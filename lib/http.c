@@ -1602,8 +1602,6 @@ CURLcode Curl_http_done(struct Curl_easy *data,
   data->state.authhost.multipass = FALSE;
   data->state.authproxy.multipass = FALSE;
 
-  Curl_unencode_cleanup(data);
-
   /* set the proper values (possibly modified on POST) */
   conn->seek_func = data->set.seek_func; /* restore */
   conn->seek_client = data->set.seek_client; /* restore */
@@ -3620,9 +3618,9 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
      * of chunks, and a chunk-data set to zero signals the
      * end-of-chunks. */
 
-    result = Curl_build_unencoding_stack(data,
-                                         headp + strlen("Transfer-Encoding:"),
-                                         TRUE);
+    result = Curl_df_add_decoders(data,
+                                  headp + strlen("Transfer-Encoding:"),
+                                  CURL_DF_PHASE_TRANSCODE);
     if(result)
       return result;
     if(!k->chunk && data->set.http_transfer_encoding) {
@@ -3641,9 +3639,9 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
      * 2616). zlib cannot handle compress.  However, errors are
      * handled further down when the response body is processed
      */
-    result = Curl_build_unencoding_stack(data,
-                                         headp + strlen("Content-Encoding:"),
-                                         FALSE);
+    result = Curl_df_add_decoders(data,
+                                  headp + strlen("Content-Encoding:"),
+                                  CURL_DF_PHASE_CONTENT);
     if(result)
       return result;
   }
@@ -4235,9 +4233,9 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         ((k->httpcode/100 == 1) ? CLIENTWRITE_1XX : 0);
 
       headerlen = Curl_dyn_len(&data->state.headerb);
-      result = Curl_client_write(data, writetype,
-                                 Curl_dyn_ptr(&data->state.headerb),
-                                 headerlen);
+      result = Curl_client_write_meta(data, writetype,
+                                      Curl_dyn_ptr(&data->state.headerb),
+                                      headerlen);
       if(result)
         return result;
 
@@ -4571,8 +4569,8 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
     Curl_debug(data, CURLINFO_HEADER_IN, headp,
                Curl_dyn_len(&data->state.headerb));
 
-    result = Curl_client_write(data, writetype, headp,
-                               Curl_dyn_len(&data->state.headerb));
+    result = Curl_client_write_meta(data, writetype, headp,
+                                    Curl_dyn_len(&data->state.headerb));
     if(result)
       return result;
 

@@ -1138,7 +1138,7 @@ static CURLcode tftp_receive_packet(struct Curl_easy *data)
       /* Don't pass to the client empty or retransmitted packets */
       if(state->rbytes > 4 &&
          (NEXT_BLOCKNUM(state->block) == getrpacketblock(&state->rpacket))) {
-        result = Curl_client_write(data, CLIENTWRITE_BODY,
+        result = Curl_client_write_body(data,
                                    (char *)state->rpacket.data + 4,
                                    state->rbytes-4);
         if(result) {

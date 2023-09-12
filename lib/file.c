@@ -457,12 +457,13 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
       headerlen = msnprintf(header, sizeof(header),
                 "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n",
                 expected_size);
-      result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
+      result = Curl_client_write_meta(data, CLIENTWRITE_HEADER,
+                                      header, headerlen);
       if(result)
         return result;
 
-      result = Curl_client_write(data, CLIENTWRITE_HEADER,
-                                 accept_ranges, strlen(accept_ranges));
+      result = Curl_client_write_meta(data, CLIENTWRITE_HEADER,
+                                      accept_ranges, strlen(accept_ranges));
       if(result != CURLE_OK)
         return result;
     }
@@ -483,7 +484,8 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
               tm->tm_min,
               tm->tm_sec,
               data->req.no_body ? "": "\r\n");
-    result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
+    result = Curl_client_write_meta(data, CLIENTWRITE_HEADER,
+                                    header, headerlen);
     if(result)
       return result;
     /* set the file size to make it available post transfer */
@@ -567,7 +569,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     if(size_known)
       expected_size -= nread;
 
-    result = Curl_client_write(data, CLIENTWRITE_BODY, buf, nread);
+    result = Curl_client_write_body(data, buf, nread);
     if(result)
       return result;
 

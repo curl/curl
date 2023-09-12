@@ -1065,7 +1065,7 @@ static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
   if(imapcode == '*') {
     /* Temporarily add the LF character back and send as body to the client */
     line[len] = '\n';
-    result = Curl_client_write(data, CLIENTWRITE_BODY, line, len + 1);
+    result = Curl_client_write_body(data, line, len + 1);
     line[len] = '\0';
   }
   else if(imapcode != IMAP_RESP_OK)
@@ -1190,7 +1190,7 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
         imap_state(data, IMAP_STOP);
         return CURLE_OK;
       }
-      result = Curl_client_write(data, CLIENTWRITE_BODY, pp->cache, chunk);
+      result = Curl_client_write_body(data, pp->cache, chunk);
       if(result)
         return result;
 

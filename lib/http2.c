@@ -1731,8 +1731,9 @@ static ssize_t http2_handle_stream_close(struct Curl_cfilter *cf,
         break;
       Curl_debug(data, CURLINFO_HEADER_IN, Curl_dyn_ptr(&dbuf),
                  Curl_dyn_len(&dbuf));
-      *err = Curl_client_write(data, CLIENTWRITE_HEADER|CLIENTWRITE_TRAILER,
-                               Curl_dyn_ptr(&dbuf), Curl_dyn_len(&dbuf));
+      *err = Curl_client_write_meta(data,
+                                    CLIENTWRITE_HEADER|CLIENTWRITE_TRAILER,
+                                    Curl_dyn_ptr(&dbuf), Curl_dyn_len(&dbuf));
       if(*err)
         break;
     }

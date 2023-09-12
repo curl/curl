@@ -3564,6 +3564,7 @@ static CURLcode create_conn(struct Curl_easy *data,
         DEBUGASSERT(conn->handler->done);
         /* we ignore the return code for the protocol-specific DONE */
         (void)conn->handler->done(data, result, FALSE);
+        Curl_df_writers_cleanup(data);
         goto out;
       }
       Curl_setup_transfer(data, -1, -1, FALSE, -1);

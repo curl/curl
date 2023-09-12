@@ -667,7 +667,7 @@ struct SingleRequest {
   enum upgrade101 upgr101;      /* 101 upgrade state */
 
   /* Content unencoding stack. See sec 3.5, RFC2616. */
-  struct contenc_writer *writer_stack;
+  struct Curl_df_writer *writer_stack;
   time_t timeofdoc;
   long bodywrites;
   char *location;   /* This points to an allocated version of the Location:
@@ -711,7 +711,6 @@ struct SingleRequest {
 #ifndef CURL_DISABLE_COOKIES
   unsigned char setcookies;
 #endif
-  unsigned char writer_stack_depth; /* Unencoding stack depth. */
   BIT(header);        /* incoming data has HTTP header */
   BIT(content_range); /* set TRUE if Content-Range: was found */
   BIT(upload_done);   /* set to TRUE when doing chunked transfer-encoding

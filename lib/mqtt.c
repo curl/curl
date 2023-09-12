@@ -672,7 +672,7 @@ MQTT_SUBACK_COMING:
 
     /* if QoS is set, message contains packet id */
 
-    result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)pkt, nread);
+    result = Curl_client_write_body(data, (char *)pkt, nread);
     if(result)
       goto end;
 

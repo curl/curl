@@ -582,7 +582,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
         (data->set.include_header ? CLIENTWRITE_BODY : 0) |
         (ts->headerlines == 1 ? CLIENTWRITE_STATUS : 0);
 
-      result = Curl_client_write(data, writetype, linep, perline);
+      result = Curl_client_write_meta(data, writetype, linep, perline);
       if(result)
         return result;
     }

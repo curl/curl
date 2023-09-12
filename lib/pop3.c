@@ -1481,7 +1481,7 @@ CURLcode Curl_pop3_write(struct Curl_easy *data, char *str, size_t nread)
 
         if(i) {
           /* Write out the body part that didn't match */
-          result = Curl_client_write(data, CLIENTWRITE_BODY, &str[last],
+          result = Curl_client_write_body(data, &str[last],
                                      i - last);
 
           if(result)
@@ -1540,11 +1540,11 @@ CURLcode Curl_pop3_write(struct Curl_easy *data, char *str, size_t nread)
         /* If the partial match was the CRLF and dot then only write the CRLF
            as the server would have inserted the dot */
         if(strip_dot && prev - 1 > 0) {
-          result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)POP3_EOB,
+          result = Curl_client_write_body(data, (char *)POP3_EOB,
                                      prev - 1);
         }
         else if(!strip_dot) {
-          result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)POP3_EOB,
+          result = Curl_client_write_body(data, (char *)POP3_EOB,
                                      prev);
         }
         else {
@@ -1564,7 +1564,7 @@ CURLcode Curl_pop3_write(struct Curl_easy *data, char *str, size_t nread)
     /* We have a full match so the transfer is done, however we must transfer
     the CRLF at the start of the EOB as this is considered to be part of the
     message as per RFC-1939, sect. 3 */
-    result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)POP3_EOB, 2);
+    result = Curl_client_write_body(data, (char *)POP3_EOB, 2);
 
     k->keepon &= ~KEEP_RECV;
     pop3c->eob = 0;
@@ -1577,7 +1577,7 @@ CURLcode Curl_pop3_write(struct Curl_easy *data, char *str, size_t nread)
     return CURLE_OK;
 
   if(nread - last) {
-    result = Curl_client_write(data, CLIENTWRITE_BODY, &str[last],
+    result = Curl_client_write_body(data, &str[last],
                                nread - last);
   }
 

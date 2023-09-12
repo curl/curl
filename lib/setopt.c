@@ -592,7 +592,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      */
     argptr = va_arg(param, char *);
     if(argptr && !*argptr) {
-      argptr = Curl_all_content_encodings();
+      argptr = Curl_all_content_decodings();
       if(!argptr)
         result = CURLE_OUT_OF_MEMORY;
       else {

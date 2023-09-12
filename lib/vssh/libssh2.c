@@ -2323,11 +2323,11 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
         sshp->readdir_filename[readdir_len] = '\0';
 
         if(data->set.list_only) {
-          result = Curl_client_write(data, CLIENTWRITE_BODY,
+          result = Curl_client_write_body(data,
                                      sshp->readdir_filename,
                                      readdir_len);
           if(!result)
-            result = Curl_client_write(data, CLIENTWRITE_BODY,
+            result = Curl_client_write_body(data,
                                        (char *)"\n", 1);
           if(result) {
             state(data, SSH_STOP);
@@ -2415,7 +2415,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
     case SSH_SFTP_READDIR_BOTTOM:
       result = Curl_dyn_addn(&sshp->readdir, "\n", 1);
       if(!result)
-        result = Curl_client_write(data, CLIENTWRITE_BODY,
+        result = Curl_client_write_body(data,
                                    Curl_dyn_ptr(&sshp->readdir),
                                    Curl_dyn_len(&sshp->readdir));
 

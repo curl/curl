@@ -2120,8 +2120,8 @@ static CURLcode ftp_state_mdtm_resp(struct Curl_easy *data,
                   tm->tm_hour,
                   tm->tm_min,
                   tm->tm_sec);
-        result = Curl_client_write(data, CLIENTWRITE_BOTH, headerbuf,
-                                   headerbuflen);
+        result = Curl_client_write_meta(data, CLIENTWRITE_BOTH, headerbuf,
+                                        headerbuflen);
         if(result)
           return result;
       } /* end of a ridiculous amount of conditionals */
@@ -2331,7 +2331,7 @@ static CURLcode ftp_state_size_resp(struct Curl_easy *data,
       char clbuf[128];
       int clbuflen = msnprintf(clbuf, sizeof(clbuf),
                 "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n", filesize);
-      result = Curl_client_write(data, CLIENTWRITE_BOTH, clbuf, clbuflen);
+      result = Curl_client_write_meta(data, CLIENTWRITE_BOTH, clbuf, clbuflen);
       if(result)
         return result;
     }
@@ -2365,8 +2365,8 @@ static CURLcode ftp_state_rest_resp(struct Curl_easy *data,
 #ifdef CURL_FTP_HTTPSTYLE_HEAD
     if(ftpcode == 350) {
       char buffer[24]= { "Accept-ranges: bytes\r\n" };
-      result = Curl_client_write(data, CLIENTWRITE_BOTH, buffer,
-                                 strlen(buffer));
+      result = Curl_client_write_meta(data, CLIENTWRITE_BOTH, buffer,
+                                      strlen(buffer));
       if(result)
         return result;
     }

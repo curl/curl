@@ -945,17 +945,17 @@ static CURLcode client_write(struct Curl_easy *data,
        separator, drop the latter. */
     if(!len && plen && prefix[plen - 1] == ' ')
       plen--;
-    result = Curl_client_write(data, CLIENTWRITE_BODY, (char *) prefix, plen);
+    result = Curl_client_write_body(data, (char *) prefix, plen);
     if(!result)
       data->req.bytecount += plen;
   }
   if(!result && value) {
-    result = Curl_client_write(data, CLIENTWRITE_BODY, (char *) value, len);
+    result = Curl_client_write_body(data, (char *) value, len);
     if(!result)
       data->req.bytecount += len;
   }
   if(!result && suffix) {
-    result = Curl_client_write(data, CLIENTWRITE_BODY, (char *) suffix, slen);
+    result = Curl_client_write_body(data, (char *) suffix, slen);
     if(!result)
       data->req.bytecount += slen;
   }

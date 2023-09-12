@@ -705,6 +705,7 @@ static CURLcode multi_done(struct Curl_easy *data,
     result = conn->handler->done(data, status, premature);
   else
     result = status;
+  Curl_df_writers_cleanup(data);
 
   if(CURLE_ABORTED_BY_CALLBACK != result) {
     /* avoid this if we already aborted by callback to avoid this calling

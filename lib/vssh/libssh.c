@@ -1458,7 +1458,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
             sshc->actualcode = CURLE_OUT_OF_MEMORY;
             break;
           }
-          result = Curl_client_write(data, CLIENTWRITE_BODY,
+          result = Curl_client_write_body(data,
                                      tmpLine, sshc->readdir_len + 1);
           free(tmpLine);
 
@@ -1560,7 +1560,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       if(Curl_dyn_addn(&sshc->readdir_buf, "\n", 1))
         result = CURLE_OUT_OF_MEMORY;
       else
-        result = Curl_client_write(data, CLIENTWRITE_BODY,
+        result = Curl_client_write_body(data,
                                    Curl_dyn_ptr(&sshc->readdir_buf),
                                    Curl_dyn_len(&sshc->readdir_buf));
 

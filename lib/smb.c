@@ -1038,7 +1038,7 @@ static CURLcode smb_request_state(struct Curl_easy *data, bool *done)
         result = CURLE_RECV_ERROR;
       }
       else
-        result = Curl_client_write(data, CLIENTWRITE_BODY,
+        result = Curl_client_write_body(data,
                                    (char *)msg + off + sizeof(unsigned int),
                                    len);
       if(result) {

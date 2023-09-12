@@ -27,6 +27,7 @@
 #include "curl_setup.h"
 
 #include "curl_trc.h"
+#include "dfilters.h"
 
 
 #define CLIENTWRITE_BODY    (1<<0)

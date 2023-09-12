@@ -873,7 +873,7 @@ static CURLcode wssh_statemach_act(struct Curl_easy *data, bool *block)
             sshc->actualcode = CURLE_OUT_OF_MEMORY;
             break;
           }
-          result = Curl_client_write(data, CLIENTWRITE_BODY,
+          result = Curl_client_write_body(data,
                                      line, strlen(line));
           free(line);
           if(result) {

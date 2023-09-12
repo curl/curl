@@ -1047,7 +1047,7 @@ static CURLcode smtp_state_command_resp(struct Curl_easy *data, int smtpcode,
     /* Temporarily add the LF character back and send as body to the client */
     if(!data->req.no_body) {
       line[len] = '\n';
-      result = Curl_client_write(data, CLIENTWRITE_BODY, line, len + 1);
+      result = Curl_client_write_body(data, line, len + 1);
       line[len] = '\0';
     }
 
