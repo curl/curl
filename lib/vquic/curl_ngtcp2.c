@@ -616,15 +616,19 @@ static CURLcode quic_ssl_ctx(WOLFSSL_CTX **pssl_ctx,
 
   wolfSSL_CTX_set_default_verify_paths(ssl_ctx);
 
-  if(wolfSSL_CTX_set_cipher_list(ssl_ctx, QUIC_CIPHERS) != 1) {
+  if(wolfSSL_CTX_set_cipher_list(ssl_ctx, conn->ssl_config.cipher_list13 ?
+                                 conn->ssl_config.cipher_list13 :
+                                 QUIC_CIPHERS) != 1) {
     char error_buffer[256];
     ERR_error_string_n(ERR_get_error(), error_buffer, sizeof(error_buffer));
-    failf(data, "wolfSSL_CTX_set_cipher_list: %s", error_buffer);
+    failf(data, "wolfSSL failed to set ciphers: %s", error_buffer);
     goto out;
   }
 
-  if(wolfSSL_CTX_set1_groups_list(ssl_ctx, (char *)QUIC_GROUPS) != 1) {
-    failf(data, "SSL_CTX_set1_groups_list failed");
+  if(wolfSSL_CTX_set1_groups_list(ssl_ctx, conn->ssl_config.curves ?
+                                  conn->ssl_config.curves :
+                                  (char *)QUIC_GROUPS) != 1) {
+    failf(data, "wolfSSL failed to set curves");
     goto out;
   }
 
