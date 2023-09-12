@@ -34,6 +34,13 @@ CURLcode Curl_rand(struct Curl_easy *data, unsigned char *rnd, size_t num);
 CURLcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd,
                        size_t num);
 
+/*
+ * Curl_rand_alnum() fills the 'rnd' buffer with a given 'num' size with random
+ * alphanumerical chars PLUS a null-terminating byte.
+ */
+CURLcode Curl_rand_alnum(struct Curl_easy *data, unsigned char *rnd,
+                         size_t num);
+
 #ifdef WIN32
 /* Random generator shared between the Schannel vtls and Curl_rand*()
    functions */

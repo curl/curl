@@ -53,7 +53,7 @@ POST /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Content-Length: 954
+Content-Length: 1002
 Content-Type: multipart/form-data; boundary=----------------------------24e78000bd32
 
 ------------------------------24e78000bd32

@@ -49,24 +49,24 @@ POST /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPSPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Content-Length: 1386
-Content-Type: multipart/form-data; boundary=----------------------------c3b2ef7f0bb8
+Content-Length: 1410
+Content-Type: multipart/form-data; boundary=----------------------------qrstuvwxyz0123456789AB
 
-------------------------------c3b2ef7f0bb8
+------------------------------qrstuvwxyz0123456789AB
 Content-Disposition: form-data; name="name"
 
 daniel
-------------------------------c3b2ef7f0bb8
+------------------------------qrstuvwxyz0123456789AB
 Content-Disposition: form-data; name="tool"
 
 curl
-------------------------------c3b2ef7f0bb8
+------------------------------qrstuvwxyz0123456789AB
 Content-Disposition: form-data; name="file"; filename="test%TESTNUMBER.txt"
 Content-Type: text/plain
 
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
-------------------------------c3b2ef7f0bb8--
+------------------------------qrstuvwxyz0123456789AB--
 </protocol>
 </verify>
 </testcase>

@@ -47,15 +47,15 @@ http://0 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -F=
 # Verify data after the test has been "shot"
 <verify>
 <strippart>
-s/^--------------------------[a-z0-9]*/------------------------------/
-s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
+s/^--------------------------[A-Za-z0-9]*/------------------------------/
+s/boundary=------------------------[A-Za-z0-9]*/boundary=----------------------------/
 </strippart>
 <protocol>
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Content-Length: 126
+Content-Length: 138
 Content-Type: multipart/form-data; boundary=----------------------------
 
 ------------------------------

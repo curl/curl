@@ -52,8 +52,8 @@ This is data from a file.
 # Verify data after the test has been "shot"
 <verify>
 <strippart>
-s/^--------------------------[a-z0-9]*/------------------------------/
-s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
+s/^--------------------------[A-Za-z0-9]*/------------------------------/
+s/boundary=------------------------[A-Za-z0-9]*/boundary=----------------------------/
 </strippart>
 # Note that the stripping above removes 12 bytes from every occurrence of the
 # boundary string and since 5 of them are in the body contents, we see
@@ -62,7 +62,7 @@ s/boundary=------------------------[a-z0-9]*/boundary=--------------------------
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Content-Length: 17139
+Content-Length: 17151
 Content-Type: multipart/form-data; boundary=----------------------------
 
 ------------------------------
