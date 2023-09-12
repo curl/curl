@@ -619,7 +619,7 @@ static CURLcode quic_ssl_ctx(WOLFSSL_CTX **pssl_ctx,
   if(wolfSSL_CTX_set_cipher_list(ssl_ctx, QUIC_CIPHERS) != 1) {
     char error_buffer[256];
     ERR_error_string_n(ERR_get_error(), error_buffer, sizeof(error_buffer));
-    failf(data, "SSL_CTX_set_ciphersuites: %s", error_buffer);
+    failf(data, "wolfSSL_CTX_set_cipher_list: %s", error_buffer);
     goto out;
   }
 
