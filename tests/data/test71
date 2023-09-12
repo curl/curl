@@ -56,7 +56,7 @@ bar
 POST /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Content-Length: 408
+Content-Length: 432
 Content-Type: multipart/form-data; boundary=----------------------------9ef8d6205763
 
 ------------------------------9ef8d6205763

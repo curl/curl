@@ -24,6 +24,8 @@
 
 #include "curl_setup.h"
 
+#include <limits.h>
+
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
@@ -262,6 +264,39 @@ CURLcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd,
     *rnd++ = hex[*bufp & 0x0F];
     bufp++;
     num -= 2;
+  }
+  *rnd = 0;
+
+  return result;
+}
+
+/*
+ * Curl_rand_alnum() fills the 'rnd' buffer with a given 'num' size with random
+ * alphanumerical chars PLUS a null-terminating byte.
+ */
+
+static const char alnum[26 + 26 + 10] =
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+CURLcode Curl_rand_alnum(struct Curl_easy *data, unsigned char *rnd,
+                         size_t num)
+{
+  CURLcode result = CURLE_OK;
+  const int alnumspace = sizeof(alnum);
+  unsigned int r;
+  DEBUGASSERT(num > 1);
+
+  num--; /* save one for null-termination */
+
+  while(num) {
+    do {
+      result = randit(data, &r);
+      if(result)
+        return result;
+    } while(r >= (UINT_MAX - UINT_MAX % alnumspace));
+
+    *rnd++ = alnum[r % alnumspace];
+    num--;
   }
   *rnd = 0;
 

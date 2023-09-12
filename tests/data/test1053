@@ -81,7 +81,7 @@ POST /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Content-Length: 410
+Content-Length: 434
 Content-Type: multipart/form-data; boundary=----------------------------9ef8d6205763
 
 ------------------------------9ef8d6205763
@@ -105,7 +105,7 @@ POST /we/want/data/%TESTNUMBER0002.txt?coolsite=yes HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Content-Length: 410
+Content-Length: 434
 Content-Type: multipart/form-data; boundary=----------------------------9ef8d6205763
 
 ------------------------------9ef8d6205763

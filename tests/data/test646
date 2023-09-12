@@ -51,8 +51,8 @@ X-fileheader2: This is #a
 # Verify data after the test has been "shot"
 <verify>
 <strippart>
-s/^--------------------------[a-z0-9]*/------------------------------/
-s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
+s/^--------------------------[A-Za-z0-9]*/------------------------------/
+s/boundary=------------------------[A-Za-z0-9]*/boundary=----------------------------/
 </strippart>
 <protocol>
 EHLO %TESTNUMBER

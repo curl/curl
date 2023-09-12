@@ -295,8 +295,8 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   /* set initial values for the CONNECT packet */
   pos = init_connpack(packet, remain, remain_pos);
 
-  result = Curl_rand_hex(data, (unsigned char *)&client_id[clen],
-                         MQTT_CLIENTID_LEN - clen + 1);
+  result = Curl_rand_alnum(data, (unsigned char *)&client_id[clen],
+                           MQTT_CLIENTID_LEN - clen + 1);
   /* add client id */
   rc = add_client_id(client_id, strlen(client_id), packet, pos + 1);
   if(rc) {

@@ -64,7 +64,7 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
   fclose(*fh);
   *fh = NULL;
 
-  result = Curl_rand_hex(data, randsuffix, sizeof(randsuffix));
+  result = Curl_rand_alnum(data, randsuffix, sizeof(randsuffix));
   if(result)
     goto fail;
 
