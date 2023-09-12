@@ -312,4 +312,4 @@ stages:
       displayName: 'test'
       env:
         AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: "-ac /usr/bin/curl.exe !IDN !SCP ~612 ~1056 $(tests)"
+        TFLAGS: "-ac /usr/bin/curl.exe !IDN !SCP ~612 $(tests)"
