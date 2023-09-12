@@ -149,8 +149,8 @@ static CURLcode quic_x509_store_setup(struct Curl_cfilter *cf,
         SSL_CTX_set_verify(ctx->sslctx, SSL_VERIFY_PEER, NULL);
         /* tell OpenSSL where to find CA certificates that are used to verify
            the server's certificate. */
-        if(!SSL_CTX_load_verify_locations(
-              ctx->sslctx, ssl_cafile, ssl_capath)) {
+        if(!SSL_CTX_load_verify_locations(ctx->sslctx, ssl_cafile,
+                                          ssl_capath)) {
           /* Fail if we insist on successfully verifying the server. */
           failf(data, "error setting certificate verify locations:"
                 "  CAfile: %s CApath: %s",
@@ -178,6 +178,8 @@ static CURLcode quic_ssl_setup(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   unsigned char checkip[16];
+  struct connectdata *conn = data->conn;
+  const char *curves = conn->ssl_config.curves;
 
   DEBUGASSERT(!ctx->sslctx);
   ctx->sslctx = SSL_CTX_new(TLS_method());
@@ -194,6 +196,11 @@ static CURLcode quic_ssl_setup(struct Curl_cfilter *cf, struct Curl_easy *data)
   Curl_tls_keylog_open();
   if(Curl_tls_keylog_enabled()) {
     SSL_CTX_set_keylog_callback(ctx->sslctx, keylog_callback);
+  }
+
+  if(curves && !SSL_CTX_set1_curves_list(ctx->sslctx, curves)) {
+    failf(data, "failed setting curves list for QUIC: '%s'", curves);
+    return CURLE_SSL_CIPHER;
   }
 
   ctx->ssl = SSL_new(ctx->sslctx);
