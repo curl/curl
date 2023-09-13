@@ -172,6 +172,7 @@ int main(int argc, char **argv)
   fprintf(stderr, "URL: %s\n", URL);
 
   result = test(URL);
+  fprintf(stderr, "Test ended with result %d\n", result);
 
 #ifdef WIN32
   /* flush buffers of all streams regardless of mode */
