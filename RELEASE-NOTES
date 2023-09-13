@@ -4,7 +4,7 @@ curl and libcurl 8.3.0
  Command line options:         257
  curl_easy_setopt() options:   303
  Public functions in libcurl:  92
- Contributors:                 2976
+ Contributors:                 2977
 
 This release includes the following changes:
 
@@ -22,7 +22,9 @@ This release includes the following bugfixes:
 
  o altsvc: accept and parse IPv6 addresses in response headers [113]
  o asyn-ares: reduce timeout to 2000ms [148]
+ o aws-sigv4: canonicalize the query [127]
  o aws-sigv4: fix having date header twice in some cases [141]
+ o aws-sigv4: handle no-value user header entries [159]
  o bearssl: don't load CA certs when peer verification is disabled [33]
  o bearssl: handshake fix, provide proper get_select_socks() implementation [99]
  o build: fix portability of mancheck and checksrc targets
@@ -51,6 +53,7 @@ This release includes the following bugfixes:
  o cmake: drop `HAVE_LIBWINMM` and `HAVE_LIBWS2_32` feature checks [68]
  o cmake: fix to use variable for the curl namespace [79]
  o cmake: fixup H2 duplicate symbols for unity builds [23]
+ o cmake: set SIZEOF_LONG_LONG in curl_config.h [165]
  o cmake: support building static and shared libcurl in one go [17]
  o cmdline-docs: make sure to phrase it as "added in ...." [161]
  o cmdline-docs: use present tense, not future [160]
@@ -105,7 +108,6 @@ This release includes the following bugfixes:
  o http: fix sending of large requests [156]
  o http: remove the p_pragma struct field [60]
  o http: return error when receiving too large header set [43]
- o http_aws_sigv4: canonicalize the query [127]
  o hyper: fix a progress upload counter bug [122]
  o hyper: fix ownership problems [116]
  o hyper: remove `hyptransfer->endtask` [137]
@@ -141,6 +143,7 @@ This release includes the following bugfixes:
  o page-footer: QLOGDIR works with ngtcp2 and quiche [62]
  o page-header: move up a URL paragraph from GLOBBING to URL
  o pytest: fix check for slow_network skips to only apply when intended [157]
+ o quic: don't set SNI if hostname is an IP address [166]
  o quiche: adjust quiche `QUIC_IDLE_TIMEOUT` to 60s
  o quiche: enable quiche to handle timeout events [82]
  o resolve: use PF_INET6 family lookups when CURL_IPRESOLVE_V6 is set [2]
@@ -220,12 +223,13 @@ advice from friends like these:
   Michael Osipov, Mohamed Daahir, Nathan Moinvaziri, Niall McGee,
   Nicholas Nethercote, Nicolas Noben, Nicolás Ojeda Bär, Oleg Jukovec,
   oliverpool on github, Pablo Busse, Patrick Monnerat,
-  Philippe Antoine on HackerOne, pszlazak on github, Randall, Ray Satiro,
-  Richard W.M. Jones, Rutger Broekhoff, Ryan Schmidt, Samuel Chiang,
-  Satana de Sant'Ana, Sergey, Sevan Janiyan, Stefan Eissing,
-  Thomas M. DuBuisson, trrui-huawei, Viktor Szakats, wangzhikun,
-  Wilhelm von Thiele, Wyatt O'Day, yushicheng7788 on github, zhihaoy on github
-  (78 contributors)
+  Philippe Antoine on HackerOne, pszlazak on github, Randall S. Becker,
+  Ray Satiro, Richard W.M. Jones, Rutger Broekhoff, Ryan Schmidt,
+  Samuel Chiang, Satana de Sant'Ana, Sergey, Sevan Janiyan, Stefan Eissing,
+  Thomas M. DuBuisson, Thorsten Klein, trrui-huawei, Viktor Szakats, vvb2060,
+  wangzhikun, Wilhelm von Thiele, Wyatt O'Day, yushicheng7788 on github,
+  zhihaoy on github
+  (80 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -387,8 +391,11 @@ References to bug reports and discussions on issues:
  [156] = https://curl.se/bug/?i=11342
  [157] = https://curl.se/bug/?i=11801
  [158] = https://curl.se/bug/?i=11799
+ [159] = https://curl.se/bug/?i=11664
  [160] = https://curl.se/bug/?i=11821
  [161] = https://curl.se/bug/?i=11821
  [162] = https://curl.se/bug/?i=11760
  [163] = https://curl.se/bug/?i=11632
  [164] = https://curl.se/bug/?i=11395
+ [165] = https://curl.se/bug/?i=11839
+ [166] = https://curl.se/bug/?i=11827
