@@ -127,8 +127,8 @@ struct ftp_conn {
   char **dirs;   /* realloc()ed array for path components */
   char *newhost;
   char *prevpath;   /* url-decoded conn->path from the previous transfer */
-  char transfertype; /* set by ftp_transfertype for use by Curl_client_write()a
-                        and others (A/I or zero) */
+  char transfertype; /* set by ftp_transfertype for use by
+                        Curl_client_write_meta() and others (A/I or zero) */
   curl_off_t retr_size_saved; /* Size of retrieved file saved */
   char *server_os;     /* The target server operating system. */
   curl_off_t known_filesize; /* file size is different from -1, if wildcard

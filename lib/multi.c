@@ -665,7 +665,6 @@ static CURLcode multi_done(struct Curl_easy *data,
 {
   CURLcode result;
   struct connectdata *conn = data->conn;
-  unsigned int i;
 
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   DEBUGF(infof(data, "multi_done[%s]: status: %d prem: %d done: %d",
@@ -705,7 +704,6 @@ static CURLcode multi_done(struct Curl_easy *data,
     result = conn->handler->done(data, status, premature);
   else
     result = status;
-  Curl_df_writers_cleanup(data);
 
   if(CURLE_ABORTED_BY_CALLBACK != result) {
     /* avoid this if we already aborted by callback to avoid this calling
@@ -722,13 +720,6 @@ static CURLcode multi_done(struct Curl_easy *data,
 
   Curl_safefree(data->state.ulbuf);
 
-  /* if the transfer was completed in a paused state there can be buffered
-     data left to free */
-  for(i = 0; i < data->state.tempcount; i++) {
-    Curl_dyn_free(&data->state.tempwrite[i].b);
-  }
-  data->state.tempcount = 0;
-
   CONNCACHE_LOCK(data);
   Curl_detach_connection(data);
   if(CONN_INUSE(conn)) {
@@ -739,6 +730,8 @@ static CURLcode multi_done(struct Curl_easy *data,
                  conn->easyq.size));
     return CURLE_OK;
   }
+  /* Clear dfilter writers */
+  Curl_df_writers_cleanup(data);
 
   data->state.done = TRUE; /* called just now! */
 

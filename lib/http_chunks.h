@@ -65,8 +65,8 @@ typedef enum {
 
   /* A trailer LF must be found now, otherwise CHUNKE_BAD_CHUNK will be
      signalled If this is an empty trailer CHUNKE_STOP will be signalled.
-     Otherwise the trailer will be broadcasted via Curl_client_write() and the
-     next state will be CHUNK_TRAILER */
+     Otherwise the trailer will be broadcasted via Curl_client_write_meta()
+     and the next state will be CHUNK_TRAILER */
   CHUNK_TRAILER_POSTCR
 } ChunkyState;
 

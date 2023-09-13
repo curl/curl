@@ -133,6 +133,9 @@ LIB_CFILES =         \
   curl_sspi.c        \
   curl_threads.c     \
   curl_trc.c         \
+  df-crlf2lf.c       \
+  df-http.c          \
+  df-out.c           \
   dfilters.c         \
   dict.c             \
   doh.c              \
@@ -278,6 +281,9 @@ LIB_HFILES =         \
   curl_threads.h     \
   curl_trc.h         \
   curlx.h            \
+  df-crlf2lf.h       \
+  df-out.h           \
+  df-http.h          \
   dfilters.h         \
   dict.h             \
   doh.h              \

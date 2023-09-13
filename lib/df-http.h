@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_SENDF_H
-#define HEADER_CURL_SENDF_H
+#ifndef HEADER_CURL_DF_HTTP_H
+#define HEADER_CURL_DF_HTTP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,29 +23,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
-
-#include "curl_trc.h"
 #include "dfilters.h"
 
+#if !defined(CURL_DISABLE_HTTP)
 
-/* internal read-function, does plain socket, SSL and krb4 */
-CURLcode Curl_read(struct Curl_easy *data, curl_socket_t sockfd,
-                   char *buf, size_t buffersize,
-                   ssize_t *n);
+extern const struct Curl_df_write_type df_http;
 
-/* internal write-function, does plain socket, SSL, SCP, SFTP and krb4 */
-CURLcode Curl_write(struct Curl_easy *data,
-                    curl_socket_t sockfd,
-                    const void *mem, size_t len,
-                    ssize_t *written);
+#endif
 
-/* internal write-function, using sockindex for connection destination */
-CURLcode Curl_nwrite(struct Curl_easy *data,
-                     int sockindex,
-                     const void *buf,
-                     size_t blen,
-                     ssize_t *pnwritten);
-
-#endif /* HEADER_CURL_SENDF_H */
+#endif /* HEADER_CURL_DF_HTTP_H */

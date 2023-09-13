@@ -1518,7 +1518,8 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
         /* this sends an FTP-like "header" to the header callback so that the
            current directory can be read very similar to how it is read when
            using ordinary FTP. */
-        result = Curl_client_write(data, CLIENTWRITE_HEADER, tmp, strlen(tmp));
+        result = Curl_client_write_meta(data, DF_WRITE_HEADER,
+                                        tmp, strlen(tmp));
         free(tmp);
         if(result) {
           state(data, SSH_SFTP_CLOSE);
@@ -1974,7 +1975,8 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           break;
         }
 
-        result = Curl_client_write(data, CLIENTWRITE_HEADER, tmp, strlen(tmp));
+        result = Curl_client_write_meta(data, DF_WRITE_HEADER,
+                                        tmp, strlen(tmp));
         free(tmp);
         if(result) {
           state(data, SSH_SFTP_CLOSE);

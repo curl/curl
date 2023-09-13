@@ -1070,10 +1070,9 @@ CURLcode telrcv(struct Curl_easy *data,
 
 #define startskipping()                                       \
   if(startwrite >= 0) {                                       \
-    result = Curl_client_write(data,                          \
-                               CLIENTWRITE_BODY,              \
-                               (char *)&inbuf[startwrite],    \
-                               in-startwrite);                \
+    result = Curl_client_write_body(data,                     \
+                                    (char *)&inbuf[startwrite],  \
+                                    in-startwrite);           \
     if(result)                                                \
       return result;                                          \
   }                                                           \

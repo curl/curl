@@ -173,13 +173,13 @@ static int hyper_each_header(void *userdata,
   Curl_debug(data, CURLINFO_HEADER_IN, headp, len);
 
   if(!data->state.hconnect || !data->set.suppress_connect_headers) {
-    writetype = CLIENTWRITE_HEADER;
+    writetype = DF_WRITE_HEADER;
     if(data->set.include_header)
-      writetype |= CLIENTWRITE_BODY;
+      writetype |= DF_WRITE_BODY;
     if(data->state.hconnect)
-      writetype |= CLIENTWRITE_CONNECT;
+      writetype |= DF_WRITE_CONNECT;
     if(data->req.httpcode/100 == 1)
-      writetype |= CLIENTWRITE_1XX;
+      writetype |= DF_WRITE_1XX;
     result = Curl_client_write_meta(data, writetype, headp, len);
     if(result) {
       data->state.hresult = CURLE_ABORTED_BY_CALLBACK;
@@ -309,9 +309,9 @@ static CURLcode status_line(struct Curl_easy *data,
              len);
 
   if(!data->state.hconnect || !data->set.suppress_connect_headers) {
-    writetype = CLIENTWRITE_HEADER|CLIENTWRITE_STATUS;
+    writetype = DF_WRITE_HEADER|DF_WRITE_STATUS;
     if(data->set.include_header)
-      writetype |= CLIENTWRITE_BODY;
+      writetype |= DF_WRITE_BODY;
     result = Curl_client_write_meta(data, writetype,
                                     Curl_dyn_ptr(&data->state.headerb), len);
     if(result)

@@ -25,6 +25,15 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
+#define DF_WRITE_BODY    (1<<0)
+#define DF_WRITE_HEADER  (1<<1)
+#define DF_WRITE_STATUS  (1<<2) /* the first "header" is the status line */
+#define DF_WRITE_CONNECT (1<<3) /* a CONNECT response */
+#define DF_WRITE_1XX     (1<<4) /* a 1xx response */
+#define DF_WRITE_TRAILER (1<<5) /* a trailer header */
+#define DF_WRITE_BOTH    (DF_WRITE_BODY|DF_WRITE_HEADER)
+
+
 /* Data filter phases. Each data filter is added with a `phase` attribute
  * that determines where in the data filter chain it is inserted.
  *
@@ -37,7 +46,8 @@
  * TRANSCODE  the data is tranformed from its network presentation to its
  *            internal format. Examples would be HTTP de-chunking, FTP line
  *            end conversions, etc.
- * CONTENT    the data is decoded into its final form for the application.
+ * PROTOCOL   meta data can be inspected and acted upon
+ * CONTENT    body data is decoded into its final form for the application.
  *            Examples: HTTP Conent-Encodings like gzip, brotli, etc.
  * APP        Delivery of data to the application. Also suitable for
  *            monitoring the "net" amount of data transferred.
@@ -49,6 +59,7 @@
 typedef enum {
   CURL_DF_PHASE_CONN,
   CURL_DF_PHASE_TRANSCODE,
+  CURL_DF_PHASE_PROTOCOL,
   CURL_DF_PHASE_CONTENT,
   CURL_DF_PHASE_APP,
 } curl_df_phase;
@@ -155,5 +166,16 @@ CURLcode Curl_client_write_body(struct Curl_easy *data,
  */
 CURLcode Curl_client_write_meta(struct Curl_easy *data, int meta_type,
                                 char *buf, size_t blen);
+
+/**
+ * Transfer has been unpaused and now is the time to write any
+ * buffered client data that may have been kept back.
+ */
+CURLcode Curl_client_unpause(struct Curl_easy *data);
+
+/**
+ * @return TRUE iff there is paused, e.g. buffered data
+ */
+bool Curl_client_is_paused(struct Curl_easy *data);
 
 #endif /* HEADER_CURL_DFILTERS_H */

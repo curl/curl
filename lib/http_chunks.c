@@ -219,8 +219,8 @@ CHUNKcode Curl_httpchunk_read(struct Curl_easy *data,
           trlen = Curl_dyn_len(&conn->trailer);
           if(!data->set.http_te_skip) {
             result = Curl_client_write_meta(data,
-                                            (CLIENTWRITE_HEADER|
-                                             CLIENTWRITE_TRAILER),
+                                            (DF_WRITE_HEADER|
+                                             DF_WRITE_TRAILER),
                                             tr, trlen);
             if(result) {
               *extrap = result;

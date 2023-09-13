@@ -28,7 +28,11 @@
 #include <curl/curl.h>
 #include <stddef.h>
 
+#include "cfilters.h"
 #include "dfilters.h"
+#include "df-crlf2lf.h"
+#include "df-http.h"
+#include "df-out.h"
 #include "sendf.h"
 #include "http.h"
 #include "strdup.h"
@@ -38,6 +42,10 @@
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
+
+#ifndef ARRAYSIZE
+#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
+#endif
 
 /* allow no more than 5 "chained" TRANSCODE+CONTENT phase writers */
 #define MAX_ENCODE_STACK 5
@@ -79,53 +87,6 @@ CURLcode Curl_df_def_do_body(struct Curl_df_writer *writer,
 }
 
 
-/* Real client writer: no downstream. */
-static CURLcode df_app_init(struct Curl_df_writer *writer,
-                            struct Curl_easy *data)
-{
-  (void)data;
-  (void)writer;
-  return CURLE_OK;
-}
-
-static CURLcode df_app_do_meta(struct Curl_df_writer *writer,
-                               struct Curl_easy *data, int meta_type,
-                               const char *buf, size_t blen)
-{
-  (void)writer;
-  return Curl_client_write(data, meta_type, (char *) buf, blen);
-}
-
-static CURLcode df_app_do_body(struct Curl_df_writer *writer,
-                               struct Curl_easy *data,
-                               const char *buf, size_t nbytes)
-{
-  struct SingleRequest *k = &data->req;
-  (void)writer;
-
-  if(!nbytes || k->ignorebody)
-    return CURLE_OK;
-
-  return Curl_client_write(data, CLIENTWRITE_BODY, (char *) buf, nbytes);
-}
-
-static void df_app_close(struct Curl_df_writer *writer,
-                         struct Curl_easy *data)
-{
-  (void)data;
-  (void)writer;
-}
-
-static const struct Curl_df_write_type df_writer_app = {
-  "app",
-  NULL,
-  df_app_init,
-  df_app_do_meta,
-  df_app_do_body,
-  df_app_close,
-  sizeof(struct Curl_df_writer)
-};
-
 /* Create an unencoding writer stage using the given handler. */
 static struct Curl_df_writer *
 Curl_df_writer_create(struct Curl_easy *data,
@@ -135,8 +96,7 @@ Curl_df_writer_create(struct Curl_easy *data,
   struct Curl_df_writer *writer;
 
   DEBUGASSERT(handler->writersize >= sizeof(struct Curl_df_writer));
-  writer = (struct Curl_df_writer *) calloc(1, handler->writersize);
-
+  writer = calloc(1, handler->writersize);
   if(writer) {
     writer->dft = handler;
     writer->phase = phase;
@@ -151,15 +111,55 @@ Curl_df_writer_create(struct Curl_easy *data,
 /* Close and clean-up the connection's writer stack. */
 void Curl_df_writers_cleanup(struct Curl_easy *data)
 {
-  struct SingleRequest *k = &data->req;
   struct Curl_df_writer *writer;
 
-  while(k->writer_stack) {
-    writer = k->writer_stack;
-    k->writer_stack = writer->next;
+  while(data->req.df_client_writers) {
+    writer = data->req.df_client_writers;
+    data->req.df_client_writers = writer->next;
     writer->dft->do_close(writer, data);
     free(writer);
   }
+}
+
+static CURLcode insert_head(struct Curl_easy *data,
+                            const struct Curl_df_write_type *dft,
+                            int phase)
+{
+    struct Curl_df_writer *writer;
+    writer = Curl_df_writer_create(data, dft, phase);
+    if(!writer)
+      return CURLE_OUT_OF_MEMORY;
+    writer->next = data->req.df_client_writers;
+    data->req.df_client_writers = writer;
+    return CURLE_OK;
+}
+
+static CURLcode init_writer_chain(struct Curl_easy *data)
+{
+  CURLcode result = CURLE_OK;
+
+  DEBUGASSERT(!data->req.df_client_writers);
+  data->req.df_client_writers = Curl_df_writer_create(data, &df_writer_out,
+                                                      CURL_DF_PHASE_APP);
+  if(!data->req.df_client_writers)
+    return CURLE_OUT_OF_MEMORY;
+
+#if !defined(CURL_DISABLE_HTTP)
+  if(data->conn->handler->protocol & PROTO_FAMILY_HTTP) {
+    result = insert_head(data, &df_http, CURL_DF_PHASE_PROTOCOL);
+    if(result)
+      return result;
+  }
+#endif
+#if defined(CURL_DO_LINEEND_CONV) && !defined(CURL_DISABLE_FTP)
+  if(data->conn->handler->protocol & PROTO_FAMILY_FTP) {
+    /* convert end-of-line markers for FTP ascii data */
+    result = insert_head(data, &df_crlf2lf, CURL_DF_PHASE_TRANSCODE);
+    if(result)
+      return result;
+  }
+#endif
+  return result;
 }
 
 CURLcode Curl_df_add_writer(struct Curl_easy *data,
@@ -172,7 +172,7 @@ CURLcode Curl_df_add_writer(struct Curl_easy *data,
      phase == CURL_DF_PHASE_CONTENT) {
     /* Do we exceed the max number of decoders for these phases? */
     size_t ndecoders = 1; /* we are about to add 1 */
-    for(writer = data->req.writer_stack; writer; writer = writer->next) {
+    for(writer = data->req.df_client_writers; writer; writer = writer->next) {
       if(writer->phase == CURL_DF_PHASE_TRANSCODE ||
          writer->phase == CURL_DF_PHASE_CONTENT)
          ++ndecoders;
@@ -191,22 +191,21 @@ CURLcode Curl_df_add_writer(struct Curl_easy *data,
   /* Make sure we have a last writer that passes data to the client.
    * Additionally added writers in CURL_DF_PHASE_APP will come before
    * it and may override it intentionally. */
-  if(!data->req.writer_stack) {
-    data->req.writer_stack = Curl_df_writer_create(data, &df_writer_app,
-                                            CURL_DF_PHASE_APP);
-    if(!data->req.writer_stack)
-      return CURLE_OUT_OF_MEMORY;
+  if(!data->req.df_client_writers) {
+    CURLcode result = init_writer_chain(data);
+    if(result)
+      return result;
   }
 
   /* Insert the writer into the stack as the first of its phase.
    * writers are ordered in increasing phase value */
-  if(data->req.writer_stack->phase >= phase) {
+  if(data->req.df_client_writers->phase >= phase) {
     /* first installed writer has higher or same phase, insert at head */
-    writer->next = data->req.writer_stack;
-    data->req.writer_stack = writer;
+    writer->next = data->req.df_client_writers;
+    data->req.df_client_writers = writer;
   }
   else {
-    struct Curl_df_writer *w = data->req.writer_stack;
+    struct Curl_df_writer *w = data->req.df_client_writers;
     while(w->next && w->next->phase < phase)
       w = w->next;
     /* w is now the last writer in the chain with a phase lower
@@ -220,18 +219,49 @@ CURLcode Curl_df_add_writer(struct Curl_easy *data,
 
 CURLcode Curl_client_write_body(struct Curl_easy *data, char *buf, size_t blen)
 {
-  if(data->req.writer_stack)
-    return Curl_df_write_body(data->req.writer_stack, data, buf, blen);
-  else
-    return Curl_client_write(data, CLIENTWRITE_BODY, buf, blen);
+  if(!blen || data->req.ignorebody)
+    return CURLE_OK;
+
+  if(!data->req.df_client_writers) {
+    CURLcode result = init_writer_chain(data);
+    if(result)
+      return result;
+  }
+  return Curl_df_write_body(data->req.df_client_writers, data, buf, blen);
 }
 
 CURLcode Curl_client_write_meta(struct Curl_easy *data, int meta_type,
                                 char *buf, size_t blen)
 {
-  if(data->req.writer_stack)
-    return Curl_df_write_meta(data->req.writer_stack, data,
-                              meta_type, buf, blen);
-  else
-    return Curl_client_write(data, meta_type, buf, blen);
+  if(!data->req.df_client_writers) {
+    CURLcode result = init_writer_chain(data);
+    if(result)
+      return result;
+  }
+  return Curl_df_write_meta(data->req.df_client_writers, data,
+                            meta_type, buf, blen);
+}
+
+CURLcode Curl_client_unpause(struct Curl_easy *data)
+{
+  struct Curl_df_writer *writer;
+  /* So far, only the `out` writer type handles PAUSEing and may
+   * have buffered data. Look for it. */
+  for(writer = data->req.df_client_writers; writer; writer = writer->next) {
+    if(writer->dft == &df_writer_out) {
+      return df_out_unpause(writer, data);
+    }
+  }
+  return CURLE_OK;
+}
+
+bool Curl_client_is_paused(struct Curl_easy *data)
+{
+  struct Curl_df_writer *writer;
+  for(writer = data->req.df_client_writers; writer; writer = writer->next) {
+    if(writer->dft == &df_writer_out) {
+      return df_out_is_paused(writer, data);
+    }
+  }
+  return FALSE;
 }

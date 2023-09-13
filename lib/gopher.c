@@ -187,7 +187,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
 
     result = Curl_nwrite(data, FIRSTSOCKET, sel, k, &amount);
     if(!result) { /* Which may not have written it all! */
-      result = Curl_client_write_meta(data, CLIENTWRITE_HEADER, sel, amount);
+      result = Curl_client_write_meta(data, DF_WRITE_HEADER, sel, amount);
       if(result)
         break;
 
@@ -232,7 +232,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
     failf(data, "Failed sending Gopher request");
     return result;
   }
-  result = Curl_client_write_meta(data, CLIENTWRITE_HEADER, (char *)"\r\n", 2);
+  result = Curl_client_write_meta(data, DF_WRITE_HEADER, (char *)"\r\n", 2);
   if(result)
     return result;
 
