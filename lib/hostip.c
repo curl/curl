@@ -688,7 +688,11 @@ static bool is_hostname_blocked(struct Curl_easy *data, const char *hostname)
     if (lenblocked > lenhostname) {
       continue;
     }
-    offset = lenhostname - lenblocked;
+    if (item->data[0] == '.') {
+        offset = lenhostname - lenblocked;
+    } else {
+        offset = 0;
+    }
     if (curl_strequal(&hostname[offset], item->data)) {
       return (true);
     }
