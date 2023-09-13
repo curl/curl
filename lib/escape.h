@@ -28,8 +28,6 @@
 
 #include "curl_ctype.h"
 
-#define Curl_isunreserved(x) ISUNRESERVED(x)
-
 enum urlreject {
   REJECT_NADA = 2,
   REJECT_CTRL,

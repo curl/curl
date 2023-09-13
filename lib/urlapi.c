@@ -1865,7 +1865,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
           if(result)
             return CURLUE_OUT_OF_MEMORY;
         }
-        else if(Curl_isunreserved(*i) ||
+        else if(ISUNRESERVED(*i) ||
                 ((*i == '/') && urlskipslash) ||
                 ((*i == '=') && equalsencode)) {
           if((*i == '=') && equalsencode)

@@ -72,7 +72,7 @@ char *curl_easy_escape(struct Curl_easy *data, const char *string,
   while(length--) {
     unsigned char in = *string++; /* treat the characters unsigned */
 
-    if(Curl_isunreserved(in)) {
+    if(ISUNRESERVED(in)) {
       /* append this */
       if(Curl_dyn_addn(&d, &in, 1))
         return NULL;
