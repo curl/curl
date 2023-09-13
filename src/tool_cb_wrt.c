@@ -287,7 +287,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 
         if(MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)outs->utf8seq, -1,
                                prefix, sizeof(prefix)/sizeof(prefix[0]))) {
-          DEBUGASSERT(prefix[3] == L'\0');
+          DEBUGASSERT(prefix[2] == L'\0');
           if(!WriteConsoleW(
               (HANDLE) fhnd,
               prefix,
