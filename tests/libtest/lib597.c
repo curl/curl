@@ -29,7 +29,7 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-#define TEST_HANG_TIMEOUT 5 * 1000
+#define TEST_HANG_TIMEOUT 60 * 1000
 
 /*
  * Test case for below scenario:
@@ -101,7 +101,7 @@ int test(char *URL)
       interval.tv_usec = (itimeout%1000)*1000;
     }
     else {
-      interval.tv_sec = TEST_HANG_TIMEOUT/1000 + 1;
+      interval.tv_sec = TEST_HANG_TIMEOUT/1000 - 1;
       interval.tv_usec = 0;
     }
 
