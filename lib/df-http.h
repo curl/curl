@@ -28,7 +28,10 @@
 
 #if !defined(CURL_DISABLE_HTTP)
 
-extern const struct Curl_df_write_type df_http;
+/**
+ * dfilter that collects HTTP headers.
+ */
+CURLcode Curl_df_http_collect_header_add(struct Curl_easy *data);
 
 #endif
 

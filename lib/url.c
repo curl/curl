@@ -695,11 +695,6 @@ static void conn_shutdown(struct Curl_easy *data)
 
   Curl_conn_close(data, SECONDARYSOCKET);
   Curl_conn_close(data, FIRSTSOCKET);
-  /* Clear dfilter writers, again, as FTP is one protocol handler that writes
-   * client meta data during connection shutdown
-   * TODO: should it? or should df_writer discard those. The `data`
-   * here is not necessarily the one used for the transfer, or? */
-  Curl_df_writers_cleanup(data);
 }
 
 static void conn_free(struct Curl_easy *data, struct connectdata *conn)
@@ -2036,6 +2031,7 @@ static CURLcode setup_connection_internals(struct Curl_easy *data,
 
 void Curl_free_request_state(struct Curl_easy *data)
 {
+  Curl_df_writers_cleanup(data);
   Curl_safefree(data->req.p.http);
   Curl_safefree(data->req.newurl);
 
@@ -3569,7 +3565,6 @@ static CURLcode create_conn(struct Curl_easy *data,
         DEBUGASSERT(conn->handler->done);
         /* we ignore the return code for the protocol-specific DONE */
         (void)conn->handler->done(data, result, FALSE);
-        Curl_df_writers_cleanup(data);
         goto out;
       }
       Curl_setup_transfer(data, -1, -1, FALSE, -1);

@@ -30,11 +30,8 @@
 
 #include "cfilters.h"
 #include "dfilters.h"
-#include "df-crlf2lf.h"
-#include "df-http.h"
 #include "df-out.h"
 #include "sendf.h"
-#include "http.h"
 #include "strdup.h"
 #include "strcase.h"
 
@@ -72,6 +69,22 @@ CURLcode Curl_df_write_body(struct Curl_df_writer *writer,
   return writer->dft->do_body(writer, data, buf, nbytes);
 }
 
+bool Curl_df_is_paused(struct Curl_df_writer *writer,
+                       struct Curl_easy *data)
+{
+  if(!writer)
+    return FALSE;
+  return writer->dft->is_paused(writer, data);
+}
+
+CURLcode Curl_df_unpause(struct Curl_df_writer *writer,
+                             struct Curl_easy *data)
+{
+  if(!writer)
+    return CURLE_OK;
+  return writer->dft->unpause(writer, data);
+}
+
 CURLcode Curl_df_def_do_meta(struct Curl_df_writer *writer,
                              struct Curl_easy *data,
                              int meta_type, const char *buf, size_t blen)
@@ -86,6 +99,17 @@ CURLcode Curl_df_def_do_body(struct Curl_df_writer *writer,
   return Curl_df_write_body(writer->next, data, buf, blen);
 }
 
+bool Curl_df_def_is_paused(struct Curl_df_writer *writer,
+                           struct Curl_easy *data)
+{
+  return Curl_df_is_paused(writer->next, data);
+}
+
+CURLcode Curl_df_def_unpause(struct Curl_df_writer *writer,
+                             struct Curl_easy *data)
+{
+  return Curl_df_unpause(writer->next, data);
+}
 
 /* Create an unencoding writer stage using the given handler. */
 static struct Curl_df_writer *
@@ -121,52 +145,23 @@ void Curl_df_writers_cleanup(struct Curl_easy *data)
   }
 }
 
-static CURLcode insert_head(struct Curl_easy *data,
-                            const struct Curl_df_write_type *dft,
-                            int phase)
-{
-    struct Curl_df_writer *writer;
-    writer = Curl_df_writer_create(data, dft, phase);
-    if(!writer)
-      return CURLE_OUT_OF_MEMORY;
-    writer->next = data->req.df_client_writers;
-    data->req.df_client_writers = writer;
-    return CURLE_OK;
-}
-
 static CURLcode init_writer_chain(struct Curl_easy *data)
 {
-  CURLcode result = CURLE_OK;
-
   DEBUGASSERT(!data->req.df_client_writers);
   data->req.df_client_writers = Curl_df_writer_create(data, &df_writer_out,
                                                       CURL_DF_PHASE_APP);
   if(!data->req.df_client_writers)
     return CURLE_OUT_OF_MEMORY;
-
-#if !defined(CURL_DISABLE_HTTP)
-  if(data->conn->handler->protocol & PROTO_FAMILY_HTTP) {
-    result = insert_head(data, &df_http, CURL_DF_PHASE_PROTOCOL);
-    if(result)
-      return result;
-  }
-#endif
-#if defined(CURL_DO_LINEEND_CONV) && !defined(CURL_DISABLE_FTP)
-  if(data->conn->handler->protocol & PROTO_FAMILY_FTP) {
-    /* convert end-of-line markers for FTP ascii data */
-    result = insert_head(data, &df_crlf2lf, CURL_DF_PHASE_TRANSCODE);
-    if(result)
-      return result;
-  }
-#endif
-  return result;
+  return CURLE_OK;
 }
 
 CURLcode Curl_df_add_writer(struct Curl_easy *data,
                             const struct Curl_df_write_type *wtype,
-                            curl_df_phase phase)
+                            curl_df_phase phase,
+                            struct Curl_df_writer **pdf)
 {
-  struct Curl_df_writer *writer;
+  struct Curl_df_writer *writer = NULL;
+  CURLcode result = CURLE_OK;
 
   if(phase == CURL_DF_PHASE_TRANSCODE ||
      phase == CURL_DF_PHASE_CONTENT) {
@@ -180,21 +175,24 @@ CURLcode Curl_df_add_writer(struct Curl_easy *data,
     if(ndecoders >= MAX_ENCODE_STACK) {
       failf(data, "Reject response due to more than %u content encodings",
             MAX_ENCODE_STACK);
-      return CURLE_BAD_CONTENT_ENCODING;
+      result = CURLE_BAD_CONTENT_ENCODING;
+      goto out;
     }
   }
 
   writer = Curl_df_writer_create(data, wtype, phase);
-  if(!writer)
-    return CURLE_OUT_OF_MEMORY;
+  if(!writer) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
 
   /* Make sure we have a last writer that passes data to the client.
    * Additionally added writers in CURL_DF_PHASE_APP will come before
    * it and may override it intentionally. */
   if(!data->req.df_client_writers) {
-    CURLcode result = init_writer_chain(data);
+    result = init_writer_chain(data);
     if(result)
-      return result;
+      goto out;
   }
 
   /* Insert the writer into the stack as the first of its phase.
@@ -214,7 +212,12 @@ CURLcode Curl_df_add_writer(struct Curl_easy *data,
     w->next = writer;
   }
 
-  return CURLE_OK;
+out:
+  if(result && writer)
+    Curl_safefree(writer);
+  if(pdf)
+    *pdf = writer;
+  return result;
 }
 
 CURLcode Curl_client_write_body(struct Curl_easy *data, char *buf, size_t blen)
@@ -242,26 +245,13 @@ CURLcode Curl_client_write_meta(struct Curl_easy *data, int meta_type,
                             meta_type, buf, blen);
 }
 
-CURLcode Curl_client_unpause(struct Curl_easy *data)
-{
-  struct Curl_df_writer *writer;
-  /* So far, only the `out` writer type handles PAUSEing and may
-   * have buffered data. Look for it. */
-  for(writer = data->req.df_client_writers; writer; writer = writer->next) {
-    if(writer->dft == &df_writer_out) {
-      return df_out_unpause(writer, data);
-    }
-  }
-  return CURLE_OK;
-}
-
 bool Curl_client_is_paused(struct Curl_easy *data)
 {
-  struct Curl_df_writer *writer;
-  for(writer = data->req.df_client_writers; writer; writer = writer->next) {
-    if(writer->dft == &df_writer_out) {
-      return df_out_is_paused(writer, data);
-    }
-  }
-  return FALSE;
+  return Curl_df_is_paused(data->req.df_client_writers, data);
 }
+
+CURLcode Curl_client_unpause(struct Curl_easy *data)
+{
+  return Curl_df_unpause(data->req.df_client_writers, data);
+}
+

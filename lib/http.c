@@ -55,6 +55,7 @@
 #include <curl/curl.h>
 #include "transfer.h"
 #include "sendf.h"
+#include "df-http.h"
 #include "formdata.h"
 #include "mime.h"
 #include "progress.h"
@@ -227,6 +228,7 @@ static CURLcode http_setup_conn(struct Curl_easy *data,
   /* allocate the HTTP-specific struct for the Curl_easy, only to survive
      during this request */
   struct HTTP *http;
+  CURLcode result;
   DEBUGASSERT(data->req.p.http == NULL);
 
   http = calloc(1, sizeof(struct HTTP));
@@ -236,8 +238,13 @@ static CURLcode http_setup_conn(struct Curl_easy *data,
   data->req.p.http = http;
   connkeep(conn, "HTTP default");
 
+  /* Add the dfilter writer that collects HEADERs */
+  result = Curl_df_http_collect_header_add(data);
+  if(result)
+    return result;
+
   if(data->state.httpwant == CURL_HTTP_VERSION_3ONLY) {
-    CURLcode result = Curl_conn_may_http3(data, conn);
+    result = Curl_conn_may_http3(data, conn);
     if(result)
       return result;
   }

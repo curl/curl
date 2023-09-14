@@ -59,7 +59,6 @@
 typedef enum {
   CURL_DF_PHASE_CONN,
   CURL_DF_PHASE_TRANSCODE,
-  CURL_DF_PHASE_PROTOCOL,
   CURL_DF_PHASE_CONTENT,
   CURL_DF_PHASE_APP,
 } curl_df_phase;
@@ -89,6 +88,8 @@ struct Curl_df_write_type {
   CURLcode (*do_body)(struct Curl_df_writer *writer, struct Curl_easy *data,
                       const char *buf, size_t nbytes);
   void (*do_close)(struct Curl_df_writer *writer, struct Curl_easy *data);
+  bool (*is_paused)(struct Curl_df_writer *writer, struct Curl_easy *data);
+  CURLcode (*unpause)(struct Curl_df_writer *writer, struct Curl_easy *data);
   size_t writersize;
 };
 
@@ -102,6 +103,10 @@ CURLcode Curl_df_def_do_meta(struct Curl_df_writer *writer,
 CURLcode Curl_df_def_do_body(struct Curl_df_writer *writer,
                              struct Curl_easy *data,
                              const char *buf, size_t nbytes);
+bool Curl_df_def_is_paused(struct Curl_df_writer *writer,
+                           struct Curl_easy *data);
+CURLcode Curl_df_def_unpause(struct Curl_df_writer *writer,
+                             struct Curl_easy *data);
 
 /**
  * Call the `do_body` method of write filter `df`. Does NULL parameter
@@ -131,6 +136,17 @@ CURLcode Curl_df_write_meta(struct Curl_df_writer *df,
                             const char *buf, size_t blen);
 
 /**
+ * Call the `is_paused` method of write filter `df`.
+ * Does NULL parameter checks.
+ */
+bool Curl_df_is_paused(struct Curl_df_writer *df, struct Curl_easy *data);
+/**
+ * Call the `unpause` method of write filter `df`.
+ * Does NULL parameter checks.
+ */
+CURLcode Curl_df_unpause(struct Curl_df_writer *df, struct Curl_easy *data);
+
+/**
  * Cleanup, e.g. deallocate, all installed writers.
  * Calls writers `do_close` method.
  */
@@ -141,10 +157,12 @@ void Curl_df_writers_cleanup(struct Curl_easy *data);
  * @param data  transfer to add the writer to
  * @param wtype writers implementation type
  * @param phase phase this writer is for
+ * @param pwriter return added df instance, pass NULL of not interested
  */
 CURLcode Curl_df_add_writer(struct Curl_easy *data,
                             const struct Curl_df_write_type *wtype,
-                            curl_df_phase phase);
+                            curl_df_phase phase,
+                            struct Curl_df_writer **pwriter);
 
 /**
  * Write received BODY data to the client.

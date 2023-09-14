@@ -28,10 +28,4 @@
 
 extern const struct Curl_df_write_type df_writer_out;
 
-CURLcode df_out_unpause(struct Curl_df_writer *writer,
-                        struct Curl_easy *data);
-
-bool df_out_is_paused(struct Curl_df_writer *writer,
-                             struct Curl_easy *data);
-
 #endif /* HEADER_CURL_DF_OUT_H */

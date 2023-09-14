@@ -273,27 +273,32 @@ static void df_out_close(struct Curl_df_writer *writer,
   ctx->npaused = 0;
 }
 
-const struct Curl_df_write_type df_writer_out = {
-  "out",
-  NULL,
-  df_out_init,
-  df_out_do_meta,
-  df_out_do_body,
-  df_out_close,
-  sizeof(struct df_out_writer_ctx)
-};
-
-CURLcode df_out_unpause(struct Curl_df_writer *writer,
-                        struct Curl_easy *data)
+static bool df_out_is_paused(struct Curl_df_writer *writer,
+                             struct Curl_easy *data)
 {
   struct df_out_writer_ctx *ctx = (struct df_out_writer_ctx *)writer;
+  (void)data;
 
-  DEBUGASSERT(writer->dft == &df_writer_out);
+  if(ctx->npaused > 0)
+    return TRUE;
+  return Curl_df_is_paused(writer->next, data);
+}
+
+static CURLcode df_out_unpause(struct Curl_df_writer *writer,
+                               struct Curl_easy *data)
+{
+  struct df_out_writer_ctx *ctx = (struct df_out_writer_ctx *)writer;
+  CURLcode result;
+
+  /* unpause lower writers first before we might write again ourself */
+  result = Curl_df_unpause(writer->next, data);
+  if(result)
+    return result;
+
   while(ctx->npaused) {
     const char *buf;
     size_t blen;
     ssize_t nwritten;
-    CURLcode result;
 
     buf = Curl_dyn_ptr(&ctx->paused[0].b);
     blen = Curl_dyn_len(&ctx->paused[0].b);
@@ -321,11 +326,15 @@ CURLcode df_out_unpause(struct Curl_df_writer *writer,
   return CURLE_OK;
 }
 
-bool df_out_is_paused(struct Curl_df_writer *writer,
-                             struct Curl_easy *data)
-{
-  struct df_out_writer_ctx *ctx = (struct df_out_writer_ctx *)writer;
-  (void)data;
-  DEBUGASSERT(writer->dft == &df_writer_out);
-  return (ctx->npaused > 0);
-}
+const struct Curl_df_write_type df_writer_out = {
+  "out",
+  NULL,
+  df_out_init,
+  df_out_do_meta,
+  df_out_do_body,
+  df_out_close,
+  df_out_is_paused,
+  df_out_unpause,
+  sizeof(struct df_out_writer_ctx)
+};
+

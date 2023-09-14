@@ -43,6 +43,7 @@
 #include <curl/curl.h>
 #include "urldata.h"
 #include "sendf.h"
+#include "df-crlf2lf.h"
 #include "if2ip.h"
 #include "hostip.h"
 #include "progress.h"
@@ -4348,6 +4349,16 @@ CURLcode ftp_regular_transfer(struct Curl_easy *data,
   return result;
 }
 
+#ifdef CURL_DO_LINEEND_CONV
+static bool needs_crlf2lf(struct Curl_easy *data,
+                          int meta_type, void *user_data)
+{
+  (void)user_data;
+  return (meta_type & DF_WRITE_BODY &&
+          data->conn->proto.ftpc.transfertype == 'A');
+}
+#endif /* CURL_DO_LINEEND_CONV */
+
 static CURLcode ftp_setup_connection(struct Curl_easy *data,
                                      struct connectdata *conn)
 {
@@ -4409,6 +4420,11 @@ static CURLcode ftp_setup_connection(struct Curl_easy *data,
       break;
     }
   }
+
+#ifdef CURL_DO_LINEEND_CONV
+  result = Curl_df_crlf2lf_add(data, CURL_DF_PHASE_TRANSCODE,
+                               needs_crlf2lf, NULL);
+#endif
 
   /* get some initial data into the ftp struct */
   ftp->transfer = PPTRANSFER_BODY;

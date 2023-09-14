@@ -29,7 +29,11 @@
 
 #if defined(CURL_DO_LINEEND_CONV) && !defined(CURL_DISABLE_FTP)
 
-extern const struct Curl_df_write_type df_crlf2lf;
+CURLcode Curl_df_crlf2lf_add(struct Curl_easy *data, curl_df_phase phase,
+                             bool (*is_active)(struct Curl_easy *data,
+                                               int meta_type, void *user_data),
+                             void *user_data);
+
 
 #endif /* CURL_DO_LINEEND_CONV) && !CURL_DISABLE_FTP */
 

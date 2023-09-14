@@ -45,7 +45,8 @@
 
 struct df_crlf2lf_ctx {
   struct Curl_df_writer super;
-  /* for FTP downloads: track CRLF sequences that span blocks */
+  bool (*is_active)(struct Curl_easy *data, int meta_type, void *user_data);
+  void *user_data;
   BIT(prev_block_had_trailing_cr);
 };
 
@@ -55,11 +56,10 @@ struct df_crlf2lf_ctx {
  * blocks of data.  Remaining, bare CRs are changed to LFs.  The possibly new
  * size of the data is returned.
  */
-static size_t df_out_convert_crlf(struct Curl_df_writer *writer,
+static size_t df_out_convert_crlf(struct df_crlf2lf_ctx *ctx,
                                   struct Curl_easy *data,
                                   char *startPtr, size_t size)
 {
-  struct df_crlf2lf_ctx *ctx = (struct df_crlf2lf_ctx *)writer;
   char *inPtr, *outPtr;
 
   /* sanity check */
@@ -139,19 +139,13 @@ static CURLcode df_crlf2lf_init(struct Curl_df_writer *writer,
   return CURLE_OK;
 }
 
-static bool is_active(struct Curl_easy *data, int meta_type)
-{
-  return (meta_type & DF_WRITE_BODY &&
-          (data->conn->handler->protocol & PROTO_FAMILY_FTP) &&
-          data->conn->proto.ftpc.transfertype == 'A');
-}
-
 static CURLcode df_crlf2lf_do_meta(struct Curl_df_writer *writer,
                                    struct Curl_easy *data, int meta_type,
                                    const char *buf, size_t blen)
 {
-  if(is_active(data, meta_type)) {
-    blen = df_out_convert_crlf(writer, data, (char *)buf, blen);
+  struct df_crlf2lf_ctx *ctx = (struct df_crlf2lf_ctx *)writer;
+  if(ctx->is_active(data, meta_type, ctx->user_data)) {
+    blen = df_out_convert_crlf(ctx, data, (char *)buf, blen);
   }
   return Curl_df_write_meta(writer->next, data, meta_type, buf, blen);
 }
@@ -160,8 +154,9 @@ static CURLcode df_crlf2lf_do_body(struct Curl_df_writer *writer,
                                    struct Curl_easy *data,
                                    const char *buf, size_t blen)
 {
-  if(is_active(data, DF_WRITE_BODY)) {
-    blen = df_out_convert_crlf(writer, data, (char *)buf, blen);
+  struct df_crlf2lf_ctx *ctx = (struct df_crlf2lf_ctx *)writer;
+  if(ctx->is_active(data, DF_WRITE_BODY, ctx->user_data)) {
+    blen = df_out_convert_crlf(ctx, data, (char *)buf, blen);
   }
   return Curl_df_write_body(writer->next, data, buf, blen);
 }
@@ -173,14 +168,34 @@ static void df_crlf2lf_close(struct Curl_df_writer *writer,
   (void)data;
 }
 
-const struct Curl_df_write_type df_crlf2lf = {
+static const struct Curl_df_write_type df_crlf2lf = {
   "crlf2lf",
   NULL,
   df_crlf2lf_init,
   df_crlf2lf_do_meta,
   df_crlf2lf_do_body,
   df_crlf2lf_close,
+  Curl_df_def_is_paused,
+  Curl_df_def_unpause,
   sizeof(struct df_crlf2lf_ctx)
 };
+
+CURLcode Curl_df_crlf2lf_add(struct Curl_easy *data, curl_df_phase phase,
+                             bool (*is_active)(struct Curl_easy *data,
+                                               int meta_type, void *user_data),
+                             void *user_data)
+{
+  struct Curl_df_writer *writer;
+  struct df_crlf2lf_ctx *ctx;
+  CURLcode result;
+
+  result = Curl_df_add_writer(data, &df_crlf2lf, phase, &writer);
+  if(result)
+    return result;
+  ctx = (struct df_crlf2lf_ctx *)writer;
+  ctx->is_active = is_active;
+  ctx->user_data = user_data;
+  return CURLE_OK;
+}
 
 #endif /* CURL_DO_LINEEND_CONV) && !CURL_DISABLE_FTP */

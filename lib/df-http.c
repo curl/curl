@@ -45,17 +45,17 @@
 
 #if !defined(CURL_DISABLE_HTTP)
 
-static CURLcode df_http_init(struct Curl_df_writer *writer,
-                             struct Curl_easy *data)
+static CURLcode df_http_ch_init(struct Curl_df_writer *writer,
+                                struct Curl_easy *data)
 {
   (void)writer;
   (void)data;
   return CURLE_OK;
 }
 
-static CURLcode df_http_do_meta(struct Curl_df_writer *writer,
-                                struct Curl_easy *data, int meta_type,
-                                const char *buf, size_t blen)
+static CURLcode df_http_ch_do_meta(struct Curl_df_writer *writer,
+                                   struct Curl_easy *data, int meta_type,
+                                   const char *buf, size_t blen)
 {
   /* HTTP header, but not status-line
    * TODO: this assumes `buf` is NUL-terminated */
@@ -73,21 +73,28 @@ static CURLcode df_http_do_meta(struct Curl_df_writer *writer,
   return Curl_df_write_meta(writer->next, data, meta_type, buf, blen);
 }
 
-static void df_http_close(struct Curl_df_writer *writer,
-                          struct Curl_easy *data)
+static void df_http_ch_close(struct Curl_df_writer *writer,
+                             struct Curl_easy *data)
 {
   (void)writer;
   (void)data;
 }
 
-const struct Curl_df_write_type df_http = {
+static const struct Curl_df_write_type df_http_ch = {
   "http",
   NULL,
-  df_http_init,
-  df_http_do_meta,
+  df_http_ch_init,
+  df_http_ch_do_meta,
   Curl_df_def_do_body,
-  df_http_close,
+  df_http_ch_close,
+  Curl_df_def_is_paused,
+  Curl_df_def_unpause,
   sizeof(struct Curl_df_write_type)
 };
+
+CURLcode Curl_df_http_collect_header_add(struct Curl_easy *data)
+{
+  return Curl_df_add_writer(data, &df_http_ch, CURL_DF_PHASE_CONN, NULL);
+}
 
 #endif /* !CURL_DISABLE_HTTP */

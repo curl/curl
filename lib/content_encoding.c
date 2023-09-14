@@ -325,6 +325,8 @@ static const struct Curl_df_write_type df_deflate_decoder = {
   Curl_df_def_do_meta,
   df_deflate_write,
   df_deflate_close,
+  Curl_df_def_is_paused,
+  Curl_df_def_unpause,
   sizeof(struct zlib_writer)
 };
 
@@ -587,6 +589,8 @@ static const struct Curl_df_write_type df_gzip_decoder = {
   Curl_df_def_do_meta,
   df_gzip_write,
   df_gzip_close,
+  Curl_df_def_is_paused,
+  Curl_df_def_unpause,
   sizeof(struct zlib_writer)
 };
 
@@ -715,6 +719,8 @@ static const struct Curl_df_write_type df_brotli_decoder = {
   Curl_df_def_do_meta,
   df_brotli_write,
   df_brotli_close,
+  Curl_df_def_is_paused,
+  Curl_df_def_unpause,
   sizeof(struct brotli_writer)
 };
 #endif
@@ -804,6 +810,8 @@ static const struct Curl_df_write_type df_zstd_decoder = {
   Curl_df_def_do_meta,
   df_zstd_write,
   df_zstd_close,
+  Curl_df_def_is_paused,
+  Curl_df_def_unpause,
   sizeof(struct zstd_writer)
 };
 #endif
@@ -832,6 +840,8 @@ static const struct Curl_df_write_type df_identity_decoder = {
   Curl_df_def_do_meta,
   Curl_df_def_do_body,
   df_identity_close,
+  Curl_df_def_is_paused,
+  Curl_df_def_unpause,
   sizeof(struct Curl_df_writer)
 };
 
@@ -876,6 +886,8 @@ static const struct Curl_df_write_type df_writer_error = {
   Curl_df_def_do_meta,
   df_error_write,
   df_error_close,
+  Curl_df_def_is_paused,
+  Curl_df_def_unpause,
   sizeof(struct Curl_df_writer)
 };
 
@@ -990,7 +1002,7 @@ CURLcode Curl_df_add_decoders(struct Curl_easy *data,
       if(!decoder)
         decoder = &df_writer_error;  /* Defer error at stack use. */
 
-      result = Curl_df_add_writer(data, decoder, phase);
+      result = Curl_df_add_writer(data, decoder, phase, NULL);
       if(result)
         return result;
     }
