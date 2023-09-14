@@ -51,7 +51,7 @@
 #include "dfilters.h"
 #include "sendf.h"
 #include "http.h"
-#include "content_encoding.h"
+#include "df-http-enc.h"
 #include "strdup.h"
 #include "strcase.h"
 
@@ -858,7 +858,7 @@ static CURLcode df_error_write(struct Curl_df_writer *writer,
                                struct Curl_easy *data,
                                const char *buf, size_t nbytes)
 {
-  char *all = Curl_all_content_decodings();
+  char *all = Curl_df_http_enc_list_all(CURL_DF_PHASE_CONTENT);
 
   (void) writer;
   (void) buf;
@@ -909,12 +909,15 @@ static const struct Curl_df_write_type * const content_decoder[] = {
 
 
 /* Return a list of comma-separated names of supported encodings. */
-char *Curl_all_content_decodings(void)
+char *Curl_df_http_enc_list_all(curl_df_phase phase)
 {
   size_t len = 0;
   const struct Curl_df_write_type * const *cep;
   const struct Curl_df_write_type *ce;
   char *ace;
+
+  if(phase != CURL_DF_PHASE_CONTENT)
+    return NULL;
 
   for(cep = content_decoder; *cep; cep++) {
     ce = *cep;
@@ -961,7 +964,7 @@ find_decoder(const char *name, size_t len)
 /* Set-up the decoder stack from a comma-separated list of encodings.
  * See Content-Encoding header value in RFC 7231 section 3.1.2.2.
  * Applies to Transfer-Encoding as well. */
-CURLcode Curl_df_add_decoders(struct Curl_easy *data,
+CURLcode Curl_df_http_enc_add(struct Curl_easy *data,
                               const char *enclist, curl_df_phase phase)
 {
   struct SingleRequest *k = &data->req;
@@ -1011,21 +1014,5 @@ CURLcode Curl_df_add_decoders(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-#else
-/* Stubs for builds without HTTP. */
-CURLcode Curl_df_add_decoders(struct Curl_easy *data,
-                              const char *enclist, curl_df_phase phase)
-{
-  (void) data;
-  (void) enclist;
-  (void) is_transfer;
-  return CURLE_NOT_BUILT_IN;
-}
-
-char *Curl_all_content_decodings(void)
-{
-  return strdup(CONTENT_ENCODING_DEFAULT);  /* Satisfy caller. */
-}
-
-#endif /* CURL_DISABLE_HTTP */
+#endif /* !CURL_DISABLE_HTTP */
 

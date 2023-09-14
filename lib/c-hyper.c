@@ -53,7 +53,7 @@
 #include "transfer.h"
 #include "multiif.h"
 #include "progress.h"
-#include "content_encoding.h"
+#include "df-http-enc.h"
 #include "ws.h"
 
 /* The last 3 #include files should be in this order */

@@ -56,6 +56,7 @@
 #include "transfer.h"
 #include "sendf.h"
 #include "df-http.h"
+#include "df-http-enc.h"
 #include "formdata.h"
 #include "mime.h"
 #include "progress.h"
@@ -79,7 +80,6 @@
 #include "strtoofft.h"
 #include "multiif.h"
 #include "strcase.h"
-#include "content_encoding.h"
 #include "http_proxy.h"
 #include "warnless.h"
 #include "http2.h"
@@ -3625,7 +3625,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
      * of chunks, and a chunk-data set to zero signals the
      * end-of-chunks. */
 
-    result = Curl_df_add_decoders(data,
+    result = Curl_df_http_enc_add(data,
                                   headp + strlen("Transfer-Encoding:"),
                                   CURL_DF_PHASE_TRANSCODE);
     if(result)
@@ -3646,7 +3646,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
      * 2616). zlib cannot handle compress.  However, errors are
      * handled further down when the response body is processed
      */
-    result = Curl_df_add_decoders(data,
+    result = Curl_df_http_enc_add(data,
                                   headp + strlen("Content-Encoding:"),
                                   CURL_DF_PHASE_CONTENT);
     if(result)

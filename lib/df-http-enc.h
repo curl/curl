@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_CONTENT_ENCODING_H
-#define HEADER_CURL_CONTENT_ENCODING_H
+#ifndef HEADER_CURL_DF_HTTP_ENC_H
+#define HEADER_CURL_DF_HTTP_ENC_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -26,9 +26,27 @@
 #include "curl_setup.h"
 #include "dfilters.h"
 
-CURLcode Curl_df_add_decoders(struct Curl_easy *data,
+#ifndef CURL_DISABLE_HTTP
+
+/**
+ * Add all decoders listed in `enclist` in HTTP header format to the
+ * dfilter writer chain of `data`.
+ * @param data     transfer to add dfilters to
+ * @param enclist  list of encodings
+ * @param phase    phase in the dfilter write chain where decoders apply
+ */
+CURLcode Curl_df_http_enc_add(struct Curl_easy *data,
                               const char *enclist,
                               curl_df_phase phase);
-char *Curl_all_content_decodings(void);
 
-#endif /* HEADER_CURL_CONTENT_ENCODING_H */
+/**
+ * Get the HTTP header value list of encodings we accept
+ * to decode for the given phase.
+ * @return allocated string listing all supported content encodings
+ *         or NULL if none are supported for this phase
+ */
+char *Curl_df_http_enc_list_all(curl_df_phase phase);
+
+#endif /* !CURL_DISABLE_HTTP */
+
+#endif /* HEADER_CURL_DF_HTTP_ENC_H */

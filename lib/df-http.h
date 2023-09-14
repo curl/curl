@@ -29,10 +29,10 @@
 #if !defined(CURL_DISABLE_HTTP)
 
 /**
- * dfilter that collects HTTP headers.
+ * Add dfilter writer that collects HTTP headers via Curl_headers_push().
  */
 CURLcode Curl_df_http_collect_header_add(struct Curl_easy *data);
 
-#endif
+#endif /* !CURL_DISABLE_HTTP */
 
 #endif /* HEADER_CURL_DF_HTTP_H */

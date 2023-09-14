@@ -62,7 +62,6 @@
 #include <curl/curl.h>
 #include "netrc.h"
 
-#include "content_encoding.h"
 #include "hostip.h"
 #include "cfilters.h"
 #include "transfer.h"

@@ -39,7 +39,7 @@
 #include "urldata.h"
 #include "url.h"
 #include "progress.h"
-#include "content_encoding.h"
+#include "df-http-enc.h"
 #include "strcase.h"
 #include "share.h"
 #include "vtls/vtls.h"
@@ -592,7 +592,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      */
     argptr = va_arg(param, char *);
     if(argptr && !*argptr) {
-      argptr = Curl_all_content_decodings();
+      argptr = Curl_df_http_enc_list_all(CURL_DF_PHASE_CONTENT);
       if(!argptr)
         result = CURLE_OUT_OF_MEMORY;
       else {

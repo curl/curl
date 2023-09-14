@@ -113,7 +113,6 @@ LIB_CFILES =         \
   cfilters.c         \
   conncache.c        \
   connect.c          \
-  content_encoding.c \
   cookie.c           \
   curl_addrinfo.c    \
   curl_des.c         \
@@ -135,6 +134,7 @@ LIB_CFILES =         \
   curl_trc.c         \
   df-crlf2lf.c       \
   df-http.c          \
+  df-http-enc.c      \
   df-out.c           \
   dfilters.c         \
   dict.c             \
@@ -248,7 +248,6 @@ LIB_HFILES =         \
   cfilters.h         \
   conncache.h        \
   connect.h          \
-  content_encoding.h \
   cookie.h           \
   curl_addrinfo.h    \
   curl_base64.h      \
@@ -284,6 +283,7 @@ LIB_HFILES =         \
   df-crlf2lf.h       \
   df-out.h           \
   df-http.h          \
+  df-http-enc.h      \
   dfilters.h         \
   dict.h             \
   doh.h              \
