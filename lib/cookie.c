@@ -119,7 +119,6 @@ static void freecookie(struct Cookie *co)
   free(co->name);
   free(co->value);
   free(co->maxage);
-  free(co->version);
   free(co);
 }
 
@@ -718,11 +717,7 @@ Curl_cookie_add(struct Curl_easy *data,
           }
         }
         else if((nlen == 7) && strncasecompare("version", namep, 7)) {
-          strstore(&co->version, valuep, vlen);
-          if(!co->version) {
-            badcookie = TRUE;
-            break;
-          }
+          /* just ignore */
         }
         else if((nlen == 7) && strncasecompare("max-age", namep, 7)) {
           /*
@@ -1160,7 +1155,6 @@ Curl_cookie_add(struct Curl_easy *data,
     free(clist->path);
     free(clist->spath);
     free(clist->expirestr);
-    free(clist->version);
     free(clist->maxage);
 
     *clist = *co;  /* then store all the new data */
@@ -1224,9 +1218,6 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
     c = calloc(1, sizeof(struct CookieInfo));
     if(!c)
       return NULL; /* failed to get memory */
-    c->filename = strdup(file?file:"none"); /* copy the name just in case */
-    if(!c->filename)
-      goto fail; /* failed to get memory */
     /*
      * Initialize the next_expiration time to signal that we don't have enough
      * information yet.
@@ -1378,7 +1369,6 @@ static struct Cookie *dup_cookie(struct Cookie *src)
     CLONE(name);
     CLONE(value);
     CLONE(maxage);
-    CLONE(version);
     d->expires = src->expires;
     d->tailmatch = src->tailmatch;
     d->secure = src->secure;
@@ -1595,7 +1585,6 @@ void Curl_cookie_cleanup(struct CookieInfo *c)
 {
   if(c) {
     unsigned int i;
-    free(c->filename);
     for(i = 0; i < COOKIE_HASH_SIZE; i++)
       Curl_cookie_freelist(c->cookies[i]);
     free(c); /* free the base struct as well */
