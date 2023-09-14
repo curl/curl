@@ -63,7 +63,7 @@ typedef enum {
   CURL_DF_PHASE_TRANSCODE,
   CURL_DF_PHASE_PROTOCOL,
   CURL_DF_PHASE_DECODE,
-  CURL_DF_PHASE_APP,
+  CURL_DF_PHASE_APP
 } curl_df_phase;
 
 /**
