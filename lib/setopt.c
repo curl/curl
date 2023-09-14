@@ -592,7 +592,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      */
     argptr = va_arg(param, char *);
     if(argptr && !*argptr) {
-      argptr = Curl_df_http_enc_list_all(CURL_DF_PHASE_CONTENT);
+      argptr = Curl_df_http_enc_list_all(CURL_DF_PHASE_DECODE);
       if(!argptr)
         result = CURLE_OUT_OF_MEMORY;
       else {

@@ -94,7 +94,7 @@ static const struct Curl_df_write_type df_http_ch = {
 
 CURLcode Curl_df_http_collect_header_add(struct Curl_easy *data)
 {
-  return Curl_df_add_writer(data, &df_http_ch, CURL_DF_PHASE_CONN, NULL);
+  return Curl_df_add_writer(data, &df_http_ch, CURL_DF_PHASE_PROTOCOL, NULL);
 }
 
 #endif /* !CURL_DISABLE_HTTP */

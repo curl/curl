@@ -858,7 +858,7 @@ static CURLcode df_error_write(struct Curl_df_writer *writer,
                                struct Curl_easy *data,
                                const char *buf, size_t nbytes)
 {
-  char *all = Curl_df_http_enc_list_all(CURL_DF_PHASE_CONTENT);
+  char *all = Curl_df_http_enc_list_all(CURL_DF_PHASE_DECODE);
 
   (void) writer;
   (void) buf;
@@ -916,7 +916,7 @@ char *Curl_df_http_enc_list_all(curl_df_phase phase)
   const struct Curl_df_write_type *ce;
   char *ace;
 
-  if(phase != CURL_DF_PHASE_CONTENT)
+  if(phase != CURL_DF_PHASE_DECODE)
     return NULL;
 
   for(cep = content_decoder; *cep; cep++) {
@@ -970,7 +970,7 @@ CURLcode Curl_df_http_enc_add(struct Curl_easy *data,
   struct SingleRequest *k = &data->req;
   CURLcode result;
 
-  if(data->set.http_ce_skip && phase == CURL_DF_PHASE_CONTENT) {
+  if(data->set.http_ce_skip && phase == CURL_DF_PHASE_DECODE) {
     infof(data, "ignoring Content-Encoding: '%s'", enclist);
     return CURLE_OK;
   }

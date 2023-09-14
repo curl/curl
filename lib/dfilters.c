@@ -164,12 +164,12 @@ CURLcode Curl_df_add_writer(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
 
   if(phase == CURL_DF_PHASE_TRANSCODE ||
-     phase == CURL_DF_PHASE_CONTENT) {
+     phase == CURL_DF_PHASE_DECODE) {
     /* Do we exceed the max number of decoders for these phases? */
     size_t ndecoders = 1; /* we are about to add 1 */
     for(writer = data->req.df_client_writers; writer; writer = writer->next) {
       if(writer->phase == CURL_DF_PHASE_TRANSCODE ||
-         writer->phase == CURL_DF_PHASE_CONTENT)
+         writer->phase == CURL_DF_PHASE_DECODE)
          ++ndecoders;
     }
     if(ndecoders >= MAX_ENCODE_STACK) {

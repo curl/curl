@@ -3648,7 +3648,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
      */
     result = Curl_df_http_enc_add(data,
                                   headp + strlen("Content-Encoding:"),
-                                  CURL_DF_PHASE_CONTENT);
+                                  CURL_DF_PHASE_DECODE);
     if(result)
       return result;
   }

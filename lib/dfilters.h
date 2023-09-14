@@ -46,11 +46,13 @@
  * TRANSCODE  the data is tranformed from its network presentation to its
  *            internal format. Examples would be HTTP de-chunking, FTP line
  *            end conversions, etc.
- * PROTOCOL   meta data can be inspected and acted upon
- * CONTENT    body data is decoded into its final form for the application.
- *            Examples: HTTP Conent-Encodings like gzip, brotli, etc.
+ * PROTOCOL   protocol data, stripped from transport encodings. These are
+ *            the bytes that should match a HTTP "Content-Length" indicator.
+ *            Useful for checks and monitoring progress.
+ * DECODE     body data is decoded into its final form for the application.
+ *            Examples: HTTP Content-Encodings like gzip, brotli, etc.
  * APP        Delivery of data to the application. Also suitable for
- *            monitoring the "net" amount of data transferred.
+ *            monitoring the effective amount of data written.
  *
  * Writers in the same phase are called in reverse order of addition. E.g.
  * adding first "gzip" then "deflate" for CONTENT means that "deflate"
@@ -59,7 +61,8 @@
 typedef enum {
   CURL_DF_PHASE_CONN,
   CURL_DF_PHASE_TRANSCODE,
-  CURL_DF_PHASE_CONTENT,
+  CURL_DF_PHASE_PROTOCOL,
+  CURL_DF_PHASE_DECODE,
   CURL_DF_PHASE_APP,
 } curl_df_phase;
 
