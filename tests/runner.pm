@@ -753,7 +753,8 @@ sub singletest_prepare {
             my $path = $filename;
             # cut off the file name part
             $path =~ s/^(.*)\/[^\/]*/$1/;
-            my $nparts = scalar(split(/\//, $LOGDIR));
+            my @ldparts = split(/\//, $LOGDIR);
+            my $nparts = @ldparts;
             my @parts = split(/\//, $path);
             if(join("/", @parts[0..$nparts-1]) eq $LOGDIR) {
                 # the file is in $LOGDIR/
