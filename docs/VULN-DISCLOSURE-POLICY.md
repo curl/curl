@@ -1,7 +1,7 @@
-# curl security process
+# curl vulnerability disclosure policy
 
-This document describes how security vulnerabilities should be handled in the
-curl project.
+This document describes how security vulnerabilities are handled in the curl
+project.
 
 ## Publishing Information
 
