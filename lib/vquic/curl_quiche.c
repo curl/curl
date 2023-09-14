@@ -165,7 +165,7 @@ static CURLcode quic_x509_store_setup(struct Curl_cfilter *cf,
       else {
         /* verifying the peer without any CA certificates won't work so
            use openssl's built-in default as fallback */
-        SSL_CTX_set_default_verify_paths(ssl_ctx);
+        SSL_CTX_set_default_verify_paths(ctx->sslctx);
       }
 #endif
     }
