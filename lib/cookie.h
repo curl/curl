@@ -35,8 +35,6 @@ struct Cookie {
   char *spath;        /* sanitized cookie path */
   char *domain;      /* domain = <this> */
   curl_off_t expires;  /* expires = <this> */
-  char *expirestr;   /* the plain text version */
-  char *maxage;      /* Max-Age = <value> */
   bool tailmatch;    /* whether we do tail-matching of the domain name */
   bool secure;       /* whether the 'secure' keyword was used */
   bool livecookie;   /* updated from a server, not a stored file */
