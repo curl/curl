@@ -112,13 +112,11 @@ static void strstore(char **str, const char *newstr, size_t len);
 
 static void freecookie(struct Cookie *co)
 {
-  free(co->expirestr);
   free(co->domain);
   free(co->path);
   free(co->spath);
   free(co->name);
   free(co->value);
-  free(co->maxage);
   free(co);
 }
 
@@ -729,17 +727,55 @@ Curl_cookie_add(struct Curl_easy *data,
            * client should discard the cookie.  A value of zero means the
            * cookie should be discarded immediately.
            */
-          strstore(&co->maxage, valuep, vlen);
-          if(!co->maxage) {
-            badcookie = TRUE;
+          CURLofft offt;
+          const char *maxage = valuep;
+          offt = curlx_strtoofft((*maxage == '\"')?
+                                 &maxage[1]:&maxage[0], NULL, 10,
+                                 &co->expires);
+          switch(offt) {
+          case CURL_OFFT_FLOW:
+            /* overflow, used max value */
+            co->expires = CURL_OFF_T_MAX;
+            break;
+          case CURL_OFFT_INVAL:
+            /* negative or otherwise bad, expire */
+            co->expires = 1;
+            break;
+          case CURL_OFFT_OK:
+            if(!co->expires)
+              /* already expired */
+              co->expires = 1;
+            else if(CURL_OFF_T_MAX - now < co->expires)
+              /* would overflow */
+              co->expires = CURL_OFF_T_MAX;
+            else
+              co->expires += now;
             break;
           }
         }
         else if((nlen == 7) && strncasecompare("expires", namep, 7)) {
-          strstore(&co->expirestr, valuep, vlen);
-          if(!co->expirestr) {
-            badcookie = TRUE;
-            break;
+          char date[128];
+          if(!co->expires && (vlen < sizeof(date))) {
+            /* copy the date so that it can be null terminated */
+            memcpy(date, valuep, vlen);
+            date[vlen] = 0;
+            /*
+             * Let max-age have priority.
+             *
+             * If the date cannot get parsed for whatever reason, the cookie
+             * will be treated as a session cookie
+             */
+            co->expires = Curl_getdate_capped(date);
+
+            /*
+             * Session cookies have expires set to 0 so if we get that back
+             * from the date parser let's add a second to make it a
+             * non-session cookie
+             */
+            if(co->expires == 0)
+              co->expires = 1;
+            else if(co->expires < 0)
+              co->expires = 0;
           }
         }
 
@@ -758,49 +794,6 @@ Curl_cookie_add(struct Curl_easy *data,
       else
         break;
     } while(1);
-
-    if(co->maxage) {
-      CURLofft offt;
-      offt = curlx_strtoofft((*co->maxage == '\"')?
-                             &co->maxage[1]:&co->maxage[0], NULL, 10,
-                             &co->expires);
-      switch(offt) {
-      case CURL_OFFT_FLOW:
-        /* overflow, used max value */
-        co->expires = CURL_OFF_T_MAX;
-        break;
-      case CURL_OFFT_INVAL:
-        /* negative or otherwise bad, expire */
-        co->expires = 1;
-        break;
-      case CURL_OFFT_OK:
-        if(!co->expires)
-          /* already expired */
-          co->expires = 1;
-        else if(CURL_OFF_T_MAX - now < co->expires)
-          /* would overflow */
-          co->expires = CURL_OFF_T_MAX;
-        else
-          co->expires += now;
-        break;
-      }
-    }
-    else if(co->expirestr) {
-      /*
-       * Note that if the date couldn't get parsed for whatever reason, the
-       * cookie will be treated as a session cookie
-       */
-      co->expires = Curl_getdate_capped(co->expirestr);
-
-      /*
-       * Session cookies have expires set to 0 so if we get that back from the
-       * date parser let's add a second to make it a non-session cookie
-       */
-      if(co->expires == 0)
-        co->expires = 1;
-      else if(co->expires < 0)
-        co->expires = 0;
-    }
 
     if(!badcookie && !co->domain) {
       if(domain) {
@@ -1154,8 +1147,6 @@ Curl_cookie_add(struct Curl_easy *data,
     free(clist->domain);
     free(clist->path);
     free(clist->spath);
-    free(clist->expirestr);
-    free(clist->maxage);
 
     *clist = *co;  /* then store all the new data */
 
@@ -1362,13 +1353,11 @@ static struct Cookie *dup_cookie(struct Cookie *src)
 {
   struct Cookie *d = calloc(sizeof(struct Cookie), 1);
   if(d) {
-    CLONE(expirestr);
     CLONE(domain);
     CLONE(path);
     CLONE(spath);
     CLONE(name);
     CLONE(value);
-    CLONE(maxage);
     d->expires = src->expires;
     d->tailmatch = src->tailmatch;
     d->secure = src->secure;
