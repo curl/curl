@@ -4076,7 +4076,7 @@ static CURLcode ftp_disconnect(struct Curl_easy *data,
    * If it is, we try sending a QUIT.
    * If that succeeds, we check if pingpong has data buffered
    * and retry flushing to for a certain amount of time. */
-  if(conn->proto.ftpc.ctl_valid && !ftp_quit(data, conn)) {
+  if(ftpc->ctl_valid && pp && !ftp_quit(data, conn)) {
     int i, max_ms = 1000, wait_ms = 10;
     for(i = 0; i < (max_ms/wait_ms); ++i) {
       if(Curl_pp_moredata(&conn->proto.ftpc.pp))
