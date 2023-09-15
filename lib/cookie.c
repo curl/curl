@@ -484,7 +484,7 @@ Curl_cookie_add(struct Curl_easy *data,
                 struct CookieInfo *c,
                 bool httpheader, /* TRUE if HTTP header-style line */
                 bool noexpire, /* if TRUE, skip remove_expired() */
-                char *lineptr,   /* first character of the line */
+                const char *lineptr,   /* first character of the line */
                 const char *domain, /* default domain */
                 const char *path,   /* full path used when this cookie is set,
                                        used to get default path for the cookie
@@ -882,7 +882,7 @@ Curl_cookie_add(struct Curl_easy *data,
     if(ptr)
       *ptr = 0; /* clear it */
 
-    firstptr = strtok_r(lineptr, "\t", &tok_buf); /* tokenize it on the TAB */
+    firstptr = strtok_r((char *)lineptr, "\t", &tok_buf); /* tokenize on TAB */
 
     /*
      * Now loop through the fields and init the struct we already have
@@ -1237,24 +1237,20 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
 
     c->running = FALSE; /* this is not running, this is init */
     if(fp) {
-      char *lineptr;
-      bool headerline;
 
       line = malloc(MAX_COOKIE_LINE);
       if(!line)
         goto fail;
       while(Curl_get_line(line, MAX_COOKIE_LINE, fp)) {
+        char *lineptr = line;
+        bool headerline = FALSE;
         if(checkprefix("Set-Cookie:", line)) {
           /* This is a cookie line, get it! */
           lineptr = &line[11];
           headerline = TRUE;
+          while(*lineptr && ISBLANK(*lineptr))
+            lineptr++;
         }
-        else {
-          lineptr = line;
-          headerline = FALSE;
-        }
-        while(*lineptr && ISBLANK(*lineptr))
-          lineptr++;
 
         Curl_cookie_add(data, c, headerline, TRUE, lineptr, NULL, NULL, TRUE);
       }
