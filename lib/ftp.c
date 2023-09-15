@@ -4072,8 +4072,20 @@ static CURLcode ftp_disconnect(struct Curl_easy *data,
   if(dead_connection)
     ftpc->ctl_valid = FALSE;
 
-  /* The FTP session may or may not have been allocated/setup at this point! */
-  (void)ftp_quit(data, conn); /* ignore errors on the QUIT */
+  /* The FTP session may or may not have been allocated/setup at this point!
+   * If it is, we try sending a QUIT.
+   * If that succeeds, we check if pingpong has data buffered
+   * and retry flushing to for a certain amount of time. */
+  if(conn->proto.ftpc.ctl_valid && !ftp_quit(data, conn)) {
+    int i, max_ms = 1000, wait_ms = 10;
+    for(i = 0; i < (max_ms/wait_ms); ++i) {
+      if(Curl_pp_moredata(&conn->proto.ftpc.pp))
+        break; /* all flushed! */
+      if(Curl_pp_flushsend(data, &conn->proto.ftpc.pp))
+        break; /* error sending */
+      Curl_wait_ms(wait_ms);
+    }
+  }
 
   if(ftpc->entrypath) {
     if(data->state.most_recent_ftp_entrypath == ftpc->entrypath) {
