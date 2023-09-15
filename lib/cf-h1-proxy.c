@@ -273,7 +273,6 @@ static CURLcode send_CONNECT(struct Curl_cfilter *cf,
   if(nwritten < 0) {
     if(result == CURLE_AGAIN) {
       result = CURLE_OK;
-      nwritten = 0;
     }
     goto out;
   }
