@@ -36,6 +36,7 @@ from testenv import Env, CurlClient, ExecResult
 log = logging.getLogger(__name__)
 
 
+@pytest.mark.skipif(condition=Env().ci_run, reason="not suitable for CI runs")
 class TestGoAway:
 
     @pytest.fixture(autouse=True, scope='class')
