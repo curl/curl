@@ -1160,6 +1160,8 @@ static void cf_h2_proxy_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     cf_h2_proxy_ctx_clear(ctx);
     CF_DATA_RESTORE(cf, save);
   }
+  if(cf->next)
+    cf->next->cft->do_close(cf->next, data);
 }
 
 static void cf_h2_proxy_destroy(struct Curl_cfilter *cf,
