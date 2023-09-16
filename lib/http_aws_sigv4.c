@@ -409,6 +409,11 @@ static int compare_func(const void *a, const void *b)
 {
   const struct pair *aa = a;
   const struct pair *bb = b;
+  /* If one element is empty, the other is always sorted higher */
+  if(aa->len == 0)
+    return -1;
+  if(bb->len == 0)
+    return 1;
   return strncmp(aa->p, bb->p, aa->len < bb->len ? aa->len : bb->len);
 }
 
