@@ -307,6 +307,10 @@ static CURLcode dohprobe(struct Curl_easy *data,
       ERROR_CHECK_SETOPT(CURLOPT_SSL_CTX_FUNCTION, data->set.ssl.fsslctx);
     if(data->set.ssl.fsslctxp)
       ERROR_CHECK_SETOPT(CURLOPT_SSL_CTX_DATA, data->set.ssl.fsslctxp);
+    if(data->set.fdebug)
+      ERROR_CHECK_SETOPT(CURLOPT_DEBUGFUNCTION, data->set.fdebug);
+    if(data->set.debugdata)
+      ERROR_CHECK_SETOPT(CURLOPT_DEBUGDATA, data->set.debugdata);
     if(data->set.str[STRING_SSL_EC_CURVES]) {
       ERROR_CHECK_SETOPT(CURLOPT_SSL_EC_CURVES,
                          data->set.str[STRING_SSL_EC_CURVES]);
