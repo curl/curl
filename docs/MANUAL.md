@@ -323,8 +323,6 @@ of the letter's ASCII code.
 
 Example:
 
-(page located at `http://www.formpost.com/getthis/`)
-
 ```html
 <form action="post.cgi" method="post">
 <input name=user size=10>
