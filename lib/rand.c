@@ -275,14 +275,14 @@ CURLcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd,
  * alphanumerical chars PLUS a null-terminating byte.
  */
 
-static const char alnum[26 + 26 + 10] =
+static const char alnum[] =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
 CURLcode Curl_rand_alnum(struct Curl_easy *data, unsigned char *rnd,
                          size_t num)
 {
   CURLcode result = CURLE_OK;
-  const int alnumspace = sizeof(alnum);
+  const int alnumspace = sizeof(alnum) - 1;
   unsigned int r;
   DEBUGASSERT(num > 1);
 
