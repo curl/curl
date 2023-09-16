@@ -640,7 +640,9 @@ struct SingleRequest {
   curl_off_t pendingheader;      /* this many bytes left to send is actually
                                     header and not body */
   struct curltime start;         /* transfer started at this time */
-  unsigned int headerbytecount;  /* only count received headers */
+  unsigned int headerbytecount;  /* received server headers (not CONNECT
+                                    headers) */
+  unsigned int allheadercount;   /* all received headers (server + CONNECT) */
   unsigned int deductheadercount; /* this amount of bytes doesn't count when
                                      we check if anything has been transferred
                                      at the end of a connection. We use this
