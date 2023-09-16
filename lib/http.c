@@ -3970,18 +3970,23 @@ CURLcode Curl_bump_headersize(struct Curl_easy *data,
                               bool connect_only)
 {
   size_t bad = 0;
+  unsigned int max = MAX_HTTP_RESP_HEADER_SIZE;
   if(delta < MAX_HTTP_RESP_HEADER_SIZE) {
+    data->info.header_size += (unsigned int)delta;
+    data->req.allheadercount += (unsigned int)delta;
     if(!connect_only)
       data->req.headerbytecount += (unsigned int)delta;
-    data->info.header_size += (unsigned int)delta;
-    if(data->info.header_size > MAX_HTTP_RESP_HEADER_SIZE)
+    if(data->req.allheadercount > max)
+      bad = data->req.allheadercount;
+    else if(data->info.header_size > (max * 20)) {
       bad = data->info.header_size;
+      max *= 20;
+    }
   }
   else
-    bad = data->info.header_size + delta;
+    bad = data->req.allheadercount + delta;
   if(bad) {
-    failf(data, "Too large response headers: %zu > %u",
-          bad, MAX_HTTP_RESP_HEADER_SIZE);
+    failf(data, "Too large response headers: %zu > %u", bad, max);
     return CURLE_RECV_ERROR;
   }
   return CURLE_OK;
