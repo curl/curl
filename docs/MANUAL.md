@@ -323,7 +323,7 @@ of the letter's ASCII code.
 
 Example:
 
-(say a page has the following html)
+(say if `http://example.com` had the following html)
 
 ```html
 <form action="post.cgi" method="post">
@@ -338,8 +338,7 @@ We want to enter user `foobar` with password `12345`.
 
 To post to this, you would enter a curl command line like:
 
-    curl -d "user=foobar&pass=12345&id=blablabla&ding=submit"
-      http://www.example.com/getthis/post.cgi
+    curl -d "user=foobar&pass=12345&id=blablabla&ding=submit" http://example.com/post.cgi
 
 While `-d` uses the application/x-www-form-urlencoded mime-type, generally
 understood by CGI's and similar, curl also supports the more capable
