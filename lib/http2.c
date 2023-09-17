@@ -2313,7 +2313,7 @@ out:
                 "h2 windows %d-%d (stream-conn), "
                 "buffers %zu-%zu (stream-conn)",
                 stream->id, len, nwritten, *err,
-                (ssize_t)stream->upload_left,
+                stream->upload_left,
                 nghttp2_session_get_stream_remote_window_size(
                   ctx->h2, stream->id),
                 nghttp2_session_get_remote_window_size(ctx->h2),

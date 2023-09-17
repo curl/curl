@@ -646,7 +646,7 @@ evaluate:
   /* Nothing connected, check the time before we might
    * start new ballers or return ok. */
   if((ongoing || not_started) && Curl_timeleft(data, &now, TRUE) < 0) {
-    failf(data, "Connection timeout after %ld ms",
+    failf(data, "Connection timeout after %" CURL_FORMAT_CURL_OFF_T " ms",
           Curl_timediff(now, data->progress.t_startsingle));
     return CURLE_OPERATION_TIMEDOUT;
   }
