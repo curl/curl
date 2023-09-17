@@ -888,8 +888,8 @@ static bool conn_maxage(struct Curl_easy *data,
   idletime /= 1000; /* integer seconds is fine */
 
   if(idletime > data->set.maxage_conn) {
-    infof(data, "Too old connection (%ld seconds idle), disconnect it",
-          idletime);
+    infof(data, "Too old connection (%" CURL_FORMAT_TIMEDIFF_T
+          " seconds idle), disconnect it", idletime);
     return TRUE;
   }
 
@@ -898,8 +898,8 @@ static bool conn_maxage(struct Curl_easy *data,
 
   if(data->set.maxlifetime_conn && lifetime > data->set.maxlifetime_conn) {
     infof(data,
-          "Too old connection (%ld seconds since creation), disconnect it",
-          lifetime);
+          "Too old connection (%" CURL_FORMAT_TIMEDIFF_T
+          " seconds since creation), disconnect it", lifetime);
     return TRUE;
   }
 
@@ -3214,8 +3214,8 @@ static CURLcode resolve_host(struct Curl_easy *data,
   if(rc == CURLRESOLV_PENDING)
     *async = TRUE;
   else if(rc == CURLRESOLV_TIMEDOUT) {
-    failf(data, "Failed to resolve host '%s' with timeout after %ld ms",
-          connhost->dispname,
+    failf(data, "Failed to resolve host '%s' with timeout after %"
+          CURL_FORMAT_TIMEDIFF_T " ms", connhost->dispname,
           Curl_timediff(Curl_now(), data->progress.t_startsingle));
     return CURLE_OPERATION_TIMEDOUT;
   }
