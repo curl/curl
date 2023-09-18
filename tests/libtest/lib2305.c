@@ -70,6 +70,10 @@ static int websocket(CURL *curl)
              && (meta->bytesleft == 0);
     fwrite(buffer, 1, nread, save);
   }
+  if(i != 12291) {
+    return 1;
+  }
+
   fclose(save);
 
   websocket_close(curl);
