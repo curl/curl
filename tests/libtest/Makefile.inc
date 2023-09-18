@@ -75,7 +75,7 @@ noinst_PROGRAMS = chkhostname libauthretry libntlmconnect libprereq      \
  lib2402 lib2404 \
  lib2502 \
  lib3010 lib3025 lib3026 lib3027 \
- lib3100 lib3101 lib3102
+ lib3100 lib3101 lib3102 lib3103
 
 chkhostname_SOURCES = chkhostname.c ../../lib/curl_gethostname.c
 chkhostname_LDADD = @CURL_NETWORK_LIBS@
@@ -689,3 +689,6 @@ lib3101_LDADD = $(TESTUTIL_LIBS)
 
 lib3102_SOURCES = lib3102.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib3102_LDADD = $(TESTUTIL_LIBS)
+
+lib3103_SOURCES = lib3103.c $(SUPPORTFILES)
+lib3103_LDADD = $(TESTUTIL_LIBS)
