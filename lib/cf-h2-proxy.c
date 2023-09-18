@@ -233,7 +233,7 @@ static void drain_tunnel(struct Curl_cfilter *cf,
   bits = CURL_CSELECT_IN;
   if(!tunnel->closed && !tunnel->reset && tunnel->upload_blocked_len)
     bits |= CURL_CSELECT_OUT;
-  if(data->state.dselect_bits != bits || 1) {
+  if(data->state.dselect_bits != bits) {
     CURL_TRC_CF(data, cf, "[%d] DRAIN dselect_bits=%x",
                 tunnel->stream_id, bits);
     data->state.dselect_bits = bits;
