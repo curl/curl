@@ -27,7 +27,7 @@
 
 int test(char *URL)
 {
-  int res = 0;
+  CURLcode res = CURLE_OK;
   CURLSH *share;
   CURL *curl;
 
@@ -62,5 +62,5 @@ test_cleanup:
     curl_share_cleanup(share);
   curl_global_cleanup();
 
-  return res;
+  return (int)res;
 }
