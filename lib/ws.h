@@ -43,6 +43,7 @@ enum ws_dec_state {
 
 struct ws_decoder {
   int frame_age;        /* zero */
+  int frame_actual_flags; /* See the CURLWS_FLAGS_* defines */
   int frame_flags;      /* See the CURLWS_* defines */
   curl_off_t payload_offset;   /* the offset parsing is at */
   curl_off_t payload_len;

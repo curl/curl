@@ -45,7 +45,8 @@
 #include "memdebug.h"
 
 
-#define WSBIT_FIN 0x80
+#define WSBIT_FLAGS_MASK  (0xf0)
+
 #define WSBIT_OPCODE_CONT  0
 #define WSBIT_OPCODE_TEXT  (1)
 #define WSBIT_OPCODE_BIN   (2)
@@ -116,20 +117,20 @@ static void ws_dec_info(struct ws_decoder *dec, struct Curl_easy *data,
   case 1:
     infof(data, "WS-DEC: %s [%s%s]", msg,
           ws_frame_name_of_op(dec->head[0]),
-          (dec->head[0] & WSBIT_FIN)? "" : " NON-FINAL");
+          (dec->head[0] & CURLWS_FLAGS_FIN)? "" : " NON-FINAL");
     break;
   default:
     if(dec->head_len < dec->head_total) {
       infof(data, "WS-DEC: %s [%s%s](%d/%d)", msg,
             ws_frame_name_of_op(dec->head[0]),
-            (dec->head[0] & WSBIT_FIN)? "" : " NON-FINAL",
+            (dec->head[0] & CURLWS_FLAGS_FIN)? "" : " NON-FINAL",
             dec->head_len, dec->head_total);
     }
     else {
       infof(data, "WS-DEC: %s [%s%s payload=%" CURL_FORMAT_CURL_OFF_T
                   "/%" CURL_FORMAT_CURL_OFF_T "]",
             msg, ws_frame_name_of_op(dec->head[0]),
-            (dec->head[0] & WSBIT_FIN)? "" : " NON-FINAL",
+            (dec->head[0] & CURLWS_FLAGS_FIN)? "" : " NON-FINAL",
             dec->payload_offset, dec->payload_len);
     }
     break;
@@ -137,7 +138,8 @@ static void ws_dec_info(struct ws_decoder *dec, struct Curl_easy *data,
 }
 
 typedef ssize_t ws_write_payload(const unsigned char *buf, size_t buflen,
-                                 int frame_age, int frame_flags,
+                                 int frame_age,
+                                 int frame_actual_flags, int frame_flags,
                                  curl_off_t payload_offset,
                                  curl_off_t payload_len,
                                  void *userp,
@@ -147,6 +149,7 @@ typedef ssize_t ws_write_payload(const unsigned char *buf, size_t buflen,
 static void ws_dec_reset(struct ws_decoder *dec)
 {
   dec->frame_age = 0;
+  dec->frame_actual_flags = 0;
   dec->frame_flags = 0;
   dec->payload_offset = 0;
   dec->payload_len = 0;
@@ -171,6 +174,7 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
       dec->head[0] = *inbuf;
       Curl_bufq_skip(inraw, 1);
 
+      dec->frame_actual_flags = dec->head[0] & WSBIT_FLAGS_MASK;
       dec->frame_flags  = ws_frame_op2flags(dec->head[0]);
       if(!dec->frame_flags) {
         failf(data, "WS: unknown opcode: %x", dec->head[0]);
@@ -265,7 +269,8 @@ static CURLcode ws_dec_pass_payload(struct ws_decoder *dec,
   while(remain && Curl_bufq_peek(inraw, &inbuf, &inlen)) {
     if((curl_off_t)inlen > remain)
       inlen = (size_t)remain;
-    nwritten = write_payload(inbuf, inlen, dec->frame_age, dec->frame_flags,
+    nwritten = write_payload(inbuf, inlen, dec->frame_age,
+                             dec->frame_actual_flags, dec->frame_flags,
                              dec->payload_offset, dec->payload_len,
                              write_ctx, &result);
     if(nwritten < 0)
@@ -314,7 +319,8 @@ static CURLcode ws_dec_pass(struct ws_decoder *dec,
       ssize_t nwritten;
       const unsigned char tmp = '\0';
       /* special case of a 0 length frame, need to write once */
-      nwritten = write_payload(&tmp, 0, dec->frame_age, dec->frame_flags,
+      nwritten = write_payload(&tmp, 0, dec->frame_age,
+                               dec->frame_actual_flags, dec->frame_flags,
                                0, 0, write_ctx, &result);
       if(nwritten < 0)
         return result;
@@ -338,12 +344,14 @@ static CURLcode ws_dec_pass(struct ws_decoder *dec,
 }
 
 static void update_meta(struct websocket *ws,
-                        int frame_age, int frame_flags,
+                        int frame_age,
+                        int frame_actual_flags, int frame_flags,
                         curl_off_t payload_offset,
                         curl_off_t payload_len,
                         size_t cur_len)
 {
   ws->frame.age = frame_age;
+  ws->frame.actual_flags = frame_actual_flags;
   ws->frame.flags = frame_flags;
   ws->frame.offset = payload_offset;
   ws->frame.len = cur_len;
@@ -358,7 +366,7 @@ static void ws_enc_info(struct ws_encoder *enc, struct Curl_easy *data,
         msg, ws_frame_name_of_op(enc->firstbyte),
         (enc->firstbyte & WSBIT_OPCODE_MASK) == WSBIT_OPCODE_CONT ?
         " CONT" : "",
-        (enc->firstbyte & WSBIT_FIN)? "" : " NON-FIN",
+        (enc->firstbyte & CURLWS_FLAGS_FIN)? "" : " NON-FIN",
         enc->payload_len - enc->payload_remain, enc->payload_len);
 }
 
@@ -428,11 +436,11 @@ static ssize_t ws_enc_write_head(struct Curl_easy *data,
   if(!(flags & CURLWS_CONT)) {
     if(!enc->contfragment)
       /* not marked as continuing, this is the final fragment */
-      firstbyte |= WSBIT_FIN | opcode;
+      firstbyte |= CURLWS_FLAGS_FIN | opcode;
     else
       /* marked as continuing, this is the final fragment; set CONT
          opcode and FIN bit */
-      firstbyte |= WSBIT_FIN | WSBIT_OPCODE_CONT;
+      firstbyte |= CURLWS_FLAGS_FIN | WSBIT_OPCODE_CONT;
 
     enc->contfragment = FALSE;
   }
@@ -672,7 +680,8 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
 }
 
 static ssize_t ws_client_write(const unsigned char *buf, size_t buflen,
-                               int frame_age, int frame_flags,
+                               int frame_age,
+                               int frame_actual_flags, int frame_flags,
                                curl_off_t payload_offset,
                                curl_off_t payload_len,
                                void *userp,
@@ -702,7 +711,7 @@ static ssize_t ws_client_write(const unsigned char *buf, size_t buflen,
   else if(buflen || !remain) {
     /* deliver the decoded frame to the user callback. The application
      * may invoke curl_ws_meta() to access frame information. */
-    update_meta(ws, frame_age, frame_flags, payload_offset,
+    update_meta(ws, frame_age, frame_actual_flags, frame_flags, payload_offset,
                 payload_len, buflen);
     Curl_set_in_callback(data, true);
     wrote = data->set.fwrite_func((char *)buf, 1,
@@ -773,6 +782,7 @@ struct ws_collect {
   size_t buflen;
   size_t bufidx;
   int frame_age;
+  int frame_actual_flags;
   int frame_flags;
   curl_off_t payload_offset;
   curl_off_t payload_len;
@@ -780,7 +790,8 @@ struct ws_collect {
 };
 
 static ssize_t ws_client_collect(const unsigned char *buf, size_t buflen,
-                                 int frame_age, int frame_flags,
+                                 int frame_age,
+                                 int frame_actual_flags, int frame_flags,
                                  curl_off_t payload_offset,
                                  curl_off_t payload_len,
                                  void *userp,
@@ -793,6 +804,7 @@ static ssize_t ws_client_collect(const unsigned char *buf, size_t buflen,
   if(!ctx->bufidx) {
     /* first write */
     ctx->frame_age = frame_age;
+    ctx->frame_actual_flags = frame_actual_flags;
     ctx->frame_flags = frame_flags;
     ctx->payload_offset = payload_offset;
     ctx->payload_len = payload_len;
@@ -920,7 +932,9 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
   }
 
   /* update frame information to be passed back */
-  update_meta(ws, ctx.frame_age, ctx.frame_flags, ctx.payload_offset,
+  update_meta(ws, ctx.frame_age,
+              ctx.frame_actual_flags, ctx.frame_flags,
+              ctx.payload_offset,
               ctx.payload_len, ctx.bufidx);
   *metap = &ws->frame;
   *nread = ws->frame.len;

@@ -37,38 +37,44 @@ static void websocket_close(CURL *curl)
           "ws: curl_ws_send returned %u, sent %u\n", (int)result, (int)sent);
 }
 
-static void websocket(CURL *curl)
+static int websocket(CURL *curl)
 {
   char buffer[256];
   const struct curl_ws_frame *meta;
   size_t nread;
   size_t i = 0;
+  int finished = 0;
   FILE *save = fopen(libtest_arg2, FOPEN_WRITETEXT);
   if(!save)
-    return;
+    return 1;
 
   /* Three 4097-bytes frames are expected, 12291 bytes */
-  while(i < 12291) {
-    CURLcode result =
+  while(!finished) {
+    CURLcode recv_result =
       curl_ws_recv(curl, buffer, sizeof(buffer), &nread, &meta);
-    if(result) {
-      if(result == CURLE_AGAIN)
+    if(recv_result) {
+      if(recv_result == CURLE_AGAIN)
         /* crude busy-loop */
         continue;
-      printf("curl_ws_recv returned %d\n", (int)result);
-      return;
+      printf("curl_ws_recv returned %d\n", (int)recv_result);
+      return 1;
     }
-    printf("%u: nread %zu Age %u Flags %x "
+    printf("%u: nread %zu Age %u Actual flags %x Flags %x "
            "Offset %" CURL_FORMAT_CURL_OFF_T " "
            "Bytesleft %" CURL_FORMAT_CURL_OFF_T "\n",
            (int)i,
-           nread, meta->age, meta->flags, meta->offset, meta->bytesleft);
+           nread, meta->age, meta->actual_flags, meta->flags,
+           meta->offset, meta->bytesleft);
     i += meta->len;
+    finished = (meta->actual_flags & CURLWS_FLAGS_FIN)
+             && (meta->bytesleft == 0);
     fwrite(buffer, 1, nread, save);
   }
   fclose(save);
 
   websocket_close(curl);
+
+  return 0;
 }
 
 extern struct libtest_trace_cfg libtest_debug_config;
@@ -95,7 +101,7 @@ int test(char *URL)
     res = curl_easy_perform(curl);
     fprintf(stderr, "curl_easy_perform() returned %u\n", (int)res);
     if(res == CURLE_OK)
-      websocket(curl);
+      res = websocket(curl);
 
     /* always cleanup */
     curl_easy_cleanup(curl);

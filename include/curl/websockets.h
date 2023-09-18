@@ -30,6 +30,7 @@ extern "C" {
 
 struct curl_ws_frame {
   int age;              /* zero */
+  int actual_flags;      /* See the CURLWS_FLAGS_* defines */
   int flags;            /* See the CURLWS_* defines */
   curl_off_t offset;    /* the offset of this data into the frame */
   curl_off_t bytesleft; /* number of pending bytes left of the payload */
@@ -37,6 +38,12 @@ struct curl_ws_frame {
 };
 
 /* flag bits */
+#define CURLWS_FLAGS_FIN   (1<<7)
+#define CURLWS_FLAGS_RSV1  (1<<6)
+#define CURLWS_FLAGS_RSV2  (1<<5)
+#define CURLWS_FLAGS_RSV3  (1<<4)
+
+/* flag bits - not actually flags, opcodes + CURLWS_OFFSET - TODO */
 #define CURLWS_TEXT       (1<<0)
 #define CURLWS_BINARY     (1<<1)
 #define CURLWS_CONT       (1<<2)
