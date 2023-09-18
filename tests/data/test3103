@@ -29,6 +29,7 @@ Funny-head: yesyes
 <client>
 <features>
 cookies
+proxy
 </features>
 <server>
 http
