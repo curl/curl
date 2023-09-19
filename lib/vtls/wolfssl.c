@@ -361,7 +361,9 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
   const struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  const char * const ssl_cafile = conn_config->CAfile;
+  const char * const ssl_cafile =
+    /* CURLOPT_CAINFO_BLOB overrides CURLOPT_CAINFO */
+    (ca_info_blob ? NULL : conn_config->CAfile);
   const char * const ssl_capath = conn_config->CApath;
   WOLFSSL_METHOD* req_method = NULL;
 #ifdef HAVE_LIBOQS
@@ -543,35 +545,33 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
 #ifndef NO_FILESYSTEM
-  else {
   /* load trusted cacert from file if not blob */
-    if(ssl_cafile || ssl_capath) {
-      if(1 != wolfSSL_CTX_load_verify_locations(backend->ctx,
-                                                ssl_cafile,
-                                                ssl_capath)) {
-        if(conn_config->verifypeer && !imported_ca_info_blob &&
-           !imported_native_ca) {
-          /* Fail if we insist on successfully verifying the server. */
-          failf(data, "error setting certificate verify locations:"
-                " CAfile: %s CApath: %s",
-                ssl_cafile ? ssl_cafile : "none",
-                ssl_capath ? ssl_capath : "none");
-          return CURLE_SSL_CACERT_BADFILE;
-        }
-        else {
-          /* Just continue with a warning if no strict certificate
-             verification is required. */
-          infof(data, "error setting certificate verify locations,"
-                " continuing anyway:");
-        }
+  if(ssl_cafile || ssl_capath) {
+    if(1 != wolfSSL_CTX_load_verify_locations(backend->ctx,
+                                              ssl_cafile,
+                                              ssl_capath)) {
+      if(conn_config->verifypeer && !imported_ca_info_blob &&
+         !imported_native_ca) {
+        /* Fail if we insist on successfully verifying the server. */
+        failf(data, "error setting certificate verify locations:"
+              " CAfile: %s CApath: %s",
+              ssl_cafile ? ssl_cafile : "none",
+              ssl_capath ? ssl_capath : "none");
+        return CURLE_SSL_CACERT_BADFILE;
       }
       else {
-        /* Everything is fine. */
-        infof(data, "successfully set certificate verify locations:");
+        /* Just continue with a warning if no strict certificate
+           verification is required. */
+        infof(data, "error setting certificate verify locations,"
+              " continuing anyway:");
       }
-      infof(data, " CAfile: %s", ssl_cafile ? ssl_cafile : "none");
-      infof(data, " CApath: %s", ssl_capath ? ssl_capath : "none");
     }
+    else {
+      /* Everything is fine. */
+      infof(data, "successfully set certificate verify locations:");
+    }
+    infof(data, " CAfile: %s", ssl_cafile ? ssl_cafile : "none");
+    infof(data, " CApath: %s", ssl_capath ? ssl_capath : "none");
   }
 
   /* Load the client certificate, and private key */
