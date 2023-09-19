@@ -4,21 +4,34 @@ curl and libcurl 8.4.0
  Command line options:         257
  curl_easy_setopt() options:   303
  Public functions in libcurl:  92
- Contributors:                 2976
+ Contributors:                 2981
 
 This release includes the following changes:
 
 
 This release includes the following bugfixes:
 
+ o cmake: fix the help text to the static build option in CMakeLists.txt [10]
+ o cookie: do not store the expire or max-age strings [16]
+ o cookie: remove unnecessary struct fields [17]
+ o cookie: set ->running in cookie_init even if data is NULL [5]
+ o doh: inherit DEBUGFUNCTION/DATA [12]
  o escape: replace Curl_isunreserved with ISUNRESERVED [2]
+ o h2-proxy: remove left-over mistake in drain_tunnel() [7]
+ o http: use per-request counter to check too large headers [6]
+ o http_aws_sigv4: fix sorting with empty parts [13]
+ o lib: failf/infof compiler warnings [8]
+ o MANUAL.md: change domain to example.com [11]
+ o misc: better random strings [15]
  o quiche: fix build error with --with-ca-fallback [1]
+ o runtests: eliminate a warning on old perl versions
  o test1056: disable on Windows
  o test1592: greatly increase the maximum test timeout
  o test2600: remove special case handling for USE_ALARM_TIMEOUT [3]
  o test650: fix an end tag typo
  o test661: return from test early in case of curl error
  o tests: improve SLOWDOWN test reliability by reducing sent data
+ o tests: log the test result code after each libtest
  o tests: stop overriding the lock timeout
  o tool_cb_wrt: fix debug assertion [4]
 
@@ -36,9 +49,10 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Dan Fandrich, Daniel Stenberg, Douglas R. Reno, Gisle Vanem, John Haugabook,
-  Junho Choi, Ray Satiro
-  (7 contributors)
+  calvin2021y on github, Dan Fandrich, Daniel Stenberg, Douglas R. Reno,
+  Gisle Vanem, Harry Sintonen, John Haugabook, Joshix-1 on github, Junho Choi,
+  Mathias Fuchs, Peter Wang, Ray Satiro, vvb2060, 南宫雪珊
+  (14 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -46,3 +60,14 @@ References to bug reports and discussions on issues:
  [2] = https://curl.se/bug/?i=11846
  [3] = https://curl.se/bug/?i=11767
  [4] = https://github.com/curl/curl/commit/af3f4e41#r127212213
+ [5] = https://curl.se/bug/?i=11875
+ [6] = https://curl.se/bug/?i=11871
+ [7] = https://curl.se/bug/?i=11877
+ [8] = https://curl.se/bug/?i=11874
+ [10] = https://curl.se/bug/?i=11843
+ [11] = https://curl.se/bug/?i=11866
+ [12] = https://curl.se/bug/?i=11864
+ [13] = https://curl.se/bug/?i=11855
+ [15] = https://curl.se/bug/?i=11838
+ [16] = https://curl.se/bug/?i=11862
+ [17] = https://curl.se/bug/?i=11862
