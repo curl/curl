@@ -4238,7 +4238,6 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
       /* now, only output this if the header AND body are requested:
        */
       writetype = CLIENTWRITE_HEADER |
-        (data->set.include_header ? CLIENTWRITE_BODY : 0) |
         ((k->httpcode/100 == 1) ? CLIENTWRITE_1XX : 0);
 
       headerlen = Curl_dyn_len(&data->state.headerb);
@@ -4570,8 +4569,6 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
     /*
      * End of header-checks. Write them to the client.
      */
-    if(data->set.include_header)
-      writetype |= CLIENTWRITE_BODY;
     if(k->httpcode/100 == 1)
       writetype |= CLIENTWRITE_1XX;
 

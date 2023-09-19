@@ -579,7 +579,6 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
     if(!data->set.suppress_connect_headers) {
       /* send the header to the callback */
       int writetype = CLIENTWRITE_HEADER | CLIENTWRITE_CONNECT |
-        (data->set.include_header ? CLIENTWRITE_BODY : 0) |
         (ts->headerlines == 1 ? CLIENTWRITE_STATUS : 0);
 
       result = Curl_client_write(data, writetype, linep, perline);

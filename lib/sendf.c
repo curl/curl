@@ -213,6 +213,7 @@ CURLcode Curl_write(struct Curl_easy *data,
 
 static CURLcode pausewrite(struct Curl_easy *data,
                            int type, /* what type of data */
+                           bool paused_body,
                            const char *ptr,
                            size_t len)
 {
@@ -228,7 +229,8 @@ static CURLcode pausewrite(struct Curl_easy *data,
 
   if(s->tempcount) {
     for(i = 0; i< s->tempcount; i++) {
-      if(s->tempwrite[i].type == type) {
+      if(s->tempwrite[i].type == type &&
+         !!s->tempwrite[i].paused_body == !!paused_body) {
         /* data for this type exists */
         newtype = FALSE;
         break;
@@ -246,6 +248,7 @@ static CURLcode pausewrite(struct Curl_easy *data,
     /* store this information in the state struct for later use */
     Curl_dyn_init(&s->tempwrite[i].b, DYN_PAUSE_BUFFER);
     s->tempwrite[i].type = type;
+    s->tempwrite[i].paused_body = paused_body;
     s->tempcount++;
   }
 
@@ -265,6 +268,7 @@ static CURLcode pausewrite(struct Curl_easy *data,
  */
 static CURLcode chop_write(struct Curl_easy *data,
                            int type,
+                           bool skip_body_write,
                            char *optr,
                            size_t olen)
 {
@@ -281,10 +285,12 @@ static CURLcode chop_write(struct Curl_easy *data,
   /* If reading is paused, append this data to the already held data for this
      type. */
   if(data->req.keepon & KEEP_RECV_PAUSE)
-    return pausewrite(data, type, ptr, len);
+    return pausewrite(data, type, !skip_body_write, ptr, len);
 
   /* Determine the callback(s) to use. */
-  if(type & CLIENTWRITE_BODY) {
+  if(!skip_body_write &&
+     ((type & CLIENTWRITE_BODY) ||
+      ((type & CLIENTWRITE_HEADER) && data->set.include_header))) {
 #ifdef USE_WEBSOCKETS
     if(conn->handler->protocol & (CURLPROTO_WS|CURLPROTO_WSS)) {
       writebody = Curl_ws_writecb;
@@ -294,7 +300,7 @@ static CURLcode chop_write(struct Curl_easy *data,
 #endif
     writebody = data->set.fwrite_func;
   }
-  if((type & CLIENTWRITE_HEADER) &&
+  if((type & (CLIENTWRITE_HEADER|CLIENTWRITE_INFO)) &&
      (data->set.fwrite_header || data->set.writeheader)) {
     /*
      * Write headers to the same callback or to the especially setup
@@ -322,7 +328,7 @@ static CURLcode chop_write(struct Curl_easy *data,
           failf(data, "Write callback asked for PAUSE when not supported");
           return CURLE_WRITE_ERROR;
         }
-        return pausewrite(data, type, ptr, len);
+        return pausewrite(data, type, TRUE, ptr, len);
       }
       if(wrote != chunklen) {
         failf(data, "Failure writing output to destination");
@@ -357,13 +363,7 @@ static CURLcode chop_write(struct Curl_easy *data,
     Curl_set_in_callback(data, false);
 
     if(CURL_WRITEFUNC_PAUSE == wrote)
-      /* here we pass in the HEADER bit only since if this was body as well
-         then it was passed already and clearly that didn't trigger the
-         pause, so this is saved for later with the HEADER bit only */
-      return pausewrite(data, CLIENTWRITE_HEADER |
-                        (type & (CLIENTWRITE_STATUS|CLIENTWRITE_CONNECT|
-                                 CLIENTWRITE_1XX|CLIENTWRITE_TRAILER)),
-                        optr, olen);
+      return pausewrite(data, type, FALSE, optr, olen);
     if(wrote != olen) {
       failf(data, "Failed writing header");
       return CURLE_WRITE_ERROR;
@@ -397,7 +397,45 @@ CURLcode Curl_client_write(struct Curl_easy *data,
     len = convert_lineends(data, ptr, len);
   }
 #endif
-  return chop_write(data, type, ptr, len);
+  /* it is one of those, at least */
+  DEBUGASSERT(type & (CLIENTWRITE_BODY|CLIENTWRITE_HEADER|CLIENTWRITE_INFO));
+  /* BODY is only BODY */
+  DEBUGASSERT(!(type & CLIENTWRITE_BODY) || (type == CLIENTWRITE_BODY));
+  /* INFO is only INFO */
+  DEBUGASSERT(!(type & CLIENTWRITE_INFO) || (type == CLIENTWRITE_INFO));
+  return chop_write(data, type, FALSE, ptr, len);
+}
+
+CURLcode Curl_client_unpause(struct Curl_easy *data)
+{
+  CURLcode result = CURLE_OK;
+
+  if(data->state.tempcount) {
+    /* there are buffers for sending that can be delivered as the receive
+       pausing is lifted! */
+    unsigned int i;
+    unsigned int count = data->state.tempcount;
+    struct tempbuf writebuf[3]; /* there can only be three */
+
+    /* copy the structs to allow for immediate re-pausing */
+    for(i = 0; i < data->state.tempcount; i++) {
+      writebuf[i] = data->state.tempwrite[i];
+      Curl_dyn_init(&data->state.tempwrite[i].b, DYN_PAUSE_BUFFER);
+    }
+    data->state.tempcount = 0;
+
+    for(i = 0; i < count; i++) {
+      /* even if one function returns error, this loops through and frees
+         all buffers */
+      if(!result)
+        result = chop_write(data, writebuf[i].type,
+                            !writebuf[i].paused_body,
+                            Curl_dyn_ptr(&writebuf[i].b),
+                            Curl_dyn_len(&writebuf[i].b));
+      Curl_dyn_free(&writebuf[i].b);
+    }
+  }
+  return result;
 }
 
 /*

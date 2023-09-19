@@ -2067,6 +2067,31 @@ static bool ftp_213_date(const char *p, int *year, int *month, int *day,
   return TRUE;
 }
 
+static CURLcode client_write_header(struct Curl_easy *data,
+                                    char *buf, size_t blen)
+{
+  /* Some replies from an FTP server are written to the client
+   * as CLIENTWRITE_HEADER, formatted as if they came from a
+   * HTTP conversation.
+   * In all protocols, CLIENTWRITE_HEADER data is only passed to
+   * the body write callback when data->set.include_header is set
+   * via CURLOPT_HEADER.
+   * For historic reasons, FTP never played this game and expects
+   * all its HEADERs to do that always. Set that flag during the
+   * call to Curl_client_write() so it does the right thing.
+   *
+   * Notice that we cannot enable this flag for FTP in general,
+   * as an FTP transfer might involve a HTTP proxy connection and
+   * headers from CONNECT should not automatically be part of the
+   * output. */
+  CURLcode result;
+  int save = data->set.include_header;
+  data->set.include_header = TRUE;
+  result = Curl_client_write(data, CLIENTWRITE_HEADER, buf, blen);
+  data->set.include_header = save? TRUE:FALSE;
+  return result;
+}
+
 static CURLcode ftp_state_mdtm_resp(struct Curl_easy *data,
                                     int ftpcode)
 {
@@ -2120,8 +2145,7 @@ static CURLcode ftp_state_mdtm_resp(struct Curl_easy *data,
                   tm->tm_hour,
                   tm->tm_min,
                   tm->tm_sec);
-        result = Curl_client_write(data, CLIENTWRITE_BOTH, headerbuf,
-                                   headerbuflen);
+        result = client_write_header(data, headerbuf, headerbuflen);
         if(result)
           return result;
       } /* end of a ridiculous amount of conditionals */
@@ -2331,7 +2355,7 @@ static CURLcode ftp_state_size_resp(struct Curl_easy *data,
       char clbuf[128];
       int clbuflen = msnprintf(clbuf, sizeof(clbuf),
                 "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n", filesize);
-      result = Curl_client_write(data, CLIENTWRITE_BOTH, clbuf, clbuflen);
+      result = client_write_header(data, clbuf, clbuflen);
       if(result)
         return result;
     }
@@ -2365,8 +2389,7 @@ static CURLcode ftp_state_rest_resp(struct Curl_easy *data,
 #ifdef CURL_FTP_HTTPSTYLE_HEAD
     if(ftpcode == 350) {
       char buffer[24]= { "Accept-ranges: bytes\r\n" };
-      result = Curl_client_write(data, CLIENTWRITE_BOTH, buffer,
-                                 strlen(buffer));
+      result = client_write_header(data, buffer, strlen(buffer));
       if(result)
         return result;
     }

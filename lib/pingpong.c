@@ -361,7 +361,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
            * for "headers". The response lines can be seen as a kind of
            * headers.
            */
-          result = Curl_client_write(data, CLIENTWRITE_HEADER,
+          result = Curl_client_write(data, CLIENTWRITE_INFO,
                                      pp->linestart_resp, perline);
           if(result)
             return result;
