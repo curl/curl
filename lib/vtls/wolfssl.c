@@ -541,37 +541,39 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
 #ifndef NO_FILESYSTEM
-  /* load trusted cacert */
-  if(conn_config->CAfile) {
-    if(1 != wolfSSL_CTX_load_verify_locations(backend->ctx,
-                                              conn_config->CAfile,
-                                              conn_config->CApath)) {
-      if(conn_config->verifypeer && !imported_ca_info_blob &&
-         !imported_native_ca) {
-        /* Fail if we insist on successfully verifying the server. */
-        failf(data, "error setting certificate verify locations:"
-              " CAfile: %s CApath: %s",
-              conn_config->CAfile?
-              conn_config->CAfile: "none",
-              conn_config->CApath?
-              conn_config->CApath : "none");
-        return CURLE_SSL_CACERT_BADFILE;
+  else {
+  /* load trusted cacert from file if not blob */
+    if(conn_config->CAfile || conn_config->CApath) {
+      if(1 != wolfSSL_CTX_load_verify_locations(backend->ctx,
+                                                conn_config->CAfile,
+                                                conn_config->CApath)) {
+        if(conn_config->verifypeer && !imported_ca_info_blob &&
+           !imported_native_ca) {
+          /* Fail if we insist on successfully verifying the server. */
+          failf(data, "error setting certificate verify locations:"
+                " CAfile: %s CApath: %s",
+                conn_config->CAfile?
+                conn_config->CAfile: "none",
+                conn_config->CApath?
+                conn_config->CApath : "none");
+          return CURLE_SSL_CACERT_BADFILE;
+        }
+        else {
+          /* Just continue with a warning if no strict certificate
+             verification is required. */
+          infof(data, "error setting certificate verify locations,"
+                " continuing anyway:");
+        }
       }
       else {
-        /* Just continue with a warning if no strict certificate
-           verification is required. */
-        infof(data, "error setting certificate verify locations,"
-              " continuing anyway:");
+        /* Everything is fine. */
+        infof(data, "successfully set certificate verify locations:");
       }
+      infof(data, " CAfile: %s",
+            conn_config->CAfile ? conn_config->CAfile : "none");
+      infof(data, " CApath: %s",
+            conn_config->CApath ? conn_config->CApath : "none");
     }
-    else {
-      /* Everything is fine. */
-      infof(data, "successfully set certificate verify locations:");
-    }
-    infof(data, " CAfile: %s",
-          conn_config->CAfile ? conn_config->CAfile : "none");
-    infof(data, " CApath: %s",
-          conn_config->CApath ? conn_config->CApath : "none");
   }
 
   /* Load the client certificate, and private key */
