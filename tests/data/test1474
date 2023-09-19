@@ -26,6 +26,10 @@
 # less of accepted delay before failure).  Adding a --speed-time would increase
 # the 1 second delay between writes to longer, but it would also increase the
 # total time needed by the test, which is already quite high.
+#
+# The assumption in step 3 is also broken on NetBSD 9.3, OpenBSD 7.3 and
+# Solaris 10 as they only usually send about half the requested amount of data
+# (see https://curl.se/mail/lib-2023-09/0021.html).
 <info>
 <keywords>
 HTTP
@@ -84,6 +88,9 @@ HTTP PUT with Expect: 100-continue and 417 response during upload
  <command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt --limit-rate 64K --expect100-timeout 0.001
 </command>
+<precheck>
+perl -e "print 'Test does not work on this BSD system' if ( $^O eq 'netbsd' || $^O eq 'openbsd' || ($^O eq 'solaris' && `uname -r` * 100 <= 510));"
+</precheck>
 # Must be large enough to trigger curl's automatic 100-continue behaviour
 <file name="%LOGDIR/test%TESTNUMBER.txt">
 %repeat[132 x S]%%repeat[16462 x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx%0a]%
