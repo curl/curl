@@ -361,6 +361,8 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
   const struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+  const char * const ssl_cafile = conn_config->CAfile;
+  const char * const ssl_capath = conn_config->CApath;
   WOLFSSL_METHOD* req_method = NULL;
 #ifdef HAVE_LIBOQS
   word16 oqsAlg = 0;
@@ -543,19 +545,17 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 #ifndef NO_FILESYSTEM
   else {
   /* load trusted cacert from file if not blob */
-    if(conn_config->CAfile || conn_config->CApath) {
+    if(ssl_cafile || ssl_capath) {
       if(1 != wolfSSL_CTX_load_verify_locations(backend->ctx,
-                                                conn_config->CAfile,
-                                                conn_config->CApath)) {
+                                                ssl_cafile,
+                                                ssl_capath)) {
         if(conn_config->verifypeer && !imported_ca_info_blob &&
            !imported_native_ca) {
           /* Fail if we insist on successfully verifying the server. */
           failf(data, "error setting certificate verify locations:"
                 " CAfile: %s CApath: %s",
-                conn_config->CAfile?
-                conn_config->CAfile: "none",
-                conn_config->CApath?
-                conn_config->CApath : "none");
+                ssl_cafile ? ssl_cafile : "none",
+                ssl_capath ? ssl_capath : "none");
           return CURLE_SSL_CACERT_BADFILE;
         }
         else {
@@ -569,10 +569,8 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
         /* Everything is fine. */
         infof(data, "successfully set certificate verify locations:");
       }
-      infof(data, " CAfile: %s",
-            conn_config->CAfile ? conn_config->CAfile : "none");
-      infof(data, " CApath: %s",
-            conn_config->CApath ? conn_config->CApath : "none");
+      infof(data, " CAfile: %s", ssl_cafile ? ssl_cafile : "none");
+      infof(data, " CApath: %s", ssl_capath ? ssl_capath : "none");
     }
   }
 
