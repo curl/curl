@@ -28,17 +28,32 @@
 
 #include "curl_trc.h"
 
-
-#define CLIENTWRITE_BODY    (1<<0)
-#define CLIENTWRITE_HEADER  (1<<1)
-#define CLIENTWRITE_STATUS  (1<<2) /* the first "header" is the status line */
-#define CLIENTWRITE_CONNECT (1<<3) /* a CONNECT response */
-#define CLIENTWRITE_1XX     (1<<4) /* a 1xx response */
-#define CLIENTWRITE_TRAILER (1<<5) /* a trailer header */
-#define CLIENTWRITE_BOTH   (CLIENTWRITE_BODY|CLIENTWRITE_HEADER)
+/**
+ * Type of data that is being written to the client (application)
+ * - data written can be eiter BODY or META data
+ * - META data is either INFO or HEADER
+ * - INFO is meta information, e.g. not BODY, that cannot be interpreted
+ *   as headers of a response. Example FTP/IMAP pingpong answers.
+ * - HEADER can have additional bits set (more than one)
+ *   - STATUS special "header", e.g. response status line in HTTP
+ *   - CONNECT header was received during proxying the connection
+ *   - 1XX header is part of an intermediate response, e.g. HTTP 1xx code
+ *   - TRAILER header is trailing response data, e.g. HTTP trailers
+ * BODY, INFO and HEADER should not be mixed, as this would lead to
+ * confusion on how to interpret/format/convert the data.
+ */
+#define CLIENTWRITE_BODY    (1<<0) /* non-meta information, BODY */
+#define CLIENTWRITE_INFO    (1<<1) /* meta information, not a HEADER */
+#define CLIENTWRITE_HEADER  (1<<2) /* meta information, HEADER */
+#define CLIENTWRITE_STATUS  (1<<3) /* a special status HEADER */
+#define CLIENTWRITE_CONNECT (1<<4) /* a CONNECT related HEADER */
+#define CLIENTWRITE_1XX     (1<<5) /* a 1xx response related HEADER */
+#define CLIENTWRITE_TRAILER (1<<6) /* a trailer HEADER */
 
 CURLcode Curl_client_write(struct Curl_easy *data, int type, char *ptr,
                            size_t len) WARN_UNUSED_RESULT;
+
+CURLcode Curl_client_unpause(struct Curl_easy *data);
 
 /* internal read-function, does plain socket, SSL and krb4 */
 CURLcode Curl_read(struct Curl_easy *data, curl_socket_t sockfd,

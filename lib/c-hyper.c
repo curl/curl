@@ -174,8 +174,6 @@ static int hyper_each_header(void *userdata,
 
   if(!data->state.hconnect || !data->set.suppress_connect_headers) {
     writetype = CLIENTWRITE_HEADER;
-    if(data->set.include_header)
-      writetype |= CLIENTWRITE_BODY;
     if(data->state.hconnect)
       writetype |= CLIENTWRITE_CONNECT;
     if(data->req.httpcode/100 == 1)
@@ -314,8 +312,6 @@ static CURLcode status_line(struct Curl_easy *data,
 
   if(!data->state.hconnect || !data->set.suppress_connect_headers) {
     writetype = CLIENTWRITE_HEADER|CLIENTWRITE_STATUS;
-    if(data->set.include_header)
-      writetype |= CLIENTWRITE_BODY;
     result = Curl_client_write(data, writetype,
                                Curl_dyn_ptr(&data->state.headerb), len);
     if(result)
