@@ -2088,7 +2088,7 @@ static CURLcode client_write_header(struct Curl_easy *data,
   int save = data->set.include_header;
   data->set.include_header = TRUE;
   result = Curl_client_write(data, CLIENTWRITE_HEADER, buf, blen);
-  data->set.include_header = save;
+  data->set.include_header = save? TRUE:FALSE;
   return result;
 }
 
