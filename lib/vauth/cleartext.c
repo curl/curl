@@ -35,7 +35,6 @@
 #include "urldata.h"
 
 #include "vauth/vauth.h"
-#include "curl_md5.h"
 #include "warnless.h"
 #include "strtok.h"
 #include "sendf.h"
