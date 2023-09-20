@@ -162,9 +162,6 @@
 /* Define to 1 if you have the <arpa/inet.h> header file. */
 #cmakedefine HAVE_ARPA_INET_H 1
 
-/* Define to 1 if you have the <arpa/tftp.h> header file. */
-#cmakedefine HAVE_ARPA_TFTP_H 1
-
 /* Define to 1 if you have _Atomic support. */
 #cmakedefine HAVE_ATOMIC 1
 

@@ -53,7 +53,6 @@ if(NOT UNIX)
     set(HAVE_LIBZ 0)
 
     set(HAVE_ARPA_INET_H 0)
-    set(HAVE_ARPA_TFTP_H 0)
     set(HAVE_FCNTL_H 1)
     set(HAVE_IFADDRS_H 0)
     set(HAVE_IO_H 1)

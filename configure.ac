@@ -3443,7 +3443,6 @@ AC_CHECK_HEADERS(
         libgen.h \
         locale.h \
         stdbool.h \
-        arpa/tftp.h \
         sys/filio.h \
         sys/wait.h \
         setjmp.h,

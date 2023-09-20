@@ -67,11 +67,6 @@
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#ifdef HAVE_ARPA_TFTP_H
-#include <arpa/tftp.h>
-#else
-#include "tftp.h"
-#endif
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
@@ -97,6 +92,7 @@
 #include "getpart.h"
 #include "util.h"
 #include "server_sockaddr.h"
+#include "tftp.h"
 
 /* include memdebug.h last */
 #include "memdebug.h"
