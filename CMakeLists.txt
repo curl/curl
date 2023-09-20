@@ -302,7 +302,7 @@ if(ENABLE_IPV6 AND NOT WIN32)
   endif()
 
   if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND NOT ENABLE_ARES)
-    set(use_core_foundation ON)
+    set(use_core_foundation_and_core_services ON)
 
     find_library(SYSTEMCONFIGURATION_FRAMEWORK "SystemConfiguration")
     if(NOT SYSTEMCONFIGURATION_FRAMEWORK)
@@ -445,7 +445,7 @@ if(CURL_WINDOWS_SSPI)
 endif()
 
 if(CURL_USE_SECTRANSP)
-  set(use_core_foundation ON)
+  set(use_core_foundation_and_core_services ON)
 
   find_library(SECURITY_FRAMEWORK "Security")
   if(NOT SECURITY_FRAMEWORK)
@@ -457,13 +457,18 @@ if(CURL_USE_SECTRANSP)
   list(APPEND CURL_LIBS "-framework Security")
 endif()
 
-if(use_core_foundation)
+if(use_core_foundation_and_core_services)
   find_library(COREFOUNDATION_FRAMEWORK "CoreFoundation")
+  find_library(CORESERVICES_FRAMEWORK "CoreServices")
+
   if(NOT COREFOUNDATION_FRAMEWORK)
       message(FATAL_ERROR "CoreFoundation framework not found")
   endif()
+  if(NOT CORESERVICES_FRAMEWORK)
+      message(FATAL_ERROR "CoreServices framework not found")
+  endif()
 
-  list(APPEND CURL_LIBS "-framework CoreFoundation")
+  list(APPEND CURL_LIBS "-framework CoreFoundation -framework CoreServices")
 endif()
 
 if(CURL_USE_OPENSSL)
