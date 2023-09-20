@@ -532,6 +532,14 @@ void Curl_pollset_add_socks2(struct Curl_easy *data,
                                                  curl_socket_t *socks));
 
 /**
+ * Check if the pollset, as is, wants to read and/or write regarding
+ * the given socket.
+ */
+void Curl_pollset_check(struct Curl_easy *data,
+                        struct easy_pollset *ps, curl_socket_t sock,
+                        bool *pwant_read, bool *pwant_write);
+
+/**
  * Types and macros used to keep the current easy handle in filter calls,
  * allowing for nested invocations. See #10336.
  *

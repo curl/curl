@@ -1173,11 +1173,11 @@ static void cf_h2_proxy_adjust_pollset(struct Curl_cfilter *cf,
                                        struct easy_pollset *ps)
 {
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
-  bool want_recv = CURL_WANT_RECV(data);
-  bool want_send = CURL_WANT_SEND(data);
+  curl_socket_t sock = Curl_conn_cf_get_socket(cf, data);
+  bool want_recv, want_send;
 
+  Curl_pollset_check(data, ps, sock, &want_recv, &want_send);
   if(ctx->h2 && (want_recv || want_send)) {
-    curl_socket_t sock = Curl_conn_cf_get_socket(cf, data);
     struct cf_call_data save;
     bool c_exhaust, s_exhaust;
 

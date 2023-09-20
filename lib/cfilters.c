@@ -661,6 +661,9 @@ void Curl_pollset_reset(struct Curl_easy *data,
     ps->sockets[i] = CURL_SOCKET_BAD;
 }
 
+/**
+ *
+ */
 void Curl_pollset_change(struct Curl_easy *data,
                        struct easy_pollset *ps, curl_socket_t sock,
                        int add_flags, int remove_flags)
@@ -677,12 +680,8 @@ void Curl_pollset_change(struct Curl_easy *data,
   DEBUGASSERT((add_flags&remove_flags) == 0); /* no overlap */
   for(i = 0; i < ps->num; ++i) {
     if(ps->sockets[i] == sock) {
-      if(remove_flags) {
-        ps->actions[i] &= (unsigned char)(~remove_flags);
-      }
-      if(add_flags) {
-        ps->actions[i] |= (unsigned char)add_flags;
-      }
+      ps->actions[i] &= (unsigned char)(~remove_flags);
+      ps->actions[i] |= (unsigned char)add_flags;
       /* all gone? remove socket */
       if(!ps->actions[i]) {
         if((i + 1) < ps->num) {
@@ -772,3 +771,20 @@ void Curl_pollset_add_socks2(struct Curl_easy *data,
   ps_add(data, ps, bitmap, socks);
 }
 
+void Curl_pollset_check(struct Curl_easy *data,
+                        struct easy_pollset *ps, curl_socket_t sock,
+                        bool *pwant_read, bool *pwant_write)
+{
+  unsigned int i;
+
+  (void)data;
+  DEBUGASSERT(VALID_SOCK(sock));
+  for(i = 0; i < ps->num; ++i) {
+    if(ps->sockets[i] == sock) {
+      *pwant_read = !!(ps->actions[i] & CURL_POLL_IN);
+      *pwant_write = !!(ps->actions[i] & CURL_POLL_OUT);
+      return;
+    }
+  }
+  *pwant_read = *pwant_write = FALSE;
+}
