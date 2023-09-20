@@ -174,6 +174,9 @@ static CURLcode idn_decode(const char *input, char **output)
     if(rc != IDN2_OK)
       result = CURLE_URL_MALFORMAT;
   }
+  else
+    /* a too old libidn2 version */
+    result = CURLE_NOT_BUILT_IN;
 #elif defined(USE_WIN32_IDN)
   result = win32_idn_to_ascii(input, &decoded);
 #endif
