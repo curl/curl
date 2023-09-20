@@ -376,7 +376,9 @@ if(ENABLE_THREADED_RESOLVER)
 endif()
 
 # Check for all needed libraries
+if(NOT APPLE)
 check_library_exists_concat("socket" connect      HAVE_LIBSOCKET)
+endif()
 
 check_function_exists(gethostname HAVE_GETHOSTNAME)
 
@@ -1096,7 +1098,7 @@ endif()
 # Check for some functions that are used
 if(WIN32)
   set(CMAKE_REQUIRED_LIBRARIES ws2_32)
-elseif(HAVE_LIBSOCKET)
+elseif(HAVE_LIBSOCKET AND NOT APPLE)
   set(CMAKE_REQUIRED_LIBRARIES socket)
 endif()
 
