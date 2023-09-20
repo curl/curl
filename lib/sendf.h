@@ -54,6 +54,40 @@ CURLcode Curl_client_write(struct Curl_easy *data, int type, char *ptr,
                            size_t len) WARN_UNUSED_RESULT;
 
 CURLcode Curl_client_unpause(struct Curl_easy *data);
+void Curl_client_cleanup(struct Curl_easy *data);
+
+struct contenc_writer {
+  const struct content_encoding *handler;  /* Encoding handler. */
+  struct contenc_writer *downstream;  /* Downstream writer. */
+  unsigned int order; /* Ordering within writer stack. */
+};
+
+/* Content encoding writer. */
+struct content_encoding {
+  const char *name;        /* Encoding name. */
+  const char *alias;       /* Encoding name alias. */
+  CURLcode (*init_writer)(struct Curl_easy *data,
+                          struct contenc_writer *writer);
+  CURLcode (*unencode_write)(struct Curl_easy *data,
+                             struct contenc_writer *writer,
+                             const char *buf, size_t nbytes);
+  void (*close_writer)(struct Curl_easy *data,
+                       struct contenc_writer *writer);
+  size_t writersize;
+};
+
+
+CURLcode Curl_client_create_writer(struct contenc_writer **pwriter,
+                                   struct Curl_easy *data,
+                                   const struct content_encoding *ce_handler,
+                                   int order);
+
+void Curl_client_free_writer(struct Curl_easy *data,
+                             struct contenc_writer *writer);
+
+CURLcode Curl_client_add_writer(struct Curl_easy *data,
+                                struct contenc_writer *writer);
+
 
 /* internal read-function, does plain socket, SSL and krb4 */
 CURLcode Curl_read(struct Curl_easy *data, curl_socket_t sockfd,
