@@ -40,6 +40,7 @@
 #include "sendf.h"
 #include "cfilters.h"
 #include "connect.h"
+#include "content_encoding.h"
 #include "vtls/vtls.h"
 #include "vssh/ssh.h"
 #include "easyif.h"
@@ -403,6 +404,14 @@ CURLcode Curl_client_write(struct Curl_easy *data,
   DEBUGASSERT(!(type & CLIENTWRITE_BODY) || (type == CLIENTWRITE_BODY));
   /* INFO is only INFO */
   DEBUGASSERT(!(type & CLIENTWRITE_INFO) || (type == CLIENTWRITE_INFO));
+
+  if(type == CLIENTWRITE_BODY) {
+    if(data->req.ignorebody)
+      return CURLE_OK;
+
+    if(data->req.writer_stack && !data->set.http_ce_skip)
+      return Curl_unencode_write(data, data->req.writer_stack, ptr, len);
+  }
   return chop_write(data, type, FALSE, ptr, len);
 }
 
@@ -437,6 +446,138 @@ CURLcode Curl_client_unpause(struct Curl_easy *data)
   }
   return result;
 }
+
+void Curl_client_cleanup(struct Curl_easy *data)
+{
+  struct contenc_writer *writer = data->req.writer_stack;
+  size_t i;
+
+  while(writer) {
+    data->req.writer_stack = writer->downstream;
+    writer->handler->close_writer(data, writer);
+    free(writer);
+    writer = data->req.writer_stack;
+  }
+
+  for(i = 0; i < data->state.tempcount; i++) {
+    Curl_dyn_free(&data->state.tempwrite[i].b);
+  }
+  data->state.tempcount = 0;
+
+}
+
+/* Real client writer: no downstream. */
+static CURLcode client_cew_init(struct Curl_easy *data,
+                                struct contenc_writer *writer)
+{
+  (void) data;
+  (void)writer;
+  return CURLE_OK;
+}
+
+static CURLcode client_cew_write(struct Curl_easy *data,
+                                 struct contenc_writer *writer,
+                                 const char *buf, size_t nbytes)
+{
+  (void)writer;
+  if(!nbytes || data->req.ignorebody)
+    return CURLE_OK;
+  return chop_write(data, CLIENTWRITE_BODY, FALSE, (char *)buf, nbytes);
+}
+
+static void client_cew_close(struct Curl_easy *data,
+                             struct contenc_writer *writer)
+{
+  (void) data;
+  (void) writer;
+}
+
+static const struct content_encoding client_cew = {
+  NULL,
+  NULL,
+  client_cew_init,
+  client_cew_write,
+  client_cew_close,
+  sizeof(struct contenc_writer)
+};
+
+/* Create an unencoding writer stage using the given handler. */
+CURLcode Curl_client_create_writer(struct contenc_writer **pwriter,
+                                   struct Curl_easy *data,
+                                   const struct content_encoding *ce_handler,
+                                   int order)
+{
+  struct contenc_writer *writer;
+  CURLcode result = CURLE_OUT_OF_MEMORY;
+
+  DEBUGASSERT(ce_handler->writersize >= sizeof(struct contenc_writer));
+  writer = (struct contenc_writer *) calloc(1, ce_handler->writersize);
+  if(!writer)
+    goto out;
+
+  writer->handler = ce_handler;
+  writer->order = order;
+  result = ce_handler->init_writer(data, writer);
+
+out:
+  *pwriter = result? NULL : writer;
+  if(result)
+    free(writer);
+  return result;
+}
+
+void Curl_client_free_writer(struct Curl_easy *data,
+                             struct contenc_writer *writer)
+{
+  if(writer) {
+    writer->handler->close_writer(data, writer);
+    free(writer);
+  }
+}
+
+/* allow no more than 5 "chained" compression steps */
+#define MAX_ENCODE_STACK 5
+
+
+static CURLcode init_writer_stack(struct Curl_easy *data)
+{
+  DEBUGASSERT(!data->req.writer_stack);
+  return Curl_client_create_writer(&data->req.writer_stack,
+                                   data, &client_cew, 0);
+}
+
+CURLcode Curl_client_add_writer(struct Curl_easy *data,
+                                struct contenc_writer *writer)
+{
+  CURLcode result;
+
+  if(!data->req.writer_stack) {
+    result = init_writer_stack(data);
+    if(result)
+      return result;
+  }
+
+  if(data->req.writer_stack_depth++ >= MAX_ENCODE_STACK) {
+    failf(data, "Reject response due to more than %u content encodings",
+          MAX_ENCODE_STACK);
+    return CURLE_BAD_CONTENT_ENCODING;
+  }
+
+  /* Stack the unencoding stage. */
+  if(writer->order >= data->req.writer_stack->order) {
+    writer->downstream = data->req.writer_stack;
+    data->req.writer_stack = writer;
+  }
+  else {
+    struct contenc_writer *w = data->req.writer_stack;
+    while(w->downstream && writer->order < w->downstream->order)
+      w = w->downstream;
+    writer->downstream = w->downstream;
+    w->downstream = writer;
+  }
+  return CURLE_OK;
+}
+
 
 /*
  * Internal read-from-socket function. This is meant to deal with plain

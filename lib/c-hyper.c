@@ -246,11 +246,7 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
   if(0 == len)
     return HYPER_ITER_CONTINUE;
   Curl_debug(data, CURLINFO_DATA_IN, buf, len);
-  if(!data->set.http_ce_skip && k->writer_stack)
-    /* content-encoded data */
-    result = Curl_unencode_write(data, k->writer_stack, buf, len);
-  else
-    result = Curl_client_write(data, CLIENTWRITE_BODY, buf, len);
+  result = Curl_client_write(data, CLIENTWRITE_BODY, buf, len);
 
   if(result) {
     data->state.hresult = result;

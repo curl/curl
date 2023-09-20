@@ -2033,13 +2033,13 @@ void Curl_free_request_state(struct Curl_easy *data)
 {
   Curl_safefree(data->req.p.http);
   Curl_safefree(data->req.newurl);
-
 #ifndef CURL_DISABLE_DOH
   if(data->req.doh) {
     Curl_close(&data->req.doh->probe[0].easy);
     Curl_close(&data->req.doh->probe[1].easy);
   }
 #endif
+  Curl_client_cleanup(data);
 }
 
 
