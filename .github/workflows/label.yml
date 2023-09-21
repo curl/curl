@@ -24,5 +24,3 @@ jobs:
     - uses: actions/labeler@v5.0.0-beta.1
       with:
         repo-token: "${{ secrets.GITHUB_TOKEN }}"
-        # Workaround for actions/labeler#112
-        sync-labels: ''
