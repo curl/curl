@@ -671,7 +671,9 @@ static CURLcode readwrite_data(struct Curl_easy *data,
       k->bytecount += nread;
       max_recv -= nread;
 
-      Curl_pgrsSetDownloadCounter(data, k->bytecount);
+      result = Curl_pgrsSetDownloadCounter(data, k->bytecount);
+      if(result)
+        goto out;
 
       if(!k->chunk && (nread || k->badheader || is_empty_data)) {
         /* If this is chunky transfer, it was already written */
