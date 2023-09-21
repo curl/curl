@@ -34,6 +34,7 @@ typedef struct {
 } curl_ssl_backend;
 
 typedef enum {
+  CURLSSLBACKEND_ALL = -1,
   CURLSSLBACKEND_NONE = 0,
   CURLSSLBACKEND_OPENSSL = 1, /* or one of its forks */
   CURLSSLBACKEND_GNUTLS = 2,
@@ -105,7 +106,7 @@ OpenSSL flavor and version number is use.
 
   /* list the available ones */
   const curl_ssl_backend **list;
-  curl_global_sslset((curl_sslbackend)-1, NULL, &list);
+  curl_global_sslset(CURLSSLBACKEND_ALL, NULL, &list);
 
   for(i = 0; list[i]; i++)
     printf("SSL backend #%d: '%s' (ID: %d)\\n",

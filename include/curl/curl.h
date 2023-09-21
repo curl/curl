@@ -156,6 +156,7 @@ typedef int curl_socket_t;
 
 /* enum for the different supported SSL backends */
 typedef enum {
+  CURLSSLBACKEND_ALL = -1,
   CURLSSLBACKEND_NONE = 0,
   CURLSSLBACKEND_OPENSSL = 1,
   CURLSSLBACKEND_GNUTLS = 2,
