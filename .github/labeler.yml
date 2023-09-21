@@ -157,6 +157,7 @@ documentation:
       - 'LICENSES/**'
       - 'README'
       - 'RELEASE-NOTES'
+    - AllGlobsToAllFiles:
         # some negative matches
       - '!**/CMakeLists.txt'
       - '!docs/examples/**'
