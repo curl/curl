@@ -14,6 +14,17 @@
 # that give useful information about a PR that's really mostly something else
 # (e.g. CI if the PR also touches CI jobs).
 
+appleOS:
+- all:
+  - changed-files:
+    - AnyGlobToAllFiles:
+      - '.github/workflows/macos.yml'
+      - 'lib/config-mac.h'
+      - 'lib/macos*'
+      - 'lib/vtls/sectransp*'
+      - 'm4/curl-sectransp.m4'
+      - 'MacOSX-Framework'
+
 authentication:
 - all:
   - changed-files:
@@ -67,8 +78,10 @@ CI:
       - '.cirrus.yml'
       - '.github/**'
       - 'appveyor.yml'
+      - 'scripts/ci*'
       - 'tests/azure.pm'
       - 'tests/appveyor.pm'
+      - 'tests/CI.md'
 
 cmake:
 - all:
@@ -89,6 +102,7 @@ connecting & proxies:
   - changed-files:
     - AnyGlobToAllFiles:
       - 'docs/CONNECTION-FILTERS.md'
+      - 'docs/examples/ipv6.c'
       - 'docs/libcurl/opts/CURLINFO_CONNECT*'
       - 'docs/libcurl/opts/CURLINFO_PROXY*'
       - 'docs/libcurl/opts/CURLOPT_ADDRESS*'
@@ -117,8 +131,11 @@ cookies:
   - changed-files:
     - AnyGlobToAllFiles:
       - 'docs/HTTP-COOKIES.md'
+      - 'docs/cmdline-opts/cookie*'
+      - 'docs/cmdline-opts/junk-session-cookies.d'
       - 'docs/libcurl/opts/CURLINFO_COOKIE*'
       - 'docs/libcurl/opts/CURLOPT_COOKIE*'
+      - 'docs/examples/cookie_interface.c'
       - 'lib/cookie.*'
       - 'lib/psl.*'
 
@@ -158,9 +175,9 @@ documentation:
       - 'README'
       - 'RELEASE-NOTES'
     - AllGlobsToAllFiles:
-        # some negative matches
+        # negative matches
       - '!**/CMakeLists.txt'
-      - '!docs/examples/**'
+      - '!**/Makefile.am'
 
 FTP:
 - all:
@@ -169,6 +186,7 @@ FTP:
       - 'docs/libcurl/opts/CURLINFO_FTP*'
       - 'docs/libcurl/opts/CURLOPT_FTP*'
       - 'docs/libcurl/opts/CURLOPT_WILDCARDMATCH*'
+      - 'docs/examples/ftp*'
       - 'lib/curl_fnmatch.*'
       - 'lib/curl_range.*'
       - 'lib/ftp*'
@@ -184,6 +202,11 @@ HTTP:
 - all:
   - changed-files:
     - AnyGlobToAllFiles:
+      - 'docs/examples/hsts*'
+      - 'docs/examples/http-*'
+      - 'docs/examples/httpput*'
+      - 'docs/examples/https*'
+      - 'docs/examples/*post*'
       - 'docs/HSTS.md'
       - 'docs/HTTP-COOKIES.md'
       - 'docs/libcurl/opts/CURLINFO_COOKIE*'
@@ -217,6 +240,7 @@ HTTP/2:
     - AnyGlobToAllFiles:
       - 'docs/HTTP2.md'
       - 'docs/libcurl/opts/CURLOPT_STREAM*'
+      - 'docs/examples/http2*'
       - 'lib/http2*'
       - 'tests/http2-server.pl'
 
@@ -227,6 +251,7 @@ HTTP/3:
       - '.github/workflows/ngtcp2*'
       - '.github/workflows/quiche*'
       - 'docs/HTTP3.md'
+      - 'docs/examples/http3*'
       - 'lib/vquic/**'
       - 'tests/http3-server.pl'
       - 'tests/nghttpx.conf'
@@ -243,6 +268,7 @@ IMAP:
   - changed-files:
     - AnyGlobToAllFiles:
       - 'lib/imap*'
+      - 'docs/examples/imap*'
 
 LDAP:
 - all:
@@ -256,6 +282,15 @@ libcurl API:
     - AnyGlobToAnyFile:
       - 'docs/libcurl/ABI.md'
       - 'include/curl/**'
+
+logging:
+- all:
+  - changed-files:
+    - AnyGlobToAllFiles:
+      - 'docs/cmdline-opts/trace*'
+      - 'docs/libcurl/curl_global_trace*'
+      - 'lib/curl_trc*'
+      - 'tests/http/test_15_tracing.py'
 
 MIME:
 - all:
@@ -277,6 +312,7 @@ name lookup:
 - all:
   - changed-files:
     - AnyGlobToAllFiles:
+      - 'docs/examples/resolve.c'
       - 'docs/libcurl/opts/CURLINFO_NAMELOOKUP*'
       - 'docs/libcurl/opts/CURLOPT_DNS*'
       - 'docs/libcurl/opts/CURLOPT_DOH*'
@@ -294,6 +330,7 @@ POP3:
 - all:
   - changed-files:
     - AnyGlobToAllFiles:
+      - 'docs/examples/pop3*'
       - 'lib/pop3.*'
 
 RTMP:
@@ -317,6 +354,7 @@ SCP/SFTP:
   - changed-files:
     - AnyGlobToAllFiles:
       - 'docs/libcurl/opts/CURLOPT_SSH*'
+      - 'docs/examples/sftp*'
       - 'lib/vssh/**'
       - 'tests/sshhelp.pm'
       - 'tests/sshserver.pl'
@@ -344,6 +382,7 @@ SMTP:
 - all:
   - changed-files:
     - AnyGlobToAllFiles:
+      - 'docs/examples/smtp-*'
       - 'docs/libcurl/opts/CURLOPT_MAIL*'
       - 'lib/smtp.*'
 
@@ -366,6 +405,7 @@ TLS:
   - changed-files:
     - AnyGlobToAllFiles:
       - 'docs/SSL*'
+      - 'docs/libcurl/curl_global_sslset*'
       - 'docs/libcurl/opts/CURLINFO_CA*'
       - 'docs/libcurl/opts/CURLINFO_CERT*'
       - 'docs/libcurl/opts/CURLINFO_SSL*'
@@ -377,6 +417,14 @@ TLS:
       - 'docs/libcurl/opts/CURLOPT_TLS*'
       - 'docs/libcurl/opts/CURLOPT_USE_SSL*'
       - 'lib/vtls/**'
+      - 'm4/curl-bearssl.m4'
+      - 'm4/curl-gnutls.m4'
+      - 'm4/curl-mbedtls.m4'
+      - 'm4/curl-openssl.m4'
+      - 'm4/curl-rustls.m4'
+      - 'm4/curl-schannel.m4'
+      - 'm4/curl-sectransp.m4'
+      - 'm4/curl-wolfssl.m4'
 
 URL:
 - all:
@@ -384,6 +432,7 @@ URL:
     - AnyGlobToAllFiles:
       - 'docs/libcurl/curl_url*'
       - 'docs/URL-SYNTAX.md'
+      - 'docs/examples/parseurl*'
       - 'include/curl/urlapi.h'
       - 'lib/urlapi*'
 
@@ -392,11 +441,15 @@ WebSocket:
   - changed-files:
     - AnyGlobToAllFiles:
       - 'docs/WEBSOCKET.md*'
+      - 'docs/examples/websocket*'
       - 'docs/libcurl/curl_ws_*'
-      - 'docs/libcurl/libcurl-ws.3'
+      - 'docs/libcurl/libcurl-ws*'
       - 'docs/libcurl/opts/CURLOPT_WS_*'
       - 'include/curl/websockets.h'
       - 'lib/ws.*'
+      - 'tests/http/clients/ws*'
+      - 'tests/http/test_20_websockets.py'
+      - 'tests/http/testenv/ws*'
 
 Windows:
 - all:
