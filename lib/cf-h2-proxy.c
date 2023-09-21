@@ -309,8 +309,9 @@ static int proxy_h2_on_frame_recv(nghttp2_session *session,
                                   const nghttp2_frame *frame,
                                   void *userp);
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-static int on_frame_send(nghttp2_session *session, const nghttp2_frame *frame,
-                         void *userp);
+static int proxy_h2_on_frame_send(nghttp2_session *session,
+                                  const nghttp2_frame *frame,
+                                  void *userp);
 #endif
 static int proxy_h2_on_stream_close(nghttp2_session *session,
                                     int32_t stream_id,
@@ -355,7 +356,8 @@ static CURLcode cf_h2_proxy_ctx_init(struct Curl_cfilter *cf,
   nghttp2_session_callbacks_set_on_frame_recv_callback(
     cbs, proxy_h2_on_frame_recv);
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-  nghttp2_session_callbacks_set_on_frame_send_callback(cbs, on_frame_send);
+  nghttp2_session_callbacks_set_on_frame_send_callback(cbs,
+                                                       proxy_h2_on_frame_send);
 #endif
   nghttp2_session_callbacks_set_on_data_chunk_recv_callback(
     cbs, tunnel_recv_callback);
@@ -575,7 +577,8 @@ static ssize_t on_session_send(nghttp2_session *h2,
 }
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-static int fr_print(const nghttp2_frame *frame, char *buffer, size_t blen)
+static int proxy_h2_fr_print(const nghttp2_frame *frame,
+                             char *buffer, size_t blen)
 {
   switch(frame->hd.type) {
     case NGHTTP2_DATA: {
@@ -646,8 +649,9 @@ static int fr_print(const nghttp2_frame *frame, char *buffer, size_t blen)
   }
 }
 
-static int on_frame_send(nghttp2_session *session, const nghttp2_frame *frame,
-                         void *userp)
+static int proxy_h2_on_frame_send(nghttp2_session *session,
+                                  const nghttp2_frame *frame,
+                                  void *userp)
 {
   struct Curl_cfilter *cf = userp;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
@@ -657,7 +661,7 @@ static int on_frame_send(nghttp2_session *session, const nghttp2_frame *frame,
   if(data && Curl_trc_cf_is_verbose(cf, data)) {
     char buffer[256];
     int len;
-    len = fr_print(frame, buffer, sizeof(buffer)-1);
+    len = proxy_h2_fr_print(frame, buffer, sizeof(buffer)-1);
     buffer[len] = 0;
     CURL_TRC_CF(data, cf, "[%d] -> %s", frame->hd.stream_id, buffer);
   }
@@ -680,7 +684,7 @@ static int proxy_h2_on_frame_recv(nghttp2_session *session,
   if(Curl_trc_cf_is_verbose(cf, data)) {
     char buffer[256];
     int len;
-    len = fr_print(frame, buffer, sizeof(buffer)-1);
+    len = proxy_h2_fr_print(frame, buffer, sizeof(buffer)-1);
     buffer[len] = 0;
     CURL_TRC_CF(data, cf, "[%d] <- %s",frame->hd.stream_id, buffer);
   }
