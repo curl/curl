@@ -36,7 +36,7 @@ authentication:
         'lib/http_negotiate.*',
         'lib/vauth/**',
         'tests/server/fake_ntlm.c'
-    ]
+        ]
 
 build:
 - all:
@@ -58,20 +58,20 @@ build:
         'projects/**',
         'winbuild/**',
         'libcurl.def'
-    ]
+        ]
 
 CI:
 - all:
   - changed-files:
     - AnyGlobToAnyFile: [
-      '.azure-pipelines.yml',
-      '.circleci/**',
-      '.cirrus.yml',
-      '.github/**',
-      'appveyor.yml',
-      'tests/azure.pm',
-      'tests/appveyor.pm'
-    ]
+        '.azure-pipelines.yml',
+        '.circleci/**',
+        '.cirrus.yml',
+        '.github/**',
+        'appveyor.yml',
+        'tests/azure.pm',
+        'tests/appveyor.pm'
+        ]
 
 cmake:
 - all:
@@ -79,15 +79,15 @@ cmake:
     - AnyGlobToAllFiles: [
         '**/CMakeLists.txt',
         'CMake/**'
-    ]
+        ]
 
 cmdline tool:
 - all:
   - changed-files:
     - AnyGlobToAnyFile: [
-      'docs/cmdline-opts/**',
-      'src/**'
-    ]
+        'docs/cmdline-opts/**',
+        'src/**'
+        ]
 
 connecting & proxies:
 - all:
@@ -116,7 +116,7 @@ connecting & proxies:
         'lib/noproxy.*',
         'lib/socks.*',
         'tests/server/socksd.c'
-    ]
+        ]
 
 cookies:
 - all:
@@ -127,7 +127,7 @@ cookies:
         'docs/libcurl/opts/CURLOPT_COOKIE*',
         'lib/cookie.*',
         'lib/psl.*'
-    ]
+        ]
 
 cryptography:
 - all:
@@ -142,7 +142,7 @@ cryptography:
         'lib/curl_md?.*',
         'lib/md?.*',
         'lib/rand.*'
-    ]
+        ]
 
 DICT:
 - all:
@@ -150,7 +150,7 @@ DICT:
     - AnyGlobToAllFiles: [
         'lib/dict.*',
         'tests/dictserver.py'
-    ]
+        ]
 
 documentation:
 - all:
@@ -166,7 +166,7 @@ documentation:
         'LICENSES/**',
         'README',
         'RELEASE-NOTES'
-    ]
+        ]
 
 FTP:
 - all:
@@ -179,14 +179,14 @@ FTP:
         'lib/curl_range.*',
         'lib/ftp*',
         'tests/ftp*'
-    ]
+        ]
 
 GOPHER:
 - all:
   - changed-files:
     - AnyGlobToAllFiles: [
         'lib/gopher*'
-    ]
+        ]
 
 HTTP:
 - all:
@@ -218,7 +218,7 @@ HTTP:
         'tests/http-server.pl',
         'tests/http/*',
         'tests/nghttp*'
-    ]
+        ]
 
 HTTP/2:
 - all:
@@ -228,7 +228,7 @@ HTTP/2:
         'docs/libcurl/opts/CURLOPT_STREAM*',
         'lib/http2*',
         'tests/http2-server.pl'
-    ]
+        ]
 
 HTTP/3:
 - all:
@@ -240,7 +240,7 @@ HTTP/3:
         'lib/vquic/**',
         'tests/http3-server.pl',
         'tests/nghttpx.conf'
-    ]
+        ]
 
 Hyper:
 - all:
@@ -248,29 +248,29 @@ Hyper:
     - AnyGlobToAllFiles: [
         'docs/HYPER.md',
         'lib/c-hyper.*'
-    ]
+        ]
 
 IMAP:
 - all:
   - changed-files:
     - AnyGlobToAllFiles: [
         'lib/imap*'
-    ]
+        ]
 
 LDAP:
 - all:
   - changed-files:
     - AnyGlobToAllFiles: [
         'lib/*ldap*'
-    ]
+        ]
 
 libcurl API:
 - all:
   - changed-files:
     - AnyGlobToAnyFile: [
-      'docs/libcurl/ABI.md',
-      'include/curl/**'
-    ]
+        'docs/libcurl/ABI.md',
+        'include/curl/**'
+        ]
 
 MIME:
 - all:
@@ -279,7 +279,7 @@ MIME:
         'docs/libcurl/curl_mime_*',
         'docs/libcurl/opts/CURLOPT_MIME*',
         'lib/mime*'
-    ]
+        ]
 
 MQTT:
 - all:
@@ -288,7 +288,7 @@ MQTT:
         'docs/MQTT.md',
         'lib/mqtt*',
         'tests/server/mqttd.c'
-    ]
+        ]
 
 name lookup:
 - all:
@@ -306,21 +306,21 @@ name lookup:
         'lib/inet_pton.*',
         'lib/socketpair*',
         'tests/server/resolve.c'
-    ]
+        ]
 
 POP3:
 - all:
   - changed-files:
     - AnyGlobToAllFiles: [
         'lib/pop3.*'
-    ]
+        ]
 
 RTMP:
 - all:
   - changed-files:
     - AnyGlobToAllFiles: [
         'lib/curl_rtmp.*'
-    ]
+        ]
 
 RTSP:
 - all:
@@ -331,7 +331,7 @@ RTSP:
         'lib/rtsp.*',
         'tests/rtspserver.pl',
         'tests/server/rtspd.c'
-    ]
+        ]
 
 SCP/SFTP:
 - all:
@@ -341,7 +341,7 @@ SCP/SFTP:
         'lib/vssh/**',
         'tests/sshhelp.pm',
         'tests/sshserver.pl'
-    ]
+        ]
 
 script:
 - all:
@@ -354,7 +354,7 @@ script:
         'docs/mk-ca-bundle.1',
         'docs/THANKS-filter',
         'scripts/**'
-    ]
+        ]
 
 SMB:
 - all:
@@ -362,7 +362,7 @@ SMB:
     - AnyGlobToAllFiles: [
         'lib/smb.*',
         'tests/smbserver.py'
-    ]
+        ]
 
 SMTP:
 - all:
@@ -370,14 +370,14 @@ SMTP:
     - AnyGlobToAllFiles: [
         'docs/libcurl/opts/CURLOPT_MAIL*',
         'lib/smtp.*'
-    ]
+        ]
 
 tests:
 - all:
   - changed-files:
     - AnyGlobToAnyFile: [
-      'tests/**'
-    ]
+        'tests/**'
+        ]
 
 TFTP:
 - all:
@@ -386,7 +386,7 @@ TFTP:
         'lib/tftp.*',
         'tests/tftpserver.pl',
         'tests/server/tftp*'
-    ]
+        ]
 
 TLS:
 - all:
@@ -404,7 +404,7 @@ TLS:
         'docs/libcurl/opts/CURLOPT_TLS*',
         'docs/libcurl/opts/CURLOPT_USE_SSL*',
         'lib/vtls/**'
-    ]
+        ]
 
 URL:
 - all:
@@ -414,7 +414,7 @@ URL:
         'docs/URL-SYNTAX.md',
         'include/curl/urlapi.h',
         'lib/urlapi*'
-    ]
+        ]
 
 WebSocket:
 - all:
@@ -426,7 +426,7 @@ WebSocket:
         'docs/libcurl/opts/CURLOPT_WS_*',
         'include/curl/websockets.h',
         'lib/ws.*'
-    ]
+        ]
 
 Windows:
 - all:
@@ -442,4 +442,4 @@ Windows:
         'src/tool_doswin.c',
         'winbuild/**',
         'libcurl.def'
-    ]
+        ]
