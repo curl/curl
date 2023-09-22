@@ -303,9 +303,6 @@ void curl_global_cleanup(void)
 
   Curl_ssh_cleanup();
 
-#ifdef USE_WOLFSSH
-  (void)wolfSSH_Cleanup();
-#endif
 #ifdef DEBUGBUILD
   free(leakpointer);
 #endif

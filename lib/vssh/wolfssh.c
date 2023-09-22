@@ -1168,6 +1168,7 @@ CURLcode Curl_ssh_init(void)
 }
 void Curl_ssh_cleanup(void)
 {
+  (void)wolfSSH_Cleanup();
 }
 
 #endif /* USE_WOLFSSH */
