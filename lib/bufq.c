@@ -144,21 +144,6 @@ static size_t chunk_skip(struct buf_chunk *chunk, size_t amount)
   return n;
 }
 
-static void chunk_shift(struct buf_chunk *chunk)
-{
-  if(chunk->r_offset) {
-    if(!chunk_is_empty(chunk)) {
-      size_t n = chunk->w_offset - chunk->r_offset;
-      memmove(chunk->x.data, chunk->x.data + chunk->r_offset, n);
-      chunk->w_offset -= chunk->r_offset;
-      chunk->r_offset = 0;
-    }
-    else {
-      chunk->r_offset = chunk->w_offset = 0;
-    }
-  }
-}
-
 static void chunk_list_free(struct buf_chunk **anchor)
 {
   struct buf_chunk *chunk;
@@ -502,13 +487,6 @@ void Curl_bufq_skip(struct bufq *q, size_t amount)
     amount -= n;
     prune_head(q);
   }
-}
-
-void Curl_bufq_skip_and_shift(struct bufq *q, size_t amount)
-{
-  Curl_bufq_skip(q, amount);
-  if(q->tail)
-    chunk_shift(q->tail);
 }
 
 ssize_t Curl_bufq_pass(struct bufq *q, Curl_bufq_writer *writer,
