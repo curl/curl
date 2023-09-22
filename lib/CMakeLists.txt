@@ -122,6 +122,12 @@ if(NOT DEFINED SHARE_LIB_OBJECT)
   endif()
 endif()
 
+if(WIN32)
+  # On Windows we handle exports via libcurl.def
+  # or leave them implicitly exported when symbol hiding is disabled.
+  add_definitions("-DCURL_STATICLIB")
+endif()
+
 if(SHARE_LIB_OBJECT)
   set(LIB_OBJECT "libcurl_object")
   add_library(${LIB_OBJECT} OBJECT ${HHEADERS} ${CSOURCES})
