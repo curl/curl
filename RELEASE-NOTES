@@ -4,28 +4,39 @@ curl and libcurl 8.4.0
  Command line options:         257
  curl_easy_setopt() options:   303
  Public functions in libcurl:  92
- Contributors:                 2981
+ Contributors:                 2984
 
 This release includes the following changes:
 
 
 This release includes the following bugfixes:
 
+ o cmake, configure: also link with CoreServices [32]
  o cmake: fix the help text to the static build option in CMakeLists.txt [10]
  o cookie: do not store the expire or max-age strings [16]
  o cookie: remove unnecessary struct fields [17]
  o cookie: set ->running in cookie_init even if data is NULL [5]
+ o curl.h: mark CURLSSLBACKEND_NSS as deprecated since 8.3.0 [18]
+ o docs: use CURLSSLBACKEND_NONE [19]
  o doh: inherit DEBUGFUNCTION/DATA [12]
  o escape: replace Curl_isunreserved with ISUNRESERVED [2]
  o h2-proxy: remove left-over mistake in drain_tunnel() [7]
+ o http: fix CURL_DISABLE_BEARER_AUTH breakage [28]
  o http: use per-request counter to check too large headers [6]
  o http_aws_sigv4: fix sorting with empty parts [13]
+ o idn: if idn2_check_version returns NULL, return error [27]
+ o lib: disambiguate Curl_client_write flag semantics [24]
+ o lib: enable hmac for digest as well [26]
  o lib: failf/infof compiler warnings [8]
+ o libssh2: fix error message on failed pubkey-from-file [22]
+ o libssh: cap SFTP packet size sent [14]
  o MANUAL.md: change domain to example.com [11]
  o misc: better random strings [15]
+ o pytest: exclude test_03_goaway in CI runs due to timing dependency [23]
  o quiche: fix build error with --with-ca-fallback [1]
  o runtests: eliminate a warning on old perl versions
  o test1056: disable on Windows
+ o test1474: disable test on NetBSD, OpenBSD and Solaris 10 [31]
  o test1592: greatly increase the maximum test timeout
  o test2600: remove special case handling for USE_ALARM_TIMEOUT [3]
  o test650: fix an end tag typo
@@ -33,7 +44,11 @@ This release includes the following bugfixes:
  o tests: improve SLOWDOWN test reliability by reducing sent data
  o tests: log the test result code after each libtest
  o tests: stop overriding the lock timeout
+ o tftpd: always use curl's own tftp.h [25]
  o tool_cb_wrt: fix debug assertion [4]
+ o upload-file.d: describe the file name slash/backslash handling [9]
+ o wolfssl: allow capath with CURLOPT_CAINFO_BLOB [29]
+ o wolfssl: if CURLOPT_CAINFO_BLOB is set, ignore the CA files [34]
 
 This release includes the following known bugs:
 
@@ -49,10 +64,13 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  calvin2021y on github, Dan Fandrich, Daniel Stenberg, Douglas R. Reno,
-  Gisle Vanem, Harry Sintonen, John Haugabook, Joshix-1 on github, Junho Choi,
-  Mathias Fuchs, Peter Wang, Ray Satiro, vvb2060, 南宫雪珊
-  (14 contributors)
+  Aleksander Mazur, calvin2021y on github, Christian Weisgerber,
+  consulion on github, Dan Fandrich, Daniel Stenberg, Douglas R. Reno,
+  Gisle Vanem, Harry Sintonen, Jakub Jelen, John Haugabook, Joshix-1 on github,
+  Junho Choi, Marc Hörsken, Mathias Fuchs, Michael Osipov, Patrick Monnerat,
+  Peter Wang, Ray Satiro, Ryan Schmidt, s0urc3_ on hackerone, Stefan Eissing,
+  Ted Lyngmo, vvb2060, 南宫雪珊
+  (25 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -64,10 +82,25 @@ References to bug reports and discussions on issues:
  [6] = https://curl.se/bug/?i=11871
  [7] = https://curl.se/bug/?i=11877
  [8] = https://curl.se/bug/?i=11874
+ [9] = https://curl.se/bug/?i=11911
  [10] = https://curl.se/bug/?i=11843
  [11] = https://curl.se/bug/?i=11866
  [12] = https://curl.se/bug/?i=11864
  [13] = https://curl.se/bug/?i=11855
+ [14] = https://curl.se/bug/?i=11804
  [15] = https://curl.se/bug/?i=11838
  [16] = https://curl.se/bug/?i=11862
  [17] = https://curl.se/bug/?i=11862
+ [18] = https://curl.se/bug/?i=11905
+ [19] = https://curl.se/bug/?i=11909
+ [22] = https://curl.se/bug/?i=11837
+ [23] = https://curl.se/bug/?i=11860
+ [24] = https://curl.se/bug/?i=11885
+ [25] = https://curl.se/bug/?i=11897
+ [26] = https://curl.se/bug/?i=11890
+ [27] = https://curl.se/bug/?i=11898
+ [28] = https://curl.se/bug/?i=11892
+ [29] = https://curl.se/bug/?i=11886
+ [31] = https://curl.se/bug/?i=11888
+ [32] = https://curl.se/bug/?i=11893
+ [34] = https://curl.se/bug/?i=11884
