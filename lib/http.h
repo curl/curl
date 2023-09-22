@@ -114,22 +114,28 @@ CURLcode Curl_http_compile_trailers(struct curl_slist *trailers,
 
 void Curl_http_method(struct Curl_easy *data, struct connectdata *conn,
                       const char **method, Curl_HttpReq *);
+CURLcode Curl_transferencode(struct Curl_easy *data);
+#ifdef USE_HYPER
 CURLcode Curl_http_useragent(struct Curl_easy *data);
-CURLcode Curl_http_host(struct Curl_easy *data, struct connectdata *conn);
 CURLcode Curl_http_target(struct Curl_easy *data, struct connectdata *conn,
                           struct dynbuf *req);
 CURLcode Curl_http_statusline(struct Curl_easy *data,
                               struct connectdata *conn);
-CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
-                          char *headp);
-CURLcode Curl_transferencode(struct Curl_easy *data);
+CURLcode Curl_http(struct Curl_easy *data, bool *done);
+CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
+                            struct dynbuf *r, Curl_HttpReq httpreq);
 CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
                         Curl_HttpReq httpreq,
                         const char **teep);
-CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
-                            struct dynbuf *r, Curl_HttpReq httpreq);
-bool Curl_use_http_1_1plus(const struct Curl_easy *data,
-                           const struct connectdata *conn);
+CURLcode Curl_http_host(struct Curl_easy *data, struct connectdata *conn);
+CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
+                          char *headp);
+CURLcode Curl_http_range(struct Curl_easy *data,
+                         Curl_HttpReq httpreq);
+CURLcode Curl_http_resume(struct Curl_easy *data,
+                          struct connectdata *conn,
+                          Curl_HttpReq httpreq);
+CURLcode Curl_http_size(struct Curl_easy *data);
 #ifndef CURL_DISABLE_COOKIES
 CURLcode Curl_http_cookies(struct Curl_easy *data,
                            struct connectdata *conn,
@@ -137,17 +143,14 @@ CURLcode Curl_http_cookies(struct Curl_easy *data,
 #else
 #define Curl_http_cookies(a,b,c) CURLE_OK
 #endif
-CURLcode Curl_http_resume(struct Curl_easy *data,
-                          struct connectdata *conn,
-                          Curl_HttpReq httpreq);
-CURLcode Curl_http_range(struct Curl_easy *data,
-                         Curl_HttpReq httpreq);
+#endif
+bool Curl_use_http_1_1plus(const struct Curl_easy *data,
+                           const struct connectdata *conn);
 CURLcode Curl_http_firstwrite(struct Curl_easy *data,
                               struct connectdata *conn,
                               bool *done);
 
 /* protocol-specific functions set up to be called by the main engine */
-CURLcode Curl_http(struct Curl_easy *data, bool *done);
 CURLcode Curl_http_done(struct Curl_easy *data, CURLcode, bool premature);
 CURLcode Curl_http_connect(struct Curl_easy *data, bool *done);
 
@@ -222,8 +225,6 @@ struct HTTP {
                                 struct */
 #endif
 };
-
-CURLcode Curl_http_size(struct Curl_easy *data);
 
 CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
                                      struct connectdata *conn,
