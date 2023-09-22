@@ -58,11 +58,16 @@ build:
       - '**/Makefile.mk'
       - '**/*.m4'
       - '**/*.mk'
+      - '*.m4'
+      - 'docs/INSTALL.cmake'
+      - 'lib/curl_config.h.cmake'
       - 'lib/libcurl*.in'
       - 'CMake/**'
+      - 'CMakeLists.txt'
       - 'configure.ac'
       - 'm4/**'
       - 'MacOSX-Framework'
+      - 'Makefile.*'
       - 'packages/**'
       - 'plan9/**'
       - 'projects/**'
@@ -89,6 +94,8 @@ cmake:
     - AnyGlobToAllFiles:
       - '**/CMakeLists.txt'
       - 'CMake/**'
+      - 'docs/INSTALL.cmake'
+      - 'lib/curl_config.h.cmake'
 
 cmdline tool:
 - all:
@@ -238,6 +245,8 @@ HTTP/2:
 - all:
   - changed-files:
     - AnyGlobToAllFiles:
+      - 'CMake/FindNGHTTP2.cmake'
+      - 'CMake/FindQUICHE.cmake'
       - 'docs/HTTP2.md'
       - 'docs/libcurl/opts/CURLOPT_STREAM*'
       - 'docs/examples/http2*'
@@ -250,6 +259,9 @@ HTTP/3:
     - AnyGlobToAllFiles:
       - '.github/workflows/ngtcp2*'
       - '.github/workflows/quiche*'
+      - 'CMake/FindMSH3.cmake'
+      - 'CMake/FindNGHTTP3.cmake'
+      - 'CMake/FindNGTCP2.cmake'
       - 'docs/HTTP3.md'
       - 'docs/examples/http3*'
       - 'lib/vquic/**'
@@ -281,6 +293,7 @@ libcurl API:
   - changed-files:
     - AnyGlobToAnyFile:
       - 'docs/libcurl/ABI.md'
+      - 'docs/libcurl/curl_*.3'
       - 'include/curl/**'
 
 logging:
@@ -296,9 +309,13 @@ MIME:
 - all:
   - changed-files:
     - AnyGlobToAllFiles:
+      - 'docs/libcurl/curl_form*'
       - 'docs/libcurl/curl_mime_*'
       - 'docs/libcurl/opts/CURLOPT_MIME*'
+      - 'docs/libcurl/opts/CURLOPT_HTTPPOST*'
+      - 'lib/formdata*'
       - 'lib/mime*'
+      - 'src/tool_formparse.*'
 
 MQTT:
 - all:
@@ -353,6 +370,7 @@ SCP/SFTP:
 - all:
   - changed-files:
     - AnyGlobToAllFiles:
+      - 'CMake/FindLibSSH2.cmake'
       - 'docs/libcurl/opts/CURLOPT_SSH*'
       - 'docs/examples/sftp*'
       - 'lib/vssh/**'
@@ -404,6 +422,12 @@ TLS:
 - all:
   - changed-files:
     - AnyGlobToAllFiles:
+      - 'CMake/FindBearSSL.cmake'
+      - 'CMake/FindMbedTLS.cmake'
+      - 'CMake/FindWolfSSL.cmake'
+      - 'docs/examples/ssl*'
+      - 'docs/examples/*ssl.*'
+      - 'docs/examples/*tls.*'
       - 'docs/SSL*'
       - 'docs/libcurl/curl_global_sslset*'
       - 'docs/libcurl/opts/CURLINFO_CA*'
@@ -455,6 +479,8 @@ Windows:
 - all:
   - changed-files:
     - AnyGlobToAllFiles:
+      - '**/Makefile.mk'
+      - 'appveyor.yml'
       - 'CMake/Platforms/WindowsCache.cmake'
       - 'lib/*win32*'
       - 'lib/curl_multibyte.*'
