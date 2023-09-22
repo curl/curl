@@ -578,6 +578,15 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     infof(data, " CApath: %s", ssl_capath ? ssl_capath : "none");
   }
 
+#ifdef CURL_CA_FALLBACK
+  /* use system ca certificate store as fallback */
+  if(conn_config->verifypeer && !ssl_cafile && !ssl_capath &&
+     !imported_native_ca && !imported_ca_info_blob) {
+    /* this ignores errors on purpose */
+    wolfSSL_CTX_load_system_CA_certs(backend->ctx);
+  }
+#endif
+
   /* Load the client certificate, and private key */
   if(ssl_config->primary.clientcert && ssl_config->key) {
     int file_type = do_file_type(ssl_config->cert_type);
