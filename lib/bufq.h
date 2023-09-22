@@ -209,12 +209,6 @@ bool Curl_bufq_peek_at(struct bufq *q, size_t offset,
  */
 void Curl_bufq_skip(struct bufq *q, size_t amount);
 
-/**
- * Same as `skip` but shift tail data to the start afterwards,
- * so that further writes will find room in tail.
- */
-void Curl_bufq_skip_and_shift(struct bufq *q, size_t amount);
-
 typedef ssize_t Curl_bufq_writer(void *writer_ctx,
                                  const unsigned char *buf, size_t len,
                                  CURLcode *err);
