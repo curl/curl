@@ -178,6 +178,8 @@ static CURLcode quic_ssl_setup(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   unsigned char checkip[16];
+  struct connectdata *conn = data->conn;
+  const char *curves = conn->ssl_config.curves;
 
   DEBUGASSERT(!ctx->sslctx);
   ctx->sslctx = SSL_CTX_new(TLS_method());
@@ -194,6 +196,11 @@ static CURLcode quic_ssl_setup(struct Curl_cfilter *cf, struct Curl_easy *data)
   Curl_tls_keylog_open();
   if(Curl_tls_keylog_enabled()) {
     SSL_CTX_set_keylog_callback(ctx->sslctx, keylog_callback);
+  }
+
+  if(curves && !SSL_CTX_set1_curves_list(ctx->sslctx, curves)) {
+    failf(data, "failed setting curves list for QUIC: '%s'", curves);
+    return CURLE_SSL_CIPHER;
   }
 
   ctx->ssl = SSL_new(ctx->sslctx);
@@ -213,15 +220,6 @@ static CURLcode quic_ssl_setup(struct Curl_cfilter *cf, struct Curl_easy *data)
       SSL_free(ctx->ssl);
       ctx->ssl = NULL;
       return CURLE_QUIC_CONNECT_ERROR;
-    }
-  }
-
-  {
-    struct connectdata *conn = data->conn;
-    const char *curves = conn->ssl_config.curves;
-    if(curves && !SSL_CTX_set1_curves_list(ctx->sslctx, curves)) {
-      failf(data, "failed setting curves list for QUIC: '%s'", curves);
-      return CURLE_SSL_CIPHER;
     }
   }
 
