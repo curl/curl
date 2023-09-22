@@ -92,6 +92,7 @@ my %api = (
     'curl_global_init' => 'API',
     'curl_global_init_mem' => 'API',
     'curl_global_sslset' => 'API',
+    'curl_global_trace' => 'API',
     'curl_maprintf' => 'API',
     'curl_mfprintf' => 'API',
     'curl_mime_addpart' => 'API',
