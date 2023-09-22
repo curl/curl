@@ -36,5 +36,5 @@ check_required_components("@PROJECT_NAME@")
 
 # Alias for either shared or static library
 if(NOT TARGET @PROJECT_NAME@::libcurl)
-    add_library(@PROJECT_NAME@::libcurl ALIAS @PROJECT_NAME@::@LIB_SELECTED@)
+  add_library(@PROJECT_NAME@::libcurl ALIAS @PROJECT_NAME@::@LIB_SELECTED@)
 endif()
