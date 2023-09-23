@@ -123,8 +123,10 @@ if(NOT DEFINED SHARE_LIB_OBJECT)
 endif()
 
 if(WIN32)
-  # On Windows we handle exports via libcurl.def
-  # or leave them implicitly exported when symbol hiding is disabled.
+  # Define CURL_STATICLIB always, to disable __declspec(dllexport) for exported
+  # libcurl symbols. We handle exports via libcurl.def instead. Except with
+  # symbol hiding disabled or debug mode enabled, when we export _all_ symbols
+  # from libcurl DLL, without using libcurl.def.
   add_definitions("-DCURL_STATICLIB")
 endif()
 
@@ -189,8 +191,10 @@ if(BUILD_SHARED_LIBS)
   add_library(${PROJECT_NAME}::${LIB_SHARED} ALIAS ${LIB_SHARED})
   if(WIN32)
     set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES libcurl.rc)
-    if(HIDES_CURL_PRIVATE_SYMBOLS)
+    if(HIDES_CURL_PRIVATE_SYMBOLS AND NOT ENABLE_CURLDEBUG)
       set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES "${CURL_SOURCE_DIR}/libcurl.def")
+    elseif(MSVC)
+      set_target_properties(${LIB_SHARED} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
     endif()
   endif()
   target_link_libraries(${LIB_SHARED} PRIVATE ${CURL_LIBS})
