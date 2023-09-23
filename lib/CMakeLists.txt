@@ -128,6 +128,10 @@ if(WIN32)
   # symbol hiding disabled or debug mode enabled, when we export _all_ symbols
   # from libcurl DLL, without using libcurl.def.
   add_definitions("-DCURL_STATICLIB")
+
+  if(ENABLE_CURLDEBUG)
+    set(HIDES_CURL_PRIVATE_SYMBOLS FALSE)
+  endif()
 endif()
 
 if(SHARE_LIB_OBJECT)
@@ -191,7 +195,7 @@ if(BUILD_SHARED_LIBS)
   add_library(${PROJECT_NAME}::${LIB_SHARED} ALIAS ${LIB_SHARED})
   if(WIN32)
     set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES libcurl.rc)
-    if(HIDES_CURL_PRIVATE_SYMBOLS AND NOT ENABLE_CURLDEBUG)
+    if(HIDES_CURL_PRIVATE_SYMBOLS)
       set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES "${CURL_SOURCE_DIR}/libcurl.def")
     elseif(MSVC)
       set_target_properties(${LIB_SHARED} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
