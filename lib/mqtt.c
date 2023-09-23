@@ -668,7 +668,9 @@ MQTT_SUBACK_COMING:
 
     mq->npacket -= nread;
     k->bytecount += nread;
-    Curl_pgrsSetDownloadCounter(data, k->bytecount);
+    result = Curl_pgrsSetDownloadCounter(data, k->bytecount);
+    if(result)
+      goto end;
 
     /* if QoS is set, message contains packet id */
 

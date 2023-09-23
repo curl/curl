@@ -258,7 +258,11 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
   }
 
   data->req.bytecount += len;
-  Curl_pgrsSetDownloadCounter(data, data->req.bytecount);
+  result = Curl_pgrsSetDownloadCounter(data, data->req.bytecount);
+  if(result) {
+    data->state.hresult = result;
+    return HYPER_ITER_BREAK;
+  }
   return HYPER_ITER_CONTINUE;
 }
 
