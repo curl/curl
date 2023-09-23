@@ -375,6 +375,9 @@ distclean vclean: clean
 ifdef LOCAL
 
 CPPFLAGS += -DBUILDING_LIBCURL
+ifdef WIN32
+CPPFLAGS += -DCURL_STATICLIB
+endif
 
 ### Sources and targets
 
