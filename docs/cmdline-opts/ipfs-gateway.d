@@ -2,7 +2,7 @@ c: Copyright (C) 2023, Mark Gaiser, <markg85@gmail.com>
 SPDX-License-Identifier: curl
 Long: ipfs-gateway
 Arg: <URL>
-Help: Defines the gateway to handle IPFS protocol requests.
+Help: Gateway for IPFS
 Added: 8.4.0
 See-also: help manual
 Category: ipfs
