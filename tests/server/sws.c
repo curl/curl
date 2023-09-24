@@ -438,7 +438,7 @@ static int ProcessRequest(struct httprequest *req)
       if(*ptr == '/') {
         if((npath + strlen(request)) < 400)
           msnprintf(logbuf, sizeof(logbuf), "Got request: %s %.*s HTTP/%d.%d",
-                    request, npath, httppath, prot_major, prot_minor);
+                    request, (int)npath, httppath, prot_major, prot_minor);
         else
           msnprintf(logbuf, sizeof(logbuf), "Got a *HUGE* request HTTP/%d.%d",
                     prot_major, prot_minor);
