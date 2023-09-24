@@ -84,6 +84,7 @@ add_library(
   ${CURL_CFILES} ${CURLTOOL_LIBCURL_CFILES} ${CURL_HFILES}
 )
 target_compile_definitions(curltool PUBLIC UNITTESTS CURL_STATICLIB)
+target_link_libraries(curltool PRIVATE ${CURL_LIBS})
 
 if(CURL_HAS_LTO)
   set_target_properties(${EXE_NAME} PROPERTIES
