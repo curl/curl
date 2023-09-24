@@ -133,8 +133,8 @@ static void storerequest(char *reqbuf, size_t totalsize);
 #endif
 
 const char *serverlogfile = DEFAULT_LOGFILE;
-const char *logdir = "log";
-char loglockfile[256];
+static const char *logdir = "log";
+static char loglockfile[256];
 
 #define RTSPDVERSION "curl test suite RTSP server/0.1"
 
