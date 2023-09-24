@@ -192,7 +192,12 @@ int test(char *url)
             __FILE__, __LINE__, num_handles, timeout, running);
 
     if(timeout != -1L) {
-      int itimeout = (timeout > (long)INT_MAX) ? INT_MAX : (int)timeout;
+      int itimeout;
+#if LONG_MAX > INT_MAX
+      itimeout = (timeout > (long)INT_MAX) ? INT_MAX : (int)timeout;
+#else
+      itimeout = (int)timeout;
+#endif
       interval.tv_sec = itimeout/1000;
       interval.tv_usec = (itimeout%1000)*1000;
     }
