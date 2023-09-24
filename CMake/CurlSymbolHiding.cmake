@@ -26,6 +26,12 @@ include(CheckCSourceCompiles)
 option(CURL_HIDDEN_SYMBOLS "Set to ON to hide libcurl internal symbols (=hide all symbols that aren't officially external)." ON)
 mark_as_advanced(CURL_HIDDEN_SYMBOLS)
 
+if(WIN32 AND ENABLE_CURLDEBUG)
+  # We need to export internal debug functions (e.g. curl_dbg_*), so disable
+  # symbol hiding for debug builds.
+  set(CURL_HIDDEN_SYMBOLS OFF)
+endif()
+
 if(CURL_HIDDEN_SYMBOLS)
   set(SUPPORTS_SYMBOL_HIDING FALSE)
 
