@@ -40,7 +40,7 @@
 #include "memdebug.h"
 
 #define LOGFILE "%s/fake_ntlm%ld.log"
-const char *logdir = "log";
+static const char *logdir = "log";
 
 const char *serverlogfile;
 
