@@ -4,15 +4,21 @@ curl and libcurl 8.4.0
  Command line options:         257
  curl_easy_setopt() options:   303
  Public functions in libcurl:  92
- Contributors:                 2984
+ Contributors:                 2987
 
 This release includes the following changes:
 
+ o curl: add support for the IPFS protocols [46]
+ o curl_multi_get_handles: get easy handles from a multi handle [20]
+ o mingw: delete support for legacy mingw.org toolchain [45]
 
 This release includes the following bugfixes:
 
+ o bufq: remove Curl_bufq_skip_and_shift (unused) [47]
  o cmake, configure: also link with CoreServices [32]
  o cmake: fix the help text to the static build option in CMakeLists.txt [10]
+ o cmake: fix unity symbol collisions in h2 builds [48]
+ o configure: sort AC_CHECK_FUNCS
  o cookie: do not store the expire or max-age strings [16]
  o cookie: remove unnecessary struct fields [17]
  o cookie: set ->running in cookie_init even if data is NULL [5]
@@ -20,19 +26,26 @@ This release includes the following bugfixes:
  o docs: use CURLSSLBACKEND_NONE [19]
  o doh: inherit DEBUGFUNCTION/DATA [12]
  o escape: replace Curl_isunreserved with ISUNRESERVED [2]
+ o GHA/linux: run singleuse to detect single-use global functions [35]
  o h2-proxy: remove left-over mistake in drain_tunnel() [7]
  o http: fix CURL_DISABLE_BEARER_AUTH breakage [28]
+ o http: h1/h2 proxy unification [21]
  o http: use per-request counter to check too large headers [6]
  o http_aws_sigv4: fix sorting with empty parts [13]
  o idn: if idn2_check_version returns NULL, return error [27]
  o lib: disambiguate Curl_client_write flag semantics [24]
  o lib: enable hmac for digest as well [26]
  o lib: failf/infof compiler warnings [8]
+ o lib: let the max filesize option stop too big transfers too [44]
+ o lib: use wrapper for curl_mime_data fseek callback [30]
  o libssh2: fix error message on failed pubkey-from-file [22]
  o libssh: cap SFTP packet size sent [14]
+ o Makefile.mk: always set `CURL_STATICLIB` for lib (Windows) [42]
  o MANUAL.md: change domain to example.com [11]
  o misc: better random strings [15]
+ o multi: remove Curl_multi_dump [37]
  o pytest: exclude test_03_goaway in CI runs due to timing dependency [23]
+ o quic: set ciphers/curves the same way regular TLS does [43]
  o quiche: fix build error with --with-ca-fallback [1]
  o runtests: eliminate a warning on old perl versions
  o test1056: disable on Windows
@@ -41,12 +54,16 @@ This release includes the following bugfixes:
  o test2600: remove special case handling for USE_ALARM_TIMEOUT [3]
  o test650: fix an end tag typo
  o test661: return from test early in case of curl error
+ o tests: fix compiler warnings [38]
  o tests: improve SLOWDOWN test reliability by reducing sent data
  o tests: log the test result code after each libtest
  o tests: stop overriding the lock timeout
  o tftpd: always use curl's own tftp.h [25]
  o tool_cb_wrt: fix debug assertion [4]
  o upload-file.d: describe the file name slash/backslash handling [9]
+ o url: fix netrc info message [39]
+ o warnless: remove unused functions [33]
+ o wolfssh: do cleanup in Curl_ssh_cleanup [40]
  o wolfssl: allow capath with CURLOPT_CAINFO_BLOB [29]
  o wolfssl: if CURLOPT_CAINFO_BLOB is set, ignore the CA files [34]
 
@@ -57,7 +74,6 @@ This release includes the following known bugs:
 Planned upcoming removals include:
 
  o support for space-separated NOPROXY patterns
- o support for the original legacy mingw version 1
 
  See https://curl.se/dev/deprecate.html for details
 
@@ -66,11 +82,12 @@ advice from friends like these:
 
   Aleksander Mazur, calvin2021y on github, Christian Weisgerber,
   consulion on github, Dan Fandrich, Daniel Stenberg, Douglas R. Reno,
-  Gisle Vanem, Harry Sintonen, Jakub Jelen, John Haugabook, Joshix-1 on github,
-  Junho Choi, Marc Hörsken, Mathias Fuchs, Michael Osipov, Patrick Monnerat,
-  Peter Wang, Ray Satiro, Ryan Schmidt, s0urc3_ on hackerone, Stefan Eissing,
-  Ted Lyngmo, vvb2060, 南宫雪珊
-  (25 contributors)
+  Elliot Killick, Gisle Vanem, Harry Sintonen, Jakub Jelen, John Haugabook,
+  Joshix-1 on github, Junho Choi, Karthikdasari0423 on github, Lars Francke,
+  Marc Hörsken, Mark Gaiser, Mathias Fuchs, Michael Osipov, Natanael Copa,
+  Patrick Monnerat, Peter Wang, Ray Satiro, Ryan Schmidt, s0urc3_ on hackerone,
+  Stefan Eissing, Ted Lyngmo, Viktor Szakats, vvb2060, 南宫雪珊
+  (31 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -93,6 +110,8 @@ References to bug reports and discussions on issues:
  [17] = https://curl.se/bug/?i=11862
  [18] = https://curl.se/bug/?i=11905
  [19] = https://curl.se/bug/?i=11909
+ [20] = https://curl.se/bug/?i=11750
+ [21] = https://curl.se/bug/?i=11808
  [22] = https://curl.se/bug/?i=11837
  [23] = https://curl.se/bug/?i=11860
  [24] = https://curl.se/bug/?i=11885
@@ -101,6 +120,20 @@ References to bug reports and discussions on issues:
  [27] = https://curl.se/bug/?i=11898
  [28] = https://curl.se/bug/?i=11892
  [29] = https://curl.se/bug/?i=11886
+ [30] = https://curl.se/bug/?i=11882
  [31] = https://curl.se/bug/?i=11888
  [32] = https://curl.se/bug/?i=11893
+ [33] = https://curl.se/bug/?i=11932
  [34] = https://curl.se/bug/?i=11884
+ [35] = https://curl.se/bug/?i=11932
+ [37] = https://curl.se/bug/?i=11931
+ [38] = https://curl.se/bug/?i=11925
+ [39] = https://curl.se/bug/?i=11904
+ [40] = https://curl.se/bug/?i=11921
+ [42] = https://curl.se/bug/?i=11924
+ [43] = https://curl.se/bug/?i=11796
+ [44] = https://curl.se/bug/?i=11810
+ [45] = https://curl.se/bug/?i=11625
+ [46] = https://curl.se/bug/?i=8805
+ [47] = https://curl.se/bug/?i=11915
+ [48] = https://curl.se/bug/?i=11912
