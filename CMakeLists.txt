@@ -998,6 +998,7 @@ endif()
 # TODO: offload these headers to the specific tests where they are needed.
 list(APPEND CURL_INCLUDES "string.h")
 list(APPEND CURL_INCLUDES "stdlib.h")
+list(APPEND CURL_INCLUDES "stddef.h")
 
 # Check for header files
 if(NOT UNIX)
@@ -1047,8 +1048,6 @@ check_include_file_concat("termios.h"        HAVE_TERMIOS_H)
 check_include_file_concat("time.h"           HAVE_TIME_H)
 check_include_file_concat("unistd.h"         HAVE_UNISTD_H)
 check_include_file_concat("utime.h"          HAVE_UTIME_H)
-
-check_include_file_concat("stddef.h"         HAVE_STDDEF_H)
 
 check_type_size(size_t  SIZEOF_SIZE_T)
 check_type_size(ssize_t  SIZEOF_SSIZE_T)
