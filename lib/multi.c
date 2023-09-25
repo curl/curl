@@ -3788,3 +3788,21 @@ unsigned int Curl_multi_max_concurrent_streams(struct Curl_multi *multi)
   DEBUGASSERT(multi);
   return multi->max_concurrent_streams;
 }
+
+struct Curl_easy **curl_multi_get_handles(struct Curl_multi *multi)
+{
+  struct Curl_easy **a = malloc(sizeof(struct Curl_easy *) *
+                                (multi->num_easy + 1));
+  if(a) {
+    int i = 0;
+    struct Curl_easy *e = multi->easyp;
+    while(e) {
+      DEBUGASSERT(i < multi->num_easy);
+      if(!e->internal)
+        a[i++] = e;
+      e = e->next;
+    }
+    a[i] = NULL; /* last entry is a NULL */
+  }
+  return a;
+}

@@ -106,6 +106,7 @@ curl_multi_socket_all
 curl_multi_timeout
 curl_multi_setopt
 curl_multi_assign
+curl_multi_get_handles
 curl_pushheader_bynum
 curl_pushheader_byname
 curl_easy_option_by_name

@@ -107,6 +107,7 @@ int Curl_conncache_init(struct conncache *connc, int size)
   connc->closure_handle = curl_easy_init();
   if(!connc->closure_handle)
     return 1; /* bad */
+  connc->closure_handle->internal = true;
 
   Curl_hash_init(&connc->hash, size, Curl_hash_str,
                  Curl_str_key_compare, free_bundle_hash_entry);

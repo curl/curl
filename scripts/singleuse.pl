@@ -96,6 +96,7 @@ my %api = (
     'curl_multi_assign' => 'API',
     'curl_multi_cleanup' => 'API',
     'curl_multi_fdset' => 'API',
+    'curl_multi_get_handles' => 'API',
     'curl_multi_info_read' => 'API',
     'curl_multi_init' => 'API',
     'curl_multi_perform' => 'API',
