@@ -1159,8 +1159,6 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
  * http_should_fail() determines whether an HTTP response has gotten us
  * into an error state or not.
  *
- * @param conn all information about the current connection
- *
  * @retval FALSE communications should continue
  *
  * @retval TRUE communications should not continue
