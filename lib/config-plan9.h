@@ -119,7 +119,6 @@
 #define HAVE_SSL_GET_SHUTDOWN 1
 #define HAVE_STDBOOL_H 1
 #define HAVE_STDINT_H 1
-#define HAVE_STDLIB_H 1
 #define HAVE_STRCASECMP 1
 #define HAVE_STRDUP 1
 #define HAVE_STRTOK_R 1

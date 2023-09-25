@@ -150,9 +150,6 @@
 /* Define if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
 
-/* Define if you have the <stdlib.h> header file. */
-#define HAVE_STDLIB_H
-
 /* Define if you have the `strcasecmp' function. */
 #undef HAVE_STRCASECMP
 

@@ -158,9 +158,6 @@
 /* Define if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
 
-/* Define if you have the <stdlib.h> header file. */
-#define HAVE_STDLIB_H
-
 
 /* The following define is needed on OS400 to enable strcmpi(), stricmp() and
    strdup(). */
