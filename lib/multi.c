@@ -3422,20 +3422,10 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
 
     if(Curl_splaycomparekeys(multi->timetree->key, now) > 0) {
       /* some time left before expiration */
-      timediff_t diff = Curl_timediff(multi->timetree->key, now);
-      if(diff <= 0)
-        /*
-         * Since we only provide millisecond resolution on the returned value
-         * and the diff might be less than one millisecond here, we don't
-         * return zero as that may cause short bursts of busyloops on fast
-         * processors while the diff is still present but less than one
-         * millisecond! instead we return 1 until the time is ripe.
-         */
-        *timeout_ms = 1;
-      else
-        /* this should be safe even on 64 bit archs, as we don't use that
-           overly long timeouts */
-        *timeout_ms = (long)diff;
+      timediff_t diff = Curl_timediff_ceil(multi->timetree->key, now);
+      /* this should be safe even on 32 bit archs, as we don't use that
+         overly long timeouts */
+      *timeout_ms = (long)diff;
     }
     else
       /* 0 means immediately */
