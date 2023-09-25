@@ -404,7 +404,9 @@ jobs:
     - run: make V=1
       name: 'make'
 
-    - run: ./scripts/singleuse.pl ${{ matrix.build.singleuse }} lib/.libs/libcurl.a
+    - run: |
+        git config --global --add safe.directory "*"
+        ./scripts/singleuse.pl ${{ matrix.build.singleuse }} lib/.libs/libcurl.a
       name: single-use function check
 
     - run: ./src/curl -V
