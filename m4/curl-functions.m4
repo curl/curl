@@ -214,12 +214,10 @@ curl_includes_setjmp="\
 #ifdef HAVE_SYS_TYPES_H
 #  include <sys/types.h>
 #endif
-#ifdef HAVE_SETJMP_H
-#  include <setjmp.h>
-#endif
+include <setjmp.h>
 /* includes end */"
   AC_CHECK_HEADERS(
-    sys/types.h setjmp.h,
+    sys/types.h,
     [], [], [$curl_includes_setjmp])
 ])
 

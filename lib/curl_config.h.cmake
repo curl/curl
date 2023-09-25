@@ -430,9 +430,6 @@
 /* fsetxattr() takes 6 args */
 #cmakedefine HAVE_FSETXATTR_6 1
 
-/* Define to 1 if you have the <setjmp.h> header file. */
-#cmakedefine HAVE_SETJMP_H 1
-
 /* Define to 1 if you have the `setlocale' function. */
 #cmakedefine HAVE_SETLOCALE 1
 

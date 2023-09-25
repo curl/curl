@@ -75,9 +75,7 @@
 #include <sys/filio.h>
 #endif
 
-#ifdef HAVE_SETJMP_H
 #include <setjmp.h>
-#endif
 
 #ifdef HAVE_PWD_H
 #include <pwd.h>

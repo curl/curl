@@ -61,7 +61,6 @@
 #define HAVE_RECV              1
 #define HAVE_SELECT            1
 #define HAVE_SEND              1
-#define HAVE_SETJMP_H          1
 #define HAVE_SETLOCALE         1
 #define HAVE_SETMODE           1
 #define HAVE_SIGNAL            1
