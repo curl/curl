@@ -55,9 +55,7 @@
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
-#ifdef HAVE_SIGNAL_H
 #include <signal.h>
-#endif
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
@@ -75,9 +73,7 @@
 #include <sys/filio.h>
 #endif
 
-#ifdef HAVE_SETJMP_H
 #include <setjmp.h>
-#endif
 
 #ifdef HAVE_PWD_H
 #include <pwd.h>

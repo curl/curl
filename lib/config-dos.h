@@ -61,7 +61,6 @@
 #define HAVE_RECV              1
 #define HAVE_SELECT            1
 #define HAVE_SEND              1
-#define HAVE_SETJMP_H          1
 #define HAVE_SETLOCALE         1
 #define HAVE_SETMODE           1
 #define HAVE_SIGNAL            1
@@ -74,7 +73,6 @@
 #define HAVE_SYS_SOCKET_H      1
 #define HAVE_SYS_STAT_H        1
 #define HAVE_SYS_TYPES_H       1
-#define HAVE_TIME_H            1
 #define HAVE_UNISTD_H          1
 
 #define NEED_MALLOC_H          1

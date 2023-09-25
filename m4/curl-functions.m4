@@ -214,12 +214,10 @@ curl_includes_setjmp="\
 #ifdef HAVE_SYS_TYPES_H
 #  include <sys/types.h>
 #endif
-#ifdef HAVE_SETJMP_H
-#  include <setjmp.h>
-#endif
+include <setjmp.h>
 /* includes end */"
   AC_CHECK_HEADERS(
-    sys/types.h setjmp.h,
+    sys/types.h,
     [], [], [$curl_includes_setjmp])
 ])
 
@@ -235,12 +233,10 @@ curl_includes_signal="\
 #ifdef HAVE_SYS_TYPES_H
 #  include <sys/types.h>
 #endif
-#ifdef HAVE_SIGNAL_H
-#  include <signal.h>
-#endif
+include <signal.h>
 /* includes end */"
   AC_CHECK_HEADERS(
-    sys/types.h signal.h,
+    sys/types.h,
     [], [], [$curl_includes_signal])
 ])
 
@@ -277,12 +273,10 @@ curl_includes_stdlib="\
 #ifdef HAVE_SYS_TYPES_H
 #  include <sys/types.h>
 #endif
-#ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-#endif
+include <stdlib.h>
 /* includes end */"
   AC_CHECK_HEADERS(
-    sys/types.h stdlib.h,
+    sys/types.h,
     [], [], [$curl_includes_stdlib])
 ])
 
@@ -298,15 +292,13 @@ curl_includes_string="\
 #ifdef HAVE_SYS_TYPES_H
 #  include <sys/types.h>
 #endif
-#ifdef HAVE_STRING_H
-#  include <string.h>
-#endif
+#include <string.h>
 #ifdef HAVE_STRINGS_H
 #  include <strings.h>
 #endif
 /* includes end */"
   AC_CHECK_HEADERS(
-    sys/types.h string.h strings.h,
+    sys/types.h strings.h,
     [], [], [$curl_includes_string])
 ])
 

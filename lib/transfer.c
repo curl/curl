@@ -40,9 +40,7 @@
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
-#ifdef HAVE_SIGNAL_H
 #include <signal.h>
-#endif
 
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>

@@ -41,12 +41,8 @@
 #include <inet.h>
 #endif
 
-#ifdef HAVE_SETJMP_H
 #include <setjmp.h>
-#endif
-#ifdef HAVE_SIGNAL_H
 #include <signal.h>
-#endif
 
 #include "urldata.h"
 #include "sendf.h"
