@@ -82,7 +82,6 @@ if(NOT UNIX)
     set(HAVE_SYS_UTIME_H 1)
     set(HAVE_TERMIOS_H 0)
     set(HAVE_TERMIO_H 0)
-    set(HAVE_TIME_H 1)
     set(HAVE_UTIME_H 0)
 
     set(HAVE_SOCKET 1)

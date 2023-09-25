@@ -562,9 +562,6 @@
 /* Define to 1 if you have the <termio.h> header file. */
 #cmakedefine HAVE_TERMIO_H 1
 
-/* Define to 1 if you have the <time.h> header file. */
-#cmakedefine HAVE_TIME_H 1
-
 /* Define to 1 if you have the <unistd.h> header file. */
 #cmakedefine HAVE_UNISTD_H 1
 

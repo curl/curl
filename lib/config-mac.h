@@ -53,7 +53,6 @@
 #define HAVE_FCNTL_H            1
 #define HAVE_SYS_STAT_H         1
 #define HAVE_STDLIB_H           1
-#define HAVE_TIME_H             1
 #define HAVE_UTIME_H            1
 #define HAVE_SYS_TIME_H         1
 #define HAVE_SYS_UTIME_H        1

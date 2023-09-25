@@ -86,9 +86,6 @@
 /* Define if you have the <termios.h> header file.  */
 /* #define HAVE_TERMIOS_H 1 */
 
-/* Define if you have the <time.h> header file.  */
-#define HAVE_TIME_H 1
-
 /* Define if you have the <unistd.h> header file.  */
 #if defined(__MINGW32__) || defined(__LCC__)
 #define HAVE_UNISTD_H 1
