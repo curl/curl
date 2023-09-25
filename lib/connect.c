@@ -823,10 +823,9 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
     CURL_TRC_CF(data, cf, "created %s (timeout %"
                 CURL_FORMAT_TIMEDIFF_T "ms)",
                 ctx->baller[1]->name, ctx->baller[1]->timeoutms);
+    Curl_expire(data, data->set.happy_eyeballs_timeout,
+                EXPIRE_HAPPY_EYEBALLS);
   }
-
-  Curl_expire(data, data->set.happy_eyeballs_timeout,
-              EXPIRE_HAPPY_EYEBALLS);
 
   return CURLE_OK;
 }
