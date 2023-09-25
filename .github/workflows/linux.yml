@@ -178,6 +178,7 @@ jobs:
           container: 'andy5995/slackware-build-essential:15.0'
 
         - name: Alpine MUSL
+          install_packages: git
           configure: --enable-debug --enable-websockets --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl
           container: 'alpine:3.18'
           singleuse: --unit
