@@ -997,7 +997,6 @@ endif()
 
 # TODO: offload these headers to the specific tests where they are needed.
 list(APPEND CURL_INCLUDES "string.h")
-list(APPEND CURL_INCLUDES "stddef.h")
 
 # Check for header files
 if(NOT UNIX)
