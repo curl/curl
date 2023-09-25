@@ -3139,7 +3139,7 @@ static CURLMcode add_next_timeout(struct curltime now,
     struct Curl_llist_element *n = e->next;
     timediff_t diff;
     node = (struct time_node *)e->ptr;
-    diff = Curl_timediff(node->time, now);
+    diff = Curl_timediff_us(node->time, now);
     if(diff <= 0)
       /* remove outdated entry */
       Curl_llist_remove(list, e, NULL);
