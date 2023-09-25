@@ -502,6 +502,9 @@
 /* Define to 1 if you have the strtoll function. */
 #cmakedefine HAVE_STRTOLL 1
 
+/* Define to 1 if you have the memrchr function. */
+#cmakedefine HAVE_MEMRCHR 1
+
 /* if struct sockaddr_storage is defined */
 #cmakedefine HAVE_STRUCT_SOCKADDR_STORAGE 1
 
