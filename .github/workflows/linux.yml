@@ -64,51 +64,61 @@ jobs:
           install_packages: zlib1g-dev valgrind
           install_steps: bearssl pytest
           configure: LDFLAGS="-Wl,-rpath,$HOME/bearssl/lib" --with-bearssl=$HOME/bearssl --enable-debug
+          singleuse: --unit
 
         - name: bearssl-clang
           install_packages: zlib1g-dev clang
           install_steps: bearssl
           configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/bearssl/lib" --with-bearssl=$HOME/bearssl --enable-debug
+          singleuse: --unit
 
         - name: libressl
           install_packages: zlib1g-dev valgrind
           install_steps: libressl pytest
           configure: LDFLAGS="-Wl,-rpath,$HOME/libressl/lib" --with-openssl=$HOME/libressl --enable-debug
+          singleuse: --unit
 
         - name: libressl-clang
           install_packages: zlib1g-dev clang
           install_steps: libressl
           configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/libressl/lib" --with-openssl=$HOME/libressl --enable-debug
+          singleuse: --unit
 
         - name: mbedtls
           install_packages: libnghttp2-dev valgrind
           install_steps: mbedtls pytest
           configure: LDFLAGS="-Wl,-rpath,$HOME/mbedtls/lib" --with-mbedtls=$HOME/mbedtls --enable-debug
+          singleuse: --unit
 
         - name: mbedtls-clang
           install_packages: libnghttp2-dev clang
           install_steps: mbedtls
           configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/mbedtls/lib" --with-mbedtls=$HOME/mbedtls --enable-debug
+          singleuse: --unit
 
         - name: msh3
           install_packages: zlib1g-dev valgrind
           install_steps: quictls msh3
           configure: LDFLAGS="-Wl,-rpath,$HOME/msh3/lib -Wl,-rpath,$HOME/quictls/lib" --with-msh3=$HOME/msh3 --with-openssl=$HOME/quictls --enable-debug
+          singleuse: --unit
 
         - name: openssl3
           install_packages: zlib1g-dev valgrind
           install_steps: gcc-11 openssl3 pytest
           configure: LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
+          singleuse: --unit
 
         - name: openssl3-O3
           install_packages: zlib1g-dev valgrind
           install_steps: gcc-11 openssl3
           configure: CFLAGS=-O3 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
+          singleuse: --unit
 
         - name: openssl3-clang
           install_packages: zlib1g-dev clang
           install_steps: openssl3
           configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
+          singleuse: --unit
 
         - name: address-sanitizer
           install_packages: zlib1g-dev libssh2-1-dev clang libssl-dev libubsan1 libasan8 libtsan2
@@ -119,6 +129,7 @@ jobs:
             LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer"
             LIBS="-ldl -lubsan"
             --with-openssl --enable-debug --enable-websockets
+          singleuse: --unit
 
         - name: memory-sanitizer
           install_packages: clang
@@ -129,29 +140,35 @@ jobs:
             LDFLAGS="-fsanitize=memory"
             LIBS="-ldl"
             --without-ssl --without-zlib --without-brotli --without-zstd --without-libpsl --without-nghttp2 --enable-debug --enable-websocketsx
+          singleuse: --unit
 
         - name: event-based
           install_packages: libssh-dev valgrind
           configure: --enable-debug --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
           tflags: -n -e '!TLS-SRP'
+          singleuse: --unit
 
         - name: hyper
           install_steps: rust hyper valgrind
           configure: LDFLAGS="-Wl,-rpath,$HOME/hyper/target/debug" --with-openssl --with-hyper=$HOME/hyper --enable-debug --enable-websockets
+          singleuse: --unit
 
         - name: rustls
           install_steps: rust rustls pytest valgrind
           configure: --with-rustls=$HOME/rustls --enable-debug
+          singleuse: --unit
 
         - name: Intel compiler - without SSL
           install_packages: zlib1g-dev valgrind
           install_steps: intel
           configure: CC=icc --enable-debug --without-ssl
+          singleuse: --unit
 
         - name: Intel compiler - OpenSSL
           install_packages: zlib1g-dev libssl-dev valgrind
           install_steps: intel
           configure: CC=icc --enable-debug --with-openssl
+          singleuse: --unit
 
         - name: Slackware-openssl-with-gssapi-gcc
           # These are essentially the same flags used to build the curl Slackware package
@@ -163,6 +180,7 @@ jobs:
         - name: Alpine MUSL
           configure: --enable-debug --enable-websockets --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl
           container: 'alpine:3.18'
+          singleuse: --unit
 
     steps:
     - if: matrix.build.container == null
@@ -174,7 +192,7 @@ jobs:
 
     - if: startsWith(matrix.build.container, 'alpine')
       run: |
-        apk add --no-cache build-base autoconf automake libtool perl openssl-dev libssh2-dev zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev heimdal-dev libpsl-dev py3-impacket py3-asn1 py3-six py3-pycryptodomex perl-time-hires openssh stunnel sudo
+        apk add --no-cache build-base autoconf automake libtool perl openssl-dev libssh2-dev zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev heimdal-dev libpsl-dev py3-impacket py3-asn1 py3-six py3-pycryptodomex perl-time-hires openssh stunnel sudo git
       name: 'install dependencies'
 
     - uses: actions/checkout@v3
@@ -385,6 +403,11 @@ jobs:
 
     - run: make V=1
       name: 'make'
+
+    - run: |
+        git config --global --add safe.directory "*"
+        ./scripts/singleuse.pl ${{ matrix.build.singleuse }} lib/.libs/libcurl.a
+      name: single-use function check
 
     - run: ./src/curl -V
       name: 'check curl -V output'
