@@ -51,6 +51,7 @@ curl_multi_add_handle
 curl_multi_assign
 curl_multi_cleanup
 curl_multi_fdset
+curl_multi_get_handles
 curl_multi_info_read
 curl_multi_init
 curl_multi_perform

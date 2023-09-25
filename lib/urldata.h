@@ -1950,7 +1950,7 @@ struct Curl_easy {
      other using the same cache. For easier tracking
      in log output.
      This may wrap around after LONG_MAX to 0 again, so it
-     has no uniqueness guarantuee for very large processings. */
+     has no uniqueness guarantee for very large processings. */
   curl_off_t id;
 
   /* first, two fields for the linked list of these */
@@ -2013,6 +2013,10 @@ struct Curl_easy {
 #ifdef USE_HYPER
   struct hyptransfer hyp;
 #endif
+
+  /* internal: true if this easy handle was created for internal use and the
+     user does not have ownership of the handle. */
+  bool internal;
 };
 
 #define LIBCURL_NAME "libcurl"
