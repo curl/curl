@@ -133,9 +133,6 @@
 /* Define to 1 if you have the <setjmp.h> header file. */
 #define HAVE_SETJMP_H 1
 
-/* Define to 1 if you have the <string.h> header file. */
-#define HAVE_STRING_H 1
-
 /* Define to 1 if you have the <libgen.h> header file. */
 #if defined(__MINGW32__)
 #define HAVE_LIBGEN_H 1

@@ -995,6 +995,9 @@ if(CURL_CA_PATH_SET AND NOT USE_OPENSSL AND NOT USE_MBEDTLS)
           "Set CURL_CA_PATH=none or enable one of those TLS backends.")
 endif()
 
+# TODO: offload these headers to the specific tests where they are needed.
+list(APPEND CURL_INCLUDES "string.h")
+
 # Check for header files
 if(NOT UNIX)
   check_include_file_concat("windows.h"      HAVE_WINDOWS_H)
@@ -1038,7 +1041,6 @@ check_include_file_concat("stdatomic.h"      HAVE_STDATOMIC_H)
 check_include_file_concat("stdbool.h"        HAVE_STDBOOL_H)
 check_include_file_concat("stdint.h"         HAVE_STDINT_H)
 check_include_file_concat("stdlib.h"         HAVE_STDLIB_H)
-check_include_file_concat("string.h"         HAVE_STRING_H)
 check_include_file_concat("strings.h"        HAVE_STRINGS_H)
 check_include_file_concat("stropts.h"        HAVE_STROPTS_H)
 check_include_file_concat("termio.h"         HAVE_TERMIO_H)

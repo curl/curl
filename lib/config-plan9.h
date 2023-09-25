@@ -123,7 +123,6 @@
 #define HAVE_STDLIB_H 1
 #define HAVE_STRCASECMP 1
 #define HAVE_STRDUP 1
-#define HAVE_STRING_H 1
 #define HAVE_STRTOK_R 1
 #define HAVE_STRTOLL 1
 #define HAVE_STRUCT_TIMEVAL 1
