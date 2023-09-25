@@ -66,6 +66,11 @@ if(BUILD_STATIC_CURL)
   set(CURLX_CFILES ../lib/dynbuf.c ../lib/base64.c)
 endif()
 
+# Compile this source separately to avoid having `stderr` overridden in this
+# file. Necessary for successfully initializing stderr in unity builds.
+# (Not necessary for the libcurltool target.)
+set_source_files_properties(tool_stderr.c PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
+
 add_executable(
   ${EXE_NAME}
   ${CURL_CFILES} ${CURLX_CFILES} ${CURL_HFILES}
