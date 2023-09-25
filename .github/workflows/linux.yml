@@ -178,7 +178,6 @@ jobs:
           container: 'andy5995/slackware-build-essential:15.0'
 
         - name: Alpine MUSL
-          install_packages: git
           configure: --enable-debug --enable-websockets --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl
           container: 'alpine:3.18'
           singleuse: --unit
@@ -193,7 +192,7 @@ jobs:
 
     - if: startsWith(matrix.build.container, 'alpine')
       run: |
-        apk add --no-cache build-base autoconf automake libtool perl openssl-dev libssh2-dev zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev heimdal-dev libpsl-dev py3-impacket py3-asn1 py3-six py3-pycryptodomex perl-time-hires openssh stunnel sudo
+        apk add --no-cache build-base autoconf automake libtool perl openssl-dev libssh2-dev zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev heimdal-dev libpsl-dev py3-impacket py3-asn1 py3-six py3-pycryptodomex perl-time-hires openssh stunnel sudo git
       name: 'install dependencies'
 
     - uses: actions/checkout@v3
