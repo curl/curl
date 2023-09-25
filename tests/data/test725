@@ -17,7 +17,7 @@ IPFS
 http
 </server>
 <setenv>
-HOME=%PWD/log
+HOME=%PWD/%LOGDIR
 </setenv>
  <name>
 IPFS with malformed gateway URL from gateway file
@@ -25,7 +25,7 @@ IPFS with malformed gateway URL from gateway file
  <command>
 ipfs://QmV5JejrpgUxnkZeFZYMxVCqAbKy3KdPXWXyuEDiMNZwUx
 </command>
-<file name="log/.ipfs/gateway" >
+<file name="%LOGDIR/.ipfs/gateway" >
 http://nonexisting,local:8080/%TESTNUMBER
 </file>
 </client>
