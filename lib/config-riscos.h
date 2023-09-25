@@ -141,9 +141,6 @@
 /* Define if you have the `signal' function. */
 #define HAVE_SIGNAL
 
-/* Define if you have the <signal.h> header file. */
-#define HAVE_SIGNAL_H
-
 /* Define if you have the `socket' function. */
 #define HAVE_SOCKET
 

@@ -233,12 +233,10 @@ curl_includes_signal="\
 #ifdef HAVE_SYS_TYPES_H
 #  include <sys/types.h>
 #endif
-#ifdef HAVE_SIGNAL_H
-#  include <signal.h>
-#endif
+include <signal.h>
 /* includes end */"
   AC_CHECK_HEADERS(
-    sys/types.h signal.h,
+    sys/types.h,
     [], [], [$curl_includes_signal])
 ])
 

@@ -42,7 +42,6 @@
 #define HAVE_PWD_H 1
 #define HAVE_SELECT 1
 #define HAVE_SIGNAL 1
-#define HAVE_SIGNAL_H 1
 #define HAVE_SOCKET 1
 #define HAVE_STRCASECMP 1
 #define HAVE_STRDUP 1

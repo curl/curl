@@ -50,9 +50,6 @@
 /* Define if you have the <netinet/in.h> header file.  */
 /* #define HAVE_NETINET_IN_H 1 */
 
-/* Define if you have the <signal.h> header file. */
-#define HAVE_SIGNAL_H 1
-
 /* Define if you have the <sys/param.h> header file.  */
 /* #define HAVE_SYS_PARAM_H 1 */
 

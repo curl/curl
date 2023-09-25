@@ -451,9 +451,6 @@
 /* Define to 1 if you have the signal function. */
 #cmakedefine HAVE_SIGNAL 1
 
-/* Define to 1 if you have the <signal.h> header file. */
-#cmakedefine HAVE_SIGNAL_H 1
-
 /* Define to 1 if you have the sigsetjmp function or macro. */
 #cmakedefine HAVE_SIGSETJMP 1
 

@@ -29,9 +29,7 @@
 #include <tchar.h>
 #endif
 
-#ifdef HAVE_SIGNAL_H
 #include <signal.h>
-#endif
 
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>

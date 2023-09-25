@@ -42,9 +42,7 @@
 #endif
 
 #include <setjmp.h>
-#ifdef HAVE_SIGNAL_H
 #include <signal.h>
-#endif
 
 #include "urldata.h"
 #include "sendf.h"

@@ -1037,7 +1037,6 @@ check_include_file("linux/tcp.h"      HAVE_LINUX_TCP_H)
 
 check_include_file_concat("poll.h"           HAVE_POLL_H)
 check_include_file_concat("pwd.h"            HAVE_PWD_H)
-check_include_file_concat("signal.h"         HAVE_SIGNAL_H)
 check_include_file_concat("stdatomic.h"      HAVE_STDATOMIC_H)
 check_include_file_concat("stdbool.h"        HAVE_STDBOOL_H)
 check_include_file_concat("stdint.h"         HAVE_STDINT_H)
@@ -1162,9 +1161,7 @@ set(CMAKE_EXTRA_INCLUDE_FILES   "")
 
 # sigaction and sigsetjmp are special. Use special mechanism for
 # detecting those, but only if previous attempt failed.
-if(HAVE_SIGNAL_H)
-  check_symbol_exists(sigaction "signal.h" HAVE_SIGACTION)
-endif()
+check_symbol_exists(sigaction "signal.h" HAVE_SIGACTION)
 
 if(NOT HAVE_SIGSETJMP)
   check_symbol_exists(sigsetjmp "setjmp.h" HAVE_MACRO_SIGSETJMP)
