@@ -668,7 +668,7 @@ CURLcode glob_match_url(char **result, char *filename, struct URLGlob *glob)
           appendlen = strlen(numbuf);
           break;
         default:
-          fprintf(stderr, "internal error: invalid pattern type (%d)\n",
+          fprintf(tool_stderr, "internal error: invalid pattern type (%d)\n",
                   (int)pat->type);
           curlx_dyn_free(&dyn);
           return CURLE_FAILED_INIT;

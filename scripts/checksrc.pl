@@ -50,6 +50,7 @@ my @ignore_line;
 my %warnings_extended = (
     'COPYRIGHTYEAR'    => 'copyright year incorrect',
     'STRERROR',        => 'strerror() detected',
+    'STDERR',          => 'stderr detected',
     );
 
 my %warnings = (
@@ -726,6 +727,18 @@ sub scanfile {
                     checkwarn("STRERROR",
                               $line, length($1), $file, $ol,
                               "use of $2 is banned");
+                }
+            }
+        }
+        if($warnings{"STDERR"}) {
+            # scan for use of banned stderr. This is not a BANNEDFUNC to
+            # allow for individual enable/disable of this warning.
+            if($l =~ /^([^\"-]*\W)(stderr)[^\"_]/x) {
+                if($1 !~ /^ *\#/) {
+                    # skip preprocessor lines
+                    checkwarn("STDERR",
+                              $line, length($1), $file, $ol,
+                              "use of $2 is banned (use tool_stderr instead)");
                 }
             }
         }

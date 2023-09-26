@@ -274,7 +274,7 @@ void progressbarinit(struct ProgressData *bar,
   else if(bar->width > MAX_BARLENGTH)
     bar->width = MAX_BARLENGTH;
 
-  bar->out = stderr;
+  bar->out = tool_stderr;
   bar->tick = 150;
   bar->barmove = 1;
 }
