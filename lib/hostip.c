@@ -61,7 +61,11 @@
 #include "doh.h"
 #include "warnless.h"
 #include "strcase.h"
+
+#ifdef USE_ALARM_TIMEOUT
 #include "easy_lock.h"
+#endif
+
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
