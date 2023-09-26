@@ -241,11 +241,6 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
       return HYPER_ITER_BREAK;
     }
   }
-  if(k->ignorebody)
-    return HYPER_ITER_CONTINUE;
-  if(0 == len)
-    return HYPER_ITER_CONTINUE;
-  Curl_debug(data, CURLINFO_DATA_IN, buf, len);
   result = Curl_client_write(data, CLIENTWRITE_BODY, buf, len);
 
   if(result) {
@@ -253,12 +248,6 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
     return HYPER_ITER_BREAK;
   }
 
-  data->req.bytecount += len;
-  result = Curl_pgrsSetDownloadCounter(data, data->req.bytecount);
-  if(result) {
-    data->state.hresult = result;
-    return HYPER_ITER_BREAK;
-  }
   return HYPER_ITER_CONTINUE;
 }
 

@@ -75,7 +75,7 @@ void Curl_client_cleanup(struct Curl_easy *data);
  * Other uses: monitoring of download progress
  *
  * Writers in the chain are order by their `phase`. First come all
- * writers in CURL_CW_START, followed by any in CURL_CW_TRANSFER_DECODE,
+ * writers in CURL_CW_RAW, followed by any in CURL_CW_TRANSFER_DECODE,
  * followed by any in CURL_CW_PROTOCOL, etc.
  *
  * When adding a writer, it is inserted as first in its phase. This means
@@ -90,7 +90,7 @@ void Curl_client_cleanup(struct Curl_easy *data);
 
 /* Phase a writer operates at. */
 typedef enum {
-  CURL_CW_START,  /* raw data written, before any decoding */
+  CURL_CW_RAW,  /* raw data written, before any decoding */
   CURL_CW_TRANSFER_DECODE, /* remove transfer-encodings */
   CURL_CW_PROTOCOL, /* after transfer, but before content decoding */
   CURL_CW_CONTENT_DECODE, /* remove content-encodings */

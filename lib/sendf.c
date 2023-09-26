@@ -50,6 +50,7 @@
 #include "strdup.h"
 #include "http2.h"
 #include "headers.h"
+#include "progress.h"
 #include "ws.h"
 
 /* The last 3 #include files should be in this order */
@@ -530,8 +531,12 @@ static CURLcode cw_download_write(struct Curl_easy *data,
                                   struct Curl_cwriter *writer, int type,
                                   const char *buf, size_t nbytes)
 {
-  if((type & CLIENTWRITE_BODY) && data->req.ignorebody)
-    return CURLE_OK;
+  if(type & CLIENTWRITE_BODY) {
+    data->req.bytecount += nbytes;
+    Curl_pgrsSetDownloadCounter(data, data->req.bytecount);
+    if(data->req.ignorebody)
+      return CURLE_OK;
+  }
   return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
 }
 
@@ -540,6 +545,27 @@ static const struct Curl_cwtype cw_download = {
   NULL,
   Curl_cwriter_def_init,
   cw_download_write,
+  Curl_cwriter_def_close,
+  sizeof(struct Curl_cwriter)
+};
+
+/* RAW client writer in phase CURL_CW_RAW that
+ * enabled tracing of raw data. */
+static CURLcode cw_raw_write(struct Curl_easy *data,
+                             struct Curl_cwriter *writer, int type,
+                             const char *buf, size_t nbytes)
+{
+  if(type & CLIENTWRITE_BODY && data->set.verbose && !data->req.ignorebody) {
+    Curl_debug(data, CURLINFO_DATA_IN, (char *)buf, nbytes);
+  }
+  return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
+}
+
+static const struct Curl_cwtype cw_raw = {
+  "raw",
+  NULL,
+  Curl_cwriter_def_init,
+  cw_raw_write,
   Curl_cwriter_def_close,
   sizeof(struct Curl_cwriter)
 };
@@ -604,7 +630,14 @@ static CURLcode do_init_stack(struct Curl_easy *data)
   result = Curl_cwriter_create(&writer, data, &cw_download, CURL_CW_PROTOCOL);
   if(result)
     return result;
+  result = Curl_cwriter_add(data, writer);
+  if(result) {
+    Curl_cwriter_free(data, writer);
+  }
 
+  result = Curl_cwriter_create(&writer, data, &cw_raw, CURL_CW_RAW);
+  if(result)
+    return result;
   result = Curl_cwriter_add(data, writer);
   if(result) {
     Curl_cwriter_free(data, writer);
