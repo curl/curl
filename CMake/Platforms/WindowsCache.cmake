@@ -81,6 +81,8 @@ if(NOT UNIX)
     set(HAVE_TERMIO_H 0)
     set(HAVE_UTIME_H 0)
 
+    set(HAVE_FSEEKO 0)
+    set(HAVE__FSEEKI64 1)
     set(HAVE_SOCKET 1)
     set(HAVE_SELECT 1)
     set(HAVE_STRDUP 1)
