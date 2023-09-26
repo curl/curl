@@ -151,12 +151,12 @@ static void zfree_func(voidpf opaque, voidpf ptr)
 /* Decompress and send to stdout a gzip-compressed buffer */
 void hugehelp(void)
 {
-  unsigned char* buf;
-  int status,headerlen;
+  unsigned char *buf;
+  int status, headerlen;
   z_stream z;
 
   /* Make sure no gzip options are set */
-  if (hugehelpgz[3] & 0xfe)
+  if(hugehelpgz[3] & 0xfe)
     return;
 
   headerlen = 10;
@@ -166,18 +166,18 @@ void hugehelp(void)
   z.avail_in = (unsigned int)(sizeof(hugehelpgz) - headerlen);
   z.next_in = (unsigned char *)hugehelpgz + headerlen;
 
-  if (inflateInit2(&z, -MAX_WBITS) != Z_OK)
+  if(inflateInit2(&z, -MAX_WBITS) != Z_OK)
     return;
 
   buf = malloc(BUF_SIZE);
-  if (buf) {
+  if(buf) {
     while(1) {
       z.avail_out = BUF_SIZE;
       z.next_out = buf;
       status = inflate(&z, Z_SYNC_FLUSH);
-      if (status == Z_OK || status == Z_STREAM_END) {
+      if(status == Z_OK || status == Z_STREAM_END) {
         fwrite(buf, BUF_SIZE - z.avail_out, 1, stdout);
-        if (status == Z_STREAM_END)
+        if(status == Z_STREAM_END)
           break;
       }
       else
