@@ -480,8 +480,8 @@ typedef int (*curl_push_callback)(CURL *parent,
  *
  * Returns: None
  */
-typedef void (*curl_goaway_callback)(uint32_t error_code,
-                                  int32_t last_stream_id,
+typedef void (*curl_goaway_callback)(unsigned int error_code,
+                                  int last_stream_id,
                                   void *userp);
 #ifdef __cplusplus
 } /* end of extern "C" */
