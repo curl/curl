@@ -62,15 +62,6 @@ struct Curl_multi *Curl_multi_handle(int hashsize, int chashsize,
 /* mask for checking if read and/or write is set for index x */
 #define GETSOCK_MASK_RW(x) (GETSOCK_READSOCK(x)|GETSOCK_WRITESOCK(x))
 
-#ifdef DEBUGBUILD
- /*
-  * Curl_multi_dump is not a stable public function, this is only meant to
-  * allow easier tracking of the internal handle's state and what sockets
-  * they use. Only for research and development DEBUGBUILD enabled builds.
-  */
-void Curl_multi_dump(struct Curl_multi *multi);
-#endif
-
 /* Return the value of the CURLMOPT_MAX_HOST_CONNECTIONS option */
 size_t Curl_multi_max_host_connections(struct Curl_multi *multi);
 
