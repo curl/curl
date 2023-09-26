@@ -1251,6 +1251,13 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
         infof(data, "received GOAWAY, error=%d, last_stream=%u",
                     ctx->goaway_error, ctx->last_stream_id);
         Curl_multi_connchanged(data->multi);
+        if(data->multi->goaway_cb) {
+          Curl_set_in_callback(data, true);
+          data->multi->goaway_cb(ctx->goaway_error,
+                                 ctx->last_stream_id,
+                                 data->multi->goaway_userp);
+          Curl_set_in_callback(data, false);
+        }
       }
       break;
     default:

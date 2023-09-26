@@ -112,6 +112,10 @@ struct Curl_multi {
   curl_push_callback push_cb;
   void *push_userp;
 
+  /* callback function and user data pointer for goaway callback */
+  curl_goaway_callback goaway_cb;
+  void *goaway_userp;
+
   /* Hostname cache */
   struct Curl_hash hostcache;
 

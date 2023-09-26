@@ -3357,6 +3357,12 @@ CURLMcode curl_multi_setopt(struct Curl_multi *multi,
       multi->max_concurrent_streams = curlx_sltoui(streams);
     }
     break;
+  case CURLMOPT_GOAWAY_CALLBACK:
+    multi->goaway_cb = va_arg(param, curl_goaway_callback);
+    break;
+  case CURLMOPT_GOAWAY_DATA:
+    multi->goaway_userp = va_arg(param, void *);
+    break;
   default:
     res = CURLM_UNKNOWN_OPTION;
     break;

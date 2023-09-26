@@ -55,6 +55,7 @@ check_PROGRAMS = \
   http2-pushinmemory \
   http2-serverpush \
   http2-upload \
+  http2-goaway \
   http3 \
   http3-present \
   httpcustomheader \

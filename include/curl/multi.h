@@ -399,6 +399,12 @@ typedef enum {
   /* maximum number of concurrent streams to support on a connection */
   CURLOPT(CURLMOPT_MAX_CONCURRENT_STREAMS, CURLOPTTYPE_LONG, 16),
 
+  /* This is the goaway callback function pointer */
+  CURLOPT(CURLMOPT_GOAWAY_CALLBACK, CURLOPTTYPE_FUNCTIONPOINT, 17),
+
+  /* This is the argument passed to the goaway callback */
+  CURLOPT(CURLMOPT_GOAWAY_DATA, CURLOPTTYPE_OBJECTPOINT, 18),
+
   CURLMOPT_LASTENTRY /* the last unused */
 } CURLMoption;
 
@@ -464,6 +470,19 @@ typedef int (*curl_push_callback)(CURL *parent,
                                   struct curl_pushheaders *headers,
                                   void *userp);
 
+/*
+ * Name: curl_goaway_callback
+ *
+ * Desc: This callback gets called when HTTP2 connection received
+ *       GOAWAY frame from peer. The Application may interest on this
+ *       event to trigger clean up functions or prepare new fresh
+ *       connection.
+ *
+ * Returns: None
+ */
+typedef void (*curl_goaway_callback)(uint32_t error_code,
+                                  int32_t last_stream_id,
+                                  void *userp);
 #ifdef __cplusplus
 } /* end of extern "C" */
 #endif
