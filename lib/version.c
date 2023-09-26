@@ -35,7 +35,6 @@
 #include "vssh/ssh.h"
 #include "vquic/vquic.h"
 #include "curl_printf.h"
-#include "easy_lock.h"
 
 #ifdef USE_ARES
 #  if defined(CURL_STATICLIB) && !defined(CARES_STATICLIB) &&   \
