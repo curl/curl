@@ -161,7 +161,7 @@ static int setup(CURL *hnd, const char *url)
   return 0; /* all is good */
 }
 
-void on_goaway_received(unsigned int error_code,
+static void on_goaway_received(unsigned int error_code,
                         int lastStreamId,
                         void* clientp) {
     int* num_goaway_received = (int*)clientp;
