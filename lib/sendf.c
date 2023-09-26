@@ -57,6 +57,9 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+
+static CURLcode do_init_stack(struct Curl_easy *data);
+
 #if defined(CURL_DO_LINEEND_CONV) && !defined(CURL_DISABLE_FTP)
 /*
  * convert_lineends() changes CRLF (\r\n) end-of-line markers to a single LF
@@ -387,6 +390,8 @@ static CURLcode chop_write(struct Curl_easy *data,
 CURLcode Curl_client_write(struct Curl_easy *data,
                            int type, char *buf, size_t blen)
 {
+  CURLcode result;
+
 #if !defined(CURL_DISABLE_FTP) && defined(CURL_DO_LINEEND_CONV)
   /* FTP data may need conversion. */
   if((type & CLIENTWRITE_BODY) &&
@@ -403,13 +408,14 @@ CURLcode Curl_client_write(struct Curl_easy *data,
   /* INFO is only INFO */
   DEBUGASSERT(!(type & CLIENTWRITE_INFO) || (type == CLIENTWRITE_INFO));
 
-  if((type & CLIENTWRITE_BODY) && data->req.ignorebody)
-    return CURLE_OK;
+  if(!data->req.writer_stack) {
+    result = do_init_stack(data);
+    if(result)
+      return result;
+    DEBUGASSERT(data->req.writer_stack);
+  }
 
-  if(data->req.writer_stack)
-    return Curl_cwriter_write(data, data->req.writer_stack, type, buf, blen);
-  else
-    return chop_write(data, type, FALSE, buf, blen);
+  return Curl_cwriter_write(data, data->req.writer_stack, type, buf, blen);
 }
 
 CURLcode Curl_client_unpause(struct Curl_easy *data)
@@ -504,16 +510,36 @@ static CURLcode cw_client_write(struct Curl_easy *data,
                                 const char *buf, size_t nbytes)
 {
   (void)writer;
-  if(!nbytes || ((type & CLIENTWRITE_BODY) && data->req.ignorebody))
+  if(!nbytes)
     return CURLE_OK;
   return chop_write(data, type, FALSE, (char *)buf, nbytes);
 }
 
 static const struct Curl_cwtype cw_client = {
-  NULL,
+  "client",
   NULL,
   Curl_cwriter_def_init,
   cw_client_write,
+  Curl_cwriter_def_close,
+  sizeof(struct Curl_cwriter)
+};
+
+/* Download client writer in phase CURL_CW_PROTOCOL that
+ * sees the "real" download body data. */
+static CURLcode cw_download_write(struct Curl_easy *data,
+                                  struct Curl_cwriter *writer, int type,
+                                  const char *buf, size_t nbytes)
+{
+  if((type & CLIENTWRITE_BODY) && data->req.ignorebody)
+    return CURLE_OK;
+  return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
+}
+
+static const struct Curl_cwtype cw_download = {
+  "download",
+  NULL,
+  Curl_cwriter_def_init,
+  cw_download_write,
   Curl_cwriter_def_close,
   sizeof(struct Curl_cwriter)
 };
@@ -566,9 +592,24 @@ size_t Curl_cwriter_count(struct Curl_easy *data, Curl_cwriter_phase phase)
 
 static CURLcode do_init_stack(struct Curl_easy *data)
 {
+  struct Curl_cwriter *writer;
+  CURLcode result;
+
   DEBUGASSERT(!data->req.writer_stack);
-  return Curl_cwriter_create(&data->req.writer_stack,
-                                   data, &cw_client, CURL_CW_CLIENT);
+  result = Curl_cwriter_create(&data->req.writer_stack,
+                               data, &cw_client, CURL_CW_CLIENT);
+  if(result)
+    return result;
+
+  result = Curl_cwriter_create(&writer, data, &cw_download, CURL_CW_PROTOCOL);
+  if(result)
+    return result;
+
+  result = Curl_cwriter_add(data, writer);
+  if(result) {
+    Curl_cwriter_free(data, writer);
+  }
+  return result;
 }
 
 CURLcode Curl_cwriter_add(struct Curl_easy *data,
