@@ -124,7 +124,7 @@ stages:
       vmImage: 'ubuntu-latest'
     steps:
     - script: autoreconf -fi && ./configure --without-ssl
-      displayName: 'configure $(name)'
+      displayName: 'configure'
 
     - script: make && ./maketgz 99.98.97
       displayName: 'make tarball'
