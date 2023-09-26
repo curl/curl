@@ -385,9 +385,7 @@ static CURLcode chop_write(struct Curl_easy *data,
    the future to leave the original data alone.
  */
 CURLcode Curl_client_write(struct Curl_easy *data,
-                           int type,
-                           char *ptr,
-                           size_t len)
+                           int type, char *buf, size_t blen)
 {
 #if !defined(CURL_DISABLE_FTP) && defined(CURL_DO_LINEEND_CONV)
   /* FTP data may need conversion. */
@@ -395,7 +393,7 @@ CURLcode Curl_client_write(struct Curl_easy *data,
      (data->conn->handler->protocol & PROTO_FAMILY_FTP) &&
      data->conn->proto.ftpc.transfertype == 'A') {
     /* convert end-of-line markers */
-    len = convert_lineends(data, ptr, len);
+    blen = convert_lineends(data, buf, blen);
   }
 #endif
   /* it is one of those, at least */
@@ -405,14 +403,13 @@ CURLcode Curl_client_write(struct Curl_easy *data,
   /* INFO is only INFO */
   DEBUGASSERT(!(type & CLIENTWRITE_INFO) || (type == CLIENTWRITE_INFO));
 
-  if(type == CLIENTWRITE_BODY) {
-    if(data->req.ignorebody)
-      return CURLE_OK;
+  if((type & CLIENTWRITE_BODY) && data->req.ignorebody)
+    return CURLE_OK;
 
-    if(data->req.writer_stack)
-      return Curl_cwriter_write(data, data->req.writer_stack, ptr, len);
-  }
-  return chop_write(data, type, FALSE, ptr, len);
+  if(data->req.writer_stack)
+    return Curl_cwriter_write(data, data->req.writer_stack, type, buf, blen);
+  else
+    return chop_write(data, type, FALSE, buf, blen);
 }
 
 CURLcode Curl_client_unpause(struct Curl_easy *data)
@@ -469,14 +466,14 @@ void Curl_client_cleanup(struct Curl_easy *data)
 /* Write data using an unencoding writer stack. "nbytes" is not
    allowed to be 0. */
 CURLcode Curl_cwriter_write(struct Curl_easy *data,
-                             struct Curl_cwriter *writer,
+                             struct Curl_cwriter *writer, int type,
                              const char *buf, size_t nbytes)
 {
   if(!nbytes)
     return CURLE_OK;
   if(!writer)
     return CURLE_WRITE_ERROR;
-  return writer->cwt->do_write(data, writer, buf, nbytes);
+  return writer->cwt->do_write(data, writer, type, buf, nbytes);
 }
 
 CURLcode Curl_cwriter_def_init(struct Curl_easy *data,
@@ -488,10 +485,10 @@ CURLcode Curl_cwriter_def_init(struct Curl_easy *data,
 }
 
 CURLcode Curl_cwriter_def_write(struct Curl_easy *data,
-                                struct Curl_cwriter *writer,
+                                struct Curl_cwriter *writer, int type,
                                 const char *buf, size_t nbytes)
 {
-  return Curl_cwriter_write(data, writer->next, buf, nbytes);
+  return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
 }
 
 void Curl_cwriter_def_close(struct Curl_easy *data,
@@ -503,13 +500,13 @@ void Curl_cwriter_def_close(struct Curl_easy *data,
 
 /* Real client writer to installed callbacks. */
 static CURLcode cw_client_write(struct Curl_easy *data,
-                                struct Curl_cwriter *writer,
+                                struct Curl_cwriter *writer, int type,
                                 const char *buf, size_t nbytes)
 {
   (void)writer;
-  if(!nbytes || data->req.ignorebody)
+  if(!nbytes || ((type & CLIENTWRITE_BODY) && data->req.ignorebody))
     return CURLE_OK;
-  return chop_write(data, CLIENTWRITE_BODY, FALSE, (char *)buf, nbytes);
+  return chop_write(data, type, FALSE, (char *)buf, nbytes);
 }
 
 static const struct Curl_cwtype cw_client = {

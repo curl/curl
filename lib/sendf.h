@@ -104,7 +104,7 @@ struct Curl_cwtype {
   CURLcode (*do_init)(struct Curl_easy *data,
                       struct Curl_cwriter *writer);
   CURLcode (*do_write)(struct Curl_easy *data,
-                       struct Curl_cwriter *writer,
+                       struct Curl_cwriter *writer, int type,
                        const char *buf, size_t nbytes);
   void (*do_close)(struct Curl_easy *data,
                    struct Curl_cwriter *writer);
@@ -152,7 +152,7 @@ CURLcode Curl_cwriter_add(struct Curl_easy *data,
  * checks for NULL writer.
  */
 CURLcode Curl_cwriter_write(struct Curl_easy *data,
-                            struct Curl_cwriter *writer,
+                            struct Curl_cwriter *writer, int type,
                             const char *buf, size_t nbytes);
 
 /**
@@ -162,7 +162,7 @@ CURLcode Curl_cwriter_write(struct Curl_easy *data,
 CURLcode Curl_cwriter_def_init(struct Curl_easy *data,
                                struct Curl_cwriter *writer);
 CURLcode Curl_cwriter_def_write(struct Curl_easy *data,
-                                struct Curl_cwriter *writer,
+                                struct Curl_cwriter *writer, int type,
                                 const char *buf, size_t nbytes);
 void Curl_cwriter_def_close(struct Curl_easy *data,
                             struct Curl_cwriter *writer);
