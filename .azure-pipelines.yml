@@ -124,7 +124,7 @@ stages:
       vmImage: 'ubuntu-latest'
     steps:
     - script: autoreconf -fi && ./configure --without-ssl
-      displayName: 'configure $(name)'
+      displayName: 'configure'
 
     - script: make && ./maketgz 99.98.97
       displayName: 'make tarball'
@@ -204,7 +204,7 @@ stages:
   variables:
     agent.preferPowerShellOnContainers: true
   jobs:
-  - job: msys
+  - job: msys2
     # define defaults to make sure variables are always expanded/replaced
     variables:
       container_img: ''
@@ -216,64 +216,64 @@ stages:
       vmImage: 'windows-2019'
     strategy:
       matrix:
-        v2_mingw32_openssl:
+        mingw32_openssl:
           name: 32-bit OpenSSL/libssh2
           container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw32:ltsc2019
           container_cmd: C:\msys64\usr\bin\sh
           prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-i686-libssh2
-          configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-debug --enable-werror --with-libssh2 --with-openssl
+          configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32     --prefix=/mingw32 --enable-debug --enable-werror --with-libssh2 --with-openssl
           tests: "~571"
-        v2_mingw64_openssl:
+        mingw64_openssl:
           name: 64-bit OpenSSL/libssh2
           container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw64:ltsc2019
           container_cmd: C:\msys64\usr\bin\sh
           prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-x86_64-libssh2
           configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-debug --enable-werror --with-libssh2 --with-openssl
           tests: "~571"
-        v2_mingw64_libssh:
+        mingw64_libssh:
           name: 64-bit OpenSSL/libssh
           container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw64:ltsc2019
           container_cmd: C:\msys64\usr\bin\sh
           prepare: pacman -S --needed --noconfirm --noprogressbar libssh-devel mingw-w64-x86_64-libssh
           configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-debug --enable-werror --with-libssh --with-openssl
           tests: "~571 ~614"
-        v1_mingw32:
+        mingw32:
           name: 32-bit w/o zlib
-          container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys1-mingw32:ltsc2019
-          container_cmd: C:\MinGW\msys\1.0\bin\sh
-          configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-debug --enable-werror --without-zlib --without-ssl
+          container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw32:ltsc2019
+          container_cmd: C:\msys64\usr\bin\sh
+          configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32     --prefix=/mingw32 --enable-debug --enable-werror --without-zlib --without-ssl
           tests: "!203 !1143"
-        v1_mingw64:
+        mingw64:
           name: 64-bit w/o zlib
-          container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys1-mingw64:ltsc2019
-          container_cmd: C:\MinGW\msys\1.0\bin\sh
+          container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw64:ltsc2019
+          container_cmd: C:\msys64\usr\bin\sh
           configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-debug --enable-werror --without-zlib --without-ssl
           tests: "!203 !1143"
-        v2_mingw32_schannel:
+        mingw32_schannel:
           name: 32-bit Schannel/SSPI/WinIDN/libssh2
           container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw32:ltsc2019
           container_cmd: C:\msys64\usr\bin\sh
           prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-i686-libssh2
-          configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-debug --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2
+          configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32     --prefix=/mingw32 --enable-debug --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2
           tests: "~571"
-        v2_mingw64_schannel:
+        mingw64_schannel:
           name: 64-bit Schannel/SSPI/WinIDN/libssh2
           container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw64:ltsc2019
           container_cmd: C:\msys64\usr\bin\sh
           prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-x86_64-libssh2
           configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-debug --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2
           tests: "~571"
-        v1_mingw32_schannel:
+        mingw32_schannel_nozlib:
           name: 32-bit Schannel/SSPI/WinIDN w/o zlib
-          container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys1-mingw32:ltsc2019
-          container_cmd: C:\MinGW\msys\1.0\bin\sh
-          configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-debug --enable-werror --enable-sspi --with-schannel --with-winidn --without-zlib
+          container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw32:ltsc2019
+          container_cmd: C:\msys64\usr\bin\sh
+          configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32     --prefix=/mingw32 --enable-debug --enable-werror --enable-sspi --with-schannel --with-winidn --without-zlib
           tests: "!203 !1143"
-        v1_mingw64_schannel:
+        mingw64_schannel_nozlib:
           name: 64-bit Schannel/SSPI/WinIDN w/o zlib
-          container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys1-mingw64:ltsc2019
-          container_cmd: C:\MinGW\msys\1.0\bin\sh
-          configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64  --enable-debug --enable-werror --enable-sspi --with-schannel --with-winidn --without-zlib
+          container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw64:ltsc2019
+          container_cmd: C:\msys64\usr\bin\sh
+          configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-debug --enable-werror --enable-sspi --with-schannel --with-winidn --without-zlib
           tests: "!203 !1143"
     container:
       image: $(container_img)
