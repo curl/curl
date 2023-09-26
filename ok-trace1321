@@ -1,0 +1,135 @@
+12:30:15.635445 == Info: !!! WARNING !!!
+12:30:15.635674 == Info: This is a debug build of libcurl, do not use in production.
+12:30:15.635705 == Info: STATE: INIT => CONNECT handle 0x7fd19700b608; line 1942
+12:30:15.635783 == Info: Added connection 0. The cache now contains 1 members
+12:30:15.635804 == Info: STATE: CONNECT => CONNECTING handle 0x7fd19700b608; line 1995
+12:30:15.636824 == Info:   Trying 127.0.0.1:51548...
+12:30:15.636950 == Info: Connected to 127.0.0.1 (127.0.0.1) port 51548
+12:30:15.636959 == Info: CONNECT tunnel: HTTP/1.1 negotiated
+12:30:15.636970 == Info: allocate connect buffer
+12:30:15.636975 == Info: Establish HTTP proxy tunnel to imap.1321:51546
+12:30:15.637011 == Info: Server auth using Basic with user 'user'
+12:30:15.637035 => Send header, 117 bytes (0x75)
+0000: CONNECT imap.1321:51546 HTTP/1.1
+0022: Host: imap.1321:51546
+0039: User-Agent: curl/8.4.0-DEV
+0055: Proxy-Connection: Keep-Alive
+0073: 
+12:30:15.637829 <= Recv header, 33 bytes (0x21)
+0000: HTTP/1.1 200 Mighty fine indeed
+12:30:15.637844 == Info: Curl_client_write(type=1c len=33)
+12:30:15.637884 <= Recv header, 19 bytes (0x13)
+0000: imap: sure hit me
+12:30:15.637895 == Info: Curl_client_write(type=14 len=19)
+12:30:15.637902 <= Recv header, 2 bytes (0x2)
+0000: 
+12:30:15.637910 == Info: Curl_client_write(type=14 len=2)
+12:30:15.637914 == Info: CONNECT phase completed
+12:30:15.637916 == Info: CONNECT tunnel established, response 200
+12:30:15.637927 == Info: STATE: CONNECTING => PROTOCONNECT handle 0x7fd19700b608; line 2103
+12:30:15.637936 == Info: IMAP 0x7fd19700a6a0 state change from STOP to SERVERGREET
+12:30:15.637946 == Info: STATE: PROTOCONNECT => PROTOCONNECTING handle 0x7fd19700b608; line 2130
+12:30:16.141888 <= Recv header, 28 bytes (0x1c)
+0000:         _   _ ____  _     
+12:30:16.141912 == Info: Curl_client_write(type=2 len=28)
+12:30:16.141918 <= Recv header, 28 bytes (0x1c)
+0000:     ___| | | |  _ \| |    
+12:30:16.141931 == Info: Curl_client_write(type=2 len=28)
+12:30:16.141934 <= Recv header, 28 bytes (0x1c)
+0000:    / __| | | | |_) | |    
+12:30:16.141947 == Info: Curl_client_write(type=2 len=28)
+12:30:16.141950 <= Recv header, 28 bytes (0x1c)
+0000:   | (__| |_| |  _ {| |___ 
+12:30:16.141961 == Info: Curl_client_write(type=2 len=28)
+12:30:16.141964 <= Recv header, 28 bytes (0x1c)
+0000:    \___|\___/|_| \_\_____|
+12:30:16.141976 == Info: Curl_client_write(type=2 len=28)
+12:30:16.141979 <= Recv header, 38 bytes (0x26)
+0000: * OK curl IMAP server ready to serve
+12:30:16.141991 == Info: Curl_client_write(type=2 len=38)
+12:30:16.142016 => Send header, 17 bytes (0x11)
+0000: A001 CAPABILITY
+12:30:16.142029 == Info: IMAP 0x7fd19700a6a0 state change from SERVERGREET to CAPABILITY
+12:30:16.142780 <= Recv header, 18 bytes (0x12)
+0000: A001 BAD Command
+12:30:16.142796 == Info: Curl_client_write(type=2 len=18)
+12:30:16.142816 => Send header, 24 bytes (0x18)
+0000: A002 LOGIN user secret
+12:30:16.142833 == Info: IMAP 0x7fd19700a6a0 state change from CAPABILITY to LOGIN
+12:30:16.143549 <= Recv header, 25 bytes (0x19)
+0000: A002 OK LOGIN completed
+12:30:16.143565 == Info: Curl_client_write(type=2 len=25)
+12:30:16.143570 == Info: IMAP 0x7fd19700a6a0 state change from LOGIN to STOP
+12:30:16.143574 == Info: STATE: PROTOCONNECTING => DO handle 0x7fd19700b608; line 2149
+12:30:16.143585 == Info: IMAP URL parameter 'MAILINDEX' = '1'
+12:30:16.143589 == Info: DO phase starts
+12:30:16.143603 => Send header, 18 bytes (0x12)
+0000: A003 SELECT 1321
+12:30:16.143619 == Info: IMAP 0x7fd19700a6a0 state change from STOP to SELECT
+12:30:16.143628 == Info: STATE: DO => DOING handle 0x7fd19700b608; line 2216
+12:30:16.144681 <= Recv header, 14 bytes (0xe)
+0000: * 172 EXISTS
+12:30:16.144731 == Info: Curl_client_write(type=2 len=14)
+12:30:16.145205 <= Recv header, 12 bytes (0xc)
+0000: * 1 RECENT
+12:30:16.145253 == Info: Curl_client_write(type=2 len=12)
+12:30:16.145258 == Info: Curl_pp_readresp_ 45 bytes of trailing server response left
+12:30:16.145267 <= Recv header, 45 bytes (0x2d)
+0000: * OK [UNSEEN 12] Message 12 is first unseen
+12:30:16.145299 == Info: Curl_client_write(type=2 len=45)
+12:30:16.145547 <= Recv header, 42 bytes (0x2a)
+0000: * OK [UIDVALIDITY 3857529045] UIDs valid
+12:30:16.145652 == Info: Curl_client_write(type=2 len=42)
+12:30:16.145656 == Info: Curl_pp_readresp_ 40 bytes of trailing server response left
+12:30:16.145670 <= Recv header, 40 bytes (0x28)
+0000: * OK [UIDNEXT 4392] Predicted next UID
+12:30:16.145709 == Info: Curl_client_write(type=2 len=40)
+12:30:16.146049 <= Recv header, 52 bytes (0x34)
+0000: * FLAGS (\Answered \Flagged \Deleted \Seen \Draft)
+12:30:16.146065 == Info: Curl_client_write(type=2 len=52)
+12:30:16.146070 == Info: Curl_pp_readresp_ 51 bytes of trailing server response left
+12:30:16.146076 <= Recv header, 51 bytes (0x33)
+0000: * OK [PERMANENTFLAGS (\Deleted \Seen \*)] Limited
+12:30:16.146087 == Info: Curl_client_write(type=2 len=51)
+12:30:16.146205 <= Recv header, 39 bytes (0x27)
+0000: A003 OK [READ-WRITE] SELECT completed
+12:30:16.146217 == Info: Curl_client_write(type=2 len=39)
+12:30:16.146233 => Send header, 21 bytes (0x15)
+0000: A004 FETCH 1 BODY[]
+12:30:16.146242 == Info: IMAP 0x7fd19700a6a0 state change from SELECT to FETCH
+12:30:16.147169 <= Recv header, 24 bytes (0x18)
+0000: * 1 FETCH (BODY[] {71}
+12:30:16.147180 == Info: Curl_client_write(type=2 len=24)
+12:30:16.147190 == Info: Found 71 bytes to download
+12:30:16.147193 == Info: IMAP 0x7fd19700a6a0 state change from FETCH to STOP
+12:30:16.147197 == Info: DO phase is complete
+12:30:16.147201 == Info: STATE: DOING => DID handle 0x7fd19700b608; line 2297
+12:30:16.147206 == Info: STATE: DID => PERFORMING handle 0x7fd19700b608; line 2345
+12:30:16.147364 == Info: Curl_client_write(type=1 len=20)
+12:30:16.147367 <= Recv data, 20 bytes (0x14)
+0000: From: me@somewhere
+12:30:16.147511 == Info: Curl_client_write(type=1 len=18)
+12:30:16.147514 <= Recv data, 18 bytes (0x12)
+0000: To: fake@nowhere
+12:30:16.147804 == Info: Curl_client_write(type=1 len=8)
+12:30:16.147807 <= Recv data, 8 bytes (0x8)
+0000: 
+0002: body
+12:30:16.148041 == Info: Curl_client_write(type=1 len=6)
+12:30:16.148044 <= Recv data, 6 bytes (0x6)
+0000: 
+0002: --
+12:30:16.148272 == Info: Curl_client_write(type=1 len=19)
+12:30:16.148275 <= Recv data, 19 bytes (0x13)
+0000:   yours sincerely
+12:30:16.148287 == Info: STATE: PERFORMING => DONE handle 0x7fd19700b608; line 2544
+12:30:16.148291 == Info: multi_done[DONE]: status: 0 prem: 0 done: 0
+12:30:16.148296 == Info: IMAP 0x7fd19700a6a0 state change from STOP to FETCH_FINAL
+12:30:16.148307 <= Recv header, 3 bytes (0x3)
+0000: )
+12:30:16.148314 == Info: Curl_client_write(type=2 len=3)
+12:30:16.148431 <= Recv header, 25 bytes (0x19)
+0000: A004 OK FETCH completed
+12:30:16.148445 == Info: Curl_client_write(type=2 len=25)
+12:30:16.148450 == Info: IMAP 0x7fd19700a6a0 state change from FETCH_FINAL to STOP
+12:30:16.148802 == Info: Connection #0 to host 127.0.0.1 left intact
