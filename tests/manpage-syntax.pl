@@ -93,6 +93,7 @@ sub allsymbols {
 sub scanmanpage {
     my ($file) = @_;
     my $reqex = 0;
+    my $inseealso = 0;
     my $inex = 0;
     my $insynop = 0;
     my $exsize = 0;
@@ -101,6 +102,8 @@ sub scanmanpage {
     my $optpage = 0; # option or function
     my @sh;
     my $SH="";
+    my @separators;
+    my @sepline;
 
     open(my $m, "<", "$file") || die "no such file: $file";
     if($file =~ /[\/\\](CURL|curl_)[^\/\\]*.3/) {
@@ -127,9 +130,38 @@ sub scanmanpage {
             $insynop = 0;
             $inex = 1;
         }
+        elsif($_ =~ /^\.SH \"SEE ALSO\"/i) {
+            $inseealso = 1;
+        }
         elsif($_ =~ /^\.SH/i) {
             $insynop = 0;
             $inex = 0;
+        }
+        elsif($inseealso) {
+            if($_ =~ /^\.BR (.*)/i) {
+                my $f = $1;
+                if($f =~ /^(lib|)curl/i) {
+                    if($f =~ s/([a-z_0-9-]*) \([13]\)([, ]*)//i) {
+                        push @separators, $2;
+                        push @sepline, $line;
+
+                    }
+                    if($f !~ /^ *$/) {
+                        print STDERR "$file:$line bad formatting of SEE ALSO item\n";
+                        $errors++;
+                    }
+                }
+                else {
+                    if($f =~ /.*(, *)\z/) {
+                        push @separators, $1;
+                        push @sepline, $line;
+                    }
+                    else {
+                        push @separators, " ";
+                        push @sepline, $line;
+                    }
+                }
+            }
         }
         elsif($inex)  {
             $exsize++;
@@ -201,6 +233,26 @@ sub scanmanpage {
         $line++;
     }
     close($m);
+
+    if(@separators) {
+        # all except the last one need comma
+        for(0 .. $#separators - 1) {
+            my $l = $_;
+            my $sep = $separators[$l];
+            if($sep ne ",") {
+                printf STDERR "$file:%d: bad not-last SEE ALSO separator: '%s'\n",
+                    $sepline[$l], $sep;
+                $errors++;
+            }
+        }
+        # the last one should not do comma
+        my $sep = $separators[$#separators];
+        if($sep eq ",") {
+            printf STDERR "$file:%d: superfluous comma separator\n",
+                $sepline[$#separators];
+            $errors++;
+        }
+    }
 
     if($reqex) {
         # only for libcurl options man-pages
