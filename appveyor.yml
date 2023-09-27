@@ -294,6 +294,7 @@ build_script:
         -G"%PRJ_GEN%"
         %TARGET%
         -DCURL_USE_OPENSSL=%OPENSSL%
+        -DOPENSSL_ROOT_DIR=C:/OpenSSL-v111-Win64
         -DCURL_USE_SCHANNEL=%SCHANNEL%
         -DHTTP_ONLY=%HTTP_ONLY%
         -DBUILD_SHARED_LIBS=%SHARED%
