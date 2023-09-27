@@ -49,7 +49,9 @@
 # https://cmake.org/cmake/help/latest/module/FetchContent.html#integrating-with-find-package
 #
 # The following variables are available:
-#   HAVE_SSL_SET0_WBIO: `SSL_set0_wbio` present in OpenSSL
+#   HAVE_SSL_SET0_WBIO: `SSL_set0_wbio` present in OpenSSL/wolfSSL
+#   HAVE_OPENSSL_SRP: `SSL_CTX_set_srp_username` present in OpenSSL/wolfSSL
+#   HAVE_GNUTLS_SRP: `gnutls_srp_verifier` present in GnuTLS
 #   HAVE_AWSLC: OpenSSL is AWS-LC
 #   HAVE_BORINGSSL: OpenSSL is BoringSSL
 #   HAVE_SSL_CTX_SET_QUIC_METHOD: `SSL_CTX_set_quic_method` present in OpenSSL/wolfSSL
@@ -189,6 +191,8 @@ mark_as_advanced(CURL_ENABLE_EXPORT_TARGET)
 
 option(CURL_DISABLE_ALTSVC "disables alt-svc support" OFF)
 mark_as_advanced(CURL_DISABLE_ALTSVC)
+option(CURL_DISABLE_SRP "disables TLS-SRP support" OFF)
+mark_as_advanced(CURL_DISABLE_SRP)
 option(CURL_DISABLE_COOKIES "disables cookies support" OFF)
 mark_as_advanced(CURL_DISABLE_COOKIES)
 option(CURL_DISABLE_BASIC_AUTH "disables Basic authentication" OFF)
@@ -401,7 +405,7 @@ endif()
 cmake_dependent_option(CURL_USE_MBEDTLS "Enable mbedTLS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 cmake_dependent_option(CURL_USE_BEARSSL "Enable BearSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 cmake_dependent_option(CURL_USE_WOLFSSL "Enable wolfSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
-cmake_dependent_option(CURL_USE_GNUTLS "Enable GNUTLS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
+cmake_dependent_option(CURL_USE_GNUTLS "Enable GnuTLS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 
 set(openssl_default ON)
 if(WIN32 OR CURL_USE_SECTRANSP OR CURL_USE_SCHANNEL OR CURL_USE_MBEDTLS OR CURL_USE_WOLFSSL)
@@ -512,8 +516,19 @@ if(CURL_USE_WOLFSSL)
 endif()
 
 if(CURL_USE_GNUTLS)
-   set(SSL_ENABLED ON)
-   set(USE_GNUTLS ON)
+  find_package(GnuTLS REQUIRED)
+  set(SSL_ENABLED ON)
+  set(USE_GNUTLS ON)
+  list(APPEND CURL_LIBS ${GNUTLS_LIBRARIES} "nettle")
+  include_directories(${GNUTLS_INCLUDE_DIRS})
+
+  if(NOT DEFINED HAVE_GNUTLS_SRP AND NOT CURL_DISABLE_SRP)
+    cmake_push_check_state()
+    set(CMAKE_REQUIRED_INCLUDES ${GNUTLS_INCLUDE_DIRS})
+    set(CMAKE_REQUIRED_LIBRARIES ${GNUTLS_LIBRARIES})
+    check_symbol_exists(gnutls_srp_verifier "gnutls/gnutls.h" HAVE_GNUTLS_SRP)
+    cmake_pop_check_state()
+  endif()
 endif()
 
 # Keep ZLIB detection after TLS detection,
@@ -555,7 +570,7 @@ option(CURL_ZSTD "Set to ON to enable building curl with zstd support." OFF)
 set(HAVE_ZSTD OFF)
 if(CURL_ZSTD)
   find_package(Zstd REQUIRED)
-  if (NOT DEFINED HAVE_ZSTD_CREATEDSTREAM)
+  if(NOT DEFINED HAVE_ZSTD_CREATEDSTREAM)
     cmake_push_check_state()
     set(CMAKE_REQUIRED_INCLUDES ${Zstd_INCLUDE_DIRS})
     set(CMAKE_REQUIRED_LIBRARIES ${Zstd_LIBRARIES})
@@ -601,6 +616,9 @@ endmacro()
 if(USE_OPENSSL OR USE_WOLFSSL)
   if(NOT DEFINED HAVE_SSL_SET0_WBIO)
     openssl_check_symbol_exists(SSL_set0_wbio "openssl/ssl.h" HAVE_SSL_SET0_WBIO)
+  endif()
+  if(NOT DEFINED HAVE_OPENSSL_SRP AND NOT CURL_DISABLE_SRP)
+    openssl_check_symbol_exists(SSL_CTX_set_srp_username "openssl/ssl.h" HAVE_OPENSSL_SRP)
   endif()
 endif()
 
@@ -677,6 +695,10 @@ if(USE_MSH3)
   set(USE_MSH3 ON)
   include_directories(${MSH3_INCLUDE_DIRS})
   list(APPEND CURL_LIBS ${MSH3_LIBRARIES})
+endif()
+
+if(NOT CURL_DISABLE_SRP AND (HAVE_GNUTLS_SRP OR HAVE_OPENSSL_SRP))
+  set(USE_TLS_SRP 1)
 endif()
 
 if(NOT CURL_DISABLE_LDAP)
@@ -1433,7 +1455,7 @@ macro(_add_if label)
 endmacro()
 
 # NTLM support requires crypto function adaptions from various SSL libs
-# TODO alternative SSL libs tests for SSP1, GNUTLS, NSS
+# TODO alternative SSL libs tests for SSP1, GnuTLS, NSS
 if(NOT (CURL_DISABLE_NTLM) AND
     (USE_OPENSSL OR USE_MBEDTLS OR USE_DARWINSSL OR USE_WIN32_CRYPTO OR USE_GNUTLS))
   set(use_curl_ntlm_core ON)
@@ -1462,14 +1484,13 @@ _add_if("SPNEGO"        NOT CURL_DISABLE_NEGOTIATE_AUTH AND
 _add_if("Kerberos"      NOT CURL_DISABLE_KERBEROS_AUTH AND
                         (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
 # NTLM support requires crypto function adaptions from various SSL libs
-# TODO alternative SSL libs tests for SSP1, GNUTLS, NSS
+# TODO alternative SSL libs tests for SSP1, GnuTLS, NSS
 _add_if("NTLM"          NOT (CURL_DISABLE_NTLM) AND
                         (use_curl_ntlm_core OR USE_WINDOWS_SSPI))
 # TODO missing option (autoconf: --enable-ntlm-wb)
 _add_if("NTLM_WB"       NOT (CURL_DISABLE_NTLM) AND
                         (use_curl_ntlm_core OR USE_WINDOWS_SSPI) AND
                         NOT CURL_DISABLE_HTTP AND NTLM_WB_ENABLED)
-# TODO missing option (--enable-tls-srp), depends on GNUTLS_SRP/OPENSSL_SRP
 _add_if("TLS-SRP"       USE_TLS_SRP)
 # TODO option --with-nghttp2 tests for nghttp2 lib and nghttp2/nghttp2.h header
 _add_if("HTTP2"         USE_NGHTTP2)

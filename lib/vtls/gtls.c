@@ -1473,7 +1473,6 @@ static int gtls_shutdown(struct Curl_cfilter *cf,
                          struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   struct gtls_ssl_backend_data *backend =
     (struct gtls_ssl_backend_data *)connssl->backend;
   int retval = 0;
@@ -1536,8 +1535,11 @@ static int gtls_shutdown(struct Curl_cfilter *cf,
   gnutls_certificate_free_credentials(backend->gtls.cred);
 
 #ifdef USE_GNUTLS_SRP
-  if(ssl_config->primary.username)
-    gnutls_srp_free_client_credentials(backend->gtls.srp_client_cred);
+  {
+    struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+    if(ssl_config->primary.username)
+      gnutls_srp_free_client_credentials(backend->gtls.srp_client_cred);
+  }
 #endif
 
   backend->gtls.cred = NULL;

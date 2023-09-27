@@ -777,3 +777,12 @@ ${SIZEOF_TIME_T_CODE}
 
 /* Define to 1 to enable websocket support. */
 #cmakedefine USE_WEBSOCKETS 1
+
+/* Define to 1 if OpenSSL has the SSL_CTX_set_srp_username function. */
+#cmakedefine HAVE_OPENSSL_SRP 1
+
+/* Define to 1 if GnuTLS has the gnutls_srp_verifier function. */
+#cmakedefine HAVE_GNUTLS_SRP 1
+
+/* Define to 1 to enable TLS-SRP support. */
+#cmakedefine USE_TLS_SRP 1
