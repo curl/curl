@@ -704,28 +704,31 @@ static char *ipfs_gateway(void)
   char *gateway_composed_file_path = NULL;
   FILE *gateway_file = NULL;
 
-  gateway = curlx_getenv("IPFS_GATEWAY");
+  gateway = getenv("IPFS_GATEWAY");
 
   /* Gateway is found from environment variable. */
-  if(gateway && strlen(gateway)) {
+  if(gateway && *gateway) {
     char *composed_gateway = NULL;
-    bool add_slash = (gateway[strlen(gateway) - 1] == '/') ? FALSE : TRUE;
+    bool add_slash = (gateway[strlen(gateway) - 1] != '/');
     composed_gateway = aprintf("%s%s", gateway, (add_slash) ? "/" : "");
-    Curl_safefree(gateway);
-    gateway = aprintf("%s", composed_gateway);
-    Curl_safefree(composed_gateway);
+    if(composed_gateway) {
+      gateway = aprintf("%s", composed_gateway);
+      Curl_safefree(composed_gateway);
+    }
     return gateway;
   }
+  else
+    /* a blank string does not count */
+    gateway = NULL;
 
   /* Try to find the gateway in the IPFS data folder. */
-  ipfs_path = curlx_getenv("IPFS_PATH");
+  ipfs_path = getenv("IPFS_PATH");
 
   if(!ipfs_path) {
-    char *home = NULL;
-    home = curlx_getenv("HOME");
-    /* Empty path, fallback to "~/.ipfs", as that's the default location. */
-    ipfs_path = aprintf("%s/.ipfs/", home);
-    Curl_safefree(home);
+    char *home = getenv("HOME");
+    if(home && *home)
+      ipfs_path = aprintf("%s/.ipfs/", home);
+    /* fallback to "~/.ipfs", as that's the default location. */
   }
 
   if(!ipfs_path) {
@@ -750,10 +753,7 @@ static char *ipfs_gateway(void)
 
     if((PARAM_OK == file2string(&gateway_buffer, gateway_file)) &&
        gateway_buffer) {
-      bool add_slash = (gateway_buffer[strlen(gateway_buffer) - 1] == '/')
-        ? FALSE
-        : TRUE;
-
+      bool add_slash = (gateway_buffer[strlen(gateway_buffer) - 1] != '/');
       gateway = aprintf("%s%s", gateway_buffer, (add_slash) ? "/" : "");
       Curl_safefree(gateway_buffer);
     }
