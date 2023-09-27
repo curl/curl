@@ -58,7 +58,7 @@ handle.
 
 To make an easy handle stop using that particular share, you set
 \fICURLOPT_SHARE(3)\fP to NULL for that easy handle. To make a handle stop
-sharing a particular data, you can \fICURLSHOPT_UNSHARE\fP it.
+sharing a particular data, you can \fICURLSHOPT_UNSHARE(3)\fP it.
 
 When you are done using the share, make sure that no easy handle is still using
 it, and call \fIcurl_share_cleanup(3)\fP on the handle.
