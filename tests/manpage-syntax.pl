@@ -141,13 +141,14 @@ sub scanmanpage {
             if($_ =~ /^\.BR (.*)/i) {
                 my $f = $1;
                 if($f =~ /^(lib|)curl/i) {
+                    $f =~ s/[\n\r]//g;
                     if($f =~ s/([a-z_0-9-]*) \([13]\)([, ]*)//i) {
                         push @separators, $2;
                         push @sepline, $line;
 
                     }
                     if($f !~ /^ *$/) {
-                        print STDERR "$file:$line bad formatting of SEE ALSO item\n";
+                        print STDERR "$file:$line bad SEE ALSO format\n";
                         $errors++;
                     }
                 }
