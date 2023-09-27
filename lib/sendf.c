@@ -534,13 +534,23 @@ static CURLcode cw_download_write(struct Curl_easy *data,
   if(!(type & CLIENTWRITE_BODY))
     return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
 
+  data->req.bytecount += nbytes;
+  /* It seems we enforce `max_filesize` also for downloads where
+   * we never write the body. */
+  if(data->set.max_filesize &&
+     (data->req.bytecount > data->set.max_filesize)) {
+    failf(data, "Exceeded the maximum allowed file size "
+          "(%" CURL_FORMAT_CURL_OFF_T ")",
+          data->set.max_filesize);
+    return CURLE_FILESIZE_EXCEEDED;
+  }
+
   if(!data->req.ignorebody) {
     CURLcode result;
     result = Curl_cwriter_write(data, writer->next, type, buf, nbytes);
     if(result)
       return result;
   }
-  data->req.bytecount += nbytes;
   return Curl_pgrsSetDownloadCounter(data, data->req.bytecount);
 }
 
