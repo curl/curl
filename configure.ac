@@ -3352,7 +3352,6 @@ AC_CHECK_HEADERS(
         sys/select.h \
         sys/socket.h \
         sys/ioctl.h \
-        sys/uio.h \
         unistd.h \
         stdlib.h \
         arpa/inet.h \
@@ -3536,7 +3535,6 @@ CURL_CHECK_FUNC_ALARM
 CURL_CHECK_FUNC_BASENAME
 CURL_CHECK_FUNC_CLOSESOCKET
 CURL_CHECK_FUNC_CLOSESOCKET_CAMEL
-CURL_CHECK_FUNC_CONNECT
 CURL_CHECK_FUNC_FCNTL
 CURL_CHECK_FUNC_FREEADDRINFO
 CURL_CHECK_FUNC_FSETXATTR
@@ -3588,7 +3586,6 @@ AC_CHECK_FUNCS([\
   arc4random \
   fchmod \
   fnmatch \
-  fork \
   fseeko \
   geteuid \
   getpass_r \
