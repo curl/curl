@@ -273,7 +273,7 @@ curl_includes_stdlib="\
 #ifdef HAVE_SYS_TYPES_H
 #  include <sys/types.h>
 #endif
-include <stdlib.h>
+#include <stdlib.h>
 /* includes end */"
   AC_CHECK_HEADERS(
     sys/types.h,
