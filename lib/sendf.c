@@ -531,13 +531,17 @@ static CURLcode cw_download_write(struct Curl_easy *data,
                                   struct Curl_cwriter *writer, int type,
                                   const char *buf, size_t nbytes)
 {
-  if(type & CLIENTWRITE_BODY) {
-    data->req.bytecount += nbytes;
-    Curl_pgrsSetDownloadCounter(data, data->req.bytecount);
-    if(data->req.ignorebody)
-      return CURLE_OK;
+  if(!(type & CLIENTWRITE_BODY))
+    return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
+
+  if(!data->req.ignorebody) {
+    CURLcode result;
+    result = Curl_cwriter_write(data, writer->next, type, buf, nbytes);
+    if(result)
+      return result;
   }
-  return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
+  data->req.bytecount += nbytes;
+  return Curl_pgrsSetDownloadCounter(data, data->req.bytecount);
 }
 
 static const struct Curl_cwtype cw_download = {
