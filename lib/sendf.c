@@ -534,8 +534,11 @@ static CURLcode cw_download_write(struct Curl_easy *data,
   CURLcode result;
   size_t nwrite;
 
-  if(!(type & CLIENTWRITE_BODY))
+  if(!(type & CLIENTWRITE_BODY)) {
+    if((type & CLIENTWRITE_CONNECT) && data->set.suppress_connect_headers)
+      return CURLE_OK;
     return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
+  }
 
   nwrite = nbytes;
   data->req.bytecount += nbytes;

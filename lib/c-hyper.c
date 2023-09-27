@@ -172,17 +172,15 @@ static int hyper_each_header(void *userdata,
 
   Curl_debug(data, CURLINFO_HEADER_IN, headp, len);
 
-  if(!data->state.hconnect || !data->set.suppress_connect_headers) {
-    writetype = CLIENTWRITE_HEADER;
-    if(data->state.hconnect)
-      writetype |= CLIENTWRITE_CONNECT;
-    if(data->req.httpcode/100 == 1)
-      writetype |= CLIENTWRITE_1XX;
-    result = Curl_client_write(data, writetype, headp, len);
-    if(result) {
-      data->state.hresult = CURLE_ABORTED_BY_CALLBACK;
-      return HYPER_ITER_BREAK;
-    }
+  writetype = CLIENTWRITE_HEADER;
+  if(data->state.hconnect)
+    writetype |= CLIENTWRITE_CONNECT;
+  if(data->req.httpcode/100 == 1)
+    writetype |= CLIENTWRITE_1XX;
+  result = Curl_client_write(data, writetype, headp, len);
+  if(result) {
+    data->state.hresult = CURLE_ABORTED_BY_CALLBACK;
+    return HYPER_ITER_BREAK;
   }
 
   result = Curl_bump_headersize(data, len, FALSE);
@@ -299,13 +297,14 @@ static CURLcode status_line(struct Curl_easy *data,
   Curl_debug(data, CURLINFO_HEADER_IN, Curl_dyn_ptr(&data->state.headerb),
              len);
 
-  if(!data->state.hconnect || !data->set.suppress_connect_headers) {
-    writetype = CLIENTWRITE_HEADER|CLIENTWRITE_STATUS;
-    result = Curl_client_write(data, writetype,
-                               Curl_dyn_ptr(&data->state.headerb), len);
-    if(result)
-      return result;
-  }
+  writetype = CLIENTWRITE_HEADER|CLIENTWRITE_STATUS;
+  if(data->state.hconnect)
+    writetype |= CLIENTWRITE_CONNECT;
+  result = Curl_client_write(data, writetype,
+                             Curl_dyn_ptr(&data->state.headerb), len);
+  if(result)
+    return result;
+
   result = Curl_bump_headersize(data, len, FALSE);
   return result;
 }
