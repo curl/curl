@@ -214,7 +214,7 @@ curl_includes_setjmp="\
 #ifdef HAVE_SYS_TYPES_H
 #  include <sys/types.h>
 #endif
-include <setjmp.h>
+#include <setjmp.h>
 /* includes end */"
   AC_CHECK_HEADERS(
     sys/types.h,
@@ -233,7 +233,7 @@ curl_includes_signal="\
 #ifdef HAVE_SYS_TYPES_H
 #  include <sys/types.h>
 #endif
-include <signal.h>
+#include <signal.h>
 /* includes end */"
   AC_CHECK_HEADERS(
     sys/types.h,
