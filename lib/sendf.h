@@ -94,7 +94,7 @@ typedef enum {
   CURL_CW_TRANSFER_DECODE, /* remove transfer-encodings */
   CURL_CW_PROTOCOL, /* after transfer, but before content decoding */
   CURL_CW_CONTENT_DECODE, /* remove content-encodings */
-  CURL_CW_CLIENT, /* data written to client */
+  CURL_CW_CLIENT  /* data written to client */
 } Curl_cwriter_phase;
 
 /* Client Writer Type, provides the implementation */
