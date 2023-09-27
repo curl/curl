@@ -749,14 +749,13 @@ static char *ipfs_gateway(void)
   Curl_safefree(gateway_composed_file_path);
 
   if(gateway_file) {
-    char *gateway_buffer = NULL;
+    char *buf = NULL;
 
-    if((PARAM_OK == file2string(&gateway_buffer, gateway_file)) &&
-       gateway_buffer) {
-      bool add_slash = (gateway_buffer[strlen(gateway_buffer) - 1] != '/');
-      gateway = aprintf("%s%s", gateway_buffer, (add_slash) ? "/" : "");
-      Curl_safefree(gateway_buffer);
+    if((PARAM_OK == file2string(&buf, gateway_file)) && buf && *buf) {
+      bool add_slash = (buf[strlen(buf) - 1] != '/');
+      gateway = aprintf("%s%s", buf, (add_slash) ? "/" : "");
     }
+    Curl_safefree(buf);
 
     if(gateway_file)
       fclose(gateway_file);
