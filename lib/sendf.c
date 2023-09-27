@@ -531,27 +531,38 @@ static CURLcode cw_download_write(struct Curl_easy *data,
                                   struct Curl_cwriter *writer, int type,
                                   const char *buf, size_t nbytes)
 {
+  CURLcode result;
+  size_t nwrite;
+
   if(!(type & CLIENTWRITE_BODY))
     return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
 
+  nwrite = nbytes;
   data->req.bytecount += nbytes;
-  /* It seems we enforce `max_filesize` also for downloads where
-   * we never write the body. */
+  /* Enforce `max_filesize` also for downloads where we ignore the body.
+   * Also, write body data up to the max size. This ensures that we
+   * always produce the same result, even when buffers vary due to
+   * connection timings. test457 fails in CI randomly otherwise. */
   if(data->set.max_filesize &&
      (data->req.bytecount > data->set.max_filesize)) {
+    curl_off_t nexcess;
     failf(data, "Exceeded the maximum allowed file size "
           "(%" CURL_FORMAT_CURL_OFF_T ")",
           data->set.max_filesize);
-    return CURLE_FILESIZE_EXCEEDED;
+    nexcess = data->req.bytecount - data->set.max_filesize;
+    nwrite = (nexcess >= (curl_off_t)nbytes)? 0 : (nbytes - (size_t)nexcess);
   }
 
-  if(!data->req.ignorebody) {
-    CURLcode result;
-    result = Curl_cwriter_write(data, writer->next, type, buf, nbytes);
+  if(!data->req.ignorebody && nwrite) {
+    result = Curl_cwriter_write(data, writer->next, type, buf, nwrite);
     if(result)
       return result;
   }
-  return Curl_pgrsSetDownloadCounter(data, data->req.bytecount);
+  result = Curl_pgrsSetDownloadCounter(data, data->req.bytecount);
+  if(result)
+    return result;
+
+  return (nwrite == nbytes)? CURLE_OK : CURLE_FILESIZE_EXCEEDED;
 }
 
 static const struct Curl_cwtype cw_download = {
