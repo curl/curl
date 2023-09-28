@@ -138,8 +138,6 @@
 
 #define HAVE_POSIX_STRERROR_R 1
 #define HAVE_STRERROR_R 1
-
-#define TIME_WITH_SYS_TIME 1
 #define USE_MANUAL 1
 
 #define __attribute__(x)
