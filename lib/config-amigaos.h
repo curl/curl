@@ -92,7 +92,6 @@
 #endif
 
 #define STDC_HEADERS 1
-#define TIME_WITH_SYS_TIME 1
 
 #define in_addr_t int
 

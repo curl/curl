@@ -57,7 +57,6 @@ check_c_source_compiles("${_source_epilogue}
 
 if(NOT HAVE_WINDOWS_H)
   add_header_include(HAVE_SYS_TIME_H "sys/time.h")
-  add_header_include(TIME_WITH_SYS_TIME "time.h")
 endif()
 check_c_source_compiles("${_source_epilogue}
 #include <time.h>

@@ -213,9 +213,6 @@
 /* Define if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
-/* Define if you can safely include both <sys/time.h> and <time.h>. */
-#undef TIME_WITH_SYS_TIME
-
 /* Version number of package */
 #undef VERSION
 
