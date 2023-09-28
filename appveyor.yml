@@ -29,6 +29,7 @@ version: 7.50.0.{build}
 
 environment:
     UNITY: "OFF"
+    SHARED: "OFF"
     matrix:
       # generated CMake-based Visual Studio Release builds
       - job_name: "CMake, VS2008, Release x86, Schannel"
@@ -40,7 +41,6 @@ environment:
         SCHANNEL: ON
         ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
-        DEBUG: ON
         TESTING: OFF
         SHARED: ON
         DISABLED_TESTS: ""
@@ -54,7 +54,6 @@ environment:
         SCHANNEL: OFF
         ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
-        DEBUG: ON
         TESTING: OFF
         SHARED: ON
         DISABLED_TESTS: ""
@@ -70,9 +69,8 @@ environment:
         SCHANNEL: ON
         ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
-        DEBUG: ON
+        DEBUG: "ON"
         TESTING: OFF
-        SHARED: OFF
         DISABLED_TESTS: ""
       # generated CMake-based Visual Studio Debug builds
       - job_name: "CMake, VS2010, Debug x64, no SSL, Static"
@@ -84,9 +82,8 @@ environment:
         SCHANNEL: OFF
         ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
-        DEBUG: ON
+        DEBUG: "ON"
         TESTING: ON
-        SHARED: OFF
         DISABLED_TESTS: "!1139 !1501"
         ADD_PATH: "C:\\msys64\\usr\\bin"
       - job_name: "CMake, VS2022, Debug x64, Schannel, Static, Unicode"
@@ -99,9 +96,8 @@ environment:
         SCHANNEL: ON
         ENABLE_UNICODE: ON
         HTTP_ONLY: OFF
-        DEBUG: ON
+        DEBUG: "ON"
         TESTING: ON
-        SHARED: OFF
         DISABLED_TESTS: "~571 !1139 !1501"
         ADD_PATH: "C:\\msys64\\usr\\bin"
       - job_name: "CMake, VS2022, Debug x64, no SSL, Static"
@@ -114,9 +110,8 @@ environment:
         SCHANNEL: OFF
         ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
-        DEBUG: ON
+        DEBUG: "ON"
         TESTING: ON
-        SHARED: OFF
         DISABLED_TESTS: "~571 !1139 !1501"
         ADD_PATH: "C:\\msys64\\usr\\bin"
       - job_name: "CMake, VS2022, Debug x64, no SSL, Static, HTTP only"
@@ -129,9 +124,8 @@ environment:
         SCHANNEL: OFF
         ENABLE_UNICODE: OFF
         HTTP_ONLY: ON
-        DEBUG: ON
+        DEBUG: "ON"
         TESTING: ON
-        SHARED: OFF
         DISABLED_TESTS: "!1139 !1501"
         ADD_PATH: "C:\\msys64\\usr\\bin"
       # generated CMake-based MSYS Makefiles builds (mingw cross-compiling)
@@ -144,9 +138,8 @@ environment:
         SCHANNEL: ON
         ENABLE_UNICODE: ON
         HTTP_ONLY: OFF
-        DEBUG: ON
+        DEBUG: "ON"
         TESTING: ON
-        SHARED: OFF
         DISABLED_TESTS: "!1139 !1501"
         ADD_PATH: "C:\\mingw-w64\\x86_64-8.1.0-posix-seh-rt_v6-rev0\\mingw64\\bin;C:\\msys64\\usr\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
@@ -160,9 +153,8 @@ environment:
         SCHANNEL: ON
         ENABLE_UNICODE: ON
         HTTP_ONLY: OFF
-        DEBUG: ON
+        DEBUG: "ON"
         TESTING: ON
-        SHARED: OFF
         DISABLED_TESTS: "!1139 !1501"
         ADD_PATH: "C:\\mingw-w64\\x86_64-7.2.0-posix-seh-rt_v5-rev1\\mingw64\\bin;C:\\msys64\\usr\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
@@ -176,9 +168,8 @@ environment:
         SCHANNEL: ON
         ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
-        DEBUG: ON
+        DEBUG: "ON"
         TESTING: OFF
-        SHARED: OFF
         ADD_PATH: "C:\\msys64\\mingw64\\bin;C:\\msys64\\usr\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
         BUILD_OPT: -k
@@ -192,9 +183,8 @@ environment:
         SCHANNEL: ON
         ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
-        DEBUG: ON
+        DEBUG: "ON"
         TESTING: ON
-        SHARED: OFF
         DISABLED_TESTS: "!1139 !1501"
         ADD_PATH: "C:\\mingw-w64\\i686-6.3.0-posix-dwarf-rt_v5-rev1\\mingw32\\bin;C:\\msys64\\usr\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
@@ -321,7 +311,7 @@ build_script:
         -DCMAKE_BUILD_TYPE=%PRJ_CFG% &&
         cmake --build . --config %PRJ_CFG% --parallel 2 --clean-first -- %BUILD_OPT% &&
         bash.exe -e -l -c "find %POSIX_PATH_PREFIX%/c/projects/curl -name '*.exe' -o -name '*.dll'" &&
-        if %SHARED%==ON (
+        if "%SHARED%" == "ON" (
           bash.exe -e -l -c "cp -f -p %POSIX_PATH_PREFIX%/c/projects/curl/lib/*.dll %POSIX_PATH_PREFIX%/c/projects/curl/src/" &&
           bash.exe -e -l -c "cp -f -p %POSIX_PATH_PREFIX%/c/projects/curl/lib/*.dll %POSIX_PATH_PREFIX%/c/projects/curl/tests/libtest/" ) &&
         if "%OPENSSL%" == "OFF" (
