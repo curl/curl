@@ -2076,7 +2076,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     else
 #endif
       result = CURLE_NOT_BUILT_IN;
-        break;
+    break;
   case CURLOPT_PINNEDPUBLICKEY:
     /*
      * Set pinned public key for SSL connection.
