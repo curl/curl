@@ -279,7 +279,7 @@ environment:
 
 install:
     - if not "%ADD_PATH%"=="" (
-        set "PATH=%ADD_PATH%;%PATH%" )
+        set "PATH=%ADD_PATH%;C:/OpenSSL-v111-Win64;%PATH%" )
 
 build_script:
     - if %BUILD_SYSTEM%==CMake (
@@ -302,6 +302,7 @@ build_script:
         -DCMAKE_INSTALL_PREFIX="C:/CURL"
         -DCMAKE_BUILD_TYPE=%PRJ_CFG% &&
         cmake --build . --config %PRJ_CFG% --parallel 2 --clean-first -- %BUILD_OPT% &&
+        bash.exe -e -l -c "find %POSIX_PATH_PREFIX%/c/OpenSSL-v111-Win64 -name '*.dll'" &&
         bash.exe -e -l -c "find %POSIX_PATH_PREFIX%/c/projects/curl -name '*.exe' -o -name '*.dll'" &&
         if "%SHARED%" == "ON" (
           bash.exe -e -l -c "cp -f -p %POSIX_PATH_PREFIX%/c/projects/curl/lib/*.dll %POSIX_PATH_PREFIX%/c/projects/curl/src/" &&
@@ -311,7 +312,7 @@ build_script:
       ) else (
       if %BUILD_SYSTEM%==VisualStudioSolution (
         cd projects &&
-        .\\generate.bat %VC_VERSION% &&
+        .\generate.bat %VC_VERSION% &&
         msbuild.exe /p:Configuration="%PRJ_CFG%" "Windows\\%VC_VERSION%\\curl-all.sln"
       ) else (
       if %BUILD_SYSTEM%==winbuild_vs2015 (
@@ -330,7 +331,8 @@ build_script:
         ..\builds\libcurl-vc14.10-x64-%PATHPART%-dll-ssl-dll-ipv6-sspi\bin\curl.exe -V
       ) else (
       if %BUILD_SYSTEM%==autotools (
-        bash.exe -e -l -c "cd %POSIX_PATH_PREFIX%/c/projects/curl && autoreconf -fi && ./configure %CONFIG_ARGS% && make V=1 && make V=1 examples && cd tests && make V=1"
+        bash.exe -e -l -c "cd %POSIX_PATH_PREFIX%/c/projects/curl && autoreconf -fi && ./configure %CONFIG_ARGS% && make V=1 && make V=1 examples && cd tests && make V=1" &&
+        src\curl.exe -V
       )))))
   # - ps: if(Test-Path CMakeFiles/CMakeConfigureLog.yaml) { cat CMakeFiles/CMakeConfigureLog.yaml }
   # - ps: if(Test-Path CMakeFiles/CMakeOutput.log) { cat CMakeFiles/CMakeOutput.log }
