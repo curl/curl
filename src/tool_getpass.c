@@ -99,7 +99,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 {
   size_t i;
-  fputs(prompt, stderr);
+  fputs(prompt, tool_stderr);
 
   for(i = 0; i < buflen; i++) {
     buffer[i] = (char)getch();
@@ -114,7 +114,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
         i = i - (i >= 1 ? 2 : 1);
   }
   /* since echo is disabled, print a newline */
-  fputs("\n", stderr);
+  fputs("\n", tool_stderr);
   /* if user didn't hit ENTER, terminate buffer */
   if(i == buflen)
     buffer[buflen-1] = '\0';
@@ -184,7 +184,7 @@ char *getpass_r(const char *prompt, /* prompt to display */
 
   disabled = ttyecho(FALSE, fd); /* disable terminal echo */
 
-  fputs(prompt, stderr);
+  fputs(prompt, tool_stderr);
   nread = read(fd, password, buflen);
   if(nread > 0)
     password[--nread] = '\0'; /* null-terminate where enter is stored */
@@ -193,7 +193,7 @@ char *getpass_r(const char *prompt, /* prompt to display */
 
   if(disabled) {
     /* if echo actually was disabled, add a newline */
-    fputs("\n", stderr);
+    fputs("\n", tool_stderr);
     (void)ttyecho(TRUE, fd); /* enable echo */
   }
 

@@ -137,6 +137,8 @@ Currently these are the extended warnings which can be enabled:
 
 - `STRERROR`: use of banned function strerror()
 
+- `STDERR`: use of banned variable `stderr`
+
 ## Ignore certain warnings
 
 Due to the nature of the source code and the flaws of the `checksrc` tool,

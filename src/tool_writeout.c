@@ -566,7 +566,7 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
                 if(fclose_stream)
                   fclose(stream);
                 fclose_stream = FALSE;
-                stream = stderr;
+                stream = tool_stderr;
                 break;
               case VAR_JSON:
                 ourWriteOutJSON(stream, variables, per, per_result);
@@ -583,7 +583,8 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
             }
           }
           if(!match) {
-            fprintf(stderr, "curl: unknown --write-out variable: '%.*s'\n",
+            fprintf(tool_stderr,
+                    "curl: unknown --write-out variable: '%.*s'\n",
                     (int)vlen, ptr);
           }
           ptr = end + 1; /* pass the end */

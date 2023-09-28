@@ -55,7 +55,7 @@ static void voutf(struct GlobalConfig *config,
 
     ptr = print_buffer;
     while(len > 0) {
-      fputs(prefix, stderr);
+      fputs(prefix, tool_stderr);
 
       if(len > width) {
         size_t cut = width-1;
@@ -68,14 +68,14 @@ static void voutf(struct GlobalConfig *config,
              max text width then! */
           cut = width-1;
 
-        (void)fwrite(ptr, cut + 1, 1, stderr);
-        fputs("\n", stderr);
+        (void)fwrite(ptr, cut + 1, 1, tool_stderr);
+        fputs("\n", tool_stderr);
         ptr += cut + 1; /* skip the space too */
         len -= cut + 1;
       }
       else {
-        fputs(ptr, stderr);
-        fputs("\n", stderr);
+        fputs(ptr, tool_stderr);
+        fputs("\n", tool_stderr);
         len = 0;
       }
     }

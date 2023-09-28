@@ -173,7 +173,7 @@ bool progress_meter(struct GlobalConfig *global,
     header = TRUE;
     fputs("DL% UL%  Dled  Uled  Xfers  Live "
           "Total     Current  Left    Speed\n",
-          stderr);
+          tool_stderr);
   }
   if(final || (diff > 500)) {
     char time_left[10];
@@ -275,7 +275,7 @@ bool progress_meter(struct GlobalConfig *global,
     }
     time2str(time_spent, spent);
 
-    fprintf(stderr,
+    fprintf(tool_stderr,
             "\r"
             "%-3s " /* percent downloaded */
             "%-3s " /* percent uploaded */

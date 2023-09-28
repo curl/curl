@@ -41,7 +41,7 @@ Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
 
 # checksrc control files
-Files: lib/.checksrc docs/examples/.checksrc tests/libtest/.checksrc
+Files: lib/.checksrc src/.checksrc docs/examples/.checksrc tests/libtest/.checksrc
 Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
 

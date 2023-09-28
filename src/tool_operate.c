@@ -304,7 +304,7 @@ static CURLcode pre_transfer(struct GlobalConfig *global,
     if((per->infd == -1) || fstat(per->infd, &fileinfo))
 #endif
     {
-      helpf(stderr, "Can't open '%s'", per->uploadfile);
+      helpf(tool_stderr, "Can't open '%s'", per->uploadfile);
       if(per->infd != -1) {
         close(per->infd);
         per->infd = STDIN_FILENO;
@@ -415,10 +415,10 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
     if(!config->synthetic_error && result &&
        (!global->silent || global->showerror)) {
       const char *msg = per->errorbuffer;
-      fprintf(stderr, "curl: (%d) %s\n", result,
+      fprintf(tool_stderr, "curl: (%d) %s\n", result,
               (msg && msg[0]) ? msg : curl_easy_strerror(result));
       if(result == CURLE_PEER_FAILED_VERIFICATION)
-        fputs(CURL_CA_CERT_ERRORMSG, stderr);
+        fputs(CURL_CA_CERT_ERRORMSG, tool_stderr);
     }
     else if(config->failwithbody) {
       /* if HTTP response >= 400, return error */
@@ -426,7 +426,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
       curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
       if(code >= 400) {
         if(!global->silent || global->showerror)
-          fprintf(stderr,
+          fprintf(tool_stderr,
                   "curl: (%d) The requested URL returned error: %ld\n",
                   CURLE_HTTP_RETURNED_ERROR, code);
         result = CURLE_HTTP_RETURNED_ERROR;
@@ -864,19 +864,19 @@ clean:
 
   switch(result) {
   case CURLE_URL_MALFORMAT:
-    helpf(stderr, "malformed URL. Visit https://curl.se/"
+    helpf(tool_stderr, "malformed URL. Visit https://curl.se/"
           "docs/ipfs.html#Gateway-file-and-"
           "environment-variable for more "
           "information");
     break;
   case CURLE_FILE_COULDNT_READ_FILE:
-    helpf(stderr, "IPFS automatic gateway detection "
+    helpf(tool_stderr, "IPFS automatic gateway detection "
           "failure. Visit https://curl.se/docs/"
           "ipfs.html#Malformed-gateway-URL for "
           "more information");
     break;
   case CURLE_BAD_FUNCTION_ARGUMENT:
-    helpf(stderr, "--ipfs-gateway argument results in "
+    helpf(tool_stderr, "--ipfs-gateway argument results in "
           "malformed URL. Visit https://curl.se/"
           "docs/ipfs.html#Malformed-gateway-URL "
           "for more information");
@@ -1020,7 +1020,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
       /* Unless explicitly shut off */
       result = glob_url(&inglob, infiles, &state->infilenum,
                         (!global->silent || global->showerror)?
-                        stderr:NULL);
+                        tool_stderr:NULL);
       if(result)
         break;
       config->state.inglob = inglob;
@@ -1056,7 +1056,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
              expressions and return total number of URLs in pattern set */
           result = glob_url(&state->urls, urlnode->url, &state->urlnum,
                             (!global->silent || global->showerror)?
-                            stderr:NULL);
+                            tool_stderr:NULL);
           if(result)
             break;
           urlnum = state->urlnum;
@@ -2074,7 +2074,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         my_setopt(curl, CURLOPT_TIMEVALUE_LARGE, config->condtime);
         my_setopt_str(curl, CURLOPT_CUSTOMREQUEST, config->customrequest);
         customrequest_helper(config, config->httpreq, config->customrequest);
-        my_setopt(curl, CURLOPT_STDERR, stderr);
+        my_setopt(curl, CURLOPT_STDERR, tool_stderr);
 
         /* three new ones in libcurl 7.3: */
         my_setopt_str(curl, CURLOPT_INTERFACE, config->iface);
@@ -2745,7 +2745,7 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
 
   /* Check we have a url */
   if(!config->url_list || !config->url_list->url) {
-    helpf(stderr, "(%d) no URL specified", CURLE_FAILED_INIT);
+    helpf(tool_stderr, "(%d) no URL specified", CURLE_FAILED_INIT);
     return CURLE_FAILED_INIT;
   }
 
@@ -2922,7 +2922,7 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
 
     /* If we had no arguments then make sure a url was specified in .curlrc */
     if((argc < 2) && (!global->first->url_list)) {
-      helpf(stderr, NULL);
+      helpf(tool_stderr, NULL);
       result = CURLE_FAILED_INIT;
     }
   }
