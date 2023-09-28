@@ -1255,6 +1255,19 @@ if(WIN32)
   unset(HAVE_WIN32_WINNT CACHE)
 endif()
 
+if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
+  # on not-Windows and not-crosscompiling, check for writable argv[]
+  include(CheckCSourceRuns)
+  check_c_source_runs("
+int main(int argc, char **argv)
+{
+  (void)argc;
+  argv[0][0] = ' ';
+  return (argv[0][0] == ' ')?0:1;
+}"
+    HAVE_WRITABLE_ARGV)
+endif()
+
 set(CMAKE_REQUIRED_FLAGS)
 
 option(ENABLE_WEBSOCKETS "Set to ON to enable EXPERIMENTAL websockets" OFF)
