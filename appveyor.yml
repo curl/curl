@@ -307,13 +307,14 @@ build_script:
         if "%SHARED%" == "ON" (
           bash.exe -e -l -c "cp -f -p %POSIX_PATH_PREFIX%/c/projects/curl/lib/*.dll %POSIX_PATH_PREFIX%/c/projects/curl/src/" &&
           bash.exe -e -l -c "cp -f -p %POSIX_PATH_PREFIX%/c/projects/curl/lib/*.dll %POSIX_PATH_PREFIX%/c/projects/curl/tests/libtest/" ) &&
-        if "%OPENSSL%" == "OFF" (
-          src\curl.exe -V )
+        src\curl.exe -V
       ) else (
       if %BUILD_SYSTEM%==VisualStudioSolution (
         cd projects &&
         .\generate.bat %VC_VERSION% &&
-        msbuild.exe /p:Configuration="%PRJ_CFG%" "Windows\\%VC_VERSION%\\curl-all.sln"
+        msbuild.exe /p:Configuration="%PRJ_CFG%" "Windows\\%VC_VERSION%\\curl-all.sln" &&
+        bash.exe -e -l -c "find %POSIX_PATH_PREFIX%/c/projects/curl -name '*.exe' -o -name '*.dll'" &&
+        src\curl.exe -V
       ) else (
       if %BUILD_SYSTEM%==winbuild_vs2015 (
         call buildconf.bat &&
