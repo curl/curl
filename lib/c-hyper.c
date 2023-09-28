@@ -199,7 +199,7 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
   struct SingleRequest *k = &data->req;
   CURLcode result = CURLE_OK;
 
-  if(0 == k->bodywrites++) {
+  if(0 == k->bodywrites) {
     bool done = FALSE;
 #if defined(USE_NTLM)
     struct connectdata *conn = data->conn;

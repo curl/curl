@@ -580,8 +580,6 @@ static CURLcode readwrite_data(struct Curl_easy *data,
       } /* this is the first time we write a body part */
 #endif /* CURL_DISABLE_HTTP */
 
-      k->bodywrites++;
-
 #ifndef CURL_DISABLE_HTTP
       if(k->chunk) {
         /*

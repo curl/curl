@@ -542,6 +542,7 @@ static CURLcode cw_download_write(struct Curl_easy *data,
 
   nwrite = nbytes;
   data->req.bytecount += nbytes;
+  ++data->req.bodywrites;
   /* Enforce `max_filesize` also for downloads where we ignore the body.
    * Also, write body data up to the max size. This ensures that we
    * always produce the same result, even when buffers vary due to
