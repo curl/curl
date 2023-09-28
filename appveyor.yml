@@ -29,6 +29,10 @@ version: 7.50.0.{build}
 
 environment:
     UNITY: "OFF"
+    OPENSSL: "OFF"
+    DEBUG: "ON"
+    SHARED: "OFF"
+    RUN: "ON"
     matrix:
       # generated CMake-based Visual Studio Release builds
       - job_name: "CMake, VS2008, Release x86, Schannel"
@@ -36,13 +40,14 @@ environment:
         BUILD_SYSTEM: CMake
         PRJ_GEN: "Visual Studio 9 2008"
         PRJ_CFG: Release
-        OPENSSL: OFF
         SCHANNEL: ON
         ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
         TESTING: OFF
         SHARED: ON
         DISABLED_TESTS: ""
+        # MSVCR90.dll missing
+        RUN: "OFF"
       - job_name: "CMake, VS2022, Release x64, OpenSSL, WebSockets, Unity"
         APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
         BUILD_SYSTEM: CMake
@@ -64,12 +69,10 @@ environment:
         PRJ_GEN: "Visual Studio 17 2022"
         TARGET: "-A ARM64"
         PRJ_CFG: Release
-        OPENSSL: OFF
         SCHANNEL: ON
         ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
         TESTING: OFF
-        SHARED: OFF
         DISABLED_TESTS: ""
       # generated CMake-based Visual Studio Debug builds
       - job_name: "CMake, VS2010, Debug x64, no SSL, Static"
@@ -77,12 +80,10 @@ environment:
         BUILD_SYSTEM: CMake
         PRJ_GEN: "Visual Studio 10 2010 Win64"
         PRJ_CFG: Debug
-        OPENSSL: OFF
         SCHANNEL: OFF
         ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
         TESTING: ON
-        SHARED: OFF
         DISABLED_TESTS: "!1139 !1501"
         ADD_PATH: "C:\\msys64\\usr\\bin"
       - job_name: "CMake, VS2022, Debug x64, Schannel, Static, Unicode"
@@ -91,12 +92,10 @@ environment:
         PRJ_GEN: "Visual Studio 17 2022"
         TARGET: "-A x64"
         PRJ_CFG: Debug
-        OPENSSL: OFF
         SCHANNEL: ON
         ENABLE_UNICODE: ON
         HTTP_ONLY: OFF
         TESTING: ON
-        SHARED: OFF
         DISABLED_TESTS: "~571 !1139 !1501"
         ADD_PATH: "C:\\msys64\\usr\\bin"
       - job_name: "CMake, VS2022, Debug x64, no SSL, Static"
@@ -105,12 +104,10 @@ environment:
         PRJ_GEN: "Visual Studio 17 2022"
         TARGET: "-A x64"
         PRJ_CFG: Debug
-        OPENSSL: OFF
         SCHANNEL: OFF
         ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
         TESTING: ON
-        SHARED: OFF
         DISABLED_TESTS: "~571 !1139 !1501"
         ADD_PATH: "C:\\msys64\\usr\\bin"
       - job_name: "CMake, VS2022, Debug x64, no SSL, Static, HTTP only"
@@ -119,12 +116,10 @@ environment:
         PRJ_GEN: "Visual Studio 17 2022"
         TARGET: "-A x64"
         PRJ_CFG: Debug
-        OPENSSL: OFF
         SCHANNEL: OFF
         ENABLE_UNICODE: OFF
         HTTP_ONLY: ON
         TESTING: ON
-        SHARED: OFF
         DISABLED_TESTS: "!1139 !1501"
         ADD_PATH: "C:\\msys64\\usr\\bin"
       # generated CMake-based MSYS Makefiles builds (mingw cross-compiling)
@@ -133,12 +128,10 @@ environment:
         BUILD_SYSTEM: CMake
         PRJ_GEN: "MSYS Makefiles"
         PRJ_CFG: Debug
-        OPENSSL: OFF
         SCHANNEL: ON
         ENABLE_UNICODE: ON
         HTTP_ONLY: OFF
         TESTING: ON
-        SHARED: OFF
         DISABLED_TESTS: "!1139 !1501"
         ADD_PATH: "C:\\mingw-w64\\x86_64-8.1.0-posix-seh-rt_v6-rev0\\mingw64\\bin;C:\\msys64\\usr\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
@@ -148,42 +141,36 @@ environment:
         BUILD_SYSTEM: CMake
         PRJ_GEN: "MSYS Makefiles"
         PRJ_CFG: Debug
-        OPENSSL: OFF
         SCHANNEL: ON
         ENABLE_UNICODE: ON
         HTTP_ONLY: OFF
         TESTING: ON
-        SHARED: OFF
         DISABLED_TESTS: "!1139 !1501"
         ADD_PATH: "C:\\mingw-w64\\x86_64-7.2.0-posix-seh-rt_v5-rev1\\mingw64\\bin;C:\\msys64\\usr\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
         BUILD_OPT: -k
-      - job_name: "CMake, mingw-w64, Debug x64, Schannel, Static, Unity"
+      - job_name: "CMake, mingw-w64, gcc 9, Debug x64, Schannel, Static, Unity"
         APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         BUILD_SYSTEM: CMake
         PRJ_GEN: "MSYS Makefiles"
         PRJ_CFG: Debug
-        OPENSSL: OFF
         SCHANNEL: ON
         ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
         TESTING: OFF
-        SHARED: OFF
-        ADD_PATH: "C:\\mingw-w64\\x86_64-8.1.0-posix-seh-rt_v6-rev0\\mingw64\\bin;C:\\msys64\\usr\\bin"
+        ADD_PATH: "C:\\msys64\\mingw64\\bin;C:\\msys64\\usr\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
         BUILD_OPT: -k
         UNITY: "ON"
-      - job_name: "CMake, mingw-w64, Debug x86, Schannel, Static"
+      - job_name: "CMake, mingw-w64, gcc 6, Debug x86, Schannel, Static"
         APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
         BUILD_SYSTEM: CMake
         PRJ_GEN: "MSYS Makefiles"
         PRJ_CFG: Debug
-        OPENSSL: OFF
         SCHANNEL: ON
         ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
         TESTING: ON
-        SHARED: OFF
         DISABLED_TESTS: "!1139 !1501"
         ADD_PATH: "C:\\mingw-w64\\i686-6.3.0-posix-dwarf-rt_v5-rev1\\mingw32\\bin;C:\\msys64\\usr\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
@@ -302,18 +289,29 @@ build_script:
         -DENABLE_WEBSOCKETS=%WEBSOCKETS%
         -DCMAKE_UNITY_BUILD=%UNITY%
         -DCURL_WERROR=ON
-        -DENABLE_DEBUG=ON
+        -DENABLE_DEBUG=%DEBUG%
         -DENABLE_UNICODE=%ENABLE_UNICODE%
         -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=""
         -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=""
         -DCMAKE_INSTALL_PREFIX="C:/CURL"
         -DCMAKE_BUILD_TYPE=%PRJ_CFG% &&
-        cmake --build . --config %PRJ_CFG% --parallel 2 --clean-first -- %BUILD_OPT%
+        cmake --build . --config %PRJ_CFG% --parallel 2 --clean-first -- %BUILD_OPT% &&
+        if "%SHARED%" == "ON" (
+          bash.exe -e -l -c "cp -f -p %POSIX_PATH_PREFIX%/c/projects/curl/lib/*.dll %POSIX_PATH_PREFIX%/c/projects/curl/src/" &&
+          bash.exe -e -l -c "cp -f -p %POSIX_PATH_PREFIX%/c/projects/curl/lib/*.dll %POSIX_PATH_PREFIX%/c/projects/curl/tests/libtest/" ) &&
+        if "%OPENSSL%" == "ON" (
+          bash.exe -e -l -c "cp -f -p %POSIX_PATH_PREFIX%/c/OpenSSL-v111-Win64/*.dll %POSIX_PATH_PREFIX%/c/projects/curl/src/" ) &&
+        bash.exe -e -l -c "find %POSIX_PATH_PREFIX%/c/projects/curl -name '*.exe' -o -name '*.dll'" &&
+        if "%RUN%" == "ON" (
+          src\curl.exe -V )
       ) else (
       if %BUILD_SYSTEM%==VisualStudioSolution (
         cd projects &&
-        .\\generate.bat %VC_VERSION% &&
-        msbuild.exe /p:Configuration="%PRJ_CFG%" "Windows\\%VC_VERSION%\\curl-all.sln"
+        .\generate.bat %VC_VERSION% &&
+        msbuild.exe /p:Configuration="%PRJ_CFG%" "Windows\\%VC_VERSION%\\curl-all.sln" &&
+        bash.exe -e -l -c "find %POSIX_PATH_PREFIX%/c/projects/curl -name '*.exe' -o -name '*.dll'" &&
+        cd "../build/Win32/%VC_VERSION%/%PRJ_CFG%" &&
+        curld.exe -V
       ) else (
       if %BUILD_SYSTEM%==winbuild_vs2015 (
         call buildconf.bat &&
@@ -321,6 +319,7 @@ build_script:
         call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64 &&
         call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86_amd64 &&
         nmake /f Makefile.vc mode=dll VC=14 "SSL_PATH=C:\OpenSSL-v111-Win64" WITH_SSL=dll MACHINE=x64 DEBUG=%DEBUG% ENABLE_UNICODE=%ENABLE_UNICODE% &&
+        bash.exe -e -l -c "find %POSIX_PATH_PREFIX%/c/projects/curl -name '*.exe' -o -name '*.dll'" &&
         ..\builds\libcurl-vc14-x64-%PATHPART%-dll-ssl-dll-ipv6-sspi\bin\curl.exe -V
       ) else (
       if %BUILD_SYSTEM%==winbuild_vs2017 (
@@ -331,8 +330,12 @@ build_script:
         ..\builds\libcurl-vc14.10-x64-%PATHPART%-dll-ssl-dll-ipv6-sspi\bin\curl.exe -V
       ) else (
       if %BUILD_SYSTEM%==autotools (
-        bash.exe -e -l -c "cd %POSIX_PATH_PREFIX%/c/projects/curl && autoreconf -fi && ./configure %CONFIG_ARGS% && make V=1 && make V=1 examples && cd tests && make V=1"
+        bash.exe -e -l -c "cd %POSIX_PATH_PREFIX%/c/projects/curl && autoreconf -fi && ./configure %CONFIG_ARGS% && make V=1 && make V=1 examples && cd tests && make V=1" &&
+        src\curl.exe -V
       )))))
+  # - ps: if(Test-Path CMakeFiles/CMakeConfigureLog.yaml) { cat CMakeFiles/CMakeConfigureLog.yaml }
+  # - ps: if(Test-Path CMakeFiles/CMakeOutput.log) { cat CMakeFiles/CMakeOutput.log }
+  # - ps: if(Test-Path CMakeFiles/CMakeError.log) { cat CMakeFiles/CMakeError.log }
     - if %TESTING%==ON (
         if %BUILD_SYSTEM%==CMake (
           cmake --build . --config %PRJ_CFG% --parallel 2 --target testdeps
