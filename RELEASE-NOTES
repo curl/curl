@@ -1,10 +1,10 @@
 curl and libcurl 8.4.0
 
  Public curl releases:         252
- Command line options:         257
+ Command line options:         258
  curl_easy_setopt() options:   303
- Public functions in libcurl:  92
- Contributors:                 2987
+ Public functions in libcurl:  93
+ Contributors:                 2990
 
 This release includes the following changes:
 
@@ -15,14 +15,24 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o bufq: remove Curl_bufq_skip_and_shift (unused) [47]
+ o build: delete checks for C89 standard headers [65]
  o cmake, configure: also link with CoreServices [32]
+ o cmake: add feature checks for `memrchr` and `getifaddrs` [57]
+ o cmake: fix duplicate symbols when linking tests [73]
+ o cmake: fix missing `zlib.h` when compiling `libcurltool` [72]
+ o cmake: fix stderr initialization in unity builds [71]
  o cmake: fix the help text to the static build option in CMakeLists.txt [10]
  o cmake: fix unity symbol collisions in h2 builds [48]
+ o cmake: lib `CURL_STATICLIB` fixes (Windows) [74]
+ o cmake: move global headers to specific checks [58]
  o configure: sort AC_CHECK_FUNCS
+ o connect: expire the timeout when trying next [54]
  o cookie: do not store the expire or max-age strings [16]
  o cookie: remove unnecessary struct fields [17]
  o cookie: set ->running in cookie_init even if data is NULL [5]
  o curl.h: mark CURLSSLBACKEND_NSS as deprecated since 8.3.0 [18]
+ o docs: adapt SEE ALSO sections to new requirements [52]
+ o docs: explain how PINNEDPUBLICKEY is independent of VERIFYPEER [68]
  o docs: use CURLSSLBACKEND_NONE [19]
  o doh: inherit DEBUGFUNCTION/DATA [12]
  o escape: replace Curl_isunreserved with ISUNRESERVED [2]
@@ -30,9 +40,11 @@ This release includes the following bugfixes:
  o h2-proxy: remove left-over mistake in drain_tunnel() [7]
  o http: fix CURL_DISABLE_BEARER_AUTH breakage [28]
  o http: h1/h2 proxy unification [21]
+ o http: remove wrong comment for http_should_fail [55]
  o http: use per-request counter to check too large headers [6]
  o http_aws_sigv4: fix sorting with empty parts [13]
  o idn: if idn2_check_version returns NULL, return error [27]
+ o inet_ntop: add typecast to silence Coverity [51]
  o lib: disambiguate Curl_client_write flag semantics [24]
  o lib: enable hmac for digest as well [26]
  o lib: failf/infof compiler warnings [8]
@@ -43,11 +55,14 @@ This release includes the following bugfixes:
  o Makefile.mk: always set `CURL_STATICLIB` for lib (Windows) [42]
  o MANUAL.md: change domain to example.com [11]
  o misc: better random strings [15]
+ o multi: fix small timeouts [70]
  o multi: remove Curl_multi_dump [37]
+ o openssl: improve ssl shutdown handling [69]
  o pytest: exclude test_03_goaway in CI runs due to timing dependency [23]
  o quic: set ciphers/curves the same way regular TLS does [43]
  o quiche: fix build error with --with-ca-fallback [1]
  o runtests: eliminate a warning on old perl versions
+ o src/mkhelp: make generated code pass `checksrc` [59]
  o test1056: disable on Windows
  o test1474: disable test on NetBSD, OpenBSD and Solaris 10 [31]
  o test1592: greatly increase the maximum test timeout
@@ -57,9 +72,11 @@ This release includes the following bugfixes:
  o tests: fix compiler warnings [38]
  o tests: improve SLOWDOWN test reliability by reducing sent data
  o tests: log the test result code after each libtest
+ o tests: show which curl tool `runtests.pl` is using [60]
  o tests: stop overriding the lock timeout
  o tftpd: always use curl's own tftp.h [25]
  o tool_cb_wrt: fix debug assertion [4]
+ o tool_setopt: remove unused function tool_setopt_flags [56]
  o upload-file.d: describe the file name slash/backslash handling [9]
  o url: fix netrc info message [39]
  o warnless: remove unused functions [33]
@@ -80,14 +97,16 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Aleksander Mazur, calvin2021y on github, Christian Weisgerber,
-  consulion on github, Dan Fandrich, Daniel Stenberg, Douglas R. Reno,
-  Elliot Killick, Gisle Vanem, Harry Sintonen, Jakub Jelen, John Haugabook,
+  Aleksander Mazur, calvin2021y on github, Christian Schmitz,
+  Christian Weisgerber, claudiusaiz on github, consulion on github,
+  Dan Fandrich, Daniel Stenberg, Douglas R. Reno, Elliot Killick, Gisle Vanem,
+  Hakan Sunay Halil, Harry Sintonen, Jakub Jelen, John Haugabook,
   Joshix-1 on github, Junho Choi, Karthikdasari0423 on github, Lars Francke,
-  Marc Hörsken, Mark Gaiser, Mathias Fuchs, Michael Osipov, Natanael Copa,
-  Patrick Monnerat, Peter Wang, Ray Satiro, Ryan Schmidt, s0urc3_ on hackerone,
-  Stefan Eissing, Ted Lyngmo, Viktor Szakats, vvb2060, 南宫雪珊
-  (31 contributors)
+  Loïc Yhuel, Marc Hörsken, Mark Gaiser, Mathias Fuchs, Michael Osipov,
+  Natanael Copa, Patrick Monnerat, Peter Wang, Ray Satiro, Ryan Schmidt,
+  s0urc3_ on hackerone, Stefan Eissing, Ted Lyngmo, Viktor Szakats, vvb2060,
+  南宫雪珊
+  (35 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -137,3 +156,20 @@ References to bug reports and discussions on issues:
  [46] = https://curl.se/bug/?i=8805
  [47] = https://curl.se/bug/?i=11915
  [48] = https://curl.se/bug/?i=11912
+ [51] = https://curl.se/bug/?i=11960
+ [52] = https://curl.se/bug/?i=11957
+ [54] = https://curl.se/bug/?i=11920
+ [55] = https://curl.se/bug/?i=11941
+ [56] = https://curl.se/bug/?i=11943
+ [57] = https://curl.se/bug/?i=11954
+ [58] = https://curl.se/bug/?i=11951
+ [59] = https://curl.se/bug/?i=11955
+ [60] = https://curl.se/bug/?i=11953
+ [65] = https://curl.se/bug/?i=11940
+ [68] = https://curl.se/bug/?i=2935
+ [69] = https://curl.se/bug/?i=11858
+ [70] = https://curl.se/bug/?i=11937
+ [71] = https://curl.se/bug/?i=11929
+ [72] = https://curl.se/bug/?i=11927
+ [73] = https://curl.se/bug/?i=11926
+ [74] = https://curl.se/bug/?i=11914
