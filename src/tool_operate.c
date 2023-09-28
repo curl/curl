@@ -857,34 +857,29 @@ static CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
   result = CURLE_OK;
 
 clean:
-  curl_free(gateway);
+  free(gateway);
   curl_free(cid);
   curl_free(pathbuffer);
-
-  if(ipfsurl) {
-    curl_url_cleanup(ipfsurl);
-  }
+  curl_url_cleanup(ipfsurl);
 
   switch(result) {
   case CURLE_URL_MALFORMAT:
     helpf(stderr, "malformed URL. Visit https://curl.se/"
           "docs/ipfs.html#Gateway-file-and-"
           "environment-variable for more "
-          "information for more information");
+          "information");
     break;
   case CURLE_FILE_COULDNT_READ_FILE:
     helpf(stderr, "IPFS automatic gateway detection "
           "failure. Visit https://curl.se/docs/"
           "ipfs.html#Malformed-gateway-URL for "
-          "more information for more "
-          "information");
+          "more information");
     break;
   case CURLE_BAD_FUNCTION_ARGUMENT:
     helpf(stderr, "--ipfs-gateway argument results in "
           "malformed URL. Visit https://curl.se/"
           "docs/ipfs.html#Malformed-gateway-URL "
-          "for more information for more "
-          "information");
+          "for more information");
     break;
   default:
     break;
