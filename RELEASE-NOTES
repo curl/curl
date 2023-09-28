@@ -8,7 +8,7 @@ curl and libcurl 8.4.0
 
 This release includes the following changes:
 
- o curl: add support for the IPFS protocols [46]
+ o curl: add support for the IPFS protocols via HTTP gateway [46]
  o curl_multi_get_handles: get easy handles from a multi handle [20]
  o mingw: delete support for legacy mingw.org toolchain [45]
 
