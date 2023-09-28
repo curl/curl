@@ -40,6 +40,7 @@ environment:
         SCHANNEL: ON
         ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
+        DEBUG: ON
         TESTING: OFF
         SHARED: ON
         DISABLED_TESTS: ""
@@ -53,6 +54,7 @@ environment:
         SCHANNEL: OFF
         ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
+        DEBUG: ON
         TESTING: OFF
         SHARED: ON
         DISABLED_TESTS: ""
@@ -68,6 +70,7 @@ environment:
         SCHANNEL: ON
         ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
+        DEBUG: ON
         TESTING: OFF
         SHARED: OFF
         DISABLED_TESTS: ""
@@ -81,6 +84,7 @@ environment:
         SCHANNEL: OFF
         ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
+        DEBUG: ON
         TESTING: ON
         SHARED: OFF
         DISABLED_TESTS: "!1139 !1501"
@@ -95,6 +99,7 @@ environment:
         SCHANNEL: ON
         ENABLE_UNICODE: ON
         HTTP_ONLY: OFF
+        DEBUG: ON
         TESTING: ON
         SHARED: OFF
         DISABLED_TESTS: "~571 !1139 !1501"
@@ -109,6 +114,7 @@ environment:
         SCHANNEL: OFF
         ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
+        DEBUG: ON
         TESTING: ON
         SHARED: OFF
         DISABLED_TESTS: "~571 !1139 !1501"
@@ -123,6 +129,7 @@ environment:
         SCHANNEL: OFF
         ENABLE_UNICODE: OFF
         HTTP_ONLY: ON
+        DEBUG: ON
         TESTING: ON
         SHARED: OFF
         DISABLED_TESTS: "!1139 !1501"
@@ -137,6 +144,7 @@ environment:
         SCHANNEL: ON
         ENABLE_UNICODE: ON
         HTTP_ONLY: OFF
+        DEBUG: ON
         TESTING: ON
         SHARED: OFF
         DISABLED_TESTS: "!1139 !1501"
@@ -152,13 +160,14 @@ environment:
         SCHANNEL: ON
         ENABLE_UNICODE: ON
         HTTP_ONLY: OFF
+        DEBUG: ON
         TESTING: ON
         SHARED: OFF
         DISABLED_TESTS: "!1139 !1501"
         ADD_PATH: "C:\\mingw-w64\\x86_64-7.2.0-posix-seh-rt_v5-rev1\\mingw64\\bin;C:\\msys64\\usr\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
         BUILD_OPT: -k
-      - job_name: "CMake, mingw-w64, Debug x64, Schannel, Static, Unity"
+      - job_name: "CMake, mingw-w64, gcc 9, Debug x64, Schannel, Static, Unity"
         APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         BUILD_SYSTEM: CMake
         PRJ_GEN: "MSYS Makefiles"
@@ -167,13 +176,14 @@ environment:
         SCHANNEL: ON
         ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
+        DEBUG: ON
         TESTING: OFF
         SHARED: OFF
-        ADD_PATH: "C:\\mingw-w64\\x86_64-8.1.0-posix-seh-rt_v6-rev0\\mingw64\\bin;C:\\msys64\\usr\\bin"
+        ADD_PATH: "C:\\msys64\\mingw64\\bin;C:\\msys64\\usr\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
         BUILD_OPT: -k
         UNITY: "ON"
-      - job_name: "CMake, mingw-w64, Debug x86, Schannel, Static"
+      - job_name: "CMake, mingw-w64, gcc 6, Debug x86, Schannel, Static"
         APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
         BUILD_SYSTEM: CMake
         PRJ_GEN: "MSYS Makefiles"
@@ -182,6 +192,7 @@ environment:
         SCHANNEL: ON
         ENABLE_UNICODE: OFF
         HTTP_ONLY: OFF
+        DEBUG: ON
         TESTING: ON
         SHARED: OFF
         DISABLED_TESTS: "!1139 !1501"
@@ -302,13 +313,17 @@ build_script:
         -DENABLE_WEBSOCKETS=%WEBSOCKETS%
         -DCMAKE_UNITY_BUILD=%UNITY%
         -DCURL_WERROR=ON
-        -DENABLE_DEBUG=ON
+        -DENABLE_DEBUG=%DEBUG%
         -DENABLE_UNICODE=%ENABLE_UNICODE%
         -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=""
         -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=""
         -DCMAKE_INSTALL_PREFIX="C:/CURL"
         -DCMAKE_BUILD_TYPE=%PRJ_CFG% &&
-        cmake --build . --config %PRJ_CFG% --parallel 2 --clean-first -- %BUILD_OPT%
+        cmake --build . --config %PRJ_CFG% --parallel 2 --clean-first -- %BUILD_OPT% &&
+        if %SHARED%==ON (
+          bash.exe -e -l -c "cp -f -p %POSIX_PATH_PREFIX%/c/projects/curl/lib/*.dll %POSIX_PATH_PREFIX%/c/projects/curl/src/" &&
+          bash.exe -e -l -c "cp -f -p %POSIX_PATH_PREFIX%/c/projects/curl/lib/*.dll %POSIX_PATH_PREFIX%/c/projects/curl/tests/libtest/" ) &&
+        src\curl.exe -V
       ) else (
       if %BUILD_SYSTEM%==VisualStudioSolution (
         cd projects &&
@@ -333,6 +348,9 @@ build_script:
       if %BUILD_SYSTEM%==autotools (
         bash.exe -e -l -c "cd %POSIX_PATH_PREFIX%/c/projects/curl && autoreconf -fi && ./configure %CONFIG_ARGS% && make V=1 && make V=1 examples && cd tests && make V=1"
       )))))
+  # - ps: if(Test-Path CMakeFiles/CMakeConfigureLog.yaml) { cat CMakeFiles/CMakeConfigureLog.yaml }
+  # - ps: if(Test-Path CMakeFiles/CMakeOutput.log) { cat CMakeFiles/CMakeOutput.log }
+  # - ps: if(Test-Path CMakeFiles/CMakeError.log) { cat CMakeFiles/CMakeError.log }
     - if %TESTING%==ON (
         if %BUILD_SYSTEM%==CMake (
           cmake --build . --config %PRJ_CFG% --parallel 2 --target testdeps
