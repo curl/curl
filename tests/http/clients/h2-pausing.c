@@ -181,9 +181,9 @@ int main(int argc, char *argv[])
   int rounds = 0;
   int rc = 0;
   CURLU *cu;
-  struct curl_slist resolve;
+  struct curl_slist *resolve = NULL;
   char resolve_buf[1024];
-  char *url, *host, *port;
+  char *url, *host = NULL, *port = NULL;
   int all_paused = 0;
   int resume_round = -1;
 
@@ -216,7 +216,7 @@ int main(int argc, char *argv[])
   memset(&resolve, 0, sizeof(resolve));
   curl_msnprintf(resolve_buf, sizeof(resolve_buf)-1,
                  "%s:%s:127.0.0.1", host, port);
-  curl_slist_append(&resolve, resolve_buf);
+  resolve = curl_slist_append(resolve, resolve_buf);
 
   for(i = 0; i<HANDLECOUNT; i++) {
     handles[i].idx = i;
@@ -232,7 +232,7 @@ int main(int argc, char *argv[])
       curl_easy_setopt(handles[i].h, CURLOPT_DEBUGFUNCTION, debug_cb)
         != CURLE_OK ||
       curl_easy_setopt(handles[i].h, CURLOPT_SSL_VERIFYPEER, 0L) != CURLE_OK ||
-      curl_easy_setopt(handles[i].h, CURLOPT_RESOLVE, &resolve) != CURLE_OK ||
+      curl_easy_setopt(handles[i].h, CURLOPT_RESOLVE, resolve) != CURLE_OK ||
       curl_easy_setopt(handles[i].h, CURLOPT_URL, url) != CURLE_OK) {
       err();
     }
@@ -327,8 +327,10 @@ out:
     curl_easy_cleanup(handles[i].h);
   }
 
-  curl_multi_cleanup(multi_handle);
 
+  curl_slist_free_all(resolve);
+  curl_url_cleanup(cu);
+  curl_multi_cleanup(multi_handle);
   curl_global_cleanup();
 
   return rc;
