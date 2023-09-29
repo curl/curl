@@ -1469,7 +1469,7 @@ AS_HELP_STRING([--without-ca-bundle], [Don't use a default CA bundle]),
 AS_HELP_STRING([--with-ca-path=DIRECTORY],
 [Path to a directory containing CA certificates stored individually, with \
 their filenames in a hash format. This option can be used with the OpenSSL, \
-GnuTLS and mbedTLS backends. Refer to OpenSSL c_rehash for details. \
+GnuTLS, mbedTLS and wolfSSL backends. Refer to OpenSSL c_rehash for details. \
 (example: /etc/certificates)])
 AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
   [
@@ -1495,8 +1495,11 @@ AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
     capath="no"
   elif test "x$want_capath" != "xno" -a "x$want_capath" != "xunset"; then
     dnl --with-ca-path given
-    if test "x$OPENSSL_ENABLED" != "x1" -a "x$GNUTLS_ENABLED" != "x1" -a "x$MBEDTLS_ENABLED" != "x1"; then
-      AC_MSG_ERROR([--with-ca-path only works with OpenSSL, GnuTLS or mbedTLS])
+    if test "x$OPENSSL_ENABLED" != "x1" -a \
+            "x$GNUTLS_ENABLED" != "x1" -a \
+            "x$MBEDTLS_ENABLED" != "x1" -a \
+            "x$WOLFSSL_ENABLED" != "x1"; then
+      AC_MSG_ERROR([--with-ca-path only works with OpenSSL, GnuTLS, mbedTLS or wolfSSL])
     fi
     capath="$want_capath"
     ca="no"
@@ -1530,9 +1533,14 @@ AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
           fi
         done
       fi
-      if test "x$want_capath" = "xunset" -a "x$ca" = "xno" -a \
-              "x$OPENSSL_ENABLED" = "x1"; then
-        check_capath="/etc/ssl/certs/"
+      AC_MSG_NOTICE([want $want_capath ca $ca])
+      if test "x$want_capath" = "xunset"; then
+        if test "x$OPENSSL_ENABLED" = "x1" -o \
+                "x$GNUTLS_ENABLED" = "x1" -o \
+                "x$MBEDTLS_ENABLED" = "x1" -o \
+                "x$WOLFSSL_ENABLED" = "x1"; then
+          check_capath="/etc/ssl/certs/"
+        fi
       fi
     else
       dnl no option given and cross-compiling
