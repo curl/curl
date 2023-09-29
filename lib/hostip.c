@@ -119,13 +119,13 @@ static void freednsentry(void *freethis);
 
 int Curl_add_blocked_domain(struct Curl_easy *data, const char *name)
 {
-  if (data == NULL || name == NULL) {
+  if(data == NULL || name == NULL) {
     return CURLE_OUT_OF_MEMORY;
   }
 
   data->set.blocked_domains = curl_slist_append(
   data->set.blocked_domains, name);
-  if (data->set.blocked_domains == NULL) {
+  if(data->set.blocked_domains == NULL) {
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -672,22 +672,23 @@ static bool is_hostname_blocked(struct Curl_easy *data, const char *hostname)
   size_t lenblocked, lenhostname, offset;
   struct curl_slist *item;
 
-  if (data == NULL || hostname == NULL) {
+  if(data == NULL || hostname == NULL) {
     return (false);
   }
 
   lenhostname = strlen(hostname);
-  for (item = data->set.blocked_domains; item != NULL; item = item->next) {
+  for(item = data->set.blocked_domains; item != NULL; item = item->next) {
     lenblocked = strlen(item->data);
-    if (lenblocked > lenhostname) {
+    if(lenblocked > lenhostname) {
       continue;
     }
-    if (item->data[0] == '.') {
+    if(item->data[0] == '.') {
         offset = lenhostname - lenblocked;
-    } else {
+    }
+    else {
         offset = 0;
     }
-    if (curl_strequal(&hostname[offset], item->data)) {
+    if(curl_strequal(&hostname[offset], item->data)) {
       return (true);
     }
   }
@@ -723,7 +724,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
   enum resolve_t rc = CURLRESOLV_ERROR; /* default to failure */
   struct connectdata *conn = data->conn;
 
-  if (is_hostname_blocked(data, hostname)) {
+  if(is_hostname_blocked(data, hostname)) {
     return CURLRESOLV_ERROR;
   }
 

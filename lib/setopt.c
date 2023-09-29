@@ -3176,7 +3176,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      */
     argptr = va_arg(param, char *);
     result = Curl_add_blocked_domain(data, argptr);
-    if (result) {
+    if(result) {
       return result;
     }
     break;
