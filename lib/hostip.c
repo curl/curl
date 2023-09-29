@@ -119,8 +119,6 @@ static void freednsentry(void *freethis);
 
 int Curl_add_blocked_domain(struct Curl_easy *data, const char *name)
 {
-  size_t i;
-
   if (data == NULL || name == NULL) {
     return CURLE_OUT_OF_MEMORY;
   }
