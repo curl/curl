@@ -597,11 +597,11 @@ FAQ
   To specify a command line option that includes spaces, you might need to
   put the entire option within quotes. Like in:
 
-   curl -d " with spaces " url.com
+   curl -d " with spaces " example.com
 
   or perhaps
 
-   curl -d ' with spaces ' url.com
+   curl -d ' with spaces ' example.com
 
   Exactly what kind of quotes and how to do this is entirely up to the shell
   or command line interpreter that you are using. For most unix shells, you
