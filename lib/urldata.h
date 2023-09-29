@@ -2014,12 +2014,9 @@ struct Curl_easy {
   struct hyptransfer hyp;
 #endif
 
-<<<<<<< HEAD
-=======
   /* internal: true if this easy handle was created for internal use and the
      user does not have ownership of the handle. */
   bool internal;
->>>>>>> origin/master
 };
 
 #define LIBCURL_NAME "libcurl"

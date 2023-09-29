@@ -945,11 +945,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
   bool orig_isatty = global->isatty;
   struct State *state = &config->state;
   char *httpgetfields = state->httpgetfields;
-<<<<<<< HEAD
   struct curl_slist *item;
-=======
 
->>>>>>> origin/master
   *added = FALSE; /* not yet */
 
   if(config->postfields) {
