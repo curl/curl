@@ -272,11 +272,11 @@ environment:
       POSIX_PATH_PREFIX: "/cygdrive"
 
 install:
-  - if not "%ADD_PATH%"=="" (
+  - if not "%ADD_PATH%" == "" (
       set "PATH=%ADD_PATH%;%PATH%" )
 
 build_script:
-  - if %BUILD_SYSTEM%==CMake (
+  - if "%BUILD_SYSTEM%" == "CMake" (
       cmake .
         -G"%PRJ_GEN%"
         %TARGET%
@@ -305,7 +305,7 @@ build_script:
       if "%RUN%" == "ON" (
         src\curl.exe -V )
     ) else (
-    if %BUILD_SYSTEM%==VisualStudioSolution (
+    if "%BUILD_SYSTEM%" == "VisualStudioSolution" (
       cd projects &&
       .\generate.bat %VC_VERSION% &&
       msbuild.exe /p:Configuration="%PRJ_CFG%" "Windows\\%VC_VERSION%\\curl-all.sln" &&
@@ -313,7 +313,7 @@ build_script:
       cd "../build/Win32/%VC_VERSION%/%PRJ_CFG%" &&
       curld.exe -V
     ) else (
-    if %BUILD_SYSTEM%==winbuild_vs2015 (
+    if "%BUILD_SYSTEM%" == "winbuild_vs2015" (
       call buildconf.bat &&
       cd winbuild &&
       call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64 &&
@@ -322,14 +322,14 @@ build_script:
       bash.exe -e -l -c "find %POSIX_PATH_PREFIX%/c/projects/curl -name '*.exe' -o -name '*.dll'" &&
       ..\builds\libcurl-vc14-x64-%PATHPART%-dll-ssl-dll-ipv6-sspi\bin\curl.exe -V
     ) else (
-    if %BUILD_SYSTEM%==winbuild_vs2017 (
+    if "%BUILD_SYSTEM%" == "winbuild_vs2017" (
       call buildconf.bat &&
       cd winbuild &&
       call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat" &&
       nmake /f Makefile.vc mode=dll VC=14.10 "SSL_PATH=C:\OpenSSL-v111-Win64" WITH_SSL=dll MACHINE=x64 DEBUG=%DEBUG% ENABLE_UNICODE=%ENABLE_UNICODE% &&
       ..\builds\libcurl-vc14.10-x64-%PATHPART%-dll-ssl-dll-ipv6-sspi\bin\curl.exe -V
     ) else (
-    if %BUILD_SYSTEM%==autotools (
+    if "%BUILD_SYSTEM%" == "autotools" (
       bash.exe -e -l -c "cd %POSIX_PATH_PREFIX%/c/projects/curl && autoreconf -fi && ./configure %CONFIG_ARGS% && make V=1 && make V=1 examples && cd tests && make V=1" &&
       src\curl.exe -V
     )))))
@@ -337,8 +337,8 @@ build_script:
   #     if(Test-Path CMakeFiles/CMakeConfigureLog.yaml) { cat CMakeFiles/CMakeConfigureLog.yaml }
   #     if(Test-Path CMakeFiles/CMakeOutput.log) { cat CMakeFiles/CMakeOutput.log }
   #     if(Test-Path CMakeFiles/CMakeError.log) { cat CMakeFiles/CMakeError.log }
-  - if %TESTING%==ON (
-      if %BUILD_SYSTEM%==CMake (
+  - if "%TESTING%" == "ON" (
+      if "%BUILD_SYSTEM%" == "CMake" (
         cmake --build . --config %PRJ_CFG% --parallel 2 --target testdeps
     ))
 
@@ -347,12 +347,12 @@ test_script:
       set ACURL=-ac %POSIX_PATH_PREFIX%/c/msys64/usr/bin/curl.exe )
   - if exist C:/Windows/System32/curl.exe (
       set ACURL=-ac %POSIX_PATH_PREFIX%/c/Windows/System32/curl.exe )
-  - if %TESTING%==ON (
-      if %BUILD_SYSTEM%==CMake (
+  - if "%TESTING%" == "ON" (
+      if "%BUILD_SYSTEM%" == "CMake" (
         set TFLAGS=%ACURL% %DISABLED_TESTS% &&
         cmake --build . --config %PRJ_CFG% --target test-ci
       ) else (
-      if %BUILD_SYSTEM%==autotools (
+      if "%BUILD_SYSTEM%" == "autotools" (
         bash.exe -e -l -c "cd %POSIX_PATH_PREFIX%/c/projects/curl && make V=1 TFLAGS='%ACURL% %DISABLED_TESTS%' test-ci"
       ) else (
         bash.exe -e -l -c "cd %POSIX_PATH_PREFIX%/c/projects/curl/tests && ./runtests.pl -a -p !flaky -r -rm %ACURL% %DISABLED_TESTS%"
