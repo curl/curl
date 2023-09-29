@@ -132,3 +132,22 @@ if(NOT CMAKE_CROSSCOMPILING)
     }" HAVE_POLL_FINE)
   endif()
 endif()
+
+if(NOT DEFINED HAVE_CLOCK_GETTIME_MONOTONIC_RAW)
+  set(_save_epilogue "${_source_epilogue}")
+  set(_source_epilogue "#undef inline")
+
+  add_header_include(HAVE_SYS_TYPES_H "sys/types.h")
+  add_header_include(HAVE_SYS_TIME_H "sys/time.h")
+
+  check_c_source_compiles("${_source_epilogue}
+#include <time.h>
+int main(void)
+{
+  struct timespec ts;
+  (void)clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
+  return 0;
+}" HAVE_CLOCK_GETTIME_MONOTONIC_RAW)
+
+  set(_source_epilogue "${_save_epilogue}")
+endif()
