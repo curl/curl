@@ -83,11 +83,11 @@ Fetch two files and store them with their remote names:
 
 To ftp files using name and password, include them in the URL like:
 
-    curl ftp://name:passwd@machine.domain:port/full/path/to/file
+    curl ftp://name:passwd@ftp.server.example:port/full/path/to/file
 
 or specify them with the `-u` flag like
 
-    curl -u name:passwd ftp://machine.domain:port/full/path/to/file
+    curl -u name:passwd ftp://ftp.server.example:port/full/path/to/file
 
 ### FTPS
 
@@ -113,11 +113,11 @@ matching public key file must be specified using the `--pubkey` option.
 Curl also supports user and password in HTTP URLs, thus you can pick a file
 like:
 
-    curl http://name:passwd@machine.domain/full/path/to/file
+    curl http://name:passwd@http.server.example/full/path/to/file
 
 or specify user and password separately like in
 
-    curl -u name:passwd http://machine.domain/full/path/to/file
+    curl -u name:passwd http://http.server.example/full/path/to/file
 
 HTTP offers many different methods of authentication and curl supports
 several: Basic, Digest, NTLM and Negotiate (SPNEGO). Without telling which
@@ -174,9 +174,9 @@ curl supports the `-u`, `-Q` and `--ftp-account` options that can be used to
 set up transfers through many FTP proxies. For example, a file can be uploaded
 to a remote FTP server using a Blue Coat FTP proxy with the options:
 
-    curl -u "username@ftp.server Proxy-Username:Remote-Pass"
+    curl -u "username@ftp.server.example Proxy-Username:Remote-Pass"
       --ftp-account Proxy-Password --upload-file local-file
-      ftp://my-ftp.proxy.server:21/remote/upload/path/
+      ftp://my-ftp.proxy.example:21/remote/upload/path/
 
 See the manual for your FTP proxy to determine the form it expects to set up
 transfers, and curl's `-v` option to see exactly what curl is sending.
@@ -447,7 +447,7 @@ path beginning with `/foo`.
 
 Example, get a page that wants my name passed in a cookie:
 
-    curl -b "name=Daniel" www.sillypage.com
+    curl -b "name=Daniel" www.example.com
 
 Curl also has the ability to use previously received cookies in following
 sessions. If you get cookies from a server and store them in a file in a
@@ -524,12 +524,12 @@ for a specified time.
 To have curl abort the download if the speed is slower than 3000 bytes per
 second for 1 minute, run:
 
-    curl -Y 3000 -y 60 www.far-away-site.com
+    curl -Y 3000 -y 60 www.far-away.example.com
 
 This can be used in combination with the overall time limit, so that the above
 operation must be completed in whole within 30 minutes:
 
-    curl -m 1800 -Y 3000 -y 60 www.far-away-site.com
+    curl -m 1800 -Y 3000 -y 60 www.far-away.example.com
 
 Forcing curl not to transfer data faster than a given rate is also possible,
 which might be useful if you are using a limited bandwidth connection and you
@@ -538,11 +538,11 @@ do not want your transfer to use all of it (sometimes referred to as
 
 Make curl transfer data no faster than 10 kilobytes per second:
 
-    curl --limit-rate 10K www.far-away-site.com
+    curl --limit-rate 10K www.far-away.example.com
 
 or
 
-    curl --limit-rate 10240 www.far-away-site.com
+    curl --limit-rate 10240 www.far-away.example.com
 
 Or prevent curl from uploading data faster than 1 megabyte per second:
 
@@ -583,7 +583,7 @@ up to the first characters of each line are ignored.
 Prevent curl from reading the default file by using -q as the first command
 line parameter, like:
 
-    curl -q www.thatsite.com
+    curl -q www.example.org
 
 Force curl to get and display a local help page in case it is invoked without
 URL by making a config file similar to:
@@ -607,7 +607,7 @@ flag.
 Example, send the header `X-you-and-me: yes` to the server when getting a
 page:
 
-    curl -H "X-you-and-me: yes" www.love.com
+    curl -H "X-you-and-me: yes" love.example.com
 
 This can also be useful in case you want curl to send a different text in a
 header than it normally does. The `-H` header you specify then replaces the
@@ -615,7 +615,7 @@ header curl would normally send. If you replace an internal header with an
 empty one, you prevent that header from being sent. To prevent the `Host:`
 header from being used:
 
-    curl -H "Host:" www.server.com
+    curl -H "Host:" server.example.com
 
 ## FTP and Path Names
 
@@ -651,7 +651,7 @@ to open another port and await another connection performed by the
 client. This is good if the client is behind a firewall that does not allow
 incoming connections.
 
-    curl ftp.download.com
+    curl ftp.example.com
 
 If the server, for example, is behind a firewall that does not allow
 connections on ports other than 21 (or if it just does not support the `PASV`
@@ -663,16 +663,16 @@ The `-P` flag to curl supports a few different options. Your machine may have
 several IP-addresses and/or network interfaces and curl allows you to select
 which of them to use. Default address can also be used:
 
-    curl -P - ftp.download.com
+    curl -P - ftp.example.com
 
 Download with `PORT` but use the IP address of our `le0` interface (this does
 not work on Windows):
 
-    curl -P le0 ftp.download.com
+    curl -P le0 ftp.example.com
 
 Download with `PORT` but use 192.168.0.10 as our IP address to use:
 
-    curl -P 192.168.0.10 ftp.download.com
+    curl -P 192.168.0.10 ftp.example.com
 
 ## Network Interface
 
@@ -865,7 +865,7 @@ information from the previous transfer you want to extract.
 To display the amount of bytes downloaded together with some text and an
 ending newline:
 
-    curl -w 'We downloaded %{size_download} bytes\n' www.download.com
+    curl -w 'We downloaded %{size_download} bytes\n' www.example.com
 
 ## Kerberos FTP Transfer
 

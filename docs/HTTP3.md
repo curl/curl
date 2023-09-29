@@ -247,21 +247,21 @@ Run in the `C:/Program Files/msh3/lib` directory, copy `curl.exe` to that
 directory, or copy `msquic.dll` and `msh3.dll` from that directory to the
 `curl.exe` directory. For example:
 
-     % C:\Program Files\msh3\lib> F:\curl\builds\libcurl-vc-x64-release-dll-ipv6-sspi-schannel-msh3\bin\curl.exe --http3 https://www.google.com
+     % C:\Program Files\msh3\lib> F:\curl\builds\libcurl-vc-x64-release-dll-ipv6-sspi-schannel-msh3\bin\curl.exe --http3 https://curl.se/
 
 # `--http3`
 
 Use only HTTP/3:
 
-    curl --http3-only https://nghttp2.org:4433/
+    curl --http3-only https://example.org:4433/
 
 Use HTTP/3 with fallback to HTTP/2 or HTTP/1.1 (see "HTTPS eyeballing" below):
 
-    curl --http3 https://nghttp2.org:4433/
+    curl --http3 https://example.org:4433/
 
 Upgrade via Alt-Svc:
 
-    curl --alt-svc altsvc.cache https://quic.aiortc.org/
+    curl --alt-svc altsvc.cache https://curl.se/
 
 See this [list of public HTTP/3 servers](https://bagder.github.io/HTTP3-test/)
 

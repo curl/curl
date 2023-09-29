@@ -8,7 +8,7 @@ See-also: remote-name remote-name-all remote-header-name
 Category: important curl
 Example: -o file $URL
 Example: "http://{one,two}.example.com" -o "file_#1.txt"
-Example: "http://{site,host}.host[1-5].com" -o "#1_#2"
+Example: "http://{site,host}.host[1-5].example" -o "#1_#2"
 Example: -o file $URL -o file2 https://example.net
 Added: 4.0
 Multi: append
@@ -22,7 +22,7 @@ string for the URL being fetched. Like in:
 
 or use several variables like:
 
- curl "http://{site,host}.host[1-5].com" -o "#1_#2"
+ curl "http://{site,host}.host[1-5].example" -o "#1_#2"
 
 You may use this option as many times as the number of URLs you have. For
 example, if you specify two URLs on the same command line, you can use it like

@@ -555,7 +555,7 @@
  cookie file at the end of an operation:
 
     curl --cookie cookies.txt --cookie-jar newcookies.txt \
-    http://www.example.com
+      http://www.example.com
 
 # HTTPS
 

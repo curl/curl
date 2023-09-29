@@ -84,7 +84,7 @@ static void show_dir_errno(struct GlobalConfig *global, const char *name)
 /*
  * Create the needed directory hierarchy recursively in order to save
  *  multi-GETs in file output, ie:
- *  curl "http://my.site/dir[1-5]/file[1-5].txt" -o "dir#1/file#2.txt"
+ *  curl "http://example.org/dir[1-5]/file[1-5].txt" -o "dir#1/file#2.txt"
  *  should create all the dir* automagically
  */
 
