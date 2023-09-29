@@ -1553,7 +1553,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           break;
         }
 
-        for (item = config->blocked_domains; item != NULL; item = item->next) {
+        for(item = config->blocked_domains; item; item = item->next) {
           my_setopt(curl, CURLOPT_BLOCK_DOMAIN, item->data);
         }
 
