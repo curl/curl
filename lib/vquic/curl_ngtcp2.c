@@ -648,10 +648,13 @@ static CURLcode quic_ssl_ctx(WOLFSSL_CTX **pssl_ctx,
     const char * const ssl_capath = conn->ssl_config.CApath;
 
     wolfSSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_PEER, NULL);
-    if(conn->ssl_config.CAfile || conn->ssl_config.CApath) {
+    if(ssl_cafile || ssl_capath) {
       /* tell wolfSSL where to find CA certificates that are used to verify
          the server's certificate. */
-      if(!wolfSSL_CTX_load_verify_locations(ssl_ctx, ssl_cafile, ssl_capath)) {
+      int rc =
+        wolfSSL_CTX_load_verify_locations_ex(ssl_ctx, ssl_cafile, ssl_capath,
+                                             WOLFSSL_LOAD_FLAG_IGNORE_ERR);
+      if(SSL_SUCCESS != rc) {
         /* Fail if we insist on successfully verifying the server. */
         failf(data, "error setting certificate verify locations:"
               "  CAfile: %s CApath: %s",
