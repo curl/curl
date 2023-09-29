@@ -571,7 +571,9 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     if(result)
       return result;
 
-    Curl_pgrsSetDownloadCounter(data, bytecount);
+    result = Curl_pgrsSetDownloadCounter(data, bytecount);
+    if(result)
+      return result;
 
     if(Curl_pgrsUpdate(data))
       result = CURLE_ABORTED_BY_CALLBACK;

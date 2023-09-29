@@ -108,22 +108,18 @@
 #define HAVE_POLL_FINE 1
 #define HAVE_POLL_H 1
 #define HAVE_PTHREAD_H 1
-#define HAVE_SETJMP_H 1
 #define HAVE_SETLOCALE 1
 
 #define HAVE_SIGACTION 1
 #define HAVE_SIGNAL 1
-#define HAVE_SIGNAL_H 1
 #define HAVE_SIGSETJMP 1
 #define HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID 1
 #define HAVE_SOCKET 1
 #define HAVE_SSL_GET_SHUTDOWN 1
 #define HAVE_STDBOOL_H 1
 #define HAVE_STDINT_H 1
-#define HAVE_STDLIB_H 1
 #define HAVE_STRCASECMP 1
 #define HAVE_STRDUP 1
-#define HAVE_STRING_H 1
 #define HAVE_STRTOK_R 1
 #define HAVE_STRTOLL 1
 #define HAVE_STRUCT_TIMEVAL 1
@@ -136,15 +132,12 @@
 #define HAVE_SYS_TYPES_H 1
 #define HAVE_SYS_UN_H 1
 #define HAVE_TERMIOS_H 1
-#define HAVE_TIME_H 1
 #define HAVE_UNISTD_H 1
 #define HAVE_UTIME 1
 #define HAVE_UTIME_H 1
 
 #define HAVE_POSIX_STRERROR_R 1
 #define HAVE_STRERROR_R 1
-
-#define TIME_WITH_SYS_TIME 1
 #define USE_MANUAL 1
 
 #define __attribute__(x)

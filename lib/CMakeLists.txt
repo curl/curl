@@ -122,18 +122,23 @@ if(NOT DEFINED SHARE_LIB_OBJECT)
   endif()
 endif()
 
+if(WIN32)
+  # Define CURL_STATICLIB always, to disable __declspec(dllexport) for exported
+  # libcurl symbols. We handle exports via libcurl.def instead. Except with
+  # symbol hiding disabled or debug mode enabled, when we export _all_ symbols
+  # from libcurl DLL, without using libcurl.def.
+  add_definitions("-DCURL_STATICLIB")
+endif()
+
 if(SHARE_LIB_OBJECT)
   set(LIB_OBJECT "libcurl_object")
   add_library(${LIB_OBJECT} OBJECT ${HHEADERS} ${CSOURCES})
   target_link_libraries(${LIB_OBJECT} PRIVATE ${CURL_LIBS})
   set_target_properties(${LIB_OBJECT} PROPERTIES
-    COMPILE_DEFINITIONS "BUILDING_LIBCURL"
-    INTERFACE_COMPILE_DEFINITIONS "CURL_STATICLIB"
     POSITION_INDEPENDENT_CODE ON)
   if(HIDES_CURL_PRIVATE_SYMBOLS)
-    set_target_properties(${LIB_OBJECT} PROPERTIES
-      COMPILE_DEFINITIONS "CURL_HIDDEN_SYMBOLS"
-      COMPILE_FLAGS "${CURL_CFLAG_SYMBOLS_HIDE}")
+    set_property(TARGET ${LIB_OBJECT} APPEND PROPERTY COMPILE_FLAGS "${CURL_CFLAG_SYMBOLS_HIDE}")
+    set_property(TARGET ${LIB_OBJECT} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_HIDDEN_SYMBOLS")
   endif()
   if(CURL_HAS_LTO)
     set_target_properties(${LIB_OBJECT} PROPERTIES
@@ -160,12 +165,10 @@ if(BUILD_STATIC_LIBS)
   set_target_properties(${LIB_STATIC} PROPERTIES
     PREFIX "" OUTPUT_NAME "${LIBCURL_OUTPUT_NAME}"
     SUFFIX "${STATIC_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}"
-    COMPILE_DEFINITIONS "BUILDING_LIBCURL"
     INTERFACE_COMPILE_DEFINITIONS "CURL_STATICLIB")
   if(HIDES_CURL_PRIVATE_SYMBOLS)
-    set_target_properties(${LIB_STATIC} PROPERTIES
-      COMPILE_DEFINITIONS "CURL_HIDDEN_SYMBOLS"
-      COMPILE_FLAGS "${CURL_CFLAG_SYMBOLS_HIDE}")
+    set_property(TARGET ${LIB_STATIC} APPEND PROPERTY COMPILE_FLAGS "${CURL_CFLAG_SYMBOLS_HIDE}")
+    set_property(TARGET ${LIB_STATIC} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_HIDDEN_SYMBOLS")
   endif()
   if(CURL_HAS_LTO)
     set_target_properties(${LIB_STATIC} PROPERTIES
@@ -187,19 +190,20 @@ if(BUILD_SHARED_LIBS)
   add_library(${LIB_SHARED} SHARED ${LIB_SOURCE})
   add_library(${PROJECT_NAME}::${LIB_SHARED} ALIAS ${LIB_SHARED})
   if(WIN32)
-    set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES libcurl.rc ${CURL_SOURCE_DIR}/libcurl.def)
+    set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES libcurl.rc)
+    if(HIDES_CURL_PRIVATE_SYMBOLS)
+      set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES "${CURL_SOURCE_DIR}/libcurl.def")
+    endif()
   endif()
   target_link_libraries(${LIB_SHARED} PRIVATE ${CURL_LIBS})
   # Remove the "lib" prefix since the library is already named "libcurl".
   set_target_properties(${LIB_SHARED} PROPERTIES
     PREFIX "" OUTPUT_NAME "${LIBCURL_OUTPUT_NAME}"
     IMPORT_PREFIX "" IMPORT_SUFFIX "${IMPORT_LIB_SUFFIX}${CMAKE_IMPORT_LIBRARY_SUFFIX}"
-    COMPILE_DEFINITIONS "BUILDING_LIBCURL"
     POSITION_INDEPENDENT_CODE ON)
   if(HIDES_CURL_PRIVATE_SYMBOLS)
-    set_target_properties(${LIB_SHARED} PROPERTIES
-      COMPILE_DEFINITIONS "CURL_HIDDEN_SYMBOLS"
-      COMPILE_FLAGS "${CURL_CFLAG_SYMBOLS_HIDE}")
+    set_property(TARGET ${LIB_SHARED} APPEND PROPERTY COMPILE_FLAGS "${CURL_CFLAG_SYMBOLS_HIDE}")
+    set_property(TARGET ${LIB_SHARED} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_HIDDEN_SYMBOLS")
   endif()
   if(CURL_HAS_LTO)
     set_target_properties(${LIB_SHARED} PROPERTIES

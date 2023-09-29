@@ -71,8 +71,9 @@ TEST_F = -a -p -r
 TEST_T = -a -t
 TEST_E = -a -e
 
-# !flaky means that it'll skip all tests using the flaky keyword
-TEST_NF = -a -p !flaky
+# ~<keyword> means that it will run all tests matching the keyword, but will
+# ignore their results (since these ones are likely to fail for no good reason)
+TEST_NF = -a -p ~flaky ~timing-dependent
 
 # special CI target derived from nonflaky with CI-specific flags
 TEST_CI = $(TEST_NF) -rm

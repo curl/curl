@@ -45,8 +45,10 @@
 #include "vquic_int.h"
 #include "curl_quiche.h"
 #include "transfer.h"
+#include "inet_pton.h"
 #include "vtls/openssl.h"
 #include "vtls/keylog.h"
+#include "vtls/vtls.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -147,8 +149,8 @@ static CURLcode quic_x509_store_setup(struct Curl_cfilter *cf,
         SSL_CTX_set_verify(ctx->sslctx, SSL_VERIFY_PEER, NULL);
         /* tell OpenSSL where to find CA certificates that are used to verify
            the server's certificate. */
-        if(!SSL_CTX_load_verify_locations(
-              ctx->sslctx, ssl_cafile, ssl_capath)) {
+        if(!SSL_CTX_load_verify_locations(ctx->sslctx, ssl_cafile,
+                                          ssl_capath)) {
           /* Fail if we insist on successfully verifying the server. */
           failf(data, "error setting certificate verify locations:"
                 "  CAfile: %s CApath: %s",
@@ -163,7 +165,7 @@ static CURLcode quic_x509_store_setup(struct Curl_cfilter *cf,
       else {
         /* verifying the peer without any CA certificates won't work so
            use openssl's built-in default as fallback */
-        SSL_CTX_set_default_verify_paths(ssl_ctx);
+        SSL_CTX_set_default_verify_paths(ctx->sslctx);
       }
 #endif
     }
@@ -175,8 +177,10 @@ static CURLcode quic_x509_store_setup(struct Curl_cfilter *cf,
 static CURLcode quic_ssl_setup(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
+  unsigned char checkip[16];
+  struct connectdata *conn = data->conn;
+  const char *curves = conn->ssl_config.curves;
 
-  (void)data;
   DEBUGASSERT(!ctx->sslctx);
   ctx->sslctx = SSL_CTX_new(TLS_method());
   if(!ctx->sslctx)
@@ -194,12 +198,30 @@ static CURLcode quic_ssl_setup(struct Curl_cfilter *cf, struct Curl_easy *data)
     SSL_CTX_set_keylog_callback(ctx->sslctx, keylog_callback);
   }
 
+  if(curves && !SSL_CTX_set1_curves_list(ctx->sslctx, curves)) {
+    failf(data, "failed setting curves list for QUIC: '%s'", curves);
+    return CURLE_SSL_CIPHER;
+  }
+
   ctx->ssl = SSL_new(ctx->sslctx);
   if(!ctx->ssl)
     return CURLE_QUIC_CONNECT_ERROR;
 
   SSL_set_app_data(ctx->ssl, cf);
-  SSL_set_tlsext_host_name(ctx->ssl, cf->conn->host.name);
+
+  if((0 == Curl_inet_pton(AF_INET, cf->conn->host.name, checkip))
+#ifdef ENABLE_IPV6
+     && (0 == Curl_inet_pton(AF_INET6, cf->conn->host.name, checkip))
+#endif
+     ) {
+    char *snihost = Curl_ssl_snihost(data, cf->conn->host.name, NULL);
+    if(!snihost || !SSL_set_tlsext_host_name(ctx->ssl, snihost)) {
+      failf(data, "Failed set SNI");
+      SSL_free(ctx->ssl);
+      ctx->ssl = NULL;
+      return CURLE_QUIC_CONNECT_ERROR;
+    }
+  }
 
   return CURLE_OK;
 }

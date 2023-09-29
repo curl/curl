@@ -157,6 +157,8 @@ deepcode
 DELE
 DER
 deselectable
+Deserialized
+deserialization
 destructor
 detections
 dev
@@ -344,6 +346,10 @@ interoperable
 interoperates
 IoT
 ipadOS
+IPFS
+IPNS
+ipld
+trustless
 IPCXN
 IPv
 IPv4
@@ -854,6 +860,7 @@ Viktor
 VM
 VMS
 VMware
+vnd
 VRF
 VRFY
 VSE

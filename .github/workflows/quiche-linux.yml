@@ -72,6 +72,7 @@ jobs:
             --enable-debug
             --with-quiche=/home/runner/quiche/target/release
             --with-test-nghttpx="$HOME/nghttpx/bin/nghttpx"
+            --with-ca-fallback
 
     steps:
     - run: |
@@ -202,7 +203,7 @@ jobs:
       env:
         TFLAGS: "${{ matrix.build.tflags }}"
 
-    - run: pytest tests
+    - run: pytest -v tests
       name: 'run pytest'
       env:
         TFLAGS: "${{ matrix.build.tflags }}"

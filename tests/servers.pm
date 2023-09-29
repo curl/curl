@@ -2988,8 +2988,8 @@ sub subvariables {
     # used for time-out tests and that would work on most hosts as these
     # adjust for the startup/check time for this particular host. We needed to
     # do this to make the test suite run better on very slow hosts.
-    my $ftp2 = $ftpchecktime * 2;
-    my $ftp3 = $ftpchecktime * 3;
+    my $ftp2 = $ftpchecktime * 8;
+    my $ftp3 = $ftpchecktime * 12;
 
     $$thing =~ s/${prefix}FTPTIME2/$ftp2/g;
     $$thing =~ s/${prefix}FTPTIME3/$ftp3/g;

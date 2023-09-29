@@ -28,39 +28,21 @@
 #
 # Use it like this:
 #
-# $ ./scripts/singleuse.pl lib/.libs/libcurl.a
+# $ ./scripts/singleuse.pl [--unit] lib/.libs/libcurl.a
 #
-# Be aware that it might cause false positives due to various build options.
+# --unit : built to support unit tests
 #
+
+my $unittests;
+if($ARGV[0] eq "--unit") {
+    $unittests = "tests/unit ";
+    shift @ARGV;
+}
 
 my $file = $ARGV[0];
 
 my %wl = (
-    'Curl_none_cert_status_request' => 'multiple TLS backends',
-    'Curl_none_check_cxn' => 'multiple TLS backends',
-    'Curl_none_cleanup' => 'multiple TLS backends',
-    'Curl_none_close_all' => 'multiple TLS backends',
-    'Curl_none_data_pending' => 'multiple TLS backends',
-    'Curl_none_engines_list' => 'multiple TLS backends',
-    'Curl_none_init' => 'multiple TLS backends',
-    'Curl_none_md5sum' => 'multiple TLS backends',
-    'Curl_none_random' => 'multiple TLS backends',
-    'Curl_none_session_free' => 'multiple TLS backends',
-    'Curl_none_set_engine' => 'multiple TLS backends',
-    'Curl_none_set_engine_default' => 'multiple TLS backends',
-    'Curl_none_shutdown' => 'multiple TLS backends',
-    'Curl_multi_dump' => 'debug build only',
-    'Curl_parse_port' => 'UNITTEST',
-    'Curl_shuffle_addr' => 'UNITTEST',
-    'de_cleanup' => 'UNITTEST',
-    'doh_decode' => 'UNITTEST',
-    'doh_encode' => 'UNITTEST',
-    'Curl_auth_digest_get_pair' => 'by digest_sspi',
     'curlx_uztoso' => 'cmdline tool use',
-    'curlx_uztoul' => 'by krb5_sspi',
-    'curlx_uitous' => 'by schannel',
-    'Curl_islower' => 'by curl_fnmatch',
-    'getaddressinfo' => 'UNITTEST',
     );
 
 my %api = (
@@ -92,6 +74,7 @@ my %api = (
     'curl_global_init' => 'API',
     'curl_global_init_mem' => 'API',
     'curl_global_sslset' => 'API',
+    'curl_global_trace' => 'API',
     'curl_maprintf' => 'API',
     'curl_mfprintf' => 'API',
     'curl_mime_addpart' => 'API',
@@ -113,6 +96,7 @@ my %api = (
     'curl_multi_assign' => 'API',
     'curl_multi_cleanup' => 'API',
     'curl_multi_fdset' => 'API',
+    'curl_multi_get_handles' => 'API',
     'curl_multi_info_read' => 'API',
     'curl_multi_init' => 'API',
     'curl_multi_perform' => 'API',
@@ -160,6 +144,23 @@ my %api = (
     'curl_easy_perform_ev' => 'debug-build',
     );
 
+sub doublecheck {
+    my ($f, $used) = @_;
+    open(F, "git grep -le '$f\\W' -- lib ${unittests}packages|");
+    my @also;
+    while(<F>) {
+        my $e = $_;
+        chomp $e;
+        if($e =~ /\.[c]$/) {
+            if($e !~ /^lib\/${used}\.c/) {
+                push @also, $e;
+            }
+        }
+    }
+    close(F);
+    return @also;
+}
+
 open(N, "nm $file|") ||
     die;
 
@@ -206,8 +207,15 @@ for(sort keys %exist) {
             #print "$_ is WL\n";
         }
         else {
-            printf "%s is defined in %s, but not used outside\n", $_, $exist{$_};
-            $err++;
+            my $c = $_;
+            my @also = doublecheck($c, $exist{$c});
+            if(!scalar(@also)) {
+                printf "%s in %s\n", $c, $exist{$c};
+                $err++;
+            }
+            #    foreach my $a (@also) {
+            #        print "  $a\n";
+            #    }
         }
     }
     elsif($_ =~ /^curl_/) {

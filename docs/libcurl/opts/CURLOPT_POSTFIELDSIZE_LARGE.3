@@ -36,7 +36,7 @@ If you want to post static data to the server without having libcurl do a
 strlen() to measure the data size, this option must be used. When this option
 is used you can post fully binary data, which otherwise is likely to fail. If
 this size is set to -1, libcurl uses strlen() to get the size or relies on the
-\fICURLOPT_READFUNCTION\fP (if used) to signal the end of data.
+\fICURLOPT_READFUNCTION(3)\fP (if used) to signal the end of data.
 .SH DEFAULT
 -1
 .SH PROTOCOLS
@@ -63,5 +63,6 @@ Along with HTTP
 .SH RETURN VALUE
 Returns CURLE_OK if HTTP is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
-.BR CURLOPT_POSTFIELDS "(3), " CURLOPT_COPYPOSTFIELDS "(3), "
-.BR CURLOPT_POSTFIELDSIZE "(3), "
+.BR CURLOPT_COPYPOSTFIELDS (3),
+.BR CURLOPT_POSTFIELDS (3),
+.BR CURLOPT_POSTFIELDSIZE (3)

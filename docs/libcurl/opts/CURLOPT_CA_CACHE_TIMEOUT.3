@@ -37,7 +37,7 @@ time any cached certificate store it has in memory may be kept and reused for
 new connections. Once the timeout has expired, a subsequent fetch requiring a
 certificate has to reload it.
 
-Building a certificate store from a \fICURLOPT_CAINFO\fP file is a slow
+Building a certificate store from a \fICURLOPT_CAINFO(3)\fP file is a slow
 operation so curl may cache the generated certificate store internally to speed
 up future connections.
 
@@ -73,6 +73,8 @@ functionality is the OpenSSL (and forks) backend.
 .SH RETURN VALUE
 Returns CURLE_OK
 .SH "SEE ALSO"
-.BR CURLOPT_CAINFO "(3), "
-.BR CURLOPT_CAINFO_BLOB "(3), " CURLOPT_CAPATH "(3), "
-.BR CURLOPT_SSL_VERIFYPEER "(3), " CURLOPT_SSL_VERIFYHOST "(3), "
+.BR CURLOPT_CAINFO (3),
+.BR CURLOPT_CAINFO_BLOB (3),
+.BR CURLOPT_CAPATH (3),
+.BR CURLOPT_SSL_VERIFYPEER (3),
+.BR CURLOPT_SSL_VERIFYHOST (3)

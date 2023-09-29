@@ -141,17 +141,11 @@
 /* Define if you have the `signal' function. */
 #define HAVE_SIGNAL
 
-/* Define if you have the <signal.h> header file. */
-#define HAVE_SIGNAL_H
-
 /* Define if you have the `socket' function. */
 #define HAVE_SOCKET
 
 /* Define if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
-
-/* Define if you have the <stdlib.h> header file. */
-#define HAVE_STDLIB_H
 
 /* Define if you have the `strcasecmp' function. */
 #undef HAVE_STRCASECMP
@@ -167,9 +161,6 @@
 
 /* Define if you have the <strings.h> header file. */
 #undef HAVE_STRINGS_H
-
-/* Define if you have the <string.h> header file. */
-#define HAVE_STRING_H
 
 /* Define if you have the `strtok_r' function. */
 #undef HAVE_STRTOK_R
@@ -204,9 +195,6 @@
 /* Define if you have the <termio.h> header file. */
 #undef HAVE_TERMIO_H
 
-/* Define if you have the <time.h> header file. */
-#undef HAVE_TIME_H
-
 /* Define if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H
 
@@ -224,9 +212,6 @@
 
 /* Define if you have the ANSI C header files. */
 #undef STDC_HEADERS
-
-/* Define if you can safely include both <sys/time.h> and <time.h>. */
-#undef TIME_WITH_SYS_TIME
 
 /* Version number of package */
 #undef VERSION

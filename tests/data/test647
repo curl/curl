@@ -38,13 +38,13 @@ It may contain any type of data.
 # Verify data after the test has been "shot"
 <verify>
 <strippart>
-s/^--------------------------[a-z0-9]*/------------------------------/
-s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
+s/^--------------------------[A-Za-z0-9]*/------------------------------/
+s/boundary=------------------------[A-Za-z0-9]*/boundary=----------------------------/
 </strippart>
 <protocol>
 A001 CAPABILITY
 A002 LOGIN user secret
-A003 APPEND %TESTNUMBER (\Seen) {892}
+A003 APPEND %TESTNUMBER (\Seen) {940}
 A004 LOGOUT
 </protocol>
 <upload>

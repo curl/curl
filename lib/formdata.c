@@ -789,6 +789,20 @@ static CURLcode setname(curl_mimepart *part, const char *name, size_t len)
   return res;
 }
 
+/* wrap call to fseeko so it matches the calling convetion of callback */
+static int fseeko_wrapper(void *stream, curl_off_t offset, int whence)
+{
+#if defined(HAVE_FSEEKO)
+  return fseeko(stream, (off_t)offset, whence);
+#elif defined(HAVE__FSEEKI64)
+  return _fseeki64(stream, (__int64)offset, whence);
+#else
+  if(offset > LONG_MAX)
+    return -1;
+  return fseek(stream, (long)offset, whence);
+#endif
+}
+
 /*
  * Curl_getformdata() converts a linked list of "meta data" into a mime
  * structure. The input list is in 'post', while the output is stored in
@@ -874,8 +888,7 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
                compatibility: use of "-" pseudo file name should be avoided. */
             result = curl_mime_data_cb(part, (curl_off_t) -1,
                                        (curl_read_callback) fread,
-                                       CURLX_FUNCTION_CAST(curl_seek_callback,
-                                                           fseek),
+                                       fseeko_wrapper,
                                        NULL, (void *) stdin);
           }
           else

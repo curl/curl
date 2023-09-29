@@ -1141,12 +1141,15 @@ static CURLcode tftp_receive_packet(struct Curl_easy *data)
         result = Curl_client_write(data, CLIENTWRITE_BODY,
                                    (char *)state->rpacket.data + 4,
                                    state->rbytes-4);
+        if(!result) {
+          k->bytecount += state->rbytes-4;
+          result = Curl_pgrsSetDownloadCounter(data,
+                                               (curl_off_t) k->bytecount);
+        }
         if(result) {
           tftp_state_machine(state, TFTP_EVENT_ERROR);
           return result;
         }
-        k->bytecount += state->rbytes-4;
-        Curl_pgrsSetDownloadCounter(data, (curl_off_t) k->bytecount);
       }
       break;
     case TFTP_EVENT_ERROR:

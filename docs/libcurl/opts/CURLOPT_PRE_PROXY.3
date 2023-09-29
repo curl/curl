@@ -43,8 +43,8 @@ option \fICURLOPT_PROXYPORT(3)\fP. If not specified, libcurl defaults to using
 port 1080 for proxies.
 
 A pre proxy is a SOCKS proxy that curl connects to before it connects to the
-HTTP(S) proxy specified in the \fICURLOPT_PROXY\fP option. The pre proxy can
-only be a SOCKS proxy.
+HTTP(S) proxy specified in the \fICURLOPT_PROXY(3)\fP option. The pre proxy
+can only be a SOCKS proxy.
 
 The pre proxy string should be prefixed with [scheme]:// to specify which kind
 of socks is used. Use socks4://, socks4a://, socks5:// or socks5h:// (the last
@@ -80,4 +80,5 @@ Added in 7.52.0
 Returns CURLE_OK if proxies are supported, CURLE_UNKNOWN_OPTION if not, or
 CURLE_OUT_OF_MEMORY if there was insufficient heap space.
 .SH "SEE ALSO"
-.BR CURLOPT_PROXY "(3), " CURLOPT_HTTPPROXYTUNNEL "(3), "
+.BR CURLOPT_PROXY (3),
+.BR CURLOPT_HTTPPROXYTUNNEL (3)

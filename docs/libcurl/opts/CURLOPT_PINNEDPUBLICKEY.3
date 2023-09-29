@@ -43,6 +43,9 @@ indicating its identity. A public key is extracted from this certificate and
 if it does not exactly match the public key provided to this option, curl
 aborts the connection before sending or receiving any data.
 
+This option is independent of option \fICURLOPT_SSL_VERIFYPEER(3)\fP. If you
+turn off that option then the peer is still verified by public key.
+
 On mismatch, \fICURLE_SSL_PINNEDPUBKEYNOTMATCH\fP is returned.
 
 The application does not have to keep the string around after setting this
@@ -118,14 +121,14 @@ sha256 support:
 
   7.54.1: Secure Transport on macOS 10.7+/iOS 10+
 
-  7.58.1: Schannel Windows XP SP3+
+  7.58.1: Schannel
 
 Other SSL backends not supported.
 .SH RETURN VALUE
 Returns CURLE_OK if TLS enabled, CURLE_UNKNOWN_OPTION if not, or
 CURLE_OUT_OF_MEMORY if there was insufficient heap space.
 .SH "SEE ALSO"
-.BR CURLOPT_SSL_VERIFYPEER "(3), "
-.BR CURLOPT_SSL_VERIFYHOST "(3), "
-.BR CURLOPT_CAINFO "(3), "
-.BR CURLOPT_CAPATH "(3), "
+.BR CURLOPT_CAINFO (3),
+.BR CURLOPT_CAPATH (3),
+.BR CURLOPT_SSL_VERIFYHOST (3),
+.BR CURLOPT_SSL_VERIFYPEER (3)

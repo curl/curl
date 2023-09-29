@@ -74,7 +74,7 @@ UNITTEST_START
 
   fail_unless(rc == 0, "curl_formget returned error");
 
-  fail_unless(total_size == 488, "curl_formget got wrong size back");
+  fail_unless(total_size == 518, "curl_formget got wrong size back");
 
   curl_formfree(post);
 
@@ -91,7 +91,7 @@ UNITTEST_START
 
   rc = curl_formget(post, &total_size, print_httppost_callback);
   fail_unless(rc == 0, "curl_formget returned error");
-  fail_unless(total_size == 851, "curl_formget got wrong size back");
+  fail_unless(total_size == 899, "curl_formget got wrong size back");
 
   curl_formfree(post);
 

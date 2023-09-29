@@ -36,8 +36,8 @@ Deprecated since 7.45.0. Use \fICURLINFO_ACTIVESOCKET(3)\fP instead.
 
 Pass a pointer to a long to receive the last socket used by this curl
 session. If the socket is no longer valid, -1 is returned. When you finish
-working with the socket, you must call curl_easy_cleanup() as usual and let
-libcurl close the socket and cleanup other resources associated with the
+working with the socket, you must call \fIcurl_easy_cleanup(3)\fP as usual and
+let libcurl close the socket and cleanup other resources associated with the
 handle. This is typically used in combination with
 \fICURLOPT_CONNECT_ONLY(3)\fP.
 
@@ -71,5 +71,7 @@ Added in 7.15.2
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
-.BR curl_easy_getinfo "(3), " curl_easy_setopt "(3), "
-.BR CURLINFO_ACTIVESOCKET "(3), "
+.BR curl_easy_getinfo (3),
+.BR curl_easy_setopt (3),
+.BR CURLINFO_ACTIVESOCKET (3),
+.BR CURLOPT_CONNECT_ONLY (3)

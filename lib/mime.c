@@ -1289,9 +1289,9 @@ curl_mime *curl_mime_init(struct Curl_easy *easy)
     mime->lastpart = NULL;
 
     memset(mime->boundary, '-', MIME_BOUNDARY_DASHES);
-    if(Curl_rand_hex(easy,
-                     (unsigned char *) &mime->boundary[MIME_BOUNDARY_DASHES],
-                     MIME_RAND_BOUNDARY_CHARS + 1)) {
+    if(Curl_rand_alnum(easy,
+                       (unsigned char *) &mime->boundary[MIME_BOUNDARY_DASHES],
+                       MIME_RAND_BOUNDARY_CHARS + 1)) {
       /* failed to get random separator, bail out */
       free(mime);
       return NULL;

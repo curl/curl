@@ -68,22 +68,6 @@
 #  define HAS_ALPN 1
 #endif
 
-#ifndef UNISP_NAME_A
-#define UNISP_NAME_A "Microsoft Unified Security Protocol Provider"
-#endif
-
-#ifndef UNISP_NAME_W
-#define UNISP_NAME_W L"Microsoft Unified Security Protocol Provider"
-#endif
-
-#ifndef UNISP_NAME
-#ifdef UNICODE
-#define UNISP_NAME  UNISP_NAME_W
-#else
-#define UNISP_NAME  UNISP_NAME_A
-#endif
-#endif
-
 #ifndef BCRYPT_CHACHA20_POLY1305_ALGORITHM
 #define BCRYPT_CHACHA20_POLY1305_ALGORITHM L"CHACHA20_POLY1305"
 #endif
@@ -108,31 +92,12 @@
 #define BCRYPT_SHA384_ALGORITHM L"SHA384"
 #endif
 
-/* Workaround broken compilers like MinGW.
-   Return the number of elements in a statically sized array.
-*/
-#ifndef ARRAYSIZE
-#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
-#endif
-
 #ifdef HAS_CLIENT_CERT_PATH
 #ifdef UNICODE
 #define CURL_CERT_STORE_PROV_SYSTEM CERT_STORE_PROV_SYSTEM_W
 #else
 #define CURL_CERT_STORE_PROV_SYSTEM CERT_STORE_PROV_SYSTEM_A
 #endif
-#endif
-
-#ifndef SP_PROT_SSL2_CLIENT
-#define SP_PROT_SSL2_CLIENT             0x00000008
-#endif
-
-#ifndef SP_PROT_SSL3_CLIENT
-#define SP_PROT_SSL3_CLIENT             0x00000008
-#endif
-
-#ifndef SP_PROT_TLS1_CLIENT
-#define SP_PROT_TLS1_CLIENT             0x00000080
 #endif
 
 #ifndef SP_PROT_TLS1_0_CLIENT
@@ -173,12 +138,6 @@
 
 #ifndef CALG_SHA_256
 #  define CALG_SHA_256 0x0000800c
-#endif
-
-/* Work around typo in classic MinGW's w32api up to version 5.0,
-   see https://osdn.net/projects/mingw/ticket/38391 */
-#if !defined(ALG_CLASS_DHASH) && defined(ALG_CLASS_HASH)
-#define ALG_CLASS_DHASH ALG_CLASS_HASH
 #endif
 
 #ifndef PKCS12_NO_PERSIST_KEY
@@ -2752,8 +2711,7 @@ static void schannel_checksum(const unsigned char *input,
     if(!CryptCreateHash(hProv, algId, 0, 0, &hHash))
       break; /* failed */
 
-    /* workaround for original MinGW, should be (const BYTE*) */
-    if(!CryptHashData(hHash, (BYTE*)input, (DWORD)inputlen, 0))
+    if(!CryptHashData(hHash, input, (DWORD)inputlen, 0))
       break; /* failed */
 
     /* get hash size */

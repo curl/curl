@@ -56,9 +56,10 @@ data in. Like in the getinmemory example:
 https://curl.se/libcurl/c/getinmemory.html
 .SH AVAILABILITY
 Available in all libcurl versions. This option was formerly known as
-\fICURLOPT_FILE\fP, the name \fICURLOPT_WRITEDATA(3)\fP was introduced in
-7.9.7.
+CURLOPT_FILE, the name \fICURLOPT_WRITEDATA(3)\fP was added in 7.9.7.
 .SH RETURN VALUE
 This returns CURLE_OK.
 .SH "SEE ALSO"
-.BR CURLOPT_WRITEFUNCTION "(3), " CURLOPT_READDATA "(3), "
+.BR CURLOPT_WRITEFUNCTION (3),
+.BR CURLOPT_HEADERDATA (3),
+.BR CURLOPT_READDATA (3)

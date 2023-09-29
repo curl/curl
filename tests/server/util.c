@@ -23,9 +23,7 @@
  ***************************************************************************/
 #include "server_setup.h"
 
-#ifdef HAVE_SIGNAL_H
 #include <signal.h>
-#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -395,8 +393,7 @@ static struct timeval tvnow(void)
   ** is typically in the range of 10 milliseconds to 16 milliseconds.
   */
   struct timeval now;
-#if defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0600) && \
-    (!defined(__MINGW32__) || defined(__MINGW64_VERSION_MAJOR))
+#if defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0600)
   ULONGLONG milliseconds = GetTickCount64();
 #else
   DWORD milliseconds = GetTickCount();
@@ -704,8 +701,6 @@ void install_signal_handlers(bool keep_sigalrm)
 #ifdef WIN32
 #ifdef _WIN32_WCE
   typedef HANDLE curl_win_thread_handle_t;
-#elif defined(__MINGW32__) && !defined(__MINGW64_VERSION_MAJOR)
-  typedef unsigned long curl_win_thread_handle_t;
 #else
   typedef uintptr_t curl_win_thread_handle_t;
 #endif

@@ -29,7 +29,7 @@ Connection: close
 Content-Type: text/html
 
 -foo-
-</data>
+</data2>
 </reply>
 
 # Client-side
@@ -60,11 +60,11 @@ This is data from a file.
 </client>
 
 #
-# Verify data after the test has been "shot"
+# Verify data bbter the test has been "shot"
 <verify>
 <strippart>
-s/^--------------------------[a-z0-9]*/------------------------------/
-s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
+s/^--------------------------[A-Za-z0-9]*/------------------------------/
+s/boundary=------------------------[A-Za-z0-9]*/boundary=----------------------------/
 </strippart>
 # Note that the stripping above removes 12 bytes from every occurrence of the
 # boundary string and since 5 of them are in the body contents, we see
@@ -77,7 +77,7 @@ Transfer-Encoding: chunked
 Content-Type: multipart/form-data; boundary=----------------------------
 Expect: 100-continue
 
-361
+385
 ------------------------------
 Content-Disposition: form-data; name="fieldname"
 Content-Type: text/plain
@@ -105,9 +105,9 @@ Content-Type: text/whatever
 
 
 %if hyper
-A5
+AB
 %else
-a5
+ab
 %endif
 This is data from a file.
 
@@ -117,9 +117,9 @@ Content-Type: text/whatever
 
 
 %if hyper
-AF
+BB
 %else
-af
+bb
 %endif
 This is data from a file.
 
@@ -130,16 +130,16 @@ Content-Disposition: form-data; name="filecontents"
 
 
 %if hyper
-10F
+11B
 %else
-10f
+11b
 %endif
 This is data from a file.
 
 ------------------------------
 Content-Disposition: form-data; name="formlength"
 
-1367
+1433
 ------------------------------
 Content-Disposition: form-data; name="standardinput"
 Content-Type: application/octet-stream
@@ -148,7 +148,7 @@ Content-Type: application/octet-stream
 16
  Some data from stdin
 
-30
+36
 
 --------------------------------
 
@@ -161,7 +161,7 @@ Transfer-Encoding: chunked
 Content-Type: multipart/form-data; boundary=----------------------------
 Expect: 100-continue
 
-361
+385
 ------------------------------
 Content-Disposition: form-data; name="fieldname"
 Content-Type: text/plain
@@ -189,9 +189,9 @@ Content-Type: text/whatever
 
 
 %if hyper
-A5
+AB
 %else
-a5
+ab
 %endif
 This is data from a file.
 
@@ -201,9 +201,9 @@ Content-Type: text/whatever
 
 
 %if hyper
-AF
+BB
 %else
-af
+bb
 %endif
 This is data from a file.
 
@@ -214,16 +214,16 @@ Content-Disposition: form-data; name="filecontents"
 
 
 %if hyper
-10F
+11B
 %else
-10f
+11b
 %endif
 This is data from a file.
 
 ------------------------------
 Content-Disposition: form-data; name="formlength"
 
-1367
+1433
 ------------------------------
 Content-Disposition: form-data; name="standardinput"
 Content-Type: application/octet-stream
@@ -232,7 +232,7 @@ Content-Type: application/octet-stream
 16
  Some data from stdin
 
-30
+36
 
 --------------------------------
 

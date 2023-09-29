@@ -61,8 +61,9 @@ must be called \fBbefore\fP \fIcurl_global_init(3)\fP.
 
 The backend can be identified by the \fIid\fP
 (e.g. \fBCURLSSLBACKEND_OPENSSL\fP). The backend can also be specified via the
-\fIname\fP parameter for a case insensitive match (passing -1 as \fIid\fP). If
-both \fIid\fP and \fIname\fP are specified, the \fIname\fP is ignored.
+\fIname\fP parameter for a case insensitive match (passing
+\fBCURLSSLBACKEND_NONE\fP as \fIid\fP). If both \fIid\fP and \fIname\fP are
+specified, the \fIname\fP is ignored.
 
 If neither \fIid\fP nor \fPname\fP are specified, the function fails with
 \fBCURLSSLSET_UNKNOWN_BACKEND\fP and set the \fIavail\fP pointer to the
@@ -105,7 +106,7 @@ OpenSSL flavor and version number is use.
 
   /* list the available ones */
   const curl_ssl_backend **list;
-  curl_global_sslset((curl_sslbackend)-1, NULL, &list);
+  curl_global_sslset(CURLSSLBACKEND_NONE, NULL, &list);
 
   for(i = 0; list[i]; i++)
     printf("SSL backend #%d: '%s' (ID: %d)\\n",
@@ -128,5 +129,5 @@ has already been called, the function returns \fICURLSSLSET_TOO_LATE\fP.
 If this libcurl was built completely without SSL support, with no backends at
 all, this function returns \fICURLSSLSET_NO_BACKENDS\fP.
 .SH "SEE ALSO"
-.BR curl_global_init "(3), "
-.BR libcurl "(3) "
+.BR curl_global_init (3),
+.BR libcurl (3)

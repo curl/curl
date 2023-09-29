@@ -735,7 +735,9 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
       if(result)
         goto quit;
       dlsize++;
-      Curl_pgrsSetDownloadCounter(data, dlsize);
+      result = Curl_pgrsSetDownloadCounter(data, dlsize);
+      if(result)
+        goto quit;
     }
 
     if(ber)

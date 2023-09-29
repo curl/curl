@@ -634,6 +634,7 @@ evaluate:
         /* next attempt was started */
         CURL_TRC_CF(data, cf, "%s trying next", baller->name);
         ++ongoing;
+        Curl_expire(data, 0, EXPIRE_RUN_NOW);
       }
     }
   }
@@ -646,7 +647,7 @@ evaluate:
   /* Nothing connected, check the time before we might
    * start new ballers or return ok. */
   if((ongoing || not_started) && Curl_timeleft(data, &now, TRUE) < 0) {
-    failf(data, "Connection timeout after %ld ms",
+    failf(data, "Connection timeout after %" CURL_FORMAT_CURL_OFF_T " ms",
           Curl_timediff(now, data->progress.t_startsingle));
     return CURLE_OPERATION_TIMEDOUT;
   }
@@ -823,10 +824,9 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
     CURL_TRC_CF(data, cf, "created %s (timeout %"
                 CURL_FORMAT_TIMEDIFF_T "ms)",
                 ctx->baller[1]->name, ctx->baller[1]->timeoutms);
+    Curl_expire(data, data->set.happy_eyeballs_timeout,
+                EXPIRE_HAPPY_EYEBALLS);
   }
-
-  Curl_expire(data, data->set.happy_eyeballs_timeout,
-              EXPIRE_HAPPY_EYEBALLS);
 
   return CURLE_OK;
 }

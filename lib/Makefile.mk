@@ -375,6 +375,9 @@ distclean vclean: clean
 ifdef LOCAL
 
 CPPFLAGS += -DBUILDING_LIBCURL
+ifdef WIN32
+CPPFLAGS += -DCURL_STATICLIB
+endif
 
 ### Sources and targets
 
@@ -388,7 +391,9 @@ ifdef WIN32
 CURL_DLL_SUFFIX ?=
 libcurl_dll_LIBRARY := libcurl$(CURL_DLL_SUFFIX).dll
 libcurl_dll_a_LIBRARY := libcurl.dll.a
+ifeq ($(findstring -trackmem,$(CFG)),)
 CURL_LDFLAGS_LIB += $(PROOT)/libcurl.def
+endif
 ifdef MAP
 libcurl_map_LIBRARY := libcurl$(CURL_DLL_SUFFIX).map
 CURL_LDFLAGS_LIB += -Wl,-Map,$(libcurl_map_LIBRARY)

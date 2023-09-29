@@ -55,9 +55,7 @@
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
-#ifdef HAVE_SIGNAL_H
 #include <signal.h>
-#endif
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
@@ -67,11 +65,6 @@
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#ifdef HAVE_ARPA_TFTP_H
-#include <arpa/tftp.h>
-#else
-#include "tftp.h"
-#endif
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
@@ -80,9 +73,7 @@
 #include <sys/filio.h>
 #endif
 
-#ifdef HAVE_SETJMP_H
 #include <setjmp.h>
-#endif
 
 #ifdef HAVE_PWD_H
 #include <pwd.h>
@@ -97,6 +88,7 @@
 #include "getpart.h"
 #include "util.h"
 #include "server_sockaddr.h"
+#include "tftp.h"
 
 /* include memdebug.h last */
 #include "memdebug.h"

@@ -21,12 +21,18 @@ indicating its identity. A public key is extracted from this certificate and
 if it does not exactly match the public key provided to this option, curl
 aborts the connection before sending or receiving any data.
 
+This option is independent of option --insecure. If you use both options
+together then the peer is still verified by public key.
+
 PEM/DER support:
 
-OpenSSL and GnuTLS (added in 7.39.0), wolfSSL (added in 7.43.0), mbedTLS (added in 7.47.0)
+OpenSSL and GnuTLS (added in 7.39.0), wolfSSL (added in 7.43.0), mbedTLS
+(added in 7.47.0), Secure Transport macOS 10.7+/iOS 10+ (7.54.1), Schannel
+(7.58.1)
 
 sha256 support:
 
-OpenSSL, GnuTLS and wolfSSL (added in 7.44.0), mbedTLS (added in 7.47.0)
+OpenSSL, GnuTLS and wolfSSL (added in 7.44.0), mbedTLS (added in 7.47.0),
+Secure Transport macOS 10.7+/iOS 10+ (7.54.1), Schannel (7.58.1)
 
 Other SSL backends not supported.

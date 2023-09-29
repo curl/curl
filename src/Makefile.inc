@@ -29,6 +29,11 @@
 # CSRC2 = file4.c file5.c file6.c
 # CSOURCES = $(CSRC1) $(CSRC2)
 
+# libcurl sources to include in curltool lib we use for test binaries
+CURLTOOL_LIBCURL_CFILES = \
+  ../lib/base64.c \
+  ../lib/dynbuf.c
+
 # libcurl has sources that provide functions named curlx_* that aren't part of
 # the official API, but we reuse the code here to avoid duplication.
 CURLX_CFILES = \

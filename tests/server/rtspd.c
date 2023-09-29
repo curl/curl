@@ -29,9 +29,7 @@
  * This source file was started based on curl's HTTP test suite server.
  */
 
-#ifdef HAVE_SIGNAL_H
 #include <signal.h>
-#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -133,8 +131,8 @@ static void storerequest(char *reqbuf, size_t totalsize);
 #endif
 
 const char *serverlogfile = DEFAULT_LOGFILE;
-const char *logdir = "log";
-char loglockfile[256];
+static const char *logdir = "log";
+static char loglockfile[256];
 
 #define RTSPDVERSION "curl test suite RTSP server/0.1"
 

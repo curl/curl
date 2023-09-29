@@ -2,7 +2,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: trace-config
 Arg: <string>
-Help: enable
+Help: Details to log in trace/verbose output
 Mutexed: trace verbose
 Category: verbose
 Example: --trace-config ids,http/2 $URL

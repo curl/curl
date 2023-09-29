@@ -62,8 +62,8 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 # Verify data after the test has been "shot"
 <verify>
 <strippart>
-s/^--------------------------[a-z0-9]*/------------------------------/
-s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
+s/^--------------------------[A-Za-z0-9]*/------------------------------/
+s/boundary=------------------------[A-Za-z0-9]*/boundary=----------------------------/
 </strippart>
 # Note that the stripping above removes 12 bytes from every occurrence of the
 # boundary string and since 5 of them are in the body contents, we see
@@ -76,7 +76,11 @@ Transfer-Encoding: chunked
 Content-Type: multipart/form-data; boundary=----------------------------
 Expect: 100-continue
 
-76
+%if hyper
+7C
+%else
+7c
+%endif
 ------------------------------
 Content-Disposition: form-data; name="sendfile"; filename="postit2.c"
 
@@ -92,7 +96,11 @@ y
 1
 
 
-65
+%if hyper
+6B
+%else
+6b
+%endif
 
 ------------------------------
 Content-Disposition: form-data; name="callbackdata"
@@ -112,9 +120,9 @@ y
 
 
 %if hyper
-19A
+1B2
 %else
-19a
+1b2
 %endif
 
 ------------------------------
@@ -141,7 +149,11 @@ Transfer-Encoding: chunked
 Content-Type: multipart/form-data; boundary=----------------------------
 Expect: 100-continue
 
-84
+%if hyper
+8A
+%else
+8a
+%endif
 ------------------------------
 Content-Disposition: form-data; name="sendfile alternative"; filename="file name 2"
 
@@ -157,7 +169,11 @@ y
 1
 
 
-65
+%if hyper
+6B
+%else
+6b
+%endif
 
 ------------------------------
 Content-Disposition: form-data; name="callbackdata"
@@ -177,9 +193,9 @@ y
 
 
 %if hyper
-19A
+1B2
 %else
-19a
+1b2
 %endif
 
 ------------------------------

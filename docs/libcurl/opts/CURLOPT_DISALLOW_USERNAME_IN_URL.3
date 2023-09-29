@@ -58,8 +58,10 @@ Added in 7.61.0
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 
-curl_easy_perform() returns CURLE_LOGIN_DENIED if this option is enabled and a
-URL containing a username is specified.
+\fIcurl_easy_perform(3)\fP returns CURLE_LOGIN_DENIED if this option is
+enabled and a URL containing a username is specified.
 .SH "SEE ALSO"
-.BR libcurl-security "(3), ", CURLOPT_PROTOCOLS "(3), "
-.BR curl_url_set "(3), "
+.BR curl_url_set (3),
+.BR CURLOPT_PROTOCOLS (3),
+.BR CURLOPT_URL (3),
+.BR libcurl-security (3)

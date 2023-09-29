@@ -86,7 +86,7 @@ Host: remotehost:54321
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
-Content-Length: 409
+Content-Length: 433
 Content-Type: multipart/form-data; boundary=----------------------------7c633d5c27ce
 
 ------------------------------7c633d5c27ce
@@ -112,7 +112,7 @@ Proxy-Authorization: Digest username="uuuser", realm="many secrets", nonce="911"
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
-Content-Length: 409
+Content-Length: 433
 Content-Type: multipart/form-data; boundary=----------------------------7c633d5c27ce
 
 ------------------------------7c633d5c27ce

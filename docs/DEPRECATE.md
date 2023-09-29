@@ -6,18 +6,6 @@ email the
 as soon as possible and explain to us why this is a problem for you and
 how your use case cannot be satisfied properly using a workaround.
 
-## mingw v1
-
-We remove support for building curl with the original legacy mingw version 1
-in September 2023.
-
-During the deprecation period you can enable the support with the configure
-option `--with-mingw1-deprecated`.
-
-mingw version 1 is old and deprecated software. There are much better and
-still support build environments to use to build curl and other software. For
-example [MinGW-w64](https://www.mingw-w64.org/).
-
 ## space-separated `NOPROXY` patterns
 
 When specifying patterns/domain names for curl that should *not* go through a
@@ -46,3 +34,4 @@ curl will remove the support for space-separated names in July 2024.
  - Support for systems without 64 bit data types
  - NSS
  - gskit
+ - mingw v1

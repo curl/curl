@@ -33,7 +33,7 @@ if test "x$OPT_SECURETRANSPORT" != xno; then
     ssl_msg="Secure Transport"
     test secure-transport != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
     SECURETRANSPORT_ENABLED=1
-    LDFLAGS="$LDFLAGS -framework CoreFoundation -framework Security"
+    LDFLAGS="$LDFLAGS -framework CoreFoundation -framework CoreServices -framework Security"
   else
     AC_MSG_RESULT(no)
   fi

@@ -42,7 +42,7 @@
 #endif
 
 #ifndef STDERR_FILENO
-#  define STDERR_FILENO  fileno(stderr)
+#  define STDERR_FILENO  fileno(tool_stderr)
 #endif
 
 #endif /* HEADER_CURL_TOOL_MAIN_H */

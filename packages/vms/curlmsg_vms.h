@@ -52,8 +52,8 @@
 */
 
 static const long vms_cond[] =
-        {
-        CURL_OK,
+	{
+	CURL_OK,
 	CURL_UNSUPPORTED_PROTOCOL,
 	CURL_FAILED_INIT,
 	CURL_URL_MALFORMAT,
@@ -137,7 +137,7 @@ static const long vms_cond[] =
 	CURL_AGAIN,
 	CURLE_SSL_CRL_BADFILE,
 	CURLE_SSL_ISSUER_ERROR,
-        CURL_CURL_LAST
-        };
+	CURL_CURL_LAST
+	};
 
 #endif /* HEADER_CURLMSG_VMS_H */

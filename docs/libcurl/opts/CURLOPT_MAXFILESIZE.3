@@ -41,6 +41,9 @@ transfers this option has no effect - even if the file transfer eventually
 ends up being larger than this given limit.
 
 If you want a limit above 2GB, use \fICURLOPT_MAXFILESIZE_LARGE(3)\fP.
+
+Since 8.4.0, this option also stops ongoing transfers if they reach this
+threshold.
 .SH DEFAULT
 None
 .SH PROTOCOLS
@@ -61,4 +64,5 @@ Always
 .SH RETURN VALUE
 Returns CURLE_OK
 .SH "SEE ALSO"
-.BR CURLOPT_MAXFILESIZE_LARGE "(3), " CURLOPT_MAX_RECV_SPEED_LARGE "(3), "
+.BR CURLOPT_MAX_RECV_SPEED_LARGE (3),
+.BR CURLOPT_MAXFILESIZE_LARGE (3)

@@ -42,8 +42,14 @@ body
 #
 # Client-side
 <client>
+# This test relies on the IPv6 scope field being ignored when connecting to
+# ipv6-localhost (i.e. [::1%259999] is treated as [::1]). Maybe this is a bit
+# dodgy, but it happens on all our test platforms but Windows so skip this
+# test there. This feature doesn't work on msys or Cygwin, so use a precheck
+# to skip those.
 <features>
 ipv6
+!win32
 </features>
 <server>
 http
@@ -55,6 +61,9 @@ HTTP follow redirect from IPv4 to IPv6 with scope
  <command>
 http://%HOSTIP:%HTTPPORT/we/are/all/twits/%TESTNUMBER -L
 </command>
+<precheck>
+perl -e "print 'Test is not supported on the Windows kernel' if ($^O eq 'MSWin32' || $^O eq 'msys' || $^O eq 'cygwin');"
+</precheck>
 </client>
 
 #

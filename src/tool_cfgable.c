@@ -109,6 +109,7 @@ static void free_config_fields(struct OperationConfig *config)
   config->url_get = NULL;
   config->url_out = NULL;
 
+  Curl_safefree(config->ipfs_gateway);
   Curl_safefree(config->doh_url);
   Curl_safefree(config->cipher_list);
   Curl_safefree(config->proxy_cipher_list);

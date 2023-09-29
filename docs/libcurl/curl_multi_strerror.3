@@ -29,8 +29,8 @@ curl_multi_strerror - return string describing error code
 .B #include <curl/curl.h>
 .BI "const char *curl_multi_strerror(CURLMcode " errornum ");"
 .SH DESCRIPTION
-The curl_multi_strerror() function returns a string describing the
-\fICURLMcode\fP error code passed in the argument \fIerrornum\fP.
+This function returns a string describing the \fICURLMcode\fP error code
+passed in the argument \fIerrornum\fP.
 .SH EXAMPLE
 .nf
 int still_running;
@@ -44,5 +44,7 @@ This function was added in libcurl 7.12.0
 .SH RETURN VALUE
 A pointer to a null-terminated string.
 .SH "SEE ALSO"
-.BR libcurl-errors "(3), " curl_easy_strerror "(3), "
-.BR curl_share_strerror "(3), " curl_url_strerror "(3)"
+.BR curl_easy_strerror (3),
+.BR curl_share_strerror (3),
+.BR curl_url_strerror (3),
+.BR libcurl-errors (3)

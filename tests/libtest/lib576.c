@@ -32,11 +32,6 @@ struct chunk_data {
 };
 
 static
-long chunk_bgn(const struct curl_fileinfo *finfo, void *ptr, int remains);
-static
-long chunk_end(void *ptr);
-
-static
 long chunk_bgn(const struct curl_fileinfo *finfo, void *ptr, int remains)
 {
   struct chunk_data *ch_d = ptr;
@@ -76,8 +71,8 @@ long chunk_bgn(const struct curl_fileinfo *finfo, void *ptr, int remains)
   }
   if(finfo->filetype == CURLFILETYPE_FILE) {
     ch_d->print_content = 1;
-    printf("Content:\n-----------------------"
-           "--------------------------------------\n");
+    printf("Content:\n"
+      "-------------------------------------------------------------\n");
   }
   if(strcmp(finfo->filename, "someothertext.txt") == 0) {
     printf("# THIS CONTENT WAS SKIPPED IN CHUNK_BGN CALLBACK #\n");

@@ -624,7 +624,7 @@ becomes:
  curl_mime_headers(part, headers, FALSE);
 .fi
 
-Setting the last \fIcurl_mime_headers\fP argument to TRUE would have caused
+Setting the last \fIcurl_mime_headers(3)\fP argument to TRUE would have caused
 the headers to be automatically released upon destroyed the multi-part, thus
 saving a clean-up call to \fIcurl_slist_free_all(3)\fP.
 
@@ -641,10 +641,10 @@ becomes:
  curl_mime_data_cb(part, (curl_off_t) -1, fread, fseek, NULL, stdin);
 .fi
 
-\fIcurl_mime_name\fP always copies the field name. The special file name "-"
-is not supported by \fIcurl_mime_file\fP: to read an open file, use a callback
-source using fread(). The transfer is be chunk-encoded since the data size is
-unknown.
+\fIcurl_mime_name(3)\fP always copies the field name. The special file name
+"-" is not supported by \fIcurl_mime_filename(3)\fP: to read an open file, use
+a callback source using fread(). The transfer is be chunk-encoded since the
+data size is unknown.
 
 .nf
  curl_formadd(&post, &last,
@@ -686,7 +686,7 @@ becomes:
  curl_mime_type(part, "application/zip");
 .fi
 
-\fICURLOPT_READFUNCTION\fP callback is not used: it is replace by directly
+\fICURLOPT_READFUNCTION(3)\fP callback is not used: it is replace by directly
 setting the part source data from the callback read function.
 
 .nf
@@ -705,7 +705,7 @@ becomes:
  curl_mime_filename(part, "memfile.bin");
 .fi
 
-\fIcurl_mime_data\fP always copies the initial data: data buffer is thus
+\fIcurl_mime_data(3)\fP always copies the initial data: data buffer is thus
 free for immediate reuse.
 
 .nf
@@ -722,8 +722,9 @@ becomes:
  curl_mime_filename(part, NULL);
 .fi
 
-Use of \fIcurl_mime_filedata\fP sets the remote file name as a side effect: it
-is therefore necessary to clear it for \fICURLFORM_FILECONTENT\fP emulation.
+Use of \fIcurl_mime_filedata(3)\fP sets the remote file name as a side effect:
+it is therefore necessary to clear it for \fICURLFORM_FILECONTENT\fP
+emulation.
 
 .SH "Showing Progress"
 
@@ -1391,4 +1392,7 @@ installs the library, header files, man pages etc.
 This behavior was different in versions before 7.17.0, where strings had to
 remain valid past the end of the \fIcurl_easy_setopt(3)\fP call.
 .SH "SEE ALSO"
-.BR libcurl-errors "(3), " libcurl-multi "(3), " libcurl-easy "(3) "
+.BR libcurl-easy (3),
+.BR libcurl-errors (3),
+.BR libcurl-multi (3),
+.BR libcurl-url (3)

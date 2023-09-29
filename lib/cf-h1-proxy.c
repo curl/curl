@@ -34,6 +34,7 @@
 #include "dynbuf.h"
 #include "sendf.h"
 #include "http.h"
+#include "http1.h"
 #include "http_proxy.h"
 #include "url.h"
 #include "select.h"
@@ -64,13 +65,10 @@ typedef enum {
 
 /* struct for HTTP CONNECT tunneling */
 struct h1_tunnel_state {
-  int sockindex;
-  const char *hostname;
-  int remote_port;
   struct HTTP CONNECT;
   struct dynbuf rcvbuf;
-  struct dynbuf req;
-  size_t nsend;
+  struct dynbuf request_data;
+  size_t nsent;
   size_t headerlines;
   enum keeponval {
     KEEPON_DONE,
@@ -94,46 +92,31 @@ static bool tunnel_is_failed(struct h1_tunnel_state *ts)
   return ts && (ts->tunnel_state == H1_TUNNEL_FAILED);
 }
 
-static CURLcode tunnel_reinit(struct h1_tunnel_state *ts,
-                              struct connectdata *conn,
-                              struct Curl_easy *data)
+static CURLcode tunnel_reinit(struct Curl_cfilter *cf,
+                              struct Curl_easy *data,
+                              struct h1_tunnel_state *ts)
 {
   (void)data;
+  (void)cf;
   DEBUGASSERT(ts);
   Curl_dyn_reset(&ts->rcvbuf);
-  Curl_dyn_reset(&ts->req);
+  Curl_dyn_reset(&ts->request_data);
   ts->tunnel_state = H1_TUNNEL_INIT;
   ts->keepon = KEEPON_CONNECT;
   ts->cl = 0;
   ts->close_connection = FALSE;
-
-  if(conn->bits.conn_to_host)
-    ts->hostname = conn->conn_to_host.name;
-  else if(ts->sockindex == SECONDARYSOCKET)
-    ts->hostname = conn->secondaryhostname;
-  else
-    ts->hostname = conn->host.name;
-
-  if(ts->sockindex == SECONDARYSOCKET)
-    ts->remote_port = conn->secondary_port;
-  else if(conn->bits.conn_to_port)
-    ts->remote_port = conn->conn_to_port;
-  else
-    ts->remote_port = conn->remote_port;
-
   return CURLE_OK;
 }
 
-static CURLcode tunnel_init(struct h1_tunnel_state **pts,
+static CURLcode tunnel_init(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
-                            struct connectdata *conn,
-                            int sockindex)
+                            struct h1_tunnel_state **pts)
 {
   struct h1_tunnel_state *ts;
   CURLcode result;
 
-  if(conn->handler->flags & PROTOPT_NOTCPPROXY) {
-    failf(data, "%s cannot be done over CONNECT", conn->handler->scheme);
+  if(cf->conn->handler->flags & PROTOPT_NOTCPPROXY) {
+    failf(data, "%s cannot be done over CONNECT", cf->conn->handler->scheme);
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
 
@@ -146,15 +129,14 @@ static CURLcode tunnel_init(struct h1_tunnel_state **pts,
   if(!ts)
     return CURLE_OUT_OF_MEMORY;
 
-  ts->sockindex = sockindex;
   infof(data, "allocate connect buffer");
 
   Curl_dyn_init(&ts->rcvbuf, DYN_PROXY_CONNECT_HEADERS);
-  Curl_dyn_init(&ts->req, DYN_HTTP_REQUEST);
+  Curl_dyn_init(&ts->request_data, DYN_HTTP_REQUEST);
 
   *pts =  ts;
-  connkeep(conn, "HTTP proxy CONNECT");
-  return tunnel_reinit(ts, conn, data);
+  connkeep(cf->conn, "HTTP proxy CONNECT");
+  return tunnel_reinit(cf, data, ts);
 }
 
 static void h1_tunnel_go_state(struct Curl_cfilter *cf,
@@ -176,7 +158,7 @@ static void h1_tunnel_go_state(struct Curl_cfilter *cf,
   switch(new_state) {
   case H1_TUNNEL_INIT:
     CURL_TRC_CF(data, cf, "new tunnel state 'init'");
-    tunnel_reinit(ts, cf->conn, data);
+    tunnel_reinit(cf, data, ts);
     break;
 
   case H1_TUNNEL_CONNECT:
@@ -207,7 +189,7 @@ static void h1_tunnel_go_state(struct Curl_cfilter *cf,
       CURL_TRC_CF(data, cf, "new tunnel state 'failed'");
     ts->tunnel_state = new_state;
     Curl_dyn_reset(&ts->rcvbuf);
-    Curl_dyn_reset(&ts->req);
+    Curl_dyn_reset(&ts->request_data);
     /* restore the protocol pointer */
     data->info.httpcode = 0; /* clear it as it might've been used for the
                                 proxy */
@@ -229,42 +211,10 @@ static void tunnel_free(struct Curl_cfilter *cf,
   if(ts) {
     h1_tunnel_go_state(cf, ts, H1_TUNNEL_FAILED, data);
     Curl_dyn_free(&ts->rcvbuf);
-    Curl_dyn_free(&ts->req);
+    Curl_dyn_free(&ts->request_data);
     free(ts);
     cf->ctx = NULL;
   }
-}
-
-static CURLcode CONNECT_host(struct Curl_easy *data,
-                             struct connectdata *conn,
-                             const char *hostname,
-                             int remote_port,
-                             char **connecthostp,
-                             char **hostp)
-{
-  char *hostheader; /* for CONNECT */
-  char *host = NULL; /* Host: */
-  bool ipv6_ip = conn->bits.ipv6_ip;
-
-  /* the hostname may be different */
-  if(hostname != conn->host.name)
-    ipv6_ip = (strchr(hostname, ':') != NULL);
-  hostheader = /* host:port with IPv6 support */
-    aprintf("%s%s%s:%d", ipv6_ip?"[":"", hostname, ipv6_ip?"]":"",
-            remote_port);
-  if(!hostheader)
-    return CURLE_OUT_OF_MEMORY;
-
-  if(!Curl_checkProxyheaders(data, conn, STRCONST("Host"))) {
-    host = aprintf("Host: %s\r\n", hostheader);
-    if(!host) {
-      free(hostheader);
-      return CURLE_OUT_OF_MEMORY;
-    }
-  }
-  *connecthostp = hostheader;
-  *hostp = host;
-  return CURLE_OK;
 }
 
 #ifndef USE_HYPER
@@ -272,128 +222,69 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
                               struct h1_tunnel_state *ts)
 {
-  struct connectdata *conn = cf->conn;
-  char *hostheader = NULL;
-  char *host = NULL;
-  const char *httpv;
+  struct httpreq *req = NULL;
+  int http_minor;
   CURLcode result;
-
-  infof(data, "Establish HTTP proxy tunnel to %s:%d",
-        ts->hostname, ts->remote_port);
 
     /* This only happens if we've looped here due to authentication
        reasons, and we don't really use the newly cloned URL here
        then. Just free() it. */
   Curl_safefree(data->req.newurl);
 
-  result = CONNECT_host(data, conn,
-                        ts->hostname, ts->remote_port,
-                        &hostheader, &host);
+  result = Curl_http_proxy_create_CONNECT(&req, cf, data, 1);
   if(result)
     goto out;
 
-  /* Setup the proxy-authorization header, if any */
-  result = Curl_http_output_auth(data, conn, "CONNECT", HTTPREQ_GET,
-                                 hostheader, TRUE);
-  if(result)
-    goto out;
+  infof(data, "Establish HTTP proxy tunnel to %s", req->authority);
 
-  httpv = (conn->http_proxy.proxytype == CURLPROXY_HTTP_1_0) ? "1.0" : "1.1";
-
-  result =
-      Curl_dyn_addf(&ts->req,
-                    "CONNECT %s HTTP/%s\r\n"
-                    "%s"  /* Host: */
-                    "%s", /* Proxy-Authorization */
-                    hostheader,
-                    httpv,
-                    host?host:"",
-                    data->state.aptr.proxyuserpwd?
-                    data->state.aptr.proxyuserpwd:"");
-  if(result)
-    goto out;
-
-  if(!Curl_checkProxyheaders(data, conn, STRCONST("User-Agent"))
-     && data->set.str[STRING_USERAGENT])
-    result = Curl_dyn_addf(&ts->req, "User-Agent: %s\r\n",
-                           data->set.str[STRING_USERAGENT]);
-  if(result)
-    goto out;
-
-  if(!Curl_checkProxyheaders(data, conn, STRCONST("Proxy-Connection")))
-    result = Curl_dyn_addn(&ts->req,
-                           STRCONST("Proxy-Connection: Keep-Alive\r\n"));
-  if(result)
-    goto out;
-
-  result = Curl_add_custom_headers(data, TRUE, &ts->req);
-  if(result)
-    goto out;
-
-  /* CRLF terminate the request */
-  result = Curl_dyn_addn(&ts->req, STRCONST("\r\n"));
-  if(result)
-    goto out;
-
-  /* Send the connect request to the proxy */
-  result = Curl_buffer_send(&ts->req, data, &ts->CONNECT,
-                            &data->info.request_size, 0,
-                            ts->sockindex);
+  Curl_dyn_reset(&ts->request_data);
+  ts->nsent = 0;
   ts->headerlines = 0;
+  http_minor = (cf->conn->http_proxy.proxytype == CURLPROXY_HTTP_1_0) ? 0 : 1;
+
+  result = Curl_h1_req_write_head(req, http_minor, &ts->request_data);
 
 out:
   if(result)
     failf(data, "Failed sending CONNECT to proxy");
-  free(host);
-  free(hostheader);
+  if(req)
+    Curl_http_req_free(req);
   return result;
 }
 
-static CURLcode send_CONNECT(struct Curl_easy *data,
-                             struct connectdata *conn,
+static CURLcode send_CONNECT(struct Curl_cfilter *cf,
+                             struct Curl_easy *data,
                              struct h1_tunnel_state *ts,
                              bool *done)
 {
-  struct SingleRequest *k = &data->req;
-  struct HTTP *http = &ts->CONNECT;
+  char *buf = Curl_dyn_ptr(&ts->request_data);
+  size_t request_len = Curl_dyn_len(&ts->request_data);
+  size_t blen = request_len;
   CURLcode result = CURLE_OK;
+  ssize_t nwritten;
 
-  if(http->sending != HTTPSEND_REQUEST)
+  if(blen <= ts->nsent)
+    goto out;  /* we are done */
+
+  blen -= ts->nsent;
+  buf += ts->nsent;
+
+  nwritten = cf->next->cft->do_send(cf->next, data, buf, blen, &result);
+  if(nwritten < 0) {
+    if(result == CURLE_AGAIN) {
+      result = CURLE_OK;
+    }
     goto out;
-
-  if(!ts->nsend) {
-    size_t fillcount;
-    k->upload_fromhere = data->state.ulbuf;
-    result = Curl_fillreadbuffer(data, data->set.upload_buffer_size,
-                                 &fillcount);
-    if(result)
-      goto out;
-    ts->nsend = fillcount;
   }
-  if(ts->nsend) {
-    ssize_t bytes_written;
-    /* write to socket (send away data) */
-    result = Curl_write(data,
-                        conn->writesockfd,  /* socket to send to */
-                        k->upload_fromhere, /* buffer pointer */
-                        ts->nsend,          /* buffer size */
-                        &bytes_written);    /* actually sent */
-    if(result)
-      goto out;
-    /* send to debug callback! */
-    Curl_debug(data, CURLINFO_HEADER_OUT,
-               k->upload_fromhere, bytes_written);
 
-    ts->nsend -= bytes_written;
-    k->upload_fromhere += bytes_written;
-  }
-  if(!ts->nsend)
-    http->sending = HTTPSEND_NADA;
+  DEBUGASSERT(blen >= (size_t)nwritten);
+  ts->nsent += (size_t)nwritten;
+  Curl_debug(data, CURLINFO_HEADER_OUT, buf, (size_t)nwritten);
 
 out:
   if(result)
     failf(data, "Failed sending CONNECT to proxy");
-  *done = (http->sending != HTTPSEND_REQUEST);
+  *done = (!result && (ts->nsent >= request_len));
   return result;
 }
 
@@ -491,7 +382,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
   error = SELECT_OK;
   *done = FALSE;
 
-  if(!Curl_conn_data_pending(data, ts->sockindex))
+  if(!Curl_conn_data_pending(data, cf->sockindex))
     return CURLE_OK;
 
   while(ts->keepon) {
@@ -579,7 +470,6 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
     if(!data->set.suppress_connect_headers) {
       /* send the header to the callback */
       int writetype = CLIENTWRITE_HEADER | CLIENTWRITE_CONNECT |
-        (data->set.include_header ? CLIENTWRITE_BODY : 0) |
         (ts->headerlines == 1 ? CLIENTWRITE_STATUS : 0);
 
       result = Curl_client_write(data, writetype, linep, perline);
@@ -670,6 +560,41 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
 }
 
 #else /* USE_HYPER */
+
+static CURLcode CONNECT_host(struct Curl_cfilter *cf,
+                             struct Curl_easy *data,
+                             char **pauthority,
+                             char **phost_header)
+{
+  const char *hostname;
+  int port;
+  bool ipv6_ip;
+  CURLcode result;
+  char *authority; /* for CONNECT, the destination host + port */
+  char *host_header = NULL; /* Host: authority */
+
+  result = Curl_http_proxy_get_destination(cf, &hostname, &port, &ipv6_ip);
+  if(result)
+    return result;
+
+  authority = aprintf("%s%s%s:%d", ipv6_ip?"[":"", hostname, ipv6_ip?"]":"",
+                      port);
+  if(!authority)
+    return CURLE_OUT_OF_MEMORY;
+
+  /* If user is not overriding the Host header later */
+  if(!Curl_checkProxyheaders(data, cf->conn, STRCONST("Host"))) {
+    host_header = aprintf("Host: %s\r\n", authority);
+    if(!host_header) {
+      free(authority);
+      return CURLE_OUT_OF_MEMORY;
+    }
+  }
+  *pauthority = authority;
+  *phost_header = host_header;
+  return CURLE_OK;
+}
+
 /* The Hyper version of CONNECT */
 static CURLcode start_CONNECT(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
@@ -686,9 +611,10 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
   hyper_task *task = NULL; /* for the handshake */
   hyper_clientconn *client = NULL;
   hyper_task *sendtask = NULL; /* for the send */
-  char *hostheader = NULL; /* for CONNECT */
-  char *host = NULL; /* Host: */
+  char *authority = NULL; /* for CONNECT */
+  char *host_header = NULL; /* Host: */
   CURLcode result = CURLE_OUT_OF_MEMORY;
+  (void)ts;
 
   io = hyper_io_new();
   if(!io) {
@@ -766,27 +692,25 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
     goto error;
   }
 
-  infof(data, "Establish HTTP proxy tunnel to %s:%d",
-        ts->hostname, ts->remote_port);
-
     /* This only happens if we've looped here due to authentication
        reasons, and we don't really use the newly cloned URL here
        then. Just free() it. */
   Curl_safefree(data->req.newurl);
 
-  result = CONNECT_host(data, conn, ts->hostname, ts->remote_port,
-                        &hostheader, &host);
+  result = CONNECT_host(cf, data, &authority, &host_header);
   if(result)
     goto error;
 
-  if(hyper_request_set_uri(req, (uint8_t *)hostheader,
-                           strlen(hostheader))) {
+  infof(data, "Establish HTTP proxy tunnel to %s", authority);
+
+  if(hyper_request_set_uri(req, (uint8_t *)authority,
+                           strlen(authority))) {
     failf(data, "error setting path");
     result = CURLE_OUT_OF_MEMORY;
     goto error;
   }
   if(data->set.verbose) {
-    char *se = aprintf("CONNECT %s HTTP/1.1\r\n", hostheader);
+    char *se = aprintf("CONNECT %s HTTP/1.1\r\n", authority);
     if(!se) {
       result = CURLE_OUT_OF_MEMORY;
       goto error;
@@ -796,10 +720,10 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
   }
   /* Setup the proxy-authorization header, if any */
   result = Curl_http_output_auth(data, conn, "CONNECT", HTTPREQ_GET,
-                                 hostheader, TRUE);
+                                 authority, TRUE);
   if(result)
     goto error;
-  Curl_safefree(hostheader);
+  Curl_safefree(authority);
 
   /* default is 1.1 */
   if((conn->http_proxy.proxytype == CURLPROXY_HTTP_1_0) &&
@@ -816,11 +740,11 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
     result = CURLE_OUT_OF_MEMORY;
     goto error;
   }
-  if(host) {
-    result = Curl_hyper_header(data, headers, host);
+  if(host_header) {
+    result = Curl_hyper_header(data, headers, host_header);
     if(result)
       goto error;
-    Curl_safefree(host);
+    Curl_safefree(host_header);
   }
 
   if(data->state.aptr.proxyuserpwd) {
@@ -874,8 +798,8 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
   client = NULL;
 
 error:
-  free(host);
-  free(hostheader);
+  free(host_header);
+  free(authority);
   if(io)
     hyper_io_free(io);
   if(options)
@@ -890,12 +814,13 @@ error:
   return result;
 }
 
-static CURLcode send_CONNECT(struct Curl_easy *data,
-                             struct connectdata *conn,
+static CURLcode send_CONNECT(struct Curl_cfilter *cf,
+                             struct Curl_easy *data,
                              struct h1_tunnel_state *ts,
                              bool *done)
 {
   struct hyptransfer *h = &data->hyp;
+  struct connectdata *conn = cf->conn;
   hyper_task *task = NULL;
   hyper_error *hypererr = NULL;
   CURLcode result = CURLE_OK;
@@ -995,7 +920,7 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
     case H1_TUNNEL_CONNECT:
       /* see that the request is completely sent */
       CURL_TRC_CF(data, cf, "CONNECT send");
-      result = send_CONNECT(data, cf->conn, ts, &done);
+      result = send_CONNECT(cf, data, ts, &done);
       if(result || !done)
         goto out;
       h1_tunnel_go_state(cf, ts, H1_TUNNEL_RECEIVE, data);
@@ -1090,7 +1015,7 @@ static CURLcode cf_h1_proxy_connect(struct Curl_cfilter *cf,
 
   *done = FALSE;
   if(!ts) {
-    result = tunnel_init(&ts, data, cf->conn, cf->sockindex);
+    result = tunnel_init(cf, data, &ts);
     if(result)
       return result;
     cf->ctx = ts;

@@ -210,6 +210,20 @@ timediff_t Curl_timediff(struct curltime newer, struct curltime older)
 }
 
 /*
+ * Returns: time difference in number of milliseconds, rounded up.
+ * For too large diffs it returns max value.
+ */
+timediff_t Curl_timediff_ceil(struct curltime newer, struct curltime older)
+{
+  timediff_t diff = (timediff_t)newer.tv_sec-older.tv_sec;
+  if(diff >= (TIMEDIFF_T_MAX/1000))
+    return TIMEDIFF_T_MAX;
+  else if(diff <= (TIMEDIFF_T_MIN/1000))
+    return TIMEDIFF_T_MIN;
+  return diff * 1000 + (newer.tv_usec - older.tv_usec + 999)/1000;
+}
+
+/*
  * Returns: time difference in number of microseconds. For too large diffs it
  * returns max value.
  */

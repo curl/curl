@@ -890,8 +890,8 @@ static bool conn_maxage(struct Curl_easy *data,
   idletime /= 1000; /* integer seconds is fine */
 
   if(idletime > data->set.maxage_conn) {
-    infof(data, "Too old connection (%ld seconds idle), disconnect it",
-          idletime);
+    infof(data, "Too old connection (%" CURL_FORMAT_TIMEDIFF_T
+          " seconds idle), disconnect it", idletime);
     return TRUE;
   }
 
@@ -900,8 +900,8 @@ static bool conn_maxage(struct Curl_easy *data,
 
   if(data->set.maxlifetime_conn && lifetime > data->set.maxlifetime_conn) {
     infof(data,
-          "Too old connection (%ld seconds since creation), disconnect it",
-          lifetime);
+          "Too old connection (%" CURL_FORMAT_TIMEDIFF_T
+          " seconds since creation), disconnect it", lifetime);
     return TRUE;
   }
 
@@ -2035,13 +2035,13 @@ void Curl_free_request_state(struct Curl_easy *data)
 {
   Curl_safefree(data->req.p.http);
   Curl_safefree(data->req.newurl);
-
 #ifndef CURL_DISABLE_DOH
   if(data->req.doh) {
     Curl_close(&data->req.doh->probe[0].easy);
     Curl_close(&data->req.doh->probe[1].easy);
   }
 #endif
+  Curl_client_cleanup(data);
 }
 
 
@@ -2721,7 +2721,9 @@ static CURLcode override_login(struct Curl_easy *data,
                           data->set.str[STRING_NETRC_FILE]);
     if(ret > 0) {
       infof(data, "Couldn't find host %s in the %s file; using defaults",
-            conn->host.name, data->set.str[STRING_NETRC_FILE]);
+            conn->host.name,
+            (data->set.str[STRING_NETRC_FILE] ?
+             data->set.str[STRING_NETRC_FILE] : ".netrc"));
     }
     else if(ret < 0) {
       failf(data, ".netrc parser error");
@@ -3216,8 +3218,8 @@ static CURLcode resolve_host(struct Curl_easy *data,
   if(rc == CURLRESOLV_PENDING)
     *async = TRUE;
   else if(rc == CURLRESOLV_TIMEDOUT) {
-    failf(data, "Failed to resolve host '%s' with timeout after %ld ms",
-          connhost->dispname,
+    failf(data, "Failed to resolve host '%s' with timeout after %"
+          CURL_FORMAT_TIMEDIFF_T " ms", connhost->dispname,
           Curl_timediff(Curl_now(), data->progress.t_startsingle));
     return CURLE_OPERATION_TIMEDOUT;
   }

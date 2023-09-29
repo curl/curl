@@ -49,7 +49,9 @@
 # https://cmake.org/cmake/help/latest/module/FetchContent.html#integrating-with-find-package
 #
 # The following variables are available:
-#   HAVE_SSL_SET0_WBIO: `SSL_set0_wbio` present in OpenSSL
+#   HAVE_SSL_SET0_WBIO: `SSL_set0_wbio` present in OpenSSL/wolfSSL
+#   HAVE_OPENSSL_SRP: `SSL_CTX_set_srp_username` present in OpenSSL/wolfSSL
+#   HAVE_GNUTLS_SRP: `gnutls_srp_verifier` present in GnuTLS
 #   HAVE_AWSLC: OpenSSL is AWS-LC
 #   HAVE_BORINGSSL: OpenSSL is BoringSSL
 #   HAVE_SSL_CTX_SET_QUIC_METHOD: `SSL_CTX_set_quic_method` present in OpenSSL/wolfSSL
@@ -102,7 +104,7 @@ option(CURL_WERROR "Turn compiler warnings into errors" OFF)
 option(PICKY_COMPILER "Enable picky compiler options" ON)
 option(BUILD_CURL_EXE "Set to ON to build curl executable." ON)
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
-option(BUILD_STATIC_LIBS "Build shared libraries" OFF)
+option(BUILD_STATIC_LIBS "Build static libraries" OFF)
 option(BUILD_STATIC_CURL "Build curl executable with static libcurl" OFF)
 option(ENABLE_ARES "Set to ON to enable c-ares support" OFF)
 if(WIN32)
@@ -189,6 +191,8 @@ mark_as_advanced(CURL_ENABLE_EXPORT_TARGET)
 
 option(CURL_DISABLE_ALTSVC "disables alt-svc support" OFF)
 mark_as_advanced(CURL_DISABLE_ALTSVC)
+option(CURL_DISABLE_SRP "disables TLS-SRP support" OFF)
+mark_as_advanced(CURL_DISABLE_SRP)
 option(CURL_DISABLE_COOKIES "disables cookies support" OFF)
 mark_as_advanced(CURL_DISABLE_COOKIES)
 option(CURL_DISABLE_BASIC_AUTH "disables Basic authentication" OFF)
@@ -302,7 +306,7 @@ if(ENABLE_IPV6 AND NOT WIN32)
   endif()
 
   if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND NOT ENABLE_ARES)
-    set(use_core_foundation ON)
+    set(use_core_foundation_and_core_services ON)
 
     find_library(SYSTEMCONFIGURATION_FRAMEWORK "SystemConfiguration")
     if(NOT SYSTEMCONFIGURATION_FRAMEWORK)
@@ -385,19 +389,6 @@ if(WIN32)
   if(USE_LIBRTMP)
     list(APPEND CURL_LIBS "winmm")
   endif()
-
-  # Matching logic used for Curl_win32_random()
-  if(MINGW)
-    check_c_source_compiles("
-      #include <_mingw.h>
-      #if defined(__MINGW64_VERSION_MAJOR)
-      #error
-      #endif
-      int main(void) {
-        return 0;
-      }"
-      HAVE_MINGW_ORIGINAL)
-  endif()
 endif()
 
 # check SSL libraries
@@ -414,7 +405,7 @@ endif()
 cmake_dependent_option(CURL_USE_MBEDTLS "Enable mbedTLS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 cmake_dependent_option(CURL_USE_BEARSSL "Enable BearSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 cmake_dependent_option(CURL_USE_WOLFSSL "Enable wolfSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
-cmake_dependent_option(CURL_USE_GNUTLS "Enable GNUTLS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
+cmake_dependent_option(CURL_USE_GNUTLS "Enable GnuTLS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 
 set(openssl_default ON)
 if(WIN32 OR CURL_USE_SECTRANSP OR CURL_USE_SCHANNEL OR CURL_USE_MBEDTLS OR CURL_USE_WOLFSSL)
@@ -445,7 +436,7 @@ if(CURL_WINDOWS_SSPI)
 endif()
 
 if(CURL_USE_SECTRANSP)
-  set(use_core_foundation ON)
+  set(use_core_foundation_and_core_services ON)
 
   find_library(SECURITY_FRAMEWORK "Security")
   if(NOT SECURITY_FRAMEWORK)
@@ -457,13 +448,18 @@ if(CURL_USE_SECTRANSP)
   list(APPEND CURL_LIBS "-framework Security")
 endif()
 
-if(use_core_foundation)
+if(use_core_foundation_and_core_services)
   find_library(COREFOUNDATION_FRAMEWORK "CoreFoundation")
+  find_library(CORESERVICES_FRAMEWORK "CoreServices")
+
   if(NOT COREFOUNDATION_FRAMEWORK)
       message(FATAL_ERROR "CoreFoundation framework not found")
   endif()
+  if(NOT CORESERVICES_FRAMEWORK)
+      message(FATAL_ERROR "CoreServices framework not found")
+  endif()
 
-  list(APPEND CURL_LIBS "-framework CoreFoundation")
+  list(APPEND CURL_LIBS "-framework CoreFoundation -framework CoreServices")
 endif()
 
 if(CURL_USE_OPENSSL)
@@ -483,9 +479,7 @@ if(CURL_USE_OPENSSL)
 
   if(WIN32)
     list(APPEND CURL_LIBS "ws2_32")
-    if(NOT HAVE_MINGW_ORIGINAL)
-      list(APPEND CURL_LIBS "bcrypt")  # for OpenSSL/LibreSSL
-    endif()
+    list(APPEND CURL_LIBS "bcrypt")  # for OpenSSL/LibreSSL
   endif()
 
   set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
@@ -522,8 +516,19 @@ if(CURL_USE_WOLFSSL)
 endif()
 
 if(CURL_USE_GNUTLS)
-   set(SSL_ENABLED ON)
-   set(USE_GNUTLS ON)
+  find_package(GnuTLS REQUIRED)
+  set(SSL_ENABLED ON)
+  set(USE_GNUTLS ON)
+  list(APPEND CURL_LIBS ${GNUTLS_LIBRARIES} "nettle")
+  include_directories(${GNUTLS_INCLUDE_DIRS})
+
+  if(NOT DEFINED HAVE_GNUTLS_SRP AND NOT CURL_DISABLE_SRP)
+    cmake_push_check_state()
+    set(CMAKE_REQUIRED_INCLUDES ${GNUTLS_INCLUDE_DIRS})
+    set(CMAKE_REQUIRED_LIBRARIES ${GNUTLS_LIBRARIES})
+    check_symbol_exists(gnutls_srp_verifier "gnutls/gnutls.h" HAVE_GNUTLS_SRP)
+    cmake_pop_check_state()
+  endif()
 endif()
 
 # Keep ZLIB detection after TLS detection,
@@ -565,7 +570,7 @@ option(CURL_ZSTD "Set to ON to enable building curl with zstd support." OFF)
 set(HAVE_ZSTD OFF)
 if(CURL_ZSTD)
   find_package(Zstd REQUIRED)
-  if (NOT DEFINED HAVE_ZSTD_CREATEDSTREAM)
+  if(NOT DEFINED HAVE_ZSTD_CREATEDSTREAM)
     cmake_push_check_state()
     set(CMAKE_REQUIRED_INCLUDES ${Zstd_INCLUDE_DIRS})
     set(CMAKE_REQUIRED_LIBRARIES ${Zstd_LIBRARIES})
@@ -590,9 +595,7 @@ macro(openssl_check_symbol_exists SYMBOL FILES VARIABLE)
     endif()
     if(WIN32)
       list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32")
-      if(NOT HAVE_MINGW_ORIGINAL)
-        list(APPEND CMAKE_REQUIRED_LIBRARIES "bcrypt")  # for OpenSSL/LibreSSL
-      endif()
+      list(APPEND CMAKE_REQUIRED_LIBRARIES "bcrypt")  # for OpenSSL/LibreSSL
     endif()
   elseif(USE_WOLFSSL)
     set(CMAKE_REQUIRED_INCLUDES   "${WolfSSL_INCLUDE_DIRS}")
@@ -613,6 +616,9 @@ endmacro()
 if(USE_OPENSSL OR USE_WOLFSSL)
   if(NOT DEFINED HAVE_SSL_SET0_WBIO)
     openssl_check_symbol_exists(SSL_set0_wbio "openssl/ssl.h" HAVE_SSL_SET0_WBIO)
+  endif()
+  if(NOT DEFINED HAVE_OPENSSL_SRP AND NOT CURL_DISABLE_SRP)
+    openssl_check_symbol_exists(SSL_CTX_set_srp_username "openssl/ssl.h" HAVE_OPENSSL_SRP)
   endif()
 endif()
 
@@ -689,6 +695,10 @@ if(USE_MSH3)
   set(USE_MSH3 ON)
   include_directories(${MSH3_INCLUDE_DIRS})
   list(APPEND CURL_LIBS ${MSH3_LIBRARIES})
+endif()
+
+if(NOT CURL_DISABLE_SRP AND (HAVE_GNUTLS_SRP OR HAVE_OPENSSL_SRP))
+  set(USE_TLS_SRP 1)
 endif()
 
 if(NOT CURL_DISABLE_LDAP)
@@ -1030,7 +1040,6 @@ check_include_file_concat("sys/un.h"         HAVE_SYS_UN_H)
 check_include_file_concat("sys/utime.h"      HAVE_SYS_UTIME_H)
 check_include_file_concat("sys/xattr.h"      HAVE_SYS_XATTR_H)
 check_include_file_concat("arpa/inet.h"      HAVE_ARPA_INET_H)
-check_include_file_concat("arpa/tftp.h"      HAVE_ARPA_TFTP_H)
 check_include_file_concat("fcntl.h"          HAVE_FCNTL_H)
 check_include_file_concat("idn2.h"           HAVE_IDN2_H)
 check_include_file_concat("ifaddrs.h"        HAVE_IFADDRS_H)
@@ -1045,22 +1054,15 @@ check_include_file("linux/tcp.h"      HAVE_LINUX_TCP_H)
 
 check_include_file_concat("poll.h"           HAVE_POLL_H)
 check_include_file_concat("pwd.h"            HAVE_PWD_H)
-check_include_file_concat("setjmp.h"         HAVE_SETJMP_H)
-check_include_file_concat("signal.h"         HAVE_SIGNAL_H)
 check_include_file_concat("stdatomic.h"      HAVE_STDATOMIC_H)
 check_include_file_concat("stdbool.h"        HAVE_STDBOOL_H)
 check_include_file_concat("stdint.h"         HAVE_STDINT_H)
-check_include_file_concat("stdlib.h"         HAVE_STDLIB_H)
-check_include_file_concat("string.h"         HAVE_STRING_H)
 check_include_file_concat("strings.h"        HAVE_STRINGS_H)
 check_include_file_concat("stropts.h"        HAVE_STROPTS_H)
 check_include_file_concat("termio.h"         HAVE_TERMIO_H)
 check_include_file_concat("termios.h"        HAVE_TERMIOS_H)
-check_include_file_concat("time.h"           HAVE_TIME_H)
 check_include_file_concat("unistd.h"         HAVE_UNISTD_H)
 check_include_file_concat("utime.h"          HAVE_UTIME_H)
-
-check_include_file_concat("stddef.h"         HAVE_STDDEF_H)
 
 check_type_size(size_t  SIZEOF_SIZE_T)
 check_type_size(ssize_t  SIZEOF_SSIZE_T)
@@ -1069,6 +1071,7 @@ check_type_size("long"  SIZEOF_LONG)
 check_type_size("int"  SIZEOF_INT)
 check_type_size("__int64"  SIZEOF___INT64)
 check_type_size("time_t"  SIZEOF_TIME_T)
+check_type_size("suseconds_t"  SIZEOF_SUSECONDS_T)
 if(NOT HAVE_SIZEOF_SSIZE_T)
   if(SIZEOF_LONG EQUAL SIZEOF_SIZE_T)
     set(ssize_t long)
@@ -1079,8 +1082,11 @@ if(NOT HAVE_SIZEOF_SSIZE_T)
 endif()
 # off_t is sized later, after the HAVE_FILE_OFFSET_BITS test
 
-if(HAVE_SIZEOF_LONG_LONG)
+if(SIZEOF_LONG_LONG)
   set(HAVE_LONGLONG 1)
+endif()
+if(SIZEOF_SUSECONDS_T)
+  set(HAVE_SUSECONDS_T 1)
 endif()
 
 if(NOT CMAKE_CROSSCOMPILING)
@@ -1096,19 +1102,24 @@ elseif(HAVE_LIBSOCKET)
 endif()
 
 check_symbol_exists(fchmod        "${CURL_INCLUDES}" HAVE_FCHMOD)
-check_symbol_exists(basename      "${CURL_INCLUDES}" HAVE_BASENAME)
+check_symbol_exists(fnmatch       "${CURL_INCLUDES};fnmatch.h" HAVE_FNMATCH)
+check_symbol_exists(basename      "${CURL_INCLUDES};string.h" HAVE_BASENAME)
 check_symbol_exists(socket        "${CURL_INCLUDES}" HAVE_SOCKET)
+check_symbol_exists(sched_yield   "${CURL_INCLUDES};sched.h" HAVE_SCHED_YIELD)
 check_symbol_exists(socketpair    "${CURL_INCLUDES}" HAVE_SOCKETPAIR)
 check_symbol_exists(recv          "${CURL_INCLUDES}" HAVE_RECV)
 check_symbol_exists(send          "${CURL_INCLUDES}" HAVE_SEND)
 check_symbol_exists(sendmsg       "${CURL_INCLUDES}" HAVE_SENDMSG)
 check_symbol_exists(select        "${CURL_INCLUDES}" HAVE_SELECT)
-check_symbol_exists(strdup        "${CURL_INCLUDES}" HAVE_STRDUP)
-check_symbol_exists(strtok_r      "${CURL_INCLUDES}" HAVE_STRTOK_R)
-check_symbol_exists(strcasecmp    "${CURL_INCLUDES}" HAVE_STRCASECMP)
-check_symbol_exists(stricmp       "${CURL_INCLUDES}" HAVE_STRICMP)
-check_symbol_exists(strcmpi       "${CURL_INCLUDES}" HAVE_STRCMPI)
+check_symbol_exists(strdup        "${CURL_INCLUDES};string.h" HAVE_STRDUP)
+check_symbol_exists(strtok_r      "${CURL_INCLUDES};string.h" HAVE_STRTOK_R)
+check_symbol_exists(strcasecmp    "${CURL_INCLUDES};string.h" HAVE_STRCASECMP)
+check_symbol_exists(stricmp       "${CURL_INCLUDES};string.h" HAVE_STRICMP)
+check_symbol_exists(strcmpi       "${CURL_INCLUDES};string.h" HAVE_STRCMPI)
+check_symbol_exists(memrchr       "${CURL_INCLUDES};string.h" HAVE_MEMRCHR)
 check_symbol_exists(alarm         "${CURL_INCLUDES}" HAVE_ALARM)
+check_symbol_exists(arc4random    "${CURL_INCLUDES};stdlib.h" HAVE_ARC4RANDOM)
+check_symbol_exists(fcntl         "${CURL_INCLUDES}" HAVE_FCNTL)
 check_symbol_exists(getppid       "${CURL_INCLUDES}" HAVE_GETPPID)
 check_symbol_exists(utimes        "${CURL_INCLUDES}" HAVE_UTIMES)
 
@@ -1120,21 +1131,24 @@ check_symbol_exists(getpwuid      "${CURL_INCLUDES}" HAVE_GETPWUID)
 check_symbol_exists(getpwuid_r    "${CURL_INCLUDES}" HAVE_GETPWUID_R)
 check_symbol_exists(geteuid       "${CURL_INCLUDES}" HAVE_GETEUID)
 check_symbol_exists(utime         "${CURL_INCLUDES}" HAVE_UTIME)
-check_symbol_exists(gmtime_r      "${CURL_INCLUDES}" HAVE_GMTIME_R)
+check_symbol_exists(gmtime_r      "${CURL_INCLUDES};stdlib.h;time.h" HAVE_GMTIME_R)
 
 check_symbol_exists(gethostbyname_r "${CURL_INCLUDES}" HAVE_GETHOSTBYNAME_R)
 
 check_symbol_exists(signal         "${CURL_INCLUDES}" HAVE_SIGNAL)
-check_symbol_exists(strtoll        "${CURL_INCLUDES}" HAVE_STRTOLL)
-check_symbol_exists(strerror_r     "${CURL_INCLUDES}" HAVE_STRERROR_R)
+check_symbol_exists(strtoll        "${CURL_INCLUDES};stdlib.h" HAVE_STRTOLL)
+check_symbol_exists(strerror_r     "${CURL_INCLUDES};stdlib.h;string.h" HAVE_STRERROR_R)
 check_symbol_exists(siginterrupt   "${CURL_INCLUDES}" HAVE_SIGINTERRUPT)
-check_symbol_exists(getaddrinfo    "${CURL_INCLUDES}" HAVE_GETADDRINFO)
+check_symbol_exists(getaddrinfo    "${CURL_INCLUDES};stdlib.h;string.h" HAVE_GETADDRINFO)
+check_symbol_exists(getifaddrs     "${CURL_INCLUDES};stdlib.h" HAVE_GETIFADDRS)
 if(WIN32)
   set(HAVE_GETADDRINFO_THREADSAFE ${HAVE_GETADDRINFO})
 endif()
 check_symbol_exists(freeaddrinfo   "${CURL_INCLUDES}" HAVE_FREEADDRINFO)
 check_symbol_exists(pipe           "${CURL_INCLUDES}" HAVE_PIPE)
 check_symbol_exists(ftruncate      "${CURL_INCLUDES}" HAVE_FTRUNCATE)
+check_symbol_exists(fseeko         "${CURL_INCLUDES};stdio.h" HAVE_FSEEKO)
+check_symbol_exists(_fseeki64      "${CURL_INCLUDES};stdio.h" HAVE__FSEEKI64)
 check_symbol_exists(getpeername    "${CURL_INCLUDES}" HAVE_GETPEERNAME)
 check_symbol_exists(getsockname    "${CURL_INCLUDES}" HAVE_GETSOCKNAME)
 check_symbol_exists(if_nametoindex "${CURL_INCLUDES}" HAVE_IF_NAMETOINDEX)
@@ -1148,11 +1162,11 @@ if(NOT MSVC OR (MSVC_VERSION GREATER_EQUAL 1900))
   check_symbol_exists(snprintf       "stdio.h" HAVE_SNPRINTF)
 endif()
 check_function_exists(mach_absolute_time HAVE_MACH_ABSOLUTE_TIME)
-check_symbol_exists(inet_ntop      "${CURL_INCLUDES}" HAVE_INET_NTOP)
+check_symbol_exists(inet_ntop      "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_NTOP)
 if(MSVC AND (MSVC_VERSION LESS_EQUAL 1600))
   set(HAVE_INET_NTOP OFF)
 endif()
-check_symbol_exists(inet_pton      "${CURL_INCLUDES}" HAVE_INET_PTON)
+check_symbol_exists(inet_pton      "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_PTON)
 
 check_symbol_exists(fsetxattr "${CURL_INCLUDES}" HAVE_FSETXATTR)
 if(HAVE_FSETXATTR)
@@ -1173,16 +1187,12 @@ set(CMAKE_EXTRA_INCLUDE_FILES   "")
 
 # sigaction and sigsetjmp are special. Use special mechanism for
 # detecting those, but only if previous attempt failed.
-if(HAVE_SIGNAL_H)
-  check_symbol_exists(sigaction "signal.h" HAVE_SIGACTION)
-endif()
+check_symbol_exists(sigaction "signal.h" HAVE_SIGACTION)
 
 if(NOT HAVE_SIGSETJMP)
-  if(HAVE_SETJMP_H)
-    check_symbol_exists(sigsetjmp "setjmp.h" HAVE_MACRO_SIGSETJMP)
-    if(HAVE_MACRO_SIGSETJMP)
-      set(HAVE_SIGSETJMP 1)
-    endif()
+  check_symbol_exists(sigsetjmp "setjmp.h" HAVE_MACRO_SIGSETJMP)
+  if(HAVE_MACRO_SIGSETJMP)
+    set(HAVE_SIGSETJMP 1)
   endif()
 endif()
 
@@ -1201,7 +1211,6 @@ foreach(CURL_TEST
     HAVE_IOCTL_FIONBIO
     HAVE_IOCTL_SIOCGIFADDR
     HAVE_SETSOCKOPT_SO_NONBLOCK
-    TIME_WITH_SYS_TIME
     HAVE_O_NONBLOCK
     HAVE_GETHOSTBYNAME_R_3
     HAVE_GETHOSTBYNAME_R_5
@@ -1356,11 +1365,7 @@ if(WIN32)
     list(APPEND CURL_LIBS "advapi32" "crypt32")
   endif()
 
-  if(NOT HAVE_MINGW_ORIGINAL)
-    list(APPEND CURL_LIBS "bcrypt")
-  else()
-    set(HAVE_FTRUNCATE OFF)
-  endif()
+  list(APPEND CURL_LIBS "bcrypt")
 endif()
 
 if(MSVC)
@@ -1457,7 +1462,7 @@ macro(_add_if label)
 endmacro()
 
 # NTLM support requires crypto function adaptions from various SSL libs
-# TODO alternative SSL libs tests for SSP1, GNUTLS, NSS
+# TODO alternative SSL libs tests for SSP1, GnuTLS, NSS
 if(NOT (CURL_DISABLE_NTLM) AND
     (USE_OPENSSL OR USE_MBEDTLS OR USE_DARWINSSL OR USE_WIN32_CRYPTO OR USE_GNUTLS))
   set(use_curl_ntlm_core ON)
@@ -1486,14 +1491,13 @@ _add_if("SPNEGO"        NOT CURL_DISABLE_NEGOTIATE_AUTH AND
 _add_if("Kerberos"      NOT CURL_DISABLE_KERBEROS_AUTH AND
                         (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
 # NTLM support requires crypto function adaptions from various SSL libs
-# TODO alternative SSL libs tests for SSP1, GNUTLS, NSS
+# TODO alternative SSL libs tests for SSP1, GnuTLS, NSS
 _add_if("NTLM"          NOT (CURL_DISABLE_NTLM) AND
                         (use_curl_ntlm_core OR USE_WINDOWS_SSPI))
 # TODO missing option (autoconf: --enable-ntlm-wb)
 _add_if("NTLM_WB"       NOT (CURL_DISABLE_NTLM) AND
                         (use_curl_ntlm_core OR USE_WINDOWS_SSPI) AND
                         NOT CURL_DISABLE_HTTP AND NTLM_WB_ENABLED)
-# TODO missing option (--enable-tls-srp), depends on GNUTLS_SRP/OPENSSL_SRP
 _add_if("TLS-SRP"       USE_TLS_SRP)
 # TODO option --with-nghttp2 tests for nghttp2 lib and nghttp2/nghttp2.h header
 _add_if("HTTP2"         USE_NGHTTP2)

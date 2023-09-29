@@ -8,6 +8,7 @@ timeout
 FAILURE
 SLOWDOWN
 flaky
+timing-dependent
 </keywords>
 </info>
 
@@ -17,6 +18,7 @@ flaky
 # to avoid wasting time waiting for the data phase to start
 <servercmd>
 SLOWDOWN
+REPLY welcome 220 Hey
 REPLY USER 331 OK
 REPLY PASS 230 OK
 REPLY PWD 257 "/"
@@ -87,7 +89,7 @@ ftp
  <name>
 FTP download with strict timeout and slow data transfer
  </name>
- <command timeout="1">
+ <command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -m 7
 </command>
 </client>

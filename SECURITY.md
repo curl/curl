@@ -6,7 +6,7 @@ SPDX-License-Identifier: curl
 
 # Security Policy
 
-See [SECURITY-PROCESS](docs/SECURITY-PROCESS.md) for full details.
+Read our [Vulnerability Disclosure Policy](docs/VULN-DISCLOSURE-POLICY.md).
 
 ## Reporting a Vulnerability
 

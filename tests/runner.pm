@@ -126,7 +126,7 @@ our $tortalloc;
 my %oldenv;       # environment variables before test is started
 my $UNITDIR="./unit";
 my $CURLLOG="$LOGDIR/commands.log"; # all command lines run
-my $defserverlogslocktimeout = 2; # timeout to await server logs lock removal
+my $defserverlogslocktimeout = 5; # timeout to await server logs lock removal
 my $defpostcommanddelay = 0; # delay between command and postcheck sections
 my $multiprocess;   # nonzero with a separate test runner process
 
@@ -753,7 +753,8 @@ sub singletest_prepare {
             my $path = $filename;
             # cut off the file name part
             $path =~ s/^(.*)\/[^\/]*/$1/;
-            my $nparts = scalar(split(/\//, $LOGDIR));
+            my @ldparts = split(/\//, $LOGDIR);
+            my $nparts = @ldparts;
             my @parts = split(/\//, $path);
             if(join("/", @parts[0..$nparts-1]) eq $LOGDIR) {
                 # the file is in $LOGDIR/

@@ -51,7 +51,7 @@ and desired behavior.
 
 Note: if libcurl returns a -1 timeout here, it just means that libcurl
 currently has no stored timeout value. You must not wait too long (more than a
-few seconds perhaps) before you call curl_multi_perform() again.
+few seconds perhaps) before you call \fIcurl_multi_perform(3)\fP again.
 .SH EXAMPLE
 .nf
 struct timeval timeout;
@@ -79,5 +79,7 @@ This function was added in libcurl 7.15.4.
 .SH RETURN VALUE
 The standard CURLMcode for multi interface error codes.
 .SH "SEE ALSO"
-.BR curl_multi_fdset "(3), " curl_multi_info_read "(3), "
-.BR curl_multi_socket "(3), " curl_multi_setopt "(3) "
+.BR curl_multi_fdset (3),
+.BR curl_multi_info_read (3),
+.BR curl_multi_setopt (3),
+.BR curl_multi_socket (3)

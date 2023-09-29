@@ -54,8 +54,8 @@ If \fIverify\fP value is set to 1:
 In 7.28.0 and earlier: treated as a debug option of some sorts, not supported
 anymore due to frequently leading to programmer mistakes.
 
-From 7.28.1 to 7.65.3: setting it to 1 made curl_easy_setopt() return an error
-and leaving the flag untouched.
+From 7.28.1 to 7.65.3: setting it to 1 made \fIcurl_easy_setopt(3)\fP return
+an error and leaving the flag untouched.
 
 From 7.66.0: treats 1 and 2 the same.
 
@@ -107,4 +107,6 @@ Returns CURLE_OK if TLS is supported, and CURLE_UNKNOWN_OPTION if not.
 
 If 1 is set as argument, \fICURLE_BAD_FUNCTION_ARGUMENT\fP is returned.
 .SH "SEE ALSO"
-.BR CURLOPT_SSL_VERIFYPEER "(3), " CURLOPT_CAINFO "(3), "
+.BR CURLOPT_CAINFO (3),
+.BR CURLOPT_PINNEDPUBLICKEY (3),
+.BR CURLOPT_SSL_VERIFYPEER (3)

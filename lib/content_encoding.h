@@ -25,26 +25,9 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-struct contenc_writer {
-  const struct content_encoding *handler;  /* Encoding handler. */
-  struct contenc_writer *downstream;  /* Downstream writer. */
-  unsigned int order; /* Ordering within writer stack. */
-};
+struct contenc_writer;
 
-/* Content encoding writer. */
-struct content_encoding {
-  const char *name;        /* Encoding name. */
-  const char *alias;       /* Encoding name alias. */
-  CURLcode (*init_writer)(struct Curl_easy *data,
-                          struct contenc_writer *writer);
-  CURLcode (*unencode_write)(struct Curl_easy *data,
-                             struct contenc_writer *writer,
-                             const char *buf, size_t nbytes);
-  void (*close_writer)(struct Curl_easy *data,
-                       struct contenc_writer *writer);
-  size_t writersize;
-};
-
+char *Curl_all_content_encodings(void);
 
 CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
                                      const char *enclist, int is_transfer);
@@ -52,6 +35,5 @@ CURLcode Curl_unencode_write(struct Curl_easy *data,
                              struct contenc_writer *writer,
                              const char *buf, size_t nbytes);
 void Curl_unencode_cleanup(struct Curl_easy *data);
-char *Curl_all_content_encodings(void);
 
 #endif /* HEADER_CURL_CONTENT_ENCODING_H */

@@ -12,7 +12,7 @@ HTTP MIME POST
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Tue, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:4f:00 GMT
 Server: test-server/fake swsclose
 Connection: close
 Content-Type: text/html
@@ -21,7 +21,7 @@ hello
 </data>
 <datacheck>
 HTTP/1.1 200 OK
-Date: Tue, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:4f:00 GMT
 Server: test-server/fake swsclose
 Connection: close
 Content-Type: text/html
@@ -58,8 +58,8 @@ This is data from a file
 # Verify data after the test has been "shot"
 <verify>
 <strippart>
-s/^--------------------------[a-z0-9]*/------------------------------/
-s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
+s/^--------------------------[A-Za-z0-9]*/------------------------------/
+s/boundary=------------------------[A-Za-z0-9]*/boundary=----------------------------/
 </strippart>
 # Note that the stripping above removes 12 bytes from every occurrence of the
 # boundary string and since 5 of them are in the body contents, we see
@@ -73,9 +73,9 @@ Content-Type: multipart/form-data; boundary=----------------------------
 Expect: 100-continue
 
 %if hyper
-C1
+CD
 %else
-c1
+cd
 %endif
 ------------------------------
 Content-Disposition: form-data; name="field1"
@@ -87,14 +87,18 @@ Content-Disposition: form-data; name="field2"
 
 5
 dummy
-91
+97
 
 ------------------------------
 Content-Disposition: form-data; name="field3"; filename="file%TESTNUMBER.txt"
 Content-Type: text/plain
 
 
-49
+%if hyper
+4F
+%else
+4f
+%endif
 This is data from a file
 
 --------------------------------

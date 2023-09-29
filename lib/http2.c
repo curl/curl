@@ -2313,7 +2313,7 @@ out:
                 "h2 windows %d-%d (stream-conn), "
                 "buffers %zu-%zu (stream-conn)",
                 stream->id, len, nwritten, *err,
-                (ssize_t)stream->upload_left,
+                stream->upload_left,
                 nghttp2_session_get_stream_remote_window_size(
                   ctx->h2, stream->id),
                 nghttp2_session_get_remote_window_size(ctx->h2),
@@ -2425,6 +2425,8 @@ static void cf_h2_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     cf_h2_ctx_clear(ctx);
     CF_DATA_RESTORE(cf, save);
   }
+  if(cf->next)
+    cf->next->cft->do_close(cf->next, data);
 }
 
 static void cf_h2_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)

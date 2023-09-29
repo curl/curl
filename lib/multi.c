@@ -665,7 +665,6 @@ static CURLcode multi_done(struct Curl_easy *data,
 {
   CURLcode result;
   struct connectdata *conn = data->conn;
-  unsigned int i;
 
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   DEBUGF(infof(data, "multi_done[%s]: status: %d prem: %d done: %d",
@@ -721,12 +720,7 @@ static CURLcode multi_done(struct Curl_easy *data,
 
   Curl_safefree(data->state.ulbuf);
 
-  /* if the transfer was completed in a paused state there can be buffered
-     data left to free */
-  for(i = 0; i < data->state.tempcount; i++) {
-    Curl_dyn_free(&data->state.tempwrite[i].b);
-  }
-  data->state.tempcount = 0;
+  Curl_client_cleanup(data);
 
   CONNCACHE_LOCK(data);
   Curl_detach_connection(data);
@@ -3139,7 +3133,7 @@ static CURLMcode add_next_timeout(struct curltime now,
     struct Curl_llist_element *n = e->next;
     timediff_t diff;
     node = (struct time_node *)e->ptr;
-    diff = Curl_timediff(node->time, now);
+    diff = Curl_timediff_us(node->time, now);
     if(diff <= 0)
       /* remove outdated entry */
       Curl_llist_remove(list, e, NULL);
@@ -3422,20 +3416,10 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
 
     if(Curl_splaycomparekeys(multi->timetree->key, now) > 0) {
       /* some time left before expiration */
-      timediff_t diff = Curl_timediff(multi->timetree->key, now);
-      if(diff <= 0)
-        /*
-         * Since we only provide millisecond resolution on the returned value
-         * and the diff might be less than one millisecond here, we don't
-         * return zero as that may cause short bursts of busyloops on fast
-         * processors while the diff is still present but less than one
-         * millisecond! instead we return 1 until the time is ripe.
-         */
-        *timeout_ms = 1;
-      else
-        /* this should be safe even on 64 bit archs, as we don't use that
-           overly long timeouts */
-        *timeout_ms = (long)diff;
+      timediff_t diff = Curl_timediff_ceil(multi->timetree->key, now);
+      /* this should be safe even on 32 bit archs, as we don't use that
+         overly long timeouts */
+      *timeout_ms = (long)diff;
     }
     else
       /* 0 means immediately */
@@ -3783,41 +3767,26 @@ bool Curl_is_in_callback(struct Curl_easy *easy)
           (easy->multi_easy && easy->multi_easy->in_callback));
 }
 
-#ifdef DEBUGBUILD
-void Curl_multi_dump(struct Curl_multi *multi)
-{
-  struct Curl_easy *data;
-  int i;
-  fprintf(stderr, "* Multi status: %d handles, %d alive\n",
-          multi->num_easy, multi->num_alive);
-  for(data = multi->easyp; data; data = data->next) {
-    if(data->mstate < MSTATE_COMPLETED) {
-      /* only display handles that are not completed */
-      fprintf(stderr, "handle %p, state %s, %d sockets\n",
-              (void *)data,
-              multi_statename[data->mstate], data->numsocks);
-      for(i = 0; i < data->numsocks; i++) {
-        curl_socket_t s = data->sockets[i];
-        struct Curl_sh_entry *entry = sh_getentry(&multi->sockhash, s);
-
-        fprintf(stderr, "%d ", (int)s);
-        if(!entry) {
-          fprintf(stderr, "INTERNAL CONFUSION\n");
-          continue;
-        }
-        fprintf(stderr, "[%s %s] ",
-                (entry->action&CURL_POLL_IN)?"RECVING":"",
-                (entry->action&CURL_POLL_OUT)?"SENDING":"");
-      }
-      if(data->numsocks)
-        fprintf(stderr, "\n");
-    }
-  }
-}
-#endif
-
 unsigned int Curl_multi_max_concurrent_streams(struct Curl_multi *multi)
 {
   DEBUGASSERT(multi);
   return multi->max_concurrent_streams;
+}
+
+struct Curl_easy **curl_multi_get_handles(struct Curl_multi *multi)
+{
+  struct Curl_easy **a = malloc(sizeof(struct Curl_easy *) *
+                                (multi->num_easy + 1));
+  if(a) {
+    int i = 0;
+    struct Curl_easy *e = multi->easyp;
+    while(e) {
+      DEBUGASSERT(i < multi->num_easy);
+      if(!e->internal)
+        a[i++] = e;
+      e = e->next;
+    }
+    a[i] = NULL; /* last entry is a NULL */
+  }
+  return a;
 }

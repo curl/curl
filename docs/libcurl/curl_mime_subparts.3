@@ -37,7 +37,7 @@ structure.
 \fIpart\fP is a handle to the multipart part.
 
 \fIsubparts\fP is a mime structure handle holding the sub-parts. After
-\fIcurl_mime_subparts\fP succeeds, the mime structure handle belongs to the
+\fIcurl_mime_subparts(3)\fP succeeds, the mime structure handle belongs to the
 multipart part and must not be freed explicitly. It may however be updated by
 subsequent calls to mime API functions.
 
@@ -71,5 +71,5 @@ As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
 .SH RETURN VALUE
 CURLE_OK or a CURL error code upon failure.
 .SH "SEE ALSO"
-.BR curl_mime_addpart "(3),"
-.BR curl_mime_init "(3)"
+.BR curl_mime_addpart (3),
+.BR curl_mime_init (3)

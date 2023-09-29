@@ -35,12 +35,6 @@ struct Cookie {
   char *spath;        /* sanitized cookie path */
   char *domain;      /* domain = <this> */
   curl_off_t expires;  /* expires = <this> */
-  char *expirestr;   /* the plain text version */
-
-  /* RFC 2109 keywords. Version=1 means 2109-compliant cookie sending */
-  char *version;     /* Version = <value> */
-  char *maxage;      /* Max-Age = <value> */
-
   bool tailmatch;    /* whether we do tail-matching of the domain name */
   bool secure;       /* whether the 'secure' keyword was used */
   bool livecookie;   /* updated from a server, not a stored file */
@@ -56,17 +50,16 @@ struct Cookie {
 #define COOKIE_PREFIX__SECURE (1<<0)
 #define COOKIE_PREFIX__HOST (1<<1)
 
-#define COOKIE_HASH_SIZE 256
+#define COOKIE_HASH_SIZE 63
 
 struct CookieInfo {
   /* linked list of cookies we know of */
   struct Cookie *cookies[COOKIE_HASH_SIZE];
-  char *filename;  /* file we read from/write to */
-  long numcookies; /* number of cookies in the "jar" */
+  curl_off_t next_expiration; /* the next time at which expiration happens */
+  int numcookies;  /* number of cookies in the "jar" */
+  int lastct;      /* last creation-time used in the jar */
   bool running;    /* state info, for cookie adding information */
   bool newsession; /* new session, discard session cookies on load */
-  int lastct;      /* last creation-time used in the jar */
-  curl_off_t next_expiration; /* the next time at which expiration happens */
 };
 
 /* The maximum sizes we accept for cookies. RFC 6265 section 6.1 says
@@ -75,7 +68,6 @@ struct CookieInfo {
 
    - At least 4096 bytes per cookie (as measured by the sum of the length of
      the cookie's name, value, and attributes).
-
    In the 6265bis draft document section 5.4 it is phrased even stronger: "If
    the sum of the lengths of the name string and the value string is more than
    4096 octets, abort these steps and ignore the set-cookie-string entirely."
@@ -116,7 +108,7 @@ struct Curl_easy;
 
 struct Cookie *Curl_cookie_add(struct Curl_easy *data,
                                struct CookieInfo *c, bool header,
-                               bool noexpiry, char *lineptr,
+                               bool noexpiry, const char *lineptr,
                                const char *domain, const char *path,
                                bool secure);
 

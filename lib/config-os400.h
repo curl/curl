@@ -149,17 +149,11 @@
 /* Define if you have the `signal' function. */
 #undef HAVE_SIGNAL
 
-/* Define if you have the <signal.h> header file. */
-#define HAVE_SIGNAL_H
-
 /* Define if you have the `socket' function. */
 #define HAVE_SOCKET
 
 /* Define if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
-
-/* Define if you have the <stdlib.h> header file. */
-#define HAVE_STDLIB_H
 
 
 /* The following define is needed on OS400 to enable strcmpi(), stricmp() and
@@ -180,9 +174,6 @@
 
 /* Define if you have the <strings.h> header file. */
 #define HAVE_STRINGS_H
-
-/* Define if you have the <string.h> header file. */
-#define HAVE_STRING_H
 
 /* Define if you have the <stropts.h> header file. */
 #undef HAVE_STROPTS_H
@@ -226,9 +217,6 @@
 /* Define if you have the <termio.h> header file. */
 #undef HAVE_TERMIO_H
 
-/* Define if you have the <time.h> header file. */
-#define HAVE_TIME_H
-
 /* Define if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H
 
@@ -258,9 +246,6 @@
 
 /* Define if you have the ANSI C header files. */
 #define STDC_HEADERS
-
-/* Define if you can safely include both <sys/time.h> and <time.h>. */
-#define TIME_WITH_SYS_TIME
 
 /* Define to enable HTTP3 support (experimental, requires NGTCP2, QUICHE or
    MSH3) */

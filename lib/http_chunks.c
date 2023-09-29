@@ -175,10 +175,7 @@ CHUNKcode Curl_httpchunk_read(struct Curl_easy *data,
 
       /* Write the data portion available */
       if(!data->set.http_te_skip && !k->ignorebody) {
-        if(!data->set.http_ce_skip && k->writer_stack)
-          result = Curl_unencode_write(data, k->writer_stack, datap, piece);
-        else
-          result = Curl_client_write(data, CLIENTWRITE_BODY, datap, piece);
+        result = Curl_client_write(data, CLIENTWRITE_BODY, datap, piece);
 
         if(result) {
           *extrap = result;

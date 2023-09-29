@@ -27,10 +27,7 @@ the master branch using pull-requests, just like ordinary changes.
 
 To fix before we remove the experimental label:
 
- - working multiplexing and GTFO handling
- - fallback or another flexible way to go (back to) h1/h2 if h3 fails
- - enough test cases to verify basic HTTP/3 functionality
- - no "important" bugs left on HTTP/3
+ - the used QUIC library needs to consider itself non-beta
  - it's fine to "leave" individual backends as experimental if necessary
 
 # ngtcp2 version
@@ -194,6 +191,10 @@ Build curl:
 
 # msh3 (msquic) version
 
+**Note**: The msquic HTTP/3 backend is immature and is not properly functional
+one as of September 2023. Feel free to help us test it and improve it, but
+there is no point in filing bugs about it just yet.
+
 ## Build Linux (with quictls fork of OpenSSL)
 
 Build msh3:
@@ -226,19 +227,21 @@ Build msh3:
      % cmake --install . --config Release
 
 **Note** - On Windows, Schannel will be used for TLS support by default. If
-you with to use (the quictls fork of) OpenSSL, specify the `-DQUIC_TLS=openssl`
-option to the generate command above. Also note that OpenSSL brings with it an
-additional set of build dependencies not specified here.
+you with to use (the quictls fork of) OpenSSL, specify the
+`-DQUIC_TLS=openssl` option to the generate command above. Also note that
+OpenSSL brings with it an additional set of build dependencies not specified
+here.
 
-Build curl (in [Visual Studio Command prompt](../winbuild/README.md#open-a-command-prompt)):
+Build curl (in [Visual Studio Command
+prompt](../winbuild/README.md#open-a-command-prompt)):
 
      % git clone https://github.com/curl/curl
      % cd curl/winbuild
      % nmake /f Makefile.vc mode=dll WITH_MSH3=dll MSH3_PATH="C:/Program Files/msh3" MACHINE=x64
 
-**Note** - If you encounter a build error with `tool_hugehelp.c` being missing,
-rename `tool_hugehelp.c.cvs` in the same directory to `tool_hugehelp.c` and
-then run `nmake` again.
+**Note** - If you encounter a build error with `tool_hugehelp.c` being
+missing, rename `tool_hugehelp.c.cvs` in the same directory to
+`tool_hugehelp.c` and then run `nmake` again.
 
 Run in the `C:/Program Files/msh3/lib` directory, copy `curl.exe` to that
 directory, or copy `msquic.dll` and `msh3.dll` from that directory to the
@@ -264,25 +267,41 @@ See this [list of public HTTP/3 servers](https://bagder.github.io/HTTP3-test/)
 
 ### HTTPS eyeballing
 
-With option `--http3` curl will attempt earlier HTTP versions as well should the connect
-attempt via HTTP/3 not succeed "fast enough". This strategy is similar to IPv4/6 happy
-eyeballing where the alternate address family is used in parallel after a short delay.
+With option `--http3` curl will attempt earlier HTTP versions as well should
+the connect attempt via HTTP/3 not succeed "fast enough". This strategy is
+similar to IPv4/6 happy eyeballing where the alternate address family is used
+in parallel after a short delay.
 
-The IPv4/6 eyeballing has a default of 200ms and you may override that via `--happy-eyeballs-timeout-ms value`.
-Since HTTP/3 is still relatively new, we decided to use this timeout also for the HTTP eyeballing - with a slight twist.
+The IPv4/6 eyeballing has a default of 200ms and you may override that via
+`--happy-eyeballs-timeout-ms value`. Since HTTP/3 is still relatively new, we
+decided to use this timeout also for the HTTP eyeballing - with a slight
+twist.
 
-The `happy-eyeballs-timeout-ms` value is the **hard** timeout, meaning after that time expired, a TLS connection is opened in addition to negotiate HTTP/2 or HTTP/1.1. At half of that value - currently - is the **soft** timeout. The soft timeout fires, when there has been **no data at all** seen from the server on the HTTP/3 connection.
+The `happy-eyeballs-timeout-ms` value is the **hard** timeout, meaning after
+that time expired, a TLS connection is opened in addition to negotiate HTTP/2
+or HTTP/1.1. At half of that value - currently - is the **soft** timeout. The
+soft timeout fires, when there has been **no data at all** seen from the
+server on the HTTP/3 connection.
 
 So, without you specifying anything, the hard timeout is 200ms and the soft is 100ms:
 
- * Ideally, the whole QUIC handshake happens and curl has an HTTP/3 connection in less than 100ms.
- * When QUIC is not supported (or UDP does not work for this network path), no reply is seen and the HTTP/2 TLS+TCP connection starts 100ms later.
- * In the worst case, UDP replies start before 100ms, but drag on. This will start the TLS+TCP connection after 200ms.
- * When the QUIC handshake fails, the TLS+TCP connection is attempted right away. For example, when the QUIC server presents the wrong certificate.
+ * Ideally, the whole QUIC handshake happens and curl has an HTTP/3 connection
+   in less than 100ms.
+ * When QUIC is not supported (or UDP does not work for this network path), no
+   reply is seen and the HTTP/2 TLS+TCP connection starts 100ms later.
+ * In the worst case, UDP replies start before 100ms, but drag on. This will
+   start the TLS+TCP connection after 200ms.
+ * When the QUIC handshake fails, the TLS+TCP connection is attempted right
+   away. For example, when the QUIC server presents the wrong certificate.
 
-The whole transfer only fails, when **both** QUIC and TLS+TCP fail to handshake or time out.
+The whole transfer only fails, when **both** QUIC and TLS+TCP fail to
+handshake or time out.
 
-Note that all this happens in addition to IP version happy eyeballing. If the name resolution for the server gives more than one IP address, curl will try all those until one succeeds - just as with all other protocols. And if those IP addresses contain both IPv6 and IPv4, those attempts will happen, delayed, in parallel (the actual eyeballing).
+Note that all this happens in addition to IP version happy eyeballing. If the
+name resolution for the server gives more than one IP address, curl will try
+all those until one succeeds - just as with all other protocols. And if those
+IP addresses contain both IPv6 and IPv4, those attempts will happen, delayed,
+in parallel (the actual eyeballing).
 
 ## Known Bugs
 

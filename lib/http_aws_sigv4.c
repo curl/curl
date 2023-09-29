@@ -199,10 +199,41 @@ static CURLcode make_headers(struct Curl_easy *data,
     head = tmp_head;
   }
 
+  /* copy user headers to our header list. the logic is based on how http.c
+     handles user headers.
+
+     user headers in format 'name:' with no value are used to signal that an
+     internal header of that name should be removed. those user headers are not
+     added to this list.
+
+     user headers in format 'name;' with no value are used to signal that a
+     header of that name with no value should be sent. those user headers are
+     added to this list but in the format that they will be sent, ie the
+     semi-colon is changed to a colon for format 'name:'.
+
+     user headers with a value of whitespace only, or without a colon or
+     semi-colon, are not added to this list.
+     */
   for(l = data->set.headers; l; l = l->next) {
-    tmp_head = curl_slist_append(head, l->data);
-    if(!tmp_head)
+    char *dupdata, *ptr;
+    char *sep = strchr(l->data, ':');
+    if(!sep)
+      sep = strchr(l->data, ';');
+    if(!sep || (*sep == ':' && !*(sep + 1)))
+      continue;
+    for(ptr = sep + 1; ISSPACE(*ptr); ++ptr)
+      ;
+    if(!*ptr && ptr != sep + 1) /* a value of whitespace only */
+      continue;
+    dupdata = strdup(l->data);
+    if(!dupdata)
       goto fail;
+    dupdata[sep - l->data] = ':';
+    tmp_head = Curl_slist_append_nodup(head, dupdata);
+    if(!tmp_head) {
+      free(dupdata);
+      goto fail;
+    }
     head = tmp_head;
   }
 
@@ -378,6 +409,11 @@ static int compare_func(const void *a, const void *b)
 {
   const struct pair *aa = a;
   const struct pair *bb = b;
+  /* If one element is empty, the other is always sorted higher */
+  if(aa->len == 0)
+    return -1;
+  if(bb->len == 0)
+    return 1;
   return strncmp(aa->p, bb->p, aa->len < bb->len ? aa->len : bb->len);
 }
 
@@ -445,6 +481,7 @@ static CURLcode canon_query(struct Curl_easy *data,
             tmp[2] = Curl_raw_toupper(q[2]);
             result = Curl_dyn_addn(dq, tmp, 3);
             q += 2;
+            len -= 2;
           }
           else
             /* '%' without a following two-digit hex, encode it */
@@ -666,6 +703,8 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
                   (int)payload_hash_len, payload_hash);
   if(!canonical_request)
     goto fail;
+
+  DEBUGF(infof(data, "Canonical request: %s", canonical_request));
 
   /* provider 0 lowercase */
   Curl_strntolower(provider0, provider0, strlen(provider0));

@@ -96,10 +96,10 @@ static char *inet_ntop6 (const unsigned char *src, char *dst, size_t size)
   char tmp[sizeof("ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255")];
   char *tp;
   struct {
-    long base;
-    long len;
+    int base;
+    int len;
   } best, cur;
-  unsigned long words[IN6ADDRSZ / INT16SZ];
+  unsigned int words[IN6ADDRSZ / INT16SZ];
   int i;
 
   /* Preprocess:
@@ -108,7 +108,7 @@ static char *inet_ntop6 (const unsigned char *src, char *dst, size_t size)
    */
   memset(words, '\0', sizeof(words));
   for(i = 0; i < IN6ADDRSZ; i++)
-    words[i/2] |= (src[i] << ((1 - (i % 2)) << 3));
+    words[i/2] |= ((unsigned int)src[i] << ((1 - (i % 2)) << 3));
 
   best.base = -1;
   cur.base  = -1;
@@ -159,7 +159,7 @@ static char *inet_ntop6 (const unsigned char *src, char *dst, size_t size)
       tp += strlen(tp);
       break;
     }
-    tp += msnprintf(tp, 5, "%lx", words[i]);
+    tp += msnprintf(tp, 5, "%x", words[i]);
   }
 
   /* Was it a trailing run of 0x00's?

@@ -254,8 +254,8 @@ See \fICURLINFO_CONN_ID(3)\fP
 The ID of the transfer. (Added in 8.2.0)
 See \fICURLINFO_XFER_ID(3)\fP
 .SH TIMES
+An overview of the six time values available from \fIcurl_easy_getinfo(3)\fP
 .nf
-An overview of the six time values available from curl_easy_getinfo()
 
 curl_easy_perform()
     |
@@ -268,34 +268,34 @@ curl_easy_perform()
     |--|--|--|--|--|--REDIRECT
 .fi
 .IP NAMELOOKUP
-\fICURLINFO_NAMELOOKUP_TIME\fP and \fICURLINFO_NAMELOOKUP_TIME_T\fP.
+\fICURLINFO_NAMELOOKUP_TIME(3)\fP and \fICURLINFO_NAMELOOKUP_TIME_T(3)\fP.
 The time it took from the start until the name resolving was completed.
 .IP CONNECT
-\fICURLINFO_CONNECT_TIME\fP and \fICURLINFO_CONNECT_TIME_T\fP.
-The time it took from the start until the connect
-to the remote host (or proxy) was completed.
+\fICURLINFO_CONNECT_TIME(3)\fP and \fICURLINFO_CONNECT_TIME_T(3)\fP.  The time
+it took from the start until the connect to the remote host (or proxy) was
+completed.
 .IP APPCONNECT
-\fICURLINFO_APPCONNECT_TIME\fP and \fICURLINFO_APPCONNECT_TIME_T\fP.
-The time it took from the start until the SSL
-connect/handshake with the remote host was completed. (Added in 7.19.0)
-The latter is the integer version (measuring microseconds).  (Added in 7.60.0)
+\fICURLINFO_APPCONNECT_TIME(3)\fP and \fICURLINFO_APPCONNECT_TIME_T(3)\fP.
+The time it took from the start until the SSL connect/handshake with the
+remote host was completed. (Added in 7.19.0) The latter is the integer version
+(measuring microseconds). (Added in 7.60.0)
 .IP PRETRANSFER
-\fICURLINFO_PRETRANSFER_TIME\fP and \fICURLINFO_PRETRANSFER_TIME_T\fP.
-The time it took from the start until the
-file transfer is just about to begin. This includes all pre-transfer commands
-and negotiations that are specific to the particular protocol(s) involved.
+\fICURLINFO_PRETRANSFER_TIME(3)\fP and \fICURLINFO_PRETRANSFER_TIME_T(3)\fP.
+The time it took from the start until the file transfer is just about to
+begin. This includes all pre-transfer commands and negotiations that are
+specific to the particular protocol(s) involved.
 .IP STARTTRANSFER
-\fICURLINFO_STARTTRANSFER_TIME\fP and \fICURLINFO_STARTTRANSFER_TIME_T\fP.
-The time it took from the start until the
-first byte is received by libcurl.
+\fICURLINFO_STARTTRANSFER_TIME(3)\fP and
+\fICURLINFO_STARTTRANSFER_TIME_T(3)\fP. The time it took from the start until
+the first byte is received by libcurl.
 .IP TOTAL
-\fICURLINFO_TOTAL_TIME\fP and \fICURLINFO_TOTAL_TIME_T\fP.
-Total time of the previous request.
+\fICURLINFO_TOTAL_TIME(3)\fP and \fICURLINFO_TOTAL_TIME_T(3)\fP. Total time
+of the previous request.
 .IP REDIRECT
-\fICURLINFO_REDIRECT_TIME\fP and \fICURLINFO_REDIRECT_TIME_T\fP.
-The time it took for all redirection steps
-include name lookup, connect, pretransfer and transfer before final
-transaction was started. So, this is zero if no redirection took place.
+\fICURLINFO_REDIRECT_TIME(3)\fP and \fICURLINFO_REDIRECT_TIME_T(3)\fP. The
+time it took for all redirection steps include name lookup, connect,
+pretransfer and transfer before final transaction was started. So, this is
+zero if no redirection took place.
 .SH EXAMPLE
 .nf
   curl = curl_easy_init();
@@ -322,4 +322,4 @@ Added in 7.4.1
 If the operation was successful, CURLE_OK is returned. Otherwise an
 appropriate error code is returned.
 .SH "SEE ALSO"
-.BR curl_easy_setopt "(3)"
+.BR curl_easy_setopt (3)

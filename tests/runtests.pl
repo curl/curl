@@ -2433,6 +2433,7 @@ if(!$randseed) {
         localtime(time);
     # seed of the month. December 2019 becomes 201912
     $randseed = ($year+1900)*100 + $mon+1;
+    print "Using curl: $CURL\n";
     open(my $curlvh, "-|", shell_quote($CURL) . " --version 2>/dev/null") ||
         die "could not get curl version!";
     my @c = <$curlvh>;

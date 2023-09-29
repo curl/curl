@@ -26,7 +26,7 @@
 /* Escape and unescape URL encoding in strings. The functions return a new
  * allocated string or NULL if an error occurred.  */
 
-bool Curl_isunreserved(unsigned char in);
+#include "curl_ctype.h"
 
 enum urlreject {
   REJECT_NADA = 2,

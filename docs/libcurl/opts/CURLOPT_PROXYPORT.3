@@ -32,6 +32,8 @@ CURLOPT_PROXYPORT \- port number the proxy listens on
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXYPORT, long port);
 .fi
 .SH DESCRIPTION
+We discourage use of this option.
+
 Pass a long with this option to set the proxy port to connect to unless it is
 specified in the proxy string \fICURLOPT_PROXY(3)\fP or uses 443 for https
 proxies and 1080 for all others as default.
@@ -58,4 +60,7 @@ Always
 .SH RETURN VALUE
 Returns CURLE_OK
 .SH "SEE ALSO"
-.BR CURLOPT_PROXY "(3), " CURLOPT_PROXYTYPE "(3), "
+.BR CURLINFO_PRIMARY_PORT (3),
+.BR CURLOPT_PORT (3),
+.BR CURLOPT_PROXY (3),
+.BR CURLOPT_PROXYTYPE (3)

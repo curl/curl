@@ -41,7 +41,7 @@ recommended that if used in conjunction with \fICURLOPT_TIMEOUT(3)\fP, you set
 \fICURLOPT_SERVER_RESPONSE_TIMEOUT(3)\fP to a value smaller than
 \fICURLOPT_TIMEOUT(3)\fP.
 
-This option was formerly known as \fBCURLOPT_FTP_RESPONSE_TIMEOUT\fP.
+This option was formerly known as CURLOPT_FTP_RESPONSE_TIMEOUT.
 .SH DEFAULT
 None
 .SH PROTOCOLS
@@ -68,5 +68,6 @@ Returns CURLE_OK if supported, and CURLE_UNKNOWN_OPTION if not. Returns
 CURLE_BAD_FUNCTION_ARGUMENT if set to a negative value or a value that when
 converted to milliseconds is too large.
 .SH "SEE ALSO"
-.BR CURLOPT_TIMEOUT "(3), " CURLOPT_CONNECTTIMEOUT "(3), "
-.BR CURLOPT_LOW_SPEED_LIMIT "(3), "
+.BR CURLOPT_CONNECTTIMEOUT (3),
+.BR CURLOPT_LOW_SPEED_LIMIT (3),
+.BR CURLOPT_TIMEOUT (3)

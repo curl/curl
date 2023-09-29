@@ -25,7 +25,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if defined(HAVE_SIGNAL_H) && defined(HAVE_SIGACTION) &&        \
+#if defined(HAVE_SIGACTION) &&        \
   (defined(USE_OPENSSL) || defined(USE_MBEDTLS) || defined(USE_WOLFSSL))
 #include <signal.h>
 

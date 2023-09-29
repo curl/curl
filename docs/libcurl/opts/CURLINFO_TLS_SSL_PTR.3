@@ -88,7 +88,8 @@ as well:
 
 If the \fIinternals\fP pointer is NULL then either the SSL backend is not
 supported, an SSL session has not yet been established or the connection is no
-longer associated with the easy handle (e.g. curl_easy_perform has returned).
+longer associated with the easy handle (e.g. \fIcurl_easy_perform(3)\fP has
+returned).
 .SH LIMITATIONS
 This option has some limitations that could make it unsafe when it comes to
 the manual verification of certificates.
@@ -159,5 +160,6 @@ This option is exactly the same as that option except in the case of OpenSSL.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
-.BR curl_easy_getinfo "(3), " curl_easy_setopt "(3), "
-.BR CURLINFO_TLS_SESSION "(3), "
+.BR curl_easy_getinfo (3),
+.BR curl_easy_setopt (3),
+.BR CURLINFO_TLS_SESSION (3)
