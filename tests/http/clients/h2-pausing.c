@@ -329,6 +329,8 @@ out:
 
 
   curl_slist_free_all(resolve);
+  curl_free(host);
+  curl_free(port);
   curl_url_cleanup(cu);
   curl_multi_cleanup(multi_handle);
   curl_global_cleanup();
