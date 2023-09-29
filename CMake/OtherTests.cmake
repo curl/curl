@@ -162,36 +162,35 @@ if(NOT DEFINED HAVE_GETADDRINFO_THREADSAFE)
   add_header_include(HAVE_NETDB_H "netdb.h")
 
   check_c_source_compiles("${_source_epilogue}
-int main(void)
-{
-#ifdef h_errno
-  return 0;
-#else
-  force compilation error
-#endif
-}" HAVE_H_ERRNO)
+    int main(void)
+    {
+    #ifdef h_errno
+      return 0;
+    #else
+      force compilation error
+    #endif
+    }" HAVE_H_ERRNO)
 
   if(NOT HAVE_H_ERRNO)
     check_c_source_runs("${_source_epilogue}
-int main(void)
-{
-  h_errno = 2;
-  return h_errno != 0 ? 1 : 0;
-}" HAVE_H_ERRNO_ASSIGNABLE)
+      int main(void)
+      {
+        h_errno = 2;
+        return h_errno != 0 ? 1 : 0;
+      }" HAVE_H_ERRNO_ASSIGNABLE)
 
     if(NOT HAVE_H_ERRNO_ASSIGNABLE)
       check_c_source_compiles("${_source_epilogue}
-int main(void)
-{
-#if defined(_POSIX_C_SOURCE) && (_POSIX_C_SOURCE >= 200809L)
-  return 0;
-#elif defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE >= 700)
-  return 0;
-#else
-  force compilation error
-#endif
-}
-" HAVE_H_ERRNO_SBS_ISSUE_7)
+        int main(void)
+        {
+        #if defined(_POSIX_C_SOURCE) && (_POSIX_C_SOURCE >= 200809L)
+          return 0;
+        #elif defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE >= 700)
+          return 0;
+        #else
+          force compilation error
+        #endif
+        }" HAVE_H_ERRNO_SBS_ISSUE_7)
     endif()
   endif()
 
