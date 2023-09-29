@@ -34,6 +34,7 @@
 #include "transfer.h"
 #include "parsedate.h"
 #include "sendf.h"
+#include "escape.h"
 
 #include <time.h>
 
@@ -63,11 +64,8 @@
 
 static void sha256_to_hex(char *dst, unsigned char *sha)
 {
-  int i;
-
-  for(i = 0; i < SHA256_DIGEST_LENGTH; ++i) {
-    msnprintf(dst + (i * 2), SHA256_HEX_LENGTH - (i * 2), "%02x", sha[i]);
-  }
+  Curl_hexencode(sha, SHA256_DIGEST_LENGTH,
+                 (unsigned char *)dst, SHA256_HEX_LENGTH);
 }
 
 static char *find_date_hdr(struct Curl_easy *data, const char *sig_hdr)

@@ -206,3 +206,29 @@ void curl_free(void *p)
 {
   free(p);
 }
+
+/*
+ * Curl_hexencode()
+ *
+ * Converts binary input to lowercase hex-encoded ASCII output.
+ * Null-terminated.
+ */
+void Curl_hexencode(const unsigned char *src, size_t len, /* input length */
+                    unsigned char *out, size_t olen) /* output buffer size */
+{
+  const char *hex = "0123456789abcdef";
+  DEBUGASSERT(src && len && (olen >= 3));
+  if(src && len && (olen >= 3)) {
+    while(len-- && (olen >= 3)) {
+      /* clang-tidy warns on this line without this comment: */
+      /* NOLINTNEXTLINE(clang-analyzer-core.UndefinedBinaryOperatorResult) */
+      *out++ = hex[(*src & 0xF0)>>4];
+      *out++ = hex[*src & 0x0F];
+      ++src;
+      olen -= 2;
+    }
+    *out = 0;
+  }
+  else if(olen)
+    *out = 0;
+}
