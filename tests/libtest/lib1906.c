@@ -29,46 +29,55 @@
 
 int test(char *URL)
 {
-  char *url_after;
+  CURLcode res = CURLE_OK;
+  char *url_after = NULL;
   CURLU *curlu = curl_url();
-  CURL *curl = curl_easy_init();
-  CURLcode curl_code;
   char error_buffer[CURL_ERROR_SIZE] = "";
+  CURL *curl;
+
+  easy_init(curl);
 
   curl_url_set(curlu, CURLUPART_URL, URL, CURLU_DEFAULT_SCHEME);
-  curl_easy_setopt(curl, CURLOPT_CURLU, curlu);
-  curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, error_buffer);
-  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_CURLU, curlu);
+  easy_setopt(curl, CURLOPT_ERRORBUFFER, error_buffer);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
   /* set a port number that makes this request fail */
-  curl_easy_setopt(curl, CURLOPT_PORT, 1L);
-  curl_code = curl_easy_perform(curl);
-  if(!curl_code)
+  easy_setopt(curl, CURLOPT_PORT, 1L);
+  res = curl_easy_perform(curl);
+  if(res != CURLE_COULDNT_CONNECT && res != CURLE_OPERATION_TIMEDOUT) {
     fprintf(stderr, "failure expected, "
-            "curl_easy_perform returned %ld: <%s>, <%s>\n",
-            (long) curl_code, curl_easy_strerror(curl_code), error_buffer);
+            "curl_easy_perform returned %d: <%s>, <%s>\n",
+            (int) res, curl_easy_strerror(res), error_buffer);
+    if(res == CURLE_OK)
+      res = TEST_ERR_MAJOR_BAD;  /* force an error return */
+    goto test_cleanup;
+  }
+  res = CURLE_OK;  /* reset for next use */
 
   /* print the used url */
   curl_url_get(curlu, CURLUPART_URL, &url_after, 0);
   fprintf(stderr, "curlu now: <%s>\n", url_after);
   curl_free(url_after);
+  url_after = NULL;
 
   /* now reset CURLOP_PORT to go back to originally set port number */
-  curl_easy_setopt(curl, CURLOPT_PORT, 0L);
+  easy_setopt(curl, CURLOPT_PORT, 0L);
 
-  curl_code = curl_easy_perform(curl);
-  if(curl_code)
+  res = curl_easy_perform(curl);
+  if(res)
     fprintf(stderr, "success expected, "
             "curl_easy_perform returned %ld: <%s>, <%s>\n",
-            (long) curl_code, curl_easy_strerror(curl_code), error_buffer);
+            (long) res, curl_easy_strerror(res), error_buffer);
 
   /* print url */
   curl_url_get(curlu, CURLUPART_URL, &url_after, 0);
   fprintf(stderr, "curlu now: <%s>\n", url_after);
-  curl_free(url_after);
 
+test_cleanup:
+  curl_free(url_after);
   curl_easy_cleanup(curl);
   curl_url_cleanup(curlu);
   curl_global_cleanup();
 
-  return 0;
+  return (int)res;
 }

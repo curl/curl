@@ -29,25 +29,28 @@
 
 int test(char *URL)
 {
+  CURLcode res = CURLE_OK;
   CURL *curl;
-  curl_global_init(CURL_GLOBAL_ALL);
+  int i;
 
-  curl = curl_easy_init();
-  if(curl) {
-    int i;
-    curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BEARER);
-    curl_easy_setopt(curl, CURLOPT_XOAUTH2_BEARER,
-                     "c4e448d652a961fda0ab64f882c8c161d5985f805d45d80c9ddca1");
-    curl_easy_setopt(curl, CURLOPT_SASL_AUTHZID,
-                     "c4e448d652a961fda0ab64f882c8c161d5985f805d45d80c9ddca2");
-    curl_easy_setopt(curl, CURLOPT_URL, URL);
+  global_init(CURL_GLOBAL_ALL);
+  easy_init(curl);
+  easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BEARER);
+  easy_setopt(curl, CURLOPT_XOAUTH2_BEARER,
+                   "c4e448d652a961fda0ab64f882c8c161d5985f805d45d80c9ddca1");
+  easy_setopt(curl, CURLOPT_SASL_AUTHZID,
+                   "c4e448d652a961fda0ab64f882c8c161d5985f805d45d80c9ddca2");
+  easy_setopt(curl, CURLOPT_URL, URL);
 
-    for(i = 0; i < 2; i++)
-      /* the second request needs to do connection reuse */
-      curl_easy_perform(curl);
-
-    curl_easy_cleanup(curl);
+  for(i = 0; i < 2; i++) {
+    /* the second request needs to do connection reuse */
+    res = curl_easy_perform(curl);
+    if(res)
+      goto test_cleanup;
   }
+
+test_cleanup:
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return 0;
+  return (int)res;
 }

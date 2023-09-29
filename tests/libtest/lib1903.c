@@ -30,26 +30,27 @@
 
 int test(char *URL)
 {
+  CURLcode res = CURLE_OK;
   CURL *ch = NULL;
-  curl_global_init(CURL_GLOBAL_ALL);
+  global_init(CURL_GLOBAL_ALL);
 
-  ch = curl_easy_init();
-  if(!ch)
-    goto cleanup;
+  easy_init(ch);
 
-  curl_easy_setopt(ch, CURLOPT_URL, URL);
-  curl_easy_setopt(ch, CURLOPT_COOKIEFILE, libtest_arg2);
-  curl_easy_perform(ch);
+  easy_setopt(ch, CURLOPT_URL, URL);
+  easy_setopt(ch, CURLOPT_COOKIEFILE, libtest_arg2);
+  res = curl_easy_perform(ch);
+  if(res)
+    goto test_cleanup;
 
   curl_easy_reset(ch);
 
-  curl_easy_setopt(ch, CURLOPT_URL, URL);
-  curl_easy_setopt(ch, CURLOPT_COOKIEFILE, libtest_arg2);
-  curl_easy_perform(ch);
+  easy_setopt(ch, CURLOPT_URL, URL);
+  easy_setopt(ch, CURLOPT_COOKIEFILE, libtest_arg2);
+  res = curl_easy_perform(ch);
 
-cleanup:
+test_cleanup:
   curl_easy_cleanup(ch);
   curl_global_cleanup();
 
-  return 0;
+  return (int)res;
 }

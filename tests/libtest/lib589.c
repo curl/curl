@@ -56,6 +56,8 @@ int test(char *URL)
     test_setopt(curl, CURLOPT_MIMEPOST, mime);
     res = curl_easy_perform(curl);
     curl_mime_free(mime);
+    if(res)
+      goto test_cleanup;
   }
 #endif
 

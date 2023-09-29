@@ -28,21 +28,24 @@
 
 int test(char *URL)
 {
-  CURLcode ret;
+  CURLcode res = CURLE_OK;
   CURL *hnd;
-  curl_global_init(CURL_GLOBAL_ALL);
+  global_init(CURL_GLOBAL_ALL);
 
-  hnd = curl_easy_init();
-  curl_easy_setopt(hnd, CURLOPT_URL, URL);
-  curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
-  curl_easy_setopt(hnd, CURLOPT_HEADER, 1L);
+  easy_init(hnd);
+  easy_setopt(hnd, CURLOPT_URL, URL);
+  easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
+  easy_setopt(hnd, CURLOPT_HEADER, 1L);
 
-  ret = curl_easy_perform(hnd);
+  res = curl_easy_perform(hnd);
+  if(res)
+    goto test_cleanup;
 
   curl_easy_setopt(hnd, CURLOPT_URL, libtest_arg2);
-  ret = curl_easy_perform(hnd);
-  curl_easy_cleanup(hnd);
+  res = curl_easy_perform(hnd);
 
+test_cleanup:
+  curl_easy_cleanup(hnd);
   curl_global_cleanup();
-  return (int)ret;
+  return (int)res;
 }

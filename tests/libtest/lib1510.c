@@ -83,6 +83,8 @@ int test(char *URL)
     easy_setopt(curl, CURLOPT_URL, target_url);
 
     res = curl_easy_perform(curl);
+    if(res)
+      goto test_cleanup;
 
     abort_on_test_timeout();
   }
