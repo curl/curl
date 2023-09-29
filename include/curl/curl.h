@@ -3209,7 +3209,7 @@ CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
  *
  * Block a domain from being resolved.
  */
-CURL_EXTERN int Curl_add_blocked_domain(struct Curl_easy *, const char *);
+CURL_EXTERN int Curl_add_blocked_domain(CURL *, const char *);
 
 #define CURLPAUSE_RECV      (1<<0)
 #define CURLPAUSE_RECV_CONT (0)
