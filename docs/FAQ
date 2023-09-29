@@ -441,6 +441,9 @@ FAQ
   managed and controlled entirely by Microsoft as owners of the operating
   system.
 
+  You can always download and install the latest version of curl for Windows
+  from https://curl.se/windows into a separate location.
+
   2.4 Does curl support SOCKS (RFC 1928) ?
 
   Yes, SOCKS 4 and 5 are supported.
