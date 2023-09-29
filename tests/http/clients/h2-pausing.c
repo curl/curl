@@ -164,11 +164,11 @@ static size_t cb(void *data, size_t size, size_t nmemb, void *clientp)
   if(!handle->resumed) {
     ++handle->paused;
     fprintf(stderr, "INFO: [%d] write, PAUSING on %lu bytes\n",
-            handle->idx, realsize);
+            handle->idx, (long)realsize);
     return CURL_WRITEFUNC_PAUSE;
   }
   fprintf(stderr, "INFO: [%d] write, accepting %lu bytes\n",
-          handle->idx, realsize);
+          handle->idx, (long)realsize);
   return realsize;
 }
 
