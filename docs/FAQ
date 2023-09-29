@@ -452,19 +452,19 @@ FAQ
 
   3.1 curl: (1) SSL is disabled, https: not supported
 
-  If you get this output when trying to get anything from an https:// server,
-  it means that the instance of curl/libcurl that you are using was built
-  without support for this protocol.
+  If you get this output when trying to get anything from an HTTPS server, it
+  means that the instance of curl/libcurl that you are using was built without
+  support for this protocol.
 
   This could have happened if the configure script that was run at build time
   could not find all libs and include files curl requires for SSL to work. If
   the configure script fails to find them, curl is simply built without SSL
   support.
 
-  To get the https:// support into a curl that was previously built but that
-  reports that https:// is not supported, you should dig through the document
-  and logs and check out why the configure script does not find the SSL libs
-  and/or include files.
+  To get HTTPS support into a curl that was previously built but that reports
+  that HTTPS is not supported, you should dig through the document and logs
+  and check out why the configure script does not find the SSL libs and/or
+  include files.
 
   Also, check out the other paragraph in this FAQ labeled "configure does not
   find OpenSSL even when it is installed".
@@ -522,11 +522,11 @@ FAQ
 
   One example would be to delete a file after you have downloaded it:
 
-     curl -O ftp://download.com/coolfile -Q '-DELE coolfile'
+     curl -O ftp://example.com/coolfile -Q '-DELE coolfile'
 
   or rename a file after upload:
 
-     curl -T infile ftp://upload.com/dir/ -Q "-RNFR infile" -Q "-RNTO newname"
+     curl -T infile ftp://example.com/dir/ -Q "-RNFR infile" -Q "-RNTO newname"
 
   3.8 How do I tell curl to follow HTTP redirects?
 
@@ -534,7 +534,7 @@ FAQ
   that informs the client about this is only interpreted if you are using the
   -L/--location option. As in:
 
-     curl -L http://redirector.com
+     curl -L http://example.com
 
   Not all redirects are HTTP ones, see 4.14
 
@@ -698,12 +698,12 @@ FAQ
   There are two ways. The way defined in the RFC is to use an encoded slash
   in the first path part. List the "/tmp" directory like this:
 
-     curl ftp://ftp.sunet.se/%2ftmp/
+     curl ftp://ftp.example.com/%2ftmp/
 
   or the not-quite-kosher-but-more-readable way, by simply starting the path
   section of the URL with a slash:
 
-     curl ftp://ftp.sunet.se//tmp/
+     curl ftp://ftp.example.com//tmp/
 
   3.18 Can I use curl to send a POST/PUT and not wait for a response?
 
@@ -798,7 +798,7 @@ FAQ
 
   An example that would invoke a remote CGI that uses &-symbols could be:
 
-     curl 'http://www.altavista.com/cgi-bin/query?text=yes&q=curl'
+     curl 'http://www.example.com/cgi-bin/query?text=yes&q=curl'
 
   In Windows, the standard DOS shell treats the percent sign specially and you
   need to use TWO percent signs for each single one you want to use in the
