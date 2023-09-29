@@ -547,9 +547,12 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 #ifndef NO_FILESYSTEM
   /* load trusted cacert from file if not blob */
   if(ssl_cafile || ssl_capath) {
-    if(1 != wolfSSL_CTX_load_verify_locations(backend->ctx,
-                                              ssl_cafile,
-                                              ssl_capath)) {
+    int rc =
+      wolfSSL_CTX_load_verify_locations_ex(backend->ctx,
+                                           ssl_cafile,
+                                           ssl_capath,
+                                           WOLFSSL_LOAD_FLAG_IGNORE_ERR);
+    if(SSL_SUCCESS != rc) {
       if(conn_config->verifypeer && !imported_ca_info_blob &&
          !imported_native_ca) {
         /* Fail if we insist on successfully verifying the server. */
@@ -1378,6 +1381,7 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
 #ifdef USE_BIO_CHAIN
   SSLSUPP_HTTPS_PROXY |
 #endif
+  SSLSUPP_CA_PATH |
   SSLSUPP_CAINFO_BLOB |
   SSLSUPP_SSL_CTX,
 
