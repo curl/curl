@@ -91,6 +91,8 @@ static CURLcode win32_idn_to_ascii(const char *in, char **out)
     else
       return CURLE_URL_MALFORMAT;
   }
+  else
+    return CURLE_URL_MALFORMAT;
 
   return CURLE_OK;
 }
