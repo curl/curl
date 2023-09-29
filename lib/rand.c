@@ -251,7 +251,7 @@ CURLcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd,
   if(result)
     return result;
 
-  Curl_hexencode(buffer, num/2, rnd, num);
+  Curl_hexencode(buffer, num/2, rnd, num + 1);
   return result;
 }
 
