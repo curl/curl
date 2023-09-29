@@ -26,6 +26,7 @@ FAQ
  2. Install Related Problems
   2.1 configure fails when using static libraries
   2.2 Does curl work/build with other SSL libraries?
+  2.3 How do I upgrade curl.exe in Windows?
   2.4 Does curl support SOCKS (RFC 1928) ?
 
  3. Usage Problems
@@ -426,6 +427,22 @@ FAQ
   (native iOS/OS X), Schannel (native Windows), BearSSL or Rustls. They all
   have their pros and cons, and we try to maintain a comparison of them here:
   https://curl.se/docs/ssl-compared.html
+
+  2.3 How do I upgrade curl.exe in Windows?
+
+  The curl tool that is shipped as an integrated component of Windows 10 and
+  Windows 11 is managed by Microsoft. If you were to delete the file or
+  replace it with a newer version downloaded from https://curl.se/windows,
+  then Windows Update will cease to work on your system.
+
+  There is no way to independently force an upgrade of the curl.exe that is
+  part of Windows other than through the regular Windows update process. There
+  is also nothing the curl project itself can do about this, since this is
+  managed and controlled entirely by Microsoft as owners of the operating
+  system.
+
+  You can always download and install the latest version of curl for Windows
+  from https://curl.se/windows into a separate location.
 
   2.4 Does curl support SOCKS (RFC 1928) ?
 
