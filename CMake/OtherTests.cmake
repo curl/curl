@@ -153,7 +153,7 @@ endif()
 if(NOT DEFINED HAVE_GETADDRINFO_THREADSAFE)
 
   set(save_epilogue "${_source_epilogue}")
-  unset(_source_epilogue)
+  set(_source_epilogue "#undef inline")
 
   add_header_include(HAVE_SYS_SOCKET_H "sys/socket.h")
   add_header_include(HAVE_SYS_TIME_H "sys/time.h")
