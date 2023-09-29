@@ -820,7 +820,7 @@ FAQ
   To be able to use those characters as actual parts of the URL (without using
   them for the curl URL "globbing" system), use the -g/--globoff option:
 
-    curl -g 'www.site.com/weirdname[].html'
+    curl -g 'www.example.com/weirdname[].html'
 
   4.4 Why do I get downloaded data even though the web page does not exist?
 
