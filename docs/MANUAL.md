@@ -83,11 +83,11 @@ Fetch two files and store them with their remote names:
 
 To ftp files using name and password, include them in the URL like:
 
-    curl ftp://name:passwd@ftpserver.example:port/full/path/to/file
+    curl ftp://name:passwd@ftp.server.example:port/full/path/to/file
 
 or specify them with the `-u` flag like
 
-    curl -u name:passwd ftp://ftpserver.example:port/full/path/to/file
+    curl -u name:passwd ftp://ftp.server.example:port/full/path/to/file
 
 ### FTPS
 
@@ -113,11 +113,11 @@ matching public key file must be specified using the `--pubkey` option.
 Curl also supports user and password in HTTP URLs, thus you can pick a file
 like:
 
-    curl http://name:passwd@httpserver.example/full/path/to/file
+    curl http://name:passwd@http.server.example/full/path/to/file
 
 or specify user and password separately like in
 
-    curl -u name:passwd http://httpserver.example/full/path/to/file
+    curl -u name:passwd http://http.server.example/full/path/to/file
 
 HTTP offers many different methods of authentication and curl supports
 several: Basic, Digest, NTLM and Negotiate (SPNEGO). Without telling which
@@ -174,7 +174,7 @@ curl supports the `-u`, `-Q` and `--ftp-account` options that can be used to
 set up transfers through many FTP proxies. For example, a file can be uploaded
 to a remote FTP server using a Blue Coat FTP proxy with the options:
 
-    curl -u "username@ftpserver.example Proxy-Username:Remote-Pass"
+    curl -u "username@ftp.server.example Proxy-Username:Remote-Pass"
       --ftp-account Proxy-Password --upload-file local-file
       ftp://my-ftp.proxy.example:21/remote/upload/path/
 
