@@ -106,7 +106,7 @@ static int perform_and_check_connections(CURL *curl, const char *description,
 
   res = curl_easy_perform(curl);
   if(res != CURLE_OK) {
-    fprintf(stderr, "curl_easy_perform() failed\n");
+    fprintf(stderr, "curl_easy_perform() failed with %d\n", (int)res);
     return TEST_ERR_MAJOR_BAD;
   }
 

@@ -49,6 +49,8 @@ int test(char *URL)
 
   /* get first page */
   res = curl_easy_perform(curl);
+  if(res)
+    goto test_cleanup;
 
   test_setopt(curl, CURLOPT_USERPWD, "anothermonster:inwardrobe");
 

@@ -44,36 +44,35 @@ static size_t put_callback(char *ptr, size_t size, size_t nmemb, void *stream)
 int test(char *URL)
 {
   CURL *curl;
-  CURLcode res = CURLE_OUT_OF_MEMORY;
+  CURLcode res = CURLE_OK;
+  const char *testput = "This is test PUT data\n";
+  put_buffer pbuf;
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
 
-  curl = curl_easy_init();
-  if(curl) {
-    const char *testput = "This is test PUT data\n";
-    put_buffer pbuf;
+  easy_init(curl);
 
-    /* PUT */
-    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
-    curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, put_callback);
-    pbuf.buf = (char *)testput;
-    pbuf.len = strlen(testput);
-    curl_easy_setopt(curl, CURLOPT_READDATA, &pbuf);
-    curl_easy_setopt(curl, CURLOPT_INFILESIZE, (long)strlen(testput));
-    res = curl_easy_setopt(curl, CURLOPT_URL, URL);
-    if(!res)
-      res = curl_easy_perform(curl);
-    if(!res) {
-      /* POST */
-      curl_easy_setopt(curl, CURLOPT_POST, 1L);
-      curl_easy_setopt(curl, CURLOPT_POSTFIELDS, testput);
-      curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(testput));
-      res = curl_easy_perform(curl);
-    }
-    curl_easy_cleanup(curl);
-  }
+  /* PUT */
+  easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+  easy_setopt(curl, CURLOPT_HEADER, 1L);
+  easy_setopt(curl, CURLOPT_READFUNCTION, put_callback);
+  pbuf.buf = (char *)testput;
+  pbuf.len = strlen(testput);
+  easy_setopt(curl, CURLOPT_READDATA, &pbuf);
+  easy_setopt(curl, CURLOPT_INFILESIZE, (long)strlen(testput));
+  easy_setopt(curl, CURLOPT_URL, URL);
+  res = curl_easy_perform(curl);
+  if(res)
+    goto test_cleanup;
 
+  /* POST */
+  easy_setopt(curl, CURLOPT_POST, 1L);
+  easy_setopt(curl, CURLOPT_POSTFIELDS, testput);
+  easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(testput));
+  res = curl_easy_perform(curl);
+
+test_cleanup:
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
   return (int)res;
 }

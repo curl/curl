@@ -46,7 +46,7 @@ static void my_unlock(CURL *handle, curl_lock_data data, void *useptr)
 int test(char *URL)
 {
   CURLcode res = CURLE_OK;
-  CURLSH *share;
+  CURLSH *share = NULL;
   int i;
 
   global_init(CURL_GLOBAL_ALL);
@@ -54,8 +54,7 @@ int test(char *URL)
   share = curl_share_init();
   if(!share) {
     fprintf(stderr, "curl_share_init() failed\n");
-    curl_global_cleanup();
-    return TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
   }
 
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
@@ -75,18 +74,22 @@ int test(char *URL)
 
       /* Perform the request, res will get the return code */
       res = curl_easy_perform(curl);
-      /* Check for errors */
-      if(res != CURLE_OK)
-        fprintf(stderr, "curl_easy_perform() failed: %s\n",
-                curl_easy_strerror(res));
 
       /* always cleanup */
       curl_easy_cleanup(curl);
+
+      /* Check for errors */
+      if(res != CURLE_OK) {
+        fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                curl_easy_strerror(res));
+        goto test_cleanup;
+      }
     }
   }
 
+test_cleanup:
   curl_share_cleanup(share);
   curl_global_cleanup();
 
-  return 0;
+  return (int)res;
 }

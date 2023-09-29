@@ -84,7 +84,6 @@ static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *userp)
 int test(char *URL)
 {
   CURL *curls = NULL;
-  int i = 0;
   int res = 0;
   struct transfer_status st;
 
@@ -114,8 +113,5 @@ test_cleanup:
   curl_easy_cleanup(curls);
   curl_global_cleanup();
 
-  if(res)
-    i = res;
-
-  return i; /* return the final return code */
+  return (int)res; /* return the final return code */
 }

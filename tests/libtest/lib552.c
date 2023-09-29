@@ -213,7 +213,6 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_PROXYAUTH, (long)CURLAUTH_ANY);
 
   res = curl_easy_perform(curl);
-  fprintf(stderr, "curl_easy_perform = %d\n", (int)res);
 
 test_cleanup:
 

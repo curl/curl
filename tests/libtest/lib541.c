@@ -99,7 +99,9 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_READDATA, hd_src);
 
   /* Now run off and do what you've been told! */
-  curl_easy_perform(curl);
+  res = curl_easy_perform(curl);
+  if(res)
+    goto test_cleanup;
 
   /* and now upload the exact same again, but without rewinding so it already
      is at end of file */

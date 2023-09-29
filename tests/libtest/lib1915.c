@@ -98,36 +98,39 @@ static CURLSTScode hstswrite(CURL *easy, struct curl_hstsentry *e,
 
 int test(char *URL)
 {
-  CURLcode ret = CURLE_OK;
+  CURLcode res = CURLE_OK;
   CURL *hnd;
   struct state st = {0};
 
-  curl_global_init(CURL_GLOBAL_ALL);
+  global_init(CURL_GLOBAL_ALL);
 
-  hnd = curl_easy_init();
-  if(hnd) {
-    curl_easy_setopt(hnd, CURLOPT_URL, URL);
-    curl_easy_setopt(hnd, CURLOPT_HSTSREADFUNCTION, hstsread);
-    curl_easy_setopt(hnd, CURLOPT_HSTSREADDATA, &st);
-    curl_easy_setopt(hnd, CURLOPT_HSTSWRITEFUNCTION, hstswrite);
-    curl_easy_setopt(hnd, CURLOPT_HSTSWRITEDATA, &st);
-    curl_easy_setopt(hnd, CURLOPT_HSTS_CTRL, CURLHSTS_ENABLE);
-    ret = curl_easy_perform(hnd);
-    curl_easy_cleanup(hnd);
-    printf("First request returned %d\n", (int)ret);
-  }
-  hnd = curl_easy_init();
-  if(hnd) {
-    curl_easy_setopt(hnd, CURLOPT_URL, URL);
-    curl_easy_setopt(hnd, CURLOPT_HSTSREADFUNCTION, hstsreadfail);
-    curl_easy_setopt(hnd, CURLOPT_HSTSREADDATA, &st);
-    curl_easy_setopt(hnd, CURLOPT_HSTSWRITEFUNCTION, hstswrite);
-    curl_easy_setopt(hnd, CURLOPT_HSTSWRITEDATA, &st);
-    curl_easy_setopt(hnd, CURLOPT_HSTS_CTRL, CURLHSTS_ENABLE);
-    ret = curl_easy_perform(hnd);
-    curl_easy_cleanup(hnd);
-    printf("Second request returned %d\n", (int)ret);
-  }
+  easy_init(hnd);
+  easy_setopt(hnd, CURLOPT_URL, URL);
+  easy_setopt(hnd, CURLOPT_HSTSREADFUNCTION, hstsread);
+  easy_setopt(hnd, CURLOPT_HSTSREADDATA, &st);
+  easy_setopt(hnd, CURLOPT_HSTSWRITEFUNCTION, hstswrite);
+  easy_setopt(hnd, CURLOPT_HSTSWRITEDATA, &st);
+  easy_setopt(hnd, CURLOPT_HSTS_CTRL, CURLHSTS_ENABLE);
+  res = curl_easy_perform(hnd);
+  curl_easy_cleanup(hnd);
+  hnd = NULL;
+  printf("First request returned %d\n", (int)res);
+  res = CURLE_OK;
+
+  easy_init(hnd);
+  easy_setopt(hnd, CURLOPT_URL, URL);
+  easy_setopt(hnd, CURLOPT_HSTSREADFUNCTION, hstsreadfail);
+  easy_setopt(hnd, CURLOPT_HSTSREADDATA, &st);
+  easy_setopt(hnd, CURLOPT_HSTSWRITEFUNCTION, hstswrite);
+  easy_setopt(hnd, CURLOPT_HSTSWRITEDATA, &st);
+  easy_setopt(hnd, CURLOPT_HSTS_CTRL, CURLHSTS_ENABLE);
+  res = curl_easy_perform(hnd);
+  curl_easy_cleanup(hnd);
+  hnd = NULL;
+  printf("Second request returned %d\n", (int)res);
+
+test_cleanup:
+  curl_easy_cleanup(hnd);
   curl_global_cleanup();
-  return (int)ret;
+  return (int)res;
 }
