@@ -32,6 +32,7 @@ environment:
     OPENSSL: "OFF"
     DEBUG: "ON"
     SHARED: "OFF"
+    RUN: "ON"
     matrix:
       # generated CMake-based Visual Studio Release builds
       - job_name: "CMake, VS2008, Release x86, Schannel"
@@ -45,6 +46,7 @@ environment:
         TESTING: OFF
         SHARED: ON
         DISABLED_TESTS: ""
+        RUN: "OFF"
       - job_name: "CMake, VS2022, Release x64, OpenSSL, WebSockets, Unity"
         APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
         BUILD_SYSTEM: CMake
@@ -270,7 +272,7 @@ environment:
 
 install:
     - if not "%ADD_PATH%"=="" (
-        set "PATH=%ADD_PATH%;C:/OpenSSL-v111-Win64;%PATH%" )
+        set "PATH=%ADD_PATH%;%PATH%" )
 
 build_script:
     - if %BUILD_SYSTEM%==CMake (
@@ -293,19 +295,21 @@ build_script:
         -DCMAKE_INSTALL_PREFIX="C:/CURL"
         -DCMAKE_BUILD_TYPE=%PRJ_CFG% &&
         cmake --build . --config %PRJ_CFG% --parallel 2 --clean-first -- %BUILD_OPT% &&
-        bash.exe -e -l -c "find %POSIX_PATH_PREFIX%/c/OpenSSL-v111-Win64 -name '*.dll'" &&
         bash.exe -e -l -c "find %POSIX_PATH_PREFIX%/c/projects/curl -name '*.exe' -o -name '*.dll'" &&
         if "%SHARED%" == "ON" (
           bash.exe -e -l -c "cp -f -p %POSIX_PATH_PREFIX%/c/projects/curl/lib/*.dll %POSIX_PATH_PREFIX%/c/projects/curl/src/" &&
           bash.exe -e -l -c "cp -f -p %POSIX_PATH_PREFIX%/c/projects/curl/lib/*.dll %POSIX_PATH_PREFIX%/c/projects/curl/tests/libtest/" ) &&
-        src\curl.exe -V
+        if "%OPENSSL%" == "ON" (
+          copy /Y C:/OpenSSL-v111-Win64/*.dll src ) &&
+        if "%RUN%" == "ON" (
+          src\curl.exe -V )
       ) else (
       if %BUILD_SYSTEM%==VisualStudioSolution (
         cd projects &&
         .\generate.bat %VC_VERSION% &&
         msbuild.exe /p:Configuration="%PRJ_CFG%" "Windows\\%VC_VERSION%\\curl-all.sln" &&
-        bash.exe -e -l -c "find %POSIX_PATH_PREFIX%/c/projects/curl -name '*.exe' -o -name '*.dll'" &&
-        src\curl.exe -V
+        cd "build/Win32/%VC_VERSION%/%PRJ_CFG%" &&
+        curld.exe -V
       ) else (
       if %BUILD_SYSTEM%==winbuild_vs2015 (
         call buildconf.bat &&
