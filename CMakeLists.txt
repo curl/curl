@@ -1011,9 +1011,13 @@ elseif(CURL_CA_PATH_AUTODETECT OR CURL_CA_BUNDLE_AUTODETECT)
   endif()
 endif()
 
-if(CURL_CA_PATH_SET AND NOT USE_OPENSSL AND NOT USE_MBEDTLS)
+if(CURL_CA_PATH_SET AND
+   NOT USE_OPENSSL AND
+   NOT USE_WOLFSSL AND
+   NOT USE_GNUTLS AND
+   NOT USE_MBEDTLS)
   message(STATUS
-          "CA path only supported by OpenSSL, GnuTLS or mbed TLS. "
+          "CA path only supported by OpenSSL, wolfSSL, GnuTLS or mbedTLS. "
           "Set CURL_CA_PATH=none or enable one of those TLS backends.")
 endif()
 
