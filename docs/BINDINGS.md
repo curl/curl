@@ -111,7 +111,7 @@ Ruby: [curb](https://github.com/taf2/curb) written by Ross Bamford,
 
 [Rust](https://github.com/alexcrichton/curl-rust) curl-rust - by Carl Lerche
 
-[Scheme](http://www.metapaper.net/lisovsky/web/curl/) Bigloo binding by Kirill Lisovsky
+[Scheme](https://www.metapaper.net/lisovsky/web/curl/) Bigloo binding by Kirill Lisovsky
 
 [Scilab](https://help.scilab.org/docs/current/fr_FR/getURL.html) binding by Sylvestre Ledru
 
