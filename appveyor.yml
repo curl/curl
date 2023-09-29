@@ -46,6 +46,7 @@ environment:
         TESTING: OFF
         SHARED: ON
         DISABLED_TESTS: ""
+        # MSVCR90.dll missing
         RUN: "OFF"
       - job_name: "CMake, VS2022, Release x64, OpenSSL, WebSockets, Unity"
         APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
@@ -62,6 +63,8 @@ environment:
         DISABLED_TESTS: ""
         WEBSOCKETS: ON
         UNITY: "ON"
+        # VCRUNTIME140.dll missing
+        RUN: "OFF"
       - job_name: "CMake, VS2022, Release arm64, Schannel, Static"
         APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
         BUILD_SYSTEM: CMake
@@ -301,6 +304,7 @@ build_script:
           bash.exe -e -l -c "cp -f -p %POSIX_PATH_PREFIX%/c/projects/curl/lib/*.dll %POSIX_PATH_PREFIX%/c/projects/curl/tests/libtest/" ) &&
         if "%OPENSSL%" == "ON" (
           copy /Y C:/OpenSSL-v111-Win64/*.dll src ) &&
+        bash.exe -e -l -c "find %POSIX_PATH_PREFIX%/c/projects/curl -name '*.exe' -o -name '*.dll'" &&
         if "%RUN%" == "ON" (
           src\curl.exe -V )
       ) else (
@@ -308,6 +312,8 @@ build_script:
         cd projects &&
         .\generate.bat %VC_VERSION% &&
         msbuild.exe /p:Configuration="%PRJ_CFG%" "Windows\\%VC_VERSION%\\curl-all.sln" &&
+        bash.exe -e -l -c "find %POSIX_PATH_PREFIX%/c/projects/curl -name '*.exe' -o -name '*.dll'" &&
+        echo "|build/Win32/%VC_VERSION%/%PRJ_CFG%|" &&
         cd "build/Win32/%VC_VERSION%/%PRJ_CFG%" &&
         curld.exe -V
       ) else (
@@ -317,6 +323,7 @@ build_script:
         call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64 &&
         call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86_amd64 &&
         nmake /f Makefile.vc mode=dll VC=14 "SSL_PATH=C:\OpenSSL-v111-Win64" WITH_SSL=dll MACHINE=x64 DEBUG=%DEBUG% ENABLE_UNICODE=%ENABLE_UNICODE% &&
+        bash.exe -e -l -c "find %POSIX_PATH_PREFIX%/c/projects/curl -name '*.exe' -o -name '*.dll'" &&
         ..\builds\libcurl-vc14-x64-%PATHPART%-dll-ssl-dll-ipv6-sspi\bin\curl.exe -V
       ) else (
       if %BUILD_SYSTEM%==winbuild_vs2017 (
