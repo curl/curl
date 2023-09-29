@@ -247,7 +247,7 @@ Run in the `C:/Program Files/msh3/lib` directory, copy `curl.exe` to that
 directory, or copy `msquic.dll` and `msh3.dll` from that directory to the
 `curl.exe` directory. For example:
 
-     % C:\Program Files\msh3\lib> F:\curl\builds\libcurl-vc-x64-release-dll-ipv6-sspi-schannel-msh3\bin\curl.exe --http3 https://curl.se
+     % C:\Program Files\msh3\lib> F:\curl\builds\libcurl-vc-x64-release-dll-ipv6-sspi-schannel-msh3\bin\curl.exe --http3 https://curl.se/
 
 # `--http3`
 
