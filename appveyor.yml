@@ -63,8 +63,6 @@ environment:
         DISABLED_TESTS: ""
         WEBSOCKETS: ON
         UNITY: "ON"
-        # VCRUNTIME140.dll missing?
-        RUN: "ON"
       - job_name: "CMake, VS2022, Release arm64, Schannel, Static"
         APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
         BUILD_SYSTEM: CMake
@@ -298,7 +296,6 @@ build_script:
         -DCMAKE_INSTALL_PREFIX="C:/CURL"
         -DCMAKE_BUILD_TYPE=%PRJ_CFG% &&
         cmake --build . --config %PRJ_CFG% --parallel 2 --clean-first -- %BUILD_OPT% &&
-        bash.exe -e -l -c "find %POSIX_PATH_PREFIX%/c/projects/curl -name '*.exe' -o -name '*.dll'" &&
         if "%SHARED%" == "ON" (
           bash.exe -e -l -c "cp -f -p %POSIX_PATH_PREFIX%/c/projects/curl/lib/*.dll %POSIX_PATH_PREFIX%/c/projects/curl/src/" &&
           bash.exe -e -l -c "cp -f -p %POSIX_PATH_PREFIX%/c/projects/curl/lib/*.dll %POSIX_PATH_PREFIX%/c/projects/curl/tests/libtest/" ) &&
