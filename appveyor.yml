@@ -278,23 +278,23 @@ install:
 build_script:
   - if %BUILD_SYSTEM%==CMake (
       cmake .
-      -G"%PRJ_GEN%"
-      %TARGET%
-      -DCURL_USE_OPENSSL=%OPENSSL%
-      -DOPENSSL_ROOT_DIR=C:/OpenSSL-v111-Win64
-      -DCURL_USE_SCHANNEL=%SCHANNEL%
-      -DHTTP_ONLY=%HTTP_ONLY%
-      -DBUILD_SHARED_LIBS=%SHARED%
-      -DBUILD_TESTING=%TESTING%
-      -DENABLE_WEBSOCKETS=%WEBSOCKETS%
-      -DCMAKE_UNITY_BUILD=%UNITY%
-      -DCURL_WERROR=ON
-      -DENABLE_DEBUG=%DEBUG%
-      -DENABLE_UNICODE=%ENABLE_UNICODE%
-      -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=""
-      -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=""
-      -DCMAKE_INSTALL_PREFIX="C:/CURL"
-      -DCMAKE_BUILD_TYPE=%PRJ_CFG% &&
+        -G"%PRJ_GEN%"
+        %TARGET%
+        -DCURL_USE_OPENSSL=%OPENSSL%
+        -DOPENSSL_ROOT_DIR=C:/OpenSSL-v111-Win64
+        -DCURL_USE_SCHANNEL=%SCHANNEL%
+        -DHTTP_ONLY=%HTTP_ONLY%
+        -DBUILD_SHARED_LIBS=%SHARED%
+        -DBUILD_TESTING=%TESTING%
+        -DENABLE_WEBSOCKETS=%WEBSOCKETS%
+        -DCMAKE_UNITY_BUILD=%UNITY%
+        -DCURL_WERROR=ON
+        -DENABLE_DEBUG=%DEBUG%
+        -DENABLE_UNICODE=%ENABLE_UNICODE%
+        -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=""
+        -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=""
+        -DCMAKE_INSTALL_PREFIX="C:/CURL"
+        -DCMAKE_BUILD_TYPE=%PRJ_CFG% &&
       cmake --build . --config %PRJ_CFG% --parallel 2 --clean-first -- %BUILD_OPT% &&
       if "%SHARED%" == "ON" (
         bash.exe -e -l -c "cp -f -p %POSIX_PATH_PREFIX%/c/projects/curl/lib/*.dll %POSIX_PATH_PREFIX%/c/projects/curl/src/" &&
@@ -333,9 +333,10 @@ build_script:
       bash.exe -e -l -c "cd %POSIX_PATH_PREFIX%/c/projects/curl && autoreconf -fi && ./configure %CONFIG_ARGS% && make V=1 && make V=1 examples && cd tests && make V=1" &&
       src\curl.exe -V
     )))))
-  # - ps: if(Test-Path CMakeFiles/CMakeConfigureLog.yaml) { cat CMakeFiles/CMakeConfigureLog.yaml }
-  # - ps: if(Test-Path CMakeFiles/CMakeOutput.log) { cat CMakeFiles/CMakeOutput.log }
-  # - ps: if(Test-Path CMakeFiles/CMakeError.log) { cat CMakeFiles/CMakeError.log }
+  # - ps: |
+  #     if(Test-Path CMakeFiles/CMakeConfigureLog.yaml) { cat CMakeFiles/CMakeConfigureLog.yaml }
+  #     if(Test-Path CMakeFiles/CMakeOutput.log) { cat CMakeFiles/CMakeOutput.log }
+  #     if(Test-Path CMakeFiles/CMakeError.log) { cat CMakeFiles/CMakeError.log }
   - if %TESTING%==ON (
       if %BUILD_SYSTEM%==CMake (
         cmake --build . --config %PRJ_CFG% --parallel 2 --target testdeps
