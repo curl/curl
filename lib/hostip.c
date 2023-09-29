@@ -119,13 +119,13 @@ static void freednsentry(void *freethis);
 
 int Curl_add_blocked_domain(struct Curl_easy *data, const char *name)
 {
-  if(data == NULL || name == NULL) {
+  if(!data || !name) {
     return CURLE_OUT_OF_MEMORY;
   }
 
   data->set.blocked_domains = curl_slist_append(
   data->set.blocked_domains, name);
-  if(data->set.blocked_domains == NULL) {
+  if(!data->set.blocked_domains) {
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -672,7 +672,7 @@ static bool is_hostname_blocked(struct Curl_easy *data, const char *hostname)
   size_t lenblocked, lenhostname, offset;
   struct curl_slist *item;
 
-  if(data == NULL || hostname == NULL) {
+  if(!data || !hostname) {
     return (false);
   }
 
@@ -683,10 +683,10 @@ static bool is_hostname_blocked(struct Curl_easy *data, const char *hostname)
       continue;
     }
     if(item->data[0] == '.') {
-        offset = lenhostname - lenblocked;
+      offset = lenhostname - lenblocked;
     }
     else {
-        offset = 0;
+      offset = 0;
     }
     if(curl_strequal(&hostname[offset], item->data)) {
       return (true);
