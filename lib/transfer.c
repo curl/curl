@@ -1046,6 +1046,19 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+static int select_bits_paused(struct Curl_easy *data, int select_bits)
+{
+  /* See issue #11982: we really need to be careful not to progress
+   * a transfer direction when that direction is paused. Not all parts
+   * of our state machine are handling PAUSED transfers correctly. So, we
+   * do not want to go there.
+   * NOTE: we are only interested in PAUSE, not HOLD. */
+  return (((select_bits & CURL_CSELECT_IN) &&
+           (data->req.keepon & KEEP_RECV_PAUSE)) ||
+          ((select_bits & CURL_CSELECT_OUT) &&
+           (data->req.keepon & KEEP_SEND_PAUSE)));
+}
+
 /*
  * Curl_readwrite() is the low-level function to be called when data is to
  * be read and written to/from the connection.
@@ -1064,12 +1077,20 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   int didwhat = 0;
   int select_bits;
 
-
   if(data->state.dselect_bits) {
+    if(select_bits_paused(data, data->state.dselect_bits)) {
+      /* leave the bits unchanged, so they'll tell us what to do when
+       * this transfer gets unpaused. */
+      DEBUGF(infof(data, "readwrite, dselect_bits, early return on PAUSED"));
+      result = CURLE_OK;
+      goto out;
+    }
     select_bits = data->state.dselect_bits;
     data->state.dselect_bits = 0;
   }
   else if(conn->cselect_bits) {
+    /* CAVEAT: adding `select_bits_paused()` check here makes test640 hang
+     * (among others). Which hints at strange state handling in FTP land... */
     select_bits = conn->cselect_bits;
     conn->cselect_bits = 0;
   }

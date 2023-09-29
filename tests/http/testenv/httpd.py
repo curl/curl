@@ -385,6 +385,7 @@ class Httpd:
                 f'    <Location /curltest/tweak>',
                 f'      SetHandler curltest-tweak',
                 f'    </Location>',
+                f'    Redirect 302 /tweak /curltest/tweak',
                 f'    <Location /curltest/1_1>',
                 f'      SetHandler curltest-1_1-required',
                 f'    </Location>',

@@ -29,4 +29,5 @@ check_PROGRAMS = \
   ws-data \
   ws-pingpong \
   h2-upgrade-extreme \
-  tls-session-reuse
+  tls-session-reuse \
+  h2-pausing
