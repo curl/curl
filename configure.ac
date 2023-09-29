@@ -1151,7 +1151,7 @@ then
 #endif
 #endif
         ]],[[
-          gethostbyname("www.dummysite.com");
+          gethostbyname("localhost");
         ]])
       ],[
         AC_MSG_RESULT([yes])
@@ -1174,7 +1174,7 @@ then
 /* Older Minix versions may need <net/gen/netdb.h> here instead */
 #include <netdb.h>
     ]],[[
-      gethostbyname("www.dummysite.com");
+      gethostbyname("localhost");
     ]])
   ],[
     AC_MSG_RESULT([yes])
@@ -1193,7 +1193,7 @@ then
 #include <stdio.h>
 #include <netdb.h>
     ]],[[
-      gethostbyname("www.dummysite.com");
+      gethostbyname("localhost");
     ]])
   ],[
     AC_MSG_RESULT([yes])
@@ -1217,7 +1217,7 @@ then
   struct Library *SocketBase = NULL;
   #endif
     ]],[[
-      gethostbyname("www.dummysite.com");
+      gethostbyname("localhost");
     ]])
   ],[
     AC_MSG_RESULT([yes])
