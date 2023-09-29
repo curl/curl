@@ -163,8 +163,8 @@ static size_t cb(void *data, size_t size, size_t nmemb, void *clientp)
 
   if(!handle->resumed) {
     ++handle->paused;
-    fprintf(stderr, "INFO: [%d] write, PAUSING on %lu bytes\n",
-            handle->idx, (long)realsize);
+    fprintf(stderr, "INFO: [%d] write, PAUSING %d time on %lu bytes\n",
+            handle->idx, handle->paused, (long)realsize);
     return CURL_WRITEFUNC_PAUSE;
   }
   fprintf(stderr, "INFO: [%d] write, accepting %lu bytes\n",
@@ -184,7 +184,8 @@ int main(int argc, char *argv[])
   struct curl_slist resolve;
   char resolve_buf[1024];
   char *url, *host, *port;
-  const int WAIT_ROUNDS = 10;
+  int all_paused = 0;
+  int resume_round = -1;
 
   if(argc != 2) {
     fprintf(stderr, "ERROR: need URL as argument\n");
@@ -284,13 +285,7 @@ int main(int argc, char *argv[])
       if(msg->msg == CURLMSG_DONE) {
         for(i = 0; i<HANDLECOUNT; i++) {
           if(msg->easy_handle == handles[i].h) {
-            if(rounds < WAIT_ROUNDS) {
-              fprintf(stderr, "ERROR: [%d] done early after %d rounds, "
-                      "result %d - wtf?\n", i, rounds, msg->data.result);
-              rc = 1;
-              goto out;
-            }
-            else if(handles[i].paused != 1 || !handles[i].resumed) {
+            if(handles[i].paused != 1 || !handles[i].resumed) {
               fprintf(stderr, "ERROR: [%d] done, pauses=%d, resumed=%d, "
                       "result %d - wtf?\n", i, handles[i].paused,
                       handles[i].resumed, msg->data.result);
@@ -303,26 +298,21 @@ int main(int argc, char *argv[])
     }
 
     /* Successfully paused? */
-    if(rounds == WAIT_ROUNDS) {
-      int as_expected = 1;
+    if(!all_paused) {
       for(i = 0; i<HANDLECOUNT; i++) {
         if(!handles[i].paused) {
-          fprintf(stderr, "ERROR: [%d] NOT PAUSED\n", i);
-          as_expected = 0;
-        }
-        else if(handles[i].paused != 1) {
-          fprintf(stderr, "ERROR: [%d] PAUSED %d times!\n",
-                  i, handles[i].paused);
-          as_expected = 0;
+          break;
         }
       }
-      if(!as_expected) {
-        fprintf(stderr, "ERROR: handles not in expected state "
-                "after %d rounds\n", rounds);
-        rc = 1;
-        break;
+      all_paused = (i == HANDLECOUNT);
+      if(all_paused) {
+        fprintf(stderr, "INFO: all transfers paused\n");
+        /* give transfer some rounds to mess things up */
+        resume_round = rounds + 3;
       }
-      /* everything as expected, lets resume */
+    }
+    if(resume_round > 0 && rounds == resume_round) {
+      /* time to resume */
       for(i = 0; i<HANDLECOUNT; i++) {
         fprintf(stderr, "INFO: [%d] resumed\n", i);
         handles[i].resumed = 1;
