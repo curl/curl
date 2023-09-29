@@ -63,8 +63,8 @@ environment:
         DISABLED_TESTS: ""
         WEBSOCKETS: ON
         UNITY: "ON"
-        # VCRUNTIME140.dll missing
-        RUN: "OFF"
+        # VCRUNTIME140.dll missing?
+        RUN: "ON"
       - job_name: "CMake, VS2022, Release arm64, Schannel, Static"
         APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
         BUILD_SYSTEM: CMake
@@ -303,7 +303,7 @@ build_script:
           bash.exe -e -l -c "cp -f -p %POSIX_PATH_PREFIX%/c/projects/curl/lib/*.dll %POSIX_PATH_PREFIX%/c/projects/curl/src/" &&
           bash.exe -e -l -c "cp -f -p %POSIX_PATH_PREFIX%/c/projects/curl/lib/*.dll %POSIX_PATH_PREFIX%/c/projects/curl/tests/libtest/" ) &&
         if "%OPENSSL%" == "ON" (
-          copy /Y C:/OpenSSL-v111-Win64/*.dll src ) &&
+          bash.exe -e -l -c "cp -f -p %POSIX_PATH_PREFIX%/c/OpenSSL-v111-Win64/*.dll %POSIX_PATH_PREFIX%/c/projects/curl/src/" ) &&
         bash.exe -e -l -c "find %POSIX_PATH_PREFIX%/c/projects/curl -name '*.exe' -o -name '*.dll'" &&
         if "%RUN%" == "ON" (
           src\curl.exe -V )
@@ -313,8 +313,7 @@ build_script:
         .\generate.bat %VC_VERSION% &&
         msbuild.exe /p:Configuration="%PRJ_CFG%" "Windows\\%VC_VERSION%\\curl-all.sln" &&
         bash.exe -e -l -c "find %POSIX_PATH_PREFIX%/c/projects/curl -name '*.exe' -o -name '*.dll'" &&
-        echo "|build/Win32/%VC_VERSION%/%PRJ_CFG%|" &&
-        cd "build/Win32/%VC_VERSION%/%PRJ_CFG%" &&
+        cd "../build/Win32/%VC_VERSION%/%PRJ_CFG%" &&
         curld.exe -V
       ) else (
       if %BUILD_SYSTEM%==winbuild_vs2015 (
