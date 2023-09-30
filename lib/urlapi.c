@@ -100,7 +100,7 @@ static void free_urlhandle(struct Curl_URL *u)
 
 /*
  * Find the separator at the end of the host name, or the '?' in cases like
- * http://www.url.com?id=2380
+ * http://www.example.com?id=2380
  */
 static const char *find_host_sep(const char *url)
 {
@@ -338,7 +338,7 @@ static char *concat_url(char *base, const char *relurl)
       pathsep = strchr(protsep, '/');
       if(pathsep) {
         /* When people use badly formatted URLs, such as
-           "http://www.url.com?dir=/home/daniel" we must not use the first
+           "http://www.example.com?dir=/home/daniel" we must not use the first
            slash, if there's a ?-letter before it! */
         char *sep = strchr(protsep, '?');
         if(sep && (sep < pathsep))
@@ -347,9 +347,9 @@ static char *concat_url(char *base, const char *relurl)
       }
       else {
         /* There was no slash. Now, since we might be operating on a badly
-           formatted URL, such as "http://www.url.com?id=2380" which doesn't
-           use a slash separator as it is supposed to, we need to check for a
-           ?-letter as well! */
+           formatted URL, such as "http://www.example.com?id=2380" which
+           doesn't use a slash separator as it is supposed to, we need to check
+           for a ?-letter as well! */
         pathsep = strchr(protsep, '?');
         if(pathsep)
           *pathsep = 0;

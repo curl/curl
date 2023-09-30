@@ -38,4 +38,7 @@ CURLcode Curl_urldecode(const char *string, size_t length,
                         char **ostring, size_t *olen,
                         enum urlreject ctrl);
 
+void Curl_hexencode(const unsigned char *src, size_t len, /* input length */
+                    unsigned char *out, size_t olen); /* output buffer size */
+
 #endif /* HEADER_CURL_ESCAPE_H */

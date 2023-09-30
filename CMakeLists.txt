@@ -394,6 +394,10 @@ endif()
 # check SSL libraries
 option(CURL_ENABLE_SSL "Enable SSL support" ON)
 
+if(CURL_DEFAULT_SSL_BACKEND)
+  set(valid_default_ssl_backend FALSE)
+endif()
+
 if(APPLE)
   cmake_dependent_option(CURL_USE_SECTRANSP "Enable Apple OS native SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 endif()
@@ -430,6 +434,10 @@ if(CURL_USE_SCHANNEL)
   set(SSL_ENABLED ON)
   set(USE_SCHANNEL ON) # Windows native SSL/TLS support
   set(USE_WINDOWS_SSPI ON) # CURL_USE_SCHANNEL implies CURL_WINDOWS_SSPI
+
+  if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "schannel")
+    set(valid_default_ssl_backend TRUE)
+  endif()
 endif()
 if(CURL_WINDOWS_SSPI)
   set(USE_WINDOWS_SSPI ON)
@@ -446,6 +454,10 @@ if(CURL_USE_SECTRANSP)
   set(SSL_ENABLED ON)
   set(USE_SECTRANSP ON)
   list(APPEND CURL_LIBS "-framework Security")
+
+  if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "secure-transport")
+    set(valid_default_ssl_backend TRUE)
+  endif()
 endif()
 
 if(use_core_foundation_and_core_services)
@@ -482,6 +494,10 @@ if(CURL_USE_OPENSSL)
     list(APPEND CURL_LIBS "bcrypt")  # for OpenSSL/LibreSSL
   endif()
 
+  if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "openssl")
+    set(valid_default_ssl_backend TRUE)
+  endif()
+
   set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
   if(NOT DEFINED HAVE_BORINGSSL)
     check_symbol_exists(OPENSSL_IS_BORINGSSL "openssl/base.h" HAVE_BORINGSSL)
@@ -497,6 +513,10 @@ if(CURL_USE_MBEDTLS)
   set(USE_MBEDTLS ON)
   list(APPEND CURL_LIBS ${MBEDTLS_LIBRARIES})
   include_directories(${MBEDTLS_INCLUDE_DIRS})
+
+  if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "mbedtls")
+    set(valid_default_ssl_backend TRUE)
+  endif()
 endif()
 
 if(CURL_USE_BEARSSL)
@@ -505,6 +525,10 @@ if(CURL_USE_BEARSSL)
   set(USE_BEARSSL ON)
   list(APPEND CURL_LIBS ${BEARSSL_LIBRARY})
   include_directories(${BEARSSL_INCLUDE_DIRS})
+
+  if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "bearssl")
+    set(valid_default_ssl_backend TRUE)
+  endif()
 endif()
 
 if(CURL_USE_WOLFSSL)
@@ -513,6 +537,10 @@ if(CURL_USE_WOLFSSL)
   set(USE_WOLFSSL ON)
   list(APPEND CURL_LIBS ${WolfSSL_LIBRARIES})
   include_directories(${WolfSSL_INCLUDE_DIRS})
+
+  if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "wolfssl")
+    set(valid_default_ssl_backend TRUE)
+  endif()
 endif()
 
 if(CURL_USE_GNUTLS)
@@ -522,6 +550,10 @@ if(CURL_USE_GNUTLS)
   list(APPEND CURL_LIBS ${GNUTLS_LIBRARIES} "nettle")
   include_directories(${GNUTLS_INCLUDE_DIRS})
 
+  if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "gnutls")
+    set(valid_default_ssl_backend TRUE)
+  endif()
+
   if(NOT DEFINED HAVE_GNUTLS_SRP AND NOT CURL_DISABLE_SRP)
     cmake_push_check_state()
     set(CMAKE_REQUIRED_INCLUDES ${GNUTLS_INCLUDE_DIRS})
@@ -529,6 +561,10 @@ if(CURL_USE_GNUTLS)
     check_symbol_exists(gnutls_srp_verifier "gnutls/gnutls.h" HAVE_GNUTLS_SRP)
     cmake_pop_check_state()
   endif()
+endif()
+
+if(CURL_DEFAULT_SSL_BACKEND AND NOT valid_default_ssl_backend)
+  message(FATAL_ERROR "CURL_DEFAULT_SSL_BACKEND '${CURL_DEFAULT_SSL_BACKEND}' not enabled.")
 endif()
 
 # Keep ZLIB detection after TLS detection,
@@ -1011,9 +1047,13 @@ elseif(CURL_CA_PATH_AUTODETECT OR CURL_CA_BUNDLE_AUTODETECT)
   endif()
 endif()
 
-if(CURL_CA_PATH_SET AND NOT USE_OPENSSL AND NOT USE_MBEDTLS)
+if(CURL_CA_PATH_SET AND
+   NOT USE_OPENSSL AND
+   NOT USE_WOLFSSL AND
+   NOT USE_GNUTLS AND
+   NOT USE_MBEDTLS)
   message(STATUS
-          "CA path only supported by OpenSSL, GnuTLS or mbed TLS. "
+          "CA path only supported by OpenSSL, wolfSSL, GnuTLS or mbedTLS. "
           "Set CURL_CA_PATH=none or enable one of those TLS backends.")
 endif()
 
@@ -1026,6 +1066,7 @@ endif()
 
 check_include_file_concat("inttypes.h"       HAVE_INTTYPES_H)
 check_include_file_concat("sys/filio.h"      HAVE_SYS_FILIO_H)
+check_include_file_concat("sys/wait.h"       HAVE_SYS_WAIT_H)
 check_include_file_concat("sys/ioctl.h"      HAVE_SYS_IOCTL_H)
 check_include_file_concat("sys/param.h"      HAVE_SYS_PARAM_H)
 check_include_file_concat("sys/poll.h"       HAVE_SYS_POLL_H)
@@ -1050,6 +1091,7 @@ check_include_file_concat("net/if.h"         HAVE_NET_IF_H)
 check_include_file_concat("netdb.h"          HAVE_NETDB_H)
 check_include_file_concat("netinet/in.h"     HAVE_NETINET_IN_H)
 check_include_file_concat("netinet/tcp.h"    HAVE_NETINET_TCP_H)
+check_include_file_concat("netinet/udp.h"    HAVE_NETINET_UDP_H)
 check_include_file("linux/tcp.h"      HAVE_LINUX_TCP_H)
 
 check_include_file_concat("poll.h"           HAVE_POLL_H)
@@ -1141,9 +1183,6 @@ check_symbol_exists(strerror_r     "${CURL_INCLUDES};stdlib.h;string.h" HAVE_STR
 check_symbol_exists(siginterrupt   "${CURL_INCLUDES}" HAVE_SIGINTERRUPT)
 check_symbol_exists(getaddrinfo    "${CURL_INCLUDES};stdlib.h;string.h" HAVE_GETADDRINFO)
 check_symbol_exists(getifaddrs     "${CURL_INCLUDES};stdlib.h" HAVE_GETIFADDRS)
-if(WIN32)
-  set(HAVE_GETADDRINFO_THREADSAFE ${HAVE_GETADDRINFO})
-endif()
 check_symbol_exists(freeaddrinfo   "${CURL_INCLUDES}" HAVE_FREEADDRINFO)
 check_symbol_exists(pipe           "${CURL_INCLUDES}" HAVE_PIPE)
 check_symbol_exists(ftruncate      "${CURL_INCLUDES}" HAVE_FTRUNCATE)
@@ -1253,6 +1292,18 @@ if(WIN32)
   endif()
   # avoid storing HAVE_WIN32_WINNT in CMake cache
   unset(HAVE_WIN32_WINNT CACHE)
+endif()
+
+if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
+  # on not-Windows and not-crosscompiling, check for writable argv[]
+  include(CheckCSourceRuns)
+  check_c_source_runs("
+    int main(int argc, char **argv)
+    {
+      (void)argc;
+      argv[0][0] = ' ';
+      return (argv[0][0] == ' ')?0:1;
+    }" HAVE_WRITABLE_ARGV)
 endif()
 
 set(CMAKE_REQUIRED_FLAGS)

@@ -597,11 +597,11 @@ FAQ
   To specify a command line option that includes spaces, you might need to
   put the entire option within quotes. Like in:
 
-   curl -d " with spaces " url.com
+   curl -d " with spaces " example.com
 
   or perhaps
 
-   curl -d ' with spaces ' url.com
+   curl -d ' with spaces ' example.com
 
   Exactly what kind of quotes and how to do this is entirely up to the shell
   or command line interpreter that you are using. For most unix shells, you
@@ -820,7 +820,7 @@ FAQ
   To be able to use those characters as actual parts of the URL (without using
   them for the curl URL "globbing" system), use the -g/--globoff option:
 
-    curl -g 'www.site.com/weirdname[].html'
+    curl -g 'www.example.com/weirdname[].html'
 
   4.4 Why do I get downloaded data even though the web page does not exist?
 

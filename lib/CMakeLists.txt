@@ -85,19 +85,6 @@ else()
   unset(CMAKESONAME)
 endif()
 
-if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
-  # on not-Windows and not-crosscompiling, check for writable argv[]
-    include(CheckCSourceRuns)
-    check_c_source_runs("
-int main(int argc, char **argv)
-{
-  (void)argc;
-  argv[0][0] = ' ';
-  return (argv[0][0] == ' ')?0:1;
-}"
-      HAVE_WRITABLE_ARGV)
-endif()
-
 ## Library definition
 
 # Add "_imp" as a suffix before the extension to avoid conflicting with
