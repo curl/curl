@@ -117,21 +117,6 @@
 
 static void freednsentry(void *freethis);
 
-int Curl_add_blocked_domain(struct Curl_easy *data, const char *name)
-{
-  if(!data || !name) {
-    return CURLE_OUT_OF_MEMORY;
-  }
-
-  data->set.blocked_domains = curl_slist_append(
-  data->set.blocked_domains, name);
-  if(!data->set.blocked_domains) {
-    return CURLE_OUT_OF_MEMORY;
-  }
-
-  return 0;
-}
-
 /*
  * Curl_printable_address() stores a printable version of the 1st address
  * given in the 'ai' argument. The result will be stored in the buf that is

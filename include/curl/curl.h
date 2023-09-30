@@ -3202,15 +3202,6 @@ CURL_EXTERN const char *curl_share_strerror(CURLSHcode);
  */
 CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
 
-/*
- * NAME Curl_add_blocked_domain()
- *
- * DESCRIPTION
- *
- * Block a domain from being resolved.
- */
-CURL_EXTERN int Curl_add_blocked_domain(CURL *, const char *);
-
 #define CURLPAUSE_RECV      (1<<0)
 #define CURLPAUSE_RECV_CONT (0)
 
