@@ -945,7 +945,6 @@ static CURLcode single_transfer(struct GlobalConfig *global,
   bool orig_isatty = global->isatty;
   struct State *state = &config->state;
   char *httpgetfields = state->httpgetfields;
-  struct curl_slist *item;
 
   *added = FALSE; /* not yet */
 
@@ -1553,9 +1552,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           break;
         }
 
-        for(item = config->blocked_domains; item; item = item->next) {
-          my_setopt(curl, CURLOPT_BLOCK_DOMAIN, item->data);
-        }
+	my_setopt(curl, CURLOPT_BLOCK_DOMAIN, config->blocked_domains);
 
         /* new in libcurl 7.5 */
         if(config->proxy)

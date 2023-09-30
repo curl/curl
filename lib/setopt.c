@@ -50,6 +50,7 @@
 #include "multiif.h"
 #include "altsvc.h"
 #include "hsts.h"
+#include "slist.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -3171,13 +3172,10 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.quick_exit = (0 != va_arg(param, long)) ? 1L:0L;
     break;
   case CURLOPT_BLOCK_DOMAIN:
-    /*
-     * A string that defines a domain to block
-     */
-    argptr = va_arg(param, char *);
-    result = Curl_add_blocked_domain(data, argptr);
-    if(result) {
-      return result;
+    data->set.blocked_domains = Curl_slist_duplicate(va_arg(
+      param, struct curl_slist *));
+    if(!data->set.blocked_domains) {
+      return CURLE_OUT_OF_MEMORY;
     }
     break;
   default:
