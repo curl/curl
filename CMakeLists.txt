@@ -394,6 +394,10 @@ endif()
 # check SSL libraries
 option(CURL_ENABLE_SSL "Enable SSL support" ON)
 
+if(CURL_DEFAULT_SSL_BACKEND)
+  set(valid_default_ssl_backend FALSE)
+endif()
+
 if(APPLE)
   cmake_dependent_option(CURL_USE_SECTRANSP "Enable Apple OS native SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 endif()
@@ -430,6 +434,10 @@ if(CURL_USE_SCHANNEL)
   set(SSL_ENABLED ON)
   set(USE_SCHANNEL ON) # Windows native SSL/TLS support
   set(USE_WINDOWS_SSPI ON) # CURL_USE_SCHANNEL implies CURL_WINDOWS_SSPI
+
+  if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "schannel")
+    set(valid_default_ssl_backend TRUE)
+  endif()
 endif()
 if(CURL_WINDOWS_SSPI)
   set(USE_WINDOWS_SSPI ON)
@@ -446,6 +454,10 @@ if(CURL_USE_SECTRANSP)
   set(SSL_ENABLED ON)
   set(USE_SECTRANSP ON)
   list(APPEND CURL_LIBS "-framework Security")
+
+  if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "secure-transport")
+    set(valid_default_ssl_backend TRUE)
+  endif()
 endif()
 
 if(use_core_foundation_and_core_services)
@@ -482,6 +494,10 @@ if(CURL_USE_OPENSSL)
     list(APPEND CURL_LIBS "bcrypt")  # for OpenSSL/LibreSSL
   endif()
 
+  if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "openssl")
+    set(valid_default_ssl_backend TRUE)
+  endif()
+
   set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
   if(NOT DEFINED HAVE_BORINGSSL)
     check_symbol_exists(OPENSSL_IS_BORINGSSL "openssl/base.h" HAVE_BORINGSSL)
@@ -497,6 +513,10 @@ if(CURL_USE_MBEDTLS)
   set(USE_MBEDTLS ON)
   list(APPEND CURL_LIBS ${MBEDTLS_LIBRARIES})
   include_directories(${MBEDTLS_INCLUDE_DIRS})
+
+  if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "mbedtls")
+    set(valid_default_ssl_backend TRUE)
+  endif()
 endif()
 
 if(CURL_USE_BEARSSL)
@@ -505,6 +525,10 @@ if(CURL_USE_BEARSSL)
   set(USE_BEARSSL ON)
   list(APPEND CURL_LIBS ${BEARSSL_LIBRARY})
   include_directories(${BEARSSL_INCLUDE_DIRS})
+
+  if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "bearssl")
+    set(valid_default_ssl_backend TRUE)
+  endif()
 endif()
 
 if(CURL_USE_WOLFSSL)
@@ -513,6 +537,10 @@ if(CURL_USE_WOLFSSL)
   set(USE_WOLFSSL ON)
   list(APPEND CURL_LIBS ${WolfSSL_LIBRARIES})
   include_directories(${WolfSSL_INCLUDE_DIRS})
+
+  if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "wolfssl")
+    set(valid_default_ssl_backend TRUE)
+  endif()
 endif()
 
 if(CURL_USE_GNUTLS)
@@ -522,6 +550,10 @@ if(CURL_USE_GNUTLS)
   list(APPEND CURL_LIBS ${GNUTLS_LIBRARIES} "nettle")
   include_directories(${GNUTLS_INCLUDE_DIRS})
 
+  if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "gnutls")
+    set(valid_default_ssl_backend TRUE)
+  endif()
+
   if(NOT DEFINED HAVE_GNUTLS_SRP AND NOT CURL_DISABLE_SRP)
     cmake_push_check_state()
     set(CMAKE_REQUIRED_INCLUDES ${GNUTLS_INCLUDE_DIRS})
@@ -529,6 +561,10 @@ if(CURL_USE_GNUTLS)
     check_symbol_exists(gnutls_srp_verifier "gnutls/gnutls.h" HAVE_GNUTLS_SRP)
     cmake_pop_check_state()
   endif()
+endif()
+
+if(CURL_DEFAULT_SSL_BACKEND AND NOT valid_default_ssl_backend)
+  message(FATAL_ERROR "CURL_DEFAULT_SSL_BACKEND '${CURL_DEFAULT_SSL_BACKEND}' not enabled.")
 endif()
 
 # Keep ZLIB detection after TLS detection,
