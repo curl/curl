@@ -1448,7 +1448,7 @@ dnl /etc/pki/tls/certs/ca-bundle.crt Redhat and Mandriva
 dnl /usr/share/ssl/certs/ca-bundle.crt old(er) Redhat
 dnl /usr/local/share/certs/ca-root-nss.crt MidnightBSD
 dnl /etc/ssl/cert.pem OpenBSD, MidnightBSD (symlink)
-dnl /etc/ssl/certs/ (CA path) SUSE, FreeBSD
+dnl /etc/ssl/certs (CA path) SUSE, FreeBSD
 
 AC_DEFUN([CURL_CHECK_CA_BUNDLE], [
 
@@ -1539,7 +1539,7 @@ AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
                 "x$GNUTLS_ENABLED" = "x1" -o \
                 "x$MBEDTLS_ENABLED" = "x1" -o \
                 "x$WOLFSSL_ENABLED" = "x1"; then
-          check_capath="/etc/ssl/certs/"
+          check_capath="/etc/ssl/certs"
         fi
       fi
     else
