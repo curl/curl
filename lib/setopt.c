@@ -3172,6 +3172,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.quick_exit = (0 != va_arg(param, long)) ? 1L:0L;
     break;
   case CURLOPT_BLOCK_DOMAIN:
+    curl_slist_free_all(data->set.blocked_domains);
     data->set.blocked_domains = Curl_slist_duplicate(va_arg(
       param, struct curl_slist *));
     if(!data->set.blocked_domains) {
