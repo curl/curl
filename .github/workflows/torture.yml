@@ -72,7 +72,7 @@ jobs:
         sudo python3 -m pip install impacket
       name: 'install prereqs and impacket'
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - run: autoreconf -fi
       name: 'autoreconf'
