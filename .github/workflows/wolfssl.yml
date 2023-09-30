@@ -82,7 +82,7 @@ jobs:
         make install
       name: 'install wolfssl'
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - run: autoreconf -fi
       name: 'autoreconf'
