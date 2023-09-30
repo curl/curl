@@ -398,6 +398,9 @@
 /* Define to 1 if you have the <netinet/tcp.h> header file. */
 #cmakedefine HAVE_NETINET_TCP_H 1
 
+/* Define to 1 if you have the <netinet/udp.h> header file. */
+#cmakedefine HAVE_NETINET_UDP_H 1
+
 /* Define to 1 if you have the <linux/tcp.h> header file. */
 #cmakedefine HAVE_LINUX_TCP_H 1
 
@@ -535,6 +538,9 @@
 
 /* Define to 1 if you have the <sys/filio.h> header file. */
 #cmakedefine HAVE_SYS_FILIO_H 1
+
+/* Define to 1 if you have the <sys/wait.h> header file. */
+#cmakedefine HAVE_SYS_WAIT_H 1
 
 /* Define to 1 if you have the <sys/ioctl.h> header file. */
 #cmakedefine HAVE_SYS_IOCTL_H 1
