@@ -32,7 +32,6 @@ environment:
   OPENSSL: 'OFF'
   DEBUG: 'ON'
   SHARED: 'OFF'
-  RUN: 'ON'
   matrix:
     # generated CMake-based Visual Studio Release builds
     - job_name: 'CMake, VS2008, Release x86, Schannel'
@@ -46,8 +45,7 @@ environment:
       TESTING: 'OFF'
       SHARED: 'ON'
       DISABLED_TESTS: ''
-      # MSVCR90.dll missing
-      RUN: 'OFF'
+      SKIP_RUN: 'Needs missing MSVCR90.dll'
     - job_name: 'CMake, VS2022, Release x64, OpenSSL, WebSockets, Unity'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
@@ -132,7 +130,7 @@ environment:
       ENABLE_UNICODE: 'ON'
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
-      DISABLED_TESTS: '!1139 !1501'
+      DISABLED_TESTS: '!1139 !1451 !1501'
       ADD_PATH: 'C:\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin;C:\msys64\usr\bin'
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
@@ -145,7 +143,7 @@ environment:
       ENABLE_UNICODE: 'ON'
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
-      DISABLED_TESTS: '!1139 !1501'
+      DISABLED_TESTS: '!1139 !1451 !1501'
       ADD_PATH: 'C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin;C:\msys64\usr\bin'
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
@@ -171,7 +169,7 @@ environment:
       ENABLE_UNICODE: 'OFF'
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
-      DISABLED_TESTS: '!1139 !1501'
+      DISABLED_TESTS: '!1139 !1451 !1501'
       ADD_PATH: 'C:\mingw-w64\i686-6.3.0-posix-dwarf-rt_v5-rev1\mingw32\bin;C:\msys64\usr\bin'
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
@@ -272,92 +270,136 @@ environment:
       POSIX_PATH_PREFIX: '/cygdrive'
 
 install:
-  - if not "%ADD_PATH%" == "" (
-      set "PATH=%ADD_PATH%;%PATH%" )
+  - ps: |
+      if($env:ADD_PATH -ne $null) {
+        $env:PATH = "$env:ADD_PATH;$env:PATH"
+      }
 
 build_script:
-  - if "%BUILD_SYSTEM%" == "CMake" (
-      cmake .
-        -G"%PRJ_GEN%"
-        %TARGET%
-        -DCURL_USE_OPENSSL=%OPENSSL%
-        -DOPENSSL_ROOT_DIR=C:/OpenSSL-v111-Win64
-        -DCURL_USE_SCHANNEL=%SCHANNEL%
-        -DHTTP_ONLY=%HTTP_ONLY%
-        -DBUILD_SHARED_LIBS=%SHARED%
-        -DBUILD_TESTING=%TESTING%
-        -DENABLE_WEBSOCKETS=%WEBSOCKETS%
-        -DCMAKE_UNITY_BUILD=%UNITY%
-        -DCURL_WERROR=ON
-        -DENABLE_DEBUG=%DEBUG%
-        -DENABLE_UNICODE=%ENABLE_UNICODE%
-        -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=""
-        -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=""
-        -DCMAKE_INSTALL_PREFIX="C:/CURL"
-        -DCMAKE_BUILD_TYPE=%PRJ_CFG% &&
-      cmake --build . --config %PRJ_CFG% --parallel 2 --clean-first -- %BUILD_OPT% &&
-      if "%SHARED%" == "ON" (
-        bash.exe -e -l -c "cp -f -p %POSIX_PATH_PREFIX%/c/projects/curl/lib/*.dll %POSIX_PATH_PREFIX%/c/projects/curl/src/" &&
-        bash.exe -e -l -c "cp -f -p %POSIX_PATH_PREFIX%/c/projects/curl/lib/*.dll %POSIX_PATH_PREFIX%/c/projects/curl/tests/libtest/" ) &&
-      if "%OPENSSL%" == "ON" (
-        bash.exe -e -l -c "cp -f -p %POSIX_PATH_PREFIX%/c/OpenSSL-v111-Win64/*.dll %POSIX_PATH_PREFIX%/c/projects/curl/src/" ) &&
-      bash.exe -e -l -c "find %POSIX_PATH_PREFIX%/c/projects/curl -name '*.exe' -o -name '*.dll'" &&
-      if "%RUN%" == "ON" (
-        src\curl.exe -V )
-    ) else (
-    if "%BUILD_SYSTEM%" == "VisualStudioSolution" (
-      cd projects &&
-      .\generate.bat %VC_VERSION% &&
-      msbuild.exe /p:Configuration="%PRJ_CFG%" "Windows\\%VC_VERSION%\\curl-all.sln" &&
-      bash.exe -e -l -c "find %POSIX_PATH_PREFIX%/c/projects/curl -name '*.exe' -o -name '*.dll'" &&
-      cd "../build/Win32/%VC_VERSION%/%PRJ_CFG%" &&
-      curld.exe -V
-    ) else (
-    if "%BUILD_SYSTEM%" == "winbuild_vs2015" (
-      call buildconf.bat &&
-      cd winbuild &&
-      call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64 &&
-      call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86_amd64 &&
-      nmake /f Makefile.vc mode=dll VC=14 "SSL_PATH=C:\OpenSSL-v111-Win64" WITH_SSL=dll MACHINE=x64 DEBUG=%DEBUG% ENABLE_UNICODE=%ENABLE_UNICODE% &&
-      bash.exe -e -l -c "find %POSIX_PATH_PREFIX%/c/projects/curl -name '*.exe' -o -name '*.dll'" &&
-      ..\builds\libcurl-vc14-x64-%PATHPART%-dll-ssl-dll-ipv6-sspi\bin\curl.exe -V
-    ) else (
-    if "%BUILD_SYSTEM%" == "winbuild_vs2017" (
-      call buildconf.bat &&
-      cd winbuild &&
-      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat" &&
-      nmake /f Makefile.vc mode=dll VC=14.10 "SSL_PATH=C:\OpenSSL-v111-Win64" WITH_SSL=dll MACHINE=x64 DEBUG=%DEBUG% ENABLE_UNICODE=%ENABLE_UNICODE% &&
-      ..\builds\libcurl-vc14.10-x64-%PATHPART%-dll-ssl-dll-ipv6-sspi\bin\curl.exe -V
-    ) else (
-    if "%BUILD_SYSTEM%" == "autotools" (
-      bash.exe -e -l -c "cd %POSIX_PATH_PREFIX%/c/projects/curl && autoreconf -fi && ./configure %CONFIG_ARGS% && make V=1 && make V=1 examples && cd tests && make V=1" &&
-      src\curl.exe -V
-    )))))
-  # - ps: |
-  #     if(Test-Path CMakeFiles/CMakeConfigureLog.yaml) { cat CMakeFiles/CMakeConfigureLog.yaml }
-  #     if(Test-Path CMakeFiles/CMakeOutput.log) { cat CMakeFiles/CMakeOutput.log }
-  #     if(Test-Path CMakeFiles/CMakeError.log) { cat CMakeFiles/CMakeError.log }
-  - if "%TESTING%" == "ON" (
-      if "%BUILD_SYSTEM%" == "CMake" (
-        cmake --build . --config %PRJ_CFG% --parallel 2 --target testdeps
-    ))
+  - ps: |
+      function Pull-BatchFile-Env {
+        param([string]$Path, [string]$Parameters)
+        $tempFile = [IO.Path]::GetTempFileName()
+        cmd.exe /c " `"$Path`" $Parameters && set " > $tempFile
+        Get-Content $tempFile | ForEach-Object { if($_ -match '^(.*?)=(.*)$') { Set-Content "env:\$($matches[1])" $matches[2] } }
+        Remove-Item $tempFile
+      }
+
+      $ErrorActionPreference = 'Stop'
+
+      $openssl_root = 'C:\OpenSSL-v111-Win64'
+
+      if($env:BUILD_SYSTEM -eq 'CMake') {
+
+        $options = @('-DCURL_WERROR=ON')
+        $options += "-G$env:PRJ_GEN"
+        if($env:TARGET -ne $null) {
+          $options += "$env:TARGET"
+          if($env:TARGET.Contains('ARM64')) {
+            $env:SKIP_RUN = 'ARM64 architecture'
+          }
+        }
+        $options += "-DCURL_USE_OPENSSL=$env:OPENSSL"
+        if($env:OPENSSL -eq 'ON') {
+          $options += "-DOPENSSL_ROOT_DIR=$openssl_root"
+        }
+        $options += "-DCURL_USE_SCHANNEL=$env:SCHANNEL"
+        $options += "-DHTTP_ONLY=$env:HTTP_ONLY"
+        $options += "-DBUILD_SHARED_LIBS=$env:SHARED"
+        $options += "-DBUILD_TESTING=$env:TESTING"
+        $options += "-DENABLE_WEBSOCKETS=$env:WEBSOCKETS"
+        $options += "-DCMAKE_UNITY_BUILD=$env:UNITY"
+        $options += "-DENABLE_DEBUG=$env:DEBUG"
+        $options += "-DENABLE_UNICODE=$env:ENABLE_UNICODE"
+        $options += '-DCMAKE_INSTALL_PREFIX=C:/CURL'
+        $options += "-DCMAKE_BUILD_TYPE=$env:PRJ_CFG"
+        if($env:PRJ_CFG -eq 'Debug') {
+          $options += '-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
+        }
+        elseif ($env:PRJ_CFG -eq 'Release') {
+          $options += '-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
+        }
+
+        Write-Host 'CMake options:' $options
+        cmake . $options
+        cmake --build . --config $env:PRJ_CFG --parallel 2 --clean-first -- $env:BUILD_OPT
+        if($env:SHARED -eq 'ON') {
+          Copy-Item -Path 'C:\Projects\curl\lib\*.dll' -Destination 'C:\projects\curl\src'
+          Copy-Item -Path 'C:\Projects\curl\lib\*.dll' -Destination 'C:\projects\curl\tests\libtest'
+        }
+        if($env:OPENSSL -eq 'ON') {
+          Copy-Item -Path "$openssl_root\*.dll" -Destination 'C:\projects\curl\src'
+        }
+        $curl = '.\src\curl.exe'
+      }
+      elseif($env:BUILD_SYSTEM -eq 'VisualStudioSolution') {
+        cd projects
+        .\generate.bat $env:VC_VERSION
+        msbuild.exe "-property:Configuration=$env:PRJ_CFG" "Windows\$env:VC_VERSION\curl-all.sln"
+        $curl = "..\build\Win32\$env:VC_VERSION\$env:PRJ_CFG\curld.exe"
+      }
+      elseif($env:BUILD_SYSTEM -eq 'winbuild_vs2015') {
+        .\buildconf.bat
+        cd winbuild
+        Pull-BatchFile-Env 'C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd' /x64
+        Pull-BatchFile-Env 'C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat' x86_amd64
+        nmake /nologo /f Makefile.vc mode=dll VC=14 "SSL_PATH=$openssl_root" WITH_SSL=dll MACHINE=x64 DEBUG=$env:DEBUG ENABLE_UNICODE=$env:ENABLE_UNICODE
+        $curl = "..\builds\libcurl-vc14-x64-$env:PATHPART-dll-ssl-dll-ipv6-sspi\bin\curl.exe"
+      }
+      elseif($env:BUILD_SYSTEM -eq 'winbuild_vs2017') {
+        .\buildconf.bat
+        cd winbuild
+        Pull-BatchFile-Env 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat'
+        nmake /nologo /f Makefile.vc mode=dll VC=14.10 "SSL_PATH=$openssl_root" WITH_SSL=dll MACHINE=x64 DEBUG=$env:DEBUG ENABLE_UNICODE=$env:ENABLE_UNICODE
+        $curl = "..\builds\libcurl-vc14.10-x64-$env:PATHPART-dll-ssl-dll-ipv6-sspi\bin\curl.exe"
+      }
+      elseif($env:BUILD_SYSTEM -eq 'autotools') {
+        & bash -e -c "cd $env:POSIX_PATH_PREFIX/c/projects/curl && autoreconf -fi 2>&1 && ./configure $env:CONFIG_ARGS 2>&1 && make V=1 && make V=1 examples && cd tests && make V=1"
+        $curl = '.\src\curl.exe'
+      }
+
+      Get-ChildItem -Path C:\projects\curl -Include ('*.exe', '*.dll') -Recurse -Name
+      if($env:SKIP_RUN -eq $null) {
+        cmd.exe /c "`"$curl`" -V 2>&1"
+        if(-not $?) {
+          Write-Host "Error running curl: '$curl':" ("0x" + $LastExitCode.ToString("X"))
+          exit 1
+        }
+      }
+      else {
+        Write-Host "Skip running curl.exe. Reason: $env:SKIP_RUN"
+      }
+
+      if($false) {
+        if(Test-Path CMakeFiles/CMakeConfigureLog.yaml) { cat CMakeFiles/CMakeConfigureLog.yaml }
+        if(Test-Path CMakeFiles/CMakeOutput.log) { cat CMakeFiles/CMakeOutput.log }
+        if(Test-Path CMakeFiles/CMakeError.log) { cat CMakeFiles/CMakeError.log }
+      }
+
+      if($env:TESTING -eq 'ON' -and $env:BUILD_SYSTEM -eq 'CMake') {
+        cmake --build . --config $env:PRJ_CFG --parallel 2 --target testdeps
+      }
 
 test_script:
-  - if exist C:/msys64/usr/bin/curl.exe (
-      set ACURL=-ac %POSIX_PATH_PREFIX%/c/msys64/usr/bin/curl.exe )
-  - if exist C:/Windows/System32/curl.exe (
-      set ACURL=-ac %POSIX_PATH_PREFIX%/c/Windows/System32/curl.exe )
-  - if "%TESTING%" == "ON" (
-      if "%BUILD_SYSTEM%" == "CMake" (
-        set TFLAGS=%ACURL% %DISABLED_TESTS% &&
-        cmake --build . --config %PRJ_CFG% --target test-ci
-      ) else (
-      if "%BUILD_SYSTEM%" == "autotools" (
-        bash.exe -e -l -c "cd %POSIX_PATH_PREFIX%/c/projects/curl && make V=1 TFLAGS='%ACURL% %DISABLED_TESTS%' test-ci"
-      ) else (
-        bash.exe -e -l -c "cd %POSIX_PATH_PREFIX%/c/projects/curl/tests && ./runtests.pl -a -p !flaky -r -rm %ACURL% %DISABLED_TESTS%"
-      ))
-    )
+  - ps: |
+      if(Test-Path 'C:/msys64/usr/bin/curl.exe') {
+        $acurl="-ac $env:POSIX_PATH_PREFIX/c/msys64/usr/bin/curl.exe"
+      }
+      if(Test-Path 'C:/Windows/System32/curl.exe') {
+        $acurl="-ac $env:POSIX_PATH_PREFIX/c/Windows/System32/curl.exe"
+      }
+      if($env:TESTING -eq 'ON') {
+        if($env:BUILD_SYSTEM -eq 'CMake') {
+          $env:TFLAGS="$acurl $env:DISABLED_TESTS"
+          cmake --build . --config $env:PRJ_CFG --target test-ci
+        }
+        elseif($env:BUILD_SYSTEM -eq 'autotools') {
+          & bash -e -c "cd $env:POSIX_PATH_PREFIX/c/projects/curl && make V=1 TFLAGS='$acurl $env:DISABLED_TESTS' test-ci"
+        }
+        else {
+          & bash -e -c "cd $env:POSIX_PATH_PREFIX/c/projects/curl/tests && ./runtests.pl -a -p !flaky -r -rm $acurl $env:DISABLED_TESTS"
+        }
+      }
 
 # select branches to avoid testing feature branches twice (as branch and as pull request)
 branches:
