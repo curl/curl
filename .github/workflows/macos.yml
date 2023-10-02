@@ -205,7 +205,7 @@ jobs:
         build:
         - name: OpenSSL
           install: nghttp2 openssl
-          generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
+          generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9
         - name: LibreSSL
           install: nghttp2 libressl
           generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DCMAKE_UNITY_BUILD=ON
