@@ -808,8 +808,7 @@ if(NOT CURL_DISABLE_LDAP)
         list(APPEND CMAKE_REQUIRED_LIBRARIES ${CMAKE_LBER_LIB})
       endif()
 
-      set(_SRC_STRING
-        "
+      check_c_source_compiles("
         ${_INCLUDE_STRING}
         int main(int argc, char ** argv)
         {
@@ -817,9 +816,7 @@ if(NOT CURL_DISABLE_LDAP)
           BerElement *bep = ber_init(bvp);
           ber_free(bep, 1);
           return 0;
-        }"
-      )
-      check_c_source_compiles("${_SRC_STRING}" NOT_NEED_LBER_H)
+        }" NOT_NEED_LBER_H)
       if(NOT_NEED_LBER_H)
         set(NEED_LBER_H OFF)
       else()
