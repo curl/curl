@@ -4,7 +4,7 @@ curl and libcurl 8.4.0
  Command line options:         258
  curl_easy_setopt() options:   303
  Public functions in libcurl:  93
- Contributors:                 2990
+ Contributors:                 2992
 
 This release includes the following changes:
 
@@ -14,10 +14,20 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o acinclude.m4: Document proper system truststore on FreeBSD [83]
+ o appveyor: fix yamlint issues, indent [67]
+ o autotools: adjust `CURL_CA_PATH` value to CMake [53]
  o bufq: remove Curl_bufq_skip_and_shift (unused) [47]
  o build: delete checks for C89 standard headers [65]
  o cmake, configure: also link with CoreServices [32]
+ o cmake: add check for suseconds_t [91]
  o cmake: add feature checks for `memrchr` and `getifaddrs` [57]
+ o cmake: add missing checks [86]
+ o cmake: detect `HAVE_CLOCK_GETTIME_MONOTONIC_RAW` [75]
+ o cmake: detect `HAVE_GETADDRINFO_THREADSAFE` [76]
+ o cmake: detect `sys/wait.h` and `netinet/udp.h` [61]
+ o cmake: detect TLS-SRP in OpenSSL/wolfSSL/GnuTLS [93]
+ o cmake: fix `HAVE_WRITABLE_ARGV` detection [77]
  o cmake: fix duplicate symbols when linking tests [73]
  o cmake: fix missing `zlib.h` when compiling `libcurltool` [72]
  o cmake: fix stderr initialization in unity builds [71]
@@ -25,19 +35,31 @@ This release includes the following bugfixes:
  o cmake: fix unity symbol collisions in h2 builds [48]
  o cmake: lib `CURL_STATICLIB` fixes (Windows) [74]
  o cmake: move global headers to specific checks [58]
+ o cmake: pre-cache `HAVE_BASENAME` for mingw-w64 and MSVC [85]
+ o cmake: pre-cache `HAVE_POLL_FINE` on Windows [36]
+ o cmake: validate `CURL_DEFAULT_SSL_BACKEND` config value [50]
+ o configure: check for the capath by default [63]
+ o configure: remove unused checks [87]
+ o configure: replace adhoc domain with `localhost` in tests [79]
  o configure: sort AC_CHECK_FUNCS
  o connect: expire the timeout when trying next [54]
+ o connect: only start the happy eyeballs timer when needed [95]
  o cookie: do not store the expire or max-age strings [16]
  o cookie: remove unnecessary struct fields [17]
  o cookie: set ->running in cookie_init even if data is NULL [5]
+ o create-dirs.d: clarify it also uses --output-dirs [66]
  o curl.h: mark CURLSSLBACKEND_NSS as deprecated since 8.3.0 [18]
  o docs: adapt SEE ALSO sections to new requirements [52]
  o docs: explain how PINNEDPUBLICKEY is independent of VERIFYPEER [68]
+ o docs: replace made up domains with example.com [82]
+ o docs: update curl man page references [89]
  o docs: use CURLSSLBACKEND_NONE [19]
  o doh: inherit DEBUGFUNCTION/DATA [12]
  o escape: replace Curl_isunreserved with ISUNRESERVED [2]
+ o FAQ: How do I upgrade curl.exe in Windows? [84]
  o GHA/linux: run singleuse to detect single-use global functions [35]
  o h2-proxy: remove left-over mistake in drain_tunnel() [7]
+ o h2: testcase and fix for pausing h2 streams [49]
  o http: fix CURL_DISABLE_BEARER_AUTH breakage [28]
  o http: h1/h2 proxy unification [21]
  o http: remove wrong comment for http_should_fail [55]
@@ -49,6 +71,9 @@ This release includes the following bugfixes:
  o lib: enable hmac for digest as well [26]
  o lib: failf/infof compiler warnings [8]
  o lib: let the max filesize option stop too big transfers too [44]
+ o lib: move handling of `data->req.writer_stack` into Curl_client_write() [97]
+ o lib: provide and use Curl_hexencode [62]
+ o lib: remove TIME_WITH_SYS_TIME [88]
  o lib: use wrapper for curl_mime_data fseek callback [30]
  o libssh2: fix error message on failed pubkey-from-file [22]
  o libssh: cap SFTP packet size sent [14]
@@ -57,10 +82,12 @@ This release includes the following bugfixes:
  o misc: better random strings [15]
  o multi: fix small timeouts [70]
  o multi: remove Curl_multi_dump [37]
+ o multi: round the timeout up to prevent early wakeups [98]
  o openssl: improve ssl shutdown handling [69]
  o pytest: exclude test_03_goaway in CI runs due to timing dependency [23]
  o quic: set ciphers/curves the same way regular TLS does [43]
  o quiche: fix build error with --with-ca-fallback [1]
+ o runtests: display the test status if tests appear hung [81]
  o runtests: eliminate a warning on old perl versions
  o src/mkhelp: make generated code pass `checksrc` [59]
  o test1056: disable on Windows
@@ -75,6 +102,7 @@ This release includes the following bugfixes:
  o tests: show which curl tool `runtests.pl` is using [60]
  o tests: stop overriding the lock timeout
  o tftpd: always use curl's own tftp.h [25]
+ o tool: use our own stderr variable [94]
  o tool_cb_wrt: fix debug assertion [4]
  o tool_setopt: remove unused function tool_setopt_flags [56]
  o upload-file.d: describe the file name slash/backslash handling [9]
@@ -83,6 +111,7 @@ This release includes the following bugfixes:
  o wolfssh: do cleanup in Curl_ssh_cleanup [40]
  o wolfssl: allow capath with CURLOPT_CAINFO_BLOB [29]
  o wolfssl: if CURLOPT_CAINFO_BLOB is set, ignore the CA files [34]
+ o wolfssl: ignore errors in CA path [64]
 
 This release includes the following known bugs:
 
@@ -101,12 +130,12 @@ advice from friends like these:
   Christian Weisgerber, claudiusaiz on github, consulion on github,
   Dan Fandrich, Daniel Stenberg, Douglas R. Reno, Elliot Killick, Gisle Vanem,
   Hakan Sunay Halil, Harry Sintonen, Jakub Jelen, John Haugabook,
-  Joshix-1 on github, Junho Choi, Karthikdasari0423 on github, Lars Francke,
-  Loïc Yhuel, Marc Hörsken, Mark Gaiser, Mathias Fuchs, Michael Osipov,
-  Natanael Copa, Patrick Monnerat, Peter Wang, Ray Satiro, Ryan Schmidt,
-  s0urc3_ on hackerone, Stefan Eissing, Ted Lyngmo, Viktor Szakats, vvb2060,
-  南宫雪珊
-  (35 contributors)
+  Joshix-1 on github, Juliusz Sosinowicz, Junho Choi,
+  Karthikdasari0423 on github, Lars Francke, Loïc Yhuel, Marc Hörsken,
+  Mark Gaiser, Mathias Fuchs, Michael Osipov, Natanael Copa, Patrick Monnerat,
+  Peter Wang, Ray Satiro, Robert Simpson, Ryan Schmidt, s0urc3_ on hackerone,
+  Samuel Henrique, Stefan Eissing, Ted Lyngmo, Viktor Szakats, vvb2060, 南宫雪珊
+  (38 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -145,6 +174,7 @@ References to bug reports and discussions on issues:
  [33] = https://curl.se/bug/?i=11932
  [34] = https://curl.se/bug/?i=11884
  [35] = https://curl.se/bug/?i=11932
+ [36] = https://curl.se/bug/?i=12003
  [37] = https://curl.se/bug/?i=11931
  [38] = https://curl.se/bug/?i=11925
  [39] = https://curl.se/bug/?i=11904
@@ -156,8 +186,11 @@ References to bug reports and discussions on issues:
  [46] = https://curl.se/bug/?i=8805
  [47] = https://curl.se/bug/?i=11915
  [48] = https://curl.se/bug/?i=11912
+ [49] = https://curl.se/bug/?i=11982
+ [50] = https://curl.se/bug/?i=11998
  [51] = https://curl.se/bug/?i=11960
  [52] = https://curl.se/bug/?i=11957
+ [53] = https://curl.se/bug/?i=11997
  [54] = https://curl.se/bug/?i=11920
  [55] = https://curl.se/bug/?i=11941
  [56] = https://curl.se/bug/?i=11943
@@ -165,7 +198,13 @@ References to bug reports and discussions on issues:
  [58] = https://curl.se/bug/?i=11951
  [59] = https://curl.se/bug/?i=11955
  [60] = https://curl.se/bug/?i=11953
+ [61] = https://curl.se/bug/?i=11996
+ [62] = https://curl.se/bug/?i=11990
+ [63] = https://curl.se/bug/?i=11987
+ [64] = https://curl.se/bug/?i=11987
  [65] = https://curl.se/bug/?i=11940
+ [66] = https://curl.se/bug/?i=11991
+ [67] = https://curl.se/bug/?i=11994
  [68] = https://curl.se/bug/?i=2935
  [69] = https://curl.se/bug/?i=11858
  [70] = https://curl.se/bug/?i=11937
@@ -173,3 +212,22 @@ References to bug reports and discussions on issues:
  [72] = https://curl.se/bug/?i=11927
  [73] = https://curl.se/bug/?i=11926
  [74] = https://curl.se/bug/?i=11914
+ [75] = https://curl.se/bug/?i=11981
+ [76] = https://curl.se/bug/?i=11979
+ [77] = https://curl.se/bug/?i=11978
+ [79] = https://curl.se/bug/?i=11988
+ [81] = https://curl.se/bug/?i=11980
+ [82] = https://curl.se/bug/?i=11986
+ [83] = https://curl.se/bug/?i=11985
+ [84] = https://curl.se/bug/?i=11984
+ [85] = https://curl.se/bug/?i=11974
+ [86] = https://curl.se/bug/?i=11973
+ [87] = https://curl.se/bug/?i=11973
+ [88] = https://curl.se/bug/?i=11975
+ [89] = https://curl.se/bug/?i=11963
+ [91] = https://curl.se/bug/?i=11977
+ [93] = https://curl.se/bug/?i=11967
+ [94] = https://curl.se/bug/?i=11958
+ [95] = https://curl.se/bug/?i=11939
+ [97] = https://curl.se/bug/?i=11908
+ [98] = https://curl.se/bug/?i=11938
