@@ -22,6 +22,7 @@
 #
 ###########################################################################
 set(EXE_NAME curl)
+add_definitions(-DBUILDING_CURL)
 
 if(USE_MANUAL)
   # Use the C locale to ensure that only ASCII characters appear in the
