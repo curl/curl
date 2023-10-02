@@ -407,26 +407,6 @@ bool Curl_meets_timecondition(struct Curl_easy *data, time_t timeofdoc)
   return TRUE;
 }
 
-static size_t get_max_body_write_len(struct Curl_easy *data)
-{
-  if(data->req.maxdownload != -1) {
-    /* How much more are we allowed to write? */
-    curl_off_t remain_diff;
-    remain_diff = data->req.maxdownload - data->req.bytecount;
-    if(remain_diff < 0) {
-      /* already written too much! */
-      return 0;
-    }
-    else if(remain_diff > SSIZE_T_MAX) {
-      return SIZE_T_MAX;
-    }
-    else {
-      return (size_t)remain_diff;
-    }
-  }
-  return SIZE_T_MAX;
-}
-
 /*
  * Go ahead and do a read if we have a readable socket or if
  * the stream was rewound (in which case we have data in a
@@ -442,8 +422,8 @@ static CURLcode readwrite_data(struct Curl_easy *data,
                                bool *comeback)
 {
   CURLcode result = CURLE_OK;
-  char *buf, *excess_data;
-  size_t blen, hd_data_len, excess_len;
+  char *buf;
+  size_t blen;
   size_t consumed;
   int maxloops = 100;
   curl_off_t max_recv = data->set.max_recv_speed?
@@ -471,8 +451,6 @@ static CURLcode readwrite_data(struct Curl_easy *data,
      * all data read into it. */
     buf = data->state.buffer;
     blen = 0;
-    excess_data = NULL;
-    excess_len = 0;
 
     /* If we are reading BODY data and the connection does NOT handle EOF
      * and we know the size of the BODY data, limit the read amount */
@@ -663,56 +641,6 @@ static CURLcode readwrite_data(struct Curl_easy *data,
       }
 #endif   /* CURL_DISABLE_HTTP */
 
-      /* If we know how much to download, have we reached the last bytes? */
-      if(-1 != k->maxdownload) {
-        size_t max_write_len = get_max_body_write_len(data);
-
-        /* Account for body content stillin the header buffer */
-        hd_data_len = k->badheader? Curl_dyn_len(&data->state.headerb) : 0;
-        if(blen + hd_data_len >= max_write_len) {
-          /* We have all download bytes, but do we have too many? */
-          excess_len = (blen + hd_data_len) - max_write_len;
-          if(excess_len > 0 && !k->ignorebody) {
-            infof(data,
-                  "Excess found in a read:"
-                  " excess = %zu"
-                  ", size = %" CURL_FORMAT_CURL_OFF_T
-                  ", maxdownload = %" CURL_FORMAT_CURL_OFF_T
-                  ", bytecount = %" CURL_FORMAT_CURL_OFF_T,
-                  excess_len, k->size, k->maxdownload, k->bytecount);
-            connclose(conn, "excess found in a read");
-          }
-
-          if(!excess_len) {
-            /* no excess bytes, perfect! */
-            excess_data = NULL;
-          }
-          else if(hd_data_len >= excess_len) {
-            /* uh oh, header body data already exceeds, the whole `buf`
-             * is excess data */
-            excess_len = blen;
-            excess_data = buf;
-            blen = 0;
-          }
-          else {
-            /* `buf` bytes exceed, shorten and set `excess_data` */
-            excess_len -= hd_data_len;
-            DEBUGASSERT(blen >= excess_len);
-            blen -= excess_len;
-            excess_data = buf + blen;
-          }
-
-          /* HTTP/3 over QUIC should keep reading until QUIC connection
-             is closed.  In contrast to HTTP/2 which can stop reading
-             from TCP connection, HTTP/3 over QUIC needs ACK from server
-             to ensure stream closure.  It should keep reading. */
-          if(!is_http3) {
-            k->keepon &= ~KEEP_RECV; /* we're done reading */
-          }
-          k->download_done = TRUE;
-        }
-      }
-
       max_recv -= blen;
 
       if(!k->chunk && (blen || k->badheader || is_empty_data)) {
@@ -750,21 +678,14 @@ static CURLcode readwrite_data(struct Curl_easy *data,
           goto out;
       }
 
+      if(k->download_done && !is_http3) {
+        /* HTTP/3 over QUIC should keep reading until QUIC connection
+           is closed.  In contrast to HTTP/2 which can stop reading
+           from TCP connection, HTTP/3 over QUIC needs ACK from server
+           to ensure stream closure.  It should keep reading. */
+        k->keepon &= ~KEEP_RECV; /* we're done reading */
+      }
     } /* if(!header and data to read) */
-
-    if(conn->handler->readwrite && excess_data) {
-      bool readmore = FALSE; /* indicates data is incomplete, need more */
-
-      consumed = 0;
-      result = conn->handler->readwrite(data, conn, excess_data, excess_len,
-                                        &consumed, &readmore);
-      if(result)
-        goto out;
-
-      if(readmore)
-        k->keepon |= KEEP_RECV; /* we're not done reading */
-      break;
-    }
 
     if(is_empty_data) {
       /* if we received nothing, the server closed the connection and we
