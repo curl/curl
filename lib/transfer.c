@@ -529,11 +529,8 @@ static CURLcode readwrite_data(struct Curl_easy *data,
     /* Since this is a two-state thing, we check if we are parsing
        headers at the moment or not. */
     if(k->header) {
-      bool stop_reading = FALSE;
-
       consumed = 0;
-      result = Curl_http_readwrite_headers(data, conn, buf, blen,
-                                           &consumed, &stop_reading);
+      result = Curl_http_readwrite_headers(data, conn, buf, blen, &consumed);
       if(result)
         goto out;
       buf += consumed;
@@ -553,7 +550,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
         blen -= consumed;
       }
 
-      if(stop_reading) {
+      if(k->download_done) {
         /* We've stopped dealing with input, get out of the do-while loop */
         if(blen > 0) {
           infof(data,
@@ -563,6 +560,8 @@ static CURLcode readwrite_data(struct Curl_easy *data,
                 blen, data->state.up.path);
         }
 
+        /* we make sure that this socket isn't read more now */
+        k->keepon &= ~KEEP_RECV;
         break;
       }
     }
