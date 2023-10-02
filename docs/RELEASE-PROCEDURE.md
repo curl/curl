@@ -107,11 +107,11 @@ Coming dates
 Based on the description above, here are some planned release dates (at the
 time of this writing):
 
-- July 19, 2023
-- September 13, 2023
-- November 8, 2023
-- January 3, 2024
-- February 28, 2024
-- April 24, 2024
-- June 19, 2024
-- August 14, 2024
+- October 11, 2023
+- December 6, 2023
+- January 31, 2024
+- March 27, 2024
+- May 22, 2024
+- July 17, 2024
+- September 11, 2024
+- November 6, 2024
