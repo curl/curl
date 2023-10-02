@@ -827,6 +827,13 @@ if(NOT CURL_DISABLE_LDAP)
         set(CURL_TEST_DEFINES "${CURL_TEST_DEFINES} -DNEED_LBER_H")
       endif()
     endif()
+
+    if(NOT CURL_DISABLE_LDAP AND NOT CURL_DISABLE_LDAPS)
+      check_include_file_concat("ldap_ssl.h" HAVE_LDAP_SSL_H)
+      if(HAVE_LDAP_SSL_H)
+        set(HAVE_LDAP_SSL ON)
+      endif()
+    endif()
   endif()
 endif()
 
@@ -836,10 +843,6 @@ if(CURL_DISABLE_LDAP)
     message(STATUS "LDAP needs to be enabled to support LDAPS")
     set(CURL_DISABLE_LDAPS ON CACHE BOOL "" FORCE)
   endif()
-endif()
-
-if(NOT CURL_DISABLE_LDAPS)
-  check_include_file_concat("ldap_ssl.h" HAVE_LDAP_SSL_H)
 endif()
 
 # Check for idn2
