@@ -797,7 +797,7 @@ if(NOT CURL_DISABLE_LDAP)
       endif()
       list(APPEND _HEADER_LIST "ldap.h")
 
-      set(_SRC_STRING "")
+      set(_INCLUDE_STRING "")
       foreach(_HEADER ${_HEADER_LIST})
         set(_INCLUDE_STRING "${_INCLUDE_STRING}#include <${_HEADER}>\n")
       endforeach()
