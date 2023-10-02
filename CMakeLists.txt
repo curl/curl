@@ -830,7 +830,7 @@ if(NOT CURL_DISABLE_LDAP)
 
       unset(CMAKE_REQUIRED_LIBRARIES)
 
-      check_include_file_concat("ldap_ssl.h" HAVE_LDAP_SSL_H)
+      check_include_file("ldap_ssl.h" HAVE_LDAP_SSL_H)
 
       if(NOT CURL_DISABLE_LDAPS)
         set(HAVE_LDAP_SSL ON)
