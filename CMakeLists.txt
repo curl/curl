@@ -823,6 +823,7 @@ if(NOT CURL_DISABLE_LDAP)
 
       if(HAVE_LDAP_INIT_FD)
         set(USE_OPENLDAP ON)
+        add_definitions("-DLDAP_DEPRECATED=1")
       endif()
       if(NOT CURL_DISABLE_LDAPS)
         set(HAVE_LDAP_SSL ON)
