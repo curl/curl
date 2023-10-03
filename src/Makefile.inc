@@ -88,10 +88,10 @@ CURL_CFILES = \
   tool_paramhlp.c \
   tool_parsecfg.c \
   tool_progress.c \
-  tool_stderr.c \
-  tool_strdup.c \
   tool_setopt.c \
   tool_sleep.c \
+  tool_stderr.c \
+  tool_strdup.c \
   tool_urlglob.c \
   tool_util.c \
   tool_vms.c \

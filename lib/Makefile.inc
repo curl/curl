@@ -162,12 +162,12 @@ LIB_CFILES =         \
   http.c             \
   http1.c            \
   http2.c            \
+  http_aws_sigv4.c   \
   http_chunks.c      \
   http_digest.c      \
   http_negotiate.c   \
   http_ntlm.c        \
   http_proxy.c       \
-  http_aws_sigv4.c   \
   idn.c              \
   if2ip.c            \
   imap.c             \
