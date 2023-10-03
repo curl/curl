@@ -27,7 +27,7 @@ OK
 http
 </server>
  <name>
-Connect to specific host: Re-use existing connections if possible
+Connect to specific host: Reuse existing connections if possible
  </name>
 
  <command>

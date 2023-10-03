@@ -1023,7 +1023,7 @@ static CURLcode inspect_response(struct Curl_cfilter *cf,
     if(result)
       return result;
     if(data->req.newurl) {
-      /* Inidicator that we should try again */
+      /* Indicator that we should try again */
       Curl_safefree(data->req.newurl);
       h2_tunnel_go_state(cf, ts, H2_TUNNEL_INIT, data);
       return CURLE_OK;

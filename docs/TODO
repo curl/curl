@@ -618,7 +618,7 @@
 
 5.3 Rearrange request header order
 
- Server implementors often make an effort to detect browser and to reject
+ Server implementers often make an effort to detect browser and to reject
  clients it can detect to not match. One of the last details we cannot yet
  control in libcurl's HTTP requests, which also can be exploited to detect
  that libcurl is in fact used even when it tries to impersonate a browser, is

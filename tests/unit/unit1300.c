@@ -75,7 +75,7 @@ UNITTEST_START
 
   fail_unless(llist.size == 0, "list initial size should be zero");
   fail_unless(llist.head == NULL, "list head should initiate to NULL");
-  fail_unless(llist.tail == NULL, "list tail should intiate to NULL");
+  fail_unless(llist.tail == NULL, "list tail should initiate to NULL");
   fail_unless(llist.dtor == test_Curl_llist_dtor,
                "list dtor should initiate to test_Curl_llist_dtor");
 

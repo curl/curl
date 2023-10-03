@@ -838,7 +838,7 @@ static const struct setcase set_parts_list[] = {
    0, /* set */
    CURLUE_OK, CURLUE_BAD_HOSTNAME},
   {"https://example.com/",
-   "host=0xff,", /* '++' there's no automatic URL decode when settin this
+   "host=0xff,", /* '++' there's no automatic URL decode when setting this
                   part */
    "https://0xff/",
    0, /* get */

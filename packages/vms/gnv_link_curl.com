@@ -388,7 +388,7 @@ $ if f$search("[.src]curl-tool_main.o") .nes. ""
 $ then
 $!  From src/makefile.inc:
 $!  # libcurl has sources that provide functions named curlx_* that aren't
-$!  # part of the official API, but we re-use the code here to avoid
+$!  # part of the official API, but we reuse the code here to avoid
 $!  # duplication.
 $!
 $!
