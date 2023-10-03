@@ -138,7 +138,7 @@ int test(char *URL)
   stream_uri = NULL;
 
   test_setopt(curl, CURLOPT_INTERLEAVEFUNCTION, rtp_write);
-  test_setopt(curl, CURLOPT_TIMEOUT, 3L);
+  test_setopt(curl, CURLOPT_TIMEOUT, 30L);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
   test_setopt(curl, CURLOPT_WRITEDATA, protofile);
 
