@@ -411,7 +411,7 @@ static size_t get_max_body_write_len(struct Curl_easy *data)
 {
   if(data->req.maxdownload != -1) {
     /* How much more are we allowed to write? */
-    ssize_t remain_diff;
+    curl_off_t remain_diff;
     remain_diff = data->req.maxdownload - data->req.bytecount;
     if(remain_diff < 0) {
       /* already written too much! */
