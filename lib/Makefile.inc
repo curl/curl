@@ -289,9 +289,9 @@ LIB_HFILES =         \
   fileinfo.h         \
   fopen.h            \
   formdata.h         \
-  functypes.h        \
   ftp.h              \
   ftplistparser.h    \
+  functypes.h        \
   getinfo.h          \
   gopher.h           \
   hash.h             \
@@ -301,12 +301,12 @@ LIB_HFILES =         \
   http.h             \
   http1.h            \
   http2.h            \
+  http_aws_sigv4.h   \
   http_chunks.h      \
   http_digest.h      \
   http_negotiate.h   \
   http_ntlm.h        \
   http_proxy.h       \
-  http_aws_sigv4.h   \
   idn.h              \
   if2ip.h            \
   imap.h             \

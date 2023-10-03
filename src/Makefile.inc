@@ -47,15 +47,15 @@ CURLX_CFILES = \
   ../lib/warnless.c
 
 CURLX_HFILES = \
-  ../lib/curl_setup.h \
-  ../lib/strtoofft.h \
-  ../lib/timediff.h \
-  ../lib/nonblock.h \
-  ../lib/warnless.h \
   ../lib/curl_ctype.h \
   ../lib/curl_multibyte.h \
+  ../lib/curl_setup.h \
+  ../lib/dynbuf.h \
+  ../lib/nonblock.h \
+  ../lib/strtoofft.h \
+  ../lib/timediff.h \
   ../lib/version_win32.h \
-  ../lib/dynbuf.h
+  ../lib/warnless.h
 
 CURL_CFILES = \
   slist_wc.c \
