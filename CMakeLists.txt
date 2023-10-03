@@ -1567,7 +1567,6 @@ _add_if("FILE"          NOT CURL_DISABLE_FILE)
 _add_if("TELNET"        NOT CURL_DISABLE_TELNET)
 _add_if("LDAP"          NOT CURL_DISABLE_LDAP)
 # CURL_DISABLE_LDAP implies CURL_DISABLE_LDAPS
-# TODO check HAVE_LDAP_SSL (in autoconf this is enabled with --enable-ldaps)
 _add_if("LDAPS"         NOT CURL_DISABLE_LDAPS AND
                         ((USE_OPENLDAP AND SSL_ENABLED) OR
                         (NOT USE_OPENLDAP AND HAVE_LDAP_SSL)))
