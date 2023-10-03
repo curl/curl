@@ -56,9 +56,9 @@ add_library(
 target_compile_definitions(curlu PUBLIC UNITTESTS CURL_STATICLIB)
 
 if(ENABLE_CURLDEBUG)
-  # We must compile memdebug.c separately to avoid memdebug.h redefinitions
-  # being applied to memdebug.c itself.
-  set_source_files_properties(memdebug.c PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
+  # We must compile these sources separately to avoid memdebug.h redefinitions
+  # applying to them.
+  set_source_files_properties(memdebug.c curl_multibyte.c PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
 endif()
 target_link_libraries(curlu PRIVATE ${CURL_LIBS})
 
