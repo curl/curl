@@ -229,7 +229,7 @@ static const struct group_name_map gnm[] = {
 
 #ifdef USE_BIO_CHAIN
 
-static int bio_cf_create(WOLFSSL_BIO *bio)
+static int wolfssl_bio_cf_create(WOLFSSL_BIO *bio)
 {
   wolfSSL_BIO_set_shutdown(bio, 1);
   wolfSSL_BIO_set_init(bio, 1);
@@ -237,14 +237,14 @@ static int bio_cf_create(WOLFSSL_BIO *bio)
   return 1;
 }
 
-static int bio_cf_destroy(WOLFSSL_BIO *bio)
+static int wolfssl_bio_cf_destroy(WOLFSSL_BIO *bio)
 {
   if(!bio)
     return 0;
   return 1;
 }
 
-static long bio_cf_ctrl(WOLFSSL_BIO *bio, int cmd, long num, void *ptr)
+static long wolfssl_bio_cf_ctrl(WOLFSSL_BIO *bio, int cmd, long num, void *ptr)
 {
   struct Curl_cfilter *cf = BIO_get_data(bio);
   long ret = 1;
@@ -278,7 +278,8 @@ static long bio_cf_ctrl(WOLFSSL_BIO *bio, int cmd, long num, void *ptr)
   return ret;
 }
 
-static int bio_cf_out_write(WOLFSSL_BIO *bio, const char *buf, int blen)
+static int wolfssl_bio_cf_out_write(WOLFSSL_BIO *bio,
+                                    const char *buf, int blen)
 {
   struct Curl_cfilter *cf = wolfSSL_BIO_get_data(bio);
   struct ssl_connect_data *connssl = cf->ctx;
@@ -299,7 +300,7 @@ static int bio_cf_out_write(WOLFSSL_BIO *bio, const char *buf, int blen)
   return (int)nwritten;
 }
 
-static int bio_cf_in_read(WOLFSSL_BIO *bio, char *buf, int blen)
+static int wolfssl_bio_cf_in_read(WOLFSSL_BIO *bio, char *buf, int blen)
 {
   struct Curl_cfilter *cf = wolfSSL_BIO_get_data(bio);
   struct ssl_connect_data *connssl = cf->ctx;
@@ -323,27 +324,27 @@ static int bio_cf_in_read(WOLFSSL_BIO *bio, char *buf, int blen)
   return (int)nread;
 }
 
-static WOLFSSL_BIO_METHOD *bio_cf_method = NULL;
+static WOLFSSL_BIO_METHOD *wolfssl_bio_cf_method = NULL;
 
-static void bio_cf_init_methods(void)
+static void wolfssl_bio_cf_init_methods(void)
 {
-  bio_cf_method = wolfSSL_BIO_meth_new(BIO_TYPE_MEM, "wolfSSL CF BIO");
-  wolfSSL_BIO_meth_set_write(bio_cf_method, &bio_cf_out_write);
-  wolfSSL_BIO_meth_set_read(bio_cf_method, &bio_cf_in_read);
-  wolfSSL_BIO_meth_set_ctrl(bio_cf_method, &bio_cf_ctrl);
-  wolfSSL_BIO_meth_set_create(bio_cf_method, &bio_cf_create);
-  wolfSSL_BIO_meth_set_destroy(bio_cf_method, &bio_cf_destroy);
+  wolfssl_bio_cf_method = wolfSSL_BIO_meth_new(BIO_TYPE_MEM, "wolfSSL CF BIO");
+  wolfSSL_BIO_meth_set_write(wolfssl_bio_cf_method, &wolfssl_bio_cf_out_write);
+  wolfSSL_BIO_meth_set_read(wolfssl_bio_cf_method, &wolfssl_bio_cf_in_read);
+  wolfSSL_BIO_meth_set_ctrl(wolfssl_bio_cf_method, &wolfssl_bio_cf_ctrl);
+  wolfSSL_BIO_meth_set_create(wolfssl_bio_cf_method, &wolfssl_bio_cf_create);
+  wolfSSL_BIO_meth_set_destroy(wolfssl_bio_cf_method, &wolfssl_bio_cf_destroy);
 }
 
-static void bio_cf_free_methods(void)
+static void wolfssl_bio_cf_free_methods(void)
 {
-  wolfSSL_BIO_meth_free(bio_cf_method);
+  wolfSSL_BIO_meth_free(wolfssl_bio_cf_method);
 }
 
 #else /* USE_BIO_CHAIN */
 
-#define bio_cf_init_methods() Curl_nop_stmt
-#define bio_cf_free_methods() Curl_nop_stmt
+#define wolfssl_bio_cf_init_methods() Curl_nop_stmt
+#define wolfssl_bio_cf_free_methods() Curl_nop_stmt
 
 #endif /* !USE_BIO_CHAIN */
 
@@ -723,7 +724,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   {
     WOLFSSL_BIO *bio;
 
-    bio = BIO_new(bio_cf_method);
+    bio = BIO_new(wolfssl_bio_cf_method);
     if(!bio)
       return CURLE_OUT_OF_MEMORY;
 
@@ -1143,14 +1144,14 @@ static int wolfssl_init(void)
   Curl_tls_keylog_open();
 #endif
   ret = (wolfSSL_Init() == SSL_SUCCESS);
-  bio_cf_init_methods();
+  wolfssl_bio_cf_init_methods();
   return ret;
 }
 
 
 static void wolfssl_cleanup(void)
 {
-  bio_cf_free_methods();
+  wolfssl_bio_cf_free_methods();
   wolfSSL_Cleanup();
 #ifdef OPENSSL_EXTRA
   Curl_tls_keylog_close();

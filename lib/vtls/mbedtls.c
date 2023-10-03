@@ -156,7 +156,8 @@ static void mbed_debug(void *context, int level, const char *f_name,
 #else
 #endif
 
-static int bio_cf_write(void *bio, const unsigned char *buf, size_t blen)
+static int mbedtls_bio_cf_write(void *bio,
+                                const unsigned char *buf, size_t blen)
 {
   struct Curl_cfilter *cf = bio;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
@@ -165,7 +166,7 @@ static int bio_cf_write(void *bio, const unsigned char *buf, size_t blen)
 
   DEBUGASSERT(data);
   nwritten = Curl_conn_cf_send(cf->next, data, (char *)buf, blen, &result);
-  CURL_TRC_CF(data, cf, "bio_cf_out_write(len=%zu) -> %zd, err=%d",
+  CURL_TRC_CF(data, cf, "mbedtls_bio_cf_out_write(len=%zu) -> %zd, err=%d",
               blen, nwritten, result);
   if(nwritten < 0 && CURLE_AGAIN == result) {
     nwritten = MBEDTLS_ERR_SSL_WANT_WRITE;
@@ -173,7 +174,7 @@ static int bio_cf_write(void *bio, const unsigned char *buf, size_t blen)
   return (int)nwritten;
 }
 
-static int bio_cf_read(void *bio, unsigned char *buf, size_t blen)
+static int mbedtls_bio_cf_read(void *bio, unsigned char *buf, size_t blen)
 {
   struct Curl_cfilter *cf = bio;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
@@ -186,7 +187,7 @@ static int bio_cf_read(void *bio, unsigned char *buf, size_t blen)
     return 0;
 
   nread = Curl_conn_cf_recv(cf->next, data, (char *)buf, blen, &result);
-  CURL_TRC_CF(data, cf, "bio_cf_in_read(len=%zu) -> %zd, err=%d",
+  CURL_TRC_CF(data, cf, "mbedtls_bio_cf_in_read(len=%zu) -> %zd, err=%d",
               blen, nread, result);
   if(nread < 0 && CURLE_AGAIN == result) {
     nread = MBEDTLS_ERR_SSL_WANT_READ;
@@ -591,7 +592,9 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   mbedtls_ssl_conf_rng(&backend->config, mbedtls_ctr_drbg_random,
                        &backend->ctr_drbg);
-  mbedtls_ssl_set_bio(&backend->ssl, cf, bio_cf_write, bio_cf_read,
+  mbedtls_ssl_set_bio(&backend->ssl, cf,
+                      mbedtls_bio_cf_write,
+                      mbedtls_bio_cf_read,
                       NULL /*  rev_timeout() */);
 
   mbedtls_ssl_conf_ciphersuites(&backend->config,
