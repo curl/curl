@@ -3988,9 +3988,22 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
     connssl->connecting_state = ssl_connect_3;
 
     /* Informational message */
-    infof(data, "SSL connection using %s / %s",
+    int psigtype_nid;
+    psigtype_nid = NID_undef;
+    SSL_get_peer_signature_type_nid(backend->handle, &psigtype_nid);
+    const char *negotiated_group_name;
+#if defined(OPENSSL_VERSION_MAJOR) && defined(OPENSSL_VERSION_MINOR) && \
+    (OPENSSL_VERSION_MAJOR >= 3) && (OPENSSL_VERSION_MINOR >= 2)
+      negotiated_group_name = SSL_get0_group_name(backend->handle);
+#else
+    negotiated_group_name =
+      OBJ_nid2sn(0x0000FFFF & SSL_get_negotiated_group(backend->handle));
+#endif
+    infof(data, "SSL connection using %s / %s / %s / %s",
           SSL_get_version(backend->handle),
-          SSL_get_cipher(backend->handle));
+          SSL_get_cipher(backend->handle),
+          negotiated_group_name == NULL ? NULL : negotiated_group_name,
+          OBJ_nid2sn(psigtype_nid));
 
 #ifdef HAS_ALPN
     /* Sets data and len to negotiated protocol, len is 0 if no protocol was
@@ -4254,6 +4267,48 @@ static CURLcode servercert(struct Curl_cfilter *cf,
     }
     else
       infof(data, " SSL certificate verify ok.");
+  }
+
+  STACK_OF(X509) *certstack;
+  long verify_result = SSL_get_verify_result(backend->handle);
+  if(verify_result != X509_V_OK)
+    certstack = SSL_get_peer_cert_chain(backend->handle);
+  else
+    certstack = SSL_get0_verified_chain(backend->handle);
+  int num_cert_levels = sk_X509_num(certstack);
+  OpenSSL_add_all_algorithms();
+  OpenSSL_add_all_digests();
+
+  for(int cert_level = 0; cert_level < num_cert_levels; cert_level++) {
+    char cert_algorithm[80];
+    char group_name[80];
+    char group_name_final[80];
+    const X509_ALGOR *palg_cert = NULL;
+    const ASN1_OBJECT *paobj_cert = NULL;
+
+    X509 *current_cert = NULL;
+    current_cert = sk_X509_value(certstack, cert_level);
+
+    X509_get0_signature(NULL, &palg_cert, current_cert);
+    X509_ALGOR_get0(&paobj_cert, NULL, NULL, palg_cert);
+    OBJ_obj2txt(cert_algorithm, sizeof(cert_algorithm), paobj_cert, 0);
+
+    EVP_PKEY *current_pkey;
+    current_pkey = X509_get0_pubkey(current_cert);
+    int key_bits = EVP_PKEY_bits(current_pkey);
+    int key_sec_bits = EVP_PKEY_get_security_bits(current_pkey);
+    int get_group_name = EVP_PKEY_get_group_name(current_pkey,
+                                                 group_name,
+                                                 sizeof(group_name),
+                                                 NULL);
+    msnprintf(group_name_final, sizeof(group_name_final), "/%s", group_name);
+
+    infof(data,
+          "  Certificate level %d: "
+          "Public key type %s%s (%d/%d Bits/secBits), signed using %s",
+          cert_level, EVP_PKEY_get0_type_name(current_pkey),
+          get_group_name == 0 ? "" : group_name_final,
+          key_bits, key_sec_bits, cert_algorithm);
   }
 
 #if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_TLSEXT) && \
