@@ -1237,11 +1237,6 @@ if(NOT HAVE_SIGSETJMP)
   endif()
 endif()
 
-# If there is no stricmp(), do not allow LDAP to parse URLs
-if(NOT HAVE_STRICMP)
-  set(HAVE_LDAP_URL_PARSE 1)
-endif()
-
 # Do curl specific tests
 foreach(CURL_TEST
     HAVE_FCNTL_O_NONBLOCK
