@@ -90,7 +90,7 @@ sub scanmanpage {
 
 my $r;
 
-# check for define alises
+# check for define aliases
 open($r, "<", "$curlh") ||
     die "no curl.h";
 while(<$r>) {

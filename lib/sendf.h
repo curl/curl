@@ -30,7 +30,7 @@
 
 /**
  * Type of data that is being written to the client (application)
- * - data written can be eiter BODY or META data
+ * - data written can be either BODY or META data
  * - META data is either INFO or HEADER
  * - INFO is meta information, e.g. not BODY, that cannot be interpreted
  *   as headers of a response. Example FTP/IMAP pingpong answers.

@@ -1,7 +1,7 @@
 # IPFS
 For an overview about IPFS, visit the [IPFS project site](https://ipfs.tech/).
 
-In IPFS there are two protocols. IPFS and IPNS (their workings are explained in detail [here](https://docs.ipfs.tech/concepts/)). The ideal way to access data on the IPFS network is trough those protocols. For example to access the Big Buck Bunny video the ideal way to access it is like: `ipfs://bafybeigagd5nmnn2iys2f3doro7ydrevyr2mzarwidgadawmamiteydbzi`
+In IPFS there are two protocols. IPFS and IPNS (their workings are explained in detail [here](https://docs.ipfs.tech/concepts/)). The ideal way to access data on the IPFS network is through those protocols. For example to access the Big Buck Bunny video the ideal way to access it is like: `ipfs://bafybeigagd5nmnn2iys2f3doro7ydrevyr2mzarwidgadawmamiteydbzi`
 
 ## IPFS Gateways
 

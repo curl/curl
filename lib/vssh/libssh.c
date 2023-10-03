@@ -2660,7 +2660,7 @@ static void sftp_quote(struct Curl_easy *data)
   /* if a command starts with an asterisk, which a legal SFTP command never
      can, the command will be allowed to fail without it causing any
      aborts or cancels etc. It will cause libcurl to act as if the command
-     is successful, whatever the server reponds. */
+     is successful, whatever the server responds. */
 
   if(cmd[0] == '*') {
     cmd++;
@@ -2834,7 +2834,7 @@ static void sftp_quote_stat(struct Curl_easy *data)
   /* if a command starts with an asterisk, which a legal SFTP command never
      can, the command will be allowed to fail without it causing any
      aborts or cancels etc. It will cause libcurl to act as if the command
-     is successful, whatever the server reponds. */
+     is successful, whatever the server responds. */
 
   if(cmd[0] == '*') {
     cmd++;

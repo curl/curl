@@ -728,7 +728,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
   }
 #endif
 
-  /* allocate memory for the re-usable credential handle */
+  /* allocate memory for the reusable credential handle */
   backend->cred = (struct Curl_schannel_cred *)
     calloc(1, sizeof(struct Curl_schannel_cred));
   if(!backend->cred) {
@@ -1128,7 +1128,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   backend->cred = NULL;
 
-  /* check for an existing re-usable credential handle */
+  /* check for an existing reusable credential handle */
   if(ssl_config->primary.sessionid) {
     Curl_ssl_sessionid_lock(data);
     if(!Curl_ssl_getsessionid(cf, data, (void **)&old_cred, NULL)) {

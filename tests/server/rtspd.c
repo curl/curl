@@ -1288,7 +1288,7 @@ int main(int argc, char *argv[])
     }
 
     /*
-    ** As soon as this server acepts a connection from the test harness it
+    ** As soon as this server accepts a connection from the test harness it
     ** must set the server logs advisor read lock to indicate that server
     ** logs should not be read until this lock is removed by this server.
     */

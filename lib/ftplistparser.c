@@ -379,7 +379,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
     /* scenario:
      * 1. call => OK..
      * 2. call => OUT_OF_MEMORY (or other error)
-     * 3. (last) call => is skipped RIGHT HERE and the error is hadled later
+     * 3. (last) call => is skipped RIGHT HERE and the error is handled later
      *    in wc_statemach()
      */
     goto fail;

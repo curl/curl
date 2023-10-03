@@ -118,7 +118,7 @@ int main(void)
       /* set the private key (file or ID in engine) */
       curl_easy_setopt(curl, CURLOPT_SSLKEY, pKeyName);
 
-      /* set the file with the certs vaildating the server */
+      /* set the file with the certs validating the server */
       curl_easy_setopt(curl, CURLOPT_CAINFO, pCACertFile);
 
       /* disconnect if we cannot validate server's cert */
