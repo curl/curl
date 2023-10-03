@@ -748,14 +748,8 @@ if(NOT CURL_DISABLE_LDAP)
     endif()
   endif()
 
-  option(CURL_USE_OPENLDAP "Use OpenLDAP code." OFF)
-  mark_as_advanced(CURL_USE_OPENLDAP)
   set(CMAKE_LDAP_LIB "ldap" CACHE STRING "Name or full path to ldap library")
   set(CMAKE_LBER_LIB "lber" CACHE STRING "Name or full path to lber library")
-
-  if(CURL_USE_OPENLDAP AND USE_WIN32_LDAP)
-    message(FATAL_ERROR "Cannot use USE_WIN32_LDAP and CURL_USE_OPENLDAP at the same time")
-  endif()
 
   # Now that we know, we're not using windows LDAP...
   if(NOT USE_WIN32_LDAP)
@@ -781,9 +775,6 @@ if(NOT CURL_DISABLE_LDAP)
       set(CURL_DISABLE_LDAP ON CACHE BOOL "" FORCE)
       set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES_BAK}) #LDAP includes won't be used
     else()
-      if(CURL_USE_OPENLDAP)
-        set(USE_OPENLDAP ON)
-      endif()
       if(CMAKE_LDAP_INCLUDE_DIR)
         include_directories(${CMAKE_LDAP_INCLUDE_DIR})
       endif()
@@ -824,11 +815,15 @@ if(NOT CURL_DISABLE_LDAP)
       endif()
 
       check_function_exists(ldap_url_parse HAVE_LDAP_URL_PARSE)
+      check_function_exists(ldap_init_fd HAVE_LDAP_INIT_FD)
 
       unset(CMAKE_REQUIRED_LIBRARIES)
 
       check_include_file("ldap_ssl.h" HAVE_LDAP_SSL_H)
 
+      if(HAVE_LDAP_INIT_FD)
+        set(USE_OPENLDAP ON)
+      endif()
       if(NOT CURL_DISABLE_LDAPS)
         set(HAVE_LDAP_SSL ON)
       endif()
