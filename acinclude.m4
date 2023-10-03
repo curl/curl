@@ -421,7 +421,7 @@ AC_DEFUN([CURL_CHECK_HEADER_LDAP], [
 #endif
 #include <ldap.h>
       ]],[[
-        LDAP *ldp = ldap_init("dummy", LDAP_PORT);
+        LDAP *ldp = ldap_init("0.0.0.0", LDAP_PORT);
         int res = ldap_unbind(ldp);
       ]])
     ],[
@@ -470,7 +470,7 @@ AC_DEFUN([CURL_CHECK_HEADER_LDAP_SSL], [
 #endif
 #include <ldap_ssl.h>
       ]],[[
-        LDAP *ldp = ldapssl_init("dummy", LDAPS_PORT, 1);
+        LDAP *ldp = ldapssl_init("0.0.0.0", LDAPS_PORT, 1);
       ]])
     ],[
       curl_cv_header_ldap_ssl_h="yes"
@@ -547,7 +547,7 @@ AC_DEFUN([CURL_CHECK_LIBS_WINLDAP], [
         ]],[[
           BERVAL *bvp = NULL;
           BerElement *bep = ber_init(bvp);
-          LDAP *ldp = ldap_init("dummy", LDAP_PORT);
+          LDAP *ldp = ldap_init("0.0.0.0", LDAP_PORT);
           ULONG res = ldap_unbind(ldp);
           ber_free(bep, 1);
         ]])
@@ -657,7 +657,7 @@ AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
         ]],[[
           BerValue *bvp = NULL;
           BerElement *bep = ber_init(bvp);
-          LDAP *ldp = ldap_init("dummy", LDAP_PORT);
+          LDAP *ldp = ldap_init("0.0.0.0", LDAP_PORT);
           int res = ldap_unbind(ldp);
           ber_free(bep, 1);
         ]])
