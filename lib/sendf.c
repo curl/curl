@@ -467,7 +467,8 @@ void Curl_client_cleanup(struct Curl_easy *data)
     Curl_dyn_free(&data->state.tempwrite[i].b);
   }
   data->state.tempcount = 0;
-
+  data->req.bytecount = 0;
+  data->req.headerline = 0;
 }
 
 /* Write data using an unencoding writer stack. "nbytes" is not
@@ -569,7 +570,7 @@ static CURLcode cw_download_write(struct Curl_easy *data,
       excess_data = buf + nbytes;
       if(!data->req.ignorebody) {
         infof(data,
-              "Excess found in a read:"
+              "Excess found writing body:"
               " excess = %zu"
               ", size = %" CURL_FORMAT_CURL_OFF_T
               ", maxdownload = %" CURL_FORMAT_CURL_OFF_T
