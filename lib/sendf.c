@@ -623,8 +623,10 @@ static CURLcode cw_download_write(struct Curl_easy *data,
                                             &consumed, &readmore);
     if(result)
       return result;
-    if(readmore)
+    if(readmore) {
+      data->req.download_done = FALSE;
       data->req.keepon |= KEEP_RECV; /* we're not done reading */
+    }
   }
 
   return CURLE_OK;

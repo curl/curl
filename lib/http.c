@@ -4005,7 +4005,6 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
   char *end_ptr;
 
   /* header line within buffer loop */
-  *stop_reading = FALSE;
   *pconsumed = 0;
   do {
     size_t line_length;
