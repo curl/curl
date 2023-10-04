@@ -661,7 +661,7 @@ CURLcode Curl_ossl_certchain(struct Curl_easy *data, SSL *ssl)
 #define BIO_set_shutdown(x,v)      ((x)->shutdown=(v))
 #endif /* USE_PRE_1_1_API */
 
-static int bio_cf_create(BIO *bio)
+static int ossl_bio_cf_create(BIO *bio)
 {
   BIO_set_shutdown(bio, 1);
   BIO_set_init(bio, 1);
@@ -672,14 +672,14 @@ static int bio_cf_create(BIO *bio)
   return 1;
 }
 
-static int bio_cf_destroy(BIO *bio)
+static int ossl_bio_cf_destroy(BIO *bio)
 {
   if(!bio)
     return 0;
   return 1;
 }
 
-static long bio_cf_ctrl(BIO *bio, int cmd, long num, void *ptr)
+static long ossl_bio_cf_ctrl(BIO *bio, int cmd, long num, void *ptr)
 {
   struct Curl_cfilter *cf = BIO_get_data(bio);
   long ret = 1;
@@ -713,7 +713,7 @@ static long bio_cf_ctrl(BIO *bio, int cmd, long num, void *ptr)
   return ret;
 }
 
-static int bio_cf_out_write(BIO *bio, const char *buf, int blen)
+static int ossl_bio_cf_out_write(BIO *bio, const char *buf, int blen)
 {
   struct Curl_cfilter *cf = BIO_get_data(bio);
   struct ssl_connect_data *connssl = cf->ctx;
@@ -725,7 +725,7 @@ static int bio_cf_out_write(BIO *bio, const char *buf, int blen)
 
   DEBUGASSERT(data);
   nwritten = Curl_conn_cf_send(cf->next, data, buf, blen, &result);
-  CURL_TRC_CF(data, cf, "bio_cf_out_write(len=%d) -> %d, err=%d",
+  CURL_TRC_CF(data, cf, "ossl_bio_cf_out_write(len=%d) -> %d, err=%d",
               blen, (int)nwritten, result);
   BIO_clear_retry_flags(bio);
   backend->io_result = result;
@@ -736,7 +736,7 @@ static int bio_cf_out_write(BIO *bio, const char *buf, int blen)
   return (int)nwritten;
 }
 
-static int bio_cf_in_read(BIO *bio, char *buf, int blen)
+static int ossl_bio_cf_in_read(BIO *bio, char *buf, int blen)
 {
   struct Curl_cfilter *cf = BIO_get_data(bio);
   struct ssl_connect_data *connssl = cf->ctx;
@@ -752,7 +752,7 @@ static int bio_cf_in_read(BIO *bio, char *buf, int blen)
     return 0;
 
   nread = Curl_conn_cf_recv(cf->next, data, buf, blen, &result);
-  CURL_TRC_CF(data, cf, "bio_cf_in_read(len=%d) -> %d, err=%d",
+  CURL_TRC_CF(data, cf, "ossl_bio_cf_in_read(len=%d) -> %d, err=%d",
               blen, (int)nread, result);
   BIO_clear_retry_flags(bio);
   backend->io_result = result;
@@ -777,42 +777,42 @@ static int bio_cf_in_read(BIO *bio, char *buf, int blen)
 
 #if USE_PRE_1_1_API
 
-static BIO_METHOD bio_cf_meth_1_0 = {
+static BIO_METHOD ossl_bio_cf_meth_1_0 = {
   BIO_TYPE_MEM,
   "OpenSSL CF BIO",
-  bio_cf_out_write,
-  bio_cf_in_read,
+  ossl_bio_cf_out_write,
+  ossl_bio_cf_in_read,
   NULL,                    /* puts is never called */
   NULL,                    /* gets is never called */
-  bio_cf_ctrl,
-  bio_cf_create,
-  bio_cf_destroy,
+  ossl_bio_cf_ctrl,
+  ossl_bio_cf_create,
+  ossl_bio_cf_destroy,
   NULL
 };
 
-static BIO_METHOD *bio_cf_method_create(void)
+static BIO_METHOD *ossl_bio_cf_method_create(void)
 {
-  return &bio_cf_meth_1_0;
+  return &ossl_bio_cf_meth_1_0;
 }
 
-#define bio_cf_method_free(m) Curl_nop_stmt
+#define ossl_bio_cf_method_free(m) Curl_nop_stmt
 
 #else
 
-static BIO_METHOD *bio_cf_method_create(void)
+static BIO_METHOD *ossl_bio_cf_method_create(void)
 {
   BIO_METHOD *m = BIO_meth_new(BIO_TYPE_MEM, "OpenSSL CF BIO");
   if(m) {
-    BIO_meth_set_write(m, &bio_cf_out_write);
-    BIO_meth_set_read(m, &bio_cf_in_read);
-    BIO_meth_set_ctrl(m, &bio_cf_ctrl);
-    BIO_meth_set_create(m, &bio_cf_create);
-    BIO_meth_set_destroy(m, &bio_cf_destroy);
+    BIO_meth_set_write(m, &ossl_bio_cf_out_write);
+    BIO_meth_set_read(m, &ossl_bio_cf_in_read);
+    BIO_meth_set_ctrl(m, &ossl_bio_cf_ctrl);
+    BIO_meth_set_create(m, &ossl_bio_cf_create);
+    BIO_meth_set_destroy(m, &ossl_bio_cf_destroy);
   }
   return m;
 }
 
-static void bio_cf_method_free(BIO_METHOD *m)
+static void ossl_bio_cf_method_free(BIO_METHOD *m)
 {
   if(m)
     BIO_meth_free(m);
@@ -1927,7 +1927,7 @@ static void ossl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     backend->x509_store_setup = FALSE;
   }
   if(backend->bio_method) {
-    bio_cf_method_free(backend->bio_method);
+    ossl_bio_cf_method_free(backend->bio_method);
     backend->bio_method = NULL;
   }
 }
@@ -3817,7 +3817,7 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
     Curl_ssl_sessionid_unlock(data);
   }
 
-  backend->bio_method = bio_cf_method_create();
+  backend->bio_method = ossl_bio_cf_method_create();
   if(!backend->bio_method)
     return CURLE_OUT_OF_MEMORY;
   bio = BIO_new(backend->bio_method);
