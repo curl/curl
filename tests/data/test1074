@@ -36,10 +36,10 @@ wait 1
 <server>
 http
 </server>
- <name>
+<name>
 HTTP downgrade to HTTP/1.0 on second request
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER http://%HOSTIP:%HTTPPORT/wantmore/%TESTNUMBER0001
 </command>
 </client>

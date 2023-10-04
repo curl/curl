@@ -32,10 +32,10 @@ https
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 simple HTTPS GET with multi interface
- </name>
- <command>
+</name>
+<command>
 https://%HOSTIP:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>

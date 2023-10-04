@@ -29,10 +29,10 @@ body
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP custom request doesn't check continuation data
- </name>
- <command>
+</name>
+<command>
  imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/ -u user:secret -X 'FETCH 123 BODY[1]'
 </command>
 </client>

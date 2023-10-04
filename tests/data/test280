@@ -37,10 +37,10 @@ COUNT USER 1
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP --ftp-alternative-to-user on USER failure
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER/ --ftp-alternative-to-user "USER replacement"
 </command>
 </client>

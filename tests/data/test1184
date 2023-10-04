@@ -45,10 +45,10 @@ second
 http
 http-proxy
 </server>
- <name>
+<name>
 HTTP 1.1 CONNECT with redirect and set -H user-agent
- </name>
- <command>
+</name>
+<command>
 -x %HOSTIP:%PROXYPORT -p http://%HOSTIP.%TESTNUMBER:%HTTPPORT/we/want/that/page/%TESTNUMBER -L -H "User-Agent: %TESTNUMBER-agent"
 </command>
 <features>

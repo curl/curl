@@ -41,10 +41,10 @@ body
 <server>
 http
 </server>
- <name>
+<name>
 HTTP PUT with 303 redirect
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/blah/%TESTNUMBER -L -T %LOGDIR/upload%TESTNUMBER.txt
 </command>
 <file name="%LOGDIR/upload%TESTNUMBER.txt">

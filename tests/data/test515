@@ -28,10 +28,10 @@ http
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 make a POSTFIELDS set to NULL with POSTFIELDSIZE set to zero
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

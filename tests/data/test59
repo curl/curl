@@ -23,10 +23,10 @@ hej
 <server>
 http
 </server>
- <name>
+<name>
 HTTP URL with slash but with "parameter"
- </name>
- <command>
+</name>
+<command>
 "http://%HOSTIP:%HTTPPORT?mooo/%TESTNUMBER"
 </command>
 </client>

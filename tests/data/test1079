@@ -45,10 +45,10 @@ http
 !SSPI
 crypto
 </features>
- <name>
+<name>
 HTTP retry after closed connection and empty response
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --digest
 </command>
 </client>

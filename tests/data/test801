@@ -24,10 +24,10 @@ body
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP FETCH message by MAILINDEX and SECTION
- </name>
- <command>
+</name>
+<command>
 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=123/;SECTION=1' -u user:secret
 </command>
 </client>

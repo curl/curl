@@ -55,10 +55,10 @@ If this is received, the location following worked
 <server>
 http
 </server>
- <name>
+<name>
 HTTP cookie expiry date at Jan 1 00:00:00 GMT 1970
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -L -x %HOSTIP:%HTTPPORT -c %LOGDIR/cookies%TESTNUMBER.jar
 </command>
 <features>

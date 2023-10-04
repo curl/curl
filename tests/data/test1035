@@ -32,10 +32,10 @@ LC_CTYPE=en_US.UTF-8
 <precheck>
 perl -MI18N::Langinfo=langinfo,CODESET -e 'die "Needs a UTF-8 locale" if (lc(langinfo(CODESET())) ne "utf-8");'
 </precheck>
- <name>
+<name>
 HTTP over proxy with too long IDN host name
- </name>
- <command>
+</name>
+<command>
 http://too-long-IDN-name-cürl-rüles-la-la-la-dee-da-flooby-nooby.local/page/%TESTNUMBER -x %HOSTIP:%NOLISTENPORT
 </command>
 </client>

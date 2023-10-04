@@ -15,8 +15,8 @@ none
 <features>
 unittest
 </features>
- <name>
+<name>
 unit tests for url.c
- </name>
+</name>
 </client>
 </testcase>

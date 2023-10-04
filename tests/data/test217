@@ -28,10 +28,10 @@ And you should ignore this data.
 <server>
 http
 </server>
- <name>
+<name>
 HTTP proxy CONNECT to proxy returning 405
- </name>
- <command>
+</name>
+<command>
 http://test.remote.example.com.%TESTNUMBER:%HTTPPORT/path/%TESTNUMBER0002 --proxy http://%HOSTIP:%HTTPPORT --proxytunnel -w "%{http_code} %{http_connect}\n"
 </command>
 <features>

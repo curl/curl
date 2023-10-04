@@ -19,10 +19,10 @@ dict
 <features>
 dict
 </features>
- <name>
+<name>
 Basic DICT lookup
- </name>
- <command>
+</name>
+<command>
 dict://%HOSTIP:%DICTPORT/d:basic
 </command>
 </client>

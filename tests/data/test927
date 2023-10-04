@@ -23,10 +23,10 @@ CUSTOMREQUEST
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP mailing list EXPN (CUSTOMREQUEST)
- </name>
- <command>
+</name>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt Friends -X EXPN
 </command>
 </client>

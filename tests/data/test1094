@@ -30,10 +30,10 @@ returned
 <server>
 tftp
 </server>
- <name>
+<name>
 TFTP retrieve with mode=netascii
- </name>
- <command>
+</name>
+<command>
 "tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER;mode=netascii"
 </command>
 </client>

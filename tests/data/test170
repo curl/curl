@@ -24,10 +24,10 @@ SSL
 !SSPI
 proxy
 </features>
- <name>
+<name>
 HTTP POST with --proxy-ntlm and no SSL with no response
- </name>
- <command>
+</name>
+<command>
 http://a.galaxy.far.far.away/%TESTNUMBER --proxy http://%HOSTIP:%HTTPPORT --proxy-user foo:bar --proxy-ntlm -F "dummy=value"
 </command>
 </client>

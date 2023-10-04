@@ -34,10 +34,10 @@ connection-monitor
 <server>
 http
 </server>
- <name>
+<name>
 ANYAUTH connection reuse of non-authed connection
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --next http://%HOSTIP:%HTTPPORT/%TESTNUMBER --anyauth -u foo:moo
 </command>
 </client>

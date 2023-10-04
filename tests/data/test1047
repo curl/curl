@@ -34,10 +34,10 @@ dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP dir list PASV with localhost --interface
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/ --interface %CLIENTIP
 </command>
 </client>

@@ -16,10 +16,10 @@ STOR
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP upload with --crlf
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T %LOGDIR/upload%TESTNUMBER --crlf
 </command>
 <file name="%LOGDIR/upload%TESTNUMBER">

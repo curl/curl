@@ -23,9 +23,9 @@ Content-Length: 0
 <server>
 http
 </server>
- <name>
+<name>
 CURLINFO_EFFECTIVE_URL with non-scheme URL
- </name>
+</name>
 <tool>
 lib%TESTNUMBER
 </tool>

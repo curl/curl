@@ -24,10 +24,10 @@ NODATACONN425
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP PORT and 425 on download
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -P -
 </command>
 

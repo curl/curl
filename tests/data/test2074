@@ -32,10 +32,10 @@ Funny-head: yesyes
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --oauth2-bearer mF_9.B5f-4.1JqM
 </command>
 </client>

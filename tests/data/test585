@@ -46,10 +46,10 @@ http
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 socket open/close callbacks
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

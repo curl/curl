@@ -25,10 +25,10 @@ SSL
 <server>
 ftps
 </server>
- <name>
+<name>
 Get two FTPS files from the same remote dir: no second CWD
- </name>
- <command>
+</name>
+<command>
 -k --ftp-ssl-control ftps://%HOSTIP:%FTPSPORT/a/path/%TESTNUMBER ftps://%HOSTIP:%FTPSPORT/a/path/%TESTNUMBER
 </command>
 <stdout>

@@ -28,9 +28,9 @@ Content-Type: text/html
 <server>
 http
 </server>
- <name>
+<name>
 HTTP PUT with resume from end of already-uploaded file
- </name>
+</name>
 <file name="%LOGDIR/test%TESTNUMBER.txt">
 012345678
 012345678
@@ -43,7 +43,7 @@ HTTP PUT with resume from end of already-uploaded file
 012345678
 012345678
 </file>
- <command>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T%LOGDIR/test%TESTNUMBER.txt -C -
 </command>
 </client>

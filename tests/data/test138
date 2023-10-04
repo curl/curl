@@ -24,10 +24,10 @@ REPLY SIZE 500 command not understood
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP download without size in RETR string and no SIZE command
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/blalbla/lululul/%TESTNUMBER
 </command>
 </client>

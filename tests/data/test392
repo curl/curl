@@ -27,14 +27,14 @@ boo
 <server>
 http
 </server>
- <name>
+<name>
 HTTP secure cookies over localhost
- </name>
+</name>
 
 <setenv>
 TZ=GMT
 </setenv>
- <command>
+<command>
 http://localhost:%HTTPPORT/%TESTNUMBER -b none http://localhost:%HTTPPORT/%TESTNUMBER
 </command>
 <precheck>

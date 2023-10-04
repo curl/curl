@@ -21,10 +21,10 @@ bla bla bla
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP CWD with --ftp-method multicwd
- </name>
- <command>
+</name>
+<command>
 --ftp-method multicwd ftp://%HOSTIP:%FTPPORT/first/second/third/%TESTNUMBER
 </command>
 </client>

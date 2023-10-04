@@ -22,9 +22,9 @@ Connection: close
 <server>
 http
 </server>
- <name>
+<name>
 --write-out with %{onerror} and %{urlnum} to stderr
- </name>
+</name>
 <command>
 -f -s -w '%{onerror}%{stderr}%{urlnum} says %{exitcode} %{errormsg}\n' http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER
 </command>

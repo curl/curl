@@ -23,10 +23,10 @@ Mime
 <server>
 http
 </server>
- <name>
+<name>
 HTTP multipart formpost with only a 100 reply
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -F name=daniel
 </command>
 </client>

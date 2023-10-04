@@ -11,10 +11,10 @@ FAILURE
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP %0d-code in URL's CWD part
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER%0d
 </command>
 </client>

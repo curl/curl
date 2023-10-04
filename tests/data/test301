@@ -29,10 +29,10 @@ SSL
 <server>
 https
 </server>
- <name>
+<name>
 HTTPS GET with user and password
- </name>
- <command>
+</name>
+<command>
 -k -u fake:user https://%HOSTIP:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>

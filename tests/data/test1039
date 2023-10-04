@@ -19,10 +19,10 @@ Resume
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP PASV upload resume from end of empty file
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T %LOGDIR/upload%TESTNUMBER -C -
 </command>
 <file name="%LOGDIR/upload%TESTNUMBER">

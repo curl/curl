@@ -31,8 +31,8 @@ lib%TESTNUMBER
 </tool>
 <name>
 Pass URL to libcurl with CURLOPT_CURLU
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

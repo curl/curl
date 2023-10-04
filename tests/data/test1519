@@ -32,10 +32,10 @@ http
 lib1518
 </tool>
 
- <name>
+<name>
 Extract Location: with broken absolute URL
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

@@ -36,10 +36,10 @@ proxy
 http
 socks4
 </server>
- <name>
+<name>
 HTTP GET via SOCKS4 proxy
- </name>
- <command>
+</name>
+<command>
 --socks4 %HOSTIP:%SOCKSPORT http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

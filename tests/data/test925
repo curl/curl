@@ -20,10 +20,10 @@ VRFY
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP external VRFY
- </name>
- <command>
+</name>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt user@example.net
 </command>
 </client>

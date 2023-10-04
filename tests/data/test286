@@ -12,10 +12,10 @@ TFTP WRQ
 <server>
 tftp
 </server>
- <name>
+<name>
 TFTP send of boundary case 512 byte file
- </name>
- <command>
+</name>
+<command>
 -T %LOGDIR/test%TESTNUMBER.txt tftp://%HOSTIP:%TFTPPORT//
 </command>
 <file name="%LOGDIR/test%TESTNUMBER.txt">

@@ -23,9 +23,9 @@ SSL
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP STARTTLS pipelined server response
- </name>
+</name>
 <file name="%LOGDIR/test%TESTNUMBER.txt">
 data
     to
@@ -34,7 +34,7 @@ that FTPS
 works
   so does it?
 </file>
- <command>
+<command>
 --ssl --ftp-ssl-control ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt -u user:secret -P %CLIENTIP
 </command>
 </client>

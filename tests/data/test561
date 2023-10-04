@@ -38,11 +38,11 @@ proxy
 <tool>
 lib549
 </tool>
- <name>
+<name>
 FTP RETR with CURLOPT_PROXY_TRANSFER_MODE, ASCII transfer and type=i
- </name>
+</name>
 # first URL then proxy
- <command>
+<command>
 "ftp://www.example.com/moo/%TESTNUMBER;type=i" http://%HOSTIP:%HTTPPORT ascii
 </command>
 </client>

@@ -17,9 +17,9 @@ none
 # the build. We break binary compatibility by changing order. Only add
 # new entries last or bump the SONAME.
 #
- <name>
+<name>
 Verify CURL_EXTERN order
- </name>
+</name>
 
 <command type="perl">
 %SRCDIR/extern-scan.pl %SRCDIR/..

@@ -21,7 +21,7 @@ none
 <name>
 parallel upload missing file
 </name>
- <command>
+<command>
 0 -Z -Tz
 </command>
 </client>

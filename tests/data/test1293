@@ -35,10 +35,10 @@ Mime
 <server>
 http
 </server>
- <name>
+<name>
 Multipart formpost to two URLs, the first failing
- </name>
- <command>
+</name>
+<command>
 http://0 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -F=
 </command>
 </client>

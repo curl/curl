@@ -46,10 +46,10 @@ http-proxy
 http
 proxy
 </features>
- <name>
+<name>
 FTP fetch with --proxy set to http:// and with --connect-to
- </name>
- <command>
+</name>
+<command>
 ftp://ftp.example.com.%TESTNUMBER/%TESTNUMBER --connect-to ::connect.example.com.%TESTNUMBER:%FTPPORT --proxytunnel --proxy http://%HOSTIP:%PROXYPORT
 </command>
 </client>

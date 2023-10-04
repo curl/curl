@@ -32,8 +32,8 @@ http
 
 <name>
 HTTP GET with 100-digit subversion number in response
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

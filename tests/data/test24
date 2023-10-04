@@ -21,10 +21,10 @@ This silly page doesn't reaaaaaly exist so you should not get it.
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET fail silently on HTTP error return
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --fail --silent --show-error
 </command>
 </client>

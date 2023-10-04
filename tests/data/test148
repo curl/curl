@@ -18,10 +18,10 @@ REPLY MKD 550 We will have no such thing
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP with --ftp-create-dirs (failing MKD)
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/attempt/to/get/this/%TESTNUMBER --ftp-create-dirs
 </command>
 </client>

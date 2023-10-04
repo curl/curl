@@ -25,10 +25,10 @@ ftp
 <features>
 ipv6
 </features>
- <name>
+<name>
 Get two FTP files with no remote EPRT support
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/a/path/%TESTNUMBER ftp://%HOSTIP:%FTPPORT/a/path/%TESTNUMBER -P -
 </command>
 <stdout>

@@ -17,10 +17,10 @@ data in file
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP URL with ?-letters in username and password
- </name>
- <command>
+</name>
+<command>
 "ftp://use%3fr:pass%3fword@%HOSTIP:%FTPPORT/%TESTNUMBER"
 </command>
 </client>

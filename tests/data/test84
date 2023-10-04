@@ -27,10 +27,10 @@ contents
 <server>
 http
 </server>
- <name>
+<name>
 HTTP over proxy with site authentication
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/that/page/%TESTNUMBER -x %HOSTIP:%HTTPPORT --user iam:myself
 </command>
 <features>

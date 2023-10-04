@@ -28,10 +28,10 @@ SSL
 <server>
 https
 </server>
- <name>
+<name>
 simple HTTPS GET
- </name>
- <command>
+</name>
+<command>
 -k https://%HOSTIP:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>

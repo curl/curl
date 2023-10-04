@@ -26,9 +26,9 @@ Set-Cookie: secondcookie=present;
 <server>
 http
 </server>
- <name>
+<name>
 CURLOPT_COOKIEFILE then reset then set again
- </name>
+</name>
 <tool>
 lib%TESTNUMBER
 </tool>

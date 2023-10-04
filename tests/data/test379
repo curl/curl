@@ -34,9 +34,9 @@ exists before command runs
 <server>
 http
 </server>
- <name>
+<name>
 --remove-on-error with --no-clobber and an added number
- </name>
+</name>
  <command option="no-output">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o %LOGDIR/save --remove-on-error --no-clobber
 </command>

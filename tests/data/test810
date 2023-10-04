@@ -21,10 +21,10 @@ SEARCH
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP SEARCH for NEW messages
- </name>
- <command>
+</name>
+<command>
 imap://%HOSTIP:%IMAPPORT/%TESTNUMBER?NEW -u user:secret
 </command>
 </client>

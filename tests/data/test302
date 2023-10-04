@@ -29,10 +29,10 @@ proxy
 <server>
 https
 </server>
- <name>
+<name>
 HTTPS GET over HTTP proxy fails
- </name>
- <command>
+</name>
+<command>
 -k -U fake:user -x %HOSTIP:%HTTPPORT https://bad.fakeurl-to.test:%TESTNUMBER/slash/%TESTNUMBER
 </command>
 </client>

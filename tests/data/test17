@@ -22,9 +22,9 @@ This is the proof it works
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with config file on stdin
- </name>
+</name>
  <stdin>
 #
 # Use a silly request without '--':
@@ -36,7 +36,7 @@ request MOOO
 # long option *with* '--':
 --max-time 180
  </stdin>
- <command>
+<command>
 -K - %HOSTIP:%HTTPPORT/that.site.com/%TESTNUMBER
 </command>
 </client>

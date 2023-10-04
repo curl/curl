@@ -27,10 +27,10 @@ body
 <server>
 pop3
 </server>
- <name>
+<name>
 POP3 RETR message
- </name>
- <command>
+</name>
+<command>
 pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 </command>
 </client>

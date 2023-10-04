@@ -25,10 +25,10 @@ Date: Tue, 09 Nov 2010 14:49:00 GMT
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with -d and -G and -I
- </name>
- <command>
+</name>
+<command>
 -d "foo=moo&moo=poo" http://%HOSTIP:%HTTPPORT/%TESTNUMBER -G -I http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

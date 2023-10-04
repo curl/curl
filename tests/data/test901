@@ -16,9 +16,9 @@ SMTP
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP with CRLF-dot-CRLF in data
- </name>
+</name>
 <stdin>
 From: different
 To: another
@@ -31,7 +31,7 @@ To: another
 
 body
 </stdin>
- <command>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -T -
 </command>
 </client>

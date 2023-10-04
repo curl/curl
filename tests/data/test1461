@@ -16,10 +16,10 @@
 <server>
 none
 </server>
- <name>
+<name>
 curl important --help
- </name>
- <command>
+</name>
+<command>
 --help
 </command>
 </client>

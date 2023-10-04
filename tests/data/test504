@@ -28,10 +28,10 @@ proxy
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 simple multi through local proxy without listener
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER %HOSTIP:%NOLISTENPORT
 </command>
 </client>

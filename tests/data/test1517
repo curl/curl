@@ -49,10 +49,10 @@ lib%TESTNUMBER
 ./libtest/lib%TESTNUMBER check
 </precheck>
 
- <name>
+<name>
 HTTP POST, server responds before completed send
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

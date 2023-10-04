@@ -33,10 +33,10 @@ ws
 <server>
 http
 </server>
- <name>
+<name>
 WebSockets upgrade only
- </name>
- <command>
+</name>
+<command>
 ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

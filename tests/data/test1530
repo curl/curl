@@ -15,9 +15,9 @@ http
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 CURLOPT_OPENSOCKETFUNCTION returns bad socket
- </name>
+</name>
 </client>
 
 # it should be detected and an error should be reported

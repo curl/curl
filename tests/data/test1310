@@ -61,9 +61,9 @@ debug
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with NTLM delegation to winbind helper
- </name>
+</name>
  <setenv>
 # we force our own host name, in order to make the test machine independent
 CURL_GETHOSTNAME=curlhost
@@ -78,7 +78,7 @@ CURL_NTLM_LOGDIR=%LOGDIR
 # set the test number
 CURL_NTLM_AUTH_TESTNUM=%TESTNUMBER
  </setenv>
- <command>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:anypasswd --ntlm-wb
 </command>
 <precheck>

@@ -18,9 +18,9 @@ none
 <features>
 http
 </features>
- <name>
+<name>
 HTTP, -O with no slash at all in the URL
- </name>
+</name>
  <command option="no-output">
 %HOSTIP:%NOLISTENPORT -O
 </command>

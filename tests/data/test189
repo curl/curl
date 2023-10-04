@@ -41,10 +41,10 @@ Content-Length: 15
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with resume and redirect (to a page that doesn't resume)
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C 50 -L
 </command>
 </client>

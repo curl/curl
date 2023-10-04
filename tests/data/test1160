@@ -25,10 +25,10 @@ Set-Cookie: ____________ÿ=         ;                                            
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with long funny format cookie
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -c %LOGDIR/cookies%TESTNUMBER.txt
 </command>
 <features>

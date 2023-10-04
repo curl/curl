@@ -30,10 +30,10 @@ socks4
 http
 proxy
 </features>
- <name>
+<name>
 Attempt connect to non-listening HTTP server via SOCKS4 proxy
- </name>
- <command>
+</name>
+<command>
 --socks4 %HOSTIP:%SOCKSPORT http://%HOSTIP:%NOLISTENPORT
 </command>
 </client>

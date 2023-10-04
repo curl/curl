@@ -19,9 +19,9 @@ none
 <features>
 file
 </features>
- <name>
+<name>
 X-Y range on a file:// URL to stdout
- </name>
+</name>
 <command option="no-include">
 -r 1-4 file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt
 </command>

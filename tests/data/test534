@@ -28,10 +28,10 @@ ftp
 <tool>
 lib533
 </tool>
- <name>
+<name>
 FTP RETR twice using multi: non-existing host and non-existing file
- </name>
- <command>
+</name>
+<command>
 ftp://non-existing-host.haxx.se/path/%TESTNUMBER ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER
 </command>
 </client>

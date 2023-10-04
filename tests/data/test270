@@ -26,10 +26,10 @@ PASVBADIP
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP RETR PASV --ftp-skip-pasv-ip
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --ftp-skip-pasv-ip --disable-epsv
 </command>
 </client>

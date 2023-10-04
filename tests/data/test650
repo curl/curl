@@ -45,13 +45,13 @@ http
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 HTTP formpost using form API - with redirect and re-POST
- </name>
+</name>
 <stdin>
  Some data from stdin
 </stdin>
- <command>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/test%TESTNUMBER.filedata
 </command>
 <file name="%LOGDIR/test%TESTNUMBER.filedata">

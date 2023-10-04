@@ -49,10 +49,10 @@ If this is received, the location following worked
 <server>
 http
 </server>
- <name>
+<name>
 HTTP redirect with credentials using # in user and password
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -L -u "catmai#d:#DZaRJYrixKE*gFY"
 </command>
 </client>

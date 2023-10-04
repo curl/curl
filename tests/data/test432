@@ -58,10 +58,10 @@ data = "c"
 <server>
 http
 </server>
- <name>
+<name>
 Use -K with --next and --config from within
- </name>
- <command>
+</name>
+<command>
 -K %LOGDIR/config%TESTNUMBER
 </command>
 </client>

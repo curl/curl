@@ -24,9 +24,9 @@ data blobb
 <server>
 ftp
 </server>
- <name>
+<name>
 Get a file via FTP but 550 after MDTM command
- </name>
+</name>
 <tool>
 lib3027
 </tool>

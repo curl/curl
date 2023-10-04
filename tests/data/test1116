@@ -53,10 +53,10 @@ writedelay: 10
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with chunked trailer without Trailer:
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -D %LOGDIR/heads%TESTNUMBER
 </command>
 </client>

@@ -47,10 +47,10 @@ condition in the TFTP receive code.
 <server>
 tftp
 </server>
- <name>
+<name>
 TFTP retrieve of boundary case 512 byte file
- </name>
- <command>
+</name>
+<command>
 tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER
 </command>
 </client>

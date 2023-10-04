@@ -41,10 +41,10 @@ writedelay: 1000
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with invalid range then another URL
- </name>
- <command>
+</name>
+<command>
 -r 10-22 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER http://%HOSTIP:%HTTPPORT/wantmore/%TESTNUMBER0001
 </command>
 </client>

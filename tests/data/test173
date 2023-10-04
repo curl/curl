@@ -27,10 +27,10 @@ Mime
 <server>
 http
 </server>
- <name>
+<name>
 HTTP RFC1867-formpost a file from stdin with "faked" filename
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F field1=contents1 -F "fileupload=@-;filename=/dev/null;type=text/x-null;format=x-curl"
 </command>
 

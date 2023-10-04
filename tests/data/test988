@@ -26,10 +26,10 @@ body
 <server>
 imaps
 </server>
- <name>
+<name>
 IMAPS FETCH with redundant explicit SSL request
- </name>
- <command>
+</name>
+<command>
 -k --ssl-reqd -u '"user:sec"ret{' 'imaps://%HOSTIP:%IMAPSPORT/%TESTNUMBER/;MAILINDEX=1'
 </command>
 </client>

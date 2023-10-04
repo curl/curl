@@ -23,10 +23,10 @@ LIST
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP LIST mailbox
- </name>
- <command>
+</name>
+<command>
 imap://%HOSTIP:%IMAPPORT/%TESTNUMBER -u user:secret
 </command>
 </client>

@@ -31,10 +31,10 @@ http
 ftp
 proxy
 </features>
- <name>
+<name>
 FTP over HTTP proxy
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%HTTPPORT/we/want/that/page/%TESTNUMBER -x %HOSTIP:%HTTPPORT
 </command>
 </client>

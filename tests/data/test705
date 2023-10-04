@@ -19,10 +19,10 @@ FAILURE
 <server>
 http
 </server>
- <name>
+<name>
 Attempt connect to non-listening SOCKS5 proxy
- </name>
- <command>
+</name>
+<command>
 --socks5 %HOSTIP:%NOLISTENPORT http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 <features>

@@ -23,10 +23,10 @@ bytes
 <server>
 http
 </server>
- <name>
+<name>
 simple [a-d] globbing
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/[a-d]/%TESTNUMBER
 </command>
 </client>

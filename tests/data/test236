@@ -20,10 +20,10 @@ REPLY SIZE 500 command not understood
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP resume upload but denied access to remote file
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T %LOGDIR/file%TESTNUMBER.txt -C -
 </command>
 <file name="%LOGDIR/file%TESTNUMBER.txt">

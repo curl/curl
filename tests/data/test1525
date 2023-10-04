@@ -45,10 +45,10 @@ http-proxy
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 CURLOPT_PROXYHEADER is ignored CURLHEADER_UNIFIED
- </name>
- <command>
+</name>
+<command>
  http://the.old.moo.%TESTNUMBER:%HTTPPORT/%TESTNUMBER %HOSTIP:%PROXYPORT
 </command>
 <features>

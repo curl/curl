@@ -25,10 +25,10 @@ ftp
 <features>
 ipv6
 </features>
- <name>
+<name>
 FTP download, failed PORT
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -P 1.2.3.4
 </command>
 </client>

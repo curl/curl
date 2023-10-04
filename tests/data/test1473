@@ -28,10 +28,10 @@ Content-Length: 6
 <server>
 http
 </server>
- <name>
+<name>
 first HTTP header starts with white space
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

@@ -24,10 +24,10 @@ Content-Length: 0
 <server>
 http
 </server>
- <name>
+<name>
 --data-urlencode
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --data-urlencode "my name is moo[]" --data-urlencode "y e s=s_i_r" --data-urlencode "v_alue@%LOGDIR/%TESTNUMBER.txt" --data-urlencode @%LOGDIR/%TESTNUMBER.txt
 </command>
 <file name="%LOGDIR/%TESTNUMBER.txt">

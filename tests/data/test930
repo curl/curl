@@ -18,10 +18,10 @@ CUSTOMREQUEST
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP RSET (CUSTOMREQUEST)
- </name>
- <command>
+</name>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER -X RSET -I
 </command>
 </client>

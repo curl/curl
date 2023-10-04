@@ -25,10 +25,10 @@ bing
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with failed proxy auth
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -x %HOSTIP:%HTTPPORT
 </command>
 <features>

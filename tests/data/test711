@@ -32,10 +32,10 @@ socks5
 <setenv>
 all_proxy=socks5://%HOSTIP:%SOCKSPORT
 </setenv>
- <name>
+<name>
 FTP fetch with all_proxy set to socks5
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>

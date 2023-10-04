@@ -24,10 +24,10 @@ PUT received fine. Thank you very much
 <server>
 http
 </server>
- <name>
+<name>
 HTTP PUT with --anyauth (when the server requires none)
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T %LOGDIR/put%TESTNUMBER -u testuser:testpass --anyauth
 </command>
 <file name="%LOGDIR/put%TESTNUMBER">

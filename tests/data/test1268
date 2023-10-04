@@ -19,10 +19,10 @@ none
 <features>
 unix-sockets
 </features>
- <name>
+<name>
 file name argument looks like a flag
- </name>
- <command>
+</name>
+<command>
 --stderr %LOGDIR/moo%TESTNUMBER --unix-socket -k hej://moo
 </command>
 </client>

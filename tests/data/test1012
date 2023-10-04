@@ -45,10 +45,10 @@ body
 <server>
 http
 </server>
- <name>
+<name>
 HTTP POST with 301 redirect and --post301
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/blah/%TESTNUMBER -L -d "moo" --post301
 </command>
 </client>

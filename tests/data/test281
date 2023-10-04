@@ -24,10 +24,10 @@ Server: test-server/fake
 <server>
 http
 </server>
- <name>
+<name>
 HTTP PUT from file with 100 + 401 responses and -f without auth given
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -f -T %LOGDIR/test%TESTNUMBER.txt
 </command>
 <file name="%LOGDIR/test%TESTNUMBER.txt">

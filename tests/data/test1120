@@ -21,10 +21,10 @@ REPLY CWD 421 Timeout!
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP with 421 timeout response
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/a/path/%TESTNUMBER
 </command>
 </client>

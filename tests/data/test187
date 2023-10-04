@@ -50,10 +50,10 @@ If this is received, the location following worked
 <server>
 http
 </server>
- <name>
+<name>
 HTTP redirect with bad host name separation and slash in parameters
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT?oh=what-weird=test/%TESTNUMBER -L
 </command>
 </client>

@@ -44,10 +44,10 @@ Content-range: bytes 12-15/3781
 <server>
 http
 </server>
- <name>
+<name>
 HTTP range with multiple ranges
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -r 0-10,12-15
 </command>
 </client>

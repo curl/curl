@@ -30,10 +30,10 @@ http
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 send HTTP POST using read callback
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

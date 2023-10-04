@@ -18,10 +18,10 @@ none
 <features>
 http
 </features>
- <name>
+<name>
 HTTP URL with rubbish after port number
- </name>
- <command>
+</name>
+<command>
 -g "http://[%HOSTIP]:%NOLISTENPORT:80/we/want/%TESTNUMBER" "http://%HOSTIP:%NOLISTENPORT:80/we/want/%TESTNUMBER" "http://user@example.com:80@localhost"
 </command>
 </client>

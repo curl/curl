@@ -19,10 +19,10 @@ CUSTOMREQUEST
 <server>
 pop3
 </server>
- <name>
+<name>
 POP3 STAT (CUSTOMREQUEST)
- </name>
- <command>
+</name>
+<command>
 pop3://%HOSTIP:%POP3PORT -u user:secret -X STAT -I
 </command>
 </client>

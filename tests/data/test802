@@ -25,10 +25,10 @@ body
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP SELECT UIDVALIDITY Success
- </name>
- <command>
+</name>
+<command>
 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER;UIDVALIDITY=3857529045/;MAILINDEX=123/;SECTION=TEXT' -u user:secret
 </command>
 </client>

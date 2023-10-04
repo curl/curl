@@ -20,10 +20,10 @@ none
 <features>
 file
 </features>
- <name>
+<name>
 curl file category --help
- </name>
- <command>
+</name>
+<command>
 --help file
 </command>
 </client>

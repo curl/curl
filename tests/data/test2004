@@ -26,9 +26,9 @@ for tftp test
 tftp
 sftp
 </server>
- <name>
+<name>
 TFTP RRQ followed by SFTP retrieval followed by FILE followed by SCP retrieval then again in reverse order
- </name>
+</name>
 <command option="no-include">
 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/test%TESTNUMBER.txt file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt scp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/test%TESTNUMBER.txt file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/test%TESTNUMBER.txt tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER --insecure
 </command>

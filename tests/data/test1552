@@ -31,14 +31,14 @@ body
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP multi transfer error without curl_multi_remove_handle
- </name>
+</name>
 # tool is what to use instead of 'curl'
 <tool>
 lib%TESTNUMBER
 </tool>
- <command>
+<command>
 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1'
 </command>
 </client>

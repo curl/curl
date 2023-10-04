@@ -14,9 +14,9 @@ documentation
 none
 </server>
 
- <name>
+<name>
 Man page syntax checks
- </name>
+</name>
 
 <command type="perl">
 %SRCDIR/manpage-syntax.pl %SRCDIR/../docs/libcurl/symbols-in-versions %SRCDIR/../docs/*.1  %SRCDIR/../docs/libcurl/*.3 %SRCDIR/../docs/libcurl/opts/*.3

@@ -48,10 +48,10 @@ http-proxy
 http
 proxy
 </features>
- <name>
+<name>
 IMAP FETCH tunneled through HTTP proxy
- </name>
- <command>
+</name>
+<command>
 'imap://imap.%TESTNUMBER:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user:secret -p -x %HOSTIP:%PROXYPORT
 </command>
 </client>

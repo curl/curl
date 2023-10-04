@@ -55,10 +55,10 @@ http
 !SSPI
 crypto
 </features>
- <name>
+<name>
 HTTP with RFC7616 Digest authorization with bad password, SHA-512-256 and userhash=false
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:test2pass --digest
 </command>
 </client>

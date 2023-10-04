@@ -16,8 +16,8 @@ none
 unittest
 DoH
 </features>
- <name>
+<name>
 DOH
- </name>
+</name>
 </client>
 </testcase>

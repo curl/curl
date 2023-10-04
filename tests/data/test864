@@ -33,10 +33,10 @@ pop3
 <features>
 crypto
 </features>
- <name>
+<name>
 POP3 APOP authentication
- </name>
- <command>
+</name>
+<command>
 pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 </command>
 </client>

@@ -12,10 +12,10 @@ TFTP WRQ
 <server>
 tftp
 </server>
- <name>
+<name>
 TFTP send without TFTP options requests
- </name>
- <command>
+</name>
+<command>
 -T %LOGDIR/test%TESTNUMBER.txt tftp://%HOSTIP:%TFTPPORT// --tftp-no-options
 </command>
 <file name="%LOGDIR/test%TESTNUMBER.txt">

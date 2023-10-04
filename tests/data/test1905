@@ -26,9 +26,9 @@ Set-Cookie: secondcookie=present;
 <server>
 http
 </server>
- <name>
+<name>
 CURLOPT_COOKIELIST set to "FLUSH" of a shared cookie object
- </name>
+</name>
 <tool>
 lib%TESTNUMBER
 </tool>

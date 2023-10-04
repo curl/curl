@@ -16,10 +16,10 @@ FAILURE
 <server>
 http
 </server>
- <name>
+<name>
 unsupported protocol:// URL
- </name>
- <command>
+</name>
+<command>
 htfp://%HOSTIP:%HTTPPORT/none.htfml
 </command>
 </client>

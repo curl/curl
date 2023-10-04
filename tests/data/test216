@@ -14,10 +14,10 @@ FTP
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP upload two files to the same dir
- </name>
- <command>
+</name>
+<command>
 -T %LOGDIR/upload.%TESTNUMBER ftp://%HOSTIP:%FTPPORT/a/path/%TESTNUMBER/ -T %LOGDIR/upload.%TESTNUMBER ftp://%HOSTIP:%FTPPORT/a/path/%TESTNUMBER/%2e%2eanotherup.%TESTNUMBER
 </command>
 <file name="%LOGDIR/upload.%TESTNUMBER">

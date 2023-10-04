@@ -19,9 +19,9 @@
 <server>
 http
 </server>
- <name>
+<name>
 --connect-to with IPv6 address w/o IPv6 support!
- </name>
+</name>
 <command>
 --connect-to localhost:80:[::1]:80 localhost
 </command>

@@ -19,9 +19,9 @@ data blobb
 <server>
 ftp
 </server>
- <name>
+<name>
 Get two FTP files from the same remote dir: no second CWD
- </name>
+</name>
 <command option="no-include">
 ftp://%HOSTIP:%FTPPORT/a/path/%TESTNUMBER ftp://%HOSTIP:%FTPPORT/a/path/%TESTNUMBER
 </command>

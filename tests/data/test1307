@@ -17,8 +17,8 @@ none
 unittest
 ftp
 </features>
- <name>
+<name>
 internal Curl_fnmatch() testing
- </name>
+</name>
 </client>
 </testcase>

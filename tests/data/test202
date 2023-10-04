@@ -16,9 +16,9 @@ FILE
 <server>
 file
 </server>
- <name>
+<name>
 two file:// URLs to stdout
- </name>
+</name>
 <command option="no-include">
 file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt FILE://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt
 </command>

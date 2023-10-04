@@ -17,10 +17,10 @@ file
 <precheck>
 perl %SRCDIR/libtest/test613.pl prepare %PWD/%LOGDIR/test%TESTNUMBER.dir
 </precheck>
- <name>
+<name>
 file:// with --remote-time
- </name>
- <command>
+</name>
+<command>
 file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.dir/plainfile.txt --remote-time
 </command>
 <postcheck>

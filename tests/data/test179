@@ -27,10 +27,10 @@ This server says moo
 <server>
 http
 </server>
- <name>
+<name>
 HTTP using proxy and cookies with path checks
- </name>
- <command>
+</name>
+<command>
 http://supertrooper.fake/c/%TESTNUMBER -b %LOGDIR/injar%TESTNUMBER -x %HOSTIP:%HTTPPORT
 </command>
 <file name="%LOGDIR/injar%TESTNUMBER">

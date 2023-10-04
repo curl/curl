@@ -26,10 +26,10 @@ Connection: close
 <server>
 http
 </server>
- <name>
+<name>
 netrc with multiple logins - pick second
- </name>
- <command>
+</name>
+<command>
 --netrc-optional --netrc-file %LOGDIR/netrc%TESTNUMBER http://user2@%HOSTIP:%HTTPPORT/
 </command>
 <file name="%LOGDIR/netrc%TESTNUMBER" >

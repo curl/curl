@@ -26,9 +26,9 @@ REPLY EPSV 500 no such command
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP first type=A then regular URL
- </name>
+</name>
 <tool>
 lib%TESTNUMBER
 </tool>

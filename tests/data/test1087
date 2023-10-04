@@ -74,10 +74,10 @@ contents
 <server>
 http
 </server>
- <name>
+<name>
 HTTP, proxy with --anyauth and Location: to new host
- </name>
- <command>
+</name>
+<command>
 http://first.host.it.is/we/want/that/page/%TESTNUMBER1000 -x %HOSTIP:%HTTPPORT --user iam:myself --location --anyauth
 </command>
 <features>

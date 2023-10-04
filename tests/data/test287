@@ -24,10 +24,10 @@ And you should ignore this data.
 <server>
 http
 </server>
- <name>
+<name>
 HTTP proxy CONNECT with custom User-Agent header
- </name>
- <command>
+</name>
+<command>
 http://test.remote.example.com.%TESTNUMBER:%HTTPPORT/path/%TESTNUMBER -H "User-Agent: looser/2015" --proxy http://%HOSTIP:%HTTPPORT --proxytunnel --proxy-header "User-Agent: looser/2007"
 </command>
 <features>

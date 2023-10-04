@@ -22,10 +22,10 @@ blablabla
 <server>
 http
 </server>
- <name>
+<name>
 simple HTTP PUT from file
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt
 </command>
 <file name="%LOGDIR/test%TESTNUMBER.txt">

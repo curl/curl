@@ -45,9 +45,9 @@ line 1
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET chunked data in raw mode
- </name>
+</name>
  <command option="no-include">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --raw
  </command>

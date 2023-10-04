@@ -20,11 +20,11 @@ ftp
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 FTP upload with target URL ending with slash
- </name>
+</name>
 # first URL then proxy
- <command>
+<command>
 ftp://%HOSTIP:%FTPPORT/path/to/
 </command>
 </client>

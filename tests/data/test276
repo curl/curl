@@ -49,10 +49,10 @@ If this is received, the location following worked
 <server>
 http
 </server>
- <name>
+<name>
 HTTP Location: following with multiple question marks in URLs
- </name>
- <command>
+</name>
+<command>
 "http://%HOSTIP:%HTTPPORT/want?uri=http://anything/%TESTNUMBER?secondq/%TESTNUMBER" -L
 </command>
 </client>

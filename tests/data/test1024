@@ -71,10 +71,10 @@ If this is received, the location following worked
 <server>
 http
 </server>
- <name>
+<name>
 HTTP Location: following with cookies
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -L -c %LOGDIR/jar%TESTNUMBER
 </command>
 <features>

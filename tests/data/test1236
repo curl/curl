@@ -14,11 +14,11 @@ FAILURE
 <server>
 none
 </server>
- <name>
+<name>
 [] globbing overflowing the range counter
- </name>
+</name>
 # 2^62 == 4611686018427387904
- <command>
+<command>
 "%HOSTIP:%NOLISTENPORT/1234[0-1]{" "%HOSTIP:%NOLISTENPORT/[1-4611686018427387904][1-4611686018427387904]"
 </command>
 </client>

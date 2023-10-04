@@ -34,16 +34,16 @@ LC_CTYPE=en_US.UTF-8
 <precheck>
 perl -MI18N::Langinfo=langinfo,CODESET -e 'die "Needs a UTF-8 locale" if (lc(langinfo(CODESET())) ne "utf-8");'
 </precheck>
- <name>
+<name>
 HTTP over proxy with malformatted IDN host name
- </name>
+</name>
 
 # This host name contains an invalid UTF-8 byte sequence that can't be
 # converted into an IDN name
 <stdin>
 url = "http://invalid-utf8-‚ê.local/page/%TESTNUMBER"
 </stdin>
- <command>
+<command>
 -K - -x %HOSTIP:%NOLISTENPORT
 </command>
 </client>

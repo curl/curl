@@ -31,14 +31,14 @@ Schannel
 <server>
 https Server-localhost-sv.pem
 </server>
- <name>
+<name>
 simple HTTPS GET with DER public key pinning (Schannel variant)
- </name>
+</name>
  <setenv>
 # This test is pointless if we're not using the schannel backend
 CURL_SSL_BACKEND=schannel
  </setenv>
- <command>
+<command>
 --cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --pinnedpubkey %SRCDIR/certs/Server-localhost-sv.pub.der --ssl-revoke-best-effort https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
 # Ensure that we're running on localhost because we're checking the host name

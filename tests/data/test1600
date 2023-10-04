@@ -16,8 +16,8 @@ none
 unittest
 NTLM
 </features>
- <name>
+<name>
 NTLM unit tests
- </name>
+</name>
 </client>
 </testcase>

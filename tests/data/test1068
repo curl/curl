@@ -28,7 +28,7 @@ http
 <name>
 HTTP PUT from stdin
 </name>
- <command>
+<command>
 http://%HOSTIP:%HTTPPORT/bzz/%TESTNUMBER -T -
 </command>
 <stdin>

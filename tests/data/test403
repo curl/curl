@@ -38,10 +38,10 @@ SSL
 <server>
 ftps
 </server>
- <name>
+<name>
 FTPS with CCC not supported by server
- </name>
- <command>
+</name>
+<command>
 -k --ftp-ssl-control --ftp-ssl-ccc ftps://%HOSTIP:%FTPSPORT/
 </command>
 </client>

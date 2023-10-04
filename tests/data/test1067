@@ -49,10 +49,10 @@ If this is received, the location following worked
 <server>
 http
 </server>
- <name>
+<name>
 HTTP Location: following with auto-referer
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER --silent --location --referer "firstone.html;auto" --write-out "%{stderr}|%{referer}|"
 </command>
 </client>

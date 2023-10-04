@@ -24,10 +24,10 @@ the content would go here
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with proxy string including http:// and user+password
- </name>
- <command>
+</name>
+<command>
 http://we.want.that.site.com/%TESTNUMBER -x http://f%61ke:user@%HOSTIP:%HTTPPORT
 </command>
 <features>

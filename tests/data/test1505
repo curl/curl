@@ -34,10 +34,10 @@ http
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 HTTP multi with CURLOPT_RESOLVE, cleanup sequence PB
- </name>
- <command>
+</name>
+<command>
 http://google.com:%HTTPPORT/%TESTNUMBER %HTTPPORT %HOSTIP
 </command>
 </client>

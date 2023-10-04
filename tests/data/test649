@@ -20,16 +20,16 @@ Mime
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP multipart with 7bit encoder error
- </name>
+</name>
 <stdin>
 From: different
 To: another
 
 body
 </stdin>
- <command>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -F '=This is valid;encoder=7bit' -F "=@%LOGDIR/test%TESTNUMBER.txt;encoder=7bit" -H "From: different" -H "To: another"
 </command>
 <file name="%LOGDIR/test%TESTNUMBER.txt">

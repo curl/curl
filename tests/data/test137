@@ -21,10 +21,10 @@ RETRNOSIZE
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP download without size in RETR string
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/blalbla/lululul/%TESTNUMBER
 </command>
 </client>

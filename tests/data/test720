@@ -37,10 +37,10 @@ proxy
 http
 socks5
 </server>
- <name>
+<name>
 HTTP GET with IPv4 numerical via SOCKS5h
- </name>
- <command>
+</name>
+<command>
 http://12.34.56.78:%HTTPPORT/%TESTNUMBER --proxy socks5h://%HOSTIP:%SOCKSPORT
 </command>
 </client>

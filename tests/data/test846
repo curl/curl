@@ -29,10 +29,10 @@ body
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP PREAUTH response
- </name>
- <command>
+</name>
+<command>
 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u notused:still-provided
 </command>
 </client>

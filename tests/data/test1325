@@ -47,10 +47,10 @@ body
 <server>
 http
 </server>
- <name>
+<name>
 HTTP 308-redirect with POST
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/%TESTNUMBER -L -d "moo"
 </command>
 </client>

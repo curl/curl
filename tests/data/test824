@@ -33,10 +33,10 @@ body
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP OAuth 2.0 (XOAUTH2) authentication
- </name>
- <command>
+</name>
+<command>
 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user --oauth2-bearer mF_9.B5f-4.1JqM
 </command>
 </client>

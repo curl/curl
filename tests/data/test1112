@@ -89,10 +89,10 @@ ftps
 <killserver>
 ftps
 </killserver>
- <name>
+<name>
 FTPS download with strict timeout and slow data transfer
- </name>
- <command>
+</name>
+<command>
 -k --ftp-ssl-control ftps://%HOSTIP:%FTPSPORT/%TESTNUMBER -m 16
 </command>
 </client>

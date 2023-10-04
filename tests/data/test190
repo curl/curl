@@ -23,10 +23,10 @@ ftp
 <killserver>
 ftp
 </killserver>
- <name>
+<name>
 FTP download with strict timeout and slow CWD
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/path/to/file/%TESTNUMBER -m %FTPTIME2
 </command>
 </client>

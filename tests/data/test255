@@ -37,10 +37,10 @@ ipv6
 <server>
 ftp-ipv6
 </server>
- <name>
+<name>
 FTP IPv6 dir list with EPRT and --disable-eprt
- </name>
- <command>
+</name>
+<command>
 -g "ftp://%HOST6IP:%FTP6PORT/" -P - --disable-eprt
 </command>
 </client>

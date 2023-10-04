@@ -40,10 +40,10 @@ large_file
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with large-file resume point and failed resume
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C 9999999999
 </command>
 </client>

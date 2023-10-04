@@ -15,8 +15,8 @@ none
 <features>
 unittest
 </features>
- <name>
+<name>
 MD5 unit tests
- </name>
+</name>
 </client>
 </testcase>

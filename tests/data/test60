@@ -27,7 +27,7 @@ http
 <name>
 HTTP PUT from stdin with wrong content-length
 </name>
- <command>
+<command>
 http://%HOSTIP:%HTTPPORT/bzz/%TESTNUMBER -T - -H "Content-Length: 1"
 </command>
 <stdin>

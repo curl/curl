@@ -25,12 +25,12 @@ http
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 return failure immediately from progress callback
- </name>
+</name>
 
 # this server/host won't be used for real
- <command>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

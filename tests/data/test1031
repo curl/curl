@@ -49,10 +49,10 @@ If this is received, the location following worked
 <server>
 http
 </server>
- <name>
+<name>
 HTTP Location: following to a query string
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/want/this/%TESTNUMBER -L
 </command>
 </client>

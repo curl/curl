@@ -16,16 +16,16 @@ SMTP
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP with multiple and invalid (all but one) --mail-rcpt and --mail-rcpt-allowfails
- </name>
+</name>
 <stdin>
 From: different
 To: another
 
 body
 </stdin>
- <command>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt-allowfails --mail-rcpt invalid.one --mail-rcpt recipient.two@example.com --mail-rcpt invalid.three --mail-rcpt invalid.four --mail-rcpt invalid.five --mail-from sender@example.com -T -
 </command>
 </client>

@@ -58,10 +58,10 @@ lib%TESTNUMBER
 crypto
 proxy
 </features>
- <name>
+<name>
 HTTP proxy auth Digest with 70K POST data from read callback
- </name>
- <command>
+</name>
+<command>
 http://test.remote.example.com/path/%TESTNUMBER http://s1lly:pers0n@%HOSTIP:%HTTPPORT/
 </command>
 </client>

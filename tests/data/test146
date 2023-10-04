@@ -19,10 +19,10 @@ this is file contents
 <server>
 ftp
 </server>
- <name>
+<name>
 persistent FTP with different paths
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/first/dir/here/%TESTNUMBER ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>

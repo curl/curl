@@ -28,10 +28,10 @@ Mime
 <server>
 http
 </server>
- <name>
+<name>
 HTTP RFC1867-type formposting - -F with three files, one with explicit type
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F name=value -F 'file=@%LOGDIR/test%TESTNUMBER.txt,%LOGDIR/test%TESTNUMBER.txt;type=magic/content,%LOGDIR/test%TESTNUMBER.txt'
 </command>
 # We create this file before the command is invoked!

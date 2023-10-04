@@ -15,9 +15,9 @@ none
 <features>
 unittest
 </features>
- <name>
+<name>
 splay unit tests
- </name>
+</name>
 </client>
 
 <verify>

@@ -23,10 +23,10 @@ boo
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with cookies file and custom added cookie
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -b %LOGDIR/jar%TESTNUMBER.txt -b "tool=curl; name=fool"
 </command>
 <file name="%LOGDIR/jar%TESTNUMBER.txt">

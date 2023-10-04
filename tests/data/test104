@@ -17,10 +17,10 @@ NOBODY
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP --head to get file size only
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/a/path/%TESTNUMBER --head
 </command>
 </client>

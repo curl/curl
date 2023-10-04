@@ -32,10 +32,10 @@ Connection:
 <server>
 http
 </server>
- <name>
+<name>
 HTTP header line folding
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -D %LOGDIR/out%TESTNUMBER
 </command>
 </client>

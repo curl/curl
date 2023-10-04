@@ -34,9 +34,9 @@ libz
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET gzip transfer-encoded data in raw mode
- </name>
+</name>
  <command option="no-include">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --raw
  </command>

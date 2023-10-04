@@ -29,10 +29,10 @@ connection-monitor
 <server>
 http
 </server>
- <name>
+<name>
 Re-using HTTP proxy connection for two different host names
- </name>
- <command>
+</name>
+<command>
 --proxy http://%HOSTIP:%HTTPPORT http://test.remote.haxx.se.%TESTNUMBER:8990/ http://different.remote.haxx.se.%TESTNUMBER:8990
 </command>
 <features>

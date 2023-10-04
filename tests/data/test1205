@@ -26,10 +26,10 @@ Funny-head: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with 18K HTTP header
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

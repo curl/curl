@@ -32,10 +32,10 @@ ipv6
 <server>
 http-ipv6
 </server>
- <name>
+<name>
 HTTP-IPv6 GET with ip6-localhost --interface
- </name>
- <command>
+</name>
+<command>
 -g "http://%HOST6IP:%HTTP6PORT/%TESTNUMBER" --interface ip6-localhost
 </command>
 <precheck>

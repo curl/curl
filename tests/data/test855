@@ -22,10 +22,10 @@ REPLY RETR -ERR no such message
 <server>
 pop3
 </server>
- <name>
+<name>
 POP3 RETR invalid message
- </name>
- <command>
+</name>
+<command>
 pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 </command>
 </client>

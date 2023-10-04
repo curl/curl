@@ -69,10 +69,10 @@ http
 !SSPI
 crypto
 </features>
- <name>
+<name>
 Downgraded HTTP PUT to HTTP 1.0 with authorization
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T %LOGDIR/put%TESTNUMBER -u testuser:testpass --anyauth
 </command>
 <file name="%LOGDIR/put%TESTNUMBER">

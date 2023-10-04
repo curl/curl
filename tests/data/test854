@@ -23,10 +23,10 @@ REPLY LIST +OK but no messages\r\n.
 <server>
 pop3
 </server>
- <name>
+<name>
 POP3 LIST no messages available
- </name>
- <command>
+</name>
+<command>
 pop3://%HOSTIP:%POP3PORT/ -u user:secret
 </command>
 </client>

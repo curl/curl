@@ -25,10 +25,10 @@ sftp
 <precheck>
 perl %SRCDIR/libtest/test%TESTNUMBER.pl prepare %PWD/%LOGDIR/test%TESTNUMBER.dir
 </precheck>
- <name>
+<name>
 SFTP directory retrieval
- </name>
- <command>
+</name>
+<command>
 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/test%TESTNUMBER.dir/ --insecure
 </command>
 <postcheck>

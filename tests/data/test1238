@@ -35,11 +35,11 @@ tftp
 <killserver>
 tftp
 </killserver>
- <name>
+<name>
 slow TFTP retrieve cancel due to -Y and -y
- </name>
+</name>
 # if less than 1000 bytes/sec within 2 seconds, abort!
- <command>
+<command>
 tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER -Y1000 -y2
 </command>
 </client>

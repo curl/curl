@@ -39,10 +39,10 @@ Set-Cookie: foobar=name; expires=Thu, 01 Jan 1970 00:00:00 GMT;
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with cookiejar without cookies left
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -b none -c %LOGDIR/cookies%TESTNUMBER http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER0002
 </command>
 <features>

@@ -29,10 +29,10 @@ Content-Length: 0
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with unexpected 1xx response
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

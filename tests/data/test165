@@ -38,10 +38,10 @@ LC_CTYPE=en_US.UTF-8
 <precheck>
 perl -MI18N::Langinfo=langinfo,CODESET -e 'die "Needs a UTF-8 locale" if (lc(langinfo(CODESET())) ne "utf-8");'
 </precheck>
- <name>
+<name>
 HTTP over proxy with IDN host name
- </name>
- <command>
+</name>
+<command>
 http://www.åäö.se/page/%TESTNUMBER -x %HOSTIP:%HTTPPORT http://www.große.de/page/%TESTNUMBER
 </command>
 </client>

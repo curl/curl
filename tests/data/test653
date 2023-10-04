@@ -50,10 +50,10 @@ http
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 Reuse of handle after altering mime data
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

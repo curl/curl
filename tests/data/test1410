@@ -13,10 +13,10 @@ FAILURE
 <server>
 none
 </server>
- <name>
+<name>
 Pass in negative number to --max-time
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER --max-time -4
 </command>
 </client>

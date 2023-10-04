@@ -49,10 +49,10 @@ SSL
 !SSPI
 proxy
 </features>
- <name>
+<name>
 HTTP POST using CONNECT with --proxy-ntlm but no auth is required
- </name>
- <command>
+</name>
+<command>
 http://test.a.galaxy.far.far.away.%TESTNUMBER:%HTTPPORT/%TESTNUMBER --proxy http://%HOSTIP:%HTTPPORT --proxy-user foo:bar --proxy-ntlm -d "dummy=value" -p
 </command>
 </client>

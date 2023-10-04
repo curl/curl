@@ -34,10 +34,10 @@ http
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 HTTP POST lower than MAX_INITIAL_POST_SIZE with progress callback
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/ip%TESTNUMBER
 </command>
 </client>

@@ -26,10 +26,10 @@ swsclose
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with a invalid HTTP/1 response line start
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --http0.9
 </command>
 </client>

@@ -20,10 +20,10 @@ REPLY SIZE 500 command not understood
 <server>
 ftp
 </server>
- <name>
+<name>
 Two FTP downloads, with failed RETR but reused control connection
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/dir/%TESTNUMBER ftp://%HOSTIP:%FTPPORT/dir/%TESTNUMBER
 </command>
 </client>

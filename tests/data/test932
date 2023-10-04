@@ -29,10 +29,10 @@ smtp
 <features>
 crypto
 </features>
- <name>
+<name>
 SMTP CRAM-MD5 graceful cancellation
- </name>
- <command>
+</name>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret -T -
 </command>
 </client>

@@ -45,10 +45,10 @@ chunky-trailer: header data
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with chunked encoding and chunked trailer without CRs
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -D %LOGDIR/heads%TESTNUMBER
 </command>
 </client>

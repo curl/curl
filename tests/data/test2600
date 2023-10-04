@@ -18,8 +18,8 @@ unittest
 debug
 http
 </features>
- <name>
+<name>
 connection filter connect/destroy unit tests
- </name>
+</name>
 </client>
 </testcase>

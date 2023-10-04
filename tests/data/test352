@@ -32,10 +32,10 @@ dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP root dir list singlecwd
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT// --ftp-method singlecwd
 </command>
 </client>

@@ -46,10 +46,10 @@ http-proxy
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 Check same headers are generated with CURLOPT_HEADEROPT == CURLHEADER_UNIFIED
- </name>
- <command>
+</name>
+<command>
  http://the.old.moo.%TESTNUMBER:%HTTPPORT/%TESTNUMBER %HOSTIP:%PROXYPORT
 </command>
 <features>

@@ -19,10 +19,10 @@ manual
 <server>
 none
 </server>
- <name>
+<name>
 curl --manual
- </name>
- <command>
+</name>
+<command>
 --manual
 </command>
 # Search for these two sentinel lines in the manual output; if they are found,

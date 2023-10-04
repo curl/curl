@@ -13,10 +13,10 @@ server key check
 <server>
 sftp
 </server>
- <name>
+<name>
 SFTP incorrect host key
- </name>
- <command>
+</name>
+<command>
 --hostpubmd5 00000000000000000000000000000000 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/irrelevant-file --insecure
 </command>
 </client>

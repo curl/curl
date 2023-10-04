@@ -10,10 +10,10 @@ FAILURE
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP %0a-code in URL's name part
- </name>
- <command>
+</name>
+<command>
 ftp://bad%0auser:passwd@%HOSTIP:%FTPPORT/%TESTNUMBER%0a
 </command>
 </client>

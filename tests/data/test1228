@@ -25,10 +25,10 @@ This server says cookie path test
 <server>
 http
 </server>
- <name>
+<name>
 HTTP cookie path match
- </name>
- <command>
+</name>
+<command>
 http://example.fake/hoge/%TESTNUMBER http://example.fake/hogege/ -b nonexisting -x %HOSTIP:%HTTPPORT
 </command>
 <features>

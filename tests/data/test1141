@@ -41,10 +41,10 @@ hej
 <server>
 http
 </server>
- <name>
+<name>
 HTTP redirect to http:/// (three slashes!)
- </name>
- <command>
+</name>
+<command>
 %HOSTIP:%HTTPPORT/want/%TESTNUMBER -L -x http://%HOSTIP:%HTTPPORT
 </command>
 <features>

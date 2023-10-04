@@ -58,10 +58,10 @@ hello
 <server>
 http
 </server>
- <name>
+<name>
 HTTP --proxy-anyauth and 407 with cookies
- </name>
- <command>
+</name>
+<command>
 -U myname:mypassword -x %HOSTIP:%HTTPPORT http://z.x.com/%TESTNUMBER --proxy-anyauth -c %LOGDIR/dump%TESTNUMBER
 </command>
 <features>

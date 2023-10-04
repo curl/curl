@@ -47,10 +47,10 @@ http
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 CURLOPT_MIMEPOST first set then set to NULL
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

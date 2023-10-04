@@ -51,10 +51,10 @@ debug
 DoH
 ipv6
 </features>
- <name>
+<name>
 HTTP GET using DoH
- </name>
- <command>
+</name>
+<command>
 http://foo.example.com:%HTTPPORT/%TESTNUMBER --doh-url http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001
 </command>
 </client>

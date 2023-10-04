@@ -13,10 +13,10 @@ FAILURE
 <server>
 tftp
 </server>
- <name>
+<name>
 TFTP retrieve on invalid file
- </name>
- <command>
+</name>
+<command>
 tftp://%HOSTIP:%TFTPPORT//invalid-file --tftp-blksize 1024
 </command>
 </client>

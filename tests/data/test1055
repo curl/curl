@@ -32,10 +32,10 @@ Connection: close
 http
 ftp
 </server>
- <name>
+<name>
 HTTP PUT Location: redirect to FTP URL
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -L -T %LOGDIR/test%TESTNUMBER.txt
 </command>
 <file name="%LOGDIR/test%TESTNUMBER.txt">

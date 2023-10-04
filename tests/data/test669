@@ -27,10 +27,10 @@ Mime
 <server>
 http
 </server>
- <name>
+<name>
 HTTP custom Content-Type with parameter
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -H 'Content-type: multipart/form-data; charset=utf-8' -F name=daniel -F tool=curl
 </command>
 </client>

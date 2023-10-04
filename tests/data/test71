@@ -27,16 +27,16 @@ Mime
 <server>
 http
 </server>
- <name>
+<name>
 HTTP and -F upload in config file
- </name>
+</name>
 <stdin>
 -F name=daniel
 -F tool=curl
 -F file=@%LOGDIR/test%TESTNUMBER.txt
 user-agent = ""
 </stdin>
- <command>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -K -
 </command>
 # We create this file before the command is invoked!

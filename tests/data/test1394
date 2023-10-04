@@ -14,9 +14,9 @@ none
 <features>
 unittest
 </features>
- <name>
+<name>
 unit test for parse_cert_parameter()
- </name>
+</name>
 </client>
 
 <verify>

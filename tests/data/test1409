@@ -13,10 +13,10 @@ FAILURE
 <server>
 none
 </server>
- <name>
+<name>
 Pass in string to -C
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER -C wrong
 </command>
 </client>

@@ -34,10 +34,10 @@ body
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP login authentication with initial response
- </name>
- <command>
+</name>
+<command>
 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user:secret
 </command>
 </client>

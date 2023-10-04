@@ -23,9 +23,9 @@ the content would go here
 <server>
 http
 </server>
- <name>
+<name>
 HTTP connection reuse and different credentials
- </name>
+</name>
 
 <command>
 http://user1:foo1@%HOSTIP:%HTTPPORT/user1/%TESTNUMBER http://user2:foo2@%HOSTIP:%HTTPPORT/user2/%TESTNUMBER

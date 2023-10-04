@@ -22,10 +22,10 @@ ftp
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 FTP PORT upload using multi interface (weird cleanup function sequence)
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER %LOGDIR/upload%TESTNUMBER
 </command>
 <file name="%LOGDIR/upload%TESTNUMBER">

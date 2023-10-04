@@ -43,10 +43,10 @@ http
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 HTTP chunked mimepost using single-byte read callback with encoder
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

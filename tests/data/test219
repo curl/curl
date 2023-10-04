@@ -20,10 +20,10 @@ none
 http
 proxy
 </features>
- <name>
+<name>
 try using proxy with unsupported scheme
- </name>
- <command>
+</name>
+<command>
 -x foo://%HOSTIP:%NOLISTENPORT/%TESTNUMBER http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER
 </command>
 </client>

@@ -55,10 +55,10 @@ http
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 verify setting CURLOPT_COOKIEFILE to NULL again
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER %LOGDIR/cookies676
 </command>
 <features>

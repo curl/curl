@@ -24,10 +24,10 @@ REPLY SITE 250 Name format set to 1
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP OS/400 server name format check
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>

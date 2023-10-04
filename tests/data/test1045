@@ -28,10 +28,10 @@ Content-Type: text/plain
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with numeric localhost --interface
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --interface %CLIENTIP
 </command>
 </client>

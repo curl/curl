@@ -27,10 +27,10 @@ This server reply is for testing a simple cookie test case...
 <server>
 http
 </server>
- <name>
+<name>
 HTTP, get cookie with dot prefixed full domain
- </name>
- <command>
+</name>
+<command>
 -c %LOGDIR/jar%TESTNUMBER -x %HOSTIP:%HTTPPORT http://z.x.com/%TESTNUMBER
 </command>
 <features>

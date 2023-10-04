@@ -22,10 +22,10 @@ This server reply is for testing
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with blank Location:
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -L
 </command>
 </client>

@@ -31,10 +31,10 @@ proxy
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with proxy requiring NTLM, but we send Basic
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --proxy-user testuser:testpass -x http://%HOSTIP:%HTTPPORT
 </command>
 </client>

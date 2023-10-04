@@ -25,10 +25,10 @@ works
 <server>
 ftp
 </server>
- <name>
+<name>
 ftp download with post- and pre-transfer delete operations
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -Q "-DELE after_transfer" -Q "DELE before_transfer"
 </command>
 </client>

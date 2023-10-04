@@ -12,10 +12,10 @@ FAILURE
 <server>
 scp
 </server>
- <name>
+<name>
 SCP invalid user login (password authentication)
- </name>
- <command>
+</name>
+<command>
 -u not-a-valid-user: scp://%HOSTIP:%SSHPORT%SSH_PWD/irrelevant-file --insecure
 </command>
 </client>

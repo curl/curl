@@ -22,10 +22,10 @@ file data
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP with --remote-time
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --remote-time
 </command>
 # Verify the mtime of the file. The mtime is specifically chosen to be an even

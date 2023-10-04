@@ -13,10 +13,10 @@ FAILURE
 <server>
 tftp
 </server>
- <name>
+<name>
 TFTP send with invalid permission on server
- </name>
- <command>
+</name>
+<command>
 -T %LOGDIR/test%TESTNUMBER.txt tftp://%HOSTIP:%TFTPPORT//invalid-file -sS
 </command>
 <file name="%LOGDIR/test%TESTNUMBER.txt">

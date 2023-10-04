@@ -33,14 +33,14 @@ debug
 <server>
 http
 </server>
- <name>
+<name>
 alt-svc using host name with trailing dot on host from file
- </name>
+</name>
 <setenv>
 # make debug-curl accept Alt-Svc over plain HTTP
 CURL_ALTSVC_HTTP="yeah"
 </setenv>
- <command>
+<command>
 --alt-svc "%LOGDIR/altsvc-%TESTNUMBER" "http://whohoo:12345/%TESTNUMBER"
 </command>
 <file name="%LOGDIR/altsvc-%TESTNUMBER">

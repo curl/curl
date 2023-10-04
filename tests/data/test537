@@ -43,10 +43,10 @@ lib%TESTNUMBER
 ./libtest/lib%TESTNUMBER check
 </precheck>
 
- <name>
+<name>
 HTTP GET with a HUGE number of file descriptors open
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

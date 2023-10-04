@@ -32,10 +32,10 @@ in the request
 <server>
 http
 </server>
- <name>
+<name>
 HTTP range support
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -r 100-200
 </command>
 </client>

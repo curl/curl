@@ -61,10 +61,10 @@ contents
 <server>
 http
 </server>
- <name>
+<name>
 HTTP, proxy, site+proxy auth and Location: to new host
- </name>
- <command>
+</name>
+<command>
 http://first.host.it.is/we/want/that/page/%TESTNUMBER -x %HOSTIP:%HTTPPORT --user iam:myself --proxy-user testing:this --location
 </command>
 <features>

@@ -31,10 +31,10 @@ zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 <server>
 http
 </server>
- <name>
+<name>
 progress-bar
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -# --stderr %LOGDIR/stderrlog%TESTNUMBER
 </command>
 <setenv>

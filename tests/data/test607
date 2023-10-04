@@ -12,10 +12,10 @@ FAILURE
 <server>
 scp
 </server>
- <name>
+<name>
 SCP invalid user login
- </name>
- <command>
+</name>
+<command>
 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u not-a-valid-user: scp://%HOSTIP:%SSHPORT%SSH_PWD/not-a-valid-file-moooo --insecure
 </command>
 </client>

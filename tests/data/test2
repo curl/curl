@@ -25,10 +25,10 @@ Funny-head: yesyes
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with user and password
- </name>
- <command>
+</name>
+<command>
  -u fake:user http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

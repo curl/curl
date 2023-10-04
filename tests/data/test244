@@ -31,10 +31,10 @@ dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP dir listing with nocwd and URL encoded path
- </name>
- <command>
+</name>
+<command>
 --ftp-method nocwd ftp://%HOSTIP:%FTPPORT/fir%23t/th%69rd/%TESTNUMBER/
 </command>
 </client>

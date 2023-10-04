@@ -17,10 +17,10 @@ FAILURE
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with no data in server reply
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER
 </command>
 </client>

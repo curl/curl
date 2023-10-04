@@ -23,10 +23,10 @@ works
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP RETR PORT with CWD
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/a/path/%TESTNUMBER -P -
 </command>
 </client>

@@ -57,10 +57,10 @@ http/2
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 HTTP/2 using STREAM_WEIGHTs
- </name>
- <command>
+</name>
+<command>
 https://%HOSTIP:%HTTP2TLSPORT/path/%TESTNUMBER %HOSTIP %HTTP2TLSPORT
 </command>
 </client>

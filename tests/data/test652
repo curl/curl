@@ -24,10 +24,10 @@ smtp
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 SMTP with encoded huge mime data contents
- </name>
- <command>
+</name>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER
 </command>
 </client>

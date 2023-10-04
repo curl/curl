@@ -31,10 +31,10 @@ lib%TESTNUMBER
 </tool>
 <features>
 </features>
- <name>
+<name>
 HTTP post with huge request headers and post data from callback
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/path/%TESTNUMBER
 </command>
 </client>

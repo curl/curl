@@ -19,10 +19,10 @@ none
 <features>
 http
 </features>
- <name>
+<name>
 netrc with quoted password but missing end quote
- </name>
- <command>
+</name>
+<command>
 --netrc --netrc-file %LOGDIR/netrc%TESTNUMBER http://user1@http.example/
 </command>
 <file name="%LOGDIR/netrc%TESTNUMBER" >

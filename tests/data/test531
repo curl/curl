@@ -25,10 +25,10 @@ ftp
 <tool>
 lib525
 </tool>
- <name>
+<name>
 FTP PORT upload using multi interface and get 425 response
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER %LOGDIR/upload%TESTNUMBER
 </command>
 <file name="%LOGDIR/upload%TESTNUMBER">

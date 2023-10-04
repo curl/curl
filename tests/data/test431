@@ -53,10 +53,10 @@ data = "b"
 <server>
 http
 </server>
- <name>
+<name>
 Two -K uses with --next and then one on cmdline
- </name>
- <command>
+</name>
+<command>
 -K %LOGDIR/config%TESTNUMBER-a -K %LOGDIR/config%TESTNUMBER-b --next -d c %HOSTIP:%HTTPPORT/%TESTNUMBER0003 -H "c: c"
 </command>
 </client>

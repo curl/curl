@@ -22,10 +22,10 @@ CUSTOMREQUEST
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP mailbox STATUS (CUSTOMREQUEST)
- </name>
- <command>
+</name>
+<command>
 imap://%HOSTIP:%IMAPPORT -u user:secret -X 'STATUS %TESTNUMBER (UIDNEXT MESSAGES)'
 </command>
 </client>

@@ -45,10 +45,10 @@ body
 <server>
 http
 </server>
- <name>
+<name>
 HTTP redirect with UTF-8 characters
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/are/all/twits/%TESTNUMBER -L
 </command>
 </client>

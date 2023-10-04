@@ -28,10 +28,10 @@ Set-Cookie: partmatch=present; domain=.0.0.1; path=/;
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with cookie parser and header recording
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -b none -D %LOGDIR/heads%TESTNUMBER.txt
 </command>
 </client>

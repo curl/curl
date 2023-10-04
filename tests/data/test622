@@ -18,10 +18,10 @@ FAILURE
 <server>
 sftp
 </server>
- <name>
+<name>
 SFTP put failure
- </name>
- <command>
+</name>
+<command>
 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -T %LOGDIR/file%TESTNUMBER.txt sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/nonexistent-directory/nonexistent-file --insecure
 </command>
 <file name="%LOGDIR/file%TESTNUMBER.txt">

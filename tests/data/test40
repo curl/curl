@@ -49,10 +49,10 @@ body
 <server>
 http
 </server>
- <name>
+<name>
 HTTP redirect with whitespace after ? (and conversion)
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/are/all/twits/%TESTNUMBER -L
 </command>
 </client>

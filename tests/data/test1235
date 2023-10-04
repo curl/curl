@@ -30,10 +30,10 @@ two is nice too
 <server>
 http
 </server>
- <name>
+<name>
 multiple requests using {}{} in the URL
- </name>
- <command>
+</name>
+<command>
 "%HOSTIP:%HTTPPORT/{%TESTNUMBER,%TESTNUMBER}{0001,0002}"
 </command>
 </client>

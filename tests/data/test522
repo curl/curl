@@ -32,10 +32,10 @@ http
 <tool>
 lib521
 </tool>
- <name>
+<name>
 HTTP GET with CURLOPT_PORT
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP/%TESTNUMBER %HTTPPORT
 </command>
 </client>

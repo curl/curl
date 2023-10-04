@@ -35,10 +35,10 @@ Set-Cookie: FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with too long cookies
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -c %LOGDIR/cookies%TESTNUMBER.txt
 </command>
 <features>

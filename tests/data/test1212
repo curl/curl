@@ -29,9 +29,9 @@ proxy
 <server>
 http
 </server>
- <name>
+<name>
 noproxy setting together with socks proxy
- </name>
+</name>
 
 <command>
 http://user:secret@%HOSTIP:%HTTPPORT/ulion/%TESTNUMBER --socks5 non-existing-host.haxx.se:1080 --noproxy %HOSTIP --max-time 5

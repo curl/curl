@@ -31,9 +31,9 @@ Funny-head: yesyes
 <server>
 http
 </server>
- <name>
+<name>
 --remove-on-error
- </name>
+</name>
  <command option="no-output">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o %LOGDIR/save-%TESTNUMBER --remove-on-error
 </command>

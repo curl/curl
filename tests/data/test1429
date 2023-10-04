@@ -33,8 +33,8 @@ http
 
 <name>
 HTTP GET with 999 response code
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --write-out '%{response_code}'
 </command>
 </client>

@@ -15,9 +15,9 @@ none
 <features>
 unittest
 </features>
- <name>
+<name>
 curl_msnprintf unit tests
- </name>
+</name>
 </client>
 
 </testcase>

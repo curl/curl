@@ -23,10 +23,10 @@ sftp
 <precheck>
 perl %SRCDIR/libtest/test610.pl mkdir %PWD/%LOGDIR/test%TESTNUMBER.dir
 </precheck>
- <name>
+<name>
 SFTP post-quote rename
- </name>
- <command>
+</name>
+<command>
 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -Q "-rename %PWD/%LOGDIR/test%TESTNUMBER.dir %PWD/%LOGDIR/test%TESTNUMBER.new" sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/file%TESTNUMBER.txt --insecure
 </command>
 <postcheck>

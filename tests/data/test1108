@@ -20,10 +20,10 @@ REPLY PRET 550 unknown command
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP RETR PASV with PRET not supported
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --ftp-pret
 </command>
 

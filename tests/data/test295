@@ -23,10 +23,10 @@ REPLY PWD 530 No ACCT, go away
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP ACCT request without --ftp-account
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER/
 </command>
 </client>

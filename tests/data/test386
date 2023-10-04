@@ -45,10 +45,10 @@ hello
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with --json + --next
- </name>
- <command>
+</name>
+<command>
 --json '{ "drink": "coffe" }' http://%HOSTIP:%HTTPPORT/%TESTNUMBER --next http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002
 </command>
 </client>

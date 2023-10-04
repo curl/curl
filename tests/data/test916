@@ -16,16 +16,16 @@ SMTP
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP with invalid --mail-rcpt
- </name>
+</name>
 <stdin>
 From: different
 To: another
 
 body
 </stdin>
- <command>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt invalid --mail-from sender@example.com -T -
 </command>
 </client>

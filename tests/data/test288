@@ -24,9 +24,9 @@ none
 <features>
 file
 </features>
- <name>
+<name>
 file:// with (unsupported) proxy, authentication and range
- </name>
+</name>
 <setenv>
 all_proxy=http://fake:user@%HOSTIP:%NOLISTENPORT/
 </setenv>

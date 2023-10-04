@@ -175,10 +175,10 @@ libz
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET multiply compressed content
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed
 </command>
 </client>

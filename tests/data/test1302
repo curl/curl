@@ -15,8 +15,8 @@ none
 <features>
 unittest
 </features>
- <name>
+<name>
 base64 encode/decode unit tests
- </name>
+</name>
 </client>
 </testcase>

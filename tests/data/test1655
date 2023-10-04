@@ -16,8 +16,8 @@ none
 unittest
 DoH
 </features>
- <name>
+<name>
 unit test for doh_encode
- </name>
+</name>
 </client>
 </testcase>

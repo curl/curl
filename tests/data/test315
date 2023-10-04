@@ -60,10 +60,10 @@ brotli
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET brotli compressed content with broken header
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed
 </command>
 </client>

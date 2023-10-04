@@ -26,10 +26,10 @@ Range
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP retrieve a byte-range relative to end of file
- </name>
- <command>
+</name>
+<command>
 -r -12 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>

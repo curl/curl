@@ -36,10 +36,10 @@ ipv6
 <server>
 ftp-ipv6
 </server>
- <name>
+<name>
 FTP IPv6 dir list with EPRT
- </name>
- <command>
+</name>
+<command>
 -g "ftp://%HOST6IP:%FTP6PORT/" -P -
 </command>
 </client>

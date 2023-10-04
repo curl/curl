@@ -35,10 +35,10 @@ ftp
 <tool>
 lib591
 </tool>
- <name>
+<name>
 FTP multi PORT upload, no data conn and no positive prelim. reply
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER %FTPTIME2 %LOGDIR/upload%TESTNUMBER
 </command>
 <file name="%LOGDIR/upload%TESTNUMBER">

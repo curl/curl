@@ -12,9 +12,9 @@ source analysis
 none
 </server>
 
- <name>
+<name>
 Verify deprecation statuses and versions
- </name>
+</name>
 
 <command type="perl">
 %SRCDIR/check-deprecated.pl %SRCDIR/..

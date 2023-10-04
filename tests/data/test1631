@@ -39,10 +39,10 @@ companions always called me.
 ftp
 https-proxy
 </server>
- <name>
+<name>
 FTP through HTTPS-proxy
- </name>
- <command>
+</name>
+<command>
 -p -x https://%HOSTIP:%HTTPSPROXYPORT ftp://ftp.site.thru.https.proxy:%FTPPORT/%TESTNUMBER --proxy-insecure
 </command>
 <features>

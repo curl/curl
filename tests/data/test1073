@@ -30,10 +30,10 @@ Connection: close
 <server>
 http
 </server>
- <name>
+<name>
 HTTP chunked PUT to HTTP 1.0 server with redirect
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T - -L
 </command>
 <stdin>

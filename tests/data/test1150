@@ -26,10 +26,10 @@ daniel
 <server>
 http
 </server>
- <name>
+<name>
 HTTP proxy with URLs using different ports
- </name>
- <command>
+</name>
+<command>
 --proxy http://%HOSTIP:%HTTPPORT http://test.remote.example.com.%TESTNUMBER:150/path http://test.remote.example.com.%TESTNUMBER:1234/path/
 </command>
 <features>

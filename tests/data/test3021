@@ -24,10 +24,10 @@ libssh2
 <server>
 sftp
 </server>
- <name>
+<name>
 SFTP correct sha256 host key
- </name>
- <command>
+</name>
+<command>
 --hostpubsha256 %SSHSRVSHA256 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/file%TESTNUMBER.txt
 </command>
 <setenv>

@@ -55,10 +55,10 @@ http
 !SSPI
 crypto
 </features>
- <name>
+<name>
 HTTP with Digest and realm with quoted quotes
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --digest
 </command>
 </client>

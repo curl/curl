@@ -14,10 +14,10 @@ none
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 Close a multi handle without using it
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%NOLISTENPORT/path/%TESTNUMBER
 </command>
 </client>

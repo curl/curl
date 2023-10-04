@@ -21,10 +21,10 @@ HTTP/1.1 200 OK swsclose
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with no response body or headers
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

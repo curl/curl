@@ -20,9 +20,9 @@ HTTP/1.1 200 OK swsclose
 <server>
 http
 </server>
- <name>
+<name>
 HTTP PUT with resume
- </name>
+</name>
 <file name="%LOGDIR/test%TESTNUMBER.txt">
 012345678
 012345678
@@ -35,7 +35,7 @@ HTTP PUT with resume
 012345678
 012345678
 </file>
- <command>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T%LOGDIR/test%TESTNUMBER.txt -C 50
 </command>
 </client>

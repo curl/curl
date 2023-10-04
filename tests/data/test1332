@@ -46,10 +46,10 @@ body
 <server>
 http
 </server>
- <name>
+<name>
 HTTP POST with 303 redirect and --post303
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/blah/%TESTNUMBER -L -d "moo" --post303
 </command>
 </client>

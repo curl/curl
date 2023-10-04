@@ -14,9 +14,9 @@ imap
 <tool>
 lib597
 </tool>
- <name>
+<name>
 IMAP CONNECT_ONLY option
- </name>
+</name>
 
 <command>
 imap://%HOSTIP:%IMAPPORT/%TESTNUMBER

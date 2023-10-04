@@ -25,10 +25,10 @@ This server says moo
 <server>
 http
 </server>
- <name>
+<name>
 HTTP, junk session cookies
- </name>
- <command>
+</name>
+<command>
 %HOSTIP:%HTTPPORT/want/%TESTNUMBER -b %LOGDIR/injar%TESTNUMBER -j
 </command>
 <file name="%LOGDIR/injar%TESTNUMBER">

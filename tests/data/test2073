@@ -33,10 +33,10 @@ Mime
 <server>
 http
 </server>
- <name>
+<name>
 HTTP form posts with handle reset
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -F 'name=a;filename=a.pdf' --next http://%HOSTIP:%HTTPPORT/%TESTNUMBER -F 'name=b;filename=b.jpg'
 </command>
 </client>

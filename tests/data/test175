@@ -52,10 +52,10 @@ http
 <features>
 crypto
 </features>
- <name>
+<name>
 HTTP POST --digest to server not requiring any auth at all
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u auser:apasswd --digest -d "junkelijunk"
 </command>
 </client>

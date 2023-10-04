@@ -34,9 +34,9 @@ NTLM
 SSL
 !SSPI
 </features>
- <name>
+<name>
 SMTP NTLM authentication with SASL downgrade
- </name>
+</name>
 <stdin>
 mail body
 </stdin>
@@ -46,7 +46,7 @@ CURL_GETHOSTNAME=curlhost
 # we try to use the LD_PRELOAD hack, if not a debug build
 LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
  </setenv>
- <command>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret -T -
 </command>
 <precheck>

@@ -13,9 +13,9 @@ symbols-in-versions
 none
 </server>
 
- <name>
+<name>
 Verify that symbols-in-versions and headers are in sync
- </name>
+</name>
 
 <command type="perl">
 %SRCDIR/symbol-scan.pl %SRCDIR/.. ../include/curl

@@ -29,16 +29,16 @@ http-proxy
 http
 proxy
 </features>
- <name>
+<name>
 SMTP send tunneled through HTTP proxy
- </name>
+</name>
 <stdin>
 From: different
 To: another
 
 body
 </stdin>
- <command>
+<command>
 smtp://smtp.%TESTNUMBER:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -T - -p -x %HOSTIP:%PROXYPORT
 </command>
 </client>

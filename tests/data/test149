@@ -14,10 +14,10 @@ FTP
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP with multiple uploads
- </name>
- <command>
+</name>
+<command>
 -T %LOGDIR/upload%TESTNUMBER ftp://%HOSTIP:%FTPPORT/dir1/%TESTNUMBER -T %LOGDIR/upload%TESTNUMBER ftp://%HOSTIP:%FTPPORT/dir2/%TESTNUMBER
 </command>
 <file name="%LOGDIR/upload%TESTNUMBER">

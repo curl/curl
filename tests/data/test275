@@ -50,10 +50,10 @@ contents
 http
 http-proxy
 </server>
- <name>
+<name>
 HTTP CONNECT with proxytunnel getting two URLs from the same host
- </name>
- <command>
+</name>
+<command>
 http://remotesite.com.%TESTNUMBER:%HTTPPORT/we/want/that/page/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT --user iam:myself --proxy-user youare:yourself http://remotesite.com.%TESTNUMBER:%HTTPPORT/we/want/that/page/%TESTNUMBER
 </command>
 <features>

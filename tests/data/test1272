@@ -25,10 +25,10 @@ gophers
 <killserver>
 gophers
 </killserver>
- <name>
+<name>
 Gophers index
- </name>
- <command>
+</name>
+<command>
 -k gophers://%HOSTIP:%GOPHERSPORT/1/%TESTNUMBER
 </command>
 </client>

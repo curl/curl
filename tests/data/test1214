@@ -26,13 +26,13 @@ the content goes here
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with proxy and URL with ? and no slash separator
- </name>
+</name>
 # the thing here is that this sloppy form is accepted and we convert it
 # for normal server use, and we need to make sure it gets converted to
 # RFC style even for proxies
- <command>
+<command>
 -x %HOSTIP:%HTTPPORT http://we.want.that.site.com.%TESTNUMBER?moo=foo
 </command>
 <features>

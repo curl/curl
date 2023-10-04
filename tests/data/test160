@@ -34,10 +34,10 @@ wait 1
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with delayed close, conn reuse, connection reset and retry
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER http://%HOSTIP:%HTTPPORT/wantmore/%TESTNUMBER0001
 </command>
 </client>

@@ -34,10 +34,10 @@ http
 lib500
 </tool>
 
- <name>
+<name>
 simple libcurl HTTP GET tool
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/ip%TESTNUMBER
 </command>
 </client>

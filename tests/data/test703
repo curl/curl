@@ -27,10 +27,10 @@ socks5
 http
 proxy
 </features>
- <name>
+<name>
 Attempt connect to non-listening HTTP server via SOCKS5 proxy
- </name>
- <command>
+</name>
+<command>
 --socks5 %HOSTIP:%SOCKSPORT http://%HOSTIP:%NOLISTENPORT
 </command>
 </client>

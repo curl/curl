@@ -32,10 +32,10 @@ SSL
 <server>
 pop3
 </server>
- <name>
+<name>
 POP3 require STARTTLS with failing capabilities
- </name>
- <command>
+</name>
+<command>
 pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret --ssl-reqd
  </command>
 </client>

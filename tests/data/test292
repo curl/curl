@@ -32,10 +32,10 @@ Funny-head: yesyes
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with maximum filesize not exceeded
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --max-filesize 1000
 </command>
 </client>

@@ -17,10 +17,10 @@ APPE
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP PASV upload append
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T %LOGDIR/upload%TESTNUMBER --append
 </command>
 <file name="%LOGDIR/upload%TESTNUMBER">

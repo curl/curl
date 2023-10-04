@@ -13,10 +13,10 @@ server key check
 <server>
 scp
 </server>
- <name>
+<name>
 SCP incorrect host key
- </name>
- <command>
+</name>
+<command>
 --hostpubmd5 00000000000000000000000000000000 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: scp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/irrelevant-file --insecure
 </command>
 </client>

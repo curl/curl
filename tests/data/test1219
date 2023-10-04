@@ -26,10 +26,10 @@ REPLY welcome 230 welcome without password
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP with no user+password required (230 response)
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 

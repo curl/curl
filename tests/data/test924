@@ -23,10 +23,10 @@ VRFY
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP ambiguous VRFY
- </name>
- <command>
+</name>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt smith
 </command>
 </client>

@@ -43,10 +43,10 @@ http
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 Request pause from mime read callback: easy
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

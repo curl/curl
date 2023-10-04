@@ -47,10 +47,10 @@ http
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 chunked with trailers and pausing the receive
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

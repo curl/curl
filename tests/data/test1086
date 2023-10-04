@@ -86,10 +86,10 @@ ftp
 <killserver>
 ftp
 </killserver>
- <name>
+<name>
 FTP download with strict timeout and slow data transfer
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -m 7
 </command>
 </client>

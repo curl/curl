@@ -23,10 +23,10 @@ ftp
 <tool>
 lib504
 </tool>
- <name>
+<name>
 FTP multi-interface download, failed login: PASS not valid
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>

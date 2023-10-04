@@ -20,13 +20,13 @@ REPLY EHLO 500 Command unrecognized
 <server>
 smtp
 </server>
- <name>
+<name>
 RFC821-only SMTP with username and password
- </name>
+</name>
 <stdin>
 mail body
 </stdin>
- <command>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret -T -
 </command>
 </client>

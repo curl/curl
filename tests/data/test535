@@ -44,10 +44,10 @@ http
 lib533
 </tool>
 
- <name>
+<name>
 HTTP GET multi two files with FAILONERROR
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001
 </command>
 </client>

@@ -30,10 +30,10 @@ alt-svc
 <server>
 http
 </server>
- <name>
+<name>
 load Alt-Svc from file and use
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --alt-svc ""
 </command>
 <file name="%LOGDIR/altsvc-%TESTNUMBER">

@@ -33,10 +33,10 @@ proxy
 <server>
 http
 </server>
- <name>
+<name>
 URL with trailing dot and receiving a cookie for the TLD with dot
- </name>
- <command>
+</name>
+<command>
 -x http://%HOSTIP:%HTTPPORT http://firsthost.me. -c %LOGDIR/cookies%TESTNUMBER
 </command>
 </client>

@@ -49,10 +49,10 @@ contents
 http
 http-proxy
 </server>
- <name>
+<name>
 HTTP 1.0 CONNECT with proxytunnel and proxy+host Basic authentication
- </name>
- <command>
+</name>
+<command>
 http://test.%TESTNUMBER:%HTTPPORT/we/want/that/page/%TESTNUMBER -p --proxy1.0 %HOSTIP:%PROXYPORT --user iam:myself --proxy-user youare:yourself
 </command>
 <features>

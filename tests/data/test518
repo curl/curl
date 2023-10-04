@@ -43,10 +43,10 @@ lib%TESTNUMBER
 ./libtest/lib%TESTNUMBER check
 </precheck>
 
- <name>
+<name>
 HTTP GET with more than FD_SETSIZE descriptors open
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

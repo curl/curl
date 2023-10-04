@@ -19,10 +19,10 @@ none
 <features>
 http
 </features>
- <name>
+<name>
 HTTP URL with rubbish after IPv6 bracket
- </name>
- <command>
+</name>
+<command>
 -g "http://[%HOSTIP]test:%NOLISTENPORT/we/want/%TESTNUMBER" "http://[%HOSTIP][%HOSTIP]:%NOLISTENPORT/we/want/%TESTNUMBER" "http://user@[::1]@localhost"
 </command>
 </client>

@@ -17,10 +17,10 @@ failure
 <server>
 http
 </server>
- <name>
+<name>
 --dump-header to file that cannot be created
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -D loggg/save-here/fails
 </command>
 </client>

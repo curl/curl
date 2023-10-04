@@ -35,10 +35,10 @@ ftp
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 FTP dir list PASV with CURLOPT_PORT
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP/%TESTNUMBER/ %FTPPORT
 </command>
 </client>

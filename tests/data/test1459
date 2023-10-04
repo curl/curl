@@ -19,10 +19,10 @@ mkdir -p %PWD/%LOGDIR/test%TESTNUMBER.dir/.ssh
 sftp
 !oldlibssh
 </features>
- <name>
+<name>
 SFTP with corrupted known_hosts
- </name>
- <command>
+</name>
+<command>
 -u : sftp://%HOSTIP:%SSHPORT/ -l
 </command>
 <file name="%LOGDIR/test%TESTNUMBER.dir/.ssh/known_hosts">

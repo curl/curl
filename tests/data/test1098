@@ -31,11 +31,11 @@ http
 ftp
 proxy
 </features>
- <name>
+<name>
 FTP RETR twice over proxy confirming persistent connection
- </name>
+</name>
 
- <command>
+<command>
 ftp://ftp-site/moo/%TESTNUMBER ftp://ftp-site/moo/%TESTNUMBER --proxy http://%HOSTIP:%HTTPPORT
 </command>
 </client>

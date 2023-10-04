@@ -31,10 +31,10 @@ REPLY SIZE 500 no such command
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP range download when SIZE doesn't work
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --range 3-6
 </command>
 </client>

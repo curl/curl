@@ -13,9 +13,9 @@ FAILURE
 <server>
 file
 </server>
- <name>
+<name>
 "upload" with file://
- </name>
+</name>
 <command option="no-include">
 file://localhost/%PWD/%LOGDIR/nonexisting/result%TESTNUMBER.txt -T %LOGDIR/upload%TESTNUMBER.txt
 </command>

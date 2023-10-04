@@ -24,9 +24,9 @@ todelooooo lalalala yada yada, we know nothing about ranges ;-)
 <server>
 http
 </server>
- <name>
+<name>
 HTTP resume request without server supporting it
- </name>
+</name>
  <command option="no-output">
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -C - --no-include -o %LOGDIR/fewl%TESTNUMBER.txt
 </command>

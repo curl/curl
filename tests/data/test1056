@@ -55,10 +55,10 @@ ipv6
 http
 http-ipv6
 </server>
- <name>
+<name>
 HTTP follow redirect from IPv4 to IPv6 with scope
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/are/all/twits/%TESTNUMBER -L
 </command>
 <precheck>

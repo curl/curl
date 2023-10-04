@@ -47,10 +47,10 @@ Actual content
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with resume and redirect
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C 50 -L
 </command>
 </client>

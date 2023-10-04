@@ -29,10 +29,10 @@ http
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 HTTP POST text data using CURLOPT_COPYPOSTFIELDS
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

@@ -90,10 +90,10 @@ http
 !SSPI
 crypto
 </features>
- <name>
+<name>
 HTTP GET with --anyauth with two URLs (picking Digest)
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --anyauth http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001
 </command>
 </client>

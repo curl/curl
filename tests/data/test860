@@ -19,10 +19,10 @@ CUSTOMREQUEST
 <server>
 pop3
 </server>
- <name>
+<name>
 POP3 NOOP (CUSTOMREQUEST)
- </name>
- <command>
+</name>
+<command>
 pop3://%HOSTIP:%POP3PORT -u user:secret -X NOOP -I
 </command>
 </client>

@@ -25,13 +25,13 @@ REPLY dXJzZWwAa3VydAB4aXBqM3BsbXE= 235 Authenticated
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP plain authentication with alternative authorization identity
- </name>
+</name>
 <stdin>
 mail body
 </stdin>
- <command>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u kurt:xipj3plmq --sasl-authzid ursel -T -
 </command>
 </client>

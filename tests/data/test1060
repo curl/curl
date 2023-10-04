@@ -871,10 +871,10 @@ http
 crypto
 proxy
 </features>
- <name>
+<name>
 HTTP proxy CONNECT auth Digest, large headers and data
- </name>
- <command>
+</name>
+<command>
 http://test.remote.haxx.se.%TESTNUMBER:8990/path/%TESTNUMBER0002 --proxy http://%HOSTIP:%HTTPPORT --proxy-user silly:person --proxy-digest --proxytunnel
 </command>
 </client>

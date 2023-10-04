@@ -16,9 +16,9 @@ smtp
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 SMTP with CRLF-dot-CRLF in data
- </name>
+</name>
 <stdin>
 From: different
 To: another
@@ -31,7 +31,7 @@ To: another
 
 body
 </stdin>
- <command>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER
 </command>
 </client>

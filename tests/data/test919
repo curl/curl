@@ -25,13 +25,13 @@ REPLY AUTH 235 Authenticated
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP plain authentication with initial response
- </name>
+</name>
 <stdin>
 mail body
 </stdin>
- <command>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret --sasl-ir -T -
 </command>
 </client>

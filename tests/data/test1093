@@ -24,10 +24,10 @@ returned
 <server>
 tftp
 </server>
- <name>
+<name>
 TFTP retrieve with mode=i
- </name>
- <command>
+</name>
+<command>
 "tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER;mode=i" --use-ascii
 </command>
 </client>

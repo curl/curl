@@ -32,10 +32,10 @@ http
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 Extract Location: with broken URL
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

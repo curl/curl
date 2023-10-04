@@ -18,10 +18,10 @@ RETR
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP timed conditioned get file with identical time stamp
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -z "2004 jan 1 12:12:12 UTC"
 </command>
 

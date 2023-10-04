@@ -20,10 +20,10 @@ none
 <features>
 http
 </features>
- <name>
+<name>
 reject non-numerical port number in URL
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:alpha/beta/%TESTNUMBER
 </command>
 </client>

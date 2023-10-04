@@ -12,9 +12,9 @@ STOR
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP PASV upload file
- </name>
+</name>
 <file name="%LOGDIR/test%TESTNUMBER.txt">
 data
     to
@@ -23,7 +23,7 @@ that FTP
 works
   so does it?
 </file>
- <command>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt
 </command>
 </client>

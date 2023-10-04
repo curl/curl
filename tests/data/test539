@@ -40,10 +40,10 @@ ftp
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 Two FTP fetches using different CURLOPT_FTP_FILEMETHOD
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/path/to/the/file/%TESTNUMBER
 </command>
 </client>

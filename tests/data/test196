@@ -18,10 +18,10 @@ REPLY PASS 430 temporarily not available
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP transient error, retry request once
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --retry 1
 </command>
 </client>

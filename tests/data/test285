@@ -12,10 +12,10 @@ TFTP WRQ
 <server>
 tftp
 </server>
- <name>
+<name>
 TFTP send
- </name>
- <command>
+</name>
+<command>
 -T %LOGDIR/test%TESTNUMBER.txt tftp://%HOSTIP:%TFTPPORT// --connect-time 549
 </command>
 <file name="%LOGDIR/test%TESTNUMBER.txt">

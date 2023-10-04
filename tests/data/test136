@@ -18,10 +18,10 @@ RETR
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP with user and no password
- </name>
- <command>
+</name>
+<command>
 -u user: ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>

@@ -33,10 +33,10 @@ https
 <killserver>
 https
 </killserver>
- <name>
+<name>
 HTTPS with 8 secs timeout
- </name>
- <command>
+</name>
+<command>
 -k https://%HOSTIP:%HTTPSPORT/want/%TESTNUMBER -m 8
 </command>
 </client>

@@ -29,13 +29,13 @@ REPLY FAIL 500 this might not be a failure!
 <server>
 ftp
 </server>
- <name>
+<name>
 --libcurl for FTP with quote ops
- </name>
+</name>
 <setenv>
 SSL_CERT_FILE=
 </setenv>
- <command>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -Q "NOOP 1" -Q "+NOOP 2" -Q "-NOOP 3" -Q "*FAIL" -Q "+*FAIL HARD" --libcurl %LOGDIR/test%TESTNUMBER.c
 </command>
 </client>

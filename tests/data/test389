@@ -31,10 +31,10 @@ Funny-head: yesyes
 <server>
 http
 </server>
- <name>
+<name>
 *.localhost is a local host
- </name>
- <command>
+</name>
+<command>
 http://curlmachine.localhost:%HTTPPORT/%TESTNUMBER
 </command>
 # Ensure that we're running on localhost

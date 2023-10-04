@@ -25,9 +25,9 @@ Funny-head: yesyes
 <server>
 http
 </server>
- <name>
+<name>
 HTTP URL with escaped { and }
- </name>
+</name>
 <command>
 "http://%HOSTIP:%HTTPPORT/\{\}\/%TESTNUMBER"
 </command>

@@ -61,10 +61,10 @@ http
 crypto
 proxy
 </features>
- <name>
+<name>
 HTTP with proxy-requiring-Digest to site-requiring-Digest
- </name>
- <command>
+</name>
+<command>
 http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER --proxy http://%HOSTIP:%HTTPPORT --proxy-user foo:bar --proxy-digest --digest --user digest:alot
 </command>
 </client>

@@ -22,10 +22,10 @@ iSearch results		error.host	1
 <server>
 gopher
 </server>
- <name>
+<name>
 Gopher query
- </name>
- <command>
+</name>
+<command>
 "gopher://%HOSTIP:%GOPHERPORT/7/the/search/engine%09query%20succeeded/%TESTNUMBER"
 </command>
 </client>

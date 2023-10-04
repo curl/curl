@@ -22,10 +22,10 @@ REPLY PWD 257 there is rubbish all over "/this/is/the/path"
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP with rubbish before name in 257-response
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/get/file/%TESTNUMBER ftp://%HOSTIP:%FTPPORT/get/file/again/%TESTNUMBER --ftp-method singlecwd
 </command>
 </client>

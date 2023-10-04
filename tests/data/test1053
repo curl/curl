@@ -57,10 +57,10 @@ Mime
 <server>
 http
 </server>
- <name>
+<name>
 HTTP RFC1867-type formposting from file with Location: following
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -L -F name=daniel -F tool=curl -F file=@%LOGDIR/test%TESTNUMBER.txt
 </command>
 # We create this file before the command is invoked!

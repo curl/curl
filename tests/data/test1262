@@ -19,10 +19,10 @@ RETR
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP request and denied to download an older file with -z
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/blalbla/%TESTNUMBER -z "-1 jan 2001"
 </command>
 </client>

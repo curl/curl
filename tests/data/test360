@@ -11,10 +11,10 @@
 <server>
 http
 </server>
- <name>
+<name>
 Error on both --fail-with-body and --fail
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --fail-with-body --fail
 </command>
 </client>

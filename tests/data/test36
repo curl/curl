@@ -38,10 +38,10 @@ a
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with bad chunked Transfer-Encoding
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

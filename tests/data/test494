@@ -21,10 +21,10 @@ blipp
 <server>
 ftp
 </server>
- <name>
+<name>
 skip 'macdef' when parsing netrc
- </name>
- <command>
+</name>
+<command>
 --netrc --netrc-file %LOGDIR/netrc%TESTNUMBER ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 <file name="%LOGDIR/netrc%TESTNUMBER" >

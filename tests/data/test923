@@ -17,10 +17,10 @@ VRFY
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP VRFY
- </name>
- <command>
+</name>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient
 </command>
 </client>

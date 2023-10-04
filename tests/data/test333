@@ -16,10 +16,10 @@ command-line
 <server>
 none
 </server>
- <name>
+<name>
 Try a non-boolean command line option with --no-
- </name>
- <command>
+</name>
+<command>
 --no-proxy "hey" http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER
 </command>
 </client>

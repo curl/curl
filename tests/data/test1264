@@ -18,10 +18,10 @@ none
 <features>
 http
 </features>
- <name>
+<name>
 HTTP URL with space in host name
- </name>
- <command>
+</name>
+<command>
 -g "http://127.0.0.1 www.example.com/we/want/%TESTNUMBER"
 </command>
 </client>

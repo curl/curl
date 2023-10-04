@@ -33,10 +33,10 @@ http
 <tool>
 lib526
 </tool>
- <name>
+<name>
 HTTP GET same file using different handles but same connection
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/path/%TESTNUMBER
 </command>
 </client>

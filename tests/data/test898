@@ -63,10 +63,10 @@ proxy
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with custom auth and cookies redirected to HTTP on a diff port
- </name>
- <command>
+</name>
+<command>
 -x http://%HOSTIP:%HTTPPORT http://firsthost.com -L -H "Authorization: Basic am9lOnNlY3JldA==" -H "Cookie: userpwd=am9lOnNlY3JldA=="
 </command>
 </client>

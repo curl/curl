@@ -48,10 +48,10 @@ mother knew what became of me.
 ftp
 https-proxy
 </server>
- <name>
+<name>
 FTP through HTTPS-proxy, with connection reuse
- </name>
- <command>
+</name>
+<command>
 -p -x https://%HOSTIP:%HTTPSPROXYPORT ftp://ftp.site.thru.https.proxy:%FTPPORT/%TESTNUMBER --proxy-insecure ftp://ftp.site.thru.https.proxy:%FTPPORT/%TESTNUMBER0002
 </command>
 <features>
