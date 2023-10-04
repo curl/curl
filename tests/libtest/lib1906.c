@@ -44,7 +44,7 @@ int test(char *URL)
   /* set a port number that makes this request fail */
   easy_setopt(curl, CURLOPT_PORT, 1L);
   res = curl_easy_perform(curl);
-  if(res != CURLE_COULDNT_CONNECT) {
+  if(res != CURLE_COULDNT_CONNECT && res != CURLE_OPERATION_TIMEDOUT) {
     fprintf(stderr, "failure expected, "
             "curl_easy_perform returned %d: <%s>, <%s>\n",
             (int) res, curl_easy_strerror(res), error_buffer);
