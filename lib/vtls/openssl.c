@@ -79,6 +79,8 @@
 #include <openssl/bio.h>
 #include <openssl/buffer.h>
 #include <openssl/pkcs12.h>
+#include <openssl/tls1.h>
+#include <openssl/evp.h>
 
 #if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_OCSP)
 #include <openssl/ocsp.h>
@@ -3996,7 +3998,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
 #if defined(OPENSSL_VERSION_MAJOR) && defined(OPENSSL_VERSION_MINOR) && \
     (OPENSSL_VERSION_MAJOR >= 3) && (OPENSSL_VERSION_MINOR >= 2)
       negotiated_group_name = SSL_get0_group_name(backend->handle);
-#else
+#elif defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
     negotiated_group_name =
       OBJ_nid2sn(SSL_get_negotiated_group(backend->handle) & 0x0000FFFF);
 #endif
