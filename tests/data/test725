@@ -19,10 +19,10 @@ http
 <setenv>
 HOME=%PWD/%LOGDIR
 </setenv>
- <name>
+<name>
 IPFS with malformed gateway URL from gateway file
- </name>
- <command>
+</name>
+<command>
 ipfs://QmV5JejrpgUxnkZeFZYMxVCqAbKy3KdPXWXyuEDiMNZwUx
 </command>
 <file name="%LOGDIR/.ipfs/gateway" >

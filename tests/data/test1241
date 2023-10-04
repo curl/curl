@@ -34,10 +34,10 @@ Connection: close
 <server>
 http
 </server>
- <name>
+<name>
 HTTP _without_ dotdot removal
- </name>
- <command>
+</name>
+<command>
 --path-as-is --proxy http://%HOSTIP:%HTTPPORT http://test.remote.haxx.se.%TESTNUMBER:8990/../../hej/but/who/../%TESTNUMBER?stupid=me/../%TESTNUMBER#soo/../%TESTNUMBER http://test.remote.haxx.se.%TESTNUMBER:8990/../../hej/but/who/../%TESTNUMBER0001#/../%TESTNUMBER0001
 </command>
 <features>

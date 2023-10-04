@@ -21,10 +21,10 @@ blabla custom request result
 <server>
 http
 </server>
- <name>
+<name>
 HTTP custom request 'DELETE'
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -X DELETE
 </command>
 </client>

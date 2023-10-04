@@ -25,10 +25,10 @@ blaha
 <server>
 http
 </server>
- <name>
+<name>
 HTTP PUT from stdin with set size, disabling chunked transfer-encoding
- </name>
- <command>
+</name>
+<command>
  -T - -H "Transfer-Encoding:" -H "Content-Length: 14" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 <stdin>

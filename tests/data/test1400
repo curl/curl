@@ -24,13 +24,13 @@ Connection: close
 <server>
 http
 </server>
- <name>
+<name>
 --libcurl for simple HTTP GET
- </name>
+</name>
 <setenv>
 SSL_CERT_FILE=
 </setenv>
- <command>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --libcurl %LOGDIR/test%TESTNUMBER.c
 </command>
 </client>

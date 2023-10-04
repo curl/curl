@@ -28,10 +28,10 @@ CUSTOMREQUEST
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP EXAMINE mailbox (CUSTOMREQUEST)
- </name>
- <command>
+</name>
+<command>
 imap://%HOSTIP:%IMAPPORT -u user:secret -X 'EXAMINE %TESTNUMBER'
 </command>
 </client>

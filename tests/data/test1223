@@ -26,10 +26,10 @@ hej
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET -w remote_ip and -w remote_port
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w 'IP %{remote_ip} and PORT %{remote_port}\n'
 </command>
 </client>

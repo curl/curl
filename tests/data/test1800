@@ -32,10 +32,10 @@ http
 <features>
 http/2
 </features>
- <name>
+<name>
 HTTP/2 upgrade refused
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --http2
 </command>
 

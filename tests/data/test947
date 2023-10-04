@@ -26,13 +26,13 @@ REPLY AUTH 235 Authenticated
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP OAuth 2.0 (OAUTHBEARER) authentication with initial response
- </name>
+</name>
 <stdin>
 mail body
 </stdin>
- <command>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u user --oauth2-bearer mF_9.B5f-4.1JqM --sasl-ir -T -
 </command>
 </client>

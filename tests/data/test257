@@ -67,10 +67,10 @@ If this is received, the location following worked
 <server>
 http
 </server>
- <name>
+<name>
 HTTP Location: following with --netrc-optional
- </name>
- <command>
+</name>
+<command>
 http://supersite.com/want/%TESTNUMBER -L -x http://%HOSTIP:%HTTPPORT --netrc-optional --netrc-file %LOGDIR/netrc%TESTNUMBER
 </command>
 <features>

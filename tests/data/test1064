@@ -31,10 +31,10 @@ still ok
 <server>
 http
 </server>
- <name>
+<name>
 HTTP PUT twice
- </name>
- <command>
+</name>
+<command>
 -H "Expect:" -T %LOGDIR/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER.upload1 -T %LOGDIR/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002.upload2
 </command>
 <file name="%LOGDIR/%TESTNUMBER">

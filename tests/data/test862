@@ -28,10 +28,10 @@ To: fake@nowhere
 <server>
 pop3
 </server>
- <name>
+<name>
 POP3 retrieve message header (CUSTOMREQUEST)
- </name>
- <command>
+</name>
+<command>
 pop3://%HOSTIP:%POP3PORT -u user:secret -X 'TOP %TESTNUMBER 0'
 </command>
 </client>

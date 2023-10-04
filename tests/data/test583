@@ -20,15 +20,15 @@ sftp
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 SFTP with multi interface, remove handle early
- </name>
+</name>
 
 # The command here uses 'localhost' just to make sure that curl_multi_perform
 # won't reach too far in the first invoke. When using c-ares at least, the
 # name resolve will cause it to return rather quickly and thus we could trigger
 # the problem we're looking to verify.
- <command>
+<command>
 sftp://localhost:%SSHPORT%SSH_PWD/%LOGDIR/upload%TESTNUMBER.txt %USER: %LOGDIR/server/curl_client_key.pub %LOGDIR/server/curl_client_key
 </command>
 </client>

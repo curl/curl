@@ -32,10 +32,10 @@ Content-Length: 0
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with --resolve and same host name using different cases
- </name>
- <command>
+</name>
+<command>
 --resolve MiXeDcAsE.cOm:%HTTPPORT:%HOSTIP http://MiXeDcAsE.cOm:%HTTPPORT/%TESTNUMBER http://mixedcase.com:%HTTPPORT/%TESTNUMBER0001
 </command>
 </client>

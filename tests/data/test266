@@ -49,10 +49,10 @@ writedelay: 10
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with chunked Transfer-Encoding and chunked trailer
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -D %LOGDIR/heads%TESTNUMBER
 </command>
 </client>

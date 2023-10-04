@@ -37,16 +37,16 @@ This server reply is for testing cookies
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with bad domain name, get cookies and store in cookie jar
- </name>
+</name>
 # Explicitly set the time zone to a known good one, in case the user is
 # using one of the 'right' zones that take into account leap seconds
 # which causes the cookie expiry times to be different from what we expect.
 <setenv>
 TZ=GMT
 </setenv>
- <command>
+<command>
 domain..tld:%HTTPPORT/want/%TESTNUMBER --resolve domain..tld:%HTTPPORT:%HOSTIP -c %LOGDIR/jar%TESTNUMBER -b %LOGDIR/injar%TESTNUMBER
 </command>
 <file name="%LOGDIR/injar%TESTNUMBER">

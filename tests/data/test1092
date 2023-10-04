@@ -32,10 +32,10 @@ http
 ftp
 proxy
 </features>
- <name>
+<name>
 FTP with type=i over HTTP proxy
- </name>
- <command>
+</name>
+<command>
 "ftp://%HOSTIP:%HTTPPORT/we/want/that/page/%TESTNUMBER;type=i" --use-ascii -x %HOSTIP:%HTTPPORT
 </command>
 </client>

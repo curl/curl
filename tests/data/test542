@@ -30,10 +30,10 @@ ftp
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 FTP a file with NOBODY yes and HEADER no
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 

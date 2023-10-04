@@ -25,10 +25,10 @@ SSL
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP STARTTLS pipelined server response
- </name>
- <command>
+</name>
+<command>
 imap://%HOSTIP:%IMAPPORT/%TESTNUMBER -T %LOGDIR/upload%TESTNUMBER -u user:secret --ssl
 </command>
 <file name="%LOGDIR/upload%TESTNUMBER">

@@ -30,10 +30,10 @@ Funny-head: yesyes
 <server>
 http
 </server>
- <name>
+<name>
 netrc with quoted password
- </name>
- <command>
+</name>
+<command>
 --netrc-optional --netrc-file %LOGDIR/netrc%TESTNUMBER http://%HOSTIP:%HTTPPORT/
 </command>
 <file name="%LOGDIR/netrc%TESTNUMBER" >

@@ -30,10 +30,10 @@ Hello curl from IPNS
 <server>
 http
 </server>
- <name>
+<name>
 IPNS
- </name>
- <command>
+</name>
+<command>
 --ipfs-gateway http://%HOSTIP:%HTTPPORT/%TESTNUMBER ipns://QmV5JejrpgUxnkZeFZYMxVCqAbKy3KdPXWXyuEDiMNZwUx
 </command>
 </client>

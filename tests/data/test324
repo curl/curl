@@ -15,9 +15,9 @@ httptls+srp
 <features>
 TLS-SRP
 </features>
- <name>
+<name>
 TLS-SRP with server cert checking
- </name>
+</name>
 <command> # no --insecure
 --tlsauthtype SRP --tlsuser jsmith --tlspassword abc https://%HOSTIP:%HTTPTLSPORT/want/fails
 </command>

@@ -16,10 +16,10 @@
 <server>
 none
 </server>
- <name>
+<name>
 -K with missing file causes error
- </name>
- <command>
+</name>
+<command>
 -K %LOGDIR/missing http://localhost
 </command>
 </client>

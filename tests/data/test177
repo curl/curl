@@ -28,10 +28,10 @@ http
 <features>
 crypto
 </features>
- <name>
+<name>
 HTTP POST --digest to server doing a 302-location response
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u auser:apasswd --digest -d "junkelijunk"
 </command>
 </client>

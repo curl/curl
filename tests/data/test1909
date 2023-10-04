@@ -32,9 +32,9 @@ data
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET --retry-all-errors to overcome partial transfer
- </name>
+</name>
  <command option="no-output,no-include">
 --retry 1 --retry-all-errors -o %LOGDIR/outfile%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>

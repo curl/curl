@@ -24,10 +24,10 @@ Repeated nonsense-headers
 <server>
 http
 </server>
- <name>
+<name>
 --write-out test
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER --write-out "%{url_effective} %{http_code} %{size_download}\n"
 </command>
 </client>

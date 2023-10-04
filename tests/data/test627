@@ -20,10 +20,10 @@ NOBODY
 <server>
 sftp
 </server>
- <name>
+<name>
 SFTP quote remove file with NOBODY
- </name>
- <command>
+</name>
+<command>
 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -I -Q "rm %PWD/%LOGDIR/file%TESTNUMBER.txt" sftp://%HOSTIP:%SSHPORT --insecure
 </command>
 <postcheck>

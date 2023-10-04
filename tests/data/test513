@@ -21,9 +21,9 @@ http
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 send HTTP POST using read callback that returns CURL_READFUNC_ABORT
- </name>
+</name>
 # the 1s post-command delay helps to prevent a spurious failure on s390
  <command delay="1">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER

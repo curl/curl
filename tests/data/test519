@@ -51,10 +51,10 @@ http
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 GET same URL twice with different users
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

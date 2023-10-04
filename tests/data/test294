@@ -38,10 +38,10 @@ REPLY ACCT 230 Thank-you for the ACCT
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP --ftp-account on ACCT request
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER/ --ftp-account "data for acct"
 </command>
 </client>

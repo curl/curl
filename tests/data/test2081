@@ -32,10 +32,10 @@ Thanks for following.
 <server>
 http
 </server>
- <name>
+<name>
 Automatic referrer credential and anchor stripping check
- </name>
- <command>
+</name>
+<command>
 http://user:pass@%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER#anchor --location --referer ';auto' --write-out '%{referer}\n'
 </command>
 </client>

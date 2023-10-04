@@ -46,10 +46,10 @@ Connection: close
 <server>
 http
 </server>
- <name>
+<name>
 HTTP resume transfer with the whole file already downloaded and --fail
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -C 87 --fail
 </command>
 </client>

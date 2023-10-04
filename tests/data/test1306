@@ -16,9 +16,9 @@ none
 <features>
 unittest
 </features>
- <name>
+<name>
 internal hash create/add/destroy testing
- </name>
+</name>
 <tool>
 unit1305
 </tool>

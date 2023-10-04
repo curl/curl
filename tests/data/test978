@@ -31,10 +31,10 @@ Funny-head: yesyes
 <server>
 http
 </server>
- <name>
+<name>
 verify that --stderr works for -w's stderr as well
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --stderr %LOGDIR/redir --silent -w '%{stderr}nonsense\n'
 </command>
 </client>

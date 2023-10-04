@@ -25,15 +25,15 @@ boo
 <server>
 http
 </server>
- <name>
+<name>
 NO_PROXY test, with user name in URL
- </name>
+</name>
 
 <setenv>
 no_proxy=%HOSTIP
 http_proxy=http://non-existing-host.haxx.se:3128/
 </setenv>
- <command>
+<command>
 http://user:secret@%HOSTIP:%HTTPPORT/gimme/%TESTNUMBER
 </command>
 </client>

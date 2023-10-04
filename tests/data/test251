@@ -33,10 +33,10 @@ SLOWDOWN
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP dir list, PORT with specified IP and slow response
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/ -P %CLIENTIP
 </command>
 </client>

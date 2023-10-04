@@ -36,10 +36,10 @@ Funny-head: yesyes
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with 102 response!
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

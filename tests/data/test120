@@ -27,10 +27,10 @@ REPLY EPSV 314 bluah you f00l!
 <server>
 ftp
 </server>
- <name>
+<name>
 ftp download with post-quote delete operation
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -Q "-DELE file"
 </command>
 </client>

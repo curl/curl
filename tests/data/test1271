@@ -23,10 +23,10 @@ Moo
 <server>
 http
 </server>
- <name>
+<name>
 --write-out from file with empty file
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER -w @%LOGDIR/blank%TESTNUMBER
 </command>
 <file name="%LOGDIR/blank%TESTNUMBER">

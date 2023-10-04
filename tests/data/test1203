@@ -25,10 +25,10 @@ ipv6
 <server>
 gopher-ipv6
 </server>
- <name>
+<name>
 Gopher IPv6 index
- </name>
- <command>
+</name>
+<command>
 -g gopher://%HOST6IP:%GOPHER6PORT/1/moo/%TESTNUMBER
 </command>
 </client>

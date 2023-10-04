@@ -36,14 +36,14 @@ h2c
 https
 http/2
 </server>
- <name>
+<name>
 HTTPS GET translated by alt-svc lookup to HTTP/2 GET
- </name>
+</name>
 <setenv>
 # make debug-curl accept Alt-Svc over plain HTTP
 CURL_ALTSVC_HTTP="yeah"
 </setenv>
- <command>
+<command>
 --http2 --alt-svc "%LOGDIR/altsvc-%TESTNUMBER" "http://%HOSTIP:%HTTPSPORT/%TESTNUMBER" "http://%HOSTIP:%HTTPSPORT/%TESTNUMBER"
 </command>
 <file name="%LOGDIR/altsvc-%TESTNUMBER">

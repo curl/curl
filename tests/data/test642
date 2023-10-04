@@ -20,10 +20,10 @@ for ssh test
 <server>
 sftp
 </server>
- <name>
+<name>
 SFTP retrieval
- </name>
- <command>
+</name>
+<command>
 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: --compressed-ssh sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/file%TESTNUMBER.txt --insecure
 </command>
 <file name="%LOGDIR/file%TESTNUMBER.txt">

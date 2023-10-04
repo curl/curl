@@ -23,10 +23,10 @@ ftp
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 FTP wildcard download - dup_handle and multi interface
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/fully_simulated/UNIX/*
 </command>
 </client>

@@ -19,10 +19,10 @@ FETCH
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP with --login-options 'AUTH=dummy' (failing)
- </name>
- <command>
+</name>
+<command>
 'imap://%HOSTIP:%IMAPPORT/895/;MAILINDEX=1' -u '"user:sec"ret{' --login-options 'AUTH=dummy'
 </command>
 </client>

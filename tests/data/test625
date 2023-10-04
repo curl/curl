@@ -18,10 +18,10 @@ SFTP put
 <server>
 sftp
 </server>
- <name>
+<name>
 SFTP put with --ftp-create-dirs twice
- </name>
- <command>
+</name>
+<command>
 --ftp-create-dirs --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -T %LOGDIR/file%TESTNUMBER.txt sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/test%TESTNUMBER.a/upload.%TESTNUMBER -T %LOGDIR/file%TESTNUMBER.txt sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/test%TESTNUMBER.b/upload.%TESTNUMBER --insecure
 </command>
 <postcheck>

@@ -14,10 +14,10 @@ none
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 curl_easy_escape
- </name>
- <command>
+</name>
+<command>
 -
 </command>
 

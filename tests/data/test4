@@ -26,10 +26,10 @@ Funny-head: yesyes
 <server>
 http
 </server>
- <name>
+<name>
 Replaced internal and added custom HTTP headers
- </name>
- <command>
+</name>
+<command>
  -H "extra-header: here" -H "Accept: replaced" -H "X-Custom-Header;" -H "X-Test: foo; " -H "X-Test:" -H "X-Test2: foo;" -H "X-Test3:  " -H "X-Test4;  " -H "X-Test5;ignored" http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

@@ -25,10 +25,10 @@ monster
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET -w num_connects with one simple connect
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w "%{num_connects}\n"
 </command>
 </client>

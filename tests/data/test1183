@@ -27,10 +27,10 @@ http
 <features>
 proxy
 </features>
- <name>
+<name>
 %TESTNUMBER used instead of actual test number
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

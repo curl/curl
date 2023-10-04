@@ -82,10 +82,10 @@ connection-monitor
 <server>
 http
 </server>
- <name>
+<name>
 HTTP PUT with Expect: 100-continue and 417 response during upload
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt --limit-rate 64K --expect100-timeout 0.001
 </command>
 <precheck>

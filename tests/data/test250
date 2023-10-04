@@ -35,10 +35,10 @@ SLOWDOWN
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP dir list PASV with slow response
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/
 </command>
 </client>

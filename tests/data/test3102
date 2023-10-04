@@ -30,10 +30,10 @@ https
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 verify certificate chain order with simple HTTPS GET
- </name>
- <command>
+</name>
+<command>
 https://%HOSTIP:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>

@@ -56,10 +56,10 @@ http/3
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 HTTP GET multiple over HTTP/3
- </name>
- <command>
+</name>
+<command>
 https://%HOSTIP:%HTTP3PORT/path/%TESTNUMBER %HOSTIP %HTTP3PORT
 </command>
 </client>

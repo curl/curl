@@ -19,10 +19,10 @@ CUSTOMREQUEST
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP DELETE mailbox (CUSTOMREQUEST)
- </name>
- <command>
+</name>
+<command>
 imap://%HOSTIP:%IMAPPORT -u user:secret -X 'DELETE %TESTNUMBER'
 </command>
 </client>

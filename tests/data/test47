@@ -24,10 +24,10 @@ Server: test-server/fake
 <server>
 http
 </server>
- <name>
+<name>
 simple HTTP 1.0 GET
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -0
 </command>
 </client>

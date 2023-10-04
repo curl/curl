@@ -19,10 +19,10 @@ moooooooo
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP --disable-epsv
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/path/to/file/%TESTNUMBER --disable-epsv
 </command>
 </client>

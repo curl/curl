@@ -21,10 +21,10 @@ COUNT CWD 1
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP with --ftp-create-dirs (failing CWD)
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/first/dir/here/%TESTNUMBER --ftp-create-dirs
 </command>
 </client>

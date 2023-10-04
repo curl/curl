@@ -48,10 +48,10 @@ socks5
 http
 proxy
 </features>
- <name>
+<name>
 FTP fetch with --preproxy, --proxy and --connect-to
- </name>
- <command>
+</name>
+<command>
 ftp://ftp.example.com.%TESTNUMBER/%TESTNUMBER --connect-to ::connect.example.com.%TESTNUMBER:%FTPPORT --proxytunnel --proxy %HOSTIP:%PROXYPORT --preproxy socks5://%HOSTIP:%SOCKSPORT
 </command>
 </client>

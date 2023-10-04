@@ -32,10 +32,10 @@ https
 perl %SRCDIR/libtest/test%TESTNUMBER.pl %CURL
 </precheck>
 
- <name>
+<name>
 simple HTTPS GET with openssl engine
- </name>
- <command>
+</name>
+<command>
 --engine openssl -k https://%HOSTIP:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>

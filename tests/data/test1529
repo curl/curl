@@ -25,10 +25,10 @@ http-proxy
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 HTTP request-injection in URL sent over proxy
- </name>
- <command>
+</name>
+<command>
  "http://the.old.moo:%HTTPPORT/%TESTNUMBER" %HOSTIP:%PROXYPORT
 </command>
 <features>

@@ -24,10 +24,10 @@ CUSTOMREQUEST
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP LSUB mailbox
- </name>
- <command>
+</name>
+<command>
 imap://%HOSTIP:%IMAPPORT -u user:secret -X 'LSUB "%TESTNUMBER" *'
 </command>
 </client>

@@ -28,10 +28,10 @@ body
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP with --login-options 'AUTH=*'
- </name>
- <command>
+</name>
+<command>
 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u '"user:sec"ret{' --login-options 'AUTH=*'
 </command>
 </client>

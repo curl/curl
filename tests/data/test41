@@ -18,10 +18,10 @@ Mime
 <server>
 http
 </server>
- <name>
+<name>
 HTTP formpost with missing file
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -F moo=@boo
 </command>
 </client>

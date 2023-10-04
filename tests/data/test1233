@@ -22,10 +22,10 @@ here are some bytes
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP failing to connect to EPSV port, switching to PASV
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>

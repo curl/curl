@@ -17,10 +17,10 @@ SSL
 <server>
 https Server-localhost-sv.pem
 </server>
- <name>
+<name>
 CRL test
- </name>
- <command>
+</name>
+<command>
 --cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --crlfile %SRCDIR/certs/Server-localhost-sv.crl https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
 # Ensure that we're running on localhost because we're checking the host name

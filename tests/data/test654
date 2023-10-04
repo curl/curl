@@ -50,10 +50,10 @@ http
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 HTTP duplicate easy handle with mime data
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/file%TESTNUMBER.txt
 </command>
 <file name="%LOGDIR/file%TESTNUMBER.txt">

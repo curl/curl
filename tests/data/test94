@@ -31,10 +31,10 @@ http
 SSL
 proxy
 </features>
- <name>
+<name>
 HTTPS GET with failed proxy auth (CONNECT 1.0)
- </name>
- <command>
+</name>
+<command>
 https://test.anything.really.com:%TESTNUMBER --proxy1.0 %HOSTIP:%HTTPPORT
 </command>
 </client>

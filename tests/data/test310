@@ -30,10 +30,10 @@ SSL
 <server>
 https Server-localhost-sv.pem
 </server>
- <name>
+<name>
 simple HTTPS GET
- </name>
- <command>
+</name>
+<command>
 --cacert %SRCDIR/certs/EdelCurlRoot-ca.crt https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
 # Ensure that we're running on localhost because we're checking the host name

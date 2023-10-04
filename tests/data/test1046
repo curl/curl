@@ -32,10 +32,10 @@ ipv6
 <server>
 http-ipv6
 </server>
- <name>
+<name>
 HTTP-IPv6 GET with numeric localhost --interface
- </name>
- <command>
+</name>
+<command>
 -g "http://%HOST6IP:%HTTP6PORT/%TESTNUMBER" --interface ::1
 </command>
 # --interface doesn't accept an address surrounded by [] so %CLIENT6IP is out

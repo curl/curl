@@ -29,14 +29,14 @@ proxy
 <server>
 http
 </server>
- <name>
+<name>
 FTP URL and with ftp_proxy environment variable set
- </name>
+</name>
 
 <setenv>
 ftp_proxy=http://%HOSTIP:%HTTPPORT/
 </setenv>
- <command>
+<command>
 ftp://%HOSTIP:23456/%TESTNUMBER
 </command>
 

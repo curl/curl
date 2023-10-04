@@ -19,9 +19,9 @@ form-api
 <server>
 none
 </server>
- <name>
+<name>
 formpost unit tests
- </name>
+</name>
 <command>
 %LOGDIR/test-%TESTNUMBER
 </command>

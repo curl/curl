@@ -25,14 +25,14 @@ http
 <features>
 telnet
 </features>
- <name>
+<name>
 TELNET to HTTP server
- </name>
+</name>
 <stdin>
 GET /we/want/%TESTNUMBER HTTP/1.0
 
 </stdin>
- <command>
+<command>
 telnet://%HOSTIP:%HTTPPORT --upload-file -
 </command>
 </client>

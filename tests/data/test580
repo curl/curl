@@ -35,10 +35,10 @@ http
 lib507
 </tool>
 
- <name>
+<name>
 multi interface, multiple Location: headers
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

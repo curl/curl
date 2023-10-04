@@ -34,10 +34,10 @@ ftp
 <tool>
 lib585
 </tool>
- <name>
+<name>
 FTP and open/close socket callbacks
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>

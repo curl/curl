@@ -26,10 +26,10 @@ server not available
 <server>
 http
 </server>
- <name>
+<name>
 HTTP --retry-max-time with too long Retry-After
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --retry 2 --retry-max-time 10
 </command>
 </client>

@@ -61,10 +61,10 @@ contents
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with custom Authorization: and redirect to new host
- </name>
- <command>
+</name>
+<command>
 http://first.host.it.is/we/want/that/page/%TESTNUMBER -x %HOSTIP:%HTTPPORT -H "Authorization: s3cr3t" --proxy-user testing:this --location
 </command>
 <features>

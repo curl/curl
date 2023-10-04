@@ -54,10 +54,10 @@ Content-Range: bytes 40-99/100
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with resume from end of file
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C -
 </command>
 <file name="%LOGDIR/curl%TESTNUMBER.out">

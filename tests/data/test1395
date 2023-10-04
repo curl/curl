@@ -14,8 +14,8 @@ none
 <features>
 unittest
 </features>
- <name>
+<name>
 Curl_dedotdotify
- </name>
+</name>
 </client>
 </testcase>

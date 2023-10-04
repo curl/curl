@@ -24,10 +24,10 @@ SSL
 <server>
 https
 </server>
- <name>
+<name>
 HTTPS PUT of small file
- </name>
- <command>
+</name>
+<command>
 -k https://%HOSTIP:%HTTPSPORT/we/want/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt
 </command>
 <file name="%LOGDIR/test%TESTNUMBER.txt">

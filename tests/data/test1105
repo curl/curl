@@ -31,10 +31,10 @@ Set-Cookie: bar=foo	bar
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with cookie parser and header recording
- </name>
- <command>
+</name>
+<command>
 "http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER?parm1=this*that/other/thing&parm2=foobar/%TESTNUMBER" -c %LOGDIR/cookie%TESTNUMBER.txt -d "userid=myname&password=mypassword"
 </command>
 <precheck>

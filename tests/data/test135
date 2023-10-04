@@ -28,10 +28,10 @@ Range
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP retrieve a byte-range
- </name>
- <command>
+</name>
+<command>
 -r 4-16 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>

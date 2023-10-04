@@ -52,10 +52,10 @@ http-proxy
 http
 proxy
 </features>
- <name>
+<name>
 POP3 fetch tunneled through HTTP proxy
- </name>
- <command>
+</name>
+<command>
 pop3://pop.%TESTNUMBER:%POP3PORT/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT -u user:secret
 </command>
 </client>

@@ -12,10 +12,10 @@ FAILURE
 <server>
 scp
 </server>
- <name>
+<name>
 SCP retrieval of missing file followed by good file
- </name>
- <command>
+</name>
+<command>
 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: scp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/not-a-valid-file-moooo scp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/file%TESTNUMBER.txt --insecure
 </command>
 <file name="%LOGDIR/file%TESTNUMBER.txt">

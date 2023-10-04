@@ -17,10 +17,10 @@ REPLY USER 314 bluah you fewl!
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP download, failed login: USER not valid
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>

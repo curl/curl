@@ -29,9 +29,9 @@ SSL
 <server>
 https Server-localhost-sv.pem
 </server>
- <name>
+<name>
 HTTPS GET using CURLOPT_CAINFO_BLOB
- </name>
+</name>
 <tool>
 lib%TESTNUMBER
 </tool>

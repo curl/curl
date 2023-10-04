@@ -21,10 +21,10 @@ ftp
 <features>
 GSS-API
 </features>
- <name>
+<name>
 FTP with 633 response before gss initialized
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 

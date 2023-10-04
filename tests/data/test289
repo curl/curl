@@ -13,10 +13,10 @@ FAILURE
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP resume upload but denied access to local file
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T %LOGDIR/illegal-nonexistent-file -C -
 </command>
 </client>

@@ -33,10 +33,10 @@ ok
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET --retry on 503 error with output to stdout
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --retry 1000
 </command>
 </client>

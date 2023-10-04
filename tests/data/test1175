@@ -13,9 +13,9 @@ symbols-in-versions
 none
 </server>
 
- <name>
+<name>
 Verify that symbols-in-versions and libcurl-errors.3 are in sync
- </name>
+</name>
 
 <command type="perl">
 %SRCDIR/error-codes.pl %SRCDIR

@@ -38,10 +38,10 @@ proxy
 ftp
 socks5
 </server>
- <name>
+<name>
 FTP dir list PASV via SOCKS5
- </name>
- <command>
+</name>
+<command>
 --socks5 %HOSTIP:%SOCKSPORT ftp://%HOSTIP:%FTPPORT/
 </command>
 </client>

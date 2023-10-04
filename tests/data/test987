@@ -16,16 +16,16 @@ SMTPS
 <server>
 smtps
 </server>
- <name>
+<name>
 SMTPS with redundant explicit SSL request
- </name>
+</name>
 <stdin>
 From: different
 To: another
 
 body
 </stdin>
- <command>
+<command>
 -k --ssl-reqd --mail-rcpt recipient@example.com --mail-from sender@example.com -T - smtps://%HOSTIP:%SMTPSPORT/%TESTNUMBER
 </command>
 </client>

@@ -27,10 +27,10 @@ http
 <features>
 proxy
 </features>
- <name>
+<name>
 HTTP GET request with proxy and --proxy-header "Proxy-Connection: Keep-Alive"
- </name>
- <command>
+</name>
+<command>
 --proxy http://%HOSTIP:%HTTPPORT --proxy-header "Proxy-Connection: Keep-Alive" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

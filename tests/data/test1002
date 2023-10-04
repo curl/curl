@@ -67,10 +67,10 @@ http
 crypto
 proxy
 </features>
- <name>
+<name>
 HTTP PUT with Digest auth, resumed upload and modified method, twice
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER.upload1 -T %LOGDIR/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER.upload2 -T %LOGDIR/%TESTNUMBER -u auser:apasswd --digest -x  http://%HOSTIP:%HTTPPORT -C 2 -X GET
 </command>
 <file name="%LOGDIR/%TESTNUMBER">

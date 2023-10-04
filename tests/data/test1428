@@ -46,10 +46,10 @@ contents
 http
 http-proxy
 </server>
- <name>
+<name>
 HTTP over proxy-tunnel with --proxy-header and --header
- </name>
- <command>
+</name>
+<command>
 http://test.%TESTNUMBER:%HTTPPORT/we/want/that/page/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT --user 'iam:my:;self' --header "header-type: server" --proxy-header "header-type: proxy"
 </command>
 <features>

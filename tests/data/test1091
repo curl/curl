@@ -20,10 +20,10 @@ bla bla bla
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP URL with type=i
- </name>
- <command>
+</name>
+<command>
 "ftp://%HOSTIP:%FTPPORT/%2ftmp/moo/%TESTNUMBER;type=i" --use-ascii
 </command>
 </client>

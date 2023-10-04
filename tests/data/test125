@@ -17,10 +17,10 @@ REPLY CWD 314 bluah you f00l!
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP download, failed CWD
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/path/to/file/%TESTNUMBER
 </command>
 </client>

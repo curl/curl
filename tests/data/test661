@@ -22,10 +22,10 @@ ftp
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 Avoid redundant CWDs
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/
 </command>
 </client>

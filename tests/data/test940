@@ -16,13 +16,13 @@ SMTP
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP with username and password but no AUTH capability
- </name>
+</name>
 <stdin>
 mail body
 </stdin>
- <command>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret -T -
 </command>
 </client>

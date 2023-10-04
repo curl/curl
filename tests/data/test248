@@ -16,9 +16,9 @@ FTP
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP upload time condition evaluates FALSE => upload anyway
- </name>
+</name>
 <file name="%LOGDIR/test%TESTNUMBER.txt">
 data
     to
@@ -27,7 +27,7 @@ that FTP
 works
   so does it?
 </file>
- <command>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt -z "apr 1 2005 08:00:00"
 </command>
 </client>

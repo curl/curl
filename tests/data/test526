@@ -29,10 +29,10 @@ ftp
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 FTP RETR same file using different handles but same connection
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER
 </command>
 </client>

@@ -23,9 +23,9 @@ REPLY LIST +OK %TESTNUMBER 100\r\n.
 <server>
 pop3
 </server>
- <name>
+<name>
 --libcurl for POP3 LIST one message
- </name>
+</name>
 <setenv>
 SSL_CERT_FILE=
 </setenv>

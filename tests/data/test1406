@@ -22,9 +22,9 @@ CAPA SIZE
 <server>
 smtp
 </server>
- <name>
+<name>
 --libcurl for SMTP
- </name>
+</name>
 <setenv>
 SSL_CERT_FILE=
 </setenv>
@@ -34,7 +34,7 @@ To: another
 
 body
 </file>
- <command>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient.one@example.com --mail-rcpt recipient.two@example.com --mail-from sender@example.com -T %LOGDIR/test%TESTNUMBER.eml --libcurl %LOGDIR/test%TESTNUMBER.c
 </command>
 </client>

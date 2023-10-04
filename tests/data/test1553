@@ -34,9 +34,9 @@ Mime
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP cleanup before a connection was created
- </name>
+</name>
 # tool is what to use instead of 'curl'
 <tool>
 lib%TESTNUMBER

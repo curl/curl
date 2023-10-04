@@ -32,10 +32,10 @@ body
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP multiple connection authentication
- </name>
- <command>
+</name>
+<command>
 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user.one:secret -: 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;UID=2' -u user.two:secret
 </command>
 </client>

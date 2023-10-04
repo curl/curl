@@ -30,10 +30,10 @@ dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr
 <server>
 ftp
 </server>
- <name>
+<name>
 Get two FTP dir listings from the same remote dir: no second CWD
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/a/path/%TESTNUMBER/ ftp://%HOSTIP:%FTPPORT/a/path/%TESTNUMBER/
 </command>
 </client>

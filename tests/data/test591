@@ -33,10 +33,10 @@ ftp
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 FTP multi PORT and 425 on upload
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER %FTPTIME2 %LOGDIR/upload%TESTNUMBER
 </command>
 <file name="%LOGDIR/upload%TESTNUMBER">

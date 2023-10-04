@@ -48,10 +48,10 @@ Content-Length: 0
 <server>
 http
 </server>
- <name>
+<name>
 HTTP PUT with --anyauth authorization (picking Basic)
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T %LOGDIR/put%TESTNUMBER -u testuser:testpass --anyauth
 </command>
 <file name="%LOGDIR/put%TESTNUMBER">

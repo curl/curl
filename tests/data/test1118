@@ -31,10 +31,10 @@ Funny-head: yesyes
 <server>
 http
 </server>
- <name>
+<name>
 URL without slash and @-letter in query
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT?email=name@example.com/%TESTNUMBER
 </command>
 </client>

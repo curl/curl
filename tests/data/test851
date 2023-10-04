@@ -22,10 +22,10 @@ REPLY LIST +OK %TESTNUMBER 100\r\n.
 <server>
 pop3
 </server>
- <name>
+<name>
 POP3 LIST one message
- </name>
- <command>
+</name>
+<command>
 pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -l -u user:secret
 </command>
 </client>

@@ -38,10 +38,10 @@ http
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 re-run redirected transfer without setting URL again
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

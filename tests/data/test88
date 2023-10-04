@@ -59,10 +59,10 @@ http
 !SSPI
 crypto
 </features>
- <name>
+<name>
 HTTP PUT with Digest authorization
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T %LOGDIR/put%TESTNUMBER -u testuser:testpass --digest
 </command>
 <file name="%LOGDIR/put%TESTNUMBER">

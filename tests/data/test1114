@@ -21,10 +21,10 @@ ftp
 <tool>
 lib576
 </tool>
- <name>
+<name>
 FTP wildcard download - skip/parser_correctness/CURLOPT_FNMATCH_FUNCTION (DOS)
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/fully_simulated/DOS/*
 </command>
 </client>

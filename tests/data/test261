@@ -23,10 +23,10 @@ REPLY TYPE 226 Kind of on the positive side!
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP RETR with 226 response code to TYPE
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>

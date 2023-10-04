@@ -37,10 +37,10 @@ Funny-head: yesyes
 <server>
 http
 </server>
- <name>
+<name>
 HTTP max-filesize and out-of-range Content-Length
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --max-filesize 2000000
 </command>
 </client>

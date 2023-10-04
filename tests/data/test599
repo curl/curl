@@ -68,10 +68,10 @@ lib%TESTNUMBER
 
 # Bug 3510057 pointed out that when following a location to a larger chunked
 # encoded page, the first size would still be used in the progress callback
- <name>
+<name>
 HTTP GET with progress callback and redirects changing content sizes
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/ip%TESTNUMBER
 </command>
 </client>

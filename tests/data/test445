@@ -42,10 +42,10 @@ smtp
 <server>
 http-proxy
 </server>
- <name>
+<name>
 Refuse tunneling protocols through HTTP proxy
- </name>
- <command>
+</name>
+<command>
 -x http://%HOSTIP:%PROXYPORT/%TESTNUMBER -p gopher://127.0.0.1 dict://127.0.0.1 http://moo https://example telnet://another ftp://yes ftps://again imap://more ldap://perhaps mqtt://yes pop3://mail rtsp://harder scp://copy sftp://files smb://wird smtp://send
 </command>
 </client>

@@ -13,9 +13,9 @@ CURL_VERSION
 none
 </server>
 
- <name>
+<name>
 Verify that feature names and CURL_VERSION_* in lib and docs are in sync
- </name>
+</name>
 
 <command type="perl">
 %SRCDIR/version-scan.pl %SRCDIR/../docs/libcurl/curl_version_info.3 %SRCDIR/../include/curl/curl.h %SRCDIR/../lib/version.c

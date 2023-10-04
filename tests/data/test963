@@ -28,9 +28,9 @@ LC_CTYPE=en_US.UTF-8
 <precheck>
 perl -MI18N::Langinfo=langinfo,CODESET -e 'die "Needs a UTF-8 locale" if (lc(langinfo(CODESET())) ne "utf-8");'
 </precheck>
- <name>
+<name>
 SMTP without SMTPUTF8 support (IDN Enabled) - UTF-8 based recipient (host part only)
- </name>
+</name>
 <stdin>
 From: different
 To: another

@@ -12,10 +12,10 @@ FAILURE
 <server>
 none
 </server>
- <name>
+<name>
 Space in FTP upload URL
- </name>
- <command>
+</name>
+<command>
 "ftp://%HOSTIP:%NOLISTENPORT/%TESTNUMBER%/with space/" -T %LOGDIR/irrelevant-file
 </command>
 </client>

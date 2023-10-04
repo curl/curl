@@ -23,10 +23,10 @@ returned
 <server>
 tftp
 </server>
- <name>
+<name>
 TFTP retrieve without TFTP options requests
- </name>
- <command>
+</name>
+<command>
 tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER --tftp-no-options
 </command>
 </client>

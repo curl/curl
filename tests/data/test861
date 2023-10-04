@@ -30,10 +30,10 @@ CAPA UIDL USER
 <server>
 pop3
 </server>
- <name>
+<name>
 POP3 UIDL (CUSTOMREQUEST)
- </name>
- <command>
+</name>
+<command>
 pop3://%HOSTIP:%POP3PORT -u user:secret -X UIDL
 </command>
 </client>

@@ -36,10 +36,10 @@ Location: http:////foo.example.com/want/%TESTNUMBER0001
 <server>
 http
 </server>
- <name>
+<name>
 HTTP redirect to http://// (four slashes!)
- </name>
- <command>
+</name>
+<command>
 %HOSTIP:%HTTPPORT/want/%TESTNUMBER -L -x http://%HOSTIP:%HTTPPORT
 </command>
 <features>

@@ -56,10 +56,10 @@ lib%TESTNUMBER
 <features>
 proxy
 </features>
- <name>
+<name>
 simple multi http:// through proxytunnel with authentication info
- </name>
- <command>
+</name>
+<command>
 http://the.old.moo.%TESTNUMBER:%HTTPPORT/%TESTNUMBER %HOSTIP:%PROXYPORT
 </command>
 <file name="%LOGDIR/test%TESTNUMBER.txt">

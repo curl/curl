@@ -25,10 +25,10 @@ swsclose: booo
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with simple cookie send
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/that/page/%TESTNUMBER -b "name=contents;name2=content2" -b name3=content3
 </command>
 <features>

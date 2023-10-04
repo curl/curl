@@ -46,10 +46,10 @@ http
 ftp
 proxy
 </features>
- <name>
+<name>
 FTP over HTTP proxy with downgrade to HTTP 1.0
- </name>
- <command>
+</name>
+<command>
 -x %HOSTIP:%HTTPPORT ftp://%HOSTIP:%HTTPPORT/we/want/that/page/%TESTNUMBER ftp://%HOSTIP:%HTTPPORT/we/want/that/page/%TESTNUMBER0002
 </command>
 </client>

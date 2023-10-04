@@ -63,10 +63,10 @@ http
 !SSPI
 crypto
 </features>
- <name>
+<name>
 HTTP PUT with --anyauth authorization (picking Digest)
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T %LOGDIR/put%TESTNUMBER -u testuser:testpass --anyauth
 </command>
 <file name="%LOGDIR/put%TESTNUMBER">

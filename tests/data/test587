@@ -28,9 +28,9 @@ http
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 HTTP multi-part formpost with aborted read callback
- </name>
+</name>
 # Add a delay to give server time to write its output since we otherwise might
 # not even give it enough time to write its lock file.
  <command delay="1">

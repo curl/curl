@@ -30,10 +30,10 @@ Funny-head: yesyes
 <server>
 http
 </server>
- <name>
+<name>
 Send "OPTIONS *" with --request-target
- </name>
- <command>
+</name>
+<command>
 --request-target '*' -X OPTIONS http://%HOSTIP:%HTTPPORT/ -H "Testno: %TESTNUMBER"
 </command>
 </client>

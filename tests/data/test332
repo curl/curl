@@ -22,10 +22,10 @@ returned
 <server>
 tftp
 </server>
- <name>
+<name>
 TFTP retrieve with blksize 400
- </name>
- <command>
+</name>
+<command>
 tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER --tftp-blksize 400
 </command>
 </client>

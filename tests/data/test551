@@ -65,10 +65,10 @@ lib547
 crypto
 proxy
 </features>
- <name>
+<name>
 HTTP proxy auth Digest with POST data from read callback
- </name>
- <command>
+</name>
+<command>
 http://test.remote.example.com/path/%TESTNUMBER http://%HOSTIP:%HTTPPORT s1lly:pers0n
 </command>
 </client>

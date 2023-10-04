@@ -13,9 +13,9 @@ CURL_DISABLE
 none
 </server>
 
- <name>
+<name>
 Verify configure.ac and source code CURL_DISABLE_-sync
- </name>
+</name>
 
 <command type="perl">
 %SRCDIR/disable-scan.pl %SRCDIR/..

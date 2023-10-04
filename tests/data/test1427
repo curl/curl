@@ -11,10 +11,10 @@ integer overflow
 <server>
 none
 </server>
- <name>
+<name>
 too large -m timeout value
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER -m 184467440737095510
 </command>
 </client>

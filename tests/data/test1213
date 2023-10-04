@@ -26,13 +26,13 @@ the content goes here
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with proxy and host-only URL
- </name>
+</name>
 # the thing here is that this sloppy form is accepted and we convert it
 # for normal server use, and we need to make sure it gets converted to
 # RFC style even for proxies
- <command>
+<command>
 -x %HOSTIP:%HTTPPORT we.want.that.site.com.%TESTNUMBER
 </command>
 <features>

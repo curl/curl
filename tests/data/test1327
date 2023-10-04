@@ -20,9 +20,9 @@ http
 <features>
 telnet
 </features>
- <name>
+<name>
 TELNET check of upload with stdout redirected
- </name>
+</name>
 <stdin>
 GET /ignore/for/%TESTNUMBER HTTP/1.0
 

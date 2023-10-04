@@ -25,13 +25,13 @@ REPLY AUTH 235 Authenticated
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP external authentication with initial response without credentials
- </name>
+</name>
 <stdin>
 mail body
 </stdin>
- <command>
+<command>
 'smtp://;AUTH=EXTERNAL@%HOSTIP:%SMTPPORT/%TESTNUMBER' --mail-rcpt recipient@example.com --mail-from sender@example.com --sasl-ir -T -
 </command>
 </client>

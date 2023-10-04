@@ -16,10 +16,10 @@ curl-config
 <server>
 none
 </server>
- <name>
+<name>
 Compare curl --version with curl-config --features
- </name>
- <command>
+</name>
+<command>
 --version
 </command>
 <postcheck>

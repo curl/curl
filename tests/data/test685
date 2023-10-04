@@ -26,10 +26,10 @@ Connection: close
 <server>
 http
 </server>
- <name>
+<name>
 netrc with no login - provided user
- </name>
- <command>
+</name>
+<command>
 --netrc-optional --netrc-file %LOGDIR/netrc%TESTNUMBER http://user@%HOSTIP:%HTTPPORT/
 </command>
 <file name="%LOGDIR/netrc%TESTNUMBER" >

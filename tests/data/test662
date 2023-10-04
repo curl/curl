@@ -46,10 +46,10 @@ body
 <server>
 http
 </server>
- <name>
+<name>
 HTTP redirect with whitespace in absolute Location: URL
- </name>
- <command>
+</name>
+<command>
 http://example.com/please/gimme/%TESTNUMBER -L -x http://%HOSTIP:%HTTPPORT
 </command>
 <features>

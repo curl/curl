@@ -36,14 +36,14 @@ ipv6
 http
 http-ipv6
 </server>
- <name>
+<name>
 HTTPS IPv4 GET translated by alt-svc to IPv6 address
- </name>
+</name>
 <setenv>
 # make debug-curl accept Alt-Svc over plain HTTP
 CURL_ALTSVC_HTTP="yeah"
 </setenv>
- <command>
+<command>
 --alt-svc "%LOGDIR/altsvc-%TESTNUMBER" "http://%HOSTIP:%HTTPPORT/%TESTNUMBER" "http://%HOSTIP:%HTTPPORT/%TESTNUMBER"
 </command>
 <file name="%LOGDIR/altsvc-%TESTNUMBER">

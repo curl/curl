@@ -20,10 +20,10 @@ FAILURE
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP SELECT UIDVALIDITY Failure
- </name>
- <command>
+</name>
+<command>
 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER;UIDVALIDITY=12345/;MAILINDEX=123' -u user:secret
 </command>
 </client>

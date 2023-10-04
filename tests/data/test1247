@@ -19,10 +19,10 @@ HTTP
 <server>
 http
 </server>
- <name>
+<name>
 --fail-early
- </name>
- <command>
+</name>
+<command>
 --fail-early h1234://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

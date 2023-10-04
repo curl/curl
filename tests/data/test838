@@ -33,10 +33,10 @@ body
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP external authentication without credentials
- </name>
- <command>
+</name>
+<command>
 'imap://;AUTH=EXTERNAL@%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1'
 </command>
 </client>

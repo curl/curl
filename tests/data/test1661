@@ -15,8 +15,8 @@ none
 <features>
 unittest
 </features>
- <name>
+<name>
 bufref unit tests
- </name>
+</name>
 </client>
 </testcase>

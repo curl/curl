@@ -80,9 +80,9 @@ SSL
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with NTLM/Negotiate/Basic, anyauth and user with domain, with size 0
- </name>
+</name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --anyauth -u mydomain\\myself:secret
 </command>

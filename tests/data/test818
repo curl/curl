@@ -25,10 +25,10 @@ CUSTOMREQUEST
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP NOOP (CUSTOMREQUEST)
- </name>
- <command>
+</name>
+<command>
 imap://%HOSTIP:%IMAPPORT -X NOOP -u user:secret
 </command>
 </client>

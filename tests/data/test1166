@@ -26,10 +26,10 @@ This server reply is for testing a Location: following with cookies
 <server>
 http
 </server>
- <name>
+<name>
 HTTP response with cookies but not receiving!
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER
 </command>
 </client>

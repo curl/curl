@@ -31,10 +31,10 @@ SSLpinning
 <server>
 https Server-localhost-sv.pem
 </server>
- <name>
+<name>
 simple HTTPS GET with PEM public key pinning
- </name>
- <command>
+</name>
+<command>
 --cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --pinnedpubkey %SRCDIR/certs/Server-localhost-sv.pub.pem https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
 # Ensure that we're running on localhost because we're checking the host name

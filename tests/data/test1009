@@ -24,10 +24,10 @@ returned
 <server>
 tftp
 </server>
- <name>
+<name>
 TFTP retrieve with --local-port
- </name>
- <command>
+</name>
+<command>
 tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER --local-port 44444-45444
 </command>
 </client>

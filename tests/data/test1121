@@ -23,10 +23,10 @@ blaha
 <server>
 http
 </server>
- <name>
+<name>
 HTTP multiple provided Host: headers
- </name>
- <command>
+</name>
+<command>
 -H "Host: host1" -H "Host: host2" -H "Host: host3" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

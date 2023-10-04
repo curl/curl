@@ -14,9 +14,9 @@ ftp
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 FTP connect only option
- </name>
+</name>
 
 <command>
 ftp://%HOSTIP:%FTPPORT

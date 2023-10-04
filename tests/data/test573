@@ -35,10 +35,10 @@ http
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 verify connect time with multi interface
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

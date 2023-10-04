@@ -45,10 +45,10 @@ body
 <server>
 http
 </server>
- <name>
+<name>
 HTTP redirect with fragment in new URL
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/this/%TESTNUMBER -L
 </command>
 </client>

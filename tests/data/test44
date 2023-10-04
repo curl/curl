@@ -26,10 +26,10 @@ Mime
 <server>
 http
 </server>
- <name>
+<name>
 HTTP RFC1867-type formposting without Expect: header
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F name=daniel -F tool=curl -F file=@%LOGDIR/test%TESTNUMBER.txt -H "Expect:"
 </command>
 # We create this file before the command is invoked!

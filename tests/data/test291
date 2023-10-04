@@ -23,10 +23,10 @@ works
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP download maximum filesize not exceeded
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --max-filesize 100
 </command>
 </client>

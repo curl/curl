@@ -19,10 +19,10 @@ CUSTOMREQUEST
 <server>
 pop3
 </server>
- <name>
+<name>
 POP3 DELE message (CUSTOMREQUEST)
- </name>
- <command>
+</name>
+<command>
 pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret -X DELE -I
 </command>
 </client>

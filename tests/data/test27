@@ -23,10 +23,10 @@ Content-Length: 8
 <server>
 http
 </server>
- <name>
+<name>
 Get same cookie page several times
- </name>
- <command>
+</name>
+<command>
 "http://%HOSTIP:%HTTPPORT/want/{%TESTNUMBER,%TESTNUMBER,%TESTNUMBER}" -b none
 </command>
 <features>

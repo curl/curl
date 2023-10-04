@@ -61,10 +61,10 @@ proxy
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with auth redirected to HTTP on a diff port --location-trusted
- </name>
- <command>
+</name>
+<command>
 -x http://%HOSTIP:%HTTPPORT http://firsthost.com --location-trusted -u joe:secret
 </command>
 </client>

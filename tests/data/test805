@@ -19,10 +19,10 @@ UPLOAD
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP APPEND message
- </name>
- <command>
+</name>
+<command>
 imap://%HOSTIP:%IMAPPORT/%TESTNUMBER -T %LOGDIR/upload%TESTNUMBER -u user:secret
 </command>
 <file name="%LOGDIR/upload%TESTNUMBER">

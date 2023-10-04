@@ -41,10 +41,10 @@ works
 http
 ftp
 </server>
- <name>
+<name>
 HTTP Location: redirect to FTP URL
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 -L
 </command>
 </client>

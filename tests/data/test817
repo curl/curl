@@ -19,10 +19,10 @@ CUSTOMREQUEST
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP COPY message to mailbox (CUSTOMREQUEST)
- </name>
- <command>
+</name>
+<command>
 imap://%HOSTIP:%IMAPPORT -u user:secret -X 'COPY 123 %TESTNUMBER'
 </command>
 </client>

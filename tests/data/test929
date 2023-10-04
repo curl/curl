@@ -18,10 +18,10 @@ CUSTOMREQUEST
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP NOOP (CUSTOMREQUEST)
- </name>
- <command>
+</name>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER -X NOOP -I
 </command>
 </client>

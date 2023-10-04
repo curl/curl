@@ -19,10 +19,10 @@ ftp
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 FTP upload and upload same file again without rewind
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER %LOGDIR/upload%TESTNUMBER
 </command>
 <file name="%LOGDIR/upload%TESTNUMBER">

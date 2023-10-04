@@ -31,10 +31,10 @@ http
 <features>
 libz
 </features>
- <name>
+<name>
 HTTP with "Content-Encoding: none
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/hello/%TESTNUMBER --compressed
 </command>
 </client>

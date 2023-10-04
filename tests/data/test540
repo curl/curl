@@ -69,10 +69,10 @@ lib%TESTNUMBER
 crypto
 proxy
 </features>
- <name>
+<name>
 HTTP proxy auth Digest multi API re-using connection
- </name>
- <command>
+</name>
+<command>
 http://test.remote.example.com/path/%TESTNUMBER http://%HOSTIP:%HTTPPORT silly:person custom.set.host.name
 </command>
 </client>

@@ -36,10 +36,10 @@ imap
 <features>
 crypto
 </features>
- <name>
+<name>
 IMAP CRAM-MD5 authentication
- </name>
- <command>
+</name>
+<command>
 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user:secret
 </command>
 </client>

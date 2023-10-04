@@ -35,10 +35,10 @@ body
 <server>
 pop3
 </server>
- <name>
+<name>
 POP3 plain authentication with alternative authorization identity
- </name>
- <command>
+</name>
+<command>
 pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret --sasl-authzid shared-mailbox
 </command>
 </client>

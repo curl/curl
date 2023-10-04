@@ -24,10 +24,10 @@ authentication so we should still fail.
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with an error code that might trick authentication
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

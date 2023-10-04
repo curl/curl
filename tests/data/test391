@@ -45,10 +45,10 @@ Content-Type: text/html
 <server>
 http
 </server>
- <name>
+<name>
 --path-as-is with redirect, keeping dotdots
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/../../%TESTNUMBER --path-as-is -L
 </command>
 </client>

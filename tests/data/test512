@@ -29,10 +29,10 @@ http
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 simple curl_easy_duplicate() test
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

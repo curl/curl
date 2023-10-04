@@ -31,10 +31,10 @@ Funny-head: yesyes
 <server>
 http
 </server>
- <name>
+<name>
 HTTP HEAD with --range
- </name>
- <command>
+</name>
+<command>
 --range 1-3 --head http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

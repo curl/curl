@@ -36,10 +36,10 @@ SSL
 <server>
 ftps
 </server>
- <name>
+<name>
 FTPS dir list PASV unencrypted data
- </name>
- <command>
+</name>
+<command>
 -k --ftp-ssl-control ftps://%HOSTIP:%FTPSPORT/
 </command>
 </client>

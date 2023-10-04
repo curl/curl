@@ -29,10 +29,10 @@ Long: %repeat[102400 x A]%
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with 100K (too long) response header
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

@@ -21,10 +21,10 @@ Server: test-server/fake
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with cookie parsing from header file
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -b %LOGDIR/heads%TESTNUMBER.txt
 </command>
 

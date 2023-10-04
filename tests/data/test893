@@ -26,10 +26,10 @@ REPLY dXJzZWwAa3VydAB4aXBqM3BsbXE= -ERR Not authorized
 <server>
 pop3
 </server>
- <name>
+<name>
 POP3 plain authentication with alternative authorization identity (Not authorized)
- </name>
- <command>
+</name>
+<command>
 pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u kurt:xipj3plmq --sasl-authzid ursel
 </command>
 </client>

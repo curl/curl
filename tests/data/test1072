@@ -36,10 +36,10 @@ http
 <features>
 crypto
 </features>
- <name>
+<name>
 HTTP chunked PUT to HTTP 1.0 server with authorization
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T - -u testuser:testpass --anyauth
 </command>
 <stdin>

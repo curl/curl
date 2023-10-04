@@ -15,10 +15,10 @@ SSL
 <server>
 ftps
 </server>
- <name>
+<name>
 FTPS with invalid cacert
- </name>
- <command>
+</name>
+<command>
 --ftp-ssl-control --cacert moooo ftps://%HOSTIP:%FTPSPORT/
 </command>
 </client>

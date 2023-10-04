@@ -23,9 +23,9 @@ Funny-head: yesyes swsclose
 <server>
 http
 </server>
- <name>
+<name>
 CURLOPT_CURLU and CURLOPT_PORT
- </name>
+</name>
 <tool>
 lib%TESTNUMBER
 </tool>

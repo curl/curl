@@ -28,14 +28,14 @@ SSL
 <server>
 https
 </server>
- <name>
+<name>
 HTTPS GET with very long request header
- </name>
+</name>
 # 14 characters repeated 3500 times makes 49000 bytes
 <file name="%LOGDIR/file%TESTNUMBER">
 Long: %repeat[3500 x header content]%
 </file>
- <command>
+<command>
 -k https://%HOSTIP:%HTTPSPORT/%TESTNUMBER -H @%LOGDIR/file%TESTNUMBER
 </command>
 </client>

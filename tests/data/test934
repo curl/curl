@@ -31,10 +31,10 @@ smtp
 debug
 crypto
 </features>
- <name>
+<name>
 SMTP DIGEST-MD5 graceful cancellation
- </name>
- <command>
+</name>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret -T -
 </command>
 </client>

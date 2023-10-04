@@ -20,9 +20,9 @@ moo
 <server>
 file
 </server>
- <name>
+<name>
 basic file:// file with "127.0.0.1" hostname
- </name>
+</name>
 <command option="no-include">
 file://127.0.0.1%FILE_PWD/%LOGDIR/test2070.txt
 </command>

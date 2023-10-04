@@ -83,10 +83,10 @@ http
 !SSPI
 crypto
 </features>
- <name>
+<name>
 HTTP with --anyauth and connection reuse
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --anyauth http://%HOSTIP:%HTTPPORT/%TESTNUMBER0003
 </command>
 </client>

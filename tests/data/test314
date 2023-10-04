@@ -170,10 +170,10 @@ brotli
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET brotli compressed content
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed
 </command>
 </client>

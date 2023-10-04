@@ -39,10 +39,10 @@ bigger monster
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET --write-out with redirected fetch
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w "%{num_connects}\n%{num_redirects}\n%{size_download}\n%{url_effective}\n%{content_type}\n%{response_code}\n" -L
 </command>
 </client>

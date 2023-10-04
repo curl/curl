@@ -63,10 +63,10 @@ http
 !SSPI
 crypto
 </features>
- <name>
+<name>
 HTTP POST --digest with server doing a 100 before 401 response
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u auser:apasswd --digest -d "junkelijunk"
 </command>
 </client>

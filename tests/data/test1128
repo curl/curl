@@ -37,10 +37,10 @@ Content-Type: text/html
 <server>
 http
 </server>
- <name>
+<name>
 HTTP 200 If-Modified-Since with old+new documents
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 -z "dec 12 12:00:00 1999 GMT"
 </command>
 </client>

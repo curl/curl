@@ -17,10 +17,10 @@ HTTP POST
 <server>
 none
 </server>
- <name>
+<name>
 Reject using -T and -d at once
- </name>
- <command>
+</name>
+<command>
 -T %LOGDIR/%TESTNUMBER -d input http://never-accessed
 </command>
 </client>

@@ -26,10 +26,10 @@ This server reply is for testing a simple Location: following
 <server>
 http
 </server>
- <name>
+<name>
 'redirect_url' with --location and --max-redirs
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER -w '%{redirect_url}\n' --location --max-redirs 0
 </command>
 </client>

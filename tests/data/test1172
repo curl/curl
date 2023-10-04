@@ -22,10 +22,10 @@ HTTP/0.9
 <server>
 http
 </server>
- <name>
+<name>
 HTTP/0.9 GET response denied
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --no-http0.9
 </command>
 </client>

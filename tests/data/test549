@@ -37,11 +37,11 @@ proxy
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 FTP RETR over proxy with CURLOPT_PROXY_TRANSFER_MODE
- </name>
+</name>
 # first URL then proxy
- <command>
+<command>
 ftp://www.example.com/moo/%TESTNUMBER http://%HOSTIP:%HTTPPORT
 </command>
 </client>

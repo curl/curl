@@ -23,10 +23,10 @@ REPLY CWD 250-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP with excessively large number of server command response lines
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER
 </command>
 </client>

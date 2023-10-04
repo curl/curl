@@ -24,10 +24,10 @@ Connection: close
 <server>
 http
 </server>
- <name>
+<name>
 HTTP Location: following with --max-redirs 0
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -L --max-redirs 0
 </command>
 </client>

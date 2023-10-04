@@ -23,10 +23,10 @@ SSL
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP require STARTTLS with failing capabilities
- </name>
- <command>
+</name>
+<command>
 imap://%HOSTIP:%IMAPPORT/%TESTNUMBER -T %LOGDIR/upload%TESTNUMBER -u user:secret --ssl-reqd
 </command>
 <file name="%LOGDIR/upload%TESTNUMBER">

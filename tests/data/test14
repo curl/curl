@@ -20,10 +20,10 @@ Connection: close
 <server>
 http
 </server>
- <name>
+<name>
 HTTP HEAD with Connection: close
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -i --head
 </command>
 </client>

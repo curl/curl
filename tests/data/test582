@@ -20,10 +20,10 @@ sftp
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 SFTP upload using multi interface
- </name>
- <command>
+</name>
+<command>
 Sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/upload%TESTNUMBER.txt %PWD/%LOGDIR/file%TESTNUMBER.txt %USER: %LOGDIR/server/curl_client_key.pub %LOGDIR/server/curl_client_key
 </command>
 <file name="%LOGDIR/file%TESTNUMBER.txt">

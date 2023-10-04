@@ -20,16 +20,16 @@ CAPA SIZE
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP with SIZE support
- </name>
+</name>
 <file name="%LOGDIR/test%TESTNUMBER.eml">
 From: different
 To: another
 
 body
 </file>
- <command>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -T %LOGDIR/test%TESTNUMBER.eml
 </command>
 </client>

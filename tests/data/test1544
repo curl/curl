@@ -12,9 +12,9 @@ source analysis
 none
 </server>
 
- <name>
+<name>
 Verify all string options are translated by OS/400 wrapper
- </name>
+</name>
 
 <command type="perl">
 %SRCDIR/check-translatable-options.pl %SRCDIR/..

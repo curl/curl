@@ -16,8 +16,8 @@ none
 unittest
 https
 </features>
- <name>
+<name>
 unit tests for stripcredentials from URL
- </name>
+</name>
 </client>
 </testcase>

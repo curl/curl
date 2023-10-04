@@ -63,10 +63,10 @@ http
 crypto
 proxy
 </features>
- <name>
+<name>
 HTTP with proxy Digest and site Digest with creds in URLs
- </name>
- <command>
+</name>
+<command>
 http://digest:alot@data.from.server.requiring.digest.hohoho.com/%TESTNUMBER --proxy http://foo:bar@%HOSTIP:%HTTPPORT --proxy-digest --digest
 </command>
 </client>

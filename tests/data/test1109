@@ -22,10 +22,10 @@ hello
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with URL that contains fragment after the path
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER#test
 </command>
 </client>

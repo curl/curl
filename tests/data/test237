@@ -17,10 +17,10 @@ REPLY PASV 227 Entering Passiv Mode (1216,256,2,127,127,127)
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP getting bad host in 227-response to PASV
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --disable-epsv
 </command>
 </client>

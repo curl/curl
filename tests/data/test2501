@@ -33,12 +33,12 @@ http/3
 http
 http/3
 </server>
- <name>
+<name>
 HTTP/3 POST
- </name>
+</name>
 <setenv>
 </setenv>
- <command>
+<command>
 -k --http3 "https://%HOSTIP:%HTTP3PORT/%TESTNUMBER" -d "moo"
 </command>
 

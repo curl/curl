@@ -19,9 +19,9 @@ C01234567
 <server>
 file
 </server>
- <name>
+<name>
 file:// with resume
- </name>
+</name>
 <command option="no-include">
 file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt -C 10
 </command>

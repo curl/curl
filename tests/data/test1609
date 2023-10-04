@@ -15,8 +15,8 @@ none
 <features>
 unittest
 </features>
- <name>
+<name>
 CURLOPT_RESOLVE parsing
- </name>
+</name>
 </client>
 </testcase>

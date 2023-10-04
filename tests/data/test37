@@ -19,10 +19,10 @@ FAILURE
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with nothing returned from server
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

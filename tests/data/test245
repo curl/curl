@@ -53,10 +53,10 @@ http
 !SSPI
 crypto
 </features>
- <name>
+<name>
 HTTP POST --digest
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u auser:apasswd --digest -d "junkelijunk"
 </command>
 </client>

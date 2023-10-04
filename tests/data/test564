@@ -32,9 +32,9 @@ socks4
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 FTP RETR a file over a SOCKS proxy using the multi interface
- </name>
+</name>
 <command>
 ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER %HOSTIP:%SOCKSPORT
 </command>

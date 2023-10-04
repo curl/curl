@@ -25,10 +25,10 @@ works
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP GET with type=A style ASCII URL using %20 codes
- </name>
- <command>
+</name>
+<command>
 "ftp://%HOSTIP:%FTPPORT//path%20with%20%20spaces//and%20things2/%TESTNUMBER;type=A"
 </command>
 </client>

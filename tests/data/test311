@@ -21,10 +21,10 @@ SSL
 <server>
 https Server-localhost0h-sv.pem
 </server>
- <name>
+<name>
 HTTPS wrong subjectAltName but right CN
- </name>
- <command>
+</name>
+<command>
 --cacert %SRCDIR/certs/EdelCurlRoot-ca.crt https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
 # Ensure that we're running on localhost because we're checking the host name

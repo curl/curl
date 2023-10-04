@@ -32,14 +32,14 @@ alt-svc
 <server>
 http
 </server>
- <name>
+<name>
 Alt-Svc to numerical IPv6 address
- </name>
+</name>
 <setenv>
 # make debug-curl accept Alt-Svc over plain HTTP
 CURL_ALTSVC_HTTP="yeah"
 </setenv>
- <command>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --alt-svc "%LOGDIR/altsvc-%TESTNUMBER"
 </command>
 </client>

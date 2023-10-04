@@ -29,9 +29,9 @@ body
 <server>
 imap
 </server>
- <name>
+<name>
 --libcurl for IMAP FETCH message
- </name>
+</name>
 <setenv>
 SSL_CERT_FILE=
 </setenv>

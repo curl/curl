@@ -16,10 +16,10 @@ errorcode
 <server>
 none
 </server>
- <name>
+<name>
 verify return code for missing URL after --next
- </name>
- <command>
+</name>
+<command>
 htdhdhdtp://localhost --next
 </command>
 </client>

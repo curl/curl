@@ -24,10 +24,10 @@ moo
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET two URLs over a single proxy with persistent connection
- </name>
- <command>
+</name>
+<command>
 http://deathstar.another.galaxy/%TESTNUMBER http://a.galaxy.far.far.away/%TESTNUMBER --proxy http://%HOSTIP:%HTTPPORT
 </command>
 <features>

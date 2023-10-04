@@ -18,10 +18,10 @@ singlecwd
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP using %00 in path with singlecwd
- </name>
- <command>
+</name>
+<command>
 --ftp-method singlecwd ftp://%HOSTIP:%FTPPORT/%00first/second/third/%TESTNUMBER
 </command>
 </client>

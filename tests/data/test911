@@ -16,15 +16,15 @@ SMTP
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP with no mail data
- </name>
+</name>
 
 <stdin nonewline="yes">
 
 </stdin>
 
- <command>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -T -
 </command>
 </client>

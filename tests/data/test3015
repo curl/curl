@@ -46,10 +46,10 @@ monster
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET -w num_headers with redirected fetch (2 connects)
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w "%{num_headers}\n" -L -o/dev/null
 </command>
 </client>

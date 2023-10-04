@@ -20,10 +20,10 @@ none
 http
 proxy
 </features>
- <name>
+<name>
 Provide illegal proxy name
- </name>
- <command>
+</name>
+<command>
 --proxy "http://a:b@/x" http://%HOSTIP:%NOLISTENPORT
 </command>
 </client>

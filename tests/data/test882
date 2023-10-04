@@ -31,10 +31,10 @@ body
 <server>
 pop3
 </server>
- <name>
+<name>
 POP3 multiple connection authentication
- </name>
- <command>
+</name>
+<command>
 pop3://%HOSTIP:%POP3PORT/%TESTNUMBER001 -u user.one:secret -: pop3://%HOSTIP:%POP3PORT/%TESTNUMBER002 -u user.two:secret
 </command>
 </client>

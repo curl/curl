@@ -66,10 +66,10 @@ crypto
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 send HTTP POST using read callback, chunked transfer-encoding and Digest
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

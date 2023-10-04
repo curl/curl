@@ -34,10 +34,10 @@ Connection: close
 <server>
 http
 </server>
- <name>
+<name>
 URL with '#' at end of host name instead of '/'
- </name>
- <command>
+</name>
+<command>
 --proxy http://%HOSTIP:%HTTPPORT http://test.remote.haxx.se.%TESTNUMBER:%HTTPPORT#@127.0.0.1/tricked.html no-scheme-url.com.%TESTNUMBER:%HTTPPORT#@127.127.127.127/again.html
 </command>
 <features>

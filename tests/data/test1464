@@ -20,10 +20,10 @@ none
 <features>
 file
 </features>
- <name>
+<name>
 curl file category --help with lower/upper mix
- </name>
- <command>
+</name>
+<command>
 --help fIlE
 </command>
 </client>

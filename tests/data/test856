@@ -21,10 +21,10 @@ REPLY PASS -ERR Login failure
 <server>
 pop3
 </server>
- <name>
+<name>
 POP3 invalid login
- </name>
- <command>
+</name>
+<command>
 pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:wrong
 </command>
 </client>

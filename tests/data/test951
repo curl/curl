@@ -16,9 +16,9 @@ SMTP
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP data with dot as first character
- </name>
+</name>
 <stdin>
 .This first line starts with a dot
 </stdin>

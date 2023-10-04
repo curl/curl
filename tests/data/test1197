@@ -39,10 +39,10 @@ bigger monster
 <server>
 http
 </server>
- <name>
+<name>
 HTTP POST redirected to GET and --write-out method
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w "%{method}\n" -L -d "twinkle twinkle little star"
 </command>
 </client>

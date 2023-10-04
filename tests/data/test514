@@ -32,9 +32,9 @@ http
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 First set options to POST and then to make HEAD
- </name>
+</name>
 # the 1s post-command delay helps to prevent a spurious failure on s390
  <command delay="1">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER

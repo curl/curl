@@ -23,10 +23,10 @@ hello
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with URL that contains a fragment after the query part
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER?q=foobar#fragment
 </command>
 </client>

@@ -22,10 +22,10 @@ NOBODY
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP download info with -I
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/blalbla/%TESTNUMBER -I
 </command>
 </client>

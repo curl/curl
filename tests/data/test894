@@ -18,10 +18,10 @@ RETR
 <server>
 pop3
 </server>
- <name>
+<name>
 POP3 with CR in username
- </name>
- <command>
+</name>
+<command>
 pop3://user%0dFRIGGING_cmd:secret@%HOSTIP:%POP3PORT/%TESTNUMBER
 </command>
 </client>

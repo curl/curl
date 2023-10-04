@@ -26,10 +26,10 @@ boo
 <server>
 http
 </server>
- <name>
+<name>
 HTTP, use cookies with localhost
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER http://%HOSTIP:%HTTPPORT/we/want?hoge=fuga -b non-existing -H "Host: localhost"
 </command>
 <features>

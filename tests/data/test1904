@@ -47,10 +47,10 @@ contents
 http
 http-proxy
 </server>
- <name>
+<name>
 HTTP CONNECT with 204 response
- </name>
- <command>
+</name>
+<command>
 http://test.%TESTNUMBER:%HTTPPORT/we/want/that/page/%TESTNUMBER -p --proxy %HOSTIP:%PROXYPORT
 </command>
 <features>

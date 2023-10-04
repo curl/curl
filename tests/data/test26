@@ -21,10 +21,10 @@ Connection: close
 <server>
 http
 </server>
- <name>
+<name>
 specify more -o than URLs
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -o - -o -
 </command>
 </client>

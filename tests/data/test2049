@@ -26,11 +26,11 @@ OK
 <server>
 http
 </server>
- <name>
+<name>
 Connect to specific host
- </name>
+</name>
 
- <command>
+<command>
 http://www1.example.com:8081/%TESTNUMBER --connect-to ::%HOSTIP:%HTTPPORT --next http://www2.example.com:8082/%TESTNUMBER --connect-to :8082:%HOSTIP:%HTTPPORT --next http://www3.example.com:8083/%TESTNUMBER --connect-to www3.example.com::%HOSTIP:%HTTPPORT --next http://www4.example.com:8084/%TESTNUMBER --connect-to www4.example.com:8084:%HOSTIP:%HTTPPORT
 </command>
 </client>

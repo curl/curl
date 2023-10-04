@@ -25,10 +25,10 @@ Funny-head: yesyes
 <server>
 http
 </server>
- <name>
+<name>
 HTTP over proxy
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/that/page/%TESTNUMBER#5 -x %HOSTIP:%HTTPPORT
 </command>
 <features>

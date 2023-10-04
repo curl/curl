@@ -30,10 +30,10 @@ Content-Type: text/html
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with -z + -w response_code and simulated 304
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -z "-dec 12 12:00:00 1999 GMT" -w '%{response_code}'
 </command>
 </client>

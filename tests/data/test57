@@ -22,10 +22,10 @@ Content-Type: text/html; charset=ISO-8859-4
 <server>
 http
 </server>
- <name>
+<name>
 HTTP content-type with spaces in
- </name>
- <command>
+</name>
+<command>
 -w "%{content_type}\n" http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o %LOGDIR/out%TESTNUMBER
 </command>
 </client>

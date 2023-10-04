@@ -25,10 +25,10 @@ Mime
 <server>
 http
 </server>
- <name>
+<name>
 Multipart formposting with backslash-escaping of name= and filename=
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --form-escape -F name=daniel -F tool=curl --form-string "str1=@literal" --form-string "str2=<verbatim;type=xxx/yyy" -F "file=@%LOGDIR/test%TESTNUMBER.txt;type=moo/foobar;filename=fakerfile" -F file2=@%LOGDIR/test%TESTNUMBER.txt -F "file3=@\"%LOGDIR/test%TESTNUMBER.txt\";type=mo/foo;filename=\"f\\\\\\\\ak\\\\\\er,\\\\an\\d;.t\\\"xt\"" -F 'file4=@"%LOGDIR/test%TESTNUMBER.txt"; filename="A\\AA\"\"\\\"ZZZ"'
 </command>
 # We create this file before the command is invoked!

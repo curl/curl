@@ -17,10 +17,10 @@ OpenSSL
 <server>
 https
 </server>
- <name>
+<name>
 simple HTTPS GET with invalid crypto engine
- </name>
- <command>
+</name>
+<command>
 --engine invalid-crypto-engine-xyzzy -k https://%HOSTIP:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>

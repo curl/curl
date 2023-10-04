@@ -33,10 +33,10 @@ Connection: close
 <server>
 http
 </server>
- <name>
+<name>
 HTTP URL with dotdot removal from path
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/../../hej/but/who/../%TESTNUMBER?stupid=me/../%TESTNUMBER#soo/../%TESTNUMBER http://%HOSTIP:%HTTPPORT/../../hej/but/who/../%TESTNUMBER0001#/../%TESTNUMBER0001
 </command>
 </client>

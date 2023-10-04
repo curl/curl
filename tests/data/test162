@@ -34,10 +34,10 @@ proxy
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET asking for --proxy-ntlm when some other authentication is required
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --proxy http://%HOSTIP:%HTTPPORT --proxy-user foo:bar --proxy-ntlm --fail
 </command>
 </client>

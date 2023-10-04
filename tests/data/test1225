@@ -23,10 +23,10 @@ works
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP fetch two files using absolute paths
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT//foo/%TESTNUMBER ftp://%HOSTIP:%FTPPORT//foo/bar/%TESTNUMBER
 </command>
 

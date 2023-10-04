@@ -64,10 +64,10 @@ libz
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET deflate compressed content with broken deflate header
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed
 </command>
 </client>

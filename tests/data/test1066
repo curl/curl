@@ -31,10 +31,10 @@ second
 <server>
 http
 </server>
- <name>
+<name>
 HTTP --dump-header - with two URLs
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER0001 --dump-header -
 </command>
 </client>

@@ -54,9 +54,9 @@ ftp
 file
 tftp
 </server>
- <name>
+<name>
 HTTP GET followed by FTP RETR followed by FILE followed by TFTP RRQ
- </name>
+</name>
 <command option="no-include">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER0002 file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER0003
 </command>

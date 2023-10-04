@@ -21,9 +21,9 @@ moo
 <server>
 file
 </server>
- <name>
+<name>
 file:/path URL with a single slash
- </name>
+</name>
 <setenv>
 # Needed for MSYS2 to not convert
 MSYS2_ARG_CONV_EXCL=file:

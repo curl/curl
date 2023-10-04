@@ -39,10 +39,10 @@ http
 <features>
 http/2
 </features>
- <name>
+<name>
 HTTP/2 upgrade with lying server
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --http2
 </command>
 

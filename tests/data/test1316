@@ -57,10 +57,10 @@ http-proxy
 <features>
 http
 </features>
- <name>
+<name>
 FTP LIST tunneled through HTTP proxy
- </name>
- <command>
+</name>
+<command>
 ftp://ftp.%TESTNUMBER:%FTPPORT/ -p -x %HOSTIP:%PROXYPORT
 </command>
 </client>

@@ -14,9 +14,9 @@ documentation
 none
 </server>
 
- <name>
+<name>
 Verify the nroff of man pages
- </name>
+</name>
 
 <command type="perl">
 %SRCDIR/nroff-scan.pl %SRCDIR/../docs/ %SRCDIR/../docs/libcurl/*.3 %SRCDIR/../docs/libcurl/opts/*.3 %SRCDIR/../docs/*.1

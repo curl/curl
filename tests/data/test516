@@ -33,10 +33,10 @@ http
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 make an HTTPPOST set to NULL
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

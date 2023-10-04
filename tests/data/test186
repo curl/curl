@@ -27,10 +27,10 @@ Mime
 <server>
 http
 </server>
- <name>
+<name>
 HTTP RFC1867-type formposting with types on text fields
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F "name=daniel;type=moo/foo" -F "html= <body>hello</body>;type=text/html;charset=verymoo"
 </command>
 # We create this file before the command is invoked!

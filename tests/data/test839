@@ -34,10 +34,10 @@ body
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP external authentication with initial response
- </name>
- <command>
+</name>
+<command>
 'imap://user;AUTH=EXTERNAL@%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1'
 </command>
 </client>

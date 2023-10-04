@@ -29,10 +29,10 @@ in the request
 <server>
 http
 </server>
- <name>
+<name>
 HTTP range relative to end of file
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -r -101
 </command>
 </client>

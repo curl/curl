@@ -21,10 +21,10 @@ HELP
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP HELP
- </name>
- <command>
+</name>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER
 </command>
 </client>

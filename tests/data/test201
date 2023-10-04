@@ -17,10 +17,10 @@ FAILURE
 <server>
 file
 </server>
- <name>
+<name>
 missing file:// file
- </name>
- <command>
+</name>
+<command>
 file://localhost/%PWD/%LOGDIR/non-existent-file.txt
 </command>
 </client>

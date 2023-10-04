@@ -64,10 +64,10 @@ crypto
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 small chunked HTTP POSTs with digest auth. and progress callback
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/ip%TESTNUMBER
 </command>
 </client>

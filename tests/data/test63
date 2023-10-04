@@ -24,13 +24,13 @@ the content would go here
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with proxy authorization set in environment
- </name>
+</name>
 <setenv>
 http_proxy=http://fake:user@%HOSTIP:%HTTPPORT/
 </setenv>
- <command>
+<command>
 http://we.want.that.site.com/%TESTNUMBER
 </command>
 <features>

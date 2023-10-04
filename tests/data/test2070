@@ -30,14 +30,14 @@ Schannel
 <server>
 https Server-localhost-sv.pem
 </server>
- <name>
+<name>
 Ignore certificate revocation "best effort" strategy
- </name>
+</name>
   <setenv>
 # This test is pointless if we're not using the schannel backend
 CURL_SSL_BACKEND=schannel
  </setenv>
- <command>
+<command>
 --cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --ssl-revoke-best-effort https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
 # Ensure that we're running on localhost because we're checking the host name

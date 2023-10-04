@@ -26,10 +26,10 @@ Mime
 <server>
 http
 </server>
- <name>
+<name>
 HTTP multipart formpost with contents from a file
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F "name=<%LOGDIR/field%TESTNUMBER" -F tool=curl
 </command>
 # We create this file before the command is invoked!

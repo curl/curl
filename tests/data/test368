@@ -26,10 +26,10 @@ Connection: close
 <server>
 http
 </server>
- <name>
+<name>
 Append dash if -r range specified without one
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -r 4
 </command>
 </client>

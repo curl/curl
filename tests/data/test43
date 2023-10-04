@@ -50,10 +50,10 @@ If this is received, the location following worked
 <server>
 http
 </server>
- <name>
+<name>
 HTTP Location: following over HTTP proxy
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -L -x %HOSTIP:%HTTPPORT
 </command>
 <features>

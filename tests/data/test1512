@@ -50,10 +50,10 @@ http
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 GLOBAL CACHE test over two easy performs
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/path/%TESTNUMBER %HOSTIP %HTTPPORT
 </command>
 </client>

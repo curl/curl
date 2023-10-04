@@ -14,9 +14,9 @@ libcurl.def
 none
 </server>
 
- <name>
+<name>
 Verify libcurl.def against CURL_EXTERN declarations
- </name>
+</name>
 
 <command type="perl">
 %SRCDIR/extern-scan.pl --heading=EXPORTS --sort %SRCDIR/..

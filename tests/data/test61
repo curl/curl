@@ -40,16 +40,16 @@ boo
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with various cookies and custom Host:
- </name>
+</name>
 # Explicitly set the time zone to a known good one, in case the user is
 # using one of the 'right' zones that take into account leap seconds
 # which causes the cookie expiry times to be different.
 <setenv>
 TZ=GMT
 </setenv>
- <command>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -c %LOGDIR/jar%TESTNUMBER.txt -H "Host: www.host.foo.com"
 </command>
 <features>

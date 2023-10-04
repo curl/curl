@@ -13,9 +13,9 @@ options-in-versions
 none
 </server>
 
- <name>
+<name>
 Verify that options-in-versions and docs/cmdline-opts are in sync
- </name>
+</name>
 
 <command type="perl">
 %SRCDIR/options-scan.pl %SRCDIR/../docs/options-in-versions %SRCDIR/../docs/cmdline-opts

@@ -39,9 +39,9 @@ crap data
 <server>
 http
 </server>
- <name>
+<name>
 HTTP, urlglob {}-retrieval and -o #[num] usage
- </name>
+</name>
  <command option="no-output">
 "http://%HOSTIP:%HTTPPORT/{%TESTNUMBER,%TESTNUMBER0001}" -o "%LOGDIR/dumpit#1.dump"
 </command>

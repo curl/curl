@@ -35,10 +35,10 @@ http
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 send long HTTP headers to header callback
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

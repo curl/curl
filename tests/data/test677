@@ -19,9 +19,9 @@ CONNECT_ONLY
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP with CONNECT_ONLY, custom command then exit
- </name>
+</name>
 <tool>
 lib%TESTNUMBER
 </tool>

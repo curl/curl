@@ -20,16 +20,16 @@ Mime
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP multipart with transfer content encoders
- </name>
+</name>
 <stdin>
 From: different
 To: another
 
 body
 </stdin>
- <command>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -F '=This is the email inline text with a very long line containing the special character = and that should be split by encoder.;headers=Content-disposition: "inline";encoder=quoted-printable' -F "=@%LOGDIR/test%TESTNUMBER.txt;encoder=base64" -H "From: different" -H "To: another"
 </command>
 <file name="%LOGDIR/test%TESTNUMBER.txt">

@@ -26,10 +26,10 @@ CUSTOMREQUEST
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP STORE - delete message with confirmation (CUSTOMREQUEST)
- </name>
- <command>
+</name>
+<command>
 imap://%HOSTIP:%IMAPPORT/%TESTNUMBER -X 'STORE 123 +Flags \Deleted' -u user:secret -: imap://%HOSTIP:%IMAPPORT/%TESTNUMBER -X EXPUNGE -u user:secret
 </command>
 </client>

@@ -20,10 +20,10 @@ NOBODY
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP dir list PASV with -I
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER/ -I
 </command>
 </client>

@@ -34,10 +34,10 @@ ipv6
 <server>
 http-ipv6
 </server>
- <name>
+<name>
 HTTP-IPv6 GET
- </name>
- <command>
+</name>
+<command>
 -g "http://%HOST6IP:%HTTP6PORT/%TESTNUMBER"
 </command>
 </client>

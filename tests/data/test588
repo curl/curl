@@ -31,10 +31,10 @@ ftp
 <tool>
 lib525
 </tool>
- <name>
+<name>
 FTP PORT upload using multi interface, EPRT doesn't work
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER %LOGDIR/upload%TESTNUMBER
 </command>
 <file name="%LOGDIR/upload%TESTNUMBER">

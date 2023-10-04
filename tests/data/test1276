@@ -13,9 +13,9 @@ documentation
 none
 </server>
 
- <name>
+<name>
 Verify lib/optiontable.pl
- </name>
+</name>
 
 <command type="perl">
 %SRCDIR/option-check.pl %SRCDIR/..

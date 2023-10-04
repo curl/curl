@@ -16,9 +16,9 @@ SSL
 <server>
 ftps
 </server>
- <name>
+<name>
 FTPS PASV upload file
- </name>
+</name>
 <file name="%LOGDIR/test%TESTNUMBER.txt">
 data
     to
@@ -27,7 +27,7 @@ that FTPS
 works
   so does it?
 </file>
- <command>
+<command>
 -k --ftp-ssl-control ftps://%HOSTIP:%FTPSPORT/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt
 </command>
 </client>

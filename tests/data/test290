@@ -17,10 +17,10 @@ FTP
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP download maximum filesize exceeded
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --max-filesize 30
 </command>
 </client>

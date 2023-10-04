@@ -31,10 +31,10 @@ REPLY SIZE 213 file: 213, Size =51
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP range download with SIZE returning extra crap
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --range 3-6
 </command>
 </client>

@@ -27,10 +27,10 @@ POSTFETCH extra stuff sent in the envelope after the body
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP and envelope meta data after body transfer
- </name>
- <command>
+</name>
+<command>
 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=123/;SECTION=1' -u user:secret -D %LOGDIR/head-%TESTNUMBER
 </command>
 </client>

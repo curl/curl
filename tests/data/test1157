@@ -32,12 +32,12 @@ Funny-head: yesyes
 <server>
 http
 </server>
- <name>
+<name>
 Get -H headers from empty file
- </name>
+</name>
 <file name="%LOGDIR/heads%TESTNUMBER.txt">
 </file>
- <command>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -H @%LOGDIR/heads%TESTNUMBER.txt
 </command>
 </client>

@@ -43,10 +43,10 @@ libz
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET transfer-encoding with removed Connection:
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --tr-encoding -H "Connection:"
 </command>
 </client>

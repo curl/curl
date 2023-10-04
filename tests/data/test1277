@@ -178,10 +178,10 @@ libz
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET with both content and transfer encoding
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --tr-encoding --compressed
 </command>
 </client>

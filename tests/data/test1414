@@ -28,10 +28,10 @@ REPLY EPRT 502 no such command
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP PORT without SIZE or EPRT support
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -P -
 </command>
 </client>

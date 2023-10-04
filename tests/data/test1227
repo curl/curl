@@ -23,10 +23,10 @@ works
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP fetch a file from the root directory with nocwd
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT//%TESTNUMBER --ftp-method nocwd
 </command>
 

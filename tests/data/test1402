@@ -25,13 +25,13 @@ Connection: close
 <server>
 http
 </server>
- <name>
+<name>
 --libcurl for simple POST
- </name>
+</name>
 <setenv>
 SSL_CERT_FILE=
 </setenv>
- <command>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --libcurl %LOGDIR/test%TESTNUMBER.c -d "foo=bar" -d "baz=quux"
 </command>
 </client>

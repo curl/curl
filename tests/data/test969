@@ -31,10 +31,10 @@ smtp
 idn
 !win32
 </features>
- <name>
+<name>
 SMTP mailing list EXPN (CUSTOMREQUEST) with SMTPUTF8 support
- </name>
- <command>
+</name>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt Friends -X EXPN
 </command>
 </client>

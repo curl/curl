@@ -55,10 +55,10 @@ http
 !SSPI
 crypto
 </features>
- <name>
+<name>
 HTTP with Digest authorization with bad password
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:test2pass --digest
 </command>
 </client>

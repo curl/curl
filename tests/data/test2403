@@ -37,12 +37,12 @@ headers-api
 http
 http/2
 </server>
- <name>
+<name>
 HTTP/2 GET
- </name>
+</name>
 <setenv>
 </setenv>
- <command>
+<command>
 -k --http2 -w '%{header_json}\n' "https://%HOSTIP:%HTTP2TLSPORT/%TESTNUMBER"
 </command>
 

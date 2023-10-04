@@ -15,10 +15,10 @@ SSL
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP SSL required on non-SSL server
- </name>
- <command>
+</name>
+<command>
 -k --ftp-ssl-reqd ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>

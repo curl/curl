@@ -31,10 +31,10 @@ Funny-head: yesyes
 <server>
 http
 </server>
- <name>
+<name>
 using more -o than URLs in the command line
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o %LOGDIR/dump -o %LOGDIR/dump2 --no-progress-meter
 </command>
 </client>

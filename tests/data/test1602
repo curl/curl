@@ -15,8 +15,8 @@ none
 <features>
 unittest
 </features>
- <name>
+<name>
 Internal hash create/add/destroy testing, exercising clean functions
- </name>
+</name>
 </client>
 </testcase>

@@ -32,10 +32,10 @@ ftp
 lib585
 </tool>
 
- <name>
+<name>
 verify close callbacks with active FTP
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER %LOGDIR/ip%TESTNUMBER activeftp
 </command>
 </client>

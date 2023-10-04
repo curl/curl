@@ -22,13 +22,13 @@ telnet
 <features>
 telnet
 </features>
- <name>
+<name>
 Basic TELNET negotiation
- </name>
+</name>
 <stdin>
 test%TESTNUMBER
 </stdin>
- <command>
+<command>
 telnet://%HOSTIP:%TELNETPORT --upload-file -
 </command>
 </client>

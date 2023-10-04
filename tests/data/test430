@@ -59,10 +59,10 @@ data = "c"
 <server>
 http
 </server>
- <name>
+<name>
 Three -K uses with --next and --data in each
- </name>
- <command>
+</name>
+<command>
 -K %LOGDIR/config%TESTNUMBER-a -K %LOGDIR/config%TESTNUMBER-b -K %LOGDIR/config%TESTNUMBER-c
 </command>
 </client>

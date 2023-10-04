@@ -25,13 +25,13 @@ REPLY dXNlcg== 235 Authenticated
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP external authentication
- </name>
+</name>
 <stdin>
 mail body
 </stdin>
- <command>
+<command>
 'smtp://user;AUTH=EXTERNAL@%HOSTIP:%SMTPPORT/%TESTNUMBER' --mail-rcpt recipient@example.com --mail-from sender@example.com -T -
 </command>
 </client>

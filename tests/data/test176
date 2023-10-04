@@ -54,10 +54,10 @@ SSL
 <server>
 http
 </server>
- <name>
+<name>
 HTTP POST --ntlm to server not requiring any auth at all
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u auser:apasswd --ntlm -d "junkelijunk"
 </command>
 </client>

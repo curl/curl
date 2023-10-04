@@ -32,8 +32,8 @@ lib%TESTNUMBER
 </tool>
 <name>
 Set CURLOPT_CURLU and dupe the handle
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

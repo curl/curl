@@ -15,9 +15,9 @@ none
 <features>
 unittest
 </features>
- <name>
+<name>
 curl_get_line unit tests
- </name>
+</name>
 <command>
 %LOGDIR/curl_get_line%TESTNUMBER
 </command>

@@ -42,10 +42,10 @@ imap
 debug
 crypto
 </features>
- <name>
+<name>
 IMAP DIGEST-MD5 authentication with SASL downgrade
- </name>
- <command>
+</name>
+<command>
 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user:secret
 </command>
 </client>

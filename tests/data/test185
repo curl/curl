@@ -44,10 +44,10 @@ moo
 <server>
 http
 </server>
- <name>
+<name>
 HTTP replace Host: when following Location: on the same host
- </name>
- <command>
+</name>
+<command>
 http://deathstar.another.galaxy/%TESTNUMBER -L -H "Host: another.visitor.stay.a.while.stay.foreeeeeever" --proxy http://%HOSTIP:%HTTPPORT
 </command>
 <features>

@@ -43,10 +43,10 @@ libz
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET gzip compressed content
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed
 </command>
 </client>

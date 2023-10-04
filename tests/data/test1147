@@ -32,9 +32,9 @@ Funny-head: yesyes
 <server>
 http
 </server>
- <name>
+<name>
 Get -H headers from a file
- </name>
+</name>
 <file name="%LOGDIR/heads%TESTNUMBER.txt">
 One: 1
 Two: 2
@@ -45,7 +45,7 @@ no-colon
 %endif
 User-Agent:
 </file>
- <command>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -H @%LOGDIR/heads%TESTNUMBER.txt
 </command>
 </client>

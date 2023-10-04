@@ -16,9 +16,9 @@ SMTP
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP data with single dot-only line
- </name>
+</name>
 <stdin>
 .
 </stdin>

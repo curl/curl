@@ -22,10 +22,10 @@ SSLpinning
 <server>
 https Server-localhost-sv.pem
 </server>
- <name>
+<name>
 HTTPS wrong base64-sha256 pinnedpubkey but right CN
- </name>
- <command>
+</name>
+<command>
 --cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --pinnedpubkey sha256//bSIggTf+ikMG0CtmDlpMVBd7yi7H1md4URogRPqerso= https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
 # Ensure that we're running on localhost because we're checking the host name

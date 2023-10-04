@@ -33,10 +33,10 @@ dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP (optional .netrc with 'default' override; no user/pass) dir list PASV
- </name>
- <command>
+</name>
+<command>
 --netrc-optional --netrc-file %LOGDIR/netrc%TESTNUMBER ftp://%HOSTIP:%FTPPORT/
 </command>
 <file name="%LOGDIR/netrc%TESTNUMBER" >

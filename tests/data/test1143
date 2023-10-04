@@ -22,10 +22,10 @@ hej
 <server>
 http
 </server>
- <name>
+<name>
 HTTP URL with http:/ (one slash!)
- </name>
- <command>
+</name>
+<command>
 http:/%HOSTIP:%HTTPPORT/want/%TESTNUMBER
 </command>
 <setenv>

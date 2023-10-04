@@ -30,10 +30,10 @@ proxy
 <server>
 http-ipv6
 </server>
- <name>
+<name>
 HTTP-IPv6 GET with proxy specified using IPv6-numerical address
- </name>
- <command>
+</name>
+<command>
 -g -x "http://%HOST6IP:%HTTP6PORT" http://veryveryremotesite.com/%TESTNUMBER
 </command>
 </client>

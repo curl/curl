@@ -16,10 +16,10 @@
 <server>
 none
 </server>
- <name>
+<name>
 curl invalid category --help
- </name>
- <command>
+</name>
+<command>
 --help sdfafdsfadsfsd
 </command>
 </client>

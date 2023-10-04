@@ -27,10 +27,10 @@ proxy
 ftp
 socks5
 </server>
- <name>
+<name>
 FTP fetch with --proxy set to socks5:// and with --connect-to
- </name>
- <command>
+</name>
+<command>
 ftp://ftp.example.com/%TESTNUMBER --connect-to ::%HOSTIP:%FTPPORT --proxy socks5://%HOSTIP:%SOCKSPORT
 </command>
 </client>

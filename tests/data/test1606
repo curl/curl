@@ -15,8 +15,8 @@ none
 <features>
 unittest
 </features>
- <name>
+<name>
 verify speedcheck
- </name>
+</name>
 </client>
 </testcase>

@@ -36,12 +36,12 @@ headers-api
 http
 http/3
 </server>
- <name>
+<name>
 HTTP/3 header-api
- </name>
+</name>
 <setenv>
 </setenv>
- <command>
+<command>
 -w '%{header_json}\n' --http3-only --cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --resolve localhost:%HTTP3PORT:%HOSTIP https://localhost:%HTTP3PORT/%TESTNUMBER
 </command>
 

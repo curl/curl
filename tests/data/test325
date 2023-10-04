@@ -38,10 +38,10 @@ SSL
 <server>
 https
 </server>
- <name>
+<name>
 HTTPS with attempted redirect to denied HTTP
- </name>
- <command>
+</name>
+<command>
 -k https://%HOSTIP:%HTTPSPORT/%TESTNUMBER --proto-redir -http --location
 </command>
 </client>

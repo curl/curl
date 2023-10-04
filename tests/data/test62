@@ -25,10 +25,10 @@ boo
 <server>
 http
 </server>
- <name>
+<name>
 HTTP, send cookies when using custom Host:
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER?hoge=fuga -b %LOGDIR/jar%TESTNUMBER.txt -H "Host: www.host.foo.com"
 </command>
 <file name="%LOGDIR/jar%TESTNUMBER.txt">

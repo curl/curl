@@ -28,10 +28,10 @@ RETRSIZE 7
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP growing file support
- </name>
- <command>
+</name>
+<command>
 --ignore-content-length ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>

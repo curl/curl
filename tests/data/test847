@@ -27,10 +27,10 @@ body
 <server>
 imap
 </server>
- <name>
+<name>
 IMAP FETCH message
- </name>
- <command>
+</name>
+<command>
 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;UID=1' -u '"user:sec"ret{'
 </command>
 </client>

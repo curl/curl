@@ -19,10 +19,10 @@ none
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 verify setting pipeling blocklisting options
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER
 </command>
 </client>

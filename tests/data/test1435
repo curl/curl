@@ -24,10 +24,10 @@ unix-sockets
 <server>
 http-unix
 </server>
- <name>
+<name>
 simple HTTP GET over Unix socket
- </name>
- <command>
+</name>
+<command>
 --unix-socket %HTTPUNIXPATH http://server-interpreted.example.com/%TESTNUMBER
 </command>
 </client>

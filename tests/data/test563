@@ -29,9 +29,9 @@ ftp
 <tool>
 lib562
 </tool>
- <name>
+<name>
 FTP type=A URL and CURLOPT_PORT set and proxy
- </name>
+</name>
 <features>
 proxy
 </features>
@@ -40,7 +40,7 @@ ftp_proxy=http://%HOSTIP:%HTTPPORT/
 </setenv>
 # note that we need quotes around the URL below to make sure the shell doesn't
 # treat the semicolon as a separator!
- <command>
+<command>
 "ftp://%HOSTIP:23456/%TESTNUMBER;type=A" %FTPPORT
 </command>
 

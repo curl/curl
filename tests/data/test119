@@ -20,10 +20,10 @@ REPLY SIZE 500 command not understood
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP download, failed RETR with PORT
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -P -
 </command>
 </client>

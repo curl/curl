@@ -47,10 +47,10 @@ verify
 <server>
 http
 </server>
- <name>
+<name>
 HTTP HEAD, receive no headers only body
- </name>
- <command>
+</name>
+<command>
 -I http://%HOSTIP:%HTTPPORT/%TESTNUMBER --http0.9
 </command>
 </client>

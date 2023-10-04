@@ -31,10 +31,10 @@ proxy
 <server>
 http
 </server>
- <name>
+<name>
 HTTP CONNECT with proxytunnel to unsupported FTP URL
- </name>
- <command>
+</name>
+<command>
 ftp://test-number:%TESTNUMBER/wanted/page -p -x %HOSTIP:%HTTPPORT
 </command>
 </client>

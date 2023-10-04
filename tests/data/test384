@@ -31,9 +31,9 @@ Funny-head: yesyes
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with --json from stdin
- </name>
+</name>
 <stdin>
 { "drink": "coffe" }
 </stdin>

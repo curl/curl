@@ -26,10 +26,10 @@ This server says moo
 <server>
 http
 </server>
- <name>
+<name>
 HTTP cookies and domains with same prefix
- </name>
- <command>
+</name>
+<command>
 http://example.fake/c/%TESTNUMBER http://example.fake/c/%TESTNUMBER http://bexample.fake/c/%TESTNUMBER -b nonexisting -x %HOSTIP:%HTTPPORT
 </command>
 <features>

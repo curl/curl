@@ -24,10 +24,10 @@ REPLY CWD 250-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP with excessively long server command response lines, boundary condition
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER
 </command>
 </client>

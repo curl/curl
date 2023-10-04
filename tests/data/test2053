@@ -26,11 +26,11 @@ OK
 <server>
 http
 </server>
- <name>
+<name>
 Connect to specific host with IP addresses
- </name>
+</name>
 
- <command>
+<command>
 http://10.0.0.1:8081/%TESTNUMBER --connect-to 10.0.0.1:8081:%HOSTIP:%HTTPPORT --next http://[fc00::1]:8082/%TESTNUMBER --connect-to [fc00::1]:8082:%HOSTIP:%HTTPPORT
 </command>
 </client>

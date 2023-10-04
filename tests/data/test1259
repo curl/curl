@@ -23,10 +23,10 @@ boo
 <server>
 http
 </server>
- <name>
+<name>
 HTTP URL with semicolon in password
- </name>
- <command>
+</name>
+<command>
 "http://user:pass;word@%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER"
 </command>
 </client>

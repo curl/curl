@@ -68,10 +68,10 @@ http
 crypto
 proxy
 </features>
- <name>
+<name>
 HTTP POST --digest with PUT, resumed upload, modified method, SHA-512-256 and userhash=false
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u auser:apasswd --digest -T %LOGDIR/%TESTNUMBER -x  http://%HOSTIP:%HTTPPORT -C 2 -X GET
 </command>
 <file name="%LOGDIR/%TESTNUMBER">

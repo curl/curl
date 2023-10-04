@@ -54,10 +54,10 @@ http
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 HTTP resume/range fail range-error content-range combinations
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER
 </command>
 </client>

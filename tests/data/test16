@@ -27,10 +27,10 @@ the content goes here
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with proxy authorization
- </name>
- <command>
+</name>
+<command>
  -U fake@user:loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong -x %HOSTIP:%HTTPPORT http://we.want.that.site.com/%TESTNUMBER
 </command>
 <features>

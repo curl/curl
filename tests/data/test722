@@ -30,10 +30,10 @@ Hello curl from IPFS
 <server>
 http
 </server>
- <name>
+<name>
 IPFS
- </name>
- <command>
+</name>
+<command>
 --ipfs-gateway http://%HOSTIP:%HTTPPORT/%TESTNUMBER ipfs://QmV5JejrpgUxnkZeFZYMxVCqAbKy3KdPXWXyuEDiMNZwUx
 </command>
 </client>

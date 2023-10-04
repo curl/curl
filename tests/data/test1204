@@ -51,10 +51,10 @@ This IS the real page!
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with WWW-Authenticate and multiple auths in a single line
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --anyauth
 </command>
 </client>

@@ -22,10 +22,10 @@ http
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 simple libcurl attempt operation without URL set
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER
 </command>
 </client>

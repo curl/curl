@@ -48,11 +48,11 @@ LC_CTYPE=en_US.UTF-8
 <precheck>
 perl -MI18N::Langinfo=langinfo,CODESET -e 'die "Needs a UTF-8 locale" if (lc(langinfo(CODESET())) ne "utf-8");'
 </precheck>
- <name>
+<name>
 Connection reuse with IDN host name
- </name>
+</name>
 
- <command>
+<command>
 http://åäö.se:%HTTPPORT/%TESTNUMBER --resolve xn--4cab6c.se:%HTTPPORT:%HOSTIP -w "%{num_connects}\n%{num_redirects}\n%{size_download}\n%{url_effective}\n%{content_type}\n%{response_code}\n" -L
 </command>
 </client>

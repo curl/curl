@@ -26,10 +26,10 @@ Funny-head: yesyes
 <server>
 http
 </server>
- <name>
+<name>
 Replaced internal headers with a blank one
- </name>
- <command>
+</name>
+<command>
  -H "Host;" -H "Accept;" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

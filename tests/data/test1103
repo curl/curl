@@ -23,10 +23,10 @@ REPLY SYST 215  unknown-OS runs this server
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP non-OS/400 server
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>

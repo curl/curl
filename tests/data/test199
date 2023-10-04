@@ -31,10 +31,10 @@ Funny-head: yesyes
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with -d, -G and {}
- </name>
- <command>
+</name>
+<command>
 -d "foo=moo&moo=poo" "http://%HOSTIP:%HTTPPORT/{%TESTNUMBER,%TESTNUMBER}" -G
 </command>
 </client>

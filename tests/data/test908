@@ -25,13 +25,13 @@ REPLY dXNlcj11c2VyAWF1dGg9QmVhcmVyIG1GXzkuQjVmLTQuMUpxTQEB 235 Authenticated
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP OAuth 2.0 (XOAUTH2) authentication
- </name>
+</name>
 <stdin>
 mail body
 </stdin>
- <command>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u user --oauth2-bearer mF_9.B5f-4.1JqM -T -
 </command>
 </client>

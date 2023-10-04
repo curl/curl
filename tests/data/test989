@@ -26,10 +26,10 @@ body
 <server>
 pop3s
 </server>
- <name>
+<name>
 POP3S RETR with redundant explicit SSL request
- </name>
- <command>
+</name>
+<command>
 -k --ssl-reqd  -u user:secret pop3s://%HOSTIP:%POP3SPORT/%TESTNUMBER
 </command>
 </client>

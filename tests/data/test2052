@@ -27,11 +27,11 @@ OK
 <server>
 http
 </server>
- <name>
+<name>
 Connect to specific host: Do not mix connections with and without a "connect to host"
- </name>
+</name>
 
- <command>
+<command>
 http://www.example.com:%HTTPPORT/%TESTNUMBER --resolve www.example.com:%HTTPPORT:%HOSTIP -w "%{num_connects}\n" --next --resolve -www.example.com:%HTTPPORT --connect-to ::%HOSTIP:%HTTPPORT http://www.example.com:%HTTPPORT/%TESTNUMBER -w "%{num_connects}\n"
 </command>
 </client>

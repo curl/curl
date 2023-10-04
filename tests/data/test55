@@ -39,10 +39,10 @@ body
 <server>
 http
 </server>
- <name>
+<name>
 HTTP follow redirect with single slash in path
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -L
 </command>
 </client>

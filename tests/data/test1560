@@ -26,9 +26,9 @@ ldap
 dict
 ftp
 </features>
- <name>
+<name>
 URL API
- </name>
+</name>
 <tool>
 lib%TESTNUMBER
 </tool>

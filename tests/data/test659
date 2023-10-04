@@ -32,8 +32,8 @@ lib%TESTNUMBER
 </tool>
 <name>
 CURLOPT_CURLU without the path set - over proxy
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT
 </command>
 <features>

@@ -20,10 +20,10 @@ REPLY VRFY 550 Unknown user
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP unknown user VRFY
- </name>
- <command>
+</name>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient
 </command>
 </client>

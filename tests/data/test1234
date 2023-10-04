@@ -15,10 +15,10 @@ FAILURE
 <server>
 none
 </server>
- <name>
+<name>
 abusing {}-globbing
- </name>
- <command>
+</name>
+<command>
 "%HOSTIP:%NOLISTENPORT/%TESTNUMBER[0-1]{" "%HOSTIP:%NOLISTENPORT/{}{}{}{"
 </command>
 </client>

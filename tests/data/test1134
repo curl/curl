@@ -34,10 +34,10 @@ contents2
 <server>
 http
 </server>
- <name>
+<name>
 HTTP connection reuse with different credentials
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u user1:password1 --next http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 -u 2user:password2
 </command>
 </client>

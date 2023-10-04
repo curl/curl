@@ -50,11 +50,11 @@ http-proxy
 http-ipv6
 http
 </server>
- <name>
+<name>
 HTTP CONNECT to IPv6 numerical address
- </name>
+</name>
 # 0x4ce == %TESTNUMBER, the test number
- <command>
+<command>
 http://[1234:1234:1234::4ce]:%HTTPPORT/wanted/page/%TESTNUMBER -p -x %HOSTIP:%HTTPPORT
 </command>
 </client>

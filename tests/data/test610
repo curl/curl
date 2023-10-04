@@ -23,10 +23,10 @@ sftp
 <precheck>
 perl %SRCDIR/libtest/test%TESTNUMBER.pl mkdir %PWD/%LOGDIR/test%TESTNUMBER.dir
 </precheck>
- <name>
+<name>
 SFTP post-quote rmdir
- </name>
- <command>
+</name>
+<command>
 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -Q "-rmdir %PWD/%LOGDIR/test%TESTNUMBER.dir" sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/file%TESTNUMBER.txt --insecure
 </command>
 <postcheck>

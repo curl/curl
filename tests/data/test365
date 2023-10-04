@@ -43,10 +43,10 @@ chunked data fun
 <server>
 http
 </server>
- <name>
+<name>
 HTTP/1.1 with chunked AND Content-Length headers
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

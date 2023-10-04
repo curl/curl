@@ -37,10 +37,10 @@ proxy
 http
 socks5
 </server>
- <name>
+<name>
 HTTP GET with host name using SOCKS5h
- </name>
- <command>
+</name>
+<command>
 http://this.is.a.host.name:%HTTPPORT/%TESTNUMBER --proxy socks5h://%HOSTIP:%SOCKSPORT
 </command>
 </client>

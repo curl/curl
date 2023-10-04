@@ -31,10 +31,10 @@ Funny-head: yesyes
 <server>
 http
 </server>
- <name>
+<name>
 Two globbed HTTP PUTs, the second upload file is missing
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T '{%LOGDIR/in%TESTNUMBER,%LOGDIR/bad%TESTNUMBER}'
 </command>
 <file name="%LOGDIR/in%TESTNUMBER">

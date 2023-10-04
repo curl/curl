@@ -50,10 +50,10 @@ moo
 <server>
 http
 </server>
- <name>
+<name>
 HTTP Location: following a // prefixed url
- </name>
- <command>
+</name>
+<command>
 http://firstplace.example.com/want/%TESTNUMBER -L -x http://%HOSTIP:%HTTPPORT
 </command>
 <features>

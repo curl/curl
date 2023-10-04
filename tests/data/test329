@@ -40,16 +40,16 @@ moo
 <server>
 http
 </server>
- <name>
+<name>
 HTTP cookie with Max-Age=0
- </name>
+</name>
 # Explicitly set the time zone to a known good one, in case the user is
 # using one of the 'right' zones that take into account leap seconds
 # which causes the cookie expiry times to be different.
 <setenv>
 TZ=GMT
 </setenv>
- <command>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -b %LOGDIR/jar%TESTNUMBER.txt -b %LOGDIR/jar%TESTNUMBER-2.txt -H "Host: host.foo.com" http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER0002
 </command>
 <features>

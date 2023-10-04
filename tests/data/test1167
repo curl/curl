@@ -12,9 +12,9 @@ source analysis
 none
 </server>
 
- <name>
+<name>
 Verify curl prefix of public symbols in header files
- </name>
+</name>
 
 <command type="perl">
 %SRCDIR/badsymbols.pl %SRCDIR/..

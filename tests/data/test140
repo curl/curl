@@ -20,10 +20,10 @@ FTP
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP download file with -z, expected to not transfer
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/blalbla/%TESTNUMBER -z "1 jan 2004"
 </command>
 </client>

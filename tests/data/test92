@@ -44,10 +44,10 @@ Content-Type: image/gif
 <server>
 http
 </server>
- <name>
+<name>
 HTTP resume transfer with the whole file already downloaded
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -C 87
 </command>
 </client>

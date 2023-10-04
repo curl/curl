@@ -34,10 +34,10 @@ This second URL does not have a location
 <server>
 http
 </server>
- <name>
+<name>
 HTTP no Location: on second URL 'redirect_url' check
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER0002 -w '%{redirect_url}\n'
 </command>
 </client>

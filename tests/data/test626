@@ -18,10 +18,10 @@ FAILURE
 <server>
 sftp
 </server>
- <name>
+<name>
 SFTP invalid quote command
- </name>
- <command>
+</name>
+<command>
 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -Q "invalid-command foo bar" sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/file%TESTNUMBER.txt --insecure
 </command>
 <file name="%LOGDIR/file%TESTNUMBER.txt">

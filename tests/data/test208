@@ -29,10 +29,10 @@ http
 ftp
 proxy
 </features>
- <name>
+<name>
 HTTP PUT to a FTP URL with username+password - over HTTP proxy
- </name>
- <command>
+</name>
+<command>
 -x http://%HOSTIP:%HTTPPORT ftp://daniel:mysecret@host.com/we/want/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt
 </command>
 <file name="%LOGDIR/test%TESTNUMBER.txt">

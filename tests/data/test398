@@ -35,10 +35,10 @@ Date: Tue, 09 Nov 2010 14:49:00 GMT
 <server>
 http
 </server>
- <name>
+<name>
 Reject HTTP/1.1 response with colon-less header
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

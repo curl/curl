@@ -19,10 +19,10 @@ data for %TESTNUMBER
 <server>
 tftp
 </server>
- <name>
+<name>
 TFTP get first a non-existing file then an existing
- </name>
- <command>
+</name>
+<command>
 tftp://%HOSTIP:%TFTPPORT/an/invalid-file tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER
 </command>
 </client>

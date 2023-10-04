@@ -77,10 +77,10 @@ http
 !SSPI
 crypto
 </features>
- <name>
+<name>
 HTTP with Digest authorization with stale=true
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 -u testuser:testpass --digest http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002
 </command>
 </client>

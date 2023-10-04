@@ -30,9 +30,9 @@ Funny-head: yesyes
 <server>
 http
 </server>
- <name>
+<name>
 --output using #0
- </name>
+</name>
  <command option="no-output">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o '%LOGDIR/base-#0'
 </command>

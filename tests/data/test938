@@ -27,13 +27,13 @@ REPLY dXNlci50d28AdXNlci50d28Ac2VjcmV0 235 Authenticated
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP multiple connection authentication
- </name>
+</name>
 <file name="%LOGDIR/upload%TESTNUMBER">
 mail body
 </file>
- <command>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER001 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user.one:secret -T %LOGDIR/upload%TESTNUMBER -: smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER002 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user.two:secret -T %LOGDIR/upload%TESTNUMBER
 </command>
 </client>

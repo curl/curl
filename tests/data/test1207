@@ -22,10 +22,10 @@ NODATACONN421
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP PORT and 421 on download
- </name>
- <command>
+</name>
+<command>
 --max-time %FTPTIME2 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -P -
 </command>
 

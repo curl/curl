@@ -34,13 +34,13 @@ smtp
 debug
 crypto
 </features>
- <name>
+<name>
 SMTP DIGEST-MD5 authentication with SASL downgrade
- </name>
+</name>
 <stdin>
 mail body
 </stdin>
- <command>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret -T -
 </command>
 </client>

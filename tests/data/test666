@@ -42,10 +42,10 @@ http
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 HTTP mime post with binary-encoded huge data contents
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

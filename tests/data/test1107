@@ -27,10 +27,10 @@ REPLY PRET 200 fine
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP RETR PASV with PRET
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --ftp-pret
 </command>
 

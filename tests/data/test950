@@ -21,9 +21,9 @@ VRFY
 <server>
 smtp
 </server>
- <name>
+<name>
 SMTP VRFY with custom request
- </name>
+</name>
 
 # the custom request just does it lowercase to remain the same command
 <command>

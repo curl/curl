@@ -44,7 +44,7 @@ SOCKS5 proxy auth
 </name>
 
 # target a port that won't work without the SOCKS magic
- <command>
+<command>
 http://%HOSTIP:1/%TESTNUMBER -x socks5://uz3r:p4ssworm@%HOSTIP:%SOCKSPORT
 </command>
 <features>

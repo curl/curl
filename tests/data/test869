@@ -41,10 +41,10 @@ pop3
 debug
 crypto
 </features>
- <name>
+<name>
 POP3 DIGEST-MD5 authentication
- </name>
- <command>
+</name>
+<command>
 pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 </command>
 </client>

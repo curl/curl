@@ -50,16 +50,16 @@ proxy
 http
 http-proxy
 </server>
- <name>
+<name>
 CONNECT with short sends
- </name>
+</name>
 <setenv>
 # make the first send cut off after this amount of data
 CURL_SMALLREQSEND=8
 # make repeated sends small too
 CURL_SMALLSENDS=8
 </setenv>
- <command>
+<command>
 http://test.%TESTNUMBER:%HTTPPORT/we/want/that/page/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT -d "datatopost=ohthatsfunyesyes"
 </command>
 </client>

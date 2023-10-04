@@ -14,8 +14,8 @@ none
 <tool>
 lib%TESTNUMBER
 </tool>
- <name>
+<name>
 curl_strequal tests
- </name>
+</name>
 </client>
 </testcase>

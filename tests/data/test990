@@ -35,7 +35,7 @@ http
 <name>
 use -w %output{}
 </name>
- <command>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w '%output{%LOGDIR/output}%{http_code}\n'
 </command>
 </client>

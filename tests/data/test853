@@ -31,10 +31,10 @@ SLOWDOWN
 <server>
 pop3
 </server>
- <name>
+<name>
 POP3 LIST messages from *SLOW* server
- </name>
- <command>
+</name>
+<command>
 pop3://%HOSTIP:%POP3PORT/ -u user:secret
 </command>
 </client>

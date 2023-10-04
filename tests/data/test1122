@@ -45,10 +45,10 @@ libz
 <server>
 http
 </server>
- <name>
+<name>
 HTTP GET gzip transfer-encoded content
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --tr-encoding
 </command>
 </client>

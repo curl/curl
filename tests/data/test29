@@ -26,10 +26,10 @@ wait 10
 <server>
 http
 </server>
- <name>
+<name>
 HTTP with 2 secs timeout
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -m 2
 </command>
 </client>

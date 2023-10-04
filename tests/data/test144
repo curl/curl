@@ -21,10 +21,10 @@ REPLY NLST 450 No files found
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP NLST dir list without contents, using PORT
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/ -P - -l
 </command>
 </client>

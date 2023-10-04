@@ -21,10 +21,10 @@ iMenu results		error.host	1
 <server>
 gopher
 </server>
- <name>
+<name>
 Gopher index
- </name>
- <command>
+</name>
+<command>
 gopher://%HOSTIP:%GOPHERPORT/1/%TESTNUMBER
 </command>
 </client>

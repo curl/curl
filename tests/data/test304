@@ -27,10 +27,10 @@ SSL
 <server>
 https
 </server>
- <name>
+<name>
 HTTPS multipart formpost
- </name>
- <command>
+</name>
+<command>
 -k https://%HOSTIP:%HTTPSPORT/we/want/%TESTNUMBER -F name=daniel -F tool=curl -F file=@%LOGDIR/test%TESTNUMBER.txt
 </command>
 # We create this file before the command is invoked!

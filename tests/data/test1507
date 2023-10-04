@@ -22,16 +22,16 @@ lib%TESTNUMBER
 </tool>
 
 # based on bug report #1184
- <name>
+<name>
 SMTP with multi interface and CURLE_ABORTED_BY_CALLBACK
- </name>
+</name>
 <stdin>
 From: different
 To: another
 
 body
 </stdin>
- <command>
+<command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER
 </command>
 </client>

@@ -63,10 +63,10 @@ Connection: close
 <server>
 http
 </server>
- <name>
+<name>
 looping HTTP Location: following with --max-redirs
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -L --max-redirs 5
 </command>
 </client>

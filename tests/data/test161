@@ -21,10 +21,10 @@ PASV
 <server>
 ftp
 </server>
- <name>
+<name>
 FTP RETR PASV
- </name>
- <command>
+</name>
+<command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>

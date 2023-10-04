@@ -37,10 +37,10 @@ http
 crypto
 proxy
 </features>
- <name>
+<name>
 HTTP proxy CONNECT (no auth) with proxy returning 407 and closing
- </name>
- <command>
+</name>
+<command>
 http://test.remote.haxx.se.%TESTNUMBER:8990/path/%TESTNUMBER0002 --proxy http://%HOSTIP:%HTTPPORT --proxytunnel
 </command>
 </client>

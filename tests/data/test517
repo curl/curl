@@ -20,10 +20,10 @@ none
 lib%TESTNUMBER
 </tool>
 
- <name>
+<name>
 curl_getdate() testing
- </name>
- <command>
+</name>
+<command>
 nothing
 </command>
 </client>

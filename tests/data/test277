@@ -26,10 +26,10 @@ Mime
 <server>
 http
 </server>
- <name>
+<name>
 HTTP RFC1867-type formposting with custom Content-Type
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -F name=daniel -H "Content-Type: text/info"
 </command>
 </client>

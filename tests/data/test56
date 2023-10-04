@@ -23,9 +23,9 @@ This is the proof it works
 <server>
 http
 </server>
- <name>
+<name>
 HTTP POST with *HUGE* request and chunked transfer-encoding
- </name>
+</name>
  <stdin>
 #
 data "we post this"
@@ -37,7 +37,7 @@ header "Transfer-Encoding: chunked"
 -A "%repeat[99999 x a]%"
 #
  </stdin>
- <command>
+<command>
 -K - %HOSTIP:%HTTPPORT/that.site.com/%TESTNUMBER
 </command>
 </client>

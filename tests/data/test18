@@ -37,10 +37,10 @@ hoo
 <server>
 http
 </server>
- <name>
+<name>
 multiple requests using {} in URL
- </name>
- <command>
+</name>
+<command>
 "%HOSTIP:%HTTPPORT/{%TESTNUMBER,%TESTNUMBER0002,%TESTNUMBER0003}"
 </command>
 </client>

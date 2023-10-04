@@ -26,11 +26,11 @@ OK
 <server>
 http
 </server>
- <name>
+<name>
 Connect to specific host: use the first "connect-to" string that matches
- </name>
+</name>
 
- <command>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --connect-to foo::bar: --connect-to :123::456 --next http://www.example.com:%HTTPPORT/%TESTNUMBER --connect-to www.example.com::%HOSTIP: --connect-to www.example.com::foo: --next http://%HOSTIP:8083/%TESTNUMBER --connect-to :8083::%HTTPPORT --connect-to :8083::123 --next http://www.example.com:8084/%TESTNUMBER --connect-to www.example.com:8084:%HOSTIP:%HTTPPORT --connect-to www.example.com:8084:foo:123
 </command>
 </client>

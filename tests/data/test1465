@@ -25,13 +25,13 @@ Connection: close
 <server>
 http
 </server>
- <name>
+<name>
 --libcurl for POST with binary content
- </name>
+</name>
 <setenv>
 SSL_CERT_FILE=
 </setenv>
- <command>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --libcurl %LOGDIR/test%TESTNUMBER.c --data-binary @%LOGDIR/%TESTNUMBER-upload
 </command>
 # "ab\x81""cd\0e\\\"?\r\n\t\x01""fghi%x1Ajklm%xFD"

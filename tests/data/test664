@@ -20,10 +20,10 @@ test
 <server>
 sftp
 </server>
- <name>
+<name>
 SFTP correct host key
- </name>
- <command>
+</name>
+<command>
 --hostpubmd5 %SSHSRVMD5 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/file%TESTNUMBER.txt
 </command>
 <file name="%LOGDIR/file%TESTNUMBER.txt">

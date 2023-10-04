@@ -46,10 +46,10 @@ contents
 http
 http-proxy
 </server>
- <name>
+<name>
 HTTP over proxytunnel using POST
- </name>
- <command>
+</name>
+<command>
 http://test.%TESTNUMBER:%HTTPPORT/we/want/that/page/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT -d "datatopost=ohthatsfunyesyes"
 </command>
 <features>
