@@ -243,7 +243,7 @@ mark_as_advanced(CURL_DISABLE_RTSP)
 option(CURL_DISABLE_SHUFFLE_DNS "disables shuffle DNS feature" OFF)
 mark_as_advanced(CURL_DISABLE_SHUFFLE_DNS)
 # Experimental
-option(CURL_DISABLE_SIEVE "disables SIEVE" ON)
+option(CURL_DISABLE_SIEVE "disables SIEVE" OFF)
 mark_as_advanced(CURL_DISABLE_SIEVE)
 option(CURL_DISABLE_SMB "disables SMB" OFF)
 mark_as_advanced(CURL_DISABLE_SMB)

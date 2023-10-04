@@ -947,18 +947,18 @@ AC_ARG_ENABLE(sieve,
 AS_HELP_STRING([--enable-sieve], [Enable SIEVE support])
 AS_HELP_STRING([--disable-sieve], [Disable SIEVE support]),
 [ case "$enableval" in
-  yes) AC_MSG_RESULT(yes)
+  no)  AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_SIEVE, 1, [to disable SIEVE])
+       AC_SUBST(CURL_DISABLE_SIEVE, [1])
+       ;;
+  *)   AC_MSG_RESULT(yes)
        experimental="$experimental SIEVE"
        AC_MSG_NOTICE([SIEVE support is experimental])
        ;;
-  *)   AC_MSG_RESULT(no)
-       AC_DEFINE(CURL_DISABLE_SIEVE, 1, [to disable SIEVE])
-       AC_SUBST(CURL_DISABLE_SIEVE, [1])
-       ;;
   esac ],[
-       AC_MSG_RESULT(no)
-       AC_DEFINE(CURL_DISABLE_SIEVE, 1, [to disable SIEVE])
-       AC_SUBST(CURL_DISABLE_SIEVE, [1])
+       AC_MSG_RESULT(yes)
+       experimental="$experimental SIEVE"
+       AC_MSG_NOTICE([SIEVE support is experimental])
   ]
 )
 
