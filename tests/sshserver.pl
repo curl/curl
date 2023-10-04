@@ -1175,7 +1175,8 @@ if ($sshdid =~ /OpenSSH-Windows/) {
 #***************************************************************************
 # Start the ssh server daemon without forking it
 #
-my $rc = system($cmd);
+# "exec" avoids the shell process sticking around
+my $rc = system("exec " . $cmd);
 if($rc == -1) {
     logmsg "\"$sshd\" failed with: $!\n";
 }
