@@ -41,6 +41,8 @@ int test(char *URL)
   easy_setopt(curl, CURLOPT_CURLU, curlu);
   easy_setopt(curl, CURLOPT_ERRORBUFFER, error_buffer);
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  /* msys2 times out instead of CURLE_COULDNT_CONNECT, so make it faster */
+  easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, 5000L);
   /* set a port number that makes this request fail */
   easy_setopt(curl, CURLOPT_PORT, 1L);
   res = curl_easy_perform(curl);
