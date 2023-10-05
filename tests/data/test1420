@@ -38,6 +38,10 @@ SSL_CERT_FILE=
 <command>
 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user:secret --libcurl %LOGDIR/test%TESTNUMBER.c
 </command>
+# Need ftp so the FTP options are written in the --libcurl template
+<features>
+ftp
+</features>
 </client>
 
 #

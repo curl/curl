@@ -35,6 +35,9 @@ lib%TESTNUMBER
 <command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER %LOGDIR/cookies%TESTNUMBER
 </command>
+<features>
+cookies
+</features>
 <file name="%LOGDIR/cookies%TESTNUMBER" mode="text">
 # Netscape HTTP Cookie File
 # https://curl.se/docs/http-cookies.html

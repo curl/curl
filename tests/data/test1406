@@ -37,6 +37,10 @@ body
 <command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient.one@example.com --mail-rcpt recipient.two@example.com --mail-from sender@example.com -T %LOGDIR/test%TESTNUMBER.eml --libcurl %LOGDIR/test%TESTNUMBER.c
 </command>
+# Need ftp so the FTP options are written in the --libcurl template
+<features>
+ftp
+</features>
 </client>
 
 #

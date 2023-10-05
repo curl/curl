@@ -35,6 +35,7 @@ http
 http
 ftp
 file
+cookies
 </features>
 <setenv>
 SSL_CERT_FILE=

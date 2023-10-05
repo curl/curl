@@ -34,6 +34,7 @@ boo
 <features>
 PSL
 proxy
+cookies
 </features>
 <server>
 http
