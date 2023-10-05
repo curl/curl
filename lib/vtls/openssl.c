@@ -461,12 +461,14 @@ CURLcode Curl_ossl_certchain(struct Curl_easy *data, SSL *ssl)
 #if defined(HAVE_X509_GET0_SIGNATURE) && defined(HAVE_X509_GET0_EXTENSIONS)
     {
       const X509_ALGOR *sigalg = NULL;
+      const ASN1_OBJECT *sigalgoid = NULL;
       X509_PUBKEY *xpubkey = NULL;
       ASN1_OBJECT *pubkeyoid = NULL;
 
       X509_get0_signature(&psig, &sigalg, x);
       if(sigalg) {
-        i2a_ASN1_OBJECT(mem, sigalg->algorithm);
+        X509_ALGOR_get0(&sigalgoid, NULL, NULL, sigalg);
+        i2a_ASN1_OBJECT(mem, sigalgoid);
         push_certinfo("Signature Algorithm", i);
       }
 
