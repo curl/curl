@@ -4,7 +4,7 @@ curl and libcurl 8.4.0
  Command line options:         258
  curl_easy_setopt() options:   303
  Public functions in libcurl:  93
- Contributors:                 2992
+ Contributors:                 2993
 
 This release includes the following changes:
 
@@ -16,27 +16,37 @@ This release includes the following bugfixes:
 
  o acinclude.m4: Document proper system truststore on FreeBSD [83]
  o appveyor: fix yamlint issues, indent [67]
+ o appveyor: rewrite batch in PowerShell + CI improvements [109]
  o autotools: adjust `CURL_CA_PATH` value to CMake [53]
+ o autotools: restore `HAVE_IOCTL_*` detections [111]
+ o base64: also build for curl [78]
  o bufq: remove Curl_bufq_skip_and_shift (unused) [47]
  o build: delete checks for C89 standard headers [65]
  o cmake, configure: also link with CoreServices [32]
  o cmake: add check for suseconds_t [91]
  o cmake: add feature checks for `memrchr` and `getifaddrs` [57]
  o cmake: add missing checks [86]
+ o cmake: delete old `HAVE_LDAP_URL_PARSE` logic [105]
  o cmake: detect `HAVE_CLOCK_GETTIME_MONOTONIC_RAW` [75]
  o cmake: detect `HAVE_GETADDRINFO_THREADSAFE` [76]
  o cmake: detect `sys/wait.h` and `netinet/udp.h` [61]
  o cmake: detect TLS-SRP in OpenSSL/wolfSSL/GnuTLS [93]
+ o cmake: disable unity mode with Windows Unicode + TrackMemory [108]
+ o cmake: fix `HAVE_LDAP_SSL`, `HAVE_LDAP_URL_PARSE` on non-Windows [110]
  o cmake: fix `HAVE_WRITABLE_ARGV` detection [77]
  o cmake: fix duplicate symbols when linking tests [73]
  o cmake: fix missing `zlib.h` when compiling `libcurltool` [72]
  o cmake: fix stderr initialization in unity builds [71]
  o cmake: fix the help text to the static build option in CMakeLists.txt [10]
+ o cmake: fix unity builds for more build combinations [96]
  o cmake: fix unity symbol collisions in h2 builds [48]
+ o cmake: fix unity with Windows Unicode + TrackMemory [107]
+ o cmake: improve OpenLDAP builds [92]
  o cmake: lib `CURL_STATICLIB` fixes (Windows) [74]
  o cmake: move global headers to specific checks [58]
  o cmake: pre-cache `HAVE_BASENAME` for mingw-w64 and MSVC [85]
  o cmake: pre-cache `HAVE_POLL_FINE` on Windows [36]
+ o cmake: tidy-up `NOT_NEED_LBER_H` detection
  o cmake: validate `CURL_DEFAULT_SSL_BACKEND` config value [50]
  o configure: check for the capath by default [63]
  o configure: remove unused checks [87]
@@ -58,6 +68,7 @@ This release includes the following bugfixes:
  o escape: replace Curl_isunreserved with ISUNRESERVED [2]
  o FAQ: How do I upgrade curl.exe in Windows? [84]
  o GHA/linux: run singleuse to detect single-use global functions [35]
+ o GHA: add workflow to compare configure vs cmake outputs [102]
  o h2-proxy: remove left-over mistake in drain_tunnel() [7]
  o h2: testcase and fix for pausing h2 streams [49]
  o http: fix CURL_DISABLE_BEARER_AUTH breakage [28]
@@ -65,6 +76,7 @@ This release includes the following bugfixes:
  o http: remove wrong comment for http_should_fail [55]
  o http: use per-request counter to check too large headers [6]
  o http_aws_sigv4: fix sorting with empty parts [13]
+ o idn: fix WinIDN null ptr deref on bad host [90]
  o idn: if idn2_check_version returns NULL, return error [27]
  o inet_ntop: add typecast to silence Coverity [51]
  o lib: disambiguate Curl_client_write flag semantics [24]
@@ -87,6 +99,7 @@ This release includes the following bugfixes:
  o pytest: exclude test_03_goaway in CI runs due to timing dependency [23]
  o quic: set ciphers/curves the same way regular TLS does [43]
  o quiche: fix build error with --with-ca-fallback [1]
+ o RELEASE-PROCEDURE.md: updated coming release dates
  o runtests: display the test status if tests appear hung [81]
  o runtests: eliminate a warning on old perl versions
  o src/mkhelp: make generated code pass `checksrc` [59]
@@ -96,9 +109,14 @@ This release includes the following bugfixes:
  o test2600: remove special case handling for USE_ALARM_TIMEOUT [3]
  o test650: fix an end tag typo
  o test661: return from test early in case of curl error
+ o tests: close the shell used to start sshd [41]
  o tests: fix compiler warnings [38]
+ o tests: Fix zombie processes left behind by FTP tests. [80]
  o tests: improve SLOWDOWN test reliability by reducing sent data
+ o tests: increase lib571 timeout from 3s to 30s [106]
  o tests: log the test result code after each libtest
+ o tests: propagate errors in libtests
+ o tests: set --expect100-timeout to improve test reliability
  o tests: show which curl tool `runtests.pl` is using [60]
  o tests: stop overriding the lock timeout
  o tftpd: always use curl's own tftp.h [25]
@@ -128,14 +146,14 @@ advice from friends like these:
 
   Aleksander Mazur, calvin2021y on github, Christian Schmitz,
   Christian Weisgerber, claudiusaiz on github, consulion on github,
-  Dan Fandrich, Daniel Stenberg, Douglas R. Reno, Elliot Killick, Gisle Vanem,
-  Hakan Sunay Halil, Harry Sintonen, Jakub Jelen, John Haugabook,
-  Joshix-1 on github, Juliusz Sosinowicz, Junho Choi,
+  Dan Fandrich, Daniel Stenberg, Douglas R. Reno, Eduard Strehlau,
+  Elliot Killick, Gisle Vanem, Hakan Sunay Halil, Harry Sintonen, Jakub Jelen,
+  John Haugabook, Joshix-1 on github, Juliusz Sosinowicz, Junho Choi,
   Karthikdasari0423 on github, Lars Francke, Loïc Yhuel, Marc Hörsken,
   Mark Gaiser, Mathias Fuchs, Michael Osipov, Natanael Copa, Patrick Monnerat,
   Peter Wang, Ray Satiro, Robert Simpson, Ryan Schmidt, s0urc3_ on hackerone,
   Samuel Henrique, Stefan Eissing, Ted Lyngmo, Viktor Szakats, vvb2060, 南宫雪珊
-  (38 contributors)
+  (39 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -179,6 +197,7 @@ References to bug reports and discussions on issues:
  [38] = https://curl.se/bug/?i=11925
  [39] = https://curl.se/bug/?i=11904
  [40] = https://curl.se/bug/?i=11921
+ [41] = https://curl.se/bug/?i=12032
  [42] = https://curl.se/bug/?i=11924
  [43] = https://curl.se/bug/?i=11796
  [44] = https://curl.se/bug/?i=11810
@@ -215,7 +234,9 @@ References to bug reports and discussions on issues:
  [75] = https://curl.se/bug/?i=11981
  [76] = https://curl.se/bug/?i=11979
  [77] = https://curl.se/bug/?i=11978
+ [78] = https://curl.se/bug/?i=12010
  [79] = https://curl.se/bug/?i=11988
+ [80] = https://curl.se/bug/?i=12018
  [81] = https://curl.se/bug/?i=11980
  [82] = https://curl.se/bug/?i=11986
  [83] = https://curl.se/bug/?i=11985
@@ -225,9 +246,20 @@ References to bug reports and discussions on issues:
  [87] = https://curl.se/bug/?i=11973
  [88] = https://curl.se/bug/?i=11975
  [89] = https://curl.se/bug/?i=11963
+ [90] = https://curl.se/bug/?i=11983
  [91] = https://curl.se/bug/?i=11977
+ [92] = https://curl.se/bug/?i=12024
  [93] = https://curl.se/bug/?i=11967
  [94] = https://curl.se/bug/?i=11958
  [95] = https://curl.se/bug/?i=11939
+ [96] = https://curl.se/bug/?i=12027
  [97] = https://curl.se/bug/?i=11908
  [98] = https://curl.se/bug/?i=11938
+ [102] = https://curl.se/bug/?i=11964
+ [105] = https://curl.se/bug/?i=12015
+ [106] = https://curl.se/bug/?i=12013
+ [107] = https://curl.se/bug/?i=11928
+ [108] = https://curl.se/bug/?i=12005
+ [109] = https://curl.se/bug/?i=11999
+ [110] = https://curl.se/bug/?i=12006
+ [111] = https://curl.se/bug/?i=12008
