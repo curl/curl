@@ -3987,7 +3987,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
   }
   else {
     int psigtype_nid;
-    const char *negotiated_group_name;
+    const char *negotiated_group_name = NULL;
 
     /* we connected fine, we're not waiting for anything else. */
     connssl->connecting_state = ssl_connect_3;
@@ -3995,10 +3995,9 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
     /* Informational message */
     psigtype_nid = NID_undef;
     SSL_get_peer_signature_type_nid(backend->handle, &psigtype_nid);
-#if defined(OPENSSL_VERSION_MAJOR) && defined(OPENSSL_VERSION_MINOR) && \
-    (OPENSSL_VERSION_MAJOR >= 3) && (OPENSSL_VERSION_MINOR >= 2)
+#if (OPENSSL_VERSION_NUMBER >= 0x30200000L)
       negotiated_group_name = SSL_get0_group_name(backend->handle);
-#elif defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
+#elif (OPENSSL_VERSION_NUMBER >= 0x30000000L)
     negotiated_group_name =
       OBJ_nid2sn(SSL_get_negotiated_group(backend->handle) & 0x0000FFFF);
 #endif
@@ -4276,6 +4275,7 @@ static CURLcode servercert(struct Curl_cfilter *cf,
       infof(data, " SSL certificate verify ok.");
   }
 
+#if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
   verify_result = SSL_get_verify_result(backend->handle);
   if(verify_result != X509_V_OK)
     certstack = SSL_get_peer_cert_chain(backend->handle);
@@ -4286,12 +4286,12 @@ static CURLcode servercert(struct Curl_cfilter *cf,
   OpenSSL_add_all_digests();
 
   for(cert_level = 0; cert_level < num_cert_levels; cert_level++) {
-    char cert_algorithm[80];
-    char group_name[80];
-    char group_name_final[80];
+    char cert_algorithm[80] = "";
+    char group_name[80] = "";
+    char group_name_final[80] = "";
     const X509_ALGOR *palg_cert = NULL;
     const ASN1_OBJECT *paobj_cert = NULL;
-    X509 *current_cert = NULL;
+    X509 *current_cert;
     EVP_PKEY *current_pkey;
     int key_bits;
     int key_sec_bits;
@@ -4317,6 +4317,7 @@ static CURLcode servercert(struct Curl_cfilter *cf,
           get_group_name == 0 ? "" : group_name_final,
           key_bits, key_sec_bits, cert_algorithm);
   }
+#endif
 
 #if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_TLSEXT) && \
   !defined(OPENSSL_NO_OCSP)
