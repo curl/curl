@@ -126,7 +126,6 @@ if(NOT UNIX)
     set(STDC_HEADERS 1)
 
     set(HAVE_SIGACTION 0)
-    set(HAVE_MACRO_SIGSETJMP 0)
   else()
     message("This file should be included on Windows platform only")
   endif()

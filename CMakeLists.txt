@@ -1234,13 +1234,6 @@ set(CMAKE_EXTRA_INCLUDE_FILES   "")
 # detecting those, but only if previous attempt failed.
 check_symbol_exists(sigaction "signal.h" HAVE_SIGACTION)
 
-if(NOT HAVE_SIGSETJMP)
-  check_symbol_exists(sigsetjmp "setjmp.h" HAVE_MACRO_SIGSETJMP)
-  if(HAVE_MACRO_SIGSETJMP)
-    set(HAVE_SIGSETJMP 1)
-  endif()
-endif()
-
 # Do curl specific tests
 foreach(CURL_TEST
     HAVE_FCNTL_O_NONBLOCK
