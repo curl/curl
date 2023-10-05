@@ -62,6 +62,7 @@ not null-terminated, but is exactly of the \fIsize\fP as told by the
 The \fIclientp\fP argument is the pointer set with \fICURLOPT_DEBUGDATA(3)\fP.
 
 Available \fBcurl_infotype\fP values:
+.RS
 .IP CURLINFO_TEXT
 The data is informational text.
 .IP CURLINFO_HEADER_IN
@@ -79,6 +80,13 @@ The data is protocol data sent to the peer.
 The data is SSL/TLS (binary) data sent to the peer.
 .IP CURLINFO_SSL_DATA_IN
 The data is SSL/TLS (binary) data received from the peer.
+.RE
+
+WARNING: This callback may be called with the curl \fIhandle\fP set to an
+internal handle. (Added in 8.4.0)
+
+If you need to distinguish your curl \fIhandle\fP from internal handles then
+set \fICURLOPT_PRIVATE(3)\fP on your handle.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

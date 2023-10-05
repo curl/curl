@@ -61,6 +61,10 @@ void Curl_debug(struct Curl_easy *data, curl_infotype type,
       "* ", "< ", "> ", "{ ", "} ", "{ ", "} " };
     if(data->set.fdebug) {
       bool inCallback = Curl_is_in_callback(data);
+      /* CURLOPT_DEBUGFUNCTION doc says the user may set CURLOPT_PRIVATE to
+         distinguish their handle from internal handles. */
+      if(data->internal)
+        DEBUGASSERT(!data->set.private_data);
       Curl_set_in_callback(data, true);
       (void)(*data->set.fdebug)(data, type, ptr, size, data->set.debugdata);
       Curl_set_in_callback(data, inCallback);
