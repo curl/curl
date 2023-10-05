@@ -2221,6 +2221,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             /* we're supposed to do more, but we need to sit down, relax
                and wait a little while first */
             multistate(data, MSTATE_DOING_MORE);
+            rc = CURLM_CALL_MULTI_PERFORM;
           }
           else {
             /* we're done with the DO, now DID */
