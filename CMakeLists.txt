@@ -1165,7 +1165,7 @@ check_symbol_exists(utimes        "${CURL_INCLUDES}" HAVE_UTIMES)
 
 check_symbol_exists(gettimeofday  "${CURL_INCLUDES}" HAVE_GETTIMEOFDAY)
 check_symbol_exists(closesocket   "${CURL_INCLUDES}" HAVE_CLOSESOCKET)
-check_symbol_exists(sigsetjmp     "${CURL_INCLUDES}" HAVE_SIGSETJMP)
+check_symbol_exists(sigsetjmp     "${CURL_INCLUDES};setjmp.h" HAVE_SIGSETJMP)
 check_symbol_exists(getpass_r     "${CURL_INCLUDES}" HAVE_GETPASS_R)
 check_symbol_exists(getpwuid      "${CURL_INCLUDES}" HAVE_GETPWUID)
 check_symbol_exists(getpwuid_r    "${CURL_INCLUDES}" HAVE_GETPWUID_R)
@@ -1175,10 +1175,10 @@ check_symbol_exists(gmtime_r      "${CURL_INCLUDES};stdlib.h;time.h" HAVE_GMTIME
 
 check_symbol_exists(gethostbyname_r "${CURL_INCLUDES}" HAVE_GETHOSTBYNAME_R)
 
-check_symbol_exists(signal         "${CURL_INCLUDES}" HAVE_SIGNAL)
+check_symbol_exists(signal         "${CURL_INCLUDES};signal.h" HAVE_SIGNAL)
 check_symbol_exists(strtoll        "${CURL_INCLUDES};stdlib.h" HAVE_STRTOLL)
 check_symbol_exists(strerror_r     "${CURL_INCLUDES};stdlib.h;string.h" HAVE_STRERROR_R)
-check_symbol_exists(siginterrupt   "${CURL_INCLUDES}" HAVE_SIGINTERRUPT)
+check_symbol_exists(siginterrupt   "${CURL_INCLUDES};signal.h" HAVE_SIGINTERRUPT)
 check_symbol_exists(getaddrinfo    "${CURL_INCLUDES};stdlib.h;string.h" HAVE_GETADDRINFO)
 check_symbol_exists(getifaddrs     "${CURL_INCLUDES};stdlib.h" HAVE_GETIFADDRS)
 check_symbol_exists(freeaddrinfo   "${CURL_INCLUDES}" HAVE_FREEADDRINFO)
