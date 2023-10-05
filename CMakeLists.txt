@@ -1186,6 +1186,7 @@ check_symbol_exists(gethostbyname_r "${CURL_INCLUDES}" HAVE_GETHOSTBYNAME_R)
 check_symbol_exists(signal         "${CURL_INCLUDES};signal.h" HAVE_SIGNAL)
 check_symbol_exists(strtoll        "${CURL_INCLUDES};stdlib.h" HAVE_STRTOLL)
 check_symbol_exists(strerror_r     "${CURL_INCLUDES};stdlib.h;string.h" HAVE_STRERROR_R)
+check_symbol_exists(sigaction      "signal.h" HAVE_SIGACTION)
 check_symbol_exists(siginterrupt   "${CURL_INCLUDES};signal.h" HAVE_SIGINTERRUPT)
 check_symbol_exists(getaddrinfo    "${CURL_INCLUDES};stdlib.h;string.h" HAVE_GETADDRINFO)
 check_symbol_exists(getifaddrs     "${CURL_INCLUDES};stdlib.h" HAVE_GETIFADDRS)
@@ -1229,10 +1230,6 @@ set(CMAKE_EXTRA_INCLUDE_FILES   "ws2def.h")
 check_type_size("ADDRESS_FAMILY"    SIZEOF_ADDRESS_FAMILY)
 set(HAVE_ADDRESS_FAMILY         ${HAVE_SIZEOF_ADDRESS_FAMILY})
 set(CMAKE_EXTRA_INCLUDE_FILES   "")
-
-# sigaction and sigsetjmp are special. Use special mechanism for
-# detecting those, but only if previous attempt failed.
-check_symbol_exists(sigaction "signal.h" HAVE_SIGACTION)
 
 # Do curl specific tests
 foreach(CURL_TEST
