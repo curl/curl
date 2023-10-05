@@ -46,6 +46,7 @@ int test(char *URL)
 
   easy_setopt(ch, CURLOPT_URL, URL);
   easy_setopt(ch, CURLOPT_COOKIEFILE, libtest_arg2);
+  easy_setopt(ch, CURLOPT_COOKIEJAR, libtest_arg3);
   res = curl_easy_perform(ch);
 
 test_cleanup:
