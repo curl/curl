@@ -61,6 +61,7 @@
 # variable is NOT DEFINED, the symbol detection will be performed.
 
 cmake_minimum_required(VERSION 3.7...3.16 FATAL_ERROR)
+message(STATUS "Using CMake version ${CMAKE_VERSION}")
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 include(Utilities)
@@ -362,7 +363,9 @@ include(CheckCSourceCompiles)
 
 # On windows preload settings
 if(WIN32)
-  list(APPEND CMAKE_REQUIRED_DEFINITIONS -D_WINSOCKAPI_=)
+  set(HAVE_WINDOWS_H 1)
+  set(HAVE_WS2TCPIP_H 1)
+  set(HAVE_WINSOCK2_H 1)
   include(${CMAKE_CURRENT_SOURCE_DIR}/CMake/Platforms/WindowsCache.cmake)
 endif()
 
@@ -416,7 +419,7 @@ set(openssl_default ON)
 if(WIN32 OR CURL_USE_SECTRANSP OR CURL_USE_SCHANNEL OR CURL_USE_MBEDTLS OR CURL_USE_WOLFSSL)
   set(openssl_default OFF)
 endif()
-cmake_dependent_option(CURL_USE_OPENSSL "Use OpenSSL code. Experimental" ${openssl_default} CURL_ENABLE_SSL OFF)
+cmake_dependent_option(CURL_USE_OPENSSL "Enable OpenSSL for SSL/TLS" ${openssl_default} CURL_ENABLE_SSL OFF)
 option(CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG "Disable automatic loading of OpenSSL configuration" OFF)
 
 count_true(enabled_ssl_options_count
@@ -857,6 +860,7 @@ if(USE_LIBIDN2)
   check_library_exists("idn2" "idn2_lookup_ul" "" HAVE_LIBIDN2)
   if(HAVE_LIBIDN2)
     set(CURL_LIBS "idn2;${CURL_LIBS}")
+    check_include_file_concat("idn2.h" HAVE_IDN2_H)
   endif()
 else()
   set(HAVE_LIBIDN2 OFF)
@@ -1070,10 +1074,46 @@ if(CURL_CA_PATH_SET AND
 endif()
 
 # Check for header files
-if(NOT UNIX)
-  check_include_file_concat("windows.h"      HAVE_WINDOWS_H)
-  check_include_file_concat("ws2tcpip.h"     HAVE_WS2TCPIP_H)
+if(WIN32)
   check_include_file_concat("winsock2.h"     HAVE_WINSOCK2_H)
+  check_include_file_concat("ws2tcpip.h"     HAVE_WS2TCPIP_H)
+  check_include_file_concat("windows.h"      HAVE_WINDOWS_H)
+endif()
+
+if(WIN32)
+  # detect actual value of _WIN32_WINNT and store as HAVE_WIN32_WINNT
+  curl_internal_test(HAVE_WIN32_WINNT)
+  if(HAVE_WIN32_WINNT)
+    string(REGEX MATCH ".*_WIN32_WINNT=0x[0-9a-fA-F]+" OUTPUT "${OUTPUT}")
+    string(REGEX REPLACE ".*_WIN32_WINNT=" "" OUTPUT "${OUTPUT}")
+    string(REGEX REPLACE "0x([0-9a-f][0-9a-f][0-9a-f])$" "0x0\\1" OUTPUT "${OUTPUT}")  # pad to 4 digits
+    string(TOLOWER "${OUTPUT}" HAVE_WIN32_WINNT)
+    message(STATUS "Found _WIN32_WINNT=${HAVE_WIN32_WINNT}")
+  endif()
+  # avoid storing HAVE_WIN32_WINNT in CMake cache
+  unset(HAVE_WIN32_WINNT CACHE)
+
+  # pre-fill detection results that are based on target OS version
+  if(HAVE_WIN32_WINNT AND (MINGW OR MSVC))
+    if(HAVE_WIN32_WINNT STRLESS "0x0501")
+      set(HAVE_GETADDRINFO 0)
+      set(HAVE_FREEADDRINFO 0)
+    else()  # Windows XP or newer
+      set(HAVE_GETADDRINFO 1)
+      set(HAVE_FREEADDRINFO 1)
+    endif()
+    unset(HAVE_GETADDRINFO CACHE)
+    unset(HAVE_FREEADDRINFO CACHE)
+    if(HAVE_WIN32_WINNT STRLESS "0x0600")
+      set(HAVE_INET_NTOP 0)
+      set(HAVE_INET_PTON 0)
+    else()  # Windows Vista or newer
+      set(HAVE_INET_NTOP 1)
+      set(HAVE_INET_PTON 1)
+    endif()
+    unset(HAVE_INET_NTOP CACHE)
+    unset(HAVE_INET_PTON CACHE)
+  endif()
 endif()
 
 check_include_file_concat("inttypes.h"       HAVE_INTTYPES_H)
@@ -1094,7 +1134,6 @@ check_include_file_concat("sys/utime.h"      HAVE_SYS_UTIME_H)
 check_include_file_concat("sys/xattr.h"      HAVE_SYS_XATTR_H)
 check_include_file_concat("arpa/inet.h"      HAVE_ARPA_INET_H)
 check_include_file_concat("fcntl.h"          HAVE_FCNTL_H)
-check_include_file_concat("idn2.h"           HAVE_IDN2_H)
 check_include_file_concat("ifaddrs.h"        HAVE_IFADDRS_H)
 check_include_file_concat("io.h"             HAVE_IO_H)
 check_include_file_concat("libgen.h"         HAVE_LIBGEN_H)
@@ -1192,6 +1231,7 @@ check_symbol_exists(gethostbyname_r "${CURL_INCLUDES}" HAVE_GETHOSTBYNAME_R)
 check_symbol_exists(signal         "${CURL_INCLUDES};signal.h" HAVE_SIGNAL)
 check_symbol_exists(strtoll        "${CURL_INCLUDES};stdlib.h" HAVE_STRTOLL)
 check_symbol_exists(strerror_r     "${CURL_INCLUDES};stdlib.h;string.h" HAVE_STRERROR_R)
+check_symbol_exists(sigaction      "signal.h" HAVE_SIGACTION)
 check_symbol_exists(siginterrupt   "${CURL_INCLUDES};signal.h" HAVE_SIGINTERRUPT)
 check_symbol_exists(getaddrinfo    "${CURL_INCLUDES};stdlib.h;string.h" HAVE_GETADDRINFO)
 check_symbol_exists(getifaddrs     "${CURL_INCLUDES};stdlib.h" HAVE_GETIFADDRS)
@@ -1235,20 +1275,11 @@ check_type_size("sa_family_t"   SIZEOF_SA_FAMILY_T)
 set(HAVE_SA_FAMILY_T            ${HAVE_SIZEOF_SA_FAMILY_T})
 set(CMAKE_EXTRA_INCLUDE_FILES   "")
 
-set(CMAKE_EXTRA_INCLUDE_FILES   "ws2def.h")
-check_type_size("ADDRESS_FAMILY"    SIZEOF_ADDRESS_FAMILY)
-set(HAVE_ADDRESS_FAMILY         ${HAVE_SIZEOF_ADDRESS_FAMILY})
-set(CMAKE_EXTRA_INCLUDE_FILES   "")
-
-# sigaction and sigsetjmp are special. Use special mechanism for
-# detecting those, but only if previous attempt failed.
-check_symbol_exists(sigaction "signal.h" HAVE_SIGACTION)
-
-if(NOT HAVE_SIGSETJMP)
-  check_symbol_exists(sigsetjmp "setjmp.h" HAVE_MACRO_SIGSETJMP)
-  if(HAVE_MACRO_SIGSETJMP)
-    set(HAVE_SIGSETJMP 1)
-  endif()
+if(WIN32)
+  set(CMAKE_EXTRA_INCLUDE_FILES   "ws2def.h")
+  check_type_size("ADDRESS_FAMILY"    SIZEOF_ADDRESS_FAMILY)
+  set(HAVE_ADDRESS_FAMILY         ${HAVE_SIZEOF_ADDRESS_FAMILY})
+  set(CMAKE_EXTRA_INCLUDE_FILES   "")
 endif()
 
 # Do curl specific tests
@@ -1292,18 +1323,6 @@ check_type_size("curl_off_t"  SIZEOF_CURL_OFF_T)
 set(CMAKE_EXTRA_INCLUDE_FILES "curl/curl.h")
 check_type_size("curl_socket_t"  SIZEOF_CURL_SOCKET_T)
 set(CMAKE_EXTRA_INCLUDE_FILES "")
-
-if(WIN32)
-  # detect actual value of _WIN32_WINNT and store as HAVE_WIN32_WINNT
-  curl_internal_test(HAVE_WIN32_WINNT)
-  if(HAVE_WIN32_WINNT)
-    string(REGEX MATCH ".*_WIN32_WINNT=0x[0-9a-fA-F]+" OUTPUT "${OUTPUT}")
-    string(REGEX REPLACE ".*_WIN32_WINNT=" "" HAVE_WIN32_WINNT "${OUTPUT}")
-    message(STATUS "Found _WIN32_WINNT=${HAVE_WIN32_WINNT}")
-  endif()
-  # avoid storing HAVE_WIN32_WINNT in CMake cache
-  unset(HAVE_WIN32_WINNT CACHE)
-endif()
 
 if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
   # on not-Windows and not-crosscompiling, check for writable argv[]
@@ -1360,8 +1379,10 @@ if(NEED_REENTRANT)
   endforeach()
 endif()
 
-# Check clock_gettime(CLOCK_MONOTONIC, x) support
-curl_internal_test(HAVE_CLOCK_GETTIME_MONOTONIC)
+if(NOT WIN32)
+  # Check clock_gettime(CLOCK_MONOTONIC, x) support
+  curl_internal_test(HAVE_CLOCK_GETTIME_MONOTONIC)
+endif()
 
 # Check compiler support of __builtin_available()
 curl_internal_test(HAVE_BUILTIN_AVAILABLE)
