@@ -466,7 +466,9 @@ CURLcode Curl_ossl_certchain(struct Curl_easy *data, SSL *ssl)
 
       X509_get0_signature(&psig, &sigalg, x);
       if(sigalg) {
-        i2a_ASN1_OBJECT(mem, sigalg->algorithm);
+        const ASN1_OBJECT *sigalgoid = NULL;
+        X509_ALGOR_get0(&sigalgoid, NULL, NULL, sigalg);
+        i2a_ASN1_OBJECT(mem, sigalgoid);
         push_certinfo("Signature Algorithm", i);
       }
 
