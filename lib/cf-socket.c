@@ -781,6 +781,8 @@ struct cf_socket_ctx {
 #ifdef DEBUGBUILD
   int wblock_percent;                /* percent of writes doing EAGAIN */
   int wpartial_percent;              /* percent of bytes written in send */
+  int rblock_percent;                /* percent of reads doing EAGAIN */
+  size_t recv_max;                  /* max enforced read size */
 #endif
   BIT(got_first_byte);               /* if first byte was received */
   BIT(accepted);                     /* socket was accepted, not connected */
@@ -810,6 +812,18 @@ static void cf_socket_ctx_init(struct cf_socket_ctx *ctx,
       long l = strtol(p, NULL, 10);
       if(l >= 0 && l <= 100)
         ctx->wpartial_percent = (int)l;
+    }
+    p = getenv("CURL_DBG_SOCK_RBLOCK");
+    if(p) {
+      long l = strtol(p, NULL, 10);
+      if(l >= 0 && l <= 100)
+        ctx->rblock_percent = (int)l;
+    }
+    p = getenv("CURL_DBG_SOCK_RMAX");
+    if(p) {
+      long l = strtol(p, NULL, 10);
+      if(l >= 0)
+        ctx->recv_max = (size_t)l;
     }
   }
 #endif
@@ -1357,6 +1371,27 @@ static ssize_t cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   fdsave = cf->conn->sock[cf->sockindex];
   cf->conn->sock[cf->sockindex] = ctx->sock;
+
+#ifdef DEBUGBUILD
+  /* simulate network blocking/partial reads */
+  if(cf->cft != &Curl_cft_udp && ctx->rblock_percent > 0) {
+    unsigned char c;
+    Curl_rand(data, &c, 1);
+    if(c >= ((100-ctx->rblock_percent)*256/100)) {
+      CURL_TRC_CF(data, cf, "recv(len=%zu) SIMULATE EWOULDBLOCK", len);
+      *err = CURLE_AGAIN;
+      nread = -1;
+      cf->conn->sock[cf->sockindex] = fdsave;
+      return nread;
+    }
+  }
+  if(cf->cft != &Curl_cft_udp && ctx->recv_max && ctx->recv_max < len) {
+    size_t orig_len = len;
+    len = ctx->recv_max;
+    CURL_TRC_CF(data, cf, "recv(len=%zu) SIMULATE max read of %zu bytes",
+                orig_len, len);
+  }
+#endif
 
   if(ctx->buffer_recv && !Curl_bufq_is_empty(&ctx->recvbuf)) {
     CURL_TRC_CF(data, cf, "recv from buffer");
