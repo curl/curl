@@ -32,7 +32,9 @@ curl_easy_pause - pause and unpause a connection
 .fi
 .SH DESCRIPTION
 Using this function, you can explicitly mark a running connection to get
-paused, and you can unpause a connection that was previously paused.
+paused, and you can unpause a connection that was previously paused. Unlike
+most other libcurl functions, \fIcurl_easy_pause(3)\fP can be used from within
+callbacks.
 
 A connection can be paused by using this function or by letting the read or
 the write callbacks return the proper magic return code
