@@ -106,6 +106,11 @@ effect that if you download something that is compressed a lot, it can result
 in a large data amount needing to be allocated to save the data during the
 pause. consider not using paused receiving if you allow libcurl to uncompress
 data automatically.
+
+If the download is done with HTTP/2 or HTTP/3, there is up to a stream window
+size worth of data that curl cannot stop but instead needs to cache while the
+transfer is paused. This means that if a window size of 64 MB is used, libcurl
+might end up having to cache 64 MB of data.
 .SH AVAILABILITY
 Added in 7.18.0.
 .SH RETURN VALUE
