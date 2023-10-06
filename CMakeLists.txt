@@ -1261,10 +1261,12 @@ check_type_size("sa_family_t"   SIZEOF_SA_FAMILY_T)
 set(HAVE_SA_FAMILY_T            ${HAVE_SIZEOF_SA_FAMILY_T})
 set(CMAKE_EXTRA_INCLUDE_FILES   "")
 
-set(CMAKE_EXTRA_INCLUDE_FILES   "ws2def.h")
-check_type_size("ADDRESS_FAMILY"    SIZEOF_ADDRESS_FAMILY)
-set(HAVE_ADDRESS_FAMILY         ${HAVE_SIZEOF_ADDRESS_FAMILY})
-set(CMAKE_EXTRA_INCLUDE_FILES   "")
+if(WIN32)
+  set(CMAKE_EXTRA_INCLUDE_FILES   "ws2def.h")
+  check_type_size("ADDRESS_FAMILY"    SIZEOF_ADDRESS_FAMILY)
+  set(HAVE_ADDRESS_FAMILY         ${HAVE_SIZEOF_ADDRESS_FAMILY})
+  set(CMAKE_EXTRA_INCLUDE_FILES   "")
+endif()
 
 # Do curl specific tests
 foreach(CURL_TEST
