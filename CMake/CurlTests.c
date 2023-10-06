@@ -23,7 +23,6 @@
  ***************************************************************************/
 
 #ifdef HAVE_FCNTL_O_NONBLOCK
-
 /* headers for FCNTL_O_NONBLOCK test */
 #include <sys/types.h>
 #include <unistd.h>
@@ -45,14 +44,13 @@
 #error "O_NONBLOCK does not work on this platform"
 #endif
 
-int
-main ()
+int main(void)
 {
-      /* O_NONBLOCK source test */
-      int flags = 0;
-      if(0 != fcntl(0, F_SETFL, flags | O_NONBLOCK))
-          return 1;
-      return 0;
+  /* O_NONBLOCK source test */
+  int flags = 0;
+  if(0 != fcntl(0, F_SETFL, flags | O_NONBLOCK))
+    return 1;
+  return 0;
 }
 #endif
 
@@ -115,13 +113,12 @@ int main(void)
 #include <sys/types.h>
 #include <sys/socket.h>
 #endif
-int
-main ()
+int main(void)
 {
-if ((socklen_t *) 0)
-  return 0;
-if (sizeof (socklen_t))
-  return 0;
+  if((socklen_t *) 0)
+    return 0;
+  if(sizeof(socklen_t))
+    return 0;
   ;
   return 0;
 }
@@ -130,14 +127,12 @@ if (sizeof (socklen_t))
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-
-int
-main ()
+int main(void)
 {
-if ((in_addr_t *) 0)
-  return 0;
-if (sizeof (in_addr_t))
-  return 0;
+  if((in_addr_t *) 0)
+    return 0;
+  if(sizeof(in_addr_t))
+    return 0;
   ;
   return 0;
 }
@@ -150,11 +145,10 @@ if (sizeof (in_addr_t))
 #ifdef HAVE_STDBOOL_H
 #include <stdbool.h>
 #endif
-int
-main ()
+int main(void)
 {
-if (sizeof (bool *) )
-  return 0;
+  if(sizeof(bool *))
+    return 0;
   ;
   return 0;
 }
@@ -165,8 +159,9 @@ if (sizeof (bool *) )
 #include <stdarg.h>
 #include <string.h>
 #include <float.h>
-int main() { return 0; }
+int main(void) { return 0; }
 #endif
+
 #ifdef HAVE_FILE_OFFSET_BITS
 #ifdef _FILE_OFFSET_BITS
 #undef _FILE_OFFSET_BITS
@@ -181,8 +176,9 @@ int main() { return 0; }
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
                        && LARGE_OFF_T % 2147483647 == 1)
                       ? 1 : -1];
-int main () { ; return 0; }
+int main(void) { ; return 0; }
 #endif
+
 #ifdef HAVE_IOCTLSOCKET
 /* includes start */
 #ifdef HAVE_WINDOWS_H
@@ -194,20 +190,17 @@ int main () { ; return 0; }
 #    include <winsock2.h>
 #  endif
 #endif
-
-int
-main ()
+int main(void)
 {
-
-/* ioctlsocket source code */
- int socket;
- unsigned long flags = ioctlsocket(socket, FIONBIO, &flags);
-
+  /* ioctlsocket source code */
+  int socket;
+  unsigned long flags = ioctlsocket(socket, FIONBIO, &flags);
   ;
   return 0;
 }
 
 #endif
+
 #ifdef HAVE_IOCTLSOCKET_CAMEL
 /* includes start */
 #ifdef HAVE_WINDOWS_H
@@ -219,18 +212,16 @@ main ()
 #    include <winsock2.h>
 #  endif
 #endif
-
-int
-main ()
+int main(void)
 {
-
-/* IoctlSocket source code */
-    if(0 != IoctlSocket(0, 0, 0))
-      return 1;
+  /* IoctlSocket source code */
+  if(0 != IoctlSocket(0, 0, 0))
+    return 1;
   ;
   return 0;
 }
 #endif
+
 #ifdef HAVE_IOCTLSOCKET_CAMEL_FIONBIO
 /* includes start */
 #ifdef HAVE_WINDOWS_H
@@ -242,19 +233,17 @@ main ()
 #    include <winsock2.h>
 #  endif
 #endif
-
-int
-main ()
+int main(void)
 {
-
-/* IoctlSocket source code */
-        long flags = 0;
-        if(0 != IoctlSocket(0, FIONBIO, &flags))
-          return 1;
+  /* IoctlSocket source code */
+  long flags = 0;
+  if(0 != IoctlSocket(0, FIONBIO, &flags))
+    return 1;
   ;
   return 0;
 }
 #endif
+
 #ifdef HAVE_IOCTLSOCKET_FIONBIO
 /* includes start */
 #ifdef HAVE_WINDOWS_H
@@ -266,19 +255,16 @@ main ()
 #    include <winsock2.h>
 #  endif
 #endif
-
-int
-main ()
+int main(void)
 {
-
-        int flags = 0;
-        if(0 != ioctlsocket(0, FIONBIO, &flags))
-          return 1;
-
+  int flags = 0;
+  if(0 != ioctlsocket(0, FIONBIO, &flags))
+    return 1;
   ;
   return 0;
 }
 #endif
+
 #ifdef HAVE_IOCTL_FIONBIO
 /* headers for FIONBIO test */
 /* includes start */
@@ -297,19 +283,16 @@ main ()
 #ifdef HAVE_STROPTS_H
 #  include <stropts.h>
 #endif
-
-int
-main ()
+int main(void)
 {
-
-        int flags = 0;
-        if(0 != ioctl(0, FIONBIO, &flags))
-          return 1;
-
+  int flags = 0;
+  if(0 != ioctl(0, FIONBIO, &flags))
+    return 1;
   ;
   return 0;
 }
 #endif
+
 #ifdef HAVE_IOCTL_SIOCGIFADDR
 /* headers for FIONBIO test */
 /* includes start */
@@ -329,18 +312,16 @@ main ()
 #  include <stropts.h>
 #endif
 #include <net/if.h>
-
-int
-main ()
+int main(void)
 {
-        struct ifreq ifr;
-        if(0 != ioctl(0, SIOCGIFADDR, &ifr))
-          return 1;
-
+  struct ifreq ifr;
+  if(0 != ioctl(0, SIOCGIFADDR, &ifr))
+    return 1;
   ;
   return 0;
 }
 #endif
+
 #ifdef HAVE_SETSOCKOPT_SO_NONBLOCK
 /* includes start */
 #ifdef HAVE_WINDOWS_H
@@ -360,30 +341,30 @@ main ()
 #  include <sys/socket.h>
 #endif
 /* includes end */
-
-int
-main ()
+int main(void)
 {
-        if(0 != setsockopt(0, SOL_SOCKET, SO_NONBLOCK, 0, 0))
-          return 1;
+  if(0 != setsockopt(0, SOL_SOCKET, SO_NONBLOCK, 0, 0))
+    return 1;
   ;
   return 0;
 }
 #endif
+
 #ifdef HAVE_GLIBC_STRERROR_R
 #include <string.h>
 #include <errno.h>
 
 void check(char c) {}
 
-int
-main () {
+int main(void)
+{
   char buffer[1024];
   /* This will not compile if strerror_r does not return a char* */
   check(strerror_r(EACCES, buffer, sizeof(buffer))[0]);
   return 0;
 }
 #endif
+
 #ifdef HAVE_POSIX_STRERROR_R
 #include <string.h>
 #include <errno.h>
@@ -391,46 +372,51 @@ main () {
 /* float, because a pointer can't be implicitly cast to float */
 void check(float f) {}
 
-int
-main () {
+int main(void)
+{
   char buffer[1024];
   /* This will not compile if strerror_r does not return an int */
   check(strerror_r(EACCES, buffer, sizeof(buffer)));
   return 0;
 }
 #endif
+
 #ifdef HAVE_FSETXATTR_6
 #include <sys/xattr.h> /* header from libc, not from libattr */
-int
-main() {
+int main(void)
+{
   fsetxattr(0, 0, 0, 0, 0, 0);
   return 0;
 }
 #endif
+
 #ifdef HAVE_FSETXATTR_5
 #include <sys/xattr.h> /* header from libc, not from libattr */
-int
-main() {
+int main(void)
+{
   fsetxattr(0, 0, 0, 0, 0);
   return 0;
 }
 #endif
+
 #ifdef HAVE_CLOCK_GETTIME_MONOTONIC
 #include <time.h>
-int
-main() {
+int main(void)
+{
   struct timespec ts = {0, 0};
   clock_gettime(CLOCK_MONOTONIC, &ts);
   return 0;
 }
 #endif
+
 #ifdef HAVE_BUILTIN_AVAILABLE
-int
-main() {
+int main(void)
+{
   if(__builtin_available(macOS 10.12, *)) {}
   return 0;
 }
 #endif
+
 #ifdef HAVE_VARIADIC_MACROS_C99
 #define c99_vmacro3(first, ...) fun3(first, __VA_ARGS__)
 #define c99_vmacro2(first, ...) fun2(first, __VA_ARGS__)
@@ -438,15 +424,17 @@ main() {
 int fun3(int arg1, int arg2, int arg3);
 int fun2(int arg1, int arg2);
 
-int fun3(int arg1, int arg2, int arg3) {
+int fun3(int arg1, int arg2, int arg3)
+{
   return arg1 + arg2 + arg3;
 }
-int fun2(int arg1, int arg2) {
+int fun2(int arg1, int arg2)
+{
   return arg1 + arg2;
 }
 
-int
-main() {
+int main(void)
+{
   int res3 = c99_vmacro3(1, 2, 3);
   int res2 = c99_vmacro2(1, 2);
   (void)res3;
@@ -454,6 +442,7 @@ main() {
   return 0;
 }
 #endif
+
 #ifdef HAVE_VARIADIC_MACROS_GCC
 #define gcc_vmacro3(first, args...) fun3(first, args)
 #define gcc_vmacro2(first, args...) fun2(first, args)
@@ -461,15 +450,17 @@ main() {
 int fun3(int arg1, int arg2, int arg3);
 int fun2(int arg1, int arg2);
 
-int fun3(int arg1, int arg2, int arg3) {
+int fun3(int arg1, int arg2, int arg3)
+{
   return arg1 + arg2 + arg3;
 }
-int fun2(int arg1, int arg2) {
+int fun2(int arg1, int arg2)
+{
   return arg1 + arg2;
 }
 
-int
-main() {
+int main(void)
+{
   int res3 = gcc_vmacro3(1, 2, 3);
   int res2 = gcc_vmacro2(1, 2);
   (void)res3;
@@ -477,6 +468,7 @@ main() {
   return 0;
 }
 #endif
+
 #ifdef HAVE_ATOMIC
 /* includes start */
 #ifdef HAVE_SYS_TYPES_H
@@ -490,13 +482,14 @@ main() {
 #endif
 /* includes end */
 
-int
-main() {
+int main(void)
+{
   _Atomic int i = 1;
   i = 0;  /* Force an atomic-write operation. */
   return i;
 }
 #endif
+
 #ifdef HAVE_WIN32_WINNT
 /* includes start */
 #ifdef _WIN32
@@ -508,8 +501,8 @@ main() {
 #define expand(x) enquote(x)
 #pragma message("_WIN32_WINNT=" expand(_WIN32_WINNT))
 
-int
-main() {
+int main(void)
+{
   return 0;
 }
 #endif
