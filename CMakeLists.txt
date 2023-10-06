@@ -1069,6 +1069,42 @@ if(NOT UNIX)
   check_include_file_concat("windows.h"      HAVE_WINDOWS_H)
 endif()
 
+if(WIN32)
+  # detect actual value of _WIN32_WINNT and store as HAVE_WIN32_WINNT
+  curl_internal_test(HAVE_WIN32_WINNT)
+  if(HAVE_WIN32_WINNT)
+    string(REGEX MATCH ".*_WIN32_WINNT=0x[0-9a-fA-F]+" OUTPUT "${OUTPUT}")
+    string(REGEX REPLACE ".*_WIN32_WINNT=" "" OUTPUT "${OUTPUT}")
+    string(REGEX REPLACE "0x([0-9a-f][0-9a-f][0-9a-f])$" "0x0\\1" OUTPUT "${OUTPUT}")  # pad to 4 digits
+    string(TOLOWER "${OUTPUT}" HAVE_WIN32_WINNT)
+    message(STATUS "Found _WIN32_WINNT=${HAVE_WIN32_WINNT}")
+  endif()
+  # avoid storing HAVE_WIN32_WINNT in CMake cache
+  unset(HAVE_WIN32_WINNT CACHE)
+
+  # pre-fill detection results that are based on target OS version
+  if(HAVE_WIN32_WINNT AND (MINGW OR MSVC))
+    if(HAVE_WIN32_WINNT STRLESS "0x0501")
+      set(HAVE_GETADDRINFO 0)
+      set(HAVE_FREEADDRINFO 0)
+    else()
+      set(HAVE_GETADDRINFO 1)
+      set(HAVE_FREEADDRINFO 1)
+    endif()
+    unset(HAVE_GETADDRINFO CACHE)
+    unset(HAVE_FREEADDRINFO CACHE)
+    if(HAVE_WIN32_WINNT STRLESS "0x0600")
+      set(HAVE_INET_NTOP 0)
+      set(HAVE_INET_PTON 0)
+    else()
+      set(HAVE_INET_NTOP 1)
+      set(HAVE_INET_PTON 1)
+    endif()
+    unset(HAVE_INET_NTOP CACHE)
+    unset(HAVE_INET_PTON CACHE)
+  endif()
+endif()
+
 check_include_file_concat("inttypes.h"       HAVE_INTTYPES_H)
 check_include_file_concat("sys/filio.h"      HAVE_SYS_FILIO_H)
 check_include_file_concat("sys/wait.h"       HAVE_SYS_WAIT_H)
@@ -1271,18 +1307,6 @@ check_type_size("curl_off_t"  SIZEOF_CURL_OFF_T)
 set(CMAKE_EXTRA_INCLUDE_FILES "curl/curl.h")
 check_type_size("curl_socket_t"  SIZEOF_CURL_SOCKET_T)
 set(CMAKE_EXTRA_INCLUDE_FILES "")
-
-if(WIN32)
-  # detect actual value of _WIN32_WINNT and store as HAVE_WIN32_WINNT
-  curl_internal_test(HAVE_WIN32_WINNT)
-  if(HAVE_WIN32_WINNT)
-    string(REGEX MATCH ".*_WIN32_WINNT=0x[0-9a-fA-F]+" OUTPUT "${OUTPUT}")
-    string(REGEX REPLACE ".*_WIN32_WINNT=" "" HAVE_WIN32_WINNT "${OUTPUT}")
-    message(STATUS "Found _WIN32_WINNT=${HAVE_WIN32_WINNT}")
-  endif()
-  # avoid storing HAVE_WIN32_WINNT in CMake cache
-  unset(HAVE_WIN32_WINNT CACHE)
-endif()
 
 if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
   # on not-Windows and not-crosscompiling, check for writable argv[]
