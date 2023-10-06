@@ -43,7 +43,6 @@ if(NOT UNIX)
       set(HAVE_BASENAME 1)
       set(HAVE_STRCASECMP 1)
       set(HAVE_FTRUNCATE 1)
-      # set(HAVE_VARIADIC_MACROS_C99 1)
     else()
       set(HAVE_LIBGEN_H 0)
       set(HAVE_STRCASECMP 0)
@@ -85,11 +84,6 @@ if(NOT UNIX)
         set(HAVE_ATOMIC 0)
       endif()
     endif()
-
-    # set(HAVE_GETADDRINFO 1)   # _WIN32_WINNT >= 0x0501
-    # set(HAVE_FREEADDRINFO 1)  # _WIN32_WINNT >= 0x0501
-    # set(HAVE_INET_NTOP 1)     # _WIN32_WINNT >= 0x0600
-    # set(HAVE_INET_PTON 1)     # _WIN32_WINNT >= 0x0600
 
     set(HAVE_FCHMOD 0)
     set(HAVE_SOCKETPAIR 0)
