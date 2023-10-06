@@ -196,6 +196,7 @@ if(NOT UNIX)
     set(STDC_HEADERS 1)
 
     set(HAVE_SIZEOF_SUSECONDS_T 0)
+    set(HAVE_SIZEOF_SA_FAMILY_T 0)
   else()
     message("This file should be included on Windows platform only")
   endif()
