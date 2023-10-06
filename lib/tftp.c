@@ -1202,8 +1202,8 @@ static timediff_t tftp_state_timeout(struct Curl_easy *data,
   struct tftp_state_data *state = conn->proto.tftpc;
   timediff_t timeout_ms;
 
-  if(event)
-    *event = TFTP_EVENT_NONE;
+  DEBUGASSERT(event);
+  *event = TFTP_EVENT_NONE;
 
   timeout_ms = Curl_timeleft(state->data, NULL,
                              (state->state == TFTP_STATE_START));
@@ -1214,8 +1214,10 @@ static timediff_t tftp_state_timeout(struct Curl_easy *data,
   }
   time(&current);
   if(current > state->rx_time + state->retry_time) {
-    if(event)
-      *event = TFTP_EVENT_TIMEOUT;
+    DEBUGF(infof(data, "tftp_state_timeout: %ld > %ld + %ld",
+                 (long)current, (long)state->rx_time,
+                 (long)state->retry_time));
+    *event = TFTP_EVENT_TIMEOUT;
     time(&state->rx_time); /* update even though we received nothing */
   }
 
