@@ -185,10 +185,10 @@ int main(void) { ; return 0; }
 #  ifndef WIN32_LEAN_AND_MEAN
 #    define WIN32_LEAN_AND_MEAN
 #  endif
-#  include <windows.h>
 #  ifdef HAVE_WINSOCK2_H
 #    include <winsock2.h>
 #  endif
+#  include <windows.h>
 #endif
 int main(void)
 {
@@ -207,10 +207,10 @@ int main(void)
 #  ifndef WIN32_LEAN_AND_MEAN
 #    define WIN32_LEAN_AND_MEAN
 #  endif
-#  include <windows.h>
 #  ifdef HAVE_WINSOCK2_H
 #    include <winsock2.h>
 #  endif
+#  include <windows.h>
 #endif
 int main(void)
 {
@@ -228,10 +228,10 @@ int main(void)
 #  ifndef WIN32_LEAN_AND_MEAN
 #    define WIN32_LEAN_AND_MEAN
 #  endif
-#  include <windows.h>
 #  ifdef HAVE_WINSOCK2_H
 #    include <winsock2.h>
 #  endif
+#  include <windows.h>
 #endif
 int main(void)
 {
@@ -250,10 +250,10 @@ int main(void)
 #  ifndef WIN32_LEAN_AND_MEAN
 #    define WIN32_LEAN_AND_MEAN
 #  endif
-#  include <windows.h>
 #  ifdef HAVE_WINSOCK2_H
 #    include <winsock2.h>
 #  endif
+#  include <windows.h>
 #endif
 int main(void)
 {
@@ -328,10 +328,10 @@ int main(void)
 #  ifndef WIN32_LEAN_AND_MEAN
 #    define WIN32_LEAN_AND_MEAN
 #  endif
-#  include <windows.h>
 #  ifdef HAVE_WINSOCK2_H
 #    include <winsock2.h>
 #  endif
+#  include <windows.h>
 #endif
 /* includes start */
 #ifdef HAVE_SYS_TYPES_H

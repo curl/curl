@@ -1065,9 +1065,9 @@ endif()
 
 # Check for header files
 if(NOT UNIX)
-  check_include_file_concat("windows.h"      HAVE_WINDOWS_H)
-  check_include_file_concat("ws2tcpip.h"     HAVE_WS2TCPIP_H)
   check_include_file_concat("winsock2.h"     HAVE_WINSOCK2_H)
+  check_include_file_concat("ws2tcpip.h"     HAVE_WS2TCPIP_H)
+  check_include_file_concat("windows.h"      HAVE_WINDOWS_H)
 endif()
 
 check_include_file_concat("inttypes.h"       HAVE_INTTYPES_H)
