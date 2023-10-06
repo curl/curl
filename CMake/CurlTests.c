@@ -499,7 +499,7 @@ main() {
 #endif
 #ifdef HAVE_WIN32_WINNT
 /* includes start */
-#ifdef WIN32
+#ifdef _WIN32
 #  include "../lib/setup-win32.h"
 #endif
 /* includes end */
