@@ -43,9 +43,9 @@ freebsd_task:
   name: FreeBSD
 
   matrix:
-    - name: FreeBSD 13.2
+    - name: FreeBSD 14.0
       freebsd_instance:
-        image_family: freebsd-13-2
+        image_family: freebsd-14-0
 
   env:
     CIRRUS_CLONE_DEPTH: 10
