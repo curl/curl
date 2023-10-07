@@ -21,7 +21,7 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-if(NOT WIN32 OR UNIX)
+if(NOT WIN32)
   message(FATAL_ERROR "This file should be included on Windows platform only")
 endif()
 
