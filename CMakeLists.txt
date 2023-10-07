@@ -61,6 +61,7 @@
 # variable is NOT DEFINED, the symbol detection will be performed.
 
 cmake_minimum_required(VERSION 3.7...3.16 FATAL_ERROR)
+message(STATUS "Using CMake version ${CMAKE_VERSION}")
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 include(Utilities)

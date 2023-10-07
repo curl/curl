@@ -326,7 +326,6 @@ build_script:
           $options += '-DCMAKE_VS_GLOBALS=TrackFileAccess=false'
         }
 
-        cmake --version
         Write-Host 'CMake options:' $options
         cmake . $options
         cmake --build . --config $env:PRJ_CFG --parallel 2 --clean-first -- $env:BUILD_OPT
