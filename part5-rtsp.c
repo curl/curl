@@ -59,15 +59,19 @@ static int rtsp_getsock_do(struct Curl_easy *data,
 
 /*
  * Parse and write out any available RTP data.
- *
- * nread: amount of data left after k->str. will be modified if RTP
- *        data is parsed and k->str is moved up
- * readmore: whether or not the RTP parser needs more data right away
+ * @param data     the transfer
+ * @param conn     the connection
+ * @param buf      data read from connection
+ * @param blen     amount of data in buf
+ * @param consumed out, number of blen consumed
+ * @param done     TRUE iff transfer is done
  */
 static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
                                    struct connectdata *conn,
-                                   ssize_t *nread,
-                                   bool *readmore);
+                                   const char *buf,
+                                   size_t blen,
+                                   size_t *pconsumed,
+                                   bool *done);
 
 static CURLcode rtsp_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn);
@@ -611,7 +615,6 @@ static CURLcode rtsp_filter_rtp(struct Curl_easy *data,
             /* This could be the next response, no consume and return */
             DEBUGF(infof(data, "RTP rtsp_filter_rtp[SKIP] RTSP/ prefix"));
             rtspc->state = RTP_PARSE_SKIP;
-            rtspc->in_header = TRUE;
             goto out;
           }
         }
@@ -745,27 +748,18 @@ out:
 
 static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
                                    struct connectdata *conn,
-                                   ssize_t *nread,
-                                   bool *readmore)
+                                   const char *buf,
+                                   size_t blen,
+                                   size_t *pconsumed,
+                                   bool *done)
 {
   struct rtsp_conn *rtspc = &(conn->proto.rtspc);
   CURLcode result = CURLE_OK;
-  size_t consumed = 0;
-  char *buf;
-  size_t blen;
-  bool in_body;
+  size_t consumed;
+  bool in_body = (data->req.headerline && !data->req.download_done);
 
-  if(!data->req.header)
-    rtspc->in_header = FALSE;
-  in_body = (data->req.headerline && !rtspc->in_header) &&
-            (data->req.size >= 0) &&
-            (data->req.bytecount < data->req.size);
-
-  DEBUGASSERT(*nread >= 0);
-  blen = (size_t)(*nread);
-  buf = data->req.str;
-  *readmore = FALSE;
-
+  *pconsumed = 0;
+  *done = FALSE;
   if(!blen) {
     goto out;
   }
@@ -777,45 +771,33 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
       goto out;
     buf += consumed;
     blen -= consumed;
+    *pconsumed += consumed;
   }
 
-  /* we want to parse headers, do so */
   if(data->req.header && blen) {
-    bool stop_reading;
     rtspc->in_header = TRUE;
-    data->req.str = buf;
-    *nread = blen;
-    result = Curl_http_readwrite_headers(data, conn, nread, &stop_reading);
+    result = Curl_http_readwrite(data, conn, buf, blen, &consumed, done);
     if(result)
       goto out;
+    buf += consumed;
+    blen -= consumed;
+    *pconsumed += consumed;
 
-    DEBUGASSERT(*nread >= 0);
-    blen = (size_t)(*nread);
-    buf = data->req.str;
-
-    if(!data->req.header)
+    /* If header parsing is done and data left, extract RTP messages */
+    if(!data->req.header) {
       rtspc->in_header = FALSE;
-
-    if(!rtspc->in_header) {
-      /* If header parsing is done and data left, extract RTP messages */
-      result = rtsp_filter_rtp(data, conn, buf, blen, TRUE, &consumed);
+      result = rtsp_filter_rtp(data, conn, buf, blen,
+                               TRUE, &consumed);
       if(result)
         goto out;
-      buf += consumed;
-      blen -= consumed;
+      *pconsumed += consumed;
     }
   }
-
-  data->req.str = buf;
-  *nread = blen;
-  if(rtspc->state != RTP_PARSE_SKIP)
-    *readmore = TRUE;
-
 out:
-  if(!*readmore && data->set.rtspreq == RTSPREQ_RECEIVE) {
-    /* In special mode RECEIVE, we just process one chunk of network
-     * data, so we stop the transfer here, if we have no incomplete
-     * RTP message pending. */
+  if(data->set.rtspreq == RTSPREQ_RECEIVE && !rtspc->in_header &&
+     (rtspc->state == RTP_PARSE_SKIP)) {
+    /* If we are in a passive receive, give control back
+     * to the app as often as we can. */
     data->req.keepon &= ~KEEP_RECV;
   }
   return result;

@@ -423,7 +423,6 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
   ssize_t nread; /* number of bytes read */
-  size_t excess = 0; /* excess bytes read */
   bool readmore = FALSE; /* used by RTP to signal for more data */
   int maxloops = 100;
   curl_off_t max_recv = data->set.max_recv_speed?
@@ -439,6 +438,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
      read or we get a CURLE_AGAIN */
   do {
     bool is_empty_data = FALSE;
+    size_t excess = 0; /* excess bytes read */
     size_t buffersize = data->set.buffer_size;
     size_t bytestoread = buffersize;
     /* For HTTP/2 and HTTP/3, read data without caring about the content
@@ -642,17 +642,6 @@ static CURLcode readwrite_data(struct Curl_easy *data,
          (k->bytecount + nread >= k->maxdownload)) {
 
         excess = (size_t)(k->bytecount + nread - k->maxdownload);
-        if(excess > 0 && !k->ignorebody) {
-          infof(data,
-                "Excess found in a read:"
-                " excess = %zu"
-                ", size = %" CURL_FORMAT_CURL_OFF_T
-                ", maxdownload = %" CURL_FORMAT_CURL_OFF_T
-                ", bytecount = %" CURL_FORMAT_CURL_OFF_T,
-                excess, k->size, k->maxdownload, k->bytecount);
-          connclose(conn, "excess found in a read");
-        }
-
         nread = (ssize_t) (k->maxdownload - k->bytecount);
         if(nread < 0) /* this should be unusual */
           nread = 0;
@@ -718,6 +707,41 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 
     } /* if(!header and data to read) */
 
+    if(excess > 0 && !k->ignorebody) {
+      if(conn->handler->readwrite) {
+        /* Give protocol handler a chance to do something with it */
+        k->str += nread;
+        if(&k->str[excess] > &buf[data->set.buffer_size]) {
+          /* the excess amount was too excessive(!), make sure
+             it doesn't read out of buffer */
+          excess = &buf[data->set.buffer_size] - k->str;
+        }
+        nread = (ssize_t)excess;
+        result = conn->handler->readwrite(data, conn, &nread, &readmore);
+        if(result)
+          goto out;
+
+        if(readmore) {
+          DEBUGASSERT(nread == 0);
+          k->keepon |= KEEP_RECV; /* we're not done reading */
+        }
+        else if(nread == 0)
+          break;
+        /* protocol handler did not consume all excess data */
+        excess = nread;
+      }
+      if(excess) {
+        infof(data,
+              "Excess found in a read:"
+              " excess = %zu"
+              ", size = %" CURL_FORMAT_CURL_OFF_T
+              ", maxdownload = %" CURL_FORMAT_CURL_OFF_T
+              ", bytecount = %" CURL_FORMAT_CURL_OFF_T,
+              excess, k->size, k->maxdownload, k->bytecount);
+        connclose(conn, "excess found in a read");
+      }
+    }
+
     if(conn->handler->readwrite && excess) {
       /* Parse the excess data */
       k->str += nread;
@@ -735,6 +759,8 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 
       if(readmore)
         k->keepon |= KEEP_RECV; /* we're not done reading */
+      else if(nread > 0)
+        connclose(conn, "excess found in a read");
       break;
     }
 

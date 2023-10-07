@@ -4045,7 +4045,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
           break;
         }
       }
-
+      *nread = 0;
       break; /* read more and try again */
     }
 
