@@ -670,6 +670,51 @@ sub protocolsetup {
     }
 }
 
+# Perform the disconnecgt handshake with sockfilt on the secondary connection
+# (the only connection we actively disconnect).
+# This involves waiting for the disconnect acknowledgmeent after the DISC
+# command, while throwing away anything else that might come in before
+# that.
+sub disc_handshake {
+    print DWRITE "DISC\n";
+    my $line;
+    my $nr;
+    while (5 == ($nr = sysread DREAD, $line, 5)) {
+        if($line eq "DATA\n") {
+            # Must read the data bytes to stay in sync
+            my $i;
+            sysread DREAD, $i, 5;
+
+            my $size = 0;
+            if($i =~ /^([0-9a-fA-F]{4})\n/) {
+                $size = hex($1);
+            }
+
+            read_datasockf(\$line, $size);
+
+            logmsg "> Throwing away $size bytes on closed connection\n";
+        }
+        elsif($line eq "DISC\n") {
+            logmsg "Fancy that; client wants to DISC, too\n";
+            printf DWRITE "ACKD\n";
+        }
+        elsif($line eq "ACKD\n") {
+            # Got the ack we were waiting for
+            last;
+        }
+        else {
+            logmsg "Ignoring: $line";
+            # sockfilt should not be sending us any other commands
+        }
+    }
+    if(!defined($nr)) {
+        logmsg "Error: pipe read error ($!) while waiting for ACKD";
+    }
+    elsif($nr <= 0) {
+        logmsg "Error: pipe EOF while waiting for ACKD";
+    }
+}
+
 sub close_dataconn {
     my ($closed)=@_; # non-zero if already disconnected
 
@@ -680,9 +725,7 @@ sub close_dataconn {
     if(!$closed) {
         if($datapid > 0) {
             logmsg "Server disconnects $datasockf_mode DATA connection\n";
-            print DWRITE "DISC\n";
-            my $i;
-            sysread DREAD, $i, 5;
+            disc_handshake();
             logmsg "Server disconnected $datasockf_mode DATA connection\n";
         }
         else {
@@ -940,6 +983,7 @@ sub DATA_smtp {
             elsif($line eq "DISC\n") {
                 # disconnect!
                 $disc=1;
+                printf SFWRITE "ACKD\n";
                 last;
             }
             else {
@@ -1286,6 +1330,7 @@ sub APPEND_imap {
             }
             elsif($line eq "DISC\n") {
                 logmsg "Unexpected disconnect!\n";
+                printf SFWRITE "ACKD\n";
                 last;
             }
             else {
@@ -2405,6 +2450,7 @@ sub STOR_ftp {
         elsif($line eq "DISC\n") {
             # disconnect!
             $disc=1;
+            printf DWRITE "ACKD\n";
             last;
         }
         else {
@@ -3156,6 +3202,7 @@ while(1) {
             logmsg "MAIN sockfilt said $i";
             if($i =~ /^DISC/) {
                 # disconnect
+                printf SFWRITE "ACKD\n";
                 last;
             }
             next;
