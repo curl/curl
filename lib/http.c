@@ -3986,6 +3986,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
   char *end_ptr;
 
   /* header line within buffer loop */
+  *stop_reading = FALSE;
   do {
     size_t rest_length;
     size_t full_length;
@@ -4023,7 +4024,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
           break;
         }
       }
-
+      *nread = 0;
       break; /* read more and try again */
     }
 
