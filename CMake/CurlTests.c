@@ -476,7 +476,13 @@ int main(void)
 #ifdef HAVE_WIN32_WINNT
 /* includes start */
 #ifdef _WIN32
-#  include "../lib/setup-win32.h"
+#  ifndef WIN32_LEAN_AND_MEAN
+#    define WIN32_LEAN_AND_MEAN
+#  endif
+#  ifndef NOGDI
+#    define NOGDI
+#  endif
+#  include <windows.h>
 #endif
 /* includes end */
 
