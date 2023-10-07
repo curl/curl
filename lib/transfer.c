@@ -555,9 +555,11 @@ static CURLcode readwrite_data(struct Curl_easy *data,
        is non-headers. */
     if(!k->header && (nread > 0 || is_empty_data)) {
 
-      if(data->req.no_body) {
+      if(data->req.no_body && nread > 0) {
         /* data arrives although we want none, bail out */
         streamclose(conn, "ignoring body");
+        DEBUGF(infof(data, "did not want a BODY, but seeing %zd bytes",
+                     nread));
         *done = TRUE;
         result = CURLE_WEIRD_SERVER_REPLY;
         goto out;
@@ -740,28 +742,6 @@ static CURLcode readwrite_data(struct Curl_easy *data,
               excess, k->size, k->maxdownload, k->bytecount);
         connclose(conn, "excess found in a read");
       }
-    }
-
-    if(conn->handler->readwrite && excess) {
-      /* Parse the excess data */
-      k->str += nread;
-
-      if(&k->str[excess] > &buf[data->set.buffer_size]) {
-        /* the excess amount was too excessive(!), make sure
-           it doesn't read out of buffer */
-        excess = &buf[data->set.buffer_size] - k->str;
-      }
-      nread = (ssize_t)excess;
-
-      result = conn->handler->readwrite(data, conn, &nread, &readmore);
-      if(result)
-        goto out;
-
-      if(readmore)
-        k->keepon |= KEEP_RECV; /* we're not done reading */
-      else if(nread > 0)
-        connclose(conn, "excess found in a read");
-      break;
     }
 
     if(is_empty_data) {

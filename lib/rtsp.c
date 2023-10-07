@@ -609,7 +609,10 @@ static CURLcode rtsp_filter_rtp(struct Curl_easy *data,
         if(!in_body && buf[0] == 'R') {
           if(strncmp(buf, "RTSP/", (blen < 5) ? blen : 5) == 0) {
             /* This could be the next response, no consume and return */
-            DEBUGF(infof(data, "RTP rtsp_filter_rtp[SKIP] RTSP/ prefix"));
+            if(*pconsumed) {
+              DEBUGF(infof(data, "RTP rtsp_filter_rtp[SKIP] RTSP/ prefix, "
+                           "skipping %zd bytes of junk", *pconsumed));
+            }
             rtspc->state = RTP_PARSE_SKIP;
             rtspc->in_header = TRUE;
             goto out;
@@ -642,6 +645,9 @@ static CURLcode rtsp_filter_rtp(struct Curl_easy *data,
         /* invalid channel number, junk or BODY data */
         rtspc->state = RTP_PARSE_SKIP;
         if(in_body) {
+          /* we do not consume this byte, it is BODY data */
+          DEBUGF(infof(data, "RTSP: invalid RTP channel %d in BODY, "
+                       "treating as BODY data", idx));
           if(*pconsumed == 0) {
             /* We did not consume the initial '$' in our buffer, but had
              * it from an earlier call. We cannot un-consume it and have
@@ -662,7 +668,9 @@ static CURLcode rtsp_filter_rtp(struct Curl_easy *data,
           }
         }
         else {
-          /* not BODY, forget the junk '$' */
+          /* not BODY, forget the junk '$'. Do not consume this byte,
+           * it might be a start */
+          infof(data, "RTSP: invalid RTP channel %d, skipping", idx);
           Curl_dyn_free(&rtspc->buf);
         }
         break;
@@ -761,6 +769,9 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
             (data->req.size >= 0) &&
             (data->req.bytecount < data->req.size);
 
+  DEBUGF(infof(data, "-> rtsp_rtp_readwrite(len=%zd) header=%d body=%d",
+               *nread, rtspc->in_header, in_body));
+
   DEBUGASSERT(*nread >= 0);
   blen = (size_t)(*nread);
   buf = data->req.str;
@@ -798,7 +809,10 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
 
     if(!rtspc->in_header) {
       /* If header parsing is done and data left, extract RTP messages */
-      result = rtsp_filter_rtp(data, conn, buf, blen, TRUE, &consumed);
+      in_body = (data->req.headerline && !rtspc->in_header) &&
+                (data->req.size >= 0) &&
+                (data->req.bytecount < data->req.size);
+      result = rtsp_filter_rtp(data, conn, buf, blen, in_body, &consumed);
       if(result)
         goto out;
       buf += consumed;
@@ -812,6 +826,10 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
     *readmore = TRUE;
 
 out:
+  DEBUGF(infof(data, "rtsp_rtp_readwrite() -> %d, %zd, header=%d body=%d "
+               "readmore=%d no_body=%d",
+               result, *nread, rtspc->in_header, in_body, *readmore,
+               data->req.no_body));
   if(!*readmore && data->set.rtspreq == RTSPREQ_RECEIVE) {
     /* In special mode RECEIVE, we just process one chunk of network
      * data, so we stop the transfer here, if we have no incomplete
