@@ -106,23 +106,6 @@ int main(void)
 }
 #endif
 
-#ifdef HAVE_SOCKLEN_T
-#ifdef _WIN32
-#include <ws2tcpip.h>
-#else
-#include <sys/types.h>
-#include <sys/socket.h>
-#endif
-int main(void)
-{
-  if((socklen_t *) 0)
-    return 0;
-  if(sizeof(socklen_t))
-    return 0;
-  ;
-  return 0;
-}
-#endif
 #ifdef HAVE_IN_ADDR_T
 #include <sys/types.h>
 #include <sys/socket.h>
