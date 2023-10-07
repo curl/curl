@@ -25,10 +25,6 @@ if(NOT WIN32)
   message(FATAL_ERROR "This file should be included on Windows platform only")
 endif()
 
-set(HAVE_WINDOWS_H 1)
-set(HAVE_WS2TCPIP_H 1)
-set(HAVE_WINSOCK2_H 1)
-
 set(HAVE_LOCALE_H 1)
 
 if(MINGW)

@@ -363,6 +363,9 @@ include(CheckCSourceCompiles)
 
 # On windows preload settings
 if(WIN32)
+  set(HAVE_WINDOWS_H 1)
+  set(HAVE_WS2TCPIP_H 1)
+  set(HAVE_WINSOCK2_H 1)
   include(${CMAKE_CURRENT_SOURCE_DIR}/CMake/Platforms/WindowsCache.cmake)
 endif()
 
