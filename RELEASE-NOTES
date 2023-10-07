@@ -4,7 +4,7 @@ curl and libcurl 8.4.0
  Command line options:         258
  curl_easy_setopt() options:   303
  Public functions in libcurl:  93
- Contributors:                 2993
+ Contributors:                 2995
 
 This release includes the following changes:
 
@@ -59,6 +59,9 @@ This release includes the following bugfixes:
  o cookie: set ->running in cookie_init even if data is NULL [5]
  o create-dirs.d: clarify it also uses --output-dirs [66]
  o curl.h: mark CURLSSLBACKEND_NSS as deprecated since 8.3.0 [18]
+ o curl_easy_pause.3: mention h2/h3 buffering [113]
+ o curl_easy_pause.3: mention it works within callbacks [112]
+ o docs/libcurl/opts/Makefile.inc: add missing manpage files
  o docs: adapt SEE ALSO sections to new requirements [52]
  o docs: explain how PINNEDPUBLICKEY is independent of VERIFYPEER [68]
  o docs: replace made up domains with example.com [82]
@@ -92,10 +95,13 @@ This release includes the following bugfixes:
  o Makefile.mk: always set `CURL_STATICLIB` for lib (Windows) [42]
  o MANUAL.md: change domain to example.com [11]
  o misc: better random strings [15]
+ o multi: do CURLM_CALL_MULTI_PERFORM at two more places [99]
  o multi: fix small timeouts [70]
  o multi: remove Curl_multi_dump [37]
  o multi: round the timeout up to prevent early wakeups [98]
+ o multi: set CURLM_CALL_MULTI_PERFORM after switch to DOING_MORE [115]
  o openssl: improve ssl shutdown handling [69]
+ o openssl: use X509_ALGOR_get0 instead of reaching into X509_ALGOR [104]
  o pytest: exclude test_03_goaway in CI runs due to timing dependency [23]
  o quic: set ciphers/curves the same way regular TLS does [43]
  o quiche: fix build error with --with-ca-fallback [1]
@@ -106,10 +112,14 @@ This release includes the following bugfixes:
  o test1056: disable on Windows
  o test1474: disable test on NetBSD, OpenBSD and Solaris 10 [31]
  o test1592: greatly increase the maximum test timeout
+ o test1903: actually verify the cookies after the test [116]
+ o test1906: set a lower timeout since it's hit on Windows [117]
  o test2600: remove special case handling for USE_ALARM_TIMEOUT [3]
  o test650: fix an end tag typo
  o test661: return from test early in case of curl error
+ o test: add missing <feature>s
  o tests: close the shell used to start sshd [41]
+ o tests: fix a race condition in ftp server disconnect [101]
  o tests: fix compiler warnings [38]
  o tests: Fix zombie processes left behind by FTP tests. [80]
  o tests: improve SLOWDOWN test reliability by reducing sent data
@@ -146,14 +156,16 @@ advice from friends like these:
 
   Aleksander Mazur, calvin2021y on github, Christian Schmitz,
   Christian Weisgerber, claudiusaiz on github, consulion on github,
-  Dan Fandrich, Daniel Stenberg, Douglas R. Reno, Eduard Strehlau,
-  Elliot Killick, Gisle Vanem, Hakan Sunay Halil, Harry Sintonen, Jakub Jelen,
-  John Haugabook, Joshix-1 on github, Juliusz Sosinowicz, Junho Choi,
+  Dan Fandrich, Dan Fandrich., Daniel Stenberg, David Benjamin,
+  Douglas R. Reno, Eduard Strehlau, Elliot Killick, Gisle Vanem,
+  Hakan Sunay Halil, Harry Sintonen, Jakub Jelen, John Haugabook,
+  Joshix-1 on github, Juliusz Sosinowicz, Junho Choi,
   Karthikdasari0423 on github, Lars Francke, Loïc Yhuel, Marc Hörsken,
-  Mark Gaiser, Mathias Fuchs, Michael Osipov, Natanael Copa, Patrick Monnerat,
-  Peter Wang, Ray Satiro, Robert Simpson, Ryan Schmidt, s0urc3_ on hackerone,
-  Samuel Henrique, Stefan Eissing, Ted Lyngmo, Viktor Szakats, vvb2060, 南宫雪珊
-  (39 contributors)
+  Mark Gaiser, Mathias Fuchs, Maxim Dzhura, Michael Osipov, Natanael Copa,
+  Patrick Monnerat, Peter Wang, Ray Satiro, Robert Simpson, Ryan Schmidt,
+  s0urc3_ on hackerone, Samuel Henrique, Stefan Eissing, Ted Lyngmo,
+  Viktor Szakats, vvb2060, 南宫雪珊
+  (42 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -255,7 +267,10 @@ References to bug reports and discussions on issues:
  [96] = https://curl.se/bug/?i=12027
  [97] = https://curl.se/bug/?i=11908
  [98] = https://curl.se/bug/?i=11938
+ [99] = https://curl.se/bug/?i=12033
+ [101] = https://curl.se/bug/?i=12002
  [102] = https://curl.se/bug/?i=11964
+ [104] = https://curl.se/bug/?i=12038
  [105] = https://curl.se/bug/?i=12015
  [106] = https://curl.se/bug/?i=12013
  [107] = https://curl.se/bug/?i=11928
@@ -263,3 +278,8 @@ References to bug reports and discussions on issues:
  [109] = https://curl.se/bug/?i=11999
  [110] = https://curl.se/bug/?i=12006
  [111] = https://curl.se/bug/?i=12008
+ [112] = https://curl.se/mail/lib-2023-10/0010.html
+ [113] = https://curl.se/bug/?i=12045
+ [115] = https://curl.se/bug/?i=12042
+ [116] = https://curl.se/bug/?i=12041
+ [117] = https://curl.se/bug/?i=12036
