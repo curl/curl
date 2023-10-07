@@ -2125,9 +2125,11 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
       if(!result)
         result = protocol_connect(data, &protocol_connected);
-      if(!result && !protocol_connected)
+      if(!result && !protocol_connected) {
         /* switch to waiting state */
         multistate(data, MSTATE_PROTOCONNECTING);
+        rc = CURLM_CALL_MULTI_PERFORM;
+      }
       else if(!result) {
         /* protocol connect has completed, go WAITDO or DO */
         multistate(data, MSTATE_DO);
@@ -2214,6 +2216,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             /* DO was not completed in one function call, we must continue
                DOING... */
             multistate(data, MSTATE_DOING);
+            rc = CURLM_CALL_MULTI_PERFORM;
           }
 
           /* after DO, go DO_DONE... or DO_MORE */
