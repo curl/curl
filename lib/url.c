@@ -2076,7 +2076,6 @@ static char *detect_proxy(struct Curl_easy *data,
   char proxy_env[128];
   const char *protop = conn->handler->scheme;
   char *envp = proxy_env;
-  char *prox;
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
   (void)data;
 #endif
@@ -2089,7 +2088,7 @@ static char *detect_proxy(struct Curl_easy *data,
   strcpy(envp, "_proxy");
 
   /* read the protocol proxy: */
-  prox = curl_getenv(proxy_env);
+  proxy = curl_getenv(proxy_env);
 
   /*
    * We don't try the uppercase version of HTTP_PROXY because of
@@ -2103,23 +2102,35 @@ static char *detect_proxy(struct Curl_easy *data,
    * This can cause 'internal' http/ftp requests to be
    * arbitrarily redirected by any external attacker.
    */
-  if(!prox && !strcasecompare("http_proxy", proxy_env)) {
+  if(!proxy && !strcasecompare("http_proxy", proxy_env)) {
     /* There was no lowercase variable, try the uppercase version: */
     Curl_strntoupper(proxy_env, proxy_env, sizeof(proxy_env));
-    prox = curl_getenv(proxy_env);
+    proxy = curl_getenv(proxy_env);
   }
 
   envp = proxy_env;
-  if(prox) {
-    proxy = prox; /* use this */
-  }
-  else {
-    envp = (char *)"all_proxy";
-    proxy = curl_getenv(envp); /* default proxy to use */
-    if(!proxy) {
-      envp = (char *)"ALL_PROXY";
-      proxy = curl_getenv(envp);
+  if(!proxy) {
+#ifdef USE_WEBSOCKETS
+    /* websocket proxy fallbacks */
+    if(strcasecompare("ws_proxy", proxy_env)) {
+      proxy = curl_getenv("http_proxy");
     }
+    else if(strcasecompare("wss_proxy", proxy_env)) {
+      proxy = curl_getenv("https_proxy");
+      if(!proxy)
+        proxy = curl_getenv("HTTPS_PROXY");
+    }
+    if(!proxy) {
+#endif
+      envp = (char *)"all_proxy";
+      proxy = curl_getenv(envp); /* default proxy to use */
+      if(!proxy) {
+        envp = (char *)"ALL_PROXY";
+        proxy = curl_getenv(envp);
+      }
+#ifdef USE_WEBSOCKETS
+    }
+#endif
   }
   if(proxy)
     infof(data, "Uses proxy env variable %s == '%s'", envp, proxy);
