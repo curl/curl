@@ -1688,7 +1688,7 @@ static ssize_t http2_handle_stream_close(struct Curl_cfilter *cf,
                 "connection", stream->id);
     connclose(cf->conn, "REFUSED_STREAM"); /* don't use this anymore */
     data->state.refused_stream = TRUE;
-    *err = CURLE_SEND_ERROR; /* trigger Curl_retry_request() later */
+    *err = CURLE_RECV_ERROR; /* trigger Curl_retry_request() later */
     return -1;
   }
   else if(stream->error != NGHTTP2_NO_ERROR) {
