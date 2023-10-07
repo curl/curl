@@ -35,10 +35,10 @@ endmacro()
 
 set(signature_call_conv)
 if(HAVE_WINDOWS_H)
-  add_header_include(HAVE_WINSOCK2_H "winsock2.h")
-  add_header_include(HAVE_WINDOWS_H "windows.h")
   set(_source_epilogue
       "${_source_epilogue}\n#ifndef WIN32_LEAN_AND_MEAN\n#define WIN32_LEAN_AND_MEAN\n#endif")
+  add_header_include(HAVE_WINSOCK2_H "winsock2.h")
+  add_header_include(HAVE_WINDOWS_H "windows.h")
   set(signature_call_conv "PASCAL")
   if(WIN32)
     set(CMAKE_REQUIRED_LIBRARIES "ws2_32")
