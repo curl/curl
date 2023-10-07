@@ -1169,7 +1169,7 @@ ConnectionExists(struct Curl_easy *data,
         foundPendingCandidate = TRUE;
         /* Don't pick a connection that hasn't connected yet */
         infof(data, "Connection #%" CURL_FORMAT_CURL_OFF_T
-              "isn't open enough, can't reuse", check->connection_id);
+              " isn't open enough, can't reuse", check->connection_id);
         continue;
       }
 
