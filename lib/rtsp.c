@@ -606,7 +606,8 @@ static CURLcode rtsp_filter_rtp(struct Curl_easy *data,
         goto out;
       }
       while(blen && buf[0] != '$') {
-        if(!in_body && buf[0] == 'R') {
+        if(!in_body && buf[0] == 'R' &&
+           data->set.rtspreq != RTSPREQ_RECEIVE) {
           if(strncmp(buf, "RTSP/", (blen < 5) ? blen : 5) == 0) {
             /* This could be the next response, no consume and return */
             if(*pconsumed) {
@@ -654,6 +655,7 @@ static CURLcode rtsp_filter_rtp(struct Curl_easy *data,
              * to write it directly as BODY data */
             result = Curl_client_write(data, CLIENTWRITE_BODY,
                                        Curl_dyn_ptr(&rtspc->buf), 1);
+            ++data->req.bytecount;
             Curl_dyn_free(&rtspc->buf);
             if(result)
               goto out;
@@ -769,9 +771,6 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
             (data->req.size >= 0) &&
             (data->req.bytecount < data->req.size);
 
-  DEBUGF(infof(data, "-> rtsp_rtp_readwrite(len=%zd) header=%d body=%d",
-               *nread, rtspc->in_header, in_body));
-
   DEBUGASSERT(*nread >= 0);
   blen = (size_t)(*nread);
   buf = data->req.str;
@@ -826,10 +825,6 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
     *readmore = TRUE;
 
 out:
-  DEBUGF(infof(data, "rtsp_rtp_readwrite() -> %d, %zd, header=%d body=%d "
-               "readmore=%d no_body=%d",
-               result, *nread, rtspc->in_header, in_body, *readmore,
-               data->req.no_body));
   if(!*readmore && data->set.rtspreq == RTSPREQ_RECEIVE) {
     /* In special mode RECEIVE, we just process one chunk of network
      * data, so we stop the transfer here, if we have no incomplete
