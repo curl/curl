@@ -52,8 +52,6 @@
 #   HAVE_SSL_SET0_WBIO: `SSL_set0_wbio` present in OpenSSL/wolfSSL
 #   HAVE_OPENSSL_SRP: `SSL_CTX_set_srp_username` present in OpenSSL/wolfSSL
 #   HAVE_GNUTLS_SRP: `gnutls_srp_verifier` present in GnuTLS
-#   HAVE_AWSLC: OpenSSL is AWS-LC
-#   HAVE_BORINGSSL: OpenSSL is BoringSSL
 #   HAVE_SSL_CTX_SET_QUIC_METHOD: `SSL_CTX_set_quic_method` present in OpenSSL/wolfSSL
 #   HAVE_QUICHE_CONN_SET_QLOG_FD: `quiche_conn_set_qlog_fd` present in QUICHE
 #   HAVE_ZSTD_CREATEDSTREAM: `ZSTD_createDStream` present in Zstd

@@ -270,8 +270,6 @@ if test "x$OPT_OPENSSL" != xno; then
        ]])
     ],[
         AC_MSG_RESULT([yes])
-        AC_DEFINE_UNQUOTED(HAVE_BORINGSSL, 1,
-                           [Define to 1 if using BoringSSL.])
         ssl_msg="BoringSSL"
     ],[
         AC_MSG_RESULT([no])
@@ -288,8 +286,6 @@ if test "x$OPT_OPENSSL" != xno; then
        ]])
     ],[
         AC_MSG_RESULT([yes])
-        AC_DEFINE_UNQUOTED(HAVE_AWSLC, 1,
-                           [Define to 1 if using AWS-LC.])
         ssl_msg="AWS-LC"
     ],[
         AC_MSG_RESULT([no])
