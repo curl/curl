@@ -430,6 +430,7 @@ static CURLcode quic_ssl_ctx(SSL_CTX **pssl_ctx,
     }
   }
 
+#ifndef OPENSSL_IS_BORINGSSL
   {
     const char *ciphers13 = conn->ssl_config.cipher_list13 ?
       conn->ssl_config.cipher_list13 : QUIC_CIPHERS;
@@ -439,6 +440,7 @@ static CURLcode quic_ssl_ctx(SSL_CTX **pssl_ctx,
     }
     infof(data, "QUIC cipher selection: %s", ciphers13);
   }
+#endif
 
   /* Open the file if a TLS or QUIC backend has not done this before. */
   Curl_tls_keylog_open();
