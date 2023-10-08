@@ -2370,7 +2370,15 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /*
      * Set private data pointer.
      */
-    data->set.private_data = va_arg(param, void *);
+    if(!data->internal)
+      data->set.private_data = va_arg(param, void *);
+    else {
+      /* Ignore setting private data on internal handles since the user is
+         allowed to distinguish their handles from internal handles by setting
+         private data. */
+      DEBUGASSERT(0);
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
     break;
 
   case CURLOPT_MAXFILESIZE:
