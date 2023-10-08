@@ -31,8 +31,10 @@ Find the ngtcp2 library
 This module accepts optional COMPONENTS to control the crypto library (these are
 mutually exclusive)::
 
-  OpenSSL:  Use libngtcp2_crypto_quictls
-  GnuTLS:   Use libngtcp2_crypto_gnutls
+  quictls, LibreSSL:  Use libngtcp2_crypto_quictls
+  BoringSSL, AWS-LC:  Use libngtcp2_crypto_boringssl
+  wolfSSL:            Use libngtcp2_crypto_wolfssl
+  GnuTLS:             Use libngtcp2_crypto_gnutls
 
 Result Variables
 ^^^^^^^^^^^^^^^^

@@ -30,7 +30,7 @@
 
 #ifdef USE_OPENSSL
 #include <openssl/err.h>
-#ifdef OPENSSL_IS_BORINGSSL
+#if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
 #include <ngtcp2/ngtcp2_crypto_boringssl.h>
 #else
 #include <ngtcp2/ngtcp2_crypto_quictls.h>
@@ -407,7 +407,7 @@ static CURLcode quic_ssl_ctx(SSL_CTX **pssl_ctx,
     goto out;
   }
 
-#ifdef OPENSSL_IS_BORINGSSL
+#if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
   if(ngtcp2_crypto_boringssl_configure_client_context(ssl_ctx) != 0) {
     failf(data, "ngtcp2_crypto_boringssl_configure_client_context failed");
     goto out;
