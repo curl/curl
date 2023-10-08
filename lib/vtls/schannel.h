@@ -68,7 +68,7 @@
  * BoringSSL's <openssl/x509.h>: So just undefine those defines here
  * (and only here).
  */
-#if defined(HAVE_BORINGSSL) || defined(OPENSSL_IS_BORINGSSL)
+#if defined(OPENSSL_IS_BORINGSSL)
 # undef X509_NAME
 # undef X509_CERT_PAIR
 # undef X509_EXTENSIONS
