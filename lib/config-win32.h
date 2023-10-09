@@ -72,7 +72,9 @@
 #endif
 
 /* Define if you have the <sys/param.h> header file. */
-/* #define HAVE_SYS_PARAM_H 1 */
+#if defined(__MINGW32__)
+#define HAVE_SYS_PARAM_H 1
+#endif
 
 /* Define if you have the <sys/select.h> header file. */
 /* #define HAVE_SYS_SELECT_H 1 */
@@ -87,7 +89,9 @@
 #define HAVE_SYS_STAT_H 1
 
 /* Define if you have the <sys/time.h> header file. */
-/* #define HAVE_SYS_TIME_H 1 */
+#if defined(__MINGW32__)
+#define HAVE_SYS_TIME_H 1
+#endif
 
 /* Define if you have the <sys/types.h> header file. */
 #define HAVE_SYS_TYPES_H 1
@@ -160,7 +164,9 @@
 #define HAVE_GETHOSTNAME 1
 
 /* Define if you have the gettimeofday function. */
-/* #define HAVE_GETTIMEOFDAY 1 */
+#if defined(__MINGW32__)
+#define HAVE_GETTIMEOFDAY 1
+#endif
 
 /* Define if you have the ioctlsocket function. */
 #define HAVE_IOCTLSOCKET 1
