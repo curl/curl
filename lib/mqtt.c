@@ -498,8 +498,8 @@ static CURLcode mqtt_verify_suback(struct Curl_easy *data)
   ptr = Curl_dyn_ptr(&mq->recvbuf);
   Curl_debug(data, CURLINFO_HEADER_IN, ptr, MQTT_SUBACK_LEN);
 
-  if(ptr[0] != ((mqtt->packetid >> 8) & 0xff) ||
-     ptr[1] != (mqtt->packetid & 0xff) ||
+  if(((unsigned char)ptr[0]) != ((mqtt->packetid >> 8) & 0xff) ||
+     ((unsigned char)ptr[1]) != (mqtt->packetid & 0xff) ||
      ptr[2] != 0x00) {
     Curl_dyn_reset(&mq->recvbuf);
     result = CURLE_WEIRD_SERVER_REPLY;
