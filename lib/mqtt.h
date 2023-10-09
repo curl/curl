@@ -56,6 +56,7 @@ struct MQTT {
   size_t npacket; /* byte counter */
   unsigned char firstbyte;
   size_t remaining_length;
+  struct dynbuf recvbuf;
 };
 
 #endif /* HEADER_CURL_MQTT_H */
