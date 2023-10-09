@@ -32,7 +32,7 @@
 
 #include "memdebug.h"
 
-#define PAUSE_TIME      2
+#define PAUSE_TIME      5
 
 
 static const char name[] = "field";
