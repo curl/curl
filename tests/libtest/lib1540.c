@@ -76,7 +76,8 @@ static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *userp)
     fwrite(ptr, size, nmemb, stdout);
     return len;
   }
-  printf("Got %d bytes but pausing!\n", (int)len);
+  if(len)
+    printf("Got bytes but pausing!\n");
   st->halted = 1;
   return CURL_WRITEFUNC_PAUSE;
 }
