@@ -419,7 +419,7 @@ set(openssl_default ON)
 if(WIN32 OR CURL_USE_SECTRANSP OR CURL_USE_SCHANNEL OR CURL_USE_MBEDTLS OR CURL_USE_WOLFSSL)
   set(openssl_default OFF)
 endif()
-cmake_dependent_option(CURL_USE_OPENSSL "Use OpenSSL code. Experimental" ${openssl_default} CURL_ENABLE_SSL OFF)
+cmake_dependent_option(CURL_USE_OPENSSL "Enable OpenSSL for SSL/TLS" ${openssl_default} CURL_ENABLE_SSL OFF)
 option(CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG "Disable automatic loading of OpenSSL configuration" OFF)
 
 count_true(enabled_ssl_options_count
