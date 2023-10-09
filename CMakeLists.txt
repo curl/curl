@@ -378,7 +378,10 @@ if(ENABLE_THREADED_RESOLVER)
 endif()
 
 # Check for all needed libraries
-check_library_exists_concat("socket" connect      HAVE_LIBSOCKET)
+check_library_exists("socket" "connect" "" HAVE_LIBSOCKET)
+if(HAVE_LIBSOCKET)
+  set(CURL_LIBS "socket;${CURL_LIBS}")
+endif()
 
 check_function_exists(gethostname HAVE_GETHOSTNAME)
 
@@ -751,8 +754,12 @@ if(NOT CURL_DISABLE_LDAP)
   if(NOT USE_WIN32_LDAP)
     # Check for LDAP
     set(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_LIBRARIES})
-    check_library_exists_concat(${CMAKE_LDAP_LIB} ldap_init HAVE_LIBLDAP)
-    check_library_exists_concat(${CMAKE_LBER_LIB} ber_init HAVE_LIBLBER)
+    check_library_exists("${CMAKE_LDAP_LIB}" "ldap_init" "" HAVE_LIBLDAP)
+    if(HAVE_LIBLDAP)
+      check_library_exists("${CMAKE_LDAP_LIB};${CMAKE_LBER_LIB}" "ber_init" "" HAVE_LIBLBER)
+    else()
+      check_library_exists("${CMAKE_LBER_LIB}" "ber_init" "" HAVE_LIBLBER)
+    endif()
 
     set(CMAKE_REQUIRED_INCLUDES_BAK ${CMAKE_REQUIRED_INCLUDES})
     set(CMAKE_LDAP_INCLUDE_DIR "" CACHE STRING "Path to LDAP include directory")
@@ -791,8 +798,10 @@ if(NOT CURL_DISABLE_LDAP)
 
       list(APPEND CMAKE_REQUIRED_DEFINITIONS -DLDAP_DEPRECATED=1)
       list(APPEND CMAKE_REQUIRED_LIBRARIES ${CMAKE_LDAP_LIB})
+      set(CURL_LIBS "${CMAKE_LDAP_LIB};${CURL_LIBS}")
       if(HAVE_LIBLBER)
         list(APPEND CMAKE_REQUIRED_LIBRARIES ${CMAKE_LBER_LIB})
+        set(CURL_LIBS "${CMAKE_LBER_LIB};${CURL_LIBS}")
       endif()
 
       check_c_source_compiles("
@@ -839,7 +848,10 @@ endif()
 # Check for idn2
 option(USE_LIBIDN2 "Use libidn2 for IDN support" ON)
 if(USE_LIBIDN2)
-  check_library_exists_concat("idn2" idn2_lookup_ul HAVE_LIBIDN2)
+  check_library_exists("idn2" "idn2_lookup_ul" "" HAVE_LIBIDN2)
+  if(HAVE_LIBIDN2)
+    set(CURL_LIBS "idn2;${CURL_LIBS}")
+  endif()
 else()
   set(HAVE_LIBIDN2 OFF)
 endif()
