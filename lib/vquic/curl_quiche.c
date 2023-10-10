@@ -58,7 +58,6 @@
 /* #define DEBUG_QUICHE */
 
 #define QUIC_MAX_STREAMS              (100)
-#define QUIC_IDLE_TIMEOUT        (60 * 1000) /* milliseconds */
 
 #define H3_STREAM_WINDOW_SIZE  (128 * 1024)
 #define H3_STREAM_CHUNK_SIZE    (16 * 1024)
@@ -105,6 +104,7 @@ struct cf_quiche_ctx {
   struct curltime reconnect_at;      /* time the next attempt should start */
   struct bufc_pool stream_bufcp;     /* chunk pool for streams */
   curl_off_t data_recvd;
+  uint64_t max_idle_ms;              /* max idle time for QUIC conn */
   size_t sends_on_hold;              /* # of streams with SEND_HOLD set */
   BIT(goaway);                       /* got GOAWAY from server */
   BIT(got_first_byte);               /* if first byte was received */
@@ -883,6 +883,8 @@ static ssize_t cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   ssize_t nread = -1;
   CURLcode result;
 
+  vquic_ctx_update_time(&ctx->q);
+
   if(!stream) {
     *err = CURLE_RECV_ERROR;
     return -1;
@@ -1080,6 +1082,8 @@ static ssize_t cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct stream_ctx *stream = H3_STREAM_CTX(data);
   CURLcode result;
   ssize_t nwritten;
+
+  vquic_ctx_update_time(&ctx->q);
 
   *err = cf_process_ingress(cf, data);
   if(*err) {
@@ -1345,6 +1349,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
     debug_log_init = 1;
   }
 #endif
+  ctx->max_idle_ms = CURL_QUIC_MAX_IDLE_MS;
   Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
                   H3_STREAM_POOL_SPARES);
   ctx->data_recvd = 0;
@@ -1359,7 +1364,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
     return CURLE_FAILED_INIT;
   }
   quiche_config_enable_pacing(ctx->cfg, false);
-  quiche_config_set_max_idle_timeout(ctx->cfg, QUIC_IDLE_TIMEOUT);
+  quiche_config_set_max_idle_timeout(ctx->cfg, ctx->max_idle_ms * 1000);
   quiche_config_set_initial_max_data(ctx->cfg, (1 * 1024 * 1024)
     /* (QUIC_MAX_STREAMS/2) * H3_STREAM_WINDOW_SIZE */);
   quiche_config_set_initial_max_streams_bidi(ctx->cfg, QUIC_MAX_STREAMS);
@@ -1449,7 +1454,6 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
-  struct curltime now;
 
   if(cf->connected) {
     *done = TRUE;
@@ -1464,9 +1468,10 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
   }
 
   *done = FALSE;
-  now = Curl_now();
+  vquic_ctx_update_time(&ctx->q);
 
-  if(ctx->reconnect_at.tv_sec && Curl_timediff(now, ctx->reconnect_at) < 0) {
+  if(ctx->reconnect_at.tv_sec &&
+     Curl_timediff(ctx->q.last_op, ctx->reconnect_at) < 0) {
     /* Not time yet to attempt the next connect */
     CURL_TRC_CF(data, cf, "waiting for reconnect time");
     goto out;
@@ -1476,7 +1481,7 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
     result = cf_connect_start(cf, data);
     if(result)
       goto out;
-    ctx->started_at = now;
+    ctx->started_at = ctx->q.last_op;
     result = cf_flush_egress(cf, data);
     /* we do not expect to be able to recv anything yet */
     goto out;
@@ -1491,9 +1496,9 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
     goto out;
 
   if(quiche_conn_is_established(ctx->qconn)) {
+    ctx->handshake_at = ctx->q.last_op;
     CURL_TRC_CF(data, cf, "handshake complete after %dms",
-                (int)Curl_timediff(now, ctx->started_at));
-    ctx->handshake_at = now;
+                (int)Curl_timediff(ctx->handshake_at, ctx->started_at));
     result = cf_verify_peer(cf, data);
     if(!result) {
       CURL_TRC_CF(data, cf, "peer verified");
@@ -1550,6 +1555,7 @@ static void cf_quiche_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   if(ctx) {
     if(ctx->qconn) {
+      vquic_ctx_update_time(&ctx->q);
       (void)quiche_conn_close(ctx->qconn, TRUE, 0, NULL, 0);
       /* flushing the egress is not a failsafe way to deliver all the
          outstanding packets, but we also don't want to get stuck here... */
@@ -1617,9 +1623,31 @@ static bool cf_quiche_conn_is_alive(struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
                                     bool *input_pending)
 {
+  struct cf_quiche_ctx *ctx = cf->ctx;
   bool alive = TRUE;
 
   *input_pending = FALSE;
+  if(!ctx->qconn)
+    return FALSE;
+
+  /* Both sides of the QUIC connection announce they max idle times in
+   * the transport parameters. Look at the minimum of both and if
+   * we exceed this, regard the connection as dead. The other side
+   * may have completely purged it and will no longer respond
+   * to any packets from us. */
+  {
+    quiche_stats qstats;
+    timediff_t idletime;
+    uint64_t idle_ms = ctx->max_idle_ms;
+
+    quiche_conn_stats(ctx->qconn, &qstats);
+    if(qstats.peer_max_idle_timeout && qstats.peer_max_idle_timeout < idle_ms)
+      idle_ms = qstats.peer_max_idle_timeout;
+    idletime = Curl_timediff(Curl_now(), cf->conn->lastused);
+    if(idletime > 0 && (uint64_t)idletime > idle_ms)
+      return FALSE;
+  }
+
   if(!cf->next || !cf->next->cft->is_alive(cf->next, data, input_pending))
     return FALSE;
 

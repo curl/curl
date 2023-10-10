@@ -78,7 +78,6 @@
 
 #define QUIC_MAX_STREAMS (256*1024)
 #define QUIC_MAX_DATA (1*1024*1024)
-#define QUIC_IDLE_TIMEOUT (60*NGTCP2_SECONDS)
 #define QUIC_HANDSHAKE_TIMEOUT (10*NGTCP2_SECONDS)
 
 /* A stream window is the maximum amount we need to buffer for
@@ -161,6 +160,7 @@ struct cf_ngtcp2_ctx {
   struct curltime reconnect_at;      /* time the next attempt should start */
   struct bufc_pool stream_bufcp;     /* chunk pool for streams */
   size_t max_stream_window;          /* max flow window for one stream */
+  uint64_t max_idle_ms;              /* max idle time for QUIC connection */
   int qlogfd;
   BIT(got_first_byte);               /* if first byte was received */
 #ifdef USE_OPENSSL
@@ -261,10 +261,14 @@ struct pkt_io_ctx {
   ngtcp2_path_storage ps;
 };
 
-static ngtcp2_tstamp timestamp(void)
+static void pktx_update_time(struct pkt_io_ctx *pktx,
+                             struct Curl_cfilter *cf)
 {
-  struct curltime ct = Curl_now();
-  return ct.tv_sec * NGTCP2_SECONDS + ct.tv_usec * NGTCP2_MICROSECONDS;
+  struct cf_ngtcp2_ctx *ctx = cf->ctx;
+
+  vquic_ctx_update_time(&ctx->q);
+  pktx->ts = ctx->q.last_op.tv_sec * NGTCP2_SECONDS +
+             ctx->q.last_op.tv_usec * NGTCP2_MICROSECONDS;
 }
 
 static void pktx_init(struct pkt_io_ctx *pktx,
@@ -273,9 +277,9 @@ static void pktx_init(struct pkt_io_ctx *pktx,
 {
   pktx->cf = cf;
   pktx->data = data;
-  pktx->ts = timestamp();
   pktx->pkt_count = 0;
   ngtcp2_path_storage_zero(&pktx->ps);
+  pktx_update_time(pktx, cf);
 }
 
 static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
@@ -354,7 +358,7 @@ static void quic_settings(struct cf_ngtcp2_ctx *ctx,
   t->initial_max_stream_data_uni = ctx->max_stream_window;
   t->initial_max_streams_bidi = QUIC_MAX_STREAMS;
   t->initial_max_streams_uni = QUIC_MAX_STREAMS;
-  t->max_idle_timeout = QUIC_IDLE_TIMEOUT;
+  t->max_idle_timeout = (ctx->max_idle_ms * NGTCP2_MILLISECONDS);
   if(ctx->qlogfd != -1) {
     s->qlog_write = qlog_callback;
   }
@@ -1038,7 +1042,7 @@ static CURLcode check_and_set_expiry(struct Curl_cfilter *cf,
     pktx = &local_pktx;
   }
   else {
-    pktx->ts = timestamp();
+    pktx_update_time(pktx, cf);
   }
 
   expiry = ngtcp2_conn_get_expiry(ctx->qconn);
@@ -1993,7 +1997,7 @@ static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
     pktx = &local_pktx;
   }
   else {
-    pktx->ts = timestamp();
+    pktx_update_time(pktx, cf);
   }
 
 #ifdef USE_OPENSSL
@@ -2145,7 +2149,7 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
     pktx = &local_pktx;
   }
   else {
-    pktx->ts = timestamp();
+    pktx_update_time(pktx, cf);
     ngtcp2_path_storage_zero(&pktx->ps);
   }
 
@@ -2358,15 +2362,15 @@ static void cf_ngtcp2_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   CF_DATA_SAVE(save, cf, data);
   if(ctx && ctx->qconn) {
     char buffer[NGTCP2_MAX_UDP_PAYLOAD_SIZE];
-    ngtcp2_tstamp ts;
+    struct pkt_io_ctx pktx;
     ngtcp2_ssize rc;
 
     CURL_TRC_CF(data, cf, "close");
-    ts = timestamp();
+    pktx_init(&pktx, cf, data);
     rc = ngtcp2_conn_write_connection_close(ctx->qconn, NULL, /* path */
                                             NULL, /* pkt_info */
                                             (uint8_t *)buffer, sizeof(buffer),
-                                            &ctx->last_error, ts);
+                                            &ctx->last_error, pktx.ts);
     if(rc > 0) {
       while((send(ctx->q.sockfd, buffer, (SEND_TYPE_ARG3)rc, 0) == -1) &&
             SOCKERRNO == EINTR);
@@ -2411,6 +2415,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
 
   ctx->version = NGTCP2_PROTO_VER_MAX;
   ctx->max_stream_window = H3_STREAM_WINDOW_SIZE;
+  ctx->max_idle_ms = CURL_QUIC_MAX_IDLE_MS;
   Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
                   H3_STREAM_POOL_SPARES);
 
@@ -2657,9 +2662,32 @@ static bool cf_ngtcp2_conn_is_alive(struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
                                     bool *input_pending)
 {
+  struct cf_ngtcp2_ctx *ctx = cf->ctx;
   bool alive = TRUE;
+  const ngtcp2_transport_params *rp;
 
   *input_pending = FALSE;
+  if(!ctx->qconn)
+    return FALSE;
+
+  /* Both sides of the QUIC connection announce they max idle times in
+   * the transport parameters. Look at the minimum of both and if
+   * we exceed this, regard the connection as dead. The other side
+   * may have completely purged it and will no longer respond
+   * to any packets from us. */
+  rp = ngtcp2_conn_get_remote_transport_params(ctx->qconn);
+  if(rp) {
+    timediff_t idletime;
+    uint64_t idle_ms = ctx->max_idle_ms;
+
+    if(rp->max_idle_timeout &&
+      (rp->max_idle_timeout / NGTCP2_MILLISECONDS) < idle_ms)
+      idle_ms = (rp->max_idle_timeout / NGTCP2_MILLISECONDS);
+    idletime = Curl_timediff(Curl_now(), ctx->q.last_io);
+    if(idletime > 0 && (uint64_t)idletime > idle_ms)
+      return FALSE;
+  }
+
   if(!cf->next || !cf->next->cft->is_alive(cf->next, data, input_pending))
     return FALSE;
 
