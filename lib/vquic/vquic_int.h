@@ -31,6 +31,8 @@
 
 #define MAX_PKT_BURST 10
 #define MAX_UDP_PAYLOAD_SIZE  1452
+/* Default QUIC connection timeout we announce from our side */
+#define CURL_QUIC_MAX_IDLE_MS   (120 * 1000)
 
 struct cf_quic_ctx {
   curl_socket_t sockfd; /* connected UDP socket */
@@ -38,6 +40,8 @@ struct cf_quic_ctx {
   socklen_t local_addrlen; /* length of local address */
 
   struct bufq sendbuf; /* buffer for sending one or more packets */
+  struct curltime last_op; /* last (attempted) send/recv operation */
+  struct curltime last_io; /* last successful socket IO */
   size_t gsolen; /* length of individual packets in send buf */
   size_t split_len; /* if != 0, buffer length after which GSO differs */
   size_t split_gsolen; /* length of individual packets after split_len */
@@ -49,6 +53,8 @@ struct cf_quic_ctx {
 
 CURLcode vquic_ctx_init(struct cf_quic_ctx *qctx);
 void vquic_ctx_free(struct cf_quic_ctx *qctx);
+
+void vquic_ctx_update_time(struct cf_quic_ctx *qctx);
 
 void vquic_push_blocked_pkt(struct Curl_cfilter *cf,
                             struct cf_quic_ctx *qctx,
