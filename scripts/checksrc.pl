@@ -83,6 +83,7 @@ my %warnings = (
     'ONELINECONDITION' => 'conditional block on the same line as the if()',
     'OPENCOMMENT'      => 'file ended with a /* comment still "open"',
     'PARENBRACE'       => '){ without sufficient space',
+    'PRIVATEDATA'      => 'private_data is user only, not for internal use',
     'RETURNNOSPACE'    => 'return without space',
     'SEMINOSPACE'      => 'semicolon without following space',
     'SIZEOFNOPAREN'    => 'use of sizeof without parentheses',
@@ -757,6 +758,14 @@ sub scanfile {
                           $line, length($1), $file, $ol,
                           "use of non-binary fopen without FOPEN_* macro: $mode");
             }
+        }
+
+        # scan for assignment of private_data
+        # private_data is user only (via CURLOPT_PRIVATE), not for internal use
+        if($l =~ /(.*(?:\.|->))(private_data) *=/) {
+            checkwarn("PRIVATEDATA",
+                      $line, length($1), $file, $ol,
+                      "use of $2 is banned");
         }
 
         # check for open brace first on line but not first column only alert

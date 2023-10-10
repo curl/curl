@@ -2370,6 +2370,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /*
      * Set private data pointer.
      */
+    /* !checksrc! disable PRIVATEDATA 1 */
     data->set.private_data = va_arg(param, void *);
     break;
 
