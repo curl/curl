@@ -171,7 +171,7 @@ CURLcode Curl_dynhds_add(struct dynhds *dynhds,
   if(dynhds->strs_len + namelen + valuelen > dynhds->max_strs_size)
     return CURLE_OUT_OF_MEMORY;
 
-entry = entry_new(name, namelen, value, valuelen, dynhds->opts);
+  entry = entry_new(name, namelen, value, valuelen, dynhds->opts);
   if(!entry)
     goto out;
 
@@ -364,4 +364,3 @@ CURLcode Curl_dynhds_h1_dprint(struct dynhds *dynhds, struct dynbuf *dbuf)
 
   return result;
 }
-

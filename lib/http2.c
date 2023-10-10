@@ -2062,10 +2062,18 @@ static ssize_t h2_submit(struct stream_ctx **pstream,
 
   for(i = 0; i < nheader; ++i) {
     struct dynhds_entry *e = Curl_dynhds_getn(&h2_headers, i);
-    nva[i].name = (unsigned char *)e->name;
-    nva[i].namelen = e->namelen;
-    nva[i].value = (unsigned char *)e->value;
-    nva[i].valuelen = e->valuelen;
+    if(e) {
+      nva[i].name = (unsigned char *)e->name;
+      nva[i].namelen = e->namelen;
+      nva[i].value = (unsigned char *)e->value;
+      nva[i].valuelen = e->valuelen;
+    }
+    else {
+      nva[i].name = NULL;
+      nva[i].namelen = 0;
+      nva[i].value = NULL;
+      nva[i].valuelen = 0;
+    }
     nva[i].flags = NGHTTP2_NV_FLAG_NONE;
   }
 
