@@ -655,7 +655,6 @@ static CURLcode rtsp_filter_rtp(struct Curl_easy *data,
              * to write it directly as BODY data */
             result = Curl_client_write(data, CLIENTWRITE_BODY,
                                        Curl_dyn_ptr(&rtspc->buf), 1);
-            ++data->req.bytecount;
             Curl_dyn_free(&rtspc->buf);
             if(result)
               goto out;

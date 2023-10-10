@@ -423,7 +423,6 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
   ssize_t nread; /* number of bytes read */
-  size_t excess = 0; /* excess bytes read */
   ssize_t n_to_write;
   bool readmore = FALSE; /* used by RTP to signal for more data */
   int maxloops = 100;
