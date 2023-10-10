@@ -2670,7 +2670,7 @@ static bool cf_ngtcp2_conn_is_alive(struct Curl_cfilter *cf,
   if(!ctx->qconn)
     return FALSE;
 
-  /* Both sides of the QUIC connection announce they max idle time in
+  /* Both sides of the QUIC connection announce they max idle times in
    * the transport parameters. Look at the minimum of both and if
    * we exceed this, regard the connection as dead. The other side
    * may have completely purged it and will no longer respond
