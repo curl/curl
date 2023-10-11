@@ -523,6 +523,20 @@ static CURLcode readwrite_data(struct Curl_easy *data,
         break;
       buf += consumed;
       blen -= consumed;
+      if(k->download_done) {
+        /* We've stopped dealing with input, get out of the do-while loop */
+        if(blen > 0) {
+          infof(data,
+                "Excess found:"
+                " excess = %zu"
+                " url = %s (zero-length body)",
+                blen, data->state.up.path);
+        }
+
+        /* we make sure that this socket isn't read more now */
+        k->keepon &= ~KEEP_RECV;
+        break;
+      }
     }
 
 #ifndef CURL_DISABLE_HTTP
