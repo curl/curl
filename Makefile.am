@@ -48,7 +48,6 @@ CMAKE_DIST =                                    \
  CMake/FindZstd.cmake                           \
  CMake/Macros.cmake                             \
  CMake/OtherTests.cmake                         \
- CMake/PickyWarnings.cmake                      \
  CMake/Platforms/WindowsCache.cmake             \
  CMake/Utilities.cmake                          \
  CMakeLists.txt
