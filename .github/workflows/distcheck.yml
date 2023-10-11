@@ -96,9 +96,10 @@ jobs:
         pushd curl-99.98.97
         mkdir build
         pushd build
-        ../configure --without-ssl --enable-debug
+        ../configure --without-ssl --enable-debug "--prefix=${PWD}/pkg"
         make -j3
         make -j3 TFLAGS=1279 test
+        make -j3 install
       name: 'verify out-of-tree autotools debug build'
 
   verify-out-of-tree-cmake:
