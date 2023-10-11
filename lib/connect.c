@@ -693,11 +693,11 @@ evaluate:
   result = CURLE_COULDNT_CONNECT;
   for(i = 0; i < sizeof(ctx->baller)/sizeof(ctx->baller[0]); i++) {
     struct eyeballer *baller = ctx->baller[i];
+    if(!baller)
+      continue;
     CURL_TRC_CF(data, cf, "%s assess started=%d, result=%d",
-                baller?baller->name:NULL,
-                baller?baller->has_started:0,
-                baller?baller->result:0);
-    if(baller && baller->has_started && baller->result) {
+                baller->name, baller->has_started, baller->result);
+    if(baller->has_started && baller->result) {
       result = baller->result;
       break;
     }
