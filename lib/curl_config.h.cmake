@@ -74,6 +74,9 @@
 /* disables FTP */
 #cmakedefine CURL_DISABLE_FTP 1
 
+/* disables curl_easy_options API for existing options to curl_easy_setopt */
+#cmakedefine CURL_DISABLE_GETOPTIONS 1
+
 /* disables GOPHER */
 #cmakedefine CURL_DISABLE_GOPHER 1
 
