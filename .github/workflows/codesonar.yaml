@@ -1,0 +1,63 @@
+name: CodeSonar
+on:
+  push:                  # Only run onces the Pull request is created
+    branches:
+      - 'release/**'               # Feature Branches
+  pull_request:
+    branches:
+      - 'release/**'       
+  
+jobs:
+  CodeSonar_Analyze:
+    permissions: write-all
+    runs-on: self-hosted
+    container:
+      image: canuckmh/curl-cso-builder:7.4p0
+      credentials:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    env:
+      CAFILE: ".github/github.cert.pem" 
+      TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      API_URL: https://api.github.com
+      REQUEST_NUMBER: ${{ github.event.pull_request.number }}
+      ROOT_TREE: "OSS-Projects/curl-GitHub" 
+      PROJECT_NAME: "curl"
+      BRANCH_NAME: ${{ github.head_ref || github.ref_name }} 
+      CSONAR_HUB_URL: "https://partnerdemo.codesonar.com" 
+      CSONAR_HUB_USER: "${{ secrets.CSONAR_HUB_USER }}"
+      CSONAR_HUB_PASSWORD: "${{ secrets.CSONAR_HUB_PASS }}"
+      CSONAR_CSHOME: /opt/codesonar
+      COMMIT_HASH: ${{ github.sha }}
+      REPO_URL: "https://github.com/CodeSecure-SE/curl"    # the github.repositoryUrl is not an http-link.
+      TARGET: ${{ github.base_ref }}
+      IS_PR: ${{ github.event_name }}
+    steps:
+      - name: Set parallelism
+        run:  echo "PARALLEL=`nproc`" >> $GITHUB_ENV
+      - name: Checkout 
+        uses: actions/checkout@v4
+      - name: Safe directory
+        run: git config --global --add safe.directory `pwd`
+      - name : configure
+        run: ./autogen.sh --with-only-libndpi
+      - name: Checkout CodeSonar CI-Script
+        uses: actions/checkout@v4
+        with:
+          repository: CodeSecure-SE/codesonar_ci
+          ref: main
+          path: scripts
+      - name: Build and Analyze
+        run: python3 scripts/build_and_analyze.py codesonar.conf make -j $PARALLEL
+      - name: Upload SARIF to GitHub #Use this if you do not have GitHub Enterprise
+        if: ${{ github.event.pull_request }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: SARIF file
+          path: warnings.sarif
+      - name: Push Summary Report
+        if: ${{ github.event.pull_request }}
+        uses: thollander/actions-comment-pull-request@v2
+        with: 
+          filePath: warnings.md
+            
