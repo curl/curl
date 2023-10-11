@@ -154,8 +154,6 @@ endif()
 
 if(NOT DEFINED HAVE_GETADDRINFO_THREADSAFE)
 
-  # FIXME: This detection is likely broken.
-
   set(_save_epilogue "${_source_epilogue}")
   set(_source_epilogue "#undef inline")
 
@@ -174,16 +172,12 @@ if(NOT DEFINED HAVE_GETADDRINFO_THREADSAFE)
     }" HAVE_H_ERRNO)
 
   if(NOT HAVE_H_ERRNO)
-    if(NOT CMAKE_CROSSCOMPILING)
-      check_c_source_runs("${_source_epilogue}
-        int main(void)
-        {
-          h_errno = 2;
-          return h_errno != 0 ? 1 : 0;
-        }" HAVE_H_ERRNO_ASSIGNABLE)
-    else()
-      set(HAVE_H_ERRNO_ASSIGNABLE FALSE)
-    endif()
+    check_c_source_compiles("${_source_epilogue}
+      int main(void)
+      {
+        h_errno = 2;
+        return h_errno != 0 ? 1 : 0;
+      }" HAVE_H_ERRNO_ASSIGNABLE)
 
     if(NOT HAVE_H_ERRNO_ASSIGNABLE)
       check_c_source_compiles("${_source_epilogue}
