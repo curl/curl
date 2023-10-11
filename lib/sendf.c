@@ -526,12 +526,12 @@ static const struct Curl_cwtype cw_client = {
   sizeof(struct Curl_cwriter)
 };
 
-static size_t get_max_body_write_len(struct Curl_easy *data)
+static size_t get_max_body_write_len(struct Curl_easy *data, curl_off_t limit)
 {
-  if(data->req.maxdownload != -1) {
+  if(limit != -1) {
     /* How much more are we allowed to write? */
     curl_off_t remain_diff;
-    remain_diff = data->req.maxdownload - data->req.bytecount;
+    remain_diff = limit - data->req.bytecount;
     if(remain_diff < 0) {
       /* already written too much! */
       return 0;
@@ -562,47 +562,29 @@ static CURLcode cw_download_write(struct Curl_easy *data,
     return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
   }
 
+  nwrite = nbytes;
   if(-1 != data->req.maxdownload) {
-    size_t max_write_len = get_max_body_write_len(data);
-    if(nbytes > max_write_len) {
-      excess_len = nbytes - max_write_len;
-      nbytes = max_write_len;
-      excess_data = buf + nbytes;
-      if(!data->req.ignorebody) {
-        infof(data,
-              "Excess found writing body:"
-              " excess = %zu"
-              ", size = %" CURL_FORMAT_CURL_OFF_T
-              ", maxdownload = %" CURL_FORMAT_CURL_OFF_T
-              ", bytecount = %" CURL_FORMAT_CURL_OFF_T,
-              excess_len, data->req.size, data->req.maxdownload,
-              data->req.bytecount);
-        connclose(data->conn, "excess found in a read");
-      }
+    size_t wmax = get_max_body_write_len(data, data->req.maxdownload);
+    if(nwrite > wmax) {
+      excess_len = nbytes - wmax;
+      nwrite = wmax;
+      excess_data = buf + nwrite;
     }
 
-    if(nbytes == max_write_len) {
+    if(nwrite == wmax) {
       data->req.download_done = TRUE;
     }
   }
 
-  data->req.bytecount += nbytes;
-  ++data->req.bodywrites;
-  nwrite = nbytes;
-  /* Enforce `max_filesize` also for downloads where we ignore the body.
-   * Also, write body data up to the max size. This ensures that we
-   * always produce the same result, even when buffers vary due to
-   * connection timings. test457 fails in CI randomly otherwise. */
-  if(data->set.max_filesize &&
-     (data->req.bytecount > data->set.max_filesize)) {
-    curl_off_t nexcess;
-    failf(data, "Exceeded the maximum allowed file size "
-          "(%" CURL_FORMAT_CURL_OFF_T ")",
-          data->set.max_filesize);
-    nexcess = data->req.bytecount - data->set.max_filesize;
-    nwrite = (nexcess >= (curl_off_t)nbytes)? 0 : (nbytes - (size_t)nexcess);
+  if(data->set.max_filesize) {
+    size_t wmax = get_max_body_write_len(data, data->set.max_filesize);
+    if(nwrite > wmax) {
+      nwrite = wmax;
+    }
   }
 
+  data->req.bytecount += nwrite;
+  ++data->req.bodywrites;
   if(!data->req.ignorebody && nwrite) {
     result = Curl_cwriter_write(data, writer->next, type, buf, nwrite);
     if(result)
@@ -612,22 +594,42 @@ static CURLcode cw_download_write(struct Curl_easy *data,
   if(result)
     return result;
 
-  if(nwrite != nbytes)
-    return CURLE_FILESIZE_EXCEEDED;
-
-  if(data->conn->handler->readwrite && excess_data) {
-    /* RTSP hack moved from tranfer loop to here */
-    bool readmore = FALSE; /* indicates data is incomplete, need more */
-    size_t consumed = 0;
-    result = data->conn->handler->readwrite(data, data->conn,
-                                            excess_data, excess_len,
-                                            &consumed, &readmore);
-    if(result)
-      return result;
-    if(readmore) {
-      data->req.download_done = FALSE;
-      data->req.keepon |= KEEP_RECV; /* we're not done reading */
+  if(excess_len) {
+    if(data->conn->handler->readwrite) {
+      /* RTSP hack moved from tranfer loop to here */
+      bool readmore = FALSE; /* indicates data is incomplete, need more */
+      size_t consumed = 0;
+      result = data->conn->handler->readwrite(data, data->conn,
+                                              excess_data, excess_len,
+                                              &consumed, &readmore);
+      if(result)
+        return result;
+      DEBUGASSERT(consumed <= excess_len);
+      excess_data += consumed;
+      excess_len -= consumed;
+      if(readmore) {
+        data->req.download_done = FALSE;
+        data->req.keepon |= KEEP_RECV; /* we're not done reading */
+      }
     }
+    if(excess_len && !data->req.ignorebody) {
+      infof(data,
+            "Excess found writing body:"
+            " excess = %zu"
+            ", size = %" CURL_FORMAT_CURL_OFF_T
+            ", maxdownload = %" CURL_FORMAT_CURL_OFF_T
+            ", bytecount = %" CURL_FORMAT_CURL_OFF_T,
+            excess_len, data->req.size, data->req.maxdownload,
+            data->req.bytecount);
+      connclose(data->conn, "excess found in a read");
+    }
+  }
+  else if(nwrite < nbytes) {
+    failf(data, "Exceeded the maximum allowed file size "
+          "(%" CURL_FORMAT_CURL_OFF_T ") with %"
+          CURL_FORMAT_CURL_OFF_T " bytes",
+          data->set.max_filesize, data->req.bytecount);
+    return CURLE_FILESIZE_EXCEEDED;
   }
 
   return CURLE_OK;
