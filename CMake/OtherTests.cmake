@@ -154,6 +154,8 @@ endif()
 
 if(NOT DEFINED HAVE_GETADDRINFO_THREADSAFE)
 
+  # FIXME: This detection is likely broken.
+
   set(_save_epilogue "${_source_epilogue}")
   set(_source_epilogue "#undef inline")
 
