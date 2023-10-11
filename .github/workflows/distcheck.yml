@@ -21,6 +21,8 @@ jobs:
   distcheck:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      DISTCHECK_CONFIGURE_FLAGS: --without-ssl
     steps:
     - uses: actions/checkout@v4
 
@@ -30,13 +32,13 @@ jobs:
     - run: autoreconf -fi
       name: 'autoreconf'
 
-    - run: mkdir bld && cd bld && ../configure --without-ssl
+    - run: mkdir bld && cd bld && ../configure ${DISTCHECK_CONFIGURE_FLAGS}
       name: 'configure'
 
     - run: make -C bld -j3 V=1
       name: 'make'
 
-    - run: make -C bld -j3 distcheck TFLAGS=1 DISTCHECK_CONFIGURE_FLAGS=--without-ssl
+    - run: make -C bld -j3 distcheck TFLAGS=1279
       name: 'make distcheck'
 
   maketgz-and-verify-in-tree:
