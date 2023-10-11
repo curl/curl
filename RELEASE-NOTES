@@ -22,6 +22,8 @@ This release includes the following bugfixes:
  o base64: also build for curl [78]
  o bufq: remove Curl_bufq_skip_and_shift (unused) [47]
  o build: delete checks for C89 standard headers [65]
+ o build: do not publish `HAVE_BORINGSSL`, `HAVE_AWSLC` macros [114]
+ o cf-socket: simulate slow/blocked receives in debug [120]
  o cmake, configure: also link with CoreServices [32]
  o cmake: add check for suseconds_t [91]
  o cmake: add feature checks for `memrchr` and `getifaddrs` [57]
@@ -61,6 +63,8 @@ This release includes the following bugfixes:
  o curl.h: mark CURLSSLBACKEND_NSS as deprecated since 8.3.0 [18]
  o curl_easy_pause.3: mention h2/h3 buffering [113]
  o curl_easy_pause.3: mention it works within callbacks [112]
+ o curl_easy_pause: set "in callback" true on exit if true [100]
+ o CURLOPT_DEBUGFUNCTION.3: warn about internal handles [122]
  o docs/libcurl/opts/Makefile.inc: add missing manpage files
  o docs: adapt SEE ALSO sections to new requirements [52]
  o docs: explain how PINNEDPUBLICKEY is independent of VERIFYPEER [68]
@@ -74,6 +78,8 @@ This release includes the following bugfixes:
  o GHA: add workflow to compare configure vs cmake outputs [102]
  o h2-proxy: remove left-over mistake in drain_tunnel() [7]
  o h2: testcase and fix for pausing h2 streams [49]
+ o h3: add support for ngtcp2 with AWS-LC builds [103]
+ o http2: refused stream handling for retry [121]
  o http: fix CURL_DISABLE_BEARER_AUTH breakage [28]
  o http: h1/h2 proxy unification [21]
  o http: remove wrong comment for http_should_fail [55]
@@ -95,6 +101,7 @@ This release includes the following bugfixes:
  o Makefile.mk: always set `CURL_STATICLIB` for lib (Windows) [42]
  o MANUAL.md: change domain to example.com [11]
  o misc: better random strings [15]
+ o MQTT: improve receive of ACKs [125]
  o multi: do CURLM_CALL_MULTI_PERFORM at two more places [99]
  o multi: fix small timeouts [70]
  o multi: remove Curl_multi_dump [37]
@@ -108,6 +115,7 @@ This release includes the following bugfixes:
  o RELEASE-PROCEDURE.md: updated coming release dates
  o runtests: display the test status if tests appear hung [81]
  o runtests: eliminate a warning on old perl versions
+ o socks: return error if hostname too long for remote resolve [118]
  o src/mkhelp: make generated code pass `checksrc` [59]
  o test1056: disable on Windows
  o test1474: disable test on NetBSD, OpenBSD and Solaris 10 [31]
@@ -132,8 +140,10 @@ This release includes the following bugfixes:
  o tftpd: always use curl's own tftp.h [25]
  o tool: use our own stderr variable [94]
  o tool_cb_wrt: fix debug assertion [4]
+ o tool_getparam: accept variable expansion on file names too [123]
  o tool_setopt: remove unused function tool_setopt_flags [56]
  o upload-file.d: describe the file name slash/backslash handling [9]
+ o url: fall back to http/https proxy env-variable if ws/wss not set [119]
  o url: fix netrc info message [39]
  o warnless: remove unused functions [33]
  o wolfssh: do cleanup in Curl_ssh_cleanup [40]
@@ -154,18 +164,19 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Aleksander Mazur, calvin2021y on github, Christian Schmitz,
-  Christian Weisgerber, claudiusaiz on github, consulion on github,
-  Dan Fandrich, Dan Fandrich., Daniel Stenberg, David Benjamin,
-  Douglas R. Reno, Eduard Strehlau, Elliot Killick, Gisle Vanem,
-  Hakan Sunay Halil, Harry Sintonen, Jakub Jelen, John Haugabook,
+  Aleksander Mazur, black-desk on github, calvin2021y on github,
+  Christian Schmitz, Christian Weisgerber, claudiusaiz on github,
+  consulion on github, Craig Andrews, Dan Fandrich, Daniel Stenberg,
+  David Benjamin, Douglas R. Reno, Eduard Strehlau, Elliot Killick,
+  Gisle Vanem, Hakan Sunay Halil, Harry Sintonen, Jakub Jelen, John Haugabook,
   Joshix-1 on github, Juliusz Sosinowicz, Junho Choi,
   Karthikdasari0423 on github, Lars Francke, Loïc Yhuel, Marc Hörsken,
   Mark Gaiser, Mathias Fuchs, Maxim Dzhura, Michael Osipov, Natanael Copa,
-  Patrick Monnerat, Peter Wang, Ray Satiro, Robert Simpson, Ryan Schmidt,
-  s0urc3_ on hackerone, Samuel Henrique, Stefan Eissing, Ted Lyngmo,
-  Viktor Szakats, vvb2060, 南宫雪珊
-  (42 contributors)
+  Patrick Monnerat, PBudmark on github, Peter Wang, Philip Heiduck, Ray Satiro,
+  Robert Simpson, Ryan Schmidt, s0urc3_ on hackerone, Samuel Henrique,
+  Stefan Eissing, Ted Lyngmo, Viktor Szakats, vvb2060, w0x42 on hackerone,
+  南宫雪珊
+  (46 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -268,8 +279,10 @@ References to bug reports and discussions on issues:
  [97] = https://curl.se/bug/?i=11908
  [98] = https://curl.se/bug/?i=11938
  [99] = https://curl.se/bug/?i=12033
+ [100] = https://curl.se/bug/?i=12059
  [101] = https://curl.se/bug/?i=12002
  [102] = https://curl.se/bug/?i=11964
+ [103] = https://curl.se/bug/?i=12066
  [104] = https://curl.se/bug/?i=12038
  [105] = https://curl.se/bug/?i=12015
  [106] = https://curl.se/bug/?i=12013
@@ -280,6 +293,14 @@ References to bug reports and discussions on issues:
  [111] = https://curl.se/bug/?i=12008
  [112] = https://curl.se/mail/lib-2023-10/0010.html
  [113] = https://curl.se/bug/?i=12045
+ [114] = https://curl.se/bug/?i=12065
  [115] = https://curl.se/bug/?i=12042
  [116] = https://curl.se/bug/?i=12041
  [117] = https://curl.se/bug/?i=12036
+ [118] = https://curl.se/docs/CVE-2023-38545.html
+ [119] = https://curl.se/bug/?i=12031
+ [120] = https://curl.se/bug/?i=12035
+ [121] = https://curl.se/bug/?i=12054
+ [122] = https://curl.se/bug/?i=12034
+ [123] = https://curl.se/bug/?i=12048
+ [125] = https://curl.se/bug/?i=12071
