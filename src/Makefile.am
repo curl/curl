@@ -89,7 +89,7 @@ CLEANFILES = tool_hugehelp.c
 NROFF=env LC_ALL=C @NROFF@ @MANOPT@ 2>/dev/null # figured out by the configure script
 
 EXTRA_DIST = mkhelp.pl \
- Makefile.mk curl.rc Makefile.inc CMakeLists.txt
+ Makefile.mk curl.rc Makefile.inc CMakeLists.txt .checksrc
 
 # Use absolute directory to disable VPATH
 MANPAGE=$(abs_top_builddir)/docs/curl.1
