@@ -1927,10 +1927,6 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
         dnl All other bsd's
         tst_tsafe_getaddrinfo="no"
         ;;
-      *serenity*)
-        dnl SerenityOS
-        tst_tsafe_getaddrinfo="yes"
-        ;;
       solaris2*)
         dnl solaris which have it
         tst_tsafe_getaddrinfo="yes"
