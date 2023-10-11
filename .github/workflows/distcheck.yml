@@ -18,29 +18,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  distcheck:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    env:
-      DISTCHECK_CONFIGURE_FLAGS: --without-ssl
-    steps:
-    - uses: actions/checkout@v4
-
-    - run: sudo apt-get purge -y curl libcurl4 libcurl4-doc
-      name: 'remove preinstalled curl libcurl4{-doc}'
-
-    - run: autoreconf -fi
-      name: 'autoreconf'
-
-    - run: mkdir bld && cd bld && ../configure ${DISTCHECK_CONFIGURE_FLAGS}
-      name: 'configure'
-
-    - run: make -C bld -j3 V=1
-      name: 'make'
-
-    - run: make -C bld -j3 distcheck TFLAGS=1279
-      name: 'make distcheck'
-
   maketgz-and-verify-in-tree:
     runs-on: ubuntu-latest
     timeout-minutes: 30
