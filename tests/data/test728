@@ -1,0 +1,64 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+SOCKS5
+SOCKS5h
+followlocation
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+# The hostname in this redirect is 256 characters and too long (> 255) for
+# SOCKS5 remote resolve. curl must return error CURLE_PROXY in this case.
+<data>
+HTTP/1.1 301 Moved Permanently
+Location: http://AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/
+Content-Length: 0
+Connection: close
+
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+proxy
+</features>
+<server>
+http
+socks5
+</server>
+ <name>
+SOCKS5h with HTTP redirect to hostname too long
+ </name>
+ <command>
+--no-progress-meter --location --proxy socks5h://%HOSTIP:%SOCKSPORT http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="yes">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<errorcode>
+97
+</errorcode>
+# the error message is verified because error code CURLE_PROXY (97) may be
+# returned for any number of reasons and we need to make sure it is
+# specifically for the reason below so that we know the check is working.
+<stderr mode="text">
+curl: (97) SOCKS5: the destination hostname is too long to be resolved remotely by the proxy.
+</stderr>
+</verify>
+</testcase>
