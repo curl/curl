@@ -172,7 +172,7 @@ if(NOT DEFINED HAVE_GETADDRINFO_THREADSAFE)
     }" HAVE_H_ERRNO)
 
   if(NOT HAVE_H_ERRNO)
-    check_c_source_runs("${_source_epilogue}
+    check_c_source_compiles("${_source_epilogue}
       int main(void)
       {
         h_errno = 2;
