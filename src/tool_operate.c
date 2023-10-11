@@ -1776,7 +1776,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
                                   (config->proxy_capath ?
                                    config->proxy_capath :
                                    config->capath));
-          if(result == CURLE_NOT_BUILT_IN) {
+          if((result == CURLE_NOT_BUILT_IN) ||
+             (result == CURLE_UNKNOWN_OPTION)) {
             if(config->proxy_capath) {
               warnf(global,
                     "ignoring --proxy-capath, not supported by libcurl");
