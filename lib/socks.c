@@ -402,8 +402,11 @@ CONNECT_REQ_INIT:
     socksreq[8] = 0; /* ensure empty userid is NUL-terminated */
     if(sx->proxy_user) {
       size_t plen = strlen(sx->proxy_user);
-      if(plen >= (size_t)data->set.buffer_size - 8) {
-        failf(data, "Too long SOCKS proxy user name, can't use");
+      if(plen > 255) {
+        /* there is no real size limit to this field in the protocol, but
+           SOCKS5 limits the proxy user field to 255 bytes and it seems likely
+           that a longer field is either a mistake or malicous input */
+        failf(data, "Too long SOCKS proxy user name");
         return CURLPX_LONG_USER;
       }
       /* copy the proxy name WITH trailing zero */
@@ -426,7 +429,8 @@ CONNECT_REQ_INIT:
         socksreq[7] = 1;
         /* append hostname */
         hostnamelen = strlen(sx->hostname) + 1; /* length including NUL */
-        if(hostnamelen <= 255)
+        if((hostnamelen <= 255) &&
+           (packetsize + hostnamelen < data->set.buffer_size))
           strcpy((char *)socksreq + packetsize, sx->hostname);
         else {
           failf(data, "SOCKS4: too long host name");
