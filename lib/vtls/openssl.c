@@ -538,9 +538,9 @@ CURLcode Curl_ossl_certchain(struct Curl_easy *data, SSL *ssl)
 #else
           RSA_get0_key(rsa, &n, &e, NULL);
 #endif /* HAVE_EVP_PKEY_GET_PARAMS */
-          BIO_printf(mem, "%d", BN_num_bits(n));
+          BIO_printf(mem, "%d", n ? BN_num_bits(n) : 0);
 #else
-          BIO_printf(mem, "%d", BN_num_bits(rsa->n));
+          BIO_printf(mem, "%d", rsa->n ? BN_num_bits(rsa->n) : 0);
 #endif /* HAVE_OPAQUE_RSA_DSA_DH */
           push_certinfo("RSA Public Key", i);
           print_pubkey_BN(rsa, n, i);
