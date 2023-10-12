@@ -4083,6 +4083,59 @@ static CURLcode ossl_pkp_pin_peer_pubkey(struct Curl_easy *data, X509* cert,
 
   return result;
 }
+#if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
+static void infof_certstack(struct Curl_easy *data, const SSL *ssl)
+{
+  STACK_OF(X509) *certstack;
+  long verify_result;
+  int num_cert_levels;
+  int cert_level;
+
+  verify_result = SSL_get_verify_result(ssl);
+  if(verify_result != X509_V_OK)
+    certstack = SSL_get_peer_cert_chain(ssl);
+  else
+    certstack = SSL_get0_verified_chain(ssl);
+  num_cert_levels = sk_X509_num(certstack);
+  OpenSSL_add_all_algorithms();
+  OpenSSL_add_all_digests();
+
+  for(cert_level = 0; cert_level < num_cert_levels; cert_level++) {
+    char cert_algorithm[80] = "";
+    char group_name[80] = "";
+    char group_name_final[80] = "";
+    const X509_ALGOR *palg_cert = NULL;
+    const ASN1_OBJECT *paobj_cert = NULL;
+    X509 *current_cert;
+    EVP_PKEY *current_pkey;
+    int key_bits;
+    int key_sec_bits;
+    int get_group_name;
+
+    current_cert = sk_X509_value(certstack, cert_level);
+
+    X509_get0_signature(NULL, &palg_cert, current_cert);
+    X509_ALGOR_get0(&paobj_cert, NULL, NULL, palg_cert);
+    OBJ_obj2txt(cert_algorithm, sizeof(cert_algorithm), paobj_cert, 0);
+
+    current_pkey = X509_get0_pubkey(current_cert);
+    key_bits = EVP_PKEY_bits(current_pkey);
+    key_sec_bits = EVP_PKEY_get_security_bits(current_pkey);
+    get_group_name = EVP_PKEY_get_group_name(current_pkey, group_name,
+                                             sizeof(group_name), NULL);
+    msnprintf(group_name_final, sizeof(group_name_final), "/%s", group_name);
+
+    infof(data,
+          "  Certificate level %d: "
+          "Public key type %s%s (%d/%d Bits/secBits), signed using %s",
+          cert_level, EVP_PKEY_get0_type_name(current_pkey),
+          get_group_name == 0 ? "" : group_name_final,
+          key_bits, key_sec_bits, cert_algorithm);
+  }
+}
+#else
+#define infof_certstack(data, ssl)
+#endif
 
 /*
  * Get the server cert, verify it and show it, etc., only call failf() if the
@@ -4273,56 +4326,7 @@ static CURLcode servercert(struct Curl_cfilter *cf,
       infof(data, " SSL certificate verify ok.");
   }
 
-#if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
-  {
-    STACK_OF(X509) *certstack;
-    long verify_result;
-    int num_cert_levels;
-    int cert_level;
-
-    verify_result = SSL_get_verify_result(backend->handle);
-    if(verify_result != X509_V_OK)
-      certstack = SSL_get_peer_cert_chain(backend->handle);
-    else
-      certstack = SSL_get0_verified_chain(backend->handle);
-    num_cert_levels = sk_X509_num(certstack);
-    OpenSSL_add_all_algorithms();
-    OpenSSL_add_all_digests();
-
-    for(cert_level = 0; cert_level < num_cert_levels; cert_level++) {
-      char cert_algorithm[80] = "";
-      char group_name[80] = "";
-      char group_name_final[80] = "";
-      const X509_ALGOR *palg_cert = NULL;
-      const ASN1_OBJECT *paobj_cert = NULL;
-      X509 *current_cert;
-      EVP_PKEY *current_pkey;
-      int key_bits;
-      int key_sec_bits;
-      int get_group_name;
-
-      current_cert = sk_X509_value(certstack, cert_level);
-
-      X509_get0_signature(NULL, &palg_cert, current_cert);
-      X509_ALGOR_get0(&paobj_cert, NULL, NULL, palg_cert);
-      OBJ_obj2txt(cert_algorithm, sizeof(cert_algorithm), paobj_cert, 0);
-
-      current_pkey = X509_get0_pubkey(current_cert);
-      key_bits = EVP_PKEY_bits(current_pkey);
-      key_sec_bits = EVP_PKEY_get_security_bits(current_pkey);
-      get_group_name = EVP_PKEY_get_group_name(current_pkey, group_name,
-                                               sizeof(group_name), NULL);
-      msnprintf(group_name_final, sizeof(group_name_final), "/%s", group_name);
-
-      infof(data,
-            "  Certificate level %d: "
-            "Public key type %s%s (%d/%d Bits/secBits), signed using %s",
-            cert_level, EVP_PKEY_get0_type_name(current_pkey),
-            get_group_name == 0 ? "" : group_name_final,
-            key_bits, key_sec_bits, cert_algorithm);
-    }
-  }
-#endif
+  infof_certstack(data, backend->handle);
 
 #if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_TLSEXT) && \
   !defined(OPENSSL_NO_OCSP)
