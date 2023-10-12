@@ -66,13 +66,22 @@ static CURLcode glob_fixed(struct URLGlob *glob, char *fixed, size_t len)
  */
 static int multiply(curl_off_t *amount, curl_off_t with)
 {
-  curl_off_t sum = *amount * with;
-  if(!with) {
-    *amount = 0;
-    return 0;
+  curl_off_t sum;
+  DEBUGASSERT(*amount >= 0);
+  DEBUGASSERT(with >= 0);
+  if((with <= 0) || (*amount <= 0)) {
+    sum = 0;
   }
-  if(sum/with != *amount)
-    return 1; /* didn't fit, bail out */
+  else {
+#ifdef __GNUC__
+    if(__builtin_mul_overflow(*amount, with, &sum))
+      return 1;
+#else
+    sum = *amount * with;
+    if(sum/with != *amount)
+      return 1; /* didn't fit, bail out */
+#endif
+  }
   *amount = sum;
   return 0;
 }
