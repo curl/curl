@@ -171,4 +171,13 @@ CURLcode Curl_dynhds_h1_add_line(struct dynhds *dynhds,
  */
 CURLcode Curl_dynhds_h1_dprint(struct dynhds *dynhds, struct dynbuf *dbuf);
 
+#ifdef USE_NGHTTP2
+
+#include <stdint.h>
+#include <nghttp2/nghttp2.h>
+
+nghttp2_nv *Curl_dynhds_to_nva(struct dynhds *dynhds, size_t *pcount);
+
+#endif /* USE_NGHTTP2 */
+
 #endif /* HEADER_CURL_DYNHDS_H */

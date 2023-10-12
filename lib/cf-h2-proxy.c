@@ -909,7 +909,6 @@ static CURLcode proxy_h2_submit(int32_t *pstream_id,
 {
   struct dynhds h2_headers;
   nghttp2_nv *nva = NULL;
-  unsigned int i;
   int32_t stream_id = -1;
   size_t nheader;
   CURLcode result;
@@ -920,20 +919,10 @@ static CURLcode proxy_h2_submit(int32_t *pstream_id,
   if(result)
     goto out;
 
-  nheader = Curl_dynhds_count(&h2_headers);
-  nva = malloc(sizeof(nghttp2_nv) * nheader);
+  nva = Curl_dynhds_to_nva(&h2_headers, &nheader);
   if(!nva) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
-  }
-
-  for(i = 0; i < nheader; ++i) {
-    struct dynhds_entry *e = Curl_dynhds_getn(&h2_headers, i);
-    nva[i].name = (unsigned char *)e->name;
-    nva[i].namelen = e->namelen;
-    nva[i].value = (unsigned char *)e->value;
-    nva[i].valuelen = e->valuelen;
-    nva[i].flags = NGHTTP2_NV_FLAG_NONE;
   }
 
   if(read_callback) {
