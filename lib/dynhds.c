@@ -371,9 +371,6 @@ CURLcode Curl_dynhds_h1_dprint(struct dynhds *dynhds, struct dynbuf *dbuf)
 
 #ifdef USE_NGHTTP2
 
-#include <stdint.h>
-#include <nghttp2/nghttp2.h>
-
 nghttp2_nv *Curl_dynhds_to_nva(struct dynhds *dynhds, size_t *pcount)
 {
   nghttp2_nv *nva = calloc(1, sizeof(nghttp2_nv) * dynhds->hds_len);
