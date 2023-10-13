@@ -231,11 +231,11 @@ CURLcode Curl_trc_init(void)
 #endif
   return CURLE_OK;
 }
-#else /* !CURL_DISABLE_VERBOSE_STRINGS) */
+#else /* defined(CURL_DISABLE_VERBOSE_STRINGS) */
 
 CURLcode Curl_trc_init(void)
 {
   return CURLE_OK;
 }
 
-#endif /* !DEBUGBUILD */
+#endif /* !defined(CURL_DISABLE_VERBOSE_STRINGS) */
