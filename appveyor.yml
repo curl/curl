@@ -157,7 +157,8 @@ environment:
       ENABLE_UNICODE: 'OFF'
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
-      DISABLED_TESTS: '!1086 !1139 !1451 !1501'
+      # test 286 disabled due to https://github.com/curl/curl/issues/12040
+      DISABLED_TESTS: '~286 !1086 !1139 !1451 !1501'
       ADD_PATH: 'C:\msys64\mingw64\bin;C:\msys64\usr\bin'
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
