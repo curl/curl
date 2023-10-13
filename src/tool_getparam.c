@@ -1043,6 +1043,12 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
             break;
           }
         }
+
+        if(denominator > numerator) {
+          err = PARAM_NUMBER_TOO_LARGE;
+          break;
+        }
+
         global->ms_per_transfer = numerator/denominator;
       }
       break;
