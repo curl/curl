@@ -133,6 +133,8 @@ static void nosigpipe(struct Curl_easy *data,
     char buffer[STRERROR_LEN];
     infof((data, "Could not set SO_NOSIGPIPE: %s",
           Curl_strerror(SOCKERRNO, buffer, sizeof(buffer))));
+#else
+    (void)data;
 #endif
   }
 }
@@ -1288,6 +1290,7 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   curl_socket_t fdsave;
   ssize_t nwritten;
   size_t orig_len = len;
+  (void)orig_len;
 
   *err = CURLE_OK;
   fdsave = cf->conn->sock[cf->sockindex];

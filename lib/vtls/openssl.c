@@ -1909,6 +1909,7 @@ static void ossl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
           break;
         default:
           sslerr = ERR_get_error();
+          (void)sslerr;
           CURL_TRC_CF((data, cf, "SSL shutdown, error: '%s', errno %d",
                       (sslerr ?
                        ossl_strerror(sslerr, buf, sizeof(buf)) :
