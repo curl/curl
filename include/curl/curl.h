@@ -65,7 +65,8 @@
 #include <stdio.h>
 #include <limits.h>
 
-#if (defined(__FreeBSD__) && (__FreeBSD__ >= 2)) || defined(__MidnightBSD__)
+#if (defined(__FreeBSD__) && (__FreeBSD__ >= 2) && (__FreeBSD__ < 8)) || \
+  defined(__MidnightBSD__)
 /* Needed for __FreeBSD_version or __MidnightBSD_version symbol definition */
 #include <osreldate.h>
 #endif
