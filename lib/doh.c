@@ -339,9 +339,10 @@ static CURLcode dohprobe(struct Curl_easy *data,
     doh->set.dohfor = data; /* identify for which transfer this is done */
     p->easy = doh;
 
-    /* DoH private_data must be null because the user must have a way to
-       distinguish their transfer's handle from DoH handles in user
-       callbacks (ie SSL CTX callback). */
+    /* DoH handles must not inherit private_data. The handles may be passed to
+       the user via callbacks and the user will be able to identify them as
+       internal handles because private data is not set. The user can then set
+       private_data via CURLOPT_PRIVATE if they so choose. */
     DEBUGASSERT(!doh->set.private_data);
 
     if(curl_multi_add_handle(multi, doh))
