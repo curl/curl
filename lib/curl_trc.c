@@ -130,7 +130,7 @@ void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
                        const char *fmt, ...)
 {
   DEBUGASSERT(cf);
-  if(data && Curl_trc_cf_is_verbose(cf, data)) {
+  if(Curl_trc_cf_is_verbose(cf, data)) {
     va_list ap;
     int len;
     char buffer[MAXINFO + 2];
@@ -228,14 +228,14 @@ CURLcode Curl_trc_init(void)
   if(config) {
     return Curl_trc_opt(config);
   }
-#endif
+#endif /* DEBUGBUILD */
   return CURLE_OK;
 }
-#else /* !CURL_DISABLE_VERBOSE_STRINGS) */
+#else /* defined(CURL_DISABLE_VERBOSE_STRINGS) */
 
 CURLcode Curl_trc_init(void)
 {
   return CURLE_OK;
 }
 
-#endif /* !DEBUGBUILD */
+#endif /* !defined(CURL_DISABLE_VERBOSE_STRINGS) */

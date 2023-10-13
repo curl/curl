@@ -327,7 +327,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 
   *done = TRUE; /* unconditionally */
   infof(data, "LDAP local: LDAP Vendor = %s ; LDAP Version = %d",
-          LDAP_VENDOR_NAME, LDAP_VENDOR_VERSION);
+        LDAP_VENDOR_NAME, LDAP_VENDOR_VERSION);
   infof(data, "LDAP local: %s", data->state.url);
 
 #ifdef HAVE_LDAP_URL_PARSE
@@ -345,7 +345,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   if(conn->given->flags & PROTOPT_SSL)
     ldap_ssl = 1;
   infof(data, "LDAP local: trying to establish %s connection",
-          ldap_ssl ? "encrypted" : "cleartext");
+        ldap_ssl ? "encrypted" : "cleartext");
 
 #if defined(USE_WIN32_LDAP)
   host = curlx_convert_UTF8_to_tchar(conn->host.name);
