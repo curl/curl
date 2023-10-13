@@ -238,14 +238,4 @@ CURLcode Curl_trc_init(void)
   return CURLE_OK;
 }
 
-#if !defined(__STDC_VERSION__) || (__STDC_VERSION__ < 199901L)
-void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
-                       const char *fmt, ...)
-{
-  (void)data;
-  (void)cf;
-  (void)fmt;
-}
-#endif
-
 #endif /* !DEBUGBUILD */
