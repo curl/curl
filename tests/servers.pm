@@ -153,10 +153,15 @@ our $stunnel;        # path to stunnel command
 #
 sub checkcmd {
     my ($cmd, @extrapaths)=@_;
-    my @paths=(split(m/[:]/, $ENV{'PATH'}), "/usr/sbin", "/usr/local/sbin",
+    my $sep = '[:]';
+    if ($^O eq 'MSWin32' || $^O eq 'dos' || $^O eq 'os2') {
+        # PATH separator is different
+        $sep = '[;]';
+    }
+    my @paths=(split(m/$sep/, $ENV{'PATH'}), "/usr/sbin", "/usr/local/sbin",
                "/sbin", "/usr/bin", "/usr/local/bin", @extrapaths);
     for(@paths) {
-        if( -x "$_/$cmd" && ! -d "$_/$cmd") {
+        if( -x "$_/$cmd" . exe_ext('SYS') && ! -d "$_/$cmd" . exe_ext('SYS')) {
             # executable bit but not a directory!
             return "$_/$cmd";
         }
@@ -264,19 +269,22 @@ sub clearlocks {
     if(os_is_win()) {
         $dir = sys_native_abs_path($dir);
         $dir =~ s/\//\\\\/g;
-        my $handle = "handle.exe";
+        my $handle = "handle";
         if($ENV{"PROCESSOR_ARCHITECTURE"} =~ /64$/) {
-            $handle = "handle64.exe";
+            $handle = "handle64";
         }
-        my @handles = `$handle $dir -accepteula -nobanner`;
-        for my $tryhandle (@handles) {
-            if($tryhandle =~ /^(\S+)\s+pid:\s+(\d+)\s+type:\s+(\w+)\s+([0-9A-F]+):\s+(.+)\r\r/) {
-                logmsg "Found $3 lock of '$5' ($4) by $1 ($2)\n";
-                # Ignore stunnel since we cannot do anything about its locks
-                if("$3" eq "File" && "$1" ne "tstunnel.exe") {
-                    logmsg "Killing IMAGENAME eq $1 and PID eq $2\n";
-                    system("taskkill.exe -f -fi \"IMAGENAME eq $1\" -fi \"PID eq $2\" >nul 2>&1");
-                    $done = 1;
+        if(checkcmd($handle)) {
+            my @handles = `$handle $dir -accepteula -nobanner`;
+            for my $tryhandle (@handles) {
+                # Skip the "No matching handles found." warning when returned
+                if($tryhandle =~ /^(\S+)\s+pid:\s+(\d+)\s+type:\s+(\w+)\s+([0-9A-F]+):\s+(.+)\r\r/) {
+                    logmsg "Found $3 lock of '$5' ($4) by $1 ($2)\n";
+                    # Ignore stunnel since we cannot do anything about its locks
+                    if("$3" eq "File" && "$1" ne "tstunnel.exe") {
+                        logmsg "Killing IMAGENAME eq $1 and PID eq $2\n";
+                        system("taskkill.exe -f -fi \"IMAGENAME eq $1\" -fi \"PID eq $2\" >nul 2>&1");
+                        $done = 1;
+                    }
                 }
             }
         }
