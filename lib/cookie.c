@@ -342,7 +342,7 @@ void Curl_cookie_loadfiles(struct Curl_easy *data)
          * Failure may be due to OOM or a bad cookie; both are ignored
          * but only the first should be
          */
-        infof(data, "ignoring failed cookie_init for %s", list->data);
+        infof((data, "ignoring failed cookie_init for %s", list->data));
       else
         data->cookies = newcookies;
       list = list->next;
@@ -563,7 +563,7 @@ Curl_cookie_add(struct Curl_easy *data,
           /* Reject cookies with a TAB inside the value */
           if(memchr(valuep, '\t', vlen)) {
             freecookie(co);
-            infof(data, "cookie contains TAB, dropping");
+            infof((data, "cookie contains TAB, dropping"));
             return NULL;
           }
         }
@@ -580,8 +580,8 @@ Curl_cookie_add(struct Curl_easy *data,
         if(nlen >= (MAX_NAME-1) || vlen >= (MAX_NAME-1) ||
            ((nlen + vlen) > MAX_NAME)) {
           freecookie(co);
-          infof(data, "oversized cookie dropped, name/val %zu + %zu bytes",
-                nlen, vlen);
+          infof((data, "oversized cookie dropped, name/val %zu + %zu bytes",
+                nlen, vlen));
           return NULL;
         }
 
@@ -619,7 +619,7 @@ Curl_cookie_add(struct Curl_easy *data,
             break;
           }
           if(invalid_octets(co->value) || invalid_octets(co->name)) {
-            infof(data, "invalid octets in name/value, cookie dropped");
+            infof((data, "invalid octets in name/value, cookie dropped"));
             badcookie = TRUE;
             break;
           }
@@ -710,8 +710,8 @@ Curl_cookie_add(struct Curl_easy *data,
              * not a domain to which the current host belongs. Mark as bad.
              */
             badcookie = TRUE;
-            infof(data, "skipped cookie with bad tailmatch domain: %s",
-                  valuep);
+            infof((data, "skipped cookie with bad tailmatch domain: %s",
+                  valuep));
           }
         }
         else if((nlen == 7) && strncasecompare("version", namep, 7)) {
@@ -1040,8 +1040,8 @@ Curl_cookie_add(struct Curl_easy *data,
       acceptable = !bad_domain(domain, strlen(domain));
 
     if(!acceptable) {
-      infof(data, "cookie '%s' dropped, domain '%s' must not "
-                  "set cookies for '%s'", co->name, domain, co->domain);
+      infof((data, "cookie '%s' dropped, domain '%s' must not "
+                  "set cookies for '%s'", co->name, domain, co->domain));
       freecookie(co);
       return NULL;
     }
@@ -1085,8 +1085,8 @@ Curl_cookie_add(struct Curl_easy *data,
           cllen = strlen(clist->spath);
 
         if(strncasecompare(clist->spath, co->spath, cllen)) {
-          infof(data, "cookie '%s' for domain '%s' dropped, would "
-                "overlay an existing cookie", co->name, co->domain);
+          infof((data, "cookie '%s' for domain '%s' dropped, would "
+                "overlay an existing cookie", co->name, co->domain));
           freecookie(co);
           return NULL;
         }
@@ -1156,10 +1156,10 @@ Curl_cookie_add(struct Curl_easy *data,
 
   if(c->running)
     /* Only show this when NOT reading the cookies from a file */
-    infof(data, "%s cookie %s=\"%s\" for domain %s, path %s, "
+    infof((data, "%s cookie %s=\"%s\" for domain %s, path %s, "
           "expire %" CURL_FORMAT_CURL_OFF_T,
           replace_old?"Replaced":"Added", co->name, co->value,
-          co->domain, co->path, co->expires);
+          co->domain, co->path, co->expires));
 
   if(!replace_old) {
     /* then make the last item point on this new one */
@@ -1229,7 +1229,7 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
       else {
         fp = fopen(file, "rb");
         if(!fp)
-          infof(data, "WARNING: failed to open cookie file \"%s\"", file);
+          infof((data, "WARNING: failed to open cookie file \"%s\"", file));
         else
           handle = fp;
       }
@@ -1435,8 +1435,8 @@ struct Cookie *Curl_cookie_getlist(struct Curl_easy *data,
 
             matches++;
             if(matches >= MAX_COOKIE_SEND_AMOUNT) {
-              infof(data, "Included max number of cookies (%zu) in request!",
-                    matches);
+              infof((data, "Included max number of cookies (%zu)) in request!",
+                    matches));
               break;
             }
           }
@@ -1762,8 +1762,8 @@ void Curl_flush_cookies(struct Curl_easy *data, bool cleanup)
     /* if we have a destination file for all the cookies to get dumped to */
     res = cookie_output(data, data->cookies, data->set.str[STRING_COOKIEJAR]);
     if(res)
-      infof(data, "WARNING: failed to save cookies in %s: %s",
-            data->set.str[STRING_COOKIEJAR], curl_easy_strerror(res));
+      infof((data, "WARNING: failed to save cookies in %s: %s",
+            data->set.str[STRING_COOKIEJAR], curl_easy_strerror(res)));
   }
   else {
     Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);

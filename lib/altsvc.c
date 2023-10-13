@@ -512,7 +512,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
   (void)data;
 #endif
   if(result) {
-    infof(data, "Excessive alt-svc header, ignoring.");
+    infof((data, "Excessive alt-svc header, ignoring."));
     return CURLE_OK;
   }
 
@@ -560,7 +560,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
             len = p - hostp;
           }
           if(!len || (len >= MAX_ALTSVC_HOSTLEN)) {
-            infof(data, "Excessive alt-svc host name, ignoring.");
+            infof((data, "Excessive alt-svc host name, ignoring."));
             valid = FALSE;
           }
           else {
@@ -582,7 +582,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
           else
             end_ptr = (char *)p; /* not left uninitialized */
           if(!port || port > USHRT_MAX || end_ptr == p || *end_ptr != '\"') {
-            infof(data, "Unknown alt-svc port number, ignoring.");
+            infof((data, "Unknown alt-svc port number, ignoring."));
             valid = FALSE;
           }
           else {
@@ -655,8 +655,8 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
             as->expires = maxage + time(NULL);
             as->persist = persist;
             Curl_llist_insert_next(&asi->list, asi->list.tail, as, &as->node);
-            infof(data, "Added alt-svc: %s:%d over %s", dsthost, dstport,
-                  Curl_alpnid2str(dstalpnid));
+            infof((data, "Added alt-svc: %s:%d over %s", dsthost, dstport,
+                  Curl_alpnid2str(dstalpnid)));
           }
         }
       }

@@ -256,9 +256,9 @@ if(option) {
 Align with the "current open" parenthesis:
 
 ```c
-DEBUGF(infof(data, "Curl_pp_readresp_ %d bytes of trailing "
+DEBUGF(infof((data, "Curl_pp_readresp_ %d bytes of trailing "
              "server response left\n",
-             (int)clipamount));
+             (int)clipamount)));
 ```
 
 ## Platform dependent code

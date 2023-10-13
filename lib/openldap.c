@@ -222,8 +222,8 @@ static void oldap_state(struct Curl_easy *data, ldapstate newstate)
   };
 
   if(ldapc->state != newstate)
-    infof(data, "LDAP %p state change from %s to %s",
-          (void *)ldapc, names[ldapc->state], names[newstate]);
+    infof((data, "LDAP %p state change from %s to %s",
+          (void *)ldapc, names[ldapc->state], names[newstate]));
 #endif
 
   ldapc->state = newstate;
@@ -644,7 +644,7 @@ static CURLcode oldap_state_mechs_resp(struct Curl_easy *data,
   case LDAP_RES_SEARCH_RESULT:
     switch(code) {
     case LDAP_SIZELIMIT_EXCEEDED:
-      infof(data, "Too many authentication mechanisms\n");
+      infof((data, "Too many authentication mechanisms\n"));
       /* FALLTHROUGH */
     case LDAP_SUCCESS:
     case LDAP_NO_RESULTS_RETURNED:
@@ -883,7 +883,7 @@ static CURLcode oldap_do(struct Curl_easy *data, bool *done)
 
   connkeep(conn, "OpenLDAP do");
 
-  infof(data, "LDAP local: %s", data->state.url);
+  infof((data, "LDAP local: %s", data->state.url));
 
   result = oldap_url_parse(data, &lud);
   if(!result) {
@@ -1019,7 +1019,7 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
 
     switch(code) {
     case LDAP_SIZELIMIT_EXCEEDED:
-      infof(data, "There are more than %d entries", lr->nument);
+      infof((data, "There are more than %d entries", lr->nument));
       /* FALLTHROUGH */
     case LDAP_SUCCESS:
       data->req.size = data->req.bytecount;

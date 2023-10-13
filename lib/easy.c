@@ -480,15 +480,15 @@ static int events_socket(struct Curl_easy *easy,      /* easy handle */
           ev->list = nxt;
         free(m);
         m = nxt;
-        infof(easy, "socket cb: socket %d REMOVED", s);
+        infof((easy, "socket cb: socket %d REMOVED", s));
       }
       else {
         /* The socket 's' is already being monitored, update the activity
            mask. Convert from libcurl bitmask to the poll one. */
         m->socket.events = socketcb2poll(what);
-        infof(easy, "socket cb: socket %d UPDATED as %s%s", s,
+        infof((easy, "socket cb: socket %d UPDATED as %s%s", s,
               (what&CURL_POLL_IN)?"IN":"",
-              (what&CURL_POLL_OUT)?"OUT":"");
+              (what&CURL_POLL_OUT)?"OUT":""));
       }
       break;
     }
@@ -510,9 +510,9 @@ static int events_socket(struct Curl_easy *easy,      /* easy handle */
         m->socket.events = socketcb2poll(what);
         m->socket.revents = 0;
         ev->list = m;
-        infof(easy, "socket cb: socket %d ADDED as %s%s", s,
+        infof((easy, "socket cb: socket %d ADDED as %s%s", s,
               (what&CURL_POLL_IN)?"IN":"",
-              (what&CURL_POLL_OUT)?"OUT":"");
+              (what&CURL_POLL_OUT)?"OUT":""));
       }
       else
         return CURLE_OUT_OF_MEMORY;
@@ -599,8 +599,8 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
         if(fds[i].revents) {
           /* socket activity, tell libcurl */
           int act = poll2cselect(fds[i].revents); /* convert */
-          infof(multi->easyp, "call curl_multi_socket_action(socket %d)",
-                fds[i].fd);
+          infof((multi->easyp, "call curl_multi_socket_action(socket %d)",
+                fds[i].fd));
           mcode = curl_multi_socket_action(multi, fds[i].fd, act,
                                            &ev->running_handles);
         }
@@ -1093,7 +1093,7 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
 
   if((newstate & (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE)) == oldstate) {
     /* Not changing any pause state, return */
-    DEBUGF(infof(data, "pause: no change, early return"));
+    DEBUGF(infof((data, "pause: no change, early return")));
     return CURLE_OK;
   }
 

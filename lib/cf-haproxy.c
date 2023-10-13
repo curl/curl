@@ -157,14 +157,14 @@ static void cf_haproxy_destroy(struct Curl_cfilter *cf,
                                struct Curl_easy *data)
 {
   (void)data;
-  CURL_TRC_CF(data, cf, "destroy");
+  CURL_TRC_CF((data, cf, "destroy"));
   cf_haproxy_ctx_free(cf->ctx);
 }
 
 static void cf_haproxy_close(struct Curl_cfilter *cf,
                              struct Curl_easy *data)
 {
-  CURL_TRC_CF(data, cf, "close");
+  CURL_TRC_CF((data, cf, "close"));
   cf->connected = FALSE;
   cf_haproxy_ctx_reset(cf->ctx);
   if(cf->next)

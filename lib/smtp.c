@@ -305,8 +305,8 @@ static void smtp_state(struct Curl_easy *data, smtpstate newstate)
   };
 
   if(smtpc->state != newstate)
-    infof(data, "SMTP %p state change from %s to %s",
-          (void *)smtpc, names[smtpc->state], names[newstate]);
+    infof((data, "SMTP %p state change from %s to %s",
+          (void *)smtpc, names[smtpc->state], names[newstate]));
 #endif
 
   smtpc->state = newstate;
@@ -508,7 +508,7 @@ static CURLcode smtp_perform_authentication(struct Curl_easy *data)
       smtp_state(data, SMTP_AUTH);
     else {
       /* Other mechanisms not supported */
-      infof(data, "No known authentication mechanisms supported");
+      infof((data, "No known authentication mechanisms supported"));
       result = CURLE_LOGIN_DENIED;
     }
   }
@@ -1484,7 +1484,7 @@ static CURLcode smtp_perform(struct Curl_easy *data, bool *connected,
   CURLcode result = CURLE_OK;
   struct SMTP *smtp = data->req.p.smtp;
 
-  DEBUGF(infof(data, "DO phase starts"));
+  DEBUGF(infof((data, "DO phase starts")));
 
   if(data->req.no_body) {
     /* Requested no body means no transfer */
@@ -1524,7 +1524,7 @@ static CURLcode smtp_perform(struct Curl_easy *data, bool *connected,
   *connected = Curl_conn_is_connected(data->conn, FIRSTSOCKET);
 
   if(*dophase_done)
-    DEBUGF(infof(data, "DO phase is complete"));
+    DEBUGF(infof((data, "DO phase is complete")));
 
   return result;
 }
@@ -1608,11 +1608,11 @@ static CURLcode smtp_doing(struct Curl_easy *data, bool *dophase_done)
   CURLcode result = smtp_multi_statemach(data, dophase_done);
 
   if(result)
-    DEBUGF(infof(data, "DO phase failed"));
+    DEBUGF(infof((data, "DO phase failed")));
   else if(*dophase_done) {
     result = smtp_dophase_done(data, FALSE /* not connected */);
 
-    DEBUGF(infof(data, "DO phase is complete"));
+    DEBUGF(infof((data, "DO phase is complete")));
   }
 
   return result;

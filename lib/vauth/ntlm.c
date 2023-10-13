@@ -178,8 +178,8 @@ static CURLcode ntlm_decode_type2_target(struct Curl_easy *data,
       if((target_info_offset > type2len) ||
          (target_info_offset + target_info_len) > type2len ||
          target_info_offset < 48) {
-        infof(data, "NTLM handshake failure (bad type-2 message). "
-              "Target Info Offset Len is set incorrect by the peer");
+        infof((data, "NTLM handshake failure (bad type-2 message). "
+              "Target Info Offset Len is set incorrect by the peer"));
         return CURLE_BAD_CONTENT_ENCODING;
       }
 
@@ -278,7 +278,7 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
      (memcmp(type2, NTLMSSP_SIGNATURE, 8) != 0) ||
      (memcmp(type2 + 8, type2_marker, sizeof(type2_marker)) != 0)) {
     /* This was not a good enough type-2 message */
-    infof(data, "NTLM handshake failure (bad type-2 message)");
+    infof((data, "NTLM handshake failure (bad type-2 message)"));
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
@@ -288,7 +288,7 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
   if(ntlm->flags & NTLMFLAG_NEGOTIATE_TARGET_INFO) {
     result = ntlm_decode_type2_target(data, type2ref, ntlm);
     if(result) {
-      infof(data, "NTLM handshake failure (bad type-2 message)");
+      infof((data, "NTLM handshake failure (bad type-2 message)"));
       return result;
     }
   }
@@ -520,7 +520,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   /* Get the machine's un-qualified host name as NTLM doesn't like the fully
      qualified domain name */
   if(Curl_gethostname(host, sizeof(host))) {
-    infof(data, "gethostname() failed, continuing without");
+    infof((data, "gethostname() failed, continuing without"));
     hostlen = 0;
   }
   else {

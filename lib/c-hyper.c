@@ -76,11 +76,11 @@ size_t Curl_hyper_recv(void *userp, hyper_context *ctx,
   DEBUGASSERT(conn);
   (void)ctx;
 
-  DEBUGF(infof(data, "Curl_hyper_recv(%zu)", buflen));
+  DEBUGF(infof((data, "Curl_hyper_recv(%zu)", buflen)));
   result = Curl_read(data, conn->sockfd, (char *)buf, buflen, &nread);
   if(result == CURLE_AGAIN) {
     /* would block, register interest */
-    DEBUGF(infof(data, "Curl_hyper_recv(%zu) -> EAGAIN", buflen));
+    DEBUGF(infof((data, "Curl_hyper_recv(%zu) -> EAGAIN", buflen)));
     if(data->hyp.read_waker)
       hyper_waker_free(data->hyp.read_waker);
     data->hyp.read_waker = hyper_context_waker(ctx);
@@ -94,7 +94,7 @@ size_t Curl_hyper_recv(void *userp, hyper_context *ctx,
     failf(data, "Curl_read failed");
     return HYPER_IO_ERROR;
   }
-  DEBUGF(infof(data, "Curl_hyper_recv(%zu) -> %zd", buflen, nread));
+  DEBUGF(infof((data, "Curl_hyper_recv(%zu) -> %zd", buflen, nread)));
   return (size_t)nread;
 }
 
@@ -106,12 +106,12 @@ size_t Curl_hyper_send(void *userp, hyper_context *ctx,
   CURLcode result;
   ssize_t nwrote;
 
-  DEBUGF(infof(data, "Curl_hyper_send(%zu)", buflen));
+  DEBUGF(infof((data, "Curl_hyper_send(%zu)", buflen)));
   result = Curl_write(data, conn->sockfd, (void *)buf, buflen, &nwrote);
   if(!result && !nwrote)
     result = CURLE_AGAIN;
   if(result == CURLE_AGAIN) {
-    DEBUGF(infof(data, "Curl_hyper_send(%zu) -> EAGAIN", buflen));
+    DEBUGF(infof((data, "Curl_hyper_send(%zu) -> EAGAIN", buflen)));
     /* would block, register interest */
     if(data->hyp.write_waker)
       hyper_waker_free(data->hyp.write_waker);
@@ -126,7 +126,7 @@ size_t Curl_hyper_send(void *userp, hyper_context *ctx,
     failf(data, "Curl_write failed");
     return HYPER_IO_ERROR;
   }
-  DEBUGF(infof(data, "Curl_hyper_send(%zu) -> %zd", buflen, nwrote));
+  DEBUGF(infof((data, "Curl_hyper_send(%zu) -> %zd", buflen, nwrote)));
   return (size_t)nwrote;
 }
 
@@ -210,7 +210,7 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
          (conn->http_ntlm_state == NTLMSTATE_TYPE2)) ||
         ((data->req.httpcode == 407) &&
          (conn->proxy_ntlm_state == NTLMSTATE_TYPE2)))) {
-      infof(data, "Connection closed while negotiating NTLM");
+      infof((data, "Connection closed while negotiating NTLM"));
       data->state.authproblem = TRUE;
       Curl_safefree(data->req.newurl);
     }
@@ -236,7 +236,7 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
     else
       result = Curl_http_firstwrite(data, data->conn, &done);
     if(result || done) {
-      infof(data, "Return early from hyper_body_chunk");
+      infof((data, "Return early from hyper_body_chunk"));
       data->state.hresult = result;
       return HYPER_ITER_BREAK;
     }
@@ -365,7 +365,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
       k->exp100 = EXP100_SEND_DATA;
       k->keepon |= KEEP_SEND;
       Curl_expire_done(data, EXPIRE_100_TIMEOUT);
-      infof(data, "Done waiting for 100-continue");
+      infof((data, "Done waiting for 100-continue"));
       if(data->hyp.exp100_waker) {
         hyper_waker_wake(data->hyp.exp100_waker);
         data->hyp.exp100_waker = NULL;
@@ -399,7 +399,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
       if(data->state.hresult) {
         /* override Hyper's view, might not even be an error */
         result = data->state.hresult;
-        infof(data, "hyperstream is done (by early callback)");
+        infof((data, "hyperstream is done (by early callback)"));
       }
       else {
         uint8_t errbuf[256];
@@ -437,7 +437,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
       if((userdata_t)userdata == USERDATA_RESP_BODY) {
         /* end of transfer */
         *done = TRUE;
-        infof(data, "hyperstream is done");
+        infof((data, "hyperstream is done"));
         if(!k->bodywrites) {
           /* hyper doesn't always call the body write callback */
           bool stilldone;
@@ -468,7 +468,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
     reason_len = hyper_response_reason_phrase_len(resp);
 
     if(http_status == 417 && data->state.expect100header) {
-      infof(data, "Got 417 while waiting for a 100");
+      infof((data, "Got 417 while waiting for a 100"));
       data->state.disableexpect = TRUE;
       data->req.newurl = strdup(data->state.url);
       Curl_done_sending(data, k);
@@ -847,7 +847,7 @@ static void http1xx_cb(void *arg, struct hyper_response *resp)
   const uint8_t *reasonp;
   size_t reason_len;
 
-  infof(data, "Got HTTP 1xx informational");
+  infof((data, "Got HTTP 1xx informational"));
 
   http_status = hyper_response_status(resp);
   http_version = hyper_response_version(resp);
@@ -875,7 +875,7 @@ static void http1xx_cb(void *arg, struct hyper_response *resp)
   }
 
   if(data->state.hresult)
-    infof(data, "ERROR in 1xx, bail out");
+    infof((data, "ERROR in 1xx, bail out"));
 }
 
 /*
@@ -908,7 +908,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
      the rest of the request in the PERFORM phase. */
   *done = TRUE;
 
-  infof(data, "Time for the Hyper dance");
+  infof((data, "Time for the Hyper dance"));
   memset(h, 0, sizeof(struct hyptransfer));
 
   result = Curl_http_host(data, conn);

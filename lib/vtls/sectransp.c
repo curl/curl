@@ -845,8 +845,8 @@ static OSStatus sectransp_bio_cf_in_read(SSLConnectionRef connection,
 
   DEBUGASSERT(data);
   nread = Curl_conn_cf_recv(cf->next, data, buf, *dataLength, &result);
-  CURL_TRC_CF(data, cf, "bio_read(len=%zu) -> %zd, result=%d",
-              *dataLength, nread, result);
+  CURL_TRC_CF((data, cf, "bio_read(len=%zu) -> %zd, result=%d",
+              *dataLength, nread, result));
   if(nread < 0) {
     switch(result) {
       case CURLE_OK:
@@ -885,8 +885,8 @@ static OSStatus sectransp_bio_cf_out_write(SSLConnectionRef connection,
 
   DEBUGASSERT(data);
   nwritten = Curl_conn_cf_send(cf->next, data, buf, *dataLength, &result);
-  CURL_TRC_CF(data, cf, "bio_send(len=%zu) -> %zd, result=%d",
-              *dataLength, nwritten, result);
+  CURL_TRC_CF((data, cf, "bio_send(len=%zu) -> %zd, result=%d",
+              *dataLength, nwritten, result));
   if(nwritten <= 0) {
     if(result == CURLE_AGAIN) {
       rtn = errSSLWouldBlock;
@@ -1626,7 +1626,7 @@ static CURLcode sectransp_set_selected_ciphers(struct Curl_easy *data,
     }
   }
   /* All cipher suites in the list are found. Report to logs as-is */
-  infof(data, "SSL: Setting cipher suites list \"%s\"", ciphers);
+  infof((data, "SSL: Setting cipher suites list \"%s\"", ciphers));
 
   err = SSLSetEnabledCiphers(ssl_ctx, selected_ciphers, ciphers_count);
   if(err != noErr) {
@@ -1663,7 +1663,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
 
   DEBUGASSERT(backend);
 
-  CURL_TRC_CF(data, cf, "connect_step1");
+  CURL_TRC_CF((data, cf, "connect_step1"));
   GetDarwinVersionNumber(&darwinver_maj, &darwinver_min);
 #endif /* CURL_BUILD_MAC */
 
@@ -1832,14 +1832,14 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
               err);
       CFRelease(alpnArr);
       Curl_alpn_to_proto_str(&proto, connssl->alpn);
-      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
+      infof((data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data));
     }
   }
 #endif
 
   if(ssl_config->key) {
-    infof(data, "WARNING: SSL: CURLOPT_SSLKEY is ignored by Secure "
-          "Transport. The private key must be in the Keychain.");
+    infof((data, "WARNING: SSL: CURLOPT_SSLKEY is ignored by Secure "
+          "Transport. The private key must be in the Keychain."));
   }
 
   if(ssl_cert || ssl_cert_blob) {
@@ -1857,8 +1857,8 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
       err = !noErr;
     if((err != noErr) && (is_cert_file || is_cert_data)) {
       if(!ssl_config->cert_type)
-        infof(data, "SSL: Certificate type not set, assuming "
-              "PKCS#12 format.");
+        infof((data, "SSL: Certificate type not set, assuming "
+              "PKCS#12 format."));
       else if(!strcasecompare(ssl_config->cert_type, "P12")) {
         failf(data, "SSL: The Security framework only supports "
               "loading identities that are in PKCS#12 format.");
@@ -1881,7 +1881,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
         char *certp;
         CURLcode result = CopyCertSubject(data, cert, &certp);
         if(!result) {
-          infof(data, "Client certificate: %s", certp);
+          infof((data, "Client certificate: %s", certp));
           free(certp);
         }
 
@@ -2022,12 +2022,12 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
     || (Curl_inet_pton(AF_INET6, connssl->hostname, &addr))
   #endif
        ) {
-      infof(data, "WARNING: using IP address, SNI is being disabled by "
-            "the OS.");
+      infof((data, "WARNING: using IP address, SNI is being disabled by "
+            "the OS."));
     }
   }
   else {
-    infof(data, "WARNING: disabling hostname validation also disables SNI.");
+    infof((data, "WARNING: disabling hostname validation also disables SNI."));
   }
 
   ciphers = conn_config->cipher_list;
@@ -2070,7 +2070,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
         return CURLE_SSL_CONNECT_ERROR;
       }
       /* Informational message */
-      infof(data, "SSL reusing session ID");
+      infof((data, "SSL reusing session ID"));
     }
     /* If there isn't one, then let's make one up! This has to be done prior
        to starting the handshake. */
@@ -2296,7 +2296,7 @@ static CURLcode verify_cert_buf(struct Curl_cfilter *cf,
       /* This is not a PEM file, probably a certificate in DER format. */
       rc = append_cert_to_array(data, certbuf, buflen, array);
       if(rc != CURLE_OK) {
-        CURL_TRC_CF(data, cf, "append_cert for CA failed");
+        CURL_TRC_CF((data, cf, "append_cert for CA failed"));
         result = rc;
         goto out;
       }
@@ -2310,7 +2310,7 @@ static CURLcode verify_cert_buf(struct Curl_cfilter *cf,
     rc = append_cert_to_array(data, der, derlen, array);
     free(der);
     if(rc != CURLE_OK) {
-      CURL_TRC_CF(data, cf, "append_cert for CA failed");
+      CURL_TRC_CF((data, cf, "append_cert for CA failed"));
       result = rc;
       goto out;
     }
@@ -2326,7 +2326,7 @@ static CURLcode verify_cert_buf(struct Curl_cfilter *cf,
     goto out;
   }
 
-  CURL_TRC_CF(data, cf, "setting %d trust anchors", n);
+  CURL_TRC_CF((data, cf, "setting %d trust anchors", n));
   ret = SecTrustSetAnchorCertificates(trust, array);
   if(ret != noErr) {
     failf(data, "SecTrustSetAnchorCertificates() returned error %d", ret);
@@ -2348,11 +2348,11 @@ static CURLcode verify_cert_buf(struct Curl_cfilter *cf,
   switch(trust_eval) {
     case kSecTrustResultUnspecified:
       /* what does this really mean? */
-      CURL_TRC_CF(data, cf, "trust result: Unspecified");
+      CURL_TRC_CF((data, cf, "trust result: Unspecified"));
       result = CURLE_OK;
       goto out;
     case kSecTrustResultProceed:
-      CURL_TRC_CF(data, cf, "trust result: Proceed");
+      CURL_TRC_CF((data, cf, "trust result: Proceed"));
       result = CURLE_OK;
       goto out;
 
@@ -2385,7 +2385,7 @@ static CURLcode verify_cert(struct Curl_cfilter *cf,
   size_t buflen;
 
   if(ca_info_blob) {
-    CURL_TRC_CF(data, cf, "verify_peer, CA from config blob");
+    CURL_TRC_CF((data, cf, "verify_peer, CA from config blob"));
     certbuf = (unsigned char *)malloc(ca_info_blob->len + 1);
     if(!certbuf) {
       return CURLE_OUT_OF_MEMORY;
@@ -2395,7 +2395,7 @@ static CURLcode verify_cert(struct Curl_cfilter *cf,
     certbuf[ca_info_blob->len]='\0';
   }
   else if(cafile) {
-    CURL_TRC_CF(data, cf, "verify_peer, CA from file '%s'", cafile);
+    CURL_TRC_CF((data, cf, "verify_peer, CA from file '%s'", cafile));
     if(read_cert(cafile, &certbuf, &buflen) < 0) {
       failf(data, "SSL: failed to read or invalid CA certificate");
       return CURLE_SSL_CACERT_BADFILE;
@@ -2489,7 +2489,7 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
         spkiHeaderLength = 23;
         break;
       default:
-        infof(data, "SSL: unhandled public key length: %zu", pubkeylen);
+        infof((data, "SSL: unhandled public key length: %zu", pubkeylen));
 #elif SECTRANSP_PINNEDPUBKEY_V2
       default:
         /* ecDSA secp256r1 pubkeylen == 91 header already included?
@@ -2538,7 +2538,7 @@ static CURLcode sectransp_connect_step2(struct Curl_cfilter *cf,
               || ssl_connect_2_reading == connssl->connecting_state
               || ssl_connect_2_writing == connssl->connecting_state);
   DEBUGASSERT(backend);
-  CURL_TRC_CF(data, cf, "connect_step2");
+  CURL_TRC_CF((data, cf, "connect_step2"));
 
   /* Here goes nothing: */
 check_handshake:
@@ -2783,35 +2783,35 @@ check_handshake:
     (void)SSLGetNegotiatedProtocolVersion(backend->ssl_ctx, &protocol);
     switch(protocol) {
       case kSSLProtocol2:
-        infof(data, "SSL 2.0 connection using %s",
-              TLSCipherNameForNumber(cipher));
+        infof((data, "SSL 2.0 connection using %s",
+              TLSCipherNameForNumber(cipher)));
         break;
       case kSSLProtocol3:
-        infof(data, "SSL 3.0 connection using %s",
-              TLSCipherNameForNumber(cipher));
+        infof((data, "SSL 3.0 connection using %s",
+              TLSCipherNameForNumber(cipher)));
         break;
       case kTLSProtocol1:
-        infof(data, "TLS 1.0 connection using %s",
-              TLSCipherNameForNumber(cipher));
+        infof((data, "TLS 1.0 connection using %s",
+              TLSCipherNameForNumber(cipher)));
         break;
 #if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
       case kTLSProtocol11:
-        infof(data, "TLS 1.1 connection using %s",
-              TLSCipherNameForNumber(cipher));
+        infof((data, "TLS 1.1 connection using %s",
+              TLSCipherNameForNumber(cipher)));
         break;
       case kTLSProtocol12:
-        infof(data, "TLS 1.2 connection using %s",
-              TLSCipherNameForNumber(cipher));
+        infof((data, "TLS 1.2 connection using %s",
+              TLSCipherNameForNumber(cipher)));
         break;
 #endif /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
 #if CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11
       case kTLSProtocol13:
-        infof(data, "TLS 1.3 connection using %s",
-              TLSCipherNameForNumber(cipher));
+        infof((data, "TLS 1.3 connection using %s",
+              TLSCipherNameForNumber(cipher)));
         break;
 #endif /* CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11 */
       default:
-        infof(data, "Unknown protocol connection");
+        infof((data, "Unknown protocol connection"));
         break;
     }
 
@@ -2837,7 +2837,7 @@ check_handshake:
           cf->conn->alpn = CURL_HTTP_VERSION_1_1;
         }
         else
-          infof(data, VTLS_INFOF_NO_ALPN);
+          infof((data, VTLS_INFOF_NO_ALPN));
 
         Curl_multiuse_state(data, cf->conn->alpn == CURL_HTTP_VERSION_2 ?
                             BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
@@ -2886,7 +2886,7 @@ collect_server_cert_single(struct Curl_cfilter *cf, struct Curl_easy *data,
     char *certp;
     result = CopyCertSubject(data, server_cert, &certp);
     if(!result) {
-      infof(data, "Server certificate: %s", certp);
+      infof((data, "Server certificate: %s", certp));
       free(certp);
     }
   }
@@ -3005,7 +3005,7 @@ static CURLcode sectransp_connect_step3(struct Curl_cfilter *cf,
   struct ssl_connect_data *connssl = cf->ctx;
   CURLcode result;
 
-  CURL_TRC_CF(data, cf, "connect_step3");
+  CURL_TRC_CF((data, cf, "connect_step3"));
   /* There is no step 3!
    * Well, okay, let's collect server certificates, and if verbose mode is on,
    * let's print the details of the server certificates. */
@@ -3114,7 +3114,7 @@ sectransp_connect_common(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
   if(ssl_connect_done == connssl->connecting_state) {
-    CURL_TRC_CF(data, cf, "connected");
+    CURL_TRC_CF((data, cf, "connected"));
     connssl->state = ssl_connection_complete;
     *done = TRUE;
   }
@@ -3161,7 +3161,7 @@ static void sectransp_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   DEBUGASSERT(backend);
 
   if(backend->ssl_ctx) {
-    CURL_TRC_CF(data, cf, "close");
+    CURL_TRC_CF((data, cf, "close"));
     (void)SSLClose(backend->ssl_ctx);
 #if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
     if(SSLCreateContext)
@@ -3207,7 +3207,7 @@ static int sectransp_shutdown(struct Curl_cfilter *cf,
   what = SOCKET_READABLE(Curl_conn_cf_get_socket(cf, data),
                          SSL_SHUTDOWN_TIMEOUT);
 
-  CURL_TRC_CF(data, cf, "shutdown");
+  CURL_TRC_CF((data, cf, "shutdown"));
   while(loop--) {
     if(what < 0) {
       /* anything that gets here is fatally bad */
@@ -3269,7 +3269,7 @@ static bool sectransp_data_pending(struct Curl_cfilter *cf,
   DEBUGASSERT(backend);
 
   if(backend->ssl_ctx) {  /* SSL is in use */
-    CURL_TRC_CF((struct Curl_easy *)data, cf, "data_pending");
+    CURL_TRC_CF(((struct Curl_easy *)data, cf, "data_pending"));
     err = SSLGetBufferedReadSize(backend->ssl_ctx, &buffer);
     if(err == noErr)
       return buffer > 0UL;

@@ -453,10 +453,10 @@ bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
     }
   }
 
-  DEBUGF(infof(data, "%s Session ID in cache for %s %s://%s:%d",
+  DEBUGF(infof((data, "%s Session ID in cache for %s %s://%s:%d",
                no_match? "Didn't find": "Found",
                Curl_ssl_cf_is_proxy(cf) ? "proxy" : "host",
-               cf->conn->handler->scheme, connssl->hostname, connssl->port));
+               cf->conn->handler->scheme, connssl->hostname, connssl->port)));
   return no_match;
 }
 
@@ -601,9 +601,9 @@ CURLcode Curl_ssl_addsessionid(struct Curl_cfilter *cf,
   if(added)
     *added = TRUE;
 
-  DEBUGF(infof(data, "Added Session ID to cache for %s://%s:%d [%s]",
+  DEBUGF(infof((data, "Added Session ID to cache for %s://%s:%d [%s]",
                store->scheme, store->name, store->remote_port,
-               Curl_ssl_cf_is_proxy(cf) ? "PROXY" : "server"));
+               Curl_ssl_cf_is_proxy(cf) ? "PROXY" : "server")));
   return CURLE_OK;
 }
 
@@ -917,7 +917,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     if(encode)
       return encode;
 
-    infof(data, " public key hash: sha256//%s", encoded);
+    infof((data, " public key hash: sha256//%s", encoded));
 
     /* it starts with sha256//, copy so we can modify it */
     pinkeylen = strlen(pinnedpubkey) + 1;
@@ -1512,7 +1512,7 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
   }
 
   CF_DATA_SAVE(save, cf, data);
-  CURL_TRC_CF(data, cf, "cf_connect()");
+  CURL_TRC_CF((data, cf, "cf_connect()"));
   (void)connssl;
   DEBUGASSERT(data->conn);
   DEBUGASSERT(data->conn == cf->conn);
@@ -1542,7 +1542,7 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
     DEBUGASSERT(connssl->state == ssl_connection_complete);
   }
 out:
-  CURL_TRC_CF(data, cf, "cf_connect() -> %d, done=%d", result, *done);
+  CURL_TRC_CF((data, cf, "cf_connect() -> %d, done=%d", result, *done));
   CF_DATA_RESTORE(cf, save);
   return result;
 }
@@ -1593,7 +1593,7 @@ static ssize_t ssl_cf_recv(struct Curl_cfilter *cf,
     /* eof */
     *err = CURLE_OK;
   }
-  CURL_TRC_CF(data, cf, "cf_recv(len=%zu) -> %zd, %d", len, nread, *err);
+  CURL_TRC_CF((data, cf, "cf_recv(len=%zu) -> %zd, %d", len, nread, *err));
   CF_DATA_RESTORE(cf, save);
   return nread;
 }
@@ -2025,11 +2025,11 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
       /* return CURLE_NOT_BUILT_IN; */
       goto out;
     }
-    infof(data, VTLS_INFOF_ALPN_ACCEPTED_LEN_1STR, (int)proto_len, proto);
+    infof((data, VTLS_INFOF_ALPN_ACCEPTED_LEN_1STR, (int)proto_len, proto));
   }
   else {
     *palpn = CURL_HTTP_VERSION_NONE;
-    infof(data, VTLS_INFOF_NO_ALPN);
+    infof((data, VTLS_INFOF_NO_ALPN));
   }
 
 out:

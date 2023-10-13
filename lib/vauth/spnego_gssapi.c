@@ -139,7 +139,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
 
     /* Ensure we have a valid challenge message */
     if(!chlg) {
-      infof(data, "SPNEGO handshake failure (empty challenge message)");
+      infof((data, "SPNEGO handshake failure (empty challenge message)"));
       return CURLE_BAD_CONTENT_ENCODING;
     }
 

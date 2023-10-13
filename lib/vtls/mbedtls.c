@@ -150,7 +150,7 @@ static void mbed_debug(void *context, int level, const char *f_name,
 
   data = (struct Curl_easy *)context;
 
-  infof(data, "%s", line);
+  infof((data, "%s", line));
   (void) level;
 }
 #else
@@ -166,8 +166,8 @@ static int mbedtls_bio_cf_write(void *bio,
 
   DEBUGASSERT(data);
   nwritten = Curl_conn_cf_send(cf->next, data, (char *)buf, blen, &result);
-  CURL_TRC_CF(data, cf, "mbedtls_bio_cf_out_write(len=%zu) -> %zd, err=%d",
-              blen, nwritten, result);
+  CURL_TRC_CF((data, cf, "mbedtls_bio_cf_out_write(len=%zu) -> %zd, err=%d",
+              blen, nwritten, result));
   if(nwritten < 0 && CURLE_AGAIN == result) {
     nwritten = MBEDTLS_ERR_SSL_WANT_WRITE;
   }
@@ -187,8 +187,8 @@ static int mbedtls_bio_cf_read(void *bio, unsigned char *buf, size_t blen)
     return 0;
 
   nread = Curl_conn_cf_recv(cf->next, data, (char *)buf, blen, &result);
-  CURL_TRC_CF(data, cf, "mbedtls_bio_cf_in_read(len=%zu) -> %zd, err=%d",
-              blen, nread, result);
+  CURL_TRC_CF((data, cf, "mbedtls_bio_cf_in_read(len=%zu) -> %zd, err=%d",
+              blen, nread, result));
   if(nread < 0 && CURLE_AGAIN == result) {
     nread = MBEDTLS_ERR_SSL_WANT_READ;
   }
@@ -542,7 +542,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 #endif
 
-  infof(data, "mbedTLS: Connecting to %s:%d", hostname, connssl->port);
+  infof((data, "mbedTLS: Connecting to %s:%d", hostname, connssl->port));
 
   mbedtls_ssl_config_init(&backend->config);
   ret = mbedtls_ssl_config_defaults(&backend->config,
@@ -570,7 +570,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 #if MBEDTLS_VERSION_NUMBER < 0x03000000
     mbedtls_ssl_conf_min_version(&backend->config, MBEDTLS_SSL_MAJOR_VERSION_3,
                                  MBEDTLS_SSL_MINOR_VERSION_1);
-    infof(data, "mbedTLS: Set min SSL version to TLS 1.0");
+    infof((data, "mbedTLS: Set min SSL version to TLS 1.0"));
     break;
 #endif
   case CURL_SSLVERSION_TLSv1_0:
@@ -622,7 +622,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
         failf(data, "mbedtls_ssl_set_session returned -0x%x", -ret);
         return CURLE_SSL_CONNECT_ERROR;
       }
-      infof(data, "mbedTLS reusing session");
+      infof((data, "mbedTLS reusing session"));
     }
     Curl_ssl_sessionid_unlock(data);
   }
@@ -666,7 +666,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       return CURLE_SSL_CONNECT_ERROR;
     }
     Curl_alpn_to_proto_str(&proto, connssl->alpn);
-    infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
+    infof((data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data));
   }
 #endif
 
@@ -730,8 +730,8 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  infof(data, "mbedTLS: Handshake complete, cipher is %s",
-        mbedtls_ssl_get_ciphersuite(&backend->ssl));
+  infof((data, "mbedTLS: Handshake complete, cipher is %s",
+        mbedtls_ssl_get_ciphersuite(&backend->ssl)));
 
   ret = mbedtls_ssl_get_verify_result(&backend->ssl);
 
@@ -768,9 +768,9 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
       return CURLE_OUT_OF_MEMORY;
 
     if(mbedtls_x509_crt_info(buffer, bufsize, "* ", peercert) > 0)
-      infof(data, "Dumping cert info: %s", buffer);
+      infof((data, "Dumping cert info: %s", buffer));
     else
-      infof(data, "Unable to dump certificate information");
+      infof((data, "Unable to dump certificate information"));
 
     free(buffer);
   }
@@ -856,7 +856,7 @@ pinnedpubkey_error:
 #endif
 
   connssl->connecting_state = ssl_connect_3;
-  infof(data, "SSL connected");
+  infof((data, "SSL connected"));
 
   return CURLE_OK;
 }

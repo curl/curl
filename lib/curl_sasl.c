@@ -253,8 +253,8 @@ static void sasl_state(struct SASL *sasl, struct Curl_easy *data,
   };
 
   if(sasl->state != newstate)
-    infof(data, "SASL %p state change from %s to %s",
-          (void *)sasl, names[sasl->state], names[newstate]);
+    infof((data, "SASL %p state change from %s to %s",
+          (void *)sasl, names[sasl->state], names[newstate]));
 #else
   (void) data;
 #endif

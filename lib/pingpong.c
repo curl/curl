@@ -392,9 +392,9 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
            it may actually contain another end of response already! */
         clipamount = gotbytes - i;
         restart = TRUE;
-        DEBUGF(infof(data, "Curl_pp_readresp_ %d bytes of trailing "
+        DEBUGF(infof((data, "Curl_pp_readresp_ %d bytes of trailing "
                      "server response left",
-                     (int)clipamount));
+                     (int)clipamount)));
       }
       else if(keepon) {
 
@@ -403,8 +403,8 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
           /* We got an excessive line without newlines and we need to deal
              with it. We keep the first bytes of the line then we throw
              away the rest. */
-          infof(data, "Excessive server response line length received, "
-                "%zd bytes. Stripping", gotbytes);
+          infof((data, "Excessive server response line length received, "
+                "%zd bytes. Stripping", gotbytes));
           restart = TRUE;
 
           /* we keep 40 bytes since all our pingpong protocols are only

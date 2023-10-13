@@ -207,14 +207,14 @@ static CURLcode add_certs_data_to_store(HCERTSTORE trust_store,
 
   if(result == CURLE_OK) {
     if(!num_certs) {
-      infof(data,
+      infof((data,
             "schannel: did not add any certificates from CA file '%s'",
-            ca_file_text);
+            ca_file_text));
     }
     else {
-      infof(data,
+      infof((data,
             "schannel: added %d certificate(s) from CA file '%s'",
-            num_certs, ca_file_text);
+            num_certs, ca_file_text));
     }
   }
   return result;
@@ -431,7 +431,7 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
       continue;
     }
     if(!entry->pwszDNSName) {
-      infof(data, "schannel: Empty DNS name.");
+      infof((data, "schannel: Empty DNS name."));
       continue;
     }
     current_length = wcslen(entry->pwszDNSName) + 1;
@@ -541,19 +541,19 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
     else {
       if(Curl_cert_hostcheck(cert_hostname, strlen(cert_hostname),
                              conn_hostname, hostlen)) {
-        infof(data,
+        infof((data,
               "schannel: connection hostname (%s) validated "
               "against certificate name (%s)",
-              conn_hostname, cert_hostname);
+              conn_hostname, cert_hostname));
         result = CURLE_OK;
       }
       else {
         size_t cert_hostname_len;
 
-        infof(data,
+        infof((data,
               "schannel: connection hostname (%s) did not match "
               "against certificate name (%s)",
-              conn_hostname, cert_hostname);
+              conn_hostname, cert_hostname));
 
         cert_hostname_len =
           _tcslen(&cert_hostname_buff[cert_hostname_buff_index]);

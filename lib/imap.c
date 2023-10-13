@@ -411,8 +411,8 @@ static void imap_state(struct Curl_easy *data, imapstate newstate)
   };
 
   if(imapc->state != newstate)
-    infof(data, "IMAP %p state change from %s to %s",
-          (void *)imapc, names[imapc->state], names[newstate]);
+    infof((data, "IMAP %p state change from %s to %s",
+          (void *)imapc, names[imapc->state], names[newstate]));
 #endif
 
   imapc->state = newstate;
@@ -627,7 +627,7 @@ static CURLcode imap_perform_authentication(struct Curl_easy *data,
       result = imap_perform_login(data, conn);
     else {
       /* Other mechanisms not supported */
-      infof(data, "No known authentication mechanisms supported");
+      infof((data, "No known authentication mechanisms supported"));
       result = CURLE_LOGIN_DENIED;
     }
   }
@@ -877,7 +877,7 @@ static CURLcode imap_state_servergreet_resp(struct Curl_easy *data,
     /* PREAUTH */
     struct imap_conn *imapc = &conn->proto.imapc;
     imapc->preauth = TRUE;
-    infof(data, "PREAUTH connection, already authenticated");
+    infof((data, "PREAUTH connection, already authenticated"));
   }
   else if(imapcode != IMAP_RESP_OK) {
     failf(data, "Got unexpected imap-server response");
@@ -1171,8 +1171,8 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
   }
 
   if(parsed) {
-    infof(data, "Found %" CURL_FORMAT_CURL_OFF_T " bytes to download",
-          size);
+    infof((data, "Found %" CURL_FORMAT_CURL_OFF_T " bytes to download",
+          size));
     Curl_pgrsSetDownloadSize(data, size);
 
     if(pp->cache) {
@@ -1196,8 +1196,8 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
 
       data->req.bytecount += chunk;
 
-      infof(data, "Written %zu bytes, %" CURL_FORMAT_CURL_OFF_TU
-            " bytes are left for transfer", chunk, size - chunk);
+      infof((data, "Written %zu bytes, %" CURL_FORMAT_CURL_OFF_TU
+            " bytes are left for transfer", chunk, size - chunk));
 
       /* Have we used the entire cache or just part of it?*/
       if(pp->cache_size > chunk) {
@@ -1572,7 +1572,7 @@ static CURLcode imap_perform(struct Curl_easy *data, bool *connected,
   struct imap_conn *imapc = &conn->proto.imapc;
   bool selected = FALSE;
 
-  DEBUGF(infof(data, "DO phase starts"));
+  DEBUGF(infof((data, "DO phase starts")));
 
   if(data->req.no_body) {
     /* Requested no body means no transfer */
@@ -1619,7 +1619,7 @@ static CURLcode imap_perform(struct Curl_easy *data, bool *connected,
   *connected = Curl_conn_is_connected(conn, FIRSTSOCKET);
 
   if(*dophase_done)
-    DEBUGF(infof(data, "DO phase is complete"));
+    DEBUGF(infof((data, "DO phase is complete")));
 
   return result;
 }
@@ -1711,11 +1711,11 @@ static CURLcode imap_doing(struct Curl_easy *data, bool *dophase_done)
   CURLcode result = imap_multi_statemach(data, dophase_done);
 
   if(result)
-    DEBUGF(infof(data, "DO phase failed"));
+    DEBUGF(infof((data, "DO phase failed")));
   else if(*dophase_done) {
     result = imap_dophase_done(data, FALSE /* not connected */);
 
-    DEBUGF(infof(data, "DO phase is complete"));
+    DEBUGF(infof((data, "DO phase is complete")));
   }
 
   return result;
@@ -2010,7 +2010,7 @@ static CURLcode imap_parse_url_path(struct Curl_easy *data)
       return result;
     }
 
-    DEBUGF(infof(data, "IMAP URL parameter '%s' = '%s'", name, value));
+    DEBUGF(infof((data, "IMAP URL parameter '%s' = '%s'", name, value)));
 
     /* Process the known hierarchical parameters (UIDVALIDITY, UID, SECTION and
        PARTIAL) stripping of the trailing slash character if it is present.

@@ -308,7 +308,7 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
     user.oldest = 0;
 
     if(hostcache_timestamp_remove(&user, dns)) {
-      infof(data, "Hostname in DNS cache was stale, zapped");
+      infof((data, "Hostname in DNS cache was stale, zapped"));
       dns = NULL; /* the memory deallocation is being handled by the hash */
       Curl_hash_delete(data->dns.hostcache, entry_id, entry_len + 1);
     }
@@ -334,7 +334,8 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
     }
 
     if(!found) {
-      infof(data, "Hostname in DNS cache doesn't have needed family, zapped");
+      infof((data, "Hostname in DNS cache doesn't have needed family, "
+            "zapped"));
       dns = NULL; /* the memory deallocation is being handled by the hash */
       Curl_hash_delete(data->dns.hostcache, entry_id, entry_len + 1);
     }
@@ -413,7 +414,7 @@ UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
 
   if(num_addrs > 1) {
     struct Curl_addrinfo **nodes;
-    infof(data, "Shuffling %i addresses", num_addrs);
+    infof((data, "Shuffling %i addresses", num_addrs));
 
     nodes = malloc(num_addrs*sizeof(*nodes));
     if(nodes) {
@@ -712,7 +713,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
   dns = fetch_addr(data, hostname, port);
 
   if(dns) {
-    infof(data, "Hostname %s was found in DNS cache", hostname);
+    infof((data, "Hostname %s was found in DNS cache", hostname));
     dns->inuse++; /* we use it! */
     rc = CURLRESOLV_RESOLVED;
   }
@@ -974,7 +975,7 @@ enum resolve_t Curl_resolv_timeout(struct Curl_easy *data,
 #else
 #ifndef CURLRES_ASYNCH
   if(timeoutms)
-    infof(data, "timeout on name lookup is not supported");
+    infof((data, "timeout on name lookup is not supported"));
 #else
   (void)timeoutms; /* timeoutms not used with an async resolver */
 #endif
@@ -1122,8 +1123,8 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
           host_end = NULL;
       }
       if(!host_end) {
-        infof(data, "Bad syntax CURLOPT_RESOLVE removal entry '%s'",
-              hostp->data);
+        infof((data, "Bad syntax CURLOPT_RESOLVE removal entry '%s'",
+              hostp->data));
         continue;
       }
       /* Create an entry id, based upon the hostname and port */
@@ -1206,15 +1207,15 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
 
 #ifndef ENABLE_IPV6
         if(strchr(address, ':')) {
-          infof(data, "Ignoring resolve address '%s', missing IPv6 support.",
-                address);
+          infof((data, "Ignoring resolve address '%s', missing IPv6 support.",
+                address));
           continue;
         }
 #endif
 
         ai = Curl_str2addr(address, port);
         if(!ai) {
-          infof(data, "Resolve address '%s' found illegal", address);
+          infof((data, "Resolve address '%s' found illegal", address));
           goto err;
         }
 
@@ -1250,8 +1251,8 @@ err:
       dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len + 1);
 
       if(dns) {
-        infof(data, "RESOLVE %.*s:%d - old addresses discarded",
-              (int)hlen, host_begin, port);
+        infof((data, "RESOLVE %.*s:%d - old addresses discarded",
+              (int)hlen, host_begin, port));
         /* delete old entry, there are two reasons for this
          1. old entry may have different addresses.
          2. even if entry with correct addresses is already in the cache,
@@ -1283,13 +1284,13 @@ err:
         Curl_freeaddrinfo(head);
         return CURLE_OUT_OF_MEMORY;
       }
-      infof(data, "Added %.*s:%d:%s to DNS cache%s",
+      infof((data, "Added %.*s:%d:%s to DNS cache%s",
             (int)hlen, host_begin, port, addresses,
-            permanent ? "" : " (non-permanent)");
+            permanent ? "" : " (non-permanent)"));
 
       /* Wildcard hostname */
       if((hlen == 1) && (host_begin[0] == '*')) {
-        infof(data, "RESOLVE *:%d using wildcard", port);
+        infof((data, "RESOLVE *:%d using wildcard", port));
         data->state.wildcard_resolve = true;
       }
     }

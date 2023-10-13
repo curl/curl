@@ -291,11 +291,11 @@ static CURLproxycode do_SOCKS4(struct Curl_cfilter *cf,
     /* SOCKS4 can only do IPv4, insist! */
     conn->ip_version = CURL_IPRESOLVE_V4;
     if(conn->bits.httpproxy)
-      infof(data, "SOCKS4%s: connecting to HTTP proxy %s port %d",
-            protocol4a ? "a" : "", sx->hostname, sx->remote_port);
+      infof((data, "SOCKS4%s: connecting to HTTP proxy %s port %d",
+            protocol4a ? "a" : "", sx->hostname, sx->remote_port));
 
-    infof(data, "SOCKS4 communication to %s:%d",
-          sx->hostname, sx->remote_port);
+    infof((data, "SOCKS4 communication to %s:%d",
+          sx->hostname, sx->remote_port));
 
     /*
      * Compose socks4 request
@@ -322,7 +322,7 @@ static CURLproxycode do_SOCKS4(struct Curl_cfilter *cf,
         return CURLPX_RESOLVE_HOST;
       else if(rc == CURLRESOLV_PENDING) {
         sxstate(sx, data, CONNECT_RESOLVING);
-        infof(data, "SOCKS4 non-blocking resolve of %s", sx->hostname);
+        infof((data, "SOCKS4 non-blocking resolve of %s", sx->hostname));
         return CURLPX_OK;
       }
       sxstate(sx, data, CONNECT_RESOLVED);
@@ -342,7 +342,7 @@ static CURLproxycode do_SOCKS4(struct Curl_cfilter *cf,
       data->state.async.dns = dns;
       data->state.async.done = TRUE;
 #endif
-      infof(data, "Hostname '%s' was found", sx->hostname);
+      infof((data, "Hostname '%s' was found", sx->hostname));
       sxstate(sx, data, CONNECT_RESOLVED);
     }
     else {
@@ -379,7 +379,7 @@ CONNECT_RESOLVED:
         socksreq[6] = ((unsigned char *)&saddr_in->sin_addr.s_addr)[2];
         socksreq[7] = ((unsigned char *)&saddr_in->sin_addr.s_addr)[3];
 
-        infof(data, "SOCKS4 connect to IPv4 %s (locally resolved)", buf);
+        infof((data, "SOCKS4 connect to IPv4 %s (locally resolved)", buf));
 
         Curl_resolv_unlock(data, dns); /* not used anymore from now on */
       }
@@ -504,7 +504,7 @@ CONNECT_REQ_INIT:
   /* Result */
   switch(socksreq[1]) {
   case 90:
-    infof(data, "SOCKS4%s request granted.", protocol4a?"a":"");
+    infof((data, "SOCKS4%s request granted.", protocol4a?"a":""));
     break;
   case 91:
     failf(data,
@@ -586,8 +586,8 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
   switch(sx->state) {
   case CONNECT_SOCKS_INIT:
     if(conn->bits.httpproxy)
-      infof(data, "SOCKS5: connecting to HTTP proxy %s port %d",
-            sx->hostname, sx->remote_port);
+      infof((data, "SOCKS5: connecting to HTTP proxy %s port %d",
+            sx->hostname, sx->remote_port));
 
     /* RFC1928 chapter 5 specifies max 255 chars for domain name in packet */
     if(!socks5_resolve_local && hostname_len > 255) {
@@ -597,9 +597,9 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
     }
 
     if(auth & ~(CURLAUTH_BASIC | CURLAUTH_GSSAPI))
-      infof(data,
+      infof((data,
             "warning: unsupported value passed to CURLOPT_SOCKS5_AUTH: %u",
-            auth);
+            auth));
     if(!(auth & CURLAUTH_BASIC))
       /* disable username/password auth */
       sx->proxy_user = NULL;
@@ -809,7 +809,7 @@ CONNECT_REQ_INIT:
       data->state.async.dns = dns;
       data->state.async.done = TRUE;
 #endif
-      infof(data, "SOCKS5: hostname '%s' found", sx->hostname);
+      infof((data, "SOCKS5: hostname '%s' found", sx->hostname));
     }
 
     if(!dns) {
@@ -858,8 +858,8 @@ CONNECT_RESOLVED:
         socksreq[len++] = ((unsigned char *)&saddr_in->sin_addr.s_addr)[i];
       }
 
-      infof(data, "SOCKS5 connect to %s:%d (locally resolved)", dest,
-            sx->remote_port);
+      infof((data, "SOCKS5 connect to %s:%d (locally resolved)", dest,
+            sx->remote_port));
     }
 #ifdef ENABLE_IPV6
     else if(hp->ai_family == AF_INET6) {
@@ -873,8 +873,8 @@ CONNECT_RESOLVED:
           ((unsigned char *)&saddr_in6->sin6_addr.s6_addr)[i];
       }
 
-      infof(data, "SOCKS5 connect to [%s]:%d (locally resolved)", dest,
-            sx->remote_port);
+      infof((data, "SOCKS5 connect to [%s]:%d (locally resolved)", dest,
+            sx->remote_port));
     }
 #endif
     else {
@@ -920,8 +920,8 @@ CONNECT_RESOLVE_REMOTE:
         memcpy(&socksreq[len], sx->hostname, hostname_len); /* w/o NULL */
         len += hostname_len;
       }
-      infof(data, "SOCKS5 connect to %s:%d (remotely resolved)",
-            sx->hostname, sx->remote_port);
+      infof((data, "SOCKS5 connect to %s:%d (remotely resolved)",
+            sx->hostname, sx->remote_port));
     }
     /* FALLTHROUGH */
 
@@ -1061,7 +1061,7 @@ CONNECT_REQ_SEND:
     }
     sxstate(sx, data, CONNECT_DONE);
   }
-  infof(data, "SOCKS5 request granted.");
+  infof((data, "SOCKS5 request granted."));
 
   return CURLPX_OK; /* Proxy was successful! */
 }

@@ -270,9 +270,9 @@ static void printoption(struct Curl_easy *data,
   if(data->set.verbose) {
     if(cmd == CURL_IAC) {
       if(CURL_TELCMD_OK(option))
-        infof(data, "%s IAC %s", direction, CURL_TELCMD(option));
+        infof((data, "%s IAC %s", direction, CURL_TELCMD(option)));
       else
-        infof(data, "%s IAC %d", direction, option);
+        infof((data, "%s IAC %d", direction, option));
     }
     else {
       const char *fmt = (cmd == CURL_WILL) ? "WILL" :
@@ -289,12 +289,12 @@ static void printoption(struct Curl_easy *data,
           opt = NULL;
 
         if(opt)
-          infof(data, "%s %s %s", direction, fmt, opt);
+          infof((data, "%s %s %s", direction, fmt, opt));
         else
-          infof(data, "%s %s %d", direction, fmt, option);
+          infof((data, "%s %s %d", direction, fmt, option));
       }
       else
-        infof(data, "%s %d %d", direction, cmd, option);
+        infof((data, "%s %d %d", direction, cmd, option));
     }
   }
 }
@@ -668,7 +668,7 @@ static void printsub(struct Curl_easy *data,
   if(data->set.verbose) {
     unsigned int i = 0;
     if(direction) {
-      infof(data, "%s IAC SB ", (direction == '<')? "RCVD":"SENT");
+      infof((data, "%s IAC SB ", (direction == '<')? "RCVD":"SENT"));
       if(length >= 3) {
         int j;
 
@@ -676,26 +676,26 @@ static void printsub(struct Curl_easy *data,
         j = pointer[length-1];
 
         if(i != CURL_IAC || j != CURL_SE) {
-          infof(data, "(terminated by ");
+          infof((data, "(terminated by "));
           if(CURL_TELOPT_OK(i))
-            infof(data, "%s ", CURL_TELOPT(i));
+            infof((data, "%s ", CURL_TELOPT(i)));
           else if(CURL_TELCMD_OK(i))
-            infof(data, "%s ", CURL_TELCMD(i));
+            infof((data, "%s ", CURL_TELCMD(i)));
           else
-            infof(data, "%u ", i);
+            infof((data, "%u ", i));
           if(CURL_TELOPT_OK(j))
-            infof(data, "%s", CURL_TELOPT(j));
+            infof((data, "%s", CURL_TELOPT(j)));
           else if(CURL_TELCMD_OK(j))
-            infof(data, "%s", CURL_TELCMD(j));
+            infof((data, "%s", CURL_TELCMD(j)));
           else
-            infof(data, "%d", j);
-          infof(data, ", not IAC SE) ");
+            infof((data, "%d", j));
+          infof((data, ", not IAC SE) "));
         }
       }
       length -= 2;
     }
     if(length < 1) {
-      infof(data, "(Empty suboption?)");
+      infof((data, "(Empty suboption?)"));
       return;
     }
 
@@ -705,35 +705,35 @@ static void printsub(struct Curl_easy *data,
       case CURL_TELOPT_XDISPLOC:
       case CURL_TELOPT_NEW_ENVIRON:
       case CURL_TELOPT_NAWS:
-        infof(data, "%s", CURL_TELOPT(pointer[0]));
+        infof((data, "%s", CURL_TELOPT(pointer[0])));
         break;
       default:
-        infof(data, "%s (unsupported)", CURL_TELOPT(pointer[0]));
+        infof((data, "%s (unsupported)", CURL_TELOPT(pointer[0])));
         break;
       }
     }
     else
-      infof(data, "%d (unknown)", pointer[i]);
+      infof((data, "%d (unknown)", pointer[i]));
 
     switch(pointer[0]) {
     case CURL_TELOPT_NAWS:
       if(length > 4)
-        infof(data, "Width: %d ; Height: %d", (pointer[1]<<8) | pointer[2],
-              (pointer[3]<<8) | pointer[4]);
+        infof((data, "Width: %d ; Height: %d", (pointer[1]<<8) | pointer[2],
+              (pointer[3]<<8) | pointer[4]));
       break;
     default:
       switch(pointer[1]) {
       case CURL_TELQUAL_IS:
-        infof(data, " IS");
+        infof((data, " IS"));
         break;
       case CURL_TELQUAL_SEND:
-        infof(data, " SEND");
+        infof((data, " SEND"));
         break;
       case CURL_TELQUAL_INFO:
-        infof(data, " INFO/REPLY");
+        infof((data, " INFO/REPLY"));
         break;
       case CURL_TELQUAL_NAME:
-        infof(data, " NAME");
+        infof((data, " NAME"));
         break;
       }
 
@@ -741,21 +741,21 @@ static void printsub(struct Curl_easy *data,
       case CURL_TELOPT_TTYPE:
       case CURL_TELOPT_XDISPLOC:
         pointer[length] = 0;
-        infof(data, " \"%s\"", &pointer[2]);
+        infof((data, " \"%s\"", &pointer[2]));
         break;
       case CURL_TELOPT_NEW_ENVIRON:
         if(pointer[1] == CURL_TELQUAL_IS) {
-          infof(data, " ");
+          infof((data, " "));
           for(i = 3; i < length; i++) {
             switch(pointer[i]) {
             case CURL_NEW_ENV_VAR:
-              infof(data, ", ");
+              infof((data, ", "));
               break;
             case CURL_NEW_ENV_VALUE:
-              infof(data, " = ");
+              infof((data, " = "));
               break;
             default:
-              infof(data, "%c", pointer[i]);
+              infof((data, "%c", pointer[i]));
               break;
             }
           }
@@ -763,7 +763,7 @@ static void printsub(struct Curl_easy *data,
         break;
       default:
         for(i = 2; i < length; i++)
-          infof(data, " %.2x", pointer[i]);
+          infof((data, " %.2x", pointer[i]));
         break;
       }
     }
@@ -1457,7 +1457,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
       if(WSAEnumNetworkEvents(sockfd, event_handle, &events) == SOCKET_ERROR) {
         err = SOCKERRNO;
         if(err != EINPROGRESS) {
-          infof(data, "WSAEnumNetworkEvents failed (%d)", err);
+          infof((data, "WSAEnumNetworkEvents failed (%d)", err));
           keepon = FALSE;
           result = CURLE_READ_ERROR;
         }
@@ -1515,7 +1515,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
 
   /* We called WSACreateEvent, so call WSACloseEvent */
   if(!WSACloseEvent(event_handle)) {
-    infof(data, "WSACloseEvent failed (%d)", SOCKERRNO);
+    infof((data, "WSACloseEvent failed (%d)", SOCKERRNO));
   }
 #else
   pfd[0].fd = sockfd;
@@ -1534,7 +1534,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
   }
 
   while(keepon) {
-    DEBUGF(infof(data, "telnet_do, poll %d fds", poll_cnt));
+    DEBUGF(infof((data, "telnet_do, poll %d fds", poll_cnt)));
     switch(Curl_poll(pfd, poll_cnt, interval_ms)) {
     case -1:                    /* error, stop reading */
       keepon = FALSE;
@@ -1558,7 +1558,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
            * in a clean way? Seems to be timing related, happens more
            * on slow debug build */
           if(data->state.os_errno == ECONNRESET) {
-            DEBUGF(infof(data, "telnet_do, unexpected ECONNRESET on recv"));
+            DEBUGF(infof((data, "telnet_do, unexpected ECONNRESET on recv")));
           }
           break;
         }

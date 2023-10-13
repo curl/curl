@@ -123,8 +123,8 @@ static void cf_test_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_test_ctx *ctx = cf->ctx;
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-  infof(data, "%04dms: cf[%s] destroyed",
-       (int)Curl_timediff(Curl_now(), current_tr->started), ctx->id);
+  infof((data, "%04dms: cf[%s] destroyed",
+       (int)Curl_timediff(Curl_now(), current_tr->started), ctx->id));
 #else
   (void)data;
 #endif
@@ -144,12 +144,12 @@ static CURLcode cf_test_connect(struct Curl_cfilter *cf,
   *done = FALSE;
   duration_ms = Curl_timediff(Curl_now(), ctx->started);
   if(duration_ms >= ctx->fail_delay_ms) {
-    infof(data, "%04dms: cf[%s] fail delay reached",
-         (int)duration_ms, ctx->id);
+    infof((data, "%04dms: cf[%s] fail delay reached",
+         (int)duration_ms, ctx->id));
     return CURLE_COULDNT_CONNECT;
   }
   if(duration_ms)
-    infof(data, "%04dms: cf[%s] continuing", (int)duration_ms, ctx->id);
+    infof((data, "%04dms: cf[%s] continuing", (int)duration_ms, ctx->id));
   Curl_expire(data, ctx->fail_delay_ms - duration_ms, EXPIRE_RUN_NOW);
   return CURLE_OK;
 }
@@ -213,7 +213,7 @@ static CURLcode cf_test_create(struct Curl_cfilter **pcf,
   if(ctx->stats->creations == 1)
     ctx->stats->first_created = created_at;
   ctx->stats->last_created = created_at;
-  infof(data, "%04dms: cf[%s] created", (int)created_at, ctx->id);
+  infof((data, "%04dms: cf[%s] created", (int)created_at, ctx->id));
 
   result = Curl_cf_create(&cf, &cft_test, ctx);
   if(result)

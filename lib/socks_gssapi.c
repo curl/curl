@@ -331,7 +331,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   user[gss_send_token.length] = '\0';
   gss_release_name(&gss_status, &gss_client_name);
   gss_release_buffer(&gss_status, &gss_send_token);
-  infof(data, "SOCKS5 server authenticated user %s with GSS-API.",user);
+  infof((data, "SOCKS5 server authenticated user %s with GSS-API.",user));
   free(user);
   user = NULL;
 
@@ -347,8 +347,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   else if(gss_ret_flags & GSS_C_INTEG_FLAG)
     gss_enc = 1;
 
-  infof(data, "SOCKS5 server supports GSS-API %s data protection.",
-        (gss_enc == 0)?"no":((gss_enc==1)?"integrity":"confidentiality"));
+  infof((data, "SOCKS5 server supports GSS-API %s data protection.",
+        (gss_enc == 0)?"no":((gss_enc==1)?"integrity":"confidentiality")));
   /* force for the moment to no data protection */
   gss_enc = 0;
   /*
@@ -522,9 +522,9 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
 
   (void)curlx_nonblock(sock, TRUE);
 
-  infof(data, "SOCKS5 access with%s protection granted.",
+  infof((data, "SOCKS5 access with%s protection granted.",
         (socksreq[0] == 0)?"out GSS-API data":
-        ((socksreq[0] == 1)?" GSS-API integrity":" GSS-API confidentiality"));
+        ((socksreq[0] == 1)?" GSS-API integrity":" GSS-API confidentiality")));
 
   conn->socks5_gssapi_enctype = socksreq[0];
   if(socksreq[0] == 0)

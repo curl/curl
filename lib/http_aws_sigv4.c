@@ -599,7 +599,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
     strncpy(service, hostname, len);
     service[len] = '\0';
 
-    infof(data, "aws_sigv4: picked service %s from host", service);
+    infof((data, "aws_sigv4: picked service %s from host", service));
 
     if(!region[0]) {
       const char *reg = hostdot + 1;
@@ -617,7 +617,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
       }
       strncpy(region, reg, len);
       region[len] = '\0';
-      infof(data, "aws_sigv4: picked region %s from host", region);
+      infof((data, "aws_sigv4: picked region %s from host", region));
     }
   }
 
@@ -702,7 +702,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   if(!canonical_request)
     goto fail;
 
-  DEBUGF(infof(data, "Canonical request: %s", canonical_request));
+  DEBUGF(infof((data, "Canonical request: %s", canonical_request)));
 
   /* provider 0 lowercase */
   Curl_strntolower(provider0, provider0, strlen(provider0));

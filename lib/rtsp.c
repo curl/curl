@@ -207,7 +207,7 @@ static CURLcode rtsp_done(struct Curl_easy *data,
     }
     if(data->set.rtspreq == RTSPREQ_RECEIVE &&
        (data->conn->proto.rtspc.rtp_channel == -1)) {
-      infof(data, "Got an RTP Receive with a CSeq of %ld", CSeq_recv);
+      infof((data, "Got an RTP Receive with a CSeq of %ld", CSeq_recv));
     }
   }
 
@@ -611,8 +611,8 @@ static CURLcode rtsp_filter_rtp(struct Curl_easy *data,
           if(strncmp(buf, "RTSP/", (blen < 5) ? blen : 5) == 0) {
             /* This could be the next response, no consume and return */
             if(*pconsumed) {
-              DEBUGF(infof(data, "RTP rtsp_filter_rtp[SKIP] RTSP/ prefix, "
-                           "skipping %zd bytes of junk", *pconsumed));
+              DEBUGF(infof((data, "RTP rtsp_filter_rtp[SKIP] RTSP/ prefix, "
+                           "skipping %zd bytes of junk", *pconsumed)));
             }
             rtspc->state = RTP_PARSE_SKIP;
             rtspc->in_header = TRUE;
@@ -647,8 +647,8 @@ static CURLcode rtsp_filter_rtp(struct Curl_easy *data,
         rtspc->state = RTP_PARSE_SKIP;
         if(in_body) {
           /* we do not consume this byte, it is BODY data */
-          DEBUGF(infof(data, "RTSP: invalid RTP channel %d in BODY, "
-                       "treating as BODY data", idx));
+          DEBUGF(infof((data, "RTSP: invalid RTP channel %d in BODY, "
+                       "treating as BODY data", idx)));
           if(*pconsumed == 0) {
             /* We did not consume the initial '$' in our buffer, but had
              * it from an earlier call. We cannot un-consume it and have
@@ -672,7 +672,7 @@ static CURLcode rtsp_filter_rtp(struct Curl_easy *data,
         else {
           /* not BODY, forget the junk '$'. Do not consume this byte,
            * it might be a start */
-          infof(data, "RTSP: invalid RTP channel %d, skipping", idx);
+          infof((data, "RTSP: invalid RTP channel %d, skipping", idx));
           Curl_dyn_free(&rtspc->buf);
         }
         break;
@@ -723,8 +723,8 @@ static CURLcode rtsp_filter_rtp(struct Curl_easy *data,
         buf += needed;
         blen -= needed;
         /* complete RTP message in buffer */
-        DEBUGF(infof(data, "RTP write channel %d rtp_len %zu",
-                     rtspc->rtp_channel, rtspc->rtp_len));
+        DEBUGF(infof((data, "RTP write channel %d rtp_len %zu",
+                     rtspc->rtp_channel, rtspc->rtp_len)));
         result = rtp_client_write(data, Curl_dyn_ptr(&rtspc->buf),
                                   rtspc->rtp_len);
         Curl_dyn_free(&rtspc->buf);
@@ -979,8 +979,8 @@ CURLcode rtsp_parse_transport(struct Curl_easy *data, char *transport)
           p = endp + 1;
           chan2 = strtol(p, &endp, 10);
           if(p == endp || chan2 < 0 || chan2 > 255) {
-            infof(data, "Unable to read the interleaved parameter from "
-                  "Transport header: [%s]", transport);
+            infof((data, "Unable to read the interleaved parameter from "
+                  "Transport header: [%s]", transport));
             chan2 = chan1;
           }
         }
@@ -991,8 +991,8 @@ CURLcode rtsp_parse_transport(struct Curl_easy *data, char *transport)
         }
       }
       else {
-        infof(data, "Unable to read the interleaved parameter from "
-              "Transport header: [%s]", transport);
+        infof((data, "Unable to read the interleaved parameter from "
+              "Transport header: [%s]", transport));
       }
       break;
     }

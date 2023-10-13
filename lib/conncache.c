@@ -243,9 +243,9 @@ CURLcode Curl_conncache_add_conn(struct Curl_easy *data)
   conn->connection_id = connc->next_connection_id++;
   connc->num_conn++;
 
-  DEBUGF(infof(data, "Added connection %ld. "
+  DEBUGF(infof((data, "Added connection %ld. "
                "The cache now contains %zu members",
-               conn->connection_id, connc->num_conn));
+               conn->connection_id, connc->num_conn)));
 
 unlock:
   CONNCACHE_UNLOCK(data);
@@ -278,8 +278,8 @@ void Curl_conncache_remove_conn(struct Curl_easy *data,
     conn->bundle = NULL; /* removed from it */
     if(connc) {
       connc->num_conn--;
-      DEBUGF(infof(data, "The cache now contains %zu members",
-                   connc->num_conn));
+      DEBUGF(infof((data, "The cache now contains %zu members",
+                   connc->num_conn)));
     }
     if(lock) {
       CONNCACHE_UNLOCK(data);
@@ -388,7 +388,7 @@ bool Curl_conncache_return_conn(struct Curl_easy *data,
   conn->lastused = Curl_now(); /* it was used up until now */
   if(maxconnects > 0 &&
      Curl_conncache_size(data) > maxconnects) {
-    infof(data, "Connection cache is full, closing the oldest one");
+    infof((data, "Connection cache is full, closing the oldest one"));
 
     conn_candidate = Curl_conncache_extract_oldest(data);
     if(conn_candidate) {
@@ -444,8 +444,8 @@ Curl_conncache_extract_bundle(struct Curl_easy *data,
     /* remove it to prevent another thread from nicking it */
     bundle_remove_conn(bundle, conn_candidate);
     data->state.conn_cache->num_conn--;
-    DEBUGF(infof(data, "The cache now contains %zu members",
-                 data->state.conn_cache->num_conn));
+    DEBUGF(infof((data, "The cache now contains %zu members",
+                 data->state.conn_cache->num_conn)));
   }
 
   return conn_candidate;
@@ -506,8 +506,8 @@ Curl_conncache_extract_oldest(struct Curl_easy *data)
     /* remove it to prevent another thread from nicking it */
     bundle_remove_conn(bundle_candidate, conn_candidate);
     connc->num_conn--;
-    DEBUGF(infof(data, "The cache now contains %zu members",
-                 connc->num_conn));
+    DEBUGF(infof((data, "The cache now contains %zu members",
+                 connc->num_conn)));
   }
   CONNCACHE_UNLOCK(data);
 

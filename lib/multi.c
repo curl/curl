@@ -447,9 +447,9 @@ struct Curl_multi *curl_multi_init(void)
 static void multi_warn_debug(struct Curl_multi *multi, struct Curl_easy *data)
 {
   if(!multi->warned) {
-    infof(data, "!!! WARNING !!!");
-    infof(data, "This is a debug build of libcurl, "
-          "do not use in production.");
+    infof((data, "!!! WARNING !!!"));
+    infof((data, "This is a debug build of libcurl, "
+          "do not use in production."));
     multi->warned = true;
   }
 }
@@ -651,12 +651,12 @@ static CURLcode multi_done(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
 
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
-  DEBUGF(infof(data, "multi_done[%s]: status: %d prem: %d done: %d",
+  DEBUGF(infof((data, "multi_done[%s]: status: %d prem: %d done: %d",
                multi_statename[data->mstate],
-               (int)status, (int)premature, data->state.done));
+               (int)status, (int)premature, data->state.done)));
 #else
-  DEBUGF(infof(data, "multi_done: status: %d prem: %d done: %d",
-               (int)status, (int)premature, data->state.done));
+  DEBUGF(infof((data, "multi_done: status: %d prem: %d done: %d",
+               (int)status, (int)premature, data->state.done)));
 #endif
 
   if(data->state.done)
@@ -711,9 +711,9 @@ static CURLcode multi_done(struct Curl_easy *data,
   if(CONN_INUSE(conn)) {
     /* Stop if still used. */
     CONNCACHE_UNLOCK(data);
-    DEBUGF(infof(data, "Connection still in use %zu, "
+    DEBUGF(infof((data, "Connection still in use %zu, "
                  "no more multi_done now!",
-                 conn->easyq.size));
+                 conn->easyq.size)));
     return CURLE_OK;
   }
 
@@ -752,12 +752,12 @@ static CURLcode multi_done(struct Curl_easy *data,
 #endif
      ) || conn->bits.close
        || (premature && !Curl_conn_is_multiplex(conn, FIRSTSOCKET))) {
-    DEBUGF(infof(data, "multi_done, not reusing connection=%"
+    DEBUGF(infof((data, "multi_done, not reusing connection=%"
                        CURL_FORMAT_CURL_OFF_T ", forbid=%d"
                        ", close=%d, premature=%d, conn_multiplex=%d",
                  conn->connection_id,
                  data->set.reuse_forbid, conn->bits.close, premature,
-                 Curl_conn_is_multiplex(conn, FIRSTSOCKET)));
+                 Curl_conn_is_multiplex(conn, FIRSTSOCKET))));
     connclose(conn, "disconnecting");
     Curl_conncache_remove_conn(data, conn, FALSE);
     CONNCACHE_UNLOCK(data);
@@ -784,7 +784,7 @@ static CURLcode multi_done(struct Curl_easy *data,
       /* remember the most recently used connection */
       data->state.lastconnect_id = connection_id;
       data->state.recent_conn_id = connection_id;
-      infof(data, "%s", buffer);
+      infof((data, "%s", buffer));
     }
     else
       data->state.lastconnect_id = -1;
@@ -1784,7 +1784,7 @@ static CURLcode readrewind(struct Curl_easy *data)
       err = (data->set.ioctl_func)(data, CURLIOCMD_RESTARTREAD,
                                    data->set.ioctl_client);
       Curl_set_in_callback(data, false);
-      infof(data, "the ioctl callback returned %d", (int)err);
+      infof((data, "the ioctl callback returned %d", (int)err));
 
       if(err) {
         failf(data, "ioctl callback returned error %d", (int)err);
@@ -1867,7 +1867,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     rc = CURLM_OK;
 
     if(multi_ischanged(multi, TRUE)) {
-      DEBUGF(infof(data, "multi changed, check CONNECT_PEND queue"));
+      DEBUGF(infof((data, "multi changed, check CONNECT_PEND queue")));
       process_pending_handles(multi); /* multiplexed */
     }
 
@@ -1940,7 +1940,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
       else if(data->state.previouslypending) {
         /* this transfer comes from the pending queue so try move another */
-        infof(data, "Transfer was pending, now try another");
+        infof((data, "Transfer was pending, now try another"));
         process_pending_handles(data->multi);
       }
 
@@ -1990,7 +1990,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         data->state.async.done = TRUE;
 #endif
         result = CURLE_OK;
-        infof(data, "Hostname '%s' was found in DNS cache", hostname);
+        infof((data, "Hostname '%s' was found in DNS cache", hostname));
       }
 
       if(!dns)
@@ -2430,7 +2430,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         CURLcode ret = Curl_retry_request(data, &newurl);
 
         if(!ret) {
-          infof(data, "Downgrades to HTTP/1.1");
+          infof((data, "Downgrades to HTTP/1.1"));
           streamclose(data->conn, "Disconnect HTTP/2 for HTTP/1");
           data->state.httpwant = CURL_HTTP_VERSION_1_1;
           /* clear the error message bit too as we ignore the one we got */
@@ -3567,7 +3567,7 @@ void Curl_expire(struct Curl_easy *data, timediff_t milli, expire_id id)
     rc = Curl_splayremove(multi->timetree, &data->state.timenode,
                           &multi->timetree);
     if(rc)
-      infof(data, "Internal error removing splay node = %d", rc);
+      infof((data, "Internal error removing splay node = %d", rc));
   }
 
   /* Indicate that we are in the splay tree and insert the new timer expiry
@@ -3614,7 +3614,7 @@ void Curl_expire_clear(struct Curl_easy *data)
     rc = Curl_splayremove(multi->timetree, &data->state.timenode,
                           &multi->timetree);
     if(rc)
-      infof(data, "Internal error clearing splay node = %d", rc);
+      infof((data, "Internal error clearing splay node = %d", rc));
 
     /* flush the timeout list too */
     while(list->size > 0) {
@@ -3622,7 +3622,7 @@ void Curl_expire_clear(struct Curl_easy *data)
     }
 
 #ifdef DEBUGBUILD
-    infof(data, "Expire cleared");
+    infof((data, "Expire cleared"));
 #endif
     nowp->tv_sec = 0;
     nowp->tv_usec = 0;

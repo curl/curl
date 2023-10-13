@@ -189,9 +189,9 @@ static int doh_done(struct Curl_easy *doh, CURLcode result)
   struct dohdata *dohp = data->req.doh;
   /* so one of the DoH request done for the 'data' transfer is now complete! */
   dohp->pending--;
-  infof(data, "a DoH request is completed, %u to go", dohp->pending);
+  infof((data, "a DoH request is completed, %u to go", dohp->pending));
   if(result)
-    infof(data, "DoH request %s", curl_easy_strerror(result));
+    infof((data, "DoH request %s", curl_easy_strerror(result)));
 
   if(!dohp->pending) {
     /* DoH completed */
@@ -742,13 +742,13 @@ static void showdoh(struct Curl_easy *data,
                     const struct dohentry *d)
 {
   int i;
-  infof(data, "TTL: %u seconds", d->ttl);
+  infof((data, "TTL: %u seconds", d->ttl));
   for(i = 0; i < d->numaddr; i++) {
     const struct dohaddr *a = &d->addr[i];
     if(a->type == DNS_TYPE_A) {
-      infof(data, "DoH A: %u.%u.%u.%u",
+      infof((data, "DoH A: %u.%u.%u.%u",
             a->ip.v4[0], a->ip.v4[1],
-            a->ip.v4[2], a->ip.v4[3]);
+            a->ip.v4[2], a->ip.v4[3]));
     }
     else if(a->type == DNS_TYPE_AAAA) {
       int j;
@@ -766,11 +766,11 @@ static void showdoh(struct Curl_easy *data,
         len -= l;
         ptr += l;
       }
-      infof(data, "%s", buffer);
+      infof((data, "%s", buffer));
     }
   }
   for(i = 0; i < d->numcname; i++) {
-    infof(data, "CNAME: %s", Curl_dyn_ptr(&d->cname[i]));
+    infof((data, "CNAME: %s", Curl_dyn_ptr(&d->cname[i])));
   }
 }
 #else
@@ -936,8 +936,8 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
                             &de);
       Curl_dyn_free(&p->serverdoh);
       if(rc[slot]) {
-        infof(data, "DoH: %s type %s for %s", doh_strerror(rc[slot]),
-              type2name(p->dnstype), dohp->host);
+        infof((data, "DoH: %s type %s for %s", doh_strerror(rc[slot]),
+              type2name(p->dnstype), dohp->host));
       }
     } /* next slot */
 
@@ -947,7 +947,7 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
       struct Curl_dns_entry *dns;
       struct Curl_addrinfo *ai;
 
-      infof(data, "DoH Host name: %s", dohp->host);
+      infof((data, "DoH Host name: %s", dohp->host));
       showdoh(data, &de);
 
       ai = doh2ai(&de, dohp->host, dohp->port);
