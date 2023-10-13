@@ -51,6 +51,7 @@ freebsd_task:
     CIRRUS_CLONE_DEPTH: 10
     CRYPTOGRAPHY_DONT_BUILD_RUST: 1
     MAKEFLAGS: -j 3
+    PARALLEL_TESTS: -j7
 
   pkginstall_script:
     - pkg update -f
@@ -80,6 +81,6 @@ freebsd_task:
     # The OpenSSH server instance for the testsuite cannot be started on FreeBSD,
     # therefore the SFTP and SCP tests are disabled right away from the beginning.
     #
-    - sudo -u nobody make V=1 TFLAGS="-n !SFTP !SCP" test-ci
+    - sudo -u nobody make V=1 TFLAGS="-n $PARALLEL_TESTS !SFTP !SCP" test-ci
   install_script:
     - make V=1 install

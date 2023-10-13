@@ -131,6 +131,7 @@ environment:
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
       DISABLED_TESTS: '!1086 !1139 !1451 !1501'
+      PARALLEL_TESTS: '-j0'
       ADD_PATH: 'C:\msys64\mingw64\bin;C:\msys64\usr\bin'
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
@@ -145,6 +146,7 @@ environment:
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
       DISABLED_TESTS: '!1086 !1139 !1451 !1501'
+      PARALLEL_TESTS: '-j0'
       ADD_PATH: 'C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin;C:\msys64\usr\bin'
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
@@ -158,6 +160,7 @@ environment:
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
       DISABLED_TESTS: '!1086 !1139 !1451 !1501'
+      PARALLEL_TESTS: '-j0'
       ADD_PATH: 'C:\msys64\mingw64\bin;C:\msys64\usr\bin'
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
@@ -172,6 +175,7 @@ environment:
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
       DISABLED_TESTS: '!1086 !1139 !1451 !1501'
+      PARALLEL_TESTS: '-j0'
       ADD_PATH: 'C:\mingw-w64\i686-6.3.0-posix-dwarf-rt_v5-rev1\mingw32\bin;C:\msys64\usr\bin'
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
@@ -245,6 +249,7 @@ environment:
       BUILD_SYSTEM: autotools
       TESTING: 'ON'
       DISABLED_TESTS: '!19 !1233'
+      PARALLEL_TESTS: '-j0'
       ADD_PATH: 'C:\msys64\usr\bin'
       CONFIG_ARGS: '--enable-debug --enable-werror --disable-threaded-resolver --disable-proxy --without-ssl --enable-websockets'
     - job_name: 'autotools, msys2, Debug, x86_64, no SSL'
@@ -252,6 +257,7 @@ environment:
       BUILD_SYSTEM: autotools
       TESTING: 'ON'
       DISABLED_TESTS: '!19 !504 !704 !705 !1233'
+      PARALLEL_TESTS: '-j0'
       ADD_PATH: 'C:\msys64\usr\bin'
       CONFIG_ARGS: '--enable-debug --enable-werror --disable-threaded-resolver --without-ssl --enable-websockets'
     - job_name: 'autotools, msys2, Release, x86_64, no SSL'
@@ -259,6 +265,7 @@ environment:
       BUILD_SYSTEM: autotools
       TESTING: 'ON'
       DISABLED_TESTS: '!19 !504 !704 !705 !1233'
+      PARALLEL_TESTS: '-j0'
       ADD_PATH: 'C:\msys64\usr\bin'
       CONFIG_ARGS: '--enable-warnings --enable-werror --without-ssl --enable-websockets'
     # autotools-based Cygwin build
@@ -267,6 +274,7 @@ environment:
       BUILD_SYSTEM: autotools
       TESTING: 'ON'
       DISABLED_TESTS: ''
+      PARALLEL_TESTS: '-j0'
       ADD_PATH: 'C:\cygwin64\bin'
       CONFIG_ARGS: '--enable-debug --enable-werror --disable-threaded-resolver --without-ssl --enable-websockets'
       POSIX_PATH_PREFIX: '/cygdrive'
@@ -397,14 +405,14 @@ test_script:
       }
       if($env:TESTING -eq 'ON') {
         if($env:BUILD_SYSTEM -eq 'CMake') {
-          $env:TFLAGS="$acurl $env:DISABLED_TESTS"
+          $env:TFLAGS="$acurl $env:DISABLED_TESTS $env:PARALLEL_TESTS"
           cmake --build . --config $env:PRJ_CFG --target test-ci
         }
         elseif($env:BUILD_SYSTEM -eq 'autotools') {
-          & bash -e -c "cd $env:POSIX_PATH_PREFIX/c/projects/curl && make V=1 TFLAGS='$acurl $env:DISABLED_TESTS' test-ci"
+          & bash -e -c "cd $env:POSIX_PATH_PREFIX/c/projects/curl && make V=1 TFLAGS='$acurl $env:DISABLED_TESTS $env:PARALLEL_TESTS' test-ci"
         }
         else {
-          & bash -e -c "cd $env:POSIX_PATH_PREFIX/c/projects/curl/tests && ./runtests.pl -a -p !flaky -r -rm $acurl $env:DISABLED_TESTS"
+          & bash -e -c "cd $env:POSIX_PATH_PREFIX/c/projects/curl/tests && ./runtests.pl -a -p !flaky -r -rm $acurl $env:DISABLED_TESTS $env:PARALLEL_TESTS"
         }
       }
 
