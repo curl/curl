@@ -273,9 +273,9 @@ static CURLcode ws_dec_pass_payload(struct ws_decoder *dec,
     Curl_bufq_skip(inraw, (size_t)nwritten);
     dec->payload_offset += (curl_off_t)nwritten;
     remain = dec->payload_len - dec->payload_offset;
-    /* infof(data, "WS-DEC: passed  %zd bytes payload, %"
-                CURL_FORMAT_CURL_OFF_T " remain",
-          nwritten, remain); */
+    /* infof((data, "WS-DEC: passed  %zd bytes payload, %"
+             CURL_FORMAT_CURL_OFF_T " remain",
+             nwritten, remain)); */
   }
 
   return remain? CURLE_AGAIN : CURLE_OK;
@@ -652,8 +652,8 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
                      sizeof(ws->enc.mask));
   if(result)
     return result;
-  infof(data, "Received 101, switch to WebSocket; mask %02x%02x%02x%02x",
-        ws->enc.mask[0], ws->enc.mask[1], ws->enc.mask[2], ws->enc.mask[3]);
+  infof((data, "Received 101, switch to WebSocket; mask %02x%02x%02x%02x",
+        ws->enc.mask[0], ws->enc.mask[1], ws->enc.mask[2], ws->enc.mask[3]));
 
   if(data->set.connect_only) {
     ssize_t nwritten;
@@ -924,9 +924,9 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
               ctx.payload_len, ctx.bufidx);
   *metap = &ws->frame;
   *nread = ws->frame.len;
-  /* infof(data, "curl_ws_recv(len=%zu) -> %zu bytes (frame at %"
-              CURL_FORMAT_CURL_OFF_T ", %" CURL_FORMAT_CURL_OFF_T " left)",
-        buflen, *nread, ws->frame.offset, ws->frame.bytesleft); */
+  /* infof((data, "curl_ws_recv(len=%zu) -> %zu bytes (frame at %"
+           CURL_FORMAT_CURL_OFF_T ", %" CURL_FORMAT_CURL_OFF_T " left)",
+           buflen, *nread, ws->frame.offset, ws->frame.bytesleft)); */
   return CURLE_OK;
 }
 

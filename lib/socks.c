@@ -191,10 +191,10 @@ static void socksstate(struct socks_state *sx, struct Curl_easy *data,
   sx->state = state;
 
 #ifdef DEBUG_AND_VERBOSE
-  infof(data,
+  infof((data,
         "SXSTATE: %s => %s; line %d",
         socks_statename[oldstate], socks_statename[sx->state],
-        lineno);
+        lineno));
 #endif
 }
 

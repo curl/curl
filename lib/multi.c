@@ -178,10 +178,10 @@ static void mstate(struct Curl_easy *data, CURLMstate state
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   if(data->mstate >= MSTATE_PENDING &&
      data->mstate < MSTATE_COMPLETED) {
-    infof(data,
+    infof((data,
           "STATE: %s => %s handle %p; line %d",
           multi_statename[oldstate], multi_statename[data->mstate],
-          (void *)data, lineno);
+          (void *)data, lineno));
   }
 #endif
 

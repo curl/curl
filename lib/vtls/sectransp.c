@@ -1828,8 +1828,8 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
       }
       err = SSLSetALPNProtocols(backend->ssl_ctx, alpnArr);
       if(err != noErr)
-        infof(data, "WARNING: failed to set ALPN protocols; OSStatus %d",
-              err);
+        infof((data, "WARNING: failed to set ALPN protocols; OSStatus %d",
+              err));
       CFRelease(alpnArr);
       Curl_alpn_to_proto_str(&proto, connssl->alpn);
       infof((data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data));
