@@ -130,7 +130,7 @@ void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
                        const char *fmt, ...)
 {
   DEBUGASSERT(cf);
-  if(data && Curl_trc_cf_is_verbose(cf, data)) {
+  if(Curl_trc_cf_is_verbose(cf, data)) {
     va_list ap;
     int len;
     char buffer[MAXINFO + 2];
