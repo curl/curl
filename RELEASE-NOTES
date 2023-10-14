@@ -4,16 +4,29 @@ curl and libcurl 8.4.1
  Command line options:         258
  curl_easy_setopt() options:   303
  Public functions in libcurl:  93
- Contributors:                 2995
+ Contributors:                 3001
 
 This release includes the following changes:
 
 
 This release includes the following bugfixes:
 
- o cmake: fix `HAVE_H_ERRNO_ASSIGNABLE` detection [2]
  o build: add `src/.checksrc` to source tarball [1]
- --- new entries are listed above this ---
+ o CI: add autotools, out-of-tree, debug build to distro check job [14]
+ o CI: ignore test 286 on Appveyor gcc 9 build [6]
+ o cmake: fix `HAVE_H_ERRNO_ASSIGNABLE` detection [2]
+ o cmake: fix CURL_DISABLE_GETOPTIONS [12]
+ o docs: use SOURCE_DATE_EPOCH for generated manpages [16]
+ o easy_lock: add a pthread_mutex_t fallback [13]
+ o http2: safer invocation of populate_binsettings [8]
+ o http: avoid Expect: 100-continue if Upgrade: is used [15]
+ o lib: fix gcc warning in printf call [7]
+ o openssl: avoid BN_num_bits() NULL pointer derefs [9]
+ o quic: manage connection idle timeouts [5]
+ o test613: stop showing an error on missing output file
+ o tool_getparam: limit --rate to be smaller than number of ms [3]
+ o tool_urlglob: make multiply() bail out on negative values [11]
+ o wolfssl: require WOLFSSL_SYS_CA_CERTS for loading system CA [10]
 
 This release includes the following known bugs:
 
@@ -28,10 +41,26 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, Kartatz on Github, Romain Geissler, Viktor Szakats
-  (4 contributors)
+  Alex Klyubin, calvin2021y on github, Dan Fandrich, Daniel Jeliński,
+  Daniel Stenberg, icy17 on github, Jan Alexander Steffens, Jeroen Ooms,
+  Kartatz on Github, Loïc Yhuel, Ray Satiro, Romain Geissler, Sohom Datta,
+  Stefan Eissing, Torben Dury, Viktor Szakats
+  (16 contributors)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.se/bug/?i=12084
  [2] = https://curl.se/bug/?i=12093
+ [3] = https://curl.se/bug/?i=12116
+ [5] = https://curl.se/bug/?i=12064
+ [6] = https://curl.se/bug/?i=12040
+ [7] = https://curl.se/bug/?i=12082
+ [8] = https://curl.se/bug/?i=12101
+ [9] = https://curl.se/bug/?i=12099
+ [10] = https://curl.se/bug/?i=12108
+ [11] = https://curl.se/bug/?i=12102
+ [12] = https://curl.se/bug/?i=12091
+ [13] = https://curl.se/bug/?i=12090
+ [14] = https://curl.se/bug/?i=12088
+ [15] = https://curl.se/bug/?i=12022
+ [16] = https://curl.se/bug/?i=12092
