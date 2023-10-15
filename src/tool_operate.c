@@ -865,20 +865,20 @@ clean:
   switch(result) {
   case CURLE_URL_MALFORMAT:
     helpf(tool_stderr, "malformed URL. Visit https://curl.se/"
-          "docs/ipfs.html#Gateway-file-and-"
+          "docs/ipfs.html#gateway-file-and-"
           "environment-variable for more "
           "information");
     break;
   case CURLE_FILE_COULDNT_READ_FILE:
     helpf(tool_stderr, "IPFS automatic gateway detection "
           "failure. Visit https://curl.se/docs/"
-          "ipfs.html#Malformed-gateway-URL for "
+          "ipfs.html#malformed-gateway-url for "
           "more information");
     break;
   case CURLE_BAD_FUNCTION_ARGUMENT:
     helpf(tool_stderr, "--ipfs-gateway argument results in "
           "malformed URL. Visit https://curl.se/"
-          "docs/ipfs.html#Malformed-gateway-URL "
+          "docs/ipfs.html#malformed-gateway-url "
           "for more information");
     break;
   default:
