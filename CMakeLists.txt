@@ -1548,8 +1548,9 @@ _add_if("HTTPS-proxy"   SSL_ENABLED AND (USE_OPENSSL OR USE_GNUTLS
                         OR USE_SCHANNEL OR USE_RUSTLS OR USE_BEARSSL OR
                         USE_MBEDTLS OR USE_SECTRANSP))
 _add_if("unicode"       ENABLE_UNICODE)
-_add_if("threadsafe"    HAVE_ATOMIC OR (WIN32 AND
-                        HAVE_WIN32_WINNT GREATER_EQUAL 0x600))
+_add_if("threadsafe"    HAVE_ATOMIC OR
+                        (USE_THREADS_POSIX AND HAVE_PTHREAD_H) OR
+                        (WIN32 AND HAVE_WIN32_WINNT GREATER_EQUAL 0x600))
 _add_if("PSL"           USE_LIBPSL)
 string(REPLACE ";" " " SUPPORT_FEATURES "${_items}")
 message(STATUS "Enabled features: ${SUPPORT_FEATURES}")
