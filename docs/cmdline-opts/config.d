@@ -58,7 +58,11 @@ config file is checked for in the following places in this order:
 
 1) **"$CURL_HOME/.curlrc"**
 
-2) **"$XDG_CONFIG_HOME/curlrc"** (Added in 7.73.0)
+2a) **"$XDG_CONFIG_HOME/curlrc"** (Added in 7.73.0) (see notes)
+
+2b) **"$CURL_HOME/.config/curlrc"** (Only if XDG_CONFIG_HOME is not set)
+
+2c) **"$HOME/.config/curlrc"** (Only if XDG_CONFIG_HOME is not set)
 
 3) **"$HOME/.curlrc"**
 
@@ -70,8 +74,14 @@ config file is checked for in the following places in this order:
 
 7) Non-Windows: use getpwuid to find the home directory
 
-8) On Windows, if it finds no *.curlrc* file in the sequence described above, it
-checks for one in the same dir the curl executable is placed.
+8) On Windows, if it finds no *.curlrc* file in the sequence described above,
+it checks for one in the same dir the curl executable is placed.
 
-On Windows two filenames are checked per location: *.curlrc* and *_curlrc*,
-preferring the former. Older versions on Windows checked for *_curlrc* only.
+For those entries above where curlrc does not have the leading dot, if *curlrc*
+is not found then the location is also checked for *.curlrc*.
+
+Additionally, on Windows if *.curlrc* is not found then the location is also
+checked for *_curlrc*. Older versions on Windows checked for *_curlrc* only.
+
+Prior to curl 8.5.0, location #2 (XDG home and its fallbacks) did not check for
+*curlrc*, instead the first check was for *.curlrc* with the leading dot.

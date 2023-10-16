@@ -2007,7 +2007,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
         if((use_proto == proto_scp || use_proto == proto_sftp) &&
            !config->insecure_ok) {
-          char *known = findfile(".ssh/known_hosts", FALSE);
+          char *known = findfile(".ssh/known_hosts");
           if(known) {
             /* new in curl 7.19.6 */
             result = res_setopt_str(curl, CURLOPT_SSH_KNOWNHOSTS, known);

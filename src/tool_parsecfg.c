@@ -88,8 +88,9 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
   char *pathalloc = NULL;
 
   if(!filename) {
-    /* NULL means load .curlrc from homedir! */
-    char *curlrc = findfile(".curlrc", CURLRC_DOTSCORE);
+    /* NULL means load .curlrc from homedir.
+       On Windows a findfile check for .curlrc also checks for _curlrc */
+    char *curlrc = findfile(".curlrc");
     if(curlrc) {
       file = fopen(curlrc, FOPEN_READTEXT);
       if(!file) {
