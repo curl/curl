@@ -698,9 +698,12 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
 #ifdef CURLRES_IPV6
   if((data->conn->ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data)) {
     /* The stack seems to be IPv6-enabled */
+#ifndef WIN32
+    /* getaddrinfo on Windows cannot do PF_INET6-only only resolves */
     if(data->conn->ip_version == CURL_IPRESOLVE_V6)
       pf = PF_INET6;
     else
+#endif
       pf = PF_UNSPEC;
   }
 #endif /* CURLRES_IPV6 */
