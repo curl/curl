@@ -196,7 +196,7 @@ void destroy_thread_sync_data(struct thread_sync_data *tsd)
    * the other end (for reading) is always closed in the parent thread.
    */
   if(tsd->sock_pair[1] != CURL_SOCKET_BAD) {
-    sclose(tsd->sock_pair[1]);
+    wakeup_close(tsd->sock_pair[1]);
   }
 #endif
   memset(tsd, 0, sizeof(*tsd));
@@ -233,8 +233,8 @@ int init_thread_sync_data(struct thread_data *td,
   Curl_mutex_init(tsd->mtx);
 
 #ifndef CURL_DISABLE_SOCKETPAIR
-  /* create socket pair, avoid AF_LOCAL since it doesn't build on Solaris */
-  if(Curl_socketpair(AF_UNIX, SOCK_STREAM, 0, &tsd->sock_pair[0]) < 0) {
+  /* create socket pair or pipe */
+  if(wakeup_create(&tsd->sock_pair[0]) < 0) {
     tsd->sock_pair[0] = CURL_SOCKET_BAD;
     tsd->sock_pair[1] = CURL_SOCKET_BAD;
     goto err_exit;
@@ -254,7 +254,7 @@ int init_thread_sync_data(struct thread_data *td,
 err_exit:
 #ifndef CURL_DISABLE_SOCKETPAIR
   if(tsd->sock_pair[0] != CURL_SOCKET_BAD) {
-    sclose(tsd->sock_pair[0]);
+    wakeup_close(tsd->sock_pair[0]);
     tsd->sock_pair[0] = CURL_SOCKET_BAD;
   }
 #endif
@@ -320,7 +320,7 @@ static unsigned int CURL_STDCALL getaddrinfo_thread(void *arg)
     if(tsd->sock_pair[1] != CURL_SOCKET_BAD) {
       /* DNS has been resolved, signal client task */
       buf[0] = 1;
-      if(swrite(tsd->sock_pair[1],  buf, sizeof(buf)) < 0) {
+      if(wakeup_write(tsd->sock_pair[1],  buf, sizeof(buf)) < 0) {
         /* update sock_erro to errno */
         tsd->sock_error = SOCKERRNO;
       }
