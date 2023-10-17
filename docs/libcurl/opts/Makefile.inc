@@ -113,6 +113,7 @@ man_MANS =                                      \
   CURLMOPT_SOCKETFUNCTION.3                     \
   CURLMOPT_TIMERDATA.3                          \
   CURLMOPT_TIMERFUNCTION.3                      \
+  CURLMOPT_VERBOSE.3                            \
   CURLOPT_ABSTRACT_UNIX_SOCKET.3                \
   CURLOPT_ACCEPT_ENCODING.3                     \
   CURLOPT_ACCEPTTIMEOUT_MS.3                    \
@@ -417,8 +418,11 @@ man_MANS =                                      \
   CURLOPT_XFERINFODATA.3                        \
   CURLOPT_XFERINFOFUNCTION.3                    \
   CURLOPT_XOAUTH2_BEARER.3                      \
+  CURLSHOPT_DEBUGFUNCTION.3                     \
+  CURLSHOPT_DEBUGDATA.3                         \
   CURLSHOPT_LOCKFUNC.3                          \
   CURLSHOPT_SHARE.3                             \
   CURLSHOPT_UNLOCKFUNC.3                        \
   CURLSHOPT_UNSHARE.3                           \
-  CURLSHOPT_USERDATA.3
+  CURLSHOPT_USERDATA.3                          \
+  CURLSHOPT_VERBOSE.3
