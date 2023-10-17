@@ -19,6 +19,6 @@ Experimental support in curl means:
 ## Experimental features right now
 
  - The Hyper HTTP backend
- - HTTP/3 support and options
+ - HTTP/3 support (using the quiche or msh3 backends)
  - The rustls backend
  - WebSocket
