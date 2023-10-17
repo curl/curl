@@ -201,7 +201,7 @@ if(NOT DEFINED HAVE_GETADDRINFO_THREADSAFE)
   set(_source_epilogue "${_save_epilogue}")
 endif()
 
-if(NOT DEFINED HAVE_CLOCK_GETTIME_MONOTONIC_RAW)
+if(NOT WIN32 AND NOT DEFINED HAVE_CLOCK_GETTIME_MONOTONIC_RAW)
   set(_save_epilogue "${_source_epilogue}")
   set(_source_epilogue "#undef inline")
 
