@@ -1369,8 +1369,10 @@ if(NEED_REENTRANT)
   endforeach()
 endif()
 
-# Check clock_gettime(CLOCK_MONOTONIC, x) support
-curl_internal_test(HAVE_CLOCK_GETTIME_MONOTONIC)
+if(NOT WIN32)
+  # Check clock_gettime(CLOCK_MONOTONIC, x) support
+  curl_internal_test(HAVE_CLOCK_GETTIME_MONOTONIC)
+endif()
 
 # Check compiler support of __builtin_available()
 curl_internal_test(HAVE_BUILTIN_AVAILABLE)
