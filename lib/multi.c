@@ -55,14 +55,14 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#ifdef __APPLE__
+#ifdef HAVE_PIPE
 
 #define wakeup_write  write
 #define wakeup_read   read
 #define wakeup_close  close
 #define wakeup_create pipe
 
-#else /* __APPLE__ */
+#else /* HAVE_PIPE */
 
 #define wakeup_write     swrite
 #define wakeup_read      sread
