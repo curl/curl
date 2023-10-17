@@ -56,7 +56,7 @@ class TestTracing:
         ])
         r.check_response(http_status=200)
         for line in  r.trace_lines:
-            m = re.match(r'^\[0-[0x]] .+', line)
+            m = re.match(r'^\[[0x]-[0x]] .+', line)
             if m is None:
                 assert False, f'no match: {line}'
 
@@ -69,7 +69,7 @@ class TestTracing:
         ])
         r.check_response(http_status=200)
         for line in  r.trace_lines:
-            m = re.match(r'^([0-9:.]+) \[0-[0x]] .+', line)
+            m = re.match(r'^([0-9:.]+) \[[0x]-[0x]] .+', line)
             if m is None:
                 assert False, f'no match: {line}'
 
@@ -83,7 +83,7 @@ class TestTracing:
         r.check_response(http_status=200)
         found_tcp = False
         for line in  r.trace_lines:
-            m = re.match(r'^([0-9:.]+) \[0-[0x]] .+', line)
+            m = re.match(r'^([0-9:.]+) \[[0x]-[0x]] .+', line)
             if m is None:
                 assert False, f'no match: {line}'
             m = re.match(r'^([0-9:.]+) \[0-[0x]] . \[TCP].+', line)
@@ -102,7 +102,7 @@ class TestTracing:
         r.check_response(http_status=200)
         found_tcp = False
         for line in  r.trace_lines:
-            m = re.match(r'^\[0-[0x]] .+', line)
+            m = re.match(r'^\[[0x]-[0x]] .+', line)
             if m is None:
                 assert False, f'no match: {line}'
             m = re.match(r'^\[0-[0x]] . \[TCP].+', line)

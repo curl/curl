@@ -83,6 +83,7 @@ static void log_line_start(FILE *log, const char *timebuf,
     fputs(s_infotype[type], log);
 }
 
+#define TRC_IDS_FORMAT_IDS_0  "[x-x] "
 #define TRC_IDS_FORMAT_IDS_1  "[%" CURL_FORMAT_CURL_OFF_T "-x] "
 #define TRC_IDS_FORMAT_IDS_2  "[%" CURL_FORMAT_CURL_OFF_T "-%" \
                                    CURL_FORMAT_CURL_OFF_T "] "
@@ -127,8 +128,9 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
       msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_1, xfer_id);
     }
   }
-  else
-    idsbuf[0] = 0;
+  else {
+    strcpy(idsbuf, TRC_IDS_FORMAT_IDS_0);
+  }
 
   if(!config->trace_stream) {
     /* open for append */
