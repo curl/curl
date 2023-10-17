@@ -40,7 +40,7 @@
 #define wakeup_close     sclose
 #define wakeup_create(p) Curl_socketpair(AF_UNIX, SOCK_STREAM, 0, p)
 
-#endif /* __HAVE_PIPE__ */
+#endif /* HAVE_PIPE */
 
 #ifndef HAVE_SOCKETPAIR
 #include <curl/curl.h>
