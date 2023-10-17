@@ -150,6 +150,8 @@ struct Curl_multi {
   void *timer_userp;
   struct curltime timer_lastcall; /* the fixed time for the timeout for the
                                     previous callback */
+  curl_debug_callback fdebug;   /* function that write informational data */
+  void *debugdata;              /* the data that will be passed to fdebug */
   unsigned int max_concurrent_streams;
 
 #ifdef USE_WINSOCK
@@ -175,6 +177,7 @@ struct Curl_multi {
 #ifdef DEBUGBUILD
   BIT(warned);                 /* true after user warned of DEBUGBUILD */
 #endif
+  BIT(verbose);                /* true when tracing is enabled */
 };
 
 #endif /* HEADER_CURL_MULTIHANDLE_H */

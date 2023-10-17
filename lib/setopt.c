@@ -2324,6 +2324,12 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       data->share = set;
     if(data->share) {
 
+      if(!data->set.fdebug && !data->set.debugdata) {
+        data->set.fdebug = data->share->fdebug;
+        data->set.debugdata = data->share->debugdata;
+        data->set.verbose |= data->share->verbose;
+      }
+
       Curl_share_lock(data, CURL_LOCK_DATA_SHARE, CURL_LOCK_ACCESS_SINGLE);
 
       data->share->dirty++;

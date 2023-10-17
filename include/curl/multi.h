@@ -399,6 +399,15 @@ typedef enum {
   /* maximum number of concurrent streams to support on a connection */
   CURLOPT(CURLMOPT_MAX_CONCURRENT_STREAMS, CURLOPTTYPE_LONG, 16),
 
+  /* set the debug function */
+  CURLOPT(CURLMOPT_DEBUGFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 17),
+
+  /* set the debug function */
+  CURLOPT(CURLMOPT_VERBOSE, CURLOPTTYPE_LONG, 18),
+
+  /* set the data for the debug function */
+  CURLOPT(CURLMOPT_DEBUGDATA, CURLOPTTYPE_CBPOINT, 18),
+
   CURLMOPT_LASTENTRY /* the last unused */
 } CURLMoption;
 

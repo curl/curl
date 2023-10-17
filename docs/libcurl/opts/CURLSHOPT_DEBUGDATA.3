@@ -21,48 +21,51 @@
 .\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
-.TH curl_share_setopt 3 "8 Aug 2003" "libcurl" "libcurl"
+.\"
+.TH CURLSHOPT_DEBUGDATA 3 "17 Oct 2023" libcurl libcurl
 .SH NAME
-curl_share_setopt - Set options for a shared object
+CURLSHOPT_DEBUGDATA \- pointer passed to the debug callback
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
 
-CURLSHcode curl_share_setopt(CURLSH *share, CURLSHoption option, parameter);
+CURLSHcode curl_share_setopt(CURLSH *share, CURLSHOPT_DEBUGDATA,
+                             void *pointer);
 .fi
 .SH DESCRIPTION
-Set the \fIoption\fP to \fIparameter\fP for the given \fIshare\fP.
-.SH OPTIONS
-.IP CURLSHOPT_LOCKFUNC
-See \fICURLSHOPT_LOCKFUNC(3)\fP.
-.IP CURLSHOPT_UNLOCKFUNC
-See \fICURLSHOPT_UNLOCKFUNC(3)\fP.
-.IP CURLSHOPT_SHARE
-See \fICURLSHOPT_SHARE(3)\fP.
-.IP CURLSHOPT_UNSHARE
-See \fICURLSHOPT_UNSHARE(3)\fP.
-.IP CURLSHOPT_USERDATA
-See \fICURLSHOPT_USERDATA(3)\fP.
-.IP CURLSHOPT_DEBUGFUNCTION
-See \fICURLSHOPT_DEBUGFUNCTION(3)\fP.
-.IP CURLSHOPT_DEBUGDATA
-See \fICURLSHOPT_DEBUGDATA(3)\fP.
-.IP CURLSHOPT_VERBOSE
-See \fICURLSHOPT_VERBOSE(3)\fP.
+Pass a \fIpointer\fP to whatever you want passed in to your
+\fICURLSHOPT_DEBUGFUNCTION(3)\fP in the last void * argument. This pointer is
+not used by libcurl, it is only passed to the callback.
+
+\fICURLSHOPT_DEBUGFUNCTION(3)\fP and \fICURLSHOPT_DEBUGDATA\fP can be used
+as defaults for all easy handles that use the same share. They are also
+used for internal handles, for examples when closing cached connections.
+They take effect only for easy handles when this share is set for them
+using \fICURLOPT_SHARE(3)\fP.
+
+Values underly the same restrictions and use patterns as defined for
+\fICURLOPT_DEBUGFUNCTION(3)\fP and \fICURLOPT_DEBUGDATA(3)\fP.
+.SH DEFAULT
+NULL
+.SH PROTOCOLS
+All
 .SH EXAMPLE
 .nf
-  CURLSHcode sh;
+main()
+{
+  struct data my_tracedata;
+
   share = curl_share_init();
-  sh = curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
-  if(sh)
-    printf("Error: %s\\n", curl_share_strerror(sh));
+  curl_share_setopt(share, CURLSHOPT_DEBUGFUNCTION, my_trace);
+  curl_share_setopt(share, CURLSHOPT_DEBUGDATA, &my_tracedata);
+}
 .fi
 .SH AVAILABILITY
-Added in 7.10
+Always
 .SH RETURN VALUE
-CURLSHE_OK (zero) means that the option was set properly, non-zero means an
-error occurred as \fI<curl/curl.h>\fP defines. See the \fIlibcurl-errors(3)\fP
-man page for the full list with descriptions.
+Returns CURLE_OK
 .SH "SEE ALSO"
-.BR curl_share_cleanup (3),
-.BR curl_share_init (3)
+.BR CURLMOPT_DEBUGFUNCTION (3),
+.BR CURLOPT_DEBUGDATA (3),
+.BR CURLOPT_DEBUGFUNCTION (3),
+.BR CURLOPT_STDERR (3)

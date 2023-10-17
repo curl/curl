@@ -57,6 +57,7 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
   int type;
   curl_lock_function lockfunc;
   curl_unlock_function unlockfunc;
+  curl_debug_callback debugfunc;
   void *ptr;
   CURLSHcode res = CURLSHE_OK;
 
@@ -197,6 +198,21 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
     share->clientdata = ptr;
     break;
 
+  case CURLSHOPT_DEBUGFUNCTION:
+    debugfunc = va_arg(param, curl_debug_callback);
+    share->fdebug = debugfunc;
+    break;
+
+  case CURLSHOPT_DEBUGDATA:
+    ptr = va_arg(param, void *);
+    share->debugdata = ptr;
+    break;
+
+  case CURLSHOPT_VERBOSE: {
+    long flag = va_arg(param, long);
+    share->verbose = (flag != 0);
+    break;
+  }
   default:
     res = CURLSHE_BAD_OPTION;
     break;
@@ -223,7 +239,7 @@ curl_share_cleanup(struct Curl_share *share)
     return CURLSHE_IN_USE;
   }
 
-  Curl_conncache_close_all_connections(&share->conn_cache);
+  Curl_conncache_close_all_connections(&share->conn_cache, NULL, share);
   Curl_conncache_destroy(&share->conn_cache);
   Curl_hash_destroy(&share->hostcache);
 

@@ -514,7 +514,9 @@ Curl_conncache_extract_oldest(struct Curl_easy *data)
   return conn_candidate;
 }
 
-void Curl_conncache_close_all_connections(struct conncache *connc)
+void Curl_conncache_close_all_connections(struct conncache *connc,
+                                          struct Curl_multi *multi,
+                                          struct Curl_share *share)
 {
   struct connectdata *conn;
   char buffer[READBUFFER_MIN + 1];
@@ -523,7 +525,16 @@ void Curl_conncache_close_all_connections(struct conncache *connc)
     return;
   connc->closure_handle->state.buffer = buffer;
   connc->closure_handle->set.buffer_size = READBUFFER_MIN;
-
+  if(multi) {
+    connc->closure_handle->set.debugdata = multi->debugdata;
+    connc->closure_handle->set.fdebug = multi->fdebug;
+    connc->closure_handle->set.verbose = multi->verbose;
+  }
+  else if(share) {
+    connc->closure_handle->set.debugdata = share->debugdata;
+    connc->closure_handle->set.fdebug = share->fdebug;
+    connc->closure_handle->set.verbose = share->verbose;
+  }
   conn = conncache_find_first_connection(connc);
   while(conn) {
     sigpipe_ignore(connc->closure_handle, &pipe_st);

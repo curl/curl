@@ -93,8 +93,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
                   char *data, size_t size,
                   void *userdata)
 {
-  struct OperationConfig *operation = userdata;
-  struct GlobalConfig *config = operation->global;
+  struct GlobalConfig *config = userdata;
   FILE *output = tool_stderr;
   const char *text;
   struct timeval tv;

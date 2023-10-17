@@ -2144,7 +2144,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
         if(global->tracetype != TRACE_NONE) {
           my_setopt(curl, CURLOPT_DEBUGFUNCTION, tool_debug_cb);
-          my_setopt(curl, CURLOPT_DEBUGDATA, config);
+          my_setopt(curl, CURLOPT_DEBUGDATA, config->global);
           my_setopt(curl, CURLOPT_VERBOSE, 1L);
         }
 
@@ -2537,6 +2537,12 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
   multi = curl_multi_init();
   if(!multi)
     return CURLE_OUT_OF_MEMORY;
+
+  if(global->tracetype != TRACE_NONE) {
+    curl_multi_setopt(multi, CURLMOPT_DEBUGFUNCTION, tool_debug_cb);
+    curl_multi_setopt(multi, CURLMOPT_DEBUGDATA, global);
+    curl_multi_setopt(multi, CURLMOPT_VERBOSE, 1);
+  }
 
   result = add_parallel_transfers(global, multi, share,
                                   &more_transfers, &added_transfers);
@@ -2982,6 +2988,12 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
           curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
           curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_PSL);
           curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_HSTS);
+
+          if(global->tracetype != TRACE_NONE) {
+            curl_share_setopt(share, CURLSHOPT_DEBUGFUNCTION, tool_debug_cb);
+            curl_share_setopt(share, CURLSHOPT_DEBUGDATA, global);
+            curl_share_setopt(share, CURLSHOPT_VERBOSE, 1L);
+          }
 
           /* Get the required arguments for each operation */
           do {

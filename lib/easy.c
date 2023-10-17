@@ -737,6 +737,10 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
     multi = Curl_multi_handle(1, 3, 7);
     if(!multi)
       return CURLE_OUT_OF_MEMORY;
+    /* inherit tracing information */
+    multi->fdebug = data->set.fdebug;
+    multi->debugdata = data->set.debugdata;
+    multi->verbose = data->set.verbose;
     data->multi_easy = multi;
   }
 

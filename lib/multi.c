@@ -590,6 +590,12 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
     data->state.conn_cache = &multi->conn_cache;
   data->state.lastconnect_id = -1;
 
+  if(!data->set.fdebug && !data->set.debugdata) {
+    data->set.fdebug = multi->fdebug;
+    data->set.debugdata = multi->debugdata;
+    data->set.verbose |= multi->verbose;
+  }
+
 #ifdef USE_LIBPSL
   /* Do the same for PSL. */
   if(data->share && (data->share->specifier & (1 << CURL_LOCK_DATA_PSL)))
@@ -2807,7 +2813,7 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
     }
 
     /* Close all the connections in the connection cache */
-    Curl_conncache_close_all_connections(&multi->conn_cache);
+    Curl_conncache_close_all_connections(&multi->conn_cache, multi, NULL);
 
     sockhash_destroy(&multi->sockhash);
     Curl_conncache_destroy(&multi->conn_cache);
@@ -3339,6 +3345,27 @@ CURLMcode curl_multi_setopt(struct Curl_multi *multi,
       multi->max_concurrent_streams = curlx_sltoui(streams);
     }
     break;
+  case CURLMOPT_DEBUGFUNCTION:
+    /*
+     * stderr write callback.
+     */
+    multi->fdebug = va_arg(param, curl_debug_callback);
+    /*
+     * if the callback provided is NULL, it'll use the default callback
+     */
+    break;
+  case CURLMOPT_DEBUGDATA:
+    /*
+     * Set to a void * that should receive all error writes. This
+     * defaults to CURLOPT_STDERR for normal operations.
+     */
+    multi->debugdata = va_arg(param, void *);
+    break;
+  case CURLMOPT_VERBOSE: {
+    long flag = va_arg(param, long);
+    multi->verbose = (flag != 0);
+    break;
+  }
   default:
     res = CURLM_UNKNOWN_OPTION;
     break;

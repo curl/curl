@@ -35,6 +35,8 @@
 #include "timeval.h"
 
 struct connectdata;
+struct Curl_share;
+struct Curl_multi;
 
 struct conncache {
   struct Curl_hash hash;
@@ -116,7 +118,15 @@ Curl_conncache_extract_bundle(struct Curl_easy *data,
                               struct connectbundle *bundle);
 struct connectdata *
 Curl_conncache_extract_oldest(struct Curl_easy *data);
-void Curl_conncache_close_all_connections(struct conncache *connc);
+/**
+ * Close all connections in the cache
+ * @param connc the connection cache
+ * @param multi the optional multi handle involved
+ * @param share the optional share handle involved
+ */
+void Curl_conncache_close_all_connections(struct conncache *connc,
+                                          struct Curl_multi *multi,
+                                          struct Curl_share *share);
 void Curl_conncache_print(struct conncache *connc);
 
 #endif /* HEADER_CURL_CONNCACHE_H */
