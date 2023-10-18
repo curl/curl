@@ -20,19 +20,21 @@ http
 HOME=%PWD/%LOGDIR
 </setenv>
 <name>
-IPFS with malformed gateway URL from gateway file
+IPFS with malformed gateway URL from multiline gateway file, first line no url
 </name>
 <command>
 ipfs://bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u
 </command>
 <file name="%LOGDIR/.ipfs/gateway" >
-http://nonexisting,local:8080
+foo
+bar
 </file>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
+# malformed gateway URL, first line in file must be a gateway URL
 <errorcode>
 3
 </errorcode>

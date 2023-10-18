@@ -17,19 +17,18 @@ IPFS
 http
 </server>
 <name>
-IPFS with malformed gateway URL (bad function argument error)
+IPNS path and query args for gateway and IPFS url (malformed gateway url)
 </name>
 <command>
---ipfs-gateway http://nonexisting,local:8080 ipfs://bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u
+--ipfs-gateway "http://%HOSTIP:%HTTPPORT/some/path?biz=baz" "ipns://fancy.tld/a/b?foo=bar&aaa=bbb"
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-# malformed gateway URL (bad function argument error)
 <errorcode>
-43
+3
 </errorcode>
 </verify>
 </testcase>

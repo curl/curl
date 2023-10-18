@@ -8,7 +8,7 @@ IPFS
 #
 # Server-side
 <reply>
-<data>
+<data nocheck="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -37,10 +37,10 @@ HOME=%PWD/%LOGDIR
 IPFS with gateway URL from gateway file
 </name>
 <command>
-ipfs://QmV5JejrpgUxnkZeFZYMxVCqAbKy3KdPXWXyuEDiMNZwUx
+ipfs://bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u
 </command>
 <file name="%LOGDIR/.ipfs/gateway" >
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+http://%HOSTIP:%HTTPPORT
 </file>
 </client>
 
@@ -48,7 +48,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
-GET /ipfs/QmV5JejrpgUxnkZeFZYMxVCqAbKy3KdPXWXyuEDiMNZwUx HTTP/1.1
+GET /ipfs/bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
