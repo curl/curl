@@ -42,6 +42,7 @@
 //
 //  Case-insensitive string comparison
 //
+//project
 
 #ifdef _MSC_VER
 #define COMPARE(a, b) (!_stricmp((a), (b)))
