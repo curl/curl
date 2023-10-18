@@ -1,7 +1,7 @@
 <testcase>
 <info>
 <keywords>
-IPNS
+IPFS
 </keywords>
 </info>
 
@@ -20,7 +20,7 @@ Connection: close
 Content-Type: text/plain
 Funny-head: yesyes
 
-Hello curl from IPNS
+Hello curl from IPFS
 </data>
 </reply>
 
@@ -30,19 +30,26 @@ Hello curl from IPNS
 <server>
 http
 </server>
+<setenv>
+HOME=%PWD/%LOGDIR
+IPFS_DATA=$HOME/.ipfs
+</setenv>
 <name>
-IPNS
+IPFS with IPFS_DATA set, no traling slash
 </name>
 <command>
---ipfs-gateway http://%HOSTIP:%HTTPPORT ipns://bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u
+ipfs://bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u
 </command>
+<file name="%LOGDIR/.ipfs/gateway" >
+http://%HOSTIP:%HTTPPORT
+</file>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
-GET /ipns/bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u HTTP/1.1
+GET /ipfs/bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

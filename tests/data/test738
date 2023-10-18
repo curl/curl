@@ -18,23 +18,21 @@ http
 </server>
 <setenv>
 HOME=%PWD/%LOGDIR
+IPFS_DATA=%HOME/.ipfs/
 </setenv>
 <name>
-IPFS with malformed gateway URL from gateway file
+IPFS with IPFS_DATA, no gateway file
 </name>
 <command>
 ipfs://bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u
 </command>
-<file name="%LOGDIR/.ipfs/gateway" >
-http://nonexisting,local:8080
-</file>
 </client>
 
 #
-# Verify data after the test has been "shot"
+# Verify error code with no gateway file (detection fails)
 <verify>
 <errorcode>
-3
+37
 </errorcode>
 </verify>
 </testcase>
