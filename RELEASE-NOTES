@@ -4,27 +4,39 @@ curl and libcurl 8.4.1
  Command line options:         258
  curl_easy_setopt() options:   303
  Public functions in libcurl:  93
- Contributors:                 3001
+ Contributors:                 3006
 
 This release includes the following changes:
 
 
 This release includes the following bugfixes:
 
+ o asyn-thread: use pipe instead of socketpair for IPC when available [4]
  o build: add `src/.checksrc` to source tarball [1]
+ o build: fix 'threadsafe' feature detection for older gcc [19]
  o CI: add autotools, out-of-tree, debug build to distro check job [14]
  o CI: ignore test 286 on Appveyor gcc 9 build [6]
  o cmake: fix `HAVE_H_ERRNO_ASSIGNABLE` detection [2]
  o cmake: fix CURL_DISABLE_GETOPTIONS [12]
+ o cmake: replace `check_library_exists_concat()` [23]
+ o curl.h: on FreeBSD include sys/param.h instead of osreldate.h [21]
+ o docs/libcurl: fix three minor man page format mistakes [26]
  o docs: use SOURCE_DATE_EPOCH for generated manpages [16]
  o easy_lock: add a pthread_mutex_t fallback [13]
  o http2: safer invocation of populate_binsettings [8]
  o http: avoid Expect: 100-continue if Upgrade: is used [15]
  o lib: fix gcc warning in printf call [7]
+ o multi: use pipe instead of socketpair to *wakeup() [18]
  o openssl: avoid BN_num_bits() NULL pointer derefs [9]
  o quic: manage connection idle timeouts [5]
+ o socks: better buffer size checks for socks4a user and hostname [20]
  o test613: stop showing an error on missing output file
+ o tests/server: add more SOCKS5 handshake error checking [27]
+ o tests: Fix Windows test helper tool search & use it for handle64 [17]
+ o tool_cb_wrt: fix write output for very old Windows versions [24]
  o tool_getparam: limit --rate to be smaller than number of ms [3]
+ o tool_operate: fix links in ipfs errors [22]
+ o tool_urlglob: fix build for old gcc versions [25]
  o tool_urlglob: make multiply() bail out on negative values [11]
  o wolfssl: require WOLFSSL_SYS_CA_CERTS for loading system CA [10]
 
@@ -41,17 +53,20 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alex Klyubin, calvin2021y on github, Dan Fandrich, Daniel Jeliński,
-  Daniel Stenberg, icy17 on github, Jan Alexander Steffens, Jeroen Ooms,
-  Kartatz on Github, Loïc Yhuel, Ray Satiro, Romain Geissler, Sohom Datta,
-  Stefan Eissing, Torben Dury, Viktor Szakats
-  (16 contributors)
+  Alex Klyubin, calvin2021y on github, Carlos Henrique Lima Melara,
+  Dan Fandrich, Daniel Jeliński, Daniel Stenberg, Faraz Fallahi,
+  icy17 on github, Jan Alexander Steffens, Jeroen Ooms, Kartatz on Github,
+  Loïc Yhuel, LoRd_MuldeR, Marcin Rataj, Ray Satiro, Romain Geissler,
+  Samuel Henrique, sd0 on hackerone, Sohom Datta, Stefan Eissing, Torben Dury,
+  Viktor Szakats
+  (22 contributors)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.se/bug/?i=12084
  [2] = https://curl.se/bug/?i=12093
  [3] = https://curl.se/bug/?i=12116
+ [4] = https://curl.se/bug/?i=12146
  [5] = https://curl.se/bug/?i=12064
  [6] = https://curl.se/bug/?i=12040
  [7] = https://curl.se/bug/?i=12082
@@ -64,3 +79,14 @@ References to bug reports and discussions on issues:
  [14] = https://curl.se/bug/?i=12088
  [15] = https://curl.se/bug/?i=12022
  [16] = https://curl.se/bug/?i=12092
+ [17] = https://curl.se/bug/?i=12115
+ [18] = https://curl.se/bug/?i=12142
+ [19] = https://curl.se/bug/?i=12125
+ [20] = https://curl.se/bug/?i=12139
+ [21] = https://curl.se/bug/?i=12107
+ [22] = https://curl.se/bug/?i=12133
+ [23] = https://curl.se/bug/?i=11285
+ [24] = https://curl.se/bug/?i=12131
+ [25] = https://curl.se/bug/?i=12124
+ [26] = https://curl.se/bug/?i=12126
+ [27] = https://curl.se/bug/?i=12117
