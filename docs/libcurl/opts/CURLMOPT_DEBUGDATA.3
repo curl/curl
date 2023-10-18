@@ -39,7 +39,9 @@ not used by libcurl, it is only passed to the callback.
 \fICURLMOPT_DEBUGFUNCTION(3)\fP and \fICURLMOPT_DEBUGDATA\fP can be used
 as defaults for all easy handles that are added to the multi. They are also
 used for internal handles, for examples when closing cached connections.
-They take effect only for easy handles added to the multi handle afterwards.
+These options take effect and are used only for the easy handles that are
+added to the multi handle after these options have been set for the multi
+handle.
 
 Values have the same restrictions and use patterns as defined for
 \fICURLOPT_DEBUGFUNCTION(3)\fP and \fICURLOPT_DEBUGDATA(3)\fP.
@@ -60,7 +62,7 @@ main()
 }
 .fi
 .SH AVAILABILITY
-Always
+This option was added in libcurl 8.5.0.
 .SH RETURN VALUE
 Returns CURLE_OK
 .SH "SEE ALSO"

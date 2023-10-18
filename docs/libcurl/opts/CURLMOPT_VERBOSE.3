@@ -29,7 +29,7 @@ CURLMOPT_VERBOSE \- verbose mode
 .nf
 #include <curl/curl.h>
 
-CURLcode curl_multi_setopt(CURLM *handle, CURLOPT_VERBOSE, long onoff);
+CURLcode curl_multi_setopt(CURLM *handle, CURLMOPT_VERBOSE, long onoff);
 .fi
 .SH DESCRIPTION
 Set the \fIonoff\fP parameter to 1 to make the library display a lot of
@@ -39,20 +39,16 @@ this multi.
 \fICURLMOPT_VERBOSE(3)\fP can be used as default for all easy handles
 that are added to the multi. They are also used for internal handles,
 for examples when closing cached connections.
-They take effect only for easy handles added to the multi handle afterwards.
+This option takes effect and is used only for the easy handles that are
+added to the multi handle after this option is set for the multi handle.
 .SH PROTOCOLS
 All
 .SH EXAMPLE
 .nf
-main()
-{
-  GlobalInfo setup;
-  /* ... use debug callback and custom pointer */
   curl_multi_setopt(multi, CURLMOPT_VERBOSE, 1L);
-}
 .fi
 .SH AVAILABILITY
-Always
+This option was added in libcurl 8.5.0.
 .SH RETURN VALUE
 Returns CURLE_OK
 .SH "SEE ALSO"

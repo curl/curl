@@ -38,7 +38,9 @@ that is defined for \fICURLOPT_DEBUGFUNCTION(3)\fP.
 \fICURLMOPT_DEBUGFUNCTION(3)\fP and \fICURLMOPT_DEBUGDATA\fP can be used
 as defaults for all easy handles that are added to the multi. They are also
 used for internal handles, for examples when closing cached connections.
-They take effect only for easy handles added to the multi handle afterwards.
+These options take effect and are used only for the easy handles that are
+added to the multi handle after these options have been set for the multi
+handle.
 
 Values have the same restrictions and use patterns as defined for
 \fICURLOPT_DEBUGFUNCTION(3)\fP and \fICURLOPT_DEBUGDATA(3)\fP.
@@ -48,18 +50,12 @@ NULL
 All
 .SH EXAMPLE
 .nf
-main()
-{
-  struct data my_tracedata;
-
-  GlobalInfo setup;
   /* ... use debug callback and custom pointer */
   curl_multi_setopt(multi, CURLMOPT_DEBUGFUNCTION, my_trace);
   curl_multi_setopt(multi, CURLMOPT_DEBUGDATA, &my_tracedata);
-}
 .fi
 .SH AVAILABILITY
-Always
+This option was added in libcurl 8.5.0.
 .SH RETURN VALUE
 Returns CURLE_OK
 .SH "SEE ALSO"
