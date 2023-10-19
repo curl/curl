@@ -886,6 +886,11 @@ static CURLcode oldap_do(struct Curl_easy *data, bool *done)
 
   result = oldap_url_parse(data, &lud);
   if(!result) {
+    Sockbuf *sb;
+    /* re-install the libcurl SSL handlers into the sockbuf. */
+    ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb);
+    ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, data);
+
     rc = ldap_search_ext(li->ld, lud->lud_dn, lud->lud_scope,
                          lud->lud_filter, lud->lud_attrs, 0,
                          NULL, NULL, NULL, 0, &msgid);
