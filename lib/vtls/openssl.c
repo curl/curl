@@ -1705,6 +1705,9 @@ static int ossl_init(void)
 #else
     OPENSSL_INIT_LOAD_CONFIG |
 #endif
+#ifdef OPENSSL_INIT_NO_ATEXIT
+    OPENSSL_INIT_NO_ATEXIT |
+#endif
     0;
   OPENSSL_init_ssl(flags, NULL);
 #else
@@ -1748,6 +1751,7 @@ static void ossl_cleanup(void)
   !defined(LIBRESSL_VERSION_NUMBER)
   /* OpenSSL 1.1 deprecates all these cleanup functions and
      turns them into no-ops in OpenSSL 1.0 compatibility mode */
+  OPENSSL_cleanup();
 #else
   /* Free ciphers and digests lists */
   EVP_cleanup();
