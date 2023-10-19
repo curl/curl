@@ -3581,7 +3581,6 @@ AC_CHECK_DECLS([getpwuid_r], [], [AC_DEFINE(HAVE_DECL_GETPWUID_R_MISSING, 1, "Se
         [[#include <pwd.h>
           #include <sys/types.h>]])
 
-
 AC_CHECK_FUNCS([\
   _fseeki64 \
   arc4random \
@@ -3627,6 +3626,15 @@ AC_CHECK_FUNCS([\
     ])
   fi
 ])
+
+dnl On Android, the only way to know if fseeko can be used is to see if it is
+dnl declared or not (for this API level), as the symbol always exists in the
+dnl lib.
+AC_CHECK_DECL([fseeko],
+              [AC_DEFINE([HAVE_DECL_FSEEKO], [1],
+               [Define to 1 if you have the fseeko declaration])],
+              [],
+              [[#include <stdio.h>]])
 
 CURL_CHECK_NONBLOCKING_SOCKET
 

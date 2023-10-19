@@ -792,7 +792,7 @@ static CURLcode setname(curl_mimepart *part, const char *name, size_t len)
 /* wrap call to fseeko so it matches the calling convention of callback */
 static int fseeko_wrapper(void *stream, curl_off_t offset, int whence)
 {
-#if defined(HAVE_FSEEKO)
+#if defined(HAVE_FSEEKO) && defined(HAVE_DECL_FSEEKO)
   return fseeko(stream, (off_t)offset, whence);
 #elif defined(HAVE__FSEEKI64)
   return _fseeki64(stream, (__int64)offset, whence);

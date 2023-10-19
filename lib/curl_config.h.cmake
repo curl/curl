@@ -211,6 +211,9 @@
 /* Define to 1 if you have the fseeko function. */
 #cmakedefine HAVE_FSEEKO 1
 
+/* Define to 1 if you have the fseeko declaration. */
+#cmakedefine HAVE_DECL_FSEEKO 1
+
 /* Define to 1 if you have the _fseeki64 function. */
 #cmakedefine HAVE__FSEEKI64 1
 
