@@ -319,30 +319,11 @@ static CURLcode oldap_setup_connection(struct Curl_easy *data,
 {
   CURLcode result;
   LDAPURLDesc *lud;
-  struct ldapconninfo *li;
+  (void)conn;
 
   /* Early URL syntax check. */
   result = oldap_url_parse(data, &lud);
   ldap_free_urldesc(lud);
-
-  if(!result) {
-    li = calloc(1, sizeof(struct ldapconninfo));
-    if(!li)
-      result = CURLE_OUT_OF_MEMORY;
-    else {
-      li->proto = ldap_pvt_url_scheme2proto(data->state.up.scheme);
-      conn->proto.ldapc = li;
-      connkeep(conn, "OpenLDAP default");
-
-      /* Initialize the SASL storage */
-      Curl_sasl_init(&li->sasl, data, &saslldap);
-
-      /* Clear the TLS upgraded flag */
-      conn->bits.tls_upgraded = FALSE;
-
-      result = oldap_parse_login_options(conn);
-    }
-  }
 
   return result;
 }
@@ -537,7 +518,7 @@ static CURLcode oldap_perform_starttls(struct Curl_easy *data)
 static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
 {
   struct connectdata *conn = data->conn;
-  struct ldapconninfo *li = conn->proto.ldapc;
+  struct ldapconninfo *li;
   static const int version = LDAP_VERSION3;
   int rc;
   char *hosturl;
@@ -546,6 +527,26 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
 #endif
 
   (void)done;
+
+  DEBUGASSERT(!conn->proto.ldapc);
+  li = calloc(1, sizeof(struct ldapconninfo));
+  if(!li)
+    return CURLE_OUT_OF_MEMORY;
+  else {
+    CURLcode result;
+    li->proto = ldap_pvt_url_scheme2proto(data->state.up.scheme);
+    conn->proto.ldapc = li;
+
+    /* Initialize the SASL storage */
+    Curl_sasl_init(&li->sasl, data, &saslldap);
+
+    /* Clear the TLS upgraded flag */
+    conn->bits.tls_upgraded = FALSE;
+
+    result = oldap_parse_login_options(conn);
+    if(result)
+      return result;
+  }
 
   hosturl = aprintf("ldap%s://%s:%d",
                     conn->handler->flags & PROTOPT_SSL? "s": "",
