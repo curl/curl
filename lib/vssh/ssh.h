@@ -267,7 +267,7 @@ void Curl_ssh_attach(struct Curl_easy *data,
 /* for non-SSH builds */
 #define Curl_ssh_cleanup()
 #define Curl_ssh_attach(x,y)
-#define Curl_ssh_init() Curl_nop_stmt
+#define Curl_ssh_init() 0
 #endif
 
 #endif /* HEADER_CURL_SSH_H */
