@@ -1202,6 +1202,10 @@ check_symbol_exists(setlocale      "${CURL_INCLUDES}" HAVE_SETLOCALE)
 check_symbol_exists(setmode        "${CURL_INCLUDES}" HAVE_SETMODE)
 check_symbol_exists(setrlimit      "${CURL_INCLUDES}" HAVE_SETRLIMIT)
 
+if(HAVE_FSEEKO)
+  set(HAVE_DECL_FSEEKO 1)
+endif()
+
 if(NOT MSVC OR (MSVC_VERSION GREATER_EQUAL 1900))
   # earlier MSVC compilers had faulty snprintf implementations
   check_symbol_exists(snprintf       "stdio.h" HAVE_SNPRINTF)
