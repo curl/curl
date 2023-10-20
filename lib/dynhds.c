@@ -381,10 +381,12 @@ nghttp2_nv *Curl_dynhds_to_nva(struct dynhds *dynhds, size_t *pcount)
     return NULL;
 
   for(i = 0; i < dynhds->hds_len; ++i) {
-    nva[i].name = (unsigned char *)dynhds->hds[i]->name;
-    nva[i].namelen = dynhds->hds[i]->namelen;
-    nva[i].value = (unsigned char *)dynhds->hds[i]->value;
-    nva[i].valuelen = dynhds->hds[i]->valuelen;
+    struct dynhds_entry *e = dynhds->hds[i];
+    DEBUGASSERT(e);
+    nva[i].name = (unsigned char *)e->name;
+    nva[i].namelen = e->namelen;
+    nva[i].value = (unsigned char *)e->value;
+    nva[i].valuelen = e->valuelen;
     nva[i].flags = NGHTTP2_NV_FLAG_NONE;
   }
   *pcount = dynhds->hds_len;
