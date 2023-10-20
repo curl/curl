@@ -102,11 +102,7 @@ static void tcpnodelay(struct Curl_easy *data, curl_socket_t sockfd)
 #if defined(TCP_NODELAY)
   curl_socklen_t onoff = (curl_socklen_t) 1;
   int level = IPPROTO_TCP;
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
   char buffer[STRERROR_LEN];
-#else
-  (void) data;
-#endif
 
   if(setsockopt(sockfd, level, TCP_NODELAY, (void *)&onoff,
                 sizeof(onoff)) < 0)
