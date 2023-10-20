@@ -70,10 +70,10 @@ name is provided for backwards compatibility as an alias.
 .nf
 /* iterate over all available options */
 const struct curl_easyoption *opt;
-opt = curl_easy_option_by_next(NULL);
+opt = curl_easy_option_next(NULL);
 while(opt) {
   printf("Name: %s\\n", opt->name);
-  opt = curl_easy_option_by_next(opt);
+  opt = curl_easy_option_next(opt);
 }
 .fi
 .SH AVAILABILITY
