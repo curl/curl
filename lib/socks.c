@@ -823,10 +823,19 @@ CONNECT_REQ_INIT:
     /* FALLTHROUGH */
 CONNECT_RESOLVED:
   case CONNECT_RESOLVED: {
-    char dest[MAX_IPADR_LEN] = "unknown";  /* printable address */
+    char dest[MAX_IPADR_LEN];  /* printable address */
     struct Curl_addrinfo *hp = NULL;
     if(dns)
       hp = dns->addr;
+#ifdef ENABLE_IPV6
+    if(data->set.ipver != CURL_IPRESOLVE_WHATEVER) {
+      int wanted_family = data->set.ipver == CURL_IPRESOLVE_V4 ?
+        AF_INET : AF_INET6;
+      /* scan for the first proper address */
+      while(hp && (hp->ai_family != wanted_family))
+        hp = hp->ai_next;
+    }
+#endif
     if(!hp) {
       failf(data, "Failed to resolve \"%s\" for SOCKS5 connect.",
             sx->hostname);
