@@ -105,6 +105,8 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
   }
 }
 
+#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
+
 /* Curl_infof() is for info message along the way */
 #define MAXINFO 2048
 
@@ -123,8 +125,6 @@ void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
     Curl_debug(data, CURLINFO_TEXT, buffer, len);
   }
 }
-
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
 
 void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
                        const char *fmt, ...)
@@ -237,15 +237,5 @@ CURLcode Curl_trc_init(void)
 {
   return CURLE_OK;
 }
-
-#if !defined(__STDC_VERSION__) || (__STDC_VERSION__ < 199901L)
-void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
-                       const char *fmt, ...)
-{
-  (void)data;
-  (void)cf;
-  (void)fmt;
-}
-#endif
 
 #endif /* !DEBUGBUILD */

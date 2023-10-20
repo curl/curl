@@ -1269,9 +1269,11 @@ err:
         Curl_freeaddrinfo(head);
         return CURLE_OUT_OF_MEMORY;
       }
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
       infof(data, "Added %.*s:%d:%s to DNS cache%s",
             (int)hlen, host_begin, port, addresses,
             permanent ? "" : " (non-permanent)");
+#endif
 
       /* Wildcard hostname */
       if((hlen == 1) && (host_begin[0] == '*')) {

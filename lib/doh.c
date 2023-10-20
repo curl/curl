@@ -933,10 +933,12 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
                             p->dnstype,
                             &de);
       Curl_dyn_free(&p->serverdoh);
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
       if(rc[slot]) {
         infof(data, "DoH: %s type %s for %s", doh_strerror(rc[slot]),
               type2name(p->dnstype), dohp->host);
       }
+#endif
     } /* next slot */
 
     result = CURLE_COULDNT_RESOLVE_HOST; /* until we know better */
