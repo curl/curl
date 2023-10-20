@@ -3770,7 +3770,7 @@ struct Curl_easy **curl_multi_get_handles(struct Curl_multi *multi)
     struct Curl_easy *e = multi->easyp;
     while(e) {
       DEBUGASSERT(i < multi->num_easy);
-      if(!e->internal)
+      if(!e->state.internal)
         a[i++] = e;
       e = e->next;
     }
