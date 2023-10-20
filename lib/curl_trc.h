@@ -134,13 +134,22 @@ void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
 #define Curl_trc_cf_is_verbose(x,y)   ((void)(x), (void)(y), FALSE)
 
 #if defined(HAVE_VARIADIC_MACROS_C99)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wvariadic-macros"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wvariadic-macros"
 #define infof(...)  Curl_nop_stmt
 #define CURL_TRC_CF(...)  Curl_nop_stmt
 #define Curl_trc_cf_infof(...)  Curl_nop_stmt
+#pragma GCC diagnostic pop
+#pragma clang diagnostic pop
 #elif defined(HAVE_VARIADIC_MACROS_GCC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wvariadic-macros"
 #define infof(x...)  Curl_nop_stmt
 #define CURL_TRC_CF(x...)  Curl_nop_stmt
 #define Curl_trc_cf_infof(x...)  Curl_nop_stmt
+#pragma GCC diagnostic pop
 #else
 #error "missing VARIADIC macro define, fix and rebuild!"
 #endif

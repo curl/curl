@@ -75,6 +75,7 @@ static struct ws_frame_meta WS_FRAMES[] = {
   { WSBIT_OPCODE_PONG,  CURLWS_PONG,   "PONG" },
 };
 
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
 static const char *ws_frame_name_of_op(unsigned char proto_opcode)
 {
   unsigned char opcode = proto_opcode & WSBIT_OPCODE_MASK;
@@ -85,6 +86,7 @@ static const char *ws_frame_name_of_op(unsigned char proto_opcode)
   }
   return "???";
 }
+#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
 
 static int ws_frame_op2flags(unsigned char proto_opcode)
 {
@@ -110,6 +112,10 @@ static unsigned char ws_frame_flags2op(int flags)
 static void ws_dec_info(struct ws_decoder *dec, struct Curl_easy *data,
                         const char *msg)
 {
+  (void)dec;
+  (void)data;
+  (void)msg;
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
   switch(dec->head_len) {
   case 0:
     break;
@@ -134,6 +140,7 @@ static void ws_dec_info(struct ws_decoder *dec, struct Curl_easy *data,
     }
     break;
   }
+#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
 }
 
 typedef ssize_t ws_write_payload(const unsigned char *buf, size_t buflen,
@@ -353,6 +360,10 @@ static void update_meta(struct websocket *ws,
 static void ws_enc_info(struct ws_encoder *enc, struct Curl_easy *data,
                         const char *msg)
 {
+  (void)enc;
+  (void)data;
+  (void)msg;
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
   infof(data, "WS-ENC: %s [%s%s%s payload=%" CURL_FORMAT_CURL_OFF_T
               "/%" CURL_FORMAT_CURL_OFF_T "]",
         msg, ws_frame_name_of_op(enc->firstbyte),
@@ -360,6 +371,7 @@ static void ws_enc_info(struct ws_encoder *enc, struct Curl_easy *data,
         " CONT" : "",
         (enc->firstbyte & WSBIT_FIN)? "" : " NON-FIN",
         enc->payload_len - enc->payload_remain, enc->payload_len);
+#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
 }
 
 static void ws_enc_reset(struct ws_encoder *enc)

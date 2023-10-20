@@ -56,10 +56,6 @@
 #error too old nghttp2 version, upgrade!
 #endif
 
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-#define nghttp2_session_callbacks_set_error_callback(x,y)
-#endif
-
 #if (NGHTTP2_VERSION_NUM >= 0x010c00)
 #define NGHTTP2_HAS_SET_LOCAL_WINDOW_SIZE 1
 #endif
@@ -398,8 +394,6 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
                      const uint8_t *value, size_t valuelen,
                      uint8_t flags,
                      void *userp);
-static int error_callback(nghttp2_session *session, const char *msg,
-                          size_t len, void *userp);
 
 /*
  * Initialize the cfilter context
@@ -437,7 +431,6 @@ static CURLcode cf_h2_ctx_init(struct Curl_cfilter *cf,
   nghttp2_session_callbacks_set_on_begin_headers_callback(
     cbs, on_begin_headers);
   nghttp2_session_callbacks_set_on_header_callback(cbs, on_header);
-  nghttp2_session_callbacks_set_error_callback(cbs, error_callback);
 
   /* The nghttp2 session is not yet setup, do it */
   rc = h2_client_new(cf, cbs);
@@ -1600,20 +1593,6 @@ static ssize_t req_body_read_callback(nghttp2_session *session,
 
   return nread;
 }
-
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
-static int error_callback(nghttp2_session *session,
-                          const char *msg,
-                          size_t len,
-                          void *userp)
-{
-  (void)session;
-  (void)msg;
-  (void)len;
-  (void)userp;
-  return 0;
-}
-#endif
 
 /*
  * Append headers to ask for an HTTP1.1 to HTTP2 upgrade.
