@@ -70,7 +70,7 @@
    to avoid fooling the socket leak detector */
 #ifdef HAVE_PIPE
 #  define sclose_nolog(x)  close((x))
-#eliif defined(HAVE_CLOSESOCKET)
+#elif defined(HAVE_CLOSESOCKET)
 #  define sclose_nolog(x)  closesocket((x))
 #elif defined(HAVE_CLOSESOCKET_CAMEL)
 #  define sclose_nolog(x)  CloseSocket((x))
