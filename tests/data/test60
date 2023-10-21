@@ -25,12 +25,12 @@ blablabla
 http
 </server>
 <name>
-HTTP PUT from stdin with wrong content-length
+HTTP PUT from stdin pipe with wrong content-length
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/bzz/%TESTNUMBER -T - -H "Content-Length: 1"
 </command>
-<stdin>
+<stdin pipe="yes">
 more than one byte
 </stdin>
 </client>

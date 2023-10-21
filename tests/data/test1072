@@ -42,9 +42,9 @@ HTTP chunked PUT to HTTP 1.0 server with authorization
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T - -u testuser:testpass --anyauth
 </command>
-<stdin>
+<stdin pipe="yes">
 This is data we upload with PUT
-it comes from stdin so MUST be sent
+it comes from a pipe so MUST be sent
 with chunked encoding
 which is impossible in HTTP/1.0
 </stdin>
@@ -53,7 +53,7 @@ which is impossible in HTTP/1.0
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
-25
+65
 </errorcode>
 <protocol>
 PUT /%TESTNUMBER HTTP/1.1
@@ -64,12 +64,12 @@ Transfer-Encoding: chunked
 Expect: 100-continue
 
 %if hyper
-7A
+7B
 %else
-7a
+7b
 %endif
 This is data we upload with PUT
-it comes from stdin so MUST be sent
+it comes from a pipe so MUST be sent
 with chunked encoding
 which is impossible in HTTP/1.0
 

@@ -1,10 +1,8 @@
 <testcase>
-# Similar to test 60
 <info>
 <keywords>
 HTTP
 HTTP PUT
-chunked Transfer-Encoding
 </keywords>
 </info>
 
@@ -26,12 +24,12 @@ blablabla
 http
 </server>
 <name>
-HTTP PUT from stdin pipe
+HTTP PUT of regular file stdin
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/bzz/%TESTNUMBER -T -
 </command>
-<stdin pipe="yes">
+<stdin>
 more than one byte
 </stdin>
 </client>
@@ -43,14 +41,9 @@ PUT /bzz/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Transfer-Encoding: chunked
-Expect: 100-continue
+Content-Length: 19
 
-13
 more than one byte
-
-0
-
 </protocol>
 </verify>
 </testcase>

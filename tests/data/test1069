@@ -17,12 +17,12 @@ HTTP/1.0
 http
 </server>
 <name>
-HTTP 1.0 PUT from stdin with no content length
+HTTP 1.0 PUT from stdin pipe with no content length
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/bzz/%TESTNUMBER -T - -0
 </command>
-<stdin>
+<stdin pipe="yes">
 this data can't be sent
 </stdin>
 </client>

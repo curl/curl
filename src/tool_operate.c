@@ -267,55 +267,78 @@ static CURLcode pre_transfer(struct GlobalConfig *global,
   struct_stat fileinfo;
   CURLcode result = CURLE_OK;
 
-  if(per->uploadfile && !stdin_upload(per->uploadfile)) {
-    /* VMS Note:
-     *
-     * Reading binary from files can be a problem...  Only FIXED, VAR
-     * etc WITHOUT implied CC will work. Others need a \n appended to
-     * a line
-     *
-     * - Stat gives a size but this is UNRELIABLE in VMS. E.g.
-     * a fixed file with implied CC needs to have a byte added for every
-     * record processed, this can be derived from Filesize & recordsize
-     * for VARiable record files the records need to be counted!  for
-     * every record add 1 for linefeed and subtract 2 for the record
-     * header for VARIABLE header files only the bare record data needs
-     * to be considered with one appended if implied CC
-     */
+  if(per->uploadfile) {
+    bool isstdin = stdin_upload(per->uploadfile);
+    if(!isstdin) {
 #ifdef __VMS
-    /* Calculate the real upload size for VMS */
-    per->infd = -1;
-    if(stat(per->uploadfile, &fileinfo) == 0) {
-      fileinfo.st_size = VmsSpecialSize(uploadfile, &fileinfo);
-      switch(fileinfo.st_fab_rfm) {
-      case FAB$C_VAR:
-      case FAB$C_VFC:
-      case FAB$C_STMCR:
-        per->infd = open(per->uploadfile, O_RDONLY | O_BINARY);
-        break;
-      default:
-        per->infd = open(per->uploadfile, O_RDONLY | O_BINARY,
-                        "rfm=stmlf", "ctx=stm");
+      /* VMS Note:
+       *
+       * Reading binary from files can be a problem...  Only FIXED, VAR
+       * etc WITHOUT implied CC will work. Others need a \n appended to
+       * a line
+       *
+       * - Stat gives a size but this is UNRELIABLE in VMS. E.g.  a
+       * fixed file with implied CC needs to have a byte added for every
+       * record processed, this can be derived from Filesize &
+       * recordsize for VARiable record files the records need to be
+       * counted!  for every record add 1 for linefeed and subtract 2
+       * for the record header for VARIABLE header files only the bare
+       * record data needs to be considered with one appended if implied
+       * CC
+       */
+      /* Calculate the real upload size for VMS */
+      per->infd = -1;
+      if(stat(per->uploadfile, &fileinfo) == 0) {
+        fileinfo.st_size = VmsSpecialSize(uploadfile, &fileinfo);
+        switch(fileinfo.st_fab_rfm) {
+        case FAB$C_VAR:
+        case FAB$C_VFC:
+        case FAB$C_STMCR:
+          per->infd = open(per->uploadfile, O_RDONLY | O_BINARY);
+          break;
+        default:
+          per->infd = open(per->uploadfile, O_RDONLY | O_BINARY,
+                           "rfm=stmlf", "ctx=stm");
+        }
       }
-    }
-    if(per->infd == -1)
 #else
       per->infd = open(per->uploadfile, O_RDONLY | O_BINARY);
-    if((per->infd == -1) || fstat(per->infd, &fileinfo))
+#endif
+    }
+
+#ifdef __VMS
+    if(per->infd == -1)
+#else
+    if(per->infd == -1 || fstat(per->infd, &fileinfo))
 #endif
     {
       helpf(tool_stderr, "Can't open '%s'", per->uploadfile);
-      if(per->infd != -1) {
+      if(!isstdin && per->infd != -1) {
         close(per->infd);
         per->infd = STDIN_FILENO;
       }
       return CURLE_READ_ERROR;
     }
-    per->infdopen = TRUE;
+    per->infdopen = !isstdin;
 
     /* we ignore file size for char/block devices, sockets, etc. */
     if(S_ISREG(fileinfo.st_mode))
+#ifdef __VMS
       uploadfilesize = fileinfo.st_size;
+#else
+    {
+      /* When the upload file is stdin, or when the upload file is
+         /dev/std{in,out,err} or /dev/fd/N on BSDs, the offset may not
+         be 0 */
+      off_t offset = lseek(per->infd, 0, SEEK_CUR);
+      if(offset >= 0)
+        uploadfilesize = fileinfo.st_size - offset;
+      else {
+        warnf(global, "Can't get file position of file descriptor %d ('%s')",
+              per->infd, per->uploadfile);
+      }
+    }
+#endif
 
 #ifdef DEBUGBUILD
     /* allow dedicated test cases to override */
