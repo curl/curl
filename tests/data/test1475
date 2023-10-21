@@ -1,0 +1,83 @@
+<testcase>
+# also verified by 1156 in libcurl API terms
+
+<info>
+<keywords>
+HTTP
+HTTP GET
+Resume
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 416 Invalid range
+Connection: close
+Content-Length: 0
+Content-Range: */100
+
+</data>
+
+# The file data that exists at the start of the test must be included in
+# the verification.
+<datacheck>
+012345678
+012345678
+012345678
+012345678
+012345678
+012345678
+012345678
+012345678
+012345678
+012345678
+HTTP/1.1 416 Invalid range
+Connection: close
+Content-Length: 0
+Content-Range: */100
+
+</datacheck>
+
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<killserver>
+http
+</killserver>
+<name>
+-f and 416 with Content-Range: */size
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C - -f
+</command>
+<file name="%LOGDIR/curl%TESTNUMBER.out">
+012345678
+012345678
+012345678
+012345678
+012345678
+012345678
+012345678
+012345678
+012345678
+012345678
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Range: bytes=100-
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>
