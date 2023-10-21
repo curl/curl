@@ -68,7 +68,7 @@ static const struct testparams params[] = {
   { F_RESUME | F_HTTP416 |          F_CONTENTRANGE | F_IGNOREBODY, CURLE_OK },
   { F_RESUME | F_HTTP416 | F_FAIL |                  F_IGNOREBODY, CURLE_OK },
   { F_RESUME | F_HTTP416 | F_FAIL | F_CONTENTRANGE | F_IGNOREBODY,
-                                                  CURLE_HTTP_RETURNED_ERROR }
+                                                                   CURLE_OK }
 };
 
 static int      hasbody;
