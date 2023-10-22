@@ -1,13 +1,14 @@
-curl and libcurl 8.4.1
+curl and libcurl 8.5.0
 
  Public curl releases:         253
  Command line options:         258
  curl_easy_setopt() options:   303
  Public functions in libcurl:  93
- Contributors:                 3006
+ Contributors:                 3010
 
 This release includes the following changes:
 
+ o gnutls: support CURLSSLOPT_NATIVE_CA [31]
 
 This release includes the following bugfixes:
 
@@ -21,23 +22,41 @@ This release includes the following bugfixes:
  o cmake: replace `check_library_exists_concat()` [23]
  o curl.h: on FreeBSD include sys/param.h instead of osreldate.h [21]
  o docs/libcurl: fix three minor man page format mistakes [26]
+ o docs: fix function typo in curl_easy_option_next.3 [36]
  o docs: use SOURCE_DATE_EPOCH for generated manpages [16]
+ o easy: remove duplicate wolfSSH init call [37]
  o easy_lock: add a pthread_mutex_t fallback [13]
+ o getenv: PlayStation doesn't have getenv() [41]
+ o GHA: move mod_h2 version in CI to v2.0.25 [43]
+ o hostip: show the list of IPs when resolving is done [35]
+ o http2: header conversion tightening [33]
  o http2: safer invocation of populate_binsettings [8]
  o http: avoid Expect: 100-continue if Upgrade: is used [15]
  o lib: fix gcc warning in printf call [7]
  o multi: use pipe instead of socketpair to *wakeup() [18]
+ o ntlm_wb: use pipe instead of socketpair when possible [44]
+ o openldap: move the alloc of ldapconninfo to *connect() [29]
+ o openldap: set the callback argument in oldap_do [30]
  o openssl: avoid BN_num_bits() NULL pointer derefs [9]
  o quic: manage connection idle timeouts [5]
+ o RTSP: improved RTP parser [32]
  o socks: better buffer size checks for socks4a user and hostname [20]
+ o socks: make SOCKS5 use the CURLOPT_IPRESOLVE choice [38]
+ o test1683: remove commented-out check alternatives
+ o test3103: add missing quotes around a test tag attribute
  o test613: stop showing an error on missing output file
  o tests/server: add more SOCKS5 handshake error checking [27]
  o tests: Fix Windows test helper tool search & use it for handle64 [17]
+ o tool: fix --capath when proxy support is disabled [28]
  o tool_cb_wrt: fix write output for very old Windows versions [24]
  o tool_getparam: limit --rate to be smaller than number of ms [3]
  o tool_operate: fix links in ipfs errors [22]
  o tool_urlglob: fix build for old gcc versions [25]
  o tool_urlglob: make multiply() bail out on negative values [11]
+ o transfer: only reset the FTP wildcard engine in CLEAR state [42]
+ o url: don't touch the multi handle when closing internal handles [40]
+ o urldata: move the 'internal' boolean to the state struct [39]
+ o vssh: remove the #ifdef for Curl_ssh_init, use empty macro
  o wolfssl: require WOLFSSL_SYS_CA_CERTS for loading system CA [10]
 
 This release includes the following known bugs:
@@ -53,13 +72,14 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alex Klyubin, calvin2021y on github, Carlos Henrique Lima Melara,
-  Dan Fandrich, Daniel Jeliński, Daniel Stenberg, Faraz Fallahi,
-  icy17 on github, Jan Alexander Steffens, Jeroen Ooms, Kartatz on Github,
-  Loïc Yhuel, LoRd_MuldeR, Marcin Rataj, Ray Satiro, Romain Geissler,
-  Samuel Henrique, sd0 on hackerone, Sohom Datta, Stefan Eissing, Torben Dury,
-  Viktor Szakats
-  (22 contributors)
+  Alex Klyubin, Ammar Faizi, calvin2021y on github,
+  Carlos Henrique Lima Melara, Dan Fandrich, Daniel Jeliński, Daniel Stenberg,
+  Faraz Fallahi, icy17 on github, Jan Alexander Steffens, Jeroen Ooms,
+  Kartatz on Github, lkordos on github, Loïc Yhuel, LoRd_MuldeR,
+  Maksymilian Arciemowicz, Manfred Schwarb, Marcin Rataj, Ray Satiro, rilysh,
+  Romain Geissler, Samuel Henrique, sd0 on hackerone, Sohom Datta,
+  Stefan Eissing, Torben Dury, Viktor Szakats
+  (27 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -90,3 +110,19 @@ References to bug reports and discussions on issues:
  [25] = https://curl.se/bug/?i=12124
  [26] = https://curl.se/bug/?i=12126
  [27] = https://curl.se/bug/?i=12117
+ [28] = https://curl.se/bug/?i=12089
+ [29] = https://curl.se/bug/?i=12166
+ [30] = https://curl.se/bug/?i=12166
+ [31] = https://curl.se/bug/?i=12137
+ [32] = https://curl.se/bug/?i=12052
+ [33] = https://curl.se/bug/?i=12097
+ [35] = https://curl.se/bug/?i=12145
+ [36] = https://curl.se/bug/?i=12170
+ [37] = https://curl.se/bug/?i=12168
+ [38] = https://curl.se/bug/?i=11949
+ [39] = https://curl.se/bug/?i=12165
+ [40] = https://curl.se/bug/?i=12165
+ [41] = https://curl.se/bug/?i=12140
+ [42] = https://curl.se/bug/?i=11775
+ [43] = https://curl.se/bug/?i=12157
+ [44] = https://curl.se/bug/?i=12149
