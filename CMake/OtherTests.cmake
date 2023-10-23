@@ -86,51 +86,53 @@ endif()
 
 unset(CMAKE_TRY_COMPILE_TARGET_TYPE)
 
-if(NOT CMAKE_CROSSCOMPILING)
-  if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "iOS")
-    # only try this on non-apple platforms
+if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "iOS")
+  # only try this on non-apple platforms
 
-    # if not cross-compilation...
-    set(CMAKE_REQUIRED_FLAGS "")
-    if(HAVE_SYS_POLL_H)
-      set(CMAKE_REQUIRED_FLAGS "-DHAVE_SYS_POLL_H")
-    elseif(HAVE_POLL_H)
-      set(CMAKE_REQUIRED_FLAGS "-DHAVE_POLL_H")
-    endif()
-    check_c_source_runs("
-      #include <stdlib.h>
-      #include <sys/time.h>
+  set(CMAKE_REQUIRED_FLAGS "")
+  if(HAVE_SYS_POLL_H)
+    set(CMAKE_REQUIRED_FLAGS "-DHAVE_SYS_POLL_H")
+  elseif(HAVE_POLL_H)
+    set(CMAKE_REQUIRED_FLAGS "-DHAVE_POLL_H")
+  endif()
+  set(POLL_FINE_C_SOURCE "
+    #include <stdlib.h>
+    #include <sys/time.h>
 
-      #ifdef HAVE_SYS_POLL_H
-      #  include <sys/poll.h>
-      #elif  HAVE_POLL_H
-      #  include <poll.h>
-      #endif
+    #ifdef HAVE_SYS_POLL_H
+    #  include <sys/poll.h>
+    #elif  HAVE_POLL_H
+    #  include <poll.h>
+    #endif
 
-      int main(void)
-      {
-          if(0 != poll(0, 0, 10)) {
-            return 1; /* fail */
+    int main(void)
+    {
+        if(0 != poll(0, 0, 10)) {
+          return 1; /* fail */
+        }
+        else {
+          /* detect the 10.12 poll() breakage */
+          struct timeval before, after;
+          int rc;
+          size_t us;
+
+          gettimeofday(&before, NULL);
+          rc = poll(NULL, 0, 500);
+          gettimeofday(&after, NULL);
+
+          us = (after.tv_sec - before.tv_sec) * 1000000 +
+            (after.tv_usec - before.tv_usec);
+
+          if(us < 400000) {
+            return 1;
           }
-          else {
-            /* detect the 10.12 poll() breakage */
-            struct timeval before, after;
-            int rc;
-            size_t us;
-
-            gettimeofday(&before, NULL);
-            rc = poll(NULL, 0, 500);
-            gettimeofday(&after, NULL);
-
-            us = (after.tv_sec - before.tv_sec) * 1000000 +
-              (after.tv_usec - before.tv_usec);
-
-            if(us < 400000) {
-              return 1;
-            }
-          }
-          return 0;
-    }" HAVE_POLL_FINE)
+        }
+        return 0;
+    }")
+  if(CMAKE_CROSSCOMPILING)
+    check_c_source_compiles("${POLL_FINE_C_SOURCE}" HAVE_POLL_FINE)
+  else()
+    check_c_source_runs("${POLL_FINE_C_SOURCE}" HAVE_POLL_FINE)
   endif()
 endif()
 
