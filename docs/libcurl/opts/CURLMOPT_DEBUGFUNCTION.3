@@ -37,13 +37,16 @@ that is defined for \fICURLOPT_DEBUGFUNCTION(3)\fP.
 
 \fICURLMOPT_DEBUGFUNCTION(3)\fP and \fICURLMOPT_DEBUGDATA\fP can be used
 as defaults for all easy handles that are added to the multi. They are also
-used for internal handles, for examples when closing cached connections.
+used for internal handles, for example when closing cached connections.
 These options take effect and are used only for the easy handles that are
 added to the multi handle after these options have been set for the multi
 handle.
 
 Values have the same restrictions and use patterns as defined for
 \fICURLOPT_DEBUGFUNCTION(3)\fP and \fICURLOPT_DEBUGDATA(3)\fP.
+
+Setting these options both to NULL will let the values set in the easy handle
+determine the behaviour.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
