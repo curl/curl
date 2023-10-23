@@ -69,7 +69,8 @@ struct Curl_share {
 #endif
   curl_debug_callback fdebug;   /* function that write informational data */
   void *debugdata;              /* the data that will be passed to fdebug */
-  BIT(verbose);                /* true when tracing is enabled */
+  FILE *err;                    /* stderr for the easy handle to inherit */
+  BIT(verbose);                 /* true when tracing is enabled */
 };
 
 CURLSHcode Curl_share_lock(struct Curl_easy *, curl_lock_data,

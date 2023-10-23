@@ -124,9 +124,7 @@ Curl_conncache_extract_oldest(struct Curl_easy *data);
  * @param multi the optional multi handle involved
  * @param share the optional share handle involved
  */
-void Curl_conncache_close_all_connections(struct conncache *connc,
-                                          struct Curl_multi *multi,
-                                          struct Curl_share *share);
+void Curl_conncache_close_all_connections(struct conncache *connc);
 void Curl_conncache_print(struct conncache *connc);
 
 #endif /* HEADER_CURL_CONNCACHE_H */

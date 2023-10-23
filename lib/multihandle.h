@@ -152,6 +152,7 @@ struct Curl_multi {
                                     previous callback */
   curl_debug_callback fdebug;   /* function that write informational data */
   void *debugdata;              /* the data that will be passed to fdebug */
+  FILE *err;                    /* stderr for the easy handle to inherit */
   unsigned int max_concurrent_streams;
 
 #ifdef USE_WINSOCK

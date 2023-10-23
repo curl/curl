@@ -21,51 +21,42 @@
 .\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
-.TH curl_share_setopt 3 "8 Aug 2003" "libcurl" "libcurl"
+.\"
+.TH CURLSHOPT_STDERR 3 "17 Oct 2023" libcurl libcurl
 .SH NAME
-curl_share_setopt - Set options for a shared object
+CURLSHOPT_STDERR \- redirect stderr to another stream
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
 
-CURLSHcode curl_share_setopt(CURLSH *share, CURLSHoption option, parameter);
+CURLSHcode curl_share_setopt(CURLSH *share, CURLSHOPT_STDERR, FILE *stream);
 .fi
 .SH DESCRIPTION
-Set the \fIoption\fP to \fIparameter\fP for the given \fIshare\fP.
-.SH OPTIONS
-.IP CURLSHOPT_LOCKFUNC
-See \fICURLSHOPT_LOCKFUNC(3)\fP.
-.IP CURLSHOPT_UNLOCKFUNC
-See \fICURLSHOPT_UNLOCKFUNC(3)\fP.
-.IP CURLSHOPT_SHARE
-See \fICURLSHOPT_SHARE(3)\fP.
-.IP CURLSHOPT_UNSHARE
-See \fICURLSHOPT_UNSHARE(3)\fP.
-.IP CURLSHOPT_USERDATA
-See \fICURLSHOPT_USERDATA(3)\fP.
-.SH DEBUG OPTIONS
-.IP CURLSHOPT_DEBUGFUNCTION
-See \fICURLSHOPT_DEBUGFUNCTION(3)\fP.
-.IP CURLSHOPT_DEBUGDATA
-See \fICURLSHOPT_DEBUGDATA(3)\fP.
-.IP CURLSHOPT_STDERR
-See \fICURLSHOPT_STDERR(3)\fP.
-.IP CURLSHOPT_VERBOSE
-See \fICURLSHOPT_VERBOSE(3)\fP.
+Pass a FILE * as parameter. Tell libcurl to use this \fIstream\fP instead of
+stderr for displaying verbose data.
+
+This option is used to set the stderr stream for a shared object and the easy
+handles associated with it.
+
+This option has no effect on an easy handle that has set its own stderr stream
+to something other than stderr via \fICURLOPT_STDERR(3)\fP.
+
+If you are using libcurl as a Windows DLL, this option causes an exception and
+a crash in the library since it cannot access a FILE * passed on from the
+application. A work-around is to instead use \fICURLSHOPT_DEBUGFUNCTION(3)\fP.
+.SH DEFAULT
+stderr
+.SH PROTOCOLS
+All
 .SH EXAMPLE
 .nf
-  CURLSHcode sh;
-  share = curl_share_init();
-  sh = curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
-  if(sh)
-    printf("Error: %s\\n", curl_share_strerror(sh));
+FILE *filep = fopen("dump", "wb");
+curl_share_setopt(share, CURLSHOPT_STDERR, filep);
 .fi
 .SH AVAILABILITY
-Added in 7.10
+Always
 .SH RETURN VALUE
-CURLSHE_OK (zero) means that the option was set properly, non-zero means an
-error occurred as \fI<curl/curl.h>\fP defines. See the \fIlibcurl-errors(3)\fP
-man page for the full list with descriptions.
+Returns CURLE_OK
 .SH "SEE ALSO"
-.BR curl_share_cleanup (3),
-.BR curl_share_init (3)
+.BR CURLOPT_STDERR (3),
+.BR CURLMOPT_STDERR (3)

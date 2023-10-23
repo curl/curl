@@ -3027,6 +3027,7 @@ typedef enum {
   CURLSHOPT_DEBUGFUNCTION, /* share a debug function */
   CURLSHOPT_DEBUGDATA, /* share void* passed to debug function */
   CURLSHOPT_VERBOSE,   /* share verbose setting, long, != 0 for on */
+  CURLSHOPT_STDERR,    /* FILE handle to use instead of stderr */
   CURLSHOPT_LAST  /* never use */
 } CURLSHoption;
 

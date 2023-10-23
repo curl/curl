@@ -2542,6 +2542,7 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
     curl_multi_setopt(multi, CURLMOPT_DEBUGFUNCTION, tool_debug_cb);
     curl_multi_setopt(multi, CURLMOPT_DEBUGDATA, global);
     curl_multi_setopt(multi, CURLMOPT_VERBOSE, 1);
+    curl_multi_setopt(multi, CURLMOPT_STDERR, tool_stderr);
   }
 
   result = add_parallel_transfers(global, multi, share,
@@ -2993,6 +2994,7 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
             curl_share_setopt(share, CURLSHOPT_DEBUGFUNCTION, tool_debug_cb);
             curl_share_setopt(share, CURLSHOPT_DEBUGDATA, global);
             curl_share_setopt(share, CURLSHOPT_VERBOSE, 1L);
+            curl_share_setopt(share, CURLSHOPT_STDERR, tool_stderr);
           }
 
           /* Get the required arguments for each operation */

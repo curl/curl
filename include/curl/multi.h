@@ -408,6 +408,9 @@ typedef enum {
   /* talk a lot */
   CURLOPT(CURLMOPT_VERBOSE, CURLOPTTYPE_LONG, 19),
 
+  /* FILE handle to use instead of stderr */
+  CURLOPT(CURLMOPT_STDERR, CURLOPTTYPE_OBJECTPOINT, 20),
+
   CURLMOPT_LASTENTRY /* the last unused */
 } CURLMoption;
 

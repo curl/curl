@@ -111,6 +111,7 @@ man_MANS =                                      \
   CURLMOPT_PUSHFUNCTION.3                       \
   CURLMOPT_SOCKETDATA.3                         \
   CURLMOPT_SOCKETFUNCTION.3                     \
+  CURLMOPT_STDERR.3                             \
   CURLMOPT_TIMERDATA.3                          \
   CURLMOPT_TIMERFUNCTION.3                      \
   CURLMOPT_VERBOSE.3                            \
@@ -422,6 +423,7 @@ man_MANS =                                      \
   CURLSHOPT_DEBUGDATA.3                         \
   CURLSHOPT_LOCKFUNC.3                          \
   CURLSHOPT_SHARE.3                             \
+  CURLSHOPT_STDERR.3                            \
   CURLSHOPT_UNLOCKFUNC.3                        \
   CURLSHOPT_UNSHARE.3                           \
   CURLSHOPT_USERDATA.3                          \

@@ -44,6 +44,7 @@ curl_share_init(void)
     share->magic = CURL_GOOD_SHARE;
     share->specifier |= (1<<CURL_LOCK_DATA_SHARE);
     Curl_init_dnscache(&share->hostcache, 23);
+    share->err = stderr;
   }
 
   return share;
@@ -57,7 +58,6 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
   int type;
   curl_lock_function lockfunc;
   curl_unlock_function unlockfunc;
-  curl_debug_callback debugfunc;
   void *ptr;
   CURLSHcode res = CURLSHE_OK;
 
@@ -120,7 +120,13 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
       break;
 
     case CURL_LOCK_DATA_CONNECT:
-      if(Curl_conncache_init(&share->conn_cache, 103))
+      if(!Curl_conncache_init(&share->conn_cache, 103)) {
+        share->conn_cache.closure_handle->set.fdebug = share->fdebug;
+        share->conn_cache.closure_handle->set.debugdata = share->debugdata;
+        share->conn_cache.closure_handle->set.verbose = share->verbose;
+        share->conn_cache.closure_handle->set.err = share->err;
+      }
+      else
         res = CURLSHE_NOMEM;
       break;
 
@@ -199,20 +205,31 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
     break;
 
   case CURLSHOPT_DEBUGFUNCTION:
-    debugfunc = va_arg(param, curl_debug_callback);
-    share->fdebug = debugfunc;
+    share->fdebug = va_arg(param, curl_debug_callback);
+    if(share->conn_cache.closure_handle)
+      share->conn_cache.closure_handle->set.fdebug = share->fdebug;
     break;
 
   case CURLSHOPT_DEBUGDATA:
-    ptr = va_arg(param, void *);
-    share->debugdata = ptr;
+    share->debugdata = va_arg(param, void *);
+    if(share->conn_cache.closure_handle)
+      share->conn_cache.closure_handle->set.debugdata = share->debugdata;
     break;
 
-  case CURLSHOPT_VERBOSE: {
-    long flag = va_arg(param, long);
-    share->verbose = (flag != 0);
+  case CURLSHOPT_VERBOSE:
+    share->verbose = (0 != va_arg(param, long)) ? TRUE : FALSE;
+    if(share->conn_cache.closure_handle)
+      share->conn_cache.closure_handle->set.verbose = share->verbose;
     break;
-  }
+
+  case CURLSHOPT_STDERR:
+    share->err = va_arg(param, void *);
+    if(!share->err)
+      share->err = stderr;
+    if(share->conn_cache.closure_handle)
+      share->conn_cache.closure_handle->set.err = share->err;
+    break;
+
   default:
     res = CURLSHE_BAD_OPTION;
     break;
@@ -239,7 +256,7 @@ curl_share_cleanup(struct Curl_share *share)
     return CURLSHE_IN_USE;
   }
 
-  Curl_conncache_close_all_connections(&share->conn_cache, NULL, share);
+  Curl_conncache_close_all_connections(&share->conn_cache);
   Curl_conncache_destroy(&share->conn_cache);
   Curl_hash_destroy(&share->hostcache);
 
