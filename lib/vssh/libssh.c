@@ -1466,13 +1466,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
             state(data, SSH_STOP);
             break;
           }
-          /* since this counts what we send to the client, we include the
-             newline in this counter */
-          data->req.bytecount += sshc->readdir_len + 1;
 
-          /* output debug output if that is requested */
-          Curl_debug(data, CURLINFO_DATA_OUT, (char *)sshc->readdir_filename,
-                     sshc->readdir_len);
         }
         else {
           if(Curl_dyn_add(&sshc->readdir_buf, sshc->readdir_longentry)) {
@@ -1564,12 +1558,6 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
                                    Curl_dyn_ptr(&sshc->readdir_buf),
                                    Curl_dyn_len(&sshc->readdir_buf));
 
-      if(!result) {
-        /* output debug output if that is requested */
-        Curl_debug(data, CURLINFO_DATA_OUT, Curl_dyn_ptr(&sshc->readdir_buf),
-                   Curl_dyn_len(&sshc->readdir_buf));
-        data->req.bytecount += Curl_dyn_len(&sshc->readdir_buf);
-      }
       ssh_string_free_char(sshc->readdir_tmp);
       sshc->readdir_tmp = NULL;
 

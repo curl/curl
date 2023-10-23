@@ -172,17 +172,15 @@ static int hyper_each_header(void *userdata,
 
   Curl_debug(data, CURLINFO_HEADER_IN, headp, len);
 
-  if(!data->state.hconnect || !data->set.suppress_connect_headers) {
-    writetype = CLIENTWRITE_HEADER;
-    if(data->state.hconnect)
-      writetype |= CLIENTWRITE_CONNECT;
-    if(data->req.httpcode/100 == 1)
-      writetype |= CLIENTWRITE_1XX;
-    result = Curl_client_write(data, writetype, headp, len);
-    if(result) {
-      data->state.hresult = CURLE_ABORTED_BY_CALLBACK;
-      return HYPER_ITER_BREAK;
-    }
+  writetype = CLIENTWRITE_HEADER;
+  if(data->state.hconnect)
+    writetype |= CLIENTWRITE_CONNECT;
+  if(data->req.httpcode/100 == 1)
+    writetype |= CLIENTWRITE_1XX;
+  result = Curl_client_write(data, writetype, headp, len);
+  if(result) {
+    data->state.hresult = CURLE_ABORTED_BY_CALLBACK;
+    return HYPER_ITER_BREAK;
   }
 
   result = Curl_bump_headersize(data, len, FALSE);
@@ -201,7 +199,7 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
   struct SingleRequest *k = &data->req;
   CURLcode result = CURLE_OK;
 
-  if(0 == k->bodywrites++) {
+  if(0 == k->bodywrites) {
     bool done = FALSE;
 #if defined(USE_NTLM)
     struct connectdata *conn = data->conn;
@@ -241,11 +239,6 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
       return HYPER_ITER_BREAK;
     }
   }
-  if(k->ignorebody)
-    return HYPER_ITER_CONTINUE;
-  if(0 == len)
-    return HYPER_ITER_CONTINUE;
-  Curl_debug(data, CURLINFO_DATA_IN, buf, len);
   result = Curl_client_write(data, CLIENTWRITE_BODY, buf, len);
 
   if(result) {
@@ -253,12 +246,6 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
     return HYPER_ITER_BREAK;
   }
 
-  data->req.bytecount += len;
-  result = Curl_pgrsSetDownloadCounter(data, data->req.bytecount);
-  if(result) {
-    data->state.hresult = result;
-    return HYPER_ITER_BREAK;
-  }
   return HYPER_ITER_CONTINUE;
 }
 
@@ -310,13 +297,14 @@ static CURLcode status_line(struct Curl_easy *data,
   Curl_debug(data, CURLINFO_HEADER_IN, Curl_dyn_ptr(&data->state.headerb),
              len);
 
-  if(!data->state.hconnect || !data->set.suppress_connect_headers) {
-    writetype = CLIENTWRITE_HEADER|CLIENTWRITE_STATUS;
-    result = Curl_client_write(data, writetype,
-                               Curl_dyn_ptr(&data->state.headerb), len);
-    if(result)
-      return result;
-  }
+  writetype = CLIENTWRITE_HEADER|CLIENTWRITE_STATUS;
+  if(data->state.hconnect)
+    writetype |= CLIENTWRITE_CONNECT;
+  result = Curl_client_write(data, writetype,
+                             Curl_dyn_ptr(&data->state.headerb), len);
+  if(result)
+    return result;
+
   result = Curl_bump_headersize(data, len, FALSE);
   return result;
 }

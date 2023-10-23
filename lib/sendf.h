@@ -50,43 +50,122 @@
 #define CLIENTWRITE_1XX     (1<<5) /* a 1xx response related HEADER */
 #define CLIENTWRITE_TRAILER (1<<6) /* a trailer HEADER */
 
+/**
+ * Write `len` bytes at `prt` to the client. `type` indicates what
+ * kind of data is being written.
+ */
 CURLcode Curl_client_write(struct Curl_easy *data, int type, char *ptr,
                            size_t len) WARN_UNUSED_RESULT;
 
+/**
+ * For a paused transfer, there might be buffered data held back.
+ * Attempt to flush this data to the client. This *may* trigger
+ * another pause of the transfer.
+ */
 CURLcode Curl_client_unpause(struct Curl_easy *data);
+
+/**
+ * Free all resources related to client writing.
+ */
 void Curl_client_cleanup(struct Curl_easy *data);
 
-struct contenc_writer {
-  const struct content_encoding *handler;  /* Encoding handler. */
-  struct contenc_writer *downstream;  /* Downstream writer. */
-  unsigned int order; /* Ordering within writer stack. */
+/**
+ * Client Writers - a chain passing transfer BODY data to the client.
+ * Main application: HTTP and related protocols
+ * Other uses: monitoring of download progress
+ *
+ * Writers in the chain are order by their `phase`. First come all
+ * writers in CURL_CW_RAW, followed by any in CURL_CW_TRANSFER_DECODE,
+ * followed by any in CURL_CW_PROTOCOL, etc.
+ *
+ * When adding a writer, it is inserted as first in its phase. This means
+ * the order of adding writers of the same phase matters, but writers for
+ * different phases may be added in any order.
+ *
+ * Writers which do modify the BODY data written are expected to be of
+ * phases TRANSFER_DECODE or CONTENT_DECODE. The other phases are intended
+ * for monitoring writers. Which do *not* modify the data but gather
+ * statistics or update progress reporting.
+ */
+
+/* Phase a writer operates at. */
+typedef enum {
+  CURL_CW_RAW,  /* raw data written, before any decoding */
+  CURL_CW_TRANSFER_DECODE, /* remove transfer-encodings */
+  CURL_CW_PROTOCOL, /* after transfer, but before content decoding */
+  CURL_CW_CONTENT_DECODE, /* remove content-encodings */
+  CURL_CW_CLIENT  /* data written to client */
+} Curl_cwriter_phase;
+
+/* Client Writer Type, provides the implementation */
+struct Curl_cwtype {
+  const char *name;        /* writer name. */
+  const char *alias;       /* writer name alias, maybe NULL. */
+  CURLcode (*do_init)(struct Curl_easy *data,
+                      struct Curl_cwriter *writer);
+  CURLcode (*do_write)(struct Curl_easy *data,
+                       struct Curl_cwriter *writer, int type,
+                       const char *buf, size_t nbytes);
+  void (*do_close)(struct Curl_easy *data,
+                   struct Curl_cwriter *writer);
+  size_t cwriter_size;  /* sizeof() allocated struct Curl_cwriter */
 };
 
-/* Content encoding writer. */
-struct content_encoding {
-  const char *name;        /* Encoding name. */
-  const char *alias;       /* Encoding name alias. */
-  CURLcode (*init_writer)(struct Curl_easy *data,
-                          struct contenc_writer *writer);
-  CURLcode (*unencode_write)(struct Curl_easy *data,
-                             struct contenc_writer *writer,
-                             const char *buf, size_t nbytes);
-  void (*close_writer)(struct Curl_easy *data,
-                       struct contenc_writer *writer);
-  size_t writersize;
+/* Client writer instance */
+struct Curl_cwriter {
+  const struct Curl_cwtype *cwt;  /* type implementation */
+  struct Curl_cwriter *next;  /* Downstream writer. */
+  Curl_cwriter_phase phase; /* phase at which it operates */
 };
 
+/**
+ * Create a new cwriter instance with given type and phase. Is not
+ * inserted into the writer chain by this call.
+ * Invokes `writer->do_init()`.
+ */
+CURLcode Curl_cwriter_create(struct Curl_cwriter **pwriter,
+                             struct Curl_easy *data,
+                             const struct Curl_cwtype *ce_handler,
+                             Curl_cwriter_phase phase);
 
-CURLcode Curl_client_create_writer(struct contenc_writer **pwriter,
-                                   struct Curl_easy *data,
-                                   const struct content_encoding *ce_handler,
-                                   int order);
+/**
+ * Free a cwriter instance.
+ * Invokes `writer->do_close()`.
+ */
+void Curl_cwriter_free(struct Curl_easy *data,
+                       struct Curl_cwriter *writer);
 
-void Curl_client_free_writer(struct Curl_easy *data,
-                             struct contenc_writer *writer);
+/**
+ * Count the number of writers installed of the given phase.
+ */
+size_t Curl_cwriter_count(struct Curl_easy *data, Curl_cwriter_phase phase);
 
-CURLcode Curl_client_add_writer(struct Curl_easy *data,
-                                struct contenc_writer *writer);
+/**
+ * Adds a writer to the transfer's writer chain.
+ * The writers `phase` determines where in the chain it is inserted.
+ */
+CURLcode Curl_cwriter_add(struct Curl_easy *data,
+                          struct Curl_cwriter *writer);
+
+/**
+ * Convenience method for calling `writer->do_write()` that
+ * checks for NULL writer.
+ */
+CURLcode Curl_cwriter_write(struct Curl_easy *data,
+                            struct Curl_cwriter *writer, int type,
+                            const char *buf, size_t nbytes);
+
+/**
+ * Default implementations for do_init, do_write, do_close that
+ * do nothing and pass the data through.
+ */
+CURLcode Curl_cwriter_def_init(struct Curl_easy *data,
+                               struct Curl_cwriter *writer);
+CURLcode Curl_cwriter_def_write(struct Curl_easy *data,
+                                struct Curl_cwriter *writer, int type,
+                                const char *buf, size_t nbytes);
+void Curl_cwriter_def_close(struct Curl_easy *data,
+                            struct Curl_cwriter *writer);
 
 
 /* internal read-function, does plain socket, SSL and krb4 */
