@@ -1610,7 +1610,7 @@ static int error_callback(nghttp2_session *session,
   struct Curl_cfilter *cf = userp;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
   (void)session;
-  failf(data, "Error: %.*s", (int)len, msg);
+  failf(data, "%.*s", (int)len, msg);
   return 0;
 }
 #endif
