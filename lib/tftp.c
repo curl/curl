@@ -1107,7 +1107,6 @@ static CURLcode tftp_receive_packet(struct Curl_easy *data)
   CURLcode              result = CURLE_OK;
   struct connectdata *conn = data->conn;
   struct tftp_state_data *state = conn->proto.tftpc;
-  struct SingleRequest  *k = &data->req;
 
   /* Receive the packet */
   fromlen = sizeof(fromaddr);
@@ -1141,11 +1140,6 @@ static CURLcode tftp_receive_packet(struct Curl_easy *data)
         result = Curl_client_write(data, CLIENTWRITE_BODY,
                                    (char *)state->rpacket.data + 4,
                                    state->rbytes-4);
-        if(!result) {
-          k->bytecount += state->rbytes-4;
-          result = Curl_pgrsSetDownloadCounter(data,
-                                               (curl_off_t) k->bytecount);
-        }
         if(result) {
           tftp_state_machine(state, TFTP_EVENT_ERROR);
           return result;

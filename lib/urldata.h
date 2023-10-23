@@ -685,7 +685,7 @@ struct SingleRequest {
   enum upgrade101 upgr101;      /* 101 upgrade state */
 
   /* Content unencoding stack. See sec 3.5, RFC2616. */
-  struct contenc_writer *writer_stack;
+  struct Curl_cwriter *writer_stack;
   time_t timeofdoc;
   long bodywrites;
   char *location;   /* This points to an allocated version of the Location:

@@ -50,12 +50,16 @@
 #include "strdup.h"
 #include "http2.h"
 #include "headers.h"
+#include "progress.h"
 #include "ws.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
+
+
+static CURLcode do_init_stack(struct Curl_easy *data);
 
 #if defined(CURL_DO_LINEEND_CONV) && !defined(CURL_DISABLE_FTP)
 /*
@@ -385,17 +389,17 @@ static CURLcode chop_write(struct Curl_easy *data,
    the future to leave the original data alone.
  */
 CURLcode Curl_client_write(struct Curl_easy *data,
-                           int type,
-                           char *ptr,
-                           size_t len)
+                           int type, char *buf, size_t blen)
 {
+  CURLcode result;
+
 #if !defined(CURL_DISABLE_FTP) && defined(CURL_DO_LINEEND_CONV)
   /* FTP data may need conversion. */
   if((type & CLIENTWRITE_BODY) &&
      (data->conn->handler->protocol & PROTO_FAMILY_FTP) &&
      data->conn->proto.ftpc.transfertype == 'A') {
     /* convert end-of-line markers */
-    len = convert_lineends(data, ptr, len);
+    blen = convert_lineends(data, buf, blen);
   }
 #endif
   /* it is one of those, at least */
@@ -405,14 +409,14 @@ CURLcode Curl_client_write(struct Curl_easy *data,
   /* INFO is only INFO */
   DEBUGASSERT(!(type & CLIENTWRITE_INFO) || (type == CLIENTWRITE_INFO));
 
-  if(type == CLIENTWRITE_BODY) {
-    if(data->req.ignorebody)
-      return CURLE_OK;
-
-    if(data->req.writer_stack && !data->set.http_ce_skip)
-      return Curl_unencode_write(data, data->req.writer_stack, ptr, len);
+  if(!data->req.writer_stack) {
+    result = do_init_stack(data);
+    if(result)
+      return result;
+    DEBUGASSERT(data->req.writer_stack);
   }
-  return chop_write(data, type, FALSE, ptr, len);
+
+  return Curl_cwriter_write(data, data->req.writer_stack, type, buf, blen);
 }
 
 CURLcode Curl_client_unpause(struct Curl_easy *data)
@@ -449,12 +453,12 @@ CURLcode Curl_client_unpause(struct Curl_easy *data)
 
 void Curl_client_cleanup(struct Curl_easy *data)
 {
-  struct contenc_writer *writer = data->req.writer_stack;
+  struct Curl_cwriter *writer = data->req.writer_stack;
   size_t i;
 
   while(writer) {
-    data->req.writer_stack = writer->downstream;
-    writer->handler->close_writer(data, writer);
+    data->req.writer_stack = writer->next;
+    writer->cwt->do_close(data, writer);
     free(writer);
     writer = data->req.writer_stack;
   }
@@ -466,58 +470,152 @@ void Curl_client_cleanup(struct Curl_easy *data)
 
 }
 
-/* Real client writer: no downstream. */
-static CURLcode client_cew_init(struct Curl_easy *data,
-                                struct contenc_writer *writer)
+/* Write data using an unencoding writer stack. "nbytes" is not
+   allowed to be 0. */
+CURLcode Curl_cwriter_write(struct Curl_easy *data,
+                             struct Curl_cwriter *writer, int type,
+                             const char *buf, size_t nbytes)
 {
-  (void) data;
+  if(!nbytes)
+    return CURLE_OK;
+  if(!writer)
+    return CURLE_WRITE_ERROR;
+  return writer->cwt->do_write(data, writer, type, buf, nbytes);
+}
+
+CURLcode Curl_cwriter_def_init(struct Curl_easy *data,
+                               struct Curl_cwriter *writer)
+{
+  (void)data;
   (void)writer;
   return CURLE_OK;
 }
 
-static CURLcode client_cew_write(struct Curl_easy *data,
-                                 struct contenc_writer *writer,
-                                 const char *buf, size_t nbytes)
+CURLcode Curl_cwriter_def_write(struct Curl_easy *data,
+                                struct Curl_cwriter *writer, int type,
+                                const char *buf, size_t nbytes)
 {
-  (void)writer;
-  if(!nbytes || data->req.ignorebody)
-    return CURLE_OK;
-  return chop_write(data, CLIENTWRITE_BODY, FALSE, (char *)buf, nbytes);
+  return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
 }
 
-static void client_cew_close(struct Curl_easy *data,
-                             struct contenc_writer *writer)
+void Curl_cwriter_def_close(struct Curl_easy *data,
+                            struct Curl_cwriter *writer)
 {
   (void) data;
   (void) writer;
 }
 
-static const struct content_encoding client_cew = {
+/* Real client writer to installed callbacks. */
+static CURLcode cw_client_write(struct Curl_easy *data,
+                                struct Curl_cwriter *writer, int type,
+                                const char *buf, size_t nbytes)
+{
+  (void)writer;
+  if(!nbytes)
+    return CURLE_OK;
+  return chop_write(data, type, FALSE, (char *)buf, nbytes);
+}
+
+static const struct Curl_cwtype cw_client = {
+  "client",
   NULL,
+  Curl_cwriter_def_init,
+  cw_client_write,
+  Curl_cwriter_def_close,
+  sizeof(struct Curl_cwriter)
+};
+
+/* Download client writer in phase CURL_CW_PROTOCOL that
+ * sees the "real" download body data. */
+static CURLcode cw_download_write(struct Curl_easy *data,
+                                  struct Curl_cwriter *writer, int type,
+                                  const char *buf, size_t nbytes)
+{
+  CURLcode result;
+  size_t nwrite;
+
+  if(!(type & CLIENTWRITE_BODY)) {
+    if((type & CLIENTWRITE_CONNECT) && data->set.suppress_connect_headers)
+      return CURLE_OK;
+    return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
+  }
+
+  nwrite = nbytes;
+  data->req.bytecount += nbytes;
+  ++data->req.bodywrites;
+  /* Enforce `max_filesize` also for downloads where we ignore the body.
+   * Also, write body data up to the max size. This ensures that we
+   * always produce the same result, even when buffers vary due to
+   * connection timings. test457 fails in CI randomly otherwise. */
+  if(data->set.max_filesize &&
+     (data->req.bytecount > data->set.max_filesize)) {
+    curl_off_t nexcess;
+    failf(data, "Exceeded the maximum allowed file size "
+          "(%" CURL_FORMAT_CURL_OFF_T ")",
+          data->set.max_filesize);
+    nexcess = data->req.bytecount - data->set.max_filesize;
+    nwrite = (nexcess >= (curl_off_t)nbytes)? 0 : (nbytes - (size_t)nexcess);
+  }
+
+  if(!data->req.ignorebody && nwrite) {
+    result = Curl_cwriter_write(data, writer->next, type, buf, nwrite);
+    if(result)
+      return result;
+  }
+  result = Curl_pgrsSetDownloadCounter(data, data->req.bytecount);
+  if(result)
+    return result;
+
+  return (nwrite == nbytes)? CURLE_OK : CURLE_FILESIZE_EXCEEDED;
+}
+
+static const struct Curl_cwtype cw_download = {
+  "download",
   NULL,
-  client_cew_init,
-  client_cew_write,
-  client_cew_close,
-  sizeof(struct contenc_writer)
+  Curl_cwriter_def_init,
+  cw_download_write,
+  Curl_cwriter_def_close,
+  sizeof(struct Curl_cwriter)
+};
+
+/* RAW client writer in phase CURL_CW_RAW that
+ * enabled tracing of raw data. */
+static CURLcode cw_raw_write(struct Curl_easy *data,
+                             struct Curl_cwriter *writer, int type,
+                             const char *buf, size_t nbytes)
+{
+  if(type & CLIENTWRITE_BODY && data->set.verbose && !data->req.ignorebody) {
+    Curl_debug(data, CURLINFO_DATA_IN, (char *)buf, nbytes);
+  }
+  return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
+}
+
+static const struct Curl_cwtype cw_raw = {
+  "raw",
+  NULL,
+  Curl_cwriter_def_init,
+  cw_raw_write,
+  Curl_cwriter_def_close,
+  sizeof(struct Curl_cwriter)
 };
 
 /* Create an unencoding writer stage using the given handler. */
-CURLcode Curl_client_create_writer(struct contenc_writer **pwriter,
+CURLcode Curl_cwriter_create(struct Curl_cwriter **pwriter,
                                    struct Curl_easy *data,
-                                   const struct content_encoding *ce_handler,
-                                   int order)
+                                   const struct Curl_cwtype *cwt,
+                                   Curl_cwriter_phase phase)
 {
-  struct contenc_writer *writer;
+  struct Curl_cwriter *writer;
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
-  DEBUGASSERT(ce_handler->writersize >= sizeof(struct contenc_writer));
-  writer = (struct contenc_writer *) calloc(1, ce_handler->writersize);
+  DEBUGASSERT(cwt->cwriter_size >= sizeof(struct Curl_cwriter));
+  writer = (struct Curl_cwriter *) calloc(1, cwt->cwriter_size);
   if(!writer)
     goto out;
 
-  writer->handler = ce_handler;
-  writer->order = order;
-  result = ce_handler->init_writer(data, writer);
+  writer->cwt = cwt;
+  writer->phase = phase;
+  result = cwt->do_init(data, writer);
 
 out:
   *pwriter = result? NULL : writer;
@@ -526,55 +624,74 @@ out:
   return result;
 }
 
-void Curl_client_free_writer(struct Curl_easy *data,
-                             struct contenc_writer *writer)
+void Curl_cwriter_free(struct Curl_easy *data,
+                             struct Curl_cwriter *writer)
 {
   if(writer) {
-    writer->handler->close_writer(data, writer);
+    writer->cwt->do_close(data, writer);
     free(writer);
   }
 }
 
-/* allow no more than 5 "chained" compression steps */
-#define MAX_ENCODE_STACK 5
-
-
-static CURLcode init_writer_stack(struct Curl_easy *data)
+size_t Curl_cwriter_count(struct Curl_easy *data, Curl_cwriter_phase phase)
 {
-  DEBUGASSERT(!data->req.writer_stack);
-  return Curl_client_create_writer(&data->req.writer_stack,
-                                   data, &client_cew, 0);
+  struct Curl_cwriter *w;
+  size_t n = 0;
+
+  for(w = data->req.writer_stack; w; w = w->next) {
+    if(w->phase == phase)
+      ++n;
+  }
+  return n;
 }
 
-CURLcode Curl_client_add_writer(struct Curl_easy *data,
-                                struct contenc_writer *writer)
+static CURLcode do_init_stack(struct Curl_easy *data)
 {
+  struct Curl_cwriter *writer;
   CURLcode result;
 
-  if(!data->req.writer_stack) {
-    result = init_writer_stack(data);
+  DEBUGASSERT(!data->req.writer_stack);
+  result = Curl_cwriter_create(&data->req.writer_stack,
+                               data, &cw_client, CURL_CW_CLIENT);
+  if(result)
+    return result;
+
+  result = Curl_cwriter_create(&writer, data, &cw_download, CURL_CW_PROTOCOL);
+  if(result)
+    return result;
+  result = Curl_cwriter_add(data, writer);
+  if(result) {
+    Curl_cwriter_free(data, writer);
+  }
+
+  result = Curl_cwriter_create(&writer, data, &cw_raw, CURL_CW_RAW);
+  if(result)
+    return result;
+  result = Curl_cwriter_add(data, writer);
+  if(result) {
+    Curl_cwriter_free(data, writer);
+  }
+  return result;
+}
+
+CURLcode Curl_cwriter_add(struct Curl_easy *data,
+                          struct Curl_cwriter *writer)
+{
+  CURLcode result;
+  struct Curl_cwriter **anchor = &data->req.writer_stack;
+
+  if(!*anchor) {
+    result = do_init_stack(data);
     if(result)
       return result;
   }
 
-  if(data->req.writer_stack_depth++ >= MAX_ENCODE_STACK) {
-    failf(data, "Reject response due to more than %u content encodings",
-          MAX_ENCODE_STACK);
-    return CURLE_BAD_CONTENT_ENCODING;
-  }
-
-  /* Stack the unencoding stage. */
-  if(writer->order >= data->req.writer_stack->order) {
-    writer->downstream = data->req.writer_stack;
-    data->req.writer_stack = writer;
-  }
-  else {
-    struct contenc_writer *w = data->req.writer_stack;
-    while(w->downstream && writer->order < w->downstream->order)
-      w = w->downstream;
-    writer->downstream = w->downstream;
-    w->downstream = writer;
-  }
+  /* Insert the writer as first in its phase.
+   * Skip existing writers of lower phases. */
+  while(*anchor && (*anchor)->phase < writer->phase)
+    anchor = &((*anchor)->next);
+  writer->next = *anchor;
+  *anchor = writer;
   return CURLE_OK;
 }
 
