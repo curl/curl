@@ -1882,7 +1882,6 @@ static void ossl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     if(cf->next && cf->next->connected) {
       char buf[1024];
       int nread, err;
-      long sslerr;
 
       /* Maybe the server has already sent a close notify alert.
          Read it to avoid an RST on the TCP connection. */
@@ -1908,13 +1907,16 @@ static void ossl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
           CURL_TRC_CF((data, cf, "SSL shutdown send blocked"));
           break;
         default:
-          sslerr = ERR_get_error();
-          (void)sslerr;
-          CURL_TRC_CF((data, cf, "SSL shutdown, error: '%s', errno %d",
-                      (sslerr ?
-                       ossl_strerror(sslerr, buf, sizeof(buf)) :
-                       SSL_ERROR_to_str(err)),
-                      SOCKERRNO));
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+          {
+            long sslerr = ERR_get_error();
+            CURL_TRC_CF((data, cf, "SSL shutdown, error: '%s', errno %d",
+                        (sslerr ?
+                         ossl_strerror(sslerr, buf, sizeof(buf)) :
+                         SSL_ERROR_to_str(err)),
+                        SOCKERRNO));
+          }
+#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
           break;
         }
       }

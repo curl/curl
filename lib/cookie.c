@@ -1389,6 +1389,7 @@ struct Cookie *Curl_cookie_getlist(struct Curl_easy *data,
   bool is_ip;
   const size_t myhash = cookiehash(host);
 
+  (void)data;
   if(!c || !c->cookies[myhash])
     return NULL; /* no cookie struct or no cookies in the struct */
 
@@ -1435,7 +1436,6 @@ struct Cookie *Curl_cookie_getlist(struct Curl_easy *data,
 
             matches++;
             if(matches >= MAX_COOKIE_SEND_AMOUNT) {
-              (void)data;
               infof((data, "Included max number of cookies (%zu)) in request!",
                     matches));
               break;

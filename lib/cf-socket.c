@@ -127,14 +127,13 @@ static void nosigpipe(struct Curl_easy *data,
                       curl_socket_t sockfd)
 {
   int onoff = 1;
+  (void)data;
   if(setsockopt(sockfd, SOL_SOCKET, SO_NOSIGPIPE, (void *)&onoff,
                 sizeof(onoff)) < 0) {
 #if !defined(CURL_DISABLE_VERBOSE_STRINGS)
     char buffer[STRERROR_LEN];
     infof((data, "Could not set SO_NOSIGPIPE: %s",
           Curl_strerror(SOCKERRNO, buffer, sizeof(buffer))));
-#else
-    (void)data;
 #endif
   }
 }
@@ -1289,8 +1288,7 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct cf_socket_ctx *ctx = cf->ctx;
   curl_socket_t fdsave;
   ssize_t nwritten;
-  size_t orig_len = len;
-  (void)orig_len;
+  size_t blen = len;
 
   *err = CURLE_OK;
   fdsave = cf->conn->sock[cf->sockindex];
@@ -1302,7 +1300,7 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     unsigned char c;
     Curl_rand(data, &c, 1);
     if(c >= ((100-ctx->wblock_percent)*256/100)) {
-      CURL_TRC_CF((data, cf, "send(len=%zu) SIMULATE EWOULDBLOCK", orig_len));
+      CURL_TRC_CF((data, cf, "send(len=%zu) SIMULATE EWOULDBLOCK", len));
       *err = CURLE_AGAIN;
       nwritten = -1;
       cf->conn->sock[cf->sockindex] = fdsave;
@@ -1310,24 +1308,24 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
   }
   if(cf->cft != &Curl_cft_udp && ctx->wpartial_percent > 0 && len > 8) {
-    len = len * ctx->wpartial_percent / 100;
-    if(!len)
-      len = 1;
+    blen = len * ctx->wpartial_percent / 100;
+    if(!blen)
+      blen = 1;
     CURL_TRC_CF((data, cf, "send(len=%zu) SIMULATE partial write of %zu bytes",
-                orig_len, len));
+                len, blen));
   }
 #endif
 
 #if defined(MSG_FASTOPEN) && !defined(TCP_FASTOPEN_CONNECT) /* Linux */
   if(cf->conn->bits.tcp_fastopen) {
-    nwritten = sendto(ctx->sock, buf, len, MSG_FASTOPEN,
+    nwritten = sendto(ctx->sock, buf, blen, MSG_FASTOPEN,
                       &cf->conn->remote_addr->sa_addr,
                       cf->conn->remote_addr->addrlen);
     cf->conn->bits.tcp_fastopen = FALSE;
   }
   else
 #endif
-    nwritten = swrite(ctx->sock, buf, len);
+    nwritten = swrite(ctx->sock, buf, blen);
 
   if(-1 == nwritten) {
     int sockerr = SOCKERRNO;
@@ -1357,7 +1355,7 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
   CURL_TRC_CF((data, cf, "send(len=%zu) -> %d, err=%d",
-              orig_len, (int)nwritten, *err));
+              len, (int)nwritten, *err));
   cf->conn->sock[cf->sockindex] = fdsave;
   return nwritten;
 }
