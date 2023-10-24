@@ -570,11 +570,14 @@ which is useful if the test case needs a file to act on.
 If `nonewline="yes"` is used, the created file will have the final newline
 stripped off.
 
-### `<stdin [nonewline="yes"]>`
+### `<stdin [nonewline="yes"] [pipe="yes"]>`
 Pass this given data on stdin to the tool.
 
 If `nonewline` is set, we will cut off the trailing newline of this given data
 before comparing with the one actually received by the client
+
+If `pipe` is set, stdin will be a pipe, otherwise it is a regular file by
+default.
 
 ## `<verify>`
 ### `<errorcode>`

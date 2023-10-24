@@ -898,6 +898,7 @@ sub singletest_run {
     }
 
     my @stdintest = getpart("client", "stdin");
+    my $stdincmd = "";
 
     if(@stdintest) {
         my $stdinfile="$LOGDIR/stdin-for-$testnum";
@@ -910,7 +911,7 @@ sub singletest_run {
 
         writearray($stdinfile, \@stdintest);
 
-        $cmdargs .= " <$stdinfile";
+        $stdincmd = $hash{'pipe'} ? "cat $stdinfile | " : "<$stdinfile ";
     }
 
     if(!$tool) {
@@ -930,6 +931,8 @@ sub singletest_run {
 
     $CMDLINE .= "$cmdargs > " . stdoutfilename($LOGDIR, $testnum) .
                 " 2> " . stderrfilename($LOGDIR, $testnum);
+
+    $CMDLINE = "$stdincmd$CMDLINE";
 
     if($verbose) {
         logmsg "$CMDLINE\n";
