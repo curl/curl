@@ -122,7 +122,6 @@
   #define HAVE_SIGSETJMP  1
   #define HAVE_SYS_TIME_H 1
   #define HAVE_TERMIOS_H  1
-  #define HAVE_VARIADIC_MACROS_GCC 1
 
 #elif defined(__HIGHC__)
   #define HAVE_SYS_TIME_H 1
