@@ -455,7 +455,7 @@ static const struct feat features_table[] = {
 #ifndef CURL_DISABLE_HSTS
   FEATURE("HSTS",        NULL,                CURL_VERSION_HSTS),
 #endif
-#if defined(USE_NGHTTP2) || defined(USE_HYPER)
+#if defined(USE_NGHTTP2)
   FEATURE("HTTP2",       NULL,                CURL_VERSION_HTTP2),
 #endif
 #if defined(ENABLE_QUIC)

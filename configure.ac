@@ -174,7 +174,7 @@ curl_headers_msg="enabled (--disable-headers-api)"
      curl_ws_msg="no      (--enable-websockets)"
     ssl_backends=
      curl_h1_msg="enabled (internal)"
-     curl_h2_msg="no      (--with-nghttp2, --with-hyper)"
+     curl_h2_msg="no      (--with-nghttp2)"
      curl_h3_msg="no      (--with-ngtcp2 --with-nghttp3, --with-quiche, --with-msh3)"
 
 enable_altsvc="yes"
@@ -803,7 +803,6 @@ if test X"$want_hyper" != Xno; then
           experimental="$experimental Hyper"
           AC_MSG_NOTICE([Hyper support is experimental])
           curl_h1_msg="enabled (Hyper)"
-          curl_h2_msg=$curl_h1_msg
           HYPER_ENABLED=1
           AC_DEFINE(USE_HYPER, 1, [if hyper is in use])
           AC_SUBST(USE_HYPER, [1])
@@ -4576,7 +4575,7 @@ if test "x$USE_TLS_SRP" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES TLS-SRP"
 fi
 
-if test "x$USE_NGHTTP2" = "x1" -o "x$USE_HYPER" = "x1"; then
+if test "x$USE_NGHTTP2" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES HTTP2"
 fi
 
