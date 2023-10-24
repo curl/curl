@@ -53,6 +53,35 @@ this keyword. Remember that the exclamation marks and spaces will need to be
 quoted somehow when entered at many command shells.
 
 Prefix a keyword with a tilde (~) to still run it, but ignore the results.
+
+.SH "OUTPUT"
+
+When running without -s (short output), for instance when running runtests.pl
+directly rather than via make, each test will emits a pair of lines like this:
+
+Test 0045...[simple HTTP Location: without protocol in initial URL]
+--pd---e-v- OK (45  out of 1427, remaining: 16:08, took 6.188s, duration: 00:31)
+
+the first line contains the test number and a description. On the second line,
+the characters at the beginning are flags indicating which aspects of curl's
+behavior were checked by the test:
+
+    s stdout
+    r stderr
+    p protocol
+    d data
+    u upload
+    P proxy
+    o output
+    e exit code
+    m memory
+    v valgrind
+    E the test was run event-based
+
+The remainder of the second line contains the test result, current test sequence,
+total number of tests to be run and an estimated amount of time to complete the
+test run.
+
 .SH OPTIONS
 .IP "-a"
 Continue running the rest of the test cases even if one test fails. By
@@ -91,9 +120,6 @@ start.
 Run the given test(s) with gdb as a windowed application.
 .IP "-h, --help"
 Displays a help text about this program's command line options.
-.IP "-k"
-Keep output and log files in log/ after a test run, even if no error was
-detected. Useful for debugging.
 .IP "-j[num]"
 Spawn num processes to run tests. This defaults to 0 to run tests serially
 within a single process. Using a number greater than one allows multiple tests
@@ -101,6 +127,9 @@ to run in parallel, speeding up a test run. The optimum number is dependent on
 the system and set of tests to run, but 7*number of CPU cores is a good figure
 to start with, or 1.3*number of CPU cores if Valgrind is in use. Enabling
 parallel tests is not recommended in conjunction with the \-g option.
+.IP "-k"
+Keep output and log files in log/ after a test run, even if no error was
+detected. Useful for debugging.
 .IP "-L <file>"
 Load and execute the specified file which should contain perl code.
 This option allows one to change \fIruntests.pl\fP behaviour by overwriting
