@@ -120,14 +120,7 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
       break;
 
     case CURL_LOCK_DATA_CONNECT:
-      if(!Curl_conncache_init(&share->conn_cache, 103)) {
-        share->conn_cache.closure_handle->set.fdebug = share->fdebug;
-        share->conn_cache.closure_handle->set.debugdata = share->debugdata;
-        share->conn_cache.closure_handle->set.verbose = share->verbose;
-        share->conn_cache.closure_handle->set.err = share->err;
-      }
-      else
-        res = CURLSHE_NOMEM;
+      Curl_conncache_init(&share->conn_cache, 103);
       break;
 
     case CURL_LOCK_DATA_PSL:
@@ -206,28 +199,20 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
 
   case CURLSHOPT_DEBUGFUNCTION:
     share->fdebug = va_arg(param, curl_debug_callback);
-    if(share->conn_cache.closure_handle)
-      share->conn_cache.closure_handle->set.fdebug = share->fdebug;
     break;
 
   case CURLSHOPT_DEBUGDATA:
     share->debugdata = va_arg(param, void *);
-    if(share->conn_cache.closure_handle)
-      share->conn_cache.closure_handle->set.debugdata = share->debugdata;
     break;
 
   case CURLSHOPT_VERBOSE:
     share->verbose = (0 != va_arg(param, long)) ? TRUE : FALSE;
-    if(share->conn_cache.closure_handle)
-      share->conn_cache.closure_handle->set.verbose = share->verbose;
     break;
 
   case CURLSHOPT_STDERR:
     share->err = va_arg(param, void *);
     if(!share->err)
       share->err = stderr;
-    if(share->conn_cache.closure_handle)
-      share->conn_cache.closure_handle->set.err = share->err;
     break;
 
   default:
@@ -256,7 +241,7 @@ curl_share_cleanup(struct Curl_share *share)
     return CURLSHE_IN_USE;
   }
 
-  Curl_conncache_close_all_connections(&share->conn_cache);
+  Curl_conncache_close_all_connections(&share->conn_cache, NULL, share);
   Curl_conncache_destroy(&share->conn_cache);
   Curl_hash_destroy(&share->hostcache);
 

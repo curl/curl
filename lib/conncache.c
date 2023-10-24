@@ -101,19 +101,10 @@ static void free_bundle_hash_entry(void *freethis)
   bundle_destroy(b);
 }
 
-int Curl_conncache_init(struct conncache *connc, int size)
+void Curl_conncache_init(struct conncache *connc, int size)
 {
-  /* allocate a new easy handle to use when closing cached connections */
-  connc->closure_handle = curl_easy_init();
-  if(!connc->closure_handle)
-    return 1; /* bad */
-  connc->closure_handle->state.internal = true;
-
   Curl_hash_init(&connc->hash, size, Curl_hash_str,
                  Curl_str_key_compare, free_bundle_hash_entry);
-  connc->closure_handle->state.conn_cache = connc;
-
-  return 0; /* good */
 }
 
 void Curl_conncache_destroy(struct conncache *connc)
@@ -514,34 +505,62 @@ Curl_conncache_extract_oldest(struct Curl_easy *data)
   return conn_candidate;
 }
 
-void Curl_conncache_close_all_connections(struct conncache *connc)
+CURLcode Curl_conncache_close_all_connections(struct conncache *connc,
+                                              struct Curl_multi *multi,
+                                              struct Curl_share *share)
 {
   struct connectdata *conn;
   char buffer[READBUFFER_MIN + 1];
+  struct Curl_easy *data;
   SIGPIPE_VARIABLE(pipe_st);
-  if(!connc->closure_handle)
-    return;
-  connc->closure_handle->state.buffer = buffer;
-  connc->closure_handle->set.buffer_size = READBUFFER_MIN;
+
+  if(!Curl_hash_count(&connc->hash))
+    return CURLE_OK;
+
+  /* allocate a new easy handle to use when closing cached connections */
+  data = curl_easy_init();
+  if(!data)
+    return CURLE_OUT_OF_MEMORY;
+
+  data->state.internal = TRUE;
+  data->state.conn_cache = connc;
+  data->state.buffer = buffer;
+  data->set.buffer_size = READBUFFER_MIN;
+  data->set.timeout = connc->close_timeout;
+  data->set.server_response_timeout = connc->close_server_response_timeout;
+  data->set.no_signal = connc->close_no_signal;
+  if(multi) {
+    data->set.debugdata = multi->debugdata;
+    data->set.fdebug = multi->fdebug;
+    data->set.verbose = multi->verbose;
+    data->set.err = multi->err;
+  }
+  else if(share) {
+    data->set.debugdata = share->debugdata;
+    data->set.fdebug = share->fdebug;
+    data->set.verbose = share->verbose;
+    data->set.err = share->err;
+  }
+
   conn = conncache_find_first_connection(connc);
   while(conn) {
-    sigpipe_ignore(connc->closure_handle, &pipe_st);
+    sigpipe_ignore(data, &pipe_st);
     /* This will remove the connection from the cache */
     connclose(conn, "kill all");
-    Curl_conncache_remove_conn(connc->closure_handle, conn, TRUE);
-    Curl_disconnect(connc->closure_handle, conn, FALSE);
+    Curl_conncache_remove_conn(data, conn, TRUE);
+    Curl_disconnect(data, conn, FALSE);
     sigpipe_restore(&pipe_st);
 
     conn = conncache_find_first_connection(connc);
   }
 
-  connc->closure_handle->state.buffer = NULL;
-  sigpipe_ignore(connc->closure_handle, &pipe_st);
+  data->state.buffer = NULL;
+  sigpipe_ignore(data, &pipe_st);
 
-  Curl_hostcache_clean(connc->closure_handle,
-                       connc->closure_handle->dns.hostcache);
-  Curl_close(&connc->closure_handle);
+  Curl_hostcache_clean(data, data->dns.hostcache);
+  Curl_close(&data);
   sigpipe_restore(&pipe_st);
+  return CURLE_OK;
 }
 
 #if 0

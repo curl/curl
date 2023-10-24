@@ -392,8 +392,7 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
 
   sh_init(&multi->sockhash, hashsize);
 
-  if(Curl_conncache_init(&multi->conn_cache, chashsize))
-    goto error;
+  Curl_conncache_init(&multi->conn_cache, chashsize);
 
   Curl_llist_init(&multi->msglist, NULL);
   Curl_llist_init(&multi->pending, NULL);
@@ -429,6 +428,7 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
 
   return multi;
 
+#ifdef USE_WINSOCK
 error:
 
   sockhash_destroy(&multi->sockhash);
@@ -436,6 +436,7 @@ error:
   Curl_conncache_destroy(&multi->conn_cache);
   free(multi);
   return NULL;
+#endif /* USE_WINSOCK */
 }
 
 struct Curl_multi *curl_multi_init(void)
@@ -546,47 +547,15 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
   if(data->set.errorbuffer)
     data->set.errorbuffer[0] = 0;
 
-  /* The easy handle inherits shared or multi's debug function, verbosity
-     and/or stderr stream if they were not already set in the easy handle. */
-  if(!data->set.fdebug) {
-    if(data->share->fdebug) {
-      data->set.fdebug = data->share->fdebug;
-      data->set.inherited_fdebug = true;
-    }
-    else if(multi->fdebug) {
-      data->set.fdebug = multi->fdebug;
-      data->set.inherited_fdebug = true;
-    }
-  }
-  if(!data->set.debugdata) {
-    if(data->share->debugdata) {
-      data->set.debugdata = data->share->debugdata;
-      data->set.inherited_debugdata = true;
-    }
-    else if(multi->debugdata) {
-      data->set.debugdata = multi->debugdata;
-      data->set.inherited_debugdata = true;
-    }
-  }
-  if(!data->set.verbose) {
-    if(data->share->verbose) {
-      data->set.verbose = data->share->verbose;
-      data->set.inherited_verbose = true;
-    }
-    else if(multi->verbose) {
-      data->set.verbose = multi->verbose;
-      data->set.inherited_verbose = true;
-    }
-  }
-  if(data->set.err == stderr) {
-    if(data->share->err != stderr) {
-      data->set.err = data->share->err;
-      data->set.inherited_stderr = true;
-    }
-    else if(multi->err != stderr) {
-      data->set.err = multi->err;
-      data->set.inherited_stderr = true;
-    }
+  /* The easy handle inherits shared or multi's debug settings *iff*
+   * the easy handle shows only default values for all */
+  if(!data->set.fdebug && !data->set.debugdata &&
+     !data->set.verbose && data->set.err == stderr) {
+    data->set.inherited_debug = TRUE;
+    data->set.fdebug = multi->fdebug;
+    data->set.debugdata = multi->debugdata;
+    data->set.verbose = multi->verbose;
+    data->set.err = multi->err;
   }
 
   /* make the Curl_easy refer back to this multi handle - before Curl_expire()
@@ -656,11 +625,10 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
      state somewhat we clone the timeouts from each added handle so that the
      closure handle always has the same timeouts as the most recently added
      easy handle. */
-  data->state.conn_cache->closure_handle->set.timeout = data->set.timeout;
-  data->state.conn_cache->closure_handle->set.server_response_timeout =
+  data->state.conn_cache->close_timeout = data->set.timeout;
+  data->state.conn_cache->close_server_response_timeout =
     data->set.server_response_timeout;
-  data->state.conn_cache->closure_handle->set.no_signal =
-    data->set.no_signal;
+  data->state.conn_cache->close_no_signal = data->set.no_signal;
   data->id = data->state.conn_cache->next_easy_id++;
   if(data->state.conn_cache->next_easy_id <= 0)
     data->state.conn_cache->next_easy_id = 0;
@@ -981,15 +949,14 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
 
   data->multi = NULL; /* clear the association to this multi handle */
 
-  /* reset the options that the easy handle inherited */
-  if(data->set.inherited_fdebug)
+  /* reset the options that the easy handle may have inherited */
+  if(data->set.inherited_debug) {
     data->set.fdebug = NULL;
-  if(data->set.inherited_debugdata)
     data->set.debugdata = NULL;
-  if(data->set.inherited_verbose)
-    data->set.verbose = false;
-  if(data->set.inherited_stderr)
+    data->set.verbose = FALSE;
     data->set.err = stderr;
+    data->set.inherited_debug = FALSE;
+  }
 
   /* make sure there's no pending message in the queue sent from this easy
      handle */
@@ -2862,7 +2829,7 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
     }
 
     /* Close all the connections in the connection cache */
-    Curl_conncache_close_all_connections(&multi->conn_cache);
+    Curl_conncache_close_all_connections(&multi->conn_cache, multi, NULL);
 
     sockhash_destroy(&multi->sockhash);
     Curl_conncache_destroy(&multi->conn_cache);
@@ -3396,25 +3363,17 @@ CURLMcode curl_multi_setopt(struct Curl_multi *multi,
     break;
   case CURLMOPT_DEBUGFUNCTION:
     multi->fdebug = va_arg(param, curl_debug_callback);
-    if(multi->conn_cache.closure_handle)
-      multi->conn_cache.closure_handle->set.fdebug = multi->fdebug;
     break;
   case CURLMOPT_DEBUGDATA:
     multi->debugdata = va_arg(param, void *);
-    if(multi->conn_cache.closure_handle)
-      multi->conn_cache.closure_handle->set.debugdata = multi->debugdata;
     break;
   case CURLMOPT_VERBOSE:
     multi->verbose = (0 != va_arg(param, long)) ? TRUE : FALSE;
-    if(multi->conn_cache.closure_handle)
-      multi->conn_cache.closure_handle->set.verbose = multi->verbose;
     break;
   case CURLMOPT_STDERR:
     multi->err = va_arg(param, void *);
     if(!multi->err)
       multi->err = stderr;
-    if(multi->conn_cache.closure_handle)
-      multi->conn_cache.closure_handle->set.err = multi->err;
     break;
   default:
     res = CURLM_UNKNOWN_OPTION;

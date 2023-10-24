@@ -37,9 +37,15 @@ Set the \fIonoff\fP parameter to 1 to make the library display a lot of
 verbose information about its operations on \fIhandle\fPs used with
 this share.
 
-\fICURLSHOPT_VERBOSE(3)\fP can be used as default for all easy handles
-that use this share via \fICURLOPT_SHARE(3)\fP. It is also used for
-internal handles, for example when closing cached connections.
+\fICURLSHOPT_DEBUGFUNCTION(3)\fP, \fICURLSHOPT_DEBUGDATA(3)\fP,
+ \fICURLSHOPT_VERBOSE(3)\fP and \fICURLSHOPT_STDERR(3)\fP can be used
+as defaults for all easy handles that use the same share. They are also
+used for internal handles, for example when closing cached connections.
+
+They take effect only for easy handles when this share is set for them
+using \fICURLOPT_SHARE(3)\fP. They only apply to easy handles that have
+default values for \fICURLOPT_DEBUGFUNCTION(3)\fP, \fICURLOPT_DEBUGDATA(3)\fP,
+\fICURLOPT_VERBOSE(3)\fP and \fICURLOPT_STDERR(3)\fP.
 .SH DEFAULT
 This is treated as if set to 0 by default.
 .SH PROTOCOLS
@@ -60,5 +66,6 @@ This option was added in libcurl 8.5.0.
 Returns CURLE_OK
 .SH "SEE ALSO"
 .BR CURLOPT_VERBOSE (3),
+.BR CURLSHOPT_DEBUGDATA (3),
 .BR CURLSHOPT_DEBUGFUNCTION (3),
-.BR CURLSHOPT_DEBUGDATA (3)
+.BR CURLSHOPT_STDERR (3)

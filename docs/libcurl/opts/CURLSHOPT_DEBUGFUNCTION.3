@@ -35,11 +35,15 @@ CURLSHcode curl_share_setopt(CURLSH *share, CURLSHOPT_DEBUGFUNCTION,
 Pass a pointer to your callback function, which should match the prototype
 that is defined for \fICURLOPT_DEBUGFUNCTION(3)\fP.
 
-\fICURLSHOPT_DEBUGFUNCTION(3)\fP and \fICURLSHOPT_DEBUGDATA\fP can be used
+\fICURLSHOPT_DEBUGFUNCTION(3)\fP, \fICURLSHOPT_DEBUGDATA(3)\fP,
+ \fICURLSHOPT_VERBOSE(3)\fP and \fICURLSHOPT_STDERR(3)\fP can be used
 as defaults for all easy handles that use the same share. They are also
 used for internal handles, for example when closing cached connections.
+
 They take effect only for easy handles when this share is set for them
-using \fICURLOPT_SHARE(3)\fP.
+using \fICURLOPT_SHARE(3)\fP. They only apply to easy handles that have
+default values for \fICURLOPT_DEBUGFUNCTION(3)\fP, \fICURLOPT_DEBUGDATA(3)\fP,
+\fICURLOPT_VERBOSE(3)\fP and \fICURLOPT_STDERR(3)\fP.
 
 Values have the same restrictions and use patterns as defined for
 \fICURLOPT_DEBUGFUNCTION(3)\fP and \fICURLOPT_DEBUGDATA(3)\fP.
@@ -68,6 +72,7 @@ Returns CURLE_OK
 .SH "SEE ALSO"
 .BR curl_global_trace (3),
 .BR CURLSHOPT_DEBUGDATA (3),
+.BR CURLSHOPT_STDERR (3),
 .BR CURLSHOPT_VERBOSE (3),
 .BR CURLOPT_DEBUGDATA (3),
 .BR CURLOPT_DEBUGFUNCTION (3),

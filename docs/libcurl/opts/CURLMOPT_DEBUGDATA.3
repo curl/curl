@@ -36,12 +36,16 @@ Pass a \fIpointer\fP to whatever you want passed in to your
 \fICURLMOPT_DEBUGFUNCTION(3)\fP in the last void * argument. This pointer is
 not used by libcurl, it is only passed to the callback.
 
-\fICURLMOPT_DEBUGFUNCTION(3)\fP and \fICURLMOPT_DEBUGDATA\fP can be used
+\fICURLMOPT_DEBUGFUNCTION(3)\fP, \fICURLMOPT_DEBUGDATA(3)\fP,
+ \fICURLMOPT_VERBOSE(3)\fP and \fICURLMOPT_STDERR(3)\fP can be used
 as defaults for all easy handles that are added to the multi. They are also
 used for internal handles, for example when closing cached connections.
+
 These options take effect and are used only for the easy handles that are
 added to the multi handle after these options have been set for the multi
-handle.
+handle. They only apply to easy handles that have default values
+for \fICURLOPT_DEBUGFUNCTION(3)\fP, \fICURLOPT_DEBUGDATA(3)\fP,
+\fICURLOPT_VERBOSE(3)\fP and \fICURLOPT_STDERR(3)\fP.
 
 Values have the same restrictions and use patterns as defined for
 \fICURLOPT_DEBUGFUNCTION(3)\fP and \fICURLOPT_DEBUGDATA(3)\fP.
@@ -66,6 +70,9 @@ This option was added in libcurl 8.5.0.
 Returns CURLE_OK
 .SH "SEE ALSO"
 .BR CURLMOPT_DEBUGFUNCTION (3),
+.BR CURLMOPT_STDERR (3),
+.BR CURLMOPT_VERBOSE (3),
 .BR CURLOPT_DEBUGDATA (3),
 .BR CURLOPT_DEBUGFUNCTION (3),
+.BR CURLOPT_VERBOSE (3),
 .BR CURLOPT_STDERR (3)

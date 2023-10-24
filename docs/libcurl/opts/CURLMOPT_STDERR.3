@@ -35,12 +35,16 @@ CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_STDERR, FILE *stream);
 Pass a FILE * as parameter. Tell libcurl to use this \fIstream\fP instead of
 stderr for displaying verbose data.
 
-This option is used to set the stderr stream for a multi handle and the easy
-handles associated with it.
+\fICURLMOPT_DEBUGFUNCTION(3)\fP, \fICURLMOPT_DEBUGDATA(3)\fP,
+ \fICURLMOPT_VERBOSE(3)\fP and \fICURLMOPT_STDERR(3)\fP can be used
+as defaults for all easy handles that are added to the multi. They are also
+used for internal handles, for example when closing cached connections.
 
-This option has no effect on an easy handle that has set its own stderr stream
-to something other than stderr via \fICURLOPT_STDERR(3)\fP or shared object
-stderr stream via \fICURLSHOPT_STDERR(3)\fP.
+These options take effect and are used only for the easy handles that are
+added to the multi handle after these options have been set for the multi
+handle. They only apply to easy handles that have default values
+for \fICURLOPT_DEBUGFUNCTION(3)\fP, \fICURLOPT_DEBUGDATA(3)\fP,
+\fICURLOPT_VERBOSE(3)\fP and \fICURLOPT_STDERR(3)\fP.
 
 If you are using libcurl as a Windows DLL, this option causes an exception and
 a crash in the library since it cannot access a FILE * passed on from the
@@ -59,5 +63,8 @@ Always
 .SH RETURN VALUE
 Returns CURLE_OK
 .SH "SEE ALSO"
+.BR CURLMOPT_DEBUGDATA (3),
+.BR CURLMOPT_DEBUGFUNCTION (3),
+.BR CURLMOPT_VERBOSE (3),
 .BR CURLOPT_STDERR (3),
 .BR CURLSHOPT_STDERR (3)

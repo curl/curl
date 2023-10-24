@@ -37,11 +37,15 @@ Pass a \fIpointer\fP to whatever you want passed in to your
 \fICURLSHOPT_DEBUGFUNCTION(3)\fP in the last void * argument. This pointer is
 not used by libcurl, it is only passed to the callback.
 
-\fICURLSHOPT_DEBUGFUNCTION(3)\fP and \fICURLSHOPT_DEBUGDATA\fP can be used
+\fICURLSHOPT_DEBUGFUNCTION(3)\fP, \fICURLSHOPT_DEBUGDATA(3)\fP,
+ \fICURLSHOPT_VERBOSE(3)\fP and \fICURLSHOPT_STDERR(3)\fP can be used
 as defaults for all easy handles that use the same share. They are also
 used for internal handles, for example when closing cached connections.
+
 They take effect only for easy handles when this share is set for them
-using \fICURLOPT_SHARE(3)\fP.
+using \fICURLOPT_SHARE(3)\fP. They only apply to easy handles that have
+default values for \fICURLOPT_DEBUGFUNCTION(3)\fP, \fICURLOPT_DEBUGDATA(3)\fP,
+\fICURLOPT_VERBOSE(3)\fP and \fICURLOPT_STDERR(3)\fP.
 
 Values have the same restrictions and use patterns as defined for
 \fICURLOPT_DEBUGFUNCTION(3)\fP and \fICURLOPT_DEBUGDATA(3)\fP.
@@ -65,7 +69,9 @@ This option was added in libcurl 8.5.0.
 .SH RETURN VALUE
 Returns CURLE_OK
 .SH "SEE ALSO"
-.BR CURLMOPT_DEBUGFUNCTION (3),
 .BR CURLOPT_DEBUGDATA (3),
 .BR CURLOPT_DEBUGFUNCTION (3),
-.BR CURLOPT_STDERR (3)
+.BR CURLOPT_STDERR (3),
+.BR CURLSHOPT_DEBUGFUNCTION (3),
+.BR CURLSHOPT_STDERR (3),
+.BR CURLSHOPT_VERBOSE (3)

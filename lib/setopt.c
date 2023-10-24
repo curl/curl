@@ -286,7 +286,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * the connection and transfer procedures as well as internal choices.
      */
     data->set.verbose = (0 != va_arg(param, long)) ? TRUE : FALSE;
-    data->set.inherited_verbose = false;
+    data->set.inherited_debug = FALSE;
     break;
   case CURLOPT_HEADER:
     /*
@@ -1664,7 +1664,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * stderr write callback.
      */
     data->set.fdebug = va_arg(param, curl_debug_callback);
-    data->set.inherited_fdebug = false;
+    data->set.inherited_debug = FALSE;
     /*
      * if the callback provided is NULL, it'll use the default callback
      */
@@ -1675,7 +1675,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * defaults to CURLOPT_STDERR for normal operations.
      */
     data->set.debugdata = va_arg(param, void *);
-    data->set.inherited_debugdata = false;
+    data->set.inherited_debug = FALSE;
     break;
   case CURLOPT_STDERR:
     /*
@@ -1685,7 +1685,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.err = va_arg(param, FILE *);
     if(!data->set.err)
       data->set.err = stderr;
-    data->set.inherited_stderr = false;
+    data->set.inherited_debug = FALSE;
     break;
   case CURLOPT_HEADERFUNCTION:
     /*
@@ -2327,6 +2327,16 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       /* use new share if it set */
       data->share = set;
     if(data->share) {
+
+      /* If the easy handle shows only default debug values, it
+       * takes the ones present in the share */
+      if(!data->set.fdebug && !data->set.debugdata &&
+         !data->set.verbose && data->set.err == stderr) {
+        data->set.fdebug = data->share->fdebug;
+        data->set.debugdata = data->share->debugdata;
+        data->set.verbose = data->share->verbose;
+        data->set.err = data->share->err;
+      }
 
       Curl_share_lock(data, CURL_LOCK_DATA_SHARE, CURL_LOCK_ACCESS_SINGLE);
 

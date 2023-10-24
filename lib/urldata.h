@@ -1923,10 +1923,7 @@ struct UserDefined {
 #ifdef USE_WEBSOCKETS
   BIT(ws_raw_mode);
 #endif
-  BIT(inherited_fdebug);      /* fdebug was inherited from multi or share */
-  BIT(inherited_debugdata);   /* debugdata was inherited from multi or share */
-  BIT(inherited_verbose);     /* verbose was inherited from multi or share */
-  BIT(inherited_stderr);      /* stderr was inherited from multi or share */
+  BIT(inherited_debug);       /* debug settings inherited from multi/share */
 };
 
 struct Names {

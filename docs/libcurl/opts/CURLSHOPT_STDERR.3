@@ -38,8 +38,15 @@ stderr for displaying verbose data.
 This option is used to set the stderr stream for a shared object and the easy
 handles associated with it.
 
-This option has no effect on an easy handle that has set its own stderr stream
-to something other than stderr via \fICURLOPT_STDERR(3)\fP.
+\fICURLSHOPT_DEBUGFUNCTION(3)\fP, \fICURLSHOPT_DEBUGDATA(3)\fP,
+ \fICURLSHOPT_VERBOSE(3)\fP and \fICURLSHOPT_STDERR(3)\fP can be used
+as defaults for all easy handles that use the same share. They are also
+used for internal handles, for example when closing cached connections.
+
+They take effect only for easy handles when this share is set for them
+using \fICURLOPT_SHARE(3)\fP. They only apply to easy handles that have
+default values for \fICURLOPT_DEBUGFUNCTION(3)\fP, \fICURLOPT_DEBUGDATA(3)\fP,
+\fICURLOPT_VERBOSE(3)\fP and \fICURLOPT_STDERR(3)\fP.
 
 If you are using libcurl as a Windows DLL, this option causes an exception and
 a crash in the library since it cannot access a FILE * passed on from the
@@ -59,4 +66,7 @@ Always
 Returns CURLE_OK
 .SH "SEE ALSO"
 .BR CURLOPT_STDERR (3),
-.BR CURLMOPT_STDERR (3)
+.BR CURLMOPT_STDERR (3),
+.BR CURLSHOPT_DEBUGDATA (3),
+.BR CURLSHOPT_DEBUGFUNCTION (3),
+.BR CURLSHOPT_VERBOSE (3)
