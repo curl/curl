@@ -1321,8 +1321,8 @@ static void show_resolve_info(struct Curl_easy *data,
 
   a = dns->addr;
 
-  infof(data, "Host %s:%d was resolved.",
-        (dns->hostname[0] ? dns->hostname : "(none)"), dns->hostport);
+  infof((data, "Host %s:%d was resolved.",
+        (dns->hostname[0] ? dns->hostname : "(none)"), dns->hostport));
 
   Curl_dyn_init(&out[0], 1024);
 #ifdef CURLRES_IPV6
@@ -1343,7 +1343,7 @@ static void show_resolve_info(struct Curl_easy *data,
       if(!result)
         result = Curl_dyn_add(d, buf);
       if(result) {
-        infof(data, "too many IP, can't show");
+        infof((data, "too many IP, can't show"));
         goto fail;
       }
     }
@@ -1351,11 +1351,11 @@ static void show_resolve_info(struct Curl_easy *data,
   }
 
 #ifdef CURLRES_IPV6
-  infof(data, "IPv6: %s",
-        (Curl_dyn_len(&out[1]) ? Curl_dyn_ptr(&out[1]) : "(none)"));
+  infof((data, "IPv6: %s",
+        (Curl_dyn_len(&out[1]) ? Curl_dyn_ptr(&out[1]) : "(none)")));
 #endif
-  infof(data, "IPv4: %s",
-        (Curl_dyn_len(&out[0]) ? Curl_dyn_ptr(&out[0]) : "(none)"));
+  infof((data, "IPv4: %s",
+        (Curl_dyn_len(&out[0]) ? Curl_dyn_ptr(&out[0]) : "(none)")));
 
 fail:
   Curl_dyn_free(&out[0]);

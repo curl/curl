@@ -4129,12 +4129,12 @@ static void infof_certstack(struct Curl_easy *data, const SSL *ssl)
                                              sizeof(group_name), NULL);
     msnprintf(group_name_final, sizeof(group_name_final), "/%s", group_name);
 
-    infof(data,
+    infof((data,
           "  Certificate level %d: "
           "Public key type %s%s (%d/%d Bits/secBits), signed using %s",
           cert_level, EVP_PKEY_get0_type_name(current_pkey),
           get_group_name == 0 ? "" : group_name_final,
-          key_bits, key_sec_bits, cert_algorithm);
+          key_bits, key_sec_bits, cert_algorithm));
   }
 }
 #else
