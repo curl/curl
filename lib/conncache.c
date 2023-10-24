@@ -101,10 +101,19 @@ static void free_bundle_hash_entry(void *freethis)
   bundle_destroy(b);
 }
 
-void Curl_conncache_init(struct conncache *connc, int size)
+int Curl_conncache_init(struct conncache *connc, int size)
 {
+  /* allocate a new easy handle to use when closing cached connections */
+  connc->closure_handle = curl_easy_init();
+  if(!connc->closure_handle)
+    return 1; /* bad */
+  connc->closure_handle->state.internal = true;
+
   Curl_hash_init(&connc->hash, size, Curl_hash_str,
                  Curl_str_key_compare, free_bundle_hash_entry);
+  connc->closure_handle->state.conn_cache = connc;
+
+  return 0; /* good */
 }
 
 void Curl_conncache_destroy(struct conncache *connc)
@@ -505,30 +514,22 @@ Curl_conncache_extract_oldest(struct Curl_easy *data)
   return conn_candidate;
 }
 
-CURLcode Curl_conncache_close_all_connections(struct conncache *connc,
-                                              struct Curl_multi *multi,
-                                              struct Curl_share *share)
+void Curl_conncache_close_all_connections(struct conncache *connc,
+                                          struct Curl_multi *multi,
+                                          struct Curl_share *share)
 {
   struct connectdata *conn;
   char buffer[READBUFFER_MIN + 1];
-  struct Curl_easy *data;
+  struct Curl_easy *data = connc->closure_handle;
   SIGPIPE_VARIABLE(pipe_st);
 
-  if(!Curl_hash_count(&connc->hash))
-    return CURLE_OK;
-
-  /* allocate a new easy handle to use when closing cached connections */
-  data = curl_easy_init();
   if(!data)
-    return CURLE_OUT_OF_MEMORY;
+    return;
 
   data->state.internal = TRUE;
   data->state.conn_cache = connc;
   data->state.buffer = buffer;
   data->set.buffer_size = READBUFFER_MIN;
-  data->set.timeout = connc->close_timeout;
-  data->set.server_response_timeout = connc->close_server_response_timeout;
-  data->set.no_signal = connc->close_no_signal;
   if(multi) {
     data->set.debugdata = multi->debugdata;
     data->set.fdebug = multi->fdebug;
@@ -559,8 +560,8 @@ CURLcode Curl_conncache_close_all_connections(struct conncache *connc,
 
   Curl_hostcache_clean(data, data->dns.hostcache);
   Curl_close(&data);
+  connc->closure_handle = NULL;
   sigpipe_restore(&pipe_st);
-  return CURLE_OK;
 }
 
 #if 0

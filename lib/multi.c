@@ -392,7 +392,8 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
 
   sh_init(&multi->sockhash, hashsize);
 
-  Curl_conncache_init(&multi->conn_cache, chashsize);
+  if(Curl_conncache_init(&multi->conn_cache, chashsize))
+    goto error;
 
   Curl_llist_init(&multi->msglist, NULL);
   Curl_llist_init(&multi->pending, NULL);
@@ -428,7 +429,6 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
 
   return multi;
 
-#ifdef USE_WINSOCK
 error:
 
   sockhash_destroy(&multi->sockhash);
@@ -436,7 +436,6 @@ error:
   Curl_conncache_destroy(&multi->conn_cache);
   free(multi);
   return NULL;
-#endif /* USE_WINSOCK */
 }
 
 struct Curl_multi *curl_multi_init(void)
@@ -625,10 +624,11 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
      state somewhat we clone the timeouts from each added handle so that the
      closure handle always has the same timeouts as the most recently added
      easy handle. */
-  data->state.conn_cache->close_timeout = data->set.timeout;
-  data->state.conn_cache->close_server_response_timeout =
+  data->state.conn_cache->closure_handle->set.timeout = data->set.timeout;
+  data->state.conn_cache->closure_handle->set.server_response_timeout =
     data->set.server_response_timeout;
-  data->state.conn_cache->close_no_signal = data->set.no_signal;
+  data->state.conn_cache->closure_handle->set.no_signal =
+    data->set.no_signal;
   data->id = data->state.conn_cache->next_easy_id++;
   if(data->state.conn_cache->next_easy_id <= 0)
     data->state.conn_cache->next_easy_id = 0;

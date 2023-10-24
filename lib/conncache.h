@@ -45,9 +45,8 @@ struct conncache {
   curl_off_t next_connection_id;
   curl_off_t next_easy_id;
   struct curltime last_cleanup;
-  unsigned int close_timeout;
-  unsigned int close_server_response_timeout;
-  BIT(close_no_signal);      /* do not use any signal/alarm handler */
+  /* handle used for closing cached connections */
+  struct Curl_easy *closure_handle;
 };
 
 #define BUNDLE_NO_MULTIUSE -1
@@ -89,7 +88,7 @@ struct connectbundle {
 };
 
 /* returns 1 on error, 0 is fine */
-void Curl_conncache_init(struct conncache *, int size);
+int Curl_conncache_init(struct conncache *, int size);
 void Curl_conncache_destroy(struct conncache *connc);
 
 /* return the correct bundle, to a host or a proxy */
@@ -126,9 +125,9 @@ Curl_conncache_extract_oldest(struct Curl_easy *data);
  * @param multi the optional multi handle involved
  * @param share the optional share handle involved
  */
-CURLcode Curl_conncache_close_all_connections(struct conncache *connc,
-                                              struct Curl_multi *multi,
-                                              struct Curl_share *share);
+void Curl_conncache_close_all_connections(struct conncache *connc,
+                                          struct Curl_multi *multi,
+                                          struct Curl_share *share);
 void Curl_conncache_print(struct conncache *connc);
 
 #endif /* HEADER_CURL_CONNCACHE_H */
