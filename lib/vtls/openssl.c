@@ -3991,28 +3991,32 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
     }
   }
   else {
-    int psigtype_nid = NID_undef;
-    const char *negotiated_group_name = NULL;
-
     /* we connected fine, we're not waiting for anything else. */
     connssl->connecting_state = ssl_connect_3;
 
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+    {
+      int psigtype_nid = NID_undef;
+      const char *negotiated_group_name = NULL;
+
 #if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
-    SSL_get_peer_signature_type_nid(backend->handle, &psigtype_nid);
+      SSL_get_peer_signature_type_nid(backend->handle, &psigtype_nid);
 #if (OPENSSL_VERSION_NUMBER >= 0x30200000L)
-    negotiated_group_name = SSL_get0_group_name(backend->handle);
+      negotiated_group_name = SSL_get0_group_name(backend->handle);
 #else
-    negotiated_group_name =
-      OBJ_nid2sn(SSL_get_negotiated_group(backend->handle) & 0x0000FFFF);
+      negotiated_group_name =
+        OBJ_nid2sn(SSL_get_negotiated_group(backend->handle) & 0x0000FFFF);
 #endif
 #endif
 
-    /* Informational message */
-    infof((data, "SSL connection using %s / %s / %s / %s",
-          SSL_get_version(backend->handle),
-          SSL_get_cipher(backend->handle),
-          negotiated_group_name == NULL ? NULL : negotiated_group_name,
-          OBJ_nid2sn(psigtype_nid)));
+      /* Informational message */
+      infof((data, "SSL connection using %s / %s / %s / %s",
+            SSL_get_version(backend->handle),
+            SSL_get_cipher(backend->handle),
+            negotiated_group_name == NULL ? NULL : negotiated_group_name,
+            OBJ_nid2sn(psigtype_nid)));
+    }
+#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
 
 #ifdef HAS_ALPN
     /* Sets data and len to negotiated protocol, len is 0 if no protocol was
