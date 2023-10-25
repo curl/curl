@@ -50,7 +50,7 @@ SPDX-License-Identifier: curl
   - python-impacket (for SMB tests)
   - diff (when a test fails, a diff is shown)
   - stunnel (for HTTPS and FTPS tests)
-  - OpenSSH or SunSSH (for SCP, SFTP and SOCKS4/5 tests)
+  - OpenSSH or SunSSH (for SCP and SFTP tests)
   - nghttpx (for HTTP/2 and HTTP/3 tests)
   - nroff (for --manual tests)
   - An available `en_US.UTF-8` locale
@@ -94,9 +94,7 @@ SPDX-License-Identifier: curl
 
   The test suite runs stand-alone servers on random ports to which it makes
   requests. For SSL tests, it runs stunnel to handle encryption to the regular
-  servers. For SSH, it runs a standard OpenSSH server. For SOCKS4/5 tests SSH
-  is used to perform the SOCKS functionality and requires a SSH client and
-  server.
+  servers. For SSH, it runs a standard OpenSSH server.
 
   The listen port numbers for the test servers are picked randomly to allow
   users to run multiple test cases concurrently and to not collide with other
@@ -112,7 +110,7 @@ SPDX-License-Identifier: curl
 
 ### Shell startup scripts
 
-  Tests which use the ssh test server, SCP/SFTP/SOCKS tests, might be badly
+  Tests which use the ssh test server, SCP/SFTP tests, might be badly
   influenced by the output of system wide or user specific shell startup
   scripts, .bashrc, .profile, /etc/csh.cshrc, .login, /etc/bashrc, etc. which
   output text messages or escape sequences on user login. When these shell
