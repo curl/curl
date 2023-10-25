@@ -4008,7 +4008,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
     infof(data, "SSL connection using %s / %s / %s / %s",
           SSL_get_version(backend->handle),
           SSL_get_cipher(backend->handle),
-          negotiated_group_name == NULL ? NULL : negotiated_group_name,
+          negotiated_group_name? negotiated_group_name : "[blank]",
           OBJ_nid2sn(psigtype_nid));
 
 #ifdef HAS_ALPN
