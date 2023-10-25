@@ -1264,7 +1264,7 @@ static void cf_socket_adjust_pollset(struct Curl_cfilter *cf,
       Curl_pollset_set_out_only(data, ps, ctx->sock);
     else
       Curl_pollset_add_in(data, ps, ctx->sock);
-    CURL_TRC_CF(data, cf, "adjust_pollset -> %d socks", ps->num);
+    CURL_TRC_CF((data, cf, "adjust_pollset -> %d socks", ps->num));
   }
 }
 
