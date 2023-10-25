@@ -1595,13 +1595,13 @@ static bool cf_quiche_conn_is_alive(struct Curl_cfilter *cf,
    * may have completely purged it and will no longer respond
    * to any packets from us. */
   {
-    quiche_stats qstats;
+    quiche_transport_params qparams;
     timediff_t idletime;
     uint64_t idle_ms = ctx->max_idle_ms;
 
-    quiche_conn_stats(ctx->qconn, &qstats);
-    if(qstats.peer_max_idle_timeout && qstats.peer_max_idle_timeout < idle_ms)
-      idle_ms = qstats.peer_max_idle_timeout;
+    quiche_conn_peer_transport_params(ctx->qconn, &qparams);
+    if(qparams.peer_max_idle_timeout && qparams.peer_max_idle_timeout < idle_ms)
+      idle_ms = qparams.peer_max_idle_timeout;
     idletime = Curl_timediff(Curl_now(), cf->conn->lastused);
     if(idletime > 0 && (uint64_t)idletime > idle_ms)
       return FALSE;
