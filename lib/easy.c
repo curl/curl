@@ -968,33 +968,6 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
     (void)Curl_hsts_loadcb(outcurl, outcurl->hsts);
   }
 #endif
-  /* Clone the resolver handle, if present, for the new handle */
-  if(Curl_resolver_duphandle(outcurl,
-                             &outcurl->state.async.resolver,
-                             data->state.async.resolver))
-    goto fail;
-
-#ifdef USE_ARES
-  {
-    CURLcode rc;
-
-    rc = Curl_set_dns_servers(outcurl, data->set.str[STRING_DNS_SERVERS]);
-    if(rc && rc != CURLE_NOT_BUILT_IN)
-      goto fail;
-
-    rc = Curl_set_dns_interface(outcurl, data->set.str[STRING_DNS_INTERFACE]);
-    if(rc && rc != CURLE_NOT_BUILT_IN)
-      goto fail;
-
-    rc = Curl_set_dns_local_ip4(outcurl, data->set.str[STRING_DNS_LOCAL_IP4]);
-    if(rc && rc != CURLE_NOT_BUILT_IN)
-      goto fail;
-
-    rc = Curl_set_dns_local_ip6(outcurl, data->set.str[STRING_DNS_LOCAL_IP6]);
-    if(rc && rc != CURLE_NOT_BUILT_IN)
-      goto fail;
-  }
-#endif /* USE_ARES */
 
   Curl_initinfo(outcurl);
 

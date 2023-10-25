@@ -422,10 +422,6 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_safefree(data->info.contenttype);
   Curl_safefree(data->info.wouldredirect);
 
-  /* this destroys the channel and we cannot use it anymore after this */
-  Curl_resolver_cancel(data);
-  Curl_resolver_cleanup(data->state.async.resolver);
-
   data_priority_cleanup(data);
 
   /* No longer a dirty share, if it exists */
@@ -652,13 +648,6 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
   data->magic = CURLEASY_MAGIC_NUMBER;
 
-  result = Curl_resolver_init(data, &data->state.async.resolver);
-  if(result) {
-    DEBUGF(fprintf(stderr, "Error: resolver_init failed\n"));
-    free(data);
-    return result;
-  }
-
   result = Curl_init_userdefined(data);
   if(!result) {
     Curl_dyn_init(&data->state.headerb, CURL_MAX_HTTP_HEADER);
@@ -675,7 +664,6 @@ CURLcode Curl_open(struct Curl_easy **curl)
   }
 
   if(result) {
-    Curl_resolver_cleanup(data->state.async.resolver);
     Curl_dyn_free(&data->state.headerb);
     Curl_freeset(data);
     free(data);
@@ -709,6 +697,7 @@ static void conn_free(struct Curl_easy *data, struct connectdata *conn)
     Curl_conn_cf_discard_all(data, conn, (int)i);
   }
 
+  Curl_resolver_cleanup(conn->resolve_async.resolver);
   Curl_free_idnconverted_hostname(&conn->host);
   Curl_free_idnconverted_hostname(&conn->conn_to_host);
 #ifndef CURL_DISABLE_PROXY
@@ -809,6 +798,7 @@ void Curl_disconnect(struct Curl_easy *data,
     conn->handler->disconnect(data, conn, dead_connection);
 
   conn_shutdown(data);
+  Curl_resolver_cancel(data);
 
   /* detach it again */
   Curl_detach_connection(data);
@@ -3791,7 +3781,35 @@ static CURLcode create_conn(struct Curl_easy *data,
        * This is a brand new connection, so let's store it in the connection
        * cache of ours!
        */
+      result = Curl_resolver_init(data, &conn->resolve_async.resolver);
+      if(result) {
+        DEBUGF(fprintf(stderr, "Error: resolver_init failed\n"));
+        goto out;
+      }
+
       Curl_attach_connection(data, conn);
+
+#ifdef USE_ARES
+      result = Curl_set_dns_servers(data, data->set.str[STRING_DNS_SERVERS]);
+      if(result && result != CURLE_NOT_BUILT_IN)
+        goto out;
+
+      result = Curl_set_dns_interface(data,
+                                      data->set.str[STRING_DNS_INTERFACE]);
+      if(result && result != CURLE_NOT_BUILT_IN)
+        goto out;
+
+      result = Curl_set_dns_local_ip4(data,
+                                      data->set.str[STRING_DNS_LOCAL_IP4]);
+      if(result && result != CURLE_NOT_BUILT_IN)
+        goto out;
+
+      result = Curl_set_dns_local_ip6(data,
+                                      data->set.str[STRING_DNS_LOCAL_IP6]);
+      if(result && result != CURLE_NOT_BUILT_IN)
+        goto out;
+#endif /* USE_ARES */
+
       result = Curl_conncache_add_conn(data);
       if(result)
         goto out;
