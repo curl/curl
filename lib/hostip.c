@@ -741,7 +741,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
       Curl_set_in_callback(data, true);
       st = data->set.resolver_start(
 #ifdef USE_CURL_ASYNC
-        data->state.async.resolver,
+        conn->resolve_async.resolver,
 #else
         NULL,
 #endif
@@ -1413,9 +1413,9 @@ CURLcode Curl_once_resolved(struct Curl_easy *data, bool *protocol_done)
   struct connectdata *conn = data->conn;
 
 #ifdef USE_CURL_ASYNC
-  if(data->state.async.dns) {
-    conn->dns_entry = data->state.async.dns;
-    data->state.async.dns = NULL;
+  if(conn->resolve_async.dns) {
+    conn->dns_entry = conn->resolve_async.dns;
+    conn->resolve_async.dns = NULL;
   }
 #endif
 
@@ -1437,11 +1437,11 @@ CURLcode Curl_once_resolved(struct Curl_easy *data, bool *protocol_done)
 #ifdef USE_CURL_ASYNC
 CURLcode Curl_resolver_error(struct Curl_easy *data)
 {
+  struct connectdata *conn = data->conn;
   const char *host_or_proxy;
   CURLcode result;
 
 #ifndef CURL_DISABLE_PROXY
-  struct connectdata *conn = data->conn;
   if(conn->bits.httpproxy) {
     host_or_proxy = "proxy";
     result = CURLE_COULDNT_RESOLVE_PROXY;
@@ -1454,7 +1454,7 @@ CURLcode Curl_resolver_error(struct Curl_easy *data)
   }
 
   failf(data, "Could not resolve %s: %s", host_or_proxy,
-        data->state.async.hostname);
+        conn->resolve_async.hostname);
 
   return result;
 }
