@@ -66,13 +66,40 @@ CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
 #endif
 
 char *Curl_ssl_snihost(struct Curl_easy *data, const char *host, size_t *olen);
-bool Curl_ssl_config_matches(struct ssl_primary_config *data,
-                             struct ssl_primary_config *needle);
-bool Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
-                                   struct ssl_primary_config *dest);
-void Curl_free_primary_ssl_config(struct ssl_primary_config *sslc);
 
 curl_sslbackend Curl_ssl_backend(void);
+
+/**
+ * Init ssl config for a new easy handle.
+ */
+void Curl_ssl_easy_config_init(struct Curl_easy *data);
+
+/**
+ * Init SSL configs (main + proxy) for a new connection from the easy handle.
+ */
+CURLcode Curl_ssl_conn_config_init(struct Curl_easy *data,
+                                   struct connectdata *conn);
+
+/**
+ * Free allocated resources in SSL configs (main + proxy) for
+ * the given connection.
+ */
+void Curl_ssl_conn_config_cleanup(struct connectdata *conn);
+
+/**
+ * Return TRUE iff SSL configuration from `conn` is functionally the
+ * same as the one on `candidate`.
+ * @param proxy   match the proxy SSL config or the main one
+ */
+bool Curl_ssl_conn_config_match(struct Curl_easy *data,
+                                struct connectdata *conn,
+                                struct connectdata *candidate,
+                                bool proxy);
+
+/* Update certain connection SSL config flags after they have
+ * been changed on the easy handle. Will work for `verifypeer`,
+ * `verifyhost` and `verifystatus`. */
+void Curl_ssl_conn_config_update(struct Curl_easy *data, bool for_proxy);
 
 #ifdef USE_SSL
 int Curl_ssl_init(void);
@@ -188,7 +215,6 @@ struct ssl_config_data *Curl_ssl_cf_get_config(struct Curl_cfilter *cf,
 struct ssl_primary_config *
   Curl_ssl_cf_get_primary_config(struct Curl_cfilter *cf);
 
-
 extern struct Curl_cftype Curl_cft_ssl;
 extern struct Curl_cftype Curl_cft_ssl_proxy;
 
@@ -211,7 +237,7 @@ extern struct Curl_cftype Curl_cft_ssl_proxy;
 #define Curl_ssl_supports(a,b) FALSE
 #define Curl_ssl_cfilter_add(a,b,c) CURLE_NOT_BUILT_IN
 #define Curl_ssl_cfilter_remove(a,b) CURLE_OK
-#define Curl_ssl_cf_get_config(a.b) NULL
+#define Curl_ssl_cf_get_config(a,b) NULL
 #define Curl_ssl_cf_get_primary_config(a) NULL
 #endif
 

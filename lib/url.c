@@ -526,25 +526,15 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
 
   Curl_mime_initpart(&set->mimepost);
 
-  /*
-   * libcurl 7.10 introduced SSL verification *by default*! This needs to be
-   * switched off unless wanted.
-   */
+  Curl_ssl_easy_config_init(data);
 #ifndef CURL_DISABLE_DOH
   set->doh_verifyhost = TRUE;
   set->doh_verifypeer = TRUE;
 #endif
-  set->ssl.primary.verifypeer = TRUE;
-  set->ssl.primary.verifyhost = TRUE;
 #ifdef USE_SSH
   /* defaults to any auth type */
   set->ssh_auth_types = CURLSSH_AUTH_DEFAULT;
   set->new_directory_perms = 0755; /* Default permissions */
-#endif
-  set->ssl.primary.sessionid = TRUE; /* session ID caching enabled by
-                                        default */
-#ifndef CURL_DISABLE_PROXY
-  set->proxy_ssl = set->ssl;
 #endif
 
   set->new_file_perms = 0644;    /* Default permissions */
@@ -707,7 +697,6 @@ static void conn_free(struct Curl_easy *data, struct connectdata *conn)
   Curl_safefree(conn->socks_proxy.passwd);
   Curl_safefree(conn->http_proxy.host.rawalloc); /* http proxy name buffer */
   Curl_safefree(conn->socks_proxy.host.rawalloc); /* socks proxy name buffer */
-  Curl_free_primary_ssl_config(&conn->proxy_ssl_config);
 #endif
   Curl_safefree(conn->user);
   Curl_safefree(conn->passwd);
@@ -722,7 +711,7 @@ static void conn_free(struct Curl_easy *data, struct connectdata *conn)
   Curl_safefree(conn->hostname_resolve);
   Curl_safefree(conn->secondaryhostname);
   Curl_safefree(conn->localdev);
-  Curl_free_primary_ssl_config(&conn->ssl_config);
+  Curl_ssl_conn_config_cleanup(conn);
 
 #ifdef USE_UNIX_SOCKETS
   Curl_safefree(conn->unix_domain_socket);
@@ -1220,12 +1209,10 @@ ConnectionExists(struct Curl_easy *data,
             continue;
           else if(needle->handler->flags&PROTOPT_SSL) {
             /* use double layer ssl */
-            if(!Curl_ssl_config_matches(&needle->proxy_ssl_config,
-                                        &check->proxy_ssl_config))
+            if(!Curl_ssl_conn_config_match(data, needle, check, TRUE))
               continue;
           }
-          else if(!Curl_ssl_config_matches(&needle->ssl_config,
-                                           &check->ssl_config))
+          else if(!Curl_ssl_conn_config_match(data, needle, check, FALSE))
             continue;
         }
       }
@@ -1343,8 +1330,7 @@ ConnectionExists(struct Curl_easy *data,
           if(needle->handler->flags & PROTOPT_SSL) {
             /* This is a SSL connection so verify that we're using the same
                SSL options as well */
-            if(!Curl_ssl_config_matches(&needle->ssl_config,
-                                        &check->ssl_config)) {
+            if(!Curl_ssl_conn_config_match(data, needle, check, FALSE)) {
               DEBUGF(infof(data,
                            "Connection #%" CURL_FORMAT_CURL_OFF_T
                            " has different SSL parameters, can't reuse",
@@ -1550,17 +1536,6 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
 #ifndef CURL_DISABLE_FTP
   conn->bits.ftp_use_epsv = data->set.ftp_use_epsv;
   conn->bits.ftp_use_eprt = data->set.ftp_use_eprt;
-#endif
-  conn->ssl_config.verifystatus = data->set.ssl.primary.verifystatus;
-  conn->ssl_config.verifypeer = data->set.ssl.primary.verifypeer;
-  conn->ssl_config.verifyhost = data->set.ssl.primary.verifyhost;
-  conn->ssl_config.ssl_options = data->set.ssl.primary.ssl_options;
-#ifndef CURL_DISABLE_PROXY
-  conn->proxy_ssl_config.verifystatus =
-    data->set.proxy_ssl.primary.verifystatus;
-  conn->proxy_ssl_config.verifypeer = data->set.proxy_ssl.primary.verifypeer;
-  conn->proxy_ssl_config.verifyhost = data->set.proxy_ssl.primary.verifyhost;
-  conn->proxy_ssl_config.ssl_options = data->set.proxy_ssl.primary.ssl_options;
 #endif
   conn->ip_version = data->set.ipver;
   conn->connect_only = data->set.connect_only;
@@ -3587,85 +3562,8 @@ static CURLcode create_conn(struct Curl_easy *data,
   conn->send[SECONDARYSOCKET] = Curl_conn_send;
   conn->bits.tcp_fastopen = data->set.tcp_fastopen;
 
-  /* Get a cloned copy of the SSL config situation stored in the
-     connection struct. But to get this going nicely, we must first make
-     sure that the strings in the master copy are pointing to the correct
-     strings in the session handle strings array!
-
-     Keep in mind that the pointers in the master copy are pointing to strings
-     that will be freed as part of the Curl_easy struct, but all cloned
-     copies will be separately allocated.
-  */
-  data->set.ssl.primary.CApath = data->set.str[STRING_SSL_CAPATH];
-  data->set.ssl.primary.CAfile = data->set.str[STRING_SSL_CAFILE];
-  data->set.ssl.primary.issuercert = data->set.str[STRING_SSL_ISSUERCERT];
-  data->set.ssl.primary.issuercert_blob = data->set.blobs[BLOB_SSL_ISSUERCERT];
-  data->set.ssl.primary.cipher_list =
-    data->set.str[STRING_SSL_CIPHER_LIST];
-  data->set.ssl.primary.cipher_list13 =
-    data->set.str[STRING_SSL_CIPHER13_LIST];
-  data->set.ssl.primary.pinned_key =
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY];
-  data->set.ssl.primary.cert_blob = data->set.blobs[BLOB_CERT];
-  data->set.ssl.primary.ca_info_blob = data->set.blobs[BLOB_CAINFO];
-  data->set.ssl.primary.curves = data->set.str[STRING_SSL_EC_CURVES];
-
-#ifndef CURL_DISABLE_PROXY
-  data->set.proxy_ssl.primary.CApath = data->set.str[STRING_SSL_CAPATH_PROXY];
-  data->set.proxy_ssl.primary.CAfile = data->set.str[STRING_SSL_CAFILE_PROXY];
-  data->set.proxy_ssl.primary.cipher_list =
-    data->set.str[STRING_SSL_CIPHER_LIST_PROXY];
-  data->set.proxy_ssl.primary.cipher_list13 =
-    data->set.str[STRING_SSL_CIPHER13_LIST_PROXY];
-  data->set.proxy_ssl.primary.pinned_key =
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY];
-  data->set.proxy_ssl.primary.cert_blob = data->set.blobs[BLOB_CERT_PROXY];
-  data->set.proxy_ssl.primary.ca_info_blob =
-    data->set.blobs[BLOB_CAINFO_PROXY];
-  data->set.proxy_ssl.primary.issuercert =
-    data->set.str[STRING_SSL_ISSUERCERT_PROXY];
-  data->set.proxy_ssl.primary.issuercert_blob =
-    data->set.blobs[BLOB_SSL_ISSUERCERT_PROXY];
-  data->set.proxy_ssl.primary.CRLfile =
-    data->set.str[STRING_SSL_CRLFILE_PROXY];
-  data->set.proxy_ssl.cert_type = data->set.str[STRING_CERT_TYPE_PROXY];
-  data->set.proxy_ssl.key = data->set.str[STRING_KEY_PROXY];
-  data->set.proxy_ssl.key_type = data->set.str[STRING_KEY_TYPE_PROXY];
-  data->set.proxy_ssl.key_passwd = data->set.str[STRING_KEY_PASSWD_PROXY];
-  data->set.proxy_ssl.primary.clientcert = data->set.str[STRING_CERT_PROXY];
-  data->set.proxy_ssl.key_blob = data->set.blobs[BLOB_KEY_PROXY];
-#endif
-  data->set.ssl.primary.CRLfile = data->set.str[STRING_SSL_CRLFILE];
-  data->set.ssl.cert_type = data->set.str[STRING_CERT_TYPE];
-  data->set.ssl.key = data->set.str[STRING_KEY];
-  data->set.ssl.key_type = data->set.str[STRING_KEY_TYPE];
-  data->set.ssl.key_passwd = data->set.str[STRING_KEY_PASSWD];
-  data->set.ssl.primary.clientcert = data->set.str[STRING_CERT];
-#ifdef USE_TLS_SRP
-  data->set.ssl.primary.username = data->set.str[STRING_TLSAUTH_USERNAME];
-  data->set.ssl.primary.password = data->set.str[STRING_TLSAUTH_PASSWORD];
-#ifndef CURL_DISABLE_PROXY
-  data->set.proxy_ssl.primary.username =
-    data->set.str[STRING_TLSAUTH_USERNAME_PROXY];
-  data->set.proxy_ssl.primary.password =
-    data->set.str[STRING_TLSAUTH_PASSWORD_PROXY];
-#endif
-#endif
-  data->set.ssl.key_blob = data->set.blobs[BLOB_KEY];
-
-  if(!Curl_clone_primary_ssl_config(&data->set.ssl.primary,
-                                    &conn->ssl_config)) {
-    result = CURLE_OUT_OF_MEMORY;
-    goto out;
-  }
-
-#ifndef CURL_DISABLE_PROXY
-  if(!Curl_clone_primary_ssl_config(&data->set.proxy_ssl.primary,
-                                    &conn->proxy_ssl_config)) {
-    result = CURLE_OUT_OF_MEMORY;
-    goto out;
-  }
-#endif
+  /* Init the SSL configuration for the connection from settings in data */
+  result = Curl_ssl_conn_config_init(data, conn);
 
   prune_dead_connections(data);
 

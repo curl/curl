@@ -139,11 +139,16 @@ static CURLcode quic_x509_store_setup(struct Curl_cfilter *cf,
                                       struct Curl_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
+  struct ssl_primary_config *conn_config;
+
+  conn_config = Curl_ssl_cf_get_primary_config(cf);
+  if(!conn_config)
+    return CURLE_FAILED_INIT;
 
   if(!ctx->x509_store_setup) {
-    if(cf->conn->ssl_config.verifypeer) {
-      const char * const ssl_cafile = cf->conn->ssl_config.CAfile;
-      const char * const ssl_capath = cf->conn->ssl_config.CApath;
+    if(conn_config->verifypeer) {
+      const char * const ssl_cafile = conn_config->CAfile;
+      const char * const ssl_capath = conn_config->CApath;
       if(ssl_cafile || ssl_capath) {
         SSL_CTX_set_verify(ctx->sslctx, SSL_VERIFY_PEER, NULL);
         /* tell OpenSSL where to find CA certificates that are used to verify
@@ -176,9 +181,12 @@ static CURLcode quic_x509_store_setup(struct Curl_cfilter *cf,
 static CURLcode quic_ssl_setup(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
+  struct ssl_primary_config *conn_config;
   unsigned char checkip[16];
-  struct connectdata *conn = data->conn;
-  const char *curves = conn->ssl_config.curves;
+
+  conn_config = Curl_ssl_cf_get_primary_config(cf);
+  if(!conn_config)
+    return CURLE_FAILED_INIT;
 
   DEBUGASSERT(!ctx->sslctx);
   ctx->sslctx = SSL_CTX_new(TLS_method());
@@ -197,8 +205,10 @@ static CURLcode quic_ssl_setup(struct Curl_cfilter *cf, struct Curl_easy *data)
     SSL_CTX_set_keylog_callback(ctx->sslctx, keylog_callback);
   }
 
-  if(curves && !SSL_CTX_set1_curves_list(ctx->sslctx, curves)) {
-    failf(data, "failed setting curves list for QUIC: '%s'", curves);
+  if(conn_config->curves &&
+     !SSL_CTX_set1_curves_list(ctx->sslctx, conn_config->curves)) {
+    failf(data, "failed setting curves list for QUIC: '%s'",
+          conn_config->curves);
     return CURLE_SSL_CIPHER;
   }
 
@@ -1239,13 +1249,18 @@ static CURLcode cf_verify_peer(struct Curl_cfilter *cf,
                                struct Curl_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
+  struct ssl_primary_config *conn_config;
   CURLcode result = CURLE_OK;
+
+  conn_config = Curl_ssl_cf_get_primary_config(cf);
+  if(!conn_config)
+    return CURLE_FAILED_INIT;
 
   cf->conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
   cf->conn->httpversion = 30;
   cf->conn->bundle->multiuse = BUNDLE_MULTIPLEX;
 
-  if(cf->conn->ssl_config.verifyhost) {
+  if(conn_config->verifyhost) {
     X509 *server_cert;
     server_cert = SSL_get_peer_certificate(ctx->ssl);
     if(!server_cert) {
