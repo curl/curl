@@ -331,6 +331,10 @@ static CURLcode chop_write(struct Curl_easy *data,
         }
         return pausewrite(data, type, TRUE, ptr, len);
       }
+      else if(CURL_WRITEFUNC_ABORT == wrote) {
+        failf(data, "write callback aborted");
+        return CURLE_ABORTED_BY_CALLBACK;
+      }
       if(wrote != chunklen) {
         failf(data, "Failure writing output to destination");
         return CURLE_WRITE_ERROR;
