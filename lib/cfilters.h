@@ -130,6 +130,7 @@ typedef CURLcode Curl_cft_conn_keep_alive(struct Curl_cfilter *cf,
 #define CF_CTRL_DATA_DONE_SEND        8  /* 0          NULL     ignored */
 /* update conn info at connection and data */
 #define CF_CTRL_CONN_INFO_UPDATE (256+0) /* 0          NULL     ignored */
+#define CF_CTRL_FORGET_SOCKET    (256+1) /* 0          NULL     ignored */
 
 /**
  * Handle event/control for the filter.
@@ -379,6 +380,11 @@ bool Curl_conn_data_pending(struct Curl_easy *data,
  * Returns CURL_SOCKET_BAD if not available.
  */
 curl_socket_t Curl_conn_get_socket(struct Curl_easy *data, int sockindex);
+
+/**
+ * Tell filters to forget about the soket at sockindex.
+ */
+void Curl_conn_forget_socket(struct Curl_easy *data, int sockindex);
 
 /**
  * Adjust the pollset for the filter chain startgin at `cf`.
