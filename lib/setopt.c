@@ -811,15 +811,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * prevent the forthcoming read-cookies-from-file actions to accept
      * cookies that are marked as being session cookies, as they belong to a
      * previous session.
-     *
-     * In the original Netscape cookie spec, "session cookies" are cookies
-     * with no expire date set. RFC2109 describes the same action if no
-     * 'Max-Age' is set and RFC2965 includes the RFC2109 description and adds
-     * a 'Discard' action that can enforce the discard even for cookies that
-     * have a Max-Age.
-     *
-     * We run mostly with the original cookie spec, as hardly anyone implements
-     * anything else.
      */
     data->set.cookiesession = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
