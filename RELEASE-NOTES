@@ -4,7 +4,7 @@ curl and libcurl 8.5.0
  Command line options:         258
  curl_easy_setopt() options:   303
  Public functions in libcurl:  93
- Contributors:                 3010
+ Contributors:                 3014
 
 This release includes the following changes:
 
@@ -13,14 +13,20 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o asyn-thread: use pipe instead of socketpair for IPC when available [4]
+ o autotools: update references to deleted `crypt-auth` option [46]
+ o BINDINGS: add V binding [54]
  o build: add `src/.checksrc` to source tarball [1]
  o build: fix 'threadsafe' feature detection for older gcc [19]
  o CI: add autotools, out-of-tree, debug build to distro check job [14]
  o CI: ignore test 286 on Appveyor gcc 9 build [6]
  o cmake: fix `HAVE_H_ERRNO_ASSIGNABLE` detection [2]
  o cmake: fix CURL_DISABLE_GETOPTIONS [12]
+ o cmake: fix OpenSSL quic detection in quiche builds [56]
+ o cmake: pre-fill rest of detection values for Windows [50]
  o cmake: replace `check_library_exists_concat()` [23]
+ o configure: check for the fseeko declaration too [55]
  o curl.h: on FreeBSD include sys/param.h instead of osreldate.h [21]
+ o CURLOPT_WRITEFUNCTION.3: clarify libcurl returns for CURL_WRITEFUNC_ERROR [45]
  o docs/libcurl: fix three minor man page format mistakes [26]
  o docs: fix function typo in curl_easy_option_next.3 [36]
  o docs: use SOURCE_DATE_EPOCH for generated manpages [16]
@@ -30,6 +36,7 @@ This release includes the following bugfixes:
  o GHA: move mod_h2 version in CI to v2.0.25 [43]
  o hostip: show the list of IPs when resolving is done [35]
  o http2: header conversion tightening [33]
+ o http2: provide an error callback and failf the message [53]
  o http2: safer invocation of populate_binsettings [8]
  o http: avoid Expect: 100-continue if Upgrade: is used [15]
  o lib: fix gcc warning in printf call [7]
@@ -38,6 +45,8 @@ This release includes the following bugfixes:
  o openldap: move the alloc of ldapconninfo to *connect() [29]
  o openldap: set the callback argument in oldap_do [30]
  o openssl: avoid BN_num_bits() NULL pointer derefs [9]
+ o OpenSSL: include SIG and KEM algorithms in verbose [52]
+ o page-footer: clarify exit code 25 [51]
  o quic: manage connection idle timeouts [5]
  o RTSP: improved RTP parser [32]
  o socks: better buffer size checks for socks4a user and hostname [20]
@@ -45,6 +54,7 @@ This release includes the following bugfixes:
  o test1683: remove commented-out check alternatives
  o test3103: add missing quotes around a test tag attribute
  o test613: stop showing an error on missing output file
+ o tests/README: SOCKS tests are not using OpenSSH, it has its own server [48]
  o tests/server: add more SOCKS5 handshake error checking [27]
  o tests: Fix Windows test helper tool search & use it for handle64 [17]
  o tool: fix --capath when proxy support is disabled [28]
@@ -55,6 +65,7 @@ This release includes the following bugfixes:
  o tool_urlglob: make multiply() bail out on negative values [11]
  o transfer: only reset the FTP wildcard engine in CLEAR state [42]
  o url: don't touch the multi handle when closing internal handles [40]
+ o urldata: move async resolver state from easy handle to connectdata [34]
  o urldata: move the 'internal' boolean to the state struct [39]
  o vssh: remove the #ifdef for Curl_ssh_init, use empty macro
  o wolfssl: require WOLFSSL_SYS_CA_CERTS for loading system CA [10]
@@ -72,14 +83,16 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alex Klyubin, Ammar Faizi, calvin2021y on github,
-  Carlos Henrique Lima Melara, Dan Fandrich, Daniel Jeliński, Daniel Stenberg,
-  Faraz Fallahi, icy17 on github, Jan Alexander Steffens, Jeroen Ooms,
-  Kartatz on Github, lkordos on github, Loïc Yhuel, LoRd_MuldeR,
-  Maksymilian Arciemowicz, Manfred Schwarb, Marcin Rataj, Ray Satiro, rilysh,
-  Romain Geissler, Samuel Henrique, sd0 on hackerone, Sohom Datta,
-  Stefan Eissing, Torben Dury, Viktor Szakats
-  (27 contributors)
+  12932 on github, Alex Bozarth, Alex Klyubin, Ammar Faizi,
+  calvin2021y on github, Carlos Henrique Lima Melara, Casey Bodley,
+  Dan Fandrich, Daniel Jeliński, Daniel Stenberg, Emanuele Torre,
+  enWILLYado on github, Faraz Fallahi, icy17 on github, Jacob Hoffman-Andrews,
+  Jan Alexander Steffens, Jeroen Ooms, Kartatz on Github, lkordos on github,
+  Loïc Yhuel, LoRd_MuldeR, Maksymilian Arciemowicz, Manfred Schwarb,
+  Marcin Rataj, Martin Schmatz, Ray Satiro, rilysh, Romain Geissler,
+  Samuel Henrique, sd0 on hackerone, Sohom Datta, Stefan Eissing, Torben Dury,
+  Turiiya, Viktor Szakats
+  (35 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -116,6 +129,7 @@ References to bug reports and discussions on issues:
  [31] = https://curl.se/bug/?i=12137
  [32] = https://curl.se/bug/?i=12052
  [33] = https://curl.se/bug/?i=12097
+ [34] = https://curl.se/bug/?i=12198
  [35] = https://curl.se/bug/?i=12145
  [36] = https://curl.se/bug/?i=12170
  [37] = https://curl.se/bug/?i=12168
@@ -126,3 +140,13 @@ References to bug reports and discussions on issues:
  [42] = https://curl.se/bug/?i=11775
  [43] = https://curl.se/bug/?i=12157
  [44] = https://curl.se/bug/?i=12149
+ [45] = https://curl.se/bug/?i=12201
+ [46] = https://curl.se/bug/?i=12194
+ [48] = https://curl.se/bug/?i=12195
+ [50] = https://curl.se/bug/?i=12044
+ [51] = https://curl.se/bug/?i=12189
+ [52] = https://curl.se/bug/?i=12030
+ [53] = https://curl.se/bug/?i=12179
+ [54] = https://curl.se/bug/?i=12182
+ [55] = https://curl.se/bug/?i=12086
+ [56] = https://curl.se/bug/?i=12160
