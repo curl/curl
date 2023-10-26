@@ -654,10 +654,17 @@ static CURLcode quic_init_ssl(struct Curl_cfilter *cf,
 static CURLcode quic_ssl_ctx(WOLFSSL_CTX **pssl_ctx,
                              struct Curl_cfilter *cf, struct Curl_easy *data)
 {
-  struct connectdata *conn = cf->conn;
   CURLcode result = CURLE_FAILED_INIT;
-  WOLFSSL_CTX *ssl_ctx = wolfSSL_CTX_new(wolfTLSv1_3_client_method());
+  struct ssl_primary_config *conn_config;
+  WOLFSSL_CTX *ssl_ctx = NULL;
 
+  conn_config = Curl_ssl_cf_get_primary_config(cf);
+  if(!conn_config) {
+    result = CURLE_FAILED_INIT;
+    goto out;
+  }
+
+  ssl_ctx = wolfSSL_CTX_new(wolfTLSv1_3_client_method());
   if(!ssl_ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -665,6 +672,7 @@ static CURLcode quic_ssl_ctx(WOLFSSL_CTX **pssl_ctx,
 
   if(ngtcp2_crypto_wolfssl_configure_client_context(ssl_ctx) != 0) {
     failf(data, "ngtcp2_crypto_wolfssl_configure_client_context failed");
+    result = CURLE_FAILED_INIT;
     goto out;
   }
 
