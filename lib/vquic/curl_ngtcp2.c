@@ -440,12 +440,17 @@ static CURLcode quic_ssl_ctx(SSL_CTX **pssl_ctx,
                              struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
-  struct connectdata *conn = cf->conn;
+  struct ssl_primary_config *conn_config;
   CURLcode result = CURLE_FAILED_INIT;
-  SSL_CTX *ssl_ctx = SSL_CTX_new(TLS_method());
 
+  SSL_CTX *ssl_ctx = SSL_CTX_new(TLS_method());
   if(!ssl_ctx) {
     result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+  conn_config = Curl_ssl_cf_get_primary_config(cf);
+  if(!conn_config) {
+    result = CURLE_FAILED_INIT;
     goto out;
   }
 
@@ -464,8 +469,8 @@ static CURLcode quic_ssl_ctx(SSL_CTX **pssl_ctx,
   SSL_CTX_set_default_verify_paths(ssl_ctx);
 
   {
-    const char *curves = conn->ssl_config.curves ?
-      conn->ssl_config.curves : QUIC_GROUPS;
+    const char *curves = conn_config->curves ?
+      conn_config->curves : QUIC_GROUPS;
     if(!SSL_CTX_set1_curves_list(ssl_ctx, curves)) {
       failf(data, "failed setting curves list for QUIC: '%s'", curves);
       return CURLE_SSL_CIPHER;
@@ -474,8 +479,8 @@ static CURLcode quic_ssl_ctx(SSL_CTX **pssl_ctx,
 
 #ifndef OPENSSL_IS_BORINGSSL
   {
-    const char *ciphers13 = conn->ssl_config.cipher_list13 ?
-      conn->ssl_config.cipher_list13 : QUIC_CIPHERS;
+    const char *ciphers13 = conn_config->cipher_list13 ?
+      conn_config->cipher_list13 : QUIC_CIPHERS;
     if(SSL_CTX_set_ciphersuites(ssl_ctx, ciphers13) != 1) {
       failf(data, "failed setting QUIC cipher suite: %s", ciphers13);
       return CURLE_SSL_CIPHER;
@@ -494,7 +499,7 @@ static CURLcode quic_ssl_ctx(SSL_CTX **pssl_ctx,
    * fail to connect if the verification fails, or if it should continue
    * anyway. In the latter case the result of the verification is checked with
    * SSL_get_verify_result() below. */
-  SSL_CTX_set_verify(ssl_ctx, conn->ssl_config.verifypeer ?
+  SSL_CTX_set_verify(ssl_ctx, conn_config->verifypeer ?
                      SSL_VERIFY_PEER : SSL_VERIFY_NONE, NULL);
 
   /* give application a chance to interfere with SSL set up. */
@@ -533,7 +538,7 @@ static CURLcode quic_set_client_cert(struct Curl_cfilter *cf,
   SSL_CTX *ssl_ctx = ctx->sslctx;
   const struct ssl_config_data *ssl_config;
 
-  ssl_config = Curl_ssl_get_config(data, FIRSTSOCKET);
+  ssl_config = Curl_ssl_cf_get_config(cf, data);
   DEBUGASSERT(ssl_config);
 
   if(ssl_config->primary.clientcert || ssl_config->primary.cert_blob
@@ -591,6 +596,7 @@ static CURLcode quic_init_ssl(struct Curl_cfilter *cf,
                               struct Curl_easy *data)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
+  struct ssl_primary_config *conn_config;
   CURLcode result;
   gnutls_datum_t alpn[2];
   /* this will need some attention when HTTPS proxy over QUIC get fixed */
@@ -598,12 +604,16 @@ static CURLcode quic_init_ssl(struct Curl_cfilter *cf,
   long * const pverifyresult = &data->set.ssl.certverifyresult;
   int rc;
 
+  conn_config = Curl_ssl_cf_get_primary_config(cf);
+  if(!conn_config)
+    return CURLE_FAILED_INIT;
+
   DEBUGASSERT(ctx->gtls == NULL);
   ctx->gtls = calloc(1, sizeof(*(ctx->gtls)));
   if(!ctx->gtls)
     return CURLE_OUT_OF_MEMORY;
 
-  result = gtls_client_init(data, &cf->conn->ssl_config, &data->set.ssl,
+  result = gtls_client_init(data, conn_config, &data->set.ssl,
                             hostname, ctx->gtls, pverifyresult);
   if(result)
     return result;
@@ -644,10 +654,17 @@ static CURLcode quic_init_ssl(struct Curl_cfilter *cf,
 static CURLcode quic_ssl_ctx(WOLFSSL_CTX **pssl_ctx,
                              struct Curl_cfilter *cf, struct Curl_easy *data)
 {
-  struct connectdata *conn = cf->conn;
   CURLcode result = CURLE_FAILED_INIT;
-  WOLFSSL_CTX *ssl_ctx = wolfSSL_CTX_new(wolfTLSv1_3_client_method());
+  struct ssl_primary_config *conn_config;
+  WOLFSSL_CTX *ssl_ctx = NULL;
 
+  conn_config = Curl_ssl_cf_get_primary_config(cf);
+  if(!conn_config) {
+    result = CURLE_FAILED_INIT;
+    goto out;
+  }
+
+  ssl_ctx = wolfSSL_CTX_new(wolfTLSv1_3_client_method());
   if(!ssl_ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -655,13 +672,14 @@ static CURLcode quic_ssl_ctx(WOLFSSL_CTX **pssl_ctx,
 
   if(ngtcp2_crypto_wolfssl_configure_client_context(ssl_ctx) != 0) {
     failf(data, "ngtcp2_crypto_wolfssl_configure_client_context failed");
+    result = CURLE_FAILED_INIT;
     goto out;
   }
 
   wolfSSL_CTX_set_default_verify_paths(ssl_ctx);
 
-  if(wolfSSL_CTX_set_cipher_list(ssl_ctx, conn->ssl_config.cipher_list13 ?
-                                 conn->ssl_config.cipher_list13 :
+  if(wolfSSL_CTX_set_cipher_list(ssl_ctx, conn_config->cipher_list13 ?
+                                 conn_config->cipher_list13 :
                                  QUIC_CIPHERS) != 1) {
     char error_buffer[256];
     ERR_error_string_n(ERR_get_error(), error_buffer, sizeof(error_buffer));
@@ -669,8 +687,8 @@ static CURLcode quic_ssl_ctx(WOLFSSL_CTX **pssl_ctx,
     goto out;
   }
 
-  if(wolfSSL_CTX_set1_groups_list(ssl_ctx, conn->ssl_config.curves ?
-                                  conn->ssl_config.curves :
+  if(wolfSSL_CTX_set1_groups_list(ssl_ctx, conn_config->curves ?
+                                  conn_config->curves :
                                   (char *)QUIC_GROUPS) != 1) {
     failf(data, "wolfSSL failed to set curves");
     goto out;
@@ -687,9 +705,9 @@ static CURLcode quic_ssl_ctx(WOLFSSL_CTX **pssl_ctx,
 #endif
   }
 
-  if(conn->ssl_config.verifypeer) {
-    const char * const ssl_cafile = conn->ssl_config.CAfile;
-    const char * const ssl_capath = conn->ssl_config.CApath;
+  if(conn_config->verifypeer) {
+    const char * const ssl_cafile = conn_config->CAfile;
+    const char * const ssl_capath = conn_config->CApath;
 
     wolfSSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_PEER, NULL);
     if(ssl_cafile || ssl_capath) {
@@ -1912,10 +1930,15 @@ static CURLcode qng_verify_peer(struct Curl_cfilter *cf,
                                 struct Curl_easy *data)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
+  struct ssl_primary_config *conn_config;
   CURLcode result = CURLE_OK;
   const char *hostname, *disp_hostname;
   int port;
   char *snihost;
+
+  conn_config = Curl_ssl_cf_get_primary_config(cf);
+  if(!conn_config)
+    return CURLE_FAILED_INIT;
 
   Curl_conn_get_host(data, cf->sockindex, &hostname, &disp_hostname, &port);
   snihost = Curl_ssl_snihost(data, hostname, NULL);
@@ -1926,7 +1949,7 @@ static CURLcode qng_verify_peer(struct Curl_cfilter *cf,
   cf->conn->httpversion = 30;
   cf->conn->bundle->multiuse = BUNDLE_MULTIPLEX;
 
-  if(cf->conn->ssl_config.verifyhost) {
+  if(conn_config->verifyhost) {
 #ifdef USE_OPENSSL
     X509 *server_cert;
     server_cert = SSL_get_peer_certificate(ctx->ssl);
@@ -1939,7 +1962,7 @@ static CURLcode qng_verify_peer(struct Curl_cfilter *cf,
       return result;
 #elif defined(USE_GNUTLS)
     result = Curl_gtls_verifyserver(data, ctx->gtls->session,
-                                    &cf->conn->ssl_config, &data->set.ssl,
+                                    conn_config, &data->set.ssl,
                                     hostname, disp_hostname,
                                     data->set.str[STRING_SSL_PINNEDPUBLICKEY]);
     if(result)
