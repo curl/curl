@@ -4628,22 +4628,9 @@ static ssize_t ossl_send(struct Curl_cfilter *cf,
     case SSL_ERROR_SSL: {
       /*  A failure in the SSL library occurred, usually a protocol error.
           The OpenSSL error queue contains more information on the error. */
-      struct Curl_cfilter *cf_ssl_next = Curl_ssl_cf_get_ssl(cf->next);
-      struct ssl_connect_data *connssl_next = cf_ssl_next?
-        cf_ssl_next->ctx : NULL;
       sslerror = ERR_get_error();
-      if(ERR_GET_LIB(sslerror) == ERR_LIB_SSL &&
-         ERR_GET_REASON(sslerror) == SSL_R_BIO_NOT_SET &&
-         connssl->state == ssl_connection_complete &&
-         (connssl_next && connssl_next->state == ssl_connection_complete)
-        ) {
-        char ver[120];
-        (void)ossl_version(ver, sizeof(ver));
-        failf(data, "Error: %s does not support double SSL tunneling.", ver);
-      }
-      else
-        failf(data, "SSL_write() error: %s",
-              ossl_strerror(sslerror, error_buffer, sizeof(error_buffer)));
+      failf(data, "SSL_write() error: %s",
+            ossl_strerror(sslerror, error_buffer, sizeof(error_buffer)));
       *curlcode = CURLE_SEND_ERROR;
       rc = -1;
       goto out;

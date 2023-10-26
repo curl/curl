@@ -160,18 +160,6 @@ CURLcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
 #endif /* !CURL_DISABLE_PROXY */
 
 /**
- * Get the SSL configuration that is used on the connection.
- * This returns NULL if no SSL is configured.
- * Otherwise it returns the config of the first (highest) one that is
- * either connected, in handshake or about to start
- * (e.g. all filters below it are connected). If SSL filters are present,
- * but neither can start operating, return the config of the lowest one
- * that will first come into effect when connecting.
- */
-struct ssl_config_data *Curl_ssl_get_config(struct Curl_easy *data,
-                                            int sockindex);
-
-/**
  * True iff the underlying SSL implementation supports the option.
  * Option is one of the defined SSLSUPP_* values.
  * `data` maybe NULL for the features of the default implementation.
@@ -187,6 +175,19 @@ bool Curl_ssl_supports(struct Curl_easy *data, int ssl_option);
  */
 void *Curl_ssl_get_internals(struct Curl_easy *data, int sockindex,
                              CURLINFO info, int n);
+
+/**
+ * Get the ssl_config_data in `data` that is relevant for cfilter `cf`.
+ */
+struct ssl_config_data *Curl_ssl_cf_get_config(struct Curl_cfilter *cf,
+                                               struct Curl_easy *data);
+
+/**
+ * Get the primary config relevant for the filter from its connection.
+ */
+struct ssl_primary_config *
+  Curl_ssl_cf_get_primary_config(struct Curl_cfilter *cf);
+
 
 extern struct Curl_cftype Curl_cft_ssl;
 extern struct Curl_cftype Curl_cft_ssl_proxy;
@@ -209,8 +210,9 @@ extern struct Curl_cftype Curl_cft_ssl_proxy;
 #define Curl_ssl_get_internals(a,b,c,d) NULL
 #define Curl_ssl_supports(a,b) FALSE
 #define Curl_ssl_cfilter_add(a,b,c) CURLE_NOT_BUILT_IN
-#define Curl_ssl_get_config(a,b) NULL
 #define Curl_ssl_cfilter_remove(a,b) CURLE_OK
+#define Curl_ssl_cf_get_config(a.b) NULL
+#define Curl_ssl_cf_get_primary_config(a) NULL
 #endif
 
 #endif /* HEADER_CURL_VTLS_H */

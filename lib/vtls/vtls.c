@@ -1831,6 +1831,16 @@ bool Curl_ssl_supports(struct Curl_easy *data, int option)
   return (Curl_ssl->supports & option)? TRUE : FALSE;
 }
 
+static struct Curl_cfilter *get_ssl_filter(struct Curl_cfilter *cf)
+{
+  for(; cf; cf = cf->next) {
+    if(cf->cft == &Curl_cft_ssl || cf->cft == &Curl_cft_ssl_proxy)
+      return cf;
+  }
+  return NULL;
+}
+
+
 void *Curl_ssl_get_internals(struct Curl_easy *data, int sockindex,
                              CURLINFO info, int n)
 {
@@ -1838,8 +1848,8 @@ void *Curl_ssl_get_internals(struct Curl_easy *data, int sockindex,
   (void)n;
   if(data->conn) {
     struct Curl_cfilter *cf;
-    /* get first filter in chain, if any is present */
-    cf = Curl_ssl_cf_get_ssl(data->conn->cfilter[sockindex]);
+    /* get first SSL filter in chain, if any is present */
+    cf = get_ssl_filter(data->conn->cfilter[sockindex]);
     if(cf) {
       struct cf_call_data save;
       CF_DATA_SAVE(save, cf, data);
@@ -1869,23 +1879,6 @@ CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
   return result;
 }
 
-static struct Curl_cfilter *get_ssl_cf_engaged(struct connectdata *conn,
-                                               int sockindex)
-{
-  struct Curl_cfilter *cf, *lowest_ssl_cf = NULL;
-
-  for(cf = conn->cfilter[sockindex]; cf; cf = cf->next) {
-    if(cf->cft == &Curl_cft_ssl || cf->cft == &Curl_cft_ssl_proxy) {
-      lowest_ssl_cf = cf;
-      if(cf->connected || (cf->next && cf->next->connected)) {
-        /* connected or about to start */
-        return cf;
-      }
-    }
-  }
-  return lowest_ssl_cf;
-}
-
 bool Curl_ssl_cf_is_proxy(struct Curl_cfilter *cf)
 {
   return (cf->cft == &Curl_cft_ssl_proxy);
@@ -1902,17 +1895,6 @@ Curl_ssl_cf_get_config(struct Curl_cfilter *cf, struct Curl_easy *data)
 #endif
 }
 
-struct ssl_config_data *
-Curl_ssl_get_config(struct Curl_easy *data, int sockindex)
-{
-  struct Curl_cfilter *cf;
-
-  (void)data;
-  DEBUGASSERT(data->conn);
-  cf = get_ssl_cf_engaged(data->conn, sockindex);
-  return cf? Curl_ssl_cf_get_config(cf, data) : &data->set.ssl;
-}
-
 struct ssl_primary_config *
 Curl_ssl_cf_get_primary_config(struct Curl_cfilter *cf)
 {
@@ -1922,15 +1904,6 @@ Curl_ssl_cf_get_primary_config(struct Curl_cfilter *cf)
   return Curl_ssl_cf_is_proxy(cf)?
     &cf->conn->proxy_ssl_config : &cf->conn->ssl_config;
 #endif
-}
-
-struct Curl_cfilter *Curl_ssl_cf_get_ssl(struct Curl_cfilter *cf)
-{
-  for(; cf; cf = cf->next) {
-    if(cf->cft == &Curl_cft_ssl || cf->cft == &Curl_cft_ssl_proxy)
-      return cf;
-  }
-  return NULL;
 }
 
 CURLcode Curl_alpn_to_proto_buf(struct alpn_proto_buf *buf,

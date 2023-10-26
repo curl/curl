@@ -533,7 +533,7 @@ static CURLcode quic_set_client_cert(struct Curl_cfilter *cf,
   SSL_CTX *ssl_ctx = ctx->sslctx;
   const struct ssl_config_data *ssl_config;
 
-  ssl_config = Curl_ssl_get_config(data, FIRSTSOCKET);
+  ssl_config = Curl_ssl_cf_get_config(cf, data);
   DEBUGASSERT(ssl_config);
 
   if(ssl_config->primary.clientcert || ssl_config->primary.cert_blob
