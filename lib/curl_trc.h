@@ -123,7 +123,7 @@ void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
                       const char *fmt, ...);
 #endif
 
-#else /* !CURL_DISABLE_VERBOSE_STRINGS */
+#else /* defined(CURL_DISABLE_VERBOSE_STRINGS) */
 /* All informational messages are not compiled in for size savings */
 
 #define Curl_trc_is_verbose(d)        ((void)(d), FALSE)
@@ -141,6 +141,6 @@ static void Curl_trc_cf_infof(struct Curl_easy *data,
   (void)data; (void)cf; (void)fmt;
 }
 
-#endif /* CURL_DISABLE_VERBOSE_STRINGS */
+#endif /* !defined(CURL_DISABLE_VERBOSE_STRINGS) */
 
 #endif /* HEADER_CURL_TRC_H */
