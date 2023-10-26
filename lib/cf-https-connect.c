@@ -325,42 +325,25 @@ out:
   return result;
 }
 
-static int cf_hc_get_select_socks(struct Curl_cfilter *cf,
+static void cf_hc_adjust_pollset(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
-                                  curl_socket_t *socks)
+                                  struct easy_pollset *ps)
 {
-  struct cf_hc_ctx *ctx = cf->ctx;
-  size_t i, j, s;
-  int brc, rc = GETSOCK_BLANK;
-  curl_socket_t bsocks[MAX_SOCKSPEREASYHANDLE];
-  struct cf_hc_baller *ballers[2];
+  if(!cf->connected) {
+    struct cf_hc_ctx *ctx = cf->ctx;
+    struct cf_hc_baller *ballers[2];
+    size_t i;
 
-  if(cf->connected)
-    return cf->next->cft->get_select_socks(cf->next, data, socks);
-
-  ballers[0] = &ctx->h3_baller;
-  ballers[1] = &ctx->h21_baller;
-  for(i = s = 0; i < sizeof(ballers)/sizeof(ballers[0]); i++) {
-    struct cf_hc_baller *b = ballers[i];
-    if(!cf_hc_baller_is_active(b))
-      continue;
-    brc = Curl_conn_cf_get_select_socks(b->cf, data, bsocks);
-    CURL_TRC_CF(data, cf, "get_selected_socks(%s) -> %x", b->name, brc);
-    if(!brc)
-      continue;
-    for(j = 0; j < MAX_SOCKSPEREASYHANDLE && s < MAX_SOCKSPEREASYHANDLE; ++j) {
-      if((brc & GETSOCK_WRITESOCK(j)) || (brc & GETSOCK_READSOCK(j))) {
-        socks[s] = bsocks[j];
-        if(brc & GETSOCK_WRITESOCK(j))
-          rc |= GETSOCK_WRITESOCK(s);
-        if(brc & GETSOCK_READSOCK(j))
-          rc |= GETSOCK_READSOCK(s);
-        s++;
-      }
+    ballers[0] = &ctx->h3_baller;
+    ballers[1] = &ctx->h21_baller;
+    for(i = 0; i < sizeof(ballers)/sizeof(ballers[0]); i++) {
+      struct cf_hc_baller *b = ballers[i];
+      if(!cf_hc_baller_is_active(b))
+        continue;
+      Curl_conn_cf_adjust_pollset(b->cf, data, ps);
     }
+    CURL_TRC_CF(data, cf, "adjust_pollset -> %d socks", ps->num);
   }
-  CURL_TRC_CF(data, cf, "get_selected_socks -> %x", rc);
-  return rc;
 }
 
 static bool cf_hc_data_pending(struct Curl_cfilter *cf,
@@ -455,7 +438,7 @@ struct Curl_cftype Curl_cft_http_connect = {
   cf_hc_connect,
   cf_hc_close,
   Curl_cf_def_get_host,
-  cf_hc_get_select_socks,
+  cf_hc_adjust_pollset,
   cf_hc_data_pending,
   Curl_cf_def_send,
   Curl_cf_def_recv,

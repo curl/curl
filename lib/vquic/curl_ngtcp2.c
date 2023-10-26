@@ -78,7 +78,6 @@
 
 #define QUIC_MAX_STREAMS (256*1024)
 #define QUIC_MAX_DATA (1*1024*1024)
-#define QUIC_IDLE_TIMEOUT (60*NGTCP2_SECONDS)
 #define QUIC_HANDSHAKE_TIMEOUT (10*NGTCP2_SECONDS)
 
 /* A stream window is the maximum amount we need to buffer for
@@ -161,6 +160,7 @@ struct cf_ngtcp2_ctx {
   struct curltime reconnect_at;      /* time the next attempt should start */
   struct bufc_pool stream_bufcp;     /* chunk pool for streams */
   size_t max_stream_window;          /* max flow window for one stream */
+  uint64_t max_idle_ms;              /* max idle time for QUIC connection */
   int qlogfd;
   BIT(got_first_byte);               /* if first byte was received */
 #ifdef USE_OPENSSL
@@ -191,6 +191,7 @@ struct h3_stream_ctx {
   bool closed; /* TRUE on stream close */
   bool reset;  /* TRUE on stream reset */
   bool send_closed; /* stream is local closed */
+  BIT(quic_flow_blocked); /* stream is blocked by QUIC flow control */
 };
 
 #define H3_STREAM_CTX(d)  ((struct h3_stream_ctx *)(((d) && (d)->req.p.http)? \
@@ -249,6 +250,43 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 }
 
+static struct Curl_easy *get_stream_easy(struct Curl_cfilter *cf,
+                                         struct Curl_easy *data,
+                                         int64_t stream_id)
+{
+  struct Curl_easy *sdata;
+
+  (void)cf;
+  if(H3_STREAM_ID(data) == stream_id) {
+    return data;
+  }
+  else {
+    DEBUGASSERT(data->multi);
+    for(sdata = data->multi->easyp; sdata; sdata = sdata->next) {
+      if((sdata->conn == data->conn) && H3_STREAM_ID(sdata) == stream_id) {
+        return sdata;
+      }
+    }
+  }
+  return NULL;
+}
+
+static void h3_drain_stream(struct Curl_cfilter *cf,
+                            struct Curl_easy *data)
+{
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
+  unsigned char bits;
+
+  (void)cf;
+  bits = CURL_CSELECT_IN;
+  if(stream && stream->upload_left && !stream->send_closed)
+    bits |= CURL_CSELECT_OUT;
+  if(data->state.dselect_bits != bits) {
+    data->state.dselect_bits = bits;
+    Curl_expire(data, 0, EXPIRE_RUN_NOW);
+  }
+}
+
 /* ngtcp2 default congestion controller does not perform pacing. Limit
    the maximum packet burst to MAX_PKT_BURST packets. */
 #define MAX_PKT_BURST 10
@@ -261,10 +299,14 @@ struct pkt_io_ctx {
   ngtcp2_path_storage ps;
 };
 
-static ngtcp2_tstamp timestamp(void)
+static void pktx_update_time(struct pkt_io_ctx *pktx,
+                             struct Curl_cfilter *cf)
 {
-  struct curltime ct = Curl_now();
-  return ct.tv_sec * NGTCP2_SECONDS + ct.tv_usec * NGTCP2_MICROSECONDS;
+  struct cf_ngtcp2_ctx *ctx = cf->ctx;
+
+  vquic_ctx_update_time(&ctx->q);
+  pktx->ts = ctx->q.last_op.tv_sec * NGTCP2_SECONDS +
+             ctx->q.last_op.tv_usec * NGTCP2_MICROSECONDS;
 }
 
 static void pktx_init(struct pkt_io_ctx *pktx,
@@ -273,9 +315,9 @@ static void pktx_init(struct pkt_io_ctx *pktx,
 {
   pktx->cf = cf;
   pktx->data = data;
-  pktx->ts = timestamp();
   pktx->pkt_count = 0;
   ngtcp2_path_storage_zero(&pktx->ps);
+  pktx_update_time(pktx, cf);
 }
 
 static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
@@ -354,7 +396,7 @@ static void quic_settings(struct cf_ngtcp2_ctx *ctx,
   t->initial_max_stream_data_uni = ctx->max_stream_window;
   t->initial_max_streams_bidi = QUIC_MAX_STREAMS;
   t->initial_max_streams_uni = QUIC_MAX_STREAMS;
-  t->max_idle_timeout = QUIC_IDLE_TIMEOUT;
+  t->max_idle_timeout = (ctx->max_idle_ms * NGTCP2_MILLISECONDS);
   if(ctx->qlogfd != -1) {
     s->qlog_write = qlog_callback;
   }
@@ -911,6 +953,9 @@ static int cb_extend_max_stream_data(ngtcp2_conn *tconn, int64_t stream_id,
 {
   struct Curl_cfilter *cf = user_data;
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
+  struct Curl_easy *data = CF_DATA_CURRENT(cf);
+  struct Curl_easy *s_data;
+  struct h3_stream_ctx *stream;
   int rv;
   (void)tconn;
   (void)max_data;
@@ -920,7 +965,13 @@ static int cb_extend_max_stream_data(ngtcp2_conn *tconn, int64_t stream_id,
   if(rv) {
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
-
+  s_data = get_stream_easy(cf, data, stream_id);
+  stream = H3_STREAM_CTX(s_data);
+  if(stream && stream->quic_flow_blocked) {
+    CURL_TRC_CF(data, cf, "[%" PRId64 "] unblock quic flow", stream_id);
+    stream->quic_flow_blocked = FALSE;
+    h3_drain_stream(cf, data);
+  }
   return 0;
 }
 
@@ -1038,7 +1089,7 @@ static CURLcode check_and_set_expiry(struct Curl_cfilter *cf,
     pktx = &local_pktx;
   }
   else {
-    pktx->ts = timestamp();
+    pktx_update_time(pktx, cf);
   }
 
   expiry = ngtcp2_conn_get_expiry(ctx->qconn);
@@ -1073,46 +1124,29 @@ static CURLcode check_and_set_expiry(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-static int cf_ngtcp2_get_select_socks(struct Curl_cfilter *cf,
+static void cf_ngtcp2_adjust_pollset(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
-                                      curl_socket_t *socks)
+                                      struct easy_pollset *ps)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
-  struct SingleRequest *k = &data->req;
-  int rv = GETSOCK_BLANK;
-  struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
-  struct cf_call_data save;
+  bool want_recv = CURL_WANT_RECV(data);
+  bool want_send = CURL_WANT_SEND(data);
 
-  CF_DATA_SAVE(save, cf, data);
-  socks[0] = ctx->q.sockfd;
+  if(ctx->qconn && (want_recv || want_send)) {
+    struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
+    struct cf_call_data save;
+    bool c_exhaust, s_exhaust;
 
-  /* in HTTP/3 we can always get a frame, so check read */
-  rv |= GETSOCK_READSOCK(0);
+    CF_DATA_SAVE(save, cf, data);
+    c_exhaust = !ngtcp2_conn_get_cwnd_left(ctx->qconn) ||
+                !ngtcp2_conn_get_max_data_left(ctx->qconn);
+    s_exhaust = stream && stream->id >= 0 && stream->quic_flow_blocked;
+    want_recv = (want_recv || c_exhaust || s_exhaust);
+    want_send = (!s_exhaust && want_send) ||
+                 !Curl_bufq_is_empty(&ctx->q.sendbuf);
 
-  /* we're still uploading or the HTTP/2 layer wants to send data */
-  if((k->keepon & KEEP_SENDBITS) == KEEP_SEND &&
-     ngtcp2_conn_get_cwnd_left(ctx->qconn) &&
-     ngtcp2_conn_get_max_data_left(ctx->qconn) &&
-     stream && nghttp3_conn_is_stream_writable(ctx->h3conn, stream->id))
-    rv |= GETSOCK_WRITESOCK(0);
-
-  CF_DATA_RESTORE(cf, save);
-  return rv;
-}
-
-static void h3_drain_stream(struct Curl_cfilter *cf,
-                            struct Curl_easy *data)
-{
-  struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
-  unsigned char bits;
-
-  (void)cf;
-  bits = CURL_CSELECT_IN;
-  if(stream && stream->upload_left && !stream->send_closed)
-    bits |= CURL_CSELECT_OUT;
-  if(data->state.dselect_bits != bits) {
-    data->state.dselect_bits = bits;
-    Curl_expire(data, 0, EXPIRE_RUN_NOW);
+    Curl_pollset_set(data, ps, ctx->q.sockfd, want_recv, want_send);
+    CF_DATA_RESTORE(cf, save);
   }
 }
 
@@ -1141,7 +1175,6 @@ static int cb_h3_stream_close(nghttp3_conn *conn, int64_t stream_id,
   else {
     CURL_TRC_CF(data, cf, "[%" PRId64 "] CLOSED", stream->id);
   }
-  data->req.keepon &= ~KEEP_SEND_HOLD;
   h3_drain_stream(cf, data);
   return 0;
 }
@@ -1573,12 +1606,6 @@ static int cb_h3_acked_req_body(nghttp3_conn *conn, int64_t stream_id,
     if(rv) {
       return NGTCP2_ERR_CALLBACK_FAILURE;
     }
-    if((data->req.keepon & KEEP_SEND_HOLD) &&
-       (data->req.keepon & KEEP_SEND)) {
-      data->req.keepon &= ~KEEP_SEND_HOLD;
-      h3_drain_stream(cf, data);
-      CURL_TRC_CF(data, cf, "[%" PRId64 "] unpausing acks", stream_id);
-    }
   }
   return 0;
 }
@@ -1860,15 +1887,13 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(stream && sent > 0 && stream->sendbuf_len_in_flight) {
     /* We have unacknowledged DATA and cannot report success to our
      * caller. Instead we EAGAIN and remember how much we have already
-     * "written" into our various internal connection buffers.
-     * We put the stream upload on HOLD, until this gets ACKed. */
+     * "written" into our various internal connection buffers. */
     stream->upload_blocked_len = sent;
     CURL_TRC_CF(data, cf, "[%" PRId64 "] cf_send(len=%zu), "
                 "%zu bytes in flight -> EGAIN", stream->id, len,
                 stream->sendbuf_len_in_flight);
     *err = CURLE_AGAIN;
     sent = -1;
-    data->req.keepon |= KEEP_SEND_HOLD;
   }
 
 out:
@@ -1993,7 +2018,7 @@ static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
     pktx = &local_pktx;
   }
   else {
-    pktx->ts = timestamp();
+    pktx_update_time(pktx, cf);
   }
 
 #ifdef USE_OPENSSL
@@ -2081,11 +2106,18 @@ static ssize_t read_pkt_to_send(void *userp,
     }
     else if(n < 0) {
       switch(n) {
-      case NGTCP2_ERR_STREAM_DATA_BLOCKED:
+      case NGTCP2_ERR_STREAM_DATA_BLOCKED: {
+        struct h3_stream_ctx *stream = H3_STREAM_CTX(x->data);
         DEBUGASSERT(ndatalen == -1);
         nghttp3_conn_block_stream(ctx->h3conn, stream_id);
+        CURL_TRC_CF(x->data, x->cf, "[%" PRId64 "] block quic flow",
+                    stream_id);
+        DEBUGASSERT(stream);
+        if(stream)
+          stream->quic_flow_blocked = TRUE;
         n = 0;
         break;
+      }
       case NGTCP2_ERR_STREAM_SHUT_WR:
         DEBUGASSERT(ndatalen == -1);
         nghttp3_conn_shutdown_stream_write(ctx->h3conn, stream_id);
@@ -2145,7 +2177,7 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
     pktx = &local_pktx;
   }
   else {
-    pktx->ts = timestamp();
+    pktx_update_time(pktx, cf);
     ngtcp2_path_storage_zero(&pktx->ps);
   }
 
@@ -2358,15 +2390,15 @@ static void cf_ngtcp2_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   CF_DATA_SAVE(save, cf, data);
   if(ctx && ctx->qconn) {
     char buffer[NGTCP2_MAX_UDP_PAYLOAD_SIZE];
-    ngtcp2_tstamp ts;
+    struct pkt_io_ctx pktx;
     ngtcp2_ssize rc;
 
     CURL_TRC_CF(data, cf, "close");
-    ts = timestamp();
+    pktx_init(&pktx, cf, data);
     rc = ngtcp2_conn_write_connection_close(ctx->qconn, NULL, /* path */
                                             NULL, /* pkt_info */
                                             (uint8_t *)buffer, sizeof(buffer),
-                                            &ctx->last_error, ts);
+                                            &ctx->last_error, pktx.ts);
     if(rc > 0) {
       while((send(ctx->q.sockfd, buffer, (SEND_TYPE_ARG3)rc, 0) == -1) &&
             SOCKERRNO == EINTR);
@@ -2411,6 +2443,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
 
   ctx->version = NGTCP2_PROTO_VER_MAX;
   ctx->max_stream_window = H3_STREAM_WINDOW_SIZE;
+  ctx->max_idle_ms = CURL_QUIC_MAX_IDLE_MS;
   Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
                   H3_STREAM_POOL_SPARES);
 
@@ -2657,9 +2690,32 @@ static bool cf_ngtcp2_conn_is_alive(struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
                                     bool *input_pending)
 {
+  struct cf_ngtcp2_ctx *ctx = cf->ctx;
   bool alive = TRUE;
+  const ngtcp2_transport_params *rp;
 
   *input_pending = FALSE;
+  if(!ctx->qconn)
+    return FALSE;
+
+  /* Both sides of the QUIC connection announce they max idle times in
+   * the transport parameters. Look at the minimum of both and if
+   * we exceed this, regard the connection as dead. The other side
+   * may have completely purged it and will no longer respond
+   * to any packets from us. */
+  rp = ngtcp2_conn_get_remote_transport_params(ctx->qconn);
+  if(rp) {
+    timediff_t idletime;
+    uint64_t idle_ms = ctx->max_idle_ms;
+
+    if(rp->max_idle_timeout &&
+      (rp->max_idle_timeout / NGTCP2_MILLISECONDS) < idle_ms)
+      idle_ms = (rp->max_idle_timeout / NGTCP2_MILLISECONDS);
+    idletime = Curl_timediff(Curl_now(), ctx->q.last_io);
+    if(idletime > 0 && (uint64_t)idletime > idle_ms)
+      return FALSE;
+  }
+
   if(!cf->next || !cf->next->cft->is_alive(cf->next, data, input_pending))
     return FALSE;
 
@@ -2686,7 +2742,7 @@ struct Curl_cftype Curl_cft_http3 = {
   cf_ngtcp2_connect,
   cf_ngtcp2_close,
   Curl_cf_def_get_host,
-  cf_ngtcp2_get_select_socks,
+  cf_ngtcp2_adjust_pollset,
   cf_ngtcp2_data_pending,
   cf_ngtcp2_send,
   cf_ngtcp2_recv,

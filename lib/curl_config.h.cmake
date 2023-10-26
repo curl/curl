@@ -74,6 +74,9 @@
 /* disables FTP */
 #cmakedefine CURL_DISABLE_FTP 1
 
+/* disables curl_easy_options API for existing options to curl_easy_setopt */
+#cmakedefine CURL_DISABLE_GETOPTIONS 1
+
 /* disables GOPHER */
 #cmakedefine CURL_DISABLE_GOPHER 1
 
@@ -207,6 +210,9 @@
 
 /* Define to 1 if you have the fseeko function. */
 #cmakedefine HAVE_FSEEKO 1
+
+/* Define to 1 if you have the fseeko declaration. */
+#cmakedefine HAVE_DECL_FSEEKO 1
 
 /* Define to 1 if you have the _fseeki64 function. */
 #cmakedefine HAVE__FSEEKI64 1

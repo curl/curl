@@ -81,7 +81,7 @@ elsif ($ARGV[0] eq "postprocess")
 
     rmdir $dirname || die "$!";
 
-    if ($logfile) {
+    if ($logfile && -s $logfile) {
         # Process the directory file to remove all information that
         # could be inconsistent from one test run to the next (e.g.
         # file date) or may be unsupported on some platforms (e.g.

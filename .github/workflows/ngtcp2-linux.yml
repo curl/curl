@@ -52,7 +52,7 @@ env:
   nghttp3-version: v0.15.0
   ngtcp2-version: v0.19.1
   nghttp2-version: v1.56.0
-  mod_h2-version: v2.0.21
+  mod_h2-version: v2.0.25
 
 jobs:
   autotools:

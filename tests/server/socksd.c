@@ -379,12 +379,21 @@ static curl_socket_t sockit(curl_socket_t fd)
   getconfig();
 
   rc = recv(fd, (char *)buffer, sizeof(buffer), 0);
+  if(rc <= 0) {
+    logmsg("SOCKS identifier message missing, recv returned %d", rc);
+    return CURL_SOCKET_BAD;
+  }
 
   logmsg("READ %d bytes", rc);
   loghex(buffer, rc);
 
   if(buffer[SOCKS5_VERSION] == 4)
     return socks4(fd, buffer, rc);
+
+  if(rc < 3) {
+    logmsg("SOCKS5 identifier message too short: %d", rc);
+    return CURL_SOCKET_BAD;
+  }
 
   if(buffer[SOCKS5_VERSION] != config.version) {
     logmsg("VERSION byte not %d", config.version);
@@ -417,6 +426,10 @@ static curl_socket_t sockit(curl_socket_t fd)
 
   /* expect the request or auth */
   rc = recv(fd, (char *)buffer, sizeof(buffer), 0);
+  if(rc <= 0) {
+    logmsg("SOCKS5 request or auth message missing, recv returned %d", rc);
+    return CURL_SOCKET_BAD;
+  }
 
   logmsg("READ %d bytes", rc);
   loghex(buffer, rc);
@@ -472,6 +485,10 @@ static curl_socket_t sockit(curl_socket_t fd)
 
     /* expect the request */
     rc = recv(fd, (char *)buffer, sizeof(buffer), 0);
+    if(rc <= 0) {
+      logmsg("SOCKS5 request message missing, recv returned %d", rc);
+      return CURL_SOCKET_BAD;
+    }
 
     logmsg("READ %d bytes", rc);
     loghex(buffer, rc);
