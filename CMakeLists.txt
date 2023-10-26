@@ -613,6 +613,8 @@ if(CURL_ZSTD)
     set(HAVE_ZSTD ON)
     list(APPEND CURL_LIBS ${Zstd_LIBRARIES})
     include_directories(${Zstd_INCLUDE_DIRS})
+  else()
+    message(WARNING "zstd v1.0.0 or newer is required, disabling zstd support.")
   endif()
 endif()
 
