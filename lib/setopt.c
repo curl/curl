@@ -171,7 +171,7 @@ static CURLcode protocol2num(const char *str, curl_prot_t *val)
     str = strchr(str, ',');
     tlen = str? (size_t) (str - token): strlen(token);
     if(tlen) {
-      const struct Curl_handler *h = Curl_builtin_scheme(token, tlen);
+      const struct Curl_handler *h = Curl_getn_scheme_handler(token, tlen);
 
       if(!h)
         return CURLE_UNSUPPORTED_PROTOCOL;
