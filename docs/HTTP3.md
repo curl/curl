@@ -36,7 +36,7 @@ Building curl with ngtcp2 involves 3 components: `ngtcp2` itself, `nghttp3` and 
 
 For now, `ngtcp2` and `nghttp3` are still *experimental* which means their evolution bring breaking changes. Therefore, the proper version of both libraries need to be used when building curl. These are
 
- * `ngtcp2`: v1.0.0
+ * `ngtcp2`: v1.0.1
  * `nghttp3`: v1.0.0
 
 ## Build with OpenSSL
@@ -62,7 +62,7 @@ Build nghttp3
 Build ngtcp2
 
      % cd ..
-     % git clone -b v1.0.0 https://github.com/ngtcp2/ngtcp2
+     % git clone -b v1.0.1 https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only
@@ -105,7 +105,7 @@ Build nghttp3
 Build ngtcp2
 
      % cd ..
-     % git clone -b v1.0.0 https://github.com/ngtcp2/ngtcp2
+     % git clone -b v1.0.1 https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only --with-gnutls
@@ -146,7 +146,7 @@ Build nghttp3
 Build ngtcp2
 
      % cd ..
-     % git clone -b v1.0.0 https://github.com/ngtcp2/ngtcp2
+     % git clone -b v1.0.1 https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only --with-wolfssl
