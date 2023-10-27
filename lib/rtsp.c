@@ -867,6 +867,10 @@ CURLcode rtp_client_write(struct Curl_easy *data, const char *ptr, size_t len)
     failf(data, "Cannot pause RTP");
     return CURLE_WRITE_ERROR;
   }
+  else if(CURL_WRITEFUNC_ABORT == wrote) {
+    failf(data, "rtp interleave callback aborted");
+    return CURLE_ABORTED_BY_CALLBACK;
+  }
 
   if(wrote != len) {
     failf(data, "Failed writing RTP data");

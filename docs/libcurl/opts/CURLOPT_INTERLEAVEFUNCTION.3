@@ -64,7 +64,11 @@ that amount differs from the amount passed to your callback function, it
 signals an error condition to the library. This causes the transfer to abort
 and the libcurl function used returns \fICURLE_WRITE_ERROR\fP.
 
-You can also abort the transfer by returning CURL_WRITEFUNC_ERROR. (7.87.0)
+You can abort the transfer by returning CURL_WRITEFUNC_ERROR, which makes
+\fICURLE_WRITE_ERROR\fP get returned. (added in 7.87.0)
+
+You can also abort the transfer by returning CURL_WRITEFUNC_ABORT, which makes
+\fICURLE_ABORTED_BY_CALLBACK\fP get returned. (added in 8.5.0)
 .SH DEFAULT
 NULL, the interleave data is then passed to the regular write function:
 \fICURLOPT_WRITEFUNCTION(3)\fP.

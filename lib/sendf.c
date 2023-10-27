@@ -369,6 +369,11 @@ static CURLcode chop_write(struct Curl_easy *data,
 
     if(CURL_WRITEFUNC_PAUSE == wrote)
       return pausewrite(data, type, FALSE, optr, olen);
+    else if(CURL_WRITEFUNC_ABORT == wrote) {
+      failf(data, "%s callback aborted",
+            (writeheader == data->set.fwrite_header ? "header" : "write"));
+      return CURLE_ABORTED_BY_CALLBACK;
+    }
     if(wrote != olen) {
       failf(data, "Failed writing header");
       return CURLE_WRITE_ERROR;
