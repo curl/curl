@@ -455,8 +455,8 @@ CURLcode Curl_close(struct Curl_easy **datap)
   }
 #endif
 
+#ifndef CURL_DISABLE_FORM_API
   Curl_mime_cleanpart(data->state.formp);
-#ifndef CURL_DISABLE_HTTP
   Curl_safefree(data->state.formp);
 #endif
 
