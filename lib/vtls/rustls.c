@@ -589,32 +589,28 @@ cr_connect_nonblocking(struct Curl_cfilter *cf,
   DEBUGASSERT(false);
 }
 
-/* returns a bitmap of flags for this connection's first socket indicating
-   whether we want to read or write */
-static int
-cr_get_select_socks(struct Curl_cfilter *cf, struct Curl_easy *data,
-                    curl_socket_t *socks)
+static void cr_adjust_pollset(struct Curl_cfilter *cf,
+                              struct Curl_easy *data,
+                              struct easy_pollset *ps)
 {
-  struct ssl_connect_data *const connssl = cf->ctx;
-  curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
-  struct rustls_ssl_backend_data *const backend =
-    (struct rustls_ssl_backend_data *)connssl->backend;
-  struct rustls_connection *rconn = NULL;
+  if(!cf->connected) {
+    curl_socket_t sock = Curl_conn_cf_get_socket(cf->next, data);
+    struct ssl_connect_data *const connssl = cf->ctx;
+    struct rustls_ssl_backend_data *const backend =
+      (struct rustls_ssl_backend_data *)connssl->backend;
+    struct rustls_connection *rconn = NULL;
 
-  (void)data;
-  DEBUGASSERT(backend);
-  rconn = backend->conn;
+    (void)data;
+    DEBUGASSERT(backend);
+    rconn = backend->conn;
 
-  if(rustls_connection_wants_write(rconn)) {
-    socks[0] = sockfd;
-    return GETSOCK_WRITESOCK(0);
+    if(rustls_connection_wants_write(rconn)) {
+      Curl_pollset_add_out(data, ps, sock);
+    }
+    if(rustls_connection_wants_read(rconn)) {
+      Curl_pollset_add_in(data, ps, sock);
+    }
   }
-  if(rustls_connection_wants_read(rconn)) {
-    socks[0] = sockfd;
-    return GETSOCK_READSOCK(0);
-  }
-
-  return GETSOCK_BLANK;
 }
 
 static void *
@@ -677,7 +673,7 @@ const struct Curl_ssl Curl_ssl_rustls = {
   Curl_none_cert_status_request,   /* cert_status_request */
   cr_connect,                      /* connect */
   cr_connect_nonblocking,          /* connect_nonblocking */
-  cr_get_select_socks,             /* get_select_socks */
+  cr_adjust_pollset,               /* adjust_pollset */
   cr_get_internals,                /* get_internals */
   cr_close,                        /* close_one */
   Curl_none_close_all,             /* close_all */

@@ -1678,8 +1678,6 @@ static CURLcode expect100(struct Curl_easy *data,
                           struct dynbuf *req)
 {
   CURLcode result = CURLE_OK;
-  data->state.expect100header = FALSE; /* default to false unless it is set
-                                          to TRUE below */
   if(!data->state.disableexpect && Curl_use_http_1_1plus(data, conn) &&
      (conn->httpversion < 20)) {
     /* if not doing HTTP 1.0 or version 2, or disabled explicitly, we add an
@@ -2494,6 +2492,29 @@ CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
   return result;
 }
 
+static CURLcode addexpect(struct Curl_easy *data, struct connectdata *conn,
+                          struct dynbuf *r)
+{
+  data->state.expect100header = FALSE;
+  /* Avoid Expect: 100-continue if Upgrade: is used */
+  if(data->req.upgr101 == UPGR101_INIT) {
+    struct HTTP *http = data->req.p.http;
+    /* For really small puts we don't use Expect: headers at all, and for
+       the somewhat bigger ones we allow the app to disable it. Just make
+       sure that the expect100header is always set to the preferred value
+       here. */
+    char *ptr = Curl_checkheaders(data, STRCONST("Expect"));
+    if(ptr) {
+      data->state.expect100header =
+        Curl_compareheader(ptr, STRCONST("Expect:"),
+                           STRCONST("100-continue"));
+    }
+    else if(http->postsize > EXPECT_100_THRESHOLD || http->postsize < 0)
+      return expect100(data, conn, r);
+  }
+  return CURLE_OK;
+}
+
 CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
                             struct dynbuf *r, Curl_HttpReq httpreq)
 {
@@ -2506,14 +2527,8 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
 #endif
   CURLcode result = CURLE_OK;
   struct HTTP *http = data->req.p.http;
-  const char *ptr;
-
-  /* If 'authdone' is FALSE, we must not set the write socket index to the
-     Curl_transfer() call below, as we're not ready to actually upload any
-     data yet. */
 
   switch(httpreq) {
-
   case HTTPREQ_PUT: /* Let's PUT the data to the server! */
 
     if(conn->bits.authneg)
@@ -2531,20 +2546,9 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
         return result;
     }
 
-    /* For really small puts we don't use Expect: headers at all, and for
-       the somewhat bigger ones we allow the app to disable it. Just make
-       sure that the expect100header is always set to the preferred value
-       here. */
-    ptr = Curl_checkheaders(data, STRCONST("Expect"));
-    if(ptr) {
-      data->state.expect100header =
-        Curl_compareheader(ptr, STRCONST("Expect:"), STRCONST("100-continue"));
-    }
-    else if(http->postsize > EXPECT_100_THRESHOLD || http->postsize < 0) {
-      result = expect100(data, conn, r);
-      if(result)
-        return result;
-    }
+    result = addexpect(data, conn, r);
+    if(result)
+      return result;
 
     /* end of headers */
     result = Curl_dyn_addn(r, STRCONST("\r\n"));
@@ -2617,22 +2621,9 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
     }
 #endif
 
-    /* For really small posts we don't use Expect: headers at all, and for
-       the somewhat bigger ones we allow the app to disable it. Just make
-       sure that the expect100header is always set to the preferred value
-       here. */
-    ptr = Curl_checkheaders(data, STRCONST("Expect"));
-    if(ptr) {
-      data->state.expect100header =
-        Curl_compareheader(ptr, STRCONST("Expect:"), STRCONST("100-continue"));
-    }
-    else if(http->postsize > EXPECT_100_THRESHOLD || http->postsize < 0) {
-      result = expect100(data, conn, r);
-      if(result)
-        return result;
-    }
-    else
-      data->state.expect100header = FALSE;
+    result = addexpect(data, conn, r);
+    if(result)
+      return result;
 
     /* make the request end in a true CRLF */
     result = Curl_dyn_addn(r, STRCONST("\r\n"));
@@ -2692,22 +2683,9 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
         return result;
     }
 
-    /* For really small posts we don't use Expect: headers at all, and for
-       the somewhat bigger ones we allow the app to disable it. Just make
-       sure that the expect100header is always set to the preferred value
-       here. */
-    ptr = Curl_checkheaders(data, STRCONST("Expect"));
-    if(ptr) {
-      data->state.expect100header =
-        Curl_compareheader(ptr, STRCONST("Expect:"), STRCONST("100-continue"));
-    }
-    else if(http->postsize > EXPECT_100_THRESHOLD || http->postsize < 0) {
-      result = expect100(data, conn, r);
-      if(result)
-        return result;
-    }
-    else
-      data->state.expect100header = FALSE;
+    result = addexpect(data, conn, r);
+    if(result)
+      return result;
 
 #ifndef USE_HYPER
     /* With Hyper the body is always passed on separately */
@@ -4008,6 +3986,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
   char *end_ptr;
 
   /* header line within buffer loop */
+  *stop_reading = FALSE;
   do {
     size_t rest_length;
     size_t full_length;
@@ -4045,7 +4024,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
           break;
         }
       }
-
+      *nread = 0;
       break; /* read more and try again */
     }
 

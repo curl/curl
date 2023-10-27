@@ -672,31 +672,25 @@ out:
   return nwritten;
 }
 
-static int cf_msh3_get_select_socks(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data,
-                                    curl_socket_t *socks)
+static void cf_msh3_adjust_pollset(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   struct easy_pollset *ps)
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
   struct stream_ctx *stream = H3_STREAM_CTX(data);
-  int bitmap = GETSOCK_BLANK;
   struct cf_call_data save;
 
   CF_DATA_SAVE(save, cf, data);
   if(stream && ctx->sock[SP_LOCAL] != CURL_SOCKET_BAD) {
-    socks[0] = ctx->sock[SP_LOCAL];
-
     if(stream->recv_error) {
-      bitmap |= GETSOCK_READSOCK(0);
+      Curl_pollset_add_in(data, ps, ctx->sock[SP_LOCAL]);
       drain_stream(cf, data);
     }
     else if(stream->req) {
-      bitmap |= GETSOCK_READSOCK(0);
+      Curl_pollset_add_out(data, ps, ctx->sock[SP_LOCAL]);
       drain_stream(cf, data);
     }
   }
-  CURL_TRC_CF(data, cf, "select_sock -> %d", bitmap);
-  CF_DATA_RESTORE(cf, save);
-  return bitmap;
 }
 
 static bool cf_msh3_data_pending(struct Curl_cfilter *cf,
@@ -1025,7 +1019,7 @@ struct Curl_cftype Curl_cft_http3 = {
   cf_msh3_connect,
   cf_msh3_close,
   Curl_cf_def_get_host,
-  cf_msh3_get_select_socks,
+  cf_msh3_adjust_pollset,
   cf_msh3_data_pending,
   cf_msh3_send,
   cf_msh3_recv,

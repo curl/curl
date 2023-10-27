@@ -504,8 +504,8 @@ class CurlClient:
         args = [self._curl, "-s", "--path-as-is"]
         if with_headers:
             args.extend(["-D", self._headerfile])
-        if def_tracing is not False:
-            args.extend(['-v', '--trace-config', 'ids,time'])
+        if def_tracing is not False and not self._silent:
+            args.extend(['-v', '--trace-ids', '--trace-time'])
             if self.env.verbose > 1:
                 args.extend(['--trace-config', 'http/2,http/3,h2-proxy,h1-proxy'])
                 pass
