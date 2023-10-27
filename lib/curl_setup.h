@@ -28,6 +28,11 @@
 #define CURL_NO_OLDIES
 #endif
 
+/* Set default _WIN32_WINNT */
+#ifdef __MINGW32__
+#include <_mingw.h>
+#endif
+
 /*
  * Disable Visual Studio warnings:
  * 4127 "conditional expression is constant"
