@@ -252,6 +252,7 @@ static CURLcode dohprobe(struct Curl_easy *data,
     ERROR_CHECK_SETOPT(CURLOPT_HTTPHEADER, headers);
 #ifdef USE_HTTP2
     ERROR_CHECK_SETOPT(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
+    ERROR_CHECK_SETOPT(CURLOPT_PIPEWAIT, 1L);
 #endif
 #ifndef CURLDEBUG
     /* enforce HTTPS if not debug */
