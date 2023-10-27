@@ -729,14 +729,16 @@ static void addrinfo_cb(void *arg, int status, int timeouts,
                         struct ares_addrinfo *result)
 {
   struct Curl_easy *data = (struct Curl_easy *)arg;
-  struct thread_data *res = data->conn->resolve_async.tdata;
-  (void)timeouts;
-  if(ARES_SUCCESS == status) {
-    res->temp_ai = ares2addr(result->nodes);
-    res->last_status = CURL_ASYNC_SUCCESS;
-    ares_freeaddrinfo(result);
+  if(data->conn) {
+    struct thread_data *res = data->conn->resolve_async.tdata;
+    (void)timeouts;
+    if(ARES_SUCCESS == status) {
+      res->temp_ai = ares2addr(result->nodes);
+      res->last_status = CURL_ASYNC_SUCCESS;
+      ares_freeaddrinfo(result);
+    }
+    res->num_pending--;
   }
-  res->num_pending--;
 }
 
 #endif
