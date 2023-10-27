@@ -1333,9 +1333,9 @@ static void show_resolve_info(struct Curl_easy *data,
   while(a) {
     if(
 #ifdef CURLRES_IPV6
-       (a->ai_family == PF_INET6) ||
+       a->ai_family == PF_INET6 ||
 #endif
-       (a->ai_family == PF_INET)) {
+       a->ai_family == PF_INET) {
       char buf[MAX_IPADR_LEN];
       struct dynbuf *d = &out[(a->ai_family != PF_INET)];
       Curl_printable_address(a, buf, sizeof(buf));
