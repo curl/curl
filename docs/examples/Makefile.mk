@@ -49,6 +49,6 @@ TOCLEAN := $(TARGETS)
 ### Rules
 
 %$(BIN_EXT): %.c $(curl_DEPENDENCIES)
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $(CURL_LDFLAGS_BIN) $< -o $@ $(LIBS)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $< -o $@ $(LIBS)
 
 all: $(TARGETS)

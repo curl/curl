@@ -32,7 +32,6 @@ include $(PROOT)/lib/Makefile.mk
 
 ### Local
 
-RCFLAGS  += -DCURL_EMBED_MANIFEST
 CPPFLAGS += -I$(PROOT)/lib
 LDFLAGS  += -L$(PROOT)/lib
 LIBS     := -lcurl $(LIBS)
@@ -41,7 +40,7 @@ curl_DEPENDENCIES := $(PROOT)/lib/libcurl.a
 
 ### Sources and targets
 
-# Provides CURL_CFILES, CURLX_CFILES, CURL_RCFILES
+# Provides CURL_CFILES, CURLX_CFILES
 include Makefile.inc
 
 TARGETS := curl$(BIN_EXT)
@@ -51,7 +50,7 @@ CURL_CFILES += $(notdir $(CURLX_CFILES))
 curl_OBJECTS := $(patsubst %.c,$(OBJ_DIR)/%.o,$(strip $(CURL_CFILES)))
 ifdef MAP
 CURL_MAP := curl.map
-CURL_LDFLAGS_BIN += -Wl,-Map,$(CURL_MAP)
+LDFLAGS += -Wl,-Map,$(CURL_MAP)
 TOVCLEAN := $(CURL_MAP)
 endif
 vpath %.c $(PROOT)/lib
@@ -88,6 +87,6 @@ endif
 endif
 
 $(TARGETS): $(curl_OBJECTS) $(curl_DEPENDENCIES)
-	$(CC) $(LDFLAGS) $(CURL_LDFLAGS_BIN) -o $@ $(curl_OBJECTS) $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ $(curl_OBJECTS) $(LIBS)
 
 all: $(OBJ_DIR) $(TARGETS)

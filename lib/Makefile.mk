@@ -41,8 +41,6 @@ endif
 CFLAGS ?=
 CPPFLAGS ?=
 LDFLAGS ?=
-CURL_LDFLAGS_BIN ?=
-CURL_LDFLAGS_LIB ?=
 LIBS ?=
 
 CROSSPREFIX ?=
@@ -325,7 +323,7 @@ CPPFLAGS += -DBUILDING_LIBCURL
 
 ### Sources and targets
 
-# Provides CSOURCES, HHEADERS, LIB_RCFILES
+# Provides CSOURCES, HHEADERS
 include Makefile.inc
 
 vpath %.c vauth vquic vssh vtls
@@ -337,8 +335,8 @@ TARGETS := $(libcurl_a_LIBRARY)
 libcurl_a_OBJECTS := $(patsubst %.c,$(OBJ_DIR)/%.o,$(notdir $(strip $(CSOURCES))))
 libcurl_a_DEPENDENCIES := $(strip $(CSOURCES) $(HHEADERS))
 
-TOCLEAN := $(libcurl_a_OBJECTS)
-TOVCLEAN := $(libcurl_a_LIBRARY)
+TOCLEAN :=
+TOVCLEAN :=
 
 ### Rules
 
