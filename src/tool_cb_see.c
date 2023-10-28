@@ -98,16 +98,6 @@ int tool_seek_cb(void *userdata, curl_off_t offset, int whence)
 #  define _lseeki64(hnd,ofs,whence) lseek(hnd,ofs,whence)
 #endif
 
-#ifdef __POCC__
-#  if(__POCC__ < 450)
-/* 64-bit lseek-like function unavailable */
-#    define _lseeki64(hnd,ofs,whence) _lseek(hnd,ofs,whence)
-#  else
-#    undef _lseeki64
-#    define _lseeki64(hnd,ofs,whence) _lseek64(hnd,ofs,whence)
-#  endif
-#endif
-
 #ifdef _WIN32_WCE
 /* 64-bit lseek-like function unavailable */
 #  undef _lseeki64

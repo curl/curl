@@ -190,8 +190,7 @@
 #define in_addr_t unsigned long
 
 /* Define ssize_t if it is not an available 'typedefed' type */
-#if defined(__POCC__)
-#elif defined(_WIN64)
+#if defined(_WIN64)
 #define ssize_t __int64
 #else
 #define ssize_t int

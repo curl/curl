@@ -353,12 +353,6 @@
 #include <curl/stdcheaders.h>
 #endif
 
-#ifdef __POCC__
-#  include <sys/types.h>
-#  include <unistd.h>
-#  define sys_nerr EILSEQ
-#endif
-
 /*
  * Salford-C kludge section (mostly borrowed from wxWidgets).
  */
@@ -563,7 +557,7 @@
  * Does not apply if lwIP is used.
  */
 
-#if defined(_MSC_VER) && !defined(__POCC__) && !defined(USE_LWIPSOCK)
+#if defined(_MSC_VER) && !defined(USE_LWIPSOCK)
 #  if !defined(HAVE_WS2TCPIP_H) || \
      ((_MSC_VER < 1300) && !defined(INET6_ADDRSTRLEN))
 #    undef HAVE_GETADDRINFO_THREADSAFE
@@ -592,7 +586,7 @@
  * _beginthreadex() is not available in single-threaded ones.
  */
 
-#if defined(_MSC_VER) && !defined(__POCC__) && !defined(_MT)
+#if defined(_MSC_VER) && !defined(_MT)
 #  undef USE_THREADS_POSIX
 #  undef USE_THREADS_WIN32
 #endif
@@ -631,7 +625,7 @@
  * are available if PSDK is properly installed.
  */
 
-#if defined(_MSC_VER) && !defined(__POCC__)
+#if defined(_MSC_VER)
 #  if !defined(HAVE_WINSOCK2_H) || ((_MSC_VER < 1300) && !defined(IPPROTO_ESP))
 #    undef HAVE_STRUCT_SOCKADDR_STORAGE
 #  endif
@@ -643,7 +637,7 @@
  * in lib/config-win32.h although absolutely discouraged and unsupported.
  */
 
-#if defined(_MSC_VER) && !defined(__POCC__)
+#if defined(_MSC_VER)
 #  if !defined(HAVE_WINDOWS_H) || ((_MSC_VER < 1300) && !defined(_FILETIME_))
 #    if !defined(ALLOW_MSVC6_WITHOUT_PSDK)
 #      error MSVC 6.0 requires "February 2003 Platform SDK" a.k.a. \

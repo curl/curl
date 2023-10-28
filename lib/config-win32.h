@@ -45,7 +45,7 @@
 #define HAVE_LOCALE_H 1
 
 /* Define if you need <malloc.h> header even with <stdlib.h> header file. */
-#if !defined(__SALFORDC__) && !defined(__POCC__)
+#if !defined(__SALFORDC__)
 #define NEED_MALLOC_H 1
 #endif
 
@@ -97,7 +97,7 @@
 /* #define HAVE_TERMIOS_H 1 */
 
 /* Define if you have the <unistd.h> header file. */
-#if defined(__MINGW32__) || defined(__LCC__) || defined(__POCC__)
+#if defined(__MINGW32__) || defined(__LCC__)
 #define HAVE_UNISTD_H 1
 #endif
 
@@ -187,8 +187,7 @@
 #define HAVE_STRICMP 1
 
 /* Define if you have the strtoll function. */
-#if defined(__MINGW32__) || defined(__POCC__) || \
-    (defined(_MSC_VER) && (_MSC_VER >= 1800))
+#if (defined(_MSC_VER) && (_MSC_VER >= 1800)) || defined(__MINGW32__)
 #define HAVE_STRTOLL 1
 #endif
 
@@ -270,7 +269,7 @@
 
 /* Define if ssize_t is not an available 'typedefed' type. */
 #ifndef _SSIZE_T_DEFINED
-#  if defined(__POCC__) || defined(__MINGW32__)
+#  if defined(__MINGW32__)
 #  elif defined(_WIN64)
 #    define _SSIZE_T_DEFINED
 #    define ssize_t __int64
@@ -447,30 +446,10 @@ Vista
 #  endif
 #endif
 
-/* When no build target is specified Pelles C 5.00 and later default build
-   target is Windows Vista. We override default target to be Windows 2000. */
-#if defined(__POCC__) && (__POCC__ >= 500)
-#  ifndef _WIN32_WINNT
-#    define _WIN32_WINNT 0x0500
-#  endif
-#  ifndef WINVER
-#    define WINVER 0x0500
-#  endif
-#endif
-
 /* Windows XP is required for freeaddrinfo, getaddrinfo */
 #define HAVE_FREEADDRINFO           1
 #define HAVE_GETADDRINFO            1
 #define HAVE_GETADDRINFO_THREADSAFE 1
-
-#if defined(__POCC__)
-#  ifndef _MSC_VER
-#    error Microsoft extensions /Ze compiler option is required
-#  endif
-#  ifndef __POCC__OLDNAMES
-#    error Compatibility names /Go compiler option is required
-#  endif
-#endif
 
 /* ---------------------------------------------------------------- */
 /*                          STRUCT RELATED                          */
@@ -501,10 +480,6 @@ Vista
 
 #if defined(__MINGW32__) && !defined(USE_WIN32_LARGE_FILES)
 #  define USE_WIN32_LARGE_FILES
-#endif
-
-#if defined(__POCC__)
-#  undef USE_WIN32_LARGE_FILES
 #endif
 
 #if !defined(USE_WIN32_LARGE_FILES) && !defined(USE_WIN32_SMALL_FILES)
@@ -568,10 +543,6 @@ Vista
 #define USE_WIN32_LDAP 1
 #endif
 
-#if defined(__POCC__) && defined(USE_WIN32_LDAP)
-#  define CURL_DISABLE_LDAP 1
-#endif
-
 /* Define to use the Windows crypto library. */
 #if !defined(CURL_WINDOWS_APP)
 #define USE_WIN32_CRYPTO
@@ -607,7 +578,7 @@ Vista
 /* If you want to build curl with the built-in manual */
 #define USE_MANUAL 1
 
-#if defined(__POCC__) || defined(USE_IPV6)
+#if defined(USE_IPV6)
 #  define ENABLE_IPV6 1
 #endif
 
