@@ -481,7 +481,6 @@ Windows:
   - all:
       - changed-files:
           - any-glob-to-all-files:
-              - '**/Makefile.mk'
               - 'appveyor.yml'
               - 'CMake/Platforms/WindowsCache.cmake'
               - 'lib/*win32*'

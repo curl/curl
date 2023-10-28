@@ -185,54 +185,6 @@ multi-threaded dynamic C runtime.
 
  If you get linkage errors read section 5.7 of the FAQ document.
 
-## mingw-w64
-
-Make sure that mingw-w64's bin directory is in the search path, for example:
-
-```cmd
-set PATH=c:\mingw-w64\bin;%PATH%
-```
-
-then run `mingw32-make mingw32` in the root dir. There are other
-make targets available to build libcurl with more features, use:
-
- - `mingw32-make mingw32-zlib` to build with Zlib support;
- - `mingw32-make mingw32-ssl-zlib` to build with SSL and Zlib enabled;
- - `mingw32-make mingw32-ssh2-ssl-zlib` to build with SSH2, SSL, Zlib;
- - `mingw32-make mingw32-ssh2-ssl-sspi-zlib` to build with SSH2, SSL, Zlib
-   and SSPI support.
-
-If you have any problems linking libraries or finding header files, be sure
-to verify that the provided `Makefile.mk` files use the proper paths, and
-adjust as necessary. It is also possible to override these paths with
-environment variables, for example:
-
-```cmd
-set ZLIB_PATH=c:\zlib-1.2.12
-set OPENSSL_PATH=c:\openssl-3.0.5
-set LIBSSH2_PATH=c:\libssh2-1.10.0
-```
-
-It is also possible to build with other LDAP installations than MS LDAP;
-currently it is possible to build with native Win32 OpenLDAP, or with the
-*Novell CLDAP* SDK. If you want to use these you need to set these vars:
-
-```cmd
-set CPPFLAGS=-Ic:/openldap/include -DCURL_HAS_OPENLDAP_LDAPSDK
-set LDFLAGS=-Lc:/openldap/lib
-set LIBS=-lldap -llber
-```
-
-or for using the Novell SDK:
-
-```cmd
-set CPPFLAGS=-Ic:/openldapsdk/inc -DCURL_HAS_NOVELL_LDAPSDK
-set LDFLAGS=-Lc:/openldapsdk/lib/mscvc
-set LIBS=-lldapsdk -lldapssl -lldapx
-```
-
-If you want to enable LDAPS support then append `-ldaps` to the make target.
-
 ## Cygwin
 
 Almost identical to the Unix installation. Run the configure script in the
