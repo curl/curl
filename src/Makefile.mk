@@ -36,8 +36,6 @@ CPPFLAGS += -I$(PROOT)/lib
 LDFLAGS  += -L$(PROOT)/lib
 LIBS     := -lcurl $(LIBS)
 
-curl_DEPENDENCIES := $(PROOT)/lib/libcurl.a
-
 ### Sources and targets
 
 # Provides CURL_CFILES, CURLX_CFILES
@@ -86,7 +84,7 @@ tool_hugehelp.c:
 endif
 endif
 
-$(TARGETS): $(curl_OBJECTS) $(curl_DEPENDENCIES)
+$(TARGETS): $(curl_OBJECTS) $(PROOT)/lib/libcurl.a
 	$(CC) $(LDFLAGS) -o $@ $(curl_OBJECTS) $(LIBS)
 
 all: $(OBJ_DIR) $(TARGETS)

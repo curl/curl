@@ -36,8 +36,6 @@ CPPFLAGS += -DCURL_NO_OLDIES
 LDFLAGS  += -L$(PROOT)/lib
 LIBS     := -lcurl $(LIBS)
 
-curl_DEPENDENCIES := $(PROOT)/lib/libcurl.a
-
 ### Sources and targets
 
 # Provides check_PROGRAMS
@@ -48,7 +46,7 @@ TOCLEAN := $(TARGETS)
 
 ### Rules
 
-%$(BIN_EXT): %.c $(curl_DEPENDENCIES)
+%$(BIN_EXT): %.c $(PROOT)/lib/libcurl.a
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $< -o $@ $(LIBS)
 
 all: $(TARGETS)
