@@ -53,21 +53,18 @@ AR := $(CROSSPREFIX)$(AR)
 
 TRIPLET ?= $(shell $(CC) -dumpmachine)
 
-BIN_EXT := .exe
+BIN_EXT :=
 
 ifneq ($(findstring msdos,$(TRIPLET)),)
   # Cross-tools: https://github.com/andrewwutw/build-djgpp
   MSDOS := 1
+  BIN_EXT := .exe
 else ifneq ($(findstring amigaos,$(TRIPLET)),)
   # Cross-tools: https://github.com/bebbo/amiga-gcc
   AMIGA := 1
 endif
 
 CPPFLAGS += -I. -I$(PROOT)/include
-
-ifdef AMIGA
-  BIN_EXT :=
-endif
 
 ### Deprecated settings. For compatibility.
 
