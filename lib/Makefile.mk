@@ -24,8 +24,8 @@
 
 # Makefile to build curl parts with GCC-like toolchains and optional features.
 #
-# Usage:   [mingw32-]make -f Makefile.mk CFG=-feat1[-feat2][-feat3][...]
-# Example: [mingw32-]make -f Makefile.mk CFG=-zlib-ssl-libssh2-ipv6
+# Usage:   make -f Makefile.mk CFG=-feat1[-feat2][-feat3][...]
+# Example: make -f Makefile.mk CFG=-zlib-ssl-libssh2-ipv6
 #
 # Look for ' ?=' to find all accepted customization variables.
 
@@ -91,7 +91,6 @@ endif
 # comments below about exceptions). Always include them anyway to match
 # behavior of other build systems.
 
-# Linker options to exclude for shared mode executables.
 _LDFLAGS :=
 _LIBS :=
 
@@ -168,10 +167,6 @@ ifneq ($(findstring -mbedtls,$(CFG)),)
   CPPFLAGS += -I"$(MBEDTLS_PATH)/include"
   _LDFLAGS += -L"$(MBEDTLS_PATH)/lib"
   _LIBS += -lmbedtls -lmbedx509 -lmbedcrypto
-  SSLLIBS += 1
-endif
-ifneq ($(findstring -schannel,$(CFG)),)
-  CPPFLAGS += -DUSE_SCHANNEL
   SSLLIBS += 1
 endif
 
