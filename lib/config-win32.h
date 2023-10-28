@@ -86,9 +86,7 @@
 #define HAVE_SYS_TYPES_H 1
 
 /* Define if you have the <sys/utime.h> header file. */
-#ifndef __BORLANDC__
 #define HAVE_SYS_UTIME_H 1
-#endif
 
 /* Define if you have the <termio.h> header file. */
 /* #define HAVE_TERMIO_H 1 */
@@ -192,9 +190,7 @@
 #endif
 
 /* Define if you have the utime function. */
-#ifndef __BORLANDC__
 #define HAVE_UTIME 1
-#endif
 
 /* Define if you have the recv function. */
 #define HAVE_RECV 1
@@ -362,9 +358,7 @@
 /* #undef HAVE_GMTIME_R */
 
 /* Define if the compiler supports the 'long long' data type. */
-#if defined(__MINGW32__) || \
-    (defined(_MSC_VER)     && (_MSC_VER     >= 1310)) || \
-    (defined(__BORLANDC__) && (__BORLANDC__ >= 0x561))
+#if (defined(_MSC_VER) && (_MSC_VER >= 1310)) || defined(__MINGW32__)
 #define HAVE_LONGLONG 1
 #endif
 
@@ -456,7 +450,7 @@ Vista
 /* ---------------------------------------------------------------- */
 
 /* Define if you have struct sockaddr_storage. */
-#if !defined(__SALFORDC__) && !defined(__BORLANDC__)
+#if !defined(__SALFORDC__)
 #define HAVE_STRUCT_SOCKADDR_STORAGE 1
 #endif
 

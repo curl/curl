@@ -93,11 +93,6 @@ int tool_seek_cb(void *userdata, curl_off_t offset, int whence)
 
 #ifdef USE_TOOL_FTRUNCATE
 
-#ifdef __BORLANDC__
-/* 64-bit lseek-like function unavailable */
-#  define _lseeki64(hnd,ofs,whence) lseek(hnd,ofs,whence)
-#endif
-
 #ifdef _WIN32_WCE
 /* 64-bit lseek-like function unavailable */
 #  undef _lseeki64
