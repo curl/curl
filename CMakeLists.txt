@@ -1088,7 +1088,7 @@ if(WIN32)
   unset(HAVE_WIN32_WINNT CACHE)
 
   if(HAVE_WIN32_WINNT AND HAVE_WIN32_WINNT STRLESS "0x0501")
-    # We require XP for getaddrinfo and freeaddrinfo
+    # Windows XP is required for freeaddrinfo, getaddrinfo
     message(FATAL_ERROR "Building for Windows XP or newer is required.")
   endif()
 
