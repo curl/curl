@@ -81,7 +81,7 @@
 /* #define HAVE_TERMIOS_H 1 */
 
 /* Define if you have the <unistd.h> header file.  */
-#if defined(__MINGW32__) || defined(__LCC__)
+#if defined(__MINGW32__)
 #define HAVE_UNISTD_H 1
 #endif
 
