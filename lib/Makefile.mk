@@ -40,7 +40,6 @@ endif
 
 CFLAGS ?=
 CPPFLAGS ?=
-RCFLAGS ?=
 LDFLAGS ?=
 CURL_LDFLAGS_BIN ?=
 CURL_LDFLAGS_LIB ?=
@@ -53,29 +52,12 @@ ifeq ($(CC),cc)
 endif
 CC := $(CROSSPREFIX)$(CC)
 AR := $(CROSSPREFIX)$(AR)
-RC ?= $(CROSSPREFIX)windres
 
-# For compatibility
-ARCH ?=
-ifeq ($(ARCH),w64)
-  TRIPLET := x86_64-w64-mingw32
-  CFLAGS  += -m64
-  LDFLAGS += -m64
-  RCFLAGS += --target=pe-x86-64
-else ifdef ARCH
-  TRIPLET := i686-w64-mingw32
-  CFLAGS  += -m32
-  LDFLAGS += -m32
-  RCFLAGS += --target=pe-i386
-else
-  TRIPLET ?= $(shell $(CC) -dumpmachine)
-endif
+TRIPLET ?= $(shell $(CC) -dumpmachine)
 
 BIN_EXT := .exe
 
-ifneq ($(findstring -w,$(TRIPLET)),)
-  WIN32 := 1
-else ifneq ($(findstring msdos,$(TRIPLET)),)
+ifneq ($(findstring msdos,$(TRIPLET)),)
   # Cross-tools: https://github.com/andrewwutw/build-djgpp
   MSDOS := 1
 else ifneq ($(findstring amigaos,$(TRIPLET)),)
@@ -84,11 +66,6 @@ else ifneq ($(findstring amigaos,$(TRIPLET)),)
 endif
 
 CPPFLAGS += -I. -I$(PROOT)/include
-RCFLAGS  += -I$(PROOT)/include
-
-ifndef WIN32
-  DYN :=
-endif
 
 ifdef AMIGA
   BIN_EXT :=
@@ -115,13 +92,6 @@ ifneq ($(findstring -map,$(CFG)),)
   MAP := 1
 endif
 
-ifdef WIN32
-  ifneq ($(findstring -unicode,$(CFG)),)
-    CPPFLAGS += -DUNICODE -D_UNICODE
-    CURL_LDFLAGS_BIN += -municode
-  endif
-endif
-
 # CPPFLAGS below are only necessary when building libcurl via 'lib' (see
 # comments below about exceptions). Always include them anyway to match
 # behavior of other build systems.
@@ -146,9 +116,6 @@ ifneq ($(findstring -rtmp,$(CFG)),)
   CPPFLAGS += -I"$(LIBRTMP_PATH)"
   _LDFLAGS += -L"$(LIBRTMP_PATH)/librtmp"
   _LIBS += -lrtmp
-  ifdef WIN32
-    _LIBS += -lwinmm
-  endif
   ZLIB := 1
 endif
 
@@ -157,9 +124,6 @@ ifneq ($(findstring -ssh2,$(CFG)),)
   CPPFLAGS += -DUSE_LIBSSH2
   CPPFLAGS += -I"$(LIBSSH2_PATH)/include"
   _LDFLAGS += -L"$(LIBSSH2_PATH)/lib"
-  ifdef WIN32
-    _LDFLAGS += -L"$(LIBSSH2_PATH)/win32"
-  endif
   _LIBS += -lssh2
 else ifneq ($(findstring -libssh,$(CFG)),)
   LIBSSH_PATH ?= $(PROOT)/../libssh
@@ -300,16 +264,8 @@ ifneq ($(findstring -psl,$(CFG)),)
   _LDFLAGS += -L"$(LIBPSL_PATH)/lib"
   _LIBS += -lpsl
 endif
-else ifneq ($(findstring -winidn,$(CFG)),)
-  CPPFLAGS += -DUSE_WIN32_IDN
-  _LIBS += -lnormaliz
 endif
 
-ifneq ($(findstring -sspi,$(CFG)),)
-  ifdef WIN32
-    CPPFLAGS += -DUSE_WINDOWS_SSPI
-  endif
-endif
 ifneq ($(findstring -ipv6,$(CFG)),)
   CPPFLAGS += -DENABLE_IPV6
 endif
@@ -321,21 +277,12 @@ ifneq ($(findstring -watt,$(CFG))$(MSDOS),)
   _LIBS += -lwatt
 endif
 
-ifdef WIN32
-  ifeq ($(findstring -lldap,$(LIBS)),)
-    _LIBS += -lwldap32
-  endif
-  _LIBS += -lws2_32 -lcrypt32 -lbcrypt
-endif
-
 ifneq ($(findstring 11,$(subst $(subst ,, ),,$(SSLLIBS))),)
   CPPFLAGS += -DCURL_WITH_MULTI_SSL
 endif
 
-ifndef DYN
-  LDFLAGS += $(_LDFLAGS)
-  LIBS += $(_LIBS)
-endif
+LDFLAGS += $(_LDFLAGS)
+LIBS += $(_LIBS)
 
 ### Common rules
 
@@ -363,9 +310,6 @@ $(OBJ_DIR):
 $(OBJ_DIR)/%.o: %.c
 	$(CC) -W -Wall $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
-$(OBJ_DIR)/%.res: %.rc
-	$(RC) -O coff $(RCFLAGS) -i $< -o $@
-
 clean:
 	@$(call DEL, $(TOCLEAN))
 	@$(RMDIR) $(OBJ_DIR)
@@ -378,9 +322,6 @@ distclean vclean: clean
 ifdef LOCAL
 
 CPPFLAGS += -DBUILDING_LIBCURL
-ifdef WIN32
-CPPFLAGS += -DCURL_STATICLIB
-endif
 
 ### Sources and targets
 
@@ -390,40 +331,20 @@ include Makefile.inc
 vpath %.c vauth vquic vssh vtls
 
 libcurl_a_LIBRARY := libcurl.a
-ifdef WIN32
-CURL_DLL_SUFFIX ?=
-libcurl_dll_LIBRARY := libcurl$(CURL_DLL_SUFFIX).dll
-libcurl_dll_a_LIBRARY := libcurl.dll.a
-ifeq ($(findstring -trackmem,$(CFG)),)
-CURL_LDFLAGS_LIB += $(PROOT)/libcurl.def
-endif
-ifdef MAP
-libcurl_map_LIBRARY := libcurl$(CURL_DLL_SUFFIX).map
-CURL_LDFLAGS_LIB += -Wl,-Map,$(libcurl_map_LIBRARY)
-endif
-endif
 
-TARGETS := $(libcurl_a_LIBRARY) $(libcurl_dll_LIBRARY)
+TARGETS := $(libcurl_a_LIBRARY)
 
 libcurl_a_OBJECTS := $(patsubst %.c,$(OBJ_DIR)/%.o,$(notdir $(strip $(CSOURCES))))
 libcurl_a_DEPENDENCIES := $(strip $(CSOURCES) $(HHEADERS))
-ifdef WIN32
-libcurl_dll_OBJECTS := $(libcurl_a_OBJECTS)
-libcurl_dll_OBJECTS += $(patsubst %.rc,$(OBJ_DIR)/%.res,$(strip $(LIB_RCFILES)))
-endif
 
-TOCLEAN := $(libcurl_dll_OBJECTS)
-TOVCLEAN := $(libcurl_dll_LIBRARY:.dll=.def) $(libcurl_dll_a_LIBRARY) $(libcurl_map_LIBRARY)
+TOCLEAN := $(libcurl_a_OBJECTS)
+TOVCLEAN := $(libcurl_a_LIBRARY)
 
 ### Rules
 
 $(libcurl_a_LIBRARY): $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
 	@$(call DEL, $@)
 	$(AR) rcs $@ $(libcurl_a_OBJECTS)
-
-$(libcurl_dll_LIBRARY): $(libcurl_dll_OBJECTS)
-	$(CC) $(LDFLAGS) -shared $(CURL_LDFLAGS_LIB) -o $@ $(libcurl_dll_OBJECTS) $(LIBS) \
-	  -Wl,--output-def,$(@:.dll=.def),--out-implib,$(libcurl_dll_a_LIBRARY)
 
 all: $(OBJ_DIR) $(TARGETS)
 endif

@@ -37,22 +37,7 @@ CPPFLAGS += -I$(PROOT)/lib
 LDFLAGS  += -L$(PROOT)/lib
 LIBS     := -lcurl $(LIBS)
 
-ifdef WIN32
-  ifneq ($(findstring -dyn,$(CFG)),)
-    DYN := 1
-  endif
-endif
-
-ifdef DYN
-  curl_DEPENDENCIES := $(PROOT)/lib/libcurl$(CURL_DLL_SUFFIX).dll
-  curl_DEPENDENCIES += $(PROOT)/lib/libcurl.dll.a
-else
-  curl_DEPENDENCIES := $(PROOT)/lib/libcurl.a
-  ifdef WIN32
-    CPPFLAGS += -DCURL_STATICLIB
-    LDFLAGS += -static
-  endif
-endif
+curl_DEPENDENCIES := $(PROOT)/lib/libcurl.a
 
 ### Sources and targets
 
@@ -64,9 +49,6 @@ TARGETS := curl$(BIN_EXT)
 CURL_CFILES += $(notdir $(CURLX_CFILES))
 
 curl_OBJECTS := $(patsubst %.c,$(OBJ_DIR)/%.o,$(strip $(CURL_CFILES)))
-ifdef WIN32
-curl_OBJECTS += $(patsubst %.rc,$(OBJ_DIR)/%.res,$(strip $(CURL_RCFILES)))
-endif
 ifdef MAP
 CURL_MAP := curl.map
 CURL_LDFLAGS_BIN += -Wl,-Map,$(CURL_MAP)

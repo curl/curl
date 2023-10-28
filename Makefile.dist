@@ -30,27 +30,6 @@ ssl:
 	./configure --with-openssl
 	make
 
-mingw32:
-	$(MAKE) -C lib -f Makefile.mk
-	$(MAKE) -C src -f Makefile.mk
-
-mingw32-clean:
-	$(MAKE) -C lib -f Makefile.mk clean
-	$(MAKE) -C src -f Makefile.mk clean
-	$(MAKE) -C docs/examples -f Makefile.mk clean
-
-mingw32-vclean mingw32-distclean:
-	$(MAKE) -C lib -f Makefile.mk vclean
-	$(MAKE) -C src -f Makefile.mk vclean
-	$(MAKE) -C docs/examples -f Makefile.mk vclean
-
-mingw32-examples%:
-	$(MAKE) -C docs/examples -f Makefile.mk CFG=$@
-
-mingw32%:
-	$(MAKE) -C lib -f Makefile.mk CFG=$@
-	$(MAKE) -C src -f Makefile.mk CFG=$@
-
 vc:
 	cd winbuild
 	nmake /f Makefile.vc MACHINE=x86
