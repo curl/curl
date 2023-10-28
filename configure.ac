@@ -4590,20 +4590,31 @@ if test "x$CURL_WITH_MULTI_SSL" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES MultiSSL"
 fi
 
+AC_MSG_CHECKING([if this build supports HTTPS-proxy])
 dnl if not explicitly turned off, HTTPS-proxy comes with some TLS backends
-if test "x$https_proxy" != "xno"; then
-  if test "x$OPENSSL_ENABLED" = "x1" \
-      -o "x$GNUTLS_ENABLED" = "x1" \
-      -o "x$SECURETRANSPORT_ENABLED" = "x1" \
-      -o "x$RUSTLS_ENABLED" = "x1" \
-      -o "x$BEARSSL_ENABLED" = "x1" \
-      -o "x$SCHANNEL_ENABLED" = "x1" \
-      -o "x$GNUTLS_ENABLED" = "x1" \
-      -o "x$MBEDTLS_ENABLED" = "x1"; then
-    SUPPORT_FEATURES="$SUPPORT_FEATURES HTTPS-proxy"
-  elif test "x$WOLFSSL_ENABLED" = "x1" -a "x$WOLFSSL_FULL_BIO" = "x1"; then
-    SUPPORT_FEATURES="$SUPPORT_FEATURES HTTPS-proxy"
+if test "x$CURL_DISABLE_HTTP" != "x1"; then
+  if test "x$https_proxy" != "xno"; then
+    if test "x$OPENSSL_ENABLED" = "x1" \
+        -o "x$GNUTLS_ENABLED" = "x1" \
+        -o "x$SECURETRANSPORT_ENABLED" = "x1" \
+        -o "x$RUSTLS_ENABLED" = "x1" \
+        -o "x$BEARSSL_ENABLED" = "x1" \
+        -o "x$SCHANNEL_ENABLED" = "x1" \
+        -o "x$GNUTLS_ENABLED" = "x1" \
+        -o "x$MBEDTLS_ENABLED" = "x1"; then
+      SUPPORT_FEATURES="$SUPPORT_FEATURES HTTPS-proxy"
+      AC_MSG_RESULT([yes])
+    elif test "x$WOLFSSL_ENABLED" = "x1" -a "x$WOLFSSL_FULL_BIO" = "x1"; then
+      SUPPORT_FEATURES="$SUPPORT_FEATURES HTTPS-proxy"
+      AC_MSG_RESULT([yes])
+    else
+      AC_MSG_RESULT([no])
+    fi
+  else
+    AC_MSG_RESULT([no])
   fi
+else
+  AC_MSG_RESULT([no])
 fi
 
 if test "x$ECH_ENABLED" = "x1"; then

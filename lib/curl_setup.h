@@ -219,6 +219,23 @@
 #  define CURL_DISABLE_RTSP
 #endif
 
+/*
+ * When HTTP is disabled, disable HTTP-only features
+ */
+
+#if defined(CURL_DISABLE_HTTP)
+#  define CURL_DISABLE_ALTSVC 1
+#  define CURL_DISABLE_COOKIES 1
+#  define CURL_DISABLE_BASIC_AUTH 1
+#  define CURL_DISABLE_BEARER_AUTH 1
+#  define CURL_DISABLE_AWS 1
+#  define CURL_DISABLE_DOH 1
+#  define CURL_DISABLE_FORM_API 1
+#  define CURL_DISABLE_HEADERS_API 1
+#  define CURL_DISABLE_HSTS 1
+#  define CURL_DISABLE_HTTP_AUTH 1
+#endif
+
 /* ================================================================ */
 /* No system header file shall be included in this file before this */
 /* point.                                                           */
