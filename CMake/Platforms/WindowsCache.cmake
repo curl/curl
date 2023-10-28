@@ -82,6 +82,10 @@ else()
   endif()
 endif()
 
+# Available in Windows XP and newer
+set(HAVE_GETADDRINFO 1)
+set(HAVE_FREEADDRINFO 1)
+
 set(HAVE_FCHMOD 0)
 set(HAVE_SOCKETPAIR 0)
 set(HAVE_SENDMSG 0)

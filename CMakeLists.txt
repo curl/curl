@@ -1087,26 +1087,24 @@ if(WIN32)
   # avoid storing HAVE_WIN32_WINNT in CMake cache
   unset(HAVE_WIN32_WINNT CACHE)
 
-  # pre-fill detection results that are based on target OS version
-  if(HAVE_WIN32_WINNT AND (MINGW OR MSVC))
+  if(HAVE_WIN32_WINNT)
     if(HAVE_WIN32_WINNT STRLESS "0x0501")
-      set(HAVE_GETADDRINFO 0)
-      set(HAVE_FREEADDRINFO 0)
-    else()  # Windows XP or newer
-      set(HAVE_GETADDRINFO 1)
-      set(HAVE_FREEADDRINFO 1)
+      # Windows XP is required for freeaddrinfo, getaddrinfo
+      message(FATAL_ERROR "Building for Windows XP or newer is required.")
     endif()
-    unset(HAVE_GETADDRINFO CACHE)
-    unset(HAVE_FREEADDRINFO CACHE)
-    if(HAVE_WIN32_WINNT STRLESS "0x0600")
-      set(HAVE_INET_NTOP 0)
-      set(HAVE_INET_PTON 0)
-    else()  # Windows Vista or newer
-      set(HAVE_INET_NTOP 1)
-      set(HAVE_INET_PTON 1)
+
+    # pre-fill detection results based on target OS version
+    if(MINGW OR MSVC)
+      if(HAVE_WIN32_WINNT STRLESS "0x0600")
+        set(HAVE_INET_NTOP 0)
+        set(HAVE_INET_PTON 0)
+      else()  # Windows Vista or newer
+        set(HAVE_INET_NTOP 1)
+        set(HAVE_INET_PTON 1)
+      endif()
+      unset(HAVE_INET_NTOP CACHE)
+      unset(HAVE_INET_PTON CACHE)
     endif()
-    unset(HAVE_INET_NTOP CACHE)
-    unset(HAVE_INET_PTON CACHE)
   endif()
 endif()
 
