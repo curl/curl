@@ -354,17 +354,6 @@
 #endif
 
 /*
- * Salford-C kludge section (mostly borrowed from wxWidgets).
- */
-#ifdef __SALFORDC__
-  #pragma suppress 353             /* Possible nested comments */
-  #pragma suppress 593             /* Define not used */
-  #pragma suppress 61              /* enum has no name */
-  #pragma suppress 106             /* unnamed, unused parameter */
-  #include <clib.h>
-#endif
-
-/*
  * Large file (>2Gb) support using WIN32 functions.
  */
 

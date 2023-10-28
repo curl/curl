@@ -45,9 +45,7 @@
 #define HAVE_LOCALE_H 1
 
 /* Define if you need <malloc.h> header even with <stdlib.h> header file. */
-#if !defined(__SALFORDC__)
 #define NEED_MALLOC_H 1
-#endif
 
 /* Define if you have the <netdb.h> header file. */
 /* #define HAVE_NETDB_H 1 */
@@ -103,14 +101,10 @@
 #define HAVE_WINDOWS_H 1
 
 /* Define if you have the <winsock2.h> header file. */
-#ifndef __SALFORDC__
 #define HAVE_WINSOCK2_H 1
-#endif
 
 /* Define if you have the <ws2tcpip.h> header file. */
-#ifndef __SALFORDC__
 #define HAVE_WS2TCPIP_H 1
-#endif
 
 /* Define to 1 if you have the <libgen.h> header file. */
 #if defined(__MINGW32__)
@@ -450,9 +444,7 @@ Vista
 /* ---------------------------------------------------------------- */
 
 /* Define if you have struct sockaddr_storage. */
-#if !defined(__SALFORDC__)
 #define HAVE_STRUCT_SOCKADDR_STORAGE 1
-#endif
 
 /* Define if you have struct timeval. */
 #define HAVE_STRUCT_TIMEVAL 1
