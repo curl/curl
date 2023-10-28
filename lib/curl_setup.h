@@ -581,6 +581,9 @@
 
 #if defined(ENABLE_IPV6) && defined(HAVE_GETADDRINFO)
 #  define CURLRES_IPV6
+#elif defined(ENABLE_IPV6) && (defined(WIN32) || defined(__CYGWIN__))
+/* assume on Windows that IPv6 without getaddrinfo is a broken build */
+#  error "Unexpected build: IPv6 is enabled but getaddrinfo was not found."
 #else
 #  define CURLRES_IPV4
 #endif
