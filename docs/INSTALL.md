@@ -162,6 +162,8 @@ library check.
 
 # Windows
 
+Building for Windows XP is required as a minimum.
+
 ## Building Windows DLLs and C runtime (CRT) linkage issues
 
  As a general rule, building a DLL with static CRT linkage is highly
