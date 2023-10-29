@@ -191,14 +191,14 @@ environment:
       PATHPART: release
       TESTING: 'OFF'
       ENABLE_UNICODE: 'no'
-    - job_name: 'winbuild, VS2017, Debug, x64, Build-only'
+    - job_name: 'winbuild, VS2017, Debug, x64, OpenSSL 1.1.1, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: winbuild_vs2017
       DEBUG: 'yes'
       PATHPART: debug
       TESTING: 'OFF'
       ENABLE_UNICODE: 'no'
-    - job_name: 'winbuild, VS2017, Release, x64, Build-only'
+    - job_name: 'winbuild, VS2017, Release, x64, OpenSSL 1.1.1, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: winbuild_vs2017
       DEBUG: 'no'
@@ -219,14 +219,14 @@ environment:
       PATHPART: release
       TESTING: 'OFF'
       ENABLE_UNICODE: 'yes'
-    - job_name: 'winbuild, VS2017, Debug, x64, Unicode, Build-only'
+    - job_name: 'winbuild, VS2017, Debug, x64, OpenSSL 1.1.1, Unicode, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: winbuild_vs2017
       DEBUG: 'yes'
       PATHPART: debug
       TESTING: 'OFF'
       ENABLE_UNICODE: 'yes'
-    - job_name: 'winbuild, VS2017, Release, x64, Unicode, Build-only'
+    - job_name: 'winbuild, VS2017, Release, x64, OpenSSL 1.1.1, Unicode, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: winbuild_vs2017
       DEBUG: 'no'
