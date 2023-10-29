@@ -237,7 +237,7 @@ environment:
       TESTING: 'OFF'
       ENABLE_UNICODE: 'yes'
     # generated VisualStudioSolution-based builds
-    - job_name: 'VisualStudioSolution, VS2017, Debug, x86, Build-only'
+    - job_name: 'VisualStudioSolution, VS2017, Debug, x86, Schannel, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: VisualStudioSolution
       PRJ_CFG: 'DLL Debug - DLL Windows SSPI - DLL WinIDN'
