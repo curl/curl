@@ -290,7 +290,7 @@ build_script:
 
       $ErrorActionPreference = 'Stop'
 
-      $openssl_root = 'C:\OpenSSL-v111-Win64'
+      $openssl_root = 'C:\OpenSSL-v30-Win64'
 
       if($env:BUILD_SYSTEM -eq 'CMake') {
 
