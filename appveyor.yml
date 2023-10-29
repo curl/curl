@@ -21,9 +21,12 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+
 # https://ci.appveyor.com/project/curlorg/curl/history
-# Appveyor configuration
-# https://www.appveyor.com/docs/appveyor-yml/
+# AppVeyor configuration:
+#   https://www.appveyor.com/docs/appveyor-yml/
+# AppVeyor worker images:
+#   https://www.appveyor.com/docs/windows-images-software/
 
 version: 7.50.0.{build}
 
