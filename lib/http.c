@@ -999,10 +999,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
   unsigned long *availp;
   struct auth *authp;
 
-  /* In case conditionals make them unused. */
-  (void) conn;
-  (void) availp;
-  (void) authp;
+  (void) conn; /* In case conditionals make it unused. */
 
   if(proxy) {
     availp = &data->info.proxyauthavail;
