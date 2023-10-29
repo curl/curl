@@ -845,7 +845,7 @@ output_auth_headers(struct Curl_easy *data,
   else
     authstatus->multipass = FALSE;
 
-  return result;
+  return CURLE_OK;
 }
 
 /**
@@ -1053,9 +1053,9 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
         }
       }
     }
+    else
 #endif
 #ifdef USE_NTLM
-    else
       /* NTLM support requires the SSL crypto libs */
       if(checkprefix("NTLM", auth) && is_valid_auth_separator(auth[4])) {
         if((authp->avail & CURLAUTH_NTLM) ||
@@ -1092,9 +1092,9 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
           }
         }
       }
+      else
 #endif
 #ifndef CURL_DISABLE_DIGEST_AUTH
-      else
         if(checkprefix("Digest", auth) && is_valid_auth_separator(auth[6])) {
           if((authp->avail & CURLAUTH_DIGEST) != 0)
             infof(data, "Ignoring duplicate digest auth header.");
@@ -1115,9 +1115,9 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
             }
           }
         }
+        else
 #endif
 #ifndef CURL_DISABLE_BASIC_AUTH
-        else
           if(checkprefix("Basic", auth) &&
              is_valid_auth_separator(auth[5])) {
             *availp |= CURLAUTH_BASIC;
@@ -1131,9 +1131,9 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
               data->state.authproblem = TRUE;
             }
           }
+          else
 #endif
 #ifndef CURL_DISABLE_BEARER_AUTH
-          else
             if(checkprefix("Bearer", auth) &&
                is_valid_auth_separator(auth[6])) {
               *availp |= CURLAUTH_BEARER;
@@ -1146,6 +1146,8 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
                 data->state.authproblem = TRUE;
               }
             }
+#else
+           ;
 #endif
 
     /* there may be multiple methods on one line, so keep reading */
