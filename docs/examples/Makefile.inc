@@ -77,6 +77,7 @@ check_PROGRAMS = \
   imap-store \
   imap-tls \
   ipv6 \
+  localport \
   maxconnects  \
   multi-app \
   multi-debugcallback \
