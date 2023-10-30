@@ -3564,6 +3564,8 @@ static CURLcode create_conn(struct Curl_easy *data,
 
   /* Init the SSL configuration for the connection from settings in data */
   result = Curl_ssl_conn_config_init(data, conn);
+  if(result)
+    goto out;
 
   prune_dead_connections(data);
 
