@@ -297,7 +297,7 @@ jobs:
       run: |
         git clone --quiet --depth=1 -b openssl-${{ env.quictls-version }} https://github.com/quictls/openssl
         cd openssl
-        ./config enable-tls1_3 --prefix=$HOME/quictls
+        ./config enable-tls1_3 --prefix=$HOME/quictls --libdir=$HOME/quictls/lib
         make -j1 install_sw
 
     - name: cache msh3
