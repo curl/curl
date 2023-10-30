@@ -78,6 +78,7 @@ check_PROGRAMS = \
   imap-tls \
   interface \
   ipv6 \
+  localport \
   maxconnects  \
   multi-app \
   multi-debugcallback \
