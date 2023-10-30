@@ -76,6 +76,7 @@ check_PROGRAMS = \
   imap-ssl \
   imap-store \
   imap-tls \
+  interface \
   ipv6 \
   maxconnects  \
   multi-app \
