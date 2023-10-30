@@ -42,37 +42,10 @@ interface but you must provide your own locking and set
 Note that some items are specifically documented as not thread-safe in the
 share API (the connection pool and HSTS cache for example).
 .SH TLS
-If you are accessing HTTPS or FTPS URLs in a multi-threaded manner, you are
-then of course using the underlying SSL library multi-threaded and those libs
-might have their own requirements on this issue. You may need to provide one
-or two functions to allow it to function properly:
-.IP OpenSSL
-OpenSSL 1.1.0+ "can be safely used in multi-threaded applications provided that
-support for the underlying OS threading API is built-in." In that case the
-engine is used by libcurl in a way that is fully thread-safe.
-
-https://www.openssl.org/docs/man1.1.0/man3/CRYPTO_THREAD_run_once.html#DESCRIPTION
-
-OpenSSL <= 1.0.2 the user must set callbacks.
-
-https://www.openssl.org/docs/man1.0.2/man3/CRYPTO_set_locking_callback.html#DESCRIPTION
-
-https://curl.se/libcurl/c/opensslthreadlock.html
-
-.IP GnuTLS
-https://gnutls.org/manual/html_node/Thread-safety.html
-.IP NSS
-thread-safe already without anything required.
-.IP Secure-Transport
-The engine is used by libcurl in a way that is fully thread-safe.
-.IP Schannel
-The engine is used by libcurl in a way that is fully thread-safe.
-.IP wolfSSL
-The engine is used by libcurl in a way that is fully thread-safe.
-.IP BoringSSL
-The engine is used by libcurl in a way that is fully thread-safe.
-.IP AWS-LC
-The engine is used by libcurl in a way that is fully thread-safe.
+All current TLS libraries libcurl supports are thread-safe. OpenSSL 1.1.0+ can
+be safely used in multi-threaded applications provided that support for the
+underlying OS threading API is built-in. For older versions of OpenSSL, the
+user must set mutex callbacks.
 .SH "Signals"
 Signals are used for timing out name resolves (during DNS lookup) - when built
 without using either the c-ares or threaded resolver backends. On systems that
