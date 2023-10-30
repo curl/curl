@@ -147,6 +147,7 @@ PLAN9_DIST = plan9/include/mkfile \
  plan9/src/mkfile
 
 EXTRA_DIST = CHANGES COPYING maketgz Makefile.dist curl-config.in            \
+ TINY-RELEASE-NOTES \
  RELEASE-NOTES buildconf libcurl.pc.in MacOSX-Framework $(CMAKE_DIST)        \
  $(VC_DIST) $(WINBUILD_DIST) $(PLAN9_DIST) lib/libcurl.vers.in buildconf.bat \
  libcurl.def

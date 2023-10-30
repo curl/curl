@@ -138,7 +138,8 @@ struct timeval {
 #define sread(x,y,z) (ssize_t)read((RECV_TYPE_ARG1)(x), \
                                    (RECV_TYPE_ARG2)(y), \
                                    (RECV_TYPE_ARG3)(z))
-
+#elif defined(FreeRTOS)
+#define sread(a,b,c) FreeRTOS_recv(a,b,c,0)
 #elif defined(HAVE_RECV)
 /*
  * The definitions for the return type and arguments types
@@ -174,12 +175,14 @@ struct timeval {
 #endif
 #endif /* HAVE_RECV */
 
-
 #if defined(__minix)
 /* Minix doesn't support send on TCP sockets */
 #define swrite(x,y,z) (ssize_t)write((SEND_TYPE_ARG1)(x), \
                                     (SEND_TYPE_ARG2)(y), \
                                     (SEND_TYPE_ARG3)(z))
+#elif defined(FreeRTOS)
+  /* The flags argument (4) marked as 'Not currently used' */
+#define swrite(a,b,c) FreeRTOS_send(a,b,c,0)
 
 #elif defined(HAVE_SEND)
 #define swrite(x,y,z) (ssize_t)send((SEND_TYPE_ARG1)(x), \
@@ -207,6 +210,8 @@ struct timeval {
 #  define sclose(x)  close_s((x))
 #elif defined(USE_LWIPSOCK)
 #  define sclose(x)  lwip_close((x))
+#elif defined(FreeRTOS)
+#  define sclose(x)  FreeRTOS_closesocket((x))
 #else
 #  define sclose(x)  close((x))
 #endif

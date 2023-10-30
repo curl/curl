@@ -96,3 +96,11 @@ License: curl
 Files: .mailmap
 Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
+
+Files: TINY-RELEASE-NOTES
+Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
+License: curl
+
+File: lib/config-freertos.h lib/config-micrium.h docs/GPLv3.txt
+Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
+License: GPL-3.0-or-later

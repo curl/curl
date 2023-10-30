@@ -26,6 +26,7 @@
 #
 ###########################################################################
 
+CURL="tiny-curl"
 version=$1
 
 if [ -z "$version" ]; then
@@ -103,7 +104,7 @@ if test -n "$only"; then
   exit;
 fi
 
-echo "curl version $curlversion"
+echo "$CURL version $curlversion"
 echo "libcurl version $libversion"
 echo "libcurl numerical $numeric"
 echo "datestamp $datestamp"
@@ -163,14 +164,17 @@ make -s vc-ide
 echo "produce CHANGES"
 git log --pretty=fuller --no-color --date=short --decorate=full -1000 | ./scripts/log2changes.pl > CHANGES.dist
 
+echo "generate patch set from ${major}.${minor}.${patch}"
+git diff curl-${major}_${minor}_${patch} >$CURL-${major}.${minor}.${patch}.patch.dist
+
 ############################################################################
 #
 # Now run make dist to generate a tar.gz archive
 #
 
 echo "make dist"
-targz="curl-$version.tar.gz"
-make -sj dist VERSION=$version
+targz="$CURL-$version.tar.gz"
+make -sj dist VERSION=$version PACKAGE="$CURL"
 res=$?
 
 if test "$res" != 0; then
@@ -183,7 +187,7 @@ fi
 # Now make a bz2 archive from the tar.gz original
 #
 
-bzip2="curl-$version.tar.bz2"
+bzip2="$CURL-$version.tar.bz2"
 echo "Generating $bzip2"
 gzip -dc $targz | bzip2 --best > $bzip2
 
@@ -192,7 +196,7 @@ gzip -dc $targz | bzip2 --best > $bzip2
 # Now make an xz archive from the tar.gz original
 #
 
-xz="curl-$version.tar.xz"
+xz="$CURL-$version.tar.xz"
 echo "Generating $xz"
 gzip -dc $targz | xz -6e - > $xz
 
@@ -211,13 +215,13 @@ makezip() {
   rm -rf $tempdir
 }
 
-zip="curl-$version.zip"
+zip="$CURL-$version.zip"
 echo "Generating $zip"
 tempdir=".builddir"
 makezip
 
 echo "------------------"
-echo "maketgz report:"
+echo "maketgz $CURL report:"
 echo ""
 ls -l $targz $bzip2 $zip $xz
 

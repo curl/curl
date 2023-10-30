@@ -79,10 +79,18 @@
 
 #else /* HAVE_CONFIG_H */
 
+#ifdef MICRIUM
+#include "config-micrium.h"
+#endif
+
+#ifdef FreeRTOS
+#include "config-freertos.h"
+#endif
+
 #ifdef _WIN32_WCE
 #  include "config-win32ce.h"
 #else
-#  ifdef WIN32
+#  if defined(WIN32) && !defined(FreeRTOS)
 #    include "config-win32.h"
 #  endif
 #endif
@@ -579,7 +587,7 @@
  * Mutually exclusive CURLRES_* definitions.
  */
 
-#if defined(ENABLE_IPV6) && defined(HAVE_GETADDRINFO)
+#if defined(HAVE_GETADDRINFO)
 #  define CURLRES_IPV6
 #else
 #  define CURLRES_IPV4
