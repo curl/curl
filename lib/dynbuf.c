@@ -78,6 +78,12 @@ static CURLcode dyn_nappend(struct dynbuf *s,
   DEBUGASSERT(!s->leng || s->bufr);
   DEBUGASSERT(a <= s->toobig);
 
+  if(!len)
+    /* nothing to do */
+    return CURLE_OK;
+
+  DEBUGASSERT(mem);
+
   if(fit > s->toobig) {
     Curl_dyn_free(s);
     return CURLE_OUT_OF_MEMORY;
@@ -174,10 +180,12 @@ CURLcode Curl_dyn_addn(struct dynbuf *s, const void *mem, size_t len)
  */
 CURLcode Curl_dyn_add(struct dynbuf *s, const char *str)
 {
-  size_t n = strlen(str);
+  size_t n;
+  DEBUGASSERT(str);
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
   DEBUGASSERT(!s->leng || s->bufr);
+  n = strlen(str);
   return dyn_nappend(s, (unsigned char *)str, n);
 }
 
@@ -191,6 +199,7 @@ CURLcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
   DEBUGASSERT(!s->leng || s->bufr);
+  DEBUGASSERT(fmt);
   rc = Curl_dyn_vprintf(s, fmt, ap);
 
   if(!rc)
