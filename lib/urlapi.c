@@ -1902,7 +1902,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     }
     newp = Curl_dyn_ptr(&enc);
 
-    if(appendquery) {
+    if(appendquery && newp) {
       /* Append the 'newp' string onto the old query. Add a '&' separator if
          none is present at the end of the existing query already */
 
