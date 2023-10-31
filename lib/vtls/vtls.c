@@ -206,18 +206,17 @@ match_ssl_primary_config(struct Curl_easy *data,
 }
 
 bool Curl_ssl_conn_config_match(struct Curl_easy *data,
-                                struct connectdata *conn,
                                 struct connectdata *candidate,
                                 bool proxy)
 {
 #ifndef CURL_DISABLE_PROXY
   if(proxy)
-    return match_ssl_primary_config(data, &conn->proxy_ssl_config,
+    return match_ssl_primary_config(data, &data->set.proxy_ssl.primary,
                                     &candidate->proxy_ssl_config);
 #else
   (void)proxy;
 #endif
-  return match_ssl_primary_config(data, &conn->ssl_config,
+  return match_ssl_primary_config(data, &data->set.ssl.primary,
                                   &candidate->ssl_config);
 }
 
@@ -272,8 +271,7 @@ static void Curl_free_primary_ssl_config(struct ssl_primary_config *sslc)
 #endif
 }
 
-static CURLcode Curl_ssl_init_ssl_config(struct Curl_easy *data,
-                                         struct ssl_primary_config *config)
+CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
 {
   data->set.ssl.primary.CApath = data->set.str[STRING_SSL_CAPATH];
   data->set.ssl.primary.CAfile = data->set.str[STRING_SSL_CAFILE];
@@ -300,16 +298,7 @@ static CURLcode Curl_ssl_init_ssl_config(struct Curl_easy *data,
   data->set.ssl.primary.clientcert = data->set.str[STRING_CERT];
   data->set.ssl.key_blob = data->set.blobs[BLOB_KEY];
 
-  if(!clone_ssl_primary_config(&data->set.ssl.primary, config))
-    return CURLE_OUT_OF_MEMORY;
-  return CURLE_OK;
-}
-
 #ifndef CURL_DISABLE_PROXY
-static CURLcode
-Curl_ssl_init_proxy_ssl_config(struct Curl_easy *data,
-                               struct ssl_primary_config *config)
-{
   data->set.proxy_ssl.primary.CApath = data->set.str[STRING_SSL_CAPATH_PROXY];
   data->set.proxy_ssl.primary.CAfile = data->set.str[STRING_SSL_CAFILE_PROXY];
   data->set.proxy_ssl.primary.cipher_list =
@@ -339,27 +328,25 @@ Curl_ssl_init_proxy_ssl_config(struct Curl_easy *data,
   data->set.proxy_ssl.primary.password =
     data->set.str[STRING_TLSAUTH_PASSWORD_PROXY];
 #endif
+#endif /* CURL_DISABLE_PROXY */
 
-  if(!clone_ssl_primary_config(&data->set.proxy_ssl.primary, config))
-    return CURLE_OUT_OF_MEMORY;
   return CURLE_OK;
 }
-#endif /* !CURL_DISABLE_PROXY */
 
 CURLcode Curl_ssl_conn_config_init(struct Curl_easy *data,
                                    struct connectdata *conn)
 {
-  CURLcode result;
- /* Get a cloned copy of the SSL config situation for use in
-   * the connection. `data` might have a shorter lifetime than `conn`*/
-  result = Curl_ssl_init_ssl_config(data, &conn->ssl_config);
-  if(result)
-    goto out;
+  /* Clone "primary" SSL configurations from the esay handle to
+   * the connection. They are used for connection cache matching and
+   * probably outlive the easy handle */
+  if(!clone_ssl_primary_config(&data->set.ssl.primary, &conn->ssl_config))
+    return CURLE_OUT_OF_MEMORY;
 #ifndef CURL_DISABLE_PROXY
-  result = Curl_ssl_init_proxy_ssl_config(data, &conn->proxy_ssl_config);
+  if(!clone_ssl_primary_config(&data->set.proxy_ssl.primary,
+                               &conn->proxy_ssl_config))
+    return CURLE_OUT_OF_MEMORY;
 #endif
-out:
-  return result;
+  return CURLE_OK;
 }
 
 void Curl_ssl_conn_config_cleanup(struct connectdata *conn)
