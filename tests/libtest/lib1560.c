@@ -785,6 +785,14 @@ static const struct setgetcase setget_parts_list[] = {
 
 /* !checksrc! disable SPACEBEFORECOMMA 1 */
 static const struct setcase set_parts_list[] = {
+  {"https://example.com/",
+   "host=\"\",",
+   "https://example.com/",
+   0, CURLU_URLENCODE, CURLUE_OK, CURLUE_BAD_HOSTNAME},
+  {"https://example.com/",
+   "host=\"\",",
+   "https://example.com/",
+   0, 0, CURLUE_OK, CURLUE_BAD_HOSTNAME},
   {"https://example.com",
    "path=get,",
    "https://example.com/get",
