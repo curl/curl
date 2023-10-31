@@ -1209,10 +1209,10 @@ ConnectionExists(struct Curl_easy *data,
             continue;
           else if(needle->handler->flags&PROTOPT_SSL) {
             /* use double layer ssl */
-            if(!Curl_ssl_conn_config_match(data, needle, check, TRUE))
+            if(!Curl_ssl_conn_config_match(data, check, TRUE))
               continue;
           }
-          else if(!Curl_ssl_conn_config_match(data, needle, check, FALSE))
+          else if(!Curl_ssl_conn_config_match(data, check, FALSE))
             continue;
         }
       }
@@ -1330,7 +1330,7 @@ ConnectionExists(struct Curl_easy *data,
           if(needle->handler->flags & PROTOPT_SSL) {
             /* This is a SSL connection so verify that we're using the same
                SSL options as well */
-            if(!Curl_ssl_conn_config_match(data, needle, check, FALSE)) {
+            if(!Curl_ssl_conn_config_match(data, check, FALSE)) {
               DEBUGF(infof(data,
                            "Connection #%" CURL_FORMAT_CURL_OFF_T
                            " has different SSL parameters, can't reuse",
@@ -3562,8 +3562,8 @@ static CURLcode create_conn(struct Curl_easy *data,
   conn->send[SECONDARYSOCKET] = Curl_conn_send;
   conn->bits.tcp_fastopen = data->set.tcp_fastopen;
 
-  /* Init the SSL configuration for the connection from settings in data */
-  result = Curl_ssl_conn_config_init(data, conn);
+  /* Complete the easy's SSL configuration for connection cache matching */
+  result = Curl_ssl_easy_config_complete(data);
   if(result)
     goto out;
 
@@ -3680,6 +3680,12 @@ static CURLcode create_conn(struct Curl_easy *data,
        * This is a brand new connection, so let's store it in the connection
        * cache of ours!
        */
+      result = Curl_ssl_conn_config_init(data, conn);
+      if(result) {
+        DEBUGF(fprintf(stderr, "Error: init connection ssl config\n"));
+        goto out;
+      }
+
       result = Curl_resolver_init(data, &conn->resolve_async.resolver);
       if(result) {
         DEBUGF(fprintf(stderr, "Error: resolver_init failed\n"));

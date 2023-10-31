@@ -75,6 +75,12 @@ curl_sslbackend Curl_ssl_backend(void);
 void Curl_ssl_easy_config_init(struct Curl_easy *data);
 
 /**
+ * Init the `data->set.ssl` and `data->set.proxy_ssl` for
+ * connection matching use.
+ */
+CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data);
+
+/**
  * Init SSL configs (main + proxy) for a new connection from the easy handle.
  */
 CURLcode Curl_ssl_conn_config_init(struct Curl_easy *data,
@@ -92,7 +98,6 @@ void Curl_ssl_conn_config_cleanup(struct connectdata *conn);
  * @param proxy   match the proxy SSL config or the main one
  */
 bool Curl_ssl_conn_config_match(struct Curl_easy *data,
-                                struct connectdata *conn,
                                 struct connectdata *candidate,
                                 bool proxy);
 
