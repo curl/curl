@@ -1931,8 +1931,8 @@ nomem:
       }
     }
 
-    if(what == CURLUPART_HOST) {
-      size_t n = strlen(newp);
+    else if(what == CURLUPART_HOST) {
+      size_t n = Curl_dyn_len(&enc);
       if(!n && (flags & CURLU_NO_AUTHORITY)) {
         /* Skip hostname check, it's allowed to be empty. */
       }
