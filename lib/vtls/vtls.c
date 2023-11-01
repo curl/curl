@@ -210,9 +210,13 @@ bool Curl_ssl_conn_config_match(struct Curl_easy *data,
                                 struct connectdata *candidate,
                                 bool proxy)
 {
+#ifndef CURL_DISABLE_PROXY
   if(proxy)
     return match_ssl_primary_config(data, &conn->proxy_ssl_config,
                                     &candidate->proxy_ssl_config);
+#else
+  (void)proxy;
+#endif
   return match_ssl_primary_config(data, &conn->ssl_config,
                                   &candidate->ssl_config);
 }
@@ -371,8 +375,14 @@ void Curl_ssl_conn_config_update(struct Curl_easy *data, bool for_proxy)
   /* May be called on an easy that has no connection yet */
   if(data->conn) {
     struct ssl_primary_config *src, *dest;
+#ifndef CURL_DISABLE_PROXY
     src = for_proxy? &data->set.proxy_ssl.primary : &data->set.ssl.primary;
     dest = for_proxy? &data->conn->proxy_ssl_config : &data->conn->ssl_config;
+#else
+    (void)for_proxy;
+    src = &data->set.ssl.primary;
+    dest = &data->conn->ssl_config;
+#endif
     dest->verifyhost = src->verifyhost;
     dest->verifypeer = src->verifypeer;
     dest->verifystatus = src->verifystatus;
