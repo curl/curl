@@ -77,7 +77,7 @@ static CURLcode dyn_nappend(struct dynbuf *s,
   DEBUGASSERT(indx < s->toobig);
   DEBUGASSERT(!s->leng || s->bufr);
   DEBUGASSERT(a <= s->toobig);
-  DEBUGASSERT(mem);
+  DEBUGASSERT(!len || mem);
 
   if(fit > s->toobig) {
     Curl_dyn_free(s);
