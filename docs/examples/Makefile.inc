@@ -78,6 +78,7 @@ check_PROGRAMS = \
   imap-tls \
   interface \
   ipv6 \
+  keepalive \
   localport \
   maxconnects  \
   multi-app \
