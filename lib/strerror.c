@@ -986,6 +986,10 @@ const char *Curl_sspi_strerror(int err, char *buf, size_t buflen)
       break;
 #define SEC2TXT(sec) case sec: txt = #sec; break
     SEC2TXT(CRYPT_E_REVOKED);
+    SEC2TXT(CRYPT_E_NO_REVOCATION_DLL);
+    SEC2TXT(CRYPT_E_NO_REVOCATION_CHECK);
+    SEC2TXT(CRYPT_E_REVOCATION_OFFLINE);
+    SEC2TXT(CRYPT_E_NOT_IN_REVOCATION_DATABASE);
     SEC2TXT(SEC_E_ALGORITHM_MISMATCH);
     SEC2TXT(SEC_E_BAD_BINDINGS);
     SEC2TXT(SEC_E_BAD_PKGID);
