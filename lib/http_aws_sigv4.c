@@ -456,6 +456,7 @@ static CURLcode canon_query(struct Curl_easy *data,
   for(i = 0; !result && (i < entry); i++, ap++) {
     size_t len;
     const char *q = ap->p;
+    bool found_equals = false;
     if(!ap->len)
       continue;
     for(len = ap->len; len && !result; q++, len--) {
@@ -467,9 +468,13 @@ static CURLcode canon_query(struct Curl_easy *data,
         case '.':
         case '_':
         case '~':
+          /* allowed as-is */
+          result = Curl_dyn_addn(dq, q, 1);
+          break;
         case '=':
           /* allowed as-is */
           result = Curl_dyn_addn(dq, q, 1);
+          found_equals = true;
           break;
         case '%':
           /* uppercase the following if hexadecimal */
@@ -497,7 +502,11 @@ static CURLcode canon_query(struct Curl_easy *data,
         }
       }
     }
-    if(i < entry - 1) {
+    if(!result && !found_equals) {
+      /* queries without value still need an equals */
+      result = Curl_dyn_addn(dq, "=", 1);
+    }
+    if(!result && i < entry - 1) {
       /* insert ampersands between query pairs */
       result = Curl_dyn_addn(dq, "&", 1);
     }

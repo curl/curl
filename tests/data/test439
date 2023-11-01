@@ -38,7 +38,7 @@ debug
 aws-sigv4 with query
 </name>
 <command>
-"http://fake.fake.fake:8000/%TESTNUMBER/?name=me%&aim=b%aad&&&weirdo=*.//-" -u user:secret --aws-sigv4 "aws:amz:us-east-2:es" --connect-to fake.fake.fake:8000:%HOSTIP:%HTTPPORT
+"http://fake.fake.fake:8000/%TESTNUMBER/?name=me%&noval&aim=b%aad&&&weirdo=*.//-" -u user:secret --aws-sigv4 "aws:amz:us-east-2:es" --connect-to fake.fake.fake:8000:%HOSTIP:%HTTPPORT
 </command>
 </client>
 
@@ -46,9 +46,9 @@ aws-sigv4 with query
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
-GET /%TESTNUMBER/?name=me%&aim=b%aad&&&weirdo=*.//- HTTP/1.1
+GET /439/?name=me%&noval&aim=b%aad&&&weirdo=*.//- HTTP/1.1
 Host: fake.fake.fake:8000
-Authorization: AWS4-HMAC-SHA256 Credential=user/19700101/us-east-2/es/aws4_request, SignedHeaders=host;x-amz-date, Signature=88884e3b3142133685b2092d29d8b522b785b1a9ec9e4a90cbea83e882f8dcb6
+Authorization: AWS4-HMAC-SHA256 Credential=user/19700101/us-east-2/es/aws4_request, SignedHeaders=host;x-amz-date, Signature=cbbf4a72764e27e396730f5e56cea046d4ce862a2d91db4856fb086b92f49270
 X-Amz-Date: 19700101T000000Z
 User-Agent: curl/%VERSION
 Accept: */*
