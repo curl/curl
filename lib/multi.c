@@ -606,16 +606,23 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
   /* increase the alive-counter */
   multi->num_alive++;
 
+#define CONNCACHE_INHERIT(x) \
+  do { data->state.conn_cache->closure_handle->set.x = data->set.x; } while(0)
+
   CONNCACHE_LOCK(data);
   /* The closure handle only ever has default timeouts set. To improve the
      state somewhat we clone the timeouts from each added handle so that the
      closure handle always has the same timeouts as the most recently added
      easy handle. */
-  data->state.conn_cache->closure_handle->set.timeout = data->set.timeout;
-  data->state.conn_cache->closure_handle->set.server_response_timeout =
-    data->set.server_response_timeout;
-  data->state.conn_cache->closure_handle->set.no_signal =
-    data->set.no_signal;
+  CONNCACHE_INHERIT(timeout);
+  CONNCACHE_INHERIT(server_response_timeout);
+  CONNCACHE_INHERIT(no_signal);
+  if(data->set.debug_conncache) {
+    CONNCACHE_INHERIT(fdebug);
+    CONNCACHE_INHERIT(debugdata);
+    CONNCACHE_INHERIT(err);
+    CONNCACHE_INHERIT(verbose);
+  }
   data->id = data->state.conn_cache->next_easy_id++;
   if(data->state.conn_cache->next_easy_id <= 0)
     data->state.conn_cache->next_easy_id = 0;

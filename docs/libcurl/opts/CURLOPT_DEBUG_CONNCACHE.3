@@ -1,0 +1,98 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_DEBUG_CONNCACHE 3 "31 Oct 2023" libcurl libcurl
+.SH NAME
+CURLOPT_DEBUG_CONNCACHE \- debug the connection cache
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DEBUG_CONNCACHE, long onoff);
+.fi
+.SH DESCRIPTION
+This option enables debugging the internal connection cache associated with
+your easy handle. Several debug settings are copied from \fIhandle\fP to every
+associated internal connection cache:
+\fICURLOPT_DEBUGFUNCTION(3)\fP, \fICURLOPT_DEBUGDATA(3)\fP,
+\fICURLOPT_STDERR(3)\fP and \fICURLOPT_VERBOSE(3)\fP.
+
+\fBWARNING:\fP The copied settings remain even if the option is later disabled.
+The set data must survive until any multi and share handles used by
+\fIhandle\fP are cleaned up and \fIhandle\fP is cleaned up. This is because if
+your easy handle is associated with a share handle or multi handle then your
+easy handle's connection cache may be part of that shared resource and may
+survive past your easy handle's lifetime.
+
+The debug settings are copied into the currently associated connection cache
+handle every time easy \fIhandle\fP is added to a multi handle. If the easy
+handle is later removed from the multi handle that does not remove the settings
+from the connection cache handle, whether or not it is still associated.
+
+If you have set this option on multiple easy handles that are using the same
+share handle or multi handle then the most recently added easy handle's
+debug settings are assigned to the currently associated connection cache.
+
+If you have not set this option on some easy handles that are using the same
+share handle or multi handle then that does not change existing debug settings
+already copied to connection caches.
+
+This is an advanced option because it changes the scope of other options. It
+is recommended to add a comment before setting this option that explains the
+change in behavior. Refer to the comment in the EXAMPLE section.
+.SH DEFAULT
+0
+.SH PROTOCOLS
+All
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  /* CURLOPT_DEBUG_CONNCACHE copies debug settings to every
+   * internal connection cache used by the easy handle:
+   *
+   * CURLOPT_DEBUGFUNCTION, CURLOPT_DEBUGDATA,
+   * CURLOPT_STDERR and CURLOPT_VERBOSE.
+   *
+   * The copied settings remain even if the option is later
+   * disabled. The set data must survive until any multi and
+   * share handles used by the easy handle are cleaned up
+   * and the easy handle is cleaned up.
+   */
+  curl_easy_setopt(curl, CURLOPT_DEBUG_CONNCACHE, 1L);
+  curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, fdebug);
+  curl_easy_setopt(curl, CURLOPT_DEBUGDATA, debugdata);
+
+  curl_easy_perform(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in 8.5.0
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_DEBUGFUNCTION (3),
+.BR CURLOPT_DEBUGDATA (3),
+.BR CURLOPT_STDERR (3),
+.BR CURLOPT_VERBOSE (3)

@@ -1939,6 +1939,7 @@ struct UserDefined {
 #ifdef USE_WEBSOCKETS
   BIT(ws_raw_mode);
 #endif
+  BIT(debug_conncache);    /* copy debug settings to the connection cache */
 };
 
 struct Names {

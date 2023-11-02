@@ -42,6 +42,9 @@ this used when you debug/report problems.
 
 To also get all the protocol data sent and received, consider using the
 \fICURLOPT_DEBUGFUNCTION(3)\fP.
+
+\fBWARNING:\fP If \fICURLOPT_DEBUG_CONNCACHE(3)\fP is on then this setting will
+be copied into every internal connection cache used by \fIhandle\fP.
 .SH DEFAULT
 0, meaning disabled.
 .SH PROTOCOLS

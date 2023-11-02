@@ -1658,6 +1658,14 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * if the callback provided is NULL, it'll use the default callback
      */
     break;
+  case CURLOPT_DEBUG_CONNCACHE:
+    /*
+     * If true then some debug settings are copied to every associated internal
+     * connection cache handle: CURLOPT_DEBUGFUNCTION, CURLOPT_DEBUGDATA,
+     * CURLOPT_STDERR and CURLOPT_VERBOSE.
+     */
+    data->set.debug_conncache = (0 != va_arg(param, long)) ? TRUE : FALSE;
+    break;
   case CURLOPT_DEBUGDATA:
     /*
      * Set to a void * that should receive all error writes. This

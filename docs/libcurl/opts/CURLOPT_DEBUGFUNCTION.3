@@ -82,11 +82,16 @@ The data is SSL/TLS (binary) data sent to the peer.
 The data is SSL/TLS (binary) data received from the peer.
 .RE
 
-WARNING: This callback may be called with the curl \fIhandle\fP set to an
-internal handle. (Added in 8.4.0)
+This callback may be called with the curl \fIhandle\fP set to an internal
+handle. (Added in 8.4.0)
 
 If you need to distinguish your curl \fIhandle\fP from internal handles then
 set \fICURLOPT_PRIVATE(3)\fP on your handle.
+
+\fBWARNING:\fP If \fICURLOPT_DEBUG_CONNCACHE(3)\fP is on then this setting will
+be copied into every internal connection cache used by \fIhandle\fP, and the
+\fIdebug_callback\fP must survive until any multi and share handles used by
+\fIhandle\fP are cleaned up and \fIhandle\fP is cleaned up.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

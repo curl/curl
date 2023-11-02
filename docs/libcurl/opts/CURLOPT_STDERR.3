@@ -39,6 +39,11 @@ data.
 If you are using libcurl as a Windows DLL, this option causes an exception and
 a crash in the library since it cannot access a FILE * passed on from the
 application. A work-around is to instead use \fICURLOPT_DEBUGFUNCTION(3)\fP.
+
+\fBWARNING:\fP If \fICURLOPT_DEBUG_CONNCACHE(3)\fP is on then this setting will
+be copied into every internal connection cache used by \fIhandle\fP, and the
+FILE \fIstream\fP must survive until any multi and share handles used by
+\fIhandle\fP are cleaned up and \fIhandle\fP is cleaned up.
 .SH DEFAULT
 stderr
 .SH PROTOCOLS

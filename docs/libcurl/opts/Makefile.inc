@@ -148,6 +148,7 @@ man_MANS =                                      \
   CURLOPT_CRLFILE.3                             \
   CURLOPT_CURLU.3                               \
   CURLOPT_CUSTOMREQUEST.3                       \
+  CURLOPT_DEBUG_CONNCACHE.3                     \
   CURLOPT_DEBUGDATA.3                           \
   CURLOPT_DEBUGFUNCTION.3                       \
   CURLOPT_DEFAULT_PROTOCOL.3                    \
