@@ -103,18 +103,20 @@ void *Curl_memdup(const void *src, size_t length)
  *
  * Curl_strndup(source, length)
  *
- * Copies the 'source' data to a newly allocated buffer (that is
- * returned). Copies 'length' bytes then adds a null terminator.
+ * Copies the 'source' string to a newly allocated buffer (that is returned).
+ * Copies not more than 'length' bytes then adds a null terminator.
  *
  * Returns the new pointer or NULL on failure.
  *
  ***************************************************************************/
 void *Curl_strndup(const void *src, size_t length)
 {
-  char *b = Curl_memdup(src, length + 1);
-  if(b)
-    b[length] = 0;
-  return b;
+  char *buf = malloc(length + 1);
+  if(!buf)
+    return NULL;
+  strncpy(buf, src, length);
+  buf[length] = 0;
+  return buf;
 }
 
 /***************************************************************************
