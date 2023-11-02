@@ -46,6 +46,10 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#ifdef CURL_DISABLE_SOCKETPAIR
+#error "MSH3 cannot be build with CURL_DISABLE_SOCKETPAIR set"
+#endif
+
 #define H3_STREAM_WINDOW_SIZE (128 * 1024)
 #define H3_STREAM_CHUNK_SIZE   (16 * 1024)
 #define H3_STREAM_RECV_CHUNKS \
