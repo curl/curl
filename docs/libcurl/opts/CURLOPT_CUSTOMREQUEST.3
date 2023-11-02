@@ -39,6 +39,9 @@ When you change the request \fImethod\fP by setting
 libcurl behaves or acts in regards to the particular request method, it only
 changes the actual string sent in the request.
 
+libcurl passes on the verbatim string in its request without any filter or
+other safe guards. That includes white space and control characters.
+
 Restore to the internal default by setting this to NULL.
 
 This option can be used to specify the request:

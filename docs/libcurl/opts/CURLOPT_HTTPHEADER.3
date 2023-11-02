@@ -55,7 +55,9 @@ semicolon).
 
 The headers included in the linked list \fBmust not\fP be CRLF-terminated,
 because libcurl adds CRLF after each header item itself. Failure to comply
-with this might result in strange behavior.
+with this might result in strange behavior. libcurl passes on the verbatim
+strings you give it, without any filter or other safe guards. That includes
+white space and control characters.
 
 The first line in an HTTP request (containing the method, usually a GET or
 POST) is not a header and cannot be replaced using this option. Only the lines
