@@ -365,9 +365,7 @@ static void strstore(char **str, const char *newstr, size_t len)
   DEBUGASSERT(newstr);
   DEBUGASSERT(str);
   free(*str);
-  *str = Curl_memdup(newstr, len + 1);
-  if(*str)
-    (*str)[len] = 0;
+  *str = Curl_strndup(newstr, len);
 }
 
 /*

@@ -135,12 +135,11 @@ static CURLcode hsts_create(struct hsts *h,
   if(!sts)
     return CURLE_OUT_OF_MEMORY;
 
-  duphost = Curl_memdup(hostname, hlen + 1);
+  duphost = Curl_strndup(hostname, hlen);
   if(!duphost) {
     free(sts);
     return CURLE_OUT_OF_MEMORY;
   }
-  duphost[hlen] = 0; /* might remove a dot */
 
   sts->host = duphost;
   sts->expires = expires;

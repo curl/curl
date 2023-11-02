@@ -603,9 +603,9 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
            app passed in a bad combo, so we better check for that first. */
         if(form->name) {
           /* copy name (without strdup; possibly not null-terminated) */
-          form->name = Curl_memdup(form->name, form->namelength?
-                                   form->namelength:
-                                   strlen(form->name) + 1);
+          form->name = Curl_strndup(form->name, form->namelength?
+                                    form->namelength:
+                                    strlen(form->name));
         }
         if(!form->name) {
           return_value = CURL_FORMADD_MEMORY;

@@ -101,6 +101,24 @@ void *Curl_memdup(const void *src, size_t length)
 
 /***************************************************************************
  *
+ * Curl_strndup(source, length)
+ *
+ * Copies the 'source' data to a newly allocated buffer (that is
+ * returned). Copies 'length' bytes then adds a null terminator.
+ *
+ * Returns the new pointer or NULL on failure.
+ *
+ ***************************************************************************/
+void *Curl_strndup(const void *src, size_t length)
+{
+  char *b = Curl_memdup(src, length + 1);
+  if(b)
+    b[length] = 0;
+  return b;
+}
+
+/***************************************************************************
+ *
  * Curl_saferealloc(ptr, size)
  *
  * Does a normal realloc(), but will free the data pointer if the realloc
