@@ -151,6 +151,9 @@ struct clearurlcase {
 };
 
 static const struct testcase get_parts_list[] ={
+  {"https://curl.se/#  ",
+   "https | [11] | [12] | [13] | curl.se | [15] | / | [16] | %20%20",
+   CURLU_URLENCODE|CURLU_ALLOW_SPACE, 0, CURLUE_OK},
   {"", "", 0, 0, CURLUE_MALFORMED_INPUT},
   {" ", "", 0, 0, CURLUE_MALFORMED_INPUT},
   {"1h://example.net", "", 0, 0, CURLUE_BAD_SCHEME},

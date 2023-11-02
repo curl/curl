@@ -1224,7 +1224,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
       if(flags & CURLU_URLENCODE) {
         struct dynbuf enc;
         Curl_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
-        if(urlencode_str(&enc, fragment + 1, fraglen, TRUE, FALSE)) {
+        if(urlencode_str(&enc, fragment + 1, fraglen - 1, TRUE, FALSE)) {
           result = CURLUE_OUT_OF_MEMORY;
           goto fail;
         }
