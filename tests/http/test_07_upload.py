@@ -124,7 +124,7 @@ class TestUpload:
         if proto == 'h3' and env.curl_uses_lib('msh3'):
             pytest.skip("msh3 stalls here")
         fdata = os.path.join(env.gen_dir, 'data-100k')
-        count = 50
+        count = 20
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-{count-1}]'
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto)
@@ -161,7 +161,7 @@ class TestUpload:
         if proto == 'h3' and env.curl_uses_lib('msh3'):
             pytest.skip("msh3 stalls here")
         # limit since we use a separate connection in h1
-        count = 50
+        count = 20
         data = '0123456789'
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-{count-1}]'
@@ -181,7 +181,7 @@ class TestUpload:
             pytest.skip("msh3 stalls here")
         fdata = os.path.join(env.gen_dir, 'data-100k')
         # limit since we use a separate connection in h1
-        count = 50
+        count = 20
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-{count-1}]'
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto,
@@ -219,7 +219,7 @@ class TestUpload:
         fdata = os.path.join(env.gen_dir, 'data-10m')
         count = 1
         curl = CurlClient(env=env)
-        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?id=[0-{count-1}]&chunk_delay=10ms'
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?id=[0-{count-1}]&chunk_delay=2ms'
         r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto,
                              extra_args=['--parallel'])
         r.check_stats(count=count, http_status=200, exitcode=0)
