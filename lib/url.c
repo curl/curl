@@ -1203,17 +1203,19 @@ ConnectionExists(struct Curl_easy *data,
           continue;
 
         if(IS_HTTPS_PROXY(needle->http_proxy.proxytype)) {
-          /* use https proxy */
-          if(needle->http_proxy.proxytype !=
-             check->http_proxy.proxytype)
+          /* https proxies come in different types, http/1.1, h2, ... */
+          if(needle->http_proxy.proxytype != check->http_proxy.proxytype)
             continue;
-          else if(needle->handler->flags&PROTOPT_SSL) {
-            /* use double layer ssl */
-            if(!Curl_ssl_conn_config_match(data, check, TRUE))
-              continue;
+          /* match SSL config to proxy */
+          if(!Curl_ssl_conn_config_match(data, check, TRUE)) {
+            DEBUGF(infof(data,
+              "Connection #%" CURL_FORMAT_CURL_OFF_T
+              " has different SSL proxy parameters, can't reuse",
+              check->connection_id));
+            continue;
           }
-          else if(!Curl_ssl_conn_config_match(data, check, FALSE))
-            continue;
+          /* the SSL config to the server, which may apply here is checked
+           * further below */
         }
       }
 #endif
