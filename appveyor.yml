@@ -48,7 +48,6 @@ environment:
       SHARED: 'ON'
       TESTING: 'OFF'
       DISABLED_TESTS: ''
-      SKIP_RUN: 'Needs missing MSVCR90.dll'
     - job_name: 'CMake, VS2022, Release, x64, OpenSSL 3, WebSockets, Unity, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
@@ -332,6 +331,10 @@ build_script:
         }
         if($env:PRJ_GEN.Contains('Visual Studio')) {
           $options += '-DCMAKE_VS_GLOBALS=TrackFileAccess=false'
+        }
+        if($env:PRJ_GEN -eq 'Visual Studio 9 2008') {
+          # Without this it fails to run due to missing MSVCR90.dll
+          $options += '-DCURL_STATIC_CRT=ON'
         }
 
         Write-Host 'CMake options:' $options
