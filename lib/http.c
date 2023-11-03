@@ -1144,7 +1144,14 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
               }
             }
 #else
-           ;
+            {
+              /*
+               * Empty block to terminate the if-else chain correctly.
+               *
+               * A semicolon would yield the same result here, but can cause a
+               * compiler warning when -Wextra is enabled.
+               */
+            }
 #endif
 
     /* there may be multiple methods on one line, so keep reading */
