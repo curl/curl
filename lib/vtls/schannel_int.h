@@ -152,10 +152,10 @@ struct schannel_ssl_backend_data {
 struct schannel_multi_ssl_backend_data {
   unsigned char *CAinfo_blob_digest; /* CA info blob digest */
   size_t CAinfo_blob_size;           /* CA info blob size */
-  char *CAfile;                      /* CAfile path used to generate certificate
-                                        store */
-  HCERTSTORE cert_store;             /* cached certificate store or NULL if none
-                                        */
+  char *CAfile;                      /* CAfile path used to generate
+                                        certificate store */
+  HCERTSTORE cert_store;             /* cached certificate store or
+                                        NULL if none */
   struct curltime time;              /* when the cached store was created */
 };
 

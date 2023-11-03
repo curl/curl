@@ -2807,7 +2807,7 @@ HCERTSTORE schannel_get_cached_cert_store(struct Curl_cfilter *cf,
   }
   else {
     if(!conn_config->CAfile) {
-        return NULL;
+      return NULL;
     }
     if(!mbackend->CAfile) {
       return NULL;
@@ -2832,7 +2832,7 @@ bool schannel_set_cached_cert_store(struct Curl_cfilter *cf,
 
   if(!multi->ssl_backend_data) {
     multi->ssl_backend_data =
-      calloc(1,sizeof(struct schannel_multi_ssl_backend_data));
+      calloc(1, sizeof(struct schannel_multi_ssl_backend_data));
     if(!multi->ssl_backend_data) {
       return false;
     }
