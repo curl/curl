@@ -2754,10 +2754,20 @@ static void *schannel_get_internals(struct ssl_connect_data *connssl,
   return &backend->ctxt->ctxt_handle;
 }
 
-HCERTSTORE schannel_get_cached_cert_store(struct Curl_cfilter *cf,
-                                          const struct Curl_easy *data)
+HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
+                                               const struct Curl_easy *data)
 {
+  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct Curl_multi *multi = data->multi_easy ? data->multi_easy : data->multi;
+  const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
+  struct schannel_multi_ssl_backend_data *mbackend;
+  const struct ssl_general_config *cfg = &data->set.general_ssl;
+  timediff_t timeout_ms;
+  timediff_t elapsed_ms;
+  struct curltime now;
+  unsigned char info_blob_digest[CURL_SHA256_DIGEST_LENGTH];
+
+  DEBUGASSERT(multi);
 
   if(!multi) {
     return NULL;
@@ -2767,25 +2777,20 @@ HCERTSTORE schannel_get_cached_cert_store(struct Curl_cfilter *cf,
     return NULL;
   }
 
-  struct schannel_multi_ssl_backend_data *mbackend;
   mbackend = (struct schannel_multi_ssl_backend_data *)multi->ssl_backend_data;
   if(!mbackend->cert_store) {
     return NULL;
   }
 
   /* use cached_x509_store_expired timediff calculation pattern */
-  const struct ssl_general_config *cfg = &data->set.general_ssl;
-  timediff_t timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
+  timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
   if(timeout_ms >= 0) {
-    struct curltime now = Curl_now();
-    timediff_t elapsed_ms = Curl_timediff(now, mbackend->time);
+    now = Curl_now();
+    elapsed_ms = Curl_timediff(now, mbackend->time);
     if(elapsed_ms >= timeout_ms) {
       return NULL;
     }
   }
-
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
 
   if(ca_info_blob) {
     if(!mbackend->CAinfo_blob_digest) {
@@ -2794,7 +2799,6 @@ HCERTSTORE schannel_get_cached_cert_store(struct Curl_cfilter *cf,
     if(mbackend->CAinfo_blob_size != ca_info_blob->len) {
       return NULL;
     }
-    unsigned char info_blob_digest[CURL_SHA256_DIGEST_LENGTH];
     schannel_sha256sum((const char *)ca_info_blob->data,
                        ca_info_blob->len,
                        info_blob_digest,
@@ -2820,11 +2824,19 @@ HCERTSTORE schannel_get_cached_cert_store(struct Curl_cfilter *cf,
   return mbackend->cert_store;
 }
 
-bool schannel_set_cached_cert_store(struct Curl_cfilter *cf,
-                                    const struct Curl_easy *data,
-                                    HCERTSTORE cert_store)
+bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
+                                         const struct Curl_easy *data,
+                                         HCERTSTORE cert_store)
 {
+  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct Curl_multi *multi = data->multi_easy ? data->multi_easy : data->multi;
+  const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
+  struct schannel_multi_ssl_backend_data *mbackend;
+  unsigned char *CAinfo_blob_digest = NULL;
+  size_t CAinfo_blob_size = 0;
+  char *CAfile = NULL;
+
+  DEBUGASSERT(multi);
 
   if(!multi) {
     return false;
@@ -2838,15 +2850,8 @@ bool schannel_set_cached_cert_store(struct Curl_cfilter *cf,
     }
   }
 
-  struct schannel_multi_ssl_backend_data *mbackend;
   mbackend = (struct schannel_multi_ssl_backend_data *)multi->ssl_backend_data;
 
-
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  unsigned char *CAinfo_blob_digest = NULL;
-  size_t CAinfo_blob_size = 0;
-  char *CAfile = NULL;
-  const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
 
   if(ca_info_blob) {
     CAinfo_blob_digest = malloc(CURL_SHA256_DIGEST_LENGTH);

@@ -159,12 +159,12 @@ struct schannel_multi_ssl_backend_data {
   struct curltime time;              /* when the cached store was created */
 };
 
-HCERTSTORE schannel_get_cached_cert_store(struct Curl_cfilter *cf,
-                                          const struct Curl_easy *data);
+HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
+                                               const struct Curl_easy *data);
 
-bool schannel_set_cached_cert_store(struct Curl_cfilter *cf,
-                                    const struct Curl_easy *data,
-                                    HCERTSTORE cert_store);
+bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
+                                         const struct Curl_easy *data,
+                                         HCERTSTORE cert_store);
 
 #endif /* USE_SCHANNEL */
 #endif /* HEADER_CURL_SCHANNEL_INT_H */

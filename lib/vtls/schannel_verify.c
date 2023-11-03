@@ -632,7 +632,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
     }
     else {
       /* try cache */
-      trust_store = schannel_get_cached_cert_store(cf, data);
+      trust_store = Curl_schannel_get_cached_cert_store(cf, data);
 
       if(trust_store) {
         infof(data, "schannel: reusing certificate store from cache");
@@ -667,7 +667,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
                                               data);
           }
           if(result == CURLE_OK) {
-            if(schannel_set_cached_cert_store(cf, data, trust_store)) {
+            if(Curl_schannel_set_cached_cert_store(cf, data, trust_store)) {
               own_trust_store = NULL;
             }
           }
