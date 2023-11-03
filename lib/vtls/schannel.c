@@ -2754,6 +2754,151 @@ static void *schannel_get_internals(struct ssl_connect_data *connssl,
   return &backend->ctxt->ctxt_handle;
 }
 
+HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
+                                               const struct Curl_easy *data)
+{
+  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct Curl_multi *multi = data->multi_easy ? data->multi_easy : data->multi;
+  const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
+  struct schannel_multi_ssl_backend_data *mbackend;
+  const struct ssl_general_config *cfg = &data->set.general_ssl;
+  timediff_t timeout_ms;
+  timediff_t elapsed_ms;
+  struct curltime now;
+  unsigned char info_blob_digest[CURL_SHA256_DIGEST_LENGTH];
+
+  DEBUGASSERT(multi);
+
+  if(!multi || !multi->ssl_backend_data) {
+    return NULL;
+  }
+
+  mbackend = (struct schannel_multi_ssl_backend_data *)multi->ssl_backend_data;
+  if(!mbackend->cert_store) {
+    return NULL;
+  }
+
+  /* zero ca_cache_timeout completely disables caching */
+  if(!cfg->ca_cache_timeout) {
+    return NULL;
+  }
+
+  /* check for cache timeout by using the cached_x509_store_expired timediff
+     calculation pattern from openssl.c.
+     negative timeout means retain forever. */
+  timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
+  if(timeout_ms >= 0) {
+    now = Curl_now();
+    elapsed_ms = Curl_timediff(now, mbackend->time);
+    if(elapsed_ms >= timeout_ms) {
+      return NULL;
+    }
+  }
+
+  if(ca_info_blob) {
+    if(!mbackend->CAinfo_blob_digest) {
+      return NULL;
+    }
+    if(mbackend->CAinfo_blob_size != ca_info_blob->len) {
+      return NULL;
+    }
+    schannel_sha256sum((const unsigned char *)ca_info_blob->data,
+                       ca_info_blob->len,
+                       info_blob_digest,
+                       CURL_SHA256_DIGEST_LENGTH);
+    if(memcmp(mbackend->CAinfo_blob_digest,
+              info_blob_digest,
+              CURL_SHA256_DIGEST_LENGTH)) {
+        return NULL;
+    }
+  }
+  else {
+    if(!conn_config->CAfile || !mbackend->CAfile ||
+       strcmp(mbackend->CAfile, conn_config->CAfile)) {
+      return NULL;
+    }
+  }
+
+  return mbackend->cert_store;
+}
+
+bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
+                                         const struct Curl_easy *data,
+                                         HCERTSTORE cert_store)
+{
+  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct Curl_multi *multi = data->multi_easy ? data->multi_easy : data->multi;
+  const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
+  struct schannel_multi_ssl_backend_data *mbackend;
+  unsigned char *CAinfo_blob_digest = NULL;
+  size_t CAinfo_blob_size = 0;
+  char *CAfile = NULL;
+
+  DEBUGASSERT(multi);
+
+  if(!multi) {
+    return false;
+  }
+
+  if(!multi->ssl_backend_data) {
+    multi->ssl_backend_data =
+      calloc(1, sizeof(struct schannel_multi_ssl_backend_data));
+    if(!multi->ssl_backend_data) {
+      return false;
+    }
+  }
+
+  mbackend = (struct schannel_multi_ssl_backend_data *)multi->ssl_backend_data;
+
+
+  if(ca_info_blob) {
+    CAinfo_blob_digest = malloc(CURL_SHA256_DIGEST_LENGTH);
+    if(!CAinfo_blob_digest) {
+      return false;
+    }
+    schannel_sha256sum((const unsigned char *)ca_info_blob->data,
+                       ca_info_blob->len,
+                       CAinfo_blob_digest,
+                       CURL_SHA256_DIGEST_LENGTH);
+    CAinfo_blob_size = ca_info_blob->len;
+  }
+  else {
+    if(conn_config->CAfile) {
+      CAfile = strdup(conn_config->CAfile);
+      if(!CAfile) {
+        return false;
+      }
+    }
+  }
+
+  /* free old cache data */
+  if(mbackend->cert_store) {
+    CertCloseStore(mbackend->cert_store, 0);
+  }
+  free(mbackend->CAinfo_blob_digest);
+  free(mbackend->CAfile);
+
+  mbackend->time = Curl_now();
+  mbackend->cert_store = cert_store;
+  mbackend->CAinfo_blob_digest = CAinfo_blob_digest;
+  mbackend->CAinfo_blob_size = CAinfo_blob_size;
+  mbackend->CAfile = CAfile;
+  return true;
+}
+
+static void schannel_free_multi_ssl_backend_data(
+  struct multi_ssl_backend_data *msbd)
+{
+  struct schannel_multi_ssl_backend_data *mbackend =
+    (struct schannel_multi_ssl_backend_data*)msbd;
+  if(mbackend->cert_store) {
+    CertCloseStore(mbackend->cert_store, 0);
+  }
+  free(mbackend->CAinfo_blob_digest);
+  free(mbackend->CAfile);
+  free(mbackend);
+}
+
 const struct Curl_ssl Curl_ssl_schannel = {
   { CURLSSLBACKEND_SCHANNEL, "schannel" }, /* info */
 
@@ -2789,7 +2934,7 @@ const struct Curl_ssl Curl_ssl_schannel = {
   schannel_sha256sum,                /* sha256sum */
   NULL,                              /* associate_connection */
   NULL,                              /* disassociate_connection */
-  NULL,                              /* free_multi_ssl_backend_data */
+  schannel_free_multi_ssl_backend_data, /* free_multi_ssl_backend_data */
   schannel_recv,                     /* recv decrypted data */
   schannel_send,                     /* send data to encrypt */
 };

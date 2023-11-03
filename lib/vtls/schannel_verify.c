@@ -600,6 +600,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
   const CERT_CHAIN_CONTEXT *pChainContext = NULL;
   HCERTCHAINENGINE cert_chain_engine = NULL;
   HCERTSTORE trust_store = NULL;
+  HCERTSTORE own_trust_store = NULL;
 
   DEBUGASSERT(BACKEND);
 
@@ -630,31 +631,46 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
       result = CURLE_SSL_CACERT_BADFILE;
     }
     else {
-      /* Open the certificate store */
-      trust_store = CertOpenStore(CERT_STORE_PROV_MEMORY,
-                                  0,
-                                  (HCRYPTPROV)NULL,
-                                  CERT_STORE_CREATE_NEW_FLAG,
-                                  NULL);
-      if(!trust_store) {
-        char buffer[STRERROR_LEN];
-        failf(data, "schannel: failed to create certificate store: %s",
-              Curl_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
-        result = CURLE_SSL_CACERT_BADFILE;
+      /* try cache */
+      trust_store = Curl_schannel_get_cached_cert_store(cf, data);
+
+      if(trust_store) {
+        infof(data, "schannel: reusing certificate store from cache");
       }
       else {
-        const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
-        if(ca_info_blob) {
-          result = add_certs_data_to_store(trust_store,
-                                           (const char *)ca_info_blob->data,
-                                           ca_info_blob->len,
-                                           "(memory blob)",
-                                           data);
+        /* Open the certificate store */
+        trust_store = CertOpenStore(CERT_STORE_PROV_MEMORY,
+                                    0,
+                                    (HCRYPTPROV)NULL,
+                                    CERT_STORE_CREATE_NEW_FLAG,
+                                    NULL);
+        if(!trust_store) {
+          char buffer[STRERROR_LEN];
+          failf(data, "schannel: failed to create certificate store: %s",
+                Curl_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
+          result = CURLE_SSL_CACERT_BADFILE;
         }
         else {
-          result = add_certs_file_to_store(trust_store,
-                                           conn_config->CAfile,
-                                           data);
+          const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
+          own_trust_store = trust_store;
+
+          if(ca_info_blob) {
+            result = add_certs_data_to_store(trust_store,
+                                              (const char *)ca_info_blob->data,
+                                              ca_info_blob->len,
+                                              "(memory blob)",
+                                              data);
+          }
+          else {
+            result = add_certs_file_to_store(trust_store,
+                                              conn_config->CAfile,
+                                              data);
+          }
+          if(result == CURLE_OK) {
+            if(Curl_schannel_set_cached_cert_store(cf, data, trust_store)) {
+              own_trust_store = NULL;
+            }
+          }
         }
       }
     }
@@ -754,8 +770,8 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
     CertFreeCertificateChainEngine(cert_chain_engine);
   }
 
-  if(trust_store) {
-    CertCloseStore(trust_store, 0);
+  if(own_trust_store) {
+    CertCloseStore(own_trust_store, 0);
   }
 
   if(pChainContext)
