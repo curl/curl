@@ -2773,7 +2773,7 @@ HCERTSTORE schannel_get_cached_cert_store(struct Curl_cfilter *cf,
     return NULL;
   }
 
-  // use cached_x509_store_expired timediff calculation pattern
+  /* use cached_x509_store_expired timediff calculation pattern */
   const struct ssl_general_config *cfg = &data->set.general_ssl;
   timediff_t timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
   if (timeout_ms >= 0) {
@@ -2865,7 +2865,7 @@ bool schannel_set_cached_cert_store(struct Curl_cfilter *cf,
     }
   }
 
-  // free old cache data
+  /* free old cache data */
   if(mbackend->cert_store) {
     CertCloseStore(mbackend->cert_store, 0);
   }
