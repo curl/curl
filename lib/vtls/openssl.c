@@ -3374,6 +3374,7 @@ static X509_STORE *get_cached_x509_store(struct Curl_cfilter *cf,
   struct Curl_multi *multi = data->multi_easy ? data->multi_easy : data->multi;
   X509_STORE *store = NULL;
 
+  DEBUGASSERT(multi);
   if(multi &&
      multi->ssl_backend_data &&
      multi->ssl_backend_data->store &&
@@ -3393,6 +3394,7 @@ static void set_cached_x509_store(struct Curl_cfilter *cf,
   struct Curl_multi *multi = data->multi_easy ? data->multi_easy : data->multi;
   struct multi_ssl_backend_data *mbackend;
 
+  DEBUGASSERT(multi);
   if(!multi)
     return;
 
