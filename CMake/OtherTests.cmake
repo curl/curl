@@ -35,13 +35,13 @@ endmacro()
 
 set(signature_call_conv)
 if(HAVE_WINDOWS_H)
-  add_header_include(HAVE_WINSOCK2_H "winsock2.h")
-  add_header_include(HAVE_WINDOWS_H "windows.h")
   set(_source_epilogue
       "${_source_epilogue}\n#ifndef WIN32_LEAN_AND_MEAN\n#define WIN32_LEAN_AND_MEAN\n#endif")
+  add_header_include(HAVE_WINSOCK2_H "winsock2.h")
+  add_header_include(HAVE_WINDOWS_H "windows.h")
   set(signature_call_conv "PASCAL")
   if(WIN32)
-    set(CMAKE_REQUIRED_LIBRARIES ws2_32)
+    set(CMAKE_REQUIRED_LIBRARIES "ws2_32")
   endif()
 else()
   add_header_include(HAVE_SYS_TYPES_H "sys/types.h")
@@ -71,11 +71,11 @@ int main(void) {
 }" HAVE_STRUCT_TIMEVAL)
 
 if(HAVE_WINDOWS_H)
-  set(CMAKE_EXTRA_INCLUDE_FILES winsock2.h)
+  set(CMAKE_EXTRA_INCLUDE_FILES "winsock2.h")
 else()
   set(CMAKE_EXTRA_INCLUDE_FILES)
   if(HAVE_SYS_SOCKET_H)
-    set(CMAKE_EXTRA_INCLUDE_FILES sys/socket.h)
+    set(CMAKE_EXTRA_INCLUDE_FILES "sys/socket.h")
   endif()
 endif()
 
@@ -172,7 +172,7 @@ if(NOT DEFINED HAVE_GETADDRINFO_THREADSAFE)
     }" HAVE_H_ERRNO)
 
   if(NOT HAVE_H_ERRNO)
-    check_c_source_runs("${_source_epilogue}
+    check_c_source_compiles("${_source_epilogue}
       int main(void)
       {
         h_errno = 2;
@@ -201,7 +201,7 @@ if(NOT DEFINED HAVE_GETADDRINFO_THREADSAFE)
   set(_source_epilogue "${_save_epilogue}")
 endif()
 
-if(NOT DEFINED HAVE_CLOCK_GETTIME_MONOTONIC_RAW)
+if(NOT WIN32 AND NOT DEFINED HAVE_CLOCK_GETTIME_MONOTONIC_RAW)
   set(_save_epilogue "${_source_epilogue}")
   set(_source_epilogue "#undef inline")
 

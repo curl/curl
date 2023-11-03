@@ -25,6 +25,23 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
+
+#ifdef HAVE_PIPE
+
+#define wakeup_write  write
+#define wakeup_read   read
+#define wakeup_close  close
+#define wakeup_create pipe
+
+#else /* HAVE_PIPE */
+
+#define wakeup_write     swrite
+#define wakeup_read      sread
+#define wakeup_close     sclose
+#define wakeup_create(p) Curl_socketpair(AF_UNIX, SOCK_STREAM, 0, p)
+
+#endif /* HAVE_PIPE */
+
 #ifndef HAVE_SOCKETPAIR
 #include <curl/curl.h>
 

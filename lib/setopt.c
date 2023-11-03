@@ -171,7 +171,7 @@ static CURLcode protocol2num(const char *str, curl_prot_t *val)
     str = strchr(str, ',');
     tlen = str? (size_t) (str - token): strlen(token);
     if(tlen) {
-      const struct Curl_handler *h = Curl_builtin_scheme(token, tlen);
+      const struct Curl_handler *h = Curl_getn_scheme_handler(token, tlen);
 
       if(!h)
         return CURLE_UNSUPPORTED_PROTOCOL;
@@ -811,15 +811,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * prevent the forthcoming read-cookies-from-file actions to accept
      * cookies that are marked as being session cookies, as they belong to a
      * previous session.
-     *
-     * In the original Netscape cookie spec, "session cookies" are cookies
-     * with no expire date set. RFC2109 describes the same action if no
-     * 'Max-Age' is set and RFC2965 includes the RFC2109 description and adds
-     * a 'Discard' action that can enforce the discard even for cookies that
-     * have a Max-Age.
-     *
-     * We run mostly with the original cookie spec, as hardly anyone implements
-     * anything else.
      */
     data->set.cookiesession = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
@@ -1930,10 +1921,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       TRUE : FALSE;
 
     /* Update the current connection ssl_config. */
-    if(data->conn) {
-      data->conn->ssl_config.verifypeer =
-        data->set.ssl.primary.verifypeer;
-    }
+    Curl_ssl_conn_config_update(data, FALSE);
     break;
 #ifndef CURL_DISABLE_DOH
   case CURLOPT_DOH_SSL_VERIFYPEER:
@@ -1953,10 +1941,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       (0 != va_arg(param, long))?TRUE:FALSE;
 
     /* Update the current connection proxy_ssl_config. */
-    if(data->conn) {
-      data->conn->proxy_ssl_config.verifypeer =
-        data->set.proxy_ssl.primary.verifypeer;
-    }
+    Curl_ssl_conn_config_update(data, TRUE);
     break;
 #endif
   case CURLOPT_SSL_VERIFYHOST:
@@ -1971,10 +1956,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.ssl.primary.verifyhost = (bool)((arg & 3) ? TRUE : FALSE);
 
     /* Update the current connection ssl_config. */
-    if(data->conn) {
-      data->conn->ssl_config.verifyhost =
-        data->set.ssl.primary.verifyhost;
-    }
+    Curl_ssl_conn_config_update(data, FALSE);
     break;
 #ifndef CURL_DISABLE_DOH
   case CURLOPT_DOH_SSL_VERIFYHOST:
@@ -1996,12 +1978,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 
     /* Treat both 1 and 2 as TRUE */
     data->set.proxy_ssl.primary.verifyhost = (bool)((arg & 3)?TRUE:FALSE);
-
     /* Update the current connection proxy_ssl_config. */
-    if(data->conn) {
-      data->conn->proxy_ssl_config.verifyhost =
-        data->set.proxy_ssl.primary.verifyhost;
-    }
+    Curl_ssl_conn_config_update(data, TRUE);
     break;
 #endif
   case CURLOPT_SSL_VERIFYSTATUS:
@@ -2017,10 +1995,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       TRUE : FALSE;
 
     /* Update the current connection ssl_config. */
-    if(data->conn) {
-      data->conn->ssl_config.verifystatus =
-        data->set.ssl.primary.verifystatus;
-    }
+    Curl_ssl_conn_config_update(data, FALSE);
     break;
 #ifndef CURL_DISABLE_DOH
   case CURLOPT_DOH_SSL_VERIFYSTATUS:

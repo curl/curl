@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_STRDUP_H
-#define HEADER_CURL_STRDUP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,16 +21,33 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
+/* <DESC>
+ * Use CURLOPT_LOCALPORT to control local port number
+ * </DESC>
+ */
+#include <stdio.h>
+#include <curl/curl.h>
 
-#ifndef HAVE_STRDUP
-char *Curl_strdup(const char *str);
-#endif
-#ifdef WIN32
-wchar_t* Curl_wcsdup(const wchar_t* src);
-#endif
-void *Curl_memdup(const void *src, size_t buffer_length);
-void *Curl_saferealloc(void *ptr, size_t size);
-void *Curl_strndup(const void *src, size_t length);
+int main(void)
+{
+  CURL *curl;
+  CURLcode res = CURLE_OK;
 
-#endif /* HEADER_CURL_STRDUP_H */
+  curl = curl_easy_init();
+  if(curl) {
+    /* Try to use a local port number between 20000-20009 */
+    curl_easy_setopt(curl, CURLOPT_LOCALPORT, 20000L);
+    /* 10 means number of attempts, which starts with the number set in
+       CURLOPT_LOCALPORT. The lowe value set, the smaller the change it will
+       work. */
+    curl_easy_setopt(curl, CURLOPT_LOCALPORTRANGE, 10L);
+    curl_easy_setopt(curl, CURLOPT_URL, "https://curl.se/");
+
+    res = curl_easy_perform(curl);
+
+    /* always cleanup */
+    curl_easy_cleanup(curl);
+  }
+
+  return (int)res;
+}

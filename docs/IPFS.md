@@ -78,5 +78,5 @@ Alternatively you could set the `IPFS_GATEWAY` environment variable or pass the 
 ### Malformed gateway URL
 The command executed evaluates in an invalid URL. This could be anywhere in the URL, but a likely point is a wrong gateway URL.
 
-Inspect your URL.
-Alternatively opt to go for the [automatic](#Automatic-gateway-detection) gateway detection.
+Inspect the URL set via the `IPFS_GATEWAY` environment variable or passed with the `--ipfs-gateway` flag.
+Alternatively opt to go for the [automatic](#automatic-gateway-detection) gateway detection.

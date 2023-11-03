@@ -56,12 +56,14 @@ static const char * const telnetoptions[]=
   "TERM SPEED",  "LFLOW",          "LINEMODE",      "XDISPLOC",
   "OLD-ENVIRON", "AUTHENTICATION", "ENCRYPT",       "NEW-ENVIRON"
 };
+#define CURL_TELOPT(x)    telnetoptions[x]
+#else
+#define CURL_TELOPT(x)    ""
 #endif
 
 #define CURL_TELOPT_MAXIMUM CURL_TELOPT_NEW_ENVIRON
 
 #define CURL_TELOPT_OK(x) ((x) <= CURL_TELOPT_MAXIMUM)
-#define CURL_TELOPT(x)    telnetoptions[x]
 
 #define CURL_NTELOPTS 40
 
@@ -103,7 +105,12 @@ static const char * const telnetcmds[]=
 
 #define CURL_TELCMD_OK(x) ( ((unsigned int)(x) >= CURL_TELCMD_MINIMUM) && \
                        ((unsigned int)(x) <= CURL_TELCMD_MAXIMUM) )
+
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
 #define CURL_TELCMD(x)    telnetcmds[(x)-CURL_TELCMD_MINIMUM]
+#else
+#define CURL_TELCMD(x)    ""
+#endif
 
 #endif /* CURL_DISABLE_TELNET */
 

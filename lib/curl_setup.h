@@ -28,6 +28,11 @@
 #define CURL_NO_OLDIES
 #endif
 
+/* Set default _WIN32_WINNT */
+#ifdef __MINGW32__
+#include <_mingw.h>
+#endif
+
 /*
  * Disable Visual Studio warnings:
  * 4127 "conditional expression is constant"
@@ -212,6 +217,23 @@
 
 #if defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_RTSP)
 #  define CURL_DISABLE_RTSP
+#endif
+
+/*
+ * When HTTP is disabled, disable HTTP-only features
+ */
+
+#if defined(CURL_DISABLE_HTTP)
+#  define CURL_DISABLE_ALTSVC 1
+#  define CURL_DISABLE_COOKIES 1
+#  define CURL_DISABLE_BASIC_AUTH 1
+#  define CURL_DISABLE_BEARER_AUTH 1
+#  define CURL_DISABLE_AWS 1
+#  define CURL_DISABLE_DOH 1
+#  define CURL_DISABLE_FORM_API 1
+#  define CURL_DISABLE_HEADERS_API 1
+#  define CURL_DISABLE_HSTS 1
+#  define CURL_DISABLE_HTTP_AUTH 1
 #endif
 
 /* ================================================================ */
@@ -581,6 +603,9 @@
 
 #if defined(ENABLE_IPV6) && defined(HAVE_GETADDRINFO)
 #  define CURLRES_IPV6
+#elif defined(ENABLE_IPV6) && (defined(WIN32) || defined(__CYGWIN__))
+/* assume on Windows that IPv6 without getaddrinfo is a broken build */
+#  error "Unexpected build: IPv6 is enabled but getaddrinfo was not found."
 #else
 #  define CURLRES_IPV4
 #endif

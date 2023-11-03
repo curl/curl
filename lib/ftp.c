@@ -819,7 +819,7 @@ static int ftp_domore_getsock(struct Curl_easy *data,
   DEBUGF(infof(data, "ftp_domore_getsock()"));
   if(conn->cfilter[SECONDARYSOCKET]
      && !Curl_conn_is_connected(conn, SECONDARYSOCKET))
-    return Curl_conn_get_select_socks(data, SECONDARYSOCKET, socks);
+    return 0;
 
   if(FTP_STOP == ftpc->state) {
     int bits = GETSOCK_READSOCK(0);

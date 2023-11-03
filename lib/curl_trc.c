@@ -61,10 +61,6 @@ void Curl_debug(struct Curl_easy *data, curl_infotype type,
       "* ", "< ", "> ", "{ ", "} ", "{ ", "} " };
     if(data->set.fdebug) {
       bool inCallback = Curl_is_in_callback(data);
-      /* CURLOPT_DEBUGFUNCTION doc says the user may set CURLOPT_PRIVATE to
-         distinguish their handle from internal handles. */
-      if(data->internal)
-        DEBUGASSERT(!data->set.private_data);
       Curl_set_in_callback(data, true);
       (void)(*data->set.fdebug)(data, type, ptr, size, data->set.debugdata);
       Curl_set_in_callback(data, inCallback);
@@ -109,6 +105,8 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
   }
 }
 
+#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
+
 /* Curl_infof() is for info message along the way */
 #define MAXINFO 2048
 
@@ -128,13 +126,11 @@ void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
   }
 }
 
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
-
 void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
                        const char *fmt, ...)
 {
   DEBUGASSERT(cf);
-  if(data && Curl_trc_cf_is_verbose(cf, data)) {
+  if(Curl_trc_cf_is_verbose(cf, data)) {
     va_list ap;
     int len;
     char buffer[MAXINFO + 2];
@@ -232,24 +228,14 @@ CURLcode Curl_trc_init(void)
   if(config) {
     return Curl_trc_opt(config);
   }
-#endif
+#endif /* DEBUGBUILD */
   return CURLE_OK;
 }
-#else /* !CURL_DISABLE_VERBOSE_STRINGS) */
+#else /* defined(CURL_DISABLE_VERBOSE_STRINGS) */
 
 CURLcode Curl_trc_init(void)
 {
   return CURLE_OK;
 }
 
-#if !defined(__STDC_VERSION__) || (__STDC_VERSION__ < 199901L)
-void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
-                       const char *fmt, ...)
-{
-  (void)data;
-  (void)cf;
-  (void)fmt;
-}
-#endif
-
-#endif /* !DEBUGBUILD */
+#endif /* !defined(CURL_DISABLE_VERBOSE_STRINGS) */

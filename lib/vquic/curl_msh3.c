@@ -38,12 +38,17 @@
 #include "http1.h"
 #include "curl_msh3.h"
 #include "socketpair.h"
+#include "vtls/vtls.h"
 #include "vquic/vquic.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
+
+#ifdef CURL_DISABLE_SOCKETPAIR
+#error "MSH3 cannot be build with CURL_DISABLE_SOCKETPAIR set"
+#endif
 
 #define H3_STREAM_WINDOW_SIZE (128 * 1024)
 #define H3_STREAM_CHUNK_SIZE   (16 * 1024)
@@ -672,31 +677,25 @@ out:
   return nwritten;
 }
 
-static int cf_msh3_get_select_socks(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data,
-                                    curl_socket_t *socks)
+static void cf_msh3_adjust_pollset(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   struct easy_pollset *ps)
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
   struct stream_ctx *stream = H3_STREAM_CTX(data);
-  int bitmap = GETSOCK_BLANK;
   struct cf_call_data save;
 
   CF_DATA_SAVE(save, cf, data);
   if(stream && ctx->sock[SP_LOCAL] != CURL_SOCKET_BAD) {
-    socks[0] = ctx->sock[SP_LOCAL];
-
     if(stream->recv_error) {
-      bitmap |= GETSOCK_READSOCK(0);
+      Curl_pollset_add_in(data, ps, ctx->sock[SP_LOCAL]);
       drain_stream(cf, data);
     }
     else if(stream->req) {
-      bitmap |= GETSOCK_READSOCK(0);
+      Curl_pollset_add_out(data, ps, ctx->sock[SP_LOCAL]);
       drain_stream(cf, data);
     }
   }
-  CURL_TRC_CF(data, cf, "select_sock -> %d", bitmap);
-  CF_DATA_RESTORE(cf, save);
-  return bitmap;
 }
 
 static bool cf_msh3_data_pending(struct Curl_cfilter *cf,
@@ -802,14 +801,20 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
                                  struct Curl_easy *data)
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
-  bool verify = !!cf->conn->ssl_config.verifypeer;
+  struct ssl_primary_config *conn_config;
   MSH3_ADDR addr = {0};
   CURLcode result;
+  bool verify;
+
+  conn_config = Curl_ssl_cf_get_primary_config(cf);
+  if(!conn_config)
+    return CURLE_FAILED_INIT;
+  verify = !!conn_config->verifypeer;
 
   memcpy(&addr, &ctx->addr.sa_addr, ctx->addr.addrlen);
   MSH3_SET_PORT(&addr, (uint16_t)cf->conn->remote_port);
 
-  if(verify && (cf->conn->ssl_config.CAfile || cf->conn->ssl_config.CApath)) {
+  if(verify && (conn_config->CAfile || conn_config->CApath)) {
     /* TODO: need a way to provide trust anchors to MSH3 */
 #ifdef DEBUGBUILD
     /* we need this for our test cases to run */
@@ -1025,7 +1030,7 @@ struct Curl_cftype Curl_cft_http3 = {
   cf_msh3_connect,
   cf_msh3_close,
   Curl_cf_def_get_host,
-  cf_msh3_get_select_socks,
+  cf_msh3_adjust_pollset,
   cf_msh3_data_pending,
   cf_msh3_send,
   cf_msh3_recv,

@@ -447,10 +447,10 @@ curl_includes_winsock2="\
 #  ifndef WIN32_LEAN_AND_MEAN
 #    define WIN32_LEAN_AND_MEAN
 #  endif
-#  include <windows.h>
 #  ifdef HAVE_WINSOCK2_H
 #    include <winsock2.h>
 #  endif
+#  include <windows.h>
 #endif
 /* includes end */"
   CURL_CHECK_HEADER_WINDOWS
@@ -470,13 +470,13 @@ curl_includes_ws2tcpip="\
 #  ifndef WIN32_LEAN_AND_MEAN
 #    define WIN32_LEAN_AND_MEAN
 #  endif
-#  include <windows.h>
 #  ifdef HAVE_WINSOCK2_H
 #    include <winsock2.h>
 #    ifdef HAVE_WS2TCPIP_H
 #       include <ws2tcpip.h>
 #    endif
 #  endif
+#  include <windows.h>
 #endif
 /* includes end */"
   CURL_CHECK_HEADER_WINDOWS

@@ -705,10 +705,10 @@ AC_DEFUN([TYPE_SOCKADDR_STORAGE],
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#include <windows.h>
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
 #endif
+#include <windows.h>
 #else
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -743,10 +743,10 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#include <windows.h>
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
 #endif
+#include <windows.h>
 #else
 $curl_includes_bsdsocket
 #ifdef HAVE_SYS_TYPES_H
@@ -794,10 +794,10 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#include <windows.h>
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
 #endif
+#include <windows.h>
 #else
 $curl_includes_bsdsocket
 #ifdef HAVE_SYS_TYPES_H
@@ -841,10 +841,10 @@ AC_DEFUN([CURL_CHECK_MSG_NOSIGNAL], [
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#include <windows.h>
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
 #endif
+#include <windows.h>
 #else
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -886,10 +886,10 @@ AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#include <windows.h>
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
 #endif
+#include <windows.h>
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -941,10 +941,10 @@ AC_DEFUN([TYPE_IN_ADDR_T], [
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#include <windows.h>
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
 #endif
+#include <windows.h>
 #else
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -983,10 +983,10 @@ AC_DEFUN([TYPE_IN_ADDR_T], [
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#include <windows.h>
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
 #endif
+#include <windows.h>
 #else
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -1298,10 +1298,10 @@ AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#include <windows.h>
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
 #endif
+#include <windows.h>
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -1371,70 +1371,6 @@ int main()
 
     dnl if this test fails, configure has already stopped
   fi
-])
-
-
-dnl CURL_CHECK_VARIADIC_MACROS
-dnl -------------------------------------------------
-dnl Check compiler support of variadic macros
-
-AC_DEFUN([CURL_CHECK_VARIADIC_MACROS], [
-  AC_CACHE_CHECK([for compiler support of C99 variadic macro style],
-    [curl_cv_variadic_macros_c99], [
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-#define c99_vmacro3(first, ...) fun3(first, __VA_ARGS__)
-#define c99_vmacro2(first, ...) fun2(first, __VA_ARGS__)
-        int fun3(int arg1, int arg2, int arg3);
-        int fun2(int arg1, int arg2);
-        int fun3(int arg1, int arg2, int arg3)
-        { return arg1 + arg2 + arg3; }
-        int fun2(int arg1, int arg2)
-        { return arg1 + arg2; }
-      ]],[[
-        int res3 = c99_vmacro3(1, 2, 3);
-        int res2 = c99_vmacro2(1, 2);
-      ]])
-    ],[
-      curl_cv_variadic_macros_c99="yes"
-    ],[
-      curl_cv_variadic_macros_c99="no"
-    ])
-  ])
-  case "$curl_cv_variadic_macros_c99" in
-    yes)
-      AC_DEFINE_UNQUOTED(HAVE_VARIADIC_MACROS_C99, 1,
-        [Define to 1 if compiler supports C99 variadic macro style.])
-      ;;
-  esac
-  AC_CACHE_CHECK([for compiler support of old gcc variadic macro style],
-    [curl_cv_variadic_macros_gcc], [
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-#define gcc_vmacro3(first, args...) fun3(first, args)
-#define gcc_vmacro2(first, args...) fun2(first, args)
-        int fun3(int arg1, int arg2, int arg3);
-        int fun2(int arg1, int arg2);
-        int fun3(int arg1, int arg2, int arg3)
-        { return arg1 + arg2 + arg3; }
-        int fun2(int arg1, int arg2)
-        { return arg1 + arg2; }
-      ]],[[
-        int res3 = gcc_vmacro3(1, 2, 3);
-        int res2 = gcc_vmacro2(1, 2);
-      ]])
-    ],[
-      curl_cv_variadic_macros_gcc="yes"
-    ],[
-      curl_cv_variadic_macros_gcc="no"
-    ])
-  ])
-  case "$curl_cv_variadic_macros_gcc" in
-    yes)
-      AC_DEFINE_UNQUOTED(HAVE_VARIADIC_MACROS_GCC, 1,
-        [Define to 1 if compiler supports old gcc variadic macro style.])
-      ;;
-  esac
 ])
 
 
