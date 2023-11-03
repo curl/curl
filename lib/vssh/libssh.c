@@ -1963,10 +1963,9 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       ssh_disconnect(sshc->ssh_session);
       if(!ssh_version(SSH_VERSION_INT(0, 10, 0))) {
         /* conn->sock[FIRSTSOCKET] is closed by ssh_disconnect behind our back,
-           explicitly mark it as closed with the memdebug macro. This libssh
+           tell the connection to forget about it. This libssh
            bug is fixed in 0.10.0. */
-        fake_sclose(conn->sock[FIRSTSOCKET]);
-        conn->sock[FIRSTSOCKET] = CURL_SOCKET_BAD;
+        Curl_conn_forget_socket(data, FIRSTSOCKET);
       }
 
       SSH_STRING_FREE_CHAR(sshc->homedir);

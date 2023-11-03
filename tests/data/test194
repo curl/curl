@@ -64,9 +64,8 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-# CURLE_HTTP_RETURNED_ERROR
 <errorcode>
-22
+0
 </errorcode>
 </verify>
 </testcase>

@@ -4,47 +4,80 @@ curl and libcurl 8.5.0
  Command line options:         258
  curl_easy_setopt() options:   303
  Public functions in libcurl:  93
- Contributors:                 3010
+ Contributors:                 3014
 
 This release includes the following changes:
 
  o gnutls: support CURLSSLOPT_NATIVE_CA [31]
+ o HTTP3: ngtcp2 builds are no longer experimental [77]
 
 This release includes the following bugfixes:
 
  o asyn-thread: use pipe instead of socketpair for IPC when available [4]
+ o autotools: update references to deleted `crypt-auth` option [46]
+ o BINDINGS: add V binding [54]
  o build: add `src/.checksrc` to source tarball [1]
  o build: fix 'threadsafe' feature detection for older gcc [19]
+ o build: fix compiler warning with auths disabled [85]
+ o build: require Windows XP or newer [86]
+ o cfilter: provide call to tell connection to forget a socket [65]
  o CI: add autotools, out-of-tree, debug build to distro check job [14]
  o CI: ignore test 286 on Appveyor gcc 9 build [6]
  o cmake: fix `HAVE_H_ERRNO_ASSIGNABLE` detection [2]
  o cmake: fix CURL_DISABLE_GETOPTIONS [12]
+ o cmake: fix OpenSSL quic detection in quiche builds [56]
+ o cmake: pre-fill rest of detection values for Windows [50]
  o cmake: replace `check_library_exists_concat()` [23]
+ o cmake: speed up threads setup for Windows [68]
+ o cmake: speed up zstd detection [69]
+ o configure: better --disable-http [80]
+ o configure: check for the fseeko declaration too [55]
  o curl.h: on FreeBSD include sys/param.h instead of osreldate.h [21]
+ o curl_setup: disallow Windows IPv6 builds missing getaddrinfo [57]
+ o CURLOPT_WRITEFUNCTION.3: clarify libcurl returns for CURL_WRITEFUNC_ERROR [45]
+ o docs/example/keepalive.c: show TCP keep-alive options [73]
+ o docs/example/localport.c: show off CURLOPT_LOCALPORT [83]
+ o docs/examples/interface.c: show CURLOPT_INTERFACE use [84]
  o docs/libcurl: fix three minor man page format mistakes [26]
+ o docs: clarify that curl passes on input unfiltered [47]
  o docs: fix function typo in curl_easy_option_next.3 [36]
  o docs: use SOURCE_DATE_EPOCH for generated manpages [16]
+ o doh: use PIPEWAIT when HTTP/2 is attempted [63]
  o easy: remove duplicate wolfSSH init call [37]
  o easy_lock: add a pthread_mutex_t fallback [13]
  o getenv: PlayStation doesn't have getenv() [41]
  o GHA: move mod_h2 version in CI to v2.0.25 [43]
  o hostip: show the list of IPs when resolving is done [35]
+ o hostip: silence compiler warning `-Wparentheses-equality` [62]
+ o hsts: skip single-dot hostname [67]
  o http2: header conversion tightening [33]
+ o http2: provide an error callback and failf the message [53]
  o http2: safer invocation of populate_binsettings [8]
  o http: avoid Expect: 100-continue if Upgrade: is used [15]
+ o http: consider resume with CURLOPT_FAILONERRROR and 416 to be fine [81]
+ o lib: apache style infof and trace macros/functions [71]
  o lib: fix gcc warning in printf call [7]
+ o libcurl-thread.3: simplify the TLS section [79]
+ o Makefile.mk: fix `-rtmp` option for non-Windows
+ o msh3: error when built with CURL_DISABLE_SOCKETPAIR set [61]
  o multi: use pipe instead of socketpair to *wakeup() [18]
  o ntlm_wb: use pipe instead of socketpair when possible [44]
  o openldap: move the alloc of ldapconninfo to *connect() [29]
  o openldap: set the callback argument in oldap_do [30]
  o openssl: avoid BN_num_bits() NULL pointer derefs [9]
+ o openssl: fix infof() to avoid compiler warning for %s with null [70]
+ o OpenSSL: include SIG and KEM algorithms in verbose [52]
+ o openssl: make CURLSSLOPT_NATIVE_CA import Windows intermediate CAs [58]
+ o page-footer: clarify exit code 25 [51]
  o quic: manage connection idle timeouts [5]
  o RTSP: improved RTP parser [32]
+ o setopt: remove outdated cookie comment [64]
  o socks: better buffer size checks for socks4a user and hostname [20]
  o socks: make SOCKS5 use the CURLOPT_IPRESOLVE choice [38]
  o test1683: remove commented-out check alternatives
  o test3103: add missing quotes around a test tag attribute
  o test613: stop showing an error on missing output file
+ o tests/README: SOCKS tests are not using OpenSSH, it has its own server [48]
  o tests/server: add more SOCKS5 handshake error checking [27]
  o tests: Fix Windows test helper tool search & use it for handle64 [17]
  o tool: fix --capath when proxy support is disabled [28]
@@ -55,8 +88,16 @@ This release includes the following bugfixes:
  o tool_urlglob: make multiply() bail out on negative values [11]
  o transfer: only reset the FTP wildcard engine in CLEAR state [42]
  o url: don't touch the multi handle when closing internal handles [40]
+ o url: protocol handler lookup tidy-up [66]
+ o urlapi: avoid null deref if setting blank host to url encode [75]
+ o urlapi: skip appending NULL pointer query [74]
+ o urlapi: when URL encoding the fragment, pass in the right length [59]
+ o urldata: move async resolver state from easy handle to connectdata [34]
  o urldata: move the 'internal' boolean to the state struct [39]
  o vssh: remove the #ifdef for Curl_ssh_init, use empty macro
+ o vtls: cleanup SSL config management [78]
+ o vtls: late clone of connection ssl config [60]
+ o wolfssl: add default case for wolfssl_connect_step1 switch [49]
  o wolfssl: require WOLFSSL_SYS_CA_CERTS for loading system CA [10]
 
 This release includes the following known bugs:
@@ -72,14 +113,17 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alex Klyubin, Ammar Faizi, calvin2021y on github,
-  Carlos Henrique Lima Melara, Dan Fandrich, Daniel Jeliński, Daniel Stenberg,
-  Faraz Fallahi, icy17 on github, Jan Alexander Steffens, Jeroen Ooms,
-  Kartatz on Github, lkordos on github, Loïc Yhuel, LoRd_MuldeR,
-  Maksymilian Arciemowicz, Manfred Schwarb, Marcin Rataj, Ray Satiro, rilysh,
-  Romain Geissler, Samuel Henrique, sd0 on hackerone, Sohom Datta,
-  Stefan Eissing, Torben Dury, Viktor Szakats
-  (27 contributors)
+  12932 on github, Alex Bozarth, Alex Klyubin, Ammar Faizi, Anubhav Rai,
+  calvin2021y on github, Carlos Henrique Lima Melara, Casey Bodley,
+  Dan Fandrich, Daniel Jeliński, Daniel Stenberg, Emanuele Torre,
+  enWILLYado on github, Faraz Fallahi, Gisle Vanem, icy17 on github,
+  Jacob Hoffman-Andrews, Jan Alexander Steffens, Jeroen Ooms, Kareem,
+  Kartatz on Github, kirbyn17 on hackerone, lkordos on github, Loïc Yhuel,
+  LoRd_MuldeR, Maksymilian Arciemowicz, Manfred Schwarb, Marcin Rataj,
+  Martin Schmatz, Nico Rieck, Ophir Lojkine, Ray Satiro, rilysh,
+  Romain Geissler, Samuel Henrique, sd0 on hackerone, Smackd0wn, Sohom Datta,
+  Stefan Eissing, Torben Dury, Turiiya, Viktor Szakats, zhengqwe on github
+  (43 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -116,6 +160,7 @@ References to bug reports and discussions on issues:
  [31] = https://curl.se/bug/?i=12137
  [32] = https://curl.se/bug/?i=12052
  [33] = https://curl.se/bug/?i=12097
+ [34] = https://curl.se/bug/?i=12198
  [35] = https://curl.se/bug/?i=12145
  [36] = https://curl.se/bug/?i=12170
  [37] = https://curl.se/bug/?i=12168
@@ -126,3 +171,42 @@ References to bug reports and discussions on issues:
  [42] = https://curl.se/bug/?i=11775
  [43] = https://curl.se/bug/?i=12157
  [44] = https://curl.se/bug/?i=12149
+ [45] = https://curl.se/bug/?i=12201
+ [46] = https://curl.se/bug/?i=12194
+ [47] = https://curl.se/bug/?i=12249
+ [48] = https://curl.se/bug/?i=12195
+ [49] = https://curl.se/bug/?i=12218
+ [50] = https://curl.se/bug/?i=12044
+ [51] = https://curl.se/bug/?i=12189
+ [52] = https://curl.se/bug/?i=12030
+ [53] = https://curl.se/bug/?i=12179
+ [54] = https://curl.se/bug/?i=12182
+ [55] = https://curl.se/bug/?i=12086
+ [56] = https://curl.se/bug/?i=12160
+ [57] = https://curl.se/bug/?i=12221
+ [58] = https://curl.se/bug/?i=12155
+ [59] = https://curl.se/bug/?i=12250
+ [60] = https://curl.se/bug/?i=12237
+ [61] = https://curl.se/bug/?i=12213
+ [62] = https://curl.se/bug/?i=12215
+ [63] = https://curl.se/bug/?i=12214
+ [64] = https://curl.se/bug/?i=12206
+ [65] = https://curl.se/bug/?i=12207
+ [66] = https://curl.se/bug/?i=12216
+ [67] = https://curl.se/bug/?i=12247
+ [68] = https://curl.se/bug/?i=12202
+ [69] = https://curl.se/bug/?i=12200
+ [70] = https://curl.se/bug/?i=12196
+ [71] = https://curl.se/bug/?i=12083
+ [73] = https://curl.se/bug/?i=12242
+ [74] = https://curl.se/bug/?i=12240
+ [75] = https://curl.se/bug/?i=12240
+ [77] = https://curl.se/bug/?i=12235
+ [78] = https://curl.se/bug/?i=12204
+ [79] = https://curl.se/bug/?i=12233
+ [80] = https://curl.se/bug/?i=12223
+ [81] = https://curl.se/bug/?i=10521
+ [83] = https://curl.se/bug/?i=12230
+ [84] = https://curl.se/bug/?i=12229
+ [85] = https://curl.se/bug/?i=12227
+ [86] = https://curl.se/bug/?i=12225

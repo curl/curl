@@ -102,11 +102,7 @@ static void tcpnodelay(struct Curl_easy *data, curl_socket_t sockfd)
 #if defined(TCP_NODELAY)
   curl_socklen_t onoff = (curl_socklen_t) 1;
   int level = IPPROTO_TCP;
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
   char buffer[STRERROR_LEN];
-#else
-  (void) data;
-#endif
 
   if(setsockopt(sockfd, level, TCP_NODELAY, (void *)&onoff,
                 sizeof(onoff)) < 0)
@@ -127,6 +123,7 @@ static void nosigpipe(struct Curl_easy *data,
                       curl_socket_t sockfd)
 {
   int onoff = 1;
+  (void)data;
   if(setsockopt(sockfd, SOL_SOCKET, SO_NOSIGPIPE, (void *)&onoff,
                 sizeof(onoff)) < 0) {
 #if !defined(CURL_DISABLE_VERBOSE_STRINGS)
@@ -883,34 +880,14 @@ static void cf_socket_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct cf_socket_ctx *ctx = cf->ctx;
 
   if(ctx && CURL_SOCKET_BAD != ctx->sock) {
-    if(ctx->active) {
-      /* We share our socket at cf->conn->sock[cf->sockindex] when active.
-       * If it is no longer there, someone has stolen (and hopefully
-       * closed it) and we just forget about it.
-       */
-      if(ctx->sock == cf->conn->sock[cf->sockindex]) {
-        CURL_TRC_CF(data, cf, "cf_socket_close(%" CURL_FORMAT_SOCKET_T
-                    ", active)", ctx->sock);
-        socket_close(data, cf->conn, !ctx->accepted, ctx->sock);
-        cf->conn->sock[cf->sockindex] = CURL_SOCKET_BAD;
-      }
-      else {
-        CURL_TRC_CF(data, cf, "cf_socket_close(%" CURL_FORMAT_SOCKET_T
-                    ") no longer at conn->sock[], discarding", ctx->sock);
-        /* TODO: we do not want this to happen. Need to check which
-         * code is messing with conn->sock[cf->sockindex] */
-      }
-      ctx->sock = CURL_SOCKET_BAD;
-      if(cf->sockindex == FIRSTSOCKET)
-        cf->conn->remote_addr = NULL;
-    }
-    else {
-      /* this is our local socket, we did never publish it */
-      CURL_TRC_CF(data, cf, "cf_socket_close(%" CURL_FORMAT_SOCKET_T
-                  ", not active)", ctx->sock);
-      socket_close(data, cf->conn, !ctx->accepted, ctx->sock);
-      ctx->sock = CURL_SOCKET_BAD;
-    }
+    CURL_TRC_CF(data, cf, "cf_socket_close(%" CURL_FORMAT_SOCKET_T
+                ")", ctx->sock);
+    if(ctx->sock == cf->conn->sock[cf->sockindex])
+      cf->conn->sock[cf->sockindex] = CURL_SOCKET_BAD;
+    socket_close(data, cf->conn, !ctx->accepted, ctx->sock);
+    ctx->sock = CURL_SOCKET_BAD;
+    if(ctx->active && cf->sockindex == FIRSTSOCKET)
+      cf->conn->remote_addr = NULL;
     Curl_bufq_reset(&ctx->recvbuf);
     ctx->active = FALSE;
     ctx->buffer_recv = FALSE;
@@ -1516,6 +1493,9 @@ static CURLcode cf_socket_cntrl(struct Curl_cfilter *cf,
     break;
   case CF_CTRL_DATA_SETUP:
     Curl_persistconninfo(data, cf->conn, ctx->l_ip, ctx->l_port);
+    break;
+  case CF_CTRL_FORGET_SOCKET:
+    ctx->sock = CURL_SOCKET_BAD;
     break;
   }
   return CURLE_OK;

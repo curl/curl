@@ -71,8 +71,7 @@ bool Curl_ipvalid(struct Curl_easy *data, struct connectdata *conn)
 #if defined(CURLRES_SYNCH)
 
 #ifdef DEBUG_ADDRINFO
-static void dump_addrinfo(struct connectdata *conn,
-                          const struct Curl_addrinfo *ai)
+static void dump_addrinfo(const struct Curl_addrinfo *ai)
 {
   printf("dump_addrinfo:\n");
   for(; ai; ai = ai->ai_next) {
@@ -84,7 +83,7 @@ static void dump_addrinfo(struct connectdata *conn,
   }
 }
 #else
-#define dump_addrinfo(x,y) Curl_nop_stmt
+#define dump_addrinfo(x) Curl_nop_stmt
 #endif
 
 /*
@@ -149,7 +148,7 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
     Curl_addrinfo_set_port(res, port);
   }
 
-  dump_addrinfo(conn, res);
+  dump_addrinfo(res);
 
   return res;
 }

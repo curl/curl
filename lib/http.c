@@ -970,17 +970,21 @@ Curl_http_output_auth(struct Curl_easy *data,
 }
 #endif
 
+#if defined(USE_SPNEGO) || defined(USE_NTLM) || \
+  !defined(CURL_DISABLE_DIGEST_AUTH) || \
+  !defined(CURL_DISABLE_BASIC_AUTH) || \
+  !defined(CURL_DISABLE_BEARER_AUTH)
+static int is_valid_auth_separator(char ch)
+{
+  return ch == '\0' || ch == ',' || ISSPACE(ch);
+}
+#endif
+
 /*
  * Curl_http_input_auth() deals with Proxy-Authenticate: and WWW-Authenticate:
  * headers. They are dealt with both in the transfer.c main loop and in the
  * proxy CONNECT loop.
  */
-
-static int is_valid_auth_separator(char ch)
-{
-  return ch == '\0' || ch == ',' || ISSPACE(ch);
-}
-
 CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
                               const char *auth) /* the first non-space */
 {
@@ -3663,7 +3667,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
           k->content_range = TRUE;
       }
     }
-    else
+    else if(k->httpcode < 300)
       data->state.resume_from = 0; /* get everything */
   }
 #if !defined(CURL_DISABLE_COOKIES)

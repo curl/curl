@@ -38,12 +38,17 @@
 #include "http1.h"
 #include "curl_msh3.h"
 #include "socketpair.h"
+#include "vtls/vtls.h"
 #include "vquic/vquic.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
+
+#ifdef CURL_DISABLE_SOCKETPAIR
+#error "MSH3 cannot be build with CURL_DISABLE_SOCKETPAIR set"
+#endif
 
 #define H3_STREAM_WINDOW_SIZE (128 * 1024)
 #define H3_STREAM_CHUNK_SIZE   (16 * 1024)
@@ -796,14 +801,20 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
                                  struct Curl_easy *data)
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
-  bool verify = !!cf->conn->ssl_config.verifypeer;
+  struct ssl_primary_config *conn_config;
   MSH3_ADDR addr = {0};
   CURLcode result;
+  bool verify;
+
+  conn_config = Curl_ssl_cf_get_primary_config(cf);
+  if(!conn_config)
+    return CURLE_FAILED_INIT;
+  verify = !!conn_config->verifypeer;
 
   memcpy(&addr, &ctx->addr.sa_addr, ctx->addr.addrlen);
   MSH3_SET_PORT(&addr, (uint16_t)cf->conn->remote_port);
 
-  if(verify && (cf->conn->ssl_config.CAfile || cf->conn->ssl_config.CApath)) {
+  if(verify && (conn_config->CAfile || conn_config->CApath)) {
     /* TODO: need a way to provide trust anchors to MSH3 */
 #ifdef DEBUGBUILD
     /* we need this for our test cases to run */

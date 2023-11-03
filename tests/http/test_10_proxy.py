@@ -247,3 +247,105 @@ class TestProxy:
             assert r.total_connects == 2
         else:
             assert r.total_connects == 2
+
+    @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason=f"curl without SSL")
+    @pytest.mark.parametrize("tunnel", ['http/1.1', 'h2'])
+    @pytest.mark.skipif(condition=not Env.have_nghttpx(), reason="no nghttpx available")
+    def test_10_10_reuse_proxy(self, env: Env, httpd, nghttpx_fwd, tunnel, repeat):
+        # url twice via https: proxy separated with '--next', will reuse
+        if tunnel == 'h2' and not env.curl_uses_lib('nghttp2'):
+            pytest.skip('only supported with nghttp2')
+        curl = CurlClient(env=env)
+        url = f'https://localhost:{env.https_port}/data.json'
+        proxy_args = curl.get_proxy_args(tunnel=True, proto=tunnel)
+        r1 = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
+                               extra_args=proxy_args)
+        r1.check_response(count=1, http_status=200)
+        assert self.get_tunnel_proto_used(r1) == 'HTTP/2' \
+            if tunnel == 'h2' else 'HTTP/1.1'
+        # get the args, duplicate separated with '--next'
+        x2_args = r1.args[1:]
+        x2_args.append('--next')
+        x2_args.extend(proxy_args)
+        r2 = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
+                               extra_args=x2_args)
+        r2.check_response(count=2, http_status=200)
+        assert r2.total_connects == 1
+
+    @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason=f"curl without SSL")
+    @pytest.mark.parametrize("tunnel", ['http/1.1', 'h2'])
+    @pytest.mark.skipif(condition=not Env.have_nghttpx(), reason="no nghttpx available")
+    @pytest.mark.skipif(condition=not Env.curl_uses_lib('openssl'), reason="tls13-ciphers not supported")
+    def test_10_11_noreuse_proxy_https(self, env: Env, httpd, nghttpx_fwd, tunnel, repeat):
+        # different --proxy-tls13-ciphers, no reuse of connection for https:
+        curl = CurlClient(env=env)
+        if tunnel == 'h2' and not env.curl_uses_lib('nghttp2'):
+            pytest.skip('only supported with nghttp2')
+        url = f'https://localhost:{env.https_port}/data.json'
+        proxy_args = curl.get_proxy_args(tunnel=True, proto=tunnel)
+        r1 = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
+                               extra_args=proxy_args)
+        r1.check_response(count=1, http_status=200)
+        assert self.get_tunnel_proto_used(r1) == 'HTTP/2' \
+            if tunnel == 'h2' else 'HTTP/1.1'
+        # get the args, duplicate separated with '--next'
+        x2_args = r1.args[1:]
+        x2_args.append('--next')
+        x2_args.extend(proxy_args)
+        x2_args.extend(['--proxy-tls13-ciphers', 'TLS_AES_128_GCM_SHA256'])
+        r2 = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
+                               extra_args=x2_args)
+        r2.check_response(count=2, http_status=200)
+        assert r2.total_connects == 2
+
+    @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason=f"curl without SSL")
+    @pytest.mark.parametrize("tunnel", ['http/1.1', 'h2'])
+    @pytest.mark.skipif(condition=not Env.have_nghttpx(), reason="no nghttpx available")
+    @pytest.mark.skipif(condition=not Env.curl_uses_lib('openssl'), reason="tls13-ciphers not supported")
+    def test_10_12_noreuse_proxy_http(self, env: Env, httpd, nghttpx_fwd, tunnel, repeat):
+        # different --proxy-tls13-ciphers, no reuse of connection for http:
+        if tunnel == 'h2' and not env.curl_uses_lib('nghttp2'):
+            pytest.skip('only supported with nghttp2')
+        curl = CurlClient(env=env)
+        url = f'http://localhost:{env.http_port}/data.json'
+        proxy_args = curl.get_proxy_args(tunnel=True, proto=tunnel)
+        r1 = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
+                               extra_args=proxy_args)
+        r1.check_response(count=1, http_status=200)
+        assert self.get_tunnel_proto_used(r1) == 'HTTP/2' \
+            if tunnel == 'h2' else 'HTTP/1.1'
+        # get the args, duplicate separated with '--next'
+        x2_args = r1.args[1:]
+        x2_args.append('--next')
+        x2_args.extend(proxy_args)
+        x2_args.extend(['--proxy-tls13-ciphers', 'TLS_AES_128_GCM_SHA256'])
+        r2 = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
+                               extra_args=x2_args)
+        r2.check_response(count=2, http_status=200)
+        assert r2.total_connects == 2
+
+    @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason=f"curl without SSL")
+    @pytest.mark.parametrize("tunnel", ['http/1.1', 'h2'])
+    @pytest.mark.skipif(condition=not Env.have_nghttpx(), reason="no nghttpx available")
+    @pytest.mark.skipif(condition=not Env.curl_uses_lib('openssl'), reason="tls13-ciphers not supported")
+    def test_10_13_noreuse_https(self, env: Env, httpd, nghttpx_fwd, tunnel, repeat):
+        # different --tls13-ciphers on https: same proxy config
+        if tunnel == 'h2' and not env.curl_uses_lib('nghttp2'):
+            pytest.skip('only supported with nghttp2')
+        curl = CurlClient(env=env)
+        url = f'https://localhost:{env.https_port}/data.json'
+        proxy_args = curl.get_proxy_args(tunnel=True, proto=tunnel)
+        r1 = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
+                               extra_args=proxy_args)
+        r1.check_response(count=1, http_status=200)
+        assert self.get_tunnel_proto_used(r1) == 'HTTP/2' \
+            if tunnel == 'h2' else 'HTTP/1.1'
+        # get the args, duplicate separated with '--next'
+        x2_args = r1.args[1:]
+        x2_args.append('--next')
+        x2_args.extend(proxy_args)
+        x2_args.extend(['--tls13-ciphers', 'TLS_AES_128_GCM_SHA256'])
+        r2 = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
+                               extra_args=x2_args)
+        r2.check_response(count=2, http_status=200)
+        assert r2.total_connects == 2

@@ -527,6 +527,18 @@ curl_socket_t Curl_conn_get_socket(struct Curl_easy *data, int sockindex)
   return data->conn? data->conn->sock[sockindex] : CURL_SOCKET_BAD;
 }
 
+void Curl_conn_forget_socket(struct Curl_easy *data, int sockindex)
+{
+  if(data->conn) {
+    struct Curl_cfilter *cf = data->conn->cfilter[sockindex];
+    if(cf)
+      (void)Curl_conn_cf_cntrl(cf, data, TRUE,
+                               CF_CTRL_FORGET_SOCKET, 0, NULL);
+    fake_sclose(data->conn->sock[sockindex]);
+    data->conn->sock[sockindex] = CURL_SOCKET_BAD;
+  }
+}
+
 static CURLcode cf_cntrl_all(struct connectdata *conn,
                              struct Curl_easy *data,
                              bool ignore_result,

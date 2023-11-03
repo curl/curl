@@ -331,8 +331,6 @@
 #  undef RECV_TYPE_ARG3
 #  undef SEND_TYPE_ARG1
 #  undef SEND_TYPE_ARG3
-#  define HAVE_FREEADDRINFO
-#  define HAVE_GETADDRINFO
 #  define HAVE_GETHOSTBYNAME_R
 #  define HAVE_GETHOSTBYNAME_R_6
 #  define LWIP_POSIX_SOCKETS_IO_NAMES 0
@@ -353,13 +351,11 @@
   #undef USE_WINSOCK
   #undef HAVE_WINSOCK2_H
   #undef HAVE_WS2TCPIP_H
-  #define HAVE_GETADDRINFO
   #define HAVE_SYS_IOCTL_H
   #define HAVE_SYS_SOCKET_H
   #define HAVE_NETINET_IN_H
   #define HAVE_NETDB_H
   #define HAVE_ARPA_INET_H
-  #define HAVE_FREEADDRINFO
   #define SOCKET int
 #endif
 
@@ -376,11 +372,6 @@
 
 /* Windows should not have HAVE_GMTIME_R defined */
 /* #undef HAVE_GMTIME_R */
-
-/* Define if the compiler supports C99 variadic macro style. */
-#if defined(_MSC_VER) && (_MSC_VER >= 1400)
-#define HAVE_VARIADIC_MACROS_C99 1
-#endif
 
 /* Define if the compiler supports the 'long long' data type. */
 #if defined(__MINGW32__) || \
@@ -478,24 +469,10 @@ Vista
 #  endif
 #endif
 
-/* Availability of freeaddrinfo, getaddrinfo, and if_nametoindex
-   functions is quite convoluted, compiler dependent and even build target
-   dependent. */
-#if defined(HAVE_WS2TCPIP_H)
-#  if defined(__POCC__)
-#    define HAVE_FREEADDRINFO           1
-#    define HAVE_GETADDRINFO            1
-#    define HAVE_GETADDRINFO_THREADSAFE 1
-#  elif defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0501)
-#    define HAVE_FREEADDRINFO           1
-#    define HAVE_GETADDRINFO            1
-#    define HAVE_GETADDRINFO_THREADSAFE 1
-#  elif defined(_MSC_VER) && (_MSC_VER >= 1200)
-#    define HAVE_FREEADDRINFO           1
-#    define HAVE_GETADDRINFO            1
-#    define HAVE_GETADDRINFO_THREADSAFE 1
-#  endif
-#endif
+/* Windows XP is required for freeaddrinfo, getaddrinfo */
+#define HAVE_FREEADDRINFO           1
+#define HAVE_GETADDRINFO            1
+#define HAVE_GETADDRINFO_THREADSAFE 1
 
 #if defined(__POCC__)
 #  ifndef _MSC_VER

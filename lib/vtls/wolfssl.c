@@ -480,6 +480,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       return CURLE_SSL_CONNECT_ERROR;
     }
 #endif
+  default:
     break;
   }
 

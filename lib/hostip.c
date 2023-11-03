@@ -741,7 +741,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
       Curl_set_in_callback(data, true);
       st = data->set.resolver_start(
 #ifdef USE_CURL_ASYNC
-        data->state.async.resolver,
+        conn->resolve_async.resolver,
 #else
         NULL,
 #endif
@@ -1283,9 +1283,11 @@ err:
         Curl_freeaddrinfo(head);
         return CURLE_OUT_OF_MEMORY;
       }
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
       infof(data, "Added %.*s:%d:%s to DNS cache%s",
             (int)hlen, host_begin, port, addresses,
             permanent ? "" : " (non-permanent)");
+#endif
 
       /* Wildcard hostname */
       if((hlen == 1) && (host_begin[0] == '*')) {
@@ -1331,9 +1333,9 @@ static void show_resolve_info(struct Curl_easy *data,
   while(a) {
     if(
 #ifdef CURLRES_IPV6
-       (a->ai_family == PF_INET6) ||
+       a->ai_family == PF_INET6 ||
 #endif
-       (a->ai_family == PF_INET)) {
+       a->ai_family == PF_INET) {
       char buf[MAX_IPADR_LEN];
       struct dynbuf *d = &out[(a->ai_family != PF_INET)];
       Curl_printable_address(a, buf, sizeof(buf));
@@ -1413,9 +1415,9 @@ CURLcode Curl_once_resolved(struct Curl_easy *data, bool *protocol_done)
   struct connectdata *conn = data->conn;
 
 #ifdef USE_CURL_ASYNC
-  if(data->state.async.dns) {
-    conn->dns_entry = data->state.async.dns;
-    data->state.async.dns = NULL;
+  if(conn->resolve_async.dns) {
+    conn->dns_entry = conn->resolve_async.dns;
+    conn->resolve_async.dns = NULL;
   }
 #endif
 
@@ -1437,11 +1439,11 @@ CURLcode Curl_once_resolved(struct Curl_easy *data, bool *protocol_done)
 #ifdef USE_CURL_ASYNC
 CURLcode Curl_resolver_error(struct Curl_easy *data)
 {
+  struct connectdata *conn = data->conn;
   const char *host_or_proxy;
   CURLcode result;
 
 #ifndef CURL_DISABLE_PROXY
-  struct connectdata *conn = data->conn;
   if(conn->bits.httpproxy) {
     host_or_proxy = "proxy";
     result = CURLE_COULDNT_RESOLVE_PROXY;
@@ -1454,7 +1456,7 @@ CURLcode Curl_resolver_error(struct Curl_easy *data)
   }
 
   failf(data, "Could not resolve %s: %s", host_or_proxy,
-        data->state.async.hostname);
+        conn->resolve_async.hostname);
 
   return result;
 }

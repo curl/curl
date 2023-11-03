@@ -21,9 +21,12 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+
 # https://ci.appveyor.com/project/curlorg/curl/history
-# Appveyor configuration
-# https://www.appveyor.com/docs/appveyor-yml/
+# AppVeyor configuration:
+#   https://www.appveyor.com/docs/appveyor-yml/
+# AppVeyor worker images:
+#   https://www.appveyor.com/docs/windows-images-software/
 
 version: 7.50.0.{build}
 
@@ -34,7 +37,7 @@ environment:
   SHARED: 'OFF'
   matrix:
     # generated CMake-based Visual Studio Release builds
-    - job_name: 'CMake, VS2008, Release x86, Schannel, Build-only'
+    - job_name: 'CMake, VS2008, Release, x86, Schannel, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'Visual Studio 9 2008'
@@ -45,8 +48,7 @@ environment:
       SHARED: 'ON'
       TESTING: 'OFF'
       DISABLED_TESTS: ''
-      SKIP_RUN: 'Needs missing MSVCR90.dll'
-    - job_name: 'CMake, VS2022, Release x64, OpenSSL, WebSockets, Unity, Build-only'
+    - job_name: 'CMake, VS2022, Release, x64, OpenSSL 3, WebSockets, Unity, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'Visual Studio 17 2022'
@@ -61,7 +63,7 @@ environment:
       DISABLED_TESTS: ''
       WEBSOCKETS: 'ON'
       UNITY: 'ON'
-    - job_name: 'CMake, VS2022, Release arm64, Schannel, Static, Build-only'
+    - job_name: 'CMake, VS2022, Release, arm64, Schannel, Static, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'Visual Studio 17 2022'
@@ -73,7 +75,7 @@ environment:
       TESTING: 'OFF'
       DISABLED_TESTS: ''
     # generated CMake-based Visual Studio Debug builds
-    - job_name: 'CMake, VS2010, Debug x64, no SSL, Static'
+    - job_name: 'CMake, VS2010, Debug, x64, no SSL, Static'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'Visual Studio 10 2010 Win64'
@@ -84,7 +86,7 @@ environment:
       TESTING: 'ON'
       DISABLED_TESTS: '!1139 !1501'
       ADD_PATH: 'C:\msys64\usr\bin'
-    - job_name: 'CMake, VS2022, Debug x64, Schannel, Static, Unicode'
+    - job_name: 'CMake, VS2022, Debug, x64, Schannel, Static, Unicode'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'Visual Studio 17 2022'
@@ -96,7 +98,7 @@ environment:
       TESTING: 'ON'
       DISABLED_TESTS: '!1139 !1501'
       ADD_PATH: 'C:\msys64\usr\bin'
-    - job_name: 'CMake, VS2022, Debug x64, no SSL, Static'
+    - job_name: 'CMake, VS2022, Debug, x64, no SSL, Static'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'Visual Studio 17 2022'
@@ -108,7 +110,7 @@ environment:
       TESTING: 'ON'
       DISABLED_TESTS: '!1139 !1501'
       ADD_PATH: 'C:\msys64\usr\bin'
-    - job_name: 'CMake, VS2022, Debug x64, no SSL, Static, HTTP only'
+    - job_name: 'CMake, VS2022, Debug, x64, no SSL, Static, HTTP only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'Visual Studio 17 2022'
@@ -121,7 +123,7 @@ environment:
       DISABLED_TESTS: '!1139 !1501'
       ADD_PATH: 'C:\msys64\usr\bin'
     # generated CMake-based MSYS Makefiles builds (mingw cross-compiling)
-    - job_name: 'CMake, mingw-w64, gcc 13, Debug x64, Schannel, Static, Unicode, Unity'
+    - job_name: 'CMake, mingw-w64, gcc 13, Debug, x64, Schannel, Static, Unicode, Unity'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'MSYS Makefiles'
@@ -135,7 +137,7 @@ environment:
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
       UNITY: 'ON'
-    - job_name: 'CMake, mingw-w64, gcc 7, Debug x64, Schannel, Static, Unicode'
+    - job_name: 'CMake, mingw-w64, gcc 7, Debug, x64, Schannel, Static, Unicode'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'MSYS Makefiles'
@@ -148,7 +150,7 @@ environment:
       ADD_PATH: 'C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin;C:\msys64\usr\bin'
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
-    - job_name: 'CMake, mingw-w64, gcc 9, Debug x64, Schannel, Static, Unity'
+    - job_name: 'CMake, mingw-w64, gcc 9, Debug, x64, Schannel, Static, Unity'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'MSYS Makefiles'
@@ -163,7 +165,7 @@ environment:
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
       UNITY: 'ON'
-    - job_name: 'CMake, mingw-w64, gcc 6, Debug x86, Schannel, Static'
+    - job_name: 'CMake, mingw-w64, gcc 6, Debug, x86, Schannel, Static'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'MSYS Makefiles'
@@ -177,56 +179,56 @@ environment:
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
     # winbuild-based builds
-    - job_name: 'winbuild, VS2015, Debug, x64, Build-only'
+    - job_name: 'winbuild, VS2015, Debug, x64, OpenSSL 1.1.1, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       BUILD_SYSTEM: winbuild_vs2015
       DEBUG: 'yes'
       PATHPART: debug
       TESTING: 'OFF'
       ENABLE_UNICODE: 'no'
-    - job_name: 'winbuild, VS2015, Release, x64, Build-only'
+    - job_name: 'winbuild, VS2015, Release, x64, OpenSSL 1.1.1, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       BUILD_SYSTEM: winbuild_vs2015
       DEBUG: 'no'
       PATHPART: release
       TESTING: 'OFF'
       ENABLE_UNICODE: 'no'
-    - job_name: 'winbuild, VS2017, Debug, x64, Build-only'
+    - job_name: 'winbuild, VS2017, Debug, x64, OpenSSL 1.1.1, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: winbuild_vs2017
       DEBUG: 'yes'
       PATHPART: debug
       TESTING: 'OFF'
       ENABLE_UNICODE: 'no'
-    - job_name: 'winbuild, VS2017, Release, x64, Build-only'
+    - job_name: 'winbuild, VS2017, Release, x64, OpenSSL 1.1.1, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: winbuild_vs2017
       DEBUG: 'no'
       PATHPART: release
       TESTING: 'OFF'
       ENABLE_UNICODE: 'no'
-    - job_name: 'winbuild, VS2015, Debug, x64, Unicode, Build-only'
+    - job_name: 'winbuild, VS2015, Debug, x64, OpenSSL 1.1.1, Unicode, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       BUILD_SYSTEM: winbuild_vs2015
       DEBUG: 'yes'
       PATHPART: debug
       TESTING: 'OFF'
       ENABLE_UNICODE: 'yes'
-    - job_name: 'winbuild, VS2015, Release, x64, Unicode, Build-only'
+    - job_name: 'winbuild, VS2015, Release, x64, OpenSSL 1.1.1, Unicode, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       BUILD_SYSTEM: winbuild_vs2015
       DEBUG: 'no'
       PATHPART: release
       TESTING: 'OFF'
       ENABLE_UNICODE: 'yes'
-    - job_name: 'winbuild, VS2017, Debug, x64, Unicode, Build-only'
+    - job_name: 'winbuild, VS2017, Debug, x64, OpenSSL 1.1.1, Unicode, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: winbuild_vs2017
       DEBUG: 'yes'
       PATHPART: debug
       TESTING: 'OFF'
       ENABLE_UNICODE: 'yes'
-    - job_name: 'winbuild, VS2017, Release, x64, Unicode, Build-only'
+    - job_name: 'winbuild, VS2017, Release, x64, OpenSSL 1.1.1, Unicode, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: winbuild_vs2017
       DEBUG: 'no'
@@ -234,7 +236,7 @@ environment:
       TESTING: 'OFF'
       ENABLE_UNICODE: 'yes'
     # generated VisualStudioSolution-based builds
-    - job_name: 'VisualStudioSolution, VS2017, Debug, x86, Build-only'
+    - job_name: 'VisualStudioSolution, VS2017, Debug, x86, Schannel, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: VisualStudioSolution
       PRJ_CFG: 'DLL Debug - DLL Windows SSPI - DLL WinIDN'
@@ -290,7 +292,12 @@ build_script:
 
       $ErrorActionPreference = 'Stop'
 
-      $openssl_root = 'C:\OpenSSL-v111-Win64'
+      if($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'Visual Studio 2022') {
+        $openssl_root = 'C:\OpenSSL-v30-Win64'
+      }
+      else {
+        $openssl_root = 'C:\OpenSSL-v111-Win64'
+      }
 
       if($env:BUILD_SYSTEM -eq 'CMake') {
 
@@ -324,6 +331,10 @@ build_script:
         }
         if($env:PRJ_GEN.Contains('Visual Studio')) {
           $options += '-DCMAKE_VS_GLOBALS=TrackFileAccess=false'
+        }
+        if($env:PRJ_GEN -eq 'Visual Studio 9 2008') {
+          # Without this it fails to run due to missing MSVCR90.dll
+          $options += '-DCURL_STATIC_CRT=ON'
         }
 
         Write-Host 'CMake options:' $options

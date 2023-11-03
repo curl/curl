@@ -40,6 +40,7 @@
 #include "fopen.h"
 #include "rename.h"
 #include "share.h"
+#include "strdup.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -116,22 +117,29 @@ static CURLcode hsts_create(struct hsts *h,
                             bool subdomains,
                             curl_off_t expires)
 {
-  struct stsentry *sts = hsts_entry();
+  struct stsentry *sts;
   char *duphost;
   size_t hlen;
+  DEBUGASSERT(h);
+  DEBUGASSERT(hostname);
+
+  hlen = strlen(hostname);
+  if(hlen && (hostname[hlen - 1] == '.'))
+    /* strip off any trailing dot */
+    --hlen;
+  if(!hlen)
+    /* no host name left */
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  sts = hsts_entry();
   if(!sts)
     return CURLE_OUT_OF_MEMORY;
 
-  duphost = strdup(hostname);
+  duphost = Curl_strndup(hostname, hlen);
   if(!duphost) {
     free(sts);
     return CURLE_OUT_OF_MEMORY;
   }
-
-  hlen = strlen(duphost);
-  if(duphost[hlen - 1] == '.')
-    /* strip off trailing any dot */
-    duphost[--hlen] = 0;
 
   sts->host = duphost;
   sts->expires = expires;

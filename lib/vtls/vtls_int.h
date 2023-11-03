@@ -170,23 +170,6 @@ void Curl_ssl_adjust_pollset(struct Curl_cfilter *cf, struct Curl_easy *data,
                               struct easy_pollset *ps);
 
 /**
- * Get the ssl_config_data in `data` that is relevant for cfilter `cf`.
- */
-struct ssl_config_data *Curl_ssl_cf_get_config(struct Curl_cfilter *cf,
-                                               struct Curl_easy *data);
-
-/**
- * Get the primary config relevant for the filter from its connection.
- */
-struct ssl_primary_config *
-  Curl_ssl_cf_get_primary_config(struct Curl_cfilter *cf);
-
-/**
- * Get the first SSL filter in the chain starting with `cf`, or NULL.
- */
-struct Curl_cfilter *Curl_ssl_cf_get_ssl(struct Curl_cfilter *cf);
-
-/**
  * Get the SSL filter below the given one or NULL if there is none.
  */
 bool Curl_ssl_cf_is_proxy(struct Curl_cfilter *cf);

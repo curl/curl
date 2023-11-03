@@ -12,6 +12,9 @@ See-also: request-target
 Multi: single
 ---
 Change the method to use when starting the transfer.
+
+curl passes on the verbatim string you give it its the request without any
+filter or other safe guards. That includes white space and control characters.
 .RS
 .TP 15
 **HTTP**

@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_STRDUP_H
-#define HEADER_CURL_STRDUP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,16 +21,35 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
+/* <DESC>
+ * Use the TCP keep-alive options
+ * </DESC>
+ */
+#include <stdio.h>
+#include <curl/curl.h>
 
-#ifndef HAVE_STRDUP
-char *Curl_strdup(const char *str);
-#endif
-#ifdef WIN32
-wchar_t* Curl_wcsdup(const wchar_t* src);
-#endif
-void *Curl_memdup(const void *src, size_t buffer_length);
-void *Curl_saferealloc(void *ptr, size_t size);
-void *Curl_strndup(const void *src, size_t length);
+int main(void)
+{
+  CURL *curl;
+  CURLcode res = CURLE_OK;
 
-#endif /* HEADER_CURL_STRDUP_H */
+  curl = curl_easy_init();
+  if(curl) {
+    /* enable TCP keep-alive for this transfer */
+    curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
+
+    /* keep-alive idle time to 120 seconds */
+    curl_easy_setopt(curl, CURLOPT_TCP_KEEPIDLE, 120L);
+
+    /* interval time between keep-alive probes: 60 seconds */
+    curl_easy_setopt(curl, CURLOPT_TCP_KEEPINTVL, 60L);
+
+    curl_easy_setopt(curl, CURLOPT_URL, "https://curl.se/");
+
+    res = curl_easy_perform(curl);
+
+    curl_easy_cleanup(curl);
+  }
+
+  return (int)res;
+}

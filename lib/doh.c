@@ -252,6 +252,7 @@ static CURLcode dohprobe(struct Curl_easy *data,
     ERROR_CHECK_SETOPT(CURLOPT_HTTPHEADER, headers);
 #ifdef USE_HTTP2
     ERROR_CHECK_SETOPT(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
+    ERROR_CHECK_SETOPT(CURLOPT_PIPEWAIT, 1L);
 #endif
 #ifndef CURLDEBUG
     /* enforce HTTPS if not debug */
@@ -901,6 +902,7 @@ UNITTEST void de_cleanup(struct dohentry *d)
 CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
                               struct Curl_dns_entry **dnsp)
 {
+  struct connectdata *conn = data->conn;
   CURLcode result;
   struct dohdata *dohp = data->req.doh;
   *dnsp = NULL; /* defaults to no response */
@@ -909,7 +911,7 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
 
   if(!dohp->probe[DOH_PROBE_SLOT_IPADDR_V4].easy &&
      !dohp->probe[DOH_PROBE_SLOT_IPADDR_V6].easy) {
-    failf(data, "Could not DoH-resolve: %s", data->state.async.hostname);
+    failf(data, "Could not DoH-resolve: %s", conn->resolve_async.hostname);
     return CONN_IS_PROXIED(data->conn)?CURLE_COULDNT_RESOLVE_PROXY:
       CURLE_COULDNT_RESOLVE_HOST;
   }
@@ -935,10 +937,12 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
                             p->dnstype,
                             &de);
       Curl_dyn_free(&p->serverdoh);
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
       if(rc[slot]) {
         infof(data, "DoH: %s type %s for %s", doh_strerror(rc[slot]),
               type2name(p->dnstype), dohp->host);
       }
+#endif
     } /* next slot */
 
     result = CURLE_COULDNT_RESOLVE_HOST; /* until we know better */
@@ -970,7 +974,7 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
         Curl_freeaddrinfo(ai);
       }
       else {
-        data->state.async.dns = dns;
+        conn->resolve_async.dns = dns;
         *dnsp = dns;
         result = CURLE_OK;      /* address resolution OK */
       }
