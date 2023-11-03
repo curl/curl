@@ -2804,7 +2804,8 @@ HCERTSTORE schannel_get_cached_cert_store(struct Curl_cfilter *cf,
               CURL_SHA256_DIGEST_LENGTH)) {
         return NULL;
     }
-  } else {
+  }
+  else {
     if(!conn_config->CAfile) {
         return NULL;
     }
@@ -2857,7 +2858,8 @@ bool schannel_set_cached_cert_store(struct Curl_cfilter *cf,
                        CAinfo_blob_digest,
                        CURL_SHA256_DIGEST_LENGTH);
     CAinfo_blob_size = ca_info_blob->len;
-  } else {
+  }
+  else {
     if(conn_config->CAfile) {
       CAfile = strdup(conn_config->CAfile);
       if(!CAfile) {
@@ -2884,7 +2886,7 @@ bool schannel_set_cached_cert_store(struct Curl_cfilter *cf,
 static void schannel_free_multi_ssl_backend_data(
   struct multi_ssl_backend_data *msbd)
 {
-  struct schannel_multi_ssl_backend_data* mbackend =
+  struct schannel_multi_ssl_backend_data *mbackend =
     (struct schannel_multi_ssl_backend_data*)msbd;
   if(mbackend->cert_store) {
     CertCloseStore(mbackend->cert_store, 0);

@@ -636,7 +636,8 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
 
       if(trust_store) {
         infof(data, "schannel: reusing certificate store from cache");
-      } else {
+      }
+      else {
         /* Open the certificate store */
         trust_store = CertOpenStore(CERT_STORE_PROV_MEMORY,
                                     0,
@@ -651,7 +652,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
         }
         else {
           own_trust_store = trust_store;
-          const struct curl_blob* ca_info_blob = conn_config->ca_info_blob;
+          const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
 
           if(ca_info_blob) {
             result = add_certs_data_to_store(trust_store,
