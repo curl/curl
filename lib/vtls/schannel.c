@@ -2769,14 +2769,14 @@ HCERTSTORE schannel_get_cached_cert_store(struct Curl_cfilter *cf,
 
   struct schannel_multi_ssl_backend_data *mbackend;
   mbackend = (struct schannel_multi_ssl_backend_data *)multi->ssl_backend_data;
-  if (!mbackend->cert_store) {
+  if(!mbackend->cert_store) {
     return NULL;
   }
 
   /* use cached_x509_store_expired timediff calculation pattern */
   const struct ssl_general_config *cfg = &data->set.general_ssl;
   timediff_t timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
-  if (timeout_ms >= 0) {
+  if(timeout_ms >= 0) {
     struct curltime now = Curl_now();
     timediff_t elapsed_ms = Curl_timediff(now, mbackend->time);
     if(elapsed_ms >= timeout_ms) {
@@ -2785,13 +2785,13 @@ HCERTSTORE schannel_get_cached_cert_store(struct Curl_cfilter *cf,
   }
 
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  const struct curl_blob* ca_info_blob = conn_config->ca_info_blob;
+  const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
 
   if(ca_info_blob) {
-    if (!mbackend->CAinfo_blob_digest) {
+    if(!mbackend->CAinfo_blob_digest) {
       return NULL;
     }
-    if (mbackend->CAinfo_blob_size != ca_info_blob->len) {
+    if(mbackend->CAinfo_blob_size != ca_info_blob->len) {
       return NULL;
     }
     unsigned char info_blob_digest[CURL_SHA256_DIGEST_LENGTH];
@@ -2808,10 +2808,10 @@ HCERTSTORE schannel_get_cached_cert_store(struct Curl_cfilter *cf,
     if(!conn_config->CAfile) {
         return NULL;
     }
-    if (!mbackend->CAfile) {
+    if(!mbackend->CAfile) {
       return NULL;
     }
-    if (strcmp(mbackend->CAfile, conn_config->CAfile)) {
+    if(strcmp(mbackend->CAfile, conn_config->CAfile)) {
       return NULL;
     }
   }
@@ -2830,7 +2830,8 @@ bool schannel_set_cached_cert_store(struct Curl_cfilter *cf,
   }
 
   if(!multi->ssl_backend_data) {
-    multi->ssl_backend_data = calloc(1, sizeof(struct schannel_multi_ssl_backend_data));
+    multi->ssl_backend_data =
+      calloc(1,sizeof(struct schannel_multi_ssl_backend_data));
     if(!multi->ssl_backend_data) {
       return false;
     }
@@ -2844,7 +2845,7 @@ bool schannel_set_cached_cert_store(struct Curl_cfilter *cf,
   unsigned char *CAinfo_blob_digest = NULL;
   size_t CAinfo_blob_size = 0;
   char *CAfile = NULL;
-  const struct curl_blob* ca_info_blob = conn_config->ca_info_blob;
+  const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
 
   if(ca_info_blob) {
     CAinfo_blob_digest = malloc(CURL_SHA256_DIGEST_LENGTH);
@@ -2883,7 +2884,8 @@ bool schannel_set_cached_cert_store(struct Curl_cfilter *cf,
 static void schannel_free_multi_ssl_backend_data(
   struct multi_ssl_backend_data *msbd)
 {
-  struct schannel_multi_ssl_backend_data* mbackend = (struct schannel_multi_ssl_backend_data*)msbd;
+  struct schannel_multi_ssl_backend_data* mbackend =
+    (struct schannel_multi_ssl_backend_data*)msbd;
   if(mbackend->cert_store) {
     CertCloseStore(mbackend->cert_store, 0);
   }
