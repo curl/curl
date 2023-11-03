@@ -96,6 +96,9 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#define checkauth(x, a) (checkprefix((x), (a)) && \
+    is_valid_auth_separator((a)[sizeof(x) - 1]))
+
 /*
  * Forward declarations.
  */
@@ -845,7 +848,7 @@ output_auth_headers(struct Curl_easy *data,
   else
     authstatus->multipass = FALSE;
 
-  return CURLE_OK;
+  return result;
 }
 
 /**
@@ -980,6 +983,169 @@ static int is_valid_auth_separator(char ch)
 }
 #endif
 
+struct authdata {
+  const char *auth;
+  struct Curl_easy *data;
+  bool proxy;
+  struct connectdata *conn;
+  curlnegotiate *negstate;
+  unsigned long *availp;
+  struct auth *authp;
+};
+
+static bool handle_spnego(struct authdata *authinfo)
+{
+  (void)authinfo;
+#ifdef USE_SPNEGO
+  if(checkauth("Negotiate", authinfo->auth)) {
+    if((authinfo->authp->avail & CURLAUTH_NEGOTIATE) ||
+       Curl_auth_is_spnego_supported()) {
+      *authinfo->availp |= CURLAUTH_NEGOTIATE;
+      authinfo->authp->avail |= CURLAUTH_NEGOTIATE;
+
+      if(authinfo->authp->picked == CURLAUTH_NEGOTIATE) {
+        CURLcode result = Curl_input_negotiate(authinfo->data,
+                                               authinfo->conn,
+                                               authinfo->proxy,
+                                               authinfo->auth);
+        if(!result) {
+          free(authinfo->data->req.newurl);
+          authinfo->data->req.newurl = strdup(authinfo->data->state.url);
+          if(!authinfo->data->req.newurl)
+            return CURLE_OUT_OF_MEMORY;
+          authinfo->data->state.authproblem = FALSE;
+          /* we received a GSS auth token and we dealt with it fine */
+          *authinfo->negstate = GSS_AUTHRECV;
+        }
+        else
+          authinfo->data->state.authproblem = TRUE;
+      }
+    }
+    return true;
+  }
+#endif
+  return false;
+}
+
+static bool handle_ntlm(struct authdata *authinfo)
+{
+  (void)authinfo;
+#ifdef USE_NTLM
+  /* NTLM support requires the SSL crypto libs */
+  if(checkauth("NTLM", authinfo->auth)) {
+    if((authinfo->authp->avail & CURLAUTH_NTLM) ||
+       (authinfo->authp->avail & CURLAUTH_NTLM_WB) ||
+       Curl_auth_is_ntlm_supported()) {
+      *authinfo->availp |= CURLAUTH_NTLM;
+      authinfo->authp->avail |= CURLAUTH_NTLM;
+
+      if(authinfo->authp->picked == CURLAUTH_NTLM ||
+         authinfo->authp->picked == CURLAUTH_NTLM_WB) {
+        /* NTLM authentication is picked and activated */
+        CURLcode result = Curl_input_ntlm(authinfo->data, authinfo->proxy,
+                                          authinfo->auth);
+        if(!result) {
+          authinfo->data->state.authproblem = FALSE;
+#ifdef NTLM_WB_ENABLED
+          if(authp->picked == CURLAUTH_NTLM_WB) {
+            *availp &= ~CURLAUTH_NTLM;
+            authp->avail &= ~CURLAUTH_NTLM;
+            *availp |= CURLAUTH_NTLM_WB;
+            authp->avail |= CURLAUTH_NTLM_WB;
+
+            result = Curl_input_ntlm_wb(data, conn, proxy, auth);
+            if(result) {
+              infof(data, "Authentication problem. Ignoring this.");
+              data->state.authproblem = TRUE;
+            }
+          }
+#endif
+        }
+        else {
+          infof(authinfo->data, "Authentication problem. Ignoring this.");
+          authinfo->data->state.authproblem = TRUE;
+        }
+      }
+    }
+    return true;
+  }
+#endif
+  return false;
+}
+
+static bool handle_digest(struct authdata *authinfo)
+{
+  (void)authinfo;
+#ifndef CURL_DISABLE_DIGEST_AUTH
+  if(checkauth("Digest", authinfo->auth)) {
+    if((authinfo->authp->avail & CURLAUTH_DIGEST) != 0)
+      infof(authinfo->data, "Ignoring duplicate digest auth header.");
+    else if(Curl_auth_is_digest_supported()) {
+      CURLcode result;
+
+      *authinfo->availp |= CURLAUTH_DIGEST;
+      authinfo->authp->avail |= CURLAUTH_DIGEST;
+
+      /* We call this function on input Digest headers even if Digest
+       * authentication isn't activated yet, as we need to store the
+       * incoming data from this header in case we are going to use
+       * Digest */
+      result = Curl_input_digest(authinfo->data, authinfo->proxy,
+                                 authinfo->auth);
+      if(result) {
+        infof(authinfo->data, "Authentication problem. Ignoring this.");
+        authinfo->data->state.authproblem = TRUE;
+      }
+    }
+    return true;
+  }
+#endif
+  return false;
+}
+
+static bool handle_basic(struct authdata *authinfo)
+{
+  (void)authinfo;
+#ifndef CURL_DISABLE_BASIC_AUTH
+  if(checkprefix("Basic", authinfo->auth) &&
+     is_valid_auth_separator(authinfo->auth[5])) {
+    *authinfo->availp |= CURLAUTH_BASIC;
+    authinfo->authp->avail |= CURLAUTH_BASIC;
+    if(authinfo->authp->picked == CURLAUTH_BASIC) {
+      /* We asked for Basic authentication but got a 40X back
+         anyway, which basically means our name+password isn't
+         valid. */
+      authinfo->authp->avail = CURLAUTH_NONE;
+      infof(authinfo->data, "Authentication problem. Ignoring this.");
+      authinfo->data->state.authproblem = TRUE;
+    }
+    return true;
+  }
+#endif
+  return false;
+}
+
+static bool handle_bearer(struct authdata *authinfo)
+{
+  (void)authinfo;
+#ifndef CURL_DISABLE_BEARER_AUTH
+  if(checkprefix("Bearer", authinfo->auth) &&
+     is_valid_auth_separator(authinfo->auth[6])) {
+    *authinfo->availp |= CURLAUTH_BEARER;
+    authinfo->authp->avail |= CURLAUTH_BEARER;
+    if(authinfo->authp->picked == CURLAUTH_BEARER) {
+      /* We asked for Bearer authentication but got a 40X back
+        anyway, which basically means our token isn't valid. */
+      authinfo->authp->avail = CURLAUTH_NONE;
+      infof(authinfo->data, "Authentication problem. Ignoring this.");
+      authinfo->data->state.authproblem = TRUE;
+    }
+    return true;
+  }
+#endif
+  return false;
+}
+
 /*
  * Curl_http_input_auth() deals with Proxy-Authenticate: and WWW-Authenticate:
  * headers. They are dealt with both in the transfer.c main loop and in the
@@ -991,23 +1157,23 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
   /*
    * This resource requires authentication
    */
-  struct connectdata *conn = data->conn;
+  struct authdata authinfo = {0};
+  authinfo.auth = auth;
+  authinfo.data = data;
+  authinfo.proxy = proxy;
+  authinfo.conn = data->conn;
 #ifdef USE_SPNEGO
-  curlnegotiate *negstate = proxy ? &conn->proxy_negotiate_state :
-                                    &conn->http_negotiate_state;
+  authinfo.negstate = proxy ? &authinfo->conn->proxy_negotiate_state :
+                       &authinfo->conn->http_negotiate_state;
 #endif
-  unsigned long *availp;
-  struct auth *authp;
-
-  (void) conn; /* In case conditionals make it unused. */
 
   if(proxy) {
-    availp = &data->info.proxyauthavail;
-    authp = &data->state.authproxy;
+    authinfo.availp = &data->info.proxyauthavail;
+    authinfo.authp = &data->state.authproxy;
   }
   else {
-    availp = &data->info.httpauthavail;
-    authp = &data->state.authhost;
+    authinfo.availp = &data->info.httpauthavail;
+    authinfo.authp = &data->state.authhost;
   }
 
   /*
@@ -1027,132 +1193,11 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
    */
 
   while(*auth) {
-#ifdef USE_SPNEGO
-    if(checkprefix("Negotiate", auth) && is_valid_auth_separator(auth[9])) {
-      if((authp->avail & CURLAUTH_NEGOTIATE) ||
-         Curl_auth_is_spnego_supported()) {
-        *availp |= CURLAUTH_NEGOTIATE;
-        authp->avail |= CURLAUTH_NEGOTIATE;
-
-        if(authp->picked == CURLAUTH_NEGOTIATE) {
-          CURLcode result = Curl_input_negotiate(data, conn, proxy, auth);
-          if(!result) {
-            free(data->req.newurl);
-            data->req.newurl = strdup(data->state.url);
-            if(!data->req.newurl)
-              return CURLE_OUT_OF_MEMORY;
-            data->state.authproblem = FALSE;
-            /* we received a GSS auth token and we dealt with it fine */
-            *negstate = GSS_AUTHRECV;
-          }
-          else
-            data->state.authproblem = TRUE;
-        }
-      }
-    }
-    else
-#endif
-#ifdef USE_NTLM
-      /* NTLM support requires the SSL crypto libs */
-      if(checkprefix("NTLM", auth) && is_valid_auth_separator(auth[4])) {
-        if((authp->avail & CURLAUTH_NTLM) ||
-           (authp->avail & CURLAUTH_NTLM_WB) ||
-           Curl_auth_is_ntlm_supported()) {
-          *availp |= CURLAUTH_NTLM;
-          authp->avail |= CURLAUTH_NTLM;
-
-          if(authp->picked == CURLAUTH_NTLM ||
-             authp->picked == CURLAUTH_NTLM_WB) {
-            /* NTLM authentication is picked and activated */
-            CURLcode result = Curl_input_ntlm(data, proxy, auth);
-            if(!result) {
-              data->state.authproblem = FALSE;
-#ifdef NTLM_WB_ENABLED
-              if(authp->picked == CURLAUTH_NTLM_WB) {
-                *availp &= ~CURLAUTH_NTLM;
-                authp->avail &= ~CURLAUTH_NTLM;
-                *availp |= CURLAUTH_NTLM_WB;
-                authp->avail |= CURLAUTH_NTLM_WB;
-
-                result = Curl_input_ntlm_wb(data, conn, proxy, auth);
-                if(result) {
-                  infof(data, "Authentication problem. Ignoring this.");
-                  data->state.authproblem = TRUE;
-                }
-              }
-#endif
-            }
-            else {
-              infof(data, "Authentication problem. Ignoring this.");
-              data->state.authproblem = TRUE;
-            }
-          }
-        }
-      }
-      else
-#endif
-#ifndef CURL_DISABLE_DIGEST_AUTH
-        if(checkprefix("Digest", auth) && is_valid_auth_separator(auth[6])) {
-          if((authp->avail & CURLAUTH_DIGEST) != 0)
-            infof(data, "Ignoring duplicate digest auth header.");
-          else if(Curl_auth_is_digest_supported()) {
-            CURLcode result;
-
-            *availp |= CURLAUTH_DIGEST;
-            authp->avail |= CURLAUTH_DIGEST;
-
-            /* We call this function on input Digest headers even if Digest
-             * authentication isn't activated yet, as we need to store the
-             * incoming data from this header in case we are going to use
-             * Digest */
-            result = Curl_input_digest(data, proxy, auth);
-            if(result) {
-              infof(data, "Authentication problem. Ignoring this.");
-              data->state.authproblem = TRUE;
-            }
-          }
-        }
-        else
-#endif
-#ifndef CURL_DISABLE_BASIC_AUTH
-          if(checkprefix("Basic", auth) &&
-             is_valid_auth_separator(auth[5])) {
-            *availp |= CURLAUTH_BASIC;
-            authp->avail |= CURLAUTH_BASIC;
-            if(authp->picked == CURLAUTH_BASIC) {
-              /* We asked for Basic authentication but got a 40X back
-                 anyway, which basically means our name+password isn't
-                 valid. */
-              authp->avail = CURLAUTH_NONE;
-              infof(data, "Authentication problem. Ignoring this.");
-              data->state.authproblem = TRUE;
-            }
-          }
-          else
-#endif
-#ifndef CURL_DISABLE_BEARER_AUTH
-            if(checkprefix("Bearer", auth) &&
-               is_valid_auth_separator(auth[6])) {
-              *availp |= CURLAUTH_BEARER;
-              authp->avail |= CURLAUTH_BEARER;
-              if(authp->picked == CURLAUTH_BEARER) {
-                /* We asked for Bearer authentication but got a 40X back
-                  anyway, which basically means our token isn't valid. */
-                authp->avail = CURLAUTH_NONE;
-                infof(data, "Authentication problem. Ignoring this.");
-                data->state.authproblem = TRUE;
-              }
-            }
-#else
-            {
-              /*
-               * Empty block to terminate the if-else chain correctly.
-               *
-               * A semicolon would yield the same result here, but can cause a
-               * compiler warning when -Wextra is enabled.
-               */
-            }
-#endif
+    if(handle_spnego(&authinfo)) {}
+    else if(handle_ntlm(&authinfo)) {}
+    else if(handle_digest(&authinfo)) {}
+    else if(handle_basic(&authinfo)) {}
+    else if(handle_bearer(&authinfo)) {}
 
     /* there may be multiple methods on one line, so keep reading */
     while(*auth && *auth != ',') /* read up to the next comma */
