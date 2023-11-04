@@ -4601,17 +4601,6 @@ out:
   return result;
 }
 
-/* simple implementation of strndup(), which isn't portable */
-static char *my_strndup(const char *ptr, size_t len)
-{
-  char *copy = malloc(len + 1);
-  if(!copy)
-    return NULL;
-  memcpy(copy, ptr, len);
-  copy[len] = '\0';
-  return copy;
-}
-
 CURLcode Curl_http_req_make(struct httpreq **preq,
                             const char *method, size_t m_len,
                             const char *scheme, size_t s_len,
@@ -4630,17 +4619,17 @@ CURLcode Curl_http_req_make(struct httpreq **preq,
     goto out;
   memcpy(req->method, method, m_len);
   if(scheme) {
-    req->scheme = my_strndup(scheme, s_len);
+    req->scheme = Curl_strndup(scheme, s_len);
     if(!req->scheme)
       goto out;
   }
   if(authority) {
-    req->authority = my_strndup(authority, a_len);
+    req->authority = Curl_strndup(authority, a_len);
     if(!req->authority)
       goto out;
   }
   if(path) {
-    req->path = my_strndup(path, p_len);
+    req->path = Curl_strndup(path, p_len);
     if(!req->path)
       goto out;
   }
