@@ -26,8 +26,9 @@
 curl_share_strerror - return string describing error code
 .SH SYNOPSIS
 .nf
-.B #include <curl/curl.h>
-.BI "const char *curl_share_strerror(CURLSHcode " errornum ");"
+#include <curl/curl.h>
+
+const char *curl_share_strerror(CURLSHcode errornum);
 .SH DESCRIPTION
 The \fIcurl_share_strerror(3)\fP function returns a string describing the
 \fICURLSHcode\fP error code passed in the argument \fIerrornum\fP.
