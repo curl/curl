@@ -5293,6 +5293,91 @@ AC_DEFUN([CURL_CHECK_FUNC_STRDUP], [
 ])
 
 
+dnl CURL_CHECK_FUNC_STRNDUP
+dnl -------------------------------------------------
+dnl Verify if strndup is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable curl_disallow_strndup, then
+dnl HAVE_STRNDUP will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_STRNDUP], [
+  AC_REQUIRE([CURL_INCLUDES_STRING])dnl
+  #
+  tst_links_strndup="unknown"
+  tst_proto_strndup="unknown"
+  tst_compi_strndup="unknown"
+  tst_allow_strndup="unknown"
+  #
+  AC_MSG_CHECKING([if strndup can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([strndup])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_strndup="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_strndup="no"
+  ])
+  #
+  if test "$tst_links_strndup" = "yes"; then
+    AC_MSG_CHECKING([if strndup is prototyped])
+    AC_EGREP_CPP([strndup],[
+      $curl_includes_string
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_strndup="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_strndup="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_strndup" = "yes"; then
+    AC_MSG_CHECKING([if strndup is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_string
+      ]],[[
+        if(0 != strndup("foo",4))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_strndup="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_strndup="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_strndup" = "yes"; then
+    AC_MSG_CHECKING([if strndup usage allowed])
+    if test "x$curl_disallow_strndup" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_strndup="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_strndup="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if strndup might be used])
+  if test "$tst_links_strndup" = "yes" &&
+     test "$tst_proto_strndup" = "yes" &&
+     test "$tst_compi_strndup" = "yes" &&
+     test "$tst_allow_strndup" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_STRNDUP, 1,
+      [Define to 1 if you have the strndup function.])
+    curl_cv_func_strndup="yes"
+  else
+    AC_MSG_RESULT([no])
+    curl_cv_func_strndup="no"
+  fi
+])
+
+
 dnl CURL_CHECK_FUNC_STRERROR_R
 dnl -------------------------------------------------
 dnl Verify if strerror_r is available, prototyped, can be compiled and

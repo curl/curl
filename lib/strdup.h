@@ -25,14 +25,34 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
+#ifndef BUILDING_LIBCURL
+/* this renames functions so that the tool code can use the same code
+   without getting symbol collisions */
+#define Curl_strdup(ptr) curlx_strdup(ptr)
+#define Curl_strndup(ptr,size) curlx_strndup(ptr,size)
+#define Curl_wcsdup(ptr) curlx_wcsdup(ptr)
+#define Curl_memdup(ptr,size) curlx_memdup(ptr,size)
+#define Curl_saferealloc(ptr,size) curlx_saferealloc(ptr,size)
+#endif
+
 #ifndef HAVE_STRDUP
 char *Curl_strdup(const char *str);
+#define strdup Curl_strdup
+#else
+#include <string.h>
 #endif
+
+#ifndef HAVE_STRNDUP
+void *Curl_strndup(const char *src, size_t length);
+#define strndup Curl_strndup
+#else
+#include <string.h>
+#endif
+
 #ifdef WIN32
 wchar_t* Curl_wcsdup(const wchar_t* src);
 #endif
 void *Curl_memdup(const void *src, size_t buffer_length);
 void *Curl_saferealloc(void *ptr, size_t size);
-void *Curl_strndup(const char *src, size_t length);
 
 #endif /* HEADER_CURL_STRDUP_H */

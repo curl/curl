@@ -29,6 +29,8 @@
 /* use our own printf() functions */
 #include "curlx.h"
 
+#include "strdup.h"
+
 #include "tool_cfgable.h"
 #include "tool_doswin.h"
 #include "tool_msgs.h"
@@ -242,12 +244,9 @@ static char *parse_filename(const char *ptr, size_t len)
   char *q;
   char  stop = '\0';
 
-  /* simple implementation of strndup() */
-  copy = malloc(len + 1);
+  copy = strndup(ptr, len);
   if(!copy)
     return NULL;
-  memcpy(copy, ptr, len);
-  copy[len] = '\0';
 
   p = copy;
   if(*p == '\'' || *p == '"') {

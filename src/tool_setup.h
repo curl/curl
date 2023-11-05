@@ -63,7 +63,7 @@ extern FILE *tool_stderr;
 #endif
 
 #ifndef HAVE_STRDUP
-#  include "tool_strdup.h"
+#  include "strdup.h"
 #endif
 
 #if defined(WIN32) && !defined(MSDOS)
