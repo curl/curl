@@ -2810,13 +2810,8 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
     }
   }
   else {
-    if(!conn_config->CAfile) {
-      return NULL;
-    }
-    if(!mbackend->CAfile) {
-      return NULL;
-    }
-    if(strcmp(mbackend->CAfile, conn_config->CAfile)) {
+    if(!conn_config->CAfile || !mbackend->CAfile ||
+       strcmp(mbackend->CAfile, conn_config->CAfile)) {
       return NULL;
     }
   }
