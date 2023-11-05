@@ -2799,7 +2799,7 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
     if(mbackend->CAinfo_blob_size != ca_info_blob->len) {
       return NULL;
     }
-    schannel_sha256sum((const char *)ca_info_blob->data,
+    schannel_sha256sum((const unsigned char *)ca_info_blob->data,
                        ca_info_blob->len,
                        info_blob_digest,
                        CURL_SHA256_DIGEST_LENGTH);
@@ -2858,7 +2858,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
     if(!CAinfo_blob_digest) {
       return false;
     }
-    schannel_sha256sum((const char *)ca_info_blob->data,
+    schannel_sha256sum((const unsigned char *)ca_info_blob->data,
                        ca_info_blob->len,
                        CAinfo_blob_digest,
                        CURL_SHA256_DIGEST_LENGTH);
