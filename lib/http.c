@@ -4619,17 +4619,17 @@ CURLcode Curl_http_req_make(struct httpreq **preq,
     goto out;
   memcpy(req->method, method, m_len);
   if(scheme) {
-    req->scheme = strndup(scheme, s_len);
+    req->scheme = Curl_strndup(scheme, s_len);
     if(!req->scheme)
       goto out;
   }
   if(authority) {
-    req->authority = strndup(authority, a_len);
+    req->authority = Curl_strndup(authority, a_len);
     if(!req->authority)
       goto out;
   }
   if(path) {
-    req->path = strndup(path, p_len);
+    req->path = Curl_strndup(path, p_len);
     if(!req->path)
       goto out;
   }

@@ -603,7 +603,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
            app passed in a bad combo, so we better check for that first. */
         if(form->name) {
           /* copy name (without strdup; possibly not null-terminated) */
-          form->name = strndup(form->name, form->namelength?
+          form->name = Curl_strndup(form->name, form->namelength?
                                     form->namelength:
                                     strlen(form->name));
         }

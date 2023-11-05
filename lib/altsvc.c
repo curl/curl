@@ -123,11 +123,11 @@ static struct altsvc *altsvc_createid(const char *srchost,
     dlen -= 2;
   }
 
-  as->src.host = strndup(srchost, hlen);
+  as->src.host = Curl_strndup(srchost, hlen);
   if(!as->src.host)
     goto error;
 
-  as->dst.host = strndup(dsthost, dlen);
+  as->dst.host = Curl_strndup(dsthost, dlen);
   if(!as->dst.host)
     goto error;
 
