@@ -515,9 +515,6 @@
 /* Define to 1 if you have the strdup function. */
 #cmakedefine HAVE_STRDUP 1
 
-/* Define to 1 if you have the strndup function. */
-#cmakedefine HAVE_STRNDUP 1
-
 /* Define to 1 if you have the strerror_r function. */
 #cmakedefine HAVE_STRERROR_R 1
 

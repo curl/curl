@@ -31,11 +31,9 @@
 #endif
 
 #include "strdup.h"
-
-/* The last 2 #include files should be in this order */
-#ifdef BUILDING_LIBCURL
 #include "curl_memory.h"
-#endif
+
+/* The last #include file should be: */
 #include "memdebug.h"
 
 #ifndef HAVE_STRDUP
@@ -101,7 +99,6 @@ void *Curl_memdup(const void *src, size_t length)
   return buffer;
 }
 
-#ifndef HAVE_STRNDUP
 /***************************************************************************
  *
  * Curl_strndup(source, length)
@@ -125,7 +122,6 @@ void *Curl_strndup(const char *src, size_t length)
   buf[length] = 0;
   return buf;
 }
-#endif
 
 /***************************************************************************
  *

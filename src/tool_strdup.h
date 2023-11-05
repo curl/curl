@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_STRDUP_H
-#define HEADER_CURL_STRDUP_H
+#ifndef HEADER_TOOL_STRDUP_H
+#define HEADER_TOOL_STRDUP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,16 +23,10 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "tool_setup.h"
 
 #ifndef HAVE_STRDUP
-char *Curl_strdup(const char *str);
+extern char *strdup(const char *str);
 #endif
-#ifdef WIN32
-wchar_t* Curl_wcsdup(const wchar_t* src);
-#endif
-void *Curl_memdup(const void *src, size_t buffer_length);
-void *Curl_saferealloc(void *ptr, size_t size);
-void *Curl_strndup(const char *src, size_t length);
 
-#endif /* HEADER_CURL_STRDUP_H */
+#endif /* HEADER_TOOL_STRDUP_H */
