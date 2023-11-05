@@ -651,8 +651,8 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
           result = CURLE_SSL_CACERT_BADFILE;
         }
         else {
-          own_trust_store = trust_store;
           const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
+          own_trust_store = trust_store;
 
           if(ca_info_blob) {
             result = add_certs_data_to_store(trust_store,
