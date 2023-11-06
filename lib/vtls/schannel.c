@@ -2782,6 +2782,11 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
     return NULL;
   }
 
+  /* zero ca_cache_timeout completely disables caching */
+  if(cfg->ca_cache_timeout == 0) {
+    return NULL;
+  }
+
   /* use cached_x509_store_expired timediff calculation pattern */
   timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
   if(timeout_ms >= 0) {
@@ -2790,7 +2795,9 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
     if(elapsed_ms >= timeout_ms) {
       return NULL;
     }
-  }
+  } /* ca_cache_timeout -1 (or negative) to
+      retain the cached store remain forever */
+
 
   if(ca_info_blob) {
     if(!mbackend->CAinfo_blob_digest) {
