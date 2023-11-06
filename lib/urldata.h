@@ -117,7 +117,7 @@ typedef unsigned int curl_prot_t;
 
 /* Max string input length is a precaution against abuse and to detect junk
    input easier and better. */
-#define CURL_MAX_INPUT_LENGTH 8000000
+#define CURL_MAX_INPUT_LENGTH 100000000 /* 100 million */
 
 
 #include "cookie.h"
