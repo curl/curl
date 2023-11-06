@@ -123,11 +123,6 @@ curl_includes_inttypes="\
 # include <inttypes.h>
 #endif
 /* includes end */"
-  case $host_os in
-    irix*)
-      ac_cv_header_stdint_h="no"
-      ;;
-  esac
   AC_CHECK_HEADERS(
     sys/types.h inttypes.h,
     [], [], [$curl_includes_inttypes])
