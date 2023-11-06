@@ -47,20 +47,25 @@ if(USE_ARES)
   include_directories(${CARES_INCLUDE_DIR})
 endif()
 
-add_library(
-  curlu # special libcurlu library just for unittests
-  STATIC
-  EXCLUDE_FROM_ALL
-  ${HHEADERS} ${CSOURCES}
-)
-target_compile_definitions(curlu PUBLIC UNITTESTS CURL_STATICLIB)
+if(BUILD_TESTING)
+  add_library(
+    curlu # special libcurlu library just for unittests
+    STATIC
+    EXCLUDE_FROM_ALL
+    ${HHEADERS} ${CSOURCES}
+  )
+  target_compile_definitions(curlu PUBLIC UNITTESTS CURL_STATICLIB)
+endif()
 
 if(ENABLE_CURLDEBUG)
   # We must compile these sources separately to avoid memdebug.h redefinitions
   # applying to them.
   set_source_files_properties(memdebug.c curl_multibyte.c PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
 endif()
-target_link_libraries(curlu PRIVATE ${CURL_LIBS})
+
+if(BUILD_TESTING)
+  target_link_libraries(curlu PRIVATE ${CURL_LIBS})
+endif()
 
 transform_makefile_inc("Makefile.soname" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake")
 include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake)
