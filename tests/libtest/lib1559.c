@@ -27,7 +27,7 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-#define EXCESSIVE 10*1000*1000
+#define EXCESSIVE (100000000 + 2)
 int test(char *URL)
 {
   CURLcode res = CURLE_OK;
