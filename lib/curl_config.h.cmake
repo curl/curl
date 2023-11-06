@@ -319,9 +319,6 @@
 /* Define to 1 if symbol `ADDRESS_FAMILY' exists */
 #cmakedefine HAVE_ADDRESS_FAMILY 1
 
-/* Define to 1 if you have the <inttypes.h> header file. */
-#cmakedefine HAVE_INTTYPES_H 1
-
 /* Define to 1 if you have the ioctlsocket function. */
 #cmakedefine HAVE_IOCTLSOCKET 1
 

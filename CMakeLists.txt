@@ -1108,7 +1108,6 @@ if(WIN32)
   endif()
 endif()
 
-check_include_file_concat("inttypes.h"       HAVE_INTTYPES_H)
 check_include_file_concat("sys/filio.h"      HAVE_SYS_FILIO_H)
 check_include_file_concat("sys/wait.h"       HAVE_SYS_WAIT_H)
 check_include_file_concat("sys/ioctl.h"      HAVE_SYS_IOCTL_H)
