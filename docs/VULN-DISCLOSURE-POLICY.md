@@ -286,9 +286,9 @@ user run a much worse command that can do something fatal (like
 
 ## Terminal output and escape sequences
 
-Content that is transfered from a server and displayed in a terminal by curl
-may contain escape sequences or use other tricks to fool the user. This is
-curl working as designed and is not a curl security problem. Escape sequences,
-moving cursor, changing color, is also frequently used for good. To reduce the
-risk of getting fooled, save files and browse them after download using a
-display method that minimizes risks.
+Content that is transferred from a server and gets displayed in a terminal by
+curl may contain escape sequences or use other tricks to fool the user. This
+is curl working as designed and is not a curl security problem. Escape
+sequences, moving cursor, changing color etc, is also frequently used for
+good. To reduce the risk of getting fooled, save files and browse them after
+download using a display method that minimizes risks.
