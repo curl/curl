@@ -3182,7 +3182,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
       DEBUGASSERT(Curl_conn_is_http2(data, conn, FIRSTSOCKET));
     break;
   case CURL_HTTP_VERSION_1_1:
-    /* continue with HTTP/1.1 when explicitly requested */
+    /* continue with HTTP/1.x when explicitly requested */
     break;
   default:
     /* Check if user wants to use HTTP/2 with clear TCP */
