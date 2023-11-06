@@ -227,7 +227,8 @@ CURLcode Curl_http_size(struct Curl_easy *data);
 
 CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
                                      struct connectdata *conn,
-                                     ssize_t *nread,
+                                     const char *buf, size_t blen,
+                                     size_t *pconsumed,
                                      bool *stop_reading);
 
 /**

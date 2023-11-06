@@ -93,8 +93,8 @@ struct Curl_chunker {
 
 /* The following functions are defined in http_chunks.c */
 void Curl_httpchunk_init(struct Curl_easy *data);
-CHUNKcode Curl_httpchunk_read(struct Curl_easy *data, char *datap,
-                              ssize_t length, ssize_t *wrote,
+CHUNKcode Curl_httpchunk_read(struct Curl_easy *data, char *buf,
+                              size_t blen, size_t *pconsumed,
                               CURLcode *passthru);
 
 #endif /* HEADER_CURL_HTTP_CHUNKS_H */

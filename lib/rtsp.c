@@ -59,14 +59,19 @@ static int rtsp_getsock_do(struct Curl_easy *data,
 
 /*
  * Parse and write out any available RTP data.
- *
- * nread: amount of data left after k->str. will be modified if RTP
- *        data is parsed and k->str is moved up
- * readmore: whether or not the RTP parser needs more data right away
+ * @param data     the transfer
+ * @param conn     the connection
+ * @param buf      data read from connection
+ * @param blen     amount of data in buf
+ * @param consumed out, number of blen consumed
+ * @param readmore out, TRUE iff complete buf was consumed and more data
+ *                 is needed
  */
 static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
                                    struct connectdata *conn,
-                                   ssize_t *nread,
+                                   const char *buf,
+                                   size_t blen,
+                                   size_t *pconsumed,
                                    bool *readmore);
 
 static CURLcode rtsp_setup_connection(struct Curl_easy *data,
@@ -754,14 +759,14 @@ out:
 
 static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
                                    struct connectdata *conn,
-                                   ssize_t *nread,
+                                   const char *buf,
+                                   size_t blen,
+                                   size_t *pconsumed,
                                    bool *readmore)
 {
   struct rtsp_conn *rtspc = &(conn->proto.rtspc);
   CURLcode result = CURLE_OK;
   size_t consumed = 0;
-  char *buf;
-  size_t blen;
   bool in_body;
 
   if(!data->req.header)
@@ -770,11 +775,8 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
             (data->req.size >= 0) &&
             (data->req.bytecount < data->req.size);
 
-  DEBUGASSERT(*nread >= 0);
-  blen = (size_t)(*nread);
-  buf = data->req.str;
   *readmore = FALSE;
-
+  *pconsumed = 0;
   if(!blen) {
     goto out;
   }
@@ -784,6 +786,7 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
     result = rtsp_filter_rtp(data, conn, buf, blen, in_body, &consumed);
     if(result)
       goto out;
+    *pconsumed += consumed;
     buf += consumed;
     blen -= consumed;
   }
@@ -791,16 +794,16 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
   /* we want to parse headers, do so */
   if(data->req.header && blen) {
     bool stop_reading;
+
     rtspc->in_header = TRUE;
-    data->req.str = buf;
-    *nread = blen;
-    result = Curl_http_readwrite_headers(data, conn, nread, &stop_reading);
+    result = Curl_http_readwrite_headers(data, conn, buf, blen,
+                                         &consumed, &stop_reading);
     if(result)
       goto out;
 
-    DEBUGASSERT(*nread >= 0);
-    blen = (size_t)(*nread);
-    buf = data->req.str;
+    *pconsumed += consumed;
+    buf += consumed;
+    blen -= consumed;
 
     if(!data->req.header)
       rtspc->in_header = FALSE;
@@ -813,13 +816,10 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
       result = rtsp_filter_rtp(data, conn, buf, blen, in_body, &consumed);
       if(result)
         goto out;
-      buf += consumed;
-      blen -= consumed;
+      *pconsumed += consumed;
     }
   }
 
-  data->req.str = buf;
-  *nread = blen;
   if(rtspc->state != RTP_PARSE_SKIP)
     *readmore = TRUE;
 
