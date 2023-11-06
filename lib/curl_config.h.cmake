@@ -503,9 +503,6 @@
 /* Define to 1 if you have the <stdbool.h> header file. */
 #cmakedefine HAVE_STDBOOL_H 1
 
-/* Define to 1 if you have the <stdint.h> header file. */
-#cmakedefine HAVE_STDINT_H 1
-
 /* Define to 1 if you have the strcasecmp function. */
 #cmakedefine HAVE_STRCASECMP 1
 

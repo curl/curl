@@ -119,9 +119,6 @@ curl_includes_inttypes="\
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
-#ifdef HAVE_STDINT_H
-# include <stdint.h>
-#endif
 #ifdef HAVE_INTTYPES_H
 # include <inttypes.h>
 #endif
@@ -132,7 +129,7 @@ curl_includes_inttypes="\
       ;;
   esac
   AC_CHECK_HEADERS(
-    sys/types.h stdint.h inttypes.h,
+    sys/types.h inttypes.h,
     [], [], [$curl_includes_inttypes])
 ])
 

@@ -144,9 +144,6 @@
 /* Define if you have the `socket' function. */
 #define HAVE_SOCKET
 
-/* Define if you have the <stdint.h> header file. */
-#undef HAVE_STDINT_H
-
 /* Define if you have the `strcasecmp' function. */
 #undef HAVE_STRCASECMP
 

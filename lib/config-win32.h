@@ -43,12 +43,6 @@
 #define HAVE_INTTYPES_H 1
 #endif
 
-/* Define to 1 if you have the <stdint.h> header file. */
-#if (defined(_MSC_VER) && (_MSC_VER >= 1600)) || defined(__MINGW32__) || \
-    (defined(__BORLANDC__) && (__BORLANDC__ >= 0x0582)) || defined(__POCC__)
-#define HAVE_STDINT_H 1
-#endif
-
 /* Define if you have the <io.h> header file. */
 #define HAVE_IO_H 1
 
