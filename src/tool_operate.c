@@ -907,11 +907,8 @@ static CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
   curl_url_get(gatewaysurl, CURLUPART_PATH, &gatewaypath, CURLU_URLDECODE);
 
   /* get the path from user input */
-  if(curl_url_get(uh, CURLUPART_PATH, &inputpath, CURLU_URLDECODE)) {
-    inputpath = strdup("");
-    if(!inputpath)
-      goto clean;
-  }
+  curl_url_get(uh, CURLUPART_PATH, &inputpath, CURLU_URLDECODE);
+  /* inputpath might be NULL or a valid pointer now */
 
   /* set gateway parts in input url */
   if(curl_url_set(uh, CURLUPART_SCHEME, gatewayscheme, CURLU_URLENCODE)) {
@@ -927,16 +924,14 @@ static CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
   }
 
   /* if the input path is just a slash, clear it */
-  if(inputpath && *inputpath && strlen(inputpath) == 1) {
-    if(*inputpath == '/') {
-      *inputpath = '\0';
-    }
-  }
+  if(inputpath && (inputpath[0] == '/') && !inputpath[1])
+    *inputpath = '\0';
 
   /* ensure the gateway path ends with a trailing slash */
   ensure_trailing(&gatewaypath, '/');
 
-  pathbuffer = aprintf("%s%s/%s%s", gatewaypath, protocol, cid, inputpath);
+  pathbuffer = aprintf("%s%s/%s%s", gatewaypath, protocol, cid,
+                       inputpath ? inputpath : "");
   if(!pathbuffer) {
     goto clean;
   }
