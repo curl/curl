@@ -43,6 +43,7 @@ my %remove = (
     '#define HAVE_DECL_GETPWUID_R 1' => 1,
     '#define HAVE_DLFCN_H 1' => 1,
     '#define HAVE_GETHOSTBYNAME 1' => 1,
+    '#define HAVE_INTTYPES_H 1' => 1,
     '#define HAVE_IOCTL 1' => 1,
     '#define HAVE_LDAP_SSL 1' => 1,
     '#define HAVE_LIBBROTLIDEC 1' => 1,
