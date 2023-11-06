@@ -70,11 +70,7 @@
 #endif
 
 #ifdef USE_WOLFSSL
-#  if defined(HAVE_INTTYPES_H)
-#    include <inttypes.h>
-#  else
-#    include <stdint.h>
-#  endif
+#include <stdint.h>
 #endif
 
 #ifdef USE_SCHANNEL
