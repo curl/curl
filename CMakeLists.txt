@@ -105,6 +105,9 @@ option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(BUILD_STATIC_LIBS "Build static libraries" OFF)
 option(BUILD_STATIC_CURL "Build curl executable with static libcurl" OFF)
 option(ENABLE_ARES "Set to ON to enable c-ares support" OFF)
+option(CURL_DISABLE_INSTALL "Set to ON to disable instalation targets" OFF)
+
+
 if(WIN32)
   option(CURL_STATIC_CRT "Set to ON to build libcurl with static CRT on Windows (/MT)." OFF)
   option(ENABLE_UNICODE "Set to ON to use the Unicode version of the Windows API functions" OFF)
@@ -1525,259 +1528,263 @@ if(BUILD_TESTING)
   add_subdirectory(tests)
 endif()
 
-# Helper to populate a list (_items) with a label when conditions (the remaining
-# args) are satisfied
-macro(_add_if label)
-  # needs to be a macro to allow this indirection
-  if(${ARGN})
-    set(_items ${_items} "${label}")
-  endif()
-endmacro()
+if (NOT CURL_DISABLE_INSTALL)
 
-# NTLM support requires crypto function adaptions from various SSL libs
-# TODO alternative SSL libs tests for SSP1, GnuTLS, NSS
-if(NOT (CURL_DISABLE_NTLM) AND
-    (USE_OPENSSL OR USE_MBEDTLS OR USE_DARWINSSL OR USE_WIN32_CRYPTO OR USE_GNUTLS))
-  set(use_curl_ntlm_core ON)
-endif()
-
-# Clear list and try to detect available features
-set(_items)
-_add_if("SSL"           SSL_ENABLED)
-_add_if("IPv6"          ENABLE_IPV6)
-_add_if("unixsockets"   USE_UNIX_SOCKETS)
-_add_if("libz"          HAVE_LIBZ)
-_add_if("brotli"        HAVE_BROTLI)
-_add_if("zstd"          HAVE_ZSTD)
-_add_if("AsynchDNS"     USE_ARES OR USE_THREADS_POSIX OR USE_THREADS_WIN32)
-_add_if("IDN"           HAVE_LIBIDN2 OR USE_WIN32_IDN)
-_add_if("Largefile"     (SIZEOF_CURL_OFF_T GREATER 4) AND
-                        ((SIZEOF_OFF_T GREATER 4) OR USE_WIN32_LARGE_FILES))
-# TODO SSP1 (Schannel) check is missing
-_add_if("SSPI"          USE_WINDOWS_SSPI)
-_add_if("GSS-API"       HAVE_GSSAPI)
-_add_if("alt-svc"       NOT CURL_DISABLE_ALTSVC)
-_add_if("HSTS"          NOT CURL_DISABLE_HSTS)
-# TODO SSP1 missing for SPNEGO
-_add_if("SPNEGO"        NOT CURL_DISABLE_NEGOTIATE_AUTH AND
-                        (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
-_add_if("Kerberos"      NOT CURL_DISABLE_KERBEROS_AUTH AND
-                        (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
-# NTLM support requires crypto function adaptions from various SSL libs
-# TODO alternative SSL libs tests for SSP1, GnuTLS, NSS
-_add_if("NTLM"          NOT (CURL_DISABLE_NTLM) AND
-                        (use_curl_ntlm_core OR USE_WINDOWS_SSPI))
-# TODO missing option (autoconf: --enable-ntlm-wb)
-_add_if("NTLM_WB"       NOT (CURL_DISABLE_NTLM) AND
-                        (use_curl_ntlm_core OR USE_WINDOWS_SSPI) AND
-                        NOT CURL_DISABLE_HTTP AND NTLM_WB_ENABLED)
-_add_if("TLS-SRP"       USE_TLS_SRP)
-# TODO option --with-nghttp2 tests for nghttp2 lib and nghttp2/nghttp2.h header
-_add_if("HTTP2"         USE_NGHTTP2)
-_add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE)
-_add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
-# TODO wolfSSL only support this from v5.0.0 onwards
-_add_if("HTTPS-proxy"   SSL_ENABLED AND (USE_OPENSSL OR USE_GNUTLS
-                        OR USE_SCHANNEL OR USE_RUSTLS OR USE_BEARSSL OR
-                        USE_MBEDTLS OR USE_SECTRANSP))
-_add_if("unicode"       ENABLE_UNICODE)
-_add_if("threadsafe"    HAVE_ATOMIC OR
-                        (USE_THREADS_POSIX AND HAVE_PTHREAD_H) OR
-                        (WIN32 AND HAVE_WIN32_WINNT GREATER_EQUAL 0x600))
-_add_if("PSL"           USE_LIBPSL)
-string(REPLACE ";" " " SUPPORT_FEATURES "${_items}")
-message(STATUS "Enabled features: ${SUPPORT_FEATURES}")
-
-# Clear list and try to detect available protocols
-set(_items)
-_add_if("HTTP"          NOT CURL_DISABLE_HTTP)
-_add_if("HTTPS"         NOT CURL_DISABLE_HTTP AND SSL_ENABLED)
-_add_if("FTP"           NOT CURL_DISABLE_FTP)
-_add_if("FTPS"          NOT CURL_DISABLE_FTP AND SSL_ENABLED)
-_add_if("FILE"          NOT CURL_DISABLE_FILE)
-_add_if("TELNET"        NOT CURL_DISABLE_TELNET)
-_add_if("LDAP"          NOT CURL_DISABLE_LDAP)
-# CURL_DISABLE_LDAP implies CURL_DISABLE_LDAPS
-_add_if("LDAPS"         NOT CURL_DISABLE_LDAPS AND
-                        ((USE_OPENLDAP AND SSL_ENABLED) OR
-                        (NOT USE_OPENLDAP AND HAVE_LDAP_SSL)))
-_add_if("DICT"          NOT CURL_DISABLE_DICT)
-_add_if("TFTP"          NOT CURL_DISABLE_TFTP)
-_add_if("GOPHER"        NOT CURL_DISABLE_GOPHER)
-_add_if("GOPHERS"       NOT CURL_DISABLE_GOPHER AND SSL_ENABLED)
-_add_if("POP3"          NOT CURL_DISABLE_POP3)
-_add_if("POP3S"         NOT CURL_DISABLE_POP3 AND SSL_ENABLED)
-_add_if("IMAP"          NOT CURL_DISABLE_IMAP)
-_add_if("IMAPS"         NOT CURL_DISABLE_IMAP AND SSL_ENABLED)
-_add_if("SMB"           NOT CURL_DISABLE_SMB AND
-                        use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
-_add_if("SMBS"          NOT CURL_DISABLE_SMB AND SSL_ENABLED AND
-                        use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
-_add_if("SMTP"          NOT CURL_DISABLE_SMTP)
-_add_if("SMTPS"         NOT CURL_DISABLE_SMTP AND SSL_ENABLED)
-_add_if("SCP"           USE_LIBSSH2 OR USE_LIBSSH)
-_add_if("SFTP"          USE_LIBSSH2 OR USE_LIBSSH)
-_add_if("RTSP"          NOT CURL_DISABLE_RTSP)
-_add_if("RTMP"          USE_LIBRTMP)
-_add_if("MQTT"          NOT CURL_DISABLE_MQTT)
-_add_if("WS"            USE_WEBSOCKETS)
-_add_if("WSS"           USE_WEBSOCKETS)
-if(_items)
-  list(SORT _items)
-endif()
-string(REPLACE ";" " " SUPPORT_PROTOCOLS "${_items}")
-message(STATUS "Enabled protocols: ${SUPPORT_PROTOCOLS}")
-
-# Clear list and collect SSL backends
-set(_items)
-_add_if("Schannel"         SSL_ENABLED AND USE_SCHANNEL)
-_add_if("OpenSSL"          SSL_ENABLED AND USE_OPENSSL)
-_add_if("Secure Transport" SSL_ENABLED AND USE_SECTRANSP)
-_add_if("mbedTLS"          SSL_ENABLED AND USE_MBEDTLS)
-_add_if("BearSSL"          SSL_ENABLED AND USE_BEARSSL)
-_add_if("wolfSSL"          SSL_ENABLED AND USE_WOLFSSL)
-_add_if("GnuTLS"           SSL_ENABLED AND USE_GNUTLS)
-
-if(_items)
-  list(SORT _items)
-endif()
-string(REPLACE ";" " " SSL_BACKENDS "${_items}")
-message(STATUS "Enabled SSL backends: ${SSL_BACKENDS}")
-if(CURL_DEFAULT_SSL_BACKEND)
-  message(STATUS "Default SSL backend: ${CURL_DEFAULT_SSL_BACKEND}")
-endif()
-
-# curl-config needs the following options to be set.
-set(CC                      "${CMAKE_C_COMPILER}")
-# TODO probably put a -D... options here?
-set(CONFIGURE_OPTIONS       "")
-set(CURLVERSION             "${CURL_VERSION}")
-set(exec_prefix             "\${prefix}")
-set(includedir              "\${prefix}/include")
-set(LDFLAGS                 "${CMAKE_SHARED_LINKER_FLAGS}")
-set(LIBCURL_LIBS            "")
-set(libdir                  "${CMAKE_INSTALL_PREFIX}/lib")
-foreach(_lib ${CMAKE_C_IMPLICIT_LINK_LIBRARIES} ${CURL_LIBS})
-  if(TARGET "${_lib}")
-    set(_libname "${_lib}")
-    get_target_property(_imported "${_libname}" IMPORTED)
-    if(NOT _imported)
-      # Reading the LOCATION property on non-imported target will error out.
-      # Assume the user won't need this information in the .pc file.
-      continue()
+    
+  # Helper to populate a list (_items) with a label when conditions (the remaining
+  # args) are satisfied
+  macro(_add_if label)
+    # needs to be a macro to allow this indirection
+    if(${ARGN})
+      set(_items ${_items} "${label}")
     endif()
-    get_target_property(_lib "${_libname}" LOCATION)
-    if(NOT _lib)
-      message(WARNING "Bad lib in library list: ${_libname}")
-      continue()
-    endif()
+  endmacro()
+
+  # NTLM support requires crypto function adaptions from various SSL libs
+  # TODO alternative SSL libs tests for SSP1, GnuTLS, NSS
+  if(NOT (CURL_DISABLE_NTLM) AND
+      (USE_OPENSSL OR USE_MBEDTLS OR USE_DARWINSSL OR USE_WIN32_CRYPTO OR USE_GNUTLS))
+    set(use_curl_ntlm_core ON)
   endif()
-  if(_lib MATCHES ".*/.*" OR _lib MATCHES "^-")
-    set(LIBCURL_LIBS          "${LIBCURL_LIBS} ${_lib}")
+
+  # Clear list and try to detect available features
+  set(_items)
+  _add_if("SSL"           SSL_ENABLED)
+  _add_if("IPv6"          ENABLE_IPV6)
+  _add_if("unixsockets"   USE_UNIX_SOCKETS)
+  _add_if("libz"          HAVE_LIBZ)
+  _add_if("brotli"        HAVE_BROTLI)
+  _add_if("zstd"          HAVE_ZSTD)
+  _add_if("AsynchDNS"     USE_ARES OR USE_THREADS_POSIX OR USE_THREADS_WIN32)
+  _add_if("IDN"           HAVE_LIBIDN2 OR USE_WIN32_IDN)
+  _add_if("Largefile"     (SIZEOF_CURL_OFF_T GREATER 4) AND
+                          ((SIZEOF_OFF_T GREATER 4) OR USE_WIN32_LARGE_FILES))
+  # TODO SSP1 (Schannel) check is missing
+  _add_if("SSPI"          USE_WINDOWS_SSPI)
+  _add_if("GSS-API"       HAVE_GSSAPI)
+  _add_if("alt-svc"       NOT CURL_DISABLE_ALTSVC)
+  _add_if("HSTS"          NOT CURL_DISABLE_HSTS)
+  # TODO SSP1 missing for SPNEGO
+  _add_if("SPNEGO"        NOT CURL_DISABLE_NEGOTIATE_AUTH AND
+                          (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
+  _add_if("Kerberos"      NOT CURL_DISABLE_KERBEROS_AUTH AND
+                          (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
+  # NTLM support requires crypto function adaptions from various SSL libs
+  # TODO alternative SSL libs tests for SSP1, GnuTLS, NSS
+  _add_if("NTLM"          NOT (CURL_DISABLE_NTLM) AND
+                          (use_curl_ntlm_core OR USE_WINDOWS_SSPI))
+  # TODO missing option (autoconf: --enable-ntlm-wb)
+  _add_if("NTLM_WB"       NOT (CURL_DISABLE_NTLM) AND
+                          (use_curl_ntlm_core OR USE_WINDOWS_SSPI) AND
+                          NOT CURL_DISABLE_HTTP AND NTLM_WB_ENABLED)
+  _add_if("TLS-SRP"       USE_TLS_SRP)
+  # TODO option --with-nghttp2 tests for nghttp2 lib and nghttp2/nghttp2.h header
+  _add_if("HTTP2"         USE_NGHTTP2)
+  _add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE)
+  _add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
+  # TODO wolfSSL only support this from v5.0.0 onwards
+  _add_if("HTTPS-proxy"   SSL_ENABLED AND (USE_OPENSSL OR USE_GNUTLS
+                          OR USE_SCHANNEL OR USE_RUSTLS OR USE_BEARSSL OR
+                          USE_MBEDTLS OR USE_SECTRANSP))
+  _add_if("unicode"       ENABLE_UNICODE)
+  _add_if("threadsafe"    HAVE_ATOMIC OR
+                          (USE_THREADS_POSIX AND HAVE_PTHREAD_H) OR
+                          (WIN32 AND HAVE_WIN32_WINNT GREATER_EQUAL 0x600))
+  _add_if("PSL"           USE_LIBPSL)
+  string(REPLACE ";" " " SUPPORT_FEATURES "${_items}")
+  message(STATUS "Enabled features: ${SUPPORT_FEATURES}")
+
+  # Clear list and try to detect available protocols
+  set(_items)
+  _add_if("HTTP"          NOT CURL_DISABLE_HTTP)
+  _add_if("HTTPS"         NOT CURL_DISABLE_HTTP AND SSL_ENABLED)
+  _add_if("FTP"           NOT CURL_DISABLE_FTP)
+  _add_if("FTPS"          NOT CURL_DISABLE_FTP AND SSL_ENABLED)
+  _add_if("FILE"          NOT CURL_DISABLE_FILE)
+  _add_if("TELNET"        NOT CURL_DISABLE_TELNET)
+  _add_if("LDAP"          NOT CURL_DISABLE_LDAP)
+  # CURL_DISABLE_LDAP implies CURL_DISABLE_LDAPS
+  _add_if("LDAPS"         NOT CURL_DISABLE_LDAPS AND
+                          ((USE_OPENLDAP AND SSL_ENABLED) OR
+                          (NOT USE_OPENLDAP AND HAVE_LDAP_SSL)))
+  _add_if("DICT"          NOT CURL_DISABLE_DICT)
+  _add_if("TFTP"          NOT CURL_DISABLE_TFTP)
+  _add_if("GOPHER"        NOT CURL_DISABLE_GOPHER)
+  _add_if("GOPHERS"       NOT CURL_DISABLE_GOPHER AND SSL_ENABLED)
+  _add_if("POP3"          NOT CURL_DISABLE_POP3)
+  _add_if("POP3S"         NOT CURL_DISABLE_POP3 AND SSL_ENABLED)
+  _add_if("IMAP"          NOT CURL_DISABLE_IMAP)
+  _add_if("IMAPS"         NOT CURL_DISABLE_IMAP AND SSL_ENABLED)
+  _add_if("SMB"           NOT CURL_DISABLE_SMB AND
+                          use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
+  _add_if("SMBS"          NOT CURL_DISABLE_SMB AND SSL_ENABLED AND
+                          use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
+  _add_if("SMTP"          NOT CURL_DISABLE_SMTP)
+  _add_if("SMTPS"         NOT CURL_DISABLE_SMTP AND SSL_ENABLED)
+  _add_if("SCP"           USE_LIBSSH2 OR USE_LIBSSH)
+  _add_if("SFTP"          USE_LIBSSH2 OR USE_LIBSSH)
+  _add_if("RTSP"          NOT CURL_DISABLE_RTSP)
+  _add_if("RTMP"          USE_LIBRTMP)
+  _add_if("MQTT"          NOT CURL_DISABLE_MQTT)
+  _add_if("WS"            USE_WEBSOCKETS)
+  _add_if("WSS"           USE_WEBSOCKETS)
+  if(_items)
+    list(SORT _items)
+  endif()
+  string(REPLACE ";" " " SUPPORT_PROTOCOLS "${_items}")
+  message(STATUS "Enabled protocols: ${SUPPORT_PROTOCOLS}")
+
+  # Clear list and collect SSL backends
+  set(_items)
+  _add_if("Schannel"         SSL_ENABLED AND USE_SCHANNEL)
+  _add_if("OpenSSL"          SSL_ENABLED AND USE_OPENSSL)
+  _add_if("Secure Transport" SSL_ENABLED AND USE_SECTRANSP)
+  _add_if("mbedTLS"          SSL_ENABLED AND USE_MBEDTLS)
+  _add_if("BearSSL"          SSL_ENABLED AND USE_BEARSSL)
+  _add_if("wolfSSL"          SSL_ENABLED AND USE_WOLFSSL)
+  _add_if("GnuTLS"           SSL_ENABLED AND USE_GNUTLS)
+
+  if(_items)
+    list(SORT _items)
+  endif()
+  string(REPLACE ";" " " SSL_BACKENDS "${_items}")
+  message(STATUS "Enabled SSL backends: ${SSL_BACKENDS}")
+  if(CURL_DEFAULT_SSL_BACKEND)
+    message(STATUS "Default SSL backend: ${CURL_DEFAULT_SSL_BACKEND}")
+  endif()
+
+  # curl-config needs the following options to be set.
+  set(CC                      "${CMAKE_C_COMPILER}")
+  # TODO probably put a -D... options here?
+  set(CONFIGURE_OPTIONS       "")
+  set(CURLVERSION             "${CURL_VERSION}")
+  set(exec_prefix             "\${prefix}")
+  set(includedir              "\${prefix}/include")
+  set(LDFLAGS                 "${CMAKE_SHARED_LINKER_FLAGS}")
+  set(LIBCURL_LIBS            "")
+  set(libdir                  "${CMAKE_INSTALL_PREFIX}/lib")
+  foreach(_lib ${CMAKE_C_IMPLICIT_LINK_LIBRARIES} ${CURL_LIBS})
+    if(TARGET "${_lib}")
+      set(_libname "${_lib}")
+      get_target_property(_imported "${_libname}" IMPORTED)
+      if(NOT _imported)
+        # Reading the LOCATION property on non-imported target will error out.
+        # Assume the user won't need this information in the .pc file.
+        continue()
+      endif()
+      get_target_property(_lib "${_libname}" LOCATION)
+      if(NOT _lib)
+        message(WARNING "Bad lib in library list: ${_libname}")
+        continue()
+      endif()
+    endif()
+    if(_lib MATCHES ".*/.*" OR _lib MATCHES "^-")
+      set(LIBCURL_LIBS          "${LIBCURL_LIBS} ${_lib}")
+    else()
+      set(LIBCURL_LIBS          "${LIBCURL_LIBS} -l${_lib}")
+    endif()
+  endforeach()
+  if(BUILD_SHARED_LIBS)
+    set(ENABLE_SHARED         "yes")
+    set(LIBCURL_NO_SHARED     "")
+    set(CPPFLAG_CURL_STATICLIB "")
   else()
-    set(LIBCURL_LIBS          "${LIBCURL_LIBS} -l${_lib}")
+    set(ENABLE_SHARED         "no")
+    set(LIBCURL_NO_SHARED     "${LIBCURL_LIBS}")
+    set(CPPFLAG_CURL_STATICLIB "-DCURL_STATICLIB")
   endif()
-endforeach()
-if(BUILD_SHARED_LIBS)
-  set(ENABLE_SHARED         "yes")
-  set(LIBCURL_NO_SHARED     "")
-  set(CPPFLAG_CURL_STATICLIB "")
-else()
-  set(ENABLE_SHARED         "no")
-  set(LIBCURL_NO_SHARED     "${LIBCURL_LIBS}")
-  set(CPPFLAG_CURL_STATICLIB "-DCURL_STATICLIB")
-endif()
-if(BUILD_STATIC_LIBS)
-  set(ENABLE_STATIC         "yes")
-else()
-  set(ENABLE_STATIC         "no")
-endif()
-# "a" (Linux) or "lib" (Windows)
-string(REPLACE "." "" libext "${CMAKE_STATIC_LIBRARY_SUFFIX}")
-set(prefix                  "${CMAKE_INSTALL_PREFIX}")
-# Set this to "yes" to append all libraries on which -lcurl is dependent
-set(REQUIRE_LIB_DEPS        "no")
-# SUPPORT_FEATURES
-# SUPPORT_PROTOCOLS
-set(VERSIONNUM              "${CURL_VERSION_NUM}")
+  if(BUILD_STATIC_LIBS)
+    set(ENABLE_STATIC         "yes")
+  else()
+    set(ENABLE_STATIC         "no")
+  endif()
+  # "a" (Linux) or "lib" (Windows)
+  string(REPLACE "." "" libext "${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  set(prefix                  "${CMAKE_INSTALL_PREFIX}")
+  # Set this to "yes" to append all libraries on which -lcurl is dependent
+  set(REQUIRE_LIB_DEPS        "no")
+  # SUPPORT_FEATURES
+  # SUPPORT_PROTOCOLS
+  set(VERSIONNUM              "${CURL_VERSION_NUM}")
 
-# Finally generate a "curl-config" matching this config
-# Use:
-# * ENABLE_SHARED
-# * ENABLE_STATIC
-configure_file("${CURL_SOURCE_DIR}/curl-config.in"
-               "${CURL_BINARY_DIR}/curl-config" @ONLY)
-install(FILES "${CURL_BINARY_DIR}/curl-config"
-        DESTINATION ${CMAKE_INSTALL_BINDIR}
-        PERMISSIONS
-          OWNER_READ OWNER_WRITE OWNER_EXECUTE
-          GROUP_READ GROUP_EXECUTE
-          WORLD_READ WORLD_EXECUTE)
+  # Finally generate a "curl-config" matching this config
+  # Use:
+  # * ENABLE_SHARED
+  # * ENABLE_STATIC
+  configure_file("${CURL_SOURCE_DIR}/curl-config.in"
+                "${CURL_BINARY_DIR}/curl-config" @ONLY)
+  install(FILES "${CURL_BINARY_DIR}/curl-config"
+          DESTINATION ${CMAKE_INSTALL_BINDIR}
+          PERMISSIONS
+            OWNER_READ OWNER_WRITE OWNER_EXECUTE
+            GROUP_READ GROUP_EXECUTE
+            WORLD_READ WORLD_EXECUTE)
 
-# Finally generate a pkg-config file matching this config
-configure_file("${CURL_SOURCE_DIR}/libcurl.pc.in"
-               "${CURL_BINARY_DIR}/libcurl.pc" @ONLY)
-install(FILES "${CURL_BINARY_DIR}/libcurl.pc"
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+  # Finally generate a pkg-config file matching this config
+  configure_file("${CURL_SOURCE_DIR}/libcurl.pc.in"
+                "${CURL_BINARY_DIR}/libcurl.pc" @ONLY)
+  install(FILES "${CURL_BINARY_DIR}/libcurl.pc"
+          DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
-# install headers
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/curl"
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-    FILES_MATCHING PATTERN "*.h")
+  # install headers
+  install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/curl"
+      DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+      FILES_MATCHING PATTERN "*.h")
 
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-    "${version_config}"
-    VERSION ${CURL_VERSION}
-    COMPATIBILITY SameMajorVersion
-)
-file(READ "${version_config}" generated_version_config)
-file(WRITE "${version_config}"
-"if(NOT PACKAGE_FIND_VERSION_RANGE AND PACKAGE_FIND_VERSION_MAJOR STREQUAL \"7\")
-    # Version 8 satisfies version 7... requirements
-    set(PACKAGE_FIND_VERSION_MAJOR 8)
-    set(PACKAGE_FIND_VERSION_COUNT 1)
-endif()
-${generated_version_config}"
-)
+  include(CMakePackageConfigHelpers)
+  write_basic_package_version_file(
+      "${version_config}"
+      VERSION ${CURL_VERSION}
+      COMPATIBILITY SameMajorVersion
+  )
+  file(READ "${version_config}" generated_version_config)
+  file(WRITE "${version_config}"
+  "if(NOT PACKAGE_FIND_VERSION_RANGE AND PACKAGE_FIND_VERSION_MAJOR STREQUAL \"7\")
+      # Version 8 satisfies version 7... requirements
+      set(PACKAGE_FIND_VERSION_MAJOR 8)
+      set(PACKAGE_FIND_VERSION_COUNT 1)
+  endif()
+  ${generated_version_config}"
+  )
 
-# Use:
-# * TARGETS_EXPORT_NAME
-# * PROJECT_NAME
-configure_package_config_file(CMake/curl-config.cmake.in
-        "${project_config}"
-        INSTALL_DESTINATION ${CURL_INSTALL_CMAKE_DIR}
-)
+  # Use:
+  # * TARGETS_EXPORT_NAME
+  # * PROJECT_NAME
+  configure_package_config_file(CMake/curl-config.cmake.in
+          "${project_config}"
+          INSTALL_DESTINATION ${CURL_INSTALL_CMAKE_DIR}
+  )
 
-if(CURL_ENABLE_EXPORT_TARGET)
+  if(CURL_ENABLE_EXPORT_TARGET)
+    install(
+            EXPORT "${TARGETS_EXPORT_NAME}"
+            NAMESPACE "${PROJECT_NAME}::"
+            DESTINATION ${CURL_INSTALL_CMAKE_DIR}
+    )
+  endif()
+
   install(
-          EXPORT "${TARGETS_EXPORT_NAME}"
-          NAMESPACE "${PROJECT_NAME}::"
+          FILES ${version_config} ${project_config}
           DESTINATION ${CURL_INSTALL_CMAKE_DIR}
   )
-endif()
 
-install(
-        FILES ${version_config} ${project_config}
-        DESTINATION ${CURL_INSTALL_CMAKE_DIR}
-)
-
-# Workaround for MSVS10 to avoid the Dialog Hell
-# FIXME: This could be removed with future version of CMake.
-if(MSVC_VERSION EQUAL 1600)
-  set(CURL_SLN_FILENAME "${CMAKE_CURRENT_BINARY_DIR}/CURL.sln")
-  if(EXISTS "${CURL_SLN_FILENAME}")
-    file(APPEND "${CURL_SLN_FILENAME}" "\n# This should be regenerated!\n")
+  # Workaround for MSVS10 to avoid the Dialog Hell
+  # FIXME: This could be removed with future version of CMake.
+  if(MSVC_VERSION EQUAL 1600)
+    set(CURL_SLN_FILENAME "${CMAKE_CURRENT_BINARY_DIR}/CURL.sln")
+    if(EXISTS "${CURL_SLN_FILENAME}")
+      file(APPEND "${CURL_SLN_FILENAME}" "\n# This should be regenerated!\n")
+    endif()
   endif()
-endif()
 
-if(NOT TARGET curl_uninstall)
-  configure_file(
-      ${CMAKE_CURRENT_SOURCE_DIR}/CMake/cmake_uninstall.cmake.in
-      ${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake
-      IMMEDIATE @ONLY)
+  if(NOT TARGET curl_uninstall)
+    configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/CMake/cmake_uninstall.cmake.in
+        ${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake
+        IMMEDIATE @ONLY)
 
-  add_custom_target(curl_uninstall
-      COMMAND ${CMAKE_COMMAND} -P
-      ${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake)
+    add_custom_target(curl_uninstall
+        COMMAND ${CMAKE_COMMAND} -P
+        ${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake)
+  endif()
 endif()
