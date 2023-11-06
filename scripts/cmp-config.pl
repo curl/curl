@@ -57,6 +57,7 @@ my %remove = (
     '#define HAVE_OPENSSL_X509_H 1' => 1,
     '#define HAVE_SA_FAMILY_T 1' => 1,
     '#define HAVE_SETJMP_H 1' => 1,
+    '#define HAVE_STDINT_H 1' => 1,
     '#define HAVE_STDIO_H 1' => 1,
     '#define HAVE_STDLIB_H 1' => 1,
     '#define HAVE_STRING_H 1' => 1,
