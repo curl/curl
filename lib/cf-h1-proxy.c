@@ -374,7 +374,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
   curl_socket_t tunnelsocket = Curl_conn_cf_get_socket(cf, data);
   char *linep;
   size_t perline;
-  int error;
+  int error, writetype;
 
 #define SELECT_OK      0
 #define SELECT_ERROR   1
@@ -467,15 +467,12 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
     /* output debug if that is requested */
     Curl_debug(data, CURLINFO_HEADER_IN, linep, perline);
 
-    if(!data->set.suppress_connect_headers) {
-      /* send the header to the callback */
-      int writetype = CLIENTWRITE_HEADER | CLIENTWRITE_CONNECT |
-        (ts->headerlines == 1 ? CLIENTWRITE_STATUS : 0);
-
-      result = Curl_client_write(data, writetype, linep, perline);
-      if(result)
-        return result;
-    }
+    /* send the header to the callback */
+    writetype = CLIENTWRITE_HEADER | CLIENTWRITE_CONNECT |
+      (ts->headerlines == 1 ? CLIENTWRITE_STATUS : 0);
+    result = Curl_client_write(data, writetype, linep, perline);
+    if(result)
+      return result;
 
     result = Curl_bump_headersize(data, perline, TRUE);
     if(result)
