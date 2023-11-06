@@ -88,6 +88,13 @@ VC14_10_SRCTMPL = projects/Windows/VC14.10/src/curl.tmpl
 VC14_10_SRCVCXPROJ = projects/Windows/VC14.10/src/curl.vcxproj.dist
 VC14_10_SRCVCXPROJ_DEPS = $(VC14_10_SRCTMPL) Makefile.am src/Makefile.inc
 
+VC14_20_LIBTMPL = projects/Windows/VC14.20/lib/libcurl.tmpl
+VC14_20_LIBVCXPROJ = projects/Windows/VC14.20/lib/libcurl.vcxproj.dist
+VC14_20_LIBVCXPROJ_DEPS = $(VC14_20_LIBTMPL) Makefile.am lib/Makefile.inc
+VC14_20_SRCTMPL = projects/Windows/VC14.20/src/curl.tmpl
+VC14_20_SRCVCXPROJ = projects/Windows/VC14.20/src/curl.vcxproj.dist
+VC14_20_SRCVCXPROJ_DEPS = $(VC14_20_SRCTMPL) Makefile.am src/Makefile.inc
+
 VC14_30_LIBTMPL = projects/Windows/VC14.30/lib/libcurl.tmpl
 VC14_30_LIBVCXPROJ = projects/Windows/VC14.30/lib/libcurl.vcxproj.dist
 VC14_30_LIBVCXPROJ_DEPS = $(VC14_30_LIBTMPL) Makefile.am lib/Makefile.inc
@@ -124,6 +131,11 @@ VC_DIST = projects/README.md                           \
  projects/Windows/VC14.10/lib/libcurl.vcxproj.filters  \
  projects/Windows/VC14.10/src/curl.sln                 \
  projects/Windows/VC14.10/src/curl.vcxproj.filters     \
+ projects/Windows/VC14.20/curl-all.sln                 \
+ projects/Windows/VC14.20/lib/libcurl.sln              \
+ projects/Windows/VC14.20/lib/libcurl.vcxproj.filters  \
+ projects/Windows/VC14.20/src/curl.sln                 \
+ projects/Windows/VC14.20/src/curl.vcxproj.filters     \
  projects/Windows/VC14.30/curl-all.sln                 \
  projects/Windows/VC14.30/lib/libcurl.sln              \
  projects/Windows/VC14.30/lib/libcurl.vcxproj.filters  \
