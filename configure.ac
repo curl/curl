@@ -1850,10 +1850,7 @@ AC_INCLUDES_DEFAULT
       if test "x$not_mit" = "x1"; then
         dnl MIT not found, check for Heimdal
         AC_CHECK_HEADER(gssapi.h,
-            [
-              dnl found
-              AC_DEFINE(HAVE_GSSHEIMDAL, 1, [if you have Heimdal])
-            ],
+            [],
             [
               dnl no header found, disabling GSS
               want_gss=no

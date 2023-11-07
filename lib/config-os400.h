@@ -116,9 +116,6 @@
 /* Define if you have the GNU gssapi libraries */
 #undef HAVE_GSSGNU
 
-/* Define if you have the Heimdal gssapi libraries */
-#define HAVE_GSSHEIMDAL
-
 /* Define if you have the MIT gssapi libraries */
 #undef HAVE_GSSMIT
 

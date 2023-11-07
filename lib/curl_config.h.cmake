@@ -298,9 +298,6 @@
 /* if you have the GNU gssapi libraries */
 #cmakedefine HAVE_GSSGNU 1
 
-/* if you have the Heimdal gssapi libraries */
-#cmakedefine HAVE_GSSHEIMDAL 1
-
 /* if you have the MIT gssapi libraries */
 #cmakedefine HAVE_GSSMIT 1
 
