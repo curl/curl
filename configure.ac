@@ -1828,10 +1828,7 @@ AC_INCLUDES_DEFAULT
       if test "x$not_mit" = "x1"; then
         dnl MIT not found, check for Heimdal
         AC_CHECK_HEADER(gssapi.h,
-            [
-              dnl found
-              AC_DEFINE(HAVE_GSSHEIMDAL, 1, [if you have Heimdal])
-            ],
+            [],
             [
               dnl no header found, disabling GSS
               want_gss=no
@@ -1840,7 +1837,6 @@ AC_INCLUDES_DEFAULT
           )
       else
         dnl MIT found
-        AC_DEFINE(HAVE_GSSMIT, 1, [if you have MIT Kerberos])
         dnl check if we have a really old MIT Kerberos version (<= 1.2)
         AC_MSG_CHECKING([if GSS-API headers declare GSS_C_NT_HOSTBASED_SERVICE])
         AC_COMPILE_IFELSE([

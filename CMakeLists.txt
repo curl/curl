@@ -907,10 +907,8 @@ if(CURL_USE_GSSAPI)
     check_include_file_concat("gssapi/gssapi_generic.h" HAVE_GSSAPI_GSSAPI_GENERIC_H)
     check_include_file_concat("gssapi/gssapi_krb5.h" HAVE_GSSAPI_GSSAPI_KRB5_H)
 
-    if(GSS_FLAVOUR STREQUAL "Heimdal")
-      set(HAVE_GSSHEIMDAL ON)
-    else() # MIT
-      set(HAVE_GSSMIT ON)
+    if(NOT GSS_FLAVOUR STREQUAL "Heimdal")
+      # MIT
       set(_INCLUDE_LIST "")
       if(HAVE_GSSAPI_GSSAPI_H)
         list(APPEND _INCLUDE_LIST "gssapi/gssapi.h")
