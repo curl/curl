@@ -66,9 +66,7 @@
  * Non-ANSI integer extensions
  */
 
-#if (defined(__BORLANDC__) && (__BORLANDC__ >= 0x520)) || \
-    (defined(__POCC__) && defined(_MSC_VER)) || \
-    (defined(_WIN32_WCE)) || \
+#if (defined(_WIN32_WCE)) || \
     (defined(__MINGW32__)) || \
     (defined(_MSC_VER) && (_MSC_VER >= 900) && (_INTEGRAL_MAX_BITS >= 64))
 #  define MP_HAVE_INT_EXTENSIONS
