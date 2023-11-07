@@ -1940,9 +1940,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
       else
       {
-        /* update the start time when we have left the CURLE_NO_CONNECTION_AVAILABLE state */
+        /* update the start time when we have left the
+           CURLE_NO_CONNECTION_AVAILABLE state */
         Curl_pgrsTimeWas(data, TIMER_STARTSINGLE, *nowp);
-        
+
         if(data->state.previouslypending) {
           /* this transfer comes from the pending queue so try move another */
           infof(data, "Transfer was pending, now try another");
