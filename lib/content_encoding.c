@@ -1020,15 +1020,14 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
   return CURLE_NOT_BUILT_IN;
 }
 
-int Curl_all_content_encodings(char *buf, size_t blen)
+void Curl_all_content_encodings(char *buf, size_t blen)
 {
   DEBUGASSERT(buf);
   DEBUGASSERT(blen);
-  if(blen < sizeof(CONTENT_ENCODING_DEFAULT)) {
+  if(blen < sizeof(CONTENT_ENCODING_DEFAULT))
     buf[0] = 0;
-    return 1; /* does not fit */
-  }
-  strcpy(buf, CONTENT_ENCODING_DEFAULT);
+  else
+    strcpy(buf, CONTENT_ENCODING_DEFAULT);
 }
 
 
