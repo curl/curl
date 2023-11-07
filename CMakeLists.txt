@@ -107,7 +107,6 @@ option(BUILD_STATIC_CURL "Build curl executable with static libcurl" OFF)
 option(ENABLE_ARES "Set to ON to enable c-ares support" OFF)
 option(CURL_DISABLE_INSTALL "Set to ON to disable instalation targets" OFF)
 
-
 if(WIN32)
   option(CURL_STATIC_CRT "Set to ON to build libcurl with static CRT on Windows (/MT)." OFF)
   option(ENABLE_UNICODE "Set to ON to use the Unicode version of the Windows API functions" OFF)
@@ -1526,7 +1525,7 @@ if(BUILD_TESTING)
   add_subdirectory(tests)
 endif()
 
-if (NOT CURL_DISABLE_INSTALL)
+if(NOT CURL_DISABLE_INSTALL)
 
     
   # Helper to populate a list (_items) with a label when conditions (the remaining
