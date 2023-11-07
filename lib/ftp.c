@@ -947,7 +947,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
     char *port_start = NULL;
     char *port_sep = NULL;
 
-    addr = calloc(addrlen + 1, 1);
+    addr = calloc(1, addrlen + 1);
     if(!addr) {
       result = CURLE_OUT_OF_MEMORY;
       goto out;
@@ -4379,7 +4379,7 @@ static CURLcode ftp_setup_connection(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
 
-  ftp = calloc(sizeof(struct FTP), 1);
+  ftp = calloc(1, sizeof(struct FTP));
   if(!ftp)
     return CURLE_OUT_OF_MEMORY;
 

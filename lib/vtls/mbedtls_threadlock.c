@@ -51,7 +51,7 @@ int Curl_mbedtlsthreadlock_thread_setup(void)
 {
   int i;
 
-  mutex_buf = calloc(NUMT * sizeof(MBEDTLS_MUTEX_T), 1);
+  mutex_buf = calloc(1, NUMT * sizeof(MBEDTLS_MUTEX_T));
   if(!mutex_buf)
     return 0;     /* error, no number of threads defined */
 

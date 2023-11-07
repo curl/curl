@@ -1345,7 +1345,7 @@ static int cookie_sort_ct(const void *p1, const void *p2)
 
 static struct Cookie *dup_cookie(struct Cookie *src)
 {
-  struct Cookie *d = calloc(sizeof(struct Cookie), 1);
+  struct Cookie *d = calloc(1, sizeof(struct Cookie));
   if(d) {
     CLONE(domain);
     CLONE(path);

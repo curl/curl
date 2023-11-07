@@ -759,7 +759,7 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
   size_t namelen = strlen(hostname);
   *waitp = 0; /* default to synchronous response */
 
-  res = calloc(sizeof(struct thread_data) + namelen, 1);
+  res = calloc(1, sizeof(struct thread_data) + namelen);
   if(res) {
     strcpy(res->hostname, hostname);
     data->conn->resolve_async.hostname = res->hostname;
