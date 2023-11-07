@@ -2423,7 +2423,7 @@ CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
     /* Convert the form structure into a mime structure, then keep
        the conversion */
     if(!data->state.formp) {
-      data->state.formp = calloc(sizeof(curl_mimepart), 1);
+      data->state.formp = calloc(1, sizeof(curl_mimepart));
       if(!data->state.formp)
         return CURLE_OUT_OF_MEMORY;
       Curl_mime_cleanpart(data->state.formp);

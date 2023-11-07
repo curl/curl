@@ -77,7 +77,7 @@ static time_t hsts_debugtime(void *unused)
 
 struct hsts *Curl_hsts_init(void)
 {
-  struct hsts *h = calloc(sizeof(struct hsts), 1);
+  struct hsts *h = calloc(1, sizeof(struct hsts));
   if(h) {
     Curl_llist_init(&h->list, NULL);
   }
@@ -109,7 +109,7 @@ void Curl_hsts_cleanup(struct hsts **hp)
 
 static struct stsentry *hsts_entry(void)
 {
-  return calloc(sizeof(struct stsentry), 1);
+  return calloc(1, sizeof(struct stsentry));
 }
 
 static CURLcode hsts_create(struct hsts *h,
