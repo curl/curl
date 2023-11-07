@@ -275,9 +275,7 @@ checksrc:
 
 .PHONY: vc-ide
 
-vc-ide: $(VC10_LIBVCXPROJ_DEPS) $(VC10_SRCVCXPROJ_DEPS)                  \
- $(VC11_LIBVCXPROJ_DEPS) $(VC11_SRCVCXPROJ_DEPS) $(VC12_LIBVCXPROJ_DEPS) \
- $(VC12_SRCVCXPROJ_DEPS) $(VC14_LIBVCXPROJ_DEPS) $(VC14_SRCVCXPROJ_DEPS) \
+vc-ide: $(VC14_LIBVCXPROJ_DEPS) $(VC14_SRCVCXPROJ_DEPS) \
  $(VC14_10_LIBVCXPROJ_DEPS) $(VC14_10_SRCVCXPROJ_DEPS)                   \
  $(VC14_30_LIBVCXPROJ_DEPS) $(VC14_30_SRCVCXPROJ_DEPS)
 	@(win32_lib_srcs='$(LIB_CFILES)'; \
@@ -439,78 +437,6 @@ function gen_element(type, dir, file)\
   else\
     printf("%s\r\n", $$0);\
 }';\
-	\
-	echo "generating '$(VC10_LIBVCXPROJ)'"; \
-	awk -v proj_type=vcxproj \
-		-v lib_srcs="$$sorted_lib_srcs" \
-		-v lib_hdrs="$$sorted_lib_hdrs" \
-		-v lib_rc="$$win32_lib_rc" \
-		-v lib_vauth_srcs="$$sorted_lib_vauth_srcs" \
-		-v lib_vauth_hdrs="$$sorted_lib_vauth_hdrs" \
-		-v lib_vquic_srcs="$$sorted_lib_vquic_srcs" \
-		-v lib_vquic_hdrs="$$sorted_lib_vquic_hdrs" \
-		-v lib_vssh_srcs="$$sorted_lib_vssh_srcs" \
-		-v lib_vssh_hdrs="$$sorted_lib_vssh_hdrs" \
-		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
-		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
-		"$$awk_code" $(srcdir)/$(VC10_LIBTMPL) > $(VC10_LIBVCXPROJ) || { exit 1; }; \
-	\
-	echo "generating '$(VC10_SRCVCXPROJ)'"; \
-	awk -v proj_type=vcxproj \
-		-v src_srcs="$$sorted_src_srcs" \
-		-v src_hdrs="$$sorted_src_hdrs" \
-		-v src_rc="$$win32_src_rc" \
-		-v src_x_srcs="$$sorted_src_x_srcs" \
-		-v src_x_hdrs="$$sorted_src_x_hdrs" \
-		"$$awk_code" $(srcdir)/$(VC10_SRCTMPL) > $(VC10_SRCVCXPROJ) || { exit 1; }; \
-	\
-	echo "generating '$(VC11_LIBVCXPROJ)'"; \
-	awk -v proj_type=vcxproj \
-		-v lib_srcs="$$sorted_lib_srcs" \
-		-v lib_hdrs="$$sorted_lib_hdrs" \
-		-v lib_rc="$$win32_lib_rc" \
-		-v lib_vauth_srcs="$$sorted_lib_vauth_srcs" \
-		-v lib_vauth_hdrs="$$sorted_lib_vauth_hdrs" \
-		-v lib_vquic_srcs="$$sorted_lib_vquic_srcs" \
-		-v lib_vquic_hdrs="$$sorted_lib_vquic_hdrs" \
-		-v lib_vssh_srcs="$$sorted_lib_vssh_srcs" \
-		-v lib_vssh_hdrs="$$sorted_lib_vssh_hdrs" \
-		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
-		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
-		"$$awk_code" $(srcdir)/$(VC11_LIBTMPL) > $(VC11_LIBVCXPROJ) || { exit 1; }; \
-	\
-	echo "generating '$(VC11_SRCVCXPROJ)'"; \
-	awk -v proj_type=vcxproj \
-		-v src_srcs="$$sorted_src_srcs" \
-		-v src_hdrs="$$sorted_src_hdrs" \
-		-v src_rc="$$win32_src_rc" \
-		-v src_x_srcs="$$sorted_src_x_srcs" \
-		-v src_x_hdrs="$$sorted_src_x_hdrs" \
-		"$$awk_code" $(srcdir)/$(VC11_SRCTMPL) > $(VC11_SRCVCXPROJ) || { exit 1; }; \
-	\
-	echo "generating '$(VC12_LIBVCXPROJ)'"; \
-	awk -v proj_type=vcxproj \
-		-v lib_srcs="$$sorted_lib_srcs" \
-		-v lib_hdrs="$$sorted_lib_hdrs" \
-		-v lib_rc="$$win32_lib_rc" \
-		-v lib_vauth_srcs="$$sorted_lib_vauth_srcs" \
-		-v lib_vauth_hdrs="$$sorted_lib_vauth_hdrs" \
-		-v lib_vquic_srcs="$$sorted_lib_vquic_srcs" \
-		-v lib_vquic_hdrs="$$sorted_lib_vquic_hdrs" \
-		-v lib_vssh_srcs="$$sorted_lib_vssh_srcs" \
-		-v lib_vssh_hdrs="$$sorted_lib_vssh_hdrs" \
-		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
-		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
-		"$$awk_code" $(srcdir)/$(VC12_LIBTMPL) > $(VC12_LIBVCXPROJ) || { exit 1; }; \
-	\
-	echo "generating '$(VC12_SRCVCXPROJ)'"; \
-	awk -v proj_type=vcxproj \
-		-v src_srcs="$$sorted_src_srcs" \
-		-v src_hdrs="$$sorted_src_hdrs" \
-		-v src_rc="$$win32_src_rc" \
-		-v src_x_srcs="$$sorted_src_x_srcs" \
-		-v src_x_hdrs="$$sorted_src_x_hdrs" \
-		"$$awk_code" $(srcdir)/$(VC12_SRCTMPL) > $(VC12_SRCVCXPROJ) || { exit 1; }; \
 	\
 	echo "generating '$(VC14_LIBVCXPROJ)'"; \
 	awk -v proj_type=vcxproj \
