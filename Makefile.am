@@ -53,27 +53,6 @@ CMAKE_DIST =                                    \
  CMake/Utilities.cmake                          \
  CMakeLists.txt
 
-VC10_LIBTMPL = projects/Windows/VC10/lib/libcurl.tmpl
-VC10_LIBVCXPROJ = projects/Windows/VC10/lib/libcurl.vcxproj.dist
-VC10_LIBVCXPROJ_DEPS = $(VC10_LIBTMPL) Makefile.am lib/Makefile.inc
-VC10_SRCTMPL = projects/Windows/VC10/src/curl.tmpl
-VC10_SRCVCXPROJ = projects/Windows/VC10/src/curl.vcxproj.dist
-VC10_SRCVCXPROJ_DEPS = $(VC10_SRCTMPL) Makefile.am src/Makefile.inc
-
-VC11_LIBTMPL = projects/Windows/VC11/lib/libcurl.tmpl
-VC11_LIBVCXPROJ = projects/Windows/VC11/lib/libcurl.vcxproj.dist
-VC11_LIBVCXPROJ_DEPS = $(VC11_LIBTMPL) Makefile.am lib/Makefile.inc
-VC11_SRCTMPL = projects/Windows/VC11/src/curl.tmpl
-VC11_SRCVCXPROJ = projects/Windows/VC11/src/curl.vcxproj.dist
-VC11_SRCVCXPROJ_DEPS = $(VC11_SRCTMPL) Makefile.am src/Makefile.inc
-
-VC12_LIBTMPL = projects/Windows/VC12/lib/libcurl.tmpl
-VC12_LIBVCXPROJ = projects/Windows/VC12/lib/libcurl.vcxproj.dist
-VC12_LIBVCXPROJ_DEPS = $(VC12_LIBTMPL) Makefile.am lib/Makefile.inc
-VC12_SRCTMPL = projects/Windows/VC12/src/curl.tmpl
-VC12_SRCVCXPROJ = projects/Windows/VC12/src/curl.vcxproj.dist
-VC12_SRCVCXPROJ_DEPS = $(VC12_SRCTMPL) Makefile.am src/Makefile.inc
-
 VC14_LIBTMPL = projects/Windows/VC14/lib/libcurl.tmpl
 VC14_LIBVCXPROJ = projects/Windows/VC14/lib/libcurl.vcxproj.dist
 VC14_LIBVCXPROJ_DEPS = $(VC14_LIBTMPL) Makefile.am lib/Makefile.inc
@@ -106,21 +85,6 @@ VC_DIST = projects/README.md                           \
  projects/build-openssl.bat                            \
  projects/build-wolfssl.bat                            \
  projects/checksrc.bat                                 \
- projects/Windows/VC10/curl-all.sln                    \
- projects/Windows/VC10/lib/libcurl.sln                 \
- projects/Windows/VC10/lib/libcurl.vcxproj.filters     \
- projects/Windows/VC10/src/curl.sln                    \
- projects/Windows/VC10/src/curl.vcxproj.filters        \
- projects/Windows/VC11/curl-all.sln                    \
- projects/Windows/VC11/lib/libcurl.sln                 \
- projects/Windows/VC11/lib/libcurl.vcxproj.filters     \
- projects/Windows/VC11/src/curl.sln                    \
- projects/Windows/VC11/src/curl.vcxproj.filters        \
- projects/Windows/VC12/curl-all.sln                    \
- projects/Windows/VC12/lib/libcurl.sln                 \
- projects/Windows/VC12/lib/libcurl.vcxproj.filters     \
- projects/Windows/VC12/src/curl.sln                    \
- projects/Windows/VC12/src/curl.vcxproj.filters        \
  projects/Windows/VC14/curl-all.sln                    \
  projects/Windows/VC14/lib/libcurl.sln                 \
  projects/Windows/VC14/lib/libcurl.vcxproj.filters     \
@@ -163,8 +127,7 @@ EXTRA_DIST = CHANGES COPYING maketgz Makefile.dist curl-config.in            \
  $(VC_DIST) $(WINBUILD_DIST) $(PLAN9_DIST) lib/libcurl.vers.in buildconf.bat \
  libcurl.def
 
-CLEANFILES = $(VC10_LIBVCXPROJ) $(VC10_SRCVCXPROJ) $(VC11_LIBVCXPROJ)        \
- $(VC11_SRCVCXPROJ) $(VC12_LIBVCXPROJ) $(VC12_SRCVCXPROJ) $(VC14_LIBVCXPROJ) \
+CLEANFILES = $(VC14_LIBVCXPROJ) \
  $(VC14_SRCVCXPROJ) $(VC14_10_LIBVCXPROJ) $(VC14_10_SRCVCXPROJ)              \
  $(VC14_30_LIBVCXPROJ) $(VC14_30_SRCVCXPROJ)
 
