@@ -2816,6 +2816,7 @@ if test X"$want_nghttp2" != Xno; then
   LDFLAGS="$LDFLAGS $LD_H2"
   CPPFLAGS="$CPPFLAGS $CPP_H2"
   LIBS="$LIB_H2 $LIBS"
+  AC_SUBST(LIB_H2)
 
   # use nghttp2_session_get_stream_local_window_size to require nghttp2
   # >= 1.15.0
