@@ -1527,7 +1527,6 @@ endif()
 
 if(NOT CURL_DISABLE_INSTALL)
 
-    
   # Helper to populate a list (_items) with a label when conditions (the remaining
   # args) are satisfied
   macro(_add_if label)
