@@ -849,13 +849,17 @@ static const struct Curl_cwtype * const encodings[] = {
 };
 
 
-/* Return a list of comma-separated names of supported encodings. */
-char *Curl_all_content_encodings(void)
+/* Provide a list of comma-separated names of supported encodings.
+*/
+void Curl_all_content_encodings(char *buf, size_t blen)
 {
   size_t len = 0;
   const struct Curl_cwtype * const *cep;
   const struct Curl_cwtype *ce;
-  char *ace;
+
+  DEBUGASSERT(buf);
+  DEBUGASSERT(blen);
+  buf[0] = 0;
 
   for(cep = encodings; *cep; cep++) {
     ce = *cep;
@@ -863,12 +867,12 @@ char *Curl_all_content_encodings(void)
       len += strlen(ce->name) + 2;
   }
 
-  if(!len)
-    return strdup(CONTENT_ENCODING_DEFAULT);
-
-  ace = malloc(len);
-  if(ace) {
-    char *p = ace;
+  if(!len) {
+    if(blen >= sizeof(CONTENT_ENCODING_DEFAULT))
+      strcpy(buf, CONTENT_ENCODING_DEFAULT);
+  }
+  else if(blen > len) {
+    char *p = buf;
     for(cep = encodings; *cep; cep++) {
       ce = *cep;
       if(!strcasecompare(ce->name, CONTENT_ENCODING_DEFAULT)) {
@@ -880,10 +884,7 @@ char *Curl_all_content_encodings(void)
     }
     p[-2] = '\0';
   }
-
-  return ace;
 }
-
 
 /* Deferred error dummy writer. */
 static CURLcode error_do_init(struct Curl_easy *data,
@@ -898,7 +899,8 @@ static CURLcode error_do_write(struct Curl_easy *data,
                                      struct Curl_cwriter *writer, int type,
                                      const char *buf, size_t nbytes)
 {
-  char *all = Curl_all_content_encodings();
+  char all[256];
+  (void)Curl_all_content_encodings(all, sizeof(all));
 
   (void) writer;
   (void) buf;
@@ -907,11 +909,8 @@ static CURLcode error_do_write(struct Curl_easy *data,
   if(!(type & CLIENTWRITE_BODY))
     return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
 
-  if(!all)
-    return CURLE_OUT_OF_MEMORY;
   failf(data, "Unrecognized content encoding type. "
         "libcurl understands %s content encodings.", all);
-  free(all);
   return CURLE_BAD_CONTENT_ENCODING;
 }
 
@@ -1021,9 +1020,16 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
   return CURLE_NOT_BUILT_IN;
 }
 
-char *Curl_all_content_encodings(void)
+int Curl_all_content_encodings(char *buf, size_t blen)
 {
-  return strdup(CONTENT_ENCODING_DEFAULT);  /* Satisfy caller. */
+  DEBUGASSERT(buf);
+  DEBUGASSERT(blen);
+  if(blen < sizeof(CONTENT_ENCODING_DEFAULT)) {
+    buf[0] = 0;
+    return 1; /* does not fit */
+  }
+  strcpy(buf, CONTENT_ENCODING_DEFAULT);
 }
+
 
 #endif /* CURL_DISABLE_HTTP */
