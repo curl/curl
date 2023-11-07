@@ -817,8 +817,6 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
       if(result)
         goto out;
       *pconsumed += consumed;
-      buf += consumed;
-      blen -= consumed;
     }
   }
 
