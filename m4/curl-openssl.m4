@@ -312,7 +312,7 @@ if test "x$OPT_OPENSSL" != xno; then
       AC_LANG_PROGRAM([[
 #include <openssl/opensslv.h>
       ]],[[
-        #if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
+        #if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
         return 0;
         #else
         #error older than 3

@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_CONTENT_ENCODING_H
-#define HEADER_CURL_CONTENT_ENCODING_H
+#ifndef HEADER_CURL_TOOL_IPFS_H
+#define HEADER_CURL_TOOL_IPFS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,12 +23,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "tool_setup.h"
 
-struct Curl_cwriter;
+#define MAX_GATEWAY_URL_LEN 10000
 
-void Curl_all_content_encodings(char *buf, size_t blen);
+CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
+                          struct OperationConfig *config);
 
-CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
-                                     const char *enclist, int is_transfer);
-#endif /* HEADER_CURL_CONTENT_ENCODING_H */
+#endif /* HEADER_CURL_TOOL_IPFS_H */

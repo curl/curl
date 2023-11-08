@@ -131,9 +131,6 @@ static bool blobcmp(struct curl_blob *first, struct curl_blob *second)
 }
 
 #ifdef USE_SSL
-static const struct alpn_spec ALPN_SPEC_H10 = {
-  { ALPN_HTTP_1_0 }, 1
-};
 static const struct alpn_spec ALPN_SPEC_H11 = {
   { ALPN_HTTP_1_1 }, 1
 };
@@ -147,12 +144,14 @@ static const struct alpn_spec *alpn_get_spec(int httpwant, bool use_alpn)
 {
   if(!use_alpn)
     return NULL;
-  if(httpwant == CURL_HTTP_VERSION_1_0)
-    return &ALPN_SPEC_H10;
 #ifdef USE_HTTP2
   if(httpwant >= CURL_HTTP_VERSION_2)
     return &ALPN_SPEC_H2_H11;
+#else
+  (void)httpwant;
 #endif
+  /* Use the ALPN protocol "http/1.1" for HTTP/1.x.
+     Avoid "http/1.0" because some servers don't support it. */
   return &ALPN_SPEC_H11;
 }
 #endif /* USE_SSL */
@@ -2106,10 +2105,6 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
     if(proto_len == ALPN_HTTP_1_1_LENGTH &&
        !memcmp(ALPN_HTTP_1_1, proto, ALPN_HTTP_1_1_LENGTH)) {
       *palpn = CURL_HTTP_VERSION_1_1;
-    }
-    else if(proto_len == ALPN_HTTP_1_0_LENGTH &&
-            !memcmp(ALPN_HTTP_1_0, proto, ALPN_HTTP_1_0_LENGTH)) {
-      *palpn = CURL_HTTP_VERSION_1_0;
     }
 #ifdef USE_HTTP2
     else if(proto_len == ALPN_H2_LENGTH &&
