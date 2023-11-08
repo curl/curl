@@ -12,7 +12,6 @@ check the changelog of the current development status, as one or more of these
 problems may have been fixed or changed somewhat since this was written.
 
  1. HTTP
- 1.1 hyper memory-leaks
  1.2 hyper is slow
  1.5 Expect-100 meets 417
 
@@ -102,10 +101,6 @@ problems may have been fixed or changed somewhat since this was written.
 
  16. aws-sigv4
  16.1 aws-sigv4 does not sign requests with * correctly
- 16.2 aws-sigv4 does not sign requests with valueless queries correctly
- 16.3 aws-sigv4 is missing the amz-content-sha256 header
- 16.4 aws-sigv4 does not sort query string parameters before signing
- 16.5 aws-sigv4 does not sign requests with empty URL query correctly
  16.6 aws-sigv4 does not behave well with AWS VPC Lattice
 
  17. HTTP/2
@@ -578,22 +573,6 @@ problems may have been fixed or changed somewhat since this was written.
 16.1 aws-sigv4 does not sign requests with * correctly
 
  https://github.com/curl/curl/issues/7559
-
-16.2 aws-sigv4 does not sign requests with valueless queries correctly
-
- https://github.com/curl/curl/issues/8107
-
-16.3 aws-sigv4 is missing the amz-content-sha256 header
-
- https://github.com/curl/curl/issues/8810
-
-16.4 aws-sigv4 does not sort query string parameters before signing
-
- https://github.com/curl/curl/issues/9717
-
-16.5 aws-sigv4 does not sign requests with empty URL query correctly
-
- https://github.com/curl/curl/issues/10129
 
 16.6 aws-sigv4 does not behave well with AWS VPC Lattice
 

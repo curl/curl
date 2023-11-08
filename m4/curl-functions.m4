@@ -108,35 +108,6 @@ curl_includes_ifaddrs="\
 ])
 
 
-dnl CURL_INCLUDES_INTTYPES
-dnl -------------------------------------------------
-dnl Set up variable with list of headers that must be
-dnl included when inttypes.h is to be included.
-
-AC_DEFUN([CURL_INCLUDES_INTTYPES], [
-curl_includes_inttypes="\
-/* includes start */
-#ifdef HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
-#ifdef HAVE_STDINT_H
-# include <stdint.h>
-#endif
-#ifdef HAVE_INTTYPES_H
-# include <inttypes.h>
-#endif
-/* includes end */"
-  case $host_os in
-    irix*)
-      ac_cv_header_stdint_h="no"
-      ;;
-  esac
-  AC_CHECK_HEADERS(
-    sys/types.h stdint.h inttypes.h,
-    [], [], [$curl_includes_inttypes])
-])
-
-
 dnl CURL_INCLUDES_LIBGEN
 dnl -------------------------------------------------
 dnl Set up variable with list of headers that must be

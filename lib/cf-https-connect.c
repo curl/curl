@@ -188,9 +188,6 @@ static CURLcode baller_connected(struct Curl_cfilter *cf,
 #endif
     infof(data, "using HTTP/2");
     break;
-  case CURL_HTTP_VERSION_1_1:
-    infof(data, "using HTTP/1.1");
-    break;
   default:
     infof(data, "using HTTP/1.x");
     break;

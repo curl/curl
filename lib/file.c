@@ -414,7 +414,6 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
   bool size_known;
   bool fstated = FALSE;
   char *buf = data->state.buffer;
-  curl_off_t bytecount = 0;
   int fd;
   struct FILEPROTO *file;
 
@@ -563,15 +562,10 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     if(nread <= 0 || (size_known && (expected_size == 0)))
       break;
 
-    bytecount += nread;
     if(size_known)
       expected_size -= nread;
 
     result = Curl_client_write(data, CLIENTWRITE_BODY, buf, nread);
-    if(result)
-      return result;
-
-    result = Curl_pgrsSetDownloadCounter(data, bytecount);
     if(result)
       return result;
 

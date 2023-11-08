@@ -1194,8 +1194,6 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
       if(result)
         return result;
 
-      data->req.bytecount += chunk;
-
       infof(data, "Written %zu bytes, %" CURL_FORMAT_CURL_OFF_TU
             " bytes are left for transfer", chunk, size - chunk);
 

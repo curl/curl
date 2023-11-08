@@ -38,17 +38,6 @@
 /* Define if you have the <fcntl.h> header file. */
 #define HAVE_FCNTL_H 1
 
-/* Define to 1 if you have the <inttypes.h> header file. */
-#if (defined(_MSC_VER) && (_MSC_VER >= 1800)) || defined(__MINGW32__)
-#define HAVE_INTTYPES_H 1
-#endif
-
-/* Define to 1 if you have the <stdint.h> header file. */
-#if (defined(_MSC_VER) && (_MSC_VER >= 1600)) || defined(__MINGW32__) || \
-    (defined(__BORLANDC__) && (__BORLANDC__ >= 0x0582)) || defined(__POCC__)
-#define HAVE_STDINT_H 1
-#endif
-
 /* Define if you have the <io.h> header file. */
 #define HAVE_IO_H 1
 
@@ -56,9 +45,7 @@
 #define HAVE_LOCALE_H 1
 
 /* Define if you need <malloc.h> header even with <stdlib.h> header file. */
-#if !defined(__SALFORDC__) && !defined(__POCC__)
 #define NEED_MALLOC_H 1
-#endif
 
 /* Define if you have the <netdb.h> header file. */
 /* #define HAVE_NETDB_H 1 */
@@ -97,9 +84,7 @@
 #define HAVE_SYS_TYPES_H 1
 
 /* Define if you have the <sys/utime.h> header file. */
-#ifndef __BORLANDC__
 #define HAVE_SYS_UTIME_H 1
-#endif
 
 /* Define if you have the <termio.h> header file. */
 /* #define HAVE_TERMIO_H 1 */
@@ -108,7 +93,7 @@
 /* #define HAVE_TERMIOS_H 1 */
 
 /* Define if you have the <unistd.h> header file. */
-#if defined(__MINGW32__) || defined(__LCC__) || defined(__POCC__)
+#if defined(__MINGW32__)
 #define HAVE_UNISTD_H 1
 #endif
 
@@ -116,14 +101,10 @@
 #define HAVE_WINDOWS_H 1
 
 /* Define if you have the <winsock2.h> header file. */
-#ifndef __SALFORDC__
 #define HAVE_WINSOCK2_H 1
-#endif
 
 /* Define if you have the <ws2tcpip.h> header file. */
-#ifndef __SALFORDC__
 #define HAVE_WS2TCPIP_H 1
-#endif
 
 /* Define to 1 if you have the <libgen.h> header file. */
 #if defined(__MINGW32__)
@@ -198,15 +179,12 @@
 #define HAVE_STRICMP 1
 
 /* Define if you have the strtoll function. */
-#if defined(__MINGW32__) || defined(__POCC__) || \
-    (defined(_MSC_VER) && (_MSC_VER >= 1800))
+#if (defined(_MSC_VER) && (_MSC_VER >= 1800)) || defined(__MINGW32__)
 #define HAVE_STRTOLL 1
 #endif
 
 /* Define if you have the utime function. */
-#ifndef __BORLANDC__
 #define HAVE_UTIME 1
-#endif
 
 /* Define if you have the recv function. */
 #define HAVE_RECV 1
@@ -281,7 +259,7 @@
 
 /* Define if ssize_t is not an available 'typedefed' type. */
 #ifndef _SSIZE_T_DEFINED
-#  if defined(__POCC__) || defined(__MINGW32__)
+#  if defined(__MINGW32__)
 #  elif defined(_WIN64)
 #    define _SSIZE_T_DEFINED
 #    define ssize_t __int64
@@ -374,9 +352,7 @@
 /* #undef HAVE_GMTIME_R */
 
 /* Define if the compiler supports the 'long long' data type. */
-#if defined(__MINGW32__) || \
-    (defined(_MSC_VER)     && (_MSC_VER     >= 1310)) || \
-    (defined(__BORLANDC__) && (__BORLANDC__ >= 0x561))
+#if (defined(_MSC_VER) && (_MSC_VER >= 1310)) || defined(__MINGW32__)
 #define HAVE_LONGLONG 1
 #endif
 
@@ -458,39 +434,17 @@ Vista
 #  endif
 #endif
 
-/* When no build target is specified Pelles C 5.00 and later default build
-   target is Windows Vista. We override default target to be Windows 2000. */
-#if defined(__POCC__) && (__POCC__ >= 500)
-#  ifndef _WIN32_WINNT
-#    define _WIN32_WINNT 0x0500
-#  endif
-#  ifndef WINVER
-#    define WINVER 0x0500
-#  endif
-#endif
-
 /* Windows XP is required for freeaddrinfo, getaddrinfo */
 #define HAVE_FREEADDRINFO           1
 #define HAVE_GETADDRINFO            1
 #define HAVE_GETADDRINFO_THREADSAFE 1
-
-#if defined(__POCC__)
-#  ifndef _MSC_VER
-#    error Microsoft extensions /Ze compiler option is required
-#  endif
-#  ifndef __POCC__OLDNAMES
-#    error Compatibility names /Go compiler option is required
-#  endif
-#endif
 
 /* ---------------------------------------------------------------- */
 /*                          STRUCT RELATED                          */
 /* ---------------------------------------------------------------- */
 
 /* Define if you have struct sockaddr_storage. */
-#if !defined(__SALFORDC__) && !defined(__BORLANDC__)
 #define HAVE_STRUCT_SOCKADDR_STORAGE 1
-#endif
 
 /* Define if you have struct timeval. */
 #define HAVE_STRUCT_TIMEVAL 1
@@ -512,10 +466,6 @@ Vista
 
 #if defined(__MINGW32__) && !defined(USE_WIN32_LARGE_FILES)
 #  define USE_WIN32_LARGE_FILES
-#endif
-
-#if defined(__POCC__)
-#  undef USE_WIN32_LARGE_FILES
 #endif
 
 #if !defined(USE_WIN32_LARGE_FILES) && !defined(USE_WIN32_SMALL_FILES)
@@ -579,10 +529,6 @@ Vista
 #define USE_WIN32_LDAP 1
 #endif
 
-#if defined(__POCC__) && defined(USE_WIN32_LDAP)
-#  define CURL_DISABLE_LDAP 1
-#endif
-
 /* Define to use the Windows crypto library. */
 #if !defined(CURL_WINDOWS_APP)
 #define USE_WIN32_CRYPTO
@@ -618,7 +564,7 @@ Vista
 /* If you want to build curl with the built-in manual */
 #define USE_MANUAL 1
 
-#if defined(__POCC__) || defined(USE_IPV6)
+#if defined(USE_IPV6)
 #  define ENABLE_IPV6 1
 #endif
 

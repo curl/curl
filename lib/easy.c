@@ -112,7 +112,7 @@ static curl_simple_lock s_lock = CURL_SIMPLE_LOCK_INIT;
 #define system_strdup strdup
 #endif
 
-#if defined(_MSC_VER) && defined(_DLL) && !defined(__POCC__)
+#if defined(_MSC_VER) && defined(_DLL)
 #  pragma warning(disable:4232) /* MSVC extension, dllimport identity */
 #endif
 
@@ -129,7 +129,7 @@ curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
 curl_wcsdup_callback Curl_cwcsdup = Curl_wcsdup;
 #endif
 
-#if defined(_MSC_VER) && defined(_DLL) && !defined(__POCC__)
+#if defined(_MSC_VER) && defined(_DLL)
 #  pragma warning(default:4232) /* MSVC extension, dllimport identity */
 #endif
 
