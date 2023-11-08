@@ -1938,8 +1938,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         result = CURLE_OK;
         break;
       }
-      else
-      {
+      else {
         /* update the start time when we have left the
            CURLE_NO_CONNECTION_AVAILABLE state */
         Curl_pgrsTimeWas(data, TIMER_STARTSINGLE, *nowp);
