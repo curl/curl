@@ -1047,14 +1047,7 @@ static CURLcode smb_request_state(struct Curl_easy *data, bool *done)
         break;
       }
     }
-    data->req.bytecount += len;
     data->req.offset += len;
-    result = Curl_pgrsSetDownloadCounter(data, data->req.bytecount);
-    if(result) {
-      req->result = result;
-      next_state = SMB_CLOSE;
-      break;
-    }
     next_state = (len < MAX_PAYLOAD_SIZE) ? SMB_CLOSE : SMB_DOWNLOAD;
     break;
 

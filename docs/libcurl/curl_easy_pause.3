@@ -26,9 +26,9 @@
 curl_easy_pause - pause and unpause a connection
 .SH SYNOPSIS
 .nf
-.B #include <curl/curl.h>
+#include <curl/curl.h>
 
-.BI "CURLcode curl_easy_pause(CURL *"handle ", int "bitmask ");"
+CURLcode curl_easy_pause(CURL *handle, int bitmask );
 .fi
 .SH DESCRIPTION
 Using this function, you can explicitly mark a running connection to get

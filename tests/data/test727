@@ -8,7 +8,7 @@ IPNS
 #
 # Server-side
 <reply>
-<data>
+<data nocheck="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -34,7 +34,7 @@ http
 IPNS
 </name>
 <command>
---ipfs-gateway http://%HOSTIP:%HTTPPORT/%TESTNUMBER ipns://QmV5JejrpgUxnkZeFZYMxVCqAbKy3KdPXWXyuEDiMNZwUx
+--ipfs-gateway http://%HOSTIP:%HTTPPORT ipns://bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u
 </command>
 </client>
 
@@ -42,7 +42,7 @@ IPNS
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
-GET /ipns/QmV5JejrpgUxnkZeFZYMxVCqAbKy3KdPXWXyuEDiMNZwUx HTTP/1.1
+GET /ipns/bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

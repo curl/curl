@@ -953,18 +953,12 @@ static CURLcode client_write(struct Curl_easy *data,
     if(!len && plen && prefix[plen - 1] == ' ')
       plen--;
     result = Curl_client_write(data, CLIENTWRITE_BODY, (char *) prefix, plen);
-    if(!result)
-      data->req.bytecount += plen;
   }
   if(!result && value) {
     result = Curl_client_write(data, CLIENTWRITE_BODY, (char *) value, len);
-    if(!result)
-      data->req.bytecount += len;
   }
   if(!result && suffix) {
     result = Curl_client_write(data, CLIENTWRITE_BODY, (char *) suffix, slen);
-    if(!result)
-      data->req.bytecount += slen;
   }
   return result;
 }

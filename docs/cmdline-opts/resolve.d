@@ -37,5 +37,3 @@ Support for providing multiple IP addresses per entry was added in 7.59.0.
 Support for resolving with wildcard was added in 7.64.0.
 
 Support for the '+' prefix was was added in 7.75.0.
-
-This option can be used many times to add many host names to resolve.

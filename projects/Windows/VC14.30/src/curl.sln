@@ -1,5 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
+# Visual Studio 17
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "curl", "curl.vcxproj", "{5228E9CE-A216-422F-A5E6-58E95E2DD71D}"
 EndProject
 Global

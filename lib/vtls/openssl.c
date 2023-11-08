@@ -240,7 +240,11 @@
 #elif defined(OPENSSL_IS_AWSLC)
 #define OSSL_PACKAGE "AWS-LC"
 #else
-#define OSSL_PACKAGE "OpenSSL"
+# if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
+#   define OSSL_PACKAGE "quictls"
+# else
+#   define OSSL_PACKAGE "OpenSSL"
+#endif
 #endif
 
 #if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
@@ -3374,6 +3378,7 @@ static X509_STORE *get_cached_x509_store(struct Curl_cfilter *cf,
   struct Curl_multi *multi = data->multi_easy ? data->multi_easy : data->multi;
   X509_STORE *store = NULL;
 
+  DEBUGASSERT(multi);
   if(multi &&
      multi->ssl_backend_data &&
      multi->ssl_backend_data->store &&
@@ -3393,6 +3398,7 @@ static void set_cached_x509_store(struct Curl_cfilter *cf,
   struct Curl_multi *multi = data->multi_easy ? data->multi_easy : data->multi;
   struct multi_ssl_backend_data *mbackend;
 
+  DEBUGASSERT(multi);
   if(!multi)
     return;
 
