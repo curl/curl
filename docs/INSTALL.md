@@ -461,10 +461,16 @@ There are a number of configure options that can be used to reduce the size of
 libcurl for embedded applications where binary size is an important factor.
 First, be sure to set the `CFLAGS` variable when configuring with any relevant
 compiler optimization flags to reduce the size of the binary. For gcc, this
-would mean at minimum the -Os option, and potentially the `-march=X`,
-`-mdynamic-no-pic` and `-flto` options as well, e.g.
+would mean at minimum the `-Os` option, and others like the following that
+may be relevant in some environments: `-march=X`, `-mthumb`, `-m32`,
+`-mdynamic-no-pic`, `-flto`, `-fdata-sections`, `-ffunction-sections`,
+`-fno-unwind-tables`, `-fno-asynchronous-unwind-tables`,
+`-fno-record-gcc-switches`, `-fsection-anchors`, `-fno-plt`,
+`-Wl,--gc-sections`, `-Wl,-Bsymbolic`, `-Wl,-s`,
 
-    ./configure CFLAGS='-Os' LDFLAGS='-Wl,-Bsymbolic'...
+For example, this is how to combine a few of these options:
+
+    ./configure CC=gcc CFLAGS='-Os -ffunction-sections' LDFLAGS='-Wl,--gc-sections'...
 
 Note that newer compilers often produce smaller code than older versions
 due to improved optimization.
@@ -474,7 +480,7 @@ configure command-line as you can to disable all the libcurl features that you
 know your application is not going to need. Besides specifying the
 `--disable-PROTOCOL` flags for all the types of URLs your application do not
 use, here are some other flags that can reduce the size of the library by
-disabling support for some feature:
+disabling support for some feature (run `./configure --help` to see them all):
 
  - `--disable-alt-svc` (HTTP Alt-Svc)
  - `--disable-ares` (the C-ARES DNS library)
@@ -488,13 +494,17 @@ disabling support for some feature:
  - `--disable-dateparse` (date parsing for time conditionals)
  - `--disable-dnsshuffle` (internal server load spreading)
  - `--disable-doh` (DNS-over-HTTP)
+ - `--disable-form-api` (POST form API)
  - `--disable-get-easy-options` (lookup easy options at runtime)
+ - `--disable-headers-api` (API to access headers)
  - `--disable-hsts` (HTTP Strict Transport Security)
  - `--disable-http-auth` (all HTTP authentication)
  - `--disable-ipv6` (IPv6)
  - `--disable-libcurl-option` (--libcurl C code generation support)
- - `--disable-manual` (built-in documentation)
+ - `--disable-manual` (--manual built-in documentation)
+ - `--disable-mime` (MIME API)
  - `--disable-netrc`  (.netrc file)
+ - `--disable-ntlm` (NTLM authentication)
  - `--disable-ntlm-wb` (NTLM WinBind)
  - `--disable-progress-meter` (graphical progress meter in library)
  - `--disable-proxy` (HTTP and SOCKS proxies)
@@ -516,23 +526,14 @@ disabling support for some feature:
  - `--without-ssl` (SSL/TLS)
  - `--without-zlib` (on-the-fly decompression)
 
-The GNU compiler and linker have a number of options that can reduce the
-size of the libcurl dynamic libraries on some platforms even further.
-Specify them by providing appropriate `CFLAGS` and `LDFLAGS` variables on
-the configure command-line, e.g.
-
-    CFLAGS="-Os -ffunction-sections -fdata-sections
-            -fno-unwind-tables -fno-asynchronous-unwind-tables -flto"
-    LDFLAGS="-Wl,-s -Wl,-Bsymbolic -Wl,--gc-sections"
-
 Be sure also to strip debugging symbols from your binaries after compiling
-using 'strip' (or the appropriate variant if cross-compiling). If space is
-really tight, you may be able to remove some unneeded sections of the shared
-library using the -R option to objcopy (e.g. the .comment section).
+using 'strip' or an option like `-s`. If space is really tight, you may be able
+to gain a few bytes by removing some unneeded sections of the shared library
+using the -R option to objcopy (e.g. the .comment section).
 
 Using these techniques it is possible to create a basic HTTP-only libcurl
-shared library for i386 Linux platforms that is only 133 KiB in size
-(as of libcurl version 7.80.0, using gcc 11.2.0).
+shared library for i386 Linux platforms that is only 130 KiB in size
+(as of libcurl version 8.6.0, using gcc 13.2.0).
 
 You may find that statically linking libcurl to your application results in a
 lower total size than dynamically linking.
