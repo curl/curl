@@ -104,7 +104,8 @@ static char *ipfs_gateway(void)
 
     /* get the first line of the gateway file, ignore the rest */
     while((c = getc(gateway_file)) != EOF && c != '\n' && c != '\r') {
-      if(curlx_dyn_addn(&dyn, &c, 1))
+      char c_char = (char)c;
+      if(curlx_dyn_addn(&dyn, &c_char, 1))
         goto fail;
     }
 
