@@ -69,7 +69,7 @@ If you trust this behavior from your gateway of choice then passing the `-L` opt
 Depending on the arguments, cURL could present the user with an error.
 
 ### Gateway file and environment variable
-cURL tried to look for the file: `~/.ipfs/gateway` but couldn't find it. It also tried to look for the `IPFS_GATEWAY` environment variable but couldn't find that either. This happens when no extra arguments are passed to cURL and letting it try to figure it out [automatically](#Automatic-gateway-detection).
+cURL tried to look for the file: `~/.ipfs/gateway` but couldn't find it. It also tried to look for the `IPFS_GATEWAY` environment variable but couldn't find that either. This happens when no extra arguments are passed to cURL and letting it try to figure it out [automatically](#automatic-gateway-detection).
 
 Any IPFS implementation that has gateway support should expose it's URL in `~/.ipfs/gateway`. If you are already running a gateway, make sure it exposes the file where cURL expects to find it.
 
