@@ -390,7 +390,7 @@ endif()
 check_function_exists(gethostname HAVE_GETHOSTNAME)
 
 if(WIN32)
-  list(APPEND CURL_LIBS "ws2_32")
+  list(APPEND CURL_LIBS "ws2_32" "bcrypt")
   if(USE_LIBRTMP)
     list(APPEND CURL_LIBS "winmm")
   endif()
@@ -492,11 +492,6 @@ if(CURL_USE_OPENSSL)
   else()
     list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})
     include_directories(${OPENSSL_INCLUDE_DIR})
-  endif()
-
-  if(WIN32)
-    list(APPEND CURL_LIBS "ws2_32")
-    list(APPEND CURL_LIBS "bcrypt")  # for OpenSSL/LibreSSL
   endif()
 
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "openssl")
@@ -1437,8 +1432,6 @@ if(WIN32)
   if(USE_WIN32_CRYPTO OR USE_SCHANNEL)
     list(APPEND CURL_LIBS "advapi32" "crypt32")
   endif()
-
-  list(APPEND CURL_LIBS "bcrypt")
 endif()
 
 if(MSVC)
