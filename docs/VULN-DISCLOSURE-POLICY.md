@@ -59,8 +59,7 @@ announcement.
   [SECURITY-ADVISORY](https://curl.se/dev/advisory.html) for help on creating
   the advisory.
 
-- Request a CVE number from
-  [HackerOne](https://docs.hackerone.com/programs/cve-requests.html)
+- Request a CVE number from HackerOne
 
 - Update the "security advisory" with the CVE number.
 
