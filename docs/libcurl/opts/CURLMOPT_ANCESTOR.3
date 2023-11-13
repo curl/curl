@@ -21,44 +21,51 @@
 .\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
-.TH curl_share_setopt 3 "8 Aug 2003" "libcurl" "libcurl"
+.\"
+.TH CURLMOPT_ANCESTOR 3 "13 Nov 2023" libcurl libcurl
 .SH NAME
-curl_share_setopt - Set options for a shared object
+CURLMOPT_ANCESTOR \- easy handle to inherit from
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
 
-CURLSHcode curl_share_setopt(CURLSH *share, CURLSHoption option, parameter);
+CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_ANCESTOR, CURL *easy);
 .fi
 .SH DESCRIPTION
-Set the \fIoption\fP to \fIparameter\fP for the given \fIshare\fP.
-.SH OPTIONS
-.IP CURLSHOPT_ANCESTOR
-See \fICURLSHOPT_ANCESTOR(3)\fP.
-.IP CURLSHOPT_LOCKFUNC
-See \fICURLSHOPT_LOCKFUNC(3)\fP.
-.IP CURLSHOPT_UNLOCKFUNC
-See \fICURLSHOPT_UNLOCKFUNC(3)\fP.
-.IP CURLSHOPT_SHARE
-See \fICURLSHOPT_SHARE(3)\fP.
-.IP CURLSHOPT_UNSHARE
-See \fICURLSHOPT_UNSHARE(3)\fP.
-.IP CURLSHOPT_USERDATA
-See \fICURLSHOPT_USERDATA(3)\fP.
+This passes in an easy handle that curl uses to copy values from when doing
+DoH requests and uses when closing connections after all "ordinary" easy
+handles are gone.
+
+This handle is not returned when \fIcurl_multi_get_handles(3)\fP is called.
+
+This handle will be closed and freed by curl itself when
+\fIcurl_multi_cleanup(3)\fP is called. Do not call \fIcurl_easy_cleanup(3)\fP
+once the ownership has been transferred with the \fIcurl_multi_setopt(3)\fP
+call.
+
+This operation cannot be reversed. The ancestor handle cannot be removed
+again.
+
+Set debug callbacks, verbose level, stderr redirects and more for this
+ancestor handle to control what happens for DoH requests and when shutting
+down "orphan" connections.
+.SH DEFAULT
+NULL
+.SH PROTOCOLS
+All
 .SH EXAMPLE
 .nf
-  CURLSHcode sh;
-  share = curl_share_init();
-  sh = curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
-  if(sh)
-    printf("Error: %s\\n", curl_share_strerror(sh));
+CURL *easy = curl_easy_init();
+
+/* we want verbose shutdowns */
+curl_easy_setopt(easy, CURLOPT_VERBOSE, 1L);
+
+curl_multi_setopt(multi, CURLMOPT_ANCESTOR, easy);
 .fi
 .SH AVAILABILITY
-Added in 7.10
+Added in 8.6.0
 .SH RETURN VALUE
-CURLSHE_OK (zero) means that the option was set properly, non-zero means an
-error occurred as \fI<curl/curl.h>\fP defines. See the \fIlibcurl-errors(3)\fP
-man page for the full list with descriptions.
+Returns CURLM_OK if the option is supported, and CURLM_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
-.BR curl_share_cleanup (3),
-.BR curl_share_init (3)
+.BR CURLOPT_DOH_URL (3),
+.BR CURLSHOPT_ANCESTOR (3)

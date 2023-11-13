@@ -99,6 +99,8 @@ static curl_simple_lock s_lock = CURL_SIMPLE_LOCK_INIT;
 
 #endif
 
+static struct Curl_easy *duphandle(struct Curl_easy *data,
+                                   bool internal);
 /*
  * strdup (and other memory functions) is redefined in complicated
  * ways, but at this point it must be defined as the system-supplied strdup
@@ -728,15 +730,22 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
     failf(data, "easy handle already used in multi handle");
     return CURLE_FAILED_INIT;
   }
-
+  if(!data->closure) {
+    /* only create it once */
+    data->closure = duphandle(data, TRUE);
+    if(!data->closure)
+      return CURLE_OUT_OF_MEMORY;
+  }
   if(data->multi_easy)
     multi = data->multi_easy;
   else {
     /* this multi handle will only ever have a single easy handled attached
        to it, so make it use minimal hashes */
     multi = Curl_multi_handle(1, 3, 7);
-    if(!multi)
+    if(!multi) {
+      Curl_close(&data->closure);
       return CURLE_OUT_OF_MEMORY;
+    }
     data->multi_easy = multi;
   }
 
@@ -745,6 +754,8 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
 
   /* Copy the MAXCONNECTS option to the multi handle */
   curl_multi_setopt(multi, CURLMOPT_MAXCONNECTS, data->set.maxconnects);
+
+  curl_multi_setopt(multi, CURLMOPT_ANCESTOR, data->closure);
 
   mcode = curl_multi_add_handle(multi, data);
   if(mcode) {
@@ -826,7 +837,8 @@ CURLcode curl_easy_getinfo(struct Curl_easy *data, CURLINFO info, ...)
   return result;
 }
 
-static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
+static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src,
+                       bool internal)
 {
   CURLcode result = CURLE_OK;
   enum dupstring i;
@@ -849,43 +861,49 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
       return result;
   }
 
-  /* duplicate all blobs */
-  for(j = (enum dupblob)0; j < BLOB_LAST; j++) {
-    result = Curl_setblobopt(&dst->set.blobs[j], src->set.blobs[j]);
-    if(result)
-      return result;
-  }
-
-  /* duplicate memory areas pointed to */
-  i = STRING_COPYPOSTFIELDS;
-  if(src->set.str[i]) {
-    if(src->set.postfieldsize == -1)
-      dst->set.str[i] = strdup(src->set.str[i]);
-    else
-      /* postfieldsize is curl_off_t, Curl_memdup() takes a size_t ... */
-      dst->set.str[i] = Curl_memdup(src->set.str[i],
-                                    curlx_sotouz(src->set.postfieldsize));
-    if(!dst->set.str[i])
-      return CURLE_OUT_OF_MEMORY;
-    /* point to the new copy */
-    dst->set.postfields = dst->set.str[i];
-  }
-
-  /* Duplicate mime data. */
-  result = Curl_mime_duppart(dst, &dst->set.mimepost, &src->set.mimepost);
-
   if(src->set.resolve)
     dst->state.resolve = dst->set.resolve;
+
+  /* clear all blob pointers first */
+  memset(dst->set.blobs, 0, BLOB_LAST * sizeof(struct curl_blob *));
+
+  if(!internal) {
+    /* duplicate all blobs */
+    for(j = (enum dupblob)0; j < BLOB_LAST; j++) {
+      result = Curl_setblobopt(&dst->set.blobs[j], src->set.blobs[j]);
+      if(result)
+        return result;
+    }
+
+    /* duplicate memory areas pointed to */
+    i = STRING_COPYPOSTFIELDS;
+    if(src->set.str[i]) {
+      if(src->set.postfieldsize == -1)
+        dst->set.str[i] = strdup(src->set.str[i]);
+      else
+        /* postfieldsize is curl_off_t, Curl_memdup() takes a size_t ... */
+        dst->set.str[i] = Curl_memdup(src->set.str[i],
+                                    curlx_sotouz(src->set.postfieldsize));
+      if(!dst->set.str[i])
+        return CURLE_OUT_OF_MEMORY;
+      /* point to the new copy */
+      dst->set.postfields = dst->set.str[i];
+    }
+
+    /* Duplicate mime data. */
+    result = Curl_mime_duppart(dst, &dst->set.mimepost, &src->set.mimepost);
+  }
 
   return result;
 }
 
 /*
- * curl_easy_duphandle() is an external interface to allow duplication of a
- * given input easy handle. The returned handle will be a new working handle
- * with all options set exactly as the input source handle.
+ * duphandle() is the internal version of curl_easy_duphandle and provides an
+ * additional option to do a "shallow" clone with less state and ignoring data
+ * to send.
  */
-struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
+static struct Curl_easy *duphandle(struct Curl_easy *data,
+                                   bool internal)
 {
   struct Curl_easy *outcurl = calloc(1, sizeof(struct Curl_easy));
   if(!outcurl)
@@ -899,7 +917,7 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
   outcurl->set.buffer_size = data->set.buffer_size;
 
   /* copy all userdefined values */
-  if(dupset(outcurl, data))
+  if(dupset(outcurl, data, internal))
     goto fail;
 
   Curl_dyn_init(&outcurl->state.headerb, CURL_MAX_HTTP_HEADER);
@@ -953,7 +971,7 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
   }
 
 #ifndef CURL_DISABLE_ALTSVC
-  if(data->asi) {
+  if(!internal && data->asi) {
     outcurl->asi = Curl_altsvc_init();
     if(!outcurl->asi)
       goto fail;
@@ -962,7 +980,7 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
   }
 #endif
 #ifndef CURL_DISABLE_HSTS
-  if(data->hsts) {
+  if(!internal && data->hsts) {
     outcurl->hsts = Curl_hsts_init();
     if(!outcurl->hsts)
       goto fail;
@@ -998,6 +1016,15 @@ fail:
   return NULL;
 }
 
+/*
+ * curl_easy_duphandle() is an external interface to allow duplication of a
+ * given input easy handle. The returned handle will be a new working handle
+ * with all options set exactly as the input source handle.
+ */
+struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
+{
+  return duphandle(data, FALSE);
+}
 /*
  * curl_easy_reset() is an external interface that allows an app to re-
  * initialize a session handle to the default values.

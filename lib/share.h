@@ -45,6 +45,7 @@ struct Curl_share {
   void *clientdata;
   struct conncache conn_cache;
   struct Curl_hash hostcache;
+  struct Curl_easy *ancestor;
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
   struct CookieInfo *cookies;
 #endif

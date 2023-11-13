@@ -242,6 +242,8 @@ static CURLcode dohprobe(struct Curl_easy *data,
     /* pass in the struct pointer via a local variable to please coverity and
        the gcc typecheck helpers */
     struct dynbuf *resp = &p->serverdoh;
+    struct Curl_easy *prnt = multi->ancestor ?
+      multi->ancestor : data;
     doh->state.internal = true;
     ERROR_CHECK_SETOPT(CURLOPT_URL, url);
     ERROR_CHECK_SETOPT(CURLOPT_DEFAULT_PROTOCOL, "https");
@@ -262,20 +264,20 @@ static CURLcode dohprobe(struct Curl_easy *data,
     ERROR_CHECK_SETOPT(CURLOPT_PROTOCOLS, CURLPROTO_HTTP|CURLPROTO_HTTPS);
 #endif
     ERROR_CHECK_SETOPT(CURLOPT_TIMEOUT_MS, (long)timeout_ms);
-    ERROR_CHECK_SETOPT(CURLOPT_SHARE, data->share);
-    if(data->set.err && data->set.err != stderr)
-      ERROR_CHECK_SETOPT(CURLOPT_STDERR, data->set.err);
-    if(data->set.verbose)
+    ERROR_CHECK_SETOPT(CURLOPT_SHARE, prnt->share);
+    if(prnt->set.err && prnt->set.err != stderr)
+      ERROR_CHECK_SETOPT(CURLOPT_STDERR, prnt->set.err);
+    if(prnt->set.verbose)
       ERROR_CHECK_SETOPT(CURLOPT_VERBOSE, 1L);
-    if(data->set.no_signal)
+    if(prnt->set.no_signal)
       ERROR_CHECK_SETOPT(CURLOPT_NOSIGNAL, 1L);
 
     ERROR_CHECK_SETOPT(CURLOPT_SSL_VERIFYHOST,
-      data->set.doh_verifyhost ? 2L : 0L);
+      prnt->set.doh_verifyhost ? 2L : 0L);
     ERROR_CHECK_SETOPT(CURLOPT_SSL_VERIFYPEER,
-      data->set.doh_verifypeer ? 1L : 0L);
+      prnt->set.doh_verifypeer ? 1L : 0L);
     ERROR_CHECK_SETOPT(CURLOPT_SSL_VERIFYSTATUS,
-      data->set.doh_verifystatus ? 1L : 0L);
+      prnt->set.doh_verifystatus ? 1L : 0L);
 
     /* Inherit *some* SSL options from the user's transfer. This is a
        best-guess as to which options are needed for compatibility. #3661
@@ -285,52 +287,52 @@ static CURLcode dohprobe(struct Curl_easy *data,
        options should be added to check doh proxy insecure separately,
        CURLOPT_DOH_PROXY_SSL_VERIFYHOST and CURLOPT_DOH_PROXY_SSL_VERIFYPEER.
        */
-    if(data->set.ssl.falsestart)
+    if(prnt->set.ssl.falsestart)
       ERROR_CHECK_SETOPT(CURLOPT_SSL_FALSESTART, 1L);
-    if(data->set.str[STRING_SSL_CAFILE]) {
+    if(prnt->set.str[STRING_SSL_CAFILE]) {
       ERROR_CHECK_SETOPT(CURLOPT_CAINFO,
-                         data->set.str[STRING_SSL_CAFILE]);
+                         prnt->set.str[STRING_SSL_CAFILE]);
     }
-    if(data->set.blobs[BLOB_CAINFO]) {
+    if(prnt->set.blobs[BLOB_CAINFO]) {
       ERROR_CHECK_SETOPT(CURLOPT_CAINFO_BLOB,
-                         data->set.blobs[BLOB_CAINFO]);
+                         prnt->set.blobs[BLOB_CAINFO]);
     }
-    if(data->set.str[STRING_SSL_CAPATH]) {
+    if(prnt->set.str[STRING_SSL_CAPATH]) {
       ERROR_CHECK_SETOPT(CURLOPT_CAPATH,
-                         data->set.str[STRING_SSL_CAPATH]);
+                         prnt->set.str[STRING_SSL_CAPATH]);
     }
-    if(data->set.str[STRING_SSL_CRLFILE]) {
+    if(prnt->set.str[STRING_SSL_CRLFILE]) {
       ERROR_CHECK_SETOPT(CURLOPT_CRLFILE,
-                         data->set.str[STRING_SSL_CRLFILE]);
+                         prnt->set.str[STRING_SSL_CRLFILE]);
     }
-    if(data->set.ssl.certinfo)
+    if(prnt->set.ssl.certinfo)
       ERROR_CHECK_SETOPT(CURLOPT_CERTINFO, 1L);
-    if(data->set.ssl.fsslctx)
-      ERROR_CHECK_SETOPT(CURLOPT_SSL_CTX_FUNCTION, data->set.ssl.fsslctx);
-    if(data->set.ssl.fsslctxp)
-      ERROR_CHECK_SETOPT(CURLOPT_SSL_CTX_DATA, data->set.ssl.fsslctxp);
-    if(data->set.fdebug)
-      ERROR_CHECK_SETOPT(CURLOPT_DEBUGFUNCTION, data->set.fdebug);
-    if(data->set.debugdata)
-      ERROR_CHECK_SETOPT(CURLOPT_DEBUGDATA, data->set.debugdata);
-    if(data->set.str[STRING_SSL_EC_CURVES]) {
+    if(prnt->set.ssl.fsslctx)
+      ERROR_CHECK_SETOPT(CURLOPT_SSL_CTX_FUNCTION, prnt->set.ssl.fsslctx);
+    if(prnt->set.ssl.fsslctxp)
+      ERROR_CHECK_SETOPT(CURLOPT_SSL_CTX_DATA, prnt->set.ssl.fsslctxp);
+    if(prnt->set.fdebug)
+      ERROR_CHECK_SETOPT(CURLOPT_DEBUGFUNCTION, prnt->set.fdebug);
+    if(prnt->set.debugdata)
+      ERROR_CHECK_SETOPT(CURLOPT_DEBUGDATA, prnt->set.debugdata);
+    if(prnt->set.str[STRING_SSL_EC_CURVES]) {
       ERROR_CHECK_SETOPT(CURLOPT_SSL_EC_CURVES,
-                         data->set.str[STRING_SSL_EC_CURVES]);
+                         prnt->set.str[STRING_SSL_EC_CURVES]);
     }
 
     {
       long mask =
-        (data->set.ssl.enable_beast ?
+        (prnt->set.ssl.enable_beast ?
          CURLSSLOPT_ALLOW_BEAST : 0) |
-        (data->set.ssl.no_revoke ?
+        (prnt->set.ssl.no_revoke ?
          CURLSSLOPT_NO_REVOKE : 0) |
-        (data->set.ssl.no_partialchain ?
+        (prnt->set.ssl.no_partialchain ?
          CURLSSLOPT_NO_PARTIALCHAIN : 0) |
-        (data->set.ssl.revoke_best_effort ?
+        (prnt->set.ssl.revoke_best_effort ?
          CURLSSLOPT_REVOKE_BEST_EFFORT : 0) |
-        (data->set.ssl.native_ca_store ?
+        (prnt->set.ssl.native_ca_store ?
          CURLSSLOPT_NATIVE_CA : 0) |
-        (data->set.ssl.auto_client_cert ?
+        (prnt->set.ssl.auto_client_cert ?
          CURLSSLOPT_AUTO_CLIENT_CERT : 0);
 
       (void)curl_easy_setopt(doh, CURLOPT_SSL_OPTIONS, mask);

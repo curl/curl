@@ -116,6 +116,20 @@ int Curl_conncache_init(struct conncache *connc, int size)
   return 0; /* good */
 }
 
+void Curl_conncache_sethandle(struct conncache *connc,
+                              struct Curl_easy *handle)
+{
+  DEBUGASSERT(connc);
+  DEBUGASSERT(handle);
+  DEBUGASSERT(connc->closure_handle);
+  if(!connc->ancestor)
+    Curl_close(&connc->closure_handle);
+  connc->closure_handle = handle;
+  connc->ancestor = TRUE;
+  connc->closure_handle->state.conn_cache = connc;
+  connc->closure_handle->state.internal = true;
+}
+
 void Curl_conncache_destroy(struct conncache *connc)
 {
   if(connc)

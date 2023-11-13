@@ -44,6 +44,7 @@ struct conncache {
   struct curltime last_cleanup;
   /* handle used for closing cached connections */
   struct Curl_easy *closure_handle;
+  BIT(ancestor); /* if closure handle is set with *OPT_ANCESTOR */
 };
 
 #define BUNDLE_NO_MULTIUSE -1
@@ -87,6 +88,8 @@ struct connectbundle {
 /* returns 1 on error, 0 is fine */
 int Curl_conncache_init(struct conncache *, int size);
 void Curl_conncache_destroy(struct conncache *connc);
+void Curl_conncache_sethandle(struct conncache *connc,
+                              struct Curl_easy *handle);
 
 /* return the correct bundle, to a host or a proxy */
 struct connectbundle *Curl_conncache_find_bundle(struct Curl_easy *data,

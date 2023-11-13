@@ -3302,6 +3302,10 @@ CURLMcode curl_multi_setopt(struct Curl_multi *multi,
       multi->max_concurrent_streams = curlx_sltoui(streams);
     }
     break;
+  case CURLMOPT_ANCESTOR:
+    multi->ancestor = va_arg(param, CURL *);
+    Curl_conncache_sethandle(&multi->conn_cache, multi->ancestor);
+    break;
   default:
     res = CURLM_UNKNOWN_OPTION;
     break;

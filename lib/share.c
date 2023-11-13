@@ -197,6 +197,12 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
     share->clientdata = ptr;
     break;
 
+  case CURLSHOPT_ANCESTOR:
+    share->ancestor = va_arg(param, struct Curl_easy *);
+    if(share->specifier & (1<< CURL_LOCK_DATA_CONNECT))
+      Curl_conncache_sethandle(&share->conn_cache, share->ancestor);
+    break;
+
   default:
     res = CURLSHE_BAD_OPTION;
     break;

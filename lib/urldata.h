@@ -1998,6 +1998,8 @@ struct Curl_easy {
   struct Curl_multi *multi_easy; /* if non-NULL, points to the multi handle
                                     struct to which this "belongs" when used
                                     by the easy interface */
+  struct Curl_easy *closure;   /* spare handle when the easy interface is used
+                                */
   struct Curl_share *share;    /* Share, handles global variable mutexing */
 #ifdef USE_LIBPSL
   struct PslCache *psl;        /* The associated PSL cache. */

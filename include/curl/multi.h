@@ -399,6 +399,9 @@ typedef enum {
   /* maximum number of concurrent streams to support on a connection */
   CURLOPT(CURLMOPT_MAX_CONCURRENT_STREAMS, CURLOPTTYPE_LONG, 16),
 
+  /* This is a "CURL *" handle to inherit from */
+  CURLOPT(CURLMOPT_ANCESTOR, CURLOPTTYPE_OBJECTPOINT, 17),
+
   CURLMOPT_LASTENTRY /* the last unused */
 } CURLMoption;
 

@@ -135,6 +135,7 @@ struct Curl_multi {
 
   /* Shared connection cache (bundles)*/
   struct conncache conn_cache;
+  struct Curl_easy *ancestor;
 
   long maxconnects; /* if >0, a fixed limit of the maximum number of entries
                        we're allowed to grow the connection cache to */
