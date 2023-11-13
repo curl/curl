@@ -914,7 +914,7 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
   outcurl->progress.callback = data->progress.callback;
 
 #ifndef CURL_DISABLE_COOKIES
-  if(data->cookies) {
+  if(data->cookies && data->state.cookie_engine) {
     /* If cookies are enabled in the parent handle, we enable them
        in the clone as well! */
     outcurl->cookies = Curl_cookie_init(outcurl, NULL, outcurl->cookies,
