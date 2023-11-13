@@ -572,7 +572,7 @@ CURLcode Curl_hsts_loadcb(struct Curl_easy *data, struct hsts *h)
 
 void Curl_hsts_loadfiles(struct Curl_easy *data)
 {
-  struct curl_slist *l = data->set.hstslist;
+  struct curl_slist *l = data->state.hstslist;
   if(l) {
     Curl_share_lock(data, CURL_LOCK_DATA_HSTS, CURL_LOCK_ACCESS_SINGLE);
 

@@ -412,7 +412,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
 #ifndef CURL_DISABLE_HSTS
   if(!data->share || !data->share->hsts)
     Curl_hsts_cleanup(&data->hsts);
-  curl_slist_free_all(data->set.hstslist); /* clean up list */
+  curl_slist_free_all(data->state.hstslist); /* clean up list */
 #endif
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_DIGEST_AUTH)
   Curl_http_auth_cleanup_digest(data);
