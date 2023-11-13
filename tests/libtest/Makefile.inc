@@ -65,6 +65,7 @@ noinst_PROGRAMS = chkhostname libauthretry libntlmconnect libprereq      \
  \
  lib1662 \
  \
+ lib1900 \
  lib1903 lib1905 lib1906 lib1907 lib1908 lib1910 lib1911 lib1912 lib1913 \
          lib1915 lib1916 lib1917 lib1918 lib1919 \
  lib1933 lib1934 lib1935 lib1936 lib1937 lib1938 lib1939 lib1940 \
@@ -529,6 +530,8 @@ lib1597_LDADD = $(TESTUTIL_LIBS)
 
 lib1662_SOURCES = lib1662.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib1662_LDADD = $(TESTUTIL_LIBS)
+
+lib1900_SOURCES = lib1900.c $(SUPPORTFILES)
 
 lib1903_SOURCES = lib1903.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib1903_LDADD = $(TESTUTIL_LIBS)
