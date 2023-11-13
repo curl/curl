@@ -263,7 +263,7 @@ CURLcode Curl_http_decode_status(int *pstatus, const char *s, size_t len);
  * All about a core HTTP request, excluding body and trailers
  */
 struct httpreq {
-  char method[12];
+  char method[24];
   char *scheme;
   char *authority;
   char *path;
