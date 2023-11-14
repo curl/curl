@@ -714,6 +714,8 @@ static struct TerminalSettings {
 #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 #endif
 
+bool tool_term_has_bold;
+
 static void restore_terminal(void)
 {
   if(InterlockedExchange(&TerminalSettings.valid, (LONG)FALSE))
@@ -733,16 +735,23 @@ static BOOL WINAPI signal_handler(DWORD type)
 static void init_terminal(void)
 {
   TerminalSettings.hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+
   /*
    * Enable VT (Virtual Terminal) output.
    * Note: VT mode flag can be set on any version of Windows, but VT
-   * processing only performed on Win10 >= Creators Update)
+   * processing only performed on Win10 >= version 1709 (OS build 16299)
+   * Creator's Update. Also, ANSI bold on/off supported since then.
    */
-  if((TerminalSettings.hStdOut != INVALID_HANDLE_VALUE) &&
-     GetConsoleMode(TerminalSettings.hStdOut,
-                    &TerminalSettings.dwOutputMode) &&
-     !(TerminalSettings.dwOutputMode &
-       ENABLE_VIRTUAL_TERMINAL_PROCESSING)) {
+  if(TerminalSettings.hStdOut == INVALID_HANDLE_VALUE ||
+     !GetConsoleMode(TerminalSettings.hStdOut,
+                     &TerminalSettings.dwOutputMode) ||
+     !curlx_verify_windows_version(10, 0, 16299, PLATFORM_WINNT,
+                                   VERSION_GREATER_THAN_EQUAL))
+    return;
+
+  if((TerminalSettings.dwOutputMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING))
+    tool_term_has_bold = true;
+  else {
     /* The signal handler is set before attempting to change the console mode
        because otherwise a signal would not be caught after the change but
        before the handler was installed. */
@@ -751,6 +760,7 @@ static void init_terminal(void)
       if(SetConsoleMode(TerminalSettings.hStdOut,
                         (TerminalSettings.dwOutputMode |
                          ENABLE_VIRTUAL_TERMINAL_PROCESSING))) {
+        tool_term_has_bold = true;
         atexit(restore_terminal);
       }
       else {
