@@ -150,16 +150,19 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
       char *filename;
       size_t len;
 
-      while(*p && (p < end) && !ISALPHA(*p))
+      while((p < end) && *p && !ISALPHA(*p))
         p++;
       if(p > end - 9)
         break;
 
       if(memcmp(p, "filename=", 9)) {
         /* no match, find next parameter */
-        while((p < end) && (*p != ';'))
+        while((p < end) && *p && (*p != ';'))
           p++;
-        continue;
+        if((p < end) && *p)
+          continue;
+        else
+          break;
       }
       p += 9;
 
