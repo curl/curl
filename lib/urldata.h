@@ -1439,6 +1439,10 @@ struct UrlState {
   trailers_state trailers_state; /* whether we are sending trailers
                                     and what stage are we at */
 #endif
+#ifndef CURL_DISABLE_COOKIES
+  struct curl_slist *cookielist; /* list of cookie files set by
+                                    curl_easy_setopt(COOKIEFILE) calls */
+#endif
 #ifdef USE_HYPER
   bool hconnect;  /* set if a CONNECT request */
   CURLcode hresult; /* used to pass return codes back from hyper callbacks */
@@ -1694,10 +1698,6 @@ struct UserDefined {
   void *prereq_userp; /* pre-initial request user data */
 
   void *seek_client;    /* pointer to pass to the seek callback */
-#ifndef CURL_DISABLE_COOKIES
-  struct curl_slist *cookielist; /* list of cookie files set by
-                                    curl_easy_setopt(COOKIEFILE) calls */
-#endif
 #ifndef CURL_DISABLE_HSTS
   curl_hstsread_callback hsts_read;
   void *hsts_read_userp;
