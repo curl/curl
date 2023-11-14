@@ -330,7 +330,7 @@ static char *sanitize_cookie_path(const char *cookie_path)
  */
 void Curl_cookie_loadfiles(struct Curl_easy *data)
 {
-  struct curl_slist *list = data->set.cookielist;
+  struct curl_slist *list = data->state.cookielist;
   if(list) {
     Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
     while(list) {

@@ -318,8 +318,8 @@ void Curl_freeset(struct Curl_easy *data)
   Curl_mime_cleanpart(&data->set.mimepost);
 
 #ifndef CURL_DISABLE_COOKIES
-  curl_slist_free_all(data->set.cookielist);
-  data->set.cookielist = NULL;
+  curl_slist_free_all(data->state.cookielist);
+  data->state.cookielist = NULL;
 #endif
 }
 
