@@ -211,7 +211,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 
     if(hdrcbdata->global->isatty &&
 #ifdef WIN32
-       tool_isVirtualTerminal &&
+       tool_term_has_bold &&
 #endif
        hdrcbdata->global->styled_output)
       value = memchr(ptr, ':', cb);

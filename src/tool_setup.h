@@ -71,7 +71,7 @@ extern FILE *tool_stderr;
 extern LARGE_INTEGER tool_freq;
 extern bool tool_isVistaOrGreater;
 /* set in init_terminal() */
-extern bool tool_isVirtualTerminal;
+extern bool tool_term_has_bold;
 #endif
 
 #endif /* HEADER_CURL_TOOL_SETUP_H */
