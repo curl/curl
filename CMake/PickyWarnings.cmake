@@ -125,8 +125,10 @@ if(PICKY_COMPILER)
       if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.3)
         list(APPEND WPICKY_ENABLE
           ${WPICKY_COMMON_OLD}
+          -Wclobbered                      #             gcc  4.3
           -Wmissing-parameter-type         #             gcc  4.3
           -Wold-style-declaration          #             gcc  4.3
+          -Wold-style-definition           #             gcc  3.4
           -Wstrict-aliasing=3              #             gcc  4.0
         )
       endif()
@@ -159,7 +161,7 @@ if(PICKY_COMPILER)
           -Walloc-zero                     #             gcc  7.0
           -Wduplicated-branches            #             gcc  7.0
           -Wformat-overflow=2              #             gcc  7.0
-          -Wformat-truncation=1            #             gcc  7.0
+          -Wformat-truncation=2            #             gcc  7.0
           -Wrestrict                       #             gcc  7.0
         )
       endif()
