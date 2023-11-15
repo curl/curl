@@ -853,7 +853,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
  * execution.  This effectively causes the remainder of the application to run
  * within a signal handler which is nonportable and could lead to problems.
  */
-static
+CURL_NORETURN static
 void alarmfunc(int sig)
 {
   (void)sig;

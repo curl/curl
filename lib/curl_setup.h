@@ -648,6 +648,18 @@
 #  define WARN_UNUSED_RESULT
 #endif
 
+/* noreturn attribute */
+
+#if !defined(CURL_NORETURN)
+#if (defined(__GNUC__) && (__GNUC__ >= 3)) || defined(__clang__)
+#  define CURL_NORETURN  __attribute__((__noreturn__))
+#elif defined(_MSC_VER) && (_MSC_VER >= 1200)
+#  define CURL_NORETURN  __declspec(noreturn)
+#else
+#  define CURL_NORETURN
+#endif
+#endif
+
 /*
  * Include macros and defines that should only be processed once.
  */
