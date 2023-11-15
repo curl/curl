@@ -87,11 +87,12 @@ static int xattr(int fd,
   int err = 0;
   if(value) {
 #ifdef DEBUGBUILD
+    (void)fd;
     if(getenv("CURL_FAKE_XATTR")) {
       printf("%s => %s\n", attr, value);
     }
     return 0;
-#endif
+#else
 #ifdef HAVE_FSETXATTR_6
     err = fsetxattr(fd, attr, value, strlen(value), 0, 0);
 #elif defined(HAVE_FSETXATTR_5)
@@ -104,6 +105,7 @@ static int xattr(int fd,
          attribute */
       err = (rc < 0 ? -1 : 0);
     }
+#endif
 #endif
   }
   return err;
