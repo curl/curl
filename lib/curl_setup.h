@@ -534,10 +534,6 @@
 
 #  define DIR_CHAR      "/"
 
-#  ifndef fileno /* sunos 4 have this as a macro! */
-     int fileno(FILE *stream);
-#  endif
-
 #endif /* WIN32 */
 
 /* ---------------------------------------------------------------- */
