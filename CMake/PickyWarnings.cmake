@@ -176,11 +176,11 @@ if(PICKY_COMPILER)
 
     unset(WPICKY)
 
-    foreach(_CCOPT ${WPICKY_ENABLE})
+    foreach(_CCOPT IN LISTS WPICKY_ENABLE)
       set(WPICKY "${WPICKY} ${_CCOPT}")
     endforeach()
 
-    foreach(_CCOPT ${WPICKY_DETECT})
+    foreach(_CCOPT IN LISTS WPICKY_DETECT)
       # surprisingly, CHECK_C_COMPILER_FLAG needs a new variable to store each new
       # test result in.
       string(MAKE_C_IDENTIFIER "OPT${_CCOPT}" _optvarname)
