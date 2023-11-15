@@ -805,6 +805,18 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unused])
           fi
           #
+          dnl Only clang 2.7 or later
+          if test "$compiler_num" -ge "207"; then
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [address])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [attributes])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [div-by-zero format-security])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-field-initializers missing-noreturn])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [redundant-decls])
+          # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [switch-enum])       # Not used because this basically disallows default case
+          # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unused-macros])     # Not practical
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unreachable-code unused-parameter])
+          fi
+          #
           dnl Only clang 2.8 or later
           if test "$compiler_num" -ge "208"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [vla])
@@ -813,6 +825,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl Only clang 2.9 or later
           if test "$compiler_num" -ge "209"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [shift-sign-overflow])
+          # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [padded])  # Not used because we cannot change public structs
           fi
           #
           dnl Only clang 3.0 or later (possibly earlier)
@@ -961,6 +974,19 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             tmp_CFLAGS="$tmp_CFLAGS -Wstrict-aliasing=3"
           fi
           #
+          dnl Only gcc 4.1 or later
+          if test "$compiler_num" -ge "401"; then
+            tmp_CFLAGS="$tmp_CFLAGS -Wstrict-aliasing=3"
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [attributes])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [div-by-zero format-security])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-field-initializers missing-noreturn])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unreachable-code unused-parameter])
+          # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [padded])           # Not used because we cannot change public structs
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [redundant-decls])
+          # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [switch-enum])      # Not used because this basically disallows default case
+          # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unused-macros])    # Not practical
+          fi
+          #
           dnl Only gcc 4.2 or later
           if test "$compiler_num" -ge "402"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [cast-align])
@@ -968,6 +994,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           #
           dnl Only gcc 4.3 or later
           if test "$compiler_num" -ge "403"; then
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [address])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [type-limits old-style-declaration])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-parameter-type empty-body])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [clobbered ignored-qualifiers])
