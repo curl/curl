@@ -790,7 +790,8 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-prototypes])
           tmp_CFLAGS="$tmp_CFLAGS -Wno-long-long"
           CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [float-equal])
-          CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [no-multichar sign-compare])
+          CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [sign-compare])
+          tmp_CFLAGS="$tmp_CFLAGS -Wno-multichar"
           CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [undef])
           tmp_CFLAGS="$tmp_CFLAGS -Wno-format-nonliteral"
           CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [endif-labels strict-prototypes])
