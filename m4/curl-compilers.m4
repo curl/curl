@@ -978,7 +978,6 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           #
           dnl Only gcc 4.1 or later
           if test "$compiler_num" -ge "401"; then
-            tmp_CFLAGS="$tmp_CFLAGS -Wstrict-aliasing=3"
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [attributes])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [div-by-zero format-security])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-field-initializers missing-noreturn])
