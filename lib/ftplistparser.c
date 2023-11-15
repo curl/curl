@@ -55,9 +55,6 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-/* allocs buffer which will contain one line of LIST command response */
-#define FTP_BUFFER_ALLOCSIZE 160
-
 typedef enum {
   PL_UNIX_TOTALSIZE = 0,
   PL_UNIX_FILETYPE,

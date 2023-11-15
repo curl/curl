@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#include "sethostname.h"
-
 /*
  * we force our own host name, in order to make some tests machine independent
  */

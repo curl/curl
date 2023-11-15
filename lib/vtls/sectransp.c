@@ -49,6 +49,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Waddress"
 #pragma GCC diagnostic ignored "-Wundef"
+#pragma GCC diagnostic ignored "-Wunreachable-code"
 #endif
 
 #include <limits.h>
@@ -3403,7 +3404,6 @@ again:
         }
         *curlcode = CURLE_AGAIN;
         return -1L;
-        break;
 
       /* errSSLClosedGraceful - server gracefully shut down the SSL session
          errSSLClosedNoNotify - server hung up on us instead of sending a
@@ -3413,7 +3413,6 @@ again:
       case errSSLClosedNoNotify:
         *curlcode = CURLE_OK;
         return 0;
-        break;
 
         /* The below is errSSLPeerAuthCompleted; it's not defined in
            Leopard's headers */
@@ -3433,7 +3432,6 @@ again:
         failf(data, "SSLRead() return error %d", err);
         *curlcode = CURLE_RECV_ERROR;
         return -1L;
-        break;
     }
   }
   return (ssize_t)processed;

@@ -1069,9 +1069,6 @@ static int alloc_addbyter(int output, FILE *data)
   return outc; /* fputc() returns like this on success */
 }
 
-extern int Curl_dyn_vprintf(struct dynbuf *dyn,
-                            const char *format, va_list ap_save);
-
 /* appends the formatted string, returns 0 on success, 1 on error */
 int Curl_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list ap_save)
 {

@@ -379,8 +379,8 @@ ssize_t curlx_write(int fd, const void *buf, size_t count)
   return (ssize_t)write(fd, buf, curlx_uztoui(count));
 }
 
-/* Ensure that warnless.h continues to have an effect in "unity" builds. */
-#undef HEADER_CURL_WARNLESS_H
-
 #endif /* WIN32 */
 
+/* Ensure that warnless.h redefinitions continue to have an effect
+   in "unity" builds. */
+#undef HEADER_CURL_WARNLESS_H_REDEFS

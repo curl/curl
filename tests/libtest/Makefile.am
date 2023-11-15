@@ -103,7 +103,7 @@ libhostname_la_CPPFLAGS = $(AM_CPPFLAGS) $(libhostname_la_CPPFLAGS_EXTRA)
 libhostname_la_LDFLAGS = $(AM_LDFLAGS) $(libhostname_la_LDFLAGS_EXTRA)
 libhostname_la_CFLAGS = $(AM_CFLAGS) $(libhostname_la_CFLAGS_EXTRA)
 
-libhostname_la_SOURCES = sethostname.c sethostname.h
+libhostname_la_SOURCES = sethostname.c
 
 libhostname_la_LIBADD =
 libhostname_la_DEPENDENCIES =

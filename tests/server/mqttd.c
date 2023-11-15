@@ -98,7 +98,6 @@
 #define MQTT_CONNACK_LEN 4
 #define MQTT_SUBACK_LEN 5
 #define MQTT_CLIENTID_LEN 12 /* "curl0123abcd" */
-#define MQTT_HEADER_LEN 5    /* max 5 bytes */
 
 struct configurable {
   unsigned char version; /* initial version byte in the request must match

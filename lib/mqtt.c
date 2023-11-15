@@ -616,9 +616,6 @@ static void mqstate(struct Curl_easy *data,
 }
 
 
-/* for the publish packet */
-#define MQTT_HEADER_LEN 5    /* max 5 bytes */
-
 static CURLcode mqtt_read_publish(struct Curl_easy *data, bool *done)
 {
   CURLcode result = CURLE_OK;
