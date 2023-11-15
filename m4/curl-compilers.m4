@@ -764,6 +764,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [inline nested-externs])
           CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-declarations])
           CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-prototypes])
+          CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [old-style-definition])
           tmp_CFLAGS="$tmp_CFLAGS -Wno-long-long"
           CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [float-equal])
           CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [no-multichar sign-compare])

@@ -52,8 +52,8 @@ if(PICKY_COMPILER)
     # Assume these options always exist with both clang and gcc.
     # Require clang 3.0 / gcc 2.95 or later.
     list(APPEND WPICKY_ENABLE
-      -Wbad-function-cast                  # clang  3.0  gcc  2.95
-      -Wconversion                         # clang  3.0  gcc  2.95
+      -Wbad-function-cast                  # clang  2.7  gcc  2.95
+      -Wconversion                         # clang  2.7  gcc  2.95
       -Winline                             # clang  1.0  gcc  1.0
       -Wmissing-declarations               # clang  1.0  gcc  2.7
       -Wmissing-prototypes                 # clang  1.0  gcc  1.0
@@ -72,15 +72,16 @@ if(PICKY_COMPILER)
     set(WPICKY_COMMON_OLD
       -Wcast-align                         # clang  1.0  gcc  4.2
       -Wdeclaration-after-statement        # clang  1.0  gcc  3.4
-      -Wempty-body                         # clang  3.0  gcc  4.3
+      -Wempty-body                         # clang  2.7  gcc  4.3
       -Wendif-labels                       # clang  1.0  gcc  3.3
       -Wfloat-equal                        # clang  1.0  gcc  2.96 (3.0)
-      -Wignored-qualifiers                 # clang  3.0  gcc  4.3
+      -Wignored-qualifiers                 # clang  2.8  gcc  4.3
       -Wno-format-nonliteral               # clang  1.0  gcc  2.96 (3.0)
-      -Wno-sign-conversion                 # clang  3.0  gcc  4.3
+      -Wno-sign-conversion                 # clang  2.9  gcc  4.3
       -Wno-system-headers                  # clang  1.0  gcc  3.0
+      -Wold-style-definition               # clang  2.7  gcc  3.4
       -Wstrict-prototypes                  # clang  1.0  gcc  3.3
-      -Wtype-limits                        # clang  3.0  gcc  4.3
+      -Wtype-limits                        # clang  2.7  gcc  4.3
       -Wvla                                # clang  2.8  gcc  4.3
     )
 
@@ -125,6 +126,7 @@ if(PICKY_COMPILER)
       if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.3)
         list(APPEND WPICKY_ENABLE
           ${WPICKY_COMMON_OLD}
+          -Wclobbered                      #             gcc  4.3
           -Wmissing-parameter-type         #             gcc  4.3
           -Wold-style-declaration          #             gcc  4.3
           -Wstrict-aliasing=3              #             gcc  4.0
@@ -159,7 +161,7 @@ if(PICKY_COMPILER)
           -Walloc-zero                     #             gcc  7.0
           -Wduplicated-branches            #             gcc  7.0
           -Wformat-overflow=2              #             gcc  7.0
-          -Wformat-truncation=1            #             gcc  7.0
+          -Wformat-truncation=2            #             gcc  7.0
           -Wrestrict                       #             gcc  7.0
         )
       endif()
@@ -174,11 +176,11 @@ if(PICKY_COMPILER)
 
     unset(WPICKY)
 
-    foreach(_CCOPT ${WPICKY_ENABLE})
+    foreach(_CCOPT IN LISTS WPICKY_ENABLE)
       set(WPICKY "${WPICKY} ${_CCOPT}")
     endforeach()
 
-    foreach(_CCOPT ${WPICKY_DETECT})
+    foreach(_CCOPT IN LISTS WPICKY_DETECT)
       # surprisingly, CHECK_C_COMPILER_FLAG needs a new variable to store each new
       # test result in.
       string(MAKE_C_IDENTIFIER "OPT${_CCOPT}" _optvarname)
