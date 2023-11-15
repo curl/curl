@@ -987,11 +987,12 @@ fail:
 #ifndef CURL_DISABLE_COOKIES
     curl_slist_free_all(outcurl->state.cookielist);
     outcurl->state.cookielist = NULL;
+    free(outcurl->cookies);
 #endif
-    Curl_safefree(outcurl->state.buffer);
+    free(outcurl->state.buffer);
     Curl_dyn_free(&outcurl->state.headerb);
-    Curl_safefree(outcurl->state.url);
-    Curl_safefree(outcurl->state.referer);
+    free(outcurl->state.url);
+    free(outcurl->state.referer);
     Curl_altsvc_cleanup(&outcurl->asi);
     Curl_hsts_cleanup(&outcurl->hsts);
     Curl_freeset(outcurl);
