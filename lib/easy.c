@@ -985,14 +985,10 @@ fail:
 
   if(outcurl) {
 #ifndef CURL_DISABLE_COOKIES
-    curl_slist_free_all(outcurl->state.cookielist);
-    outcurl->state.cookielist = NULL;
     free(outcurl->cookies);
 #endif
     free(outcurl->state.buffer);
     Curl_dyn_free(&outcurl->state.headerb);
-    free(outcurl->state.url);
-    free(outcurl->state.referer);
     Curl_altsvc_cleanup(&outcurl->asi);
     Curl_hsts_cleanup(&outcurl->hsts);
     Curl_freeset(outcurl);
