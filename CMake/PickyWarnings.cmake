@@ -52,8 +52,8 @@ if(PICKY_COMPILER)
     # Assume these options always exist with both clang and gcc.
     # Require clang 3.0 / gcc 2.95 or later.
     list(APPEND WPICKY_ENABLE
-      -Wbad-function-cast                  # clang  3.0  gcc  2.95
-      -Wconversion                         # clang  3.0  gcc  2.95
+      -Wbad-function-cast                  # clang  2.7  gcc  2.95
+      -Wconversion                         # clang  2.7  gcc  2.95
       -Winline                             # clang  1.0  gcc  1.0
       -Wmissing-declarations               # clang  1.0  gcc  2.7
       -Wmissing-prototypes                 # clang  1.0  gcc  1.0
@@ -72,16 +72,16 @@ if(PICKY_COMPILER)
     set(WPICKY_COMMON_OLD
       -Wcast-align                         # clang  1.0  gcc  4.2
       -Wdeclaration-after-statement        # clang  1.0  gcc  3.4
-      -Wempty-body                         # clang  3.0  gcc  4.3
+      -Wempty-body                         # clang  2.7  gcc  4.3
       -Wendif-labels                       # clang  1.0  gcc  3.3
       -Wfloat-equal                        # clang  1.0  gcc  2.96 (3.0)
-      -Wignored-qualifiers                 # clang  3.0  gcc  4.3
+      -Wignored-qualifiers                 # clang  2.8  gcc  4.3
       -Wno-format-nonliteral               # clang  1.0  gcc  2.96 (3.0)
-      -Wno-sign-conversion                 # clang  3.0  gcc  4.3
+      -Wno-sign-conversion                 # clang  2.9  gcc  4.3
       -Wno-system-headers                  # clang  1.0  gcc  3.0
       -Wold-style-definition               # clang  2.7  gcc  3.4
       -Wstrict-prototypes                  # clang  1.0  gcc  3.3
-      -Wtype-limits                        # clang  3.0  gcc  4.3
+      -Wtype-limits                        # clang  2.7  gcc  4.3
       -Wvla                                # clang  2.8  gcc  4.3
     )
 
