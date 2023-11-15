@@ -75,8 +75,6 @@
 
  */
 
-#define isxdigit_ascii(x) Curl_isxdigit(x)
-
 void Curl_httpchunk_init(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
