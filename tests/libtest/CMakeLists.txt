@@ -67,7 +67,7 @@ endforeach()
 # Allows for hostname override to make tests machine independent.
 # TODO this cmake build assumes a shared build, detect static linking here!
 if(NOT WIN32)
-  add_library(hostname MODULE EXCLUDE_FROM_ALL sethostname.c sethostname.h)
+  add_library(hostname MODULE EXCLUDE_FROM_ALL sethostname.c)
   add_dependencies(testdeps hostname)
   # Output to .libs for compatibility with autotools, the test data expects a
   # library at (tests)/libtest/.libs/libhostname.so
