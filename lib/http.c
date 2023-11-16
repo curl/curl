@@ -836,6 +836,7 @@ output_auth_headers(struct Curl_easy *data,
           (data->state.aptr.user ?
            data->state.aptr.user : ""));
 #else
+    (void)proxy;
     infof(data, "Server auth using %s with user '%s'",
           auth, data->state.aptr.user ?
           data->state.aptr.user : "");
