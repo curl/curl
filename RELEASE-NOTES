@@ -15,6 +15,8 @@ This release includes the following bugfixes:
 
  o appveyor: make VS2008-built curl tool runnable [93]
  o asyn-thread: use pipe instead of socketpair for IPC when available [4]
+ o autotools: accept linker flags via `CURL_LDFLAGS_{LIB,BIN}` [128]
+ o autotools: avoid passing `LDFLAGS` twice to libcurl [127]
  o autotools: update references to deleted `crypt-auth` option [46]
  o BINDINGS: add V binding [54]
  o build: add `src/.checksrc` to source tarball [1]
@@ -22,6 +24,8 @@ This release includes the following bugfixes:
  o build: delete support bits for obsolete Windows compilers [106]
  o build: fix 'threadsafe' feature detection for older gcc [19]
  o build: fix compiler warning with auths disabled [85]
+ o build: fix libssh2 + `CURL_DISABLE_DIGEST_AUTH` + `CURL_DISABLE_AWS` [120]
+ o build: picky warning updates [125]
  o build: require Windows XP or newer [86]
  o cfilter: provide call to tell connection to forget a socket [65]
  o CI: add autotools, out-of-tree, debug build to distro check job [14]
@@ -36,6 +40,7 @@ This release includes the following bugfixes:
  o cmake: replace `check_library_exists_concat()` [23]
  o cmake: speed up threads setup for Windows [68]
  o cmake: speed up zstd detection [69]
+ o config-win32: set `HAVE_SNPRINTF` for mingw-w64 [123]
  o configure: better --disable-http [80]
  o configure: check for the fseeko declaration too [55]
  o content_encoding: make Curl_all_content_encodings allocless [101]
@@ -59,6 +64,10 @@ This release includes the following bugfixes:
  o docs: remove bold from some man page SYNOPSIS sections [90]
  o docs: use SOURCE_DATE_EPOCH for generated manpages [16]
  o doh: use PIPEWAIT when HTTP/2 is attempted [63]
+ o duphandle: also free 'outcurl->cookies' in error path [122]
+ o duphandle: make dupset() not return with pointers to old alloced data [109]
+ o duphandle: use strdup to clone *COPYPOSTFIELDS if size is not set [132]
+ o easy: in duphandle, init the cookies for the new handle [131]
  o easy: remove duplicate wolfSSH init call [37]
  o easy_lock: add a pthread_mutex_t fallback [13]
  o getenv: PlayStation doesn't have getenv() [41]
@@ -72,6 +81,7 @@ This release includes the following bugfixes:
  o http: allow longer HTTP/2 request method names [112]
  o http: avoid Expect: 100-continue if Upgrade: is used [15]
  o http: consider resume with CURLOPT_FAILONERRROR and 416 to be fine [81]
+ o http: fix `-Wunused-variable` compiler warning [115]
  o http: fix empty-body warning [76]
  o http_aws_sigv4: canonicalise valueless query params [88]
  o IPFS: fix IPFS_PATH and file parsing [119]
@@ -101,6 +111,7 @@ This release includes the following bugfixes:
  o rand: fix build error with autotools + LibreSSL [111]
  o resolve.d: drop a multi use-sentence [100]
  o RTSP: improved RTP parser [32]
+ o sasl: fix `-Wunused-function` compiler warning [124]
  o schannel: add CA cache support for files and memory blobs [121]
  o setopt: remove outdated cookie comment [64]
  o socks: better buffer size checks for socks4a user and hostname [20]
@@ -112,6 +123,8 @@ This release includes the following bugfixes:
  o tests/server: add more SOCKS5 handshake error checking [27]
  o tests: Fix Windows test helper tool search & use it for handle64 [17]
  o tool: fix --capath when proxy support is disabled [28]
+ o tool: support bold headers in Windows [117]
+ o tool_cb_hdr: add an additional parsing check [129]
  o tool_cb_wrt: fix write output for very old Windows versions [24]
  o tool_getparam: limit --rate to be smaller than number of ms [3]
  o tool_operate: do not mix memory models [108]
@@ -126,6 +139,7 @@ This release includes the following bugfixes:
  o urlapi: skip appending NULL pointer query [74]
  o urlapi: when URL encoding the fragment, pass in the right length [59]
  o urldata: move async resolver state from easy handle to connectdata [34]
+ o urldata: move cookielist from UserDefined to UrlState [126]
  o urldata: move hstslist from 'set' to 'state' [105]
  o urldata: move the 'internal' boolean to the state struct [39]
  o vssh: remove the #ifdef for Curl_ssh_init, use empty macro
@@ -158,11 +172,11 @@ advice from friends like these:
   Kai Pastor, Kareem, Kartatz on Github, kirbyn17 on hackerone,
   lkordos on github, Loïc Yhuel, LoRd_MuldeR, Maksymilian Arciemowicz,
   Manfred Schwarb, Marcel Raad, Marcin Rataj, Mark Gaiser, Martin Schmatz,
-  Michael Kaufmann, Nico Rieck, Niracler Li, Ophir Lojkine, Ray Satiro, rilysh,
-  Romain Geissler, Sam James, Samuel Henrique, sd0 on hackerone, Smackd0wn,
-  Sohom Datta, Stefan Eissing, Steven Allen, Torben Dury, Turiiya,
-  Viktor Szakats, zhengqwe on github, 積丹尼 Dan Jacobson
-  (59 contributors)
+  Michael Kaufmann, Nico Rieck, Niracler Li, Ophir Lojkine, Philip Heiduck,
+  Ray Satiro, rilysh, Romain Geissler, Sam James, Samuel Henrique,
+  sd0 on hackerone, Smackd0wn, Sohom Datta, Stefan Eissing, Steven Allen,
+  Torben Dury, Turiiya, Viktor Szakats, zhengqwe on github, 積丹尼 Dan Jacobson
+  (60 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -274,12 +288,26 @@ References to bug reports and discussions on issues:
  [106] = https://curl.se/bug/?i=12222
  [107] = https://curl.se/bug/?i=12275
  [108] = https://curl.se/bug/?i=12280
+ [109] = https://curl.se/bug/?i=12337
  [110] = https://curl.se/bug/?i=12278
  [111] = https://curl.se/bug/?i=12257
  [112] = https://curl.se/bug/?i=12311
  [113] = https://curl.se/bug/?i=12277
  [114] = https://curl.se/bug/?i=12307
+ [115] = https://curl.se/bug/?i=12228
  [116] = https://curl.se/bug/?i=12180
+ [117] = https://curl.se/bug/?i=12321
  [118] = https://curl.se/bug/?i=12292
  [119] = https://curl.se/bug/?i=12152
+ [120] = https://curl.se/bug/?i=12273
  [121] = https://curl.se/bug/?i=12261
+ [122] = https://curl.se/bug/?i=12329
+ [123] = https://curl.se/bug/?i=12325
+ [124] = https://curl.se/bug/?i=12326
+ [125] = https://curl.se/bug/?i=12324
+ [126] = https://curl.se/bug/?i=12323
+ [127] = https://curl.se/bug/?i=12310
+ [128] = https://curl.se/bug/?i=12312
+ [129] = https://curl.se/bug/?i=12320
+ [131] = https://curl.se/bug/?i=12318
+ [132] = https://curl.se/bug/?i=12317
