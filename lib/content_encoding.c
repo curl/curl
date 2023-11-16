@@ -239,6 +239,21 @@ static CURLcode inflate_stream(struct Curl_easy *data,
       /* No more data to flush: just exit loop. */
       break;
     case Z_STREAM_END:
+      if(!zp->trailerlen && z->avail_in)
+      {
+        uInt avail_in = z->avail_in;
+        Bytef *next_in = z->next_in;
+
+        (void) inflateEnd(z);     /* don't care about the return code */
+        if(inflateInit2(z, MAX_WBITS + 32) == Z_OK) {
+          z->next_in = next_in;
+          z->avail_in = avail_in;
+          /* continue with next stream */
+          done = FALSE;
+          continue;
+        }
+        zp->zlib_init = ZLIB_UNINIT;
+      }
       result = process_trailer(data, zp);
       break;
     case Z_DATA_ERROR:
