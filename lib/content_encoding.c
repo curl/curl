@@ -252,7 +252,8 @@ static CURLcode inflate_stream(struct Curl_easy *data,
           break;
         }
         zp->zlib_init = ZLIB_UNINIT;
-        result = exit_zlib(data, z, &zp->zlib_init, process_zlib_error(data, z));
+        result = exit_zlib(data, z, &zp->zlib_init,
+                            process_zlib_error(data, z));
         break;
       }
       result = process_trailer(data, zp);
