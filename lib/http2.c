@@ -369,12 +369,15 @@ static ssize_t nw_out_writer(void *writer_ctx,
 {
   struct Curl_cfilter *cf = writer_ctx;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
-  ssize_t nwritten;
 
-  nwritten = Curl_conn_cf_send(cf->next, data, (const char *)buf, buflen, err);
-  if(nwritten > 0)
-    CURL_TRC_CF(data, cf, "[0] egress: wrote %zd bytes", nwritten);
-  return nwritten;
+  if(data) {
+    ssize_t nwritten = Curl_conn_cf_send(cf->next, data,
+                                         (const char *)buf, buflen, err);
+    if(nwritten > 0)
+      CURL_TRC_CF(data, cf, "[0] egress: wrote %zd bytes", nwritten);
+    return nwritten;
+  }
+  return 0;
 }
 
 static ssize_t send_callback(nghttp2_session *h2,
