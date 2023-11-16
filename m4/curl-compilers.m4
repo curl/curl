@@ -835,14 +835,15 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [padded])  # Not used because we cannot change public structs
           fi
           #
-          dnl Only clang 3.0 or later (possibly earlier)
+          dnl Only clang 3.0 or later
           if test "$compiler_num" -ge "300"; then
-            tmp_CFLAGS="$tmp_CFLAGS"
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [language-extension-token])
           fi
           #
           dnl Only clang 3.2 or later
           if test "$compiler_num" -ge "302"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [enum-conversion])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [sometimes-uninitialized])
             case $host_os in
             cygwin* | mingw*)
               dnl skip missing-variable-declarations warnings for cygwin and
@@ -856,7 +857,14 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           #
           dnl Only clang 3.4 or later
           if test "$compiler_num" -ge "304"; then
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [header-guard])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unused-const-variable])
+          fi
+          #
+          dnl Only clang 3.5 or later
+          if test "$compiler_num" -ge "305"; then
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [pragmas])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unreachable-code-break])
           fi
           #
           dnl Only clang 3.6 or later
@@ -983,6 +991,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-field-initializers missing-noreturn])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unreachable-code unused-parameter])
           # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [padded])           # Not used because we cannot change public structs
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [pragmas])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [redundant-decls])
           # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [switch-enum])      # Not used because this basically disallows default case
           # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unused-macros])    # Not practical
