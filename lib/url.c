@@ -288,6 +288,8 @@ static const struct Curl_handler * const protocols[] = {
 #ifndef CURL_DISABLE_DICT
   &Curl_handler_dict,
 #endif
+
+  NULL
 };
 
 void Curl_freeset(struct Curl_easy *data)
@@ -1594,7 +1596,7 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
   size_t i;
   /* Scan protocol handler table and match against 'scheme'. The handler may
      be changed later when the protocol specific setup function is called. */
-  for(i = 0; i < ARRAYSIZE(protocols); ++i)
+  for(i = 0; i < ARRAYSIZE(protocols) - 1; ++i)
     if(strncasecompare(protocols[i]->scheme, scheme, len) &&
        !protocols[i]->scheme[len])
       /* Protocol found in table. */
