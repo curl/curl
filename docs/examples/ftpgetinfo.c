@@ -26,6 +26,12 @@
 
 #include <curl/curl.h>
 
+#if defined(__MINGW32__)
+#include <inttypes.h>
+#undef CURL_FORMAT_CURL_OFF_T
+#define CURL_FORMAT_CURL_OFF_T PRId64
+#endif
+
 /* <DESC>
  * Checks a single file's size and mtime from an FTP server.
  * </DESC>

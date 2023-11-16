@@ -44,6 +44,12 @@
 
 #ifdef WIN32
 #define sleep(sec) Sleep ((sec)*1000)
+
+#if defined(__MINGW32__)
+#include <inttypes.h>
+#undef CURL_FORMAT_CURL_OFF_T
+#define CURL_FORMAT_CURL_OFF_T PRId64
+#endif
 #endif
 
 #define test_setopt(A,B,C)                                      \
