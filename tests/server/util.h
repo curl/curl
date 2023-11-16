@@ -68,7 +68,6 @@ int write_pidfile(const char *filename);
 int write_portfile(const char *filename, int port);
 void set_advisor_read_lock(const char *filename);
 void clear_advisor_read_lock(const char *filename);
-int strncasecompare(const char *first, const char *second, size_t max);
 
 /* global variable which if set indicates that the program should finish */
 extern volatile int got_exit_signal;
