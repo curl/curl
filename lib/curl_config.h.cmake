@@ -101,6 +101,9 @@
 /* disables MIME support */
 #cmakedefine CURL_DISABLE_MIME 1
 
+/* disables local binding support */
+#cmakedefine CURL_DISABLE_BINDLOCAL 1
+
 /* disables MQTT */
 #cmakedefine CURL_DISABLE_MQTT 1
 
