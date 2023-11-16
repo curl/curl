@@ -845,7 +845,7 @@ output_auth_headers(struct Curl_easy *data,
   else
     authstatus->multipass = FALSE;
 
-  return CURLE_OK;
+  return result;
 }
 
 /**
