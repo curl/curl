@@ -83,15 +83,17 @@ UNITTEST_START
     abort_unless(err == 0, "returned error");
     abort_if(err && out, "returned error with output");
 
-    if(out && strcmp(out, pairs[i].output)) {
+    if(out && pairs[i].output && strcmp(out, pairs[i].output)) {
       fprintf(stderr, "Test %u: '%s' gave '%s' instead of '%s'\n",
               i, pairs[i].input, out, pairs[i].output);
       fail("Test case output mismatched");
       fails++;
     }
-    else if(!out && pairs[i].output) {
-      fprintf(stderr, "Test %u: '%s' gave '%s' instead of NULL\n",
-              i, pairs[i].input, out);
+    else if((!out && pairs[i].output) ||
+            (out && !pairs[i].output)) {
+      fprintf(stderr, "Test %u: '%s' gave '%s' instead of '%s'\n",
+              i, pairs[i].input, out ? out : "(null)",
+              pairs[i].output ? pairs[i].output : "(null)");
       fail("Test case output mismatched");
       fails++;
     }
