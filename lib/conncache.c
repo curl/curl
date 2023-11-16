@@ -243,7 +243,7 @@ CURLcode Curl_conncache_add_conn(struct Curl_easy *data)
   conn->connection_id = connc->next_connection_id++;
   connc->num_conn++;
 
-  DEBUGF(infof(data, "Added connection %ld. "
+  DEBUGF(infof(data, "Added connection %" CURL_FORMAT_CURL_OFF_T ". "
                "The cache now contains %zu members",
                conn->connection_id, connc->num_conn));
 
