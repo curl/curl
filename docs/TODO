@@ -122,6 +122,7 @@
  13.8 Support DANE
  13.9 TLS record padding
  13.10 Support Authority Information Access certificate extension (AIA)
+ 13.11 Some TLS options are not offered for HTTPS proxies
  13.12 Reduce CA certificate bundle reparsing
  13.13 Make sure we forbid TLS 1.3 post-handshake authentication
  13.14 Support the clienthello extension
@@ -883,6 +884,14 @@
  it is probably a bit tricky to get done right.
 
  See https://github.com/curl/curl/issues/2793
+
+13.11 Some TLS options are not offered for HTTPS proxies
+
+ Some TLS related options to the command line tool and libcurl are only
+ provided for the server and not for HTTPS proxies. --proxy-tls-max,
+ --proxy-tlsv1.3, --proxy-curves and a few more.a
+
+ https://github.com/curl/curl/issues/12286
 
 13.12 Reduce CA certificate bundle reparsing
 
