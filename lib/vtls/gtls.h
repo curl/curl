@@ -43,6 +43,7 @@ struct Curl_easy;
 struct Curl_cfilter;
 struct ssl_primary_config;
 struct ssl_config_data;
+struct ssl_peer;
 
 struct gtls_instance {
   gnutls_session_t session;
