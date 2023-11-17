@@ -222,6 +222,8 @@ option(CURL_DISABLE_GETOPTIONS "disables curl_easy_options API for existing opti
 mark_as_advanced(CURL_DISABLE_GETOPTIONS)
 option(CURL_DISABLE_GOPHER "disables Gopher" OFF)
 mark_as_advanced(CURL_DISABLE_GOPHER)
+option(CURL_DISABLE_HEADERS_API "disables headers-api support" OFF)
+mark_as_advanced(CURL_DISABLE_HEADERS_API)
 option(CURL_DISABLE_HSTS "disables HSTS support" OFF)
 mark_as_advanced(CURL_DISABLE_HSTS)
 option(CURL_DISABLE_HTTP "disables HTTP" OFF)
