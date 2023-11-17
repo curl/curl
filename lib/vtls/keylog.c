@@ -23,6 +23,11 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
+#if defined(USE_OPENSSL) || \
+  defined(USE_WOLFSSL) || \
+  (defined(USE_NGTCP2) && defined(USE_NGHTTP3)) || \
+  defined(USE_QUICHE)
+
 #include "keylog.h"
 #include <curl/curl.h>
 
@@ -157,3 +162,5 @@ Curl_tls_keylog_write(const char *label,
   fputs(line, keylog_file_fp);
   return true;
 }
+
+#endif  /* TLS or QUIC backend */
