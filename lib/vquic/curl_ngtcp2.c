@@ -595,7 +595,6 @@ static CURLcode quic_init_ssl(struct Curl_cfilter *cf,
   CURLcode result;
   gnutls_datum_t alpn[2];
   /* this will need some attention when HTTPS proxy over QUIC get fixed */
-  const char * const hostname = cf->conn->host.name;
   long * const pverifyresult = &data->set.ssl.certverifyresult;
   int rc;
 
