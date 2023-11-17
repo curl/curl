@@ -225,9 +225,6 @@ static void main_free(struct GlobalConfig *config)
 #pragma GCC diagnostic ignored "-Wmissing-declarations"
 #endif
 int wmain(int argc, wchar_t *argv[])
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
 #else
 int main(int argc, char *argv[])
 #endif
@@ -290,5 +287,11 @@ int main(int argc, char *argv[])
   return (int)result;
 #endif
 }
+
+#ifdef _UNICODE
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+#endif
 
 #endif /* ndef UNITTESTS */
