@@ -542,7 +542,7 @@ CURLcode gtls_client_init(struct Curl_easy *data,
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  if(peer->sni) {
+  if(sni && peer->sni) {
     if(gnutls_server_name_set(gtls->session, GNUTLS_NAME_DNS,
                               peer->sni, strlen(peer->sni)) < 0) {
       failf(data, "Failed to set SNI");
