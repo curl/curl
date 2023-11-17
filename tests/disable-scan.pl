@@ -69,7 +69,9 @@ sub scanconf_cmake {
     while(<S>) {
         if(/(CURL_DISABLE_[A-Z_]+)/g) {
             my ($sym)=($1);
-            $disable_cmake{$sym} = 1;
+            if(not $sym =~ /(CURL_DISABLE_INSTALL|CURL_DISABLE_TESTS|CURL_DISABLE_SRP)/) {
+                $disable_cmake{$sym} = 1;
+            }
         }
     }
     close S;
