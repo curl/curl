@@ -26,10 +26,11 @@
 
 #include "curl_setup.h"
 
-#if defined(_WIN32)
+#ifdef _WIN32
 
 extern LARGE_INTEGER Curl_freq;
 extern bool Curl_isVistaOrGreater;
+extern bool Curl_isWindows8OrGreater;
 
 CURLcode Curl_win32_init(long flags);
 void Curl_win32_cleanup(long init_flags);
@@ -39,6 +40,29 @@ typedef unsigned int(WINAPI *IF_NAMETOINDEX_FN)(const char *);
 
 /* This is used instead of if_nametoindex if available on Windows */
 extern IF_NAMETOINDEX_FN Curl_if_nametoindex;
+
+/* Identical copy of addrinfoexW/ADDRINFOEXW */
+typedef struct addrinfoexW_
+{
+  int                  ai_flags;
+  int                  ai_family;
+  int                  ai_socktype;
+  int                  ai_protocol;
+  size_t               ai_addrlen;
+  PWSTR                ai_canonname;
+  struct sockaddr     *ai_addr;
+  void                *ai_blob;
+  size_t               ai_bloblen;
+  LPGUID               ai_provider;
+  struct addrinfoexW_ *ai_next;
+} ADDRINFOEXW_;
+
+typedef void(CALLBACK *LOOKUP_COMPLETION)(DWORD, DWORD, LPWSAOVERLAPPED);
+extern void(WSAAPI *Curl_FreeAddrInfoExW)(ADDRINFOEXW_*);
+extern int(WSAAPI *Curl_GetAddrInfoExCancel)(LPHANDLE);
+extern int(WSAAPI *Curl_GetAddrInfoExW)(PCWSTR, PCWSTR, DWORD, LPGUID,
+  const ADDRINFOEXW_*, ADDRINFOEXW_**, struct timeval*, LPOVERLAPPED,
+  LOOKUP_COMPLETION, LPHANDLE);
 
 /* This is used to dynamically load DLLs */
 HMODULE Curl_load_library(LPCTSTR filename);

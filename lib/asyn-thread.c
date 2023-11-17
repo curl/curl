@@ -54,6 +54,7 @@
 #  define RESOLVER_ENOMEM  ENOMEM
 #endif
 
+#include "system_win32.h"
 #include "urldata.h"
 #include "sendf.h"
 #include "hostip.h"
@@ -144,9 +145,22 @@ static bool init_resolve_thread(struct Curl_easy *data,
                                 const char *hostname, int port,
                                 const struct addrinfo *hints);
 
+#ifdef _WIN32
+/* Thread sync data used by GetAddrInfoExW for win8+ */
+struct thread_sync_data_w8
+{
+  OVERLAPPED overlapped;
+  ADDRINFOEXW_ *res;
+  HANDLE cancel_ev;
+  ADDRINFOEXW_ hints;
+};
+#endif
 
 /* Data for synchronization between resolver thread and its parent */
 struct thread_sync_data {
+#ifdef _WIN32
+  struct thread_sync_data_w8 w8;
+#endif
   curl_mutex_t *mtx;
   int done;
   int port;
@@ -165,6 +179,9 @@ struct thread_sync_data {
 };
 
 struct thread_data {
+#ifdef _WIN32
+  HANDLE complete_ev;
+#endif
   curl_thread_t thread_hnd;
   unsigned int poll_interval;
   timediff_t interval_end;
@@ -276,6 +293,144 @@ static CURLcode getaddrinfo_complete(struct Curl_easy *data)
   return result;
 }
 
+#ifdef _WIN32
+static VOID WINAPI
+query_complete(DWORD err, DWORD bytes, LPWSAOVERLAPPED overlapped)
+{
+  size_t ss_size;
+  const ADDRINFOEXW_ *ai;
+  struct Curl_addrinfo *ca;
+  struct Curl_addrinfo *cafirst = NULL;
+  struct Curl_addrinfo *calast = NULL;
+  struct thread_sync_data *tsd =
+    CONTAINING_RECORD(overlapped, struct thread_sync_data, w8.overlapped);
+  struct thread_data *td = tsd->td;
+  const ADDRINFOEXW_ *res = tsd->w8.res;
+  int error = (int)err;
+  (void)bytes;
+
+  if(error == ERROR_SUCCESS) {
+    /* traverse the addrinfo list */
+
+    for(ai = res; ai != NULL; ai = ai->ai_next) {
+      size_t namelen = ai->ai_canonname ? wcslen(ai->ai_canonname) + 1 : 0;
+      /* ignore elements with unsupported address family, */
+      /* settle family-specific sockaddr structure size.  */
+      if(ai->ai_family == AF_INET)
+        ss_size = sizeof(struct sockaddr_in);
+#ifdef ENABLE_IPV6
+      else if(ai->ai_family == AF_INET6)
+        ss_size = sizeof(struct sockaddr_in6);
+#endif
+      else
+        continue;
+
+      /* ignore elements without required address info */
+      if(!ai->ai_addr || !(ai->ai_addrlen > 0))
+        continue;
+
+      /* ignore elements with bogus address size */
+      if((size_t)ai->ai_addrlen < ss_size)
+        continue;
+
+      ca = malloc(sizeof(struct Curl_addrinfo) + ss_size + namelen);
+      if(!ca) {
+        error = EAI_MEMORY;
+        break;
+      }
+
+      /* copy each structure member individually, member ordering, */
+      /* size, or padding might be different for each platform.    */
+      ca->ai_flags     = ai->ai_flags;
+      ca->ai_family    = ai->ai_family;
+      ca->ai_socktype  = ai->ai_socktype;
+      ca->ai_protocol  = ai->ai_protocol;
+      ca->ai_addrlen   = (curl_socklen_t)ss_size;
+      ca->ai_addr      = NULL;
+      ca->ai_canonname = NULL;
+      ca->ai_next      = NULL;
+
+      ca->ai_addr = (void *)((char *)ca + sizeof(struct Curl_addrinfo));
+      memcpy(ca->ai_addr, ai->ai_addr, ss_size);
+
+      if(namelen) {
+        size_t i;
+        ca->ai_canonname = (void *)((char *)ca->ai_addr + ss_size);
+        for(i = 0; i < namelen; ++i) /* convert wide string to ascii */
+          ca->ai_canonname[i] = (char)ai->ai_canonname[i];
+        ca->ai_canonname[namelen] = '\0';
+      }
+
+      /* if the return list is empty, this becomes the first element */
+      if(!cafirst)
+        cafirst = ca;
+
+      /* add this element last in the return list */
+      if(calast)
+        calast->ai_next = ca;
+      calast = ca;
+    }
+
+    /* if we failed, also destroy the Curl_addrinfo list */
+    if(error) {
+      Curl_freeaddrinfo(cafirst);
+      cafirst = NULL;
+    }
+    else if(!cafirst) {
+#ifdef EAI_NONAME
+      /* rfc3493 conformant */
+      error = EAI_NONAME;
+#else
+      /* rfc3493 obsoleted */
+      error = EAI_NODATA;
+#endif
+#ifdef USE_WINSOCK
+      SET_SOCKERRNO(error);
+#endif
+    }
+    tsd->res = cafirst;
+  }
+
+  if(tsd->w8.res) {
+    Curl_FreeAddrInfoExW(tsd->w8.res);
+    tsd->w8.res = NULL;
+  }
+
+  if(error) {
+    tsd->sock_error = SOCKERRNO?SOCKERRNO:error;
+    if(tsd->sock_error == 0)
+      tsd->sock_error = RESOLVER_ENOMEM;
+  }
+  else {
+    Curl_addrinfo_set_port(tsd->res, tsd->port);
+  }
+
+  Curl_mutex_acquire(tsd->mtx);
+  if(tsd->done) {
+    /* too late, gotta clean up the mess */
+    Curl_mutex_release(tsd->mtx);
+    destroy_thread_sync_data(tsd);
+    free(td);
+  }
+  else {
+#ifndef CURL_DISABLE_SOCKETPAIR
+    char buf[1];
+    if(tsd->sock_pair[1] != CURL_SOCKET_BAD) {
+      /* DNS has been resolved, signal client task */
+      buf[0] = 1;
+      if(swrite(tsd->sock_pair[1],  buf, sizeof(buf)) < 0) {
+        /* update sock_erro to errno */
+        tsd->sock_error = SOCKERRNO;
+      }
+    }
+#endif
+    tsd->done = 1;
+    Curl_mutex_release(tsd->mtx);
+    if(td->complete_ev)
+      SetEvent(td->complete_ev); /* Notify caller that the query completed */
+  }
+}
+#endif
 
 #ifdef HAVE_GETADDRINFO
 
@@ -391,9 +546,21 @@ static void destroy_async_data(struct Curl_async *async)
     Curl_mutex_release(td->tsd.mtx);
 
     if(!done) {
+#ifdef _WIN32
+      if(td->complete_ev)
+        CloseHandle(td->complete_ev);
+      else
+#endif
       Curl_thread_destroy(td->thread_hnd);
     }
     else {
+#ifdef _WIN32
+      if(td->complete_ev) {
+        Curl_GetAddrInfoExCancel(&td->tsd.w8.cancel_ev);
+        WaitForSingleObject(td->complete_ev, INFINITE);
+        CloseHandle(td->complete_ev);
+      }
+#endif
       if(td->thread_hnd != curl_thread_t_null)
         Curl_thread_join(&td->thread_hnd);
 
@@ -439,6 +606,9 @@ static bool init_resolve_thread(struct Curl_easy *data,
   asp->status = 0;
   asp->dns = NULL;
   td->thread_hnd = curl_thread_t_null;
+#ifdef _WIN32
+  td->complete_ev = NULL;
+#endif
 
   if(!init_thread_sync_data(td, hostname, port, hints)) {
     asp->tdata = NULL;
@@ -453,6 +623,41 @@ static bool init_resolve_thread(struct Curl_easy *data,
 
   /* The thread will set this to 1 when complete. */
   td->tsd.done = 0;
+
+#ifdef _WIN32
+  if(Curl_isWindows8OrGreater && Curl_FreeAddrInfoExW &&
+     Curl_GetAddrInfoExCancel && Curl_GetAddrInfoExW) {
+#define MAX_NAME_LEN 256 /* max domain name is 253 chars */
+#define MAX_PORT_LEN 8
+    WCHAR namebuf[MAX_NAME_LEN];
+    WCHAR portbuf[MAX_PORT_LEN];
+    /* calculate required length */
+    int w_len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, hostname,
+                                    -1, NULL, 0);
+    if((w_len > 0) && (w_len < MAX_NAME_LEN)) {
+      /* do utf8 conversion */
+      w_len = MultiByteToWideChar(CP_UTF8, 0, hostname, -1, namebuf, w_len);
+      if((w_len > 0) && (w_len < MAX_NAME_LEN)) {
+        swprintf(portbuf, MAX_PORT_LEN, L"%d", port);
+        td->tsd.w8.hints.ai_family = hints->ai_family;
+        td->tsd.w8.hints.ai_socktype = hints->ai_socktype;
+        td->complete_ev = CreateEvent(NULL, TRUE, FALSE, NULL);
+        if(!td->complete_ev) {
+          /* failed to start, mark it as done here for proper cleanup. */
+          td->tsd.done = 1;
+          goto err_exit;
+        }
+        err = Curl_GetAddrInfoExW(namebuf, portbuf, NS_DNS,
+                                  NULL, &td->tsd.w8.hints, &td->tsd.w8.res,
+                                  NULL, &td->tsd.w8.overlapped,
+                                  &query_complete, &td->tsd.w8.cancel_ev);
+        if(err != WSA_IO_PENDING)
+          query_complete(err, 0, &td->tsd.w8.overlapped);
+        return TRUE;
+      }
+    }
+  }
+#endif
 
 #ifdef HAVE_GETADDRINFO
   td->thread_hnd = Curl_thread_create(getaddrinfo_thread, &td->tsd);
@@ -490,9 +695,22 @@ static CURLcode thread_wait_resolv(struct Curl_easy *data,
   DEBUGASSERT(data);
   td = data->state.async.tdata;
   DEBUGASSERT(td);
+#ifdef _WIN32
+  DEBUGASSERT(td->complete_ev || td->thread_hnd != curl_thread_t_null);
+#else
   DEBUGASSERT(td->thread_hnd != curl_thread_t_null);
+#endif
 
   /* wait for the thread to resolve the name */
+#ifdef _WIN32
+  if(td->complete_ev) {
+    WaitForSingleObject(td->complete_ev, INFINITE);
+    CloseHandle(td->complete_ev);
+    if(entry)
+      result = getaddrinfo_complete(data);
+  }
+  else
+#endif
   if(Curl_thread_join(&td->thread_hnd)) {
     if(entry)
       result = getaddrinfo_complete(data);
