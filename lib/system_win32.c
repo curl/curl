@@ -38,12 +38,23 @@
 
 LARGE_INTEGER Curl_freq;
 bool Curl_isVistaOrGreater;
+bool Curl_isWindows8OrGreater;
 
 /* Handle of iphlpapp.dll */
 static HMODULE s_hIpHlpApiDll = NULL;
 
+/* Handle of ws2_32.dll */
+static HMODULE s_ws2_32Dll = NULL;
+
 /* Pointer to the if_nametoindex function */
 IF_NAMETOINDEX_FN Curl_if_nametoindex = NULL;
+
+void(WSAAPI *Curl_FreeAddrInfoExW)(ADDRINFOEXW_ *pAddrInfoEx) = NULL;
+int(WSAAPI *Curl_GetAddrInfoExCancel)(LPHANDLE lpHandle) = NULL;
+int(WSAAPI *Curl_GetAddrInfoExW)(PCWSTR pName, PCWSTR pServiceName,
+  DWORD dwNameSpace, LPGUID lpNspId, const ADDRINFOEXW_ *hints,
+  ADDRINFOEXW_ **ppResult, struct timeval *timeout, LPOVERLAPPED lpOverlapped,
+  LOOKUP_COMPLETION lpCompletionRoutine, LPHANDLE lpHandle) = NULL;
 
 /* Curl_win32_init() performs win32 global initialization */
 CURLcode Curl_win32_init(long flags)
@@ -104,6 +115,16 @@ CURLcode Curl_win32_init(long flags)
       Curl_if_nametoindex = pIfNameToIndex;
   }
 
+  s_ws2_32Dll = Curl_load_library(TEXT("ws2_32.dll"));
+  if(s_ws2_32Dll) {
+    *(FARPROC*)&Curl_FreeAddrInfoExW = GetProcAddress(s_ws2_32Dll,
+      "FreeAddrInfoExW");
+    *(FARPROC*)&Curl_GetAddrInfoExCancel = GetProcAddress(s_ws2_32Dll,
+      "GetAddrInfoExCancel");
+    *(FARPROC*)&Curl_GetAddrInfoExW = GetProcAddress(s_ws2_32Dll,
+      "GetAddrInfoExW");
+  }
+
   /* curlx_verify_windows_version must be called during init at least once
      because it has its own initialization routine. */
   if(curlx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
@@ -113,6 +134,13 @@ CURLcode Curl_win32_init(long flags)
   else
     Curl_isVistaOrGreater = FALSE;
 
+  if(curlx_verify_windows_version(6, 2, 0, PLATFORM_WINNT,
+                                  VERSION_GREATER_THAN_EQUAL)) {
+    Curl_isWindows8OrGreater = TRUE;
+  }
+  else
+    Curl_isWindows8OrGreater = FALSE;
+
   QueryPerformanceFrequency(&Curl_freq);
   return CURLE_OK;
 }
@@ -120,6 +148,13 @@ CURLcode Curl_win32_init(long flags)
 /* Curl_win32_cleanup() is the opposite of Curl_win32_init() */
 void Curl_win32_cleanup(long init_flags)
 {
+  if(s_ws2_32Dll) {
+    FreeLibrary(s_ws2_32Dll);
+    s_ws2_32Dll = NULL;
+    Curl_FreeAddrInfoExW = NULL;
+    Curl_GetAddrInfoExCancel = NULL;
+    Curl_GetAddrInfoExW = NULL;
+  }
   if(s_hIpHlpApiDll) {
     FreeLibrary(s_hIpHlpApiDll);
     s_hIpHlpApiDll = NULL;
