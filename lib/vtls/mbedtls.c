@@ -322,7 +322,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   char * const ssl_cert = ssl_config->primary.clientcert;
   const struct curl_blob *ssl_cert_blob = ssl_config->primary.cert_blob;
   const char * const ssl_crlfile = ssl_config->primary.CRLfile;
-  const char *hostname = connssl->hostname;
+  const char *hostname = connssl->peer.hostname;
   int ret = -1;
   char errorbuf[128];
 
@@ -639,9 +639,9 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     mbedtls_ssl_conf_own_cert(&backend->config,
                               &backend->clicert, &backend->pk);
   }
-  {
-    char *snihost = Curl_ssl_snihost(data, hostname, NULL);
-    if(!snihost || mbedtls_ssl_set_hostname(&backend->ssl, snihost)) {
+
+  if(connssl->peer.sni) {
+    if(mbedtls_ssl_set_hostname(&backend->ssl, connssl->peer.sni)) {
       /* mbedtls_ssl_set_hostname() sets the name to use in CN/SAN checks and
          the name to set in the SNI extension. So even if curl connects to a
          host specified as an IP address, this function must be used. */

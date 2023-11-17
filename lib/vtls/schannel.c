@@ -1063,12 +1063,8 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 #endif
   SECURITY_STATUS sspi_status = SEC_E_OK;
   struct Curl_schannel_cred *old_cred = NULL;
-  struct in_addr addr;
-#ifdef ENABLE_IPV6
-  struct in6_addr addr6;
-#endif
   CURLcode result;
-  const char *hostname = connssl->hostname;
+  const char *hostname = connssl->peer.hostname;
 
   DEBUGASSERT(backend);
   DEBUGF(infof(data,
@@ -1154,22 +1150,14 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
     /* A hostname associated with the credential is needed by
        InitializeSecurityContext for SNI and other reasons. */
-    snihost = Curl_ssl_snihost(data, hostname, NULL);
-    if(!snihost) {
-      failf(data, "Failed to set SNI");
-      return CURLE_SSL_CONNECT_ERROR;
-    }
+    snihost = connssl->peer.sni? connssl->peer.sni : connssl->peer.hostname;
     backend->cred->sni_hostname = curlx_convert_UTF8_to_tchar(snihost);
     if(!backend->cred->sni_hostname)
       return CURLE_OUT_OF_MEMORY;
   }
 
   /* Warn if SNI is disabled due to use of an IP address */
-  if(Curl_inet_pton(AF_INET, hostname, &addr)
-#ifdef ENABLE_IPV6
-     || Curl_inet_pton(AF_INET6, hostname, &addr6)
-#endif
-    ) {
+  if(connssl->peer.is_ip_address) {
     infof(data, "schannel: using IP address, SNI is not supported by OS.");
   }
 
@@ -1346,7 +1334,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   DEBUGF(infof(data,
                "schannel: SSL/TLS connection with %s port %d (step 2/3)",
-               connssl->hostname, connssl->port));
+               connssl->peer.hostname, connssl->port));
 
   if(!backend->cred || !backend->ctxt)
     return CURLE_SSL_CONNECT_ERROR;
@@ -1700,7 +1688,7 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   DEBUGF(infof(data,
                "schannel: SSL/TLS connection with %s port %d (step 3/3)",
-               connssl->hostname, connssl->port));
+               connssl->peer.hostname, connssl->port));
 
   if(!backend->cred)
     return CURLE_SSL_CONNECT_ERROR;
@@ -2498,7 +2486,7 @@ static int schannel_shutdown(struct Curl_cfilter *cf,
 
   if(backend->ctxt) {
     infof(data, "schannel: shutting down SSL/TLS connection with %s port %d",
-          connssl->hostname, connssl->port);
+          connssl->peer.hostname, connssl->port);
   }
 
   if(backend->cred && backend->ctxt) {

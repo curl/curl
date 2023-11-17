@@ -582,17 +582,12 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
   const char * const ssl_cafile =
     /* CURLOPT_CAINFO_BLOB overrides CURLOPT_CAINFO */
     (ca_info_blob ? NULL : conn_config->CAfile);
-  const char *hostname = connssl->hostname;
+  const char *hostname = connssl->peer.hostname;
   const bool verifypeer = conn_config->verifypeer;
   const bool verifyhost = conn_config->verifyhost;
   CURLcode ret;
   unsigned version_min, version_max;
   int session_set = 0;
-#ifdef ENABLE_IPV6
-  struct in6_addr addr;
-#else
-  struct in_addr addr;
-#endif
 
   DEBUGASSERT(backend);
   CURL_TRC_CF(data, cf, "connect_step1");
@@ -706,11 +701,7 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
     infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
   }
 
-  if((1 == Curl_inet_pton(AF_INET, hostname, &addr))
-#ifdef ENABLE_IPV6
-      || (1 == Curl_inet_pton(AF_INET6, hostname, &addr))
-#endif
-     ) {
+  if(connssl->peer.is_ip_address) {
     if(verifyhost) {
       failf(data, "BearSSL: "
             "host verification of IP address is not supported");
@@ -719,12 +710,11 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
     hostname = NULL;
   }
   else {
-    char *snihost = Curl_ssl_snihost(data, hostname, NULL);
-    if(!snihost) {
+    if(!connssl->peer.sni) {
       failf(data, "Failed to set SNI");
       return CURLE_SSL_CONNECT_ERROR;
     }
-    hostname = snihost;
+    hostname = connssl->peer.sni;
     CURL_TRC_CF(data, cf, "connect_step1, SNI set");
   }
 

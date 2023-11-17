@@ -386,7 +386,7 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
     /* CURLOPT_CAINFO_BLOB overrides CURLOPT_CAINFO */
     (ca_info_blob ? NULL : conn_config->CAfile);
   const bool verifypeer = conn_config->verifypeer;
-  const char *hostname = connssl->hostname;
+  const char *hostname = connssl->peer.hostname;
   char errorbuf[256];
   size_t errorlen;
   int result;
@@ -458,12 +458,11 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
   backend->config = rustls_client_config_builder_build(config_builder);
   DEBUGASSERT(rconn == NULL);
   {
-    char *snihost = Curl_ssl_snihost(data, hostname, NULL);
-    if(!snihost) {
-      failf(data, "rustls: failed to get SNI");
-      return CURLE_SSL_CONNECT_ERROR;
-    }
-    result = rustls_client_connection_new(backend->config, snihost, &rconn);
+    /* rustls claims to manage ip address hostnames as well here. So,
+     * if we have an SNI, we use it, otherwise we pass the hostname */
+    char *server = connssl->peer.sni?
+                   connssl->peer.sni : connssl->peer.hostname;
+    result = rustls_client_connection_new(backend->config, server, &rconn);
   }
   if(result != RUSTLS_RESULT_OK) {
     rustls_error(result, errorbuf, sizeof(errorbuf), &errorlen);

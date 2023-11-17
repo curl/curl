@@ -91,6 +91,7 @@ static void keylog_callback(const SSL *ssl, const char *line)
 
 struct cf_quiche_ctx {
   struct cf_quic_ctx q;
+  struct ssl_peer peer;
   quiche_conn *qconn;
   quiche_config *cfg;
   quiche_h3_conn *h3c;
@@ -131,6 +132,8 @@ static void cf_quiche_ctx_clear(struct cf_quiche_ctx *ctx)
     if(ctx->cfg)
       quiche_config_free(ctx->cfg);
     Curl_bufcp_free(&ctx->stream_bufcp);
+    Curl_ssl_peer_cleanup(&ctx->peer);
+
     memset(ctx, 0, sizeof(*ctx));
   }
 }
@@ -182,11 +185,15 @@ static CURLcode quic_ssl_setup(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct ssl_primary_config *conn_config;
-  unsigned char checkip[16];
+  CURLcode result;
 
   conn_config = Curl_ssl_cf_get_primary_config(cf);
   if(!conn_config)
     return CURLE_FAILED_INIT;
+
+  result = Curl_ssl_peer_init(&ctx->peer, cf);
+  if(result)
+    return result;
 
   DEBUGASSERT(!ctx->sslctx);
   ctx->sslctx = SSL_CTX_new(TLS_method());
@@ -218,13 +225,8 @@ static CURLcode quic_ssl_setup(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   SSL_set_app_data(ctx->ssl, cf);
 
-  if((0 == Curl_inet_pton(AF_INET, cf->conn->host.name, checkip))
-#ifdef ENABLE_IPV6
-     && (0 == Curl_inet_pton(AF_INET6, cf->conn->host.name, checkip))
-#endif
-     ) {
-    char *snihost = Curl_ssl_snihost(data, cf->conn->host.name, NULL);
-    if(!snihost || !SSL_set_tlsext_host_name(ctx->ssl, snihost)) {
+  if(ctx->peer.sni) {
+    if(!SSL_set_tlsext_host_name(ctx->ssl, ctx->peer.sni)) {
       failf(data, "Failed set SNI");
       SSL_free(ctx->ssl);
       ctx->ssl = NULL;
@@ -1267,7 +1269,7 @@ static CURLcode cf_verify_peer(struct Curl_cfilter *cf,
       result = CURLE_PEER_FAILED_VERIFICATION;
       goto out;
     }
-    result = Curl_ossl_verifyhost(data, cf->conn, server_cert);
+    result = Curl_ossl_verifyhost(data, cf->conn, &ctx->peer, server_cert);
     X509_free(server_cert);
     if(result)
       goto out;
