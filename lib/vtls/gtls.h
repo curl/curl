@@ -65,8 +65,7 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
                        gnutls_session_t session,
                        struct ssl_primary_config *config,
                        struct ssl_config_data *ssl_config,
-                       const char *hostname,
-                       const char *dispname,
+                       struct ssl_peer *peer,
                        const char *pinned_key);
 
 extern const struct Curl_ssl Curl_ssl_gnutls;

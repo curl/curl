@@ -266,6 +266,13 @@ typedef enum {
 /* SSL backend-specific data; declared differently by each SSL backend */
 struct ssl_backend_data;
 
+struct ssl_peer {
+  char *hostname;        /* hostname for verification */
+  char *dispname;        /* display version of hostname */
+  char *sni;             /* SNI version of hostname or NULL if not usable */
+  BIT(is_ip_address);    /* if hostname is an IPv4|6 address */
+};
+
 struct ssl_primary_config {
   char *CApath;          /* certificate dir (doesn't work on windows) */
   char *CAfile;          /* certificate to verify peer against */

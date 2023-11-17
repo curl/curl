@@ -43,6 +43,7 @@
  */
 struct x509_st;
 CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
+                              struct ssl_peer *peer,
                               struct x509_st *server_cert);
 extern const struct Curl_ssl Curl_ssl_openssl;
 
@@ -64,6 +65,10 @@ CURLcode Curl_ossl_certchain(struct Curl_easy *data, SSL *ssl);
 CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    SSL_CTX *ssl_ctx);
+
+CURLcode Curl_ossl_ctx_configure(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 SSL_CTX *ssl_ctx);
 
 #endif /* USE_OPENSSL */
 #endif /* HEADER_CURL_SSLUSE_H */
