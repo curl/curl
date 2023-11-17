@@ -1598,7 +1598,7 @@ CURLcode Curl_ssl_peer_init(struct ssl_peer *peer, struct Curl_cfilter *cf)
     }
 
     peer->sni = NULL;
-    peer->is_ip_address = is_ip_address(peer->hostname);
+    peer->is_ip_address = is_ip_address(peer->hostname)? TRUE : FALSE;
     if(peer->hostname[0] && !peer->is_ip_address) {
       /* not an IP address, normalize according to RCC 6066 ch. 3,
        * max len of SNI is 2^16-1, no trailing dot */
