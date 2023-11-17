@@ -38,6 +38,7 @@
 
 LARGE_INTEGER Curl_freq;
 bool Curl_isVistaOrGreater;
+bool Curl_isWindows8OrGreater;
 
 /* Handle of iphlpapp.dll */
 static HMODULE s_hIpHlpApiDll = NULL;
@@ -112,6 +113,13 @@ CURLcode Curl_win32_init(long flags)
   }
   else
     Curl_isVistaOrGreater = FALSE;
+
+  if(curlx_verify_windows_version(6, 2, 0, PLATFORM_WINNT,
+                                  VERSION_GREATER_THAN_EQUAL)) {
+    Curl_isWindows8OrGreater = TRUE;
+  }
+  else
+    Curl_isWindows8OrGreater = FALSE;
 
   QueryPerformanceFrequency(&Curl_freq);
   return CURLE_OK;
