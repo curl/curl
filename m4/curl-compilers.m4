@@ -813,7 +813,8 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [conversion])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [div-by-zero format-security])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [empty-body])
-            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-field-initializers missing-noreturn])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-field-initializers])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-noreturn])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [old-style-definition])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [redundant-decls])
           # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [switch-enum])       # Not used because this basically disallows default case
@@ -988,7 +989,14 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           if test "$compiler_num" -ge "401"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [attributes])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [div-by-zero format-security])
-            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-field-initializers missing-noreturn])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-field-initializers])
+            case $host in
+              *-*-msys*)
+                ;;
+              *)
+                CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-noreturn])  # Seen to clash with libtool-generated stub code
+                ;;
+            esac
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unreachable-code unused-parameter])
           # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [padded])           # Not used because we cannot change public structs
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [pragmas])
