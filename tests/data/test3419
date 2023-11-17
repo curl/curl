@@ -1,0 +1,33 @@
+<testcase>
+<info>
+<keywords>
+SIEVE
+HAVESPACE
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+sieve
+</server>
+ <name>
+SIEVE very large script space check
+ </name>
+ <command>
+sieve://%HOSTIP:%SIEVEPORT/ --request 'HAVESPACE "script2big%TESTNUMBER" 54608'
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+HAVESPACE "script2big%TESTNUMBER" 54608
+LOGOUT
+</protocol>
+<errorcode>
+63
+</errorcode>
+</testcase>

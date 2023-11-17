@@ -1,0 +1,33 @@
+<testcase>
+<info>
+<keywords>
+SIEVE
+DELETESCRIPT
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+sieve
+</server>
+ <name>
+SIEVE active script deletion
+ </name>
+ <command>
+sieve://%HOSTIP:%SIEVEPORT/default --request DELETESCRIPT
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+DELETESCRIPT "default"
+LOGOUT
+</protocol>
+<errorcode>
+9
+</errorcode>
+</testcase>

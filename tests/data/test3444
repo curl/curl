@@ -1,0 +1,44 @@
+<testcase>
+<info>
+<keywords>
+SIEVE
+redirect_url
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+REPLY welcome \"SASL\" \"PLAIN\"\r\nOK
+REPLY AUTHENTICATE OK \"Logged in\"
+REPLY GETSCRIPT \"# Dummy script\"\r\nOK (REFERRAL \"sieve://%HOSTIP:%SIEVEPORT\")
+COUNT GETSCRIPT 1
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+sieve
+</server>
+ <name>
+SIEVE ignore referral if following not needed
+ </name>
+ <command>
+'sieve://%HOSTIP:%SIEVEPORT/script%TESTNUMBER' -u user:secret --location-trusted
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+AUTHENTICATE "PLAIN" "%b64[%00user%00secret]b64%"
+CAPABILITY
+GETSCRIPT "script%TESTNUMBER"
+LOGOUT
+</protocol>
+</verify>
+</testcase>

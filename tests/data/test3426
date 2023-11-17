@@ -1,0 +1,55 @@
+<testcase>
+<info>
+<keywords>
+SIEVE
+SASL
+SASL AUTH CRAM-MD5
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+REPLY welcome \"SASL\" \"CRAM-MD5\"\r\nOK
+REPLY AUTHENTICATE \"%b64[<1972.987654321@curl>]b64%\"
+REPLY %b64[user 7031725599fdbb5d412689aa323e3e0b]b64% OK \"Logged in\"
+</servercmd>
+<data>
+require "fileinto";
+if header :comparator "i;ascii-casemap" :contains "X-Spam-Level" "*****"  {
+    fileinto "Junk";
+    stop;
+}
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+sieve
+</server>
+<features>
+crypto
+</features>
+ <name>
+SIEVE CRAM-MD5 authentication
+ </name>
+ <command>
+sieve://%HOSTIP:%SIEVEPORT/script%TESTNUMBER -u user:secret
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+AUTHENTICATE "CRAM-MD5"
+"%b64[user 7031725599fdbb5d412689aa323e3e0b]b64%"
+CAPABILITY
+GETSCRIPT "script%TESTNUMBER"
+LOGOUT
+</protocol>
+</verify>
+</testcase>

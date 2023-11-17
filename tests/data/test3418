@@ -1,0 +1,33 @@
+<testcase>
+<info>
+<keywords>
+SIEVE
+RENAMESCRIPT
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+sieve
+</server>
+ <name>
+SIEVE rename script to an already existing name
+ </name>
+ <command>
+sieve://%HOSTIP:%SIEVEPORT/ --request 'RENAMESCRIPT "spam" "holidays"'
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+RENAMESCRIPT "spam" "holidays"
+LOGOUT
+</protocol>
+<errorcode>
+73
+</errorcode>
+</testcase>

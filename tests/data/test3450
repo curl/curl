@@ -1,0 +1,46 @@
+<testcase>
+<info>
+<keywords>
+SIEVE
+STARTTLS
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+REPLY welcome "STARTTLS"\r\nOK \"Welcome\"
+REPLY STARTTLS OK\r\nOK
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+SSL
+</features>
+<server>
+sieve
+</server>
+ <name>
+SIEVE STARTTLS pipelined server response
+ </name>
+ <command>
+sieve://%HOSTIP:%SIEVEPORT/ --ssl
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+STARTTLS
+</protocol>
+# 8 - CURLE_WEIRD_SERVER_REPLY
+<errorcode>
+8
+</errorcode>
+</verify>
+</testcase>
