@@ -1651,11 +1651,6 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
   const bool verifypeer = conn_config->verifypeer;
   char * const ssl_cert = ssl_config->primary.clientcert;
   const struct curl_blob *ssl_cert_blob = ssl_config->primary.cert_blob;
-#ifdef ENABLE_IPV6
-  struct in6_addr addr;
-#else
-  struct in_addr addr;
-#endif /* ENABLE_IPV6 */
   char *ciphers;
   OSStatus err = noErr;
 #if CURL_BUILD_MAC
@@ -2657,7 +2652,7 @@ check_handshake:
          host name: */
       case errSSLHostNameMismatch:
         failf(data, "SSL certificate peer verification failed, the "
-              "certificate did not match \"%s\"\n", connssl->dispname);
+              "certificate did not match \"%s\"\n", connssl->peer.dispname);
         return CURLE_PEER_FAILED_VERIFICATION;
 
       /* Problem with SSL / TLS negotiation */
