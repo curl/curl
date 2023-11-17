@@ -220,6 +220,7 @@ static void main_free(struct GlobalConfig *config)
 #ifdef _UNICODE
 #if defined(__GNUC__)
 /* GCC doesn't know about wmain() */
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 #pragma GCC diagnostic ignored "-Wmissing-declarations"
 #endif
@@ -286,5 +287,11 @@ int main(int argc, char *argv[])
   return (int)result;
 #endif
 }
+
+#ifdef _UNICODE
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+#endif
 
 #endif /* ndef UNITTESTS */
