@@ -609,7 +609,7 @@ static CURLcode quic_init_ssl(struct Curl_cfilter *cf,
     return CURLE_OUT_OF_MEMORY;
 
   result = gtls_client_init(data, conn_config, &data->set.ssl,
-                            hostname, ctx->gtls, pverifyresult);
+                            &ctx->peer, ctx->gtls, pverifyresult);
   if(result)
     return result;
 

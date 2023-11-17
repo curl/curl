@@ -56,7 +56,7 @@ CURLcode
 gtls_client_init(struct Curl_easy *data,
                  struct ssl_primary_config *config,
                  struct ssl_config_data *ssl_config,
-                 const char *hostname,
+                 struct ssl_peer *peer,
                  struct gtls_instance *gtls,
                  long *pverifyresult);
 
