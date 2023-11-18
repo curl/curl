@@ -1962,13 +1962,23 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
         break;
       }
       else if(rc == 0) {
+        #ifdef _MSC_VER
+        #define LIBSSH2_VFS_SIZE_MASK "I64u"
+        #else
+        #define LIBSSH2_VFS_SIZE_MASK "llu"
+        #endif
         char *tmp = aprintf("statvfs:\n"
-                            "f_bsize: %llu\n" "f_frsize: %llu\n"
-                            "f_blocks: %llu\n" "f_bfree: %llu\n"
-                            "f_bavail: %llu\n" "f_files: %llu\n"
-                            "f_ffree: %llu\n" "f_favail: %llu\n"
-                            "f_fsid: %llu\n" "f_flag: %llu\n"
-                            "f_namemax: %llu\n",
+                            "f_bsize: %" LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_frsize: %" LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_blocks: %" LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_bfree: %" LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_bavail: %" LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_files: %" LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_ffree: %" LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_favail: %" LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_fsid: %" LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_flag: %" LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_namemax: %" LIBSSH2_VFS_SIZE_MASK "\n",
                             statvfs.f_bsize, statvfs.f_frsize,
                             statvfs.f_blocks, statvfs.f_bfree,
                             statvfs.f_bavail, statvfs.f_files,
