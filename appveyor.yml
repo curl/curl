@@ -142,6 +142,9 @@ build_script:
         $curl = "..\builds\libcurl-vc14.10-x64-$env:PATHPART-dll-ssl-dll-ipv6-sspi\bin\curl.exe"
       }
       elseif($env:BUILD_SYSTEM -eq 'autotools') {
+        pacman --noconfirm --ask 20 --noprogressbar --sync --refresh --sysupgrade --sysupgrade
+        pacman --noconfirm --ask 20 --noprogressbar --sync --refresh --sysupgrade --sysupgrade
+        pacman --noconfirm --ask 20 --noprogressbar --sync --needed openssl
         & bash -e -c "cd $env:POSIX_PATH_PREFIX/c/projects/curl && autoreconf -fi 2>&1 && ./configure $env:CONFIG_ARGS 2>&1 && make V=1 && make V=1 examples && cd tests && make V=1"
         $curl = '.\src\curl.exe'
       }
