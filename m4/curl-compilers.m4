@@ -817,9 +817,9 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-noreturn])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [old-style-definition])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [redundant-decls])
-          # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [switch-enum])       # Not used because this basically disallows default case
+          # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [switch-enum])      # Not used because this basically disallows default case
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [type-limits])
-          # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unused-macros])     # Not practical
+          # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unused-macros])    # Not practical
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unreachable-code unused-parameter])
           fi
           #
