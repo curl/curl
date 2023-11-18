@@ -93,16 +93,14 @@ unsigned short curlx_ntohs(unsigned short usnum);
 
 #endif /* HEADER_CURL_WARNLESS_H */
 
-#if defined(WIN32)
-
 #ifndef HEADER_CURL_WARNLESS_H_REDEFS
 #define HEADER_CURL_WARNLESS_H_REDEFS
 
+#if defined(WIN32)
 #undef  read
 #define read(fd, buf, count)  curlx_read(fd, buf, count)
 #undef  write
 #define write(fd, buf, count) curlx_write(fd, buf, count)
+#endif
 
 #endif /* HEADER_CURL_WARNLESS_H_REDEFS */
-
-#endif
