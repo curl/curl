@@ -1160,7 +1160,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       }
       else if(statvfs) {
         #ifdef _MSC_VER
-        #define LIBSSH_VFS_SIZE_MASK "llu"
+        #define LIBSSH_VFS_SIZE_MASK "I64u"
         #else
         #define LIBSSH_VFS_SIZE_MASK PRIu64
         #endif
