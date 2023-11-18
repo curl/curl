@@ -75,11 +75,6 @@ ssize_t curlx_read(int fd, void *buf, size_t count);
 
 ssize_t curlx_write(int fd, const void *buf, size_t count);
 
-#undef  read
-#define read(fd, buf, count)  curlx_read(fd, buf, count)
-#undef  write
-#define write(fd, buf, count) curlx_write(fd, buf, count)
-
 #endif /* WIN32 */
 
 #if defined(__INTEL_COMPILER) && defined(__unix__)
@@ -97,3 +92,17 @@ unsigned short curlx_ntohs(unsigned short usnum);
 #endif /* __INTEL_COMPILER && __unix__ */
 
 #endif /* HEADER_CURL_WARNLESS_H */
+
+#if defined(WIN32)
+
+#ifndef HEADER_CURL_WARNLESS_H_REDEFS
+#define HEADER_CURL_WARNLESS_H_REDEFS
+
+#undef  read
+#define read(fd, buf, count)  curlx_read(fd, buf, count)
+#undef  write
+#define write(fd, buf, count) curlx_write(fd, buf, count)
+
+#endif /* HEADER_CURL_WARNLESS_H_REDEFS */
+
+#endif
