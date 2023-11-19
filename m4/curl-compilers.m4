@@ -158,7 +158,8 @@ AC_DEFUN([CURL_CHECK_COMPILER_GNU_C], [
     test "$compiler_id" = "unknown"; then
     AC_MSG_RESULT([yes])
     compiler_id="GNU_C"
-    gccver=`$CC -dumpversion`
+    # strip '-suffix' parts, e.g. Ubuntu Windows cross-gcc returns '10-win32'
+    gccver=`$CC -dumpversion | sed -E 's/-.+$//'`
     gccvhi=`echo $gccver | cut -d . -f1`
     gccvlo=`echo $gccver | cut -d . -f2`
     compiler_num=`(expr $gccvhi "*" 100 + $gccvlo) 2>/dev/null`
