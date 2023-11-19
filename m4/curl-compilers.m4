@@ -91,6 +91,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_CLANG], [
       AC_MSG_RESULT([no])
       compiler_id="CLANG"
     fi
+    AC_MSG_CHECKING([compiler version])
     fullclangver=`$CC -v 2>&1 | grep version`
     clangver=`echo $fullclangver | grep "based on LLVM " | "$SED" 's/.*(based on LLVM \(@<:@0-9@:>@*\.@<:@0-9@:>@*\).*)/\1/'`
     if test -z "$clangver"; then
@@ -104,6 +105,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_CLANG], [
     clangvhi=`echo $clangver | cut -d . -f1`
     clangvlo=`echo $clangver | cut -d . -f2`
     compiler_num=`(expr $clangvhi "*" 100 + $clangvlo) 2>/dev/null`
+    AC_MSG_RESULT([clang '$compiler_num' (raw: '$fullclangver' / '$clangver')])
     flags_dbg_yes="-g"
     flags_opt_all="-O -O0 -O1 -O2 -Os -O3 -O4"
     flags_opt_yes="-O2"
@@ -158,10 +160,12 @@ AC_DEFUN([CURL_CHECK_COMPILER_GNU_C], [
     test "$compiler_id" = "unknown"; then
     AC_MSG_RESULT([yes])
     compiler_id="GNU_C"
+    AC_MSG_CHECKING([compiler version])
     gccver=`$CC -dumpversion`
     gccvhi=`echo $gccver | cut -d . -f1`
     gccvlo=`echo $gccver | cut -d . -f2`
     compiler_num=`(expr $gccvhi "*" 100 + $gccvlo) 2>/dev/null`
+    AC_MSG_RESULT([gcc '$compiler_num' (raw: '$gccver')])
     flags_dbg_yes="-g"
     flags_opt_all="-O -O0 -O1 -O2 -O3 -Os -Og -Ofast"
     flags_opt_yes="-O2"
@@ -231,7 +235,9 @@ AC_DEFUN([CURL_CHECK_COMPILER_INTEL_C], [
   CURL_CHECK_DEF([__INTEL_COMPILER], [], [silent])
   if test "$curl_cv_have_def___INTEL_COMPILER" = "yes"; then
     AC_MSG_RESULT([yes])
+    AC_MSG_CHECKING([compiler version])
     compiler_num="$curl_cv_def___INTEL_COMPILER"
+    AC_MSG_RESULT([Intel C '$compiler_num'])
     CURL_CHECK_DEF([__unix__], [], [silent])
     if test "$curl_cv_have_def___unix__" = "yes"; then
       compiler_id="INTEL_UNIX_C"
