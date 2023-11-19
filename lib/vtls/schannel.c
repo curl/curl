@@ -1064,12 +1064,11 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   SECURITY_STATUS sspi_status = SEC_E_OK;
   struct Curl_schannel_cred *old_cred = NULL;
   CURLcode result;
-  const char *hostname = connssl->peer.hostname;
 
   DEBUGASSERT(backend);
   DEBUGF(infof(data,
                "schannel: SSL/TLS connection with %s port %d (step 1/3)",
-               hostname, connssl->port));
+               connssl->peer.hostname, connssl->port));
 
   if(curlx_verify_windows_version(5, 1, 0, PLATFORM_WINNT,
                                   VERSION_LESS_THAN_EQUAL)) {
