@@ -559,12 +559,6 @@ AC_DEFUN([CURL_SET_COMPILER_BASIC_OPTS], [
         tmp_CFLAGS="$tmp_CFLAGS"
         ;;
         #
-      LCC)
-        #
-        dnl Disallow run-time dereferencing of null pointers
-        tmp_CFLAGS="$tmp_CFLAGS -n"
-        ;;
-        #
       SGI_MIPS_C)
         #
         dnl Placeholder
@@ -1083,17 +1077,6 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
         #
         dnl Placeholder
         tmp_CFLAGS="$tmp_CFLAGS"
-        ;;
-        #
-      LCC)
-        #
-        if test "$want_warnings" = "yes"; then
-          dnl Highest warning level is double -A, next is single -A.
-          dnl Due to the big number of warnings these trigger on third
-          dnl party header files it is impractical for us to use any of
-          dnl them here. If you want them simply define it in CPPFLAGS.
-          tmp_CFLAGS="$tmp_CFLAGS"
-        fi
         ;;
         #
       SGI_MIPS_C)
