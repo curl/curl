@@ -102,6 +102,7 @@ if(PICKY_COMPILER)
          (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 6.3))
         list(APPEND WPICKY_ENABLE
           ${WPICKY_COMMON}
+          -Wc99-extensions                 # clang  3.1            appleclang  4.3
         )
       endif()
       if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 3.9) OR
