@@ -55,7 +55,8 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-/* #define DEBUG_QUICHE */
+/* HTTP/3 error values defined in RFC 9114, ch. 8.1 */
+#define CURL_H3_NO_ERROR  (0x0100)
 
 #define QUIC_MAX_STREAMS              (100)
 
@@ -303,11 +304,22 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
 
 static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
+  struct cf_quiche_ctx *ctx = cf->ctx;
   struct stream_ctx *stream = H3_STREAM_CTX(data);
 
   (void)cf;
   if(stream) {
     CURL_TRC_CF(data, cf, "[%"PRId64"] easy handle is done", stream->id);
+    if(ctx->qconn && !stream->closed) {
+      quiche_conn_stream_shutdown(ctx->qconn, stream->id,
+                                  QUICHE_SHUTDOWN_READ, CURL_H3_NO_ERROR);
+      if(!stream->send_closed) {
+        quiche_conn_stream_shutdown(ctx->qconn, stream->id,
+                                    QUICHE_SHUTDOWN_WRITE, CURL_H3_NO_ERROR);
+        stream->send_closed = TRUE;
+      }
+      stream->closed = TRUE;
+    }
     Curl_bufq_free(&stream->recvbuf);
     Curl_h1_req_parse_free(&stream->h1);
     free(stream);
@@ -1213,10 +1225,12 @@ static CURLcode cf_quiche_data_event(struct Curl_cfilter *cf,
   case CF_CTRL_DATA_PAUSE:
     result = h3_data_pause(cf, data, (arg1 != 0));
     break;
-  case CF_CTRL_DATA_DONE: {
+  case CF_CTRL_DATA_DETACH:
     h3_data_done(cf, data);
     break;
-  }
+  case CF_CTRL_DATA_DONE:
+    h3_data_done(cf, data);
+    break;
   case CF_CTRL_DATA_DONE_SEND: {
     struct stream_ctx *stream = H3_STREAM_CTX(data);
     if(stream && !stream->send_closed) {
