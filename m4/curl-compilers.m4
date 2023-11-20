@@ -93,18 +93,37 @@ AC_DEFUN([CURL_CHECK_COMPILER_CLANG], [
     fi
     AC_MSG_CHECKING([compiler version])
     fullclangver=`$CC -v 2>&1 | grep version`
+    if echo $fullclangver | grep 'Apple' >/dev/null; then
+      appleclang=1
+    else
+      appleclang=0
+    fi
     clangver=`echo $fullclangver | grep "based on LLVM " | "$SED" 's/.*(based on LLVM \(@<:@0-9@:>@*\.@<:@0-9@:>@*\).*)/\1/'`
     if test -z "$clangver"; then
-      if echo $fullclangver | grep "Apple LLVM version " >/dev/null; then
-        dnl Starting with Xcode 7 / clang 3.7, Apple clang won't tell its upstream version
-        clangver="3.7"
-      else
-        clangver=`echo $fullclangver | "$SED" 's/.*version \(@<:@0-9@:>@*\.@<:@0-9@:>@*\).*/\1/'`
-      fi
+      clangver=`echo $fullclangver | "$SED" 's/.*version \(@<:@0-9@:>@*\.@<:@0-9@:>@*\).*/\1/'`
+      oldapple=0
+    else
+      oldapple=1
     fi
     clangvhi=`echo $clangver | cut -d . -f1`
     clangvlo=`echo $clangver | cut -d . -f2`
     compiler_num=`(expr $clangvhi "*" 100 + $clangvlo) 2>/dev/null`
+    if test "$appleclang" = '1' && test "$oldapple" = '0'; then
+      dnl Starting with Xcode 7 / clang 3.7, Apple clang won't tell its upstream version
+      if   test "$compiler_num" -ge '1300'; then compiler_num='1200'
+      elif test "$compiler_num" -ge '1205'; then compiler_num='1101'
+      elif test "$compiler_num" -ge '1204'; then compiler_num='1000'
+      elif test "$compiler_num" -ge '1107'; then compiler_num='900'
+      elif test "$compiler_num" -ge '1103'; then compiler_num='800'
+      elif test "$compiler_num" -ge '1003'; then compiler_num='700'
+      elif test "$compiler_num" -ge '1001'; then compiler_num='600'
+      elif test "$compiler_num" -ge  '904'; then compiler_num='500'
+      elif test "$compiler_num" -ge  '902'; then compiler_num='400'
+      elif test "$compiler_num" -ge  '803'; then compiler_num='309'
+      elif test "$compiler_num" -ge  '703'; then compiler_num='308'
+      else                                       compiler_num='307'
+      fi
+    fi
     AC_MSG_RESULT([clang '$compiler_num' (raw: '$fullclangver' / '$clangver')])
     flags_dbg_yes="-g"
     flags_opt_all="-O -O0 -O1 -O2 -Os -O3 -O4"
