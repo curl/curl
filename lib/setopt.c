@@ -366,6 +366,17 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     else
       return CURLE_BAD_FUNCTION_ARGUMENT;
     break;
+  case CURLOPT_SERVER_RESPONSE_TIMEOUT_MS:
+    /*
+     * Option that specifies how quickly a server response must be obtained
+     * before it is considered failure. For pingpong protocols.
+     */
+    arg = va_arg(param, long);
+    if((arg >= 0) && (arg <= INT_MAX))
+      data->set.server_response_timeout = (unsigned int)arg;
+    else
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    break;
 #ifndef CURL_DISABLE_TFTP
   case CURLOPT_TFTP_NO_OPTIONS:
     /*
