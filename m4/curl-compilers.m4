@@ -161,7 +161,11 @@ AC_DEFUN([CURL_CHECK_COMPILER_GNU_C], [
     # strip '-suffix' parts, e.g. Ubuntu Windows cross-gcc returns '10-win32'
     gccver=`$CC -dumpversion | sed -E 's/-.+$//'`
     gccvhi=`echo $gccver | cut -d . -f1`
-    gccvlo=`echo $gccver | cut -d . -f2`
+    if echo $gccver | grep -F '.' >/dev/null; then
+      gccvlo=`echo $gccver | cut -d . -f2`
+    else
+      gccvlo="0"
+    fi
     compiler_num=`(expr $gccvhi "*" 100 + $gccvlo) 2>/dev/null`
     flags_dbg_yes="-g"
     flags_opt_all="-O -O0 -O1 -O2 -O3 -Os -Og -Ofast"
