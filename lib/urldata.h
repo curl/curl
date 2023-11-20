@@ -733,6 +733,8 @@ struct SingleRequest {
   struct curltime last_sndbuf_update;  /* last time readwrite_upload called
                                           win_update_buffer_size */
 #endif
+  char fread_eof[2]; /* the body read callback (index 0) returned EOF or
+                        the trailer read callback (index 1) returned EOF */
 #ifndef CURL_DISABLE_COOKIES
   unsigned char setcookies;
 #endif

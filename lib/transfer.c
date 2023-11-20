@@ -163,9 +163,9 @@ CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
 {
   size_t buffersize = bytes;
   size_t nread;
-
   curl_read_callback readfunc = NULL;
   void *extra_data = NULL;
+  int eof_index = 0;
 
 #ifndef CURL_DISABLE_HTTP
   if(data->state.trailers_state == TRAILERS_INITIALIZED) {
@@ -223,6 +223,7 @@ CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
        */
     readfunc = trailers_read;
     extra_data = (void *)data;
+    eof_index = 1;
   }
   else
 #endif
@@ -231,10 +232,15 @@ CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
     extra_data = data->state.in;
   }
 
-  Curl_set_in_callback(data, true);
-  nread = readfunc(data->req.upload_fromhere, 1,
-                   buffersize, extra_data);
-  Curl_set_in_callback(data, false);
+  if(!data->req.fread_eof[eof_index]) {
+    Curl_set_in_callback(data, true);
+    nread = readfunc(data->req.upload_fromhere, 1, buffersize, extra_data);
+    Curl_set_in_callback(data, false);
+    /* make sure the callback is not called again after EOF */
+    data->req.fread_eof[eof_index] = !nread;
+  }
+  else
+    nread = 0;
 
   if(nread == CURL_READFUNC_ABORT) {
     failf(data, "operation aborted by callback");
