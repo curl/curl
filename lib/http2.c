@@ -2486,14 +2486,15 @@ static CURLcode cf_h2_cntrl(struct Curl_cfilter *cf,
   case CF_CTRL_DATA_PAUSE:
     result = http2_data_pause(cf, data, (arg1 != 0));
     break;
-  case CF_CTRL_DATA_DONE_SEND: {
+  case CF_CTRL_DATA_DONE_SEND:
     result = http2_data_done_send(cf, data);
     break;
-  }
-  case CF_CTRL_DATA_DONE: {
+  case CF_CTRL_DATA_DETACH:
+    http2_data_done(cf, data, TRUE);
+    break;
+  case CF_CTRL_DATA_DONE:
     http2_data_done(cf, data, arg1 != 0);
     break;
-  }
   default:
     break;
   }
