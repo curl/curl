@@ -753,6 +753,7 @@ struct SingleRequest {
                         specific upload buffers. See readmoredata() in http.c
                         for details. */
   BIT(no_body);      /* the response has no body */
+  BIT(fread_func_eof); /* the read callback has returned EOF */
 };
 
 /*

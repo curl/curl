@@ -231,10 +231,16 @@ CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
     extra_data = data->state.in;
   }
 
-  Curl_set_in_callback(data, true);
-  nread = readfunc(data->req.upload_fromhere, 1,
-                   buffersize, extra_data);
-  Curl_set_in_callback(data, false);
+  if(!data->req.fread_func_eof) {
+    Curl_set_in_callback(data, true);
+    nread = readfunc(data->req.upload_fromhere, 1,
+                     buffersize, extra_data);
+    Curl_set_in_callback(data, false);
+    /* make sure the callback is not called again after EOF */
+    data->req.fread_func_eof = !nread;
+  }
+  else
+    nread = 0;
 
   if(nread == CURL_READFUNC_ABORT) {
     failf(data, "operation aborted by callback");
