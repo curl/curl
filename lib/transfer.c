@@ -423,9 +423,11 @@ static size_t get_max_body_write_len(struct Curl_easy *data)
       /* already written too much! */
       return 0;
     }
+#if SIZEOF_CURL_OFF_T > SIZEOF_SIZE_T
     else if(remain_diff > SSIZE_T_MAX) {
       return SIZE_T_MAX;
     }
+#endif
     else {
       return (size_t)remain_diff;
     }
