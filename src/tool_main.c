@@ -25,7 +25,7 @@
 
 #include <sys/stat.h>
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <tchar.h>
 #endif
 
@@ -235,7 +235,7 @@ int main(int argc, char *argv[])
 
   tool_init_stderr();
 
-#ifdef WIN32
+#ifdef _WIN32
   /* Undocumented diagnostic option to list the full paths of all loaded
      modules. This is purposely pre-init. */
   if(argc == 2 && !_tcscmp(argv[1], _T("--dump-module-paths"))) {
@@ -276,7 +276,7 @@ int main(int argc, char *argv[])
     main_free(&global);
   }
 
-#ifdef WIN32
+#ifdef _WIN32
   /* Flush buffers of all streams opened in write or update mode */
   fflush(NULL);
 #endif

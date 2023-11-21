@@ -206,7 +206,7 @@ size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen,
   (void)buflen; /* only used in debug-builds */
   if(buf)
     buf[0] = 0; /* always leave a defined value in buf */
-#ifdef WIN32
+#ifdef _WIN32
   if(guess_scheme && STARTS_WITH_DRIVE_PREFIX(url))
     return 0;
 #endif
@@ -1056,7 +1056,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
           ptr += 9; /* now points to the slash after the host */
         }
         else {
-#if defined(WIN32)
+#if defined(_WIN32)
           size_t len;
 
           /* the host name, NetBIOS computer name, can not contain disallowed
@@ -1095,7 +1095,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
       /* no host for file: URLs by default */
       Curl_dyn_reset(&host);
 
-#if !defined(MSDOS) && !defined(WIN32) && !defined(__CYGWIN__)
+#if !defined(_WIN32) && !defined(MSDOS) && !defined(__CYGWIN__)
     /* Don't allow Windows drive letters when not in Windows.
      * This catches both "file:/c:" and "file:c:" */
     if(('/' == path[0] && STARTS_WITH_URL_DRIVE_PREFIX(&path[1])) ||

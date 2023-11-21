@@ -35,7 +35,7 @@ static char *GetEnv(const char *variable)
   defined(__ORBIS__) || defined(__PROSPERO__) /* PlayStation 4 and 5 */
   (void)variable;
   return NULL;
-#elif defined(WIN32)
+#elif defined(_WIN32)
   /* This uses Windows API instead of C runtime getenv() to get the environment
      variable since some changes aren't always visible to the latter. #4774 */
   char *buf = NULL;

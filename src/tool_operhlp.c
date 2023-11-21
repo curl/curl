@@ -215,7 +215,7 @@ CURLcode get_url_file_name(char **filename, const char *url)
       if(!*filename)
         return CURLE_OUT_OF_MEMORY;
 
-#if defined(MSDOS) || defined(WIN32)
+#if defined(_WIN32) || defined(MSDOS)
       {
         char *sanitized;
         SANITIZEcode sc = sanitize_file_name(&sanitized, *filename, 0);
@@ -227,7 +227,7 @@ CURLcode get_url_file_name(char **filename, const char *url)
         }
         *filename = sanitized;
       }
-#endif /* MSDOS || WIN32 */
+#endif /* _WIN32 || MSDOS */
 
       /* in case we built debug enabled, we allow an environment variable
        * named CURL_TESTDIR to prefix the given file name to put it into a

@@ -46,7 +46,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#ifdef WIN32
+#ifdef _WIN32
 
 #if defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x600
 #  define HAVE_WIN_BCRYPTGENRANDOM
@@ -133,7 +133,7 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
 
   /* ---- non-cryptographic version following ---- */
 
-#ifdef WIN32
+#ifdef _WIN32
   if(!seeded) {
     result = Curl_win32_random((unsigned char *)rnd, sizeof(*rnd));
     if(result != CURLE_NOT_BUILT_IN)
@@ -148,7 +148,7 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
   }
 #endif
 
-#if defined(RANDOM_FILE) && !defined(WIN32)
+#if defined(RANDOM_FILE) && !defined(_WIN32)
   if(!seeded) {
     /* if there's a random file to read a seed from, use it */
     int fd = open(RANDOM_FILE, O_RDONLY);

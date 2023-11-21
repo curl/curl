@@ -53,7 +53,7 @@ static const struct finder conf_list[] = {
   { "CURL_HOME", NULL, FALSE },
   { "XDG_CONFIG_HOME", NULL, FALSE }, /* index == 1, used in the code */
   { "HOME", NULL, FALSE },
-#ifdef WIN32
+#ifdef _WIN32
   { "USERPROFILE", NULL, FALSE },
   { "APPDATA", NULL, FALSE },
   { "USERPROFILE", "\\Application Data", FALSE},

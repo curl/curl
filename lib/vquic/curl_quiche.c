@@ -1406,7 +1406,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   }
 
   /* Known to not work on Windows */
-#if !defined(WIN32) && defined(HAVE_QUICHE_CONN_SET_QLOG_FD)
+#if !defined(_WIN32) && defined(HAVE_QUICHE_CONN_SET_QLOG_FD)
   {
     int qfd;
     (void)Curl_qlogdir(data, ctx->scid, sizeof(ctx->scid), &qfd);

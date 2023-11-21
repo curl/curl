@@ -44,7 +44,7 @@
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
-#ifdef WIN32
+#ifdef _WIN32
 #define OPENMODE S_IREAD | S_IWRITE
 #else
 #define OPENMODE S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH
@@ -159,7 +159,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   struct OperationConfig *config = per->config;
   size_t bytes = sz * nmemb;
   bool is_tty = config->global->isatty;
-#ifdef WIN32
+#ifdef _WIN32
   CONSOLE_SCREEN_BUFFER_INFO console_info;
   intptr_t fhnd;
 #endif
@@ -231,7 +231,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     }
   }
 
-#ifdef WIN32
+#ifdef _WIN32
   fhnd = _get_osfhandle(fileno(outs->stream));
   /* if windows console then UTF-8 must be converted to UTF-16 */
   if(isatty(fileno(outs->stream)) &&

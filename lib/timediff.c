@@ -53,7 +53,7 @@ struct timeval *curlx_mstotv(struct timeval *tv, timediff_t ms)
 #endif
     tv->tv_sec = (time_t)tv_sec;
     tv->tv_usec = (suseconds_t)tv_usec;
-#elif defined(WIN32) /* maybe also others in the future */
+#elif defined(_WIN32) /* maybe also others in the future */
 #if TIMEDIFF_T_MAX > LONG_MAX
     /* tv_sec overflow check on Windows there we know it is long */
     if(tv_sec > LONG_MAX)

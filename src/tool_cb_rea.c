@@ -62,7 +62,7 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     if(msdelta > config->timeout_ms)
       /* timeout */
       return 0;
-#ifndef WIN32
+#ifndef _WIN32
     /* this logic waits on read activity on a file descriptor that is not a
        socket which makes it not work with select() on Windows */
     else {

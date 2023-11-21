@@ -25,7 +25,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if defined(WIN32)
+#if defined(_WIN32)
 
  /*
   * MultiByte conversions using Windows kernel32 library.
@@ -33,7 +33,7 @@
 
 wchar_t *curlx_convert_UTF8_to_wchar(const char *str_utf8);
 char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w);
-#endif /* WIN32 */
+#endif /* _WIN32 */
 
 /*
  * Macros curlx_convert_UTF8_to_tchar(), curlx_convert_tchar_to_UTF8()
@@ -54,7 +54,7 @@ char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w);
  * ensure that the curl memdebug override macros do not replace them.
  */
 
-#if defined(UNICODE) && defined(WIN32)
+#if defined(UNICODE) && defined(_WIN32)
 
 #define curlx_convert_UTF8_to_tchar(ptr) curlx_convert_UTF8_to_wchar((ptr))
 #define curlx_convert_tchar_to_UTF8(ptr) curlx_convert_wchar_to_UTF8((ptr))
@@ -78,7 +78,7 @@ typedef union {
   const unsigned char *const_tbyte_ptr;
 } xcharp_u;
 
-#endif /* UNICODE && WIN32 */
+#endif /* UNICODE && _WIN32 */
 
 #define curlx_unicodefree(ptr)                          \
   do {                                                  \

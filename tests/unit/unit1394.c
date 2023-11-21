@@ -61,7 +61,7 @@ UNITTEST_START
     "pkcs11:foobar",          "pkcs11:foobar",      NULL,
     "PKCS11:foobar",          "PKCS11:foobar",      NULL,
     "PkCs11:foobar",          "PkCs11:foobar",      NULL,
-#ifdef WIN32
+#ifdef _WIN32
     "c:\\foo:bar:baz",        "c:\\foo",            "bar:baz",
     "c:\\foo\\:bar:baz",      "c:\\foo:bar",        "baz",
     "c:\\foo\\\\:bar:baz",    "c:\\foo\\",          "bar:baz",

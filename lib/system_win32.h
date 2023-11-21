@@ -26,7 +26,7 @@
 
 #include "curl_setup.h"
 
-#if defined(WIN32)
+#if defined(_WIN32)
 
 extern LARGE_INTEGER Curl_freq;
 extern bool Curl_isVistaOrGreater;
@@ -42,8 +42,8 @@ extern IF_NAMETOINDEX_FN Curl_if_nametoindex;
 
 /* This is used to dynamically load DLLs */
 HMODULE Curl_load_library(LPCTSTR filename);
-#else  /* WIN32 */
+#else  /* _WIN32 */
 #define Curl_win32_init(x) CURLE_OK
-#endif /* !WIN32 */
+#endif /* !_WIN32 */
 
 #endif /* HEADER_CURL_SYSTEM_WIN32_H */

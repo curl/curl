@@ -190,7 +190,7 @@ CURL_VERSION_ZSTD               7.72.0
 CURL_WAIT_POLLIN                7.28.0
 CURL_WAIT_POLLOUT               7.28.0
 CURL_WAIT_POLLPRI               7.28.0
-CURL_WIN32                      7.69.0
+CURL_WIN32                      7.69.0        -           8.5.0
 CURL_WRITEFUNC_ERROR            7.87.0
 CURL_WRITEFUNC_PAUSE            7.18.0
 CURL_ZERO_TERMINATED            7.56.0

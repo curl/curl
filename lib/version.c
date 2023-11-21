@@ -39,7 +39,7 @@
 
 #ifdef USE_ARES
 #  if defined(CURL_STATICLIB) && !defined(CARES_STATICLIB) &&   \
-  defined(WIN32)
+  defined(_WIN32)
 #    define CARES_STATICLIB
 #  endif
 #  include <ares.h>
@@ -512,7 +512,7 @@ static const struct feat features_table[] = {
 #ifdef CURLDEBUG
   FEATURE("TrackMemory", NULL,                CURL_VERSION_CURLDEBUG),
 #endif
-#if defined(WIN32) && defined(UNICODE) && defined(_UNICODE)
+#if defined(_WIN32) && defined(UNICODE) && defined(_UNICODE)
   FEATURE("Unicode",     NULL,                CURL_VERSION_UNICODE),
 #endif
 #ifdef USE_UNIX_SOCKETS

@@ -144,7 +144,7 @@ void logmsg(const char *msg, ...)
   }
 }
 
-#ifdef WIN32
+#ifdef _WIN32
 /* use instead of strerror() on generic Windows */
 static const char *win32_strerror(int err, char *buf, size_t buflen)
 {
@@ -208,7 +208,7 @@ const char *sstrerror(int err)
   static char buf[512];
   return win32_strerror(err, buf, sizeof(buf));
 }
-#endif  /* WIN32 */
+#endif  /* _WIN32 */
 
 /* set by the main code to point to where the test dir is */
 const char *path = ".";
@@ -292,7 +292,7 @@ curl_off_t our_getpid(void)
   curl_off_t pid;
 
   pid = (curl_off_t)getpid();
-#if defined(WIN32) || defined(_WIN32)
+#if defined(_WIN32) || defined(_WIN32)
   /* store pid + 65536 to avoid conflict with Cygwin/msys PIDs, see also:
    * - https://cygwin.com/git/?p=newlib-cygwin.git;a=commit; ↵
    *   h=b5e1003722cb14235c4f166be72c09acdffc62ea
@@ -378,7 +378,7 @@ void clear_advisor_read_lock(const char *filename)
 }
 
 
-#if defined(WIN32) && !defined(MSDOS)
+#if defined(_WIN32) && !defined(MSDOS)
 
 static struct timeval tvnow(void)
 {
@@ -501,11 +501,11 @@ static SIGHANDLER_T old_sigint_handler  = SIG_ERR;
 static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
 #endif
 
-#if defined(SIGBREAK) && defined(WIN32)
+#if defined(SIGBREAK) && defined(_WIN32)
 static SIGHANDLER_T old_sigbreak_handler = SIG_ERR;
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 #ifdef _WIN32_WCE
 static DWORD thread_main_id = 0;
 #else
@@ -521,7 +521,7 @@ volatile int got_exit_signal = 0;
 /* if next is set indicates the first signal handled in exit_signal_handler */
 volatile int exit_signal = 0;
 
-#ifdef WIN32
+#ifdef _WIN32
 /* event which if set indicates that the program should finish */
 HANDLE exit_event = NULL;
 #endif
@@ -538,7 +538,7 @@ static void exit_signal_handler(int signum)
   if(got_exit_signal == 0) {
     got_exit_signal = 1;
     exit_signal = signum;
-#ifdef WIN32
+#ifdef _WIN32
     if(exit_event)
       (void)SetEvent(exit_event);
 #endif
@@ -547,7 +547,7 @@ static void exit_signal_handler(int signum)
   errno = old_errno;
 }
 
-#ifdef WIN32
+#ifdef _WIN32
 /* CTRL event handler for Windows Console applications to simulate
  * SIGINT, SIGTERM and SIGBREAK on CTRL events and trigger signal handler.
  *
@@ -698,7 +698,7 @@ static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler,
 
 void install_signal_handlers(bool keep_sigalrm)
 {
-#ifdef WIN32
+#ifdef _WIN32
 #ifdef _WIN32_WCE
   typedef HANDLE curl_win_thread_handle_t;
 #else
@@ -744,13 +744,13 @@ void install_signal_handlers(bool keep_sigalrm)
   if(old_sigterm_handler == SIG_ERR)
     logmsg("cannot install SIGTERM handler: %s", strerror(errno));
 #endif
-#if defined(SIGBREAK) && defined(WIN32)
+#if defined(SIGBREAK) && defined(_WIN32)
   /* handle SIGBREAK signal with our exit_signal_handler */
   old_sigbreak_handler = set_signal(SIGBREAK, exit_signal_handler, TRUE);
   if(old_sigbreak_handler == SIG_ERR)
     logmsg("cannot install SIGBREAK handler: %s", strerror(errno));
 #endif
-#ifdef WIN32
+#ifdef _WIN32
   if(!SetConsoleCtrlHandler(ctrl_event_handler, TRUE))
     logmsg("cannot install CTRL event handler");
 #ifdef _WIN32_WCE
@@ -792,11 +792,11 @@ void restore_signal_handlers(bool keep_sigalrm)
   if(SIG_ERR != old_sigterm_handler)
     (void) set_signal(SIGTERM, old_sigterm_handler, FALSE);
 #endif
-#if defined(SIGBREAK) && defined(WIN32)
+#if defined(SIGBREAK) && defined(_WIN32)
   if(SIG_ERR != old_sigbreak_handler)
     (void) set_signal(SIGBREAK, old_sigbreak_handler, FALSE);
 #endif
-#ifdef WIN32
+#ifdef _WIN32
   (void)SetConsoleCtrlHandler(ctrl_event_handler, FALSE);
   if(thread_main_window && thread_main_id) {
     if(PostThreadMessage(thread_main_id, WM_APP, 0, 0)) {
@@ -846,7 +846,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
         return rc;
       }
       /* socket server is not alive, now check if it was actually a socket. */
-#ifdef WIN32
+#ifdef _WIN32
       /* Windows does not have lstat function. */
       rc = curlx_win32_stat(unix_socket, &statbuf);
 #else
