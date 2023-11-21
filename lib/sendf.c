@@ -607,7 +607,6 @@ static CURLcode cw_download_write(struct Curl_easy *data,
       if(result)
         return result;
       DEBUGASSERT(consumed <= excess_len);
-      excess_data += consumed;
       excess_len -= consumed;
       if(readmore) {
         data->req.download_done = FALSE;
