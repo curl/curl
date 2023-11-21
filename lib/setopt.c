@@ -985,8 +985,9 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
 
   case CURLOPT_MIME_OPTIONS:
-    data->set.mime_options = (unsigned int)va_arg(param, long);
-    break;
+    arg = va_arg(param, long);
+    data->set.mime_formescape = !!(arg & CURLMIMEOPT_FORMESCAPE);
+  break;
 # endif
 #endif
 
