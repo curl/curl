@@ -1802,9 +1802,6 @@ struct UserDefined {
 #endif
   curl_prot_t allowed_protocols;
   curl_prot_t redir_protocols;
-#ifndef CURL_DISABLE_MIME
-  unsigned int mime_options;      /* Mime option flags. */
-#endif
 #ifndef CURL_DISABLE_RTSP
   void *rtp_out;     /* write RTP to this if non-NULL */
   /* Common RTSP header options */
@@ -1857,6 +1854,9 @@ struct UserDefined {
                               IMAP or POP3 or others! (type: curl_usessl)*/
   unsigned char connect_only; /* make connection/request, then let
                                  application use the socket */
+#ifndef CURL_DISABLE_MIME
+  BIT(mime_formescape);
+#endif
   BIT(is_fread_set); /* has read callback been set to non-NULL? */
 #ifndef CURL_DISABLE_TFTP
   BIT(tftp_no_options); /* do not send TFTP options requests */
