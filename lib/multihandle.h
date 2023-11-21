@@ -93,9 +93,9 @@ struct Curl_multi {
   struct Curl_easy *easyp;
   struct Curl_easy *easylp; /* last node */
 
-  int num_easy; /* amount of entries in the linked list above. */
-  int num_alive; /* amount of easy handles that are added but have not yet
-                    reached COMPLETE state */
+  unsigned int num_easy; /* amount of entries in the linked list above. */
+  unsigned int num_alive; /* amount of easy handles that are added but have
+                             not yet reached COMPLETE state */
 
   struct Curl_llist msglist; /* a list of messages from completed transfers */
 
@@ -136,8 +136,9 @@ struct Curl_multi {
   /* Shared connection cache (bundles)*/
   struct conncache conn_cache;
 
-  long maxconnects; /* if >0, a fixed limit of the maximum number of entries
-                       we're allowed to grow the connection cache to */
+  unsigned int maxconnects; /* if >0, a fixed limit of the maximum number of
+                               entries we're allowed to grow the connection
+                               cache to */
 
   long max_host_connections; /* if >0, a fixed limit of the maximum number
                                 of connections per host */

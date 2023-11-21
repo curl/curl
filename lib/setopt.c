@@ -262,10 +262,10 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * Set the absolute number of maximum simultaneous alive connection that
      * libcurl is allowed to have.
      */
-    arg = va_arg(param, long);
-    if(arg < 0)
+    uarg = va_arg(param, unsigned long);
+    if(uarg > UINT_MAX)
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.maxconnects = arg;
+    data->set.maxconnects = (unsigned int)uarg;
     break;
   case CURLOPT_FORBID_REUSE:
     /*
