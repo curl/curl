@@ -3980,6 +3980,7 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
   k->bytecount = 0;
   k->ignorebody = FALSE;
 
+  Curl_client_cleanup(data);
   Curl_speedinit(data);
   Curl_pgrsSetUploadCounter(data, 0);
   Curl_pgrsSetDownloadCounter(data, 0);

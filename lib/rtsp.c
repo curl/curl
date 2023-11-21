@@ -793,11 +793,9 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
 
   /* we want to parse headers, do so */
   if(data->req.header && blen) {
-    bool stop_reading;
-
     rtspc->in_header = TRUE;
     result = Curl_http_readwrite_headers(data, conn, buf, blen,
-                                         &consumed, &stop_reading);
+                                         &consumed);
     if(result)
       goto out;
 

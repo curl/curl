@@ -882,6 +882,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
      may be parts of the request that is not yet sent, since we can deal with
      the rest of the request in the PERFORM phase. */
   *done = TRUE;
+  Curl_client_cleanup(data);
 
   infof(data, "Time for the Hyper dance");
   memset(h, 0, sizeof(struct hyptransfer));
@@ -891,6 +892,8 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     return result;
 
   Curl_http_method(data, conn, &method, &httpreq);
+
+  DEBUGASSERT(data->req.bytecount ==  0);
 
   /* setup the authentication headers */
   {
