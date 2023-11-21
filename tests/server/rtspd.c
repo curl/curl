@@ -1150,7 +1150,7 @@ int main(int argc, char *argv[])
   msnprintf(loglockfile, sizeof(loglockfile), "%s/%s/rtsp-%s.lock",
             logdir, SERVERLOGS_LOCKDIR, ipv_inuse);
 
-#ifdef WIN32
+#ifdef _WIN32
   win32_init();
   atexit(win32_cleanup);
 #endif

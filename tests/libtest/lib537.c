@@ -42,7 +42,7 @@
 
 #define SAFETY_MARGIN (11)
 
-#if defined(WIN32) || defined(_WIN32) || defined(MSDOS)
+#if defined(_WIN32) || defined(MSDOS)
 #define DEV_NULL "NUL"
 #else
 #define DEV_NULL "/dev/null"

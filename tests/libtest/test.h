@@ -42,7 +42,7 @@
 
 #include "curl_printf.h"
 
-#ifdef WIN32
+#ifdef _WIN32
 #define sleep(sec) Sleep ((sec)*1000)
 #endif
 

@@ -2119,7 +2119,7 @@ int main(int argc, char *argv[])
             logdir, SERVERLOGS_LOCKDIR, protocol_type,
             is_proxy ? "-proxy" : "", socket_type);
 
-#ifdef WIN32
+#ifdef _WIN32
   win32_init();
   atexit(win32_cleanup);
 #endif
