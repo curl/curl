@@ -76,7 +76,7 @@ int Curl_wait_ms(timediff_t timeout_ms)
   }
 #if defined(MSDOS)
   delay(timeout_ms);
-#elif defined(WIN32)
+#elif defined(_WIN32)
   /* prevent overflow, timeout_ms is typecast to ULONG/DWORD. */
 #if TIMEDIFF_T_MAX >= ULONG_MAX
   if(timeout_ms >= ULONG_MAX)

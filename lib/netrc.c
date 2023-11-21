@@ -327,7 +327,7 @@ int Curl_parsenetrc(const char *host, char **loginp, char **passwordp,
     }
     retcode = parsenetrc(host, loginp, passwordp, filealloc);
     free(filealloc);
-#ifdef WIN32
+#ifdef _WIN32
     if(retcode == NETRC_FILE_MISSING) {
       /* fallback to the old-style "_netrc" file */
       filealloc = curl_maprintf("%s%s_netrc", home, DIR_CHAR);

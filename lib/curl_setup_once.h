@@ -56,7 +56,7 @@
 #include <sys/time.h>
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <io.h>
 #include <fcntl.h>
 #endif

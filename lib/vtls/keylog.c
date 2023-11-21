@@ -60,7 +60,7 @@ Curl_tls_keylog_open(void)
     if(keylog_file_name) {
       keylog_file_fp = fopen(keylog_file_name, FOPEN_APPENDTEXT);
       if(keylog_file_fp) {
-#ifdef WIN32
+#ifdef _WIN32
         if(setvbuf(keylog_file_fp, NULL, _IONBF, 0))
 #else
         if(setvbuf(keylog_file_fp, NULL, _IOLBF, 4096))

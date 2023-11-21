@@ -81,7 +81,7 @@
 #include "memdebug.h"
 
 
-#if defined(ENABLE_IPV6) && defined(IPV6_V6ONLY) && defined(WIN32)
+#if defined(ENABLE_IPV6) && defined(IPV6_V6ONLY) && defined(_WIN32)
 /* It makes support for IPv4-mapped IPv6 addresses.
  * Linux kernel, NetBSD, FreeBSD and Darwin: default is off;
  * Windows Vista and later: default is on;
@@ -659,7 +659,7 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
   int err = 0;
   curl_socklen_t errSize = sizeof(err);
 
-#ifdef WIN32
+#ifdef _WIN32
   /*
    * In October 2003 we effectively nullified this function on Windows due to
    * problems with it using all CPU in multi-threaded cases.

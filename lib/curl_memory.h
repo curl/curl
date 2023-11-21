@@ -68,7 +68,7 @@
 #undef send
 #undef recv
 
-#ifdef WIN32
+#ifdef _WIN32
 #  ifdef UNICODE
 #    undef wcsdup
 #    undef _wcsdup
@@ -134,7 +134,7 @@ extern curl_free_callback Curl_cfree;
 extern curl_realloc_callback Curl_crealloc;
 extern curl_strdup_callback Curl_cstrdup;
 extern curl_calloc_callback Curl_ccalloc;
-#if defined(WIN32) && defined(UNICODE)
+#if defined(_WIN32) && defined(UNICODE)
 extern curl_wcsdup_callback Curl_cwcsdup;
 #endif
 
@@ -160,7 +160,7 @@ extern curl_wcsdup_callback Curl_cwcsdup;
 #undef free
 #define free(ptr) Curl_cfree(ptr)
 
-#ifdef WIN32
+#ifdef _WIN32
 #  ifdef UNICODE
 #    undef wcsdup
 #    define wcsdup(ptr) Curl_cwcsdup(ptr)

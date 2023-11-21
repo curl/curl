@@ -48,7 +48,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#ifdef WIN32
+#ifdef _WIN32
 # ifndef R_OK
 #  define R_OK 4
 # endif

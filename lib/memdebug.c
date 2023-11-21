@@ -208,7 +208,7 @@ ALLOC_FUNC char *curl_dbg_strdup(const char *str,
   return mem;
 }
 
-#if defined(WIN32) && defined(UNICODE)
+#if defined(_WIN32) && defined(UNICODE)
 ALLOC_FUNC wchar_t *curl_dbg_wcsdup(const wchar_t *str,
                                     int line, const char *source)
 {

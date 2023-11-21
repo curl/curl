@@ -24,7 +24,7 @@
 
 #include "timeval.h"
 
-#if defined(WIN32)
+#if defined(_WIN32)
 
 #include <curl/curl.h>
 #include "system_win32.h"

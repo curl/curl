@@ -69,7 +69,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#if defined(WIN32) || defined(MSDOS) || defined(__EMX__)
+#if defined(_WIN32) || defined(MSDOS) || defined(__EMX__)
 #define DOS_FILESYSTEM 1
 #elif defined(__amigaos4__)
 #define AMIGA_FILESYSTEM 1
