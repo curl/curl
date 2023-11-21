@@ -70,8 +70,6 @@
 
 /* RFC2348 allows the block size to be negotiated */
 #define TFTP_BLKSIZE_DEFAULT 512
-#define TFTP_BLKSIZE_MIN 8
-#define TFTP_BLKSIZE_MAX 65464
 #define TFTP_OPTION_BLKSIZE "blksize"
 
 /* from RFC2349: */
@@ -978,11 +976,9 @@ static CURLcode tftp_connect(struct Curl_easy *data, bool *done)
     return CURLE_OUT_OF_MEMORY;
 
   /* alloc pkt buffers based on specified blksize */
-  if(data->set.tftp_blksize) {
+  if(data->set.tftp_blksize)
+    /* range checked when set */
     blksize = (int)data->set.tftp_blksize;
-    if(blksize > TFTP_BLKSIZE_MAX || blksize < TFTP_BLKSIZE_MIN)
-      return CURLE_TFTP_ILLEGAL;
-  }
 
   need_blksize = blksize;
   /* default size is the fallback when no OACK is received */

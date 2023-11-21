@@ -50,6 +50,7 @@
 #include "multiif.h"
 #include "altsvc.h"
 #include "hsts.h"
+#include "tftp.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -379,7 +380,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * TFTP option that specifies the block size to use for data transmission.
      */
     arg = va_arg(param, long);
-    if(arg < 0)
+    if(arg > TFTP_BLKSIZE_MAX || arg < TFTP_BLKSIZE_MIN)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.tftp_blksize = arg;
     break;
