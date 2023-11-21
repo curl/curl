@@ -744,7 +744,7 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
     return CURLE_RECURSIVE_API_CALL;
 
   /* Copy the MAXCONNECTS option to the multi handle */
-  curl_multi_setopt(multi, CURLMOPT_MAXCONNECTS, data->set.maxconnects);
+  curl_multi_setopt(multi, CURLMOPT_MAXCONNECTS, (long)data->set.maxconnects);
 
   mcode = curl_multi_add_handle(multi, data);
   if(mcode) {

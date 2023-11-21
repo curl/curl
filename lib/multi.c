@@ -396,9 +396,6 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
   Curl_llist_init(&multi->msgsent, NULL);
 
   multi->multiplexing = TRUE;
-
-  /* -1 means it not set by user, use the default value */
-  multi->maxconnects = -1;
   multi->max_concurrent_streams = 100;
 
 #ifdef USE_WINSOCK
@@ -3239,6 +3236,7 @@ CURLMcode curl_multi_setopt(struct Curl_multi *multi,
 {
   CURLMcode res = CURLM_OK;
   va_list param;
+  unsigned long uarg;
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
@@ -3271,7 +3269,9 @@ CURLMcode curl_multi_setopt(struct Curl_multi *multi,
     multi->timer_userp = va_arg(param, void *);
     break;
   case CURLMOPT_MAXCONNECTS:
-    multi->maxconnects = va_arg(param, long);
+    uarg = va_arg(param, unsigned long);
+    if(uarg <= UINT_MAX)
+      multi->maxconnects = (unsigned int)uarg;
     break;
   case CURLMOPT_MAX_HOST_CONNECTIONS:
     multi->max_host_connections = va_arg(param, long);
@@ -3725,7 +3725,7 @@ struct Curl_easy **curl_multi_get_handles(struct Curl_multi *multi)
   struct Curl_easy **a = malloc(sizeof(struct Curl_easy *) *
                                 (multi->num_easy + 1));
   if(a) {
-    int i = 0;
+    unsigned int i = 0;
     struct Curl_easy *e = multi->easyp;
     while(e) {
       DEBUGASSERT(i < multi->num_easy);
