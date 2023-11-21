@@ -30,7 +30,7 @@
 #include <stdlib.h>
 #include <curl/curl.h>
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -96,7 +96,7 @@ int main(void)
   struct sockaddr_in servaddr;  /*  socket address structure  */
   curl_socket_t sockfd;
 
-#ifdef WIN32
+#ifdef _WIN32
   WSADATA wsaData;
   int initwsa = WSAStartup(MAKEWORD(2, 2), &wsaData);
   if(initwsa) {
@@ -168,7 +168,7 @@ int main(void)
     }
   }
 
-#ifdef WIN32
+#ifdef _WIN32
   WSACleanup();
 #endif
   return 0;
