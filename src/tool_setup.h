@@ -66,7 +66,7 @@ extern FILE *tool_stderr;
 #  include "tool_strdup.h"
 #endif
 
-#if defined(WIN32) && !defined(MSDOS)
+#if defined(_WIN32)
 /* set in win32_init() */
 extern LARGE_INTEGER tool_freq;
 extern bool tool_isVistaOrGreater;

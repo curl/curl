@@ -41,7 +41,7 @@
 
 static char *parse_filename(const char *ptr, size_t len);
 
-#ifdef WIN32
+#ifdef _WIN32
 #define BOLD "\x1b[1m"
 #define BOLDOFF "\x1b[22m"
 #else
@@ -87,7 +87,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
   }
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
   /* Discard incomplete UTF-8 sequence buffered from body */
   if(outs->utf8seq[0])
     memset(outs->utf8seq, 0, sizeof(outs->utf8seq));
@@ -213,7 +213,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
       return CURL_WRITEFUNC_ERROR;
 
     if(hdrcbdata->global->isatty &&
-#ifdef WIN32
+#ifdef _WIN32
        tool_term_has_bold &&
 #endif
        hdrcbdata->global->styled_output)
@@ -304,7 +304,7 @@ static char *parse_filename(const char *ptr, size_t len)
   if(copy != p)
     memmove(copy, p, strlen(p) + 1);
 
-#if defined(MSDOS) || defined(WIN32)
+#if defined(_WIN32) || defined(MSDOS)
   {
     char *sanitized;
     SANITIZEcode sc = sanitize_file_name(&sanitized, copy, 0);
@@ -313,7 +313,7 @@ static char *parse_filename(const char *ptr, size_t len)
       return NULL;
     copy = sanitized;
   }
-#endif /* MSDOS || WIN32 */
+#endif /* _WIN32 || MSDOS */
 
   /* in case we built debug enabled, we allow an environment variable
    * named CURL_TESTDIR to prefix the given file name to put it into a

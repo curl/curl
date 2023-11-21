@@ -23,13 +23,13 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#if defined(MSDOS) || defined(WIN32)
+#if defined(_WIN32) || defined(MSDOS)
 
 #if defined(HAVE_LIBGEN_H) && defined(HAVE_BASENAME)
 #  include <libgen.h>
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 #  include <stdlib.h>
 #  include <tlhelp32.h>
 #  include "tool_cfgable.h"
@@ -42,7 +42,7 @@
 #include "curlx.h"
 #include "memdebug.h" /* keep this as LAST include */
 
-#ifdef WIN32
+#ifdef _WIN32
 #  undef  PATH_MAX
 #  define PATH_MAX MAX_PATH
 #endif
@@ -55,7 +55,7 @@
 #  endif
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 #  define _use_lfn(f) (1)   /* long file names always available */
 #elif !defined(__DJGPP__) || (__DJGPP__ < 2)  /* DJGPP 2.0 has _use_lfn() */
 #  define _use_lfn(f) (0)  /* long file names never available */
@@ -597,7 +597,7 @@ char **__crt0_glob_function(char *arg)
 
 #endif /* MSDOS && (__DJGPP__ || __GO32__) */
 
-#ifdef WIN32
+#ifdef _WIN32
 
 /*
  * Function to find CACert bundle on a Win32 platform using SearchPath.
@@ -791,6 +791,6 @@ CURLcode win32_init(void)
   return CURLE_OK;
 }
 
-#endif /* WIN32 */
+#endif /* _WIN32 */
 
-#endif /* MSDOS || WIN32 */
+#endif /* _WIN32 || MSDOS */
