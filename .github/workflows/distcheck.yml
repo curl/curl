@@ -17,6 +17,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   maketgz-and-verify-in-tree:
     runs-on: ubuntu-latest
