@@ -4,7 +4,7 @@ curl and libcurl 8.5.0
  Command line options:         258
  curl_easy_setopt() options:   303
  Public functions in libcurl:  93
- Contributors:                 3029
+ Contributors:                 3030
 
 This release includes the following changes:
 
@@ -17,9 +17,13 @@ This release includes the following bugfixes:
  o asyn-thread: use pipe instead of socketpair for IPC when available [4]
  o autotools: accept linker flags via `CURL_LDFLAGS_{LIB,BIN}` [128]
  o autotools: avoid passing `LDFLAGS` twice to libcurl [127]
+ o autotools: delete LCC compiler support bits [137]
+ o autotools: fix/improve gcc and Apple clang version detection [136]
+ o autotools: stop setting `-std=gnu89` with `--enable-warnings` [135]
  o autotools: update references to deleted `crypt-auth` option [46]
  o BINDINGS: add V binding [54]
  o build: add `src/.checksrc` to source tarball [1]
+ o build: always revert `#pragma GCC diagnostic` after use [143]
  o build: delete `HAVE_STDINT_H` and `HAVE_INTTYPES_H` [107]
  o build: delete support bits for obsolete Windows compilers [106]
  o build: fix 'threadsafe' feature detection for older gcc [19]
@@ -30,6 +34,8 @@ This release includes the following bugfixes:
  o cfilter: provide call to tell connection to forget a socket [65]
  o CI: add autotools, out-of-tree, debug build to distro check job [14]
  o CI: ignore test 286 on Appveyor gcc 9 build [6]
+ o cmake: add `CURL_DISABLE_BINDLOCAL` option [146]
+ o cmake: add test for `DISABLE` options, add `CURL_DISABLE_HEADERS_API` [138]
  o cmake: dedupe Windows system libs [114]
  o cmake: fix `HAVE_H_ERRNO_ASSIGNABLE` detection [2]
  o cmake: fix CURL_DISABLE_GETOPTIONS [12]
@@ -63,6 +69,7 @@ This release includes the following bugfixes:
  o docs: preserve the modification date when copying the prebuilt man page [89]
  o docs: remove bold from some man page SYNOPSIS sections [90]
  o docs: use SOURCE_DATE_EPOCH for generated manpages [16]
+ o doh: provide better return code for responses w/o addresses [133]
  o doh: use PIPEWAIT when HTTP/2 is attempted [63]
  o duphandle: also free 'outcurl->cookies' in error path [122]
  o duphandle: make dupset() not return with pointers to old alloced data [109]
@@ -75,16 +82,20 @@ This release includes the following bugfixes:
  o hostip: show the list of IPs when resolving is done [35]
  o hostip: silence compiler warning `-Wparentheses-equality` [62]
  o hsts: skip single-dot hostname [67]
+ o HTTP/2, HTTP/3: handle detach of onoing transfers [134]
  o http2: header conversion tightening [33]
  o http2: provide an error callback and failf the message [53]
  o http2: safer invocation of populate_binsettings [8]
  o http: allow longer HTTP/2 request method names [112]
  o http: avoid Expect: 100-continue if Upgrade: is used [15]
  o http: consider resume with CURLOPT_FAILONERRROR and 416 to be fine [81]
+ o http: fix `-Wunused-parameter` with no auth and no proxy [149]
  o http: fix `-Wunused-variable` compiler warning [115]
  o http: fix empty-body warning [76]
  o http_aws_sigv4: canonicalise valueless query params [88]
+ o hyper: temporarily remove HTTP/2 support [139]
  o IPFS: fix IPFS_PATH and file parsing [119]
+ o keylog: disable if unused [145]
  o lib: add and use Curl_strndup() [97]
  o lib: apache style infof and trace macros/functions [71]
  o lib: fix gcc warning in printf call [7]
@@ -122,6 +133,7 @@ This release includes the following bugfixes:
  o tests/README: SOCKS tests are not using OpenSSH, it has its own server [48]
  o tests/server: add more SOCKS5 handshake error checking [27]
  o tests: Fix Windows test helper tool search & use it for handle64 [17]
+ o tidy-up: casing typos, delete unused Windows version aliases [144]
  o tool: fix --capath when proxy support is disabled [28]
  o tool: support bold headers in Windows [117]
  o tool_cb_hdr: add an additional parsing check [129]
@@ -131,8 +143,12 @@ This release includes the following bugfixes:
  o tool_operate: fix links in ipfs errors [22]
  o tool_urlglob: fix build for old gcc versions [25]
  o tool_urlglob: make multiply() bail out on negative values [11]
+ o transfer: avoid calling the read callback again after EOF [130]
  o transfer: only reset the FTP wildcard engine in CLEAR state [42]
  o url: don't touch the multi handle when closing internal handles [40]
+ o url: find scheme with a "perfect hash" [141]
+ o url: fix `-Wzero-length-array` with no protocols [147]
+ o url: fix builds with `CURL_DISABLE_HTTP` [148]
  o url: protocol handler lookup tidy-up [66]
  o url: proxy ssl connection reuse fix [94]
  o urlapi: avoid null deref if setting blank host to url encode [75]
@@ -168,15 +184,16 @@ advice from friends like these:
   Casey Bodley, Charlie C, Dan Fandrich, Daniel Jeliński, Daniel Stenberg,
   David Suter, Emanuele Torre, Enno Boland, enWILLYado on github,
   Faraz Fallahi, Gisle Vanem, Goro FUJI, Harry Mallon, icy17 on github,
-  Jacob Hoffman-Andrews, Jan Alexander Steffens, Jeroen Ooms, Junho Choi,
-  Kai Pastor, Kareem, Kartatz on Github, kirbyn17 on hackerone,
-  lkordos on github, Loïc Yhuel, LoRd_MuldeR, Maksymilian Arciemowicz,
-  Manfred Schwarb, Marcel Raad, Marcin Rataj, Mark Gaiser, Martin Schmatz,
-  Michael Kaufmann, Nico Rieck, Niracler Li, Ophir Lojkine, Philip Heiduck,
-  Ray Satiro, rilysh, Romain Geissler, Sam James, Samuel Henrique,
-  sd0 on hackerone, Smackd0wn, Sohom Datta, Stefan Eissing, Steven Allen,
-  Torben Dury, Turiiya, Viktor Szakats, zhengqwe on github, 積丹尼 Dan Jacobson
-  (60 contributors)
+  Jacob Hoffman-Andrews, Jan Alexander Steffens, Jeroen Ooms, Jiri Hruska,
+  Junho Choi, Kai Pastor, Kareem, Kartatz on Github, kirbyn17 on hackerone,
+  lkordos on github, Loïc Yhuel, LoRd_MuldeR, lRoccoon on github,
+  Maksymilian Arciemowicz, Manfred Schwarb, Marcel Raad, Marcin Rataj,
+  Mark Gaiser, Martin Schmatz, Michael Kaufmann, Nico Rieck, Niracler Li,
+  Ophir Lojkine, Paweł Wegner, Philip Heiduck, Ray Satiro, rilysh,
+  Romain Geissler, Sam James, Samuel Henrique, sd0 on hackerone, Smackd0wn,
+  Sohom Datta, Stefan Eissing, Steven Allen, Torben Dury, Turiiya,
+  Viktor Szakats, zhengqwe on github, 積丹尼 Dan Jacobson
+  (63 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -309,5 +326,21 @@ References to bug reports and discussions on issues:
  [127] = https://curl.se/bug/?i=12310
  [128] = https://curl.se/bug/?i=12312
  [129] = https://curl.se/bug/?i=12320
+ [130] = https://curl.se/mail/lib-2023-11/0017.html
  [131] = https://curl.se/bug/?i=12318
  [132] = https://curl.se/bug/?i=12317
+ [133] = https://curl.se/bug/?i=12365
+ [134] = https://curl.se/bug/?i=12356
+ [135] = https://curl.se/bug/?i=12346
+ [136] = https://curl.se/bug/?i=12362
+ [137] = https://curl.se/bug/?i=12357
+ [138] = https://curl.se/bug/?i=12353
+ [139] = https://curl.se/bug/?i=12191
+ [141] = https://curl.se/bug/?i=12347
+ [143] = https://curl.se/bug/?i=12352
+ [144] = https://curl.se/bug/?i=12351
+ [145] = https://curl.se/bug/?i=12350
+ [146] = https://curl.se/bug/?i=12345
+ [147] = https://curl.se/bug/?i=12344
+ [148] = https://curl.se/bug/?i=12343
+ [149] = https://curl.se/bug/?i=12338
