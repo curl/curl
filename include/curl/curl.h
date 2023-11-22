@@ -79,7 +79,7 @@
    libc5-based Linux systems. Only include it on systems that are known to
    require it! */
 #if defined(_AIX) || defined(__NOVELL_LIBC__) || defined(__NetBSD__) || \
-    defined(__minix) || defined(__SYMBIAN32__) || defined(__INTEGRITY) || \
+    defined(__minix) || defined(__INTEGRITY) || \
     defined(ANDROID) || defined(__ANDROID__) || defined(__OpenBSD__) || \
     defined(__CYGWIN__) || defined(AMIGA) || defined(__NuttX__) || \
    (defined(__FreeBSD_version) && (__FreeBSD_version < 800000)) || \
@@ -119,7 +119,7 @@ typedef void CURLSH;
 
 #ifdef CURL_STATICLIB
 #  define CURL_EXTERN
-#elif defined(_WIN32) || defined(__SYMBIAN32__) || \
+#elif defined(_WIN32) || \
      (__has_declspec_attribute(dllexport) && \
       __has_declspec_attribute(dllimport))
 #  if defined(BUILDING_LIBCURL)
