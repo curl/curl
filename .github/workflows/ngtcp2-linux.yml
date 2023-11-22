@@ -66,7 +66,7 @@ jobs:
         - name: quictls
           configure: >-
             PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/nghttpx/lib"
-            --with-ngtcp2=$HOME/nghttpx --enable-warnings --enable-werror --enable-debug
+            --with-ngtcp2=$HOME/nghttpx --enable-warnings --enable-werror --enable-debug --disable-ntlm
             --with-test-nghttpx="$HOME/nghttpx/bin/nghttpx"
             --with-openssl=$HOME/nghttpx
         - name: gnutls
