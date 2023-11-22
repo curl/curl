@@ -107,7 +107,7 @@ jobs:
         cd $HOME
         git clone --quiet --depth=1 -b openssl-${{ env.quictls-version }} https://github.com/quictls/openssl quictls
         cd quictls
-        ./config --prefix=$HOME/nghttpx --libdir=$HOME/nghttpx/lib
+        ./config no-deprecated --prefix=$HOME/nghttpx --libdir=$HOME/nghttpx/lib
         make
       name: 'build quictls'
 
