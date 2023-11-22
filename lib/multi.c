@@ -3293,9 +3293,9 @@ CURLMcode curl_multi_setopt(struct Curl_multi *multi,
   case CURLMOPT_MAX_CONCURRENT_STREAMS:
     {
       long streams = va_arg(param, long);
-      if(streams < 1)
+      if((streams < 1) || (streams > INT_MAX))
         streams = 100;
-      multi->max_concurrent_streams = curlx_sltoui(streams);
+      multi->max_concurrent_streams = (unsigned int)streams;
     }
     break;
   default:
