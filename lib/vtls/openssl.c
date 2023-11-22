@@ -178,8 +178,6 @@
 
 #if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
 #define HAVE_EVP_PKEY_GET_PARAMS 1
-#else
-#define SSL_get1_peer_certificate SSL_get_peer_certificate
 #endif
 
 #ifdef HAVE_EVP_PKEY_GET_PARAMS
