@@ -34,8 +34,8 @@ CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_MAX_CONCURRENT_STREAMS,
 .fi
 .SH DESCRIPTION
 Pass a long indicating the \fBmax\fP. The set number is used as the maximum
-number of concurrent streams for a connections that libcurl should support on
-connections done using HTTP/2.
+number of concurrent streams libcurl should support on connections done using
+HTTP/2 or HTTP/3.
 
 Valid values range from 1 to 2147483647 (2^31 - 1) and defaults to 100.  The
 value passed here would be honored based on other system resources properties.
