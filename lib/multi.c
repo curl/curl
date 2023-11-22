@@ -396,9 +396,6 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
   Curl_llist_init(&multi->msgsent, NULL);
 
   multi->multiplexing = TRUE;
-
-  /* 0 means it not set by user, use the default value */
-  multi->maxconnects = 0;
   multi->max_concurrent_streams = 100;
 
 #ifdef USE_WINSOCK
