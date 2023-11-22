@@ -136,10 +136,6 @@ struct Curl_multi {
   /* Shared connection cache (bundles)*/
   struct conncache conn_cache;
 
-  unsigned int maxconnects; /* if >0, a fixed limit of the maximum number of
-                               entries we're allowed to grow the connection
-                               cache to */
-
   long max_host_connections; /* if >0, a fixed limit of the maximum number
                                 of connections per host */
 
@@ -151,8 +147,6 @@ struct Curl_multi {
   void *timer_userp;
   struct curltime timer_lastcall; /* the fixed time for the timeout for the
                                     previous callback */
-  unsigned int max_concurrent_streams;
-
 #ifdef USE_WINSOCK
   WSAEVENT wsa_event; /* winsock event used for waits */
 #else
@@ -161,6 +155,10 @@ struct Curl_multi {
                                    0 is used for read, 1 is used for write */
 #endif
 #endif
+  unsigned int max_concurrent_streams;
+  unsigned int maxconnects; /* if >0, a fixed limit of the maximum number of
+                               entries we're allowed to grow the connection
+                               cache to */
 #define IPV6_UNKNOWN 0
 #define IPV6_DEAD    1
 #define IPV6_WORKS   2
