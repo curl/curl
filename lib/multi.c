@@ -3273,7 +3273,7 @@ CURLMcode curl_multi_setopt(struct Curl_multi *multi,
     break;
   case CURLMOPT_MAXCONNECTS:
     uarg = va_arg(param, unsigned long);
-    if(uarg && (uarg <= UINT_MAX))
+    if(uarg <= UINT_MAX)
       multi->maxconnects = (unsigned int)uarg;
     break;
   case CURLMOPT_MAX_HOST_CONNECTIONS:

@@ -379,15 +379,12 @@ conncache_find_first_connection(struct conncache *connc)
 bool Curl_conncache_return_conn(struct Curl_easy *data,
                                 struct connectdata *conn)
 {
-  /* data->multi->maxconnects can be negative, deal with it. */
-  unsigned int maxconnects =
-    !data->multi->maxconnects ? data->multi->num_easy * 4:
-    data->multi->maxconnects;
+  unsigned int maxconnects = !data->multi->maxconnects ?
+    data->multi->num_easy * 4: data->multi->maxconnects;
   struct connectdata *conn_candidate = NULL;
 
   conn->lastused = Curl_now(); /* it was used up until now */
-  if(maxconnects > 0 &&
-     Curl_conncache_size(data) > maxconnects) {
+  if(maxconnects && Curl_conncache_size(data) > maxconnects) {
     infof(data, "Connection cache is full, closing the oldest one");
 
     conn_candidate = Curl_conncache_extract_oldest(data);
