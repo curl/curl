@@ -111,6 +111,7 @@
 #  include <wincrypt.h>
 #else
 #  error "Can't compile NTLM support without a crypto library with DES."
+#  define CURL_NTLM_NOT_SUPPORTED
 #endif
 
 #include "urldata.h"
@@ -130,6 +131,7 @@
 #define NTLMv2_BLOB_SIGNATURE "\x01\x01\x00\x00"
 #define NTLMv2_BLOB_LEN       (44 -16 + ntlm->target_info_len + 4)
 
+#if !defined(CURL_NTLM_NOT_SUPPORTED)
 /*
 * Turns a 56-bit key into being 64-bit wide.
 */
@@ -144,6 +146,7 @@ static void extend_key_56_to_64(const unsigned char *key_56, char *key)
   key[6] = (unsigned char)(((key_56[5] << 2) & 0xFF) | (key_56[6] >> 6));
   key[7] = (unsigned char) ((key_56[6] << 1) & 0xFF);
 }
+#endif
 
 #if defined(USE_OPENSSL_DES) || defined(USE_WOLFSSL)
 /*
@@ -337,6 +340,10 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
   encrypt_des(plaintext, results, keys);
   encrypt_des(plaintext, results + 8, keys + 7);
   encrypt_des(plaintext, results + 16, keys + 14);
+#else
+  (void)keys;
+  (void)plaintext;
+  (void)results;
 #endif
 }
 
@@ -347,9 +354,11 @@ CURLcode Curl_ntlm_core_mk_lm_hash(const char *password,
                                    unsigned char *lmbuffer /* 21 bytes */)
 {
   unsigned char pw[14];
+#if !defined(CURL_NTLM_NOT_SUPPORTED)
   static const unsigned char magic[] = {
     0x4B, 0x47, 0x53, 0x21, 0x40, 0x23, 0x24, 0x25 /* i.e. KGS!@#$% */
   };
+#endif
   size_t len = CURLMIN(strlen(password), 14);
 
   Curl_strntoupper((char *)pw, password, len);

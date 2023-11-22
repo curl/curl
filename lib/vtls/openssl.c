@@ -178,8 +178,6 @@
 
 #if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
 #define HAVE_EVP_PKEY_GET_PARAMS 1
-#else
-#define SSL_get1_peer_certificate SSL_get_peer_certificate
 #endif
 
 #ifdef HAVE_EVP_PKEY_GET_PARAMS
@@ -4079,6 +4077,7 @@ static CURLcode ossl_pkp_pin_peer_pubkey(struct Curl_easy *data, X509* cert,
 
   return result;
 }
+
 #if (OPENSSL_VERSION_NUMBER >= 0x30000000L) &&  \
   !defined(CURL_DISABLE_VERBOSE_STRINGS)
 static void infof_certstack(struct Curl_easy *data, const SSL *ssl)
@@ -4094,8 +4093,6 @@ static void infof_certstack(struct Curl_easy *data, const SSL *ssl)
   else
     certstack = SSL_get0_verified_chain(ssl);
   num_cert_levels = sk_X509_num(certstack);
-  OpenSSL_add_all_algorithms();
-  OpenSSL_add_all_digests();
 
   for(cert_level = 0; cert_level < num_cert_levels; cert_level++) {
     char cert_algorithm[80] = "";

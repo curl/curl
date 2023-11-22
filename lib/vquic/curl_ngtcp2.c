@@ -1947,7 +1947,7 @@ static CURLcode qng_verify_peer(struct Curl_cfilter *cf,
   if(conn_config->verifyhost) {
 #ifdef USE_OPENSSL
     X509 *server_cert;
-    server_cert = SSL_get_peer_certificate(ctx->ssl);
+    server_cert = SSL_get1_peer_certificate(ctx->ssl);
     if(!server_cert) {
       return CURLE_PEER_FAILED_VERIFICATION;
     }

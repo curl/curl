@@ -35,6 +35,10 @@
 
 #include "urldata.h"
 
+#if (OPENSSL_VERSION_NUMBER < 0x30000000L)
+#define SSL_get1_peer_certificate SSL_get_peer_certificate
+#endif
+
 /*
  * In an effort to avoid using 'X509 *' here, we instead use the struct
  * x509_st version of the type so that we can forward-declare it here without
