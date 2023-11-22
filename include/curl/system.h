@@ -141,29 +141,6 @@
 #    define CURL_TYPEOF_CURL_SOCKLEN_T int
 #  endif
 
-#elif defined(__SYMBIAN32__)
-#  if defined(__EABI__) /* Treat all ARM compilers equally */
-#    define CURL_TYPEOF_CURL_OFF_T     long long
-#    define CURL_FORMAT_CURL_OFF_T     "lld"
-#    define CURL_FORMAT_CURL_OFF_TU    "llu"
-#    define CURL_SUFFIX_CURL_OFF_T     LL
-#    define CURL_SUFFIX_CURL_OFF_TU    ULL
-#  elif defined(__CW32__)
-#    pragma longlong on
-#    define CURL_TYPEOF_CURL_OFF_T     long long
-#    define CURL_FORMAT_CURL_OFF_T     "lld"
-#    define CURL_FORMAT_CURL_OFF_TU    "llu"
-#    define CURL_SUFFIX_CURL_OFF_T     LL
-#    define CURL_SUFFIX_CURL_OFF_TU    ULL
-#  elif defined(__VC32__)
-#    define CURL_TYPEOF_CURL_OFF_T     __int64
-#    define CURL_FORMAT_CURL_OFF_T     "lld"
-#    define CURL_FORMAT_CURL_OFF_TU    "llu"
-#    define CURL_SUFFIX_CURL_OFF_T     LL
-#    define CURL_SUFFIX_CURL_OFF_TU    ULL
-#  endif
-#  define CURL_TYPEOF_CURL_SOCKLEN_T unsigned int
-
 #elif defined(macintosh)
 #  include <ConditionalMacros.h>
 #  if TYPE_LONGLONG
