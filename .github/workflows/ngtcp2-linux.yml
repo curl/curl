@@ -95,14 +95,14 @@ jobs:
 
     - name: cache quictls
       uses: actions/cache@v3
-      id: cache-quictls
+      id: cache-quictls-no-deprecated
       env:
-        cache-name: cache-quictls
+        cache-name: cache-quictls-no-deprecated
       with:
         path: /home/runner/quictls
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.quictls-version }}
 
-    - if: steps.cache-quictls.outputs.cache-hit != 'true'
+    - if: steps.cache-quictls-no-deprecated.outputs.cache-hit != 'true'
       run: |
         cd $HOME
         git clone --quiet --depth=1 -b openssl-${{ env.quictls-version }} https://github.com/quictls/openssl quictls
