@@ -337,6 +337,10 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
   encrypt_des(plaintext, results, keys);
   encrypt_des(plaintext, results + 8, keys + 7);
   encrypt_des(plaintext, results + 16, keys + 14);
+#else
+  (void)keys;
+  (void)plaintext;
+  (void)results;
 #endif
 }
 
