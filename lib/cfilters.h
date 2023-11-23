@@ -382,7 +382,7 @@ bool Curl_conn_data_pending(struct Curl_easy *data,
 curl_socket_t Curl_conn_get_socket(struct Curl_easy *data, int sockindex);
 
 /**
- * Tell filters to forget about the soket at sockindex.
+ * Tell filters to forget about the socket at sockindex.
  */
 void Curl_conn_forget_socket(struct Curl_easy *data, int sockindex);
 
