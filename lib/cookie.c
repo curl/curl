@@ -1027,15 +1027,23 @@ Curl_cookie_add(struct Curl_easy *data,
    * dereference it.
    */
   if(data && (domain && co->domain && !Curl_host_is_ipnum(co->domain))) {
-    const psl_ctx_t *psl = Curl_psl_use(data);
-    int acceptable;
-
-    if(psl) {
-      acceptable = psl_is_cookie_domain_acceptable(psl, domain, co->domain);
-      Curl_psl_release(data);
+    bool acceptable = FALSE;
+    char lcase[256];
+    char lcookie[256];
+    size_t dlen = strlen(domain);
+    size_t clen = strlen(co->domain);
+    if((dlen < sizeof(lcase)) && (clen < sizeof(lcookie))) {
+      const psl_ctx_t *psl = Curl_psl_use(data);
+      if(psl) {
+        /* the PSL check requires lowercase domain name and pattern */
+        Curl_strntolower(lcase, domain, dlen + 1);
+        Curl_strntolower(lcookie, co->domain, clen + 1);
+        acceptable = psl_is_cookie_domain_acceptable(psl, lcase, lcookie);
+        Curl_psl_release(data);
+      }
+      else
+        acceptable = !bad_domain(domain, strlen(domain));
     }
-    else
-      acceptable = !bad_domain(domain, strlen(domain));
 
     if(!acceptable) {
       infof(data, "cookie '%s' dropped, domain '%s' must not "
