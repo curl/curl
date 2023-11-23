@@ -1432,7 +1432,7 @@ struct UrlState {
                                  this should be dealt with in pretransfer */
 #ifndef CURL_DISABLE_HTTP
   curl_mimepart *mimepost;
-  curl_mimepart *formp; /* storage for old API form-posting, alloced on
+  curl_mimepart *formp; /* storage for old API form-posting, allocated on
                            demand */
   size_t trailers_bytes_sent;
   struct dynbuf trailers_buf; /* a buffer containing the compiled trailing
