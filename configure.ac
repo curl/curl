@@ -3581,7 +3581,6 @@ AC_CHECK_DECLS([getpwuid_r], [], [AC_DEFINE(HAVE_DECL_GETPWUID_R_MISSING, 1, "Se
 AC_CHECK_FUNCS([\
   _fseeki64 \
   arc4random \
-  fchmod \
   fnmatch \
   fseeko \
   geteuid \

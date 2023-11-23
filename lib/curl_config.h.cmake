@@ -177,9 +177,6 @@
 /* Define to 1 if you have _Atomic support. */
 #cmakedefine HAVE_ATOMIC 1
 
-/* Define to 1 if you have the `fchmod' function. */
-#cmakedefine HAVE_FCHMOD 1
-
 /* Define to 1 if you have the `fnmatch' function. */
 #cmakedefine HAVE_FNMATCH 1
 
