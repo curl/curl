@@ -129,21 +129,9 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
   }
 
   result = CURLE_WRITE_ERROR;
-  fd = open(tempstore, O_WRONLY | O_CREAT | O_EXCL, 0600);
+  fd = open(tempstore, O_WRONLY | O_CREAT | O_EXCL, 0600|sb.st_mode);
   if(fd == -1)
     goto fail;
-
-#ifdef HAVE_FCHMOD
-  {
-    struct_stat nsb;
-    if((fstat(fd, &nsb) != -1) &&
-       (nsb.st_uid == sb.st_uid) && (nsb.st_gid == sb.st_gid)) {
-      /* if the user and group are the same, clone the original mode */
-      if(fchmod(fd, (mode_t)sb.st_mode) == -1)
-        goto fail;
-    }
-  }
-#endif
 
   *fh = fdopen(fd, FOPEN_WRITETEXT);
   if(!*fh)
