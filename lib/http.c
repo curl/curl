@@ -1424,7 +1424,7 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
      *   and install our own `data->state.fread_func` that
      *   on subsequent calls reads `in` empty.
      * - when the whisked away `in` is empty, the `fread_func`
-     *   is restored ot its original state.
+     *   is restored to its original state.
      * The problem is that `fread_func` can only return
      * `upload_buffer_size` lengths. If the send we do here
      * is larger and blocks, we do re-sending with smaller
