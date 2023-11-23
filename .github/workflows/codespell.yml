@@ -1,0 +1,36 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: Codespell
+
+on:
+  push:
+    branches:
+    - master
+    - '*/ci'
+    paths:
+    - 'lib/**'
+    - 'src/**'
+    - 'include/**'
+  pull_request:
+    branches:
+    - master
+    - 'lib/**'
+    - 'src/**'
+    - 'include/**'
+
+jobs:
+  codespell:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: install
+        run: |
+          sudo apt-get update
+          sudo apt-get install codespell
+
+      - name: spellcheck
+        run: codespell --skip src/tool_hugehelp.c -I .github/scripts/codespell-ignore.txt include src lib
