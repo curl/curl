@@ -11,3 +11,5 @@ numer
 anull
 inout
 msdos
+ba
+fo
