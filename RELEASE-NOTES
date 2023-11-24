@@ -23,6 +23,7 @@ This release includes the following bugfixes:
  o autotools: update references to deleted `crypt-auth` option [46]
  o BINDINGS: add V binding [54]
  o build: add `src/.checksrc` to source tarball [1]
+ o build: add more picky warnings and fix them [172]
  o build: always revert `#pragma GCC diagnostic` after use [143]
  o build: delete `HAVE_STDINT_H` and `HAVE_INTTYPES_H` [107]
  o build: delete support bits for obsolete Windows compilers [106]
@@ -50,11 +51,14 @@ This release includes the following bugfixes:
  o configure: better --disable-http [80]
  o configure: check for the fseeko declaration too [55]
  o content_encoding: make Curl_all_content_encodings allocless [101]
+ o cookie: lowercase the domain names before PSL checks [160]
+ o curl.h: delete Symbian OS references [162]
  o curl.h: on FreeBSD include sys/param.h instead of osreldate.h [21]
  o curl: improved IPFS and IPNS URL support [87]
  o curl_easy_duphandle.3: clarify how HSTS and alt-svc are duped [99]
  o curl_setup: disallow Windows IPv6 builds missing getaddrinfo [57]
  o curl_sspi: support more revocation error names in error messages [95]
+ o CURLMOPT_MAX_CONCURRENT_STREAMS: make sure the set value is within range [165]
  o CURLOPT_CAINFO_BLOB.3: explain what CURL_BLOB_COPY does [113]
  o CURLOPT_WRITEFUNCTION.3: clarify libcurl returns for CURL_WRITEFUNC_ERROR [45]
  o CURPOST_POSTFIELDS.3: add CURLOPT_COPYPOSTFIELDS in SEE ALSO
@@ -62,6 +66,7 @@ This release includes the following bugfixes:
  o docs/example/localport.c: show off CURLOPT_LOCALPORT [83]
  o docs/examples/interface.c: show CURLOPT_INTERFACE use [84]
  o docs/libcurl: fix three minor man page format mistakes [26]
+ o docs/libcurl: SYNSOPSIS cleanup [150]
  o docs: add supported version for the json write-out [92]
  o docs: clarify that curl passes on input unfiltered [47]
  o docs: fix function typo in curl_easy_option_next.3 [36]
@@ -77,6 +82,8 @@ This release includes the following bugfixes:
  o easy: in duphandle, init the cookies for the new handle [131]
  o easy: remove duplicate wolfSSH init call [37]
  o easy_lock: add a pthread_mutex_t fallback [13]
+ o fopen: create new file using old file's mode [153]
+ o fopen: create short(er) temporary file name [155]
  o getenv: PlayStation doesn't have getenv() [41]
  o GHA: move mod_h2 version in CI to v2.0.25 [43]
  o hostip: show the list of IPs when resolving is done [35]
@@ -102,6 +109,7 @@ This release includes the following bugfixes:
  o libcurl-thread.3: simplify the TLS section [79]
  o Makefile.am: drop vc10, vc11 and vc12 projects from dist [103]
  o Makefile.mk: fix `-rtmp` option for non-Windows
+ o mime: store "form escape" as a single bit [170]
  o misc: fix -Walloc-size warnings [118]
  o msh3: error when built with CURL_DISABLE_SOCKETPAIR set [61]
  o multi: use pipe instead of socketpair to *wakeup() [18]
@@ -109,6 +117,8 @@ This release includes the following bugfixes:
  o openldap: move the alloc of ldapconninfo to *connect() [29]
  o openldap: set the callback argument in oldap_do [30]
  o openssl: avoid BN_num_bits() NULL pointer derefs [9]
+ o openssl: enable `infof_certstack` for 1.1 and LibreSSL 3.6 [157]
+ o openssl: fix building with v3 `no-deprecated` + add CI test [161]
  o openssl: fix infof() to avoid compiler warning for %s with null [70]
  o openssl: identify the "quictls" backend correctly [82]
  o openssl: include SIG and KEM algorithms in verbose [52]
@@ -117,6 +127,7 @@ This release includes the following bugfixes:
  o page-footer: clarify exit code 25 [51]
  o projects: add VC14.20 project files [104]
  o pytest: use lower count in repeat tests [98]
+ o quic: make eyeballers connect retries stop at weird replies [140]
  o quic: manage connection idle timeouts [5]
  o quiche: use quiche_conn_peer_transport_params() [116]
  o rand: fix build error with autotools + LibreSSL [111]
@@ -124,7 +135,9 @@ This release includes the following bugfixes:
  o RTSP: improved RTP parser [32]
  o sasl: fix `-Wunused-function` compiler warning [124]
  o schannel: add CA cache support for files and memory blobs [121]
+ o setopt: check CURLOPT_TFTP_BLKSIZE range on set [171]
  o setopt: remove outdated cookie comment [64]
+ o setopt: remove superfluous use of ternary expressions [169]
  o socks: better buffer size checks for socks4a user and hostname [20]
  o socks: make SOCKS5 use the CURLOPT_IPRESOLVE choice [38]
  o test1683: remove commented-out check alternatives
@@ -154,6 +167,7 @@ This release includes the following bugfixes:
  o urlapi: avoid null deref if setting blank host to url encode [75]
  o urlapi: skip appending NULL pointer query [74]
  o urlapi: when URL encoding the fragment, pass in the right length [59]
+ o urldata: make maxconnects a 32 bit value [166]
  o urldata: move async resolver state from easy handle to connectdata [34]
  o urldata: move cookielist from UserDefined to UrlState [126]
  o urldata: move hstslist from 'set' to 'state' [105]
@@ -163,6 +177,8 @@ This release includes the following bugfixes:
  o vtls: late clone of connection ssl config [60]
  o vtls: use ALPN "http/1.1" for HTTP/1.x, including HTTP/1.0 [102]
  o VULN-DISCLOSURE-POLICY: escape sequences are not a security flaw [110]
+ o windows: use built-in `_WIN32` macro to detect Windows [163]
+ o wolfssh: remove redundant static prototypes [168]
  o wolfssl: add default case for wolfssl_connect_step1 switch [49]
  o wolfssl: require WOLFSSL_SYS_CA_CERTS for loading system CA [10]
 
@@ -183,17 +199,17 @@ advice from friends like these:
   Anubhav Rai, boilingoden, calvin2021y on github, Carlos Henrique Lima Melara,
   Casey Bodley, Charlie C, Dan Fandrich, Daniel Jeliński, Daniel Stenberg,
   David Suter, Emanuele Torre, Enno Boland, enWILLYado on github,
-  Faraz Fallahi, Gisle Vanem, Goro FUJI, Harry Mallon, icy17 on github,
-  Jacob Hoffman-Andrews, Jan Alexander Steffens, Jeroen Ooms, Jiri Hruska,
-  Junho Choi, Kai Pastor, Kareem, Kartatz on Github, kirbyn17 on hackerone,
-  lkordos on github, Loïc Yhuel, LoRd_MuldeR, lRoccoon on github,
-  Maksymilian Arciemowicz, Manfred Schwarb, Marcel Raad, Marcin Rataj,
-  Mark Gaiser, Martin Schmatz, Michael Kaufmann, Nico Rieck, Niracler Li,
-  Ophir Lojkine, Paweł Wegner, Philip Heiduck, Ray Satiro, rilysh,
+  Faraz Fallahi, Gisle Vanem, Goro FUJI, Harry Mallon, Harry Sintonen,
+  icy17 on github, Jacob Hoffman-Andrews, Jan Alexander Steffens, Jeroen Ooms,
+  Jiri Hruska, Junho Choi, Kai Pastor, Kareem, Kartatz on Github,
+  kirbyn17 on hackerone, lkordos on github, Loïc Yhuel, LoRd_MuldeR,
+  lRoccoon on github, Maksymilian Arciemowicz, Manfred Schwarb, Marcel Raad,
+  Marcin Rataj, Mark Gaiser, Martin Schmatz, Michael Kaufmann, Nico Rieck,
+  Niracler Li, Ophir Lojkine, Paweł Wegner, Philip Heiduck, Ray Satiro, rilysh,
   Romain Geissler, Sam James, Samuel Henrique, sd0 on hackerone, Smackd0wn,
   Sohom Datta, Stefan Eissing, Steven Allen, Torben Dury, Turiiya,
   Viktor Szakats, zhengqwe on github, 積丹尼 Dan Jacobson
-  (63 contributors)
+  (64 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -336,6 +352,7 @@ References to bug reports and discussions on issues:
  [137] = https://curl.se/bug/?i=12357
  [138] = https://curl.se/bug/?i=12353
  [139] = https://curl.se/bug/?i=12191
+ [140] = https://curl.se/bug/?i=12400
  [141] = https://curl.se/bug/?i=12347
  [143] = https://curl.se/bug/?i=12352
  [144] = https://curl.se/bug/?i=12351
@@ -344,3 +361,18 @@ References to bug reports and discussions on issues:
  [147] = https://curl.se/bug/?i=12344
  [148] = https://curl.se/bug/?i=12343
  [149] = https://curl.se/bug/?i=12338
+ [150] = https://curl.se/bug/?i=12402
+ [153] = https://curl.se/bug/?i=12299
+ [155] = https://curl.se/bug/?i=12388
+ [157] = https://curl.se/bug/?i=12385
+ [160] = https://curl.se/bug/?i=12387
+ [161] = https://curl.se/bug/?i=12384
+ [162] = https://curl.se/bug/?i=12378
+ [163] = https://curl.se/bug/?i=12376
+ [165] = https://curl.se/bug/?i=12382
+ [166] = https://curl.se/bug/?i=12375
+ [168] = https://curl.se/bug/?i=12381
+ [169] = https://curl.se/bug/?i=12374
+ [170] = https://curl.se/bug/?i=12374
+ [171] = https://curl.se/bug/?i=12374
+ [172] = https://curl.se/bug/?i=12331
