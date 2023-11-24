@@ -99,18 +99,13 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
   char *tempstore = NULL;
   struct_stat sb;
   int fd = -1;
-  char *dir;
+  char *dir = NULL;
   *tempname = NULL;
-
-  dir = dirslash(filename);
-  if(!dir)
-    goto fail;
 
   *fh = fopen(filename, FOPEN_WRITETEXT);
   if(!*fh)
     goto fail;
   if(fstat(fileno(*fh), &sb) == -1 || !S_ISREG(sb.st_mode)) {
-    free(dir);
     return CURLE_OK;
   }
   fclose(*fh);
@@ -120,9 +115,14 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
   if(result)
     goto fail;
 
-  /* The temp file name should not end up too long for the target file
-     system */
-  tempstore = aprintf("%s%s.tmp", dir, randbuf);
+  dir = dirslash(filename);
+  if(dir) {
+    /* The temp file name should not end up too long for the target file
+       system */
+    tempstore = aprintf("%s%s.tmp", dir, randbuf);
+    free(dir);
+  }
+
   if(!tempstore) {
     result = CURLE_OUT_OF_MEMORY;
     goto fail;
@@ -137,7 +137,6 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
   if(!*fh)
     goto fail;
 
-  free(dir);
   *tempname = tempstore;
   return CURLE_OK;
 
@@ -148,7 +147,6 @@ fail:
   }
 
   free(tempstore);
-  free(dir);
   return result;
 }
 
