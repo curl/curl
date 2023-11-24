@@ -94,7 +94,7 @@ static char *dirslash(const char *path)
 CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
                     FILE **fh, char **tempname)
 {
-  CURLcode result;
+  CURLcode result = CURLE_WRITE_ERROR;
   unsigned char randbuf[41];
   char *tempstore = NULL;
   struct_stat sb;
