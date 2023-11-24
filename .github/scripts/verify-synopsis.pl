@@ -73,6 +73,7 @@ sub extract {
 
 my $error;
 for my $m (@files) {
+    print "Verify $m\n";
     extract($m);
     $error |= testcompile($m);
 }
