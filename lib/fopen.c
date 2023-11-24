@@ -116,14 +116,11 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
     goto fail;
 
   dir = dirslash(filename);
-  if(!dir) {
-    result = CURLE_OUT_OF_MEMORY;
-    goto fail;
-  }
+  if(dir)
+    /* The temp file name should not end up too long for the target file
+       system */
+    tempstore = aprintf("%s%s.tmp", dir, randbuf);
 
-  /* The temp file name should not end up too long for the target file
-     system */
-  tempstore = aprintf("%s%s.tmp", dir, randbuf);
   if(!tempstore) {
     result = CURLE_OUT_OF_MEMORY;
     goto fail;
