@@ -198,6 +198,18 @@ static const struct NameValue setopt_nv_CURLNONZERODEFAULTS[] = {
 #define REM1(f,a) ADDF((&easysrc_toohard, f,a))
 #define REM3(f,a,b,c) ADDF((&easysrc_toohard, f,a,b,c))
 
+static void setopt_warn(struct GlobalConfig *global,
+                         CURLcode result, const char *option)
+{
+  if(result == CURLE_UNKNOWN_OPTION)
+    warnf(global, "'%s' is unknown", option);
+  else if(result == CURLE_BAD_FUNCTION_ARGUMENT)
+    warnf(global, "'%s' returned bad argument", option);
+  else
+    warnf(global, "'%s' returned error %d (%s)", option, (int)result,
+          curl_easy_strerror(result));
+}
+
 /* Escape string to C string syntax.  Return NULL if out of memory.
  * Is this correct for those wacky EBCDIC guys? */
 
@@ -292,10 +304,8 @@ CURLcode tool_setopt_enum(CURL *curl, struct GlobalConfig *config,
     }
   }
 
-#ifdef DEBUGBUILD
   if(ret)
-    warnf(config, "option %s returned error (%d)", name, (int)ret);
-#endif
+    setopt_warn(config, ret, name);
 nomem:
   return ret;
 }
@@ -339,7 +349,8 @@ CURLcode tool_setopt_bitmask(CURL *curl, struct GlobalConfig *config,
     if(rest)
       CODE2("%s%luUL);", preamble, rest);
   }
-
+  if(ret)
+    setopt_warn(config, ret, name);
 nomem:
   return ret;
 }
@@ -665,6 +676,8 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
 
 nomem:
   Curl_safefree(escaped);
+  if(ret)
+    setopt_warn(global, ret, name);
   return ret;
 }
 
