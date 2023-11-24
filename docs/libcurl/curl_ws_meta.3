@@ -27,14 +27,7 @@
 curl_ws_meta - meta data WebSocket information
 .SH SYNOPSIS
 .nf
-#include <curl/easy.h>
-
-struct curl_ws_frame {
-  int age;              /* zero */
-  int flags;            /* See the CURLWS_* defines */
-  curl_off_t offset;    /* the offset of this data into the frame */
-  curl_off_t bytesleft; /* number of pending bytes left of the payload */
-};
+#include <curl/curl.h>
 
 const struct curl_ws_frame *curl_ws_meta(CURL *curl);
 .fi
@@ -53,7 +46,15 @@ what transfer the question is about, but as there is no such pointer provided
 to the callback by libcurl itself, applications that want to use
 \fIcurl_ws_meta(3)\fP need to pass it on to the callback on its own.
 
-.SH "struct fields"
+.SH "struct curl_ws_frame"
+.nf
+struct curl_ws_frame {
+  int age;
+  int flags;
+  curl_off_t offset;
+  curl_off_t bytesleft;
+};
+.fi
 .IP age
 This field specify the age of this struct. It is always zero for now.
 .IP flags

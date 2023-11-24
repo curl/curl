@@ -33,7 +33,7 @@ CURLMcode curl_multi_fdset(CURLM *multi_handle,
                            fd_set *write_fd_set,
                            fd_set *exc_fd_set,
                            int *max_fd);
-.ad
+.fi
 .SH DESCRIPTION
 This function extracts file descriptor information from a given multi_handle.
 libcurl returns its \fIfd_set\fP sets. The application can use these to

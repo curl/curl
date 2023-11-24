@@ -28,6 +28,25 @@ curl_easy_option_next - iterate over easy setopt options
 .nf
 #include <curl/curl.h>
 
+const struct curl_easyoption *
+curl_easy_option_next(const struct curl_easyoption *prev);
+.fi
+.SH DESCRIPTION
+This function returns a pointer to the first or the next \fIcurl_easyoption\fP
+struct, providing an ability to iterate over all known options for
+\fIcurl_easy_setopt(3)\fP in this instance of libcurl.
+
+Pass a \fBNULL\fP argument as \fBprev\fP to get the first option returned, or
+pass in the current option to get the next one returned. If there is no more
+option to return, \fIcurl_easy_option_next(3)\fP returns NULL.
+
+The options returned by this functions are the ones known to this libcurl and
+information about what argument type they want.
+
+If the \fBCURLOT_FLAG_ALIAS\fP bit is set in the flags field, it means the
+name is provided for backwards compatibility as an alias.
+.SH struct
+.nf
 typedef enum {
   CURLOT_LONG,    /* long (a range of values) */
   CURLOT_VALUES,  /*      (a defined set or bitmask) */
@@ -48,24 +67,7 @@ struct curl_easyoption {
   curl_easytype type;
   unsigned int flags;
 };
-
-const struct curl_easyoption *
-curl_easy_option_next(const struct curl_easyoption *prev);
 .fi
-.SH DESCRIPTION
-This function returns a pointer to the first or the next \fIcurl_easyoption\fP
-struct, providing an ability to iterate over all known options for
-\fIcurl_easy_setopt(3)\fP in this instance of libcurl.
-
-Pass a \fBNULL\fP argument as \fBprev\fP to get the first option returned, or
-pass in the current option to get the next one returned. If there is no more
-option to return, \fIcurl_easy_option_next(3)\fP returns NULL.
-
-The options returned by this functions are the ones known to this libcurl and
-information about what argument type they want.
-
-If the \fBCURLOT_FLAG_ALIAS\fP bit is set in the flags field, it means the
-name is provided for backwards compatibility as an alias.
 .SH EXAMPLE
 .nf
 /* iterate over all available options */

@@ -28,7 +28,7 @@ curl_url_get - extract a part from a URL
 .nf
 #include <curl/curl.h>
 
-CURLUcode curl_url_get(CURLU *url,
+CURLUcode curl_url_get(const CURLU *url,
                        CURLUPart part,
                        char **content,
                        unsigned int flags);

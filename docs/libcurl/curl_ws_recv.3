@@ -27,7 +27,7 @@
 curl_ws_recv - receive WebSocket data
 .SH SYNOPSIS
 .nf
-#include <curl/easy.h>
+#include <curl/curl.h>
 
 CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
                       size_t *recv, const struct curl_ws_frame **meta);
