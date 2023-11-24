@@ -363,7 +363,7 @@ struct eyeballer {
   expire_id timeout_id;              /* ID for Curl_expire() */
   CURLcode result;
   int error;
-  int rewinds;                       /* how often we rewinded the addr list */
+  BIT(rewinded);                     /* if we rewinded the addr list */
   BIT(has_started);                  /* attempts have started */
   BIT(is_done);                      /* out of addresses/time */
   BIT(connected);                    /* cf has connected */
@@ -447,7 +447,7 @@ static void baller_free(struct eyeballer *baller,
 
 static void baller_rewind(struct eyeballer *baller)
 {
-  ++baller->rewinds;
+  baller->rewinded = TRUE;
   baller->addr = baller->first;
   baller->inconclusive = FALSE;
 }
@@ -544,7 +544,7 @@ static CURLcode baller_start_next(struct Curl_cfilter *cf,
     baller_next_addr(baller);
     /* If we get inconclusive answers from the server(s), we make
      * a second iteration over the address list */
-    if(!baller->addr && baller->inconclusive && baller->rewinds == 0)
+    if(!baller->addr && baller->inconclusive && !baller->rewinded)
       baller_rewind(baller);
     baller_start(cf, data, baller, timeoutms);
   }
