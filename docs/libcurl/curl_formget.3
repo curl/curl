@@ -29,7 +29,8 @@ curl_formget - serialize a previously built multipart form POST chain
 #include <curl/curl.h>
 
 int curl_formget(struct curl_httppost * form, void *userp,
-                  curl_formget_callback append );
+                 curl_formget_callback append);
+.fi
 .SH DESCRIPTION
 curl_formget() is used to serialize data previously built/appended with
 \fIcurl_formadd(3)\fP. Accepts a void pointer as second argument named

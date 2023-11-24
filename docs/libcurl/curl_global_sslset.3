@@ -28,31 +28,9 @@ curl_global_sslset - Select SSL backend to use with libcurl
 .nf
 #include <curl/curl.h>
 
-typedef struct {
-  curl_sslbackend id;
-  const char *name;
-} curl_ssl_backend;
-
-typedef enum {
-  CURLSSLBACKEND_NONE = 0,
-  CURLSSLBACKEND_OPENSSL = 1, /* or one of its forks */
-  CURLSSLBACKEND_GNUTLS = 2,
-  CURLSSLBACKEND_NSS = 3,
-  CURLSSLBACKEND_GSKIT = 5, /* deprecated */
-  CURLSSLBACKEND_POLARSSL = 6, /* deprecated */
-  CURLSSLBACKEND_WOLFSSL = 7,
-  CURLSSLBACKEND_SCHANNEL = 8,
-  CURLSSLBACKEND_SECURETRANSPORT = 9,
-  CURLSSLBACKEND_AXTLS = 10, /* deprecated */
-  CURLSSLBACKEND_MBEDTLS = 11,
-  CURLSSLBACKEND_MESALINK = 12, /* deprecated */
-  CURLSSLBACKEND_BEARSSL = 13,
-  CURLSSLBACKEND_RUSTLS = 14
-} curl_sslbackend;
-
 CURLsslset curl_global_sslset(curl_sslbackend id,
                               const char *name,
-                              curl_ssl_backend ***avail);
+                              const curl_ssl_backend ***avail);
 .fi
 .SH DESCRIPTION
 This function configures at runtime which SSL backend to use with
@@ -99,6 +77,30 @@ provide the same API.
 
 \fIcurl_version_info(3)\fP can return more specific info about the exact
 OpenSSL flavor and version number is use.
+.SH struct
+.nf
+typedef struct {
+  curl_sslbackend id;
+  const char *name;
+} curl_ssl_backend;
+
+typedef enum {
+  CURLSSLBACKEND_NONE = 0,
+  CURLSSLBACKEND_OPENSSL = 1, /* or one of its forks */
+  CURLSSLBACKEND_GNUTLS = 2,
+  CURLSSLBACKEND_NSS = 3,
+  CURLSSLBACKEND_GSKIT = 5, /* deprecated */
+  CURLSSLBACKEND_POLARSSL = 6, /* deprecated */
+  CURLSSLBACKEND_WOLFSSL = 7,
+  CURLSSLBACKEND_SCHANNEL = 8,
+  CURLSSLBACKEND_SECURETRANSPORT = 9,
+  CURLSSLBACKEND_AXTLS = 10, /* deprecated */
+  CURLSSLBACKEND_MBEDTLS = 11,
+  CURLSSLBACKEND_MESALINK = 12, /* deprecated */
+  CURLSSLBACKEND_BEARSSL = 13,
+  CURLSSLBACKEND_RUSTLS = 14
+} curl_sslbackend;
+.fi
 .SH EXAMPLE
 .nf
   /* choose a specific backend */

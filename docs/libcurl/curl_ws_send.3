@@ -27,7 +27,7 @@
 curl_ws_send - send WebSocket data
 .SH SYNOPSIS
 .nf
-#include <curl/easy.h>
+#include <curl/curl.h>
 
 CURLcode curl_ws_send(CURL *curl, const void *buffer, size_t buflen,
                       size_t *sent, curl_off_t fragsize,

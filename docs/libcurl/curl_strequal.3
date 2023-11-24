@@ -28,8 +28,8 @@ curl_strequal, curl_strnequal - case insensitive string comparisons
 .nf
 #include <curl/curl.h>
 
-int curl_strequal(char *str1, char *str2);
-int curl_strnequal(char *str1, char *str2, size_t length);
+int curl_strequal(const char *str1, const char *str2);
+int curl_strnequal(const char *str1, const char *str2, size_t length);
 .fi
 .SH DESCRIPTION
 The

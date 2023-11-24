@@ -28,7 +28,7 @@ curl_url_dup - duplicate a URL handle
 .nf
 #include <curl/curl.h>
 
-CURLU *curl_url_dup(CURLU *inhandle);
+CURLU *curl_url_dup(const CURLU *inhandle);
 .fi
 .SH DESCRIPTION
 Duplicates the URL object the input \fICURLU\fP \fIinhandle\fP identifies and
