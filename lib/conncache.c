@@ -389,8 +389,16 @@ bool Curl_conncache_return_conn(struct Curl_easy *data,
 
     conn_candidate = Curl_conncache_extract_oldest(data);
     if(conn_candidate) {
-      /* the winner gets the honour of being disconnected */
-      Curl_disconnect(data, conn_candidate, /* dead_connection */ FALSE);
+      /* Use the closure handle for this disconnect so that anything that
+         happens during the disconnect is not stored and associated with the
+         'data' handle which already just finished a transfer and it is
+         important that details from this (unrelated) disconnect does not
+         taint meta-data in the data handle. */
+      struct conncache *connc = data->state.conn_cache;
+      connc->closure_handle->state.buffer = data->state.buffer;
+      connc->closure_handle->set.buffer_size = data->set.buffer_size;
+      Curl_disconnect(connc->closure_handle, conn_candidate,
+                      /* dead_connection */ FALSE);
     }
   }
 
