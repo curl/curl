@@ -53,7 +53,7 @@ BEGIN
       VALUE "OriginalFilename", "curl.exe\0"
       VALUE "ProductName",      "The curl executable\0"
       VALUE "ProductVersion",   CURL_VERSION "\0"
-      VALUE "LegalCopyright",   "\xa9 " CURL_COPYRIGHT "\0"  /* a9: Copyright symbol */
+      VALUE "LegalCopyright",   "Copyright (C) " CURL_COPYRIGHT "\0"
       VALUE "License",          "https://curl.se/docs/copyright.html\0"
     END
   END
