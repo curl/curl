@@ -158,6 +158,8 @@ Available substitute variables include:
 - `%PWD` - Current directory
 - `%RTSP6PORT` - IPv6 port number of the RTSP server
 - `%RTSPPORT` - Port number of the RTSP server
+- `%SIEVE6PORT` - IPv6 port number of the SIEVE server
+- `%SIEVEPORT` - Port number of the SIEVE server
 - `%SMBPORT` - Port number of the SMB server
 - `%SMBSPORT` - Port number of the SMBS server
 - `%SMTP6PORT` - IPv6 port number of the SMTP server
@@ -318,17 +320,19 @@ The first line of this file will always be set to `Testnum [number]` by the
 test script, to allow servers to read that to know what test the client is
 about to issue.
 
-#### For FTP/SMTP/POP/IMAP
+#### For FTP/SMTP/POP/IMAP/SIEVE
 
 - `REPLY [command] [return value] [response string]` - Changes how the server
   responds to the [command]. [response string] is evaluated as a perl string,
   so it can contain embedded \r\n, for example. There's a special [command]
   named "welcome" (without quotes) which is the string sent immediately on
-  connect as a welcome.
+  connect as a welcome. If [command] is single-quoted, it is intended to match
+  a full command line.
 - `REPLYLF` (like above but sends the response terminated with LF-only and not
    CRLF)
 - `COUNT [command] [num]` - Do the `REPLY` change for `[command]` only `[num]`
-  times and then go back to the built-in approach
+  times and then go back to the built-in approach. Counters are persistent
+  across retries/redirections.
 - `DELAY [command] [secs]` - Delay responding to this command for the given
   time
 - `RETRWEIRDO` - Enable the "weirdo" RETR case when multiple response lines
@@ -341,9 +345,10 @@ about to issue.
 - `PASVBADIP` - makes PASV send back an illegal IP in its 227 response
 - `CAPA [capabilities]` - Enables support for and specifies a list of space
    separated capabilities to return to the client for the IMAP `CAPABILITY`,
-   POP3 `CAPA` and SMTP `EHLO` commands
+   SIEVE `CAPABILITY`, POP3 `CAPA` and SMTP `EHLO` commands
+- `CAPB [capability]' - Append a single capability without quotes processing
 - `AUTH [mechanisms]` - Enables support for SASL authentication and specifies
-   a list of space separated mechanisms for IMAP, POP3 and SMTP
+   a list of space separated mechanisms for IMAP, SIEVE, POP3 and SMTP
 - `STOR [msg]` respond with this instead of default after `STOR`
 
 #### For HTTP/HTTPS
@@ -399,6 +404,7 @@ What server(s) this test case requires/uses. Available servers:
 - `rtsp-ipv6`
 - `scp`
 - `sftp`
+- `sieve`
 - `smb`
 - `smtp`
 - `socks4`
