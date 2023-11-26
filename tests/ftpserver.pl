@@ -94,7 +94,7 @@ my $proto = 'ftp';  # default server protocol
 my $srcdir;         # directory where ftpserver.pl is located
 my $srvrname;       # server name for presentation purposes
 my $cwd_testno;     # test case numbers extracted from CWD command
-my $testno = 0;     # test case number (read from server.cmd)
+my $testnumber = 0; # test case number (read from server.cmd)
 my $path   = '.';
 my $logdir = $path .'/log';
 my $piddir;
@@ -643,6 +643,27 @@ sub protocolsetup {
             '  | (__| |_| |  _ {| |___ '."\r\n",
             '   \___|\___/|_| \_\_____|'."\r\n",
             '* OK curl IMAP server ready to serve'."\r\n")
+        );
+    }
+    elsif($proto eq 'sieve') {
+        %commandfunc = (
+            'CAPABILITY'   => \&CAPABILITY_sieve,
+            'CHECKSCRIPT'  => \&CHECKSCRIPT_sieve,
+            'DELETESCRIPT' => \&DELETESCRIPT_sieve,
+            'GETSCRIPT'    => \&GETSCRIPT_sieve,
+            'HAVESPACE'    => \&HAVESPACE_sieve,
+            'LISTSCRIPTS'  => \&LISTSCRIPTS_sieve,
+            'LOGOUT'       => \&LOGOUT_sieve,
+            'NOOP'         => \&NOOP_sieve,
+            'PUTSCRIPT'    => \&PUTSCRIPT_sieve,
+            'RENAMESCRIPT' => \&RENAMESCRIPT_sieve,
+            'SETACTIVE'    => \&SETACTIVE_sieve,
+        );
+        %displaytext = (
+            'welcome' => join("",
+            '"IMPLEMENTATION" "curl SIEVE test server"'."\r\n",
+            '"VERSION" "1.0"'."\r\n",
+            'OK "curl SIEVE server ready to serve"'."\r\n")
         );
     }
     elsif($proto eq 'smtp') {
@@ -2025,6 +2046,400 @@ sub QUIT_pop3 {
 }
 
 ################
+################ SIEVE commands
+################
+
+# This is a built-in fake script directory.
+my %sievedir = (
+    'holidays'     => 0,
+    'default'      => 1,
+    'spam'         => 0,
+    'strange"name' => 0,
+);
+
+# Global holding data read after initial command line.
+my $cmdtrail;
+
+sub read_sieve_literal {
+    my ($size) = @_;
+    my $received = 0;
+    my $literal = '';
+    my $nextargs = '';
+    my $line = $cmdtrail;
+    my $chunksize = length($line);
+
+    # Read literal data and next arguments.
+    $cmdtrail = '';
+
+    while(1) {
+        my $left = $size - $received;
+        my $datasize = ($left > $chunksize) ? $chunksize : $left;
+
+        if($datasize > 0) {
+            $literal .= substr($line, 0, $datasize);
+            $line = substr($line, $datasize);
+            $received += $datasize;
+        }
+
+        $nextargs .= $line;
+
+        if($received == $size && $nextargs =~ /\r\n$/) {
+            # Remove trailing CRLF.
+            $nextargs =~ s/[\r\n]+$//;
+            return ($literal, $nextargs);
+        }
+
+        if(5 != (sysread \*SFREAD, $line, 5)) {
+            last;
+        }
+
+        if($line eq "DATA\n") {
+            sysread \*SFREAD, $line, 5;
+
+            $chunksize = 0;
+            if($line =~ /^([0-9a-fA-F]{4})\n/) {
+                $chunksize = hex($1);
+            }
+
+            read_mainsockf(\$line, $chunksize);
+            ftpmsg $line;
+        }
+        elsif($line eq "DISC\n") {
+            logmsg "Unexpected disconnect!\n";
+            printf SFWRITE "ACKD\n";
+            last;
+        }
+        else {
+            logmsg "No support for: $line";
+            last;
+        }
+    }
+
+    return (undef, undef);
+}
+
+sub parse_sieve_params {
+    my ($args, $cmd, $typesre) = @_;
+    my $types = '';
+    my @params;
+    my $status = 'NO';
+    my $response;
+
+    while ($args && (not defined $response)) {
+        if ($args =~ /^(0|[1-9]\d*)(?: (.*)|$)/) {
+            # Number.
+            $args = $2;
+            push(@params, $1 + 0);
+            $types .= 'n';
+        }
+        elsif($args =~ /^"((?:[^\\"\r\n]|\\\\|\\")*)"(?: (.*)|$)/) {
+            # Quoted string.
+            my $string = $1;
+            $args = $2;
+            $string =~ s/\\(\\|")/$1/g;
+            push(@params, $string);
+            $types .= $string? 's': 'e';
+        }
+        elsif($args =~ /^\{(\d+)\+\}$/) {
+            # Literal.
+            my $size = $1 + 0;
+            my $input;
+
+            ($input, $args) = read_sieve_literal($size);
+
+            if(not defined $input) {
+                $response = "Literal read error";
+            }
+            else {
+                push(@params, $input);
+                $types .= $input? 's': 'e';
+            }
+        }
+        elsif($args =~ /^([^ "{}]+)(?: (.*)|$)/) {
+            # Atom.
+            $args = $2;
+            push(@params, $1);
+            $types .= 'a';
+        }
+        else {
+            # Error.
+            $response = "$cmd command syntax";
+        }
+    }
+
+    # Check argument count and types.
+    if(not defined $response) {
+        if($types !~ /^$typesre$/) {
+            $response = "$cmd: Bad argument count or type(s)";
+        }
+        else {
+            $response = "$cmd completed";
+            $status = 'OK';
+        }
+    }
+
+    return ($status, '', " \"$response\"", \@params);
+}
+
+sub check_sieve_script {
+    my ($script, $status, $code, $response) = @_;
+
+    # The magic here is taken from the script content to influence the
+    # reply: tokens @STATUS@<OK|NO|BYE>, @CODE@<code># and
+    # @RESPONSE@<response string>@ can appear in the checked script for
+    # that purpose.
+    if($script =~ /\@STATUS\@([^\@]*)\@/) {
+        $$status = $1;
+        $$response = '';
+    }
+    if($script =~ /\@CODE\@([^\@]*)\@/) {
+        $$code = " ($1)";
+        $$response = '';
+    }
+    if($script =~ /\@RESPONSE\@([^\@]*)\@/) {
+        my $text = eval "qq{$1}";
+        my $len = length $text;
+        $$response = " {$len}\r\n$text";
+    }
+}
+
+sub CAPABILITY_sieve {
+    my ($args) = @_;
+    my ($status, $code, $response, $params) =
+                    parse_sieve_params($args, 'CAPABILITY', '');
+
+    if($status eq 'OK') {
+      for my $c (@capabilities) {
+          sendcontrol "$c\r\n";
+      }
+
+      sendcontrol('"SASL" "' . join(' ', @auth_mechs) . "\"\r\n");
+    }
+
+    sendcontrol "$status$code$response\r\n";
+
+    return 0;
+}
+
+sub CHECKSCRIPT_sieve {
+    my ($args) = @_;
+    my ($status, $code, $response, $params) =
+                    parse_sieve_params($args, 'CHECKSCRIPT', '[es]');
+
+    if($status eq 'OK') {
+        my ($script) = @{$params};
+
+        check_sieve_script($script, \$status, \$code, \$response);
+    }
+    sendcontrol "$status$code$response\r\n";
+
+    return 0;
+}
+
+sub DELETESCRIPT_sieve {
+    my ($args) = @_;
+    my ($status, $code, $response, $params) =
+                    parse_sieve_params($args, 'DELETESCRIPT', 's');
+
+    if($status eq 'OK') {
+        my ($scriptname) = @{$params};
+
+        if($sievedir{$scriptname}) {
+            $status = 'NO';
+            $code = ' (ACTIVE)';
+            $response = ' "Script is active"';
+        }
+    }
+    sendcontrol "$status$code$response\r\n";
+
+    return 0;
+}
+
+sub GETSCRIPT_sieve {
+    my ($args) = @_;
+    my ($status, $code, $response, $params) =
+                    parse_sieve_params($args, 'GETSCRIPT', 's');
+
+    if($status eq 'OK') {
+        my ($scriptname) = @{$params};
+        my $script;
+
+        if($scriptname eq "verifiedserver") {
+            # this is the secret command that verifies that this actually is
+            # the curl test server
+            $script = "WE ROOLZ: $$\r\n";
+            if($verbose) {
+                print STDERR "FTPD: We returned proof we are the test server\n";
+            }
+            logmsg "return proof we are we\n";
+        }
+        else {
+            logmsg "retrieve a script\n";
+            $script = join('', getreplydata($scriptname));
+        }
+        my $l = length $script;
+        sendcontrol "{$l}\r\n$script\r\n";
+    }
+    sendcontrol "$status$code$response\r\n";
+
+    return 0;
+}
+
+sub HAVESPACE_sieve {
+    my ($args) = @_;
+    my ($status, $code, $response, $params) =
+                    parse_sieve_params($args, 'HAVESPACE', 'sn');
+
+    if($status eq 'OK') {
+        my ($scriptname, $size) = @{$params};
+
+        if($scriptname =~ /2big/) {
+            $status = 'NO';
+            $code = ' (QUOTA/MAXSIZE)';
+            $response = ' "Script too large"';
+        }
+        elsif($scriptname =~ /2many/) {
+            $status = 'NO';
+            $code = ' (QUOTA/MAXSCRIPTS)';
+            $response = ' "Allowed script count exceeded"';
+        }
+        elsif($size > 100000) {
+            $status = 'NO';
+            $code = ' (QUOTA)';
+            $response = ' "Script too large"';
+        }
+    }
+    sendcontrol "$status$code$response\r\n";
+
+    return 0;
+}
+
+sub LISTSCRIPTS_sieve {
+    my ($args) = @_;
+    my ($status, $code, $response, $params) =
+                    parse_sieve_params($args, 'LISTSCRIPTS', '');
+
+    if($status eq 'OK') {
+        foreach my $scriptname (sort keys %sievedir) {
+            my $len = length $scriptname;
+            my $line = "\"$scriptname\"";
+            $line = "{$len}\r\n$scriptname" if($scriptname =~ /[\"\\\r\n]/);
+            $line .= ' ACTIVE' if ($sievedir{$scriptname});
+            sendcontrol "$line\r\n";
+        }
+    }
+    sendcontrol "$status$code$response\r\n";
+
+    return 0;
+}
+
+sub LOGOUT_sieve {
+    my ($args) = @_;
+    my ($status, $code, $response, $params) =
+                    parse_sieve_params($args, 'LOGOUT', '');
+
+    sendcontrol "$status$code$response\r\n";
+    return 0;
+}
+
+sub NOOP_sieve {
+    my ($args) = @_;
+    my ($status, $code, $response, $params) =
+                    parse_sieve_params($args, 'NOOP', '[es]?');
+
+    if($status eq 'OK' && ${$params}) {
+        my ($tag) = @{$params};
+        $code = " (TAG \"$tag\")";
+    }
+    sendcontrol "$status$code$response\r\n";
+
+    return 0;
+}
+
+sub PUTSCRIPT_sieve {
+    my ($args) = @_;
+    my ($status, $code, $response, $params) =
+                    parse_sieve_params($args, 'PUTSCRIPT', 's[es]');
+
+    if($status eq 'OK') {
+        my ($scriptname, $script) = @{$params};
+
+        if($sievedir{$scriptname}) {
+            $status = 'NO';
+            $code = ' (ACTIVE)';
+            $response = " \"Script '$scriptname' is active\"";
+        }
+        else {
+            check_sieve_script($script, \$status, \$code, \$response);
+
+            if($status eq 'OK' && not $nosave) {
+                my $filename = "$logdir/upload.$scriptname";
+
+                logmsg "Store test number $testnumber in $filename\n";
+
+                if(not open(FILE, ">$filename")) {
+                    $status = 'NO';
+                    $code = ' (QUOTA/MAXSCRIPTS)';
+                    $response = " \"Cannot open $filename for writing\"";
+                }
+                else {
+                    my $len = length $script;
+                    logmsg "> Appending $len bytes to $filename\n";
+                    print FILE $script;
+                    close(FILE);
+                }
+            }
+        }
+    }
+    sendcontrol "$status$code$response\r\n";
+
+    return 0;
+}
+
+sub RENAMESCRIPT_sieve {
+    my ($args) = @_;
+    my ($status, $code, $response, $params) =
+                    parse_sieve_params($args, 'RENAMESCRIPT', 'ss');
+
+    if($status eq 'OK') {
+        my ($oldname, $newname) = @{$params};
+
+        if(not exists $sievedir{$oldname}) {
+            $status = 'NO';
+            $code = ' (NONEXISTENT)';
+            $response = ' "Script not found"';
+        }
+        elsif(exists $sievedir{$newname}) {
+            $status = 'NO';
+            $code = ' (ALREADYEXISTS)';
+            $response = ' "A script with the new name already exists"';
+        }
+    }
+    sendcontrol "$status$code$response\r\n";
+
+    return 0;
+}
+
+sub SETACTIVE_sieve {
+    my ($args) = @_;
+    my ($status, $code, $response, $params) =
+                    parse_sieve_params($args, 'SETACTIVE', '[es]');
+
+    if($status eq 'OK') {
+        my ($scriptname) = @{$params};
+
+        if($scriptname && (not exists $sievedir{$scriptname})) {
+            $status = 'NO';
+            $code = ' (NONEXISTENT)';
+            $response = " \"$scriptname not found\"";
+        }
+    }
+    sendcontrol "$status$code$response\r\n";
+
+    return 0;
+}
+
+################
 ################ FTP commands
 ################
 my $rest=0;
@@ -2830,6 +3245,11 @@ sub nodataconn_str {
 # On success returns 1, otherwise zero.
 #
 sub customize {
+    # Save things that should be preserved across retries/redirects.
+    my $savetestnumber = $testnumber;
+    my %savecustomcount = %customcount;
+
+    # Initialize global variables.
     $ctrldelay = 0;     # default is no throttling of the ctrl stream
     $datadelay = 0;     # default is no throttling of the data stream
     $retrweirdo = 0;    # default is no use of RETRWEIRDO
@@ -2857,6 +3277,10 @@ sub customize {
 
     while(<$custom>) {
         if($_ =~ /REPLY \"([A-Z]+ [A-Za-z0-9+-\/=\*. ]+)\" (.*)/) {
+            $fulltextreply{$1}=eval "qq{$2}";
+            logmsg "FTPD: set custom reply for $1\n";
+        }
+        elsif($_ =~ /REPLY \'([^\']*)\' (.*)/) {
             $fulltextreply{$1}=eval "qq{$2}";
             logmsg "FTPD: set custom reply for $1\n";
         }
@@ -2944,6 +3368,9 @@ sub customize {
                 $_ = $1 if /^"(.*)"$/;
             }
         }
+        elsif($_ =~ /CAPB (.*)/) {
+            push(@capabilities, $1);
+        }
         elsif($_ =~ /AUTH (.*)/) {
             logmsg "FTPD: instructed to support AUTHENTICATION command\n";
             @auth_mechs = split(/ /, $1);
@@ -2955,11 +3382,20 @@ sub customize {
             logmsg "FTPD: NOSAVE prevents saving of uploaded data\n";
         }
         elsif($_ =~ /^Testnum (\d+)/){
-            $testno = $1;
-            logmsg "FTPD: run test case number: $testno\n";
+            $testnumber = $1;
+            logmsg "FTPD: run test case number: $testnumber\n";
         }
     }
     close($custom);
+
+    # Restore persistent data across retries/redirects.
+    if($savetestnumber && $testnumber == $savetestnumber) {
+        logmsg "FTPD: retry/redirect detected: keep persistent data\n";
+        %customcount = %savecustomcount;
+        while(my ($key, $value) = each(%customcount)) {
+            $commandreply{$key} = "" unless($value);
+        }
+    }
 }
 
 #----------------------------------------------------------------------
@@ -3003,7 +3439,7 @@ while(@ARGV) {
         }
     }
     elsif($ARGV[0] eq '--proto') {
-        if($ARGV[1] && ($ARGV[1] =~ /^(ftp|imap|pop3|smtp)$/)) {
+        if($ARGV[1] && ($ARGV[1] =~ /^(ftp|imap|pop3|sieve|smtp)$/)) {
             $proto = $1;
             shift @ARGV;
         }
@@ -3161,7 +3597,7 @@ while(1) {
     $| = 1;
 
     &customize(); # read test control instructions
-    loadtest("$logdir/test$testno");
+    loadtest("$logdir/test$testnumber");
 
     my $welcome = $commandreply{"welcome"};
     if(!$welcome) {
@@ -3225,51 +3661,51 @@ while(1) {
         $full .= $input;
 
         # Loop until command completion
-        next unless($full =~ /\r\n$/);
+        next unless($full =~ /\r\n/);
 
-        # Remove trailing CRLF.
-        $full =~ s/[\n\r]+$//;
+        # Remove trailing CRLF of 1st line and keep trailing data.
+	my ($head, $tail) = split /\r\n/, $full, 2;
 
         my $FTPCMD;
         my $FTPARG;
         if($proto eq "imap") {
             # IMAP is different with its identifier first on the command line
-            if(($full =~ /^([^ ]+) ([^ ]+) (.*)/) ||
-               ($full =~ /^([^ ]+) ([^ ]+)/)) {
+            if(($head =~ /^([^ ]+) ([^ ]+) (.*)/) ||
+               ($head =~ /^([^ ]+) ([^ ]+)/)) {
                 $cmdid=$1; # set the global variable
                 $FTPCMD=$2;
                 $FTPARG=$3;
             }
             # IMAP authentication cancellation
-            elsif($full =~ /^\*$/) {
+            elsif($head =~ /^\*$/) {
                 # Command id has already been set
                 $FTPCMD="*";
                 $FTPARG="";
             }
             # IMAP long "commands" are base64 authentication data
-            elsif($full =~ /^[A-Z0-9+\/]*={0,2}$/i) {
+            elsif($head =~ /^[A-Z0-9+\/]*={0,2}$/i) {
                 # Command id has already been set
-                $FTPCMD=$full;
+                $FTPCMD=$head;
                 $FTPARG="";
             }
             else {
-                sendcontrol "$full BAD Command\r\n";
+                sendcontrol "$head BAD Command\r\n";
                 last;
             }
         }
-        elsif($full =~ /^([A-Z]{3,4})(\s(.*))?$/i) {
+        elsif($head =~ /^([A-Z]{3,4})(\s(.*))?$/i) {
             $FTPCMD=$1;
             $FTPARG=$3;
         }
         elsif($proto eq "pop3") {
             # POP3 authentication cancellation
-            if($full =~ /^\*$/) {
+            if($head =~ /^\*$/) {
                 $FTPCMD="*";
                 $FTPARG="";
             }
             # POP3 long "commands" are base64 authentication data
-            elsif($full =~ /^[A-Z0-9+\/]*={0,2}$/i) {
-                $FTPCMD=$full;
+            elsif($head =~ /^[A-Z0-9+\/]*={0,2}$/i) {
+                $FTPCMD=$head;
                 $FTPARG="";
             }
             else {
@@ -3277,15 +3713,36 @@ while(1) {
                 last;
             }
         }
+        elsif($proto eq "sieve") {
+            $cmdtrail = $tail;
+            # SIEVE authentication cancellation
+            if($head =~ /^"\*"$/) {
+                $FTPCMD="*";
+                $FTPARG="";
+            }
+            elsif($head =~ /^([A-Z0-9]+)(?:\s(.*))?$/i) {
+                $FTPCMD=$1;
+                $FTPARG=$2;
+            }
+            elsif($head =~ /^\"([A-Z0-9+\/=*]*)\"$/i) {
+                # Base64 data for authentication dialog.
+                $FTPCMD=$1;
+                $FTPARG="";
+            }
+            else {
+                sendcontrol "NO \"Unrecognized command\"\r\n";
+                last;
+            }
+        }
         elsif($proto eq "smtp") {
             # SMTP authentication cancellation
-            if($full =~ /^\*$/) {
+            if($head =~ /^\*$/) {
                 $FTPCMD="*";
                 $FTPARG="";
             }
             # SMTP long "commands" are base64 authentication data
-            elsif($full =~ /^[A-Z0-9+\/]{0,512}={0,2}$/i) {
-                $FTPCMD=$full;
+            elsif($head =~ /^[A-Z0-9+\/]{0,512}={0,2}$/i) {
+                $FTPCMD=$head;
                 $FTPARG="";
             }
             else {
@@ -3298,10 +3755,10 @@ while(1) {
             last;
         }
 
-        logmsg "< \"$full\"\n";
+        logmsg "< \"$head\"\n";
 
         if($verbose) {
-            print STDERR "IN: $full\n";
+            print STDERR "IN: $head\n";
         }
 
         $full = "";
@@ -3367,6 +3824,9 @@ while(1) {
             }
             elsif($proto eq 'imap') {
                 sendcontrol "$cmdid BAD $FTPCMD is not dealt with!\r\n";
+            }
+            elsif($proto eq 'sieve') {
+                sendcontrol "NO \"$FTPCMD is not dealt with!\"\r\n";
             }
             else {
                 sendcontrol "500 $FTPCMD is not dealt with!\r\n";
