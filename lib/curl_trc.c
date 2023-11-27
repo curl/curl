@@ -162,7 +162,9 @@ void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
 }
 
 static struct curl_trc_feat *trc_feats[] = {
+#ifndef CURL_DISABLE_DOH
   &Curl_doh_trc,
+#endif
   NULL,
 };
 
