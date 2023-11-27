@@ -210,7 +210,8 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
             break;
           default:
             warnf(operation->global, "%s:%d: warning: '%s' uses unquoted "
-                  "whitespace in the line that may cause side-effects",
+                  "whitespace that may cause side-effects. Consider quoting "
+                  "the value with double quotes?",
                   filename, lineno, option);
           }
         }
