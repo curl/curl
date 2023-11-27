@@ -75,6 +75,7 @@ struct ssl_connect_data {
   struct curltime handshake_done;   /* time when handshake finished */
   int port;                         /* remote port at origin */
   BIT(use_alpn);                    /* if ALPN shall be used in handshake */
+  BIT(reused_session);              /* session-ID was reused for this */
 };
 
 
