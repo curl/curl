@@ -3796,6 +3796,7 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
 
   SSL_set_app_data(backend->handle, cf);
 
+  connssl->reused_session = FALSE;
   if(ssl_config->primary.sessionid) {
     Curl_ssl_sessionid_lock(data);
     if(!Curl_ssl_getsessionid(cf, data, &ssl_sessionid, NULL)) {
@@ -3809,6 +3810,7 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
       }
       /* Informational message */
       infof(data, "SSL reusing session ID");
+      connssl->reused_session = TRUE;
     }
     Curl_ssl_sessionid_unlock(data);
   }
@@ -4340,7 +4342,8 @@ static CURLcode servercert(struct Curl_cfilter *cf,
 
 #if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_TLSEXT) && \
   !defined(OPENSSL_NO_OCSP)
-  if(conn_config->verifystatus) {
+  if(conn_config->verifystatus && !connssl->reused_session) {
+    /* don't do this after Session ID reuse */
     result = verifystatus(cf, data);
     if(result) {
       X509_free(backend->server_cert);
