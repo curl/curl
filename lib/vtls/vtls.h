@@ -54,6 +54,13 @@ struct Curl_ssl_session;
 struct multi_ssl_backend_data;
 struct Curl_cfilter;
 
+struct ssl_peer {
+  char *hostname;        /* hostname for verification */
+  char *dispname;        /* display version of hostname */
+  char *sni;             /* SNI version of hostname or NULL if not usable */
+  BIT(is_ip_address);    /* if hostname is an IPv4|6 address */
+};
+
 CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
                                    const curl_ssl_backend ***avail);
 

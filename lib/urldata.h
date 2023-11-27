@@ -247,31 +247,8 @@ enum protection_level {
 };
 #endif
 
-/* enum for the nonblocking SSL connection state machine */
-typedef enum {
-  ssl_connect_1,
-  ssl_connect_2,
-  ssl_connect_2_reading,
-  ssl_connect_2_writing,
-  ssl_connect_3,
-  ssl_connect_done
-} ssl_connect_state;
-
-typedef enum {
-  ssl_connection_none,
-  ssl_connection_negotiating,
-  ssl_connection_complete
-} ssl_connection_state;
-
 /* SSL backend-specific data; declared differently by each SSL backend */
 struct ssl_backend_data;
-
-struct ssl_peer {
-  char *hostname;        /* hostname for verification */
-  char *dispname;        /* display version of hostname */
-  char *sni;             /* SNI version of hostname or NULL if not usable */
-  BIT(is_ip_address);    /* if hostname is an IPv4|6 address */
-};
 
 struct ssl_primary_config {
   char *CApath;          /* certificate dir (doesn't work on windows) */
