@@ -104,7 +104,7 @@ struct curl_trc_feat {
             (cf) && (cf)->cft->log_level >= CURL_LOG_LVL_INFO)
 #define Curl_trc_ft_is_verbose(data, ft) \
                             (Curl_trc_is_verbose(data) && \
-                            (ft) && (ft)->log_level >= CURL_LOG_LVL_INFO)
+                            (ft)->log_level >= CURL_LOG_LVL_INFO)
 
 /**
  * Output an informational message when transfer's verbose logging is enabled.
