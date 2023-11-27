@@ -36,6 +36,7 @@
 
 #include "cf-socket.h"
 #include "connect.h"
+#include "doh.h"
 #include "http2.h"
 #include "http_proxy.h"
 #include "cf-h1-proxy.h"
@@ -113,12 +114,14 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
 void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
 {
   DEBUGASSERT(!strchr(fmt, '\n'));
-  if(data && data->set.verbose) {
+  if(Curl_trc_is_verbose(data)) {
     va_list ap;
-    int len;
+    int len = 0;
     char buffer[MAXINFO + 2];
+    if(data->state.feat)
+      len = msnprintf(buffer, MAXINFO, "[%s] ", data->state.feat->name);
     va_start(ap, fmt);
-    len = mvsnprintf(buffer, MAXINFO, fmt, ap);
+    len += mvsnprintf(buffer + len, MAXINFO - len, fmt, ap);
     va_end(ap);
     buffer[len++] = '\n';
     buffer[len] = '\0';
@@ -132,13 +135,16 @@ void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
   DEBUGASSERT(cf);
   if(Curl_trc_cf_is_verbose(cf, data)) {
     va_list ap;
-    int len;
+    int len = 0;
     char buffer[MAXINFO + 2];
+    if(data->state.feat)
+      len += msnprintf(buffer + len, MAXINFO - len, "[%s] ",
+                       data->state.feat->name);
     if(cf->sockindex)
-      len = msnprintf(buffer, MAXINFO, "[%s-%d] ",
+      len += msnprintf(buffer + len, MAXINFO - len, "[%s-%d] ",
                       cf->cft->name, cf->sockindex);
     else
-      len = msnprintf(buffer, MAXINFO, "[%s] ", cf->cft->name);
+      len += msnprintf(buffer + len, MAXINFO - len, "[%s] ", cf->cft->name);
     va_start(ap, fmt);
     len += mvsnprintf(buffer + len, MAXINFO - len, fmt, ap);
     va_end(ap);
@@ -148,6 +154,12 @@ void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
   }
 }
 
+static struct curl_trc_feat *trc_feats[] = {
+#ifndef CURL_DISABLE_DOH
+  &Curl_doh_trc,
+#endif
+  NULL,
+};
 
 static struct Curl_cftype *cf_types[] = {
   &Curl_cft_tcp,
@@ -216,6 +228,15 @@ CURLcode Curl_trc_opt(const char *config)
       }
       else if(strcasecompare(token, cf_types[i]->name)) {
         cf_types[i]->log_level = lvl;
+        break;
+      }
+    }
+    for(i = 0; trc_feats[i]; ++i) {
+      if(strcasecompare(token, "all")) {
+        trc_feats[i]->log_level = lvl;
+      }
+      else if(strcasecompare(token, trc_feats[i]->name)) {
+        trc_feats[i]->log_level = lvl;
         break;
       }
     }

@@ -53,6 +53,8 @@
 #define PORT_GOPHER 70
 #define PORT_MQTT 1883
 
+struct curl_trc_featt;
+
 #ifdef USE_WEBSOCKETS
 /* CURLPROTO_GOPHERS (29) is the highest publicly used protocol bit number,
  * the rest are internal information. If we use higher bits we only do this on
@@ -1444,6 +1446,10 @@ struct UrlState {
 #ifdef USE_HYPER
   bool hconnect;  /* set if a CONNECT request */
   CURLcode hresult; /* used to pass return codes back from hyper callbacks */
+#endif
+
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+  struct curl_trc_feat *feat; /* opt. trace feature transfer is part of */
 #endif
 
   /* Dynamically allocated strings, MUST be freed before this struct is

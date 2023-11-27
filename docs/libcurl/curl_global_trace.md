@@ -91,6 +91,10 @@ In order to find out all components involved in a transfer, run it with "all"
 configured. You can then see all names involved in your libcurl version in the
 trace.
 
+## `doh`
+
+Tracing of DNS-over-HTTP operations to resolve hostnames.
+
 # EXAMPLE
 
 ~~~c
