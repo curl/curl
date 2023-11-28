@@ -2439,8 +2439,10 @@ CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
       Curl_mime_cleanpart(data->state.formp);
       result = Curl_getformdata(data, data->state.formp, data->set.httppost,
                                 data->state.fread_func);
-      if(result)
+      if(result) {
+        Curl_safefree(data->state.formp);
         return result;
+      }
       data->state.mimepost = data->state.formp;
     }
     break;
