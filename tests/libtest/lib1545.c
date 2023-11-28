@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "test.h"
 
-#include "testutil.h"
-
 int test(char *URL)
 {
   CURL *eh = NULL;
