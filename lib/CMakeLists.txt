@@ -63,6 +63,12 @@ if(ENABLE_CURLDEBUG)
   set_source_files_properties(memdebug.c curl_multibyte.c PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
 endif()
 
+if(CYGWIN)
+  # for cygwin compile dllmain.c separately since it includes windows.h, which
+  # shouldn't be included for other units.
+  set_source_files_properties(dllmain.c PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
+endif()
+
 if(BUILD_TESTING)
   target_link_libraries(curlu PRIVATE ${CURL_LIBS})
 endif()

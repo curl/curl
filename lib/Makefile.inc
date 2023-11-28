@@ -134,6 +134,7 @@ LIB_CFILES =         \
   curl_threads.c     \
   curl_trc.c         \
   dict.c             \
+  dllmain.c          \
   doh.c              \
   dynbuf.c           \
   dynhds.c           \

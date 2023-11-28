@@ -42,10 +42,22 @@ interface but you must provide your own locking and set
 Note that some items are specifically documented as not thread-safe in the
 share API (the connection pool and HSTS cache for example).
 .SH TLS
-All current TLS libraries libcurl supports are thread-safe. OpenSSL 1.1.0+ can
-be safely used in multi-threaded applications provided that support for the
-underlying OS threading API is built-in. For older versions of OpenSSL, the
-user must set mutex callbacks.
+All current TLS libraries libcurl supports are thread-safe.
+
+OpenSSL 1.1.0+ can be safely used in multi-threaded applications provided that
+support for the underlying OS threading API is built-in. For older versions of
+OpenSSL, the user must set mutex callbacks.
+
+OpenSSL may require thread cleanup in some unusual cases so that it won't leak
+memory. The most significant case of this is if OpenSSL was linked statically.
+For example, in Windows if both libcurl and OpenSSL are linked statically to a
+DLL or application then OpenSSL will leak memory unless the DLL or application
+calls OPENSSL_thread_stop() before each thread terminates. However, if libcurl
+is built as a DLL and OpenSSL is linked statically to it then since libcurl
+8.5.0 it will call OPENSSL_thread_stop() for you. Otherwise, libcurl cannot
+call it for you and it is up to the DLL or application. There are several other
+cases that are unusual. Refer to OpenSSL documentation:
+https://www.openssl.org/docs/man3.0/man3/OPENSSL_thread_stop.html#NOTES
 .SH "Signals"
 Signals are used for timing out name resolves (during DNS lookup) - when built
 without using either the c-ares or threaded resolver backends. On systems that
