@@ -2443,7 +2443,6 @@ CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
         Curl_safefree(data->state.formp);
         return result;
       }
-      data->set.httppost = NULL;
       data->state.mimepost = data->state.formp;
     }
     break;
