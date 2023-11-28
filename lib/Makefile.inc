@@ -139,6 +139,7 @@ LIB_CFILES =         \
   curl_trc.c         \
   cw-out.c           \
   dict.c             \
+  dllmain.c          \
   doh.c              \
   dynbuf.c           \
   dynhds.c           \
