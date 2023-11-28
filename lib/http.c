@@ -3260,7 +3260,11 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
 
   result = Curl_http_body(data, conn, httpreq, &te);
   if(result)
+  {
+    if (data->state.formp)
+      Curl_safefree(data->state.formp);
     return result;
+  }
 
   p_accept = Curl_checkheaders(data,
                                STRCONST("Accept"))?NULL:"Accept: */*\r\n";
