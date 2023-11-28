@@ -4,7 +4,7 @@ curl and libcurl 8.5.0
  Command line options:         258
  curl_easy_setopt() options:   303
  Public functions in libcurl:  93
- Contributors:                 3030
+ Contributors:                 3035
 
 This release includes the following changes:
 
@@ -50,12 +50,15 @@ This release includes the following bugfixes:
  o config-win32: set `HAVE_SNPRINTF` for mingw-w64 [123]
  o configure: better --disable-http [80]
  o configure: check for the fseeko declaration too [55]
+ o conncache: use the closure handle when disconnecting surplus connections [173]
  o content_encoding: make Curl_all_content_encodings allocless [101]
  o cookie: lowercase the domain names before PSL checks [160]
  o curl.h: delete Symbian OS references [162]
  o curl.h: on FreeBSD include sys/param.h instead of osreldate.h [21]
+ o curl.rc: switch out the copyright symbol for plain ASCII [167]
  o curl: improved IPFS and IPNS URL support [87]
  o curl_easy_duphandle.3: clarify how HSTS and alt-svc are duped [99]
+ o Curl_http_body: cleanup properly when Curl_getformdata errors [152]
  o curl_setup: disallow Windows IPv6 builds missing getaddrinfo [57]
  o curl_sspi: support more revocation error names in error messages [95]
  o CURLMOPT_MAX_CONCURRENT_STREAMS: make sure the set value is within range [165]
@@ -106,6 +109,7 @@ This release includes the following bugfixes:
  o lib: add and use Curl_strndup() [97]
  o lib: apache style infof and trace macros/functions [71]
  o lib: fix gcc warning in printf call [7]
+ o libcurl-errors.3: sync with current public headers [156]
  o libcurl-thread.3: simplify the TLS section [79]
  o Makefile.am: drop vc10, vc11 and vc12 projects from dist [103]
  o Makefile.mk: fix `-rtmp` option for non-Windows
@@ -124,6 +128,7 @@ This release includes the following bugfixes:
  o openssl: include SIG and KEM algorithms in verbose [52]
  o openssl: make CURLSSLOPT_NATIVE_CA import Windows intermediate CAs [58]
  o openssl: two multi pointer checks should probably rather be asserts [91]
+ o openssl: when a session-ID is reused, skip OCSP stapling [142]
  o page-footer: clarify exit code 25 [51]
  o projects: add VC14.20 project files [104]
  o pytest: use lower count in repeat tests [98]
@@ -150,10 +155,12 @@ This release includes the following bugfixes:
  o tool: fix --capath when proxy support is disabled [28]
  o tool: support bold headers in Windows [117]
  o tool_cb_hdr: add an additional parsing check [129]
+ o tool_cb_prg: make the carriage return fit for wide progress bars [159]
  o tool_cb_wrt: fix write output for very old Windows versions [24]
  o tool_getparam: limit --rate to be smaller than number of ms [3]
  o tool_operate: do not mix memory models [108]
  o tool_operate: fix links in ipfs errors [22]
+ o tool_parsecfg: make warning output propose double-quoting [164]
  o tool_urlglob: fix build for old gcc versions [25]
  o tool_urlglob: make multiply() bail out on negative values [11]
  o transfer: avoid calling the read callback again after EOF [130]
@@ -195,21 +202,23 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  12932 on github, Alex Bozarth, Alex Klyubin, Ammar Faizi, Andrew Kurushin,
-  Anubhav Rai, boilingoden, calvin2021y on github, Carlos Henrique Lima Melara,
-  Casey Bodley, Charlie C, Dan Fandrich, Daniel Jeliński, Daniel Stenberg,
-  David Suter, Emanuele Torre, Enno Boland, enWILLYado on github,
-  Faraz Fallahi, Gisle Vanem, Goro FUJI, Harry Mallon, Harry Sintonen,
-  icy17 on github, Jacob Hoffman-Andrews, Jan Alexander Steffens, Jeroen Ooms,
-  Jiri Hruska, Junho Choi, Kai Pastor, Kareem, Kartatz on Github,
-  kirbyn17 on hackerone, lkordos on github, Loïc Yhuel, LoRd_MuldeR,
-  lRoccoon on github, Maksymilian Arciemowicz, Manfred Schwarb, Marcel Raad,
-  Marcin Rataj, Mark Gaiser, Martin Schmatz, Michael Kaufmann, Nico Rieck,
-  Niracler Li, Ophir Lojkine, Paweł Wegner, Philip Heiduck, Ray Satiro, rilysh,
-  Romain Geissler, Sam James, Samuel Henrique, sd0 on hackerone, Smackd0wn,
-  Sohom Datta, Stefan Eissing, Steven Allen, Torben Dury, Turiiya,
-  Viktor Szakats, zhengqwe on github, 積丹尼 Dan Jacobson
-  (64 contributors)
+  12932 on github, Alex Bozarth, Alexey Larikov, Alex Klyubin, Ammar Faizi,
+  Andrew Kurushin, Anubhav Rai, boilingoden, calvin2021y on github,
+  Carlos Henrique Lima Melara, Casey Bodley, Charlie C, Dan Fandrich,
+  Daniel Jeliński, Daniel Stenberg, David Suter, Emanuele Torre, Enno Boland,
+  enWILLYado on github, Faraz Fallahi, Gisle Vanem, Goro FUJI, Harry Mallon,
+  Harry Sintonen, icy17 on github, Jacob Hoffman-Andrews,
+  Jan Alexander Steffens, Jeroen Ooms, Jiehong on github, Jiri Hruska,
+  Junho Choi, Kai Pastor, Kareem, Kartatz on Github, kirbyn17 on hackerone,
+  lkordos on github, Loïc Yhuel, LoRd_MuldeR, lRoccoon on github,
+  Maksymilian Arciemowicz, Manfred Schwarb, Marcel Raad, Marcin Rataj,
+  Mark Gaiser, Martin Schmatz, Michael Kaufmann, Nico Rieck, Niracler Li,
+  ohyeaah on github, Ophir Lojkine, Paweł Wegner, Philip Heiduck, Ray Satiro,
+  rilysh, Robert Southee, Romain Geissler, Sam James, Samuel Henrique,
+  sd0 on hackerone, Smackd0wn, Sohom Datta, Stefan Eissing, Steven Allen,
+  Tim Hill, Torben Dury, Turiiya, Viktor Szakats, yushicheng7788 on github,
+  zhengqwe on github, 積丹尼 Dan Jacobson
+  (70 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -354,6 +363,7 @@ References to bug reports and discussions on issues:
  [139] = https://curl.se/bug/?i=12191
  [140] = https://curl.se/bug/?i=12400
  [141] = https://curl.se/bug/?i=12347
+ [142] = https://curl.se/bug/?i=12399
  [143] = https://curl.se/bug/?i=12352
  [144] = https://curl.se/bug/?i=12351
  [145] = https://curl.se/bug/?i=12350
@@ -362,17 +372,23 @@ References to bug reports and discussions on issues:
  [148] = https://curl.se/bug/?i=12343
  [149] = https://curl.se/bug/?i=12338
  [150] = https://curl.se/bug/?i=12402
+ [152] = https://curl.se/bug/?i=12410
  [153] = https://curl.se/bug/?i=12299
  [155] = https://curl.se/bug/?i=12388
+ [156] = https://curl.se/bug/?i=12424
  [157] = https://curl.se/bug/?i=12385
+ [159] = https://curl.se/bug/?i=12407
  [160] = https://curl.se/bug/?i=12387
  [161] = https://curl.se/bug/?i=12384
  [162] = https://curl.se/bug/?i=12378
  [163] = https://curl.se/bug/?i=12376
+ [164] = https://curl.se/bug/?i=12409
  [165] = https://curl.se/bug/?i=12382
  [166] = https://curl.se/bug/?i=12375
+ [167] = https://curl.se/bug/?i=12403
  [168] = https://curl.se/bug/?i=12381
  [169] = https://curl.se/bug/?i=12374
  [170] = https://curl.se/bug/?i=12374
  [171] = https://curl.se/bug/?i=12374
  [172] = https://curl.se/bug/?i=12331
+ [173] = https://curl.se/bug/?i=12367
