@@ -251,6 +251,10 @@ See example below.
               CURLFORM_FILECONTENT, ".bashrc", CURLFORM_END);
  /* Set the form info */
  curl_easy_setopt(curl, CURLOPT_HTTPPOST, post);
+.SH RESTRICTION
+A formpost set in a handle with \fICURLOPT_HTTPPOST(3)\fP is not duplicated
+with \fIcurl_easy_duphandle(3)\fP. This is a known bug. Another reason to not
+use this deprecated API.
 .SH AVAILABILITY
 Deprecated in 7.56.0. Before this release, field names were allowed to
 contain zero-valued bytes. The pseudo-filename "-" to read stdin is
