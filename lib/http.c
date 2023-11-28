@@ -2439,8 +2439,10 @@ CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
       Curl_mime_cleanpart(data->state.formp);
       result = Curl_getformdata(data, data->state.formp, data->set.httppost,
                                 data->state.fread_func);
-      if(result)
+      if(result) {
+        Curl_safefree(data->state.formp);
         return result;
+      }
       data->state.mimepost = data->state.formp;
     }
     break;
@@ -3260,11 +3262,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
 
   result = Curl_http_body(data, conn, httpreq, &te);
   if(result)
-  {
-    if (data->state.formp)
-      Curl_safefree(data->state.formp);
     return result;
-  }
 
   p_accept = Curl_checkheaders(data,
                                STRCONST("Accept"))?NULL:"Accept: */*\r\n";
