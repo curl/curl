@@ -733,6 +733,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
        on from our side, we need to stop that immediately. */
     infof(data, "we are done reading and this is set to close, stop send");
     k->keepon &= ~KEEP_SEND; /* no writing anymore either */
+    k->keepon &= ~KEEP_SEND_PAUSE; /* no pausing anymore either */
   }
 
 out:
