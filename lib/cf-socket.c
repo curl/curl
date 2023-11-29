@@ -1146,6 +1146,7 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
 
   *done = FALSE; /* a very negative world view is best */
   if(ctx->sock == CURL_SOCKET_BAD) {
+    int error;
 
     result = cf_socket_open(cf, data);
     if(result)
@@ -1158,8 +1159,12 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
 
     /* Connect TCP socket */
     rc = do_connect(cf, data, cf->conn->bits.tcp_fastopen);
+    error = SOCKERRNO;
+    set_local_ip(cf, data);
+    CURL_TRC_CF(data, cf, "local address %s port %d...",
+                ctx->l_ip, ctx->l_port);
     if(-1 == rc) {
-      result = socket_connect_result(data, ctx->r_ip, SOCKERRNO);
+      result = socket_connect_result(data, ctx->r_ip, error);
       goto out;
     }
   }
@@ -1197,13 +1202,14 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
 out:
   if(result) {
     if(ctx->error) {
+      set_local_ip(cf, data);
       data->state.os_errno = ctx->error;
       SET_SOCKERRNO(ctx->error);
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
       {
         char buffer[STRERROR_LEN];
-        infof(data, "connect to %s port %u failed: %s",
-              ctx->r_ip, ctx->r_port,
+        infof(data, "connect to %s port %u from %s port %d failed: %s",
+              ctx->r_ip, ctx->r_port, ctx->l_ip, ctx->l_port,
               Curl_strerror(ctx->error, buffer, sizeof(buffer)));
       }
 #endif
