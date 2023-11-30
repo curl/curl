@@ -1064,6 +1064,10 @@ static void multi_getsock(struct Curl_easy *data,
   case MSTATE_PERFORMING:
     Curl_pollset_add_socks(data, ps, Curl_single_getsock);
     break;
+
+  case MSTATE_RATELIMITING:
+    /* nothing to wait for */
+    return;
   }
 
   /* Let connection filters add/remove as needed */
