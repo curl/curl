@@ -1158,13 +1158,13 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
 
     /* Connect TCP socket */
     rc = do_connect(cf, data, cf->conn->bits.tcp_fastopen);
-    set_local_ip(cf, data);
-    CURL_TRC_CF(data, cf, "local address %s port %d...",
-                ctx->l_ip, ctx->l_port);
     if(-1 == rc) {
       result = socket_connect_result(data, ctx->r_ip, SOCKERRNO);
       goto out;
     }
+    set_local_ip(cf, data);
+    CURL_TRC_CF(data, cf, "local address %s port %d...",
+                ctx->l_ip, ctx->l_port);
   }
 
 #ifdef mpeix
@@ -1200,13 +1200,14 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
 out:
   if(result) {
     if(ctx->error) {
+      set_local_ip(cf, data);
       data->state.os_errno = ctx->error;
       SET_SOCKERRNO(ctx->error);
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
       {
         char buffer[STRERROR_LEN];
-        infof(data, "connect to %s port %u failed: %s",
-              ctx->r_ip, ctx->r_port,
+        infof(data, "connect to %s port %u from %s port %d failed: %s",
+              ctx->r_ip, ctx->r_port, ctx->l_ip, ctx->l_port,
               Curl_strerror(ctx->error, buffer, sizeof(buffer)));
       }
 #endif
