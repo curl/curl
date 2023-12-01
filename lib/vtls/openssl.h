@@ -31,6 +31,7 @@
  * This header should only be needed to get included by vtls.c, openssl.c
  * and ngtcp2.c
  */
+#include <openssl/ossl_typ.h>
 #include <openssl/ssl.h>
 
 #include "urldata.h"
@@ -39,21 +40,12 @@
 #define SSL_get1_peer_certificate SSL_get_peer_certificate
 #endif
 
-/*
- * In an effort to avoid using 'X509 *' here, we instead use the struct
- * x509_st version of the type so that we can forward-declare it here without
- * having to include <openssl/x509v3.h>. Including that header causes name
- * conflicts when libcurl is built with both Schannel and OpenSSL support.
- */
-struct x509_st;
 CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
-                              struct ssl_peer *peer,
-                              struct x509_st *server_cert);
+                              struct ssl_peer *peer, X509 *server_cert);
 extern const struct Curl_ssl Curl_ssl_openssl;
 
-struct ssl_ctx_st;
 CURLcode Curl_ossl_set_client_cert(struct Curl_easy *data,
-                                   struct ssl_ctx_st *ctx, char *cert_file,
+                                   SSL_CTX *ctx, char *cert_file,
                                    const struct curl_blob *cert_blob,
                                    const char *cert_type, char *key_file,
                                    const struct curl_blob *key_blob,
