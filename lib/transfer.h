@@ -45,9 +45,7 @@ typedef enum {
 
 CURLcode Curl_follow(struct Curl_easy *data, char *newurl,
                      followtype type);
-CURLcode Curl_readwrite(struct connectdata *conn,
-                        struct Curl_easy *data, bool *done,
-                        bool *comeback);
+CURLcode Curl_readwrite(struct Curl_easy *data, bool *done, bool *comeback);
 int Curl_single_getsock(struct Curl_easy *data,
                         struct connectdata *conn, curl_socket_t *socks);
 CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
@@ -58,6 +56,23 @@ CURLcode Curl_get_upload_buffer(struct Curl_easy *data);
 
 CURLcode Curl_done_sending(struct Curl_easy *data,
                            struct SingleRequest *k);
+
+/**
+ * Write the transfer raw response bytes, as received from the connection.
+ * Will handle all passed bytes or return an error. By default, this will
+ * write the bytes as BODY to the client. Protocols may provide a
+ * "readwrite" callback in their handler to add specific treatment. E.g.
+ * HTTP parses response headers and passes them differently to the client.
+ * @param data     the transfer
+ * @param buf      the raw response bytes
+ * @param blen     the amount of bytes in `buf`
+ * @param is_eos   TRUE iff the connection indicates this to be the last
+ *                 bytes of the response
+ * @param done     on returnm, TRUE iff the response is complete
+ */
+CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
+                              char *buf, size_t blen,
+                              bool is_eos, bool *done);
 
 /* This sets up a forthcoming transfer */
 void

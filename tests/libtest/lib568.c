@@ -93,6 +93,7 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_READDATA, sdpf);
   test_setopt(curl, CURLOPT_UPLOAD, 1L);
   test_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t) file_info.st_size);
+  test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* Do the ANNOUNCE */
   res = curl_easy_perform(curl);

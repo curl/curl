@@ -129,7 +129,7 @@ const struct Curl_handler Curl_handler_http = {
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
-  ZERO_NULL,                            /* readwrite */
+  Curl_http_readwrite,                  /* readwrite */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_HTTP,                            /* defport */
@@ -154,7 +154,7 @@ const struct Curl_handler Curl_handler_ws = {
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   Curl_ws_disconnect,                   /* disconnect */
-  ZERO_NULL,                            /* readwrite */
+  Curl_http_readwrite,                  /* readwrite */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_HTTP,                            /* defport */
@@ -183,7 +183,7 @@ const struct Curl_handler Curl_handler_https = {
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
-  ZERO_NULL,                            /* readwrite */
+  Curl_http_readwrite,                  /* readwrite */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_HTTPS,                           /* defport */
@@ -208,7 +208,7 @@ const struct Curl_handler Curl_handler_wss = {
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   Curl_ws_disconnect,                   /* disconnect */
-  ZERO_NULL,                            /* readwrite */
+  Curl_http_readwrite,                  /* readwrite */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_HTTPS,                           /* defport */
@@ -3995,15 +3995,16 @@ CURLcode Curl_bump_headersize(struct Curl_easy *data,
 /*
  * Read any HTTP header lines from the server and pass them to the client app.
  */
-CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
-                                     struct connectdata *conn,
-                                     const char *buf, size_t blen,
-                                     size_t *pconsumed)
+static CURLcode http_rw_headers(struct Curl_easy *data,
+                                const char *buf, size_t blen,
+                                size_t *pconsumed)
 {
-  CURLcode result;
+  struct connectdata *conn = data->conn;
+  CURLcode result = CURLE_OK;
   struct SingleRequest *k = &data->req;
   char *headp;
   char *end_ptr;
+  bool leftover_body = FALSE;
 
   /* header line within buffer loop */
   *pconsumed = 0;
@@ -4032,12 +4033,12 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         if(st == STATUS_BAD) {
           /* this is not the beginning of a protocol first header line */
           k->header = FALSE;
-          k->badheader = TRUE;
           streamclose(conn, "bad HTTP: No end-of-message indicator");
           if(!data->set.http09_allowed) {
             failf(data, "Received HTTP/0.9 when not allowed");
             return CURLE_UNSUPPORTED_PROTOCOL;
           }
+          leftover_body = TRUE;
           goto out;
         }
       }
@@ -4071,15 +4072,8 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
           return CURLE_UNSUPPORTED_PROTOCOL;
         }
         k->header = FALSE;
-        if(blen)
-          /* since there's more, this is a partial bad header */
-          k->badheader = TRUE;
-        else {
-          /* this was all we read so it's all a bad header */
-          k->badheader = TRUE;
-          return CURLE_OK;
-        }
-        break;
+        leftover_body = TRUE;
+        goto out;
       }
     }
 
@@ -4359,16 +4353,6 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
          */
         if(data->req.no_body)
           k->download_done = TRUE;
-#ifndef CURL_DISABLE_RTSP
-        else if((conn->handler->protocol & CURLPROTO_RTSP) &&
-                (data->set.rtspreq == RTSPREQ_DESCRIBE) &&
-                (k->size <= -1))
-          /* Respect section 4.4 of rfc2326: If the Content-Length header is
-             absent, a length 0 must be assumed.  It will prevent libcurl from
-             hanging on DESCRIBE request that got refused for whatever
-             reason */
-          k->download_done = TRUE;
-#endif
 
         /* If max download size is *zero* (nothing) we already have
            nothing and can safely return ok now!  But for HTTP/2, we'd
@@ -4578,9 +4562,77 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
      there might be a non-header part left in the end of the read
      buffer. */
 out:
+  if(!k->header && !leftover_body) {
+    Curl_dyn_free(&data->state.headerb);
+  }
   return CURLE_OK;
 }
 
+/*
+ * HTTP protocol `readwrite` implementation. Will parse headers
+ * when not done yet and otherwise return without consuming data.
+ */
+CURLcode Curl_http_rw_headers(struct Curl_easy *data,
+                              const char *buf, size_t blen,
+                              size_t *pconsumed,
+                              bool *done)
+{
+  if(!data->req.header) {
+    *done = FALSE;
+    *pconsumed = 0;
+    return CURLE_OK;
+  }
+  else {
+    CURLcode result;
+
+    result = http_rw_headers(data, buf, blen, pconsumed);
+    if(!result && !data->req.header) {
+      /* we have successfully finished parsing the HEADERs */
+      result = Curl_http_firstwrite(data, data->conn, done);
+
+      if(!data->req.no_body && Curl_dyn_len(&data->state.headerb)) {
+        /* leftover from parsing somethhing that turned out not
+         * to be a header, only happens if we allow for
+         * HTTP/0.9 like responses */
+        result = Curl_client_write(data, CLIENTWRITE_BODY,
+                                   Curl_dyn_ptr(&data->state.headerb),
+                                   Curl_dyn_len(&data->state.headerb));
+      }
+      Curl_dyn_free(&data->state.headerb);
+    }
+    return result;
+  }
+}
+
+CURLcode Curl_http_readwrite(struct Curl_easy *data,
+                             const char *buf, size_t blen,
+                             bool is_eos,
+                             bool *done)
+{
+  CURLcode result;
+  size_t consumed;
+  int flags;
+
+  result = Curl_http_rw_headers(data, buf, blen, &consumed, done);
+  if(result || *done)
+    goto out;
+
+  DEBUGASSERT(consumed <= blen);
+  blen -= consumed;
+  buf += consumed;
+  /* either all was consumed in header parsing, or we have data left
+   * and are done with heders, e.g. it is BODY data */
+  DEBUGASSERT(!blen || !data->req.header);
+  if(!data->req.header && (blen || is_eos)) {
+    /* BODY data after header been parsed, write and consume */
+    flags = CLIENTWRITE_BODY;
+    if(is_eos)
+      flags |= CLIENTWRITE_EOS;
+    result = Curl_client_write(data, flags, (char *)buf, blen);
+  }
+out:
+  return result;
+}
 
 /* Decode HTTP status code string. */
 CURLcode Curl_http_decode_status(int *pstatus, const char *s, size_t len)

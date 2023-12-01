@@ -325,6 +325,9 @@ static CURLcode empty_header(struct Curl_easy *data)
       CURLE_WRITE_ERROR : CURLE_OK;
     if(result)
       failf(data, "hyperstream: couldn't pass blank header");
+    /* Hyper does chunked decoding itself. If it was added during
+     * response header processing, remove it again. */
+    Curl_cwriter_remove_by_name(data, "chunked");
   }
   return result;
 }
