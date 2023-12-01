@@ -1129,8 +1129,12 @@ struct transport_provider transport_providers[] = {
 #ifdef ENABLE_QUIC
   { TRNSPRT_QUIC, Curl_cf_quic_create },
 #endif
+#ifndef CURL_DISABLE_TFTP
   { TRNSPRT_UDP, Curl_cf_udp_create },
+#endif
+#ifdef USE_UNIX_SOCKETS
   { TRNSPRT_UNIX, Curl_cf_unix_create },
+#endif
 };
 
 static cf_ip_connect_create *get_cf_create(int transport)
