@@ -879,7 +879,7 @@ cb_acked_stream_data_offset(ngtcp2_conn *tconn, int64_t stream_id,
   (void)stream_user_data;
 
   rv = nghttp3_conn_add_ack_offset(ctx->h3conn, stream_id, datalen);
-  if(rv) {
+  if(rv && rv != NGHTTP3_ERR_STREAM_NOT_FOUND) {
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
 
@@ -907,7 +907,7 @@ static int cb_stream_close(ngtcp2_conn *tconn, uint32_t flags,
                                  app_error_code);
   CURL_TRC_CF(data, cf, "[%" PRId64 "] quic close(err=%"
               PRIu64 ") -> %d", stream3_id, app_error_code, rv);
-  if(rv) {
+  if(rv && rv != NGHTTP3_ERR_STREAM_NOT_FOUND) {
     ngtcp2_ccerr_set_application_error(
       &ctx->last_error, nghttp3_err_infer_quic_app_error_code(rv), NULL, 0);
     return NGTCP2_ERR_CALLBACK_FAILURE;
@@ -931,7 +931,7 @@ static int cb_stream_reset(ngtcp2_conn *tconn, int64_t stream_id,
 
   rv = nghttp3_conn_shutdown_stream_read(ctx->h3conn, stream_id);
   CURL_TRC_CF(data, cf, "[%" PRId64 "] reset -> %d", stream_id, rv);
-  if(rv) {
+  if(rv && rv != NGHTTP3_ERR_STREAM_NOT_FOUND) {
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
 
@@ -950,7 +950,7 @@ static int cb_stream_stop_sending(ngtcp2_conn *tconn, int64_t stream_id,
   (void)stream_user_data;
 
   rv = nghttp3_conn_shutdown_stream_read(ctx->h3conn, stream_id);
-  if(rv) {
+  if(rv && rv != NGHTTP3_ERR_STREAM_NOT_FOUND) {
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
 
@@ -983,7 +983,7 @@ static int cb_extend_max_stream_data(ngtcp2_conn *tconn, int64_t stream_id,
   (void)stream_user_data;
 
   rv = nghttp3_conn_unblock_stream(ctx->h3conn, stream_id);
-  if(rv) {
+  if(rv && rv != NGHTTP3_ERR_STREAM_NOT_FOUND) {
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
   s_data = get_stream_easy(cf, data, stream_id);
@@ -1624,7 +1624,7 @@ static int cb_h3_acked_req_body(nghttp3_conn *conn, int64_t stream_id,
   /* Everything ACKed, we resume upload processing */
   if(!stream->sendbuf_len_in_flight) {
     int rv = nghttp3_conn_resume_stream(conn, stream_id);
-    if(rv) {
+    if(rv && rv != NGHTTP3_ERR_STREAM_NOT_FOUND) {
       return NGTCP2_ERR_CALLBACK_FAILURE;
     }
   }
