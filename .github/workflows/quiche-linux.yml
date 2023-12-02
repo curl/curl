@@ -46,7 +46,7 @@ permissions: {}
 
 env:
   MAKEFLAGS: -j 3
-  openssl-version: 3.0.10+quic
+  openssl-version: 3.1.4+quic
   nghttp3-version: v1.0.0
   ngtcp2-version: v1.0.1
   nghttp2-version: v1.58.0
