@@ -4,7 +4,7 @@ curl and libcurl 8.5.0
  Command line options:         258
  curl_easy_setopt() options:   303
  Public functions in libcurl:  93
- Contributors:                 3035
+ Contributors:                 3039
 
 This release includes the following changes:
 
@@ -28,6 +28,7 @@ This release includes the following bugfixes:
  o build: delete `HAVE_STDINT_H` and `HAVE_INTTYPES_H` [107]
  o build: delete support bits for obsolete Windows compilers [106]
  o build: fix 'threadsafe' feature detection for older gcc [19]
+ o build: fix builds that disable protocols but not digest auth [174]
  o build: fix compiler warning with auths disabled [85]
  o build: fix libssh2 + `CURL_DISABLE_DIGEST_AUTH` + `CURL_DISABLE_AWS` [120]
  o build: picky warning updates [125]
@@ -61,6 +62,7 @@ This release includes the following bugfixes:
  o Curl_http_body: cleanup properly when Curl_getformdata errors [152]
  o curl_setup: disallow Windows IPv6 builds missing getaddrinfo [57]
  o curl_sspi: support more revocation error names in error messages [95]
+ o CURLINFO_PRETRANSFER_TIME_T.3: fix time explanation [181]
  o CURLMOPT_MAX_CONCURRENT_STREAMS: make sure the set value is within range [165]
  o CURLOPT_CAINFO_BLOB.3: explain what CURL_BLOB_COPY does [113]
  o CURLOPT_WRITEFUNCTION.3: clarify libcurl returns for CURL_WRITEFUNC_ERROR [45]
@@ -104,6 +106,7 @@ This release includes the following bugfixes:
  o http: fix empty-body warning [76]
  o http_aws_sigv4: canonicalise valueless query params [88]
  o hyper: temporarily remove HTTP/2 support [139]
+ o INSTALL: update list of ports and CPU archs
  o IPFS: fix IPFS_PATH and file parsing [119]
  o keylog: disable if unused [145]
  o lib: add and use Curl_strndup() [97]
@@ -116,12 +119,13 @@ This release includes the following bugfixes:
  o mime: store "form escape" as a single bit [170]
  o misc: fix -Walloc-size warnings [118]
  o msh3: error when built with CURL_DISABLE_SOCKETPAIR set [61]
+ o multi: during ratelimit multi_getsock should return no sockets [182]
  o multi: use pipe instead of socketpair to *wakeup() [18]
+ o ngtcp2: fix races in stream handling [178]
  o ntlm_wb: use pipe instead of socketpair when possible [44]
  o openldap: move the alloc of ldapconninfo to *connect() [29]
  o openldap: set the callback argument in oldap_do [30]
  o openssl: avoid BN_num_bits() NULL pointer derefs [9]
- o openssl: enable `infof_certstack` for 1.1 and LibreSSL 3.6 [157]
  o openssl: fix building with v3 `no-deprecated` + add CI test [161]
  o openssl: fix infof() to avoid compiler warning for %s with null [70]
  o openssl: identify the "quictls" backend correctly [82]
@@ -145,6 +149,7 @@ This release includes the following bugfixes:
  o setopt: remove superfluous use of ternary expressions [169]
  o socks: better buffer size checks for socks4a user and hostname [20]
  o socks: make SOCKS5 use the CURLOPT_IPRESOLVE choice [38]
+ o symbols-in-versions: the CLOSEPOLICY options are deprecated
  o test1683: remove commented-out check alternatives
  o test3103: add missing quotes around a test tag attribute
  o test613: stop showing an error on missing output file
@@ -163,6 +168,8 @@ This release includes the following bugfixes:
  o tool_parsecfg: make warning output propose double-quoting [164]
  o tool_urlglob: fix build for old gcc versions [25]
  o tool_urlglob: make multiply() bail out on negative values [11]
+ o tool_writeout_json: fix JSON encoding of non-ascii bytes [179]
+ o transfer: abort pause send when connection is marked for closing [183]
  o transfer: avoid calling the read callback again after EOF [130]
  o transfer: only reset the FTP wildcard engine in CLEAR state [42]
  o url: don't touch the multi handle when closing internal handles [40]
@@ -181,6 +188,7 @@ This release includes the following bugfixes:
  o urldata: move the 'internal' boolean to the state struct [39]
  o vssh: remove the #ifdef for Curl_ssh_init, use empty macro
  o vtls: cleanup SSL config management [78]
+ o vtls: consistently use typedef names for OpenSSL structs [176]
  o vtls: late clone of connection ssl config [60]
  o vtls: use ALPN "http/1.1" for HTTP/1.x, including HTTP/1.0 [102]
  o VULN-DISCLOSURE-POLICY: escape sequences are not a security flaw [110]
@@ -205,20 +213,21 @@ advice from friends like these:
   12932 on github, Alex Bozarth, Alexey Larikov, Alex Klyubin, Ammar Faizi,
   Andrew Kurushin, Anubhav Rai, boilingoden, calvin2021y on github,
   Carlos Henrique Lima Melara, Casey Bodley, Charlie C, Dan Fandrich,
-  Daniel Jeliński, Daniel Stenberg, David Suter, Emanuele Torre, Enno Boland,
-  enWILLYado on github, Faraz Fallahi, Gisle Vanem, Goro FUJI, Harry Mallon,
-  Harry Sintonen, icy17 on github, Jacob Hoffman-Andrews,
+  Daniel Jeliński, Daniel Stenberg, David Benjamin, David Suter, Dmitry Karpov,
+  eeverettrbx on github, Emanuele Torre, Enno Boland, enWILLYado on github,
+  Faraz Fallahi, Gisle Vanem, Goro FUJI, Graham Campbell, Harry Mallon,
+  Harry Sintonen, iconoclasthero, icy17 on github, Jacob Hoffman-Andrews,
   Jan Alexander Steffens, Jeroen Ooms, Jiehong on github, Jiri Hruska,
   Junho Choi, Kai Pastor, Kareem, Kartatz on Github, kirbyn17 on hackerone,
-  lkordos on github, Loïc Yhuel, LoRd_MuldeR, lRoccoon on github,
+  Lau, lkordos on github, Loïc Yhuel, LoRd_MuldeR, lRoccoon on github,
   Maksymilian Arciemowicz, Manfred Schwarb, Marcel Raad, Marcin Rataj,
-  Mark Gaiser, Martin Schmatz, Michael Kaufmann, Nico Rieck, Niracler Li,
-  ohyeaah on github, Ophir Lojkine, Paweł Wegner, Philip Heiduck, Ray Satiro,
-  rilysh, Robert Southee, Romain Geissler, Sam James, Samuel Henrique,
-  sd0 on hackerone, Smackd0wn, Sohom Datta, Stefan Eissing, Steven Allen,
-  Tim Hill, Torben Dury, Turiiya, Viktor Szakats, yushicheng7788 on github,
-  zhengqwe on github, 積丹尼 Dan Jacobson
-  (70 contributors)
+  Mark Gaiser, Martin Schmatz, Michael Kaufmann, Michał Antoniak, Nico Rieck,
+  Niracler Li, ohyeaah on github, Ophir Lojkine, Paweł Wegner, Philip Heiduck,
+  Ray Satiro, rilysh, Robert Southee, Romain Geissler, Sam James,
+  Samuel Henrique, sd0 on hackerone, Smackd0wn, Sohom Datta, Stefan Eissing,
+  Steven Allen, Tim Hill, Torben Dury, Turiiya, Viktor Szakats,
+  yushicheng7788 on github, z2_, zhengqwe on github, 積丹尼 Dan Jacobson
+  (78 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -376,7 +385,6 @@ References to bug reports and discussions on issues:
  [153] = https://curl.se/bug/?i=12299
  [155] = https://curl.se/bug/?i=12388
  [156] = https://curl.se/bug/?i=12424
- [157] = https://curl.se/bug/?i=12385
  [159] = https://curl.se/bug/?i=12407
  [160] = https://curl.se/bug/?i=12387
  [161] = https://curl.se/bug/?i=12384
@@ -392,3 +400,10 @@ References to bug reports and discussions on issues:
  [171] = https://curl.se/bug/?i=12374
  [172] = https://curl.se/bug/?i=12331
  [173] = https://curl.se/bug/?i=12367
+ [174] = https://curl.se/bug/?i=12440
+ [176] = https://curl.se/bug/?i=12439
+ [178] = https://curl.se/bug/?i=12435
+ [179] = https://curl.se/bug/?i=12434
+ [181] = https://curl.se/bug/?i=12431
+ [182] = https://curl.se/bug/?i=12430
+ [183] = https://curl.se/bug/?i=12428
