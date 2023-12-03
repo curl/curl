@@ -24,21 +24,36 @@
 
 #include "curl_setup.h"
 
-#if (defined(_WIN32) || defined(__CYGWIN__)) && !defined(CURL_STATICLIB)
-
-/* WARNING: Including Cygwin windows.h may define _WIN32 in old versions or
-   may have unexpected behavior in unity builds (where all source files are
-   bundled into a single unit). For that reason, this source file must be
-   compiled separately for Cygwin unity builds. */
-
-#ifdef __CYGWIN__
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#endif
-
 #ifdef USE_OPENSSL
 #include <openssl/crypto.h>
 #endif
+
+/* The fourth-to-last include */
+#ifdef __CYGWIN__
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#ifdef _WIN32
+#undef _WIN32
+#endif
+#endif
+
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
+#include "curl_memory.h"
+#include "memdebug.h"
+
+/*
+ * DllMain() must only be defined for Windows and Cygwin DLL builds. For most
+ * build systems that means CURL_STATICLIB is not defined. However, CMake
+ * defines CURL_STATICLIB always for Windows builds (discussion in #12408).
+ * CMake builds dllmain.c only for Windows and Cygwin DLL builds and defines
+ * CURL_CMAKE_DLLMAIN.
+ */
+
+#if (defined(_WIN32) || defined(__CYGWIN__)) && \
+    (!defined(CURL_STATICLIB) || defined(CURL_CMAKE_DLLMAIN))
+
+BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved);
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
@@ -53,7 +68,12 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
   case DLL_THREAD_ATTACH:
     break;
   case DLL_THREAD_DETACH:
-#if defined(USE_OPENSSL) && (OPENSSL_VERSION_NUMBER >= 0x10100000L)
+    MessageBoxA(NULL, "test", "", 0);
+#if defined(USE_OPENSSL) && \
+    !defined(OPENSSL_IS_AWSLC) && \
+    !defined(OPENSSL_IS_BORINGSSL) && \
+    !defined(LIBRESSL_VERSION_NUMBER) && \
+    (OPENSSL_VERSION_NUMBER >= 0x10100000L)
     /* Call OPENSSL_thread_stop to prevent a memory leak in case OpenSSL is
        linked statically.
        https://github.com/curl/curl/issues/12327#issuecomment-1826405944 */
@@ -64,4 +84,4 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
   return TRUE;
 }
 
-#endif /* (_WIN32 || __CYGWIN__) && !CURL_STATICLIB */
+#endif /* DLL build */
