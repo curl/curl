@@ -403,6 +403,13 @@ sub scanfile {
             checksrc($cmd, $line, $file, $l)
         }
 
+        if($l =~ /^#line (\d+) \"([^\"]*)\"/) {
+            # a #line instruction
+            $file = $2;
+            $line = $1;
+            next;
+        }
+
         # check for a copyright statement and save the years
         if($l =~ /\* +copyright .* (\d\d\d\d|)/i) {
             my $count = 0;
