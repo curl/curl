@@ -39,21 +39,24 @@ available.
 HTTP
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  CURLcode res;
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  /* typically CONNECT is used to do HTTPS over HTTP proxies */
-  curl_easy_setopt(curl, CURLOPT_PROXY, "http://127.0.0.1");
-  res = curl_easy_perform(curl);
-  if(res == CURLE_OK) {
-    long code;
-    res = curl_easy_getinfo(curl, CURLINFO_HTTP_CONNECTCODE, &code);
-    if(!res && code)
-      printf("The CONNECT response code: %03ld\\n", code);
+    /* typically CONNECT is used to do HTTPS over HTTP proxies */
+    curl_easy_setopt(curl, CURLOPT_PROXY, "http://127.0.0.1");
+    res = curl_easy_perform(curl);
+    if(res == CURLE_OK) {
+      long code;
+      res = curl_easy_getinfo(curl, CURLINFO_HTTP_CONNECTCODE, &code);
+      if(!res && code)
+        printf("The CONNECT response code: %03ld\\n", code);
+    }
+    curl_easy_cleanup(curl);
   }
-  curl_easy_cleanup(curl);
 }
 .fi
 .SH AVAILABILITY

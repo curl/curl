@@ -63,18 +63,29 @@ Furthermore if you wait on the socket and it tells you there is data to read,
 read was for internal SSL processing, and no other data is available.
 .SH EXAMPLE
 .nf
- curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
- /* Do not do the transfer - only connect to host */
- curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);
- res = curl_easy_perform(curl);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+    /* Do not do the transfer - only connect to host */
+    curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);
+    res = curl_easy_perform(curl);
 
- if(res == CURLE_OK) {
-   /* Extract the socket from the curl handle - we need it for waiting. */
-   res = curl_easy_getinfo(curl, CURLINFO_ACTIVESOCKET, &sockfd);
+    if(res == CURLE_OK) {
+      char buf[256];
+      size_t nread;
+      long sockfd;
 
-   /* read data */
-   res = curl_easy_recv(curl, buf, sizeof(buf), &nread);
- }
+      /* Extract the socket from the curl handle - we need it for waiting. */
+      res = curl_easy_getinfo(curl, CURLINFO_ACTIVESOCKET, &sockfd);
+
+      /* read data */
+      res = curl_easy_recv(curl, buf, sizeof(buf), &nread);
+    }
+  }
+}
 .fi
 .SH AVAILABILITY
 Added in 7.18.2.

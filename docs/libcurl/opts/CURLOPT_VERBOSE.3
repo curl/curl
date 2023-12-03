@@ -48,15 +48,18 @@ To also get all the protocol data sent and received, consider using the
 All
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  /* ask libcurl to show us the verbose output */
-  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    /* ask libcurl to show us the verbose output */
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  /* Perform the request */
-  curl_easy_perform(curl);
+    /* Perform the request */
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

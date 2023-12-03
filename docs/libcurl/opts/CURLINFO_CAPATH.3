@@ -47,15 +47,17 @@ The \fBpath\fP pointer is set to NULL if there is no default path.
 All
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  CURLcode res;
-  char *capath = NULL;
-  curl_easy_getinfo(curl, CURLINFO_CAPATH, &capath);
-  if(capath)
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    char *capath = NULL;
+    curl_easy_getinfo(curl, CURLINFO_CAPATH, &capath);
+    if(capath) {
       printf("default ca path: %s\\n", capath);
+    }
+    curl_easy_cleanup(curl);
   }
-  curl_easy_cleanup(curl);
 }
 .fi
 .SH AVAILABILITY

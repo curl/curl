@@ -40,17 +40,22 @@ option. This is only used for HTTPS proxies.
 All
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  CURLcode res;
-  long verifyresult;
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-  curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy:443");
-  res = curl_easy_perform(curl);
-  curl_easy_getinfo(curl, CURLINFO_PROXY_SSL_VERIFYRESULT, &verifyresult);
-  printf("The peer verification said %s\\n", verifyresult?
-         "fine":"BAAAD");
-  curl_easy_cleanup(curl);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    long verifyresult;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+    curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy:443");
+    res = curl_easy_perform(curl);
+    if(res)
+      printf("error: %s\\n", curl_easy_strerror(res));
+    curl_easy_getinfo(curl, CURLINFO_PROXY_SSL_VERIFYRESULT, &verifyresult);
+    printf("The peer verification said %s\\n", verifyresult?
+           "fine" : "bad");
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

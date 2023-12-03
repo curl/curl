@@ -86,11 +86,14 @@ Added in 7.88.0
 All
 .SH EXAMPLE
 .nf
+int main(void)
+{
   CURLSHcode sh;
-  share = curl_share_init();
+  CURLSH *share = curl_share_init();
   sh = curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
   if(sh)
     printf("Error: %s\\n", curl_share_strerror(sh));
+}
 .fi
 .SH AVAILABILITY
 Added in 7.10

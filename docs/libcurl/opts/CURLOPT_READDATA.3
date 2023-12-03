@@ -48,16 +48,23 @@ By default, this is a FILE * to stdin.
 This is used for all protocols when sending data.
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-struct MyData this;
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+struct MyData {
+  void *custom;
+};
 
-  /* pass pointer that gets passed in to the
-     CURLOPT_READFUNCTION callback */
-  curl_easy_setopt(curl, CURLOPT_READDATA, &this);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  struct MyData this;
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  curl_easy_perform(curl);
+    /* pass pointer that gets passed in to the
+       CURLOPT_READFUNCTION callback */
+    curl_easy_setopt(curl, CURLOPT_READDATA, &this);
+
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

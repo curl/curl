@@ -60,17 +60,21 @@ NULL
 HTTP
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
 
-  /* export cookies to this file when closing the handle */
-  curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "/tmp/cookies.txt");
+    /* export cookies to this file when closing the handle */
+    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "/tmp/cookies.txt");
 
-  ret = curl_easy_perform(curl);
+    res = curl_easy_perform(curl);
 
-  /* close the handle, write the cookies! */
-  curl_easy_cleanup(curl);
+    /* close the handle, write the cookies! */
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

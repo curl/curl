@@ -51,18 +51,26 @@ NULL
 All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  struct curl_blob stblob;
-  stblob.data = certificateData;
-  stblob.len = filesize;
-  stblob.flags = CURL_BLOB_COPY;
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-  curl_easy_setopt(curl, CURLOPT_SSLCERT_BLOB, &stblob);
-  curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "P12");
-  curl_easy_setopt(curl, CURLOPT_KEYPASSWD, "s3cret");
-  ret = curl_easy_perform(curl);
-  curl_easy_cleanup(curl);
+
+extern char *certificateData; /* point to data */
+extern size_t filesize; /* size of data */
+
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    struct curl_blob stblob;
+    stblob.data = certificateData;
+    stblob.len = filesize;
+    stblob.flags = CURL_BLOB_COPY;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+    curl_easy_setopt(curl, CURLOPT_SSLCERT_BLOB, &stblob);
+    curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "P12");
+    curl_easy_setopt(curl, CURLOPT_KEYPASSWD, "s3cret");
+    res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

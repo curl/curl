@@ -50,21 +50,26 @@ If you need to resume a transfer beyond the 2GB limit, use
 HTTP, FTP, SFTP, FILE
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    long size_of_file;
 
-  /* resume upload at byte index 200 */
-  curl_easy_setopt(curl, CURLOPT_RESUME_FROM, 200L);
+    curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com");
 
-  /* ask for upload */
-  curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+    /* resume upload at byte index 200 */
+    curl_easy_setopt(curl, CURLOPT_RESUME_FROM, 200L);
 
-  /* set total data amount to expect */
-  curl_easy_setopt(curl, CURLOPT_INFILESIZE, size_of_file);
+    /* ask for upload */
+    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
-  /* Perform the request */
-  curl_easy_perform(curl);
+    /* set total data amount to expect */
+    curl_easy_setopt(curl, CURLOPT_INFILESIZE, size_of_file);
+
+    /* Perform the request */
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

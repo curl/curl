@@ -42,29 +42,32 @@ The list should be freed again (after usage) with
 \fIcurl_slist_free_all(3)\fP.
 .SH EXAMPLE
 .nf
-CURL *handle;
-struct curl_slist *slist=NULL;
-struct curl_slist *temp=NULL;
+int main(void)
+{
+  CURL *handle;
+  struct curl_slist *slist = NULL;
+  struct curl_slist *temp = NULL;
 
-slist = curl_slist_append(slist, "pragma:");
+  slist = curl_slist_append(slist, "pragma:");
 
-if (slist == NULL)
-  return -1;
+  if(!slist)
+    return -1;
 
-temp = curl_slist_append(slist, "Accept:")
+  temp = curl_slist_append(slist, "Accept:");
 
-if (temp == NULL) {
-  curl_slist_free_all(slist);
-  return -1;
+  if(!temp) {
+    curl_slist_free_all(slist);
+    return -1;
+  }
+
+  slist = temp;
+
+  curl_easy_setopt(handle, CURLOPT_HTTPHEADER, slist);
+
+  curl_easy_perform(handle);
+
+  curl_slist_free_all(slist); /* free the list again */
 }
-
-slist = temp;
-
-curl_easy_setopt(handle, CURLOPT_HTTPHEADER, slist);
-
-curl_easy_perform(handle);
-
-curl_slist_free_all(slist); /* free the list again */
 .fi
 .SH AVAILABILITY
 Always

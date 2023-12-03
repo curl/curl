@@ -51,14 +51,17 @@ Default \fImaxlifetime\fP is 0 seconds (i.e., disabled).
 All
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  /* only allow each connection to be reused for 30 seconds */
-  curl_easy_setopt(curl, CURLOPT_MAXLIFETIME_CONN, 30L);
+    /* only allow each connection to be reused for 30 seconds */
+    curl_easy_setopt(curl, CURLOPT_MAXLIFETIME_CONN, 30L);
 
-  curl_easy_perform(curl);
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

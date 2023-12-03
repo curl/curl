@@ -42,16 +42,21 @@ option).
 All using TLS
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  CURLcode res;
-  long verifyresult;
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-  res = curl_easy_perform(curl);
-  curl_easy_getinfo(curl, CURLINFO_SSL_VERIFYRESULT, &verifyresult);
-  printf("The peer verification said %s\\n", verifyresult?
-         "BAAAD":"fine");
-  curl_easy_cleanup(curl);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    long verifyresult;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+    res = curl_easy_perform(curl);
+    if(res)
+      printf("error: %s\\n", curl_easy_strerror(res));
+    curl_easy_getinfo(curl, CURLINFO_SSL_VERIFYRESULT, &verifyresult);
+    printf("The peer verification said %s\\n", verifyresult?
+           "BAAAD":"fine");
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

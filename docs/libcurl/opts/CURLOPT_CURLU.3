@@ -49,19 +49,22 @@ The default value of this parameter is NULL.
 All
 .SH EXAMPLE
 .nf
-CURL *handle = curl_easy_init();
-CURLU *urlp = curl_url();
-int res = 0;
-if(curl) {
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  CURLU *urlp = curl_url();
+  if(curl) {
+    CURLcode res;
+    CURLUcode ret;
+    ret = curl_url_set(urlp, CURLUPART_URL, "https://example.com", 0);
 
-  res = curl_url_set(urlp, CURLUPART_URL, "https://example.com", 0);
+    curl_easy_setopt(curl, CURLOPT_CURLU, urlp);
 
-  curl_easy_setopt(handle, CURLOPT_CURLU, urlp);
+    res = curl_easy_perform(curl);
 
-  ret = curl_easy_perform(handle);
-
-  curl_url_cleanup(urlp);
-  curl_easy_cleanup(handle);
+    curl_url_cleanup(urlp);
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

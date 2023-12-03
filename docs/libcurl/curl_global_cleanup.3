@@ -58,11 +58,14 @@ recommend you do not run libcurl from any module that may be unloaded
 dynamically. This behavior may be addressed in the future.
 .SH EXAMPLE
 .nf
- curl_global_init(CURL_GLOBAL_DEFAULT);
+int main(void)
+{
+  curl_global_init(CURL_GLOBAL_DEFAULT);
 
- /* use libcurl, then before exiting... */
+  /* use libcurl, then before exiting... */
 
- curl_global_cleanup();
+  curl_global_cleanup();
+}
 .fi
 .SH AVAILABILITY
 Added in 7.8

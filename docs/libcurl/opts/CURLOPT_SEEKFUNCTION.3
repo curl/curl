@@ -70,17 +70,26 @@ By default, this is NULL and unused.
 HTTP, FTP, SFTP
 .SH EXAMPLE
 .nf
+#include <unistd.h> /* for lseek */
+
+struct data {
+  int our_fd;
+};
 static int seek_cb(void *clientp, curl_off_t offset, int origin)
 {
   struct data *d = (struct data *)clientp;
-  lseek(our_fd, offset, origin);
+  lseek(d->our_fd, offset, origin);
   return CURL_SEEKFUNC_OK;
 }
 
+int main(void)
 {
   struct data seek_data;
-  curl_easy_setopt(CURL *handle, CURLOPT_SEEKFUNCTION, seek_cb);
-  curl_easy_setopt(CURL *handle, CURLOPT_SEEKDATA, &seek_data);
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_SEEKFUNCTION, seek_cb);
+    curl_easy_setopt(curl, CURLOPT_SEEKDATA, &seek_data);
+  }
 }
 .fi
 .SH AVAILABILITY

@@ -47,21 +47,25 @@ The modern way to get this header from a response is to instead use the
 HTTP(S)
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  res = curl_easy_perform(curl);
+    res = curl_easy_perform(curl);
 
-  if(!res) {
-    /* extract the content-type */
-    char *ct = NULL;
-    res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
-    if(!res && ct) {
-      printf("Content-Type: %s\\n", ct);
+    if(!res) {
+      /* extract the content-type */
+      char *ct = NULL;
+      res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
+      if(!res && ct) {
+        printf("Content-Type: %s\\n", ct);
+      }
     }
+    curl_easy_cleanup(curl);
   }
-  curl_easy_cleanup(curl);
 }
 .fi
 .SH AVAILABILITY

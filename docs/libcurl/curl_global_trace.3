@@ -91,11 +91,14 @@ trace.
 
 .SH EXAMPLE
 .nf
- /* log details of HTTP/2 and SSL handling */
- curl_global_trace("http/2,ssl");
+int main(void)
+{
+  /* log details of HTTP/2 and SSL handling */
+  curl_global_trace("http/2,ssl");
 
- /* log all details, except SSL handling */
- curl_global_trace("all,-ssl");
+  /* log all details, except SSL handling */
+  curl_global_trace("all,-ssl");
+}
 .fi
 
 Below is a trace sample where "http/2" was configured. The trace output

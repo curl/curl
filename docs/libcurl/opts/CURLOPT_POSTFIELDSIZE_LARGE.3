@@ -43,19 +43,24 @@ this size is set to -1, libcurl uses strlen() to get the size or relies on the
 HTTP(S)
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  const char *data = large_chunk;
-  curl_off_t length_of_data; /* set somehow */
+extern char *large_chunk; /* pointer to somewhere */
 
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    const char *data = large_chunk;
+    curl_off_t length_of_data; /* set somehow */
 
-  /* size of the POST data */
-  curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, length_of_data);
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+    /* size of the POST data */
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, length_of_data);
 
-  curl_easy_perform(curl);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

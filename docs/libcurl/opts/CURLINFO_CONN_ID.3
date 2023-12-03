@@ -44,18 +44,23 @@ same multi handle.
 All
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
 
-  /* Perform the request */
-  res = curl_easy_perform(curl);
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  if(!res) {
-    curl_off_t conn_id;
-    res = curl_easy_getinfo(curl, CURLINFO_CONN_ID, &conn_id);
+    /* Perform the request */
+    res = curl_easy_perform(curl);
+
     if(!res) {
-      printf("Connection used: %" CURL_FORMAT_CURL_OFF_T "\\n", conn_id);
+      curl_off_t conn_id;
+      res = curl_easy_getinfo(curl, CURLINFO_CONN_ID, &conn_id);
+      if(!res) {
+        printf("Connection used: %" CURL_FORMAT_CURL_OFF_T "\\n", conn_id);
+      }
     }
   }
 }

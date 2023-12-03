@@ -54,19 +54,27 @@ currently has no stored timeout value. You must not wait too long (more than a
 few seconds perhaps) before you call \fIcurl_multi_perform(3)\fP again.
 .SH EXAMPLE
 .nf
-struct timeval timeout;
-long timeo;
+int main(void)
+{
+  struct timeval timeout;
+  long timeo;
+  fd_set fdread;
+  fd_set fdwrite;
+  fd_set fdexcep;
+  int maxfd;
+  CURLM *multi = curl_multi_init();
 
-curl_multi_timeout(multi_handle, &timeo);
-if(timeo < 0)
-  /* no set timeout, use a default */
-  timeo = 980;
+  curl_multi_timeout(multi, &timeo);
+  if(timeo < 0)
+    /* no set timeout, use a default */
+    timeo = 980;
 
-timeout.tv_sec = timeo / 1000;
-timeout.tv_usec = (timeo % 1000) * 1000;
+  timeout.tv_sec = timeo / 1000;
+  timeout.tv_usec = (timeo % 1000) * 1000;
 
-/* wait for activities no longer than the set timeout */
-select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+  /* wait for activities no longer than the set timeout */
+  select(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout);
+}
 .fi
 .SH TYPICAL USAGE
 Call \fIcurl_multi_timeout(3)\fP, then wait for action on the sockets. Figure

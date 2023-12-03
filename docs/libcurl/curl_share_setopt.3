@@ -45,11 +45,14 @@ See \fICURLSHOPT_UNSHARE(3)\fP.
 See \fICURLSHOPT_USERDATA(3)\fP.
 .SH EXAMPLE
 .nf
+int main(void)
+{
   CURLSHcode sh;
-  share = curl_share_init();
+  CURLSH *share = curl_share_init();
   sh = curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
   if(sh)
     printf("Error: %s\\n", curl_share_strerror(sh));
+}
 .fi
 .SH AVAILABILITY
 Added in 7.10

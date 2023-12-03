@@ -79,20 +79,23 @@ The error code is zero (\fBCURLPX_OK\fP) if no response code was available.
 All that can be done over SOCKS
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  CURLcode res;
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  curl_easy_setopt(curl, CURLOPT_PROXY, "socks5://127.0.0.1");
-  res = curl_easy_perform(curl);
-  if(res == CURLE_PROXY) {
-    long proxycode;
-    res = curl_easy_getinfo(curl, CURLINFO_PROXY_ERROR, &proxycode);
-    if(!res && proxycode)
-      printf("The detailed proxy error: %ld\\n", proxycode);
+    curl_easy_setopt(curl, CURLOPT_PROXY, "socks5://127.0.0.1");
+    res = curl_easy_perform(curl);
+    if(res == CURLE_PROXY) {
+      long proxycode;
+      res = curl_easy_getinfo(curl, CURLINFO_PROXY_ERROR, &proxycode);
+      if(!res && proxycode)
+        printf("The detailed proxy error: %ld\\n", proxycode);
+    }
+    curl_easy_cleanup(curl);
   }
-  curl_easy_cleanup(curl);
 }
 .fi
 .SH AVAILABILITY

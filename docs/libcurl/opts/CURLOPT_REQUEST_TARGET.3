@@ -43,16 +43,19 @@ NULL
 HTTP
 .SH EXAMPLE
 .nf
-curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/*");
-  curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "OPTIONS");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/*");
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "OPTIONS");
 
-  /* issue an OPTIONS * request (no leading slash) */
-  curl_easy_setopt(curl, CURLOPT_REQUEST_TARGET, "*");
+    /* issue an OPTIONS * request (no leading slash) */
+    curl_easy_setopt(curl, CURLOPT_REQUEST_TARGET, "*");
 
-  /* Perform the request */
-  curl_easy_perform(curl);
+    /* Perform the request */
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

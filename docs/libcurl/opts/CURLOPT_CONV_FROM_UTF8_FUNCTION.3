@@ -76,12 +76,10 @@ TLS-based protocols.
 .nf
 static CURLcode my_conv_from_utf8_to_ebcdic(char *buffer, size_t length)
 {
-  char *tempptrin, *tempptrout;
-  size_t bytes = length;
-  int rc;
-  tempptrin = tempptrout = buffer;
-  rc = platform_u2e(&tempptrin, &bytes, &tempptrout, &bytes);
-  if(rc == PLATFORM_CONV_OK) {
+  int rc = 0;
+  /* in-place convert 'buffer' from UTF-8 to EBCDIC */
+  if(rc == 0) {
+    /* success */
     return CURLE_OK;
   }
   else {
@@ -89,8 +87,12 @@ static CURLcode my_conv_from_utf8_to_ebcdic(char *buffer, size_t length)
   }
 }
 
-curl_easy_setopt(curl, CURLOPT_CONV_FROM_UTF8_FUNCTION,
-                 my_conv_from_utf8_to_ebcdic);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  curl_easy_setopt(curl, CURLOPT_CONV_FROM_UTF8_FUNCTION,
+                   my_conv_from_utf8_to_ebcdic);
+}
 .fi
 .SH AVAILABILITY
 Not available and deprecated since 7.82.0.

@@ -45,31 +45,35 @@ domain name are not exported by this option.
 HTTP(S)
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  /* enable the cookie engine */
-  curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
+    /* enable the cookie engine */
+    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
 
-  res = curl_easy_perform(curl);
+    res = curl_easy_perform(curl);
 
-  if(!res) {
-    /* extract all known cookies */
-    struct curl_slist *cookies = NULL;
-    res = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies);
-    if(!res && cookies) {
-      /* a linked list of cookies in cookie file format */
-      struct curl_slist *each = cookies;
-      while(each) {
-        printf("%s\\n", each->data);
-        each = each->next;
+    if(!res) {
+      /* extract all known cookies */
+      struct curl_slist *cookies = NULL;
+      res = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies);
+      if(!res && cookies) {
+        /* a linked list of cookies in cookie file format */
+        struct curl_slist *each = cookies;
+        while(each) {
+          printf("%s\\n", each->data);
+          each = each->next;
+        }
+        /* we must free these cookies when we are done */
+        curl_slist_free_all(cookies);
       }
-      /* we must free these cookies when we are done */
-      curl_slist_free_all(cookies);
     }
+    curl_easy_cleanup(curl);
   }
-  curl_easy_cleanup(curl);
 }
 .fi
 .SH AVAILABILITY

@@ -83,31 +83,35 @@ Bit flag to curl_waitfd.events indicating the socket should poll on write
 events such as the socket being clear to write without blocking.
 .SH EXAMPLE
 .nf
-CURL *easy_handle;
-CURLM *multi_handle;
+int main(void)
+{
+  CURL *easy_handle;
+  CURLM *multi_handle;
+  int still_running = 0;
 
-/* add the individual easy handle */
-curl_multi_add_handle(multi_handle, easy_handle);
+  /* add the individual easy handle */
+  curl_multi_add_handle(multi_handle, easy_handle);
 
-do {
-  CURLMcode mc;
-  int numfds;
+  do {
+    CURLMcode mc;
+    int numfds;
 
-  mc = curl_multi_perform(multi_handle, &still_running);
+    mc = curl_multi_perform(multi_handle, &still_running);
 
-  if(mc == CURLM_OK) {
-    /* wait for activity or timeout */
-    mc = curl_multi_poll(multi_handle, NULL, 0, 1000, &numfds);
-  }
+    if(mc == CURLM_OK) {
+      /* wait for activity or timeout */
+      mc = curl_multi_poll(multi_handle, NULL, 0, 1000, &numfds);
+    }
 
-  if(mc != CURLM_OK) {
-    fprintf(stderr, "curl_multi failed, code %d.\\n", mc);
-    break;
-  }
+    if(mc != CURLM_OK) {
+      fprintf(stderr, "curl_multi failed, code %d.\\n", mc);
+      break;
+    }
 
-} while(still_running);
+  } while(still_running);
 
-curl_multi_remove_handle(multi_handle, easy_handle);
+  curl_multi_remove_handle(multi_handle, easy_handle);
+}
 .fi
 .SH AVAILABILITY
 Added in 7.66.0.

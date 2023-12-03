@@ -39,19 +39,22 @@ operation. The number is OS and system specific.
 All
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  CURLcode res;
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-  res = curl_easy_perform(curl);
-  if(res != CURLE_OK) {
-    long error;
-    res = curl_easy_getinfo(curl, CURLINFO_OS_ERRNO, &error);
-    if(res && error) {
-      printf("Errno: %ld\\n", error);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+    res = curl_easy_perform(curl);
+    if(res != CURLE_OK) {
+      long error;
+      res = curl_easy_getinfo(curl, CURLINFO_OS_ERRNO, &error);
+      if(res && error) {
+        printf("Errno: %ld\\n", error);
+      }
     }
+    curl_easy_cleanup(curl);
   }
-  curl_easy_cleanup(curl);
 }
 .fi
 .SH AVAILABILITY

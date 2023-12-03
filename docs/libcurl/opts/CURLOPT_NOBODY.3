@@ -54,15 +54,18 @@ URL you request).
 Most
 .SH EXAMPLE
 .nf
-curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  /* get us the resource without a body - use HEAD! */
-  curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
+    /* get us the resource without a body - use HEAD! */
+    curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
 
-  /* Perform the request */
-  curl_easy_perform(curl);
+    /* Perform the request */
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

@@ -306,11 +306,14 @@ names are the same as would be used in URLs. The array is terminated by a NULL
 entry.
 .SH EXAMPLE
 .nf
-curl_version_info_data *ver = curl_version_info(CURLVERSION_NOW);
-printf("libcurl version %u.%u.%u\\n",
-       (ver->version_num >> 16) & 0xff,
-       (ver->version_num >> 8) & 0xff,
-       ver->version_num & 0xff);
+int main(void)
+{
+  curl_version_info_data *ver = curl_version_info(CURLVERSION_NOW);
+  printf("libcurl version %u.%u.%u\\n",
+         (ver->version_num >> 16) & 0xff,
+         (ver->version_num >> 8) & 0xff,
+         ver->version_num & 0xff);
+}
 .fi
 .SH AVAILABILITY
 Added in 7.10

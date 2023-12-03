@@ -44,17 +44,23 @@ is valid: only the value set by the last call is retained. It is possible to
 reset the name of a part by setting \fIname\fP to NULL.
 .SH EXAMPLE
 .nf
- curl_mime *mime;
- curl_mimepart *part;
+int main(void)
+{
+  curl_mime *mime;
+  curl_mimepart *part;
 
- /* create a mime handle */
- mime = curl_mime_init(easy);
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    /* create a mime handle */
+    mime = curl_mime_init(curl);
 
- /* add a part */
- part = curl_mime_addpart(mime);
+    /* add a part */
+    part = curl_mime_addpart(mime);
 
- /* give the part a name */
- curl_mime_name(part, "shoe_size");
+    /* give the part a name */
+    curl_mime_name(part, "shoe_size");
+  }
+}
 .fi
 .SH AVAILABILITY
 As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.

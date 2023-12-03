@@ -42,15 +42,18 @@ may or may not do it.
 All SSH based protocols: SCP, SFTP
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "sftp://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "sftp://example.com");
 
-  /* enable built-in compression */
-  curl_easy_setopt(curl, CURLOPT_SSH_COMPRESSION, 1L);
+    /* enable built-in compression */
+    curl_easy_setopt(curl, CURLOPT_SSH_COMPRESSION, 1L);
 
-  /* Perform the request */
-  curl_easy_perform(curl);
+    /* Perform the request */
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

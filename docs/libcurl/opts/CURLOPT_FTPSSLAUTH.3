@@ -49,14 +49,18 @@ CURLFTPAUTH_DEFAULT
 FTP
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/file.txt");
-  curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_TRY);
-  /* funny server, ask for SSL before TLS */
-  curl_easy_setopt(curl, CURLOPT_FTPSSLAUTH, (long)CURLFTPAUTH_SSL);
-  ret = curl_easy_perform(curl);
-  curl_easy_cleanup(curl);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/file.txt");
+    curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_TRY);
+    /* funny server, ask for SSL before TLS */
+    curl_easy_setopt(curl, CURLOPT_FTPSSLAUTH, (long)CURLFTPAUTH_SSL);
+    res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

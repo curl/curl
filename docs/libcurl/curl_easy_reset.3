@@ -40,11 +40,15 @@ connections, the Session ID cache, the DNS cache, the cookies, the shares or
 the alt-svc cache.
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
 
-/* ... the handle is used and options are set ... */
-
-curl_easy_reset(curl);
+    /* ... the handle is used and options are set ... */
+    curl_easy_reset(curl);
+  }
+}
 .fi
 .SH AVAILABILITY
 This function was added in libcurl 7.12.1

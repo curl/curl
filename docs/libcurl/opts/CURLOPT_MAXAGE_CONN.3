@@ -49,14 +49,17 @@ Default maximum age is set to 118 seconds.
 All
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  /* only allow 30 seconds idle time */
-  curl_easy_setopt(curl, CURLOPT_MAXAGE_CONN, 30L);
+    /* only allow 30 seconds idle time */
+    curl_easy_setopt(curl, CURLOPT_MAXAGE_CONN, 30L);
 
-  curl_easy_perform(curl);
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

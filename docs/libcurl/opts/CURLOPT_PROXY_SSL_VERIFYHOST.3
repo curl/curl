@@ -68,14 +68,17 @@ of the proxy certificate.
 All protocols when used over an HTTPS proxy.
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  /* Set the default value: strict name check please */
-  curl_easy_setopt(curl, CURLOPT_PROXY_SSL_VERIFYHOST, 2L);
+    /* Set the default value: strict name check please */
+    curl_easy_setopt(curl, CURLOPT_PROXY_SSL_VERIFYHOST, 2L);
 
-  curl_easy_perform(curl);
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

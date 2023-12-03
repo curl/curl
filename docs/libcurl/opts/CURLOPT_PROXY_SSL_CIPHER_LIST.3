@@ -65,13 +65,17 @@ NULL, use internal default
 All
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-  curl_easy_setopt(curl, CURLOPT_PROXY, "https://localhost");
-  curl_easy_setopt(curl, CURLOPT_PROXY_SSL_CIPHER_LIST, "TLSv1");
-  ret = curl_easy_perform(curl);
-  curl_easy_cleanup(curl);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+    curl_easy_setopt(curl, CURLOPT_PROXY, "https://localhost");
+    curl_easy_setopt(curl, CURLOPT_PROXY_SSL_CIPHER_LIST, "TLSv1");
+    res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

@@ -40,6 +40,9 @@ NULL
 SFTP and SCP
 .SH EXAMPLE
 .nf
+struct mine {
+  void *custom;
+};
 static int keycb(CURL *easy,
                  const struct curl_khkey *knownkey,
                  const struct curl_khkey *foundkey,
@@ -50,13 +53,19 @@ static int keycb(CURL *easy,
   /* investigate the situation and return the correct value */
   return CURLKHSTAT_FINE_ADD_TO_FILE;
 }
-{
-  curl_easy_setopt(curl, CURLOPT_URL, "sftp://example.com/thisfile.txt");
-  curl_easy_setopt(curl, CURLOPT_SSH_KEYFUNCTION, keycb);
-  curl_easy_setopt(curl, CURLOPT_SSH_KEYDATA, &callback_data);
-  curl_easy_setopt(curl, CURLOPT_SSH_KNOWNHOSTS, "/home/user/known_hosts");
 
-  curl_easy_perform(curl);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    struct mine callback_data;
+    curl_easy_setopt(curl, CURLOPT_URL, "sftp://example.com/thisfile.txt");
+    curl_easy_setopt(curl, CURLOPT_SSH_KEYFUNCTION, keycb);
+    curl_easy_setopt(curl, CURLOPT_SSH_KEYDATA, &callback_data);
+    curl_easy_setopt(curl, CURLOPT_SSH_KNOWNHOSTS, "/home/user/known_hosts");
+
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

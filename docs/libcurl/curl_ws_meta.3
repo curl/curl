@@ -96,15 +96,22 @@ static size_t writecb(unsigned char *buffer,
   struct customdata *c = (struct customdata *)p;
   const struct curl_ws_frame *m = curl_ws_meta(c->easy);
 
-  /* m->flags tells us about the traffic */
+  printf("flags: %x\\n", m->flags);
 }
 
+int main(void)
 {
-  struct customdata custom;
-  custom.easy = easy;
-  custom.ptr = NULL;
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writecb);
-  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &custom);
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    struct customdata custom;
+    custom.easy = curl;
+    custom.ptr = NULL;
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writecb);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &custom);
+
+    curl_easy_perform(curl);
+
+  }
 }
 .fi
 .SH AVAILABILITY

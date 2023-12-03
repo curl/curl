@@ -45,9 +45,12 @@ value passed here would be honored based on other system resources properties.
 All
 .SH EXAMPLE
 .nf
+int main(void)
+{
   CURLM *m = curl_multi_init();
   /* max concurrent streams 200 */
   curl_multi_setopt(m, CURLMOPT_MAX_CONCURRENT_STREAMS, 200L);
+}
 .fi
 .SH AVAILABILITY
 Added in 7.67.0

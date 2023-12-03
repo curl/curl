@@ -145,6 +145,8 @@ The initial hash sign that denotes the beginning of the fragment is a
 delimiter only. It is not part of the fragment contents.
 .SH EXAMPLE
 .nf
+int main(void)
+{
   CURLUcode rc;
   CURLU *url = curl_url();
   rc = curl_url_set(url, CURLUPART_URL, "https://example.com", 0);
@@ -157,6 +159,7 @@ delimiter only. It is not part of the fragment contents.
     }
     curl_url_cleanup(url);
   }
+}
 .fi
 .SH AVAILABILITY
 Added in 7.62.0. CURLUPART_ZONEID was added in 7.65.0.

@@ -45,40 +45,47 @@ that multiple calls to this function wake up the same waiting operation.
 This function has no effect on \fIcurl_multi_wait(3)\fP calls.
 .SH EXAMPLE
 .nf
-CURL *easy_handle;
-CURLM *multi_handle;
+extern int time_to_die(void);
+extern int set_something_to_signal_thread_1_to_exit(void);
+extern int decide_to_stop_thread1();
 
-/* add the individual easy handle */
-curl_multi_add_handle(multi_handle, easy_handle);
+int main(void)
+{
+  CURL *easy;
+  CURLM *multi;
+  int still_running;
 
-/* this is thread 1 */
-do {
-  CURLMcode mc;
-  int numfds;
+  /* add the individual easy handle */
+  curl_multi_add_handle(multi, easy);
 
-  mc = curl_multi_perform(multi_handle, &still_running);
+  /* this is thread 1 */
+  do {
+    CURLMcode mc;
+    int numfds;
 
-  if(mc == CURLM_OK) {
-    /* wait for activity, timeout or wakeup */
-    mc = curl_multi_poll(multi_handle, NULL, 0, 10000, &numfds);
+    mc = curl_multi_perform(multi, &still_running);
+
+    if(mc == CURLM_OK) {
+      /* wait for activity, timeout or wakeup */
+      mc = curl_multi_poll(multi, NULL, 0, 10000, &numfds);
+    }
+
+    if(time_to_die())
+      return 1;
+
+  } while(still_running);
+
+  curl_multi_remove_handle(multi, easy);
+
+  /* this is thread 2 */
+
+  if(decide_to_stop_thread1()) {
+
+    set_something_to_signal_thread_1_to_exit();
+
+    curl_multi_wakeup(multi);
   }
-
-  if(time_to_die())
-    exit(1);
-
-} while(still_running);
-
-curl_multi_remove_handle(multi_handle, easy_handle);
-
-/* this is thread 2 */
-
-if(something makes us decide to stop thread 1) {
-
-  set_something_to_signal_thread_1_to_exit();
-
-  curl_multi_wakeup(multi_handle);
 }
-
 .fi
 .SH AVAILABILITY
 Added in 7.68.0

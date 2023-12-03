@@ -48,14 +48,18 @@ None
 FTP, IMAP, POP3, SMTP, and SSH
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/slow.txt");
-  /* wait no more than 23 seconds */
-  curl_easy_setopt(curl, CURLOPT_SERVER_RESPONSE_TIMEOUT, 23L);
-  ret = curl_easy_perform(curl);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/slow.txt");
+    /* wait no more than 23 seconds */
+    curl_easy_setopt(curl, CURLOPT_SERVER_RESPONSE_TIMEOUT, 23L);
+    res = curl_easy_perform(curl);
 
-  curl_easy_cleanup(curl);
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

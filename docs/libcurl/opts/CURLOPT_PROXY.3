@@ -109,11 +109,14 @@ single port number used widely for proxies. Specify it!
 All except file://. Note that some protocols do not work well over proxy.
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/file.txt");
-  curl_easy_setopt(curl, CURLOPT_PROXY, "http://proxy:80");
-  curl_easy_perform(curl);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/file.txt");
+    curl_easy_setopt(curl, CURLOPT_PROXY, "http://proxy:80");
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

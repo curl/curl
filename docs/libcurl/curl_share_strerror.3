@@ -35,11 +35,14 @@ The \fIcurl_share_strerror(3)\fP function returns a string describing the
 \fICURLSHcode\fP error code passed in the argument \fIerrornum\fP.
 .SH EXAMPLE
 .nf
+int main(void)
+{
   CURLSHcode sh;
-  share = curl_share_init();
+  CURLSH *share = curl_share_init();
   sh = curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
   if(sh)
     printf("Error: %s\\n", curl_share_strerror(sh));
+}
 .fi
 .SH AVAILABILITY
 This function was added in libcurl 7.12.0

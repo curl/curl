@@ -70,12 +70,15 @@ struct curl_easyoption {
 .fi
 .SH EXAMPLE
 .nf
-/* iterate over all available options */
-const struct curl_easyoption *opt;
-opt = curl_easy_option_next(NULL);
-while(opt) {
-  printf("Name: %s\\n", opt->name);
-  opt = curl_easy_option_next(opt);
+int main(void)
+{
+  /* iterate over all available options */
+  const struct curl_easyoption *opt;
+  opt = curl_easy_option_next(NULL);
+  while(opt) {
+    printf("Name: %s\\n", opt->name);
+    opt = curl_easy_option_next(opt);
+  }
 }
 .fi
 .SH AVAILABILITY

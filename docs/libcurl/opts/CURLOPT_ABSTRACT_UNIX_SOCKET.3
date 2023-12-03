@@ -52,10 +52,18 @@ Default is NULL.
 All
 .SH EXAMPLE
 .nf
-  curl_easy_setopt(curl_handle, CURLOPT_ABSTRACT_UNIX_SOCKET, "/tmp/foo.sock");
-  curl_easy_setopt(curl_handle, CURLOPT_URL, "http://localhost/");
-.fi
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_ABSTRACT_UNIX_SOCKET, "/tmp/foo.sock");
+    curl_easy_setopt(curl, CURLOPT_URL, "http://localhost/");
 
+    /* Perform the request */
+    curl_easy_perform(curl);
+  }
+}
+.fi
 .SH AVAILABILITY
 Added in 7.53.0.
 .SH RETURN VALUE

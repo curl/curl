@@ -49,15 +49,18 @@ CURL_HET_DEFAULT (currently defined as 200L)
 All except FILE
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-  curl_easy_setopt(curl, CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS, 300L);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+    curl_easy_setopt(curl, CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS, 300L);
 
-  curl_easy_perform(curl);
+    curl_easy_perform(curl);
 
-  /* always cleanup */
-  curl_easy_cleanup(curl);
+    /* always cleanup */
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

@@ -52,14 +52,17 @@ get closed and \fICURLE_HTTP_RETURNED_ERROR\fP is returned.
 HTTP
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  CURLcode ret;
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-  curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
-  ret = curl_easy_perform(curl);
-  if(ret == CURLE_HTTP_RETURNED_ERROR) {
-    /* an HTTP response error problem */
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode ret;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+    curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
+    ret = curl_easy_perform(curl);
+    if(ret == CURLE_HTTP_RETURNED_ERROR) {
+      /* an HTTP response error problem */
+    }
   }
 }
 .fi

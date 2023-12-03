@@ -67,12 +67,19 @@ first the easy handle and then the multi handle:
 3 - \fIcurl_multi_cleanup(3)\fP
 .SH EXAMPLE
 .nf
+int main(void)
+{
   /* init a multi stack */
-  multi_handle = curl_multi_init();
+  CURLM *multi = curl_multi_init();
+
+  /* create two easy handles */
+  CURL *http_handle = curl_easy_init();
+  CURL *http_handle2 = curl_easy_init();
 
   /* add individual transfers */
-  curl_multi_add_handle(multi_handle, http_handle);
-  curl_multi_add_handle(multi_handle, http_handle2);
+  curl_multi_add_handle(multi, http_handle);
+  curl_multi_add_handle(multi, http_handle2);
+}
 .fi
 .SH AVAILABILITY
 Added in 7.9.6

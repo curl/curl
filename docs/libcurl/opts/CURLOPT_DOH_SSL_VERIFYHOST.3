@@ -62,16 +62,20 @@ of the DoH server certificate.
 DoH
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  curl_easy_setopt(curl, CURLOPT_DOH_URL, "https://cloudflare-dns.com/dns-query");
+    curl_easy_setopt(curl, CURLOPT_DOH_URL,
+                     "https://cloudflare-dns.com/dns-query");
 
-  /* Disable host name verification of the DoH server */
-  curl_easy_setopt(curl, CURLOPT_DOH_SSL_VERIFYHOST, 0L);
+    /* Disable host name verification of the DoH server */
+    curl_easy_setopt(curl, CURLOPT_DOH_SSL_VERIFYHOST, 0L);
 
-  curl_easy_perform(curl);
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

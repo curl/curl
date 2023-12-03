@@ -42,14 +42,17 @@ Default timeout is 0 (zero) which means it never times out during transfer.
 All
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  /* complete within 20000 milliseconds */
-  curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 20000L);
+    /* complete within 20000 milliseconds */
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 20000L);
 
-  curl_easy_perform(curl);
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

@@ -82,15 +82,18 @@ NULL
 HTTP
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  /* enable all supported built-in compressions */
-  curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
+    /* enable all supported built-in compressions */
+    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
 
-  /* Perform the request */
-  curl_easy_perform(curl);
+    /* Perform the request */
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY
