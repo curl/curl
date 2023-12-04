@@ -108,6 +108,7 @@ check_PROGRAMS = \
   progressfunc \
   protofeats \
   resolve \
+  rstp-options \
   sendrecv \
   sepheaders \
   sftpget \
