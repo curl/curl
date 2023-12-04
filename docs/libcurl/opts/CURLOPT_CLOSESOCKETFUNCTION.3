@@ -60,7 +60,7 @@ struct priv {
 static int closesocket(void *clientp, curl_socket_t item)
 {
   struct priv *my = clientp;
-  printf("our ptr: %p\n", my->custom);
+  printf("our ptr: %p\\n", my->custom);
 
   printf("libcurl wants to close %d now\\n", (int)item);
   return 0;

@@ -50,7 +50,7 @@ static int my_trace(CURL *handle, curl_infotype type,
                     void *clientp)
 {
   struct data *mine = clientp;
-  printf("our ptr: %p\n", mine->custom);
+  printf("our ptr: %p\\n", mine->custom);
 
   /* output debug info */
 }
