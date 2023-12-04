@@ -58,7 +58,7 @@ static int rtsp_getsock_do(struct Curl_easy *data,
                            struct connectdata *conn, curl_socket_t *socks);
 
 /*
- * Parse and write out any available RTP data.
+ * Parse and write out an RTSP response.
  * @param data     the transfer
  * @param conn     the connection
  * @param buf      data read from connection
@@ -67,11 +67,11 @@ static int rtsp_getsock_do(struct Curl_easy *data,
  * @param readmore out, TRUE iff complete buf was consumed and more data
  *                 is needed
  */
-static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
-                                   const char *buf,
-                                   size_t blen,
-                                   bool is_eos,
-                                   bool *done);
+static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
+                                    const char *buf,
+                                    size_t blen,
+                                    bool is_eos,
+                                    bool *done);
 
 static CURLcode rtsp_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn);
@@ -114,7 +114,7 @@ const struct Curl_handler Curl_handler_rtsp = {
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   rtsp_disconnect,                      /* disconnect */
-  rtsp_rtp_readwrite,                   /* readwrite */
+  rtsp_rtp_write_resp,                  /* write_resp */
   rtsp_conncheck,                       /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_RTSP,                            /* defport */
@@ -776,11 +776,11 @@ out:
   return result;
 }
 
-static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
-                                   const char *buf,
-                                   size_t blen,
-                                   bool is_eos,
-                                   bool *done)
+static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
+                                    const char *buf,
+                                    size_t blen,
+                                    bool is_eos,
+                                    bool *done)
 {
   struct rtsp_conn *rtspc = &(data->conn->proto.rtspc);
   CURLcode result = CURLE_OK;
@@ -793,7 +793,7 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
     goto out;
   }
 
-  DEBUGF(infof(data, "rtsp_rtp_readwrite(len=%zu, in_header=%d, eos=%d)",
+  DEBUGF(infof(data, "rtsp_rtp_write_resp(len=%zu, in_header=%d, eos=%d)",
                blen, rtspc->in_header, is_eos));
 
   /* If header parsing is not onging, extract RTP messages */
@@ -810,7 +810,7 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
   /* we want to parse headers, do so */
   if(data->req.header && blen) {
     rtspc->in_header = TRUE;
-    result = Curl_http_rw_headers(data, buf, blen, &consumed, done);
+    result = Curl_http_write_resp_hds(data, buf, blen, &consumed, done);
     if(result)
       goto out;
 
@@ -839,7 +839,7 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
   if(rtspc->state != RTP_PARSE_SKIP)
     *done = FALSE;
   /* we MUST have consumed all bytes */
-  DEBUGF(infof(data, "rtsp_rtp_readwrite(len=%zu, in_header=%d, done=%d)",
+  DEBUGF(infof(data, "rtsp_rtp_write_resp(len=%zu, in_header=%d, done=%d)",
                blen, rtspc->in_header, *done));
   DEBUGASSERT(blen == 0);
   if(!result && is_eos) {

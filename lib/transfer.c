@@ -1678,9 +1678,9 @@ Curl_setup_transfer(
 }
 
 ssize_t Curl_xfer_recv_resp(struct Curl_easy *data,
-                              char *buf, size_t blen,
-                              bool avoid_excess,
-                              CURLcode *err)
+                            char *buf, size_t blen,
+                            bool avoid_excess,
+                            CURLcode *err)
 {
   ssize_t nread;
 
@@ -1716,10 +1716,10 @@ CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
 
-  if(data->conn->handler->readwrite) {
+  if(data->conn->handler->write_resp) {
     /* protocol handlers offering this function take full responsibility
      * for writing all received download data to the client. */
-    result = data->conn->handler->readwrite(data, buf, blen, is_eos, done);
+    result = data->conn->handler->write_resp(data, buf, blen, is_eos, done);
   }
   else {
     /* No special handling by protocol handler, write all received data

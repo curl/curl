@@ -167,7 +167,7 @@ const struct Curl_handler Curl_handler_ftp = {
   ftp_domore_getsock,              /* domore_getsock */
   ZERO_NULL,                       /* perform_getsock */
   ftp_disconnect,                  /* disconnect */
-  ZERO_NULL,                       /* readwrite */
+  ZERO_NULL,                       /* write_resp */
   ZERO_NULL,                       /* connection_check */
   ZERO_NULL,                       /* attach connection */
   PORT_FTP,                        /* defport */
@@ -198,7 +198,7 @@ const struct Curl_handler Curl_handler_ftps = {
   ftp_domore_getsock,              /* domore_getsock */
   ZERO_NULL,                       /* perform_getsock */
   ftp_disconnect,                  /* disconnect */
-  ZERO_NULL,                       /* readwrite */
+  ZERO_NULL,                       /* write_resp */
   ZERO_NULL,                       /* connection_check */
   ZERO_NULL,                       /* attach connection */
   PORT_FTPS,                       /* defport */
