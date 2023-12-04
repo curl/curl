@@ -44,18 +44,21 @@ redirect to happen (since 7.54.1).
 HTTP(S)
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  CURLcode res;
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-  res = curl_easy_perform(curl);
-  if(res == CURLE_OK) {
-    char *url = NULL;
-    curl_easy_getinfo(curl, CURLINFO_REDIRECT_URL, &url);
-    if(url)
-      printf("Redirect to: %s\\n", url);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+    res = curl_easy_perform(curl);
+    if(res == CURLE_OK) {
+      char *url = NULL;
+      curl_easy_getinfo(curl, CURLINFO_REDIRECT_URL, &url);
+      if(url)
+        printf("Redirect to: %s\\n", url);
+    }
+    curl_easy_cleanup(curl);
   }
-  curl_easy_cleanup(curl);
 }
 .fi
 .SH AVAILABILITY

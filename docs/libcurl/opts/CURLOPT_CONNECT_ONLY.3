@@ -60,14 +60,17 @@ application wants to use it. Once it has been removed with
 HTTP, SMTP, POP3 and IMAP. For WS and WSS starting in 7.86.0.
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  CURLcode ret;
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-  curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);
-  ret = curl_easy_perform(curl);
-  if(ret == CURLE_OK) {
-    /* only connected! */
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode ret;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+    curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);
+    ret = curl_easy_perform(curl);
+    if(ret == CURLE_OK) {
+      /* only connected! */
+    }
   }
 }
 .fi

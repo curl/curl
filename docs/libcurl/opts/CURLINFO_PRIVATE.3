@@ -40,19 +40,26 @@ pointer, although effectively being a 'void *'.
 All
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  void *pointer = 0x2345454;
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    void *pointer = (void *)0x2345454;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
 
-  /* set the private pointer */
-  curl_easy_setopt(curl, CURLOPT_PRIVATE, pointer);
-  ret = curl_easy_perform(curl);
+    /* set the private pointer */
+    curl_easy_setopt(curl, CURLOPT_PRIVATE, pointer);
+    res = curl_easy_perform(curl);
 
-  /* extract the private pointer again */
-  ret = curl_easy_getinfo(curl, CURLINFO_PRIVATE, &pointer);
+    /* extract the private pointer again */
+    res = curl_easy_getinfo(curl, CURLINFO_PRIVATE, &pointer);
 
-  curl_easy_cleanup(curl);
+    if(res)
+      printf("error: %s\\n", curl_easy_strerror(res));
+
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

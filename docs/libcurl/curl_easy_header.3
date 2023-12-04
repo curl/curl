@@ -127,9 +127,18 @@ response that might happen before the "real" response.
 The header is an HTTP/2 or HTTP/3 pseudo header
 .SH EXAMPLE
 .nf
-struct curl_header *type;
-CURLHcode h =
-  curl_easy_header(easy, "Content-Type", 0, CURLH_HEADER, -1, &type);
+int main(void)
+{
+  struct curl_header *type;
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLHcode h;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+    curl_easy_perform(curl);
+    h = curl_easy_header(curl, "Content-Type", 0, CURLH_HEADER, -1, &type);
+    curl_easy_cleanup(curl);
+  }
+}
 .fi
 .SH AVAILABILITY
 Added in 7.83.0. Officially supported since 7.84.0.

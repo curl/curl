@@ -97,11 +97,18 @@ socket(s) that got action. If no activity is detected and the timeout expires,
 call \fIcurl_multi_socket_action(3)\fP with \fICURL_SOCKET_TIMEOUT\fP.
 .SH EXAMPLE
 .nf
-/* the event-library gets told when there activity on the socket 'fd',
-   which we translate to a call to curl_multi_socket_action() */
-int running;
-rc = curl_multi_socket_action(multi_handle, fd, EVENT,
-                              &running);
+int main(void)
+{
+  /* the event-library gets told when there activity on the socket 'fd',
+     which we translate to a call to curl_multi_socket_action() */
+  int running;
+  CURLM *multi; /* the stack we work with */
+  int fd; /* the descriptor that had action */
+  int bitmask; /* what activity that happened */
+  CURLMcode mc = curl_multi_socket_action(multi, fd, bitmask, &running);
+  if(mc)
+    printf("error: %s\\n", curl_multi_strerror(mc));
+}
 .fi
 .SH AVAILABILITY
 This function was added in libcurl 7.15.4, and is deemed stable since 7.16.0.

@@ -66,14 +66,17 @@ signals to be used unless \fICURLOPT_NOSIGNAL(3)\fP is set.
 All
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  /* complete connection within 10 seconds */
-  curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 10L);
+    /* complete connection within 10 seconds */
+    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 10L);
 
-  curl_easy_perform(curl);
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

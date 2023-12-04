@@ -43,13 +43,13 @@ libcurl when this callback returns. The returned pointer points to a
 .SH EXAMPLE
 .nf
 /* output all the incoming push request headers */
-int curl_push_callback(CURL *parent,
-                       CURL *easy,
-                       size_t num_headers,
-                       struct curl_pushheaders *headers,
-                       void *clientp)
+static int push_cb(CURL *parent,
+                   CURL *easy,
+                   size_t num_headers,
+                   struct curl_pushheaders *headers,
+                   void *clientp)
 {
-  sizt_t i = 0;
+  int i = 0;
   char *field;
   do {
      field = curl_pushheader_bynum(headers, i);
@@ -60,7 +60,11 @@ int curl_push_callback(CURL *parent,
   return CURL_PUSH_OK; /* permission granted */
 }
 
-curl_multi_setopt(multi, CURLMOPT_PUSHFUNCTION, curl_push_callback);
+int main(void)
+{
+  CURLM *multi = curl_multi_init();
+  curl_multi_setopt(multi, CURLMOPT_PUSHFUNCTION, push_cb);
+}
 .fi
 .SH AVAILABILITY
 Added in 7.44.0

@@ -81,20 +81,29 @@ By default, this is NULL and unused.
 ALL
 .SH EXAMPLE
 .nf
+struct priv {
+  void *custom;
+};
+
 static int prereq_callback(void *clientp,
                            char *conn_primary_ip,
                            char *conn_local_ip,
                            int conn_primary_port,
                            int conn_local_port)
 {
-  printf("Connection made to %s:%s\\n", conn_primary_ip, conn_primary_port);
+  printf("Connection made to %s:%d\\n", conn_primary_ip, conn_primary_port);
   return CURL_PREREQFUNC_OK;
 }
 
+int main(void)
 {
-  struct data prereq_data;
-  curl_easy_setopt(CURL *handle, CURLOPT_PREREQFUNCTION, prereq_callback);
-  curl_easy_setopt(CURL *handle, CURLOPT_PREREQDATA, &prereq_data);
+  struct priv prereq_data;
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_PREREQFUNCTION, prereq_callback);
+    curl_easy_setopt(curl, CURLOPT_PREREQDATA, &prereq_data);
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

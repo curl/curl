@@ -45,18 +45,23 @@ If you post more than 2GB, use \fICURLOPT_POSTFIELDSIZE_LARGE(3)\fP.
 HTTP
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  const char *data = "data to send";
+#include <string.h> /* for strlen */
 
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    const char *data = "data to send";
 
-  /* size of the POST data */
-  curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long) strlen(data));
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+    /* size of the POST data */
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long) strlen(data));
 
-  curl_easy_perform(curl);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

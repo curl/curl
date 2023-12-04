@@ -53,15 +53,31 @@ By default libcurl uses the standard socket close function.
 All
 .SH EXAMPLE
 .nf
+struct priv {
+  void *custom;
+};
+
 static int closesocket(void *clientp, curl_socket_t item)
 {
+  struct priv *my = clientp;
+  printf("our ptr: %p\\n", my->custom);
+
   printf("libcurl wants to close %d now\\n", (int)item);
   return 0;
 }
 
-/* call this function to close sockets */
-curl_easy_setopt(curl, CURLOPT_CLOSESOCKETFUNCTION, closesocket);
-curl_easy_setopt(curl, CURLOPT_CLOSESOCKETDATA, &sockfd);
+int main(void)
+{
+  struct priv myown;
+  CURL *curl = curl_easy_init();
+
+  /* call this function to close sockets */
+  curl_easy_setopt(curl, CURLOPT_CLOSESOCKETFUNCTION, closesocket);
+  curl_easy_setopt(curl, CURLOPT_CLOSESOCKETDATA, &myown);
+
+  curl_easy_perform(curl);
+  curl_easy_cleanup(curl);
+}
 .fi
 .SH AVAILABILITY
 Added in 7.21.7

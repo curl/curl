@@ -40,14 +40,17 @@ instead of overwrite it. This is only useful when uploading to an FTP site.
 FTP
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
 
-  curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/dir/to/newfile");
-  curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
-  curl_easy_setopt(curl, CURLOPT_APPEND, 1L);
+    curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/dir/to/newfile");
+    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+    curl_easy_setopt(curl, CURLOPT_APPEND, 1L);
 
-  curl_easy_perform(curl);
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

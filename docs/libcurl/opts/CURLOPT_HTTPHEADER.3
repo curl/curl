@@ -136,21 +136,24 @@ NULL
 HTTP, IMAP and SMTP
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
+int main(void)
+{
+  CURL *curl = curl_easy_init();
 
-struct curl_slist *list = NULL;
+  struct curl_slist *list = NULL;
 
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  list = curl_slist_append(list, "Shoesize: 10");
-  list = curl_slist_append(list, "Accept:");
+    list = curl_slist_append(list, "Shoesize: 10");
+    list = curl_slist_append(list, "Accept:");
 
-  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
 
-  curl_easy_perform(curl);
+    curl_easy_perform(curl);
 
-  curl_slist_free_all(list); /* free the list */
+    curl_slist_free_all(list); /* free the list */
+  }
 }
 .fi
 

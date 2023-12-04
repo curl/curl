@@ -74,10 +74,17 @@ See \fICURLMOPT_TIMERDATA(3)\fP
 .IP CURLMOPT_MAX_CONCURRENT_STREAMS
 See \fICURLMOPT_MAX_CONCURRENT_STREAMS(3)\fP
 .SH EXAMPLE
-.fi
-  /* Limit the amount of simultaneous connections curl should allow: */
-  curl_multi_setopt(handle, CURLMOPT_MAXCONNECTS, (long)MAX_PARALLEL);
 .nf
+
+#define MAX_PARALLEL 45
+
+int main(void)
+{
+  CURLM *multi;
+  /* Limit the amount of simultaneous connections curl should allow: */
+  curl_multi_setopt(multi, CURLMOPT_MAXCONNECTS, (long)MAX_PARALLEL);
+}
+.fi
 .SH AVAILABILITY
 Added in 7.15.4
 .SH RETURN VALUE

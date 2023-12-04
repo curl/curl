@@ -44,24 +44,28 @@ Using a mime handle is the recommended way to post an HTTP form, format and
 send a multi-part email with SMTP or upload such an email to an IMAP server.
 .SH EXAMPLE
 .nf
- CURL *easy = curl_easy_init();
- curl_mime *mime;
- curl_mimepart *part;
+int main(void)
+{
+  CURL *easy = curl_easy_init();
+  curl_mime *mime;
+  curl_mimepart *part;
 
- /* Build an HTTP form with a single field named "data", */
- mime = curl_mime_init(easy);
- part = curl_mime_addpart(mime);
- curl_mime_data(part, "This is the field data", CURL_ZERO_TERMINATED);
- curl_mime_name(part, "data");
+  /* Build an HTTP form with a single field named "data", */
+  mime = curl_mime_init(easy);
+  part = curl_mime_addpart(mime);
+  curl_mime_data(part, "This is the field data", CURL_ZERO_TERMINATED);
+  curl_mime_name(part, "data");
 
- /* Post and send it. */
- curl_easy_setopt(easy, CURLOPT_MIMEPOST, mime);
- curl_easy_setopt(easy, CURLOPT_URL, "https://example.com");
- curl_easy_perform(easy);
+  /* Post and send it. */
+  curl_easy_setopt(easy, CURLOPT_MIMEPOST, mime);
+  curl_easy_setopt(easy, CURLOPT_URL, "https://example.com");
+  curl_easy_perform(easy);
 
- /* Clean-up. */
- curl_easy_cleanup(easy);
- curl_mime_free(mime);
+  /* Clean-up. */
+  curl_easy_cleanup(easy);
+  curl_mime_free(mime);
+}
+.fi
 .SH AVAILABILITY
 As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
 .SH RETURN VALUE

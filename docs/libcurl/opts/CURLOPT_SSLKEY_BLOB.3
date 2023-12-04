@@ -49,23 +49,34 @@ NULL
 All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  struct curl_blob blob;
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-  blob.data = certificateData;
-  blob.len = filesize;
-  blob.flags = CURL_BLOB_COPY;
-  curl_easy_setopt(curl, CURLOPT_SSLCERT_BLOB, &blob);
-  curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
 
-  blob.data = privateKeyData;
-  blob.len = privateKeySize;
-  curl_easy_setopt(curl, CURLOPT_SSLKEY_BLOB, &blob);
-  curl_easy_setopt(curl, CURLOPT_KEYPASSWD, "s3cret");
-  curl_easy_setopt(curl, CURLOPT_SSLKEYTYPE, "PEM");
-  ret = curl_easy_perform(curl);
-  curl_easy_cleanup(curl);
+extern char *certificateData; /* point to cert */
+extern size_t filesize; /* size of cert */
+
+extern char *privateKeyData; /* point to key */
+extern size_t privateKeySize; /* size of key */
+
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    struct curl_blob blob;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+    blob.data = certificateData;
+    blob.len = filesize;
+    blob.flags = CURL_BLOB_COPY;
+    curl_easy_setopt(curl, CURLOPT_SSLCERT_BLOB, &blob);
+    curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
+
+    blob.data = privateKeyData;
+    blob.len = privateKeySize;
+    curl_easy_setopt(curl, CURLOPT_SSLKEY_BLOB, &blob);
+    curl_easy_setopt(curl, CURLOPT_KEYPASSWD, "s3cret");
+    curl_easy_setopt(curl, CURLOPT_SSLKEYTYPE, "PEM");
+    res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

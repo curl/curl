@@ -35,11 +35,15 @@ This function returns a string describing the \fICURLMcode\fP error code
 passed in the argument \fIerrornum\fP.
 .SH EXAMPLE
 .nf
-int still_running;
+int main(void)
+{
+  int still_running;
+  CURLM *multi = curl_multi_init();
 
-CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
-if(mc)
-  printf("error: %s\\n", curl_multi_strerror(mc));
+  CURLMcode mc = curl_multi_perform(multi, &still_running);
+  if(mc)
+    printf("error: %s\\n", curl_multi_strerror(mc));
+}
 .fi
 .SH AVAILABILITY
 This function was added in libcurl 7.12.0

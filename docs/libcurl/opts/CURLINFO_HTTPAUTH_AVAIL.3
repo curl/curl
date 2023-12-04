@@ -40,29 +40,33 @@ bits is explained in the \fICURLOPT_HTTPAUTH(3)\fP option for
 HTTP(S)
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  res = curl_easy_perform(curl);
+    res = curl_easy_perform(curl);
 
-  if(!res) {
-    /* extract the available authentication types */
-    long auth;
-    res = curl_easy_getinfo(curl, CURLINFO_HTTPAUTH_AVAIL, &auth);
     if(!res) {
-      if(!auth)
-        printf("No auth available, perhaps no 401?\\n");
-      else {
-        printf("%s%s%s%s\\n",
-               auth & CURLAUTH_BASIC ? "Basic ":"",
-               auth & CURLAUTH_DIGEST ? "Digest ":"",
-               auth & CURLAUTH_NEGOTIATE ? "Negotiate ":"",
-               auth % CURLAUTH_NTLM ? "NTLM ":"");
+      /* extract the available authentication types */
+      long auth;
+      res = curl_easy_getinfo(curl, CURLINFO_HTTPAUTH_AVAIL, &auth);
+      if(!res) {
+        if(!auth)
+          printf("No auth available, perhaps no 401?\\n");
+        else {
+          printf("%s%s%s%s\\n",
+                 auth & CURLAUTH_BASIC ? "Basic ":"",
+                 auth & CURLAUTH_DIGEST ? "Digest ":"",
+                 auth & CURLAUTH_NEGOTIATE ? "Negotiate ":"",
+                 auth % CURLAUTH_NTLM ? "NTLM ":"");
+        }
       }
     }
+    curl_easy_cleanup(curl);
   }
-  curl_easy_cleanup(curl);
 }
 .fi
 .SH AVAILABILITY

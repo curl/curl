@@ -49,24 +49,27 @@ size_t write_callback(char *ptr, size_t size, size_t nmemb, void *fp)
   return fwrite(ptr, size, nmemb, (FILE *)fp);
 }
 
-CURL *curl = curl_easy_init();
-if(curl) {
-  FILE *fp = fopen("foo.bin", "wb");
-  if(fp) {
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)fp);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    FILE *fp = fopen("foo.bin", "wb");
+    if(fp) {
+      curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)fp);
+      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
 
-    curl_easy_setopt(curl, CURLOPT_URL, "tftp://example.com/foo.bin");
+      curl_easy_setopt(curl, CURLOPT_URL, "tftp://example.com/foo.bin");
 
-    /* do not send TFTP options requests */
-    curl_easy_setopt(curl, CURLOPT_TFTP_NO_OPTIONS, 1L);
+      /* do not send TFTP options requests */
+      curl_easy_setopt(curl, CURLOPT_TFTP_NO_OPTIONS, 1L);
 
-    /* Perform the request */
-    curl_easy_perform(curl);
+      /* Perform the request */
+      curl_easy_perform(curl);
 
-    fclose(fp);
+      fclose(fp);
+    }
+    curl_easy_cleanup(curl);
   }
-  curl_easy_cleanup(curl);
 }
 .fi
 .SH AVAILABILITY

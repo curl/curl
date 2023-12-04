@@ -74,35 +74,41 @@ HTTP
 
 #define SEP  "\\t"  /* Tab separates the fields */
 
-char *my_cookie =
-  "example.com"    /* Hostname */
-  SEP "FALSE"      /* Include subdomains */
-  SEP "/"          /* Path */
-  SEP "FALSE"      /* Secure */
-  SEP "0"          /* Expiry in epoch time format. 0 == Session */
-  SEP "foo"        /* Name */
-  SEP "bar";       /* Value */
+int main(void)
+{
+  char *my_cookie =
+    "example.com"    /* Hostname */
+    SEP "FALSE"      /* Include subdomains */
+    SEP "/"          /* Path */
+    SEP "FALSE"      /* Secure */
+    SEP "0"          /* Expiry in epoch time format. 0 == Session */
+    SEP "foo"        /* Name */
+    SEP "bar";       /* Value */
 
-/* my_cookie is imported immediately via CURLOPT_COOKIELIST. */
-curl_easy_setopt(curl, CURLOPT_COOKIELIST, my_cookie);
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    /* my_cookie is imported immediately via CURLOPT_COOKIELIST. */
+    curl_easy_setopt(curl, CURLOPT_COOKIELIST, my_cookie);
 
-/* The list of cookies in cookies.txt are not be imported until right
-   before a transfer is performed. Cookies in the list that have the same
-   hostname, path and name as in my_cookie are skipped. That is because
-   libcurl has already imported my_cookie and it's considered a "live"
-   cookie. A live cookie is not replaced by one read from a file.
-*/
-curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "cookies.txt");  /* import */
+    /* The list of cookies in cookies.txt are not be imported until right
+       before a transfer is performed. Cookies in the list that have the same
+       hostname, path and name as in my_cookie are skipped. That is because
+       libcurl has already imported my_cookie and it's considered a "live"
+       cookie. A live cookie is not replaced by one read from a file.
+    */
+    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "cookies.txt");  /* import */
 
-/* Cookies are exported after curl_easy_cleanup is called. The server
-   may have added, deleted or modified cookies by then. The cookies that
-   were skipped on import are not exported.
-*/
-curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "cookies.txt");  /* export */
+    /* Cookies are exported after curl_easy_cleanup is called. The server
+       may have added, deleted or modified cookies by then. The cookies that
+       were skipped on import are not exported.
+    */
+    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "cookies.txt");  /* export */
 
-curl_easy_perform(curl);  /* cookies imported from cookies.txt */
+    curl_easy_perform(curl);  /* cookies imported from cookies.txt */
 
-curl_easy_cleanup(curl);  /* cookies exported to cookies.txt */
+    curl_easy_cleanup(curl);  /* cookies exported to cookies.txt */
+  }
+}
 .fi
 .SH "Cookie file format"
 The cookie file format and general cookie concepts in curl are described

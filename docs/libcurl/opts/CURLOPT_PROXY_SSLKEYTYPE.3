@@ -43,16 +43,20 @@ option.
 Used with HTTPS proxy
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-  curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy");
-  curl_easy_setopt(curl, CURLOPT_PROXY_SSLCERT, "client.pem");
-  curl_easy_setopt(curl, CURLOPT_PROXY_SSLKEY, "key.pem");
-  curl_easy_setopt(curl, CURLOPT_PROXY_SSLKEYTYPE, "PEM");
-  curl_easy_setopt(curl, CURLOPT_PROXY_KEYPASSWD, "s3cret");
-  ret = curl_easy_perform(curl);
-  curl_easy_cleanup(curl);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+    curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy");
+    curl_easy_setopt(curl, CURLOPT_PROXY_SSLCERT, "client.pem");
+    curl_easy_setopt(curl, CURLOPT_PROXY_SSLKEY, "key.pem");
+    curl_easy_setopt(curl, CURLOPT_PROXY_SSLKEYTYPE, "PEM");
+    curl_easy_setopt(curl, CURLOPT_PROXY_KEYPASSWD, "s3cret");
+    res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

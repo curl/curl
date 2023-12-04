@@ -70,29 +70,32 @@ year, MM as the month number and DD as the day of the month, for the specified
 calendar date.
 .SH EXAMPLE
 .nf
- time_t t;
- t = curl_getdate("Sun, 06 Nov 1994 08:49:37 GMT", NULL);
- t = curl_getdate("Sunday, 06-Nov-94 08:49:37 GMT", NULL);
- t = curl_getdate("Sun Nov  6 08:49:37 1994", NULL);
- t = curl_getdate("06 Nov 1994 08:49:37 GMT", NULL);
- t = curl_getdate("06-Nov-94 08:49:37 GMT", NULL);
- t = curl_getdate("Nov  6 08:49:37 1994", NULL);
- t = curl_getdate("06 Nov 1994 08:49:37", NULL);
- t = curl_getdate("06-Nov-94 08:49:37", NULL);
- t = curl_getdate("1994 Nov 6 08:49:37", NULL);
- t = curl_getdate("GMT 08:49:37 06-Nov-94 Sunday", NULL);
- t = curl_getdate("94 6 Nov 08:49:37", NULL);
- t = curl_getdate("1994 Nov 6", NULL);
- t = curl_getdate("06-Nov-94", NULL);
- t = curl_getdate("Sun Nov 6 94", NULL);
- t = curl_getdate("1994.Nov.6", NULL);
- t = curl_getdate("Sun/Nov/6/94/GMT", NULL);
- t = curl_getdate("Sun, 06 Nov 1994 08:49:37 CET", NULL);
- t = curl_getdate("06 Nov 1994 08:49:37 EST", NULL);
- t = curl_getdate("Sun, 12 Sep 2004 15:05:58 -0700", NULL);
- t = curl_getdate("Sat, 11 Sep 2004 21:32:11 +0200", NULL);
- t = curl_getdate("20040912 15:05:58 -0700", NULL);
- t = curl_getdate("20040911 +0200", NULL);
+int main(void)
+{
+  time_t t;
+  t = curl_getdate("Sun, 06 Nov 1994 08:49:37 GMT", NULL);
+  t = curl_getdate("Sunday, 06-Nov-94 08:49:37 GMT", NULL);
+  t = curl_getdate("Sun Nov  6 08:49:37 1994", NULL);
+  t = curl_getdate("06 Nov 1994 08:49:37 GMT", NULL);
+  t = curl_getdate("06-Nov-94 08:49:37 GMT", NULL);
+  t = curl_getdate("Nov  6 08:49:37 1994", NULL);
+  t = curl_getdate("06 Nov 1994 08:49:37", NULL);
+  t = curl_getdate("06-Nov-94 08:49:37", NULL);
+  t = curl_getdate("1994 Nov 6 08:49:37", NULL);
+  t = curl_getdate("GMT 08:49:37 06-Nov-94 Sunday", NULL);
+  t = curl_getdate("94 6 Nov 08:49:37", NULL);
+  t = curl_getdate("1994 Nov 6", NULL);
+  t = curl_getdate("06-Nov-94", NULL);
+  t = curl_getdate("Sun Nov 6 94", NULL);
+  t = curl_getdate("1994.Nov.6", NULL);
+  t = curl_getdate("Sun/Nov/6/94/GMT", NULL);
+  t = curl_getdate("Sun, 06 Nov 1994 08:49:37 CET", NULL);
+  t = curl_getdate("06 Nov 1994 08:49:37 EST", NULL);
+  t = curl_getdate("Sun, 12 Sep 2004 15:05:58 -0700", NULL);
+  t = curl_getdate("Sat, 11 Sep 2004 21:32:11 +0200", NULL);
+  t = curl_getdate("20040912 15:05:58 -0700", NULL);
+  t = curl_getdate("20040911 +0200", NULL);
+}
 .fi
 .SH STANDARDS
 This parser handles date formats specified in RFC 822 (including the update in

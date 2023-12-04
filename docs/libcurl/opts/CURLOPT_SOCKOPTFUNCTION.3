@@ -100,21 +100,27 @@ static int sockopt_callback(void *clientp, curl_socket_t curlfd,
   return CURL_SOCKOPT_ALREADY_CONNECTED;
 }
 
-curl = curl_easy_init();
-if(curl) {
-  /* libcurl thinks that you connect to the host
-   * and port that you specify in the URL option. */
-  curl_easy_setopt(curl, CURLOPT_URL, "http://99.99.99.99:9999");
-  /* call this function to get a socket */
-  curl_easy_setopt(curl, CURLOPT_OPENSOCKETFUNCTION, opensocket);
-  curl_easy_setopt(curl, CURLOPT_OPENSOCKETDATA, &sockfd);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    int sockfd; /* our custom file descriptor */
+    /* libcurl thinks that you connect to the host
+     * and port that you specify in the URL option. */
+    curl_easy_setopt(curl, CURLOPT_URL, "http://99.99.99.99:9999");
+    /* call this function to get a socket */
+    curl_easy_setopt(curl, CURLOPT_OPENSOCKETFUNCTION, opensocket);
+    curl_easy_setopt(curl, CURLOPT_OPENSOCKETDATA, &sockfd);
 
-  /* call this function to set options for the socket */
-  curl_easy_setopt(curl, CURLOPT_SOCKOPTFUNCTION, sockopt_callback);
+    /* call this function to set options for the socket */
+    curl_easy_setopt(curl, CURLOPT_SOCKOPTFUNCTION, sockopt_callback);
 
-  res = curl_easy_perform(curl);
+    res = curl_easy_perform(curl);
 
-  curl_easy_cleanup(curl);
+    curl_easy_cleanup(curl);
+  }
+}
 .fi
 .SH AVAILABILITY
 Added in 7.16.0. The \fICURL_SOCKOPT_ALREADY_CONNECTED\fP return code was

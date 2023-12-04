@@ -40,20 +40,29 @@ By default, the value of this parameter is NULL.
 Used with HTTP
 .SH EXAMPLE
 .nf
+#include <unistd.h> /* for lseek */
+
+struct data {
+  int fd; /* our file descriptor */
+};
+
 static curlioerr ioctl_callback(CURL *handle, int cmd, void *clientp)
 {
   struct data *io = (struct data *)clientp;
   if(cmd == CURLIOCMD_RESTARTREAD) {
-    lseek(fd, 0, SEEK_SET);
-    current_offset = 0;
+    lseek(io->fd, 0, SEEK_SET);
     return CURLIOE_OK;
   }
   return CURLIOE_UNKNOWNCMD;
 }
+int main(void)
 {
   struct data ioctl_data;
-  curl_easy_setopt(curl, CURLOPT_IOCTLFUNCTION, ioctl_callback);
-  curl_easy_setopt(curl, CURLOPT_IOCTLDATA, &ioctl_data);
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_IOCTLFUNCTION, ioctl_callback);
+    curl_easy_setopt(curl, CURLOPT_IOCTLDATA, &ioctl_data);
+  }
 }
 .fi
 .SH AVAILABILITY

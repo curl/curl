@@ -43,34 +43,39 @@ its option \fICURLINFO_CERTINFO(3)\fP.
 All TLS-based
 .SH EXAMPLE
 .nf
-curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/");
 
-  /* connect to any HTTPS site, trusted or not */
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+    /* connect to any HTTPS site, trusted or not */
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
-  curl_easy_setopt(curl, CURLOPT_CERTINFO, 1L);
+    curl_easy_setopt(curl, CURLOPT_CERTINFO, 1L);
 
-  res = curl_easy_perform(curl);
+    res = curl_easy_perform(curl);
 
-  if (!res) {
-    struct curl_certinfo *ci;
-    res = curl_easy_getinfo(curl, CURLINFO_CERTINFO, &ci);
+    if(!res) {
+      struct curl_certinfo *ci;
+      res = curl_easy_getinfo(curl, CURLINFO_CERTINFO, &ci);
 
-    if (!res) {
-      printf("%d certs!\\n", ci->num_of_certs);
+      if(!res) {
+        int i;
+        printf("%d certs!\\n", ci->num_of_certs);
 
-      for(i = 0; i < ci->num_of_certs; i++) {
-        struct curl_slist *slist;
+        for(i = 0; i < ci->num_of_certs; i++) {
+          struct curl_slist *slist;
 
-        for(slist = ci->certinfo[i]; slist; slist = slist->next)
-          printf("%s\\n", slist->data);
+          for(slist = ci->certinfo[i]; slist; slist = slist->next)
+            printf("%s\\n", slist->data);
+        }
       }
     }
+    curl_easy_cleanup(curl);
   }
-  curl_easy_cleanup(curl);
 }
 .fi
 .SH AVAILABILITY

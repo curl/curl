@@ -58,24 +58,27 @@ struct my_info {
 static size_t header_callback(char *buffer, size_t size,
                               size_t nitems, void *userdata)
 {
-  struct my_info *i = (struct my_info *)userdata;
-
+  struct my_info *i = userdata;
+  printf("shoe size: %d\\n", i->shoesize);
   /* now this callback can access the my_info struct */
 
   return nitems * size;
 }
 
-CURL *curl = curl_easy_init();
-if(curl) {
-  struct my_info my = { 10, "the cookies are in the cupboard" };
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    struct my_info my = { 10, "the cookies are in the cupboard" };
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
 
-  /* pass in custom data to the callback */
-  curl_easy_setopt(curl, CURLOPT_HEADERDATA, &my);
+    /* pass in custom data to the callback */
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, &my);
 
-  curl_easy_perform(curl);
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

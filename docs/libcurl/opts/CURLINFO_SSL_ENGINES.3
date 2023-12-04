@@ -43,17 +43,20 @@ data for you.
 All TLS based ones.
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  CURLcode res;
-  struct curl_slist *engines;
-  res = curl_easy_getinfo(curl, CURLINFO_SSL_ENGINES, &engines);
-  if((res == CURLE_OK) && engines) {
-    /* we have a list, free it when done using it */
-    curl_slist_free_all(engines);
-  }
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    struct curl_slist *engines;
+    res = curl_easy_getinfo(curl, CURLINFO_SSL_ENGINES, &engines);
+    if((res == CURLE_OK) && engines) {
+      /* we have a list, free it when done using it */
+      curl_slist_free_all(engines);
+    }
 
-  curl_easy_cleanup(curl);
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

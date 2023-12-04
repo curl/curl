@@ -86,19 +86,26 @@ Using the rules above, a file name pattern can be constructed:
 This feature is only supported for FTP download.
 .SH EXAMPLE
 .nf
-/* initialization of easy handle */
-handle = curl_easy_init();
 
-/* turn on wildcard matching */
-curl_easy_setopt(handle, CURLOPT_WILDCARDMATCH, 1L);
+extern long begin_cb(struct curl_fileinfo *, void *, int);
+extern long end_cb(void *ptr);
 
-/* callback is called before download of concrete file started */
-curl_easy_setopt(handle, CURLOPT_CHUNK_BGN_FUNCTION, file_is_coming);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    /* turn on wildcard matching */
+    curl_easy_setopt(curl, CURLOPT_WILDCARDMATCH, 1L);
 
-/* callback is called after data from the file have been transferred */
-curl_easy_setopt(handle, CURLOPT_CHUNK_END_FUNCTION, file_is_downloaded);
+    /* callback is called before download of concrete file started */
+    curl_easy_setopt(curl, CURLOPT_CHUNK_BGN_FUNCTION, begin_cb);
 
-/* See more on https://curl.se/libcurl/c/ftp-wildcard.html */
+    /* callback is called after data from the file have been transferred */
+    curl_easy_setopt(curl, CURLOPT_CHUNK_END_FUNCTION, end_cb);
+
+    /* See more on https://curl.se/libcurl/c/ftp-wildcard.html */
+  }
+}
 .fi
 .SH AVAILABILITY
 Added in 7.21.0

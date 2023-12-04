@@ -53,19 +53,25 @@ NULL
 Used with HTTPS proxy
 .SH EXAMPLE
 .nf
-char *strpem; /* strpem must point to a PEM string */
-CURL *curl = curl_easy_init();
-if(curl) {
-  struct curl_blob blob;
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-  /* using an HTTPS proxy */
-  curl_easy_setopt(curl, CURLOPT_PROXY, "https://localhost:443");
-  blob.data = strpem;
-  blob.len = strlen(strpem);
-  blob.flags = CURL_BLOB_COPY;
-  curl_easy_setopt(curl, CURLOPT_PROXY_CAINFO_BLOB, &blob);
-  ret = curl_easy_perform(curl);
-  curl_easy_cleanup(curl);
+#include <string.h> /* for strlen */
+
+extern char *strpem; /* strpem must point to a PEM string */
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    struct curl_blob blob;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+    /* using an HTTPS proxy */
+    curl_easy_setopt(curl, CURLOPT_PROXY, "https://localhost:443");
+    blob.data = strpem;
+    blob.len = strlen(strpem);
+    blob.flags = CURL_BLOB_COPY;
+    curl_easy_setopt(curl, CURLOPT_PROXY_CAINFO_BLOB, &blob);
+    res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

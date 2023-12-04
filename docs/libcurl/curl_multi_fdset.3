@@ -80,16 +80,35 @@ save you from the crash, but makes your program NOT wait for sockets it should
 wait for...
 .SH EXAMPLE
 .nf
- /* get file descriptors from the transfers */
- mc = curl_multi_fdset(multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
+int main(void)
+{
+  fd_set fdread;
+  fd_set fdwrite;
+  fd_set fdexcep;
+  int maxfd;
+  int rc;
+  CURLMcode mc;
+  struct timeval timeout = {1, 0};
 
- if(mc != CURLM_OK) {
-   fprintf(stderr, "curl_multi_fdset() failed, code %d.\\n", mc);
-   break;
- }
+  CURLM *multi = curl_multi_init();
 
- /* wait for activity on one of the sockets */
- rc = select(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout);
+  do {
+
+    /* call curl_multi_perform() */
+
+    /* get file descriptors from the transfers */
+    mc = curl_multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
+
+    if(mc != CURLM_OK) {
+      fprintf(stderr, "curl_multi_fdset() failed, code %d.\\n", mc);
+      break;
+    }
+
+    /* wait for activity on one of the sockets */
+    rc = select(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout);
+
+  } while(!mc);
+}
 .fi
 .SH AVAILABILITY
 Added in 7.9.6

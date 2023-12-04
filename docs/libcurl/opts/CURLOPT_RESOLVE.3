@@ -79,22 +79,25 @@ NULL
 All
 .SH EXAMPLE
 .nf
-CURL *curl;
-struct curl_slist *host = NULL;
-host = curl_slist_append(NULL, "example.com:443:127.0.0.1");
+int main(void)
+{
+  CURL *curl;
+  struct curl_slist *host = NULL;
+  host = curl_slist_append(NULL, "example.com:443:127.0.0.1");
 
-curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_RESOLVE, host);
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_RESOLVE, host);
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  curl_easy_perform(curl);
+    curl_easy_perform(curl);
 
-  /* always cleanup */
-  curl_easy_cleanup(curl);
+    /* always cleanup */
+    curl_easy_cleanup(curl);
+  }
+
+  curl_slist_free_all(host);
 }
-
-curl_slist_free_all(host);
 .fi
 .SH AVAILABILITY
 Added in 7.21.3. Removal support added in 7.42.0.

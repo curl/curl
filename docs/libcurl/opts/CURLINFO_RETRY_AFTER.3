@@ -46,18 +46,21 @@ Returns zero delay if there was no header.
 HTTP(S)
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  CURLcode res;
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-  res = curl_easy_perform(curl);
-  if(res == CURLE_OK) {
-    curl_off_t wait = 0;
-    curl_easy_getinfo(curl, CURLINFO_RETRY_AFTER, &wait);
-    if(wait)
-      printf("Wait for %" CURL_FORMAT_CURL_OFF_T " seconds\\n", wait);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+    res = curl_easy_perform(curl);
+    if(res == CURLE_OK) {
+      curl_off_t wait = 0;
+      curl_easy_getinfo(curl, CURLINFO_RETRY_AFTER, &wait);
+      if(wait)
+        printf("Wait for %" CURL_FORMAT_CURL_OFF_T " seconds\\n", wait);
+    }
+    curl_easy_cleanup(curl);
   }
-  curl_easy_cleanup(curl);
 }
 .fi
 .SH AVAILABILITY

@@ -53,16 +53,19 @@ NULL
 HTTP/2
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-CURL *curl2 = curl_easy_init(); /* a second handle */
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/one");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  CURL *curl2 = curl_easy_init(); /* a second handle */
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/one");
 
-  /* the second depends on the first */
-  curl_easy_setopt(curl2, CURLOPT_URL, "https://example.com/two");
-  curl_easy_setopt(curl2, CURLOPT_STREAM_DEPENDS, curl);
+    /* the second depends on the first */
+    curl_easy_setopt(curl2, CURLOPT_URL, "https://example.com/two");
+    curl_easy_setopt(curl2, CURLOPT_STREAM_DEPENDS, curl);
 
-  /* then add both to a multi handle and transfer them! */
+    /* then add both to a multi handle and transfer them! */
+  }
 }
 .fi
 .SH AVAILABILITY

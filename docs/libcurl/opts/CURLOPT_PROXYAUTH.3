@@ -48,18 +48,21 @@ CURLAUTH_BASIC
 HTTP
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  CURLcode ret;
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-  /* use this proxy */
-  curl_easy_setopt(curl, CURLOPT_PROXY, "http://local.example.com:1080");
-  /* allow whatever auth the proxy speaks */
-  curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
-  /* set the proxy credentials */
-  curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, "james:007");
-  ret = curl_easy_perform(curl);
-  curl_easy_cleanup(curl);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode ret;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+    /* use this proxy */
+    curl_easy_setopt(curl, CURLOPT_PROXY, "http://local.example.com:1080");
+    /* allow whatever auth the proxy speaks */
+    curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
+    /* set the proxy credentials */
+    curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, "james:007");
+    ret = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

@@ -52,18 +52,21 @@ when setting \fICURLOPT_FOLLOWLOCATION(3)\fP.
 HTTP(S)
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  /* a silly POST example */
-  curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "data=true");
+    /* a silly POST example */
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "data=true");
 
-  /* example.com is redirected, so we tell libcurl to send POST on 301, 302 and
-     303 HTTP response codes */
-  curl_easy_setopt(curl, CURLOPT_POSTREDIR, CURL_REDIR_POST_ALL);
+    /* example.com is redirected, so we tell libcurl to send POST on 301,
+       302 and 303 HTTP response codes */
+    curl_easy_setopt(curl, CURLOPT_POSTREDIR, CURL_REDIR_POST_ALL);
 
-  curl_easy_perform(curl);
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

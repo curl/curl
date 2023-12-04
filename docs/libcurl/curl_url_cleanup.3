@@ -37,9 +37,12 @@ Passing in a NULL pointer in \fIhandle\fP makes this function return
 immediately with no action.
 .SH EXAMPLE
 .nf
+int main(void)
+{
   CURLU *url = curl_url();
   curl_url_set(url, CURLUPART_URL, "https://example.com", 0);
   curl_url_cleanup(url);
+}
 .fi
 .SH AVAILABILITY
 Added in 7.62.0

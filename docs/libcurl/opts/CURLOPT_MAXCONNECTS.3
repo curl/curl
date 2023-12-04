@@ -54,13 +54,16 @@ acknowledged, and you must instead use \fIcurl_multi_setopt(3)\fP and the
 Most
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  CURLcode ret;
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-  /* limit the connection cache for this handle to no more than 3 */
-  curl_easy_setopt(curl, CURLOPT_MAXCONNECTS, 3L);
-  ret = curl_easy_perform(curl);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode ret;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+    /* limit the connection cache for this handle to no more than 3 */
+    curl_easy_setopt(curl, CURLOPT_MAXCONNECTS, 3L);
+    ret = curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

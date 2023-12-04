@@ -77,45 +77,35 @@ Bit flag to \fIcurl_waitfd.events\fP indicating the socket should poll on
 write events such as the socket being clear to write without blocking.
 .SH EXAMPLE
 .nf
-CURL *easy_handle;
-CURLM *multi_handle;
+int main(void)
+{
+  CURL *easy;
+  CURLM *multi = curl_multi_init();
+  int still_running;
 
-/* add the individual easy handle */
-curl_multi_add_handle(multi_handle, easy_handle);
+  /* add the individual easy handle */
+  curl_multi_add_handle(multi, easy);
 
-do {
-  CURLMcode mc;
-  int numfds;
+  do {
+    CURLMcode mc;
+    int numfds;
 
-  mc = curl_multi_perform(multi_handle, &still_running);
+    mc = curl_multi_perform(multi, &still_running);
 
-  if(mc == CURLM_OK ) {
-    /* wait for activity, timeout or "nothing" */
-    mc = curl_multi_wait(multi_handle, NULL, 0, 1000, &numfds);
-  }
-
-  if(mc != CURLM_OK) {
-    fprintf(stderr, "curl_multi failed, code %d.\\n", mc);
-    break;
-  }
-
-  /* 'numfds' being zero means either a timeout or no file descriptors to
-     wait for. Try timeout on first occurrence, then assume no file
-     descriptors and no file descriptors to wait for means wait for 100
-     milliseconds. */
-
-  if(!numfds) {
-    repeats++; /* count number of repeated zero numfds */
-    if(repeats > 1) {
-      WAITMS(100); /* sleep 100 milliseconds */
+    if(mc == CURLM_OK) {
+      /* wait for activity, timeout or "nothing" */
+      mc = curl_multi_wait(multi, NULL, 0, 1000, &numfds);
     }
-  }
-  else
-    repeats = 0;
 
-} while(still_running);
+    if(mc != CURLM_OK) {
+      fprintf(stderr, "curl_multi failed, code %d.\\n", mc);
+      break;
+    }
 
-curl_multi_remove_handle(multi_handle, easy_handle);
+  } while(still_running);
+
+  curl_multi_remove_handle(multi, easy);
+}
 .fi
 .SH AVAILABILITY
 This function was added in libcurl 7.28.0.

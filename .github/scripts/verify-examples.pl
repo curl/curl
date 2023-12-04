@@ -50,8 +50,6 @@ sub extract {
     open(F, "<$f");
     open(O, ">$cfile");
     print O "#include <curl/curl.h>\n";
-    print O "extern struct CURLM *multi;\n";
-    print O "extern struct CURL *easy;\n";
     while(<F>) {
         $iline++;
         if(/^.SH EXAMPLE/) {

@@ -56,9 +56,12 @@ See DESCRIPTION
 All
 .SH EXAMPLE
 .nf
-CURLM *m = curl_multi_init();
-/* only keep 10 connections in the cache */
-curl_multi_setopt(m, CURLMOPT_MAXCONNECTS, 10L);
+int main(void)
+{
+  CURLM *m = curl_multi_init();
+  /* only keep 10 connections in the cache */
+  curl_multi_setopt(m, CURLMOPT_MAXCONNECTS, 10L);
+}
 .fi
 .SH AVAILABILITY
 Added in 7.16.3

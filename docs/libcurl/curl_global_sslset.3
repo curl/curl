@@ -103,6 +103,9 @@ typedef enum {
 .fi
 .SH EXAMPLE
 .nf
+int main(void)
+{
+  int i;
   /* choose a specific backend */
   curl_global_sslset(CURLSSLBACKEND_WOLFSSL, NULL, NULL);
 
@@ -113,6 +116,7 @@ typedef enum {
   for(i = 0; list[i]; i++)
     printf("SSL backend #%d: '%s' (ID: %d)\\n",
            i, list[i]->name, list[i]->id);
+}
 .fi
 .SH AVAILABILITY
 This function was added in libcurl 7.56.0. Before this version, there was no

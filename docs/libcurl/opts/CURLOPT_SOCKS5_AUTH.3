@@ -44,18 +44,21 @@ CURLAUTH_BASIC|CURLAUTH_GSSAPI
 All
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  /* request to use a SOCKS5 proxy */
-  curl_easy_setopt(curl, CURLOPT_PROXY, "socks5://user:pass@myproxy.com");
+    /* request to use a SOCKS5 proxy */
+    curl_easy_setopt(curl, CURLOPT_PROXY, "socks5://user:pass@myproxy.com");
 
-  /* enable username/password authentication only */
-  curl_easy_setopt(curl, CURLOPT_SOCKS5_AUTH, (long)CURLAUTH_BASIC);
+    /* enable username/password authentication only */
+    curl_easy_setopt(curl, CURLOPT_SOCKS5_AUTH, (long)CURLAUTH_BASIC);
 
-  /* Perform the request */
-  curl_easy_perform(curl);
+    /* Perform the request */
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

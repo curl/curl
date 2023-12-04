@@ -41,10 +41,17 @@ NULL
 FTP
 .SH EXAMPLE
 .nf
+#include <stdio.h>
+
+struct callback_data {
+   FILE *output;
+};
+
 static long file_is_coming(struct curl_fileinfo *finfo,
-                           struct callback_data *data,
+                           void *ptr,
                            int remains)
 {
+  struct callback_data *data = ptr;
   printf("%3d %40s %10luB ", remains, finfo->filename,
          (unsigned long)finfo->size);
 
@@ -80,6 +87,8 @@ int main()
 {
   /* data for callback */
   struct callback_data callback_info;
+
+  CURL *curl = curl_easy_init();
 
   /* callback is called before download of concrete file started */
   curl_easy_setopt(curl, CURLOPT_CHUNK_BGN_FUNCTION, file_is_coming);

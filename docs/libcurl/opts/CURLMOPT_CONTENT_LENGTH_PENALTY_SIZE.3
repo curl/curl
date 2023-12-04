@@ -46,9 +46,12 @@ The default value is 0, which means that the size penalization is inactive.
 HTTP(S)
 .SH EXAMPLE
 .nf
-CURLM *m = curl_multi_init();
-long maxlength = 10000;
-curl_multi_setopt(m, CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE, maxlength);
+int main(void)
+{
+  CURLM *m = curl_multi_init();
+  long maxlength = 10000;
+  curl_multi_setopt(m, CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE, maxlength);
+}
 .fi
 .SH AVAILABILITY
 Added in 7.30.0

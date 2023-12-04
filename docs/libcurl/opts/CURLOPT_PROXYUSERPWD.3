@@ -48,13 +48,17 @@ This is NULL by default.
 Used with all protocols that can use a proxy
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
-  curl_easy_setopt(curl, CURLOPT_PROXY, "http://localhost:8080");
-  curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, "clark%20kent:superman");
-  ret = curl_easy_perform(curl);
-  curl_easy_cleanup(curl);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
+    curl_easy_setopt(curl, CURLOPT_PROXY, "http://localhost:8080");
+    curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, "clark%20kent:superman");
+    res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

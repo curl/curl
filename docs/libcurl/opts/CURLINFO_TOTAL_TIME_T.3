@@ -44,20 +44,24 @@ See also the TIMES overview in the \fIcurl_easy_getinfo(3)\fP man page.
 All
 .SH EXAMPLE
 .nf
-curl = curl_easy_init();
-if(curl) {
-  curl_off_t total;
-  curl_easy_setopt(curl, CURLOPT_URL, url);
-  res = curl_easy_perform(curl);
-  if(CURLE_OK == res) {
-    res = curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME_T, &total);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_off_t total;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+    res = curl_easy_perform(curl);
     if(CURLE_OK == res) {
-      printf("Time: %" CURL_FORMAT_CURL_OFF_T ".%06ld", total / 1000000,
-             (long)(total % 1000000));
+      res = curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME_T, &total);
+      if(CURLE_OK == res) {
+        printf("Time: %" CURL_FORMAT_CURL_OFF_T ".%06ld", total / 1000000,
+               (long)(total % 1000000));
+      }
     }
+    /* always cleanup */
+    curl_easy_cleanup(curl);
   }
-  /* always cleanup */
-  curl_easy_cleanup(curl);
 }
 .fi
 .SH AVAILABILITY

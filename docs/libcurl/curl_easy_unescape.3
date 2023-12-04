@@ -54,17 +54,20 @@ TPF, but it was otherwise ignored.
 You must \fIcurl_free(3)\fP the returned string when you are done with it.
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  int decodelen;
-  char *decoded = curl_easy_unescape(curl, "%63%75%72%6c", 12, &decodelen);
-  if(decoded) {
-    /* do not assume printf() works on the decoded data! */
-    printf("Decoded: ");
-    /* ... */
-    curl_free(decoded);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    int decodelen;
+    char *decoded = curl_easy_unescape(curl, "%63%75%72%6c", 12, &decodelen);
+    if(decoded) {
+      /* do not assume printf() works on the decoded data! */
+      printf("Decoded: ");
+      /* ... */
+      curl_free(decoded);
+    }
+    curl_easy_cleanup(curl);
   }
-  curl_easy_cleanup(curl);
 }
 .fi
 .SH AVAILABILITY
