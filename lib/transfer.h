@@ -58,6 +58,20 @@ CURLcode Curl_done_sending(struct Curl_easy *data,
                            struct SingleRequest *k);
 
 /**
+ * Receive response bytes from the connection.
+ * @param          the transfer
+ * @param buf      buffer to hold the received bytes
+ * @param blen     maximum amount of bytes to receive
+ * @param avoid_excess  if TRUE, limit recv amount of response length known
+ * @param err      on return error code
+ * @return amount of bytes received or -1 for error
+ */
+ssize_t Curl_xfer_recv_resp(struct Curl_easy *data,
+                            char *buf, size_t blen,
+                            bool avoid_excess,
+                            CURLcode *err);
+
+/**
  * Write the transfer raw response bytes, as received from the connection.
  * Will handle all passed bytes or return an error. By default, this will
  * write the bytes as BODY to the client. Protocols may provide a
