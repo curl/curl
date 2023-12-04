@@ -249,6 +249,7 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
       nghttp3_conn_close_stream(ctx->h3conn, stream->id,
                                 NGHTTP3_H3_REQUEST_CANCELLED);
       nghttp3_conn_set_stream_user_data(ctx->h3conn, stream->id, NULL);
+      ngtcp2_conn_set_stream_user_data(ctx->qconn, stream->id, NULL);
       stream->closed = TRUE;
     }
 
@@ -849,6 +850,12 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
   CURL_TRC_CF(data, cf, "[%" PRId64 "] read_stream(len=%zu) -> %zd",
               stream_id, buflen, nconsumed);
   if(nconsumed < 0) {
+    if(!data) {
+      struct Curl_easy *cdata = CF_DATA_CURRENT(cf);
+      CURL_TRC_CF(cdata, cf, "[%" PRId64 "] nghttp3 error on stream not "
+                  "used by us, ignored", stream_id);
+      return 0;
+    }
     ngtcp2_ccerr_set_application_error(
       &ctx->last_error,
       nghttp3_err_infer_quic_app_error_code((int)nconsumed), NULL, 0);
@@ -1724,6 +1731,10 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
     goto out;
   stream = H3_STREAM_CTX(data);
   DEBUGASSERT(stream);
+  if(!stream) {
+    *err = CURLE_FAILED_INIT;
+    goto out;
+  }
 
   nwritten = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL, 0, err);
   if(nwritten < 0)
@@ -1759,7 +1770,7 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
     nva[i].flags = NGHTTP3_NV_FLAG_NONE;
   }
 
-  rc = ngtcp2_conn_open_bidi_stream(ctx->qconn, &stream->id, NULL);
+  rc = ngtcp2_conn_open_bidi_stream(ctx->qconn, &stream->id, data);
   if(rc) {
     failf(data, "can get bidi streams");
     *err = CURLE_SEND_ERROR;
@@ -1998,8 +2009,8 @@ static CURLcode recv_pkt(const unsigned char *pkt, size_t pktlen,
 
   rv = ngtcp2_conn_read_pkt(ctx->qconn, &path, &pi, pkt, pktlen, pktx->ts);
   if(rv) {
-    CURL_TRC_CF(pktx->data, pktx->cf, "ingress, read_pkt -> %s",
-                ngtcp2_strerror(rv));
+    CURL_TRC_CF(pktx->data, pktx->cf, "ingress, read_pkt -> %s (%d)",
+                ngtcp2_strerror(rv), rv);
     if(!ctx->last_error.error_code) {
       if(rv == NGTCP2_ERR_CRYPTO) {
         ngtcp2_ccerr_set_tls_alert(&ctx->last_error,
@@ -2698,12 +2709,14 @@ static bool cf_ngtcp2_conn_is_alive(struct Curl_cfilter *cf,
                                     bool *input_pending)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
-  bool alive = TRUE;
+  bool alive = FALSE;
   const ngtcp2_transport_params *rp;
+  struct cf_call_data save;
 
+    CF_DATA_SAVE(save, cf, data);
   *input_pending = FALSE;
   if(!ctx->qconn)
-    return FALSE;
+    goto out;
 
   /* Both sides of the QUIC connection announce they max idle times in
    * the transport parameters. Look at the minimum of both and if
@@ -2720,24 +2733,26 @@ static bool cf_ngtcp2_conn_is_alive(struct Curl_cfilter *cf,
       idle_ms = (rp->max_idle_timeout / NGTCP2_MILLISECONDS);
     idletime = Curl_timediff(Curl_now(), ctx->q.last_io);
     if(idletime > 0 && (uint64_t)idletime > idle_ms)
-      return FALSE;
+      goto out;
   }
 
   if(!cf->next || !cf->next->cft->is_alive(cf->next, data, input_pending))
-    return FALSE;
+    goto out;
 
+  alive = TRUE;
   if(*input_pending) {
+    CURLcode result;
     /* This happens before we've sent off a request and the connection is
        not in use by any other transfer, there shouldn't be any data here,
        only "protocol frames" */
     *input_pending = FALSE;
-    if(cf_progress_ingress(cf, data, NULL))
-      alive = FALSE;
-    else {
-      alive = TRUE;
-    }
+    result = cf_progress_ingress(cf, data, NULL);
+    CURL_TRC_CF(data, cf, "is_alive, progress ingress -> %d", result);
+    alive = result? FALSE : TRUE;
   }
 
+out:
+  CF_DATA_RESTORE(cf, save);
   return alive;
 }
 
