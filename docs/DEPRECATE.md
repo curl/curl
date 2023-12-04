@@ -8,8 +8,8 @@ how your use case cannot be satisfied properly using a workaround.
 
 ## NTLM_WB auth
 
-This NTLM authentication method is powered by a separate tool, winbind's
-`ntlm_auth` helper. Barely oneone use this. It was always a quirky
+This NTLM authentication method is powered by a separate tool,
+`ntlm_auth`. Barely anyone use this method. It was always a quirky
 implementation (including fork + exec), it has limited portability and we
 don't test it in the test suite and CI.
 
