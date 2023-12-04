@@ -75,7 +75,7 @@ ssize_t Curl_xfer_recv_resp(struct Curl_easy *data,
  * Write the transfer raw response bytes, as received from the connection.
  * Will handle all passed bytes or return an error. By default, this will
  * write the bytes as BODY to the client. Protocols may provide a
- * "readwrite" callback in their handler to add specific treatment. E.g.
+ * "write_resp" callback in their handler to add specific treatment. E.g.
  * HTTP parses response headers and passes them differently to the client.
  * @param data     the transfer
  * @param buf      the raw response bytes

@@ -816,9 +816,10 @@ struct Curl_handler {
                          bool dead_connection);
 
   /* If used, this function gets called from transfer.c:readwrite_data() to
-     allow the protocol to do extra reads/writes */
-  CURLcode (*readwrite)(struct Curl_easy *data, const char *buf, size_t blen,
-                        bool is_eos, bool *done);
+     allow the protocol to do extra handling in writing response to
+     the client. */
+  CURLcode (*write_resp)(struct Curl_easy *data, const char *buf, size_t blen,
+                         bool is_eos, bool *done);
 
   /* This function can perform various checks on the connection. See
      CONNCHECK_* for more information about the checks that can be performed,
