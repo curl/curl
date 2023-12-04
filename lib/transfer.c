@@ -438,6 +438,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
   do {
     bool is_eos = FALSE;
     size_t bytestoread;
+    ssize_t nread;
 
     if(!is_multiplex) {
       /* Multiplexed connection have inherent handling of EOF and we do not
@@ -450,15 +451,6 @@ static CURLcode readwrite_data(struct Curl_easy *data,
     blen = 0;
     bytestoread = data->set.buffer_size;
 
-    /* If we are reading BODY data and the connection does NOT handle EOF
-     * and we know the size of the BODY data, limit the read amount */
-    if(!k->header && !is_multiplex && k->size != -1) {
-      curl_off_t totalleft = k->size - k->bytecount;
-      if(totalleft <= 0)
-        bytestoread = 0;
-      else if(totalleft < (curl_off_t)bytestoread)
-        bytestoread = (size_t)totalleft;
-    }
     /* Observe any imposed speed limit */
     if(bytestoread && data->set.max_recv_speed) {
       curl_off_t net_limit = data->set.max_recv_speed - total_received;
@@ -468,24 +460,18 @@ static CURLcode readwrite_data(struct Curl_easy *data,
         bytestoread = (size_t)net_limit;
     }
 
-    if(bytestoread) {
-      ssize_t nread; /* number of bytes read */
-      result = Curl_read(data, conn->sockfd, buf, bytestoread, &nread);
+    nread = Curl_xfer_recv_resp(data, buf, bytestoread,
+                                !is_multiplex, &result);
+    if(nread < 0) {
       if(CURLE_AGAIN == result) {
         result = CURLE_OK;
         break; /* get out of loop */
       }
-      else if(result)
-        goto out;
-      DEBUGASSERT(nread >= 0);
-      blen = (size_t)nread;
-    }
-    else {
-      /* want nothing - continue as if read nothing. */
-      DEBUGF(infof(data, "readwrite_data: we're done"));
+      goto out; /* real error */
     }
 
     /* We only get a 0-length read on EndOfStream */
+    blen = (size_t)nread;
     is_eos = (blen == 0);
     *didwhat |= KEEP_RECV;
 
@@ -517,9 +503,8 @@ static CURLcode readwrite_data(struct Curl_easy *data,
       k->keepon &= ~KEEP_RECV;
     }
     /* And if we are PAUSEd or stopped receiving, we leave the loop */
-    if((k->keepon & KEEP_RECV_PAUSE) || !(k->keepon & KEEP_RECV)) {
+    if((k->keepon & KEEP_RECV_PAUSE) || !(k->keepon & KEEP_RECV))
       break;
-    }
 
   } while(maxloops-- && data_pending(data));
 
@@ -1651,6 +1636,39 @@ Curl_setup_transfer(
 
 }
 
+ssize_t Curl_xfer_recv_resp(struct Curl_easy *data,
+                              char *buf, size_t blen,
+                              bool avoid_excess,
+                              CURLcode *err)
+{
+  ssize_t nread;
+
+  DEBUGASSERT(blen > 0);
+  /* If we are reading BODY data and the connection does NOT handle EOF
+   * and we know the size of the BODY data, limit the read amount */
+  if(avoid_excess && !data->req.header && data->req.size != -1) {
+    curl_off_t totalleft = data->req.size - data->req.bytecount;
+    if(totalleft <= 0)
+      blen = 0;
+    else if(totalleft < (curl_off_t)blen)
+      blen = (size_t)totalleft;
+  }
+
+  if(!blen) {
+    /* want nothing - continue as if read nothing. */
+    DEBUGF(infof(data, "readwrite_data: we're done"));
+    *err = CURLE_OK;
+    return 0;
+  }
+
+  *err = Curl_read(data, data->conn->sockfd, buf, blen, &nread);
+  if(*err)
+    return -1;
+  DEBUGASSERT(nread >= 0);
+  *err = CURLE_OK;
+  return nread;
+}
+
 CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
                               char *buf, size_t blen,
                               bool is_eos, bool *done)
@@ -1679,6 +1697,16 @@ CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
 #endif /* CURL_DISABLE_POP3 */
         result = Curl_client_write(data, cwtype, buf, blen);
     }
+  }
+
+  if(!result && is_eos) {
+    /* If we wrote the EOS, we are definitely done */
+    data->req.eos_written = TRUE;
+    data->req.download_done = TRUE;
+  }
+  /* if we are done, we stop receiving */
+  if(data->req.download_done) {
+    data->req.keepon &= ~KEEP_RECV;
   }
   return result;
 }
