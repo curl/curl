@@ -936,16 +936,13 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
 
   if(data->set.str[STRING_FTPPORT] &&
      (strlen(data->set.str[STRING_FTPPORT]) > 1)) {
-    char *ip_start = string_ftpport;
     char *ip_end = NULL;
-    char *port_start = NULL;
-    char *port_sep = NULL;
 
 #ifdef ENABLE_IPV6
     if(*string_ftpport == '[') {
       /* [ipv6]:port(-range) */
-      ip_start = string_ftpport + 1;
-      ip_end = strchr(string_ftpport, ']');
+      char *ip_start = string_ftpport + 1;
+      ip_end = strchr(ip_start, ']');
       if(ip_end) {
         addrlen = ip_end - ip_start;
         addr = ip_start;
@@ -978,7 +975,8 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
 
     /* parse the port */
     if(ip_end) {
-      port_start = strchr(ip_end, ':');
+      char *port_sep = NULL;
+      char *port_start = strchr(ip_end, ':');
       if(port_start) {
         port_min = curlx_ultous(strtoul(port_start + 1, NULL, 10));
         port_sep = strchr(port_start, '-');
