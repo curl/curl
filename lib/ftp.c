@@ -926,6 +926,8 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   bool possibly_non_local = TRUE;
   char buffer[STRERROR_LEN];
   char *addr = NULL;
+  size_t addrlen = 0;
+  char ipstr[50];
 
   /* Step 1, figure out what is requested,
    * accepted format :
@@ -934,32 +936,20 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
 
   if(data->set.str[STRING_FTPPORT] &&
      (strlen(data->set.str[STRING_FTPPORT]) > 1)) {
-
-#ifdef ENABLE_IPV6
-    size_t addrlen = INET6_ADDRSTRLEN > strlen(string_ftpport) ?
-      INET6_ADDRSTRLEN : strlen(string_ftpport);
-#else
-    size_t addrlen = INET_ADDRSTRLEN > strlen(string_ftpport) ?
-      INET_ADDRSTRLEN : strlen(string_ftpport);
-#endif
     char *ip_start = string_ftpport;
     char *ip_end = NULL;
     char *port_start = NULL;
     char *port_sep = NULL;
-
-    addr = calloc(1, addrlen + 1);
-    if(!addr) {
-      result = CURLE_OUT_OF_MEMORY;
-      goto out;
-    }
 
 #ifdef ENABLE_IPV6
     if(*string_ftpport == '[') {
       /* [ipv6]:port(-range) */
       ip_start = string_ftpport + 1;
       ip_end = strchr(string_ftpport, ']');
-      if(ip_end)
-        strncpy(addr, ip_start, ip_end - ip_start);
+      if(ip_end) {
+        addrlen = ip_end - ip_start;
+        addr = ip_start;
+      }
     }
     else
 #endif
@@ -969,23 +959,21 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
       }
       else {
         ip_end = strchr(string_ftpport, ':');
+        addr = string_ftpport;
         if(ip_end) {
           /* either ipv6 or (ipv4|domain|interface):port(-range) */
+          addrlen = ip_end - string_ftpport;
 #ifdef ENABLE_IPV6
           if(Curl_inet_pton(AF_INET6, string_ftpport, &sa6->sin6_addr) == 1) {
             /* ipv6 */
             port_min = port_max = 0;
-            strcpy(addr, string_ftpport);
             ip_end = NULL; /* this got no port ! */
           }
-          else
 #endif
-            /* (ipv4|domain|interface):port(-range) */
-            strncpy(addr, string_ftpport, ip_end - ip_start);
         }
         else
           /* ipv4|interface */
-          strcpy(addr, string_ftpport);
+          addrlen = strlen(string_ftpport);
       }
 
     /* parse the port */
@@ -1011,22 +999,29 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
     if(port_min > port_max)
       port_min = port_max = 0;
 
-    if(*addr != '\0') {
+    if(addrlen) {
+      DEBUGASSERT(addr);
+      if(addrlen >= sizeof(ipstr))
+        goto out;
+      memcpy(ipstr, addr, addrlen);
+      ipstr[addrlen] = 0;
+
       /* attempt to get the address of the given interface name */
       switch(Curl_if2ip(conn->remote_addr->family,
 #ifdef ENABLE_IPV6
                         Curl_ipv6_scope(&conn->remote_addr->sa_addr),
                         conn->scope_id,
 #endif
-                        addr, hbuf, sizeof(hbuf))) {
+                        ipstr, hbuf, sizeof(hbuf))) {
         case IF2IP_NOT_FOUND:
           /* not an interface, use the given string as host name instead */
-          host = addr;
+          host = ipstr;
           break;
         case IF2IP_AF_NOT_SUPPORTED:
           goto out;
         case IF2IP_FOUND:
           host = hbuf; /* use the hbuf for host name */
+          break;
       }
     }
     else
@@ -1266,7 +1261,6 @@ out:
   }
   if(portsock != CURL_SOCKET_BAD)
     Curl_socket_close(data, conn, portsock);
-  free(addr);
   return result;
 }
 
