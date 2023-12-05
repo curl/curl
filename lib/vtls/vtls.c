@@ -1846,6 +1846,8 @@ struct Curl_cftype Curl_cft_ssl = {
   ssl_cf_query,
 };
 
+#ifndef CURL_DISABLE_PROXY
+
 struct Curl_cftype Curl_cft_ssl_proxy = {
   "SSL-PROXY",
   CF_TYPE_SSL,
@@ -1863,6 +1865,8 @@ struct Curl_cftype Curl_cft_ssl_proxy = {
   Curl_cf_def_conn_keep_alive,
   Curl_cf_def_query,
 };
+
+#endif /* !CURL_DISABLE_PROXY */
 
 static CURLcode cf_ssl_create(struct Curl_cfilter **pcf,
                               struct Curl_easy *data,
@@ -1971,8 +1975,12 @@ bool Curl_ssl_supports(struct Curl_easy *data, int option)
 static struct Curl_cfilter *get_ssl_filter(struct Curl_cfilter *cf)
 {
   for(; cf; cf = cf->next) {
-    if(cf->cft == &Curl_cft_ssl || cf->cft == &Curl_cft_ssl_proxy)
+    if(cf->cft == &Curl_cft_ssl)
       return cf;
+#ifndef CURL_DISABLE_PROXY
+    if(cf->cft == &Curl_cft_ssl_proxy)
+      return cf;
+#endif
   }
   return NULL;
 }
@@ -2018,7 +2026,12 @@ CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
 
 bool Curl_ssl_cf_is_proxy(struct Curl_cfilter *cf)
 {
+#ifndef CURL_DISABLE_PROXY
   return (cf->cft == &Curl_cft_ssl_proxy);
+#else
+  (void)cf;
+  return FALSE;
+#endif
 }
 
 struct ssl_config_data *
