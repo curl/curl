@@ -493,16 +493,13 @@ static CURLcode readwrite_data(struct Curl_easy *data,
     if(result || *done)
       goto out;
 
-    /* If we wrote the EOS, we are definitely done */
-    if(is_eos) {
-      k->eos_written = TRUE;
-      k->download_done = TRUE;
+    /* if we are done, we stop receiving. On multiplexed connections,
+     * we should read the EOS. Which may arrive as meta data after
+     * the bytes. Not taking it in might lead to RST of streams. */
+    if((!is_multiplex && data->req.download_done) || is_eos) {
+      data->req.keepon &= ~KEEP_RECV;
     }
-    /* And if we are done, we stop receiving */
-    if(k->download_done) {
-      k->keepon &= ~KEEP_RECV;
-    }
-    /* And if we are PAUSEd or stopped receiving, we leave the loop */
+    /* if we are PAUSEd or stopped receiving, leave the loop */
     if((k->keepon & KEEP_RECV_PAUSE) || !(k->keepon & KEEP_RECV))
       break;
 
@@ -1703,10 +1700,6 @@ CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
     /* If we wrote the EOS, we are definitely done */
     data->req.eos_written = TRUE;
     data->req.download_done = TRUE;
-  }
-  /* if we are done, we stop receiving */
-  if(data->req.download_done) {
-    data->req.keepon &= ~KEEP_RECV;
   }
   return result;
 }
