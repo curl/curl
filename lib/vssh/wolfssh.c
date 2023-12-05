@@ -42,6 +42,7 @@
 #include "select.h"
 #include "multiif.h"
 #include "warnless.h"
+#include "strdup.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -512,15 +513,9 @@ static CURLcode wssh_statemach_act(struct Curl_easy *data, bool *block)
         return CURLE_OK;
       }
       else if(name && (rc == WS_SUCCESS)) {
-        sshc->homedir = malloc(name->fSz + 1);
-        if(!sshc->homedir) {
+        sshc->homedir = Curl_strndup(name->fName, name->fSz);
+        if(!sshc->homedir)
           sshc->actualcode = CURLE_OUT_OF_MEMORY;
-        }
-        else {
-          memcpy(sshc->homedir, name->fName, name->fSz);
-          sshc->homedir[name->fSz] = 0;
-          infof(data, "wolfssh SFTP realpath succeeded");
-        }
         wolfSSH_SFTPNAME_list_free(name);
         state(data, SSH_STOP);
         return CURLE_OK;

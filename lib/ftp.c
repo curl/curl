@@ -72,6 +72,7 @@
 #include "warnless.h"
 #include "http_proxy.h"
 #include "socks.h"
+#include "strdup.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -4169,13 +4170,12 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
           return CURLE_OUT_OF_MEMORY;
         }
 
-        ftpc->dirs[0] = calloc(1, dirlen + 1);
+        ftpc->dirs[0] = Curl_strndup(rawPath, dirlen);
         if(!ftpc->dirs[0]) {
           free(rawPath);
           return CURLE_OUT_OF_MEMORY;
         }
 
-        strncpy(ftpc->dirs[0], rawPath, dirlen);
         ftpc->dirdepth = 1; /* we consider it to be a single dir */
         fileName = slashPos + 1; /* rest is file name */
       }
@@ -4214,12 +4214,11 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
              CWD requires a parameter and a non-existent parameter a) doesn't
              work on many servers and b) has no effect on the others. */
           if(compLen > 0) {
-            char *comp = calloc(1, compLen + 1);
+            char *comp = Curl_strndup(curPos, compLen);
             if(!comp) {
               free(rawPath);
               return CURLE_OUT_OF_MEMORY;
             }
-            strncpy(comp, curPos, compLen);
             ftpc->dirs[ftpc->dirdepth++] = comp;
           }
           curPos = slashPos + 1;

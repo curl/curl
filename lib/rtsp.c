@@ -922,7 +922,7 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, char *header)
 
       /* If the Session ID is set, then compare */
       if(strlen(data->set.str[STRING_RTSP_SESSION_ID]) != idlen ||
-         strncmp(start, data->set.str[STRING_RTSP_SESSION_ID], idlen) != 0) {
+         strncmp(start, data->set.str[STRING_RTSP_SESSION_ID], idlen)) {
         failf(data, "Got RTSP Session ID Line [%s], but wanted ID [%s]",
               start, data->set.str[STRING_RTSP_SESSION_ID]);
         return CURLE_RTSP_SESSION_ERROR;
@@ -934,11 +934,9 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, char *header)
        */
 
       /* Copy the id substring into a new buffer */
-      data->set.str[STRING_RTSP_SESSION_ID] = malloc(idlen + 1);
+      data->set.str[STRING_RTSP_SESSION_ID] = Curl_strndup(start, idlen);
       if(!data->set.str[STRING_RTSP_SESSION_ID])
         return CURLE_OUT_OF_MEMORY;
-      memcpy(data->set.str[STRING_RTSP_SESSION_ID], start, idlen);
-      (data->set.str[STRING_RTSP_SESSION_ID])[idlen] = '\0';
     }
   }
   else if(checkprefix("Transport:", header)) {

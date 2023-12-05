@@ -821,10 +821,8 @@ Curl_cookie_add(struct Curl_easy *data,
         endslash = memrchr(path, '/', (queryp - path));
       if(endslash) {
         size_t pathlen = (endslash-path + 1); /* include end slash */
-        co->path = malloc(pathlen + 1); /* one extra for the zero byte */
+        co->path = Curl_strndup(path, pathlen);
         if(co->path) {
-          memcpy(co->path, path, pathlen);
-          co->path[pathlen] = 0; /* null-terminate */
           co->spath = sanitize_cookie_path(co->path);
           if(!co->spath)
             badcookie = TRUE; /* out of memory bad */
