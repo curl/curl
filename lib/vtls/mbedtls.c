@@ -67,6 +67,7 @@
 #include "select.h"
 #include "multiif.h"
 #include "mbedtls_threadlock.h"
+#include "strdup.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -367,11 +368,10 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     /* Unfortunately, mbedtls_x509_crt_parse() requires the data to be null
        terminated even when provided the exact length, forcing us to waste
        extra memory here. */
-    unsigned char *newblob = malloc(ca_info_blob->len + 1);
+    unsigned char *newblob = Curl_strndup(ca_info_blob->data,
+                                          ca_info_blob->len);
     if(!newblob)
       return CURLE_OUT_OF_MEMORY;
-    memcpy(newblob, ca_info_blob->data, ca_info_blob->len);
-    newblob[ca_info_blob->len] = 0; /* null terminate */
     ret = mbedtls_x509_crt_parse(&backend->cacert, newblob,
                                  ca_info_blob->len + 1);
     free(newblob);
@@ -441,11 +441,10 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     /* Unfortunately, mbedtls_x509_crt_parse() requires the data to be null
        terminated even when provided the exact length, forcing us to waste
        extra memory here. */
-    unsigned char *newblob = malloc(ssl_cert_blob->len + 1);
+    unsigned char *newblob = Curl_strndup(ssl_cert_blob->data,
+                                          ssl_cert_blob->len);
     if(!newblob)
       return CURLE_OUT_OF_MEMORY;
-    memcpy(newblob, ssl_cert_blob->data, ssl_cert_blob->len);
-    newblob[ssl_cert_blob->len] = 0; /* null terminate */
     ret = mbedtls_x509_crt_parse(&backend->clicert, newblob,
                                  ssl_cert_blob->len + 1);
     free(newblob);

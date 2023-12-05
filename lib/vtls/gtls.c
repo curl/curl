@@ -584,13 +584,9 @@ CURLcode gtls_client_init(struct Curl_easy *data,
   /* Only add SRP to the cipher list if SRP is requested. Otherwise
    * GnuTLS will disable TLS 1.3 support. */
   if(config->username) {
-    size_t len = strlen(prioritylist);
-
-    char *prioritysrp = malloc(len + sizeof(GNUTLS_SRP) + 1);
+    char *prioritysrp = aprintf("%s:" GNUTLS_SRP, prioritylist);
     if(!prioritysrp)
       return CURLE_OUT_OF_MEMORY;
-    strcpy(prioritysrp, prioritylist);
-    strcpy(prioritysrp + len, ":" GNUTLS_SRP);
     rc = gnutls_priority_set_direct(gtls->session, prioritysrp, &err);
     free(prioritysrp);
 

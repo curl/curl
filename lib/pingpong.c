@@ -36,6 +36,7 @@
 #include "pingpong.h"
 #include "multiif.h"
 #include "vtls/vtls.h"
+#include "strdup.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -424,10 +425,8 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
 
       if(clipamount) {
         pp->cache_size = clipamount;
-        pp->cache = malloc(pp->cache_size);
-        if(pp->cache)
-          memcpy(pp->cache, pp->linestart_resp, pp->cache_size);
-        else
+        pp->cache = Curl_memdup(pp->linestart_resp, pp->cache_size);
+        if(!pp->cache)
           return CURLE_OUT_OF_MEMORY;
       }
       if(restart) {
