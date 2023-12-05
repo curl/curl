@@ -228,7 +228,9 @@ struct ssl_primary_config *
   Curl_ssl_cf_get_primary_config(struct Curl_cfilter *cf);
 
 extern struct Curl_cftype Curl_cft_ssl;
+#ifndef CURL_DISABLE_PROXY
 extern struct Curl_cftype Curl_cft_ssl_proxy;
+#endif
 
 #else /* if not USE_SSL */
 

@@ -157,7 +157,9 @@ static struct Curl_cftype *cf_types[] = {
 #endif
 #ifdef USE_SSL
   &Curl_cft_ssl,
+#ifndef CURL_DISABLE_PROXY
   &Curl_cft_ssl_proxy,
+#endif
 #endif
 #if !defined(CURL_DISABLE_PROXY)
 #if !defined(CURL_DISABLE_HTTP)
