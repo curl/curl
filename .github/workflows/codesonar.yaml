@@ -60,4 +60,8 @@ jobs:
         uses: thollander/actions-comment-pull-request@v2
         with: 
           filePath: warnings.md
-            
+      - name: Upload SARIF results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: warnings.sarif
+          category: "CodeSecure CodeSonar"            
