@@ -274,8 +274,8 @@ static CURLcode ws_dec_pass_payload(struct ws_decoder *dec,
     dec->payload_offset += (curl_off_t)nwritten;
     remain = dec->payload_len - dec->payload_offset;
     /* infof(data, "WS-DEC: passed  %zd bytes payload, %"
-                CURL_FORMAT_CURL_OFF_T " remain",
-          nwritten, remain); */
+             CURL_FORMAT_CURL_OFF_T " remain",
+             nwritten, remain); */
   }
 
   return remain? CURLE_AGAIN : CURLE_OK;
@@ -925,8 +925,8 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
   *metap = &ws->frame;
   *nread = ws->frame.len;
   /* infof(data, "curl_ws_recv(len=%zu) -> %zu bytes (frame at %"
-              CURL_FORMAT_CURL_OFF_T ", %" CURL_FORMAT_CURL_OFF_T " left)",
-        buflen, *nread, ws->frame.offset, ws->frame.bytesleft); */
+           CURL_FORMAT_CURL_OFF_T ", %" CURL_FORMAT_CURL_OFF_T " left)",
+           buflen, *nread, ws->frame.offset, ws->frame.bytesleft); */
   return CURLE_OK;
 }
 

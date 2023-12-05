@@ -81,6 +81,27 @@ jobs:
         rm -rf curl-99.98.97
       name: 'verify out-of-tree configure build including docs'
 
+  verify-out-of-tree-autotools-debug:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: maketgz-and-verify-in-tree
+    steps:
+    - uses: actions/download-artifact@v3
+      with:
+        name: 'release-tgz'
+
+    - run: |
+        echo "::stop-commands::$(uuidgen)"
+        tar xvf curl-99.98.97.tar.gz
+        pushd curl-99.98.97
+        mkdir build
+        pushd build
+        ../configure --without-ssl --enable-debug "--prefix=${PWD}/pkg"
+        make -j3
+        make -j3 TFLAGS=1279 test
+        make -j3 install
+      name: 'verify out-of-tree autotools debug build'
+
   verify-out-of-tree-cmake:
     runs-on: ubuntu-latest
     timeout-minutes: 30

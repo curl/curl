@@ -91,7 +91,6 @@
 #define HAVE_GMTIME_R 1
 #define HAVE_INET_NTOP 1
 #define HAVE_INET_PTON 1
-#define HAVE_INTTYPES_H 1
 #define HAVE_LIBGEN_H 1
 #define HAVE_LIBZ 1
 #define HAVE_LOCALE_H 1
@@ -117,7 +116,6 @@
 #define HAVE_SOCKET 1
 #define HAVE_SSL_GET_SHUTDOWN 1
 #define HAVE_STDBOOL_H 1
-#define HAVE_STDINT_H 1
 #define HAVE_STRCASECMP 1
 #define HAVE_STRDUP 1
 #define HAVE_STRTOK_R 1

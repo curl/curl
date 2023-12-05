@@ -1,0 +1,42 @@
+<testcase>
+<info>
+<keywords>
+IPFS
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<setenv>
+HOME=%PWD/%LOGDIR
+</setenv>
+<name>
+IPFS with malformed gateway URL from multiline gateway file, first line no url
+</name>
+<command>
+ipfs://bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u
+</command>
+<file name="%LOGDIR/.ipfs/gateway" >
+foo
+bar
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# malformed gateway URL, first line in file must be a gateway URL
+<errorcode>
+3
+</errorcode>
+</verify>
+</testcase>

@@ -125,6 +125,8 @@ Ruby: [curb](https://github.com/taf2/curb) written by Ross Bamford,
 
 [Tcl](https://web.archive.org/web/20160826011806/mirror.yellow5.com/tclcurl/) Tclcurl by Andrés García
 
+[Vibe](https://github.com/ttytm/vibe) HTTP requests through libcurl in V
+
 [Visual Basic](https://sourceforge.net/projects/libcurl-vb/) libcurl-vb by Jeffrey Phillips
 
 [Visual Foxpro](https://web.archive.org/web/20130730181523/www.ctl32.com.ar/libcurl.asp) by Carlos Alloatti

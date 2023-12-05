@@ -48,7 +48,6 @@ AC_DEFUN([CURL_CHECK_COMPILER], [
   CURL_CHECK_COMPILER_INTEL_C
   CURL_CHECK_COMPILER_CLANG
   CURL_CHECK_COMPILER_GNU_C
-  CURL_CHECK_COMPILER_LCC
   CURL_CHECK_COMPILER_SGI_MIPSPRO_C
   CURL_CHECK_COMPILER_SGI_MIPS_C
   CURL_CHECK_COMPILER_SUNPRO_C
@@ -247,26 +246,6 @@ AC_DEFUN([CURL_CHECK_COMPILER_INTEL_C], [
       flags_opt_yes="/O2"
       flags_opt_off="/Od"
     fi
-  else
-    AC_MSG_RESULT([no])
-  fi
-])
-
-
-dnl CURL_CHECK_COMPILER_LCC
-dnl -------------------------------------------------
-dnl Verify if compiler being used is LCC.
-
-AC_DEFUN([CURL_CHECK_COMPILER_LCC], [
-  AC_MSG_CHECKING([if compiler is LCC])
-  CURL_CHECK_DEF([__LCC__], [], [silent])
-  if test "$curl_cv_have_def___LCC__" = "yes"; then
-    AC_MSG_RESULT([yes])
-    compiler_id="LCC"
-    flags_dbg_yes="-g"
-    flags_opt_all=""
-    flags_opt_yes=""
-    flags_opt_off=""
   else
     AC_MSG_RESULT([no])
   fi

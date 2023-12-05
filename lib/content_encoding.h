@@ -25,15 +25,10 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-struct contenc_writer;
+struct Curl_cwriter;
 
-char *Curl_all_content_encodings(void);
+void Curl_all_content_encodings(char *buf, size_t blen);
 
 CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
                                      const char *enclist, int is_transfer);
-CURLcode Curl_unencode_write(struct Curl_easy *data,
-                             struct contenc_writer *writer,
-                             const char *buf, size_t nbytes);
-void Curl_unencode_cleanup(struct Curl_easy *data);
-
 #endif /* HEADER_CURL_CONTENT_ENCODING_H */

@@ -108,9 +108,6 @@
 /* Define if you have the `timeval' struct. */
 #define HAVE_STRUCT_TIMEVAL
 
-/* Define if you have the <inttypes.h> header file. */
-#define HAVE_INTTYPES_H
-
 /* Define if you have the <io.h> header file. */
 #undef HAVE_IO_H
 
@@ -143,9 +140,6 @@
 
 /* Define if you have the `socket' function. */
 #define HAVE_SOCKET
-
-/* Define if you have the <stdint.h> header file. */
-#undef HAVE_STDINT_H
 
 /* Define if you have the `strcasecmp' function. */
 #undef HAVE_STRCASECMP

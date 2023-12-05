@@ -313,7 +313,6 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   int ldap_ssl = 0;
   char *val_b64 = NULL;
   size_t val_b64_sz = 0;
-  curl_off_t dlsize = 0;
 #ifdef LDAP_OPT_NETWORK_TIMEOUT
   struct timeval ldap_timeout = {10, 0}; /* 10 sec connection/search timeout */
 #endif
@@ -327,7 +326,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 
   *done = TRUE; /* unconditionally */
   infof(data, "LDAP local: LDAP Vendor = %s ; LDAP Version = %d",
-          LDAP_VENDOR_NAME, LDAP_VENDOR_VERSION);
+        LDAP_VENDOR_NAME, LDAP_VENDOR_VERSION);
   infof(data, "LDAP local: %s", data->state.url);
 
 #ifdef HAVE_LDAP_URL_PARSE
@@ -345,7 +344,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   if(conn->given->flags & PROTOPT_SSL)
     ldap_ssl = 1;
   infof(data, "LDAP local: trying to establish %s connection",
-          ldap_ssl ? "encrypted" : "cleartext");
+        ldap_ssl ? "encrypted" : "cleartext");
 
 #if defined(USE_WIN32_LDAP)
   host = curlx_convert_UTF8_to_tchar(conn->host.name);
@@ -535,6 +534,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     goto quit;
   }
 
+  Curl_pgrsSetDownloadCounter(data, 0);
   rc = ldap_search_s(server, ludp->lud_dn, ludp->lud_scope,
                      ludp->lud_filter, ludp->lud_attrs, 0, &ldapmsg);
 
@@ -595,8 +595,6 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 
         goto quit;
       }
-
-      dlsize += name_len + 5;
 
       FREE_ON_WINLDAP(name);
       ldap_memfree(dn);
@@ -659,8 +657,6 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
             goto quit;
           }
 
-          dlsize += attr_len + 3;
-
           if((attr_len > 7) &&
              (strcmp(";binary", attr + (attr_len - 7)) == 0)) {
             /* Binary attribute, encode to base64. */
@@ -689,8 +685,6 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 
                 goto quit;
               }
-
-              dlsize += val_b64_sz;
             }
           }
           else {
@@ -705,8 +699,6 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 
               goto quit;
             }
-
-            dlsize += vals[i]->bv_len;
           }
 
           result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
@@ -719,8 +711,6 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 
             goto quit;
           }
-
-          dlsize++;
         }
 
         /* Free memory used to store values */
@@ -732,10 +722,6 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
       ldap_memfree(attribute);
 
       result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
-      if(result)
-        goto quit;
-      dlsize++;
-      result = Curl_pgrsSetDownloadCounter(data, dlsize);
       if(result)
         goto quit;
     }

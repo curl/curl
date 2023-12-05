@@ -26,8 +26,9 @@
 curl_multi_strerror - return string describing error code
 .SH SYNOPSIS
 .nf
-.B #include <curl/curl.h>
-.BI "const char *curl_multi_strerror(CURLMcode " errornum ");"
+#include <curl/curl.h>
+
+const char *curl_multi_strerror(CURLMcode errornum);
 .SH DESCRIPTION
 This function returns a string describing the \fICURLMcode\fP error code
 passed in the argument \fIerrornum\fP.

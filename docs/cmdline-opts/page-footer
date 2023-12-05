@@ -173,8 +173,8 @@ appears if --fail is used.
 .IP 23
 Write error. Curl could not write data to a local filesystem or similar.
 .IP 25
-FTP could not STOR file. The server denied the STOR operation, used for FTP
-uploading.
+Failed starting the upload. For FTP, the server typically denied the STOR
+command.
 .IP 26
 Read error. Various reading problems.
 .IP 27

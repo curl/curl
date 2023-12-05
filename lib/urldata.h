@@ -571,6 +571,13 @@ struct hostname {
 #define KEEP_RECVBITS (KEEP_RECV | KEEP_RECV_HOLD | KEEP_RECV_PAUSE)
 #define KEEP_SENDBITS (KEEP_SEND | KEEP_SEND_HOLD | KEEP_SEND_PAUSE)
 
+/* transfer wants to send is not PAUSE or HOLD */
+#define CURL_WANT_SEND(data) \
+  (((data)->req.keepon & KEEP_SENDBITS) == KEEP_SEND)
+/* transfer receive is not on PAUSE or HOLD */
+#define CURL_WANT_RECV(data) \
+  (!((data)->req.keepon & (KEEP_RECV_PAUSE|KEEP_RECV_HOLD)))
+
 #if defined(CURLRES_ASYNCH) || !defined(CURL_DISABLE_DOH)
 #define USE_CURL_ASYNC
 struct Curl_async {
@@ -588,6 +595,15 @@ struct Curl_async {
 
 #define FIRSTSOCKET     0
 #define SECONDARYSOCKET 1
+
+/* Polling requested by an easy handle.
+ * `action` is CURL_POLL_IN, CURL_POLL_OUT or CURL_POLL_INOUT.
+ */
+struct easy_pollset {
+  curl_socket_t sockets[MAX_SOCKSPEREASYHANDLE];
+  unsigned int num;
+  unsigned char actions[MAX_SOCKSPEREASYHANDLE];
+};
 
 enum expect100 {
   EXP100_SEND_DATA,           /* enough waiting, just send the body now */
@@ -669,7 +685,7 @@ struct SingleRequest {
   enum upgrade101 upgr101;      /* 101 upgrade state */
 
   /* Content unencoding stack. See sec 3.5, RFC2616. */
-  struct contenc_writer *writer_stack;
+  struct Curl_cwriter *writer_stack;
   time_t timeofdoc;
   long bodywrites;
   char *location;   /* This points to an allocated version of the Location:
@@ -901,6 +917,9 @@ struct connectdata {
      multi_done(). This entry will be NULL if the connection is reused as then
      there is no name resolve done. */
   struct Curl_dns_entry *dns_entry;
+#ifdef USE_CURL_ASYNC
+  struct Curl_async resolve_async;  /* asynchronous name resolver data */
+#endif
 
   /* 'remote_addr' is the particular IP we connected to. it is owned, set
    * and NULLed by the connected socket filter (if there is one). */
@@ -1358,9 +1377,6 @@ struct UrlState {
 #endif
   struct auth authhost;  /* auth details for host */
   struct auth authproxy; /* auth details for proxy */
-#ifdef USE_CURL_ASYNC
-  struct Curl_async async;  /* asynchronous name resolver data */
-#endif
 
 #if defined(USE_OPENSSL)
   /* void instead of ENGINE to avoid bleeding OpenSSL into this header */
@@ -1498,6 +1514,9 @@ struct UrlState {
                            though it will be discarded. We must call the data
                            rewind callback before trying to send again. */
   BIT(upload);         /* upload request */
+  BIT(internal); /* internal: true if this easy handle was created for
+                    internal use and the user does not have ownership of the
+                    handle. */
 };
 
 /*
@@ -1971,10 +1990,7 @@ struct Curl_easy {
      particular order. Note that all sockets are added to the sockhash, where
      the state etc are also kept. This array is mostly used to detect when a
      socket is to be removed from the hash. See singlesocket(). */
-  curl_socket_t sockets[MAX_SOCKSPEREASYHANDLE];
-  unsigned char actions[MAX_SOCKSPEREASYHANDLE]; /* action for each socket in
-                                                    sockets[] */
-  int numsocks;
+  struct easy_pollset last_poll;
 
   struct Names dns;
   struct Curl_multi *multi;    /* if non-NULL, points to the multi handle
@@ -2013,10 +2029,6 @@ struct Curl_easy {
 #ifdef USE_HYPER
   struct hyptransfer hyp;
 #endif
-
-  /* internal: true if this easy handle was created for internal use and the
-     user does not have ownership of the handle. */
-  bool internal;
 };
 
 #define LIBCURL_NAME "libcurl"

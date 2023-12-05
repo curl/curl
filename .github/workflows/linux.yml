@@ -44,10 +44,10 @@ env:
   bearssl-version: 0.6
   libressl-version: v3.7.3
   mbedtls-version: v3.5.0
-  mod_h2-version: v2.0.21
+  mod_h2-version: v2.0.25
   msh3-version: v0.6.0
   openssl3-version: openssl-3.1.3
-  quictls-version: OpenSSL_1_1_1w+quic
+  quictls-version: 3.1.4+quic
   rustls-version: v0.10.0
 
 jobs:
@@ -295,9 +295,9 @@ jobs:
     - name: 'build quictls'
       if: contains(matrix.build.install_steps, 'quictls') && steps.cache-quictls.outputs.cache-hit != 'true'
       run: |
-        git clone --quiet --depth=1 -b ${{ env.quictls-version }} https://github.com/quictls/openssl
+        git clone --quiet --depth=1 -b openssl-${{ env.quictls-version }} https://github.com/quictls/openssl
         cd openssl
-        ./config enable-tls1_3 --prefix=$HOME/quictls
+        ./config enable-tls1_3 --prefix=$HOME/quictls --libdir=$HOME/quictls/lib
         make -j1 install_sw
 
     - name: cache msh3

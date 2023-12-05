@@ -123,15 +123,13 @@ static struct altsvc *altsvc_createid(const char *srchost,
     dlen -= 2;
   }
 
-  as->src.host = Curl_memdup(srchost, hlen + 1);
+  as->src.host = Curl_strndup(srchost, hlen);
   if(!as->src.host)
     goto error;
-  as->src.host[hlen] = 0;
 
-  as->dst.host = Curl_memdup(dsthost, dlen + 1);
+  as->dst.host = Curl_strndup(dsthost, dlen);
   if(!as->dst.host)
     goto error;
-  as->dst.host[dlen] = 0;
 
   as->src.alpnid = srcalpnid;
   as->dst.alpnid = dstalpnid;

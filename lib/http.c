@@ -970,17 +970,21 @@ Curl_http_output_auth(struct Curl_easy *data,
 }
 #endif
 
+#if defined(USE_SPNEGO) || defined(USE_NTLM) || \
+  !defined(CURL_DISABLE_DIGEST_AUTH) || \
+  !defined(CURL_DISABLE_BASIC_AUTH) || \
+  !defined(CURL_DISABLE_BEARER_AUTH)
+static int is_valid_auth_separator(char ch)
+{
+  return ch == '\0' || ch == ',' || ISSPACE(ch);
+}
+#endif
+
 /*
  * Curl_http_input_auth() deals with Proxy-Authenticate: and WWW-Authenticate:
  * headers. They are dealt with both in the transfer.c main loop and in the
  * proxy CONNECT loop.
  */
-
-static int is_valid_auth_separator(char ch)
-{
-  return ch == '\0' || ch == ',' || ISSPACE(ch);
-}
-
 CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
                               const char *auth) /* the first non-space */
 {
@@ -1140,7 +1144,14 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
               }
             }
 #else
-           ;
+            {
+              /*
+               * Empty block to terminate the if-else chain correctly.
+               *
+               * A semicolon would yield the same result here, but can cause a
+               * compiler warning when -Wextra is enabled.
+               */
+            }
 #endif
 
     /* there may be multiple methods on one line, so keep reading */
@@ -1678,8 +1689,6 @@ static CURLcode expect100(struct Curl_easy *data,
                           struct dynbuf *req)
 {
   CURLcode result = CURLE_OK;
-  data->state.expect100header = FALSE; /* default to false unless it is set
-                                          to TRUE below */
   if(!data->state.disableexpect && Curl_use_http_1_1plus(data, conn) &&
      (conn->httpversion < 20)) {
     /* if not doing HTTP 1.0 or version 2, or disabled explicitly, we add an
@@ -2494,6 +2503,29 @@ CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
   return result;
 }
 
+static CURLcode addexpect(struct Curl_easy *data, struct connectdata *conn,
+                          struct dynbuf *r)
+{
+  data->state.expect100header = FALSE;
+  /* Avoid Expect: 100-continue if Upgrade: is used */
+  if(data->req.upgr101 == UPGR101_INIT) {
+    struct HTTP *http = data->req.p.http;
+    /* For really small puts we don't use Expect: headers at all, and for
+       the somewhat bigger ones we allow the app to disable it. Just make
+       sure that the expect100header is always set to the preferred value
+       here. */
+    char *ptr = Curl_checkheaders(data, STRCONST("Expect"));
+    if(ptr) {
+      data->state.expect100header =
+        Curl_compareheader(ptr, STRCONST("Expect:"),
+                           STRCONST("100-continue"));
+    }
+    else if(http->postsize > EXPECT_100_THRESHOLD || http->postsize < 0)
+      return expect100(data, conn, r);
+  }
+  return CURLE_OK;
+}
+
 CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
                             struct dynbuf *r, Curl_HttpReq httpreq)
 {
@@ -2506,14 +2538,8 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
 #endif
   CURLcode result = CURLE_OK;
   struct HTTP *http = data->req.p.http;
-  const char *ptr;
-
-  /* If 'authdone' is FALSE, we must not set the write socket index to the
-     Curl_transfer() call below, as we're not ready to actually upload any
-     data yet. */
 
   switch(httpreq) {
-
   case HTTPREQ_PUT: /* Let's PUT the data to the server! */
 
     if(conn->bits.authneg)
@@ -2531,20 +2557,9 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
         return result;
     }
 
-    /* For really small puts we don't use Expect: headers at all, and for
-       the somewhat bigger ones we allow the app to disable it. Just make
-       sure that the expect100header is always set to the preferred value
-       here. */
-    ptr = Curl_checkheaders(data, STRCONST("Expect"));
-    if(ptr) {
-      data->state.expect100header =
-        Curl_compareheader(ptr, STRCONST("Expect:"), STRCONST("100-continue"));
-    }
-    else if(http->postsize > EXPECT_100_THRESHOLD || http->postsize < 0) {
-      result = expect100(data, conn, r);
-      if(result)
-        return result;
-    }
+    result = addexpect(data, conn, r);
+    if(result)
+      return result;
 
     /* end of headers */
     result = Curl_dyn_addn(r, STRCONST("\r\n"));
@@ -2617,22 +2632,9 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
     }
 #endif
 
-    /* For really small posts we don't use Expect: headers at all, and for
-       the somewhat bigger ones we allow the app to disable it. Just make
-       sure that the expect100header is always set to the preferred value
-       here. */
-    ptr = Curl_checkheaders(data, STRCONST("Expect"));
-    if(ptr) {
-      data->state.expect100header =
-        Curl_compareheader(ptr, STRCONST("Expect:"), STRCONST("100-continue"));
-    }
-    else if(http->postsize > EXPECT_100_THRESHOLD || http->postsize < 0) {
-      result = expect100(data, conn, r);
-      if(result)
-        return result;
-    }
-    else
-      data->state.expect100header = FALSE;
+    result = addexpect(data, conn, r);
+    if(result)
+      return result;
 
     /* make the request end in a true CRLF */
     result = Curl_dyn_addn(r, STRCONST("\r\n"));
@@ -2692,22 +2694,9 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
         return result;
     }
 
-    /* For really small posts we don't use Expect: headers at all, and for
-       the somewhat bigger ones we allow the app to disable it. Just make
-       sure that the expect100header is always set to the preferred value
-       here. */
-    ptr = Curl_checkheaders(data, STRCONST("Expect"));
-    if(ptr) {
-      data->state.expect100header =
-        Curl_compareheader(ptr, STRCONST("Expect:"), STRCONST("100-continue"));
-    }
-    else if(http->postsize > EXPECT_100_THRESHOLD || http->postsize < 0) {
-      result = expect100(data, conn, r);
-      if(result)
-        return result;
-    }
-    else
-      data->state.expect100header = FALSE;
+    result = addexpect(data, conn, r);
+    if(result)
+      return result;
 
 #ifndef USE_HYPER
     /* With Hyper the body is always passed on separately */
@@ -3193,7 +3182,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
       DEBUGASSERT(Curl_conn_is_http2(data, conn, FIRSTSOCKET));
     break;
   case CURL_HTTP_VERSION_1_1:
-    /* continue with HTTP/1.1 when explicitly requested */
+    /* continue with HTTP/1.x when explicitly requested */
     break;
   default:
     /* Check if user wants to use HTTP/2 with clear TCP */
@@ -3685,7 +3674,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
           k->content_range = TRUE;
       }
     }
-    else
+    else if(k->httpcode < 300)
       data->state.resume_from = 0; /* get everything */
   }
 #if !defined(CURL_DISABLE_COOKIES)
@@ -4008,6 +3997,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
   char *end_ptr;
 
   /* header line within buffer loop */
+  *stop_reading = FALSE;
   do {
     size_t rest_length;
     size_t full_length;
@@ -4045,7 +4035,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
           break;
         }
       }
-
+      *nread = 0;
       break; /* read more and try again */
     }
 
@@ -4618,17 +4608,6 @@ out:
   return result;
 }
 
-/* simple implementation of strndup(), which isn't portable */
-static char *my_strndup(const char *ptr, size_t len)
-{
-  char *copy = malloc(len + 1);
-  if(!copy)
-    return NULL;
-  memcpy(copy, ptr, len);
-  copy[len] = '\0';
-  return copy;
-}
-
 CURLcode Curl_http_req_make(struct httpreq **preq,
                             const char *method, size_t m_len,
                             const char *scheme, size_t s_len,
@@ -4647,17 +4626,17 @@ CURLcode Curl_http_req_make(struct httpreq **preq,
     goto out;
   memcpy(req->method, method, m_len);
   if(scheme) {
-    req->scheme = my_strndup(scheme, s_len);
+    req->scheme = Curl_strndup(scheme, s_len);
     if(!req->scheme)
       goto out;
   }
   if(authority) {
-    req->authority = my_strndup(authority, a_len);
+    req->authority = Curl_strndup(authority, a_len);
     if(!req->authority)
       goto out;
   }
   if(path) {
-    req->path = my_strndup(path, p_len);
+    req->path = Curl_strndup(path, p_len);
     if(!req->path)
       goto out;
   }

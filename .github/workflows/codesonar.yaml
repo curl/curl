@@ -12,7 +12,7 @@ jobs:
     permissions: write-all
     runs-on: self-hosted
     container:
-      image: canuckmh/curl-cso-builder:7.4p0
+      image: canuckmh/curl-cso-builder:8.0p0
       credentials:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}

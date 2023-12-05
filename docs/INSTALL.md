@@ -162,6 +162,8 @@ library check.
 
 # Windows
 
+Building for Windows XP is required as a minimum.
+
 ## Building Windows DLLs and C runtime (CRT) linkage issues
 
  As a general rule, building a DLL with static CRT linkage is highly
@@ -524,7 +526,12 @@ disabling support for some feature:
  - `--disable-alt-svc` (HTTP Alt-Svc)
  - `--disable-ares` (the C-ARES DNS library)
  - `--disable-cookies` (HTTP cookies)
- - `--disable-crypto-auth` (cryptographic authentication)
+ - `--disable-basic-auth` (cryptographic authentication)
+ - `--disable-bearer-auth` (cryptographic authentication)
+ - `--disable-digest-auth` (cryptographic authentication)
+ - `--disable-kerberos-auth` (cryptographic authentication)
+ - `--disable-negotiate-auth` (cryptographic authentication)
+ - `--disable-aws` (cryptographic authentication)
  - `--disable-dateparse` (date parsing for time conditionals)
  - `--disable-dnsshuffle` (internal server load spreading)
  - `--disable-doh` (DNS-over-HTTP)

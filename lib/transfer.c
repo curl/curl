@@ -423,7 +423,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
   ssize_t nread; /* number of bytes read */
-  size_t excess = 0; /* excess bytes read */
+  ssize_t n_to_write;
   bool readmore = FALSE; /* used by RTP to signal for more data */
   int maxloops = 100;
   curl_off_t max_recv = data->set.max_recv_speed?
@@ -439,6 +439,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
      read or we get a CURLE_AGAIN */
   do {
     bool is_empty_data = FALSE;
+    size_t excess = 0; /* excess bytes read */
     size_t buffersize = data->set.buffer_size;
     size_t bytestoread = buffersize;
     /* For HTTP/2 and HTTP/3, read data without caring about the content
@@ -555,9 +556,11 @@ static CURLcode readwrite_data(struct Curl_easy *data,
        is non-headers. */
     if(!k->header && (nread > 0 || is_empty_data)) {
 
-      if(data->req.no_body) {
+      if(data->req.no_body && nread > 0) {
         /* data arrives although we want none, bail out */
         streamclose(conn, "ignoring body");
+        DEBUGF(infof(data, "did not want a BODY, but seeing %zd bytes",
+                     nread));
         *done = TRUE;
         result = CURLE_WEIRD_SERVER_REPLY;
         goto out;
@@ -575,23 +578,6 @@ static CURLcode readwrite_data(struct Curl_easy *data,
         }
       } /* this is the first time we write a body part */
 #endif /* CURL_DISABLE_HTTP */
-
-      k->bodywrites++;
-
-      /* pass data to the debug function before it gets "dechunked" */
-      if(data->set.verbose) {
-        if(k->badheader) {
-          Curl_debug(data, CURLINFO_DATA_IN,
-                     Curl_dyn_ptr(&data->state.headerb),
-                     Curl_dyn_len(&data->state.headerb));
-          if(k->badheader == HEADER_PARTHEADER)
-            Curl_debug(data, CURLINFO_DATA_IN,
-                       k->str, (size_t)nread);
-        }
-        else
-          Curl_debug(data, CURLINFO_DATA_IN,
-                     k->str, (size_t)nread);
-      }
 
 #ifndef CURL_DISABLE_HTTP
       if(k->chunk) {
@@ -632,16 +618,15 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 #endif   /* CURL_DISABLE_HTTP */
 
       /* Account for body content stored in the header buffer */
+      n_to_write = nread;
       if((k->badheader == HEADER_PARTHEADER) && !k->ignorebody) {
-        size_t headlen = Curl_dyn_len(&data->state.headerb);
-        DEBUGF(infof(data, "Increasing bytecount by %zu", headlen));
-        k->bytecount += headlen;
+        n_to_write += Curl_dyn_len(&data->state.headerb);
       }
 
       if((-1 != k->maxdownload) &&
-         (k->bytecount + nread >= k->maxdownload)) {
+         (k->bytecount + n_to_write >= k->maxdownload)) {
 
-        excess = (size_t)(k->bytecount + nread - k->maxdownload);
+        excess = (size_t)(k->bytecount + n_to_write - k->maxdownload);
         if(excess > 0 && !k->ignorebody) {
           infof(data,
                 "Excess found in a read:"
@@ -666,17 +651,12 @@ static CURLcode readwrite_data(struct Curl_easy *data,
         }
       }
 
-      k->bytecount += nread;
       max_recv -= nread;
-
-      result = Curl_pgrsSetDownloadCounter(data, k->bytecount);
-      if(result)
-        goto out;
 
       if(!k->chunk && (nread || k->badheader || is_empty_data)) {
         /* If this is chunky transfer, it was already written */
 
-        if(k->badheader && !k->ignorebody) {
+        if(k->badheader) {
           /* we parsed a piece of data wrongly assuming it was a header
              and now we output it as body instead */
           size_t headlen = Curl_dyn_len(&data->state.headerb);
@@ -700,10 +680,12 @@ static CURLcode readwrite_data(struct Curl_easy *data,
              in http_chunks.c.
              Make sure that ALL_CONTENT_ENCODINGS contains all the
              encodings handled here. */
-          if(!k->ignorebody && nread) {
+          if(nread) {
 #ifndef CURL_DISABLE_POP3
-            if(conn->handler->protocol & PROTO_FAMILY_POP3)
-              result = Curl_pop3_write(data, k->str, nread);
+            if(conn->handler->protocol & PROTO_FAMILY_POP3) {
+              result = k->ignorebody? CURLE_OK :
+                       Curl_pop3_write(data, k->str, nread);
+            }
             else
 #endif /* CURL_DISABLE_POP3 */
               result = Curl_client_write(data, CLIENTWRITE_BODY, k->str,
@@ -718,24 +700,39 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 
     } /* if(!header and data to read) */
 
-    if(conn->handler->readwrite && excess) {
-      /* Parse the excess data */
-      k->str += nread;
+    if(excess > 0 && !k->ignorebody) {
+      if(conn->handler->readwrite) {
+        /* Give protocol handler a chance to do something with it */
+        k->str += nread;
+        if(&k->str[excess] > &buf[data->set.buffer_size]) {
+          /* the excess amount was too excessive(!), make sure
+             it doesn't read out of buffer */
+          excess = &buf[data->set.buffer_size] - k->str;
+        }
+        nread = (ssize_t)excess;
+        result = conn->handler->readwrite(data, conn, &nread, &readmore);
+        if(result)
+          goto out;
 
-      if(&k->str[excess] > &buf[data->set.buffer_size]) {
-        /* the excess amount was too excessive(!), make sure
-           it doesn't read out of buffer */
-        excess = &buf[data->set.buffer_size] - k->str;
+        if(readmore) {
+          DEBUGASSERT(nread == 0);
+          k->keepon |= KEEP_RECV; /* we're not done reading */
+        }
+        else if(nread == 0)
+          break;
+        /* protocol handler did not consume all excess data */
+        excess = nread;
       }
-      nread = (ssize_t)excess;
-
-      result = conn->handler->readwrite(data, conn, &nread, &readmore);
-      if(result)
-        goto out;
-
-      if(readmore)
-        k->keepon |= KEEP_RECV; /* we're not done reading */
-      break;
+      if(excess) {
+        infof(data,
+              "Excess found in a read:"
+              " excess = %zu"
+              ", size = %" CURL_FORMAT_CURL_OFF_T
+              ", maxdownload = %" CURL_FORMAT_CURL_OFF_T
+              ", bytecount = %" CURL_FORMAT_CURL_OFF_T,
+              excess, k->size, k->maxdownload, k->bytecount);
+        connclose(conn, "excess found in a read");
+      }
     }
 
     if(is_empty_data) {
@@ -1430,8 +1427,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
           return CURLE_OUT_OF_MEMORY;
       }
       wc = data->wildcard;
-      if((wc->state < CURLWC_INIT) ||
-         (wc->state >= CURLWC_CLEAN)) {
+      if(wc->state < CURLWC_INIT) {
         if(wc->ftpwc)
           wc->dtor(wc->ftpwc);
         Curl_safefree(wc->pattern);
@@ -1635,7 +1631,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
           return Curl_uc_to_curlcode(uc);
         }
 
-        p = Curl_builtin_scheme(scheme, CURL_ZERO_TERMINATED);
+        p = Curl_get_scheme_handler(scheme);
         if(p && (p->protocol != data->info.conn_protocol)) {
           infof(data, "Clear auth, redirects scheme from %s to %s",
                 data->info.conn_scheme, scheme);

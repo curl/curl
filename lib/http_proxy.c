@@ -299,7 +299,7 @@ struct Curl_cftype Curl_cft_http_proxy = {
   http_proxy_cf_connect,
   http_proxy_cf_close,
   Curl_cf_http_proxy_get_host,
-  Curl_cf_def_get_select_socks,
+  Curl_cf_def_adjust_pollset,
   Curl_cf_def_data_pending,
   Curl_cf_def_send,
   Curl_cf_def_recv,

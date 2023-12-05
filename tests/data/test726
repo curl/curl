@@ -26,7 +26,7 @@ HOME=%PWD
 IPFS with no gateway URL (no environment or home file either)
 </name>
 <command>
-ipfs://QmV5JejrpgUxnkZeFZYMxVCqAbKy3KdPXWXyuEDiMNZwUx
+ipfs://bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u
 </command>
 </client>
 

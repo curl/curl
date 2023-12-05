@@ -34,7 +34,8 @@ with no-value then its header must be terminated with a semicolon, such as \-H
 curl makes sure that each header you add/replace is sent with the proper
 end-of-line marker, you should thus **not** add that as a part of the header
 content: do not add newlines or carriage returns, they only mess things up for
-you.
+you. curl passes on the verbatim string you give it without any filter or
+other safe guards. That includes white space and control characters.
 
 This option can take an argument in @filename style, which then adds a header
 for each line in the input file. Using @- makes curl read the header file from

@@ -27,6 +27,10 @@
 #include "strcase.h"
 
 /* The last 3 #include files should be in this order */
+#ifdef USE_NGHTTP2
+#include <stdint.h>
+#include <nghttp2/nghttp2.h>
+#endif /* USE_NGHTTP2 */
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
@@ -365,3 +369,28 @@ CURLcode Curl_dynhds_h1_dprint(struct dynhds *dynhds, struct dynbuf *dbuf)
   return result;
 }
 
+#ifdef USE_NGHTTP2
+
+nghttp2_nv *Curl_dynhds_to_nva(struct dynhds *dynhds, size_t *pcount)
+{
+  nghttp2_nv *nva = calloc(1, sizeof(nghttp2_nv) * dynhds->hds_len);
+  size_t i;
+
+  *pcount = 0;
+  if(!nva)
+    return NULL;
+
+  for(i = 0; i < dynhds->hds_len; ++i) {
+    struct dynhds_entry *e = dynhds->hds[i];
+    DEBUGASSERT(e);
+    nva[i].name = (unsigned char *)e->name;
+    nva[i].namelen = e->namelen;
+    nva[i].value = (unsigned char *)e->value;
+    nva[i].valuelen = e->valuelen;
+    nva[i].flags = NGHTTP2_NV_FLAG_NONE;
+  }
+  *pcount = dynhds->hds_len;
+  return nva;
+}
+
+#endif /* USE_NGHTTP2 */

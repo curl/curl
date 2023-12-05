@@ -39,6 +39,12 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, char *header);
 
 #endif /* CURL_DISABLE_RTSP */
 
+typedef enum {
+  RTP_PARSE_SKIP,
+  RTP_PARSE_CHANNEL,
+  RTP_PARSE_LEN,
+  RTP_PARSE_DATA
+} rtp_parse_st;
 /*
  * RTSP Connection data
  *
@@ -47,6 +53,9 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, char *header);
 struct rtsp_conn {
   struct dynbuf buf;
   int rtp_channel;
+  size_t rtp_len;
+  rtp_parse_st state;
+  BIT(in_header);
 };
 
 /****************************************************************************

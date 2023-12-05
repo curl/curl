@@ -55,7 +55,9 @@ semicolon).
 
 The headers included in the linked list \fBmust not\fP be CRLF-terminated,
 because libcurl adds CRLF after each header item itself. Failure to comply
-with this might result in strange behavior.
+with this might result in strange behavior. libcurl passes on the verbatim
+strings you give it, without any filter or other safe guards. That includes
+white space and control characters.
 
 The first line in an HTTP request (containing the method, usually a GET or
 POST) is not a header and cannot be replaced using this option. Only the lines
@@ -100,7 +102,7 @@ MIME mail is only composed of alternative representations of the same data
 (i.e.: HTML and plain text), this header must be set to "multipart/alternative".
 In all cases the value must be of the form "multipart/*" to respect the
 document structure and may not include the "boundary=" parameter.
-.P
+
 Other specific headers that do not have a libcurl default value but are
 strongly desired by mail delivery and user agents should also be included.
 These are "From:", "To:", "Date:" and "Subject:" among others and their

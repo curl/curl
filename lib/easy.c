@@ -112,7 +112,7 @@ static curl_simple_lock s_lock = CURL_SIMPLE_LOCK_INIT;
 #define system_strdup strdup
 #endif
 
-#if defined(_MSC_VER) && defined(_DLL) && !defined(__POCC__)
+#if defined(_MSC_VER) && defined(_DLL)
 #  pragma warning(disable:4232) /* MSVC extension, dllimport identity */
 #endif
 
@@ -129,7 +129,7 @@ curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
 curl_wcsdup_callback Curl_cwcsdup = Curl_wcsdup;
 #endif
 
-#if defined(_MSC_VER) && defined(_DLL) && !defined(__POCC__)
+#if defined(_MSC_VER) && defined(_DLL)
 #  pragma warning(default:4232) /* MSVC extension, dllimport identity */
 #endif
 
@@ -188,18 +188,10 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     goto fail;
   }
 
-#if defined(USE_SSH)
   if(Curl_ssh_init()) {
+    DEBUGF(fprintf(stderr, "Error: Curl_ssh_init failed\n"));
     goto fail;
   }
-#endif
-
-#ifdef USE_WOLFSSH
-  if(WS_SUCCESS != wolfSSH_Init()) {
-    DEBUGF(fprintf(stderr, "Error: wolfSSH_Init failed\n"));
-    return CURLE_FAILED_INIT;
-  }
-#endif
 
   easy_init_flags = flags;
 
@@ -976,33 +968,6 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
     (void)Curl_hsts_loadcb(outcurl, outcurl->hsts);
   }
 #endif
-  /* Clone the resolver handle, if present, for the new handle */
-  if(Curl_resolver_duphandle(outcurl,
-                             &outcurl->state.async.resolver,
-                             data->state.async.resolver))
-    goto fail;
-
-#ifdef USE_ARES
-  {
-    CURLcode rc;
-
-    rc = Curl_set_dns_servers(outcurl, data->set.str[STRING_DNS_SERVERS]);
-    if(rc && rc != CURLE_NOT_BUILT_IN)
-      goto fail;
-
-    rc = Curl_set_dns_interface(outcurl, data->set.str[STRING_DNS_INTERFACE]);
-    if(rc && rc != CURLE_NOT_BUILT_IN)
-      goto fail;
-
-    rc = Curl_set_dns_local_ip4(outcurl, data->set.str[STRING_DNS_LOCAL_IP4]);
-    if(rc && rc != CURLE_NOT_BUILT_IN)
-      goto fail;
-
-    rc = Curl_set_dns_local_ip6(outcurl, data->set.str[STRING_DNS_LOCAL_IP6]);
-    if(rc && rc != CURLE_NOT_BUILT_IN)
-      goto fail;
-  }
-#endif /* USE_ARES */
 
   Curl_initinfo(outcurl);
 

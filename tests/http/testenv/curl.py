@@ -504,14 +504,20 @@ class CurlClient:
         args = [self._curl, "-s", "--path-as-is"]
         if with_headers:
             args.extend(["-D", self._headerfile])
-        if def_tracing is not False:
-            args.extend(['-v', '--trace-config', 'ids,time'])
+        if def_tracing is not False and not self._silent:
+            args.extend(['-v', '--trace-ids', '--trace-time'])
             if self.env.verbose > 1:
                 args.extend(['--trace-config', 'http/2,http/3,h2-proxy,h1-proxy'])
                 pass
 
+        active_options = options
+        if options is not None and '--next' in options:
+            active_options = options[options.index('--next') + 1:]
+
         for url in urls:
             u = urlparse(urls[0])
+            if options:
+                args.extend(options)
             if alpn_proto is not None:
                 if alpn_proto not in self.ALPN_ARG:
                     raise Exception(f'unknown ALPN protocol: "{alpn_proto}"')
@@ -521,7 +527,7 @@ class CurlClient:
                 pass
             elif insecure:
                 args.append('--insecure')
-            elif options and "--cacert" in options:
+            elif active_options and "--cacert" in active_options:
                 pass
             elif u.hostname:
                 args.extend(["--cacert", self.env.ca.cert_file])
@@ -532,8 +538,6 @@ class CurlClient:
                 args.extend(["--resolve", f"{u.hostname}:{port}:127.0.0.1"])
             if timeout is not None and int(timeout) > 0:
                 args.extend(["--connect-timeout", str(int(timeout))])
-            if options:
-                args.extend(options)
             args.append(url)
         return args
 
