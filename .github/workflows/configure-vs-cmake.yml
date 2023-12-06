@@ -6,23 +6,23 @@ name: configure-vs-cmake
 on:
   push:
     branches:
-    - master
+      - master
     paths:
-    - '*.ac'
-    - '**/*.m4'
-    - '**/CMakeLists.txt'
-    - 'lib/curl_config.h.cmake'
-    - 'scripts/cmp-config.pl'
+      - '*.ac'
+      - '**/*.m4'
+      - '**/CMakeLists.txt'
+      - 'lib/curl_config.h.cmake'
+      - 'scripts/cmp-config.pl'
 
   pull_request:
     branches:
-    - master
+      - master
     paths:
-    - '*.ac'
-    - '**/*.m4'
-    - '**/CMakeLists.txt'
-    - 'lib/curl_config.h.cmake'
-    - 'scripts/cmp-config.pl'
+      - '*.ac'
+      - '**/*.m4'
+      - '**/CMakeLists.txt'
+      - 'lib/curl_config.h.cmake'
+      - 'scripts/cmp-config.pl'
 
 permissions: {}
 
@@ -30,16 +30,16 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: run configure --with-openssl
-      run: |
-         autoreconf -fi
-         ./configure --with-openssl
+      - name: run configure --with-openssl
+        run: |
+           autoreconf -fi
+           ./configure --with-openssl
 
-    - name: run cmake
-      run: |
-         mkdir build && cd build && cmake ..
+      - name: run cmake
+        run: |
+           mkdir build && cd build && cmake ..
 
-    - name: compare generated curl_config.h files
-      run: ./scripts/cmp-config.pl lib/curl_config.h build/lib/curl_config.h
+      - name: compare generated curl_config.h files
+        run: ./scripts/cmp-config.pl lib/curl_config.h build/lib/curl_config.h

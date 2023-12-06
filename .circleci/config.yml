@@ -527,9 +527,9 @@ workflows:
 
   # There are problem linking with LibreSSL on the CI boxes that prevent this
   # from working.
-  #macos-x86-http-libressl-http2:
-  #  jobs:
-  #    - macos-x86-http-libressl-http2
+  # macos-x86-http-libressl-http2:
+  #   jobs:
+  #     - macos-x86-http-libressl-http2
 
   macos-x86-http-torture:
     jobs:

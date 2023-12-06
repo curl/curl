@@ -59,13 +59,13 @@ freebsd_task:
   configure_script:
     - autoreconf -fi
     # Building with the address sanitizer is causing unexplainable test issues due to timeouts
-    #- case `uname -r` in
-    #    12.2*)
-    #    export CC=clang;
-    #    export CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g";
-    #    export CXXFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g";
-    #    export LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer" ;;
-    #  esac
+    # - case `uname -r` in
+    #     12.2*)
+    #     export CC=clang;
+    #     export CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g";
+    #     export CXXFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g";
+    #     export LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer" ;;
+    #   esac
     - ./configure --prefix="${HOME}"/install --enable-debug --with-openssl --with-libssh2 --with-brotli --with-gssapi --with-libidn2 --enable-manual --enable-ldap --enable-ldaps --with-librtmp --with-libpsl --with-nghttp2 || { tail -300 config.log; false; }
   compile_script:
     - make V=1 && make V=1 examples && cd tests && make V=1

@@ -7,18 +7,18 @@ name: Codespell
 on:
   push:
     branches:
-    - master
-    - '*/ci'
+      - master
+      - '*/ci'
     paths:
-    - 'lib/**'
-    - 'src/**'
-    - 'include/**'
+      - 'lib/**'
+      - 'src/**'
+      - 'include/**'
   pull_request:
     branches:
-    - master
-    - 'lib/**'
-    - 'src/**'
-    - 'include/**'
+      - master
+      - 'lib/**'
+      - 'src/**'
+      - 'include/**'
 
 jobs:
   codespell:
