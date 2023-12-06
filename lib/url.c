@@ -1680,8 +1680,9 @@ static CURLcode findprotocol(struct Curl_easy *data,
   /* The protocol was not found in the table, but we don't have to assign it
      to anything since it is already assigned to a dummy-struct in the
      create_conn() function when the connectdata struct is allocated. */
-  failf(data, "Protocol \"%s\" not supported or disabled in " LIBCURL_NAME,
-        protostr);
+  failf(data, "Protocol \"%s\" %s%s", protostr,
+        p ? "disabled" : "not supported",
+        data->state.this_is_a_follow ? " (in redirect)":"");
 
   return CURLE_UNSUPPORTED_PROTOCOL;
 }
