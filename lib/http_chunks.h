@@ -90,8 +90,6 @@ typedef enum {
   CHUNKE_PASSTHRU_ERROR /* Curl_httpchunk_read() returns a CURLcode to use */
 } CHUNKcode;
 
-const char *Curl_chunked_strerror(CHUNKcode code);
-
 struct Curl_chunker {
   curl_off_t datasize;
   ChunkyState state;

@@ -350,7 +350,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-const char *Curl_chunked_strerror(CHUNKcode code)
+static const char *Curl_chunked_strerror(CHUNKcode code)
 {
   switch(code) {
   default:
