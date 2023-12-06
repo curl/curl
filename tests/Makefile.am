@@ -27,7 +27,7 @@ PDFPAGES = testcurl.pdf runtests.pdf
 MANDISTPAGES = runtests.1.dist testcurl.1.dist
 
 EXTRA_DIST = appveyor.pm azure.pm badsymbols.pl check-deprecated.pl CMakeLists.txt \
- devtest.pl dictserver.py directories.pm disable-scan.pl error-codes.pl extern-scan.pl FILEFORMAT.md \
+ devtest.pl dictserver.py directories.pm disable-scan.pl errorcodes.pl error-codes.pl extern-scan.pl FILEFORMAT.md \
  processhelp.pm ftpserver.pl getpart.pm globalconfig.pm http-server.pl http2-server.pl \
  http3-server.pl manpage-scan.pl manpage-syntax.pl markdown-uppercase.pl mem-include-scan.pl \
  memanalyze.pl negtelnetserver.py nroff-scan.pl option-check.pl options-scan.pl \
