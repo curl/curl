@@ -3582,6 +3582,7 @@ AC_CHECK_FUNCS([\
   _fseeki64 \
   arc4random \
   fnmatch \
+  fork \
   fseeko \
   geteuid \
   getpass_r \
