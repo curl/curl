@@ -34,6 +34,7 @@ This release includes the following bugfixes:
  o build: picky warning updates [125]
  o build: require Windows XP or newer [86]
  o cfilter: provide call to tell connection to forget a socket [65]
+ o checksrc.pl: support #line instructions
  o CI: add autotools, out-of-tree, debug build to distro check job [14]
  o CI: ignore test 286 on Appveyor gcc 9 build [6]
  o cmake: add `CURL_DISABLE_BINDLOCAL` option [146]
@@ -76,6 +77,7 @@ This release includes the following bugfixes:
  o docs: clarify that curl passes on input unfiltered [47]
  o docs: fix function typo in curl_easy_option_next.3 [36]
  o docs: KNOWN_BUGS cleanup
+ o docs: make all examples in all libcurl man pages compile [175]
  o docs: preserve the modification date when copying the prebuilt man page [89]
  o docs: remove bold from some man page SYNOPSIS sections [90]
  o docs: use SOURCE_DATE_EPOCH for generated manpages [16]
@@ -87,6 +89,7 @@ This release includes the following bugfixes:
  o easy: in duphandle, init the cookies for the new handle [131]
  o easy: remove duplicate wolfSSH init call [37]
  o easy_lock: add a pthread_mutex_t fallback [13]
+ o examples/rtsp-options.c: add [157]
  o fopen: create new file using old file's mode [153]
  o fopen: create short(er) temporary file name [155]
  o getenv: PlayStation doesn't have getenv() [41]
@@ -122,6 +125,7 @@ This release includes the following bugfixes:
  o multi: during ratelimit multi_getsock should return no sockets [182]
  o multi: use pipe instead of socketpair to *wakeup() [18]
  o ngtcp2: fix races in stream handling [178]
+ o ngtcp2: ignore errors on unknown streams [158]
  o ntlm_wb: use pipe instead of socketpair when possible [44]
  o openldap: move the alloc of ldapconninfo to *connect() [29]
  o openldap: set the callback argument in oldap_do [30]
@@ -142,6 +146,7 @@ This release includes the following bugfixes:
  o rand: fix build error with autotools + LibreSSL [111]
  o resolve.d: drop a multi use-sentence [100]
  o RTSP: improved RTP parser [32]
+ o rustls: implement connect_blocking [154]
  o sasl: fix `-Wunused-function` compiler warning [124]
  o schannel: add CA cache support for files and memory blobs [121]
  o setopt: check CURLOPT_TFTP_BLKSIZE range on set [171]
@@ -383,8 +388,11 @@ References to bug reports and discussions on issues:
  [150] = https://curl.se/bug/?i=12402
  [152] = https://curl.se/bug/?i=12410
  [153] = https://curl.se/bug/?i=12299
+ [154] = https://curl.se/bug/?i=11647
  [155] = https://curl.se/bug/?i=12388
  [156] = https://curl.se/bug/?i=12424
+ [157] = https://curl.se/bug/?i=12452
+ [158] = https://curl.se/bug/?i=12449
  [159] = https://curl.se/bug/?i=12407
  [160] = https://curl.se/bug/?i=12387
  [161] = https://curl.se/bug/?i=12384
@@ -401,6 +409,7 @@ References to bug reports and discussions on issues:
  [172] = https://curl.se/bug/?i=12331
  [173] = https://curl.se/bug/?i=12367
  [174] = https://curl.se/bug/?i=12440
+ [175] = https://curl.se/bug/?i=12448
  [176] = https://curl.se/bug/?i=12439
  [178] = https://curl.se/bug/?i=12435
  [179] = https://curl.se/bug/?i=12434
