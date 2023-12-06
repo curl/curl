@@ -28,5 +28,5 @@ matrix:
           - 'pre'
           - 'strong'
           - 'em'
-        sources:
-          - '**/*.md|!docs/BINDINGS.md'
+    sources:
+      - '**/*.md|!docs/BINDINGS.md'
