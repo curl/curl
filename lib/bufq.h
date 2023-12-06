@@ -241,6 +241,12 @@ ssize_t Curl_bufq_slurp(struct bufq *q, Curl_bufq_reader *reader,
                         void *reader_ctx, CURLcode *err);
 
 /**
+ * Same as `Curl_bufq_slurpn` but stop after having read `n` or more bytes.
+ */
+ssize_t Curl_bufq_slurpn(struct bufq *q, size_t n, Curl_bufq_reader *reader,
+                         void *reader_ctx, CURLcode *err);
+
+/**
  * Read *once* up to `max_len` bytes and append it to the buffer.
  * if `max_len` is 0, no limit is imposed besides the chunk space.
  * Returns the total amount of buf read (may be 0) or -1 on other

@@ -654,3 +654,9 @@ ssize_t Curl_bufq_slurp(struct bufq *q, Curl_bufq_reader *reader,
 {
   return bufq_slurpn(q, 0, reader, reader_ctx, err);
 }
+
+ssize_t Curl_bufq_slurpn(struct bufq *q, size_t n, Curl_bufq_reader *reader,
+                         void *reader_ctx, CURLcode *err)
+{
+  return bufq_slurpn(q, n, reader, reader_ctx, err);
+}
