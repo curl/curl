@@ -3059,6 +3059,7 @@ CURLcode Curl_http_firstwrite(struct Curl_easy *data,
 {
   struct SingleRequest *k = &data->req;
 
+  *done = FALSE;
   if(data->req.newurl) {
     if(conn->bits.close) {
       /* Abort after the headers if "follow Location" is set
@@ -4582,8 +4583,8 @@ CURLcode Curl_http_write_resp_hds(struct Curl_easy *data,
                                   size_t *pconsumed,
                                   bool *done)
 {
+  *done = FALSE;
   if(!data->req.header) {
-    *done = FALSE;
     *pconsumed = 0;
     return CURLE_OK;
   }
@@ -4618,6 +4619,7 @@ static CURLcode http_write_resp(struct Curl_easy *data,
   size_t consumed;
   int flags;
 
+  *done = FALSE;
   result = Curl_http_write_resp_hds(data, buf, blen, &consumed, done);
   if(result || *done)
     goto out;
