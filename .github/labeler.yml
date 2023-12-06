@@ -13,6 +13,8 @@
 # PR is all about that one topic, like HTTP/3), while the second ones are
 # "addendums" that give useful information about a PR that's really mostly
 # something else (e.g. CI if the PR also touches CI jobs).
+#
+# See https://github.com/actions/labeler/ for documentation on this file.
 
 appleOS:
 - all:
@@ -181,7 +183,7 @@ documentation:
       - 'LICENSES/**'
       - 'README'
       - 'RELEASE-NOTES'
-    - AllGlobsToAllFiles:
+    - all-globs-to-all-files:
         # negative matches
       - '!**/CMakeLists.txt'
       - '!**/Makefile.am'
