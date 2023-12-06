@@ -7,15 +7,15 @@ name: SYNOPSIS
 on:
   push:
     branches:
-    - master
-    - '*/ci'
+      - master
+      - '*/ci'
     paths:
-    - 'docs/libcurl/curl_*.3'
+      - 'docs/libcurl/curl_*.3'
   pull_request:
     branches:
-    - master
+      - master
     paths:
-    - 'docs/libcurl/curl_*.3'
+      - 'docs/libcurl/curl_*.3'
 
 jobs:
   verify:

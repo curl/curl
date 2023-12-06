@@ -7,31 +7,31 @@ name: Linux AWS-LC
 on:
   push:
     branches:
-    - master
-    - '*/ci'
+      - master
+      - '*/ci'
     paths-ignore:
-    - '**/*.md'
-    - '.azure-pipelines.yml'
-    - '.circleci/**'
-    - '.cirrus.yml'
-    - 'appveyor.yml'
-    - 'packages/**'
-    - 'plan9/**'
-    - 'projects/**'
-    - 'winbuild/**'
+      - '**/*.md'
+      - '.azure-pipelines.yml'
+      - '.circleci/**'
+      - '.cirrus.yml'
+      - 'appveyor.yml'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+      - 'winbuild/**'
   pull_request:
     branches:
-    - master
+      - master
     paths-ignore:
-    - '**/*.md'
-    - '.azure-pipelines.yml'
-    - '.circleci/**'
-    - '.cirrus.yml'
-    - 'appveyor.yml'
-    - 'packages/**'
-    - 'plan9/**'
-    - 'projects/**'
-    - 'winbuild/**'
+      - '**/*.md'
+      - '.azure-pipelines.yml'
+      - '.circleci/**'
+      - '.cirrus.yml'
+      - 'appveyor.yml'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+      - 'winbuild/**'
 
 concurrency:
   # Hardcoded workflow filename as workflow name above is just Linux again
@@ -51,58 +51,58 @@ jobs:
     timeout-minutes: 30
 
     steps:
-    - run: |
-        sudo apt-get update --yes
-        sudo apt-get install --yes libtool autoconf automake pkg-config stunnel4
-        # ensure we don't pick up openssl in this build
-        sudo apt remove --yes libssl-dev
-        sudo python3 -m pip install impacket
-      name: 'install prereqs and impacket'
+      - run: |
+          sudo apt-get update --yes
+          sudo apt-get install --yes libtool autoconf automake pkg-config stunnel4
+          # ensure we don't pick up openssl in this build
+          sudo apt remove --yes libssl-dev
+          sudo python3 -m pip install impacket
+        name: 'install prereqs and impacket'
 
-    - name: cache awslc
-      uses: actions/cache@v3
-      id: cache-awslc
-      env:
-        cache-name: cache-awslc
-      with:
-        path: /home/runner/awslc
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.awslc-version }}
+      - name: cache awslc
+        uses: actions/cache@v3
+        id: cache-awslc
+        env:
+          cache-name: cache-awslc
+        with:
+          path: /home/runner/awslc
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.awslc-version }}
 
-    - name: build awslc
-      if: steps.cache-awslc.outputs.cache-hit != 'true'
-      run: |
-        curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
-          https://github.com/awslabs/aws-lc/archive/refs/tags/v${{ env.awslc-version }}.tar.gz
-        tar xzf v${{ env.awslc-version }}.tar.gz
-        mkdir aws-lc-${{ env.awslc-version }}-build
-        cd aws-lc-${{ env.awslc-version }}-build
-        cmake -DCMAKE_INSTALL_PREFIX=$HOME/awslc ../aws-lc-${{ env.awslc-version }}
-        cmake --build . --parallel
-        cmake --install .
+      - name: build awslc
+        if: steps.cache-awslc.outputs.cache-hit != 'true'
+        run: |
+          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
+            https://github.com/awslabs/aws-lc/archive/refs/tags/v${{ env.awslc-version }}.tar.gz
+          tar xzf v${{ env.awslc-version }}.tar.gz
+          mkdir aws-lc-${{ env.awslc-version }}-build
+          cd aws-lc-${{ env.awslc-version }}-build
+          cmake -DCMAKE_INSTALL_PREFIX=$HOME/awslc ../aws-lc-${{ env.awslc-version }}
+          cmake --build . --parallel
+          cmake --install .
 
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - run: autoreconf -fi
-      name: 'autoreconf'
+      - run: autoreconf -fi
+        name: 'autoreconf'
 
-    - run: |
-        mkdir build
-        cd build
-        ../configure --enable-warnings --enable-werror --with-openssl=$HOME/awslc
-        cd ..
-      name: 'configure out-of-tree'
+      - run: |
+          mkdir build
+          cd build
+          ../configure --enable-warnings --enable-werror --with-openssl=$HOME/awslc
+          cd ..
+        name: 'configure out-of-tree'
 
-    - run: make -C build V=1
-      name: 'make'
+      - run: make -C build V=1
+        name: 'make'
 
-    - run: make -C build V=1 examples
-      name: 'make examples'
+      - run: make -C build V=1 examples
+        name: 'make examples'
 
-    - run: make -C build V=1 -C tests
-      name: 'make tests'
+      - run: make -C build V=1 -C tests
+        name: 'make tests'
 
-    - run: make -C build V=1 test-ci
-      name: 'run tests'
+      - run: make -C build V=1 test-ci
+        name: 'run tests'
 
   cmake:
     name: awslc (cmake)
@@ -110,43 +110,43 @@ jobs:
     timeout-minutes: 15
 
     steps:
-    - run: |
-        sudo apt-get update
-        sudo apt-get install cmake stunnel4
-        # ensure we don't pick up openssl in this build
-        sudo apt remove --yes libssl-dev
-        sudo python3 -m pip install impacket
-      name: 'install prereqs and impacket'
+      - run: |
+          sudo apt-get update
+          sudo apt-get install cmake stunnel4
+          # ensure we don't pick up openssl in this build
+          sudo apt remove --yes libssl-dev
+          sudo python3 -m pip install impacket
+        name: 'install prereqs and impacket'
 
-    - name: cache awslc
-      uses: actions/cache@v3
-      id: cache-awslc
-      env:
-        cache-name: cache-awslc
-      with:
-        path: /home/runner/awslc
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.awslc-version }}
+      - name: cache awslc
+        uses: actions/cache@v3
+        id: cache-awslc
+        env:
+          cache-name: cache-awslc
+        with:
+          path: /home/runner/awslc
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.awslc-version }}
 
-    - name: build awslc
-      if: steps.cache-awslc.outputs.cache-hit != 'true'
-      run: |
-        curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
-          https://github.com/awslabs/aws-lc/archive/refs/tags/v${{ env.awslc-version }}.tar.gz
-        tar xzf v${{ env.awslc-version }}.tar.gz
-        mkdir aws-lc-${{ env.awslc-version }}-build
-        cd aws-lc-${{ env.awslc-version }}-build
-        cmake -DCMAKE_INSTALL_PREFIX=$HOME/awslc ../aws-lc-${{ env.awslc-version }}
-        cmake --build . --parallel
-        cmake --install .
+      - name: build awslc
+        if: steps.cache-awslc.outputs.cache-hit != 'true'
+        run: |
+          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
+            https://github.com/awslabs/aws-lc/archive/refs/tags/v${{ env.awslc-version }}.tar.gz
+          tar xzf v${{ env.awslc-version }}.tar.gz
+          mkdir aws-lc-${{ env.awslc-version }}-build
+          cd aws-lc-${{ env.awslc-version }}-build
+          cmake -DCMAKE_INSTALL_PREFIX=$HOME/awslc ../aws-lc-${{ env.awslc-version }}
+          cmake --build . --parallel
+          cmake --install .
 
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    # CMAKE_COMPILE_WARNING_AS_ERROR is available in cmake 3.24 or later
-    - run: cmake -Bbuild -DOPENSSL_ROOT_DIR=$HOME/awslc -DBUILD_SHARED_LIBS=ON -DCMAKE_COMPILE_WARNING_AS_ERROR=ON .
-      name: 'cmake generate out-of-tree'
+      # CMAKE_COMPILE_WARNING_AS_ERROR is available in cmake 3.24 or later
+      - run: cmake -Bbuild -DOPENSSL_ROOT_DIR=$HOME/awslc -DBUILD_SHARED_LIBS=ON -DCMAKE_COMPILE_WARNING_AS_ERROR=ON .
+        name: 'cmake generate out-of-tree'
 
-    - run: cmake --build build --parallel
-      name: 'cmake build'
+      - run: cmake --build build --parallel
+        name: 'cmake build'
 
-    - run: cmake --install build --prefix $HOME/curl --strip
-      name: 'cmake install'
+      - run: cmake --install build --prefix $HOME/curl --strip
+        name: 'cmake install'

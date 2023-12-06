@@ -29,221 +29,221 @@
 trigger:
   branches:
     include:
-    - 'master'
-    - '*/ci'
+      - 'master'
+      - '*/ci'
   paths:
     exclude:
-    - '.circleci/*'
-    - '.cirrus.yml'
-    - '.github/*'
-    - '.github/workflows/*'
-    - 'appveyor.yml'
-    - 'packages/*'
-    - 'plan9/*'
+      - '.circleci/*'
+      - '.cirrus.yml'
+      - '.github/*'
+      - '.github/workflows/*'
+      - 'appveyor.yml'
+      - 'packages/*'
+      - 'plan9/*'
 
 pr:
   branches:
     include:
-    - 'master'
+      - 'master'
   paths:
     exclude:
-    - '.circleci/*'
-    - '.cirrus.yml'
-    - '.github/*'
-    - '.github/workflows/*'
-    - 'appveyor.yml'
-    - 'packages/*'
-    - 'plan9/*'
+      - '.circleci/*'
+      - '.cirrus.yml'
+      - '.github/*'
+      - '.github/workflows/*'
+      - 'appveyor.yml'
+      - 'packages/*'
+      - 'plan9/*'
 
 variables:
   MAKEFLAGS: '-j 2'
 
 stages:
 
-##########################################
-### Linux jobs first
-##########################################
+  ##########################################
+  ### Linux jobs first
+  ##########################################
 
-- stage: linux
-  dependsOn: []
-  jobs:
-  - job: ubuntu
-    # define defaults to make sure variables are always expanded/replaced
+  - stage: linux
+    dependsOn: []
+    jobs:
+      - job: ubuntu
+        # define defaults to make sure variables are always expanded/replaced
+        variables:
+          install: ''
+          configure: ''
+          tests: '!433'
+        timeoutInMinutes: 60
+        pool:
+          vmImage: 'ubuntu-latest'
+        strategy:
+          matrix:
+            default:
+              name: default
+              install:
+              configure: --enable-debug --with-openssl
+            disable_ipv6:
+              name: w/o IPv6
+              configure: --disable-ipv6 --with-openssl
+            disable_http_smtp_imap:
+              name: w/o HTTP/SMTP/IMAP
+              configure: --disable-http --disable-smtp --disable-imap --without-ssl
+            disable_thredres:
+              name: sync resolver
+              configure: --disable-threaded-resolver --with-openssl
+            https_only:
+              name: HTTPS only
+              configure: --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp --disable-smb --disable-smtp --disable-telnet --disable-tftp --with-openssl
+            torture:
+              name: torture
+              install: libnghttp2-dev
+              configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl
+              tests: -n -t --shallow=25 !FTP
+        steps:
+          - script: sudo apt-get update && sudo apt-get install -y stunnel4 python3-impacket libzstd-dev libbrotli-dev $(install)
+            displayName: 'apt install'
+            retryCountOnTaskFailure: 3
+
+          - script: autoreconf -fi && ./configure --enable-warnings --enable-werror $(configure)
+            displayName: 'configure $(name)'
+
+          - script: make V=1 && make V=1 examples && cd tests && make V=1
+            displayName: 'compile'
+
+          - script: make V=1 test-ci
+            displayName: 'test'
+            env:
+              AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
+              TFLAGS: "-ac /usr/bin/curl -r $(tests)"
+
+  - stage: scanbuild
+    dependsOn: []
+    jobs:
+      - job: ubuntu
+        timeoutInMinutes: 30
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - script: sudo apt-get update && sudo apt-get install -y clang-tools clang libssl-dev libssh2-1-dev libpsl-dev libbrotli-dev libzstd-dev
+            displayName: 'apt install'
+            retryCountOnTaskFailure: 3
+
+          - script: autoreconf -fi
+            displayName: 'autoreconf'
+
+          - script: scan-build ./configure --enable-debug --enable-werror --with-openssl --with-libssh2
+            displayName: 'configure'
+            env:
+              CC: "clang"
+              CCX: "clang++"
+
+          - script: scan-build --status-bugs make
+            displayName: 'make'
+
+          - script: scan-build --status-bugs make examples
+            displayName: 'make examples'
+
+  ##########################################
+  ### Windows jobs below
+  ##########################################
+
+  - stage: windows
+    dependsOn: []
     variables:
-      install: ''
-      configure: ''
-      tests: '!433'
-    timeoutInMinutes: 60
-    pool:
-      vmImage: 'ubuntu-latest'
-    strategy:
-      matrix:
-        default:
-          name: default
-          install:
-          configure: --enable-debug --with-openssl
-        disable_ipv6:
-          name: w/o IPv6
-          configure: --disable-ipv6 --with-openssl
-        disable_http_smtp_imap:
-          name: w/o HTTP/SMTP/IMAP
-          configure: --disable-http --disable-smtp --disable-imap --without-ssl
-        disable_thredres:
-          name: sync resolver
-          configure: --disable-threaded-resolver --with-openssl
-        https_only:
-          name: HTTPS only
-          configure: --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp --disable-smb --disable-smtp --disable-telnet --disable-tftp --with-openssl
-        torture:
-          name: torture
-          install: libnghttp2-dev
-          configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl
-          tests: -n -t --shallow=25 !FTP
-    steps:
-    - script: sudo apt-get update && sudo apt-get install -y stunnel4 python3-impacket libzstd-dev libbrotli-dev $(install)
-      displayName: 'apt install'
-      retryCountOnTaskFailure: 3
+      agent.preferPowerShellOnContainers: true
+    jobs:
+      - job: msys2
+        # define defaults to make sure variables are always expanded/replaced
+        variables:
+          container_img: ''
+          container_cmd: ''
+          configure: ''
+          tests: ''
+        timeoutInMinutes: 120
+        pool:
+          vmImage: 'windows-2019'
+        strategy:
+          matrix:
+            mingw32_openssl:
+              name: 32-bit OpenSSL/libssh2
+              container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw32:ltsc2019
+              container_cmd: C:\msys64\usr\bin\sh
+              prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-i686-libssh2
+              configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32     --prefix=/mingw32 --enable-debug --enable-werror --with-libssh2 --with-openssl
+              tests: "~571"
+            mingw64_openssl:
+              name: 64-bit OpenSSL/libssh2
+              container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw64:ltsc2019
+              container_cmd: C:\msys64\usr\bin\sh
+              prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-x86_64-libssh2
+              configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-debug --enable-werror --with-libssh2 --with-openssl
+              tests: "~571"
+            mingw64_libssh:
+              name: 64-bit OpenSSL/libssh
+              container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw64:ltsc2019
+              container_cmd: C:\msys64\usr\bin\sh
+              prepare: pacman -S --needed --noconfirm --noprogressbar libssh-devel mingw-w64-x86_64-libssh
+              configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-debug --enable-werror --with-libssh --with-openssl
+              tests: "~571 ~614"
+            mingw32:
+              name: 32-bit w/o zlib
+              container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw32:ltsc2019
+              container_cmd: C:\msys64\usr\bin\sh
+              configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32     --prefix=/mingw32 --enable-debug --enable-werror --without-zlib --without-ssl
+              tests: "!203 !1143"
+            mingw64:
+              name: 64-bit w/o zlib
+              container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw64:ltsc2019
+              container_cmd: C:\msys64\usr\bin\sh
+              configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-debug --enable-werror --without-zlib --without-ssl
+              tests: "!203 !1143"
+            mingw32_schannel:
+              name: 32-bit Schannel/SSPI/WinIDN/libssh2
+              container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw32:ltsc2019
+              container_cmd: C:\msys64\usr\bin\sh
+              prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-i686-libssh2
+              configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32     --prefix=/mingw32 --enable-debug --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2
+              tests: "~571"
+            mingw64_schannel:
+              name: 64-bit Schannel/SSPI/WinIDN/libssh2
+              container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw64:ltsc2019
+              container_cmd: C:\msys64\usr\bin\sh
+              prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-x86_64-libssh2
+              configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-debug --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2
+              tests: "~571"
+            mingw32_schannel_nozlib:
+              name: 32-bit Schannel/SSPI/WinIDN w/o zlib
+              container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw32:ltsc2019
+              container_cmd: C:\msys64\usr\bin\sh
+              configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32     --prefix=/mingw32 --enable-debug --enable-werror --enable-sspi --with-schannel --with-winidn --without-zlib
+              tests: "!203 !1143"
+            mingw64_schannel_nozlib:
+              name: 64-bit Schannel/SSPI/WinIDN w/o zlib
+              container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw64:ltsc2019
+              container_cmd: C:\msys64\usr\bin\sh
+              configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-debug --enable-werror --enable-sspi --with-schannel --with-winidn --without-zlib
+              tests: "!203 !1143"
+        container:
+          image: $(container_img)
+          env:
+            MSYS2_PATH_TYPE: inherit
+        steps:
+          - script: $(container_cmd) -l -c "cd $(echo '%cd%') && $(prepare)"
+            displayName: 'prepare'
+            condition: variables.prepare
+            retryCountOnTaskFailure: 3
 
-    - script: autoreconf -fi && ./configure --enable-warnings --enable-werror $(configure)
-      displayName: 'configure $(name)'
+          - script: $(container_cmd) -l -c "cd $(echo '%cd%') && autoreconf -fi && ./configure $(configure)"
+            displayName: 'configure $(name)'
 
-    - script: make V=1 && make V=1 examples && cd tests && make V=1
-      displayName: 'compile'
+          - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make V=1 && make V=1 examples && cd tests && make V=1"
+            displayName: 'compile'
 
-    - script: make V=1 test-ci
-      displayName: 'test'
-      env:
-        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: "-ac /usr/bin/curl -r $(tests)"
+          - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make V=1 install && PATH=/usr/bin:/bin find . -type f -path '*/.libs/*.exe' -print -execdir mv -t .. {} \;"
+            displayName: 'install'
 
-- stage: scanbuild
-  dependsOn: []
-  jobs:
-  - job: ubuntu
-    timeoutInMinutes: 30
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-    - script: sudo apt-get update && sudo apt-get install -y clang-tools clang libssl-dev libssh2-1-dev libpsl-dev libbrotli-dev libzstd-dev
-      displayName: 'apt install'
-      retryCountOnTaskFailure: 3
-
-    - script: autoreconf -fi
-      displayName: 'autoreconf'
-
-    - script: scan-build ./configure --enable-debug --enable-werror --with-openssl --with-libssh2
-      displayName: 'configure'
-      env:
-        CC: "clang"
-        CCX: "clang++"
-
-    - script: scan-build --status-bugs make
-      displayName: 'make'
-
-    - script: scan-build --status-bugs make examples
-      displayName: 'make examples'
-
-##########################################
-### Windows jobs below
-##########################################
-
-- stage: windows
-  dependsOn: []
-  variables:
-    agent.preferPowerShellOnContainers: true
-  jobs:
-  - job: msys2
-    # define defaults to make sure variables are always expanded/replaced
-    variables:
-      container_img: ''
-      container_cmd: ''
-      configure: ''
-      tests: ''
-    timeoutInMinutes: 120
-    pool:
-      vmImage: 'windows-2019'
-    strategy:
-      matrix:
-        mingw32_openssl:
-          name: 32-bit OpenSSL/libssh2
-          container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw32:ltsc2019
-          container_cmd: C:\msys64\usr\bin\sh
-          prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-i686-libssh2
-          configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32     --prefix=/mingw32 --enable-debug --enable-werror --with-libssh2 --with-openssl
-          tests: "~571"
-        mingw64_openssl:
-          name: 64-bit OpenSSL/libssh2
-          container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw64:ltsc2019
-          container_cmd: C:\msys64\usr\bin\sh
-          prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-x86_64-libssh2
-          configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-debug --enable-werror --with-libssh2 --with-openssl
-          tests: "~571"
-        mingw64_libssh:
-          name: 64-bit OpenSSL/libssh
-          container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw64:ltsc2019
-          container_cmd: C:\msys64\usr\bin\sh
-          prepare: pacman -S --needed --noconfirm --noprogressbar libssh-devel mingw-w64-x86_64-libssh
-          configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-debug --enable-werror --with-libssh --with-openssl
-          tests: "~571 ~614"
-        mingw32:
-          name: 32-bit w/o zlib
-          container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw32:ltsc2019
-          container_cmd: C:\msys64\usr\bin\sh
-          configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32     --prefix=/mingw32 --enable-debug --enable-werror --without-zlib --without-ssl
-          tests: "!203 !1143"
-        mingw64:
-          name: 64-bit w/o zlib
-          container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw64:ltsc2019
-          container_cmd: C:\msys64\usr\bin\sh
-          configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-debug --enable-werror --without-zlib --without-ssl
-          tests: "!203 !1143"
-        mingw32_schannel:
-          name: 32-bit Schannel/SSPI/WinIDN/libssh2
-          container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw32:ltsc2019
-          container_cmd: C:\msys64\usr\bin\sh
-          prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-i686-libssh2
-          configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32     --prefix=/mingw32 --enable-debug --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2
-          tests: "~571"
-        mingw64_schannel:
-          name: 64-bit Schannel/SSPI/WinIDN/libssh2
-          container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw64:ltsc2019
-          container_cmd: C:\msys64\usr\bin\sh
-          prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-x86_64-libssh2
-          configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-debug --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2
-          tests: "~571"
-        mingw32_schannel_nozlib:
-          name: 32-bit Schannel/SSPI/WinIDN w/o zlib
-          container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw32:ltsc2019
-          container_cmd: C:\msys64\usr\bin\sh
-          configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32     --prefix=/mingw32 --enable-debug --enable-werror --enable-sspi --with-schannel --with-winidn --without-zlib
-          tests: "!203 !1143"
-        mingw64_schannel_nozlib:
-          name: 64-bit Schannel/SSPI/WinIDN w/o zlib
-          container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw64:ltsc2019
-          container_cmd: C:\msys64\usr\bin\sh
-          configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-debug --enable-werror --enable-sspi --with-schannel --with-winidn --without-zlib
-          tests: "!203 !1143"
-    container:
-      image: $(container_img)
-      env:
-        MSYS2_PATH_TYPE: inherit
-    steps:
-    - script: $(container_cmd) -l -c "cd $(echo '%cd%') && $(prepare)"
-      displayName: 'prepare'
-      condition: variables.prepare
-      retryCountOnTaskFailure: 3
-
-    - script: $(container_cmd) -l -c "cd $(echo '%cd%') && autoreconf -fi && ./configure $(configure)"
-      displayName: 'configure $(name)'
-
-    - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make V=1 && make V=1 examples && cd tests && make V=1"
-      displayName: 'compile'
-
-    - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make V=1 install && PATH=/usr/bin:/bin find . -type f -path '*/.libs/*.exe' -print -execdir mv -t .. {} \;"
-      displayName: 'install'
-
-    - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make V=1 test-ci"
-      displayName: 'test'
-      env:
-        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: "-ac /usr/bin/curl.exe !IDN !SCP ~612 $(tests)"
+          - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make V=1 test-ci"
+            displayName: 'test'
+            env:
+              AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
+              TFLAGS: "-ac /usr/bin/curl.exe !IDN !SCP ~612 $(tests)"

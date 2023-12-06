@@ -7,35 +7,35 @@ name: Linux 32-bit
 on:
   push:
     branches:
-    - master
-    - '*/ci'
+      - master
+      - '*/ci'
     paths-ignore:
-    - '**/*.md'
-    - '**/CMakeLists.txt'
-    - '.azure-pipelines.yml'
-    - '.circleci/**'
-    - '.cirrus.yml'
-    - 'appveyor.yml'
-    - 'CMake/**'
-    - 'packages/**'
-    - 'plan9/**'
-    - 'projects/**'
-    - 'winbuild/**'
+      - '**/*.md'
+      - '**/CMakeLists.txt'
+      - '.azure-pipelines.yml'
+      - '.circleci/**'
+      - '.cirrus.yml'
+      - 'appveyor.yml'
+      - 'CMake/**'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+      - 'winbuild/**'
   pull_request:
     branches:
-    - master
+      - master
     paths-ignore:
-    - '**/*.md'
-    - '**/CMakeLists.txt'
-    - '.azure-pipelines.yml'
-    - '.circleci/**'
-    - '.cirrus.yml'
-    - 'appveyor.yml'
-    - 'CMake/**'
-    - 'packages/**'
-    - 'plan9/**'
-    - 'projects/**'
-    - 'winbuild/**'
+      - '**/*.md'
+      - '**/CMakeLists.txt'
+      - '.azure-pipelines.yml'
+      - '.circleci/**'
+      - '.cirrus.yml'
+      - 'appveyor.yml'
+      - 'CMake/**'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+      - 'winbuild/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
@@ -55,39 +55,39 @@ jobs:
       fail-fast: false
       matrix:
         build:
-        - name: Linux i686
-          install_packages: gcc-11-i686-linux-gnu libssl-dev:i386 zlib1g-dev:i386 libpsl-dev:i386 libbrotli-dev:i386 libzstd-dev:i386
-          configure: --enable-debug --enable-websockets --with-openssl --host=i686-linux-gnu CC=i686-linux-gnu-gcc-11 PKG_CONFIG_PATH=/usr/lib/i386-linux-gnu/pkgconfig CPPFLAGS=-I/usr/include/i386-linux-gnu LDFLAGS=-L/usr/lib/i386-linux-gnu
+          - name: Linux i686
+            install_packages: gcc-11-i686-linux-gnu libssl-dev:i386 zlib1g-dev:i386 libpsl-dev:i386 libbrotli-dev:i386 libzstd-dev:i386
+            configure: --enable-debug --enable-websockets --with-openssl --host=i686-linux-gnu CC=i686-linux-gnu-gcc-11 PKG_CONFIG_PATH=/usr/lib/i386-linux-gnu/pkgconfig CPPFLAGS=-I/usr/include/i386-linux-gnu LDFLAGS=-L/usr/lib/i386-linux-gnu
 
     steps:
-    - run: |
-        sudo dpkg --add-architecture i386
-        sudo apt-get update -y
-        sudo apt-get install -y --no-install-suggests --no-install-recommends libtool autoconf automake pkg-config stunnel4 ${{ matrix.build.install_packages }}
-        sudo python3 -m pip install impacket
-      name: 'install prereqs'
+      - run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update -y
+          sudo apt-get install -y --no-install-suggests --no-install-recommends libtool autoconf automake pkg-config stunnel4 ${{ matrix.build.install_packages }}
+          sudo python3 -m pip install impacket
+        name: 'install prereqs'
 
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - run: autoreconf -fi
-      name: 'autoreconf'
+      - run: autoreconf -fi
+        name: 'autoreconf'
 
-    - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
-      name: 'configure'
+      - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
+        name: 'configure'
 
-    - run: make V=1
-      name: 'make'
+      - run: make V=1
+        name: 'make'
 
-    - run: ./src/curl -V
-      name: 'check curl -V output'
+      - run: ./src/curl -V
+        name: 'check curl -V output'
 
-    - run: make V=1 examples
-      name: 'make examples'
+      - run: make V=1 examples
+        name: 'make examples'
 
-    - run: make V=1 -C tests
-      name: 'make tests'
+      - run: make V=1 -C tests
+        name: 'make tests'
 
-    - run: make V=1 test-ci
-      name: 'run tests'
-      env:
-        TFLAGS: "${{ matrix.build.tflags }}"
+      - run: make V=1 test-ci
+        name: 'run tests'
+        env:
+          TFLAGS: "${{ matrix.build.tflags }}"

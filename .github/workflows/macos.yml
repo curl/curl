@@ -7,31 +7,31 @@ name: macOS
 on:
   push:
     branches:
-    - master
-    - '*/ci'
+      - master
+      - '*/ci'
     paths-ignore:
-    - '**/*.md'
-    - '.azure-pipelines.yml'
-    - '.circleci/**'
-    - '.cirrus.yml'
-    - 'appveyor.yml'
-    - 'packages/**'
-    - 'plan9/**'
-    - 'projects/**'
-    - 'winbuild/**'
+      - '**/*.md'
+      - '.azure-pipelines.yml'
+      - '.circleci/**'
+      - '.cirrus.yml'
+      - 'appveyor.yml'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+      - 'winbuild/**'
   pull_request:
     branches:
-    - master
+      - master
     paths-ignore:
-    - '**/*.md'
-    - '.azure-pipelines.yml'
-    - '.circleci/**'
-    - '.cirrus.yml'
-    - 'appveyor.yml'
-    - 'packages/**'
-    - 'plan9/**'
-    - 'projects/**'
-    - 'winbuild/**'
+      - '**/*.md'
+      - '.azure-pipelines.yml'
+      - '.circleci/**'
+      - '.cirrus.yml'
+      - 'appveyor.yml'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+      - 'winbuild/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
@@ -52,141 +52,142 @@ jobs:
       fail-fast: false
       matrix:
         build:
-        - name: normal
-          install: nghttp2
-          configure: --without-ssl --enable-websockets
-          macosx-version-min: 10.9
-        - name: debug
-          install: nghttp2
-          configure: --enable-debug --without-ssl --enable-websockets
-          macosx-version-min: 10.9
-        - name: libssh2
-          install: nghttp2 libssh2
-          configure: --enable-debug --with-libssh2 --without-ssl --enable-websockets
-          macosx-version-min: 10.9
-        - name: libssh-c-ares
-          install: openssl nghttp2 libssh
-          configure: --enable-debug --with-libssh --with-openssl=/usr/local/opt/openssl --enable-ares --enable-websockets
-          macosx-version-min: 10.9
-        - name: libssh
-          install: openssl nghttp2 libssh
-          configure: --enable-debug --with-libssh --with-openssl=/usr/local/opt/openssl --enable-websockets
-          macosx-version-min: 10.9
-        - name: c-ares
-          install: nghttp2
-          configure: --enable-debug --enable-ares --without-ssl --enable-websockets
-          macosx-version-min: 10.9
-        - name: HTTP only
-          install: nghttp2
-          configure: |
-            --enable-debug \
-            --enable-maintainer-mode \
-            --disable-alt-svc \
-            --disable-dict \
-            --disable-file \
-            --disable-ftp \
-            --disable-gopher \
-            --disable-imap \
-            --disable-ldap \
-            --disable-pop3 \
-            --disable-rtmp \
-            --disable-rtsp \
-            --disable-scp \
-            --disable-sftp \
-            --disable-shared \
-            --disable-smb \
-            --disable-smtp \
-            --disable-telnet \
-            --disable-tftp \
-            --disable-unix-sockets \
-            --without-brotli \
-            --without-gssapi \
-            --without-libidn2 \
-            --without-libpsl \
-            --without-librtmp \
-            --without-libssh2 \
-            --without-nghttp2 \
-            --without-ntlm-auth \
-            --without-ssl \
-            --without-zlib \
-            --without-zstd
-          macosx-version-min: 10.15
-        - name: SecureTransport http2
-          install: nghttp2
-          configure: --enable-debug --with-secure-transport --enable-websockets
-          macosx-version-min: 10.8
-        - name: gcc SecureTransport
-          configure: CC=gcc-12 --enable-debug --with-secure-transport --enable-websockets
-          macosx-version-min: 10.8
-        - name: OpenSSL http2
-          install: nghttp2 openssl
-          configure: --enable-debug --with-openssl=/usr/local/opt/openssl --enable-websockets
-          macosx-version-min: 10.9
-        - name: LibreSSL http2
-          install: nghttp2 libressl
-          configure: --enable-debug --with-openssl=/usr/local/opt/libressl --enable-websockets
-          macosx-version-min: 10.9
-        - name: torture
-          install: nghttp2 openssl
-          configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=/usr/local/opt/openssl --enable-websockets
-          tflags: -n -t --shallow=25 !FTP
-          macosx-version-min: 10.9
-        - name: torture-ftp
-          install: nghttp2 openssl
-          configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=/usr/local/opt/openssl --enable-websockets
-          tflags: -n -t --shallow=20 FTP
-          macosx-version-min: 10.9
-        - name: macOS 10.15
-          install: nghttp2 libssh2 openssl
-          configure: --enable-debug --disable-ldap --with-openssl=/usr/local/opt/openssl --enable-websockets
-          macosx-version-min: 10.15
+          - name: normal
+            install: nghttp2
+            configure: --without-ssl --enable-websockets
+            macosx-version-min: 10.9
+          - name: debug
+            install: nghttp2
+            configure: --enable-debug --without-ssl --enable-websockets
+            macosx-version-min: 10.9
+          - name: libssh2
+            install: nghttp2 libssh2
+            configure: --enable-debug --with-libssh2 --without-ssl --enable-websockets
+            macosx-version-min: 10.9
+          - name: libssh-c-ares
+            install: openssl nghttp2 libssh
+            configure: --enable-debug --with-libssh --with-openssl=/usr/local/opt/openssl --enable-ares --enable-websockets
+            macosx-version-min: 10.9
+          - name: libssh
+            install: openssl nghttp2 libssh
+            configure: --enable-debug --with-libssh --with-openssl=/usr/local/opt/openssl --enable-websockets
+            macosx-version-min: 10.9
+          - name: c-ares
+            install: nghttp2
+            configure: --enable-debug --enable-ares --without-ssl --enable-websockets
+            macosx-version-min: 10.9
+          - name: HTTP only
+            install: nghttp2
+            configure: |
+              --enable-debug \
+              --enable-maintainer-mode \
+              --disable-alt-svc \
+              --disable-dict \
+              --disable-file \
+              --disable-ftp \
+              --disable-gopher \
+              --disable-imap \
+              --disable-ldap \
+              --disable-pop3 \
+              --disable-rtmp \
+              --disable-rtsp \
+              --disable-scp \
+              --disable-sftp \
+              --disable-shared \
+              --disable-smb \
+              --disable-smtp \
+              --disable-telnet \
+              --disable-tftp \
+              --disable-unix-sockets \
+              --without-brotli \
+              --without-gssapi \
+              --without-libidn2 \
+              --without-libpsl \
+              --without-librtmp \
+              --without-libssh2 \
+              --without-nghttp2 \
+              --without-ntlm-auth \
+              --without-ssl \
+              --without-zlib \
+              --without-zstd
+
+            macosx-version-min: 10.15
+          - name: SecureTransport http2
+            install: nghttp2
+            configure: --enable-debug --with-secure-transport --enable-websockets
+            macosx-version-min: 10.8
+          - name: gcc SecureTransport
+            configure: CC=gcc-12 --enable-debug --with-secure-transport --enable-websockets
+            macosx-version-min: 10.8
+          - name: OpenSSL http2
+            install: nghttp2 openssl
+            configure: --enable-debug --with-openssl=/usr/local/opt/openssl --enable-websockets
+            macosx-version-min: 10.9
+          - name: LibreSSL http2
+            install: nghttp2 libressl
+            configure: --enable-debug --with-openssl=/usr/local/opt/libressl --enable-websockets
+            macosx-version-min: 10.9
+          - name: torture
+            install: nghttp2 openssl
+            configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=/usr/local/opt/openssl --enable-websockets
+            tflags: -n -t --shallow=25 !FTP
+            macosx-version-min: 10.9
+          - name: torture-ftp
+            install: nghttp2 openssl
+            configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=/usr/local/opt/openssl --enable-websockets
+            tflags: -n -t --shallow=20 FTP
+            macosx-version-min: 10.9
+          - name: macOS 10.15
+            install: nghttp2 libssh2 openssl
+            configure: --enable-debug --disable-ldap --with-openssl=/usr/local/opt/openssl --enable-websockets
+            macosx-version-min: 10.15
     steps:
-    - run: echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
-      name: 'brew bundle'
+      - run: echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+        name: 'brew bundle'
 
-    # Run this command with retries because of spurious failures seen
-    # while running the tests, for example
-    # https://github.com/curl/curl/runs/4095721123?check_suite_focus=true
-    - run: "while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done"
-      name: 'brew install'
+      # Run this command with retries because of spurious failures seen
+      # while running the tests, for example
+      # https://github.com/curl/curl/runs/4095721123?check_suite_focus=true
+      - run: "while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done"
+        name: 'brew install'
 
-    - run: |
-        case "${{ matrix.build.install }}" in
-          *openssl*)
-            ;;
-          *)
-            if test -d /usr/local/include/openssl; then
-              brew unlink openssl
-            fi;;
-        esac
-      name: 'brew unlink openssl'
+      - run: |
+          case "${{ matrix.build.install }}" in
+            *openssl*)
+              ;;
+            *)
+              if test -d /usr/local/include/openssl; then
+                brew unlink openssl
+              fi;;
+          esac
+        name: 'brew unlink openssl'
 
-    - run: python3 -m pip install impacket
-      name: 'pip3 install'
+      - run: python3 -m pip install impacket
+        name: 'pip3 install'
 
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - run: autoreconf -fi
-      name: 'autoreconf'
+      - run: autoreconf -fi
+        name: 'autoreconf'
 
-    - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
-      name: 'configure'
-      env:
-        CFLAGS: "-mmacosx-version-min=${{ matrix.build.macosx-version-min }}"
+      - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
+        name: 'configure'
+        env:
+          CFLAGS: "-mmacosx-version-min=${{ matrix.build.macosx-version-min }}"
 
-    - run: make V=1
-      name: 'make'
+      - run: make V=1
+        name: 'make'
 
-    - run: make V=1 examples
-      name: 'make examples'
+      - run: make V=1 examples
+        name: 'make examples'
 
-    - run: make V=1 -C tests
-      name: 'make tests'
+      - run: make V=1 -C tests
+        name: 'make tests'
 
-    - run: make V=1 test-ci
-      name: 'run tests'
-      env:
-        TFLAGS: "${{ matrix.build.tflags }} ~1452"
+      - run: make V=1 test-ci
+        name: 'run tests'
+        env:
+          TFLAGS: "${{ matrix.build.tflags }} ~1452"
 
   cmake:
     name: cmake ${{ matrix.compiler.CC }} ${{ matrix.build.name }}
@@ -196,47 +197,47 @@ jobs:
       fail-fast: false
       matrix:
         compiler:
-        - CC: clang
-          CXX: clang++
-          CFLAGS: "-mmacosx-version-min=10.15 -Wno-deprecated-declarations"
-        - CC: gcc-12
-          CXX: g++-12
-          CFLAGS: "-mmacosx-version-min=10.15 -Wno-error=undef -Wno-error=conversion"
+          - CC: clang
+            CXX: clang++
+            CFLAGS: "-mmacosx-version-min=10.15 -Wno-deprecated-declarations"
+          - CC: gcc-12
+            CXX: g++-12
+            CFLAGS: "-mmacosx-version-min=10.15 -Wno-error=undef -Wno-error=conversion"
         build:
-        - name: OpenSSL
-          install: nghttp2 openssl
-          generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9
-        - name: LibreSSL
-          install: nghttp2 libressl
-          generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DCMAKE_UNITY_BUILD=ON
-        - name: libssh2
-          install: nghttp2 openssl libssh2
-          generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCURL_USE_LIBSSH2=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON
-        - name: GnuTLS
-          install: gnutls
-          generate: -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DCMAKE_SHARED_LINKER_FLAGS=-L/usr/local/lib -DCMAKE_EXE_LINKER_FLAGS=-L/usr/local/lib
+          - name: OpenSSL
+            install: nghttp2 openssl
+            generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9
+          - name: LibreSSL
+            install: nghttp2 libressl
+            generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DCMAKE_UNITY_BUILD=ON
+          - name: libssh2
+            install: nghttp2 openssl libssh2
+            generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCURL_USE_LIBSSH2=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON
+          - name: GnuTLS
+            install: gnutls
+            generate: -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DCMAKE_SHARED_LINKER_FLAGS=-L/usr/local/lib -DCMAKE_EXE_LINKER_FLAGS=-L/usr/local/lib
     steps:
-    - run: echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
-      name: 'brew bundle'
+      - run: echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+        name: 'brew bundle'
 
-    - run: "while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done"
-      name: 'brew install'
+      - run: "while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done"
+        name: 'brew install'
 
-    - run: |
-        case "${{ matrix.build.install }}" in
-          *openssl*)
-            ;;
-          *)
-            if test -d /usr/local/include/openssl; then
-              brew unlink openssl
-            fi;;
-        esac
-      name: 'brew unlink openssl'
+      - run: |
+          case "${{ matrix.build.install }}" in
+            *openssl*)
+              ;;
+            *)
+              if test -d /usr/local/include/openssl; then
+                brew unlink openssl
+              fi;;
+          esac
+        name: 'brew unlink openssl'
 
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - run: cmake -S. -Bbuild -DCURL_WERROR=ON -DPICKY_COMPILER=ON ${{ matrix.build.generate }}
-      name: 'cmake generate'
+      - run: cmake -S. -Bbuild -DCURL_WERROR=ON -DPICKY_COMPILER=ON ${{ matrix.build.generate }}
+        name: 'cmake generate'
 
-    - run: cmake --build build
-      name: 'cmake build'
+      - run: cmake --build build
+        name: 'cmake build'
