@@ -57,14 +57,17 @@ The caller of \fIcurl_easy_escape(3)\fP must make sure that the data passed in
 to the function is encoded correctly.
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  char *output = curl_easy_escape(curl, "data to convert", 15);
-  if(output) {
-    printf("Encoded: %s\\n", output);
-    curl_free(output);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    char *output = curl_easy_escape(curl, "data to convert", 15);
+    if(output) {
+      printf("Encoded: %s\\n", output);
+      curl_free(output);
+    }
+    curl_easy_cleanup(curl);
   }
-  curl_easy_cleanup(curl);
 }
 .fi
 .SH AVAILABILITY

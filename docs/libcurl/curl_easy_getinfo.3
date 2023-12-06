@@ -298,8 +298,11 @@ pretransfer and transfer before final transaction was started. So, this is
 zero if no redirection took place.
 .SH EXAMPLE
 .nf
-  curl = curl_easy_init();
+int main(void)
+{
+  CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode res;
     curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/");
     res = curl_easy_perform(curl);
 
@@ -315,6 +318,7 @@ zero if no redirection took place.
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
+}
 .fi
 .SH AVAILABILITY
 Added in 7.4.1

@@ -149,5 +149,22 @@ struct schannel_ssl_backend_data {
 #endif
 };
 
+struct schannel_multi_ssl_backend_data {
+  unsigned char *CAinfo_blob_digest; /* CA info blob digest */
+  size_t CAinfo_blob_size;           /* CA info blob size */
+  char *CAfile;                      /* CAfile path used to generate
+                                        certificate store */
+  HCERTSTORE cert_store;             /* cached certificate store or
+                                        NULL if none */
+  struct curltime time;              /* when the cached store was created */
+};
+
+HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
+                                               const struct Curl_easy *data);
+
+bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
+                                         const struct Curl_easy *data,
+                                         HCERTSTORE cert_store);
+
 #endif /* USE_SCHANNEL */
 #endif /* HEADER_CURL_SCHANNEL_INT_H */

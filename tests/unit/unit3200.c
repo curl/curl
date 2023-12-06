@@ -47,6 +47,7 @@ static CURLcode unit_stop(void)
 }
 
 #ifdef __GNUC__
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverlength-strings"
 #endif
 
@@ -160,6 +161,10 @@ UNITTEST_START
     fprintf(stderr, "OK\n");
   }
 UNITTEST_STOP
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 #else
 static CURLcode unit_setup(void)

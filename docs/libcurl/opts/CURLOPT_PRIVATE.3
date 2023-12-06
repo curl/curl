@@ -42,19 +42,26 @@ NULL
 All
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-struct private secrets;
-if(curl) {
-  struct private *extracted;
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+struct private {
+  void *custom;
+};
 
-  /* store a pointer to our private struct */
-  curl_easy_setopt(curl, CURLOPT_PRIVATE, &secrets);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  struct private secrets;
+  if(curl) {
+    struct private *extracted;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  curl_easy_perform(curl);
+    /* store a pointer to our private struct */
+    curl_easy_setopt(curl, CURLOPT_PRIVATE, &secrets);
 
-  /* we can extract the private pointer again too */
-  curl_easy_getinfo(curl, CURLINFO_PRIVATE, &extracted);
+    curl_easy_perform(curl);
+
+    /* we can extract the private pointer again too */
+    curl_easy_getinfo(curl, CURLINFO_PRIVATE, &extracted);
+  }
 }
 .fi
 .SH AVAILABILITY

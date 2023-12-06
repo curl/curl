@@ -836,6 +836,7 @@ output_auth_headers(struct Curl_easy *data,
           (data->state.aptr.user ?
            data->state.aptr.user : ""));
 #else
+    (void)proxy;
     infof(data, "Server auth using %s with user '%s'",
           auth, data->state.aptr.user ?
           data->state.aptr.user : "");
@@ -845,7 +846,7 @@ output_auth_headers(struct Curl_easy *data,
   else
     authstatus->multipass = FALSE;
 
-  return CURLE_OK;
+  return result;
 }
 
 /**
@@ -996,10 +997,14 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
   curlnegotiate *negstate = proxy ? &conn->proxy_negotiate_state :
                                     &conn->http_negotiate_state;
 #endif
+#if defined(USE_SPNEGO) || \
+  defined(USE_NTLM) || \
+  !defined(CURL_DISABLE_DIGEST_AUTH) || \
+  !defined(CURL_DISABLE_BASIC_AUTH) || \
+  !defined(CURL_DISABLE_BEARER_AUTH)
+
   unsigned long *availp;
   struct auth *authp;
-
-  (void) conn; /* In case conditionals make it unused. */
 
   if(proxy) {
     availp = &data->info.proxyauthavail;
@@ -1009,6 +1014,11 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
     availp = &data->info.httpauthavail;
     authp = &data->state.authhost;
   }
+#else
+  (void) proxy;
+#endif
+
+  (void) conn; /* In case conditionals make it unused. */
 
   /*
    * Here we check if we want the specific single authentication (using ==) and
@@ -1414,7 +1424,7 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
      *   and install our own `data->state.fread_func` that
      *   on subsequent calls reads `in` empty.
      * - when the whisked away `in` is empty, the `fread_func`
-     *   is restored ot its original state.
+     *   is restored to its original state.
      * The problem is that `fread_func` can only return
      * `upload_buffer_size` lengths. If the send we do here
      * is larger and blocks, we do re-sending with smaller
@@ -2423,14 +2433,16 @@ CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
     /* Convert the form structure into a mime structure, then keep
        the conversion */
     if(!data->state.formp) {
-      data->state.formp = calloc(sizeof(curl_mimepart), 1);
+      data->state.formp = calloc(1, sizeof(curl_mimepart));
       if(!data->state.formp)
         return CURLE_OUT_OF_MEMORY;
       Curl_mime_cleanpart(data->state.formp);
       result = Curl_getformdata(data, data->state.formp, data->set.httppost,
                                 data->state.fread_func);
-      if(result)
+      if(result) {
+        Curl_safefree(data->state.formp);
         return result;
+      }
       data->state.mimepost = data->state.formp;
     }
     break;
@@ -3985,36 +3997,30 @@ CURLcode Curl_bump_headersize(struct Curl_easy *data,
  */
 CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
                                      struct connectdata *conn,
-                                     ssize_t *nread,
-                                     bool *stop_reading)
+                                     const char *buf, size_t blen,
+                                     size_t *pconsumed)
 {
   CURLcode result;
   struct SingleRequest *k = &data->req;
-  ssize_t onread = *nread;
-  char *ostr = k->str;
   char *headp;
-  char *str_start;
   char *end_ptr;
 
   /* header line within buffer loop */
-  *stop_reading = FALSE;
+  *pconsumed = 0;
   do {
-    size_t rest_length;
-    size_t full_length;
+    size_t line_length;
     int writetype;
 
-    /* str_start is start of line within buf */
-    str_start = k->str;
-
     /* data is in network encoding so use 0x0a instead of '\n' */
-    end_ptr = memchr(str_start, 0x0a, *nread);
+    end_ptr = memchr(buf, 0x0a, blen);
 
     if(!end_ptr) {
       /* Not a complete header line within buffer, append the data to
          the end of the headerbuff. */
-      result = Curl_dyn_addn(&data->state.headerb, str_start, *nread);
+      result = Curl_dyn_addn(&data->state.headerb, buf, blen);
       if(result)
         return result;
+      *pconsumed += blen;
 
       if(!k->headerline) {
         /* check if this looks like a protocol header */
@@ -4026,30 +4032,27 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         if(st == STATUS_BAD) {
           /* this is not the beginning of a protocol first header line */
           k->header = FALSE;
-          k->badheader = HEADER_ALLBAD;
+          k->badheader = TRUE;
           streamclose(conn, "bad HTTP: No end-of-message indicator");
           if(!data->set.http09_allowed) {
             failf(data, "Received HTTP/0.9 when not allowed");
             return CURLE_UNSUPPORTED_PROTOCOL;
           }
-          break;
+          goto out;
         }
       }
-      *nread = 0;
-      break; /* read more and try again */
+      goto out; /* read more and try again */
     }
 
     /* decrease the size of the remaining (supposed) header line */
-    rest_length = (end_ptr - k->str) + 1;
-    *nread -= (ssize_t)rest_length;
-
-    k->str = end_ptr + 1; /* move past new line */
-
-    full_length = k->str - str_start;
-
-    result = Curl_dyn_addn(&data->state.headerb, str_start, full_length);
+    line_length = (end_ptr - buf) + 1;
+    result = Curl_dyn_addn(&data->state.headerb, buf, line_length);
     if(result)
       return result;
+
+    blen -= line_length;
+    buf += line_length;
+    *pconsumed += line_length;
 
     /****
      * We now have a FULL header line in 'headerb'.
@@ -4068,14 +4071,12 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
           return CURLE_UNSUPPORTED_PROTOCOL;
         }
         k->header = FALSE;
-        if(*nread)
+        if(blen)
           /* since there's more, this is a partial bad header */
-          k->badheader = HEADER_PARTHEADER;
+          k->badheader = TRUE;
         else {
           /* this was all we read so it's all a bad header */
-          k->badheader = HEADER_ALLBAD;
-          *nread = onread;
-          k->str = ostr;
+          k->badheader = TRUE;
           return CURLE_OK;
         }
         break;
@@ -4129,22 +4130,23 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 
             /* switch to http2 now. The bytes after response headers
                are also processed here, otherwise they are lost. */
-            result = Curl_http2_upgrade(data, conn, FIRSTSOCKET,
-                                        k->str, *nread);
+            result = Curl_http2_upgrade(data, conn, FIRSTSOCKET, buf, blen);
             if(result)
               return result;
-            *nread = 0;
+            *pconsumed += blen;
+            blen = 0;
           }
 #ifdef USE_WEBSOCKETS
           else if(k->upgr101 == UPGR101_WS) {
             /* verify the response */
-            result = Curl_ws_accept(data, k->str, *nread);
+            result = Curl_ws_accept(data, buf, blen);
             if(result)
               return result;
             k->header = FALSE; /* no more header to parse! */
             if(data->set.connect_only) {
               k->keepon &= ~KEEP_RECV; /* read no more content */
-              *nread = 0;
+              *pconsumed += blen;
+              blen = 0;
             }
           }
 #endif
@@ -4356,7 +4358,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
          * out and return home.
          */
         if(data->req.no_body)
-          *stop_reading = TRUE;
+          k->download_done = TRUE;
 #ifndef CURL_DISABLE_RTSP
         else if((conn->handler->protocol & CURLPROTO_RTSP) &&
                 (data->set.rtspreq == RTSPREQ_DESCRIBE) &&
@@ -4365,7 +4367,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
              absent, a length 0 must be assumed.  It will prevent libcurl from
              hanging on DESCRIBE request that got refused for whatever
              reason */
-          *stop_reading = TRUE;
+          k->download_done = TRUE;
 #endif
 
         /* If max download size is *zero* (nothing) we already have
@@ -4376,15 +4378,12 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         if(0 == k->maxdownload
            && !Curl_conn_is_http2(data, conn, FIRSTSOCKET)
            && !Curl_conn_is_http3(data, conn, FIRSTSOCKET))
-          *stop_reading = TRUE;
+          k->download_done = TRUE;
 
-        if(*stop_reading) {
-          /* we make sure that this socket isn't read more now */
-          k->keepon &= ~KEEP_RECV;
-        }
-
-        Curl_debug(data, CURLINFO_HEADER_IN, str_start, headerlen);
-        break; /* exit header line loop */
+        Curl_debug(data, CURLINFO_HEADER_IN,
+                   Curl_dyn_ptr(&data->state.headerb),
+                   Curl_dyn_len(&data->state.headerb));
+        goto out; /* exit header line loop */
       }
 
       /* We continue reading headers, reset the line-based header */
@@ -4573,12 +4572,12 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 
     Curl_dyn_reset(&data->state.headerb);
   }
-  while(*k->str); /* header line within buffer */
+  while(blen);
 
   /* We might have reached the end of the header part here, but
      there might be a non-header part left in the end of the read
      buffer. */
-
+out:
   return CURLE_OK;
 }
 

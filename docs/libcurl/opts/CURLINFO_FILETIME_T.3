@@ -50,22 +50,26 @@ range.
 HTTP(S), FTP(S), SFTP
 .SH EXAMPLE
 .nf
-curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, url);
-  /* Ask for filetime */
-  curl_easy_setopt(curl, CURLOPT_FILETIME, 1L);
-  res = curl_easy_perform(curl);
-  if(CURLE_OK == res) {
-    curl_off_t filetime;
-    res = curl_easy_getinfo(curl, CURLINFO_FILETIME_T, &filetime);
-    if((CURLE_OK == res) && (filetime >= 0)) {
-      time_t file_time = (time_t)filetime;
-      printf("filetime %s: %s", filename, ctime(&file_time));
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+    /* Ask for filetime */
+    curl_easy_setopt(curl, CURLOPT_FILETIME, 1L);
+    res = curl_easy_perform(curl);
+    if(CURLE_OK == res) {
+      curl_off_t filetime;
+      res = curl_easy_getinfo(curl, CURLINFO_FILETIME_T, &filetime);
+      if((CURLE_OK == res) && (filetime >= 0)) {
+        time_t file_time = (time_t)filetime;
+        printf("filetime: %s", ctime(&file_time));
+      }
     }
+    /* always cleanup */
+    curl_easy_cleanup(curl);
   }
-  /* always cleanup */
-  curl_easy_cleanup(curl);
 }
 .fi
 .SH AVAILABILITY

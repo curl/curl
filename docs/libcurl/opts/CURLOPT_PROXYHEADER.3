@@ -51,22 +51,25 @@ NULL
 HTTP
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
+int main(void)
+{
+  CURL *curl = curl_easy_init();
 
-struct curl_slist *list;
+  struct curl_slist *list;
 
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-  curl_easy_setopt(curl, CURLOPT_PROXY, "http://proxy.example.com:80");
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+    curl_easy_setopt(curl, CURLOPT_PROXY, "http://proxy.example.com:80");
 
-  list = curl_slist_append(NULL, "Shoesize: 10");
-  list = curl_slist_append(list, "Accept:");
+    list = curl_slist_append(NULL, "Shoesize: 10");
+    list = curl_slist_append(list, "Accept:");
 
-  curl_easy_setopt(curl, CURLOPT_PROXYHEADER, list);
+    curl_easy_setopt(curl, CURLOPT_PROXYHEADER, list);
 
-  curl_easy_perform(curl);
+    curl_easy_perform(curl);
 
-  curl_slist_free_all(list); /* free the list again */
+    curl_slist_free_all(list); /* free the list again */
+  }
 }
 .fi
 .SH AVAILABILITY

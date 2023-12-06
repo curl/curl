@@ -40,16 +40,19 @@ CURL_HTTP_VERSION_3 or 0 if the version cannot be determined.
 HTTP
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  CURLcode res;
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-  res = curl_easy_perform(curl);
-  if(res == CURLE_OK) {
-    long http_version;
-    curl_easy_getinfo(curl, CURLINFO_HTTP_VERSION, &http_version);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+    res = curl_easy_perform(curl);
+    if(res == CURLE_OK) {
+      long http_version;
+      curl_easy_getinfo(curl, CURLINFO_HTTP_VERSION, &http_version);
+    }
+    curl_easy_cleanup(curl);
   }
-  curl_easy_cleanup(curl);
 }
 .fi
 .SH AVAILABILITY

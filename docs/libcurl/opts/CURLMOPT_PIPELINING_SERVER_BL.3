@@ -50,14 +50,17 @@ The default value is NULL, which means that there is no block list.
 .SH PROTOCOLS
 .SH EXAMPLE
 .nf
-  char *server_block_list[] =
-  {
-    "Microsoft-IIS/6.0",
-    "nginx/0.8.54",
-    NULL
-  };
-
+static char *server_block_list[] =
+{
+  "Microsoft-IIS/6.0",
+  "nginx/0.8.54",
+  NULL
+};
+int main(void)
+{
+  CURLM *m = curl_multi_init();
   curl_multi_setopt(m, CURLMOPT_PIPELINING_SERVER_BL, server_block_list);
+}
 .fi
 .SH AVAILABILITY
 Added in 7.30.0

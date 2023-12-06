@@ -45,8 +45,11 @@ CURL handle.
 All network based ones
 .SH EXAMPLE
 .nf
+int main(void)
 {
   char *ip;
+  CURLcode res;
+  CURL *curl = curl_easy_init();
 
   curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 

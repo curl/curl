@@ -96,17 +96,11 @@
 #ifndef _WIN32_WINNT_WS03
 #define _WIN32_WINNT_WS03           0x0502   /* Windows Server 2003 */
 #endif
-#ifndef _WIN32_WINNT_WIN6
-#define _WIN32_WINNT_WIN6           0x0600   /* Windows Vista */
-#endif
 #ifndef _WIN32_WINNT_VISTA
 #define _WIN32_WINNT_VISTA          0x0600   /* Windows Vista */
 #endif
 #ifndef _WIN32_WINNT_WS08
 #define _WIN32_WINNT_WS08           0x0600   /* Windows Server 2008 */
-#endif
-#ifndef _WIN32_WINNT_LONGHORN
-#define _WIN32_WINNT_LONGHORN       0x0600   /* Windows Vista */
 #endif
 #ifndef _WIN32_WINNT_WIN7
 #define _WIN32_WINNT_WIN7           0x0601   /* Windows 7 */
@@ -116,9 +110,6 @@
 #endif
 #ifndef _WIN32_WINNT_WINBLUE
 #define _WIN32_WINNT_WINBLUE        0x0603   /* Windows 8.1 */
-#endif
-#ifndef _WIN32_WINNT_WINTHRESHOLD
-#define _WIN32_WINNT_WINTHRESHOLD   0x0A00   /* Windows 10 */
 #endif
 #ifndef _WIN32_WINNT_WIN10
 #define _WIN32_WINNT_WIN10          0x0A00   /* Windows 10 */

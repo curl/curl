@@ -41,9 +41,9 @@
 
 static char *parse_filename(const char *ptr, size_t len);
 
-#ifdef WIN32
-#define BOLD
-#define BOLDOFF
+#ifdef _WIN32
+#define BOLD "\x1b[1m"
+#define BOLDOFF "\x1b[22m"
 #else
 #define BOLD "\x1b[1m"
 /* Switch off bold by setting "all attributes off" since the explicit
@@ -87,7 +87,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
   }
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
   /* Discard incomplete UTF-8 sequence buffered from body */
   if(outs->utf8seq[0])
     memset(outs->utf8seq, 0, sizeof(outs->utf8seq));
@@ -150,16 +150,19 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
       char *filename;
       size_t len;
 
-      while(*p && (p < end) && !ISALPHA(*p))
+      while((p < end) && *p && !ISALPHA(*p))
         p++;
       if(p > end - 9)
         break;
 
       if(memcmp(p, "filename=", 9)) {
         /* no match, find next parameter */
-        while((p < end) && (*p != ';'))
+        while((p < end) && *p && (*p != ';'))
           p++;
-        continue;
+        if((p < end) && *p)
+          continue;
+        else
+          break;
       }
       p += 9;
 
@@ -209,7 +212,11 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
     if(!outs->stream && !tool_create_output_file(outs, per->config))
       return CURL_WRITEFUNC_ERROR;
 
-    if(hdrcbdata->global->isatty && hdrcbdata->global->styled_output)
+    if(hdrcbdata->global->isatty &&
+#ifdef _WIN32
+       tool_term_has_bold &&
+#endif
+       hdrcbdata->global->styled_output)
       value = memchr(ptr, ':', cb);
     if(value) {
       size_t namelen = value - ptr;
@@ -297,7 +304,7 @@ static char *parse_filename(const char *ptr, size_t len)
   if(copy != p)
     memmove(copy, p, strlen(p) + 1);
 
-#if defined(MSDOS) || defined(WIN32)
+#if defined(_WIN32) || defined(MSDOS)
   {
     char *sanitized;
     SANITIZEcode sc = sanitize_file_name(&sanitized, copy, 0);
@@ -306,7 +313,7 @@ static char *parse_filename(const char *ptr, size_t len)
       return NULL;
     copy = sanitized;
   }
-#endif /* MSDOS || WIN32 */
+#endif /* _WIN32 || MSDOS */
 
   /* in case we built debug enabled, we allow an environment variable
    * named CURL_TESTDIR to prefix the given file name to put it into a

@@ -44,16 +44,23 @@ NULL
 This feature is only used for HTTP(S) transfer.
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-struct MyData this;
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+struct MyData {
+  void *custom;
+};
 
-  /* pass pointer that gets passed in to the
-     CURLOPT_HSTSREADFUNCTION callback */
-  curl_easy_setopt(curl, CURLOPT_HSTSREADDATA, &this);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  struct MyData this;
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
 
-  curl_easy_perform(curl);
+    /* pass pointer that gets passed in to the
+       CURLOPT_HSTSREADFUNCTION callback */
+    curl_easy_setopt(curl, CURLOPT_HSTSREADDATA, &this);
+
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

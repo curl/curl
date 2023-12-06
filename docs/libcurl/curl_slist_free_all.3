@@ -38,19 +38,22 @@ Passing in a NULL pointer in \fIlist\fP makes this function return immediately
 with no action.
 .SH EXAMPLE
 .nf
-CURL *handle;
-struct curl_slist *slist=NULL;
+int main(void)
+{
+  CURL *handle;
+  struct curl_slist *slist = NULL;
 
-slist = curl_slist_append(slist, "X-libcurl: coolness");
+  slist = curl_slist_append(slist, "X-libcurl: coolness");
 
-if (slist == NULL)
-  return -1;
+  if(!slist)
+    return -1;
 
-curl_easy_setopt(handle, CURLOPT_HTTPHEADER, slist);
+  curl_easy_setopt(handle, CURLOPT_HTTPHEADER, slist);
 
-curl_easy_perform(handle);
+  curl_easy_perform(handle);
 
-curl_slist_free_all(slist); /* free the list again */
+  curl_slist_free_all(slist); /* free the list again */
+}
 .fi
 .SH AVAILABILITY
 Always

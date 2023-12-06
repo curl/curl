@@ -65,8 +65,6 @@ CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
 #define CURL_SHA256_DIGEST_LENGTH 32 /* fixed size */
 #endif
 
-char *Curl_ssl_snihost(struct Curl_easy *data, const char *host, size_t *olen);
-
 curl_sslbackend Curl_ssl_backend(void);
 
 /**
@@ -105,6 +103,15 @@ bool Curl_ssl_conn_config_match(struct Curl_easy *data,
  * been changed on the easy handle. Will work for `verifypeer`,
  * `verifyhost` and `verifystatus`. */
 void Curl_ssl_conn_config_update(struct Curl_easy *data, bool for_proxy);
+
+/**
+ * Init SSL peer information for filter. Can be called repeatedly.
+ */
+CURLcode Curl_ssl_peer_init(struct ssl_peer *peer, struct Curl_cfilter *cf);
+/**
+ * Free all allocated data and reset peer information.
+ */
+void Curl_ssl_peer_cleanup(struct ssl_peer *peer);
 
 #ifdef USE_SSL
 int Curl_ssl_init(void);

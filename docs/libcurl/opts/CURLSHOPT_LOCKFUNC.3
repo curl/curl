@@ -55,11 +55,17 @@ This pointer is not used by libcurl itself.
 All
 .SH EXAMPLE
 .nf
+extern void mutex_lock(CURL *handle, curl_lock_data data,
+                       curl_lock_access access, void *clientp);
+
+int main(void)
+{
   CURLSHcode sh;
-  share = curl_share_init();
+  CURLSH *share = curl_share_init();
   sh = curl_share_setopt(share, CURLSHOPT_LOCKFUNC, mutex_lock);
   if(sh)
     printf("Error: %s\\n", curl_share_strerror(sh));
+}
 .fi
 .SH AVAILABILITY
 Added in 7.10

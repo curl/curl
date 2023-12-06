@@ -46,9 +46,12 @@ The default value is 0, which means that the penalization is inactive.
 HTTP(S)
 .SH EXAMPLE
 .nf
-CURLM *m = curl_multi_init();
-long maxchunk = 10000;
-curl_multi_setopt(m, CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE, maxchunk);
+int main(void)
+{
+  CURLM *m = curl_multi_init();
+  long maxchunk = 10000;
+  curl_multi_setopt(m, CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE, maxchunk);
+}
 .fi
 .SH AVAILABILITY
 Added in 7.30.0

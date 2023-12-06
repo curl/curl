@@ -31,12 +31,12 @@ int getfiletime(const char *filename, struct GlobalConfig *global,
                 curl_off_t *stamp);
 
 #if defined(HAVE_UTIME) || defined(HAVE_UTIMES) ||      \
-  (defined(WIN32) && (SIZEOF_CURL_OFF_T >= 8))
+  (defined(_WIN32) && (SIZEOF_CURL_OFF_T >= 8))
 void setfiletime(curl_off_t filetime, const char *filename,
                  struct GlobalConfig *global);
 #else
 #define setfiletime(a,b,c) Curl_nop_stmt
 #endif /* defined(HAVE_UTIME) || defined(HAVE_UTIMES) ||        \
-          (defined(WIN32) && (SIZEOF_CURL_OFF_T >= 8)) */
+          (defined(_WIN32) && (SIZEOF_CURL_OFF_T >= 8)) */
 
 #endif /* HEADER_CURL_TOOL_FILETIME_H */

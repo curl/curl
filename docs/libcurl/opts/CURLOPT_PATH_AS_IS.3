@@ -53,13 +53,17 @@ The corresponding flag for the \fIcurl_url_set(3)\fP function is called
 All
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/../../etc/password");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL,
+                     "https://example.com/../../etc/password");
 
-  curl_easy_setopt(curl, CURLOPT_PATH_AS_IS, 1L);
+    curl_easy_setopt(curl, CURLOPT_PATH_AS_IS, 1L);
 
-  curl_easy_perform(curl);
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

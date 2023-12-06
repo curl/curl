@@ -319,7 +319,7 @@ static const struct testcase get_parts_list[] ={
    "http | ftp.user | moo | [13] | example.com | [15] | /color/ | [16] | "
    "green?no-red",
    CURLU_GUESS_SCHEME, 0, CURLUE_OK },
-#ifdef WIN32
+#ifdef _WIN32
   {"file:/C:\\programs\\foo",
    "file | [11] | [12] | [13] | [14] | [15] | C:\\programs\\foo | [16] | [17]",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},

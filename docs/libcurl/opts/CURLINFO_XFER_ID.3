@@ -45,18 +45,22 @@ same multi handle.
 All
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  /* Perform the request */
-  res = curl_easy_perform(curl);
+    /* Perform the request */
+    res = curl_easy_perform(curl);
 
-  if(!res) {
-    curl_off_t xfer_id;
-    res = curl_easy_getinfo(curl, CURLINFO_XFER_ID, &xfer_id);
     if(!res) {
-      printf("Transfer ID: %" CURL_FORMAT_CURL_OFF_T "\\n", xfer_id);
+      curl_off_t xfer_id;
+      res = curl_easy_getinfo(curl, CURLINFO_XFER_ID, &xfer_id);
+      if(!res) {
+        printf("Transfer ID: %" CURL_FORMAT_CURL_OFF_T "\\n", xfer_id);
+      }
     }
   }
 }

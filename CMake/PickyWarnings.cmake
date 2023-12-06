@@ -52,8 +52,8 @@ if(PICKY_COMPILER)
     # Assume these options always exist with both clang and gcc.
     # Require clang 3.0 / gcc 2.95 or later.
     list(APPEND WPICKY_ENABLE
-      -Wbad-function-cast                  # clang  3.0  gcc  2.95
-      -Wconversion                         # clang  3.0  gcc  2.95
+      -Wbad-function-cast                  # clang  2.7  gcc  2.95
+      -Wconversion                         # clang  2.7  gcc  2.95
       -Winline                             # clang  1.0  gcc  1.0
       -Wmissing-declarations               # clang  1.0  gcc  2.7
       -Wmissing-prototypes                 # clang  1.0  gcc  1.0
@@ -70,23 +70,37 @@ if(PICKY_COMPILER)
 
     # Always enable with clang, version dependent with gcc
     set(WPICKY_COMMON_OLD
+      -Waddress                            # clang  2.7  gcc  4.3
+      -Wattributes                         # clang  2.7  gcc  4.1
       -Wcast-align                         # clang  1.0  gcc  4.2
       -Wdeclaration-after-statement        # clang  1.0  gcc  3.4
-      -Wempty-body                         # clang  3.0  gcc  4.3
+      -Wdiv-by-zero                        # clang  2.7  gcc  4.1
+      -Wempty-body                         # clang  2.7  gcc  4.3
       -Wendif-labels                       # clang  1.0  gcc  3.3
       -Wfloat-equal                        # clang  1.0  gcc  2.96 (3.0)
-      -Wignored-qualifiers                 # clang  3.0  gcc  4.3
+      -Wformat-security                    # clang  2.7  gcc  4.1
+      -Wignored-qualifiers                 # clang  2.8  gcc  4.3
+      -Wmissing-field-initializers         # clang  2.7  gcc  4.1
+      -Wmissing-noreturn                   # clang  2.7  gcc  4.1
       -Wno-format-nonliteral               # clang  1.0  gcc  2.96 (3.0)
-      -Wno-sign-conversion                 # clang  3.0  gcc  4.3
+      -Wno-sign-conversion                 # clang  2.9  gcc  4.3
       -Wno-system-headers                  # clang  1.0  gcc  3.0
+    # -Wpadded                             # clang  2.9  gcc  4.1               # Not used because we cannot change public structs
+      -Wredundant-decls                    # clang  2.7  gcc  4.1
+      -Wold-style-definition               # clang  2.7  gcc  3.4
       -Wstrict-prototypes                  # clang  1.0  gcc  3.3
-      -Wtype-limits                        # clang  3.0  gcc  4.3
+    # -Wswitch-enum                        # clang  2.7  gcc  4.1               # Not used because this basically disallows default case
+      -Wtype-limits                        # clang  2.7  gcc  4.3
+      -Wunreachable-code                   # clang  2.7  gcc  4.1
+    # -Wunused-macros                      # clang  2.7  gcc  4.1               # Not practical
+      -Wunused-parameter                   # clang  2.7  gcc  4.1
       -Wvla                                # clang  2.8  gcc  4.3
     )
 
     set(WPICKY_COMMON
       -Wdouble-promotion                   # clang  3.6  gcc  4.6  appleclang  6.3
       -Wenum-conversion                    # clang  3.2  gcc 10.0  appleclang  4.6  g++ 11.0
+      -Wpragmas                            # clang  3.5  gcc  4.1  appleclang  6.0
       -Wunused-const-variable              # clang  3.4  gcc  6.0  appleclang  5.1
     )
 
@@ -95,12 +109,16 @@ if(PICKY_COMPILER)
         ${WPICKY_COMMON_OLD}
         -Wshift-sign-overflow              # clang  2.9
         -Wshorten-64-to-32                 # clang  1.0
+        -Wlanguage-extension-token         # clang  3.0
       )
       # Enable based on compiler version
       if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 3.6) OR
          (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 6.3))
         list(APPEND WPICKY_ENABLE
           ${WPICKY_COMMON}
+          -Wunreachable-code-break         # clang  3.5            appleclang  6.0
+          -Wheader-guard                   # clang  3.4            appleclang  5.1
+          -Wsometimes-uninitialized        # clang  3.2            appleclang  4.6
         )
       endif()
       if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 3.9) OR
@@ -125,6 +143,7 @@ if(PICKY_COMPILER)
       if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.3)
         list(APPEND WPICKY_ENABLE
           ${WPICKY_COMMON_OLD}
+          -Wclobbered                      #             gcc  4.3
           -Wmissing-parameter-type         #             gcc  4.3
           -Wold-style-declaration          #             gcc  4.3
           -Wstrict-aliasing=3              #             gcc  4.0
@@ -159,7 +178,7 @@ if(PICKY_COMPILER)
           -Walloc-zero                     #             gcc  7.0
           -Wduplicated-branches            #             gcc  7.0
           -Wformat-overflow=2              #             gcc  7.0
-          -Wformat-truncation=1            #             gcc  7.0
+          -Wformat-truncation=2            #             gcc  7.0
           -Wrestrict                       #             gcc  7.0
         )
       endif()
@@ -174,11 +193,11 @@ if(PICKY_COMPILER)
 
     unset(WPICKY)
 
-    foreach(_CCOPT ${WPICKY_ENABLE})
+    foreach(_CCOPT IN LISTS WPICKY_ENABLE)
       set(WPICKY "${WPICKY} ${_CCOPT}")
     endforeach()
 
-    foreach(_CCOPT ${WPICKY_DETECT})
+    foreach(_CCOPT IN LISTS WPICKY_DETECT)
       # surprisingly, CHECK_C_COMPILER_FLAG needs a new variable to store each new
       # test result in.
       string(MAKE_C_IDENTIFIER "OPT${_CCOPT}" _optvarname)

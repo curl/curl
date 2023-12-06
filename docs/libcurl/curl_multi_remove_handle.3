@@ -52,13 +52,19 @@ multi handle, ready to get reused for a future transfer using this multi
 handle.
 .SH EXAMPLE
 .nf
-/* when an easy handle has completed, remove it */
-msg = curl_multi_info_read(multi_handle, &queued);
-if(msg) {
-  if(msg->msg == CURLMSG_DONE) {
-    /* a transfer ended */
-    fprintf(stderr, "Transfer completed\\n");
-    curl_multi_remove_handle(multi_handle, msg->easy_handle);
+int main(void)
+{
+  CURLM *multi = curl_multi_init();
+  int queued = 0;
+
+  /* when an easy handle has completed, remove it */
+  CURLMsg *msg = curl_multi_info_read(multi, &queued);
+  if(msg) {
+    if(msg->msg == CURLMSG_DONE) {
+      /* a transfer ended */
+      fprintf(stderr, "Transfer completed\\n");
+      curl_multi_remove_handle(multi, msg->easy_handle);
+    }
   }
 }
 .fi

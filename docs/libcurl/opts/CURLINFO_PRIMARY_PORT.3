@@ -43,18 +43,21 @@ accessed URL.
 All
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  CURLcode res;
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-  res = curl_easy_perform(curl);
-  if(res == CURLE_OK) {
-    long port;
-    res = curl_easy_getinfo(curl, CURLINFO_PRIMARY_PORT, &port);
-    if(!res)
-      printf("Connected to remote port: %ld\\n", port);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+    res = curl_easy_perform(curl);
+    if(res == CURLE_OK) {
+      long port;
+      res = curl_easy_getinfo(curl, CURLINFO_PRIMARY_PORT, &port);
+      if(!res)
+        printf("Connected to remote port: %ld\\n", port);
+    }
+    curl_easy_cleanup(curl);
   }
-  curl_easy_cleanup(curl);
 }
 .fi
 .SH AVAILABILITY

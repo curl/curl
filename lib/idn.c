@@ -36,7 +36,7 @@
 #ifdef USE_LIBIDN2
 #include <idn2.h>
 
-#if defined(WIN32) && defined(UNICODE)
+#if defined(_WIN32) && defined(UNICODE)
 #define IDN2_LOOKUP(name, host, flags)                                  \
   idn2_lookup_u8((const uint8_t *)name, (uint8_t **)host, flags)
 #else

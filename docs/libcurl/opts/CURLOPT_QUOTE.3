@@ -102,20 +102,24 @@ NULL
 SFTP and FTP
 .SH EXAMPLE
 .nf
-struct curl_slist *cmdlist = NULL;
-cmdlist = curl_slist_append(cmdlist, "RNFR source-name");
-cmdlist = curl_slist_append(cmdlist, "RNTO new-name");
+int main(void)
+{
+  struct curl_slist *cmdlist = NULL;
+  cmdlist = curl_slist_append(cmdlist, "RNFR source-name");
+  cmdlist = curl_slist_append(cmdlist, "RNTO new-name");
 
-curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/foo.bin");
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/foo.bin");
 
-  /* pass in the FTP commands to run before the transfer */
-  curl_easy_setopt(curl, CURLOPT_QUOTE, cmdlist);
+    /* pass in the FTP commands to run before the transfer */
+    curl_easy_setopt(curl, CURLOPT_QUOTE, cmdlist);
 
-  ret = curl_easy_perform(curl);
+    res = curl_easy_perform(curl);
 
-  curl_easy_cleanup(curl);
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

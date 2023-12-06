@@ -77,40 +77,42 @@ HTTP
 .SH EXAMPLE
 .nf
 /* send an application/x-www-form-urlencoded POST */
-CURL *curl = curl_easy_init();
-if(curl) {
-  const char *data = "data to send";
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    const char *data = "data to send";
 
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  /* size of the POST data if strlen() is not good enough */
-  curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 12L);
+    /* size of the POST data if strlen() is not good enough */
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 12L);
 
-  /* pass in a pointer to the data - libcurl does not copy */
-  curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+    /* pass in a pointer to the data - libcurl does not copy */
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
-  curl_easy_perform(curl);
+    curl_easy_perform(curl);
+  }
+
+  /* send an application/json POST */
+  curl = curl_easy_init();
+  if(curl) {
+    const char *json = "{\"name\": \"daniel\"}";
+    struct curl_slist *slist1 = NULL;
+    slist1 = curl_slist_append(slist1, "Content-Type: application/json");
+    slist1 = curl_slist_append(slist1, "Accept: application/json");
+
+    /* set custom headers */
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist1);
+
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+
+    /* pass in a pointer to the data - libcurl does not copy */
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json);
+
+    curl_easy_perform(curl);
+  }
 }
-
-/* send an application/json POST */
-CURL *curl = curl_easy_init();
-if(curl) {
-  const char *json = "{\"name\": \"daniel\"}";
-  struct curl_slist *slist1 = NULL;
-  slist1 = curl_slist_append(slist1, "Content-Type: application/json");
-  slist1 = curl_slist_append(slist1, "Accept: application/json");
-
-  /* set custom headers */
-  curl_easy_setopt(hnd, CURLOPT_HTTPHEADER, slist1);
-
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-
-  /* pass in a pointer to the data - libcurl does not copy */
-  curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json);
-
-  curl_easy_perform(curl);
-}
-
 .fi
 .SH AVAILABILITY
 Always

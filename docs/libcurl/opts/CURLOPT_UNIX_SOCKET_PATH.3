@@ -56,16 +56,21 @@ Default is NULL, meaning that no Unix domain sockets are used.
 All protocols except for FILE and FTP are supported in theory. HTTP, IMAP,
 POP3 and SMTP should in particular work (including their SSL/TLS variants).
 .SH EXAMPLE
-Given that you have an HTTP server running listening on /tmp/httpd.sock, you
-can request an HTTP resource with:
-
 .nf
-  curl_easy_setopt(curl_handle, CURLOPT_UNIX_SOCKET_PATH, "/tmp/httpd.sock");
-  curl_easy_setopt(curl_handle, CURLOPT_URL, "http://localhost/");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_UNIX_SOCKET_PATH, "/tmp/httpd.sock");
+    curl_easy_setopt(curl, CURLOPT_URL, "http://localhost/");
+
+    curl_easy_perform(curl);
+  }
+}
 .fi
 
 If you are on Linux and somehow have a need for paths larger than 107 bytes,
-you could use the proc filesystem to bypass the limitation:
+you can use the proc filesystem to bypass the limitation:
 
 .nf
   int dirfd = open(long_directory_path_to_socket, O_DIRECTORY | O_RDONLY);

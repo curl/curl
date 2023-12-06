@@ -73,8 +73,6 @@ static const struct category_descriptors categories[] = {
   {NULL, NULL, CURLHELP_HIDDEN}
 };
 
-extern const struct helptxt helptext[];
-
 
 static void print_category(curlhelp_t category)
 {

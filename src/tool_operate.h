@@ -74,7 +74,7 @@ struct per_transfer {
 
   /* NULL or malloced */
   char *uploadfile;
-  char *errorbuffer; /* alloced and assigned while this is used for a
+  char *errorbuffer; /* allocated and assigned while this is used for a
                         transfer */
 };
 

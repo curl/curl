@@ -1,0 +1,28 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: SYNOPSIS
+
+on:
+  push:
+    branches:
+    - master
+    - '*/ci'
+    paths:
+    - 'docs/libcurl/curl_*.3'
+  pull_request:
+    branches:
+    - master
+    paths:
+    - 'docs/libcurl/curl_*.3'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: verify-synopsis
+        run: ./.github/scripts/verify-synopsis.pl docs/libcurl/curl*.3

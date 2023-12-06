@@ -61,6 +61,8 @@ curl_SOURCES += $(CURL_RCFILES)
 $(CURL_RCFILES): tool_version.h
 endif
 
+curl_LDFLAGS = $(AM_LDFLAGS) $(CURL_LDFLAGS_BIN)
+
 # This might hold -Werror
 CFLAGS += @CURL_CFLAG_EXTRAS@
 

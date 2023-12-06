@@ -54,8 +54,17 @@ functionality.
 It is acceptable to call this function from your multi callback functions.
 .SH EXAMPLE
 .nf
- /* make our struct pointer associated with socket fd */
- mc = curl_multi_assign(multi_handle, fd, ourstructp);
+int main(void)
+{
+  CURLM *multi = curl_multi_init();
+  void *ourstructp; /* pointer to our data */
+  curl_socket_t fd; /* file descriptor to associate our data with */
+
+  /* make our struct pointer associated with socket fd */
+  CURLMcode mc = curl_multi_assign(multi, fd, ourstructp);
+  if(mc)
+    printf("error: %s\\n", curl_multi_strerror(mc));
+}
 .fi
 .SH AVAILABILITY
 Added in 7.15.5

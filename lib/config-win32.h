@@ -226,7 +226,7 @@
 #define SEND_TYPE_RETV int
 
 /* Define to 1 if you have the snprintf function. */
-#if defined(_MSC_VER) && (_MSC_VER >= 1900)
+#if (defined(_MSC_VER) && (_MSC_VER >= 1900)) || defined(__MINGW32__)
 #define HAVE_SNPRINTF 1
 #endif
 

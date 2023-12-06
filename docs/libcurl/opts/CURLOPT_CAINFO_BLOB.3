@@ -37,6 +37,10 @@ Pass a pointer to a curl_blob structure, which contains information (pointer
 and size) about a memory block with binary data of PEM encoded content holding
 one or more certificates to verify the HTTPS server with.
 
+If the blob is initialized with the flags member of struct curl_blob set to
+CURL_BLOB_COPY, the application does not have to keep the buffer around after
+setting this.
+
 If \fICURLOPT_SSL_VERIFYPEER(3)\fP is zero and you avoid verifying the
 server's certificate, \fICURLOPT_CAINFO_BLOB(3)\fP is not needed.
 
@@ -47,17 +51,23 @@ NULL
 All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
 .SH EXAMPLE
 .nf
-char *strpem; /* strpem must point to a PEM string */
-CURL *curl = curl_easy_init();
-if(curl) {
-  struct curl_blob blob;
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-  blob.data = strpem;
-  blob.len = strlen(strpem);
-  blob.flags = CURL_BLOB_COPY;
-  curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
-  ret = curl_easy_perform(curl);
-  curl_easy_cleanup(curl);
+#include <string.h>
+
+int main(void)
+{
+  char *strpem; /* strpem must point to a PEM string */
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    struct curl_blob blob;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+    blob.data = strpem;
+    blob.len = strlen(strpem);
+    blob.flags = CURL_BLOB_COPY;
+    curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
+    res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

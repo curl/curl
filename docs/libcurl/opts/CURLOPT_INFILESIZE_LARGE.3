@@ -53,17 +53,23 @@ Unset
 Many
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_off_t uploadsize = FILE_SIZE;
+#define FILE_SIZE 123456
 
-  curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/destination.tar.gz");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_off_t uploadsize = FILE_SIZE;
 
-  curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+    curl_easy_setopt(curl, CURLOPT_URL,
+                     "ftp://example.com/destination.tar.gz");
 
-  curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, uploadsize);
+    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
-  curl_easy_perform(curl);
+    curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, uploadsize);
+
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

@@ -41,6 +41,20 @@ NULL
 All
 .SH EXAMPLE
 .nf
+struct data {
+  void *custom;
+};
+
+static int my_trace(CURL *handle, curl_infotype type,
+                    char *data, size_t size,
+                    void *clientp)
+{
+  struct data *mine = clientp;
+  printf("our ptr: %p\\n", mine->custom);
+
+  /* output debug info */
+}
+
 int main(void)
 {
   CURL *curl;

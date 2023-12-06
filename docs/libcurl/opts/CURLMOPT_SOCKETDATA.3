@@ -42,28 +42,32 @@ NULL
 All
 .SH EXAMPLE
 .nf
+struct priv {
+  void *ours;
+};
+
 static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
 {
-  GlobalInfo *g = (GlobalInfo*) cbp;
-  SockInfo *fdp = (SockInfo*) sockp;
+  struct priv *p = sockp;
+  printf("my ptr: %p\\n", p->ours);
 
   if(what == CURL_POLL_REMOVE) {
-    remsock(fdp);
+    /* remove the socket from our collection */
   }
-  else {
-    if(!fdp) {
-      addsock(s, e, what, g);
-    }
-    else {
-      setsock(fdp, s, e, what, g);
-    }
+  if(what & CURL_POLL_IN) {
+    /* wait for read on this socket */
   }
+  if(what & CURL_POLL_OUT) {
+    /* wait for write on this socket */
+  }
+
   return 0;
 }
 
-main()
+int main(void)
 {
-  GlobalInfo setup;
+  struct priv setup;
+  CURLM *multi = curl_multi_init();
   /* ... use socket callback and custom pointer */
   curl_multi_setopt(multi, CURLMOPT_SOCKETFUNCTION, sock_cb);
   curl_multi_setopt(multi, CURLMOPT_SOCKETDATA, &setup);

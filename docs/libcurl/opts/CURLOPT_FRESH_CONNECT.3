@@ -48,11 +48,16 @@ Set \fIfresh\fP to 0 to have libcurl attempt reusing an existing connection
 Most
 .SH EXAMPLE
 .nf
+int main(void)
 {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-  curl_easy_setopt(curl, CURLOPT_FRESH_CONNECT, 1L);
-  /* this transfer must use a new connection, not reuse an existing */
-  curl_easy_perform(curl);
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+    curl_easy_setopt(curl, CURLOPT_FRESH_CONNECT, 1L);
+    /* this transfer must use a new connection, not reuse an existing */
+    curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

@@ -98,7 +98,6 @@
 #define MQTT_CONNACK_LEN 4
 #define MQTT_SUBACK_LEN 5
 #define MQTT_CLIENTID_LEN 12 /* "curl0123abcd" */
-#define MQTT_HEADER_LEN 5    /* max 5 bytes */
 
 struct configurable {
   unsigned char version; /* initial version byte in the request must match
@@ -1017,7 +1016,7 @@ int main(int argc, char *argv[])
   msnprintf(loglockfile, sizeof(loglockfile), "%s/%s/mqtt-%s.lock",
             logdir, SERVERLOGS_LOCKDIR, ipv_inuse);
 
-#ifdef WIN32
+#ifdef _WIN32
   win32_init();
   atexit(win32_cleanup);
 

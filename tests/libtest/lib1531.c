@@ -110,7 +110,7 @@ int test(char *URL)
        curl_multi_fdset() doc. */
 
     if(maxfd == -1) {
-#if defined(WIN32) || defined(_WIN32)
+#if defined(_WIN32)
       Sleep(100);
       rc = 0;
 #else

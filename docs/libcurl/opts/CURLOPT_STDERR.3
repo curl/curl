@@ -45,13 +45,16 @@ stderr
 All
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-FILE *filep = fopen("dump", "wb");
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-  curl_easy_setopt(curl, CURLOPT_STDERR, filep);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  FILE *filep = fopen("dump", "wb");
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+    curl_easy_setopt(curl, CURLOPT_STDERR, filep);
 
-  curl_easy_perform(curl);
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

@@ -45,13 +45,17 @@ extension, the verification fails.
 All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-  /* ask for OCSP stapling! */
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYSTATUS, 1L);
-  ret = curl_easy_perform(curl);
-  curl_easy_cleanup(curl);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+    /* ask for OCSP stapling! */
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYSTATUS, 1L);
+    res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

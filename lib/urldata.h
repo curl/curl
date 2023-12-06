@@ -266,6 +266,13 @@ typedef enum {
 /* SSL backend-specific data; declared differently by each SSL backend */
 struct ssl_backend_data;
 
+struct ssl_peer {
+  char *hostname;        /* hostname for verification */
+  char *dispname;        /* display version of hostname */
+  char *sni;             /* SNI version of hostname or NULL if not usable */
+  BIT(is_ip_address);    /* if hostname is an IPv4|6 address */
+};
+
 struct ssl_primary_config {
   char *CApath;          /* certificate dir (doesn't work on windows) */
   char *CAfile;          /* certificate to verify peer against */
@@ -665,16 +672,8 @@ struct SingleRequest {
                                      counter to make only a 100 reply (without
                                      a following second response code) result
                                      in a CURLE_GOT_NOTHING error code */
-  enum {
-    HEADER_NORMAL,              /* no bad header at all */
-    HEADER_PARTHEADER,          /* part of the chunk is a bad header, the rest
-                                   is normal data */
-    HEADER_ALLBAD               /* all was believed to be header */
-  } badheader;                  /* the header was deemed bad and will be
-                                   written as body */
   int headerline;               /* counts header lines to better track the
                                    first one */
-  char *str;                    /* within buf */
   curl_off_t offset;            /* possible resume offset read from the
                                    Content-Range: header */
   int httpcode;                 /* error code from the 'HTTP/1.? XXX' or
@@ -722,16 +721,20 @@ struct SingleRequest {
 #ifndef CURL_DISABLE_DOH
   struct dohdata *doh; /* DoH specific data for this request */
 #endif
-#if defined(WIN32) && defined(USE_WINSOCK)
+#if defined(_WIN32) && defined(USE_WINSOCK)
   struct curltime last_sndbuf_update;  /* last time readwrite_upload called
                                           win_update_buffer_size */
 #endif
+  char fread_eof[2]; /* the body read callback (index 0) returned EOF or
+                        the trailer read callback (index 1) returned EOF */
 #ifndef CURL_DISABLE_COOKIES
   unsigned char setcookies;
 #endif
   unsigned char writer_stack_depth; /* Unencoding stack depth. */
   BIT(header);        /* incoming data has HTTP header */
+  BIT(badheader);     /* header parsing found sth not a header */
   BIT(content_range); /* set TRUE if Content-Range: was found */
+  BIT(download_done); /* set to TRUE when download is complete */
   BIT(upload_done);   /* set to TRUE when doing chunked transfer-encoding
                          upload and we're uploading the last chunk */
   BIT(ignorebody);    /* we read a response-body but we ignore it! */
@@ -815,7 +818,8 @@ struct Curl_handler {
   /* If used, this function gets called from transfer.c:readwrite_data() to
      allow the protocol to do extra reads/writes */
   CURLcode (*readwrite)(struct Curl_easy *data, struct connectdata *conn,
-                        ssize_t *nread, bool *readmore);
+                        const char *buf, size_t blen,
+                        size_t *pconsumed, bool *readmore);
 
   /* This function can perform various checks on the connection. See
      CONNCHECK_* for more information about the checks that can be performed,
@@ -1344,7 +1348,8 @@ struct UrlState {
   curl_off_t recent_conn_id; /* The most recent connection used, might no
                               * longer exist */
   struct dynbuf headerb; /* buffer to store headers in */
-
+  struct curl_slist *hstslist; /* list of HSTS files set by
+                                  curl_easy_setopt(HSTS) calls */
   char *buffer; /* download buffer */
   char *ulbuf; /* allocated upload buffer or NULL */
   curl_off_t current_speed;  /* the ProgressShow() function sets this,
@@ -1389,7 +1394,7 @@ struct UrlState {
 
   /* a place to store the most recently set (S)FTP entrypath */
   char *most_recent_ftp_entrypath;
-#if !defined(WIN32) && !defined(MSDOS) && !defined(__EMX__)
+#if !defined(_WIN32) && !defined(MSDOS) && !defined(__EMX__)
 /* do FTP line-end conversions on most platforms */
 #define CURL_DO_LINEEND_CONV
   /* for FTP downloads: track CRLF sequences that span blocks */
@@ -1427,7 +1432,7 @@ struct UrlState {
                                  this should be dealt with in pretransfer */
 #ifndef CURL_DISABLE_HTTP
   curl_mimepart *mimepost;
-  curl_mimepart *formp; /* storage for old API form-posting, alloced on
+  curl_mimepart *formp; /* storage for old API form-posting, allocated on
                            demand */
   size_t trailers_bytes_sent;
   struct dynbuf trailers_buf; /* a buffer containing the compiled trailing
@@ -1437,6 +1442,10 @@ struct UrlState {
   struct Curl_header_store *prevhead; /* the latest added header */
   trailers_state trailers_state; /* whether we are sending trailers
                                     and what stage are we at */
+#endif
+#ifndef CURL_DISABLE_COOKIES
+  struct curl_slist *cookielist; /* list of cookie files set by
+                                    curl_easy_setopt(COOKIEFILE) calls */
 #endif
 #ifdef USE_HYPER
   bool hconnect;  /* set if a CONNECT request */
@@ -1693,13 +1702,7 @@ struct UserDefined {
   void *prereq_userp; /* pre-initial request user data */
 
   void *seek_client;    /* pointer to pass to the seek callback */
-#ifndef CURL_DISABLE_COOKIES
-  struct curl_slist *cookielist; /* list of cookie files set by
-                                    curl_easy_setopt(COOKIEFILE) calls */
-#endif
 #ifndef CURL_DISABLE_HSTS
-  struct curl_slist *hstslist; /* list of HSTS files set by
-                                  curl_easy_setopt(HSTS) calls */
   curl_hstsread_callback hsts_read;
   void *hsts_read_userp;
   curl_hstswrite_callback hsts_write;
@@ -1799,9 +1802,6 @@ struct UserDefined {
 #endif
   curl_prot_t allowed_protocols;
   curl_prot_t redir_protocols;
-#ifndef CURL_DISABLE_MIME
-  unsigned int mime_options;      /* Mime option flags. */
-#endif
 #ifndef CURL_DISABLE_RTSP
   void *rtp_out;     /* write RTP to this if non-NULL */
   /* Common RTSP header options */
@@ -1823,8 +1823,6 @@ struct UserDefined {
 
   int tcp_keepidle;     /* seconds in idle before sending keepalive probe */
   int tcp_keepintvl;    /* seconds between TCP keepalive probes */
-
-  size_t maxconnects;    /* Max idle connections in the connection cache */
 
   long expect_100_timeout; /* in milliseconds */
 #if defined(USE_HTTP2) || defined(USE_HTTP3)
@@ -1850,10 +1848,14 @@ struct UserDefined {
   BIT(mail_rcpt_allowfails); /* allow RCPT TO command to fail for some
                                 recipients */
 #endif
+  unsigned int maxconnects; /* Max idle connections in the connection cache */
   unsigned char use_ssl;   /* if AUTH TLS is to be attempted etc, for FTP or
                               IMAP or POP3 or others! (type: curl_usessl)*/
   unsigned char connect_only; /* make connection/request, then let
                                  application use the socket */
+#ifndef CURL_DISABLE_MIME
+  BIT(mime_formescape);
+#endif
   BIT(is_fread_set); /* has read callback been set to non-NULL? */
 #ifndef CURL_DISABLE_TFTP
   BIT(tftp_no_options); /* do not send TFTP options requests */

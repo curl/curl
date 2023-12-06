@@ -50,19 +50,23 @@ then.
 .SH PROTOCOLS
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/file.txt");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/file.txt");
 
-  /* contact us back, aka "active" FTP */
-  curl_easy_setopt(curl, CURLOPT_FTPPORT, "-");
+    /* contact us back, aka "active" FTP */
+    curl_easy_setopt(curl, CURLOPT_FTPPORT, "-");
 
-  /* FTP the way the neanderthals did it */
-  curl_easy_setopt(curl, CURLOPT_FTP_USE_EPRT, 0L);
+    /* FTP the way the neanderthals did it */
+    curl_easy_setopt(curl, CURLOPT_FTP_USE_EPRT, 0L);
 
-  ret = curl_easy_perform(curl);
+    res = curl_easy_perform(curl);
 
-  curl_easy_cleanup(curl);
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

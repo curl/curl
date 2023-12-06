@@ -47,13 +47,17 @@ See above
 All network protocols
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-  curl_easy_setopt(curl, CURLOPT_PROXY, "socks5://proxy");
-  curl_easy_setopt(curl, CURLOPT_SOCKS5_GSSAPI_SERVICE, "rcmd-special");
-  ret = curl_easy_perform(curl);
-  curl_easy_cleanup(curl);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+    curl_easy_setopt(curl, CURLOPT_PROXY, "socks5://proxy");
+    curl_easy_setopt(curl, CURLOPT_SOCKS5_GSSAPI_SERVICE, "rcmd-special");
+    res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

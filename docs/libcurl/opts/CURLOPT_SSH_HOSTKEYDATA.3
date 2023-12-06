@@ -40,21 +40,31 @@ NULL
 SCP and SFTP
 .SH EXAMPLE
 .nf
-int hostkeycb(void *clientp,    /* passed with CURLOPT_SSH_HOSTKEYDATA */
-              int keytype,      /* CURLKHTYPE */
-              const char * key, /* host key to check */
-              size_t keylen);   /* length of the key */
+struct mine {
+  void *custom;
+};
+
+static int hostkeycb(void *clientp,   /* CURLOPT_SSH_HOSTKEYDATA */
+                     int keytype,     /* CURLKHTYPE */
+                     const char *key, /* host key to check */
+                     size_t keylen)   /* length of the key */
 {
   /* 'clientp' points to the callback_data struct */
   /* investigate the situation and return the correct value */
   return CURLKHMATCH_OK;
 }
-{
-  curl_easy_setopt(curl, CURLOPT_URL, "sftp://example.com/thisfile.txt");
-  curl_easy_setopt(curl, CURLOPT_SSH_HOSTKEYFUNCTION, hostkeycb);
-  curl_easy_setopt(curl, CURLOPT_SSH_HOSTKEYDATA, &callback_data);
 
-  curl_easy_perform(curl);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    struct mine callback_data;
+    curl_easy_setopt(curl, CURLOPT_URL, "sftp://example.com/thisfile.txt");
+    curl_easy_setopt(curl, CURLOPT_SSH_HOSTKEYFUNCTION, hostkeycb);
+    curl_easy_setopt(curl, CURLOPT_SSH_HOSTKEYDATA, &callback_data);
+
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

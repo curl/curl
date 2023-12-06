@@ -62,15 +62,20 @@ CURLFTP_CREATE_DIR_NONE (0)
 FTP and SFTP
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/non-existing/new.txt");
-  curl_easy_setopt(curl, CURLOPT_FTP_CREATE_MISSING_DIRS,
-                   (long)CURLFTP_CREATE_DIR_RETRY);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL,
+                     "ftp://example.com/non-existing/new.txt");
+    curl_easy_setopt(curl, CURLOPT_FTP_CREATE_MISSING_DIRS,
+                     (long)CURLFTP_CREATE_DIR_RETRY);
 
-  ret = curl_easy_perform(curl);
+    res = curl_easy_perform(curl);
 
-  curl_easy_cleanup(curl);
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

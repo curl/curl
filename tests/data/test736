@@ -31,11 +31,10 @@ Hello curl from IPFS
 http
 </server>
 <setenv>
-HOME=%PWD/%LOGDIR
-IPFS_DATA=$HOME/.ipfs
+IPFS_PATH=%LOGDIR/.ipfs
 </setenv>
 <name>
-IPFS with IPFS_DATA set, no traling slash
+IPFS with IPFS_PATH set, no trailing slash
 </name>
 <command>
 ipfs://bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u

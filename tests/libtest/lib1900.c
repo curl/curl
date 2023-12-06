@@ -21,22 +21,35 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "test.h"
 
-#ifdef CURL_STATICLIB
-#  define LIBHOSTNAME_EXTERN
-#elif defined(WIN32)
-#  define LIBHOSTNAME_EXTERN  __declspec(dllexport)
-#elif defined(CURL_HIDDEN_SYMBOLS)
-#  define LIBHOSTNAME_EXTERN CURL_EXTERN_SYMBOL
-#else
-#  define LIBHOSTNAME_EXTERN
-#endif
+#include "testutil.h"
+#include "warnless.h"
+#include "memdebug.h"
 
-#ifdef USE_WINSOCK
-#  define FUNCALLCONV __stdcall
-#else
-#  define FUNCALLCONV
-#endif
+int test(char *URL)
+{
+  CURLcode res = CURLE_OK;
+  CURL *hnd = NULL;
+  CURL *second = NULL;
 
-LIBHOSTNAME_EXTERN int FUNCALLCONV
-  gethostname(char *name, GETHOSTNAME_TYPE_ARG2 namelen);
+  global_init(CURL_GLOBAL_ALL);
+
+  easy_init(hnd);
+  easy_setopt(hnd, CURLOPT_URL, URL);
+  easy_setopt(hnd, CURLOPT_HSTS, "first-hsts.txt");
+  easy_setopt(hnd, CURLOPT_HSTS, "second-hsts.txt");
+
+  second = curl_easy_duphandle(hnd);
+
+  curl_easy_cleanup(hnd);
+  curl_easy_cleanup(second);
+  curl_global_cleanup();
+  return 0;
+
+test_cleanup:
+  curl_easy_cleanup(hnd);
+  curl_easy_cleanup(second);
+  curl_global_cleanup();
+  return (int)res;
+}

@@ -46,7 +46,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#ifdef WIN32
+#ifdef _WIN32
 
 #if defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x600
 #  define HAVE_WIN_BCRYPTGENRANDOM
@@ -101,7 +101,6 @@ CURLcode Curl_win32_random(unsigned char *entropy, size_t length)
 
 static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
 {
-  unsigned int r;
   CURLcode result = CURLE_OK;
   static unsigned int randseed;
   static bool seeded = FALSE;
@@ -134,7 +133,7 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
 
   /* ---- non-cryptographic version following ---- */
 
-#ifdef WIN32
+#ifdef _WIN32
   if(!seeded) {
     result = Curl_win32_random((unsigned char *)rnd, sizeof(*rnd));
     if(result != CURLE_NOT_BUILT_IN)
@@ -143,11 +142,13 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
 #endif
 
 #if defined(HAVE_ARC4RANDOM) && !defined(USE_OPENSSL)
-  *rnd = (unsigned int)arc4random();
-  return CURLE_OK;
+  if(!seeded) {
+    *rnd = (unsigned int)arc4random();
+    return CURLE_OK;
+  }
 #endif
 
-#if defined(RANDOM_FILE) && !defined(WIN32)
+#if defined(RANDOM_FILE) && !defined(_WIN32)
   if(!seeded) {
     /* if there's a random file to read a seed from, use it */
     int fd = open(RANDOM_FILE, O_RDONLY);
@@ -171,9 +172,12 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
     seeded = TRUE;
   }
 
-  /* Return an unsigned 32-bit pseudo-random number. */
-  r = randseed = randseed * 1103515245 + 12345;
-  *rnd = (r << 16) | ((r >> 16) & 0xFFFF);
+  {
+    unsigned int r;
+    /* Return an unsigned 32-bit pseudo-random number. */
+    r = randseed = randseed * 1103515245 + 12345;
+    *rnd = (r << 16) | ((r >> 16) & 0xFFFF);
+  }
   return CURLE_OK;
 }
 

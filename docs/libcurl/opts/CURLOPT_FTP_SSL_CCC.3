@@ -50,14 +50,18 @@ CURLFTPSSL_CCC_NONE
 FTP
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/file.txt");
-  curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_CONTROL);
-  /* go back to clear-text FTP after authenticating */
-  curl_easy_setopt(curl, CURLOPT_FTP_SSL_CCC, (long)CURLFTPSSL_CCC_ACTIVE);
-  ret = curl_easy_perform(curl);
-  curl_easy_cleanup(curl);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/file.txt");
+    curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_CONTROL);
+    /* go back to clear-text FTP after authenticating */
+    curl_easy_setopt(curl, CURLOPT_FTP_SSL_CCC, (long)CURLFTPSSL_CCC_ACTIVE);
+    res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

@@ -40,9 +40,12 @@ insensitive.
 If libcurl has no option with the given name, this function returns NULL.
 .SH EXAMPLE
 .nf
-const struct curl_easyoption *opt = curl_easy_option_by_name("URL");
-if(opt) {
-  printf("This option wants CURLoption %x\\n", (int)opt->id);
+int main(void)
+{
+  const struct curl_easyoption *opt = curl_easy_option_by_name("URL");
+  if(opt) {
+    printf("This option wants CURLoption %x\\n", (int)opt->id);
+  }
 }
 .fi
 .SH AVAILABILITY

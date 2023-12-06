@@ -27,7 +27,7 @@
 
 #if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE)
 
-#ifdef WIN32
+#ifdef _WIN32
 #define getpid GetCurrentProcessId
 #endif
 

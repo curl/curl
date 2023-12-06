@@ -74,20 +74,26 @@ a part with content set with \fIcurl_mime_subparts(3)\fP is strongly
 discouraged.
 .SH EXAMPLE
 .nf
- curl_mime *mime;
- curl_mimepart *part;
+int main(void)
+{
+  curl_mime *mime;
+  curl_mimepart *part;
 
- /* create a mime handle */
- mime = curl_mime_init(easy);
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    /* create a mime handle */
+    mime = curl_mime_init(curl);
 
- /* add a part */
- part = curl_mime_addpart(mime);
+    /* add a part */
+    part = curl_mime_addpart(mime);
 
- /* send a file */
- curl_mime_filedata(part, "image.png");
+    /* send a file */
+    curl_mime_filedata(part, "image.png");
 
- /* encode file data in base64 for transfer */
- curl_mime_encoder(part, "base64");
+    /* encode file data in base64 for transfer */
+    curl_mime_encoder(part, "base64");
+  }
+}
 .fi
 .SH AVAILABILITY
 As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.

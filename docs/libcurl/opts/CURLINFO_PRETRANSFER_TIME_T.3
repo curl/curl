@@ -33,12 +33,12 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_PRETRANSFER_TIME_T,
                            curl_off_t *timep);
 .fi
 .SH DESCRIPTION
-Pass a pointer to a curl_off_t to receive the time, in microseconds,
-it took from the
-start until the file transfer is just about to begin. This includes all
-pre-transfer commands and negotiations that are specific to the particular
-protocol(s) involved. It does \fInot\fP involve the sending of the protocol-
-specific request that triggers a transfer.
+Pass a pointer to a curl_off_t to receive the time, in microseconds, it took
+from the start until the file transfer is just about to begin.
+
+This time-stamp includes all pre-transfer commands and negotiations that are
+specific to the particular protocol(s) involved. It includes the sending of
+the protocol-specific instructions that trigger a transfer.
 
 When a redirect is followed, the time from each request is added together.
 
@@ -47,20 +47,25 @@ See also the TIMES overview in the \fIcurl_easy_getinfo(3)\fP man page.
 All
 .SH EXAMPLE
 .nf
-curl = curl_easy_init();
-if(curl) {
-  curl_off_t pretransfer;
-  curl_easy_setopt(curl, CURLOPT_URL, url);
-  res = curl_easy_perform(curl);
-  if(CURLE_OK == res) {
-    res = curl_easy_getinfo(curl, CURLINFO_PRETRANSFER_TIME_T, &pretransfer);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_off_t pretransfer;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+    res = curl_easy_perform(curl);
     if(CURLE_OK == res) {
-      printf("Time: %" CURL_FORMAT_CURL_OFF_T ".%06ld", pretransfer / 1000000,
-             (long)(pretransfer % 1000000));
+      res = curl_easy_getinfo(curl, CURLINFO_PRETRANSFER_TIME_T, &pretransfer);
+      if(CURLE_OK == res) {
+        printf("Time: %" CURL_FORMAT_CURL_OFF_T ".%06ld\\n",
+               pretransfer / 1000000,
+               (long)(pretransfer % 1000000));
+      }
     }
+    /* always cleanup */
+    curl_easy_cleanup(curl);
   }
-  /* always cleanup */
-  curl_easy_cleanup(curl);
 }
 .fi
 .SH AVAILABILITY

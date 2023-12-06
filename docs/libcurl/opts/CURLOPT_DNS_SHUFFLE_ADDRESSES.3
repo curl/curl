@@ -54,15 +54,18 @@ performance impacts and may cause IPv4 to be used before IPv6 or vice versa.
 All
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-  curl_easy_setopt(curl, CURLOPT_DNS_SHUFFLE_ADDRESSES, 1L);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+    curl_easy_setopt(curl, CURLOPT_DNS_SHUFFLE_ADDRESSES, 1L);
 
-  curl_easy_perform(curl);
+    curl_easy_perform(curl);
 
-  /* always cleanup */
-  curl_easy_cleanup(curl);
+    /* always cleanup */
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

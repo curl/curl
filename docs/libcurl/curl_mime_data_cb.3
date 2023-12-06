@@ -104,7 +104,7 @@ to avoid overhead resources consumption, one might want to use a callback
 source to avoid data duplication. In this case, original data must be retained
 until after the transfer terminates.
 .nf
-
+#include <string.h> /* for memcpy */
 char hugedata[512000];
 
 struct ctl {
@@ -146,17 +146,22 @@ int seek_callback(void *arg, curl_off_t offset, int origin)
   return CURL_SEEKFUNC_OK;
 }
 
- CURL *easy = curl_easy_init();
- curl_mime *mime = curl_mime_init(easy);
- curl_mimepart *part = curl_mime_addpart(mime);
- struct ctl hugectl;
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_mime *mime = curl_mime_init(curl);
+    curl_mimepart *part = curl_mime_addpart(mime);
+    struct ctl hugectl;
 
- hugectl.buffer = hugedata;
- hugectl.size = sizeof hugedata;
- hugectl.position = 0;
- curl_mime_data_cb(part, hugectl.size, read_callback, seek_callback, NULL,
-                   &hugectl);
-
+    hugectl.buffer = hugedata;
+    hugectl.size = sizeof(hugedata);
+    hugectl.position = 0;
+    curl_mime_data_cb(part, hugectl.size, read_callback, seek_callback, NULL,
+                      &hugectl);
+  }
+}
+.fi
 .SH AVAILABILITY
 As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
 .SH RETURN VALUE

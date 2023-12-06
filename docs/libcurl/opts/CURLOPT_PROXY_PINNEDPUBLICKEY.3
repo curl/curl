@@ -52,15 +52,20 @@ NULL
 All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-  curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy:443");
-  curl_easy_setopt(curl, CURLOPT_PROXY_PINNEDPUBLICKEY,
-  "sha256//YhKJKSzoTt2b5FP18fvpHo7fJYqQCjAa3HWY3tvRMwE=;sha256//t62CeU2tQiqkexU74Gxa2eg7fRbEgoChTociMee9wno=");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+    curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy:443");
+    curl_easy_setopt(curl, CURLOPT_PROXY_PINNEDPUBLICKEY,
+                     "sha256//YhKJKSzoTt2b5FP18fvpHo7fJYqQCjA"
+                     "a3HWY3tvRMwE=;sha256//t62CeU2tQiqkexU74"
+                     "Gxa2eg7fRbEgoChTociMee9wno=");
 
-  /* Perform the request */
-  curl_easy_perform(curl);
+    /* Perform the request */
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH PUBLIC KEY EXTRACTION

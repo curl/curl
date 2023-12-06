@@ -26,7 +26,7 @@
 
 #include <curl/curl.h>
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <wchar.h>
 #endif
 
@@ -56,7 +56,7 @@ char *Curl_strdup(const char *str)
 }
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 /***************************************************************************
  *
  * Curl_wcsdup(source)

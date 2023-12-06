@@ -42,7 +42,7 @@
 #define NUM_OPEN      (FD_SETSIZE + 10)
 #define NUM_NEEDED    (NUM_OPEN + SAFETY_MARGIN)
 
-#if defined(WIN32) || defined(_WIN32) || defined(MSDOS)
+#if defined(_WIN32) || defined(MSDOS)
 #define DEV_NULL "NUL"
 #else
 #define DEV_NULL "/dev/null"

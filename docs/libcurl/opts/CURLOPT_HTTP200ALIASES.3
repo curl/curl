@@ -51,17 +51,20 @@ NULL
 HTTP
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  struct curl_slist *list;
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    struct curl_slist *list;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  list = curl_slist_append(NULL, "ICY 200 OK");
-  list = curl_slist_append(list, "WEIRDO 99 FINE");
+    list = curl_slist_append(NULL, "ICY 200 OK");
+    list = curl_slist_append(list, "WEIRDO 99 FINE");
 
-  curl_easy_setopt(curl, CURLOPT_HTTP200ALIASES, list);
-  curl_easy_perform(curl);
-  curl_slist_free_all(list); /* free the list again */
+    curl_easy_setopt(curl, CURLOPT_HTTP200ALIASES, list);
+    curl_easy_perform(curl);
+    curl_slist_free_all(list); /* free the list again */
+  }
 }
 .fi
 .SH AVAILABILITY

@@ -237,8 +237,13 @@ by the corresponding argument.
 A '%' is written. No argument is converted.
 .SH EXAMPLE
 .nf
+const char *name = "John";
+
+int main(void)
+{
   curl_mprintf("My name is %s\\n", name);
-  curl_mprintf("Pi is almost %f\\n", 25/8);
+  curl_mprintf("Pi is almost %f\\n", (double)25.0/8);
+}
 .fi
 .SH AVAILABILITY
 These functions might be removed from the public libcurl API in the future. Do

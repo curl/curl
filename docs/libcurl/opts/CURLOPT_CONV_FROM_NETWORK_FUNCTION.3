@@ -77,12 +77,12 @@ FTP, SMTP, IMAP, POP3
 .nf
 static CURLcode my_conv_from_ascii_to_ebcdic(char *buffer, size_t length)
 {
-  char *tempptrin, *tempptrout;
-  size_t bytes = length;
-  int rc;
-  tempptrin = tempptrout = buffer;
-  rc = platform_a2e(&tempptrin, &bytes, &tempptrout, &bytes);
-  if(rc == PLATFORM_CONV_OK) {
+  int rc = 0;
+
+  /* in-place convert 'buffer' from ASCII to EBCDIC */
+
+  if(rc == 0) {
+    /* success */
     return CURLE_OK;
   }
   else {
@@ -90,9 +90,14 @@ static CURLcode my_conv_from_ascii_to_ebcdic(char *buffer, size_t length)
   }
 }
 
-/* use platform-specific functions for codeset conversions */
-curl_easy_setopt(curl, CURLOPT_CONV_FROM_NETWORK_FUNCTION,
-                 my_conv_from_ascii_to_ebcdic);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+
+  /* use platform-specific functions for codeset conversions */
+  curl_easy_setopt(curl, CURLOPT_CONV_FROM_NETWORK_FUNCTION,
+                   my_conv_from_ascii_to_ebcdic);
+}
 .fi
 .SH AVAILABILITY
 Not available and deprecated since 7.82.0.

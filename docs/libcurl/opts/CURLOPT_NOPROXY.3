@@ -66,15 +66,18 @@ NULL
 Most
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  /* accept various URLs */
-  curl_easy_setopt(curl, CURLOPT_URL, input);
-  /* use this proxy */
-  curl_easy_setopt(curl, CURLOPT_PROXY, "http://proxy:80");
-  /* ... but make sure this host name is not proxied */
-  curl_easy_setopt(curl, CURLOPT_NOPROXY, "www.example.com");
-  curl_easy_perform(curl);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    /* accept various URLs */
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+    /* use this proxy */
+    curl_easy_setopt(curl, CURLOPT_PROXY, "http://proxy:80");
+    /* ... but make sure this host name is not proxied */
+    curl_easy_setopt(curl, CURLOPT_NOPROXY, "www.example.com");
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

@@ -25,7 +25,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#if defined(WIN32) && !defined(HAVE_FTRUNCATE)
+#if defined(_WIN32) && !defined(HAVE_FTRUNCATE)
 
 int tool_ftruncate64(int fd, curl_off_t where);
 
@@ -35,7 +35,7 @@ int tool_ftruncate64(int fd, curl_off_t where);
 #define HAVE_FTRUNCATE 1
 #define USE_TOOL_FTRUNCATE 1
 
-#endif /* WIN32  && ! HAVE_FTRUNCATE */
+#endif /* _WIN32 && ! HAVE_FTRUNCATE */
 
 /*
 ** callback for CURLOPT_SEEKFUNCTION

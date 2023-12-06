@@ -70,39 +70,30 @@ NULL
 All
 .SH EXAMPLE
 .nf
-static gboolean timeout_cb(gpointer user_data)
-{
-  int running;
-  if(user_data) {
-    g_free(user_data);
-    curl_multi_setopt(curl_handle, CURLMOPT_TIMERDATA, NULL);
-  }
-  curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0, &running);
-  return G_SOURCE_REMOVE;
-}
+struct priv {
+  void *custom;
+};
 
 static int timerfunc(CURLM *multi, long timeout_ms, void *clientp)
 {
-  guint *id = clientp;
+ struct priv *mydata = clientp;
+ printf("our ptr: %p\\n", mydata->custom);
 
-  if(id)
-    g_source_remove(*id);
-
-  /* -1 means we should just delete our timer. */
-  if(timeout_ms == -1) {
-    g_free(id);
-    id = NULL;
-  }
-  else {
-    if(!id)
-      id = g_new(guint, 1);
-    *id = g_timeout_add(timeout_ms, timeout_cb, id);
-  }
-  current_timer = id;
-  return 0;
+ if(timeout_ms) {
+   /* this is the new single timeout to wait for */
+ }
+ else {
+   /* delete the timeout, nothing to wait for now */
+ }
 }
 
-curl_multi_setopt(multi, CURLMOPT_TIMERFUNCTION, timerfunc);
+int main(void)
+{
+  struct priv mydata;
+  CURLM *multi = curl_multi_init();
+  curl_multi_setopt(multi, CURLMOPT_TIMERFUNCTION, timerfunc);
+  curl_multi_setopt(multi, CURLMOPT_TIMERDATA, &mydata);
+}
 .fi
 .SH AVAILABILITY
 Added in 7.16.0

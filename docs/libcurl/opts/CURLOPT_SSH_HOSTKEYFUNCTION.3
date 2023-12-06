@@ -61,21 +61,30 @@ NULL
 SCP and SFTP
 .SH EXAMPLE
 .nf
+struct mine {
+  void *custom;
+};
+
 int hostkeycb(void *clientp,    /* passed with CURLOPT_SSH_HOSTKEYDATA */
               int keytype,      /* CURLKHTYPE */
-              const char * key, /* host key to check */
-              size_t keylen);   /* length of the key */
+              const char *key,  /* host key to check */
+              size_t keylen)    /* length of the key */
 {
   /* 'clientp' points to the callback_data struct */
   /* investigate the situation and return the correct value */
   return CURLKHMATCH_OK;
 }
+int main(void)
 {
-  curl_easy_setopt(curl, CURLOPT_URL, "sftp://example.com/thisfile.txt");
-  curl_easy_setopt(curl, CURLOPT_SSH_HOSTKEYFUNCTION, hostkeycb);
-  curl_easy_setopt(curl, CURLOPT_SSH_HOSTKEYDATA, &callback_data);
+  struct mine callback_data;
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "sftp://example.com/thisfile.txt");
+    curl_easy_setopt(curl, CURLOPT_SSH_HOSTKEYFUNCTION, hostkeycb);
+    curl_easy_setopt(curl, CURLOPT_SSH_HOSTKEYDATA, &callback_data);
 
-  curl_easy_perform(curl);
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

@@ -211,7 +211,7 @@ static curl_off_t all_pers;
 static CURLcode add_per_transfer(struct per_transfer **per)
 {
   struct per_transfer *p;
-  p = calloc(sizeof(struct per_transfer), 1);
+  p = calloc(1, sizeof(struct per_transfer));
   if(!p)
     return CURLE_OUT_OF_MEMORY;
   if(!transfers)
@@ -463,7 +463,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
     }
   }
 
-#ifdef WIN32
+#ifdef _WIN32
   /* Discard incomplete UTF-8 sequence buffered from body */
   if(outs->utf8seq[0])
     memset(outs->utf8seq, 0, sizeof(outs->utf8seq));
@@ -2636,7 +2636,7 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
 
       if(env)
         curl_free(env);
-#ifdef WIN32
+#ifdef _WIN32
       else {
         result = FindWin32CACert(config, tls_backend_info->backend,
                                  TEXT("curl-ca-bundle.crt"));

@@ -386,12 +386,12 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
     return CURLE_OK;
 
   while(ts->keepon) {
-    ssize_t gotbytes;
+    ssize_t nread;
     char byte;
 
     /* Read one byte at a time to avoid a race condition. Wait at most one
        second before looping to ensure continuous pgrsUpdates. */
-    result = Curl_read(data, tunnelsocket, &byte, 1, &gotbytes);
+    result = Curl_read(data, tunnelsocket, &byte, 1, &nread);
     if(result == CURLE_AGAIN)
       /* socket buffer drained, return */
       return CURLE_OK;
@@ -404,7 +404,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
       break;
     }
 
-    if(gotbytes <= 0) {
+    if(nread <= 0) {
       if(data->set.proxyauth && data->state.authproxy.avail &&
          data->state.aptr.proxyuserpwd) {
         /* proxy auth was requested and there was proxy auth available,
@@ -437,11 +437,11 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
            properly to know when the end of the body is reached */
         CHUNKcode r;
         CURLcode extra;
-        ssize_t tookcareof = 0;
+        size_t consumed = 0;
 
         /* now parse the chunked piece of data so that we can
            properly tell when the stream ends */
-        r = Curl_httpchunk_read(data, &byte, 1, &tookcareof, &extra);
+        r = Curl_httpchunk_read(data, &byte, 1, &consumed, &extra);
         if(r == CHUNKE_STOP) {
           /* we're done reading chunks! */
           infof(data, "chunk reading DONE");
@@ -499,6 +499,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
         else if(ts->chunked_encoding) {
           CHUNKcode r;
           CURLcode extra;
+          size_t consumed = 0;
 
           infof(data, "Ignore chunked response-body");
 
@@ -513,8 +514,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
 
           /* now parse the chunked piece of data so that we can properly
              tell when the stream ends */
-          r = Curl_httpchunk_read(data, linep + 1, 1, &gotbytes,
-                                  &extra);
+          r = Curl_httpchunk_read(data, linep + 1, 1, &consumed, &extra);
           if(r == CHUNKE_STOP) {
             /* we're done reading chunks! */
             infof(data, "chunk reading DONE");

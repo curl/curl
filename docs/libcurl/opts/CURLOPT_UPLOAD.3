@@ -52,25 +52,41 @@ transfer, you must specify the size of the data with
 Most
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  /* we want to use our own read function */
-  curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
+{
+  FILE *src = userdata;
+  /* copy as much data as possible into the 'ptr' buffer, but no more than
+     'size' * 'nmemb' bytes! */
+  size_t retcode = fread(ptr, size, nmemb, src);
 
-  /* enable uploading */
-  curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+  return retcode;
+}
 
-  /* specify target */
-  curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/dir/to/newfile");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    FILE *src = fopen("local-file", "r");
+    curl_off_t fsize; /* set this to the size of the input file */
 
-  /* now specify which pointer to pass to our callback */
-  curl_easy_setopt(curl, CURLOPT_READDATA, hd_src);
+    /* we want to use our own read function */
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
 
-  /* Set the size of the file to upload */
-  curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)fsize);
+    /* enable uploading */
+    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
-  /* Now run off and do what you have been told! */
-  curl_easy_perform(curl);
+    /* specify target */
+    curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/dir/to/newfile");
+
+    /* now specify which pointer to pass to our callback */
+    curl_easy_setopt(curl, CURLOPT_READDATA, src);
+
+    /* Set the size of the file to upload */
+    curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)fsize);
+
+    /* Now run off and do what you have been told! */
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

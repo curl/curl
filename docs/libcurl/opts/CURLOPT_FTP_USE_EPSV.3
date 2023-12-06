@@ -50,16 +50,21 @@ If the server is an IPv6 host, this option has no effect.
 FTP
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/old-server/file.txt");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL,
+                     "ftp://example.com/old-server/file.txt");
 
-  /* let's shut off this modern feature */
-  curl_easy_setopt(curl, CURLOPT_FTP_USE_EPSV, 0L);
+    /* let's shut off this modern feature */
+    curl_easy_setopt(curl, CURLOPT_FTP_USE_EPSV, 0L);
 
-  ret = curl_easy_perform(curl);
+    res = curl_easy_perform(curl);
 
-  curl_easy_cleanup(curl);
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

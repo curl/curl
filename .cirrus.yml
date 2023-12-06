@@ -43,9 +43,9 @@ freebsd_task:
   name: FreeBSD
 
   matrix:
-    - name: FreeBSD 13.2
+    - name: FreeBSD 14.0
       freebsd_instance:
-        image_family: freebsd-13-2
+        image_family: freebsd-14-0
 
   env:
     CIRRUS_CLONE_DEPTH: 10
@@ -54,7 +54,7 @@ freebsd_task:
 
   pkginstall_script:
     - pkg update -f
-    - pkg install -y autoconf automake libtool pkgconf brotli openldap26-client heimdal libpsl libssh2 openssh-portable libidn2 librtmp libnghttp2 nghttp2 stunnel py39-openssl py39-impacket py39-cryptography
+    - pkg install -y autoconf automake libtool pkgconf brotli openldap26-client heimdal libpsl libssh2 libidn2 librtmp libnghttp2 nghttp2 stunnel py39-openssl py39-impacket py39-cryptography
     - pkg delete -y curl
   configure_script:
     - autoreconf -fi

@@ -50,9 +50,12 @@ total number of requests in-flight is \fICURLMOPT_MAX_HOST_CONNECTIONS(3)\fP *
 HTTP(S)
 .SH EXAMPLE
 .nf
-CURLM *m = curl_multi_init();
-/* set a more conservative pipe length */
-curl_multi_setopt(m, CURLMOPT_MAX_PIPELINE_LENGTH, 3L);
+int main(void)
+{
+  CURLM *m = curl_multi_init();
+  /* set a more conservative pipe length */
+  curl_multi_setopt(m, CURLMOPT_MAX_PIPELINE_LENGTH, 3L);
+}
 .fi
 .SH AVAILABILITY
 Added in 7.30.0

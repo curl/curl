@@ -57,23 +57,29 @@ extension, or application/octet-stream by default.
 - text/plain in other cases.
 .SH EXAMPLE
 .nf
- curl_mime *mime;
- curl_mimepart *part;
+int main(void)
+{
+  curl_mime *mime;
+  curl_mimepart *part;
 
- /* create a mime handle */
- mime = curl_mime_init(easy);
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    /* create a mime handle */
+    mime = curl_mime_init(curl);
 
- /* add a part */
- part = curl_mime_addpart(mime);
+    /* add a part */
+    part = curl_mime_addpart(mime);
 
- /* get data from this file */
- curl_mime_filedata(part, "image.png");
+    /* get data from this file */
+    curl_mime_filedata(part, "image.png");
 
- /* content-type for this part */
- curl_mime_type(part, "image/png");
+    /* content-type for this part */
+    curl_mime_type(part, "image/png");
 
- /* set name */
- curl_mime_name(part, "image");
+    /* set name */
+    curl_mime_name(part, "image");
+}
+}
 .fi
 .SH AVAILABILITY
 As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.

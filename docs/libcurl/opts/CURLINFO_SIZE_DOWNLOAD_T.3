@@ -41,19 +41,23 @@ commonly called body. All meta and header data is excluded from this amount.
 All
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  /* Perform the request */
-  res = curl_easy_perform(curl);
+    /* Perform the request */
+    res = curl_easy_perform(curl);
 
-  if(!res) {
-    /* check the size */
-    curl_off_t dl;
-    res = curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD_T, &dl);
     if(!res) {
-      printf("Downloaded %" CURL_FORMAT_CURL_OFF_T " bytes\\n", dl);
+      /* check the size */
+      curl_off_t dl;
+      res = curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD_T, &dl);
+      if(!res) {
+        printf("Downloaded %" CURL_FORMAT_CURL_OFF_T " bytes\\n", dl);
+      }
     }
   }
 }

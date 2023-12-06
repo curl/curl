@@ -55,7 +55,8 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-/* #define DEBUG_QUICHE */
+/* HTTP/3 error values defined in RFC 9114, ch. 8.1 */
+#define CURL_H3_NO_ERROR  (0x0100)
 
 #define QUIC_MAX_STREAMS              (100)
 
@@ -91,6 +92,7 @@ static void keylog_callback(const SSL *ssl, const char *line)
 
 struct cf_quiche_ctx {
   struct cf_quic_ctx q;
+  struct ssl_peer peer;
   quiche_conn *qconn;
   quiche_config *cfg;
   quiche_h3_conn *h3c;
@@ -131,6 +133,8 @@ static void cf_quiche_ctx_clear(struct cf_quiche_ctx *ctx)
     if(ctx->cfg)
       quiche_config_free(ctx->cfg);
     Curl_bufcp_free(&ctx->stream_bufcp);
+    Curl_ssl_peer_cleanup(&ctx->peer);
+
     memset(ctx, 0, sizeof(*ctx));
   }
 }
@@ -182,11 +186,15 @@ static CURLcode quic_ssl_setup(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct ssl_primary_config *conn_config;
-  unsigned char checkip[16];
+  CURLcode result;
 
   conn_config = Curl_ssl_cf_get_primary_config(cf);
   if(!conn_config)
     return CURLE_FAILED_INIT;
+
+  result = Curl_ssl_peer_init(&ctx->peer, cf);
+  if(result)
+    return result;
 
   DEBUGASSERT(!ctx->sslctx);
   ctx->sslctx = SSL_CTX_new(TLS_method());
@@ -218,13 +226,8 @@ static CURLcode quic_ssl_setup(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   SSL_set_app_data(ctx->ssl, cf);
 
-  if((0 == Curl_inet_pton(AF_INET, cf->conn->host.name, checkip))
-#ifdef ENABLE_IPV6
-     && (0 == Curl_inet_pton(AF_INET6, cf->conn->host.name, checkip))
-#endif
-     ) {
-    char *snihost = Curl_ssl_snihost(data, cf->conn->host.name, NULL);
-    if(!snihost || !SSL_set_tlsext_host_name(ctx->ssl, snihost)) {
+  if(ctx->peer.sni) {
+    if(!SSL_set_tlsext_host_name(ctx->ssl, ctx->peer.sni)) {
       failf(data, "Failed set SNI");
       SSL_free(ctx->ssl);
       ctx->ssl = NULL;
@@ -301,11 +304,22 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
 
 static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
+  struct cf_quiche_ctx *ctx = cf->ctx;
   struct stream_ctx *stream = H3_STREAM_CTX(data);
 
   (void)cf;
   if(stream) {
     CURL_TRC_CF(data, cf, "[%"PRId64"] easy handle is done", stream->id);
+    if(ctx->qconn && !stream->closed) {
+      quiche_conn_stream_shutdown(ctx->qconn, stream->id,
+                                  QUICHE_SHUTDOWN_READ, CURL_H3_NO_ERROR);
+      if(!stream->send_closed) {
+        quiche_conn_stream_shutdown(ctx->qconn, stream->id,
+                                    QUICHE_SHUTDOWN_WRITE, CURL_H3_NO_ERROR);
+        stream->send_closed = TRUE;
+      }
+      stream->closed = TRUE;
+    }
     Curl_bufq_free(&stream->recvbuf);
     Curl_h1_req_parse_free(&stream->h1);
     free(stream);
@@ -1211,10 +1225,12 @@ static CURLcode cf_quiche_data_event(struct Curl_cfilter *cf,
   case CF_CTRL_DATA_PAUSE:
     result = h3_data_pause(cf, data, (arg1 != 0));
     break;
-  case CF_CTRL_DATA_DONE: {
+  case CF_CTRL_DATA_DETACH:
     h3_data_done(cf, data);
     break;
-  }
+  case CF_CTRL_DATA_DONE:
+    h3_data_done(cf, data);
+    break;
   case CF_CTRL_DATA_DONE_SEND: {
     struct stream_ctx *stream = H3_STREAM_CTX(data);
     if(stream && !stream->send_closed) {
@@ -1267,7 +1283,7 @@ static CURLcode cf_verify_peer(struct Curl_cfilter *cf,
       result = CURLE_PEER_FAILED_VERIFICATION;
       goto out;
     }
-    result = Curl_ossl_verifyhost(data, cf->conn, server_cert);
+    result = Curl_ossl_verifyhost(data, cf->conn, &ctx->peer, server_cert);
     X509_free(server_cert);
     if(result)
       goto out;
@@ -1390,7 +1406,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   }
 
   /* Known to not work on Windows */
-#if !defined(WIN32) && defined(HAVE_QUICHE_CONN_SET_QLOG_FD)
+#if !defined(_WIN32) && defined(HAVE_QUICHE_CONN_SET_QLOG_FD)
   {
     int qfd;
     (void)Curl_qlogdir(data, ctx->scid, sizeof(ctx->scid), &qfd);
@@ -1485,27 +1501,9 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
   else if(quiche_conn_is_draining(ctx->qconn)) {
     /* When a QUIC server instance is shutting down, it may send us a
      * CONNECTION_CLOSE right away. Our connection then enters the DRAINING
-     * state.
-     * This may be a stopping of the service or it may be that the server
-     * is reloading and a new instance will start serving soon.
-     * In any case, we tear down our socket and start over with a new one.
-     * We re-open the underlying UDP cf right now, but do not start
-     * connecting until called again.
-     */
-    int reconn_delay_ms = 200;
-
-    CURL_TRC_CF(data, cf, "connect, remote closed, reconnect after %dms",
-                reconn_delay_ms);
-    Curl_conn_cf_close(cf->next, data);
-    cf_quiche_ctx_clear(ctx);
-    result = Curl_conn_cf_connect(cf->next, data, FALSE, done);
-    if(!result && *done) {
-      *done = FALSE;
-      ctx->reconnect_at = Curl_now();
-      ctx->reconnect_at.tv_usec += reconn_delay_ms * 1000;
-      Curl_expire(data, reconn_delay_ms, EXPIRE_QUIC);
-      result = CURLE_OK;
-    }
+     * state. The CONNECT may work in the near future again. Indicate
+     * that as a "weird" reply. */
+    result = CURLE_WEIRD_SERVER_REPLY;
   }
 
 out:
@@ -1610,13 +1608,14 @@ static bool cf_quiche_conn_is_alive(struct Curl_cfilter *cf,
    * may have completely purged it and will no longer respond
    * to any packets from us. */
   {
-    quiche_stats qstats;
+    quiche_transport_params qpeerparams;
     timediff_t idletime;
     uint64_t idle_ms = ctx->max_idle_ms;
 
-    quiche_conn_stats(ctx->qconn, &qstats);
-    if(qstats.peer_max_idle_timeout && qstats.peer_max_idle_timeout < idle_ms)
-      idle_ms = qstats.peer_max_idle_timeout;
+    if(quiche_conn_peer_transport_params(ctx->qconn, &qpeerparams) &&
+       qpeerparams.peer_max_idle_timeout &&
+       qpeerparams.peer_max_idle_timeout < idle_ms)
+      idle_ms = qpeerparams.peer_max_idle_timeout;
     idletime = Curl_timediff(Curl_now(), cf->conn->lastused);
     if(idletime > 0 && (uint64_t)idletime > idle_ms)
       return FALSE;
@@ -1669,7 +1668,7 @@ CURLcode Curl_cf_quiche_create(struct Curl_cfilter **pcf,
 
   (void)data;
   (void)conn;
-  ctx = calloc(sizeof(*ctx), 1);
+  ctx = calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;

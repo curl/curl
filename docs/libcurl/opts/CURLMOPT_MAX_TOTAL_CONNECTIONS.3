@@ -56,9 +56,12 @@ controlled by the number of easy handles added.
 All
 .SH EXAMPLE
 .nf
-CURLM *m = curl_multi_init();
-/* never do more than 15 connections */
-curl_multi_setopt(m, CURLMOPT_MAX_TOTAL_CONNECTIONS, 15L);
+int main(void)
+{
+  CURLM *m = curl_multi_init();
+  /* never do more than 15 connections */
+  curl_multi_setopt(m, CURLMOPT_MAX_TOTAL_CONNECTIONS, 15L);
+}
 .fi
 .SH AVAILABILITY
 Added in 7.30.0
