@@ -906,7 +906,6 @@ static OSStatus sectransp_bio_cf_out_write(SSLConnectionRef connection,
   return rtn;
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
 CF_INLINE const char *TLSCipherNameForNumber(SSLCipherSuite cipher)
 {
   /* The first ciphers in the ciphertable are continuous. Here we do small
@@ -925,7 +924,6 @@ CF_INLINE const char *TLSCipherNameForNumber(SSLCipherSuite cipher)
   }
   return ciphertable[SSL_NULL_WITH_NULL_NULL].name;
 }
-#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
 
 #if CURL_BUILD_MAC
 CF_INLINE void GetDarwinVersionNumber(int *major, int *minor)
