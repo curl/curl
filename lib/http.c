@@ -4082,6 +4082,7 @@ static CURLcode http_rw_headers(struct Curl_easy *data,
     headp = Curl_dyn_ptr(&data->state.headerb);
     if((0x0a == *headp) || (0x0d == *headp)) {
       size_t headerlen;
+      bool switch_to_h2 = FALSE;
       /* Zero-length header line means end of headers! */
 
       if('\r' == *headp)
@@ -4121,14 +4122,7 @@ static CURLcode http_rw_headers(struct Curl_easy *data,
             /* we'll get more headers (HTTP/2 response) */
             k->header = TRUE;
             k->headerline = 0; /* restart the header line counter */
-
-            /* switch to http2 now. The bytes after response headers
-               are also processed here, otherwise they are lost. */
-            result = Curl_http2_upgrade(data, conn, FIRSTSOCKET, buf, blen);
-            if(result)
-              return result;
-            *pconsumed += blen;
-            blen = 0;
+            switch_to_h2 = TRUE;
           }
 #ifdef USE_WEBSOCKETS
           else if(k->upgr101 == UPGR101_WS) {
@@ -4372,6 +4366,17 @@ static CURLcode http_rw_headers(struct Curl_easy *data,
 
       /* We continue reading headers, reset the line-based header */
       Curl_dyn_reset(&data->state.headerb);
+      if(switch_to_h2) {
+        /* Having handled the headers, we can do the HTTP/2 switch.
+         * Any remaining `buf` bytes are already HTTP/2 and passed to
+         * be processed. */
+        result = Curl_http2_upgrade(data, conn, FIRSTSOCKET, buf, blen);
+        if(result)
+          return result;
+        *pconsumed += blen;
+        blen = 0;
+      }
+
       continue;
     }
 
