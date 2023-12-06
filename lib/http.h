@@ -230,11 +230,6 @@ CURLcode Curl_http_write_resp_hds(struct Curl_easy *data,
                                   size_t *pconsumed,
                                   bool *done);
 
-CURLcode Curl_http_write_resp(struct Curl_easy *data,
-                              const char *buf, size_t blen,
-                              bool is_eos,
-                              bool *done);
-
 /**
  * Curl_http_output_auth() setups the authentication headers for the
  * host/proxy and the correct authentication

@@ -990,7 +990,7 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
       const struct Curl_cwtype *cwt;
       struct Curl_cwriter *writer;
 
-      /* if we skip the deocding in this phase, do not look further.
+      /* if we skip the decoding in this phase, do not look further.
        * Exception is "chunked" transfer-encoding which always must happen */
       if((is_transfer && !data->set.http_transfer_encoding &&
           (namelen != 7 || !strncasecompare(name, "chunked", 7))) ||

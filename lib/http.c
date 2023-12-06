@@ -107,6 +107,11 @@ static bool http_should_fail(struct Curl_easy *data);
 
 static CURLcode http_setup_conn(struct Curl_easy *data,
                                 struct connectdata *conn);
+static CURLcode http_write_resp(struct Curl_easy *data,
+                                const char *buf, size_t blen,
+                                bool is_eos,
+                                bool *done);
+
 #ifdef USE_WEBSOCKETS
 static CURLcode ws_setup_conn(struct Curl_easy *data,
                               struct connectdata *conn);
@@ -129,7 +134,7 @@ const struct Curl_handler Curl_handler_http = {
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
-  Curl_http_write_resp,                 /* write_resp */
+  http_write_resp,                      /* write_resp */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_HTTP,                            /* defport */
@@ -154,7 +159,7 @@ const struct Curl_handler Curl_handler_ws = {
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   Curl_ws_disconnect,                   /* disconnect */
-  Curl_http_write_resp,                 /* write_resp */
+  http_write_resp,                      /* write_resp */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_HTTP,                            /* defport */
@@ -183,7 +188,7 @@ const struct Curl_handler Curl_handler_https = {
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
-  Curl_http_write_resp,                 /* write_resp */
+  http_write_resp,                      /* write_resp */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_HTTPS,                           /* defport */
@@ -208,7 +213,7 @@ const struct Curl_handler Curl_handler_wss = {
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   Curl_ws_disconnect,                   /* disconnect */
-  Curl_http_write_resp,                 /* write_resp */
+  http_write_resp,                      /* write_resp */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_HTTPS,                           /* defport */
@@ -4609,10 +4614,10 @@ CURLcode Curl_http_write_resp_hds(struct Curl_easy *data,
   }
 }
 
-CURLcode Curl_http_write_resp(struct Curl_easy *data,
-                              const char *buf, size_t blen,
-                              bool is_eos,
-                              bool *done)
+static CURLcode http_write_resp(struct Curl_easy *data,
+                                const char *buf, size_t blen,
+                                bool is_eos,
+                                bool *done)
 {
   CURLcode result;
   size_t consumed;

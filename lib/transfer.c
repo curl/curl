@@ -413,6 +413,39 @@ bool Curl_meets_timecondition(struct Curl_easy *data, time_t timeofdoc)
   return TRUE;
 }
 
+static ssize_t Curl_xfer_recv_resp(struct Curl_easy *data,
+                                   char *buf, size_t blen,
+                                   bool avoid_excess,
+                                   CURLcode *err)
+{
+  ssize_t nread;
+
+  DEBUGASSERT(blen > 0);
+  /* If we are reading BODY data and the connection does NOT handle EOF
+   * and we know the size of the BODY data, limit the read amount */
+  if(avoid_excess && !data->req.header && data->req.size != -1) {
+    curl_off_t totalleft = data->req.size - data->req.bytecount;
+    if(totalleft <= 0)
+      blen = 0;
+    else if(totalleft < (curl_off_t)blen)
+      blen = (size_t)totalleft;
+  }
+
+  if(!blen) {
+    /* want nothing - continue as if read nothing. */
+    DEBUGF(infof(data, "readwrite_data: we're done"));
+    *err = CURLE_OK;
+    return 0;
+  }
+
+  *err = Curl_read(data, data->conn->sockfd, buf, blen, &nread);
+  if(*err)
+    return -1;
+  DEBUGASSERT(nread >= 0);
+  *err = CURLE_OK;
+  return nread;
+}
+
 /*
  * Go ahead and do a read if we have a readable socket or if
  * the stream was rewound (in which case we have data in a
@@ -1681,39 +1714,6 @@ Curl_setup_transfer(
     } /* if(writesockindex != -1) */
   } /* if(k->getheader || !data->req.no_body) */
 
-}
-
-ssize_t Curl_xfer_recv_resp(struct Curl_easy *data,
-                            char *buf, size_t blen,
-                            bool avoid_excess,
-                            CURLcode *err)
-{
-  ssize_t nread;
-
-  DEBUGASSERT(blen > 0);
-  /* If we are reading BODY data and the connection does NOT handle EOF
-   * and we know the size of the BODY data, limit the read amount */
-  if(avoid_excess && !data->req.header && data->req.size != -1) {
-    curl_off_t totalleft = data->req.size - data->req.bytecount;
-    if(totalleft <= 0)
-      blen = 0;
-    else if(totalleft < (curl_off_t)blen)
-      blen = (size_t)totalleft;
-  }
-
-  if(!blen) {
-    /* want nothing - continue as if read nothing. */
-    DEBUGF(infof(data, "readwrite_data: we're done"));
-    *err = CURLE_OK;
-    return 0;
-  }
-
-  *err = Curl_read(data, data->conn->sockfd, buf, blen, &nread);
-  if(*err)
-    return -1;
-  DEBUGASSERT(nread >= 0);
-  *err = CURLE_OK;
-  return nread;
 }
 
 CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
