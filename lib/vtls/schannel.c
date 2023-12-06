@@ -2332,10 +2332,10 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     else {
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
       char buffer[STRERROR_LEN];
-#endif
-      *err = CURLE_RECV_ERROR;
       infof(data, "schannel: failed to read data from server: %s",
             Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
+#endif
+      *err = CURLE_RECV_ERROR;
       goto cleanup;
     }
   }
