@@ -15,18 +15,18 @@ matrix:
       encoding: utf-8
     pipeline:
       - pyspelling.filters.markdown:
-        markdown_extensions:
-          - markdown.extensions.extra:
+          markdown_extensions:
+            - markdown.extensions.extra:
       - pyspelling.filters.html:
-        comments: true
-        attributes:
-          - title
-          - alt
-        ignores:
-          - ':matches(code, pre)'
-          - 'code'
-          - 'pre'
-          - 'strong'
-          - 'em'
+          comments: true
+          attributes:
+            - title
+            - alt
+          ignores:
+            - ':matches(code, pre)'
+            - 'code'
+            - 'pre'
+            - 'strong'
+            - 'em'
     sources:
       - '**/*.md|!docs/BINDINGS.md'
