@@ -68,14 +68,14 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
 struct ssl_connect_data {
   ssl_connection_state state;
   ssl_connect_state connecting_state;
-  char *hostname;                   /* hostname for verification */
-  char *dispname;                   /* display version of hostname */
+  struct ssl_peer peer;
   const struct alpn_spec *alpn;     /* ALPN to use or NULL for none */
   void *backend;                    /* vtls backend specific props */
   struct cf_call_data call_data;    /* data handle used in current call */
   struct curltime handshake_done;   /* time when handshake finished */
   int port;                         /* remote port at origin */
   BIT(use_alpn);                    /* if ALPN shall be used in handshake */
+  BIT(reused_session);              /* session-ID was reused for this */
 };
 
 

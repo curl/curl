@@ -1,0 +1,30 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: manpage examples
+
+on:
+  push:
+    branches:
+    - master
+    - '*/ci'
+    paths:
+    - 'docs/libcurl/curl_*.3'
+    - 'docs/libcurl/opts/*.3'
+  pull_request:
+    branches:
+    - master
+    paths:
+    - 'docs/libcurl/curl_*.3'
+    - 'docs/libcurl/opts/*.3'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: verify examples
+        run: ./.github/scripts/verify-examples.pl docs/libcurl/curl*.3 docs/libcurl/opts/*.3

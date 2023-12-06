@@ -58,20 +58,26 @@ Setting a part's contents multiple times is valid: only the value set by the
 last call is retained.
 .SH EXAMPLE
 .nf
- curl_mime *mime;
- curl_mimepart *part;
+int main(void)
+{
+  curl_mime *mime;
+  curl_mimepart *part;
 
- /* create a mime handle */
- mime = curl_mime_init(easy);
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    /* create a mime handle */
+    mime = curl_mime_init(curl);
 
- /* add a part */
- part = curl_mime_addpart(mime);
+    /* add a part */
+    part = curl_mime_addpart(mime);
 
- /* send data from this file */
- curl_mime_filedata(part, "image.png");
+    /* send data from this file */
+    curl_mime_filedata(part, "image.png");
 
- /* set name */
- curl_mime_name(part, "data");
+    /* set name */
+    curl_mime_name(part, "data");
+  }
+}
 .fi
 .SH AVAILABILITY
 As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.

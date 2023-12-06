@@ -1317,16 +1317,16 @@ CURLcode Curl_verifyhost(struct Curl_cfilter *cf,
   if(Curl_parseX509(&cert, beg, end))
     return CURLE_PEER_FAILED_VERIFICATION;
 
-  hostlen = strlen(connssl->hostname);
+  hostlen = strlen(connssl->peer.hostname);
 
   /* Get the server IP address. */
 #ifdef ENABLE_IPV6
   if(cf->conn->bits.ipv6_ip &&
-     Curl_inet_pton(AF_INET6, connssl->hostname, &addr))
+     Curl_inet_pton(AF_INET6, connssl->peer.hostname, &addr))
     addrlen = sizeof(struct in6_addr);
   else
 #endif
-  if(Curl_inet_pton(AF_INET, connssl->hostname, &addr))
+  if(Curl_inet_pton(AF_INET, connssl->peer.hostname, &addr))
     addrlen = sizeof(struct in_addr);
 
   /* Process extensions. */
@@ -1361,7 +1361,7 @@ CURLcode Curl_verifyhost(struct Curl_cfilter *cf,
                             name.beg, name.end);
           if(len > 0 && (size_t)len == strlen(dnsname))
             matched = Curl_cert_hostcheck(dnsname, (size_t)len,
-                                          connssl->hostname, hostlen);
+                                          connssl->peer.hostname, hostlen);
           else
             matched = 0;
           free(dnsname);
@@ -1421,7 +1421,7 @@ CURLcode Curl_verifyhost(struct Curl_cfilter *cf,
     if(strlen(dnsname) != (size_t) len)         /* Nul byte in string ? */
       failf(data, "SSL: illegal cert name field");
     else if(Curl_cert_hostcheck((const char *) dnsname,
-                                len, connssl->hostname, hostlen)) {
+                                len, connssl->peer.hostname, hostlen)) {
       infof(data, "  common name: %s (matched)", dnsname);
       free(dnsname);
       return CURLE_OK;

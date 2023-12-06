@@ -25,7 +25,7 @@
 
 #include <sys/stat.h>
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <tchar.h>
 #endif
 
@@ -220,6 +220,7 @@ static void main_free(struct GlobalConfig *config)
 #ifdef _UNICODE
 #if defined(__GNUC__)
 /* GCC doesn't know about wmain() */
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 #pragma GCC diagnostic ignored "-Wmissing-declarations"
 #endif
@@ -234,7 +235,7 @@ int main(int argc, char *argv[])
 
   tool_init_stderr();
 
-#ifdef WIN32
+#ifdef _WIN32
   /* Undocumented diagnostic option to list the full paths of all loaded
      modules. This is purposely pre-init. */
   if(argc == 2 && !_tcscmp(argv[1], _T("--dump-module-paths"))) {
@@ -275,7 +276,7 @@ int main(int argc, char *argv[])
     main_free(&global);
   }
 
-#ifdef WIN32
+#ifdef _WIN32
   /* Flush buffers of all streams opened in write or update mode */
   fflush(NULL);
 #endif
@@ -286,5 +287,11 @@ int main(int argc, char *argv[])
   return (int)result;
 #endif
 }
+
+#ifdef _UNICODE
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+#endif
 
 #endif /* ndef UNITTESTS */

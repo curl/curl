@@ -42,12 +42,15 @@ this are \fIsftp://\fP, \fIscp://\fP, and \fIfile://\fP.
 SFTP, SCP and FILE
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  CURLcode ret;
-  curl_easy_setopt(curl, CURLOPT_URL, "sftp://upload.example.com/file.txt");
-  curl_easy_setopt(curl, CURLOPT_NEW_FILE_PERMS, 0664L);
-  ret = curl_easy_perform(curl);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode ret;
+    curl_easy_setopt(curl, CURLOPT_URL, "sftp://upload.example.com/file.txt");
+    curl_easy_setopt(curl, CURLOPT_NEW_FILE_PERMS, 0664L);
+    ret = curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

@@ -40,6 +40,8 @@ stored. They are then set in the object with the \fIcurl_url_set(3)\fP
 function.
 .SH EXAMPLE
 .nf
+int main(void)
+{
   CURLUcode rc;
   CURLU *url = curl_url();
   rc = curl_url_set(url, CURLUPART_URL, "https://example.com", 0);
@@ -52,6 +54,7 @@ function.
     }
     curl_url_cleanup(url);
   }
+}
 .fi
 .SH AVAILABILITY
 Added in 7.62.0

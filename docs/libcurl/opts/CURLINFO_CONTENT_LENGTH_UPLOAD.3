@@ -42,19 +42,23 @@ more sensible variable type.
 All
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  /* Perform the upload */
-  res = curl_easy_perform(curl);
+    /* Perform the upload */
+    res = curl_easy_perform(curl);
 
-  if(!res) {
-    /* check the size */
-    double cl;
-    res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_UPLOAD, &cl);
     if(!res) {
-      printf("Size: %.0f\\n", cl);
+      /* check the size */
+      double cl;
+      res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_UPLOAD, &cl);
+      if(!res) {
+        printf("Size: %.0f\\n", cl);
+      }
     }
   }
 }

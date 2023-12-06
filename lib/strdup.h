@@ -28,7 +28,7 @@
 #ifndef HAVE_STRDUP
 char *Curl_strdup(const char *str);
 #endif
-#ifdef WIN32
+#ifdef _WIN32
 wchar_t* Curl_wcsdup(const wchar_t* src);
 #endif
 void *Curl_memdup(const void *src, size_t buffer_length);

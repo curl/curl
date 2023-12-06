@@ -68,20 +68,29 @@ is associated with the easy handle. Applications must copy the data if they
 want it to survive subsequent API calls or the life-time of the easy handle.
 .SH EXAMPLE
 .nf
-struct curl_header *prev = NULL;
-struct curl_header *h;
+int main(void)
+{
+  struct curl_header *prev = NULL;
+  struct curl_header *h;
 
-/* extract the normal headers from the first request */
-while((h = curl_easy_nextheader(easy, CURLH_HEADER, 0, prev))) {
-   printf("%s: %s\\n", h->name, h->value);
-   prev = h;
-}
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+    curl_easy_perform(curl);
 
-/* extract the normal headers + 1xx + trailers from the last request */
-unsigned int origin = CURLH_HEADER| CURLH_1XX | CURLH_TRAILER;
-while((h = curl_easy_nextheader(easy, origin, -1, prev))) {
-   printf("%s: %s\\n", h->name, h->value);
-   prev = h;
+    /* extract the normal headers from the first request */
+    while((h = curl_easy_nextheader(curl, CURLH_HEADER, 0, prev))) {
+      printf("%s: %s\\n", h->name, h->value);
+      prev = h;
+    }
+
+    /* extract the normal headers + 1xx + trailers from the last request */
+    unsigned int origin = CURLH_HEADER| CURLH_1XX | CURLH_TRAILER;
+    while((h = curl_easy_nextheader(curl, origin, -1, prev))) {
+      printf("%s: %s\\n", h->name, h->value);
+      prev = h;
+    }
+  }
 }
 .fi
 .SH AVAILABILITY

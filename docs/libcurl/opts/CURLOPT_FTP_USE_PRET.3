@@ -42,16 +42,21 @@ no effect when using the active FTP transfers mode.
 FTP
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/old-server/file.txt");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL,
+                     "ftp://example.com/old-server/file.txt");
 
-  /* a drftpd server, do it! */
-  curl_easy_setopt(curl, CURLOPT_FTP_USE_PRET, 1L);
+    /* a drftpd server, do it! */
+    curl_easy_setopt(curl, CURLOPT_FTP_USE_PRET, 1L);
 
-  ret = curl_easy_perform(curl);
+    res = curl_easy_perform(curl);
 
-  curl_easy_cleanup(curl);
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

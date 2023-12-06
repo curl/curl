@@ -60,29 +60,32 @@ When the containing multipart form is sent, this is normally transmitted as
 HTTP, IMAP, SMTP
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-curl_mime *form = NULL;
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  curl_mime *form = NULL;
 
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-  curl_easy_setopt(curl, CURLOPT_MIME_OPTIONS, CURLMIMEOPT_FORMESCAPE);
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+    curl_easy_setopt(curl, CURLOPT_MIME_OPTIONS, CURLMIMEOPT_FORMESCAPE);
 
-  form = curl_mime_init(curl);
-  if(form) {
-    curl_mimepart *part = curl_mime_addpart(form);
+    form = curl_mime_init(curl);
+    if(form) {
+      curl_mimepart *part = curl_mime_addpart(form);
 
-    if(part) {
-      curl_mime_filedata(part, "strange\\\\file\\\\name");
-      curl_mime_name(part, "strange\\"field\\"name");
-      curl_easy_setopt(curl, CURLOPT_MIMEPOST, form);
+      if(part) {
+        curl_mime_filedata(part, "strange\\\\file\\\\name");
+        curl_mime_name(part, "strange\\"field\\"name");
+        curl_easy_setopt(curl, CURLOPT_MIMEPOST, form);
 
-      /* Perform the request */
-      curl_easy_perform(curl);
+        /* Perform the request */
+        curl_easy_perform(curl);
+      }
     }
-  }
 
-  curl_easy_cleanup(curl);
-  curl_mime_free(mime);
+    curl_easy_cleanup(curl);
+    curl_mime_free(form);
+  }
 }
 .fi
 .SH AVAILABILITY

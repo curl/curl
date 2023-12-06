@@ -52,27 +52,41 @@ NULL
 HTTP
 .SH EXAMPLE
 .nf
-/* Fill in the file upload field. This makes libcurl load data from
-   the given file name when curl_easy_perform() is called. */
-curl_formadd(&formpost,
-             &lastptr,
-             CURLFORM_COPYNAME, "sendfile",
-             CURLFORM_FILE, "postit2.c",
-             CURLFORM_END);
+int main(void)
+{
+  struct curl_httppost *formpost;
+  struct curl_httppost *lastptr;
 
-/* Fill in the filename field */
-curl_formadd(&formpost,
-             &lastptr,
-             CURLFORM_COPYNAME, "filename",
-             CURLFORM_COPYCONTENTS, "postit2.c",
-             CURLFORM_END);
+  /* Fill in the file upload field. This makes libcurl load data from
+     the given file name when curl_easy_perform() is called. */
+  curl_formadd(&formpost,
+               &lastptr,
+               CURLFORM_COPYNAME, "sendfile",
+               CURLFORM_FILE, "postit2.c",
+               CURLFORM_END);
 
-/* Fill in the submit field too, even if this is rarely needed */
-curl_formadd(&formpost,
-             &lastptr,
-             CURLFORM_COPYNAME, "submit",
-             CURLFORM_COPYCONTENTS, "send",
-             CURLFORM_END);
+  /* Fill in the filename field */
+  curl_formadd(&formpost,
+               &lastptr,
+               CURLFORM_COPYNAME, "filename",
+               CURLFORM_COPYCONTENTS, "postit2.c",
+               CURLFORM_END);
+
+  /* Fill in the submit field too, even if this is rarely needed */
+  curl_formadd(&formpost,
+               &lastptr,
+               CURLFORM_COPYNAME, "submit",
+               CURLFORM_COPYCONTENTS, "send",
+               CURLFORM_END);
+
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
+    curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+  }
+  curl_formfree(formpost);
+}
 .fi
 .SH AVAILABILITY
 As long as HTTP is enabled. Deprecated in 7.56.0.

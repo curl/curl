@@ -26,7 +26,7 @@
 #include "testutil.h"
 #include "memdebug.h"
 
-#if defined(WIN32) && !defined(MSDOS)
+#if defined(_WIN32)
 
 struct timeval tutil_tvnow(void)
 {
@@ -130,7 +130,7 @@ double tutil_tvdiff_secs(struct timeval newer, struct timeval older)
   return (double)(newer.tv_usec-older.tv_usec)/1000000.0;
 }
 
-#ifdef WIN32
+#ifdef _WIN32
 HMODULE win32_load_system_library(const TCHAR *filename)
 {
   size_t filenamelen = _tcslen(filename);

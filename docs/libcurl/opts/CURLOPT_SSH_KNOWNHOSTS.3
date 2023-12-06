@@ -47,13 +47,17 @@ NULL
 SFTP and SCP
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "sftp://example.com/file");
-  curl_easy_setopt(curl, CURLOPT_SSH_KNOWNHOSTS,
-                   "/home/clarkkent/.ssh/known_hosts");
-  ret = curl_easy_perform(curl);
-  curl_easy_cleanup(curl);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "sftp://example.com/file");
+    curl_easy_setopt(curl, CURLOPT_SSH_KNOWNHOSTS,
+                     "/home/clarkkent/.ssh/known_hosts");
+    res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

@@ -51,11 +51,16 @@ This pointer is not used by libcurl itself.
 All
 .SH EXAMPLE
 .nf
+extern void mutex_unlock(CURL *, curl_lock_data, void *);
+
+int main(void)
+{
   CURLSHcode sh;
-  share = curl_share_init();
+  CURLSH *share = curl_share_init();
   sh = curl_share_setopt(share, CURLSHOPT_UNLOCKFUNC, mutex_unlock);
   if(sh)
     printf("Error: %s\\n", curl_share_strerror(sh));
+}
 .fi
 .SH AVAILABILITY
 Added in 7.10

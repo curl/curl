@@ -47,24 +47,27 @@ file to the remote target file.
 HTTP, FTP, SFTP, FILE
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_off_t resume_position = GET_IT_SOMEHOW;
-  curl_off_t file_size = GET_IT_SOMEHOW_AS_WELL;
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_off_t resume_position; /* get it somehow */
+    curl_off_t file_size; /* get it somehow as well */
 
-  curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com");
+    curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com");
 
-  /* resuming upload at this position, possibly beyond 2GB */
-  curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, resume_position);
+    /* resuming upload at this position, possibly beyond 2GB */
+    curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, resume_position);
 
-  /* ask for upload */
-  curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+    /* ask for upload */
+    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
-  /* set total data amount to expect */
-  curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, file_size);
+    /* set total data amount to expect */
+    curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, file_size);
 
-  /* Perform the request */
-  curl_easy_perform(curl);
+    /* Perform the request */
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

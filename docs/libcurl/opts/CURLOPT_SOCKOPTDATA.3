@@ -44,23 +44,28 @@ static int sockopt_callback(void *clientp, curl_socket_t curlfd,
                             curlsocktype purpose)
 {
   int val = *(int *)clientp;
-  setsockopt(curldfd, SOL_SOCKET, SO_RCVBUF, (const char *)&val, sizeof(val));
+  setsockopt((int)curlfd, SOL_SOCKET, SO_RCVBUF,
+             (const char *)&val, sizeof(val));
   return CURL_SOCKOPT_OK;
 }
 
-curl = curl_easy_init();
-if(curl) {
-  int recvbuffersize = 256 * 1024;
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    int recvbuffersize = 256 * 1024;
 
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
 
-  /* call this function to set options for the socket */
-  curl_easy_setopt(curl, CURLOPT_SOCKOPTFUNCTION, sockopt_callback);
-  curl_easy_setopt(curl, CURLOPT_SOCKOPTDATA, &recvbuffersize);
+    /* call this function to set options for the socket */
+    curl_easy_setopt(curl, CURLOPT_SOCKOPTFUNCTION, sockopt_callback);
+    curl_easy_setopt(curl, CURLOPT_SOCKOPTDATA, &recvbuffersize);
 
-  res = curl_easy_perform(curl);
+    res = curl_easy_perform(curl);
 
-  curl_easy_cleanup(curl);
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

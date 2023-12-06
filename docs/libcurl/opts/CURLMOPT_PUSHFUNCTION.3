@@ -91,6 +91,8 @@ NULL, no callback
 HTTP(S) (HTTP/2 only)
 .SH EXAMPLE
 .nf
+#include <string.h>
+
 /* only allow pushes for file names starting with "push-" */
 int push_callback(CURL *parent,
                   CURL *easy,
@@ -118,8 +120,13 @@ int push_callback(CURL *parent,
   return CURL_PUSH_DENY;
 }
 
-curl_multi_setopt(multi, CURLMOPT_PUSHFUNCTION, push_callback);
-curl_multi_setopt(multi, CURLMOPT_PUSHDATA, &counter);
+int main(void)
+{
+  int counter;
+  CURLM *multi = curl_multi_init();
+  curl_multi_setopt(multi, CURLMOPT_PUSHFUNCTION, push_callback);
+  curl_multi_setopt(multi, CURLMOPT_PUSHDATA, &counter);
+}
 .fi
 .SH AVAILABILITY
 Added in 7.44.0

@@ -49,27 +49,31 @@ store remain forever. By default, libcurl caches this info for 24 hours.
 All
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
 
-  /* only reuse certificate stores for a short time */
-  curl_easy_setopt(curl, CURLOPT_CA_CACHE_TIMEOUT, 60L);
+    /* only reuse certificate stores for a short time */
+    curl_easy_setopt(curl, CURLOPT_CA_CACHE_TIMEOUT, 60L);
 
-  ret = curl_easy_perform(curl);
+    res = curl_easy_perform(curl);
 
-  /* in this second request, the cache is not used if more than
-     sixty seconds passed since the previous connection */
-  ret = curl_easy_perform(curl);
+    /* in this second request, the cache is not used if more than
+       sixty seconds passed since the previous connection */
+    res = curl_easy_perform(curl);
 
-  curl_easy_cleanup(curl);
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY
 This option was added in curl 7.87.0.
 
-Currently the only SSL backend to implement this certificate store caching
-functionality is the OpenSSL (and forks) backend.
+This option is supported by OpenSSL and its forks (since 7.87.0) and Schannel
+(since 8.5.0).
 .SH RETURN VALUE
 Returns CURLE_OK
 .SH "SEE ALSO"

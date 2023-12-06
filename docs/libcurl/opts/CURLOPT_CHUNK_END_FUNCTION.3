@@ -48,6 +48,12 @@ NULL
 FTP
 .SH EXAMPLE
 .nf
+#include <stdio.h>
+
+struct callback_data {
+   FILE *output;
+};
+
 static long file_is_downloaded(struct callback_data *data)
 {
   if(data->output) {
@@ -61,6 +67,9 @@ int main()
 {
   /* data for callback */
   struct callback_data callback_info;
+
+  CURL *curl = curl_easy_init();
+
   curl_easy_setopt(curl, CURLOPT_CHUNK_END_FUNCTION, file_is_downloaded);
   curl_easy_setopt(curl, CURLOPT_CHUNK_DATA, &callback_info);
 }

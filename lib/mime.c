@@ -48,7 +48,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#ifdef WIN32
+#ifdef _WIN32
 # ifndef R_OK
 #  define R_OK 4
 # endif
@@ -311,8 +311,7 @@ static char *escape_string(struct Curl_easy *data,
   table = formtable;
   /* data can be NULL when this function is called indirectly from
      curl_formget(). */
-  if(strategy == MIMESTRATEGY_MAIL ||
-     (data && (data->set.mime_options & CURLMIMEOPT_FORMESCAPE)))
+  if(strategy == MIMESTRATEGY_MAIL || (data && (data->set.mime_formescape)))
     table = mimetable;
 
   Curl_dyn_init(&db, CURL_MAX_INPUT_LENGTH);

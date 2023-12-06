@@ -65,9 +65,18 @@ Manipulating these gives considerable powers to the application to severely
 screw things up for libcurl. Take care!
 .SH EXAMPLE
 .nf
- curl_global_init_mem(CURL_GLOBAL_DEFAULT, curl_malloc_cb,
-                      curl_free_cb, curl_realloc_cb,
-                      curl_strdup_cb, curl_calloc_cb);
+extern void *malloc_cb(size_t);
+extern void free_cb(void *);
+extern void *realloc_cb(void *, size_t);
+extern char *strdup_cb(const char *);
+extern void *calloc_cb(size_t, size_t);
+
+int main(void)
+{
+  curl_global_init_mem(CURL_GLOBAL_DEFAULT, malloc_cb,
+                       free_cb, realloc_cb,
+                       strdup_cb, calloc_cb);
+}
 .fi
 .SH AVAILABILITY
 Added in 7.12.0

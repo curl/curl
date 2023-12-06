@@ -44,13 +44,16 @@ This is the equivalent to the \fICURLU_DISALLOW_USER\fP flag for the
 Several
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
 
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-  curl_easy_setopt(curl, CURLOPT_DISALLOW_USERNAME_IN_URL, 1L);
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+    curl_easy_setopt(curl, CURLOPT_DISALLOW_USERNAME_IN_URL, 1L);
 
-  curl_easy_perform(curl);
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

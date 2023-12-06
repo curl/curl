@@ -44,20 +44,23 @@ this amount.
 All
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  /* enable TCP keep-alive for this transfer */
-  curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
+    /* enable TCP keep-alive for this transfer */
+    curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
 
-  /* set keep-alive idle time to 120 seconds */
-  curl_easy_setopt(curl, CURLOPT_TCP_KEEPIDLE, 120L);
+    /* set keep-alive idle time to 120 seconds */
+    curl_easy_setopt(curl, CURLOPT_TCP_KEEPIDLE, 120L);
 
-  /* interval time between keep-alive probes: 60 seconds */
-  curl_easy_setopt(curl, CURLOPT_TCP_KEEPINTVL, 60L);
+    /* interval time between keep-alive probes: 60 seconds */
+    curl_easy_setopt(curl, CURLOPT_TCP_KEEPINTVL, 60L);
 
-  curl_easy_perform(curl);
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

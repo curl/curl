@@ -61,7 +61,7 @@ int test(char *URL)
   struct WriteThis pooh;
 
   if(!strcmp(URL, "check")) {
-#if (defined(WIN32) || defined(__CYGWIN__))
+#if (defined(_WIN32) || defined(__CYGWIN__))
     printf("Windows TCP does not deliver response data but reports "
            "CONNABORTED\n");
     return 1; /* skip since test will fail on Windows without workaround */

@@ -105,7 +105,7 @@ jobs:
         - name: openssl3
           install_packages: zlib1g-dev valgrind
           install_steps: gcc-11 openssl3 pytest
-          configure: LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
+          configure: CFLAGS=-std=gnu89 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
           singleuse: --unit
 
         - name: openssl3-O3

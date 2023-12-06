@@ -44,10 +44,13 @@ on \fBstring\fP to find out the size.
 You must \fIcurl_free(3)\fP the returned string when you are done with it.
 .SH EXAMPLE
 .nf
-char *output = curl_escape("data to convert", 15);
-if(output) {
-  printf("Encoded: %s\\n", output);
-  curl_free(output);
+int main(void)
+{
+  char *output = curl_escape("data to convert", 15);
+  if(output) {
+    printf("Encoded: %s\\n", output);
+    curl_free(output);
+  }
 }
 .fi
 .SH AVAILABILITY

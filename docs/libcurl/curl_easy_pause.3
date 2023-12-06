@@ -92,8 +92,15 @@ When such a paused stream is unpaused again, any buffered data is delivered
 first.
 .SH EXAMPLE
 .nf
-/* pause a transfer in both directions */
-curl_easy_pause(curl, CURL_READFUNC_PAUSE | CURL_WRITEFUNC_PAUSE);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    /* pause a transfer in both directions */
+    curl_easy_pause(curl, CURL_READFUNC_PAUSE | CURL_WRITEFUNC_PAUSE);
+
+  }
+}
 .fi
 .SH "MEMORY USE"
 When pausing a download transfer by returning the magic return code from a

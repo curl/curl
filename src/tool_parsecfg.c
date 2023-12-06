@@ -46,7 +46,7 @@ static const char *unslashquote(const char *line, char *param);
 #define MAX_CONFIG_LINE_LENGTH (10*1024*1024)
 static bool my_get_line(FILE *fp, struct curlx_dynbuf *, bool *error);
 
-#ifdef WIN32
+#ifdef _WIN32
 static FILE *execpath(const char *filename, char **pathp)
 {
   static char filebuffer[512];
@@ -98,7 +98,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
       }
       filename = pathalloc = curlrc;
     }
-#ifdef WIN32 /* Windows */
+#ifdef _WIN32 /* Windows */
     else {
       char *fullp;
       /* check for .curlrc then _curlrc in the dir of the executable */
@@ -210,8 +210,9 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
             break;
           default:
             warnf(operation->global, "%s:%d: warning: '%s' uses unquoted "
-                  "whitespace in the line that may cause side-effects",
-                  filename, lineno, option);
+                  "whitespace", filename, lineno, option);
+            warnf(operation->global, "This may cause side-effects. "
+                  "Consider using double quotes?");
           }
         }
         if(!*param)

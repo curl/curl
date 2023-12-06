@@ -41,7 +41,7 @@ int getfiletime(const char *filename, struct GlobalConfig *global,
 /* Windows stat() may attempt to adjust the unix GMT file time by a daylight
    saving time offset and since it's GMT that is bad behavior. When we have
    access to a 64-bit type we can bypass stat and get the times directly. */
-#if defined(WIN32)
+#if defined(_WIN32)
   HANDLE hfile;
   TCHAR *tchar_filename = curlx_convert_UTF8_to_tchar((char *)filename);
 
@@ -87,7 +87,7 @@ int getfiletime(const char *filename, struct GlobalConfig *global,
   return rc;
 }
 
-#if defined(HAVE_UTIME) || defined(HAVE_UTIMES) || defined(WIN32)
+#if defined(HAVE_UTIME) || defined(HAVE_UTIMES) || defined(_WIN32)
 void setfiletime(curl_off_t filetime, const char *filename,
                  struct GlobalConfig *global)
 {
@@ -95,7 +95,7 @@ void setfiletime(curl_off_t filetime, const char *filename,
 /* Windows utime() may attempt to adjust the unix GMT file time by a daylight
    saving time offset and since it's GMT that is bad behavior. When we have
    access to a 64-bit type we can bypass utime and set the times directly. */
-#if defined(WIN32)
+#if defined(_WIN32)
     HANDLE hfile;
     TCHAR *tchar_filename = curlx_convert_UTF8_to_tchar((char *)filename);
 
@@ -153,4 +153,4 @@ void setfiletime(curl_off_t filetime, const char *filename,
   }
 }
 #endif /* defined(HAVE_UTIME) || defined(HAVE_UTIMES) ||        \
-          defined(WIN32) */
+          defined(_WIN32) */

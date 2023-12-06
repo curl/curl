@@ -27,7 +27,7 @@
 curl_ws_recv - receive WebSocket data
 .SH SYNOPSIS
 .nf
-#include <curl/easy.h>
+#include <curl/curl.h>
 
 CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
                       size_t *recv, const struct curl_ws_frame **meta);
@@ -48,10 +48,18 @@ that contains information about the received data. See the
 \fIcurl_ws_meta(3)\fP for details on that struct.
 .SH EXAMPLE
 .nf
+int main(void)
+{
   size_t rlen;
   const struct curl_ws_frame *meta;
   char buffer[256];
-  CURLcode result = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
+    if(res)
+      printf("error: %s\\n", curl_easy_strerror(res));
+  }
+}
 .fi
 .SH AVAILABILITY
 Added in 7.86.0.

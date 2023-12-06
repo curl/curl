@@ -93,8 +93,6 @@
   } while(0)
 
 
-extern int unitfail;
-
 #define UNITTEST_START                          \
   int test(char *arg)                           \
   {                                             \

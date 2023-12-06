@@ -48,21 +48,25 @@ type is 64 bits large while its 'long' is 32 bits. Use the
 All
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  long sockfd; /* does not work on win64! */
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    long sockfd; /* does not work on win64! */
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  /* Do not do the transfer - only connect to host */
-  curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);
-  res = curl_easy_perform(curl);
+    /* Do not do the transfer - only connect to host */
+    curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);
+    res = curl_easy_perform(curl);
 
-  /* Extract the socket from the curl handle */
-  res = curl_easy_getinfo(curl, CURLINFO_LASTSOCKET, &sockfd);
+    /* Extract the socket from the curl handle */
+    res = curl_easy_getinfo(curl, CURLINFO_LASTSOCKET, &sockfd);
 
-  if(res != CURLE_OK) {
-    printf("Error: %s\\n", curl_easy_strerror(res));
-    return 1;
+    if(res != CURLE_OK) {
+      printf("Error: %s\\n", curl_easy_strerror(res));
+      return 1;
+    }
   }
 }
 .fi

@@ -25,7 +25,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#if defined(MSDOS) || defined(WIN32)
+#if defined(_WIN32) || defined(MSDOS)
 
 #define SANITIZE_ALLOW_COLONS    (1<<0)  /* Allow colons */
 #define SANITIZE_ALLOW_PATH      (1<<1)  /* Allow path separators and colons */
@@ -57,7 +57,7 @@ char **__crt0_glob_function(char *arg);
 
 #endif /* MSDOS && (__DJGPP__ || __GO32__) */
 
-#ifdef WIN32
+#ifdef _WIN32
 
 CURLcode FindWin32CACert(struct OperationConfig *config,
                          curl_sslbackend backend,
@@ -65,8 +65,8 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
 struct curl_slist *GetLoadedModulePaths(void);
 CURLcode win32_init(void);
 
-#endif /* WIN32 */
+#endif /* _WIN32 */
 
-#endif /* MSDOS || WIN32 */
+#endif /* _WIN32 || MSDOS */
 
 #endif /* HEADER_CURL_TOOL_DOSWIN_H */

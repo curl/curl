@@ -46,7 +46,7 @@
 #  include iodef
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 #  include <conio.h>
 #endif
 
@@ -94,7 +94,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 #define DONE
 #endif /* __VMS */
 
-#if defined(WIN32)
+#if defined(_WIN32)
 
 char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 {
@@ -122,7 +122,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
   return buffer; /* we always return success */
 }
 #define DONE
-#endif /* WIN32 */
+#endif /* _WIN32 */
 
 #ifndef DONE /* not previously provided */
 

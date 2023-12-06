@@ -47,13 +47,19 @@ Passing in a NULL pointer in \fImime\fP makes this function return immediately
 with no action.
 .SH EXAMPLE
 .nf
-  /* Build the mime message. */
-  mime = curl_mime_init(curl);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    /* Build the mime message. */
+    curl_mime *mime = curl_mime_init(curl);
 
-  /* ... */
+    /* send off the transfer */
 
-  /* Free multipart message. */
-  curl_mime_free(mime);
+    /* Free multipart message. */
+    curl_mime_free(mime);
+  }
+}
 .fi
 .SH AVAILABILITY
 As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.

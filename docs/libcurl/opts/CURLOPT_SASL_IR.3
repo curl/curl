@@ -52,12 +52,16 @@ SASL-IR CAPABILITY.
 IMAP, POP3 and SMTP
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "smtp://example.com/");
-  curl_easy_setopt(curl, CURLOPT_SASL_IR, 1L);
-  ret = curl_easy_perform(curl);
-  curl_easy_cleanup(curl);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "smtp://example.com/");
+    curl_easy_setopt(curl, CURLOPT_SASL_IR, 1L);
+    res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

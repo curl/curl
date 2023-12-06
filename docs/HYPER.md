@@ -57,6 +57,10 @@ The hyper backend does not support
 - leading whitespace in first HTTP/1 response header
 - HTTP/0.9
 - HTTP/2 upgrade using HTTP:// URLs. Aka 'h2c'
+- HTTP/2 in general. Hyper has support for HTTP/2 but the curl side
+  needs changes so that a `hyper_clientconn` can last for the duration
+  of a connection. Probably this means turning the Hyper HTTP/2 backend
+  into a connection filter.
 
 ## Remaining issues
 

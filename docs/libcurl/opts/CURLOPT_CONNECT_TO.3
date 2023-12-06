@@ -88,22 +88,25 @@ NULL
 All
 .SH EXAMPLE
 .nf
-CURL *curl;
-struct curl_slist *connect_to = NULL;
-connect_to = curl_slist_append(NULL, "example.com::server1.example.com:");
+int main(void)
+{
+  CURL *curl;
+  struct curl_slist *connect_to = NULL;
+  connect_to = curl_slist_append(NULL, "example.com::server1.example.com:");
 
-curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_CONNECT_TO, connect_to);
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_CONNECT_TO, connect_to);
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  curl_easy_perform(curl);
+    curl_easy_perform(curl);
 
-  /* always cleanup */
-  curl_easy_cleanup(curl);
+    /* always cleanup */
+    curl_easy_cleanup(curl);
+  }
+
+  curl_slist_free_all(connect_to);
 }
-
-curl_slist_free_all(connect_to);
 .fi
 .SH AVAILABILITY
 Added in 7.49.0

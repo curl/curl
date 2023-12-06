@@ -39,11 +39,14 @@ Passing in a NULL pointer in \fIptr\fP makes this function return immediately
 with no action.
 .SH EXAMPLE
 .nf
+int main(void)
+{
   char *width = curl_getenv("COLUMNS");
   if(width) {
     /* it was set! */
     curl_free(width);
   }
+}
 .fi
 .SH AVAILABILITY
 Always

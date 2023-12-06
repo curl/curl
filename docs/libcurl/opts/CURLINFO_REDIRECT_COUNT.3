@@ -39,17 +39,20 @@ actually followed.
 HTTP(S)
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  CURLcode res;
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-  curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-  res = curl_easy_perform(curl);
-  if(res == CURLE_OK) {
-    long redirects;
-    curl_easy_getinfo(curl, CURLINFO_REDIRECT_COUNT, &redirects);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    res = curl_easy_perform(curl);
+    if(res == CURLE_OK) {
+      long redirects;
+      curl_easy_getinfo(curl, CURLINFO_REDIRECT_COUNT, &redirects);
+    }
+    curl_easy_cleanup(curl);
   }
-  curl_easy_cleanup(curl);
 }
 .fi
 .SH AVAILABILITY

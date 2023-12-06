@@ -39,11 +39,18 @@ NULL
 HTTP
 .SH EXAMPLE
 .nf
-/* Assuming we have a CURL handle in the hndl variable. */
+struct MyData {
+  void *custom;
+};
 
-struct MyData data;
-
-curl_easy_setopt(hndl, CURLOPT_TRAILERDATA, &data);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    struct MyData data;
+    curl_easy_setopt(curl, CURLOPT_TRAILERDATA, &data);
+  }
+}
 .fi
 
 A more complete example can be found in examples/http_trailers.html

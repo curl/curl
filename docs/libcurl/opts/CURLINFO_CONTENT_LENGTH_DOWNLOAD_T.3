@@ -40,19 +40,23 @@ the size is not known.
 HTTP(S)
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  /* Perform the request */
-  res = curl_easy_perform(curl);
+    /* Perform the request */
+    res = curl_easy_perform(curl);
 
-  if(!res) {
-    /* check the size */
-    curl_off_t cl;
-    res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &cl);
     if(!res) {
-      printf("Download size: %" CURL_FORMAT_CURL_OFF_T "\\n", cl);
+      /* check the size */
+      curl_off_t cl;
+      res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &cl);
+      if(!res) {
+        printf("Download size: %" CURL_FORMAT_CURL_OFF_T "\\n", cl);
+      }
     }
   }
 }

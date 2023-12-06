@@ -227,8 +227,8 @@ CURLcode Curl_http_size(struct Curl_easy *data);
 
 CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
                                      struct connectdata *conn,
-                                     ssize_t *nread,
-                                     bool *stop_reading);
+                                     const char *buf, size_t blen,
+                                     size_t *pconsumed);
 
 /**
  * Curl_http_output_auth() setups the authentication headers for the
@@ -263,7 +263,7 @@ CURLcode Curl_http_decode_status(int *pstatus, const char *s, size_t len);
  * All about a core HTTP request, excluding body and trailers
  */
 struct httpreq {
-  char method[12];
+  char method[24];
   char *scheme;
   char *authority;
   char *path;

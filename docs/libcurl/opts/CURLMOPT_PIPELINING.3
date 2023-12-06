@@ -53,9 +53,12 @@ Before that, default was \fBCURLPIPE_NOTHING\fP.
 HTTP(S)
 .SH EXAMPLE
 .nf
-CURLM *m = curl_multi_init();
-/* try HTTP/2 multiplexing */
-curl_multi_setopt(m, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
+int main(void)
+{
+  CURLM *m = curl_multi_init();
+  /* try HTTP/2 multiplexing */
+  curl_multi_setopt(m, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
+}
 .fi
 .SH AVAILABILITY
 Added in 7.16.0. Multiplex support bit added in 7.43.0. HTTP/1 Pipelining

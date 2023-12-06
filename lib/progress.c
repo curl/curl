@@ -304,7 +304,7 @@ timediff_t Curl_pgrsLimitWaitTime(curl_off_t cursize,
    * 'actual' is the time in milliseconds it took to actually download the
    * last 'size' bytes.
    */
-  actual = Curl_timediff(now, start);
+  actual = Curl_timediff_ceil(now, start);
   if(actual < minimum) {
     /* if it downloaded the data faster than the limit, make it wait the
        difference */

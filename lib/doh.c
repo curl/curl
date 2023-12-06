@@ -382,7 +382,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
   DEBUGASSERT(conn);
 
   /* start clean, consider allocating this struct on demand */
-  dohp = data->req.doh = calloc(sizeof(struct dohdata), 1);
+  dohp = data->req.doh = calloc(1, sizeof(struct dohdata));
   if(!dohp)
     return NULL;
 
@@ -791,8 +791,8 @@ static void showdoh(struct Curl_easy *data,
  * must be an associated call later to Curl_freeaddrinfo().
  */
 
-static struct Curl_addrinfo *
-doh2ai(const struct dohentry *de, const char *hostname, int port)
+static CURLcode doh2ai(const struct dohentry *de, const char *hostname,
+                       int port, struct Curl_addrinfo **aip)
 {
   struct Curl_addrinfo *ai;
   struct Curl_addrinfo *prevai = NULL;
@@ -805,9 +805,10 @@ doh2ai(const struct dohentry *de, const char *hostname, int port)
   int i;
   size_t hostlen = strlen(hostname) + 1; /* include null-terminator */
 
-  if(!de)
-    /* no input == no output! */
-    return NULL;
+  DEBUGASSERT(de);
+
+  if(!de->numaddr)
+    return CURLE_COULDNT_RESOLVE_HOST;
 
   for(i = 0; i < de->numaddr; i++) {
     size_t ss_size;
@@ -880,8 +881,9 @@ doh2ai(const struct dohentry *de, const char *hostname, int port)
     Curl_freeaddrinfo(firstai);
     firstai = NULL;
   }
+  *aip = firstai;
 
-  return firstai;
+  return result;
 }
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
@@ -954,10 +956,10 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
       infof(data, "DoH Host name: %s", dohp->host);
       showdoh(data, &de);
 
-      ai = doh2ai(&de, dohp->host, dohp->port);
-      if(!ai) {
+      result = doh2ai(&de, dohp->host, dohp->port, &ai);
+      if(result) {
         de_cleanup(&de);
-        return CURLE_OUT_OF_MEMORY;
+        return result;
       }
 
       if(data->share)

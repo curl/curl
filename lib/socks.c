@@ -405,7 +405,7 @@ CONNECT_REQ_INIT:
       if(plen > 255) {
         /* there is no real size limit to this field in the protocol, but
            SOCKS5 limits the proxy user field to 255 bytes and it seems likely
-           that a longer field is either a mistake or malicous input */
+           that a longer field is either a mistake or malicious input */
         failf(data, "Too long SOCKS proxy user name");
         return CURLPX_LONG_USER;
       }
@@ -1132,7 +1132,7 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
     return result;
 
   if(!sx) {
-    sx = calloc(sizeof(*sx), 1);
+    sx = calloc(1, sizeof(*sx));
     if(!sx)
       return CURLE_OUT_OF_MEMORY;
     cf->ctx = sx;

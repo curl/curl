@@ -71,7 +71,7 @@ struct OutStruct {
   FILE *stream;
   curl_off_t bytes;
   curl_off_t init;
-#ifdef WIN32
+#ifdef _WIN32
   unsigned char utf8seq[5];
 #endif
 };

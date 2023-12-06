@@ -369,12 +369,15 @@ static ssize_t nw_out_writer(void *writer_ctx,
 {
   struct Curl_cfilter *cf = writer_ctx;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
-  ssize_t nwritten;
 
-  nwritten = Curl_conn_cf_send(cf->next, data, (const char *)buf, buflen, err);
-  if(nwritten > 0)
-    CURL_TRC_CF(data, cf, "[0] egress: wrote %zd bytes", nwritten);
-  return nwritten;
+  if(data) {
+    ssize_t nwritten = Curl_conn_cf_send(cf->next, data,
+                                         (const char *)buf, buflen, err);
+    if(nwritten > 0)
+      CURL_TRC_CF(data, cf, "[0] egress: wrote %zd bytes", nwritten);
+    return nwritten;
+  }
+  return 0;
 }
 
 static ssize_t send_callback(nghttp2_session *h2,
@@ -2483,14 +2486,15 @@ static CURLcode cf_h2_cntrl(struct Curl_cfilter *cf,
   case CF_CTRL_DATA_PAUSE:
     result = http2_data_pause(cf, data, (arg1 != 0));
     break;
-  case CF_CTRL_DATA_DONE_SEND: {
+  case CF_CTRL_DATA_DONE_SEND:
     result = http2_data_done_send(cf, data);
     break;
-  }
-  case CF_CTRL_DATA_DONE: {
+  case CF_CTRL_DATA_DETACH:
+    http2_data_done(cf, data, TRUE);
+    break;
+  case CF_CTRL_DATA_DONE:
     http2_data_done(cf, data, arg1 != 0);
     break;
-  }
   default:
     break;
   }
@@ -2598,7 +2602,7 @@ static CURLcode http2_cfilter_add(struct Curl_cfilter **pcf,
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
   DEBUGASSERT(data->conn);
-  ctx = calloc(sizeof(*ctx), 1);
+  ctx = calloc(1, sizeof(*ctx));
   if(!ctx)
     goto out;
 
@@ -2624,7 +2628,7 @@ static CURLcode http2_cfilter_insert_after(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
   (void)data;
-  ctx = calloc(sizeof(*ctx), 1);
+  ctx = calloc(1, sizeof(*ctx));
   if(!ctx)
     goto out;
 

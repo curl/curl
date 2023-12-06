@@ -40,6 +40,51 @@
 #include "memdebug.h"
 
 /*
+  The dirslash() function breaks a null-terminated pathname string into
+  directory and filename components then returns the directory component up
+  to, *AND INCLUDING*, a final '/'.  If there is no directory in the path,
+  this instead returns a "" string.
+
+  This function returns a pointer to malloc'ed memory.
+
+  The input path to this function is expected to have a file name part.
+*/
+
+#ifdef _WIN32
+#define PATHSEP "\\"
+#define IS_SEP(x) (((x) == '/') || ((x) == '\\'))
+#elif defined(MSDOS) || defined(__EMX__) || defined(OS2)
+#define PATHSEP "\\"
+#define IS_SEP(x) ((x) == '\\')
+#else
+#define PATHSEP "/"
+#define IS_SEP(x) ((x) == '/')
+#endif
+
+static char *dirslash(const char *path)
+{
+  size_t n;
+  struct dynbuf out;
+  DEBUGASSERT(path);
+  Curl_dyn_init(&out, CURL_MAX_INPUT_LENGTH);
+  n = strlen(path);
+  if(n) {
+    /* find the rightmost path separator, if any */
+    while(n && !IS_SEP(path[n-1]))
+      --n;
+    /* skip over all the path separators, if any */
+    while(n && IS_SEP(path[n-1]))
+      --n;
+  }
+  if(Curl_dyn_addn(&out, path, n))
+    return NULL;
+  /* if there was a directory, append a single trailing slash */
+  if(n && Curl_dyn_addn(&out, PATHSEP, 1))
+    return NULL;
+  return Curl_dyn_ptr(&out);
+}
+
+/*
  * Curl_fopen() opens a file for writing with a temp name, to be renamed
  * to the final name when completed. If there is an existing file using this
  * name at the time of the open, this function will clone the mode from that
@@ -50,46 +95,43 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
                     FILE **fh, char **tempname)
 {
   CURLcode result = CURLE_WRITE_ERROR;
-  unsigned char randsuffix[9];
+  unsigned char randbuf[41];
   char *tempstore = NULL;
   struct_stat sb;
   int fd = -1;
+  char *dir = NULL;
   *tempname = NULL;
 
   *fh = fopen(filename, FOPEN_WRITETEXT);
   if(!*fh)
     goto fail;
-  if(fstat(fileno(*fh), &sb) == -1 || !S_ISREG(sb.st_mode))
+  if(fstat(fileno(*fh), &sb) == -1 || !S_ISREG(sb.st_mode)) {
     return CURLE_OK;
+  }
   fclose(*fh);
   *fh = NULL;
 
-  result = Curl_rand_alnum(data, randsuffix, sizeof(randsuffix));
+  result = Curl_rand_alnum(data, randbuf, sizeof(randbuf));
   if(result)
     goto fail;
 
-  tempstore = aprintf("%s.%s.tmp", filename, randsuffix);
+  dir = dirslash(filename);
+  if(dir) {
+    /* The temp file name should not end up too long for the target file
+       system */
+    tempstore = aprintf("%s%s.tmp", dir, randbuf);
+    free(dir);
+  }
+
   if(!tempstore) {
     result = CURLE_OUT_OF_MEMORY;
     goto fail;
   }
 
   result = CURLE_WRITE_ERROR;
-  fd = open(tempstore, O_WRONLY | O_CREAT | O_EXCL, 0600);
+  fd = open(tempstore, O_WRONLY | O_CREAT | O_EXCL, 0600|sb.st_mode);
   if(fd == -1)
     goto fail;
-
-#ifdef HAVE_FCHMOD
-  {
-    struct_stat nsb;
-    if((fstat(fd, &nsb) != -1) &&
-       (nsb.st_uid == sb.st_uid) && (nsb.st_gid == sb.st_gid)) {
-      /* if the user and group are the same, clone the original mode */
-      if(fchmod(fd, (mode_t)sb.st_mode) == -1)
-        goto fail;
-    }
-  }
-#endif
 
   *fh = fdopen(fd, FOPEN_WRITETEXT);
   if(!*fh)
@@ -105,7 +147,6 @@ fail:
   }
 
   free(tempstore);
-
   return result;
 }
 

@@ -69,14 +69,32 @@ NULL - no callback.
 This feature is only used for HTTP(S) transfer.
 .SH EXAMPLE
 .nf
+struct priv {
+  void *custom;
+};
+
+static CURLSTScode hsts_cb(CURL *easy, struct curl_hstsentry *sts,
+                           void *clientp)
 {
-  /* set HSTS read callback */
-  curl_easy_setopt(curl, CURLOPT_HSTSREADFUNCTION, hstsread);
+  /* populate the struct as documented */
+  return CURLSTS_OK;
+}
 
-  /* pass in suitable argument to the callback */
-  curl_easy_setopt(curl, CURLOPT_HSTSREADDATA, &hstspreload[0]);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    struct priv my_stuff;
+    CURLcode res;
 
-  result = curl_easy_perform(curl);
+    /* set HSTS read callback */
+    curl_easy_setopt(curl, CURLOPT_HSTSREADFUNCTION, hsts_cb);
+
+    /* pass in suitable argument to the callback */
+    curl_easy_setopt(curl, CURLOPT_HSTSREADDATA, &my_stuff);
+
+    res = curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

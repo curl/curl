@@ -45,15 +45,17 @@ NULL
 FTP
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/foo.bin");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/foo.bin");
+    curl_easy_setopt(curl, CURLOPT_FTP_ALTERNATIVE_TO_USER, "two users");
+    res = curl_easy_perform(curl);
 
-  curl_easy_setopt(curl, CURLOPT_FTP_ALTERNATIVE_TO_USER, "two users");
-
-  ret = curl_easy_perform(curl);
-
-  curl_easy_cleanup(curl);
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

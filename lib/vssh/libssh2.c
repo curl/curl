@@ -1537,139 +1537,137 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           state(data, SSH_SFTP_NEXT_QUOTE);
         break;
       }
-      {
-        /*
-         * the arguments following the command must be separated from the
-         * command with a space so we can check for it unconditionally
-         */
-        cp = strchr(cmd, ' ');
-        if(!cp) {
-          failf(data, "Syntax error command '%s', missing parameter",
-                cmd);
-          state(data, SSH_SFTP_CLOSE);
-          sshc->nextstate = SSH_NO_STATE;
-          sshc->actualcode = CURLE_QUOTE_ERROR;
-          break;
-        }
 
-        /*
-         * also, every command takes at least one argument so we get that
-         * first argument right now
-         */
-        result = Curl_get_pathname(&cp, &sshc->quote_path1, sshc->homedir);
-        if(result) {
-          if(result == CURLE_OUT_OF_MEMORY)
-            failf(data, "Out of memory");
-          else
-            failf(data, "Syntax error: Bad first parameter to '%s'", cmd);
-          state(data, SSH_SFTP_CLOSE);
-          sshc->nextstate = SSH_NO_STATE;
-          sshc->actualcode = result;
-          break;
-        }
-
-        /*
-         * SFTP is a binary protocol, so we don't send text commands
-         * to the server. Instead, we scan for commands used by
-         * OpenSSH's sftp program and call the appropriate libssh2
-         * functions.
-         */
-        if(strncasecompare(cmd, "chgrp ", 6) ||
-           strncasecompare(cmd, "chmod ", 6) ||
-           strncasecompare(cmd, "chown ", 6) ||
-           strncasecompare(cmd, "atime ", 6) ||
-           strncasecompare(cmd, "mtime ", 6)) {
-          /* attribute change */
-
-          /* sshc->quote_path1 contains the mode to set */
-          /* get the destination */
-          result = Curl_get_pathname(&cp, &sshc->quote_path2, sshc->homedir);
-          if(result) {
-            if(result == CURLE_OUT_OF_MEMORY)
-              failf(data, "Out of memory");
-            else
-              failf(data, "Syntax error in %s: Bad second parameter", cmd);
-            Curl_safefree(sshc->quote_path1);
-            state(data, SSH_SFTP_CLOSE);
-            sshc->nextstate = SSH_NO_STATE;
-            sshc->actualcode = result;
-            break;
-          }
-          memset(&sshp->quote_attrs, 0, sizeof(LIBSSH2_SFTP_ATTRIBUTES));
-          state(data, SSH_SFTP_QUOTE_STAT);
-          break;
-        }
-        if(strncasecompare(cmd, "ln ", 3) ||
-           strncasecompare(cmd, "symlink ", 8)) {
-          /* symbolic linking */
-          /* sshc->quote_path1 is the source */
-          /* get the destination */
-          result = Curl_get_pathname(&cp, &sshc->quote_path2, sshc->homedir);
-          if(result) {
-            if(result == CURLE_OUT_OF_MEMORY)
-              failf(data, "Out of memory");
-            else
-              failf(data,
-                    "Syntax error in ln/symlink: Bad second parameter");
-            Curl_safefree(sshc->quote_path1);
-            state(data, SSH_SFTP_CLOSE);
-            sshc->nextstate = SSH_NO_STATE;
-            sshc->actualcode = result;
-            break;
-          }
-          state(data, SSH_SFTP_QUOTE_SYMLINK);
-          break;
-        }
-        else if(strncasecompare(cmd, "mkdir ", 6)) {
-          /* create dir */
-          state(data, SSH_SFTP_QUOTE_MKDIR);
-          break;
-        }
-        else if(strncasecompare(cmd, "rename ", 7)) {
-          /* rename file */
-          /* first param is the source path */
-          /* second param is the dest. path */
-          result = Curl_get_pathname(&cp, &sshc->quote_path2, sshc->homedir);
-          if(result) {
-            if(result == CURLE_OUT_OF_MEMORY)
-              failf(data, "Out of memory");
-            else
-              failf(data, "Syntax error in rename: Bad second parameter");
-            Curl_safefree(sshc->quote_path1);
-            state(data, SSH_SFTP_CLOSE);
-            sshc->nextstate = SSH_NO_STATE;
-            sshc->actualcode = result;
-            break;
-          }
-          state(data, SSH_SFTP_QUOTE_RENAME);
-          break;
-        }
-        else if(strncasecompare(cmd, "rmdir ", 6)) {
-          /* delete dir */
-          state(data, SSH_SFTP_QUOTE_RMDIR);
-          break;
-        }
-        else if(strncasecompare(cmd, "rm ", 3)) {
-          state(data, SSH_SFTP_QUOTE_UNLINK);
-          break;
-        }
-#ifdef HAS_STATVFS_SUPPORT
-        else if(strncasecompare(cmd, "statvfs ", 8)) {
-          state(data, SSH_SFTP_QUOTE_STATVFS);
-          break;
-        }
-#endif
-
-        failf(data, "Unknown SFTP command");
-        Curl_safefree(sshc->quote_path1);
-        Curl_safefree(sshc->quote_path2);
+      /*
+       * the arguments following the command must be separated from the
+       * command with a space so we can check for it unconditionally
+       */
+      cp = strchr(cmd, ' ');
+      if(!cp) {
+        failf(data, "Syntax error command '%s', missing parameter",
+              cmd);
         state(data, SSH_SFTP_CLOSE);
         sshc->nextstate = SSH_NO_STATE;
         sshc->actualcode = CURLE_QUOTE_ERROR;
         break;
       }
+
+      /*
+       * also, every command takes at least one argument so we get that
+       * first argument right now
+       */
+      result = Curl_get_pathname(&cp, &sshc->quote_path1, sshc->homedir);
+      if(result) {
+        if(result == CURLE_OUT_OF_MEMORY)
+          failf(data, "Out of memory");
+        else
+          failf(data, "Syntax error: Bad first parameter to '%s'", cmd);
+        state(data, SSH_SFTP_CLOSE);
+        sshc->nextstate = SSH_NO_STATE;
+        sshc->actualcode = result;
+        break;
+      }
+
+      /*
+       * SFTP is a binary protocol, so we don't send text commands
+       * to the server. Instead, we scan for commands used by
+       * OpenSSH's sftp program and call the appropriate libssh2
+       * functions.
+       */
+      if(strncasecompare(cmd, "chgrp ", 6) ||
+         strncasecompare(cmd, "chmod ", 6) ||
+         strncasecompare(cmd, "chown ", 6) ||
+         strncasecompare(cmd, "atime ", 6) ||
+         strncasecompare(cmd, "mtime ", 6)) {
+        /* attribute change */
+
+        /* sshc->quote_path1 contains the mode to set */
+        /* get the destination */
+        result = Curl_get_pathname(&cp, &sshc->quote_path2, sshc->homedir);
+        if(result) {
+          if(result == CURLE_OUT_OF_MEMORY)
+            failf(data, "Out of memory");
+          else
+            failf(data, "Syntax error in %s: Bad second parameter", cmd);
+          Curl_safefree(sshc->quote_path1);
+          state(data, SSH_SFTP_CLOSE);
+          sshc->nextstate = SSH_NO_STATE;
+          sshc->actualcode = result;
+          break;
+        }
+        memset(&sshp->quote_attrs, 0, sizeof(LIBSSH2_SFTP_ATTRIBUTES));
+        state(data, SSH_SFTP_QUOTE_STAT);
+        break;
+      }
+      if(strncasecompare(cmd, "ln ", 3) ||
+         strncasecompare(cmd, "symlink ", 8)) {
+        /* symbolic linking */
+        /* sshc->quote_path1 is the source */
+        /* get the destination */
+        result = Curl_get_pathname(&cp, &sshc->quote_path2, sshc->homedir);
+        if(result) {
+          if(result == CURLE_OUT_OF_MEMORY)
+            failf(data, "Out of memory");
+          else
+            failf(data,
+                  "Syntax error in ln/symlink: Bad second parameter");
+          Curl_safefree(sshc->quote_path1);
+          state(data, SSH_SFTP_CLOSE);
+          sshc->nextstate = SSH_NO_STATE;
+          sshc->actualcode = result;
+          break;
+        }
+        state(data, SSH_SFTP_QUOTE_SYMLINK);
+        break;
+      }
+      else if(strncasecompare(cmd, "mkdir ", 6)) {
+        /* create dir */
+        state(data, SSH_SFTP_QUOTE_MKDIR);
+        break;
+      }
+      else if(strncasecompare(cmd, "rename ", 7)) {
+        /* rename file */
+        /* first param is the source path */
+        /* second param is the dest. path */
+        result = Curl_get_pathname(&cp, &sshc->quote_path2, sshc->homedir);
+        if(result) {
+          if(result == CURLE_OUT_OF_MEMORY)
+            failf(data, "Out of memory");
+          else
+            failf(data, "Syntax error in rename: Bad second parameter");
+          Curl_safefree(sshc->quote_path1);
+          state(data, SSH_SFTP_CLOSE);
+          sshc->nextstate = SSH_NO_STATE;
+          sshc->actualcode = result;
+          break;
+        }
+        state(data, SSH_SFTP_QUOTE_RENAME);
+        break;
+      }
+      else if(strncasecompare(cmd, "rmdir ", 6)) {
+        /* delete dir */
+        state(data, SSH_SFTP_QUOTE_RMDIR);
+        break;
+      }
+      else if(strncasecompare(cmd, "rm ", 3)) {
+        state(data, SSH_SFTP_QUOTE_UNLINK);
+        break;
+      }
+#ifdef HAS_STATVFS_SUPPORT
+      else if(strncasecompare(cmd, "statvfs ", 8)) {
+        state(data, SSH_SFTP_QUOTE_STATVFS);
+        break;
+      }
+#endif
+
+      failf(data, "Unknown SFTP command");
+      Curl_safefree(sshc->quote_path1);
+      Curl_safefree(sshc->quote_path2);
+      state(data, SSH_SFTP_CLOSE);
+      sshc->nextstate = SSH_NO_STATE;
+      sshc->actualcode = CURLE_QUOTE_ERROR;
+      break;
     }
-    break;
 
     case SSH_SFTP_NEXT_QUOTE:
       Curl_safefree(sshc->quote_path1);
@@ -1962,13 +1960,23 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
         break;
       }
       else if(rc == 0) {
+        #ifdef _MSC_VER
+        #define LIBSSH2_VFS_SIZE_MASK "I64u"
+        #else
+        #define LIBSSH2_VFS_SIZE_MASK "llu"
+        #endif
         char *tmp = aprintf("statvfs:\n"
-                            "f_bsize: %llu\n" "f_frsize: %llu\n"
-                            "f_blocks: %llu\n" "f_bfree: %llu\n"
-                            "f_bavail: %llu\n" "f_files: %llu\n"
-                            "f_ffree: %llu\n" "f_favail: %llu\n"
-                            "f_fsid: %llu\n" "f_flag: %llu\n"
-                            "f_namemax: %llu\n",
+                            "f_bsize: %" LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_frsize: %" LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_blocks: %" LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_bfree: %" LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_bavail: %" LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_files: %" LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_ffree: %" LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_favail: %" LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_fsid: %" LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_flag: %" LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_namemax: %" LIBSSH2_VFS_SIZE_MASK "\n",
                             statvfs.f_bsize, statvfs.f_frsize,
                             statvfs.f_blocks, statvfs.f_bfree,
                             statvfs.f_bavail, statvfs.f_files,

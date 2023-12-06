@@ -52,17 +52,23 @@ Setting large data is memory consuming: one might consider using
 \fIcurl_mime_data_cb(3)\fP in such a case.
 .SH EXAMPLE
 .nf
- curl_mime *mime;
- curl_mimepart *part;
+int main(void)
+{
+  curl_mime *mime;
+  curl_mimepart *part;
 
- /* create a mime handle */
- mime = curl_mime_init(easy);
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    /* create a mime handle */
+    mime = curl_mime_init(curl);
 
- /* add a part */
- part = curl_mime_addpart(mime);
+    /* add a part */
+    part = curl_mime_addpart(mime);
 
- /* add data to the part  */
- curl_mime_data(part, "raw contents to send", CURL_ZERO_TERMINATED);
+    /* add data to the part  */
+    curl_mime_data(part, "raw contents to send", CURL_ZERO_TERMINATED);
+  }
+}
 .fi
 .SH AVAILABILITY
 As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.

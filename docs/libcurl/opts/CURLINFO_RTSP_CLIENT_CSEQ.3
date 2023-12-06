@@ -39,16 +39,19 @@ by the application.
 RTSP
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  CURLcode res;
-  curl_easy_setopt(curl, CURLOPT_URL, "rtsp://rtsp.example.com");
-  res = curl_easy_perform(curl);
-  if(res == CURLE_OK) {
-    long cseq;
-    curl_easy_getinfo(curl, CURLINFO_RTSP_CLIENT_CSEQ, &cseq);
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "rtsp://rtsp.example.com");
+    res = curl_easy_perform(curl);
+    if(res == CURLE_OK) {
+      long cseq;
+      curl_easy_getinfo(curl, CURLINFO_RTSP_CLIENT_CSEQ, &cseq);
+    }
+    curl_easy_cleanup(curl);
   }
-  curl_easy_cleanup(curl);
 }
 .fi
 .SH AVAILABILITY

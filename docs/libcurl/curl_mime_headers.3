@@ -47,18 +47,32 @@ Setting a part's custom headers list multiple times is valid: only the value
 set by the last call is retained.
 .SH EXAMPLE
 .nf
- struct curl_slist *headers = NULL;
+int main(void)
+{
+  struct curl_slist *headers = NULL;
+  CURL *easy = curl_easy_init();
+  curl_mime *mime;
+  curl_mimepart *part;
 
- headers = curl_slist_append(headers, "Custom-Header: mooo");
+  headers = curl_slist_append(headers, "Custom-Header: mooo");
 
- /* use these headers, please take ownership */
- curl_mime_headers(part, headers, TRUE);
+  mime = curl_mime_init(easy);
+  part = curl_mime_addpart(mime);
 
- /* pass on this data */
- curl_mime_data(part, "12345679", CURL_ZERO_TERMINATED);
+  /* use these headers in the part, takes ownership */
+  curl_mime_headers(part, headers, 1);
 
- /* set name */
- curl_mime_name(part, "numbers");
+  /* pass on this data */
+  curl_mime_data(part, "12345679", CURL_ZERO_TERMINATED);
+
+  /* set name */
+  curl_mime_name(part, "numbers");
+
+  /* Post and send it. */
+  curl_easy_setopt(easy, CURLOPT_MIMEPOST, mime);
+  curl_easy_setopt(easy, CURLOPT_URL, "https://example.com");
+  curl_easy_perform(easy);
+}
 .fi
 .SH AVAILABILITY
 As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.

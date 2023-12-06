@@ -62,16 +62,19 @@ NULL (make a guess based on the host)
 All
 .SH EXAMPLE
 .nf
-curl = curl_easy_init();
-if(curl) {
-  /* set a URL without a scheme */
-  curl_easy_setopt(curl, CURLOPT_URL, "example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    /* set a URL without a scheme */
+    curl_easy_setopt(curl, CURLOPT_URL, "example.com");
 
-  /* set the default protocol (scheme) for schemeless URLs */
-  curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, "https");
+    /* set the default protocol (scheme) for schemeless URLs */
+    curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, "https");
 
-  /* Perform the request */
-  curl_easy_perform(curl);
+    /* Perform the request */
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

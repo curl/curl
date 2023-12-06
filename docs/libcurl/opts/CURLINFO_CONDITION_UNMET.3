@@ -44,26 +44,31 @@ custom "If-Match-*" header.
 HTTP and some
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode res;
 
-  /* January 1, 2020 is 1577833200 */
-  curl_easy_setopt(curl, CURLOPT_TIMEVALUE, 1577833200L);
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  /* If-Modified-Since the above time stamp */
-  curl_easy_setopt(curl, CURLOPT_TIMECONDITION,
-                   (long)CURL_TIMECOND_IFMODSINCE);
+    /* January 1, 2020 is 1577833200 */
+    curl_easy_setopt(curl, CURLOPT_TIMEVALUE, 1577833200L);
 
-  /* Perform the request */
-  res = curl_easy_perform(curl);
+    /* If-Modified-Since the above time stamp */
+    curl_easy_setopt(curl, CURLOPT_TIMECONDITION,
+                     (long)CURL_TIMECOND_IFMODSINCE);
 
-  if(!res) {
-    /* check the time condition */
-    long unmet;
-    res = curl_easy_getinfo(curl, CURLINFO_CONDITION_UNMET, &unmet);
+    /* Perform the request */
+    res = curl_easy_perform(curl);
+
     if(!res) {
-      printf("The time condition was %sfulfilled\\n", unmet?"NOT":"");
+      /* check the time condition */
+      long unmet;
+      res = curl_easy_getinfo(curl, CURLINFO_CONDITION_UNMET, &unmet);
+      if(!res) {
+        printf("The time condition was %sfulfilled\\n", unmet?"NOT":"");
+      }
     }
   }
 }

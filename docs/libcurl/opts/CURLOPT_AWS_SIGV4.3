@@ -67,20 +67,23 @@ as calling this with \fB"aws:amz"\fP in parameter.
 HTTP
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
+int main(void)
+{
+  CURL *curl = curl_easy_init();
 
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL,
-                  "https://service.region.example.com/uri");
-  curl_easy_setopt(c, CURLOPT_AWS_SIGV4, "provider1:provider2");
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL,
+                    "https://service.region.example.com/uri");
+    curl_easy_setopt(curl, CURLOPT_AWS_SIGV4, "provider1:provider2");
 
-  /* service and region can also be set in CURLOPT_AWS_SIGV4 */
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/uri");
-  curl_easy_setopt(c, CURLOPT_AWS_SIGV4,
-                   "provider1:provider2:region:service");
+    /* service and region can also be set in CURLOPT_AWS_SIGV4 */
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/uri");
+    curl_easy_setopt(curl, CURLOPT_AWS_SIGV4,
+                     "provider1:provider2:region:service");
 
-  curl_easy_setopt(c, CURLOPT_USERPWD, "MY_ACCESS_KEY:MY_SECRET_KEY");
-  curl_easy_perform(curl);
+    curl_easy_setopt(curl, CURLOPT_USERPWD, "MY_ACCESS_KEY:MY_SECRET_KEY");
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

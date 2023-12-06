@@ -51,18 +51,21 @@ NULL
 HTTP(S)
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  char local_buffer[1024]="data to send";
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    char local_buffer[1024]="data to send";
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  /* size of the data to copy from the buffer and send in the request */
-  curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 12L);
+    /* size of the data to copy from the buffer and send in the request */
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 12L);
 
-  /* send data from the local stack */
-  curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, local_buffer);
+    /* send data from the local stack */
+    curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, local_buffer);
 
-  curl_easy_perform(curl);
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

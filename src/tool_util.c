@@ -31,7 +31,7 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
-#if defined(WIN32) && !defined(MSDOS)
+#if defined(_WIN32)
 
 /* In case of bug fix this function has a counterpart in timeval.c */
 struct timeval tvnow(void)

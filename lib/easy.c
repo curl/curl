@@ -125,7 +125,7 @@ curl_free_callback Curl_cfree = (curl_free_callback)free;
 curl_realloc_callback Curl_crealloc = (curl_realloc_callback)realloc;
 curl_strdup_callback Curl_cstrdup = (curl_strdup_callback)system_strdup;
 curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
-#if defined(WIN32) && defined(UNICODE)
+#if defined(_WIN32) && defined(UNICODE)
 curl_wcsdup_callback Curl_cwcsdup = Curl_wcsdup;
 #endif
 
@@ -153,7 +153,7 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     Curl_crealloc = (curl_realloc_callback)realloc;
     Curl_cstrdup = (curl_strdup_callback)system_strdup;
     Curl_ccalloc = (curl_calloc_callback)calloc;
-#if defined(WIN32) && defined(UNICODE)
+#if defined(_WIN32) && defined(UNICODE)
     Curl_cwcsdup = (curl_wcsdup_callback)_wcsdup;
 #endif
   }
@@ -287,7 +287,7 @@ void curl_global_cleanup(void)
   Curl_ssl_cleanup();
   Curl_resolver_global_cleanup();
 
-#ifdef WIN32
+#ifdef _WIN32
   Curl_win32_cleanup(easy_init_flags);
 #endif
 
@@ -744,7 +744,7 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
     return CURLE_RECURSIVE_API_CALL;
 
   /* Copy the MAXCONNECTS option to the multi handle */
-  curl_multi_setopt(multi, CURLMOPT_MAXCONNECTS, data->set.maxconnects);
+  curl_multi_setopt(multi, CURLMOPT_MAXCONNECTS, (long)data->set.maxconnects);
 
   mcode = curl_multi_add_handle(multi, data);
   if(mcode) {
@@ -837,8 +837,10 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
   dst->set = src->set;
   Curl_mime_initpart(&dst->set.mimepost);
 
-  /* clear all string pointers first */
+  /* clear all dest string and blob pointers first, in case we error out
+     mid-function */
   memset(dst->set.str, 0, STRING_LAST * sizeof(char *));
+  memset(dst->set.blobs, 0, BLOB_LAST * sizeof(struct curl_blob *));
 
   /* duplicate all strings */
   for(i = (enum dupstring)0; i< STRING_LASTZEROTERMINATED; i++) {
@@ -847,8 +849,6 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
       return result;
   }
 
-  /* clear all blob pointers first */
-  memset(dst->set.blobs, 0, BLOB_LAST * sizeof(struct curl_blob *));
   /* duplicate all blobs */
   for(j = (enum dupblob)0; j < BLOB_LAST; j++) {
     result = Curl_setblobopt(&dst->set.blobs[j], src->set.blobs[j]);
@@ -858,10 +858,13 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
 
   /* duplicate memory areas pointed to */
   i = STRING_COPYPOSTFIELDS;
-  if(src->set.postfieldsize && src->set.str[i]) {
-    /* postfieldsize is curl_off_t, Curl_memdup() takes a size_t ... */
-    dst->set.str[i] = Curl_memdup(src->set.str[i],
-                                  curlx_sotouz(src->set.postfieldsize));
+  if(src->set.str[i]) {
+    if(src->set.postfieldsize == -1)
+      dst->set.str[i] = strdup(src->set.str[i]);
+    else
+      /* postfieldsize is curl_off_t, Curl_memdup() takes a size_t ... */
+      dst->set.str[i] = Curl_memdup(src->set.str[i],
+                                    curlx_sotouz(src->set.postfieldsize));
     if(!dst->set.str[i])
       return CURLE_OUT_OF_MEMORY;
     /* point to the new copy */
@@ -911,18 +914,19 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
   outcurl->progress.callback = data->progress.callback;
 
 #ifndef CURL_DISABLE_COOKIES
-  if(data->cookies) {
+  outcurl->state.cookielist = NULL;
+  if(data->cookies && data->state.cookie_engine) {
     /* If cookies are enabled in the parent handle, we enable them
        in the clone as well! */
-    outcurl->cookies = Curl_cookie_init(data, NULL, outcurl->cookies,
+    outcurl->cookies = Curl_cookie_init(outcurl, NULL, outcurl->cookies,
                                         data->set.cookiesession);
     if(!outcurl->cookies)
       goto fail;
   }
 
-  if(data->set.cookielist) {
-    outcurl->set.cookielist = Curl_slist_duplicate(data->set.cookielist);
-    if(!outcurl->set.cookielist)
+  if(data->state.cookielist) {
+    outcurl->state.cookielist = Curl_slist_duplicate(data->state.cookielist);
+    if(!outcurl->state.cookielist)
       goto fail;
   }
 #endif
@@ -981,13 +985,10 @@ fail:
 
   if(outcurl) {
 #ifndef CURL_DISABLE_COOKIES
-    curl_slist_free_all(outcurl->set.cookielist);
-    outcurl->set.cookielist = NULL;
+    free(outcurl->cookies);
 #endif
-    Curl_safefree(outcurl->state.buffer);
+    free(outcurl->state.buffer);
     Curl_dyn_free(&outcurl->state.headerb);
-    Curl_safefree(outcurl->state.url);
-    Curl_safefree(outcurl->state.referer);
     Curl_altsvc_cleanup(&outcurl->asi);
     Curl_hsts_cleanup(&outcurl->hsts);
     Curl_freeset(outcurl);

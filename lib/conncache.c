@@ -243,7 +243,7 @@ CURLcode Curl_conncache_add_conn(struct Curl_easy *data)
   conn->connection_id = connc->next_connection_id++;
   connc->num_conn++;
 
-  DEBUGF(infof(data, "Added connection %ld. "
+  DEBUGF(infof(data, "Added connection %" CURL_FORMAT_CURL_OFF_T ". "
                "The cache now contains %zu members",
                conn->connection_id, connc->num_conn));
 
@@ -379,21 +379,26 @@ conncache_find_first_connection(struct conncache *connc)
 bool Curl_conncache_return_conn(struct Curl_easy *data,
                                 struct connectdata *conn)
 {
-  /* data->multi->maxconnects can be negative, deal with it. */
-  size_t maxconnects =
-    (data->multi->maxconnects < 0) ? data->multi->num_easy * 4:
-    data->multi->maxconnects;
+  unsigned int maxconnects = !data->multi->maxconnects ?
+    data->multi->num_easy * 4: data->multi->maxconnects;
   struct connectdata *conn_candidate = NULL;
 
   conn->lastused = Curl_now(); /* it was used up until now */
-  if(maxconnects > 0 &&
-     Curl_conncache_size(data) > maxconnects) {
+  if(maxconnects && Curl_conncache_size(data) > maxconnects) {
     infof(data, "Connection cache is full, closing the oldest one");
 
     conn_candidate = Curl_conncache_extract_oldest(data);
     if(conn_candidate) {
-      /* the winner gets the honour of being disconnected */
-      Curl_disconnect(data, conn_candidate, /* dead_connection */ FALSE);
+      /* Use the closure handle for this disconnect so that anything that
+         happens during the disconnect is not stored and associated with the
+         'data' handle which already just finished a transfer and it is
+         important that details from this (unrelated) disconnect does not
+         taint meta-data in the data handle. */
+      struct conncache *connc = data->state.conn_cache;
+      connc->closure_handle->state.buffer = data->state.buffer;
+      connc->closure_handle->set.buffer_size = data->set.buffer_size;
+      Curl_disconnect(connc->closure_handle, conn_candidate,
+                      /* dead_connection */ FALSE);
     }
   }
 

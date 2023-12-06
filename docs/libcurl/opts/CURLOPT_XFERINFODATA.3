@@ -42,30 +42,35 @@ The default value of this parameter is NULL.
 All
 .SH EXAMPLE
 .nf
- struct progress {
-   char *private;
-   size_t size;
- };
+struct progress {
+  char *private;
+  size_t size;
+};
 
- static size_t progress_callback(void *clientp,
-                                 curl_off_t dltotal,
-                                 curl_off_t dlnow,
-                                 curl_off_t ultotal,
-                                 curl_off_t ulnow)
- {
-   struct memory *progress = (struct progress *)clientp;
+static size_t progress_cb(void *clientp,
+                          curl_off_t dltotal,
+                          curl_off_t dlnow,
+                          curl_off_t ultotal,
+                          curl_off_t ulnow)
+{
+  struct progress *memory = clientp;
+  printf("private ptr: %p\\n", memory->private);
+  /* use the values */
 
-   /* use the values */
+  return 0; /* all is good */
+}
 
-   return 0; /* all is good */
- }
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    struct progress data;
 
- struct progress data;
-
- /* pass struct to callback  */
- curl_easy_setopt(curl_handle, CURLOPT_XFERINFODATA, &data);
-
- curl_easy_setopt(curl_handle, CURLOPT_XFERINFOFUNCTION, progress_callback);
+    /* pass struct to callback  */
+    curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &data);
+    curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, progress_cb);
+  }
+}
 .fi
 .SH AVAILABILITY
 Added in 7.32.0

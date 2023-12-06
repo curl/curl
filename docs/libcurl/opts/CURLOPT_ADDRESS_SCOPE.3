@@ -39,15 +39,20 @@ Pass a long specifying the scope id value to use when connecting to IPv6 address
 All, when using IPv6
 .SH EXAMPLE
 .nf
-CURL *curl = curl_easy_init();
-if(curl) {
-  CURLcode ret;
-  long my_scope_id;
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-  my_scope_id = if_nametoindex("eth0");
-  curl_easy_setopt(curl, CURLOPT_ADDRESS_SCOPE, my_scope_id);
-  ret = curl_easy_perform(curl);
-  curl_easy_cleanup(curl);
+#include <net/if.h> /* for if_nametoindex() */
+
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode ret;
+    long my_scope_id;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+    my_scope_id = if_nametoindex("eth0");
+    curl_easy_setopt(curl, CURLOPT_ADDRESS_SCOPE, my_scope_id);
+    ret = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

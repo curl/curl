@@ -61,16 +61,19 @@ All protocols built-in
 All
 .SH EXAMPLE
 .nf
-curl = curl_easy_init();
-if(curl) {
-  /* pass in the URL from an external source */
-  curl_easy_setopt(curl, CURLOPT_URL, argv[1]);
+int main(int argc, char **argv)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    /* pass in the URL from an external source */
+    curl_easy_setopt(curl, CURLOPT_URL, argv[1]);
 
-  /* only allow HTTP, TFTP and SFTP */
-  curl_easy_setopt(curl, CURLOPT_PROTOCOLS_STR, "http,tftp,sftp");
+    /* only allow HTTP, TFTP and SFTP */
+    curl_easy_setopt(curl, CURLOPT_PROTOCOLS_STR, "http,tftp,sftp");
 
-  /* Perform the request */
-  curl_easy_perform(curl);
+    /* Perform the request */
+    curl_easy_perform(curl);
+  }
 }
 .fi
 .SH AVAILABILITY

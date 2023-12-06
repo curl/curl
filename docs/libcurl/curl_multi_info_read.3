@@ -72,21 +72,28 @@ that just completed.
 At this point, there are no other \fBmsg\fP types defined.
 .SH EXAMPLE
 .nf
-struct CURLMsg *m;
+int main(void)
+{
+  CURLM *multi = curl_multi_init();
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    struct CURLMsg *m;
 
-/* call curl_multi_perform or curl_multi_socket_action first, then loop
-   through and check if there are any transfers that have completed */
+    /* call curl_multi_perform or curl_multi_socket_action first, then loop
+       through and check if there are any transfers that have completed */
 
-do {
-  int msgq = 0;
-  m = curl_multi_info_read(multi_handle, &msgq);
-  if(m && (m->msg == CURLMSG_DONE)) {
-    CURL *e = m->easy_handle;
-    transfers--;
-    curl_multi_remove_handle(multi_handle, e);
-    curl_easy_cleanup(e);
+    do {
+      int msgq = 0;
+      m = curl_multi_info_read(multi, &msgq);
+      if(m && (m->msg == CURLMSG_DONE)) {
+        CURL *e = m->easy_handle;
+        /* m->data.result holds the error code for the transfer */
+        curl_multi_remove_handle(multi, e);
+        curl_easy_cleanup(e);
+      }
+    } while(m);
   }
-} while(m);
+}
 .fi
 .SH AVAILABILITY
 Added in 7.9.6

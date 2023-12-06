@@ -215,10 +215,6 @@ struct Curl_sh_entry {
   unsigned int readers; /* this many transfers want to read */
   unsigned int writers; /* this many transfers want to write */
 };
-/* bits for 'action' having no bits means this socket is not expecting any
-   action */
-#define SH_READ  1
-#define SH_WRITE 2
 
 /* look up a given socket in the socket hash, skip invalid sockets */
 static struct Curl_sh_entry *sh_getentry(struct Curl_hash *sh,
@@ -400,9 +396,6 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
   Curl_llist_init(&multi->msgsent, NULL);
 
   multi->multiplexing = TRUE;
-
-  /* -1 means it not set by user, use the default value */
-  multi->maxconnects = -1;
   multi->max_concurrent_streams = 100;
 
 #ifdef USE_WINSOCK
@@ -1071,6 +1064,10 @@ static void multi_getsock(struct Curl_easy *data,
   case MSTATE_PERFORMING:
     Curl_pollset_add_socks(data, ps, Curl_single_getsock);
     break;
+
+  case MSTATE_RATELIMITING:
+    /* nothing to wait for */
+    return;
   }
 
   /* Let connection filters add/remove as needed */
@@ -2928,7 +2925,7 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
       }
     }
 
-    comboaction = (entry->writers? CURL_POLL_OUT : 0) |
+    comboaction = (entry->writers ? CURL_POLL_OUT : 0) |
                    (entry->readers ? CURL_POLL_IN : 0);
 
     /* socket existed before and has the same action set as before */
@@ -3243,6 +3240,7 @@ CURLMcode curl_multi_setopt(struct Curl_multi *multi,
 {
   CURLMcode res = CURLM_OK;
   va_list param;
+  unsigned long uarg;
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
@@ -3275,7 +3273,9 @@ CURLMcode curl_multi_setopt(struct Curl_multi *multi,
     multi->timer_userp = va_arg(param, void *);
     break;
   case CURLMOPT_MAXCONNECTS:
-    multi->maxconnects = va_arg(param, long);
+    uarg = va_arg(param, unsigned long);
+    if(uarg <= UINT_MAX)
+      multi->maxconnects = (unsigned int)uarg;
     break;
   case CURLMOPT_MAX_HOST_CONNECTIONS:
     multi->max_host_connections = va_arg(param, long);
@@ -3297,9 +3297,9 @@ CURLMcode curl_multi_setopt(struct Curl_multi *multi,
   case CURLMOPT_MAX_CONCURRENT_STREAMS:
     {
       long streams = va_arg(param, long);
-      if(streams < 1)
+      if((streams < 1) || (streams > INT_MAX))
         streams = 100;
-      multi->max_concurrent_streams = curlx_sltoui(streams);
+      multi->max_concurrent_streams = (unsigned int)streams;
     }
     break;
   default:
@@ -3729,7 +3729,7 @@ struct Curl_easy **curl_multi_get_handles(struct Curl_multi *multi)
   struct Curl_easy **a = malloc(sizeof(struct Curl_easy *) *
                                 (multi->num_easy + 1));
   if(a) {
-    int i = 0;
+    unsigned int i = 0;
     struct Curl_easy *e = multi->easyp;
     while(e) {
       DEBUGASSERT(i < multi->num_easy);

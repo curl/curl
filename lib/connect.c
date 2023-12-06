@@ -351,6 +351,7 @@ void Curl_conncontrol(struct connectdata *conn,
  */
 struct eyeballer {
   const char *name;
+  const struct Curl_addrinfo *first; /* complete address list, not owned */
   const struct Curl_addrinfo *addr;  /* List of addresses to try, not owned */
   int ai_family;                     /* matching address family only */
   cf_ip_connect_create *cf_create;   /* for creating cf */
@@ -362,9 +363,12 @@ struct eyeballer {
   expire_id timeout_id;              /* ID for Curl_expire() */
   CURLcode result;
   int error;
+  BIT(rewinded);                     /* if we rewinded the addr list */
   BIT(has_started);                  /* attempts have started */
   BIT(is_done);                      /* out of addresses/time */
   BIT(connected);                    /* cf has connected */
+  BIT(inconclusive);                 /* connect was not a hard failure, we
+                                      * might talk to a restarting server */
 };
 
 
@@ -411,7 +415,7 @@ static CURLcode eyeballer_new(struct eyeballer **pballer,
 #endif
                   "ip"));
   baller->cf_create = cf_create;
-  baller->addr = addr;
+  baller->first = baller->addr = addr;
   baller->ai_family = ai_family;
   baller->primary = primary;
   baller->delay_ms = delay_ms;
@@ -439,6 +443,13 @@ static void baller_free(struct eyeballer *baller,
     baller_close(baller, data);
     free(baller);
   }
+}
+
+static void baller_rewind(struct eyeballer *baller)
+{
+  baller->rewinded = TRUE;
+  baller->addr = baller->first;
+  baller->inconclusive = FALSE;
 }
 
 static void baller_next_addr(struct eyeballer *baller)
@@ -531,6 +542,10 @@ static CURLcode baller_start_next(struct Curl_cfilter *cf,
 {
   if(cf->sockindex == FIRSTSOCKET) {
     baller_next_addr(baller);
+    /* If we get inconclusive answers from the server(s), we make
+     * a second iteration over the address list */
+    if(!baller->addr && baller->inconclusive && !baller->rewinded)
+      baller_rewind(baller);
     baller_start(cf, data, baller, timeoutms);
   }
   else {
@@ -569,6 +584,8 @@ static CURLcode baller_connect(struct Curl_cfilter *cf,
         baller->result = CURLE_OPERATION_TIMEDOUT;
       }
     }
+    else if(baller->result == CURLE_WEIRD_SERVER_REPLY)
+      baller->inconclusive = TRUE;
   }
   return baller->result;
 }
@@ -1079,7 +1096,7 @@ cf_happy_eyeballs_create(struct Curl_cfilter **pcf,
   (void)data;
   (void)conn;
   *pcf = NULL;
-  ctx = calloc(sizeof(*ctx), 1);
+  ctx = calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -1112,8 +1129,12 @@ struct transport_provider transport_providers[] = {
 #ifdef ENABLE_QUIC
   { TRNSPRT_QUIC, Curl_cf_quic_create },
 #endif
+#ifndef CURL_DISABLE_TFTP
   { TRNSPRT_UDP, Curl_cf_udp_create },
+#endif
+#ifdef USE_UNIX_SOCKETS
   { TRNSPRT_UNIX, Curl_cf_unix_create },
+#endif
 };
 
 static cf_ip_connect_create *get_cf_create(int transport)
@@ -1326,7 +1347,7 @@ static CURLcode cf_setup_create(struct Curl_cfilter **pcf,
   CURLcode result = CURLE_OK;
 
   (void)data;
-  ctx = calloc(sizeof(*ctx), 1);
+  ctx = calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;

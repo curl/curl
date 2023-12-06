@@ -81,7 +81,7 @@
 #include "memdebug.h"
 
 
-#if defined(ENABLE_IPV6) && defined(IPV6_V6ONLY) && defined(WIN32)
+#if defined(ENABLE_IPV6) && defined(IPV6_V6ONLY) && defined(_WIN32)
 /* It makes support for IPv4-mapped IPv6 addresses.
  * Linux kernel, NetBSD, FreeBSD and Darwin: default is off;
  * Windows Vista and later: default is on;
@@ -659,7 +659,7 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
   int err = 0;
   curl_socklen_t errSize = sizeof(err);
 
-#ifdef WIN32
+#ifdef _WIN32
   /*
    * In October 2003 we effectively nullified this function on Windows due to
    * problems with it using all CPU in multi-threaded cases.
@@ -1146,6 +1146,7 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
 
   *done = FALSE; /* a very negative world view is best */
   if(ctx->sock == CURL_SOCKET_BAD) {
+    int error;
 
     result = cf_socket_open(cf, data);
     if(result)
@@ -1158,8 +1159,12 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
 
     /* Connect TCP socket */
     rc = do_connect(cf, data, cf->conn->bits.tcp_fastopen);
+    error = SOCKERRNO;
+    set_local_ip(cf, data);
+    CURL_TRC_CF(data, cf, "local address %s port %d...",
+                ctx->l_ip, ctx->l_port);
     if(-1 == rc) {
-      result = socket_connect_result(data, ctx->r_ip, SOCKERRNO);
+      result = socket_connect_result(data, ctx->r_ip, error);
       goto out;
     }
   }
@@ -1197,13 +1202,14 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
 out:
   if(result) {
     if(ctx->error) {
+      set_local_ip(cf, data);
       data->state.os_errno = ctx->error;
       SET_SOCKERRNO(ctx->error);
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
       {
         char buffer[STRERROR_LEN];
-        infof(data, "connect to %s port %u failed: %s",
-              ctx->r_ip, ctx->r_port,
+        infof(data, "connect to %s port %u from %s port %d failed: %s",
+              ctx->r_ip, ctx->r_port, ctx->l_ip, ctx->l_port,
               Curl_strerror(ctx->error, buffer, sizeof(buffer)));
       }
 #endif
@@ -1614,7 +1620,7 @@ CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
   (void)data;
   (void)conn;
   DEBUGASSERT(transport == TRNSPRT_TCP);
-  ctx = calloc(sizeof(*ctx), 1);
+  ctx = calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -1744,7 +1750,7 @@ CURLcode Curl_cf_udp_create(struct Curl_cfilter **pcf,
   (void)data;
   (void)conn;
   DEBUGASSERT(transport == TRNSPRT_UDP || transport == TRNSPRT_QUIC);
-  ctx = calloc(sizeof(*ctx), 1);
+  ctx = calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -1795,7 +1801,7 @@ CURLcode Curl_cf_unix_create(struct Curl_cfilter **pcf,
   (void)data;
   (void)conn;
   DEBUGASSERT(transport == TRNSPRT_UNIX);
-  ctx = calloc(sizeof(*ctx), 1);
+  ctx = calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -1858,7 +1864,7 @@ CURLcode Curl_conn_tcp_listen_set(struct Curl_easy *data,
   Curl_conn_cf_discard_all(data, conn, sockindex);
   DEBUGASSERT(conn->sock[sockindex] == CURL_SOCKET_BAD);
 
-  ctx = calloc(sizeof(*ctx), 1);
+  ctx = calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;

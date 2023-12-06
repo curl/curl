@@ -58,9 +58,12 @@ timeout is however treated as a per-connect timeout.
 HTTP(S)
 .SH EXAMPLE
 .nf
-CURLM *m = curl_multi_init();
-/* do no more than 2 connections per host */
-curl_multi_setopt(m, CURLMOPT_MAX_HOST_CONNECTIONS, 2L);
+int main(void)
+{
+  CURLM *m = curl_multi_init();
+  /* do no more than 2 connections per host */
+  curl_multi_setopt(m, CURLMOPT_MAX_HOST_CONNECTIONS, 2L);
+}
 .fi
 .SH AVAILABILITY
 Added in 7.30.0

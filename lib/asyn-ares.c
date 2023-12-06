@@ -60,13 +60,13 @@
 #include "progress.h"
 #include "timediff.h"
 
-#  if defined(CURL_STATICLIB) && !defined(CARES_STATICLIB) &&   \
-  defined(WIN32)
-#    define CARES_STATICLIB
-#  endif
-#  include <ares.h>
-#  include <ares_version.h> /* really old c-ares didn't include this by
-                               itself */
+#if defined(CURL_STATICLIB) && !defined(CARES_STATICLIB) &&   \
+  defined(_WIN32)
+#  define CARES_STATICLIB
+#endif
+#include <ares.h>
+#include <ares_version.h> /* really old c-ares didn't include this by
+                             itself */
 
 #if ARES_VERSION >= 0x010500
 /* c-ares 1.5.0 or later, the callback proto is modified */
@@ -759,7 +759,7 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
   size_t namelen = strlen(hostname);
   *waitp = 0; /* default to synchronous response */
 
-  res = calloc(sizeof(struct thread_data) + namelen, 1);
+  res = calloc(1, sizeof(struct thread_data) + namelen);
   if(res) {
     strcpy(res->hostname, hostname);
     data->conn->resolve_async.hostname = res->hostname;
