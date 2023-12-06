@@ -105,7 +105,7 @@ option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(BUILD_STATIC_LIBS "Build static libraries" OFF)
 option(BUILD_STATIC_CURL "Build curl executable with static libcurl" OFF)
 option(ENABLE_ARES "Set to ON to enable c-ares support" OFF)
-option(CURL_DISABLE_INSTALL "Set to ON to disable instalation targets" OFF)
+option(CURL_DISABLE_INSTALL "Set to ON to disable installation targets" OFF)
 
 if(WIN32)
   option(CURL_STATIC_CRT "Set to ON to build libcurl with static CRT on Windows (/MT)." OFF)
