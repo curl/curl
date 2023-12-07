@@ -58,7 +58,7 @@ rem ***************************************************************************
     set VERSION=VC14.10
   ) else if /i "%~1" == "vc14.20" (
     set VERSION=VC14.20
-  )else if /i "%~1" == "vc14.30" (
+  ) else if /i "%~1" == "vc14.30" (
     set VERSION=VC14.30
   ) else if /i "%~1" == "-clean" (
     set MODE=CLEAN
