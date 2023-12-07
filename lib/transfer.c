@@ -413,9 +413,18 @@ bool Curl_meets_timecondition(struct Curl_easy *data, time_t timeofdoc)
   return TRUE;
 }
 
+/**
+ * Receive raw response data for the transfer.
+ * @param data         the transfer
+ * @param buf          buffer to keep response data received
+ * @param blen         length of `buf`
+ * @param eos_reliable if EOS detection in underlying connection is reliable
+ * @param err error    code in case of -1 return
+ * @return number of bytes read or -1 for error
+ */
 static ssize_t Curl_xfer_recv_resp(struct Curl_easy *data,
                                    char *buf, size_t blen,
-                                   bool avoid_excess,
+                                   bool eos_reliable,
                                    CURLcode *err)
 {
   ssize_t nread;
@@ -423,7 +432,7 @@ static ssize_t Curl_xfer_recv_resp(struct Curl_easy *data,
   DEBUGASSERT(blen > 0);
   /* If we are reading BODY data and the connection does NOT handle EOF
    * and we know the size of the BODY data, limit the read amount */
-  if(avoid_excess && !data->req.header && data->req.size != -1) {
+  if(!eos_reliable && !data->req.header && data->req.size != -1) {
     curl_off_t totalleft = data->req.size - data->req.bytecount;
     if(totalleft <= 0)
       blen = 0;
@@ -494,7 +503,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
     }
 
     nread = Curl_xfer_recv_resp(data, buf, bytestoread,
-                                !is_multiplex, &result);
+                                is_multiplex, &result);
     if(nread < 0) {
       if(CURLE_AGAIN == result) {
         result = CURLE_OK;

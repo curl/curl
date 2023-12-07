@@ -4597,7 +4597,7 @@ CURLcode Curl_http_write_resp_hds(struct Curl_easy *data,
       result = Curl_http_firstwrite(data, data->conn, done);
 
       if(!data->req.no_body && Curl_dyn_len(&data->state.headerb)) {
-        /* leftover from parsing somethhing that turned out not
+        /* leftover from parsing something that turned out not
          * to be a header, only happens if we allow for
          * HTTP/0.9 like responses */
         result = Curl_client_write(data, CLIENTWRITE_BODY,
