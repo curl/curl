@@ -1796,8 +1796,8 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
 
         #ifdef HAVE_WINSOCK2_H
         WSADATA wsa;
-        if (WSAStartup(MAKEWORD(2,2), &wsa))
-                exit(2);
+        if(WSAStartup(MAKEWORD(2, 2), &wsa))
+          exit(2);
         #endif
 
         memset(&hints, 0, sizeof(hints));
