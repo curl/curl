@@ -426,7 +426,6 @@ static CURLcode cw_chunked_write(struct Curl_easy *data,
     return result;
   }
 
-  buf += consumed;
   blen -= consumed;
   if(CHUNK_DONE == ctx->ch.state) {
     /* chunks read successfully, download is complete */
