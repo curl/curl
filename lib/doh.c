@@ -218,7 +218,6 @@ static CURLcode dohprobe(struct Curl_easy *data,
                          struct curl_slist *headers)
 {
   struct Curl_easy *doh = NULL;
-  char *nurl = NULL;
   CURLcode result = CURLE_OK;
   timediff_t timeout_ms;
   DOHcode d = doh_encode(host, dnstype, p->dohbuffer, sizeof(p->dohbuffer),
@@ -351,11 +350,9 @@ static CURLcode dohprobe(struct Curl_easy *data,
   }
   else
     goto error;
-  free(nurl);
   return CURLE_OK;
 
 error:
-  free(nurl);
   Curl_close(&doh);
   return result;
 }
