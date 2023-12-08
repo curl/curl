@@ -983,20 +983,14 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
   if(result)
     goto out;
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-  {
-    const char *ipmsg;
 #ifdef ENABLE_IPV6
-    if(ctx->addr.family == AF_INET6) {
-      set_ipv6_v6only(ctx->sock, 0);
-      ipmsg = "  Trying [%s]:%d...";
-    }
-    else
-#endif
-      ipmsg = "  Trying %s:%d...";
-    infof(data, ipmsg, ctx->r_ip, ctx->r_port);
+  if(ctx->addr.family == AF_INET6) {
+    set_ipv6_v6only(ctx->sock, 0);
+    infof(data, "  Trying [%s]:%d...", ctx->r_ip, ctx->r_port);
   }
+  else
 #endif
+    infof(data, "  Trying %s:%d...", ctx->r_ip, ctx->r_port);
 
 #ifdef ENABLE_IPV6
   is_tcp = (ctx->addr.family == AF_INET
