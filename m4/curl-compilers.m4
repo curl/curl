@@ -832,6 +832,8 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl Only clang 2.9 or later
           if test "$compiler_num" -ge "209"; then
             tmp_CFLAGS="$tmp_CFLAGS -Wno-sign-conversion"
+          # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [sign-conversion])  # FIXME
+          # tmp_CFLAGS="$tmp_CFLAGS -Wno-error=sign-conversion"          # FIXME
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [shift-sign-overflow])
           # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [padded])  # Not used because we cannot change public structs
           fi
@@ -839,6 +841,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl Only clang 3.0 or later
           if test "$compiler_num" -ge "300"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [language-extension-token])
+            tmp_CFLAGS="$tmp_CFLAGS -Wformat=2"
           fi
           #
           dnl Only clang 3.2 or later
@@ -886,6 +889,10 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           if test "$compiler_num" -ge "700"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [assign-enum])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [extra-semi-stmt])
+          fi
+          dnl clang 10 or later
+          if test "$compiler_num" -ge "1000"; then
+            tmp_CFLAGS="$tmp_CFLAGS -Wimplicit-fallthrough"  # we have silencing markup for clang 10.0 and above only
           fi
         fi
         dnl Disable pointer to bool conversion warnings since they cause
@@ -1016,8 +1023,10 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [type-limits old-style-declaration])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-parameter-type empty-body])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [clobbered ignored-qualifiers])
-            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [conversion])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [conversion trampolines])
             tmp_CFLAGS="$tmp_CFLAGS -Wno-sign-conversion"
+          # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [sign-conversion])  # FIXME
+          # tmp_CFLAGS="$tmp_CFLAGS -Wno-error=sign-conversion"          # FIXME
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [vla])
             dnl required for -Warray-bounds, included in -Wall
             tmp_CFLAGS="$tmp_CFLAGS -ftree-vrp"
@@ -1063,10 +1072,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [alloc-zero])
             tmp_CFLAGS="$tmp_CFLAGS -Wformat-overflow=2"
             tmp_CFLAGS="$tmp_CFLAGS -Wformat-truncation=2"
-            if test "$compiler_num" -lt "1200"; then
-              dnl gcc 12 doesn't acknowledge our comment markups
-              tmp_CFLAGS="$tmp_CFLAGS -Wimplicit-fallthrough=4"
-            fi
+            tmp_CFLAGS="$tmp_CFLAGS -Wimplicit-fallthrough"
           fi
           #
           dnl Only gcc 10 or later
