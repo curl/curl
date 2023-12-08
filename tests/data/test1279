@@ -19,7 +19,7 @@ Verify libcurl.def against CURL_EXTERN declarations
 </name>
 
 <command type="perl">
-%SRCDIR/extern-scan.pl --heading=EXPORTS --sort %SRCDIR/..
+%SRCDIR/test1135.pl --heading=EXPORTS --sort %SRCDIR/..
 </command>
 </client>
 
