@@ -513,7 +513,7 @@ static CURLcode wssh_statemach_act(struct Curl_easy *data, bool *block)
         return CURLE_OK;
       }
       else if(name && (rc == WS_SUCCESS)) {
-        sshc->homedir = Curl_strndup(name->fName, name->fSz);
+        sshc->homedir = Curl_memdump0(name->fName, name->fSz);
         if(!sshc->homedir)
           sshc->actualcode = CURLE_OUT_OF_MEMORY;
         wolfSSH_SFTPNAME_list_free(name);
