@@ -117,7 +117,7 @@ CURLcode Curl_bufref_memdup(struct bufref *br, const void *ptr, size_t len)
   DEBUGASSERT(len <= CURL_MAX_INPUT_LENGTH);
 
   if(ptr) {
-    cpy = Curl_strndup(ptr, len);
+    cpy = Curl_memdup0(ptr, len);
     if(!cpy)
       return CURLE_OUT_OF_MEMORY;
   }

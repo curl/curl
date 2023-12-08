@@ -934,7 +934,7 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, char *header)
        */
 
       /* Copy the id substring into a new buffer */
-      data->set.str[STRING_RTSP_SESSION_ID] = Curl_strndup(start, idlen);
+      data->set.str[STRING_RTSP_SESSION_ID] = Curl_memdup0(start, idlen);
       if(!data->set.str[STRING_RTSP_SESSION_ID])
         return CURLE_OUT_OF_MEMORY;
     }

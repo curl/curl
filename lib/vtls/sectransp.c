@@ -2373,7 +2373,7 @@ static CURLcode verify_cert(struct Curl_cfilter *cf,
 
   if(ca_info_blob) {
     CURL_TRC_CF(data, cf, "verify_peer, CA from config blob");
-    certbuf = (unsigned char *)Curl_strndup(ca_info_blob->data,
+    certbuf = (unsigned char *)Curl_memdup0(ca_info_blob->data,
                                             buflen = ca_info_blob->len);
     if(!certbuf)
       return CURLE_OUT_OF_MEMORY;

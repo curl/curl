@@ -214,7 +214,7 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
   }
 
   /* Store the challenge for later use */
-  ntlm->input_token = Curl_strndup((const char *)Curl_bufref_ptr(type2),
+  ntlm->input_token = Curl_memdup0((const char *)Curl_bufref_ptr(type2),
                                    Curl_bufref_len(type2));
   if(!ntlm->input_token)
     return CURLE_OUT_OF_MEMORY;

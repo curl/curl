@@ -4170,7 +4170,7 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
           return CURLE_OUT_OF_MEMORY;
         }
 
-        ftpc->dirs[0] = Curl_strndup(rawPath, dirlen);
+        ftpc->dirs[0] = Curl_memdup0(rawPath, dirlen);
         if(!ftpc->dirs[0]) {
           free(rawPath);
           return CURLE_OUT_OF_MEMORY;
@@ -4214,7 +4214,7 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
              CWD requires a parameter and a non-existent parameter a) doesn't
              work on many servers and b) has no effect on the others. */
           if(compLen > 0) {
-            char *comp = Curl_strndup(curPos, compLen);
+            char *comp = Curl_memdup0(curPos, compLen);
             if(!comp) {
               free(rawPath);
               return CURLE_OUT_OF_MEMORY;

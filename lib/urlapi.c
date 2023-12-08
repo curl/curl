@@ -1231,7 +1231,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
         u->fragment = Curl_dyn_ptr(&enc);
       }
       else {
-        u->fragment = Curl_strndup(fragment + 1, fraglen - 1);
+        u->fragment = Curl_memdup0(fragment + 1, fraglen - 1);
         if(!u->fragment) {
           result = CURLUE_OUT_OF_MEMORY;
           goto fail;
@@ -1260,7 +1260,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
         u->query = Curl_dyn_ptr(&enc);
       }
       else {
-        u->query = Curl_strndup(query + 1, qlen - 1);
+        u->query = Curl_memdup0(query + 1, qlen - 1);
         if(!u->query) {
           result = CURLUE_OUT_OF_MEMORY;
           goto fail;
@@ -1294,7 +1294,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
   }
   else {
     if(!u->path) {
-      u->path = Curl_strndup(path, pathlen);
+      u->path = Curl_memdup0(path, pathlen);
       if(!u->path) {
         result = CURLUE_OUT_OF_MEMORY;
         goto fail;
@@ -1592,7 +1592,7 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
   if(ptr) {
     size_t partlen = strlen(ptr);
     size_t i = 0;
-    *part = Curl_strndup(ptr, partlen);
+    *part = Curl_memdup0(ptr, partlen);
     if(!*part)
       return CURLUE_OUT_OF_MEMORY;
     if(plusdecode) {
