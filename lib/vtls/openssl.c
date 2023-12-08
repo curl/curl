@@ -1088,6 +1088,7 @@ static int ssl_ui_reader(UI *ui, UI_STRING *uis)
       UI_set_result(ui, uis, password);
       return 1;
     }
+    CURL_FALLTHROUGH();
   default:
     break;
   }
@@ -1106,6 +1107,7 @@ static int ssl_ui_writer(UI *ui, UI_STRING *uis)
        (UI_get_input_flags(uis) & UI_INPUT_FLAG_DEFAULT_PWD)) {
       return 1;
     }
+    CURL_FALLTHROUGH();
   default:
     break;
   }

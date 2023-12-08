@@ -606,6 +606,7 @@ static const char *UTime2str(const char *beg, const char *end)
   switch(tzp - sec) {
   case 0:
     sec = "00";
+    CURL_FALLTHROUGH();
   case 2:
     break;
   default:

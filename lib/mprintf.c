@@ -385,6 +385,7 @@ static int dprintf_Pass1(const char *format, struct va_stack *vto,
           break;
         case '\0':
           fmt--;
+          CURL_FALLTHROUGH();
         default:
           break;
         }
