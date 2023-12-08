@@ -275,22 +275,19 @@ clean:
   curl_free(pathbuffer);
   curl_url_cleanup(gatewayurl);
   {
-    const char *msg = NULL;
     switch(result) {
     case CURLE_URL_MALFORMAT:
-      msg = "malformed target URL";
+      helpf(tool_stderr, "malformed target URL");
       break;
     case CURLE_FILE_COULDNT_READ_FILE:
-      msg = "IPFS automatic gateway detection failed";
+      helpf(tool_stderr, "IPFS automatic gateway detection failed");
       break;
     case CURLE_BAD_FUNCTION_ARGUMENT:
-      msg = "--ipfs-gateway was given a malformed URL";
+      helpf(tool_stderr, "--ipfs-gateway was given a malformed URL");
       break;
     default:
       break;
     }
-    if(msg)
-      helpf(tool_stderr, msg);
   }
   return result;
 }
