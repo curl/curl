@@ -345,7 +345,7 @@ static CURLcode chop_write(struct Curl_easy *data,
     len -= chunklen;
   }
 
-#ifndef CURL_DISABLE_HTTP
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_HEADERS_API)
   /* HTTP header, but not status-line */
   if((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
      (type & CLIENTWRITE_HEADER) && !(type & CLIENTWRITE_STATUS) ) {
