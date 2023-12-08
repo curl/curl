@@ -247,8 +247,15 @@ static char *c_escape(const char *str, curl_off_t len)
           format = "\\%03o";
         }
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
         result = curlx_dyn_addf(&escaped, format,
                                 (unsigned int) *(unsigned char *) s);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
       }
     }
   }

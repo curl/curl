@@ -99,6 +99,11 @@ static int fopen_works(void)
   return ret;
 }
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
+
 static int rlimit(int keep_open)
 {
   int *tmpfd;
@@ -459,6 +464,10 @@ static int rlimit(int keep_open)
 
   return 0;
 }
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 int test(char *URL)
 {
