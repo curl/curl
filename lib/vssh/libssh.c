@@ -445,11 +445,8 @@ static int myssh_is_known(struct Curl_easy *data)
       keymatch = CURLKHMATCH_OK;
       break;
     case SSH_KNOWN_HOSTS_OTHER:
-      CURL_FALLTHROUGH();
     case SSH_KNOWN_HOSTS_NOT_FOUND:
-      CURL_FALLTHROUGH();
     case SSH_KNOWN_HOSTS_UNKNOWN:
-      CURL_FALLTHROUGH();
     case SSH_KNOWN_HOSTS_ERROR:
       keymatch = CURLKHMATCH_MISSING;
       break;
@@ -465,7 +462,6 @@ static int myssh_is_known(struct Curl_easy *data)
       keymatch = CURLKHMATCH_OK;
       break;
     case SSH_SERVER_FILE_NOT_FOUND:
-      CURL_FALLTHROUGH();
     case SSH_SERVER_NOT_KNOWN:
       keymatch = CURLKHMATCH_MISSING;
       break;
@@ -2022,7 +2018,6 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       break;
 
     case SSH_QUIT:
-      CURL_FALLTHROUGH();
     default:
       /* internal error */
       sshc->nextstate = SSH_NO_STATE;

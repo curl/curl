@@ -1376,7 +1376,6 @@ static CURLcode imap_statemachine(struct Curl_easy *data,
       break;
 
     case IMAP_LOGOUT:
-      CURL_FALLTHROUGH();
     default:
       /* internal error */
       imap_state(data, IMAP_STOP);

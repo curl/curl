@@ -589,7 +589,6 @@ static CURLcode ssh_knownhost(struct Curl_easy *data)
 
     switch(rc) {
     default: /* unknown return codes will equal reject */
-      CURL_FALLTHROUGH();
     case CURLKHSTAT_REJECT:
       state(data, SSH_SESSION_FREE);
       CURL_FALLTHROUGH();
@@ -603,7 +602,6 @@ static CURLcode ssh_knownhost(struct Curl_easy *data)
         libssh2_knownhost_del(sshc->kh, host);
         CURL_FALLTHROUGH();
     case CURLKHSTAT_FINE:
-        CURL_FALLTHROUGH();
     case CURLKHSTAT_FINE_ADD_TO_FILE:
       /* proceed */
       if(keycheck != LIBSSH2_KNOWNHOST_CHECK_MATCH) {
@@ -3024,7 +3022,6 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       break;
 
     case SSH_QUIT:
-      CURL_FALLTHROUGH();
     default:
       /* internal error */
       sshc->nextstate = SSH_NO_STATE;
