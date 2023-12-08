@@ -625,7 +625,7 @@ restart:
       if(rc < 0)
         return SSH_ERROR;
 
-    CURL_FALLTHROUGH();
+      CURL_FALLTHROUGH();
     case 1:
       sshc->kbd_state = 1;
 

@@ -600,7 +600,7 @@ static CURLcode ssh_knownhost(struct Curl_easy *data)
       /* remove old host+key that doesn't match */
       if(host)
         libssh2_knownhost_del(sshc->kh, host);
-        CURL_FALLTHROUGH();
+      CURL_FALLTHROUGH();
     case CURLKHSTAT_FINE:
     case CURLKHSTAT_FINE_ADD_TO_FILE:
       /* proceed */
