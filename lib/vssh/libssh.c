@@ -445,11 +445,11 @@ static int myssh_is_known(struct Curl_easy *data)
       keymatch = CURLKHMATCH_OK;
       break;
     case SSH_KNOWN_HOSTS_OTHER:
-      /* fallthrough */
+      CURL_FALLTHROUGH();
     case SSH_KNOWN_HOSTS_NOT_FOUND:
-      /* fallthrough */
+      CURL_FALLTHROUGH();
     case SSH_KNOWN_HOSTS_UNKNOWN:
-      /* fallthrough */
+      CURL_FALLTHROUGH();
     case SSH_KNOWN_HOSTS_ERROR:
       keymatch = CURLKHMATCH_MISSING;
       break;
@@ -465,7 +465,7 @@ static int myssh_is_known(struct Curl_easy *data)
       keymatch = CURLKHMATCH_OK;
       break;
     case SSH_SERVER_FILE_NOT_FOUND:
-      /* fallthrough */
+      CURL_FALLTHROUGH();
     case SSH_SERVER_NOT_KNOWN:
       keymatch = CURLKHMATCH_MISSING;
       break;
@@ -629,7 +629,7 @@ restart:
       if(rc < 0)
         return SSH_ERROR;
 
-    /* FALLTHROUGH */
+    CURL_FALLTHROUGH();
     case 1:
       sshc->kbd_state = 1;
 
@@ -704,7 +704,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       ssh_set_blocking(sshc->ssh_session, 0);
 
       state(data, SSH_S_STARTUP);
-      /* FALLTHROUGH */
+      CURL_FALLTHROUGH();
 
     case SSH_S_STARTUP:
       rc = ssh_connect(sshc->ssh_session);
@@ -719,7 +719,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
 
       state(data, SSH_HOSTKEY);
 
-      /* FALLTHROUGH */
+      CURL_FALLTHROUGH();
     case SSH_HOSTKEY:
 
       rc = myssh_is_known(data);
@@ -729,7 +729,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       }
 
       state(data, SSH_AUTHLIST);
-      /* FALLTHROUGH */
+      CURL_FALLTHROUGH();
     case SSH_AUTHLIST:{
         sshc->authed = FALSE;
 
@@ -910,7 +910,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         break;
       }
       state(data, SSH_AUTH_PASS);
-      /* FALLTHROUGH */
+      CURL_FALLTHROUGH();
 
     case SSH_AUTH_PASS:
       rc = ssh_userauth_password(sshc->ssh_session, NULL, conn->passwd);
@@ -973,7 +973,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         break;
       }
       state(data, SSH_SFTP_REALPATH);
-      /* FALLTHROUGH */
+      CURL_FALLTHROUGH();
     case SSH_SFTP_REALPATH:
       /*
        * Get the "home" directory
@@ -1560,7 +1560,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       sshc->readdir_longentry = NULL;
 
       state(data, SSH_SFTP_READDIR_BOTTOM);
-      /* FALLTHROUGH */
+      CURL_FALLTHROUGH();
     case SSH_SFTP_READDIR_BOTTOM:
       if(Curl_dyn_addn(&sshc->readdir_buf, "\n", 1))
         result = CURLE_OUT_OF_MEMORY;
@@ -1884,7 +1884,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         break;
       }
       state(data, SSH_SCP_DOWNLOAD);
-      /* FALLTHROUGH */
+      CURL_FALLTHROUGH();
 
     case SSH_SCP_DOWNLOAD:{
         curl_off_t bytecount;
@@ -1948,7 +1948,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       ssh_set_blocking(sshc->ssh_session, 0);
 
       state(data, SSH_SESSION_DISCONNECT);
-      /* FALLTHROUGH */
+      CURL_FALLTHROUGH();
 
     case SSH_SESSION_DISCONNECT:
       /* during weird times when we've been prematurely aborted, the channel
@@ -1971,7 +1971,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       data->state.most_recent_ftp_entrypath = NULL;
 
       state(data, SSH_SESSION_FREE);
-      /* FALLTHROUGH */
+      CURL_FALLTHROUGH();
     case SSH_SESSION_FREE:
       if(sshc->ssh_session) {
         ssh_free(sshc->ssh_session);
@@ -2022,7 +2022,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       break;
 
     case SSH_QUIT:
-      /* fallthrough, just stop! */
+      CURL_FALLTHROUGH();
     default:
       /* internal error */
       sshc->nextstate = SSH_NO_STATE;
@@ -2613,7 +2613,7 @@ static ssize_t sftp_recv(struct Curl_easy *data, int sockindex,
         return -1;
       }
 
-      /* FALLTHROUGH */
+      CURL_FALLTHROUGH();
     case 1:
       conn->proto.sshc.sftp_recv_state = 1;
 

@@ -3124,7 +3124,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
       break;
 
     case FTP_QUIT:
-      /* fallthrough, just stop! */
+      CURL_FALLTHROUGH();
     default:
       /* internal error */
       ftp_state(data, FTP_STOP);
@@ -3251,14 +3251,14 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
   case CURLE_REMOTE_FILE_NOT_FOUND:
   case CURLE_WRITE_ERROR:
     /* the connection stays alive fine even though this happened */
-    /* fall-through */
+    CURL_FALLTHROUGH();
   case CURLE_OK: /* doesn't affect the control connection's status */
     if(!premature)
       break;
 
     /* until we cope better with prematurely ended requests, let them
      * fallback as if in complete failure */
-    /* FALLTHROUGH */
+    CURL_FALLTHROUGH();
   default:       /* by default, an error means the control connection is
                     wedged and should not be used anymore */
     ftpc->ctl_valid = FALSE;

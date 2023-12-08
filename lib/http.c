@@ -3888,7 +3888,7 @@ CURLcode Curl_http_statusline(struct Curl_easy *data,
      * fields.  */
     if(data->set.timecondition)
       data->info.timecond = TRUE;
-    /* FALLTHROUGH */
+    CURL_FALLTHROUGH();
   case 204:
     /* (quote from RFC2616, section 10.2.5): The server has
      * fulfilled the request but does not need to return an

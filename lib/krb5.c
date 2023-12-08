@@ -417,7 +417,7 @@ static char level_to_char(int level)
   case PROT_PRIVATE:
     return 'P';
   case PROT_CMD:
-    /* Fall through */
+    CURL_FALLTHROUGH();
   default:
     /* Those 2 cases should not be reached! */
     break;
