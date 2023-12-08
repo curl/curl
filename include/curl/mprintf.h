@@ -34,10 +34,16 @@ extern "C" {
 
 #if (defined(__GNUC__) || defined(__clang__)) &&                        \
   defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&         \
-  !defined(__MINGW32__) && !defined(CURL_NO_FMT_CHECKS)
-#define CURL_TEMP_PRINTF(a,b) __attribute__ ((format(printf, a, b)))
+  !defined(CURL_NO_FMT_CHECKS)
+#if defined(__MINGW32__) && !defined(__clang__)
+#define CURL_TEMP_PRINTF(fmt, arg) \
+  __attribute__((format(gnu_printf, fmt, arg)))
 #else
-#define CURL_TEMP_PRINTF(a,b)
+#define CURL_TEMP_PRINTF(fmt, arg) \
+  __attribute__((format(printf, fmt, arg)))
+#endif
+#else
+#define CURL_TEMP_PRINTF(fmt, arg)
 #endif
 
 CURL_EXTERN int curl_mprintf(const char *format, ...) CURL_TEMP_PRINTF(1, 2);

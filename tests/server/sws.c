@@ -374,7 +374,7 @@ static int ProcessRequest(struct httprequest *req)
 
   req->callcount++;
 
-  logmsg("Process %d bytes request%s", req->offset,
+  logmsg("Process %zu bytes request%s", req->offset,
          req->callcount > 1?" [CONTINUED]":"");
 
   /* try to figure out the request characteristics as soon as possible, but
@@ -557,14 +557,14 @@ static int ProcessRequest(struct httprequest *req)
     logmsg("request not complete yet");
     return 0; /* not complete yet */
   }
-  logmsg("- request found to be complete (%d)", req->testno);
+  logmsg("- request found to be complete (%ld)", req->testno);
 
   if(req->testno == DOCNUMBER_NOTHING) {
     /* check for a Testno: header with the test case number */
     char *testno = strstr(line, "\nTestno: ");
     if(testno) {
       req->testno = strtol(&testno[9], NULL, 10);
-      logmsg("Found test number %d in Testno: header!", req->testno);
+      logmsg("Found test number %ld in Testno: header!", req->testno);
     }
     else {
       logmsg("No Testno: header");
@@ -702,8 +702,8 @@ static int ProcessRequest(struct httprequest *req)
     /* Negotiate iterations */
     static long prev_testno = -1;
     static long prev_partno = -1;
-    logmsg("Negotiate: prev_testno: %d, prev_partno: %d",
-            prev_testno, prev_partno);
+    logmsg("Negotiate: prev_testno: %ld, prev_partno: %ld",
+           prev_testno, prev_partno);
     if(req->testno != prev_testno) {
       prev_testno = req->testno;
       prev_partno = req->partno;
@@ -1198,8 +1198,8 @@ retry:
       int intervals = msecs_left / MAX_SLEEP_TIME_MS;
       if(msecs_left%MAX_SLEEP_TIME_MS)
         intervals++;
-      logmsg("Pausing %d milliseconds after writing %d bytes",
-         msecs_left, written);
+      logmsg("Pausing %d milliseconds after writing %zd bytes",
+             msecs_left, written);
       while((intervals > 0) && !got_exit_signal) {
         int sleep_time = msecs_left > MAX_SLEEP_TIME_MS ?
           MAX_SLEEP_TIME_MS : msecs_left;
@@ -2334,7 +2334,8 @@ int main(int argc, char *argv[])
       curl_socket_t msgsock;
       do {
         msgsock = accept_connection(sock);
-        logmsg("accept_connection %d returned %d", sock, msgsock);
+        logmsg("accept_connection %" CURL_FORMAT_SOCKET_T
+               " returned %" CURL_FORMAT_SOCKET_T, sock, msgsock);
         if(CURL_SOCKET_BAD == msgsock)
           goto sws_cleanup;
         if(req->delay)

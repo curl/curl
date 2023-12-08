@@ -1662,6 +1662,10 @@ static int huge(void)
 
   for(i = 0; i <  7; i++) {
     char *partp;
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
     msnprintf(total, sizeof(total),
               url,
               (i == 0)? &bigpart[1] : smallpart,
@@ -1671,6 +1675,9 @@ static int huge(void)
               (i == 4)? &bigpart[1] : smallpart,
               (i == 5)? &bigpart[1] : smallpart,
               (i == 6)? &bigpart[1] : smallpart);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
     rc = curl_url_set(urlp, CURLUPART_URL, total, CURLU_NON_SUPPORT_SCHEME);
     if((!i && (rc != CURLUE_BAD_SCHEME)) ||
        (i && rc)) {

@@ -892,7 +892,7 @@ static CURLcode cf_he_connect(struct Curl_cfilter *cf,
       if(result)
         return result;
       ctx->state = SCFST_WAITING;
-      /* FALLTHROUGH */
+      FALLTHROUGH();
     case SCFST_WAITING:
       result = is_connected(cf, data, done);
       if(!result && *done) {

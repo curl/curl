@@ -672,6 +672,7 @@ static CURLcode multi_done(struct Curl_easy *data,
        many callbacks and protocols work differently, we could potentially do
        this more fine-grained in the future. */
     premature = TRUE;
+    FALLTHROUGH();
   default:
     break;
   }

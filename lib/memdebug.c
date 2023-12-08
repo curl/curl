@@ -317,8 +317,16 @@ curl_socket_t curl_dbg_socket(int domain, int type, int protocol,
 
   sockfd = socket(domain, type, protocol);
 
-  if(source && (sockfd != CURL_SOCKET_BAD))
+  if(source && (sockfd != CURL_SOCKET_BAD)) {
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
     curl_dbg_log(fmt, source, line, sockfd);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+  }
 
   return sockfd;
 }
@@ -365,8 +373,16 @@ int curl_dbg_socketpair(int domain, int type, int protocol,
 
   int res = socketpair(domain, type, protocol, socket_vector);
 
-  if(source && (0 == res))
+  if(source && (0 == res)) {
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
     curl_dbg_log(fmt, source, line, socket_vector[0], socket_vector[1]);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+  }
 
   return res;
 }
@@ -386,8 +402,16 @@ curl_socket_t curl_dbg_accept(curl_socket_t s, void *saddr, void *saddrlen,
 
   curl_socket_t sockfd = accept(s, addr, addrlen);
 
-  if(source && (sockfd != CURL_SOCKET_BAD))
+  if(source && (sockfd != CURL_SOCKET_BAD)) {
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
     curl_dbg_log(fmt, source, line, sockfd);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+  }
 
   return sockfd;
 }
@@ -401,8 +425,16 @@ void curl_dbg_mark_sclose(curl_socket_t sockfd, int line, const char *source)
     "FD %s:%d sclose(%ld)\n":
     "FD %s:%d sclose(%zd)\n";
 
-  if(source)
+  if(source) {
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
     curl_dbg_log(fmt, source, line, sockfd);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+  }
 }
 
 /* this is our own defined way to close sockets on *ALL* platforms */
@@ -467,7 +499,14 @@ void curl_dbg_log(const char *format, ...)
     return;
 
   va_start(ap, format);
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
   nchars = mvsnprintf(buf, LOGLINE_BUFSIZE, format, ap);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
   va_end(ap);
 
   if(nchars > LOGLINE_BUFSIZE - 1)

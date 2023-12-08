@@ -1281,7 +1281,7 @@ static int test_weird_arguments(void)
   rc = curl_msnprintf(buf, sizeof(buf), "%d, %.*1$d", 500, 1);
 
   if(rc != sizeof(buf) - 1) {
-    printf("curl_mprintf() returned %d and not %d!\n", rc,
+    printf("curl_mprintf() returned %d and not %zu!\n", rc,
            sizeof(buf) - 1);
     errors++;
   }

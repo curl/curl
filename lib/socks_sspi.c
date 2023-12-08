@@ -331,9 +331,15 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     failf(data, "Failed to determine user name.");
     return CURLE_COULDNT_CONNECT;
   }
-  infof(data, "SOCKS5 server authenticated user %s with GSS-API.",
-        names.sUserName);
-  s_pSecFn->FreeContextBuffer(names.sUserName);
+  else {
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+    char *user_utf8 = curlx_convert_tchar_to_UTF8(names.sUserName);
+    infof(data, "SOCKS5 server authenticated user %s with GSS-API.",
+          (user_utf8 ? user_utf8 : "(unknown)"));
+    curlx_unicodefree(user_utf8);
+#endif
+    s_pSecFn->FreeContextBuffer(names.sUserName);
+  }
 
   /* Do encryption */
   socksreq[0] = 1;    /* GSS-API subnegotiation version */

@@ -1268,7 +1268,6 @@ static CURLcode smtp_statemachine(struct Curl_easy *data,
       break;
 
     case SMTP_QUIT:
-      /* fallthrough, just stop! */
     default:
       /* internal error */
       smtp_state(data, SMTP_STOP);

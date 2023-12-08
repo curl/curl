@@ -117,10 +117,7 @@ int libtest_debug_cb(CURL *handle, curl_infotype type,
   switch(type) {
   case CURLINFO_TEXT:
     fprintf(stderr, "%s== Info: %s", timestr, (char *)data);
-    /* FALLTHROUGH */
-  default: /* in case a new one is introduced to shock us */
     return 0;
-
   case CURLINFO_HEADER_OUT:
     text = "=> Send header";
     break;
@@ -139,6 +136,8 @@ int libtest_debug_cb(CURL *handle, curl_infotype type,
   case CURLINFO_SSL_DATA_IN:
     text = "<= Recv SSL data";
     break;
+  default: /* in case a new one is introduced to shock us */
+    return 0;
   }
 
   libtest_debug_dump(timebuf, text, stderr, data, size, trace_cfg->nohex);

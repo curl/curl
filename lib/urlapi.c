@@ -712,24 +712,30 @@ static int ipv4_normalize(struct dynbuf *host)
     Curl_dyn_reset(host);
 
     result = Curl_dyn_addf(host, "%u.%u.%u.%u",
-                           parts[0] >> 24, (parts[0] >> 16) & 0xff,
-                           (parts[0] >> 8) & 0xff, parts[0] & 0xff);
+                           (unsigned int)(parts[0] >> 24),
+                           (unsigned int)((parts[0] >> 16) & 0xff),
+                           (unsigned int)((parts[0] >> 8) & 0xff),
+                           (unsigned int)(parts[0] & 0xff));
     break;
   case 1: /* a.b -- 8.24 bits */
     if((parts[0] > 0xff) || (parts[1] > 0xffffff))
       return HOST_NAME;
     Curl_dyn_reset(host);
     result = Curl_dyn_addf(host, "%u.%u.%u.%u",
-                           parts[0], (parts[1] >> 16) & 0xff,
-                           (parts[1] >> 8) & 0xff, parts[1] & 0xff);
+                           (unsigned int)(parts[0]),
+                           (unsigned int)((parts[1] >> 16) & 0xff),
+                           (unsigned int)((parts[1] >> 8) & 0xff),
+                           (unsigned int)(parts[1] & 0xff));
     break;
   case 2: /* a.b.c -- 8.8.16 bits */
     if((parts[0] > 0xff) || (parts[1] > 0xff) || (parts[2] > 0xffff))
       return HOST_NAME;
     Curl_dyn_reset(host);
     result = Curl_dyn_addf(host, "%u.%u.%u.%u",
-                           parts[0], parts[1], (parts[2] >> 8) & 0xff,
-                           parts[2] & 0xff);
+                           (unsigned int)(parts[0]),
+                           (unsigned int)(parts[1]),
+                           (unsigned int)((parts[2] >> 8) & 0xff),
+                           (unsigned int)(parts[2] & 0xff));
     break;
   case 3: /* a.b.c.d -- 8.8.8.8 bits */
     if((parts[0] > 0xff) || (parts[1] > 0xff) || (parts[2] > 0xff) ||
@@ -737,7 +743,10 @@ static int ipv4_normalize(struct dynbuf *host)
       return HOST_NAME;
     Curl_dyn_reset(host);
     result = Curl_dyn_addf(host, "%u.%u.%u.%u",
-                           parts[0], parts[1], parts[2], parts[3]);
+                           (unsigned int)(parts[0]),
+                           (unsigned int)(parts[1]),
+                           (unsigned int)(parts[2]),
+                           (unsigned int)(parts[3]));
     break;
   }
   if(result)

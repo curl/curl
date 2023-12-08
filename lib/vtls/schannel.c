@@ -666,7 +666,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
                 cert_showfilename_error);
         else
           failf(data, "schannel: Failed to import cert file %s, "
-                "last error is 0x%x",
+                "last error is 0x%lx",
                 cert_showfilename_error, errorcode);
         return CURLE_SSL_CERTPROBLEM;
       }
@@ -677,7 +677,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 
       if(!client_certs[0]) {
         failf(data, "schannel: Failed to get certificate from file %s"
-              ", last error is 0x%x",
+              ", last error is 0x%lx",
               cert_showfilename_error, GetLastError());
         CertCloseStore(cert_store, 0);
         return CURLE_SSL_CERTPROBLEM;
@@ -690,10 +690,15 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
                       CERT_STORE_OPEN_EXISTING_FLAG | cert_store_name,
                       cert_store_path);
       if(!cert_store) {
-        failf(data, "schannel: Failed to open cert store %x %s, "
-              "last error is 0x%x",
-              cert_store_name, cert_store_path, GetLastError());
+        char *path_utf8 =
+          curlx_convert_tchar_to_UTF8(cert_store_path);
+        failf(data, "schannel: Failed to open cert store %lx %s, "
+              "last error is 0x%lx",
+              cert_store_name,
+              (path_utf8 ? path_utf8 : "(unknown)"),
+              GetLastError());
         free(cert_store_path);
+        curlx_unicodefree(path_utf8);
         curlx_unicodefree(cert_path);
         return CURLE_SSL_CERTPROBLEM;
       }

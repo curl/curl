@@ -259,6 +259,33 @@
 
 #include <curl/system.h>
 
+/* curl uses its own printf() function internally. It understands the GNU
+ * format. Use this format, so that is matches the GNU format attribute we
+ * use with the mingw compiler, allowing it to verify them at compile-time.
+ */
+#ifdef  __MINGW32__
+#  undef CURL_FORMAT_CURL_OFF_T
+#  undef CURL_FORMAT_CURL_OFF_TU
+#  define CURL_FORMAT_CURL_OFF_T   "lld"
+#  define CURL_FORMAT_CURL_OFF_TU  "llu"
+#endif
+
+/* based on logic in "curl/mprintf.h" */
+
+#if (defined(__GNUC__) || defined(__clang__)) &&                        \
+  defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&         \
+  !defined(CURL_NO_FMT_CHECKS)
+#if defined(__MINGW32__) && !defined(__clang__)
+#define CURL_PRINTF(fmt, arg) \
+  __attribute__((format(gnu_printf, fmt, arg)))
+#else
+#define CURL_PRINTF(fmt, arg) \
+  __attribute__((format(__printf__, fmt, arg)))
+#endif
+#else
+#define CURL_PRINTF(fmt, arg)
+#endif
+
 /*
  * Use getaddrinfo to resolve the IPv4 address literal. If the current network
  * interface doesn't support IPv4, but supports IPv6, NAT64, and DNS64,
@@ -406,6 +433,24 @@
 #ifndef SIZEOF_TIME_T
 /* assume default size of time_t to be 32 bit */
 #define SIZEOF_TIME_T 4
+#endif
+
+#ifndef SIZEOF_CURL_SOCKET_T
+/* configure and cmake check and set the define */
+#  ifdef _WIN64
+#    define SIZEOF_CURL_SOCKET_T 8
+#  else
+/* default guess */
+#    define SIZEOF_CURL_SOCKET_T 4
+#  endif
+#endif
+
+#if SIZEOF_CURL_SOCKET_T < 8
+#  define CURL_FORMAT_SOCKET_T "d"
+#elif defined(__MINGW32__)
+#  define CURL_FORMAT_SOCKET_T "zd"
+#else
+#  define CURL_FORMAT_SOCKET_T "qd"
 #endif
 
 /*
@@ -645,6 +690,17 @@
 #  define CURL_NORETURN  __declspec(noreturn)
 #else
 #  define CURL_NORETURN
+#endif
+#endif
+
+/* fallthrough attribute */
+
+#if !defined(FALLTHROUGH)
+#if (defined(__GNUC__) && __GNUC__ >= 7) || \
+    (defined(__clang__) && __clang_major__ >= 10)
+#  define FALLTHROUGH()  __attribute__((fallthrough))
+#else
+#  define FALLTHROUGH()  do {} while (0)
 #endif
 #endif
 

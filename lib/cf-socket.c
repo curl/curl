@@ -163,7 +163,8 @@ tcpkeepalive(struct Curl_easy *data,
   /* only set IDLE and INTVL if setting KEEPALIVE is successful */
   if(setsockopt(sockfd, SOL_SOCKET, SO_KEEPALIVE,
         (void *)&optval, sizeof(optval)) < 0) {
-    infof(data, "Failed to set SO_KEEPALIVE on fd %d", sockfd);
+    infof(data, "Failed to set SO_KEEPALIVE on fd %" CURL_FORMAT_SOCKET_T,
+          sockfd);
   }
   else {
 #if defined(SIO_KEEPALIVE_VALS)
@@ -178,8 +179,9 @@ tcpkeepalive(struct Curl_easy *data,
     vals.keepaliveinterval = optval;
     if(WSAIoctl(sockfd, SIO_KEEPALIVE_VALS, (LPVOID) &vals, sizeof(vals),
                 NULL, 0, &dummy, NULL, NULL) != 0) {
-      infof(data, "Failed to set SIO_KEEPALIVE_VALS on fd %d: %d",
-            (int)sockfd, WSAGetLastError());
+      infof(data, "Failed to set SIO_KEEPALIVE_VALS on fd "
+                  "%" CURL_FORMAT_SOCKET_T ": %d",
+                  sockfd, WSAGetLastError());
     }
 #else
 #ifdef TCP_KEEPIDLE
@@ -187,7 +189,8 @@ tcpkeepalive(struct Curl_easy *data,
     KEEPALIVE_FACTOR(optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE,
           (void *)&optval, sizeof(optval)) < 0) {
-      infof(data, "Failed to set TCP_KEEPIDLE on fd %d", sockfd);
+      infof(data, "Failed to set TCP_KEEPIDLE on fd %" CURL_FORMAT_SOCKET_T,
+            sockfd);
     }
 #elif defined(TCP_KEEPALIVE)
     /* Mac OS X style */
@@ -195,7 +198,8 @@ tcpkeepalive(struct Curl_easy *data,
     KEEPALIVE_FACTOR(optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPALIVE,
       (void *)&optval, sizeof(optval)) < 0) {
-      infof(data, "Failed to set TCP_KEEPALIVE on fd %d", sockfd);
+      infof(data, "Failed to set TCP_KEEPALIVE on fd %" CURL_FORMAT_SOCKET_T,
+            sockfd);
     }
 #endif
 #ifdef TCP_KEEPINTVL
@@ -203,7 +207,8 @@ tcpkeepalive(struct Curl_easy *data,
     KEEPALIVE_FACTOR(optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPINTVL,
           (void *)&optval, sizeof(optval)) < 0) {
-      infof(data, "Failed to set TCP_KEEPINTVL on fd %d", sockfd);
+      infof(data, "Failed to set TCP_KEEPINTVL on fd %" CURL_FORMAT_SOCKET_T,
+            sockfd);
     }
 #endif
 #endif
@@ -983,20 +988,14 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
   if(result)
     goto out;
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-  {
-    const char *ipmsg;
 #ifdef ENABLE_IPV6
-    if(ctx->addr.family == AF_INET6) {
-      set_ipv6_v6only(ctx->sock, 0);
-      ipmsg = "  Trying [%s]:%d...";
-    }
-    else
-#endif
-      ipmsg = "  Trying %s:%d...";
-    infof(data, ipmsg, ctx->r_ip, ctx->r_port);
+  if(ctx->addr.family == AF_INET6) {
+    set_ipv6_v6only(ctx->sock, 0);
+    infof(data, "  Trying [%s]:%d...", ctx->r_ip, ctx->r_port);
   }
+  else
 #endif
+    infof(data, "  Trying %s:%d...", ctx->r_ip, ctx->r_port);
 
 #ifdef ENABLE_IPV6
   is_tcp = (ctx->addr.family == AF_INET
@@ -1574,7 +1573,7 @@ static CURLcode cf_socket_query(struct Curl_cfilter *cf,
         *when = ctx->first_byte_at;
         break;
       }
-      /* FALLTHROUGH */
+      FALLTHROUGH();
     default:
       *when = ctx->connected_at;
       break;

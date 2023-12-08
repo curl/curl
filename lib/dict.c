@@ -123,6 +123,9 @@ static char *unescape_word(const char *input)
 
 /* sendf() sends formatted data to the server */
 static CURLcode sendf(curl_socket_t sockfd, struct Curl_easy *data,
+                      const char *fmt, ...) CURL_PRINTF(3, 4);
+
+static CURLcode sendf(curl_socket_t sockfd, struct Curl_easy *data,
                       const char *fmt, ...)
 {
   ssize_t bytes_written;
@@ -132,7 +135,14 @@ static CURLcode sendf(curl_socket_t sockfd, struct Curl_easy *data,
   char *sptr;
   va_list ap;
   va_start(ap, fmt);
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
   s = vaprintf(fmt, ap); /* returns an allocated string */
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
   va_end(ap);
   if(!s)
     return CURLE_OUT_OF_MEMORY; /* failure */

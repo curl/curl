@@ -1084,9 +1084,7 @@ static ssize_t wolfssl_recv(struct Curl_cfilter *cf,
       *curlcode = CURLE_OK;
       return 0;
     case SSL_ERROR_NONE:
-      /* FALLTHROUGH */
     case SSL_ERROR_WANT_READ:
-      /* FALLTHROUGH */
     case SSL_ERROR_WANT_WRITE:
       /* there's data pending, re-invoke wolfSSL_read() */
       CURL_TRC_CF(data, cf, "wolfssl_recv(len=%zu) -> AGAIN", blen);

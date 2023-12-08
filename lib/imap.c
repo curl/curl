@@ -1376,7 +1376,6 @@ static CURLcode imap_statemachine(struct Curl_easy *data,
       break;
 
     case IMAP_LOGOUT:
-      /* fallthrough, just stop! */
     default:
       /* internal error */
       imap_state(data, IMAP_STOP);
@@ -1795,7 +1794,14 @@ static CURLcode imap_sendf(struct Curl_easy *data, const char *fmt, ...)
   if(!result) {
     va_list ap;
     va_start(ap, fmt);
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
     result = Curl_pp_vsendf(data, &imapc->pp, Curl_dyn_ptr(&imapc->dyn), ap);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
     va_end(ap);
   }
   return result;

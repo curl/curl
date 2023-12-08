@@ -179,7 +179,7 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
         qctx->no_gso = TRUE;
         return send_packet_no_gso(cf, data, qctx, pkt, pktlen, gsolen, psent);
       }
-      /* FALLTHROUGH */
+      FALLTHROUGH();
     default:
       failf(data, "sendmsg() returned %zd (errno %d)", sent, SOCKERRNO);
       return CURLE_SEND_ERROR;
