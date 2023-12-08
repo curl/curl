@@ -123,6 +123,9 @@ static char *unescape_word(const char *input)
 
 /* sendf() sends formatted data to the server */
 static CURLcode sendf(curl_socket_t sockfd, struct Curl_easy *data,
+                      const char *fmt, ...) CURL_PRINTF(3, 4);
+
+static CURLcode sendf(curl_socket_t sockfd, struct Curl_easy *data,
                       const char *fmt, ...)
 {
   ssize_t bytes_written;

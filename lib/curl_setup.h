@@ -659,6 +659,16 @@
 #endif
 #endif
 
+/* based on logic in "curl/mprintf.h" */
+
+#if (defined(__GNUC__) || defined(__clang__)) &&                        \
+  defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&         \
+  !defined(__MINGW32__) && !defined(CURL_NO_FMT_CHECKS)
+#define CURL_PRINTF(fmt, arg)  __attribute__((format(__printf__, fmt, arg)))
+#else
+#define CURL_PRINTF(fmt, arg)
+#endif
+
 /*
  * Include macros and defines that should only be processed once.
  */
