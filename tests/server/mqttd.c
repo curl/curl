@@ -246,7 +246,7 @@ static int connack(FILE *dump, curl_socket_t fd)
 
   rc = swrite(fd, (char *)packet, sizeof(packet));
   if(rc > 0) {
-    logmsg("WROTE %d bytes [CONNACK]", rc);
+    logmsg("WROTE %zd bytes [CONNACK]", rc);
     loghex(packet, rc);
     logprotocol(FROM_SERVER, "CONNACK", 2, dump, packet, sizeof(packet));
   }
@@ -270,7 +270,7 @@ static int suback(FILE *dump, curl_socket_t fd, unsigned short packetid)
 
   rc = swrite(fd, (char *)packet, sizeof(packet));
   if(rc == sizeof(packet)) {
-    logmsg("WROTE %d bytes [SUBACK]", rc);
+    logmsg("WROTE %zd bytes [SUBACK]", rc);
     loghex(packet, rc);
     logprotocol(FROM_SERVER, "SUBACK", 3, dump, packet, rc);
     return 0;
@@ -292,7 +292,7 @@ static int puback(FILE *dump, curl_socket_t fd, unsigned short packetid)
 
   rc = swrite(fd, (char *)packet, sizeof(packet));
   if(rc == sizeof(packet)) {
-    logmsg("WROTE %d bytes [PUBACK]", rc);
+    logmsg("WROTE %zd bytes [PUBACK]", rc);
     loghex(packet, rc);
     logprotocol(FROM_SERVER, dump, packet, rc);
     return 0;
@@ -310,7 +310,7 @@ static int disconnect(FILE *dump, curl_socket_t fd)
   };
   ssize_t rc = swrite(fd, (char *)packet, sizeof(packet));
   if(rc == sizeof(packet)) {
-    logmsg("WROTE %d bytes [DISCONNECT]", rc);
+    logmsg("WROTE %zd bytes [DISCONNECT]", rc);
     loghex(packet, rc);
     logprotocol(FROM_SERVER, "DISCONNECT", 0, dump, packet, rc);
     return 0;
@@ -439,7 +439,7 @@ static int publish(FILE *dump,
 
   rc = swrite(fd, (char *)packet, sendamount);
   if(rc > 0) {
-    logmsg("WROTE %d bytes [PUBLISH]", rc);
+    logmsg("WROTE %zd bytes [PUBLISH]", rc);
     loghex(packet, rc);
     logprotocol(FROM_SERVER, "PUBLISH", remaininglength, dump, packet, rc);
   }
@@ -465,10 +465,10 @@ static int fixedheader(curl_socket_t fd,
   ssize_t rc = sread(fd, (char *)buffer, 2);
   int i;
   if(rc < 2) {
-    logmsg("READ %d bytes [SHORT!]", rc);
+    logmsg("READ %zd bytes [SHORT!]", rc);
     return 1; /* fail */
   }
-  logmsg("READ %d bytes", rc);
+  logmsg("READ %zd bytes", rc);
   loghex(buffer, rc);
   *bytep = buffer[0];
 
@@ -483,7 +483,7 @@ static int fixedheader(curl_socket_t fd,
     }
   }
   *remaining_lengthp = decode_length(&buffer[1], i, remaining_length_bytesp);
-  logmsg("Remaining Length: %ld [%d bytes]", (long) *remaining_lengthp,
+  logmsg("Remaining Length: %zu [%zu bytes]", *remaining_lengthp,
          *remaining_length_bytesp);
   return 0;
 }
@@ -555,7 +555,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
       /* reading variable header and payload into buffer */
       rc = sread(fd, (char *)buffer, remaining_length);
       if(rc > 0) {
-        logmsg("READ %d bytes", rc);
+        logmsg("READ %zd bytes", rc);
         loghex(buffer, rc);
       }
     }
@@ -592,7 +592,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
 
       /* check the length of the payload */
       if((ssize_t)payload_len != (rc - 12)) {
-        logmsg("Payload length mismatch, expected %x got %x",
+        logmsg("Payload length mismatch, expected %zx got %zx",
                rc - 12, payload_len);
         goto end;
       }
@@ -633,7 +633,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
       /* two bytes topic length */
       topic_len = (buffer[2] << 8) | buffer[3];
       if(topic_len != (remaining_length - 5)) {
-        logmsg("Wrong topic length, got %d expected %d",
+        logmsg("Wrong topic length, got %d expected %zu",
                topic_len, remaining_length - 5);
         goto end;
       }
@@ -677,7 +677,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
                   dump, buffer, rc);
 
       topiclen = (buffer[1 + bytes] << 8) | buffer[2 + bytes];
-      logmsg("Got %d bytes topic", topiclen);
+      logmsg("Got %zu bytes topic", topiclen);
       /* TODO: verify topiclen */
 
 #ifdef QOS
@@ -688,7 +688,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
       /* get the request */
       rc = sread(fd, (char *)&buffer[0], 2);
 
-      logmsg("READ %d bytes [DISCONNECT]", rc);
+      logmsg("READ %zd bytes [DISCONNECT]", rc);
       loghex(buffer, rc);
       logprotocol(FROM_CLIENT, "DISCONNECT", 0, dump, buffer, rc);
       goto end;
