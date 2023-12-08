@@ -20,7 +20,7 @@ Verify that all libcurl options have man pages
 </name>
 
 <command type="perl">
-%SRCDIR/manpage-scan.pl %SRCDIR/.. %PWD/..
+%SRCDIR/test1139.pl %SRCDIR/.. %PWD/..
 </command>
 </client>
 

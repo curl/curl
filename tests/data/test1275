@@ -18,7 +18,7 @@ Verify capital letters after period in markdown files
 </name>
 
 <command type="perl">
-%SRCDIR/markdown-uppercase.pl %SRCDIR/..
+%SRCDIR/test1275.pl %SRCDIR/..
 </command>
 </client>
 
