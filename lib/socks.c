@@ -354,8 +354,9 @@ static CURLproxycode do_SOCKS4(struct Curl_cfilter *cf,
       }
     }
     CURL_FALLTHROUGH();
+  case CONNECT_RESOLVED:
 CONNECT_RESOLVED:
-  case CONNECT_RESOLVED: {
+  {
     struct Curl_addrinfo *hp = NULL;
     /*
      * We cannot use 'hostent' as a struct that Curl_resolv() returns.  It
@@ -394,8 +395,8 @@ CONNECT_RESOLVED:
       return CURLPX_RESOLVE_HOST;
   }
     CURL_FALLTHROUGH();
-CONNECT_REQ_INIT:
   case CONNECT_REQ_INIT:
+CONNECT_REQ_INIT:
     /*
      * This is currently not supporting "Identification Protocol (RFC1413)".
      */
@@ -641,8 +642,8 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
       return CURLPX_OK;
     }
     CURL_FALLTHROUGH();
-CONNECT_SOCKS_READ_INIT:
   case CONNECT_SOCKS_READ_INIT:
+CONNECT_SOCKS_READ_INIT:
     sx->outstanding = 2; /* expect two bytes */
     sx->outp = socksreq; /* store it here */
     CURL_FALLTHROUGH();
@@ -782,8 +783,8 @@ CONNECT_AUTH_INIT:
     /* Everything is good so far, user was authenticated! */
     sxstate(sx, data, CONNECT_REQ_INIT);
     CURL_FALLTHROUGH();
-CONNECT_REQ_INIT:
   case CONNECT_REQ_INIT:
+CONNECT_REQ_INIT:
     if(socks5_resolve_local) {
       enum resolve_t rc = Curl_resolv(data, sx->hostname, sx->remote_port,
                                       TRUE, &dns);
@@ -821,8 +822,9 @@ CONNECT_REQ_INIT:
       }
     }
     CURL_FALLTHROUGH();
+  case CONNECT_RESOLVED:
 CONNECT_RESOLVED:
-  case CONNECT_RESOLVED: {
+  {
     char dest[MAX_IPADR_LEN];  /* printable address */
     struct Curl_addrinfo *hp = NULL;
     if(dns)
@@ -925,8 +927,8 @@ CONNECT_RESOLVE_REMOTE:
     }
     CURL_FALLTHROUGH();
 
-CONNECT_REQ_SEND:
   case CONNECT_REQ_SEND:
+CONNECT_REQ_SEND:
     /* PORT MSB */
     socksreq[len++] = (unsigned char)((sx->remote_port >> 8) & 0xff);
     /* PORT LSB */
