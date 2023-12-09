@@ -1140,7 +1140,7 @@ then
       AC_MSG_CHECKING([for gethostbyname in $winsock_LIB])
       AC_LINK_IFELSE([
         AC_LANG_PROGRAM([[
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -3473,7 +3473,7 @@ AC_CHECK_TYPE(sa_family_t,
      AC_DEFINE(CURL_SA_FAMILY_T, ADDRESS_FAMILY, [IP address type in sockaddr]),
      AC_DEFINE(CURL_SA_FAMILY_T, unsigned short, [IP address type in sockaddr]),
     [
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif

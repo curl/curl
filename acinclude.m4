@@ -323,7 +323,7 @@ AC_DEFUN([CURL_CHECK_HEADER_LBER], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #undef inline
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -355,7 +355,7 @@ AC_DEFUN([CURL_CHECK_HEADER_LBER], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #undef inline
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -403,7 +403,7 @@ AC_DEFUN([CURL_CHECK_HEADER_LDAP], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #undef inline
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -449,7 +449,7 @@ AC_DEFUN([CURL_CHECK_HEADER_LDAP_SSL], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #undef inline
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -534,7 +534,7 @@ AC_DEFUN([CURL_CHECK_LIBS_WINLDAP], [
       AC_LINK_IFELSE([
         AC_LANG_PROGRAM([[
 #undef inline
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -632,7 +632,7 @@ AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
       AC_LINK_IFELSE([
         AC_LANG_PROGRAM([[
 #undef inline
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -701,7 +701,7 @@ AC_DEFUN([TYPE_SOCKADDR_STORAGE],
                   [if struct sockaddr_storage is defined]), ,
    [
 #undef inline
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -739,7 +739,7 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
 #undef inline
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -790,7 +790,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
 #undef inline
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -837,7 +837,7 @@ AC_DEFUN([CURL_CHECK_MSG_NOSIGNAL], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #undef inline
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -882,7 +882,7 @@ AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #undef inline
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -937,7 +937,7 @@ AC_DEFUN([TYPE_IN_ADDR_T], [
           AC_LINK_IFELSE([
             AC_LANG_PROGRAM([[
 #undef inline
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -979,7 +979,7 @@ AC_DEFUN([TYPE_IN_ADDR_T], [
     esac
   ],[
 #undef inline
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -1197,7 +1197,7 @@ AC_DEFUN([CURL_CHECK_LIBS_CONNECT], [
         AC_LANG_PROGRAM([[
           $curl_includes_winsock2
           $curl_includes_bsdsocket
-          #if !defined(HAVE_WINDOWS_H) && !defined(HAVE_PROTO_BSDSOCKET_H)
+          #if !defined(_WIN32) && !defined(HAVE_PROTO_BSDSOCKET_H)
             int connect(int, void*, int);
           #endif
         ]],[[
@@ -1294,7 +1294,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
 #undef inline
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -1310,7 +1310,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
 #include <sys/time.h>
 #endif
 #include <time.h>
-#ifndef HAVE_WINDOWS_H
+#ifndef _WIN32
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #elif defined(HAVE_UNISTD_H)

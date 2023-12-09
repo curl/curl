@@ -414,7 +414,7 @@ dnl included when winsock2.h is to be included.
 AC_DEFUN([CURL_INCLUDES_WINSOCK2], [
 curl_includes_winsock2="\
 /* includes start */
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #  ifndef WIN32_LEAN_AND_MEAN
 #    define WIN32_LEAN_AND_MEAN
 #  endif
@@ -437,7 +437,7 @@ dnl included when ws2tcpip.h is to be included.
 AC_DEFUN([CURL_INCLUDES_WS2TCPIP], [
 curl_includes_ws2tcpip="\
 /* includes start */
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #  ifndef WIN32_LEAN_AND_MEAN
 #    define WIN32_LEAN_AND_MEAN
 #  endif
@@ -510,7 +510,7 @@ dnl defines function calling convention.
 AC_DEFUN([CURL_PREPROCESS_CALLCONV], [
 curl_preprocess_callconv="\
 /* preprocess start */
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #  define FUNCALLCONV __stdcall
 #else
 #  define FUNCALLCONV
