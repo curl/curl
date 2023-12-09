@@ -591,14 +591,6 @@ dnl could be done later using AC_CHECK_HEADER or AC_CHECK_HEADERS for
 dnl this specific header files. And do them before its results are used.
 dnl **********************************************************************
 
-case X-"$curl_cv_native_windows" in
-  X-yes)
-    CURL_CHECK_HEADER_WS2TCPIP
-    ;;
-  *)
-    curl_cv_header_ws2tcpip_h="no"
-    ;;
-esac
 CURL_CHECK_WIN32_LARGEFILE
 CURL_CHECK_WIN32_CRYPTO
 

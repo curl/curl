@@ -198,44 +198,6 @@ AC_DEFUN([CURL_CHECK_NATIVE_WINDOWS], [
 ])
 
 
-dnl CURL_CHECK_HEADER_WS2TCPIP
-dnl -------------------------------------------------
-dnl Check for compilable and valid ws2tcpip.h header
-
-AC_DEFUN([CURL_CHECK_HEADER_WS2TCPIP], [
-  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
-  AC_CACHE_CHECK([for ws2tcpip.h], [curl_cv_header_ws2tcpip_h], [
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-#undef inline
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#include <winsock2.h>
-#include <ws2tcpip.h>
-      ]],[[
-#if defined(__CYGWIN__) || defined(__CEGCC__)
-        HAVE_WS2TCPIP_H shall not be defined.
-#else
-        int dummy=2*IP_PKTINFO;
-#endif
-      ]])
-    ],[
-      curl_cv_header_ws2tcpip_h="yes"
-    ],[
-      curl_cv_header_ws2tcpip_h="no"
-    ])
-  ])
-  case "$curl_cv_header_ws2tcpip_h" in
-    yes)
-      AC_DEFINE_UNQUOTED(HAVE_WS2TCPIP_H, 1,
-        [Define to 1 if you have the ws2tcpip.h header file.])
-      ;;
-  esac
-])
-
-
 dnl CURL_CHECK_HEADER_LBER
 dnl -------------------------------------------------
 dnl Check for compilable and valid lber.h header,

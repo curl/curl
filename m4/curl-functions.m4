@@ -439,14 +439,11 @@ curl_includes_ws2tcpip="\
 #    define WIN32_LEAN_AND_MEAN
 #  endif
 #  include <winsock2.h>
-#  ifdef HAVE_WS2TCPIP_H
-#     include <ws2tcpip.h>
-#  endif
+#  include <ws2tcpip.h>
 #  include <windows.h>
 #endif
 /* includes end */"
   CURL_CHECK_NATIVE_WINDOWS
-  CURL_CHECK_HEADER_WS2TCPIP
 ])
 
 
