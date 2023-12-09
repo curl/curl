@@ -359,7 +359,6 @@ include(CheckCSourceCompiles)
 
 # On windows preload settings
 if(WIN32)
-  set(HAVE_WS2TCPIP_H 1)
   include(${CMAKE_CURRENT_SOURCE_DIR}/CMake/Platforms/WindowsCache.cmake)
 endif()
 
@@ -1060,7 +1059,7 @@ endif()
 # Check for header files
 if(WIN32)
   set(CURL_INCLUDES ${CURL_INCLUDES} "winsock2.h")
-  check_include_file_concat("ws2tcpip.h"     HAVE_WS2TCPIP_H)
+  set(CURL_INCLUDES ${CURL_INCLUDES} "ws2tcpip.h")
   set(CURL_INCLUDES ${CURL_INCLUDES} "windows.h")
 endif()
 
@@ -1397,7 +1396,7 @@ endif()
 
 # TODO test which of these headers are required
 if(WIN32)
-  set(CURL_PULL_WS2TCPIP_H ${HAVE_WS2TCPIP_H})
+  set(CURL_PULL_WS2TCPIP_H 1)
 else()
   set(CURL_PULL_SYS_TYPES_H ${HAVE_SYS_TYPES_H})
   set(CURL_PULL_SYS_SOCKET_H ${HAVE_SYS_SOCKET_H})
