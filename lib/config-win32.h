@@ -97,9 +97,6 @@
 #define HAVE_UNISTD_H 1
 #endif
 
-/* Define if you have the <windows.h> header file. */
-#define HAVE_WINDOWS_H 1
-
 /* Define if you have the <winsock2.h> header file. */
 #define HAVE_WINSOCK2_H 1
 

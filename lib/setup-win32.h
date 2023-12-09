@@ -31,11 +31,11 @@
  * to any other further and independent block.  Under Cygwin things work
  * just as under linux (e.g. <sys/socket.h>) and the winsock headers should
  * never be included when __CYGWIN__ is defined.  configure script takes
- * care of this, not defining HAVE_WINDOWS_H, HAVE_WINSOCK2_H,
+ * care of this, not defining HAVE_WINSOCK2_H,
  * neither HAVE_WS2TCPIP_H when __CYGWIN__ is defined.
  */
 
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #  if defined(UNICODE) && !defined(_UNICODE)
 #    error "UNICODE is defined but _UNICODE is not defined"
 #  endif

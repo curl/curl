@@ -599,9 +599,6 @@
 /* Define to 1 if you have the <utime.h> header file. */
 #cmakedefine HAVE_UTIME_H 1
 
-/* Define to 1 if you have the windows.h header file. */
-#cmakedefine HAVE_WINDOWS_H 1
-
 /* Define to 1 if you have the winsock2.h header file. */
 #cmakedefine HAVE_WINSOCK2_H 1
 

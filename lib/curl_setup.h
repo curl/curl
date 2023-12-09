@@ -253,7 +253,7 @@
  * Windows setup file includes some system headers.
  */
 
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #  include "setup-win32.h"
 #endif
 
