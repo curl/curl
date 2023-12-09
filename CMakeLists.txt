@@ -1060,7 +1060,7 @@ endif()
 
 # Check for header files
 if(WIN32)
-  check_include_file_concat("winsock2.h"     HAVE_WINSOCK2_H)
+  set(CURL_INCLUDES ${CURL_INCLUDES} "winsock2.h")
   check_include_file_concat("ws2tcpip.h"     HAVE_WS2TCPIP_H)
   set(CURL_INCLUDES ${CURL_INCLUDES} "windows.h")
 endif()
