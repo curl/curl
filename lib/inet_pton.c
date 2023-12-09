@@ -112,7 +112,8 @@ inet_pton4(const char *src, unsigned char *dst)
 
     pch = strchr(digits, ch);
     if(pch) {
-      unsigned int val = *tp * 10 + (unsigned int)(pch - digits);
+      unsigned int val = (unsigned int)(*tp * 10) +
+                         (unsigned int)(pch - digits);
 
       if(saw_digit && *tp == 0)
         return (0);

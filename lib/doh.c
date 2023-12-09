@@ -444,7 +444,7 @@ static DOHcode skipqname(const unsigned char *doh, size_t dohlen,
       return DOH_DNS_BAD_LABEL;
     if(dohlen < (*indexp + 1 + length))
       return DOH_DNS_OUT_OF_RANGE;
-    *indexp += 1 + length;
+    *indexp += (unsigned int)(1 + length);
   } while(length);
   return DOH_OK;
 }
@@ -456,14 +456,15 @@ static unsigned short get16bit(const unsigned char *doh, int index)
 
 static unsigned int get32bit(const unsigned char *doh, int index)
 {
-   /* make clang and gcc optimize this to bswap by incrementing
-      the pointer first. */
-   doh += index;
+  /* make clang and gcc optimize this to bswap by incrementing
+     the pointer first. */
+  doh += index;
 
-   /* avoid undefined behavior by casting to unsigned before shifting
-      24 bits, possibly into the sign bit. codegen is same, but
-      ub sanitizer won't be upset */
-  return ( (unsigned)doh[0] << 24) | (doh[1] << 16) |(doh[2] << 8) | doh[3];
+  /* avoid undefined behavior by casting to unsigned before shifting
+     24 bits, possibly into the sign bit. codegen is same, but
+     ub sanitizer won't be upset */
+  return ((unsigned)doh[0] << 24) | ((unsigned)doh[1] << 16) |
+         ((unsigned)doh[2] << 8) | doh[3];
 }
 
 static DOHcode store_a(const unsigned char *doh, int index, struct dohentry *d)

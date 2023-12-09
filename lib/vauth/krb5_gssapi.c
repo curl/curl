@@ -226,7 +226,8 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   /* Extract the security layer and the maximum message size */
   indata = output_token.value;
   sec_layer = indata[0];
-  max_size = (indata[1] << 16) | (indata[2] << 8) | indata[3];
+  max_size = ((unsigned int)indata[1] << 16) |
+             ((unsigned int)indata[2] << 8) | indata[3];
 
   /* Free the challenge as it is not required anymore */
   gss_release_buffer(&unused_status, &output_token);
