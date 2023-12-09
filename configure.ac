@@ -503,6 +503,7 @@ dnl platform/compiler/architecture specific checks/flags
 dnl **********************************************************************
 
 CURL_CHECK_COMPILER
+CURL_CHECK_NATIVE_WINDOWS
 CURL_SET_COMPILER_BASIC_OPTS
 CURL_SET_COMPILER_DEBUG_OPTS
 CURL_SET_COMPILER_OPTIMIZE_OPTS
@@ -590,7 +591,6 @@ dnl could be done later using AC_CHECK_HEADER or AC_CHECK_HEADERS for
 dnl this specific header files. And do them before its results are used.
 dnl **********************************************************************
 
-CURL_CHECK_NATIVE_WINDOWS
 case X-"$curl_cv_native_windows" in
   X-yes)
     CURL_CHECK_HEADER_WINSOCK2
