@@ -171,67 +171,28 @@ AC_DEFUN([CURL_CHECK_AIX_ALL_SOURCE], [
 ])
 
 
-dnl CURL_CHECK_HEADER_WINDOWS
-dnl -------------------------------------------------
-dnl Check for compilable and valid windows.h header
-
-AC_DEFUN([CURL_CHECK_HEADER_WINDOWS], [
-  AC_CACHE_CHECK([for windows.h], [curl_cv_header_windows_h], [
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-#undef inline
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-      ]],[[
-#if defined(__CYGWIN__) || defined(__CEGCC__)
-        HAVE_WINDOWS_H shall not be defined.
-#else
-        int dummy=2*WINVER;
-#endif
-      ]])
-    ],[
-      curl_cv_header_windows_h="yes"
-    ],[
-      curl_cv_header_windows_h="no"
-    ])
-  ])
-  case "$curl_cv_header_windows_h" in
-    yes)
-      AC_DEFINE_UNQUOTED(HAVE_WINDOWS_H, 1,
-        [Define to 1 if you have the windows.h header file.])
-      ;;
-  esac
-])
-
-
 dnl CURL_CHECK_NATIVE_WINDOWS
 dnl -------------------------------------------------
 dnl Check if building a native Windows target
 
 AC_DEFUN([CURL_CHECK_NATIVE_WINDOWS], [
-  AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
   AC_CACHE_CHECK([whether build target is a native Windows one], [curl_cv_native_windows], [
-    if test "$curl_cv_header_windows_h" = "no"; then
-      curl_cv_native_windows="no"
-    else
-      AC_COMPILE_IFELSE([
-        AC_LANG_PROGRAM([[
-        ]],[[
-#if defined(__MINGW32__) || defined(__MINGW32CE__) || \
-   (defined(_MSC_VER) && (defined(_WIN32) || defined(_WIN64)))
-          int dummy=1;
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+      ]],[[
+#if !defined(__CYGWIN__) && !defined(__CEGCC__) && \
+  (defined(__MINGW32__) || defined(__MINGW32CE__) || \
+   (defined(_MSC_VER) && (defined(_WIN32) || defined(_WIN64))))
+        int dummy=1;
 #else
-          Not a native Windows build target.
+        Not a native Windows build target.
 #endif
-        ]])
-      ],[
-        curl_cv_native_windows="yes"
-      ],[
-        curl_cv_native_windows="no"
-      ])
-    fi
+      ]])
+    ],[
+      curl_cv_native_windows="yes"
+    ],[
+      curl_cv_native_windows="no"
+    ])
   ])
   AM_CONDITIONAL(DOING_NATIVE_WINDOWS, test "x$curl_cv_native_windows" = xyes)
 ])
@@ -242,7 +203,7 @@ dnl -------------------------------------------------
 dnl Check for compilable and valid winsock2.h header
 
 AC_DEFUN([CURL_CHECK_HEADER_WINSOCK2], [
-  AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
+  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   AC_CACHE_CHECK([for winsock2.h], [curl_cv_header_winsock2_h], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
@@ -318,7 +279,7 @@ dnl Check for compilable and valid lber.h header,
 dnl and check if it is needed even with ldap.h
 
 AC_DEFUN([CURL_CHECK_HEADER_LBER], [
-  AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
+  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   AC_CACHE_CHECK([for lber.h], [curl_cv_header_lber_h], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
@@ -1547,10 +1508,10 @@ dnl -------------------------------------------------
 dnl Check if curl's WIN32 large file will be used
 
 AC_DEFUN([CURL_CHECK_WIN32_LARGEFILE], [
-  AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
+  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   AC_MSG_CHECKING([whether build target supports WIN32 file API])
   curl_win32_file_api="no"
-  if test "$curl_cv_header_windows_h" = "yes"; then
+  if test "$curl_cv_native_windows" = "yes"; then
     if test x"$enable_largefile" != "xno"; then
       AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([[
@@ -1606,10 +1567,10 @@ dnl -------------------------------------------------
 dnl Check if curl's WIN32 crypto lib can be used
 
 AC_DEFUN([CURL_CHECK_WIN32_CRYPTO], [
-  AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
+  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   AC_MSG_CHECKING([whether build target supports WIN32 crypto API])
   curl_win32_crypto_api="no"
-  if test "$curl_cv_header_windows_h" = "yes"; then
+  if test "$curl_cv_native_windows" = "yes"; then
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #undef inline

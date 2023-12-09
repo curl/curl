@@ -590,7 +590,6 @@ dnl could be done later using AC_CHECK_HEADER or AC_CHECK_HEADERS for
 dnl this specific header files. And do them before its results are used.
 dnl **********************************************************************
 
-CURL_CHECK_HEADER_WINDOWS
 CURL_CHECK_NATIVE_WINDOWS
 case X-"$curl_cv_native_windows" in
   X-yes)
@@ -1130,7 +1129,7 @@ fi
 if test "$HAVE_GETHOSTBYNAME" != "1"
 then
   dnl This is for winsock systems
-  if test "$curl_cv_header_windows_h" = "yes"; then
+  if test "$curl_cv_native_windows" = "yes"; then
     if test "$curl_cv_header_winsock2_h" = "yes"; then
       winsock_LIB="-lws2_32"
     fi

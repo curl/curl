@@ -424,7 +424,7 @@ curl_includes_winsock2="\
 #  include <windows.h>
 #endif
 /* includes end */"
-  CURL_CHECK_HEADER_WINDOWS
+  CURL_CHECK_NATIVE_WINDOWS
   CURL_CHECK_HEADER_WINSOCK2
 ])
 
@@ -450,7 +450,7 @@ curl_includes_ws2tcpip="\
 #  include <windows.h>
 #endif
 /* includes end */"
-  CURL_CHECK_HEADER_WINDOWS
+  CURL_CHECK_NATIVE_WINDOWS
   CURL_CHECK_HEADER_WINSOCK2
   CURL_CHECK_HEADER_WS2TCPIP
 ])
