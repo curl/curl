@@ -593,11 +593,9 @@ dnl **********************************************************************
 
 case X-"$curl_cv_native_windows" in
   X-yes)
-    CURL_CHECK_HEADER_WINSOCK2
     CURL_CHECK_HEADER_WS2TCPIP
     ;;
   *)
-    curl_cv_header_winsock2_h="no"
     curl_cv_header_ws2tcpip_h="no"
     ;;
 esac
@@ -1130,9 +1128,7 @@ if test "$HAVE_GETHOSTBYNAME" != "1"
 then
   dnl This is for winsock systems
   if test "$curl_cv_native_windows" = "yes"; then
-    if test "$curl_cv_header_winsock2_h" = "yes"; then
-      winsock_LIB="-lws2_32"
-    fi
+    winsock_LIB="-lws2_32"
     if test ! -z "$winsock_LIB"; then
       my_ac_save_LIBS=$LIBS
       LIBS="$winsock_LIB $LIBS"
@@ -1143,9 +1139,7 @@ then
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
-#endif
 #include <windows.h>
 #endif
         ]],[[
@@ -1667,7 +1661,7 @@ AS_HELP_STRING([--disable-ipv6],[Disable IPv6 support]),
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
 /* are AF_INET6 and sockaddr_in6 available? */
 #include <sys/types.h>
-#ifdef HAVE_WINSOCK2_H
+#ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #else
@@ -1706,7 +1700,7 @@ if test "$ipv6" = yes; then
   AC_MSG_CHECKING([if struct sockaddr_in6 has sin6_scope_id member])
   AC_COMPILE_IFELSE([ AC_LANG_PROGRAM([[
 #include <sys/types.h>
-#ifdef HAVE_WINSOCK2_H
+#ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #else
@@ -3476,9 +3470,7 @@ AC_CHECK_TYPE(sa_family_t,
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
-#endif
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>

@@ -46,7 +46,7 @@ curl_includes_arpa_inet="\
 #ifdef HAVE_ARPA_INET_H
 #  include <arpa/inet.h>
 #endif
-#ifdef HAVE_WINSOCK2_H
+#ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #endif
@@ -418,14 +418,11 @@ curl_includes_winsock2="\
 #  ifndef WIN32_LEAN_AND_MEAN
 #    define WIN32_LEAN_AND_MEAN
 #  endif
-#  ifdef HAVE_WINSOCK2_H
-#    include <winsock2.h>
-#  endif
+#  include <winsock2.h>
 #  include <windows.h>
 #endif
 /* includes end */"
   CURL_CHECK_NATIVE_WINDOWS
-  CURL_CHECK_HEADER_WINSOCK2
 ])
 
 
@@ -441,17 +438,14 @@ curl_includes_ws2tcpip="\
 #  ifndef WIN32_LEAN_AND_MEAN
 #    define WIN32_LEAN_AND_MEAN
 #  endif
-#  ifdef HAVE_WINSOCK2_H
-#    include <winsock2.h>
-#    ifdef HAVE_WS2TCPIP_H
-#       include <ws2tcpip.h>
-#    endif
+#  include <winsock2.h>
+#  ifdef HAVE_WS2TCPIP_H
+#     include <ws2tcpip.h>
 #  endif
 #  include <windows.h>
 #endif
 /* includes end */"
   CURL_CHECK_NATIVE_WINDOWS
-  CURL_CHECK_HEADER_WINSOCK2
   CURL_CHECK_HEADER_WS2TCPIP
 ])
 
@@ -1794,7 +1788,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
         struct addrinfo *ai = 0;
         int error;
 
-        #ifdef HAVE_WINSOCK2_H
+        #ifdef _WIN32
         WSADATA wsa;
         if(WSAStartup(MAKEWORD(2, 2), &wsa))
           exit(2);

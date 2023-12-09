@@ -198,49 +198,12 @@ AC_DEFUN([CURL_CHECK_NATIVE_WINDOWS], [
 ])
 
 
-dnl CURL_CHECK_HEADER_WINSOCK2
-dnl -------------------------------------------------
-dnl Check for compilable and valid winsock2.h header
-
-AC_DEFUN([CURL_CHECK_HEADER_WINSOCK2], [
-  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
-  AC_CACHE_CHECK([for winsock2.h], [curl_cv_header_winsock2_h], [
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-#undef inline
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#include <winsock2.h>
-      ]],[[
-#if defined(__CYGWIN__) || defined(__CEGCC__)
-        HAVE_WINSOCK2_H shall not be defined.
-#else
-        int dummy=2*IPPROTO_ESP;
-#endif
-      ]])
-    ],[
-      curl_cv_header_winsock2_h="yes"
-    ],[
-      curl_cv_header_winsock2_h="no"
-    ])
-  ])
-  case "$curl_cv_header_winsock2_h" in
-    yes)
-      AC_DEFINE_UNQUOTED(HAVE_WINSOCK2_H, 1,
-        [Define to 1 if you have the winsock2.h header file.])
-      ;;
-  esac
-])
-
-
 dnl CURL_CHECK_HEADER_WS2TCPIP
 dnl -------------------------------------------------
 dnl Check for compilable and valid ws2tcpip.h header
 
 AC_DEFUN([CURL_CHECK_HEADER_WS2TCPIP], [
-  AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
+  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   AC_CACHE_CHECK([for ws2tcpip.h], [curl_cv_header_ws2tcpip_h], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
@@ -666,9 +629,7 @@ AC_DEFUN([TYPE_SOCKADDR_STORAGE],
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
-#endif
 #include <windows.h>
 #else
 #ifdef HAVE_SYS_TYPES_H
@@ -692,7 +653,7 @@ dnl -------------------------------------------------
 dnl Test if the socket recv() function is available,
 
 AC_DEFUN([CURL_CHECK_FUNC_RECV], [
-  AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
+  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
   AC_CHECK_HEADERS(sys/types.h sys/socket.h)
   #
@@ -704,9 +665,7 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
-#endif
 #include <windows.h>
 #else
 $curl_includes_bsdsocket
@@ -743,7 +702,7 @@ dnl -------------------------------------------------
 dnl Test if the socket send() function is available,
 
 AC_DEFUN([CURL_CHECK_FUNC_SEND], [
-  AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
+  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
   AC_CHECK_HEADERS(sys/types.h sys/socket.h)
   #
@@ -755,9 +714,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
-#endif
 #include <windows.h>
 #else
 $curl_includes_bsdsocket
@@ -802,9 +759,7 @@ AC_DEFUN([CURL_CHECK_MSG_NOSIGNAL], [
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
-#endif
 #include <windows.h>
 #else
 #ifdef HAVE_SYS_TYPES_H
@@ -837,7 +792,7 @@ dnl -------------------------------------------------
 dnl Check for timeval struct
 
 AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
-  AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
+  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   AC_CHECK_HEADERS(sys/types.h sys/time.h sys/socket.h)
   AC_CACHE_CHECK([for struct timeval], [curl_cv_struct_timeval], [
     AC_COMPILE_IFELSE([
@@ -847,9 +802,7 @@ AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
-#endif
 #include <windows.h>
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -902,9 +855,7 @@ AC_DEFUN([TYPE_IN_ADDR_T], [
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
-#endif
 #include <windows.h>
 #else
 #ifdef HAVE_SYS_TYPES_H
@@ -944,9 +895,7 @@ AC_DEFUN([TYPE_IN_ADDR_T], [
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
-#endif
 #include <windows.h>
 #else
 #ifdef HAVE_SYS_TYPES_H
@@ -1259,9 +1208,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
-#endif
 #include <windows.h>
 #endif
 #ifdef HAVE_SYS_TYPES_H
