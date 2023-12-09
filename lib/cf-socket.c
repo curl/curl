@@ -137,14 +137,14 @@ static void nosigpipe(struct Curl_easy *data,
 #define nosigpipe(x,y) Curl_nop_stmt
 #endif
 
-#if defined(__DragonFly__) || defined(HAVE_WINSOCK2_H)
+#if defined(__DragonFly__) || defined(USE_WINSOCK)
 /* DragonFlyBSD and Windows use millisecond units */
 #define KEEPALIVE_FACTOR(x) (x *= 1000)
 #else
 #define KEEPALIVE_FACTOR(x)
 #endif
 
-#if defined(HAVE_WINSOCK2_H) && !defined(SIO_KEEPALIVE_VALS)
+#if defined(USE_WINSOCK) && !defined(SIO_KEEPALIVE_VALS)
 #define SIO_KEEPALIVE_VALS    _WSAIOW(IOC_VENDOR,4)
 
 struct tcp_keepalive {

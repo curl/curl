@@ -253,7 +253,7 @@
  * Windows setup file includes some system headers.
  */
 
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #  include "setup-win32.h"
 #endif
 
@@ -725,10 +725,7 @@
  */
 
 #if defined(__LWIP_OPT_H__) || defined(LWIP_HDR_OPT_H)
-#  if defined(SOCKET) || \
-     defined(USE_WINSOCK) || \
-     defined(HAVE_WINSOCK2_H) || \
-     defined(HAVE_WS2TCPIP_H)
+#  if defined(SOCKET) || defined(USE_WINSOCK)
 #    error "WinSock and lwIP TCP/IP stack definitions shall not coexist!"
 #  endif
 #endif

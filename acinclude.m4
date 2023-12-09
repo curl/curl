@@ -171,144 +171,28 @@ AC_DEFUN([CURL_CHECK_AIX_ALL_SOURCE], [
 ])
 
 
-dnl CURL_CHECK_HEADER_WINDOWS
-dnl -------------------------------------------------
-dnl Check for compilable and valid windows.h header
-
-AC_DEFUN([CURL_CHECK_HEADER_WINDOWS], [
-  AC_CACHE_CHECK([for windows.h], [curl_cv_header_windows_h], [
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-#undef inline
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-      ]],[[
-#if defined(__CYGWIN__) || defined(__CEGCC__)
-        HAVE_WINDOWS_H shall not be defined.
-#else
-        int dummy=2*WINVER;
-#endif
-      ]])
-    ],[
-      curl_cv_header_windows_h="yes"
-    ],[
-      curl_cv_header_windows_h="no"
-    ])
-  ])
-  case "$curl_cv_header_windows_h" in
-    yes)
-      AC_DEFINE_UNQUOTED(HAVE_WINDOWS_H, 1,
-        [Define to 1 if you have the windows.h header file.])
-      ;;
-  esac
-])
-
-
 dnl CURL_CHECK_NATIVE_WINDOWS
 dnl -------------------------------------------------
 dnl Check if building a native Windows target
 
 AC_DEFUN([CURL_CHECK_NATIVE_WINDOWS], [
-  AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
   AC_CACHE_CHECK([whether build target is a native Windows one], [curl_cv_native_windows], [
-    if test "$curl_cv_header_windows_h" = "no"; then
-      curl_cv_native_windows="no"
-    else
-      AC_COMPILE_IFELSE([
-        AC_LANG_PROGRAM([[
-        ]],[[
-#if defined(__MINGW32__) || defined(__MINGW32CE__) || \
-   (defined(_MSC_VER) && (defined(_WIN32) || defined(_WIN64)))
-          int dummy=1;
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+      ]],[[
+#ifdef _WIN32
+        int dummy=1;
 #else
-          Not a native Windows build target.
+        Not a native Windows build target.
 #endif
-        ]])
-      ],[
-        curl_cv_native_windows="yes"
-      ],[
-        curl_cv_native_windows="no"
-      ])
-    fi
+      ]])
+    ],[
+      curl_cv_native_windows="yes"
+    ],[
+      curl_cv_native_windows="no"
+    ])
   ])
   AM_CONDITIONAL(DOING_NATIVE_WINDOWS, test "x$curl_cv_native_windows" = xyes)
-])
-
-
-dnl CURL_CHECK_HEADER_WINSOCK2
-dnl -------------------------------------------------
-dnl Check for compilable and valid winsock2.h header
-
-AC_DEFUN([CURL_CHECK_HEADER_WINSOCK2], [
-  AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
-  AC_CACHE_CHECK([for winsock2.h], [curl_cv_header_winsock2_h], [
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-#undef inline
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#include <winsock2.h>
-      ]],[[
-#if defined(__CYGWIN__) || defined(__CEGCC__) || defined(__MINGW32CE__)
-        HAVE_WINSOCK2_H shall not be defined.
-#else
-        int dummy=2*IPPROTO_ESP;
-#endif
-      ]])
-    ],[
-      curl_cv_header_winsock2_h="yes"
-    ],[
-      curl_cv_header_winsock2_h="no"
-    ])
-  ])
-  case "$curl_cv_header_winsock2_h" in
-    yes)
-      AC_DEFINE_UNQUOTED(HAVE_WINSOCK2_H, 1,
-        [Define to 1 if you have the winsock2.h header file.])
-      ;;
-  esac
-])
-
-
-dnl CURL_CHECK_HEADER_WS2TCPIP
-dnl -------------------------------------------------
-dnl Check for compilable and valid ws2tcpip.h header
-
-AC_DEFUN([CURL_CHECK_HEADER_WS2TCPIP], [
-  AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
-  AC_CACHE_CHECK([for ws2tcpip.h], [curl_cv_header_ws2tcpip_h], [
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-#undef inline
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#include <winsock2.h>
-#include <ws2tcpip.h>
-      ]],[[
-#if defined(__CYGWIN__) || defined(__CEGCC__) || defined(__MINGW32CE__)
-        HAVE_WS2TCPIP_H shall not be defined.
-#else
-        int dummy=2*IP_PKTINFO;
-#endif
-      ]])
-    ],[
-      curl_cv_header_ws2tcpip_h="yes"
-    ],[
-      curl_cv_header_ws2tcpip_h="no"
-    ])
-  ])
-  case "$curl_cv_header_ws2tcpip_h" in
-    yes)
-      AC_DEFINE_UNQUOTED(HAVE_WS2TCPIP_H, 1,
-        [Define to 1 if you have the ws2tcpip.h header file.])
-      ;;
-  esac
 ])
 
 
@@ -318,12 +202,12 @@ dnl Check for compilable and valid lber.h header,
 dnl and check if it is needed even with ldap.h
 
 AC_DEFUN([CURL_CHECK_HEADER_LBER], [
-  AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
+  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   AC_CACHE_CHECK([for lber.h], [curl_cv_header_lber_h], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #undef inline
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -355,7 +239,7 @@ AC_DEFUN([CURL_CHECK_HEADER_LBER], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #undef inline
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -403,7 +287,7 @@ AC_DEFUN([CURL_CHECK_HEADER_LDAP], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #undef inline
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -449,7 +333,7 @@ AC_DEFUN([CURL_CHECK_HEADER_LDAP_SSL], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #undef inline
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -534,7 +418,7 @@ AC_DEFUN([CURL_CHECK_LIBS_WINLDAP], [
       AC_LINK_IFELSE([
         AC_LANG_PROGRAM([[
 #undef inline
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -632,7 +516,7 @@ AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
       AC_LINK_IFELSE([
         AC_LANG_PROGRAM([[
 #undef inline
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -701,13 +585,11 @@ AC_DEFUN([TYPE_SOCKADDR_STORAGE],
                   [if struct sockaddr_storage is defined]), ,
    [
 #undef inline
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
-#endif
 #include <windows.h>
 #else
 #ifdef HAVE_SYS_TYPES_H
@@ -731,7 +613,7 @@ dnl -------------------------------------------------
 dnl Test if the socket recv() function is available,
 
 AC_DEFUN([CURL_CHECK_FUNC_RECV], [
-  AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
+  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
   AC_CHECK_HEADERS(sys/types.h sys/socket.h)
   #
@@ -739,13 +621,11 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
 #undef inline
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
-#endif
 #include <windows.h>
 #else
 $curl_includes_bsdsocket
@@ -782,7 +662,7 @@ dnl -------------------------------------------------
 dnl Test if the socket send() function is available,
 
 AC_DEFUN([CURL_CHECK_FUNC_SEND], [
-  AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
+  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
   AC_CHECK_HEADERS(sys/types.h sys/socket.h)
   #
@@ -790,13 +670,11 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
 #undef inline
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
-#endif
 #include <windows.h>
 #else
 $curl_includes_bsdsocket
@@ -837,13 +715,11 @@ AC_DEFUN([CURL_CHECK_MSG_NOSIGNAL], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #undef inline
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
-#endif
 #include <windows.h>
 #else
 #ifdef HAVE_SYS_TYPES_H
@@ -876,19 +752,17 @@ dnl -------------------------------------------------
 dnl Check for timeval struct
 
 AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
-  AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
+  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   AC_CHECK_HEADERS(sys/types.h sys/time.h sys/socket.h)
   AC_CACHE_CHECK([for struct timeval], [curl_cv_struct_timeval], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #undef inline
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
-#endif
 #include <windows.h>
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -937,13 +811,11 @@ AC_DEFUN([TYPE_IN_ADDR_T], [
           AC_LINK_IFELSE([
             AC_LANG_PROGRAM([[
 #undef inline
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
-#endif
 #include <windows.h>
 #else
 #ifdef HAVE_SYS_TYPES_H
@@ -979,13 +851,11 @@ AC_DEFUN([TYPE_IN_ADDR_T], [
     esac
   ],[
 #undef inline
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
-#endif
 #include <windows.h>
 #else
 #ifdef HAVE_SYS_TYPES_H
@@ -1197,7 +1067,7 @@ AC_DEFUN([CURL_CHECK_LIBS_CONNECT], [
         AC_LANG_PROGRAM([[
           $curl_includes_winsock2
           $curl_includes_bsdsocket
-          #if !defined(HAVE_WINDOWS_H) && !defined(HAVE_PROTO_BSDSOCKET_H)
+          #if !defined(_WIN32) && !defined(HAVE_PROTO_BSDSOCKET_H)
             int connect(int, void*, int);
           #endif
         ]],[[
@@ -1294,13 +1164,11 @@ AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
 #undef inline
-#ifdef HAVE_WINDOWS_H
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
-#endif
 #include <windows.h>
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -1310,7 +1178,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
 #include <sys/time.h>
 #endif
 #include <time.h>
-#ifndef HAVE_WINDOWS_H
+#ifndef _WIN32
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #elif defined(HAVE_UNISTD_H)
@@ -1547,17 +1415,15 @@ dnl -------------------------------------------------
 dnl Check if curl's WIN32 large file will be used
 
 AC_DEFUN([CURL_CHECK_WIN32_LARGEFILE], [
-  AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
+  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   AC_MSG_CHECKING([whether build target supports WIN32 file API])
   curl_win32_file_api="no"
-  if test "$curl_cv_header_windows_h" = "yes"; then
+  if test "$curl_cv_native_windows" = "yes"; then
     if test x"$enable_largefile" != "xno"; then
       AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([[
         ]],[[
-#if !defined(_WIN32_WCE) && \
-    (defined(__MINGW32__) || \
-    (defined(_MSC_VER) && (defined(_WIN32) || defined(_WIN64))))
+#if !defined(_WIN32_WCE) && (defined(__MINGW32__) || defined(_MSC_VER))
           int dummy=1;
 #else
           WIN32 large file API not supported.
@@ -1606,10 +1472,10 @@ dnl -------------------------------------------------
 dnl Check if curl's WIN32 crypto lib can be used
 
 AC_DEFUN([CURL_CHECK_WIN32_CRYPTO], [
-  AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
+  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   AC_MSG_CHECKING([whether build target supports WIN32 crypto API])
   curl_win32_crypto_api="no"
-  if test "$curl_cv_header_windows_h" = "yes"; then
+  if test "$curl_cv_native_windows" = "yes"; then
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #undef inline

@@ -194,7 +194,6 @@ AC_DEFUN([CURL_CHECK_COMPILER_GNU_C], [
     flags_opt_all="-O -O0 -O1 -O2 -O3 -Os -Og -Ofast"
     flags_opt_yes="-O2"
     flags_opt_off="-O0"
-    CURL_CHECK_DEF([_WIN32], [], [silent])
   else
     AC_MSG_RESULT([no])
   fi
@@ -1035,7 +1034,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl Only gcc 4.5 or later
           if test "$compiler_num" -ge "405"; then
             dnl Only windows targets
-            if test "$curl_cv_have_def__WIN32" = "yes"; then
+            if test "$curl_cv_native_windows" = "yes"; then
               tmp_CFLAGS="$tmp_CFLAGS -Wno-pedantic-ms-format"
             fi
           fi
