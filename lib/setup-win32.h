@@ -24,24 +24,27 @@
  *
  ***************************************************************************/
 
-#ifdef _WIN32
-/*
- * Define USE_WINSOCK to 2 if we have and use WINSOCK2 API, else
- * undefine USE_WINSOCK.
- */
 #undef USE_WINSOCK
-#define USE_WINSOCK 2
-#endif
 
+/* ---------------------------------------------------------------- */
+/*                        Watt-32 tcp/ip SPECIFIC                   */
+/* ---------------------------------------------------------------- */
+#ifdef USE_WATT32
+#  include <tcp.h>
+#  undef byte
+#  undef word
+#  define HAVE_SYS_IOCTL_H
+#  define HAVE_SYS_SOCKET_H
+#  define HAVE_NETINET_IN_H
+#  define HAVE_NETDB_H
+#  define HAVE_ARPA_INET_H
+#  define SOCKET int
 /* ---------------------------------------------------------------- */
 /*               BSD-style lwIP TCP/IP stack SPECIFIC               */
 /* ---------------------------------------------------------------- */
-
-/* Define to use BSD-style lwIP TCP/IP stack. */
-/* #define USE_LWIPSOCK 1 */
-
-#ifdef USE_LWIPSOCK
-#  undef USE_WINSOCK
+#elif defined(USE_LWIPSOCK)
+  /* Define to use BSD-style lwIP TCP/IP stack. */
+  /* #define USE_LWIPSOCK 1 */
 #  undef HAVE_GETHOSTNAME
 #  undef LWIP_POSIX_SOCKETS_IO_NAMES
 #  undef RECV_TYPE_ARG1
@@ -55,23 +58,8 @@
 #  define RECV_TYPE_ARG3 size_t
 #  define SEND_TYPE_ARG1 int
 #  define SEND_TYPE_ARG3 size_t
-#endif
-
-/* ---------------------------------------------------------------- */
-/*                        Watt-32 tcp/ip SPECIFIC                   */
-/* ---------------------------------------------------------------- */
-
-#ifdef USE_WATT32
-  #include <tcp.h>
-  #undef byte
-  #undef word
-  #undef USE_WINSOCK
-  #define HAVE_SYS_IOCTL_H
-  #define HAVE_SYS_SOCKET_H
-  #define HAVE_NETINET_IN_H
-  #define HAVE_NETDB_H
-  #define HAVE_ARPA_INET_H
-  #define SOCKET int
+#elif defined(_WIN32)
+#  define USE_WINSOCK 2
 #endif
 
 /*
