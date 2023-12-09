@@ -25,12 +25,12 @@
  ***************************************************************************/
 
 #ifdef _WIN32
-#ifndef HAVE_WINSOCK2_H
-#define HAVE_WINSOCK2_H
-#endif
-#ifndef HAVE_WS2TCPIP_H
-#define HAVE_WS2TCPIP_H
-#endif
+/*
+ * Define USE_WINSOCK to 2 if we have and use WINSOCK2 API, else
+ * undefine USE_WINSOCK.
+ */
+#undef USE_WINSOCK
+#define USE_WINSOCK 2
 #endif
 
 /* ---------------------------------------------------------------- */
@@ -42,8 +42,6 @@
 
 #ifdef USE_LWIPSOCK
 #  undef USE_WINSOCK
-#  undef HAVE_WINSOCK2_H
-#  undef HAVE_WS2TCPIP_H
 #  undef HAVE_GETHOSTNAME
 #  undef LWIP_POSIX_SOCKETS_IO_NAMES
 #  undef RECV_TYPE_ARG1
@@ -68,8 +66,6 @@
   #undef byte
   #undef word
   #undef USE_WINSOCK
-  #undef HAVE_WINSOCK2_H
-  #undef HAVE_WS2TCPIP_H
   #define HAVE_SYS_IOCTL_H
   #define HAVE_SYS_SOCKET_H
   #define HAVE_NETINET_IN_H
@@ -84,9 +80,7 @@
  * winsock2.h or ws2tcpip.h. Any other windows thing belongs
  * to any other further and independent block.  Under Cygwin things work
  * just as under linux (e.g. <sys/socket.h>) and the winsock headers should
- * never be included when __CYGWIN__ is defined.  configure script takes
- * care of this, not defining HAVE_WINSOCK2_H,
- * neither HAVE_WS2TCPIP_H when __CYGWIN__ is defined.
+ * never be included when __CYGWIN__ is defined.
  */
 
 #ifdef _WIN32
@@ -107,29 +101,14 @@
 #  ifndef NOGDI
 #    define NOGDI
 #  endif
-#  ifdef HAVE_WINSOCK2_H
-#    include <winsock2.h>
-#    ifdef HAVE_WS2TCPIP_H
-#      include <ws2tcpip.h>
-#    endif
-#  endif
+#  include <winsock2.h>
+#  include <ws2tcpip.h>
 #  include <windows.h>
 #  include <winerror.h>
 #  include <tchar.h>
 #  ifdef UNICODE
      typedef wchar_t *(*curl_wcsdup_callback)(const wchar_t *str);
 #  endif
-#endif
-
-/*
- * Define USE_WINSOCK to 2 if we have and use WINSOCK2 API, else
- * undefine USE_WINSOCK.
- */
-
-#undef USE_WINSOCK
-
-#ifdef HAVE_WINSOCK2_H
-#  define USE_WINSOCK 2
 #endif
 
 /*
