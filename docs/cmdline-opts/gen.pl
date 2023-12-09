@@ -675,6 +675,16 @@ sub listglobals {
     }
 }
 
+sub noext {
+    my $in = $_[0];
+    $in =~ s/\.d//;
+    return $in;
+}
+
+sub sortnames {
+    return noext($a) cmp noext($b);
+}
+
 sub mainpage {
     my (@files) = @_;
     my $ret;
@@ -682,7 +692,7 @@ sub mainpage {
     header("page-header");
 
     # output docs for all options
-    foreach my $f (sort @files) {
+    foreach my $f (sort sortnames @files) {
         $ret += single($f, 0);
     }
 
