@@ -34,11 +34,11 @@ macro(add_header_include check header)
 endmacro()
 
 set(signature_call_conv)
-if(HAVE_WINDOWS_H)
+if(WIN32)
   set(_source_epilogue
       "${_source_epilogue}\n#ifndef WIN32_LEAN_AND_MEAN\n#define WIN32_LEAN_AND_MEAN\n#endif")
   add_header_include(HAVE_WINSOCK2_H "winsock2.h")
-  add_header_include(HAVE_WINDOWS_H "windows.h")
+  set(_source_epilogue "${_source_epilogue}\n#include <windows.h>")
   set(signature_call_conv "PASCAL")
   if(WIN32)
     set(CMAKE_REQUIRED_LIBRARIES "ws2_32")
@@ -57,7 +57,7 @@ check_c_source_compiles("${_source_epilogue}
     return 0;
   }" HAVE_MSG_NOSIGNAL)
 
-if(NOT HAVE_WINDOWS_H)
+if(NOT WIN32)
   add_header_include(HAVE_SYS_TIME_H "sys/time.h")
 endif()
 check_c_source_compiles("${_source_epilogue}
@@ -70,7 +70,7 @@ int main(void) {
   return 0;
 }" HAVE_STRUCT_TIMEVAL)
 
-if(HAVE_WINDOWS_H)
+if(WIN32)
   set(CMAKE_EXTRA_INCLUDE_FILES "winsock2.h")
 else()
   set(CMAKE_EXTRA_INCLUDE_FILES)
