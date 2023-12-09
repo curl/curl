@@ -97,9 +97,6 @@
 #define HAVE_UNISTD_H 1
 #endif
 
-/* Define if you have the <ws2tcpip.h> header file. */
-#define HAVE_WS2TCPIP_H 1
-
 /* Define to 1 if you have the <libgen.h> header file. */
 #if defined(__MINGW32__)
 #define HAVE_LIBGEN_H 1

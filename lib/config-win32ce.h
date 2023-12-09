@@ -85,9 +85,6 @@
 #define HAVE_UNISTD_H 1
 #endif
 
-/* Define if you have the <ws2tcpip.h> header file.  */
-#define HAVE_WS2TCPIP_H 1
-
 /* ---------------------------------------------------------------- */
 /*                        OTHER HEADER INFO                         */
 /* ---------------------------------------------------------------- */

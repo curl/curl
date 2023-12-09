@@ -28,6 +28,9 @@
 #ifndef HAVE_WINSOCK2_H
 #define HAVE_WINSOCK2_H
 #endif
+#ifndef HAVE_WS2TCPIP_H
+#define HAVE_WS2TCPIP_H
+#endif
 #endif
 
 /* ---------------------------------------------------------------- */
