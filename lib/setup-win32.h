@@ -24,6 +24,51 @@
  *
  ***************************************************************************/
 
+/* ---------------------------------------------------------------- */
+/*               BSD-style lwIP TCP/IP stack SPECIFIC               */
+/* ---------------------------------------------------------------- */
+
+/* Define to use BSD-style lwIP TCP/IP stack. */
+/* #define USE_LWIPSOCK 1 */
+
+#ifdef USE_LWIPSOCK
+#  undef USE_WINSOCK
+#  undef HAVE_WINSOCK2_H
+#  undef HAVE_WS2TCPIP_H
+#  undef HAVE_GETHOSTNAME
+#  undef LWIP_POSIX_SOCKETS_IO_NAMES
+#  undef RECV_TYPE_ARG1
+#  undef RECV_TYPE_ARG3
+#  undef SEND_TYPE_ARG1
+#  undef SEND_TYPE_ARG3
+#  define HAVE_GETHOSTBYNAME_R
+#  define HAVE_GETHOSTBYNAME_R_6
+#  define LWIP_POSIX_SOCKETS_IO_NAMES 0
+#  define RECV_TYPE_ARG1 int
+#  define RECV_TYPE_ARG3 size_t
+#  define SEND_TYPE_ARG1 int
+#  define SEND_TYPE_ARG3 size_t
+#endif
+
+/* ---------------------------------------------------------------- */
+/*                        Watt-32 tcp/ip SPECIFIC                   */
+/* ---------------------------------------------------------------- */
+
+#ifdef USE_WATT32
+  #include <tcp.h>
+  #undef byte
+  #undef word
+  #undef USE_WINSOCK
+  #undef HAVE_WINSOCK2_H
+  #undef HAVE_WS2TCPIP_H
+  #define HAVE_SYS_IOCTL_H
+  #define HAVE_SYS_SOCKET_H
+  #define HAVE_NETINET_IN_H
+  #define HAVE_NETDB_H
+  #define HAVE_ARPA_INET_H
+  #define SOCKET int
+#endif
+
 /*
  * Include header files for windows builds before redefining anything.
  * Use this preprocessor block only to include or exclude windows.h,
