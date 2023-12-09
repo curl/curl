@@ -28,6 +28,13 @@
 #define CURL_NO_OLDIES
 #endif
 
+/* FIXME: Delete this once the warnings have been fixed. */
+#if !defined(CURL_WARN_SIGN_CONVERSION)
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
+#endif
+
 /* Set default _WIN32_WINNT */
 #ifdef __MINGW32__
 #include <_mingw.h>

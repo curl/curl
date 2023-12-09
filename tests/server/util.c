@@ -137,7 +137,7 @@ void logmsg(const char *msg, ...)
 static const char *win32_strerror(int err, char *buf, size_t buflen)
 {
   if(!FormatMessageA((FORMAT_MESSAGE_FROM_SYSTEM |
-                      FORMAT_MESSAGE_IGNORE_INSERTS), NULL, err,
+                      FORMAT_MESSAGE_IGNORE_INSERTS), NULL, (DWORD)err,
                      LANG_NEUTRAL, buf, (DWORD)buflen, NULL))
     msnprintf(buf, buflen, "Unknown error %d (%#x)", err, err);
   return buf;
@@ -247,7 +247,7 @@ int wait_ms(int timeout_ms)
 #if defined(MSDOS)
   delay(timeout_ms);
 #elif defined(USE_WINSOCK)
-  Sleep(timeout_ms);
+  Sleep((DWORD)timeout_ms);
 #else
   pending_ms = timeout_ms;
   initial_tv = tvnow();

@@ -39,7 +39,7 @@ int test(char *URL)
   CURLcode res = CURLE_OK;
   struct curl_header *h;
   int count = 0;
-  int origins;
+  unsigned int origins;
 
   global_init(CURL_GLOBAL_DEFAULT);
 

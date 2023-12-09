@@ -569,7 +569,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
         goto end;
       }
       /* ignore the connect flag byte and two keepalive bytes */
-      payload_len = (buffer[10] << 8) | buffer[11];
+      payload_len = (size_t)(buffer[10] << 8) | buffer[11];
       /* first part of the payload is the client ID */
       client_id_length = payload_len;
 
@@ -579,14 +579,16 @@ static curl_socket_t mqttit(curl_socket_t fd)
       start_usr = client_id_offset + payload_len;
       if(usr_flag == (unsigned char)(conn_flags & usr_flag)) {
         logmsg("User flag is present in CONN flag");
-        payload_len += (buffer[start_usr] << 8) | buffer[start_usr + 1];
+        payload_len += (size_t)(buffer[start_usr] << 8) |
+                       buffer[start_usr + 1];
         payload_len += 2; /* MSB and LSB for user length */
       }
 
       start_passwd = client_id_offset + payload_len;
       if(passwd_flag == (char)(conn_flags & passwd_flag)) {
         logmsg("Password flag is present in CONN flags");
-        payload_len += (buffer[start_passwd] << 8) | buffer[start_passwd + 1];
+        payload_len += (size_t)(buffer[start_passwd] << 8) |
+                       buffer[start_passwd + 1];
         payload_len += 2; /* MSB and LSB for password length */
       }
 
@@ -631,7 +633,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
       packet_id = (unsigned short)((buffer[0] << 8) | buffer[1]);
 
       /* two bytes topic length */
-      topic_len = (buffer[2] << 8) | buffer[3];
+      topic_len = (size_t)(buffer[2] << 8) | buffer[3];
       if(topic_len != (remaining_length - 5)) {
         logmsg("Wrong topic length, got %u expected %zu",
                topic_len, remaining_length - 5);
@@ -676,7 +678,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
       logprotocol(FROM_CLIENT, "PUBLISH", remaining_length,
                   dump, buffer, rc);
 
-      topiclen = (buffer[1 + bytes] << 8) | buffer[2 + bytes];
+      topiclen = (size_t)(buffer[1 + bytes] << 8) | buffer[2 + bytes];
       logmsg("Got %zu bytes topic", topiclen);
       /* TODO: verify topiclen */
 
