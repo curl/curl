@@ -29,14 +29,19 @@ set(_source_epilogue "#undef inline")
 
 macro(add_header_include check header)
   if(${check})
-    set(_source_epilogue "${_source_epilogue}\n#include <${header}>")
+    set(_source_epilogue "${_source_epilogue}
+      #include <${header}>")
   endif()
 endmacro()
 
 set(signature_call_conv)
 if(WIN32)
-  set(_source_epilogue
-      "${_source_epilogue}\n#ifndef WIN32_LEAN_AND_MEAN\n#define WIN32_LEAN_AND_MEAN\n#endif\n#include <winsock2.h>\n#include <windows.h>")
+  set(_source_epilogue "${_source_epilogue}
+    #ifndef WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
+    #endif
+    #include <winsock2.h>
+    #include <windows.h>")
   set(signature_call_conv "PASCAL")
   if(WIN32)
     set(CMAKE_REQUIRED_LIBRARIES "ws2_32")
