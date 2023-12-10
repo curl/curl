@@ -184,9 +184,8 @@
 #  define CURL_FORMAT_CURL_OFF_TU    PRIu64
 #  define CURL_SUFFIX_CURL_OFF_T     LL
 #  define CURL_SUFFIX_CURL_OFF_TU    ULL
-#  define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
+#  define CURL_TYPEOF_CURL_SOCKLEN_T int
 #  define CURL_PULL_SYS_TYPES_H      1
-#  define CURL_PULL_WS2TCPIP_H       1
 
 #elif defined(__VMS)
 #  if defined(__VAX)
@@ -415,15 +414,6 @@
 #ifdef _AIX
 /* AIX needs <sys/poll.h> */
 #define CURL_PULL_SYS_POLL_H
-#endif
-
-
-/* CURL_PULL_WS2TCPIP_H is defined above when inclusion of header file  */
-/* ws2tcpip.h is required here to properly make type definitions below. */
-#ifdef CURL_PULL_WS2TCPIP_H
-#  include <winsock2.h>
-#  include <windows.h>
-#  include <ws2tcpip.h>
 #endif
 
 /* CURL_PULL_SYS_TYPES_H is defined above when inclusion of header file  */
