@@ -1423,9 +1423,7 @@ AC_DEFUN([CURL_CHECK_WIN32_LARGEFILE], [
       AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([[
         ]],[[
-#if !defined(_WIN32_WCE) && \
-    (defined(__MINGW32__) || \
-    (defined(_MSC_VER) && (defined(_WIN32) || defined(_WIN64))))
+#if !defined(_WIN32_WCE) && (defined(__MINGW32__) || defined(_MSC_VER))
           int dummy=1;
 #else
           WIN32 large file API not supported.
