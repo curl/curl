@@ -26,19 +26,10 @@
 
 # TODO:
 # The output .so file lacks the soname number which we currently have within the lib/Makefile.am file
-# Add full (4 or 5 libs) SSL support
-# Add INSTALL target (EXTRA_DIST variables in Makefile.am may be moved to Makefile.inc so that CMake/CPack is aware of what's to include).
-# Check on all possible platforms
-# Test with as many configurations possible (With or without any option)
-# Create scripts that help keeping the CMake build system up to date (to reduce maintenance). According to Tetetest:
-#  - lists of headers that 'configure' checks for;
-#  - curl-specific tests (the ones that are in m4/curl-*.m4 files);
-#  - (most obvious thing:) curl version numbers.
 # Add documentation subproject
 #
 # To check:
 # (From Daniel Stenberg) The cmake build selected to run gcc with -fPIC on my box while the plain configure script did not.
-# (From Daniel Stenberg) The gcc command line use neither -g nor any -O options. As a developer, I also treasure our configure scripts's --enable-debug option that sets a long range of "picky" compiler options.
 
 # Note: By default this CMake build script detects the version of some
 # dependencies using `check_symbol_exists`.  Those checks do not work
