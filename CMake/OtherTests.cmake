@@ -34,7 +34,6 @@ macro(add_header_include check header)
   endif()
 endmacro()
 
-set(signature_call_conv)
 if(WIN32)
   set(_source_epilogue "${_source_epilogue}
     #ifndef WIN32_LEAN_AND_MEAN
@@ -42,7 +41,6 @@ if(WIN32)
     #endif
     #include <winsock2.h>
     #include <windows.h>")
-  set(signature_call_conv "PASCAL")
   if(WIN32)
     set(CMAKE_REQUIRED_LIBRARIES "ws2_32")
   endif()
