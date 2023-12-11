@@ -572,13 +572,15 @@ curl_url_strerror(CURLUcode error)
  * Returns NULL if no error message was found for error code.
  */
 static const char *
-get_winsock_error (int err, char *buf, size_t len)
+get_winsock_error(int err, char *buf, size_t len)
 {
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   const char *p;
 #endif
 
-  if(!len)
+  /* 41 bytes is the longest error string */
+  DEBUGASSERT(len > 41);
+  if(!len || len < 41)
     return NULL;
 
   *buf = '\0';
@@ -755,8 +757,8 @@ get_winsock_error (int err, char *buf, size_t len)
   default:
     return NULL;
   }
-  strncpy(buf, p, len);
-  buf [len-1] = '\0';
+  memcpy(buf, p, len - 1);
+  buf[len - 1] = '\0';
   return buf;
 #endif
 }
@@ -848,7 +850,7 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
 #if defined(_WIN32)
   /* 'sys_nerr' is the maximum errno number, it is not widely portable */
   if(err >= 0 && err < sys_nerr)
-    strncpy(buf, sys_errlist[err], max);
+    snprintf(buf, max, "%s", sys_errlist[err]);
   else
 #endif
   {
@@ -881,7 +883,7 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
     char buffer[256];
     char *msg = strerror_r(err, buffer, sizeof(buffer));
     if(msg)
-      strncpy(buf, msg, max);
+      snprintf(buf, max, "%s", msg);
     else
       msnprintf(buf, max, "Unknown error %d", err);
   }
@@ -890,7 +892,7 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
     /* !checksrc! disable STRERROR 1 */
     const char *msg = strerror(err);
     if(msg)
-      strncpy(buf, msg, max);
+      snprintf(buf, max, "%s", msg);
     else
       msnprintf(buf, max, "Unknown error %d", err);
   }
@@ -943,8 +945,8 @@ const char *Curl_winapi_strerror(DWORD err, char *buf, size_t buflen)
 #else
   {
     const char *txt = (err == ERROR_SUCCESS) ? "No error" : "Error";
-    strncpy(buf, txt, buflen);
-    buf[buflen - 1] = '\0';
+    if(strlen(txt) < buflen)
+      strcpy(buf, txt);
   }
 #endif
 
@@ -1081,17 +1083,11 @@ const char *Curl_sspi_strerror(int err, char *buf, size_t buflen)
               err);
   }
   else {
-    char txtbuf[80];
     char msgbuf[256];
-
-    msnprintf(txtbuf, sizeof(txtbuf), "%s (0x%08X)", txt, err);
-
     if(get_winapi_error(err, msgbuf, sizeof(msgbuf)))
-      msnprintf(buf, buflen, "%s - %s", txtbuf, msgbuf);
-    else {
-      strncpy(buf, txtbuf, buflen);
-      buf[buflen - 1] = '\0';
-    }
+      msnprintf(buf, buflen, "%s (0x%08X) - %s", txt, err, msgbuf);
+    else
+      msnprintf(buf, buflen, "%s (0x%08X)", txt, err);
   }
 
 #else
@@ -1099,8 +1095,8 @@ const char *Curl_sspi_strerror(int err, char *buf, size_t buflen)
     txt = "No error";
   else
     txt = "Error";
-  strncpy(buf, txt, buflen);
-  buf[buflen - 1] = '\0';
+  if(buflen > strlen(txt))
+    strcpy(buf, txt);
 #endif
 
   if(errno != old_errno)
