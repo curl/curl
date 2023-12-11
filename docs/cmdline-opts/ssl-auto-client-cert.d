@@ -5,6 +5,7 @@ Help: Use auto client certificate (Schannel)
 Added: 7.77.0
 See-also: proxy-ssl-auto-client-cert
 Category: tls
+Protocols: TLS
 Example: --ssl-auto-client-cert $URL
 Multi: boolean
 ---

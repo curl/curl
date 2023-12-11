@@ -3,6 +3,7 @@ SPDX-License-Identifier: curl
 Long: dns-servers
 Arg: <addresses>
 Help: DNS server addrs to use
+Protocols: DNS
 Requires: c-ares
 Added: 7.33.0
 Category: dns

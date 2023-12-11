@@ -3,6 +3,7 @@ SPDX-License-Identifier: curl
 Long: ipfs-gateway
 Arg: <URL>
 Help: Gateway for IPFS
+Protocols: IPFS
 Added: 8.4.0
 See-also: help manual
 Category: ipfs

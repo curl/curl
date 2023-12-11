@@ -3,6 +3,7 @@ SPDX-License-Identifier: curl
 Long: get
 Short: G
 Help: Put the post data in the URL and use GET
+Protocols: HTTP
 Category: http upload
 Example: --get $URL
 Example: --get -d "tool=curl" -d "age=old" $URL

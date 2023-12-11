@@ -3,6 +3,7 @@ SPDX-License-Identifier: curl
 Long: tlsauthtype
 Arg: <type>
 Help: TLS authentication type
+Protocols: TLS
 Added: 7.21.4
 Category: tls auth
 Example: --tlsauthtype SRP $URL
