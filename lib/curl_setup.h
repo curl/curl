@@ -650,12 +650,12 @@
 
 /* fallthrough attribute */
 
-#if !defined(CURL_FALLTHROUGH)
+#if !defined(FALLTHROUGH)
 #if (defined(__GNUC__) && __GNUC__ >= 7) || \
     (defined(__clang__) && __clang_major__ >= 10)
-#  define CURL_FALLTHROUGH()  __attribute__((fallthrough))
+#  define FALLTHROUGH()  __attribute__((fallthrough))
 #else
-#  define CURL_FALLTHROUGH()  do {} while (0)
+#  define FALLTHROUGH()  do {} while (0)
 #endif
 #endif
 

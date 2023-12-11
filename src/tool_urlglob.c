@@ -127,7 +127,7 @@ static CURLcode glob_set(struct URLGlob *glob, char **patternp,
       if(multiply(amount, pat->content.Set.size + 1))
         return GLOBERROR("range overflow", 0, CURLE_URL_MALFORMAT);
 
-      CURL_FALLTHROUGH();
+      FALLTHROUGH();
     case ',':
 
       *buf = '\0';
@@ -171,7 +171,7 @@ static CURLcode glob_set(struct URLGlob *glob, char **patternp,
         ++pattern;
         ++(*posp);
       }
-      CURL_FALLTHROUGH();
+      FALLTHROUGH();
     default:
       *buf++ = *pattern++;              /* copy character to set element */
       ++(*posp);

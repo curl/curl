@@ -379,10 +379,10 @@ utf8asn1str(char **to, int type, const char *from, const char *end)
       case 4:
         wc = (wc << 8) | *(const unsigned char *) from++;
         wc = (wc << 8) | *(const unsigned char *) from++;
-        CURL_FALLTHROUGH();
+        FALLTHROUGH();
       case 2:
         wc = (wc << 8) | *(const unsigned char *) from++;
-        CURL_FALLTHROUGH();
+        FALLTHROUGH();
       default: /* case 1: */
         wc = (wc << 8) | *(const unsigned char *) from++;
       }
@@ -548,7 +548,7 @@ static const char *GTime2str(const char *beg, const char *end)
     break;
   case 2:
     sec1 = fracp[-2];
-    CURL_FALLTHROUGH();
+    FALLTHROUGH();
   case 1:
     sec2 = fracp[-1];
     break;
@@ -606,7 +606,7 @@ static const char *UTime2str(const char *beg, const char *end)
   switch(tzp - sec) {
   case 0:
     sec = "00";
-    CURL_FALLTHROUGH();
+    FALLTHROUGH();
   case 2:
     break;
   default:

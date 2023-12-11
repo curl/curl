@@ -591,7 +591,7 @@ static CURLcode ssh_knownhost(struct Curl_easy *data)
     default: /* unknown return codes will equal reject */
     case CURLKHSTAT_REJECT:
       state(data, SSH_SESSION_FREE);
-      CURL_FALLTHROUGH();
+      FALLTHROUGH();
     case CURLKHSTAT_DEFER:
       /* DEFER means bail out but keep the SSH_HOSTKEY state */
       result = sshc->actualcode = CURLE_PEER_FAILED_VERIFICATION;
@@ -600,7 +600,7 @@ static CURLcode ssh_knownhost(struct Curl_easy *data)
       /* remove old host+key that doesn't match */
       if(host)
         libssh2_knownhost_del(sshc->kh, host);
-      CURL_FALLTHROUGH();
+      FALLTHROUGH();
     case CURLKHSTAT_FINE:
     case CURLKHSTAT_FINE_ADD_TO_FILE:
       /* proceed */
@@ -995,7 +995,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       }
 
       state(data, SSH_S_STARTUP);
-      CURL_FALLTHROUGH();
+      FALLTHROUGH();
 
     case SSH_S_STARTUP:
       rc = session_startup(sshc->ssh_session, sock);
@@ -1014,7 +1014,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
 
       state(data, SSH_HOSTKEY);
 
-      CURL_FALLTHROUGH();
+      FALLTHROUGH();
     case SSH_HOSTKEY:
       /*
        * Before we authenticate we should check the hostkey's fingerprint

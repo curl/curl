@@ -438,7 +438,7 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
   case TOOLMIME_STDIN:
     if(!filename)
       filename = "-";
-    CURL_FALLTHROUGH();
+    FALLTHROUGH();
   case TOOLMIME_STDINDATA:
     /* Can only be reading stdin in the current context. */
     CODE1("curl_mime_data_cb(part%d, -1, (curl_read_callback) fread, \\",

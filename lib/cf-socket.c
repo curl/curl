@@ -1568,7 +1568,7 @@ static CURLcode cf_socket_query(struct Curl_cfilter *cf,
         *when = ctx->first_byte_at;
         break;
       }
-      CURL_FALLTHROUGH();
+      FALLTHROUGH();
     default:
       *when = ctx->connected_at;
       break;

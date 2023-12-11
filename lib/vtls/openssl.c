@@ -1088,7 +1088,7 @@ static int ssl_ui_reader(UI *ui, UI_STRING *uis)
       UI_set_result(ui, uis, password);
       return 1;
     }
-    CURL_FALLTHROUGH();
+    FALLTHROUGH();
   default:
     break;
   }
@@ -1107,7 +1107,7 @@ static int ssl_ui_writer(UI *ui, UI_STRING *uis)
        (UI_get_input_flags(uis) & UI_INPUT_FLAG_DEFAULT_PWD)) {
       return 1;
     }
-    CURL_FALLTHROUGH();
+    FALLTHROUGH();
   default:
     break;
   }
@@ -1525,7 +1525,7 @@ fail:
     case SSL_FILETYPE_PEM:
       if(cert_done)
         break;
-      CURL_FALLTHROUGH();
+      FALLTHROUGH();
     case SSL_FILETYPE_ASN1:
       cert_use_result = key_blob ?
         SSL_CTX_use_PrivateKey_blob(ctx, key_blob, file_type, key_passwd) :
@@ -2851,7 +2851,7 @@ ossl_set_ssl_version_min_max_legacy(ctx_option_t *ctx_options,
   failf(data, OSSL_PACKAGE " was built without TLS 1.3 support");
   return CURLE_NOT_BUILT_IN;
 #endif
-  CURL_FALLTHROUGH();
+  FALLTHROUGH();
   case CURL_SSLVERSION_TLSv1_2:
 #if OPENSSL_VERSION_NUMBER >= 0x1000100FL
     *ctx_options |= SSL_OP_NO_TLSv1_1;
@@ -2859,7 +2859,7 @@ ossl_set_ssl_version_min_max_legacy(ctx_option_t *ctx_options,
     failf(data, OSSL_PACKAGE " was built without TLS 1.2 support");
     return CURLE_NOT_BUILT_IN;
 #endif
-    CURL_FALLTHROUGH();
+    FALLTHROUGH();
   case CURL_SSLVERSION_TLSv1_1:
 #if OPENSSL_VERSION_NUMBER >= 0x1000100FL
     *ctx_options |= SSL_OP_NO_TLSv1;
@@ -2867,7 +2867,7 @@ ossl_set_ssl_version_min_max_legacy(ctx_option_t *ctx_options,
     failf(data, OSSL_PACKAGE " was built without TLS 1.1 support");
     return CURLE_NOT_BUILT_IN;
 #endif
-    CURL_FALLTHROUGH();
+    FALLTHROUGH();
   case CURL_SSLVERSION_TLSv1_0:
   case CURL_SSLVERSION_TLSv1:
     break;
@@ -2878,12 +2878,12 @@ ossl_set_ssl_version_min_max_legacy(ctx_option_t *ctx_options,
 #if OPENSSL_VERSION_NUMBER >= 0x1000100FL
     *ctx_options |= SSL_OP_NO_TLSv1_1;
 #endif
-    CURL_FALLTHROUGH();
+    FALLTHROUGH();
   case CURL_SSLVERSION_MAX_TLSv1_1:
 #if OPENSSL_VERSION_NUMBER >= 0x1000100FL
     *ctx_options |= SSL_OP_NO_TLSv1_2;
 #endif
-    CURL_FALLTHROUGH();
+    FALLTHROUGH();
   case CURL_SSLVERSION_MAX_TLSv1_2:
 #ifdef TLS1_3_VERSION
     *ctx_options |= SSL_OP_NO_TLSv1_3;

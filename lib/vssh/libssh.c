@@ -625,7 +625,7 @@ restart:
       if(rc < 0)
         return SSH_ERROR;
 
-      CURL_FALLTHROUGH();
+      FALLTHROUGH();
     case 1:
       sshc->kbd_state = 1;
 
@@ -700,7 +700,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       ssh_set_blocking(sshc->ssh_session, 0);
 
       state(data, SSH_S_STARTUP);
-      CURL_FALLTHROUGH();
+      FALLTHROUGH();
 
     case SSH_S_STARTUP:
       rc = ssh_connect(sshc->ssh_session);
@@ -715,7 +715,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
 
       state(data, SSH_HOSTKEY);
 
-      CURL_FALLTHROUGH();
+      FALLTHROUGH();
     case SSH_HOSTKEY:
 
       rc = myssh_is_known(data);
@@ -725,7 +725,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       }
 
       state(data, SSH_AUTHLIST);
-      CURL_FALLTHROUGH();
+      FALLTHROUGH();
     case SSH_AUTHLIST:{
         sshc->authed = FALSE;
 
@@ -906,7 +906,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         break;
       }
       state(data, SSH_AUTH_PASS);
-      CURL_FALLTHROUGH();
+      FALLTHROUGH();
 
     case SSH_AUTH_PASS:
       rc = ssh_userauth_password(sshc->ssh_session, NULL, conn->passwd);
@@ -969,7 +969,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         break;
       }
       state(data, SSH_SFTP_REALPATH);
-      CURL_FALLTHROUGH();
+      FALLTHROUGH();
     case SSH_SFTP_REALPATH:
       /*
        * Get the "home" directory
@@ -1556,7 +1556,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       sshc->readdir_longentry = NULL;
 
       state(data, SSH_SFTP_READDIR_BOTTOM);
-      CURL_FALLTHROUGH();
+      FALLTHROUGH();
     case SSH_SFTP_READDIR_BOTTOM:
       if(Curl_dyn_addn(&sshc->readdir_buf, "\n", 1))
         result = CURLE_OUT_OF_MEMORY;
@@ -1880,7 +1880,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         break;
       }
       state(data, SSH_SCP_DOWNLOAD);
-      CURL_FALLTHROUGH();
+      FALLTHROUGH();
 
     case SSH_SCP_DOWNLOAD:{
         curl_off_t bytecount;
@@ -1944,7 +1944,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       ssh_set_blocking(sshc->ssh_session, 0);
 
       state(data, SSH_SESSION_DISCONNECT);
-      CURL_FALLTHROUGH();
+      FALLTHROUGH();
 
     case SSH_SESSION_DISCONNECT:
       /* during weird times when we've been prematurely aborted, the channel
@@ -1967,7 +1967,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       data->state.most_recent_ftp_entrypath = NULL;
 
       state(data, SSH_SESSION_FREE);
-      CURL_FALLTHROUGH();
+      FALLTHROUGH();
     case SSH_SESSION_FREE:
       if(sshc->ssh_session) {
         ssh_free(sshc->ssh_session);
@@ -2608,7 +2608,7 @@ static ssize_t sftp_recv(struct Curl_easy *data, int sockindex,
         return -1;
       }
 
-      CURL_FALLTHROUGH();
+      FALLTHROUGH();
     case 1:
       conn->proto.sshc.sftp_recv_state = 1;
 

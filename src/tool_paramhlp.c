@@ -408,7 +408,7 @@ ParameterError proto2num(struct OperationConfig *config,
           break;
         case set:
           protoset[0] = NULL;
-          CURL_FALLTHROUGH();
+          FALLTHROUGH();
         case allow:
           protoset_set(protoset, p);
           break;
