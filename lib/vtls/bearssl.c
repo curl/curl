@@ -517,7 +517,7 @@ static CURLcode bearssl_set_selected_ciphers(struct Curl_easy *data,
     return CURLE_SSL_CIPHER;
 
   while(true) {
-    char *cipher;
+    const char *cipher;
     size_t clen;
 
     /* Extract the next cipher name from the ciphers string */
@@ -549,7 +549,7 @@ static CURLcode bearssl_set_selected_ciphers(struct Curl_easy *data,
     }
     if(i == NUM_OF_CIPHERS) {
       infof(data, "BearSSL: unknown cipher in list: %.*s",
-            (int)clen, cipher_name);
+            (int)clen, cipher);
       continue;
     }
 
