@@ -50,7 +50,7 @@ jobs:
           pushd curl-99.98.97
           ./configure --prefix=$HOME/temp --without-ssl
           make
-          make TFLAGS=1 test
+          make test-ci
           make install
           popd
           # basic check of the installed files
@@ -75,7 +75,7 @@ jobs:
           pushd build
           ../curl-99.98.97/configure --without-ssl
           make
-          make TFLAGS='-p 1 1139' test
+          make test-ci
           popd
           rm -rf build
           rm -rf curl-99.98.97
@@ -98,7 +98,7 @@ jobs:
           pushd build
           ../configure --without-ssl --enable-debug "--prefix=${PWD}/pkg"
           make -j3
-          make -j3 TFLAGS=1279 test
+          make -j3 test-ci
           make -j3 install
         name: 'verify out-of-tree autotools debug build'
 
