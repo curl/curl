@@ -156,7 +156,6 @@ AC_DEFUN([CURL_CHECK_AIX_ALL_SOURCE], [
 #endif])
   AC_BEFORE([$0], [AC_SYS_LARGEFILE])dnl
   AC_BEFORE([$0], [CURL_CONFIGURE_REENTRANT])dnl
-  AC_BEFORE([$0], [CURL_CONFIGURE_PULL_SYS_POLL])dnl
   AC_MSG_CHECKING([if OS is AIX (to define _ALL_SOURCE)])
   AC_EGREP_CPP([yes_this_is_aix],[
 #ifdef _AIX
@@ -1114,40 +1113,6 @@ AC_DEFUN([CURL_DEFINE_UNQUOTED], [
 cat >>confdefs.h <<_EOF
 [@%:@define] $1 ifelse($#, 2, [$2], 1)
 _EOF
-])
-
-dnl CURL_CONFIGURE_PULL_SYS_POLL
-dnl -------------------------------------------------
-dnl The need for the sys/poll.h inclusion arises mainly to properly
-dnl interface AIX systems which define macros 'events' and 'revents'.
-
-AC_DEFUN([CURL_CONFIGURE_PULL_SYS_POLL], [
-  AC_REQUIRE([CURL_INCLUDES_POLL])dnl
-  #
-  tst_poll_events_macro_defined="unknown"
-  #
-  AC_COMPILE_IFELSE([
-    AC_LANG_PROGRAM([[
-      $curl_includes_poll
-    ]],[[
-#if defined(events) || defined(revents)
-      return 0;
-#else
-      force compilation error
-#endif
-    ]])
-  ],[
-    tst_poll_events_macro_defined="yes"
-  ],[
-    tst_poll_events_macro_defined="no"
-  ])
-  #
-  if test "$tst_poll_events_macro_defined" = "yes"; then
-    if test "x$ac_cv_header_sys_poll_h" = "xyes"; then
-      CURL_DEFINE_UNQUOTED([CURL_PULL_SYS_POLL_H])
-    fi
-  fi
-  #
 ])
 
 
