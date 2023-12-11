@@ -11,7 +11,6 @@ See-also: http1.1 http2 http3
 Category: http
 Example: --http3-only $URL
 Multi: mutex
-Experimental: yes
 ---
 Instructs curl to use HTTP/3 to the host in the URL, with no fallback to
 earlier HTTP versions. HTTP/3 can only be used for HTTPS and not for HTTP
