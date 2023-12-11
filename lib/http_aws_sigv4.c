@@ -247,7 +247,7 @@ static CURLcode make_headers(struct Curl_easy *data,
   }
   else {
     char *value;
-
+    char *endp;
     value = strchr(*date_header, ':');
     if(!value) {
       *date_header = NULL;
@@ -256,8 +256,17 @@ static CURLcode make_headers(struct Curl_easy *data,
     ++value;
     while(ISBLANK(*value))
       ++value;
-    strncpy(timestamp, value, TIMESTAMP_SIZE - 1);
-    timestamp[TIMESTAMP_SIZE - 1] = 0;
+    endp = value;
+    while(*endp && ISALNUM(*endp))
+      ++endp;
+    /* 16 bytes => "19700101T000000Z" */
+    if((endp - value) == TIMESTAMP_SIZE - 1) {
+      memcpy(timestamp, value, TIMESTAMP_SIZE - 1);
+      timestamp[TIMESTAMP_SIZE - 1] = 0;
+    }
+    else
+      /* bad timestamp length */
+      timestamp[0] = 0;
     *date_header = NULL;
   }
 
