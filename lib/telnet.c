@@ -826,23 +826,27 @@ static CURLcode check_telnet_options(struct Curl_easy *data)
       case 5:
         /* Terminal type */
         if(strncasecompare(option, "TTYPE", 5)) {
-          strncpy(tn->subopt_ttype, arg, 31);
-          tn->subopt_ttype[31] = 0; /* String termination */
-          tn->us_preferred[CURL_TELOPT_TTYPE] = CURL_YES;
+          size_t l = strlen(arg);
+          if(l < sizeof(tn->subopt_ttype)) {
+            strcpy(tn->subopt_ttype, arg);
+            tn->us_preferred[CURL_TELOPT_TTYPE] = CURL_YES;
+            break;
+          }
         }
-        else
-          result = CURLE_UNKNOWN_OPTION;
+        result = CURLE_UNKNOWN_OPTION;
         break;
 
       case 8:
         /* Display variable */
         if(strncasecompare(option, "XDISPLOC", 8)) {
-          strncpy(tn->subopt_xdisploc, arg, 127);
-          tn->subopt_xdisploc[127] = 0; /* String termination */
-          tn->us_preferred[CURL_TELOPT_XDISPLOC] = CURL_YES;
+          size_t l = strlen(arg);
+          if(l < sizeof(tn->subopt_xdisploc)) {
+            strcpy(tn->subopt_xdisploc, arg);
+            tn->us_preferred[CURL_TELOPT_XDISPLOC] = CURL_YES;
+            break;
+          }
         }
-        else
-          result = CURLE_UNKNOWN_OPTION;
+        result = CURLE_UNKNOWN_OPTION;
         break;
 
       case 7:

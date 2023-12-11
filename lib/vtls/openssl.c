@@ -954,8 +954,9 @@ static char *ossl_strerror(unsigned long error, char *buf, size_t size)
 #endif
 
   if(!*buf) {
-    strncpy(buf, (error ? "Unknown error" : "No error"), size);
-    buf[size - 1] = '\0';
+    const char *msg = error ? "Unknown error" : "No error";
+    if(strlen(msg) < size)
+      strcpy(buf, msg);
   }
 
   return buf;
@@ -4592,10 +4593,10 @@ static ssize_t ossl_send(struct Curl_cfilter *cf,
         ossl_strerror(sslerror, error_buffer, sizeof(error_buffer));
       else if(sockerr)
         Curl_strerror(sockerr, error_buffer, sizeof(error_buffer));
-      else {
-        strncpy(error_buffer, SSL_ERROR_to_str(err), sizeof(error_buffer));
-        error_buffer[sizeof(error_buffer) - 1] = '\0';
-      }
+      else
+        msnprintf(error_buffer, sizeof(error_buffer), "%s",
+                  SSL_ERROR_to_str(err));
+
       failf(data, OSSL_PACKAGE " SSL_write: %s, errno %d",
             error_buffer, sockerr);
       *curlcode = CURLE_SEND_ERROR;
@@ -4688,10 +4689,9 @@ static ssize_t ossl_recv(struct Curl_cfilter *cf,
           ossl_strerror(sslerror, error_buffer, sizeof(error_buffer));
         else if(sockerr && err == SSL_ERROR_SYSCALL)
           Curl_strerror(sockerr, error_buffer, sizeof(error_buffer));
-        else {
-          strncpy(error_buffer, SSL_ERROR_to_str(err), sizeof(error_buffer));
-          error_buffer[sizeof(error_buffer) - 1] = '\0';
-        }
+        else
+          msnprintf(error_buffer, sizeof(error_buffer), "%s",
+                    SSL_ERROR_to_str(err));
         failf(data, OSSL_PACKAGE " SSL_read: %s, errno %d",
               error_buffer, sockerr);
         *curlcode = CURLE_RECV_ERROR;

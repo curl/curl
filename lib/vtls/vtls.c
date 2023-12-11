@@ -1413,17 +1413,11 @@ static size_t multissl_version(char *buffer, size_t size)
     backends_len = p - backends;
   }
 
-  if(!size)
-    return 0;
-
-  if(size <= backends_len) {
-    strncpy(buffer, backends, size - 1);
-    buffer[size - 1] = '\0';
-    return size - 1;
-  }
-
-  strcpy(buffer, backends);
-  return backends_len;
+  if(size && (size < backends_len))
+    strcpy(buffer, backends);
+  else
+    *buffer = 0; /* did not fit */
+  return 0;
 }
 
 static int multissl_setup(const struct Curl_ssl *backend)
