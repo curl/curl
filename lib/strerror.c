@@ -850,7 +850,7 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
 #if defined(_WIN32)
   /* 'sys_nerr' is the maximum errno number, it is not widely portable */
   if(err >= 0 && err < sys_nerr)
-    snprintf(buf, max, "%s", sys_errlist[err]);
+    msnprintf(buf, max, "%s", sys_errlist[err]);
   else
 #endif
   {
@@ -883,7 +883,7 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
     char buffer[256];
     char *msg = strerror_r(err, buffer, sizeof(buffer));
     if(msg)
-      snprintf(buf, max, "%s", msg);
+      msnprintf(buf, max, "%s", msg);
     else
       msnprintf(buf, max, "Unknown error %d", err);
   }
@@ -892,7 +892,7 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
     /* !checksrc! disable STRERROR 1 */
     const char *msg = strerror(err);
     if(msg)
-      snprintf(buf, max, "%s", msg);
+      msnprintf(buf, max, "%s", msg);
     else
       msnprintf(buf, max, "Unknown error %d", err);
   }

@@ -4594,8 +4594,8 @@ static ssize_t ossl_send(struct Curl_cfilter *cf,
       else if(sockerr)
         Curl_strerror(sockerr, error_buffer, sizeof(error_buffer));
       else
-        snprintf(error_buffer, sizeof(error_buffer), "%s",
-                 SSL_ERROR_to_str(err));
+        msnprintf(error_buffer, sizeof(error_buffer), "%s",
+                  SSL_ERROR_to_str(err));
 
       failf(data, OSSL_PACKAGE " SSL_write: %s, errno %d",
             error_buffer, sockerr);
@@ -4690,8 +4690,8 @@ static ssize_t ossl_recv(struct Curl_cfilter *cf,
         else if(sockerr && err == SSL_ERROR_SYSCALL)
           Curl_strerror(sockerr, error_buffer, sizeof(error_buffer));
         else
-          snprintf(error_buffer, sizeof(error_buffer), "%s",
-                   SSL_ERROR_to_str(err));
+          msnprintf(error_buffer, sizeof(error_buffer), "%s",
+                    SSL_ERROR_to_str(err));
         failf(data, OSSL_PACKAGE " SSL_read: %s, errno %d",
               error_buffer, sockerr);
         *curlcode = CURLE_RECV_ERROR;
