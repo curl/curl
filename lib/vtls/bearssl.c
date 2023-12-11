@@ -557,7 +557,8 @@ static CURLcode bearssl_set_selected_ciphers(struct Curl_easy *data,
     for(j = 0; j < selected_count &&
           selected_ciphers[j] != ciphertable[i].num; j++);
     if(j < selected_count) {
-      infof(data, "BearSSL: duplicate cipher in list: %.*s", (int)clen, cipher);
+      infof(data, "BearSSL: duplicate cipher in list: %.*s",
+            (int)clen, cipher);
       continue;
     }
 
