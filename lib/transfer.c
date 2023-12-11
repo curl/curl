@@ -431,9 +431,8 @@ static CURLcode readwrite_data(struct Curl_easy *data,
   char *buf;
   size_t blen;
   size_t consumed;
-  int maxloops = 100;
-  curl_off_t max_recv = data->set.max_recv_speed?
-                        data->set.max_recv_speed : CURL_OFF_T_MAX;
+  int maxloops = 10;
+  curl_off_t max_recv = data->set.max_recv_speed ? 0 : CURL_OFF_T_MAX;
   bool data_eof_handled = FALSE;
 
   DEBUGASSERT(data->state.buffer);
