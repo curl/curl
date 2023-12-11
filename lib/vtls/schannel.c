@@ -439,6 +439,12 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
   return CURLE_OK;
 }
 #endif
+
+static bool algo(const char *check, char *namep, size_t nlen)
+{
+  return (strlen(check) == nlen) && !strncmp(check, namep, nlen);
+}
+
 static CURLcode
 schannel_acquire_credential_handle(struct Curl_cfilter *cf,
                                    struct Curl_easy *data)
@@ -790,9 +796,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 
       char *startCur = ciphers13;
       int algCount = 0;
-      char tmp[LONGEST_ALG_ID] = { 0 };
       char *nameEnd;
-      size_t n;
 
       disable_aes_gcm_sha384 = TRUE;
       disable_aes_gcm_sha256 = TRUE;
@@ -801,40 +805,34 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
       disable_aes_ccm_sha256 = TRUE;
 
       while(startCur && (0 != *startCur) && (algCount < remaining_ciphers)) {
+        size_t n;
+        char *namep;
         nameEnd = strchr(startCur, ':');
         n = nameEnd ? (size_t)(nameEnd - startCur) : strlen(startCur);
+        namep = startCur;
 
-        /* reject too-long cipher names */
-        if(n > (LONGEST_ALG_ID - 1)) {
-          failf(data, "schannel: Cipher name too long, not checked");
-          return CURLE_SSL_CIPHER;
-        }
-
-        strncpy(tmp, startCur, n);
-        tmp[n] = 0;
-
-        if(disable_aes_gcm_sha384
-           && !strcmp("TLS_AES_256_GCM_SHA384", tmp)) {
+        if(disable_aes_gcm_sha384 &&
+           algo("TLS_AES_256_GCM_SHA384", namep, n)) {
           disable_aes_gcm_sha384 = FALSE;
         }
         else if(disable_aes_gcm_sha256
-                && !strcmp("TLS_AES_128_GCM_SHA256", tmp)) {
+                && algo("TLS_AES_128_GCM_SHA256", namep, n)) {
           disable_aes_gcm_sha256 = FALSE;
         }
         else if(disable_chacha_poly
-                && !strcmp("TLS_CHACHA20_POLY1305_SHA256", tmp)) {
+                && algo("TLS_CHACHA20_POLY1305_SHA256", namep, n)) {
           disable_chacha_poly = FALSE;
         }
         else if(disable_aes_ccm_8_sha256
-                && !strcmp("TLS_AES_128_CCM_8_SHA256", tmp)) {
+                && algo("TLS_AES_128_CCM_8_SHA256", namep, n)) {
           disable_aes_ccm_8_sha256 = FALSE;
         }
         else if(disable_aes_ccm_sha256
-                && !strcmp("TLS_AES_128_CCM_SHA256", tmp)) {
+                && algo("TLS_AES_128_CCM_SHA256", namep, n)) {
           disable_aes_ccm_sha256 = FALSE;
         }
         else {
-          failf(data, "schannel: Unknown TLS 1.3 cipher: %s", tmp);
+          failf(data, "schannel: Unknown TLS 1.3 cipher: %.*s", (int)n, namep);
           return CURLE_SSL_CIPHER;
         }
 
