@@ -1406,15 +1406,6 @@ if(CMAKE_COMPILER_IS_GNUCC AND APPLE)
   endif()
 endif()
 
-# TODO test which of these headers are required
-if(WIN32)
-  set(CURL_PULL_WS2TCPIP_H ${HAVE_WS2TCPIP_H})
-else()
-  set(CURL_PULL_SYS_TYPES_H ${HAVE_SYS_TYPES_H})
-  set(CURL_PULL_SYS_SOCKET_H ${HAVE_SYS_SOCKET_H})
-  set(CURL_PULL_SYS_POLL_H ${HAVE_SYS_POLL_H})
-endif()
-
 include(CMake/OtherTests.cmake)
 
 add_definitions(-DHAVE_CONFIG_H)
