@@ -834,7 +834,6 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
 #endif
   int old_errno = errno;
   char *p;
-  size_t max;
 
   if(!buflen)
     return NULL;
@@ -843,23 +842,22 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
   DEBUGASSERT(err >= 0);
 #endif
 
-  max = buflen - 1;
   *buf = '\0';
 
 #if defined(_WIN32) || defined(_WIN32_WCE)
 #if defined(_WIN32)
   /* 'sys_nerr' is the maximum errno number, it is not widely portable */
   if(err >= 0 && err < sys_nerr)
-    msnprintf(buf, max, "%s", sys_errlist[err]);
+    msnprintf(buf, buflen, "%s", sys_errlist[err]);
   else
 #endif
   {
     if(
 #ifdef USE_WINSOCK
-       !get_winsock_error(err, buf, max) &&
+       !get_winsock_error(err, buf, buflen) &&
 #endif
-       !get_winapi_error((DWORD)err, buf, max))
-      msnprintf(buf, max, "Unknown error %d (%#x)", err, err);
+       !get_winapi_error((DWORD)err, buf, buflen))
+      msnprintf(buf, buflen, "Unknown error %d (%#x)", err, err);
   }
 #else /* not Windows coming up */
 
@@ -869,9 +867,9 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
   * storage is supplied via 'strerrbuf' and 'buflen' to hold the generated
   * message string, or EINVAL if 'errnum' is not a valid error number.
   */
-  if(0 != strerror_r(err, buf, max)) {
+  if(0 != strerror_r(err, buf, buflen)) {
     if('\0' == buf[0])
-      msnprintf(buf, max, "Unknown error %d", err);
+      msnprintf(buf, buflen, "Unknown error %d", err);
   }
 #elif defined(HAVE_STRERROR_R) && defined(HAVE_GLIBC_STRERROR_R)
  /*
@@ -883,18 +881,18 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
     char buffer[256];
     char *msg = strerror_r(err, buffer, sizeof(buffer));
     if(msg)
-      msnprintf(buf, max, "%s", msg);
+      msnprintf(buf, buflen, "%s", msg);
     else
-      msnprintf(buf, max, "Unknown error %d", err);
+      msnprintf(buf, buflen, "Unknown error %d", err);
   }
 #else
   {
     /* !checksrc! disable STRERROR 1 */
     const char *msg = strerror(err);
     if(msg)
-      msnprintf(buf, max, "%s", msg);
+      msnprintf(buf, buflen, "%s", msg);
     else
-      msnprintf(buf, max, "Unknown error %d", err);
+      msnprintf(buf, buflen, "Unknown error %d", err);
   }
 #endif
 
