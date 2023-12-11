@@ -929,7 +929,6 @@ if(CURL_USE_GSSAPI)
 
     if(NOT GSS_FLAVOUR STREQUAL "Heimdal")
       # MIT
-      set(HAVE_GSSMIT ON)
       set(_INCLUDE_LIST "")
       if(HAVE_GSSAPI_GSSAPI_H)
         list(APPEND _INCLUDE_LIST "gssapi/gssapi.h")
