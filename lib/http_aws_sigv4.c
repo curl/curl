@@ -605,7 +605,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
       result = CURLE_URL_MALFORMAT;
       goto fail;
     }
-    strncpy(service, hostname, len);
+    memcpy(service, hostname, len);
     service[len] = '\0';
 
     infof(data, "aws_sigv4: picked service %s from host", service);
@@ -624,7 +624,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
         result = CURLE_URL_MALFORMAT;
         goto fail;
       }
-      strncpy(region, reg, len);
+      memcpy(region, reg, len);
       region[len] = '\0';
       infof(data, "aws_sigv4: picked region %s from host", region);
     }
