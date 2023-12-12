@@ -173,12 +173,30 @@ void tool_version_info(void)
   printf("Release-Date: %s\n", LIBCURL_TIMESTAMP);
 #endif
   if(built_in_protos[0]) {
+    const char *insert = NULL;
+    /* we have ipfs and ipns support if libcurl has http support */
+    for(builtin = built_in_protos; *builtin; ++builtin) {
+      if(insert) {
+        /* update insertion so ipfs will be printed in alphabetical order */
+        if(strcmp(*builtin, "ipfs") < 0)
+          insert = *builtin;
+        else
+          break;
+      }
+      else if(!strcmp(*builtin, "http")) {
+        insert = *builtin;
+      }
+    }
     printf("Protocols:");
     for(builtin = built_in_protos; *builtin; ++builtin) {
       /* Special case: do not list rtmp?* protocols.
          They may only appear together with "rtmp" */
       if(!curl_strnequal(*builtin, "rtmp", 4) || !builtin[0][4])
         printf(" %s", *builtin);
+      if(insert && insert == *builtin) {
+        printf(" ipfs ipns");
+        insert = NULL;
+      }
     }
     puts(""); /* newline */
   }

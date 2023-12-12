@@ -1565,6 +1565,8 @@ if(NOT CURL_DISABLE_INSTALL)
   # Clear list and try to detect available protocols
   set(_items)
   _add_if("HTTP"          NOT CURL_DISABLE_HTTP)
+  _add_if("IPFS"          NOT CURL_DISABLE_HTTP)
+  _add_if("IPNS"          NOT CURL_DISABLE_HTTP)
   _add_if("HTTPS"         NOT CURL_DISABLE_HTTP AND SSL_ENABLED)
   _add_if("FTP"           NOT CURL_DISABLE_FTP)
   _add_if("FTPS"          NOT CURL_DISABLE_FTP AND SSL_ENABLED)
