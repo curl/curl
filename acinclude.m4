@@ -589,7 +589,6 @@ AC_DEFUN([TYPE_SOCKADDR_STORAGE],
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <winsock2.h>
-#include <windows.h>
 #else
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -625,7 +624,6 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <winsock2.h>
-#include <windows.h>
 #else
 $curl_includes_bsdsocket
 #ifdef HAVE_SYS_TYPES_H
@@ -674,7 +672,6 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <winsock2.h>
-#include <windows.h>
 #else
 $curl_includes_bsdsocket
 #ifdef HAVE_SYS_TYPES_H
@@ -719,7 +716,6 @@ AC_DEFUN([CURL_CHECK_MSG_NOSIGNAL], [
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <winsock2.h>
-#include <windows.h>
 #else
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -762,7 +758,6 @@ AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <winsock2.h>
-#include <windows.h>
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -815,7 +810,6 @@ AC_DEFUN([TYPE_IN_ADDR_T], [
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <winsock2.h>
-#include <windows.h>
 #else
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -855,7 +849,6 @@ AC_DEFUN([TYPE_IN_ADDR_T], [
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <winsock2.h>
-#include <windows.h>
 #else
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -1134,7 +1127,6 @@ AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <winsock2.h>
-#include <windows.h>
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
