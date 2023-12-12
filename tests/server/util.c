@@ -39,9 +39,6 @@
 #elif defined(HAVE_SYS_POLL_H)
 #include <sys/poll.h>
 #endif
-#ifdef __MINGW32__
-#include <w32api.h>
-#endif
 
 #define ENABLE_CURLX_PRINTF
 /* make the curlx header define all printf() functions to use the curlx_*
@@ -57,15 +54,6 @@
 #undef  EINVAL
 #define EINVAL  22 /* errno.h value */
 #endif
-
-/* MinGW with w32api version < 3.6 declared in6addr_any as extern,
-   but lacked the definition */
-#if defined(ENABLE_IPV6) && defined(__MINGW32__)
-#if (__W32API_MAJOR_VERSION < 3) || \
-    ((__W32API_MAJOR_VERSION == 3) && (__W32API_MINOR_VERSION < 6))
-const struct in6_addr in6addr_any = {{ IN6ADDR_ANY_INIT }};
-#endif /* w32api < 3.6 */
-#endif /* ENABLE_IPV6 && __MINGW32__ */
 
 static struct timeval tvnow(void);
 
