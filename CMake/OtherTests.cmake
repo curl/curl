@@ -42,6 +42,7 @@ if(WIN32)
     #include <winsock2.h>
     #include <windows.h>")
 
+  set(CMAKE_EXTRA_INCLUDE_FILES "winsock2.h")
   set(CMAKE_REQUIRED_LIBRARIES "ws2_32")
 else()
   add_header_include(HAVE_SYS_TYPES_H "sys/types.h")
@@ -70,9 +71,7 @@ int main(void) {
   return 0;
 }" HAVE_STRUCT_TIMEVAL)
 
-if(WIN32)
-  set(CMAKE_EXTRA_INCLUDE_FILES "winsock2.h")
-else()
+if(NOT WIN32)
   set(CMAKE_EXTRA_INCLUDE_FILES)
   if(HAVE_SYS_SOCKET_H)
     set(CMAKE_EXTRA_INCLUDE_FILES "sys/socket.h")
