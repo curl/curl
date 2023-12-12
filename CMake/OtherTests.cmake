@@ -35,13 +35,6 @@ macro(add_header_include check header)
 endmacro()
 
 if(WIN32)
-  set(_source_epilogue "${_source_epilogue}
-    #ifndef WIN32_LEAN_AND_MEAN
-    #define WIN32_LEAN_AND_MEAN
-    #endif
-    #include <winsock2.h>
-    #include <windows.h>")
-
   set(CMAKE_EXTRA_INCLUDE_FILES "winsock2.h")
   set(CMAKE_REQUIRED_LIBRARIES "ws2_32")
 else()
