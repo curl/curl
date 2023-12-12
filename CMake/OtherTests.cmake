@@ -36,6 +36,7 @@ endmacro()
 
 if(WIN32)
   set(CMAKE_EXTRA_INCLUDE_FILES "winsock2.h")
+  set(CMAKE_REQUIRED_DEFINITIONS "-DWIN32_LEAN_AND_MEAN")
   set(CMAKE_REQUIRED_LIBRARIES "ws2_32")
 else()
   add_header_include(HAVE_SYS_TYPES_H "sys/types.h")
