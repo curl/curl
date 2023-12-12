@@ -46,13 +46,15 @@ endif()
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
-check_c_source_compiles("${_source_epilogue}
-  int main(void)
-  {
-    int flag = MSG_NOSIGNAL;
-    (void)flag;
-    return 0;
-  }" HAVE_MSG_NOSIGNAL)
+if(NOT WIN32)
+  check_c_source_compiles("${_source_epilogue}
+    int main(void)
+    {
+      int flag = MSG_NOSIGNAL;
+      (void)flag;
+      return 0;
+    }" HAVE_MSG_NOSIGNAL)
+endif()
 
 add_header_include(HAVE_SYS_TIME_H "sys/time.h")
 check_c_source_compiles("${_source_epilogue}
