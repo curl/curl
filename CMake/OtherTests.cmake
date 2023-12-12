@@ -23,6 +23,7 @@
 ###########################################################################
 include(CheckCSourceCompiles)
 include(CheckCSourceRuns)
+include(CheckTypeSize)
 
 # The begin of the sources (macros and includes)
 set(_source_epilogue "#undef inline")
@@ -72,9 +73,13 @@ if(NOT WIN32)
   endif()
 endif()
 
-check_type_size("struct sockaddr_storage" SIZEOF_STRUCT_SOCKADDR_STORAGE)
-if(HAVE_SIZEOF_STRUCT_SOCKADDR_STORAGE)
-  set(HAVE_STRUCT_SOCKADDR_STORAGE 1)
+if(NOT DEFINED HAVE_STRUCT_SOCKADDR_STORAGE)
+  check_type_size("struct sockaddr_storage" SIZEOF_STRUCT_SOCKADDR_STORAGE)
+  if(HAVE_SIZEOF_STRUCT_SOCKADDR_STORAGE)
+    set(HAVE_STRUCT_SOCKADDR_STORAGE 1)
+  else()
+    set(HAVE_STRUCT_SOCKADDR_STORAGE 0)
+  endif()
 endif()
 
 unset(CMAKE_TRY_COMPILE_TARGET_TYPE)
