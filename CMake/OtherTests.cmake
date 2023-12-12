@@ -41,9 +41,8 @@ if(WIN32)
     #endif
     #include <winsock2.h>
     #include <windows.h>")
-  if(WIN32)
-    set(CMAKE_REQUIRED_LIBRARIES "ws2_32")
-  endif()
+
+  set(CMAKE_REQUIRED_LIBRARIES "ws2_32")
 else()
   add_header_include(HAVE_SYS_TYPES_H "sys/types.h")
   add_header_include(HAVE_SYS_SOCKET_H "sys/socket.h")
