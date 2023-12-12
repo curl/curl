@@ -55,6 +55,7 @@ EXTRA_DIST =                                    \
  CODE_OF_CONDUCT.md                             \
  CODE_REVIEW.md                                 \
  CODE_STYLE.md                                  \
+ CLIENT-WRITERS.md                              \
  CONNECTION-FILTERS.md                          \
  CONTRIBUTE.md                                  \
  CURL-DISABLE.md                                \
