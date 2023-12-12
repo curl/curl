@@ -46,7 +46,8 @@ endif()
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
 check_c_source_compiles("${_source_epilogue}
-  int main(void) {
+  int main(void)
+  {
     int flag = MSG_NOSIGNAL;
     (void)flag;
     return 0;
@@ -56,14 +57,15 @@ if(NOT WIN32)
   add_header_include(HAVE_SYS_TIME_H "sys/time.h")
 endif()
 check_c_source_compiles("${_source_epilogue}
-#include <time.h>
-int main(void) {
-  struct timeval ts;
-  ts.tv_sec  = 0;
-  ts.tv_usec = 0;
-  (void)ts;
-  return 0;
-}" HAVE_STRUCT_TIMEVAL)
+  #include <time.h>
+  int main(void)
+  {
+    struct timeval ts;
+    ts.tv_sec  = 0;
+    ts.tv_usec = 0;
+    (void)ts;
+    return 0;
+  }" HAVE_STRUCT_TIMEVAL)
 
 if(NOT WIN32)
   set(CMAKE_EXTRA_INCLUDE_FILES)
@@ -102,28 +104,28 @@ if(NOT CMAKE_CROSSCOMPILING)
 
       int main(void)
       {
-          if(0 != poll(0, 0, 10)) {
-            return 1; /* fail */
+        if(0 != poll(0, 0, 10)) {
+          return 1; /* fail */
+        }
+        else {
+          /* detect the 10.12 poll() breakage */
+          struct timeval before, after;
+          int rc;
+          size_t us;
+
+          gettimeofday(&before, NULL);
+          rc = poll(NULL, 0, 500);
+          gettimeofday(&after, NULL);
+
+          us = (after.tv_sec - before.tv_sec) * 1000000 +
+            (after.tv_usec - before.tv_usec);
+
+          if(us < 400000) {
+            return 1;
           }
-          else {
-            /* detect the 10.12 poll() breakage */
-            struct timeval before, after;
-            int rc;
-            size_t us;
-
-            gettimeofday(&before, NULL);
-            rc = poll(NULL, 0, 500);
-            gettimeofday(&after, NULL);
-
-            us = (after.tv_sec - before.tv_sec) * 1000000 +
-              (after.tv_usec - before.tv_usec);
-
-            if(us < 400000) {
-              return 1;
-            }
-          }
-          return 0;
-    }" HAVE_POLL_FINE)
+        }
+        return 0;
+      }" HAVE_POLL_FINE)
   endif()
 endif()
 
