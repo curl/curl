@@ -21,15 +21,7 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# curl/libcurl CMake script
 # by Tetetest and Sukender (Benoit Neil)
-
-# TODO:
-# The output .so file lacks the soname number which we currently have within the lib/Makefile.am file
-# Add documentation subproject
-#
-# To check:
-# (From Daniel Stenberg) The cmake build selected to run gcc with -fPIC on my box while the plain configure script did not.
 
 # Note: By default this CMake build script detects the version of some
 # dependencies using `check_symbol_exists`.  Those checks do not work
@@ -1524,7 +1516,6 @@ if(NOT CURL_DISABLE_INSTALL)
   endmacro()
 
   # NTLM support requires crypto function adaptions from various SSL libs
-  # TODO alternative SSL libs tests for SSP1, GnuTLS, NSS
   if(NOT (CURL_DISABLE_NTLM) AND
       (USE_OPENSSL OR USE_MBEDTLS OR USE_DARWINSSL OR USE_WIN32_CRYPTO OR USE_GNUTLS))
     set(use_curl_ntlm_core ON)
@@ -1542,26 +1533,20 @@ if(NOT CURL_DISABLE_INSTALL)
   _add_if("IDN"           HAVE_LIBIDN2 OR USE_WIN32_IDN)
   _add_if("Largefile"     (SIZEOF_CURL_OFF_T GREATER 4) AND
                           ((SIZEOF_OFF_T GREATER 4) OR USE_WIN32_LARGE_FILES))
-  # TODO SSP1 (Schannel) check is missing
   _add_if("SSPI"          USE_WINDOWS_SSPI)
   _add_if("GSS-API"       HAVE_GSSAPI)
   _add_if("alt-svc"       NOT CURL_DISABLE_ALTSVC)
   _add_if("HSTS"          NOT CURL_DISABLE_HSTS)
-  # TODO SSP1 missing for SPNEGO
   _add_if("SPNEGO"        NOT CURL_DISABLE_NEGOTIATE_AUTH AND
                           (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
   _add_if("Kerberos"      NOT CURL_DISABLE_KERBEROS_AUTH AND
                           (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
-  # NTLM support requires crypto function adaptions from various SSL libs
-  # TODO alternative SSL libs tests for SSP1, GnuTLS, NSS
   _add_if("NTLM"          NOT (CURL_DISABLE_NTLM) AND
                           (use_curl_ntlm_core OR USE_WINDOWS_SSPI))
-  # TODO missing option (autoconf: --enable-ntlm-wb)
   _add_if("NTLM_WB"       NOT (CURL_DISABLE_NTLM) AND
                           (use_curl_ntlm_core OR USE_WINDOWS_SSPI) AND
                           NOT CURL_DISABLE_HTTP AND NTLM_WB_ENABLED)
   _add_if("TLS-SRP"       USE_TLS_SRP)
-  # TODO option --with-nghttp2 tests for nghttp2 lib and nghttp2/nghttp2.h header
   _add_if("HTTP2"         USE_NGHTTP2)
   _add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE)
   _add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
