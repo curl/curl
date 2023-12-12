@@ -91,11 +91,11 @@
 
 #include <stdio.h>
 #include <time.h>
-#ifndef __CYGWIN__
-#include <winsock2.h>
+#include <curl/curl.h>
+
+#ifdef _WIN32
 #include <windows.h>
 #endif
-#include <curl/curl.h>
 
 
 #define MAX_STRING              256
