@@ -169,7 +169,6 @@ int main(void) { ; return 0; }
 #    define WIN32_LEAN_AND_MEAN
 #  endif
 #  include <winsock2.h>
-#  include <windows.h>
 #endif
 int main(void)
 {
@@ -189,7 +188,6 @@ int main(void)
 #    define WIN32_LEAN_AND_MEAN
 #  endif
 #  include <winsock2.h>
-#  include <windows.h>
 #endif
 int main(void)
 {
@@ -208,7 +206,6 @@ int main(void)
 #    define WIN32_LEAN_AND_MEAN
 #  endif
 #  include <winsock2.h>
-#  include <windows.h>
 #endif
 int main(void)
 {
@@ -228,7 +225,6 @@ int main(void)
 #    define WIN32_LEAN_AND_MEAN
 #  endif
 #  include <winsock2.h>
-#  include <windows.h>
 #endif
 int main(void)
 {
@@ -304,7 +300,6 @@ int main(void)
 #    define WIN32_LEAN_AND_MEAN
 #  endif
 #  include <winsock2.h>
-#  include <windows.h>
 #endif
 /* includes start */
 #ifdef HAVE_SYS_TYPES_H
