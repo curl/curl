@@ -80,22 +80,15 @@ check_c_source_compiles("${_source_epilogue}
 unset(CMAKE_TRY_COMPILE_TARGET_TYPE)
 
 if(NOT CMAKE_CROSSCOMPILING AND NOT APPLE)
-  set(CMAKE_REQUIRED_FLAGS "")
-  if(HAVE_SYS_POLL_H)
-    set(CMAKE_REQUIRED_FLAGS "-DHAVE_SYS_POLL_H")
-  elseif(HAVE_POLL_H)
-    set(CMAKE_REQUIRED_FLAGS "-DHAVE_POLL_H")
-  endif()
-  check_c_source_runs("
+
+  set(_source_epilogue "#undef inline")
+
+  add_header_include(HAVE_SYS_POLL_H "sys/poll.h")
+  add_header_include(HAVE_POLL_H "poll.h")
+
+  check_c_source_runs("${_source_epilogue}
     #include <stdlib.h>
     #include <sys/time.h>
-
-    #ifdef HAVE_SYS_POLL_H
-    #  include <sys/poll.h>
-    #elif  HAVE_POLL_H
-    #  include <poll.h>
-    #endif
-
     int main(void)
     {
       if(0 != poll(0, 0, 10)) {
