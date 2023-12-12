@@ -28,7 +28,7 @@ The `type` argument specifies what the bytes in `buf` actually are. The followin
 #define CLIENTWRITE_TRAILER (1<<6) /* a trailer HEADER */
 ```
 
-The main types here are `CLIENTWRITE_BODY` and `CLIENTWRITE_HEADER`. They are mutually exclusive. The other bits are enhancements to `CLIENTWRITE_HEADER` to specify what the header is about. And they are only used in HTTP and related protocols (RTSP and websocket).
+The main types here are `CLIENTWRITE_BODY` and `CLIENTWRITE_HEADER`. They are mutually exclusive. The other bits are enhancements to `CLIENTWRITE_HEADER` to specify what the header is about. And they are only used in HTTP and related protocols (RTSP and WebSocket).
 
 The implementation of `Curl_client_write()` uses a chain of *client writer* instances to process the call and make sure that the bytes reach the proper application callbacks. This is similar to the design of connection filters: client writers can be chained to process the bytes written through them. The definition is:
 
@@ -95,7 +95,7 @@ That is why transfer decoding writers are added for phase `CURL_CW_TRANSFER_DECO
 
 ## Summary
 
-By adding the common behavior of all protocols into `Curl_client_write()` we make sure that they do apply everywhere. Protocol handler have less to worry about. Changes to default behaviour can be done without affecting handler implementations.
+By adding the common behavior of all protocols into `Curl_client_write()` we make sure that they do apply everywhere. Protocol handler have less to worry about. Changes to default behavior can be done without affecting handler implementations.
 
-Having a writer chain as implementation allows protocol handlers with extra needs, like HTTP, to add to this for special behaviour. The common way of writing the actual response data stays the same.
+Having a writer chain as implementation allows protocol handlers with extra needs, like HTTP, to add to this for special behavior. The common way of writing the actual response data stays the same.
 
