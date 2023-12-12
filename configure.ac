@@ -584,13 +584,6 @@ dnl **********************************************************************
 dnl Compilation based checks should not be done before this point.
 dnl **********************************************************************
 
-dnl **********************************************************************
-dnl Make sure that our checks for headers windows.h winsock2.h
-dnl and ws2tcpip.h take precedence over any other further checks which
-dnl could be done later using AC_CHECK_HEADER or AC_CHECK_HEADERS for
-dnl this specific header files. And do them before its results are used.
-dnl **********************************************************************
-
 CURL_CHECK_WIN32_LARGEFILE
 CURL_CHECK_WIN32_CRYPTO
 
