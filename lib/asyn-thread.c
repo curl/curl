@@ -44,15 +44,6 @@
 #include <inet.h>
 #endif
 
-#ifdef _WIN32
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#include <windows.h>
-#define MAX_URL_LENGTH 256
-/* set in win32_init() */
-extern bool Curl_isWindows8OrGreater;
-#endif
-
 #if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
 #  include <pthread.h>
 #endif
@@ -77,6 +68,12 @@ extern bool Curl_isWindows8OrGreater;
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
+
+#ifdef _WIN32
+#include "system_win32.h"
+/* set in win32_init() */
+extern bool Curl_isWindows8OrGreater;
+#endif
 
 struct resdata {
   struct curltime start;
@@ -153,22 +150,22 @@ static bool init_resolve_thread(struct Curl_easy *data,
                                 const char *hostname, int port,
                                 const struct addrinfo *hints);
 
-#if (_WIN32_WINNT >= 0x0600)
-/* Thread sync data used for GetAddrInfoExW  for win8+ */
+#ifdef _WIN32
+/* Thread sync data used by GetAddrInfoExW for win8+ */
 struct thread_sync_data_w8
 {
-    OVERLAPPED overlapped;
-    ADDRINFOEXW *res;
-    HANDLE cancel_ev;
-    WCHAR name[256]; /* max domain name is 253 chars */
-    WCHAR service_name[20]; /* port */
-    ADDRINFOEXW hints;
+  OVERLAPPED overlapped;
+  ADDRINFOEXW *res;
+  HANDLE cancel_ev;
+  WCHAR name[256]; /* max domain name is 253 chars */
+  WCHAR port[8]; /* port */
+  ADDRINFOEXW hints;
 };
 #endif
 
 /* Data for synchronization between resolver thread and its parent */
 struct thread_sync_data {
-#if (_WIN32_WINNT >= 0x0600)
+#ifdef _WIN32
   struct thread_sync_data_w8 w8;
 #endif
   curl_mutex_t *mtx;
@@ -189,7 +186,7 @@ struct thread_sync_data {
 };
 
 struct thread_data {
-#if (_WIN32_WINNT >= 0x0600)
+#ifdef _WIN32
   HANDLE complete_ev;
 #endif
   curl_thread_t thread_hnd;
@@ -303,29 +300,25 @@ static CURLcode getaddrinfo_complete(struct Curl_easy *data)
   return result;
 }
 
-
-#if (_WIN32_WINNT >= 0x0600)
+#ifdef _WIN32
 static VOID WINAPI
-query_complete(DWORD err, DWORD bytes, LPOVERLAPPED overlapped)
+query_complete(DWORD err, DWORD bytes, LPWSAOVERLAPPED overlapped)
 {
-  (void)bytes;
-#ifndef CURL_DISABLE_SOCKETPAIR
-  char buf[1];
-#endif
-  const ADDRINFOEXW* ai;
-  struct Curl_addrinfo* cafirst = NULL;
-  struct Curl_addrinfo* calast = NULL;
-  struct Curl_addrinfo* ca;
   size_t ss_size;
-  int error = (int)err;
-  struct thread_sync_data* tsd =
+  const ADDRINFOEXW* ai;
+  struct Curl_addrinfo *ca;
+  struct Curl_addrinfo *cafirst = NULL;
+  struct Curl_addrinfo *calast = NULL;
+  struct thread_sync_data *tsd =
     CONTAINING_RECORD(overlapped, struct thread_sync_data, w8.overlapped);
-  struct thread_data* td = tsd->td;
-  const ADDRINFOEXW* res = tsd->w8.res;
+  struct thread_data *td = tsd->td;
+  const ADDRINFOEXW *res = tsd->w8.res;
+  int error = (int)err;
+  (void)bytes;
 
   if(error == ERROR_SUCCESS) {
     /* traverse the addrinfo list */
-  
+
     for(ai = res; ai != NULL; ai = ai->ai_next) {
       size_t namelen = ai->ai_canonname ? wcslen(ai->ai_canonname) + 1 : 0;
       /* ignore elements with unsupported address family, */
@@ -338,21 +331,21 @@ query_complete(DWORD err, DWORD bytes, LPOVERLAPPED overlapped)
 #endif
       else
         continue;
-  
+
       /* ignore elements without required address info */
       if(!ai->ai_addr || !(ai->ai_addrlen > 0))
         continue;
-  
+
       /* ignore elements with bogus address size */
       if((size_t)ai->ai_addrlen < ss_size)
         continue;
-  
+
       ca = malloc(sizeof(struct Curl_addrinfo) + ss_size + namelen);
       if(!ca) {
         error = EAI_MEMORY;
         break;
       }
-  
+
       /* copy each structure member individually, member ordering, */
       /* size, or padding might be different for each platform.    */
       ca->ai_flags     = ai->ai_flags;
@@ -363,25 +356,25 @@ query_complete(DWORD err, DWORD bytes, LPOVERLAPPED overlapped)
       ca->ai_addr      = NULL;
       ca->ai_canonname = NULL;
       ca->ai_next      = NULL;
-  
+
       ca->ai_addr = (void *)((char *)ca + sizeof(struct Curl_addrinfo));
       memcpy(ca->ai_addr, ai->ai_addr, ss_size);
-  
+
       if(namelen) {
         ca->ai_canonname = (void *)((char *)ca->ai_addr + ss_size);
-        sprintf(ca->ai_canonname, "%S", ai->ai_canonname);
+        curl_msprintf(ca->ai_canonname, "%S", ai->ai_canonname);
       }
-  
+
       /* if the return list is empty, this becomes the first element */
       if(!cafirst)
         cafirst = ca;
-  
+
       /* add this element last in the return list */
       if(calast)
         calast->ai_next = ca;
       calast = ca;
     }
-  
+
     /* if we failed, also destroy the Curl_addrinfo list */
     if(error) {
       Curl_freeaddrinfo(cafirst);
@@ -403,7 +396,7 @@ query_complete(DWORD err, DWORD bytes, LPOVERLAPPED overlapped)
   }
 
   if(tsd->w8.res) {
-    FreeAddrInfoExW(tsd->w8.res);
+    ptrFreeAddrInfoExW(tsd->w8.res);
     tsd->w8.res = NULL;
   }
 
@@ -425,6 +418,7 @@ query_complete(DWORD err, DWORD bytes, LPOVERLAPPED overlapped)
   }
   else {
 #ifndef CURL_DISABLE_SOCKETPAIR
+    char buf[1];
     if(tsd->sock_pair[1] != CURL_SOCKET_BAD) {
       /* DNS has been resolved, signal client task */
       buf[0] = 1;
@@ -436,7 +430,7 @@ query_complete(DWORD err, DWORD bytes, LPOVERLAPPED overlapped)
 #endif
     tsd->done = 1;
     Curl_mutex_release(tsd->mtx);
-    if(td->complete_ev != NULL)
+    if(td->complete_ev)
       SetEvent(td->complete_ev); /* Notify caller that the query completed */
   }
 }
@@ -556,17 +550,17 @@ static void destroy_async_data(struct Curl_async *async)
     Curl_mutex_release(td->tsd.mtx);
 
     if(!done) {
-#if (_WIN32_WINNT >= 0x0600)
-      if(td->complete_ev != NULL)
+#ifdef _WIN32
+      if(td->complete_ev)
         CloseHandle(td->complete_ev);
       else
 #endif
       Curl_thread_destroy(td->thread_hnd);
     }
     else {
-#if (_WIN32_WINNT >= 0x0600)
-      if(td->complete_ev != NULL) {
-        GetAddrInfoExCancel(&td->tsd.w8.cancel_ev);
+#ifdef _WIN32
+      if(td->complete_ev) {
+        ptrGetAddrInfoExCancel(&td->tsd.w8.cancel_ev);
         WaitForSingleObject(td->complete_ev, INFINITE);
         CloseHandle(td->complete_ev);
       }
@@ -616,7 +610,7 @@ static bool init_resolve_thread(struct Curl_easy *data,
   asp->status = 0;
   asp->dns = NULL;
   td->thread_hnd = curl_thread_t_null;
-#if (_WIN32_WINNT >= 0x0600)
+#ifdef _WIN32
   td->complete_ev = NULL;
 #endif
 
@@ -634,20 +628,30 @@ static bool init_resolve_thread(struct Curl_easy *data,
   /* The thread will set this to 1 when complete. */
   td->tsd.done = 0;
 
-#if (_WIN32_WINNT >= 0x0600)
-  if(Curl_isWindows8OrGreater) {
-    wsprintfW(td->tsd.w8.name, L"%S", hostname);
-    wsprintfW(td->tsd.w8.service_name, L"%d", port);
-    td->tsd.w8.hints.ai_family = hints->ai_family;
-    td->tsd.w8.hints.ai_socktype = hints->ai_socktype;
-    td->complete_ev = CreateEvent(NULL, TRUE, FALSE, NULL);
-    if(td->complete_ev != NULL) {
-      err = GetAddrInfoExW(td->tsd.w8.name, td->tsd.w8.service_name, NS_DNS,
-        NULL, &td->tsd.w8.hints, &td->tsd.w8.res, NULL,
-        &td->tsd.w8.overlapped, &query_complete, &td->tsd.w8.cancel_ev);
-      if(err != WSA_IO_PENDING)
-        query_complete(err, 0, &td->tsd.w8.overlapped);
-      return TRUE;
+#ifdef _WIN32
+  if(Curl_isWindows8OrGreater && ptrFreeAddrInfoExW &&
+      ptrGetAddrInfoExCancel && ptrGetAddrInfoExW) {
+    int hostname_w_len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
+        hostname, -1, NULL, 0);
+    int name_sz = sizeof(td->tsd.w8.name) / sizeof(td->tsd.w8.name[0]);
+    if(hostname_w_len > 0 && hostname_w_len < name_sz)
+      hostname_w_len = MultiByteToWideChar(CP_UTF8, 0, hostname, -1,
+        td->tsd.w8.name, hostname_w_len);
+    if(hostname_w_len > 0 && hostname_w_len < name_sz) {
+      swprintf(td->tsd.w8.port,
+        sizeof(td->tsd.w8.port) / sizeof(td->tsd.w8.port[0]),
+        L"%d", port);
+      td->tsd.w8.hints.ai_family = hints->ai_family;
+      td->tsd.w8.hints.ai_socktype = hints->ai_socktype;
+      td->complete_ev = CreateEvent(NULL, TRUE, FALSE, NULL);
+      if(td->complete_ev) {
+        err = ptrGetAddrInfoExW(td->tsd.w8.name, td->tsd.w8.port, NS_DNS,
+          NULL, &td->tsd.w8.hints, &td->tsd.w8.res, NULL,
+          &td->tsd.w8.overlapped, &query_complete, &td->tsd.w8.cancel_ev);
+        if(err != WSA_IO_PENDING)
+          query_complete(err, 0, &td->tsd.w8.overlapped);
+        return TRUE;
+      }
     }
   }
 #endif
@@ -688,11 +692,15 @@ static CURLcode thread_wait_resolv(struct Curl_easy *data,
   DEBUGASSERT(data);
   td = data->state.async.tdata;
   DEBUGASSERT(td);
+#ifdef _WIN32
+  DEBUGASSERT(td->complete_ev || td->thread_hnd != curl_thread_t_null);
+#else
   DEBUGASSERT(td->thread_hnd != curl_thread_t_null);
+#endif
 
   /* wait for the thread to resolve the name */
-#if (_WIN32_WINNT >= 0x0600)
-  if(td->complete_ev != NULL) {
+#ifdef _WIN32
+  if(td->complete_ev) {
     WaitForSingleObject(td->complete_ev, INFINITE);
     CloseHandle(td->complete_ev);
     if(entry)

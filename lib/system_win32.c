@@ -43,8 +43,18 @@ bool Curl_isWindows8OrGreater;
 /* Handle of iphlpapp.dll */
 static HMODULE s_hIpHlpApiDll = NULL;
 
+/* Handle of ws2_32.dll */
+static HMODULE s_ws2_32Dll = NULL;
+
 /* Pointer to the if_nametoindex function */
 IF_NAMETOINDEX_FN Curl_if_nametoindex = NULL;
+
+void(WSAAPI *ptrFreeAddrInfoExW)(PADDRINFOEXW pAddrInfoEx) = NULL;
+INT(WSAAPI *ptrGetAddrInfoExCancel)(LPHANDLE lpHandle) = NULL;
+INT(WSAAPI *ptrGetAddrInfoExW)(PCWSTR pName, PCWSTR pServiceName,
+  DWORD dwNameSpace, LPGUID lpNspId, const ADDRINFOEXW *hints,
+  PADDRINFOEXW *ppResult, struct timeval *timeout, LPOVERLAPPED lpOverlapped,
+  LOOKUP_COMPLETION lpCompletionRoutine, LPHANDLE lpHandle) = NULL;
 
 /* Curl_win32_init() performs win32 global initialization */
 CURLcode Curl_win32_init(long flags)
@@ -105,6 +115,16 @@ CURLcode Curl_win32_init(long flags)
       Curl_if_nametoindex = pIfNameToIndex;
   }
 
+  s_ws2_32Dll = Curl_load_library(TEXT("ws2_32.dll"));
+  if(s_ws2_32Dll) {
+    *(FARPROC*)&ptrFreeAddrInfoExW = GetProcAddress(s_ws2_32Dll,
+      "FreeAddrInfoExW");
+    *(FARPROC*)&ptrGetAddrInfoExCancel = GetProcAddress(s_ws2_32Dll,
+      "GetAddrInfoExCancel");
+    *(FARPROC*)&ptrGetAddrInfoExW = GetProcAddress(s_ws2_32Dll,
+      "GetAddrInfoExW");
+  }
+
   /* curlx_verify_windows_version must be called during init at least once
      because it has its own initialization routine. */
   if(curlx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
@@ -128,6 +148,13 @@ CURLcode Curl_win32_init(long flags)
 /* Curl_win32_cleanup() is the opposite of Curl_win32_init() */
 void Curl_win32_cleanup(long init_flags)
 {
+  if(s_ws2_32Dll) {
+    FreeLibrary(s_ws2_32Dll);
+    s_ws2_32Dll = NULL;
+    ptrFreeAddrInfoExW = NULL;
+    ptrGetAddrInfoExCancel = NULL;
+    ptrGetAddrInfoExW = NULL;
+  }
   if(s_hIpHlpApiDll) {
     FreeLibrary(s_hIpHlpApiDll);
     s_hIpHlpApiDll = NULL;
