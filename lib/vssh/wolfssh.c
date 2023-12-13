@@ -694,7 +694,7 @@ static CURLcode wssh_statemach_act(struct Curl_easy *data, bool *block)
         /* we want to use the _sending_ function even when the socket turns
            out readable as the underlying libssh2 sftp send function will deal
            with both accordingly */
-        conn->cselect_bits = CURL_CSELECT_OUT;
+        data->state.dselect_bits = CURL_CSELECT_OUT;
 
         /* since we don't really wait for anything at this point, we want the
            state machine to move on as soon as possible so we set a very short
@@ -790,7 +790,7 @@ static CURLcode wssh_statemach_act(struct Curl_easy *data, bool *block)
       /* we want to use the _receiving_ function even when the socket turns
          out writableable as the underlying libssh2 recv function will deal
          with both accordingly */
-      conn->cselect_bits = CURL_CSELECT_IN;
+      data->state.dselect_bits = CURL_CSELECT_IN;
 
       if(result) {
         /* this should never occur; the close state should be entered

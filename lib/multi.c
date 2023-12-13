@@ -2371,7 +2371,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     {
       char *newurl = NULL;
       bool retry = FALSE;
-      bool comeback = FALSE;
       DEBUGASSERT(data->state.buffer);
       /* check if over send speed */
       send_timeout_ms = 0;
@@ -2402,7 +2401,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
 
       /* read/write data if it is ready to do so */
-      result = Curl_readwrite(data->conn, data, &done, &comeback);
+      result = Curl_readwrite(data->conn, data, &done);
 
       if(done || (result == CURLE_RECV_ERROR)) {
         /* If CURLE_RECV_ERROR happens early enough, we assume it was a race
@@ -2512,7 +2511,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           }
         }
       }
-      else if(comeback) {
+      else if(data->state.dselect_bits) {
         /* This avoids CURLM_CALL_MULTI_PERFORM so that a very fast transfer
            won't get stuck on this transfer at the expense of other concurrent
            transfers */
@@ -3164,7 +3163,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
 
         if(data->conn && !(data->conn->handler->flags & PROTOPT_DIRLOCK))
           /* set socket event bitmask if they're not locked */
-          data->conn->cselect_bits = (unsigned char)ev_bitmask;
+          data->state.dselect_bits = (unsigned char)ev_bitmask;
 
         Curl_expire(data, 0, EXPIRE_RUN_NOW);
       }

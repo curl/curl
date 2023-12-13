@@ -1103,7 +1103,6 @@ struct connectdata {
   unsigned short localport;
   unsigned short secondary_port; /* secondary socket remote port to connect to
                                     (ftp) */
-  unsigned char cselect_bits; /* bitmask of socket events */
   unsigned char alpn; /* APLN TLS negotiated protocol, a CURL_HTTP_VERSION*
                          value */
 #ifndef CURL_DISABLE_PROXY
