@@ -292,8 +292,8 @@ static void h3_drain_stream(struct Curl_cfilter *cf,
   bits = CURL_CSELECT_IN;
   if(stream && stream->upload_left && !stream->send_closed)
     bits |= CURL_CSELECT_OUT;
-  if(data->state.dselect_bits != bits) {
-    data->state.dselect_bits = bits;
+  if(data->state.select_bits != bits) {
+    data->state.select_bits = bits;
     Curl_expire(data, 0, EXPIRE_RUN_NOW);
   }
 }
