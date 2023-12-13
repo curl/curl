@@ -2511,7 +2511,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           }
         }
       }
-      else if(data->state.dselect_bits) {
+      else if(data->state.select_bits) {
         /* This avoids CURLM_CALL_MULTI_PERFORM so that a very fast transfer
            won't get stuck on this transfer at the expense of other concurrent
            transfers */
@@ -3163,7 +3163,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
 
         if(data->conn && !(data->conn->handler->flags & PROTOPT_DIRLOCK))
           /* set socket event bitmask if they're not locked */
-          data->state.dselect_bits = (unsigned char)ev_bitmask;
+          data->state.select_bits = (unsigned char)ev_bitmask;
 
         Curl_expire(data, 0, EXPIRE_RUN_NOW);
       }

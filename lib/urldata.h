@@ -1478,7 +1478,7 @@ struct UrlState {
                                 server involved in this request */
   unsigned char httpreq; /* Curl_HttpReq; what kind of HTTP request (if any)
                             is this */
-  unsigned char dselect_bits; /* != 0 -> bitmask of socket events for this
+  unsigned char select_bits; /* != 0 -> bitmask of socket events for this
                                  transfer overriding anything the socket may
                                  report */
 #ifdef CURLDEBUG

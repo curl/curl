@@ -717,7 +717,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 
   if(maxloops <= 0 || max_recv <= 0) {
     /* we mark it as read-again-please */
-    data->state.dselect_bits = CURL_CSELECT_IN;
+    data->state.select_bits = CURL_CSELECT_IN;
   }
 
   if(((k->keepon & (KEEP_RECV|KEEP_SEND)) == KEEP_SEND) &&
@@ -1037,16 +1037,16 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   int didwhat = 0;
   int select_bits;
 
-  if(data->state.dselect_bits) {
-    if(select_bits_paused(data, data->state.dselect_bits)) {
+  if(data->state.select_bits) {
+    if(select_bits_paused(data, data->state.select_bits)) {
       /* leave the bits unchanged, so they'll tell us what to do when
        * this transfer gets unpaused. */
-      DEBUGF(infof(data, "readwrite, dselect_bits, early return on PAUSED"));
+      DEBUGF(infof(data, "readwrite, select_bits, early return on PAUSED"));
       result = CURLE_OK;
       goto out;
     }
-    select_bits = data->state.dselect_bits;
-    data->state.dselect_bits = 0;
+    select_bits = data->state.select_bits;
+    data->state.select_bits = 0;
   }
   else {
     curl_socket_t fd_read;
