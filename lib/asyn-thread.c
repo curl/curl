@@ -155,11 +155,11 @@ static bool init_resolve_thread(struct Curl_easy *data,
 struct thread_sync_data_w8
 {
   OVERLAPPED overlapped;
-  ADDRINFOEXW *res;
+  ADDRINFOEXW_ *res;
   HANDLE cancel_ev;
   WCHAR name[256]; /* max domain name is 253 chars */
   WCHAR port[8]; /* port */
-  ADDRINFOEXW hints;
+  ADDRINFOEXW_ hints;
 };
 #endif
 
@@ -305,14 +305,14 @@ static VOID WINAPI
 query_complete(DWORD err, DWORD bytes, LPWSAOVERLAPPED overlapped)
 {
   size_t ss_size;
-  const ADDRINFOEXW* ai;
+  const ADDRINFOEXW_ *ai;
   struct Curl_addrinfo *ca;
   struct Curl_addrinfo *cafirst = NULL;
   struct Curl_addrinfo *calast = NULL;
   struct thread_sync_data *tsd =
     CONTAINING_RECORD(overlapped, struct thread_sync_data, w8.overlapped);
   struct thread_data *td = tsd->td;
-  const ADDRINFOEXW *res = tsd->w8.res;
+  const ADDRINFOEXW_ *res = tsd->w8.res;
   int error = (int)err;
   (void)bytes;
 

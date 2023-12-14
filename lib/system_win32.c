@@ -49,11 +49,11 @@ static HMODULE s_ws2_32Dll = NULL;
 /* Pointer to the if_nametoindex function */
 IF_NAMETOINDEX_FN Curl_if_nametoindex = NULL;
 
-void(WSAAPI *ptrFreeAddrInfoExW)(PADDRINFOEXW pAddrInfoEx) = NULL;
+void(WSAAPI *ptrFreeAddrInfoExW)(ADDRINFOEXW_ *pAddrInfoEx) = NULL;
 INT(WSAAPI *ptrGetAddrInfoExCancel)(LPHANDLE lpHandle) = NULL;
 INT(WSAAPI *ptrGetAddrInfoExW)(PCWSTR pName, PCWSTR pServiceName,
-  DWORD dwNameSpace, LPGUID lpNspId, const ADDRINFOEXW *hints,
-  PADDRINFOEXW *ppResult, struct timeval *timeout, LPOVERLAPPED lpOverlapped,
+  DWORD dwNameSpace, LPGUID lpNspId, const ADDRINFOEXW_ *hints,
+  ADDRINFOEXW_ **ppResult, struct timeval *timeout, LPOVERLAPPED lpOverlapped,
   LOOKUP_COMPLETION lpCompletionRoutine, LPHANDLE lpHandle) = NULL;
 
 /* Curl_win32_init() performs win32 global initialization */
