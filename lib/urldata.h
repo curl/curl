@@ -921,9 +921,6 @@ struct connectdata {
      multi_done(). This entry will be NULL if the connection is reused as then
      there is no name resolve done. */
   struct Curl_dns_entry *dns_entry;
-#ifdef USE_CURL_ASYNC
-  struct Curl_async resolve_async;  /* asynchronous name resolver data */
-#endif
 
   /* 'remote_addr' is the particular IP we connected to. it is owned, set
    * and NULLed by the connected socket filter (if there is one). */
@@ -1381,6 +1378,9 @@ struct UrlState {
 #endif
   struct auth authhost;  /* auth details for host */
   struct auth authproxy; /* auth details for proxy */
+#ifdef USE_CURL_ASYNC
+  struct Curl_async async;  /* asynchronous name resolver data */
+#endif
 
 #if defined(USE_OPENSSL)
   /* void instead of ENGINE to avoid bleeding OpenSSL into this header */
