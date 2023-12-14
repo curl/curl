@@ -754,16 +754,22 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
 
 #ifndef USE_RESOLVE_ON_IPS
     /* First check if this is an IPv4 address string */
-    if(Curl_inet_pton(AF_INET, hostname, &in) > 0)
+    if(Curl_inet_pton(AF_INET, hostname, &in) > 0) {
       /* This is a dotted IP address 123.123.123.123-style */
       addr = Curl_ip2addr(AF_INET, &in, hostname, port);
+      if(!addr)
+        return CURLRESOLV_ERROR;
+    }
 #ifdef ENABLE_IPV6
-    if(!addr) {
+    else {
       struct in6_addr in6;
       /* check if this is an IPv6 address string */
-      if(Curl_inet_pton(AF_INET6, hostname, &in6) > 0)
+      if(Curl_inet_pton(AF_INET6, hostname, &in6) > 0) {
         /* This is an IPv6 address literal */
         addr = Curl_ip2addr(AF_INET6, &in6, hostname, port);
+        if(!addr)
+          return CURLRESOLV_ERROR;
+      }
     }
 #endif /* ENABLE_IPV6 */
 
