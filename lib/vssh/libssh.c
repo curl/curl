@@ -32,10 +32,7 @@
 #include <limits.h>
 
 /* in 0.10.0 or later, ignore deprecated warnings */
-#include <libssh/libssh_version.h>
-#if (LIBSSH_VERSION_MINOR >= 10) || (LIBSSH_VERSION_MAJOR > 0)
 #define SSH_SUPPRESS_DEPRECATED
-#endif
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>
 
