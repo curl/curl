@@ -690,10 +690,15 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
                       CERT_STORE_OPEN_EXISTING_FLAG | cert_store_name,
                       cert_store_path);
       if(!cert_store) {
+        char *path_utf8 =
+          curlx_convert_tchar_to_UTF8(cert_store_path);
         failf(data, "schannel: Failed to open cert store %lx %s, "
               "last error is 0x%lx",
-              cert_store_name, cert_store_path, GetLastError());
+              cert_store_name,
+              (path_utf8 ? path_utf8 : "(unknown)"),
+              GetLastError());
         free(cert_store_path);
+        curlx_unicodefree(path_utf8);
         curlx_unicodefree(cert_path);
         return CURLE_SSL_CERTPROBLEM;
       }
