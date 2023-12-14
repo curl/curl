@@ -1220,7 +1220,7 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
       data->req.maxdownload = size;
       /* force a recv/send check of this connection, as the data might've been
        read off the socket already */
-      data->conn->cselect_bits = CURL_CSELECT_IN;
+      data->state.select_bits = CURL_CSELECT_IN;
       Curl_setup_transfer(data, FIRSTSOCKET, size, FALSE, -1);
     }
   }

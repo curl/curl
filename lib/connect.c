@@ -93,25 +93,17 @@
  * transfer/connection. If the value is 0, there's no timeout (ie there's
  * infinite time left). If the value is negative, the timeout time has already
  * elapsed.
- *
- * If 'nowp' is non-NULL, it points to the current time.
- * 'duringconnect' is FALSE if not during a connect, as then of course the
- * connect timeout is not taken into account!
- *
+ * @param data the transfer to check on
+ * @param nowp timestamp to use for calculdation, NULL to use Curl_now()
+ * @param duringconnect TRUE iff connect timeout is also taken into account.
  * @unittest: 1303
  */
-
-#define TIMEOUT_CONNECT 1
-#define TIMEOUT_MAXTIME 2
-
 timediff_t Curl_timeleft(struct Curl_easy *data,
                          struct curltime *nowp,
                          bool duringconnect)
 {
-  unsigned int timeout_set = 0;
-  timediff_t connect_timeout_ms = 0;
-  timediff_t maxtime_timeout_ms = 0;
-  timediff_t timeout_ms = 0;
+  timediff_t timeleft_ms = 0;
+  timediff_t ctimeleft_ms = 0;
   struct curltime now;
 
   /* The duration of a connect and the total transfer are calculated from two
@@ -119,43 +111,35 @@ timediff_t Curl_timeleft(struct Curl_easy *data,
      before the connect timeout expires and we must acknowledge whichever
      timeout that is reached first. The total timeout is set per entire
      operation, while the connect timeout is set per connect. */
-
-  if(data->set.timeout > 0) {
-    timeout_set = TIMEOUT_MAXTIME;
-    maxtime_timeout_ms = data->set.timeout;
-  }
-  if(duringconnect) {
-    timeout_set |= TIMEOUT_CONNECT;
-    connect_timeout_ms = (data->set.connecttimeout > 0) ?
-      data->set.connecttimeout : DEFAULT_CONNECT_TIMEOUT;
-  }
-  if(!timeout_set)
-    /* no timeout  */
-    return 0;
+  if(data->set.timeout <= 0 && !duringconnect)
+    return 0; /* no timeout in place or checked, return "no limit" */
 
   if(!nowp) {
     now = Curl_now();
     nowp = &now;
   }
 
-  if(timeout_set & TIMEOUT_MAXTIME) {
-    maxtime_timeout_ms -= Curl_timediff(*nowp, data->progress.t_startop);
-    timeout_ms = maxtime_timeout_ms;
+  if(data->set.timeout > 0) {
+    timeleft_ms = data->set.timeout -
+                  Curl_timediff(*nowp, data->progress.t_startop);
+    if(!timeleft_ms)
+      timeleft_ms = -1; /* 0 is "no limit", fake 1 ms expiry */
+    if(!duringconnect)
+      return timeleft_ms; /* no connect check, this is it */
   }
 
-  if(timeout_set & TIMEOUT_CONNECT) {
-    connect_timeout_ms -= Curl_timediff(*nowp, data->progress.t_startsingle);
-
-    if(!(timeout_set & TIMEOUT_MAXTIME) ||
-       (connect_timeout_ms < maxtime_timeout_ms))
-      timeout_ms = connect_timeout_ms;
+  if(duringconnect) {
+    timediff_t ctimeout_ms = (data->set.connecttimeout > 0) ?
+      data->set.connecttimeout : DEFAULT_CONNECT_TIMEOUT;
+    ctimeleft_ms = ctimeout_ms -
+                   Curl_timediff(*nowp, data->progress.t_startsingle);
+    if(!ctimeleft_ms)
+      ctimeleft_ms = -1; /* 0 is "no limit", fake 1 ms expiry */
+    if(!timeleft_ms)
+      return ctimeleft_ms; /* no general timeout, this is it */
   }
-
-  if(!timeout_ms)
-    /* avoid returning 0 as that means no timeout! */
-    return -1;
-
-  return timeout_ms;
+  /* return minimal time left or max amount already expired */
+  return (ctimeleft_ms < timeleft_ms)? ctimeleft_ms : timeleft_ms;
 }
 
 /* Copies connection info into the transfer handle to make it available when

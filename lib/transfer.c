@@ -417,28 +417,22 @@ bool Curl_meets_timecondition(struct Curl_easy *data, time_t timeofdoc)
  * Go ahead and do a read if we have a readable socket or if
  * the stream was rewound (in which case we have data in a
  * buffer)
- *
- * return '*comeback' TRUE if we didn't properly drain the socket so this
- * function should get called again without select() or similar in between!
  */
 static CURLcode readwrite_data(struct Curl_easy *data,
                                struct connectdata *conn,
                                struct SingleRequest *k,
-                               int *didwhat, bool *done,
-                               bool *comeback)
+                               int *didwhat, bool *done)
 {
   CURLcode result = CURLE_OK;
   char *buf;
   size_t blen;
   size_t consumed;
-  int maxloops = 100;
-  curl_off_t max_recv = data->set.max_recv_speed?
-                        data->set.max_recv_speed : CURL_OFF_T_MAX;
+  int maxloops = 10;
+  curl_off_t max_recv = data->set.max_recv_speed ? 0 : CURL_OFF_T_MAX;
   bool data_eof_handled = FALSE;
 
   DEBUGASSERT(data->state.buffer);
   *done = FALSE;
-  *comeback = FALSE;
 
   /* This is where we loop until we have read everything there is to
      read or we get a CURLE_AGAIN */
@@ -722,8 +716,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 
   if(maxloops <= 0 || max_recv <= 0) {
     /* we mark it as read-again-please */
-    data->state.dselect_bits = CURL_CSELECT_IN;
-    *comeback = TRUE;
+    data->state.select_bits = CURL_CSELECT_IN;
   }
 
   if(((k->keepon & (KEEP_RECV|KEEP_SEND)) == KEEP_SEND) &&
@@ -1032,14 +1025,10 @@ static int select_bits_paused(struct Curl_easy *data, int select_bits)
 /*
  * Curl_readwrite() is the low-level function to be called when data is to
  * be read and written to/from the connection.
- *
- * return '*comeback' TRUE if we didn't properly drain the socket so this
- * function should get called again without select() or similar in between!
  */
 CURLcode Curl_readwrite(struct connectdata *conn,
                         struct Curl_easy *data,
-                        bool *done,
-                        bool *comeback)
+                        bool *done)
 {
   struct SingleRequest *k = &data->req;
   CURLcode result;
@@ -1047,22 +1036,16 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   int didwhat = 0;
   int select_bits;
 
-  if(data->state.dselect_bits) {
-    if(select_bits_paused(data, data->state.dselect_bits)) {
+  if(data->state.select_bits) {
+    if(select_bits_paused(data, data->state.select_bits)) {
       /* leave the bits unchanged, so they'll tell us what to do when
        * this transfer gets unpaused. */
-      DEBUGF(infof(data, "readwrite, dselect_bits, early return on PAUSED"));
+      DEBUGF(infof(data, "readwrite, select_bits, early return on PAUSED"));
       result = CURLE_OK;
       goto out;
     }
-    select_bits = data->state.dselect_bits;
-    data->state.dselect_bits = 0;
-  }
-  else if(conn->cselect_bits) {
-    /* CAVEAT: adding `select_bits_paused()` check here makes test640 hang
-     * (among others). Which hints at strange state handling in FTP land... */
-    select_bits = conn->cselect_bits;
-    conn->cselect_bits = 0;
+    select_bits = data->state.select_bits;
+    data->state.select_bits = 0;
   }
   else {
     curl_socket_t fd_read;
@@ -1100,7 +1083,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
      the stream was rewound (in which case we have data in a
      buffer) */
   if((k->keepon & KEEP_RECV) && (select_bits & CURL_CSELECT_IN)) {
-    result = readwrite_data(data, conn, k, &didwhat, done, comeback);
+    result = readwrite_data(data, conn, k, &didwhat, done);
     if(result || *done)
       goto out;
   }
