@@ -921,9 +921,6 @@ struct connectdata {
      multi_done(). This entry will be NULL if the connection is reused as then
      there is no name resolve done. */
   struct Curl_dns_entry *dns_entry;
-#ifdef USE_CURL_ASYNC
-  struct Curl_async resolve_async;  /* asynchronous name resolver data */
-#endif
 
   /* 'remote_addr' is the particular IP we connected to. it is owned, set
    * and NULLed by the connected socket filter (if there is one). */
@@ -2001,6 +1998,9 @@ struct Curl_easy {
                                     struct to which this "belongs" when used
                                     by the easy interface */
   struct Curl_share *share;    /* Share, handles global variable mutexing */
+#ifdef USE_CURL_ASYNC
+  struct Curl_async resolve_async;  /* asynchronous name resolver data */
+#endif
 #ifdef USE_LIBPSL
   struct PslCache *psl;        /* The associated PSL cache. */
 #endif

@@ -71,7 +71,7 @@ CURLcode Curl_resolver_init(struct Curl_easy *easy, void **resolver);
  * structure).  Should destroy the handler and free all resources connected to
  * it.
  */
-void Curl_resolver_cleanup(void *resolver);
+void Curl_resolver_cleanup(void **resolver);
 
 /*
  * Curl_resolver_duphandle()

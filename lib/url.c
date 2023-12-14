@@ -234,6 +234,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
   data = *datap;
   *datap = NULL;
 
+  Curl_resolver_cleanup(&data->resolve_async.resolver);
   Curl_expire_clear(data); /* shut off timers */
 
   /* Detach connection if any is left. This should not be normal, but can be
@@ -527,6 +528,8 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
     data->progress.flags |= PGRS_HIDE;
     data->state.current_speed = -1; /* init to negative == impossible */
+
+    result = Curl_resolver_init(data, &data->resolve_async.resolver);
   }
 
   if(result) {
@@ -563,7 +566,6 @@ static void conn_free(struct Curl_easy *data, struct connectdata *conn)
     Curl_conn_cf_discard_all(data, conn, (int)i);
   }
 
-  Curl_resolver_cleanup(conn->resolve_async.resolver);
   Curl_free_idnconverted_hostname(&conn->host);
   Curl_free_idnconverted_hostname(&conn->conn_to_host);
 #ifndef CURL_DISABLE_PROXY
@@ -663,7 +665,6 @@ void Curl_disconnect(struct Curl_easy *data,
     conn->handler->disconnect(data, conn, dead_connection);
 
   conn_shutdown(data);
-  Curl_resolver_cancel(data);
 
   /* detach it again */
   Curl_detach_connection(data);
@@ -3737,12 +3738,6 @@ static CURLcode create_conn(struct Curl_easy *data,
       result = Curl_ssl_conn_config_init(data, conn);
       if(result) {
         DEBUGF(fprintf(stderr, "Error: init connection ssl config\n"));
-        goto out;
-      }
-
-      result = Curl_resolver_init(data, &conn->resolve_async.resolver);
-      if(result) {
-        DEBUGF(fprintf(stderr, "Error: resolver_init failed\n"));
         goto out;
       }
 

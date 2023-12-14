@@ -901,7 +901,6 @@ UNITTEST void de_cleanup(struct dohentry *d)
 CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
                               struct Curl_dns_entry **dnsp)
 {
-  struct connectdata *conn = data->conn;
   CURLcode result;
   struct dohdata *dohp = data->req.doh;
   *dnsp = NULL; /* defaults to no response */
@@ -910,7 +909,7 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
 
   if(!dohp->probe[DOH_PROBE_SLOT_IPADDR_V4].easy &&
      !dohp->probe[DOH_PROBE_SLOT_IPADDR_V6].easy) {
-    failf(data, "Could not DoH-resolve: %s", conn->resolve_async.hostname);
+    failf(data, "Could not DoH-resolve: %s", data->resolve_async.hostname);
     return CONN_IS_PROXIED(data->conn)?CURLE_COULDNT_RESOLVE_PROXY:
       CURLE_COULDNT_RESOLVE_HOST;
   }
@@ -973,7 +972,7 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
         Curl_freeaddrinfo(ai);
       }
       else {
-        conn->resolve_async.dns = dns;
+        data->resolve_async.dns = dns;
         *dnsp = dns;
         result = CURLE_OK;      /* address resolution OK */
       }

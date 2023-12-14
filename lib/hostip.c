@@ -741,7 +741,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
       Curl_set_in_callback(data, true);
       st = data->set.resolver_start(
 #ifdef USE_CURL_ASYNC
-        conn->resolve_async.resolver,
+        data->resolve_async.resolver,
 #else
         NULL,
 #endif
@@ -1421,9 +1421,9 @@ CURLcode Curl_once_resolved(struct Curl_easy *data, bool *protocol_done)
   struct connectdata *conn = data->conn;
 
 #ifdef USE_CURL_ASYNC
-  if(conn->resolve_async.dns) {
-    conn->dns_entry = conn->resolve_async.dns;
-    conn->resolve_async.dns = NULL;
+  if(data->resolve_async.dns) {
+    conn->dns_entry = data->resolve_async.dns;
+    data->resolve_async.dns = NULL;
   }
 #endif
 
@@ -1462,7 +1462,7 @@ CURLcode Curl_resolver_error(struct Curl_easy *data)
   }
 
   failf(data, "Could not resolve %s: %s", host_or_proxy,
-        conn->resolve_async.hostname);
+        data->resolve_async.hostname);
 
   return result;
 }
