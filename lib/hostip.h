@@ -137,7 +137,9 @@ void Curl_hostcache_prune(struct Curl_easy *data);
 /* IPv4 threadsafe resolve function used for synch and asynch builds */
 struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, int port);
 
-CURLcode Curl_once_resolved(struct Curl_easy *data, bool *protocol_connect);
+CURLcode Curl_once_resolved(struct Curl_easy *data,
+                            struct Curl_dns_entry *dns,
+                            bool *protocol_connect);
 
 /*
  * Curl_addrinfo_callback() is used when we build with any asynch specialty.
@@ -156,19 +158,6 @@ CURLcode Curl_addrinfo_callback(struct Curl_easy *data,
  */
 void Curl_printable_address(const struct Curl_addrinfo *ip,
                             char *buf, size_t bufsize);
-
-/*
- * Curl_fetch_addr() fetches a 'Curl_dns_entry' already in the DNS cache.
- *
- * Returns the Curl_dns_entry entry pointer or NULL if not in the cache.
- *
- * The returned data *MUST* be "unlocked" with Curl_resolv_unlock() after
- * use, or we'll leak memory!
- */
-struct Curl_dns_entry *
-Curl_fetch_addr(struct Curl_easy *data,
-                const char *hostname,
-                int port);
 
 /*
  * Curl_cache_addr() stores a 'Curl_addrinfo' struct in the DNS cache.

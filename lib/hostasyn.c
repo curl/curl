@@ -72,33 +72,27 @@ CURLcode Curl_addrinfo_callback(struct Curl_easy *data,
 
   data->state.async.status = status;
 
-  if(CURL_ASYNC_SUCCESS == status) {
-    if(ai) {
-      if(data->share)
-        Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
+  if(data->share)
+    Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
-      dns = Curl_cache_addr(data, ai,
-                            data->state.async.hostname, 0,
-                            data->state.async.port);
-      if(data->share)
-        Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
+  dns = Curl_cache_addr(data, ai,
+                        data->state.async.hostname, 0,
+                        data->state.async.port);
+  if(data->share)
+    Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
 
-      if(!dns) {
-        /* failed to store, cleanup and return error */
-        Curl_freeaddrinfo(ai);
-        result = CURLE_OUT_OF_MEMORY;
-      }
-    }
-    else {
-      result = CURLE_OUT_OF_MEMORY;
-    }
+  if(!dns) {
+    /* failed to store, cleanup and return error */
+    Curl_freeaddrinfo(ai);
+    result = CURLE_OUT_OF_MEMORY;
   }
 
-  data->state.async.dns = dns;
+  if(ai)
+    data->state.async.dns = dns;
 
- /* Set async.done TRUE last in this function since it may be used multi-
-    threaded and once this is TRUE the other thread may read fields from the
-    async struct */
+  /* Set async.done TRUE last in this function since it may be used multi-
+     threaded and once this is TRUE the other thread may read fields from the
+     async struct */
   data->state.async.done = TRUE;
 
   /* IPv4: The input hostent struct will be freed by ares when we return from

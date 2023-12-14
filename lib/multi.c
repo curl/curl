@@ -1965,34 +1965,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       /* awaiting an asynch name resolve to complete */
     {
       struct Curl_dns_entry *dns = NULL;
-      struct connectdata *conn = data->conn;
-      const char *hostname;
-
-      DEBUGASSERT(conn);
-#ifndef CURL_DISABLE_PROXY
-      if(conn->bits.httpproxy)
-        hostname = conn->http_proxy.host.name;
-      else
-#endif
-        if(conn->bits.conn_to_host)
-          hostname = conn->conn_to_host.name;
-      else
-        hostname = conn->host.name;
-
-      /* check if we have the name resolved by now */
-      dns = Curl_fetch_addr(data, hostname, (int)conn->port);
-
-      if(dns) {
-#ifdef CURLRES_ASYNCH
-        data->state.async.dns = dns;
-        data->state.async.done = TRUE;
-#endif
-        result = CURLE_OK;
-        infof(data, "Hostname '%s' was found in DNS cache", hostname);
-      }
-
-      if(!dns)
-        result = Curl_resolv_check(data, &dns);
+      result = Curl_resolv_check(data, &dns);
 
       /* Update sockets here, because the socket(s) may have been
          closed and the application thus needs to be told, even if it
@@ -2007,7 +1980,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       if(dns) {
         /* Perform the next step in the connection phase, and then move on
            to the WAITCONNECT state */
-        result = Curl_once_resolved(data, &connected);
+        result = Curl_once_resolved(data, dns, &connected);
 
         if(result)
           /* if Curl_once_resolved() returns failure, the connection struct
