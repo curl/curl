@@ -41,7 +41,8 @@ extern "C" {
   __attribute__((format(__MINGW_PRINTF_FORMAT, a, b)))
 #endif
 #else
-#define CURL_TEMP_PRINTF(a,b) __attribute__ ((format(printf, a, b)))
+#define CURL_TEMP_PRINTF(a,b) \
+  __attribute__((format(printf, a, b)))
 #endif
 #else
 #define CURL_TEMP_PRINTF(a,b)
