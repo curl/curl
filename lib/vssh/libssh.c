@@ -31,6 +31,11 @@
 
 #include <limits.h>
 
+/* in 0.10.0 or later, ignore deprecated warnings */
+#include <libssh/libssh_version.h>
+#if (LIBSSH_VERSION_MINOR >= 10) || (LIBSSH_VERSION_MAJOR > 0)
+#define SSH_SUPPRESS_DEPRECATED
+#endif
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>
 
@@ -88,14 +93,6 @@
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
-
-/* in 0.10.0 or later, ignore deprecated warnings */
-#if defined(__GNUC__) &&                        \
-  (LIBSSH_VERSION_MINOR >= 10) ||               \
-  (LIBSSH_VERSION_MAJOR > 0)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif
 
 /* A recent macro provided by libssh. Or make our own. */
 #ifndef SSH_STRING_FREE_CHAR
@@ -2956,11 +2953,5 @@ void Curl_ssh_version(char *buffer, size_t buflen)
 {
   (void)msnprintf(buffer, buflen, "libssh/%s", ssh_version(0));
 }
-
-#if defined(__GNUC__) &&                        \
-  (LIBSSH_VERSION_MINOR >= 10) ||               \
-  (LIBSSH_VERSION_MAJOR > 0)
-#pragma GCC diagnostic pop
-#endif
 
 #endif                          /* USE_LIBSSH */
