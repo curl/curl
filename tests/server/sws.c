@@ -2334,7 +2334,8 @@ int main(int argc, char *argv[])
       curl_socket_t msgsock;
       do {
         msgsock = accept_connection(sock);
-        logmsg("accept_connection %d returned %d", sock, msgsock);
+        logmsg("accept_connection %ld returned %ld",
+               (long)sock, (long)msgsock);
         if(CURL_SOCKET_BAD == msgsock)
           goto sws_cleanup;
         if(req->delay)

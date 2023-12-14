@@ -754,13 +754,13 @@ static bool incoming(curl_socket_t listenfd)
       curl_socket_t newfd = accept(sockfd, NULL, NULL);
       if(CURL_SOCKET_BAD == newfd) {
         error = SOCKERRNO;
-        logmsg("accept(%d, NULL, NULL) failed with error: (%d) %s",
-               sockfd, error, sstrerror(error));
+        logmsg("accept(%ld, NULL, NULL) failed with error: (%d) %s",
+               (long)sockfd, error, sstrerror(error));
       }
       else {
         curl_socket_t remotefd;
-        logmsg("====> Client connect, fd %d. Read config from %s",
-               newfd, configfile);
+        logmsg("====> Client connect, fd %ld. Read config from %s",
+               (long)newfd, configfile);
         remotefd = sockit(newfd); /* SOCKS until done */
         if(remotefd == CURL_SOCKET_BAD) {
           logmsg("====> Client disconnect");
@@ -943,8 +943,8 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
   rc = listen(sock, 5);
   if(0 != rc) {
     error = SOCKERRNO;
-    logmsg("listen(%d, 5) failed with error: (%d) %s",
-           sock, error, sstrerror(error));
+    logmsg("listen(%ld, 5) failed with error: (%d) %s",
+           (long)sock, error, sstrerror(error));
     sclose(sock);
     return CURL_SOCKET_BAD;
   }

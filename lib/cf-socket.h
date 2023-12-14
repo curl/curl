@@ -46,6 +46,8 @@ struct Curl_sockaddr_ex;
 
 #if SIZEOF_CURL_SOCKET_T < 8
 # define CURL_FORMAT_SOCKET_T "d"
+#elif defined(__MINGW32__)
+# define CURL_FORMAT_SOCKET_T "zd"
 #else
 # define CURL_FORMAT_SOCKET_T "qd"
 #endif

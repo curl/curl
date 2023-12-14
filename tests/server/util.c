@@ -139,7 +139,7 @@ static const char *win32_strerror(int err, char *buf, size_t buflen)
   if(!FormatMessageA((FORMAT_MESSAGE_FROM_SYSTEM |
                       FORMAT_MESSAGE_IGNORE_INSERTS), NULL, err,
                      LANG_NEUTRAL, buf, (DWORD)buflen, NULL))
-    msnprintf(buf, buflen, "Unknown error %lu (%#lx)", err, err);
+    msnprintf(buf, buflen, "Unknown error %d (%#x)", err, err);
   return buf;
 }
 
@@ -555,7 +555,7 @@ static void exit_signal_handler(int signum)
 static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
 {
   int signum = 0;
-  logmsg("ctrl_event_handler: %d", dwCtrlType);
+  logmsg("ctrl_event_handler: %lu", dwCtrlType);
   switch(dwCtrlType) {
 #ifdef SIGINT
     case CTRL_C_EVENT: signum = SIGINT; break;
@@ -569,7 +569,7 @@ static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
     default: return FALSE;
   }
   if(signum) {
-    logmsg("ctrl_event_handler: %d -> %d", dwCtrlType, signum);
+    logmsg("ctrl_event_handler: %lu -> %d", dwCtrlType, signum);
     raise(signum);
   }
   return TRUE;

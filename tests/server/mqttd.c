@@ -546,7 +546,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
       buff_size = remaining_length;
       buffer = realloc(buffer, buff_size);
       if(!buffer) {
-        logmsg("Failed realloc of size %lu", buff_size);
+        logmsg("Failed realloc of size %zu", buff_size);
         goto end;
       }
     }
@@ -633,7 +633,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
       /* two bytes topic length */
       topic_len = (buffer[2] << 8) | buffer[3];
       if(topic_len != (remaining_length - 5)) {
-        logmsg("Wrong topic length, got %d expected %zu",
+        logmsg("Wrong topic length, got %u expected %zu",
                topic_len, remaining_length - 5);
         goto end;
       }
@@ -767,12 +767,12 @@ static bool incoming(curl_socket_t listenfd)
       curl_socket_t newfd = accept(sockfd, NULL, NULL);
       if(CURL_SOCKET_BAD == newfd) {
         error = SOCKERRNO;
-        logmsg("accept(%d, NULL, NULL) failed with error: (%d) %s",
-               sockfd, error, sstrerror(error));
+        logmsg("accept(%ld, NULL, NULL) failed with error: (%d) %s",
+               (long)sockfd, error, sstrerror(error));
       }
       else {
-        logmsg("====> Client connect, fd %d. Read config from %s",
-               newfd, configfile);
+        logmsg("====> Client connect, fd %ld. Read config from %s",
+               (long)newfd, configfile);
         set_advisor_read_lock(loglockfile);
         (void)mqttit(newfd); /* until done */
         clear_advisor_read_lock(loglockfile);
@@ -910,8 +910,8 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
   rc = listen(sock, 5);
   if(0 != rc) {
     error = SOCKERRNO;
-    logmsg("listen(%d, 5) failed with error: (%d) %s",
-           sock, error, sstrerror(error));
+    logmsg("listen(%ld, 5) failed with error: (%d) %s",
+           (long)sock, error, sstrerror(error));
     sclose(sock);
     return CURL_SOCKET_BAD;
   }

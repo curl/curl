@@ -965,7 +965,7 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
      */
     const size_t len = ((pubkey->end - pubkey->beg - 2) * 4);
     if(!certnum)
-      infof(data, "   ECC Public Key (%lu bits)", len);
+      infof(data, "   ECC Public Key (%zu bits)", len);
     if(data->set.ssl.certinfo) {
       char q[sizeof(len) * 8 / 3 + 1];
       (void)msnprintf(q, sizeof(q), "%zu", len);
@@ -999,7 +999,7 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
     if(len > 32)
       elem.beg = q;     /* Strip leading zero bytes. */
     if(!certnum)
-      infof(data, "   RSA Public Key (%lu bits)", len);
+      infof(data, "   RSA Public Key (%zu bits)", len);
     if(data->set.ssl.certinfo) {
       char r[sizeof(len) * 8 / 3 + 1];
       msnprintf(r, sizeof(r), "%zu", len);
