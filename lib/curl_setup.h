@@ -259,11 +259,31 @@
 
 #include <curl/system.h>
 
+/* curl uses its own printf() function internally. It understands the GNU
+ * format. Use this format, so that is matches the GNU format attribute we
+ * use with the mingw compiler, allowing it to verify them at compile-time.
+ */
 #ifdef  __MINGW32__
 #  undef CURL_FORMAT_CURL_OFF_T
 #  undef CURL_FORMAT_CURL_OFF_TU
 #  define CURL_FORMAT_CURL_OFF_T   "lld"
 #  define CURL_FORMAT_CURL_OFF_TU  "llu"
+#endif
+
+/* based on logic in "curl/mprintf.h" */
+
+#if (defined(__GNUC__) || defined(__clang__)) &&                        \
+  defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&         \
+  !defined(CURL_NO_FMT_CHECKS)
+#if defined(__MINGW32__) && !defined(__clang__)
+#define CURL_PRINTF(fmt, arg) \
+  __attribute__((format(gnu_printf, fmt, arg)))
+#else
+#define CURL_PRINTF(fmt, arg) \
+  __attribute__((format(__printf__, fmt, arg)))
+#endif
+#else
+#define CURL_PRINTF(fmt, arg)
 #endif
 
 /*
@@ -664,22 +684,6 @@
 #else
 #  define FALLTHROUGH()  do {} while (0)
 #endif
-#endif
-
-/* based on logic in "curl/mprintf.h" */
-
-#if (defined(__GNUC__) || defined(__clang__)) &&                        \
-  defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&         \
-  !defined(CURL_NO_FMT_CHECKS)
-#if defined(__MINGW32__) && !defined(__clang__)
-#define CURL_PRINTF(fmt, arg) \
-  __attribute__((format(gnu_printf, fmt, arg)))
-#else
-#define CURL_PRINTF(fmt, arg) \
-  __attribute__((format(__printf__, fmt, arg)))
-#endif
-#else
-#define CURL_PRINTF(fmt, arg)
 #endif
 
 /*
