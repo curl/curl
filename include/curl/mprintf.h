@@ -37,17 +37,17 @@ extern "C" {
   !defined(CURL_NO_FMT_CHECKS)
 #ifdef __MINGW32__
 #ifdef __MINGW_PRINTF_FORMAT
-#define CURL_TEMP_PRINTF(a,b) \
-  __attribute__((format(__MINGW_PRINTF_FORMAT, a, b)))
+#define CURL_TEMP_PRINTF(fmt, arg) \
+  __attribute__((format(__MINGW_PRINTF_FORMAT, fmt, arg)))
 #else
-#define CURL_TEMP_PRINTF(a,b)
+#define CURL_TEMP_PRINTF(fmt, arg)
 #endif
 #else
-#define CURL_TEMP_PRINTF(a,b) \
-  __attribute__((format(printf, a, b)))
+#define CURL_TEMP_PRINTF(fmt, arg) \
+  __attribute__((format(printf, fmt, arg)))
 #endif
 #else
-#define CURL_TEMP_PRINTF(a,b)
+#define CURL_TEMP_PRINTF(fmt, arg)
 #endif
 
 CURL_EXTERN int curl_mprintf(const char *format, ...) CURL_TEMP_PRINTF(1, 2);
