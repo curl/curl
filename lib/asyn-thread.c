@@ -54,6 +54,7 @@
 #  define RESOLVER_ENOMEM  ENOMEM
 #endif
 
+#include "system_win32.h"
 #include "urldata.h"
 #include "sendf.h"
 #include "hostip.h"
@@ -68,12 +69,6 @@
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
-
-#ifdef _WIN32
-#include "system_win32.h"
-/* set in win32_init() */
-extern bool Curl_isWindows8OrGreater;
-#endif
 
 struct resdata {
   struct curltime start;
@@ -361,8 +356,9 @@ query_complete(DWORD err, DWORD bytes, LPWSAOVERLAPPED overlapped)
       memcpy(ca->ai_addr, ai->ai_addr, ss_size);
 
       if(namelen) {
+        size_t i;
         ca->ai_canonname = (void *)((char *)ca->ai_addr + ss_size);
-        for(size_t i = 0; i < namelen; ++i) /* convert wide string to ascii */
+        for(i = 0; i < namelen; ++i) /* convert wide string to ascii */
           ca->ai_canonname[i] = (char)ai->ai_canonname[i];
         ca->ai_canonname[namelen] = '\0';
       }
