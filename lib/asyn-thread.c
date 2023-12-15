@@ -646,15 +646,17 @@ static bool init_resolve_thread(struct Curl_easy *data,
       td->tsd.w8.hints.ai_family = hints->ai_family;
       td->tsd.w8.hints.ai_socktype = hints->ai_socktype;
       td->complete_ev = CreateEvent(NULL, TRUE, FALSE, NULL);
-      /* fall back to old thread code if something failed */
-      if(td->complete_ev) {
-        err = Curl_GetAddrInfoExW(td->tsd.w8.name, td->tsd.w8.port, NS_DNS,
-          NULL, &td->tsd.w8.hints, &td->tsd.w8.res, NULL,
-          &td->tsd.w8.overlapped, &query_complete, &td->tsd.w8.cancel_ev);
-        if(err != WSA_IO_PENDING)
-          query_complete(err, 0, &td->tsd.w8.overlapped);
-        return TRUE;
+      if(!td->complete_ev) {
+          /* failed to start, mark it as done here for proper cleanup. */
+          td->tsd.done = 1;
+          goto err_exit;
       }
+      err = Curl_GetAddrInfoExW(td->tsd.w8.name, td->tsd.w8.port, NS_DNS,
+        NULL, &td->tsd.w8.hints, &td->tsd.w8.res, NULL,
+        &td->tsd.w8.overlapped, &query_complete, &td->tsd.w8.cancel_ev);
+      if(err != WSA_IO_PENDING)
+        query_complete(err, 0, &td->tsd.w8.overlapped);
+      return TRUE;
     }
   }
 #endif
