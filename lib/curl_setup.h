@@ -435,6 +435,24 @@
 #define SIZEOF_TIME_T 4
 #endif
 
+#ifndef SIZEOF_CURL_SOCKET_T
+/* configure and cmake check and set the define */
+# ifdef _WIN64
+#  define SIZEOF_CURL_SOCKET_T 8
+# else
+/* default guess */
+#  define SIZEOF_CURL_SOCKET_T 4
+# endif
+#endif
+
+#if SIZEOF_CURL_SOCKET_T < 8
+# define CURL_FORMAT_SOCKET_T "d"
+#elif defined(__MINGW32__)
+# define CURL_FORMAT_SOCKET_T "zd"
+#else
+# define CURL_FORMAT_SOCKET_T "qd"
+#endif
+
 /*
  * Default sizeof(off_t) in case it hasn't been defined in config file.
  */
