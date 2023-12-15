@@ -734,6 +734,7 @@ static void addrinfo_cb(void *arg, int status, int timeouts,
     res->last_status = CURL_ASYNC_SUCCESS;
     ares_freeaddrinfo(result);
   }
+  res->num_pending--;
 }
 
 #endif
