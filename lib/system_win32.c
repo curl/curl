@@ -49,9 +49,9 @@ static HMODULE s_ws2_32Dll = NULL;
 /* Pointer to the if_nametoindex function */
 IF_NAMETOINDEX_FN Curl_if_nametoindex = NULL;
 
-void(WSAAPI *ptrFreeAddrInfoExW)(ADDRINFOEXW_ *pAddrInfoEx) = NULL;
-INT(WSAAPI *ptrGetAddrInfoExCancel)(LPHANDLE lpHandle) = NULL;
-INT(WSAAPI *ptrGetAddrInfoExW)(PCWSTR pName, PCWSTR pServiceName,
+void(WSAAPI *Curl_FreeAddrInfoExW)(ADDRINFOEXW_ *pAddrInfoEx) = NULL;
+int(WSAAPI *Curl_GetAddrInfoExCancel)(LPHANDLE lpHandle) = NULL;
+int(WSAAPI *Curl_GetAddrInfoExW)(PCWSTR pName, PCWSTR pServiceName,
   DWORD dwNameSpace, LPGUID lpNspId, const ADDRINFOEXW_ *hints,
   ADDRINFOEXW_ **ppResult, struct timeval *timeout, LPOVERLAPPED lpOverlapped,
   LOOKUP_COMPLETION lpCompletionRoutine, LPHANDLE lpHandle) = NULL;
@@ -117,11 +117,11 @@ CURLcode Curl_win32_init(long flags)
 
   s_ws2_32Dll = Curl_load_library(TEXT("ws2_32.dll"));
   if(s_ws2_32Dll) {
-    *(FARPROC*)&ptrFreeAddrInfoExW = GetProcAddress(s_ws2_32Dll,
+    *(FARPROC*)&Curl_FreeAddrInfoExW = GetProcAddress(s_ws2_32Dll,
       "FreeAddrInfoExW");
-    *(FARPROC*)&ptrGetAddrInfoExCancel = GetProcAddress(s_ws2_32Dll,
+    *(FARPROC*)&Curl_GetAddrInfoExCancel = GetProcAddress(s_ws2_32Dll,
       "GetAddrInfoExCancel");
-    *(FARPROC*)&ptrGetAddrInfoExW = GetProcAddress(s_ws2_32Dll,
+    *(FARPROC*)&Curl_GetAddrInfoExW = GetProcAddress(s_ws2_32Dll,
       "GetAddrInfoExW");
   }
 
@@ -151,9 +151,9 @@ void Curl_win32_cleanup(long init_flags)
   if(s_ws2_32Dll) {
     FreeLibrary(s_ws2_32Dll);
     s_ws2_32Dll = NULL;
-    ptrFreeAddrInfoExW = NULL;
-    ptrGetAddrInfoExCancel = NULL;
-    ptrGetAddrInfoExW = NULL;
+    Curl_FreeAddrInfoExW = NULL;
+    Curl_GetAddrInfoExCancel = NULL;
+    Curl_GetAddrInfoExW = NULL;
   }
   if(s_hIpHlpApiDll) {
     FreeLibrary(s_hIpHlpApiDll);

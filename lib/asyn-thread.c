@@ -362,7 +362,7 @@ query_complete(DWORD err, DWORD bytes, LPWSAOVERLAPPED overlapped)
 
       if(namelen) {
         ca->ai_canonname = (void *)((char *)ca->ai_addr + ss_size);
-        curl_msprintf(ca->ai_canonname, "%S", ai->ai_canonname);
+        curl_msnprintf(ca->ai_canonname, namelen, "%S", ai->ai_canonname);
       }
 
       /* if the return list is empty, this becomes the first element */
@@ -396,7 +396,7 @@ query_complete(DWORD err, DWORD bytes, LPWSAOVERLAPPED overlapped)
   }
 
   if(tsd->w8.res) {
-    ptrFreeAddrInfoExW(tsd->w8.res);
+    Curl_FreeAddrInfoExW(tsd->w8.res);
     tsd->w8.res = NULL;
   }
 
@@ -560,7 +560,7 @@ static void destroy_async_data(struct Curl_async *async)
     else {
 #ifdef _WIN32
       if(td->complete_ev) {
-        ptrGetAddrInfoExCancel(&td->tsd.w8.cancel_ev);
+        Curl_GetAddrInfoExCancel(&td->tsd.w8.cancel_ev);
         WaitForSingleObject(td->complete_ev, INFINITE);
         CloseHandle(td->complete_ev);
       }
@@ -629,14 +629,14 @@ static bool init_resolve_thread(struct Curl_easy *data,
   td->tsd.done = 0;
 
 #ifdef _WIN32
-  if(Curl_isWindows8OrGreater && ptrFreeAddrInfoExW &&
-      ptrGetAddrInfoExCancel && ptrGetAddrInfoExW) {
+  if(Curl_isWindows8OrGreater && Curl_FreeAddrInfoExW &&
+      Curl_GetAddrInfoExCancel && Curl_GetAddrInfoExW) {
     int hostname_w_len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
-        hostname, -1, NULL, 0);
+        hostname, -1, NULL, 0); /* calculate required length */
     int name_sz = sizeof(td->tsd.w8.name) / sizeof(td->tsd.w8.name[0]);
     if(hostname_w_len > 0 && hostname_w_len < name_sz)
       hostname_w_len = MultiByteToWideChar(CP_UTF8, 0, hostname, -1,
-        td->tsd.w8.name, hostname_w_len);
+        td->tsd.w8.name, hostname_w_len); /* do utf8 conversion */
     if(hostname_w_len > 0 && hostname_w_len < name_sz) {
       swprintf(td->tsd.w8.port,
         sizeof(td->tsd.w8.port) / sizeof(td->tsd.w8.port[0]),
@@ -644,8 +644,9 @@ static bool init_resolve_thread(struct Curl_easy *data,
       td->tsd.w8.hints.ai_family = hints->ai_family;
       td->tsd.w8.hints.ai_socktype = hints->ai_socktype;
       td->complete_ev = CreateEvent(NULL, TRUE, FALSE, NULL);
+      /* fall back to old thread code if something failed */
       if(td->complete_ev) {
-        err = ptrGetAddrInfoExW(td->tsd.w8.name, td->tsd.w8.port, NS_DNS,
+        err = Curl_GetAddrInfoExW(td->tsd.w8.name, td->tsd.w8.port, NS_DNS,
           NULL, &td->tsd.w8.hints, &td->tsd.w8.res, NULL,
           &td->tsd.w8.overlapped, &query_complete, &td->tsd.w8.cancel_ev);
         if(err != WSA_IO_PENDING)

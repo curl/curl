@@ -57,9 +57,9 @@ typedef struct addrinfoexW_
 } ADDRINFOEXW_;
 
 typedef void(CALLBACK *LOOKUP_COMPLETION)(DWORD, DWORD, LPWSAOVERLAPPED);
-extern void(WSAAPI *ptrFreeAddrInfoExW)(ADDRINFOEXW_*);
-extern int(WSAAPI *ptrGetAddrInfoExCancel)(LPHANDLE);
-extern int(WSAAPI *ptrGetAddrInfoExW)(PCWSTR, PCWSTR, DWORD, LPGUID,
+extern void(WSAAPI *Curl_FreeAddrInfoExW)(ADDRINFOEXW_*);
+extern int(WSAAPI *Curl_GetAddrInfoExCancel)(LPHANDLE);
+extern int(WSAAPI *Curl_GetAddrInfoExW)(PCWSTR, PCWSTR, DWORD, LPGUID,
   const ADDRINFOEXW_*, ADDRINFOEXW_**, struct timeval*, LPOVERLAPPED,
   LOOKUP_COMPLETION, LPHANDLE);
 
