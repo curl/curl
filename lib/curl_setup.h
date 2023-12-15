@@ -259,6 +259,13 @@
 
 #include <curl/system.h>
 
+#ifdef  __MINGW32__
+#  undef CURL_FORMAT_CURL_OFF_T
+#  undef CURL_FORMAT_CURL_OFF_TU
+#  define CURL_FORMAT_CURL_OFF_T   "lld"
+#  define CURL_FORMAT_CURL_OFF_TU  "llu"
+#endif
+
 /*
  * Use getaddrinfo to resolve the IPv4 address literal. If the current network
  * interface doesn't support IPv4, but supports IPv6, NAT64, and DNS64,
