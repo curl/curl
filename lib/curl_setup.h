@@ -664,16 +664,9 @@
 #if (defined(__GNUC__) || defined(__clang__)) &&                        \
   defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&         \
   !defined(CURL_NO_FMT_CHECKS)
-#ifdef __MINGW32__
-#ifdef __clang__
-/* mingw sets __MINGW_PRINTF_FORMAT to `printf` for clang. This collides with
-   our local macro. Step in and use `__printf__` instead as a workaround. */
-#define CURL_PRINTF(fmt, arg) \
-  __attribute__((format(__printf__, fmt, arg)))
-#else
+#if defined(__MINGW32__) && !defined(__clang__)
 #define CURL_PRINTF(fmt, arg) \
   __attribute__((format(gnu_printf, fmt, arg)))
-#endif
 #else
 #define CURL_PRINTF(fmt, arg) \
   __attribute__((format(__printf__, fmt, arg)))

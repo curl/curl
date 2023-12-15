@@ -35,14 +35,9 @@ extern "C" {
 #if (defined(__GNUC__) || defined(__clang__)) &&                        \
   defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&         \
   !defined(CURL_NO_FMT_CHECKS)
-#ifdef __MINGW32__
-#ifdef __clang__
-#define CURL_TEMP_PRINTF(fmt, arg) \
-  __attribute__((format(printf, fmt, arg)))
-#else
+#if defined(__MINGW32__) && !defined(__clang__)
 #define CURL_TEMP_PRINTF(fmt, arg) \
   __attribute__((format(gnu_printf, fmt, arg)))
-#endif
 #else
 #define CURL_TEMP_PRINTF(fmt, arg) \
   __attribute__((format(printf, fmt, arg)))
