@@ -36,7 +36,10 @@ extern "C" {
   defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&         \
   !defined(CURL_NO_FMT_CHECKS)
 #ifdef __MINGW32__
-#ifdef __MINGW_PRINTF_FORMAT
+#ifdef __clang__
+#define CURL_TEMP_PRINTF(fmt, arg) \
+  __attribute__((format(printf, fmt, arg)))
+#elif defined(__MINGW_PRINTF_FORMAT)
 #define CURL_TEMP_PRINTF(fmt, arg) \
   __attribute__((format(__MINGW_PRINTF_FORMAT, fmt, arg)))
 #else
