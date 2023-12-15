@@ -668,6 +668,8 @@
 #ifdef __MINGW_PRINTF_FORMAT
 #define CURL_PRINTF(fmt, arg) \
   __attribute__((format(__MINGW_PRINTF_FORMAT, fmt, arg)))
+#else
+#define CURL_PRINTF(fmt, arg)
 #endif
 #else
 #define CURL_PRINTF(fmt, arg) \
