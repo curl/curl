@@ -23,8 +23,10 @@
 ###########################################################################
 include(CheckCCompilerFlag)
 
+unset(WPICKY)
+
 if(CURL_WERROR AND CMAKE_COMPILER_IS_GNUCC AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic-errors")
+  set(WPICKY "${WPICKY} -pedantic-errors")
 endif()
 
 if(PICKY_COMPILER)
@@ -206,8 +208,6 @@ if(PICKY_COMPILER)
 
     #
 
-    unset(WPICKY)
-
     foreach(_CCOPT IN LISTS WPICKY_ENABLE)
       set(WPICKY "${WPICKY} ${_CCOPT}")
     endforeach()
@@ -224,8 +224,10 @@ if(PICKY_COMPILER)
         set(WPICKY "${WPICKY} ${_CCOPT}")
       endif()
     endforeach()
-
-    message(STATUS "Picky compiler options:${WPICKY}")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WPICKY}")
   endif()
+endif()
+
+if(WPICKY)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WPICKY}")
+  message(STATUS "Picky compiler options:${WPICKY}")
 endif()
