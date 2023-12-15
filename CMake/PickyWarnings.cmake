@@ -23,6 +23,10 @@
 ###########################################################################
 include(CheckCCompilerFlag)
 
+if(CURL_WERROR AND CMAKE_COMPILER_IS_GNUCC AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic-errors")
+endif()
+
 if(PICKY_COMPILER)
   if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
 
