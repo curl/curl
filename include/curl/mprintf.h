@@ -39,11 +39,9 @@ extern "C" {
 #ifdef __clang__
 #define CURL_TEMP_PRINTF(fmt, arg) \
   __attribute__((format(printf, fmt, arg)))
-#elif defined(__MINGW_PRINTF_FORMAT)
-#define CURL_TEMP_PRINTF(fmt, arg) \
-  __attribute__((format(__MINGW_PRINTF_FORMAT, fmt, arg)))
 #else
-#define CURL_TEMP_PRINTF(fmt, arg)
+#define CURL_TEMP_PRINTF(fmt, arg) \
+  __attribute__((format(gnu_printf, fmt, arg)))
 #endif
 #else
 #define CURL_TEMP_PRINTF(fmt, arg) \

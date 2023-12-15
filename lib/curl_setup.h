@@ -670,11 +670,9 @@
    our local macro. Step in and use `__printf__` instead as a workaround. */
 #define CURL_PRINTF(fmt, arg) \
   __attribute__((format(__printf__, fmt, arg)))
-#elif defined(__MINGW_PRINTF_FORMAT)
-#define CURL_PRINTF(fmt, arg) \
-  __attribute__((format(__MINGW_PRINTF_FORMAT, fmt, arg)))
 #else
-#define CURL_PRINTF(fmt, arg)
+#define CURL_PRINTF(fmt, arg) \
+  __attribute__((format(gnu_printf, fmt, arg)))
 #endif
 #else
 #define CURL_PRINTF(fmt, arg) \
