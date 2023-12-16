@@ -288,6 +288,8 @@ the specific problem.
 SSL Client Certificate required.
 .IP "CURLE_UNRECOVERABLE_POLL (99)"
 An internal call to poll() or select() returned error that is not recoverable.
+.IP "CURLE_TOO_LARGE (100)"
+A value or data field grew larger than allowed.
 .SH "CURLMcode"
 This is the generic return code used by functions in the libcurl multi
 interface. Also consider \fIcurl_multi_strerror(3)\fP.
@@ -410,6 +412,8 @@ The URL contained an invalid number of slashes.
 The user part of the URL contained bad or invalid characters.
 .IP "CURLUE_LACKS_IDN (30)"
 libcurl lacks IDN support.
+.IP "CURLUE_TOO_LARGE (31)"
+A value or data field is larger than allowed.
 .SH "CURLHcode"
 The header interface returns a \fICURLHcode\fP to indicate when an error has
 occurred.

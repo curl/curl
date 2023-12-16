@@ -39,6 +39,7 @@
 
 #include "curl_setup.h"
 #include "dynbuf.h"
+#include "curl_printf.h"
 #include <curl/mprintf.h>
 
 #include "curl_memory.h"
@@ -169,8 +170,7 @@ struct nsprintf {
 
 struct asprintf {
   struct dynbuf *b;
-  bool fail; /* if an alloc has failed and thus the output is not the complete
-                data */
+  char merr;
 };
 
 static long dprintf_DollarString(char *input, char **end)
@@ -1062,25 +1062,27 @@ static int alloc_addbyter(int output, FILE *data)
 {
   struct asprintf *infop = (struct asprintf *)data;
   unsigned char outc = (unsigned char)output;
+  CURLcode result;
 
-  if(Curl_dyn_addn(infop->b, &outc, 1)) {
-    infop->fail = 1;
+  result = Curl_dyn_addn(infop->b, &outc, 1);
+  if(result) {
+    infop->merr = result == CURLE_TOO_LARGE ? MERR_TOO_LARGE : MERR_MEM;
     return -1; /* fail */
   }
   return outc; /* fputc() returns like this on success */
 }
 
-/* appends the formatted string, returns 0 on success, 1 on error */
+/* appends the formatted string, returns MERR error code */
 int Curl_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list ap_save)
 {
   struct asprintf info;
   info.b = dyn;
-  info.fail = 0;
+  info.merr = MERR_OK;
 
   (void)dprintf_formatf(&info, alloc_addbyter, format, ap_save);
-  if(info.fail) {
+  if(info.merr) {
     Curl_dyn_free(info.b);
-    return 1;
+    return info.merr;
   }
   return 0;
 }
@@ -1091,10 +1093,10 @@ char *curl_mvaprintf(const char *format, va_list ap_save)
   struct dynbuf dyn;
   info.b = &dyn;
   Curl_dyn_init(info.b, DYN_APRINTF);
-  info.fail = 0;
+  info.merr = MERR_OK;
 
   (void)dprintf_formatf(&info, alloc_addbyter, format, ap_save);
-  if(info.fail) {
+  if(info.merr) {
     Curl_dyn_free(info.b);
     return NULL;
   }

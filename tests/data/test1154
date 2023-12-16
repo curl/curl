@@ -47,9 +47,9 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-# 27 == CURLE_OUT_OF_MEMORY
+# 100 == CURLE_TOO_LARGE
 <errorcode>
-27
+100
 </errorcode>
 </verify>
 </testcase>

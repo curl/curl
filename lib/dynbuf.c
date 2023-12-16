@@ -81,7 +81,7 @@ static CURLcode dyn_nappend(struct dynbuf *s,
 
   if(fit > s->toobig) {
     Curl_dyn_free(s);
-    return CURLE_OUT_OF_MEMORY;
+    return CURLE_TOO_LARGE;
   }
   else if(!a) {
     DEBUGASSERT(!indx);
@@ -199,6 +199,9 @@ CURLcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
 
   if(!rc)
     return CURLE_OK;
+  else if(rc == MERR_TOO_LARGE)
+    return CURLE_TOO_LARGE;
+  return CURLE_OUT_OF_MEMORY;
 #else
   char *str;
 #ifdef __clang__
@@ -217,8 +220,8 @@ CURLcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
   }
   /* If we failed, we cleanup the whole buffer and return error */
   Curl_dyn_free(s);
+  return CURLE_OK;
 #endif
-  return CURLE_OUT_OF_MEMORY;
 }
 
 /*

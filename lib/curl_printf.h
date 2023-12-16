@@ -31,6 +31,10 @@
 
 #include <curl/mprintf.h>
 
+#define MERR_OK        0
+#define MERR_MEM       1
+#define MERR_TOO_LARGE 2
+
 # undef printf
 # undef fprintf
 # undef msnprintf
