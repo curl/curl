@@ -14,23 +14,17 @@ Multi: single
 Retrieve a byte range (i.e. a partial document) from an HTTP/1.1, FTP or SFTP
 server or a local FILE. Ranges can be specified in a number of ways.
 .RS
-.TP 10
-.B 0-499
+.IP 0-499
 specifies the first 500 bytes
-.TP
-.B 500-999
+.IP 500-999
 specifies the second 500 bytes
-.TP
-.B -500
+.IP -500
 specifies the last 500 bytes
-.TP
-.B 9500-
+.IP 9500-
 specifies the bytes from offset 9500 and forward
-.TP
-.B 0-0,-1
+.IP 0-0,-1
 specifies the first and last byte only(*)(HTTP)
-.TP
-.B 100-199,500-599
+.IP 100-199,500-599
 specifies two separate 100-byte ranges(*) (HTTP)
 .RE
 .IP
