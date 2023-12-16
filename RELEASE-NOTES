@@ -1,21 +1,50 @@
 curl and libcurl 8.5.1
 
- Public curl releases:         253
+ Public curl releases:         254
  Command line options:         258
  curl_easy_setopt() options:   303
  Public functions in libcurl:  93
- Contributors:                 3042
+ Contributors:                 3046
 
 This release includes the following changes:
 
 
 This release includes the following bugfixes:
 
+ o build: delete unused `HAVE_{GSSHEIMDAL,GSSMIT,HEIMDAL}` [4]
+ o build: enable missing OpenSSF-recommended warnings, with fixes [11]
+ o build: fix Windows ADDRESS_FAMILY detection [35]
+ o build: remove redundant `CURL_PULL_*` settings [8]
+ o CI/distcheck: run full tests [31]
  o cmake: fix typo [5]
+ o cmdline-docs: use .IP consistently [13]
+ o cmdline/gen: fix the sorting of the man page options [33]
+ o cookie: avoid fopen with empty file name [24]
+ o curl: show ipfs and ipns as supported "protocols" [15]
  o dist: add tests/errorcodes.pl to the tarball [6]
+ o docs: clean up Protocols: for cmdline options [32]
+ o doh: remove unused local variable [34]
+ o ftp: handle the PORT parsing without allocation [44]
+ o gnutls: fix build with --disable-verbose [3]
+ o hostip: return error immediately when Curl_ip2addr() fails [19]
+ o http: fix off-by-one error in request method length check [14]
  o lib: fix variable undeclared error caused by `infof` changes [2]
+ o lib: reduce use of strncpy [30]
+ o lib: rename Curl_strndup to Curl_memdup0 to avoid misunderstanding [36]
+ o lib: strndup/memdup instead of malloc, memcpy and null-terminate [42]
+ o libssh: improve the deprecation warning dismissal [20]
+ o libssh: supress warnings without version check [18]
+ o Makefile.mk: drop Windows support [12]
+ o openssl: re-match LibreSSL deinit with init [17]
+ o readwrite_data: loop less [21]
+ o Revert "urldata: move async resolver state from easy handle to connectdata" [16]
  o sectransp_ make TLSCipherNameForNumber() available in non-verbose config [1]
+ o sendf: fix compiler warning with CURL_DISABLE_HEADERS_API [38]
+ o system.h: sync mingw `CURL_TYPEOF_CURL_SOCKLEN_T` with other compilers [9]
+ o tests/server: delete workaround for old-mingw [25]
  o url: for disabled protocols, mention if found in redirect [7]
+ o vtls: remove the Curl_cft_ssl_proxy object if CURL_DISABLE_PROXY [41]
+ o windows: simplify detecting and using system headers [10]
 
 This release includes the following known bugs:
 
@@ -30,14 +59,45 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Cajus Pollmeier, Chris Sauer, Dan Fandrich, Daniel Stenberg,
-  Mauricio Scheffer, Stefan Eissing, Viktor Szakats, Xi Ruoyao, YX Hao
-  (9 contributors)
+  Baruch Siach, Ben, Boris Verkhovskiy, Cajus Pollmeier, Chara White,
+  Chris Sauer, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, Dmitry Karpov,
+  Mauricio Scheffer, Michał Antoniak, Mike Hommey, Ray Satiro, Stefan Eissing,
+  Tatsuhiko Miyagawa, Theo, Viktor Szakats, Xi Ruoyao, YX Hao
+  (20 contributors)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.se/bug/?i=12474
  [2] = https://curl.se/bug/?i=12470
+ [3] = https://curl.se/bug/?i=12505
+ [4] = https://curl.se/bug/?i=12506
  [5] = https://curl.se/bug/?i=12464
  [6] = https://curl.se/bug/?i=12462
  [7] = https://curl.se/bug/?i=12466
+ [8] = https://curl.se/bug/?i=12502
+ [9] = https://curl.se/bug/?i=12501
+ [10] = https://curl.se/bug/?i=12495
+ [11] = https://curl.se/bug/?i=12489
+ [12] = https://curl.se/bug/?i=12224
+ [13] = https://curl.se/bug/?i=12535
+ [14] = https://curl.se/bug/?i=12534
+ [15] = https://curl.se/mail/archive-2023-12/0026.html
+ [16] = https://curl.se/bug/?i=12524
+ [17] = https://curl.se/bug/?i=12525
+ [18] = https://curl.se/bug/?i=12523
+ [19] = https://curl.se/bug/?i=12522
+ [20] = https://curl.se/bug/?i=12519
+ [21] = https://curl.se/bug/?i=12504
+ [24] = https://curl.se/bug/?i=12514
+ [25] = https://curl.se/bug/?i=12510
+ [30] = https://curl.se/bug/?i=12499
+ [31] = https://curl.se/bug/?i=12503
+ [32] = https://curl.se/bug/?i=12496
+ [33] = https://curl.se/mail/archive-2023-12/0014.html
+ [34] = https://curl.se/bug/?i=12491
+ [35] = https://curl.se/bug/?i=12441
+ [36] = https://curl.se/bug/?i=12490
+ [38] = https://curl.se/bug/?i=12485
+ [41] = https://curl.se/bug/?i=12459
+ [42] = https://curl.se/bug/?i=12453
+ [44] = https://curl.se/bug/?i=12456
