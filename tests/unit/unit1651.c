@@ -368,7 +368,7 @@ UNITTEST_START
        happens */
     for(byte = 1 ; byte < 255; byte += 17) {
       for(i = 0; i < 45; i++) {
-        char backup = cert[i];
+        unsigned char backup = cert[i];
         cert[i] = (unsigned char) (byte & 0xff);
         (void) Curl_extract_certinfo(data, 0, beg, end);
         cert[i] = backup;
