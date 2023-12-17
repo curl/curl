@@ -1151,22 +1151,22 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       }
       else if(statvfs) {
         #ifdef _MSC_VER
-        #define LIBSSH_VFS_SIZE_MASK "I64u"
+        #define CURL_LIBSSH_VFS_SIZE_MASK "I64u"
         #else
-        #define LIBSSH_VFS_SIZE_MASK PRIu64
+        #define CURL_LIBSSH_VFS_SIZE_MASK PRIu64
         #endif
         char *tmp = aprintf("statvfs:\n"
-                            "f_bsize: %" LIBSSH_VFS_SIZE_MASK "\n"
-                            "f_frsize: %" LIBSSH_VFS_SIZE_MASK "\n"
-                            "f_blocks: %" LIBSSH_VFS_SIZE_MASK "\n"
-                            "f_bfree: %" LIBSSH_VFS_SIZE_MASK "\n"
-                            "f_bavail: %" LIBSSH_VFS_SIZE_MASK "\n"
-                            "f_files: %" LIBSSH_VFS_SIZE_MASK "\n"
-                            "f_ffree: %" LIBSSH_VFS_SIZE_MASK "\n"
-                            "f_favail: %" LIBSSH_VFS_SIZE_MASK "\n"
-                            "f_fsid: %" LIBSSH_VFS_SIZE_MASK "\n"
-                            "f_flag: %" LIBSSH_VFS_SIZE_MASK "\n"
-                            "f_namemax: %" LIBSSH_VFS_SIZE_MASK "\n",
+                            "f_bsize: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
+                            "f_frsize: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
+                            "f_blocks: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
+                            "f_bfree: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
+                            "f_bavail: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
+                            "f_files: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
+                            "f_ffree: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
+                            "f_favail: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
+                            "f_fsid: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
+                            "f_flag: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
+                            "f_namemax: %" CURL_LIBSSH_VFS_SIZE_MASK "\n",
                             statvfs->f_bsize, statvfs->f_frsize,
                             statvfs->f_blocks, statvfs->f_bfree,
                             statvfs->f_bavail, statvfs->f_files,
