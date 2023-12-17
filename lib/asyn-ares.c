@@ -350,9 +350,9 @@ static int waitperform(struct Curl_easy *data, timediff_t timeout_ms)
     /* move through the descriptors and ask for processing on them */
     for(i = 0; i < num; i++)
       ares_process_fd((ares_channel)data->conn->resolve_async.resolver,
-                      (pfd[i].revents & (POLLRDNORM|POLLIN))?
+                      pfd[i].revents & (POLLRDNORM|POLLIN|POLLERR|POLLHUP)?
                       pfd[i].fd:ARES_SOCKET_BAD,
-                      (pfd[i].revents & (POLLWRNORM|POLLOUT))?
+                      pfd[i].revents & (POLLWRNORM|POLLOUT|POLLERR)?
                       pfd[i].fd:ARES_SOCKET_BAD);
   }
   return nfds;
