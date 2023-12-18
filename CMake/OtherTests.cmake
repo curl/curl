@@ -54,9 +54,7 @@ check_c_source_compiles("${_source_epilogue}
     return 0;
   }" HAVE_MSG_NOSIGNAL)
 
-if(NOT WIN32)
-  add_header_include(HAVE_SYS_TIME_H "sys/time.h")
-endif()
+add_header_include(HAVE_SYS_TIME_H "sys/time.h")
 check_c_source_compiles("${_source_epilogue}
   #include <time.h>
   int main(void)
