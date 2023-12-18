@@ -115,7 +115,7 @@ our $DBGCURL=$CURL; #"../src/.libs/curl";  # alternative for debugging
 our $valgrind_logfile="--log-file";  # the option name for valgrind >=3
 our $valgrind_tool="--tool=memcheck";
 our $gdb = checktestcmd("gdb");
-our $gdbthis;      # run test case with gdb debugger
+our $gdbthis = 0;  # run test case with debugger (gdb or lldb)
 our $gdbxwin;      # use windowed gdb when using gdb
 
 # torture test variables
