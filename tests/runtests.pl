@@ -2215,6 +2215,10 @@ while(@ARGV) {
         # run this test with gdb
         $gdbthis=1;
     }
+    elsif ($ARGV[0] eq "-gl") {
+        # run this test with lldb
+        $gdbthis=2;
+    }
     elsif ($ARGV[0] eq "-gw") {
         # run this test with windowed gdb
         $gdbthis=1;
