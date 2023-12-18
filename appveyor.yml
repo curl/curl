@@ -342,7 +342,6 @@ build_script:
         cmake --build _bld --config $env:PRJ_CFG --parallel 2 --clean-first -- $env:BUILD_OPT
         if($env:SHARED -eq 'ON') {
           Copy-Item -Path 'C:\Projects\curl\_bld\lib\*.dll' -Destination 'C:\projects\curl\_bld\src'
-          Copy-Item -Path 'C:\Projects\curl\_bld\lib\*.dll' -Destination 'C:\projects\curl\_bld\tests\libtest'
         }
         if($env:OPENSSL -eq 'ON') {
           Copy-Item -Path "$openssl_root\*.dll" -Destination 'C:\projects\curl\_bld\src'
@@ -408,6 +407,7 @@ test_script:
       }
       if($env:TESTING -eq 'ON') {
         if($env:BUILD_SYSTEM -eq 'CMake') {
+          Copy-Item -Path 'C:\Projects\curl\_bld\lib\*.dll' -Destination 'C:\projects\curl\_bld\tests\libtest'
           $env:TFLAGS="$acurl $env:DISABLED_TESTS"
           cmake --build _bld --config $env:PRJ_CFG --target test-ci
         }
