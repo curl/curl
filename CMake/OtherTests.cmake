@@ -25,9 +25,6 @@ include(CheckCSourceCompiles)
 include(CheckCSourceRuns)
 include(CheckTypeSize)
 
-# The begin of the sources (macros and includes)
-set(_source_epilogue "#undef inline")
-
 macro(add_header_include check header)
   if(${check})
     set(_source_epilogue "${_source_epilogue}
@@ -49,6 +46,9 @@ if(NOT DEFINED HAVE_STRUCT_SOCKADDR_STORAGE)
   check_type_size("struct sockaddr_storage" SIZEOF_STRUCT_SOCKADDR_STORAGE)
   set(HAVE_STRUCT_SOCKADDR_STORAGE ${HAVE_SIZEOF_STRUCT_SOCKADDR_STORAGE})
 endif()
+
+# The begin of the sources (macros and includes)
+set(_source_epilogue "#undef inline")
 
 if(NOT WIN32)
   add_header_include(HAVE_SYS_TYPES_H "sys/types.h")
