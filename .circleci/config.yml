@@ -96,7 +96,7 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-maintainer-mode --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets --disable-shared --without-brotli --without-gssapi --without-libidn2 --without-libpsl --without-librtmp --without-libssh2 --without-nghttp2 --without-ntlm-auth --without-ssl --without-zlib --enable-debug CFLAGS='-Wno-vla -mmacosx-version-min=10.15'
+            ./configure --enable-warnings --enable-maintainer-mode --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-mqtt --disable-pop3 --disable-rtsp --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets --disable-shared --without-brotli --without-gssapi --without-libidn2 --without-libpsl --without-librtmp --without-libssh2 --without-nghttp2 --without-ssl --without-zlib --enable-debug CFLAGS='-Wno-vla -mmacosx-version-min=10.15'
 
   configure-macos-securetransport-http2:
     steps:
