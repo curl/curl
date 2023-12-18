@@ -47,7 +47,6 @@ if(NOT DEFINED HAVE_STRUCT_SOCKADDR_STORAGE)
   set(HAVE_STRUCT_SOCKADDR_STORAGE ${HAVE_SIZEOF_STRUCT_SOCKADDR_STORAGE})
 endif()
 
-# The begin of the sources (macros and includes)
 set(_source_epilogue "#undef inline")
 
 if(NOT WIN32)
@@ -65,6 +64,7 @@ if(NOT WIN32)
     }" HAVE_MSG_NOSIGNAL)
 endif()
 
+set(_source_epilogue "#undef inline")
 add_header_include(HAVE_SYS_TIME_H "sys/time.h")
 check_c_source_compiles("${_source_epilogue}
   #include <time.h>
