@@ -35,12 +35,12 @@ macro(add_header_include check header)
   endif()
 endmacro()
 
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+
 if(NOT WIN32)
   add_header_include(HAVE_SYS_TYPES_H "sys/types.h")
   add_header_include(HAVE_SYS_SOCKET_H "sys/socket.h")
 endif()
-
-set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
 if(NOT WIN32)
   check_c_source_compiles("${_source_epilogue}
