@@ -142,7 +142,6 @@ endif()
 
 if(NOT DEFINED HAVE_GETADDRINFO_THREADSAFE)
 
-  set(_save_epilogue "${_source_epilogue}")
   set(_source_epilogue "#undef inline")
 
   add_header_include(HAVE_SYS_SOCKET_H "sys/socket.h")
@@ -185,12 +184,9 @@ if(NOT DEFINED HAVE_GETADDRINFO_THREADSAFE)
   if(HAVE_H_ERRNO OR HAVE_H_ERRNO_ASSIGNABLE OR HAVE_H_ERRNO_SBS_ISSUE_7)
     set(HAVE_GETADDRINFO_THREADSAFE TRUE)
   endif()
-
-  set(_source_epilogue "${_save_epilogue}")
 endif()
 
 if(NOT WIN32 AND NOT DEFINED HAVE_CLOCK_GETTIME_MONOTONIC_RAW)
-  set(_save_epilogue "${_source_epilogue}")
   set(_source_epilogue "#undef inline")
 
   add_header_include(HAVE_SYS_TYPES_H "sys/types.h")
@@ -204,6 +200,4 @@ if(NOT WIN32 AND NOT DEFINED HAVE_CLOCK_GETTIME_MONOTONIC_RAW)
       (void)clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
       return 0;
     }" HAVE_CLOCK_GETTIME_MONOTONIC_RAW)
-
-  set(_source_epilogue "${_save_epilogue}")
 endif()
