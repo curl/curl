@@ -30,7 +30,8 @@
 typedef enum {
   TIMER_NONE,
   TIMER_STARTOP,
-  TIMER_STARTSINGLE,
+  TIMER_STARTSINGLE, /* start of transfer, might get queued */
+  TIMER_POSTQUEUE,   /* start, immediately after dequeue */
   TIMER_NAMELOOKUP,
   TIMER_CONNECT,
   TIMER_APPCONNECT,

@@ -409,6 +409,9 @@ static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
   case CURLINFO_STARTTRANSFER_TIME_T:
     *param_offt = data->progress.t_starttransfer;
     break;
+  case CURLINFO_QUEUE_TIME_T:
+    *param_offt = data->progress.t_postqueue;
+    break;
   case CURLINFO_REDIRECT_TIME_T:
     *param_offt = data->progress.t_redirect;
     break;
@@ -420,7 +423,7 @@ static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
     break;
   case CURLINFO_CONN_ID:
     *param_offt = data->conn?
-                  data->conn->connection_id : data->state.recent_conn_id;
+      data->conn->connection_id : data->state.recent_conn_id;
     break;
   default:
     return CURLE_UNKNOWN_OPTION;
