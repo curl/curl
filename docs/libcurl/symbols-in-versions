@@ -328,6 +328,7 @@ CURLE_TFTP_NOSUCHUSER           7.15.0
 CURLE_TFTP_NOTFOUND             7.15.0
 CURLE_TFTP_PERM                 7.15.0
 CURLE_TFTP_UNKNOWNID            7.15.0
+CURLE_TOO_LARGE                 8.6.0
 CURLE_TOO_MANY_REDIRECTS        7.5
 CURLE_UNKNOWN_OPTION            7.21.5
 CURLE_UNKNOWN_TELNET_OPTION     7.7           7.21.5
@@ -1094,6 +1095,7 @@ CURLUE_NO_USER                  7.62.0
 CURLUE_NO_ZONEID                7.81.0
 CURLUE_OK                       7.62.0
 CURLUE_OUT_OF_MEMORY            7.62.0
+CURLUE_TOO_LARGE                8.6.0
 CURLUE_UNKNOWN_PART             7.62.0
 CURLUE_UNSUPPORTED_SCHEME       7.62.0
 CURLUE_URLDECODE                7.62.0

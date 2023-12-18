@@ -319,6 +319,9 @@ curl_easy_strerror(CURLcode error)
   case CURLE_UNRECOVERABLE_POLL:
     return "Unrecoverable error in select/poll";
 
+  case CURLE_TOO_LARGE:
+    return "A value or data field grew larger than allowed";
+
     /* error codes not used by current libcurl */
   case CURLE_OBSOLETE20:
   case CURLE_OBSOLETE24:
@@ -552,6 +555,9 @@ curl_url_strerror(CURLUcode error)
 
   case CURLUE_LACKS_IDN:
     return "libcurl lacks IDN support";
+
+  case CURLUE_TOO_LARGE:
+    return "A value or data field is larger than allowed";
 
   case CURLUE_LAST:
     break;

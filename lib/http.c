@@ -3179,7 +3179,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
       ) {
       result = Curl_http2_switch(data, conn, FIRSTSOCKET);
       if(result)
-        return result;
+        goto fail;
     }
     else
 #endif
@@ -3194,7 +3194,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
       DEBUGF(infof(data, "HTTP/2 over clean TCP"));
       result = Curl_http2_switch(data, conn, FIRSTSOCKET);
       if(result)
-        return result;
+        goto fail;
     }
     break;
   }
@@ -3204,11 +3204,11 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
 
   result = Curl_http_host(data, conn);
   if(result)
-    return result;
+    goto fail;
 
   result = Curl_http_useragent(data);
   if(result)
-    return result;
+    goto fail;
 
   Curl_http_method(data, conn, &request, &httpreq);
 
@@ -3224,7 +3224,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
                                    (pq ? pq : data->state.up.path), FALSE);
     free(pq);
     if(result)
-      return result;
+      goto fail;
   }
 
   Curl_safefree(data->state.aptr.ref);
@@ -3249,23 +3249,23 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   /* we only consider transfer-encoding magic if libz support is built-in */
   result = Curl_transferencode(data);
   if(result)
-    return result;
+    goto fail;
 #endif
 
   result = Curl_http_body(data, conn, httpreq, &te);
   if(result)
-    return result;
+    goto fail;
 
   p_accept = Curl_checkheaders(data,
                                STRCONST("Accept"))?NULL:"Accept: */*\r\n";
 
   result = Curl_http_resume(data, conn, httpreq);
   if(result)
-    return result;
+    goto fail;
 
   result = Curl_http_range(data, httpreq);
   if(result)
-    return result;
+    goto fail;
 
   httpstring = get_http_string(data, conn);
 
@@ -3283,7 +3283,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     result = Curl_http_target(data, conn, &req);
   if(result) {
     Curl_dyn_free(&req);
-    return result;
+    goto fail;
   }
 
 #ifndef CURL_DISABLE_ALTSVC
@@ -3354,7 +3354,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
 
   if(result) {
     Curl_dyn_free(&req);
-    return result;
+    goto fail;
   }
 
   if(!(conn->handler->flags&PROTOPT_SSL) &&
@@ -3390,7 +3390,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   }
   if(result) {
     Curl_dyn_free(&req);
-    return result;
+    goto fail;
   }
 
   if((http->postsize > -1) &&
@@ -3426,6 +3426,9 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
        but is disabled here again to avoid that the chunked encoded version is
        actually used when sending the request body over h2 */
     data->req.upload_chunky = FALSE;
+fail:
+  if(CURLE_TOO_LARGE == result)
+    failf(data, "HTTP request too large");
   return result;
 }
 
