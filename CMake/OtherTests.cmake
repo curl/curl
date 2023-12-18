@@ -49,10 +49,8 @@ endif()
 
 if(NOT WIN32)
   set(_source_epilogue "#undef inline")
-
   add_header_include(HAVE_SYS_TYPES_H "sys/types.h")
   add_header_include(HAVE_SYS_SOCKET_H "sys/socket.h")
-
   check_c_source_compiles("${_source_epilogue}
     int main(void)
     {
@@ -80,10 +78,8 @@ unset(CMAKE_TRY_COMPILE_TARGET_TYPE)
 if(NOT CMAKE_CROSSCOMPILING AND NOT APPLE)
 
   set(_source_epilogue "#undef inline")
-
   add_header_include(HAVE_SYS_POLL_H "sys/poll.h")
   add_header_include(HAVE_POLL_H "poll.h")
-
   check_c_source_runs("${_source_epilogue}
     #include <stdlib.h>
     #include <sys/time.h>
@@ -134,11 +130,9 @@ endif()
 if(NOT DEFINED HAVE_GETADDRINFO_THREADSAFE)
 
   set(_source_epilogue "#undef inline")
-
   add_header_include(HAVE_SYS_SOCKET_H "sys/socket.h")
   add_header_include(HAVE_SYS_TIME_H "sys/time.h")
   add_header_include(HAVE_NETDB_H "netdb.h")
-
   check_c_source_compiles("${_source_epilogue}
     int main(void)
     {
@@ -178,11 +172,10 @@ if(NOT DEFINED HAVE_GETADDRINFO_THREADSAFE)
 endif()
 
 if(NOT WIN32 AND NOT DEFINED HAVE_CLOCK_GETTIME_MONOTONIC_RAW)
-  set(_source_epilogue "#undef inline")
 
+  set(_source_epilogue "#undef inline")
   add_header_include(HAVE_SYS_TYPES_H "sys/types.h")
   add_header_include(HAVE_SYS_TIME_H "sys/time.h")
-
   check_c_source_compiles("${_source_epilogue}
     #include <time.h>
     int main(void)
