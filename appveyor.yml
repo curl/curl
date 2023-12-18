@@ -338,16 +338,15 @@ build_script:
         }
 
         Write-Host 'CMake options:' $options
-        cmake . $options
-        cmake --build . --config $env:PRJ_CFG --parallel 2 --clean-first -- $env:BUILD_OPT
+        cmake -B _bld $options
+        cmake --build _bld --config $env:PRJ_CFG --parallel 2 --clean-first -- $env:BUILD_OPT
         if($env:SHARED -eq 'ON') {
-          Copy-Item -Path 'C:\Projects\curl\lib\*.dll' -Destination 'C:\projects\curl\src'
-          Copy-Item -Path 'C:\Projects\curl\lib\*.dll' -Destination 'C:\projects\curl\tests\libtest'
+          Copy-Item -Path 'C:\Projects\curl\_bld\lib\*.dll' -Destination 'C:\projects\curl\_bld\src'
         }
         if($env:OPENSSL -eq 'ON') {
-          Copy-Item -Path "$openssl_root\*.dll" -Destination 'C:\projects\curl\src'
+          Copy-Item -Path "$openssl_root\*.dll" -Destination 'C:\projects\curl\_bld\src'
         }
-        $curl = '.\src\curl.exe'
+        $curl = '.\_bld\src\curl.exe'
       }
       elseif($env:BUILD_SYSTEM -eq 'VisualStudioSolution') {
         cd projects
@@ -371,8 +370,8 @@ build_script:
         $curl = "..\builds\libcurl-vc14.10-x64-$env:PATHPART-dll-ssl-dll-ipv6-sspi\bin\curl.exe"
       }
       elseif($env:BUILD_SYSTEM -eq 'autotools') {
-        & bash -e -c "cd $env:POSIX_PATH_PREFIX/c/projects/curl && autoreconf -fi 2>&1 && ./configure $env:CONFIG_ARGS 2>&1 && make V=1 && make V=1 examples && cd tests && make V=1"
-        $curl = '.\src\curl.exe'
+        & bash -e -c "cd $env:POSIX_PATH_PREFIX/c/projects/curl && autoreconf -fi 2>&1 && mkdir _bld && cd _bld && ../configure $env:CONFIG_ARGS 2>&1 && make V=1 && make V=1 examples && cd tests && make V=1"
+        $curl = '.\_bld\src\curl.exe'
       }
 
       Get-ChildItem -Path C:\projects\curl -Include ('*.exe', '*.dll') -Recurse -Name
@@ -388,14 +387,14 @@ build_script:
       }
 
       if($false) {
-        if(Test-Path CMakeFiles/CMakeConfigureLog.yaml) { cat CMakeFiles/CMakeConfigureLog.yaml }
-        if(Test-Path CMakeFiles/CMakeOutput.log) { cat CMakeFiles/CMakeOutput.log }
-        if(Test-Path CMakeFiles/CMakeError.log) { cat CMakeFiles/CMakeError.log }
-        if(Test-Path config.log) { cat config.log }
+        if(Test-Path _bld/CMakeFiles/CMakeConfigureLog.yaml) { cat _bld/CMakeFiles/CMakeConfigureLog.yaml }
+        if(Test-Path _bld/CMakeFiles/CMakeOutput.log) { cat _bld/CMakeFiles/CMakeOutput.log }
+        if(Test-Path _bld/CMakeFiles/CMakeError.log) { cat _bld/CMakeFiles/CMakeError.log }
+        if(Test-Path config.log) { cat _bld/config.log }
       }
 
       if($env:TESTING -eq 'ON' -and $env:BUILD_SYSTEM -eq 'CMake') {
-        cmake --build . --config $env:PRJ_CFG --parallel 2 --target testdeps
+        cmake --build _bld --config $env:PRJ_CFG --parallel 2 --target testdeps
       }
 
 test_script:
@@ -408,14 +407,15 @@ test_script:
       }
       if($env:TESTING -eq 'ON') {
         if($env:BUILD_SYSTEM -eq 'CMake') {
+          Copy-Item -Path 'C:\Projects\curl\_bld\lib\*.dll' -Destination 'C:\projects\curl\_bld\tests\libtest'
           $env:TFLAGS="$acurl $env:DISABLED_TESTS"
-          cmake --build . --config $env:PRJ_CFG --target test-ci
+          cmake --build _bld --config $env:PRJ_CFG --target test-ci
         }
         elseif($env:BUILD_SYSTEM -eq 'autotools') {
-          & bash -e -c "cd $env:POSIX_PATH_PREFIX/c/projects/curl && make V=1 TFLAGS='$acurl $env:DISABLED_TESTS' test-ci"
+          & bash -e -c "cd $env:POSIX_PATH_PREFIX/c/projects/curl/_bld && make V=1 TFLAGS='$acurl $env:DISABLED_TESTS' test-ci"
         }
         else {
-          & bash -e -c "cd $env:POSIX_PATH_PREFIX/c/projects/curl/tests && ./runtests.pl -a -p !flaky -r -rm $acurl $env:DISABLED_TESTS"
+          & bash -e -c "cd $env:POSIX_PATH_PREFIX/c/projects/curl/_bld/tests && ./runtests.pl -a -p !flaky -r -rm $acurl $env:DISABLED_TESTS"
         }
       }
 
