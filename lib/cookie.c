@@ -368,6 +368,18 @@ static void strstore(char **str, const char *newstr, size_t len)
   *str = Curl_memdup0(newstr, len);
 }
 
+static time_t time_now(void)
+{
+#ifdef DEBUGBUILD
+  char *timestr = getenv("CURL_TIME");
+  if(timestr) {
+    unsigned long val = strtol(timestr, NULL, 10);
+    return (time_t)val;
+  }
+#endif
+  return time(NULL);
+}
+
 /*
  * remove_expired
  *
@@ -380,7 +392,7 @@ static void strstore(char **str, const char *newstr, size_t len)
 static void remove_expired(struct CookieInfo *cookies)
 {
   struct Cookie *co, *nx;
-  curl_off_t now = (curl_off_t)time(NULL);
+  curl_off_t now = (curl_off_t)time_now();
   unsigned int i;
 
   /*
@@ -467,6 +479,18 @@ static int invalid_octets(const char *p)
   return (p[len] != '\0');
 }
 
+/* number of seconds in 400 days */
+#define MAXAGE (400*24*3600)
+
+/* Make sure cookies never expire further away in time than 400 days into the
+   future. (from RFC6265bis draft-13 section 4.1.2.1) */
+static void cap_expires(time_t now, struct Cookie *co)
+{
+  if((TIME_T_MAX - MAXAGE) > now)
+    if(co->expires > (now + MAXAGE))
+      co->expires = now + MAXAGE;
+}
+
 /*
  * Curl_cookie_add
  *
@@ -494,7 +518,7 @@ Curl_cookie_add(struct Curl_easy *data,
   struct Cookie *lastc = NULL;
   struct Cookie *replace_co = NULL;
   struct Cookie *replace_clist = NULL;
-  time_t now = time(NULL);
+  time_t now = time_now();
   bool replace_old = FALSE;
   bool badcookie = FALSE; /* cookies are good by default. mmmmm yummy */
   size_t myhash;
@@ -750,6 +774,7 @@ Curl_cookie_add(struct Curl_easy *data,
               co->expires += now;
             break;
           }
+          cap_expires(now, co);
         }
         else if((nlen == 7) && strncasecompare("expires", namep, 7)) {
           char date[128];
@@ -774,6 +799,8 @@ Curl_cookie_add(struct Curl_easy *data,
               co->expires = 1;
             else if(co->expires < 0)
               co->expires = 0;
+            else
+              cap_expires(now, co);
           }
         }
 
