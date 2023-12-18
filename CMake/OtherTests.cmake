@@ -47,14 +47,12 @@ if(NOT DEFINED HAVE_STRUCT_SOCKADDR_STORAGE)
   set(HAVE_STRUCT_SOCKADDR_STORAGE ${HAVE_SIZEOF_STRUCT_SOCKADDR_STORAGE})
 endif()
 
-set(_source_epilogue "#undef inline")
-
 if(NOT WIN32)
+  set(_source_epilogue "#undef inline")
+
   add_header_include(HAVE_SYS_TYPES_H "sys/types.h")
   add_header_include(HAVE_SYS_SOCKET_H "sys/socket.h")
-endif()
 
-if(NOT WIN32)
   check_c_source_compiles("${_source_epilogue}
     int main(void)
     {
