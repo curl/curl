@@ -630,7 +630,7 @@ static bool init_resolve_thread(struct Curl_easy *data,
 #define MAX_NAME_LEN 256
 #define MAX_PORT_LEN 8
     WCHAR namebuf[MAX_NAME_LEN];
-    WCHAR portbuf[MAX_NAME_LEN];
+    WCHAR portbuf[MAX_PORT_LEN];
     /* calculate required length */
     int w_len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, hostname,
                                     -1, NULL, 0);
