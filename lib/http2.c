@@ -283,13 +283,20 @@ static void http2_data_done(struct Curl_cfilter *cf,
     return;
 
   if(ctx->h2) {
+    bool flush_egress = FALSE;
+    /* returns error if stream not known, which is fine here */
+    (void)nghttp2_session_set_stream_user_data(ctx->h2, stream->id, NULL);
+
     if(!stream->closed && stream->id > 0) {
       /* RST_STREAM */
       CURL_TRC_CF(data, cf, "[%d] premature DATA_DONE, RST stream",
                   stream->id);
-      if(!nghttp2_submit_rst_stream(ctx->h2, NGHTTP2_FLAG_NONE,
-                                    stream->id, NGHTTP2_STREAM_CLOSED))
-        (void)nghttp2_session_send(ctx->h2);
+      stream->closed = TRUE;
+      stream->reset = TRUE;
+      stream->send_closed = TRUE;
+      nghttp2_submit_rst_stream(ctx->h2, NGHTTP2_FLAG_NONE,
+                                stream->id, NGHTTP2_STREAM_CLOSED);
+      flush_egress = TRUE;
     }
     if(!Curl_bufq_is_empty(&stream->recvbuf)) {
       /* Anything in the recvbuf is still being counted
@@ -299,19 +306,11 @@ static void http2_data_done(struct Curl_cfilter *cf,
       nghttp2_session_consume(ctx->h2, stream->id,
                               Curl_bufq_len(&stream->recvbuf));
       /* give WINDOW_UPATE a chance to be sent, but ignore any error */
-      (void)h2_progress_egress(cf, data);
+      flush_egress = TRUE;
     }
 
-    /* -1 means unassigned and 0 means cleared */
-    if(nghttp2_session_get_stream_user_data(ctx->h2, stream->id)) {
-      int rv = nghttp2_session_set_stream_user_data(ctx->h2,
-                                                    stream->id, 0);
-      if(rv) {
-        infof(data, "http/2: failed to clear user_data for stream %u",
-              stream->id);
-        DEBUGASSERT(0);
-      }
-    }
+    if(flush_egress)
+      nghttp2_session_send(ctx->h2);
   }
 
   Curl_bufq_free(&stream->sendbuf);
@@ -1316,26 +1315,43 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
                            uint32_t error_code, void *userp)
 {
   struct Curl_cfilter *cf = userp;
-  struct Curl_easy *data_s;
+  struct Curl_easy *data_s, *call_data = CF_DATA_CURRENT(cf);
   struct stream_ctx *stream;
   int rv;
   (void)session;
 
+  DEBUGASSERT(call_data);
   /* get the stream from the hash based on Stream ID, stream ID zero is for
      connection-oriented stuff */
   data_s = stream_id?
              nghttp2_session_get_stream_user_data(session, stream_id) : NULL;
   if(!data_s) {
+    CURL_TRC_CF(call_data, cf,
+                "[%d] on_stream_close, no easy set on stream", stream_id);
     return 0;
   }
-  stream = H2_STREAM_CTX(data_s);
-  if(!stream)
+  if(!GOOD_EASY_HANDLE(data_s)) {
+    /* nghttp2 still has an easy registered for the stream which has
+     * been freed be libcurl. This points to a code path that does not
+     * trigger DONE or DETACH events as it must. */
+    CURL_TRC_CF(call_data, cf,
+                "[%d] on_stream_close, not a GOOD easy on stream", stream_id);
+    (void)nghttp2_session_set_stream_user_data(session, stream_id, 0);
     return NGHTTP2_ERR_CALLBACK_FAILURE;
+  }
+  stream = H2_STREAM_CTX(data_s);
+  if(!stream) {
+    CURL_TRC_CF(data_s, cf,
+                "[%d] on_stream_close, GOOD easy but no stream", stream_id);
+    return NGHTTP2_ERR_CALLBACK_FAILURE;
+  }
 
   stream->closed = TRUE;
   stream->error = error_code;
-  if(stream->error)
+  if(stream->error) {
     stream->reset = TRUE;
+    stream->send_closed = TRUE;
+  }
 
   if(stream->error)
     CURL_TRC_CF(data_s, cf, "[%d] RESET: %s (err %d)",

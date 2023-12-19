@@ -189,6 +189,23 @@ class TestUpload:
         r.check_response(count=count, http_status=200)
         self.check_download(count, fdata, curl)
 
+    # upload large data parallel to a URL that denies uploads
+    @pytest.mark.parametrize("proto", ['h2', 'h3'])
+    def test_07_22_upload_parallel_fail(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 stalls here")
+        fdata = os.path.join(env.gen_dir, 'data-10m')
+        count = 100
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}'\
+            f'/curltest/tweak?status=400&delay=5ms&chunks=1&body_error=reset&id=[0-{count-1}]'
+        r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto,
+                             extra_args=['--parallel'])
+        exp_exit = 92 if proto == 'h2' else 95
+        r.check_stats(count=count, exitcode=exp_exit)
+
     # PUT 100k
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_07_30_put_100k(self, env: Env, httpd, nghttpx, repeat, proto):
