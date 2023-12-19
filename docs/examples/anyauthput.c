@@ -69,17 +69,15 @@ static int my_seek(void *userp, curl_off_t offset, int origin)
 /* read callback function, fread() look alike */
 static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
 {
-  ssize_t retcode;
-  unsigned long nread;
+  size_t nread;
 
-  retcode = fread(ptr, size, nmemb, stream);
+  nread = fread(ptr, size, nmemb, stream);
 
-  if(retcode > 0) {
-    nread = (unsigned long)retcode;
-    fprintf(stderr, "*** We read %lu bytes from file\n", nread);
+  if(nread > 0) {
+    fprintf(stderr, "*** We read %lu bytes from file\n", (unsigned long)nread);
   }
 
-  return retcode;
+  return nread;
 }
 
 int main(int argc, char **argv)

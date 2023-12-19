@@ -112,11 +112,11 @@ static size_t my_write_cb(char *buf, size_t nitems, size_t buflen,
                           void *userdata)
 {
   struct transfer *t = userdata;
-  ssize_t nwritten;
+  size_t nwritten;
 
   if(!t->resumed &&
      t->recv_size < t->pause_at &&
-     ((curl_off_t)(t->recv_size + (nitems * buflen)) >= t->pause_at)) {
+     ((t->recv_size + (curl_off_t)(nitems * buflen)) >= t->pause_at)) {
     fprintf(stderr, "[t-%d] PAUSE\n", t->idx);
     t->paused = 1;
     return CURL_WRITEFUNC_PAUSE;
@@ -131,7 +131,7 @@ static size_t my_write_cb(char *buf, size_t nitems, size_t buflen,
   }
 
   nwritten = fwrite(buf, nitems, buflen, t->out);
-  if(nwritten < 0) {
+  if(nwritten < buflen) {
     fprintf(stderr, "[t-%d] write failure\n", t->idx);
     return 0;
   }
@@ -234,7 +234,7 @@ int main(int argc, char *argv[])
   for(i = 0; i < transfer_count; ++i) {
     t = &transfers[i];
     t->idx = (int)i;
-    t->pause_at = (curl_off_t)pause_offset * i;
+    t->pause_at = (curl_off_t)(pause_offset * i);
   }
 
   n = (max_parallel < transfer_count)? max_parallel : transfer_count;

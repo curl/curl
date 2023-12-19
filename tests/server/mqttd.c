@@ -497,7 +497,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
   unsigned short packet_id;
   size_t payload_len;
   size_t client_id_length;
-  unsigned int topic_len;
+  size_t topic_len;
   size_t remaining_length = 0;
   size_t bytes = 0; /* remaining length field size in bytes */
   char client_id[MAX_CLIENT_ID_LENGTH];
@@ -635,7 +635,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
       /* two bytes topic length */
       topic_len = (size_t)(buffer[2] << 8) | buffer[3];
       if(topic_len != (remaining_length - 5)) {
-        logmsg("Wrong topic length, got %u expected %zu",
+        logmsg("Wrong topic length, got %zu expected %zu",
                topic_len, remaining_length - 5);
         goto end;
       }

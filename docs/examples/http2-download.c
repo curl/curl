@@ -54,7 +54,7 @@ struct transfer {
 #define NUM_HANDLES 1000
 
 static
-void dump(const char *text, int num, unsigned char *ptr, size_t size,
+void dump(const char *text, unsigned int num, unsigned char *ptr, size_t size,
           char nohex)
 {
   size_t i;
@@ -66,7 +66,7 @@ void dump(const char *text, int num, unsigned char *ptr, size_t size,
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  fprintf(stderr, "%d %s, %lu bytes (0x%lx)\n",
+  fprintf(stderr, "%u %s, %lu bytes (0x%lx)\n",
           num, text, (unsigned long)size, (unsigned long)size);
 
   for(i = 0; i<size; i += width) {
