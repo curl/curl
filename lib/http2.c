@@ -1328,6 +1328,13 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
   if(!data_s) {
     return 0;
   }
+  if(!GOOD_EASY_HANDLE(data_s)) {
+    /* nghttp2 still has an easy registered for the stream which has
+     * been freed be libcurl. This points to a code path that does not
+     * trigger DONE or DETACH events as it must. */
+    (void)nghttp2_session_set_stream_user_data(session, stream_id, 0);
+    return NGHTTP2_ERR_CALLBACK_FAILURE;
+  }
   stream = H2_STREAM_CTX(data_s);
   if(!stream)
     return NGHTTP2_ERR_CALLBACK_FAILURE;
