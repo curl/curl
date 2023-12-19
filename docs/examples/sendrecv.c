@@ -44,6 +44,13 @@ static int wait_on_socket(curl_socket_t sockfd, int for_recv, long timeout_ms)
   FD_ZERO(&outfd);
   FD_ZERO(&errfd);
 
+/* Avoid this warning with pre-2020 Cygwin/MSYS releases:
+ * warning: conversion to 'long unsigned int' from 'curl_socket_t' {aka 'int'} may change the sign of the result [-Wsign-conversion]
+ */
+#if defined(__GNUC__) && defined(__CYGWIN__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
   FD_SET(sockfd, &errfd); /* always check for error */
 
   if(for_recv) {
@@ -52,6 +59,9 @@ static int wait_on_socket(curl_socket_t sockfd, int for_recv, long timeout_ms)
   else {
     FD_SET(sockfd, &outfd);
   }
+#if defined(__GNUC__) && defined(__CYGWIN__)
+#pragma GCC diagnostic pop
+#endif
 
   /* select() returns the number of signalled sockets or -1 */
   res = select((int)sockfd + 1, &infd, &outfd, &errfd, &tv);
