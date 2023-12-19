@@ -43,9 +43,6 @@ bool Curl_isWindows8OrGreater;
 /* Handle of iphlpapp.dll */
 static HMODULE s_hIpHlpApiDll = NULL;
 
-/* Handle of ws2_32.dll */
-static HMODULE s_ws2_32Dll = NULL;
-
 /* Pointer to the if_nametoindex function */
 IF_NAMETOINDEX_FN Curl_if_nametoindex = NULL;
 
@@ -59,6 +56,9 @@ int(WSAAPI *Curl_GetAddrInfoExW)(PCWSTR pName, PCWSTR pServiceName,
 /* Curl_win32_init() performs win32 global initialization */
 CURLcode Curl_win32_init(long flags)
 {
+#ifdef USE_WINSOCK
+  HANDLE ws2_32Dll;
+#endif
   /* CURL_GLOBAL_WIN32 controls the *optional* part of the initialization which
      is just for Winsock at the moment. Any required win32 initialization
      should take place after this block. */
@@ -115,15 +115,17 @@ CURLcode Curl_win32_init(long flags)
       Curl_if_nametoindex = pIfNameToIndex;
   }
 
-  s_ws2_32Dll = Curl_load_library(TEXT("ws2_32.dll"));
-  if(s_ws2_32Dll) {
-    *(FARPROC*)&Curl_FreeAddrInfoExW = GetProcAddress(s_ws2_32Dll,
+#ifdef USE_WINSOCK
+  ws2_32Dll = GetModuleHandleA("ws2_32");
+  if(ws2_32Dll) {
+    *(FARPROC*)&Curl_FreeAddrInfoExW = GetProcAddress(ws2_32Dll,
       "FreeAddrInfoExW");
-    *(FARPROC*)&Curl_GetAddrInfoExCancel = GetProcAddress(s_ws2_32Dll,
+    *(FARPROC*)&Curl_GetAddrInfoExCancel = GetProcAddress(ws2_32Dll,
       "GetAddrInfoExCancel");
-    *(FARPROC*)&Curl_GetAddrInfoExW = GetProcAddress(s_ws2_32Dll,
+    *(FARPROC*)&Curl_GetAddrInfoExW = GetProcAddress(ws2_32Dll,
       "GetAddrInfoExW");
   }
+#endif
 
   /* curlx_verify_windows_version must be called during init at least once
      because it has its own initialization routine. */
@@ -148,13 +150,9 @@ CURLcode Curl_win32_init(long flags)
 /* Curl_win32_cleanup() is the opposite of Curl_win32_init() */
 void Curl_win32_cleanup(long init_flags)
 {
-  if(s_ws2_32Dll) {
-    FreeLibrary(s_ws2_32Dll);
-    s_ws2_32Dll = NULL;
-    Curl_FreeAddrInfoExW = NULL;
-    Curl_GetAddrInfoExCancel = NULL;
-    Curl_GetAddrInfoExW = NULL;
-  }
+  Curl_FreeAddrInfoExW = NULL;
+  Curl_GetAddrInfoExCancel = NULL;
+  Curl_GetAddrInfoExW = NULL;
   if(s_hIpHlpApiDll) {
     FreeLibrary(s_hIpHlpApiDll);
     s_hIpHlpApiDll = NULL;
