@@ -127,8 +127,9 @@ EXTRA_DIST = CHANGES COPYING maketgz Makefile.dist curl-config.in            \
  $(VC_DIST) $(WINBUILD_DIST) $(PLAN9_DIST) lib/libcurl.vers.in buildconf.bat \
  libcurl.def
 
-CLEANFILES = $(VC14_LIBVCXPROJ) \
- $(VC14_SRCVCXPROJ) $(VC14_10_LIBVCXPROJ) $(VC14_10_SRCVCXPROJ)              \
+CLEANFILES = $(VC14_LIBVCXPROJ) $(VC14_SRCVCXPROJ) \
+ $(VC14_10_LIBVCXPROJ) $(VC14_10_SRCVCXPROJ)       \
+ $(VC14_20_LIBVCXPROJ) $(VC14_20_SRCVCXPROJ)       \
  $(VC14_30_LIBVCXPROJ) $(VC14_30_SRCVCXPROJ)
 
 bin_SCRIPTS = curl-config
@@ -509,7 +510,8 @@ function gen_element(type, dir, file)\
 		-v src_rc="$$win32_src_rc" \
 		-v src_x_srcs="$$sorted_src_x_srcs" \
 		-v src_x_hdrs="$$sorted_src_x_hdrs" \
-		"$$awk_code" $(srcdir)/$(VC14_20_SRCTMPL) > $(VC14_20_SRCVCXPROJ) || { exit 1; };) \
+		"$$awk_code" $(srcdir)/$(VC14_20_SRCTMPL) > $(VC14_20_SRCVCXPROJ) || { exit 1; }; \
+	\
 	echo "generating '$(VC14_30_LIBVCXPROJ)'"; \
 	awk -v proj_type=vcxproj \
 		-v lib_srcs="$$sorted_lib_srcs" \
