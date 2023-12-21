@@ -580,8 +580,8 @@ static CURLcode quic_init_ssl(struct Curl_cfilter *cf,
   SSL_set_connect_state(ctx->ssl);
   SSL_set_quic_use_legacy_codepoint(ctx->ssl, 0);
 
-  alpn = (const uint8_t *)H3_ALPN_H3_29 H3_ALPN_H3;
-  alpnlen = sizeof(H3_ALPN_H3_29) - 1 + sizeof(H3_ALPN_H3) - 1;
+  alpn = (const uint8_t *)H3_ALPN_H3 H3_ALPN_H3_29;
+  alpnlen = sizeof(H3_ALPN_H3) - 1 + sizeof(H3_ALPN_H3_29) - 1;
   if(alpn)
     SSL_set_alpn_protos(ctx->ssl, alpn, (int)alpnlen);
 
@@ -644,10 +644,10 @@ static CURLcode quic_init_ssl(struct Curl_cfilter *cf,
   }
 
   /* strip the first byte (the length) from NGHTTP3_ALPN_H3 */
-  alpn[0].data = (unsigned char *)H3_ALPN_H3_29 + 1;
-  alpn[0].size = sizeof(H3_ALPN_H3_29) - 2;
-  alpn[1].data = (unsigned char *)H3_ALPN_H3 + 1;
-  alpn[1].size = sizeof(H3_ALPN_H3) - 2;
+  alpn[0].data = (unsigned char *)H3_ALPN_H3 + 1;
+  alpn[0].size = sizeof(H3_ALPN_H3) - 2;
+  alpn[1].data = (unsigned char *)H3_ALPN_H3_29 + 1;
+  alpn[1].size = sizeof(H3_ALPN_H3_29) - 2;
 
   gnutls_alpn_set_protocols(ctx->gtls->session,
                             alpn, 2, GNUTLS_ALPN_MANDATORY);
@@ -782,8 +782,8 @@ static CURLcode quic_init_ssl(struct Curl_cfilter *cf,
   wolfSSL_set_connect_state(ctx->ssl);
   wolfSSL_set_quic_use_legacy_codepoint(ctx->ssl, 0);
 
-  alpn = (const uint8_t *)H3_ALPN_H3_29 H3_ALPN_H3;
-  alpnlen = sizeof(H3_ALPN_H3_29) - 1 + sizeof(H3_ALPN_H3) - 1;
+  alpn = (const uint8_t *)H3_ALPN_H3 H3_ALPN_H3_29;
+  alpnlen = sizeof(H3_ALPN_H3) - 1 + sizeof(H3_ALPN_H3_29) - 1;
   if(alpn)
     wolfSSL_set_alpn_protos(ctx->ssl, alpn, (int)alpnlen);
 
