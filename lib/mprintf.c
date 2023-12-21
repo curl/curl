@@ -145,7 +145,7 @@ enum {
  * Describes an input va_arg type and hold its value.
  */
 struct va_input {
-  unsigned char type; /* FormatType */
+  FormatType type; /* FormatType */
   union {
     char *str;
     void *ptr;
@@ -235,7 +235,7 @@ static int parsefmt(const char *format,
   int width;
   int precision;
   unsigned int flags;
-  unsigned char type;
+  FormatType type;
   int max_param = -1;
   int i;
   int ocount = 0;
