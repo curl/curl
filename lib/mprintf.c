@@ -271,7 +271,7 @@ static int parsefmt(const char *format,
         continue; /* while */
       }
 
-      flags = 0;
+      flags = width = precision = 0;
 
       if(use_dollar != DOLLAR_NOPE) {
         param = dollarstring(fmt, &fmt);
@@ -289,9 +289,6 @@ static int parsefmt(const char *format,
       }
       else
         param = -1;
-
-      width = 0;
-      precision = 0;
 
       /* Handle the flags */
       while(loopit) {
