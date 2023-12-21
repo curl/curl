@@ -795,8 +795,6 @@ static int formatf(
         }
       }
 number:
-      /* Number of base BASE.  */
-
       /* Supply a default precision if none was given.  */
       if(prec == -1)
         prec = 1;
