@@ -44,7 +44,7 @@ bool Curl_isWindows8OrGreater;
 static HMODULE s_hIpHlpApiDll = NULL;
 
 /* Pointer to the if_nametoindex function */
-IF_NAMETOINDEX_FN Curl_if_nametoindex = NULL;
+unsigned int(WINAPI *Curl_if_nametoindex)(const char *) = NULL;
 
 void(WSAAPI *Curl_FreeAddrInfoExW)(ADDRINFOEXW_ *pAddrInfoEx) = NULL;
 int(WSAAPI *Curl_GetAddrInfoExCancel)(LPHANDLE lpHandle) = NULL;
@@ -107,12 +107,8 @@ CURLcode Curl_win32_init(long flags)
   s_hIpHlpApiDll = Curl_load_library(TEXT("iphlpapi.dll"));
   if(s_hIpHlpApiDll) {
     /* Get the address of the if_nametoindex function */
-    IF_NAMETOINDEX_FN pIfNameToIndex =
-      CURLX_FUNCTION_CAST(IF_NAMETOINDEX_FN,
-                          (GetProcAddress(s_hIpHlpApiDll, "if_nametoindex")));
-
-    if(pIfNameToIndex)
-      Curl_if_nametoindex = pIfNameToIndex;
+    *(FARPROC*)&Curl_if_nametoindex = GetProcAddress(s_hIpHlpApiDll,
+      "if_nametoindex");
   }
 
 #ifdef USE_WINSOCK
@@ -178,9 +174,6 @@ void Curl_win32_cleanup(long init_flags)
 #define LOAD_LIBRARY_SEARCH_SYSTEM32   0x00000800
 #endif
 
-/* We use our own typedef here since some headers might lack these */
-typedef HMODULE (APIENTRY *LOADLIBRARYEX_FN)(LPCTSTR, HANDLE, DWORD);
-
 /* See function definitions in winbase.h */
 #ifdef UNICODE
 #  ifdef _WIN32_WCE
@@ -210,7 +203,7 @@ HMODULE Curl_load_library(LPCTSTR filename)
 {
 #ifndef CURL_WINDOWS_APP
   HMODULE hModule = NULL;
-  LOADLIBRARYEX_FN pLoadLibraryEx = NULL;
+  HMODULE(WINAPI *pLoadLibraryEx)(LPCTSTR, HANDLE, DWORD) = NULL;
 
   /* Get a handle to kernel32 so we can access it's functions at runtime */
   HMODULE hKernel32 = GetModuleHandle(TEXT("kernel32"));
@@ -219,9 +212,7 @@ HMODULE Curl_load_library(LPCTSTR filename)
 
   /* Attempt to find LoadLibraryEx() which is only available on Windows 2000
      and above */
-  pLoadLibraryEx =
-    CURLX_FUNCTION_CAST(LOADLIBRARYEX_FN,
-                        (GetProcAddress(hKernel32, LOADLIBARYEX)));
+  *(FARPROC*)&pLoadLibraryEx = GetProcAddress(hKernel32, LOADLIBARYEX);
 
   /* Detect if there's already a path in the filename and load the library if
      there is. Note: Both back slashes and forward slashes have been supported

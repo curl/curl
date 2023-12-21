@@ -37,9 +37,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-/* We use our own typedef here since some headers might lack these */
-typedef PSecurityFunctionTable (APIENTRY *INITSECURITYINTERFACE_FN)(VOID);
-
 /* See definition of SECURITY_ENTRYPOINT in sspi.h */
 #ifdef UNICODE
 #  ifdef _WIN32_WCE
@@ -76,10 +73,9 @@ PSecurityFunctionTable s_pSecFn = NULL;
  */
 CURLcode Curl_sspi_global_init(void)
 {
-  INITSECURITYINTERFACE_FN pInitSecurityInterface;
-
   /* If security interface is not yet initialized try to do this */
   if(!s_hSecDll) {
+    PSecurityFunctionTable(WINAPI *pInitSecurityInterface)(VOID) = NULL;
     /* Security Service Provider Interface (SSPI) functions are located in
      * security.dll on WinNT 4.0 and in secur32.dll on Win9x. Win2K and XP
      * have both these DLLs (security.dll forwards calls to secur32.dll) */
@@ -93,9 +89,8 @@ CURLcode Curl_sspi_global_init(void)
       return CURLE_FAILED_INIT;
 
     /* Get address of the InitSecurityInterfaceA function from the SSPI dll */
-    pInitSecurityInterface =
-      CURLX_FUNCTION_CAST(INITSECURITYINTERFACE_FN,
-                          (GetProcAddress(s_hSecDll, SECURITYENTRYPOINT)));
+    *(FARPROC*)&pInitSecurityInterface =
+                          GetProcAddress(s_hSecDll, SECURITYENTRYPOINT);
     if(!pInitSecurityInterface)
       return CURLE_FAILED_INIT;
 

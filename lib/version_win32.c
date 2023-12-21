@@ -204,14 +204,13 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
   DWORD dwTypeMask = VER_MAJORVERSION | VER_MINORVERSION |
                      VER_SERVICEPACKMAJOR | VER_SERVICEPACKMINOR;
 
-  typedef LONG (APIENTRY *RTLVERIFYVERSIONINFO_FN)
-    (struct OUR_OSVERSIONINFOEXW *, ULONG, ULONGLONG);
-  static RTLVERIFYVERSIONINFO_FN pRtlVerifyVersionInfo;
+  static LONG(WINAPI *pRtlVerifyVersionInfo)
+    (struct OUR_OSVERSIONINFOEXW *, ULONG, ULONGLONG) = NULL;
   static bool onetime = true; /* safe because first call is during init */
 
   if(onetime) {
-    pRtlVerifyVersionInfo = CURLX_FUNCTION_CAST(RTLVERIFYVERSIONINFO_FN,
-      (GetProcAddress(GetModuleHandleA("ntdll"), "RtlVerifyVersionInfo")));
+    *(FARPROC*)&pRtlVerifyVersionInfo =
+      GetProcAddress(GetModuleHandleA("ntdll"), "RtlVerifyVersionInfo");
     onetime = false;
   }
 
