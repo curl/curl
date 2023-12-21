@@ -1,0 +1,28 @@
+<testcase>
+<info>
+<keywords>
+variables
+expand
+</keywords>
+</info>
+
+# Client-side
+<client>
+<server>
+none
+</server>
+<name>
+try --expand without an argument
+</name>
+<command>
+--expand-url
+</command>
+</client>
+
+#
+<verify>
+<errorcode>
+2
+</errorcode>
+</verify>
+</testcase>
