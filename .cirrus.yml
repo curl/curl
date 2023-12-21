@@ -32,7 +32,7 @@ freebsd_task:
     '.azure-pipelines.yml',
     '.circleci/**',
     '.github/**',
-    'appveyor.yml',
+    'appveyor.*',
     'CMake/**',
     'packages/**',
     'plan9/**',

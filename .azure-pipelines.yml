@@ -37,7 +37,7 @@ trigger:
       - '.cirrus.yml'
       - '.github/*'
       - '.github/workflows/*'
-      - 'appveyor.yml'
+      - 'appveyor.*'
       - 'packages/*'
       - 'plan9/*'
 
@@ -51,7 +51,7 @@ pr:
       - '.cirrus.yml'
       - '.github/*'
       - '.github/workflows/*'
-      - 'appveyor.yml'
+      - 'appveyor.*'
       - 'packages/*'
       - 'plan9/*'
 
