@@ -940,89 +940,88 @@ number:
       }
       break;
 
-    case FORMAT_DOUBLE:
-      {
-        char formatbuf[32]="%";
-        char *fptr = &formatbuf[1];
-        size_t left = sizeof(formatbuf)-strlen(formatbuf);
-        int len;
+    case FORMAT_DOUBLE: {
+      char formatbuf[32]="%";
+      char *fptr = &formatbuf[1];
+      size_t left = sizeof(formatbuf)-strlen(formatbuf);
+      int len;
 
-        if(flags & FLAGS_WIDTH)
-          width = optr->width;
+      if(flags & FLAGS_WIDTH)
+        width = optr->width;
 
-        if(flags & FLAGS_PREC)
-          prec = optr->precision;
+      if(flags & FLAGS_PREC)
+        prec = optr->precision;
 
-        if(flags & FLAGS_LEFT)
-          *fptr++ = '-';
-        if(flags & FLAGS_SHOWSIGN)
-          *fptr++ = '+';
-        if(flags & FLAGS_SPACE)
-          *fptr++ = ' ';
-        if(flags & FLAGS_ALT)
-          *fptr++ = '#';
+      if(flags & FLAGS_LEFT)
+        *fptr++ = '-';
+      if(flags & FLAGS_SHOWSIGN)
+        *fptr++ = '+';
+      if(flags & FLAGS_SPACE)
+        *fptr++ = ' ';
+      if(flags & FLAGS_ALT)
+        *fptr++ = '#';
 
-        *fptr = 0;
+      *fptr = 0;
 
-        if(width >= 0) {
-          if(width >= (int)sizeof(work))
-            width = sizeof(work)-1;
-          /* RECURSIVE USAGE */
-          len = curl_msnprintf(fptr, left, "%d", width);
-          fptr += len;
-          left -= len;
+      if(width >= 0) {
+        if(width >= (int)sizeof(work))
+          width = sizeof(work)-1;
+        /* RECURSIVE USAGE */
+        len = curl_msnprintf(fptr, left, "%d", width);
+        fptr += len;
+        left -= len;
+      }
+      if(prec >= 0) {
+        /* for each digit in the integer part, we can have one less
+           precision */
+        size_t maxprec = sizeof(work) - 2;
+        double val = iptr->val.dnum;
+        if(width > 0 && prec <= width)
+          maxprec -= width;
+        while(val >= 10.0) {
+          val /= 10;
+          maxprec--;
         }
-        if(prec >= 0) {
-          /* for each digit in the integer part, we can have one less
-             precision */
-          size_t maxprec = sizeof(work) - 2;
-          double val = iptr->val.dnum;
-          if(width > 0 && prec <= width)
-            maxprec -= width;
-          while(val >= 10.0) {
-            val /= 10;
-            maxprec--;
-          }
 
-          if(prec > (int)maxprec)
-            prec = (int)maxprec-1;
-          if(prec < 0)
-            prec = 0;
-          /* RECURSIVE USAGE */
-          len = curl_msnprintf(fptr, left, ".%d", prec);
-          fptr += len;
-        }
-        if(flags & FLAGS_LONG)
-          *fptr++ = 'l';
+        if(prec > (int)maxprec)
+          prec = (int)maxprec-1;
+        if(prec < 0)
+          prec = 0;
+        /* RECURSIVE USAGE */
+        len = curl_msnprintf(fptr, left, ".%d", prec);
+        fptr += len;
+      }
+      if(flags & FLAGS_LONG)
+        *fptr++ = 'l';
 
-        if(flags & FLAGS_FLOATE)
-          *fptr++ = (char)((flags & FLAGS_UPPER) ? 'E':'e');
-        else if(flags & FLAGS_FLOATG)
-          *fptr++ = (char)((flags & FLAGS_UPPER) ? 'G' : 'g');
-        else
-          *fptr++ = 'f';
+      if(flags & FLAGS_FLOATE)
+        *fptr++ = (char)((flags & FLAGS_UPPER) ? 'E':'e');
+      else if(flags & FLAGS_FLOATG)
+        *fptr++ = (char)((flags & FLAGS_UPPER) ? 'G' : 'g');
+      else
+        *fptr++ = 'f';
 
-        *fptr = 0; /* and a final null-termination */
+      *fptr = 0; /* and a final null-termination */
 
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wformat-nonliteral"
 #endif
-        /* NOTE NOTE NOTE!! Not all sprintf implementations return number of
-           output characters */
+      /* NOTE NOTE NOTE!! Not all sprintf implementations return number of
+         output characters */
 #ifdef HAVE_SNPRINTF
-        (snprintf)(work, sizeof(work), formatbuf, iptr->val.dnum);
+      (snprintf)(work, sizeof(work), formatbuf, iptr->val.dnum);
 #else
-        (sprintf)(work, formatbuf, iptr->val.dnum);
+      (sprintf)(work, formatbuf, iptr->val.dnum);
 #endif
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
-        DEBUGASSERT(strlen(work) <= sizeof(work));
-        for(fptr = work; *fptr; fptr++)
-          OUTCHAR(*fptr);
-      }
+      DEBUGASSERT(strlen(work) <= sizeof(work));
+      for(fptr = work; *fptr; fptr++)
+        OUTCHAR(*fptr);
       break;
+    }
 
     case FORMAT_INTPTR:
       /* Answer the count of characters written.  */
