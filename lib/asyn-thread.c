@@ -152,8 +152,6 @@ struct thread_sync_data_w8
   OVERLAPPED overlapped;
   ADDRINFOEXW_ *res;
   HANDLE cancel_ev;
-  WCHAR name[256]; /* max domain name is 253 chars */
-  WCHAR port[8]; /* port */
   ADDRINFOEXW_ hints;
 };
 #endif
@@ -628,31 +626,35 @@ static bool init_resolve_thread(struct Curl_easy *data,
 
 #ifdef _WIN32
   if(Curl_isWindows8OrGreater && Curl_FreeAddrInfoExW &&
-      Curl_GetAddrInfoExCancel && Curl_GetAddrInfoExW) {
-    int hostname_w_len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
-        hostname, -1, NULL, 0); /* calculate required length */
-    int name_sz = sizeof(td->tsd.w8.name) / sizeof(td->tsd.w8.name[0]);
-    if(hostname_w_len > 0 && hostname_w_len < name_sz)
-      hostname_w_len = MultiByteToWideChar(CP_UTF8, 0, hostname, -1,
-        td->tsd.w8.name, hostname_w_len); /* do utf8 conversion */
-    if(hostname_w_len > 0 && hostname_w_len < name_sz) {
-      swprintf(td->tsd.w8.port,
-        sizeof(td->tsd.w8.port) / sizeof(td->tsd.w8.port[0]),
-        L"%d", port);
-      td->tsd.w8.hints.ai_family = hints->ai_family;
-      td->tsd.w8.hints.ai_socktype = hints->ai_socktype;
-      td->complete_ev = CreateEvent(NULL, TRUE, FALSE, NULL);
-      if(!td->complete_ev) {
+     Curl_GetAddrInfoExCancel && Curl_GetAddrInfoExW) {
+#define MAX_NAME_LEN 256 /* max domain name is 253 chars */
+#define MAX_PORT_LEN 8
+    WCHAR namebuf[MAX_NAME_LEN];
+    WCHAR portbuf[MAX_PORT_LEN];
+    /* calculate required length */
+    int w_len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, hostname,
+                                    -1, NULL, 0);
+    if((w_len > 0) && (w_len < MAX_NAME_LEN)) {
+      /* do utf8 conversion */
+      w_len = MultiByteToWideChar(CP_UTF8, 0, hostname, -1, namebuf, w_len);
+      if((w_len > 0) && (w_len < MAX_NAME_LEN)) {
+        swprintf(portbuf, MAX_PORT_LEN, L"%d", port);
+        td->tsd.w8.hints.ai_family = hints->ai_family;
+        td->tsd.w8.hints.ai_socktype = hints->ai_socktype;
+        td->complete_ev = CreateEvent(NULL, TRUE, FALSE, NULL);
+        if(!td->complete_ev) {
           /* failed to start, mark it as done here for proper cleanup. */
           td->tsd.done = 1;
           goto err_exit;
+        }
+        err = Curl_GetAddrInfoExW(namebuf, portbuf, NS_DNS,
+                                  NULL, &td->tsd.w8.hints, &td->tsd.w8.res,
+                                  NULL, &td->tsd.w8.overlapped,
+                                  &query_complete, &td->tsd.w8.cancel_ev);
+        if(err != WSA_IO_PENDING)
+          query_complete(err, 0, &td->tsd.w8.overlapped);
+        return TRUE;
       }
-      err = Curl_GetAddrInfoExW(td->tsd.w8.name, td->tsd.w8.port, NS_DNS,
-        NULL, &td->tsd.w8.hints, &td->tsd.w8.res, NULL,
-        &td->tsd.w8.overlapped, &query_complete, &td->tsd.w8.cancel_ev);
-      if(err != WSA_IO_PENDING)
-        query_complete(err, 0, &td->tsd.w8.overlapped);
-      return TRUE;
     }
   }
 #endif
