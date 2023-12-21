@@ -919,32 +919,28 @@ number:
 
     case FORMAT_PTR:
       /* Generic pointer.  */
-      {
-        void *ptr;
-        ptr = (void *)iptr->val.ptr;
-        if(ptr) {
-          /* If the pointer is not NULL, write it as a %#x spec.  */
-          base = 16;
-          digits = (flags & FLAGS_UPPER)? upper_digits : lower_digits;
-          is_alt = TRUE;
-          num = (size_t) ptr;
-          is_neg = FALSE;
-          goto number;
-        }
-        else {
-          /* Write "(nil)" for a nil pointer.  */
-          const char *point;
+      if(iptr->val.ptr) {
+        /* If the pointer is not NULL, write it as a %#x spec.  */
+        base = 16;
+        digits = (flags & FLAGS_UPPER)? upper_digits : lower_digits;
+        is_alt = TRUE;
+        num = (size_t) iptr->val.ptr;
+        is_neg = FALSE;
+        goto number;
+      }
+      else {
+        /* Write "(nil)" for a nil pointer.  */
+        const char *point;
 
-          width -= (int)(sizeof(nilstr) - 1);
-          if(flags & FLAGS_LEFT)
-            while(width-- > 0)
-              OUTCHAR(' ');
-          for(point = nilstr; *point != '\0'; ++point)
-            OUTCHAR(*point);
-          if(!(flags & FLAGS_LEFT))
-            while(width-- > 0)
-              OUTCHAR(' ');
-        }
+        width -= (int)(sizeof(nilstr) - 1);
+        if(flags & FLAGS_LEFT)
+          while(width-- > 0)
+            OUTCHAR(' ');
+        for(point = nilstr; *point != '\0'; ++point)
+          OUTCHAR(*point);
+        if(!(flags & FLAGS_LEFT))
+          while(width-- > 0)
+            OUTCHAR(' ');
       }
       break;
 
@@ -1209,8 +1205,7 @@ int curl_mfprintf(FILE *whereto, const char *format, ...)
 
 int curl_mvsprintf(char *buffer, const char *format, va_list ap_save)
 {
-  int retcode;
-  retcode = formatf(&buffer, storebuffer, format, ap_save);
+  int retcode = formatf(&buffer, storebuffer, format, ap_save);
   *buffer = 0; /* we terminate this with a zero byte */
   return retcode;
 }
