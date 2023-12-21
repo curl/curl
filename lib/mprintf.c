@@ -870,52 +870,50 @@ number:
           OUTCHAR(' ');
       break;
 
-    case FORMAT_STRING:
-            /* String.  */
-      {
-        const char *str;
-        size_t len;
+    case FORMAT_STRING: {
+      const char *str;
+      size_t len;
 
-        str = (char *)iptr->val.str;
-        if(!str) {
-          /* Write null string if there's space.  */
-          if(prec == -1 || prec >= (int) sizeof(nilstr) - 1) {
-            str = nilstr;
-            len = sizeof(nilstr) - 1;
-            /* Disable quotes around (nil) */
-            flags &= (~FLAGS_ALT);
-          }
-          else {
-            str = "";
-            len = 0;
-          }
+      str = (char *)iptr->val.str;
+      if(!str) {
+        /* Write null string if there's space.  */
+        if(prec == -1 || prec >= (int) sizeof(nilstr) - 1) {
+          str = nilstr;
+          len = sizeof(nilstr) - 1;
+          /* Disable quotes around (nil) */
+          flags &= (~FLAGS_ALT);
         }
-        else if(prec != -1)
-          len = (size_t)prec;
-        else if(*str == '\0')
+        else {
+          str = "";
           len = 0;
-        else
-          len = strlen(str);
-
-        width -= (len > INT_MAX) ? INT_MAX : (int)len;
-
-        if(flags & FLAGS_ALT)
-          OUTCHAR('"');
-
-        if(!(flags&FLAGS_LEFT))
-          while(width-- > 0)
-            OUTCHAR(' ');
-
-        for(; len && *str; len--)
-          OUTCHAR(*str++);
-        if(flags&FLAGS_LEFT)
-          while(width-- > 0)
-            OUTCHAR(' ');
-
-        if(flags & FLAGS_ALT)
-          OUTCHAR('"');
+        }
       }
+      else if(prec != -1)
+        len = (size_t)prec;
+      else if(*str == '\0')
+        len = 0;
+      else
+        len = strlen(str);
+
+      width -= (len > INT_MAX) ? INT_MAX : (int)len;
+
+      if(flags & FLAGS_ALT)
+        OUTCHAR('"');
+
+      if(!(flags&FLAGS_LEFT))
+        while(width-- > 0)
+          OUTCHAR(' ');
+
+      for(; len && *str; len--)
+        OUTCHAR(*str++);
+      if(flags&FLAGS_LEFT)
+        while(width-- > 0)
+          OUTCHAR(' ');
+
+      if(flags & FLAGS_ALT)
+        OUTCHAR('"');
       break;
+    }
 
     case FORMAT_PTR:
       /* Generic pointer.  */
