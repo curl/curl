@@ -1116,6 +1116,50 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
   return CURLM_OK;
 }
 
+CURLMcode curl_multi_pollfds(struct Curl_multi* multi,
+                             struct curl_waitfd* ufds,
+                             unsigned int size,
+                             unsigned int* fd_count)
+{
+  struct Curl_easy* data;
+  unsigned int nfds = 0;
+  struct easy_pollset ps;
+  unsigned int i;
+  CURLMcode result = CURLM_OK;
+
+  if(!GOOD_MULTI_HANDLE(multi))
+    return CURLM_BAD_HANDLE;
+
+  if(multi->in_callback)
+    return CURLM_RECURSIVE_API_CALL;
+
+  memset(&ps, 0, sizeof(ps));
+  for(data = multi->easyp; data; data = data->next) {
+    multi_getsock(data, &ps);
+
+    for(i = 0; i < ps.num; i++) {
+      if(nfds < size) {
+        struct curl_waitfd* ufd = &ufds[nfds];
+        ufd->fd = ps.sockets[i];
+        ufd->events = 0;
+        if(ps.actions[i] & CURL_POLL_IN)
+            ufd->events |= CURL_WAIT_POLLIN;
+        if(ps.actions[i] & CURL_POLL_OUT)
+            ufd->events |= CURL_WAIT_POLLOUT;
+      }
+      else if(size > 0)
+        result = CURLM_OUT_OF_MEMORY;
+        if(!fd_count)
+          return result;
+      nfds++;
+    }
+  }
+
+  if(fd_count)
+   *fd_count = nfds;
+  return result;
+}
+
 #ifdef USE_WINSOCK
 /* Reset FD_WRITE for TCP sockets. Nothing is actually sent. UDP sockets can't
  * be reset this way because an empty datagram would be sent. #9203

@@ -165,6 +165,20 @@ CURL_EXTERN CURLMcode curl_multi_fdset(CURLM *multi_handle,
                                        fd_set *exc_fd_set,
                                        int *max_fd);
 
+ /*
+  * Name:    curl_multi_pollfds()
+  *
+  * Desc:    Ask curl for fds for polling. The app can use these to poll() on.
+  *          We want curl_multi_perform() called as soon as one of them are
+  *          ready.
+  *
+  * Returns: CURLMcode type, general multi error code.
+  */
+CURL_EXTERN CURLMcode curl_multi_pollfds(CURLM* multi,
+                                         struct curl_waitfd *ufds,
+                                         unsigned int size,
+                                         unsigned int *fd_count);
+
 /*
  * Name:     curl_multi_wait()
  *
