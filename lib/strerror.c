@@ -582,11 +582,10 @@ get_winsock_error(int err, char *buf, size_t len)
 {
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   const char *p;
+  size_t alen;
 #endif
 
-  /* 41 bytes is the longest error string */
-  DEBUGASSERT(len > 41);
-  if(!len || len < 41)
+  if(!len)
     return NULL;
 
   *buf = '\0';
@@ -763,8 +762,11 @@ get_winsock_error(int err, char *buf, size_t len)
   default:
     return NULL;
   }
-  memcpy(buf, p, len - 1);
-  buf[len - 1] = '\0';
+  alen = strlen(p);
+  if(alen < len) {
+    memcpy(buf, p, alen);
+    buf[alen] = '\0';
+  }
   return buf;
 #endif
 }
