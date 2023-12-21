@@ -763,10 +763,8 @@ get_winsock_error(int err, char *buf, size_t len)
     return NULL;
   }
   alen = strlen(p);
-  if(alen < len) {
-    memcpy(buf, p, alen);
-    buf[alen] = '\0';
-  }
+  if(alen < len)
+    strcpy(buf, p);
   return buf;
 #endif
 }
