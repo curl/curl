@@ -84,7 +84,7 @@ CI:
               - '.circleci/**'
               - '.cirrus.yml'
               - '.github/**'
-              - 'appveyor.yml'
+              - 'appveyor.*'
               - 'scripts/ci*'
               - 'tests/azure.pm'
               - 'tests/appveyor.pm'
@@ -481,7 +481,7 @@ Windows:
   - all:
       - changed-files:
           - any-glob-to-all-files:
-              - 'appveyor.yml'
+              - 'appveyor.*'
               - 'CMake/Platforms/WindowsCache.cmake'
               - 'lib/*win32*'
               - 'lib/curl_multibyte.*'
