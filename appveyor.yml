@@ -129,7 +129,7 @@ environment:
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
       DISABLED_TESTS: '!1086 !1139 !1451 !1501'
-      ADD_PATH: 'C:\msys64\mingw64\bin'
+      ADD_PATH: 'C:/msys64/mingw64/bin'
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
       UNITY: 'ON'
@@ -143,7 +143,7 @@ environment:
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
       DISABLED_TESTS: '!1086 !1139 !1451 !1501'
-      ADD_PATH: 'C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin'
+      ADD_PATH: 'C:/mingw-w64/x86_64-7.2.0-posix-seh-rt_v5-rev1/mingw64/bin'
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
     - job_name: 'CMake, mingw-w64, gcc 9, Debug, x64, Schannel, Static, Unity'
@@ -157,7 +157,7 @@ environment:
       TESTING: 'ON'
       # test 286 disabled due to https://github.com/curl/curl/issues/12040
       DISABLED_TESTS: '~286 !1086 !1139 !1451 !1501'
-      ADD_PATH: 'C:\msys64\mingw64\bin'
+      ADD_PATH: 'C:/msys64/mingw64/bin'
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
       UNITY: 'ON'
@@ -171,7 +171,7 @@ environment:
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
       DISABLED_TESTS: '!1086 !1139 !1451 !1501'
-      ADD_PATH: 'C:\mingw-w64\i686-6.3.0-posix-dwarf-rt_v5-rev1\mingw32\bin'
+      ADD_PATH: 'C:/mingw-w64/i686-6.3.0-posix-dwarf-rt_v5-rev1/mingw32/bin'
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
     # winbuild-based builds
@@ -263,7 +263,7 @@ environment:
       BUILD_SYSTEM: autotools
       TESTING: 'ON'
       DISABLED_TESTS: ''
-      ADD_SHELL: 'C:\cygwin64\bin'
+      ADD_SHELL: 'C:/cygwin64/bin'
       CONFIG_ARGS: '--enable-debug --enable-werror --disable-threaded-resolver --without-ssl --enable-websockets'
 
 install:
@@ -272,7 +272,7 @@ install:
         $env:PATH = "$env:ADD_SHELL;$env:PATH"
       }
       else {
-        $env:PATH = "C:\msys64\usr\bin;$env:PATH"
+        $env:PATH = "C:/msys64/usr/bin;$env:PATH"
       }
       if($env:ADD_PATH -ne $null) {
         $env:PATH = "$env:ADD_PATH;$env:PATH"
