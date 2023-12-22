@@ -1206,6 +1206,9 @@ static int mbedtls_init(void)
 
 static void mbedtls_cleanup(void)
 {
+#ifdef THREADING_SUPPORT
+  mbedtls_entropy_free(&ts_entropy);
+#endif /* THREADING_SUPPORT */
   (void)Curl_mbedtlsthreadlock_thread_cleanup();
 }
 
