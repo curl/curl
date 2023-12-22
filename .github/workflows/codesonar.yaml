@@ -49,6 +49,8 @@ jobs:
           path: scripts
       - name: Build and Analyze
         run: python3 scripts/build_and_analyze.py codesonar.conf make -j $PARALLEL
+      - name: Add Misra rules
+        run: python3 scripts/add_misra_rules.py warnings.sarif Misra2012-mapping-broad.csv > warnings_misra.sarif
       - name: Upload SARIF to GitHub #Use this if you do not have GitHub Enterprise
         if: ${{ github.event.pull_request }}
         uses: actions/upload-artifact@v3
@@ -63,5 +65,5 @@ jobs:
       - name: Upload SARIF results
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: warnings.sarif
+          sarif_file: warnings_misra.sarif
           category: "CodeSecure CodeSonar"            
