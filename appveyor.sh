@@ -72,7 +72,7 @@ elif [ "${BUILD_SYSTEM}" = 'VisualStudioSolution' ]; then
   (
     cd projects
     ./generate.bat "${VC_VERSION}"
-    msbuild.exe -maxcpucount "-property:Configuration=${PRJ_CFG}" "Windows\\${VC_VERSION}\\curl-all.sln"
+    msbuild.exe -maxcpucount "-property:Configuration=${PRJ_CFG}" "Windows/${VC_VERSION}/curl-all.sln"
   )
   curl="build/Win32/${VC_VERSION}/${PRJ_CFG}/curld.exe"
 elif [ "${BUILD_SYSTEM}" = 'winbuild_vs2015' ]; then
