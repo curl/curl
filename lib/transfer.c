@@ -428,7 +428,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
   size_t blen;
   size_t consumed;
   int maxloops = 10;
-  curl_off_t max_recv = data->set.max_recv_speed ? 0 : CURL_OFF_T_MAX;
+  curl_off_t total_received = 0;
   bool data_eof_handled = FALSE;
 
   DEBUGASSERT(data->state.buffer);
@@ -439,6 +439,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
   do {
     bool is_empty_data = FALSE;
     size_t bytestoread = data->set.buffer_size;
+
     /* For HTTP/2 and HTTP/3, read data without caring about the content
        length. This is safe because body in HTTP/2 is always segmented
        thanks to its framing layer. Meanwhile, we have to call Curl_read
@@ -446,6 +447,15 @@ static CURLcode readwrite_data(struct Curl_easy *data,
        incoming bytes for a particular stream. */
     bool is_http3 = Curl_conn_is_http3(data, conn, FIRSTSOCKET);
     data_eof_handled = is_http3 || Curl_conn_is_http2(data, conn, FIRSTSOCKET);
+
+    if(data->set.max_recv_speed) {
+      /* Limit the amount we read here, break on reaching it */
+      curl_off_t net_limit = data->set.max_recv_speed - total_received;
+      if(net_limit <= 0)
+        break;
+      if((size_t)net_limit < bytestoread)
+        bytestoread = (size_t)net_limit;
+    }
 
     /* Each loop iteration starts with a fresh buffer and handles
      * all data read into it. */
@@ -654,7 +664,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
       }
 #endif   /* CURL_DISABLE_HTTP */
 
-      max_recv -= blen;
+      total_received += blen;
 
       if(!k->chunk && (blen || k->badheader || is_empty_data)) {
         /* If this is chunky transfer, it was already written */
@@ -712,11 +722,13 @@ static CURLcode readwrite_data(struct Curl_easy *data,
       break;
     }
 
-  } while((max_recv > 0) && data_pending(data) && maxloops--);
+  } while(maxloops-- && data_pending(data));
 
-  if(maxloops <= 0 || max_recv <= 0) {
-    /* we mark it as read-again-please */
+  if(maxloops <= 0) {
+    /* did not read until EAGAIN, mark read-again-please */
     data->state.select_bits = CURL_CSELECT_IN;
+    if((k->keepon & KEEP_SENDBITS) == KEEP_SEND)
+      data->state.select_bits |= CURL_CSELECT_OUT;
   }
 
   if(((k->keepon & (KEEP_RECV|KEEP_SEND)) == KEEP_SEND) &&
