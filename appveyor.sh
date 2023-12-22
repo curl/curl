@@ -135,22 +135,26 @@ fi
 # test
 
 if [ "${TESTING}" = 'ON' ]; then
-  acurl=''
-  [ -x "$(cygpath -u "C:/msys64/usr/bin/curl.exe")" ] && acurl="-ac $(cygpath -u "C:/msys64/usr/bin/curl.exe")"
-  [ -x "$(cygpath -u "${WINDIR}/System32/curl.exe")" ] && acurl="-ac $(cygpath -u "${WINDIR}/System32/curl.exe")"
+  export TFLAGS=''
+  if [ -x "$(cygpath -u "${WINDIR}/System32/curl.exe")" ]; then
+    TFLAGS+=" -ac $(cygpath -u "${WINDIR}/System32/curl.exe")"
+  elif [ -x "$(cygpath -u "C:/msys64/usr/bin/curl.exe")" ]; then
+    TFLAGS+=" -ac $(cygpath -u "C:/msys64/usr/bin/curl.exe")"
+  fi
+  TFLAGS+=" ${DISABLED_TESTS:-}"
   if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     ls _bld/lib/*.dll >/dev/null 2>&1 && cp -f -p _bld/lib/*.dll _bld/tests/libtest/
-    TFLAGS="${acurl} ${DISABLED_TESTS:-}" cmake --build _bld --config "${PRJ_CFG}" --target test-ci
+    cmake --build _bld --config "${PRJ_CFG}" --target test-ci
   elif [ "${BUILD_SYSTEM}" = 'autotools' ]; then
     (
       cd _bld
-      make -j2 V=1 TFLAGS="${acurl} ${DISABLED_TESTS:-}" test-ci
+      make -j2 V=1 test-ci
     )
   else
     (
+      TFLAGS=" -a -p !flaky !timing-dependent -r -rm ${TFLAGS}"
       cd _bld/tests
-      # shellcheck disable=SC2086
-      ./runtests.pl -a -p !flaky -r -rm ${acurl} ${DISABLED_TESTS:-}
+      ./runtests.pl
     )
   fi
 fi
