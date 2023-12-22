@@ -49,14 +49,16 @@ jobs:
           path: scripts
       - name: Build and Analyze
         run: python3 scripts/build_and_analyze.py codesonar.conf make -j $PARALLEL
-      - name: Add Misra rules
-        run: python3 scripts/add_MISRA_rules.py warnings.sarif Misra2012-mapping-broad.csv > warnings_misra.sarif
       - name: Upload SARIF to GitHub #Use this if you do not have GitHub Enterprise
         if: ${{ github.event.pull_request }}
         uses: actions/upload-artifact@v3
         with:
           name: SARIF file
           path: warnings.sarif
+      - name: Add Misra rules
+        run: | 
+            python3 scripts/add_MISRA_rules.py warnings.sarif Misra2012-mapping-broad.csv > warnings_misra.sarif
+            ls -la
       - name: Push Summary Report
         if: ${{ github.event.pull_request }}
         uses: thollander/actions-comment-pull-request@v2
