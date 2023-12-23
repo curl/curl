@@ -152,7 +152,7 @@ if [ "${TESTING}" = 'ON' ]; then
     )
   else
     (
-      TFLAGS=" -a -p !flaky -r -rm ${TFLAGS}"
+      TFLAGS="-a -p !flaky -r -rm ${TFLAGS}"
       cd _bld/tests
       ./runtests.pl
     )
