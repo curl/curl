@@ -26,6 +26,7 @@
 my @files = @ARGV;
 my $cfile = "test.c";
 my $check = "./scripts/checksrc.pl";
+my $error;
 
 if($files[0] eq "-h") {
     print "Usage: verify-synopsis [man pages]\n";
@@ -47,8 +48,9 @@ sub extract {
     my $syn = 0;
     my $l = 0;
     my $iline = 0;
-    open(F, "<$f");
-    open(O, ">$cfile");
+    my $fail = 0;
+    open(F, "<$f") or die "failed opening input file $f : $!";
+    open(O, ">$cfile") or die "failed opening output file $cfile : $!";
     print O "#include <curl/curl.h>\n";
     while(<F>) {
         $iline++;
@@ -68,6 +70,15 @@ sub extract {
             if(/^.fi/) {
                 last;
             }
+            if(/(?<!\\)(?:\\{2})*\\(?!\\)/) {
+                print STDERR
+                  "Error while processing file $f line $iline:\n$_" .
+                  "Error: Single backslashes \\ are not properly shown in " .
+                  "manpage EXAMPLE output unless they are escaped \\\\.\n";
+                $fail = 1;
+                $error = 1;
+                last;
+            }
             # two backslashes become one
             $_ =~ s/\\\\/\\/g;
             print O $_;
@@ -77,10 +88,9 @@ sub extract {
     close(F);
     close(O);
 
-    return $l;
+    return ($fail ? 0 : $l);
 }
 
-my $error;
 for my $m (@files) {
     print "Verify $m\n";
     my $out = extract($m);
