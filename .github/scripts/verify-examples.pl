@@ -69,7 +69,7 @@ sub extract {
             if(/^.fi/) {
                 last;
             }
-            if(/\\[^\\]/) {
+            if(/(?<!\\)(?:\\{2})*\\(?!\\)/) {
                 print STDERR
                   "Error while processing file $f line $iline:\n$_" .
                   "Error: Single backslashes \\ are not properly shown in " .
