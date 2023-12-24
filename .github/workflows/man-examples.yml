@@ -12,12 +12,14 @@ on:
     paths:
       - 'docs/libcurl/curl_*.3'
       - 'docs/libcurl/opts/*.3'
+      - '.github/scripts/verify-examples.pl'
   pull_request:
     branches:
       - master
     paths:
       - 'docs/libcurl/curl_*.3'
       - 'docs/libcurl/opts/*.3'
+      - '.github/scripts/verify-examples.pl'
 
 jobs:
   verify:
