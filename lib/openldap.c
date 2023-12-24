@@ -963,11 +963,10 @@ static CURLcode client_write(struct Curl_easy *data,
   return result;
 }
 
-static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
-                          size_t len, CURLcode *err)
+static int oldap_recv_single(struct Curl_easy *data, int sockindex, char *buf,
+                             size_t len, CURLcode *err)
 {
-  struct connectdata *conn = data->conn;
-  struct ldapconninfo *li = conn->proto.ldapc;
+  struct ldapconninfo *li = data->conn->proto.ldapc;
   struct ldapreqinfo *lr = data->req.p.ldap;
   int rc;
   LDAPMessage *msg = NULL;
@@ -975,7 +974,6 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
   struct timeval tv = {0, 0};
   struct berval bv, *bvals;
   int binary = 0;
-  CURLcode result = CURLE_AGAIN;
   int code;
   char *info = NULL;
 
@@ -986,16 +984,17 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
   rc = ldap_result(li->ld, lr->msgid, LDAP_MSG_ONE, &tv, &msg);
   if(rc < 0) {
     failf(data, "LDAP local: search ldap_result %s", ldap_err2string(rc));
-    result = CURLE_RECV_ERROR;
+    *err = CURLE_RECV_ERROR;
+
+    return 0;
   }
 
-  *err = result;
-
   /* error or timed out */
-  if(!msg)
-    return -1;
+  if(!msg) {
+    *err = CURLE_AGAIN;
 
-  result = CURLE_OK;
+    return 0;
+  }
 
   switch(ldap_msgtype(msg)) {
   case LDAP_RES_SEARCH_RESULT:
@@ -1004,9 +1003,12 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
     if(rc) {
       failf(data, "LDAP local: search ldap_parse_result %s",
             ldap_err2string(rc));
-      result = CURLE_LDAP_SEARCH_FAILED;
+      *err = CURLE_LDAP_SEARCH_FAILED;
       break;
     }
+
+    /* LDAP_RES_SEARCH_RESULT indicates the end of the query. */
+    *err = CURLE_OK;
 
     /* store the latest code for later retrieval */
     data->info.httpcode = code;
@@ -1021,9 +1023,10 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
     default:
       failf(data, "LDAP remote: search failed %s %s", ldap_err2string(code),
             info ? info : "");
-      result = CURLE_LDAP_SEARCH_FAILED;
+      *err = CURLE_LDAP_SEARCH_FAILED;
       break;
     }
+
     if(info)
       ldap_memfree(info);
     break;
@@ -1031,13 +1034,13 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
     lr->nument++;
     rc = ldap_get_dn_ber(li->ld, msg, &ber, &bv);
     if(rc < 0) {
-      result = CURLE_RECV_ERROR;
+      *err = CURLE_RECV_ERROR;
       break;
     }
 
-    result = client_write(data, STRCONST("DN: "), bv.bv_val, bv.bv_len,
-                          STRCONST("\n"));
-    if(result)
+    *err = client_write(data, STRCONST("DN: "), bv.bv_val, bv.bv_len,
+                        STRCONST("\n"));
+    if(*err)
       break;
 
     for(rc = ldap_get_attribute_ber(li->ld, msg, ber, &bv, &bvals);
@@ -1049,10 +1052,11 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
         break;
 
       if(!bvals) {
-        result = client_write(data, STRCONST("\t"), bv.bv_val, bv.bv_len,
-                              STRCONST(":\n"));
-        if(result)
+        *err = client_write(data, STRCONST("\t"), bv.bv_val, bv.bv_len,
+                            STRCONST(":\n"));
+        if(*err)
           break;
+
         continue;
       }
 
@@ -1062,9 +1066,9 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
       for(i = 0; bvals[i].bv_val != NULL; i++) {
         int binval = 0;
 
-        result = client_write(data, STRCONST("\t"), bv.bv_val, bv.bv_len,
-                              STRCONST(":"));
-        if(result)
+        *err = client_write(data, STRCONST("\t"), bv.bv_val, bv.bv_len,
+                            STRCONST(":"));
+        if(*err)
           break;
 
         if(!binary) {
@@ -1088,41 +1092,71 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
 
           /* Binary value, encode to base64. */
           if(bvals[i].bv_len)
-            result = Curl_base64_encode(bvals[i].bv_val, bvals[i].bv_len,
-                                        &val_b64, &val_b64_sz);
-          if(!result)
-            result = client_write(data, STRCONST(": "), val_b64, val_b64_sz,
-                                  STRCONST("\n"));
+            *err = Curl_base64_encode(bvals[i].bv_val, bvals[i].bv_len,
+                                      &val_b64, &val_b64_sz);
+          if(!*err)
+            *err = client_write(data, STRCONST(": "), val_b64, val_b64_sz,
+                                STRCONST("\n"));
           free(val_b64);
         }
         else
-          result = client_write(data, STRCONST(" "),
-                                bvals[i].bv_val, bvals[i].bv_len,
-                                STRCONST("\n"));
-        if(result)
+          *err = client_write(data, STRCONST(" "),
+                              bvals[i].bv_val, bvals[i].bv_len,
+                              STRCONST("\n"));
+        if(*err)
           break;
       }
 
       ber_memfree(bvals);
       bvals = NULL;
-      if(!result)
-        result = client_write(data, STRCONST("\n"), NULL, 0, NULL, 0);
-      if(result)
+      if(!*err)
+        *err = client_write(data, STRCONST("\n"), NULL, 0, NULL, 0);
+      if(*err)
         break;
     }
 
     ber_free(ber, 0);
 
-    if(!result)
-      result = client_write(data, STRCONST("\n"), NULL, 0, NULL, 0);
-    if(!result)
-      result = CURLE_AGAIN;
+    if(!*err)
+      *err = client_write(data, STRCONST("\n"), NULL, 0, NULL, 0);
+    if(!*err)
+      *err = CURLE_AGAIN;
     break;
   }
 
   ldap_msgfree(msg);
-  *err = result;
-  return result? -1: 0;
+
+  return 1;
+}
+
+static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
+                          size_t len, CURLcode *err)
+{
+  int read_count;
+  int msg_read;
+  (void)len;
+  (void)buf;
+  (void)sockindex;
+
+  read_count = 0;
+
+  /* There might be multiple messages so read all the available messages. */
+  do {
+    msg_read = oldap_recv_single(data, sockindex, buf, len, err);
+
+    if(msg_read)
+      read_count++;
+  } while(*err == CURLE_AGAIN && msg_read);
+
+  /**
+   * It means that, we have read some messages but there are still
+   * some messages awaiting. Therefore, we return CURLE_AGAIN so that
+   * it signals that query is not finished yet.
+  */
+  if(read_count > 0 && *err == CURLE_RECV_ERROR)
+    *err = CURLE_AGAIN;
+
+  return *err ? -1: 0;
 }
 
 #ifdef USE_SSL
