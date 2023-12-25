@@ -963,8 +963,7 @@ static CURLcode client_write(struct Curl_easy *data,
   return result;
 }
 
-static int oldap_recv_single(struct Curl_easy *data, int sockindex, char *buf,
-                             size_t len, CURLcode *err)
+static int oldap_recv_single(struct Curl_easy *data, CURLcode *err)
 {
   struct ldapconninfo *li = data->conn->proto.ldapc;
   struct ldapreqinfo *lr = data->req.p.ldap;
@@ -976,10 +975,6 @@ static int oldap_recv_single(struct Curl_easy *data, int sockindex, char *buf,
   int binary = 0;
   int code;
   char *info = NULL;
-
-  (void)len;
-  (void)buf;
-  (void)sockindex;
 
   rc = ldap_result(li->ld, lr->msgid, LDAP_MSG_ONE, &tv, &msg);
   if(rc < 0) {
@@ -1142,7 +1137,7 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
 
   /* There might be multiple messages so read all the available messages. */
   do {
-    msg_read = oldap_recv_single(data, sockindex, buf, len, err);
+    msg_read = oldap_recv_single(data, err);
 
     if(msg_read)
       read_count++;
