@@ -582,6 +582,12 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
 #ifdef USE_SSL
   if(conn->handler->flags & PROTOPT_SSL)
     return oldap_ssl_connect(data, OLDAP_SSL);
+  else {
+    CURLcode result = oldap_ssl_connect(data, OLDAP_SSL);
+
+    if(result)
+      return result;
+  }
 
   if(data->set.use_ssl) {
     CURLcode result = oldap_perform_starttls(data);
