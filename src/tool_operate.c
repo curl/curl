@@ -1731,7 +1731,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           my_setopt_str(curl, CURLOPT_SSLKEYTYPE, config->key_type);
           my_setopt_str(curl, CURLOPT_PROXY_SSLKEYTYPE,
                         config->proxy_key_type);
-          if(!config->secure_only && config->insecure_ok) {
+          if(!config->secure_only && !curlx_getenv("CURL_SECURE") &&
+             config->insecure_ok) {
             my_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
             my_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
           }
@@ -1741,12 +1742,14 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             /* my_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L); */
           }
 
-          if(!config->secure_only && config->doh_insecure_ok) {
+          if(!config->secure_only && !curlx_getenv("CURL_SECURE") &&
+             config->doh_insecure_ok) {
             my_setopt(curl, CURLOPT_DOH_SSL_VERIFYPEER, 0L);
             my_setopt(curl, CURLOPT_DOH_SSL_VERIFYHOST, 0L);
           }
 
-          if(!config->secure_only && config->proxy_insecure_ok) {
+          if(!config->secure_only && !curlx_getenv("CURL_SECURE") &&
+             config->proxy_insecure_ok) {
             my_setopt(curl, CURLOPT_PROXY_SSL_VERIFYPEER, 0L);
             my_setopt(curl, CURLOPT_PROXY_SSL_VERIFYHOST, 0L);
           }
@@ -1804,7 +1807,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           my_setopt(curl, CURLOPT_PATH_AS_IS, 1L);
 
         if((use_proto == proto_scp || use_proto == proto_sftp) &&
-           (config->secure_only || !config->insecure_ok)) {
+           (config->secure_only ||  curlx_getenv("CURL_SECURE") ||
+            !config->insecure_ok)) {
           char *known = findfile(".ssh/known_hosts", FALSE);
           if(known) {
             /* new in curl 7.19.6 */
@@ -2560,7 +2564,7 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
   capath_from_env = false;
   if(!config->cacert &&
      !config->capath &&
-     (config->secure_only ||
+     (config->secure_only || curlx_getenv("CURL_SECURE") ||
       (!config->insecure_ok || (config->doh_url && !config->doh_insecure_ok)))) {
     CURL *curltls = curl_easy_init();
     struct curl_tlssessioninfo *tls_backend_info = NULL;
