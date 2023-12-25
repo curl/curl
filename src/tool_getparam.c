@@ -279,6 +279,7 @@ typedef enum {
   C_RETRY_MAX_TIME,
   C_SASL_AUTHZID,
   C_SASL_IR,
+  C_SECURE,
   C_SERVICE_NAME,
   C_SESSIONID,
   C_SHOW_ERROR,
@@ -560,6 +561,7 @@ static const struct LongShort aliases[]= {
   {"retry-max-time",             ARG_STRG, ' ', C_RETRY_MAX_TIME},
   {"sasl-authzid",               ARG_STRG, ' ', C_SASL_AUTHZID},
   {"sasl-ir",                    ARG_BOOL, ' ', C_SASL_IR},
+  {"secure",                     ARG_NONE, ' ', C_SECURE},
   {"service-name",               ARG_STRG, ' ', C_SERVICE_NAME},
   {"sessionid",                  ARG_BOOL, ' ', C_SESSIONID},
   {"show-error",                 ARG_BOOL, 'S', C_SHOW_ERROR},
@@ -1837,6 +1839,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_PROXY_SERVICE_NAME: /* --proxy-service-name */
       err = getstr(&config->proxy_service_name, nextarg, DENY_BLANK);
+      break;
+    case C_SECURE: /* --secure */
+      config->secure_only = TRUE;
       break;
     case C_SERVICE_NAME: /* --service-name */
       err = getstr(&config->service_name, nextarg, DENY_BLANK);

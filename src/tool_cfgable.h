@@ -169,6 +169,7 @@ struct OperationConfig {
   bool readbusy;            /* set when reading input returns EAGAIN */
   bool globoff;
   bool use_httpget;
+  bool secure_only;         /* set TRUE to force secure SSL connects */
   bool insecure_ok;         /* set TRUE to allow insecure SSL connects */
   bool doh_insecure_ok;     /* set TRUE to allow insecure SSL connects
                                for DoH */

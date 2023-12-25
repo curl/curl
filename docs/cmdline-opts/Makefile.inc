@@ -245,6 +245,7 @@ DPAGES = \
   retry.md \
   sasl-authzid.md \
   sasl-ir.md \
+  secure.md \
   service-name.md \
   show-error.md \
   silent.md \
