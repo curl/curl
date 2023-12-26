@@ -2565,7 +2565,8 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
   if(!config->cacert &&
      !config->capath &&
      (config->secure_only || curlx_getenv("CURL_SECURE") ||
-      (!config->insecure_ok || (config->doh_url && !config->doh_insecure_ok)))) {
+      (!config->insecure_ok ||
+       (config->doh_url && !config->doh_insecure_ok)))) {
     CURL *curltls = curl_easy_init();
     struct curl_tlssessioninfo *tls_backend_info = NULL;
 
