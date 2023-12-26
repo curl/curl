@@ -45,7 +45,8 @@ static int wait_on_socket(curl_socket_t sockfd, int for_recv, long timeout_ms)
   FD_ZERO(&errfd);
 
 /* Avoid this warning with pre-2020 Cygwin/MSYS releases:
- * warning: conversion to 'long unsigned int' from 'curl_socket_t' {aka 'int'} may change the sign of the result [-Wsign-conversion]
+ * warning: conversion to 'long unsigned int' from 'curl_socket_t' {aka 'int'}
+ * may change the sign of the result [-Wsign-conversion]
  */
 #if defined(__GNUC__) && defined(__CYGWIN__)
 #pragma GCC diagnostic push
