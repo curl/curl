@@ -1913,7 +1913,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /*
      * Enable peer SSL verifying.
      */
-    if(!curlx_getenv("CURL_SECURE"))
+    if(!curl_getenv("CURL_SECURE"))
       data->set.ssl.primary.verifypeer = (0 != va_arg(param, long));
 
     /* Update the current connection ssl_config. */
@@ -1924,7 +1924,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /*
      * Enable peer SSL verifying for DoH.
      */
-    if(!curlx_getenv("CURL_SECURE"))
+    if(!curl_getenv("CURL_SECURE"))
       data->set.doh_verifypeer = (0 != va_arg(param, long));
     break;
 #endif
@@ -1933,7 +1933,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /*
      * Enable peer SSL verifying for proxy.
      */
-    if(!curlx_getenv("CURL_SECURE"))
+    if(!curl_getenv("CURL_SECURE"))
       data->set.proxy_ssl.primary.verifypeer =
         (0 != va_arg(param, long))?TRUE:FALSE;
 
@@ -1950,7 +1950,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /* Obviously people are not reading documentation and too many thought
        this argument took a boolean when it wasn't and misused it.
        Treat 1 and 2 the same */
-    if(!curlx_getenv("CURL_SECURE"))
+    if(!curl_getenv("CURL_SECURE"))
       data->set.ssl.primary.verifyhost = !!(arg & 3);
 
     /* Update the current connection ssl_config. */
@@ -1964,7 +1964,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     arg = va_arg(param, long);
 
     /* Treat both 1 and 2 as TRUE */
-    if(!curlx_getenv("CURL_SECURE"))
+    if(!curl_getenv("CURL_SECURE"))
       data->set.doh_verifyhost = !!(arg & 3);
     break;
 #endif
@@ -1976,7 +1976,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     arg = va_arg(param, long);
 
     /* Treat both 1 and 2 as TRUE */
-    if(!curlx_getenv("CURL_SECURE"))
+    if(!curl_getenv("CURL_SECURE"))
       data->set.proxy_ssl.primary.verifyhost = (bool)((arg & 3)?TRUE:FALSE);
 
     /* Update the current connection proxy_ssl_config. */
