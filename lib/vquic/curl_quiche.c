@@ -1112,6 +1112,9 @@ static ssize_t cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
         nwritten = (ssize_t)len;
         goto out;
       }
+      CURL_TRC_CF(data, cf, "[%" PRId64 "] send_body(len=%zu) "
+                  "-> invalid stream, closed: %s",
+                  stream->id, len, (stream->closed ? "true" : "false"));
       *err = CURLE_HTTP3;
       nwritten = -1;
       goto out;
