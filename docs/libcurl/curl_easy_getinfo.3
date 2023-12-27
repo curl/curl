@@ -95,6 +95,9 @@ See \fICURLINFO_PRETRANSFER_TIME(3)\fP
 .IP CURLINFO_PRETRANSFER_TIME_T
 Time from start until just before the transfer begins.
 See \fICURLINFO_PRETRANSFER_TIME_T(3)\fP
+.IP CURLINFO_QUEUE_TIME_T
+Time during which this transfer was held in a waiting queue.
+See \fICURLINFO_QUEUE_TIME_T(3\fP
 .IP CURLINFO_STARTTRANSFER_TIME
 Time from start until just when the first byte is received.
 See \fICURLINFO_STARTTRANSFER_TIME(3)\fP
@@ -259,14 +262,18 @@ An overview of the six time values available from \fIcurl_easy_getinfo(3)\fP
 
 curl_easy_perform()
     |
-    |--NAMELOOKUP
-    |--|--CONNECT
-    |--|--|--APPCONNECT
-    |--|--|--|--PRETRANSFER
-    |--|--|--|--|--STARTTRANSFER
-    |--|--|--|--|--|--TOTAL
-    |--|--|--|--|--|--REDIRECT
+    |--QUEUE_TIME
+    |--|--NAMELOOKUP
+    |--|--|--CONNECT
+    |--|--|--|--APPCONNECT
+    |--|--|--|--|--PRETRANSFER
+    |--|--|--|--|--|--STARTTRANSFER
+    |--|--|--|--|--|--|--TOTAL
+    |--|--|--|--|--|--|--REDIRECT
 .fi
+.IP "QUEUE_TIME"
+\fICURLINFO_QUEUE_TIME_T(3\fP. The time during which the transfer was held in
+a waiting queue before it could start for real. (Added in 8.6.0)
 .IP NAMELOOKUP
 \fICURLINFO_NAMELOOKUP_TIME(3)\fP and \fICURLINFO_NAMELOOKUP_TIME_T(3)\fP.
 The time it took from the start until the name resolving was completed.

@@ -1943,6 +1943,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
 
       if(!result) {
+        *nowp = Curl_pgrsTime(data, TIMER_POSTQUEUE);
         if(async)
           /* We're now waiting for an asynchronous name lookup */
           multistate(data, MSTATE_RESOLVING);
