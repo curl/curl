@@ -1413,10 +1413,12 @@ static size_t multissl_version(char *buffer, size_t size)
     backends_len = p - backends;
   }
 
-  if(size && (size < backends_len))
-    strcpy(buffer, backends);
-  else
-    *buffer = 0; /* did not fit */
+  if(size) {
+    if(backends_len < size)
+      strcpy(buffer, backends);
+    else
+      *buffer = 0; /* did not fit */
+  }
   return 0;
 }
 
