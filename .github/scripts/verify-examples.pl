@@ -26,6 +26,7 @@
 my @files = @ARGV;
 my $cfile = "test.c";
 my $check = "./scripts/checksrc.pl";
+my $error;
 
 if($files[0] eq "-h") {
     print "Usage: verify-synopsis [man pages]\n";
@@ -75,6 +76,7 @@ sub extract {
                   "Error: Single backslashes \\ are not properly shown in " .
                   "manpage EXAMPLE output unless they are escaped \\\\.\n";
                 $fail = 1;
+                $error = 1;
                 last;
             }
             # two backslashes become one
@@ -89,16 +91,12 @@ sub extract {
     return ($fail ? 0 : $l);
 }
 
-my $error;
 for my $m (@files) {
     print "Verify $m\n";
     my $out = extract($m);
     if($out) {
       $error |= testcompile($m);
       $error |= checksrc($m);
-    }
-    else {
-      $error = 1;
     }
 }
 exit $error;
