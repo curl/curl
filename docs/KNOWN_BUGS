@@ -110,6 +110,9 @@ problems may have been fixed or changed somewhat since this was written.
  18. HTTP/3
  18.1 connection migration does not work
 
+ 19. RTSP
+ 19.1 Some methods do not support response bodies
+
 ==============================================================================
 
 1. HTTP
@@ -602,3 +605,13 @@ problems may have been fixed or changed somewhat since this was written.
 18.1 connection migration does not work
 
  https://github.com/curl/curl/issues/7695
+
+19. RTSP
+
+19.1 Some methods do not support response bodies
+
+ The RTSP implementation is written to assume that a number of RTSP methods
+ will always get responses without bodies, even though there seems to be no
+ indication in the RFC that this is always the case.
+
+ https://github.com/curl/curl/issues/12414
