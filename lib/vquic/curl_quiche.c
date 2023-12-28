@@ -1078,6 +1078,28 @@ static ssize_t cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       goto out;
     stream = H3_STREAM_CTX(data);
   }
+  else if(stream->closed) {
+    if(stream->resp_hds_complete) {
+      /* sending request body on a stream that has been closed by the
+       * server. If the server has send us a final response, we should
+       * silently discard the send data.
+       * This happens for example on redirects where the server, instead
+       * of reading the full request body just closed the stream after
+       * sending the 30x response.
+       * This is sort of a race: had the transfer loop called recv first,
+       * it would see the response and stop/discard sending on its own- */
+      CURL_TRC_CF(data, cf, "[%" PRId64 "] discarding data"
+                  "on closed stream with response", stream->id);
+      *err = CURLE_OK;
+      nwritten = (ssize_t)len;
+      goto out;
+    }
+    CURL_TRC_CF(data, cf, "[%" PRId64 "] send_body(len=%zu) "
+                "-> stream closed", stream->id, len);
+    *err = CURLE_HTTP3;
+    nwritten = -1;
+    goto out;
+  }
   else {
     bool eof = (stream->upload_left >= 0 &&
                 (curl_off_t)len >= stream->upload_left);
@@ -1095,26 +1117,9 @@ static ssize_t cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       nwritten = -1;
       goto out;
     }
-    else if(stream->closed ||
-            nwritten == QUICHE_H3_TRANSPORT_ERR_INVALID_STREAM_STATE) {
-      if(stream->closed && stream->resp_hds_complete) {
-        /* sending request body on a stream that has been closed by the
-         * server. If the server has send us a final response, we should
-         * silently discard the send data.
-         * This happens for example on redirects where the server, instead
-         * of reading the full request body just closed the stream after
-         * sending the 30x response.
-         * This is sort of a race: had the transfer loop called recv first,
-         * it would see the response and stop/discard sending on its own- */
-        CURL_TRC_CF(data, cf, "[%" PRId64 "] discarding data"
-                    "on closed stream with response", stream->id);
-        *err = CURLE_OK;
-        nwritten = (ssize_t)len;
-        goto out;
-      }
+    else if(nwritten == QUICHE_H3_TRANSPORT_ERR_INVALID_STREAM_STATE) {
       CURL_TRC_CF(data, cf, "[%" PRId64 "] send_body(len=%zu) "
-                  "-> invalid stream, closed: %s",
-                  stream->id, len, (stream->closed ? "true" : "false"));
+                  "-> invalid stream state", stream->id, len);
       *err = CURLE_HTTP3;
       nwritten = -1;
       goto out;

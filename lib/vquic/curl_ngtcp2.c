@@ -1895,8 +1895,7 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       goto out;
     }
     CURL_TRC_CF(data, cf, "[%" PRId64 "] send_body(len=%zu) "
-                "-> invalid stream, closed: %s",
-                stream->id, len, (stream->closed ? "true" : "false"));
+                "-> stream closed", stream->id, len);
     *err = CURLE_HTTP3;
     sent = -1;
     goto out;
