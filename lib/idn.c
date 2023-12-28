@@ -53,7 +53,7 @@
 #ifdef USE_WIN32_IDN
 /* using Windows kernel32 and normaliz libraries. */
 
-#if !defined(_WIN32_WINNT) || _WIN32_WINNT < 0x600
+#if defined(__clang__) || !defined(_WIN32_WINNT) || _WIN32_WINNT < 0x600
 WINBASEAPI int WINAPI IdnToAscii(DWORD dwFlags,
                                  const WCHAR *lpUnicodeCharStr,
                                  int cchUnicodeChar,
