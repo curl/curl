@@ -24,7 +24,7 @@
 .\"
 .TH CURLINFO_REFERER 3 "11 Feb 2021" libcurl libcurl
 .SH NAME
-CURLINFO_REFERER \- get the referrer header
+CURLINFO_REFERER \- get the used referrer request header
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
@@ -32,7 +32,8 @@ CURLINFO_REFERER \- get the referrer header
 CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_REFERER, char **hdrp);
 .fi
 .SH DESCRIPTION
-Pass in a pointer to a char pointer and get the referrer header.
+Pass in a pointer to a char pointer and get the referrer header used in the
+most recent request.
 
 The \fBhdrp\fP pointer is NULL or points to private memory you MUST NOT free -
 it gets freed when you call \fIcurl_easy_cleanup(3)\fP on the corresponding
