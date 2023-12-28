@@ -57,12 +57,16 @@ typedef struct addrinfoexW_
   struct addrinfoexW_ *ai_next;
 } ADDRINFOEXW_;
 
-typedef void(CALLBACK *LOOKUP_COMPLETION)(DWORD, DWORD, LPWSAOVERLAPPED);
-extern void(WSAAPI *Curl_FreeAddrInfoExW)(ADDRINFOEXW_*);
-extern int(WSAAPI *Curl_GetAddrInfoExCancel)(LPHANDLE);
-extern int(WSAAPI *Curl_GetAddrInfoExW)(PCWSTR, PCWSTR, DWORD, LPGUID,
+typedef void (CALLBACK *LOOKUP_COMPLETION_FN)(DWORD, DWORD, LPWSAOVERLAPPED);
+typedef void (WSAAPI *FREEADDRINFOEXW_FN)(ADDRINFOEXW_*);
+typedef int (WSAAPI *GETADDRINFOEXCANCEL_FN)(LPHANDLE);
+typedef int (WSAAPI *GETADDRINFOEXW_FN)(PCWSTR, PCWSTR, DWORD, LPGUID,
   const ADDRINFOEXW_*, ADDRINFOEXW_**, struct timeval*, LPOVERLAPPED,
-  LOOKUP_COMPLETION, LPHANDLE);
+  LOOKUP_COMPLETION_FN, LPHANDLE);
+
+extern FREEADDRINFOEXW_FN Curl_FreeAddrInfoExW;
+extern GETADDRINFOEXCANCEL_FN Curl_GetAddrInfoExCancel;
+extern GETADDRINFOEXW_FN Curl_GetAddrInfoExW;
 
 /* This is used to dynamically load DLLs */
 HMODULE Curl_load_library(LPCTSTR filename);

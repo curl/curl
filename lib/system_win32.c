@@ -43,21 +43,17 @@ bool Curl_isWindows8OrGreater;
 /* Handle of iphlpapp.dll */
 static HMODULE s_hIpHlpApiDll = NULL;
 
-/* Pointer to the if_nametoindex function */
+/* Function pointers */
 IF_NAMETOINDEX_FN Curl_if_nametoindex = NULL;
-
-void(WSAAPI *Curl_FreeAddrInfoExW)(ADDRINFOEXW_ *pAddrInfoEx) = NULL;
-int(WSAAPI *Curl_GetAddrInfoExCancel)(LPHANDLE lpHandle) = NULL;
-int(WSAAPI *Curl_GetAddrInfoExW)(PCWSTR pName, PCWSTR pServiceName,
-  DWORD dwNameSpace, LPGUID lpNspId, const ADDRINFOEXW_ *hints,
-  ADDRINFOEXW_ **ppResult, struct timeval *timeout, LPOVERLAPPED lpOverlapped,
-  LOOKUP_COMPLETION lpCompletionRoutine, LPHANDLE lpHandle) = NULL;
+FREEADDRINFOEXW_FN Curl_FreeAddrInfoExW = NULL;
+GETADDRINFOEXCANCEL_FN Curl_GetAddrInfoExCancel = NULL;
+GETADDRINFOEXW_FN Curl_GetAddrInfoExW = NULL;
 
 /* Curl_win32_init() performs win32 global initialization */
 CURLcode Curl_win32_init(long flags)
 {
 #ifdef USE_WINSOCK
-  HANDLE ws2_32Dll;
+  HMODULE ws2_32Dll;
 #endif
   /* CURL_GLOBAL_WIN32 controls the *optional* part of the initialization which
      is just for Winsock at the moment. Any required win32 initialization
@@ -118,12 +114,12 @@ CURLcode Curl_win32_init(long flags)
 #ifdef USE_WINSOCK
   ws2_32Dll = GetModuleHandleA("ws2_32");
   if(ws2_32Dll) {
-    *(FARPROC*)&Curl_FreeAddrInfoExW = GetProcAddress(ws2_32Dll,
-      "FreeAddrInfoExW");
-    *(FARPROC*)&Curl_GetAddrInfoExCancel = GetProcAddress(ws2_32Dll,
-      "GetAddrInfoExCancel");
-    *(FARPROC*)&Curl_GetAddrInfoExW = GetProcAddress(ws2_32Dll,
-      "GetAddrInfoExW");
+    Curl_FreeAddrInfoExW = CURLX_FUNCTION_CAST(FREEADDRINFOEXW_FN,
+      GetProcAddress(ws2_32Dll, "FreeAddrInfoExW"));
+    Curl_GetAddrInfoExCancel = CURLX_FUNCTION_CAST(GETADDRINFOEXCANCEL_FN,
+      GetProcAddress(ws2_32Dll, "GetAddrInfoExCancel"));
+    Curl_GetAddrInfoExW = CURLX_FUNCTION_CAST(GETADDRINFOEXW_FN,
+      GetProcAddress(ws2_32Dll, "GetAddrInfoExW"));
   }
 #endif
 
