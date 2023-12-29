@@ -1655,15 +1655,12 @@ AS_HELP_STRING([--disable-ipv6],[Disable IPv6 support]),
 # include <netinet/in6.h>
 #endif
 #endif
-#include <stdlib.h> /* for exit() */
-main()
+
+int main(void)
 {
  struct sockaddr_in6 s;
  (void)s;
- if (socket(AF_INET6, SOCK_STREAM, 0) < 0)
-   exit(1);
- else
-   exit(0);
+ return socket(AF_INET6, SOCK_STREAM, 0) < 0;
 }
 ]])
 ],
