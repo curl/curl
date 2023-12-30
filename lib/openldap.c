@@ -793,10 +793,13 @@ static CURLcode oldap_connecting(struct Curl_easy *data, bool *done)
         result = oldap_perform_bind(data, OLDAP_BIND);
       break;
     }
+    result = Curl_ssl_cfilter_add(data, conn, FIRSTSOCKET);
+    if(result)
+      break;
     FALLTHROUGH();
   case OLDAP_TLS:
     result = oldap_ssl_connect(data, OLDAP_TLS);
-    if(result && data->set.use_ssl != CURLUSESSL_TRY)
+    if(result)
       result = oldap_map_error(code, CURLE_USE_SSL_FAILED);
     else if(ssl_installed(conn)) {
       conn->bits.tls_upgraded = TRUE;
