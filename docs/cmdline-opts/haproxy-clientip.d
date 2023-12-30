@@ -1,6 +1,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: haproxy-clientip
+Arg: <IP address>
 Help: Sets client IP in HAProxy PROXY protocol v1 header
 Protocols: HTTP
 Added: 8.2.0
@@ -24,6 +25,3 @@ of consecutive zeroes. The total number of decoded bits must exactly be 128.
 Otherwise, any string can be accepted for the client IP and get sent.
 
 It replaces --haproxy-protocol if used, it is not necessary to specify both flags.
-
-This option is primarily useful when sending test requests to
-verify a service is working as intended.
