@@ -76,10 +76,9 @@ For example, to insert the word hello 100 times:
 
 ## Include file
 
-This instruction allows a test case to include another file during
-preprocessing. It is helpful to know that the ordinary variables are expanded
-before the include happens so `%LOGDIR` and the others can be used in the
-include line.
+This instruction allows a test case to include another file. It is helpful to
+remember that the ordinary variables are expanded before the include happens
+so `%LOGDIR` and the others can be used in the include line.
 
 The file name cannot contain `%` as that letter is used to end the name for
 the include instruction:
