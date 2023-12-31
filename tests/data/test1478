@@ -24,7 +24,7 @@ src/tool_listhelp.c is in sync with docs/cmdline-opts
 </client>
 
 <verify>
-<stdout>
+<stdout mode="text">
 %include %SRCDIR/../src/tool_listhelp.c%
 </stdout>
 </verify>
