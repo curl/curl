@@ -1,0 +1,32 @@
+<testcase>
+<info>
+<keywords>
+source analysis
+documentation
+--help
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+
+<name>
+src/tool_listhelp.c is in sync with docs/cmdline-opts
+</name>
+
+<command type="perl">
+%SRCDIR/../docs/cmdline-opts/gen.pl listhelp %SRCDIR/../docs/cmdline-opts/*.d
+</command>
+</client>
+
+<verify>
+<stdout mode="text">
+%include %SRCDIR/../src/tool_listhelp.c%
+</stdout>
+</verify>
+
+</testcase>
