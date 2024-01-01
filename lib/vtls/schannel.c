@@ -1198,9 +1198,8 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     cur += proto.len;
 
     *list_len = curlx_uitous(cur - list_start_index);
-    *extension_len = *list_len +
-      (unsigned short)sizeof(unsigned int) +
-      (unsigned short)sizeof(unsigned short);
+    *extension_len = (unsigned int)(*list_len +
+      sizeof(unsigned int) + sizeof(unsigned short));
 
     InitSecBuffer(&inbuf, SECBUFFER_APPLICATION_PROTOCOLS, alpn_buffer, cur);
     InitSecBufferDesc(&inbuf_desc, &inbuf, 1);
