@@ -302,8 +302,15 @@ query_complete(DWORD err, DWORD bytes, LPWSAOVERLAPPED overlapped)
   struct Curl_addrinfo *ca;
   struct Curl_addrinfo *cafirst = NULL;
   struct Curl_addrinfo *calast = NULL;
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-align"
+#endif
   struct thread_sync_data *tsd =
     CONTAINING_RECORD(overlapped, struct thread_sync_data, w8.overlapped);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
   struct thread_data *td = tsd->td;
   const ADDRINFOEXW_ *res = tsd->w8.res;
   int error = (int)err;
