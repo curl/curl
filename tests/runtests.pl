@@ -1235,6 +1235,8 @@ sub singletest_check {
             # text mode when running on windows: fix line endings
             s/\r\n/\n/g for @validstdout;
             s/\n/\r\n/g for @validstdout;
+            s/\r\n/\n/g for @actual;
+            s/\n/\r\n/g for @actual;
         }
 
         if($hash{'nonewline'}) {
