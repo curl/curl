@@ -4,6 +4,7 @@
 -O
 -J
 --output-dir
+--remote-time
 </keywords>
 </info>
 #
@@ -36,10 +37,10 @@ http
 http
 </features>
 <name>
---output-dir with -J
+--output-dir with -J and -R
 </name>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/this/is/the/%TESTNUMBER -OJ --output-dir %PWD/%LOGDIR
+http://%HOSTIP:%HTTPPORT/this/is/the/%TESTNUMBER -OJR --output-dir %PWD/%LOGDIR
 </command>
 </client>
 
