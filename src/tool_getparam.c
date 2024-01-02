@@ -51,19 +51,25 @@
 #  define USE_WATT32
 #endif
 
-#define GetStr(str,val) do {                    \
-    if(*(str)) {                                \
-      free(*(str));                             \
-      *(str) = NULL;                            \
-    }                                           \
-    if((val)) {                                 \
-      *(str) = strdup((val));                   \
-      if(!(*(str))) {                           \
-        err = PARAM_NO_MEM;                     \
-        goto error;                             \
-      }                                         \
-    }                                           \
-  } while(0)
+#define ALLOW_BLANK TRUE
+#define DENY_BLANK FALSE
+
+static ParameterError getstr(char **str, const char *val, bool allowblank)
+{
+  if(*str) {
+    free(*str);
+    *str = NULL;
+  }
+  if(val) {
+    if(!allowblank && !val[0])
+      return PARAM_BLANK_STRING;
+
+    *str = strdup(val);
+    if(!*str)
+      return PARAM_NO_MEM;
+  }
+  return PARAM_OK;
+}
 
 struct LongShort {
   const char *letter; /* short name option */
@@ -559,7 +565,7 @@ static ParameterError GetSizeParameter(struct GlobalConfig *global,
 #ifdef HAVE_WRITABLE_ARGV
 static void cleanarg(argv_item_t str)
 {
-  /* now that GetStr has copied the contents of nextarg, wipe the next
+  /* now that getstr has copied the contents of nextarg, wipe the next
    * argument out so that the username:password isn't displayed in the
    * system process list */
   if(str) {
@@ -624,7 +630,9 @@ static ParameterError data_urlencode(struct GlobalConfig *global,
       return err;
   }
   else {
-    GetStr(&postdata, p);
+    err = getstr(&postdata, p, ALLOW_BLANK);
+    if(err)
+      goto error;
     if(postdata)
       size = strlen(postdata);
   }
@@ -759,6 +767,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
   bool toggle = TRUE; /* how to switch boolean options, on or off. Controlled
                          by using --OPTION or --no-OPTION */
   bool nextalloc = FALSE; /* if nextarg is allocated */
+  struct getout *url;
   static const char *redir_protos[] = {
     "http",
     "https",
@@ -907,48 +916,48 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case '*': /* options without a short option */
       switch(subletter) {
       case '4': /* --dns-ipv4-addr */
-        if(!curlinfo->ares_num) { /* c-ares is needed for this */
+        if(!curlinfo->ares_num) /* c-ares is needed for this */
           err = PARAM_LIBCURL_DOESNT_SUPPORT;
-          break;
-        }
-        /* addr in dot notation */
-        GetStr(&config->dns_ipv4_addr, nextarg);
+        else
+          /* addr in dot notation */
+          err = getstr(&config->dns_ipv4_addr, nextarg, DENY_BLANK);
         break;
       case '6': /* --dns-ipv6-addr */
-        if(!curlinfo->ares_num) { /* c-ares is needed for this */
+        if(!curlinfo->ares_num) /* c-ares is needed for this */
           err = PARAM_LIBCURL_DOESNT_SUPPORT;
-          break;
-        }
-        /* addr in dot notation */
-        GetStr(&config->dns_ipv6_addr, nextarg);
+        else
+          /* addr in dot notation */
+          err = getstr(&config->dns_ipv6_addr, nextarg, DENY_BLANK);
         break;
       case 'a': /* random-file */
         break;
       case 'b': /* egd-file */
         break;
       case 'B': /* OAuth 2.0 bearer token */
-        GetStr(&config->oauth_bearer, nextarg);
-        cleanarg(clearthis);
-        config->authtype |= CURLAUTH_BEARER;
+        err = getstr(&config->oauth_bearer, nextarg, DENY_BLANK);
+        if(!err) {
+          cleanarg(clearthis);
+          config->authtype |= CURLAUTH_BEARER;
+        }
         break;
       case 'c': /* connect-timeout */
         err = secs2ms(&config->connecttimeout_ms, nextarg);
         break;
       case 'C': /* doh-url */
-        GetStr(&config->doh_url, nextarg);
-        if(config->doh_url && !config->doh_url[0])
-          /* if given a blank string, we make it NULL again */
+        err = getstr(&config->doh_url, nextarg, ALLOW_BLANK);
+        if(!err && config->doh_url && !config->doh_url[0])
+          /* if given a blank string, make it NULL again */
           Curl_safefree(config->doh_url);
         break;
       case 'd': /* ciphers */
-        GetStr(&config->cipher_list, nextarg);
+        err = getstr(&config->cipher_list, nextarg, DENY_BLANK);
         break;
       case 'D': /* --dns-interface */
         if(!curlinfo->ares_num) /* c-ares is needed for this */
           err = PARAM_LIBCURL_DOESNT_SUPPORT;
         else
           /* interface name */
-          GetStr(&config->dns_interface, nextarg);
+          err = getstr(&config->dns_interface, nextarg, DENY_BLANK);
         break;
       case 'e': /* --disable-epsv */
         config->disable_epsv = toggle;
@@ -964,23 +973,27 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           err = PARAM_LIBCURL_DOESNT_SUPPORT;
         else
           /* IP addrs of DNS servers */
-          GetStr(&config->dns_servers, nextarg);
+          err = getstr(&config->dns_servers, nextarg, DENY_BLANK);
         break;
       case 'g': /* --trace */
-        GetStr(&global->trace_dump, nextarg);
-        if(global->tracetype && (global->tracetype != TRACE_BIN))
-          warnf(global, "--trace overrides an earlier trace/verbose option");
-        global->tracetype = TRACE_BIN;
+        err = getstr(&global->trace_dump, nextarg, DENY_BLANK);
+        if(!err) {
+          if(global->tracetype && (global->tracetype != TRACE_BIN))
+            warnf(global, "--trace overrides an earlier trace/verbose option");
+          global->tracetype = TRACE_BIN;
+        }
         break;
       case 'G': /* --npn */
         warnf(global, "--npn is no longer supported");
         break;
       case 'h': /* --trace-ascii */
-        GetStr(&global->trace_dump, nextarg);
-        if(global->tracetype && (global->tracetype != TRACE_ASCII))
-          warnf(global,
-                "--trace-ascii overrides an earlier trace/verbose option");
-        global->tracetype = TRACE_ASCII;
+        err = getstr(&global->trace_dump, nextarg, DENY_BLANK);
+        if(!err) {
+          if(global->tracetype && (global->tracetype != TRACE_ASCII))
+            warnf(global,
+                  "--trace-ascii overrides an earlier trace/verbose option");
+          global->tracetype = TRACE_ASCII;
+        }
         break;
       case 'H': /* --alpn */
         config->noalpn = (!toggle)?TRUE:FALSE;
@@ -1146,7 +1159,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
 
       case 'S': /* ipfs gateway url */
-        GetStr(&config->ipfs_gateway, nextarg);
+        err = getstr(&config->ipfs_gateway, nextarg, DENY_BLANK);
         break;
 
       case 't': /* --proxy-ntlm */
@@ -1164,7 +1177,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 
       case 'V': /* --aws-sigv4 */
         config->authtype |= CURLAUTH_AWS_SIGV4;
-        GetStr(&config->aws_sigv4, nextarg);
+        err = getstr(&config->aws_sigv4, nextarg, DENY_BLANK);
         break;
 
       case 'v': /* --stderr */
@@ -1172,7 +1185,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case 'w': /* --interface */
         /* interface */
-        GetStr(&config->iface, nextarg);
+        err = getstr(&config->iface, nextarg, DENY_BLANK);
         break;
       case 'x': /* --krb */
         /* kerberos level string */
@@ -1180,13 +1193,13 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           err = PARAM_LIBCURL_DOESNT_SUPPORT;
           break;
         }
-        GetStr(&config->krblevel, nextarg);
+        err = getstr(&config->krblevel, nextarg, DENY_BLANK);
         break;
       case 'X': /* --haproxy-protocol */
         config->haproxy_protocol = toggle;
         break;
       case 'P': /* --haproxy-clientip */
-        GetStr(&config->haproxy_clientip, nextarg);
+        err = getstr(&config->haproxy_clientip, nextarg, DENY_BLANK);
         break;
       case 'y': /* --max-filesize */
         {
@@ -1208,9 +1221,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         config->xattr = toggle;
         break;
       case '@': /* the URL! */
-      {
-        struct getout *url;
-
         if(!config->url_get)
           config->url_get = config->url_list;
 
@@ -1236,9 +1246,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         }
 
         /* fill in the URL */
-        GetStr(&url->url, nextarg);
+        err = getstr(&url->url, nextarg, DENY_BLANK);
         url->flags |= GETOUT_URL;
-      }
       }
       break;
     case '$': /* more options without a short option */
@@ -1258,20 +1267,20 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case 'c': /* --socks5 specifies a socks5 proxy to use, and resolves
                    the name locally and passes on the resolved address */
-        GetStr(&config->proxy, nextarg);
+        err = getstr(&config->proxy, nextarg, DENY_BLANK);
         config->proxyver = CURLPROXY_SOCKS5;
         break;
       case 't': /* --socks4 specifies a socks4 proxy to use */
-        GetStr(&config->proxy, nextarg);
+        err = getstr(&config->proxy, nextarg, DENY_BLANK);
         config->proxyver = CURLPROXY_SOCKS4;
         break;
       case 'T': /* --socks4a specifies a socks4a proxy to use */
-        GetStr(&config->proxy, nextarg);
+        err = getstr(&config->proxy, nextarg, DENY_BLANK);
         config->proxyver = CURLPROXY_SOCKS4A;
         break;
       case '2': /* --socks5-hostname specifies a socks5 proxy and enables name
                    resolving with the proxy */
-        GetStr(&config->proxy, nextarg);
+        err = getstr(&config->proxy, nextarg, DENY_BLANK);
         config->proxyver = CURLPROXY_SOCKS5_HOSTNAME;
         break;
       case 'd': /* --tcp-nodelay option */
@@ -1314,7 +1323,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
 
       case 'm': /* --ftp-account */
-        GetStr(&config->ftp_account, nextarg);
+        err = getstr(&config->ftp_account, nextarg, DENY_BLANK);
         break;
       case 'n': /* --proxy-anyauth */
         config->proxyanyauth = toggle;
@@ -1366,7 +1375,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       }
       case 'u': /* --ftp-alternative-to-user */
-        GetStr(&config->ftp_alternative_to_user, nextarg);
+        err = getstr(&config->ftp_alternative_to_user, nextarg, DENY_BLANK);
         break;
       case 'v': /* --ssl-reqd */
         if(toggle && !feature_ssl) {
@@ -1399,11 +1408,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         warnf(global,
               "--libcurl option was disabled at build-time");
         err = PARAM_OPTION_UNKNOWN;
-        break;
 #else
-        GetStr(&global->libcurl, nextarg);
-        break;
+        err = getstr(&global->libcurl, nextarg, DENY_BLANK);
 #endif
+        break;
       case '#': /* --raw */
         config->raw = toggle;
         break;
@@ -1424,21 +1432,21 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case '5': /* --noproxy */
         /* This specifies the noproxy list */
-        GetStr(&config->noproxy, nextarg);
+        err = getstr(&config->noproxy, nextarg, ALLOW_BLANK);
         break;
        case '7': /* --socks5-gssapi-nec */
         config->socks5_gssapi_nec = toggle;
         break;
       case '8': /* --proxy1.0 */
         /* http 1.0 proxy */
-        GetStr(&config->proxy, nextarg);
+        err = getstr(&config->proxy, nextarg, DENY_BLANK);
         config->proxyver = CURLPROXY_HTTP_1_0;
         break;
       case '9': /* --tftp-blksize */
         err = str2unum(&config->tftp_blksize, nextarg);
         break;
       case 'A': /* --mail-from */
-        GetStr(&config->mail_from, nextarg);
+        err = getstr(&config->mail_from, nextarg, DENY_BLANK);
         break;
       case 'B': /* --mail-rcpt */
         /* append receiver to a list */
@@ -1466,14 +1474,14 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         config->gssapi_delegation = delegation(config, nextarg);
         break;
       case 'H': /* --mail-auth */
-        GetStr(&config->mail_auth, nextarg);
+        err = getstr(&config->mail_auth, nextarg, DENY_BLANK);
         break;
       case 'J': /* --metalink */
         errorf(global, "--metalink is disabled");
         err = PARAM_BAD_USE;
         break;
       case '6': /* --sasl-authzid */
-        GetStr(&config->sasl_authzid, nextarg);
+        err = getstr(&config->sasl_authzid, nextarg, DENY_BLANK);
         break;
       case 'K': /* --sasl-ir */
         config->sasl_ir = toggle;
@@ -1487,20 +1495,21 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case 'M': /* --unix-socket */
         config->abstract_unix_socket = FALSE;
-        GetStr(&config->unix_socket_path, nextarg);
+        err = getstr(&config->unix_socket_path, nextarg, DENY_BLANK);
         break;
       case 'N': /* --path-as-is */
         config->path_as_is = toggle;
         break;
       case 'O': /* --proxy-service-name */
-        GetStr(&config->proxy_service_name, nextarg);
+        err = getstr(&config->proxy_service_name, nextarg, DENY_BLANK);
         break;
       case 'P': /* --service-name */
-        GetStr(&config->service_name, nextarg);
+        err = getstr(&config->service_name, nextarg, DENY_BLANK);
         break;
       case 'Q': /* --proto-default */
-        GetStr(&config->proto_default, nextarg);
-        err = check_protocol(config->proto_default);
+        err = getstr(&config->proto_default, nextarg, DENY_BLANK);
+        if(!err)
+          err = check_protocol(config->proto_default);
         break;
       case 'R': /* --expect100-timeout */
         err = secs2ms(&config->expect100timeout_ms, nextarg);
@@ -1513,7 +1522,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case 'W': /* --abstract-unix-socket */
         config->abstract_unix_socket = TRUE;
-        GetStr(&config->unix_socket_path, nextarg);
+        err = getstr(&config->unix_socket_path, nextarg, DENY_BLANK);
         break;
       case 'X': /* --tls-max */
         err = str2tls_max(&config->ssl_version_max, nextarg);
@@ -1632,10 +1641,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         config->ssl_version = CURL_SSLVERSION_TLSv1_3;
         break;
       case 'A': /* --tls13-ciphers */
-        GetStr(&config->cipher13_list, nextarg);
+        err = getstr(&config->cipher13_list, nextarg, DENY_BLANK);
         break;
       case 'B': /* --proxy-tls13-ciphers */
-        GetStr(&config->proxy_cipher13_list, nextarg);
+        err = getstr(&config->proxy_cipher13_list, nextarg, DENY_BLANK);
         break;
       }
       break;
@@ -1661,7 +1670,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case 'A':
       /* This specifies the User-Agent name */
-      GetStr(&config->useragent, nextarg);
+      err = getstr(&config->useragent, nextarg, ALLOW_BLANK);
       break;
     case 'b':
       switch(subletter) {
@@ -1669,13 +1678,13 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         if(!feature_altsvc)
           err = PARAM_LIBCURL_DOESNT_SUPPORT;
         else
-          GetStr(&config->altsvc, nextarg);
+          err = getstr(&config->altsvc, nextarg, ALLOW_BLANK);
         break;
       case 'b': /* --hsts */
         if(!feature_hsts)
           err = PARAM_LIBCURL_DOESNT_SUPPORT;
         else
-          GetStr(&config->hsts, nextarg);
+          err = getstr(&config->hsts, nextarg, ALLOW_BLANK);
         break;
       default:  /* --cookie string coming up: */
         if(nextarg[0] == '@') {
@@ -1696,7 +1705,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case 'c':
       /* get the file name to dump all cookies in */
-      GetStr(&config->cookiejar, nextarg);
+      err = getstr(&config->cookiejar, nextarg, DENY_BLANK);
       break;
     case 'C':
       /* This makes us continue an ftp transfer at given position */
@@ -1806,7 +1815,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         }
       }
       else {
-        GetStr(&postdata, nextarg);
+        err = getstr(&postdata, nextarg, ALLOW_BLANK);
+        if(err)
+          break;
         if(postdata)
           size = strlen(postdata);
       }
@@ -1860,7 +1871,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     break;
     case 'D':
       /* dump-header to given file name */
-      GetStr(&config->headerfile, nextarg);
+      err = getstr(&config->headerfile, nextarg, DENY_BLANK);
       break;
     case 'e':
     {
@@ -1874,7 +1885,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       else
         config->autoreferer = FALSE;
       ptr = *nextarg ? nextarg : NULL;
-      GetStr(&config->referer, ptr);
+      err = getstr(&config->referer, ptr, ALLOW_BLANK);
     }
     break;
     case 'E':
@@ -1884,7 +1895,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         GetFileAndPassword(nextarg, &config->cert, &config->key_passwd);
         break;
       case 'a': /* --cacert CA info PEM file */
-        GetStr(&config->cacert, nextarg);
+        err = getstr(&config->cacert, nextarg, DENY_BLANK);
         break;
       case 'G': /* --ca-native */
         config->native_ca_store = toggle;
@@ -1893,43 +1904,43 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         config->proxy_native_ca_store = toggle;
         break;
       case 'b': /* cert file type */
-        GetStr(&config->cert_type, nextarg);
+        err = getstr(&config->cert_type, nextarg, DENY_BLANK);
         break;
       case 'c': /* private key file */
-        GetStr(&config->key, nextarg);
+        err = getstr(&config->key, nextarg, DENY_BLANK);
         break;
       case 'd': /* private key file type */
-        GetStr(&config->key_type, nextarg);
+        err = getstr(&config->key_type, nextarg, DENY_BLANK);
         break;
       case 'e': /* private key passphrase */
-        GetStr(&config->key_passwd, nextarg);
+        err = getstr(&config->key_passwd, nextarg, DENY_BLANK);
         cleanarg(clearthis);
         break;
       case 'f': /* crypto engine */
-        GetStr(&config->engine, nextarg);
-        if(config->engine && curl_strequal(config->engine, "list")) {
+        err = getstr(&config->engine, nextarg, DENY_BLANK);
+        if(!err &&
+           config->engine && curl_strequal(config->engine, "list")) {
           err = PARAM_ENGINES_REQUESTED;
-          break;
         }
         break;
       case 'g': /* CA cert directory */
-        GetStr(&config->capath, nextarg);
+        err = getstr(&config->capath, nextarg, DENY_BLANK);
         break;
       case 'h': /* --pubkey public key file */
-        GetStr(&config->pubkey, nextarg);
+        err = getstr(&config->pubkey, nextarg, DENY_BLANK);
         break;
       case 'i': /* --hostpubmd5 md5 of the host public key */
-        GetStr(&config->hostpubmd5, nextarg);
-        if(!config->hostpubmd5 || strlen(config->hostpubmd5) != 32) {
-          err = PARAM_BAD_USE;
-          break;
+        err = getstr(&config->hostpubmd5, nextarg, DENY_BLANK);
+        if(!err) {
+          if(!config->hostpubmd5 || strlen(config->hostpubmd5) != 32)
+            err = PARAM_BAD_USE;
         }
         break;
       case 'F': /* --hostpubsha256 sha256 of the host public key */
-        GetStr(&config->hostpubsha256, nextarg);
+        err = getstr(&config->hostpubsha256, nextarg, DENY_BLANK);
         break;
       case 'j': /* CRL file */
-        GetStr(&config->crlfile, nextarg);
+        err = getstr(&config->crlfile, nextarg, DENY_BLANK);
         break;
       case 'k': /* TLS username */
         if(!feature_tls_srp) {
@@ -1937,7 +1948,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           err = PARAM_LIBCURL_DOESNT_SUPPORT;
           break;
         }
-        GetStr(&config->tls_username, nextarg);
+        err = getstr(&config->tls_username, nextarg, DENY_BLANK);
         cleanarg(clearthis);
         break;
       case 'l': /* TLS password */
@@ -1946,7 +1957,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           err = PARAM_LIBCURL_DOESNT_SUPPORT;
           break;
         }
-        GetStr(&config->tls_password, nextarg);
+        err = getstr(&config->tls_password, nextarg, ALLOW_BLANK);
         cleanarg(clearthis);
         break;
       case 'm': /* TLS authentication type */
@@ -1954,11 +1965,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           err = PARAM_LIBCURL_DOESNT_SUPPORT;
           break;
         }
-        GetStr(&config->tls_authtype, nextarg);
-        if(!curl_strequal(config->tls_authtype, "SRP")) {
+        err = getstr(&config->tls_authtype, nextarg, DENY_BLANK);
+        if(!err && !curl_strequal(config->tls_authtype, "SRP"))
           err = PARAM_LIBCURL_DOESNT_SUPPORT; /* only support TLS-SRP */
-          break;
-        }
         break;
       case 'n': /* no empty SSL fragments, --ssl-allow-beast */
         if(feature_ssl)
@@ -1976,11 +1985,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
 
       case 'p': /* Pinned public key DER file */
-        GetStr(&config->pinnedpubkey, nextarg);
+        err = getstr(&config->pinnedpubkey, nextarg, DENY_BLANK);
         break;
 
       case 'P': /* proxy pinned public key */
-        GetStr(&config->proxy_pinnedpubkey, nextarg);
+        err = getstr(&config->proxy_pinnedpubkey, nextarg, DENY_BLANK);
         break;
 
       case 'q': /* --cert-status */
@@ -2015,7 +2024,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           err = PARAM_LIBCURL_DOESNT_SUPPORT;
           break;
         }
-        GetStr(&config->proxy_tls_username, nextarg);
+        err = getstr(&config->proxy_tls_username, nextarg, ALLOW_BLANK);
         break;
 
       case 'v': /* TLS password for proxy */
@@ -2024,7 +2033,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           err = PARAM_LIBCURL_DOESNT_SUPPORT;
           break;
         }
-        GetStr(&config->proxy_tls_password, nextarg);
+        err = getstr(&config->proxy_tls_password, nextarg, DENY_BLANK);
         break;
 
       case 'w': /* TLS authentication type for proxy */
@@ -2032,11 +2041,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           err = PARAM_LIBCURL_DOESNT_SUPPORT;
           break;
         }
-        GetStr(&config->proxy_tls_authtype, nextarg);
-        if(!curl_strequal(config->proxy_tls_authtype, "SRP")) {
+        err = getstr(&config->proxy_tls_authtype, nextarg, DENY_BLANK);
+        if(!err && !curl_strequal(config->proxy_tls_authtype, "SRP"))
           err = PARAM_LIBCURL_DOESNT_SUPPORT; /* only support TLS-SRP */
-          break;
-        }
         break;
 
       case 'x': /* certificate file for proxy */
@@ -2046,28 +2053,28 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
 
       case 'y': /* cert file type for proxy */
-        GetStr(&config->proxy_cert_type, nextarg);
+        err = getstr(&config->proxy_cert_type, nextarg, DENY_BLANK);
         break;
 
       case 'z': /* private key file for proxy */
-        GetStr(&config->proxy_key, nextarg);
+        err = getstr(&config->proxy_key, nextarg, ALLOW_BLANK);
         break;
 
       case '0': /* private key file type for proxy */
-        GetStr(&config->proxy_key_type, nextarg);
+        err = getstr(&config->proxy_key_type, nextarg, DENY_BLANK);
         break;
 
       case '1': /* private key passphrase for proxy */
-        GetStr(&config->proxy_key_passwd, nextarg);
+        err = getstr(&config->proxy_key_passwd, nextarg, ALLOW_BLANK);
         cleanarg(clearthis);
         break;
 
       case '2': /* ciphers for proxy */
-        GetStr(&config->proxy_cipher_list, nextarg);
+        err = getstr(&config->proxy_cipher_list, nextarg, DENY_BLANK);
         break;
 
       case '3': /* CRL file for proxy */
-        GetStr(&config->proxy_crlfile, nextarg);
+        err = getstr(&config->proxy_crlfile, nextarg, DENY_BLANK);
         break;
 
       case '4': /* no empty SSL fragments for proxy */
@@ -2076,15 +2083,15 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
 
       case '5': /* --login-options */
-        GetStr(&config->login_options, nextarg);
+        err = getstr(&config->login_options, nextarg, ALLOW_BLANK);
         break;
 
       case '6': /* CA info PEM file for proxy */
-        GetStr(&config->proxy_cacert, nextarg);
+        err = getstr(&config->proxy_cacert, nextarg, DENY_BLANK);
         break;
 
       case '7': /* CA cert directory for proxy */
-        GetStr(&config->proxy_capath, nextarg);
+        err = getstr(&config->proxy_capath, nextarg, DENY_BLANK);
         break;
 
       case '8': /* allow insecure SSL connects for proxy */
@@ -2113,15 +2120,15 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
 
       case 'C':
-        GetStr(&config->etag_save_file, nextarg);
+        err = getstr(&config->etag_save_file, nextarg, DENY_BLANK);
         break;
 
       case 'D':
-        GetStr(&config->etag_compare_file, nextarg);
+        err = getstr(&config->etag_compare_file, nextarg, DENY_BLANK);
         break;
 
       case 'E':
-        GetStr(&config->ssl_ec_curves, nextarg);
+        err = getstr(&config->ssl_ec_curves, nextarg, DENY_BLANK);
         break;
 
       default: /* unknown flag */
@@ -2181,7 +2188,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 
     case 'G': /* HTTP GET */
       if(subletter == 'a') { /* --request-target */
-        GetStr(&config->request_target, nextarg);
+        err = getstr(&config->request_target, nextarg, DENY_BLANK);
       }
       else
         config->use_httpget = toggle;
@@ -2310,7 +2317,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         config->netrc_opt = toggle;
         break;
       case 'e': /* netrc-file */
-        GetStr(&config->netrc_file, nextarg);
+        err = getstr(&config->netrc_file, nextarg, DENY_BLANK);
         break;
       default:
         /* pick info from .netrc, if this is used for http, curl will
@@ -2330,7 +2337,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       }
       else if(subletter == 'b') { /* --output-dir */
-        GetStr(&config->output_dir, nextarg);
+        err = getstr(&config->output_dir, nextarg, DENY_BLANK);
         break;
       }
       else if(subletter == 'c') { /* --clobber / --no-clobber */
@@ -2340,8 +2347,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       FALLTHROUGH();
     case 'o': /* --output */
       /* output file */
-    {
-      struct getout *url;
       if(!config->url_out)
         config->url_out = config->url_list;
       if(config->url_out) {
@@ -2370,12 +2375,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 
       /* fill in the outfile */
       if('o' == letter) {
-        if(!*nextarg) {
-          warnf(global, "output file name has no length");
-          err = PARAM_BAD_USE;
-          break;
-        }
-        GetStr(&url->outfile, nextarg);
+        err = getstr(&url->outfile, nextarg, DENY_BLANK);
         url->flags &= ~GETOUT_USEREMOTE; /* switch off */
       }
       else {
@@ -2386,15 +2386,14 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           url->flags &= ~GETOUT_USEREMOTE; /* switch off */
       }
       url->flags |= GETOUT_OUTFILE;
-    }
-    break;
+      break;
     case 'P':
       /* This makes the FTP sessions use PORT instead of PASV */
       /* use <eth0> or <192.168.10.10> style addresses. Anything except
          this will make us try to get the "default" address.
          NOTE: this is a changed behavior since the released 4.1!
       */
-      GetStr(&config->ftpport, nextarg);
+      err = getstr(&config->ftpport, nextarg, DENY_BLANK);
       break;
     case 'p':
       /* proxy tunnel for non-http protocols */
@@ -2459,7 +2458,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           }
           tmp_range++;
         }
-        GetStr(&config->range, nextarg);
+        err = getstr(&config->range, nextarg, DENY_BLANK);
       }
       break;
     case 'R':
@@ -2478,8 +2477,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case 'T':
       /* we are uploading */
-    {
-      struct getout *url;
       if(!config->url_ul)
         config->url_ul = config->url_list;
       if(config->url_ul) {
@@ -2508,18 +2505,17 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         url->flags |= GETOUT_NOUPLOAD;
       else {
         /* "-" equals stdin, but keep the string around for now */
-        GetStr(&url->infile, nextarg);
+        err = getstr(&url->infile, nextarg, DENY_BLANK);
       }
-    }
-    break;
+      break;
     case 'u':
       /* user:password  */
-      GetStr(&config->userpwd, nextarg);
+      err = getstr(&config->userpwd, nextarg, ALLOW_BLANK);
       cleanarg(clearthis);
       break;
     case 'U':
       /* Proxy user:password  */
-      GetStr(&config->proxyuserpwd, nextarg);
+      err = getstr(&config->proxyuserpwd, nextarg, ALLOW_BLANK);
       cleanarg(clearthis);
       break;
     case 'v':
@@ -2527,14 +2523,14 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         /* the '%' thing here will cause the trace get sent to stderr */
         Curl_safefree(global->trace_dump);
         global->trace_dump = strdup("%");
-        if(!global->trace_dump) {
+        if(!global->trace_dump)
           err = PARAM_NO_MEM;
-          break;
+        else {
+          if(global->tracetype && (global->tracetype != TRACE_PLAIN))
+            warnf(global,
+                  "-v, --verbose overrides an earlier trace/verbose option");
+          global->tracetype = TRACE_PLAIN;
         }
-        if(global->tracetype && (global->tracetype != TRACE_PLAIN))
-          warnf(global,
-                "-v, --verbose overrides an earlier trace/verbose option");
-        global->tracetype = TRACE_PLAIN;
       }
       else
         /* verbose is disabled here */
@@ -2578,16 +2574,16 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           warnf(global, "Failed to read %s", fname);
       }
       else
-        GetStr(&config->writeout, nextarg);
+        err = getstr(&config->writeout, nextarg, DENY_BLANK);
       break;
     case 'x':
       switch(subletter) {
       case 'a': /* --preproxy */
-        GetStr(&config->preproxy, nextarg);
+        err = getstr(&config->preproxy, nextarg, DENY_BLANK);
         break;
       default:
         /* --proxy */
-        GetStr(&config->proxy, nextarg);
+        err = getstr(&config->proxy, nextarg, ALLOW_BLANK);
         if(config->proxyver != CURLPROXY_HTTPS2)
           config->proxyver = CURLPROXY_HTTP;
         break;
@@ -2595,7 +2591,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case 'X':
       /* set custom request */
-      GetStr(&config->customrequest, nextarg);
+      err = getstr(&config->customrequest, nextarg, DENY_BLANK);
       break;
     case 'y':
       /* low speed time */

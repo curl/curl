@@ -134,6 +134,8 @@ static ParameterError getnum(long *val, const char *str, int base)
   if(str) {
     char *endptr = NULL;
     long num;
+    if(!str[0])
+      return PARAM_BLANK_STRING;
     errno = 0;
     num = strtol(str, &endptr, base);
     if(errno == ERANGE)
