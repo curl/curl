@@ -27,7 +27,7 @@ foo
 http
 </server>
 <name>
-Under condition using --proxy, override NO_PROXY by --nproxy and access target URL through proxy
+override NO_PROXY by --noproxy and access target URL through proxy
 </name>
 <setenv>
 NO_PROXY=example.com
