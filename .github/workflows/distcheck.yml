@@ -39,7 +39,7 @@ jobs:
       - run: ./maketgz 99.98.97
         name: 'maketgz'
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: 'release-tgz'
           path: 'curl-99.98.97.tar.gz'
