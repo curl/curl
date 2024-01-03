@@ -836,7 +836,7 @@ static ssize_t recv_closed_stream(struct Curl_cfilter *cf,
   if(stream->reset) {
     failf(data,
           "HTTP/3 stream %" PRId64 " reset by server", stream->id);
-    *err = stream->resp_got_header? CURLE_PARTIAL_FILE : CURLE_RECV_ERROR;
+    *err = stream->resp_got_header? CURLE_PARTIAL_FILE : CURLE_HTTP3;
     CURL_TRC_CF(data, cf, "[%" PRId64 "] cf_recv, was reset -> %d",
                 stream->id, *err);
   }
@@ -846,7 +846,7 @@ static ssize_t recv_closed_stream(struct Curl_cfilter *cf,
           " all response header fields, treated as error",
           stream->id);
     /* *err = CURLE_PARTIAL_FILE; */
-    *err = CURLE_RECV_ERROR;
+    *err = CURLE_HTTP3;
     CURL_TRC_CF(data, cf, "[%" PRId64 "] cf_recv, closed incomplete"
                 " -> %d", stream->id, *err);
   }
