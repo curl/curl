@@ -2341,8 +2341,8 @@ static void cf_h2_adjust_pollset(struct Curl_cfilter *cf,
     bool c_exhaust, s_exhaust;
 
     CF_DATA_SAVE(save, cf, data);
-    c_exhaust = !nghttp2_session_get_remote_window_size(ctx->h2);
-    s_exhaust = stream && stream->id >= 0 &&
+    c_exhaust = want_send && !nghttp2_session_get_remote_window_size(ctx->h2);
+    s_exhaust = want_send && stream && stream->id >= 0 &&
                 !nghttp2_session_get_stream_remote_window_size(ctx->h2,
                                                                stream->id);
     want_recv = (want_recv || c_exhaust || s_exhaust);

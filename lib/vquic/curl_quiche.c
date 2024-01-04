@@ -1189,7 +1189,7 @@ static void cf_quiche_adjust_pollset(struct Curl_cfilter *cf,
 
     c_exhaust = FALSE; /* Have not found any call in quiche that tells
                           us if the connection itself is blocked */
-    s_exhaust = stream && stream->id >= 0 &&
+    s_exhaust = want_send && stream && stream->id >= 0 &&
                 (stream->quic_flow_blocked || !stream_is_writeable(cf, data));
     want_recv = (want_recv || c_exhaust || s_exhaust);
     want_send = (!s_exhaust && want_send) ||
