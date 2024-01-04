@@ -1166,9 +1166,10 @@ static void cf_ngtcp2_adjust_pollset(struct Curl_cfilter *cf,
     bool c_exhaust, s_exhaust;
 
     CF_DATA_SAVE(save, cf, data);
-    c_exhaust = !ngtcp2_conn_get_cwnd_left(ctx->qconn) ||
-                !ngtcp2_conn_get_max_data_left(ctx->qconn);
-    s_exhaust = stream && stream->id >= 0 && stream->quic_flow_blocked;
+    c_exhaust = want_send && (!ngtcp2_conn_get_cwnd_left(ctx->qconn) ||
+                !ngtcp2_conn_get_max_data_left(ctx->qconn));
+    s_exhaust = want_send && stream && stream->id >= 0 &&
+                stream->quic_flow_blocked;
     want_recv = (want_recv || c_exhaust || s_exhaust);
     want_send = (!s_exhaust && want_send) ||
                  !Curl_bufq_is_empty(&ctx->q.sendbuf);
