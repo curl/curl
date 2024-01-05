@@ -2957,14 +2957,13 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
         char *ptr = &data->state.buffer[4];  /* start on the first letter */
         char *os;
         char *start;
-        size_t len = 0;
 
         /* Reply format is like
            215<space><OS-name><space><commentary>
         */
         while(*ptr == ' ')
           ptr++;
-        for(start = ptr; *ptr && *ptr != ' '; len++, ptr++)
+        for(start = ptr; *ptr && *ptr != ' '; ptr++)
           ;
         os = Curl_memdup0(start, ptr - start);
         if(!os)
