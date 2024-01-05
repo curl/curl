@@ -2966,7 +2966,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
           ptr++;
         for(start = ptr; *ptr && *ptr != ' '; len++, ptr++)
           ;
-        os = Curl_memdup0(start, len);
+        os = Curl_memdup0(start, ptr - start);
         if(!os)
           return CURLE_OUT_OF_MEMORY;
 
