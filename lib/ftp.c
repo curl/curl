@@ -2956,23 +2956,21 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
       if(ftpcode == 215) {
         char *ptr = &data->state.buffer[4];  /* start on the first letter */
         char *os;
-        char *store;
-
-        os = malloc(nread + 1);
-        if(!os)
-          return CURLE_OUT_OF_MEMORY;
+        char *start;
+        size_t len = 0;
 
         /* Reply format is like
            215<space><OS-name><space><commentary>
         */
         while(*ptr == ' ')
           ptr++;
-        for(store = os; *ptr && *ptr != ' ';)
-          *store++ = *ptr++;
-        *store = '\0'; /* null-terminate */
+        for(start = ptr; *ptr && *ptr != ' '; len++, ptr++)
+          ;
+        os = Curl_memdup0(start, len);
+        if(!os)
+          return CURLE_OUT_OF_MEMORY;
 
         /* Check for special servers here. */
-
         if(strcasecompare(os, "OS/400")) {
           /* Force OS400 name format 1. */
           result = Curl_pp_sendf(data, &ftpc->pp, "%s", "SITE NAMEFMT 1");
