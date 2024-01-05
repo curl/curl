@@ -2863,12 +2863,9 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
       if(ftpcode == 257) {
         char *ptr = &data->state.buffer[4];  /* start on the first letter */
         const size_t buf_size = data->set.buffer_size;
-        char *dir;
         bool entry_extracted = FALSE;
-
-        dir = malloc(nread + 1);
-        if(!dir)
-          return CURLE_OUT_OF_MEMORY;
+        struct dynbuf out;
+        Curl_dyn_init(&out, 1000);
 
         /* Reply format is like
            257<space>[rubbish]"<directory-name>"<space><commentary> and the
@@ -2886,13 +2883,11 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
 
         if('\"' == *ptr) {
           /* it started good */
-          char *store;
-          ptr++;
-          for(store = dir; *ptr;) {
+          for(ptr++; *ptr; ptr++) {
             if('\"' == *ptr) {
               if('\"' == ptr[1]) {
                 /* "quote-doubling" */
-                *store = ptr[1];
+                result = Curl_dyn_addn(&out, &ptr[1], 1);
                 ptr++;
               }
               else {
@@ -2902,11 +2897,10 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
               }
             }
             else
-              *store = *ptr;
-            store++;
-            ptr++;
+              result = Curl_dyn_addn(&out, ptr, 1);
+            if(result)
+              return result;
           }
-          *store = '\0'; /* null-terminate */
         }
         if(entry_extracted) {
           /* If the path name does not look like an absolute path (i.e.: it
@@ -2920,6 +2914,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
                The method used here is to check the server OS: we do it only
              if the path name looks strange to minimize overhead on other
              systems. */
+          char *dir = Curl_dyn_ptr(&out);
 
           if(!ftpc->server_os && dir[0] != '/') {
             result = Curl_pp_sendf(data, &ftpc->pp, "%s", "SYST");
@@ -2944,7 +2939,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
         }
         else {
           /* couldn't get the path */
-          free(dir);
+          Curl_dyn_free(&out);
           infof(data, "Failed to figure out path");
         }
       }
