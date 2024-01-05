@@ -1240,11 +1240,8 @@ static void cf_socket_adjust_pollset(struct Curl_cfilter *cf,
 {
   struct cf_socket_ctx *ctx = cf->ctx;
 
-  if(ctx->sock != CURL_SOCKET_BAD) {
-    if(!cf->connected)
-      Curl_pollset_set_out_only(data, ps, ctx->sock);
-    else if(CURL_WANT_RECV(data))
-      Curl_pollset_add_in(data, ps, ctx->sock);
+  if(!cf->connected && ctx->sock != CURL_SOCKET_BAD) {
+    Curl_pollset_set_out_only(data, ps, ctx->sock);
     CURL_TRC_CF(data, cf, "adjust_pollset -> %d socks", ps->num);
   }
 }

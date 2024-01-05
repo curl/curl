@@ -583,7 +583,7 @@ struct hostname {
   (((data)->req.keepon & KEEP_SENDBITS) == KEEP_SEND)
 /* transfer receive is not on PAUSE or HOLD */
 #define CURL_WANT_RECV(data) \
-  (!((data)->req.keepon & (KEEP_RECV_PAUSE|KEEP_RECV_HOLD)))
+  (((data)->req.keepon & KEEP_RECVBITS) == KEEP_RECV)
 
 #if defined(CURLRES_ASYNCH) || !defined(CURL_DISABLE_DOH)
 #define USE_CURL_ASYNC

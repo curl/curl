@@ -530,12 +530,7 @@ void Curl_pollset_set(struct Curl_easy *data,
 void Curl_pollset_add_socks(struct Curl_easy *data,
                             struct easy_pollset *ps,
                             int (*get_socks_cb)(struct Curl_easy *data,
-                                                struct connectdata *conn,
                                                 curl_socket_t *socks));
-void Curl_pollset_add_socks2(struct Curl_easy *data,
-                             struct easy_pollset *ps,
-                             int (*get_socks_cb)(struct Curl_easy *data,
-                                                 curl_socket_t *socks));
 
 /**
  * Check if the pollset, as is, wants to read and/or write regarding

@@ -1220,52 +1220,6 @@ out:
   return result;
 }
 
-/*
- * Curl_single_getsock() gets called by the multi interface code when the app
- * has requested to get the sockets for the current connection. This function
- * will then be called once for every connection that the multi interface
- * keeps track of. This function will only be called for connections that are
- * in the proper state to have this information available.
- */
-int Curl_single_getsock(struct Curl_easy *data,
-                        struct connectdata *conn,
-                        curl_socket_t *sock)
-{
-  int bitmap = GETSOCK_BLANK;
-  unsigned sockindex = 0;
-
-  if(conn->handler->perform_getsock)
-    return conn->handler->perform_getsock(data, conn, sock);
-
-  /* don't include HOLD and PAUSE connections */
-  if((data->req.keepon & KEEP_RECVBITS) == KEEP_RECV) {
-
-    DEBUGASSERT(conn->sockfd != CURL_SOCKET_BAD);
-
-    bitmap |= GETSOCK_READSOCK(sockindex);
-    sock[sockindex] = conn->sockfd;
-  }
-
-  /* don't include HOLD and PAUSE connections */
-  if((data->req.keepon & KEEP_SENDBITS) == KEEP_SEND) {
-    if((conn->sockfd != conn->writesockfd) ||
-       bitmap == GETSOCK_BLANK) {
-      /* only if they are not the same socket and we have a readable
-         one, we increase index */
-      if(bitmap != GETSOCK_BLANK)
-        sockindex++; /* increase index if we need two entries */
-
-      DEBUGASSERT(conn->writesockfd != CURL_SOCKET_BAD);
-
-      sock[sockindex] = conn->writesockfd;
-    }
-
-    bitmap |= GETSOCK_WRITESOCK(sockindex);
-  }
-
-  return bitmap;
-}
-
 /* Curl_init_CONNECT() gets called each time the handle switches to CONNECT
    which means this gets called once for each subsequent redirect etc */
 void Curl_init_CONNECT(struct Curl_easy *data)
