@@ -1157,10 +1157,13 @@ static void cf_ngtcp2_adjust_pollset(struct Curl_cfilter *cf,
                                       struct easy_pollset *ps)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
-  bool want_recv = CURL_WANT_RECV(data);
-  bool want_send = CURL_WANT_SEND(data);
+  bool want_recv, want_send;
 
-  if(ctx->qconn && (want_recv || want_send)) {
+  if(!ctx->qconn)
+    return;
+
+  Curl_pollset_check(data, ps, ctx->q.sockfd, &want_recv, &want_send);
+  if(want_recv || want_send) {
     struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
     struct cf_call_data save;
     bool c_exhaust, s_exhaust;
