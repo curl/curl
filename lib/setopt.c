@@ -51,7 +51,7 @@
 #include "altsvc.h"
 #include "hsts.h"
 #include "tftp.h"
-
+#include "strdup.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -508,26 +508,17 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
           (data->set.postfieldsize > (curl_off_t)((size_t)-1))))
         result = CURLE_OUT_OF_MEMORY;
       else {
-        char *p;
-
-        (void) Curl_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], NULL);
-
         /* Allocate even when size == 0. This satisfies the need of possible
-           later address compare to detect the COPYPOSTFIELDS mode, and
-           to mark that postfields is used rather than read function or
-           form data.
+           later address compare to detect the COPYPOSTFIELDS mode, and to
+           mark that postfields is used rather than read function or form
+           data.
         */
-        p = malloc((size_t)(data->set.postfieldsize?
-                            data->set.postfieldsize:1));
-
+        char *p = Curl_memdup0(argptr, (size_t)data->set.postfieldsize);
+        (void) Curl_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], NULL);
         if(!p)
           result = CURLE_OUT_OF_MEMORY;
-        else {
-          if(data->set.postfieldsize)
-            memcpy(p, argptr, (size_t)data->set.postfieldsize);
-
+        else
           data->set.str[STRING_COPYPOSTFIELDS] = p;
-        }
       }
     }
 
