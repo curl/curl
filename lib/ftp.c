@@ -2892,7 +2892,8 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
               }
               else {
                 /* end of path */
-                entry_extracted = TRUE;
+                if(Curl_dyn_len(&out))
+                  entry_extracted = TRUE;
                 break; /* get out of this loop */
               }
             }
