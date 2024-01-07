@@ -389,7 +389,7 @@ static CURLcode eyeballer_new(struct eyeballer **pballer,
   struct eyeballer *baller;
 
   *pballer = NULL;
-  baller = calloc(1, sizeof(*baller) + 1000);
+  baller = calloc(1, sizeof(*baller));
   if(!baller)
     return CURLE_OUT_OF_MEMORY;
 
