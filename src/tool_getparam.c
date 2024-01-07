@@ -1988,16 +1988,15 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         err = getstr(&config->hsts, nextarg, ALLOW_BLANK);
       break;
     case C_COOKIE: /* --cookie */
-      if(nextarg[0] == '@') {
-        nextarg++;
-      }
-      else if(strchr(nextarg, '=')) {
+      if(strchr(nextarg, '=')) {
         /* A cookie string must have a =-letter */
         err = add2list(&config->cookies, nextarg);
         break;
       }
-      /* We have a cookie file to read from! */
-      err = add2list(&config->cookiefiles, nextarg);
+      else {
+        /* We have a cookie file to read from! */
+        err = add2list(&config->cookiefiles, nextarg);
+      }
       break;
     case C_USE_ASCII: /* --use-ascii */
       config->use_ascii = toggle;
