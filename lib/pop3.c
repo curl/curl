@@ -77,6 +77,7 @@
 #include "curl_sasl.h"
 #include "curl_md5.h"
 #include "warnless.h"
+#include "strdup.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -670,15 +671,12 @@ static CURLcode pop3_state_servergreet_resp(struct Curl_easy *data,
           if(!timestamplen)
             break;
 
-          /* Allocate some memory for the timestamp */
-          pop3c->apoptimestamp = (char *)calloc(1, timestamplen + 1);
-
-          if(!pop3c->apoptimestamp)
+          /* dupe the timestamp */
+          pop3c->apoptimestamp = Curl_memdup0(&line[i], timestamplen);
+          if(!pop3c->apoptimestamp) {
+            result = CURLE_OUT_OF_MEMORY;
             break;
-
-          /* Copy the timestamp */
-          memcpy(pop3c->apoptimestamp, line + i, timestamplen);
-          pop3c->apoptimestamp[timestamplen] = '\0';
+          }
 
           /* If the timestamp does not contain '@' it is not (as required by
              RFC-1939) conformant to the RFC-822 message id syntax, and we
@@ -694,7 +692,8 @@ static CURLcode pop3_state_servergreet_resp(struct Curl_easy *data,
       }
     }
 
-    result = pop3_perform_capa(data, conn);
+    if(!result)
+      result = pop3_perform_capa(data, conn);
   }
 
   return result;
