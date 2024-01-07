@@ -160,6 +160,7 @@ struct TELNET {
   unsigned short subopt_wsy;         /* Set with suboption NAWS */
   TelnetReceive telrcv_state;
   struct curl_slist *telnet_vars;    /* Environment variables */
+  struct dynbuf out;                 /* output buffer */
 
   /* suboptions */
   unsigned char subbuffer[SUBBUFSIZE];
@@ -204,6 +205,7 @@ CURLcode init_telnet(struct Curl_easy *data)
   if(!tn)
     return CURLE_OUT_OF_MEMORY;
 
+  Curl_dyn_init(&tn->out, 0xffff);
   data->req.p.telnet = tn; /* make us known */
 
   tn->telrcv_state = CURL_TS_DATA;
@@ -1227,37 +1229,33 @@ process_iac:
 static CURLcode send_telnet_data(struct Curl_easy *data,
                                  char *buffer, ssize_t nread)
 {
-  ssize_t escapes, i, outlen;
-  unsigned char *outbuf = NULL;
+  ssize_t i, outlen;
+  unsigned char *outbuf;
   CURLcode result = CURLE_OK;
-  ssize_t bytes_written, total_written;
+  ssize_t bytes_written, total_written = 0;
   struct connectdata *conn = data->conn;
+  struct TELNET *tn = data->req.p.telnet;
 
-  /* Determine size of new buffer after escaping */
-  escapes = 0;
-  for(i = 0; i < nread; i++)
-    if((unsigned char)buffer[i] == CURL_IAC)
-      escapes++;
-  outlen = nread + escapes;
+  DEBUGASSERT(tn);
 
-  if(outlen == nread)
-    outbuf = (unsigned char *)buffer;
-  else {
-    ssize_t j;
-    outbuf = malloc(nread + escapes + 1);
-    if(!outbuf)
-      return CURLE_OUT_OF_MEMORY;
+  if(memchr(buffer, CURL_IAC, nread)) {
+    /* only use the escape buffer when necessary */
+    Curl_dyn_reset(&tn->out);
 
-    j = 0;
-    for(i = 0; i < nread; i++) {
-      outbuf[j++] = (unsigned char)buffer[i];
-      if((unsigned char)buffer[i] == CURL_IAC)
-        outbuf[j++] = CURL_IAC;
+    for(i = 0; i < nread && !result; i++) {
+      result = Curl_dyn_addn(&tn->out, &buffer[i], 1);
+      if(!result && ((unsigned char)buffer[i] == CURL_IAC))
+        /* IAC is FF in hex */
+        result = Curl_dyn_addn(&tn->out, "\xff", 1);
     }
-    outbuf[j] = '\0';
-  }
 
-  total_written = 0;
+    outlen = Curl_dyn_len(&tn->out);
+    outbuf = Curl_dyn_uptr(&tn->out);
+  }
+  else {
+    outlen = nread;
+    outbuf = (unsigned char *)buffer;
+  }
   while(!result && total_written < outlen) {
     /* Make sure socket is writable to avoid EWOULDBLOCK condition */
     struct pollfd pfd[1];
@@ -1270,18 +1268,12 @@ static CURLcode send_telnet_data(struct Curl_easy *data,
         break;
       default:                    /* write! */
         bytes_written = 0;
-        result = Curl_nwrite(data, FIRSTSOCKET,
-                             outbuf + total_written,
-                             outlen - total_written,
-                             &bytes_written);
+        result = Curl_nwrite(data, FIRSTSOCKET, outbuf + total_written,
+                             outlen - total_written, &bytes_written);
         total_written += bytes_written;
         break;
     }
   }
-
-  /* Free malloc copy if escaped */
-  if(outbuf != (unsigned char *)buffer)
-    free(outbuf);
 
   return result;
 }
@@ -1298,6 +1290,7 @@ static CURLcode telnet_done(struct Curl_easy *data,
 
   curl_slist_free_all(tn->telnet_vars);
   tn->telnet_vars = NULL;
+  Curl_dyn_free(&tn->out);
   return CURLE_OK;
 }
 
