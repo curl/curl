@@ -761,15 +761,11 @@ static CURLcode single_transfer(struct GlobalConfig *global,
     if(config->use_httpget) {
       if(!httpgetfields) {
         /* Use the postfields data for an HTTP get */
-        httpgetfields = state->httpgetfields = strdup(config->postfields);
-        Curl_safefree(config->postfields);
-        if(!httpgetfields) {
-          errorf(global, "out of memory");
-          result = CURLE_OUT_OF_MEMORY;
-        }
-        else if(SetHTTPrequest(config,
-                               (config->no_body?HTTPREQ_HEAD:HTTPREQ_GET),
-                               &config->httpreq)) {
+        httpgetfields = state->httpgetfields = config->postfields;
+        config->postfields = NULL;
+        if(SetHTTPrequest(config,
+                          (config->no_body?HTTPREQ_HEAD:HTTPREQ_GET),
+                          &config->httpreq)) {
           result = CURLE_FAILED_INIT;
         }
       }
@@ -1432,9 +1428,9 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           }
           else {
             my_setopt_str(curl, CURLOPT_POSTFIELDS,
-                          config->postfields);
+                          curlx_dyn_ptr(&config->postdata));
             my_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE,
-                      config->postfieldsize);
+                      (curl_off_t)curlx_dyn_len(&config->postdata));
           }
           break;
         case HTTPREQ_MIMEPOST:

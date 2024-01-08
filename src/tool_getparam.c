@@ -803,7 +803,7 @@ static ParameterError set_data(char subletter,
   if(subletter == 'e') { /* --data-urlencode */
     err = data_urlencode(global, nextarg, &postdata, &size);
     if(err)
-      goto done;
+      return err;
   }
   else if('@' == *nextarg && (subletter != 'r')) {
     /* the data begins with a '@' letter, it means that a file name
@@ -819,8 +819,7 @@ static ParameterError set_data(char subletter,
       file = fopen(nextarg, "rb");
       if(!file) {
         errorf(global, "Failed to open %s", nextarg);
-        err = PARAM_READ_ERROR;
-        goto done;
+        return PARAM_READ_ERROR;
       }
     }
 
@@ -837,64 +836,39 @@ static ParameterError set_data(char subletter,
     if(file && (file != stdin))
       fclose(file);
     if(err)
-      goto done;
+      return err;
 
     if(!postdata) {
       /* no data from the file, point to a zero byte string to make this
          get sent as a POST anyway */
       postdata = strdup("");
-      if(!postdata) {
-        err = PARAM_NO_MEM;
-        goto done;
-      }
+      if(!postdata)
+        return PARAM_NO_MEM;
     }
   }
   else {
     err = getstr(&postdata, nextarg, ALLOW_BLANK);
     if(err)
-      goto done;
+      return err;
     if(postdata)
       size = strlen(postdata);
   }
   if(subletter == 'f')
     config->jsoned = TRUE;
 
-  if(config->postfields) {
-    /* we already have a string, append this one - perhaps with a separator */
-    struct curlx_dynbuf out;
-    curlx_dyn_init(&out, MAX_FILE2MEMORY);
-    if(curlx_dyn_addn(&out, config->postfields,
-                      (size_t)config->postfieldsize))
+  if(curlx_dyn_len(&config->postdata)) {
+    /* skip separator append for --json */
+    if(!err && (subletter != 'f')  &&
+       curlx_dyn_addn(&config->postdata, "&", 1))
       err = PARAM_NO_MEM;
-
-    /* skip the separator append for --json */
-    if(!err && (subletter != 'f')  && curlx_dyn_addn(&out, "&", 1))
-      err = PARAM_NO_MEM;
-
-    if(!err && curlx_dyn_addn(&out, postdata, size))
-      err = PARAM_NO_MEM;
-
-    config->postfieldsize = curlx_dyn_len(&out);
-    free(config->postfields);
-    Curl_safefree(postdata);
-    config->postfields = curlx_dyn_ptr(&out);
-  }
-  else {
-    config->postfields = postdata;
-    config->postfieldsize = curlx_uztoso(size);
   }
 
-  /*
-    We can't set the request type here, as this data might be used in
-    a simple GET if -G is used. Already or soon.
+  if(!err && curlx_dyn_addn(&config->postdata, postdata, size))
+    err = PARAM_NO_MEM;
 
-    if(SetHTTPrequest(HTTPREQ_SIMPLEPOST, &config->httpreq)) {
-    Curl_safefree(postdata);
-    return PARAM_BAD_USE;
-    }
-  */
+  Curl_safefree(postdata);
 
-done:
+  config->postfields = curlx_dyn_ptr(&config->postdata);
   return err;
 }
 
