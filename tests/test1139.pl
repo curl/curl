@@ -203,7 +203,7 @@ while(<$r>) {
                 $lo = $1;
                 $title="--$lo";
             }
-            if($rd eq "OPT_SHORT") {
+            if($s ne " ") {
                 # a short option
                 $sh = $s;
                 $title="-$sh, $title";
