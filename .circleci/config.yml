@@ -304,6 +304,7 @@ jobs:
     resource_class: arm.medium
     steps:
       - checkout
+      - install-deps
       - configure
       - build
       - test
@@ -314,6 +315,7 @@ jobs:
     resource_class: arm.medium
     steps:
       - checkout
+      - install-deps
       - install-cares
       - configure-cares-debug
       - build
