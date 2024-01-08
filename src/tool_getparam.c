@@ -760,6 +760,161 @@ static const struct LongShort *single(char letter)
   return singles[letter - ' '];
 }
 
+static ParameterError set_data(char subletter,
+                               char *nextarg,
+                               struct GlobalConfig *global,
+                               struct OperationConfig *config)
+{
+  char *postdata = NULL;
+  FILE *file;
+  size_t size = 0;
+  ParameterError err = PARAM_OK;
+
+  if(subletter == 'g') { /* --url-query */
+#define MAX_QUERY_LEN 100000 /* larger is not likely to ever work */
+    char *query;
+    struct curlx_dynbuf dyn;
+    curlx_dyn_init(&dyn, MAX_QUERY_LEN);
+
+    if(*nextarg == '+') {
+      /* use without encoding */
+      query = strdup(&nextarg[1]);
+      if(!query) {
+        err = PARAM_NO_MEM;
+        goto done;
+      }
+    }
+    else {
+      err = data_urlencode(global, nextarg, &query, &size);
+      if(err)
+        goto done;
+    }
+
+    if(config->query) {
+      CURLcode result =
+        curlx_dyn_addf(&dyn, "%s&%s", config->query, query);
+      free(query);
+      if(result) {
+        err = PARAM_NO_MEM;
+        goto done;
+      }
+      free(config->query);
+      config->query = curlx_dyn_ptr(&dyn);
+    }
+    else
+      config->query = query;
+
+    goto done; /* this is not a POST argument at all */
+  }
+  else if(subletter == 'e') { /* --data-urlencode */
+    err = data_urlencode(global, nextarg, &postdata, &size);
+    if(err)
+      goto done;
+  }
+  else if('@' == *nextarg && (subletter != 'r')) {
+    /* the data begins with a '@' letter, it means that a file name
+       or - (stdin) follows */
+    nextarg++; /* pass the @ */
+
+    if(!strcmp("-", nextarg)) {
+      file = stdin;
+      if(subletter == 'b') /* forced data-binary */
+        set_binmode(stdin);
+    }
+    else {
+      file = fopen(nextarg, "rb");
+      if(!file) {
+        errorf(global, "Failed to open %s", nextarg);
+        err = PARAM_READ_ERROR;
+        goto done;
+      }
+    }
+
+    if((subletter == 'b') || /* --data-binary */
+       (subletter == 'f') /* --json */)
+      /* forced binary */
+      err = file2memory(&postdata, &size, file);
+    else {
+      err = file2string(&postdata, file);
+      if(postdata)
+        size = strlen(postdata);
+    }
+
+    if(file && (file != stdin))
+      fclose(file);
+    if(err)
+      goto done;
+
+    if(!postdata) {
+      /* no data from the file, point to a zero byte string to make this
+         get sent as a POST anyway */
+      postdata = strdup("");
+      if(!postdata) {
+        err = PARAM_NO_MEM;
+        goto done;
+      }
+    }
+  }
+  else {
+    err = getstr(&postdata, nextarg, ALLOW_BLANK);
+    if(err)
+      goto done;
+    if(postdata)
+      size = strlen(postdata);
+  }
+  if(subletter == 'f')
+    config->jsoned = TRUE;
+
+  if(config->postfields) {
+    /* we already have a string, we append this one with a separating
+       &-letter */
+    char *oldpost = config->postfields;
+    curl_off_t oldlen = config->postfieldsize;
+    curl_off_t newlen = oldlen + curlx_uztoso(size) + 2;
+    config->postfields = malloc((size_t)newlen);
+    if(!config->postfields) {
+      Curl_safefree(oldpost);
+      Curl_safefree(postdata);
+      err = PARAM_NO_MEM;
+      goto done;
+    }
+    memcpy(config->postfields, oldpost, (size_t)oldlen);
+    if(subletter != 'f') {
+      /* skip this treatment for --json */
+      /* use byte value 0x26 for '&' to accommodate non-ASCII platforms */
+      config->postfields[oldlen] = '\x26';
+      memcpy(&config->postfields[oldlen + 1], postdata, size);
+      config->postfields[oldlen + 1 + size] = '\0';
+      config->postfieldsize += size + 1;
+    }
+    else {
+      memcpy(&config->postfields[oldlen], postdata, size);
+      config->postfields[oldlen + size] = '\0';
+      config->postfieldsize += size;
+    }
+    Curl_safefree(oldpost);
+    Curl_safefree(postdata);
+  }
+  else {
+    config->postfields = postdata;
+    config->postfieldsize = curlx_uztoso(size);
+  }
+
+  /*
+    We can't set the request type here, as this data might be used in
+    a simple GET if -G is used. Already or soon.
+
+    if(SetHTTPrequest(HTTPREQ_SIMPLEPOST, &config->httpreq)) {
+    Curl_safefree(postdata);
+    return PARAM_BAD_USE;
+    }
+  */
+
+done:
+  return err;
+}
+
+
 #define ONEOPT(x,y) (((int)x << 8) | y)
 
 ParameterError getparameter(const char *flag, /* f or -long-flag */
@@ -1675,152 +1830,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case ONEOPT('d', 'f'):  /* --json */
     case ONEOPT('d', 'g'):  /* --url-query */
     case ONEOPT('d', 'r'):  /* --data-raw */
-      /* postfield data */
-    {
-      char *postdata = NULL;
-      FILE *file;
-      size_t size = 0;
-      bool raw_mode = (subletter == 'r');
-
-      if(subletter == 'g') { /* --url-query */
-#define MAX_QUERY_LEN 100000 /* larger is not likely to ever work */
-        char *query;
-        struct curlx_dynbuf dyn;
-        curlx_dyn_init(&dyn, MAX_QUERY_LEN);
-
-        if(*nextarg == '+') {
-          /* use without encoding */
-          query = strdup(&nextarg[1]);
-          if(!query) {
-            err = PARAM_NO_MEM;
-            break;
-          }
-        }
-        else {
-          err = data_urlencode(global, nextarg, &query, &size);
-          if(err)
-            break;
-        }
-
-        if(config->query) {
-          CURLcode result =
-            curlx_dyn_addf(&dyn, "%s&%s", config->query, query);
-          free(query);
-          if(result) {
-            err = PARAM_NO_MEM;
-            break;
-          }
-          free(config->query);
-          config->query = curlx_dyn_ptr(&dyn);
-        }
-        else
-          config->query = query;
-
-        break; /* this is not a POST argument at all */
-      }
-      else if(subletter == 'e') { /* --data-urlencode */
-        err = data_urlencode(global, nextarg, &postdata, &size);
-        if(err)
-          break;
-      }
-      else if('@' == *nextarg && !raw_mode) {
-        /* the data begins with a '@' letter, it means that a file name
-           or - (stdin) follows */
-        nextarg++; /* pass the @ */
-
-        if(!strcmp("-", nextarg)) {
-          file = stdin;
-          if(subletter == 'b') /* forced data-binary */
-            set_binmode(stdin);
-        }
-        else {
-          file = fopen(nextarg, "rb");
-          if(!file) {
-            errorf(global, "Failed to open %s", nextarg);
-            err = PARAM_READ_ERROR;
-            break;
-          }
-        }
-
-        if((subletter == 'b') || /* --data-binary */
-           (subletter == 'f') /* --json */)
-          /* forced binary */
-          err = file2memory(&postdata, &size, file);
-        else {
-          err = file2string(&postdata, file);
-          if(postdata)
-            size = strlen(postdata);
-        }
-
-        if(file && (file != stdin))
-          fclose(file);
-        if(err)
-          break;
-
-        if(!postdata) {
-          /* no data from the file, point to a zero byte string to make this
-             get sent as a POST anyway */
-          postdata = strdup("");
-          if(!postdata) {
-            err = PARAM_NO_MEM;
-            break;
-          }
-        }
-      }
-      else {
-        err = getstr(&postdata, nextarg, ALLOW_BLANK);
-        if(err)
-          break;
-        if(postdata)
-          size = strlen(postdata);
-      }
-      if(subletter == 'f')
-        config->jsoned = TRUE;
-
-      if(config->postfields) {
-        /* we already have a string, we append this one with a separating
-           &-letter */
-        char *oldpost = config->postfields;
-        curl_off_t oldlen = config->postfieldsize;
-        curl_off_t newlen = oldlen + curlx_uztoso(size) + 2;
-        config->postfields = malloc((size_t)newlen);
-        if(!config->postfields) {
-          Curl_safefree(oldpost);
-          Curl_safefree(postdata);
-          err = PARAM_NO_MEM;
-          break;
-        }
-        memcpy(config->postfields, oldpost, (size_t)oldlen);
-        if(subletter != 'f') {
-          /* skip this treatment for --json */
-          /* use byte value 0x26 for '&' to accommodate non-ASCII platforms */
-          config->postfields[oldlen] = '\x26';
-          memcpy(&config->postfields[oldlen + 1], postdata, size);
-          config->postfields[oldlen + 1 + size] = '\0';
-          config->postfieldsize += size + 1;
-        }
-        else {
-          memcpy(&config->postfields[oldlen], postdata, size);
-          config->postfields[oldlen + size] = '\0';
-          config->postfieldsize += size;
-        }
-        Curl_safefree(oldpost);
-        Curl_safefree(postdata);
-      }
-      else {
-        config->postfields = postdata;
-        config->postfieldsize = curlx_uztoso(size);
-      }
-    }
-    /*
-      We can't set the request type here, as this data might be used in
-      a simple GET if -G is used. Already or soon.
-
-      if(SetHTTPrequest(HTTPREQ_SIMPLEPOST, &config->httpreq)) {
-      Curl_safefree(postdata);
-      return PARAM_BAD_USE;
-      }
-    */
+      err = set_data(subletter, nextarg, global, config);
     break;
     case ONEOPT('D', '\0'): /* --dump-header */
       err = getstr(&config->headerfile, nextarg, DENY_BLANK);
