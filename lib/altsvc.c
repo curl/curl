@@ -335,9 +335,6 @@ CURLcode Curl_altsvc_load(struct altsvcinfo *asi, const char *file)
 CURLcode Curl_altsvc_ctrl(struct altsvcinfo *asi, const long ctrl)
 {
   DEBUGASSERT(asi);
-  if(!ctrl)
-    /* unexpected */
-    return CURLE_BAD_FUNCTION_ARGUMENT;
   asi->flags = ctrl;
   return CURLE_OK;
 }

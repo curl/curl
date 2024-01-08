@@ -127,6 +127,7 @@ static CURLcode hsts_create(struct hsts *h,
   if(hlen && (hostname[hlen - 1] == '.'))
     /* strip off any trailing dot */
     --hlen;
+  DEBUGASSERT(hlen);
   if(!hlen)
     /* no host name left */
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -481,6 +482,7 @@ static CURLcode hsts_pull(struct Curl_easy *data, struct hsts *h)
       if(sc == CURLSTS_OK) {
         time_t expires;
         CURLcode result;
+        DEBUGASSERT(e.name[0]);
         if(!e.name[0])
           /* bail out if no name was stored */
           return CURLE_BAD_FUNCTION_ARGUMENT;

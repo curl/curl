@@ -799,8 +799,10 @@ static CURLcode check_telnet_options(struct Curl_easy *data)
      was given on the command line */
   if(data->state.aptr.user) {
     char buffer[256];
-    if(str_is_nonascii(data->conn->user))
+    if(str_is_nonascii(data->conn->user)) {
+      DEBUGF(infof(data, "set a non ASCII user name in telnet"));
       return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
     msnprintf(buffer, sizeof(buffer), "USER,%s", data->conn->user);
     beg = curl_slist_append(tn->telnet_vars, buffer);
     if(!beg) {

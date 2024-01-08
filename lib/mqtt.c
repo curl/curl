@@ -524,8 +524,10 @@ static CURLcode mqtt_publish(struct Curl_easy *data)
   char encodedbytes[4];
   curl_off_t postfieldsize = data->set.postfieldsize;
 
-  if(!payload)
+  if(!payload) {
+    DEBUGF(infof(data, "mqtt_publish without payload, return bad arg"));
     return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
   if(postfieldsize < 0)
     payloadlen = strlen(payload);
   else
