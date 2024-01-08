@@ -249,6 +249,7 @@ jobs:
     executor: ubuntu
     steps:
       - checkout
+      - install-deps
       - configure
       - build
       - test
