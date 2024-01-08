@@ -190,8 +190,8 @@ while(<$r>) {
         $list=1;
     }
     elsif($list) {
-        if( /^  \{(\"[^,]*\").*((\"[^ ]*)\")/) {
-            my ($l, $s)=($1, $2);
+        if( /^  \{(\"[^,]*\").*\'(.)\', (.*)\}/) {
+            my ($l, $s, $rd)=($1, $2, $3);
             my $sh;
             my $lo;
             my $title;
@@ -203,9 +203,9 @@ while(<$r>) {
                 $lo = $1;
                 $title="--$lo";
             }
-            if($s =~ /\"(.)\"/) {
+            if($rd eq "OPT_SHORT") {
                 # a short option
-                $sh = $1;
+                $sh = $s;
                 $title="-$sh, $title";
             }
             push @getparam, $title;
