@@ -284,6 +284,7 @@ jobs:
     executor: ubuntu
     steps:
       - checkout
+      - install-deps
       - install-cares
       - configure-cares
       - build
@@ -293,6 +294,7 @@ jobs:
     executor: ubuntu
     steps:
       - checkout
+      - install-deps
       - install-libssh
       - configure-libssh
       - build
