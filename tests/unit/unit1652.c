@@ -21,6 +21,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#define CURL_NO_FMT_CHECKS
+
 #include "curlcheck.h"
 
 #include "urldata.h"
@@ -105,7 +107,7 @@ fail_unless(verify(result, "Simple Test 42 testing 43\n") == 0,
 /* Variations of empty strings */
 Curl_infof(data, "");
 fail_unless(strlen(result) == 1, "Empty string");
-Curl_infof(data, "%s", NULL);
+Curl_infof(data, "%s", (char *)NULL);
 fail_unless(verify(result, "(nil)") == 0, "Passing NULL as string");
 
 /* A string just long enough to not be truncated */

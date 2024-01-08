@@ -39,6 +39,9 @@ when it follows a Location: redirect to a new destination.
 The automatic referer is set to the full previous URL even when redirects are
 done cross-origin or following redirects to insecure protocols. This is
 considered a minor privacy leak by some.
+
+With \fICURLINFO_REFERER(3)\fP, applications can extract the actually used
+referer header after the transfer.
 .SH DEFAULT
 0, disabled
 .SH PROTOCOLS
@@ -71,5 +74,6 @@ Returns CURLE_OK if HTTP is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
 .BR CURLINFO_EFFECTIVE_URL (3),
 .BR CURLINFO_REDIRECT_URL (3),
+.BR CURLINFO_REFERER (3),
 .BR CURLOPT_FOLLOWLOCATION (3),
 .BR CURLOPT_REFERER (3)

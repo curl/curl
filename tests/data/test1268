@@ -30,7 +30,7 @@ file name argument looks like a flag
 <verify>
 <file name="%LOGDIR/moo%TESTNUMBER" mode="text">
 Warning: The file name argument '-k' looks like a flag.
-curl: (1) Protocol "hej" not supported or disabled in libcurl
+curl: (1) Protocol "hej" not supported
 </file>
 
 # we expect an error since we provide a weird URL

@@ -365,11 +365,14 @@ static CURLcode gzip_do_init(struct Curl_easy *data,
 
 #ifdef OLD_ZLIB_SUPPORT
 /* Skip over the gzip header */
-static enum {
+typedef enum {
   GZIP_OK,
   GZIP_BAD,
   GZIP_UNDERFLOW
-} check_gzip_header(unsigned char const *data, ssize_t len, ssize_t *headerlen)
+} gzip_status;
+
+static gzip_status check_gzip_header(unsigned char const *data, ssize_t len,
+                                     ssize_t *headerlen)
 {
   int method, flags;
   const ssize_t totallen = len;

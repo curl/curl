@@ -72,6 +72,7 @@
 #include "warnless.h"
 #include "http_proxy.h"
 #include "socks.h"
+#include "strdup.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -926,6 +927,8 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   bool possibly_non_local = TRUE;
   char buffer[STRERROR_LEN];
   char *addr = NULL;
+  size_t addrlen = 0;
+  char ipstr[50];
 
   /* Step 1, figure out what is requested,
    * accepted format :
@@ -934,32 +937,17 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
 
   if(data->set.str[STRING_FTPPORT] &&
      (strlen(data->set.str[STRING_FTPPORT]) > 1)) {
-
-#ifdef ENABLE_IPV6
-    size_t addrlen = INET6_ADDRSTRLEN > strlen(string_ftpport) ?
-      INET6_ADDRSTRLEN : strlen(string_ftpport);
-#else
-    size_t addrlen = INET_ADDRSTRLEN > strlen(string_ftpport) ?
-      INET_ADDRSTRLEN : strlen(string_ftpport);
-#endif
-    char *ip_start = string_ftpport;
     char *ip_end = NULL;
-    char *port_start = NULL;
-    char *port_sep = NULL;
-
-    addr = calloc(1, addrlen + 1);
-    if(!addr) {
-      result = CURLE_OUT_OF_MEMORY;
-      goto out;
-    }
 
 #ifdef ENABLE_IPV6
     if(*string_ftpport == '[') {
       /* [ipv6]:port(-range) */
-      ip_start = string_ftpport + 1;
-      ip_end = strchr(string_ftpport, ']');
-      if(ip_end)
-        strncpy(addr, ip_start, ip_end - ip_start);
+      char *ip_start = string_ftpport + 1;
+      ip_end = strchr(ip_start, ']');
+      if(ip_end) {
+        addrlen = ip_end - ip_start;
+        addr = ip_start;
+      }
     }
     else
 #endif
@@ -969,28 +957,27 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
       }
       else {
         ip_end = strchr(string_ftpport, ':');
+        addr = string_ftpport;
         if(ip_end) {
           /* either ipv6 or (ipv4|domain|interface):port(-range) */
+          addrlen = ip_end - string_ftpport;
 #ifdef ENABLE_IPV6
           if(Curl_inet_pton(AF_INET6, string_ftpport, &sa6->sin6_addr) == 1) {
             /* ipv6 */
             port_min = port_max = 0;
-            strcpy(addr, string_ftpport);
             ip_end = NULL; /* this got no port ! */
           }
-          else
 #endif
-            /* (ipv4|domain|interface):port(-range) */
-            strncpy(addr, string_ftpport, ip_end - ip_start);
         }
         else
           /* ipv4|interface */
-          strcpy(addr, string_ftpport);
+          addrlen = strlen(string_ftpport);
       }
 
     /* parse the port */
     if(ip_end) {
-      port_start = strchr(ip_end, ':');
+      char *port_sep = NULL;
+      char *port_start = strchr(ip_end, ':');
       if(port_start) {
         port_min = curlx_ultous(strtoul(port_start + 1, NULL, 10));
         port_sep = strchr(port_start, '-');
@@ -1011,22 +998,29 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
     if(port_min > port_max)
       port_min = port_max = 0;
 
-    if(*addr != '\0') {
+    if(addrlen) {
+      DEBUGASSERT(addr);
+      if(addrlen >= sizeof(ipstr))
+        goto out;
+      memcpy(ipstr, addr, addrlen);
+      ipstr[addrlen] = 0;
+
       /* attempt to get the address of the given interface name */
       switch(Curl_if2ip(conn->remote_addr->family,
 #ifdef ENABLE_IPV6
                         Curl_ipv6_scope(&conn->remote_addr->sa_addr),
                         conn->scope_id,
 #endif
-                        addr, hbuf, sizeof(hbuf))) {
+                        ipstr, hbuf, sizeof(hbuf))) {
         case IF2IP_NOT_FOUND:
           /* not an interface, use the given string as host name instead */
-          host = addr;
+          host = ipstr;
           break;
         case IF2IP_AF_NOT_SUPPORTED:
           goto out;
         case IF2IP_FOUND:
           host = hbuf; /* use the hbuf for host name */
+          break;
       }
     }
     else
@@ -1266,7 +1260,6 @@ out:
   }
   if(portsock != CURL_SOCKET_BAD)
     Curl_socket_close(data, conn, portsock);
-  free(addr);
   return result;
 }
 
@@ -2870,12 +2863,9 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
       if(ftpcode == 257) {
         char *ptr = &data->state.buffer[4];  /* start on the first letter */
         const size_t buf_size = data->set.buffer_size;
-        char *dir;
         bool entry_extracted = FALSE;
-
-        dir = malloc(nread + 1);
-        if(!dir)
-          return CURLE_OUT_OF_MEMORY;
+        struct dynbuf out;
+        Curl_dyn_init(&out, 1000);
 
         /* Reply format is like
            257<space>[rubbish]"<directory-name>"<space><commentary> and the
@@ -2893,27 +2883,25 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
 
         if('\"' == *ptr) {
           /* it started good */
-          char *store;
-          ptr++;
-          for(store = dir; *ptr;) {
+          for(ptr++; *ptr; ptr++) {
             if('\"' == *ptr) {
               if('\"' == ptr[1]) {
                 /* "quote-doubling" */
-                *store = ptr[1];
+                result = Curl_dyn_addn(&out, &ptr[1], 1);
                 ptr++;
               }
               else {
                 /* end of path */
-                entry_extracted = TRUE;
+                if(Curl_dyn_len(&out))
+                  entry_extracted = TRUE;
                 break; /* get out of this loop */
               }
             }
             else
-              *store = *ptr;
-            store++;
-            ptr++;
+              result = Curl_dyn_addn(&out, ptr, 1);
+            if(result)
+              return result;
           }
-          *store = '\0'; /* null-terminate */
         }
         if(entry_extracted) {
           /* If the path name does not look like an absolute path (i.e.: it
@@ -2927,6 +2915,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
                The method used here is to check the server OS: we do it only
              if the path name looks strange to minimize overhead on other
              systems. */
+          char *dir = Curl_dyn_ptr(&out);
 
           if(!ftpc->server_os && dir[0] != '/') {
             result = Curl_pp_sendf(data, &ftpc->pp, "%s", "SYST");
@@ -2951,7 +2940,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
         }
         else {
           /* couldn't get the path */
-          free(dir);
+          Curl_dyn_free(&out);
           infof(data, "Failed to figure out path");
         }
       }
@@ -2963,23 +2952,20 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
       if(ftpcode == 215) {
         char *ptr = &data->state.buffer[4];  /* start on the first letter */
         char *os;
-        char *store;
-
-        os = malloc(nread + 1);
-        if(!os)
-          return CURLE_OUT_OF_MEMORY;
+        char *start;
 
         /* Reply format is like
            215<space><OS-name><space><commentary>
         */
         while(*ptr == ' ')
           ptr++;
-        for(store = os; *ptr && *ptr != ' ';)
-          *store++ = *ptr++;
-        *store = '\0'; /* null-terminate */
+        for(start = ptr; *ptr && *ptr != ' '; ptr++)
+          ;
+        os = Curl_memdup0(start, ptr - start);
+        if(!os)
+          return CURLE_OUT_OF_MEMORY;
 
         /* Check for special servers here. */
-
         if(strcasecompare(os, "OS/400")) {
           /* Force OS400 name format 1. */
           result = Curl_pp_sendf(data, &ftpc->pp, "%s", "SITE NAMEFMT 1");
@@ -3131,7 +3117,6 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
       break;
 
     case FTP_QUIT:
-      /* fallthrough, just stop! */
     default:
       /* internal error */
       ftp_state(data, FTP_STOP);
@@ -3258,14 +3243,13 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
   case CURLE_REMOTE_FILE_NOT_FOUND:
   case CURLE_WRITE_ERROR:
     /* the connection stays alive fine even though this happened */
-    /* fall-through */
   case CURLE_OK: /* doesn't affect the control connection's status */
     if(!premature)
       break;
 
     /* until we cope better with prematurely ended requests, let them
      * fallback as if in complete failure */
-    /* FALLTHROUGH */
+    FALLTHROUGH();
   default:       /* by default, an error means the control connection is
                     wedged and should not be used anymore */
     ftpc->ctl_valid = FALSE;
@@ -4177,13 +4161,12 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
           return CURLE_OUT_OF_MEMORY;
         }
 
-        ftpc->dirs[0] = calloc(1, dirlen + 1);
+        ftpc->dirs[0] = Curl_memdup0(rawPath, dirlen);
         if(!ftpc->dirs[0]) {
           free(rawPath);
           return CURLE_OUT_OF_MEMORY;
         }
 
-        strncpy(ftpc->dirs[0], rawPath, dirlen);
         ftpc->dirdepth = 1; /* we consider it to be a single dir */
         fileName = slashPos + 1; /* rest is file name */
       }
@@ -4222,12 +4205,11 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
              CWD requires a parameter and a non-existent parameter a) doesn't
              work on many servers and b) has no effect on the others. */
           if(compLen > 0) {
-            char *comp = calloc(1, compLen + 1);
+            char *comp = Curl_memdup0(curPos, compLen);
             if(!comp) {
               free(rawPath);
               return CURLE_OUT_OF_MEMORY;
             }
-            strncpy(comp, curPos, compLen);
             ftpc->dirs[ftpc->dirdepth++] = comp;
           }
           curPos = slashPos + 1;

@@ -1181,11 +1181,48 @@ static int test_string_formatting(void)
   return errors;
 }
 
+static int test_pos_arguments(void)
+{
+  int errors = 0;
+  char buf[256];
+
+  curl_msnprintf(buf, sizeof(buf), "%3$d %2$d %1$d", 500, 501, 502);
+  errors += string_check(buf, "502 501 500");
+
+  curl_msnprintf(buf, sizeof(buf), "%3$d %1$d %2$d", 500, 501, 502);
+  errors += string_check(buf, "502 500 501");
+
+  /* this is in invalid sequence but the output does not match
+     what glibc does */
+  curl_msnprintf(buf, sizeof(buf), "%3$d %d %2$d", 500, 501, 502);
+  errors += string_check(buf, "");
+
+  return errors;
+}
+
 static int test_weird_arguments(void)
 {
   int errors = 0;
   char buf[256];
   int rc;
+
+  /* verify %% */
+  rc = curl_msnprintf(buf, sizeof(buf), "%-20d%% right? %%", 500);
+  errors += string_check(buf, "500                 % right? %");
+
+  /* 100 x % */
+  rc = curl_msnprintf(buf, sizeof(buf), "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+                      "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+                      "%%%%%%%%%%%%%%%%%%%%%%");
+  /* 50 x % */
+  errors += string_check(buf, "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+                         "%%%%%%%%%%%%%%%");
+
+  rc = curl_msnprintf(buf, sizeof(buf), "%2 AA %d %K", 500, 501, 502);
+  errors += string_check(buf, "%2 AA 500 %K");
+
+  rc = curl_msnprintf(buf, sizeof(buf), "%2 %d %K", 500, 501, 502);
+  errors += string_check(buf, "%2 500 %K");
 
   /* MAX_PARAMETERS is 128, try exact 128! */
   rc = curl_msnprintf(buf, sizeof(buf),
@@ -1276,18 +1313,6 @@ static int test_weird_arguments(void)
 
   errors += string_check(buf, "");
 
-  /* Do not skip sanity checks with parameters! */
-  buf[0] = 0;
-  rc = curl_msnprintf(buf, sizeof(buf), "%d, %.*1$d", 500, 1);
-
-  if(rc != sizeof(buf) - 1) {
-    printf("curl_mprintf() returned %d and not %d!\n", rc,
-           sizeof(buf) - 1);
-    errors++;
-  }
-
-  errors += strlen_check(buf, 255);
-
   if(errors)
     printf("Some curl_mprintf() weird arguments tests failed!\n");
 
@@ -1374,9 +1399,10 @@ static int test_float_formatting(void)
                  123456789123456789123456789.2987654);
   errors += strlen_check(buf, 325);
 
-  /* check negative when used signed */
+  /* check negative width argument when used signed, is treated as positive
+     and maxes out the internal float width == 325 */
   curl_msnprintf(buf, sizeof(buf), "%*f", INT_MIN, 9.1);
-  errors += string_check(buf, "9.100000");
+  errors += string_check(buf, "9.100000                                                                                                                                                                                                                                                                                                                             ");
 
   /* curl_msnprintf() limits a single float output to 325 bytes maximum
      width */
@@ -1450,6 +1476,8 @@ int test(char *URL)
    */
   setlocale(LC_NUMERIC, "C");
 #endif
+
+  errors += test_pos_arguments();
 
   errors += test_weird_arguments();
 

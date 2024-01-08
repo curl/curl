@@ -39,6 +39,11 @@
 static void voutf(struct GlobalConfig *config,
                   const char *prefix,
                   const char *fmt,
+                  va_list ap) CURL_PRINTF(3, 0);
+
+static void voutf(struct GlobalConfig *config,
+                  const char *prefix,
+                  const char *fmt,
                   va_list ap)
 {
   size_t width = (79 - strlen(prefix));
@@ -48,7 +53,14 @@ static void voutf(struct GlobalConfig *config,
     char *ptr;
     char *print_buffer;
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
     print_buffer = curlx_mvaprintf(fmt, ap);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
     if(!print_buffer)
       return;
     len = strlen(print_buffer);
@@ -100,7 +112,6 @@ void notef(struct GlobalConfig *config, const char *fmt, ...)
  * Emit warning formatted message on configured 'errors' stream unless
  * mute (--silent) was selected.
  */
-
 void warnf(struct GlobalConfig *config, const char *fmt, ...)
 {
   va_list ap;
@@ -108,6 +119,7 @@ void warnf(struct GlobalConfig *config, const char *fmt, ...)
   voutf(config, WARN_PREFIX, fmt, ap);
   va_end(ap);
 }
+
 /*
  * Emit help formatted message on given stream. This is for errors with or
  * related to command line arguments.
@@ -119,7 +131,14 @@ void helpf(FILE *errors, const char *fmt, ...)
     va_start(ap, fmt);
     DEBUGASSERT(!strchr(fmt, '\n'));
     fputs("curl: ", errors); /* prefix it */
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
     vfprintf(errors, fmt, ap);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
     va_end(ap);
     fputs("\n", errors); /* newline it */
   }

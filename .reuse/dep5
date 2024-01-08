@@ -96,3 +96,7 @@ License: curl
 Files: .mailmap
 Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
+
+Files: .github/dependabot.yml
+Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
+License: curl

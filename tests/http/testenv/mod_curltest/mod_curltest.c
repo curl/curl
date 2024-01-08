@@ -423,6 +423,7 @@ static int curltest_put_handler(request_rec *r)
   char buffer[16*1024];
   const char *ct;
   apr_off_t rbody_len = 0;
+  const char *s_rbody_len;
   const char *request_id = "none";
   apr_time_t chunk_delay = 0;
   apr_array_header_t *args = NULL;
@@ -491,7 +492,9 @@ static int curltest_put_handler(request_rec *r)
     }
   }
   /* we are done */
-  rv = apr_brigade_printf(bb, NULL, NULL, "%"APR_OFF_T_FMT, rbody_len);
+  s_rbody_len = apr_psprintf(r->pool, "%"APR_OFF_T_FMT, rbody_len);
+  apr_table_setn(r->headers_out, "Received-Length", s_rbody_len);
+  rv = apr_brigade_puts(bb, NULL, NULL, s_rbody_len);
   if(APR_SUCCESS != rv) goto cleanup;
   b = apr_bucket_eos_create(c->bucket_alloc);
   APR_BRIGADE_INSERT_TAIL(bb, b);

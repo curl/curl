@@ -106,9 +106,11 @@ static struct altsvc *altsvc_createid(const char *srchost,
   dlen = strlen(dsthost);
   DEBUGASSERT(hlen);
   DEBUGASSERT(dlen);
-  if(!hlen || !dlen)
+  if(!hlen || !dlen) {
     /* bad input */
+    free(as);
     return NULL;
+  }
   if((hlen > 2) && srchost[0] == '[') {
     /* IPv6 address, strip off brackets */
     srchost++;
@@ -123,11 +125,11 @@ static struct altsvc *altsvc_createid(const char *srchost,
     dlen -= 2;
   }
 
-  as->src.host = Curl_strndup(srchost, hlen);
+  as->src.host = Curl_memdup0(srchost, hlen);
   if(!as->src.host)
     goto error;
 
-  as->dst.host = Curl_strndup(dsthost, dlen);
+  as->dst.host = Curl_memdup0(dsthost, dlen);
   if(!as->dst.host)
     goto error;
 

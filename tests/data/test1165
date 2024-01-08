@@ -18,7 +18,7 @@ Verify configure.ac and source code CURL_DISABLE_-sync
 </name>
 
 <command type="perl">
-%SRCDIR/disable-scan.pl %SRCDIR/..
+%SRCDIR/test1165.pl %SRCDIR/..
 </command>
 </client>
 

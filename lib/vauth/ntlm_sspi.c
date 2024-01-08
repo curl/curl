@@ -34,6 +34,7 @@
 #include "warnless.h"
 #include "curl_multibyte.h"
 #include "sendf.h"
+#include "strdup.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
@@ -213,11 +214,10 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
   }
 
   /* Store the challenge for later use */
-  ntlm->input_token = malloc(Curl_bufref_len(type2) + 1);
+  ntlm->input_token = Curl_memdup0((const char *)Curl_bufref_ptr(type2),
+                                   Curl_bufref_len(type2));
   if(!ntlm->input_token)
     return CURLE_OUT_OF_MEMORY;
-  memcpy(ntlm->input_token, Curl_bufref_ptr(type2), Curl_bufref_len(type2));
-  ntlm->input_token[Curl_bufref_len(type2)] = '\0';
   ntlm->input_token_len = Curl_bufref_len(type2);
 
   return CURLE_OK;
@@ -314,7 +314,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
                                                &type_3_desc,
                                                &attrs, &expiry);
   if(status != SEC_E_OK) {
-    infof(data, "NTLM handshake failure (type-3 message): Status=%x",
+    infof(data, "NTLM handshake failure (type-3 message): Status=%lx",
           status);
 
     if(status == SEC_E_INSUFFICIENT_MEMORY)

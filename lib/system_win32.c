@@ -38,16 +38,23 @@
 
 LARGE_INTEGER Curl_freq;
 bool Curl_isVistaOrGreater;
+bool Curl_isWindows8OrGreater;
 
 /* Handle of iphlpapp.dll */
 static HMODULE s_hIpHlpApiDll = NULL;
 
-/* Pointer to the if_nametoindex function */
+/* Function pointers */
 IF_NAMETOINDEX_FN Curl_if_nametoindex = NULL;
+FREEADDRINFOEXW_FN Curl_FreeAddrInfoExW = NULL;
+GETADDRINFOEXCANCEL_FN Curl_GetAddrInfoExCancel = NULL;
+GETADDRINFOEXW_FN Curl_GetAddrInfoExW = NULL;
 
 /* Curl_win32_init() performs win32 global initialization */
 CURLcode Curl_win32_init(long flags)
 {
+#ifdef USE_WINSOCK
+  HMODULE ws2_32Dll;
+#endif
   /* CURL_GLOBAL_WIN32 controls the *optional* part of the initialization which
      is just for Winsock at the moment. Any required win32 initialization
      should take place after this block. */
@@ -104,6 +111,18 @@ CURLcode Curl_win32_init(long flags)
       Curl_if_nametoindex = pIfNameToIndex;
   }
 
+#ifdef USE_WINSOCK
+  ws2_32Dll = GetModuleHandleA("ws2_32");
+  if(ws2_32Dll) {
+    Curl_FreeAddrInfoExW = CURLX_FUNCTION_CAST(FREEADDRINFOEXW_FN,
+      GetProcAddress(ws2_32Dll, "FreeAddrInfoExW"));
+    Curl_GetAddrInfoExCancel = CURLX_FUNCTION_CAST(GETADDRINFOEXCANCEL_FN,
+      GetProcAddress(ws2_32Dll, "GetAddrInfoExCancel"));
+    Curl_GetAddrInfoExW = CURLX_FUNCTION_CAST(GETADDRINFOEXW_FN,
+      GetProcAddress(ws2_32Dll, "GetAddrInfoExW"));
+  }
+#endif
+
   /* curlx_verify_windows_version must be called during init at least once
      because it has its own initialization routine. */
   if(curlx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
@@ -113,6 +132,13 @@ CURLcode Curl_win32_init(long flags)
   else
     Curl_isVistaOrGreater = FALSE;
 
+  if(curlx_verify_windows_version(6, 2, 0, PLATFORM_WINNT,
+                                  VERSION_GREATER_THAN_EQUAL)) {
+    Curl_isWindows8OrGreater = TRUE;
+  }
+  else
+    Curl_isWindows8OrGreater = FALSE;
+
   QueryPerformanceFrequency(&Curl_freq);
   return CURLE_OK;
 }
@@ -120,6 +146,9 @@ CURLcode Curl_win32_init(long flags)
 /* Curl_win32_cleanup() is the opposite of Curl_win32_init() */
 void Curl_win32_cleanup(long init_flags)
 {
+  Curl_FreeAddrInfoExW = NULL;
+  Curl_GetAddrInfoExCancel = NULL;
+  Curl_GetAddrInfoExW = NULL;
   if(s_hIpHlpApiDll) {
     FreeLibrary(s_hIpHlpApiDll);
     s_hIpHlpApiDll = NULL;

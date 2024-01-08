@@ -292,8 +292,8 @@ static void h3_drain_stream(struct Curl_cfilter *cf,
   bits = CURL_CSELECT_IN;
   if(stream && stream->upload_left && !stream->send_closed)
     bits |= CURL_CSELECT_OUT;
-  if(data->state.dselect_bits != bits) {
-    data->state.dselect_bits = bits;
+  if(data->state.select_bits != bits) {
+    data->state.select_bits = bits;
     Curl_expire(data, 0, EXPIRE_RUN_NOW);
   }
 }
@@ -580,8 +580,8 @@ static CURLcode quic_init_ssl(struct Curl_cfilter *cf,
   SSL_set_connect_state(ctx->ssl);
   SSL_set_quic_use_legacy_codepoint(ctx->ssl, 0);
 
-  alpn = (const uint8_t *)H3_ALPN_H3_29 H3_ALPN_H3;
-  alpnlen = sizeof(H3_ALPN_H3_29) - 1 + sizeof(H3_ALPN_H3) - 1;
+  alpn = (const uint8_t *)H3_ALPN_H3 H3_ALPN_H3_29;
+  alpnlen = sizeof(H3_ALPN_H3) - 1 + sizeof(H3_ALPN_H3_29) - 1;
   if(alpn)
     SSL_set_alpn_protos(ctx->ssl, alpn, (int)alpnlen);
 
@@ -644,10 +644,10 @@ static CURLcode quic_init_ssl(struct Curl_cfilter *cf,
   }
 
   /* strip the first byte (the length) from NGHTTP3_ALPN_H3 */
-  alpn[0].data = (unsigned char *)H3_ALPN_H3_29 + 1;
-  alpn[0].size = sizeof(H3_ALPN_H3_29) - 2;
-  alpn[1].data = (unsigned char *)H3_ALPN_H3 + 1;
-  alpn[1].size = sizeof(H3_ALPN_H3) - 2;
+  alpn[0].data = (unsigned char *)H3_ALPN_H3 + 1;
+  alpn[0].size = sizeof(H3_ALPN_H3) - 2;
+  alpn[1].data = (unsigned char *)H3_ALPN_H3_29 + 1;
+  alpn[1].size = sizeof(H3_ALPN_H3_29) - 2;
 
   gnutls_alpn_set_protocols(ctx->gtls->session,
                             alpn, 2, GNUTLS_ALPN_MANDATORY);
@@ -782,8 +782,8 @@ static CURLcode quic_init_ssl(struct Curl_cfilter *cf,
   wolfSSL_set_connect_state(ctx->ssl);
   wolfSSL_set_quic_use_legacy_codepoint(ctx->ssl, 0);
 
-  alpn = (const uint8_t *)H3_ALPN_H3_29 H3_ALPN_H3;
-  alpnlen = sizeof(H3_ALPN_H3_29) - 1 + sizeof(H3_ALPN_H3) - 1;
+  alpn = (const uint8_t *)H3_ALPN_H3 H3_ALPN_H3_29;
+  alpnlen = sizeof(H3_ALPN_H3) - 1 + sizeof(H3_ALPN_H3_29) - 1;
   if(alpn)
     wolfSSL_set_alpn_protos(ctx->ssl, alpn, (int)alpnlen);
 
@@ -1157,18 +1157,22 @@ static void cf_ngtcp2_adjust_pollset(struct Curl_cfilter *cf,
                                       struct easy_pollset *ps)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
-  bool want_recv = CURL_WANT_RECV(data);
-  bool want_send = CURL_WANT_SEND(data);
+  bool want_recv, want_send;
 
-  if(ctx->qconn && (want_recv || want_send)) {
+  if(!ctx->qconn)
+    return;
+
+  Curl_pollset_check(data, ps, ctx->q.sockfd, &want_recv, &want_send);
+  if(want_recv || want_send) {
     struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
     struct cf_call_data save;
     bool c_exhaust, s_exhaust;
 
     CF_DATA_SAVE(save, cf, data);
-    c_exhaust = !ngtcp2_conn_get_cwnd_left(ctx->qconn) ||
-                !ngtcp2_conn_get_max_data_left(ctx->qconn);
-    s_exhaust = stream && stream->id >= 0 && stream->quic_flow_blocked;
+    c_exhaust = want_send && (!ngtcp2_conn_get_cwnd_left(ctx->qconn) ||
+                !ngtcp2_conn_get_max_data_left(ctx->qconn));
+    s_exhaust = want_send && stream && stream->id >= 0 &&
+                stream->quic_flow_blocked;
     want_recv = (want_recv || c_exhaust || s_exhaust);
     want_send = (!s_exhaust && want_send) ||
                  !Curl_bufq_is_empty(&ctx->q.sendbuf);
@@ -1894,6 +1898,8 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       sent = (ssize_t)len;
       goto out;
     }
+    CURL_TRC_CF(data, cf, "[%" PRId64 "] send_body(len=%zu) "
+                "-> stream closed", stream->id, len);
     *err = CURLE_HTTP3;
     sent = -1;
     goto out;

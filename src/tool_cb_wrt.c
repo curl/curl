@@ -57,22 +57,12 @@ bool tool_create_output_file(struct OutStruct *outs,
   struct GlobalConfig *global;
   FILE *file = NULL;
   char *fname = outs->filename;
-  char *aname = NULL;
   DEBUGASSERT(outs);
   DEBUGASSERT(config);
   global = config->global;
   if(!fname || !*fname) {
     warnf(global, "Remote filename has no length");
     return FALSE;
-  }
-
-  if(config->output_dir && outs->is_cd_filename) {
-    aname = aprintf("%s/%s", config->output_dir, fname);
-    if(!aname) {
-      errorf(global, "out of memory");
-      return FALSE;
-    }
-    fname = aname;
   }
 
   if(config->file_clobber_mode == CLOBBER_ALWAYS ||
@@ -94,14 +84,12 @@ bool tool_create_output_file(struct OutStruct *outs,
       char *newname;
       /* Guard against wraparound in new filename */
       if(newlen < len) {
-        free(aname);
         errorf(global, "overflow in filename generation");
         return FALSE;
       }
       newname = malloc(newlen);
       if(!newname) {
         errorf(global, "out of memory");
-        free(aname);
         return FALSE;
       }
       memcpy(newname, fname, len);
@@ -135,10 +123,8 @@ bool tool_create_output_file(struct OutStruct *outs,
   if(!file) {
     warnf(global, "Failed to open the file %s: %s", fname,
           strerror(errno));
-    free(aname);
     return FALSE;
   }
-  free(aname);
   outs->s_isreg = TRUE;
   outs->fopened = TRUE;
   outs->stream = file;

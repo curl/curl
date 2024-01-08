@@ -211,8 +211,10 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
     if(status == SEC_E_INSUFFICIENT_MEMORY)
       return CURLE_OUT_OF_MEMORY;
 
+#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
     infof(data, "schannel: InitializeSecurityContext failed: %s",
           Curl_sspi_strerror(status, buffer, sizeof(buffer)));
+#endif
 
     return CURLE_AUTH_ERROR;
   }
@@ -603,8 +605,10 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
       if(status == SEC_E_INSUFFICIENT_MEMORY)
         return CURLE_OUT_OF_MEMORY;
 
+#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
       infof(data, "schannel: InitializeSecurityContext failed: %s",
             Curl_sspi_strerror(status, buffer, sizeof(buffer)));
+#endif
 
       return CURLE_AUTH_ERROR;
     }

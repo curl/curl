@@ -1045,7 +1045,7 @@ static CURLUcode updateurl(CURLU *u, const char *cmd, unsigned int setflags)
   while(p) {
     char *e = strchr(p, ',');
     if(e) {
-      size_t n = e-p;
+      size_t n = (size_t)(e - p);
       char buf[80];
       char part[80];
       char value[80];
@@ -1662,6 +1662,10 @@ static int huge(void)
 
   for(i = 0; i <  7; i++) {
     char *partp;
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
     msnprintf(total, sizeof(total),
               url,
               (i == 0)? &bigpart[1] : smallpart,
@@ -1671,6 +1675,9 @@ static int huge(void)
               (i == 4)? &bigpart[1] : smallpart,
               (i == 5)? &bigpart[1] : smallpart,
               (i == 6)? &bigpart[1] : smallpart);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
     rc = curl_url_set(urlp, CURLUPART_URL, total, CURLU_NON_SUPPORT_SCHEME);
     if((!i && (rc != CURLUE_BAD_SCHEME)) ||
        (i && rc)) {

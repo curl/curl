@@ -906,7 +906,6 @@ static OSStatus sectransp_bio_cf_out_write(SSLConnectionRef connection,
   return rtn;
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
 CF_INLINE const char *TLSCipherNameForNumber(SSLCipherSuite cipher)
 {
   /* The first ciphers in the ciphertable are continuous. Here we do small
@@ -925,7 +924,6 @@ CF_INLINE const char *TLSCipherNameForNumber(SSLCipherSuite cipher)
   }
   return ciphertable[SSL_NULL_WITH_NULL_NULL].name;
 }
-#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
 
 #if CURL_BUILD_MAC
 CF_INLINE void GetDarwinVersionNumber(int *major, int *minor)
@@ -2369,19 +2367,16 @@ static CURLcode verify_cert(struct Curl_cfilter *cf,
                             const struct curl_blob *ca_info_blob,
                             SSLContextRef ctx)
 {
-  int result;
+  CURLcode result;
   unsigned char *certbuf;
   size_t buflen;
 
   if(ca_info_blob) {
     CURL_TRC_CF(data, cf, "verify_peer, CA from config blob");
-    certbuf = (unsigned char *)malloc(ca_info_blob->len + 1);
-    if(!certbuf) {
+    certbuf = (unsigned char *)Curl_memdup0(ca_info_blob->data,
+                                            buflen = ca_info_blob->len);
+    if(!certbuf)
       return CURLE_OUT_OF_MEMORY;
-    }
-    buflen = ca_info_blob->len;
-    memcpy(certbuf, ca_info_blob->data, ca_info_blob->len);
-    certbuf[ca_info_blob->len]='\0';
   }
   else if(cafile) {
     CURL_TRC_CF(data, cf, "verify_peer, CA from file '%s'", cafile);

@@ -247,8 +247,15 @@ static char *c_escape(const char *str, curl_off_t len)
           format = "\\%03o";
         }
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
         result = curlx_dyn_addf(&escaped, format,
                                 (unsigned int) *(unsigned char *) s);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
       }
     }
   }
@@ -431,7 +438,7 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
   case TOOLMIME_STDIN:
     if(!filename)
       filename = "-";
-    /* FALLTHROUGH */
+    FALLTHROUGH();
   case TOOLMIME_STDINDATA:
     /* Can only be reading stdin in the current context. */
     CODE1("curl_mime_data_cb(part%d, -1, (curl_read_callback) fread, \\",

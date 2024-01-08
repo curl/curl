@@ -130,7 +130,8 @@ struct curl_mimepart {
   size_t lastreadstatus;           /* Last read callback returned status. */
 };
 
-CURLcode Curl_mime_add_header(struct curl_slist **slp, const char *fmt, ...);
+CURLcode Curl_mime_add_header(struct curl_slist **slp, const char *fmt, ...)
+  CURL_PRINTF(2, 3);
 
 #if !defined(CURL_DISABLE_MIME) && (!defined(CURL_DISABLE_HTTP) ||      \
                                     !defined(CURL_DISABLE_SMTP) ||      \

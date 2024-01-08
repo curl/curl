@@ -8,7 +8,7 @@ on:
   # this must not ever run on any other branch than master
   push:
     branches:
-    - master
+      - master
 
 concurrency:
   # this should not run in parallel, so just run one at a time

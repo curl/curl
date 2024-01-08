@@ -7,17 +7,17 @@ name: proselint
 on:
   push:
     branches:
-    - master
-    - '*/ci'
+      - master
+      - '*/ci'
     paths:
-    - '.github/workflows/proselint.yml'
-    - '**.md'
+      - '.github/workflows/proselint.yml'
+      - '**.md'
   pull_request:
     branches:
-    - master
+      - master
     paths:
-    - '.github/workflows/proselint.yml'
-    - '**.md'
+      - '.github/workflows/proselint.yml'
+      - '**.md'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
@@ -29,40 +29,40 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: install prereqs
-      run: sudo apt-get install python3-proselint
+      - name: install prereqs
+        run: sudo apt-get install python3-proselint
 
-    # config file help: https://github.com/amperser/proselint/
-    - name: create proselint config
-      run: |
-        cat <<JSON > $HOME/.proselintrc
-        {
-          "checks": {
-            "typography.diacritical_marks": false,
-            "typography.symbols": false,
-            "annotations.misc": false
+      # config file help: https://github.com/amperser/proselint/
+      - name: create proselint config
+        run: |
+          cat <<JSON > $HOME/.proselintrc
+          {
+            "checks": {
+              "typography.diacritical_marks": false,
+              "typography.symbols": false,
+              "annotations.misc": false
+            }
           }
-        }
-        JSON
+          JSON
 
-    - name: check prose
-      run: a=`git ls-files '*.md' | grep -v docs/CHECKSRC.md` && proselint $a README
+      - name: check prose
+        run: a=`git ls-files '*.md' | grep -v docs/CHECKSRC.md` && proselint $a README
 
-    # This is for CHECKSRC and files with aggressive exclamation mark needs
-    - name: create second proselint config
-      run: |
-        cat <<JSON > $HOME/.proselintrc
-        {
-          "checks": {
-            "typography.diacritical_marks": false,
-            "typography.symbols": false,
-            "typography.exclamation": false,
-            "annotations.misc": false
+      # This is for CHECKSRC and files with aggressive exclamation mark needs
+      - name: create second proselint config
+        run: |
+          cat <<JSON > $HOME/.proselintrc
+          {
+            "checks": {
+              "typography.diacritical_marks": false,
+              "typography.symbols": false,
+              "typography.exclamation": false,
+              "annotations.misc": false
+            }
           }
-        }
-        JSON
+          JSON
 
-    - name: check special prose
-      run: a=docs/CHECKSRC.md && proselint $a
+      - name: check special prose
+        run: a=docs/CHECKSRC.md && proselint $a

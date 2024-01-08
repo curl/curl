@@ -56,10 +56,7 @@ int my_trace(CURL *handle, curl_infotype type,
   switch(type) {
   case CURLINFO_TEXT:
     fprintf(stderr, "== Info: %s", data);
-    /* FALLTHROUGH */
-  default: /* in case a new one is introduced to shock us */
     return 0;
-
   case CURLINFO_HEADER_OUT:
     text = "=> Send header";
     break;
@@ -76,6 +73,8 @@ int my_trace(CURL *handle, curl_infotype type,
       return 0;
     text = "<= Recv data";
     break;
+  default: /* in case a new one is introduced to shock us */
+    return 0;
   }
 
   fprintf(stderr, "%s, %lu bytes (0x%lx)\n",
@@ -113,11 +112,11 @@ static size_t my_write_cb(char *buf, size_t nitems, size_t buflen,
                           void *userdata)
 {
   struct transfer *t = userdata;
-  ssize_t nwritten;
+  size_t nwritten;
 
   if(!t->resumed &&
      t->recv_size < t->pause_at &&
-     ((curl_off_t)(t->recv_size + (nitems * buflen)) >= t->pause_at)) {
+     ((t->recv_size + (curl_off_t)(nitems * buflen)) >= t->pause_at)) {
     fprintf(stderr, "[t-%d] PAUSE\n", t->idx);
     t->paused = 1;
     return CURL_WRITEFUNC_PAUSE;
@@ -132,11 +131,11 @@ static size_t my_write_cb(char *buf, size_t nitems, size_t buflen,
   }
 
   nwritten = fwrite(buf, nitems, buflen, t->out);
-  if(nwritten < 0) {
+  if(nwritten < buflen) {
     fprintf(stderr, "[t-%d] write failure\n", t->idx);
     return 0;
   }
-  t->recv_size += nwritten;
+  t->recv_size += (curl_off_t)nwritten;
   return (size_t)nwritten;
 }
 
@@ -172,7 +171,7 @@ static void usage(const char *msg)
     "  download a url with following options:\n"
     "  -m number  max parallel downloads\n"
     "  -n number  total downloads\n"
-    "  -p number  pause transfer after `number` response bytes\n"
+    "  -P number  pause transfer after `number` response bytes\n"
   );
 }
 
@@ -186,7 +185,7 @@ int main(int argc, char *argv[])
   const char *url;
   size_t i, n, max_parallel = 1;
   size_t active_transfers;
-  long pause_offset = 0;
+  size_t pause_offset = 0;
   int abort_paused = 0;
   struct transfer *t;
   int ch;
@@ -206,7 +205,7 @@ int main(int argc, char *argv[])
       transfer_count = (size_t)strtol(optarg, NULL, 10);
       break;
     case 'P':
-      pause_offset = strtol(optarg, NULL, 10);
+      pause_offset = (size_t)strtol(optarg, NULL, 10);
       break;
     default:
      usage("invalid option");
@@ -235,7 +234,7 @@ int main(int argc, char *argv[])
   for(i = 0; i < transfer_count; ++i) {
     t = &transfers[i];
     t->idx = (int)i;
-    t->pause_at = (curl_off_t)pause_offset * i;
+    t->pause_at = (curl_off_t)(pause_offset * i);
   }
 
   n = (max_parallel < transfer_count)? max_parallel : transfer_count;

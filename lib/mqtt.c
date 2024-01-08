@@ -671,7 +671,7 @@ MQTT_SUBACK_COMING:
     data->req.bytecount = 0;
     data->req.size = remlen;
     mq->npacket = remlen; /* get this many bytes */
-    /* FALLTHROUGH */
+    FALLTHROUGH();
   case MQTT_PUB_REMAIN: {
     /* read rest of packet, but no more. Cap to buffer size */
     size_t rest = mq->npacket;
@@ -776,7 +776,7 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
     /* remember the first byte */
     mq->npacket = 0;
     mqstate(data, MQTT_REMAINING_LENGTH, MQTT_NOSTATE);
-    /* FALLTHROUGH */
+    FALLTHROUGH();
   case MQTT_REMAINING_LENGTH:
     do {
       result = Curl_read(data, sockfd, (char *)&byte, 1, &nread);

@@ -18,7 +18,7 @@ Verify lib/optiontable.pl
 </name>
 
 <command type="perl">
-%SRCDIR/option-check.pl %SRCDIR/..
+%SRCDIR/test1276.pl %SRCDIR/..
 </command>
 </client>
 

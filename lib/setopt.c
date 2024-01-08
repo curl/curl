@@ -366,6 +366,17 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     else
       return CURLE_BAD_FUNCTION_ARGUMENT;
     break;
+  case CURLOPT_SERVER_RESPONSE_TIMEOUT_MS:
+    /*
+     * Option that specifies how quickly a server response must be obtained
+     * before it is considered failure. For pingpong protocols.
+     */
+    arg = va_arg(param, long);
+    if((arg >= 0) && (arg <= INT_MAX))
+      data->set.server_response_timeout = (unsigned int)arg;
+    else
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    break;
 #ifndef CURL_DISABLE_TFTP
   case CURLOPT_TFTP_NO_OPTIONS:
     /*
@@ -670,6 +681,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.opt_no_body = FALSE; /* this is implied */
     Curl_mime_cleanpart(data->state.formp);
     Curl_safefree(data->state.formp);
+    data->state.mimepost = NULL;
     break;
 #endif
 
@@ -977,6 +989,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 #ifndef CURL_DISABLE_FORM_API
       Curl_mime_cleanpart(data->state.formp);
       Curl_safefree(data->state.formp);
+      data->state.mimepost = NULL;
 #endif
     }
     break;

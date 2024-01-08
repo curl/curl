@@ -412,7 +412,7 @@ sub sysread_or_die {
 sub startsf {
     my @mainsockfcmd = ("./server/sockfilt".exe_ext('SRV'),
         "--ipv$ipvnum",
-	"--port", $port,
+        "--port", $port,
         "--pidfile", $mainsockf_pidfile,
         "--portfile", $portfile,
         "--logfile", $mainsockf_logfile);

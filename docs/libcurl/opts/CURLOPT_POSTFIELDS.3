@@ -97,7 +97,7 @@ int main(void)
   /* send an application/json POST */
   curl = curl_easy_init();
   if(curl) {
-    const char *json = "{\"name\": \"daniel\"}";
+    const char *json = "{\\"name\\": \\"daniel\\"}";
     struct curl_slist *slist1 = NULL;
     slist1 = curl_slist_append(slist1, "Content-Type: application/json");
     slist1 = curl_slist_append(slist1, "Accept: application/json");

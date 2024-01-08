@@ -132,7 +132,8 @@ e96: QUIC connection error
 e97: proxy handshake error
 e98: SSL Client Certificate required
 e99: Unrecoverable error in select/poll
-e100: Unknown error
+e100: A value or data field grew larger than allowed
+e101: Unknown error
 m-1: Please call curl_multi_perform() soon
 m0: No error
 m1: Invalid multi handle
@@ -186,7 +187,8 @@ u27: Bad scheme
 u28: Unsupported number of slashes following scheme
 u29: Bad user
 u30: libcurl lacks IDN support
-u31: CURLUcode unknown
+u31: A value or data field is larger than allowed
+u32: CURLUcode unknown
 </stdout>
 </verify>
 

@@ -204,8 +204,8 @@ static void drain_stream_from_other_thread(struct Curl_easy *data,
   bits = CURL_CSELECT_IN;
   if(stream && !stream->upload_done)
     bits |= CURL_CSELECT_OUT;
-  if(data->state.dselect_bits != bits) {
-    data->state.dselect_bits = bits;
+  if(data->state.select_bits != bits) {
+    data->state.select_bits = bits;
     /* cannot expire from other thread */
   }
 }
@@ -220,8 +220,8 @@ static void drain_stream(struct Curl_cfilter *cf,
   bits = CURL_CSELECT_IN;
   if(stream && !stream->upload_done)
     bits |= CURL_CSELECT_OUT;
-  if(data->state.dselect_bits != bits) {
-    data->state.dselect_bits = bits;
+  if(data->state.select_bits != bits) {
+    data->state.select_bits = bits;
     Curl_expire(data, 0, EXPIRE_RUN_NOW);
   }
 }

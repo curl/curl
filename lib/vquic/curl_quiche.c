@@ -337,8 +337,8 @@ static void drain_stream(struct Curl_cfilter *cf,
   bits = CURL_CSELECT_IN;
   if(stream && !stream->send_closed && stream->upload_left)
     bits |= CURL_CSELECT_OUT;
-  if(data->state.dselect_bits != bits) {
-    data->state.dselect_bits = bits;
+  if(data->state.select_bits != bits) {
+    data->state.select_bits = bits;
     Curl_expire(data, 0, EXPIRE_RUN_NOW);
   }
 }
@@ -836,7 +836,7 @@ static ssize_t recv_closed_stream(struct Curl_cfilter *cf,
   if(stream->reset) {
     failf(data,
           "HTTP/3 stream %" PRId64 " reset by server", stream->id);
-    *err = stream->resp_got_header? CURLE_PARTIAL_FILE : CURLE_RECV_ERROR;
+    *err = stream->resp_got_header? CURLE_PARTIAL_FILE : CURLE_HTTP3;
     CURL_TRC_CF(data, cf, "[%" PRId64 "] cf_recv, was reset -> %d",
                 stream->id, *err);
   }
@@ -846,7 +846,7 @@ static ssize_t recv_closed_stream(struct Curl_cfilter *cf,
           " all response header fields, treated as error",
           stream->id);
     /* *err = CURLE_PARTIAL_FILE; */
-    *err = CURLE_RECV_ERROR;
+    *err = CURLE_HTTP3;
     CURL_TRC_CF(data, cf, "[%" PRId64 "] cf_recv, closed incomplete"
                 " -> %d", stream->id, *err);
   }
@@ -1078,6 +1078,28 @@ static ssize_t cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       goto out;
     stream = H3_STREAM_CTX(data);
   }
+  else if(stream->closed) {
+    if(stream->resp_hds_complete) {
+      /* sending request body on a stream that has been closed by the
+       * server. If the server has send us a final response, we should
+       * silently discard the send data.
+       * This happens for example on redirects where the server, instead
+       * of reading the full request body just closed the stream after
+       * sending the 30x response.
+       * This is sort of a race: had the transfer loop called recv first,
+       * it would see the response and stop/discard sending on its own- */
+      CURL_TRC_CF(data, cf, "[%" PRId64 "] discarding data"
+                  "on closed stream with response", stream->id);
+      *err = CURLE_OK;
+      nwritten = (ssize_t)len;
+      goto out;
+    }
+    CURL_TRC_CF(data, cf, "[%" PRId64 "] send_body(len=%zu) "
+                "-> stream closed", stream->id, len);
+    *err = CURLE_HTTP3;
+    nwritten = -1;
+    goto out;
+  }
   else {
     bool eof = (stream->upload_left >= 0 &&
                 (curl_off_t)len >= stream->upload_left);
@@ -1095,20 +1117,11 @@ static ssize_t cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       nwritten = -1;
       goto out;
     }
-    else if(nwritten == QUICHE_H3_TRANSPORT_ERR_INVALID_STREAM_STATE &&
-            stream->closed && stream->resp_hds_complete) {
-      /* sending request body on a stream that has been closed by the
-       * server. If the server has send us a final response, we should
-       * silently discard the send data.
-       * This happens for example on redirects where the server, instead
-       * of reading the full request body just closed the stream after
-       * sending the 30x response.
-       * This is sort of a race: had the transfer loop called recv first,
-       * it would see the response and stop/discard sending on its own- */
-      CURL_TRC_CF(data, cf, "[%" PRId64 "] discarding data"
-                  "on closed stream with response", stream->id);
-      *err = CURLE_OK;
-      nwritten = (ssize_t)len;
+    else if(nwritten == QUICHE_H3_TRANSPORT_ERR_INVALID_STREAM_STATE) {
+      CURL_TRC_CF(data, cf, "[%" PRId64 "] send_body(len=%zu) "
+                  "-> invalid stream state", stream->id, len);
+      *err = CURLE_HTTP3;
+      nwritten = -1;
       goto out;
     }
     else if(nwritten == QUICHE_H3_TRANSPORT_ERR_FINAL_SIZE) {
@@ -1167,16 +1180,19 @@ static void cf_quiche_adjust_pollset(struct Curl_cfilter *cf,
                                      struct easy_pollset *ps)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
-  bool want_recv = CURL_WANT_RECV(data);
-  bool want_send = CURL_WANT_SEND(data);
+  bool want_recv, want_send;
 
-  if(ctx->qconn && (want_recv || want_send)) {
+  if(!ctx->qconn)
+    return;
+
+  Curl_pollset_check(data, ps, ctx->q.sockfd, &want_recv, &want_send);
+  if(want_recv || want_send) {
     struct stream_ctx *stream = H3_STREAM_CTX(data);
     bool c_exhaust, s_exhaust;
 
     c_exhaust = FALSE; /* Have not found any call in quiche that tells
                           us if the connection itself is blocked */
-    s_exhaust = stream && stream->id >= 0 &&
+    s_exhaust = want_send && stream && stream->id >= 0 &&
                 (stream->quic_flow_blocked || !stream_is_writeable(cf, data));
     want_recv = (want_recv || c_exhaust || s_exhaust);
     want_send = (!s_exhaust && want_send) ||

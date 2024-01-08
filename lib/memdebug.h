@@ -72,7 +72,7 @@ CURL_EXTERN ALLOC_FUNC wchar_t *curl_dbg_wcsdup(const wchar_t *str,
 
 CURL_EXTERN void curl_dbg_memdebug(const char *logname);
 CURL_EXTERN void curl_dbg_memlimit(long limit);
-CURL_EXTERN void curl_dbg_log(const char *format, ...);
+CURL_EXTERN void curl_dbg_log(const char *format, ...) CURL_PRINTF(1, 2);
 
 /* file descriptor manipulators */
 CURL_EXTERN curl_socket_t curl_dbg_socket(int domain, int type, int protocol,

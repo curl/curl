@@ -11,7 +11,6 @@ See-also: http1.1 http2
 Category: http
 Example: --http3 $URL
 Multi: mutex
-Experimental: yes
 ---
 Tells curl to try HTTP/3 to the host in the URL, but fallback to earlier
 HTTP versions if the HTTP/3 connection establishment fails. HTTP/3 is only

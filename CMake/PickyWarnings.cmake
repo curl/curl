@@ -23,6 +23,12 @@
 ###########################################################################
 include(CheckCCompilerFlag)
 
+unset(WPICKY)
+
+if(CURL_WERROR AND CMAKE_COMPILER_IS_GNUCC AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0)
+  set(WPICKY "${WPICKY} -pedantic-errors")
+endif()
+
 if(PICKY_COMPILER)
   if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
 
@@ -83,11 +89,12 @@ if(PICKY_COMPILER)
       -Wmissing-field-initializers         # clang  2.7  gcc  4.1
       -Wmissing-noreturn                   # clang  2.7  gcc  4.1
       -Wno-format-nonliteral               # clang  1.0  gcc  2.96 (3.0)
-      -Wno-sign-conversion                 # clang  2.9  gcc  4.3
       -Wno-system-headers                  # clang  1.0  gcc  3.0
     # -Wpadded                             # clang  2.9  gcc  4.1               # Not used because we cannot change public structs
-      -Wredundant-decls                    # clang  2.7  gcc  4.1
       -Wold-style-definition               # clang  2.7  gcc  3.4
+      -Wredundant-decls                    # clang  2.7  gcc  4.1
+      -Wsign-conversion                    # clang  2.9  gcc  4.3
+        -Wno-error=sign-conversion                                              # FIXME
       -Wstrict-prototypes                  # clang  1.0  gcc  3.3
     # -Wswitch-enum                        # clang  2.7  gcc  4.1               # Not used because this basically disallows default case
       -Wtype-limits                        # clang  2.7  gcc  4.3
@@ -110,6 +117,7 @@ if(PICKY_COMPILER)
         -Wshift-sign-overflow              # clang  2.9
         -Wshorten-64-to-32                 # clang  1.0
         -Wlanguage-extension-token         # clang  3.0
+        -Wformat=2                         # clang  3.0  gcc  4.8
       )
       # Enable based on compiler version
       if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 3.6) OR
@@ -135,6 +143,12 @@ if(PICKY_COMPILER)
           -Wextra-semi-stmt                # clang  7.0            appleclang 10.3
         )
       endif()
+      if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 10.0) OR
+         (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 12.4))
+        list(APPEND WPICKY_ENABLE
+          -Wimplicit-fallthrough           # clang  4.0  gcc  7.0  appleclang 12.4  # we have silencing markup for clang 10.0 and above only
+        )
+      endif()
     else()  # gcc
       list(APPEND WPICKY_DETECT
         ${WPICKY_COMMON}
@@ -147,6 +161,7 @@ if(PICKY_COMPILER)
           -Wmissing-parameter-type         #             gcc  4.3
           -Wold-style-declaration          #             gcc  4.3
           -Wstrict-aliasing=3              #             gcc  4.0
+          -Wtrampolines                    #             gcc  4.3
         )
       endif()
       if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.5 AND MINGW)
@@ -156,7 +171,7 @@ if(PICKY_COMPILER)
       endif()
       if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.8)
         list(APPEND WPICKY_ENABLE
-          -Wformat=2                       # clang  3.0  gcc  4.8 (clang part-default, enabling it fully causes -Wformat-nonliteral warnings)
+          -Wformat=2                       # clang  3.0  gcc  4.8
         )
       endif()
       if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0)
@@ -179,6 +194,7 @@ if(PICKY_COMPILER)
           -Wduplicated-branches            #             gcc  7.0
           -Wformat-overflow=2              #             gcc  7.0
           -Wformat-truncation=2            #             gcc  7.0
+          -Wimplicit-fallthrough           # clang  4.0  gcc  7.0
           -Wrestrict                       #             gcc  7.0
         )
       endif()
@@ -190,8 +206,6 @@ if(PICKY_COMPILER)
     endif()
 
     #
-
-    unset(WPICKY)
 
     foreach(_CCOPT IN LISTS WPICKY_ENABLE)
       set(WPICKY "${WPICKY} ${_CCOPT}")
@@ -209,8 +223,10 @@ if(PICKY_COMPILER)
         set(WPICKY "${WPICKY} ${_CCOPT}")
       endif()
     endforeach()
-
-    message(STATUS "Picky compiler options:${WPICKY}")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WPICKY}")
   endif()
+endif()
+
+if(WPICKY)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WPICKY}")
+  message(STATUS "Picky compiler options:${WPICKY}")
 endif()

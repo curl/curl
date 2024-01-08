@@ -101,12 +101,12 @@ Here is an example of a header file contents:
    another header
 
 To support sending multipart mail messages, the syntax is extended as follows:
-.br
+
 - name can be omitted: the equal sign is the first character of the argument,
-.br
+
 - if data starts with '(', this signals to start a new multipart: it can be
 followed by a content type specification.
-.br
+
 - a multipart can be terminated with a '=)' argument.
 
 Example: the following command sends an SMTP mime email consisting in an

@@ -1282,7 +1282,7 @@ curl_easy_setopt_ccsid(CURL *easy, CURLoption tag, ...)
       result = curl_easy_setopt(easy, tag, &blob);
       break;
     }
-    /* FALLTHROUGH */
+    FALLTHROUGH();
   case CURLOPT_ERRORBUFFER:                     /* This is an output buffer. */
     result = Curl_vsetopt(easy, tag, arg);
     break;

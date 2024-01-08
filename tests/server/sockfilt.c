@@ -551,14 +551,14 @@ static unsigned int WINAPI select_ws_wait_thread(void *lpParameter)
             continue;
           }
           else {
-            logmsg("[select_ws_wait_thread] PeekNamedPipe len: %d", length);
+            logmsg("[select_ws_wait_thread] PeekNamedPipe len: %lu", length);
           }
         }
         else {
           /* if the pipe has NOT been closed, sleep and continue waiting */
           ret = GetLastError();
           if(ret != ERROR_BROKEN_PIPE) {
-            logmsg("[select_ws_wait_thread] PeekNamedPipe error: %d", ret);
+            logmsg("[select_ws_wait_thread] PeekNamedPipe error: %lu", ret);
             SleepEx(0, FALSE);
             continue;
           }
@@ -1159,8 +1159,8 @@ static bool juggle(curl_socket_t *sockfdp,
       curl_socket_t newfd = accept(sockfd, NULL, NULL);
       if(CURL_SOCKET_BAD == newfd) {
         error = SOCKERRNO;
-        logmsg("accept(%d, NULL, NULL) failed with error: (%d) %s",
-               sockfd, error, sstrerror(error));
+        logmsg("accept(%" CURL_FORMAT_SOCKET_T ", NULL, NULL) "
+               "failed with error: (%d) %s", sockfd, error, sstrerror(error));
       }
       else {
         logmsg("====> Client connect");
@@ -1335,7 +1335,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
   rc = listen(sock, 5);
   if(0 != rc) {
     error = SOCKERRNO;
-    logmsg("listen(%d, 5) failed with error: (%d) %s",
+    logmsg("listen(%" CURL_FORMAT_SOCKET_T ", 5) failed with error: (%d) %s",
            sock, error, sstrerror(error));
     sclose(sock);
     return CURL_SOCKET_BAD;

@@ -304,12 +304,6 @@ void curl_dbg_free(void *ptr, int line, const char *source)
 curl_socket_t curl_dbg_socket(int domain, int type, int protocol,
                              int line, const char *source)
 {
-  const char *fmt = (sizeof(curl_socket_t) == sizeof(int)) ?
-    "FD %s:%d socket() = %d\n" :
-    (sizeof(curl_socket_t) == sizeof(long)) ?
-    "FD %s:%d socket() = %ld\n" :
-    "FD %s:%d socket() = %zd\n";
-
   curl_socket_t sockfd;
 
   if(countcheck("socket", line, source))
@@ -318,7 +312,8 @@ curl_socket_t curl_dbg_socket(int domain, int type, int protocol,
   sockfd = socket(domain, type, protocol);
 
   if(source && (sockfd != CURL_SOCKET_BAD))
-    curl_dbg_log(fmt, source, line, sockfd);
+    curl_dbg_log("FD %s:%d socket() = %" CURL_FORMAT_SOCKET_T "\n",
+                 source, line, sockfd);
 
   return sockfd;
 }
@@ -357,16 +352,12 @@ int curl_dbg_socketpair(int domain, int type, int protocol,
                        curl_socket_t socket_vector[2],
                        int line, const char *source)
 {
-  const char *fmt = (sizeof(curl_socket_t) == sizeof(int)) ?
-    "FD %s:%d socketpair() = %d %d\n" :
-    (sizeof(curl_socket_t) == sizeof(long)) ?
-    "FD %s:%d socketpair() = %ld %ld\n" :
-    "FD %s:%d socketpair() = %zd %zd\n";
-
   int res = socketpair(domain, type, protocol, socket_vector);
 
   if(source && (0 == res))
-    curl_dbg_log(fmt, source, line, socket_vector[0], socket_vector[1]);
+    curl_dbg_log("FD %s:%d socketpair() = "
+      "%" CURL_FORMAT_SOCKET_T " %" CURL_FORMAT_SOCKET_T "\n",
+      source, line, socket_vector[0], socket_vector[1]);
 
   return res;
 }
@@ -375,19 +366,14 @@ int curl_dbg_socketpair(int domain, int type, int protocol,
 curl_socket_t curl_dbg_accept(curl_socket_t s, void *saddr, void *saddrlen,
                              int line, const char *source)
 {
-  const char *fmt = (sizeof(curl_socket_t) == sizeof(int)) ?
-    "FD %s:%d accept() = %d\n" :
-    (sizeof(curl_socket_t) == sizeof(long)) ?
-    "FD %s:%d accept() = %ld\n" :
-    "FD %s:%d accept() = %zd\n";
-
   struct sockaddr *addr = (struct sockaddr *)saddr;
   curl_socklen_t *addrlen = (curl_socklen_t *)saddrlen;
 
   curl_socket_t sockfd = accept(s, addr, addrlen);
 
   if(source && (sockfd != CURL_SOCKET_BAD))
-    curl_dbg_log(fmt, source, line, sockfd);
+    curl_dbg_log("FD %s:%d accept() = %" CURL_FORMAT_SOCKET_T "\n",
+                 source, line, sockfd);
 
   return sockfd;
 }
@@ -395,14 +381,9 @@ curl_socket_t curl_dbg_accept(curl_socket_t s, void *saddr, void *saddrlen,
 /* separate function to allow libcurl to mark a "faked" close */
 void curl_dbg_mark_sclose(curl_socket_t sockfd, int line, const char *source)
 {
-  const char *fmt = (sizeof(curl_socket_t) == sizeof(int)) ?
-    "FD %s:%d sclose(%d)\n":
-    (sizeof(curl_socket_t) == sizeof(long)) ?
-    "FD %s:%d sclose(%ld)\n":
-    "FD %s:%d sclose(%zd)\n";
-
   if(source)
-    curl_dbg_log(fmt, source, line, sockfd);
+    curl_dbg_log("FD %s:%d sclose(%" CURL_FORMAT_SOCKET_T ")\n",
+                 source, line, sockfd);
 }
 
 /* this is our own defined way to close sockets on *ALL* platforms */
@@ -467,7 +448,14 @@ void curl_dbg_log(const char *format, ...)
     return;
 
   va_start(ap, format);
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
   nchars = mvsnprintf(buf, LOGLINE_BUFSIZE, format, ap);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
   va_end(ap);
 
   if(nchars > LOGLINE_BUFSIZE - 1)
