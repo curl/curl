@@ -154,7 +154,7 @@ jobs:
             singleuse: --unit
 
           - name: rustls
-            install_steps: rust rustls pytest valgrind
+            install_steps: rust rustls pytest valgrind libpsl-dev
             configure: --with-rustls=$HOME/rustls --enable-debug
             singleuse: --unit
 

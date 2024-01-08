@@ -117,7 +117,7 @@ jobs:
             configure: --enable-debug --with-secure-transport --enable-websockets
             macosx-version-min: 10.8
           - name: gcc SecureTransport
-            configure: CC=gcc-12 --enable-debug --with-secure-transport --enable-websockets
+            configure: CC=gcc-12 --enable-debug --with-secure-transport --enable-websockets --without-libpsl
             macosx-version-min: 10.8
           - name: OpenSSL http2
             install: nghttp2 openssl
@@ -142,7 +142,7 @@ jobs:
             configure: --enable-debug --disable-ldap --with-openssl=/usr/local/opt/openssl --enable-websockets
             macosx-version-min: 10.15
     steps:
-      - run: echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+      - run: echo libtool autoconf automake pkg-config libpsl ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
         name: 'brew bundle'
 
       # Run this command with retries because of spurious failures seen
