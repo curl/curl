@@ -858,6 +858,7 @@ CURLcode Curl_set_dns_servers(struct Curl_easy *data,
   case ARES_ENODATA:
   case ARES_EBADSTR:
   default:
+    DEBUGF(infof(data, "bad servers set"));
     result = CURLE_BAD_FUNCTION_ARGUMENT;
     break;
   }
@@ -896,6 +897,7 @@ CURLcode Curl_set_dns_local_ip4(struct Curl_easy *data,
   }
   else {
     if(Curl_inet_pton(AF_INET, local_ip4, &a4) != 1) {
+      DEBUGF(infof(data, "bad DNS IPv4 address"));
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
   }
@@ -923,6 +925,7 @@ CURLcode Curl_set_dns_local_ip6(struct Curl_easy *data,
   }
   else {
     if(Curl_inet_pton(AF_INET6, local_ip6, a6) != 1) {
+      DEBUGF(infof(data, "bad DNS IPv6 address"));
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
   }

@@ -1235,6 +1235,7 @@ CURLcode Curl_mime_duppart(struct Curl_easy *data,
     }
     break;
   default:  /* Invalid kind: should not occur. */
+    DEBUGF(infof(data, "invalid MIMEKIND* attempt"));
     res = CURLE_BAD_FUNCTION_ARGUMENT;  /* Internal error? */
     break;
   }
