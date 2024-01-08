@@ -760,6 +760,43 @@ static const struct LongShort *single(char letter)
   return singles[letter - ' '];
 }
 
+#define MAX_QUERY_LEN 100000 /* larger is not likely to ever work */
+static ParameterError url_query(char *nextarg,
+                                struct GlobalConfig *global,
+                                struct OperationConfig *config)
+{
+  size_t size = 0;
+  ParameterError err = PARAM_OK;
+  char *query;
+  struct curlx_dynbuf dyn;
+  curlx_dyn_init(&dyn, MAX_QUERY_LEN);
+
+  if(*nextarg == '+') {
+    /* use without encoding */
+    query = strdup(&nextarg[1]);
+    if(!query)
+      err = PARAM_NO_MEM;
+  }
+  else
+    err = data_urlencode(global, nextarg, &query, &size);
+
+  if(!err) {
+    if(config->query) {
+      CURLcode result = curlx_dyn_addf(&dyn, "%s&%s", config->query, query);
+      free(query);
+      if(result)
+        err = PARAM_NO_MEM;
+      else {
+        free(config->query);
+        config->query = curlx_dyn_ptr(&dyn);
+      }
+    }
+    else
+      config->query = query;
+  }
+  return err;
+}
+
 static ParameterError set_data(char subletter,
                                char *nextarg,
                                struct GlobalConfig *global,
@@ -770,43 +807,7 @@ static ParameterError set_data(char subletter,
   size_t size = 0;
   ParameterError err = PARAM_OK;
 
-  if(subletter == 'g') { /* --url-query */
-#define MAX_QUERY_LEN 100000 /* larger is not likely to ever work */
-    char *query;
-    struct curlx_dynbuf dyn;
-    curlx_dyn_init(&dyn, MAX_QUERY_LEN);
-
-    if(*nextarg == '+') {
-      /* use without encoding */
-      query = strdup(&nextarg[1]);
-      if(!query) {
-        err = PARAM_NO_MEM;
-        goto done;
-      }
-    }
-    else {
-      err = data_urlencode(global, nextarg, &query, &size);
-      if(err)
-        goto done;
-    }
-
-    if(config->query) {
-      CURLcode result =
-        curlx_dyn_addf(&dyn, "%s&%s", config->query, query);
-      free(query);
-      if(result) {
-        err = PARAM_NO_MEM;
-        goto done;
-      }
-      free(config->query);
-      config->query = curlx_dyn_ptr(&dyn);
-    }
-    else
-      config->query = query;
-
-    goto done; /* this is not a POST argument at all */
-  }
-  else if(subletter == 'e') { /* --data-urlencode */
+  if(subletter == 'e') { /* --data-urlencode */
     err = data_urlencode(global, nextarg, &postdata, &size);
     if(err)
       goto done;
@@ -1828,10 +1829,12 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case ONEOPT('d', 'b'):  /* --data-binary */
     case ONEOPT('d', 'e'):  /* --data-urlencode */
     case ONEOPT('d', 'f'):  /* --json */
-    case ONEOPT('d', 'g'):  /* --url-query */
     case ONEOPT('d', 'r'):  /* --data-raw */
       err = set_data(subletter, nextarg, global, config);
-    break;
+      break;
+    case ONEOPT('d', 'g'):  /* --url-query */
+      err = url_query(nextarg, global, config);
+      break;
     case ONEOPT('D', '\0'): /* --dump-header */
       err = getstr(&config->headerfile, nextarg, DENY_BLANK);
       break;
