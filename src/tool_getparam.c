@@ -860,34 +860,24 @@ static ParameterError set_data(char subletter,
     config->jsoned = TRUE;
 
   if(config->postfields) {
-    /* we already have a string, we append this one with a separating
-       &-letter */
-    char *oldpost = config->postfields;
-    curl_off_t oldlen = config->postfieldsize;
-    curl_off_t newlen = oldlen + curlx_uztoso(size) + 2;
-    config->postfields = malloc((size_t)newlen);
-    if(!config->postfields) {
-      Curl_safefree(oldpost);
-      Curl_safefree(postdata);
+    /* we already have a string, append this one - perhaps with a separator */
+    struct curlx_dynbuf out;
+    curlx_dyn_init(&out, MAX_FILE2MEMORY);
+    if(curlx_dyn_addn(&out, config->postfields,
+                      (size_t)config->postfieldsize))
       err = PARAM_NO_MEM;
-      goto done;
-    }
-    memcpy(config->postfields, oldpost, (size_t)oldlen);
-    if(subletter != 'f') {
-      /* skip this treatment for --json */
-      /* use byte value 0x26 for '&' to accommodate non-ASCII platforms */
-      config->postfields[oldlen] = '\x26';
-      memcpy(&config->postfields[oldlen + 1], postdata, size);
-      config->postfields[oldlen + 1 + size] = '\0';
-      config->postfieldsize += size + 1;
-    }
-    else {
-      memcpy(&config->postfields[oldlen], postdata, size);
-      config->postfields[oldlen + size] = '\0';
-      config->postfieldsize += size;
-    }
-    Curl_safefree(oldpost);
+
+    /* skip the separator append for --json */
+    if(!err && (subletter != 'f')  && curlx_dyn_addn(&out, "&", 1))
+      err = PARAM_NO_MEM;
+
+    if(!err && curlx_dyn_addn(&out, postdata, size))
+      err = PARAM_NO_MEM;
+
+    config->postfieldsize = curlx_dyn_len(&out);
+    free(config->postfields);
     Curl_safefree(postdata);
+    config->postfields = curlx_dyn_ptr(&out);
   }
   else {
     config->postfields = postdata;

@@ -372,7 +372,6 @@ void single_transfer_cleanup(struct OperationConfig *config)
       state->urls = NULL;
     }
     Curl_safefree(state->outfiles);
-    Curl_safefree(state->httpgetfields);
     Curl_safefree(state->uploadfile);
     if(state->inglob) {
       /* Free list of globbed upload files */

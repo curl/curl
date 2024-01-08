@@ -30,6 +30,8 @@ struct getout *new_getout(struct OperationConfig *config);
 
 ParameterError file2string(char **bufp, FILE *file);
 
+#define MAX_FILE2MEMORY (1024*1024*1024) /* big enough ? */
+
 ParameterError file2memory(char **bufp, size_t *size, FILE *file);
 
 ParameterError str2num(long *val, const char *str);
