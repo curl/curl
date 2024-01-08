@@ -443,7 +443,7 @@ static CURLcode cw_chunked_write(struct Curl_easy *data,
 }
 
 /* HTTP chunked Transfer-Encoding decoder */
-const struct Curl_cwtype Curl_httpchunk_decoder = {
+const struct Curl_cwtype Curl_httpchunk_unencoder = {
   "chunked",
   NULL,
   cw_chunked_init,

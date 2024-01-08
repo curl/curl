@@ -836,7 +836,7 @@ static const struct Curl_cwtype identity_encoding = {
 
 
 /* supported general content decoders. */
-static const struct Curl_cwtype * const general_decoders[] = {
+static const struct Curl_cwtype * const general_unencoders[] = {
   &identity_encoding,
 #ifdef HAVE_LIBZ
   &deflate_encoding,
@@ -852,9 +852,9 @@ static const struct Curl_cwtype * const general_decoders[] = {
 };
 
 /* supported content decoders only for transfer encodings */
-static const struct Curl_cwtype * const transfer_decoders[] = {
+static const struct Curl_cwtype * const transfer_unencoders[] = {
 #ifndef CURL_DISABLE_HTTP
-  &Curl_httpchunk_decoder,
+  &Curl_httpchunk_unencoder,
 #endif
   NULL
 };
@@ -871,7 +871,7 @@ void Curl_all_content_encodings(char *buf, size_t blen)
   DEBUGASSERT(blen);
   buf[0] = 0;
 
-  for(cep = general_decoders; *cep; cep++) {
+  for(cep = general_unencoders; *cep; cep++) {
     ce = *cep;
     if(!strcasecompare(ce->name, CONTENT_ENCODING_DEFAULT))
       len += strlen(ce->name) + 2;
@@ -883,7 +883,7 @@ void Curl_all_content_encodings(char *buf, size_t blen)
   }
   else if(blen > len) {
     char *p = buf;
-    for(cep = general_decoders; *cep; cep++) {
+    for(cep = general_unencoders; *cep; cep++) {
       ce = *cep;
       if(!strcasecompare(ce->name, CONTENT_ENCODING_DEFAULT)) {
         strcpy(p, ce->name);
@@ -941,14 +941,14 @@ static const struct Curl_cwtype error_writer = {
 };
 
 /* Find the content encoding by name. */
-static const struct Curl_cwtype *find_decode_writer(const char *name,
-                                                    size_t len,
-                                                    Curl_cwriter_phase phase)
+static const struct Curl_cwtype *find_unencode_writer(const char *name,
+                                                      size_t len,
+                                                      Curl_cwriter_phase phase)
 {
   const struct Curl_cwtype * const *cep;
 
   if(phase == CURL_CW_TRANSFER_DECODE) {
-    for(cep = transfer_decoders; *cep; cep++) {
+    for(cep = transfer_unencoders; *cep; cep++) {
       const struct Curl_cwtype *ce = *cep;
       if((strncasecompare(name, ce->name, len) && !ce->name[len]) ||
          (ce->alias && strncasecompare(name, ce->alias, len)
@@ -957,7 +957,7 @@ static const struct Curl_cwtype *find_decode_writer(const char *name,
     }
   }
   /* look among the general decoders */
-  for(cep = general_decoders; *cep; cep++) {
+  for(cep = general_unencoders; *cep; cep++) {
     const struct Curl_cwtype *ce = *cep;
     if((strncasecompare(name, ce->name, len) && !ce->name[len]) ||
        (ce->alias && strncasecompare(name, ce->alias, len) && !ce->alias[len]))
@@ -1008,7 +1008,7 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
         return CURLE_BAD_CONTENT_ENCODING;
       }
 
-      cwt = find_decode_writer(name, namelen, phase);
+      cwt = find_unencode_writer(name, namelen, phase);
       if(!cwt)
         cwt = &error_writer;  /* Defer error at use. */
 

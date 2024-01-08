@@ -131,7 +131,7 @@ CURLcode Curl_httpchunk_read(struct Curl_easy *data, struct Curl_chunker *ch,
  */
 bool Curl_httpchunk_is_done(struct Curl_easy *data, struct Curl_chunker *ch);
 
-extern const struct Curl_cwtype Curl_httpchunk_decoder;
+extern const struct Curl_cwtype Curl_httpchunk_unencoder;
 
 #endif /* !CURL_DISABLE_HTTP */
 
