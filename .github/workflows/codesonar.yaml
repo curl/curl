@@ -58,7 +58,6 @@ jobs:
       - name: Add Misra rules
         run: | 
             python3 cso-scripts/add_MISRA_rules.py warnings.sarif Misra2012-mapping-broad.csv > warnings_misra.sarif
-            ls -la
       - name: Push Summary Report
         if: ${{ github.event.pull_request }}
         uses: thollander/actions-comment-pull-request@v2
