@@ -319,7 +319,8 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   /* Extract the security layer and the maximum message size */
   indata = input_buf[1].pvBuffer;
   sec_layer = indata[0];
-  max_size = (indata[1] << 16) | (indata[2] << 8) | indata[3];
+  max_size = ((unsigned long)indata[1] << 16) |
+             ((unsigned long)indata[2] << 8) | indata[3];
 
   /* Free the challenge as it is not required anymore */
   s_pSecFn->FreeContextBuffer(input_buf[1].pvBuffer);

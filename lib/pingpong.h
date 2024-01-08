@@ -113,7 +113,7 @@ timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
  */
 CURLcode Curl_pp_sendf(struct Curl_easy *data,
                        struct pingpong *pp,
-                       const char *fmt, ...);
+                       const char *fmt, ...) CURL_PRINTF(3, 4);
 
 /***********************************************************************
  *
@@ -128,7 +128,7 @@ CURLcode Curl_pp_sendf(struct Curl_easy *data,
 CURLcode Curl_pp_vsendf(struct Curl_easy *data,
                         struct pingpong *pp,
                         const char *fmt,
-                        va_list args);
+                        va_list args) CURL_PRINTF(3, 0);
 
 /*
  * Curl_pp_readresp()

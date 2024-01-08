@@ -3,6 +3,7 @@ SPDX-License-Identifier: curl
 Long: ssl-revoke-best-effort
 Help: Ignore missing/offline cert CRL dist points (Schannel)
 Added: 7.70.0
+Protocols: TLS
 Category: tls
 Example: --ssl-revoke-best-effort $URL
 See-also: crlfile insecure

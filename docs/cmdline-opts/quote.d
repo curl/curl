@@ -35,53 +35,41 @@ itself before sending them to the server. File names may be quoted
 shell-style to embed spaces or special characters. Following is the list of
 all supported SFTP quote commands:
 .RS
-.TP
-**"atime date file"**
+.IP "atime date file"
 The atime command sets the last access time of the file named by the file
 operand. The <date expression> can be all sorts of date strings, see the
 *curl_getdate(3)* man page for date expression details. (Added in 7.73.0)
-.TP
-**"chgrp group file"**
+.IP "chgrp group file"
 The chgrp command sets the group ID of the file named by the file operand to
 the group ID specified by the group operand. The group operand is a decimal
 integer group ID.
-.TP
-**"chmod mode file"**
+.IP "chmod mode file"
 The chmod command modifies the file mode bits of the specified file. The
 mode operand is an octal integer mode number.
-.TP
-**"chown user file"**
+.IP "chown user file"
 The chown command sets the owner of the file named by the file operand to the
 user ID specified by the user operand. The user operand is a decimal
 integer user ID.
-.TP
-**"ln source_file target_file"**
+.IP "ln source_file target_file"
 The ln and symlink commands create a symbolic link at the target_file location
 pointing to the source_file location.
-.TP
-**"mkdir directory_name"**
+.IP "mkdir directory_name"
 The mkdir command creates the directory named by the directory_name operand.
-.TP
-**"mtime date file"**
+.IP "mtime date file"
 The mtime command sets the last modification time of the file named by the
 file operand. The <date expression> can be all sorts of date strings, see the
 *curl_getdate(3)* man page for date expression details. (Added in 7.73.0)
-.TP
-**"pwd"**
+.IP "pwd"
 The pwd command returns the absolute path name of the current working directory.
-.TP
-**"rename source target"**
+.IP "rename source target"
 The rename command renames the file or directory named by the source
 operand to the destination path named by the target operand.
-.TP
-**"rm file"**
+.IP "rm file"
 The rm command removes the file specified by the file operand.
-.TP
-**"rmdir directory"**
+.IP "rmdir directory"
 The rmdir command removes the directory entry specified by the directory
 operand, provided it is empty.
-.TP
-**"symlink source_file target_file"**
+.IP "symlink source_file target_file"
 See ln.
 .RE
 .IP

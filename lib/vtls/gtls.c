@@ -584,13 +584,9 @@ CURLcode gtls_client_init(struct Curl_easy *data,
   /* Only add SRP to the cipher list if SRP is requested. Otherwise
    * GnuTLS will disable TLS 1.3 support. */
   if(config->username) {
-    size_t len = strlen(prioritylist);
-
-    char *prioritysrp = malloc(len + sizeof(GNUTLS_SRP) + 1);
+    char *prioritysrp = aprintf("%s:" GNUTLS_SRP, prioritylist);
     if(!prioritysrp)
       return CURLE_OUT_OF_MEMORY;
-    strcpy(prioritysrp, prioritylist);
-    strcpy(prioritysrp + len, ":" GNUTLS_SRP);
     rc = gnutls_priority_set_direct(gtls->session, prioritysrp, &err);
     free(prioritysrp);
 
@@ -822,16 +818,17 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
   char certname[65] = ""; /* limited to 64 chars by ASN.1 */
   size_t size;
   time_t certclock;
-  const char *ptr;
   int rc;
   CURLcode result = CURLE_OK;
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
+  const char *ptr;
   unsigned int algo;
   unsigned int bits;
   gnutls_protocol_t version = gnutls_protocol_get_version(session);
 #endif
   long * const certverifyresult = &ssl_config->certverifyresult;
 
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
   /* the name of the cipher suite used, e.g. ECDHE_RSA_AES_256_GCM_SHA384. */
   ptr = gnutls_cipher_suite_get_name(gnutls_kx_get(session),
                                      gnutls_cipher_get(session),
@@ -839,6 +836,7 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
 
   infof(data, "SSL connection using %s / %s",
         gnutls_protocol_get_name(version), ptr);
+#endif
 
   /* This function will return the peer's raw certificate (chain) as sent by
      the peer. These certificates are in raw format (DER encoded for

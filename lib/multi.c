@@ -672,6 +672,7 @@ static CURLcode multi_done(struct Curl_easy *data,
        many callbacks and protocols work differently, we could potentially do
        this more fine-grained in the future. */
     premature = TRUE;
+    FALLTHROUGH();
   default:
     break;
   }
@@ -993,31 +994,90 @@ void Curl_attach_connection(struct Curl_easy *data,
   Curl_conn_ev_data_attach(conn, data);
 }
 
-static int domore_getsock(struct Curl_easy *data,
-                          struct connectdata *conn,
-                          curl_socket_t *socks)
+static int connecting_getsock(struct Curl_easy *data, curl_socket_t *socks)
 {
+  struct connectdata *conn = data->conn;
+  (void)socks;
+  if(conn && conn->sockfd != CURL_SOCKET_BAD) {
+    /* Default is to wait to something from the server */
+    socks[0] = conn->sockfd;
+    return GETSOCK_READSOCK(0);
+  }
+  return GETSOCK_BLANK;
+}
+
+static int protocol_getsock(struct Curl_easy *data, curl_socket_t *socks)
+{
+  struct connectdata *conn = data->conn;
+  if(conn && conn->handler->proto_getsock)
+    return conn->handler->proto_getsock(data, conn, socks);
+  else if(conn && conn->sockfd != CURL_SOCKET_BAD) {
+    /* Default is to wait to something from the server */
+    socks[0] = conn->sockfd;
+    return GETSOCK_READSOCK(0);
+  }
+  return GETSOCK_BLANK;
+}
+
+static int domore_getsock(struct Curl_easy *data, curl_socket_t *socks)
+{
+  struct connectdata *conn = data->conn;
   if(conn && conn->handler->domore_getsock)
     return conn->handler->domore_getsock(data, conn, socks);
+  else if(conn && conn->sockfd != CURL_SOCKET_BAD) {
+    /* Default is that we want to send something to the server */
+    socks[0] = conn->sockfd;
+    return GETSOCK_WRITESOCK(0);
+  }
   return GETSOCK_BLANK;
 }
 
-static int doing_getsock(struct Curl_easy *data,
-                         struct connectdata *conn,
-                         curl_socket_t *socks)
+static int doing_getsock(struct Curl_easy *data, curl_socket_t *socks)
 {
+  struct connectdata *conn = data->conn;
   if(conn && conn->handler->doing_getsock)
     return conn->handler->doing_getsock(data, conn, socks);
+  else if(conn && conn->sockfd != CURL_SOCKET_BAD) {
+    /* Default is that we want to send something to the server */
+    socks[0] = conn->sockfd;
+    return GETSOCK_WRITESOCK(0);
+  }
   return GETSOCK_BLANK;
 }
 
-static int protocol_getsock(struct Curl_easy *data,
-                            struct connectdata *conn,
-                            curl_socket_t *socks)
+static int perform_getsock(struct Curl_easy *data, curl_socket_t *sock)
 {
-  if(conn->handler->proto_getsock)
-    return conn->handler->proto_getsock(data, conn, socks);
-  return GETSOCK_BLANK;
+  struct connectdata *conn = data->conn;
+
+  if(!conn)
+    return GETSOCK_BLANK;
+  else if(conn->handler->perform_getsock)
+    return conn->handler->perform_getsock(data, conn, sock);
+  else {
+    /* Default is to obey the data->req.keepon flags for send/recv */
+    int bitmap = GETSOCK_BLANK;
+    unsigned sockindex = 0;
+    if(CURL_WANT_RECV(data)) {
+      DEBUGASSERT(conn->sockfd != CURL_SOCKET_BAD);
+      bitmap |= GETSOCK_READSOCK(sockindex);
+      sock[sockindex] = conn->sockfd;
+    }
+
+    if(CURL_WANT_SEND(data)) {
+      if((conn->sockfd != conn->writesockfd) ||
+         bitmap == GETSOCK_BLANK) {
+        /* only if they are not the same socket and we have a readable
+           one, we increase index */
+        if(bitmap != GETSOCK_BLANK)
+          sockindex++; /* increase index if we need two entries */
+
+        DEBUGASSERT(conn->writesockfd != CURL_SOCKET_BAD);
+        sock[sockindex] = conn->writesockfd;
+      }
+      bitmap |= GETSOCK_WRITESOCK(sockindex);
+    }
+    return bitmap;
+  }
 }
 
 /* Initializes `poll_set` with the current socket poll actions needed
@@ -1033,45 +1093,61 @@ static void multi_getsock(struct Curl_easy *data,
     return;
 
   switch(data->mstate) {
-  default:
+  case MSTATE_INIT:
+  case MSTATE_PENDING:
+  case MSTATE_CONNECT:
+    /* nothing to poll for yet */
     break;
 
   case MSTATE_RESOLVING:
-    Curl_pollset_add_socks2(data, ps, Curl_resolv_getsock);
+    Curl_pollset_add_socks(data, ps, Curl_resolv_getsock);
     /* connection filters are not involved in this phase */
-    return;
+    break;
 
-  case MSTATE_PROTOCONNECTING:
+  case MSTATE_CONNECTING:
+  case MSTATE_TUNNELING:
+    Curl_pollset_add_socks(data, ps, connecting_getsock);
+    Curl_conn_adjust_pollset(data, ps);
+    break;
+
   case MSTATE_PROTOCONNECT:
+  case MSTATE_PROTOCONNECTING:
     Curl_pollset_add_socks(data, ps, protocol_getsock);
+    Curl_conn_adjust_pollset(data, ps);
     break;
 
   case MSTATE_DO:
   case MSTATE_DOING:
     Curl_pollset_add_socks(data, ps, doing_getsock);
-    break;
-
-  case MSTATE_TUNNELING:
-  case MSTATE_CONNECTING:
+    Curl_conn_adjust_pollset(data, ps);
     break;
 
   case MSTATE_DOING_MORE:
     Curl_pollset_add_socks(data, ps, domore_getsock);
+    Curl_conn_adjust_pollset(data, ps);
     break;
 
-  case MSTATE_DID: /* since is set after DO is completed, we switch to
-                        waiting for the same as the PERFORMING state */
+  case MSTATE_DID: /* same as PERFORMING in regard to polling */
   case MSTATE_PERFORMING:
-    Curl_pollset_add_socks(data, ps, Curl_single_getsock);
+    Curl_pollset_add_socks(data, ps, perform_getsock);
+    Curl_conn_adjust_pollset(data, ps);
     break;
 
   case MSTATE_RATELIMITING:
-    /* nothing to wait for */
-    return;
-  }
+    /* we need to let time pass, ignore socket(s) */
+    break;
 
-  /* Let connection filters add/remove as needed */
-  Curl_conn_adjust_pollset(data, ps);
+  case MSTATE_DONE:
+  case MSTATE_COMPLETED:
+  case MSTATE_MSGSENT:
+    /* nothing more to poll for */
+    break;
+
+  default:
+    failf(data, "multi_getsock: unexpected multi state %d", data->mstate);
+    DEBUGASSERT(0);
+    break;
+  }
 }
 
 CURLMcode curl_multi_fdset(struct Curl_multi *multi,
@@ -1942,6 +2018,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
 
       if(!result) {
+        *nowp = Curl_pgrsTime(data, TIMER_POSTQUEUE);
         if(async)
           /* We're now waiting for an asynchronous name lookup */
           multistate(data, MSTATE_RESOLVING);
@@ -1983,8 +2060,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
       if(dns) {
 #ifdef CURLRES_ASYNCH
-        conn->resolve_async.dns = dns;
-        conn->resolve_async.done = TRUE;
+        data->state.async.dns = dns;
+        data->state.async.done = TRUE;
 #endif
         result = CURLE_OK;
         infof(data, "Hostname '%s' was found in DNS cache", hostname);
@@ -2371,7 +2448,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     {
       char *newurl = NULL;
       bool retry = FALSE;
-      bool comeback = FALSE;
       DEBUGASSERT(data->state.buffer);
       /* check if over send speed */
       send_timeout_ms = 0;
@@ -2402,7 +2478,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
 
       /* read/write data if it is ready to do so */
-      result = Curl_readwrite(data->conn, data, &done, &comeback);
+      result = Curl_readwrite(data->conn, data, &done);
 
       if(done || (result == CURLE_RECV_ERROR)) {
         /* If CURLE_RECV_ERROR happens early enough, we assume it was a race
@@ -2512,7 +2588,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           }
         }
       }
-      else if(comeback) {
+      else if(data->state.select_bits) {
         /* This avoids CURLM_CALL_MULTI_PERFORM so that a very fast transfer
            won't get stuck on this transfer at the expense of other concurrent
            transfers */
@@ -3164,7 +3240,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
 
         if(data->conn && !(data->conn->handler->flags & PROTOPT_DIRLOCK))
           /* set socket event bitmask if they're not locked */
-          data->conn->cselect_bits = (unsigned char)ev_bitmask;
+          data->state.select_bits = (unsigned char)ev_bitmask;
 
         Curl_expire(data, 0, EXPIRE_RUN_NOW);
       }

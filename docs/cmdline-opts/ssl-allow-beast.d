@@ -2,6 +2,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: ssl-allow-beast
 Help: Allow security flaw to improve interop
+Protocols: TLS
 Added: 7.25.0
 Category: tls
 Example: --ssl-allow-beast $URL

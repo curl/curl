@@ -31,9 +31,6 @@ int Curl_inet_pton(int, const char *, void *);
 #ifdef HAVE_INET_PTON
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
-#elif defined(HAVE_WS2TCPIP_H)
-/* inet_pton() exists in Vista or later */
-#include <ws2tcpip.h>
 #endif
 #define Curl_inet_pton(x,y,z) inet_pton(x,y,z)
 #endif

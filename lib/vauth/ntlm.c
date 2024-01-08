@@ -44,6 +44,7 @@
 #include "warnless.h"
 #include "rand.h"
 #include "vtls/vtls.h"
+#include "strdup.h"
 
 #define BUILDING_CURL_NTLM_MSGS_C
 #include "vauth/vauth.h"
@@ -184,11 +185,10 @@ static CURLcode ntlm_decode_type2_target(struct Curl_easy *data,
       }
 
       free(ntlm->target_info); /* replace any previous data */
-      ntlm->target_info = malloc(target_info_len);
+      ntlm->target_info = Curl_memdup(&type2[target_info_offset],
+                                      target_info_len);
       if(!ntlm->target_info)
         return CURLE_OUT_OF_MEMORY;
-
-      memcpy(ntlm->target_info, &type2[target_info_offset], target_info_len);
     }
   }
 

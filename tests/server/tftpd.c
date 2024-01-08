@@ -1129,7 +1129,7 @@ static int validate_access(struct testcase *test,
     if(!stream) {
       int error = errno;
       logmsg("fopen() failed with error: %d %s", error, strerror(error));
-      logmsg("Couldn't open test file for test : %d", testno);
+      logmsg("Couldn't open test file for test: %ld", testno);
       return EACCESS;
     }
     else {

@@ -760,21 +760,7 @@ static void ps_add(struct Curl_easy *data, struct easy_pollset *ps,
 void Curl_pollset_add_socks(struct Curl_easy *data,
                             struct easy_pollset *ps,
                             int (*get_socks_cb)(struct Curl_easy *data,
-                                                struct connectdata *conn,
                                                 curl_socket_t *socks))
-{
-  curl_socket_t socks[MAX_SOCKSPEREASYHANDLE];
-  int bitmap;
-
-  DEBUGASSERT(data->conn);
-  bitmap = get_socks_cb(data, data->conn, socks);
-  ps_add(data, ps, bitmap, socks);
-}
-
-void Curl_pollset_add_socks2(struct Curl_easy *data,
-                             struct easy_pollset *ps,
-                             int (*get_socks_cb)(struct Curl_easy *data,
-                                                 curl_socket_t *socks))
 {
   curl_socket_t socks[MAX_SOCKSPEREASYHANDLE];
   int bitmap;

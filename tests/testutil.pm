@@ -94,6 +94,15 @@ sub clearlogs {
 
 
 #######################################################################
+
+sub includefile {
+    my ($f) = @_;
+    open(F, "<$f");
+    my @a = <F>;
+    close(F);
+    return join("", @a);
+}
+
 sub subbase64 {
     my ($thing) = @_;
 
@@ -113,6 +122,7 @@ sub subbase64 {
         $d =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
         $$thing =~ s/%%HEX%%/$d/;
     }
+    # repeat
     while($$thing =~ s/%repeat\[(\d+) x (.*?)\]%/%%REPEAT%%/i) {
         # decode %NN characters
         my ($d, $n) = ($2, $1);
@@ -120,6 +130,9 @@ sub subbase64 {
         my $all = $d x $n;
         $$thing =~ s/%%REPEAT%%/$all/;
     }
+
+    # include a file
+    $$thing =~ s/%include ([^%]*)%[\n\r]+/includefile($1)/ge;
 }
 
 my $prevupdate;  # module scope so it remembers the last value

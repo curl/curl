@@ -156,7 +156,7 @@ static ssize_t tls_recv_more(struct Curl_cfilter *cf,
     size_t errorlen;
     rustls_error(rresult, errorbuf, sizeof(errorbuf), &errorlen);
     failf(data, "rustls_connection_process_new_packets: %.*s",
-      errorlen, errorbuf);
+      (int)errorlen, errorbuf);
     *err = map_error(rresult);
     return -1;
   }
@@ -225,7 +225,7 @@ cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       char errorbuf[255];
       size_t errorlen;
       rustls_error(rresult, errorbuf, sizeof(errorbuf), &errorlen);
-      failf(data, "rustls_connection_read: %.*s", errorlen, errorbuf);
+      failf(data, "rustls_connection_read: %.*s", (int)errorlen, errorbuf);
       *err = CURLE_READ_ERROR;
       nread = -1;
       goto out;
@@ -301,7 +301,7 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                                       &plainwritten);
     if(rresult != RUSTLS_RESULT_OK) {
       rustls_error(rresult, errorbuf, sizeof(errorbuf), &errorlen);
-      failf(data, "rustls_connection_write: %.*s", errorlen, errorbuf);
+      failf(data, "rustls_connection_write: %.*s", (int)errorlen, errorbuf);
       *err = CURLE_WRITE_ERROR;
       return -1;
     }
@@ -459,7 +459,7 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
   if(result != RUSTLS_RESULT_OK) {
     rustls_error(result, errorbuf, sizeof(errorbuf), &errorlen);
-    failf(data, "rustls_client_connection_new: %.*s", errorlen, errorbuf);
+    failf(data, "rustls_client_connection_new: %.*s", (int)errorlen, errorbuf);
     return CURLE_COULDNT_CONNECT;
   }
   rustls_connection_set_userdata(rconn, backend);
@@ -563,8 +563,8 @@ cr_connect_common(struct Curl_cfilter *cf,
       return CURLE_SSL_CONNECT_ERROR;
     }
     if(blocking && 0 == what) {
-      failf(data, "rustls connection timeout after %d ms",
-        socket_check_timeout);
+      failf(data, "rustls connection timeout after %"
+        CURL_FORMAT_TIMEDIFF_T " ms", socket_check_timeout);
       return CURLE_OPERATION_TIMEDOUT;
     }
     if(0 == what) {

@@ -126,15 +126,17 @@ int main(int argc, char *argv[])
             default:
               fprintf(stderr, "\r%s: invalid parameter %s\n",
                       appname, *argv + 3);
-              exit(1);
+              return 1;
             }
             break;
           }
-          /* FALLTHROUGH */
+          fprintf(stderr, "\r%s: invalid or unknown option %s\n",
+                  appname, *argv);
+          return 1;
         default:
           fprintf(stderr, "\r%s: invalid or unknown option %s\n",
                   appname, *argv);
-          exit(1);
+          return 1;
         }
       }
       else {

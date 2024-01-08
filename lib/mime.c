@@ -817,7 +817,7 @@ static size_t read_part_content(curl_mimepart *part,
     case MIMEKIND_FILE:
       if(part->fp && feof(part->fp))
         break;  /* At EOF. */
-      /* FALLTHROUGH */
+      FALLTHROUGH();
     default:
       if(part->readfunc) {
         if(!(part->flags & MIME_FAST_READ)) {
@@ -936,7 +936,7 @@ static size_t readback_part(curl_mimepart *part,
         mimesetstate(&part->state, MIMESTATE_USERHEADERS, hdr->next);
         break;
       }
-      /* FALLTHROUGH */
+      FALLTHROUGH();
     case MIMESTATE_CURLHEADERS:
       if(!hdr)
         mimesetstate(&part->state, MIMESTATE_USERHEADERS, part->userheaders);
@@ -970,7 +970,7 @@ static size_t readback_part(curl_mimepart *part,
           fclose(part->fp);
           part->fp = NULL;
         }
-        /* FALLTHROUGH */
+        FALLTHROUGH();
       case CURL_READFUNC_ABORT:
       case CURL_READFUNC_PAUSE:
       case READ_ERROR:
@@ -1680,7 +1680,14 @@ CURLcode Curl_mime_add_header(struct curl_slist **slp, const char *fmt, ...)
   va_list ap;
 
   va_start(ap, fmt);
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
   s = curl_mvaprintf(fmt, ap);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
   va_end(ap);
 
   if(s) {

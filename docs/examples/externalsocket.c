@@ -31,9 +31,7 @@
 #include <curl/curl.h>
 
 #ifdef _WIN32
-#include <windows.h>
 #include <winsock2.h>
-#include <ws2tcpip.h>
 #define close closesocket
 #else
 #include <sys/types.h>        /*  socket types              */

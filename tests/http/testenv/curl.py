@@ -247,7 +247,7 @@ class ExecResult:
         if exitcode is not None:
             for idx, x in enumerate(self.stats):
                 if 'exitcode' in x:
-                    assert x['exitcode'] == 0, \
+                    assert x['exitcode'] == exitcode, \
                         f'status #{idx} exitcode: expected {exitcode}, '\
                         f'got {x["exitcode"]}\n{self.dump_stat(x)}'
 

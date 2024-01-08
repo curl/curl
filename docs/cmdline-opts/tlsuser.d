@@ -4,6 +4,7 @@ Long: tlsuser
 Arg: <name>
 Help: TLS user name
 Added: 7.21.4
+Protocols: TLS
 Category: tls auth
 Example: --tlspassword pwd --tlsuser user $URL
 See-also: tlspassword

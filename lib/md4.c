@@ -194,11 +194,9 @@ static int MD4_Init(MD4_CTX *ctx)
 static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
 {
   if(!ctx->data) {
-    ctx->data = malloc(size);
-    if(ctx->data) {
-      memcpy(ctx->data, data, size);
+    ctx->data = Curl_memdup(data, size);
+    if(ctx->data)
       ctx->size = size;
-    }
   }
 }
 

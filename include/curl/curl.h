@@ -631,6 +631,7 @@ typedef enum {
   CURLE_PROXY,                   /* 97 - proxy handshake error */
   CURLE_SSL_CLIENTCERT,          /* 98 - client-side certificate required */
   CURLE_UNRECOVERABLE_POLL,      /* 99 - poll/select returned fatal error */
+  CURLE_TOO_LARGE,               /* 100 - a value/data met its maximum */
   CURL_LAST /* never use! */
 } CURLcode;
 
@@ -2201,6 +2202,9 @@ typedef enum {
   /* set a specific client IP for HAProxy PROXY protocol header? */
   CURLOPT(CURLOPT_HAPROXY_CLIENT_IP, CURLOPTTYPE_STRINGPOINT, 323),
 
+  /* millisecond version */
+  CURLOPT(CURLOPT_SERVER_RESPONSE_TIMEOUT_MS, CURLOPTTYPE_LONG, 324),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -2932,7 +2936,8 @@ typedef enum {
   CURLINFO_CAPATH           = CURLINFO_STRING + 62,
   CURLINFO_XFER_ID          = CURLINFO_OFF_T + 63,
   CURLINFO_CONN_ID          = CURLINFO_OFF_T + 64,
-  CURLINFO_LASTONE          = 64
+  CURLINFO_QUEUE_TIME_T     = CURLINFO_OFF_T + 65,
+  CURLINFO_LASTONE          = 65
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as

@@ -21,24 +21,7 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# curl/libcurl CMake script
 # by Tetetest and Sukender (Benoit Neil)
-
-# TODO:
-# The output .so file lacks the soname number which we currently have within the lib/Makefile.am file
-# Add full (4 or 5 libs) SSL support
-# Add INSTALL target (EXTRA_DIST variables in Makefile.am may be moved to Makefile.inc so that CMake/CPack is aware of what's to include).
-# Check on all possible platforms
-# Test with as many configurations possible (With or without any option)
-# Create scripts that help keeping the CMake build system up to date (to reduce maintenance). According to Tetetest:
-#  - lists of headers that 'configure' checks for;
-#  - curl-specific tests (the ones that are in m4/curl-*.m4 files);
-#  - (most obvious thing:) curl version numbers.
-# Add documentation subproject
-#
-# To check:
-# (From Daniel Stenberg) The cmake build selected to run gcc with -fPIC on my box while the plain configure script did not.
-# (From Daniel Stenberg) The gcc command line use neither -g nor any -O options. As a developer, I also treasure our configure scripts's --enable-debug option that sets a long range of "picky" compiler options.
 
 # Note: By default this CMake build script detects the version of some
 # dependencies using `check_symbol_exists`.  Those checks do not work
@@ -368,9 +351,6 @@ include(CheckCSourceCompiles)
 
 # On windows preload settings
 if(WIN32)
-  set(HAVE_WINDOWS_H 1)
-  set(HAVE_WS2TCPIP_H 1)
-  set(HAVE_WINSOCK2_H 1)
   include(${CMAKE_CURRENT_SOURCE_DIR}/CMake/Platforms/WindowsCache.cmake)
 endif()
 
@@ -787,7 +767,7 @@ if(NOT CURL_DISABLE_LDAP)
       endif()
       set(NEED_LBER_H ON)
       set(_HEADER_LIST)
-      if(HAVE_WINDOWS_H)
+      if(WIN32)
         list(APPEND _HEADER_LIST "windows.h")
       endif()
       if(HAVE_SYS_TYPES_H)
@@ -927,10 +907,8 @@ if(CURL_USE_GSSAPI)
     check_include_file_concat("gssapi/gssapi_generic.h" HAVE_GSSAPI_GSSAPI_GENERIC_H)
     check_include_file_concat("gssapi/gssapi_krb5.h" HAVE_GSSAPI_GSSAPI_KRB5_H)
 
-    if(GSS_FLAVOUR STREQUAL "Heimdal")
-      set(HAVE_GSSHEIMDAL ON)
-    else() # MIT
-      set(HAVE_GSSMIT ON)
+    if(NOT GSS_FLAVOUR STREQUAL "Heimdal")
+      # MIT
       set(_INCLUDE_LIST "")
       if(HAVE_GSSAPI_GSSAPI_H)
         list(APPEND _INCLUDE_LIST "gssapi/gssapi.h")
@@ -1070,9 +1048,9 @@ endif()
 
 # Check for header files
 if(WIN32)
-  check_include_file_concat("winsock2.h"     HAVE_WINSOCK2_H)
-  check_include_file_concat("ws2tcpip.h"     HAVE_WS2TCPIP_H)
-  check_include_file_concat("windows.h"      HAVE_WINDOWS_H)
+  set(CURL_INCLUDES ${CURL_INCLUDES} "winsock2.h")
+  set(CURL_INCLUDES ${CURL_INCLUDES} "ws2tcpip.h")
+  set(CURL_INCLUDES ${CURL_INCLUDES} "windows.h")
 endif()
 
 if(WIN32)
@@ -1266,7 +1244,7 @@ set(HAVE_SA_FAMILY_T            ${HAVE_SIZEOF_SA_FAMILY_T})
 set(CMAKE_EXTRA_INCLUDE_FILES   "")
 
 if(WIN32)
-  set(CMAKE_EXTRA_INCLUDE_FILES   "ws2def.h")
+  set(CMAKE_EXTRA_INCLUDE_FILES   "winsock2.h")
   check_type_size("ADDRESS_FAMILY"    SIZEOF_ADDRESS_FAMILY)
   set(HAVE_ADDRESS_FAMILY         ${HAVE_SIZEOF_ADDRESS_FAMILY})
   set(CMAKE_EXTRA_INCLUDE_FILES   "")
@@ -1406,15 +1384,6 @@ if(CMAKE_COMPILER_IS_GNUCC AND APPLE)
   endif()
 endif()
 
-# TODO test which of these headers are required
-if(WIN32)
-  set(CURL_PULL_WS2TCPIP_H ${HAVE_WS2TCPIP_H})
-else()
-  set(CURL_PULL_SYS_TYPES_H ${HAVE_SYS_TYPES_H})
-  set(CURL_PULL_SYS_SOCKET_H ${HAVE_SYS_SOCKET_H})
-  set(CURL_PULL_SYS_POLL_H ${HAVE_SYS_POLL_H})
-endif()
-
 include(CMake/OtherTests.cmake)
 
 add_definitions(-DHAVE_CONFIG_H)
@@ -1533,7 +1502,6 @@ if(NOT CURL_DISABLE_INSTALL)
   endmacro()
 
   # NTLM support requires crypto function adaptions from various SSL libs
-  # TODO alternative SSL libs tests for SSP1, GnuTLS, NSS
   if(NOT (CURL_DISABLE_NTLM) AND
       (USE_OPENSSL OR USE_MBEDTLS OR USE_DARWINSSL OR USE_WIN32_CRYPTO OR USE_GNUTLS))
     set(use_curl_ntlm_core ON)
@@ -1551,26 +1519,20 @@ if(NOT CURL_DISABLE_INSTALL)
   _add_if("IDN"           HAVE_LIBIDN2 OR USE_WIN32_IDN)
   _add_if("Largefile"     (SIZEOF_CURL_OFF_T GREATER 4) AND
                           ((SIZEOF_OFF_T GREATER 4) OR USE_WIN32_LARGE_FILES))
-  # TODO SSP1 (Schannel) check is missing
   _add_if("SSPI"          USE_WINDOWS_SSPI)
   _add_if("GSS-API"       HAVE_GSSAPI)
   _add_if("alt-svc"       NOT CURL_DISABLE_ALTSVC)
   _add_if("HSTS"          NOT CURL_DISABLE_HSTS)
-  # TODO SSP1 missing for SPNEGO
   _add_if("SPNEGO"        NOT CURL_DISABLE_NEGOTIATE_AUTH AND
                           (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
   _add_if("Kerberos"      NOT CURL_DISABLE_KERBEROS_AUTH AND
                           (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
-  # NTLM support requires crypto function adaptions from various SSL libs
-  # TODO alternative SSL libs tests for SSP1, GnuTLS, NSS
   _add_if("NTLM"          NOT (CURL_DISABLE_NTLM) AND
                           (use_curl_ntlm_core OR USE_WINDOWS_SSPI))
-  # TODO missing option (autoconf: --enable-ntlm-wb)
   _add_if("NTLM_WB"       NOT (CURL_DISABLE_NTLM) AND
                           (use_curl_ntlm_core OR USE_WINDOWS_SSPI) AND
                           NOT CURL_DISABLE_HTTP AND NTLM_WB_ENABLED)
   _add_if("TLS-SRP"       USE_TLS_SRP)
-  # TODO option --with-nghttp2 tests for nghttp2 lib and nghttp2/nghttp2.h header
   _add_if("HTTP2"         USE_NGHTTP2)
   _add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE)
   _add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
@@ -1589,6 +1551,8 @@ if(NOT CURL_DISABLE_INSTALL)
   # Clear list and try to detect available protocols
   set(_items)
   _add_if("HTTP"          NOT CURL_DISABLE_HTTP)
+  _add_if("IPFS"          NOT CURL_DISABLE_HTTP)
+  _add_if("IPNS"          NOT CURL_DISABLE_HTTP)
   _add_if("HTTPS"         NOT CURL_DISABLE_HTTP AND SSL_ENABLED)
   _add_if("FTP"           NOT CURL_DISABLE_FTP)
   _add_if("FTPS"          NOT CURL_DISABLE_FTP AND SSL_ENABLED)

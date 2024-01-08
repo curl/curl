@@ -14,8 +14,7 @@ HTTPS proxy. By default, curl uses a CA store provided in a single file or
 directory, but when using this option it interfaces the operating system's own
 vault.
 
-This option only works for curl on Windows when built to use OpenSSL. When
-curl on Windows is built to use Schannel, this feature is implied and curl
-then only uses the native CA store.
-
-curl built with wolfSSL also supports this option (added in 8.3.0).
+This option works for curl on Windows when built to use OpenSSL, wolfSSL
+(added in 8.3.0) or GnuTLS (added in 8.5.0). When curl on Windows is built to
+use Schannel, this feature is implied and curl then only uses the native CA
+store.

@@ -78,4 +78,3 @@ for my $m (@files) {
     $error |= testcompile($m);
 }
 exit $error;
-

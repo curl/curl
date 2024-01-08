@@ -85,7 +85,6 @@ environment:
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
       DISABLED_TESTS: '!1139 !1501'
-      ADD_PATH: 'C:\msys64\usr\bin'
     - job_name: 'CMake, VS2022, Debug, x64, Schannel, Static, Unicode'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
@@ -97,7 +96,6 @@ environment:
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
       DISABLED_TESTS: '!1139 !1501'
-      ADD_PATH: 'C:\msys64\usr\bin'
     - job_name: 'CMake, VS2022, Debug, x64, no SSL, Static'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
@@ -109,7 +107,6 @@ environment:
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
       DISABLED_TESTS: '!1139 !1501'
-      ADD_PATH: 'C:\msys64\usr\bin'
     - job_name: 'CMake, VS2022, Debug, x64, no SSL, Static, HTTP only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
@@ -121,7 +118,6 @@ environment:
       HTTP_ONLY: 'ON'
       TESTING: 'ON'
       DISABLED_TESTS: '!1139 !1501'
-      ADD_PATH: 'C:\msys64\usr\bin'
     # generated CMake-based MSYS Makefiles builds (mingw cross-compiling)
     - job_name: 'CMake, mingw-w64, gcc 13, Debug, x64, Schannel, Static, Unicode, Unity'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
@@ -133,7 +129,7 @@ environment:
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
       DISABLED_TESTS: '!1086 !1139 !1451 !1501'
-      ADD_PATH: 'C:\msys64\mingw64\bin;C:\msys64\usr\bin'
+      ADD_PATH: 'C:/msys64/mingw64/bin'
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
       UNITY: 'ON'
@@ -147,7 +143,7 @@ environment:
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
       DISABLED_TESTS: '!1086 !1139 !1451 !1501'
-      ADD_PATH: 'C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin;C:\msys64\usr\bin'
+      ADD_PATH: 'C:/mingw-w64/x86_64-7.2.0-posix-seh-rt_v5-rev1/mingw64/bin'
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
     - job_name: 'CMake, mingw-w64, gcc 9, Debug, x64, Schannel, Static, Unity'
@@ -161,7 +157,7 @@ environment:
       TESTING: 'ON'
       # test 286 disabled due to https://github.com/curl/curl/issues/12040
       DISABLED_TESTS: '~286 !1086 !1139 !1451 !1501'
-      ADD_PATH: 'C:\msys64\mingw64\bin;C:\msys64\usr\bin'
+      ADD_PATH: 'C:/msys64/mingw64/bin'
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
       UNITY: 'ON'
@@ -175,7 +171,7 @@ environment:
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
       DISABLED_TESTS: '!1086 !1139 !1451 !1501'
-      ADD_PATH: 'C:\mingw-w64\i686-6.3.0-posix-dwarf-rt_v5-rev1\mingw32\bin;C:\msys64\usr\bin'
+      ADD_PATH: 'C:/mingw-w64/i686-6.3.0-posix-dwarf-rt_v5-rev1/mingw32/bin'
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
     # winbuild-based builds
@@ -248,21 +244,18 @@ environment:
       BUILD_SYSTEM: autotools
       TESTING: 'ON'
       DISABLED_TESTS: '!19 !1233'
-      ADD_PATH: 'C:\msys64\usr\bin'
       CONFIG_ARGS: '--enable-debug --enable-werror --disable-threaded-resolver --disable-proxy --without-ssl --enable-websockets'
     - job_name: 'autotools, msys2, Debug, x86_64, no SSL'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: autotools
       TESTING: 'ON'
       DISABLED_TESTS: '!19 !504 !704 !705 !1233'
-      ADD_PATH: 'C:\msys64\usr\bin'
       CONFIG_ARGS: '--enable-debug --enable-werror --disable-threaded-resolver --without-ssl --enable-websockets'
     - job_name: 'autotools, msys2, Release, x86_64, no SSL'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: autotools
       TESTING: 'ON'
       DISABLED_TESTS: '!19 !504 !704 !705 !1233'
-      ADD_PATH: 'C:\msys64\usr\bin'
       CONFIG_ARGS: '--enable-warnings --enable-werror --without-ssl --enable-websockets'
     # autotools-based Cygwin build
     - job_name: 'autotools, cygwin, Debug, x86_64, no SSL'
@@ -270,154 +263,23 @@ environment:
       BUILD_SYSTEM: autotools
       TESTING: 'ON'
       DISABLED_TESTS: ''
-      ADD_PATH: 'C:\cygwin64\bin'
+      ADD_SHELL: 'C:/cygwin64/bin'
       CONFIG_ARGS: '--enable-debug --enable-werror --disable-threaded-resolver --without-ssl --enable-websockets'
-      POSIX_PATH_PREFIX: '/cygdrive'
 
 install:
   - ps: |
+      if($env:ADD_SHELL -ne $null) {
+        $env:PATH = "$env:ADD_SHELL;$env:PATH"
+      }
+      else {
+        $env:PATH = "C:/msys64/usr/bin;$env:PATH"
+      }
       if($env:ADD_PATH -ne $null) {
         $env:PATH = "$env:ADD_PATH;$env:PATH"
       }
 
 build_script:
-  - ps: |
-      function Pull-BatchFile-Env {
-        param([string]$Path, [string]$Parameters)
-        $tempFile = [IO.Path]::GetTempFileName()
-        cmd.exe /c " `"$Path`" $Parameters && set " > $tempFile
-        Get-Content $tempFile | ForEach-Object { if($_ -match '^(.*?)=(.*)$') { Set-Content "env:\$($matches[1])" $matches[2] } }
-        Remove-Item $tempFile
-      }
-
-      $ErrorActionPreference = 'Stop'
-
-      if($env:APPVEYOR_BUILD_WORKER_IMAGE -eq 'Visual Studio 2022') {
-        $openssl_root = 'C:\OpenSSL-v30-Win64'
-      }
-      else {
-        $openssl_root = 'C:\OpenSSL-v111-Win64'
-      }
-
-      if($env:BUILD_SYSTEM -eq 'CMake') {
-
-        $options = @('-DCURL_WERROR=ON')
-        $options += "-G$env:PRJ_GEN"
-        if($env:TARGET -ne $null) {
-          $options += "$env:TARGET"
-          if($env:TARGET.Contains('ARM64')) {
-            $env:SKIP_RUN = 'ARM64 architecture'
-          }
-        }
-        $options += "-DCURL_USE_OPENSSL=$env:OPENSSL"
-        if($env:OPENSSL -eq 'ON') {
-          $options += "-DOPENSSL_ROOT_DIR=$openssl_root"
-        }
-        $options += "-DCURL_USE_SCHANNEL=$env:SCHANNEL"
-        $options += "-DHTTP_ONLY=$env:HTTP_ONLY"
-        $options += "-DBUILD_SHARED_LIBS=$env:SHARED"
-        $options += "-DBUILD_TESTING=$env:TESTING"
-        $options += "-DENABLE_WEBSOCKETS=$env:WEBSOCKETS"
-        $options += "-DCMAKE_UNITY_BUILD=$env:UNITY"
-        $options += "-DENABLE_DEBUG=$env:DEBUG"
-        $options += "-DENABLE_UNICODE=$env:ENABLE_UNICODE"
-        $options += '-DCMAKE_INSTALL_PREFIX=C:/CURL'
-        $options += "-DCMAKE_BUILD_TYPE=$env:PRJ_CFG"
-        if($env:PRJ_CFG -eq 'Debug') {
-          $options += '-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
-        }
-        elseif ($env:PRJ_CFG -eq 'Release') {
-          $options += '-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
-        }
-        if($env:PRJ_GEN.Contains('Visual Studio')) {
-          $options += '-DCMAKE_VS_GLOBALS=TrackFileAccess=false'
-        }
-        if($env:PRJ_GEN -eq 'Visual Studio 9 2008') {
-          # Without this it fails to run due to missing MSVCR90.dll
-          $options += '-DCURL_STATIC_CRT=ON'
-        }
-
-        Write-Host 'CMake options:' $options
-        cmake . $options
-        cmake --build . --config $env:PRJ_CFG --parallel 2 --clean-first -- $env:BUILD_OPT
-        if($env:SHARED -eq 'ON') {
-          Copy-Item -Path 'C:\Projects\curl\lib\*.dll' -Destination 'C:\projects\curl\src'
-          Copy-Item -Path 'C:\Projects\curl\lib\*.dll' -Destination 'C:\projects\curl\tests\libtest'
-        }
-        if($env:OPENSSL -eq 'ON') {
-          Copy-Item -Path "$openssl_root\*.dll" -Destination 'C:\projects\curl\src'
-        }
-        $curl = '.\src\curl.exe'
-      }
-      elseif($env:BUILD_SYSTEM -eq 'VisualStudioSolution') {
-        cd projects
-        .\generate.bat $env:VC_VERSION
-        msbuild.exe -maxcpucount "-property:Configuration=$env:PRJ_CFG" "Windows\$env:VC_VERSION\curl-all.sln"
-        $curl = "..\build\Win32\$env:VC_VERSION\$env:PRJ_CFG\curld.exe"
-      }
-      elseif($env:BUILD_SYSTEM -eq 'winbuild_vs2015') {
-        .\buildconf.bat
-        cd winbuild
-        Pull-BatchFile-Env 'C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd' /x64
-        Pull-BatchFile-Env 'C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat' x86_amd64
-        nmake /nologo /f Makefile.vc mode=dll VC=14 "SSL_PATH=$openssl_root" WITH_SSL=dll MACHINE=x64 DEBUG=$env:DEBUG ENABLE_UNICODE=$env:ENABLE_UNICODE
-        $curl = "..\builds\libcurl-vc14-x64-$env:PATHPART-dll-ssl-dll-ipv6-sspi\bin\curl.exe"
-      }
-      elseif($env:BUILD_SYSTEM -eq 'winbuild_vs2017') {
-        .\buildconf.bat
-        cd winbuild
-        Pull-BatchFile-Env 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat'
-        nmake /nologo /f Makefile.vc mode=dll VC=14.10 "SSL_PATH=$openssl_root" WITH_SSL=dll MACHINE=x64 DEBUG=$env:DEBUG ENABLE_UNICODE=$env:ENABLE_UNICODE
-        $curl = "..\builds\libcurl-vc14.10-x64-$env:PATHPART-dll-ssl-dll-ipv6-sspi\bin\curl.exe"
-      }
-      elseif($env:BUILD_SYSTEM -eq 'autotools') {
-        & bash -e -c "cd $env:POSIX_PATH_PREFIX/c/projects/curl && autoreconf -fi 2>&1 && ./configure $env:CONFIG_ARGS 2>&1 && make V=1 && make V=1 examples && cd tests && make V=1"
-        $curl = '.\src\curl.exe'
-      }
-
-      Get-ChildItem -Path C:\projects\curl -Include ('*.exe', '*.dll') -Recurse -Name
-      if($env:SKIP_RUN -eq $null) {
-        cmd.exe /c "`"$curl`" -V 2>&1"
-        if(-not $?) {
-          Write-Host "Error running curl: '$curl':" ("0x" + $LastExitCode.ToString("X"))
-          exit 1
-        }
-      }
-      else {
-        Write-Host "Skip running curl.exe. Reason: $env:SKIP_RUN"
-      }
-
-      if($false) {
-        if(Test-Path CMakeFiles/CMakeConfigureLog.yaml) { cat CMakeFiles/CMakeConfigureLog.yaml }
-        if(Test-Path CMakeFiles/CMakeOutput.log) { cat CMakeFiles/CMakeOutput.log }
-        if(Test-Path CMakeFiles/CMakeError.log) { cat CMakeFiles/CMakeError.log }
-        if(Test-Path config.log) { cat config.log }
-      }
-
-      if($env:TESTING -eq 'ON' -and $env:BUILD_SYSTEM -eq 'CMake') {
-        cmake --build . --config $env:PRJ_CFG --parallel 2 --target testdeps
-      }
-
-test_script:
-  - ps: |
-      if(Test-Path 'C:/msys64/usr/bin/curl.exe') {
-        $acurl="-ac $env:POSIX_PATH_PREFIX/c/msys64/usr/bin/curl.exe"
-      }
-      if(Test-Path 'C:/Windows/System32/curl.exe') {
-        $acurl="-ac $env:POSIX_PATH_PREFIX/c/Windows/System32/curl.exe"
-      }
-      if($env:TESTING -eq 'ON') {
-        if($env:BUILD_SYSTEM -eq 'CMake') {
-          $env:TFLAGS="$acurl $env:DISABLED_TESTS"
-          cmake --build . --config $env:PRJ_CFG --target test-ci
-        }
-        elseif($env:BUILD_SYSTEM -eq 'autotools') {
-          & bash -e -c "cd $env:POSIX_PATH_PREFIX/c/projects/curl && make V=1 TFLAGS='$acurl $env:DISABLED_TESTS' test-ci"
-        }
-        else {
-          & bash -e -c "cd $env:POSIX_PATH_PREFIX/c/projects/curl/tests && ./runtests.pl -a -p !flaky -r -rm $acurl $env:DISABLED_TESTS"
-        }
-      }
+  - cmd: sh -c ./appveyor.sh
 
 clone_depth: 10
 

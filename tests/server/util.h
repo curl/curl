@@ -26,7 +26,7 @@
 #include "server_setup.h"
 
 char *data_to_hex(char *data, size_t len);
-void logmsg(const char *msg, ...);
+void logmsg(const char *msg, ...) CURL_PRINTF(1, 2);
 long timediff(struct timeval newer, struct timeval older);
 
 #define TEST_DATA_PATH "%s/data/test%ld"

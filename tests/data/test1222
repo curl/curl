@@ -17,7 +17,7 @@ Verify deprecation statuses and versions
 </name>
 
 <command type="perl">
-%SRCDIR/check-deprecated.pl %SRCDIR/..
+%SRCDIR/test1222.pl %SRCDIR/..
 </command>
 </client>
 

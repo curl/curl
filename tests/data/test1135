@@ -22,7 +22,7 @@ Verify CURL_EXTERN order
 </name>
 
 <command type="perl">
-%SRCDIR/extern-scan.pl %SRCDIR/..
+%SRCDIR/test1135.pl %SRCDIR/..
 </command>
 </client>
 

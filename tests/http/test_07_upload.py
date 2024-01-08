@@ -189,6 +189,23 @@ class TestUpload:
         r.check_response(count=count, http_status=200)
         self.check_download(count, fdata, curl)
 
+    # upload large data parallel to a URL that denies uploads
+    @pytest.mark.parametrize("proto", ['h2', 'h3'])
+    def test_07_22_upload_parallel_fail(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 stalls here")
+        fdata = os.path.join(env.gen_dir, 'data-10m')
+        count = 100
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}'\
+            f'/curltest/tweak?status=400&delay=5ms&chunks=1&body_error=reset&id=[0-{count-1}]'
+        r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto,
+                             extra_args=['--parallel'])
+        exp_exit = 92 if proto == 'h2' else 95
+        r.check_stats(count=count, exitcode=exp_exit)
+
     # PUT 100k
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_07_30_put_100k(self, env: Env, httpd, nghttpx, repeat, proto):
@@ -444,3 +461,42 @@ class TestUpload:
                                                     tofile=dfile,
                                                     n=1))
                 assert False, f'download {dfile} differs:\n{diff}'
+
+    # speed limited on put handler
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_07_50_put_speed_limit(self, env: Env, httpd, nghttpx, proto, repeat):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        count = 1
+        fdata = os.path.join(env.gen_dir, 'data-100k')
+        up_len = 100 * 1024
+        speed_limit = 20 * 1024
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?id=[0-0]'
+        r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto,
+                          with_headers=True, extra_args=[
+            '--limit-rate', f'{speed_limit}'
+        ])
+        r.check_response(count=count, http_status=200)
+        assert r.responses[0]['header']['received-length'] == f'{up_len}', f'{r.responses[0]}'
+        up_speed = r.stats[0]['speed_upload']
+        assert (speed_limit * 0.5) <= up_speed <= (speed_limit * 1.5), f'{r.stats[0]}'
+
+    # speed limited on echo handler
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_07_51_echo_speed_limit(self, env: Env, httpd, nghttpx, proto, repeat):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        count = 1
+        fdata = os.path.join(env.gen_dir, 'data-100k')
+        speed_limit = 20 * 1024
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]'
+        r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto,
+                             with_headers=True, extra_args=[
+            '--limit-rate', f'{speed_limit}'
+        ])
+        r.check_response(count=count, http_status=200)
+        up_speed = r.stats[0]['speed_upload']
+        assert (speed_limit * 0.5) <= up_speed <= (speed_limit * 1.5), f'{r.stats[0]}'
+

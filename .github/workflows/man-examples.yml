@@ -7,24 +7,26 @@ name: manpage examples
 on:
   push:
     branches:
-    - master
-    - '*/ci'
+      - master
+      - '*/ci'
     paths:
-    - 'docs/libcurl/curl_*.3'
-    - 'docs/libcurl/opts/*.3'
+      - 'docs/libcurl/curl_*.3'
+      - 'docs/libcurl/opts/*.3'
+      - '.github/scripts/verify-examples.pl'
   pull_request:
     branches:
-    - master
+      - master
     paths:
-    - 'docs/libcurl/curl_*.3'
-    - 'docs/libcurl/opts/*.3'
+      - 'docs/libcurl/curl_*.3'
+      - 'docs/libcurl/opts/*.3'
+      - '.github/scripts/verify-examples.pl'
 
 jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: verify examples
         run: ./.github/scripts/verify-examples.pl docs/libcurl/curl*.3 docs/libcurl/opts/*.3

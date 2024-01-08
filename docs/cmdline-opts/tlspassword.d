@@ -4,6 +4,7 @@ Long: tlspassword
 Arg: <string>
 Help: TLS password
 Added: 7.21.4
+Protocols: TLS
 Category: tls auth
 Example: --tlspassword pwd --tlsuser user $URL
 See-also: tlsuser

@@ -3,6 +3,7 @@ SPDX-License-Identifier: curl
 Long: ssl-no-revoke
 Help: Disable cert revocation checks (Schannel)
 Added: 7.44.0
+Protocols: TLS
 Category: tls
 Example: --ssl-no-revoke $URL
 See-also: crlfile

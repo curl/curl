@@ -277,7 +277,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
     case CURLFORM_PTRNAME:
       current_form->flags |= HTTPPOST_PTRNAME; /* fall through */
 
-      /* FALLTHROUGH */
+      FALLTHROUGH();
     case CURLFORM_COPYNAME:
       if(current_form->name)
         return_value = CURL_FORMADD_OPTION_TWICE;
@@ -303,7 +303,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
        */
     case CURLFORM_PTRCONTENTS:
       current_form->flags |= HTTPPOST_PTRCONTENTS;
-      /* FALLTHROUGH */
+      FALLTHROUGH();
     case CURLFORM_COPYCONTENTS:
       if(current_form->value)
         return_value = CURL_FORMADD_OPTION_TWICE;
@@ -603,7 +603,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
            app passed in a bad combo, so we better check for that first. */
         if(form->name) {
           /* copy name (without strdup; possibly not null-terminated) */
-          form->name = Curl_strndup(form->name, form->namelength?
+          form->name = Curl_memdup0(form->name, form->namelength?
                                     form->namelength:
                                     strlen(form->name));
         }
@@ -779,11 +779,9 @@ static CURLcode setname(curl_mimepart *part, const char *name, size_t len)
 
   if(!name || !len)
     return curl_mime_name(part, name);
-  zname = malloc(len + 1);
+  zname = Curl_memdup0(name, len);
   if(!zname)
     return CURLE_OUT_OF_MEMORY;
-  memcpy(zname, name, len);
-  zname[len] = '\0';
   res = curl_mime_name(part, zname);
   free(zname);
   return res;

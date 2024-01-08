@@ -7,17 +7,17 @@ name: Markdown links
 on:
   push:
     branches:
-    - master
-    - '*/ci'
+      - master
+      - '*/ci'
     paths:
-    - '.github/workflows/linkcheck.yml'
-    - '**.md'
+      - '.github/workflows/linkcheck.yml'
+      - '**.md'
   pull_request:
     branches:
-    - master
+      - master
     paths:
-    - '.github/workflows/linkcheck.yml'
-    - '**.md'
+      - '.github/workflows/linkcheck.yml'
+      - '**.md'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
@@ -30,7 +30,7 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: gaurav-nelson/github-action-markdown-link-check@v1
-      with:
-        use-quiet-mode: 'yes'
+      - uses: actions/checkout@v4
+      - uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-quiet-mode: 'yes'

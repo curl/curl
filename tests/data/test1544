@@ -17,7 +17,7 @@ Verify all string options are translated by OS/400 wrapper
 </name>
 
 <command type="perl">
-%SRCDIR/check-translatable-options.pl %SRCDIR/..
+%SRCDIR/test1544.pl %SRCDIR/..
 </command>
 </client>
 

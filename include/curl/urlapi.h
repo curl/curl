@@ -63,6 +63,7 @@ typedef enum {
   CURLUE_BAD_SLASHES,         /* 28 */
   CURLUE_BAD_USER,            /* 29 */
   CURLUE_LACKS_IDN,           /* 30 */
+  CURLUE_TOO_LARGE,           /* 31 */
   CURLUE_LAST
 } CURLUcode;
 

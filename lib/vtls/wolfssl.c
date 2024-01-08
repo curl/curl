@@ -583,12 +583,25 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(ssl_config->primary.clientcert && ssl_config->key) {
     int file_type = do_file_type(ssl_config->cert_type);
 
-    if(wolfSSL_CTX_use_certificate_file(backend->ctx,
-                                        ssl_config->primary.clientcert,
-                                        file_type) != 1) {
-      failf(data, "unable to use client certificate (no key or wrong pass"
-            " phrase?)");
-      return CURLE_SSL_CONNECT_ERROR;
+    if(file_type == WOLFSSL_FILETYPE_PEM) {
+      if(wolfSSL_CTX_use_certificate_chain_file(backend->ctx,
+                                                ssl_config->primary.clientcert)
+         != 1) {
+        failf(data, "unable to use client certificate");
+        return CURLE_SSL_CONNECT_ERROR;
+      }
+    }
+    else if(file_type == WOLFSSL_FILETYPE_ASN1) {
+      if(wolfSSL_CTX_use_certificate_file(backend->ctx,
+                                          ssl_config->primary.clientcert,
+                                          file_type) != 1) {
+        failf(data, "unable to use client certificate");
+        return CURLE_SSL_CONNECT_ERROR;
+      }
+    }
+    else {
+      failf(data, "unknown cert type");
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     }
 
     file_type = do_file_type(ssl_config->key_type);
@@ -1084,9 +1097,7 @@ static ssize_t wolfssl_recv(struct Curl_cfilter *cf,
       *curlcode = CURLE_OK;
       return 0;
     case SSL_ERROR_NONE:
-      /* FALLTHROUGH */
     case SSL_ERROR_WANT_READ:
-      /* FALLTHROUGH */
     case SSL_ERROR_WANT_WRITE:
       /* there's data pending, re-invoke wolfSSL_read() */
       CURL_TRC_CF(data, cf, "wolfssl_recv(len=%zu) -> AGAIN", blen);
