@@ -760,6 +760,8 @@ static const struct LongShort *single(char letter)
   return singles[letter - ' '];
 }
 
+#define ONEOPT(x,y) (((int)x << 8) | y)
+
 ParameterError getparameter(const char *flag, /* f or -long-flag */
                             char *nextarg,    /* NULL if unset */
                             argv_item_t cleararg,
@@ -788,6 +790,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     NULL
   };
   const struct LongShort *a = NULL;
+  curl_off_t value;
 #ifdef HAVE_WRITABLE_ARGV
   argv_item_t clearthis = NULL;
 #else
@@ -913,802 +916,745 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
          that aware of that state */
       nextarg = (char *)"";
 
-    switch(letter) {
-    case '*': /* options without a short option */
-      switch(subletter) {
-      case '4': /* --dns-ipv4-addr */
-        if(!curlinfo->ares_num) /* c-ares is needed for this */
-          err = PARAM_LIBCURL_DOESNT_SUPPORT;
-        else
-          /* addr in dot notation */
-          err = getstr(&config->dns_ipv4_addr, nextarg, DENY_BLANK);
-        break;
-      case '6': /* --dns-ipv6-addr */
-        if(!curlinfo->ares_num) /* c-ares is needed for this */
-          err = PARAM_LIBCURL_DOESNT_SUPPORT;
-        else
-          /* addr in dot notation */
-          err = getstr(&config->dns_ipv6_addr, nextarg, DENY_BLANK);
-        break;
-      case 'a': /* random-file */
-        break;
-      case 'b': /* egd-file */
-        break;
-      case 'B': /* OAuth 2.0 bearer token */
-        err = getstr(&config->oauth_bearer, nextarg, DENY_BLANK);
-        if(!err) {
-          cleanarg(clearthis);
-          config->authtype |= CURLAUTH_BEARER;
-        }
-        break;
-      case 'c': /* connect-timeout */
-        err = secs2ms(&config->connecttimeout_ms, nextarg);
-        break;
-      case 'C': /* doh-url */
-        err = getstr(&config->doh_url, nextarg, ALLOW_BLANK);
-        if(!err && config->doh_url && !config->doh_url[0])
-          /* if given a blank string, make it NULL again */
-          Curl_safefree(config->doh_url);
-        break;
-      case 'd': /* ciphers */
-        err = getstr(&config->cipher_list, nextarg, DENY_BLANK);
-        break;
-      case 'D': /* --dns-interface */
-        if(!curlinfo->ares_num) /* c-ares is needed for this */
-          err = PARAM_LIBCURL_DOESNT_SUPPORT;
-        else
-          /* interface name */
-          err = getstr(&config->dns_interface, nextarg, DENY_BLANK);
-        break;
-      case 'e': /* --disable-epsv */
-        config->disable_epsv = toggle;
-        break;
-      case 'f': /* --disallow-username-in-url */
-        config->disallow_username_in_url = toggle;
-        break;
-      case 'E': /* --epsv */
-        config->disable_epsv = (!toggle)?TRUE:FALSE;
-        break;
-      case 'F': /* --dns-servers */
-        if(!curlinfo->ares_num) /* c-ares is needed for this */
-          err = PARAM_LIBCURL_DOESNT_SUPPORT;
-        else
-          /* IP addrs of DNS servers */
-          err = getstr(&config->dns_servers, nextarg, DENY_BLANK);
-        break;
-      case 'g': /* --trace */
-        err = getstr(&global->trace_dump, nextarg, DENY_BLANK);
-        if(!err) {
-          if(global->tracetype && (global->tracetype != TRACE_BIN))
-            warnf(global, "--trace overrides an earlier trace/verbose option");
-          global->tracetype = TRACE_BIN;
-        }
-        break;
-      case 'G': /* --npn */
-        warnf(global, "--npn is no longer supported");
-        break;
-      case 'h': /* --trace-ascii */
-        err = getstr(&global->trace_dump, nextarg, DENY_BLANK);
-        if(!err) {
-          if(global->tracetype && (global->tracetype != TRACE_ASCII))
-            warnf(global,
-                  "--trace-ascii overrides an earlier trace/verbose option");
-          global->tracetype = TRACE_ASCII;
-        }
-        break;
-      case 'H': /* --alpn */
-        config->noalpn = (!toggle)?TRUE:FALSE;
-        break;
-      case 'i': /* --limit-rate */
-      {
-        curl_off_t value;
-        err = GetSizeParameter(global, nextarg, "rate", &value);
-        if(err)
-          break;
+    switch(ONEOPT(letter, subletter)) {
+    case ONEOPT('*', '4'): /* --dns-ipv4-addr */
+      if(!curlinfo->ares_num) /* c-ares is needed for this */
+        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+      else
+        /* addr in dot notation */
+        err = getstr(&config->dns_ipv4_addr, nextarg, DENY_BLANK);
+      break;
+    case ONEOPT('*', '6'): /* --dns-ipv6-addr */
+      if(!curlinfo->ares_num) /* c-ares is needed for this */
+        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+      else
+        /* addr in dot notation */
+        err = getstr(&config->dns_ipv6_addr, nextarg, DENY_BLANK);
+      break;
+    case ONEOPT('*', 'a'): /* --random-file */
+      break;
+    case ONEOPT('*', 'b'): /* --egd-file */
+      break;
+    case ONEOPT('*', 'B'): /* --oauth2-bearer */
+      err = getstr(&config->oauth_bearer, nextarg, DENY_BLANK);
+      if(!err) {
+        cleanarg(clearthis);
+        config->authtype |= CURLAUTH_BEARER;
+      }
+      break;
+    case ONEOPT('*', 'c'): /* --connect-timeout */
+      err = secs2ms(&config->connecttimeout_ms, nextarg);
+      break;
+    case ONEOPT('*', 'C'): /* --doh-url */
+      err = getstr(&config->doh_url, nextarg, ALLOW_BLANK);
+      if(!err && config->doh_url && !config->doh_url[0])
+        /* if given a blank string, make it NULL again */
+        Curl_safefree(config->doh_url);
+      break;
+    case ONEOPT('*', 'd'): /* -- ciphers */
+      err = getstr(&config->cipher_list, nextarg, DENY_BLANK);
+      break;
+    case ONEOPT('*', 'D'): /* --dns-interface */
+      if(!curlinfo->ares_num) /* c-ares is needed for this */
+        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+      else
+        /* interface name */
+        err = getstr(&config->dns_interface, nextarg, DENY_BLANK);
+      break;
+    case ONEOPT('*', 'e'): /* --disable-epsv */
+      config->disable_epsv = toggle;
+      break;
+    case ONEOPT('*', 'f'): /* --disallow-username-in-url */
+      config->disallow_username_in_url = toggle;
+      break;
+    case ONEOPT('*', 'E'): /* --epsv */
+      config->disable_epsv = (!toggle)?TRUE:FALSE;
+      break;
+    case ONEOPT('*', 'F'): /* --dns-servers */
+      if(!curlinfo->ares_num) /* c-ares is needed for this */
+        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+      else
+        /* IP addrs of DNS servers */
+        err = getstr(&config->dns_servers, nextarg, DENY_BLANK);
+      break;
+    case ONEOPT('*', 'g'): /* --trace */
+      err = getstr(&global->trace_dump, nextarg, DENY_BLANK);
+      if(!err) {
+        if(global->tracetype && (global->tracetype != TRACE_BIN))
+          warnf(global, "--trace overrides an earlier trace/verbose option");
+        global->tracetype = TRACE_BIN;
+      }
+      break;
+    case ONEOPT('*', 'G'): /* --npn */
+      warnf(global, "--npn is no longer supported");
+      break;
+    case ONEOPT('*', 'h'): /* --trace-ascii */
+      err = getstr(&global->trace_dump, nextarg, DENY_BLANK);
+      if(!err) {
+        if(global->tracetype && (global->tracetype != TRACE_ASCII))
+          warnf(global,
+                "--trace-ascii overrides an earlier trace/verbose option");
+        global->tracetype = TRACE_ASCII;
+      }
+      break;
+    case ONEOPT('*', 'H'): /* --alpn */
+      config->noalpn = (!toggle)?TRUE:FALSE;
+      break;
+    case ONEOPT('*', 'i'): /* --limit-rate */
+      err = GetSizeParameter(global, nextarg, "rate", &value);
+      if(!err) {
         config->recvpersecond = value;
         config->sendpersecond = value;
       }
       break;
-      case 'I': /* --rate (request rate) */
-      {
-        /* support a few different suffixes, extract the suffix first, then
-           get the number and convert to per hour.
-           /s == per second
-           /m == per minute
-           /h == per hour (default)
-           /d == per day (24 hours)
-        */
-        char *div = strchr(nextarg, '/');
-        char number[26];
-        long denominator;
-        long numerator = 60*60*1000; /* default per hour */
-        size_t numlen = div ? (size_t)(div - nextarg) : strlen(nextarg);
-        if(numlen > sizeof(number)-1) {
-          err = PARAM_NUMBER_TOO_LARGE;
-          break;
-        }
-        strncpy(number, nextarg, numlen);
-        number[numlen] = 0;
-        err = str2unum(&denominator, number);
-        if(err)
-          break;
-
-        if(denominator < 1) {
-          err = PARAM_BAD_USE;
-          break;
-        }
-        if(div) {
-          char unit = div[1];
-          switch(unit) {
-          case 's': /* per second */
-            numerator = 1000;
-            break;
-          case 'm': /* per minute */
-            numerator = 60*1000;
-            break;
-          case 'h': /* per hour */
-            break;
-          case 'd': /* per day */
-            numerator = 24*60*60*1000;
-            break;
-          default:
-            errorf(global, "unsupported --rate unit");
-            err = PARAM_BAD_USE;
-            break;
-          }
-        }
-
-        if(denominator > numerator) {
-          err = PARAM_NUMBER_TOO_LARGE;
-          break;
-        }
-
-        global->ms_per_transfer = numerator/denominator;
-      }
-      break;
-
-      case 'j': /* --compressed */
-        if(toggle && !(feature_libz || feature_brotli || feature_zstd)) {
-          err = PARAM_LIBCURL_DOESNT_SUPPORT;
-          break;
-        }
-        config->encoding = toggle;
-        break;
-
-      case 'J': /* --tr-encoding */
-        config->tr_encoding = toggle;
-        break;
-
-      case 'k': /* --digest */
-        if(toggle)
-          config->authtype |= CURLAUTH_DIGEST;
-        else
-          config->authtype &= ~CURLAUTH_DIGEST;
-        break;
-
-      case 'l': /* --negotiate */
-        if(!toggle)
-          config->authtype &= ~CURLAUTH_NEGOTIATE;
-        else if(feature_spnego)
-          config->authtype |= CURLAUTH_NEGOTIATE;
-        else {
-          err = PARAM_LIBCURL_DOESNT_SUPPORT;
-          break;
-        }
-        break;
-
-      case 'm': /* --ntlm */
-        if(!toggle)
-          config->authtype &= ~CURLAUTH_NTLM;
-        else if(feature_ntlm)
-          config->authtype |= CURLAUTH_NTLM;
-        else {
-          err = PARAM_LIBCURL_DOESNT_SUPPORT;
-          break;
-        }
-        break;
-
-      case 'M': /* --ntlm-wb */
-        if(!toggle)
-          config->authtype &= ~CURLAUTH_NTLM_WB;
-        else if(feature_ntlm_wb)
-          config->authtype |= CURLAUTH_NTLM_WB;
-        else {
-          err = PARAM_LIBCURL_DOESNT_SUPPORT;
-          break;
-        }
-        break;
-
-      case 'n': /* --basic for completeness */
-        if(toggle)
-          config->authtype |= CURLAUTH_BASIC;
-        else
-          config->authtype &= ~CURLAUTH_BASIC;
-        break;
-
-      case 'o': /* --anyauth, let libcurl pick it */
-        if(toggle)
-          config->authtype = CURLAUTH_ANY;
-        /* --no-anyauth simply doesn't touch it */
-        break;
-
-#ifdef USE_WATT32
-      case 'p': /* --wdebug */
-        dbug_init();
-        break;
-#endif
-      case 'q': /* --ftp-create-dirs */
-        config->ftp_create_dirs = toggle;
-        break;
-
-      case 'r': /* --create-dirs */
-        config->create_dirs = toggle;
-        break;
-
-      case 'R': /* --create-file-mode */
-        err = oct2nummax(&config->create_file_mode, nextarg, 0777);
-        break;
-
-      case 's': /* --max-redirs */
-        /* specified max no of redirects (http(s)), this accepts -1 as a
-           special condition */
-        err = str2num(&config->maxredirs, nextarg);
-        if(err)
-          break;
-        if(config->maxredirs < -1)
-          err = PARAM_BAD_NUMERIC;
-        break;
-
-      case 'S': /* ipfs gateway url */
-        err = getstr(&config->ipfs_gateway, nextarg, DENY_BLANK);
-        break;
-
-      case 't': /* --proxy-ntlm */
-        if(!feature_ntlm) {
-          err = PARAM_LIBCURL_DOESNT_SUPPORT;
-          break;
-        }
-        config->proxyntlm = toggle;
-        break;
-
-      case 'u': /* --crlf */
-        /* LF -> CRLF conversion? */
-        config->crlf = toggle;
-        break;
-
-      case 'V': /* --aws-sigv4 */
-        config->authtype |= CURLAUTH_AWS_SIGV4;
-        err = getstr(&config->aws_sigv4, nextarg, DENY_BLANK);
-        break;
-
-      case 'v': /* --stderr */
-        tool_set_stderr_file(global, nextarg);
-        break;
-      case 'w': /* --interface */
-        /* interface */
-        err = getstr(&config->iface, nextarg, DENY_BLANK);
-        break;
-      case 'x': /* --krb */
-        /* kerberos level string */
-        if(!feature_spnego) {
-          err = PARAM_LIBCURL_DOESNT_SUPPORT;
-          break;
-        }
-        err = getstr(&config->krblevel, nextarg, DENY_BLANK);
-        break;
-      case 'X': /* --haproxy-protocol */
-        config->haproxy_protocol = toggle;
-        break;
-      case 'P': /* --haproxy-clientip */
-        err = getstr(&config->haproxy_clientip, nextarg, DENY_BLANK);
-        break;
-      case 'y': /* --max-filesize */
-        {
-          curl_off_t value;
-          err =
-            GetSizeParameter(global, nextarg, "max-filesize", &value);
-          if(err)
-            break;
-          config->max_filesize = value;
-        }
-        break;
-      case 'z': /* --disable-eprt */
-        config->disable_eprt = toggle;
-        break;
-      case 'Z': /* --eprt */
-        config->disable_eprt = (!toggle)?TRUE:FALSE;
-        break;
-      case '~': /* --xattr */
-        config->xattr = toggle;
-        break;
-      case '@': /* the URL! */
-        if(!config->url_get)
-          config->url_get = config->url_list;
-
-        if(config->url_get) {
-          /* there's a node here, if it already is filled-in continue to find
-             an "empty" node */
-          while(config->url_get && (config->url_get->flags & GETOUT_URL))
-            config->url_get = config->url_get->next;
-        }
-
-        /* now there might or might not be an available node to fill in! */
-
-        if(config->url_get)
-          /* existing node */
-          url = config->url_get;
-        else
-          /* there was no free node, create one! */
-          config->url_get = url = new_getout(config);
-
-        if(!url) {
-          err = PARAM_NO_MEM;
-          break;
-        }
-
-        /* fill in the URL */
-        err = getstr(&url->url, nextarg, DENY_BLANK);
-        url->flags |= GETOUT_URL;
-      }
-      break;
-    case '$': /* more options without a short option */
-      switch(subletter) {
-      case 'a': /* --ssl */
-        if(toggle && !feature_ssl) {
-          err = PARAM_LIBCURL_DOESNT_SUPPORT;
-          break;
-        }
-        config->ftp_ssl = toggle;
-        if(config->ftp_ssl)
-          warnf(global,
-                "--ssl is an insecure option, consider --ssl-reqd instead");
-        break;
-      case 'b': /* --ftp-pasv */
-        Curl_safefree(config->ftpport);
-        break;
-      case 'c': /* --socks5 specifies a socks5 proxy to use, and resolves
-                   the name locally and passes on the resolved address */
-        err = getstr(&config->proxy, nextarg, DENY_BLANK);
-        config->proxyver = CURLPROXY_SOCKS5;
-        break;
-      case 't': /* --socks4 specifies a socks4 proxy to use */
-        err = getstr(&config->proxy, nextarg, DENY_BLANK);
-        config->proxyver = CURLPROXY_SOCKS4;
-        break;
-      case 'T': /* --socks4a specifies a socks4a proxy to use */
-        err = getstr(&config->proxy, nextarg, DENY_BLANK);
-        config->proxyver = CURLPROXY_SOCKS4A;
-        break;
-      case '2': /* --socks5-hostname specifies a socks5 proxy and enables name
-                   resolving with the proxy */
-        err = getstr(&config->proxy, nextarg, DENY_BLANK);
-        config->proxyver = CURLPROXY_SOCKS5_HOSTNAME;
-        break;
-      case 'd': /* --tcp-nodelay option */
-        config->tcp_nodelay = toggle;
-        break;
-      case 'e': /* --proxy-digest */
-        config->proxydigest = toggle;
-        break;
-      case 'f': /* --proxy-basic */
-        config->proxybasic = toggle;
-        break;
-      case 'g': /* --retry */
-        err = str2unum(&config->req_retry, nextarg);
-        break;
-      case 'V': /* --retry-connrefused */
-        config->retry_connrefused = toggle;
-        break;
-      case 'h': /* --retry-delay */
-        err = str2unummax(&config->retry_delay, nextarg, LONG_MAX/1000);
-        break;
-      case 'i': /* --retry-max-time */
-        err = str2unummax(&config->retry_maxtime, nextarg, LONG_MAX/1000);
-        break;
-      case '!': /* --retry-all-errors */
-        config->retry_all_errors = toggle;
-        break;
-
-      case 'k': /* --proxy-negotiate */
-        if(!feature_spnego) {
-          err = PARAM_LIBCURL_DOESNT_SUPPORT;
-          break;
-        }
-        config->proxynegotiate = toggle;
-        break;
-
-      case 'l': /* --form-escape */
-        config->mime_options &= ~CURLMIMEOPT_FORMESCAPE;
-        if(toggle)
-          config->mime_options |= CURLMIMEOPT_FORMESCAPE;
-        break;
-
-      case 'm': /* --ftp-account */
-        err = getstr(&config->ftp_account, nextarg, DENY_BLANK);
-        break;
-      case 'n': /* --proxy-anyauth */
-        config->proxyanyauth = toggle;
-        break;
-      case 'o': /* --trace-time */
-        global->tracetime = toggle;
-        break;
-      case 'p': /* --ignore-content-length */
-        config->ignorecl = toggle;
-        break;
-      case 'q': /* --ftp-skip-pasv-ip */
-        config->ftp_skip_ip = toggle;
-        break;
-      case 'r': /* --ftp-method (undocumented at this point) */
-        config->ftp_filemethod = ftpfilemethod(config, nextarg);
-        break;
-      case 's': { /* --local-port */
-        /* 16bit base 10 is 5 digits, but we allow 6 so that this catches
-           overflows, not just truncates */
-        char lrange[7]="";
-        char *p = nextarg;
-        while(ISDIGIT(*p))
-          p++;
-        if(*p) {
-          /* if there's anything more than a plain decimal number */
-          rc = sscanf(p, " - %6s", lrange);
-          *p = 0; /* null-terminate to make str2unum() work below */
-        }
-        else
-          rc = 0;
-
-        err = str2unum(&config->localport, nextarg);
-        if(err || (config->localport > 65535)) {
-          err = PARAM_BAD_USE;
-          break;
-        }
-        if(!rc)
-          config->localportrange = 1; /* default number of ports to try */
-        else {
-          err = str2unum(&config->localportrange, lrange);
-          if(err || (config->localportrange > 65535))
-            err = PARAM_BAD_USE;
-          else {
-            config->localportrange -= (config->localport-1);
-            if(config->localportrange < 1)
-              err = PARAM_BAD_USE;
-          }
-        }
+    case ONEOPT('*', 'I'): { /* --rate */
+      /* support a few different suffixes, extract the suffix first, then
+         get the number and convert to per hour.
+         /s == per second
+         /m == per minute
+         /h == per hour (default)
+         /d == per day (24 hours)
+      */
+      char *div = strchr(nextarg, '/');
+      char number[26];
+      long denominator;
+      long numerator = 60*60*1000; /* default per hour */
+      size_t numlen = div ? (size_t)(div - nextarg) : strlen(nextarg);
+      if(numlen > sizeof(number)-1) {
+        err = PARAM_NUMBER_TOO_LARGE;
         break;
       }
-      case 'u': /* --ftp-alternative-to-user */
-        err = getstr(&config->ftp_alternative_to_user, nextarg, DENY_BLANK);
+      strncpy(number, nextarg, numlen);
+      number[numlen] = 0;
+      err = str2unum(&denominator, number);
+      if(err)
         break;
-      case 'v': /* --ssl-reqd */
-        if(toggle && !feature_ssl) {
-          err = PARAM_LIBCURL_DOESNT_SUPPORT;
-          break;
-        }
-        config->ftp_ssl_reqd = toggle;
-        break;
-      case 'w': /* --no-sessionid */
-        config->disable_sessionid = (!toggle)?TRUE:FALSE;
-        break;
-      case 'x': /* --ftp-ssl-control */
-        if(toggle && !feature_ssl) {
-          err = PARAM_LIBCURL_DOESNT_SUPPORT;
-          break;
-        }
-        config->ftp_ssl_control = toggle;
-        break;
-      case 'y': /* --ftp-ssl-ccc */
-        config->ftp_ssl_ccc = toggle;
-        if(!config->ftp_ssl_ccc_mode)
-          config->ftp_ssl_ccc_mode = CURLFTPSSL_CCC_PASSIVE;
-        break;
-      case 'j': /* --ftp-ssl-ccc-mode */
-        config->ftp_ssl_ccc = TRUE;
-        config->ftp_ssl_ccc_mode = ftpcccmethod(config, nextarg);
-        break;
-      case 'z': /* --libcurl */
-#ifdef CURL_DISABLE_LIBCURL_OPTION
-        warnf(global,
-              "--libcurl option was disabled at build-time");
-        err = PARAM_OPTION_UNKNOWN;
-#else
-        err = getstr(&global->libcurl, nextarg, DENY_BLANK);
-#endif
-        break;
-      case '#': /* --raw */
-        config->raw = toggle;
-        break;
-      case '0': /* --post301 */
-        config->post301 = toggle;
-        break;
-      case '1': /* --no-keepalive */
-        config->nokeepalive = (!toggle)?TRUE:FALSE;
-        break;
-      case '3': /* --keepalive-time */
-        err = str2unum(&config->alivetime, nextarg);
-        break;
-      case '4': /* --post302 */
-        config->post302 = toggle;
-        break;
-      case 'I': /* --post303 */
-        config->post303 = toggle;
-        break;
-      case '5': /* --noproxy */
-        /* This specifies the noproxy list */
-        err = getstr(&config->noproxy, nextarg, ALLOW_BLANK);
-        break;
-       case '7': /* --socks5-gssapi-nec */
-        config->socks5_gssapi_nec = toggle;
-        break;
-      case '8': /* --proxy1.0 */
-        /* http 1.0 proxy */
-        err = getstr(&config->proxy, nextarg, DENY_BLANK);
-        config->proxyver = CURLPROXY_HTTP_1_0;
-        break;
-      case '9': /* --tftp-blksize */
-        err = str2unum(&config->tftp_blksize, nextarg);
-        break;
-      case 'A': /* --mail-from */
-        err = getstr(&config->mail_from, nextarg, DENY_BLANK);
-        break;
-      case 'B': /* --mail-rcpt */
-        /* append receiver to a list */
-        err = add2list(&config->mail_rcpt, nextarg);
-        break;
-      case 'C': /* --ftp-pret */
-        config->ftp_pret = toggle;
-        break;
-      case 'D': /* --proto */
-        config->proto_present = TRUE;
-        err = proto2num(config, built_in_protos, &config->proto_str, nextarg);
-        break;
-      case 'E': /* --proto-redir */
-        config->proto_redir_present = TRUE;
-        if(proto2num(config, redir_protos, &config->proto_redir_str,
-                     nextarg)) {
-          err = PARAM_BAD_USE;
-          break;
-        }
-        break;
-      case 'F': /* --resolve */
-        err = add2list(&config->resolve, nextarg);
-        break;
-      case 'G': /* --delegation LEVEL */
-        config->gssapi_delegation = delegation(config, nextarg);
-        break;
-      case 'H': /* --mail-auth */
-        err = getstr(&config->mail_auth, nextarg, DENY_BLANK);
-        break;
-      case 'J': /* --metalink */
-        errorf(global, "--metalink is disabled");
+
+      if(denominator < 1) {
         err = PARAM_BAD_USE;
         break;
-      case '6': /* --sasl-authzid */
-        err = getstr(&config->sasl_authzid, nextarg, DENY_BLANK);
-        break;
-      case 'K': /* --sasl-ir */
-        config->sasl_ir = toggle;
-        break;
-      case 'L': /* --test-event */
-#ifdef CURLDEBUG
-        global->test_event_based = toggle;
-#else
-        warnf(global, "--test-event is ignored unless a debug build");
+      }
+      if(div) {
+        char unit = div[1];
+        switch(unit) {
+        case 's': /* per second */
+          numerator = 1000;
+          break;
+        case 'm': /* per minute */
+          numerator = 60*1000;
+          break;
+        case 'h': /* per hour */
+          break;
+        case 'd': /* per day */
+          numerator = 24*60*60*1000;
+          break;
+        default:
+          errorf(global, "unsupported --rate unit");
+          err = PARAM_BAD_USE;
+          break;
+        }
+      }
+
+      if(err)
+        ;
+      else if(denominator > numerator)
+        err = PARAM_NUMBER_TOO_LARGE;
+      else
+        global->ms_per_transfer = numerator/denominator;
+    }
+      break;
+
+    case ONEOPT('*', 'j'): /* --compressed */
+      if(toggle && !(feature_libz || feature_brotli || feature_zstd))
+        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+      else
+        config->encoding = toggle;
+      break;
+
+    case ONEOPT('*', 'J'): /* --tr-encoding */
+      config->tr_encoding = toggle;
+      break;
+
+    case ONEOPT('*', 'k'): /* --digest */
+      if(toggle)
+        config->authtype |= CURLAUTH_DIGEST;
+      else
+        config->authtype &= ~CURLAUTH_DIGEST;
+      break;
+
+    case ONEOPT('*', 'l'): /* --negotiate */
+      if(!toggle)
+        config->authtype &= ~CURLAUTH_NEGOTIATE;
+      else if(feature_spnego)
+        config->authtype |= CURLAUTH_NEGOTIATE;
+      else
+        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+      break;
+
+    case ONEOPT('*', 'm'): /* --ntlm */
+      if(!toggle)
+        config->authtype &= ~CURLAUTH_NTLM;
+      else if(feature_ntlm)
+        config->authtype |= CURLAUTH_NTLM;
+      else
+        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+      break;
+
+    case ONEOPT('*', 'M'): /* --ntlm-wb */
+      if(!toggle)
+        config->authtype &= ~CURLAUTH_NTLM_WB;
+      else if(feature_ntlm_wb)
+        config->authtype |= CURLAUTH_NTLM_WB;
+      else
+        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+      break;
+
+    case ONEOPT('*', 'n'): /* --basic */
+      if(toggle)
+        config->authtype |= CURLAUTH_BASIC;
+      else
+        config->authtype &= ~CURLAUTH_BASIC;
+      break;
+
+    case ONEOPT('*', 'o'): /* --anyauth */
+      if(toggle)
+        config->authtype = CURLAUTH_ANY;
+      /* --no-anyauth simply doesn't touch it */
+      break;
+
+#ifdef USE_WATT32
+    case ONEOPT('*', 'p'): /* --wdebug */
+      dbug_init();
+      break;
 #endif
+    case ONEOPT('*', 'q'): /* --ftp-create-dirs */
+      config->ftp_create_dirs = toggle;
+      break;
+
+    case ONEOPT('*', 'r'): /* --create-dirs */
+      config->create_dirs = toggle;
+      break;
+
+    case ONEOPT('*', 'R'): /* --create-file-mode */
+      err = oct2nummax(&config->create_file_mode, nextarg, 0777);
+      break;
+
+    case ONEOPT('*', 's'): /* --max-redirs */
+      /* specified max no of redirects (http(s)), this accepts -1 as a
+         special condition */
+      err = str2num(&config->maxredirs, nextarg);
+      if(!err && (config->maxredirs < -1))
+        err = PARAM_BAD_NUMERIC;
+      break;
+
+    case ONEOPT('*', 'S'): /* --ipfs-gateway */
+      err = getstr(&config->ipfs_gateway, nextarg, DENY_BLANK);
+      break;
+
+    case ONEOPT('*', 't'): /* --proxy-ntlm */
+      if(!feature_ntlm)
+        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+      else
+        config->proxyntlm = toggle;
+      break;
+
+    case ONEOPT('*', 'u'): /* --crlf */
+      /* LF -> CRLF conversion? */
+      config->crlf = toggle;
+      break;
+
+    case ONEOPT('*', 'V'): /* --aws-sigv4 */
+      config->authtype |= CURLAUTH_AWS_SIGV4;
+      err = getstr(&config->aws_sigv4, nextarg, DENY_BLANK);
+      break;
+
+    case ONEOPT('*', 'v'): /* --stderr */
+      tool_set_stderr_file(global, nextarg);
+      break;
+    case ONEOPT('*', 'w'): /* --interface */
+      /* interface */
+      err = getstr(&config->iface, nextarg, DENY_BLANK);
+      break;
+    case ONEOPT('*', 'x'): /* --krb */
+      /* kerberos level string */
+      if(!feature_spnego)
+        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+      else
+        err = getstr(&config->krblevel, nextarg, DENY_BLANK);
+      break;
+    case ONEOPT('*', 'X'): /* --haproxy-protocol */
+      config->haproxy_protocol = toggle;
+      break;
+    case ONEOPT('*', 'P'): /* --haproxy-clientip */
+      err = getstr(&config->haproxy_clientip, nextarg, DENY_BLANK);
+      break;
+    case ONEOPT('*', 'y'): /* --max-filesize */
+      err = GetSizeParameter(global, nextarg, "max-filesize", &value);
+      if(!err)
+        config->max_filesize = value;
+      break;
+    case ONEOPT('*', 'z'): /* --disable-eprt */
+      config->disable_eprt = toggle;
+      break;
+    case ONEOPT('*', 'Z'): /* --eprt */
+      config->disable_eprt = (!toggle)?TRUE:FALSE;
+      break;
+    case ONEOPT('*', '~'): /* --xattr */
+      config->xattr = toggle;
+      break;
+    case ONEOPT('*', '@'): /* --url */
+      if(!config->url_get)
+        config->url_get = config->url_list;
+
+      if(config->url_get) {
+        /* there's a node here, if it already is filled-in continue to find
+           an "empty" node */
+        while(config->url_get && (config->url_get->flags & GETOUT_URL))
+          config->url_get = config->url_get->next;
+      }
+
+      /* now there might or might not be an available node to fill in! */
+
+      if(config->url_get)
+        /* existing node */
+        url = config->url_get;
+      else
+        /* there was no free node, create one! */
+        config->url_get = url = new_getout(config);
+
+      if(!url) {
+        err = PARAM_NO_MEM;
         break;
-      case 'M': /* --unix-socket */
-        config->abstract_unix_socket = FALSE;
-        err = getstr(&config->unix_socket_path, nextarg, DENY_BLANK);
+      }
+
+      /* fill in the URL */
+      err = getstr(&url->url, nextarg, DENY_BLANK);
+      url->flags |= GETOUT_URL;
+      break;
+
+    case ONEOPT('$', 'a'): /* --ssl */
+      if(toggle && !feature_ssl) {
+        err = PARAM_LIBCURL_DOESNT_SUPPORT;
         break;
-      case 'N': /* --path-as-is */
-        config->path_as_is = toggle;
+      }
+      config->ftp_ssl = toggle;
+      if(config->ftp_ssl)
+        warnf(global,
+              "--ssl is an insecure option, consider --ssl-reqd instead");
+      break;
+    case ONEOPT('$', 'b'): /* --ftp-pasv */
+      Curl_safefree(config->ftpport);
+      break;
+    case ONEOPT('$', 'c'): /* --socks5 */
+      /*  socks5 proxy to use, and resolves the name locally and passes on the
+          resolved address */
+      err = getstr(&config->proxy, nextarg, DENY_BLANK);
+      config->proxyver = CURLPROXY_SOCKS5;
+      break;
+    case ONEOPT('$', 't'): /* --socks4 */
+      err = getstr(&config->proxy, nextarg, DENY_BLANK);
+      config->proxyver = CURLPROXY_SOCKS4;
+      break;
+    case ONEOPT('$', 'T'): /* --socks4a */
+      err = getstr(&config->proxy, nextarg, DENY_BLANK);
+      config->proxyver = CURLPROXY_SOCKS4A;
+      break;
+    case ONEOPT('$', '2'): /* --socks5-hostname */
+      err = getstr(&config->proxy, nextarg, DENY_BLANK);
+      config->proxyver = CURLPROXY_SOCKS5_HOSTNAME;
+      break;
+    case ONEOPT('$', 'd'): /* --tcp-nodelay */
+      config->tcp_nodelay = toggle;
+      break;
+    case ONEOPT('$', 'e'): /* --proxy-digest */
+      config->proxydigest = toggle;
+      break;
+    case ONEOPT('$', 'f'): /* --proxy-basic */
+      config->proxybasic = toggle;
+      break;
+    case ONEOPT('$', 'g'): /* --retry */
+      err = str2unum(&config->req_retry, nextarg);
+      break;
+    case ONEOPT('$', 'V'): /* --retry-connrefused */
+      config->retry_connrefused = toggle;
+      break;
+    case ONEOPT('$', 'h'): /* --retry-delay */
+      err = str2unummax(&config->retry_delay, nextarg, LONG_MAX/1000);
+      break;
+    case ONEOPT('$', 'i'): /* --retry-max-time */
+      err = str2unummax(&config->retry_maxtime, nextarg, LONG_MAX/1000);
+      break;
+    case ONEOPT('$', '!'): /* --retry-all-errors */
+      config->retry_all_errors = toggle;
+      break;
+
+    case ONEOPT('$', 'k'): /* --proxy-negotiate */
+      if(!feature_spnego) {
+        err = PARAM_LIBCURL_DOESNT_SUPPORT;
         break;
-      case 'O': /* --proxy-service-name */
-        err = getstr(&config->proxy_service_name, nextarg, DENY_BLANK);
+      }
+      config->proxynegotiate = toggle;
+      break;
+
+    case ONEOPT('$', 'l'): /* --form-escape */
+      config->mime_options &= ~CURLMIMEOPT_FORMESCAPE;
+      if(toggle)
+        config->mime_options |= CURLMIMEOPT_FORMESCAPE;
+      break;
+
+    case ONEOPT('$', 'm'): /* --ftp-account */
+      err = getstr(&config->ftp_account, nextarg, DENY_BLANK);
+      break;
+    case ONEOPT('$', 'n'): /* --proxy-anyauth */
+      config->proxyanyauth = toggle;
+      break;
+    case ONEOPT('$', 'o'): /* --trace-time */
+      global->tracetime = toggle;
+      break;
+    case ONEOPT('$', 'p'): /* --ignore-content-length */
+      config->ignorecl = toggle;
+      break;
+    case ONEOPT('$', 'q'): /* --ftp-skip-pasv-ip */
+      config->ftp_skip_ip = toggle;
+      break;
+    case ONEOPT('$', 'r'): /* --ftp-method */
+      config->ftp_filemethod = ftpfilemethod(config, nextarg);
+      break;
+    case ONEOPT('$', 's'): { /* --local-port */
+      /* 16bit base 10 is 5 digits, but we allow 6 so that this catches
+         overflows, not just truncates */
+      char lrange[7]="";
+      char *p = nextarg;
+      while(ISDIGIT(*p))
+        p++;
+      if(*p) {
+        /* if there's anything more than a plain decimal number */
+        rc = sscanf(p, " - %6s", lrange);
+        *p = 0; /* null-terminate to make str2unum() work below */
+      }
+      else
+        rc = 0;
+
+      err = str2unum(&config->localport, nextarg);
+      if(err || (config->localport > 65535)) {
+        err = PARAM_BAD_USE;
         break;
-      case 'P': /* --service-name */
-        err = getstr(&config->service_name, nextarg, DENY_BLANK);
-        break;
-      case 'Q': /* --proto-default */
-        err = getstr(&config->proto_default, nextarg, DENY_BLANK);
-        if(!err)
-          err = check_protocol(config->proto_default);
-        break;
-      case 'R': /* --expect100-timeout */
-        err = secs2ms(&config->expect100timeout_ms, nextarg);
-        break;
-      case 'S': /* --tftp-no-options */
-        config->tftp_no_options = toggle;
-        break;
-      case 'U': /* --connect-to */
-        err = add2list(&config->connect_to, nextarg);
-        break;
-      case 'W': /* --abstract-unix-socket */
-        config->abstract_unix_socket = TRUE;
-        err = getstr(&config->unix_socket_path, nextarg, DENY_BLANK);
-        break;
-      case 'X': /* --tls-max */
-        err = str2tls_max(&config->ssl_version_max, nextarg);
-        break;
-      case 'Y': /* --suppress-connect-headers */
-        config->suppress_connect_headers = toggle;
-        break;
-      case 'Z': /* --compressed-ssh */
-        config->ssh_compression = toggle;
-        break;
-      case '~': /* --happy-eyeballs-timeout-ms */
-        err = str2unum(&config->happy_eyeballs_timeout_ms, nextarg);
-        /* 0 is a valid value for this timeout */
-        break;
-      case '%': /* --trace-ids */
-        global->traceids = toggle;
-        break;
-      case '&': /* --trace-config */
-        if(set_trace_config(global, nextarg)) {
-          err = PARAM_NO_MEM;
+      }
+      if(!rc)
+        config->localportrange = 1; /* default number of ports to try */
+      else {
+        err = str2unum(&config->localportrange, lrange);
+        if(err || (config->localportrange > 65535))
+          err = PARAM_BAD_USE;
+        else {
+          config->localportrange -= (config->localport-1);
+          if(config->localportrange < 1)
+            err = PARAM_BAD_USE;
         }
+      }
+      break;
+    }
+    case ONEOPT('$', 'u'): /* --ftp-alternative-to-user */
+      err = getstr(&config->ftp_alternative_to_user, nextarg, DENY_BLANK);
+      break;
+    case ONEOPT('$', 'v'): /* --ssl-reqd */
+      if(toggle && !feature_ssl) {
+        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+        break;
+      }
+      config->ftp_ssl_reqd = toggle;
+      break;
+    case ONEOPT('$', 'w'): /* --no-sessionid */
+      config->disable_sessionid = (!toggle)?TRUE:FALSE;
+      break;
+    case ONEOPT('$', 'x'): /* --ftp-ssl-control */
+      if(toggle && !feature_ssl) {
+        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+        break;
+      }
+      config->ftp_ssl_control = toggle;
+      break;
+    case ONEOPT('$', 'y'): /* --ftp-ssl-ccc */
+      config->ftp_ssl_ccc = toggle;
+      if(!config->ftp_ssl_ccc_mode)
+        config->ftp_ssl_ccc_mode = CURLFTPSSL_CCC_PASSIVE;
+      break;
+    case ONEOPT('$', 'j'): /* --ftp-ssl-ccc-mode */
+      config->ftp_ssl_ccc = TRUE;
+      config->ftp_ssl_ccc_mode = ftpcccmethod(config, nextarg);
+      break;
+    case ONEOPT('$', 'z'): /* --libcurl */
+#ifdef CURL_DISABLE_LIBCURL_OPTION
+      warnf(global,
+            "--libcurl option was disabled at build-time");
+      err = PARAM_OPTION_UNKNOWN;
+#else
+      err = getstr(&global->libcurl, nextarg, DENY_BLANK);
+#endif
+      break;
+    case ONEOPT('$', '#'): /* --raw */
+      config->raw = toggle;
+      break;
+    case ONEOPT('$', '0'): /* --post301 */
+      config->post301 = toggle;
+      break;
+    case ONEOPT('$', '1'): /* --no-keepalive */
+      config->nokeepalive = (!toggle)?TRUE:FALSE;
+      break;
+    case ONEOPT('$', '3'): /* --keepalive-time */
+      err = str2unum(&config->alivetime, nextarg);
+      break;
+    case ONEOPT('$', '4'): /* --post302 */
+      config->post302 = toggle;
+      break;
+    case ONEOPT('$', 'I'): /* --post303 */
+      config->post303 = toggle;
+      break;
+    case ONEOPT('$', '5'): /* --noproxy */
+      /* This specifies the noproxy list */
+      err = getstr(&config->noproxy, nextarg, ALLOW_BLANK);
+      break;
+    case ONEOPT('$', '7'): /* --socks5-gssapi-nec */
+      config->socks5_gssapi_nec = toggle;
+      break;
+    case ONEOPT('$', '8'): /* --proxy1.0 */
+      /* http 1.0 proxy */
+      err = getstr(&config->proxy, nextarg, DENY_BLANK);
+      config->proxyver = CURLPROXY_HTTP_1_0;
+      break;
+    case ONEOPT('$', '9'): /* --tftp-blksize */
+      err = str2unum(&config->tftp_blksize, nextarg);
+      break;
+    case ONEOPT('$', 'A'): /* --mail-from */
+      err = getstr(&config->mail_from, nextarg, DENY_BLANK);
+      break;
+    case ONEOPT('$', 'B'): /* --mail-rcpt */
+      /* append receiver to a list */
+      err = add2list(&config->mail_rcpt, nextarg);
+      break;
+    case ONEOPT('$', 'C'): /* --ftp-pret */
+      config->ftp_pret = toggle;
+      break;
+    case ONEOPT('$', 'D'): /* --proto */
+      config->proto_present = TRUE;
+      err = proto2num(config, built_in_protos, &config->proto_str, nextarg);
+      break;
+    case ONEOPT('$', 'E'): /* --proto-redir */
+      config->proto_redir_present = TRUE;
+      if(proto2num(config, redir_protos, &config->proto_redir_str,
+                   nextarg)) {
+        err = PARAM_BAD_USE;
         break;
       }
       break;
-    case '#':
-      switch(subletter) {
-      case 'm': /* --progress-meter */
-        global->noprogress = !toggle;
-        break;
-      default:  /* --progress-bar */
-        global->progressmode =
-          toggle ? CURL_PROGRESS_BAR : CURL_PROGRESS_STATS;
-        break;
+    case ONEOPT('$', 'F'): /* --resolve */
+      err = add2list(&config->resolve, nextarg);
+      break;
+    case ONEOPT('$', 'G'): /* --delegation */
+      config->gssapi_delegation = delegation(config, nextarg);
+      break;
+    case ONEOPT('$', 'H'): /* --mail-auth */
+      err = getstr(&config->mail_auth, nextarg, DENY_BLANK);
+      break;
+    case ONEOPT('$', 'J'): /* --metalink */
+      errorf(global, "--metalink is disabled");
+      err = PARAM_BAD_USE;
+      break;
+    case ONEOPT('$', '6'): /* --sasl-authzid */
+      err = getstr(&config->sasl_authzid, nextarg, DENY_BLANK);
+      break;
+    case ONEOPT('$', 'K'): /* --sasl-ir */
+      config->sasl_ir = toggle;
+      break;
+    case ONEOPT('$', 'L'): /* --test-event */
+#ifdef CURLDEBUG
+      global->test_event_based = toggle;
+#else
+      warnf(global, "--test-event is ignored unless a debug build");
+#endif
+      break;
+    case ONEOPT('$', 'M'): /* --unix-socket */
+      config->abstract_unix_socket = FALSE;
+      err = getstr(&config->unix_socket_path, nextarg, DENY_BLANK);
+      break;
+    case ONEOPT('$', 'N'): /* --path-as-is */
+      config->path_as_is = toggle;
+      break;
+    case ONEOPT('$', 'O'): /* --proxy-service-name */
+      err = getstr(&config->proxy_service_name, nextarg, DENY_BLANK);
+      break;
+    case ONEOPT('$', 'P'): /* --service-name */
+      err = getstr(&config->service_name, nextarg, DENY_BLANK);
+      break;
+    case ONEOPT('$', 'Q'): /* --proto-default */
+      err = getstr(&config->proto_default, nextarg, DENY_BLANK);
+      if(!err)
+        err = check_protocol(config->proto_default);
+      break;
+    case ONEOPT('$', 'R'): /* --expect100-timeout */
+      err = secs2ms(&config->expect100timeout_ms, nextarg);
+      break;
+    case ONEOPT('$', 'S'): /* --tftp-no-options */
+      config->tftp_no_options = toggle;
+      break;
+    case ONEOPT('$', 'U'): /* --connect-to */
+      err = add2list(&config->connect_to, nextarg);
+      break;
+    case ONEOPT('$', 'W'): /* --abstract-unix-socket */
+      config->abstract_unix_socket = TRUE;
+      err = getstr(&config->unix_socket_path, nextarg, DENY_BLANK);
+      break;
+    case ONEOPT('$', 'X'): /* --tls-max */
+      err = str2tls_max(&config->ssl_version_max, nextarg);
+      break;
+    case ONEOPT('$', 'Y'): /* --suppress-connect-headers */
+      config->suppress_connect_headers = toggle;
+      break;
+    case ONEOPT('$', 'Z'): /* --compressed-ssh */
+      config->ssh_compression = toggle;
+      break;
+    case ONEOPT('$', '~'): /* --happy-eyeballs-timeout-ms */
+      err = str2unum(&config->happy_eyeballs_timeout_ms, nextarg);
+      /* 0 is a valid value for this timeout */
+      break;
+    case ONEOPT('$', '%'): /* --trace-ids */
+      global->traceids = toggle;
+      break;
+    case ONEOPT('$', '&'): /* --trace-config */
+      if(set_trace_config(global, nextarg)) {
+        err = PARAM_NO_MEM;
       }
       break;
-    case ':':
-      switch(subletter) {
-      case 'a': /* --variable */
-        err = setvariable(global, nextarg);
-        break;
-      default:  /* --next */
-        err = PARAM_NEXT_OPERATION;
+    case ONEOPT('#', 'm'): /* --progress-meter */
+      global->noprogress = !toggle;
+      break;
+    case ONEOPT('#', '\0'): /* --progress-bar */
+      global->progressmode = toggle ? CURL_PROGRESS_BAR : CURL_PROGRESS_STATS;
+      break;
+
+    case ONEOPT(':', 'a'): /* --variable */
+      err = setvariable(global, nextarg);
+      break;
+    case ONEOPT(':', '\0'): /* --next */
+      err = PARAM_NEXT_OPERATION;
+      break;
+
+    case ONEOPT('0', '\0'): /* --http1.0 */
+      /* HTTP version 1.0 */
+      sethttpver(global, config, CURL_HTTP_VERSION_1_0);
+      break;
+    case ONEOPT('0', '1'): /* --http1.1 */
+      /* HTTP version 1.1 */
+      sethttpver(global, config, CURL_HTTP_VERSION_1_1);
+      break;
+    case ONEOPT('0', '2'): /* --http2 */
+      /* HTTP version 2.0 */
+      if(!feature_http2)
+        return PARAM_LIBCURL_DOESNT_SUPPORT;
+      sethttpver(global, config, CURL_HTTP_VERSION_2_0);
+      break;
+    case ONEOPT('0', '3'): /* --http2-prior-knowledge */
+      /* HTTP version 2.0 over clean TCP */
+      if(!feature_http2)
+        return PARAM_LIBCURL_DOESNT_SUPPORT;
+      sethttpver(global, config, CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE);
+      break;
+    case ONEOPT('0', '4'): /* --http3: */
+      /* Try HTTP/3, allow fallback */
+      if(!feature_http3) {
+        err = PARAM_LIBCURL_DOESNT_SUPPORT;
         break;
       }
+      sethttpver(global, config, CURL_HTTP_VERSION_3);
       break;
-    case '0': /* --http* options */
-      switch(subletter) {
-      case '\0':
-        /* HTTP version 1.0 */
-        sethttpver(global, config, CURL_HTTP_VERSION_1_0);
-        break;
-      case '1':
-        /* HTTP version 1.1 */
-        sethttpver(global, config, CURL_HTTP_VERSION_1_1);
-        break;
-      case '2':
-        /* HTTP version 2.0 */
-        if(!feature_http2)
-          return PARAM_LIBCURL_DOESNT_SUPPORT;
-        sethttpver(global, config, CURL_HTTP_VERSION_2_0);
-        break;
-      case '3': /* --http2-prior-knowledge */
-        /* HTTP version 2.0 over clean TCP */
-        if(!feature_http2)
-          return PARAM_LIBCURL_DOESNT_SUPPORT;
-        sethttpver(global, config, CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE);
-        break;
-      case '4': /* --http3 */
-        /* Try HTTP/3, allow fallback */
-        if(!feature_http3) {
-          err = PARAM_LIBCURL_DOESNT_SUPPORT;
-          break;
-        }
-        sethttpver(global, config, CURL_HTTP_VERSION_3);
-        break;
-      case '5': /* --http3-only */
-        /* Try HTTP/3 without fallback */
-        if(!feature_http3) {
-          err = PARAM_LIBCURL_DOESNT_SUPPORT;
-          break;
-        }
-        sethttpver(global, config, CURL_HTTP_VERSION_3ONLY);
-        break;
-      case '9':
-        /* Allow HTTP/0.9 responses! */
-        config->http09_allowed = toggle;
-        break;
-      case 'a':
-        /* --proxy-http2 */
-        if(!feature_httpsproxy || !feature_http2)
-          return PARAM_LIBCURL_DOESNT_SUPPORT;
-        config->proxyver = CURLPROXY_HTTPS2;
+    case ONEOPT('0', '5'): /* --http3-only */
+      /* Try HTTP/3 without fallback */
+      if(!feature_http3) {
+        err = PARAM_LIBCURL_DOESNT_SUPPORT;
         break;
       }
+      sethttpver(global, config, CURL_HTTP_VERSION_3ONLY);
       break;
-    case '1': /* --tlsv1* options */
-      switch(subletter) {
-      case '\0':
-        /* TLS version 1.x */
-        config->ssl_version = CURL_SSLVERSION_TLSv1;
-        break;
-      case '0':
-        /* TLS version 1.0 */
-        config->ssl_version = CURL_SSLVERSION_TLSv1_0;
-        break;
-      case '1':
-        /* TLS version 1.1 */
-        config->ssl_version = CURL_SSLVERSION_TLSv1_1;
-        break;
-      case '2':
-        /* TLS version 1.2 */
-        config->ssl_version = CURL_SSLVERSION_TLSv1_2;
-        break;
-      case '3':
-        /* TLS version 1.3 */
-        config->ssl_version = CURL_SSLVERSION_TLSv1_3;
-        break;
-      case 'A': /* --tls13-ciphers */
-        err = getstr(&config->cipher13_list, nextarg, DENY_BLANK);
-        break;
-      case 'B': /* --proxy-tls13-ciphers */
-        err = getstr(&config->proxy_cipher13_list, nextarg, DENY_BLANK);
-        break;
-      }
+    case ONEOPT('0', '9'): /* --http0.9 */
+      /* Allow HTTP/0.9 responses! */
+      config->http09_allowed = toggle;
       break;
-    case '2':
-      /* SSL version 2 */
+    case ONEOPT('0', 'a'): /* --proxy-http2 */
+      if(!feature_httpsproxy || !feature_http2)
+        return PARAM_LIBCURL_DOESNT_SUPPORT;
+      config->proxyver = CURLPROXY_HTTPS2;
+      break;
+    case ONEOPT('1', '\0'): /* --tlsv1 */
+      config->ssl_version = CURL_SSLVERSION_TLSv1;
+      break;
+    case ONEOPT('1', '0'): /* --tlsv1.0 */
+      config->ssl_version = CURL_SSLVERSION_TLSv1_0;
+      break;
+    case ONEOPT('1', '1'): /* --tlsv1.1 */
+      config->ssl_version = CURL_SSLVERSION_TLSv1_1;
+      break;
+    case ONEOPT('1', '2'): /* --tlsv1.2 */
+      config->ssl_version = CURL_SSLVERSION_TLSv1_2;
+      break;
+    case ONEOPT('1', '3'): /* --tlsv1.3 */
+      config->ssl_version = CURL_SSLVERSION_TLSv1_3;
+      break;
+    case ONEOPT('1', 'A'): /* --tls13-ciphers */
+      err = getstr(&config->cipher13_list, nextarg, DENY_BLANK);
+      break;
+    case ONEOPT('1', 'B'): /* --proxy-tls13-ciphers */
+      err = getstr(&config->proxy_cipher13_list, nextarg, DENY_BLANK);
+      break;
+    case ONEOPT('2', '\0'): /* --sslv2 */
       warnf(global, "Ignores instruction to use SSLv2");
       break;
-    case '3':
-      /* SSL version 3 */
+    case ONEOPT('3', '\0'): /* --sslv3 */
       warnf(global, "Ignores instruction to use SSLv3");
       break;
-    case '4':
-      /* IPv4 */
+    case ONEOPT('4', '\0'): /* --ipv4 */
       config->ip_version = CURL_IPRESOLVE_V4;
       break;
-    case '6':
-      /* IPv6 */
+    case ONEOPT('6', '\0'): /* --ipv6 */
       config->ip_version = CURL_IPRESOLVE_V6;
       break;
-    case 'a':
+    case ONEOPT('a', '\0'): /* --append */
       /* This makes the FTP sessions use APPE instead of STOR */
       config->ftp_append = toggle;
       break;
-    case 'A':
-      /* This specifies the User-Agent name */
+    case ONEOPT('A', '\0'): /* --user-agent */
       err = getstr(&config->useragent, nextarg, ALLOW_BLANK);
       break;
-    case 'b':
-      switch(subletter) {
-      case 'a': /* --alt-svc */
-        if(!feature_altsvc)
-          err = PARAM_LIBCURL_DOESNT_SUPPORT;
-        else
-          err = getstr(&config->altsvc, nextarg, ALLOW_BLANK);
-        break;
-      case 'b': /* --hsts */
-        if(!feature_hsts)
-          err = PARAM_LIBCURL_DOESNT_SUPPORT;
-        else
-          err = getstr(&config->hsts, nextarg, ALLOW_BLANK);
-        break;
-      default:  /* --cookie string coming up: */
-        if(nextarg[0] == '@') {
-          nextarg++;
-        }
-        else if(strchr(nextarg, '=')) {
-          /* A cookie string must have a =-letter */
-          err = add2list(&config->cookies, nextarg);
-          break;
-        }
-        /* We have a cookie file to read from! */
-        err = add2list(&config->cookiefiles, nextarg);
-      }
+    case ONEOPT('b', 'a'): /* --alt-svc */
+      if(!feature_altsvc)
+        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+      else
+        err = getstr(&config->altsvc, nextarg, ALLOW_BLANK);
       break;
-    case 'B':
-      /* use ASCII/text when transferring */
+    case ONEOPT('b', 'b'): /* --hsts */
+      if(!feature_hsts)
+        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+      else
+        err = getstr(&config->hsts, nextarg, ALLOW_BLANK);
+      break;
+    case ONEOPT('b', '\0'): /* --cookie */
+      if(nextarg[0] == '@') {
+        nextarg++;
+      }
+      else if(strchr(nextarg, '=')) {
+        /* A cookie string must have a =-letter */
+        err = add2list(&config->cookies, nextarg);
+        break;
+      }
+      /* We have a cookie file to read from! */
+      err = add2list(&config->cookiefiles, nextarg);
+      break;
+    case ONEOPT('B', '\0'): /* --use-ascii */
       config->use_ascii = toggle;
       break;
-    case 'c':
-      /* get the file name to dump all cookies in */
+    case ONEOPT('c', '\0'): /* --cookie-jar */
       err = getstr(&config->cookiejar, nextarg, DENY_BLANK);
       break;
-    case 'C':
+    case ONEOPT('C', '\0'): /* --continue-at */
       /* This makes us continue an ftp transfer at given position */
       if(strcmp(nextarg, "-")) {
         err = str2offset(&config->resume_from, nextarg);
@@ -1722,7 +1668,13 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       }
       config->use_resume = TRUE;
       break;
-    case 'd':
+    case ONEOPT('d', '\0'): /* --data */
+    case ONEOPT('d', 'a'):  /* --data-ascii */
+    case ONEOPT('d', 'b'):  /* --data-binary */
+    case ONEOPT('d', 'e'):  /* --data-urlencode */
+    case ONEOPT('d', 'f'):  /* --json */
+    case ONEOPT('d', 'g'):  /* --url-query */
+    case ONEOPT('d', 'r'):  /* --data-raw */
       /* postfield data */
     {
       char *postdata = NULL;
@@ -1865,17 +1817,15 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       a simple GET if -G is used. Already or soon.
 
       if(SetHTTPrequest(HTTPREQ_SIMPLEPOST, &config->httpreq)) {
-        Curl_safefree(postdata);
-        return PARAM_BAD_USE;
+      Curl_safefree(postdata);
+      return PARAM_BAD_USE;
       }
     */
     break;
-    case 'D':
-      /* dump-header to given file name */
+    case ONEOPT('D', '\0'): /* --dump-header */
       err = getstr(&config->headerfile, nextarg, DENY_BLANK);
       break;
-    case 'e':
-    {
+    case ONEOPT('e', '\0'): { /* --referer */
       char *ptr = strstr(nextarg, ";auto");
       if(ptr) {
         /* Automatic referer requested, this may be combined with a
@@ -1888,284 +1838,271 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       ptr = *nextarg ? nextarg : NULL;
       err = getstr(&config->referer, ptr, ALLOW_BLANK);
     }
-    break;
-    case 'E':
-      switch(subletter) {
-      case '\0': /* certificate file */
-        cleanarg(clearthis);
-        GetFileAndPassword(nextarg, &config->cert, &config->key_passwd);
-        break;
-      case 'a': /* --cacert CA info PEM file */
-        err = getstr(&config->cacert, nextarg, DENY_BLANK);
-        break;
-      case 'G': /* --ca-native */
-        config->native_ca_store = toggle;
-        break;
-      case 'H': /* --proxy-ca-native */
-        config->proxy_native_ca_store = toggle;
-        break;
-      case 'b': /* cert file type */
-        err = getstr(&config->cert_type, nextarg, DENY_BLANK);
-        break;
-      case 'c': /* private key file */
-        err = getstr(&config->key, nextarg, DENY_BLANK);
-        break;
-      case 'd': /* private key file type */
-        err = getstr(&config->key_type, nextarg, DENY_BLANK);
-        break;
-      case 'e': /* private key passphrase */
-        err = getstr(&config->key_passwd, nextarg, DENY_BLANK);
-        cleanarg(clearthis);
-        break;
-      case 'f': /* crypto engine */
-        err = getstr(&config->engine, nextarg, DENY_BLANK);
-        if(!err &&
-           config->engine && !strcmp(config->engine, "list")) {
-          err = PARAM_ENGINES_REQUESTED;
-        }
-        break;
-      case 'g': /* CA cert directory */
-        err = getstr(&config->capath, nextarg, DENY_BLANK);
-        break;
-      case 'h': /* --pubkey public key file */
-        err = getstr(&config->pubkey, nextarg, DENY_BLANK);
-        break;
-      case 'i': /* --hostpubmd5 md5 of the host public key */
-        err = getstr(&config->hostpubmd5, nextarg, DENY_BLANK);
-        if(!err) {
-          if(!config->hostpubmd5 || strlen(config->hostpubmd5) != 32)
-            err = PARAM_BAD_USE;
-        }
-        break;
-      case 'F': /* --hostpubsha256 sha256 of the host public key */
-        err = getstr(&config->hostpubsha256, nextarg, DENY_BLANK);
-        break;
-      case 'j': /* CRL file */
-        err = getstr(&config->crlfile, nextarg, DENY_BLANK);
-        break;
-      case 'k': /* TLS username */
-        if(!feature_tls_srp) {
-          cleanarg(clearthis);
-          err = PARAM_LIBCURL_DOESNT_SUPPORT;
-          break;
-        }
+      break;
+    case ONEOPT('E', '\0'): /* --cert */
+      cleanarg(clearthis);
+      GetFileAndPassword(nextarg, &config->cert, &config->key_passwd);
+      break;
+    case ONEOPT('E', 'a'): /* --cacert */
+      err = getstr(&config->cacert, nextarg, DENY_BLANK);
+      break;
+    case ONEOPT('E', 'G'): /* --ca-native */
+      config->native_ca_store = toggle;
+      break;
+    case ONEOPT('E', 'H'): /* --proxy-ca-native */
+      config->proxy_native_ca_store = toggle;
+      break;
+    case ONEOPT('E', 'b'): /* --cert-type */
+      err = getstr(&config->cert_type, nextarg, DENY_BLANK);
+      break;
+    case ONEOPT('E', 'c'): /* --key */
+      err = getstr(&config->key, nextarg, DENY_BLANK);
+      break;
+    case ONEOPT('E', 'd'): /* --key-type */
+      err = getstr(&config->key_type, nextarg, DENY_BLANK);
+      break;
+    case ONEOPT('E', 'e'): /* --pass */
+      err = getstr(&config->key_passwd, nextarg, DENY_BLANK);
+      cleanarg(clearthis);
+      break;
+    case ONEOPT('E', 'f'): /* --engine */
+      err = getstr(&config->engine, nextarg, DENY_BLANK);
+      if(!err &&
+         config->engine && !strcmp(config->engine, "list")) {
+        err = PARAM_ENGINES_REQUESTED;
+      }
+      break;
+    case ONEOPT('E', 'g'): /* --capath */
+      err = getstr(&config->capath, nextarg, DENY_BLANK);
+      break;
+    case ONEOPT('E', 'h'): /* --pubkey */
+      err = getstr(&config->pubkey, nextarg, DENY_BLANK);
+      break;
+    case ONEOPT('E', 'i'): /* --hostpubmd5 */
+      err = getstr(&config->hostpubmd5, nextarg, DENY_BLANK);
+      if(!err) {
+        if(!config->hostpubmd5 || strlen(config->hostpubmd5) != 32)
+          err = PARAM_BAD_USE;
+      }
+      break;
+    case ONEOPT('E', 'F'): /* --hostpubsha256 */
+      err = getstr(&config->hostpubsha256, nextarg, DENY_BLANK);
+      break;
+    case ONEOPT('E', 'j'): /* --crlfile */
+      err = getstr(&config->crlfile, nextarg, DENY_BLANK);
+      break;
+    case ONEOPT('E', 'k'): /* --tlsuser */
+      if(!feature_tls_srp)
+        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+      else
         err = getstr(&config->tls_username, nextarg, DENY_BLANK);
-        cleanarg(clearthis);
-        break;
-      case 'l': /* TLS password */
-        if(!feature_tls_srp) {
-          cleanarg(clearthis);
-          err = PARAM_LIBCURL_DOESNT_SUPPORT;
-          break;
-        }
+      cleanarg(clearthis);
+      break;
+    case ONEOPT('E', 'l'): /* --tlspassword */
+      if(!feature_tls_srp)
+        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+      else
         err = getstr(&config->tls_password, nextarg, ALLOW_BLANK);
-        cleanarg(clearthis);
-        break;
-      case 'm': /* TLS authentication type */
-        if(!feature_tls_srp) {
-          err = PARAM_LIBCURL_DOESNT_SUPPORT;
-          break;
-        }
+      cleanarg(clearthis);
+      break;
+    case ONEOPT('E', 'm'): /* --tlsauthtype */
+      if(!feature_tls_srp)
+        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+      else {
         err = getstr(&config->tls_authtype, nextarg, DENY_BLANK);
         if(!err && strcmp(config->tls_authtype, "SRP"))
           err = PARAM_LIBCURL_DOESNT_SUPPORT; /* only support TLS-SRP */
-        break;
-      case 'n': /* no empty SSL fragments, --ssl-allow-beast */
-        if(feature_ssl)
-          config->ssl_allow_beast = toggle;
-        break;
+      }
+      break;
+    case ONEOPT('E', 'n'): /* --ssl-allow-beast */
+      if(feature_ssl)
+        config->ssl_allow_beast = toggle;
+      break;
 
-      case 'o': /* --ssl-auto-client-cert */
-        if(feature_ssl)
-          config->ssl_auto_client_cert = toggle;
-        break;
+    case ONEOPT('E', 'o'): /* --ssl-auto-client-cert */
+      if(feature_ssl)
+        config->ssl_auto_client_cert = toggle;
+      break;
 
-      case 'O': /* --proxy-ssl-auto-client-cert */
-        if(feature_ssl)
-          config->proxy_ssl_auto_client_cert = toggle;
-        break;
+    case ONEOPT('E', 'O'): /* --proxy-ssl-auto-client-cert */
+      if(feature_ssl)
+        config->proxy_ssl_auto_client_cert = toggle;
+      break;
 
-      case 'p': /* Pinned public key DER file */
-        err = getstr(&config->pinnedpubkey, nextarg, DENY_BLANK);
-        break;
+    case ONEOPT('E', 'p'): /* --pinnedpubkey */
+      err = getstr(&config->pinnedpubkey, nextarg, DENY_BLANK);
+      break;
 
-      case 'P': /* proxy pinned public key */
-        err = getstr(&config->proxy_pinnedpubkey, nextarg, DENY_BLANK);
-        break;
+    case ONEOPT('E', 'P'): /* --proxy-pinnedpubkey */
+      err = getstr(&config->proxy_pinnedpubkey, nextarg, DENY_BLANK);
+      break;
 
-      case 'q': /* --cert-status */
-        config->verifystatus = TRUE;
-        break;
+    case ONEOPT('E', 'q'): /* --cert-status */
+      config->verifystatus = TRUE;
+      break;
 
-      case 'Q': /* --doh-cert-status */
-        config->doh_verifystatus = TRUE;
-        break;
+    case ONEOPT('E', 'Q'): /* --doh-cert-status */
+      config->doh_verifystatus = TRUE;
+      break;
 
-      case 'r': /* --false-start */
-        config->falsestart = TRUE;
-        break;
+    case ONEOPT('E', 'r'): /* --false-start */
+      config->falsestart = TRUE;
+      break;
 
-      case 's': /* --ssl-no-revoke */
-        if(feature_ssl)
-          config->ssl_no_revoke = TRUE;
-        break;
+    case ONEOPT('E', 's'): /* --ssl-no-revoke */
+      if(feature_ssl)
+        config->ssl_no_revoke = TRUE;
+      break;
 
-      case 'S': /* --ssl-revoke-best-effort */
-        if(feature_ssl)
-          config->ssl_revoke_best_effort = TRUE;
-        break;
+    case ONEOPT('E', 'S'): /* --ssl-revoke-best-effort */
+      if(feature_ssl)
+        config->ssl_revoke_best_effort = TRUE;
+      break;
 
-      case 't': /* --tcp-fastopen */
-        config->tcp_fastopen = TRUE;
-        break;
+    case ONEOPT('E', 't'): /* --tcp-fastopen */
+      config->tcp_fastopen = TRUE;
+      break;
 
-      case 'u': /* TLS username for proxy */
-        cleanarg(clearthis);
-        if(!feature_tls_srp) {
-          err = PARAM_LIBCURL_DOESNT_SUPPORT;
-          break;
-        }
+    case ONEOPT('E', 'u'): /* --proxy-tlsuser */
+      cleanarg(clearthis);
+      if(!feature_tls_srp)
+        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+      else
         err = getstr(&config->proxy_tls_username, nextarg, ALLOW_BLANK);
-        break;
+      break;
 
-      case 'v': /* TLS password for proxy */
-        cleanarg(clearthis);
-        if(!feature_tls_srp) {
-          err = PARAM_LIBCURL_DOESNT_SUPPORT;
-          break;
-        }
+    case ONEOPT('E', 'v'): /* --proxy-tlspassword */
+      cleanarg(clearthis);
+      if(!feature_tls_srp)
+        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+      else
         err = getstr(&config->proxy_tls_password, nextarg, DENY_BLANK);
-        break;
+      break;
 
-      case 'w': /* TLS authentication type for proxy */
-        if(!feature_tls_srp) {
-          err = PARAM_LIBCURL_DOESNT_SUPPORT;
-          break;
-        }
+    case ONEOPT('E', 'w'): /* --proxy-tlsauthtype */
+      if(!feature_tls_srp)
+        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+      else {
         err = getstr(&config->proxy_tls_authtype, nextarg, DENY_BLANK);
         if(!err && strcmp(config->proxy_tls_authtype, "SRP"))
           err = PARAM_LIBCURL_DOESNT_SUPPORT; /* only support TLS-SRP */
-        break;
-
-      case 'x': /* certificate file for proxy */
-        cleanarg(clearthis);
-        GetFileAndPassword(nextarg, &config->proxy_cert,
-                           &config->proxy_key_passwd);
-        break;
-
-      case 'y': /* cert file type for proxy */
-        err = getstr(&config->proxy_cert_type, nextarg, DENY_BLANK);
-        break;
-
-      case 'z': /* private key file for proxy */
-        err = getstr(&config->proxy_key, nextarg, ALLOW_BLANK);
-        break;
-
-      case '0': /* private key file type for proxy */
-        err = getstr(&config->proxy_key_type, nextarg, DENY_BLANK);
-        break;
-
-      case '1': /* private key passphrase for proxy */
-        err = getstr(&config->proxy_key_passwd, nextarg, ALLOW_BLANK);
-        cleanarg(clearthis);
-        break;
-
-      case '2': /* ciphers for proxy */
-        err = getstr(&config->proxy_cipher_list, nextarg, DENY_BLANK);
-        break;
-
-      case '3': /* CRL file for proxy */
-        err = getstr(&config->proxy_crlfile, nextarg, DENY_BLANK);
-        break;
-
-      case '4': /* no empty SSL fragments for proxy */
-        if(feature_ssl)
-          config->proxy_ssl_allow_beast = toggle;
-        break;
-
-      case '5': /* --login-options */
-        err = getstr(&config->login_options, nextarg, ALLOW_BLANK);
-        break;
-
-      case '6': /* CA info PEM file for proxy */
-        err = getstr(&config->proxy_cacert, nextarg, DENY_BLANK);
-        break;
-
-      case '7': /* CA cert directory for proxy */
-        err = getstr(&config->proxy_capath, nextarg, DENY_BLANK);
-        break;
-
-      case '8': /* allow insecure SSL connects for proxy */
-        config->proxy_insecure_ok = toggle;
-        break;
-
-      case '9': /* --proxy-tlsv1 */
-        /* TLS version 1 for proxy */
-        config->proxy_ssl_version = CURL_SSLVERSION_TLSv1;
-        break;
-
-      case 'A':
-        /* --socks5-basic */
-        if(toggle)
-          config->socks5_auth |= CURLAUTH_BASIC;
-        else
-          config->socks5_auth &= ~CURLAUTH_BASIC;
-        break;
-
-      case 'B':
-        /* --socks5-gssapi */
-        if(toggle)
-          config->socks5_auth |= CURLAUTH_GSSAPI;
-        else
-          config->socks5_auth &= ~CURLAUTH_GSSAPI;
-        break;
-
-      case 'C':
-        err = getstr(&config->etag_save_file, nextarg, DENY_BLANK);
-        break;
-
-      case 'D':
-        err = getstr(&config->etag_compare_file, nextarg, DENY_BLANK);
-        break;
-
-      case 'E':
-        err = getstr(&config->ssl_ec_curves, nextarg, DENY_BLANK);
-        break;
-
-      default: /* unknown flag */
-        err = PARAM_OPTION_UNKNOWN;
-        break;
       }
       break;
-    case 'f':
-      switch(subletter) {
-      case 'a': /* --fail-early */
-        global->fail_early = toggle;
-        break;
-      case 'b': /* --styled-output */
-        global->styled_output = toggle;
-        break;
-      case 'c': /* --mail-rcpt-allowfails */
-        config->mail_rcpt_allowfails = toggle;
-        break;
-      case 'd': /* --fail-with-body */
-        config->failwithbody = toggle;
-        break;
-      case 'e': /* --remove-on-error */
-        config->rm_partial = toggle;
-        break;
-       default: /* --fail (hard on errors)  */
-        config->failonerror = toggle;
-        break;
-      }
+
+    case ONEOPT('E', 'x'): /* --proxy-cert */
+      cleanarg(clearthis);
+      GetFileAndPassword(nextarg, &config->proxy_cert,
+                         &config->proxy_key_passwd);
+      break;
+
+    case ONEOPT('E', 'y'): /* --proxy-cert-type */
+      err = getstr(&config->proxy_cert_type, nextarg, DENY_BLANK);
+      break;
+
+    case ONEOPT('E', 'z'): /* --proxy-key */
+      err = getstr(&config->proxy_key, nextarg, ALLOW_BLANK);
+      break;
+
+    case ONEOPT('E', '0'): /* --proxy-key-type */
+      err = getstr(&config->proxy_key_type, nextarg, DENY_BLANK);
+      break;
+
+    case ONEOPT('E', '1'): /* --proxy-pass */
+      err = getstr(&config->proxy_key_passwd, nextarg, ALLOW_BLANK);
+      cleanarg(clearthis);
+      break;
+
+    case ONEOPT('E', '2'): /* --proxy-ciphers */
+      err = getstr(&config->proxy_cipher_list, nextarg, DENY_BLANK);
+      break;
+
+    case ONEOPT('E', '3'): /* --proxy-crlfile */
+      err = getstr(&config->proxy_crlfile, nextarg, DENY_BLANK);
+      break;
+
+    case ONEOPT('E', '4'): /* --proxy-allow-beast */
+      if(feature_ssl)
+        config->proxy_ssl_allow_beast = toggle;
+      break;
+
+    case ONEOPT('E', '5'): /* --login-options */
+      err = getstr(&config->login_options, nextarg, ALLOW_BLANK);
+      break;
+
+    case ONEOPT('E', '6'): /* --proxy-cacert */
+      err = getstr(&config->proxy_cacert, nextarg, DENY_BLANK);
+      break;
+
+    case ONEOPT('E', '7'): /* --proxy-cainfo */
+      err = getstr(&config->proxy_capath, nextarg, DENY_BLANK);
+      break;
+
+    case ONEOPT('E', '8'): /* --proxy-insecure */
+      config->proxy_insecure_ok = toggle;
+      break;
+
+    case ONEOPT('E', '9'): /* --proxy-tlsv1 */
+      /* TLS version 1 for proxy */
+      config->proxy_ssl_version = CURL_SSLVERSION_TLSv1;
+      break;
+
+    case ONEOPT('E', 'A'): /* --socks5-basic */
+      if(toggle)
+        config->socks5_auth |= CURLAUTH_BASIC;
+      else
+        config->socks5_auth &= ~CURLAUTH_BASIC;
+      break;
+
+    case ONEOPT('E', 'B'): /* --socks5-gssapi */
+      if(toggle)
+        config->socks5_auth |= CURLAUTH_GSSAPI;
+      else
+        config->socks5_auth &= ~CURLAUTH_GSSAPI;
+      break;
+
+    case ONEOPT('E', 'C'): /* --etag-save */
+      err = getstr(&config->etag_save_file, nextarg, DENY_BLANK);
+      break;
+
+    case ONEOPT('E', 'D'): /* --etag-compare */
+      err = getstr(&config->etag_compare_file, nextarg, DENY_BLANK);
+      break;
+
+    case ONEOPT('E', 'E'): /* --curves */
+      err = getstr(&config->ssl_ec_curves, nextarg, DENY_BLANK);
+      break;
+
+    case ONEOPT('f', 'a'): /* --fail-early */
+      global->fail_early = toggle;
+      break;
+    case ONEOPT('f', 'b'): /* --styled-output */
+      global->styled_output = toggle;
+      break;
+    case ONEOPT('f', 'c'): /* --mail-rcpt-allowfails */
+      config->mail_rcpt_allowfails = toggle;
+      break;
+    case ONEOPT('f', 'd'): /* --fail-with-body */
+      config->failwithbody = toggle;
       if(config->failonerror && config->failwithbody) {
         errorf(config->global, "You must select either --fail or "
                "--fail-with-body, not both.");
         err = PARAM_BAD_USE;
-        break;
       }
       break;
-    case 'F':
+    case ONEOPT('f', 'e'): /* --remove-on-error */
+      config->rm_partial = toggle;
+      break;
+    case ONEOPT('f', '\0'): /* --fail */
+      config->failonerror = toggle;
+      if(config->failonerror && config->failwithbody) {
+        errorf(config->global, "You must select either --fail or "
+               "--fail-with-body, not both.");
+        err = PARAM_BAD_USE;
+      }
+      break;
+
+    case ONEOPT('F', '\0'): /* --form */
+    case ONEOPT('F', 's'): /* --form-string */
       /* "form data" simulation, this is a little advanced so lets do our best
          to sort this out slowly and carefully */
       if(formparse(config,
@@ -2175,27 +2112,24 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
                    (subletter == 's')?TRUE:FALSE)) { /* 's' is literal
                                                         string */
         err = PARAM_BAD_USE;
-        break;
       }
-      if(SetHTTPrequest(config, HTTPREQ_MIMEPOST, &config->httpreq)) {
+      else if(SetHTTPrequest(config, HTTPREQ_MIMEPOST, &config->httpreq))
         err = PARAM_BAD_USE;
-        break;
-      }
       break;
 
-    case 'g': /* g disables URLglobbing */
+    case ONEOPT('g', '\0'): /* --globoff */
       config->globoff = toggle;
       break;
 
-    case 'G': /* HTTP GET */
-      if(subletter == 'a') { /* --request-target */
-        err = getstr(&config->request_target, nextarg, DENY_BLANK);
-      }
-      else
-        config->use_httpget = toggle;
+    case ONEOPT('G', '\0'): /* --get */
+      config->use_httpget = toggle;
       break;
 
-    case 'h': /* h for help */
+    case ONEOPT('G', 'a'): /* --request-target */
+      err = getstr(&config->request_target, nextarg, DENY_BLANK);
+      break;
+
+    case ONEOPT('h', '\0'): /* --help */
       if(toggle) {
         if(*nextarg) {
           global->help_category = strdup(nextarg);
@@ -2205,11 +2139,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           }
         }
         err = PARAM_HELP_REQUESTED;
-        break;
       }
       /* we now actually support --no-help too! */
       break;
-    case 'H':
+    case ONEOPT('H', '\0'): /* --header */
+    case ONEOPT('H', 'p'): /* --proxy-header */
       /* A custom header to append to a list */
       if(nextarg[0] == '@') {
         /* read many headers from a file or stdin */
@@ -2252,101 +2186,93 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           err = add2list(&config->headers, nextarg);
       }
       break;
-    case 'i':
+    case ONEOPT('i', '\0'): /* --include */
       config->show_headers = toggle; /* show the headers as well in the
                                         general output stream */
       break;
-    case 'j':
+    case ONEOPT('j', '\0'): /* --junk-session-cookies */
       config->cookiesession = toggle;
       break;
-    case 'I': /* --head */
+    case ONEOPT('I', '\0'): /* --head */
       config->no_body = toggle;
       config->show_headers = toggle;
       if(SetHTTPrequest(config,
                         (config->no_body)?HTTPREQ_HEAD:HTTPREQ_GET,
-                        &config->httpreq)) {
+                        &config->httpreq))
         err = PARAM_BAD_USE;
-        break;
-      }
       break;
-    case 'J': /* --remote-header-name */
+    case ONEOPT('J', '\0'): /* --remote-header-name */
       config->content_disposition = toggle;
       break;
-    case 'k': /* allow insecure SSL connects */
-      if(subletter == 'd') /* --doh-insecure */
-        config->doh_insecure_ok = toggle;
-      else
-        config->insecure_ok = toggle;
+    case ONEOPT('k', '\0'): /* --insecure */
+      config->insecure_ok = toggle;
       break;
-    case 'K': /* parse config file */
+    case ONEOPT('k', 'd'): /* --doh-insecure */
+      config->doh_insecure_ok = toggle;
+      break;
+    case ONEOPT('K', '\0'): /* --config */
       if(parseconfig(nextarg, global)) {
         errorf(global, "cannot read config from '%s'", nextarg);
         err = PARAM_READ_ERROR;
-        break;
       }
       break;
-    case 'l':
+    case ONEOPT('l', '\0'): /* --list-only */
       config->dirlistonly = toggle; /* only list the names of the FTP dir */
       break;
-    case 'L':
+    case ONEOPT('L', '\0'): /* --location */
+    case ONEOPT('L', 't'): /* --location-trusted */
       config->followlocation = toggle; /* Follow Location: HTTP headers */
-      switch(subletter) {
-      case 't':
+      if(subletter == 't')
         /* Continue to send authentication (user+password) when following
          * locations, even when hostname changed */
         config->unrestricted_auth = toggle;
-        break;
-      }
       break;
-    case 'm':
+    case ONEOPT('m', '\0'): /* --max-time */
       /* specified max time */
       err = secs2ms(&config->timeout_ms, nextarg);
       break;
-    case 'M': /* M for manual, huge help */
+    case ONEOPT('M', '\0'): /* --manual */
       if(toggle) { /* --no-manual shows no manual... */
 #ifndef USE_MANUAL
         warnf(global,
               "built-in manual was disabled at build-time");
 #endif
         err = PARAM_MANUAL_REQUESTED;
-        break;
       }
       break;
-    case 'n':
-      switch(subletter) {
-      case 'o': /* use .netrc or URL */
-        config->netrc_opt = toggle;
-        break;
-      case 'e': /* netrc-file */
-        err = getstr(&config->netrc_file, nextarg, DENY_BLANK);
-        break;
-      default:
-        /* pick info from .netrc, if this is used for http, curl will
-           automatically enforce user+password with the request */
-        config->netrc = toggle;
-        break;
-      }
+
+    case ONEOPT('n', 'o'): /* --netrc-optional */
+      config->netrc_opt = toggle;
       break;
-    case 'N':
+    case ONEOPT('n', 'e'): /* --netrc-file */
+      err = getstr(&config->netrc_file, nextarg, DENY_BLANK);
+      break;
+    case ONEOPT('n', '\0'): /* --netrc */
+      /* pick info from .netrc, if this is used for http, curl will
+         automatically enforce user+password with the request */
+      config->netrc = toggle;
+      break;
+
+    case ONEOPT('N', '\0'): /* --buffer */
       /* disable the output I/O buffering. note that the option is called
          --buffer but is mostly used in the negative form: --no-buffer */
       config->nobuffer = longopt ? !toggle : TRUE;
       break;
-    case 'O': /* --remote-name */
-      if(subletter == 'a') { /* --remote-name-all */
-        config->default_node_flags = toggle?GETOUT_USEREMOTE:0;
-        break;
-      }
-      else if(subletter == 'b') { /* --output-dir */
-        err = getstr(&config->output_dir, nextarg, DENY_BLANK);
-        break;
-      }
-      else if(subletter == 'c') { /* --clobber / --no-clobber */
-        config->file_clobber_mode = toggle ? CLOBBER_ALWAYS : CLOBBER_NEVER;
-        break;
-      }
-      FALLTHROUGH();
-    case 'o': /* --output */
+
+    case ONEOPT('O', 'a'): /* --remote-name-all */
+      config->default_node_flags = toggle?GETOUT_USEREMOTE:0;
+      break;
+
+    case ONEOPT('O', 'b'): /* --output-dir */
+      err = getstr(&config->output_dir, nextarg, DENY_BLANK);
+      break;
+
+    case ONEOPT('O', 'c'): /* --clobber */
+      config->file_clobber_mode = toggle ? CLOBBER_ALWAYS : CLOBBER_NEVER;
+      break;
+
+    case ONEOPT('o', '\0'): /* --output */
+    case ONEOPT('O', '\0'): /* --remote-name */
       /* output file */
       if(!config->url_out)
         config->url_out = config->url_list;
@@ -2388,7 +2314,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       }
       url->flags |= GETOUT_OUTFILE;
       break;
-    case 'P':
+    case ONEOPT('P', '\0'): /* --ftp-port */
       /* This makes the FTP sessions use PORT instead of PASV */
       /* use <eth0> or <192.168.10.10> style addresses. Anything except
          this will make us try to get the "default" address.
@@ -2396,15 +2322,16 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       */
       err = getstr(&config->ftpport, nextarg, DENY_BLANK);
       break;
-    case 'p':
+    case ONEOPT('p', '\0'): /* --proxytunnel */
       /* proxy tunnel for non-http protocols */
       config->proxytunnel = toggle;
       break;
 
-    case 'q': /* if used first, already taken care of, we do it like
-                 this so we don't cause an error! */
+    case ONEOPT('q', '\0'): /* --disable */
+      /* if used first, already taken care of, we do it like this so we don't
+         cause an error! */
       break;
-    case 'Q':
+    case ONEOPT('Q', '\0'): /* --quote */
       /* QUOTE command to send to FTP server */
       switch(nextarg[0]) {
       case '-':
@@ -2422,15 +2349,14 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       }
       break;
-    case 'r':
+    case ONEOPT('r', '\0'): /* --range */
       /* Specifying a range WITHOUT A DASH will create an illegal HTTP range
          (and won't actually be range by definition). The man page previously
          claimed that to be a good way, why this code is added to work-around
          it. */
       if(ISDIGIT(*nextarg) && !strchr(nextarg, '-')) {
         char buffer[32];
-        curl_off_t off;
-        if(curlx_strtoofft(nextarg, NULL, 10, &off)) {
+        if(curlx_strtoofft(nextarg, NULL, 10, &value)) {
           warnf(global, "unsupported range point");
           err = PARAM_BAD_USE;
           break;
@@ -2438,7 +2364,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         warnf(global,
               "A specified range MUST include at least one dash (-). "
               "Appending one for you");
-        msnprintf(buffer, sizeof(buffer), "%" CURL_FORMAT_CURL_OFF_T "-", off);
+        msnprintf(buffer, sizeof(buffer), "%" CURL_FORMAT_CURL_OFF_T "-",
+                  value);
         Curl_safefree(config->range);
         config->range = strdup(buffer);
         if(!config->range) {
@@ -2462,21 +2389,21 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         err = getstr(&config->range, nextarg, DENY_BLANK);
       }
       break;
-    case 'R':
+    case ONEOPT('R', '\0'): /* --remote-time */
       /* use remote file's time */
       config->remote_time = toggle;
       break;
-    case 's': /* --silent */
+    case ONEOPT('s', '\0'): /* --silent */
       global->silent = toggle;
       break;
-    case 'S': /* --show-error */
+    case ONEOPT('S', '\0'): /* --show-error */
       global->showerror = toggle;
       break;
-    case 't':
+    case ONEOPT('t', '\0'): /* --telnet-option */
       /* Telnet options */
       err = add2list(&config->telnet_options, nextarg);
       break;
-    case 'T':
+    case ONEOPT('T', '\0'): /* --upload */
       /* we are uploading */
       if(!config->url_ul)
         config->url_ul = config->url_list;
@@ -2509,17 +2436,17 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         err = getstr(&url->infile, nextarg, DENY_BLANK);
       }
       break;
-    case 'u':
+    case ONEOPT('u', '\0'): /* --user */
       /* user:password  */
       err = getstr(&config->userpwd, nextarg, ALLOW_BLANK);
       cleanarg(clearthis);
       break;
-    case 'U':
+    case ONEOPT('U', '\0'): /* --proxy-user */
       /* Proxy user:password  */
       err = getstr(&config->proxyuserpwd, nextarg, ALLOW_BLANK);
       cleanarg(clearthis);
       break;
-    case 'v':
+    case ONEOPT('v', '\0'): /* --verbose */
       if(toggle) {
         /* the '%' thing here will cause the trace get sent to stderr */
         Curl_safefree(global->trace_dump);
@@ -2537,14 +2464,12 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         /* verbose is disabled here */
         global->tracetype = TRACE_NONE;
       break;
-    case 'V':
-      if(toggle) {   /* --no-version yields no output! */
+    case ONEOPT('V', '\0'): /* --version */
+      if(toggle)    /* --no-version yields no output! */
         err = PARAM_VERSION_INFO_REQUESTED;
-        break;
-      }
       break;
 
-    case 'w':
+    case ONEOPT('w', '\0'): /* --write-out */
       /* get the output string */
       if('@' == *nextarg) {
         /* the data begins with a '@' letter, it means that a file name
@@ -2577,63 +2502,53 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       else
         err = getstr(&config->writeout, nextarg, DENY_BLANK);
       break;
-    case 'x':
-      switch(subletter) {
-      case 'a': /* --preproxy */
-        err = getstr(&config->preproxy, nextarg, DENY_BLANK);
-        break;
-      default:
-        /* --proxy */
-        err = getstr(&config->proxy, nextarg, ALLOW_BLANK);
-        if(config->proxyver != CURLPROXY_HTTPS2)
-          config->proxyver = CURLPROXY_HTTP;
-        break;
-      }
+    case ONEOPT('x', 'a'): /* --preproxy */
+      err = getstr(&config->preproxy, nextarg, DENY_BLANK);
       break;
-    case 'X':
+    case ONEOPT('x', '\0'): /* --proxy */
+      /* --proxy */
+      err = getstr(&config->proxy, nextarg, ALLOW_BLANK);
+      if(config->proxyver != CURLPROXY_HTTPS2)
+        config->proxyver = CURLPROXY_HTTP;
+      break;
+
+    case ONEOPT('X', '\0'): /* --request */
       /* set custom request */
       err = getstr(&config->customrequest, nextarg, DENY_BLANK);
       break;
-    case 'y':
+    case ONEOPT('y', '\0'): /* --speed-limit */
       /* low speed time */
       err = str2unum(&config->low_speed_time, nextarg);
-      if(err)
-        break;
-      if(!config->low_speed_limit)
+      if(!err && !config->low_speed_limit)
         config->low_speed_limit = 1;
       break;
-    case 'Y':
+    case ONEOPT('Y', '\0'): /* --speed-time */
       /* low speed limit */
       err = str2unum(&config->low_speed_limit, nextarg);
-      if(err)
-        break;
-      if(!config->low_speed_time)
+      if(!err && !config->low_speed_time)
         config->low_speed_time = 30;
       break;
-    case 'Z':
-      switch(subletter) {
-      case '\0':  /* --parallel */
-        global->parallel = toggle;
-        break;
-      case 'b': {  /* --parallel-max */
-        long val;
-        err = str2unum(&val, nextarg);
-        if(err)
-          break;
-        if(val > MAX_PARALLEL)
-          global->parallel_max = MAX_PARALLEL;
-        else if(val < 1)
-          global->parallel_max = PARALLEL_DEFAULT;
-        else
-          global->parallel_max = (unsigned short)val;
-        break;
-      }
-      case 'c':   /* --parallel-immediate */
-        global->parallel_connect = toggle;
-        break;
-      }
+    case ONEOPT('Z', '\0'): /* --parallel */
+      global->parallel = toggle;
       break;
-    case 'z': /* time condition coming up */
+    case ONEOPT('Z', 'b'): {  /* --parallel-max */
+      long val;
+      err = str2unum(&val, nextarg);
+      if(err)
+        break;
+      if(val > MAX_PARALLEL)
+        global->parallel_max = MAX_PARALLEL;
+      else if(val < 1)
+        global->parallel_max = PARALLEL_DEFAULT;
+      else
+        global->parallel_max = (unsigned short)val;
+      break;
+    }
+    case ONEOPT('Z', 'c'):   /* --parallel-immediate */
+      global->parallel_connect = toggle;
+      break;
+
+    case ONEOPT('z', '\0'): /* --time-cond */
       switch(*nextarg) {
       case '+':
         nextarg++;
@@ -2657,11 +2572,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       config->condtime = (curl_off_t)curl_getdate(nextarg, &now);
       if(-1 == config->condtime) {
         /* now let's see if it is a file name to get the time from instead! */
-        curl_off_t filetime;
-        rc = getfiletime(nextarg, global, &filetime);
+        rc = getfiletime(nextarg, global, &value);
         if(!rc)
           /* pull the time out from the file */
-          config->condtime = filetime;
+          config->condtime = value;
         else {
           /* failed, remove time condition */
           config->timecond = CURL_TIMECOND_NONE;
