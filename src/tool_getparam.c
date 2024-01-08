@@ -72,7 +72,6 @@ static ParameterError getstr(char **str, const char *val, bool allowblank)
 }
 
 struct LongShort {
-  const char *letter; /* short name option */
   const char *lname;  /* long name option */
   enum {
     ARG_NONE,   /* stand-alone but not a boolean */
@@ -80,292 +79,279 @@ struct LongShort {
     ARG_STRING, /* requires an argument */
     ARG_FILENAME /* requires an argument, usually a file name */
   } desc;
+  const char *letter; /* short name option */
+  /* 'letter' strings with more than one character have *no* short option. */
 };
 
+/* this array MUST be alphasorted based on the 'lname' */
 static const struct LongShort aliases[]= {
-  /* 'letter' strings with more than one character have *no* short option to
-     mention. */
-  {"*@", "url",                      ARG_STRING},
-  {"*4", "dns-ipv4-addr",            ARG_STRING},
-  {"*6", "dns-ipv6-addr",            ARG_STRING},
-  {"*a", "random-file",              ARG_FILENAME},
-  {"*b", "egd-file",                 ARG_STRING},
-  {"*B", "oauth2-bearer",            ARG_STRING},
-  {"*c", "connect-timeout",          ARG_STRING},
-  {"*C", "doh-url"        ,          ARG_STRING},
-  {"*d", "ciphers",                  ARG_STRING},
-  {"*D", "dns-interface",            ARG_STRING},
-  {"*e", "disable-epsv",             ARG_BOOL},
-  {"*f", "disallow-username-in-url", ARG_BOOL},
-  {"*E", "epsv",                     ARG_BOOL},
-         /* 'epsv' made like this to make --no-epsv and --epsv to work
-             although --disable-epsv is the documented option */
-  {"*F", "dns-servers",              ARG_STRING},
-  {"*g", "trace",                    ARG_FILENAME},
-  {"*G", "npn",                      ARG_BOOL},
-  {"*h", "trace-ascii",              ARG_FILENAME},
-  {"*H", "alpn",                     ARG_BOOL},
-  {"*i", "limit-rate",               ARG_STRING},
-  {"*I", "rate",                     ARG_STRING},
-  {"*j", "compressed",               ARG_BOOL},
-  {"*J", "tr-encoding",              ARG_BOOL},
-  {"*k", "digest",                   ARG_BOOL},
-  {"*l", "negotiate",                ARG_BOOL},
-  {"*m", "ntlm",                     ARG_BOOL},
-  {"*M", "ntlm-wb",                  ARG_BOOL},
-  {"*n", "basic",                    ARG_BOOL},
-  {"*o", "anyauth",                  ARG_BOOL},
+  {"abstract-unix-socket",     ARG_FILENAME, "$W"},
+  {"alpn",                     ARG_BOOL,     "*H"},
+  {"alt-svc",                  ARG_STRING,   "ba"},
+  {"anyauth",                  ARG_BOOL,     "*o"},
+  {"append",                   ARG_BOOL,     "a",},
+  {"aws-sigv4",                ARG_STRING,   "*V"},
+  {"basic",                    ARG_BOOL,     "*n"},
+  {"buffer",                   ARG_BOOL,     "N",},
+  {"ca-native",                ARG_BOOL,     "EG"},
+  {"cacert",                   ARG_FILENAME, "Ea"},
+  {"capath",                   ARG_FILENAME, "Eg"},
+  {"cert",                     ARG_FILENAME, "E",},
+  {"cert-status",              ARG_BOOL,     "Eq"},
+  {"cert-type",                ARG_STRING,   "Eb"},
+  {"ciphers",                  ARG_STRING,   "*d"},
+  {"clobber",                  ARG_BOOL,     "Oc"},
+  {"compressed",               ARG_BOOL,     "*j"},
+  {"compressed-ssh",           ARG_BOOL,     "$Z"},
+  {"config",                   ARG_FILENAME, "K",},
+  {"connect-timeout",          ARG_STRING,   "*c"},
+  {"connect-to",               ARG_STRING,   "$U"},
+  {"continue-at",              ARG_STRING,   "C",},
+  {"cookie",                   ARG_STRING,   "b",},
+  {"cookie-jar",               ARG_STRING,   "c",},
+  {"create-dirs",              ARG_BOOL,     "*r"},
+  {"create-file-mode",         ARG_STRING,   "*R"},
+  {"crlf",                     ARG_BOOL,     "*u"},
+  {"crlfile",                  ARG_FILENAME, "Ej"},
+  {"curves",                   ARG_STRING,   "EE"},
+  {"data",                     ARG_STRING,   "d",},
+  {"data-ascii",               ARG_STRING,   "da"},
+  {"data-binary",              ARG_STRING,   "db"},
+  {"data-raw",                 ARG_STRING,   "dr"},
+  {"data-urlencode",           ARG_STRING,   "de"},
+  {"delegation",               ARG_STRING,   "$G"},
+  {"digest",                   ARG_BOOL,     "*k"},
+  {"disable",                  ARG_BOOL,     "q",},
+  {"disable-eprt",             ARG_BOOL,     "*z"},
+  {"disable-epsv",             ARG_BOOL,     "*e"},
+  {"disallow-username-in-url", ARG_BOOL,     "*f"},
+  {"dns-interface",            ARG_STRING,   "*D"},
+  {"dns-ipv4-addr",            ARG_STRING,   "*4"},
+  {"dns-ipv6-addr",            ARG_STRING,   "*6"},
+  {"dns-servers",              ARG_STRING,   "*F"},
+  {"doh-cert-status",          ARG_BOOL,     "EQ"},
+  {"doh-insecure",             ARG_BOOL,     "kd"},
+  {"doh-url"        ,          ARG_STRING,   "*C"},
+  {"dump-header",              ARG_FILENAME, "D",},
+  {"egd-file",                 ARG_STRING,   "*b"},
+  {"engine",                   ARG_STRING,   "Ef"},
+  {"eprt",                     ARG_BOOL,     "*Z"},
+  {"epsv",                     ARG_BOOL,     "*E"},
+  {"etag-compare",             ARG_FILENAME, "ED"},
+  {"etag-save",                ARG_FILENAME, "EC"},
+  {"expect100-timeout",        ARG_STRING,   "$R"},
+  {"fail",                     ARG_BOOL,     "f",},
+  {"fail-early",               ARG_BOOL,     "fa"},
+  {"fail-with-body",           ARG_BOOL,     "fd"},
+  {"false-start",              ARG_BOOL,     "Er"},
+  {"form",                     ARG_STRING,   "F",},
+  {"form-escape",              ARG_BOOL,     "$l"},
+  {"form-string",              ARG_STRING,   "Fs"},
+  {"ftp-account",              ARG_STRING,   "$m"},
+  {"ftp-alternative-to-user",  ARG_STRING,   "$u"},
+  {"ftp-create-dirs",          ARG_BOOL,     "*q"},
+  {"ftp-method",               ARG_STRING,   "$r"},
+  {"ftp-pasv",                 ARG_BOOL,     "$b"},
+  {"ftp-port",                 ARG_STRING,   "P",},
+  {"ftp-pret",                 ARG_BOOL,     "$C"},
+  {"ftp-skip-pasv-ip",         ARG_BOOL,     "$q"},
+  {"ftp-ssl",                  ARG_BOOL,     "$a"},
+  {"ftp-ssl-ccc",              ARG_BOOL,     "$y"},
+  {"ftp-ssl-ccc-mode",         ARG_STRING,   "$j"},
+  {"ftp-ssl-control",          ARG_BOOL,     "$x"},
+  {"ftp-ssl-reqd",             ARG_BOOL,     "$v"},
+  {"get",                      ARG_BOOL,     "G",},
+  {"globoff",                  ARG_BOOL,     "g",},
+  {"happy-eyeballs-timeout-ms", ARG_STRING,  "$~"},
+  {"haproxy-clientip",         ARG_STRING,   "*P"},
+  {"haproxy-protocol",         ARG_BOOL,     "*X"},
+  {"head",                     ARG_BOOL,     "I",},
+  {"header",                   ARG_STRING,   "H",},
+  {"help",                     ARG_BOOL,     "h",},
+  {"hostpubmd5",               ARG_STRING,   "Ei"},
+  {"hostpubsha256",            ARG_STRING,   "EF"},
+  {"hsts",                     ARG_STRING,   "bb"},
+  {"http0.9",                  ARG_BOOL,     "09"},
+  {"http1.0",                  ARG_NONE,     "0",},
+  {"http1.1",                  ARG_NONE,     "01"},
+  {"http2",                    ARG_NONE,     "02"},
+  {"http2-prior-knowledge",    ARG_NONE,     "03"},
+  {"http3",                    ARG_NONE,     "04"},
+  {"http3-only",               ARG_NONE,     "05"},
+  {"ignore-content-length",    ARG_BOOL,     "$p"},
+  {"include",                  ARG_BOOL,     "i",},
+  {"insecure",                 ARG_BOOL,     "k",},
+  {"interface",                ARG_STRING,   "*w"},
+  {"ipfs-gateway",             ARG_STRING,   "*S"},
+  {"ipv4",                     ARG_NONE,     "4",},
+  {"ipv6",                     ARG_NONE,     "6",},
+  {"json",                     ARG_STRING,   "df"},
+  {"junk-session-cookies",     ARG_BOOL,     "j",},
+  {"keepalive",                ARG_BOOL,     "$1"},
+  {"keepalive-time",           ARG_STRING,   "$3"},
+  {"key",                      ARG_FILENAME, "Ec"},
+  {"key-type",                 ARG_STRING,   "Ed"},
+  {"krb",                      ARG_STRING,   "*x"},
+  {"krb4",                     ARG_STRING,   "*x"},
+  {"libcurl",                  ARG_STRING,   "$z"},
+  {"limit-rate",               ARG_STRING,   "*i"},
+  {"list-only",                ARG_BOOL,     "l",},
+  {"local-port",               ARG_STRING,   "$s"},
+  {"location",                 ARG_BOOL,     "L",},
+  {"location-trusted",         ARG_BOOL,     "Lt"},
+  {"login-options",            ARG_STRING,   "E5"},
+  {"mail-auth",                ARG_STRING,   "$H"},
+  {"mail-from",                ARG_STRING,   "$A"},
+  {"mail-rcpt",                ARG_STRING,   "$B"},
+  {"mail-rcpt-allowfails",     ARG_BOOL,     "fc"},
+  {"manual",                   ARG_BOOL,     "M",},
+  {"max-filesize",             ARG_STRING,   "*y"},
+  {"max-redirs",               ARG_STRING,   "*s"},
+  {"max-time",                 ARG_STRING,   "m",},
+  {"metalink",                 ARG_BOOL,     "$J"},
+  {"negotiate",                ARG_BOOL,     "*l"},
+  {"netrc",                    ARG_BOOL,     "n",},
+  {"netrc-file",               ARG_FILENAME, "ne"},
+  {"netrc-optional",           ARG_BOOL,     "no"},
+  {"next",                     ARG_NONE,     ":",},
+  {"noproxy",                  ARG_STRING,   "$5"},
+  {"npn",                      ARG_BOOL,     "*G"},
+  {"ntlm",                     ARG_BOOL,     "*m"},
+  {"ntlm-wb",                  ARG_BOOL,     "*M"},
+  {"oauth2-bearer",            ARG_STRING,   "*B"},
+  {"output",                   ARG_FILENAME, "o",},
+  {"output-dir",               ARG_STRING,   "Ob"},
+  {"parallel",                 ARG_BOOL,     "Z",},
+  {"parallel-immediate",       ARG_BOOL,     "Zc"},
+  {"parallel-max",             ARG_STRING,   "Zb"},
+  {"pass",                     ARG_STRING,   "Ee"},
+  {"path-as-is",               ARG_BOOL,     "$N"},
+  {"pinnedpubkey",             ARG_STRING,   "Ep"},
+  {"post301",                  ARG_BOOL,     "$0"},
+  {"post302",                  ARG_BOOL,     "$4"},
+  {"post303",                  ARG_BOOL,     "$I"},
+  {"preproxy",                 ARG_STRING,   "xa"},
+  {"progress-bar",             ARG_BOOL,     "#",},
+  {"progress-meter",           ARG_BOOL,     "#m"},
+  {"proto",                    ARG_STRING,   "$D"},
+  {"proto-default",            ARG_STRING,   "$Q"},
+  {"proto-redir",              ARG_STRING,   "$E"},
+  {"proxy",                    ARG_STRING,   "x",},
+  {"proxy-anyauth",            ARG_BOOL,     "$n"},
+  {"proxy-basic",              ARG_BOOL,     "$f"},
+  {"proxy-ca-native",          ARG_BOOL,     "EH"},
+  {"proxy-cacert",             ARG_FILENAME, "E6"},
+  {"proxy-capath",             ARG_FILENAME, "E7"},
+  {"proxy-cert",               ARG_FILENAME, "Ex"},
+  {"proxy-cert-type",          ARG_STRING,   "Ey"},
+  {"proxy-ciphers",            ARG_STRING,   "E2"},
+  {"proxy-crlfile",            ARG_FILENAME, "E3"},
+  {"proxy-digest",             ARG_BOOL,     "$e"},
+  {"proxy-header",             ARG_STRING,   "Hp"},
+  {"proxy-http2",              ARG_BOOL,     "0a"},
+  {"proxy-insecure",           ARG_BOOL,     "E8"},
+  {"proxy-key",                ARG_FILENAME, "Ez"},
+  {"proxy-key-type",           ARG_STRING,   "E0"},
+  {"proxy-negotiate",          ARG_BOOL,     "$k"},
+  {"proxy-ntlm",               ARG_BOOL,     "*t"},
+  {"proxy-pass",               ARG_STRING,   "E1"},
+  {"proxy-pinnedpubkey",       ARG_STRING,   "EP"},
+  {"proxy-service-name",       ARG_STRING,   "$O"},
+  {"proxy-ssl-allow-beast",    ARG_BOOL,     "E4"},
+  {"proxy-ssl-auto-client-cert", ARG_BOOL,   "EO"},
+  {"proxy-tls13-ciphers",      ARG_STRING,   "1B"},
+  {"proxy-tlsauthtype",        ARG_STRING,   "Ew"},
+  {"proxy-tlspassword",        ARG_STRING,   "Ev"},
+  {"proxy-tlsuser",            ARG_STRING,   "Eu"},
+  {"proxy-tlsv1",              ARG_NONE,     "E9"},
+  {"proxy-user",               ARG_STRING,   "U",},
+  {"proxy1.0",                 ARG_STRING,   "$8"},
+  {"proxytunnel",              ARG_BOOL,     "p",},
+  {"pubkey",                   ARG_STRING,   "Eh"},
+  {"quote",                    ARG_STRING,   "Q",},
+  {"random-file",              ARG_FILENAME, "*a"},
+  {"range",                    ARG_STRING,   "r",},
+  {"rate",                     ARG_STRING,   "*I"},
+  {"raw",                      ARG_BOOL,     "$#"},
+  {"referer",                  ARG_STRING,   "e",},
+  {"remote-header-name",       ARG_BOOL,     "J",},
+  {"remote-name",              ARG_BOOL,     "O",},
+  {"remote-name-all",          ARG_BOOL,     "Oa"},
+  {"remote-time",              ARG_BOOL,     "R",},
+  {"remove-on-error",          ARG_BOOL,     "fe"},
+  {"request",                  ARG_STRING,   "X",},
+  {"request-target",           ARG_STRING,   "Ga"},
+  {"resolve",                  ARG_STRING,   "$F"},
+  {"retry",                    ARG_STRING,   "$g"},
+  {"retry-all-errors",         ARG_BOOL,     "$!"},
+  {"retry-connrefused",        ARG_BOOL,     "$V"},
+  {"retry-delay",              ARG_STRING,   "$h"},
+  {"retry-max-time",           ARG_STRING,   "$i"},
+  {"sasl-authzid",             ARG_STRING,   "$6"},
+  {"sasl-ir",                  ARG_BOOL,     "$K"},
+  {"service-name",             ARG_STRING,   "$P"},
+  {"sessionid",                ARG_BOOL,     "$w"},
+  {"show-error",               ARG_BOOL,     "S",},
+  {"silent",                   ARG_BOOL,     "s",},
+  {"socks4",                   ARG_STRING,   "$t"},
+  {"socks4a",                  ARG_STRING,   "$T"},
+  {"socks5",                   ARG_STRING,   "$c"},
+  {"socks5-basic",             ARG_BOOL,     "EA"},
+  {"socks5-gssapi",            ARG_BOOL,     "EB"},
+  {"socks5-gssapi-nec",        ARG_BOOL,     "$7"},
+  {"socks5-gssapi-service",    ARG_STRING,   "$O"},
+  {"socks5-hostname",          ARG_STRING,   "$2"},
+  {"speed-limit",              ARG_STRING,   "Y",},
+  {"speed-time",               ARG_STRING,   "y",},
+  {"ssl",                      ARG_BOOL,     "$a"},
+  {"ssl-allow-beast",          ARG_BOOL,     "En"},
+  {"ssl-auto-client-cert",     ARG_BOOL,     "Eo"},
+  {"ssl-no-revoke",            ARG_BOOL,     "Es"},
+  {"ssl-reqd",                 ARG_BOOL,     "$v"},
+  {"ssl-revoke-best-effort",   ARG_BOOL,     "ES"},
+  {"sslv2",                    ARG_NONE,     "2",},
+  {"sslv3",                    ARG_NONE,     "3",},
+  {"stderr",                   ARG_FILENAME, "*v"},
+  {"styled-output",            ARG_BOOL,     "fb"},
+  {"suppress-connect-headers", ARG_BOOL,     "$Y"},
+  {"tcp-fastopen",             ARG_BOOL,     "Et"},
+  {"tcp-nodelay",              ARG_BOOL,     "$d"},
+  {"telnet-option",            ARG_STRING,   "t",},
+  {"test-event",               ARG_BOOL,     "$L"},
+  {"tftp-blksize",             ARG_STRING,   "$9"},
+  {"tftp-no-options",          ARG_BOOL,     "$S"},
+  {"time-cond",                ARG_STRING,   "z",},
+  {"tls-max",                  ARG_STRING,   "$X"},
+  {"tls13-ciphers",            ARG_STRING,   "1A"},
+  {"tlsauthtype",              ARG_STRING,   "Em"},
+  {"tlspassword",              ARG_STRING,   "El"},
+  {"tlsuser",                  ARG_STRING,   "Ek"},
+  {"tlsv1",                    ARG_NONE,     "1",},
+  {"tlsv1.0",                  ARG_NONE,     "10"},
+  {"tlsv1.1",                  ARG_NONE,     "11"},
+  {"tlsv1.2",                  ARG_NONE,     "12"},
+  {"tlsv1.3",                  ARG_NONE,     "13"},
+  {"tr-encoding",              ARG_BOOL,     "*J"},
+  {"trace",                    ARG_FILENAME, "*g"},
+  {"trace-ascii",              ARG_FILENAME, "*h"},
+  {"trace-config",             ARG_STRING,   "$&"},
+  {"trace-ids",                ARG_BOOL,     "$%"},
+  {"trace-time",               ARG_BOOL,     "$o"},
+  {"unix-socket",              ARG_FILENAME, "$M"},
+  {"upload-file",              ARG_FILENAME, "T",},
+  {"url",                      ARG_STRING,   "*@"},
+  {"url-query",                ARG_STRING,   "dg"},
+  {"use-ascii",                ARG_BOOL,     "B",},
+  {"user",                     ARG_STRING,   "u",},
+  {"user-agent",               ARG_STRING,   "A",},
+  {"variable",                 ARG_STRING,   ":a"},
+  {"verbose",                  ARG_BOOL,     "v",},
+  {"version",                  ARG_BOOL,     "V",},
 #ifdef USE_WATT32
-  {"*p", "wdebug",                   ARG_BOOL},
+  {"wdebug",                   ARG_BOOL,     "*p"},
 #endif
-  {"*q", "ftp-create-dirs",          ARG_BOOL},
-  {"*r", "create-dirs",              ARG_BOOL},
-  {"*R", "create-file-mode",         ARG_STRING},
-  {"*s", "max-redirs",               ARG_STRING},
-  {"*S", "ipfs-gateway",             ARG_STRING},
-  {"*t", "proxy-ntlm",               ARG_BOOL},
-  {"*u", "crlf",                     ARG_BOOL},
-  {"*v", "stderr",                   ARG_FILENAME},
-  {"*V", "aws-sigv4",                ARG_STRING},
-  {"*w", "interface",                ARG_STRING},
-  {"*x", "krb",                      ARG_STRING},
-  {"*x", "krb4",                     ARG_STRING},
-         /* 'krb4' is the previous name */
-  {"*X", "haproxy-protocol",         ARG_BOOL},
-  {"*P", "haproxy-clientip",         ARG_STRING},
-  {"*y", "max-filesize",             ARG_STRING},
-  {"*z", "disable-eprt",             ARG_BOOL},
-  {"*Z", "eprt",                     ARG_BOOL},
-         /* 'eprt' made like this to make --no-eprt and --eprt to work
-             although --disable-eprt is the documented option */
-  {"*~", "xattr",                    ARG_BOOL},
-  {"$a", "ftp-ssl",                  ARG_BOOL},
-         /* 'ftp-ssl' deprecated name since 7.20.0 */
-  {"$a", "ssl",                      ARG_BOOL},
-         /* 'ssl' new option name in 7.20.0, previously this was ftp-ssl */
-  {"$b", "ftp-pasv",                 ARG_BOOL},
-  {"$c", "socks5",                   ARG_STRING},
-  {"$d", "tcp-nodelay",              ARG_BOOL},
-  {"$e", "proxy-digest",             ARG_BOOL},
-  {"$f", "proxy-basic",              ARG_BOOL},
-  {"$g", "retry",                    ARG_STRING},
-  {"$V", "retry-connrefused",        ARG_BOOL},
-  {"$h", "retry-delay",              ARG_STRING},
-  {"$i", "retry-max-time",           ARG_STRING},
-  {"$k", "proxy-negotiate",          ARG_BOOL},
-  {"$l", "form-escape",              ARG_BOOL},
-  {"$m", "ftp-account",              ARG_STRING},
-  {"$n", "proxy-anyauth",            ARG_BOOL},
-  {"$o", "trace-time",               ARG_BOOL},
-  {"$p", "ignore-content-length",    ARG_BOOL},
-  {"$q", "ftp-skip-pasv-ip",         ARG_BOOL},
-  {"$r", "ftp-method",               ARG_STRING},
-  {"$s", "local-port",               ARG_STRING},
-  {"$t", "socks4",                   ARG_STRING},
-  {"$T", "socks4a",                  ARG_STRING},
-  {"$u", "ftp-alternative-to-user",  ARG_STRING},
-  {"$v", "ftp-ssl-reqd",             ARG_BOOL},
-         /* 'ftp-ssl-reqd' deprecated name since 7.20.0 */
-  {"$v", "ssl-reqd",                 ARG_BOOL},
-         /* 'ssl-reqd' new in 7.20.0, previously this was ftp-ssl-reqd */
-  {"$w", "sessionid",                ARG_BOOL},
-         /* 'sessionid' listed as --no-sessionid in the help */
-  {"$x", "ftp-ssl-control",          ARG_BOOL},
-  {"$y", "ftp-ssl-ccc",              ARG_BOOL},
-  {"$j", "ftp-ssl-ccc-mode",         ARG_STRING},
-  {"$z", "libcurl",                  ARG_STRING},
-  {"$#", "raw",                      ARG_BOOL},
-  {"$0", "post301",                  ARG_BOOL},
-  {"$1", "keepalive",                ARG_BOOL},
-         /* 'keepalive' listed as --no-keepalive in the help */
-  {"$2", "socks5-hostname",          ARG_STRING},
-  {"$3", "keepalive-time",           ARG_STRING},
-  {"$4", "post302",                  ARG_BOOL},
-  {"$5", "noproxy",                  ARG_STRING},
-  {"$7", "socks5-gssapi-nec",        ARG_BOOL},
-  {"$8", "proxy1.0",                 ARG_STRING},
-  {"$9", "tftp-blksize",             ARG_STRING},
-  {"$A", "mail-from",                ARG_STRING},
-  {"$B", "mail-rcpt",                ARG_STRING},
-  {"$C", "ftp-pret",                 ARG_BOOL},
-  {"$D", "proto",                    ARG_STRING},
-  {"$E", "proto-redir",              ARG_STRING},
-  {"$F", "resolve",                  ARG_STRING},
-  {"$G", "delegation",               ARG_STRING},
-  {"$H", "mail-auth",                ARG_STRING},
-  {"$I", "post303",                  ARG_BOOL},
-  {"$J", "metalink",                 ARG_BOOL},
-  {"$6", "sasl-authzid",             ARG_STRING},
-  {"$K", "sasl-ir",                  ARG_BOOL },
-  {"$L", "test-event",               ARG_BOOL},
-  {"$M", "unix-socket",              ARG_FILENAME},
-  {"$N", "path-as-is",               ARG_BOOL},
-  {"$O", "socks5-gssapi-service",    ARG_STRING},
-         /* 'socks5-gssapi-service' merged with'proxy-service-name' and
-            deprecated since 7.49.0 */
-  {"$O", "proxy-service-name",       ARG_STRING},
-  {"$P", "service-name",             ARG_STRING},
-  {"$Q", "proto-default",            ARG_STRING},
-  {"$R", "expect100-timeout",        ARG_STRING},
-  {"$S", "tftp-no-options",          ARG_BOOL},
-  {"$U", "connect-to",               ARG_STRING},
-  {"$W", "abstract-unix-socket",     ARG_FILENAME},
-  {"$X", "tls-max",                  ARG_STRING},
-  {"$Y", "suppress-connect-headers", ARG_BOOL},
-  {"$Z", "compressed-ssh",           ARG_BOOL},
-  {"$~", "happy-eyeballs-timeout-ms", ARG_STRING},
-  {"$!", "retry-all-errors",         ARG_BOOL},
-  {"$%", "trace-ids",                ARG_BOOL},
-  {"$&", "trace-config",             ARG_STRING},
-  {"0",   "http1.0",                 ARG_NONE},
-  {"01",  "http1.1",                 ARG_NONE},
-  {"02",  "http2",                   ARG_NONE},
-  {"03",  "http2-prior-knowledge",   ARG_NONE},
-  {"04",  "http3",                   ARG_NONE},
-  {"05",  "http3-only",              ARG_NONE},
-  {"09",  "http0.9",                 ARG_BOOL},
-  {"0a",  "proxy-http2",             ARG_BOOL},
-  {"1",  "tlsv1",                    ARG_NONE},
-  {"10",  "tlsv1.0",                 ARG_NONE},
-  {"11",  "tlsv1.1",                 ARG_NONE},
-  {"12",  "tlsv1.2",                 ARG_NONE},
-  {"13",  "tlsv1.3",                 ARG_NONE},
-  {"1A", "tls13-ciphers",            ARG_STRING},
-  {"1B", "proxy-tls13-ciphers",      ARG_STRING},
-  {"2",  "sslv2",                    ARG_NONE},
-  {"3",  "sslv3",                    ARG_NONE},
-  {"4",  "ipv4",                     ARG_NONE},
-  {"6",  "ipv6",                     ARG_NONE},
-  {"a",  "append",                   ARG_BOOL},
-  {"A",  "user-agent",               ARG_STRING},
-  {"b",  "cookie",                   ARG_STRING},
-  {"ba", "alt-svc",                  ARG_STRING},
-  {"bb", "hsts",                     ARG_STRING},
-  {"B",  "use-ascii",                ARG_BOOL},
-  {"c",  "cookie-jar",               ARG_STRING},
-  {"C",  "continue-at",              ARG_STRING},
-  {"d",  "data",                     ARG_STRING},
-  {"dr", "data-raw",                 ARG_STRING},
-  {"da", "data-ascii",               ARG_STRING},
-  {"db", "data-binary",              ARG_STRING},
-  {"de", "data-urlencode",           ARG_STRING},
-  {"df", "json",                     ARG_STRING},
-  {"dg", "url-query",                ARG_STRING},
-  {"D",  "dump-header",              ARG_FILENAME},
-  {"e",  "referer",                  ARG_STRING},
-  {"E",  "cert",                     ARG_FILENAME},
-  {"Ea", "cacert",                   ARG_FILENAME},
-  {"Eb", "cert-type",                ARG_STRING},
-  {"Ec", "key",                      ARG_FILENAME},
-  {"Ed", "key-type",                 ARG_STRING},
-  {"Ee", "pass",                     ARG_STRING},
-  {"Ef", "engine",                   ARG_STRING},
-  {"EG", "ca-native",                ARG_BOOL},
-  {"EH", "proxy-ca-native",          ARG_BOOL},
-  {"Eg", "capath",                   ARG_FILENAME},
-  {"Eh", "pubkey",                   ARG_STRING},
-  {"Ei", "hostpubmd5",               ARG_STRING},
-  {"EF", "hostpubsha256",            ARG_STRING},
-  {"Ej", "crlfile",                  ARG_FILENAME},
-  {"Ek", "tlsuser",                  ARG_STRING},
-  {"El", "tlspassword",              ARG_STRING},
-  {"Em", "tlsauthtype",              ARG_STRING},
-  {"En", "ssl-allow-beast",          ARG_BOOL},
-  {"Eo", "ssl-auto-client-cert",     ARG_BOOL},
-  {"EO", "proxy-ssl-auto-client-cert", ARG_BOOL},
-  {"Ep", "pinnedpubkey",             ARG_STRING},
-  {"EP", "proxy-pinnedpubkey",       ARG_STRING},
-  {"Eq", "cert-status",              ARG_BOOL},
-  {"EQ", "doh-cert-status",          ARG_BOOL},
-  {"Er", "false-start",              ARG_BOOL},
-  {"Es", "ssl-no-revoke",            ARG_BOOL},
-  {"ES", "ssl-revoke-best-effort",   ARG_BOOL},
-  {"Et", "tcp-fastopen",             ARG_BOOL},
-  {"Eu", "proxy-tlsuser",            ARG_STRING},
-  {"Ev", "proxy-tlspassword",        ARG_STRING},
-  {"Ew", "proxy-tlsauthtype",        ARG_STRING},
-  {"Ex", "proxy-cert",               ARG_FILENAME},
-  {"Ey", "proxy-cert-type",          ARG_STRING},
-  {"Ez", "proxy-key",                ARG_FILENAME},
-  {"E0", "proxy-key-type",           ARG_STRING},
-  {"E1", "proxy-pass",               ARG_STRING},
-  {"E2", "proxy-ciphers",            ARG_STRING},
-  {"E3", "proxy-crlfile",            ARG_FILENAME},
-  {"E4", "proxy-ssl-allow-beast",    ARG_BOOL},
-  {"E5", "login-options",            ARG_STRING},
-  {"E6", "proxy-cacert",             ARG_FILENAME},
-  {"E7", "proxy-capath",             ARG_FILENAME},
-  {"E8", "proxy-insecure",           ARG_BOOL},
-  {"E9", "proxy-tlsv1",              ARG_NONE},
-  {"EA", "socks5-basic",             ARG_BOOL},
-  {"EB", "socks5-gssapi",            ARG_BOOL},
-  {"EC", "etag-save",                ARG_FILENAME},
-  {"ED", "etag-compare",             ARG_FILENAME},
-  {"EE", "curves",                   ARG_STRING},
-  {"f",  "fail",                     ARG_BOOL},
-  {"fa", "fail-early",               ARG_BOOL},
-  {"fb", "styled-output",            ARG_BOOL},
-  {"fc", "mail-rcpt-allowfails",     ARG_BOOL},
-  {"fd", "fail-with-body",           ARG_BOOL},
-  {"fe", "remove-on-error",          ARG_BOOL},
-  {"F",  "form",                     ARG_STRING},
-  {"Fs", "form-string",              ARG_STRING},
-  {"g",  "globoff",                  ARG_BOOL},
-  {"G",  "get",                      ARG_BOOL},
-  {"Ga", "request-target",           ARG_STRING},
-  {"h",  "help",                     ARG_BOOL},
-  {"H",  "header",                   ARG_STRING},
-  {"Hp", "proxy-header",             ARG_STRING},
-  {"i",  "include",                  ARG_BOOL},
-  {"I",  "head",                     ARG_BOOL},
-  {"j",  "junk-session-cookies",     ARG_BOOL},
-  {"J",  "remote-header-name",       ARG_BOOL},
-  {"k",  "insecure",                 ARG_BOOL},
-  {"kd", "doh-insecure",             ARG_BOOL},
-  {"K",  "config",                   ARG_FILENAME},
-  {"l",  "list-only",                ARG_BOOL},
-  {"L",  "location",                 ARG_BOOL},
-  {"Lt", "location-trusted",         ARG_BOOL},
-  {"m",  "max-time",                 ARG_STRING},
-  {"M",  "manual",                   ARG_BOOL},
-  {"n",  "netrc",                    ARG_BOOL},
-  {"no", "netrc-optional",           ARG_BOOL},
-  {"ne", "netrc-file",               ARG_FILENAME},
-  {"N",  "buffer",                   ARG_BOOL},
-         /* 'buffer' listed as --no-buffer in the help */
-  {"o",  "output",                   ARG_FILENAME},
-  {"O",  "remote-name",              ARG_BOOL},
-  {"Oa", "remote-name-all",          ARG_BOOL},
-  {"Ob", "output-dir",               ARG_STRING},
-  {"Oc", "clobber",                  ARG_BOOL},
-  {"p",  "proxytunnel",              ARG_BOOL},
-  {"P",  "ftp-port",                 ARG_STRING},
-  {"q",  "disable",                  ARG_BOOL},
-  {"Q",  "quote",                    ARG_STRING},
-  {"r",  "range",                    ARG_STRING},
-  {"R",  "remote-time",              ARG_BOOL},
-  {"s",  "silent",                   ARG_BOOL},
-  {"S",  "show-error",               ARG_BOOL},
-  {"t",  "telnet-option",            ARG_STRING},
-  {"T",  "upload-file",              ARG_FILENAME},
-  {"u",  "user",                     ARG_STRING},
-  {"U",  "proxy-user",               ARG_STRING},
-  {"v",  "verbose",                  ARG_BOOL},
-  {"V",  "version",                  ARG_BOOL},
-  {"w",  "write-out",                ARG_STRING},
-  {"x",  "proxy",                    ARG_STRING},
-  {"xa", "preproxy",                 ARG_STRING},
-  {"X",  "request",                  ARG_STRING},
-  {"Y",  "speed-limit",              ARG_STRING},
-  {"y",  "speed-time",               ARG_STRING},
-  {"z",  "time-cond",                ARG_STRING},
-  {"Z",  "parallel",                 ARG_BOOL},
-  {"Zb", "parallel-max",             ARG_STRING},
-  {"Zc", "parallel-immediate",       ARG_BOOL},
-  {"#",  "progress-bar",             ARG_BOOL},
-  {"#m", "progress-meter",           ARG_BOOL},
-  {":",  "next",                     ARG_NONE},
-  {":a", "variable",                 ARG_STRING},
+  {"write-out",                ARG_STRING,   "w",},
+  {"xattr",                    ARG_BOOL,     "*~"},
 };
 
 /* Split the argument of -E to 'certname' and 'passphrase' separated by colon.
@@ -501,12 +487,14 @@ static void
 GetFileAndPassword(char *nextarg, char **file, char **password)
 {
   char *certname, *passphrase;
-  parse_cert_parameter(nextarg, &certname, &passphrase);
-  Curl_safefree(*file);
-  *file = certname;
-  if(passphrase) {
-    Curl_safefree(*password);
-    *password = passphrase;
+  if(nextarg) {
+    parse_cert_parameter(nextarg, &certname, &passphrase);
+    Curl_safefree(*file);
+    *file = certname;
+    if(passphrase) {
+      Curl_safefree(*password);
+      *password = passphrase;
+    }
   }
 }
 
@@ -746,6 +734,32 @@ out:
   return result;
 }
 
+static int findarg(const void *a, const void *b)
+{
+  const struct LongShort *aa = a;
+  const struct LongShort *bb = b;
+  return strcmp(aa->lname, bb->lname);
+}
+
+static const struct LongShort *single(char letter)
+{
+  static const struct LongShort *singles[128 - ' ']; /* ASCII => pointer */
+  static bool singles_done = FALSE;
+  DEBUGASSERT((letter < 127) && (letter > ' '));
+
+  if(!singles_done) {
+    unsigned int j;
+    for(j = 0; j < sizeof(aliases)/sizeof(aliases[0]); j++) {
+      if(!aliases[j].letter[1]) {
+        unsigned char l = aliases[j].letter[0];
+        singles[l - ' '] = &aliases[j];
+      }
+    }
+    singles_done = TRUE;
+  }
+  return singles[letter - ' '];
+}
+
 ParameterError getparameter(const char *flag, /* f or -long-flag */
                             char *nextarg,    /* NULL if unset */
                             argv_item_t cleararg,
@@ -758,9 +772,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
   char subletter = '\0'; /* subletters can only occur on long options */
   int rc;
   const char *parse = NULL;
-  unsigned int j;
   time_t now;
-  int hit = -1;
   bool longopt = FALSE;
   bool singleopt = FALSE; /* when true means '-o foo' used '-ofoo' */
   ParameterError err = PARAM_OK;
@@ -775,6 +787,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     "ftps",
     NULL
   };
+  const struct LongShort *a = NULL;
 #ifdef HAVE_WRITABLE_ARGV
   argv_item_t clearthis = NULL;
 #else
@@ -786,10 +799,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
   if(('-' != flag[0]) || ('-' == flag[1])) {
     /* this should be a long name */
     const char *word = ('-' == flag[0]) ? flag + 2 : flag;
-    size_t fnam = strlen(word);
-    int numhits = 0;
     bool noflagged = FALSE;
     bool expand = FALSE;
+    struct LongShort key;
 
     if(!strncmp(word, "no-", 3)) {
       /* disable this option but ignore the "no-" part when looking for it */
@@ -802,31 +814,19 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       word += 7;
       expand = TRUE;
     }
+    key.lname = word;
 
-    for(j = 0; j < sizeof(aliases)/sizeof(aliases[0]); j++) {
-      if(curl_strnequal(aliases[j].lname, word, fnam)) {
-        longopt = TRUE;
-        numhits++;
-        if(curl_strequal(aliases[j].lname, word)) {
-          parse = aliases[j].letter;
-          hit = j;
-          numhits = 1; /* a single unique hit */
-          break;
-        }
-        parse = aliases[j].letter;
-        hit = j;
-      }
+    a = bsearch(&key, aliases, sizeof(aliases)/sizeof(aliases[0]),
+                sizeof(aliases[0]), findarg);
+    if(a) {
+      longopt = TRUE;
+      parse = a->letter;
     }
-    if(numhits > 1) {
-      /* this is at least the second match! */
-      err = PARAM_OPTION_AMBIGUOUS;
-      goto error;
-    }
-    else if(hit < 0) {
+    else {
       err = PARAM_OPTION_UNKNOWN;
       goto error;
     }
-    else if(noflagged && (aliases[hit].desc != ARG_BOOL)) {
+    if(noflagged && (a->desc != ARG_BOOL)) {
       /* --no- prefixed an option that isn't boolean! */
       err = PARAM_NO_NOT_BOOLEAN;
       goto error;
@@ -835,8 +835,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       struct curlx_dynbuf nbuf;
       bool replaced;
 
-      if((aliases[hit].desc != ARG_STRING) &&
-         (aliases[hit].desc != ARG_FILENAME)) {
+      if((a->desc != ARG_STRING) &&
+         (a->desc != ARG_FILENAME)) {
         /* --expand on an option that isn't a string or a filename */
         err = PARAM_EXPAND_ERROR;
         goto error;
@@ -854,7 +854,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
   }
   else {
     flag++; /* prefixed with one dash, pass it */
-    hit = -1;
     parse = flag;
   }
 
@@ -870,20 +869,15 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       subletter = parse[1];
     }
 
-    if(hit < 0) {
-      for(j = 0; j < sizeof(aliases)/sizeof(aliases[0]); j++) {
-        if(letter == aliases[j].letter[0]) {
-          hit = j;
-          break;
-        }
-      }
-      if(hit < 0) {
+    if(!a) {
+      a = single(letter);
+      if(!a) {
         err = PARAM_OPTION_UNKNOWN;
         break;
       }
     }
 
-    if(aliases[hit].desc >= ARG_STRING) {
+    if(a->desc >= ARG_STRING) {
       /* this option requires an extra parameter */
       if(!longopt && parse[1]) {
         nextarg = (char *)&parse[1]; /* this is the actual extra parameter */
@@ -900,17 +894,24 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         *usedarg = TRUE; /* mark it as used */
       }
 
-      if((aliases[hit].desc == ARG_FILENAME) &&
+      if((a->desc == ARG_FILENAME) &&
          (nextarg[0] == '-') && nextarg[1]) {
         /* if the file name looks like a command line option */
         warnf(global, "The file name argument '%s' looks like a flag.",
               nextarg);
       }
     }
-    else if((aliases[hit].desc == ARG_NONE) && !toggle) {
+    else if((a->desc == ARG_NONE) && !toggle) {
       err = PARAM_NO_PREFIX;
       break;
     }
+
+    if(!nextarg)
+      /* this is a precaution mostly to please scan-build, as all arguments
+         that use nextarg should be marked as such and they will check that
+         nextarg is set before continuing, but code analyzers are not always
+         that aware of that state */
+      nextarg = (char *)"";
 
     switch(letter) {
     case '*': /* options without a short option */
@@ -1919,7 +1920,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       case 'f': /* crypto engine */
         err = getstr(&config->engine, nextarg, DENY_BLANK);
         if(!err &&
-           config->engine && curl_strequal(config->engine, "list")) {
+           config->engine && !strcmp(config->engine, "list")) {
           err = PARAM_ENGINES_REQUESTED;
         }
         break;
@@ -1966,7 +1967,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           break;
         }
         err = getstr(&config->tls_authtype, nextarg, DENY_BLANK);
-        if(!err && !curl_strequal(config->tls_authtype, "SRP"))
+        if(!err && strcmp(config->tls_authtype, "SRP"))
           err = PARAM_LIBCURL_DOESNT_SUPPORT; /* only support TLS-SRP */
         break;
       case 'n': /* no empty SSL fragments, --ssl-allow-beast */
@@ -2042,7 +2043,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           break;
         }
         err = getstr(&config->proxy_tls_authtype, nextarg, DENY_BLANK);
-        if(!err && !curl_strequal(config->proxy_tls_authtype, "SRP"))
+        if(!err && strcmp(config->proxy_tls_authtype, "SRP"))
           err = PARAM_LIBCURL_DOESNT_SUPPORT; /* only support TLS-SRP */
         break;
 
@@ -2196,7 +2197,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 
     case 'h': /* h for help */
       if(toggle) {
-        if(nextarg) {
+        if(*nextarg) {
           global->help_category = strdup(nextarg);
           if(!global->help_category) {
             err = PARAM_NO_MEM;
@@ -2675,7 +2676,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       err = PARAM_OPTION_UNKNOWN;
       break;
     }
-    hit = -1;
+    a = NULL;
 
   } while(!longopt && !singleopt && *++parse && !*usedarg && !err);
 
