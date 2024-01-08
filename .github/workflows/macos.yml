@@ -117,7 +117,7 @@ jobs:
             configure: --enable-debug --with-secure-transport --enable-websockets
             macosx-version-min: 10.8
           - name: gcc SecureTransport
-            configure: CC=gcc-12 --enable-debug --with-secure-transport --enable-websockets
+            configure: CC=gcc-12 --enable-debug --with-secure-transport --enable-websockets --without-libpsl
             macosx-version-min: 10.8
           - name: OpenSSL http2
             install: nghttp2 openssl
