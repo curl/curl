@@ -637,25 +637,18 @@ static ParameterError data_urlencode(struct GlobalConfig *global,
     char *enc = curl_easy_escape(NULL, postdata, (int)size);
     Curl_safefree(postdata); /* no matter if it worked or not */
     if(enc) {
-      /* replace (in-place) '%20' by '+' according to RFC1866 */
-      size_t enclen = replace_url_encoded_space_by_plus(enc);
-      /* now make a string with the name from above and append the
-         encoded string */
-      size_t outlen = nlen + enclen + 2;
-      char *n = malloc(outlen);
-      if(!n) {
-        curl_free(enc);
-        return PARAM_NO_MEM;
-      }
+      char *n;
+      replace_url_encoded_space_by_plus(enc);
       if(nlen > 0) { /* only append '=' if we have a name */
-        msnprintf(n, outlen, "%.*s=%s", (int)nlen, nextarg, enc);
-        size = outlen-1;
+        n = aprintf("%.*s=%s", (int)nlen, nextarg, enc);
+        curl_free(enc);
+        if(!n)
+          return PARAM_NO_MEM;
       }
-      else {
-        strcpy(n, enc);
-        size = outlen-2; /* since no '=' was inserted */
-      }
-      curl_free(enc);
+      else
+        n = enc;
+
+      size = strlen(n);
       postdata = n;
     }
     else
