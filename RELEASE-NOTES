@@ -4,7 +4,7 @@ curl and libcurl 8.6.0
  Command line options:         258
  curl_easy_setopt() options:   304
  Public functions in libcurl:  93
- Contributors:                 3058
+ Contributors:                 3064
 
 This release includes the following changes:
 
@@ -33,6 +33,8 @@ This release includes the following bugfixes:
  o cmdline-opts: update availability for the *-ca-native options [66]
  o cmdline/gen: fix the sorting of the man page options [33]
  o configure: fix no default int compile error in ipv6 detection [69]
+ o connect: remove margin from eyeballer alloc [79]
+ o content_encoding: change return code to typedef'ed enum [94]
  o cookie: avoid fopen with empty file name [24]
  o curl: show ipfs and ipns as supported "protocols" [15]
  o CURLINFO_REFERER.3: clarify that it is the *request* header [70]
@@ -43,11 +45,16 @@ This release includes the following bugfixes:
  o docs: clean up Protocols: for cmdline options [32]
  o doh: remove unused local variable [34]
  o ftp: handle the PORT parsing without allocation [44]
+ o ftp: use dynbuf to store entrypath [83]
+ o ftp: use memdup0 to store the OS from a SYST 215 response [82]
  o gnutls: fix build with --disable-verbose [3]
  o haproxy-clientip.d: document the arg [68]
  o hostip: return error immediately when Curl_ip2addr() fails [19]
  o http2: improved on_stream_close/data_done handling [49]
+ o http3/quiche: fix result code on a stream reset [91]
+ o http: adjust_pollset fix [85]
  o http: fix off-by-one error in request method length check [14]
+ o lib: add debug log outputs for CURLE_BAD_FUNCTION_ARGUMENT [62]
  o lib: fix variable undeclared error caused by `infof` changes [2]
  o lib: reduce use of strncpy [30]
  o lib: rename Curl_strndup to Curl_memdup0 to avoid misunderstanding [36]
@@ -57,11 +64,13 @@ This release includes the following bugfixes:
  o Makefile.am: fix the MSVC project generation [22]
  o Makefile.mk: drop Windows support [12]
  o mbedtls: free the entropy when threaded [46]
+ o mime: use memdup0 instead of malloc + memcpy [63]
  o mprintf: overhaul and bugfixes [52]
  o ngtcp2: put h3 at the front of alpn [58]
  o openldap: fix an LDAP crash [75]
  o openldap: fix STARTTLS [67]
  o openssl: re-match LibreSSL deinit with init [17]
+ o pop3: replace calloc + memcpy with memdup0 [60]
  o quiche: return CURLE_HTTP3 on send to invalid stream [65]
  o readwrite_data: loop less [21]
  o Revert "urldata: move async resolver state from easy handle to connectdata" [16]
@@ -69,14 +78,19 @@ This release includes the following bugfixes:
  o schannel: fix `-Warith-conversion` gcc 13 warning [28]
  o sectransp_ make TLSCipherNameForNumber() available in non-verbose config [1]
  o sendf: fix compiler warning with CURL_DISABLE_HEADERS_API [38]
+ o setopt: clear mimepost when formp is freed [92]
  o ssh: fix namespace of two local macros [51]
  o strerror: repair get_winsock_error() [56]
  o system.h: sync mingw `CURL_TYPEOF_CURL_SOCKLEN_T` with other compilers [9]
  o system_win32: fix a function pointer assignment warning [71]
  o tests/server: delete workaround for old-mingw [25]
  o tests: respect $TMPDIR when creating unix domain sockets [50]
+ o tool: make parser reject blank arguments if not supported [86]
+ o tool: prepend output_dir in header callback [95]
+ o tool_getparam: bsearch cmdline options [74]
  o tool_getparam: do not try to expand without an argument [59]
  o tool_listhelp: regenerate after recent .d updates [61]
+ o transfer: adjust_pollset improvements [81]
  o transfer: fix upload rate limiting, add test cases [37]
  o url: for disabled protocols, mention if found in redirect [7]
  o verify-examples.pl: fail verification on unescaped backslash [72]
@@ -84,6 +98,7 @@ This release includes the following bugfixes:
  o vtls: remove the Curl_cft_ssl_proxy object if CURL_DISABLE_PROXY [41]
  o windows: delete redundant headers [43]
  o windows: simplify detecting and using system headers [10]
+ o wolfssl: load certificate *chain* for PEM client certs [84]
 
 This release includes the following known bugs:
 
@@ -98,16 +113,17 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  annalee, Baruch Siach, Ben, Boris Verkhovskiy, Cajus Pollmeier,
-  calvin2021y on github, Chara White, Chris Sauer, Dan Fandrich,
-  Daniel Gustafsson, Daniel Stenberg, Dmitry Karpov, Geeknik Labs,
-  Hans-Christian Egtvedt, Haydar Alaidrus, iAroc on github, ivanfywang,
-  Karthikdasari0423 on github, Marcel Raad, Mark Sinkovics, Mauricio Scheffer,
-  Michał Antoniak, Mike Hommey, Ozan Cansel, Patrick Monnerat, Pavel Pavlov,
-  Ray Satiro, RevaliQaQ on github, Stefan Eissing, Tatsuhiko Miyagawa, Theo,
-  Viktor Szakats, Xi Ruoyao, Yedaya Katsman, Yifei Kong, YX Hao, zengwei,
-  zengwei2000
-  (38 contributors)
+  Andy Alt, annalee, Baruch Siach, Ben, Boris Verkhovskiy,
+  bubbleguuum on github, Cajus Pollmeier, calvin2021y on github, Chara White,
+  Chris Sauer, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
+  dependabot[bot], Dmitry Karpov, Gabe, Geeknik Labs, Gisle Vanem,
+  Hans-Christian Egtvedt, Haydar Alaidrus, hgdagon on github, iAroc on github,
+  ivanfywang, Karthikdasari0423 on github, Lealem Amedie, Marcel Raad,
+  Mark Sinkovics, Mauricio Scheffer, Michał Antoniak, Mike Hommey, Ozan Cansel,
+  Patrick Monnerat, Pavel Pavlov, Ray Satiro, RevaliQaQ on github,
+  Stefan Eissing, Tatsuhiko Miyagawa, Theo, Thomas Ferguson, Viktor Szakats,
+  Xi Ruoyao, Yedaya Katsman, Yifei Kong, YX Hao, zengwei, zengwei2000
+  (46 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -170,7 +186,10 @@ References to bug reports and discussions on issues:
  [57] = https://curl.se/bug/?i=12554
  [58] = https://curl.se/bug/?i=12576
  [59] = https://curl.se/bug/?i=12565
+ [60] = https://curl.se/bug/?i=12650
  [61] = https://curl.se/bug/?i=12612
+ [62] = https://curl.se/bug/?i=12658
+ [63] = https://curl.se/bug/?i=12649
  [64] = https://curl.se/bug/?i=12612
  [65] = https://curl.se/bug/?i=12590
  [66] = https://curl.se/bug/?i=12613
@@ -181,5 +200,17 @@ References to bug reports and discussions on issues:
  [71] = https://curl.se/bug/?i=12581
  [72] = https://curl.se/bug/?i=12589
  [73] = https://curl.se/bug/?i=12599
+ [74] = https://curl.se/bug/?i=12631
  [75] = https://curl.se/bug/?i=12593
  [76] = https://curl.se/bug/?i=12368
+ [79] = https://curl.se/bug/?i=12647
+ [81] = https://curl.se/bug/?i=12640
+ [82] = https://curl.se/bug/?i=12639
+ [83] = https://curl.se/bug/?i=12638
+ [84] = https://curl.se/bug/?i=12634
+ [85] = https://curl.se/bug/?i=12632
+ [86] = https://curl.se/bug/?i=12620
+ [91] = https://curl.se/bug/?i=12629
+ [92] = https://curl.se/bug/?i=12608
+ [94] = https://curl.se/bug/?i=12618
+ [95] = https://curl.se/bug/?i=12614
