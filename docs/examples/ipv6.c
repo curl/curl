@@ -22,41 +22,27 @@
  *
  ***************************************************************************/
 /* <DESC>
- * HTTP GET to an IPv6 address with specific scope
+ * HTTPS GET using IPv6 only
  * </DESC>
  */
 #include <stdio.h>
 #include <curl/curl.h>
 
-#ifndef _WIN32
-#include <net/if.h>
-#endif
-
 int main(void)
 {
-#ifndef _WIN32
-  /* Windows users need to find how to use if_nametoindex() */
   CURL *curl;
-  CURLcode res;
+  CURLcode res = CURLE_OK;
 
   curl = curl_easy_init();
   if(curl) {
-    long my_scope_id;
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+    curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V6);
 
-    my_scope_id = if_nametoindex("eth0");
-    curl_easy_setopt(curl, CURLOPT_ADDRESS_SCOPE, my_scope_id);
+    curl_easy_setopt(curl, CURLOPT_URL, "https://curl.se/");
 
-    /* Perform the request, res will get the return code */
     res = curl_easy_perform(curl);
-    /* Check for errors */
-    if(res != CURLE_OK)
-      fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
 
-    /* always cleanup */
     curl_easy_cleanup(curl);
   }
-#endif
-  return 0;
+
+  return (int)res;
 }
