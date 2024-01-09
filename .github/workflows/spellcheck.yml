@@ -39,7 +39,7 @@ jobs:
       - name: build curl.1
         run: |
            autoreconf -fi
-           ./configure --without-ssl
+           ./configure --without-ssl --without-libpsl
            make -C docs
 
       - name: strip "uncheckable" sections from .3 pages
