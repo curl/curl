@@ -109,6 +109,7 @@ check_PROGRAMS = \
   postit2-formadd \
   progressfunc \
   protofeats \
+  range \
   resolve \
   rtsp-options \
   sendrecv \
