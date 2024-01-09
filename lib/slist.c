@@ -32,21 +32,19 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+struct curl_slist_head {
+   struct curl_slist head;
+   struct curl_slist *tail;
+};
+
 /* returns last node in linked list */
 static struct curl_slist *slist_get_last(struct curl_slist *list)
 {
-  struct curl_slist     *item;
-
   /* if caller passed us a NULL, return now */
   if(!list)
     return NULL;
-
-  /* loop through to find the last item */
-  item = list;
-  while(item->next) {
-    item = item->next;
-  }
-  return item;
+  else
+    return ((struct curl_slist_head*)list)->tail;
 }
 
 /*
@@ -65,7 +63,11 @@ struct curl_slist *Curl_slist_append_nodup(struct curl_slist *list, char *data)
 
   DEBUGASSERT(data);
 
-  new_item = malloc(sizeof(struct curl_slist));
+  if(list) {
+    new_item = malloc(sizeof(struct curl_slist));
+  } else {
+    new_item = malloc(sizeof(struct curl_slist_head));
+  }
   if(!new_item)
     return NULL;
 
@@ -73,11 +75,14 @@ struct curl_slist *Curl_slist_append_nodup(struct curl_slist *list, char *data)
   new_item->data = data;
 
   /* if this is the first item, then new_item *is* the list */
-  if(!list)
+  if(!list) {
+    ((struct curl_slist_head*)new_item)->tail = new_item;
     return new_item;
+  }
 
   last = slist_get_last(list);
   last->next = new_item;
+  ((struct curl_slist_head*)list)->tail = new_item;
   return list;
 }
 
