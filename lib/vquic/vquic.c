@@ -543,8 +543,13 @@ CURLcode vquic_recv_packets(struct Curl_cfilter *cf,
 #else
   result = recvfrom_packets(cf, data, qctx, max_pkts, recv_cb, userp);
 #endif
-  if(!result)
+  if(!result) {
+    if(!qctx->got_first_byte) {
+      qctx->got_first_byte = TRUE;
+      qctx->first_byte_at = qctx->last_op;
+    }
     qctx->last_io = qctx->last_op;
+  }
   return result;
 }
 

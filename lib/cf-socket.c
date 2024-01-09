@@ -788,6 +788,7 @@ struct cf_socket_ctx {
 #endif
   BIT(got_first_byte);               /* if first byte was received */
   BIT(accepted);                     /* socket was accepted, not connected */
+  BIT(sock_connected);               /* socket is "connected", e.g. in UDP */
   BIT(active);
   BIT(buffer_recv);
 };
@@ -1053,7 +1054,7 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
 
   /* set socket non-blocking */
   (void)curlx_nonblock(ctx->sock, TRUE);
-
+  ctx->sock_connected = (ctx->addr.socktype != SOCK_DGRAM);
 out:
   if(result) {
     if(ctx->sock != CURL_SOCKET_BAD) {
@@ -1241,11 +1242,14 @@ static void cf_socket_adjust_pollset(struct Curl_cfilter *cf,
   struct cf_socket_ctx *ctx = cf->ctx;
 
   if(ctx->sock != CURL_SOCKET_BAD) {
-    if(!cf->connected)
+    if(!cf->connected) {
       Curl_pollset_set_out_only(data, ps, ctx->sock);
-    else if(!ctx->active)
+      CURL_TRC_CF(data, cf, "adjust_pollset(!connected) -> %d socks", ps->num);
+    }
+    else if(!ctx->active) {
       Curl_pollset_add_in(data, ps, ctx->sock);
-    CURL_TRC_CF(data, cf, "adjust_pollset -> %d socks", ps->num);
+      CURL_TRC_CF(data, cf, "adjust_pollset(!active) -> %d socks", ps->num);
+    }
   }
 }
 
@@ -1428,36 +1432,11 @@ out:
 static void conn_set_primary_ip(struct Curl_cfilter *cf,
                                 struct Curl_easy *data)
 {
-#ifdef HAVE_GETPEERNAME
   struct cf_socket_ctx *ctx = cf->ctx;
-  if(!(data->conn->handler->protocol & CURLPROTO_TFTP)) {
-    /* TFTP does not connect the endpoint: getpeername() failed with errno
-       107: Transport endpoint is not connected */
 
-    char buffer[STRERROR_LEN];
-    struct Curl_sockaddr_storage ssrem;
-    curl_socklen_t plen;
-    int port;
-
-    plen = sizeof(ssrem);
-    memset(&ssrem, 0, plen);
-    if(getpeername(ctx->sock, (struct sockaddr*) &ssrem, &plen)) {
-      int error = SOCKERRNO;
-      failf(data, "getpeername() failed with errno %d: %s",
-            error, Curl_strerror(error, buffer, sizeof(buffer)));
-      return;
-    }
-    if(!Curl_addr2string((struct sockaddr*)&ssrem, plen,
-                         cf->conn->primary_ip, &port)) {
-      failf(data, "ssrem inet_ntop() failed with errno %d: %s",
-            errno, Curl_strerror(errno, buffer, sizeof(buffer)));
-      return;
-    }
-  }
-#else
-  cf->conn->primary_ip[0] = 0;
   (void)data;
-#endif
+  DEBUGASSERT(sizeof(ctx->r_ip) == sizeof(cf->conn->primary_ip));
+  memcpy(cf->conn->primary_ip, ctx->r_ip, sizeof(cf->conn->primary_ip));
 }
 
 static void cf_socket_active(struct Curl_cfilter *cf, struct Curl_easy *data)
@@ -1651,6 +1630,7 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
   if(-1 == rc) {
     return socket_connect_result(data, ctx->r_ip, SOCKERRNO);
   }
+  ctx->sock_connected = TRUE;
   set_local_ip(cf, data);
   CURL_TRC_CF(data, cf, "%s socket %" CURL_FORMAT_SOCKET_T
               " connected: [%s:%d] -> [%s:%d]",
