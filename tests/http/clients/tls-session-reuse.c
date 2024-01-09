@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
   CURLMsg *msg;
   CURLSH *share;
   CURLU *cu;
-  struct curl_slist resolve;
+  struct curl_slist* resolve = curl_slist_append(NULL, "");
   char resolve_buf[1024];
   int msgs_in_queue;
   int add_more, waits, ongoing = 0;
@@ -215,10 +215,9 @@ int main(int argc, char *argv[])
     exit(1);
   }
 
-   memset(&resolve, 0, sizeof(resolve));
    curl_msnprintf(resolve_buf, sizeof(resolve_buf)-1,
                   "%s:%s:127.0.0.1", host, port);
-  curl_slist_append(&resolve, resolve_buf);
+  curl_slist_append(resolve, resolve_buf);
 
   multi = curl_multi_init();
   if(!multi) {
@@ -234,7 +233,7 @@ int main(int argc, char *argv[])
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
 
 
-  add_transfer(multi, share, &resolve, url);
+  add_transfer(multi, share, resolve, url);
   ++ongoing;
   add_more = 6;
   waits = 3;
@@ -260,7 +259,7 @@ int main(int argc, char *argv[])
     }
     else {
       while(add_more) {
-        add_transfer(multi, share, &resolve, url);
+        add_transfer(multi, share, resolve, url);
         ++ongoing;
         --add_more;
       }
