@@ -37,16 +37,6 @@ struct curl_slist_head {
    struct curl_slist *tail;
 };
 
-/* returns last node in linked list */
-static struct curl_slist *slist_get_last(struct curl_slist *list)
-{
-  /* if caller passed us a NULL, return now */
-  if(!list)
-    return NULL;
-  else
-    return ((struct curl_slist_head*)list)->tail;
-}
-
 /*
  * Curl_slist_append_nodup() appends a string to the linked list. Rather than
  * copying the string in dynamic storage, it takes its ownership. The string
@@ -80,7 +70,7 @@ struct curl_slist *Curl_slist_append_nodup(struct curl_slist *list, char *data)
     return new_item;
   }
 
-  last = slist_get_last(list);
+  last = ((struct curl_slist_head*)list)->tail;
   last->next = new_item;
   ((struct curl_slist_head*)list)->tail = new_item;
   return list;
