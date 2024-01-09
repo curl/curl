@@ -12,13 +12,13 @@ Multi: single
 ---
 Set LEVEL to tell the server what it is allowed to delegate when it
 comes to user credentials.
-.RS
-.IP "none"
+
+## none
 Do not allow any delegation.
-.IP "policy"
+
+## policy
 Delegates if and only if the OK-AS-DELEGATE flag is set in the Kerberos
 service ticket, which is a matter of realm policy.
-.IP "always"
+
+## always
 Unconditionally allow the server to delegate.
-.RE
-.IP

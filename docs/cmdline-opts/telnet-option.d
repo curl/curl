@@ -12,12 +12,11 @@ Multi: append
 ---
 Pass options to the telnet protocol. Supported options are:
 
-.RS
-.IP "TTYPE=<term>"
+## TTYPE=<term>
 Sets the terminal type.
-.IP "XDISPLOC=<X display>"
+
+## XDISPLOC=<X display>
 Sets the X display location.
-.IP "NEW_ENV=<var,val>"
+
+## NEW_ENV=<var,val>
 Sets an environment variable.
-.RE
-.IP
