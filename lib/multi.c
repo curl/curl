@@ -998,9 +998,11 @@ static int connecting_getsock(struct Curl_easy *data, curl_socket_t *socks)
 {
   struct connectdata *conn = data->conn;
   (void)socks;
-  if(conn && conn->sockfd != CURL_SOCKET_BAD) {
+  /* Not using `conn->sockfd` as `Curl_setup_transfer()` initializes
+   * that *after* the connect. */
+  if(conn && conn->sock[FIRSTSOCKET] != CURL_SOCKET_BAD) {
     /* Default is to wait to something from the server */
-    socks[0] = conn->sockfd;
+    socks[0] = conn->sock[FIRSTSOCKET];
     return GETSOCK_READSOCK(0);
   }
   return GETSOCK_BLANK;
