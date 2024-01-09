@@ -14,17 +14,17 @@ Multi: single
 ---
 Control what method curl should use to reach a file on an FTP(S)
 server. The method argument should be one of the following alternatives:
-.RS
-.IP multicwd
+
+## multicwd
 curl does a single CWD operation for each path part in the given URL. For deep
 hierarchies this means many commands. This is how RFC 1738 says it should
 be done. This is the default but the slowest behavior.
-.IP nocwd
+
+## nocwd
 curl does no CWD at all. curl does SIZE, RETR, STOR etc and give a full
 path to the server for all these commands. This is the fastest behavior.
-.IP singlecwd
+
+## singlecwd
 curl does one CWD with the full target directory and then operates on the file
 "normally" (like in the multicwd case). This is somewhat more standards
 compliant than 'nocwd' but without the full penalty of 'multicwd'.
-.RE
-.IP
