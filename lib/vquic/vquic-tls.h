@@ -86,7 +86,7 @@ CURLcode Curl_vquic_tls_before_recv(struct quic_tls_ctx *ctx,
 
 /**
  * After the QUIC basic handshake has been, verify that the peer
- * (and its certificate) fullfill our requirements.
+ * (and its certificate) fulfill our requirements.
  */
 CURLcode Curl_vquic_tls_verify_peer(struct quic_tls_ctx *ctx,
                                     struct Curl_cfilter *cf,
