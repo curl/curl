@@ -295,7 +295,7 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
     if(!end)
       return CURLE_BAD_FUNCTION_ARGUMENT;
   }
-  hlen = end - header + 1;
+  hlen = end - header;
 
   if((header[0] == ' ') || (header[0] == '\t')) {
     if(data->state.prevhead)
