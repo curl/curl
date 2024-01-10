@@ -312,7 +312,7 @@ static CURLcode curl_gtls_init_ctx(struct quic_tls_ctx *ctx,
       alpns[i].data = s + 1;
       alpns[i].size = slen;
       s += slen + 1;
-      alen -= slen + 1;
+      alen -= (size_t)slen + 1;
     }
     if(alen) /* not all alpn chars used, wrong format or too many */
         return CURLE_FAILED_INIT;
