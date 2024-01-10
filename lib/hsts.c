@@ -117,8 +117,6 @@ static CURLcode hsts_create(struct hsts *h,
                             bool subdomains,
                             curl_off_t expires)
 {
-  struct stsentry *sts;
-  char *duphost;
   size_t hlen;
   DEBUGASSERT(h);
   DEBUGASSERT(hostname);
@@ -127,25 +125,23 @@ static CURLcode hsts_create(struct hsts *h,
   if(hlen && (hostname[hlen - 1] == '.'))
     /* strip off any trailing dot */
     --hlen;
-  DEBUGASSERT(hlen);
-  if(!hlen)
-    /* no host name left */
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+  if(hlen) {
+    char *duphost;
+    struct stsentry *sts = hsts_entry();
+    if(!sts)
+      return CURLE_OUT_OF_MEMORY;
 
-  sts = hsts_entry();
-  if(!sts)
-    return CURLE_OUT_OF_MEMORY;
+    duphost = Curl_memdup0(hostname, hlen);
+    if(!duphost) {
+      free(sts);
+      return CURLE_OUT_OF_MEMORY;
+    }
 
-  duphost = Curl_memdup0(hostname, hlen);
-  if(!duphost) {
-    free(sts);
-    return CURLE_OUT_OF_MEMORY;
+    sts->host = duphost;
+    sts->expires = expires;
+    sts->includeSubDomains = subdomains;
+    Curl_llist_insert_next(&h->list, h->list.tail, sts, &sts->node);
   }
-
-  sts->host = duphost;
-  sts->expires = expires;
-  sts->includeSubDomains = subdomains;
-  Curl_llist_insert_next(&h->list, h->list.tail, sts, &sts->node);
   return CURLE_OK;
 }
 
