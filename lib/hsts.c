@@ -127,7 +127,6 @@ static CURLcode hsts_create(struct hsts *h,
   if(hlen && (hostname[hlen - 1] == '.'))
     /* strip off any trailing dot */
     --hlen;
-  DEBUGASSERT(hlen);
   if(!hlen)
     /* no host name left */
     return CURLE_BAD_FUNCTION_ARGUMENT;
