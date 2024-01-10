@@ -84,3 +84,18 @@ class TestBasic:
         r = curl.http_get(url=url, extra_args=['--http3-only'])
         r.check_response(http_status=200, protocol='HTTP/3')
         assert r.json['server'] == env.domain1
+
+    # simple download, check connect/handshake timings
+    @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason=f"curl without SSL")
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_01_06_timings(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/data.json'
+        r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True)
+        r.check_stats(http_status=200, count=1)
+        assert r.stats[0]['time_connect'] > 0, f'{r.stats[0]}'
+        assert r.stats[0]['time_appconnect'] > 0, f'{r.stats[0]}'
+
+
