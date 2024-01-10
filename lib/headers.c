@@ -185,7 +185,7 @@ struct curl_header *curl_easy_nextheader(CURL *easy,
 }
 
 static CURLcode namevalue(char *header, size_t hlen, unsigned int type,
-                           char **name, char **value)
+                          char **name, char **value)
 {
   char *end = header + hlen - 1; /* point to the last byte */
   DEBUGASSERT(hlen);
@@ -291,10 +291,11 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
   end = strchr(header, '\r');
   if(!end) {
     end = strchr(header, '\n');
+    DEBUGASSERT(end);
     if(!end)
       return CURLE_BAD_FUNCTION_ARGUMENT;
   }
-  hlen = end - header + 1;
+  hlen = end - header;
 
   if((header[0] == ' ') || (header[0] == '\t')) {
     if(data->state.prevhead)

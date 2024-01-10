@@ -660,7 +660,7 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
       if(escape) {
         curl_off_t len = ZERO_TERMINATED;
         if(tag == CURLOPT_POSTFIELDS)
-          len = config->postfieldsize;
+          len = curlx_dyn_len(&config->postdata);
         escaped = c_escape(value, len);
         NULL_CHECK(escaped);
         CODE2("curl_easy_setopt(hnd, %s, \"%s\");", name, escaped);

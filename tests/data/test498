@@ -35,7 +35,7 @@ http
 Reject too large HTTP response headers on endless redirects
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER --max-redir 400 --location
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --max-redirs 400 --location
 </command>
 </client>
 

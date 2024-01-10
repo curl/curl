@@ -181,30 +181,36 @@ open($r, "<", "$root/src/tool_getparam.c") ||
 my $list;
 my @getparam; # store all parsed parameters
 
+my $prevlong = "";
+my $no = 0;
 while(<$r>) {
+    $no++;
     chomp;
-    my $l= $_;
     if(/struct LongShort aliases/) {
         $list=1;
     }
     elsif($list) {
-        if( /^  \{([^,]*), *([^ ]*)/) {
-            my ($s, $l)=($1, $2);
+        if( /^  \{(\"[^,]*\").*\'(.)\', (.*)\}/) {
+            my ($l, $s, $rd)=($1, $2, $3);
             my $sh;
             my $lo;
             my $title;
+            if(($l cmp $prevlong) < 0) {
+                print STDERR "tool_getparam.c:$no: '$l' is NOT placed in alpha-order\n";
+            }
             if($l =~ /\"(.*)\"/) {
                 # long option
                 $lo = $1;
                 $title="--$lo";
             }
-            if($s =~ /\"(.)\"/) {
+            if($s ne " ") {
                 # a short option
-                $sh = $1;
+                $sh = $s;
                 $title="-$sh, $title";
             }
             push @getparam, $title;
             $opts{$title} |= 1;
+            $prevlong = $l;
         }
     }
 }

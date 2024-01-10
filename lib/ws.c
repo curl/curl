@@ -997,8 +997,11 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *data, const void *buffer,
   ws = data->conn->proto.ws;
 
   if(data->set.ws_raw_mode) {
-    if(fragsize || flags)
+    if(fragsize || flags) {
+      DEBUGF(infof(data, "ws_send: "
+                   "fragsize and flags cannot be non-zero in raw mode"));
       return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
     if(!buflen)
       /* nothing to do */
       return CURLE_OK;

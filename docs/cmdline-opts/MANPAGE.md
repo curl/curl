@@ -54,6 +54,19 @@ Text written within `*asterisks*` is shown using italics. Text within two
 Text that is prefixed with a space is treated like an "example" and gets
 output in monospace.
 
+Within the body, describe a lite of items like this:
+
+    ## item 1
+    description
+
+    ## item 2
+    second description
+
+The list is automatically terminated at end of file, or you can do it
+explicitly with an empty "header":
+
+    ##
+
 ## Header and footer
 
 `page-header` is the file that is output before the generated options output
