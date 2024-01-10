@@ -1346,13 +1346,31 @@ static CURLcode upkeep(struct conncache *conn_cache, void *data)
  */
 CURLcode curl_easy_upkeep(struct Curl_easy *data)
 {
+  struct conncache *conn_cache;
+
   /* Verify that we got an easy handle we can work with. */
   if(!GOOD_EASY_HANDLE(data))
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  if(data->multi_easy) {
+  /* predict the connection cache that will next be used by the easy handle.
+     if the easy handle is currently in a multi then data->state.conn_cache
+     should point to the in-use cache. otherwise use the same logic that a
+     multi would use to assign it: if there's a user-specified shared cache
+     then use that, else use the multi's default shared cache. */
+  DEBUGASSERT(!data->multi || data->state.conn_cache);
+  conn_cache =
+    data->state.conn_cache ?
+      data->state.conn_cache :
+    (data->share && (data->share->specifier & (1<< CURL_LOCK_DATA_CONNECT))) ?
+      &data->share->conn_cache :
+    data->multi ?
+      &data->multi->conn_cache :
+    data->multi_easy ?
+      &data->multi_easy->conn_cache : NULL;
+
+  if(conn_cache) {
     /* Use the common function to keep connections alive. */
-    return upkeep(&data->multi_easy->conn_cache, data);
+    return upkeep(conn_cache, data);
   }
   else {
     /* No connections, so just return success */
