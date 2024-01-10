@@ -57,10 +57,9 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-
-#define H3_ALPN_H3_29 "\x5h3-29"
-#define H3_ALPN_H3 "\x2h3"
-
+#ifndef ARRAYSIZE
+#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
+#endif
 
 #ifdef USE_OPENSSL
 #define QUIC_CIPHERS                                                          \
@@ -209,11 +208,9 @@ static CURLcode curl_ossl_set_client_cert(struct quic_tls_ctx *ctx,
 static CURLcode curl_ossl_init_ssl(struct quic_tls_ctx *ctx,
                                    struct Curl_easy *data,
                                    struct ssl_peer *peer,
+                                   const char *alpn, size_t alpn_len,
                                    void *user_data)
 {
-  const uint8_t *alpn = NULL;
-  size_t alpnlen = 0;
-
   DEBUGASSERT(!ctx->ssl);
   ctx->ssl = SSL_new(ctx->ssl_ctx);
 
@@ -221,10 +218,8 @@ static CURLcode curl_ossl_init_ssl(struct quic_tls_ctx *ctx,
   SSL_set_connect_state(ctx->ssl);
   SSL_set_quic_use_legacy_codepoint(ctx->ssl, 0);
 
-  alpn = (const uint8_t *)H3_ALPN_H3 H3_ALPN_H3_29;
-  alpnlen = sizeof(H3_ALPN_H3) - 1 + sizeof(H3_ALPN_H3_29) - 1;
   if(alpn)
-    SSL_set_alpn_protos(ctx->ssl, alpn, (int)alpnlen);
+    SSL_set_alpn_protos(ctx->ssl, (const uint8_t *)alpn, (int)alpn_len);
 
   if(peer->sni) {
     if(!SSL_set_tlsext_host_name(ctx->ssl, peer->sni)) {
@@ -257,12 +252,13 @@ static CURLcode curl_gtls_init_ctx(struct quic_tls_ctx *ctx,
                                    struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    struct ssl_peer *peer,
+                                   const char *alpn, size_t alpn_len,
                                    Curl_vquic_tls_ctx_setup *ctx_setup,
                                    void *user_data)
 {
   struct ssl_primary_config *conn_config;
   CURLcode result;
-  gnutls_datum_t alpn[2];
+  gnutls_datum_t alpns[5];
   /* this will need some attention when HTTPS proxy over QUIC get fixed */
   long * const pverifyresult = &data->set.ssl.certverifyresult;
   int rc;
@@ -302,14 +298,31 @@ static CURLcode curl_gtls_init_ctx(struct quic_tls_ctx *ctx,
     gnutls_session_set_keylog_function(ctx->gtls->session, keylog_callback);
   }
 
-  /* strip the first byte (the length) from NGHTTP3_ALPN_H3 */
-  alpn[0].data = (unsigned char *)H3_ALPN_H3 + 1;
-  alpn[0].size = sizeof(H3_ALPN_H3) - 2;
-  alpn[1].data = (unsigned char *)H3_ALPN_H3_29 + 1;
-  alpn[1].size = sizeof(H3_ALPN_H3_29) - 2;
+  /* convert the ALPN string from our arguments to a list of strings
+   * that gnutls wants and will convert internally back to this very
+   * string for sending to the server. nice. */
+  if(alpn) {
+    size_t i, alen = alpn_len;
+    unsigned char *s = (unsigned char *)alpn;
+    unsigned char slen;
+    for(i = 0; (i < ARRAYSIZE(alpns)) && alen; ++i) {
+      slen = s[0];
+      if(slen >= alen)
+        return CURLE_FAILED_INIT;
+      alpns[i].data = s + 1;
+      alpns[i].size = slen;
+      s += slen + 1;
+      alen -= slen + 1;
+    }
+    if(alen) /* not all alpn chars used, wrong format or too many */
+        return CURLE_FAILED_INIT;
+    if(i) {
+      gnutls_alpn_set_protocols(ctx->gtls->session,
+                                alpns, (unsigned int)i,
+                                GNUTLS_ALPN_MANDATORY);
+    }
+  }
 
-  gnutls_alpn_set_protocols(ctx->gtls->session,
-                            alpn, 2, GNUTLS_ALPN_MANDATORY);
   return CURLE_OK;
 }
 #elif defined(USE_WOLFSSL)
@@ -438,11 +451,9 @@ out:
 static CURLcode curl_wssl_init_ssl(struct quic_tls_ctx *ctx,
                                    struct Curl_easy *data,
                                    struct ssl_peer *peer,
+                                   const char *alpn, size_t alpn_len,
                                    void *user_data)
 {
-  const uint8_t *alpn = NULL;
-  size_t alpnlen = 0;
-
   (void)data;
   DEBUGASSERT(!ctx->ssl);
   DEBUGASSERT(ctx->ssl_ctx);
@@ -452,10 +463,9 @@ static CURLcode curl_wssl_init_ssl(struct quic_tls_ctx *ctx,
   wolfSSL_set_connect_state(ctx->ssl);
   wolfSSL_set_quic_use_legacy_codepoint(ctx->ssl, 0);
 
-  alpn = (const uint8_t *)H3_ALPN_H3 H3_ALPN_H3_29;
-  alpnlen = sizeof(H3_ALPN_H3) - 1 + sizeof(H3_ALPN_H3_29) - 1;
   if(alpn)
-    wolfSSL_set_alpn_protos(ctx->ssl, alpn, (int)alpnlen);
+    wolfSSL_set_alpn_protos(ctx->ssl, (const unsigned char *)alpn,
+                            (int)alpn_len);
 
   if(peer->sni) {
     wolfSSL_UseSNI(ctx->ssl, WOLFSSL_SNI_HOST_NAME,
@@ -470,6 +480,7 @@ CURLcode Curl_vquic_tls_init(struct quic_tls_ctx *ctx,
                              struct Curl_cfilter *cf,
                              struct Curl_easy *data,
                              struct ssl_peer *peer,
+                             const char *alpn, size_t alpn_len,
                              Curl_vquic_tls_ctx_setup *ctx_setup,
                              void *user_data)
 {
@@ -484,16 +495,17 @@ CURLcode Curl_vquic_tls_init(struct quic_tls_ctx *ctx,
   if(result)
     return result;
 
-  return curl_ossl_init_ssl(ctx, data, peer, user_data);
+  return curl_ossl_init_ssl(ctx, data, peer, alpn, alpn_len, user_data);
 #elif defined(USE_GNUTLS)
   (void)result;
-  return curl_gtls_init_ctx(ctx, cf, data, peer, ctx_setup, user_data);
+  return curl_gtls_init_ctx(ctx, cf, data, peer, alpn, alpn_len,
+                            ctx_setup, user_data);
 #elif defined(USE_WOLFSSL)
   result = curl_wssl_init_ctx(ctx, cf, data, ctx_setup);
   if(result)
     return result;
 
-  return curl_wssl_init_ssl(ctx, data, peer, user_data);
+  return curl_wssl_init_ssl(ctx, data, peer, alpn, alpn_len, user_data);
 #else
 #error "no TLS lib in used, should not happen"
   return CURLE_FAILED_INIT;

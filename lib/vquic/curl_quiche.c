@@ -1232,7 +1232,10 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
                                        sizeof(QUICHE_H3_APPLICATION_PROTOCOL)
                                        - 1);
 
-  result = Curl_vquic_tls_init(&ctx->tls, cf, data, &ctx->peer, NULL, cf);
+  result = Curl_vquic_tls_init(&ctx->tls, cf, data, &ctx->peer,
+                               QUICHE_H3_APPLICATION_PROTOCOL,
+                               sizeof(QUICHE_H3_APPLICATION_PROTOCOL) - 1,
+                               NULL, cf);
   if(result)
     return result;
 

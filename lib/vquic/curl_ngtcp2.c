@@ -2045,7 +2045,9 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   if(result)
     return result;
 
+#define H3_ALPN "\x2h3\x5h3-29"
   result = Curl_vquic_tls_init(&ctx->tls, cf, data, &ctx->peer,
+                               H3_ALPN, sizeof(H3_ALPN) - 1,
                                tls_ctx_setup, &ctx->conn_ref);
   if(result)
     return result;
