@@ -2370,13 +2370,12 @@ static CURLcode verify_cert(struct Curl_cfilter *cf,
   CURLcode result;
   unsigned char *certbuf;
   size_t buflen;
+  bool free_certbuf = FALSE;
 
   if(ca_info_blob) {
     CURL_TRC_CF(data, cf, "verify_peer, CA from config blob");
-    certbuf = (unsigned char *)Curl_memdup0(ca_info_blob->data,
-                                            buflen = ca_info_blob->len);
-    if(!certbuf)
-      return CURLE_OUT_OF_MEMORY;
+    certbuf = ca_info_blob->data;
+    buflen = ca_info_blob->len;
   }
   else if(cafile) {
     CURL_TRC_CF(data, cf, "verify_peer, CA from file '%s'", cafile);
@@ -2384,12 +2383,14 @@ static CURLcode verify_cert(struct Curl_cfilter *cf,
       failf(data, "SSL: failed to read or invalid CA certificate");
       return CURLE_SSL_CACERT_BADFILE;
     }
+    free_certbuf = TRUE;
   }
   else
     return CURLE_SSL_CACERT_BADFILE;
 
   result = verify_cert_buf(cf, data, certbuf, buflen, ctx);
-  free(certbuf);
+  if(free_certbuf)
+    free(certbuf);
   return result;
 }
 
