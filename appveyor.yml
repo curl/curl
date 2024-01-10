@@ -244,19 +244,19 @@ environment:
       BUILD_SYSTEM: autotools
       TESTING: 'ON'
       DISABLED_TESTS: '!19 !1233'
-      CONFIG_ARGS: '--enable-debug --enable-werror --disable-threaded-resolver --disable-proxy --without-ssl --enable-websockets'
+      CONFIG_ARGS: '--enable-debug --enable-werror --disable-threaded-resolver --disable-proxy --without-ssl --enable-websockets --without-libpsl'
     - job_name: 'autotools, msys2, Debug, x86_64, no SSL'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: autotools
       TESTING: 'ON'
       DISABLED_TESTS: '!19 !504 !704 !705 !1233'
-      CONFIG_ARGS: '--enable-debug --enable-werror --disable-threaded-resolver --without-ssl --enable-websockets'
+      CONFIG_ARGS: '--enable-debug --enable-werror --disable-threaded-resolver --without-ssl --enable-websockets  --without-libpsl'
     - job_name: 'autotools, msys2, Release, x86_64, no SSL'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: autotools
       TESTING: 'ON'
       DISABLED_TESTS: '!19 !504 !704 !705 !1233'
-      CONFIG_ARGS: '--enable-warnings --enable-werror --without-ssl --enable-websockets'
+      CONFIG_ARGS: '--enable-warnings --enable-werror --without-ssl --enable-websockets  --without-libpsl'
     # autotools-based Cygwin build
     - job_name: 'autotools, cygwin, Debug, x86_64, no SSL'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
@@ -264,7 +264,7 @@ environment:
       TESTING: 'ON'
       DISABLED_TESTS: ''
       ADD_SHELL: 'C:/cygwin64/bin'
-      CONFIG_ARGS: '--enable-debug --enable-werror --disable-threaded-resolver --without-ssl --enable-websockets'
+      CONFIG_ARGS: '--enable-debug --enable-werror --disable-threaded-resolver --without-ssl --enable-websockets  --without-libpsl'
 
 install:
   - ps: |

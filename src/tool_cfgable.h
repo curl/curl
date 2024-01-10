@@ -68,7 +68,7 @@ struct OperationConfig {
   char *proto_default;
   curl_off_t resume_from;
   char *postfields;
-  curl_off_t postfieldsize;
+  struct curlx_dynbuf postdata;
   char *referer;
   char *query;
   long timeout_ms;

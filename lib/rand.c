@@ -201,7 +201,7 @@ CURLcode Curl_rand(struct Curl_easy *data, unsigned char *rnd, size_t num)
 {
   CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
 
-  DEBUGASSERT(num > 0);
+  DEBUGASSERT(num);
 
   while(num) {
     unsigned int r;
@@ -241,9 +241,11 @@ CURLcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd,
   memset(buffer, 0, sizeof(buffer));
 #endif
 
-  if((num/2 >= sizeof(buffer)) || !(num&1))
+  if((num/2 >= sizeof(buffer)) || !(num&1)) {
     /* make sure it fits in the local buffer and that it is an odd number! */
+    DEBUGF(infof(data, "invalid buffer size with Curl_rand_hex"));
     return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
 
   num--; /* save one for null-termination */
 

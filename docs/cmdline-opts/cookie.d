@@ -6,6 +6,7 @@ Arg: <data|filename>
 Protocols: HTTP
 Help: Send cookies from string/file
 Category: http
+Example: -b "" $URL
 Example: -b cookiefile $URL
 Example: -b cookiefile -c cookiefile $URL
 See-also: cookie-jar junk-session-cookies
@@ -23,8 +24,11 @@ If no '=' symbol is used in the argument, it is instead treated as a filename
 to read previously stored cookie from. This option also activates the cookie
 engine which makes curl record incoming cookies, which may be handy if you are
 using this in combination with the --location option or do multiple URL
-transfers on the same invoke. If the file name is exactly a minus ("-"), curl
-instead reads the contents from stdin.
+transfers on the same invoke.
+
+If the file name is exactly a minus ("-"), curl instead reads the contents from
+stdin. If the file name is an empty string ("") and is the only cookie input,
+curl will activate the cookie engine without any cookies.
 
 The file format of the file to read cookies from should be plain HTTP headers
 (Set-Cookie style) or the Netscape/Mozilla cookie file format.

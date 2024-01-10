@@ -30,6 +30,7 @@
 #include "warnless.h"
 #include "urldata.h"
 #include "sendf.h"
+#include "strdup.h"
 
 #if !defined(CURL_DISABLE_MIME) && (!defined(CURL_DISABLE_HTTP) ||      \
                                     !defined(CURL_DISABLE_SMTP) ||      \
@@ -1235,6 +1236,7 @@ CURLcode Curl_mime_duppart(struct Curl_easy *data,
     }
     break;
   default:  /* Invalid kind: should not occur. */
+    DEBUGF(infof(data, "invalid MIMEKIND* attempt"));
     res = CURLE_BAD_FUNCTION_ARGUMENT;  /* Internal error? */
     break;
   }
@@ -1370,27 +1372,22 @@ CURLcode curl_mime_filename(curl_mimepart *part, const char *filename)
 
 /* Set mime part content from memory data. */
 CURLcode curl_mime_data(curl_mimepart *part,
-                        const char *data, size_t datasize)
+                        const char *ptr, size_t datasize)
 {
   if(!part)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   cleanup_part_content(part);
 
-  if(data) {
+  if(ptr) {
     if(datasize == CURL_ZERO_TERMINATED)
-      datasize = strlen(data);
+      datasize = strlen(ptr);
 
-    part->data = malloc(datasize + 1);
+    part->data = Curl_memdup0(ptr, datasize);
     if(!part->data)
       return CURLE_OUT_OF_MEMORY;
 
     part->datasize = datasize;
-
-    if(datasize)
-      memcpy(part->data, data, datasize);
-    part->data[datasize] = '\0';    /* Set a null terminator as sentinel. */
-
     part->readfunc = mime_mem_read;
     part->seekfunc = mime_mem_seek;
     part->freefunc = mime_mem_free;

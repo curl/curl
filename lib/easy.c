@@ -688,9 +688,9 @@ static CURLcode easy_transfer(struct Curl_multi *multi)
   /* Make sure to return some kind of error if there was a multi problem */
   if(mcode) {
     result = (mcode == CURLM_OUT_OF_MEMORY) ? CURLE_OUT_OF_MEMORY :
-              /* The other multi errors should never happen, so return
-                 something suitably generic */
-              CURLE_BAD_FUNCTION_ARGUMENT;
+      /* The other multi errors should never happen, so return
+         something suitably generic */
+      CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
   return result;

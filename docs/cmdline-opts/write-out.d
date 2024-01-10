@@ -45,25 +45,31 @@ option to properly escape. If this option is used at the command prompt then
 the % cannot be escaped and unintended expansion is possible.
 
 The variables available are:
-.RS
-.IP certs
+
+## certs
 Output the certificate chain with details. Supported only by the OpenSSL,
 GnuTLS, Schannel and Secure Transport backends. (Added in 7.88.0)
-.IP content_type
+
+## content_type
 The Content-Type of the requested document, if there was any.
-.IP errormsg
+
+## errormsg
 The error message. (Added in 7.75.0)
-.IP exitcode
+
+## exitcode
 The numerical exit code of the transfer. (Added in 7.75.0)
-.IP filename_effective
+
+## filename_effective
 The ultimate filename that curl writes out to. This is only meaningful if curl
 is told to write to a file with the --remote-name or --output
 option. It's most useful in combination with the --remote-header-name
 option. (Added in 7.26.0)
-.IP ftp_entry_path
+
+## ftp_entry_path
 The initial path curl ended up in when logging on to the remote FTP
 server. (Added in 7.15.4)
-.IP header_json
+
+## header_json
 A JSON object with all HTTP response headers from the recent transfer. Values
 are provided as arrays, since in the case of multiple headers there can be
 multiple values. (Added in 7.83.0)
@@ -71,157 +77,213 @@ multiple values. (Added in 7.83.0)
 The header names provided in lowercase, listed in order of appearance over the
 wire. Except for duplicated headers. They are grouped on the first occurrence
 of that header, each value is presented in the JSON array.
-.IP http_code
+
+## http_code
 The numerical response code that was found in the last retrieved HTTP(S) or
 FTP(s) transfer.
-.IP http_connect
+
+## http_connect
 The numerical code that was found in the last response (from a proxy) to a
 curl CONNECT request. (Added in 7.12.4)
-.IP http_version
+
+## http_version
 The http version that was effectively used. (Added in 7.50.0)
-.IP json
+
+## json
 A JSON object with all available keys. (Added in 7.70.0)
-.IP local_ip
+
+## local_ip
 The IP address of the local end of the most recently done connection - can be
 either IPv4 or IPv6. (Added in 7.29.0)
-.IP local_port
+
+## local_port
 The local port number of the most recently done connection. (Added in 7.29.0)
-.IP method
+
+## method
 The http method used in the most recent HTTP request. (Added in 7.72.0)
-.IP num_certs
+
+## num_certs
 Number of server certificates received in the TLS handshake. Supported only by
 the OpenSSL, GnuTLS, Schannel and Secure Transport backends.
 (Added in 7.88.0)
-.IP num_connects
+
+## num_connects
 Number of new connects made in the recent transfer. (Added in 7.12.3)
-.IP num_headers
+
+## num_headers
 The number of response headers in the most recent request (restarted at each
 redirect). Note that the status line IS NOT a header. (Added in 7.73.0)
-.IP num_redirects
+
+## num_redirects
 Number of redirects that were followed in the request. (Added in 7.12.3)
-.IP onerror
+
+## onerror
 The rest of the output is only shown if the transfer returned a non-zero error.
 (Added in 7.75.0)
-.IP "proxy_ssl_verify_result"
+
+## "proxy_ssl_verify_result"
 The result of the HTTPS proxy's SSL peer certificate verification that was
 requested. 0 means the verification was successful. (Added in 7.52.0)
-.IP redirect_url
+
+## redirect_url
 When an HTTP request was made without --location to follow redirects (or when
 --max-redirs is met), this variable shows the actual URL a redirect
 *would* have gone to. (Added in 7.18.2)
-.IP referer
+
+## referer
 The Referer: header, if there was any. (Added in 7.76.0)
-.IP remote_ip
+
+## remote_ip
 The remote IP address of the most recently done connection - can be either
 IPv4 or IPv6. (Added in 7.29.0)
-.IP remote_port
+
+## remote_port
 The remote port number of the most recently done connection. (Added in 7.29.0)
-.IP response_code
+
+## response_code
 The numerical response code that was found in the last transfer (formerly
 known as "http_code"). (Added in 7.18.2)
-.IP scheme
+
+## scheme
 The URL scheme (sometimes called protocol) that was effectively used. (Added in 7.52.0)
-.IP size_download
+
+## size_download
 The total amount of bytes that were downloaded. This is the size of the
 body/data that was transferred, excluding headers.
-.IP size_header
+
+## size_header
 The total amount of bytes of the downloaded headers.
-.IP size_request
+
+## size_request
 The total amount of bytes that were sent in the HTTP request.
-.IP size_upload
+
+## size_upload
 The total amount of bytes that were uploaded. This is the size of the
 body/data that was transferred, excluding headers.
-.IP speed_download
+
+## speed_download
 The average download speed that curl measured for the complete download. Bytes
 per second.
-.IP speed_upload
+
+## speed_upload
 The average upload speed that curl measured for the complete upload. Bytes per
 second.
-.IP ssl_verify_result
+
+## ssl_verify_result
 The result of the SSL peer certificate verification that was requested. 0
 means the verification was successful. (Added in 7.19.0)
-.IP stderr
+
+## stderr
 From this point on, the --write-out output is written to standard
 error. (Added in 7.63.0)
-.IP stdout
+
+## stdout
 From this point on, the --write-out output is written to standard output.
 This is the default, but can be used to switch back after switching to stderr.
 (Added in 7.63.0)
-.IP time_appconnect
+
+## time_appconnect
 The time, in seconds, it took from the start until the SSL/SSH/etc
 connect/handshake to the remote host was completed. (Added in 7.19.0)
-.IP time_connect
+
+## time_connect
 The time, in seconds, it took from the start until the TCP connect to the
 remote host (or proxy) was completed.
-.IP time_namelookup
+
+## time_namelookup
 The time, in seconds, it took from the start until the name resolving was
 completed.
-.IP time_pretransfer
+
+## time_pretransfer
 The time, in seconds, it took from the start until the file transfer was just
 about to begin. This includes all pre-transfer commands and negotiations that
 are specific to the particular protocol(s) involved.
-.IP time_redirect
+
+## time_redirect
 The time, in seconds, it took for all redirection steps including name lookup,
 connect, pretransfer and transfer before the final transaction was
 started. time_redirect shows the complete execution time for multiple
 redirections. (Added in 7.12.3)
-.IP time_starttransfer
+
+## time_starttransfer
 The time, in seconds, it took from the start until the first byte is received.
 This includes time_pretransfer and also the time the server needed to calculate
 the result.
-.IP time_total
+
+## time_total
 The total time, in seconds, that the full operation lasted.
-.IP url
+
+## url
 The URL that was fetched. (Added in 7.75.0)
-.IP url.scheme
+
+## url.scheme
 The scheme part of the URL that was fetched. (Added in 8.1.0)
-.IP url.user
+
+## url.user
 The user part of the URL that was fetched. (Added in 8.1.0)
-.IP url.password
+
+## url.password
 The password part of the URL that was fetched. (Added in 8.1.0)
-.IP url.options
+
+## url.options
 The options part of the URL that was fetched. (Added in 8.1.0)
-.IP url.host
+
+## url.host
 The host part of the URL that was fetched. (Added in 8.1.0)
-.IP url.port
+
+## url.port
 The port number of the URL that was fetched. If no port number was specified,
 but the URL scheme is known, that scheme's default port number is
 shown. (Added in 8.1.0)
-.IP url.path
+
+## url.path
 The path part of the URL that was fetched. (Added in 8.1.0)
-.IP url.query
+
+## url.query
 The query part of the URL that was fetched. (Added in 8.1.0)
-.IP url.fragment
+
+## url.fragment
 The fragment part of the URL that was fetched. (Added in 8.1.0)
-.IP url.zoneid
+
+## url.zoneid
 The zone id part of the URL that was fetched. (Added in 8.1.0)
-.IP urle.scheme
+
+## urle.scheme
 The scheme part of the effective (last) URL that was fetched. (Added in 8.1.0)
-.IP urle.user
+
+## urle.user
 The user part of the effective (last) URL that was fetched. (Added in 8.1.0)
-.IP urle.password
+
+## urle.password
 The password part of the effective (last) URL that was fetched. (Added in 8.1.0)
-.IP urle.options
+
+## urle.options
 The options part of the effective (last) URL that was fetched. (Added in 8.1.0)
-.IP urle.host
+
+## urle.host
 The host part of the effective (last) URL that was fetched. (Added in 8.1.0)
-.IP urle.port
+
+## urle.port
 The port number of the effective (last) URL that was fetched. If no port
 number was specified, but the URL scheme is known, that scheme's default port
 number is shown. (Added in 8.1.0)
-.IP urle.path
+
+## urle.path
 The path part of the effective (last) URL that was fetched. (Added in 8.1.0)
-.IP urle.query
+
+## urle.query
 The query part of the effective (last) URL that was fetched. (Added in 8.1.0)
-.IP urle.fragment
+
+## urle.fragment
 The fragment part of the effective (last) URL that was fetched. (Added in 8.1.0)
-.IP urle.zoneid
+
+## urle.zoneid
 The zone id part of the effective (last) URL that was fetched. (Added in 8.1.0)
-.IP urlnum
+
+## urlnum
 The URL index number of this transfer, 0-indexed. Unglobbed URLs share the
 same index number as the origin globbed URL. (Added in 7.75.0)
-.IP url_effective
+
+## url_effective
 The URL that was fetched last. This is most meaningful if you have told curl
 to follow location: headers.
-.RE
-.IP

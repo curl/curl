@@ -25,6 +25,7 @@
 
 #include "tool_cfgable.h"
 #include "tool_formparse.h"
+#include "tool_paramhlp.h"
 #include "tool_main.h"
 
 #include "memdebug.h" /* keep this as LAST include */
@@ -33,7 +34,6 @@ void config_init(struct OperationConfig *config)
 {
   memset(config, 0, sizeof(struct OperationConfig));
 
-  config->postfieldsize = -1;
   config->use_httpget = FALSE;
   config->create_dirs = FALSE;
   config->maxredirs = DEFAULT_MAXREDIRS;
@@ -45,6 +45,7 @@ void config_init(struct OperationConfig *config)
   config->http09_allowed = FALSE;
   config->ftp_skip_ip = TRUE;
   config->file_clobber_mode = CLOBBER_DEFAULT;
+  curlx_dyn_init(&config->postdata, MAX_FILE2MEMORY);
 }
 
 static void free_config_fields(struct OperationConfig *config)
@@ -59,7 +60,7 @@ static void free_config_fields(struct OperationConfig *config)
   Curl_safefree(config->cookiejar);
   curl_slist_free_all(config->cookiefiles);
 
-  Curl_safefree(config->postfields);
+  Curl_dyn_free(&config->postdata);
   Curl_safefree(config->query);
   Curl_safefree(config->referer);
 

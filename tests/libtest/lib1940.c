@@ -35,6 +35,8 @@ static const char *show[]={
   "set-cookie",
   "silly-thing",
   "fold",
+  "blank",
+  "Blank2",
   NULL
 };
 

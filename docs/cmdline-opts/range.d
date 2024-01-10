@@ -13,24 +13,30 @@ Multi: single
 ---
 Retrieve a byte range (i.e. a partial document) from an HTTP/1.1, FTP or SFTP
 server or a local FILE. Ranges can be specified in a number of ways.
-.RS
-.IP 0-499
+
+## 0-499
 specifies the first 500 bytes
-.IP 500-999
+
+## 500-999
 specifies the second 500 bytes
-.IP -500
+
+## -500
 specifies the last 500 bytes
-.IP 9500-
+
+## 9500-
 specifies the bytes from offset 9500 and forward
-.IP 0-0,-1
+
+## 0-0,-1
 specifies the first and last byte only(*)(HTTP)
-.IP 100-199,500-599
+
+## 100-199,500-599
 specifies two separate 100-byte ranges(*) (HTTP)
-.RE
-.IP
-(*) = NOTE that this causes the server to reply with a multipart response,
-which is returned as-is by curl! Parsing or otherwise transforming this
-response is the responsibility of the caller.
+
+##
+
+(*) = NOTE that these make the server reply with a multipart response, which
+is returned as-is by curl! Parsing or otherwise transforming this response is
+the responsibility of the caller.
 
 Only digit characters (0-9) are valid in the 'start' and 'stop' fields of the
 'start-stop' range syntax. If a non-digit character is given in the range, the

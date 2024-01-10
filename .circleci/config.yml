@@ -149,7 +149,7 @@ commands:
     steps:
       - run:
           command: |
-            sudo apt-get update && sudo apt-get install -y libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev python3-pip
+            sudo apt-get update && sudo apt-get install -y libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev python3-pip libpsl-dev
             sudo python3 -m pip install impacket
 
   install-deps-brew:
@@ -157,7 +157,7 @@ commands:
       - run:
           command: |
             # Drop libressl as long as we're not trying to build it
-            echo libtool autoconf automake pkg-config nghttp2 libssh2 openssl libssh c-ares | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+            echo libtool autoconf automake pkg-config nghttp2 libssh2 openssl libssh c-ares libpsl | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
             while [ $? -eq 0 ]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
             sudo python3 -m pip install impacket
 
@@ -249,6 +249,7 @@ jobs:
     executor: ubuntu
     steps:
       - checkout
+      - install-deps
       - configure
       - build
       - test
@@ -284,6 +285,7 @@ jobs:
     executor: ubuntu
     steps:
       - checkout
+      - install-deps
       - install-cares
       - configure-cares
       - build
@@ -293,6 +295,7 @@ jobs:
     executor: ubuntu
     steps:
       - checkout
+      - install-deps
       - install-libssh
       - configure-libssh
       - build
@@ -304,6 +307,7 @@ jobs:
     resource_class: arm.medium
     steps:
       - checkout
+      - install-deps
       - configure
       - build
       - test
@@ -314,6 +318,7 @@ jobs:
     resource_class: arm.medium
     steps:
       - checkout
+      - install-deps
       - install-cares
       - configure-cares-debug
       - build

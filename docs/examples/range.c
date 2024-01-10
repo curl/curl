@@ -22,10 +22,9 @@
  *
  ***************************************************************************/
 /* <DESC>
- * HTTPS GET using IPv6 only
+ * GET a range only of a HTTP resource
  * </DESC>
  */
-#include <stdio.h>
 #include <curl/curl.h>
 
 int main(void)
@@ -35,12 +34,10 @@ int main(void)
 
   curl = curl_easy_init();
   if(curl) {
-    curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V6);
-
     curl_easy_setopt(curl, CURLOPT_URL, "https://curl.se/");
+    curl_easy_setopt(curl, CURLOPT_RANGE, "200-999");
 
     res = curl_easy_perform(curl);
-
     curl_easy_cleanup(curl);
   }
 

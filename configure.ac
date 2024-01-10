@@ -2054,17 +2054,16 @@ dnl **********************************************************************
 
 AC_ARG_WITH(libpsl,
            AS_HELP_STRING([--without-libpsl],
-           [disable support for libpsl cookie checking]),
+           [disable support for libpsl]),
            with_libpsl=$withval,
            with_libpsl=yes)
+curl_psl_msg="no      (libpsl disabled)"
 if test $with_libpsl != "no"; then
   AC_SEARCH_LIBS(psl_builtin, psl,
     [curl_psl_msg="enabled";
      AC_DEFINE([USE_LIBPSL], [1], [PSL support enabled])
      ],
-    [curl_psl_msg="no      (libpsl not found)";
-     AC_MSG_WARN([libpsl was not found])
-     ]
+    [AC_MSG_ERROR([libpsl was not found]) ]
   )
 fi
 AM_CONDITIONAL([USE_LIBPSL], [test "$curl_psl_msg" = "enabled"])

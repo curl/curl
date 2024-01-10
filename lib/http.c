@@ -2095,6 +2095,7 @@ CURLcode Curl_add_timecondition(struct Curl_easy *data,
 
   switch(data->set.timecondition) {
   default:
+    DEBUGF(infof(data, "invalid time condition"));
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   case CURL_TIMECOND_IFMODSINCE:

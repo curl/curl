@@ -88,8 +88,6 @@ ParameterError file2string(char **bufp, FILE *file)
   return PARAM_OK;
 }
 
-#define MAX_FILE2MEMORY (1024*1024*1024) /* big enough ? */
-
 ParameterError file2memory(char **bufp, size_t *size, FILE *file)
 {
   if(file) {

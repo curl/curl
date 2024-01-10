@@ -35,7 +35,7 @@ jobs:
       - name: run configure --with-openssl
         run: |
            autoreconf -fi
-           ./configure --with-openssl
+           ./configure --with-openssl --without-libpsl
 
       - name: run cmake
         run: |

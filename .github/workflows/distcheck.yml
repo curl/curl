@@ -30,7 +30,7 @@ jobs:
       - run: autoreconf -fi
         name: 'autoreconf'
 
-      - run: ./configure --without-ssl
+      - run: ./configure --without-ssl --without-libpsl
         name: 'configure'
 
       - run: make V=1 && make V=1 clean
@@ -48,7 +48,7 @@ jobs:
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
           pushd curl-99.98.97
-          ./configure --prefix=$HOME/temp --without-ssl
+          ./configure --prefix=$HOME/temp --without-ssl --without-libpsl
           make
           make test-ci
           make install
@@ -73,7 +73,7 @@ jobs:
           touch curl-99.98.97/docs/{cmdline-opts,libcurl}/Makefile.inc
           mkdir build
           pushd build
-          ../curl-99.98.97/configure --without-ssl
+          ../curl-99.98.97/configure --without-ssl --without-libpsl
           make
           make test-ci
           popd
@@ -96,7 +96,7 @@ jobs:
           pushd curl-99.98.97
           mkdir build
           pushd build
-          ../configure --without-ssl --enable-debug "--prefix=${PWD}/pkg"
+          ../configure --without-ssl --enable-debug "--prefix=${PWD}/pkg" --without-libpsl
           make -j3
           make -j3 test-ci
           make -j3 install

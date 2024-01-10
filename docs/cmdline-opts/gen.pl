@@ -319,10 +319,36 @@ sub single {
         }
     }
     my @desc;
+    my $tablemode = 0;
     while(<F>) {
+        $line++;
+        if(/^## (.*)/) {
+            if(!$tablemode) {
+                push @desc, ".RS\n";
+                $tablemode = 1;
+            }
+            push @desc, ".IP \"\\fB$1\\fP\"\n";
+            next;
+        }
+        elsif(/^##/) {
+            if($tablemode) {
+                # end of table
+                push @desc, ".RE\n.IP\n";
+                $tablmode = 0;
+            }
+            next;
+        }
+        elsif(/^\.(IP|RS|RE)/) {
+            my ($cmd) = ($1);
+            print STDERR "$f:$line:1:ERROR: $cmd detected, use ##-style\n";
+        }
         push @desc, $_;
     }
     close(F);
+    if($tablemode) {
+        # end of table
+        push @desc, ".RE\n.IP\n";
+    }
     my $opt;
 
     if(defined($short) && $long) {
