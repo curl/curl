@@ -39,6 +39,10 @@ This function must be explicitly called in order to perform the upkeep work.
 The connection upkeep interval is set with
 CURLOPT_UPKEEP_INTERVAL_MS(3).
 
+If you call this function on an easy handle that uses a shared connection cache
+then upkeep is performed on the connections in that cache, even if those
+connections were never used by the easy handle. (Added in 8.10.0)
+
 # %PROTOCOLS%
 
 # EXAMPLE
