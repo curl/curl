@@ -419,8 +419,6 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
 
   *done = TRUE; /* unconditionally */
 
-  Curl_pgrsStartNow(data);
-
   if(data->state.upload)
     return file_upload(data);
 
