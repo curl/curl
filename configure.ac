@@ -2776,6 +2776,11 @@ esac
 
 curl_tcp2_msg="no      (--with-ngtcp2)"
 if test X"$want_tcp2" != Xno; then
+
+  if test "$QUIC_ENABLED" != "yes"; then
+    AC_MSG_ERROR([the detected TLS library does not support QUIC, making --with-ngtcp2 a no-no])
+  fi
+
   dnl backup the pre-ngtcp2 variables
   CLEANLDFLAGS="$LDFLAGS"
   CLEANCPPFLAGS="$CPPFLAGS"
@@ -3030,6 +3035,11 @@ esac
 
 curl_http3_msg="no      (--with-nghttp3)"
 if test X"$want_nghttp3" != Xno; then
+
+  if test "$NGTCP2_ENABLED" != "1"; then
+    AC_MSG_ERROR([--with-nghttp3 also requires --with-ntcp2])
+  fi
+
   dnl backup the pre-nghttp3 variables
   CLEANLDFLAGS="$LDFLAGS"
   CLEANCPPFLAGS="$CPPFLAGS"
@@ -3119,6 +3129,10 @@ case "$OPT_QUICHE" in
 esac
 
 if test X"$want_quiche" != Xno; then
+
+  if test "$QUIC_ENABLED" != "yes"; then
+    AC_MSG_ERROR([the detected TLS library does not support QUIC, making --with-quiche a no-no])
+  fi
 
   if test "$NGHTTP3_ENABLED" = 1; then
     AC_MSG_ERROR([--with-quiche and --with-ngtcp2 are mutually exclusive])
@@ -3217,6 +3231,10 @@ case "$OPT_MSH3" in
 esac
 
 if test X"$want_msh3" != Xno; then
+
+  if test "$QUIC_ENABLED" != "yes"; then
+    AC_MSG_ERROR([the detected TLS library does not support QUIC, making --with-quiche a no-no])
+  fi
 
   if test "$NGHTTP3_ENABLED" = 1; then
     AC_MSG_ERROR([--with-msh3 and --with-ngtcp2 are mutually exclusive])
