@@ -1846,7 +1846,8 @@ typedef enum {
   /* allow GSSAPI credential delegation */
   CURLOPT(CURLOPT_GSSAPI_DELEGATION, CURLOPTTYPE_VALUES, 210),
 
-  /* Set the name servers to use for DNS resolution */
+  /* Set the name servers to use for DNS resolution.
+   * Only supported by the c-ares DNS backend */
   CURLOPT(CURLOPT_DNS_SERVERS, CURLOPTTYPE_STRINGPOINT, 211),
 
   /* Time-out accept operations (currently for FTP only) after this amount
@@ -2051,7 +2052,8 @@ typedef enum {
   /* Head start in milliseconds to give happy eyeballs. */
   CURLOPT(CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS, CURLOPTTYPE_LONG, 271),
 
-  /* Function that will be called before a resolver request is made */
+  /* Function that will be called before a resolver request is made.
+   * Only supported by the c-ares DNS backend */
   CURLOPT(CURLOPT_RESOLVER_START_FUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 272),
 
   /* User data to pass to the resolver start callback. */
