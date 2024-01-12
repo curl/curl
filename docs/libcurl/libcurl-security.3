@@ -420,6 +420,13 @@ credentials may be left in freed data.
 .SH "Saving files"
 libcurl cannot protect against attacks where an attacker has write access to
 the same directory where libcurl is directed to save files.
+.SH "Cookies"
+If libcurl is built with PSL (**Public Suffix List**) support, it detects and
+discards cookies that are specified for such suffix domains that should not be
+allowed to have cookies.
+
+if libcurl is *not* built with PSL support, it has no ability to stop super
+cookies.
 .SH "Report Security Problems"
 Should you detect or just suspect a security problem in libcurl or curl,
 contact the project curl security team immediately. See
