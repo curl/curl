@@ -44,7 +44,7 @@
   cookies should not be allowed at all, because they are *Public
   Suffixes*. Similarly, a client never accepts cookies set directly for the
   top-level domain like for example `.com`. Cookies set for *too broad*
-  domains are generally refereed to as *super cookies*.
+  domains are generally referred to as *super cookies*.
 
   If curl is built with PSL (**Public Suffix List**) support, it detects and
   discards cookies that are specified for such suffix domains that should not
