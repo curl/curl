@@ -2473,17 +2473,14 @@ if test "$want_winidn" = "yes"; then
     AC_LANG_PROGRAM([[
       #include <windows.h>
     ]],[[
-      #if (WINVER < 0x600) && (_WIN32_WINNT < 0x600)
+      #if (_WIN32_WINNT < 0x600)
       #error
       #endif
     ]])
   ],[
   ],[
-     CFLAGS=`echo $CFLAGS | $SED -e 's/-DWINVER=[[^ ]]*//g'`
-     CFLAGS=`echo $CFLAGS | $SED -e 's/-D_WIN32_WINNT=[[^ ]]*//g'`
-     CPPFLAGS=`echo $CPPFLAGS | $SED -e 's/-DWINVER=[[^ ]]*//g'`
-     CPPFLAGS=`echo $CPPFLAGS | $SED -e 's/-D_WIN32_WINNT=[[^ ]]*//g'`
-     WINIDN_CPPFLAGS="$WINIDN_CPPFLAGS -DWINVER=0x0600"
+    AC_MSG_RESULT([no])
+    AC_MSG_ERROR([--with-winidn specified but minimum OS is too old])
   ])
   #
   CPPFLAGS="$CPPFLAGS $WINIDN_CPPFLAGS"
@@ -4608,7 +4605,7 @@ else
     AC_LANG_PROGRAM([[
       #include <windows.h>
     ]],[[
-      #if (WINVER < 0x600) && (_WIN32_WINNT < 0x600)
+      #if (_WIN32_WINNT < 0x600)
       #error
       #endif
     ]])
