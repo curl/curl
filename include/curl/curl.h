@@ -2052,8 +2052,7 @@ typedef enum {
   /* Head start in milliseconds to give happy eyeballs. */
   CURLOPT(CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS, CURLOPTTYPE_LONG, 271),
 
-  /* Function that will be called before a resolver request is made.
-   * Only supported by the c-ares DNS backend */
+  /* Function that will be called before a resolver request is made */
   CURLOPT(CURLOPT_RESOLVER_START_FUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 272),
 
   /* User data to pass to the resolver start callback. */
