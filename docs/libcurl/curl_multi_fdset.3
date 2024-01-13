@@ -42,17 +42,17 @@ select() on, but be sure to \fIFD_ZERO\fP them before calling this function as
 otherwise remove any others. The \fIcurl_multi_perform(3)\fP function should
 be called as soon as one of them is ready to be read from or written to.
 
-If the \fIread_fd_set\fP argument is not a null pointer, it points to an
-object of type \fBfd_set\fP that on returns specifies the file descriptors to
-be checked for being ready to read.
+The \fIread_fd_set\fP argument should point to an object of type \fBfd_set\fP
+that on returns specifies the file descriptors to be checked for being ready
+to read.
 
-If the \fIwrite_fd_set\fP argument is not a null pointer, it points to an
-object of type \fBfd_set\fP that on return specifies the file descriptors to
-be checked for being ready to write.
+The \fIwrite_fd_set\fP argument should point to an object of type \fBfd_set\fP
+that on return specifies the file descriptors to be checked for being ready to
+write.
 
-If the \fIexc_fd_set\fP argument is not a null pointer, it points to an object
-of type \fBfd_set\fP that on return specifies the file descriptors to be
-checked for error conditions pending.
+The \fIexc_fd_set\fP argument should point to an object of type \fBfd_set\fP
+that on return specifies the file descriptors to be checked for error
+conditions.
 
 If no file descriptors are set by libcurl, \fImax_fd\fP contain -1 when this
 function returns. Otherwise it contains the highest descriptor number libcurl
