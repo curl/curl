@@ -490,7 +490,6 @@ static CURLcode readwrite_data(struct Curl_easy *data,
     }
 
     buf = data->state.buffer;
-    blen = 0;
     bytestoread = data->set.buffer_size;
 
     /* Observe any imposed speed limit */
