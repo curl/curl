@@ -49,6 +49,7 @@
 #define CLIENTWRITE_CONNECT (1<<4) /* a CONNECT related HEADER */
 #define CLIENTWRITE_1XX     (1<<5) /* a 1xx response related HEADER */
 #define CLIENTWRITE_TRAILER (1<<6) /* a trailer HEADER */
+#define CLIENTWRITE_EOS     (1<<7) /* End Of transfer download Stream */
 
 /**
  * Write `len` bytes at `prt` to the client. `type` indicates what
@@ -146,6 +147,9 @@ size_t Curl_cwriter_count(struct Curl_easy *data, Curl_cwriter_phase phase);
  */
 CURLcode Curl_cwriter_add(struct Curl_easy *data,
                           struct Curl_cwriter *writer);
+
+void Curl_cwriter_remove_by_name(struct Curl_easy *data,
+                                 const char *name);
 
 /**
  * Convenience method for calling `writer->do_write()` that

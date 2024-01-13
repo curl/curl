@@ -196,6 +196,9 @@
  21. MQTT
  21.1 Support rate-limiting
 
+ 22. TFTP
+ 22.1 TFTP doesn't convert LF to CRLF for mode=netascii
+
 ==============================================================================
 
 1. libcurl
@@ -1392,3 +1395,14 @@
 
  The rate-limiting logic is done in the PERFORMING state in multi.c but MQTT
  is not (yet) implemented to use that.
+
+22. TFTP
+
+22.1 TFTP doesn't convert LF to CRLF for mode=netascii
+
+ RFC 3617 defines that an TFTP transfer can be done using "netascii"
+ mode. curl does not support extracting that mode from the URL nor does it treat
+ such transfers specifically. It should probably do LF to CRLF translations
+ for them.
+
+ See https://github.com/curl/curl/issues/12655

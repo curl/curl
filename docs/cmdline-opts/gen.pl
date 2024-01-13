@@ -98,9 +98,9 @@ sub printdesc {
         }
         if($d !~ /^.\\"/) {
             # **bold**
-            $d =~ s/\*\*([^ ]*)\*\*/\\fB$1\\fP/g;
+            $d =~ s/\*\*(.*?)\*\*/\\fB$1\\fP/g;
             # *italics*
-            $d =~ s/\*([^ ]*)\*/\\fI$1\\fP/g;
+            $d =~ s/\*(.*?)\*/\\fI$1\\fP/g;
         }
         if(!$exam && ($d =~ /^ /)) {
             # start of example

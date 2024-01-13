@@ -12,6 +12,7 @@ This release includes the following changes:
  o add CURLINFO_QUEUE_TIME_T [76]
  o add CURLOPT_SERVER_RESPONSE_TIMEOUT_MS: add [39]
  o asyn-thread: use GetAddrInfoExW on >= Windows 8 [55]
+ o configure: make libpsl detection failure cause error [109]
  o runtests: support -gl. Like -g but for lldb. [47]
 
 This release includes the following bugfixes:
@@ -33,8 +34,10 @@ This release includes the following bugfixes:
  o cmdline-opts: update availability for the *-ca-native options [66]
  o cmdline/gen: fix the sorting of the man page options [33]
  o configure: fix no default int compile error in ipv6 detection [69]
+ o configure: when enabling QUIC, check that TLS supports QUIC [87]
  o connect: remove margin from eyeballer alloc [79]
  o content_encoding: change return code to typedef'ed enum [94]
+ o cookie.d: document use of empty string to enable cookie engine [106]
  o cookie: avoid fopen with empty file name [24]
  o curl: show ipfs and ipns as supported "protocols" [15]
  o CURLINFO_REFERER.3: clarify that it is the *request* header [70]
@@ -43,17 +46,24 @@ This release includes the following bugfixes:
  o CURLOPT_SSH_*_KEYFILE: clarify [57]
  o dist: add tests/errorcodes.pl to the tarball [6]
  o docs: clean up Protocols: for cmdline options [32]
+ o docs: describe and highlight super cookies [80]
  o doh: remove unused local variable [34]
+ o examples: add four new examples [99]
  o ftp: handle the PORT parsing without allocation [44]
  o ftp: use dynbuf to store entrypath [83]
  o ftp: use memdup0 to store the OS from a SYST 215 response [82]
+ o gen.pl: support ## for doing .IP in table-like lists [105]
+ o gen: do italics/bold for a range of letters, not just single word [78]
  o gnutls: fix build with --disable-verbose [3]
  o haproxy-clientip.d: document the arg [68]
+ o headers: make sure the trailing newline is not stored [97]
  o hostip: return error immediately when Curl_ip2addr() fails [19]
+ o hsts: remove assert for zero length domain [96]
  o http2: improved on_stream_close/data_done handling [49]
  o http3/quiche: fix result code on a stream reset [91]
  o http: adjust_pollset fix [85]
  o http: fix off-by-one error in request method length check [14]
+ o http_proxy: a blank CURLOPT_USERAGENT should not be used in CONNECT [90]
  o lib: add debug log outputs for CURLE_BAD_FUNCTION_ARGUMENT [62]
  o lib: fix variable undeclared error caused by `infof` changes [2]
  o lib: reduce use of strncpy [30]
@@ -66,6 +76,7 @@ This release includes the following bugfixes:
  o mbedtls: free the entropy when threaded [46]
  o mime: use memdup0 instead of malloc + memcpy [63]
  o mprintf: overhaul and bugfixes [52]
+ o multi: remove total timer reset in file_do() while fetching file:// [89]
  o ngtcp2: put h3 at the front of alpn [58]
  o openldap: fix an LDAP crash [75]
  o openldap: fix STARTTLS [67]
@@ -76,13 +87,16 @@ This release includes the following bugfixes:
  o Revert "urldata: move async resolver state from easy handle to connectdata" [16]
  o runtests: for mode="text" on <stdout>, fix newlines on both parts [64]
  o schannel: fix `-Warith-conversion` gcc 13 warning [28]
+ o sectransp: do verify_cert without memdup for blobs [93]
  o sectransp_ make TLSCipherNameForNumber() available in non-verbose config [1]
  o sendf: fix compiler warning with CURL_DISABLE_HEADERS_API [38]
  o setopt: clear mimepost when formp is freed [92]
+ o setopt: use memdup0 when cloning COPYPOSTFIELDS [107]
  o ssh: fix namespace of two local macros [51]
  o strerror: repair get_winsock_error() [56]
  o system.h: sync mingw `CURL_TYPEOF_CURL_SOCKLEN_T` with other compilers [9]
  o system_win32: fix a function pointer assignment warning [71]
+ o telnet: use dynbuf instad of malloc for escape buffer [108]
  o tests/server: delete workaround for old-mingw [25]
  o tests: respect $TMPDIR when creating unix domain sockets [50]
  o tool: make parser reject blank arguments if not supported [86]
@@ -94,6 +108,7 @@ This release includes the following bugfixes:
  o transfer: fix upload rate limiting, add test cases [37]
  o url: for disabled protocols, mention if found in redirect [7]
  o verify-examples.pl: fail verification on unescaped backslash [72]
+ o vquic: extract TLS setup into own source [88]
  o vtls: fix missing multissl version info [73]
  o vtls: remove the Curl_cft_ssl_proxy object if CURL_DISABLE_PROXY [41]
  o windows: delete redundant headers [43]
@@ -203,14 +218,29 @@ References to bug reports and discussions on issues:
  [74] = https://curl.se/bug/?i=12631
  [75] = https://curl.se/bug/?i=12593
  [76] = https://curl.se/bug/?i=12368
+ [78] = https://curl.se/bug/?i=12689
  [79] = https://curl.se/bug/?i=12647
+ [80] = https://curl.se/bug/?i=12687
  [81] = https://curl.se/bug/?i=12640
  [82] = https://curl.se/bug/?i=12639
  [83] = https://curl.se/bug/?i=12638
  [84] = https://curl.se/bug/?i=12634
  [85] = https://curl.se/bug/?i=12632
  [86] = https://curl.se/bug/?i=12620
+ [87] = https://curl.se/bug/?i=12683
+ [88] = https://curl.se/bug/?i=12678
+ [89] = https://curl.se/bug/?i=12682
+ [90] = https://curl.se/bug/?i=12680
  [91] = https://curl.se/bug/?i=12629
  [92] = https://curl.se/bug/?i=12608
+ [93] = https://curl.se/bug/?i=12679
  [94] = https://curl.se/bug/?i=12618
  [95] = https://curl.se/bug/?i=12614
+ [96] = https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=65661
+ [97] = https://curl.se/mail/lib-2024-01/0019.html
+ [99] = https://curl.se/bug/?i=12671
+ [105] = https://curl.se/bug/?i=12667
+ [106] = https://curl.se/bug/?i=12643
+ [107] = https://curl.se/bug/?i=12651
+ [108] = https://curl.se/bug/?i=12652
+ [109] = https://curl.se/bug/?i=12661
