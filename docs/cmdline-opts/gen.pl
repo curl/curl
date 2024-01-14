@@ -219,6 +219,7 @@ sub single {
     my @examples; # there can be more than one
     my $magic; # cmdline special option
     my $line;
+    my $dline;
     my $multi;
     my $scope;
     my $experimental;
@@ -322,6 +323,11 @@ sub single {
     my $tablemode = 0;
     while(<F>) {
         $line++;
+        $dline++;
+        if(($dline == 1) && ($_ =~ /^[\r\n]*\z/)) {
+            print STDERR "$f:$line:1:ERROR: unnecessary leading blank line\n";
+            return 3;
+        }
         if(/^## (.*)/) {
             if(!$tablemode) {
                 push @desc, ".RS\n";
@@ -341,6 +347,7 @@ sub single {
         elsif(/^\.(IP|RS|RE)/) {
             my ($cmd) = ($1);
             print STDERR "$f:$line:1:ERROR: $cmd detected, use ##-style\n";
+            return 3;
         }
         push @desc, $_;
     }
