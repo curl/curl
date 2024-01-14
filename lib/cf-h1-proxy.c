@@ -725,7 +725,7 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
   }
 
   if(!Curl_checkProxyheaders(data, conn, STRCONST("User-Agent")) &&
-     data->set.str[STRING_USERAGENT]) {
+     data->set.str[STRING_USERAGENT] && *data->set.str[STRING_USERAGENT]) {
     struct dynbuf ua;
     Curl_dyn_init(&ua, DYN_HTTP_REQUEST);
     result = Curl_dyn_addf(&ua, "User-Agent: %s\r\n",
