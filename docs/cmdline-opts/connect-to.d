@@ -9,7 +9,6 @@ Category: connection
 Example: --connect-to example.com:443:example.net:8443 $URL
 Multi: append
 ---
-
 For a request to the given HOST1:PORT1 pair, connect to HOST2:PORT2 instead.
 This option is suitable to direct requests at a specific server, e.g. at a
 specific cluster node in a cluster of servers. This option is only used to
