@@ -165,6 +165,7 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
 {
   const unsigned char *inbuf;
   size_t inlen;
+  uint64_t payload_len;
 
   while(Curl_bufq_peek(inraw, &inbuf, &inlen)) {
     if(dec->head_len == 0) {
@@ -219,13 +220,13 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
     DEBUGASSERT(dec->head_len == dec->head_total);
     switch(dec->head_total) {
     case 2:
-      dec->payload_len = dec->head[1];
+      payload_len = dec->head[1];
       break;
     case 4:
-      dec->payload_len = (dec->head[2] << 8) | dec->head[3];
+      payload_len = (dec->head[2] << 8) | dec->head[3];
       break;
     case 10:
-      dec->payload_len = ((curl_off_t)dec->head[2] << 56) |
+      payload_len = ((curl_off_t)dec->head[2] << 56) |
         (curl_off_t)dec->head[3] << 48 |
         (curl_off_t)dec->head[4] << 40 |
         (curl_off_t)dec->head[5] << 32 |
@@ -246,6 +247,11 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
       return CURLE_RECV_ERROR;
     }
 
+    if(payload_len > CURL_OFF_T_MAX) {
+      failf(data, "WS: frame length %" PRIu64 " not supported", payload_len);
+      return CURLE_RECV_ERROR;
+    }
+    dec->payload_len = (curl_off_t)payload_len;
     dec->frame_age = 0;
     dec->payload_offset = 0;
     ws_dec_info(dec, data, "decoded");
