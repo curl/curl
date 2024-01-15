@@ -841,7 +841,7 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
    * In which case we write out the left over bytes, letting the client
    * writer deal with it (it will report EXCESS and fail the transfer). */
   DEBUGF(infof(data, "rtsp_rtp_write_resp(len=%zu, in_header=%d, done=%d "
-               " rtspc->state=%d, req.size=%zd)",
+               " rtspc->state=%d, req.size=%" CURL_FORMAT_CURL_OFF_T ")",
                blen, rtspc->in_header, *done, rtspc->state, data->req.size));
   if(!result && (is_eos || blen)) {
     result = Curl_client_write(data, CLIENTWRITE_BODY|
