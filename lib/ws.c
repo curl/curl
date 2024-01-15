@@ -233,6 +233,11 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
         (curl_off_t)dec->head[7] << 16 |
         (curl_off_t)dec->head[8] << 8 |
         dec->head[9];
+      if(dec->payload_len < 0) {
+        failf(data, "WS: payload length larger than signed 64bit: %"
+              CURL_FORMAT_CURL_OFF_T, dec->payload_len);
+        return CURLE_RECV_ERROR;
+      }
       break;
     default:
       /* this should never happen */
@@ -409,6 +414,13 @@ static ssize_t ws_enc_write_head(struct Curl_easy *data,
   unsigned char head[14];
   size_t hlen;
   ssize_t n;
+
+  if(payload_len < 0) {
+    failf(data, "WS: starting new frame with negative payload length %"
+                CURL_FORMAT_CURL_OFF_T, payload_len);
+    *err = CURLE_SEND_ERROR;
+    return -1;
+  }
 
   if(enc->payload_remain > 0) {
     /* trying to write a new frame before the previous one is finished */
