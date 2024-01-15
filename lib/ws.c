@@ -225,7 +225,7 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
       dec->payload_len = (dec->head[2] << 8) | dec->head[3];
       break;
     case 10:
-      if(dec->head[2] > 128) {
+      if(dec->head[2] > 127) {
         failf(data, "WS: frame length longer than 64 signed not supported");
         return CURLE_RECV_ERROR;
       }
