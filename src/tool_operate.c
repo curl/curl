@@ -637,8 +637,17 @@ noretry:
       errorf(config->global, "curl: (%d) Failed writing body", result);
     }
     if(result && config->rm_partial) {
-      notef(global, "Removing output file: %s", outs->filename);
-      unlink(outs->filename);
+      struct_stat st;
+      if(!stat(outs->filename, &st) &&
+         S_ISREG(st.st_mode)) {
+        if(!unlink(outs->filename))
+          notef(global, "Removed output file: %s", outs->filename);
+        else
+          warnf(global, "Failed removing: %s", outs->filename);
+      }
+      else
+        warnf(global, "Skipping removal; not a regular file: %s",
+              outs->filename);
     }
   }
 
