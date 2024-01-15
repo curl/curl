@@ -639,12 +639,15 @@ noretry:
     if(result && config->rm_partial) {
       struct_stat st;
       if(!stat(outs->filename, &st) &&
-         S_ISREG(st.st_mode) &&
-         !unlink(outs->filename)) {
-        notef(global, "Removed output file: %s", outs->filename);
+         S_ISREG(st.st_mode)) {
+        if(!unlink(outs->filename))
+          notef(global, "Removed output file: %s", outs->filename);
+        else
+          warnf(global, "Failed removing: %s", outs->filename);
       }
       else
-        warnf(global, "Failed removing: %s", outs->filename);
+        warnf(global, "Skipping removal; not a regular file: %s",
+              outs->filename);
     }
   }
 
