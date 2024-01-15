@@ -49,7 +49,8 @@ If set, the specified number of characters is used as the terminal width when
 the alternative progress-bar is shown. If not set, curl tries to figure it out
 using other ways.
 .IP "CURL_CA_BUNDLE <file>"
-If set, it is used as the --cacert value.
+If set, it is used as the --cacert value. This environment variable is ignored
+if Schannel is used as the TLS backend.
 .IP "CURL_HOME <dir>"
 If set, is the first variable curl checks when trying to find its home
 directory. If not set, it continues to check *XDG_CONFIG_HOME*
@@ -74,9 +75,11 @@ files can become rather large. Works with the ngtcp2 and quiche QUIC backends.
 .IP SHELL
 Used on VMS when trying to detect if using a **DCL** or a **unix** shell.
 .IP "SSL_CERT_DIR <dir>"
-If set, it is used as the --capath value.
+If set, it is used as the --capath value. This environment variable is ignored
+if Schannel is used as the TLS backend.
 .IP "SSL_CERT_FILE <path>"
-If set, it is used as the --cacert value.
+If set, it is used as the --cacert value. This environment variable is ignored
+if Schannel is used as the TLS backend.
 .IP "SSLKEYLOGFILE <file name>"
 If you set this environment variable to a file name, curl stores TLS secrets
 from its connections in that file when invoked to enable you to analyze the

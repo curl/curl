@@ -15,9 +15,9 @@ may contain multiple CA certificates. The certificate(s) must be in PEM
 format. Normally curl is built to use a default file for this, so this option
 is typically used to alter that default file.
 
-curl recognizes the environment variable named 'CURL_CA_BUNDLE' if it is
-set, and uses the given path as a path to a CA cert bundle. This option
-overrides that variable.
+curl recognizes the environment variable named 'CURL_CA_BUNDLE' if it is set
+and the TLS backend is not Schannel, and uses the given path as a path to a CA
+cert bundle. This option overrides that variable.
 
 The windows version of curl automatically looks for a CA certs file named
 'curl-ca-bundle.crt', either in the same directory as curl.exe, or in the

@@ -103,9 +103,9 @@ server, do one of the following:
        certificate store or use it stand-alone as described. Just remember that
        the security is no better than the way you obtained the certificate.
 
- 4. If you are using the curl command line tool, you can specify your own CA
-    cert file by setting the environment variable `CURL_CA_BUNDLE` to the path
-    of your choice.
+ 4. If you are using the curl command line tool and the TLS backend is not
+    Schannel then you can specify your own CA cert file by setting the
+    environment variable `CURL_CA_BUNDLE` to the path of your choice.
 
     If you are using the curl command line tool on Windows, curl will search
     for a CA cert file named "curl-ca-bundle.crt" in these directories and in
