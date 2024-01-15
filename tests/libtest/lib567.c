@@ -49,6 +49,7 @@ int test(char *URL)
   /* Dump data to stdout for protocol verification */
   test_setopt(curl, CURLOPT_HEADERDATA, stdout);
   test_setopt(curl, CURLOPT_WRITEDATA, stdout);
+  test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   test_setopt(curl, CURLOPT_URL, URL);
   test_setopt(curl, CURLOPT_RTSP_STREAM_URI, URL);
