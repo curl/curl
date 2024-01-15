@@ -822,11 +822,10 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
 
     if(!rtspc->in_header) {
       /* If header parsing is done, extract interleaved RTP messages */
-      if((data->set.rtspreq == RTSPREQ_DESCRIBE) && (data->req.size <= -1)) {
+      if(data->req.size <= -1) {
         /* Respect section 4.4 of rfc2326: If the Content-Length header is
-           absent, a length 0 must be assumed.  It will prevent libcurl from
-           hanging on DESCRIBE request that got refused for whatever
-           reason */
+           absent, a length 0 must be assumed. */
+        data->req.size = 0;
         data->req.download_done = TRUE;
       }
       result = rtsp_filter_rtp(data, buf, blen, &consumed);
@@ -838,13 +837,16 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
 
   if(rtspc->state != RTP_PARSE_SKIP)
     *done = FALSE;
-  /* we MUST have consumed all bytes */
-  DEBUGF(infof(data, "rtsp_rtp_write_resp(len=%zu, in_header=%d, done=%d)",
-               blen, rtspc->in_header, *done));
-  DEBUGASSERT(blen == 0);
-  if(!result && is_eos) {
-    result = Curl_client_write(data, CLIENTWRITE_BODY|CLIENTWRITE_EOS,
-                               (char *)buf, 0);
+  /* we SHOULD have consumed all bytes, unless the response is borked.
+   * In which case we write out the left over bytes, letting the client
+   * writer deal with it (it will report EXCESS and fail the transfer). */
+  DEBUGF(infof(data, "rtsp_rtp_write_resp(len=%zu, in_header=%d, done=%d "
+               " rtspc->state=%d, req.size=%" CURL_FORMAT_CURL_OFF_T ")",
+               blen, rtspc->in_header, *done, rtspc->state, data->req.size));
+  if(!result && (is_eos || blen)) {
+    result = Curl_client_write(data, CLIENTWRITE_BODY|
+                               (is_eos? CLIENTWRITE_EOS:0),
+                               (char *)buf, blen);
   }
 
 out:
