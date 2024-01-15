@@ -225,6 +225,10 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
       dec->payload_len = (dec->head[2] << 8) | dec->head[3];
       break;
     case 10:
+      if(dec->head[2] > 127) {
+        failf(data, "WS: frame length longer than 64 signed not supported");
+        return CURLE_RECV_ERROR;
+      }
       dec->payload_len = ((curl_off_t)dec->head[2] << 56) |
         (curl_off_t)dec->head[3] << 48 |
         (curl_off_t)dec->head[4] << 40 |
@@ -409,6 +413,13 @@ static ssize_t ws_enc_write_head(struct Curl_easy *data,
   unsigned char head[14];
   size_t hlen;
   ssize_t n;
+
+  if(payload_len < 0) {
+    failf(data, "WS: starting new frame with negative payload length %"
+                CURL_FORMAT_CURL_OFF_T, payload_len);
+    *err = CURLE_SEND_ERROR;
+    return -1;
+  }
 
   if(enc->payload_remain > 0) {
     /* trying to write a new frame before the previous one is finished */
