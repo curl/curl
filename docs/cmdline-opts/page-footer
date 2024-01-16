@@ -77,7 +77,6 @@ Used on VMS when trying to detect if using a **DCL** or a **unix** shell.
 .IP "SSL_CERT_DIR <dir>"
 If set, it is used as the --capath value. This environment variable is ignored
 if Schannel is used as the TLS backend.
-backend.)
 .IP "SSL_CERT_FILE <path>"
 If set, it is used as the --cacert value. This environment variable is ignored
 if Schannel is used as the TLS backend.
