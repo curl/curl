@@ -75,11 +75,12 @@ files can become rather large. Works with the ngtcp2 and quiche QUIC backends.
 .IP SHELL
 Used on VMS when trying to detect if using a **DCL** or a **unix** shell.
 .IP "SSL_CERT_DIR <dir>"
-If set, it is used as the --capath value. (Unless Schannel is used as TLS
+If set, it is used as the --capath value. This environment variable is ignored
+if Schannel is used as the TLS backend.
 backend.)
 .IP "SSL_CERT_FILE <path>"
-If set, it is used as the --cacert value. (Unless Schannel is used as TLS
-backend.)
+If set, it is used as the --cacert value. This environment variable is ignored
+if Schannel is used as the TLS backend.
 .IP "SSLKEYLOGFILE <file name>"
 If you set this environment variable to a file name, curl stores TLS secrets
 from its connections in that file when invoked to enable you to analyze the
