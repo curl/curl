@@ -31,6 +31,7 @@ upgrade
 <features>
 debug
 ws
+!hyper
 </features>
 <server>
 http
