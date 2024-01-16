@@ -54,14 +54,6 @@ extern const struct Curl_handler Curl_handler_http;
 extern const struct Curl_handler Curl_handler_https;
 #endif
 
-#ifdef USE_WEBSOCKETS
-extern const struct Curl_handler Curl_handler_ws;
-
-#ifdef USE_SSL
-extern const struct Curl_handler Curl_handler_wss;
-#endif
-#endif /* websockets */
-
 struct dynhds;
 
 CURLcode Curl_bump_headersize(struct Curl_easy *data,
@@ -147,9 +139,17 @@ CURLcode Curl_http_firstwrite(struct Curl_easy *data,
                               bool *done);
 
 /* protocol-specific functions set up to be called by the main engine */
+CURLcode Curl_http_setup_conn(struct Curl_easy *data,
+                              struct connectdata *conn);
 CURLcode Curl_http(struct Curl_easy *data, bool *done);
 CURLcode Curl_http_done(struct Curl_easy *data, CURLcode, bool premature);
 CURLcode Curl_http_connect(struct Curl_easy *data, bool *done);
+int Curl_http_getsock_do(struct Curl_easy *data, struct connectdata *conn,
+                         curl_socket_t *socks);
+CURLcode Curl_http_write_resp(struct Curl_easy *data,
+                              const char *buf, size_t blen,
+                              bool is_eos,
+                              bool *done);
 
 /* These functions are in http.c */
 CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
