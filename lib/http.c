@@ -100,29 +100,14 @@
  * Forward declarations.
  */
 
-static int http_getsock_do(struct Curl_easy *data,
-                           struct connectdata *conn,
-                           curl_socket_t *socks);
 static bool http_should_fail(struct Curl_easy *data);
-
-static CURLcode http_setup_conn(struct Curl_easy *data,
-                                struct connectdata *conn);
-static CURLcode http_write_resp(struct Curl_easy *data,
-                                const char *buf, size_t blen,
-                                bool is_eos,
-                                bool *done);
-
-#ifdef USE_WEBSOCKETS
-static CURLcode ws_setup_conn(struct Curl_easy *data,
-                              struct connectdata *conn);
-#endif
 
 /*
  * HTTP handler interface.
  */
 const struct Curl_handler Curl_handler_http = {
   "HTTP",                               /* scheme */
-  http_setup_conn,                      /* setup_connection */
+  Curl_http_setup_conn,                 /* setup_connection */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
@@ -130,11 +115,11 @@ const struct Curl_handler Curl_handler_http = {
   ZERO_NULL,                            /* connecting */
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
-  http_getsock_do,                      /* doing_getsock */
+  Curl_http_getsock_do,                 /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
-  http_write_resp,                      /* write_resp */
+  Curl_http_write_resp,                 /* write_resp */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_HTTP,                            /* defport */
@@ -144,39 +129,13 @@ const struct Curl_handler Curl_handler_http = {
   PROTOPT_USERPWDCTRL
 };
 
-#ifdef USE_WEBSOCKETS
-const struct Curl_handler Curl_handler_ws = {
-  "WS",                                 /* scheme */
-  ws_setup_conn,                        /* setup_connection */
-  Curl_http,                            /* do_it */
-  Curl_http_done,                       /* done */
-  ZERO_NULL,                            /* do_more */
-  Curl_http_connect,                    /* connect_it */
-  ZERO_NULL,                            /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_getsock */
-  http_getsock_do,                      /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
-  Curl_ws_disconnect,                   /* disconnect */
-  http_write_resp,                      /* write_resp */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  PORT_HTTP,                            /* defport */
-  CURLPROTO_WS,                         /* protocol */
-  CURLPROTO_HTTP,                       /* family */
-  PROTOPT_CREDSPERREQUEST |             /* flags */
-  PROTOPT_USERPWDCTRL
-};
-#endif
-
 #ifdef USE_SSL
 /*
  * HTTPS handler interface.
  */
 const struct Curl_handler Curl_handler_https = {
   "HTTPS",                              /* scheme */
-  http_setup_conn,                      /* setup_connection */
+  Curl_http_setup_conn,                 /* setup_connection */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
@@ -184,11 +143,11 @@ const struct Curl_handler Curl_handler_https = {
   NULL,                                 /* connecting */
   ZERO_NULL,                            /* doing */
   NULL,                                 /* proto_getsock */
-  http_getsock_do,                      /* doing_getsock */
+  Curl_http_getsock_do,                 /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
-  http_write_resp,                      /* write_resp */
+  Curl_http_write_resp,                 /* write_resp */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_HTTPS,                           /* defport */
@@ -198,36 +157,10 @@ const struct Curl_handler Curl_handler_https = {
   PROTOPT_USERPWDCTRL
 };
 
-#ifdef USE_WEBSOCKETS
-const struct Curl_handler Curl_handler_wss = {
-  "WSS",                                /* scheme */
-  ws_setup_conn,                        /* setup_connection */
-  Curl_http,                            /* do_it */
-  Curl_http_done,                       /* done */
-  ZERO_NULL,                            /* do_more */
-  Curl_http_connect,                    /* connect_it */
-  NULL,                                 /* connecting */
-  ZERO_NULL,                            /* doing */
-  NULL,                                 /* proto_getsock */
-  http_getsock_do,                      /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
-  Curl_ws_disconnect,                   /* disconnect */
-  http_write_resp,                      /* write_resp */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  PORT_HTTPS,                           /* defport */
-  CURLPROTO_WSS,                        /* protocol */
-  CURLPROTO_HTTP,                       /* family */
-  PROTOPT_SSL | PROTOPT_CREDSPERREQUEST | /* flags */
-  PROTOPT_USERPWDCTRL
-};
 #endif
 
-#endif
-
-static CURLcode http_setup_conn(struct Curl_easy *data,
-                                struct connectdata *conn)
+CURLcode Curl_http_setup_conn(struct Curl_easy *data,
+                              struct connectdata *conn)
 {
   /* allocate the HTTP-specific struct for the Curl_easy, only to survive
      during this request */
@@ -249,16 +182,6 @@ static CURLcode http_setup_conn(struct Curl_easy *data,
 
   return CURLE_OK;
 }
-
-#ifdef USE_WEBSOCKETS
-static CURLcode ws_setup_conn(struct Curl_easy *data,
-                              struct connectdata *conn)
-{
-  /* websockets is 1.1 only (for now) */
-  data->state.httpwant = CURL_HTTP_VERSION_1_1;
-  return http_setup_conn(data, conn);
-}
-#endif
 
 #ifndef CURL_DISABLE_PROXY
 /*
@@ -1594,9 +1517,9 @@ CURLcode Curl_http_connect(struct Curl_easy *data, bool *done)
 /* this returns the socket to wait for in the DO and DOING state for the multi
    interface and then we're always _sending_ a request and thus we wait for
    the single socket to become writable only */
-static int http_getsock_do(struct Curl_easy *data,
-                           struct connectdata *conn,
-                           curl_socket_t *socks)
+int Curl_http_getsock_do(struct Curl_easy *data,
+                         struct connectdata *conn,
+                         curl_socket_t *socks)
 {
   /* write mode */
   (void)conn;
@@ -4133,11 +4056,10 @@ static CURLcode http_rw_headers(struct Curl_easy *data,
             if(result)
               return result;
             k->header = FALSE; /* no more header to parse! */
-            if(data->set.connect_only) {
+            *pconsumed += blen; /* ws accept handled the data */
+            blen = 0;
+            if(data->set.connect_only)
               k->keepon &= ~KEEP_RECV; /* read no more content */
-              *pconsumed += blen;
-              blen = 0;
-            }
           }
 #endif
           else {
@@ -4611,10 +4533,10 @@ CURLcode Curl_http_write_resp_hds(struct Curl_easy *data,
   }
 }
 
-static CURLcode http_write_resp(struct Curl_easy *data,
-                                const char *buf, size_t blen,
-                                bool is_eos,
-                                bool *done)
+CURLcode Curl_http_write_resp(struct Curl_easy *data,
+                              const char *buf, size_t blen,
+                              bool is_eos,
+                              bool *done)
 {
   CURLcode result;
   size_t consumed;
