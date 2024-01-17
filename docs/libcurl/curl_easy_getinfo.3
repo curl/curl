@@ -190,16 +190,16 @@ See \fICURLINFO_OS_ERRNO(3)\fP
 Number of new successful connections used for previous transfer.
 See \fICURLINFO_NUM_CONNECTS(3)\fP
 .IP CURLINFO_PRIMARY_IP
-IP address of the last connection.
+Destination IP address of the last connection.
 See \fICURLINFO_PRIMARY_IP(3)\fP
 .IP CURLINFO_PRIMARY_PORT
-Port of the last connection.
+Destination port of the last connection.
 See \fICURLINFO_PRIMARY_PORT(3)\fP
 .IP CURLINFO_LOCAL_IP
-Local-end IP address of last connection.
+Source IP address of the last connection.
 See \fICURLINFO_LOCAL_IP(3)\fP
 .IP CURLINFO_LOCAL_PORT
-Local-end port of last connection.
+Source port number of the last connection.
 See \fICURLINFO_LOCAL_PORT(3)\fP
 .IP CURLINFO_COOKIELIST
 List of all known cookies.
@@ -257,7 +257,7 @@ See \fICURLINFO_CONN_ID(3)\fP
 The ID of the transfer. (Added in 8.2.0)
 See \fICURLINFO_XFER_ID(3)\fP
 .SH TIMES
-An overview of the six time values available from \fIcurl_easy_getinfo(3)\fP
+An overview of the time values available from \fIcurl_easy_getinfo(3)\fP
 .nf
 
 curl_easy_perform()
