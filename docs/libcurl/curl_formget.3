@@ -32,13 +32,14 @@ int curl_formget(struct curl_httppost * form, void *userp,
                  curl_formget_callback append);
 .fi
 .SH DESCRIPTION
-curl_formget() is used to serialize data previously built/appended with
-\fIcurl_formadd(3)\fP. Accepts a void pointer as second argument named
-\fIuserp\fP which is passed as the first argument to the curl_formget_callback
-function.
+curl_formget() serializes data previously built with \fIcurl_formadd(3)\fP. It
+accepts a void pointer as second argument named \fIuserp\fP which is passed as
+the first argument to the curl_formget_callback function.
 
-.BI "typedef size_t (*curl_formget_callback)(void *" userp, " const char *" buf,
-.BI " size_t " len ");"
+.nf
+ typedef size_t (*curl_formget_callback)(void *userp, const char *buf,
+                                         size_t len);"
+.fi
 
 The curl_formget_callback is invoked for each part of the HTTP POST chain. The
 character buffer passed to the callback must not be freed. The callback should

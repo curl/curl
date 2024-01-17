@@ -597,13 +597,13 @@ from doing a POST. It just makes it POST without any data to send!
 
 .SH "Converting from deprecated form API to MIME API"
 Four rules have to be respected in building the multi-part:
-.br
+
 - The easy handle must be created before building the multi-part.
-.br
+
 - The multi-part is always created by a call to curl_mime_init(handle).
-.br
+
 - Each part is created by a call to curl_mime_addpart(multipart).
-.br
+
 - When complete, the multi-part must be bound to the easy handle using
 \fICURLOPT_MIMEPOST(3)\fP instead of \fICURLOPT_HTTPPOST(3)\fP.
 
