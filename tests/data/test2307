@@ -63,9 +63,9 @@ Sec-WebSocket-Key: NDMyMTUzMjE2MzIxNzMyMQ==
 
 
 </protocol>
-# 23 == CURLE_WRITE_ERROR
+# 56 == CURLE_RECV_ERROR
 <errorcode>
-23
+56
 </errorcode>
 </verify>
 </testcase>
