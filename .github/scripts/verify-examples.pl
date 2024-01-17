@@ -91,12 +91,20 @@ sub extract {
     return ($fail ? 0 : $l);
 }
 
+my $count;
 for my $m (@files) {
-    print "Verify $m\n";
+    #print "Verify $m\n";
     my $out = extract($m);
     if($out) {
       $error |= testcompile($m);
       $error |= checksrc($m);
     }
+    $count++;
+}
+if(!$error) {
+    print "Verified $count man pages ok\n";
+}
+else {
+    print "Detected problems\n";
 }
 exit $error;

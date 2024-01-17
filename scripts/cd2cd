@@ -1,0 +1,226 @@
+#!/usr/bin/env perl
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
+#
+###########################################################################
+
+=begin comment
+
+This script updates a curldown file to current/better curldown.
+
+Example: cd2cd [--in-place] <file.md> > <file.md>
+
+--in-place: if used, it replaces the original file with the cleaned up
+            version. When this is used, cd2cd accepts multiple files to work
+            on and it ignores errors on single files.
+
+=end comment
+=cut
+
+my $cd2cd = "0.1"; # to keep check
+my $dir;
+my $extension;
+my $inplace = 0;
+
+while(1) {
+    if($ARGV[0] eq "--in-place") {
+        shift @ARGV;
+        $inplace = 1;
+    }
+    else {
+        last;
+    }
+}
+
+
+use POSIX qw(strftime);
+my @ts;
+if (defined($ENV{SOURCE_DATE_EPOCH})) {
+    @ts = localtime($ENV{SOURCE_DATE_EPOCH});
+} else {
+    @ts = localtime;
+}
+my $date = strftime "%B %d %Y", @ts;
+
+sub outseealso {
+    my (@sa) = @_;
+    my $comma = 0;
+    my @o;
+    push @o, ".SH SEE ALSO\n";
+    for my $s (sort @sa) {
+        push @o, sprintf "%s.BR $s", $comma ? ",\n": "";
+        $comma = 1;
+    }
+    push @o, "\n";
+    return @o;
+}
+
+sub single {
+    my @head;
+    my @seealso;
+    my ($f)=@_;
+    my $title;
+    my $section;
+    my $source;
+    my $start = 0;
+    my $d;
+    my $line = 0;
+    open(F, "<:crlf", "$f") ||
+        return 1;
+    while(<F>) {
+        $line++;
+        $d = $_;
+        if(!$start) {
+            if(/^---/) {
+                # header starts here
+                $start = 1;
+                push @head, $d;
+            }
+            next;
+        }
+        if(/^Title: *(.*)/i) {
+            $title=$1;
+        }
+        elsif(/^Section: *(.*)/i) {
+            $section=$1;
+        }
+        elsif(/^Source: *(.*)/i) {
+            $source=$1;
+        }
+        elsif(/^See-also: +(.*)/i) {
+            $salist = 0;
+            push @seealso, $1;
+        }
+        elsif(/^See-also: */i) {
+            if($seealso[0]) {
+                print STDERR "$f:$line:1:ERROR: bad See-Also, needs list\n";
+                return 2;
+            }
+            $salist = 1;
+        }
+        elsif(/^ +- (.*)/i) {
+            # the only list we support is the see-also
+            if($salist) {
+                push @seealso, $1;
+            }
+        }
+        # REUSE-IgnoreStart
+        elsif(/^C: (.*)/i) {
+            $copyright=$1;
+        }
+        elsif(/^SPDX-License-Identifier: (.*)/i) {
+            $spdx=$1;
+        }
+        # REUSE-IgnoreEnd
+        elsif(/^---/) {
+            # end of the header section
+            if(!$title) {
+                print STDERR "ERROR: no 'Title:' in $f\n";
+                return 1;
+            }
+            if(!$section) {
+                print STDERR "ERROR: no 'Section:' in $f\n";
+                return 2;
+            }
+            if(!$seealso[0]) {
+                print STDERR "$f:$line:1:ERROR: no 'See-also:' present\n";
+                return 2;
+            }
+            if(!$copyright) {
+                print STDERR "$f:$line:1:ERROR: no 'C:' field present\n";
+                return 2;
+            }
+            if(!$spdx) {
+                print STDERR "$f:$line:1:ERROR: no 'SPDX-License-Identifier:' field present\n";
+                return 2;
+            }
+            last;
+        }
+        else {
+            chomp;
+            print STDERR "WARN: unrecognized line in $f, ignoring:\n:'$_';"
+        }
+    }
+
+    if(!$start) {
+        print STDERR "$f:$line:1:ERROR: no header present\n";
+        return 2;
+    }
+
+    my @desc;
+
+    push @desc, sprintf <<HEAD
+---
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
+Title: $title
+Section: $section
+Source: $source
+HEAD
+        ;
+    push @desc, "See-also:\n";
+    for my $s (sort @seealso) {
+        push @desc, "  - $s\n" if($s);
+    }
+    push @desc, "---\n";
+
+    my $blankline = 0;
+    while(<F>) {
+        $d = $_;
+        $line++;
+        if($d =~ /^[ \t]*\n/) {
+            $blankline++;
+        }
+        else {
+            $blankline = 0;
+        }
+        # *italics* for curl symbol links get the asterisks removed
+        $d =~ s/\*((lib|)curl[^ ]*\(3\))\*/$1/gi;
+
+        if(length($d) > 90) {
+            print STDERR "$f:$line:1:WARN: excessive line length\n";
+        }
+
+        push @desc, $d if($blankline < 2);
+    }
+    close(F);
+
+    if($inplace) {
+        open(O, ">$f") || return 1;
+        print O @desc;
+        close(O);
+    }
+    else {
+        print @desc;
+    }
+    return 0;
+}
+
+if($inplace) {
+    for my $a (@ARGV) {
+        # this ignores errors
+        single($a);
+    }
+}
+else {
+    exit single($ARGV[0]);
+}

@@ -1,0 +1,193 @@
+#!/usr/bin/env perl
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
+#
+###########################################################################
+
+=begin comment
+
+This script converts an nroff file to curldown
+
+Example: cd2nroff [options] <file.md> > <file.3>
+
+Note: when converting .nf sections, this tool does not know if the
+section is code or just regular quotes. It then assumes and uses ~~~c
+for code.
+
+=end comment
+=cut
+
+my $nroff2cd = "0.1"; # to keep check
+
+sub single {
+    my ($f)=@_;
+    open(F, "<:crlf", "$f") ||
+        return 1;
+    my $line;
+    my $title;
+    my $section;
+    my $source;
+    my @seealso;
+    my @desc;
+    my $header; # non-zero when TH is passed
+    my $quote = 0; # quote state
+    while(<F>) {
+        $line++;
+        my $d = $_;
+        if($_ =~ /^.\\\"/) {
+            # a comment we can ignore
+            next;
+        }
+        if(!$header) {
+            if($d =~ /.so (.*)/) {
+                # this is basically an include, so do that
+                my $f = $1;
+                # remove leading directory
+                $f =~ s/(.*?\/)//;
+                close(F);
+                open(F, "<:crlf", "$f") || return 1;
+            }
+            if($d =~ /^\.TH ([^ ]*) (\d) \"(.*?)\" ([^ \n]*)/) {
+                # header, this needs to be the first thing after leading comments
+                $title = $1;
+                $section = $2;
+                # date is $3
+                $source = $4;
+                # if there are enclosing quotes around source, remove them
+                $source =~ s/[\"\'](.*)[\"\']\z/$1/;
+                $header = 1;
+
+            print <<HEAD
+---
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
+Title: $title
+Section: $section
+Source: $source
+HEAD
+                ;
+            }
+            next;
+        }
+
+        if($quote) {
+            if($d =~ /^\.SH/) {
+                #end of quote without an .fi
+                $quote = 0;
+                push @desc, "~~~\n";
+            }
+            elsif($d =~ /^\.fi/) {
+                #end of quote
+                $quote = 0;
+                push @desc, "~~~\n";
+                next;
+            }
+            else {
+                # double-backslashes converted to single ones
+                $d =~ s/\\\\/\\/g;
+                push @desc, $d;
+                next;
+            }
+        }
+        if($d =~ /^\.SH (.*)/) {
+            my $word = $1;
+            # if there are enclosing quotes, remove them first
+            $word =~ s/[\"\'](.*)[\"\']\z/$1/;
+            if($word eq "SEE ALSO") {
+                # we just slurp up this section
+                next;
+            }
+            push @desc, "\n# $word\n\n";
+        }
+        elsif($d =~ /^\.(RS|RE)/) {
+            # ignore these
+        }
+        elsif($d =~ /^\.IP (.*)/) {
+            my $word = $1;
+            # if there are enclosing quotes, remove them first
+            $word =~ s/[\"\'](.*)[\"\']\z/$1/;
+            push @desc, "\n## $word\n\n";
+        }
+        elsif($d =~ /^\.IP/) {
+            # .IP with no text we just skip
+        }
+        elsif($d =~ /^\.BR (.*)/) {
+            # only used for SEE ALSO
+            my $word = $1;
+            # remove trailing comma
+            $word =~ s/,\z//;
+
+            for my $s (split(/,/, $word)) {
+                # remove all double quotes
+                $s =~ s/\"//g;
+                # tream leading whitespace
+                $s =~ s/^ +//g;
+                push @seealso, $s;
+            }
+        }
+        elsif($d =~ /^\.I (.*)/) {
+            push @desc, "*$1*\n";
+        }
+        elsif($d =~ /^\.B (.*)/) {
+            push @desc, "**$1**\n";
+        }
+        elsif($d =~ /^\.nf/) {
+            push @desc, "~~~c\n";
+            $quote = 1;
+        }
+        else {
+            # embolden
+            $d =~ s/\\fB(.*?)\\fP/**$1**/g;
+            # links to "curl.*()" are left bare since cd2nroff handles them
+            # specially
+            $d =~ s/\\fI(curl.*?\(3\))\\fP/$1/ig;
+            # emphasize
+            $d =~ s/\\fI(.*?)\\fP/*$1*/g;
+            # emphasize on a split line
+            $d =~ s/\\fI/*/g;
+            # bold on a split line
+            $d =~ s/\\fB/**/g;
+            # remove backslash amp
+            $d =~ s/\\&//g;
+            # remove backslashes
+            $d =~ s/\\//g;
+            # fix single quotes
+            $d =~ s/\(aq/'/g;
+            # fix double quotes
+            $d =~ s/\(dq/\"/g;
+            push @desc, $d;
+        }
+    }
+    close(F);
+
+    print "See-also:\n";
+    for my $s (sort @seealso) {
+        print "  - $s\n" if($s);
+    }
+    print "---\n";
+    print @desc;
+
+    return !$header;
+}
+
+exit single($ARGV[0]);
+

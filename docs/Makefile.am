@@ -26,24 +26,21 @@ AUTOMAKE_OPTIONS = foreign no-dependencies
 
 # EXTRA_DIST breaks with $(abs_builddir) so build it using this variable
 # but distribute it (using the relative file name) in the next variable
-man_MANS = $(abs_builddir)/curl.1
+man_MANS = $(abs_builddir)/curl.1 mk-ca-bundle.1
 noinst_man_MANS = curl.1 mk-ca-bundle.1
 dist_man_MANS = curl-config.1
-GENHTMLPAGES = curl.html curl-config.html mk-ca-bundle.html
-PDFPAGES = curl.pdf curl-config.pdf mk-ca-bundle.pdf
-MANDISTPAGES = curl.1.dist curl-config.1.dist
-
-HTMLPAGES = $(GENHTMLPAGES)
+CURLPAGES = curl-config.md mk-ca-bundle.md
 
 # Build targets in this file (.) before cmdline-opts to ensure that
 # the curl.1 rule below runs first
-SUBDIRS = . cmdline-opts
-DIST_SUBDIRS = $(SUBDIRS) examples libcurl
+SUBDIRS = . cmdline-opts libcurl
+DIST_SUBDIRS = $(SUBDIRS) examples
 
-CLEANFILES = $(GENHTMLPAGES) $(PDFPAGES) $(MANDISTPAGES) curl.1
+CLEANFILES = $(man_MANS) curl.1 curl-config.1 mk-ca-bundle.1
+nodist_MANS = $(CLEANFILES)
 
 EXTRA_DIST =                                    \
- $(noinst_man_MANS)                             \
+ $(CURLPAGES)                                   \
  ALTSVC.md                                      \
  BINDINGS.md                                    \
  BUFREF.md                                      \
@@ -59,6 +56,7 @@ EXTRA_DIST =                                    \
  CONNECTION-FILTERS.md                          \
  CONTRIBUTE.md                                  \
  CURL-DISABLE.md                                \
+ CURLDOWN.md                                    \
  DEPRECATE.md                                   \
  DYNBUF.md                                      \
  EARLY-RELEASE.md                               \
@@ -98,9 +96,14 @@ EXTRA_DIST =                                    \
  VULN-DISCLOSURE-POLICY.md                      \
  WEBSOCKET.md
 
-MAN2HTML= roffit $< >$@
+CD2NROFF = $(top_srcdir)/scripts/cd2nroff $< >$@
 
-SUFFIXES = .1 .html .pdf
+CD2 = $(CD2_$(V))
+CD2_0 = @echo "  RENDER " $@;
+CD2_1 =
+CD2_ = $(CD2_0)
+
+SUFFIXES = .1 .md
 
 # $(abs_builddir) is to disable VPATH when searching for this file, which
 # would otherwise find the copy in $(srcdir) which breaks the $(HUGE)
@@ -116,21 +119,10 @@ $(abs_builddir)/curl.1:
 		&& touch -r "$(srcdir)/curl.1" $@; fi
 	cd cmdline-opts && $(MAKE)
 
-html: $(HTMLPAGES)
-	cd libcurl && $(MAKE) html
+.md.1:
+	$(CD2)$(CD2NROFF)
 
-pdf: $(PDFPAGES)
-	cd libcurl && $(MAKE) pdf
-
-.1.html:
-	$(MAN2HTML)
-
-.1.pdf:
-	@(foo=`echo $@ | sed -e 's/\.[0-9]$$//g'`; \
-	groff -Tps -man $< >$$foo.ps; \
-	ps2pdf $$foo.ps $@; \
-	rm $$foo.ps; \
-	echo "converted $< to $@")
+curl-config.1: curl-config.md
 
 distclean:
 	rm -f $(CLEANFILES)

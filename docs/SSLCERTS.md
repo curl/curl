@@ -116,10 +116,10 @@ server, do one of the following:
       4. Windows Directory (e.g. C:\windows)
       5. all directories along %PATH%
 
- 5. Get a better/different/newer CA cert bundle! One option is to extract the
-    one a recent Firefox browser uses by running 'make ca-bundle' in the curl
-    build tree root, or possibly download a version that was generated this
-    way for you: [CA Extract](https://curl.se/docs/caextract.html)
+ 5. Get another CA cert bundle. One option is to extract the one a recent
+    Firefox browser uses by running 'make ca-bundle' in the curl build tree
+    root, or possibly download a version that was generated this way for you:
+    [CA Extract](https://curl.se/docs/caextract.html)
 
 Neglecting to use one of the above methods when dealing with a server using a
 certificate that is not signed by one of the certificates in the installed CA

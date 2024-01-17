@@ -28,5 +28,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: render nroff versions
+        run: autoreconf -fi && ./configure --without-ssl --without-libpsl && make -C docs
+
       - name: verify examples
         run: ./.github/scripts/verify-examples.pl docs/libcurl/curl*.3 docs/libcurl/opts/*.3

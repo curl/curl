@@ -153,12 +153,6 @@ dist-hook:
 	  cp -p $$file $(distdir)$$strip; \
 	done)
 
-html:
-	cd docs && $(MAKE) html
-
-pdf:
-	cd docs && $(MAKE) pdf
-
 check: test examples check-docs
 
 if CROSSCOMPILING
