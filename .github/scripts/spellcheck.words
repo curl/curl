@@ -83,6 +83,7 @@ CCC
 CDN
 CentOS
 CFLAGS
+cflags
 CGI's
 CHACHA
 chacha
@@ -138,10 +139,11 @@ cshrc
 CTRL
 cURL
 CURLcode
+curldown
 CURLE
 CURLH
-CURLINFO
 curlimages
+CURLINFO
 curlrc
 curltest
 customizable
@@ -161,8 +163,8 @@ deepcode
 DELE
 DER
 deselectable
-Deserialized
 deserialization
+Deserialized
 destructor
 detections
 dev
@@ -350,11 +352,10 @@ interoperable
 interoperates
 IoT
 ipadOS
-IPFS
-IPNS
-ipld
-trustless
 IPCXN
+IPFS
+ipld
+IPNS
 IPv
 IPv4
 IPv4/6
@@ -804,6 +805,7 @@ TPF
 TrackMemory
 transcode
 Tru
+trustless
 Tse
 Tsujikawa
 TTL
@@ -826,6 +828,7 @@ unencoded
 unencrypted
 unescape
 Unglobbed
+Unicode
 UNICOS
 unix
 UnixSockets

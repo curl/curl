@@ -28,53 +28,27 @@ SUBDIRS = opts
 
 include Makefile.inc
 
-man_DISTMANS = $(man_MANS:.3=.3.dist)
-
-HTMLPAGES = $(man_MANS:.3=.html)
-
-PDFPAGES = $(man_MANS:.3=.pdf)
+CURLPAGES = $(man_MANS:.3=.md)
 
 m4macrodir = $(datadir)/aclocal
 dist_m4macro_DATA = libcurl.m4
 
-CLEANFILES = $(HTMLPAGES) $(PDFPAGES) $(TESTS) $(man_DISTMANS) \
-  libcurl-symbols.3
+CLEANFILES = $(man_MANS) libcurl-symbols.md
+nodist_MANS = $(man_MANS)
 
-EXTRA_DIST = $(man_MANS) ABI.md symbols-in-versions symbols.pl  \
+EXTRA_DIST = $(CURLPAGES) ABI.md symbols-in-versions symbols.pl  \
   mksymbolsmanpage.pl CMakeLists.txt
-MAN2HTML= roffit --mandir=. $< >$@
 
-SUFFIXES = .3 .html
+CD2NROFF = $(top_srcdir)/scripts/cd2nroff $< >$@
+CD2 = $(CD2_$(V))
+CD2_0 = @echo "  RENDER " $@;
+CD2_1 =
+CD2_ = $(CD2_0)
 
-libcurl-symbols.3: $(srcdir)/symbols-in-versions $(srcdir)/mksymbolsmanpage.pl
-	perl $(srcdir)/mksymbolsmanpage.pl < $(srcdir)/symbols-in-versions > $@
+SUFFIXES = .3 .md
 
-html: $(HTMLPAGES)
-	cd opts && $(MAKE) html
+libcurl-symbols.md: $(srcdir)/symbols-in-versions $(srcdir)/mksymbolsmanpage.pl
+	$(CD2)perl $(srcdir)/mksymbolsmanpage.pl < $(srcdir)/symbols-in-versions > $@
 
-.3.html:
-	$(MAN2HTML)
-
-pdf: $(PDFPAGES)
-	cd opts && $(MAKE) pdf
-
-.3.pdf:
-	@(foo=`echo $@ | sed -e 's/\.[0-9]$$//g'`; \
-	groff -Tps -man $< >$$foo.ps; \
-	ps2pdf $$foo.ps $@; \
-	rm $$foo.ps; \
-	echo "converted $< to $@")
-
-# Make sure each option man page is referenced in the main man page
-TESTS = check-easy check-multi
-LOG_COMPILER = $(PERL)
-# The test fails if the log file contains any text
-AM_LOG_FLAGS = -p -e 'die "$$_" if ($$_);'
-
-check-easy: $(srcdir)/curl_easy_setopt.3 $(srcdir)/opts/CURLOPT*.3
-	OPTS="$$(ls $(srcdir)/opts/CURLOPT*.3 | $(SED) -e 's,^.*/,,' -e 's,\.3$$,,')" && \
-	for opt in $$OPTS; do grep "^\.IP $$opt$$" $(srcdir)/curl_easy_setopt.3 >/dev/null || echo Missing $$opt; done > $@
-
-check-multi: $(srcdir)/curl_multi_setopt.3 $(srcdir)/opts/CURLMOPT*.3
-	OPTS="$$(ls $(srcdir)/opts/CURLMOPT*.3 | $(SED) -e 's,^.*/,,' -e 's,\.3$$,,')" && \
-	for opt in $$OPTS; do grep "^\.IP $$opt$$" $(srcdir)/curl_multi_setopt.3 >/dev/null || echo Missing $$opt; done > $@
+.md.3:
+	$(CD2)$(CD2NROFF)

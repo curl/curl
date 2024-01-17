@@ -116,7 +116,7 @@ features are working as they are supposed to. To maintain this situation and
 improve it, all new features and functions that are added need to be tested
 in the test suite. Every feature that is added should get at least one valid
 test case that verifies that it works as documented. If every submitter also
-posts a few test cases, it will not end up as a heavy burden on a single person!
+posts a few test cases, it will not end up as a heavy burden on a single person.
 
 If you do not have test cases or perhaps you have done something that is hard
 to write tests for, do explain exactly how you have otherwise tested and

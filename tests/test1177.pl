@@ -44,7 +44,7 @@ while(<$m>) {
     if($_ =~ / mask bit: (CURL_VERSION_[A-Z0-9_]+)/i) {
         $manversion{$1}++;
     }
-    if($_ =~ /^\.ip """([^"]+)"""/i) {
+    if($_ =~ /^\.ip (.*)/i) {
         $manname{$1}++;
     }
 }
@@ -85,7 +85,7 @@ for my $n (keys %sourcename) {
     }
 }
 for my $n (keys %manname) {
-    if(!$sourcename{$n}) {
+    if(!$sourcename{$n} && ($n ne "\"no name\"")) {
         print STDERR "$manpage: $n is not in the source!\n";
         $error++;
     }

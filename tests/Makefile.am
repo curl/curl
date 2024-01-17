@@ -72,8 +72,6 @@ PERLFLAGS = -I$(srcdir)
 
 CLEANFILES = .http.pid .https.pid .ftp.pid .ftps.pid $(MANDISTPAGES)
 
-MAN2HTML= roffit $< >$@
-
 curl:
 	@cd $(top_builddir) && $(MAKE)
 
@@ -122,16 +120,6 @@ torture-test: perlcheck all
 
 event-test: perlcheck all
 	$(TEST) $(TEST_E) $(TFLAGS)
-
-.1.html:
-	$(MAN2HTML)
-
-.1.pdf:
-	@(foo=`echo $@ | sed -e 's/\.[0-9]$$//g'`; \
-	groff -Tps -man $< >$$foo.ps; \
-	ps2pdf $$foo.ps $@; \
-	rm $$foo.ps; \
-	echo "converted $< to $@")
 
 checksrc:
 	(cd libtest && $(MAKE) checksrc)

@@ -23,8 +23,6 @@
 # *
 # ***************************************************************************
 
-my $version="7.41.0";
-
 use POSIX qw(strftime);
 my @ts;
 if (defined($ENV{SOURCE_DATE_EPOCH})) {
@@ -36,33 +34,21 @@ my $date = strftime "%b %e, %Y", @ts;
 my $year = strftime "%Y", @ts;
 
 print <<HEADER
-.\\" **************************************************************************
-.\\" *                                  _   _ ____  _
-.\\" *  Project                     ___| | | |  _ \\| |
-.\\" *                             / __| | | | |_) | |
-.\\" *                            | (__| |_| |  _ <| |___
-.\\" *                             \\___|\\___/|_| \\_\\_____|
-.\\" *
-.\\" * Copyright (C) Daniel Stenberg, <daniel\@haxx.se>, et al.
-.\\" *
-.\\" * This software is licensed as described in the file COPYING, which
-.\\" * you should have received as part of this distribution. The terms
-.\\" * are also available at https://curl.se/docs/copyright.html.
-.\\" *
-.\\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
-.\\" * copies of the Software, and permit persons to whom the Software is
-.\\" * furnished to do so, under the terms of the COPYING file.
-.\\" *
-.\\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
-.\\" * KIND, either express or implied.
-.\\" *
-.\\" * SPDX-License-Identifier: curl
-.\\" *
-.\\" **************************************************************************
-.TH libcurl-symbols 3 "$date" "libcurl" "libcurl"
-.SH NAME
-libcurl-symbols \\- libcurl symbol version information
-.SH "libcurl symbols"
+---
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
+Title: libcurl-symbols
+Section: 3
+Source: libcurl
+See-also:
+  - libcurl (3)
+  - libcurl-easy (3)
+  - libcurl-multi (3)
+  - libcurl-security (3)
+  - libcurl-thread (3)
+---
+# libcurl symbols
+
 This man page details version information for public symbols provided in the
 libcurl header files. This lists the first version in which the symbol was
 introduced and for some symbols two additional information pieces:
@@ -91,13 +77,13 @@ while(<STDIN>) {
         if($rest =~ s/^([0-9.]*) *//) {
            $rem = $1;
         }
-        print ".IP $symbol\nIntroduced in $intro\n";
+        print "\n## $symbol\nIntroduced in $intro.";
         if($dep) {
-          print "Deprecated since $dep\n";
+          print " Deprecated since $dep.";
         }
         if($rem) {
-          print "Last used in $rem\n";
+          print " Last used in $rem.";
         }
+        print "\n";
     }
-
 }

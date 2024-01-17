@@ -1,0 +1,65 @@
+---
+c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+SPDX-License-Identifier: curl
+Title: CURLOPT_GSSAPI_DELEGATION
+Section: 3
+Source: libcurl
+See-also:
+  - CURLOPT_HTTPAUTH (3)
+  - CURLOPT_PROXYAUTH (3)
+---
+
+# NAME
+
+CURLOPT_GSSAPI_DELEGATION - allowed GSS-API delegation
+
+# SYNOPSIS
+
+~~~c
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_GSSAPI_DELEGATION, long level);
+~~~
+
+# DESCRIPTION
+
+Set the long parameter *level* to **CURLGSSAPI_DELEGATION_FLAG** to allow
+unconditional GSSAPI credential delegation. The delegation is disabled by
+default since 7.21.7. Set the parameter to
+**CURLGSSAPI_DELEGATION_POLICY_FLAG** to delegate only if the OK-AS-DELEGATE
+flag is set in the service ticket in case this feature is supported by the
+GSS-API implementation and the definition of *GSS_C_DELEG_POLICY_FLAG* was
+available at compile-time.
+
+# DEFAULT
+
+CURLGSSAPI_DELEGATION_NONE
+
+# PROTOCOLS
+
+HTTP
+
+# EXAMPLE
+
+~~~c
+int main(void)
+{
+  CURL *curl = curl_easy_init();
+  if(curl) {
+    CURLcode ret;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+    /* delegate if okayed by policy */
+    curl_easy_setopt(curl, CURLOPT_GSSAPI_DELEGATION,
+                     (long)CURLGSSAPI_DELEGATION_POLICY_FLAG);
+    ret = curl_easy_perform(curl);
+  }
+}
+~~~
+
+# AVAILABILITY
+
+Added in 7.22.0
+
+# RETURN VALUE
+
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.

@@ -26,38 +26,19 @@ AUTOMAKE_OPTIONS = foreign no-dependencies
 
 include Makefile.inc
 
-man_DISTMANS = $(man_MANS:.3=.3.dist)
+CURLPAGES = $(man_MANS:.3=.md)
+CLEANFILES = $(man_MANS)
+nodist_MANS = $(man_MANS)
 
-HTMLPAGES = $(man_MANS:.3=.html)
+EXTRA_DIST = $(CURLPAGES) CMakeLists.txt
 
-PDFPAGES = $(man_MANS:.3=.pdf)
+CD2NROFF = $(top_srcdir)/scripts/cd2nroff $< >$@
+CD2 = $(CD2_$(V))
+CD2_0 = @echo "  RENDER " $@;
+CD2_1 =
+CD2_ = $(CD2_0)
 
-CLEANFILES = $(HTMLPAGES) $(PDFPAGES) $(man_DISTMANS)
+SUFFIXES = .3 .md
 
-EXTRA_DIST = $(man_MANS) CMakeLists.txt
-MAN2HTML= roffit --mandir=. $< >$@
-
-SUFFIXES = .3 .html
-
-html: $(HTMLPAGES)
-
-.3.html:
-	$(MAN2HTML)
-
-pdf: $(PDFPAGES)
-
-.3.pdf:
-	@(foo=`echo $@ | sed -e 's/\.[0-9]$$//g'`; \
-	groff -Tps -man $< >$$foo.ps; \
-	ps2pdf $$foo.ps $@; \
-	rm $$foo.ps; \
-	echo "converted $< to $@")
-
-mancheck:
-	@(cd $(top_srcdir)/docs/libcurl/opts && ls `awk -F, '!/OBSOLETE/ && /^  CINIT/ { a=substr($$1, 9); print "CURLOPT_" a ".3"}' $(top_srcdir)/include/curl/curl.h`)
-	rm -f in_temp
-	@(for a in $(man_MANS); do echo $$a >>in_temp; done)
-	sort in_temp > in_makefile
-	ls CURL*.3 > in_directory
-	-diff -u in_makefile in_directory
-	rm in_temp in_directory in_makefile
+.md.3:
+	$(CD2)$(CD2NROFF)
