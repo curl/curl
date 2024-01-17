@@ -83,7 +83,7 @@ Write italics `*` like:
     This is *italics*.
 
 Due to how man pages don't support backticks especially formatted, such
-occurances in the source will instead just use italics in the generated
+occurrences in the source will instead just use italics in the generated
 output:
 
     This `word` appears in italics.
