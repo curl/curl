@@ -112,24 +112,20 @@ string.
 
 .SH "Flag characters"
 The character % is followed by zero or more of the following flags:
-.TP
-.B #
+
+.IP #
 The value should be converted to its "alternate form".
-.TP
-.B 0
+.IP 0
 The value should be zero padded.
-.TP
-.B -
+.IP -
 The converted value is to be left adjusted on the field boundary.  (The
 default is right justification.)  The converted value is padded on the right
 with blanks, rather than on the left with blanks or zeros. A '-' overrides a
 \&'0' if both are given.
-.TP
-.B ' '
+.IP ' '
 (a space) A blank should be left before a positive number (or empty string)
 produced by a signed conversion.
-.TP
-.B +
+.IP +
 A sign (+ or -) should always be placed before a number produced by a signed
 conversion. By default, a sign is used only for negative numbers. A '+'
 overrides a space if both are used.
@@ -159,43 +155,35 @@ after the radix character for \fBa\fP, \fBA\fP, \fBe\fP, \fBE\fP, \fBf\fP, and
 \fBG\fP conversions, or the maximum number of characters to be printed from a
 string for \fBs\fP and \fBS\fP conversions.
 .SH "Length modifier"
-.TP
-.B h
+.IP h
 A following integer conversion corresponds to a \fIshort\fP or \fIunsigned
 short\fP argument.
-.TP
-.B l
+.IP l
 (ell) A following integer conversion corresponds to a \fIlong\fP or
 \fIunsigned long\fP argument, or a following n conversion corresponds to a
 pointer to a long argument
-.TP
-.B ll
+.IP ll
 (ell-ell). A following integer conversion corresponds to a \fIlong long\fP or
 \fIunsigned long long\fP argument, or a following n conversion corresponds to
 a pointer to a long long argument.
-.TP
-.B q
+.IP q
 A synonym for \fBll\fP.
-.TP
-.B L
+.IP L
 A following a, A, e, E, f, F, g, or G conversion corresponds to a long double
 argument.
-.TP
-.B z
+.IP z
 A following integer conversion corresponds to a \fIsize_t\fP or \fIssize_t\fP
 argument.
 .SH "Conversion specifiers"
 A character that specifies the type of conversion to be applied. The
 conversion specifiers and their meanings are:
-.TP
-.B d, i
+.IP "d, i"
 The int argument is converted to signed decimal notation. The precision, if
 any, gives the minimum number of digits that must appear; if the converted
 value requires fewer digits, it is padded on the left with zeros. The default
 precision is 1. When 0 is printed with an explicit precision 0, the output is
 empty.
-.TP
-.B o, u, x, X
+.IP "o, u, x, X"
 The unsigned int argument is converted to unsigned octal (o), unsigned decimal
 (u), or unsigned hexadecimal (\fBx\fP and \fBX\fP) notation. The letters
 \fIabcdef\fP are used for \fBx\fP conversions; the letters \fIABCDEF\fP are
@@ -203,38 +191,30 @@ used for \fBX\fP conversions. The precision, if any, gives the minimum number
 of digits that must appear; if the converted value requires fewer digits, it
 is padded on the left with zeros. The default precision is 1. When 0 is
 printed with an explicit precision 0, the output is empty.
-.TP
-.B e, E
+.IP "e, E"
 The double argument is rounded and output in the style \fB"[-]d.ddde±dd"\fP
-.TP
-.B f, F
+.IP "f, F"
 The double argument is rounded and output to decimal notation in the style
 \fB"[-]ddd.ddd"\fP.
-.TP
-.B g, G
+.IP "g, G"
 The double argument is converted in style f or e.
-.TP
-.B c
+.IP "c"
 The int argument is converted to an unsigned char, and the resulting character
 is written.
-.TP
-.B s
+.IP "s"
 The \fIconst char *\fP argument is expected to be a pointer to an array of
 character type (pointer to a string). Characters from the array are written up
 to (but not including) a terminating null byte. If a precision is specified,
 no more than the number specified are written. If a precision is given, no
 null byte need be present; if the precision is not specified, or is greater
 than the size of the array, the array must contain a terminating null byte.
-.TP
-.B p
+.IP "p"
 The \fIvoid *\fP pointer argument is printed in hexadecimal.
-.TP
-.B n
+.IP "n"
 The number of characters written so far is stored into the integer pointed to
 by the corresponding argument.
-.TP
-.B %
-A '%' is written. No argument is converted.
+.IP "%"
+A '%' symbol is written. No argument is converted.
 .SH EXAMPLE
 .nf
 const char *name = "John";

@@ -32,15 +32,13 @@ int curl_strequal(const char *str1, const char *str2);
 int curl_strnequal(const char *str1, const char *str2, size_t length);
 .fi
 .SH DESCRIPTION
-The
-.B curl_strequal()
-function compares the two strings \fIstr1\fP and \fIstr2\fP, ignoring the case
-of the characters. It returns a non-zero (TRUE) integer if the strings are
-identical.
-.sp
+The \fIcurl_strequal(3)\fP function compares the two strings \fIstr1\fP and
+\fIstr2\fP, ignoring the case of the characters. It returns a non-zero (TRUE)
+integer if the strings are identical.
+
 The \fBcurl_strnequal()\fP function is similar, except it only compares the
 first \fIlength\fP characters of \fIstr1\fP.
-.sp
+
 These functions are provided by libcurl to enable applications to compare
 strings in a truly portable manner. There are no standard portable case
 insensitive string comparison functions. These two work on all platforms.

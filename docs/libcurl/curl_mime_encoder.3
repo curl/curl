@@ -47,17 +47,17 @@ pertaining scheme and a corresponding \fI"Content-Transfer-Encoding"\fP header
 is added to the part.
 
 Supported encoding schemes are:
-.br
+
 "\fIbinary\fP": the data is left unchanged, the header is added.
-.br
+
 "\fI8bit\fP": header added, no data change.
-.br
+
 "\fI7bit\fP": the data is unchanged, but is each byte is checked
 to be a 7-bit value; if not, a read error occurs.
-.br
+
 "\fIbase64\fP": Data is converted to base64 encoding, then split in
 CRLF-terminated lines of at most 76 characters.
-.br
+
 "\fIquoted-printable\fP": data is encoded in quoted printable lines of
 at most 76 characters. Since the resulting size of the final data cannot be
 determined prior to reading the original data, it is left as unknown, causing

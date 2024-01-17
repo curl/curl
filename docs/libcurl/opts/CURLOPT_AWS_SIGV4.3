@@ -33,12 +33,12 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_AWS_SIGV4, char *param);
 .fi
 .SH DESCRIPTION
 Provides AWS V4 signature authentication on HTTP(S) header.
-.PP
+
 Pass a char * that is the collection of specific arguments are used for
 creating outgoing authentication headers.  The format of the \fIparam\fP
 option is:
 .IP provider1[:provider2[:region[:service]]]
-.IP provider1,\ provider2
+.IP "provider1, provider2"
 The providers arguments are used for generating some authentication parameters
 such as "Algorithm", "date", "request type" and "signed headers".
 .IP region
@@ -47,16 +47,16 @@ It is extracted from the host name specified in the URL if omitted.
 .IP service
 The argument is a function provided by a cloud.
 It is extracted from the host name specified in the URL if omitted.
-.PP
+
 NOTE: This call set \fICURLOPT_HTTPAUTH(3)\fP to CURLAUTH_AWS_SIGV4.
 Calling \fICURLOPT_HTTPAUTH(3)\fP with CURLAUTH_AWS_SIGV4 is the same
 as calling this with \fB"aws:amz"\fP in parameter.
-.PP
+
 Example with "Test:Try", when curl uses the algorithm, it generates
 \fB"TEST-HMAC-SHA256"\fP for "Algorithm", \fB"x-try-date"\fP and
 \fB"X-Try-Date"\fP for "date", \fB"test4_request"\fP for "request type",
 \fB"SignedHeaders=content-type;host;x-try-date"\fP for "signed headers"
-.PP
+
 If you use just "test", instead of "test:try", test is used for every
 generated string.
 .SH DEFAULT
@@ -94,13 +94,13 @@ Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 This option overrides the other auth types you might have set in
 \fICURLOPT_HTTPAUTH(3)\fP which should be highlighted as this makes this auth
 method special.  This method cannot be combined with other auth types.
-.PP
+
 A sha256 checksum of the request payload is used as input to the signature
 calculation.  For POST requests, this is a checksum of the provided
 \fICURLOPT_POSTFIELDS(3)\fP.  Otherwise, it's the checksum of an empty buffer.
 For requests like PUT, you can provide your own checksum in an HTTP header named
 \fBx-provider2-content-sha256\fP.
-.PP
+
 For \fBaws:s3\fP, a \fBx-amz-content-sha256\fP header is added to every request
 if not already present. For s3 requests with unknown payload, this header takes
 the special value "UNSIGNED-PAYLOAD".
