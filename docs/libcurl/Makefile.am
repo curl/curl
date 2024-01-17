@@ -30,40 +30,29 @@ include Makefile.inc
 
 man_DISTMANS = $(man_MANS:.3=.3.dist)
 
-HTMLPAGES = $(man_MANS:.3=.html)
-
-PDFPAGES = $(man_MANS:.3=.pdf)
+CURLPAGES = $(man_MANS:.3=.cd)
 
 m4macrodir = $(datadir)/aclocal
 dist_m4macro_DATA = libcurl.m4
 
-CLEANFILES = $(HTMLPAGES) $(PDFPAGES) $(TESTS) $(man_DISTMANS) \
+CLEANFILES = $(CURLPAGES) $(TESTS) $(man_DISTMANS) \
   libcurl-symbols.3
 
 EXTRA_DIST = $(man_MANS) ABI.md symbols-in-versions symbols.pl  \
   mksymbolsmanpage.pl CMakeLists.txt
-MAN2HTML= roffit --mandir=. $< >$@
+
+NROFF2CD= $(top_srcdir)/scripts/nroff2cd $< >$@
 
 SUFFIXES = .3 .html
 
 libcurl-symbols.3: $(srcdir)/symbols-in-versions $(srcdir)/mksymbolsmanpage.pl
 	perl $(srcdir)/mksymbolsmanpage.pl < $(srcdir)/symbols-in-versions > $@
 
-html: $(HTMLPAGES)
-	cd opts && $(MAKE) html
+2cd: $(CURLPAGES)
+	cd opts && $(MAKE) 2cd
 
-.3.html:
-	$(MAN2HTML)
-
-pdf: $(PDFPAGES)
-	cd opts && $(MAKE) pdf
-
-.3.pdf:
-	@(foo=`echo $@ | sed -e 's/\.[0-9]$$//g'`; \
-	groff -Tps -man $< >$$foo.ps; \
-	ps2pdf $$foo.ps $@; \
-	rm $$foo.ps; \
-	echo "converted $< to $@")
+.3.cd:
+	$(NROFF2CD)
 
 # Make sure each option man page is referenced in the main man page
 TESTS = check-easy check-multi

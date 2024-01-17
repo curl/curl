@@ -29,18 +29,15 @@ AUTOMAKE_OPTIONS = foreign no-dependencies
 man_MANS = $(abs_builddir)/curl.1
 noinst_man_MANS = curl.1 mk-ca-bundle.1
 dist_man_MANS = curl-config.1
-GENHTMLPAGES = curl.html curl-config.html mk-ca-bundle.html
-PDFPAGES = curl.pdf curl-config.pdf mk-ca-bundle.pdf
+CURLPAGES = curl-config.cd mk-ca-bundle.cd
 MANDISTPAGES = curl.1.dist curl-config.1.dist
-
-HTMLPAGES = $(GENHTMLPAGES)
 
 # Build targets in this file (.) before cmdline-opts to ensure that
 # the curl.1 rule below runs first
-SUBDIRS = . cmdline-opts
-DIST_SUBDIRS = $(SUBDIRS) examples libcurl
+SUBDIRS = . cmdline-opts libcurl
+DIST_SUBDIRS = $(SUBDIRS) examples
 
-CLEANFILES = $(GENHTMLPAGES) $(PDFPAGES) $(MANDISTPAGES) curl.1
+CLEANFILES = $(CURLPAGES) $(MANDISTPAGES) curl.1
 
 EXTRA_DIST =                                    \
  $(noinst_man_MANS)                             \
@@ -98,9 +95,9 @@ EXTRA_DIST =                                    \
  VULN-DISCLOSURE-POLICY.md                      \
  WEBSOCKET.md
 
-MAN2HTML= roffit $< >$@
+NROFF2CD= $(top_srcdir)/scripts/nroff2cd $< >$@
 
-SUFFIXES = .1 .html .pdf
+SUFFIXES = .1 .html
 
 # $(abs_builddir) is to disable VPATH when searching for this file, which
 # would otherwise find the copy in $(srcdir) which breaks the $(HUGE)
@@ -116,21 +113,11 @@ $(abs_builddir)/curl.1:
 		&& touch -r "$(srcdir)/curl.1" $@; fi
 	cd cmdline-opts && $(MAKE)
 
-html: $(HTMLPAGES)
-	cd libcurl && $(MAKE) html
+2cd: $(CURLPAGES)
+	cd libcurl && $(MAKE) 2cd
 
-pdf: $(PDFPAGES)
-	cd libcurl && $(MAKE) pdf
-
-.1.html:
-	$(MAN2HTML)
-
-.1.pdf:
-	@(foo=`echo $@ | sed -e 's/\.[0-9]$$//g'`; \
-	groff -Tps -man $< >$$foo.ps; \
-	ps2pdf $$foo.ps $@; \
-	rm $$foo.ps; \
-	echo "converted $< to $@")
+.1.cd:
+	$(NROFF2CD)
 
 distclean:
 	rm -f $(CLEANFILES)

@@ -1,3 +1,4 @@
+#!/usr/bin/env perl
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -22,32 +23,23 @@
 #
 ###########################################################################
 
-AUTOMAKE_OPTIONS = foreign no-dependencies
+# provide all dir names to scan on the cmdline
 
-include Makefile.inc
+sub convert {
+    my ($dir)=@_;
+    opendir(my $dh, $dir) || die "could not open $dir";
+    my @cd = grep { /\.cd\z/ && -f "$dir/$_" } readdir($dh);
+    closedir $dh;
 
-man_DISTMANS = $(man_MANS:.3=.3.dist)
+    for my $cd (@cd) {
+        my $nroff = "$cd";
+        $nroff =~ s/\.cd\z/.3/;
+        print "$dir/$cd = $dir/$nroff\n";
+        system("../scripts/cd2nroff $dir/$cd > $dir/$nroff");
+    }
+}
 
-CURLPAGES = $(man_MANS:.3=.cd)
+for my $d (sort @ARGV) {
+    convert($d);
+}
 
-CLEANFILES = $(CURLPAGES) $(man_DISTMANS)
-
-EXTRA_DIST = $(man_MANS) CMakeLists.txt
-
-NROFF2CD= $(top_srcdir)/scripts/nroff2cd $< >$@
-
-SUFFIXES = .3 .cd
-
-2cd: $(CURLPAGES)
-
-.3.cd:
-	$(NROFF2CD)
-
-mancheck:
-	@(cd $(top_srcdir)/docs/libcurl/opts && ls `awk -F, '!/OBSOLETE/ && /^  CINIT/ { a=substr($$1, 9); print "CURLOPT_" a ".3"}' $(top_srcdir)/include/curl/curl.h`)
-	rm -f in_temp
-	@(for a in $(man_MANS); do echo $$a >>in_temp; done)
-	sort in_temp > in_makefile
-	ls CURL*.3 > in_directory
-	-diff -u in_makefile in_directory
-	rm in_temp in_directory in_makefile

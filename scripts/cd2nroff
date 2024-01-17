@@ -1,0 +1,232 @@
+#!/usr/bin/env perl
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
+#
+###########################################################################
+
+=begin comment
+
+This script converts a curldown file to nroff.
+
+Example: cd2nroff [options] <file.cd> > <file.3>
+
+=end comment
+=cut
+
+my $cd2nroff = "0.1"; # to keep check
+
+use POSIX qw(strftime);
+my @ts;
+if (defined($ENV{SOURCE_DATE_EPOCH})) {
+    @ts = localtime($ENV{SOURCE_DATE_EPOCH});
+} else {
+    @ts = localtime;
+}
+my $date = strftime "%B %d %Y", @ts;
+
+sub outseealso {
+    my (@sa) = @_;
+    my $comma = 0;
+    print ".SH SEE ALSO\n";
+    for my $s (sort @sa) {
+        printf "%s.BR $s", $comma ? ",\n": "";
+        $comma = 1;
+    }
+    print "\n";
+}
+
+sub single {
+    my @seealso;
+    my ($f)=@_;
+    my $title;
+    my $section;
+    my $source;
+    my @seealso;
+    my $start = 0;
+    open(F, "<:crlf", "$f") ||
+        return 1;
+    while(<F>) {
+        $line++;
+        if(!$start) {
+            if(/^---/) {
+                # header starts here
+                $start = 1;
+            }
+            next;
+        }
+        if(/^Title: *(.*)/i) {
+            $title=$1;
+        }
+        elsif(/^Section: *(.*)/i) {
+            $section=$1;
+        }
+        elsif(/^Source: *(.*)/i) {
+            $source=$1;
+        }
+        elsif(/^See-also: *(.*)/i) {
+            push @seealso, $1;
+        }
+        elsif(/^C: (.*)/i) {
+            $copyright=$1;
+        }
+        elsif(/^SPDX-License-Identifier: (.*)/i) {
+            $spdx=$1;
+        }
+        elsif(/^---/) {
+            # end of the header section
+            if(!$title) {
+                print STDERR "ERROR: no 'Title:' in $f\n";
+                return 1;
+            }
+            if(!$section) {
+                print STDERR "ERROR: no 'Section:' in $f\n";
+                return 2;
+            }
+            if(!$seealso[0]) {
+                print STDERR "$f:$line:1:ERROR: no 'See-also:' present\n";
+                return 2;
+            }
+            if(!$copyright) {
+                print STDERR "$f:$line:1:ERROR: no 'C:' field present\n";
+                return 2;
+            }
+            if(!$spdx) {
+                print STDERR "$f:$line:1:ERROR: no 'SPDX-License-Identifier:' field present\n";
+                return 2;
+            }
+            last;
+        }
+        else {
+            chomp;
+            print STDERR "WARN: unrecognized line in $f, ignoring:\n:'$_';"
+        }
+    }
+
+    if(!$start) {
+        print STDERR "$f:$line:1:ERROR: no header present\n";
+        return 2;
+    }
+
+    my @desc;
+    my $quote = 0;
+    my $blankline = 0;
+    my $header = 0;
+    while(<F>) {
+        $line++;
+
+        $d = $_;
+
+        if($quote) {
+            if($quote == 4) {
+                # remove the indentation
+                if($d =~ /^    (.*)/) {
+                    push @desc, "$1\n";
+                    next;
+                }
+                else {
+                    # end of quote
+                    $quote = 0;
+                    push @desc, ".fi\n";
+                    next;
+                }
+            }
+            if(/^~~~/) {
+                # end of quote
+                $quote = 0;
+                push @desc, ".fi\n";
+                next;
+            }
+            # convert single backslahes to doubles
+            $d =~ s/\\/\\\\/g;
+            push @desc, $d;
+            next;
+        }
+
+        # **bold**
+        $d =~ s/\*\*(.*?)\*\*/\\fB$1\\fP/g;
+        # *italics*
+        $d =~ s/\*(.*?)\*/\\fI$1\\fP/g;
+
+        # backticked becomes italics
+        $d =~ s/\`(.*?)\`/\\fI$1\\fP/g;
+
+        if(/^## (.*)/) {
+            my $word = $1;
+            # if there are enclosing quotes, remove them first
+            $word =~ s/[\"\'](.*)[\"\']\z/$1/;
+
+            # enclose in double quotes if there is a space present
+            if($word =~ / /) {
+                push @desc, ".IP \"$word\"\n";
+            }
+            else {
+                push @desc, ".IP $word\n";
+            }
+            $header = 1;
+        }
+        elsif(/^# (.*)/) {
+            my $word = $1;
+            # if there are enclosing quotes, remove them first
+            $word =~ s/[\"\'](.*)[\"\']\z/$1/;
+            push @desc, ".SH $word\n";
+            $header = 1;
+        }
+        elsif(/^~~~c/) {
+            # start of a code section, not indented
+            $quote = 1;
+            push @desc, ".nf\n";
+        }
+        elsif(/^    (.*)/) {
+            # quoted, indented by 4 space
+            $quote = 4;
+            push @desc, ".nf\n$1\n";
+        }
+        elsif(/^[ \t]*\n/) {
+            # count and ignore blank lines
+            $blankline++;
+        }
+        else {
+            # don't output newlines if this is the first content after a
+            # header
+            push @desc, "\n" if($blankline && !$header);
+            $blankline = 0;
+            $header = 0;
+
+            # quote minuses in the output
+            $d =~ s/([^\\])-/$1\\-/g;
+            # replace single quotes
+            $d =~ s/\'/\\(aq/g;
+            # handle double quotes first on the line
+            $d =~ s/^(\s*)\"/$1\\(dq/;
+
+            push @desc, $d;
+        }
+    }
+    close(F);
+    print ".\\\" generated by cd2nroff $cd2nroff from $f\n";
+    print ".TH $title $section \"$date\" $source\n";
+    print @desc;
+    outseealso(@seealso);
+    return 0;
+}
+
+exit single($ARGV[0]);
