@@ -69,7 +69,6 @@ jobs:
               --with-test-nghttpx="$HOME/nghttpx/bin/nghttpx"
               --with-openssl=$HOME/openssl3 --with-openssl-quic
               --with-nghttp3=$HOME/nghttpx
-            # some 25xx tests currently do not work with openssl-quic due to fin handling
             tflags: !http3
 
     steps:
