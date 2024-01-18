@@ -64,6 +64,7 @@ jobs:
         build:
           - name: openssl-quic
             configure: >-
+              PKG_CONFIG_PATH="$HOME/openssl3/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib"
               --enable-warnings --enable-werror --enable-debug --disable-ntlm
               --with-test-nghttpx="$HOME/nghttpx/bin/nghttpx"
               --with-openssl=$HOME/openssl3 --with-openssl-quic
