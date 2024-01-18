@@ -15,6 +15,8 @@ QUIC libraries we are using:
 
 [quiche](https://github.com/cloudflare/quiche) - **EXPERIMENTAL**
 
+[OpenSSL 3.2+ QUIC](https://github.com/openssl/openssl) - **EXPERIMENTAL**
+
 [msh3](https://github.com/nibanks/msh3) (with [msquic](https://github.com/microsoft/msquic)) - **EXPERIMENTAL**
 
 ## Experimental
@@ -188,6 +190,40 @@ Build curl:
      % cd curl
      % autoreconf -fi
      % ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" --with-openssl=$PWD/../quiche/quiche/deps/boringssl/src --with-quiche=$PWD/../quiche/target/release
+     % make
+     % make install
+
+ If `make install` results in `Permission denied` error, you will need to prepend it with `sudo`.
+
+# OpenSSL version
+
+quiche QUIC support is **EXPERIMENTAL**
+
+Build OpenSSL 3.2.0
+
+     % cd ..
+     % git clone -b openssl-3.2.0 https://github.com/openssl/openssl
+     % cd openssl
+     % ./config enable-tls1_3 --prefix=<somewhere> --libdir=<somewhere>/lib
+     % make install
+
+Build nghttp3
+
+     % cd ..
+     % git clone -b v1.1.0 https://github.com/ngtcp2/nghttp3
+     % cd nghttp3
+     % autoreconf -fi
+     % ./configure --prefix=<somewhere2> --enable-lib-only
+     % make
+     % make install
+
+Build curl:
+
+     % cd ..
+     % git clone https://github.com/curl/curl
+     % cd curl
+     % autoreconf -fi
+     % ./configure --with-openssl=<somewhere> --with-openssl-quic --with-nghttp3=<somewhere2> 
      % make
      % make install
 

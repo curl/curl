@@ -133,5 +133,7 @@ class TestAuth:
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto, extra_args=[
             '--basic', '--user', f'test:{password}'
         ])
-        # request was never sent
-        r.check_response(exitcode=55, http_status=0)
+        # Depending on protocl, we might have an error sending or
+        # the server might shutdown the connection and we see the error
+        # on receiving
+        assert r.exit_code in [55, 56], f'{self.dump_logs()}'
