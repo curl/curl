@@ -97,7 +97,11 @@ static CURLcode curl_ossl_init_ctx(struct quic_tls_ctx *ctx,
   CURLcode result = CURLE_FAILED_INIT;
 
   DEBUGASSERT(!ctx->ssl_ctx);
+#ifdef USE_OPENSSL_QUIC
+  ctx->ssl_ctx = SSL_CTX_new(OSSL_QUIC_client_method());
+#else
   ctx->ssl_ctx = SSL_CTX_new(TLS_method());
+#endif
   if(!ctx->ssl_ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -216,7 +220,9 @@ static CURLcode curl_ossl_init_ssl(struct quic_tls_ctx *ctx,
 
   SSL_set_app_data(ctx->ssl, user_data);
   SSL_set_connect_state(ctx->ssl);
+#ifndef USE_OPENSSL_QUIC
   SSL_set_quic_use_legacy_codepoint(ctx->ssl, 0);
+#endif
 
   if(alpn)
     SSL_set_alpn_protos(ctx->ssl, (const uint8_t *)alpn, (int)alpn_len);

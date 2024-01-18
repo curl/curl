@@ -1630,11 +1630,17 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
   /* QUIC needs a connected socket, nonblocking */
   DEBUGASSERT(ctx->sock != CURL_SOCKET_BAD);
 
+#if defined(__APPLE__) && defined(USE_OPENSSL_QUIC)
+  (void)rc;
+  /* On macOS OpenSSL QUIC fails on connected sockets.
+   * see: <https://github.com/openssl/openssl/issues/23251> */
+#else
   rc = connect(ctx->sock, &ctx->addr.sa_addr, ctx->addr.addrlen);
   if(-1 == rc) {
     return socket_connect_result(data, ctx->r_ip, SOCKERRNO);
   }
   ctx->sock_connected = TRUE;
+#endif
   set_local_ip(cf, data);
   CURL_TRC_CF(data, cf, "%s socket %" CURL_FORMAT_SOCKET_T
               " connected: [%s:%d] -> [%s:%d]",

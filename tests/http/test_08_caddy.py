@@ -163,3 +163,20 @@ class TestCaddy:
             assert r.total_connects > 1, r.dump_logs()
         else:
             assert r.total_connects == 1, r.dump_logs()
+
+    # upload data parallel, check that they were echoed
+    @pytest.mark.skipif(condition=Env().ci_run, reason="not suitable for CI runs")
+    @pytest.mark.parametrize("proto", ['h2', 'h3'])
+    def test_08_06_upload_parallel(self, env: Env, caddy, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 stalls here")
+        # limit since we use a separate connection in h1
+        count = 20
+        data = '0123456789'
+        curl = CurlClient(env=env)
+        url = f'https://{env.domain1}:{caddy.port}/data10.data?[0-{count-1}]'
+        r = curl.http_upload(urls=[url], data=data, alpn_proto=proto,
+                             extra_args=['--parallel'])
+        r.check_stats(count=count, http_status=200, exitcode=0)

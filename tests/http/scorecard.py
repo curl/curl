@@ -332,7 +332,7 @@ class ScoreCard:
             p['name'] = 'h3'
             if not self.env.have_h3_curl():
                 raise ScoreCardException('curl does not support HTTP/3')
-            for lib in ['ngtcp2', 'quiche', 'msh3']:
+            for lib in ['ngtcp2', 'quiche', 'msh3', 'nghttp3']:
                 if self.env.curl_uses_lib(lib):
                     p['implementation'] = lib
                     break
