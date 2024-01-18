@@ -129,7 +129,9 @@ class Nghttpx:
         try_until = datetime.now() + timeout
         while datetime.now() < try_until:
             check_url = f'https://{self.env.domain1}:{self._port}/'
-            r = curl.http_get(url=check_url, extra_args=['--http3-only'])
+            r = curl.http_get(url=check_url, extra_args=[
+                '--http3-only', '--connect-timeout', '1'
+            ])
             if r.exit_code != 0:
                 return True
             log.debug(f'waiting for nghttpx to stop responding: {r}')
@@ -143,7 +145,8 @@ class Nghttpx:
         while datetime.now() < try_until:
             check_url = f'https://{self.env.domain1}:{self._port}/'
             r = curl.http_get(url=check_url, extra_args=[
-                '--http3-only', '--trace', 'curl.trace', '--trace-time'
+                '--http3-only', '--trace', 'curl.trace', '--trace-time',
+                '--connect-timeout', '1'
             ])
             if r.exit_code == 0:
                 return True
@@ -193,6 +196,7 @@ class NghttpxQuic(Nghttpx):
             f'--frontend-http3-max-window-size=10M',
             f'--frontend-http3-connection-window-size=10M',
             f'--frontend-http3-max-connection-window-size=100M',
+            # f'--frontend-quic-debug-log',
         ]
         ngerr = open(self._stderr, 'a')
         self._process = subprocess.Popen(args=args, stderr=ngerr)
