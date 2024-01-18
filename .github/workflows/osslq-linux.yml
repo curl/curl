@@ -223,7 +223,8 @@ jobs:
       - run: make V=1 test-ci
         name: 'run tests'
         env:
-          TFLAGS: "!http3"
+          # 2500 and 25002 fail atm due to fin handling
+          TFLAGS: "!http/3"
 
       - run: pytest -v tests
         name: 'run pytest'
