@@ -1603,7 +1603,7 @@ static CURLcode cf_osslq_connect(struct Curl_cfilter *cf,
       goto out;
 #endif
     default:
-      result = cf_osslq_ssl_err(cf, data, detail, CURLE_QUIC_CONNECT_ERROR);
+      result = cf_osslq_ssl_err(cf, data, detail, CURLE_COULDNT_CONNECT);
       goto out;
     }
   }
