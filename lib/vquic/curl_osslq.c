@@ -1391,7 +1391,7 @@ static CURLcode h3_send_streams(struct Curl_cfilter *cf,
     }
     for(i = 0; (i < n) && !blocked; ++i) {
       /* Without stream->s.ssl, we closed that already, so
-       * pretend the write did succeeed. */
+       * pretend the write did succeed. */
       written = vec[i].len;
       ok = !s->ssl || SSL_write_ex(s->ssl, vec[i].base, vec[i].len,
                                    &written);
