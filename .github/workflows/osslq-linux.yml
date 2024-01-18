@@ -63,7 +63,6 @@ jobs:
       matrix:
         build:
           - name: openssl-quic
-            tflags: !http3
             configure: >-
               PKG_CONFIG_PATH="$HOME/openssl3/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib"
               --enable-warnings --enable-werror --enable-debug --disable-ntlm
@@ -224,7 +223,7 @@ jobs:
       - run: make V=1 test-ci
         name: 'run tests'
         env:
-          TFLAGS: "${{ matrix.build.tflags }}"
+          TFLAGS: "!http3"
 
       - run: pytest -v tests
         name: 'run pytest'
