@@ -40,18 +40,77 @@ from .env import Env
 log = logging.getLogger(__name__)
 
 
+class RunProfile:
+
+    def __init__(self, pid: int, started_at: datetime, run_dir):
+        self._pid = pid
+        self._started_at = started_at
+        self._duration = timedelta(seconds=0)
+        self._run_dir = run_dir
+        self._samples = []
+        self._avg_cpu = 0.0
+
+    @property
+    def duration(self) -> timedelta:
+        return self._duration
+
+    @property
+    def avg_cpu(self) -> float:
+        return self._avg_cpu
+
+    @property
+    def avg_mem(self) -> float:
+        return self._avg_mem
+
+    def sample(self):
+        p2 = subprocess.run([
+            'ps', '-p', f'{self._pid}', '-o', 'pcpu=', '-o', 'pmem='
+        ], cwd=self._run_dir, shell=False, capture_output=True,
+            env={'LANG': 'en'})
+        elapsed = datetime.now() - self._started_at
+        m = re.match(r'(\d+(\.\d+)?)\s+(\d+(\.\d+)?)', p2.stdout.decode().strip())
+        if m:
+            self._samples.append({
+                'time': elapsed,
+                'cpu': float(m.group(1)) / 100,
+                'mem': float(m.group(3)) / 100,
+            })
+        else:
+            log.warning(f'error parsing ps output: {p2.stdout.decode()}')
+
+    def finish(self):
+        self._duration = datetime.now() - self._started_at
+        duration = timedelta(seconds=1)
+        load = 0
+        mem = 0
+        for s in self._samples:
+            duration = duration + s['time']
+            load += s['cpu'] * s['time'].total_seconds()
+            mem += s['mem'] * s['time'].total_seconds()
+        self._avg_cpu = load / duration.total_seconds()
+        self._avg_mem = mem / duration.total_seconds()
+
+    def __repr__(self):
+        return f'RunProfile[pid={self._pid}, '\
+               f'duration={self.duration.total_seconds():.3f}s, '\
+               f'avg_cpu={self.avg_cpu * 100:.1f}%, '\
+               f'avg_mem={self.avg_mem * 100:.1f}%]'
+
+
 class ExecResult:
 
     def __init__(self, args: List[str], exit_code: int,
                  stdout: List[str], stderr: List[str],
                  duration: Optional[timedelta] = None,
                  with_stats: bool = False,
-                 exception: Optional[str] = None):
+                 exception: Optional[str] = None,
+                 profile: Optional[RunProfile] = None):
         self._args = args
         self._exit_code = exit_code
         self._exception = exception
         self._stdout = stdout
         self._stderr = stderr
+        self._profile = profile
         self._duration = duration if duration is not None else timedelta()
         self._response = None
         self._responses = []
@@ -115,6 +174,10 @@ class ExecResult:
     @property
     def duration(self) -> timedelta:
         return self._duration
+
+    @property
+    def profile(self) -> Optional[RunProfile]:
+        return self._profile
 
     @property
     def response(self) -> Optional[Dict]:
@@ -344,9 +407,9 @@ class CurlClient:
         return xargs
 
     def http_get(self, url: str, extra_args: Optional[List[str]] = None,
-                 def_tracing: bool = True):
+                 def_tracing: bool = True, with_profile: bool = False):
         return self._raw(url, options=extra_args, with_stats=False,
-                         def_tracing=def_tracing)
+                         def_tracing=def_tracing, with_profile=with_profile)
 
     def http_download(self, urls: List[str],
                       alpn_proto: Optional[str] = None,
@@ -379,6 +442,7 @@ class CurlClient:
                     alpn_proto: Optional[str] = None,
                     with_stats: bool = True,
                     with_headers: bool = False,
+                    with_profile: bool = False,
                     extra_args: Optional[List[str]] = None):
         if extra_args is None:
             extra_args = []
@@ -391,12 +455,14 @@ class CurlClient:
             ])
         return self._raw(urls, alpn_proto=alpn_proto, options=extra_args,
                          with_stats=with_stats,
-                         with_headers=with_headers)
+                         with_headers=with_headers,
+                         with_profile=with_profile)
 
     def http_put(self, urls: List[str], data=None, fdata=None,
                  alpn_proto: Optional[str] = None,
                  with_stats: bool = True,
                  with_headers: bool = False,
+                 with_profile: bool = False,
                  extra_args: Optional[List[str]] = None):
         if extra_args is None:
             extra_args = []
@@ -414,7 +480,8 @@ class CurlClient:
         return self._raw(urls, intext=data,
                          alpn_proto=alpn_proto, options=extra_args,
                          with_stats=with_stats,
-                         with_headers=with_headers)
+                         with_headers=with_headers,
+                         with_profile=with_profile)
 
     def http_form(self, urls: List[str], form: Dict[str, str],
                   alpn_proto: Optional[str] = None,
@@ -439,7 +506,7 @@ class CurlClient:
     def response_file(self, idx: int):
         return os.path.join(self._run_dir, f'download_{idx}.data')
 
-    def run_direct(self, args, with_stats: bool = False):
+    def run_direct(self, args, with_stats: bool = False, with_profile: bool = False):
         my_args = [self._curl]
         if with_stats:
             my_args.extend([
@@ -449,22 +516,45 @@ class CurlClient:
             '-o', 'download.data',
         ])
         my_args.extend(args)
-        return self._run(args=my_args, with_stats=with_stats)
+        return self._run(args=my_args, with_stats=with_stats, with_profile=with_profile)
 
-    def _run(self, args, intext='', with_stats: bool = False):
+    def _run(self, args, intext='', with_stats: bool = False, with_profile: bool = True):
         self._rmf(self._stdoutfile)
         self._rmf(self._stderrfile)
         self._rmf(self._headerfile)
         start = datetime.now()
         exception = None
+        profile = None
         try:
             with open(self._stdoutfile, 'w') as cout:
                 with open(self._stderrfile, 'w') as cerr:
-                    p = subprocess.run(args, stderr=cerr, stdout=cout,
-                                       cwd=self._run_dir, shell=False,
-                                       input=intext.encode() if intext else None,
-                                       timeout=self._timeout)
-                    exitcode = p.returncode
+                    if with_profile:
+                        started_at = datetime.now()
+                        end_at = started_at + timedelta(seconds=self._timeout)
+                        log.info(f'starting: {args}')
+                        p = subprocess.Popen(args, stderr=cerr, stdout=cout,
+                                             cwd=self._run_dir, shell=False)
+                        profile = RunProfile(p.pid, started_at, self._run_dir)
+                        if intext is not None and False:
+                            p.communicate(input=intext.encode(), timeout=1)
+                        while True:
+                            try:
+                                p.wait(timeout=0.2)
+                                break
+                            except subprocess.TimeoutExpired:
+                                if datetime.now() >= end_at:
+                                    p.kill()
+                                    raise subprocess.TimeoutExpired(cmd=args, timeout=self._timeout)
+                                profile.sample()
+                        exitcode = p.returncode
+                        profile.finish()
+                        log.info(f'done: exit={exitcode}, profile={profile}')
+                    else:
+                        p = subprocess.run(args, stderr=cerr, stdout=cout,
+                                           cwd=self._run_dir, shell=False,
+                                           input=intext.encode() if intext else None,
+                                           timeout=self._timeout)
+                        exitcode = p.returncode
         except subprocess.TimeoutExpired:
             log.warning(f'Timeout after {self._timeout}s: {args}')
             exitcode = -1
@@ -474,19 +564,22 @@ class CurlClient:
         return ExecResult(args=args, exit_code=exitcode, exception=exception,
                           stdout=coutput, stderr=cerrput,
                           duration=datetime.now() - start,
-                          with_stats=with_stats)
+                          with_stats=with_stats,
+                          profile=profile)
 
     def _raw(self, urls, intext='', timeout=None, options=None, insecure=False,
              alpn_proto: Optional[str] = None,
              force_resolve=True,
              with_stats=False,
              with_headers=True,
-             def_tracing=True):
+             def_tracing=True,
+             with_profile=False):
         args = self._complete_args(
             urls=urls, timeout=timeout, options=options, insecure=insecure,
             alpn_proto=alpn_proto, force_resolve=force_resolve,
             with_headers=with_headers, def_tracing=def_tracing)
-        r = self._run(args, intext=intext, with_stats=with_stats)
+        r = self._run(args, intext=intext, with_stats=with_stats,
+                      with_profile=with_profile)
         if r.exit_code == 0 and with_headers:
             self._parse_headerfile(self._headerfile, r=r)
             if r.json:
