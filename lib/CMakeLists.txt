@@ -31,9 +31,12 @@ configure_file(curl_config.h.cmake
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
 
-list(APPEND HHEADERS
-  ${CMAKE_CURRENT_BINARY_DIR}/curl_config.h
-  )
+# DllMain is added later for DLL builds only.
+list(REMOVE_ITEM CSOURCES dllmain.c)
+set_source_files_properties(dllmain.c PROPERTIES
+  COMPILE_FLAGS -DCURL_CMAKE_DLLMAIN)
+
+list(APPEND HHEADERS ${CMAKE_CURRENT_BINARY_DIR}/curl_config.h)
 
 # The rest of the build
 
@@ -61,6 +64,13 @@ if(ENABLE_CURLDEBUG)
   # We must compile these sources separately to avoid memdebug.h redefinitions
   # applying to them.
   set_source_files_properties(memdebug.c curl_multibyte.c PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
+endif()
+
+if(CYGWIN)
+  # For cygwin always compile dllmain.c as a separate unit since it includes
+  # windows.h, which shouldn't be included in other units.
+  set_source_files_properties(dllmain.c PROPERTIES
+    SKIP_UNITY_BUILD_INCLUSION ON)
 endif()
 
 if(BUILD_TESTING)
@@ -181,6 +191,9 @@ if(BUILD_SHARED_LIBS)
   list(APPEND libcurl_export ${LIB_SHARED})
   add_library(${LIB_SHARED} SHARED ${LIB_SOURCE})
   add_library(${PROJECT_NAME}::${LIB_SHARED} ALIAS ${LIB_SHARED})
+  if(WIN32 OR CYGWIN)
+    set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES dllmain.c)
+  endif()
   if(WIN32)
     set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES libcurl.rc)
     if(HIDES_CURL_PRIVATE_SYMBOLS)
