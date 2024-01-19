@@ -1116,7 +1116,7 @@
  slow, potentially with a (random) wait between transfers. There is also a
  proposed set of standard HTTP headers to let servers let the client adapt to
  its rate limits:
- https://www.ietf.org/id/draft-polli-ratelimit-headers-02.html
+ https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/
 
  See https://github.com/curl/curl/issues/5406
 
