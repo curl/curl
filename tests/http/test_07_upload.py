@@ -28,6 +28,7 @@ import difflib
 import filecmp
 import logging
 import os
+import time
 import pytest
 
 from testenv import Env, CurlClient
@@ -237,7 +238,7 @@ class TestUpload:
         count = 1
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?id=[0-{count-1}]&chunk_delay=2ms'
-        r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto,
+        r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto, with_profile=True,
                              extra_args=['--parallel'])
         r.check_stats(count=count, http_status=200, exitcode=0)
         exp_data = [f'{os.path.getsize(fdata)}']
@@ -245,6 +246,7 @@ class TestUpload:
         for i in range(count):
             respdata = open(curl.response_file(i)).readlines()
             assert respdata == exp_data
+        assert r.profile.avg_cpu < 0.5, f'average cpu too high: {r.profile.avg_cpu*100:.1f}%'
 
     # issue #10591
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
