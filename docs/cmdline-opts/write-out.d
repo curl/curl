@@ -121,7 +121,7 @@ Number of redirects that were followed in the request. (Added in 7.12.3)
 The rest of the output is only shown if the transfer returned a non-zero error.
 (Added in 7.75.0)
 
-## "proxy_ssl_verify_result"
+## proxy_ssl_verify_result
 The result of the HTTPS proxy's SSL peer certificate verification that was
 requested. 0 means the verification was successful. (Added in 7.52.0)
 
