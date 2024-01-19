@@ -27,3 +27,4 @@ pytest
 cryptography
 multipart
 websockets
+psutil
