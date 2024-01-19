@@ -804,7 +804,9 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
     buf += consumed;
     blen -= consumed;
     /* either we consumed all or are at the start of header parsing */
-    DEBUGASSERT(blen == 0 || data->req.header);
+    if(blen && !data->req.header)
+      DEBUGF(infof(data, "RTSP: %zu bytes, possibly excess in response body",
+                   blen));
   }
 
   /* we want to parse headers, do so */
