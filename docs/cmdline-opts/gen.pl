@@ -90,51 +90,7 @@ sub printdesc {
     my @desc = @_;
     my $exam = 0;
     for my $d (@desc) {
-        if($d =~ /\(Added in ([0-9.]+)\)/i) {
-            my $ver = $1;
-            if(too_old($ver)) {
-                $d =~ s/ *\(Added in $ver\)//gi;
-            }
-        }
-        if($d !~ /^.\\"/) {
-            # **bold**
-            $d =~ s/\*\*(.*?)\*\*/\\fB$1\\fP/g;
-            # *italics*
-            $d =~ s/\*(.*?)\*/\\fI$1\\fP/g;
-        }
-        if(!$exam && ($d =~ /^ /)) {
-            # start of example
-            $exam = 1;
-            print ".nf\n"; # no-fill
-        }
-        elsif($exam && ($d !~ /^ /)) {
-            # end of example
-            $exam = 0;
-            print ".fi\n"; # fill-in
-        }
-        # skip lines starting with space (examples)
-        if($d =~ /^[^ ]/ && $d =~ /--/) {
-            # scan for options in longest-names first order
-            for my $k (sort {length($b) <=> length($a)} keys %optlong) {
-                # --tlsv1 is complicated since --tlsv1.2 etc are also
-                # acceptable options!
-                if(($k eq "tlsv1") && ($d =~ /--tlsv1\.[0-9]\\f/)) {
-                    next;
-                }
-                my $l = manpageify($k);
-                $d =~ s/\-\-$k([^a-z0-9-])/$l$1/g;
-            }
-        }
-        # quote minuses in the output
-        $d =~ s/([^\\])-/$1\\-/g;
-        # replace single quotes
-        $d =~ s/\'/\\(aq/g;
-        # handle double quotes first on the line
-        $d =~ s/^(\s*)\"/$1\\(dq/;
         print $d;
-    }
-    if($exam) {
-        print ".fi\n"; # fill-in
     }
 }
 
@@ -200,9 +156,173 @@ sub added {
     }
 }
 
+sub render {
+    my ($fh, $f, $line) = @_;
+    my @desc;
+    my $tablemode = 0;
+    my $header = 0;
+    # if $top is TRUE, it means a top-level page and not a command line option
+    my $top = ($line == 1);
+    my $quote;
+    $start = 0;
+
+    while(<$fh>) {
+        my $d = $_;
+        $line++;
+        if($d =~ /^\.(SH|BR|IP|B)/) {
+            print STDERR "$f:$line:1:ERROR: nroff instruction in input: \".$1\"\n";
+            return 4;
+        }
+        if(/^ *<!--/) {
+            # skip comments
+            next;
+        }
+        if((!$start) && ($_ =~ /^[\r\n]*\z/)) {
+            # skip leading blank lines
+            next;
+        }
+        $start = 1;
+        if(/^# (.*)/) {
+            $header = 1;
+            if($top != 1) {
+                # ignored for command line options
+                $blankline++;
+                next;
+            }
+            push @desc, ".SH $1\n";
+            next;
+        }
+        elsif(/^###/) {
+            print STDERR "$f:$line:1:ERROR: ### header is not supported\n";
+            exit 3;
+        }
+        elsif(/^## (.*)/) {
+            my $word = $1;
+            # if there are enclosing quotes, remove them first
+            $word =~ s/[\"\'](.*)[\"\']\z/$1/;
+
+            # remove backticks from headers
+            $words =~ s/\`//g;
+
+            # if there is a space, it needs quotes
+            if($word =~ / /) {
+                $word = "\"$word\"";
+            }
+            if($top == 1) {
+                push @desc, ".IP $word\n";
+            }
+            else {
+                if(!$tablemode) {
+                    push @desc, ".RS\n";
+                    $tablemode = 1;
+                }
+                push @desc, ".IP \\fB$word\\fP\n";
+            }
+            $header = 1;
+            next;
+        }
+        elsif(/^##/) {
+            if($top == 1) {
+                print STDERR "$f:$line:1:ERROR: ## empty header top-level mode\n";
+                exit 3;
+            }
+            if($tablemode) {
+                # end of table
+                push @desc, ".RE\n.IP\n";
+                $tablmode = 0;
+            }
+            $header = 1;
+            next;
+        }
+        elsif(/^\.(IP|RS|RE)/) {
+            my ($cmd) = ($1);
+            print STDERR "$f:$line:1:ERROR: $cmd detected, use ##-style\n";
+            return 3;
+        }
+        elsif(/^[ \t]*\n/) {
+            # count and ignore blank lines
+            $blankline++;
+            next;
+        }
+        elsif($d =~ /^    (.*)/) {
+            my $word = $1;
+            if(!$quote) {
+                push @desc, ".nf\n";
+            }
+            $quote = 1;
+            $d = "$word\n";
+        }
+        elsif($quote && ($d !~ /^    (.*)/)) {
+            # end of quote
+            push @desc, ".fi\n";
+            $quote = 0;
+        }
+
+        $d =~ s/`%DATE`/$date/g;
+        $d =~ s/`%VERSION`/$version/g;
+        $d =~ s/`%GLOBALS`/$globals/g;
+
+        # convert single backslahes to doubles
+        $d =~ s/\\/\\\\/g;
+
+        # convert backticks to double quotes
+        $d =~ s/\`/\"/g;
+
+        if(!$quote && $d =~ /--/) {
+            # scan for options in longest-names first order
+            for my $k (sort {length($b) <=> length($a)} keys %optlong) {
+                # --tlsv1 is complicated since --tlsv1.2 etc are also
+                # acceptable options!
+                if(($k eq "tlsv1") && ($d =~ /--tlsv1\.[0-9]\\f/)) {
+                    next;
+                }
+                my $l = manpageify($k);
+                $d =~ s/\-\-$k([^a-z0-9-])/$l$1/g;
+            }
+        }
+
+        if($d =~ /\(Added in ([0-9.]+)\)/i) {
+            my $ver = $1;
+            if(too_old($ver)) {
+                $d =~ s/ *\(Added in $ver\)//gi;
+            }
+        }
+
+        if(!$quote && ($d =~ /^(.*)  /)) {
+            printf STDERR "$f:$line:%d:ERROR: 2 spaces detected\n",
+                length($1);
+            return 3;
+        }
+        # quote minuses in the output
+        $d =~ s/([^\\])-/$1\\-/g;
+        # replace single quotes
+        $d =~ s/\'/\\(aq/g;
+        # handle double quotes or periods first on the line
+        $d =~ s/^([\.\"])/\\&$1/;
+        # **bold**
+        $d =~ s/\*\*(\S.*?)\*\*/\\fB$1\\fP/g;
+        # *italics*
+        $d =~ s/\*(\S.*?)\*/\\fI$1\\fP/g;
+
+        # trim trailing spaces
+        $d =~ s/[ \t]+\z//;
+        push @desc, "\n" if($blankline && !$header);
+        $blankline = 0;
+        push @desc, $d;
+        $header = 0;
+
+    }
+    if($tablemode) {
+        # end of table
+        push @desc, ".RE\n.IP\n";
+    }
+    return @desc;
+}
+
 sub single {
     my ($f, $standalone)=@_;
-    open(F, "<:crlf", "$f") ||
+    my $fh;
+    open($fh, "<:crlf", "$f") ||
         return 1;
     my $short;
     my $long;
@@ -213,7 +333,7 @@ sub single {
     my $mutexed;
     my $requires;
     my $category;
-    my $seealso;
+    my @seealso;
     my $copyright;
     my $spdx;
     my @examples; # there can be more than one
@@ -223,8 +343,19 @@ sub single {
     my $multi;
     my $scope;
     my $experimental;
-    while(<F>) {
+    my $start;
+    my $list; # identifies the list, 1 example, 2 see-also
+    while(<$fh>) {
         $line++;
+        if(/^ *<!--/) {
+            next;
+        }
+        if(!$start) {
+            if(/^---/) {
+                $start = 1;
+            }
+            next;
+        }
         if(/^Short: *(.)/i) {
             $short=$1;
         }
@@ -249,12 +380,18 @@ sub single {
         elsif(/^Protocols: *(.*)/i) {
             $protocols=$1;
         }
-        elsif(/^See-also: *(.*)/i) {
+        elsif(/^See-also: +(.+)/i) {
             if($seealso) {
                 print STDERR "ERROR: duplicated See-also in $f\n";
                 return 1;
             }
-            $seealso=$1;
+            push @seealso, $1;
+        }
+        elsif(/^See-also:/i) {
+            $list=2;
+        }
+        elsif(/^  *- (.*)/i && ($list == 2)) {
+            push @seealso, $1;
         }
         elsif(/^Requires: *(.*)/i) {
             $requires=$1;
@@ -262,7 +399,14 @@ sub single {
         elsif(/^Category: *(.*)/i) {
             $category=$1;
         }
-        elsif(/^Example: *(.*)/i) {
+        elsif(/^Example: +(.+)/i) {
+            push @examples, $1;
+        }
+        elsif(/^Example:/i) {
+            # '1' is the example list
+            $list = 1;
+        }
+        elsif(/^  *- (.*)/i && ($list == 1)) {
             push @examples, $1;
         }
         elsif(/^Multi: *(.*)/i) {
@@ -284,6 +428,7 @@ sub single {
             ;
         }
         elsif(/^---/) {
+            $start++;
             if(!$long) {
                 print STDERR "ERROR: no 'Long:' in $f\n";
                 return 1;
@@ -300,7 +445,7 @@ sub single {
                 print STDERR "$f:$line:1:ERROR: no 'Added:' version present\n";
                 return 2;
             }
-            if(!$seealso) {
+            if(!$seealso[0]) {
                 print STDERR "$f:$line:1:ERROR: no 'See-also:' field present\n";
                 return 2;
             }
@@ -316,42 +461,17 @@ sub single {
         }
         else {
             chomp;
-            print STDERR "WARN: unrecognized line in $f, ignoring:\n:'$_';"
+            print STDERR "$f:$line:1:WARN: unrecognized line in $f, ignoring:\n:'$_';"
         }
     }
-    my @desc;
-    my $tablemode = 0;
-    while(<F>) {
-        $line++;
-        $dline++;
-        if(($dline == 1) && ($_ =~ /^[\r\n]*\z/)) {
-            print STDERR "$f:$line:1:ERROR: unnecessary leading blank line\n";
-            return 3;
-        }
-        if(/^## (.*)/) {
-            if(!$tablemode) {
-                push @desc, ".RS\n";
-                $tablemode = 1;
-            }
-            push @desc, ".IP \"\\fB$1\\fP\"\n";
-            next;
-        }
-        elsif(/^##/) {
-            if($tablemode) {
-                # end of table
-                push @desc, ".RE\n.IP\n";
-                $tablmode = 0;
-            }
-            next;
-        }
-        elsif(/^\.(IP|RS|RE)/) {
-            my ($cmd) = ($1);
-            print STDERR "$f:$line:1:ERROR: $cmd detected, use ##-style\n";
-            return 3;
-        }
-        push @desc, $_;
+
+    if($start < 2) {
+        print STDERR "$f:1:1:ERROR: no proper meta-data header\n";
+        return 2;
     }
-    close(F);
+
+    my @desc = render($fh, $f, $line);
+    close($fh);
     if($tablemode) {
         # end of table
         push @desc, ".RE\n.IP\n";
@@ -442,30 +562,28 @@ sub single {
     printdesc(@extra);
 
     my @foot;
-    if($seealso) {
-        my @m=split(/ /, $seealso);
-        my $mstr;
-        my $and = 0;
-        my $num = scalar(@m);
-        if($num > 2) {
-            # use commas up to this point
-            $and = $num - 1;
-        }
-        my $i = 0;
-        for my $k (@m) {
-            if(!$helplong{$k}) {
-                print STDERR "$f:$line:1:WARN: see-also a non-existing option: $k\n";
-            }
-            my $l = manpageify($k);
-            my $sep = " and";
-            if($and && ($i < $and)) {
-                $sep = ",";
-            }
-            $mstr .= sprintf "%s$l", $mstr?"$sep ":"";
-            $i++;
-        }
-        push @foot, seealso($standalone, $mstr);
+
+    my $mstr;
+    my $and = 0;
+    my $num = scalar(@seealso);
+    if($num > 2) {
+        # use commas up to this point
+        $and = $num - 1;
     }
+    my $i = 0;
+    for my $k (@seealso) {
+        if(!$helplong{$k}) {
+            print STDERR "$f:$line:1:WARN: see-also a non-existing option: $k\n";
+        }
+        my $l = manpageify($k);
+        my $sep = " and";
+        if($and && ($i < $and)) {
+            $sep = ",";
+        }
+        $mstr .= sprintf "%s$l", $mstr?"$sep ":"";
+        $i++;
+    }
+    push @foot, seealso($standalone, $mstr);
 
     if($requires) {
         my $l = manpageify($long);
@@ -491,8 +609,10 @@ sub single {
         print "\nExample$s:\n.nf\n";
         foreach my $e (@examples) {
             $e =~ s!\$URL!https://example.com!g;
-            $e =~ s/-/\\-/g;
-            $e =~ s/\'/\\(aq/g;
+            #$e =~ s/-/\\-/g;
+            #$e =~ s/\'/\\(aq/g;
+            # convert single backslahes to doubles
+            $e =~ s/\\/\\\\/g;
             print " curl $e\n";
         }
         print ".fi\n";
@@ -518,7 +638,14 @@ sub getshortlong {
     my $arg;
     my $protocols;
     my $category;
+    my $start = 0;
     while(<F>) {
+        if(!$start) {
+            if(/^---/) {
+                $start = 1;
+            }
+            next;
+        }
         if(/^Short: (.)/i) {
             $short=$1;
         }
@@ -563,15 +690,10 @@ sub indexoptions {
 
 sub header {
     my ($f)=@_;
-    open(F, "<:crlf", "$f");
-    my @d;
-    while(<F>) {
-        s/%DATE/$date/g;
-        s/%VERSION/$version/g;
-        s/%GLOBALS/$globals/g;
-        push @d, $_;
-    }
-    close(F);
+    my $fh;
+    open($fh, "<:crlf", "$f");
+    my @d = render($fh, $f, 1);
+    close($fh);
     printdesc(@d);
 }
 
@@ -687,15 +809,22 @@ sub listglobals {
         open(F, "<:crlf", "$f") ||
             next;
         my $long;
+        my $start = 0;
         while(<F>) {
+            if(/^---/) {
+                if(!$start) {
+                    $start = 1;
+                    next;
+                }
+                else {
+                    last;
+                }
+            }
             if(/^Long: *(.*)/i) {
                 $long=$1;
             }
             elsif(/^Scope: global/i) {
                 push @globalopts, $long;
-                last;
-            }
-            elsif(/^---/) {
                 last;
             }
         }
@@ -721,17 +850,60 @@ sub sortnames {
 sub mainpage {
     my (@files) = @_;
     my $ret;
-    # show the page header
-    header("page-header");
+    my $fh;
+    open($fh, "<:crlf", "mainpage.idx") ||
+        return 1;
 
-    # output docs for all options
-    foreach my $f (sort sortnames @files) {
-        $ret += single($f, 0);
-    }
+    print <<HEADER
+.\\" **************************************************************************
+.\\" *                                  _   _ ____  _
+.\\" *  Project                     ___| | | |  _ \\| |
+.\\" *                             / __| | | | |_) | |
+.\\" *                            | (__| |_| |  _ <| |___
+.\\" *                             \\___|\\___/|_| \\_\\_____|
+.\\" *
+.\\" * Copyright (C) Daniel Stenberg, <daniel\@haxx.se>, et al.
+.\\" *
+.\\" * This software is licensed as described in the file COPYING, which
+.\\" * you should have received as part of this distribution. The terms
+.\\" * are also available at https://curl.se/docs/copyright.html.
+.\\" *
+.\\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\\" * copies of the Software, and permit persons to whom the Software is
+.\\" * furnished to do so, under the terms of the COPYING file.
+.\\" *
+.\\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\\" * KIND, either express or implied.
+.\\" *
+.\\" * SPDX-License-Identifier: curl
+.\\" *
+.\\" **************************************************************************
+.\\"
+.\\" DO NOT EDIT. Generated by the curl project gen.pl man page generator.
+.\\"
+.TH curl 1 "$date" "curl $version" "curl Manual"
+HEADER
+        ;
 
-    if(!$ret) {
-        header("page-footer");
+    while(<$fh>) {
+        my $f = $_;
+        chomp $f;
+        if($f =~ /^#/) {
+            # stardard comment
+            next;
+        }
+        if(/^%options/) {
+            # output docs for all options
+            foreach my $f (sort sortnames @files) {
+                $ret += single($f, 0);
+            }
+        }
+        else {
+            # render the file
+            header($f);
+        }
     }
+    close($fh);
     exit $ret if($ret);
 }
 

@@ -50,6 +50,7 @@ backend
 backends
 backoff
 backticks
+balancers
 Baratov
 basename
 bashrc
@@ -445,6 +446,7 @@ Makefile
 makefiles
 malloc
 mallocs
+manpage
 maprintf
 Marek
 Mavrogiannopoulos

@@ -40,12 +40,27 @@ sub checkfile {
         return;
     }
     open(my $fh, "<", "$f");
-    my $l = 1;
+    my $l;
     my $prevl;
     my $ignore = 0;
+    my $metadata = 0;
     while(<$fh>) {
         my $line = $_;
         chomp $line;
+        $l++;
+        if(($l == 1) && ($line =~ /^---/)) {
+            # first line is a meta-data divider, skip to the next one
+            $metadata = 1;
+            print STDERR "skip meta-data in $f\n";
+            next;
+        }
+        elsif($metadata) {
+            if($line !~ /^---/) {
+                next;
+            }
+            $metadata = 0;
+            next;
+        }
         if($line =~ /^(\`\`\`|\~\~\~)/) {
             # start or stop ignore-mode
             $ignore ^= 1;
@@ -87,7 +102,6 @@ sub checkfile {
             }
         }
         $prevl = $line;
-        $l++;
     }
     close($fh);
 }
