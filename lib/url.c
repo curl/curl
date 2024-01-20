@@ -814,7 +814,7 @@ static bool extract_if_dead(struct connectdata *conn,
 
       Curl_attach_connection(data, conn);
       dead = !Curl_conn_is_alive(data, conn, &input_pending);
-      if(input_pending) {
+      if(!dead && input_pending) {
         /* For reuse, we want a "clean" connection state. The includes
          * that we expect - in general - no waiting input data. Input
          * waiting might be a TLS Notify Close, for example. We reject
@@ -824,6 +824,9 @@ static bool extract_if_dead(struct connectdata *conn,
          * to install its own `connection_check` callback.
          */
         dead = TRUE;
+        infof(data, "Connection %" CURL_FORMAT_CURL_OFF_T
+              " is being treated as dead due to unexpected input from server",
+              conn->connection_id);
       }
       Curl_detach_connection(data);
     }
