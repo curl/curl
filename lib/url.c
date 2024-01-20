@@ -754,8 +754,9 @@ static bool conn_maxage(struct Curl_easy *data,
   idletime /= 1000; /* integer seconds is fine */
 
   if(idletime > data->set.maxage_conn) {
-    infof(data, "Too old connection (%" CURL_FORMAT_TIMEDIFF_T
-          " seconds idle), disconnect it", idletime);
+    infof(data, "Connection #%" CURL_FORMAT_CURL_OFF_T " is too old "
+          "(%" CURL_FORMAT_TIMEDIFF_T " seconds idle), disconnect it",
+          conn->connection_id, idletime);
     return TRUE;
   }
 
@@ -763,9 +764,9 @@ static bool conn_maxage(struct Curl_easy *data,
   lifetime /= 1000; /* integer seconds is fine */
 
   if(data->set.maxlifetime_conn && lifetime > data->set.maxlifetime_conn) {
-    infof(data,
-          "Too old connection (%" CURL_FORMAT_TIMEDIFF_T
-          " seconds since creation), disconnect it", lifetime);
+    infof(data, "Connection #%" CURL_FORMAT_CURL_OFF_T " is too old "
+          "(%" CURL_FORMAT_TIMEDIFF_T " since creation), disconnect it",
+          conn->connection_id, lifetime);
     return TRUE;
   }
 
