@@ -28,7 +28,7 @@ MANPAGE = $(top_builddir)/docs/curl.1
 
 include Makefile.inc
 
-EXTRA_DIST = $(DPAGES) MANPAGE.md gen.pl $(OTHERPAGES) CMakeLists.txt
+EXTRA_DIST = $(DPAGES) MANPAGE.md gen.pl $(SUPPORT) CMakeLists.txt mainpage.idx
 
 GEN = $(GN_$(V))
 GN_0 = @echo "  GENERATE" $@;
@@ -37,5 +37,5 @@ GN_ = $(GN_0)
 
 all: $(MANPAGE)
 
-$(MANPAGE): $(DPAGES) $(OTHERPAGES) Makefile.inc gen.pl
+$(MANPAGE): $(DPAGES) $(SUPPORT) mainpage.idx Makefile.inc gen.pl
 	$(GEN)(rm -f $(MANPAGE) && cd $(srcdir) && @PERL@ ./gen.pl mainpage $(DPAGES) > $(builddir)/manpage.tmp && mv $(builddir)/manpage.tmp $(MANPAGE))

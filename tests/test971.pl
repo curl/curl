@@ -37,11 +37,11 @@ sub cmdfiles {
     my ($dir)=@_;
 
     opendir(my $dh, $dir) || die "Can't opendir $dir: $!";
-    my @opts = grep { /\.d$/ && -f "$dir/$_" } readdir($dh);
+    my @opts = grep { /[a-z0-9].*\.md$/ && -f "$dir/$_" } readdir($dh);
     closedir $dh;
 
     for(@opts) {
-        $_ =~ s/\.d$//;
+        $_ =~ s/\.md$//;
         $file{$_}=1;
     }
     return @opts;
@@ -77,7 +77,7 @@ sub mentions {
 
 sub versioncheck {
     my ($f, $v)=@_;
-    open(my $fh, "<", "$cmddir/$f.d");
+    open(my $fh, "<", "$cmddir/$f.md");
     while(<$fh>) {
         chomp;
         if(/^Added: ([0-9.]+)/) {
