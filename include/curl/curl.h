@@ -1143,7 +1143,7 @@ typedef enum {
    *
    * For large file support, there is also a _LARGE version of the key
    * which takes an off_t type, allowing platforms with larger off_t
-   * sizes to handle larger files.  See below for INFILESIZE_LARGE.
+   * sizes to handle larger files. See below for INFILESIZE_LARGE.
    */
   CURLOPT(CURLOPT_INFILESIZE, CURLOPTTYPE_LONG, 14),
 
@@ -1176,7 +1176,7 @@ typedef enum {
    *
    * Note there is also a _LARGE version of this key which uses
    * off_t types, allowing for large file offsets on platforms which
-   * use larger-than-32-bit off_t's.  Look below for RESUME_FROM_LARGE.
+   * use larger-than-32-bit off_t's. Look below for RESUME_FROM_LARGE.
    */
   CURLOPT(CURLOPT_RESUME_FROM, CURLOPTTYPE_LONG, 21),
 
@@ -1502,7 +1502,7 @@ typedef enum {
   CURLOPT(CURLOPT_PROXYAUTH, CURLOPTTYPE_VALUES, 111),
 
   /* Option that changes the timeout, in seconds, associated with getting a
-     response.  This is different from transfer timeout time and essentially
+     response. This is different from transfer timeout time and essentially
      places a demand on the server to acknowledge commands in a timely
      manner. For FTP, SMTP, IMAP and POP3. */
   CURLOPT(CURLOPT_SERVER_RESPONSE_TIMEOUT, CURLOPTTYPE_LONG, 112),
@@ -1530,7 +1530,7 @@ typedef enum {
   CURLOPT(CURLOPT_RESUME_FROM_LARGE, CURLOPTTYPE_OFF_T, 116),
 
   /* Sets the maximum size of data that will be downloaded from
-   * an HTTP or FTP server.  See MAXFILESIZE above for the LONG version.
+   * an HTTP or FTP server. See MAXFILESIZE above for the LONG version.
    */
   CURLOPT(CURLOPT_MAXFILESIZE_LARGE, CURLOPTTYPE_OFF_T, 117),
 
@@ -1713,7 +1713,7 @@ typedef enum {
   CURLOPT(CURLOPT_USERNAME, CURLOPTTYPE_STRINGPOINT, 173),
   CURLOPT(CURLOPT_PASSWORD, CURLOPTTYPE_STRINGPOINT, 174),
 
-    /* "name" and "pwd" to use with Proxy when fetching. */
+  /* "name" and "pwd" to use with Proxy when fetching. */
   CURLOPT(CURLOPT_PROXYUSERNAME, CURLOPTTYPE_STRINGPOINT, 175),
   CURLOPT(CURLOPT_PROXYPASSWORD, CURLOPTTYPE_STRINGPOINT, 176),
 
@@ -1833,9 +1833,7 @@ typedef enum {
 
      libcurl will ask for the compressed methods it knows of, and if that
      isn't any, it will not ask for transfer-encoding at all even if this
-     option is set to 1.
-
-  */
+     option is set to 1. */
   CURLOPT(CURLOPT_TRANSFER_ENCODING, CURLOPTTYPE_LONG, 207),
 
   /* Callback function for closing socket (instead of close(2)). The callback
@@ -2703,10 +2701,10 @@ CURL_EXTERN CURLcode curl_global_init(long flags);
  * DESCRIPTION
  *
  * curl_global_init() or curl_global_init_mem() should be invoked exactly once
- * for each application that uses libcurl.  This function can be used to
+ * for each application that uses libcurl. This function can be used to
  * initialize libcurl and set user defined memory management callback
- * functions.  Users can implement memory management routines to check for
- * memory leaks, check for mis-use of the curl library etc.  User registered
+ * functions. Users can implement memory management routines to check for
+ * memory leaks, check for mis-use of the curl library etc. User registered
  * callback routines will be invoked by this library instead of the system
  * memory management routines like malloc, free etc.
  */
@@ -3169,7 +3167,7 @@ CURL_EXTERN curl_version_info_data *curl_version_info(CURLversion);
  * DESCRIPTION
  *
  * The curl_easy_strerror function may be used to turn a CURLcode value
- * into the equivalent human readable error string.  This is useful
+ * into the equivalent human readable error string. This is useful
  * for printing meaningful error messages.
  */
 CURL_EXTERN const char *curl_easy_strerror(CURLcode);
@@ -3180,7 +3178,7 @@ CURL_EXTERN const char *curl_easy_strerror(CURLcode);
  * DESCRIPTION
  *
  * The curl_share_strerror function may be used to turn a CURLSHcode value
- * into the equivalent human readable error string.  This is useful
+ * into the equivalent human readable error string. This is useful
  * for printing meaningful error messages.
  */
 CURL_EXTERN const char *curl_share_strerror(CURLSHcode);
