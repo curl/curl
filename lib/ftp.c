@@ -363,10 +363,11 @@ static CURLcode ReceivedServerConnect(struct Curl_easy *data, bool *received)
   curl_socket_t data_sock = conn->sock[SECONDARYSOCKET];
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   struct pingpong *pp = &ftpc->pp;
-  int result;
+  int socketstate = 0;
   timediff_t timeout_ms;
   ssize_t nread;
   int ftpcode;
+  bool response = FALSE;
 
   *received = FALSE;
 
@@ -379,17 +380,21 @@ static CURLcode ReceivedServerConnect(struct Curl_easy *data, bool *received)
   }
 
   /* First check whether there is a cached response from server */
-  if(pp->cache_size && pp->cache && pp->cache[0] > '3') {
+  if(Curl_dyn_len(&pp->recvbuf) && (*Curl_dyn_ptr(&pp->recvbuf) > '3')) {
     /* Data connection could not be established, let's return */
     infof(data, "There is negative response in cache while serv connect");
     (void)Curl_GetFTPResponse(data, &nread, &ftpcode);
     return CURLE_FTP_ACCEPT_FAILED;
   }
 
-  result = Curl_socket_check(ctrl_sock, data_sock, CURL_SOCKET_BAD, 0);
+  if(pp->overflow)
+    /* there is pending control data still in the buffer to read */
+    response = TRUE;
+  else
+    socketstate = Curl_socket_check(ctrl_sock, data_sock, CURL_SOCKET_BAD, 0);
 
   /* see if the connection request is already here */
-  switch(result) {
+  switch(socketstate) {
   case -1: /* error */
     /* let's die here */
     failf(data, "Error while waiting for server connect");
@@ -397,23 +402,23 @@ static CURLcode ReceivedServerConnect(struct Curl_easy *data, bool *received)
   case 0:  /* Server connect is not received yet */
     break; /* loop */
   default:
-
-    if(result & CURL_CSELECT_IN2) {
+    if(socketstate & CURL_CSELECT_IN2) {
       infof(data, "Ready to accept data connection from server");
       *received = TRUE;
     }
-    else if(result & CURL_CSELECT_IN) {
-      infof(data, "Ctrl conn has data while waiting for data conn");
-      (void)Curl_GetFTPResponse(data, &nread, &ftpcode);
-
-      if(ftpcode/100 > 3)
-        return CURLE_FTP_ACCEPT_FAILED;
-
-      return CURLE_WEIRD_SERVER_REPLY;
-    }
-
+    else if(socketstate & CURL_CSELECT_IN)
+      response = TRUE;
     break;
-  } /* switch() */
+  }
+  if(response) {
+    infof(data, "Ctrl conn has data while waiting for data conn");
+    (void)Curl_GetFTPResponse(data, &nread, &ftpcode);
+
+    if(ftpcode/100 > 3)
+      return CURLE_FTP_ACCEPT_FAILED;
+
+    return CURLE_WEIRD_SERVER_REPLY;
+  }
 
   return CURLE_OK;
 }
@@ -554,7 +559,7 @@ static CURLcode ftp_readresp(struct Curl_easy *data,
 #ifdef HAVE_GSSAPI
   {
     struct connectdata *conn = data->conn;
-    char * const buf = data->state.buffer;
+    char * const buf = Curl_dyn_ptr(&data->conn->proto.ftpc.pp.recvbuf);
 
     /* handle the security-oriented responses 6xx ***/
     switch(code) {
@@ -660,7 +665,7 @@ CURLcode Curl_GetFTPResponse(struct Curl_easy *data,
      *
      */
 
-    if(pp->cache && (cache_skip < 2)) {
+    if(Curl_dyn_len(&pp->recvbuf) && (cache_skip < 2)) {
       /*
        * There's a cache left since before. We then skipping the wait for
        * socket action, unless this is the same cache like the previous round
@@ -688,7 +693,7 @@ CURLcode Curl_GetFTPResponse(struct Curl_easy *data,
     if(result)
       break;
 
-    if(!nread && pp->cache)
+    if(!nread && Curl_dyn_len(&pp->recvbuf))
       /* bump cache skip counter as on repeated skips we must wait for more
          data */
       cache_skip++;
@@ -1821,7 +1826,9 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
   struct Curl_dns_entry *addr = NULL;
   enum resolve_t rc;
   unsigned short connectport; /* the local port connect() should use! */
-  char *str = &data->state.buffer[4];  /* start on the first letter */
+  struct pingpong *pp = &ftpc->pp;
+  char *str =
+    Curl_dyn_ptr(&pp->recvbuf) + 4; /* start on the first letter */
 
   /* if we come here again, make sure the former name is cleared */
   Curl_safefree(ftpc->newhost);
@@ -2099,8 +2106,9 @@ static CURLcode ftp_state_mdtm_resp(struct Curl_easy *data,
       /* we got a time. Format should be: "YYYYMMDDHHMMSS[.sss]" where the
          last .sss part is optional and means fractions of a second */
       int year, month, day, hour, minute, second;
-      if(ftp_213_date(&data->state.buffer[4],
-                      &year, &month, &day, &hour, &minute, &second)) {
+      struct pingpong *pp = &ftpc->pp;
+      char *resp = Curl_dyn_ptr(&pp->recvbuf) + 4;
+      if(ftp_213_date(resp, &year, &month, &day, &hour, &minute, &second)) {
         /* we have a time, reformat it */
         char timebuf[24];
         msnprintf(timebuf, sizeof(timebuf),
@@ -2311,7 +2319,8 @@ static CURLcode ftp_state_size_resp(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
   curl_off_t filesize = -1;
-  char *buf = data->state.buffer;
+  char *buf = Curl_dyn_ptr(&data->conn->proto.ftpc.pp.recvbuf);
+  size_t len = data->conn->proto.ftpc.pp.nfinal;
 
   /* get the size from the ascii string: */
   if(ftpcode == 213) {
@@ -2319,13 +2328,13 @@ static CURLcode ftp_state_size_resp(struct Curl_easy *data,
        for all the digits at the end of the response and parse only those as a
        number. */
     char *start = &buf[4];
-    char *fdigit = strchr(start, '\r');
+    char *fdigit = memchr(start, '\r', len);
     if(fdigit) {
-      do
+      fdigit--;
+      if(*fdigit == '\n')
         fdigit--;
-      while(ISDIGIT(*fdigit) && (fdigit > start));
-      if(!ISDIGIT(*fdigit))
-        fdigit++;
+      while(ISDIGIT(fdigit[-1]) && (fdigit > start))
+        fdigit--;
     }
     else
       fdigit = start;
@@ -2494,7 +2503,7 @@ static CURLcode ftp_state_get_resp(struct Curl_easy *data,
        *
        * Example D above makes this parsing a little tricky */
       char *bytes;
-      char *buf = data->state.buffer;
+      char *buf = Curl_dyn_ptr(&conn->proto.ftpc.pp.recvbuf);
       bytes = strstr(buf, " bytes");
       if(bytes) {
         long in = (long)(--bytes-buf);
@@ -2763,7 +2772,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
     case FTP_AUTH:
       /* we have gotten the response to a previous AUTH command */
 
-      if(pp->cache_size)
+      if(pp->overflow)
         return CURLE_WEIRD_SERVER_REPLY; /* Forbid pipelining in response. */
 
       /* RFC2228 (page 5) says:
@@ -2861,8 +2870,8 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
 
     case FTP_PWD:
       if(ftpcode == 257) {
-        char *ptr = &data->state.buffer[4];  /* start on the first letter */
-        const size_t buf_size = data->set.buffer_size;
+        char *ptr = Curl_dyn_ptr(&pp->recvbuf) + 4; /* start on the first
+                                                       letter */
         bool entry_extracted = FALSE;
         struct dynbuf out;
         Curl_dyn_init(&out, 1000);
@@ -2877,8 +2886,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
         */
 
         /* scan for the first double-quote for non-standard responses */
-        while(ptr < &data->state.buffer[buf_size]
-              && *ptr != '\n' && *ptr != '\0' && *ptr != '"')
+        while(*ptr != '\n' && *ptr != '\0' && *ptr != '"')
           ptr++;
 
         if('\"' == *ptr) {
@@ -2950,7 +2958,8 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
 
     case FTP_SYST:
       if(ftpcode == 215) {
-        char *ptr = &data->state.buffer[4];  /* start on the first letter */
+        char *ptr = Curl_dyn_ptr(&pp->recvbuf) + 4; /* start on the first
+                                                       letter */
         char *os;
         char *start;
 
@@ -3191,8 +3200,7 @@ static CURLcode ftp_connect(struct Curl_easy *data,
     conn->bits.ftp_use_control_ssl = TRUE;
   }
 
-  Curl_pp_setup(pp); /* once per transfer */
-  Curl_pp_init(data, pp); /* init the generic pingpong data */
+  Curl_pp_init(pp); /* once per transfer */
 
   /* When we connect, we start in the state where we await the 220
      response */
