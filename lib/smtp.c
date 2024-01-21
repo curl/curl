@@ -250,8 +250,8 @@ static bool smtp_endofresp(struct Curl_easy *data, struct connectdata *conn,
  */
 static CURLcode smtp_get_message(struct Curl_easy *data, struct bufref *out)
 {
-  char *message = data->state.buffer;
-  size_t len = strlen(message);
+  char *message = Curl_dyn_ptr(&data->conn->proto.smtpc.pp.recvbuf);
+  size_t len = data->conn->proto.smtpc.pp.nfinal;
 
   if(len > 4) {
     /* Find the start of the message */
@@ -859,7 +859,7 @@ static CURLcode smtp_state_starttls_resp(struct Curl_easy *data,
   (void)instate; /* no use for this yet */
 
   /* Pipelining in response is forbidden. */
-  if(data->conn->proto.smtpc.pp.cache_size)
+  if(data->conn->proto.smtpc.pp.overflow)
     return CURLE_WEIRD_SERVER_REPLY;
 
   if(smtpcode != 220) {
@@ -883,8 +883,8 @@ static CURLcode smtp_state_ehlo_resp(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
-  const char *line = data->state.buffer;
-  size_t len = strlen(line);
+  const char *line = Curl_dyn_ptr(&smtpc->pp.recvbuf);
+  size_t len = smtpc->pp.nfinal;
 
   (void)instate; /* no use for this yet */
 
@@ -1033,8 +1033,8 @@ static CURLcode smtp_state_command_resp(struct Curl_easy *data, int smtpcode,
 {
   CURLcode result = CURLE_OK;
   struct SMTP *smtp = data->req.p.smtp;
-  char *line = data->state.buffer;
-  size_t len = strlen(line);
+  char *line = Curl_dyn_ptr(&data->conn->proto.smtpc.pp.recvbuf);
+  size_t len = data->conn->proto.smtpc.pp.nfinal;
 
   (void)instate; /* no use for this yet */
 
@@ -1044,12 +1044,8 @@ static CURLcode smtp_state_command_resp(struct Curl_easy *data, int smtpcode,
     result = CURLE_WEIRD_SERVER_REPLY;
   }
   else {
-    /* Temporarily add the LF character back and send as body to the client */
-    if(!data->req.no_body) {
-      line[len] = '\n';
-      result = Curl_client_write(data, CLIENTWRITE_BODY, line, len + 1);
-      line[len] = '\0';
-    }
+    if(!data->req.no_body)
+      result = Curl_client_write(data, CLIENTWRITE_BODY, line, len);
 
     if(smtpcode != 1) {
       if(smtp->rcpt) {
@@ -1361,8 +1357,7 @@ static CURLcode smtp_connect(struct Curl_easy *data, bool *done)
   Curl_sasl_init(&smtpc->sasl, data, &saslsmtp);
 
   /* Initialise the pingpong layer */
-  Curl_pp_setup(pp);
-  Curl_pp_init(data, pp);
+  Curl_pp_init(pp);
 
   /* Parse the URL options */
   result = smtp_parse_url_options(conn);
@@ -1540,6 +1535,8 @@ static CURLcode smtp_perform(struct Curl_easy *data, bool *connected,
 static CURLcode smtp_do(struct Curl_easy *data, bool *done)
 {
   CURLcode result = CURLE_OK;
+  DEBUGASSERT(data);
+  DEBUGASSERT(data->conn);
   *done = FALSE; /* default to false */
 
   /* Parse the custom request */

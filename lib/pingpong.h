@@ -47,16 +47,11 @@ typedef enum {
  * It holds response cache and non-blocking sending data.
  */
 struct pingpong {
-  char *cache;     /* data cache between getresponse()-calls */
-  size_t cache_size;  /* size of cache in bytes */
   size_t nread_resp;  /* number of bytes currently read of a server response */
-  char *linestart_resp; /* line start pointer for the server response
-                           reader function */
   bool pending_resp;  /* set TRUE when a server response is pending or in
                          progress, and is cleared once the last response is
                          read */
-  char *sendthis; /* allocated pointer to a buffer that is to be sent to the
-                     server */
+  char *sendthis; /* pointer to a buffer that is to be sent to the server */
   size_t sendleft; /* number of bytes left to send from the sendthis buffer */
   size_t sendsize; /* total size of the sendthis buffer */
   struct curltime response; /* set to Curl_now() when a command has been sent
@@ -64,6 +59,10 @@ struct pingpong {
   timediff_t response_time; /* When no timeout is given, this is the amount of
                                milliseconds we await for a server response. */
   struct dynbuf sendbuf;
+  struct dynbuf recvbuf;
+  size_t overflow; /* number of bytes left after a final response line */
+  size_t nfinal;   /* number of bytes in the final response line, which
+                      after a match is first in the receice buffer */
 
   /* Function pointers the protocols MUST implement and provide for the
      pingpong layer to function */
@@ -90,10 +89,7 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data, struct pingpong *pp,
                            bool block, bool disconnecting);
 
 /* initialize stuff to prepare for reading a fresh new response */
-void Curl_pp_init(struct Curl_easy *data, struct pingpong *pp);
-
-/* setup for the transfer */
-void Curl_pp_setup(struct pingpong *pp);
+void Curl_pp_init(struct pingpong *pp);
 
 /* Returns timeout in ms. 0 or negative number means the timeout has already
    triggered */

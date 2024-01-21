@@ -38,7 +38,7 @@ ftp
 <name>
 FTP dir list PASV with slow response
 </name>
-<command>
+<command option="binary-trace">
 ftp://%HOSTIP:%FTPPORT/
 </command>
 </client>
