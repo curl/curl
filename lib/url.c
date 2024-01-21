@@ -824,7 +824,7 @@ static bool extract_if_dead(struct connectdata *conn,
          * to install its own `connection_check` callback.
          */
         dead = TRUE;
-        infof(data, "Connection %" CURL_FORMAT_CURL_OFF_T
+        infof(data, "Connection #%" CURL_FORMAT_CURL_OFF_T
               " is being treated as dead due to unexpected input from server",
               conn->connection_id);
       }
@@ -832,7 +832,7 @@ static bool extract_if_dead(struct connectdata *conn,
     }
 
     if(dead) {
-      infof(data, "Connection %" CURL_FORMAT_CURL_OFF_T " seems to be dead",
+      infof(data, "Connection #%" CURL_FORMAT_CURL_OFF_T " seems to be dead",
             conn->connection_id);
       Curl_conncache_remove_conn(data, conn, FALSE);
       return TRUE;
