@@ -304,18 +304,15 @@ if(ENABLE_IPV6 AND NOT WIN32)
   endif()
 endif()
 
-if(USE_MANUAL)
-    #nroff is currently only used when USE_MANUAL is set, so we can prevent the warning of no *NROFF if USE_MANUAL is OFF (or not defined), by not even looking for NROFF..
-    curl_nroff_check()
-endif()
 find_package(Perl)
 
-cmake_dependent_option(ENABLE_MANUAL "to provide the built-in manual"
-    ON "NROFF_USEFUL;PERL_FOUND"
-    OFF)
+option(ENABLE_MANUAL "to provide the built-in manual" OFF)
 
-if(ENABLE_MANUAL)
-  set(USE_MANUAL ON)
+if(ENABLE_MANUAL AND PERL_FOUND)
+  curl_nroff_check()
+  if(NROFF_USEFUL)
+    set(USE_MANUAL ON)
+  endif()
 endif()
 
 if(CURL_STATIC_CRT)
