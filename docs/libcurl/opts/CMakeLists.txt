@@ -28,3 +28,7 @@ include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 add_manual_pages(man_MANS)
 add_custom_target(opts-man DEPENDS ${man_MANS})
 add_dependencies(man opts-man)
+if(NOT CURL_DISABLE_INSTALL)
+  install(FILES "$<LIST:TRANSFORM,${man_MANS},PREPEND,${CMAKE_CURRENT_BINARY_DIR}/>"
+          DESTINATION ${CMAKE_INSTALL_MANDIR}/man3)
+endif()

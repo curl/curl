@@ -56,5 +56,9 @@ add_custom_command(OUTPUT libcurl-symbols.md
 
 add_manual_pages(man_MANS)
 add_custom_target(man ALL DEPENDS ${man_MANS})
+if(NOT CURL_DISABLE_INSTALL)
+  install(FILES "$<LIST:TRANSFORM,${man_MANS},PREPEND,${CMAKE_CURRENT_BINARY_DIR}/>"
+          DESTINATION ${CMAKE_INSTALL_MANDIR}/man3)
+endif()
 
 add_subdirectory(opts)
