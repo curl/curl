@@ -654,49 +654,59 @@ enum doh_slots {
  * request, as it will be cleared between multiple ones
  */
 struct SingleRequest {
-  curl_off_t size;        /* -1 if unknown at this point */
-  curl_off_t maxdownload; /* in bytes, the maximum amount of data to fetch,
-                             -1 means unlimited */
-  curl_off_t bytecount;         /* total number of bytes read */
-  curl_off_t writebytecount;    /* number of bytes written */
+  curl_off_t nrcvd_data;       /* number of data(body) bytes received */
+  curl_off_t nrecv_data_max;   /* max data bytes to receive, -1 no limit */
+  curl_off_t nrcvd_hds;        /* number of header bytes received
+                                 (excluding CONNECT headers) */
+  curl_off_t nrcvd_hds_all;    /* number of all header bytes received
+                                 (including CONNECT) */
+  curl_off_t nrcvd_hds_interim; /* number of header bytes received, which
+                                 are from an interim response (status < 200)
+                                 When we check if anything has been transferred
+                                 at the end of a connection, we use this
+                                 counter to make only a 100 reply (without
+                                 a following second response code) result
+                                 in a CURLE_GOT_NOTHING error code */
+  curl_off_t nsent_data;       /* number of data(body) bytes sent */
 
-  curl_off_t pendingheader;      /* this many bytes left to send is actually
-                                    header and not body */
-  struct curltime start;         /* transfer started at this time */
-  unsigned int headerbytecount;  /* received server headers (not CONNECT
-                                    headers) */
-  unsigned int allheadercount;   /* all received headers (server + CONNECT) */
-  unsigned int deductheadercount; /* this amount of bytes doesn't count when
-                                     we check if anything has been transferred
-                                     at the end of a connection. We use this
-                                     counter to make only a 100 reply (without
-                                     a following second response code) result
-                                     in a CURLE_GOT_NOTHING error code */
-  int headerline;               /* counts header lines to better track the
-                                   first one */
-  curl_off_t offset;            /* possible resume offset read from the
-                                   Content-Range: header */
-  int httpcode;                 /* error code from the 'HTTP/1.? XXX' or
-                                   'RTSP/1.? XXX' line */
-  int keepon;
-  struct curltime start100;      /* time stamp to wait for the 100 code from */
-  enum expect100 exp100;        /* expect 100 continue state */
-  enum upgrade101 upgr101;      /* 101 upgrade state */
+  struct curltime start;       /* transfer started at this time */
+  struct curltime start100;    /* time stamp to wait for the 100 code from */
 
-  /* Client Writer stack, handles trasnfer- and content-encodings, protocol
-   * checks, pausing by client callbacks. */
-  struct Curl_cwriter *writer_stack;
-  time_t timeofdoc;
-  long bodywrites;
-  char *location;   /* This points to an allocated version of the Location:
-                       header data */
-  char *newurl;     /* Set to the new URL to use when a redirect or a retry is
-                       wanted */
+  int keepon;                  /* KEEP_* bit flags indicating the state of
+                                  transfer handling */
+  char *newurl;                /* Set to the new URL to use when a redirect
+                                  or a retry is wanted */
 
+  int httpcode;                /* error code from the 'HTTP/1.? XXX' or
+                                  'RTSP/1.? XXX' line */
+  enum expect100 exp100;       /* expect 100 continue state */
+  enum upgrade101 upgr101;     /* 101 upgrade state */
+#if defined(_WIN32) && defined(USE_WINSOCK)
+  struct curltime last_sndbuf_update;  /* last time readwrite_upload called
+                                          win_update_buffer_size */
+#endif
+
+  curl_off_t resp_data_len;    /* length of data in response, -1 if unknown */
+  curl_off_t resp_data_offset; /* bytes offset from which response starts,
+                                  e.g. from Content-Range: header, or 0 */
+  time_t resp_last_modified;   /* server provided last modification time of
+                                  response data, 0 if not known/available */
+  char *resp_location;         /* Location header of the response if present,
+                                  allocated. */
+  int resp_hds_nlines;         /* number of header lines received so far
+                                  in the current response, restarted on
+                                  interim responses */
+
+  struct Curl_cwriter *cw_stack; /* Client writers for this transfer */
+
+  /* TODO: fix this weirdness of pointers and offsets to (hopefully
+   * existing) buffers that are owned outside this struct */
   /* 'upload_present' is used to keep a byte counter of how much data there is
      still left in the buffer, aimed for upload. */
   ssize_t upload_present;
 
+  curl_off_t pendingheader;    /* this many bytes left to send is actually
+                                  header and not body */
   /* 'upload_fromhere' is used as a read-pointer when we uploaded parts of a
      buffer, so the next read should read from where this pointer points to,
      and the 'upload_present' contains the number of bytes available at this
@@ -722,33 +732,32 @@ struct SingleRequest {
 #ifndef CURL_DISABLE_DOH
   struct dohdata *doh; /* DoH specific data for this request */
 #endif
-#if defined(_WIN32) && defined(USE_WINSOCK)
-  struct curltime last_sndbuf_update;  /* last time readwrite_upload called
-                                          win_update_buffer_size */
-#endif
   char fread_eof[2]; /* the body read callback (index 0) returned EOF or
                         the trailer read callback (index 1) returned EOF */
 #ifndef CURL_DISABLE_COOKIES
   unsigned char setcookies;
 #endif
-  BIT(header);        /* incoming data has HTTP header */
-  BIT(content_range); /* set TRUE if Content-Range: was found */
-  BIT(download_done); /* set to TRUE when download is complete */
-  BIT(eos_written);   /* iff EOS has been written to client */
-  BIT(upload_done);   /* set to TRUE when doing chunked transfer-encoding
-                         upload and we're uploading the last chunk */
-  BIT(ignorebody);    /* we read a response-body but we ignore it! */
-  BIT(http_bodyless); /* HTTP response status code is between 100 and 199,
-                         204 or 304 */
-  BIT(chunk);         /* if set, this is a chunked transfer-encoding */
-  BIT(ignore_cl);     /* ignore content-length */
-  BIT(upload_chunky); /* set TRUE if we are doing chunked transfer-encoding
-                         on upload */
-  BIT(getheader);    /* TRUE if header parsing is wanted */
-  BIT(forbidchunk);  /* used only to explicitly forbid chunk-upload for
-                        specific upload buffers. See readmoredata() in http.c
-                        for details. */
-  BIT(no_body);      /* the response has no body */
+
+  BIT(req_sent);          /* TRUE iff complete request has been sent */
+  BIT(req_body_chunked);  /* TRUE iff request body uses "chunked" TE */
+  BIT(req_body_never_chunk); /* TRUE iff "chunked" TE for requestion bodies
+                         is not allowed. RTSP does this and also see
+                         readmoredata() in http.c for usage. */
+
+  BIT(resp_rcvd);         /* TRUE iff received the complete response */
+  BIT(resp_hds_expected); /* TRUE if header expected in response */
+  BIT(resp_hds_recv);     /* TRUE iff response headers are currently parsed */
+  BIT(resp_body_unwanted); /* TRUE iff response body not wanted */
+  BIT(resp_body_skip);    /* TRUE iff response has body, but we skip it */
+  BIT(resp_body_chunked); /* TRUE iff response body uses "chunked" TE */
+  BIT(resp_bodyless);     /* TRUE iff response has no body, even though
+                             headers describe it. HTTP response status codes
+                             between 100 and 199, 204 or 304 do this */
+  BIT(resp_clen_ignore);  /* TRUE iff Content-Length is to be ignored */
+  BIT(resp_with_content_range); /* TRUE iff Content-Range: in response */
+
+  BIT(cw_written);        /* TRUE iff client written to at least once */
+  BIT(cw_written_eos);    /* TRUE iff EOS has been written to client */
 };
 
 /*

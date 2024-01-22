@@ -479,13 +479,13 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
               tm->tm_hour,
               tm->tm_min,
               tm->tm_sec,
-              data->req.no_body ? "": "\r\n");
+              data->req.resp_body_unwanted ? "": "\r\n");
     result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
     if(result)
       return result;
     /* set the file size to make it available post transfer */
     Curl_pgrsSetDownloadSize(data, expected_size);
-    if(data->req.no_body)
+    if(data->req.resp_body_unwanted)
       return result;
   }
 
@@ -517,8 +517,8 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
   }
 
   /* A high water mark has been specified so we obey... */
-  if(data->req.maxdownload > 0)
-    expected_size = data->req.maxdownload;
+  if(data->req.nrecv_data_max > 0)
+    expected_size = data->req.nrecv_data_max;
 
   if(!fstated || (expected_size <= 0))
     size_known = FALSE;

@@ -666,14 +666,14 @@ static CURLcode wssh_statemach_act(struct Curl_easy *data, bool *block)
         /* now, decrease the size of the read */
         if(data->state.infilesize > 0) {
           data->state.infilesize -= data->state.resume_from;
-          data->req.size = data->state.infilesize;
+          data->req.resp_data_len = data->state.infilesize;
           Curl_pgrsSetUploadSize(data, data->state.infilesize);
         }
 
         sshc->offset += data->state.resume_from;
       }
       if(data->state.infilesize > 0) {
-        data->req.size = data->state.infilesize;
+        data->req.resp_data_len = data->state.infilesize;
         Curl_pgrsSetUploadSize(data, data->state.infilesize);
       }
       /* upload data */
@@ -753,16 +753,16 @@ static CURLcode wssh_statemach_act(struct Curl_easy *data, bool *block)
       }
       else {
         failf(data, "wolfssh SFTP open failed: %d", rc);
-        data->req.size = -1;
-        data->req.maxdownload = -1;
+        data->req.resp_data_len = -1;
+        data->req.nrecv_data_max = -1;
         Curl_pgrsSetDownloadSize(data, -1);
         return CURLE_SSH;
       }
 
       size = ((curl_off_t)attrs.sz[1] <<32) | attrs.sz[0];
 
-      data->req.size = size;
-      data->req.maxdownload = size;
+      data->req.resp_data_len = size;
+      data->req.nrecv_data_max = size;
       Curl_pgrsSetDownloadSize(data, size);
 
       infof(data, "SFTP download %" CURL_FORMAT_CURL_OFF_T " bytes", size);
@@ -775,14 +775,15 @@ static CURLcode wssh_statemach_act(struct Curl_easy *data, bool *block)
       }
 
       /* Setup the actual download */
-      if(data->req.size == 0) {
+      if(data->req.resp_data_len == 0) {
         /* no data to transfer */
         Curl_setup_transfer(data, -1, -1, FALSE, -1);
         infof(data, "File already completely downloaded");
         state(data, SSH_STOP);
         break;
       }
-      Curl_setup_transfer(data, FIRSTSOCKET, data->req.size, FALSE, -1);
+      Curl_setup_transfer(data, FIRSTSOCKET, data->req.resp_data_len,
+                          FALSE, -1);
 
       /* not set by Curl_setup_transfer to preserve keepon bits */
       conn->writesockfd = conn->sockfd;
@@ -829,7 +830,7 @@ static CURLcode wssh_statemach_act(struct Curl_easy *data, bool *block)
 
     case SSH_SFTP_READDIR_INIT:
       Curl_pgrsSetDownloadSize(data, -1);
-      if(data->req.no_body) {
+      if(data->req.resp_body_unwanted) {
         state(data, SSH_STOP);
         break;
       }
@@ -963,7 +964,7 @@ static CURLcode wssh_do(struct Curl_easy *data, bool *done)
   struct ssh_conn *sshc = &conn->proto.sshc;
 
   *done = FALSE; /* default to false */
-  data->req.size = -1; /* make sure this is unknown at this point */
+  data->req.resp_data_len = -1; /* make sure this is unknown at this point */
   sshc->actualcode = CURLE_OK; /* reset error code */
   sshc->secondCreateDirs = 0;   /* reset the create dir attempt state
                                    variable */

@@ -1333,7 +1333,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         /* now, decrease the size of the read */
         if(data->state.infilesize > 0) {
           data->state.infilesize -= data->state.resume_from;
-          data->req.size = data->state.infilesize;
+          data->req.resp_data_len = data->state.infilesize;
           Curl_pgrsSetUploadSize(data, data->state.infilesize);
         }
 
@@ -1344,7 +1344,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         }
       }
       if(data->state.infilesize > 0) {
-        data->req.size = data->state.infilesize;
+        data->req.resp_data_len = data->state.infilesize;
         Curl_pgrsSetUploadSize(data, data->state.infilesize);
       }
       /* upload data */
@@ -1419,7 +1419,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
 
     case SSH_SFTP_READDIR_INIT:
       Curl_pgrsSetDownloadSize(data, -1);
-      if(data->req.no_body) {
+      if(data->req.resp_body_unwanted) {
         state(data, SSH_STOP);
         break;
       }
@@ -1613,8 +1613,8 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
          * OR the server doesn't return a file size with a stat()
          * OR file size is 0
          */
-        data->req.size = -1;
-        data->req.maxdownload = -1;
+        data->req.resp_data_len = -1;
+        data->req.nrecv_data_max = -1;
         Curl_pgrsSetDownloadSize(data, -1);
         size = 0;
       }
@@ -1673,8 +1673,8 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
             break;
           }
         }
-        data->req.size = size;
-        data->req.maxdownload = size;
+        data->req.resp_data_len = size;
+        data->req.nrecv_data_max = size;
         Curl_pgrsSetDownloadSize(data, size);
       }
 
@@ -1701,8 +1701,8 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
           }
         }
         /* Now store the number of bytes we are expected to download */
-        data->req.size = size - data->state.resume_from;
-        data->req.maxdownload = size - data->state.resume_from;
+        data->req.resp_data_len = size - data->state.resume_from;
+        data->req.nrecv_data_max = size - data->state.resume_from;
         Curl_pgrsSetDownloadSize(data,
                                  size - data->state.resume_from);
 
@@ -1715,14 +1715,15 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
     }
 
     /* Setup the actual download */
-    if(data->req.size == 0) {
+    if(data->req.resp_data_len == 0) {
       /* no data to transfer */
       Curl_setup_transfer(data, -1, -1, FALSE, -1);
       infof(data, "File already completely downloaded");
       state(data, SSH_STOP);
       break;
     }
-    Curl_setup_transfer(data, FIRSTSOCKET, data->req.size, FALSE, -1);
+    Curl_setup_transfer(data, FIRSTSOCKET, data->req.resp_data_len,
+                        FALSE, -1);
 
     /* not set by Curl_setup_transfer to preserve keepon bits */
     conn->writesockfd = conn->sockfd;
@@ -1846,7 +1847,8 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       }
 
       /* upload data */
-      Curl_setup_transfer(data, -1, data->req.size, FALSE, FIRSTSOCKET);
+      Curl_setup_transfer(data, -1, data->req.resp_data_len,
+                          FALSE, FIRSTSOCKET);
 
       /* not set by Curl_setup_transfer to preserve keepon bits */
       conn->sockfd = conn->writesockfd;
@@ -1889,7 +1891,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
 
         /* download data */
         bytecount = ssh_scp_request_get_size(sshc->scp_session);
-        data->req.maxdownload = (curl_off_t) bytecount;
+        data->req.nrecv_data_max = (curl_off_t) bytecount;
         Curl_setup_transfer(data, FIRSTSOCKET, bytecount, FALSE, -1);
 
         /* not set by Curl_setup_transfer to preserve keepon bits */
@@ -2322,7 +2324,7 @@ static CURLcode myssh_do_it(struct Curl_easy *data, bool *done)
 
   *done = FALSE;                /* default to false */
 
-  data->req.size = -1;          /* make sure this is unknown at this point */
+  data->req.resp_data_len = -1; /* make sure this is unknown at this point */
 
   sshc->actualcode = CURLE_OK;  /* reset error code */
   sshc->secondCreateDirs = 0;   /* reset the create dir attempt state

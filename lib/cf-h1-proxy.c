@@ -1004,9 +1004,9 @@ out:
   if(*done) {
     cf->connected = TRUE;
     /* Restore `data->req` fields that may habe been touched */
-    data->req.header = TRUE; /* assume header */
-    data->req.bytecount = 0;
-    data->req.ignorebody = FALSE;
+    data->req.resp_hds_recv = TRUE; /* assume header */
+    data->req.nrcvd_data = 0;
+    data->req.resp_body_skip = FALSE;
     Curl_client_cleanup(data);
     Curl_pgrsSetUploadCounter(data, 0);
     Curl_pgrsSetDownloadCounter(data, 0);

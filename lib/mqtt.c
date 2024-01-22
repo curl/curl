@@ -670,8 +670,8 @@ MQTT_SUBACK_COMING:
       goto end;
     }
     Curl_pgrsSetDownloadSize(data, remlen);
-    data->req.bytecount = 0;
-    data->req.size = remlen;
+    data->req.nrcvd_data = 0;
+    data->req.resp_data_len = remlen;
     mq->npacket = remlen; /* get this many bytes */
     FALLTHROUGH();
   case MQTT_PUB_REMAIN: {

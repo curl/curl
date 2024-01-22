@@ -127,7 +127,7 @@ static void h2_tunnel_go_state(struct Curl_cfilter *cf,
   /* leaving this one */
   switch(ts->state) {
   case H2_TUNNEL_CONNECT:
-    data->req.ignorebody = FALSE;
+    data->req.resp_body_skip = FALSE;
     break;
   default:
     break;

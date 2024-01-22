@@ -388,7 +388,7 @@ static CURLcode cw_chunked_init(struct Curl_easy *data,
 {
   struct chunked_writer *ctx = (struct chunked_writer *)writer;
 
-  data->req.chunk = TRUE;      /* chunks coming our way. */
+  data->req.resp_body_chunked = TRUE;      /* chunks coming our way. */
   Curl_httpchunk_init(data, &ctx->ch, FALSE);
   return CURLE_OK;
 }
@@ -429,12 +429,12 @@ static CURLcode cw_chunked_write(struct Curl_easy *data,
   blen -= consumed;
   if(CHUNK_DONE == ctx->ch.state) {
     /* chunks read successfully, download is complete */
-    data->req.download_done = TRUE;
+    data->req.resp_rcvd = TRUE;
     if(blen) {
       infof(data, "Leftovers after chunking: %zu bytes", blen);
     }
   }
-  else if((type & CLIENTWRITE_EOS) && !data->req.no_body) {
+  else if((type & CLIENTWRITE_EOS) && !data->req.resp_body_unwanted) {
     failf(data, "transfer closed with outstanding read data remaining");
     return CURLE_PARTIAL_FILE;
   }

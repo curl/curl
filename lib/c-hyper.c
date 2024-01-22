@@ -152,7 +152,7 @@ static int hyper_each_header(void *userdata,
     return HYPER_ITER_BREAK;
   }
 
-  if(!data->req.bytecount)
+  if(!data->req.nrcvd_data)
     Curl_pgrsTime(data, TIMER_STARTTRANSFER);
 
   Curl_dyn_reset(&data->state.headerb);
@@ -203,7 +203,7 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
   struct SingleRequest *k = &data->req;
   CURLcode result = CURLE_OK;
 
-  if(0 == k->bodywrites) {
+  if(!k->cw_written) {
     bool done = FALSE;
 #if defined(USE_NTLM)
     struct connectdata *conn = data->conn;
@@ -406,7 +406,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
           result = CURLE_OK;
           break;
         case HYPERE_UNEXPECTED_EOF:
-          if(!data->req.bytecount)
+          if(!data->req.nrcvd_data)
             result = CURLE_GOT_NOTHING;
           else
             result = CURLE_RECV_ERROR;
@@ -414,7 +414,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
         case HYPERE_INVALID_PEER_MESSAGE:
           /* bump headerbytecount to avoid the count remaining at zero and
              appearing to not having read anything from the peer at all */
-          data->req.headerbytecount++;
+          data->req.nrcvd_hds++;
           result = CURLE_UNSUPPORTED_PROTOCOL; /* maybe */
           break;
         default:
@@ -433,7 +433,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
         /* end of transfer */
         *done = TRUE;
         infof(data, "hyperstream is done");
-        if(!k->bodywrites) {
+        if(!k->cw_written) {
           /* hyper doesn't always call the body write callback */
           bool stilldone;
           result = Curl_http_firstwrite(data, data->conn, &stilldone);
@@ -492,8 +492,8 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
     if(result)
       break;
 
-    k->deductheadercount =
-      (100 <= http_status && 199 >= http_status)?k->headerbytecount:0;
+    k->nrcvd_hds_interim =
+      (100 <= http_status && 199 >= http_status)?k->nrcvd_hds:0;
 #ifdef USE_WEBSOCKETS
     if(k->upgr101 == UPGR101_WS) {
       if(http_status == 101) {
@@ -669,7 +669,7 @@ static int uploadpostfields(void *userdata, hyper_context *ctx,
     data->hyp.exp100_waker = hyper_context_waker(ctx);
     return HYPER_POLL_PENDING;
   }
-  if(data->req.upload_done)
+  if(data->req.req_sent)
     *chunk = NULL; /* nothing more to deliver */
   else {
     /* send everything off in a single go */
@@ -681,11 +681,11 @@ static int uploadpostfields(void *userdata, hyper_context *ctx,
       data->state.hresult = CURLE_OUT_OF_MEMORY;
       return HYPER_POLL_ERROR;
     }
-    /* increasing the writebytecount here is a little premature but we
+    /* increasing the ndata_sent here is a little premature but we
        don't know exactly when the body is sent */
-    data->req.writebytecount += (size_t)data->req.p.http->postsize;
-    Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
-    data->req.upload_done = TRUE;
+    data->req.nsent_data += (size_t)data->req.p.http->postsize;
+    Curl_pgrsSetUploadCounter(data, data->req.nsent_data);
+    data->req.req_sent = TRUE;
   }
   return HYPER_POLL_READY;
 }
@@ -710,9 +710,9 @@ static int uploadstreamed(void *userdata, hyper_context *ctx,
     return HYPER_POLL_PENDING;
   }
 
-  if(data->req.upload_chunky && conn->bits.authneg) {
+  if(data->req.req_body_chunked && conn->bits.authneg) {
     fillcount = 0;
-    data->req.upload_chunky = FALSE;
+    data->req.req_body_chunked = FALSE;
     result = CURLE_OK;
   }
   else {
@@ -743,10 +743,10 @@ static int uploadstreamed(void *userdata, hyper_context *ctx,
       data->state.hresult = CURLE_OUT_OF_MEMORY;
       return HYPER_POLL_ERROR;
     }
-    /* increasing the writebytecount here is a little premature but we
+    /* increasing the ndata_sent here is a little premature but we
        don't know exactly when the body is sent */
-    data->req.writebytecount += fillcount;
-    Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
+    data->req.nsent_data += fillcount;
+    Curl_pgrsSetUploadCounter(data, data->req.nsent_data);
   }
   return HYPER_POLL_READY;
 }
@@ -896,7 +896,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
 
   Curl_http_method(data, conn, &method, &httpreq);
 
-  DEBUGASSERT(data->req.bytecount ==  0);
+  DEBUGASSERT(data->req.nrcvd_data ==  0);
 
   /* setup the authentication headers */
   {
@@ -1166,11 +1166,11 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
 
   Curl_debug(data, CURLINFO_HEADER_OUT, (char *)"\r\n", 2);
 
-  if(data->req.upload_chunky && conn->bits.authneg) {
-    data->req.upload_chunky = TRUE;
+  if(data->req.req_body_chunked && conn->bits.authneg) {
+    data->req.req_body_chunked = TRUE;
   }
   else {
-    data->req.upload_chunky = FALSE;
+    data->req.req_body_chunked = FALSE;
   }
   sendtask = hyper_clientconn_send(client, req);
   if(!sendtask) {

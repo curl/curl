@@ -51,7 +51,7 @@ int Curl_single_getsock(struct Curl_easy *data,
 CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
                              size_t *nreadp);
 CURLcode Curl_retry_request(struct Curl_easy *data, char **url);
-bool Curl_meets_timecondition(struct Curl_easy *data, time_t timeofdoc);
+bool Curl_meets_timecondition(struct Curl_easy *data, time_t last_modified);
 CURLcode Curl_get_upload_buffer(struct Curl_easy *data);
 
 CURLcode Curl_done_sending(struct Curl_easy *data,
@@ -79,7 +79,7 @@ void
 Curl_setup_transfer (struct Curl_easy *data,
                      int sockindex,     /* socket index to read from or -1 */
                      curl_off_t size,   /* -1 if unknown at this point */
-                     bool getheader,    /* TRUE if header parsing is wanted */
+                     bool resp_hds_expected, /* TRUE iff headers in response */
                      int writesockindex /* socket index to write to. May be
                                            the same we read from. -1
                                            disables */

@@ -261,7 +261,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
    * Since all RTSP requests are included here, there is no need to
    * support custom requests like HTTP.
    **/
-  data->req.no_body = TRUE; /* most requests don't contain a body */
+  data->req.resp_body_unwanted = TRUE; /* most responses do not have a body */
   switch(rtspreq) {
   default:
     failf(data, "Got invalid RTSP request");
@@ -271,7 +271,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     break;
   case RTSPREQ_DESCRIBE:
     p_request = "DESCRIBE";
-    data->req.no_body = FALSE;
+    data->req.resp_body_unwanted = FALSE;
     break;
   case RTSPREQ_ANNOUNCE:
     p_request = "ANNOUNCE";
@@ -291,7 +291,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   case RTSPREQ_GET_PARAMETER:
     /* GET_PARAMETER's no_body status is determined later */
     p_request = "GET_PARAMETER";
-    data->req.no_body = FALSE;
+    data->req.resp_body_unwanted = FALSE;
     break;
   case RTSPREQ_SET_PARAMETER:
     p_request = "SET_PARAMETER";
@@ -302,7 +302,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   case RTSPREQ_RECEIVE:
     p_request = "";
     /* Treat interleaved RTP as body */
-    data->req.no_body = FALSE;
+    data->req.resp_body_unwanted = FALSE;
     break;
   case RTSPREQ_LAST:
     failf(data, "Got invalid RTSP request: RTSPREQ_LAST");
@@ -547,12 +547,12 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     else if(rtspreq == RTSPREQ_GET_PARAMETER) {
       /* Check for an empty GET_PARAMETER (heartbeat) request */
       data->state.httpreq = HTTPREQ_HEAD;
-      data->req.no_body = TRUE;
+      data->req.resp_body_unwanted = TRUE;
     }
   }
 
   /* RTSP never allows chunked transfer */
-  data->req.forbidchunk = TRUE;
+  data->req.req_body_never_chunk = TRUE;
   /* Finish the request buffer */
   result = Curl_dyn_addn(&req_buffer, STRCONST("\r\n"));
   if(result)
@@ -578,10 +578,10 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   /* Increment the CSeq on success */
   data->state.rtsp_next_client_CSeq++;
 
-  if(data->req.writebytecount) {
+  if(data->req.nsent_data) {
     /* if a request-body has been sent off, we make sure this progress is
        noted properly */
-    Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
+    Curl_pgrsSetUploadCounter(data, data->req.nsent_data);
     if(Curl_pgrsUpdate(data))
       result = CURLE_ABORTED_BY_CALLBACK;
   }
@@ -600,10 +600,10 @@ static CURLcode rtp_write_body_junk(struct Curl_easy *data,
   curl_off_t body_remain;
   bool in_body;
 
-  in_body = (data->req.headerline && !rtspc->in_header) &&
-            (data->req.size >= 0) &&
-            (data->req.bytecount < data->req.size);
-  body_remain = in_body? (data->req.size - data->req.bytecount) : 0;
+  in_body = (data->req.resp_hds_nlines && !rtspc->in_header) &&
+            (data->req.resp_data_len >= 0) &&
+            (data->req.nrcvd_data < data->req.resp_data_len);
+  body_remain = in_body? (data->req.resp_data_len - data->req.nrcvd_data) : 0;
   DEBUGASSERT(body_remain >= 0);
   if(body_remain) {
     if((curl_off_t)blen > body_remain)
@@ -624,9 +624,9 @@ static CURLcode rtsp_filter_rtp(struct Curl_easy *data,
 
   *pconsumed = 0;
   while(blen) {
-    bool in_body = (data->req.headerline && !rtspc->in_header) &&
-                   (data->req.size >= 0) &&
-                   (data->req.bytecount < data->req.size);
+    bool in_body = (data->req.resp_hds_nlines && !rtspc->in_header) &&
+                   (data->req.resp_data_len >= 0) &&
+                   (data->req.nrcvd_data < data->req.resp_data_len);
     switch(rtspc->state) {
 
     case RTP_PARSE_SKIP: {
@@ -786,7 +786,7 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   size_t consumed = 0;
 
-  if(!data->req.header)
+  if(!data->req.resp_hds_recv)
     rtspc->in_header = FALSE;
   *done = FALSE;
   if(!blen) {
@@ -804,13 +804,13 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
     buf += consumed;
     blen -= consumed;
     /* either we consumed all or are at the start of header parsing */
-    if(blen && !data->req.header)
+    if(blen && !data->req.resp_hds_recv)
       DEBUGF(infof(data, "RTSP: %zu bytes, possibly excess in response body",
                    blen));
   }
 
   /* we want to parse headers, do so */
-  if(data->req.header && blen) {
+  if(data->req.resp_hds_recv && blen) {
     rtspc->in_header = TRUE;
     result = Curl_http_write_resp_hds(data, buf, blen, &consumed, done);
     if(result)
@@ -819,16 +819,16 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
     buf += consumed;
     blen -= consumed;
 
-    if(!data->req.header)
+    if(!data->req.resp_hds_recv)
       rtspc->in_header = FALSE;
 
     if(!rtspc->in_header) {
       /* If header parsing is done, extract interleaved RTP messages */
-      if(data->req.size <= -1) {
+      if(data->req.resp_data_len <= -1) {
         /* Respect section 4.4 of rfc2326: If the Content-Length header is
            absent, a length 0 must be assumed. */
-        data->req.size = 0;
-        data->req.download_done = TRUE;
+        data->req.resp_data_len = 0;
+        data->req.resp_rcvd = TRUE;
       }
       result = rtsp_filter_rtp(data, buf, blen, &consumed);
       if(result)
@@ -843,8 +843,9 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
    * In which case we write out the left over bytes, letting the client
    * writer deal with it (it will report EXCESS and fail the transfer). */
   DEBUGF(infof(data, "rtsp_rtp_write_resp(len=%zu, in_header=%d, done=%d "
-               " rtspc->state=%d, req.size=%" CURL_FORMAT_CURL_OFF_T ")",
-               blen, rtspc->in_header, *done, rtspc->state, data->req.size));
+               " rtspc->state=%d, req.resp_data_len=%"
+               CURL_FORMAT_CURL_OFF_T ")", blen, rtspc->in_header, *done,
+               rtspc->state, data->req.resp_data_len));
   if(!result && (is_eos || blen)) {
     result = Curl_client_write(data, CLIENTWRITE_BODY|
                                (is_eos? CLIENTWRITE_EOS:0),
@@ -857,7 +858,7 @@ out:
     /* In special mode RECEIVE, we just process one chunk of network
      * data, so we stop the transfer here, if we have no incomplete
      * RTP message pending. */
-    data->req.download_done = TRUE;
+    data->req.resp_rcvd = TRUE;
   }
   return result;
 }

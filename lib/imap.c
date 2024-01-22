@@ -1213,12 +1213,12 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
       }
     }
 
-    if(data->req.bytecount == size)
+    if(data->req.nrcvd_data == size)
       /* The entire data is already transferred! */
       Curl_setup_transfer(data, -1, -1, FALSE, -1);
     else {
       /* IMAP download */
-      data->req.maxdownload = size;
+      data->req.nrecv_data_max = size;
       /* force a recv/send check of this connection, as the data might've been
        read off the socket already */
       data->state.select_bits = CURL_CSELECT_IN;
@@ -1572,7 +1572,7 @@ static CURLcode imap_perform(struct Curl_easy *data, bool *connected,
 
   DEBUGF(infof(data, "DO phase starts"));
 
-  if(data->req.no_body) {
+  if(data->req.resp_body_unwanted) {
     /* Requested no body means no transfer */
     imap->transfer = PPTRANSFER_INFO;
   }
@@ -1735,7 +1735,7 @@ static CURLcode imap_regular_transfer(struct Curl_easy *data,
   bool connected = FALSE;
 
   /* Make sure size is unknown at this point */
-  data->req.size = -1;
+  data->req.resp_data_len = -1;
 
   /* Set the progress data */
   Curl_pgrsSetUploadCounter(data, 0);

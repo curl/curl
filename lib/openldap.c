@@ -1023,7 +1023,7 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
       infof(data, "There are more than %d entries", lr->nument);
       FALLTHROUGH();
     case LDAP_SUCCESS:
-      data->req.size = data->req.bytecount;
+      data->req.resp_data_len = data->req.nrcvd_data;
       break;
     default:
       failf(data, "LDAP remote: search failed %s %s", ldap_err2string(code),

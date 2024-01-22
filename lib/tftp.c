@@ -790,8 +790,8 @@ static CURLcode tftp_tx(struct tftp_state_data *state, tftp_event_t event)
       return CURLE_SEND_ERROR;
     }
     /* Update the progress meter */
-    k->writebytecount += state->sbytes;
-    Curl_pgrsSetUploadCounter(data, k->writebytecount);
+    k->nsent_data += state->sbytes;
+    Curl_pgrsSetUploadCounter(data, k->nsent_data);
     break;
 
   case TFTP_EVENT_TIMEOUT:
@@ -816,7 +816,7 @@ static CURLcode tftp_tx(struct tftp_state_data *state, tftp_event_t event)
         return CURLE_SEND_ERROR;
       }
       /* since this was a re-send, we remain at the still byte position */
-      Curl_pgrsSetUploadCounter(data, k->writebytecount);
+      Curl_pgrsSetUploadCounter(data, k->nsent_data);
     }
     break;
 

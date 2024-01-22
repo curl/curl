@@ -931,8 +931,8 @@ static int push_promise(struct Curl_cfilter *cf,
     }
 
     newstream->id = frame->promised_stream_id;
-    newhandle->req.maxdownload = -1;
-    newhandle->req.size = -1;
+    newhandle->req.nrecv_data_max = -1;
+    newhandle->req.resp_data_len = -1;
 
     /* approved, add to the multi handle and immediately switch to PERFORM
        state with the given connection !*/

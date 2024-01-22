@@ -404,14 +404,14 @@ CURLcode Curl_client_write(struct Curl_easy *data,
   DEBUGASSERT(!(type & CLIENTWRITE_INFO) ||
               ((type & ~(CLIENTWRITE_INFO|CLIENTWRITE_EOS)) == 0));
 
-  if(!data->req.writer_stack) {
+  if(!data->req.cw_stack) {
     result = do_init_stack(data);
     if(result)
       return result;
-    DEBUGASSERT(data->req.writer_stack);
+    DEBUGASSERT(data->req.cw_stack);
   }
 
-  return Curl_cwriter_write(data, data->req.writer_stack, type, buf, blen);
+  return Curl_cwriter_write(data, data->req.cw_stack, type, buf, blen);
 }
 
 CURLcode Curl_client_unpause(struct Curl_easy *data)
@@ -448,22 +448,22 @@ CURLcode Curl_client_unpause(struct Curl_easy *data)
 
 void Curl_client_cleanup(struct Curl_easy *data)
 {
-  struct Curl_cwriter *writer = data->req.writer_stack;
+  struct Curl_cwriter *writer = data->req.cw_stack;
   size_t i;
 
   while(writer) {
-    data->req.writer_stack = writer->next;
+    data->req.cw_stack = writer->next;
     writer->cwt->do_close(data, writer);
     free(writer);
-    writer = data->req.writer_stack;
+    writer = data->req.cw_stack;
   }
 
   for(i = 0; i < data->state.tempcount; i++) {
     Curl_dyn_free(&data->state.tempwrite[i].b);
   }
   data->state.tempcount = 0;
-  data->req.bytecount = 0;
-  data->req.headerline = 0;
+  data->req.nrcvd_data = 0;
+  data->req.resp_hds_nlines = 0;
 }
 
 /* Write data using an unencoding writer stack. "nbytes" is not
@@ -524,7 +524,7 @@ static size_t get_max_body_write_len(struct Curl_easy *data, curl_off_t limit)
   if(limit != -1) {
     /* How much more are we allowed to write? */
     curl_off_t remain_diff;
-    remain_diff = limit - data->req.bytecount;
+    remain_diff = limit - data->req.nrcvd_data;
     if(remain_diff < 0) {
       /* already written too much! */
       return 0;
@@ -556,7 +556,7 @@ static CURLcode cw_download_write(struct Curl_easy *data,
     return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
   }
 
-  if(!data->req.bytecount) {
+  if(!data->req.nrcvd_data) {
     Curl_pgrsTime(data, TIMER_STARTTRANSFER);
     if(data->req.exp100 > EXP100_SEND_DATA)
       /* set time stamp to compare with when waiting for the 100 */
@@ -569,12 +569,12 @@ static CURLcode cw_download_write(struct Curl_easy *data,
    * This allows us to check sizes, update stats, etc. independent
    * from the protocol in play. */
 
-  if(data->req.no_body && nbytes > 0) {
+  if(data->req.resp_body_unwanted && nbytes > 0) {
     /* BODY arrives although we want none, bail out */
     streamclose(data->conn, "ignoring body");
     DEBUGF(infof(data, "did not want a BODY, but seeing %zu bytes",
                  nbytes));
-    data->req.download_done = TRUE;
+    data->req.resp_rcvd = TRUE;
     return CURLE_WEIRD_SERVER_REPLY;
   }
 
@@ -583,15 +583,15 @@ static CURLcode cw_download_write(struct Curl_easy *data,
    * This gives deterministic BODY writes on varying buffer receive
    * lengths. */
   nwrite = nbytes;
-  if(-1 != data->req.maxdownload) {
-    size_t wmax = get_max_body_write_len(data, data->req.maxdownload);
+  if(-1 != data->req.nrecv_data_max) {
+    size_t wmax = get_max_body_write_len(data, data->req.nrecv_data_max);
     if(nwrite > wmax) {
       excess_len = nbytes - wmax;
       nwrite = wmax;
     }
 
     if(nwrite == wmax) {
-      data->req.download_done = TRUE;
+      data->req.resp_rcvd = TRUE;
     }
   }
 
@@ -605,27 +605,27 @@ static CURLcode cw_download_write(struct Curl_easy *data,
   }
 
   /* Update stats, write and report progress */
-  data->req.bytecount += nwrite;
-  ++data->req.bodywrites;
-  if(!data->req.ignorebody && nwrite) {
+  data->req.nrcvd_data += nwrite;
+  data->req.cw_written = TRUE;
+  if(!data->req.resp_body_skip && nwrite) {
     result = Curl_cwriter_write(data, writer->next, type, buf, nwrite);
     if(result)
       return result;
   }
-  result = Curl_pgrsSetDownloadCounter(data, data->req.bytecount);
+  result = Curl_pgrsSetDownloadCounter(data, data->req.nrcvd_data);
   if(result)
     return result;
 
   if(excess_len) {
-    if(!data->req.ignorebody) {
+    if(!data->req.resp_body_skip) {
       infof(data,
             "Excess found writing body:"
             " excess = %zu"
             ", size = %" CURL_FORMAT_CURL_OFF_T
             ", maxdownload = %" CURL_FORMAT_CURL_OFF_T
             ", bytecount = %" CURL_FORMAT_CURL_OFF_T,
-            excess_len, data->req.size, data->req.maxdownload,
-            data->req.bytecount);
+            excess_len, data->req.resp_data_len, data->req.nrecv_data_max,
+            data->req.nrcvd_data);
       connclose(data->conn, "excess found in a read");
     }
   }
@@ -633,7 +633,7 @@ static CURLcode cw_download_write(struct Curl_easy *data,
     failf(data, "Exceeded the maximum allowed file size "
           "(%" CURL_FORMAT_CURL_OFF_T ") with %"
           CURL_FORMAT_CURL_OFF_T " bytes",
-          data->set.max_filesize, data->req.bytecount);
+          data->set.max_filesize, data->req.nrcvd_data);
     return CURLE_FILESIZE_EXCEEDED;
   }
 
@@ -655,7 +655,8 @@ static CURLcode cw_raw_write(struct Curl_easy *data,
                              struct Curl_cwriter *writer, int type,
                              const char *buf, size_t nbytes)
 {
-  if(type & CLIENTWRITE_BODY && data->set.verbose && !data->req.ignorebody) {
+  if(type & CLIENTWRITE_BODY && data->set.verbose &&
+     !data->req.resp_body_skip) {
     Curl_debug(data, CURLINFO_DATA_IN, (char *)buf, nbytes);
   }
   return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
@@ -709,7 +710,7 @@ size_t Curl_cwriter_count(struct Curl_easy *data, Curl_cwriter_phase phase)
   struct Curl_cwriter *w;
   size_t n = 0;
 
-  for(w = data->req.writer_stack; w; w = w->next) {
+  for(w = data->req.cw_stack; w; w = w->next) {
     if(w->phase == phase)
       ++n;
   }
@@ -721,8 +722,8 @@ static CURLcode do_init_stack(struct Curl_easy *data)
   struct Curl_cwriter *writer;
   CURLcode result;
 
-  DEBUGASSERT(!data->req.writer_stack);
-  result = Curl_cwriter_create(&data->req.writer_stack,
+  DEBUGASSERT(!data->req.cw_stack);
+  result = Curl_cwriter_create(&data->req.cw_stack,
                                data, &cw_client, CURL_CW_CLIENT);
   if(result)
     return result;
@@ -749,7 +750,7 @@ CURLcode Curl_cwriter_add(struct Curl_easy *data,
                           struct Curl_cwriter *writer)
 {
   CURLcode result;
-  struct Curl_cwriter **anchor = &data->req.writer_stack;
+  struct Curl_cwriter **anchor = &data->req.cw_stack;
 
   if(!*anchor) {
     result = do_init_stack(data);
@@ -769,7 +770,7 @@ CURLcode Curl_cwriter_add(struct Curl_easy *data,
 void Curl_cwriter_remove_by_name(struct Curl_easy *data,
                                  const char *name)
 {
-  struct Curl_cwriter **anchor = &data->req.writer_stack;
+  struct Curl_cwriter **anchor = &data->req.cw_stack;
 
   while(*anchor) {
     if(!strcmp(name, (*anchor)->cwt->name)) {

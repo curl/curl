@@ -3866,8 +3866,8 @@ CURLcode Curl_connect(struct Curl_easy *data,
   /* init the single-transfer specific data */
   Curl_free_request_state(data);
   memset(&data->req, 0, sizeof(struct SingleRequest));
-  data->req.size = data->req.maxdownload = -1;
-  data->req.no_body = data->set.opt_no_body;
+  data->req.resp_data_len = data->req.nrecv_data_max = -1;
+  data->req.resp_body_unwanted = data->set.opt_no_body;
 
   /* call the stuff that needs to be called */
   result = create_conn(data, &conn, asyncp);
@@ -3929,14 +3929,14 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
   data->state.done = FALSE; /* *_done() is not called yet */
   data->state.expect100header = FALSE;
 
-  if(data->req.no_body)
+  if(data->req.resp_body_unwanted)
     /* in HTTP lingo, no body means using the HEAD request... */
     data->state.httpreq = HTTPREQ_HEAD;
 
   k->start = Curl_now(); /* start time */
-  k->header = TRUE; /* assume header */
-  k->bytecount = 0;
-  k->ignorebody = FALSE;
+  k->resp_hds_recv = TRUE; /* assume header */
+  k->nrcvd_data = 0;
+  k->resp_body_skip = FALSE;
 
   Curl_client_cleanup(data);
   Curl_speedinit(data);
