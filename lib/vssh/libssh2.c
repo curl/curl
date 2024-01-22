@@ -3290,6 +3290,27 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
 #ifndef CURL_DISABLE_PROXY
   if(conn->http_proxy.proxytype == CURLPROXY_HTTPS) {
     /*
+      Setup libssh2 callbacks to make it read/write TLS from the socket.
+
+      ssize_t
+      recvcb(libssh2_socket_t sock, void *buffer, size_t length,
+      int flags, void **abstract);
+
+      ssize_t
+      sendcb(libssh2_socket_t sock, const void *buffer, size_t length,
+      int flags, void **abstract);
+
+    */
+#if LIBSSH2_VERSION_NUM >= 0x010b01
+    infof(data, "Uses HTTPS proxy");
+    libssh2_session_callback_set2(sshc->ssh_session,
+                                  LIBSSH2_CALLBACK_RECV,
+                                  (libssh2_cb_generic *)ssh_tls_recv);
+    libssh2_session_callback_set2(sshc->ssh_session,
+                                  LIBSSH2_CALLBACK_SEND,
+                                  (libssh2_cb_generic *)ssh_tls_send);
+#else
+    /*
      * This crazy union dance is here to avoid assigning a void pointer a
      * function pointer as it is invalid C. The problem is of course that
      * libssh2 has such an API...
@@ -3309,22 +3330,11 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
     sshsend.sendptr = ssh_tls_send;
 
     infof(data, "Uses HTTPS proxy");
-    /*
-      Setup libssh2 callbacks to make it read/write TLS from the socket.
-
-      ssize_t
-      recvcb(libssh2_socket_t sock, void *buffer, size_t length,
-      int flags, void **abstract);
-
-      ssize_t
-      sendcb(libssh2_socket_t sock, const void *buffer, size_t length,
-      int flags, void **abstract);
-
-    */
     libssh2_session_callback_set(sshc->ssh_session,
                                  LIBSSH2_CALLBACK_RECV, sshrecv.recvp);
     libssh2_session_callback_set(sshc->ssh_session,
                                  LIBSSH2_CALLBACK_SEND, sshsend.sendp);
+#endif
 
     /* Store the underlying TLS recv/send function pointers to be used when
        reading from the proxy */
