@@ -105,19 +105,19 @@ jobs:
           - name: openssl3
             install_packages: zlib1g-dev valgrind
             install_steps: gcc-11 openssl3 pytest
-            configure: CFLAGS=-std=gnu89 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
+            configure: CFLAGS=-std=gnu89 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
             singleuse: --unit
 
           - name: openssl3-O3
             install_packages: zlib1g-dev valgrind
             install_steps: gcc-11 openssl3
-            configure: CPPFLAGS=-DCURL_WARN_SIGN_CONVERSION CFLAGS=-O3 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
+            configure: CPPFLAGS=-DCURL_WARN_SIGN_CONVERSION CFLAGS=-O3 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
             singleuse: --unit
 
           - name: openssl3-clang
             install_packages: zlib1g-dev clang
             install_steps: openssl3
-            configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
+            configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
             singleuse: --unit
 
           - name: address-sanitizer
@@ -279,7 +279,7 @@ jobs:
         run: |
           git clone --quiet --depth=1 -b ${{ env.openssl3-version }} https://github.com/openssl/openssl
           cd openssl
-          ./config enable-tls1_3 --prefix=$HOME/openssl3
+          ./config --prefix=$HOME/openssl3 --libdir=$HOME/openssl3/lib
           make -j1 install_sw
 
       - name: cache quictls
@@ -297,7 +297,7 @@ jobs:
         run: |
           git clone --quiet --depth=1 -b openssl-${{ env.quictls-version }} https://github.com/quictls/openssl
           cd openssl
-          ./config enable-tls1_3 --prefix=$HOME/quictls --libdir=$HOME/quictls/lib
+          ./config --prefix=$HOME/quictls --libdir=$HOME/quictls/lib
           make -j1 install_sw
 
       - name: cache msh3
