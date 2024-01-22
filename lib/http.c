@@ -3911,7 +3911,8 @@ CURLcode Curl_bump_headersize(struct Curl_easy *data,
   else
     bad = data->req.nrcvd_hds_all + (curl_off_t)delta;
   if(bad) {
-    failf(data, "Too large response headers: %zu > %u", bad, max);
+    failf(data, "Too large response headers: %" CURL_FORMAT_CURL_OFF_T
+          " > %u", bad, max);
     return CURLE_RECV_ERROR;
   }
   return CURLE_OK;
