@@ -4351,6 +4351,20 @@ static CURLcode servercert(struct Curl_cfilter *cf,
     /* don't do this after Session ID reuse */
     result = verifystatus(cf, data);
     if(result) {
+      /* when verifystatus failed, remove the session id from the cache again
+         if present */
+      if(!Curl_ssl_cf_is_proxy(cf)) {
+        void *old_ssl_sessionid = NULL;
+        bool incache;
+        Curl_ssl_sessionid_lock(data);
+        incache = !(Curl_ssl_getsessionid(cf, data, &old_ssl_sessionid, NULL));
+        if(incache) {
+          infof(data, "Remove session ID again from cache");
+          Curl_ssl_delsessionid(data, old_ssl_sessionid);
+        }
+        Curl_ssl_sessionid_unlock(data);
+      }
+
       X509_free(backend->server_cert);
       backend->server_cert = NULL;
       return result;
