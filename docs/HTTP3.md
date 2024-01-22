@@ -15,7 +15,7 @@ QUIC libraries we are using:
 
 [quiche](https://github.com/cloudflare/quiche) - **EXPERIMENTAL**
 
-[openssl 3.2+ QUIC](https://github.com/openssl/openssl) - **EXPERIMENTAL**
+[OpenSSL 3.2+ QUIC](https://github.com/openssl/openssl) - **EXPERIMENTAL**
 
 [msh3](https://github.com/nibanks/msh3) (with [msquic](https://github.com/microsoft/msquic)) - **EXPERIMENTAL**
 
@@ -195,11 +195,11 @@ Build curl:
 
  If `make install` results in `Permission denied` error, you will need to prepend it with `sudo`.
 
-# openssl version
+# OpenSSL version
 
 quiche QUIC support is **EXPERIMENTAL**
 
-Build openssl 3.2.0
+Build OpenSSL 3.2.0
 
      % cd ..
      % git clone -b openssl-3.2.0 https://github.com/openssl/openssl
