@@ -209,7 +209,7 @@ jobs:
 
       - name: cache bearssl
         if: contains(matrix.build.install_steps, 'bearssl')
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-bearssl
         env:
           cache-name: cache-bearssl
@@ -230,7 +230,7 @@ jobs:
 
       - name: cache libressl
         if: contains(matrix.build.install_steps, 'libressl')
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-libressl
         env:
           cache-name: cache-libressl
@@ -249,7 +249,7 @@ jobs:
 
       - name: cache mbedtls
         if: contains(matrix.build.install_steps, 'mbedtls')
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-mbedtls
         env:
           cache-name: cache-mbedtls
@@ -266,7 +266,7 @@ jobs:
 
       - name: cache openssl3
         if: contains(matrix.build.install_steps, 'openssl3')
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-openssl3
         env:
           cache-name: cache-openssl3
@@ -284,7 +284,7 @@ jobs:
 
       - name: cache quictls
         if: contains(matrix.build.install_steps, 'quictls')
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-quictls
         env:
           cache-name: cache-quictls
@@ -302,7 +302,7 @@ jobs:
 
       - name: cache msh3
         if: contains(matrix.build.install_steps, 'msh3')
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-msh3
         env:
           cache-name: cache-msh3
@@ -329,7 +329,7 @@ jobs:
 
       - name: cache rustls
         if: contains(matrix.build.install_steps, 'rustls')
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-rustls
         env:
           cache-name: cache-rustls
@@ -371,7 +371,7 @@ jobs:
 
       - name: cache mod_h2
         if: contains(matrix.build.install_steps, 'pytest')
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-mod_h2
         env:
           cache-name: cache-mod_h2
