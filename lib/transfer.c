@@ -850,10 +850,15 @@ static int select_bits_paused(struct Curl_easy *data, int select_bits)
    * of our state machine are handling PAUSED transfers correctly. So, we
    * do not want to go there.
    * NOTE: we are only interested in PAUSE, not HOLD. */
-  return (((select_bits & CURL_CSELECT_IN) &&
-           (data->req.keepon & KEEP_RECV_PAUSE)) ||
-          ((select_bits & CURL_CSELECT_OUT) &&
-           (data->req.keepon & KEEP_SEND_PAUSE)));
+
+  /* if there is data in a direction not paused, return false */
+  if(((select_bits & CURL_CSELECT_IN) &&
+      !(data->req.keepon & KEEP_RECV_PAUSE)) ||
+     ((select_bits & CURL_CSELECT_OUT) &&
+      !(data->req.keepon & KEEP_SEND_PAUSE)))
+    return FALSE;
+
+  return (data->req.keepon & (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE));
 }
 
 /*
