@@ -31,4 +31,7 @@ add_custom_command(OUTPUT "${MANPAGE}"
   COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} && "${PERL_EXECUTABLE}" "./gen.pl" mainpage ${DPAGES} > "${MANPAGE}"
   VERBATIM
 )
-add_custom_target(generate-curl.1 DEPENDS "${MANPAGE}")
+add_custom_target(generate-curl.1 ALL DEPENDS "${MANPAGE}")
+if(NOT CURL_DISABLE_INSTALL)
+  install(FILES "${MANPAGE}" DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
+endif()
