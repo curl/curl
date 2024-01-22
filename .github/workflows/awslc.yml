@@ -60,7 +60,7 @@ jobs:
         name: 'install prereqs and impacket'
 
       - name: cache awslc
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-awslc
         env:
           cache-name: cache-awslc
@@ -119,7 +119,7 @@ jobs:
         name: 'install prereqs and impacket'
 
       - name: cache awslc
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-awslc
         env:
           cache-name: cache-awslc

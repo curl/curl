@@ -82,7 +82,7 @@ jobs:
         name: 'install prereqs and impacket, pytest, crypto'
 
       - name: cache nghttpx
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-nghttpx
         env:
           cache-name: cache-nghttpx
@@ -126,7 +126,7 @@ jobs:
         name: 'install nghttp2'
 
       - name: cache quiche
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-quiche
         env:
           cache-name: cache-quiche
@@ -154,7 +154,7 @@ jobs:
         name: 'build quiche and boringssl'
 
       - name: cache mod_h2
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-mod_h2
         env:
           cache-name: cache-mod_h2

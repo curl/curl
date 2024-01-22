@@ -83,7 +83,7 @@ jobs:
 
       - name: cache openssl3
         if: contains(matrix.build.install_steps, 'openssl3')
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-openssl3
         env:
           cache-name: cache-openssl3
@@ -101,7 +101,7 @@ jobs:
 
       - name: cache quictls
         if: contains(matrix.build.install_steps, 'quictls')
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-quictls
         env:
           cache-name: cache-quictls
@@ -110,7 +110,7 @@ jobs:
           key: ${{ runner.os }}-build-${{ env.cache-name }}-quictls-${{ env.quictls-version }}
 
       - name: cache quictls
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-quictls-no-deprecated
         env:
           cache-name: cache-quictls-no-deprecated
@@ -134,7 +134,7 @@ jobs:
 
 
       - name: cache nghttp3
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-nghttp3
         env:
           cache-name: cache-nghttp3
@@ -176,7 +176,7 @@ jobs:
         name: 'install nghttp2'
 
       - name: cache mod_h2
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-mod_h2
         env:
           cache-name: cache-mod_h2
