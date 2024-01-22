@@ -96,7 +96,7 @@ jobs:
         run: |
           git clone --quiet --depth=1 -b ${{ env.openssl3-version }} https://github.com/openssl/openssl
           cd openssl
-          ./config enable-tls1_3 --prefix=$HOME/openssl3 --libdir=$HOME/openssl3/lib
+          ./config --prefix=$HOME/openssl3 --libdir=$HOME/openssl3/lib
           make -j1 install_sw
 
       - name: cache quictls
