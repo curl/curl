@@ -27,41 +27,27 @@ include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 function(add_manual_pages _listname)
   foreach(_file IN LISTS ${_listname})
+    set(_rofffile "${CMAKE_CURRENT_BINARY_DIR}/${_file}")
     if(_file STREQUAL "libcurl-symbols.3")
       # Special case, an auto-generated file.
-      set(_srcfile "${CMAKE_CURRENT_BINARY_DIR}/${_file}")
+      string(REPLACE ".3" ".md" _mdfile "${CMAKE_CURRENT_BINARY_DIR}/${_file}")
     else()
-      set(_srcfile "${CMAKE_CURRENT_SOURCE_DIR}/${_file}")
+      string(REPLACE ".3" ".md" _mdfile "${CMAKE_CURRENT_SOURCE_DIR}/${_file}")
     endif()
 
-    string(REPLACE ".3" ".html" _htmlfile "${CMAKE_CURRENT_BINARY_DIR}/${_file}")
-    add_custom_command(OUTPUT "${_htmlfile}"
-      COMMAND roffit "--mandir=${CMAKE_CURRENT_SOURCE_DIR}" "${_srcfile}" > "${_htmlfile}"
-      DEPENDS "${_srcfile}"
+    add_custom_command(OUTPUT "${_rofffile}"
+      COMMAND ${PROJECT_SOURCE_DIR}/scripts/cd2nroff ${_mdfile} > ${_rofffile}
+      DEPENDS "${_mdfile}"
       VERBATIM
     )
-
-    string(REPLACE ".3" ".pdf" _pdffile "${CMAKE_CURRENT_BINARY_DIR}/${_file}")
-    string(REPLACE ".3" ".ps" _psfile "${CMAKE_CURRENT_BINARY_DIR}/${_file}")
-    # XXX any reason why groff -Tpdf (for gropdf) is not used?
-    add_custom_command(OUTPUT "${_pdffile}"
-      COMMAND groff -Tps -man "${_srcfile}" > "${_psfile}"
-      COMMAND ps2pdf "${_psfile}" "${_pdffile}"
-      COMMAND "${CMAKE_COMMAND}" -E remove "${_psfile}"
-      DEPENDS "${_srcfile}"
-      #BYPRODUCTS "${_psfile}"
-      VERBATIM
-    )
-    # "BYPRODUCTS" for add_custom_command requires CMake 3.2. For now hope that
-    # the temporary files are removed (i.e. the command is not interrupted).
   endforeach()
 endfunction()
 
-add_custom_command(OUTPUT libcurl-symbols.3
+add_custom_command(OUTPUT libcurl-symbols.md
   COMMAND
     "${PERL_EXECUTABLE}"
     "${CMAKE_CURRENT_SOURCE_DIR}/mksymbolsmanpage.pl" <
-    "${CMAKE_CURRENT_SOURCE_DIR}/symbols-in-versions" > libcurl-symbols.3
+    "${CMAKE_CURRENT_SOURCE_DIR}/symbols-in-versions" > libcurl-symbols.md
   DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/symbols-in-versions"
     "${CMAKE_CURRENT_SOURCE_DIR}/mksymbolsmanpage.pl"
@@ -69,10 +55,10 @@ add_custom_command(OUTPUT libcurl-symbols.3
 )
 
 add_manual_pages(man_MANS)
-
-string(REPLACE ".3" ".html" HTMLPAGES "${man_MANS}")
-string(REPLACE ".3" ".pdf" PDFPAGES "${man_MANS}")
-add_custom_target(html DEPENDS ${HTMLPAGES})
-add_custom_target(pdf DEPENDS ${PDFPAGES})
+add_custom_target(man ALL DEPENDS ${man_MANS})
+if(NOT CURL_DISABLE_INSTALL)
+  install(FILES "$<LIST:TRANSFORM,${man_MANS},PREPEND,${CMAKE_CURRENT_BINARY_DIR}/>"
+          DESTINATION ${CMAKE_INSTALL_MANDIR}/man3)
+endif()
 
 add_subdirectory(opts)
