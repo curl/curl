@@ -27,11 +27,13 @@
 import json
 import logging
 import os
+import psutil
 import re
 import shutil
 import subprocess
+from statistics import mean, fmean
 from datetime import timedelta, datetime
-from typing import List, Optional, Dict, Union
+from typing import List, Optional, Dict, Union, Any
 from urllib.parse import urlparse
 
 from .env import Env
@@ -42,59 +44,63 @@ log = logging.getLogger(__name__)
 
 class RunProfile:
 
+    STAT_KEYS = ['cpu', 'rss', 'vsz']
+
+    @classmethod
+    def AverageStats(cls, profiles: List['RunProfile']):
+        avg = {}
+        stats = [p.stats for p in profiles]
+        for key in cls.STAT_KEYS:
+            avg[key] = mean([s[key] for s in stats])
+        return avg
+
     def __init__(self, pid: int, started_at: datetime, run_dir):
         self._pid = pid
         self._started_at = started_at
         self._duration = timedelta(seconds=0)
         self._run_dir = run_dir
         self._samples = []
-        self._avg_cpu = 0.0
+        self._psu = None
+        self._stats = None
 
     @property
     def duration(self) -> timedelta:
         return self._duration
 
     @property
-    def avg_cpu(self) -> float:
-        return self._avg_cpu
-
-    @property
-    def avg_mem(self) -> float:
-        return self._avg_mem
+    def stats(self) -> Optional[Dict[str,Any]]:
+        return self._stats
 
     def sample(self):
-        p2 = subprocess.run([
-            'ps', '-p', f'{self._pid}', '-o', 'pcpu=', '-o', 'pmem='
-        ], cwd=self._run_dir, shell=False, capture_output=True,
-            env={'LANG': 'en'})
         elapsed = datetime.now() - self._started_at
-        m = re.match(r'(\d+(\.\d+)?)\s+(\d+(\.\d+)?)', p2.stdout.decode().strip())
-        if m:
+        try:
+            if self._psu is None:
+                self._psu = psutil.Process(pid=self._pid)
+            mem = self._psu.memory_info()
             self._samples.append({
                 'time': elapsed,
-                'cpu': float(m.group(1)) / 100,
-                'mem': float(m.group(3)) / 100,
+                'cpu': self._psu.cpu_percent(),
+                'vsz': mem.vms,
+                'rss': mem.rss,
             })
-        else:
-            log.warning(f'error parsing ps output: {p2.stdout.decode()}')
+        except psutil.NoSuchProcess:
+            pass
 
     def finish(self):
         self._duration = datetime.now() - self._started_at
-        duration = timedelta(seconds=1)
-        load = 0
-        mem = 0
-        for s in self._samples:
-            duration = duration + s['time']
-            load += s['cpu'] * s['time'].total_seconds()
-            mem += s['mem'] * s['time'].total_seconds()
-        self._avg_cpu = load / duration.total_seconds()
-        self._avg_mem = mem / duration.total_seconds()
+        if len(self._samples) > 0:
+            weights = [s['time'].total_seconds() for s in self._samples]
+            self._stats = {}
+            for key in self.STAT_KEYS:
+                self._stats[key] = fmean([s[key] for s in self._samples], weights)
+        else:
+            self._stats = None
+        self._psu = None
 
     def __repr__(self):
         return f'RunProfile[pid={self._pid}, '\
                f'duration={self.duration.total_seconds():.3f}s, '\
-               f'avg_cpu={self.avg_cpu * 100:.1f}%, '\
-               f'avg_mem={self.avg_mem * 100:.1f}%]'
+               f'stats={self.stats}]'
 
 
 class ExecResult:
@@ -415,6 +421,7 @@ class CurlClient:
                       alpn_proto: Optional[str] = None,
                       with_stats: bool = True,
                       with_headers: bool = False,
+                      with_profile: bool = False,
                       no_save: bool = False,
                       extra_args: List[str] = None):
         if extra_args is None:
@@ -436,7 +443,8 @@ class CurlClient:
             ])
         return self._raw(urls, alpn_proto=alpn_proto, options=extra_args,
                          with_stats=with_stats,
-                         with_headers=with_headers)
+                         with_headers=with_headers,
+                         with_profile=with_profile)
 
     def http_upload(self, urls: List[str], data: str,
                     alpn_proto: Optional[str] = None,
@@ -522,7 +530,7 @@ class CurlClient:
         self._rmf(self._stdoutfile)
         self._rmf(self._stderrfile)
         self._rmf(self._headerfile)
-        start = datetime.now()
+        started_at = datetime.now()
         exception = None
         profile = None
         try:
@@ -530,22 +538,25 @@ class CurlClient:
                 with open(self._stderrfile, 'w') as cerr:
                     if with_profile:
                         started_at = datetime.now()
-                        end_at = started_at + timedelta(seconds=self._timeout)
+                        end_at = started_at + timedelta(seconds=self._timeout) \
+                            if self._timeout else None
                         log.info(f'starting: {args}')
                         p = subprocess.Popen(args, stderr=cerr, stdout=cout,
                                              cwd=self._run_dir, shell=False)
                         profile = RunProfile(p.pid, started_at, self._run_dir)
                         if intext is not None and False:
                             p.communicate(input=intext.encode(), timeout=1)
+                        ptimeout = 0.0
                         while True:
                             try:
-                                p.wait(timeout=0.2)
+                                p.wait(timeout=ptimeout)
                                 break
                             except subprocess.TimeoutExpired:
-                                if datetime.now() >= end_at:
+                                if end_at and datetime.now() >= end_at:
                                     p.kill()
                                     raise subprocess.TimeoutExpired(cmd=args, timeout=self._timeout)
                                 profile.sample()
+                                ptimeout = 0.01
                         exitcode = p.returncode
                         profile.finish()
                         log.info(f'done: exit={exitcode}, profile={profile}')
@@ -563,7 +574,7 @@ class CurlClient:
         cerrput = open(self._stderrfile).readlines()
         return ExecResult(args=args, exit_code=exitcode, exception=exception,
                           stdout=coutput, stderr=cerrput,
-                          duration=datetime.now() - start,
+                          duration=datetime.now() - started_at,
                           with_stats=with_stats,
                           profile=profile)
 

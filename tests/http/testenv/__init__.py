@@ -32,7 +32,7 @@ from .env import Env
 from .certs import TestCA, Credentials
 from .caddy import Caddy
 from .httpd import Httpd
-from .curl import CurlClient, ExecResult
+from .curl import CurlClient, ExecResult, RunProfile
 from .client import LocalClient
 from .nghttpx import Nghttpx
 from .nghttpx import Nghttpx, NghttpxQuic, NghttpxFwd
