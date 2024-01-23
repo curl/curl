@@ -33,7 +33,7 @@ import sys
 from statistics import mean
 from typing import Dict, Any, Optional, List
 
-from testenv import Env, Httpd, Nghttpx, CurlClient, Caddy, ExecResult, NghttpxFwd
+from testenv import Env, Httpd, Nghttpx, CurlClient, Caddy, ExecResult, NghttpxQuic
 
 log = logging.getLogger(__name__)
 
@@ -466,13 +466,13 @@ def main():
     parser.add_argument("-H", "--handshakes", action='store_true',
                         default=False, help="evaluate handshakes only")
     parser.add_argument("-d", "--downloads", action='store_true',
-                        default=False, help="evaluate downloads only")
+                        default=False, help="evaluate downloads")
     parser.add_argument("--download", action='append', type=str,
                         default=None, help="evaluate download size")
     parser.add_argument("--download-count", action='store', type=int,
                         default=50, help="perform that many downloads")
     parser.add_argument("-r", "--requests", action='store_true',
-                        default=False, help="evaluate requests only")
+                        default=False, help="evaluate requests")
     parser.add_argument("--httpd", action='store_true', default=False,
                         help="evaluate httpd server only")
     parser.add_argument("--caddy", action='store_true', default=False,
@@ -491,29 +491,21 @@ def main():
 
     protocol = args.protocol
     handshakes = True
-    downloads = [1024*1024, 10*1024*1024, 100*1024*1024]
+    downloads = [1024 * 1024, 10 * 1024 * 1024, 100 * 1024 * 1024]
+    if args.download is not None:
+        downloads = sorted([parse_size(x) for x in args.download])
     requests = True
+    if args.downloads or args.requests or args.handshakes:
+        handshakes = args.handshakes
+        if not args.downloads:
+            downloads = None
+        requests = args.requests
+
     test_httpd = protocol != 'h3'
     test_caddy = True
-    if args.handshakes:
-        downloads = None
-        requests = False
-    if args.downloads:
-        handshakes = False
-        requests = False
-    if args.download:
-        downloads = sorted([parse_size(x) for x in args.download])
-        handshakes = False
-        requests = False
-    if args.requests:
-        handshakes = False
-        downloads = None
-    if args.caddy:
-        test_caddy = True
-        test_httpd = False
-    if args.httpd:
-        test_caddy = False
-        test_httpd = True
+    if args.caddy or args.httpd:
+        test_caddy = args.caddy
+        test_httpd = args.httpd
 
     rv = 0
     env = Env()
@@ -530,7 +522,7 @@ def main():
             httpd.clear_logs()
             assert httpd.start()
             if 'h3' == protocol:
-                nghttpx = NghttpxFwd(env=env)
+                nghttpx = NghttpxQuic(env=env)
                 nghttpx.clear_logs()
                 assert nghttpx.start()
         if test_caddy and env.caddy:
