@@ -2231,9 +2231,7 @@ bool Curl_conn_is_osslq(const struct Curl_easy *data,
 void Curl_osslq_ver(char *p, size_t len)
 {
   const nghttp3_info *ht3 = nghttp3_version(0);
-  char tmp[128];
-  Curl_ssl_version(tmp, sizeof(tmp)-1);
-  (void)msnprintf(p, len, "%s nghttp3/%s", tmp, ht3->version_str);
+  (void)msnprintf(p, len, "nghttp3/%s", ht3->version_str);
 }
 
 #endif /* USE_OPENSSL_QUIC && USE_NGHTTP3 */
