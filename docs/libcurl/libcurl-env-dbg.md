@@ -115,4 +115,4 @@ Debug-version of the *ntlm-wb* executable.
 ## CURL_OPENLDAP_TRACE
 
 OpenLDAP tracing is enabled if this variable exists and its value is 1 or
-greater. There's a number of debug levels, refer to *openldap.c* comments.
+greater. There is a number of debug levels, refer to *openldap.c* comments.

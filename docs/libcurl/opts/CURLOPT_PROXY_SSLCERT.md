@@ -27,7 +27,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SSLCERT, char *cert);
 This option is for connecting to an HTTPS proxy, not an HTTPS server.
 
 Pass a pointer to a null-terminated string as parameter. The string should be
-the file name of your client certificate used to connect to the HTTPS proxy.
+the filename of your client certificate used to connect to the HTTPS proxy.
 The default format is "P12" on Secure Transport and "PEM" on other engines,
 and can be changed with CURLOPT_PROXY_SSLCERTTYPE(3).
 

@@ -12,7 +12,7 @@ See-also:
 
 # NAME
 
-CURLOPT_COOKIEJAR - file name to store cookies to
+CURLOPT_COOKIEJAR - filename to store cookies to
 
 # SYNOPSIS
 

@@ -76,13 +76,13 @@ operation returns an error instead.
 
 ## CURLU_URLENCODE
 
-If set, curl_url_get(3) URL encodes the host name part when a full URL
+If set, curl_url_get(3) URL encodes the hostname part when a full URL
 is retrieved. If not set (default), libcurl returns the URL with the host name
 "raw" to support IDN names to appear as-is. IDN host names are typically using
 non-ASCII bytes that otherwise gets percent-encoded.
 
 Note that even when not asking for URL encoding, the '%' (byte 37) is URL
-encoded to make sure the host name remains valid.
+encoded to make sure the hostname remains valid.
 
 ## CURLU_PUNYCODE
 
@@ -92,7 +92,7 @@ name in its punycode version if it contains any non-ASCII octets (and is an
 IDN name).
 
 If libcurl is built without IDN capabilities, using this bit makes
-curl_url_get(3) return *CURLUE_LACKS_IDN* if the host name contains
+curl_url_get(3) return *CURLUE_LACKS_IDN* if the hostname contains
 anything outside the ASCII range.
 
 (Added in curl 7.88.0)
@@ -100,13 +100,13 @@ anything outside the ASCII range.
 ## CURLU_PUNY2IDN
 
 If set and asked to retrieve the **CURLUPART_HOST** or **CURLUPART_URL**
-parts, libcurl returns the host name in its IDN (International Domain Name)
+parts, libcurl returns the hostname in its IDN (International Domain Name)
 UTF-8 version if it otherwise is a punycode version. If the punycode name
 cannot be converted to IDN correctly, libcurl returns
 *CURLUE_BAD_HOSTNAME*.
 
 If libcurl is built without IDN capabilities, using this bit makes
-curl_url_get(3) return *CURLUE_LACKS_IDN* if the host name is using
+curl_url_get(3) return *CURLUE_LACKS_IDN* if the hostname is using
 punycode.
 
 (Added in curl 8.3.0)
@@ -139,7 +139,7 @@ this field independently of scheme when not parsing full URLs.
 
 ## CURLUPART_HOST
 
-The host name. If it is an IPv6 numeric address, the zone id is not part of it
+The hostname. If it is an IPv6 numeric address, the zone id is not part of it
 but is provided separately in *CURLUPART_ZONEID*. IPv6 numerical addresses
 are returned within brackets ([]).
 
@@ -148,7 +148,7 @@ possible while maintaining correct syntax.
 
 ## CURLUPART_ZONEID
 
-If the host name is a numeric IPv6 address, this field might also be set.
+If the hostname is a numeric IPv6 address, this field might also be set.
 
 ## CURLUPART_PORT
 

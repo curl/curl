@@ -40,15 +40,15 @@ calling curl_easy_perform(3) or curl_multi_perform(3). Note that
 curl_easy_send(3) does not work on connections that were created without
 this option.
 
-The call returns **CURLE_AGAIN** if it's not possible to send data right now
+The call returns **CURLE_AGAIN** if it is not possible to send data right now
 - the socket is used in non-blocking mode internally. When **CURLE_AGAIN**
 is returned, use your operating system facilities like *select(2)* to wait
 until the socket is writable. The socket may be obtained using
 curl_easy_getinfo(3) with CURLINFO_ACTIVESOCKET(3).
 
-Furthermore if you wait on the socket and it tells you it's writable,
-curl_easy_send(3) may return **CURLE_AGAIN** if the only data that was
-sent was for internal SSL processing, and no other data could be sent.
+Furthermore if you wait on the socket and it tells you it is writable,
+curl_easy_send(3) may return **CURLE_AGAIN** if the only data that was sent
+was for internal SSL processing, and no other data could be sent.
 
 # EXAMPLE
 

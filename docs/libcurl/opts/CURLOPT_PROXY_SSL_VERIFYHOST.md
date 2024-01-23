@@ -37,7 +37,7 @@ indicate that the server is the proxy to which you meant to connect to, or the
 connection fails.
 
 Curl considers the proxy the intended one when the Common Name field or a
-Subject Alternate Name field in the certificate matches the host name in the
+Subject Alternate Name field in the certificate matches the hostname in the
 proxy string which you told curl to use.
 
 If *verify* value is set to 1:

@@ -24,7 +24,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_RANDOM_FILE, char *path);
 
 Deprecated option. It serves no purpose anymore.
 
-Pass a char pointer to a null-terminated file name. The file might be used to
+Pass a char pointer to a null-terminated filename. The file might be used to
 read from to seed the random engine for SSL and more.
 
 The application does not have to keep the string around after setting this

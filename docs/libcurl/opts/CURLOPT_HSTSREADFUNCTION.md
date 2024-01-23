@@ -43,7 +43,7 @@ Set the *clientp* argument with the CURLOPT_HSTSREADDATA(3) option
 or it is NULL.
 
 When this callback is invoked, the *sts* pointer points to a populated
-struct: Copy the host name to *name* (no longer than *namelen*
+struct: Copy the hostname to *name* (no longer than *namelen*
 bytes). Make it null-terminated. Set *includeSubDomains* to TRUE or
 FALSE. Set *expire* to a date stamp or a zero length string for *forever*
 (wrong date stamp format might cause the name to not get accepted)

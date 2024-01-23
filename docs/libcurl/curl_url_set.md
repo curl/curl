@@ -82,7 +82,7 @@ Pass a pointer to a null-terminated string to the *url* parameter. The
 string must point to a correctly formatted "RFC 3986+" URL or be a NULL
 pointer.
 
-Unless *CURLU_NO_AUTHORITY* is set, a blank host name is not allowed in
+Unless *CURLU_NO_AUTHORITY* is set, a blank hostname is not allowed in
 the URL.
 
 ## CURLUPART_SCHEME
@@ -103,16 +103,16 @@ independently set this field.
 
 ## CURLUPART_HOST
 
-The host name. If it is International Domain Name (IDN) the string must then
-be encoded as your locale says or UTF-8 (when WinIDN is used). If it is a
+The hostname. If it is International Domain Name (IDN) the string must then be
+encoded as your locale says or UTF-8 (when WinIDN is used). If it is a
 bracketed IPv6 numeric address it may contain a zone id (or you can use
 *CURLUPART_ZONEID*).
 
-Unless *CURLU_NO_AUTHORITY* is set, a blank host name is not allowed to set.
+Unless *CURLU_NO_AUTHORITY* is set, a blank hostname is not allowed to set.
 
 ## CURLUPART_ZONEID
 
-If the host name is a numeric IPv6 address, this field can also be set.
+If the hostname is a numeric IPv6 address, this field can also be set.
 
 ## CURLUPART_PORT
 
@@ -179,10 +179,10 @@ are set.
 ## CURLU_GUESS_SCHEME
 
 If set, allows the URL to be set without a scheme and it instead "guesses"
-which scheme that was intended based on the host name. If the outermost
-subdomain name matches DICT, FTP, IMAP, LDAP, POP3 or SMTP then that scheme
-is used, otherwise it picks HTTP. Conflicts with the
-*CURLU_DEFAULT_SCHEME* option which takes precedence if both are set.
+which scheme that was intended based on the hostname. If the outermost
+subdomain name matches DICT, FTP, IMAP, LDAP, POP3 or SMTP then that scheme is
+used, otherwise it picks HTTP. Conflicts with the *CURLU_DEFAULT_SCHEME*
+option which takes precedence if both are set.
 
 ## CURLU_NO_AUTHORITY
 

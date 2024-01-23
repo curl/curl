@@ -105,7 +105,7 @@ Write italics like:
 
     This is *italics*.
 
-Due to how man pages don't support backticks especially formatted, such
+Due to how man pages do not support backticks especially formatted, such
 occurrences in the source will instead just use italics in the generated
 output:
 

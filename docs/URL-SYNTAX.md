@@ -28,7 +28,7 @@ Due to the inherent differences between URL parser implementations, it is
 considered a security risk to mix different implementations and assume the
 same behavior!
 
-For example, if you use one parser to check if a URL uses a good host name or
+For example, if you use one parser to check if a URL uses a good hostname or
 the correct auth field, and then pass on that same URL to a *second* parser,
 there will always be a risk it treats the same URL differently. There is no
 right and wrong in URL land, only differences of opinions.
@@ -92,7 +92,7 @@ curl supports "URLs" that do not start with a scheme. This is not supported by
 any of the specifications. This is a shortcut to entering URLs that was
 supported by browsers early on and has been mimicked by curl.
 
-Based on what the host name starts with, curl will "guess" what protocol to
+Based on what the hostname starts with, curl will "guess" what protocol to
 use:
 
  - `ftp.` means FTP
@@ -367,9 +367,9 @@ curl supports SMB version 1 (only)
 
 ## SMTP
 
-The path part of a SMTP request specifies the host name to present during
+The path part of a SMTP request specifies the hostname to present during
 communication with the mail server. If the path is omitted, then libcurl will
-attempt to resolve the local computer's host name. However, this may not
+attempt to resolve the local computer's hostname. However, this may not
 return the fully qualified domain name that is required by some mail servers
 and specifying this path allows you to set an alternative name, such as your
 machine's fully qualified domain name, which you might have obtained from an

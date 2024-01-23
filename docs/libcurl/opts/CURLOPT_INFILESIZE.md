@@ -34,8 +34,8 @@ mandatory.
 
 To unset this value again, set it to -1.
 
-Using CURLOPT_UPLOAD(3) to a HTTP/1.1 server and this value set to -1,
-makes libcurl do a chunked transfer-encoded upload.
+Using CURLOPT_UPLOAD(3) to an HTTP/1.1 server and this value set to -1, makes
+libcurl do a chunked transfer-encoded upload.
 
 When sending emails using SMTP, this command can be used to specify the
 optional SIZE parameter for the MAIL FROM command.

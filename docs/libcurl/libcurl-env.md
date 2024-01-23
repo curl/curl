@@ -71,7 +71,7 @@ not set.
 ## NO_PROXY
 
 This has the same functionality as the CURLOPT_NOPROXY(3) option: it
-gives libcurl a comma-separated list of host name patterns for which libcurl
+gives libcurl a comma-separated list of hostname patterns for which libcurl
 should not use a proxy.
 
 ## NTLMUSER
@@ -81,7 +81,7 @@ User name to use when invoking the *ntlm-wb* tool.
 ## SSLKEYLOGFILE
 
 When set and libcurl runs with a SSL backend that supports this feature,
-libcurl saves SSL secrets into the given file name. Using those SSL secrets,
+libcurl saves SSL secrets into the given filename. Using those SSL secrets,
 other tools (such as Wireshark) can decrypt the SSL communication and
 analyze/view the traffic.
 

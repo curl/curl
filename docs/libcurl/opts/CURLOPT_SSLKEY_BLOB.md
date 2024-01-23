@@ -32,8 +32,8 @@ If the blob is initialized with the flags member of struct curl_blob set to
 CURL_BLOB_COPY, the application does not have to keep the buffer around after
 setting this.
 
-This option is an alternative to CURLOPT_SSLKEY(3) which instead expects
-a file name as input.
+This option is an alternative to CURLOPT_SSLKEY(3) which instead expects a
+filename as input.
 
 # DEFAULT
 

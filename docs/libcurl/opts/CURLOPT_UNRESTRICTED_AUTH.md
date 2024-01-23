@@ -37,15 +37,14 @@ send custom nor internally generated Authentication: headers on requests done
 to other hosts than the one used for the initial URL.
 
 By default, libcurl only sends credentials and Authentication headers to the
-initial host name as given in the original URL, to avoid leaking username +
+initial hostname as given in the original URL, to avoid leaking username +
 password to other sites.
 
 This option should be used with caution: when curl follows redirects it
 blindly fetches the next URL as instructed by the server. Setting
-CURLOPT_UNRESTRICTED_AUTH(3) to 1L therefore also makes curl trust the
-server and sends possibly sensitive credentials to any host the server points
-out. And then maybe again and again as the following hosts can keep
-redirecting to new hosts.
+CURLOPT_UNRESTRICTED_AUTH(3) to 1L makes curl trust the server and sends
+possibly sensitive credentials to any host the server points to, possibly
+again and again as the following hosts can keep redirecting to new hosts.
 
 # DEFAULT
 

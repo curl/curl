@@ -48,7 +48,7 @@ CURL_BLOB_COPY, the application does not have to keep the buffer around after
 setting this.
 
 This option is an alternative to CURLOPT_ISSUERCERT(3) which instead
-expects a file name as input.
+expects a filename as input.
 
 # DEFAULT
 

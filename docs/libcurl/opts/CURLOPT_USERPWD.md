@@ -43,12 +43,12 @@ respectively.
 Some HTTP servers (on Windows) support inclusion of the domain for Basic
 authentication as well.
 
-When using HTTP and CURLOPT_FOLLOWLOCATION(3), libcurl might perform
-several requests to possibly different hosts. libcurl only sends this user and
-password information to hosts using the initial host name (unless
-CURLOPT_UNRESTRICTED_AUTH(3) is set), so if libcurl follows redirects to
-other hosts, it does not send the user and password to those. This is enforced
-to prevent accidental information leakage.
+When using HTTP and CURLOPT_FOLLOWLOCATION(3), libcurl might perform several
+requests to possibly different hosts. libcurl only sends this user and
+password information to hosts using the initial hostname (unless
+CURLOPT_UNRESTRICTED_AUTH(3) is set), so if libcurl follows redirects to other
+hosts, it does not send the user and password to those. This is enforced to
+prevent accidental information leakage.
 
 Use CURLOPT_HTTPAUTH(3) to specify the authentication method for HTTP
 based connections or CURLOPT_LOGIN_OPTIONS(3) to control IMAP, POP3 and

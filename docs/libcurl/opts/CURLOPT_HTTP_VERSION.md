@@ -29,7 +29,7 @@ Pass *version* a long, set to one of the values described below. They ask
 libcurl to use the specific HTTP versions.
 
 Note that the HTTP version is just a request. libcurl still prioritizes to
-reuse existing connections so it might then reuse a connection using a HTTP
+reuse existing connections so it might then reuse a connection using an HTTP
 version you have not asked for.
 
 ## CURL_HTTP_VERSION_NONE

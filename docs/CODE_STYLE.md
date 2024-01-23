@@ -221,7 +221,7 @@ too long, the statement too hard to read, or due to other style guidelines
 above. In such a case the statement will span multiple lines.
 
 If a continuation line is part of an expression or sub-expression then you
-should align on the appropriate column so that it's easy to tell what part of
+should align on the appropriate column so that it is easy to tell what part of
 the statement it is. Operators should not start continuation lines. In other
 cases follow the 2-space indent guideline. Here are some examples from
 libcurl:

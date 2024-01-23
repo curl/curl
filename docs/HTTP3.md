@@ -31,7 +31,7 @@ the master branch using pull-requests, just like ordinary changes.
 To fix before we remove the experimental label:
 
  - the used QUIC library needs to consider itself non-beta
- - it's fine to "leave" individual backends as experimental if necessary
+ - it is fine to "leave" individual backends as experimental if necessary
 
 # ngtcp2 version
 
@@ -341,9 +341,9 @@ handshake or time out.
 
 Note that all this happens in addition to IP version happy eyeballing. If the
 name resolution for the server gives more than one IP address, curl will try
-all those until one succeeds - just as with all other protocols. And if those
-IP addresses contain both IPv6 and IPv4, those attempts will happen, delayed,
-in parallel (the actual eyeballing).
+all those until one succeeds - just as with all other protocols. If those IP
+addresses contain both IPv6 and IPv4, those attempts will happen, delayed, in
+parallel (the actual eyeballing).
 
 ## Known Bugs
 

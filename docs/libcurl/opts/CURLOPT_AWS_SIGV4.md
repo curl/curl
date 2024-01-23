@@ -41,12 +41,12 @@ such as "Algorithm", "date", "request type" and "signed headers".
 ## region
 
 The argument is a geographic area of a resources collection.
-It is extracted from the host name specified in the URL if omitted.
+It is extracted from the hostname specified in the URL if omitted.
 
 ## service
 
-The argument is a function provided by a cloud.
-It is extracted from the host name specified in the URL if omitted.
+The argument is a function provided by a cloud. It is extracted from the
+hostname specified in the URL if omitted.
 
 NOTE: This call set CURLOPT_HTTPAUTH(3) to CURLAUTH_AWS_SIGV4.
 Calling CURLOPT_HTTPAUTH(3) with CURLAUTH_AWS_SIGV4 is the same
@@ -109,8 +109,8 @@ method special. This method cannot be combined with other auth types.
 
 A sha256 checksum of the request payload is used as input to the signature
 calculation. For POST requests, this is a checksum of the provided
-CURLOPT_POSTFIELDS(3). Otherwise, it's the checksum of an empty buffer.
-For requests like PUT, you can provide your own checksum in an HTTP header named
+CURLOPT_POSTFIELDS(3). Otherwise, it is the checksum of an empty buffer. For
+requests like PUT, you can provide your own checksum in an HTTP header named
 **x-provider2-content-sha256**.
 
 For **aws:s3**, a **x-amz-content-sha256** header is added to every request

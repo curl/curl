@@ -23,10 +23,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PRE_PROXY, char *preproxy);
 
 # DESCRIPTION
 
-Set the *preproxy* to use for the upcoming request. The parameter
-should be a char * to a null-terminated string holding the host name or dotted
-numerical IP address. A numerical IPv6 address must be written within
-[brackets].
+Set the *preproxy* to use for the upcoming request. The parameter should be a
+char * to a null-terminated string holding the hostname or dotted numerical IP
+address. A numerical IPv6 address must be written within [brackets].
 
 To specify port number in this string, append :[port] to the end of the host
 name. The proxy's port number may optionally be specified with the separate
@@ -53,7 +52,7 @@ option.
 
 Default is NULL, meaning no pre proxy is used.
 
-When you set a host name to use, do not assume that there is any particular
+When you set a hostname to use, do not assume that there is any particular
 single port number used widely for proxies. Specify it!
 
 # PROTOCOLS

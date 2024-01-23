@@ -195,12 +195,12 @@ and end of the program -- that is just usually the easiest way to do it.
 You can call both of these multiple times, as long as all calls meet
 these requirements and the number of calls to each is the same.
 
-The global constant situation merits special consideration when the
-code you are writing to use libcurl is not the main program, but rather
-a modular piece of a program, e.g. another library. As a module,
-your code does not know about other parts of the program -- it does not
-know whether they use libcurl or not. And its code does not necessarily
-run at the start and end of the whole program.
+The global constant situation merits special consideration when the code you
+are writing to use libcurl is not the main program, but rather a modular piece
+of a program, e.g. another library. As a module, your code does not know about
+other parts of the program -- it does not know whether they use libcurl or
+not. Its code does not necessarily run at the start and end of the whole
+program.
 
 A module like this must have global constant functions of its own, just like
 curl_global_init(3) and curl_global_cleanup(3). The module thus

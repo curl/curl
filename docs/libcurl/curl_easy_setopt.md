@@ -80,7 +80,7 @@ Do not install signal handlers. See CURLOPT_NOSIGNAL(3)
 
 ## CURLOPT_WILDCARDMATCH
 
-Transfer multiple files according to a file name pattern. See
+Transfer multiple files according to a filename pattern. See
 CURLOPT_WILDCARDMATCH(3)
 
 # CALLBACK OPTIONS
@@ -431,7 +431,7 @@ Enable .netrc parsing. See CURLOPT_NETRC(3)
 
 ## CURLOPT_NETRC_FILE
 
-&.netrc file name. See CURLOPT_NETRC_FILE(3)
+.netrc filename. See CURLOPT_NETRC_FILE(3)
 
 ## CURLOPT_USERPWD
 
@@ -614,7 +614,7 @@ Add or control cookies. See CURLOPT_COOKIELIST(3)
 
 ## CURLOPT_ALTSVC
 
-Specify the Alt-Svc: cache file name. See CURLOPT_ALTSVC(3)
+Specify the Alt-Svc: cache filename. See CURLOPT_ALTSVC(3)
 
 ## CURLOPT_ALTSVC_CTRL
 
@@ -1119,16 +1119,16 @@ Proxy SSL version to use. See CURLOPT_PROXY_SSLVERSION(3)
 
 ## CURLOPT_SSL_VERIFYHOST
 
-Verify the host name in the SSL certificate. See CURLOPT_SSL_VERIFYHOST(3)
+Verify the hostname in the SSL certificate. See CURLOPT_SSL_VERIFYHOST(3)
 
 ## CURLOPT_DOH_SSL_VERIFYHOST
 
-Verify the host name in the DoH (DNS-over-HTTPS) SSL certificate. See
+Verify the hostname in the DoH (DNS-over-HTTPS) SSL certificate. See
 CURLOPT_DOH_SSL_VERIFYHOST(3)
 
 ## CURLOPT_PROXY_SSL_VERIFYHOST
 
-Verify the host name in the proxy SSL certificate. See
+Verify the hostname in the proxy SSL certificate. See
 CURLOPT_PROXY_SSL_VERIFYHOST(3)
 
 ## CURLOPT_SSL_VERIFYPEER
@@ -1283,15 +1283,15 @@ SHA256 of host's public key. See CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256(3)
 
 ## CURLOPT_SSH_PUBLIC_KEYFILE
 
-File name of public key. See CURLOPT_SSH_PUBLIC_KEYFILE(3)
+Filename of the public key. See CURLOPT_SSH_PUBLIC_KEYFILE(3)
 
 ## CURLOPT_SSH_PRIVATE_KEYFILE
 
-File name of private key. See CURLOPT_SSH_PRIVATE_KEYFILE(3)
+Filename of the private key. See CURLOPT_SSH_PRIVATE_KEYFILE(3)
 
 ## CURLOPT_SSH_KNOWNHOSTS
 
-File name with known hosts. See CURLOPT_SSH_KNOWNHOSTS(3)
+Filename with known hosts. See CURLOPT_SSH_KNOWNHOSTS(3)
 
 ## CURLOPT_SSH_KEYFUNCTION
 

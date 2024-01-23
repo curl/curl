@@ -59,7 +59,7 @@ accept response data is used instead. That is the function specified with
 CURLOPT_WRITEFUNCTION(3), or if it is not specified or NULL - the
 default, stream-writing function.
 
-It's important to note that the callback is invoked for the headers of all
+It is important to note that the callback is invoked for the headers of all
 responses received after initiating a request and not just the final
 response. This includes all responses which occur during authentication
 negotiation. If you need to operate on only the headers from the final

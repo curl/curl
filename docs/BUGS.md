@@ -5,7 +5,7 @@
  Curl and libcurl keep being developed. Adding features and changing code
  means that bugs will sneak in, no matter how hard we try to keep them out.
 
- Of course there are lots of bugs left. And lots of misfeatures.
+ Of course there are lots of bugs left. Not to mention misfeatures.
 
  To help us make curl the stable and solid product we want it to be, we need
  bug reports and bug fixes.

@@ -43,8 +43,8 @@ HTTP browsers used to do backslash-escaping in the past but have over time
 transitioned to use percent-encoding. This option allows one to address
 server-side applications that have not yet have been converted.
 
-As an example, consider field or file name *strangename"kind*.
-When the containing multipart form is sent, this is normally transmitted as
+As an example, consider field or filename *strangename"kind*. When the
+containing multipart form is sent, this is normally transmitted as
 *strangename%22kind*. When this option is set, it is sent as
 *strangename"kind*.
 
