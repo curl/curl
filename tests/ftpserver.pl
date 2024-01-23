@@ -2258,6 +2258,7 @@ sub SIZE_ftp {
     my $size = $data[0];
 
     if($size) {
+        $size += 0; # make it a number
         if($size > -1) {
             sendcontrol "213 $size\r\n";
         }
