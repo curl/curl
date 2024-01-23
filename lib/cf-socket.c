@@ -873,9 +873,11 @@ static ssize_t nw_in_read(void *reader_ctx,
     else {
       char buffer[STRERROR_LEN];
 
-      failf(rctx->data, "Recv failure: %s",
-            Curl_strerror(sockerr, buffer, sizeof(buffer)));
-      rctx->data->state.os_errno = sockerr;
+      if(rctx->data) {
+        failf(rctx->data, "Recv failure: %s",
+              Curl_strerror(sockerr, buffer, sizeof(buffer)));
+        rctx->data->state.os_errno = sockerr;
+      }
       *err = CURLE_RECV_ERROR;
       nread = -1;
     }
@@ -1336,9 +1338,11 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
     else {
       char buffer[STRERROR_LEN];
-      failf(data, "Send failure: %s",
-            Curl_strerror(sockerr, buffer, sizeof(buffer)));
-      data->state.os_errno = sockerr;
+      if(data) {
+        failf(data, "Send failure: %s",
+              Curl_strerror(sockerr, buffer, sizeof(buffer)));
+        data->state.os_errno = sockerr;
+      }
       *err = CURLE_SEND_ERROR;
     }
   }
