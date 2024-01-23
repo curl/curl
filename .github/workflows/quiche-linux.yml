@@ -49,7 +49,7 @@ env:
   openssl-version: 3.1.4+quic
   nghttp3-version: v1.1.0
   ngtcp2-version: v1.1.0
-  nghttp2-version: v1.58.0
+  nghttp2-version: v1.59.0
   quiche-version: 0.19.0
   mod_h2-version: v2.0.25
 
