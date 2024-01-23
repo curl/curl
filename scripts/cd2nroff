@@ -33,6 +33,7 @@ Converts a curldown file to nroff (man page).
 my $cd2nroff = "0.1"; # to keep check
 my $dir;
 my $extension;
+my $keepfilename;
 
 while(1) {
     if($ARGV[0] eq "-d") {
@@ -42,6 +43,10 @@ while(1) {
     elsif($ARGV[0] eq "-e") {
         shift @ARGV;
         $extension = shift @ARGV;
+    }
+    elsif($ARGV[0] eq "-k") {
+        shift @ARGV;
+        $keepfilename = 1;
     }
     elsif($ARGV[0] eq "-h") {
         print <<HELP
@@ -318,6 +323,10 @@ sub single {
     close($fh);
     push @desc, outseealso(@seealso);
     if($dir) {
+        if($keepfilename) {
+            $title = $f;
+            $title =~ s/\.[^.]*$//;
+        }
         open(O, ">$dir/$title.$section$extension");
         print O @desc;
         close(O);
@@ -328,4 +337,16 @@ sub single {
     return $errors;
 }
 
-exit single($ARGV[0]);
+$f = $ARGV[0];
+if(defined($f)) {
+    while($f) {
+        $r = single($f);
+        if($r) {
+            exit $r;
+        }
+        $f = shift @ARGV;
+    }
+}
+else {
+    exit single();
+}

@@ -306,6 +306,7 @@ endif()
 
 find_package(Perl)
 
+option(BUILD_DOCS "to build manual pages" ON)
 option(ENABLE_MANUAL "to provide the built-in manual" OFF)
 
 if(ENABLE_MANUAL AND PERL_FOUND)
