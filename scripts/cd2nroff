@@ -30,8 +30,6 @@ Converts a curldown file to nroff (man page).
 =end comment
 =cut
 
-use File::Basename;
-
 my $cd2nroff = "0.1"; # to keep check
 my $dir;
 my $extension;
@@ -326,7 +324,8 @@ sub single {
     push @desc, outseealso(@seealso);
     if($dir) {
         if($keepfilename) {
-            $title = fileparse($f, qr/\.[^.]*/);
+            $title = $f;
+            $title =~ s/\.[^.]*$//;
         }
         open(O, ">$dir/$title.$section$extension");
         print O @desc;
