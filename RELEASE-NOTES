@@ -4,7 +4,7 @@ curl and libcurl 8.6.0
  Command line options:         258
  curl_easy_setopt() options:   304
  Public functions in libcurl:  93
- Contributors:                 3064
+ Contributors:                 3073
 
 This release includes the following changes:
 
@@ -20,17 +20,23 @@ This release includes the following bugfixes:
  o altsvc: free 'as' when returning error [23]
  o appveyor: replace PowerShell with bash + parallel autotools [54]
  o appveyor: switch to out-of-tree builds [29]
+ o asyn-ares: with modern c-ares, use its default timeout [127]
  o build: delete unused `HAVE_{GSSHEIMDAL,GSSMIT,HEIMDAL}` [4]
  o build: enable missing OpenSSF-recommended warnings, with fixes [11]
  o build: fix `-Wconversion`/`-Wsign-conversion` warnings [26]
  o build: fix Windows ADDRESS_FAMILY detection [35]
  o build: more `-Wformat` fixes [40]
  o build: remove redundant `CURL_PULL_*` settings [8]
+ o cf-h1-proxy: no CURLOPT_USERAGENT in CONNECT with hyper [133]
+ o cf-socket: show errno in tcpkeepalive error messages [120]
  o CI/distcheck: run full tests [31]
+ o cmake: add option to disable building docs
  o cmake: fix generation for system name iOS [53]
  o cmake: fix typo [5]
  o cmake: prefill/cache `HAVE_STRUCT_SOCKADDR_STORAGE` [45]
+ o cmake: when USE_MANUAL=YES, build the curl.1 man page [113]
  o cmdline-docs: use .IP consistently [13]
+ o cmdline-opts/write-out.d: remove spurious double quotes
  o cmdline-opts: update availability for the *-ca-native options [66]
  o cmdline/gen: fix the sorting of the man page options [33]
  o configure: fix no default int compile error in ipv6 detection [69]
@@ -39,14 +45,20 @@ This release includes the following bugfixes:
  o content_encoding: change return code to typedef'ed enum [94]
  o cookie.d: document use of empty string to enable cookie engine [106]
  o cookie: avoid fopen with empty file name [24]
+ o curl.h: CURLOPT_DNS_SERVERS is only available with c-ares [131]
  o curl: show ipfs and ipns as supported "protocols" [15]
+ o curl_easy_getinfo.3: remove the wrong time value count [116]
+ o curl_multi_fdset.3: remove mention of null pointer support [134]
  o CURLINFO_REFERER.3: clarify that it is the *request* header [70]
  o CURLOPT_AUTOREFERER.3: mention CURLINFO_REFERER
  o CURLOPT_POSTFIELDS.3: fix incorrect C string escape in example [27]
  o CURLOPT_SSH_*_KEYFILE: clarify [57]
  o dist: add tests/errorcodes.pl to the tarball [6]
+ o docs/cmdline: change to .md for cmdline docs [77]
  o docs: clean up Protocols: for cmdline options [32]
  o docs: describe and highlight super cookies [80]
+ o docs: introduce "curldown" for libcurl man page format [102]
+ o docs: mention env vars not used by schannel [124]
  o doh: remove unused local variable [34]
  o examples: add four new examples [99]
  o ftp: handle the PORT parsing without allocation [44]
@@ -57,10 +69,12 @@ This release includes the following bugfixes:
  o gnutls: fix build with --disable-verbose [3]
  o haproxy-clientip.d: document the arg [68]
  o headers: make sure the trailing newline is not stored [97]
+ o headers: remove assert from Curl_headers_push [115]
  o hostip: return error immediately when Curl_ip2addr() fails [19]
  o hsts: remove assert for zero length domain [96]
  o http2: improved on_stream_close/data_done handling [49]
  o http3/quiche: fix result code on a stream reset [91]
+ o http3: initial support for OpenSSL 3.2 QUIC stack [110]
  o http: adjust_pollset fix [85]
  o http: fix off-by-one error in request method length check [14]
  o http_proxy: a blank CURLOPT_USERAGENT should not be used in CONNECT [90]
@@ -68,23 +82,29 @@ This release includes the following bugfixes:
  o lib: fix variable undeclared error caused by `infof` changes [2]
  o lib: reduce use of strncpy [30]
  o lib: rename Curl_strndup to Curl_memdup0 to avoid misunderstanding [36]
+ o lib: replace readwrite with write_resp [137]
  o lib: strndup/memdup instead of malloc, memcpy and null-terminate [42]
+ o libssh2: use `libssh2_session_callback_set2()` with v1.11.1 [103]
  o libssh: improve the deprecation warning dismissal [20]
  o libssh: supress warnings without version check [18]
  o Makefile.am: fix the MSVC project generation [22]
  o Makefile.mk: drop Windows support [12]
+ o mbedtls: fix `-Wnull-dereference` and `-Wredundant-decls` [117]
  o mbedtls: free the entropy when threaded [46]
  o mime: use memdup0 instead of malloc + memcpy [63]
+ o mksymbolsmanpage.pl: provide references to where the symbol is used
  o mprintf: overhaul and bugfixes [52]
  o multi: remove total timer reset in file_do() while fetching file:// [89]
  o ngtcp2: put h3 at the front of alpn [58]
  o openldap: fix an LDAP crash [75]
  o openldap: fix STARTTLS [67]
  o openssl: re-match LibreSSL deinit with init [17]
+ o openssl: when verifystatus fails, remove session id from cache [100]
  o pop3: replace calloc + memcpy with memdup0 [60]
  o quiche: return CURLE_HTTP3 on send to invalid stream [65]
  o readwrite_data: loop less [21]
  o Revert "urldata: move async resolver state from easy handle to connectdata" [16]
+ o rtsp: deal with borked server responses [129]
  o runtests: for mode="text" on <stdout>, fix newlines on both parts [64]
  o schannel: fix `-Warith-conversion` gcc 13 warning [28]
  o sectransp: do verify_cert without memdup for blobs [93]
@@ -103,14 +123,23 @@ This release includes the following bugfixes:
  o tool: prepend output_dir in header callback [95]
  o tool_getparam: bsearch cmdline options [74]
  o tool_getparam: do not try to expand without an argument [59]
+ o tool_getparam: stop supporting `@filename` style for --cookie [121]
  o tool_listhelp: regenerate after recent .d updates [61]
+ o tool_operate: make --remove-on-error only remove "real" files [125]
+ o tool_operate: stop setting the file comment on Amiga [128]
  o transfer: adjust_pollset improvements [81]
  o transfer: fix upload rate limiting, add test cases [37]
+ o transfer: make the select_bits_paused condition check both directions [104]
+ o transfer: remove warning: Value stored to 'blen' is never read [136]
+ o url: don't set default CA paths for Secure Transport backend [126]
  o url: for disabled protocols, mention if found in redirect [7]
  o verify-examples.pl: fail verification on unescaped backslash [72]
+ o version: show only the libpsl version, not its dependencies [130]
  o vquic: extract TLS setup into own source [88]
  o vtls: fix missing multissl version info [73]
  o vtls: remove the Curl_cft_ssl_proxy object if CURL_DISABLE_PROXY [41]
+ o websockets: check for negative payload lengths [123]
+ o websockets: refactor decode chain [122]
  o windows: delete redundant headers [43]
  o windows: simplify detecting and using system headers [10]
  o wolfssl: load certificate *chain* for PEM client certs [84]
@@ -128,17 +157,20 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andy Alt, annalee, Baruch Siach, Ben, Boris Verkhovskiy,
+  Andy Alt, annalee, Baruch Siach, Ben, Boris Verkhovskiy, Brad Harder,
   bubbleguuum on github, Cajus Pollmeier, calvin2021y on github, Chara White,
   Chris Sauer, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
   dependabot[bot], Dmitry Karpov, Gabe, Geeknik Labs, Gisle Vanem,
-  Hans-Christian Egtvedt, Haydar Alaidrus, hgdagon on github, iAroc on github,
-  ivanfywang, Karthikdasari0423 on github, Lealem Amedie, Marcel Raad,
-  Mark Sinkovics, Mauricio Scheffer, Michał Antoniak, Mike Hommey, Ozan Cansel,
-  Patrick Monnerat, Pavel Pavlov, Ray Satiro, RevaliQaQ on github,
-  Stefan Eissing, Tatsuhiko Miyagawa, Theo, Thomas Ferguson, Viktor Szakats,
-  Xi Ruoyao, Yedaya Katsman, Yifei Kong, YX Hao, zengwei, zengwei2000
-  (46 contributors)
+  Hans-Christian Egtvedt, Harry Sintonen, Haydar Alaidrus, hgdagon on github,
+  Hiroki Kurosawa, iAroc on github, ivanfywang, janko-js on github, Jay Wu,
+  Jess Lowe, Karthikdasari0423 on github, Lealem Amedie, Lin Sun, Marcel Raad,
+  Mark Huang, Mark Sinkovics, Mauricio Scheffer, Michał Antoniak, Mike Hommey,
+  Mohammadreza Hendiani, Ozan Cansel, Patrick Monnerat, Pavel Pavlov,
+  Ray Satiro, RevaliQaQ on github, Richard Levitte, Sergey Bronnikov,
+  Sergey Markelov, sfan5 on github, Stefan Eissing, Tatsuhiko Miyagawa, Theo,
+  Thomas Ferguson, Viktor Szakats, Xi Ruoyao, Yadhu Krishna M, Yedaya Katsman,
+  Yifei Kong, YX Hao, zengwei, zengwei2000
+  (60 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -218,6 +250,7 @@ References to bug reports and discussions on issues:
  [74] = https://curl.se/bug/?i=12631
  [75] = https://curl.se/bug/?i=12593
  [76] = https://curl.se/bug/?i=12368
+ [77] = https://curl.se/bug/?i=12751
  [78] = https://curl.se/bug/?i=12689
  [79] = https://curl.se/bug/?i=12647
  [80] = https://curl.se/bug/?i=12687
@@ -239,8 +272,33 @@ References to bug reports and discussions on issues:
  [96] = https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=65661
  [97] = https://curl.se/mail/lib-2024-01/0019.html
  [99] = https://curl.se/bug/?i=12671
+ [100] = https://curl.se/bug/?i=12760
+ [102] = https://curl.se/bug/?i=12730
+ [103] = https://curl.se/bug/?i=12754
+ [104] = https://curl.se/mail/lib-2024-01/0049.html
  [105] = https://curl.se/bug/?i=12667
  [106] = https://curl.se/bug/?i=12643
  [107] = https://curl.se/bug/?i=12651
  [108] = https://curl.se/bug/?i=12652
  [109] = https://curl.se/bug/?i=12661
+ [110] = https://curl.se/bug/?i=12734
+ [113] = https://curl.se/bug/?i=12742
+ [115] = https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=65839
+ [116] = https://curl.se/bug/?i=12727
+ [117] = https://curl.se/bug/?i=12720
+ [120] = https://curl.se/bug/?i=12726
+ [121] = https://curl.se/bug/?i=12645
+ [122] = https://curl.se/bug/?i=12713
+ [123] = https://curl.se/bug/?i=12707
+ [124] = https://curl.se/bug/?i=12711
+ [125] = https://curl.se/bug/?i=12710
+ [126] = https://curl.se/bug/?i=12704
+ [127] = https://curl.se/bug/?i=12703
+ [128] = https://curl.se/bug/?i=12709
+ [129] = https://curl.se/bug/?i=12701
+ [130] = https://curl.se/bug/?i=12700
+ [131] = https://curl.se/bug/?i=12695
+ [133] = https://curl.se/bug/?i=12697
+ [134] = https://curl.se/bug/?i=12691
+ [136] = https://curl.se/bug/?i=12693
+ [137] = https://curl.se/bug/?i=12480
