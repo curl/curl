@@ -123,8 +123,8 @@ If you are a curl developer and use gcc, you might want to enable more debug
 options with the `--enable-debug` option.
 
 curl can be built to use a whole range of libraries to provide various useful
-services, and configure will try to auto-detect a decent default. But if you
-want to alter it, you can select how to deal with each individual library.
+services, and configure will try to auto-detect a decent default. If you want
+to alter it, you can select how to deal with each individual library.
 
 ## Select TLS backend
 
@@ -146,7 +146,7 @@ you cannot add another OpenSSL fork (or wolfSSL) simply because they have
 conflicting identical symbol names.
 
 When you build with multiple TLS backends, you can select the active one at
-run-time when curl starts up.
+runtime when curl starts up.
 
 ## configure finding libs in wrong directory
 
@@ -174,8 +174,8 @@ Building for Windows XP is required as a minimum.
  KB140584 is a must for any Windows developer. Especially important is full
  understanding if you are not going to follow the advice given above.
 
- - [How To Use the C Run-Time](https://support.microsoft.com/help/94248/how-to-use-the-c-run-time)
- - [Run-Time Library Compiler Options](https://docs.microsoft.com/cpp/build/reference/md-mt-ld-use-run-time-library)
+ - [How To Use the C Runtime](https://support.microsoft.com/help/94248/how-to-use-the-c-run-time)
+ - [Runtime Library Compiler Options](https://docs.microsoft.com/cpp/build/reference/md-mt-ld-use-run-time-library)
  - [Potential Errors Passing CRT Objects Across DLL Boundaries](https://docs.microsoft.com/cpp/c-runtime-library/potential-errors-passing-crt-objects-across-dll-boundaries)
 
 If your app is misbehaving in some strange way, or it is suffering from memory
@@ -340,14 +340,14 @@ In all above, the built libraries and executables can be found in the
 
 # Android
 
-When building curl for Android it's recommended to use a Linux/macOS environment
-since using curl's `configure` script is the easiest way to build curl
-for Android. Before you can build curl for Android, you need to install the
-Android NDK first. This can be done using the SDK Manager that is part of
-Android Studio. Once you have installed the Android NDK, you need to figure out
-where it has been installed and then set up some environment variables before
-launching `configure`. On macOS, those variables could look like this to compile
-for `aarch64` and API level 29:
+When building curl for Android it is recommended to use a Linux/macOS
+environment since using curl's `configure` script is the easiest way to build
+curl for Android. Before you can build curl for Android, you need to install
+the Android NDK first. This can be done using the SDK Manager that is part of
+Android Studio. Once you have installed the Android NDK, you need to figure
+out where it has been installed and then set up some environment variables
+before launching `configure`. On macOS, those variables could look like this
+to compile for `aarch64` and API level 29:
 
 ```bash
 export ANDROID_NDK_HOME=~/Library/Android/sdk/ndk/25.1.8937393 # Point into your NDK.
@@ -367,13 +367,13 @@ to adjust those variables accordingly. After that you can build curl like this:
 
     ./configure --host aarch64-linux-android --with-pic --disable-shared
 
-Note that this will not give you SSL/TLS support. If you need SSL/TLS, you have
-to build curl against a SSL/TLS layer, e.g. OpenSSL, because it's impossible for
-curl to access Android's native SSL/TLS layer. To build curl for Android using
-OpenSSL, follow the OpenSSL build instructions and then install `libssl.a` and
-`libcrypto.a` to `$TOOLCHAIN/sysroot/usr/lib` and copy `include/openssl` to
-`$TOOLCHAIN/sysroot/usr/include`. Now you can build curl for Android using
-OpenSSL like this:
+Note that this will not give you SSL/TLS support. If you need SSL/TLS, you
+have to build curl against a SSL/TLS layer, e.g. OpenSSL, because it is
+impossible for curl to access Android's native SSL/TLS layer. To build curl
+for Android using OpenSSL, follow the OpenSSL build instructions and then
+install `libssl.a` and `libcrypto.a` to `$TOOLCHAIN/sysroot/usr/lib` and copy
+`include/openssl` to `$TOOLCHAIN/sysroot/usr/include`. Now you can build curl
+for Android using OpenSSL like this:
 
 ```bash
 LIBS="-lssl -lcrypto -lc++" # For OpenSSL/BoringSSL. In general, you will need to the SSL/TLS layer's transitive dependencies if you are linking statically.

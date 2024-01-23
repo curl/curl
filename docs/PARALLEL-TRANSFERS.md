@@ -38,9 +38,9 @@ Example:
 ## Behavior differences
 
 Connections are shared fine between different easy handles, but the
-"authentication contexts" are not. So for example doing HTTP Digest auth with
-one handle for a particular transfer and then continue on with another handle
-that reuses the same connection, the second handle cannot send the necessary
+"authentication contexts" are not. For example doing HTTP Digest auth with one
+handle for a particular transfer and then continue on with another handle that
+reuses the same connection, the second handle cannot send the necessary
 Authorization header at once since the context is only kept in the original
 easy handle.
 

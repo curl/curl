@@ -1,6 +1,7 @@
 #!/usr/bin/perl
-
-
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
 #
 # bad[:=]correct
 #
@@ -10,6 +11,9 @@
 my $w;
 while(<STDIN>) {
     chomp;
+    if($_ =~ /^#/) {
+        next;
+    }
     if($_ =~ /^([^:=]*)([:=])(.*)/) {
         my ($bad, $sep, $better)=($1, $2, $3);
         push @w, $bad;

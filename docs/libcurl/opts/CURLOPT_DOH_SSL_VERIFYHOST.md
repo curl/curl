@@ -14,7 +14,7 @@ See-also:
 
 # NAME
 
-CURLOPT_DOH_SSL_VERIFYHOST - verify the host name in the DoH SSL certificate
+CURLOPT_DOH_SSL_VERIFYHOST - verify the hostname in the DoH SSL certificate
 
 # SYNOPSIS
 
@@ -28,7 +28,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DOH_SSL_VERIFYHOST,
 # DESCRIPTION
 
 Pass a long set to 2L as asking curl to *verify* the DoH (DNS-over-HTTPS)
-server's certificate name fields against the host name.
+server's certificate name fields against the hostname.
 
 This option is the DoH equivalent of CURLOPT_SSL_VERIFYHOST(3) and
 only affects requests to the DoH server.
@@ -38,7 +38,7 @@ the DoH server must indicate that the server name is the same as the server
 name to which you meant to connect to, or the connection fails.
 
 Curl considers the DoH server the intended one when the Common Name field or a
-Subject Alternate Name field in the certificate matches the host name in the
+Subject Alternate Name field in the certificate matches the hostname in the
 DoH URL to which you told Curl to connect.
 
 When the *verify* value is set to 1L it is treated the same as 2L. However

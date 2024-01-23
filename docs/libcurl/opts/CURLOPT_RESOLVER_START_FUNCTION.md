@@ -33,9 +33,9 @@ shown above.
 This callback function gets called by libcurl every time before a new resolve
 request is started.
 
-*resolver_state* points to a backend-specific resolver state. Currently
-only the ares resolver backend has a resolver state. It can be used to set up
-any desired option on the ares channel before it's used, for example setting up
+*resolver_state* points to a backend-specific resolver state. Currently only
+the ares resolver backend has a resolver state. It can be used to set up any
+desired option on the ares channel before it is used, for example setting up
 socket callback options.
 
 *reserved* is reserved.

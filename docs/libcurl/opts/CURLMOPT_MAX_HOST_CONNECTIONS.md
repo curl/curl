@@ -24,12 +24,12 @@ CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_MAX_HOST_CONNECTIONS,
 
 # DESCRIPTION
 
-Pass a long to indicate **max**. The set number is used as the maximum
-amount of simultaneously open connections to a single host (a host being the
-same as a host name + port number pair). For each new session to a host,
-libcurl might open a new connection up to the limit set by
-CURLMOPT_MAX_HOST_CONNECTIONS(3). When the limit is reached, new
-sessions are kept pending until a connection becomes available.
+Pass a long to indicate **max**. The set number is used as the maximum amount
+of simultaneously open connections to a single host (a host being the same as
+a hostname + port number pair). For each new session to a host, libcurl might
+open a new connection up to the limit set by
+CURLMOPT_MAX_HOST_CONNECTIONS(3). When the limit is reached, new sessions are
+kept pending until a connection becomes available.
 
 The default **max** value is 0, unlimited. This set limit is also used for
 proxy connections, and then the proxy is considered to be the host for which

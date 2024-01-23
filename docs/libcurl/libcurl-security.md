@@ -76,7 +76,7 @@ the entire connection and everything sent over it.
 Protocols that do not have any form of cryptographic authentication cannot
 with any certainty know that they communicate with the right remote server.
 
-If your application is using a fixed scheme or fixed host name, it is not safe
+If your application is using a fixed scheme or fixed hostname, it is not safe
 as long as the connection is unauthenticated. There can be a man-in-the-middle
 or in fact the whole server might have been replaced by an evil actor.
 
@@ -393,13 +393,12 @@ transactions.
 # Server-supplied Names
 
 A server can supply data which the application may, in some cases, use as a
-file name. The curl command-line tool does this with
-*--remote-header-name*, using the Content-disposition: header to generate
-a file name. An application could also use CURLINFO_EFFECTIVE_URL(3) to
-generate a file name from a server-supplied redirect URL. Special care must be
-taken to sanitize such names to avoid the possibility of a malicious server
-supplying one like **"/etc/passwd"**, **"autoexec.bat"**, **"prn:"**
-or even **".bashrc"**.
+filename. The curl command-line tool does this with *--remote-header-name*,
+using the Content-disposition: header to generate a filename. An application
+could also use CURLINFO_EFFECTIVE_URL(3) to generate a filename from a
+server-supplied redirect URL. Special care must be taken to sanitize such
+names to avoid the possibility of a malicious server supplying one like
+**"/etc/passwd"**, **"autoexec.bat"**, **"prn:"** or even **".bashrc"**.
 
 # Server Certificates
 

@@ -27,7 +27,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SSLKEY, char *keyfile);
 # DESCRIPTION
 
 Pass a pointer to a null-terminated string as parameter. The string should be
-the file name of your private key used for connecting to the HTTPS proxy. The
+the filename of your private key used for connecting to the HTTPS proxy. The
 default format is "PEM" and can be changed with
 CURLOPT_PROXY_SSLKEYTYPE(3).
 

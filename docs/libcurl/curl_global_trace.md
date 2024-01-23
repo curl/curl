@@ -83,7 +83,7 @@ Details about HTTP/3 handling: connect, frames, events, I/O etc.
 
 ## http-proxy
 
-Involved when transfers are tunneled through a HTTP proxy. "h1-proxy" or
+Involved when transfers are tunneled through an HTTP proxy. "h1-proxy" or
 "h2-proxy" are also involved, depending on the HTTP version negotiated with
 the proxy.
 

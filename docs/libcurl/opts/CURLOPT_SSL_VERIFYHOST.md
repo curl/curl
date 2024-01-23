@@ -38,7 +38,7 @@ fails. Simply put, it means it has to have the same name in the certificate as
 is in the URL you operate against.
 
 Curl considers the server the intended one when the Common Name field or a
-Subject Alternate Name field in the certificate matches the host name in the
+Subject Alternate Name field in the certificate matches the hostname in the
 URL to which you told Curl to connect.
 
 If *verify* value is set to 1:

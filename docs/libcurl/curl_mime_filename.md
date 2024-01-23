@@ -25,17 +25,17 @@ CURLcode curl_mime_filename(curl_mimepart *part,
 
 # DESCRIPTION
 
-curl_mime_filename(3) sets a mime part's remote file name. When remote
-file name is set, content data is processed as a file, whatever is the part's
-content source. A part's remote file name is transmitted to the server in the
+curl_mime_filename(3) sets a mime part's remote filename. When remote
+filename is set, content data is processed as a file, whatever is the part's
+content source. A part's remote filename is transmitted to the server in the
 associated Content-Disposition generated header.
 
-*part* is the part's handle to assign the remote file name to.
+*part* is the part's handle to assign the remote filename to.
 
-*filename* points to the null-terminated file name string; it may be set
-to NULL to remove a previously attached remote file name.
+*filename* points to the null-terminated filename string; it may be set
+to NULL to remove a previously attached remote filename.
 
-The remote file name string is copied into the part, thus the associated
+The remote filename string is copied into the part, thus the associated
 storage may safely be released or reused after call. Setting a part's file
 name multiple times is valid: only the value set by the last call is retained.
 

@@ -61,9 +61,9 @@ If you issue a POST request and then want to make a HEAD or GET using the same
 reused handle, you must explicitly set the new request type using
 CURLOPT_NOBODY(3) or CURLOPT_HTTPGET(3) or similar.
 
-When setting CURLOPT_POST(3) to 0, libcurl resets the request type to
-the default to disable the POST. Typically that would mean it's reset to GET.
-Instead you should set a new request type explicitly as described above.
+When setting CURLOPT_POST(3) to 0, libcurl resets the request type to the
+default to disable the POST. Typically that means gets reset to GET. Instead
+you should set a new request type explicitly as described above.
 
 # DEFAULT
 

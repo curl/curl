@@ -144,8 +144,8 @@ internally chosen one.
 ## CURLFORM_FILENAME
 
 is used in combination with *CURLFORM_FILE*. Followed by a pointer to a
-string, it tells libcurl to use the given string as the *filename* in the
-file upload part instead of the actual file name.
+string, it tells libcurl to use the given string as the *filename* in the file
+upload part instead of the actual filename.
 
 ## CURLFORM_BUFFER
 

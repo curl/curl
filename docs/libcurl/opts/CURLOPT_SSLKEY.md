@@ -25,7 +25,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSLKEY, char *keyfile);
 # DESCRIPTION
 
 Pass a pointer to a null-terminated string as parameter. The string should be
-the file name of your private key. The default format is "PEM" and can be
+the filename of your private key. The default format is "PEM" and can be
 changed with CURLOPT_SSLKEYTYPE(3).
 
 (Windows, iOS and Mac OS X) This option is ignored by Secure Transport and

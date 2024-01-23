@@ -12,7 +12,7 @@ See-also:
 
 # NAME
 
-CURLOPT_RESOLVE - provide custom host name to IP address resolves
+CURLOPT_RESOLVE - provide custom hostname to IP address resolves
 
 # SYNOPSIS
 
@@ -25,11 +25,11 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_RESOLVE,
 
 # DESCRIPTION
 
-Pass a pointer to a linked list of strings with host name resolve information
+Pass a pointer to a linked list of strings with hostname resolve information
 to use for requests with this handle. The linked list should be a fully valid
 list of **struct curl_slist** structs properly filled in. Use
-curl_slist_append(3) to create the list and curl_slist_free_all(3)
-to clean up an entire list.
+curl_slist_append(3) to create the list and curl_slist_free_all(3) to clean up
+an entire list.
 
 Each resolve rule to add should be written using the format
 
@@ -64,7 +64,7 @@ resolves, include a string in the linked list that uses the format
   -HOST:PORT
 ~~~
 
-The entry to remove must be prefixed with a dash, and the host name and port
+The entry to remove must be prefixed with a dash, and the hostname and port
 number must exactly match what was added previously.
 
 # DEFAULT

@@ -25,7 +25,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_INTERFACE, char *interface);
 
 Pass a char pointer as parameter. This sets the *interface* name to use as
 outgoing network interface. The name can be an interface name, an IP address,
-or a host name.
+or a hostname.
 
 If the parameter starts with "if!" then it is treated only as an interface
 name. If the parameter starts with &"host!" it is treated as either an IP

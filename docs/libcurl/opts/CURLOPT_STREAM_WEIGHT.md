@@ -38,10 +38,10 @@ sent to the server the next time an HTTP/2 frame is sent to the server.
 See section 5.3 of RFC 7540 for protocol details.
 
 Streams with the same parent should be allocated resources proportionally
-based on their weight. So if you have two streams going, stream A with weight
-16 and stream B with weight 32, stream B gets two thirds (32/48) of the
-available bandwidth (assuming the server can send off the data equally for
-both streams).
+based on their weight. If you have two streams going, stream A with weight 16
+and stream B with weight 32, stream B gets two thirds (32/48) of the available
+bandwidth (assuming the server can send off the data equally for both
+streams).
 
 # DEFAULT
 

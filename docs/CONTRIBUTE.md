@@ -101,9 +101,9 @@ archive is quite OK as well.
 ### Documentation
 
 Writing docs is dead boring and one of the big problems with many open source
-projects. But someone's gotta do it. It makes things a lot easier if you
-submit a small description of your fix or your new features with every
-contribution so that it can be swiftly added to the package documentation.
+projects but someone's gotta do it. It makes things a lot easier if you submit
+a small description of your fix or your new features with every contribution
+so that it can be swiftly added to the package documentation.
 
 The documentation is always made in man pages (nroff formatted) or plain
 ASCII files. All HTML files on the website and in the release archives are
@@ -240,10 +240,10 @@ make sure that you have your own user and email setup correctly in git before
 you commit.
 
 Add whichever header lines as appropriate, with one line per person if more
-than one person was involved. There is no need to credit yourself unless you are
-using --author=... which hides your identity. Do not include people's e-mail
-addresses in headers to avoid spam, unless they are already public from a
-previous commit; saying `{userid} on github` is OK.
+than one person was involved. There is no need to credit yourself unless you
+are using --author=... which hides your identity. Do not include people's
+email addresses in headers to avoid spam, unless they are already public from
+a previous commit; saying `{userid} on github` is OK.
 
 ### Write Access to git Repository
 

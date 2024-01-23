@@ -12,7 +12,7 @@ See-also:
 
 # NAME
 
-CURLOPT_COOKIEFILE - file name to read cookies from
+CURLOPT_COOKIEFILE - filename to read cookies from
 
 # SYNOPSIS
 
@@ -25,7 +25,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_COOKIEFILE, char *filename);
 # DESCRIPTION
 
 Pass a pointer to a null-terminated string as parameter. It should point to
-the file name of your file holding cookie data to read. The cookie data can be
+the filename of your file holding cookie data to read. The cookie data can be
 in either the old Netscape / Mozilla cookie data format or just regular HTTP
 headers (Set-Cookie style) dumped to a file.
 
@@ -33,7 +33,7 @@ It also enables the cookie engine, making libcurl parse and send cookies on
 subsequent requests with this handle.
 
 By passing the empty string ("") to this option, you enable the cookie engine
-without reading any initial cookies. If you tell libcurl the file name is "-"
+without reading any initial cookies. If you tell libcurl the filename is "-"
 (just a single minus sign), libcurl instead reads from stdin.
 
 This option only **reads** cookies. To make libcurl write cookies to file,

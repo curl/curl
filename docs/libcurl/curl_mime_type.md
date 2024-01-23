@@ -42,7 +42,7 @@ a default mime type is determined by the context:
 
 - application/form-data for an HTTP form post.
 
-- If a remote file name is set, the mime type is taken from the file name
+- If a remote filename is set, the mime type is taken from the file name
 extension, or application/octet-stream by default.
 
 - For a multipart part, multipart/mixed.

@@ -32,8 +32,8 @@ Such a cookie can be either a single line in Netscape / Mozilla format or just
 regular HTTP-style header (Set-Cookie: ...) format. This option also enables
 the cookie engine. This adds that single cookie to the internal cookie store.
 
-We strongly advice against loading cookies from a HTTP header file, as that is
-an inferior data exchange format.
+We strongly advice against loading cookies from an HTTP header file, as that
+is an inferior data exchange format.
 
 Exercise caution if you are using this option and multiple transfers may
 occur. If you use the Set-Cookie format and the string does not specify a

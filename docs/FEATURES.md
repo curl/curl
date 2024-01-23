@@ -16,7 +16,7 @@
  - custom maximum download time
  - custom least download speed acceptable
  - custom output result after completion
- - guesses protocol from host name unless specified
+ - guesses protocol from hostname unless specified
  - uses .netrc
  - progress bar with time statistics while downloading
  - "standard" proxy environment variables support
@@ -82,8 +82,8 @@
  - active/passive using PORT, EPRT, PASV or EPSV
  - single file size information (compare to HTTP HEAD)
  - 'type=' URL support
- - dir listing
- - dir listing names-only
+ - directory listing
+ - directory listing names-only
  - upload
  - upload append
  - upload via http-proxy as HTTP PUT
@@ -94,7 +94,7 @@
  - via HTTP proxy, HTTPS proxy or SOCKS proxy
  - all operations can be tunneled through proxy
  - customizable to retrieve file modification date
- - no dir depth limit
+ - no directory depth limit
 
 ## FTPS (1)
 

@@ -28,7 +28,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_PINNEDPUBLICKEY,
 # DESCRIPTION
 
 Pass a pointer to a null-terminated string as parameter. The string can be the
-file name of your pinned public key. The file format expected is "PEM" or
+filename of your pinned public key. The file format expected is "PEM" or
 "DER". The string can also be any number of base64 encoded sha256 hashes
 preceded by "sha256//" and separated by ";"
 

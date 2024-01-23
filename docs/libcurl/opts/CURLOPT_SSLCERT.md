@@ -25,8 +25,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSLCERT, char *cert);
 # DESCRIPTION
 
 Pass a pointer to a null-terminated string as parameter. The string should be
-the file name of your client certificate. The default format is "P12" on
-Secure Transport and "PEM" on other engines, and can be changed with
+the filename of your client certificate. The default format is "P12" on Secure
+Transport and "PEM" on other engines, and can be changed with
 CURLOPT_SSLCERTTYPE(3).
 
 With Secure Transport, this can also be the nickname of the certificate you

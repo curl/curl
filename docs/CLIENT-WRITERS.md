@@ -28,7 +28,10 @@ The `type` argument specifies what the bytes in `buf` actually are. The followin
 #define CLIENTWRITE_TRAILER (1<<6) /* a trailer HEADER */
 ```
 
-The main types here are `CLIENTWRITE_BODY` and `CLIENTWRITE_HEADER`. They are mutually exclusive. The other bits are enhancements to `CLIENTWRITE_HEADER` to specify what the header is about. And they are only used in HTTP and related protocols (RTSP and WebSocket).
+The main types here are `CLIENTWRITE_BODY` and `CLIENTWRITE_HEADER`. They are
+mutually exclusive. The other bits are enhancements to `CLIENTWRITE_HEADER` to
+specify what the header is about. They are only used in HTTP and related
+protocols (RTSP and WebSocket).
 
 The implementation of `Curl_client_write()` uses a chain of *client writer* instances to process the call and make sure that the bytes reach the proper application callbacks. This is similar to the design of connection filters: client writers can be chained to process the bytes written through them. The definition is:
 

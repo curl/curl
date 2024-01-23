@@ -34,7 +34,7 @@ clean up an entire list.
 
 Each single string should be written using the format
 HOST:PORT:CONNECT-TO-HOST:CONNECT-TO-PORT where HOST is the host of the
-request, PORT is the port of the request, CONNECT-TO-HOST is the host name to
+request, PORT is the port of the request, CONNECT-TO-HOST is the hostname to
 connect to, and CONNECT-TO-PORT is the port to connect to.
 
 The first string that matches the request's host and port is used.

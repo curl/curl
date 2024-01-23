@@ -26,9 +26,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_WILDCARDMATCH, long onoff);
 # DESCRIPTION
 
 Set *onoff* to 1 if you want to transfer multiple files according to a
-file name pattern. The pattern can be specified as part of the
-CURLOPT_URL(3) option, using an **fnmatch**-like pattern (Shell
-Pattern Matching) in the last part of URL (file name).
+filename pattern. The pattern can be specified as part of the CURLOPT_URL(3)
+option, using an **fnmatch**-like pattern (Shell Pattern Matching) in the last
+part of URL (filename).
 
 By default, libcurl uses its internal wildcard matching implementation. You
 can provide your own matching function by the
@@ -38,18 +38,16 @@ A brief introduction of its syntax follows:
 
 ## * - ASTERISK
 
-~~~c
-  ftp://example.com/some/path/*.txt
-~~~
+    ftp://example.com/some/path/*.txt
+
 for all txt's from the root directory. Only two asterisks are allowed within
 the same pattern string.
 
 ## ? - QUESTION MARK
 
 Question mark matches any (exactly one) character.
-~~~c
-  ftp://example.com/some/path/photo?.jpg
-~~~
+
+    ftp://example.com/some/path/photo?.jpg
 
 ## [ - BRACKET EXPRESSION
 
@@ -63,19 +61,18 @@ right bracket and matches exactly one character. Some examples follow:
 
 **[^abc]** or **[!abc]** - negation
 
-**[[:name:]]** class expression. Supported classes are
-**alnum**,**lower**, **space**, **alpha**, **digit**, **print**,
-**upper**, **blank**, **graph**, **xdigit**.
+**[[:name:]]** class expression. Supported classes are **alnum**,**lower**,
+**space**, **alpha**, **digit**, **print**, **upper**, **blank**, **graph**,
+**xdigit**.
 
 **[][-!^]** - special case - matches only '-', ']', '[', '!' or '^'. These
 characters have no special purpose.
 
 **[[]]** - escape syntax. Matches '[', ']' or 'e'.
 
-Using the rules above, a file name pattern can be constructed:
-~~~c
-  ftp://example.com/some/path/[a-z[:upper:]\\].jpg
-~~~
+Using the rules above, a filename pattern can be constructed:
+
+    ftp://example.com/some/path/[a-z[:upper:]\\].jpg
 
 # PROTOCOLS
 
@@ -84,7 +81,6 @@ This feature is only supported for FTP download.
 # EXAMPLE
 
 ~~~c
-
 extern long begin_cb(struct curl_fileinfo *, void *, int);
 extern long end_cb(void *ptr);
 

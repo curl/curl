@@ -28,7 +28,7 @@ When CURLOPT_HTTPPROXYTUNNEL(3) is used and a CONNECT request is made,
 suppress proxy CONNECT response headers from the user callback functions
 CURLOPT_HEADERFUNCTION(3) and CURLOPT_WRITEFUNCTION(3).
 
-Proxy CONNECT response headers can complicate header processing since it's
+Proxy CONNECT response headers can complicate header processing since it is
 essentially a separate set of headers. You can enable this option to suppress
 those headers.
 

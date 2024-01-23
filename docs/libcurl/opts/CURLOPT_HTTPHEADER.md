@@ -81,9 +81,9 @@ Setting some specific headers causes libcurl to act differently.
 
 ## Host:
 
-The specified host name is used for cookie matching if the cookie engine is
+The specified hostname is used for cookie matching if the cookie engine is
 also enabled for this transfer. If the request is done over HTTP/2 or HTTP/3,
-the custom host name is instead used in the ":authority" header field and
+the custom hostname is instead used in the ":authority" header field and
 Host: is not sent at all over the wire.
 
 ## Transfer-Encoding: chunked
@@ -93,8 +93,8 @@ providing the Content-Length: field in the request.
 
 # SPECIFIC MIME HEADERS
 
-When used to build a MIME e-mail for IMAP or SMTP, the following
-document-level headers can be set to override libcurl-generated values:
+When used to build a MIME email for IMAP or SMTP, the following document-level
+headers can be set to override libcurl-generated values:
 
 ## Mime-Version:
 

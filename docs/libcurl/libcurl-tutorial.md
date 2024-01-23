@@ -503,7 +503,7 @@ There are three possible data sources for a part: memory using
 curl_mime_data(3), file using curl_mime_filedata(3) and user-defined data
 read callback using curl_mime_data_cb(3). curl_mime_name(3) sets a part's
 (i.e.: form field) name, while curl_mime_filename(3) fills in the remote
-file name. With curl_mime_type(3), you can tell the MIME type of a part,
+filename. With curl_mime_type(3), you can tell the MIME type of a part,
 curl_mime_headers(3) allows defining the part's headers. When a multi-part
 body is no longer needed, you can destroy it using curl_mime_free(3).
 
@@ -739,9 +739,8 @@ becomes:
  curl_mime_filename(part, NULL);
 ~~~
 
-Use of curl_mime_filedata(3) sets the remote file name as a side effect:
-it is therefore necessary to clear it for *CURLFORM_FILECONTENT*
-emulation.
+Use of curl_mime_filedata(3) sets the remote filename as a side effect: it is
+therefore necessary to clear it for *CURLFORM_FILECONTENT* emulation.
 
 # Showing Progress
 
@@ -757,8 +756,8 @@ instead is interesting is the ability to specify a progress callback. The
 function pointer you pass to libcurl is then called on irregular intervals
 with information about the current transfer.
 
-Set the progress callback by using CURLOPT_PROGRESSFUNCTION(3). And pass
-a pointer to a function that matches this prototype:
+Set the progress callback by using CURLOPT_PROGRESSFUNCTION(3). Pass a pointer
+to a function that matches this prototype:
 
 ~~~c
  int progress_callback(void *clientp,
@@ -828,7 +827,7 @@ pass that information similar to this:
 ~~~c
  curl_easy_setopt(handle, CURLOPT_PROXYUSERPWD, "user:password");
 ~~~
-If you want to, you can specify the host name only in the
+If you want to, you can specify the hostname only in the
 CURLOPT_PROXY(3) option, and set the port number separately with
 CURLOPT_PROXYPORT(3).
 
@@ -912,8 +911,8 @@ for such innovative actions either!
 
 ## Proxy Auto-Config
 
-Netscape first came up with this. It is basically a web page (usually using a
-&.pac extension) with a JavaScript that when executed by the browser with the
+Netscape first came up with this. It is basically a webpage (usually using a
+.pac extension) with a JavaScript that when executed by the browser with the
 requested URL as input, returns information to the browser on how to connect
 to the URL. The returned information might be "DIRECT" (which means no proxy
 should be used), "PROXY host:port" (to tell the browser where the proxy for
@@ -1179,11 +1178,11 @@ libcurl automatically finds out what kind of file it is and acts accordingly.
 
 Perhaps the most advanced cookie operation libcurl offers, is saving the
 entire internal cookie state back into a Netscape/Mozilla formatted cookie
-file. We call that the cookie-jar. When you set a file name with
-CURLOPT_COOKIEJAR(3), that file name is created and all received cookies
-get stored in it when curl_easy_cleanup(3) is called. This enables
-cookies to get passed on properly between multiple handles without any
-information getting lost.
+file. We call that the cookie-jar. When you set a filename with
+CURLOPT_COOKIEJAR(3), that filename is created and all received cookies get
+stored in it when curl_easy_cleanup(3) is called. This enables cookies to get
+passed on properly between multiple handles without any information getting
+lost.
 
 # FTP Peculiarities We Need
 
@@ -1209,7 +1208,7 @@ something and only allows connections on a single port. libcurl then informs
 the remote server which IP address and port number to connect to. This is made
 with the CURLOPT_FTPPORT(3) option. If you set it to "-", libcurl uses your
 system's "default IP address". If you want to use a particular IP, you can set
-the full IP address, a host name to resolve to an IP address or even a local
+the full IP address, a hostname to resolve to an IP address or even a local
 network interface name that libcurl gets the IP address from.
 
 When doing the "PORT" approach, libcurl attempts to use the EPRT and the LPRT

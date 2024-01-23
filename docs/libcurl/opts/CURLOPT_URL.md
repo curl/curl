@@ -49,11 +49,11 @@ otherwise HTTP is used. Since 7.45.0 guessing can be disabled by setting a
 default protocol, see CURLOPT_DEFAULT_PROTOCOL(3) for details.
 
 Should the protocol, either as specified by the URL scheme or deduced by
-libcurl from the host name, not be supported by libcurl then
-*CURLE_UNSUPPORTED_PROTOCOL* is returned from either the
-curl_easy_perform(3) or curl_multi_perform(3) functions when you
-call them. Use curl_version_info(3) for detailed information of which
-protocols are supported by the build of libcurl you are using.
+libcurl from the hostname, not be supported by libcurl then
+*CURLE_UNSUPPORTED_PROTOCOL* is returned from either the curl_easy_perform(3)
+or curl_multi_perform(3) functions when you call them. Use
+curl_version_info(3) for detailed information of which protocols are supported
+by the build of libcurl you are using.
 
 CURLOPT_PROTOCOLS_STR(3) can be used to limit what protocols libcurl may
 use for this transfer, independent of what libcurl has been compiled to

@@ -36,7 +36,7 @@ data to a mime part.
 be NULL to detach the previous part contents settings. Filename storage can
 be safely be reused after this call.
 
-As a side effect, the part's remote file name is set to the base name of the
+As a side effect, the part's remote filename is set to the base name of the
 given *filename* if it is a valid named file. This can be undone or
 overridden by a subsequent call to curl_mime_filename(3).
 

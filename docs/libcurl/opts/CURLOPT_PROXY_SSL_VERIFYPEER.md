@@ -49,8 +49,8 @@ the option is zero, the peer certificate verification succeeds regardless.
 Authenticating the certificate is not enough to be sure about the server. You
 typically also want to ensure that the server is the server you mean to be
 talking to. Use CURLOPT_PROXY_SSL_VERIFYHOST(3) for that. The check that the
-host name in the certificate is valid for the host name you are connecting to
-is done independently of the CURLOPT_PROXY_SSL_VERIFYPEER(3) option.
+hostname in the certificate is valid for the hostname you are connecting to is
+done independently of the CURLOPT_PROXY_SSL_VERIFYPEER(3) option.
 
 WARNING: disabling verification of the certificate allows bad guys to
 man-in-the-middle the communication without you knowing it. Disabling

@@ -95,9 +95,9 @@ Outputs version information about the installed libcurl.
 ## --vernum
 
 Outputs version information about the installed libcurl, in numerical mode.
-This outputs the version number, in hexadecimal, with 8 bits for each part:
-major, minor, and patch. So that libcurl 7.7.4 would appear as 070704 and libcurl
-12.13.14 would appear as 0c0d0e... Note that the initial zero might be
+This shows the version number, in hexadecimal, using 8 bits for each part:
+major, minor, and patch numbers. This makes libcurl 7.7.4 appear as 070704 and
+libcurl 12.13.14 appear as 0c0d0e... Note that the initial zero might be
 omitted. (This option was broken in the 7.15.0 release.)
 
 # EXAMPLES

@@ -115,11 +115,13 @@ The currently existing filter types (curl 8.5.0) are:
 * `TCP`, `UDP`, `UNIX`: filters that operate on a socket, providing raw I/O.
 * `SOCKET-ACCEPT`: special TCP socket that has a socket that has been `accept()`ed in a `listen()`
 * `SSL`: filter that applies TLS en-/decryption and handshake. Manages the underlying TLS backend implementation.
-* `HTTP-PROXY`, `H1-PROXY`, `H2-PROXY`: the first manages the connection to a HTTP proxy server and uses the other depending on which ALPN protocol has been negotiated.
+* `HTTP-PROXY`, `H1-PROXY`, `H2-PROXY`: the first manages the connection to an
+  HTTP proxy server and uses the other depending on which ALPN protocol has
+  been negotiated.
 * `SOCKS-PROXY`: filter for the various SOCKS proxy protocol variations
 * `HAPROXY`: filter for the protocol of the same name, providing client IP information to a server.
-* `HTTP/2`: filter for handling multiplexed transfers over a HTTP/2 connection
-* `HTTP/3`: filter for handling multiplexed transfers over a HTTP/3+QUIC connection
+* `HTTP/2`: filter for handling multiplexed transfers over an HTTP/2 connection
+* `HTTP/3`: filter for handling multiplexed transfers over an HTTP/3+QUIC connection
 * `HAPPY-EYEBALLS`: meta filter that implements IPv4/IPv6 "happy eyeballing". It creates up to 2 sub-filters that race each other for a connection.
 * `SETUP`: meta filter that manages the creation of sub-filter chains for a specific transport (e.g. TCP or QUIC).
 * `HTTPS-CONNECT`: meta filter that races a TCP+TLS and a QUIC connection against each other to determine if HTTP/1.1, HTTP/2 or HTTP/3 shall be used for a transfer.
@@ -159,7 +161,9 @@ Similar checks can determine if a connection is multiplexed or not.
 
 Filters may make use of special trace macros like `CURL_TRC_CF(data, cf, msg, ...)`. With `data` being the transfer and `cf` being the filter instance. These traces are normally not active and their execution is guarded so that they are cheap to ignore.
 
-Users of `curl` may activate them by adding the name of the filter type to the `--trace-config` argument. For example, in order to get more detailed tracing of a HTTP/2 request, invoke curl with:
+Users of `curl` may activate them by adding the name of the filter type to the
+`--trace-config` argument. For example, in order to get more detailed tracing
+of an HTTP/2 request, invoke curl with:
 
 ```
 > curl -v --trace-config ids,time,http/2  https://curl.se
@@ -170,7 +174,11 @@ Which will give you trace output with time information, transfer+connection ids 
 
 Meta filters is a catch-all name for filter types that do not change the transfer data in any way but provide other important services to curl. In general, it is possible to do all sorts of silly things with them. One of the commonly used, important things is "eyeballing".
 
-The `HAPPY-EYEBALLS` filter is involved in the connect phase. It's job is to try the various IPv4 and IPv6 addresses that are known for a server. If only one address family is known (or configured), it tries the addresses one after the other with timeouts calculated from the amount of addresses and the overall connect timeout.
+The `HAPPY-EYEBALLS` filter is involved in the connect phase. Its job is to
+try the various IPv4 and IPv6 addresses that are known for a server. If only
+one address family is known (or configured), it tries the addresses one after
+the other with timeouts calculated from the amount of addresses and the
+overall connect timeout.
 
 When more than one address family is to be tried, it splits the address list into IPv4 and IPv6 and makes parallel attempts. The connection filter chain will look like this:
 

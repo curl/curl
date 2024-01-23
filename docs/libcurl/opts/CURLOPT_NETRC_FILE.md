@@ -12,7 +12,7 @@ See-also:
 
 # NAME
 
-CURLOPT_NETRC_FILE - file name to read .netrc info from
+CURLOPT_NETRC_FILE - filename to read .netrc info from
 
 # SYNOPSIS
 

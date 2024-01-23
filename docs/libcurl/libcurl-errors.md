@@ -398,9 +398,9 @@ Failed to shut down the SSL connection.
 
 ## CURLE_AGAIN (81)
 
-Socket is not ready for send/recv wait till it's ready and try again. This
-return code is only returned from curl_easy_recv(3) and
-curl_easy_send(3) (Added in 7.18.2)
+Socket is not ready for send/recv. Wait until it is ready and try again. This
+return code is only returned from curl_easy_recv(3) and curl_easy_send(3)
+(Added in 7.18.2)
 
 ## CURLE_SSL_CRL_BADFILE (82)
 

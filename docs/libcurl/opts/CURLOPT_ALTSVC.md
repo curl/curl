@@ -30,7 +30,7 @@ the Alt-Svc cache to read existing cache contents from and possibly also write
 it back to after a transfer, unless **CURLALTSVC_READONLYFILE** is set in
 CURLOPT_ALTSVC_CTRL(3).
 
-Specify a blank file name ("") to make libcurl not load from a file at all.
+Specify a blank filename ("") to make libcurl not load from a file at all.
 
 # DEFAULT
 
@@ -71,7 +71,7 @@ ALPN id for the source origin
 
 ## www.example.comp
 
-Host name for the source origin
+Hostname for the source origin
 
 ## 8443
 
@@ -83,7 +83,7 @@ ALPN id for the destination host
 
 ## second.example.com
 
-Host name for the destination host
+Hostname for the destination host
 
 ## 443
 

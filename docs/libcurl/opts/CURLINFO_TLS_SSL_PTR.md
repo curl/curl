@@ -107,9 +107,9 @@ retrieve a second in-use SSL session associated with an easy handle.
 
 This option has not been thoroughly tested with clear text protocols that can
 be upgraded/downgraded to/from SSL: FTP, SMTP, POP3, IMAP when used with
-CURLOPT_USE_SSL(3). Though you can to retrieve the SSL pointer, it's
-possible that before you can do that, data (including auth) may have already
-been sent over a connection after it was upgraded.
+CURLOPT_USE_SSL(3). Though you can to retrieve the SSL pointer, it is possible
+that before you can do that, data (including auth) may have already been sent
+over a connection after it was upgraded.
 
 Renegotiation. If unsafe renegotiation or renegotiation in a way that the
 certificate is allowed to change is allowed by your SSL library this may occur

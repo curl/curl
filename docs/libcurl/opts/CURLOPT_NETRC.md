@@ -31,7 +31,7 @@ and passwords in the URL supplied with CURLOPT_URL(3).
 On Windows, libcurl uses the file as *%HOME%/_netrc*. If *%HOME%* is
 not set on Windows, libcurl falls back to *%USERPROFILE%*.
 
-You can also tell libcurl a different file name to use with
+You can also tell libcurl a different filename to use with
 CURLOPT_NETRC_FILE(3).
 
 libcurl uses a user name (and supplied or prompted password) supplied with
@@ -79,7 +79,7 @@ a user name or password.
 ## machine <name>
 
 Provides credentials for a host called **name**. libcurl searches the .netrc
-file for a machine token that matches the host name specified in the URL. Once
+file for a machine token that matches the hostname specified in the URL. Once
 a match is made, the subsequent tokens are processed, stopping when the end of
 file is reached or another "machine" is encountered.
 

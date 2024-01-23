@@ -86,15 +86,14 @@ an empty GET_PARAMETER request.
 
 ## CURL_RTSPREQ_SET_PARAMETER
 
-Set a parameter on the server. By default, libcurl uses a
-*Content-Type: text/parameters* header unless a custom one is set.
-The interaction with SET_PARAMETER is much like an HTTP PUT or POST. An
-application may either use CURLOPT_UPLOAD(3) with
-CURLOPT_READDATA(3) like a HTTP PUT, or it may use
-CURLOPT_POSTFIELDS(3) like an HTTP POST. No chunked transfers are
-allowed, so the application must set the CURLOPT_INFILESIZE(3) in the
-former and CURLOPT_POSTFIELDSIZE(3) in the latter. Also, there is no use
-of multi-part POSTs within RTSP.
+Set a parameter on the server. By default, libcurl uses a *Content-Type:
+text/parameters* header unless a custom one is set. The interaction with
+SET_PARAMETER is much like an HTTP PUT or POST. An application may either use
+CURLOPT_UPLOAD(3) with CURLOPT_READDATA(3) like an HTTP PUT, or it may use
+CURLOPT_POSTFIELDS(3) like an HTTP POST. No chunked transfers are allowed, so
+the application must set the CURLOPT_INFILESIZE(3) in the former and
+CURLOPT_POSTFIELDSIZE(3) in the latter. Also, there is no use of multi-part
+POSTs within RTSP.
 
 ## CURL_RTSPREQ_RECORD
 
