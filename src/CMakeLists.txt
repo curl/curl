@@ -24,7 +24,7 @@
 set(EXE_NAME curl)
 add_definitions(-DBUILDING_CURL)
 
-if(USE_MANUAL AND ENABLE_MANUAL)
+if(HAVE_MANUAL_TOOLS AND ENABLE_MANUAL)
   add_definitions("-DUSE_MANUAL")
   # Use the C locale to ensure that only ASCII characters appear in the
   # embedded text. NROFF and MANOPT are set in the parent CMakeLists.txt
