@@ -228,8 +228,7 @@ class ScoreCard:
                 'description': descr,
             }
             for fsize in fsizes:
-                label = f'{int(fsize / 1024)}KB' if fsize < 1024*1024 else \
-                    f'{int(fsize / (1024 * 1024))}MB'
+                label = self.fmt_size(fsize)
                 fname = f'score{label}.data'
                 self._make_docs_file(docs_dir=self.httpd.docs_dir,
                                      fname=fname, fsize=fsize)
@@ -246,8 +245,7 @@ class ScoreCard:
                 'description': descr,
             }
             for fsize in fsizes:
-                label = f'{int(fsize / 1024)}KB' if fsize < 1024*1024 else \
-                    f'{int(fsize / (1024 * 1024))}MB'
+                label = self.fmt_size(fsize)
                 fname = f'score{label}.data'
                 self._make_docs_file(docs_dir=self.caddy.docs_dir,
                                      fname=fname, fsize=fsize)
@@ -390,8 +388,15 @@ class ScoreCard:
     def fmt_ms(self, tval):
         return f'{int(tval*1000)} ms' if tval >= 0 else '--'
 
-    def fmt_mb(self, val):
-        return f'{val/(1024*1024):0.000f} MB' if val >= 0 else '--'
+    def fmt_size(self, val):
+        if val > (1024*1024*1024):
+            return f'{val / (1024*1024*1024):0.000f}GB'
+        elif val > (1024 * 1024):
+            return f'{val / (1024*1024):0.000f}MB'
+        elif val > 1024:
+            return f'{val / 1024:0.000f}KB'
+        else:
+            return f'{val:0.000f}B'
 
     def fmt_mbs(self, val):
         return f'{val/(1024*1024):0.000f} MB/s' if val >= 0 else '--'
@@ -448,7 +453,7 @@ class ScoreCard:
                         if m in size_score:
                             print(f' {self.fmt_mbs(size_score[m]["speed"]):>{mcol_width}}', end='')
                             s = f'[{size_score[m]["stats"]["cpu"]:>.1f}%'\
-                                f'/{self.fmt_mb(size_score[m]["stats"]["rss"])}]'
+                                f'/{self.fmt_size(size_score[m]["stats"]["rss"])}]'
                             print(f' {s:<{mcol_sw}}', end='')
                         else:
                             print(' '*mcol_width, end='')
@@ -492,7 +497,7 @@ class ScoreCard:
                         if m in size_score:
                             print(f' {self.fmt_reqs(size_score[m]["speed"]):>{mcol_width}}', end='')
                             s = f'[{size_score[m]["stats"]["cpu"]:>.1f}%'\
-                                f'/{self.fmt_mb(size_score[m]["stats"]["rss"])}]'
+                                f'/{self.fmt_size(size_score[m]["stats"]["rss"])}]'
                             print(f' {s:<{mcol_sw}}', end='')
                         else:
                             print(' '*mcol_width, end='')
@@ -507,7 +512,9 @@ def parse_size(s):
     if m is None:
         raise Exception(f'unrecognized size: {s}')
     size = int(m.group(1))
-    if m.group(2).lower() == 'kb':
+    if not m.group(2):
+        pass
+    elif m.group(2).lower() == 'kb':
         size *= 1024
     elif m.group(2).lower() == 'mb':
         size *= 1024 * 1024
