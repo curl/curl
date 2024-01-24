@@ -1264,7 +1264,6 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     pathlen -= fraglen;
   }
 
-  DEBUGASSERT(pathlen < urllen);
   query = memchr(path, '?', pathlen);
   if(query) {
     size_t qlen = fragment ? (size_t)(fragment - query) :
