@@ -389,11 +389,11 @@ class ScoreCard:
         return f'{int(tval*1000)} ms' if tval >= 0 else '--'
 
     def fmt_size(self, val):
-        if val > (1024*1024*1024):
+        if val >= (1024*1024*1024):
             return f'{val / (1024*1024*1024):0.000f}GB'
-        elif val > (1024 * 1024):
+        elif val >= (1024 * 1024):
             return f'{val / (1024*1024):0.000f}MB'
-        elif val > 1024:
+        elif val >= 1024:
             return f'{val / 1024:0.000f}KB'
         else:
             return f'{val:0.000f}B'
