@@ -363,10 +363,11 @@ static CURLcode ReceivedServerConnect(struct Curl_easy *data, bool *received)
   curl_socket_t data_sock = conn->sock[SECONDARYSOCKET];
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   struct pingpong *pp = &ftpc->pp;
-  int result;
+  int socketstate = 0;
   timediff_t timeout_ms;
   ssize_t nread;
   int ftpcode;
+  bool response = FALSE;
 
   *received = FALSE;
 
@@ -386,10 +387,14 @@ static CURLcode ReceivedServerConnect(struct Curl_easy *data, bool *received)
     return CURLE_FTP_ACCEPT_FAILED;
   }
 
-  result = Curl_socket_check(ctrl_sock, data_sock, CURL_SOCKET_BAD, 0);
+  if(pp->overflow)
+    /* there is pending control data still in the buffer to read */
+    response = TRUE;
+  else
+    socketstate = Curl_socket_check(ctrl_sock, data_sock, CURL_SOCKET_BAD, 0);
 
   /* see if the connection request is already here */
-  switch(result) {
+  switch(socketstate) {
   case -1: /* error */
     /* let's die here */
     failf(data, "Error while waiting for server connect");
@@ -397,23 +402,23 @@ static CURLcode ReceivedServerConnect(struct Curl_easy *data, bool *received)
   case 0:  /* Server connect is not received yet */
     break; /* loop */
   default:
-
-    if(result & CURL_CSELECT_IN2) {
+    if(socketstate & CURL_CSELECT_IN2) {
       infof(data, "Ready to accept data connection from server");
       *received = TRUE;
     }
-    else if(result & CURL_CSELECT_IN) {
-      infof(data, "Ctrl conn has data while waiting for data conn");
-      (void)Curl_GetFTPResponse(data, &nread, &ftpcode);
-
-      if(ftpcode/100 > 3)
-        return CURLE_FTP_ACCEPT_FAILED;
-
-      return CURLE_WEIRD_SERVER_REPLY;
-    }
-
+    else if(socketstate & CURL_CSELECT_IN)
+      response = TRUE;
     break;
-  } /* switch() */
+  }
+  if(response) {
+    infof(data, "Ctrl conn has data while waiting for data conn");
+    (void)Curl_GetFTPResponse(data, &nread, &ftpcode);
+
+    if(ftpcode/100 > 3)
+      return CURLE_FTP_ACCEPT_FAILED;
+
+    return CURLE_WEIRD_SERVER_REPLY;
+  }
 
   return CURLE_OK;
 }
