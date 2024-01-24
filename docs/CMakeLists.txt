@@ -22,5 +22,9 @@
 #
 ###########################################################################
 #add_subdirectory(examples)
-add_subdirectory(libcurl)
-add_subdirectory(cmdline-opts)
+if(BUILD_DOCS)
+  add_subdirectory(libcurl)
+endif()
+if(ENABLE_MANUAL)
+  add_subdirectory(cmdline-opts)
+endif()
