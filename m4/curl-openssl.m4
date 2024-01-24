@@ -271,6 +271,7 @@ if test "x$OPT_OPENSSL" != xno; then
     ],[
         AC_MSG_RESULT([yes])
         ssl_msg="BoringSSL"
+        OPENSSL_IS_BORINGSSL=1
     ],[
         AC_MSG_RESULT([no])
     ])
@@ -287,6 +288,7 @@ if test "x$OPT_OPENSSL" != xno; then
     ],[
         AC_MSG_RESULT([yes])
         ssl_msg="AWS-LC"
+        OPENSSL_IS_BORINGSSL=1
     ],[
         AC_MSG_RESULT([no])
     ])
