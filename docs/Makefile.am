@@ -72,7 +72,7 @@ EXTRA_DIST =                                    \
  HTTP3.md                                       \
  HYPER.md                                       \
  INSTALL                                        \
- INSTALL.cmake                                  \
+ INSTALL-CMAKE.md                               \
  INSTALL.md                                     \
  INTERNALS.md                                   \
  KNOWN_BUGS                                     \
