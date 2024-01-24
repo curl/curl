@@ -301,7 +301,7 @@ class ScoreCard:
         self.info(f'ok.\n')
         return props
 
-    def requests(self, proto: str) -> Dict[str, Any]:
+    def requests(self, proto: str, req_count) -> Dict[str, Any]:
         scores = {}
         if self.httpd:
             if proto == 'h3':
@@ -318,7 +318,8 @@ class ScoreCard:
             url1 = f'https://{self.env.domain1}:{port}/reqs10.data'
             scores[via] = {
                 'description': descr,
-                '10KB': self.requests_url(url=url1, proto=proto, count=10000),
+                'count': req_count,
+                '10KB': self.requests_url(url=url1, proto=proto, count=req_count),
             }
         if self.caddy:
             port = self.caddy.port
@@ -330,7 +331,8 @@ class ScoreCard:
             url1 = f'https://{self.env.domain1}:{port}/req10.data'
             scores[via] = {
                 'description': descr,
-                '10KB': self.requests_url(url=url1, proto=proto, count=5000),
+                'count': req_count,
+                '10KB': self.requests_url(url=url1, proto=proto, count=req_count),
             }
         return scores
 
@@ -338,6 +340,7 @@ class ScoreCard:
                     handshakes: bool = True,
                     downloads: Optional[List[int]] = None,
                     download_count: int = 50,
+                    req_count=5000,
                     requests: bool = True):
         self.info(f"scoring {proto}\n")
         p = {}
@@ -381,7 +384,7 @@ class ScoreCard:
                                                 count=download_count,
                                                 fsizes=downloads)
         if requests:
-            score['requests'] = self.requests(proto=proto)
+            score['requests'] = self.requests(proto=proto, req_count=req_count)
         self.info("\n")
         return score
 
@@ -466,11 +469,11 @@ class ScoreCard:
             measures = []
             m_names = {}
             mcol_width = 9
-            mcol_sw = 17
+            mcol_sw = 13
             for server in score['requests']:
                 server_score = score['requests'][server]
                 for sskey, ssval in server_score.items():
-                    if isinstance(ssval, str):
+                    if isinstance(ssval, str) or isinstance(ssval, int):
                         continue
                     if sskey not in sizes:
                         sizes.append(sskey)
@@ -480,14 +483,15 @@ class ScoreCard:
                             m_names[mkey] = f'{mkey}'
 
             print('Requests, max in parallel')
-            print(f'  {"Server":<8} {"Size":>8}', end='')
+            print(f'  {"Server":<8} {"Size":>6} {"Reqs":>6}', end='')
             for m in measures: print(f' {m_names[m]:>{mcol_width}} {"[cpu/rss]":<{mcol_sw}}', end='')
-            print(f' {"Errors":^20}')
+            print(f' {"Errors":^10}')
 
             for server in score['requests']:
                 for size in sizes:
                     size_score = score['requests'][server][size]
-                    print(f'  {server:<8} {size:>8}', end='')
+                    count = score['requests'][server]['count']
+                    print(f'  {server:<8} {size:>6} {count:>6}', end='')
                     errors = []
                     for key, val in size_score.items():
                         if 'errors' in val:
@@ -501,9 +505,9 @@ class ScoreCard:
                         else:
                             print(' '*mcol_width, end='')
                     if len(errors):
-                        print(f' {"/".join(errors):<20}')
+                        print(f' {"/".join(errors):<10}')
                     else:
-                        print(f' {"-":^20}')
+                        print(f' {"-":^10}')
 
 
 def parse_size(s):
@@ -541,6 +545,8 @@ def main():
                         default=50, help="perform that many downloads")
     parser.add_argument("-r", "--requests", action='store_true',
                         default=False, help="evaluate requests")
+    parser.add_argument("--request-count", action='store', type=int,
+                        default=5000, help="perform that many requests")
     parser.add_argument("--httpd", action='store_true', default=False,
                         help="evaluate httpd server only")
     parser.add_argument("--caddy", action='store_true', default=False,
@@ -606,6 +612,7 @@ def main():
                                  handshakes=handshakes,
                                  downloads=downloads,
                                  download_count=args.download_count,
+                                 req_count=args.request_count,
                                  requests=requests)
         if args.json:
             print(json.JSONEncoder(indent=2).encode(score))
