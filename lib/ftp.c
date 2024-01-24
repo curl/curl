@@ -3997,6 +3997,11 @@ static CURLcode ftp_do(struct Curl_easy *data, bool *done)
   CURLcode result = CURLE_OK;
   struct connectdata *conn = data->conn;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
+  struct pingpong *pp = &ftpc->pp;
+
+  /* in case we come here for a new trasnfer without going through
+     ftp_connect() */
+  pp->linestart_resp = data->state.buffer;
 
   *done = FALSE; /* default to false */
   ftpc->wait_data_conn = FALSE; /* default to no such wait */
