@@ -25,6 +25,6 @@
 if(BUILD_LIBCURL_DOCS)
   add_subdirectory(libcurl)
 endif()
-if(ENABLE_MANUAL AND BUILD_CURL_EXE)
+if(ENABLE_CURL_MANUAL AND BUILD_CURL_EXE)
   add_subdirectory(cmdline-opts)
 endif()

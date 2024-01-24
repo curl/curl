@@ -307,9 +307,9 @@ endif()
 find_package(Perl)
 
 option(BUILD_LIBCURL_DOCS "to build libcurl man pages" ON)
-option(ENABLE_MANUAL "to provide the built-in manual and man page for curl tool" OFF)
+option(ENABLE_CURL_MANUAL "to provide the built-in manual and man page for curl tool" OFF)
 
-if(ENABLE_MANUAL OR BUILD_LIBCURL_DOCS)
+if(ENABLE_CURL_MANUAL OR BUILD_LIBCURL_DOCS)
   if(PERL_FOUND)
     curl_nroff_check()
     if(NROFF_USEFUL)
