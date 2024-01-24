@@ -202,10 +202,12 @@ class ScoreCard:
         self.info(f'  {count}x{label}: ')
         props = {
             'single': self.transfer_single(url=url, proto=proto, count=10),
-            'serial': self.transfer_serial(url=url, proto=proto, count=count),
-            'parallel': self.transfer_parallel(url=url, proto=proto,
-                                               count=count),
         }
+        if count > 1:
+            props['serial'] = self.transfer_serial(url=url, proto=proto,
+                                                   count=count)
+            props['parallel'] = self.transfer_parallel(url=url, proto=proto,
+                                                       count=count),
         self.info(f'ok.\n')
         return props
 
