@@ -317,7 +317,7 @@ if(ENABLE_MANUAL OR BUILD_DOCS)
     endif()
   endif()
   if(NOT HAVE_MANUAL_TOOLS)
-    message(WARNING "Perl not found, or nroff not useful. Will not provide built-in manual.")
+    message(WARNING "Perl not found, or nroff not useful. Will not build manuals.")
   endif()
 endif()
 
