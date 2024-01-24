@@ -553,7 +553,9 @@ def main():
     handshakes = True
     downloads = [1024 * 1024, 10 * 1024 * 1024, 100 * 1024 * 1024]
     if args.download is not None:
-        downloads = sorted([parse_size(x) for x in args.download])
+        downloads = []
+        for x in args.download:
+            downloads.extend([parse_size(s) for s in x.split(',')])
     requests = True
     if args.downloads or args.requests or args.handshakes:
         handshakes = args.handshakes
