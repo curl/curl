@@ -207,7 +207,7 @@ class ScoreCard:
             props['serial'] = self.transfer_serial(url=url, proto=proto,
                                                    count=count)
             props['parallel'] = self.transfer_parallel(url=url, proto=proto,
-                                                       count=count),
+                                                       count=count)
         self.info(f'ok.\n')
         return props
 
@@ -424,8 +424,7 @@ class ScoreCard:
             m_names = {}
             mcol_width = 12
             mcol_sw = 17
-            for server in score['downloads']:
-                server_score = score['downloads'][server]
+            for server, server_score in score['downloads'].items():
                 for sskey, ssval in server_score.items():
                     if isinstance(ssval, str):
                         continue
