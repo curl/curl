@@ -216,7 +216,7 @@ sub render {
                     push @desc, ".RS\n";
                     $tablemode = 1;
                 }
-                push @desc, ".IP \\fB$word\\fP\n";
+                push @desc, ".IP $word\n";
             }
             $header = 1;
             next;
