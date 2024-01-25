@@ -624,7 +624,6 @@ static CURLcode mqtt_read_publish(struct Curl_easy *data, bool *done)
   struct connectdata *conn = data->conn;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
   ssize_t nread;
-  unsigned char *pkt = (unsigned char *)data->state.buffer;
   size_t remlen;
   struct mqtt_conn *mqtt = &conn->proto.mqtt;
   struct MQTT *mq = data->req.p.mqtt;
@@ -676,10 +675,11 @@ MQTT_SUBACK_COMING:
     FALLTHROUGH();
   case MQTT_PUB_REMAIN: {
     /* read rest of packet, but no more. Cap to buffer size */
+    char buffer[4*1024];
     size_t rest = mq->npacket;
-    if(rest > (size_t)data->set.buffer_size)
-      rest = (size_t)data->set.buffer_size;
-    result = Curl_read(data, sockfd, (char *)pkt, rest, &nread);
+    if(rest > sizeof(buffer))
+      rest = sizeof(buffer);
+    result = Curl_read(data, sockfd, buffer, rest, &nread);
     if(result) {
       if(CURLE_AGAIN == result) {
         infof(data, "EEEE AAAAGAIN");
@@ -692,14 +692,12 @@ MQTT_SUBACK_COMING:
       goto end;
     }
 
-    mq->npacket -= nread;
-
     /* if QoS is set, message contains packet id */
-
-    result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)pkt, nread);
+    result = Curl_client_write(data, CLIENTWRITE_BODY, buffer, nread);
     if(result)
       goto end;
 
+    mq->npacket -= nread;
     if(!mq->npacket)
       /* no more PUBLISH payload, back to subscribe wait state */
       mqstate(data, MQTT_FIRST, MQTT_PUBWAIT);
