@@ -177,7 +177,7 @@ Since the quiche build manages its dependencies, curl can be built against the l
 
 Build quiche and BoringSSL:
 
-     % git clone --recursive https://github.com/cloudflare/quiche
+     % git clone --recursive -b 0.20.0 https://github.com/cloudflare/quiche
      % cd quiche
      % cargo build --package quiche --release --features ffi,pkg-config-meta,qlog
      % mkdir quiche/deps/boringssl/src/lib
