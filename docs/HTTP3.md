@@ -37,7 +37,7 @@ To fix before we remove the experimental label:
 
 Building curl with ngtcp2 involves 3 components: `ngtcp2` itself, `nghttp3` and a QUIC supporting TLS library. The supported TLS libraries are covered below.
 
- * `ngtcp2`: v1.1.0
+ * `ngtcp2`: v1.2.0
  * `nghttp3`: v1.1.0
 
 ## Build with quictls
@@ -66,7 +66,7 @@ Build nghttp3
 Build ngtcp2
 
      % cd ..
-     % git clone -b v1.1.0 https://github.com/ngtcp2/ngtcp2
+     % git clone -b v1.2.0 https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only
@@ -109,7 +109,7 @@ Build nghttp3
 Build ngtcp2
 
      % cd ..
-     % git clone -b v1.1.0 https://github.com/ngtcp2/ngtcp2
+     % git clone -b v1.2.0 https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only --with-gnutls
@@ -150,7 +150,7 @@ Build nghttp3
 Build ngtcp2
 
      % cd ..
-     % git clone -b v1.1.0 https://github.com/ngtcp2/ngtcp2
+     % git clone -b v1.2.0 https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only --with-wolfssl
@@ -177,7 +177,7 @@ Since the quiche build manages its dependencies, curl can be built against the l
 
 Build quiche and BoringSSL:
 
-     % git clone --recursive https://github.com/cloudflare/quiche
+     % git clone --recursive -b 0.20.0 https://github.com/cloudflare/quiche
      % cd quiche
      % cargo build --package quiche --release --features ffi,pkg-config-meta,qlog
      % mkdir quiche/deps/boringssl/src/lib
