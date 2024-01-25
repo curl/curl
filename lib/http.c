@@ -2280,9 +2280,7 @@ CURLcode Curl_http_target(struct Curl_easy *data,
         return CURLE_OUT_OF_MEMORY;
       }
     }
-    /* Extract the URL to use in the request. Store in STRING_TEMP_URL for
-       clean-up reasons if the function returns before the free() further
-       down. */
+    /* Extract the URL to use in the request. */
     uc = curl_url_get(h, CURLUPART_URL, &url, CURLU_NO_DEFAULT_PORT);
     if(uc) {
       curl_url_cleanup(h);
