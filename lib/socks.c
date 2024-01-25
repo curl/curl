@@ -432,7 +432,7 @@ CONNECT_REQ_INIT:
         /* append hostname */
         hostnamelen = strlen(sx->hostname) + 1; /* length including NUL */
         if((hostnamelen <= 255) &&
-           (packetsize + hostnamelen < data->set.buffer_size))
+           (packetsize + hostnamelen < sizeof(sx->buffer)))
           strcpy((char *)socksreq + packetsize, sx->hostname);
         else {
           failf(data, "SOCKS4: too long host name");
