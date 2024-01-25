@@ -290,16 +290,15 @@ static CURLcode file_upload(struct Curl_easy *data)
   int fd;
   int mode;
   CURLcode result = CURLE_OK;
-  char *buf = data->state.buffer;
+  char buffer[8*1024], *uphere_save;
   curl_off_t bytecount = 0;
   struct_stat file_stat;
-  const char *buf2;
+  const char *sendbuf;
 
   /*
    * Since FILE: doesn't do the full init, we need to provide some extra
    * assignments here.
    */
-  data->req.upload_fromhere = buf;
 
   if(!dir)
     return CURLE_FILE_COULDNT_READ_FILE; /* fix: better error code */
@@ -338,11 +337,15 @@ static CURLcode file_upload(struct Curl_easy *data)
     data->state.resume_from = (curl_off_t)file_stat.st_size;
   }
 
+  /* Yikes! Curl_fillreadbuffer uses data->req.upload_fromhere to READ
+   * client data to! Please, someone fix... */
+  uphere_save = data->req.upload_fromhere;
   while(!result) {
     size_t nread;
     ssize_t nwrite;
     size_t readcount;
-    result = Curl_fillreadbuffer(data, data->set.buffer_size, &readcount);
+    data->req.upload_fromhere = buffer;
+    result = Curl_fillreadbuffer(data, sizeof(buffer), &readcount);
     if(result)
       break;
 
@@ -356,19 +359,19 @@ static CURLcode file_upload(struct Curl_easy *data)
       if((curl_off_t)nread <= data->state.resume_from) {
         data->state.resume_from -= nread;
         nread = 0;
-        buf2 = buf;
+        sendbuf = buffer;
       }
       else {
-        buf2 = buf + data->state.resume_from;
+        sendbuf = buffer + data->state.resume_from;
         nread -= (size_t)data->state.resume_from;
         data->state.resume_from = 0;
       }
     }
     else
-      buf2 = buf;
+      sendbuf = buffer;
 
     /* write the data to the target */
-    nwrite = write(fd, buf2, nread);
+    nwrite = write(fd, sendbuf, nread);
     if((size_t)nwrite != nread) {
       result = CURLE_SEND_ERROR;
       break;
@@ -387,6 +390,7 @@ static CURLcode file_upload(struct Curl_easy *data)
     result = CURLE_ABORTED_BY_CALLBACK;
 
   close(fd);
+  data->req.upload_fromhere = uphere_save;
 
   return result;
 }
@@ -413,7 +417,6 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
   curl_off_t expected_size = -1;
   bool size_known;
   bool fstated = FALSE;
-  char *buf = data->state.buffer;
   int fd;
   struct FILEPROTO *file;
 
@@ -541,21 +544,22 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
   Curl_pgrsTime(data, TIMER_STARTTRANSFER);
 
   while(!result) {
+    char tmpbuf[8*1024];
     ssize_t nread;
     /* Don't fill a whole buffer if we want less than all data */
     size_t bytestoread;
 
     if(size_known) {
-      bytestoread = (expected_size < data->set.buffer_size) ?
-        curlx_sotouz(expected_size) : (size_t)data->set.buffer_size;
+      bytestoread = (expected_size < (curl_off_t)(sizeof(tmpbuf)-1)) ?
+        curlx_sotouz(expected_size) : (sizeof(tmpbuf)-1);
     }
     else
-      bytestoread = data->set.buffer_size-1;
+      bytestoread = sizeof(tmpbuf)-1;
 
-    nread = read(fd, buf, bytestoread);
+    nread = read(fd, tmpbuf, bytestoread);
 
     if(nread > 0)
-      buf[nread] = 0;
+      tmpbuf[nread] = 0;
 
     if(nread <= 0 || (size_known && (expected_size == 0)))
       break;
@@ -563,7 +567,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     if(size_known)
       expected_size -= nread;
 
-    result = Curl_client_write(data, CLIENTWRITE_BODY, buf, nread);
+    result = Curl_client_write(data, CLIENTWRITE_BODY, tmpbuf, nread);
     if(result)
       return result;
 
