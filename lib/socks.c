@@ -71,18 +71,18 @@ enum connect_t {
   CONNECT_DONE /* 17 connected fine to the remote or the SOCKS proxy */
 };
 
-#define SOCKS_BUF_SIZE  (8*1024)
+#define CURL_SOCKS_BUF_SIZE  (8*1024)
 
 /* make sure we configure it not too low */
-#if SOCKS_BUF_SIZE < 600
-#error SOCKS_BUF_SIZE must be at least 600
+#if CURL_SOCKS_BUF_SIZE < 600
+#error CURL_SOCKS_BUF_SIZE must be at least 600
 #endif
 
 
 struct socks_state {
   enum connect_t state;
   ssize_t outstanding;  /* send this many bytes more */
-  unsigned char buffer[SOCKS_BUF_SIZE];
+  unsigned char buffer[CURL_SOCKS_BUF_SIZE];
   unsigned char *outp; /* send from this pointer */
 
   const char *hostname;
