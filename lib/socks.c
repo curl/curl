@@ -249,7 +249,7 @@ static CURLproxycode socks_state_recv(struct Curl_cfilter *cf,
       failf(data, "connection to proxy closed");
       return CURLPX_CLOSED;
     }
-    failf(data, "SOCKS4: Failed receiving %s: %s", description,
+    failf(data, "SOCKS: Failed receiving %s: %s", description,
           curl_easy_strerror(result));
     return failcode;
   }
