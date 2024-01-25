@@ -266,7 +266,7 @@ static CURLcode ntlm_wb_response(struct Curl_easy *data, struct ntlmdata *ntlm,
   size_t len_in = strlen(input), len_out = 0;
   struct dynbuf b;
   char *ptr = NULL;
-  unsigned char *buf = (unsigned char *)data->state.buffer;
+  usigned char buf[1024]
   Curl_dyn_init(&b, MAX_NTLM_WB_RESPONSE);
 
   while(len_in > 0) {
@@ -284,7 +284,7 @@ static CURLcode ntlm_wb_response(struct Curl_easy *data, struct ntlmdata *ntlm,
   /* Read one line */
   while(1) {
     ssize_t size =
-      wakeup_read(ntlm->ntlm_auth_hlpr_socket, buf, data->set.buffer_size);
+      wakeup_read(ntlm->ntlm_auth_hlpr_socket, buf, sizeof(buf));
     if(size == -1) {
       if(errno == EINTR)
         continue;
