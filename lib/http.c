@@ -2192,7 +2192,7 @@ CURLcode Curl_http_host(struct Curl_easy *data, struct connectdata *conn)
     }
 #endif
 
-    if(strcmp("Host:", ptr)) {
+    if(!strcasecompare("Host:", ptr)) {
       aptr->host = aprintf("Host:%s\r\n", &ptr[5]);
       if(!aptr->host)
         return CURLE_OUT_OF_MEMORY;
