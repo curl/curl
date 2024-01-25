@@ -1320,7 +1320,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
   ssize_t nread;
   struct curltime now;
   bool keepon = TRUE;
-  char *buf = data->state.buffer;
+  char buffer[4*1024];
   struct TELNET *tn;
 
   *done = TRUE; /* unconditionally */
@@ -1377,7 +1377,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
 
   /* Keep on listening and act on events */
   while(keepon) {
-    const DWORD buf_size = (DWORD)data->set.buffer_size;
+    const DWORD buf_size = (DWORD)sizeof(buffer);
     DWORD waitret = WaitForMultipleObjects(obj_count, objs,
                                            FALSE, wait_timeout);
     switch(waitret) {
@@ -1388,7 +1388,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
         if(data->set.is_fread_set) {
           size_t n;
           /* read from user-supplied method */
-          n = data->state.fread_func(buf, 1, buf_size, data->state.in);
+          n = data->state.fread_func(buffer, 1, buf_size, data->state.in);
           if(n == CURL_READFUNC_ABORT) {
             keepon = FALSE;
             result = CURLE_READ_ERROR;
@@ -1416,7 +1416,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
           if(!readfile_read)
             break;
 
-          if(!ReadFile(stdin_handle, buf, buf_size,
+          if(!ReadFile(stdin_handle, buffer, buf_size,
                        &readfile_read, NULL)) {
             keepon = FALSE;
             result = CURLE_READ_ERROR;
@@ -1424,7 +1424,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
           }
         }
 
-        result = send_telnet_data(data, buf, readfile_read);
+        result = send_telnet_data(data, buffer, readfile_read);
         if(result) {
           keepon = FALSE;
           break;
@@ -1435,14 +1435,14 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
 
     case WAIT_OBJECT_0 + 1:
     {
-      if(!ReadFile(stdin_handle, buf, buf_size,
+      if(!ReadFile(stdin_handle, buffer, buf_size,
                    &readfile_read, NULL)) {
         keepon = FALSE;
         result = CURLE_READ_ERROR;
         break;
       }
 
-      result = send_telnet_data(data, buf, readfile_read);
+      result = send_telnet_data(data, buffer, readfile_read);
       if(result) {
         keepon = FALSE;
         break;
@@ -1464,7 +1464,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
       }
       if(events.lNetworkEvents & FD_READ) {
         /* read data from network */
-        result = Curl_read(data, sockfd, buf, data->set.buffer_size, &nread);
+        result = Curl_read(data, sockfd, buffer, sizeof(buffer), &nread);
         /* read would've blocked. Loop again */
         if(result == CURLE_AGAIN)
           break;
@@ -1480,7 +1480,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
           break;
         }
 
-        result = telrcv(data, (unsigned char *) buf, nread);
+        result = telrcv(data, (unsigned char *) buffer, nread);
         if(result) {
           keepon = FALSE;
           break;
@@ -1545,7 +1545,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
     default:                    /* read! */
       if(pfd[0].revents & POLLIN) {
         /* read data from network */
-        result = Curl_read(data, sockfd, buf, data->set.buffer_size, &nread);
+        result = Curl_read(data, sockfd, buffer, sizeof(buffer), &nread);
         /* read would've blocked. Loop again */
         if(result == CURLE_AGAIN)
           break;
@@ -1571,7 +1571,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
         total_dl += nread;
         result = Curl_pgrsSetDownloadCounter(data, total_dl);
         if(!result)
-          result = telrcv(data, (unsigned char *)buf, nread);
+          result = telrcv(data, (unsigned char *)buffer, nread);
         if(result) {
           keepon = FALSE;
           break;
@@ -1589,12 +1589,12 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
       nread = 0;
       if(poll_cnt == 2) {
         if(pfd[1].revents & POLLIN) { /* read from in file */
-          nread = read(pfd[1].fd, buf, data->set.buffer_size);
+          nread = read(pfd[1].fd, buffer, sizeof(buffer));
         }
       }
       else {
         /* read from user-supplied method */
-        nread = (int)data->state.fread_func(buf, 1, data->set.buffer_size,
+        nread = (int)data->state.fread_func(buffer, 1, sizeof(buffer),
                                             data->state.in);
         if(nread == CURL_READFUNC_ABORT) {
           keepon = FALSE;
@@ -1605,7 +1605,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
       }
 
       if(nread > 0) {
-        result = send_telnet_data(data, buf, nread);
+        result = send_telnet_data(data, buffer, nread);
         if(result) {
           keepon = FALSE;
           break;
