@@ -1587,13 +1587,14 @@ static CURLcode ftp_state_ul_setup(struct Curl_easy *data,
       }
       /* seekerr == CURL_SEEKFUNC_CANTSEEK (can't seek to offset) */
       do {
+        char scratch[4*1024];
         size_t readthisamountnow =
-          (data->state.resume_from - passed > data->set.buffer_size) ?
-          (size_t)data->set.buffer_size :
+          (data->state.resume_from - passed > (curl_off_t)sizeof(scratch)) ?
+          sizeof(scratch) :
           curlx_sotouz(data->state.resume_from - passed);
 
         size_t actuallyread =
-          data->state.fread_func(data->state.buffer, 1, readthisamountnow,
+          data->state.fread_func(scratch, 1, readthisamountnow,
                                  data->state.in);
 
         passed += actuallyread;
