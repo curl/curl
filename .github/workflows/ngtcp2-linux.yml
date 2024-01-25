@@ -50,7 +50,7 @@ env:
   gnutls-version: 3.8.0
   wolfssl-version: master
   nghttp3-version: v1.1.0
-  ngtcp2-version: v1.1.0
+  ngtcp2-version: v1.2.0
   nghttp2-version: v1.59.0
   mod_h2-version: v2.0.25
 
