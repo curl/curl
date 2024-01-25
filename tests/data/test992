@@ -1,0 +1,52 @@
+<testcase>
+<info>
+<keywords>
+SASL
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+AUTH OAUTHBEARER XOAUTH2
+REPLY AUTH 334 XOAUTH2 supported
+REPLY dXNlcj11c2VyAWF1dGg9QmVhcmVyIG1GXzkuQjVmLTQuMUpxTQEB 235 Authenticated
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+<name>
+SASL verify default mechanisms are reset by login options
+</name>
+<stdin>
+mail body
+</stdin>
+<command>
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u user --oauth2-bearer mF_9.B5f-4.1JqM --login-options "AUTH=XOAUTH2" -T -
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+EHLO %TESTNUMBER
+AUTH XOAUTH2
+dXNlcj11c2VyAWF1dGg9QmVhcmVyIG1GXzkuQjVmLTQuMUpxTQEB
+MAIL FROM:<sender@example.com>
+RCPT TO:<recipient@example.com>
+DATA
+QUIT
+</protocol>
+<upload>
+mail body
+.
+</upload>
+</verify>
+</testcase>
