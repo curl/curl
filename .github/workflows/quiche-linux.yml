@@ -51,7 +51,7 @@ env:
   ngtcp2-version: v1.1.0
   nghttp2-version: v1.59.0
   quiche-version: 0.19.0
-  mod_h2-version: v2.0.25
+  mod_h2-version: v2.0.26
 
 jobs:
   autotools:
