@@ -28,7 +28,7 @@
 # AppVeyor worker images:
 #   https://www.appveyor.com/docs/windows-images-software/
 
-version: 7.50.0.{build}
+version: curl-git-{branch}
 
 environment:
   UNITY: 'OFF'
