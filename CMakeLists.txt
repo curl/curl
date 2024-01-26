@@ -720,6 +720,10 @@ if(USE_MSH3)
   list(APPEND CURL_LIBS ${MSH3_LIBRARIES})
 endif()
 
+if(CURL_WITH_MULTI_SSL AND (USE_NGTCP2 OR USE_QUICHE OR USE_MSH3))
+  message(FATAL_ERROR "MultiSSL cannot be enabled with HTTP/3 and vice versa.")
+endif()
+
 if(NOT CURL_DISABLE_SRP AND (HAVE_GNUTLS_SRP OR HAVE_OPENSSL_SRP))
   set(USE_TLS_SRP 1)
 endif()
