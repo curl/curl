@@ -745,7 +745,7 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
   struct MQTT *mq = data->req.p.mqtt;
   ssize_t nread;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
-  char buffer[4*1024];
+  unsigned char buffer[4*1024];
   unsigned char byte;
 
   *done = FALSE;
