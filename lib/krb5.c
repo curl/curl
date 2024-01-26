@@ -435,6 +435,9 @@ static char level_to_char(int level)
 /* Send an FTP command defined by |message| and the optional arguments. The
    function returns the ftp_code. If an error occurs, -1 is returned. */
 static int ftp_send_command(struct Curl_easy *data, const char *message, ...)
+  CURL_PRINTF(2, 3);
+
+static int ftp_send_command(struct Curl_easy *data, const char *message, ...)
 {
   int ftp_code;
   ssize_t nread = 0;
