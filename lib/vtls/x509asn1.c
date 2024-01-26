@@ -390,7 +390,8 @@ utf8asn1str(struct dynbuf *to, int type, const char *from, const char *end)
           if(wc >= 0x00010000) {
             if(wc >= 0x00200000) {
               free(buf);
-              return -1;        /* Invalid char. size for target encoding. */
+              /* Invalid char. size for target encoding. */
+              return CURLE_WEIRD_SERVER_REPLY;
             }
             buf[3] = (char) (0x80 | (wc & 0x3F));
             wc = (wc >> 6) | 0x00010000;
@@ -455,7 +456,7 @@ static CURLcode encodeOID(struct dynbuf *store,
 static CURLcode OID2str(struct dynbuf *store,
                         const char *beg, const char *end, bool symbolic)
 {
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   if(beg < end) {
     if(symbolic) {
       struct dynbuf buf;
