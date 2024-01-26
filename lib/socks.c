@@ -71,7 +71,7 @@ enum connect_t {
   CONNECT_DONE /* 17 connected fine to the remote or the SOCKS proxy */
 };
 
-#define CURL_SOCKS_BUF_SIZE  (8*1024)
+#define CURL_SOCKS_BUF_SIZE 600
 
 /* make sure we configure it not too low */
 #if CURL_SOCKS_BUF_SIZE < 600
