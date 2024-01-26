@@ -3867,6 +3867,7 @@ CURLcode Curl_multi_xfer_buf_borrow(struct Curl_easy *data,
 
 void Curl_multi_xfer_buf_release(struct Curl_easy *data, char *buf)
 {
+  (void)buf;
   DEBUGASSERT(data);
   DEBUGASSERT(data->multi);
   DEBUGASSERT(!buf || data->multi->xfer_buf == buf);
