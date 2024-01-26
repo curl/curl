@@ -417,7 +417,6 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
   curl_off_t expected_size = -1;
   bool size_known;
   bool fstated = FALSE;
-  char *buf = data->state.buffer;
   int fd;
   struct FILEPROTO *file;
 
@@ -545,21 +544,22 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
   Curl_pgrsTime(data, TIMER_STARTTRANSFER);
 
   while(!result) {
+    char buffer[8*1024];
     ssize_t nread;
     /* Don't fill a whole buffer if we want less than all data */
     size_t bytestoread;
 
     if(size_known) {
-      bytestoread = (expected_size < data->set.buffer_size) ?
-        curlx_sotouz(expected_size) : (size_t)data->set.buffer_size;
+      bytestoread = (expected_size < (curl_off_t)(sizeof(buffer)-1)) ?
+        curlx_sotouz(expected_size) : (sizeof(buffer)-1);
     }
     else
       bytestoread = data->set.buffer_size-1;
 
-    nread = read(fd, buf, bytestoread);
+    nread = read(fd, buffer, bytestoread);
 
     if(nread > 0)
-      buf[nread] = 0;
+      buffer[nread] = 0;
 
     if(nread <= 0 || (size_known && (expected_size == 0)))
       break;
@@ -567,7 +567,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     if(size_known)
       expected_size -= nread;
 
-    result = Curl_client_write(data, CLIENTWRITE_BODY, buf, nread);
+    result = Curl_client_write(data, CLIENTWRITE_BODY, buffer, nread);
     if(result)
       return result;
 
