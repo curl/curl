@@ -97,6 +97,11 @@
 #define CURL_ASN1_CHARACTER_STRING      29
 #define CURL_ASN1_BMP_STRING            30
 
+/* Max sixes */
+
+#define MAX_X509_STR  10000
+#define MAX_X509_CERT 100000
+
 #ifdef WANT_EXTRACT_CERTINFO
 /* ASN.1 OID table entry. */
 struct Curl_OID {
@@ -322,21 +327,20 @@ static const char *int2str(const char *beg, const char *end)
 }
 
 /*
- * Perform a lazy conversion from an ASN.1 typed string to UTF8. Allocate the
- * destination buffer dynamically. The allocation size will normally be too
- * large: this is to avoid buffer overflows.
- * Terminate the string with a nul byte and return the converted
- * string length.
+ * Convert from an ASN.1 typed string to UTF8.
+ *
+ * The result is stored in a dynbuf that is inited by the user of this
+ * function.
+ *
+ * Return negative on error.
  */
 static ssize_t
-utf8asn1str(char **to, int type, const char *from, const char *end)
+utf8asn1str(struct dynbuf *to, int type, const char *from, const char *end)
 {
   size_t inlength = end - from;
   int size = 1;
-  size_t outlength;
-  char *buf;
+  CURLcode result = CURLE_OK;
 
-  *to = NULL;
   switch(type) {
   case CURL_ASN1_BMP_STRING:
     size = 2;
@@ -357,24 +361,18 @@ utf8asn1str(char **to, int type, const char *from, const char *end)
 
   if(inlength % size)
     return -1;  /* Length inconsistent with character size. */
-  if(inlength / size > (SIZE_T_MAX - 1) / 4)
-    return -1;  /* Too big. */
-  buf = malloc(4 * (inlength / size) + 1);
-  if(!buf)
-    return -1;  /* Not enough memory. */
 
   if(type == CURL_ASN1_UTF8_STRING) {
     /* Just copy. */
-    outlength = inlength;
-    if(outlength)
-      memcpy(buf, from, outlength);
+    if(inlength)
+      result = Curl_dyn_addn(to, from, inlength);
   }
   else {
-    for(outlength = 0; from < end;) {
-      int charsize;
-      unsigned int wc;
+    while(!result && (from < end)) {
+      char buf[4]; /* decode buffer */
+      int charsize = 1;
+      unsigned int wc = 0;
 
-      wc = 0;
       switch(size) {
       case 4:
         wc = (wc << 8) | *(const unsigned char *) from++;
@@ -386,7 +384,6 @@ utf8asn1str(char **to, int type, const char *from, const char *end)
       default: /* case 1: */
         wc = (wc << 8) | *(const unsigned char *) from++;
       }
-      charsize = 1;
       if(wc >= 0x00000080) {
         if(wc >= 0x00000800) {
           if(wc >= 0x00010000) {
@@ -394,25 +391,23 @@ utf8asn1str(char **to, int type, const char *from, const char *end)
               free(buf);
               return -1;        /* Invalid char. size for target encoding. */
             }
-            buf[outlength + 3] = (char) (0x80 | (wc & 0x3F));
+            buf[3] = (char) (0x80 | (wc & 0x3F));
             wc = (wc >> 6) | 0x00010000;
             charsize++;
           }
-          buf[outlength + 2] = (char) (0x80 | (wc & 0x3F));
+          buf[2] = (char) (0x80 | (wc & 0x3F));
           wc = (wc >> 6) | 0x00000800;
           charsize++;
         }
-        buf[outlength + 1] = (char) (0x80 | (wc & 0x3F));
+        buf[1] = (char) (0x80 | (wc & 0x3F));
         wc = (wc >> 6) | 0x000000C0;
         charsize++;
       }
-      buf[outlength] = (char) wc;
-      outlength += charsize;
+      buf[0] = (char) wc;
+      result = Curl_dyn_addn(to, buf, charsize);
     }
   }
-  buf[outlength] = '\0';
-  *to = buf;
-  return outlength;
+  return result ? (ssize_t) -1 : (ssize_t)Curl_dyn_len(to);
 }
 
 /*
@@ -421,10 +416,11 @@ utf8asn1str(char **to, int type, const char *from, const char *end)
  */
 static const char *string2str(int type, const char *beg, const char *end)
 {
-  char *buf;
+  struct dynbuf buf;
+  Curl_dyn_init(&buf, MAX_X509_STR);
   if(utf8asn1str(&buf, type, beg, end) < 0)
     return NULL;
-  return buf;
+  return Curl_dyn_ptr(&buf);
 }
 
 /*
@@ -1052,8 +1048,6 @@ static const char *DNtostr(struct Curl_asn1Element *dn)
   }
   return buf;
 }
-
-#define MAX_X509_CERT 100000
 
 CURLcode Curl_extract_certinfo(struct Curl_easy *data,
                                int certnum,
