@@ -129,9 +129,9 @@ associated bits.
 names of the features that libcurl supports. The array is terminated by a NULL
 entry. See the list of features names below.
 
-*ssl_version* is an ASCII string for the TLS library name + version
-used. If libcurl has no SSL support, this is NULL. For example "Schannel",
-&"Secure Transport" or "OpenSSL/1.1.0g".
+*ssl_version* is an ASCII string for the TLS library name + version used. If
+libcurl has no SSL support, this is NULL. For example "Schannel", "Secure
+Transport" or "OpenSSL/1.1.0g".
 
 *ssl_version_num* is always 0.
 

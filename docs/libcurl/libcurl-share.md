@@ -27,8 +27,7 @@ All functions in the share interface are prefixed with curl_share.
 
 # OBJECTIVES
 
-The share interface was added to enable sharing of data between curl
-&"handles".
+The share interface was added to enable sharing of data between curl handles.
 
 # ONE SET OF DATA - MANY TRANSFERS
 

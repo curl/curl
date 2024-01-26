@@ -48,7 +48,7 @@ an entry valid for all subdomains to the name as well or only for the exact
 name.
 
 [stamp] is the time (in UTC) when the entry expires and it uses the format
-&"YYYYMMDD HH:MM:SS".
+"YYYYMMDD HH:MM:SS".
 
 Lines starting with "#" are treated as comments and are ignored. There is
 currently no length or size limit.

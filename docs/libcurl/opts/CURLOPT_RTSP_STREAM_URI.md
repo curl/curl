@@ -30,16 +30,16 @@ stream using this option. If unset, libcurl defaults to operating on generic
 server options by passing '*' in the place of the RTSP Stream URI. This option
 is distinct from CURLOPT_URL(3). When working with RTSP, the
 CURLOPT_RTSP_STREAM_URI(3) indicates what URL to send to the server in the
-request header while the CURLOPT_URL(3) indicates where to make the
-connection to. (e.g. the CURLOPT_URL(3) for the above examples might be set
-to *rtsp://foo/twister*
+request header while the CURLOPT_URL(3) indicates where to make the connection
+to. (e.g. the CURLOPT_URL(3) for the above examples might be set to
+*rtsp://foo/twister*
 
 The application does not have to keep the string around after setting this
 option.
 
 # DEFAULT
 
-&'*'
+"*"
 
 # PROTOCOLS
 

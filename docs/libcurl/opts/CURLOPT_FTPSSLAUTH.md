@@ -24,7 +24,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FTPSSLAUTH, long order);
 # DESCRIPTION
 
 Pass a long using one of the values from below, to alter how libcurl issues
-&"AUTH TLS" or "AUTH SSL" when FTP over SSL is activated. This is only
+"AUTH TLS" or "AUTH SSL" when FTP over SSL is activated. This is only
 interesting if CURLOPT_USE_SSL(3) is also set.
 
 Possible *order* values:
