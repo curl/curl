@@ -28,9 +28,9 @@ Pass a pointer to a null-terminated string as parameter. The string should be
 the format of your private key. Supported formats are "PEM", "DER" and "ENG".
 
 The format "ENG" enables you to load the private key from a crypto engine. In
-this case CURLOPT_SSLKEY(3) is used as an identifier passed to the
-engine. You have to set the crypto engine with CURLOPT_SSLENGINE(3).
-&"DER" format key file currently does not work because of a bug in OpenSSL.
+this case CURLOPT_SSLKEY(3) is used as an identifier passed to the engine. You
+have to set the crypto engine with CURLOPT_SSLENGINE(3). "DER" format key file
+currently does not work because of a bug in OpenSSL.
 
 The application does not have to keep the string around after setting this
 option.

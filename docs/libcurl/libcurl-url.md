@@ -142,12 +142,14 @@ The appended string can of course also get URL encoded on add, and if asked to
 URL encode, the encoding process skips the '=' character. For example, append
 "candy=N&N" to what we already have, and URL encode it to deal with the
 ampersand in the data:
+
 ~~~c
   rc = curl_url_set(urlp, CURLUPART_QUERY, "candy=N&N",
                     CURLU_APPENDQUERY | CURLU_URLENCODE);
 ~~~
 
 Now the URL looks like
+
 ~~~c
   https://example.com/?shoes=2&hat=1&candy=N%26N
 ~~~

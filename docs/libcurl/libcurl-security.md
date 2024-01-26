@@ -44,7 +44,7 @@ this.
 
 # .netrc
 
-&.netrc is a pretty handy file/feature that allows you to login quickly and
+.netrc is a pretty handy file/feature that allows you to login quickly and
 automatically to frequently visited sites. The file contains passwords in
 clear text and is a real security risk. In some cases, your .netrc is also
 stored in a home directory that is NFS mounted or used on another network

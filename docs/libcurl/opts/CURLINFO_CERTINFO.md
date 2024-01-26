@@ -37,10 +37,10 @@ struct curl_certinfo {
 ~~~
 
 The *certinfo* struct member is an array of linked lists of certificate
-information. The *num_of_certs* struct member is the number of
-certificates which is the number of elements in the array. Each certificate's
-list has items with textual information in the format "name:content" such as
-&"Subject:Foo", "Issuer:Bar", etc. The items in each list varies depending on
+information. The *num_of_certs* struct member is the number of certificates
+which is the number of elements in the array. Each certificate's list has
+items with textual information in the format "name:content" such as
+"Subject:Foo", "Issuer:Bar", etc. The items in each list varies depending on
 the SSL backend and the certificate.
 
 # PROTOCOLS
