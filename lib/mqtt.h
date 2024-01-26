@@ -57,6 +57,7 @@ struct MQTT {
   unsigned char firstbyte;
   size_t remaining_length;
   struct dynbuf recvbuf;
+  unsigned char pkt_hd[4]; /* for decoding the arriving packet length */
 };
 
 #endif /* HEADER_CURL_MQTT_H */
