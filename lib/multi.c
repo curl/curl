@@ -2883,6 +2883,7 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
     Curl_free_multi_ssl_backend_data(multi->ssl_backend_data);
 #endif
 
+    free(multi->xfer_buf);
     free(multi);
 
     return CURLM_OK;
@@ -3818,4 +3819,56 @@ struct Curl_easy **curl_multi_get_handles(struct Curl_multi *multi)
     a[i] = NULL; /* last entry is a NULL */
   }
   return a;
+}
+
+CURLcode Curl_multi_xfer_buf_borrow(struct Curl_easy *data,
+                                    char **pbuf, size_t *pbuflen)
+{
+  size_t xfer_buf_len;
+
+  DEBUGASSERT(data);
+  DEBUGASSERT(data->multi);
+  *pbuf = NULL;
+  *pbuflen = 0;
+  if(!data->multi)
+    return CURLE_FAILED_INIT;
+  if(data->multi->xfer_buf_borrowed) {
+    failf(data, "attempt to borrow xfer_buf when already borrowed");
+    return CURLE_AGAIN;
+  }
+
+  xfer_buf_len = data->set.buffer_size; /* what the transfer wants */
+
+  if(data->multi->xfer_buf &&
+     xfer_buf_len > data->multi->xfer_buf_len) {
+    /* not large enough, get a new one */
+    free(data->multi->xfer_buf);
+    data->multi->xfer_buf = NULL;
+    data->multi->xfer_buf_len = 0;
+  }
+
+  if(!data->multi->xfer_buf) {
+    /* TODO: we always allocated `data->state.buffer` one byte larger.
+     * I think we should not and live with the consequences */
+    data->multi->xfer_buf = malloc(xfer_buf_len + 1);
+    if(!data->multi->xfer_buf) {
+      failf(data, "could not allocate xfer_buf of %zu bytes", xfer_buf_len);
+      return CURLE_OUT_OF_MEMORY;
+    }
+    data->multi->xfer_buf_len = xfer_buf_len;
+  }
+
+  data->multi->xfer_buf_borrowed = TRUE;
+  /* buf may be larger, but return length that easy wants */
+  *pbuf = data->multi->xfer_buf;
+  *pbuflen = xfer_buf_len;
+  return CURLE_OK;
+}
+
+void Curl_multi_xfer_buf_release(struct Curl_easy *data, char *buf)
+{
+  DEBUGASSERT(data);
+  DEBUGASSERT(data->multi);
+  DEBUGASSERT(!buf || data->multi->xfer_buf == buf);
+  data->multi->xfer_buf_borrowed = FALSE;
 }
