@@ -115,11 +115,18 @@ Note that a `bufq` length and it being "full" are only loosely related. A simple
 * read 1 bytes from it, it will still report "full"
 * read 999 more bytes from it, and it will no longer be "full"
 
-The reason for this is that full really means: *bufq uses max_chunks and the last one cannot be written to*.
+The reason for this is that full really means: *bufq uses max_chunks and the
+last one cannot be written to*.
 
-So when you read 1 byte from the head chunk in the example above, the head still hold 999 unread bytes. Only when those are also read, can the head chunk be removed and a new tail be added.
+When you read 1 byte from the head chunk in the example above, the head still
+hold 999 unread bytes. Only when those are also read, can the head chunk be
+removed and a new tail be added.
 
-There is another variation to this. If you initialized a `bufq` with option `BUFQ_OPT_SOFT_LIMIT`, it will allow writes **beyond** the `max_chunks`. It will report **full**, but one can **still** write. This option is necessary, if partial writes need to be avoided. But it means that you will need other checks to keep the `bufq` from growing ever larger and larger.
+There is another variation to this. If you initialized a `bufq` with option
+`BUFQ_OPT_SOFT_LIMIT`, it will allow writes **beyond** the `max_chunks`. It
+will report **full**, but one can **still** write. This option is necessary,
+if partial writes need to be avoided. It means that you will need other checks
+to keep the `bufq` from growing ever larger and larger.
 
 
 ## pools

@@ -8,15 +8,15 @@ Provide a list with three different names like this:
 
     "http://site.{one,two,three}.com"
 
-or you can get sequences of alphanumeric series by using [] as in:
+Do sequences of alphanumeric series by using [] as in:
 
     "ftp://ftp.example.com/file[1-100].txt"
 
-And with leading zeroes:
+With leading zeroes:
 
     "ftp://ftp.example.com/file[001-100].txt"
 
-Or with letters through the alphabet:
+With letters through the alphabet:
 
     "ftp://ftp.example.com/file[a-z].txt"
 

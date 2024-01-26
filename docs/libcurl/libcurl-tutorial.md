@@ -69,8 +69,9 @@ like this:
 ~~~c
   $ curl-config --feature
 ~~~
-And if SSL is supported, the keyword *SSL* is written to stdout, possibly
-together with a other features that could be either on or off on for different
+
+If SSL is supported, the keyword *SSL* is written to stdout, possibly together
+with a other features that could be either on or off on for different
 libcurls.
 
 See also the "Features libcurl Provides" further down.
@@ -386,7 +387,8 @@ CURLOPT_NETRC(3) option:
 ~~~c
  curl_easy_setopt(handle, CURLOPT_NETRC, 1L);
 ~~~
-And a basic example of how such a .netrc file may look like:
+
+A basic example of how such a .netrc file may look like:
 
 ~~~c
  machine myhost.mydomain.com
@@ -419,8 +421,10 @@ with CURLOPT_HTTPAUTH(3) as in:
 ~~~c
  curl_easy_setopt(handle, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
 ~~~
-And when you send authentication to a proxy, you can also set authentication
-type the same way but instead with CURLOPT_PROXYAUTH(3):
+
+When you send authentication to a proxy, you can also set authentication type
+the same way but instead with CURLOPT_PROXYAUTH(3):
+
 ~~~c
  curl_easy_setopt(handle, CURLOPT_PROXYAUTH, CURLAUTH_NTLM);
 ~~~
