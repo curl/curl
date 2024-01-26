@@ -745,7 +745,6 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
   struct MQTT *mq = data->req.p.mqtt;
   ssize_t nread;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
-  unsigned char *pkt = (unsigned char *)data->state.buffer;
   unsigned char byte;
 
   *done = FALSE;
@@ -783,7 +782,7 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
       if(!nread)
         break;
       Curl_debug(data, CURLINFO_HEADER_IN, (char *)&byte, 1);
-      pkt[mq->npacket++] = byte;
+      mq->pkt_hd[mq->npacket++] = byte;
     } while((byte & 0x80) && (mq->npacket < 4));
     if(nread && (byte & 0x80))
       /* MQTT supports up to 127 * 128^0 + 127 * 128^1 + 127 * 128^2 +
@@ -791,7 +790,7 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
       result = CURLE_WEIRD_SERVER_REPLY;
     if(result)
       break;
-    mq->remaining_length = mqtt_decode_len(&pkt[0], mq->npacket, NULL);
+    mq->remaining_length = mqtt_decode_len(mq->pkt_hd, mq->npacket, NULL);
     mq->npacket = 0;
     if(mq->remaining_length) {
       mqstate(data, mqtt->nextstate, MQTT_NOSTATE);
