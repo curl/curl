@@ -466,14 +466,17 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 {
   struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
-  char *buf;
-  size_t blen;
+  char *buf, *xfer_buf;
+  size_t blen, xfer_blen;
   int maxloops = 10;
   curl_off_t total_received = 0;
   bool is_multiplex = FALSE;
 
-  DEBUGASSERT(data->state.buffer);
   *done = FALSE;
+
+  result = Curl_multi_xfer_buf_borrow(data, &xfer_buf, &xfer_blen);
+  if(result)
+    goto out;
 
   /* This is where we loop until we have read everything there is to
      read or we get a CURLE_AGAIN */
@@ -489,8 +492,8 @@ static CURLcode readwrite_data(struct Curl_easy *data,
       is_multiplex = Curl_conn_is_multiplex(conn, FIRSTSOCKET);
     }
 
-    buf = data->state.buffer;
-    bytestoread = data->set.buffer_size;
+    buf = xfer_buf;
+    bytestoread = xfer_blen;
 
     /* Observe any imposed speed limit */
     if(bytestoread && data->set.max_recv_speed) {
@@ -564,6 +567,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
   }
 
 out:
+  Curl_multi_xfer_buf_release(data, xfer_buf);
   if(result)
     DEBUGF(infof(data, "readwrite_data() -> %d", result));
   return result;

@@ -395,8 +395,6 @@ bool Curl_conncache_return_conn(struct Curl_easy *data,
          important that details from this (unrelated) disconnect does not
          taint meta-data in the data handle. */
       struct conncache *connc = data->state.conn_cache;
-      connc->closure_handle->state.buffer = data->state.buffer;
-      connc->closure_handle->set.buffer_size = data->set.buffer_size;
       Curl_disconnect(connc->closure_handle, conn_candidate,
                       /* dead_connection */ FALSE);
     }
@@ -522,12 +520,9 @@ Curl_conncache_extract_oldest(struct Curl_easy *data)
 void Curl_conncache_close_all_connections(struct conncache *connc)
 {
   struct connectdata *conn;
-  char buffer[READBUFFER_MIN + 1];
   SIGPIPE_VARIABLE(pipe_st);
   if(!connc->closure_handle)
     return;
-  connc->closure_handle->state.buffer = buffer;
-  connc->closure_handle->set.buffer_size = READBUFFER_MIN;
 
   conn = conncache_find_first_connection(connc);
   while(conn) {
@@ -541,7 +536,6 @@ void Curl_conncache_close_all_connections(struct conncache *connc)
     conn = conncache_find_first_connection(connc);
   }
 
-  connc->closure_handle->state.buffer = NULL;
   sigpipe_ignore(connc->closure_handle, &pipe_st);
 
   Curl_hostcache_clean(connc->closure_handle,

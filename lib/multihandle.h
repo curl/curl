@@ -124,6 +124,10 @@ struct Curl_multi {
      times of all currently set timers */
   struct Curl_tree *timetree;
 
+  /* buffer used for transfer data, lazy initialized */
+  char *xfer_buf; /* the actual buffer */
+  size_t xfer_buf_len;      /* the allocated length */
+
 #if defined(USE_SSL)
   struct multi_ssl_backend_data *ssl_backend_data;
 #endif
@@ -171,6 +175,7 @@ struct Curl_multi {
 #endif
   BIT(dead); /* a callback returned error, everything needs to crash and
                 burn */
+  BIT(xfer_buf_borrowed);      /* xfer_buf is currently being borrowed */
 #ifdef DEBUGBUILD
   BIT(warned);                 /* true after user warned of DEBUGBUILD */
 #endif
