@@ -877,23 +877,6 @@ int Curl_parseX509(struct Curl_X509certificate *cert,
 
 #ifdef WANT_EXTRACT_CERTINFO
 
-/*
- * Copy at most 64-characters, terminate with a newline and returns the
- * effective number of stored characters.
- */
-static size_t copySubstring(char *to, const char *from)
-{
-  size_t i;
-  for(i = 0; i < 64; i++) {
-    to[i] = *from;
-    if(!*from++)
-      break;
-  }
-
-  to[i++] = '\n';
-  return i;
-}
-
 static const char *dumpAlgo(struct Curl_asn1Element *param,
                             const char *beg, const char *end)
 {
@@ -1070,6 +1053,8 @@ static const char *DNtostr(struct Curl_asn1Element *dn)
   return buf;
 }
 
+#define MAX_X509_CERT 100000
+
 CURLcode Curl_extract_certinfo(struct Curl_easy *data,
                                int certnum,
                                const char *beg,
@@ -1078,13 +1063,11 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
   struct Curl_X509certificate cert;
   struct Curl_asn1Element param;
   const char *ccp;
-  char *cp1;
-  size_t cl1;
-  char *cp2;
+  char *certptr;
+  size_t clen;
+  struct dynbuf out;
   CURLcode result = CURLE_OK;
   unsigned int version;
-  size_t i;
-  size_t j;
 
   if(!data->set.ssl.certinfo)
     if(certnum)
@@ -1222,10 +1205,11 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
   /* Generate PEM certificate. */
   result = Curl_base64_encode(cert.certificate.beg,
                               cert.certificate.end - cert.certificate.beg,
-                              &cp1, &cl1);
+                              &certptr, &clen);
   if(result)
     return result;
-  /* Compute the number of characters in final certificate string. Format is:
+
+  /* Generate the final output certificate string. Format is:
      -----BEGIN CERTIFICATE-----\n
      <max 64 base64 characters>\n
      .
@@ -1233,24 +1217,33 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
      .
      -----END CERTIFICATE-----\n
    */
-  i = 28 + cl1 + (cl1 + 64 - 1) / 64 + 26;
-  cp2 = malloc(i + 1);
-  if(!cp2) {
-    free(cp1);
-    return CURLE_OUT_OF_MEMORY;
-  }
+
+  Curl_dyn_init(&out, MAX_X509_CERT);
+
   /* Build the certificate string. */
-  i = copySubstring(cp2, "-----BEGIN CERTIFICATE-----");
-  for(j = 0; j < cl1; j += 64)
-    i += copySubstring(cp2 + i, cp1 + j);
-  i += copySubstring(cp2 + i, "-----END CERTIFICATE-----");
-  cp2[i] = '\0';
-  free(cp1);
-  if(data->set.ssl.certinfo)
-    result = ssl_push_certinfo(data, certnum, "Cert", cp2);
-  if(!certnum)
-    infof(data, "%s", cp2);
-  free(cp2);
+  result = Curl_dyn_add(&out, "-----BEGIN CERTIFICATE-----\n");
+  if(!result) {
+    size_t j = 0;
+
+    while(!result && (j < clen)) {
+      size_t chunksize = (clen - j) > 64 ? 64 : (clen - j);
+      result = Curl_dyn_addn(&out, &certptr[j], chunksize);
+      if(!result)
+        result = Curl_dyn_addn(&out, "\n", 1);
+      j += chunksize;
+    }
+    if(!result)
+      result = Curl_dyn_add(&out, "-----END CERTIFICATE-----\n");
+  }
+  free(certptr);
+  if(!result) {
+    if(data->set.ssl.certinfo)
+      result = ssl_push_certinfo(data, certnum, "Cert",
+                                 Curl_dyn_ptr(&out));
+    if(!certnum)
+      infof(data, "%s", Curl_dyn_ptr(&out));
+  }
+  Curl_dyn_free(&out);
   return result;
 }
 
