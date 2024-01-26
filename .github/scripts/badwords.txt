@@ -28,6 +28,7 @@ isation:ization
 it's:it is
 there's:there is
 [^.]\. And: Rewrite it somehow?
+^(And|So|But) = Rewrite it somehow?
 \. But: Rewrite it somehow?
 file name :filename
 \. So : Rewrite without "so" ?

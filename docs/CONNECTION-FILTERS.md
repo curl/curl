@@ -1,16 +1,26 @@
 # curl connection filters
 
-Connection filters is a design in the internals of curl, not visible in its public API. They were added
-in curl v7.87.0. This document describes the concepts, its high level implementation and the motivations.
+Connection filters is a design in the internals of curl, not visible in its
+public API. They were added in curl v7.87.0. This document describes the
+concepts, its high level implementation and the motivations.
 
 ## Filters
 
-A "connection filter" is a piece of code that is responsible for handling a range of operations
-of curl's connections: reading, writing, waiting on external events, connecting and closing down - to name the most important ones.
+A "connection filter" is a piece of code that is responsible for handling a
+range of operations of curl's connections: reading, writing, waiting on
+external events, connecting and closing down - to name the most important
+ones.
 
-The most important feat of connection filters is that they can be stacked on top of each other (or "chained" if you prefer that metaphor). In the common scenario that you want to retrieve a `https:` url with curl, you need 2 basic things to send the request and get the response: a TCP connection, represented by a `socket` and a SSL instance en- and decrypt over that socket. You write your request to the SSL instance, which encrypts and writes that data to the socket, which then sends the bytes over the network.
+The most important feat of connection filters is that they can be stacked on
+top of each other (or "chained" if you prefer that metaphor). In the common
+scenario that you want to retrieve a `https:` URL with curl, you need 2 basic
+things to send the request and get the response: a TCP connection, represented
+by a `socket` and a SSL instance en- and decrypt over that socket. You write
+your request to the SSL instance, which encrypts and writes that data to the
+socket, which then sends the bytes over the network.
 
-With connection filters, curl's internal setup will look something like this (cf for connection filter):
+With connection filters, curl's internal setup will look something like this
+(cf for connection filter):
 
 ```
 Curl_easy *data         connectdata *conn        cf-ssl        cf-socket
@@ -27,7 +37,7 @@ While connection filters all do different things, they look the same from the "o
 
 Same is true for filters. Each filter has a pointer to the `next` filter. When SSL has encrypted the data, it does not write to a socket, it writes to the next filter. If that is indeed a socket, or a file, or an HTTP/2 connection is of no concern to the SSL filter.
 
-And this allows the stacking, as in:
+This allows stacking, as in:
 
 ```
 Direct:
@@ -210,7 +220,9 @@ conn[curl.se] --> SETUP[QUIC] --> HAPPY-EYEBALLS --> HTTP/3[2a04:4e42:c00::347]:
 * transfer
 ```
 
-And when we plug these two variants together, we get the `HTTPS-CONNECT` filter type that is used for `--http3` when **both** HTTP/3 and HTTP/2 or HTTP/1.1 shall be attempted:
+When we plug these two variants together, we get the `HTTPS-CONNECT` filter
+type that is used for `--http3` when **both** HTTP/3 and HTTP/2 or HTTP/1.1
+shall be attempted:
 
 ```
 * create connection for --http3 https://curl.se

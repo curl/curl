@@ -888,7 +888,7 @@ command line similar to:
 
     curl telnet://remote.example.com
 
-And enter the data to pass to the server on stdin. The result will be sent to
+Enter the data to pass to the server on stdin. The result will be sent to
 stdout or to the file you specify with `-o`.
 
 You might want the `-N`/`--no-buffer` option to switch off the buffered output
