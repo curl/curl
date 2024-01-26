@@ -4691,6 +4691,9 @@ fi
 
 if test "x$USE_NGTCP2_H3" = "x1" -o "x$USE_QUICHE" = "x1" \
     -o "x$USE_OPENSSL_H3" = "x1" -o "x$USE_MSH3" = "x1"; then
+  if test "x$CURL_WITH_MULTI_SSL" = "x1"; then
+    AC_MSG_ERROR([MultiSSL cannot be enabled with HTTP/3 and vice versa])
+  fi
   SUPPORT_FEATURES="$SUPPORT_FEATURES HTTP3"
 fi
 
