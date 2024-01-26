@@ -544,22 +544,22 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
   Curl_pgrsTime(data, TIMER_STARTTRANSFER);
 
   while(!result) {
-    char buffer[8*1024];
+    char tmpbuf[8*1024];
     ssize_t nread;
     /* Don't fill a whole buffer if we want less than all data */
     size_t bytestoread;
 
     if(size_known) {
-      bytestoread = (expected_size < (curl_off_t)(sizeof(buffer)-1)) ?
-        curlx_sotouz(expected_size) : (sizeof(buffer)-1);
+      bytestoread = (expected_size < (curl_off_t)(sizeof(tmpbuf)-1)) ?
+        curlx_sotouz(expected_size) : (sizeof(tmpbuf)-1);
     }
     else
-      bytestoread = data->set.buffer_size-1;
+      bytestoread = sizeof(tmpbuf)-1;
 
-    nread = read(fd, buffer, bytestoread);
+    nread = read(fd, tmpbuf, bytestoread);
 
     if(nread > 0)
-      buffer[nread] = 0;
+      tmpbuf[nread] = 0;
 
     if(nread <= 0 || (size_known && (expected_size == 0)))
       break;
@@ -567,7 +567,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     if(size_known)
       expected_size -= nread;
 
-    result = Curl_client_write(data, CLIENTWRITE_BODY, buffer, nread);
+    result = Curl_client_write(data, CLIENTWRITE_BODY, tmpbuf, nread);
     if(result)
       return result;
 
