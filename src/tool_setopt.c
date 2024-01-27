@@ -240,15 +240,11 @@ static char *c_escape(const char *str, curl_off_t len)
       if(p && *p)
         result = curlx_dyn_addn(&escaped, to + 2 * (p - from), 2);
       else {
-        if(len > 1 && ISXDIGIT(s[1])) {
-          /* Octal escape to avoid >2 digit hex. */
-          result = curlx_dyn_addf(&escaped, "\\%03o",
-                                  (unsigned int) *(unsigned char *) s);
-        }
-        else {
-          result = curlx_dyn_addf(&escaped, "\\x%02x",
-                                  (unsigned int) *(unsigned char *) s);
-        }
+        result = curlx_dyn_addf(&escaped,
+                                /* Octal escape to avoid >2 digit hex. */
+                                (len > 1 && ISXDIGIT(s[1])) ?
+                                  "\\%03o" : "\\x%02x",
+                                (unsigned int) *(unsigned char *) s);
       }
     }
   }
