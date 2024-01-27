@@ -4036,34 +4036,40 @@ static CURLcode http_rw_headers(struct Curl_easy *data,
           }
           break;
         case 101:
-          /* Switching Protocols */
-          if(k->upgr101 == UPGR101_H2) {
-            /* Switching to HTTP/2 */
-            DEBUGASSERT(conn->httpversion < 20);
-            infof(data, "Received 101, Switching to HTTP/2");
-            k->upgr101 = UPGR101_RECEIVED;
+          if(conn->httpversion == 11) {
+            /* Switching Protocols only allowed from HTTP/1.1 */
+            if(k->upgr101 == UPGR101_H2) {
+              /* Switching to HTTP/2 */
+              infof(data, "Received 101, Switching to HTTP/2");
+              k->upgr101 = UPGR101_RECEIVED;
 
-            /* we'll get more headers (HTTP/2 response) */
-            k->header = TRUE;
-            k->headerline = 0; /* restart the header line counter */
-            switch_to_h2 = TRUE;
-          }
+              /* we'll get more headers (HTTP/2 response) */
+              k->header = TRUE;
+              k->headerline = 0; /* restart the header line counter */
+              switch_to_h2 = TRUE;
+            }
 #ifdef USE_WEBSOCKETS
-          else if(k->upgr101 == UPGR101_WS) {
-            /* verify the response */
-            result = Curl_ws_accept(data, buf, blen);
-            if(result)
-              return result;
-            k->header = FALSE; /* no more header to parse! */
-            *pconsumed += blen; /* ws accept handled the data */
-            blen = 0;
-            if(data->set.connect_only)
-              k->keepon &= ~KEEP_RECV; /* read no more content */
-          }
+            else if(k->upgr101 == UPGR101_WS) {
+              /* verify the response */
+              result = Curl_ws_accept(data, buf, blen);
+              if(result)
+                return result;
+              k->header = FALSE; /* no more header to parse! */
+              *pconsumed += blen; /* ws accept handled the data */
+              blen = 0;
+              if(data->set.connect_only)
+                k->keepon &= ~KEEP_RECV; /* read no more content */
+            }
 #endif
+            else {
+              /* Not switching to another protocol */
+              k->header = FALSE; /* no more header to parse! */
+            }
+          }
           else {
-            /* Not switching to another protocol */
-            k->header = FALSE; /* no more header to parse! */
+            /* invalid for other HTTP versions */
+            failf(data, "unexpected 101 response code");
+            return CURLE_WEIRD_SERVER_REPLY;
           }
           break;
         default:

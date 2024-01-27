@@ -1,0 +1,66 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP/2
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/2 101 OK
+
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+
+-maa-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+h2c
+</features>
+<server>
+http
+</server>
+<name>
+HTTP/1 doing HTTP/2 Upgrade: getting a HTTP/2 101 response
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --http2
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^X-Forwarded-Proto:.*
+^Via:.*
+</strip>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Connection: Upgrade, HTTP2-Settings
+Upgrade: h2c
+HTTP2-Settings: AAMAAABkAAQAoAAAAAIAAAAA
+
+</protocol>
+
+# CURLE_WEIRD_SERVER_REPLY (8)
+<errorcode>
+8
+</errorcode>
+</verify>
+</testcase>
