@@ -106,7 +106,7 @@ static int fopen_works(void)
 
 static int rlimit(int keep_open)
 {
-  int nitems, i;
+  rlim_t nitems, i;
   int *memchunk = NULL;
   char *fmt;
   struct rlimit rl;
@@ -263,7 +263,7 @@ static int rlimit(int keep_open)
   if(nitems > 0x7fff)
     nitems = 0x40000;
   do {
-    num_open.rlim_max = sizeof(*memchunk) * (size_t)nitems;
+    num_open.rlim_max = sizeof(*memchunk) * nitems;
     msnprintf(strbuff, sizeof(strbuff), fmt, num_open.rlim_max);
     fprintf(stderr, "allocating memchunk %s byte array\n", strbuff);
     memchunk = malloc(sizeof(*memchunk) * (size_t)nitems);
@@ -355,7 +355,7 @@ static int rlimit(int keep_open)
       msnprintf(strbuff, sizeof(strbuff), "dup() attempt %s failed", strbuff1);
       fprintf(stderr, "%s\n", strbuff);
 
-      msnprintf(strbuff1, sizeof(strbuff), fmt, num_open.rlim_cur);
+      msnprintf(strbuff1, sizeof(strbuff1), fmt, num_open.rlim_cur);
       msnprintf(strbuff, sizeof(strbuff), "fds system limit seems close to %s",
                 strbuff1);
       fprintf(stderr, "%s\n", strbuff);
@@ -436,10 +436,10 @@ static int rlimit(int keep_open)
 
   if(!fopen_works()) {
     msnprintf(strbuff1, sizeof(strbuff1), fmt, num_open.rlim_max);
-    msnprintf(strbuff, sizeof(strbuff), "fopen fails with %s fds open()",
+    msnprintf(strbuff, sizeof(strbuff), "fopen fails with %s fds open",
               strbuff1);
     fprintf(stderr, "%s\n", msgbuff);
-    msnprintf(strbuff, sizeof(strbuff), "fopen fails with lots of fds open()");
+    msnprintf(strbuff, sizeof(strbuff), "fopen fails with lots of fds open");
     store_errmsg(strbuff, 0);
     close_file_descriptors();
     free(memchunk);
