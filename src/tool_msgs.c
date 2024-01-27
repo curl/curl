@@ -53,14 +53,7 @@ static void voutf(struct GlobalConfig *config,
     char *ptr;
     char *print_buffer;
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
-#endif
     print_buffer = curlx_mvaprintf(fmt, ap);
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
     if(!print_buffer)
       return;
     len = strlen(print_buffer);
