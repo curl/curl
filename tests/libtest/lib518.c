@@ -357,7 +357,7 @@ static int rlimit(int keep_open)
 
       msnprintf(strbuff1, sizeof(strbuff), fmt, num_open.rlim_cur);
       msnprintf(strbuff, sizeof(strbuff), "fds system limit seems close to %s",
-               strbuff1);
+                strbuff1);
       fprintf(stderr, "%s\n", strbuff);
 
       num_open.rlim_max = NUM_NEEDED;
@@ -365,7 +365,7 @@ static int rlimit(int keep_open)
       msnprintf(strbuff2, sizeof(strbuff2), fmt, num_open.rlim_max);
       msnprintf(strbuff1, sizeof(strbuff1), fmt, num_open.rlim_cur);
       msnprintf(strbuff, sizeof(strbuff), "fds needed %s > system limit %s",
-               strbuff2, strbuff1);
+                strbuff2, strbuff1);
       store_errmsg(strbuff, 0);
       fprintf(stderr, "%s\n", msgbuff);
 
@@ -377,9 +377,7 @@ static int rlimit(int keep_open)
       fd = NULL;
       free(memchunk);
       return -9;
-
     }
-
   }
 
   msnprintf(strbuff, sizeof(strbuff), fmt, num_open.rlim_max);
@@ -401,7 +399,7 @@ static int rlimit(int keep_open)
   num_open.rlim_cur = FD_SETSIZE - SAFETY_MARGIN;
   if(num_open.rlim_max > num_open.rlim_cur) {
     msnprintf(strbuff, sizeof(strbuff), "select limit is FD_SETSIZE %d",
-             FD_SETSIZE);
+              FD_SETSIZE);
     store_errmsg(strbuff, 0);
     fprintf(stderr, "%s\n", msgbuff);
     close_file_descriptors();
@@ -416,7 +414,7 @@ static int rlimit(int keep_open)
     if((fd[rl.rlim_cur] > 0) &&
        ((unsigned int)fd[rl.rlim_cur] > num_open.rlim_cur)) {
       msnprintf(strbuff, sizeof(strbuff), "select limit is FD_SETSIZE %d",
-               FD_SETSIZE);
+                FD_SETSIZE);
       store_errmsg(strbuff, 0);
       fprintf(stderr, "%s\n", msgbuff);
       close_file_descriptors();
@@ -438,12 +436,10 @@ static int rlimit(int keep_open)
 
   if(!fopen_works()) {
     msnprintf(strbuff1, sizeof(strbuff1), fmt, num_open.rlim_max);
-    msnprintf(strbuff, sizeof(strbuff),
-             "fopen fails with %s fds open()",
-             strbuff1);
+    msnprintf(strbuff, sizeof(strbuff), "fopen fails with %s fds open()",
+              strbuff1);
     fprintf(stderr, "%s\n", msgbuff);
-    msnprintf(strbuff, sizeof(strbuff),
-             "fopen fails with lots of fds open()");
+    msnprintf(strbuff, sizeof(strbuff), "fopen fails with lots of fds open()");
     store_errmsg(strbuff, 0);
     close_file_descriptors();
     free(memchunk);

@@ -59,8 +59,8 @@ static void store_errmsg(const char *msg, int err)
   if(!err)
     msnprintf(msgbuff, sizeof(msgbuff), "%s", msg);
   else
-    msnprintf(msgbuff, sizeof(msgbuff), "%s, errno %d, %s", msg, err,
-              strerror(err));
+    msnprintf(msgbuff, sizeof(msgbuff), "%s, errno %d, %s", msg,
+              err, strerror(err));
 }
 
 static void close_file_descriptors(void)
@@ -163,7 +163,7 @@ static int rlimit(int keep_open)
 
 #ifdef OPEN_MAX
     if((rl.rlim_cur > 0) &&
-        (rl.rlim_cur < OPEN_MAX)) {
+       (rl.rlim_cur < OPEN_MAX)) {
       fprintf(stderr, "raising soft limit up to OPEN_MAX\n");
       rl.rlim_cur = OPEN_MAX;
       if(setrlimit(RLIMIT_NOFILE, &rl) != 0) {
@@ -294,6 +294,7 @@ static int rlimit(int keep_open)
   do {
     msnprintf(strbuff, sizeof(strbuff), fmt, num_open.rlim_max);
     fprintf(stderr, "allocating array for %s file descriptors\n", strbuff);
+
     fd = malloc(sizeof(*fd) * (size_t)(num_open.rlim_max));
     if(!fd) {
       fprintf(stderr, "fd, malloc() failed\n");
@@ -380,9 +381,7 @@ static int rlimit(int keep_open)
       }
 
       break;
-
     }
-
   }
 
   msnprintf(strbuff, sizeof(strbuff), fmt, num_open.rlim_max);
