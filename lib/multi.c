@@ -784,7 +784,6 @@ static CURLcode multi_done(struct Curl_easy *data,
       data->state.lastconnect_id = -1;
   }
 
-  Curl_safefree(data->state.buffer);
   return result;
 }
 
@@ -1891,12 +1890,9 @@ static CURLcode readrewind(struct Curl_easy *data)
  */
 CURLcode Curl_preconnect(struct Curl_easy *data)
 {
-  if(!data->state.buffer) {
-    data->state.buffer = malloc(data->set.buffer_size + 1);
-    if(!data->state.buffer)
-      return CURLE_OUT_OF_MEMORY;
-  }
-
+  /* this used to do data->state.buffer allocation,
+     maybe remove completely now? */
+  (void)data;
   return CURLE_OK;
 }
 
@@ -2450,7 +2446,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     {
       char *newurl = NULL;
       bool retry = FALSE;
-      DEBUGASSERT(data->state.buffer);
       /* check if over send speed */
       send_timeout_ms = 0;
       if(data->set.max_send_speed)
@@ -3848,7 +3843,7 @@ CURLcode Curl_multi_xfer_buf_borrow(struct Curl_easy *data,
   }
 
   if(!data->multi->xfer_buf) {
-    /* TODO: we always allocated `data->state.buffer` one byte larger.
+    /* TODO: we used to allocate `data->state.buffer` one byte larger.
      * I think we should not and live with the consequences */
     data->multi->xfer_buf = malloc(xfer_buf_len + 1);
     if(!data->multi->xfer_buf) {
