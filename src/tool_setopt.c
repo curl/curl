@@ -240,22 +240,15 @@ static char *c_escape(const char *str, curl_off_t len)
       if(p && *p)
         result = curlx_dyn_addn(&escaped, to + 2 * (p - from), 2);
       else {
-        const char *format = "\\x%02x";
-
         if(len > 1 && ISXDIGIT(s[1])) {
           /* Octal escape to avoid >2 digit hex. */
-          format = "\\%03o";
+          result = curlx_dyn_addf(&escaped, "\\%03o",
+                                  (unsigned int) *(unsigned char *) s);
         }
-
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
-#endif
-        result = curlx_dyn_addf(&escaped, format,
-                                (unsigned int) *(unsigned char *) s);
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+        else {
+          result = curlx_dyn_addf(&escaped, "\\x%02x",
+                                  (unsigned int) *(unsigned char *) s);
+        }
       }
     }
   }
