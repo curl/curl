@@ -1677,14 +1677,7 @@ CURLcode Curl_mime_add_header(struct curl_slist **slp, const char *fmt, ...)
   va_list ap;
 
   va_start(ap, fmt);
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
-#endif
   s = curl_mvaprintf(fmt, ap);
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
   va_end(ap);
 
   if(s) {

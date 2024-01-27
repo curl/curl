@@ -448,14 +448,7 @@ void curl_dbg_log(const char *format, ...)
     return;
 
   va_start(ap, format);
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
-#endif
   nchars = mvsnprintf(buf, LOGLINE_BUFSIZE, format, ap);
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
   va_end(ap);
 
   if(nchars > LOGLINE_BUFSIZE - 1)

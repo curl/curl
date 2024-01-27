@@ -204,14 +204,7 @@ CURLcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
   return CURLE_OUT_OF_MEMORY;
 #else
   char *str;
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
-#endif
   str = vaprintf(fmt, ap); /* this allocs a new string to append */
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
 
   if(str) {
     CURLcode result = dyn_nappend(s, (unsigned char *)str, strlen(str));
