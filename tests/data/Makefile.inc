@@ -215,7 +215,7 @@ test1670 test1671 \
 \
 test1680 test1681 test1682 test1683 \
 \
-test1700 test1701 test1702 test1703 \
+test1700 test1701 test1702 test1703 test1704 \
 \
 test1800 test1801 \
 \
