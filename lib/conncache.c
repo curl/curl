@@ -395,7 +395,6 @@ bool Curl_conncache_return_conn(struct Curl_easy *data,
          important that details from this (unrelated) disconnect does not
          taint meta-data in the data handle. */
       struct conncache *connc = data->state.conn_cache;
-      connc->closure_handle->set.buffer_size = data->set.buffer_size;
       Curl_disconnect(connc->closure_handle, conn_candidate,
                       /* dead_connection */ FALSE);
     }
@@ -524,7 +523,6 @@ void Curl_conncache_close_all_connections(struct conncache *connc)
   SIGPIPE_VARIABLE(pipe_st);
   if(!connc->closure_handle)
     return;
-  connc->closure_handle->set.buffer_size = READBUFFER_MIN;
 
   conn = conncache_find_first_connection(connc);
   while(conn) {
