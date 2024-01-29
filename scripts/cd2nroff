@@ -337,14 +337,12 @@ sub single {
     return $errors;
 }
 
-$f = $ARGV[0];
-if(defined($f)) {
-    while($f) {
-        $r = single($f);
+if(@ARGV) {
+    for my $f (@ARGV) {
+        my $r = single($f);
         if($r) {
             exit $r;
         }
-        $f = shift @ARGV;
     }
 }
 else {
