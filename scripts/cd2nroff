@@ -30,12 +30,15 @@ Converts a curldown file to nroff (man page).
 =end comment
 =cut
 
+use strict;
+use warnings;
+
 my $cd2nroff = "0.1"; # to keep check
 my $dir;
 my $extension;
 my $keepfilename;
 
-while(1) {
+while(@ARGV) {
     if($ARGV[0] eq "-d") {
         shift @ARGV;
         $dir = shift @ARGV;
@@ -95,18 +98,29 @@ sub outseealso {
 
 sub single {
     my @seealso;
+    my $d;
     my ($f)=@_;
-    my $title;
+    my $copyright;
+    my $errors = 0;
+    my $fh;
+    my $line;
+    my $salist;
     my $section;
     my $source;
+    my $spdx;
     my $start = 0;
-    my $errors;
-    my $fh;
-    if($f) {
-        open($fh, "<:crlf", "$f") || return 1;
+    my $title;
+
+    if(defined($f)) {
+        if(!open($fh, "<:crlf", "$f")) {
+            print STDERR "Failed to open $f : $!\n";
+            return 1;
+        }
     }
     else {
-        $fh = STDIN;
+        $f = "STDIN";
+        $fh = \*STDIN;
+        binmode($fh, ":crlf");
     }
     while(<$fh>) {
         $line++;
@@ -320,14 +334,23 @@ sub single {
             }
         }
     }
-    close($fh);
+    if($fh != \*STDIN) {
+        close($fh);
+    }
     push @desc, outseealso(@seealso);
     if($dir) {
         if($keepfilename) {
             $title = $f;
             $title =~ s/\.[^.]*$//;
         }
-        open(O, ">$dir/$title.$section$extension");
+        my $outfile = "$dir/$title.$section";
+        if(defined($extension)) {
+            $outfile .= $extension;
+        }
+        if(!open(O, ">", $outfile)) {
+            print STDERR "Failed to open $outfile : $!\n";
+            return 1;
+        }
         print O @desc;
         close(O);
     }
