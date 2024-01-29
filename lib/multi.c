@@ -94,6 +94,7 @@ static CURLMcode add_next_timeout(struct curltime now,
 static CURLMcode multi_timeout(struct Curl_multi *multi,
                                long *timeout_ms);
 static void process_pending_handles(struct Curl_multi *multi);
+static void multi_xfer_buf_free(struct Curl_easy *data);
 
 #ifdef DEBUGBUILD
 static const char * const multi_statename[]={
@@ -476,6 +477,16 @@ static void link_easy(struct Curl_multi *multi,
   }
 }
 
+static bool multi_has_active_easy(struct Curl_multi *multi)
+{
+  struct Curl_easy *data;
+  for(data = multi->easyp; data; data = data->next) {
+    if(data->mstate < MSTATE_DONE)
+      return TRUE;
+  }
+  return FALSE;
+}
+
 /* unlink the given easy handle from the linked list of easy handles */
 static void unlink_easy(struct Curl_multi *multi,
                         struct Curl_easy *data)
@@ -784,6 +795,11 @@ static CURLcode multi_done(struct Curl_easy *data,
       data->state.lastconnect_id = -1;
   }
 
+  /* If we have not more active transfers connected to this
+   * multi, we free the transfer buffer */
+  if(data->multi && !multi_has_active_easy(data->multi)) {
+    multi_xfer_buf_free(data);
+  }
   return result;
 }
 
@@ -3866,5 +3882,14 @@ void Curl_multi_xfer_buf_release(struct Curl_easy *data, char *buf)
   DEBUGASSERT(data);
   DEBUGASSERT(data->multi);
   DEBUGASSERT(!buf || data->multi->xfer_buf == buf);
+  data->multi->xfer_buf_borrowed = FALSE;
+}
+
+static void multi_xfer_buf_free(struct Curl_easy *data)
+{
+  DEBUGASSERT(data);
+  DEBUGASSERT(data->multi);
+  Curl_safefree(data->multi->xfer_buf);
+  data->multi->xfer_buf_len = 0;
   data->multi->xfer_buf_borrowed = FALSE;
 }
