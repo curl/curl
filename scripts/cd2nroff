@@ -337,8 +337,7 @@ sub single {
     return $errors;
 }
 
-$f = $ARGV[0];
-if(defined($f)) {
+if(@ARGV) {
     for my $f (@ARGV) {
         my $r = single($f);
         if($r) {
