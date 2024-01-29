@@ -667,6 +667,8 @@
      d                 c                   98
      d  CURLE_UNRECOVERABLE_POLL...
      d                 c                   99
+     d  CURLE_TOO_LARGE...
+     d                 c                   100
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLE_URL_MALFORMAT_USER...
@@ -1655,6 +1657,10 @@
      d                 c                   00321
      d  CURLOPT_QUICK_EXIT...
      d                 c                   00322
+     d  CURLOPT_HAPROXY_CLIENT_IP...
+     d                 c                   10323
+     d  CURLOPT_SERVER_RESPONSE_TIMEOUT_MS...
+     d                 c                   00324
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001
@@ -1890,6 +1896,12 @@
      d                 c                   X'0010003D'
      d  CURLINFO_CAPATH...                                                      CURLINFO_STRING + 62
      d                 c                   X'0010003E'
+     d  CURLINFO_XFER_ID...                                                     CURLINFO_OFF_T  + 63
+     d                 c                   X'0060003F'
+     d  CURLINFO_CONN_ID...                                                     CURLINFO_OFF_T  + 64
+     d                 c                   X'00600040'
+     d  CURLINFO_QUEUE_TIME_T...                                                CURLINFO_OFF_T  + 65
+     d                 c                   X'00600041'
       *
      d  CURLINFO_HTTP_CODE...                                                   Old ...RESPONSE_CODE
      d                 c                   X'00200002'
@@ -2251,6 +2263,8 @@
      d                 c                   29
      d  CURLUE_LACKS_IDN...
      d                 c                   30
+     d  CURLUE_TOO_LARGE...
+     d                 c                   31
       *
      d CURLUPart       s             10i 0 based(######ptr######)               Enum
      d  CURLUPART_URL  c                   0
@@ -3061,6 +3075,10 @@
      d  multi_handle                   *   value                                CURLM *
      d  sockfd                             value like(curl_socket_t)
      d  sockp                          *   value                                void *
+      *
+     d curl_multi_get_handles...
+     d                 pr              *   extproc('curl_multi_get_handles')    CURL **
+     d  multi_handle                   *   value                                CURLM *
       *
      d curl_url        pr              *   extproc('curl_url')                  CURLU *
       *
