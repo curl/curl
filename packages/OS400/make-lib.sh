@@ -98,26 +98,21 @@ fi
 
 
 #       Gather the list of symbols to export.
-#       First use awk to pull all CURL_EXTERN function prototypes from
-#       the header files, pass through to sed to strip CURL_DEPRECATED(..)
-#       and CURL_TEMP_PRINTF(..) then back to awk to pull the string
-#       immediately to the left of a bracket stripping any spaces or *'s.
+#       - Unfold lines from the header files so that they contain a semicolon.
+#       - Keep only CURL_EXTERN definitions.
+#       - Remove the CURL_DEPRECATED and CURL_TEMP_PRINTF macro calls.
+#	- Drop the parenthesized function arguments and what follows.
+#       - Keep the trailing function name only.
 
-EXPORTS=`awk '/^CURL_EXTERN/,/;/'                                       \
-              "${TOPDIR}"/include/curl/*.h                              \
-              "${SCRIPTDIR}/ccsidcurl.h"                                |
-         sed 's/ CURL_DEPRECATED(.*)//g;s/ CURL_TEMP_PRINTF(.*)//g'     |
-         awk '{br=index($0,"(");                                        \
-              if (br) {                                                 \
-                for(c=br-1; ;c--) {                                     \
-                  if (c==1) {                                           \
-                    print substr($0,c,br-1); break                      \
-                  } else if (match(substr($0, c, br-c), "[ *]") != 0) { \
-                    print substr($0, c+1, br-c-1); break                \
-                  }                                                     \
-                }                                                       \
-              }                                                         \
-        }'`
+EXPORTS=`cat "${TOPDIR}"/include/curl/*.h "${SCRIPTDIR}/ccsidcurl.h"	|
+         sed -e 'H;s/.*//;x;s/\n//;s/.*/& /'                            \
+             -e '/^CURL_EXTERN[[:space:]]/!d'                           \
+             -e '/\;/!{x;d;}'                                           \
+             -e 's/ CURL_DEPRECATED([^)]*)//g'                          \
+             -e 's/ CURL_TEMP_PRINTF([^)]*)//g'                         \
+             -e 's/[[:space:]]*(.*$//'                                  \
+             -e 's/^.*[^A-Za-z0-9_]\([A-Za-z0-9_]*\)$/\1/'`
+
 
 #       Create the service program exportation file in DB2 member if needed.
 
