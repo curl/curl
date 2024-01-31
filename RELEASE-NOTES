@@ -24,6 +24,7 @@ This release includes the following bugfixes:
  o appveyor: switch to out-of-tree builds [29]
  o asyn-ares: with modern c-ares, use its default timeout [127]
  o build: delete unused `HAVE_{GSSHEIMDAL,GSSMIT,HEIMDAL}` [4]
+ o build: delete/replace clang warning pragmas [111]
  o build: enable missing OpenSSF-recommended warnings, with fixes [11]
  o build: fix `-Wconversion`/`-Wsign-conversion` warnings [26]
  o build: fix Windows ADDRESS_FAMILY detection [35]
@@ -32,10 +33,10 @@ This release includes the following bugfixes:
  o cf-h1-proxy: no CURLOPT_USERAGENT in CONNECT with hyper [133]
  o cf-socket: show errno in tcpkeepalive error messages [120]
  o CI/distcheck: run full tests [31]
- o CI: remove unnecessary OpenSSL 3 option `enable-tls1_3` [168]
  o cmake: add option to disable building docs
  o cmake: fix generation for system name iOS [53]
  o cmake: fix typo [5]
+ o cmake: freshen up docs/INSTALL.cmake [101]
  o cmake: prefill/cache `HAVE_STRUCT_SOCKADDR_STORAGE` [45]
  o cmake: rework options to enable curl and libcurl docs [161]
  o cmake: when USE_MANUAL=YES, build the curl.1 man page [113]
@@ -61,7 +62,7 @@ This release includes the following bugfixes:
  o docs: clean up Protocols: for cmdline options [32]
  o docs: describe and highlight super cookies [80]
  o docs: do not start lines/sentences with So, But nor And [140]
- o docs: install curl.1 with cmake as well [166]
+ o docs: install curl.1 with cmake [166]
  o docs: mention env vars not used by schannel [124]
  o doh: remove unused local variable [34]
  o examples: add four new examples [99]
@@ -92,6 +93,7 @@ This release includes the following bugfixes:
  o http_proxy: a blank CURLOPT_USERAGENT should not be used in CONNECT [90]
  o krb5: add prototype to silence clang warnings on mvsnprintf() [119]
  o lib: add debug log outputs for CURLE_BAD_FUNCTION_ARGUMENT [62]
+ o lib: error out on multissl + http3 [13]
  o lib: fix variable undeclared error caused by `infof` changes [2]
  o lib: reduce use of strncpy [30]
  o lib: rename Curl_strndup to Curl_memdup0 to avoid misunderstanding [36]
@@ -115,6 +117,7 @@ This release includes the following bugfixes:
  o openldap: fix STARTTLS [67]
  o openssl: re-match LibreSSL deinit with init [17]
  o openssl: when verifystatus fails, remove session id from cache [100]
+ o OS400: sync ILE/RPG binding [114]
  o pingpong: stop using the download buffer [159]
  o pop3: replace calloc + memcpy with memdup0 [60]
  o pytest: scorecard tracking CPU and RSS [157]
@@ -198,7 +201,8 @@ advice from friends like these:
   Sergey Bronnikov, Sergey Markelov, sfan5 on github, Stefan Eissing,
   Tatsuhiko Miyagawa, Tatsuhiro Tsujikawa, Theo, Thomas Ferguson,
   Viktor Szakats, Xi Ruoyao, Yadhu Krishna M, Yedaya Katsman, Yifei Kong,
-  YX Hao, zengwei, zengwei2000, ウさん  (65 contributors)
+  YX Hao, zengwei, zengwei2000, ウさん
+  (65 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -214,6 +218,7 @@ References to bug reports and discussions on issues:
  [10] = https://curl.se/bug/?i=12495
  [11] = https://curl.se/bug/?i=12489
  [12] = https://curl.se/bug/?i=12224
+ [13] = https://curl.se/bug/?i=12807
  [14] = https://curl.se/bug/?i=12534
  [15] = https://curl.se/mail/archive-2023-12/0026.html
  [16] = https://curl.se/bug/?i=12524
@@ -301,6 +306,7 @@ References to bug reports and discussions on issues:
  [98] = https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=66184
  [99] = https://curl.se/bug/?i=12671
  [100] = https://curl.se/bug/?i=12760
+ [101] = https://curl.se/bug/?i=12772
  [102] = https://curl.se/bug/?i=12730
  [103] = https://curl.se/bug/?i=12754
  [104] = https://curl.se/mail/lib-2024-01/0049.html
@@ -310,8 +316,10 @@ References to bug reports and discussions on issues:
  [108] = https://curl.se/bug/?i=12652
  [109] = https://curl.se/bug/?i=12661
  [110] = https://curl.se/bug/?i=12734
+ [111] = https://curl.se/bug/?i=12812
  [112] = https://curl.se/bug/?i=12808
  [113] = https://curl.se/bug/?i=12742
+ [114] = https://curl.se/bug/?i=12815
  [115] = https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=65839
  [116] = https://curl.se/bug/?i=12727
  [117] = https://curl.se/bug/?i=12720
@@ -355,4 +363,3 @@ References to bug reports and discussions on issues:
  [163] = https://curl.se/bug/?i=12768
  [164] = https://curl.se/bug/?i=12764
  [166] = https://curl.se/bug/?i=12759
- [168] = https://curl.se/bug/?i=12758
