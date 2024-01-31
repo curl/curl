@@ -53,7 +53,7 @@ to use a TLS library that has such APIs and that works with *ngtcp2*.
 
 Build quictls
 
-     % git clone --depth 1 -b openssl-3.1.4+quic https://github.com/quictls/openssl
+     % git clone --depth 1 -b openssl-3.1.5+quic https://github.com/quictls/openssl
      % cd openssl
      % ./config enable-tls1_3 --prefix=<somewhere1>
      % make
@@ -209,10 +209,10 @@ Build curl:
 
 QUIC support is **EXPERIMENTAL**
 
-Build OpenSSL 3.2.0
+Build OpenSSL 3.2.1
 
      % cd ..
-     % git clone -b openssl-3.2.0 https://github.com/openssl/openssl
+     % git clone -b openssl-3.2.1 https://github.com/openssl/openssl
      % cd openssl
      % ./config enable-tls1_3 --prefix=<somewhere> --libdir=<somewhere>/lib
      % make
