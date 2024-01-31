@@ -11,7 +11,7 @@ Multi: append
 See-also:
   - form
 Example:
-  - --form-string "data" $URL
+  - --form-string "name=data" $URL
 ---
 
 # `--form-string`
