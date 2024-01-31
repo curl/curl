@@ -266,7 +266,7 @@ static CURLcode ntlm_wb_response(struct Curl_easy *data, struct ntlmdata *ntlm,
   size_t len_in = strlen(input), len_out = 0;
   struct dynbuf b;
   char *ptr = NULL;
-  usigned char buf[1024]
+  unsigned char buf[1024];
   Curl_dyn_init(&b, MAX_NTLM_WB_RESPONSE);
 
   while(len_in > 0) {
