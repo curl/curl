@@ -108,3 +108,30 @@ class TestErrors:
         r.check_response(http_status=200, count=1)
         # check that we did a downgrade
         assert r.stats[0]['http_version'] == '1.1', r.dump_logs()
+
+    # On the URL used here, Apache is doing an "unclean" TLS shutdown,
+    # meaning it sends no shutdown notice and just closes TCP.
+    # The HTTP response delivers a body without Content-Length. We expect:
+    # - http/1.0 to fail since it relies on a clean connection close to
+    #   detect the end of the body
+    # - http/1.1 to work since it will used "chunked" transfer encoding
+    #   and stop receiving when that signals the end
+    # - h2 to work since it will signal the end of the response before
+    #   and not see the "unclean" close either
+    @pytest.mark.parametrize("proto", ['http/1.0', 'http/1.1', 'h2'])
+    def test_05_04_unclean_tls_shutdown(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        count = 10 if proto == 'h2' else 1
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}'\
+                f'/curltest/shutdown_unclean?id=[0-{count-1}]&chunks=4'
+        r = curl.http_download(urls=[url], alpn_proto=proto, extra_args=[
+            '--parallel',
+        ])
+        if proto == 'http/1.0':
+            r.check_exit_code(56)
+        else:
+            r.check_exit_code(0)
+            r.check_response(http_status=200, count=count)
+

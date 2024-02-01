@@ -347,7 +347,7 @@ static int curltest_tweak_handler(request_rec *r)
                 "request, %s", r->args? r->args : "(no args)");
   r->status = http_status;
   r->clength = -1;
-  r->chunked = 1;
+  r->chunked = (r->proto_num >= HTTP_VERSION(1,1));
   apr_table_setn(r->headers_out, "request-id", request_id);
   apr_table_unset(r->headers_out, "Content-Length");
   /* Discourage content-encodings */
