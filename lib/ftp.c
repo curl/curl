@@ -1205,6 +1205,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   result = Curl_conn_tcp_listen_set(data, conn, SECONDARYSOCKET, &portsock);
   if(result)
     goto out;
+  portsock = CURL_SOCKET_BAD; /* now held in filter */
 
   for(; fcmd != DONE; fcmd++) {
 
@@ -1279,7 +1280,6 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   /* store which command was sent */
   ftpc->count1 = fcmd;
 
-  portsock = CURL_SOCKET_BAD; /* now held in filter */
   ftp_state(data, FTP_PORT);
 
 out:
