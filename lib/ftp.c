@@ -423,6 +423,8 @@ static CURLcode ReceivedServerConnect(struct Curl_easy *data, bool *received)
     if(pp->overflow > 3) {
       char *r = Curl_dyn_ptr(&pp->recvbuf);
 
+      DEBUGASSERT((pp->overflow + pp->nfinal) <=
+                  Curl_dyn_len(&pp->recvbuf));
       /* move over the most recently handled response line */
       r += pp->nfinal;
 
