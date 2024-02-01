@@ -2581,6 +2581,7 @@ static CURLcode http2_cfilter_add(struct Curl_cfilter **pcf,
   if(result)
     goto out;
 
+  ctx = NULL;
   Curl_conn_cf_add(data, conn, sockindex, cf);
   result = cf_h2_ctx_init(cf, data, via_h1_upgrade);
 
@@ -2608,6 +2609,7 @@ static CURLcode http2_cfilter_insert_after(struct Curl_cfilter *cf,
   if(result)
     goto out;
 
+  ctx = NULL;
   Curl_conn_cf_insert_after(cf, cf_h2);
   result = cf_h2_ctx_init(cf_h2, data, via_h1_upgrade);
 
