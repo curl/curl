@@ -44,9 +44,9 @@ User-Agent: test567
 Test-Number: 567
 
 </protocol>
-# 8 == CURLE_WEIRD_SERVER_REPLY
+# 85 == CURLE_RTSP_CSEQ_ERROR
 <errorcode>
-8
+85
 </errorcode>
 </verify>
 
