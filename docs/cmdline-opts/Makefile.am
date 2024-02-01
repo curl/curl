@@ -38,7 +38,7 @@ GN_ = $(GN_0)
 all: $(MANPAGE)
 
 $(MANPAGE): $(DPAGES) $(SUPPORT) mainpage.idx Makefile.inc gen.pl
-	$(GEN)(rm -f $(MANPAGE) && cd $(srcdir) && @PERL@ ./gen.pl mainpage $(DPAGES) > $(builddir)/manpage.tmp && mv $(builddir)/manpage.tmp $(MANPAGE))
+	$(GEN)(rm -f $(MANPAGE) && cd $(srcdir) && @PERL@ ./gen.pl mainpage $(DPAGES) > $(builddir)/manpage.tmp.$$$$ && mv $(builddir)/manpage.tmp.$$$$ $(MANPAGE))
 
 listhelp:
 	./gen.pl listhelp $(DPAGES) > $(top_builddir)/src/tool_listhelp.c
