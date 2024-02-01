@@ -85,6 +85,14 @@
 #define INET_ADDRSTRLEN 16
 #endif
 
+/* macro to check for a three-digit ftp status code at the start of the
+   given string */
+#define STATUSCODE(line) (ISDIGIT(line[0]) && ISDIGIT(line[1]) &&       \
+                          ISDIGIT(line[2]))
+
+/* macro to check for the last line in an FTP server response */
+#define LASTLINE(line) (STATUSCODE(line) && (' ' == line[3]))
+
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
 #define ftp_pasv_verbose(a,b,c,d)  Curl_nop_stmt
 #endif
@@ -412,7 +420,31 @@ static CURLcode ReceivedServerConnect(struct Curl_easy *data, bool *received)
   }
   if(response) {
     infof(data, "Ctrl conn has data while waiting for data conn");
+    if(pp->overflow > 3) {
+      char *r = Curl_dyn_ptr(&pp->recvbuf);
+
+      DEBUGASSERT((pp->overflow + pp->nfinal) <=
+                  Curl_dyn_len(&pp->recvbuf));
+      /* move over the most recently handled response line */
+      r += pp->nfinal;
+
+      if(LASTLINE(r)) {
+        int status = curlx_sltosi(strtol(r, NULL, 10));
+        if(status == 226) {
+          /* funny timing situation where we get the final message on the
+             control connection before traffic on the data connection has been
+             noticed. Leave the 226 in there and use this as a trigger to read
+             the data socket. */
+          infof(data, "Got 226 before data activity");
+          *received = TRUE;
+          return CURLE_OK;
+        }
+      }
+    }
+
     (void)Curl_GetFTPResponse(data, &nread, &ftpcode);
+
+    infof(data, "FTP code: %03d", ftpcode);
 
     if(ftpcode/100 > 3)
       return CURLE_FTP_ACCEPT_FAILED;
@@ -524,14 +556,6 @@ out:
   DEBUGF(infof(data, "ftp AllowServerConnect() -> %d", result));
   return result;
 }
-
-/* macro to check for a three-digit ftp status code at the start of the
-   given string */
-#define STATUSCODE(line) (ISDIGIT(line[0]) && ISDIGIT(line[1]) &&       \
-                          ISDIGIT(line[2]))
-
-/* macro to check for the last line in an FTP server response */
-#define LASTLINE(line) (STATUSCODE(line) && (' ' == line[3]))
 
 static bool ftp_endofresp(struct Curl_easy *data, struct connectdata *conn,
                           char *line, size_t len, int *code)
@@ -1179,6 +1203,12 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
     conn->bits.ftp_use_eprt = TRUE;
 #endif
 
+  /* Replace any filter on SECONDARY with one listening on this socket */
+  result = Curl_conn_tcp_listen_set(data, conn, SECONDARYSOCKET, &portsock);
+  if(result)
+    goto out;
+  portsock = CURL_SOCKET_BAD; /* now held in filter */
+
   for(; fcmd != DONE; fcmd++) {
 
     if(!conn->bits.ftp_use_eprt && (EPRT == fcmd))
@@ -1252,11 +1282,6 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   /* store which command was sent */
   ftpc->count1 = fcmd;
 
-  /* Replace any filter on SECONDARY with one listening on this socket */
-  result = Curl_conn_tcp_listen_set(data, conn, SECONDARYSOCKET, &portsock);
-  if(result)
-    goto out;
-  portsock = CURL_SOCKET_BAD; /* now held in filter */
   ftp_state(data, FTP_PORT);
 
 out:
