@@ -276,6 +276,7 @@ typedef enum {
   C_RETRY_ALL_ERRORS,
   C_RETRY_CONNREFUSED,
   C_RETRY_DELAY,
+  C_RETRY_IGNORE_SERVER_TIME,
   C_RETRY_MAX_TIME,
   C_SASL_AUTHZID,
   C_SASL_IR,
@@ -557,6 +558,7 @@ static const struct LongShort aliases[]= {
   {"retry-all-errors",           ARG_BOOL, ' ', C_RETRY_ALL_ERRORS},
   {"retry-connrefused",          ARG_BOOL, ' ', C_RETRY_CONNREFUSED},
   {"retry-delay",                ARG_STRG, ' ', C_RETRY_DELAY},
+  {"retry-ignore-server-time",   ARG_BOOL, ' ', C_RETRY_IGNORE_SERVER_TIME},
   {"retry-max-time",             ARG_STRG, ' ', C_RETRY_MAX_TIME},
   {"sasl-authzid",               ARG_STRG, ' ', C_SASL_AUTHZID},
   {"sasl-ir",                    ARG_BOOL, ' ', C_SASL_IR},
@@ -1641,6 +1643,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_RETRY_DELAY: /* --retry-delay */
       err = str2unummax(&config->retry_delay, nextarg, LONG_MAX/1000);
+      break;
+    case C_RETRY_IGNORE_SERVER_TIME: /* --retry-ignore-server-time */
+      config->retry_ignore_server_time = toggle;
       break;
     case C_RETRY_MAX_TIME: /* --retry-max-time */
       err = str2unummax(&config->retry_maxtime, nextarg, LONG_MAX/1000);

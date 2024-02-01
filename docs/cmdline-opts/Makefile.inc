@@ -241,6 +241,7 @@ DPAGES = \
   retry-all-errors.md \
   retry-connrefused.md \
   retry-delay.md \
+  retry-ignore-server-time.md \
   retry-max-time.md \
   retry.md \
   sasl-authzid.md \

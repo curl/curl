@@ -8,7 +8,9 @@ Help: Retry request if transient problems occur
 Category: curl
 Multi: single
 See-also:
+  - retry-delay
   - retry-max-time
+  - retry-ignore-server-time
 Example:
   - --retry 7 $URL
 ---
@@ -28,4 +30,6 @@ minutes which then remains delay between the rest of the retries. By using
 --retry-max-time to limit the total time allowed for retries.
 
 curl complies with the Retry-After: response header if one was present to know
-when to issue the next retry (added in 7.66.0).
+when to issue the next retry (added in 7.66.0). You can ignore the server's
+requested Retry-After time by using --retry-ignore-server-time but it is not
+polite to do so (added in 8.7.0).

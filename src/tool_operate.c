@@ -548,7 +548,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
       };
 
       sleeptime = per->retry_sleep;
-      if(RETRY_HTTP == retry) {
+      if(RETRY_HTTP == retry && !config->retry_ignore_server_time) {
         curl_easy_getinfo(curl, CURLINFO_RETRY_AFTER, &retry_after);
         if(retry_after) {
           /* store in a 'long', make sure it doesn't overflow */

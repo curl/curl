@@ -207,6 +207,7 @@
 --retry-all-errors                   7.71.0
 --retry-connrefused                  7.52.0
 --retry-delay                        7.12.3
+--retry-ignore-server-time           8.7.0
 --retry-max-time                     7.12.3
 --sasl-authzid                       7.66.0
 --sasl-ir                            7.31.0

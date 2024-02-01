@@ -232,6 +232,7 @@ struct OperationConfig {
   bool retry_connrefused;   /* set connection refused as a transient error */
   long retry_delay;         /* delay between retries (in seconds) */
   long retry_maxtime;       /* maximum time to keep retrying */
+  bool retry_ignore_server_time;  /* ignore server header Retry-After */
 
   char *ftp_account;        /* for ACCT */
   char *ftp_alternative_to_user;  /* send command if USER/PASS fails */
