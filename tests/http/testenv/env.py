@@ -31,6 +31,7 @@ import socket
 import subprocess
 import sys
 from configparser import ConfigParser, ExtendedInterpolation
+from datetime import timedelta
 from typing import Optional
 
 import pytest
@@ -133,7 +134,7 @@ class EnvConfig:
         self.cert_specs = [
             CertificateSpec(domains=[self.domain1, 'localhost'], key_type='rsa2048'),
             CertificateSpec(domains=[self.domain2], key_type='rsa2048'),
-            CertificateSpec(domains=[self.proxy_domain], key_type='rsa2048'),
+            CertificateSpec(domains=[self.proxy_domain, '127.0.0.1'], key_type='rsa2048'),
             CertificateSpec(name="clientsX", sub_specs=[
                CertificateSpec(name="user1", client=True),
             ]),
