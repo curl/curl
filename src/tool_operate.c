@@ -1274,6 +1274,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(result && (use_proto == proto_ipfs || use_proto == proto_ipns))
           break;
 
+#ifndef DEBUGBUILD
         /* On most modern OSes, exiting works thoroughly,
            we'll clean everything up via exit(), so don't bother with
            slow cleanups. Crappy ones might need to skip this.
@@ -1282,6 +1283,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         result = curl_easy_setopt(curl, CURLOPT_QUICK_EXIT, 1L);
         if(result)
           break;
+#endif
 
         if(!config->tcp_nodelay)
           my_setopt(curl, CURLOPT_TCP_NODELAY, 0L);
