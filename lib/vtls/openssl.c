@@ -2242,9 +2242,11 @@ CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
     /* an alternative name matched */
     ;
   else if(dNSName || iPAddress) {
-    infof(data, " subjectAltName does not match %s", peer->dispname);
+    infof(data, " subjectAltName does not match %s %s",
+          peer->is_ip_address? "ip address" : "host name", peer->dispname);
     failf(data, "SSL: no alternative certificate subject name matches "
-          "target host name '%s'", peer->dispname);
+          "target %s '%s'",
+          peer->is_ip_address? "ip address" : "host name", peer->dispname);
     result = CURLE_PEER_FAILED_VERIFICATION;
   }
   else {
