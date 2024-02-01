@@ -305,6 +305,8 @@ struct ossl_ssl_backend_data {
   X509*    server_cert;
   BIO_METHOD *bio_method;
   CURLcode io_result;       /* result of last BIO cfilter operation */
+  size_t io_read_iterations;
+  bool io_delay_subsequent_close;
 #ifndef HAVE_KEYLOG_CALLBACK
   /* Set to true once a valid keylog entry has been created to avoid dupes. */
   bool     keylog_done;
@@ -769,6 +771,18 @@ static int ossl_bio_cf_in_read(BIO *bio, char *buf, int blen)
     if(CURLE_AGAIN == result)
       BIO_set_retry_read(bio);
   }
+  else if(nread == 0 &&
+          backend->io_delay_subsequent_close &&
+          backend->io_read_iterations) {
+    /* connection closed. We are not in the first read iteration (OpenSSL
+     * may call us several times during one SSL_read()) and we are
+     * asked to delay the closing to the next SSL_read(). */
+    backend->io_result = CURLE_AGAIN;
+    backend->io_delay_subsequent_close = FALSE;
+    BIO_set_retry_read(bio);
+    nread = -1;
+    Curl_expire(data, 0, EXPIRE_RUN_NOW);
+  }
 
   /* Before returning server replies to the SSL instance, we need
    * to have setup the x509 store or verification will fail. */
@@ -780,6 +794,8 @@ static int ossl_bio_cf_in_read(BIO *bio, char *buf, int blen)
     }
     backend->x509_store_setup = TRUE;
   }
+  /* count our read invocations */
+  backend->io_read_iterations++;
 
   return (int)nread;
 }
@@ -4667,6 +4683,13 @@ static ssize_t ossl_recv(struct Curl_cfilter *cf,
   DEBUGASSERT(backend);
 
   ERR_clear_error();
+
+  /* SSL_read() may call our BIO several times. If the connection closes
+   * after the first successful BIO_read(), we delay reprting this, so
+   * that OpenSSL gives us the data it got already. This prevents us
+   * from not seeing server reponses when a TLS shutdown failure happens */
+  backend->io_delay_subsequent_close = TRUE;
+  backend->io_read_iterations = 0;
 
   buffsize = (buffersize > (size_t)INT_MAX) ? INT_MAX : (int)buffersize;
   nread = (ssize_t)SSL_read(backend->handle, buf, buffsize);
