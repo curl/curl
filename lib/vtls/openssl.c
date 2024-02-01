@@ -4688,6 +4688,7 @@ static ssize_t ossl_recv(struct Curl_cfilter *cf,
    * after the first successful BIO_read(), we delay reprting this, so
    * that OpenSSL gives us the data it got already. This prevents us
    * from not seeing server reponses when a TLS shutdown failure happens */
+  CURL_TRC_CF(data, cf, "cf_recv: delay possible close");
   backend->io_delay_subsequent_close = TRUE;
   backend->io_read_iterations = 0;
 
