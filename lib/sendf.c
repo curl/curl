@@ -575,7 +575,7 @@ static CURLcode cw_download_write(struct Curl_easy *data,
     DEBUGF(infof(data, "did not want a BODY, but seeing %zu bytes",
                  nbytes));
     data->req.download_done = TRUE;
-    return CURLE_WEIRD_SERVER_REPLY;
+    return CURLE_OK;
   }
 
   /* Determine if we see any bytes in excess to what is allowed.
