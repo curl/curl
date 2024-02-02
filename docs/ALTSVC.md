@@ -28,7 +28,7 @@ space separated fields.
 3. The port number for the source origin
 4. The ALPN id for the destination host
 5. The hostname for the destination host
-6. The host number for the destination host
+6. The port number for the destination host
 7. The expiration date and time of this entry within double quotes. The date format is "YYYYMMDD HH:MM:SS" and the time zone is GMT.
 8. Boolean (1 or 0) if "persist" was set for this entry
 9. Integer priority value (not currently used)
