@@ -241,10 +241,15 @@ cygwinbin:
 	$(MAKE) -C packages/Win32/cygwin cygwinbin
 
 # We extend the standard install with a custom hook:
+if BUILD_DOCS
 install-data-hook:
 	(cd include && $(MAKE) install)
 	(cd docs && $(MAKE) install)
 	(cd docs/libcurl && $(MAKE) install)
+else
+install-data-hook:
+	(cd include && $(MAKE) install)
+endif
 
 # We extend the standard uninstall with a custom hook:
 uninstall-hook:
