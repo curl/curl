@@ -12,7 +12,7 @@ See-also:
   - socks5
   - preproxy
 Example:
-  - --proxy1.0 -x http://proxy $URL
+  - --proxy1.0 http://proxy $URL
 ---
 
 # `--proxy1.0`
