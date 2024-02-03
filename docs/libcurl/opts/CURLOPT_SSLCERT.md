@@ -36,9 +36,9 @@ in order to avoid confusion with a nickname.
 
 (Schannel only) Client certificates can be specified by a path expression to a
 certificate store. (You can import *PFX* to a store first). You can use
-"<store location><store name><thumbprint>" to refer to a certificate in the
+"<store location>\\<store name>\\<thumbprint>" to refer to a certificate in the
 system certificates store, for example,
-**"CurrentUserMY934a7ac6f8a5d579285a74fa"**. The thumbprint is usually a SHA-1
+**"CurrentUser\\MY\\934a7ac6f8a5d579285a74fa"**. The thumbprint is usually a SHA-1
 hex string which you can see in certificate details. Following store locations
 are supported: **CurrentUser**, **LocalMachine**, **CurrentService**,
 **Services**, **CurrentUserGroupPolicy**, **LocalMachineGroupPolicy**,
