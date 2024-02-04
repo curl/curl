@@ -94,7 +94,7 @@
  * infinite time left). If the value is negative, the timeout time has already
  * elapsed.
  * @param data the transfer to check on
- * @param nowp timestamp to use for calculdation, NULL to use Curl_now()
+ * @param nowp timestamp to use for calculation, NULL to use Curl_now()
  * @param duringconnect TRUE iff connect timeout is also taken into account.
  * @unittest: 1303
  */
