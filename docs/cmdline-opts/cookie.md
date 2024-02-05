@@ -16,6 +16,7 @@ Example:
   - -b "" $URL
   - -b cookiefile $URL
   - -b cookiefile -c cookiefile $URL
+  - -b name=Jane $URL
 ---
 
 # `--cookie`
