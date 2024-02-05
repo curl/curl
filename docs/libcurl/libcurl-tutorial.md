@@ -461,7 +461,7 @@ proper way. This chapter thus includes examples using both different versions
 of HTTP POST that libcurl supports.
 
 The first version is the simple POST, the most common version, that most HTML
-pages using the <form> tag uses. We provide a pointer to the data and tell
+pages using the \<form\> tag uses. We provide a pointer to the data and tell
 libcurl to post it all to the remote site:
 
 ~~~c

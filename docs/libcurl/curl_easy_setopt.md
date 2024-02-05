@@ -267,7 +267,7 @@ Fail on HTTP 4xx errors. CURLOPT_FAILONERROR(3)
 
 ## CURLOPT_KEEP_SENDING_ON_ERROR
 
-Keep sending on HTTP >= 300 errors. CURLOPT_KEEP_SENDING_ON_ERROR(3)
+Keep sending on HTTP \>= 300 errors. CURLOPT_KEEP_SENDING_ON_ERROR(3)
 
 # NETWORK OPTIONS
 
@@ -826,7 +826,7 @@ Client CSEQ number. See CURLOPT_RTSP_CLIENT_CSEQ(3)
 
 ## CURLOPT_RTSP_SERVER_CSEQ
 
-CSEQ number for RTSP Server->Client request. See CURLOPT_RTSP_SERVER_CSEQ(3)
+CSEQ number for RTSP Server-\>Client request. See CURLOPT_RTSP_SERVER_CSEQ(3)
 
 ## CURLOPT_AWS_SIGV4
 
@@ -1366,8 +1366,8 @@ Always
 # RETURN VALUE
 
 *CURLE_OK* (zero) means that the option was set properly, non-zero means an
-error occurred as *<curl/curl.h>* defines. See the libcurl-errors(3) man page
-for the full list with descriptions.
+error occurred as *\<curl/curl.h\>* defines. See the libcurl-errors(3) man
+page for the full list with descriptions.
 
 Strings passed on to libcurl must be shorter than 8000000 bytes, otherwise
 curl_easy_setopt(3) returns **CURLE_BAD_FUNCTION_ARGUMENT** (added in 7.65.0).

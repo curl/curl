@@ -24,8 +24,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_RTSP_SERVER_CSEQ, long cseq);
 
 # DESCRIPTION
 
-Pass a long to set the CSEQ number to expect for the next RTSP Server->Client
-request. **NOTE**: this feature (listening for Server requests) is
+Pass a long to set the CSEQ number to expect for the next RTSP Server to
+Client request. **NOTE**: this feature (listening for Server requests) is
 unimplemented.
 
 # DEFAULT

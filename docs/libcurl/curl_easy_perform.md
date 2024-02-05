@@ -78,6 +78,6 @@ Always
 # RETURN VALUE
 
 CURLE_OK (0) means everything was OK, non-zero means an error occurred as
-*<curl/curl.h>* defines - see libcurl-errors(3). If the CURLOPT_ERRORBUFFER(3)
-was set with curl_easy_setopt(3) there is a readable error message stored in
-the error buffer when non-zero is returned.
+*\<curl/curl.h\>* defines - see libcurl-errors(3). If CURLOPT_ERRORBUFFER(3)
+was set with curl_easy_setopt(3) there is an error message stored in the error
+buffer when non-zero is returned.

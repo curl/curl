@@ -76,7 +76,7 @@ and end with double quotes and support the escaped special letters ", n,
 r, and t. Quoted strings are the only way a space character can be used in
 a user name or password.
 
-## machine <name>
+## machine \<name\>
 
 Provides credentials for a host called **name**. libcurl searches the .netrc
 file for a machine token that matches the hostname specified in the URL. Once
@@ -85,25 +85,25 @@ file is reached or another "machine" is encountered.
 
 ## default
 
-This is the same as "machine" name except that default matches any name. There
+This is the same as machine name except that default matches any name. There
 can be only one default token, and it must be after all machine tokens. To
 provide a default anonymous login for hosts that are not otherwise matched,
 add a line similar to this in the end:
 
- default login anonymous password user@domain
+    default login anonymous password user@domain
 
-## login <name>
+## login \<name\>
 
 The user name string for the remote machine.
 
-## password <secret>
+## password \<secret\>
 
 Supply a password. If this token is present, curl supplies the specified
 string if the remote server requires a password as part of the login process.
 Note that if this token is present in the .netrc file you really should make
 sure the file is not readable by anyone besides the user.
 
-## macdef <name>
+## macdef \<name\>
 
 Define a macro. This feature is not supported by libcurl. In order for the
 rest of the .netrc to still work fine, libcurl properly skips every definition

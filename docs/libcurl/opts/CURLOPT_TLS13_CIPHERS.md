@@ -71,7 +71,7 @@ int main(void)
 
 # AVAILABILITY
 
-Added in 7.61.0 for OpenSSL. Available when built with OpenSSL >= 1.1.1.
+Added in 7.61.0 for OpenSSL. Available when built with OpenSSL \>= 1.1.1.
 
 Added in 7.85.0 for Schannel.
 

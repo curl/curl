@@ -115,6 +115,11 @@ When generating the nroff output, the tooling will remove superfluous newlines,
 meaning they can be used freely in the source file to make the text more
 readable.
 
+To make sure curldown documents render correctly as markdown, all literal
+occurrences of `<` or `>` need to be escaped by a leading backslash.
+
+## symbols
+
 All mentioned curl symbols that have their own man pages, like
 `curl_easy_perform(3)` will automatically be rendered using italics in the
 output without having to enclose it with asterisks. This helps ensuring that

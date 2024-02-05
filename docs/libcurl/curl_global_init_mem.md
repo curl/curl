@@ -92,4 +92,4 @@ Added in 7.12.0
 # RETURN VALUE
 
 CURLE_OK (0) means everything was OK, non-zero means an error occurred as
-*<curl/curl.h>* defines - see libcurl-errors(3).
+*\<curl/curl.h\>* defines - see libcurl-errors(3).

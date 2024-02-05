@@ -25,7 +25,7 @@ data.
 
 # INCLUDE
 
-You still only include <curl/curl.h> in your code.
+You still only include \<curl/curl.h\> in your code.
 
 # SETUP
 
