@@ -8,15 +8,30 @@ curl and libcurl 8.6.1
 
 This release includes the following changes:
 
+ o configure: add --disable-docs flag [16]
 
 This release includes the following bugfixes:
 
- o cmdline-docs/Makefile: avoid using a fixed temp file name [5]
+ o ALTSVC.md: correct a typo [14]
  o asyn-thread: use wakeup_close to close the read descriptor [1]
- o ntml_wb: fix buffer type typo [2]
- o tool_operate: do not set CURLOPT_QUICK_EXIT in debug builds [3]
+ o cmdline-docs/Makefile: avoid using a fixed temp file name [5]
+ o configure: do not link with nghttp3 unless necessary [7]
+ o connect.c: fix typo [17]
+ o cookie.md: provide an example sending a fixed cookie [13]
+ o docs: add missing slashes to SChannel client certificate documentation [11]
+ o docs: remove `mk-ca-bundle.1` from `man_MANS` [21]
  o form-string.md: correct the example [4]
- --- new entries are listed above this ---
+ o ftp: treat a 226 arriving before data as a signal to read data [19]
+ o HTTP/2: write response directly [12]
+ o libcurl-security.md: Active FTP passes on the local IP address [6]
+ o md4: include strdup.h for the memdup proto [10]
+ o ntml_wb: fix buffer type typo [2]
+ o openssl-quic: check on Windows that socket conv to int is possible [8]
+ o OS400: avoid using awk in the build scripts [20]
+ o proxy1.0.md: fix example [15]
+ o sendf: ignore response body to HEAD [18]
+ o tool_cb_hdr: only parse etag + content-disposition for 2xx [9]
+ o tool_operate: do not set CURLOPT_QUICK_EXIT in debug builds [3]
 
 This release includes the following known bugs:
 
@@ -31,8 +46,11 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Boris Verkhovskiy, Dan Fandrich, Daniel Stenberg, Jon Rumsey, Stefan Eissing
-  (5 contributors)
+  Boris Verkhovskiy, Chris Webb, Dan Fandrich, Daniel Stenberg,
+  Dmitry Tretyakov, Erik Schnetter, Faraz Fallahi, Harry Sintonen, Jan Macku,
+  Joel Depooter, Jon Rumsey, Lars Kellogg-Stedman, Lukáš Zaoral,
+  Patrick Monnerat, Ryan Carsten Schmidt, Sergey Bronnikov, Stefan Eissing
+  (17 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -41,3 +59,19 @@ References to bug reports and discussions on issues:
  [3] = https://curl.se/bug/?i=12834
  [4] = https://curl.se/bug/?i=12822
  [5] = https://curl.se/bug/?i=12829
+ [6] = https://curl.se/bug/?i=12867
+ [7] = https://curl.se/bug/?i=12833
+ [8] = https://curl.se/bug/?i=12861
+ [9] = https://curl.se/bug/?i=12866
+ [10] = https://curl.se/bug/?i=12849
+ [11] = https://curl.se/bug/?i=12854
+ [12] = https://curl.se/bug/?i=12828
+ [13] = https://curl.se/bug/?i=12868
+ [14] = https://curl.se/bug/?i=12852
+ [15] = https://curl.se/bug/?i=12856
+ [16] = https://curl.se/bug/?i=12832
+ [17] = https://curl.se/bug/?i=12858
+ [18] = https://curl.se/mail/lib-2024-02/0000.html
+ [19] = https://curl.se/bug/?i=12823
+ [20] = https://curl.se/bug/?i=12826
+ [21] = https://curl.se/bug/?i=12843
