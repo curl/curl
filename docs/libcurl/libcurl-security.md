@@ -363,6 +363,12 @@ instead of back to curl.
 The fact that FTP uses two connections makes it vulnerable in a way that is
 hard to avoid.
 
+# Active FTP passes on the local IP address
+
+If you use curl/libcurl to do *active* FTP transfers, curl will pass on the
+address of your local IP to the remote server - even when for example using a
+SOCKS or HTTP proxy in between curl and the target server.
+
 # Denial of Service
 
 A malicious server could cause libcurl to effectively hang by sending data
