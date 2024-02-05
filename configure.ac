@@ -3101,9 +3101,10 @@ dnl **********************************************************************
 
 OPT_NGHTTP3="yes"
 
-if test "x$USE_NGTCP2" = "x" -a "$USE_OPENSSL_QUIC" = "x"; then
+if test "x$USE_NGTCP2" != "x1" -a "x$USE_OPENSSL_QUIC" != "x1"; then
   # without ngtcp2 or openssl quic, nghttp3 is of no use for us
   OPT_NGHTTP3="no"
+  want_nghttp3="no"
 fi
 
 AC_ARG_WITH(nghttp3,
