@@ -112,8 +112,8 @@ that you have a matching struct for in the header, as you tell libcurl your
 
 *version* is just an ascii string for the libcurl version.
 
-*version_num* is a 24 bit number created like this: <8 bits major number>
-| <8 bits minor number> | <8 bits patch number>. Version 7.9.8 is therefore
+*version_num* is a 24 bit number created like this: \<8 bits major number\> |
+\<8 bits minor number\> | \<8 bits patch number\>. Version 7.9.8 is therefore
 returned as 0x070908.
 
 *host* is an ascii string showing what host information that this libcurl

@@ -71,7 +71,7 @@ int main(void)
 # AVAILABILITY
 
 Added in 7.61.0.
-Available when built with OpenSSL >= 1.1.1.
+Available when built with OpenSSL \>= 1.1.1.
 
 # RETURN VALUE
 

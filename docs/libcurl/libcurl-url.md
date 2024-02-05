@@ -24,7 +24,7 @@ The URL interface provides functions for parsing and generating URLs.
 
 # INCLUDE
 
-You still only include <curl/curl.h> in your code.
+You still only include \<curl/curl.h\> in your code.
 
 # CREATE
 

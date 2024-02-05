@@ -12,7 +12,7 @@ See-also:
 
 # NAME
 
-CURLOPT_FAILONERROR - request failure on HTTP response >= 400
+CURLOPT_FAILONERROR - request failure on HTTP response \>= 400
 
 # SYNOPSIS
 

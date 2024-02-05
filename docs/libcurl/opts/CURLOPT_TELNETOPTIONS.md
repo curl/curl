@@ -25,9 +25,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TELNETOPTIONS,
 # DESCRIPTION
 
 Provide a pointer to a curl_slist with variables to pass to the telnet
-negotiations. The variables should be in the format <option=value>. libcurl
-supports the options **TTYPE**, **XDISPLOC** and **NEW_ENV**. See the
-TELNET standard for details.
+negotiations. The variables should be in the format \<option=value\>. libcurl
+supports the options **TTYPE**, **XDISPLOC** and **NEW_ENV**. See the TELNET
+standard for details.
 
 # DEFAULT
 

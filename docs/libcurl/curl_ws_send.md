@@ -116,5 +116,5 @@ Added in 7.86.0.
 # RETURN VALUE
 
 *CURLE_OK* (zero) means that the data was sent properly, non-zero means an
-error occurred as *<curl/curl.h>* defines. See the libcurl-errors(3)
-man page for the full list with descriptions.
+error occurred as *\<curl/curl.h\>* defines. See the libcurl-errors(3) man
+page for the full list with descriptions.

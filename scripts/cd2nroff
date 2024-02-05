@@ -243,10 +243,19 @@ sub single {
             next;
         }
 
+        # remove single line HTML comments
+        $d =~ s/<!--.*?-->//g;
+
         # **bold**
         $d =~ s/\*\*(\S.*?)\*\*/\\fB$1\\fP/g;
         # *italics*
         $d =~ s/\*(\S.*?)\*/\\fI$1\\fP/g;
+
+        if($d =~ /[^\\][\<\>]/) {
+            print STDERR "$f:$line:1:WARN: un-escaped < or > used\n";
+        }
+        # convert backslash-'<' or '> to just the second character
+        $d =~ s/\\([<<])/$1/g;
 
         # mentions of curl symbols with man pages use italics by default
         $d =~ s/((lib|)curl([^ ]*\(3\)))/\\fI$1\\fP/gi;
@@ -306,9 +315,6 @@ sub single {
             push @desc, "\n" if($blankline && !$header);
             $blankline = 0;
             $header = 0;
-
-            # remove single line HTML comments
-            $d =~ s/<!--.*?-->//g;
 
             # quote minuses in the output
             $d =~ s/([^\\])-/$1\\-/g;

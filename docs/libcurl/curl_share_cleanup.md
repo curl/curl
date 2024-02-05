@@ -49,6 +49,6 @@ Added in 7.10
 # RETURN VALUE
 
 CURLSHE_OK (zero) means that the option was set properly, non-zero means an
-error occurred as *<curl/curl.h>* defines. See the libcurl-errors(3)
-man page for the full list with descriptions. If an error occurs, then the
-share object is not deleted.
+error occurred as *\<curl/curl.h\>* defines. See the libcurl-errors(3) man
+page for the full list with descriptions. If an error occurs, then the share
+object is not deleted.

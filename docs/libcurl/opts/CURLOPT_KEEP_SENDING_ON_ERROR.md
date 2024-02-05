@@ -12,7 +12,7 @@ See-also:
 
 # NAME
 
-CURLOPT_KEEP_SENDING_ON_ERROR - keep sending on early HTTP response >= 300
+CURLOPT_KEEP_SENDING_ON_ERROR - keep sending on early HTTP response \>= 300
 
 # SYNOPSIS
 
