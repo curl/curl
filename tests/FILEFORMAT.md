@@ -522,9 +522,14 @@ Brief test case description, shown when the test runs.
 ### `<setenv>`
     variable1=contents1
     variable2=contents2
+    variable3
 
 Set the given environment variables to the specified value before the actual
-command is run. They are cleared again after the command has been run.
+command is run. They are restored back to their former values again after the
+command has been run.
+
+If the variable name has no assignment, no `=`, then that variable is just
+deleted.
 
 ### `<command [option="no-output/no-include/force-output/binary-trace"] [timeout="secs"][delay="secs"][type="perl/shell"]>`
 Command line to run.
