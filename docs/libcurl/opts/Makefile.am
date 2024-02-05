@@ -24,13 +24,17 @@
 
 AUTOMAKE_OPTIONS = foreign no-dependencies
 
+if BUILD_DOCS
 include Makefile.inc
 
 CURLPAGES = $(man_MANS:.3=.md)
+endif
 CLEANFILES = $(man_MANS)
 nodist_MANS = $(man_MANS)
 
 EXTRA_DIST = $(CURLPAGES) CMakeLists.txt
+
+if BUILD_DOCS
 
 CD2NROFF = $(top_srcdir)/scripts/cd2nroff $< >$@
 CD2 = $(CD2_$(V))
@@ -42,3 +46,4 @@ SUFFIXES = .3 .md
 
 .md.3:
 	$(CD2)$(CD2NROFF)
+endif

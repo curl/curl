@@ -26,9 +26,11 @@ AUTOMAKE_OPTIONS = foreign no-dependencies
 
 SUBDIRS = opts
 
+if BUILD_DOCS
 include Makefile.inc
 
 CURLPAGES = $(man_MANS:.3=.md)
+endif
 
 m4macrodir = $(datadir)/aclocal
 dist_m4macro_DATA = libcurl.m4
@@ -38,6 +40,8 @@ nodist_MANS = $(man_MANS)
 
 EXTRA_DIST = $(CURLPAGES) ABI.md symbols-in-versions symbols.pl  \
   mksymbolsmanpage.pl CMakeLists.txt
+
+if BUILD_DOCS
 
 CD2NROFF = $(top_srcdir)/scripts/cd2nroff $< >$@
 CD2 = $(CD2_$(V))
@@ -52,3 +56,5 @@ libcurl-symbols.md: $(srcdir)/symbols-in-versions $(srcdir)/mksymbolsmanpage.pl
 
 .md.3:
 	$(CD2)$(CD2NROFF)
+
+endif
