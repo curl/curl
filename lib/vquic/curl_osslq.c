@@ -1078,6 +1078,20 @@ static CURLcode cf_osslq_ctx_start(struct Curl_cfilter *cf,
     goto out;
   }
 
+  /* Type conversions, see #12861: OpenSSL wants an `int`, but on 64-bit
+   * Win32 systems, Microsoft defines SOCKET as `unsigned long long`.
+   */
+#if defined(_WIN32) && !defined(__LWIP_OPT_H__) && !defined(LWIP_HDR_OPT_H)
+  if(ctx->q.sockfd > INT_MAX) {
+    failf(data, "windows socket identifier larger than MAX_INT, "
+          "unable to set in OpenSSL dgram API.");
+    result = CURLE_QUIC_CONNECT_ERROR;
+    goto out;
+  }
+  bio = BIO_new_dgram((int)ctx->q.sockfd, BIO_NOCLOSE);
+#else
+  bio = BIO_new_dgram(ctx->q.sockfd, BIO_NOCLOSE);
+#endif
   bio = BIO_new_dgram(ctx->q.sockfd, BIO_NOCLOSE);
   if(!bio) {
     result = CURLE_OUT_OF_MEMORY;
