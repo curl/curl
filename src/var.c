@@ -42,6 +42,7 @@
 #include "memdebug.h" /* keep this as LAST include */
 
 #define MAX_EXPAND_CONTENT 10000000
+#define MAX_VAR_LEN 128 /* max length of a name */
 
 static char *Memdup(const char *data, size_t len)
 {
@@ -233,7 +234,7 @@ ParameterError varexpand(struct GlobalConfig *global,
       line = &envp[2];
     }
     else if(envp) {
-      char name[128];
+      char name[MAX_VAR_LEN];
       size_t nlen;
       size_t i;
       char *funcp;
@@ -393,6 +394,7 @@ ParameterError setvariable(struct GlobalConfig *global,
   ParameterError err = PARAM_OK;
   bool import = FALSE;
   char *ge = NULL;
+  char buf[MAX_VAR_LEN];
 
   if(*input == '%') {
     import = TRUE;
@@ -402,12 +404,20 @@ ParameterError setvariable(struct GlobalConfig *global,
   while(*line && (ISALNUM(*line) || (*line == '_')))
     line++;
   nlen = line - name;
-  if(!nlen || (nlen > 128)) {
+  if(!nlen || (nlen >= MAX_VAR_LEN)) {
     warnf(global, "Bad variable name length (%zd), skipping", nlen);
     return PARAM_OK;
   }
   if(import) {
-    ge = curl_getenv(name);
+    /* this does not use curl_getenv() because we want "" support for blank
+       content */
+    if(*line) {
+      /* if there is a default action, we need to copy the name */
+      memcpy(buf, name, nlen);
+      buf[nlen] = 0;
+      name = buf;
+    }
+    ge = getenv(name);
     if(!*line && !ge) {
       /* no assign, no variable, fail */
       errorf(global, "Variable '%s' import fail, not set", name);
@@ -459,6 +469,5 @@ ParameterError setvariable(struct GlobalConfig *global,
     if(contalloc)
       free(content);
   }
-  curl_free(ge);
   return err;
 }
