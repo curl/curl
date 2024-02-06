@@ -173,10 +173,26 @@ CURLcode Curl_resolver_init(struct Curl_easy *easy, void **resolver)
   int status;
   struct ares_options options;
   int optmask = ARES_OPT_SOCK_STATE_CB;
+  static int ares_ver = 0;
   options.sock_state_cb = sock_state_cb;
   options.sock_state_cb_data = easy;
-  options.timeout = CARES_TIMEOUT_PER_ATTEMPT;
-  optmask |= ARES_OPT_TIMEOUTMS;
+  if(ares_ver == 0)
+    ares_version(&ares_ver);
+
+  if(ares_ver < 0x011400) { /* c-ares included similar change since 1.20.0 */
+    options.timeout = CARES_TIMEOUT_PER_ATTEMPT;
+    optmask |= ARES_OPT_TIMEOUTMS;
+  }
+
+  /*
+     if c ares < 1.20.0: curl set timeout to CARES_TIMEOUT_PER_ATTEMPT (2s)
+
+     if c-ares >= 1.20.0 it already has the timeout to 2s, curl does not need
+     to set the timeout value;
+
+     if c-ares >= 1.24.0, user can set the timeout via /etc/resolv.conf to
+     overwrite c-ares' timeout.
+  */
 
   status = ares_init_options((ares_channel*)resolver, &options, optmask);
   if(status != ARES_SUCCESS) {

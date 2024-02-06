@@ -71,9 +71,18 @@ enum connect_t {
   CONNECT_DONE /* 17 connected fine to the remote or the SOCKS proxy */
 };
 
+#define CURL_SOCKS_BUF_SIZE 600
+
+/* make sure we configure it not too low */
+#if CURL_SOCKS_BUF_SIZE < 600
+#error CURL_SOCKS_BUF_SIZE must be at least 600
+#endif
+
+
 struct socks_state {
   enum connect_t state;
   ssize_t outstanding;  /* send this many bytes more */
+  unsigned char buffer[CURL_SOCKS_BUF_SIZE];
   unsigned char *outp; /* send from this pointer */
 
   const char *hostname;
@@ -249,7 +258,7 @@ static CURLproxycode socks_state_recv(struct Curl_cfilter *cf,
       failf(data, "connection to proxy closed");
       return CURLPX_CLOSED;
     }
-    failf(data, "SOCKS4: Failed receiving %s: %s", description,
+    failf(data, "SOCKS: Failed receiving %s: %s", description,
           curl_easy_strerror(result));
     return failcode;
   }
@@ -278,13 +287,10 @@ static CURLproxycode do_SOCKS4(struct Curl_cfilter *cf,
   struct connectdata *conn = cf->conn;
   const bool protocol4a =
     (conn->socks_proxy.proxytype == CURLPROXY_SOCKS4A) ? TRUE : FALSE;
-  unsigned char *socksreq = (unsigned char *)data->state.buffer;
+  unsigned char *socksreq = sx->buffer;
   CURLcode result;
   CURLproxycode presult;
   struct Curl_dns_entry *dns = NULL;
-
-  /* make sure that the buffer is at least 600 bytes */
-  DEBUGASSERT(READBUFFER_MIN >= 600);
 
   switch(sx->state) {
   case CONNECT_SOCKS_INIT:
@@ -431,7 +437,7 @@ CONNECT_REQ_INIT:
         /* append hostname */
         hostnamelen = strlen(sx->hostname) + 1; /* length including NUL */
         if((hostnamelen <= 255) &&
-           (packetsize + hostnamelen < data->set.buffer_size))
+           (packetsize + hostnamelen < sizeof(sx->buffer)))
           strcpy((char *)socksreq + packetsize, sx->hostname);
         else {
           failf(data, "SOCKS4: too long host name");
@@ -440,6 +446,7 @@ CONNECT_REQ_INIT:
         packetsize += hostnamelen;
       }
       sx->outp = socksreq;
+      DEBUGASSERT(packetsize <= sizeof(sx->buffer));
       sx->outstanding = packetsize;
       sxstate(sx, data, CONNECT_REQ_SENDING);
     }
@@ -571,14 +578,14 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
     o  X'00' succeeded
   */
   struct connectdata *conn = cf->conn;
-  unsigned char *socksreq = (unsigned char *)data->state.buffer;
-  int idx;
+  unsigned char *socksreq = sx->buffer;
+  size_t idx;
   CURLcode result;
   CURLproxycode presult;
   bool socks5_resolve_local =
     (conn->socks_proxy.proxytype == CURLPROXY_SOCKS5) ? TRUE : FALSE;
   const size_t hostname_len = strlen(sx->hostname);
-  ssize_t len = 0;
+  size_t len = 0;
   const unsigned char auth = data->set.socks5auth;
   bool allow_gssapi = FALSE;
   struct Curl_dns_entry *dns = NULL;
@@ -621,6 +628,7 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
     socksreq[1] = (unsigned char) (idx - 2);
 
     sx->outp = socksreq;
+    DEBUGASSERT(idx <= sizeof(sx->buffer));
     sx->outstanding = idx;
     presult = socks_state_send(cf, sx, data, CURLPX_SEND_CONNECT,
                                "initial SOCKS5 request");
@@ -747,6 +755,7 @@ CONNECT_AUTH_INIT:
     }
     len += proxy_password_len;
     sxstate(sx, data, CONNECT_AUTH_SEND);
+    DEBUGASSERT(len <= sizeof(sx->buffer));
     sx->outstanding = len;
     sx->outp = socksreq;
   }
@@ -941,6 +950,7 @@ CONNECT_REQ_SEND:
     }
 #endif
     sx->outp = socksreq;
+    DEBUGASSERT(len <= sizeof(sx->buffer));
     sx->outstanding = len;
     sxstate(sx, data, CONNECT_REQ_SENDING);
     FALLTHROUGH();
@@ -1040,6 +1050,7 @@ CONNECT_REQ_SEND:
       /* decrypt_gssapi_blockread already read the whole packet */
 #endif
       if(len > 10) {
+        DEBUGASSERT(len <= sizeof(sx->buffer));
         sx->outstanding = len - 10; /* get the rest */
         sx->outp = &socksreq[10];
         sxstate(sx, data, CONNECT_REQ_READ_MORE);

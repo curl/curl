@@ -7,7 +7,7 @@ protocols and it is the Internet transfer machine for the world.
 In the curl project we love protocols and we love supporting many protocols
 and doing it well.
 
-So how do you proceed to add a new protocol and what are the requirements?
+How do you proceed to add a new protocol and what are the requirements?
 
 ## No fixed set of requirements
 

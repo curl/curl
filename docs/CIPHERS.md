@@ -363,10 +363,10 @@ individual TLS 1.3 cipher suites since Schannel does not support it directly.
 `TLS_AES_128_CCM_8_SHA256`
 `TLS_AES_128_CCM_SHA256`
 
-Note if you set TLS 1.3 ciphers without also setting the minimum TLS version to
-1.3 then it's possible Schannel may negotiate an earlier TLS version and cipher
-suite if your libcurl and OS settings allow it. You can set the minimum TLS
-version by using `CURLOPT_SSLVERSION` or `--tlsv1.3`.
+Note if you set TLS 1.3 ciphers without also setting the minimum TLS version
+to 1.3 then it is possible Schannel may negotiate an earlier TLS version and
+cipher suite if your libcurl and OS settings allow it. You can set the minimum
+TLS version by using `CURLOPT_SSLVERSION` or `--tlsv1.3`.
 
 ## BearSSL
 

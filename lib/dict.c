@@ -89,7 +89,7 @@ const struct Curl_handler Curl_handler_dict = {
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
-  ZERO_NULL,                            /* readwrite */
+  ZERO_NULL,                            /* write_resp */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_DICT,                            /* defport */
@@ -135,14 +135,7 @@ static CURLcode sendf(curl_socket_t sockfd, struct Curl_easy *data,
   char *sptr;
   va_list ap;
   va_start(ap, fmt);
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
-#endif
   s = vaprintf(fmt, ap); /* returns an allocated string */
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
   va_end(ap);
   if(!s)
     return CURLE_OUT_OF_MEMORY; /* failure */

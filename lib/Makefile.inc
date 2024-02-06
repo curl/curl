@@ -78,15 +78,19 @@ LIB_VTLS_HFILES =           \
 LIB_VQUIC_CFILES = \
   vquic/curl_msh3.c   \
   vquic/curl_ngtcp2.c   \
+  vquic/curl_osslq.c   \
   vquic/curl_quiche.c   \
-  vquic/vquic.c
+  vquic/vquic.c \
+  vquic/vquic-tls.c
 
 LIB_VQUIC_HFILES = \
   vquic/curl_msh3.h   \
   vquic/curl_ngtcp2.h   \
+  vquic/curl_osslq.h   \
   vquic/curl_quiche.h   \
   vquic/vquic.h    \
-  vquic/vquic_int.h
+  vquic/vquic_int.h \
+  vquic/vquic-tls.h
 
 LIB_VSSH_CFILES =  \
   vssh/libssh.c    \

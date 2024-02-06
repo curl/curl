@@ -103,9 +103,9 @@ server, do one of the following:
        certificate store or use it stand-alone as described. Just remember that
        the security is no better than the way you obtained the certificate.
 
- 4. If you are using the curl command line tool, you can specify your own CA
-    cert file by setting the environment variable `CURL_CA_BUNDLE` to the path
-    of your choice.
+ 4. If you are using the curl command line tool and the TLS backend is not
+    Schannel then you can specify your own CA cert file by setting the
+    environment variable `CURL_CA_BUNDLE` to the path of your choice.
 
     If you are using the curl command line tool on Windows, curl will search
     for a CA cert file named "curl-ca-bundle.crt" in these directories and in
@@ -116,10 +116,10 @@ server, do one of the following:
       4. Windows Directory (e.g. C:\windows)
       5. all directories along %PATH%
 
- 5. Get a better/different/newer CA cert bundle! One option is to extract the
-    one a recent Firefox browser uses by running 'make ca-bundle' in the curl
-    build tree root, or possibly download a version that was generated this
-    way for you: [CA Extract](https://curl.se/docs/caextract.html)
+ 5. Get another CA cert bundle. One option is to extract the one a recent
+    Firefox browser uses by running 'make ca-bundle' in the curl build tree
+    root, or possibly download a version that was generated this way for you:
+    [CA Extract](https://curl.se/docs/caextract.html)
 
 Neglecting to use one of the above methods when dealing with a server using a
 certificate that is not signed by one of the certificates in the installed CA

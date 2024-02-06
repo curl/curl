@@ -47,12 +47,12 @@ permissions: {}
 env:
   MAKEFLAGS: -j 3
   quictls-version: 3.1.4+quic
-  gnutls-version: 3.8.0
+  gnutls-version: 3.8.3
   wolfssl-version: master
   nghttp3-version: v1.1.0
-  ngtcp2-version: v1.1.0
-  nghttp2-version: v1.58.0
-  mod_h2-version: v2.0.25
+  ngtcp2-version: v1.2.0
+  nghttp2-version: v1.59.0
+  mod_h2-version: v2.0.26
 
 jobs:
   autotools:
@@ -94,7 +94,7 @@ jobs:
         name: 'install prereqs and impacket, pytest, crypto, apache2'
 
       - name: cache quictls
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-quictls-no-deprecated
         env:
           cache-name: cache-quictls-no-deprecated
@@ -118,7 +118,7 @@ jobs:
 
 
       - name: cache gnutls
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-gnutls
         env:
           cache-name: cache-gnutls
@@ -146,7 +146,7 @@ jobs:
 
 
       - name: cache wolfssl
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-wolfssl
         env:
           cache-name: cache-wolfssl
@@ -172,7 +172,7 @@ jobs:
 
 
       - name: cache nghttp3
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-nghttp3
         env:
           cache-name: cache-nghttp3
@@ -214,7 +214,7 @@ jobs:
         name: 'install nghttp2'
 
       - name: cache mod_h2
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-mod_h2
         env:
           cache-name: cache-mod_h2

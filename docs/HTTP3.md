@@ -15,6 +15,8 @@ QUIC libraries we are using:
 
 [quiche](https://github.com/cloudflare/quiche) - **EXPERIMENTAL**
 
+[OpenSSL 3.2+ QUIC](https://github.com/openssl/openssl) - **EXPERIMENTAL**
+
 [msh3](https://github.com/nibanks/msh3) (with [msquic](https://github.com/microsoft/msquic)) - **EXPERIMENTAL**
 
 ## Experimental
@@ -29,13 +31,13 @@ the master branch using pull-requests, just like ordinary changes.
 To fix before we remove the experimental label:
 
  - the used QUIC library needs to consider itself non-beta
- - it's fine to "leave" individual backends as experimental if necessary
+ - it is fine to "leave" individual backends as experimental if necessary
 
 # ngtcp2 version
 
 Building curl with ngtcp2 involves 3 components: `ngtcp2` itself, `nghttp3` and a QUIC supporting TLS library. The supported TLS libraries are covered below.
 
- * `ngtcp2`: v1.1.0
+ * `ngtcp2`: v1.2.0
  * `nghttp3`: v1.1.0
 
 ## Build with quictls
@@ -64,7 +66,7 @@ Build nghttp3
 Build ngtcp2
 
      % cd ..
-     % git clone -b v1.1.0 https://github.com/ngtcp2/ngtcp2
+     % git clone -b v1.2.0 https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only
@@ -107,7 +109,7 @@ Build nghttp3
 Build ngtcp2
 
      % cd ..
-     % git clone -b v1.1.0 https://github.com/ngtcp2/ngtcp2
+     % git clone -b v1.2.0 https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only --with-gnutls
@@ -148,7 +150,7 @@ Build nghttp3
 Build ngtcp2
 
      % cd ..
-     % git clone -b v1.1.0 https://github.com/ngtcp2/ngtcp2
+     % git clone -b v1.2.0 https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only --with-wolfssl
@@ -175,7 +177,7 @@ Since the quiche build manages its dependencies, curl can be built against the l
 
 Build quiche and BoringSSL:
 
-     % git clone --recursive https://github.com/cloudflare/quiche
+     % git clone --recursive -b 0.20.0 https://github.com/cloudflare/quiche
      % cd quiche
      % cargo build --package quiche --release --features ffi,pkg-config-meta,qlog
      % mkdir quiche/deps/boringssl/src/lib
@@ -188,6 +190,40 @@ Build curl:
      % cd curl
      % autoreconf -fi
      % ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" --with-openssl=$PWD/../quiche/quiche/deps/boringssl/src --with-quiche=$PWD/../quiche/target/release
+     % make
+     % make install
+
+ If `make install` results in `Permission denied` error, you will need to prepend it with `sudo`.
+
+# OpenSSL version
+
+quiche QUIC support is **EXPERIMENTAL**
+
+Build OpenSSL 3.2.0
+
+     % cd ..
+     % git clone -b openssl-3.2.0 https://github.com/openssl/openssl
+     % cd openssl
+     % ./config enable-tls1_3 --prefix=<somewhere> --libdir=<somewhere>/lib
+     % make install
+
+Build nghttp3
+
+     % cd ..
+     % git clone -b v1.1.0 https://github.com/ngtcp2/nghttp3
+     % cd nghttp3
+     % autoreconf -fi
+     % ./configure --prefix=<somewhere2> --enable-lib-only
+     % make
+     % make install
+
+Build curl:
+
+     % cd ..
+     % git clone https://github.com/curl/curl
+     % cd curl
+     % autoreconf -fi
+     % ./configure --with-openssl=<somewhere> --with-openssl-quic --with-nghttp3=<somewhere2> 
      % make
      % make install
 
@@ -305,9 +341,9 @@ handshake or time out.
 
 Note that all this happens in addition to IP version happy eyeballing. If the
 name resolution for the server gives more than one IP address, curl will try
-all those until one succeeds - just as with all other protocols. And if those
-IP addresses contain both IPv6 and IPv4, those attempts will happen, delayed,
-in parallel (the actual eyeballing).
+all those until one succeeds - just as with all other protocols. If those IP
+addresses contain both IPv6 and IPv4, those attempts will happen, delayed, in
+parallel (the actual eyeballing).
 
 ## Known Bugs
 

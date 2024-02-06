@@ -71,6 +71,7 @@ while(<F>) {
         $_ =~ s/curl_url_(dup)//g;
         $_ =~ s/curl_pushheader_by(name|num)//g;
         $_ =~ s/libcurl-(env|ws)//g;
+        $_ =~ s/libcurl\\-(env|ws)//g;
         $_ =~ s/(^|\W)((tftp|https|http|ftp):\/\/[a-z0-9\-._~%:\/?\#\[\]\@!\$&'()*+,;=]+)//gi;
         print O $_;
     }

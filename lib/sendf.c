@@ -296,13 +296,6 @@ static CURLcode chop_write(struct Curl_easy *data,
   if(!skip_body_write &&
      ((type & CLIENTWRITE_BODY) ||
       ((type & CLIENTWRITE_HEADER) && data->set.include_header))) {
-#ifdef USE_WEBSOCKETS
-    if(conn->handler->protocol & (CURLPROTO_WS|CURLPROTO_WSS)) {
-      writebody = Curl_ws_writecb;
-      writebody_ptr = data;
-    }
-    else
-#endif
     writebody = data->set.fwrite_func;
   }
   if((type & (CLIENTWRITE_HEADER|CLIENTWRITE_INFO)) &&
@@ -404,10 +397,12 @@ CURLcode Curl_client_write(struct Curl_easy *data,
 #endif
   /* it is one of those, at least */
   DEBUGASSERT(type & (CLIENTWRITE_BODY|CLIENTWRITE_HEADER|CLIENTWRITE_INFO));
-  /* BODY is only BODY */
-  DEBUGASSERT(!(type & CLIENTWRITE_BODY) || (type == CLIENTWRITE_BODY));
-  /* INFO is only INFO */
-  DEBUGASSERT(!(type & CLIENTWRITE_INFO) || (type == CLIENTWRITE_INFO));
+  /* BODY is only BODY (with optional EOS) */
+  DEBUGASSERT(!(type & CLIENTWRITE_BODY) ||
+              ((type & ~(CLIENTWRITE_BODY|CLIENTWRITE_EOS)) == 0));
+  /* INFO is only INFO (with optional EOS) */
+  DEBUGASSERT(!(type & CLIENTWRITE_INFO) ||
+              ((type & ~(CLIENTWRITE_INFO|CLIENTWRITE_EOS)) == 0));
 
   if(!data->req.writer_stack) {
     result = do_init_stack(data);
@@ -477,8 +472,6 @@ CURLcode Curl_cwriter_write(struct Curl_easy *data,
                              struct Curl_cwriter *writer, int type,
                              const char *buf, size_t nbytes)
 {
-  if(!nbytes)
-    return CURLE_OK;
   if(!writer)
     return CURLE_WRITE_ERROR;
   return writer->cwt->do_write(data, writer, type, buf, nbytes);
@@ -556,7 +549,6 @@ static CURLcode cw_download_write(struct Curl_easy *data,
 {
   CURLcode result;
   size_t nwrite, excess_len = 0;
-  const char *excess_data = NULL;
 
   if(!(type & CLIENTWRITE_BODY)) {
     if((type & CLIENTWRITE_CONNECT) && data->set.suppress_connect_headers)
@@ -564,13 +556,41 @@ static CURLcode cw_download_write(struct Curl_easy *data,
     return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
   }
 
+  if(!data->req.bytecount) {
+    Curl_pgrsTime(data, TIMER_STARTTRANSFER);
+    if(data->req.exp100 > EXP100_SEND_DATA)
+      /* set time stamp to compare with when waiting for the 100 */
+      data->req.start100 = Curl_now();
+  }
+
+  /* Here, we deal with REAL BODY bytes. All filtering and transfer
+   * encodings have been applied and only the true content, e.g. BODY,
+   * bytes are passed here.
+   * This allows us to check sizes, update stats, etc. independent
+   * from the protocol in play. */
+
+  if(data->req.no_body && nbytes > 0) {
+    /* BODY arrives although we want none, bail out */
+    streamclose(data->conn, "ignoring body");
+    DEBUGF(infof(data, "did not want a BODY, but seeing %zu bytes",
+                 nbytes));
+    data->req.download_done = TRUE;
+    if(data->info.header_size)
+      /* if headers have been received, this is fine */
+      return CURLE_OK;
+    return CURLE_WEIRD_SERVER_REPLY;
+  }
+
+  /* Determine if we see any bytes in excess to what is allowed.
+   * We write the allowed bytes and handle excess further below.
+   * This gives deterministic BODY writes on varying buffer receive
+   * lengths. */
   nwrite = nbytes;
   if(-1 != data->req.maxdownload) {
     size_t wmax = get_max_body_write_len(data, data->req.maxdownload);
     if(nwrite > wmax) {
       excess_len = nbytes - wmax;
       nwrite = wmax;
-      excess_data = buf + nwrite;
     }
 
     if(nwrite == wmax) {
@@ -578,6 +598,8 @@ static CURLcode cw_download_write(struct Curl_easy *data,
     }
   }
 
+  /* Error on too large filesize is handled below, after writing
+   * the permitted bytes */
   if(data->set.max_filesize) {
     size_t wmax = get_max_body_write_len(data, data->set.max_filesize);
     if(nwrite > wmax) {
@@ -585,6 +607,7 @@ static CURLcode cw_download_write(struct Curl_easy *data,
     }
   }
 
+  /* Update stats, write and report progress */
   data->req.bytecount += nwrite;
   ++data->req.bodywrites;
   if(!data->req.ignorebody && nwrite) {
@@ -597,23 +620,7 @@ static CURLcode cw_download_write(struct Curl_easy *data,
     return result;
 
   if(excess_len) {
-    if(data->conn->handler->readwrite) {
-      /* RTSP hack moved from transfer loop to here */
-      bool readmore = FALSE; /* indicates data is incomplete, need more */
-      size_t consumed = 0;
-      result = data->conn->handler->readwrite(data, data->conn,
-                                              excess_data, excess_len,
-                                              &consumed, &readmore);
-      if(result)
-        return result;
-      DEBUGASSERT(consumed <= excess_len);
-      excess_len -= consumed;
-      if(readmore) {
-        data->req.download_done = FALSE;
-        data->req.keepon |= KEEP_RECV; /* we're not done reading */
-      }
-    }
-    if(excess_len && !data->req.ignorebody) {
+    if(!data->req.ignorebody) {
       infof(data,
             "Excess found writing body:"
             " excess = %zu"
@@ -762,6 +769,21 @@ CURLcode Curl_cwriter_add(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+void Curl_cwriter_remove_by_name(struct Curl_easy *data,
+                                 const char *name)
+{
+  struct Curl_cwriter **anchor = &data->req.writer_stack;
+
+  while(*anchor) {
+    if(!strcmp(name, (*anchor)->cwt->name)) {
+      struct Curl_cwriter *w = (*anchor);
+      *anchor = w->next;
+      Curl_cwriter_free(data, w);
+      continue;
+    }
+    anchor = &((*anchor)->next);
+  }
+}
 
 /*
  * Internal read-from-socket function. This is meant to deal with plain

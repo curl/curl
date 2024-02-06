@@ -50,6 +50,7 @@ backend
 backends
 backoff
 backticks
+balancers
 Baratov
 basename
 bashrc
@@ -83,6 +84,7 @@ CCC
 CDN
 CentOS
 CFLAGS
+cflags
 CGI's
 CHACHA
 chacha
@@ -109,6 +111,7 @@ clientp
 cliget
 closesocket
 CMake
+CMake's
 cmake
 cmake's
 CMakeLists
@@ -138,10 +141,11 @@ cshrc
 CTRL
 cURL
 CURLcode
+curldown
 CURLE
 CURLH
-CURLINFO
 curlimages
+CURLINFO
 curlrc
 curltest
 customizable
@@ -161,8 +165,8 @@ deepcode
 DELE
 DER
 deselectable
-Deserialized
 deserialization
+Deserialized
 destructor
 detections
 dev
@@ -285,6 +289,7 @@ GSS
 GSSAPI
 GTFO
 Guenter
+GUIs
 Gunderson
 Gustafsson
 gzip
@@ -350,11 +355,10 @@ interoperable
 interoperates
 IoT
 ipadOS
-IPFS
-IPNS
-ipld
-trustless
 IPCXN
+IPFS
+ipld
+IPNS
 IPv
 IPv4
 IPv4/6
@@ -444,6 +448,7 @@ Makefile
 makefiles
 malloc
 mallocs
+manpage
 maprintf
 Marek
 Mavrogiannopoulos
@@ -804,6 +809,7 @@ TPF
 TrackMemory
 transcode
 Tru
+trustless
 Tse
 Tsujikawa
 TTL
@@ -826,6 +832,7 @@ unencoded
 unencrypted
 unescape
 Unglobbed
+Unicode
 UNICOS
 unix
 UnixSockets
@@ -880,6 +887,7 @@ WB
 web page
 WebDAV
 WebOS
+webpage
 WebSocket
 WEBSOCKET
 WHATWG

@@ -48,10 +48,10 @@ env:
   MAKEFLAGS: -j 3
   openssl-version: 3.1.4+quic
   nghttp3-version: v1.1.0
-  ngtcp2-version: v1.1.0
-  nghttp2-version: v1.58.0
-  quiche-version: 0.19.0
-  mod_h2-version: v2.0.25
+  ngtcp2-version: v1.2.0
+  nghttp2-version: v1.59.0
+  quiche-version: 0.20.0
+  mod_h2-version: v2.0.26
 
 jobs:
   autotools:
@@ -82,7 +82,7 @@ jobs:
         name: 'install prereqs and impacket, pytest, crypto'
 
       - name: cache nghttpx
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-nghttpx
         env:
           cache-name: cache-nghttpx
@@ -126,7 +126,7 @@ jobs:
         name: 'install nghttp2'
 
       - name: cache quiche
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-quiche
         env:
           cache-name: cache-quiche
@@ -154,7 +154,7 @@ jobs:
         name: 'build quiche and boringssl'
 
       - name: cache mod_h2
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-mod_h2
         env:
           cache-name: cache-mod_h2

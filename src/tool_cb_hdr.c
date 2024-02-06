@@ -105,12 +105,21 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
     (void)fflush(heads->stream);
   }
 
-  /*
-   * Write etag to file when --etag-save option is given.
-   */
-  if(per->config->etag_save_file && etag_save->stream) {
-    /* match only header that start with etag (case insensitive) */
-    if(curl_strnequal(str, "etag:", 5)) {
+  curl_easy_getinfo(per->curl, CURLINFO_SCHEME, &scheme);
+  scheme = proto_token(scheme);
+  if((scheme == proto_http || scheme == proto_https)) {
+    long response = 0;
+    curl_easy_getinfo(per->curl, CURLINFO_RESPONSE_CODE, &response);
+
+    if(response/100 != 2)
+      /* only care about these headers in 2xx responses */
+      ;
+    /*
+     * Write etag to file when --etag-save option is given.
+     */
+    else if(per->config->etag_save_file && etag_save->stream &&
+            /* match only header that start with etag (case insensitive) */
+            checkprefix("etag:", str)) {
       const char *etag_h = &str[5];
       const char *eot = end - 1;
       if(*eot == '\n') {
@@ -128,77 +137,75 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
         }
       }
     }
-  }
 
-  /*
-   * This callback sets the filename where output shall be written when
-   * curl options --remote-name (-O) and --remote-header-name (-J) have
-   * been simultaneously given and additionally server returns an HTTP
-   * Content-Disposition header specifying a filename property.
-   */
+    /*
+     * This callback sets the filename where output shall be written when
+     * curl options --remote-name (-O) and --remote-header-name (-J) have
+     * been simultaneously given and additionally server returns an HTTP
+     * Content-Disposition header specifying a filename property.
+     */
 
-  curl_easy_getinfo(per->curl, CURLINFO_SCHEME, &scheme);
-  scheme = proto_token(scheme);
-  if(hdrcbdata->honor_cd_filename &&
-     (cb > 20) && checkprefix("Content-disposition:", str) &&
-     (scheme == proto_http || scheme == proto_https)) {
-    const char *p = str + 20;
+    else if(hdrcbdata->honor_cd_filename &&
+            (cb > 20) && checkprefix("Content-disposition:", str)) {
+      const char *p = str + 20;
 
-    /* look for the 'filename=' parameter
-       (encoded filenames (*=) are not supported) */
-    for(;;) {
-      char *filename;
-      size_t len;
+      /* look for the 'filename=' parameter
+         (encoded filenames (*=) are not supported) */
+      for(;;) {
+        char *filename;
+        size_t len;
 
-      while((p < end) && *p && !ISALPHA(*p))
-        p++;
-      if(p > end - 9)
-        break;
-
-      if(memcmp(p, "filename=", 9)) {
-        /* no match, find next parameter */
-        while((p < end) && *p && (*p != ';'))
+        while((p < end) && *p && !ISALPHA(*p))
           p++;
-        if((p < end) && *p)
-          continue;
-        else
+        if(p > end - 9)
           break;
-      }
-      p += 9;
 
-      /* this expression below typecasts 'cb' only to avoid
-         warning: signed and unsigned type in conditional expression
-      */
-      len = (ssize_t)cb - (p - str);
-      filename = parse_filename(p, len);
-      if(filename) {
-        if(outs->stream) {
-          /* indication of problem, get out! */
-          free(filename);
-          return CURL_WRITEFUNC_ERROR;
+        if(memcmp(p, "filename=", 9)) {
+          /* no match, find next parameter */
+          while((p < end) && *p && (*p != ';'))
+            p++;
+          if((p < end) && *p)
+            continue;
+          else
+            break;
         }
+        p += 9;
 
-        if(per->config->output_dir) {
-          outs->filename = aprintf("%s/%s", per->config->output_dir, filename);
-          free(filename);
-          if(!outs->filename)
+        /* this expression below typecasts 'cb' only to avoid
+           warning: signed and unsigned type in conditional expression
+        */
+        len = (ssize_t)cb - (p - str);
+        filename = parse_filename(p, len);
+        if(filename) {
+          if(outs->stream) {
+            /* indication of problem, get out! */
+            free(filename);
+            return CURL_WRITEFUNC_ERROR;
+          }
+
+          if(per->config->output_dir) {
+            outs->filename = aprintf("%s/%s", per->config->output_dir,
+                                     filename);
+            free(filename);
+            if(!outs->filename)
+              return CURL_WRITEFUNC_ERROR;
+          }
+          else
+            outs->filename = filename;
+
+          outs->is_cd_filename = TRUE;
+          outs->s_isreg = TRUE;
+          outs->fopened = FALSE;
+          outs->alloc_filename = TRUE;
+          hdrcbdata->honor_cd_filename = FALSE; /* done now! */
+          if(!tool_create_output_file(outs, per->config))
             return CURL_WRITEFUNC_ERROR;
         }
-        else
-          outs->filename = filename;
-
-        outs->is_cd_filename = TRUE;
-        outs->s_isreg = TRUE;
-        outs->fopened = FALSE;
-        outs->alloc_filename = TRUE;
-        hdrcbdata->honor_cd_filename = FALSE; /* done now! */
-        if(!tool_create_output_file(outs, per->config))
-          return CURL_WRITEFUNC_ERROR;
+        break;
       }
-      break;
+      if(!outs->stream && !tool_create_output_file(outs, per->config))
+        return CURL_WRITEFUNC_ERROR;
     }
-    if(!outs->stream && !tool_create_output_file(outs, per->config))
-      return CURL_WRITEFUNC_ERROR;
   }
   if(hdrcbdata->config->writeout) {
     char *value = memchr(ptr, ':', cb);

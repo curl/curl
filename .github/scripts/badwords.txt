@@ -1,0 +1,46 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+#
+back-end:backend
+e-mail:email
+run-time:runtime
+set-up:setup
+tool chain:toolchain
+tool-chain:toolchain
+wild-card:wildcard
+wild card:wildcard
+i'm:I am
+you've:You have
+they've:They have
+they're:They are
+should've:should have
+don't:do not
+could've:could have
+doesn't:does not
+isn't:is not
+ a html: an html
+ a http: an http
+ a ftp: an ftp
+ url =URL
+internet\W=Internet
+isation:ization
+it's:it is
+there's:there is
+[^.]\. And: Rewrite it somehow?
+^(And|So|But) = Rewrite it somehow?
+\. But: Rewrite it somehow?
+file name :filename
+\. So : Rewrite without "so" ?
+ dir :directory
+you'd:you would
+you'll:you will
+can't:cannot
+that's:that is
+web page:webpage
+host name\W:hostname
+file name\W:filename
+didn't:did not
+doesn't:does not
+won't:will not
+couldn't:could not

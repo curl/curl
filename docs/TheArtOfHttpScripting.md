@@ -87,16 +87,16 @@
  The Uniform Resource Locator format is how you specify the address of a
  particular resource on the Internet. You know these, you have seen URLs like
  https://curl.se or https://example.com a million times. RFC 3986 is the
- canonical spec. And yeah, the formal name is not URL, it is URI.
+ canonical spec. The formal name is not URL, it is **URI**.
 
 ## Host
 
- The host name is usually resolved using DNS or your /etc/hosts file to an IP
+ The hostname is usually resolved using DNS or your /etc/hosts file to an IP
  address and that is what curl will communicate with. Alternatively you specify
  the IP address directly in the URL instead of a name.
 
  For development and other trying out situations, you can point to a different
- IP address for a host name than what would otherwise be used, by using curl's
+ IP address for a hostname than what would otherwise be used, by using curl's
  [`--resolve`](https://curl.se/docs/manpage.html#--resolve) option:
 
     curl --resolve www.example.org:80:127.0.0.1 http://www.example.org/
@@ -107,7 +107,7 @@
  or in some cases UDP. Normally you do not have to take that into
  consideration, but at times you run test servers on other ports or
  similar. Then you can specify the port number in the URL with a colon and a
- number immediately following the host name. Like when doing HTTP to port
+ number immediately following the hostname. Like when doing HTTP to port
  1234:
 
     curl http://www.example.org:1234/
@@ -142,20 +142,20 @@
 
  The path part is just sent off to the server to request that it sends back
  the associated response. The path is what is to the right side of the slash
- that follows the host name and possibly port number.
+ that follows the hostname and possibly port number.
 
 # Fetch a page
 
 ## GET
 
  The simplest and most common request/operation made using HTTP is to GET a
- URL. The URL could itself refer to a web page, an image or a file. The client
+ URL. The URL could itself refer to a webpage, an image or a file. The client
  issues a GET request to the server and receives the document it asked for.
  If you issue the command line
 
     curl https://curl.se
 
- you get a web page returned in your terminal window. The entire HTML document
+ you get a webpage returned in your terminal window. The entire HTML document
  that that URL holds.
 
  All HTTP replies contain a set of response headers that are normally hidden,
@@ -309,12 +309,10 @@
  This method is mainly designed to better support file uploads. A form that
  allows a user to upload a file could be written like this in HTML:
 
-```html
-<form method="POST" enctype='multipart/form-data' action="upload.cgi">
-  <input type=file name=upload>
-  <input type=submit name=press value="OK">
-</form>
-```
+    <form method="POST" enctype='multipart/form-data' action="upload.cgi">
+      <input name=upload type=file>
+      <input type=submit name=press value="OK">
+    </form>
 
  This clearly shows that the Content-Type about to be sent is
  `multipart/form-data`.
@@ -500,7 +498,7 @@
  The way the web browsers do "client side state control" is by using
  cookies. Cookies are just names with associated contents. The cookies are
  sent to the client by the server. The server tells the client for what path
- and host name it wants the cookie sent back, and it also sends an expiration
+ and hostname it wants the cookie sent back, and it also sends an expiration
  date and a few more properties.
 
  When a client communicates with a server with a name and path as previously
@@ -630,18 +628,17 @@
 
  It should be noted that curl selects which methods to use on its own
  depending on what action to ask for. `-d` will do POST, `-I` will do HEAD and
- so on. If you use the
- [`--request`](https://curl.se/docs/manpage.html#-X) / `-X` option you
- can change the method keyword curl selects, but you will not modify curl's
- behavior. This means that if you for example use -d "data" to do a POST, you
- can modify the method to a `PROPFIND` with `-X` and curl will still think it
- sends a POST . You can change the normal GET to a POST method by simply
- adding `-X POST` in a command line like:
+ so on. If you use the [`--request`](https://curl.se/docs/manpage.html#-X) /
+ `-X` option you can change the method keyword curl selects, but you will not
+ modify curl's behavior. This means that if you for example use -d "data" to
+ do a POST, you can modify the method to a `PROPFIND` with `-X` and curl will
+ still think it sends a POST. You can change the normal GET to a POST method
+ by simply adding `-X POST` in a command line like:
 
     curl -X POST http://example.org/
 
- ... but curl will still think and act as if it sent a GET so it will not send
- any request body etc.
+ curl will however still act as if it sent a GET so it will not send any
+ request body etc.
 
 # Web Login
 

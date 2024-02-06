@@ -1,0 +1,48 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+--header
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data crlf="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+disable Host: when specified as lower case
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -H host:
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="yes">
+GET /%TESTNUMBER HTTP/1.1
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

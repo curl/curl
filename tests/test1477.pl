@@ -31,7 +31,8 @@ use warnings;
 
 # we may get the dir roots pointed out
 my $root=$ARGV[0] || ".";
-my $manpge = "$root/docs/libcurl/libcurl-errors.3";
+my $buildroot=$ARGV[1] || ".";
+my $manpge = "$buildroot/docs/libcurl/libcurl-errors.3";
 my $curlh = "$root/include/curl";
 my $errors=0;
 

@@ -145,13 +145,8 @@ fi
 
 ############################################################################
 #
-# Modify the man pages to display the version number and date.
-#
-
-echo "update man pages"
-./scripts/updatemanpages.pl $version >/dev/null
-
 # make the generated file newer than the man page
+
 touch src/tool_hugehelp.c
 
 ############################################################################

@@ -36,6 +36,13 @@
 /* Define this to enable lots of debugging for mbedTLS */
 /* #define MBEDTLS_DEBUG */
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+/* mbedTLS (as of v3.5.1) has a duplicate function declaration
+   in its public headers. Disable the warning that detects it. */
+#pragma GCC diagnostic ignored "-Wredundant-decls"
+#endif
+
 #include <mbedtls/version.h>
 #if MBEDTLS_VERSION_NUMBER >= 0x02040000
 #include <mbedtls/net_sockets.h>
@@ -54,6 +61,10 @@
 #  ifdef MBEDTLS_DEBUG
 #    include <mbedtls/debug.h>
 #  endif
+#endif
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
 #endif
 
 #include "urldata.h"
@@ -154,7 +165,6 @@ static void mbed_debug(void *context, int level, const char *f_name,
   infof(data, "%s", line);
   (void) level;
 }
-#else
 #endif
 
 static int mbedtls_bio_cf_write(void *bio,
@@ -166,6 +176,9 @@ static int mbedtls_bio_cf_write(void *bio,
   CURLcode result;
 
   DEBUGASSERT(data);
+  if(!data)
+    return 0;
+
   nwritten = Curl_conn_cf_send(cf->next, data, (char *)buf, blen, &result);
   CURL_TRC_CF(data, cf, "mbedtls_bio_cf_out_write(len=%zu) -> %zd, err=%d",
               blen, nwritten, result);
@@ -183,6 +196,8 @@ static int mbedtls_bio_cf_read(void *bio, unsigned char *buf, size_t blen)
   CURLcode result;
 
   DEBUGASSERT(data);
+  if(!data)
+    return 0;
   /* OpenSSL catches this case, so should we. */
   if(!buf)
     return 0;

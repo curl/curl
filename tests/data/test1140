@@ -19,7 +19,7 @@ Verify the nroff of man pages
 </name>
 
 <command type="perl">
-%SRCDIR/test1140.pl %SRCDIR/../docs/ %SRCDIR/../docs/libcurl/*.3 %SRCDIR/../docs/libcurl/opts/*.3 %SRCDIR/../docs/*.1
+%SRCDIR/test1140.pl %PWD/../docs/ %PWD/../docs/libcurl/*.3 %PWD/../docs/libcurl/opts/*.3 %PWD/../docs/*.1
 </command>
 </client>
 

@@ -45,7 +45,9 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
 
 bin_PROGRAMS = curl
 
+if BUILD_DOCS
 SUBDIRS = ../docs
+endif
 
 if USE_CPPFLAG_CURL_STATICLIB
 AM_CPPFLAGS += -DCURL_STATICLIB
@@ -157,7 +159,7 @@ tidy:
 	$(TIDY) $(CURL_CFILES) $(TIDYFLAGS) -- $(curl_CPPFLAGS) $(CPPFLAGS) -DHAVE_CONFIG_H
 
 listhelp:
-	(cd $(top_srcdir)/docs/cmdline-opts && ./gen.pl listhelp *.d) > tool_listhelp.c
+	(cd $(top_srcdir)/docs/cmdline-opts && make listhelp)
 
 if HAVE_WINDRES
 .rc.o:

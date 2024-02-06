@@ -235,9 +235,12 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
 
       if(Curl_GetFTPResponse(data, &nread, NULL))
         return -1;
-
-      if(data->state.buffer[0] != '3')
-        return -1;
+      else {
+        struct pingpong *pp = &conn->proto.ftpc.pp;
+        char *line = Curl_dyn_ptr(&pp->recvbuf);
+        if(line[0] != '3')
+          return -1;
+      }
     }
 
     stringp = aprintf("%s@%s", service, host);
@@ -321,15 +324,19 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
           ret = -1;
           break;
         }
-
-        if(data->state.buffer[0] != '2' && data->state.buffer[0] != '3') {
-          infof(data, "Server didn't accept auth data");
-          ret = AUTH_ERROR;
-          break;
+        else {
+          struct pingpong *pp = &conn->proto.ftpc.pp;
+          size_t len = Curl_dyn_len(&pp->recvbuf);
+          p = Curl_dyn_ptr(&pp->recvbuf);
+          if((len < 4) || (p[0] != '2' && p[0] != '3')) {
+            infof(data, "Server didn't accept auth data");
+            ret = AUTH_ERROR;
+            break;
+          }
         }
 
         _gssresp.value = NULL; /* make sure it is initialized */
-        p = data->state.buffer + 4;
+        p += 4; /* over '789 ' */
         p = strstr(p, "ADAT=");
         if(p) {
           result = Curl_base64_decode(p + 5,
@@ -427,6 +434,9 @@ static char level_to_char(int level)
 
 /* Send an FTP command defined by |message| and the optional arguments. The
    function returns the ftp_code. If an error occurs, -1 is returned. */
+static int ftp_send_command(struct Curl_easy *data, const char *message, ...)
+  CURL_PRINTF(2, 3);
+
 static int ftp_send_command(struct Curl_easy *data, const char *message, ...)
 {
   int ftp_code;
@@ -748,6 +758,8 @@ static int sec_set_protection_level(struct Curl_easy *data)
   if(level) {
     char *pbsz;
     unsigned int buffer_size = 1 << 20; /* 1048576 */
+    struct pingpong *pp = &conn->proto.ftpc.pp;
+    char *line;
 
     code = ftp_send_command(data, "PBSZ %u", buffer_size);
     if(code < 0)
@@ -759,10 +771,11 @@ static int sec_set_protection_level(struct Curl_easy *data)
     }
     conn->buffer_size = buffer_size;
 
-    pbsz = strstr(data->state.buffer, "PBSZ=");
+    line = Curl_dyn_ptr(&pp->recvbuf);
+    pbsz = strstr(line, "PBSZ=");
     if(pbsz) {
       /* stick to default value if the check fails */
-      if(!strncmp(pbsz, "PBSZ=", 5) && ISDIGIT(pbsz[5]))
+      if(ISDIGIT(pbsz[5]))
         buffer_size = atoi(&pbsz[5]);
       if(buffer_size < conn->buffer_size)
         conn->buffer_size = buffer_size;
