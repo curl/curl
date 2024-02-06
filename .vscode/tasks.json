@@ -1,0 +1,27 @@
+{
+    "version": "2.0.0",
+    "inputs": [
+    {
+    "id": "codesonarAnalysisName",
+    "type": "promptString",
+    "description": "CodeSonar analysis name",
+    "default": "Analysis-1234"
+    }
+    ],
+    "tasks": [
+    {
+    "type": "shell",
+    "label": "C/C++: CodeSonar analyze",
+    "command": [
+        "[ ! -e Makefile ] && autoreconf -fi && ./configure --with-openssl ;",
+        "${config:codesonar.installDir}/codesonar/bin/codesonar analyze -foreground -remote-archive \"/saas/*\" curl -hubuser ${config:codesonar.hubUser} -auth certificate -name ${input:codesonarAnalysisName} -conf-file codesonar.conf -project OSS-Projects/curl-GitHub/developers/${config:codesonar.hubUser}  ${config:codesonar.hubAddress} make -j $(nproc)"
+    ],
+    "group": "build",
+    "detail": "builder: make",
+    "presentation": {
+        "showReuseMessage": false,
+        "panel": "new"
+    }
+    }
+    ]
+}
