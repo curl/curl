@@ -1205,7 +1205,6 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
                                     bool newsession)
 {
   struct CookieInfo *c;
-  char *line = NULL;
   FILE *handle = NULL;
 
   if(!inc) {
@@ -1246,9 +1245,9 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
       while(Curl_get_line(&buf, fp)) {
         char *lineptr = Curl_dyn_ptr(&buf);
         bool headerline = FALSE;
-        if(checkprefix("Set-Cookie:", line)) {
+        if(checkprefix("Set-Cookie:", lineptr)) {
           /* This is a cookie line, get it! */
-          lineptr = &line[11];
+          lineptr += 11;
           headerline = TRUE;
           while(*lineptr && ISBLANK(*lineptr))
             lineptr++;
