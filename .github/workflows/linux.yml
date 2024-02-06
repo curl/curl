@@ -182,6 +182,10 @@ jobs:
             container: 'alpine:3.18'
             singleuse: --unit
 
+          - name: Arch Linux
+            configure: --enable-debug --enable-websockets --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl
+            container: 'archlinux/archlinux:base-devel'
+
     steps:
       - if: matrix.build.container == null
         run: |
@@ -193,6 +197,11 @@ jobs:
       - if: startsWith(matrix.build.container, 'alpine')
         run: |
           apk add --no-cache build-base autoconf automake libtool perl openssl-dev libssh2-dev zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev heimdal-dev libpsl-dev py3-impacket py3-asn1 py3-six py3-pycryptodomex perl-time-hires openssh stunnel sudo git
+        name: 'install dependencies'
+
+      - if: startsWith(matrix.build.container, 'archlinux/archlinux')
+        run: |
+          pacman -Sy autoconf automake libtool perl openssl libssh2 zlib brotli zstd libidn2 openldap heimdal libpsl impacket libtasn1 python-pycryptodomex perl openssh stunnel git
         name: 'install dependencies'
 
       - uses: actions/checkout@v4
