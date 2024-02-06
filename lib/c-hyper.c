@@ -54,6 +54,7 @@
 #include <hyper.h>
 #include "urldata.h"
 #include "sendf.h"
+#include "headers.h"
 #include "transfer.h"
 #include "multiif.h"
 #include "progress.h"
@@ -886,6 +887,13 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
      the rest of the request in the PERFORM phase. */
   *done = TRUE;
   Curl_client_cleanup(data);
+
+  /* Add collecting of headers written to client. For a new connection,
+   * we might have done that already, but reuse
+   * or multiplex needs it here as well. */
+  result = Curl_headers_init(data);
+  if(result)
+    return result;
 
   infof(data, "Time for the Hyper dance");
   memset(h, 0, sizeof(struct hyptransfer));
