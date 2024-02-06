@@ -1205,7 +1205,6 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
                                     bool newsession)
 {
   struct CookieInfo *c;
-  char *line = NULL;
   FILE *handle = NULL;
 
   if(!inc) {
@@ -1241,16 +1240,14 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
 
     c->running = FALSE; /* this is not running, this is init */
     if(fp) {
-
-      line = malloc(MAX_COOKIE_LINE);
-      if(!line)
-        goto fail;
-      while(Curl_get_line(line, MAX_COOKIE_LINE, fp)) {
-        char *lineptr = line;
+      struct dynbuf buf;
+      Curl_dyn_init(&buf, MAX_COOKIE_LINE);
+      while(Curl_get_line(&buf, fp)) {
+        char *lineptr = Curl_dyn_ptr(&buf);
         bool headerline = FALSE;
-        if(checkprefix("Set-Cookie:", line)) {
+        if(checkprefix("Set-Cookie:", lineptr)) {
           /* This is a cookie line, get it! */
-          lineptr = &line[11];
+          lineptr += 11;
           headerline = TRUE;
           while(*lineptr && ISBLANK(*lineptr))
             lineptr++;
@@ -1258,7 +1255,7 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
 
         Curl_cookie_add(data, c, headerline, TRUE, lineptr, NULL, NULL, TRUE);
       }
-      free(line); /* free the line buffer */
+      Curl_dyn_free(&buf); /* free the line buffer */
 
       /*
        * Remove expired cookies from the hash. We must make sure to run this
@@ -1274,18 +1271,6 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
   c->running = TRUE;          /* now, we're running */
 
   return c;
-
-fail:
-  free(line);
-  /*
-   * Only clean up if we allocated it here, as the original could still be in
-   * use by a share handle.
-   */
-  if(!inc)
-    Curl_cookie_cleanup(c);
-  if(handle)
-    fclose(handle);
-  return NULL; /* out of memory */
 }
 
 /*
