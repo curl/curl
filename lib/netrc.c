@@ -248,6 +248,7 @@ static int parsenetrc(const char *host,
     } /* while Curl_get_line() */
 
 out:
+    Curl_dyn_free(&buf);
     if(!retcode) {
       /* success */
       if(login_alloc) {
