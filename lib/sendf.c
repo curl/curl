@@ -296,7 +296,7 @@ static CURLcode chop_write(struct Curl_easy *data,
    The defines are in sendf.h of course.
  */
 CURLcode Curl_client_write(struct Curl_easy *data,
-                           int type, char *buf, size_t blen)
+                           int type, const char *buf, size_t blen)
 {
   CURLcode result;
 
