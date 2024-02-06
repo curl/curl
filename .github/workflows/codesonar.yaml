@@ -48,13 +48,13 @@ jobs:
           ref: main
           path: cso-scripts
       - name: Build and Analyze
-        run: python3 cso-scripts/build_and_analyze.py -misra codesonar.conf make -j $PARALLEL
+        run: python3 cso-scripts/build_and_analyze.py  codesonar.conf make -j $PARALLEL
       - name: Upload SARIF to GitHub #Use this if you do not have GitHub Enterprise
         if: ${{ github.event.pull_request }}
         uses: actions/upload-artifact@v3
         with:
           name: SARIF file
-          path: warnings-translate.sarif
+          path: warnings.sarif
       - name: Push Summary Report
         if: ${{ github.event.pull_request }}
         uses: thollander/actions-comment-pull-request@v2
@@ -63,5 +63,5 @@ jobs:
       - name: Upload SARIF results
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: warnings-translate.sarif
+          sarif_file: warnings.sarif
           category: "CodeSecure CodeSonar"            
