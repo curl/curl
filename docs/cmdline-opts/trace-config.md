@@ -22,7 +22,7 @@ Set configuration for trace output. A comma-separated list of components where
 detailed output can be made available from. Names are case-insensitive.
 Specify 'all' to enable all trace components.
 
-In addition to trace component names, specify "ids" and "time" to
-avoid extra --trace-ids or --trace-time parameters.
+In addition to trace component names, specify `ids` and `time` to avoid extra
+--trace-ids or --trace-time parameters.
 
 See the *curl_global_trace(3)* man page for more details.

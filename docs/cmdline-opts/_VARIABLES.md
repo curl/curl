@@ -2,14 +2,14 @@
 <!-- SPDX-License-Identifier: curl -->
 # VARIABLES
 curl supports command line variables (added in 8.3.0). Set variables with
---variable name=content or --variable name@file (where "file" can be stdin if
+--variable name=content or --variable name@file (where `file` can be stdin if
 set to a single dash (-)).
 
-Variable contents can be expanded in option parameters using "{{name}}" (without
-the quotes) if the option name is prefixed with "--expand-". This gets the
-contents of the variable "name" inserted, or a blank if the name does not
-exist as a variable. Insert "{{" verbatim in the string by prefixing it with a
-backslash, like "\{{".
+Variable contents can be expanded in option parameters using `{{name}}` if the
+option name is prefixed with `--expand-`. This gets the contents of the
+variable `name` inserted, or a blank if the name does not exist as a
+variable. Insert `{{` verbatim in the string by prefixing it with a backslash,
+like `\{{`.
 
 You an access and expand environment variables by first importing them. You
 can select to either require the environment variable to be set or you can

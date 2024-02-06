@@ -42,7 +42,7 @@ Select a specific target destination file to write the output to, by using
 output following that instruction is then written to that file. More than one
 *%output{}* instruction can be specified in the same write-out argument. If
 the file name cannot be created, curl leaves the output destination to the one
-used prior to the *%output{}* instruction. Use *%output{>>name}* to append
+used prior to the *%output{}* instruction. Use *%output{\>\>name}* to append
 data to an existing file.
 
 **NOTE:**

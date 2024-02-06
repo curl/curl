@@ -18,6 +18,6 @@ Example:
 
 # `--dns-interface`
 
-Tell curl to send outgoing DNS requests through <interface>. This option is a
-counterpart to --interface (which does not affect DNS). The supplied string
-must be an interface name (not an address).
+Tell curl to send outgoing DNS requests through the given interface. This
+option is a counterpart to --interface (which does not affect DNS). The
+supplied string must be an interface name (not an address).

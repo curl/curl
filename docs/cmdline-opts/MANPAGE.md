@@ -83,6 +83,9 @@ explicitly with an empty "header":
 
     ##
 
+Angle brackets (`<>`) need to be escaped when used in text like `\<` and
+`\>`. This, to ensure that the text renders nicely as markdown.
+
 ### Headers
 
 The `#` header can be used by non-option files and it produces produces a

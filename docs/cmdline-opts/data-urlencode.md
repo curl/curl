@@ -23,8 +23,8 @@ Example:
 This posts data, similar to the other --data options with the exception
 that this performs URL-encoding.
 
-To be CGI-compliant, the <data> part should begin with a *name* followed
-by a separator and a content specification. The <data> part can be passed to
+To be CGI-compliant, the \<data\> part should begin with a *name* followed by
+a separator and a content specification. The \<data\> part can be passed to
 curl using one of the following syntaxes:
 
 ## content

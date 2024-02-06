@@ -32,8 +32,8 @@ specify a file name then this option has no effect.
 There is no attempt to decode %-sequences (yet) in the provided file name, so
 this option may provide you with rather unexpected file names.
 
-This feature uses the name from the "filename" field, it does not yet support
-the "filename*" field (filenames with explicit character sets).
+This feature uses the name from the `filename` field, it does not yet support
+the `filename*` field (filenames with explicit character sets).
 
 **WARNING**: Exercise judicious use of this option, especially on Windows. A
 rogue server could send you the name of a DLL or other file that could be
