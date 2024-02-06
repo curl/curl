@@ -69,7 +69,7 @@ static const char *filecontents[] = {
   "LINE1\n"
   C4096 "SOME EXTRA TEXT",
 
-  /* First and third line should be read */
+  /* Only first should be read */
   "LINE1\n"
   C4096 "SOME EXTRA TEXT\n"
   "LINE3\n",
@@ -84,11 +84,11 @@ static const char *filecontents[] = {
 
 UNITTEST_START
   size_t i;
+  int rc = 0;
   for(i = 0; i < NUMTESTS; i++) {
     FILE *fp;
     struct dynbuf buf;
     int len = 4096;
-    int rc = 0;
     char *line;
     Curl_dyn_init(&buf, len);
 
@@ -150,11 +150,8 @@ UNITTEST_START
         fail_unless(line && !strcmp("LINE1\n", line),
                     "First line failed (5)");
         rc = Curl_get_line(&buf, fp);
-        line = Curl_dyn_ptr(&buf);
-        fail_unless(line && !strcmp("LINE3\n", line),
-                    "Third line failed (5)");
-        rc = Curl_get_line(&buf, fp);
-        abort_unless(!Curl_dyn_len(&buf), "Missed EOF (5)");
+        fail_unless(!Curl_dyn_len(&buf),
+                    "Did not bail out on too long line");
         break;
       case 5:
         rc = Curl_get_line(&buf, fp);
@@ -171,8 +168,8 @@ UNITTEST_START
     Curl_dyn_free(&buf);
     fclose(fp);
     fprintf(stderr, "OK\n");
-    return rc;
   }
+  return rc;
 UNITTEST_STOP
 
 #ifdef __GNUC__
