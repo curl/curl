@@ -38,7 +38,7 @@ include the domain name in order for the server to successfully obtain a
 Kerberos Ticket. If you do not then the initial part of the authentication
 handshake may fail.
 
-When using NTLM, the user name can be specified simply as the username without
+When using NTLM, the username can be specified simply as the username without
 the domain name should the server be part of a single domain and forest.
 
 To include the domain name use either Down-Level Logon Name or UPN (User

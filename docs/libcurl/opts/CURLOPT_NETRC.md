@@ -25,8 +25,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_NETRC, long level);
 # DESCRIPTION
 
 This parameter controls the preference *level* of libcurl between using
-user names and passwords from your *~/.netrc* file, relative to usernames
-and passwords in the URL supplied with CURLOPT_URL(3).
+usernames and passwords from your *~/.netrc* file, relative to usernames and
+passwords in the URL supplied with CURLOPT_URL(3).
 
 On Windows, libcurl uses the file as *%HOME%/_netrc*. If *%HOME%* is
 not set on Windows, libcurl falls back to *%USERPROFILE%*.
