@@ -1387,8 +1387,6 @@ struct UrlState {
 #if !defined(_WIN32) && !defined(MSDOS) && !defined(__EMX__)
 /* do FTP line-end conversions on most platforms */
 #define CURL_DO_LINEEND_CONV
-  /* for FTP downloads: track CRLF sequences that span blocks */
-  BIT(prev_block_had_trailing_cr);
   /* for FTP downloads: how many CRLFs did we converted to LFs? */
   curl_off_t crlf_conversions;
 #endif
