@@ -338,7 +338,7 @@ static CURLcode ftp_cw_lc_write(struct Curl_easy *data,
 }
 
 static const struct Curl_cwtype ftp_cw_lc = {
-  "ws-decode",
+  "ftp-lineconv",
   NULL,
   Curl_cwriter_def_init,
   ftp_cw_lc_write,
