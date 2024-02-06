@@ -24,11 +24,18 @@
 
 AUTOMAKE_OPTIONS = foreign no-dependencies
 
+if BUILD_DOCS
+# if we disable man page building, ignore these
+MK_CA_DOCS = mk-ca-bundle.1
+CURLCONF_DOCS = curl-config.1
+endif
+
+
 # EXTRA_DIST breaks with $(abs_builddir) so build it using this variable
 # but distribute it (using the relative file name) in the next variable
 man_MANS = $(abs_builddir)/curl.1
-noinst_man_MANS = curl.1 mk-ca-bundle.1
-dist_man_MANS = curl-config.1
+noinst_man_MANS = curl.1 $(MK_CA_DOCS)
+dist_man_MANS = $(CURLCONF_DOCS) $(MK_CA_DOCS)
 CURLPAGES = curl-config.md mk-ca-bundle.md
 
 # Build targets in this file (.) before cmdline-opts to ensure that
@@ -36,7 +43,7 @@ CURLPAGES = curl-config.md mk-ca-bundle.md
 SUBDIRS = . cmdline-opts libcurl
 DIST_SUBDIRS = $(SUBDIRS) examples
 
-CLEANFILES = $(man_MANS) curl.1 curl-config.1 mk-ca-bundle.1
+CLEANFILES = $(man_MANS) curl.1 $(CURLCONF_DOCS) $(MK_CA_DOCS)
 nodist_MANS = $(CLEANFILES)
 
 EXTRA_DIST =                                    \
