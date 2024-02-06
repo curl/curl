@@ -261,7 +261,7 @@ static void freedirs(struct ftp_conn *ftpc)
  * Lineend Conversions
  * On ASCII transfers, e.g. directory listings, we might get lines
  * ending in '\r\n' and we prefer just '\n'.
- * We might also get a lonley '\r' which we convert into a '\n'.
+ * We might also get a lonely '\r' which we convert into a '\n'.
  */
 struct ftp_cw_lc_ctx {
   struct Curl_cwriter super;
