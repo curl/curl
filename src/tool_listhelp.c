@@ -583,7 +583,7 @@ const struct helptxt helptext[] = {
    "Request rate for serial transfers",
    CURLHELP_CONNECTION},
   {"    --raw",
-   "Do HTTP \"raw\"; no transfer decoding",
+   "Do HTTP raw; no transfer decoding",
    CURLHELP_HTTP},
   {"-e, --referer <URL>",
    "Referrer URL",
