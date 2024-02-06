@@ -151,6 +151,9 @@ CURLcode Curl_cwriter_add(struct Curl_easy *data,
 void Curl_cwriter_remove_by_name(struct Curl_easy *data,
                                  const char *name);
 
+struct Curl_cwriter *Curl_cwriter_get_by_name(struct Curl_easy *data,
+                                              const char *name);
+
 /**
  * Convenience method for calling `writer->do_write()` that
  * checks for NULL writer.
