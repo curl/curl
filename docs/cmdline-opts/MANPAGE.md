@@ -84,7 +84,7 @@ explicitly with an empty "header":
     ##
 
 Angle brackets (`<>`) need to be escaped when used in text like `\<` and
-`\>`. This, to sure the text renders nicely as markdown.
+`\>`. This, to ensure that the text renders nicely as markdown.
 
 ### Headers
 
