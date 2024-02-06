@@ -146,14 +146,7 @@ void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
     else
       len += msnprintf(buffer + len, MAXINFO - len, "[%s] ", cf->cft->name);
     va_start(ap, fmt);
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
-#endif
     len += mvsnprintf(buffer + len, MAXINFO - len, fmt, ap);
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
     va_end(ap);
     buffer[len++] = '\n';
     buffer[len] = '\0';

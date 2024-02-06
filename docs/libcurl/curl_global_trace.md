@@ -63,7 +63,6 @@ Note that log configuration applies only to transfers where debug logging
 is enabled. See CURLOPT_VERBOSE(3) or CURLOPT_DEBUGFUNCTION(3)
 on how to control that.
 
-<<<<<<< HEAD:docs/libcurl/curl_global_trace.md
 # TRACE COMPONENTS
 
 ## `tcp`
