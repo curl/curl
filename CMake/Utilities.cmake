@@ -23,7 +23,7 @@
 ###########################################################################
 # File containing various utilities
 
-# Returns a list of arguments that evaluate to true
+# Returns number of arguments that evaluate to true
 function(count_true output_count_var)
   set(lst_len 0)
   foreach(option_var IN LISTS ARGN)
