@@ -34,9 +34,9 @@ use, your externally set header is used instead of the internal one. This
 allows you to make even trickier stuff than curl would normally do. You should
 not replace internally set headers without knowing perfectly well what you are
 doing. Remove an internal header by giving a replacement without content on
-the right side of the colon, as in: -H "Host:". If you send the custom header
-with no-value then its header must be terminated with a semicolon, such as \-H
-"X-Custom-Header;" to send "X-Custom-Header:".
+the right side of the colon, as in: -H `Host:`. If you send the custom header
+with no-value then its header must be terminated with a semicolon, such as -H
+`X-Custom-Header;` to send `X-Custom-Header:`.
 
 curl makes sure that each header you add/replace is sent with the proper
 end-of-line marker, you should thus **not** add that as a part of the header
@@ -49,7 +49,7 @@ for each line in the input file. Using @- makes curl read the header file from
 stdin. Added in 7.55.0.
 
 Please note that most anti-spam utilities check the presence and value of
-several MIME mail headers: these are "From:", "To:", "Date:" and "Subject:"
+several MIME mail headers: these are `From:`, `To:`, `Date:` and `Subject:`
 among others and should be added with this option.
 
 You need --proxy-header to send custom headers intended for an HTTP
