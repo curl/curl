@@ -97,6 +97,11 @@
 #define CURL_ASN1_CHARACTER_STRING      29
 #define CURL_ASN1_BMP_STRING            30
 
+/* Max sixes */
+
+#define MAX_X509_STR  10000
+#define MAX_X509_CERT 100000
+
 #ifdef WANT_EXTRACT_CERTINFO
 /* ASN.1 OID table entry. */
 struct Curl_OID {
@@ -255,61 +260,61 @@ static const struct Curl_OID *searchOID(const char *oid)
 }
 
 /*
- * Convert an ASN.1 Boolean value into its string representation.  Return the
- * dynamically allocated string, or NULL if source is not an ASN.1 Boolean
- * value.
+ * Convert an ASN.1 Boolean value into its string representation.
+ *
+ * Return error code.
  */
 
-static const char *bool2str(const char *beg, const char *end)
+static CURLcode bool2str(struct dynbuf *store,
+                         const char *beg, const char *end)
 {
   if(end - beg != 1)
-    return NULL;
-  return strdup(*beg? "TRUE": "FALSE");
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  return Curl_dyn_add(store, *beg? "TRUE": "FALSE");
 }
 
 /*
  * Convert an ASN.1 octet string to a printable string.
- * Return the dynamically allocated string, or NULL if an error occurs.
+ *
+ * Return error code.
  */
-static const char *octet2str(const char *beg, const char *end)
+static CURLcode octet2str(struct dynbuf *store,
+                          const char *beg, const char *end)
 {
-  struct dynbuf buf;
-  CURLcode result;
-
-  Curl_dyn_init(&buf, 3 * CURL_ASN1_MAX + 1);
-  result = Curl_dyn_addn(&buf, "", 0);
+  CURLcode result = CURLE_OK;
 
   while(!result && beg < end)
-    result = Curl_dyn_addf(&buf, "%02x:", (unsigned char) *beg++);
+    result = Curl_dyn_addf(store, "%02x:", (unsigned char) *beg++);
 
-  return Curl_dyn_ptr(&buf);
+  return result;
 }
 
-static const char *bit2str(const char *beg, const char *end)
+static CURLcode bit2str(struct dynbuf *store,
+                        const char *beg, const char *end)
 {
-  /* Convert an ASN.1 bit string to a printable string.
-     Return the dynamically allocated string, or NULL if an error occurs. */
+  /* Convert an ASN.1 bit string to a printable string. */
 
   if(++beg > end)
-    return NULL;
-  return octet2str(beg, end);
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  return octet2str(store, beg, end);
 }
 
 /*
  * Convert an ASN.1 integer value into its string representation.
- * Return the dynamically allocated string, or NULL if source is not an
- * ASN.1 integer value.
+ *
+ * Returns error.
  */
-static const char *int2str(const char *beg, const char *end)
+static CURLcode int2str(struct dynbuf *store,
+                        const char *beg, const char *end)
 {
   unsigned int val = 0;
   size_t n = end - beg;
 
   if(!n)
-    return NULL;
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 
   if(n > 4)
-    return octet2str(beg, end);
+    return octet2str(store, beg, end);
 
   /* Represent integers <= 32-bit as a single value. */
   if(*beg & 0x80)
@@ -318,25 +323,24 @@ static const char *int2str(const char *beg, const char *end)
   do
     val = (val << 8) | *(const unsigned char *) beg++;
   while(beg < end);
-  return curl_maprintf("%s%x", val >= 10? "0x": "", val);
+  return Curl_dyn_addf(store, "%s%x", val >= 10? "0x": "", val);
 }
 
 /*
- * Perform a lazy conversion from an ASN.1 typed string to UTF8. Allocate the
- * destination buffer dynamically. The allocation size will normally be too
- * large: this is to avoid buffer overflows.
- * Terminate the string with a nul byte and return the converted
- * string length.
+ * Convert from an ASN.1 typed string to UTF8.
+ *
+ * The result is stored in a dynbuf that is inited by the user of this
+ * function.
+ *
+ * Returns error.
  */
-static ssize_t
-utf8asn1str(char **to, int type, const char *from, const char *end)
+static CURLcode
+utf8asn1str(struct dynbuf *to, int type, const char *from, const char *end)
 {
   size_t inlength = end - from;
   int size = 1;
-  size_t outlength;
-  char *buf;
+  CURLcode result = CURLE_OK;
 
-  *to = NULL;
   switch(type) {
   case CURL_ASN1_BMP_STRING:
     size = 2;
@@ -352,29 +356,24 @@ utf8asn1str(char **to, int type, const char *from, const char *end)
   case CURL_ASN1_UTF8_STRING:
     break;
   default:
-    return -1;  /* Conversion not supported. */
+    return CURLE_BAD_FUNCTION_ARGUMENT;  /* Conversion not supported. */
   }
 
   if(inlength % size)
-    return -1;  /* Length inconsistent with character size. */
-  if(inlength / size > (SIZE_T_MAX - 1) / 4)
-    return -1;  /* Too big. */
-  buf = malloc(4 * (inlength / size) + 1);
-  if(!buf)
-    return -1;  /* Not enough memory. */
+    /* Length inconsistent with character size. */
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 
   if(type == CURL_ASN1_UTF8_STRING) {
     /* Just copy. */
-    outlength = inlength;
-    if(outlength)
-      memcpy(buf, from, outlength);
+    if(inlength)
+      result = Curl_dyn_addn(to, from, inlength);
   }
   else {
-    for(outlength = 0; from < end;) {
-      int charsize;
-      unsigned int wc;
+    while(!result && (from < end)) {
+      char buf[4]; /* decode buffer */
+      int charsize = 1;
+      unsigned int wc = 0;
 
-      wc = 0;
       switch(size) {
       case 4:
         wc = (wc << 8) | *(const unsigned char *) from++;
@@ -386,99 +385,56 @@ utf8asn1str(char **to, int type, const char *from, const char *end)
       default: /* case 1: */
         wc = (wc << 8) | *(const unsigned char *) from++;
       }
-      charsize = 1;
       if(wc >= 0x00000080) {
         if(wc >= 0x00000800) {
           if(wc >= 0x00010000) {
             if(wc >= 0x00200000) {
               free(buf);
-              return -1;        /* Invalid char. size for target encoding. */
+              /* Invalid char. size for target encoding. */
+              return CURLE_WEIRD_SERVER_REPLY;
             }
-            buf[outlength + 3] = (char) (0x80 | (wc & 0x3F));
+            buf[3] = (char) (0x80 | (wc & 0x3F));
             wc = (wc >> 6) | 0x00010000;
             charsize++;
           }
-          buf[outlength + 2] = (char) (0x80 | (wc & 0x3F));
+          buf[2] = (char) (0x80 | (wc & 0x3F));
           wc = (wc >> 6) | 0x00000800;
           charsize++;
         }
-        buf[outlength + 1] = (char) (0x80 | (wc & 0x3F));
+        buf[1] = (char) (0x80 | (wc & 0x3F));
         wc = (wc >> 6) | 0x000000C0;
         charsize++;
       }
-      buf[outlength] = (char) wc;
-      outlength += charsize;
+      buf[0] = (char) wc;
+      result = Curl_dyn_addn(to, buf, charsize);
     }
   }
-  buf[outlength] = '\0';
-  *to = buf;
-  return outlength;
-}
-
-/*
- * Convert an ASN.1 String into its UTF-8 string representation.
- * Return the dynamically allocated string, or NULL if an error occurs.
- */
-static const char *string2str(int type, const char *beg, const char *end)
-{
-  char *buf;
-  if(utf8asn1str(&buf, type, beg, end) < 0)
-    return NULL;
-  return buf;
-}
-
-/*
- * Decimal ASCII encode unsigned integer `x' into the buflen sized buffer at
- * buf.  Return the total number of encoded digits, even if larger than
- * `buflen'.
- */
-static size_t encodeUint(char *buf, size_t buflen, unsigned int x)
-{
-  size_t i = 0;
-  unsigned int y = x / 10;
-
-  if(y) {
-    i = encodeUint(buf, buflen, y);
-    x -= y * 10;
-  }
-  if(i < buflen)
-    buf[i] = (char) ('0' + x);
-  i++;
-  if(i < buflen)
-    buf[i] = '\0';      /* Store a terminator if possible. */
-  return i;
+  return result;
 }
 
 /*
  * Convert an ASN.1 OID into its dotted string representation.
- * Store the result in th `n'-byte buffer at `buf'.
- * Return the converted string length, or 0 on errors.
+ *
+ * Return error code.
  */
-static size_t encodeOID(char *buf, size_t buflen,
-                        const char *beg, const char *end)
+static CURLcode encodeOID(struct dynbuf *store,
+                          const char *beg, const char *end)
 {
-  size_t i;
   unsigned int x;
   unsigned int y;
+  CURLcode result = CURLE_OK;
 
   /* Process the first two numbers. */
   y = *(const unsigned char *) beg++;
   x = y / 40;
   y -= x * 40;
-  i = encodeUint(buf, buflen, x);
-  if(i < buflen)
-    buf[i] = '.';
-  i++;
-  if(i >= buflen)
-    i += encodeUint(NULL, 0, y);
-  else
-    i += encodeUint(buf + i, buflen - i, y);
+
+  result = Curl_dyn_addf(store, "%u.%u", x, y);
+  if(result)
+    return result;
 
   /* Process the trailing numbers. */
   while(beg < end) {
-    if(i < buflen)
-      buf[i] = '.';
-    i++;
     x = 0;
     do {
       if(x & 0xFF000000)
@@ -486,46 +442,42 @@ static size_t encodeOID(char *buf, size_t buflen,
       y = *(const unsigned char *) beg++;
       x = (x << 7) | (y & 0x7F);
     } while(y & 0x80);
-    if(i >= buflen)
-      i += encodeUint(NULL, 0, x);
-    else
-      i += encodeUint(buf + i, buflen - i, x);
+    result = Curl_dyn_addf(store, ".%u", x);
   }
-  if(i < buflen)
-    buf[i] = '\0';
-  return i;
+  return result;
 }
 
 /*
  * Convert an ASN.1 OID into its dotted or symbolic string representation.
- * Return the dynamically allocated string, or NULL if an error occurs.
+ *
+ * Return error code.
  */
 
-static const char *OID2str(const char *beg, const char *end, bool symbolic)
+static CURLcode OID2str(struct dynbuf *store,
+                        const char *beg, const char *end, bool symbolic)
 {
-  char *buf = NULL;
+  CURLcode result = CURLE_OK;
   if(beg < end) {
-    size_t buflen = encodeOID(NULL, 0, beg, end);
-    if(buflen) {
-      buf = malloc(buflen + 1); /* one extra for the zero byte */
-      if(buf) {
-        encodeOID(buf, buflen, beg, end);
-        buf[buflen] = '\0';
+    if(symbolic) {
+      struct dynbuf buf;
+      Curl_dyn_init(&buf, MAX_X509_STR);
+      result = encodeOID(&buf, beg, end);
 
-        if(symbolic) {
-          const struct Curl_OID *op = searchOID(buf);
-          if(op) {
-            free(buf);
-            buf = strdup(op->textoid);
-          }
-        }
+      if(!result) {
+        const struct Curl_OID *op = searchOID(Curl_dyn_ptr(&buf));
+        if(op)
+          result = Curl_dyn_add(store, op->textoid);
+        Curl_dyn_free(&buf);
       }
     }
+    else
+      result = encodeOID(store, beg, end);
   }
-  return buf;
+  return result;
 }
 
-static const char *GTime2str(const char *beg, const char *end)
+static CURLcode GTime2str(struct dynbuf *store,
+                          const char *beg, const char *end)
 {
   const char *tzp;
   const char *fracp;
@@ -553,7 +505,7 @@ static const char *GTime2str(const char *beg, const char *end)
     sec2 = fracp[-1];
     break;
   default:
-    return NULL;
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
   /* Scan for timezone, measure fractional seconds. */
@@ -582,7 +534,8 @@ static const char *GTime2str(const char *beg, const char *end)
   }
 
   tzl = end - tzp;
-  return curl_maprintf("%.4s-%.2s-%.2s %.2s:%.2s:%c%c%s%.*s%s%.*s",
+  return Curl_dyn_addf(store,
+                       "%.4s-%.2s-%.2s %.2s:%.2s:%c%c%s%.*s%s%.*s",
                        beg, beg + 4, beg + 6,
                        beg + 8, beg + 10, sec1, sec2,
                        fracl? ".": "", (int)fracl, fracp,
@@ -590,10 +543,12 @@ static const char *GTime2str(const char *beg, const char *end)
 }
 
 /*
- *  Convert an ASN.1 UTC time to a printable string.
- * Return the dynamically allocated string, or NULL if an error occurs.
+ * Convert an ASN.1 UTC time to a printable string.
+ *
+ * Return error code.
  */
-static const char *UTime2str(const char *beg, const char *end)
+static CURLcode UTime2str(struct dynbuf *store,
+                             const char *beg, const char *end)
 {
   const char *tzp;
   size_t tzl;
@@ -610,12 +565,12 @@ static const char *UTime2str(const char *beg, const char *end)
   case 2:
     break;
   default:
-    return NULL;
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
   /* Process timezone. */
   if(tzp >= end)
-    return NULL;
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   if(*tzp == 'Z') {
     tzp = "GMT";
     end = tzp + 3;
@@ -624,7 +579,7 @@ static const char *UTime2str(const char *beg, const char *end)
     tzp++;
 
   tzl = end - tzp;
-  return curl_maprintf("%u%.2s-%.2s-%.2s %.2s:%.2s:%.2s %.*s",
+  return Curl_dyn_addf(store, "%u%.2s-%.2s-%.2s %.2s:%.2s:%.2s %.*s",
                        20 - (*beg >= '5'), beg, beg + 2, beg + 4,
                        beg + 6, beg + 8, sec,
                        (int)tzl, tzp);
@@ -632,34 +587,45 @@ static const char *UTime2str(const char *beg, const char *end)
 
 /*
  * Convert an ASN.1 element to a printable string.
- * Return the dynamically allocated string, or NULL if an error occurs.
+ *
+ * Return error
  */
-static const char *ASN1tostr(struct Curl_asn1Element *elem, int type)
+static CURLcode ASN1tostr(struct dynbuf *store,
+                          struct Curl_asn1Element *elem, int type)
 {
+  CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
   if(elem->constructed)
-    return NULL; /* No conversion of structured elements. */
+    return CURLE_OK; /* No conversion of structured elements. */
 
   if(!type)
     type = elem->tag;   /* Type not forced: use element tag as type. */
 
   switch(type) {
   case CURL_ASN1_BOOLEAN:
-    return bool2str(elem->beg, elem->end);
+    result = bool2str(store, elem->beg, elem->end);
+    break;
   case CURL_ASN1_INTEGER:
   case CURL_ASN1_ENUMERATED:
-    return int2str(elem->beg, elem->end);
+    result = int2str(store, elem->beg, elem->end);
+    break;
   case CURL_ASN1_BIT_STRING:
-    return bit2str(elem->beg, elem->end);
+    result = bit2str(store, elem->beg, elem->end);
+    break;
   case CURL_ASN1_OCTET_STRING:
-    return octet2str(elem->beg, elem->end);
+    result = octet2str(store, elem->beg, elem->end);
+    break;
   case CURL_ASN1_NULL:
-    return strdup("");
+    result = Curl_dyn_addn(store, "", 1);
+    break;
   case CURL_ASN1_OBJECT_IDENTIFIER:
-    return OID2str(elem->beg, elem->end, TRUE);
+    result = OID2str(store, elem->beg, elem->end, TRUE);
+    break;
   case CURL_ASN1_UTC_TIME:
-    return UTime2str(elem->beg, elem->end);
+    result = UTime2str(store, elem->beg, elem->end);
+    break;
   case CURL_ASN1_GENERALIZED_TIME:
-    return GTime2str(elem->beg, elem->end);
+    result = GTime2str(store, elem->beg, elem->end);
+    break;
   case CURL_ASN1_UTF8_STRING:
   case CURL_ASN1_NUMERIC_STRING:
   case CURL_ASN1_PRINTABLE_STRING:
@@ -668,87 +634,96 @@ static const char *ASN1tostr(struct Curl_asn1Element *elem, int type)
   case CURL_ASN1_VISIBLE_STRING:
   case CURL_ASN1_UNIVERSAL_STRING:
   case CURL_ASN1_BMP_STRING:
-    return string2str(type, elem->beg, elem->end);
+    result = utf8asn1str(store, type, elem->beg, elem->end);
+    break;
   }
 
-  return NULL;   /* Unsupported. */
+  return result;
 }
 
 /*
- * ASCII encode distinguished name at `dn' into the `buflen'-sized buffer at
- * `buf'.
+ * ASCII encode distinguished name at `dn' into the store dynbuf.
  *
- * Returns the total string length, even if larger than `buflen' or -1 on
- * error.
+ * Returns error.
  */
-static ssize_t encodeDN(char *buf, size_t buflen, struct Curl_asn1Element *dn)
+static CURLcode encodeDN(struct dynbuf *store, struct Curl_asn1Element *dn)
 {
   struct Curl_asn1Element rdn;
   struct Curl_asn1Element atv;
   struct Curl_asn1Element oid;
   struct Curl_asn1Element value;
-  size_t l = 0;
   const char *p1;
   const char *p2;
   const char *p3;
   const char *str;
+  CURLcode result = CURLE_OK;
+  bool added = FALSE;
+  struct dynbuf temp;
+  Curl_dyn_init(&temp, MAX_X509_STR);
 
   for(p1 = dn->beg; p1 < dn->end;) {
     p1 = getASN1Element(&rdn, p1, dn->end);
-    if(!p1)
-      return -1;
+    if(!p1) {
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      goto error;
+    }
     for(p2 = rdn.beg; p2 < rdn.end;) {
       p2 = getASN1Element(&atv, p2, rdn.end);
-      if(!p2)
-        return -1;
+      if(!p2) {
+        result = CURLE_BAD_FUNCTION_ARGUMENT;
+        goto error;
+      }
       p3 = getASN1Element(&oid, atv.beg, atv.end);
-      if(!p3)
-        return -1;
-      if(!getASN1Element(&value, p3, atv.end))
-        return -1;
-      str = ASN1tostr(&oid, 0);
-      if(!str)
-        return -1;
+      if(!p3) {
+        result = CURLE_BAD_FUNCTION_ARGUMENT;
+        goto error;
+      }
+      if(!getASN1Element(&value, p3, atv.end)) {
+        result = CURLE_BAD_FUNCTION_ARGUMENT;
+        goto error;
+      }
+      Curl_dyn_reset(&temp);
+      result = ASN1tostr(&temp, &oid, 0);
+      if(result)
+        goto error;
+
+      str = Curl_dyn_ptr(&temp);
 
       /* Encode delimiter.
          If attribute has a short uppercase name, delimiter is ", ". */
-      if(l) {
-        for(p3 = str; ISUPPER(*p3); p3++)
-          ;
-        for(p3 = (*p3 || p3 - str > 2)? "/": ", "; *p3; p3++) {
-          if(l < buflen)
-            buf[l] = *p3;
-          l++;
-        }
+      for(p3 = str; ISUPPER(*p3); p3++)
+        ;
+      if(added) {
+        if(p3 - str > 2)
+          result = Curl_dyn_addn(store, "/", 1);
+        else
+          result = Curl_dyn_addn(store, ", ", 2);
+        if(result)
+          goto error;
       }
 
       /* Encode attribute name. */
-      for(p3 = str; *p3; p3++) {
-        if(l < buflen)
-          buf[l] = *p3;
-        l++;
-      }
-      free((char *) str);
+      result = Curl_dyn_add(store, str);
+      if(result)
+        goto error;
 
       /* Generate equal sign. */
-      if(l < buflen)
-        buf[l] = '=';
-      l++;
+      result = Curl_dyn_addn(store, "=", 1);
+      if(result)
+        goto error;
 
       /* Generate value. */
-      str = ASN1tostr(&value, 0);
-      if(!str)
-        return -1;
-      for(p3 = str; *p3; p3++) {
-        if(l < buflen)
-          buf[l] = *p3;
-        l++;
-      }
-      free((char *) str);
+      result = ASN1tostr(store, &value, 0);
+      if(result)
+        goto error;
+      Curl_dyn_reset(&temp);
+      added = TRUE; /* use separator for next */
     }
   }
+error:
+  Curl_dyn_free(&temp);
 
-  return l;
+  return result;
 }
 
 #endif /* WANT_EXTRACT_CERTINFO */
@@ -877,25 +852,9 @@ int Curl_parseX509(struct Curl_X509certificate *cert,
 
 #ifdef WANT_EXTRACT_CERTINFO
 
-/*
- * Copy at most 64-characters, terminate with a newline and returns the
- * effective number of stored characters.
- */
-static size_t copySubstring(char *to, const char *from)
-{
-  size_t i;
-  for(i = 0; i < 64; i++) {
-    to[i] = *from;
-    if(!*from++)
-      break;
-  }
-
-  to[i++] = '\n';
-  return i;
-}
-
-static const char *dumpAlgo(struct Curl_asn1Element *param,
-                            const char *beg, const char *end)
+static CURLcode dumpAlgo(struct dynbuf *store,
+                         struct Curl_asn1Element *param,
+                         const char *beg, const char *end)
 {
   struct Curl_asn1Element oid;
 
@@ -903,14 +862,16 @@ static const char *dumpAlgo(struct Curl_asn1Element *param,
 
   beg = getASN1Element(&oid, beg, end);
   if(!beg)
-    return NULL;
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   param->header = NULL;
   param->tag = 0;
   param->beg = param->end = end;
-  if(beg < end)
-    if(!getASN1Element(param, beg, end))
-      return NULL;
-  return OID2str(oid.beg, oid.end, TRUE);
+  if(beg < end) {
+    const char *p = getASN1Element(param, beg, end);
+    if(!p)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
+  return OID2str(store, oid.beg, oid.end, TRUE);
 }
 
 /*
@@ -927,24 +888,47 @@ static CURLcode ssl_push_certinfo(struct Curl_easy *data,
   return Curl_ssl_push_certinfo_len(data, certnum, label, value, valuelen);
 }
 
-/* return 0 on success, 1 on error */
-static int do_pubkey_field(struct Curl_easy *data, int certnum,
-                           const char *label, struct Curl_asn1Element *elem)
+/*
+ * This is a convenience function for push_certinfo_len that takes a
+ * dynbuf value.
+ *
+ * It also does the verbose output if !certnum.
+ */
+static CURLcode ssl_push_certinfo_dyn(struct Curl_easy *data,
+                                      int certnum,
+                                      const char *label,
+                                      struct dynbuf *ptr)
 {
-  const char *output;
-  CURLcode result = CURLE_OK;
+  size_t valuelen = Curl_dyn_len(ptr);
+  char *value = Curl_dyn_ptr(ptr);
+
+  CURLcode result = Curl_ssl_push_certinfo_len(data, certnum, label,
+                                               value, valuelen);
+
+  if(!certnum && !result)
+    infof(data, "   %s: %s", label, value);
+
+  return result;
+}
+
+static CURLcode do_pubkey_field(struct Curl_easy *data, int certnum,
+                                const char *label,
+                                struct Curl_asn1Element *elem)
+{
+  CURLcode result;
+  struct dynbuf out;
+
+  Curl_dyn_init(&out, MAX_X509_STR);
 
   /* Generate a certificate information record for the public key. */
 
-  output = ASN1tostr(elem, 0);
-  if(output) {
+  result = ASN1tostr(&out, elem, 0);
+  if(!result) {
     if(data->set.ssl.certinfo)
-      result = ssl_push_certinfo(data, certnum, label, output);
-    if(!certnum && !result)
-      infof(data, "   %s: %s", label, output);
-    free((char *) output);
+      result = ssl_push_certinfo_dyn(data, certnum, label, &out);
+    Curl_dyn_free(&out);
   }
-  return result ? 1 : 0;
+  return result;
 }
 
 /* return 0 on success, 1 on error */
@@ -1050,24 +1034,12 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
 
 /*
  * Convert an ASN.1 distinguished name into a printable string.
- * Return the dynamically allocated string, or NULL if an error occurs.
+ * Return error.
  */
-static const char *DNtostr(struct Curl_asn1Element *dn)
+static CURLcode DNtostr(struct dynbuf *store,
+                        struct Curl_asn1Element *dn)
 {
-  char *buf = NULL;
-  ssize_t buflen = encodeDN(NULL, 0, dn);
-
-  if(buflen >= 0) {
-    buf = malloc(buflen + 1);
-    if(buf) {
-      if(encodeDN(buf, buflen + 1, dn) == -1) {
-        free(buf);
-        return NULL;
-      }
-      buf[buflen] = '\0';
-    }
-  }
-  return buf;
+  return encodeDN(store, dn);
 }
 
 CURLcode Curl_extract_certinfo(struct Curl_easy *data,
@@ -1077,19 +1049,19 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
 {
   struct Curl_X509certificate cert;
   struct Curl_asn1Element param;
-  const char *ccp;
-  char *cp1;
-  size_t cl1;
-  char *cp2;
+  char *certptr;
+  size_t clen;
+  struct dynbuf out;
   CURLcode result = CURLE_OK;
   unsigned int version;
-  size_t i;
-  size_t j;
+  const char *ptr;
+  int rc;
 
   if(!data->set.ssl.certinfo)
     if(certnum)
       return CURLE_OK;
 
+  Curl_dyn_init(&out, MAX_X509_STR);
   /* Prepare the certificate information for curl_easy_getinfo(). */
 
   /* Extract the certificate ASN.1 elements. */
@@ -1097,135 +1069,126 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
     return CURLE_PEER_FAILED_VERIFICATION;
 
   /* Subject. */
-  ccp = DNtostr(&cert.subject);
-  if(!ccp)
-    return CURLE_OUT_OF_MEMORY;
+  result = DNtostr(&out, &cert.subject);
+  if(result)
+    goto done;
   if(data->set.ssl.certinfo) {
-    result = ssl_push_certinfo(data, certnum, "Subject", ccp);
+    result = ssl_push_certinfo_dyn(data, certnum, "Subject", &out);
     if(result)
-      return result;
+      goto done;
   }
-  if(!certnum)
-    infof(data, "%2d Subject: %s", certnum, ccp);
-  free((char *) ccp);
+  Curl_dyn_reset(&out);
 
   /* Issuer. */
-  ccp = DNtostr(&cert.issuer);
-  if(!ccp)
-    return CURLE_OUT_OF_MEMORY;
-  if(data->set.ssl.certinfo) {
-    result = ssl_push_certinfo(data, certnum, "Issuer", ccp);
-  }
-  if(!certnum)
-    infof(data, "   Issuer: %s", ccp);
-  free((char *) ccp);
+  result = DNtostr(&out, &cert.issuer);
   if(result)
-    return result;
+    goto done;
+  if(data->set.ssl.certinfo) {
+    result = ssl_push_certinfo_dyn(data, certnum, "Issuer", &out);
+    if(result)
+      goto done;
+  }
+  Curl_dyn_reset(&out);
 
   /* Version (always fits in less than 32 bits). */
   version = 0;
-  for(ccp = cert.version.beg; ccp < cert.version.end; ccp++)
-    version = (version << 8) | *(const unsigned char *) ccp;
+  for(ptr = cert.version.beg; ptr < cert.version.end; ptr++)
+    version = (version << 8) | *(const unsigned char *) ptr;
   if(data->set.ssl.certinfo) {
-    ccp = curl_maprintf("%x", version);
-    if(!ccp)
-      return CURLE_OUT_OF_MEMORY;
-    result = ssl_push_certinfo(data, certnum, "Version", ccp);
-    free((char *) ccp);
+    result = Curl_dyn_addf(&out, "%x", version);
     if(result)
-      return result;
+      goto done;
+    result = ssl_push_certinfo_dyn(data, certnum, "Version", &out);
+    if(result)
+      goto done;
+    Curl_dyn_reset(&out);
   }
-  if(!certnum)
-    infof(data, "   Version: %u (0x%x)", version + 1, version);
 
   /* Serial number. */
-  ccp = ASN1tostr(&cert.serialNumber, 0);
-  if(!ccp)
-    return CURLE_OUT_OF_MEMORY;
-  if(data->set.ssl.certinfo)
-    result = ssl_push_certinfo(data, certnum, "Serial Number", ccp);
-  if(!certnum)
-    infof(data, "   Serial Number: %s", ccp);
-  free((char *) ccp);
+  result = ASN1tostr(&out, &cert.serialNumber, 0);
   if(result)
-    return result;
+    goto done;
+  if(data->set.ssl.certinfo) {
+    result = ssl_push_certinfo_dyn(data, certnum, "Serial Number", &out);
+    if(result)
+      goto done;
+  }
+  Curl_dyn_reset(&out);
 
   /* Signature algorithm .*/
-  ccp = dumpAlgo(&param, cert.signatureAlgorithm.beg,
-                 cert.signatureAlgorithm.end);
-  if(!ccp)
-    return CURLE_OUT_OF_MEMORY;
-  if(data->set.ssl.certinfo)
-    result = ssl_push_certinfo(data, certnum, "Signature Algorithm", ccp);
-  if(!certnum)
-    infof(data, "   Signature Algorithm: %s", ccp);
-  free((char *) ccp);
+  result = dumpAlgo(&out, &param, cert.signatureAlgorithm.beg,
+                    cert.signatureAlgorithm.end);
   if(result)
-    return result;
+    goto done;
+  if(data->set.ssl.certinfo) {
+    result = ssl_push_certinfo_dyn(data, certnum, "Signature Algorithm",
+                                   &out);
+    if(result)
+      goto done;
+  }
+  Curl_dyn_reset(&out);
 
   /* Start Date. */
-  ccp = ASN1tostr(&cert.notBefore, 0);
-  if(!ccp)
-    return CURLE_OUT_OF_MEMORY;
-  if(data->set.ssl.certinfo)
-    result = ssl_push_certinfo(data, certnum, "Start Date", ccp);
-  if(!certnum)
-    infof(data, "   Start Date: %s", ccp);
-  free((char *) ccp);
+  result = ASN1tostr(&out, &cert.notBefore, 0);
   if(result)
-    return result;
+    goto done;
+  if(data->set.ssl.certinfo) {
+    result = ssl_push_certinfo_dyn(data, certnum, "Start Date", &out);
+    if(result)
+      goto done;
+  }
+  Curl_dyn_reset(&out);
 
   /* Expire Date. */
-  ccp = ASN1tostr(&cert.notAfter, 0);
-  if(!ccp)
-    return CURLE_OUT_OF_MEMORY;
-  if(data->set.ssl.certinfo)
-    result = ssl_push_certinfo(data, certnum, "Expire Date", ccp);
-  if(!certnum)
-    infof(data, "   Expire Date: %s", ccp);
-  free((char *) ccp);
+  result = ASN1tostr(&out, &cert.notAfter, 0);
   if(result)
-    return result;
+    goto done;
+  if(data->set.ssl.certinfo) {
+    result = ssl_push_certinfo_dyn(data, certnum, "Expire Date", &out);
+    if(result)
+      goto done;
+  }
+  Curl_dyn_reset(&out);
 
   /* Public Key Algorithm. */
-  ccp = dumpAlgo(&param, cert.subjectPublicKeyAlgorithm.beg,
-                 cert.subjectPublicKeyAlgorithm.end);
-  if(!ccp)
-    return CURLE_OUT_OF_MEMORY;
-  if(data->set.ssl.certinfo)
-    result = ssl_push_certinfo(data, certnum, "Public Key Algorithm",
-                                    ccp);
-  if(!result) {
-    int ret;
-    if(!certnum)
-      infof(data, "   Public Key Algorithm: %s", ccp);
-    ret = do_pubkey(data, certnum, ccp, &param, &cert.subjectPublicKey);
-    if(ret)
-      result = CURLE_OUT_OF_MEMORY; /* the most likely error */
-  }
-  free((char *) ccp);
+  result = dumpAlgo(&out, &param, cert.subjectPublicKeyAlgorithm.beg,
+                    cert.subjectPublicKeyAlgorithm.end);
   if(result)
-    return result;
+    goto done;
+  if(data->set.ssl.certinfo) {
+    result = ssl_push_certinfo_dyn(data, certnum, "Public Key Algorithm",
+                                   &out);
+    if(result)
+      goto done;
+  }
+
+  rc = do_pubkey(data, certnum, Curl_dyn_ptr(&out),
+                 &param, &cert.subjectPublicKey);
+  if(rc) {
+    result = CURLE_OUT_OF_MEMORY; /* the most likely error */
+    goto done;
+  }
+  Curl_dyn_reset(&out);
 
   /* Signature. */
-  ccp = ASN1tostr(&cert.signature, 0);
-  if(!ccp)
-    return CURLE_OUT_OF_MEMORY;
-  if(data->set.ssl.certinfo)
-    result = ssl_push_certinfo(data, certnum, "Signature", ccp);
-  if(!certnum)
-    infof(data, "   Signature: %s", ccp);
-  free((char *) ccp);
+  result = ASN1tostr(&out, &cert.signature, 0);
   if(result)
-    return result;
+    goto done;
+  if(data->set.ssl.certinfo) {
+    result = ssl_push_certinfo_dyn(data, certnum, "Signature", &out);
+    if(result)
+      goto done;
+  }
+  Curl_dyn_reset(&out);
 
   /* Generate PEM certificate. */
   result = Curl_base64_encode(cert.certificate.beg,
                               cert.certificate.end - cert.certificate.beg,
-                              &cp1, &cl1);
+                              &certptr, &clen);
   if(result)
-    return result;
-  /* Compute the number of characters in final certificate string. Format is:
+    goto done;
+
+  /* Generate the final output certificate string. Format is:
      -----BEGIN CERTIFICATE-----\n
      <max 64 base64 characters>\n
      .
@@ -1233,207 +1196,34 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
      .
      -----END CERTIFICATE-----\n
    */
-  i = 28 + cl1 + (cl1 + 64 - 1) / 64 + 26;
-  cp2 = malloc(i + 1);
-  if(!cp2) {
-    free(cp1);
-    return CURLE_OUT_OF_MEMORY;
-  }
+
+  Curl_dyn_reset(&out);
+
   /* Build the certificate string. */
-  i = copySubstring(cp2, "-----BEGIN CERTIFICATE-----");
-  for(j = 0; j < cl1; j += 64)
-    i += copySubstring(cp2 + i, cp1 + j);
-  i += copySubstring(cp2 + i, "-----END CERTIFICATE-----");
-  cp2[i] = '\0';
-  free(cp1);
-  if(data->set.ssl.certinfo)
-    result = ssl_push_certinfo(data, certnum, "Cert", cp2);
-  if(!certnum)
-    infof(data, "%s", cp2);
-  free(cp2);
+  result = Curl_dyn_add(&out, "-----BEGIN CERTIFICATE-----\n");
+  if(!result) {
+    size_t j = 0;
+
+    while(!result && (j < clen)) {
+      size_t chunksize = (clen - j) > 64 ? 64 : (clen - j);
+      result = Curl_dyn_addn(&out, &certptr[j], chunksize);
+      if(!result)
+        result = Curl_dyn_addn(&out, "\n", 1);
+      j += chunksize;
+    }
+    if(!result)
+      result = Curl_dyn_add(&out, "-----END CERTIFICATE-----\n");
+  }
+  free(certptr);
+  if(!result)
+    if(data->set.ssl.certinfo)
+      result = ssl_push_certinfo_dyn(data, certnum, "Cert", &out);
+
+done:
+  Curl_dyn_free(&out);
   return result;
 }
 
 #endif /* WANT_EXTRACT_CERTINFO */
 
 #endif /* USE_GNUTLS or USE_WOLFSSL or USE_SCHANNEL or USE_SECTRANSP */
-
-#ifdef WANT_VERIFYHOST
-
-static const char *checkOID(const char *beg, const char *end,
-                            const char *oid)
-{
-  struct Curl_asn1Element e;
-  const char *ccp;
-  const char *p;
-  bool matched;
-
-  /* Check if first ASN.1 element at `beg' is the given OID.
-     Return a pointer in the source after the OID if found, else NULL. */
-
-  ccp = getASN1Element(&e, beg, end);
-  if(!ccp || e.tag != CURL_ASN1_OBJECT_IDENTIFIER)
-    return NULL;
-
-  p = OID2str(e.beg, e.end, FALSE);
-  if(!p)
-    return NULL;
-
-  matched = !strcmp(p, oid);
-  free((char *) p);
-  return matched? ccp: NULL;
-}
-
-CURLcode Curl_verifyhost(struct Curl_cfilter *cf,
-                         struct Curl_easy *data,
-                         const char *beg, const char *end)
-{
-  struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  struct Curl_X509certificate cert;
-  struct Curl_asn1Element dn;
-  struct Curl_asn1Element elem;
-  struct Curl_asn1Element ext;
-  struct Curl_asn1Element name;
-  const char *p;
-  const char *q;
-  char *dnsname;
-  int matched = -1;
-  size_t addrlen = (size_t) -1;
-  ssize_t len;
-  size_t hostlen;
-
-#ifdef ENABLE_IPV6
-  struct in6_addr addr;
-#else
-  struct in_addr addr;
-#endif
-
-  /* Verify that connection server matches info in X509 certificate at
-     `beg'..`end'. */
-
-  if(!conn_config->verifyhost)
-    return CURLE_OK;
-
-  if(Curl_parseX509(&cert, beg, end))
-    return CURLE_PEER_FAILED_VERIFICATION;
-
-  hostlen = strlen(connssl->peer.hostname);
-
-  /* Get the server IP address. */
-#ifdef ENABLE_IPV6
-  if(cf->conn->bits.ipv6_ip &&
-     Curl_inet_pton(AF_INET6, connssl->peer.hostname, &addr))
-    addrlen = sizeof(struct in6_addr);
-  else
-#endif
-  if(Curl_inet_pton(AF_INET, connssl->peer.hostname, &addr))
-    addrlen = sizeof(struct in_addr);
-
-  /* Process extensions. */
-  for(p = cert.extensions.beg; p < cert.extensions.end && matched != 1;) {
-    p = getASN1Element(&ext, p, cert.extensions.end);
-    if(!p)
-      return CURLE_PEER_FAILED_VERIFICATION;
-
-    /* Check if extension is a subjectAlternativeName. */
-    ext.beg = checkOID(ext.beg, ext.end, sanOID);
-    if(ext.beg) {
-      ext.beg = getASN1Element(&elem, ext.beg, ext.end);
-      if(!ext.beg)
-        return CURLE_PEER_FAILED_VERIFICATION;
-      /* Skip critical if present. */
-      if(elem.tag == CURL_ASN1_BOOLEAN) {
-        ext.beg = getASN1Element(&elem, ext.beg, ext.end);
-        if(!ext.beg)
-          return CURLE_PEER_FAILED_VERIFICATION;
-      }
-      /* Parse the octet string contents: is a single sequence. */
-      if(!getASN1Element(&elem, elem.beg, elem.end))
-        return CURLE_PEER_FAILED_VERIFICATION;
-      /* Check all GeneralNames. */
-      for(q = elem.beg; matched != 1 && q < elem.end;) {
-        q = getASN1Element(&name, q, elem.end);
-        if(!q)
-          break;
-        switch(name.tag) {
-        case 2: /* DNS name. */
-          len = utf8asn1str(&dnsname, CURL_ASN1_IA5_STRING,
-                            name.beg, name.end);
-          if(len > 0 && (size_t)len == strlen(dnsname))
-            matched = Curl_cert_hostcheck(dnsname, (size_t)len,
-                                          connssl->peer.hostname, hostlen);
-          else
-            matched = 0;
-          free(dnsname);
-          break;
-
-        case 7: /* IP address. */
-          matched = (size_t)(name.end - name.beg) == addrlen &&
-            !memcmp(&addr, name.beg, addrlen);
-          break;
-        }
-      }
-    }
-  }
-
-  switch(matched) {
-  case 1:
-    /* an alternative name matched the server hostname */
-    infof(data, "  subjectAltName: %s matched", connssl->dispname);
-    return CURLE_OK;
-  case 0:
-    /* an alternative name field existed, but didn't match and then
-       we MUST fail */
-    infof(data, "  subjectAltName does not match %s", connssl->dispname);
-    return CURLE_PEER_FAILED_VERIFICATION;
-  }
-
-  /* Process subject. */
-  name.header = NULL;
-  name.beg = name.end = "";
-  q = cert.subject.beg;
-  /* we have to look to the last occurrence of a commonName in the
-     distinguished one to get the most significant one. */
-  while(q < cert.subject.end) {
-    q = getASN1Element(&dn, q, cert.subject.end);
-    if(!q)
-      break;
-    for(p = dn.beg; p < dn.end;) {
-      p = getASN1Element(&elem, p, dn.end);
-      if(!p)
-        return CURLE_PEER_FAILED_VERIFICATION;
-      /* We have a DN's AttributeTypeAndValue: check it in case it's a CN. */
-      elem.beg = checkOID(elem.beg, elem.end, cnOID);
-      if(elem.beg)
-        name = elem;    /* Latch CN. */
-    }
-  }
-
-  /* Check the CN if found. */
-  if(!getASN1Element(&elem, name.beg, name.end))
-    failf(data, "SSL: unable to obtain common name from peer certificate");
-  else {
-    len = utf8asn1str(&dnsname, elem.tag, elem.beg, elem.end);
-    if(len < 0) {
-      free(dnsname);
-      return CURLE_OUT_OF_MEMORY;
-    }
-    if(strlen(dnsname) != (size_t) len)         /* Nul byte in string ? */
-      failf(data, "SSL: illegal cert name field");
-    else if(Curl_cert_hostcheck((const char *) dnsname,
-                                len, connssl->peer.hostname, hostlen)) {
-      infof(data, "  common name: %s (matched)", dnsname);
-      free(dnsname);
-      return CURLE_OK;
-    }
-    else
-      failf(data, "SSL: certificate subject name '%s' does not match "
-            "target host name '%s'", dnsname, connssl->dispname);
-    free(dnsname);
-  }
-
-  return CURLE_PEER_FAILED_VERIFICATION;
-}
-
-#endif /* WANT_VERIFYHOST */

@@ -10,13 +10,13 @@ HTTP Strict-Transport-Security. Added as experimental in curl
 ## Behavior
 
 libcurl features an in-memory cache for HSTS hosts, so that subsequent
-HTTP-only requests to a host name present in the cache will get internally
+HTTP-only requests to a hostname present in the cache will get internally
 "redirected" to the HTTPS version.
 
 ## `curl_easy_setopt()` options:
 
  - `CURLOPT_HSTS_CTRL` - enable HSTS for this easy handle
- - `CURLOPT_HSTS` - specify file name where to store the HSTS cache on close
+ - `CURLOPT_HSTS` - specify filename where to store the HSTS cache on close
   (and possibly read from at startup)
 
 ## curl command line options

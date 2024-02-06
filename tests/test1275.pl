@@ -30,7 +30,8 @@ my @m = `git ls-files -- $root`;
 my $errors;
 
 my %accepted=('curl' => 1,
-              'libcurl' => 1);
+              'libcurl' => 1,
+              'c-ares' => 1);
 
 sub checkfile {
     my ($f) = @_;
@@ -39,20 +40,35 @@ sub checkfile {
         return;
     }
     open(my $fh, "<", "$f");
-    my $l = 1;
+    my $l;
     my $prevl;
     my $ignore = 0;
+    my $metadata = 0;
     while(<$fh>) {
         my $line = $_;
         chomp $line;
+        $l++;
+        if(($l == 1) && ($line =~ /^---/)) {
+            # first line is a meta-data divider, skip to the next one
+            $metadata = 1;
+            print STDERR "skip meta-data in $f\n";
+            next;
+        }
+        elsif($metadata) {
+            if($line !~ /^---/) {
+                next;
+            }
+            $metadata = 0;
+            next;
+        }
         if($line =~ /^(\`\`\`|\~\~\~)/) {
             # start or stop ignore-mode
             $ignore ^= 1;
         }
         if(!$ignore) {
-            if(($prevl =~ /\.\z/) && ($line =~ /^( *)([a-z]+)/)) {
+            if(($prevl =~ /\.\z/) && ($line =~ /^( *)([a-z-]+)/)) {
                 my ($prefix, $word) = ($1, $2);
-                if(!$accepted{$word}) {
+                if($word =~ /^[a-z]/ && !$accepted{$word}) {
                     my $c = length($prefix);
                     print STDERR
                         "$f:$l:$c:error: lowercase $word after period\n";
@@ -62,14 +78,16 @@ sub checkfile {
                     $errors++;
                 }
             }
-            elsif($line =~ /^(.*)\. +([a-z]+)/) {
+            elsif($line =~ /^(.*)\. +([a-z-]+)/) {
                 my ($prefix, $word) = ($1, $2);
 
                 if(($prefix =~ /\.\.\z/) ||
                    ($prefix =~ /[0-9]\z/) ||
                    ($prefix =~ /e.g\z/) ||
                    ($prefix =~ /i.e\z/) ||
+                   ($prefix =~ /E.g\z/) ||
                    ($prefix =~ /etc\z/) ||
+                   ($word !~ /^[a-z]/) ||
                    $accepted{$word}) {
                 }
                 else {
@@ -84,7 +102,6 @@ sub checkfile {
             }
         }
         $prevl = $line;
-        $l++;
     }
     close($fh);
 }

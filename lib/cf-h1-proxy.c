@@ -70,6 +70,7 @@ struct h1_tunnel_state {
   struct dynbuf request_data;
   size_t nsent;
   size_t headerlines;
+  struct Curl_chunker ch;
   enum keeponval {
     KEEPON_DONE,
     KEEPON_CONNECT,
@@ -133,6 +134,7 @@ static CURLcode tunnel_init(struct Curl_cfilter *cf,
 
   Curl_dyn_init(&ts->rcvbuf, DYN_PROXY_CONNECT_HEADERS);
   Curl_dyn_init(&ts->request_data, DYN_HTTP_REQUEST);
+  Curl_httpchunk_init(data, &ts->ch, TRUE);
 
   *pts =  ts;
   connkeep(cf->conn, "HTTP proxy CONNECT");
@@ -146,14 +148,6 @@ static void h1_tunnel_go_state(struct Curl_cfilter *cf,
 {
   if(ts->tunnel_state == new_state)
     return;
-  /* leaving this one */
-  switch(ts->tunnel_state) {
-  case H1_TUNNEL_CONNECT:
-    data->req.ignorebody = FALSE;
-    break;
-  default:
-    break;
-  }
   /* entering this one */
   switch(new_state) {
   case H1_TUNNEL_INIT:
@@ -212,6 +206,7 @@ static void tunnel_free(struct Curl_cfilter *cf,
     h1_tunnel_go_state(cf, ts, H1_TUNNEL_FAILED, data);
     Curl_dyn_free(&ts->rcvbuf);
     Curl_dyn_free(&ts->request_data);
+    Curl_httpchunk_free(data, &ts->ch);
     free(ts);
     cf->ctx = NULL;
   }
@@ -344,8 +339,8 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
                                STRCONST("chunked"))) {
       infof(data, "CONNECT responded chunked");
       ts->chunked_encoding = TRUE;
-      /* init our chunky engine */
-      Curl_httpchunk_init(data);
+      /* reset our chunky engine */
+      Curl_httpchunk_reset(data, &ts->ch, TRUE);
     }
   }
   else if(Curl_compareheader(header,
@@ -373,7 +368,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
   struct SingleRequest *k = &data->req;
   curl_socket_t tunnelsocket = Curl_conn_cf_get_socket(cf, data);
   char *linep;
-  size_t perline;
+  size_t line_len;
   int error, writetype;
 
 #define SELECT_OK      0
@@ -432,17 +427,17 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
           break;
         }
       }
-      else {
+      else if(ts->chunked_encoding) {
         /* chunked-encoded body, so we need to do the chunked dance
            properly to know when the end of the body is reached */
-        CHUNKcode r;
-        CURLcode extra;
         size_t consumed = 0;
 
         /* now parse the chunked piece of data so that we can
            properly tell when the stream ends */
-        r = Curl_httpchunk_read(data, &byte, 1, &consumed, &extra);
-        if(r == CHUNKE_STOP) {
+        result = Curl_httpchunk_read(data, &ts->ch, &byte, 1, &consumed);
+        if(result)
+          return result;
+        if(Curl_httpchunk_is_done(data, &ts->ch)) {
           /* we're done reading chunks! */
           infof(data, "chunk reading DONE");
           ts->keepon = KEEPON_DONE;
@@ -462,19 +457,19 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
 
     ts->headerlines++;
     linep = Curl_dyn_ptr(&ts->rcvbuf);
-    perline = Curl_dyn_len(&ts->rcvbuf); /* amount of bytes in this line */
+    line_len = Curl_dyn_len(&ts->rcvbuf); /* amount of bytes in this line */
 
     /* output debug if that is requested */
-    Curl_debug(data, CURLINFO_HEADER_IN, linep, perline);
+    Curl_debug(data, CURLINFO_HEADER_IN, linep, line_len);
 
     /* send the header to the callback */
     writetype = CLIENTWRITE_HEADER | CLIENTWRITE_CONNECT |
       (ts->headerlines == 1 ? CLIENTWRITE_STATUS : 0);
-    result = Curl_client_write(data, writetype, linep, perline);
+    result = Curl_client_write(data, writetype, linep, line_len);
     if(result)
       return result;
 
-    result = Curl_bump_headersize(data, perline, TRUE);
+    result = Curl_bump_headersize(data, line_len, TRUE);
     if(result)
       return result;
 
@@ -497,29 +492,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
                 " bytes of response-body", ts->cl);
         }
         else if(ts->chunked_encoding) {
-          CHUNKcode r;
-          CURLcode extra;
-          size_t consumed = 0;
-
           infof(data, "Ignore chunked response-body");
-
-          /* We set ignorebody true here since the chunked decoder
-             function will acknowledge that. Pay attention so that this is
-             cleared again when this function returns! */
-          k->ignorebody = TRUE;
-
-          if(linep[1] == '\n')
-            /* this can only be a LF if the letter at index 0 was a CR */
-            linep++;
-
-          /* now parse the chunked piece of data so that we can properly
-             tell when the stream ends */
-          r = Curl_httpchunk_read(data, linep + 1, 1, &consumed, &extra);
-          if(r == CHUNKE_STOP) {
-            /* we're done reading chunks! */
-            infof(data, "chunk reading DONE");
-            ts->keepon = KEEPON_DONE;
-          }
         }
         else {
           /* without content-length or chunked encoding, we
@@ -752,7 +725,7 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
   }
 
   if(!Curl_checkProxyheaders(data, conn, STRCONST("User-Agent")) &&
-     data->set.str[STRING_USERAGENT]) {
+     data->set.str[STRING_USERAGENT] && *data->set.str[STRING_USERAGENT]) {
     struct dynbuf ua;
     Curl_dyn_init(&ua, DYN_HTTP_REQUEST);
     result = Curl_dyn_addf(&ua, "User-Agent: %s\r\n",
@@ -1030,6 +1003,14 @@ out:
   *done = (result == CURLE_OK) && tunnel_is_established(cf->ctx);
   if(*done) {
     cf->connected = TRUE;
+    /* Restore `data->req` fields that may habe been touched */
+    data->req.header = TRUE; /* assume header */
+    data->req.bytecount = 0;
+    data->req.ignorebody = FALSE;
+    Curl_client_cleanup(data);
+    Curl_pgrsSetUploadCounter(data, 0);
+    Curl_pgrsSetDownloadCounter(data, 0);
+
     tunnel_free(cf, data);
   }
   return result;

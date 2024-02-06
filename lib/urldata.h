@@ -683,7 +683,8 @@ struct SingleRequest {
   enum expect100 exp100;        /* expect 100 continue state */
   enum upgrade101 upgr101;      /* 101 upgrade state */
 
-  /* Content unencoding stack. See sec 3.5, RFC2616. */
+  /* Client Writer stack, handles trasnfer- and content-encodings, protocol
+   * checks, pausing by client callbacks. */
   struct Curl_cwriter *writer_stack;
   time_t timeofdoc;
   long bodywrites;
@@ -730,11 +731,10 @@ struct SingleRequest {
 #ifndef CURL_DISABLE_COOKIES
   unsigned char setcookies;
 #endif
-  unsigned char writer_stack_depth; /* Unencoding stack depth. */
   BIT(header);        /* incoming data has HTTP header */
-  BIT(badheader);     /* header parsing found sth not a header */
   BIT(content_range); /* set TRUE if Content-Range: was found */
   BIT(download_done); /* set to TRUE when download is complete */
+  BIT(eos_written);   /* iff EOS has been written to client */
   BIT(upload_done);   /* set to TRUE when doing chunked transfer-encoding
                          upload and we're uploading the last chunk */
   BIT(ignorebody);    /* we read a response-body but we ignore it! */
@@ -816,10 +816,10 @@ struct Curl_handler {
                          bool dead_connection);
 
   /* If used, this function gets called from transfer.c:readwrite_data() to
-     allow the protocol to do extra reads/writes */
-  CURLcode (*readwrite)(struct Curl_easy *data, struct connectdata *conn,
-                        const char *buf, size_t blen,
-                        size_t *pconsumed, bool *readmore);
+     allow the protocol to do extra handling in writing response to
+     the client. */
+  CURLcode (*write_resp)(struct Curl_easy *data, const char *buf, size_t blen,
+                         bool is_eos, bool *done);
 
   /* This function can perform various checks on the connection. See
      CONNCHECK_* for more information about the checks that can be performed,
@@ -897,11 +897,6 @@ struct ldapconninfo;
  */
 struct connectdata {
   struct Curl_llist_element bundle_node; /* conncache */
-
-  /* chunk is for HTTP chunked encoding, but is in the general connectdata
-     struct only because we can do just about any protocol through an HTTP
-     proxy and an HTTP proxy may in fact respond using chunked encoding */
-  struct Curl_chunker chunk;
 
   curl_closesocket_callback fclosesocket; /* function closing the socket(s) */
   void *closesocket_client;
@@ -1023,11 +1018,6 @@ struct connectdata {
 
   struct negotiatedata negotiate; /* state data for host Negotiate auth */
   struct negotiatedata proxyneg; /* state data for proxy Negotiate auth */
-#endif
-
-#ifndef CURL_DISABLE_HTTP
-  /* for chunked-encoded trailer */
-  struct dynbuf trailer;
 #endif
 
   union {

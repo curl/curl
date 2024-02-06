@@ -10,7 +10,7 @@ Get a README file from an FTP server:
 
     curl ftp://ftp.example.com/README
 
-Get a web page from a server using port 8000:
+Get a webpage from a server using port 8000:
 
     curl http://www.example.com:8000/
 
@@ -63,12 +63,12 @@ Get a file from an SMB server:
 
 ## Download to a File
 
-Get a web page and store in a local file with a specific name:
+Get a webpage and store in a local file with a specific name:
 
     curl -o thatpage.html http://www.example.com/
 
-Get a web page and store in a local file, make the local file get the name of
-the remote document (if no file name part is specified in the URL, this will
+Get a webpage and store in a local file, make the local file get the name of
+the remote document (if no filename part is specified in the URL, this will
 fail):
 
     curl -O http://www.example.com/index.html
@@ -224,7 +224,7 @@ Upload data from a specified file, login with user and password:
 
     curl -T uploadfile -u user:passwd ftp://ftp.example.com/myfile
 
-Upload a local file to the remote site, and use the local file name at the
+Upload a local file to the remote site, and use the local filename at the
 remote site too:
 
     curl -T uploadfile -u user:passwd ftp://ftp.example.com/
@@ -266,7 +266,7 @@ the actual data).
     curl -v ftp://ftp.example.com/
 
 To get even more details and information on what curl does, try using the
-`--trace` or `--trace-ascii` options with a given file name to log to, like
+`--trace` or `--trace-ascii` options with a given filename to log to, like
 this:
 
     curl --trace trace.txt www.haxx.se
@@ -347,7 +347,7 @@ multipart/form-data type. This latter type supports things like file upload.
 `-F` accepts parameters like `-F "name=contents"`. If you want the contents to
 be read from a file, use `@filename` as contents. When specifying a file, you
 can also specify the file content type by appending `;type=<mime type>` to the
-file name. You can also post the contents of several files in one field.  For
+filename. You can also post the contents of several files in one field.  For
 example, the field name `coolfiles` is used to send three files, with
 different content types using the following syntax:
 
@@ -360,7 +360,7 @@ earlier file if several files are specified in a list) or else it will use the
 default type `application/octet-stream`.
 
 Emulate a fill-in form with `-F`. Let's say you fill in three fields in a
-form. One field is a file name which to post, one field is your name and one
+form. One field is a filename which to post, one field is your name and one
 field is a file description. We want to post the file we have written named
 `cooltext.txt`. To let curl do the posting of this data instead of your
 favorite browser, you have to read the HTML source of the form page and find
@@ -556,7 +556,7 @@ transfer stalls during periods.
 ## Config File
 
 Curl automatically tries to read the `.curlrc` file (or `_curlrc` file on
-Microsoft Windows systems) from the user's home dir on startup.
+Microsoft Windows systems) from the user's home directory on startup.
 
 The config file could be made up with normal command line switches, but you
 can also specify the long options without the dashes to make it more
@@ -592,7 +592,7 @@ URL by making a config file similar to:
     url = "http://help.with.curl.example.com/curlhelp.html"
 
 You can specify another config file to be read by using the `-K`/`--config`
-flag. If you set config file name to `-` it will read the config from stdin,
+flag. If you set config filename to `-` it will read the config from stdin,
 which can be handy if you want to hide options from being visible in process
 tables etc:
 
@@ -601,7 +601,7 @@ tables etc:
 ## Extra Headers
 
 When using curl in your own programs, you may end up needing to pass on your
-own custom headers when getting a web page. You can do this by using the `-H`
+own custom headers when getting a webpage. You can do this by using the `-H`
 flag.
 
 Example, send the header `X-you-and-me: yes` to the server when getting a
@@ -626,11 +626,11 @@ directory at your ftp site, do:
     curl ftp://user:passwd@my.example.com/README
 
 If you want the README file from the root directory of that same site, you
-need to specify the absolute file name:
+need to specify the absolute filename:
 
     curl ftp://user:passwd@my.example.com//README
 
-(I.e with an extra slash in front of the file name.)
+(I.e with an extra slash in front of the filename.)
 
 ## SFTP and SCP and Path Names
 
@@ -676,7 +676,7 @@ Download with `PORT` but use 192.168.0.10 as our IP address to use:
 
 ## Network Interface
 
-Get a web page from a server using a specified port for the interface:
+Get a webpage from a server using a specified port for the interface:
 
     curl --interface eth0:1 http://www.example.com/
 
@@ -829,7 +829,7 @@ set in (only an asterisk, `*` matches all hosts)
 
     NO_PROXY
 
-If the host name matches one of these strings, or the host is within the
+If the hostname matches one of these strings, or the host is within the
 domain of one of these strings, transactions with that node will not be done
 over proxy. When a domain is used, it needs to start with a period. A user can
 specify that both www.example.com and foo.example.com should not use a proxy
@@ -888,7 +888,7 @@ command line similar to:
 
     curl telnet://remote.example.com
 
-And enter the data to pass to the server on stdin. The result will be sent to
+Enter the data to pass to the server on stdin. The result will be sent to
 stdout or to the file you specify with `-o`.
 
 You might want the `-N`/`--no-buffer` option to switch off the buffered output

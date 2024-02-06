@@ -343,22 +343,6 @@ static CURLcode pre_transfer(struct GlobalConfig *global,
   return result;
 }
 
-#ifdef __AMIGA__
-static void AmigaSetComment(struct per_transfer *per,
-                            CURLcode result)
-{
-  struct OutStruct *outs = &per->outs;
-  if(!result && outs->s_isreg && outs->filename) {
-    /* Set the url (up to 80 chars) as comment for the file */
-    if(strlen(per->this_url) > 78)
-      per->this_url[79] = '\0';
-    SetComment(outs->filename, per->this_url);
-  }
-}
-#else
-#define AmigaSetComment(x,y) Curl_nop_stmt
-#endif
-
 /* When doing serial transfers, we use a single fixed error area */
 static char global_errorbuffer[CURL_ERROR_SIZE];
 
@@ -653,12 +637,19 @@ noretry:
       errorf(config->global, "curl: (%d) Failed writing body", result);
     }
     if(result && config->rm_partial) {
-      notef(global, "Removing output file: %s", outs->filename);
-      unlink(outs->filename);
+      struct_stat st;
+      if(!stat(outs->filename, &st) &&
+         S_ISREG(st.st_mode)) {
+        if(!unlink(outs->filename))
+          notef(global, "Removed output file: %s", outs->filename);
+        else
+          warnf(global, "Failed removing: %s", outs->filename);
+      }
+      else
+        warnf(global, "Skipping removal; not a regular file: %s",
+              outs->filename);
     }
   }
-
-  AmigaSetComment(per, result);
 
   /* File time can only be set _after_ the file has been closed */
   if(!result && config->remote_time && outs->s_isreg && outs->filename) {
@@ -1283,6 +1274,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(result && (use_proto == proto_ipfs || use_proto == proto_ipns))
           break;
 
+#ifndef DEBUGBUILD
         /* On most modern OSes, exiting works thoroughly,
            we'll clean everything up via exit(), so don't bother with
            slow cleanups. Crappy ones might need to skip this.
@@ -1291,6 +1283,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         result = curl_easy_setopt(curl, CURLOPT_QUICK_EXIT, 1L);
         if(result)
           break;
+#endif
 
         if(!config->tcp_nodelay)
           my_setopt(curl, CURLOPT_TCP_NODELAY, 0L);

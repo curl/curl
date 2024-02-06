@@ -193,8 +193,8 @@ static void getconfig(void)
     logmsg("parse config file");
     while(fgets(buffer, sizeof(buffer), fp)) {
       char key[32];
-      char value[32];
-      if(2 == sscanf(buffer, "%31s %31s", key, value)) {
+      char value[260];
+      if(2 == sscanf(buffer, "%31s %259s", key, value)) {
         if(!strcmp(key, "version")) {
           config.version = byteval(value);
           logmsg("version [%d] set", config.version);
@@ -365,8 +365,8 @@ static curl_socket_t socks4(curl_socket_t fd,
 
 static curl_socket_t sockit(curl_socket_t fd)
 {
-  unsigned char buffer[256 + 16];
-  unsigned char response[256 + 16];
+  unsigned char buffer[2*256 + 16];
+  unsigned char response[2*256 + 16];
   ssize_t rc;
   unsigned char len;
   unsigned char type;

@@ -91,8 +91,8 @@ OM_uint32 gss_init_sec_context(OM_uint32 *min,
             OM_uint32 *time_rec)
 {
   /* The token will be encoded in base64 */
-  int length = APPROX_TOKEN_LEN * 3 / 4;
-  int used = 0;
+  size_t length = APPROX_TOKEN_LEN * 3 / 4;
+  size_t used = 0;
   char *token = NULL;
   const char *creds = NULL;
   gss_ctx_id_t ctx = NULL;
@@ -219,8 +219,8 @@ OM_uint32 gss_init_sec_context(OM_uint32 *min,
   /* Token format: creds:target:type:padding */
   /* Note: this is using the *real* snprintf() and not the curl provided
      one */
-  used = snprintf(token, length, "%s:%s:%d:", creds,
-                  (char *) target_name, ctx->sent);
+  used = (size_t) snprintf(token, length, "%s:%s:%d:", creds,
+                           (char *) target_name, ctx->sent);
 
   if(used >= length) {
     free(token);

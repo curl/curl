@@ -1,0 +1,373 @@
+#!/usr/bin/env perl
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
+#
+###########################################################################
+
+=begin comment
+
+Converts a curldown file to nroff (man page).
+
+=end comment
+=cut
+
+use strict;
+use warnings;
+
+my $cd2nroff = "0.1"; # to keep check
+my $dir;
+my $extension;
+my $keepfilename;
+
+while(@ARGV) {
+    if($ARGV[0] eq "-d") {
+        shift @ARGV;
+        $dir = shift @ARGV;
+    }
+    elsif($ARGV[0] eq "-e") {
+        shift @ARGV;
+        $extension = shift @ARGV;
+    }
+    elsif($ARGV[0] eq "-k") {
+        shift @ARGV;
+        $keepfilename = 1;
+    }
+    elsif($ARGV[0] eq "-h") {
+        print <<HELP
+Usage: cd2nroff [options] [file.md]
+
+-d <dir> Write the output to the file name from the meta-data in the
+         specified directory, instead of writing to stdout
+-e <ext> If -d is used, this option can provide an added "extension", arbitrary
+         text really, to append to the file name.
+-h       This help text,
+-v       Show version then exit
+HELP
+            ;
+        exit 0;
+    }
+    elsif($ARGV[0] eq "-v") {
+        print "cd2nroff version $cd2nroff\n";
+        exit 0;
+    }
+    else {
+        last;
+    }
+}
+
+use POSIX qw(strftime);
+my @ts;
+if (defined($ENV{SOURCE_DATE_EPOCH})) {
+    @ts = localtime($ENV{SOURCE_DATE_EPOCH});
+} else {
+    @ts = localtime;
+}
+my $date = strftime "%B %d %Y", @ts;
+
+sub outseealso {
+    my (@sa) = @_;
+    my $comma = 0;
+    my @o;
+    push @o, ".SH SEE ALSO\n";
+    for my $s (sort @sa) {
+        push @o, sprintf "%s.BR $s", $comma ? ",\n": "";
+        $comma = 1;
+    }
+    push @o, "\n";
+    return @o;
+}
+
+sub single {
+    my @seealso;
+    my $d;
+    my ($f)=@_;
+    my $copyright;
+    my $errors = 0;
+    my $fh;
+    my $line;
+    my $salist;
+    my $section;
+    my $source;
+    my $spdx;
+    my $start = 0;
+    my $title;
+
+    if(defined($f)) {
+        if(!open($fh, "<:crlf", "$f")) {
+            print STDERR "Failed to open $f : $!\n";
+            return 1;
+        }
+    }
+    else {
+        $f = "STDIN";
+        $fh = \*STDIN;
+        binmode($fh, ":crlf");
+    }
+    while(<$fh>) {
+        $line++;
+        if(!$start) {
+            if(/^---/) {
+                # header starts here
+                $start = 1;
+            }
+            next;
+        }
+        if(/^Title: *(.*)/i) {
+            $title=$1;
+        }
+        elsif(/^Section: *(.*)/i) {
+            $section=$1;
+        }
+        elsif(/^Source: *(.*)/i) {
+            $source=$1;
+        }
+        elsif(/^See-also: +(.*)/i) {
+            $salist = 0;
+            push @seealso, $1;
+        }
+        elsif(/^See-also: */i) {
+            if($seealso[0]) {
+                print STDERR "$f:$line:1:ERROR: bad See-Also, needs list\n";
+                return 2;
+            }
+            $salist = 1;
+        }
+        elsif(/^ +- (.*)/i) {
+            # the only list we support is the see-also
+            if($salist) {
+                push @seealso, $1;
+            }
+        }
+        # REUSE-IgnoreStart
+        elsif(/^C: (.*)/i) {
+            $copyright=$1;
+        }
+        elsif(/^SPDX-License-Identifier: (.*)/i) {
+            $spdx=$1;
+        }
+        # REUSE-IgnoreEnd
+        elsif(/^---/) {
+            # end of the header section
+            if(!$title) {
+                print STDERR "ERROR: no 'Title:' in $f\n";
+                return 1;
+            }
+            if(!$section) {
+                print STDERR "ERROR: no 'Section:' in $f\n";
+                return 2;
+            }
+            if(!$seealso[0]) {
+                print STDERR "$f:$line:1:ERROR: no 'See-also:' present\n";
+                return 2;
+            }
+            if(!$copyright) {
+                print STDERR "$f:$line:1:ERROR: no 'C:' field present\n";
+                return 2;
+            }
+            if(!$spdx) {
+                print STDERR "$f:$line:1:ERROR: no 'SPDX-License-Identifier:' field present\n";
+                return 2;
+            }
+            last;
+        }
+        else {
+            chomp;
+            print STDERR "WARN: unrecognized line in $f, ignoring:\n:'$_';"
+        }
+    }
+
+    if(!$start) {
+        print STDERR "$f:$line:1:ERROR: no header present\n";
+        return 2;
+    }
+
+    my @desc;
+    my $quote = 0;
+    my $blankline = 0;
+    my $header = 0;
+
+    # cut off the leading path from the file name, if any
+    $f =~ s/^(.*[\\\/])//;
+
+    push @desc, ".\\\" generated by cd2nroff $cd2nroff from $f\n";
+    push @desc, ".TH $title $section \"$date\" $source\n";
+    while(<$fh>) {
+        $line++;
+
+        $d = $_;
+
+        if($quote) {
+            if($quote == 4) {
+                # remove the indentation
+                if($d =~ /^    (.*)/) {
+                    push @desc, "$1\n";
+                    next;
+                }
+                else {
+                    # end of quote
+                    $quote = 0;
+                    push @desc, ".fi\n";
+                    next;
+                }
+            }
+            if(/^~~~/) {
+                # end of quote
+                $quote = 0;
+                push @desc, ".fi\n";
+                next;
+            }
+            # convert single backslahes to doubles
+            $d =~ s/\\/\\\\/g;
+            # lines starting with a period needs it escaped
+            $d =~ s/^\./\\&./;
+            push @desc, $d;
+            next;
+        }
+
+        # **bold**
+        $d =~ s/\*\*(\S.*?)\*\*/\\fB$1\\fP/g;
+        # *italics*
+        $d =~ s/\*(\S.*?)\*/\\fI$1\\fP/g;
+
+        # mentions of curl symbols with man pages use italics by default
+        $d =~ s/((lib|)curl([^ ]*\(3\)))/\\fI$1\\fP/gi;
+
+        # backticked becomes italics
+        $d =~ s/\`(.*?)\`/\\fI$1\\fP/g;
+
+        if(/^## (.*)/) {
+            my $word = $1;
+            # if there are enclosing quotes, remove them first
+            $word =~ s/[\"\'](.*)[\"\']\z/$1/;
+
+            # enclose in double quotes if there is a space present
+            if($word =~ / /) {
+                push @desc, ".IP \"$word\"\n";
+            }
+            else {
+                push @desc, ".IP $word\n";
+            }
+            $header = 1;
+        }
+        elsif(/^# (.*)/) {
+            my $word = $1;
+            # if there are enclosing quotes, remove them first
+            $word =~ s/[\"\'](.*)[\"\']\z/$1/;
+            push @desc, ".SH $word\n";
+            $header = 1;
+        }
+        elsif(/^~~~c/) {
+            # start of a code section, not indented
+            $quote = 1;
+            push @desc, "\n" if($blankline && !$header);
+            $header = 0;
+            push @desc, ".nf\n";
+        }
+        elsif(/^~~~/) {
+            # start of a quote section; not code, not indented
+            $quote = 1;
+            push @desc, "\n" if($blankline && !$header);
+            $header = 0;
+            push @desc, ".nf\n";
+        }
+        elsif(/^    (.*)/) {
+            # quoted, indented by 4 space
+            $quote = 4;
+            push @desc, "\n" if($blankline && !$header);
+            $header = 0;
+            push @desc, ".nf\n$1\n";
+        }
+        elsif(/^[ \t]*\n/) {
+            # count and ignore blank lines
+            $blankline++;
+        }
+        else {
+            # don't output newlines if this is the first content after a
+            # header
+            push @desc, "\n" if($blankline && !$header);
+            $blankline = 0;
+            $header = 0;
+
+            # remove single line HTML comments
+            $d =~ s/<!--.*?-->//g;
+
+            # quote minuses in the output
+            $d =~ s/([^\\])-/$1\\-/g;
+            # replace single quotes
+            $d =~ s/\'/\\(aq/g;
+            # handle double quotes first on the line
+            $d =~ s/^(\s*)\"/$1\\&\"/;
+
+            # lines starting with a period needs it escaped
+            $d =~ s/^\./\\&./;
+
+            if($d =~ /^(.*)  /) {
+                printf STDERR "$f:$line:%d:ERROR: 2 spaces detected\n",
+                    length($1);
+                $errors++;
+            }
+            if($d =~ /^[ \t]*\n/) {
+                # replaced away all contents
+                $blankline= 1;
+            }
+            else {
+                push @desc, $d;
+            }
+        }
+    }
+    if($fh != \*STDIN) {
+        close($fh);
+    }
+    push @desc, outseealso(@seealso);
+    if($dir) {
+        if($keepfilename) {
+            $title = $f;
+            $title =~ s/\.[^.]*$//;
+        }
+        my $outfile = "$dir/$title.$section";
+        if(defined($extension)) {
+            $outfile .= $extension;
+        }
+        if(!open(O, ">", $outfile)) {
+            print STDERR "Failed to open $outfile : $!\n";
+            return 1;
+        }
+        print O @desc;
+        close(O);
+    }
+    else {
+        print @desc;
+    }
+    return $errors;
+}
+
+if(@ARGV) {
+    for my $f (@ARGV) {
+        my $r = single($f);
+        if($r) {
+            exit $r;
+        }
+    }
+}
+else {
+    exit single();
+}

@@ -581,7 +581,7 @@ static void destroy_async_data(struct Curl_async *async)
      * before the FD is invalidated to avoid EBADF on EPOLL_CTL_DEL
      */
     Curl_multi_closed(data, sock_rd);
-    sclose(sock_rd);
+    wakeup_close(sock_rd);
 #endif
   }
   async->tdata = NULL;

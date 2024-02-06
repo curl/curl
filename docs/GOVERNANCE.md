@@ -179,4 +179,4 @@ this.
 ### Stop being a maintainer
 
 If you (appear to) not be active in the project anymore, you may be removed as
-a maintainer. Thank you for your service!
+a maintainer. Thank you for your service.

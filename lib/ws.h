@@ -25,7 +25,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#ifdef USE_WEBSOCKETS
+#if defined(USE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
 
 #ifdef USE_HYPER
 #define REQTYPE void
@@ -75,11 +75,14 @@ struct websocket {
 
 CURLcode Curl_ws_request(struct Curl_easy *data, REQTYPE *req);
 CURLcode Curl_ws_accept(struct Curl_easy *data, const char *mem, size_t len);
-size_t Curl_ws_writecb(char *buffer, size_t size, size_t nitems, void *userp);
 void Curl_ws_done(struct Curl_easy *data);
-CURLcode Curl_ws_disconnect(struct Curl_easy *data,
-                            struct connectdata *conn,
-                            bool dead_connection);
+
+extern const struct Curl_handler Curl_handler_ws;
+#ifdef USE_SSL
+extern const struct Curl_handler Curl_handler_wss;
+#endif
+
+
 #else
 #define Curl_ws_request(x,y) CURLE_OK
 #define Curl_ws_done(x) Curl_nop_stmt

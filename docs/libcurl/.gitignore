@@ -2,7 +2,4 @@
 #
 # SPDX-License-Identifier: curl
 
-*.html
-*.pdf
-*.3.dist
-libcurl-symbols.3
+libcurl-symbols.md

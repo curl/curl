@@ -28,8 +28,10 @@ transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 add_custom_command(OUTPUT "${MANPAGE}"
-  COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/gen.pl" mainpage "${CMAKE_CURRENT_SOURCE_DIR}" > "${MANPAGE}"
-  DEPENDS ${DPAGES} ${OTHERPAGES}
+  COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} && "${PERL_EXECUTABLE}" "./gen.pl" mainpage ${DPAGES} > "${MANPAGE}"
   VERBATIM
 )
-add_custom_target(generate-curl.1 DEPENDS "${MANPAGE}")
+add_custom_target(generate-curl.1 ALL DEPENDS "${MANPAGE}")
+if(NOT CURL_DISABLE_INSTALL)
+  install(FILES "${MANPAGE}" DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
+endif()

@@ -24,6 +24,10 @@
  *
  ***************************************************************************/
 
+#ifndef CURL_DISABLE_HTTP
+
+#include "dynbuf.h"
+
 struct connectdata;
 
 /*
@@ -67,34 +71,68 @@ typedef enum {
      signalled If this is an empty trailer CHUNKE_STOP will be signalled.
      Otherwise the trailer will be broadcasted via Curl_client_write() and the
      next state will be CHUNK_TRAILER */
-  CHUNK_TRAILER_POSTCR
+  CHUNK_TRAILER_POSTCR,
+
+  /* Successfully de-chunked everything */
+  CHUNK_DONE,
+
+  /* Failed on seeing a bad or not correctly terminated chunk */
+  CHUNK_FAILED
 } ChunkyState;
 
 typedef enum {
-  CHUNKE_STOP = -1,
   CHUNKE_OK = 0,
   CHUNKE_TOO_LONG_HEX = 1,
   CHUNKE_ILLEGAL_HEX,
   CHUNKE_BAD_CHUNK,
   CHUNKE_BAD_ENCODING,
   CHUNKE_OUT_OF_MEMORY,
-  CHUNKE_PASSTHRU_ERROR, /* Curl_httpchunk_read() returns a CURLcode to use */
-  CHUNKE_LAST
+  CHUNKE_PASSTHRU_ERROR /* Curl_httpchunk_read() returns a CURLcode to use */
 } CHUNKcode;
-
-const char *Curl_chunked_strerror(CHUNKcode code);
 
 struct Curl_chunker {
   curl_off_t datasize;
   ChunkyState state;
+  CHUNKcode last_code;
+  struct dynbuf trailer; /* for chunked-encoded trailer */
   unsigned char hexindex;
-  char hexbuffer[ CHUNK_MAXNUM_LEN + 1]; /* +1 for null-terminator */
+  char hexbuffer[CHUNK_MAXNUM_LEN + 1]; /* +1 for null-terminator */
+  BIT(ignore_body); /* never write response body data */
 };
 
 /* The following functions are defined in http_chunks.c */
-void Curl_httpchunk_init(struct Curl_easy *data);
-CHUNKcode Curl_httpchunk_read(struct Curl_easy *data, char *buf,
-                              size_t blen, size_t *pconsumed,
-                              CURLcode *passthru);
+void Curl_httpchunk_init(struct Curl_easy *data, struct Curl_chunker *ch,
+                         bool ignore_body);
+void Curl_httpchunk_free(struct Curl_easy *data, struct Curl_chunker *ch);
+void Curl_httpchunk_reset(struct Curl_easy *data, struct Curl_chunker *ch,
+                          bool ignore_body);
+
+/*
+ * Read BODY bytes in HTTP/1.1 chunked encoding from `buf` and return
+ * the amount of bytes consumed. The actual response bytes and trailer
+ * headers are written out to the client.
+ * On success, this will consume all bytes up to the end of the response,
+ * e.g. the last chunk, has been processed.
+ * @param data   the transfer involved
+ * @param ch     the chunker instance keeping state across calls
+ * @param buf    the response data
+ * @param blen   amount of bytes in `buf`
+ * @param pconsumed  on successful return, the number of bytes in `buf`
+ *                   consumed
+ *
+ * This function always uses ASCII hex values to accommodate non-ASCII hosts.
+ * For example, 0x0d and 0x0a are used instead of '\r' and '\n'.
+ */
+CURLcode Curl_httpchunk_read(struct Curl_easy *data, struct Curl_chunker *ch,
+                             char *buf, size_t blen, size_t *pconsumed);
+
+/**
+ * @return TRUE iff chunked decoded has finished successfully.
+ */
+bool Curl_httpchunk_is_done(struct Curl_easy *data, struct Curl_chunker *ch);
+
+extern const struct Curl_cwtype Curl_httpchunk_unencoder;
+
+#endif /* !CURL_DISABLE_HTTP */
 
 #endif /* HEADER_CURL_HTTP_CHUNKS_H */

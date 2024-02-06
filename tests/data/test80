@@ -53,7 +53,7 @@ http-proxy
 HTTP 1.0 CONNECT with proxytunnel and proxy+host Basic authentication
 </name>
 <command>
-http://test.%TESTNUMBER:%HTTPPORT/we/want/that/page/%TESTNUMBER -p --proxy1.0 %HOSTIP:%PROXYPORT --user iam:myself --proxy-user youare:yourself
+http://test.%TESTNUMBER:%HTTPPORT/we/want/that/page/%TESTNUMBER -p --proxy1.0 %HOSTIP:%PROXYPORT --user iam:myself --proxy-user youare:yourself -A ""
 </command>
 <features>
 proxy
@@ -67,7 +67,6 @@ proxy
 CONNECT test.%TESTNUMBER:%HTTPPORT HTTP/1.0
 Host: test.%TESTNUMBER:%HTTPPORT
 Proxy-Authorization: Basic eW91YXJlOnlvdXJzZWxm
-User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>
@@ -75,7 +74,6 @@ Proxy-Connection: Keep-Alive
 GET /we/want/that/page/%TESTNUMBER HTTP/1.1
 Host: test.%TESTNUMBER:%HTTPPORT
 Authorization: Basic aWFtOm15c2VsZg==
-User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>

@@ -34,6 +34,25 @@
   over plain HTTP for this host. curl does this to match how popular browsers
   work with secure cookies.
 
+## Super cookies
+
+  A single cookie can be set for a domain that matches multiple hosts. Like if
+  set for `example.com` it gets sent to both `aa.example.com` as well as
+  `bb.example.com`.
+
+  A challenge with this concept is that there are certain domains for which
+  cookies should not be allowed at all, because they are *Public
+  Suffixes*. Similarly, a client never accepts cookies set directly for the
+  top-level domain like for example `.com`. Cookies set for *too broad*
+  domains are generally referred to as *super cookies*.
+
+  If curl is built with PSL (**Public Suffix List**) support, it detects and
+  discards cookies that are specified for such suffix domains that should not
+  be allowed to have cookies.
+
+  if curl is *not* built with PSL support, it has no ability to stop super
+  cookies.
+
 ## Cookies saved to disk
 
   Netscape once created a file format for storing cookies on disk so that they

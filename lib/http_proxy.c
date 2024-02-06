@@ -131,8 +131,8 @@ CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
       goto out;
   }
 
-  if(!Curl_checkProxyheaders(data, cf->conn, STRCONST("User-Agent"))
-     && data->set.str[STRING_USERAGENT]) {
+  if(!Curl_checkProxyheaders(data, cf->conn, STRCONST("User-Agent")) &&
+     data->set.str[STRING_USERAGENT] && *data->set.str[STRING_USERAGENT]) {
     result = Curl_dynhds_cadd(&req->headers, "User-Agent",
                               data->set.str[STRING_USERAGENT]);
     if(result)

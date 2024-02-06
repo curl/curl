@@ -28,6 +28,7 @@
 
 #include <string.h>
 
+#include "strdup.h"
 #include "curl_md4.h"
 #include "warnless.h"
 
