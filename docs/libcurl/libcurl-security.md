@@ -218,15 +218,15 @@ information to be sent to an unknown second server. Applications can mitigate
 against this by disabling CURLOPT_FOLLOWLOCATION(3) and handling
 redirects itself, sanitizing where necessary.
 
-Use of the CURLAUTH_ANY option to CURLOPT_HTTPAUTH(3) could result in
-user name and password being sent in clear text to an HTTP server. Instead,
-use CURLAUTH_ANYSAFE which ensures that the password is encrypted over the
+Use of the CURLAUTH_ANY option to CURLOPT_HTTPAUTH(3) could result in username
+and password being sent in clear text to an HTTP server. Instead, use
+CURLAUTH_ANYSAFE which ensures that the password is encrypted over the
 network, or else fail the request.
 
 Use of the CURLUSESSL_TRY option to CURLOPT_USE_SSL(3) could result in
-user name and password being sent in clear text to an FTP server. Instead,
-use CURLUSESSL_CONTROL to ensure that an encrypted connection is used or else
-fail the request.
+username and password being sent in clear text to an FTP server. Instead, use
+CURLUSESSL_CONTROL to ensure that an encrypted connection is used or else fail
+the request.
 
 # Cookies
 
@@ -419,14 +419,14 @@ plain HTTP connection.
 
 Relatedly, be aware that in situations when you have problems with libcurl and
 ask someone for help, everything you reveal in order to get best possible help
-might also impose certain security related risks. Host names, user names,
-paths, operating system specifics, etc. (not to mention passwords of course)
-may in fact be used by intruders to gain additional information of a potential
+might also impose certain security related risks. Hostnames, usernames, paths,
+operating system specifics, etc. (not to mention passwords of course) may in
+fact be used by intruders to gain additional information of a potential
 target.
 
 Be sure to limit access to application logs if they could hold private or
-security-related data. Besides the obvious candidates like user names and
-passwords, things like URLs, cookies or even file names could also hold
+security-related data. Besides the obvious candidates like usernames and
+passwords, things like URLs, cookies or even filenames could also hold
 sensitive data.
 
 To avoid this problem, you must of course use your common sense. Often, you
@@ -460,7 +460,7 @@ only the trusted and reliable helper program is invoked!
 
 # Secrets in memory
 
-When applications pass user names, passwords or other sensitive data to
+When applications pass usernames, passwords or other sensitive data to
 libcurl to be used for upcoming transfers, those secrets are kept around as-is
 in memory. In many cases they are stored in the heap for as long as the handle
 itself for which the options are set.

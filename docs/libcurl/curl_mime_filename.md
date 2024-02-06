@@ -12,7 +12,7 @@ See-also:
 
 # NAME
 
-curl_mime_filename - set a mime part's remote file name
+curl_mime_filename - set a mime part's remote filename
 
 # SYNOPSIS
 

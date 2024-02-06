@@ -38,5 +38,5 @@ The time stamp is when the entry expires.
 
 ## Possible future additions
 
- - `CURLOPT_HSTS_PRELOAD` - provide a set of HSTS host names to load first
+ - `CURLOPT_HSTS_PRELOAD` - provide a set of HSTS hostnames to load first
  - ability to save to something else than a file

@@ -299,12 +299,12 @@ int main(void)
 
 # AVAILABILITY
 
-Deprecated in 7.56.0. Before this release, field names were allowed to
-contain zero-valued bytes. The pseudo-filename "-" to read stdin is
-discouraged although still supported, but data is not read before being
-actually sent: the effective data size can then not be automatically
-determined, resulting in a chunked encoding transfer. Backslashes and
-double quotes in field and file names are now escaped before transmission.
+Deprecated in 7.56.0. Before this release, field names were allowed to contain
+zero-valued bytes. The pseudo-filename "-" to read stdin is discouraged
+although still supported, but data is not read before being actually sent: the
+effective data size can then not be automatically determined, resulting in a
+chunked encoding transfer. Backslashes and double quotes in field and
+filenames are now escaped before transmission.
 
 # RETURN VALUE
 

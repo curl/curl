@@ -76,9 +76,9 @@ operation returns an error instead.
 
 ## CURLU_URLENCODE
 
-If set, curl_url_get(3) URL encodes the hostname part when a full URL
-is retrieved. If not set (default), libcurl returns the URL with the host name
-"raw" to support IDN names to appear as-is. IDN host names are typically using
+If set, curl_url_get(3) URL encodes the hostname part when a full URL is
+retrieved. If not set (default), libcurl returns the URL with the hostname raw
+to support IDN names to appear as-is. IDN hostnames are typically using
 non-ASCII bytes that otherwise gets percent-encoded.
 
 Note that even when not asking for URL encoding, the '%' (byte 37) is URL
@@ -119,7 +119,7 @@ When asked to return the full URL, curl_url_get(3) returns a normalized
 and possibly cleaned up version using all available URL parts.
 
 We advise using the *CURLU_PUNYCODE* option to get the URL as "normalized"
-as possible since IDN allows host names to be written in many different ways
+as possible since IDN allows hostnames to be written in many different ways
 that still end up the same punycode version.
 
 ## CURLUPART_SCHEME

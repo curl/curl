@@ -13,7 +13,7 @@ See-also:
 
 # NAME
 
-CURLOPT_USERNAME - user name to use in authentication
+CURLOPT_USERNAME - username to use in authentication
 
 # SYNOPSIS
 
@@ -27,9 +27,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_USERNAME,
 # DESCRIPTION
 
 Pass a char pointer as parameter, which should be pointing to the
-null-terminated user name to use for the transfer.
+null-terminated username to use for the transfer.
 
-CURLOPT_USERNAME(3) sets the user name to be used in protocol
+CURLOPT_USERNAME(3) sets the username to be used in protocol
 authentication. You should not use this option together with the (older)
 CURLOPT_USERPWD(3) option.
 
@@ -38,9 +38,8 @@ include the domain name in order for the server to successfully obtain a
 Kerberos Ticket. If you do not then the initial part of the authentication
 handshake may fail.
 
-When using NTLM, the user name can be specified simply as the user name
-without the domain name should the server be part of a single domain and
-forest.
+When using NTLM, the username can be specified simply as the username without
+the domain name should the server be part of a single domain and forest.
 
 To include the domain name use either Down-Level Logon Name or UPN (User
 Principal Name) formats. For example, **EXAMPLE\user** and
@@ -49,7 +48,7 @@ Principal Name) formats. For example, **EXAMPLE\user** and
 Some HTTP servers (on Windows) support inclusion of the domain for Basic
 authentication as well.
 
-To specify the password and login options, along with the user name, use the
+To specify the password and login options, along with the username, use the
 CURLOPT_PASSWORD(3) and CURLOPT_LOGIN_OPTIONS(3) options.
 
 The application does not have to keep the string around after setting this

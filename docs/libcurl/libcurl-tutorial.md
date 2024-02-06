@@ -350,7 +350,7 @@ buffer. Returning 0 signals the end of the upload.
 
 # Passwords
 
-Many protocols use or even require that user name and password are provided
+Many protocols use or even require that username and password are provided
 to be able to download or upload the data of your choice. libcurl offers
 several ways to specify them.
 
@@ -360,10 +360,10 @@ this:
 ~~~c
  protocol://user:password@example.com/path/
 ~~~
-If you need any odd letters in your user name or password, you should enter
+If you need any odd letters in your username or password, you should enter
 them URL encoded, as %XX where XX is a two-digit hexadecimal number.
 
-libcurl also provides options to set various passwords. The user name and
+libcurl also provides options to set various passwords. The username and
 password as shown embedded in the URL can instead get set with the
 CURLOPT_USERPWD(3) option. The argument passed to libcurl should be a
 char * to a string in the format "user:password". In a manner like this:
@@ -381,13 +381,13 @@ to the CURLOPT_USERPWD(3) option like this:
  curl_easy_setopt(handle, CURLOPT_PROXYUSERPWD, "myname:thesecret");
 ~~~
 
-There is a long time Unix "standard" way of storing FTP user names and
+There is a long time Unix "standard" way of storing FTP usernames and
 passwords, namely in the $HOME/.netrc file (on Windows, libcurl also checks
 the *%USERPROFILE% environment* variable if *%HOME%* is unset, and tries
 "_netrc" as name). The file should be made private so that only the user may
 read it (see also the "Security Considerations" chapter), as it might contain
 the password in plain text. libcurl has the ability to use this file to figure
-out what set of user name and password to use for a particular host. As an
+out what set of username and password to use for a particular host. As an
 extension to the normal functionality, libcurl also supports this file for
 non-FTP protocols such as HTTP. To make curl use this file, use the
 CURLOPT_NETRC(3) option:
@@ -416,7 +416,7 @@ To pass the known private key password to libcurl:
 
 # HTTP Authentication
 
-The previous chapter showed how to set user name and password for getting URLs
+The previous chapter showed how to set username and password for getting URLs
 that require authentication. When using the HTTP protocol, there are many
 different ways a client can provide those credentials to the server and you
 can control which way libcurl uses them. The default HTTP authentication
@@ -675,10 +675,10 @@ becomes:
  curl_mime_data_cb(part, (curl_off_t) -1, fread, fseek, NULL, stdin);
 ~~~
 
-curl_mime_name(3) always copies the field name. The special file name
-"-" is not supported by curl_mime_filename(3): to read an open file, use
-a callback source using fread(). The transfer is be chunk-encoded since the
-data size is unknown.
+curl_mime_name(3) always copies the field name. The special filename "-" is
+not supported by curl_mime_filename(3): to read an open file, use a callback
+source using fread(). The transfer is be chunk-encoded since the data size is
+unknown.
 
 ~~~c
  curl_formadd(&post, &last,

@@ -25,18 +25,17 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_NOPROXY, char *noproxy);
 # DESCRIPTION
 
 Pass a pointer to a null-terminated string. The string consists of a comma
-separated list of host names that do not require a proxy to get reached, even
+separated list of hostnames that do not require a proxy to get reached, even
 if one is specified. The only wildcard available is a single * character,
 which matches all hosts, and effectively disables the proxy. Each name in this
 list is matched as either a domain which contains the hostname, or the
 hostname itself. For example, "ample.com" would match ample.com, ample.com:80,
 and www.ample.com, but not www.example.com or ample.com.org.
 
-Setting the *noproxy* string to "" (an empty string) explicitly enables
-the proxy for all host names, even if there is an environment variable set for
-it.
+Setting the *noproxy* string to "" (an empty string) explicitly enables the
+proxy for all hostnames, even if there is an environment variable set for it.
 
-Enter IPv6 numerical addresses in the list of host names without enclosing
+Enter IPv6 numerical addresses in the list of hostnames without enclosing
 brackets:
 
  "example.com,::1,localhost"

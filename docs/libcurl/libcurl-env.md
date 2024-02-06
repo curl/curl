@@ -65,7 +65,7 @@ only) in which the .netrc file is likely to exist.
 
 ## LOGNAME
 
-User name to use when invoking the *ntlm-wb* tool, if *NTLMUSER* was
+Username to use when invoking the *ntlm-wb* tool, if *NTLMUSER* was
 not set.
 
 ## NO_PROXY
@@ -76,7 +76,7 @@ should not use a proxy.
 
 ## NTLMUSER
 
-User name to use when invoking the *ntlm-wb* tool.
+Username to use when invoking the *ntlm-wb* tool.
 
 ## SSLKEYLOGFILE
 
@@ -90,8 +90,8 @@ precautions so that they are not stolen or otherwise inadvertently revealed.
 
 ## USER
 
-User name to use when invoking the *ntlm-wb* tool, if *NTLMUSER* and
-*LOGNAME* were not set.
+Username to use when invoking the *ntlm-wb* tool, if *NTLMUSER* and *LOGNAME*
+were not set.
 
 # Debug Variables
 

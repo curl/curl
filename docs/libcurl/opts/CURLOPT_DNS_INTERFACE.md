@@ -39,7 +39,7 @@ NULL
 
 # PROTOCOLS
 
-All protocols except file:// - protocols that resolve host names.
+All protocols except file:// - protocols that resolve hostnames.
 
 # EXAMPLE
 

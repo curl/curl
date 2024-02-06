@@ -30,7 +30,7 @@ Available bits are:
 
 ## CURLMIMEOPT_FORMESCAPE
 
-Tells libcurl to escape multipart form field and file names using the
+Tells libcurl to escape multipart form field and filenames using the
 backslash-escaping algorithm rather than percent-encoding (HTTP only).
 
 Backslash-escaping consists in preceding backslashes and double quotes with

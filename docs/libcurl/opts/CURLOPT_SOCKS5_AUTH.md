@@ -27,7 +27,7 @@ Pass a long as parameter, which is set to a bitmask, to tell libcurl which
 authentication method(s) are allowed for SOCKS5 proxy authentication. The only
 supported flags are *CURLAUTH_BASIC*, which allows username/password
 authentication, *CURLAUTH_GSSAPI*, which allows GSS-API authentication, and
-*CURLAUTH_NONE*, which allows no authentication. Set the actual user name and
+*CURLAUTH_NONE*, which allows no authentication. Set the actual username and
 password with the CURLOPT_PROXYUSERPWD(3) option.
 
 # DEFAULT

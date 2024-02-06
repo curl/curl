@@ -11,7 +11,7 @@ See-also:
 
 # NAME
 
-CURLOPT_TLSAUTH_USERNAME - user name to use for TLS authentication
+CURLOPT_TLSAUTH_USERNAME - username to use for TLS authentication
 
 # SYNOPSIS
 

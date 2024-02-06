@@ -119,7 +119,7 @@
 
     curl --proxy http://proxy.example.org:4321 http://remote.example.org/
 
-## User name and password
+## Username and password
 
  Some services are setup to require HTTP authentication and then you need to
  provide name and password which is then transferred to the remote site in

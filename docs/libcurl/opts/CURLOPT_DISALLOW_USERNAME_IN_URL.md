@@ -34,7 +34,7 @@ curl_url_set(3) function.
 
 # DEFAULT
 
-0 (disabled) - user names are allowed by default.
+0 (disabled) - usernames are allowed by default.
 
 # PROTOCOLS
 

@@ -824,17 +824,17 @@ with
 
     ALL_PROXY
 
-A comma-separated list of host names that should not go through any proxy is
+A comma-separated list of hostnames that should not go through any proxy is
 set in (only an asterisk, `*` matches all hosts)
 
     NO_PROXY
 
-If the hostname matches one of these strings, or the host is within the
-domain of one of these strings, transactions with that node will not be done
-over proxy. When a domain is used, it needs to start with a period. A user can
+If the hostname matches one of these strings, or the host is within the domain
+of one of these strings, transactions with that node will not be done over
+proxy. When a domain is used, it needs to start with a period. A user can
 specify that both www.example.com and foo.example.com should not use a proxy
 by setting `NO_PROXY` to `.example.com`. By including the full name you can
-exclude specific host names, so to make `www.example.com` not use a proxy but
+exclude specific hostnames, so to make `www.example.com` not use a proxy but
 still have `foo.example.com` do it, set `NO_PROXY` to `www.example.com`.
 
 The usage of the `-x`/`--proxy` flag overrides the environment variables.

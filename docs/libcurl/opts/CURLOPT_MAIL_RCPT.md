@@ -35,7 +35,7 @@ as the first character libcurl assumes you provided a single email address and
 encloses that address within brackets for you.
 
 When performing an address verification (**VRFY** command), each recipient
-should be specified as the user name or user name and domain (as per Section
+should be specified as the username or username plus domain (as per Section
 3.5 of RFC 5321).
 
 When performing a mailing list expand (**EXPN** command), each recipient

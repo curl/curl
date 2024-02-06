@@ -33,8 +33,7 @@ default, libcurl caches this info for 60 seconds.
 
 We recommend users not to tamper with this option unless strictly necessary.
 If you do, be careful of using large values that can make the cache size grow
-significantly if many different host names are used within that timeout
-period.
+significantly if many different hostnames are used within that timeout period.
 
 The name resolve functions of various libc implementations do not re-read name
 server information unless explicitly told so (for example, by calling

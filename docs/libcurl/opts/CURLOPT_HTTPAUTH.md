@@ -40,7 +40,7 @@ For authentication with a proxy, see CURLOPT_PROXYAUTH(3).
 
 HTTP Basic authentication. This is the default choice, and the only method
 that is in wide-spread use and supported virtually everywhere. This sends
-the user name and password over the network in plain text, easily captured by
+the username and password over the network in plain text, easily captured by
 others.
 
 ## CURLAUTH_DIGEST

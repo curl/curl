@@ -147,7 +147,7 @@ schemes:
 
 ## Userinfo
 
-The userinfo field can be used to set user name and password for
+The userinfo field can be used to set username and password for
 authentication purposes in this transfer. The use of this field is discouraged
 since it often means passing around the password in plain text and is thus a
 security risk.
@@ -184,7 +184,7 @@ machine.
 ### IDNA
 
 If curl was built with International Domain Name (IDN) support, it can also
-handle host names using non-ASCII characters.
+handle hostnames using non-ASCII characters.
 
 When built with libidn2, curl uses the IDNA 2008 standard. This is equivalent
 to the WHATWG URL spec, but differs from certain browsers that use IDNA 2003
@@ -357,7 +357,7 @@ file. If the path is omitted entirely then the directory listing for the root
 ## SMB
 The path part of a SMB request specifies the file to retrieve and from what
 share and directory or the share to upload to and as such, may not be omitted.
-If the user name is embedded in the URL then it must contain the domain name
+If the username is embedded in the URL then it must contain the domain name
 and as such, the backslash must be URL encoded as %2f.
 
 When uploading to SMB, the size of the file needs to be known ahead of time,
