@@ -185,7 +185,7 @@ jobs:
           - name: Arch Linux
             configure: --enable-debug --enable-websockets --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl
             container: 'archlinux/archlinux:base-devel'
-
+            singleuse: --unit
     steps:
       - if: matrix.build.container == null
         run: |
