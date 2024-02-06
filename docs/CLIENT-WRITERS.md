@@ -14,7 +14,7 @@ With this naming established, client writers are concerned with writing response
 All code in `libcurl` that handles response data is ultimately expected to forward this data via `Curl_client_write()` to the application. The exact prototype of this function is:
 
 ```
-CURLcode Curl_client_write(struct Curl_easy *data, int type, char *buf, size_t blen);
+CURLcode Curl_client_write(struct Curl_easy *data, int type, const char *buf, size_t blen);
 ```
 The `type` argument specifies what the bytes in `buf` actually are. The following bits are defined:
 

@@ -55,7 +55,7 @@
  * Write `len` bytes at `prt` to the client. `type` indicates what
  * kind of data is being written.
  */
-CURLcode Curl_client_write(struct Curl_easy *data, int type, char *ptr,
+CURLcode Curl_client_write(struct Curl_easy *data, int type, const char *ptr,
                            size_t len) WARN_UNUSED_RESULT;
 
 /**
