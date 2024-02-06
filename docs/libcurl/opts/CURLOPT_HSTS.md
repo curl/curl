@@ -12,7 +12,7 @@ See-also:
 
 # NAME
 
-CURLOPT_HSTS - HSTS cache file name
+CURLOPT_HSTS - HSTS cache filename
 
 # SYNOPSIS
 
@@ -55,7 +55,7 @@ currently no length or size limit.
 
 # DEFAULT
 
-NULL, no file name
+NULL, no filename
 
 # PROTOCOLS
 

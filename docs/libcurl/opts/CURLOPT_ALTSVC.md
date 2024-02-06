@@ -13,7 +13,7 @@ See-also:
 <!-- markdown-link-check-disable -->
 # NAME
 
-CURLOPT_ALTSVC - alt-svc cache file name
+CURLOPT_ALTSVC - alt-svc cache filename
 
 # SYNOPSIS
 

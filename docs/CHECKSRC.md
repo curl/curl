@@ -12,7 +12,7 @@ check that it adheres to our [Source Code Style guide](CODE_STYLE.md).
 `-W[file]` skip that file and exclude it from being checked. Helpful
 when, for example, one of the files is generated.
 
-`-D[dir]` directory name to prepend to file names when accessing them.
+`-D[dir]` directory name to prepend to filenames when accessing them.
 
 `-h` shows the help output, that also lists all recognized warnings
 

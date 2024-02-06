@@ -13,7 +13,7 @@ See-also:
 
 # NAME
 
-CURLOPT_PROXYUSERPWD - user name and password to use for proxy authentication
+CURLOPT_PROXYUSERPWD - username and password to use for proxy authentication
 
 # SYNOPSIS
 
@@ -25,10 +25,10 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXYUSERPWD, char *userpwd);
 
 # DESCRIPTION
 
-Pass a char pointer as parameter, which should be [user name]:[password] to
-use for the connection to the HTTP proxy. Both the name and the password are
-URL decoded before used, so to include for example a colon in the user name
-you should encode it as %3A. (This is different to how CURLOPT_USERPWD(3) is
+Pass a char pointer as parameter, which should be [username]:[password] to use
+for the connection to the HTTP proxy. Both the name and the password are URL
+decoded before used, so to include for example a colon in the username you
+should encode it as %3A. (This is different to how CURLOPT_USERPWD(3) is
 used - beware.)
 
 Use CURLOPT_PROXYAUTH(3) to specify the authentication method.

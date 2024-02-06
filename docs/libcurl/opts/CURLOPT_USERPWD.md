@@ -12,7 +12,7 @@ See-also:
 
 # NAME
 
-CURLOPT_USERPWD - user name and password to use in authentication
+CURLOPT_USERPWD - username and password to use in authentication
 
 # SYNOPSIS
 
@@ -25,14 +25,14 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_USERPWD, char *userpwd);
 # DESCRIPTION
 
 Pass a char pointer as parameter, pointing to a null-terminated login details
-string for the connection. The format of which is: [user name]:[password].
+string for the connection. The format of which is: [username]:[password].
 
 When using Kerberos V5 authentication with a Windows based server, you should
-specify the user name part with the domain name in order for the server to
+specify the username part with the domain name in order for the server to
 successfully obtain a Kerberos Ticket. If you do not then the initial part of
 the authentication handshake may fail.
 
-When using NTLM, the user name can be specified simply as the user name
+When using NTLM, the user name can be specified simply as the username
 without the domain name should the server be part of a single domain and
 forest.
 
@@ -55,8 +55,8 @@ based connections or CURLOPT_LOGIN_OPTIONS(3) to control IMAP, POP3 and
 SMTP options.
 
 The user and password strings are not URL decoded, so there is no way to send
-in a user name containing a colon using this option. Use
-CURLOPT_USERNAME(3) for that, or include it in the URL.
+in a username containing a colon using this option. Use CURLOPT_USERNAME(3)
+for that, or include it in the URL.
 
 The application does not have to keep the string around after setting this
 option.

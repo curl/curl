@@ -42,7 +42,7 @@ HTTP(S)
 ~~~c
 #include <string.h>
 
-/* only allow pushes for file names starting with "push-" */
+/* only allow pushes for filenames starting with "push-" */
 int push_callback(CURL *parent,
                   CURL *easy,
                   size_t num_headers,

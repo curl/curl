@@ -24,7 +24,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FTP_ACCOUNT, char *account);
 # DESCRIPTION
 
 Pass a pointer to a null-terminated string (or NULL to disable). When an FTP
-server asks for "account data" after user name and password has been provided,
+server asks for "account data" after username and password has been provided,
 this data is sent off using the ACCT command.
 
 The application does not have to keep the string around after setting this

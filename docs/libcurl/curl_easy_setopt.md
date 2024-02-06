@@ -435,15 +435,15 @@ Enable .netrc parsing. See CURLOPT_NETRC(3)
 
 ## CURLOPT_USERPWD
 
-User name and password. See CURLOPT_USERPWD(3)
+Username and password. See CURLOPT_USERPWD(3)
 
 ## CURLOPT_PROXYUSERPWD
 
-Proxy user name and password. See CURLOPT_PROXYUSERPWD(3)
+Proxy username and password. See CURLOPT_PROXYUSERPWD(3)
 
 ## CURLOPT_USERNAME
 
-User name. See CURLOPT_USERNAME(3)
+Username. See CURLOPT_USERNAME(3)
 
 ## CURLOPT_PASSWORD
 
@@ -455,7 +455,7 @@ Login options. See CURLOPT_LOGIN_OPTIONS(3)
 
 ## CURLOPT_PROXYUSERNAME
 
-Proxy user name. See CURLOPT_PROXYUSERNAME(3)
+Proxy username. See CURLOPT_PROXYUSERNAME(3)
 
 ## CURLOPT_PROXYPASSWORD
 
@@ -467,11 +467,11 @@ HTTP server authentication methods. See CURLOPT_HTTPAUTH(3)
 
 ## CURLOPT_TLSAUTH_USERNAME
 
-TLS authentication user name. See CURLOPT_TLSAUTH_USERNAME(3)
+TLS authentication username. See CURLOPT_TLSAUTH_USERNAME(3)
 
 ## CURLOPT_PROXY_TLSAUTH_USERNAME
 
-Proxy TLS authentication user name. See CURLOPT_PROXY_TLSAUTH_USERNAME(3)
+Proxy TLS authentication username. See CURLOPT_PROXY_TLSAUTH_USERNAME(3)
 
 ## CURLOPT_TLSAUTH_PASSWORD
 

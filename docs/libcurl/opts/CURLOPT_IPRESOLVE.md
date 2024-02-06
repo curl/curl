@@ -26,7 +26,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_IPRESOLVE, long resolve);
 
 Allows an application to select what kind of IP addresses to use when
 establishing a connection or choosing one from the connection pool. This is
-interesting when using host names that resolve to more than one IP family.
+interesting when using hostnames that resolve to more than one IP family.
 
 If the URL provided for a transfer contains a numerical IP version as a host
 name, this option does not override or prohibit libcurl from using that IP

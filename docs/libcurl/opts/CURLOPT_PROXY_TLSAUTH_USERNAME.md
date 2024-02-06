@@ -13,7 +13,7 @@ See-also:
 
 # NAME
 
-CURLOPT_PROXY_TLSAUTH_USERNAME - user name to use for proxy TLS authentication
+CURLOPT_PROXY_TLSAUTH_USERNAME - username to use for proxy TLS authentication
 
 # SYNOPSIS
 
