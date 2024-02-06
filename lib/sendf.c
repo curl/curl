@@ -49,7 +49,6 @@
 #include "select.h"
 #include "strdup.h"
 #include "http2.h"
-#include "headers.h"
 #include "progress.h"
 #include "ws.h"
 
@@ -255,21 +254,6 @@ static CURLcode chop_write(struct Curl_easy *data,
     ptr += chunklen;
     len -= chunklen;
   }
-
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_HEADERS_API)
-  /* HTTP header, but not status-line */
-  if((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
-     (type & CLIENTWRITE_HEADER) && !(type & CLIENTWRITE_STATUS) ) {
-    unsigned char htype = (unsigned char)
-      (type & CLIENTWRITE_CONNECT ? CURLH_CONNECT :
-       (type & CLIENTWRITE_1XX ? CURLH_1XX :
-        (type & CLIENTWRITE_TRAILER ? CURLH_TRAILER :
-         CURLH_HEADER)));
-    CURLcode result = Curl_headers_push(data, optr, htype);
-    if(result)
-      return result;
-  }
-#endif
 
   if(writeheader) {
     size_t wrote;
@@ -672,6 +656,17 @@ CURLcode Curl_cwriter_add(struct Curl_easy *data,
   writer->next = *anchor;
   *anchor = writer;
   return CURLE_OK;
+}
+
+struct Curl_cwriter *Curl_cwriter_get_by_name(struct Curl_easy *data,
+                                              const char *name)
+{
+  struct Curl_cwriter *writer;
+  for(writer = data->req.writer_stack; writer; writer = writer->next) {
+    if(!strcmp(name, writer->cwt->name))
+      return writer;
+  }
+  return NULL;
 }
 
 void Curl_cwriter_remove_by_name(struct Curl_easy *data,

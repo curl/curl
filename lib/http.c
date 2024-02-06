@@ -73,6 +73,7 @@
 #include "hostip.h"
 #include "dynhds.h"
 #include "http.h"
+#include "headers.h"
 #include "select.h"
 #include "parsedate.h" /* for the week day and month names */
 #include "strtoofft.h"
@@ -3127,6 +3128,13 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     }
     break;
   }
+
+  /* Add collecting of headers written to client. For a new connection,
+   * we might have done that already, but reuse
+   * or multiplex needs it here as well. */
+  result = Curl_headers_init(data);
+  if(result)
+    goto fail;
 
   http = data->req.p.http;
   DEBUGASSERT(http);
