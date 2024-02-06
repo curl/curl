@@ -42,6 +42,11 @@ transfer as that may lead to unintended consequences.
 
 The maximum size was 512kB until 7.88.0.
 
+Starting in libcurl 8.7.0, there is just a single transfer buffer allocated
+per multi handle. This buffer is used by all easy handles added to a multi
+handle no matter how many parallel transfers there are. The buffer remains
+allocated as long as there are active transfers.
+
 # DEFAULT
 
 CURL_MAX_WRITE_SIZE (16kB)
