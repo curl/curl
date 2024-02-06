@@ -288,11 +288,19 @@ sub render {
             }
         }
 
-        if(!$quote && ($d =~ /^(.*)  /)) {
-            printf STDERR "$f:$line:%d:ERROR: 2 spaces detected\n",
-                length($1);
-            return 3;
+        if(!$quote) {
+            if($d =~ /^(.*)  /) {
+                printf STDERR "$f:$line:%d:ERROR: 2 spaces detected\n",
+                    length($1);
+                return 3;
+            }
+            elsif($d =~ /[^\\][\<\>]/) {
+                print STDERR "$f:$line:1:WARN: un-escaped < or > used\n";
+                return 3;
+            }
         }
+        # convert backslash-'<' or '> to just the second character
+        $d =~ s/\\([<<])/$1/g;
         # quote minuses in the output
         $d =~ s/([^\\])-/$1\\-/g;
         # replace single quotes

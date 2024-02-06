@@ -14,12 +14,12 @@ the progress meter as otherwise it would mess up the output mixing progress
 meter and response data.
 
 If you want a progress meter for HTTP POST or PUT requests, you need to
-redirect the response output to a file, using shell redirect (>), --output or
-similar.
+redirect the response output to a file, using shell redirect (\>), --output
+or similar.
 
 This does not apply to FTP upload as that operation does not spit out any
 response data to the terminal.
 
-If you prefer a progress "bar" instead of the regular meter, --progress-bar is
+If you prefer a progress bar instead of the regular meter, --progress-bar is
 your friend. You can also disable the progress meter completely with the
 --silent option.

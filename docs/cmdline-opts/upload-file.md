@@ -33,16 +33,16 @@ When putting the local file name at the end of the URL, curl ignores what is
 on the left side of any slash (/) or backslash (\) used in the file name and
 only appends what is on the right side of the rightmost such character.
 
-Use the file name "-" (a single dash) to use stdin instead of a given file.
-Alternately, the file name "." (a single period) may be specified instead of
-"-" to use stdin in non-blocking mode to allow reading server output while
+Use the file name `-` (a single dash) to use stdin instead of a given file.
+Alternately, the file name `.` (a single period) may be specified instead of
+`-` to use stdin in non-blocking mode to allow reading server output while
 stdin is being uploaded.
 
 If this option is used with a HTTP(S) URL, the PUT method is used.
 
 You can specify one --upload-file for each URL on the command line. Each
 --upload-file + URL pair specifies what to upload and to where. curl also
-supports "globbing" of the --upload-file argument, meaning that you can upload
+supports globbing of the --upload-file argument, meaning that you can upload
 multiple files to a single URL by using the same URL globbing style supported
 in the URL.
 

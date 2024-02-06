@@ -21,10 +21,10 @@ Example:
 
 # `--output`
 
-Write output to <file> instead of stdout. If you are using {} or [] to fetch
-multiple documents, you should quote the URL and you can use '#' followed by a
-number in the <file> specifier. That variable is replaced with the current
-string for the URL being fetched. Like in:
+Write output to the given file instead of stdout. If you are using globbing to
+fetch multiple documents, you should quote the URL and you can use `#`
+followed by a number in the file name. That variable is then replaced with the
+current string for the URL being fetched. Like in:
 
     curl "http://{one,two}.example.com" -o "file_#1.txt"
 

@@ -19,7 +19,7 @@ Example:
 # `--trace-ascii`
 
 Enables a full trace dump of all incoming and outgoing data, including
-descriptive information, to the given output file. Use "-" as filename to have
+descriptive information, to the given output file. Use `-` as filename to have
 the output sent to stdout.
 
 This is similar to --trace, but leaves out the hex part and only shows the

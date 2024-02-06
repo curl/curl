@@ -29,13 +29,13 @@ message to transmit.
 
 This enables uploading of binary files etc. To force the 'content' part to be
 a file, prefix the file name with an @ sign. To just get the content part from
-a file, prefix the file name with the symbol <. The difference between @ and <
-is then that @ makes a file get attached in the post as a file upload, while
-the < makes a text field and just get the contents for that text field from a
+a file, prefix the file name with the symbol \<. The difference between @ and
+< is then that @ makes a file get attached in the post as a file upload, while
+the \< makes a text field and just get the contents for that text field from a
 file.
 
 Tell curl to read content from stdin instead of a file by using - as
-filename. This goes for both @ and < constructs. When stdin is used, the
+filename. This goes for both @ and \< constructs. When stdin is used, the
 contents is buffered in memory first by curl to determine its size and allow a
 possible resend. Defining a part's data from a named non-regular file (such as
 a named pipe or similar) is not subject to buffering and is instead read at

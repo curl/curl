@@ -7,7 +7,7 @@ is presumed to be and treated as a URL.
 
 The short "single-dash" form of the options, -d for example, may be used with
 or without a space between it and its value, although a space is a recommended
-separator. The long "double-dash" form, --data for example, requires a space
+separator. The long double-dash form, --data for example, requires a space
 between it and its value.
 
 Short version options that do not need any additional values can be used
@@ -16,11 +16,11 @@ options *-O*, *-L* and *-v* at once as *-OLv*.
 
 In general, all boolean options are enabled with --**option** and yet again
 disabled with --**no-**option. That is, you use the same option name but
-prefix it with "no-". However, in this list we mostly only list and show the
+prefix it with `no-`. However, in this list we mostly only list and show the
 *--option* version of them.
 
 When --next is used, it resets the parser state and you start again with a
-clean option state, except for the options that are "global". Global options
+clean option state, except for the options that are global. Global options
 retain their values and meaning even after --next.
 
 The following options are global: `%GLOBALS`.

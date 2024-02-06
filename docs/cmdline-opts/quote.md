@@ -43,7 +43,7 @@ all supported SFTP quote commands:
 
 ## atime date file
 The atime command sets the last access time of the file named by the file
-operand. The <date expression> can be all sorts of date strings, see the
+operand. The date expression can be all sorts of date strings, see the
 *curl_getdate(3)* man page for date expression details. (Added in 7.73.0)
 
 ## chgrp group file
@@ -69,7 +69,7 @@ The mkdir command creates the directory named by the directory_name operand.
 
 ## mtime date file
 The mtime command sets the last modification time of the file named by the
-file operand. The <date expression> can be all sorts of date strings, see the
+file operand. The date expression can be all sorts of date strings, see the
 *curl_getdate(3)* man page for date expression details. (Added in 7.73.0)
 
 ## pwd

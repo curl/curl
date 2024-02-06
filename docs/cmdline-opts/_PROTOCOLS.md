@@ -19,14 +19,14 @@ curl supports HTTP with numerous options and variations. It can speak HTTP
 version 0.9, 1.0, 1.1, 2 and 3 depending on build options and the correct
 command line options.
 ## IMAP(S)
-Using the mail reading protocol, curl can "download" emails for you. With or
+Using the mail reading protocol, curl can download emails for you. With or
 without using TLS.
 ## LDAP(S)
 curl can do directory lookups for you, with or without TLS.
 ## MQTT
-curl supports MQTT version 3. Downloading over MQTT equals "subscribe" to a
-topic while uploading/posting equals "publish" on a topic. MQTT over TLS is
-not supported (yet).
+curl supports MQTT version 3. Downloading over MQTT equals subscribe to a
+topic while uploading/posting equals publish on a topic. MQTT over TLS is not
+supported (yet).
 ## POP3(S)
 Downloading from a pop3 server means getting a mail. With or without using
 TLS.

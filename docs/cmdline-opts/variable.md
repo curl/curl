@@ -15,22 +15,22 @@ Example:
 
 # `--variable`
 
-Set a variable with "name=content" or "name@file" (where "file" can be stdin
-if set to a single dash (-)). The name is a case sensitive identifier that
+Set a variable with `name=content` or `name@file` (where `file` can be stdin
+if set to a single dash (`-`)). The name is a case sensitive identifier that
 must consist of no other letters than a-z, A-Z, 0-9 or underscore. The
 specified content is then associated with this identifier.
 
 Setting the same variable name again overwrites the old contents with the new.
 
 The contents of a variable can be referenced in a later command line option
-when that option name is prefixed with "--expand-", and the name is used as
-"{{name}}" (without the quotes).
+when that option name is prefixed with `--expand-`, and the name is used as
+`{{name}}`.
 
 --variable can import environment variables into the name space. Opt to either
 require the environment variable to be set or provide a default value for the
 variable in case it is not already set.
 
---variable %name imports the variable called 'name' but exits with an error if
+--variable %name imports the variable called `name` but exits with an error if
 that environment variable is not already set. To provide a default value if
 the environment variable is not set, use --variable %name=content or
 --variable %name@content. Note that on some systems - but not all -
