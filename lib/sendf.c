@@ -41,6 +41,7 @@
 #include "cfilters.h"
 #include "connect.h"
 #include "content_encoding.h"
+#include "cw-out.h"
 #include "vtls/vtls.h"
 #include "vssh/ssh.h"
 #include "easyif.h"
@@ -133,147 +134,6 @@ CURLcode Curl_write(struct Curl_easy *data,
   return Curl_nwrite(data, num, mem, len, written);
 }
 
-static CURLcode pausewrite(struct Curl_easy *data,
-                           int type, /* what type of data */
-                           bool paused_body,
-                           const char *ptr,
-                           size_t len)
-{
-  /* signalled to pause sending on this connection, but since we have data
-     we want to send we need to dup it to save a copy for when the sending
-     is again enabled */
-  struct SingleRequest *k = &data->req;
-  struct UrlState *s = &data->state;
-  unsigned int i;
-  bool newtype = TRUE;
-
-  Curl_conn_ev_data_pause(data, TRUE);
-
-  if(s->tempcount) {
-    for(i = 0; i< s->tempcount; i++) {
-      if(s->tempwrite[i].type == type &&
-         !!s->tempwrite[i].paused_body == !!paused_body) {
-        /* data for this type exists */
-        newtype = FALSE;
-        break;
-      }
-    }
-    DEBUGASSERT(i < 3);
-    if(i >= 3)
-      /* There are more types to store than what fits: very bad */
-      return CURLE_OUT_OF_MEMORY;
-  }
-  else
-    i = 0;
-
-  if(newtype) {
-    /* store this information in the state struct for later use */
-    Curl_dyn_init(&s->tempwrite[i].b, DYN_PAUSE_BUFFER);
-    s->tempwrite[i].type = type;
-    s->tempwrite[i].paused_body = paused_body;
-    s->tempcount++;
-  }
-
-  if(Curl_dyn_addn(&s->tempwrite[i].b, (unsigned char *)ptr, len))
-    return CURLE_OUT_OF_MEMORY;
-
-  /* mark the connection as RECV paused */
-  k->keepon |= KEEP_RECV_PAUSE;
-
-  return CURLE_OK;
-}
-
-
-/* chop_write() writes chunks of data not larger than CURL_MAX_WRITE_SIZE via
- * client write callback(s) and takes care of pause requests from the
- * callbacks.
- */
-static CURLcode chop_write(struct Curl_easy *data,
-                           int type,
-                           bool skip_body_write,
-                           char *optr,
-                           size_t olen)
-{
-  struct connectdata *conn = data->conn;
-  curl_write_callback writeheader = NULL;
-  curl_write_callback writebody = NULL;
-  char *ptr = optr;
-  size_t len = olen;
-  void *writebody_ptr = data->set.out;
-
-  if(!len)
-    return CURLE_OK;
-
-  /* If reading is paused, append this data to the already held data for this
-     type. */
-  if(data->req.keepon & KEEP_RECV_PAUSE)
-    return pausewrite(data, type, !skip_body_write, ptr, len);
-
-  /* Determine the callback(s) to use. */
-  if(!skip_body_write &&
-     ((type & CLIENTWRITE_BODY) ||
-      ((type & CLIENTWRITE_HEADER) && data->set.include_header))) {
-    writebody = data->set.fwrite_func;
-  }
-  if((type & (CLIENTWRITE_HEADER|CLIENTWRITE_INFO)) &&
-     (data->set.fwrite_header || data->set.writeheader)) {
-    /*
-     * Write headers to the same callback or to the especially setup
-     * header callback function (added after version 7.7.1).
-     */
-    writeheader =
-      data->set.fwrite_header? data->set.fwrite_header: data->set.fwrite_func;
-  }
-
-  /* Chop data, write chunks. */
-  while(len) {
-    size_t chunklen = len <= CURL_MAX_WRITE_SIZE? len: CURL_MAX_WRITE_SIZE;
-
-    if(writebody) {
-      size_t wrote;
-      Curl_set_in_callback(data, true);
-      wrote = writebody(ptr, 1, chunklen, writebody_ptr);
-      Curl_set_in_callback(data, false);
-
-      if(CURL_WRITEFUNC_PAUSE == wrote) {
-        if(conn->handler->flags & PROTOPT_NONETWORK) {
-          /* Protocols that work without network cannot be paused. This is
-             actually only FILE:// just now, and it can't pause since the
-             transfer isn't done using the "normal" procedure. */
-          failf(data, "Write callback asked for PAUSE when not supported");
-          return CURLE_WRITE_ERROR;
-        }
-        return pausewrite(data, type, TRUE, ptr, len);
-      }
-      if(wrote != chunklen) {
-        failf(data, "Failure writing output to destination");
-        return CURLE_WRITE_ERROR;
-      }
-    }
-
-    ptr += chunklen;
-    len -= chunklen;
-  }
-
-  if(writeheader) {
-    size_t wrote;
-
-    Curl_set_in_callback(data, true);
-    wrote = writeheader(optr, 1, olen, data->set.writeheader);
-    Curl_set_in_callback(data, false);
-
-    if(CURL_WRITEFUNC_PAUSE == wrote)
-      return pausewrite(data, type, FALSE, optr, olen);
-    if(wrote != olen) {
-      failf(data, "Failed writing header");
-      return CURLE_WRITE_ERROR;
-    }
-  }
-
-  return CURLE_OK;
-}
-
-
 /* Curl_client_write() sends data to the write callback(s)
 
    The bit pattern defines to what "streams" to write to. Body and/or header.
@@ -303,42 +163,9 @@ CURLcode Curl_client_write(struct Curl_easy *data,
   return Curl_cwriter_write(data, data->req.writer_stack, type, buf, blen);
 }
 
-CURLcode Curl_client_unpause(struct Curl_easy *data)
-{
-  CURLcode result = CURLE_OK;
-
-  if(data->state.tempcount) {
-    /* there are buffers for sending that can be delivered as the receive
-       pausing is lifted! */
-    unsigned int i;
-    unsigned int count = data->state.tempcount;
-    struct tempbuf writebuf[3]; /* there can only be three */
-
-    /* copy the structs to allow for immediate re-pausing */
-    for(i = 0; i < data->state.tempcount; i++) {
-      writebuf[i] = data->state.tempwrite[i];
-      Curl_dyn_init(&data->state.tempwrite[i].b, DYN_PAUSE_BUFFER);
-    }
-    data->state.tempcount = 0;
-
-    for(i = 0; i < count; i++) {
-      /* even if one function returns error, this loops through and frees
-         all buffers */
-      if(!result)
-        result = chop_write(data, writebuf[i].type,
-                            !writebuf[i].paused_body,
-                            Curl_dyn_ptr(&writebuf[i].b),
-                            Curl_dyn_len(&writebuf[i].b));
-      Curl_dyn_free(&writebuf[i].b);
-    }
-  }
-  return result;
-}
-
 void Curl_client_cleanup(struct Curl_easy *data)
 {
   struct Curl_cwriter *writer = data->req.writer_stack;
-  size_t i;
 
   while(writer) {
     data->req.writer_stack = writer->next;
@@ -347,10 +174,6 @@ void Curl_client_cleanup(struct Curl_easy *data)
     writer = data->req.writer_stack;
   }
 
-  for(i = 0; i < data->state.tempcount; i++) {
-    Curl_dyn_free(&data->state.tempwrite[i].b);
-  }
-  data->state.tempcount = 0;
   data->req.bytecount = 0;
   data->req.headerline = 0;
 }
@@ -387,26 +210,6 @@ void Curl_cwriter_def_close(struct Curl_easy *data,
   (void) data;
   (void) writer;
 }
-
-/* Real client writer to installed callbacks. */
-static CURLcode cw_client_write(struct Curl_easy *data,
-                                struct Curl_cwriter *writer, int type,
-                                const char *buf, size_t nbytes)
-{
-  (void)writer;
-  if(!nbytes)
-    return CURLE_OK;
-  return chop_write(data, type, FALSE, (char *)buf, nbytes);
-}
-
-static const struct Curl_cwtype cw_client = {
-  "client",
-  NULL,
-  Curl_cwriter_def_init,
-  cw_client_write,
-  Curl_cwriter_def_close,
-  sizeof(struct Curl_cwriter)
-};
 
 static size_t get_max_body_write_len(struct Curl_easy *data, curl_off_t limit)
 {
@@ -496,14 +299,14 @@ static CURLcode cw_download_write(struct Curl_easy *data,
     }
   }
 
-  /* Update stats, write and report progress */
-  data->req.bytecount += nwrite;
-  ++data->req.bodywrites;
-  if(!data->req.ignorebody && nwrite) {
+  if(!data->req.ignorebody && (nwrite || (type & CLIENTWRITE_EOS))) {
     result = Curl_cwriter_write(data, writer->next, type, buf, nwrite);
     if(result)
       return result;
   }
+  /* Update stats, write and report progress */
+  data->req.bytecount += nwrite;
+  ++data->req.bodywrites;
   result = Curl_pgrsSetDownloadCounter(data, data->req.bytecount);
   if(result)
     return result;
@@ -615,7 +418,7 @@ static CURLcode do_init_stack(struct Curl_easy *data)
 
   DEBUGASSERT(!data->req.writer_stack);
   result = Curl_cwriter_create(&data->req.writer_stack,
-                               data, &cw_client, CURL_CW_CLIENT);
+                               data, &Curl_cwt_out, CURL_CW_CLIENT);
   if(result)
     return result;
 
@@ -664,6 +467,17 @@ struct Curl_cwriter *Curl_cwriter_get_by_name(struct Curl_easy *data,
   struct Curl_cwriter *writer;
   for(writer = data->req.writer_stack; writer; writer = writer->next) {
     if(!strcmp(name, writer->cwt->name))
+      return writer;
+  }
+  return NULL;
+}
+
+struct Curl_cwriter *Curl_cwriter_get_by_type(struct Curl_easy *data,
+                                              const struct Curl_cwtype *cwt)
+{
+  struct Curl_cwriter *writer;
+  for(writer = data->req.writer_stack; writer; writer = writer->next) {
+    if(writer->cwt == cwt)
       return writer;
   }
   return NULL;

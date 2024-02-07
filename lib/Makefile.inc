@@ -138,6 +138,7 @@ LIB_CFILES =         \
   curl_sspi.c        \
   curl_threads.c     \
   curl_trc.c         \
+  cw-out.c           \
   dict.c             \
   doh.c              \
   dynbuf.c           \
@@ -283,6 +284,7 @@ LIB_HFILES =         \
   curl_threads.h     \
   curl_trc.h         \
   curlx.h            \
+  cw-out.h           \
   dict.h             \
   doh.h              \
   dynbuf.h           \

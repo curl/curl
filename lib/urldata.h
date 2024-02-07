@@ -1273,18 +1273,6 @@ struct Curl_data_priority {
 #endif
 };
 
-/*
- * This struct is for holding data that was attempted to get sent to the user's
- * callback but is held due to pausing. One instance per type (BOTH, HEADER,
- * BODY).
- */
-struct tempbuf {
-  struct dynbuf b;
-  int type;   /* type of the 'tempwrite' buffer as a bitmask that is used with
-                 Curl_client_write() */
-  BIT(paused_body); /* if PAUSE happened before/during BODY write */
-};
-
 /* Timers */
 typedef enum {
   EXPIRE_100_TIMEOUT,
@@ -1362,8 +1350,6 @@ struct UrlState {
   int retrycount; /* number of retries on a new connection */
   struct Curl_ssl_session *session; /* array of 'max_ssl_sessions' size */
   long sessionage;                  /* number of the most recent session */
-  struct tempbuf tempwrite[3]; /* BOTH, HEADER, BODY */
-  unsigned int tempcount; /* number of entries in use in tempwrite, 0 - 3 */
   int os_errno;  /* filled in with errno whenever an error occurs */
   char *scratch; /* huge buffer[set.buffer_size*2] for upload CRLF replacing */
   long followlocation; /* redirect counter */

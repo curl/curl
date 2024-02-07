@@ -59,13 +59,6 @@ CURLcode Curl_client_write(struct Curl_easy *data, int type, const char *ptr,
                            size_t len) WARN_UNUSED_RESULT;
 
 /**
- * For a paused transfer, there might be buffered data held back.
- * Attempt to flush this data to the client. This *may* trigger
- * another pause of the transfer.
- */
-CURLcode Curl_client_unpause(struct Curl_easy *data);
-
-/**
  * Free all resources related to client writing.
  */
 void Curl_client_cleanup(struct Curl_easy *data);
@@ -147,6 +140,13 @@ size_t Curl_cwriter_count(struct Curl_easy *data, Curl_cwriter_phase phase);
  */
 CURLcode Curl_cwriter_add(struct Curl_easy *data,
                           struct Curl_cwriter *writer);
+
+/**
+ * Look up an installed client writer on `data` by its type.
+ * @return first writer with that type or NULL
+ */
+struct Curl_cwriter *Curl_cwriter_get_by_type(struct Curl_easy *data,
+                                              const struct Curl_cwtype *cwt);
 
 void Curl_cwriter_remove_by_name(struct Curl_easy *data,
                                  const char *name);

@@ -58,6 +58,7 @@
 #include "multiif.h"
 #include "select.h"
 #include "cfilters.h"
+#include "cw-out.h"
 #include "sendf.h" /* for failf function prototype */
 #include "connect.h" /* for Curl_getconnectinfo */
 #include "slist.h"
@@ -1117,7 +1118,7 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
 
   if(!(newstate & KEEP_RECV_PAUSE)) {
     Curl_conn_ev_data_pause(data, FALSE);
-    result = Curl_client_unpause(data);
+    result = Curl_cw_out_flush(data);
     if(result)
       return result;
   }
@@ -1141,7 +1142,7 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
     /* reset the too-slow time keeper */
     data->state.keeps_speed.tv_sec = 0;
 
-    if(!data->state.tempcount)
+    if(!Curl_cw_out_is_paused(data))
       /* if not pausing again, force a recv/send check of this connection as
          the data might've been read off the socket already */
       data->state.select_bits = CURL_CSELECT_IN | CURL_CSELECT_OUT;
