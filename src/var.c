@@ -342,7 +342,7 @@ ParameterError varexpand(struct GlobalConfig *global,
 }
 
 /*
- * Created in a way that is not revealing how variables is actually stored so
+ * Created in a way that is not revealing how variables are actually stored so
  * that we can improve this if we want better performance when managing many
  * at a later point.
  */
