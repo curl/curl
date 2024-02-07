@@ -202,6 +202,8 @@ jobs:
       - if: startsWith(matrix.build.container, 'archlinux/archlinux')
         run: |
           pacman -Syyu openldap heimdall impacket python-pycryptodomex openssh stunnel git --noconfirm
+          sed -i "/\SendEnv/"'s/^#/' /etc/ssh/sshd_config
+          systemctl restart sshd
         name: 'install dependencies'
 
       - uses: actions/checkout@v4
