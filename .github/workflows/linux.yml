@@ -40,6 +40,7 @@ concurrency:
 permissions: {}
 
 env:
+  shell: bash
   MAKEFLAGS: -j 3
   bearssl-version: 0.6
   libressl-version: v3.7.3
@@ -183,7 +184,6 @@ jobs:
             singleuse: --unit
 
           - name: Arch Linux
-            shell: bash
             configure: --enable-debug --enable-websockets --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl
             container: 'archlinux/archlinux:base-devel'
             singleuse: --unit
@@ -201,7 +201,6 @@ jobs:
         name: 'install dependencies'
 
       - if: startsWith(matrix.build.container, 'archlinux/archlinux')
-        shell: bash
         run: |
           pacman -Syyu autoconf automake libtool perl openssl libssh2 zlib brotli zstd libidn2 openldap heimdall libpsl impacket libtasn1 python-pycryptodomex perl openssh stunnel git --noconfirm
         name: 'install dependencies'
