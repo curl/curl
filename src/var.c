@@ -63,7 +63,6 @@ void varcleanup(struct GlobalConfig *global)
     struct var *t = list;
     list = list->next;
     free((char *)t->content);
-    free((char *)t->name);
     free(t);
   }
 }
@@ -343,7 +342,7 @@ ParameterError varexpand(struct GlobalConfig *global,
 }
 
 /*
- * Created in a way that is not revealing how variables is actually stored so
+ * Created in a way that is not revealing how variables are actually stored so
  * that we can improve this if we want better performance when managing many
  * at a later point.
  */
@@ -356,29 +355,24 @@ static ParameterError addvariable(struct GlobalConfig *global,
 {
   struct var *p;
   const struct var *check = varcontent(global, name, nlen);
+  DEBUGASSERT(nlen);
   if(check)
     notef(global, "Overwriting variable '%s'", check->name);
 
-  p = calloc(1, sizeof(struct var));
-  if(!p)
-    return PARAM_NO_MEM;
+  p = calloc(1, sizeof(struct var) + nlen);
+  if(p) {
+    memcpy(p->name, name, nlen);
 
-  p->name = Memdup(name, nlen);
-  if(!p->name)
-    goto err;
+    p->content = contalloc ? content: Memdup(content, clen);
+    if(p->content) {
+      p->clen = clen;
 
-  p->content = contalloc ? content: Memdup(content, clen);
-  if(!p->content)
-    goto err;
-  p->clen = clen;
-
-  p->next = global->variables;
-  global->variables = p;
-  return PARAM_OK;
-err:
-  free((char *)p->content);
-  free((char *)p->name);
-  free(p);
+      p->next = global->variables;
+      global->variables = p;
+      return PARAM_OK;
+    }
+    free(p);
+  }
   return PARAM_NO_MEM;
 }
 
