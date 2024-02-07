@@ -28,6 +28,11 @@
 
 #include "sendf.h"
 
+/**
+ * The client writer type "cw-out" that does the actual writing to
+ * the client callbacks. Intended to be the last installed in the
+ * client writer stack of a transfer.
+ */
 extern struct Curl_cwtype Curl_cwt_out;
 
 /**
@@ -35,6 +40,11 @@ extern struct Curl_cwtype Curl_cwt_out;
  * Attempt to flush this data to the client. This *may* trigger
  * another pause of the transfer.
  */
-CURLcode Curl_client_unpause(struct Curl_easy *data);
+CURLcode Curl_cw_out_unpause(struct Curl_easy *data);
+
+/**
+ * Return TRUE iff 'cw-out' client write has paused data.
+ */
+bool Curl_cw_out_is_paused(struct Curl_easy *data);
 
 #endif /* HEADER_CURL_CW_OUT_H */

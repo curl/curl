@@ -166,7 +166,6 @@ CURLcode Curl_client_write(struct Curl_easy *data,
 void Curl_client_cleanup(struct Curl_easy *data)
 {
   struct Curl_cwriter *writer = data->req.writer_stack;
-  size_t i;
 
   while(writer) {
     data->req.writer_stack = writer->next;
@@ -175,10 +174,6 @@ void Curl_client_cleanup(struct Curl_easy *data)
     writer = data->req.writer_stack;
   }
 
-  for(i = 0; i < data->state.tempcount; i++) {
-    Curl_dyn_free(&data->state.tempwrite[i].b);
-  }
-  data->state.tempcount = 0;
   data->req.bytecount = 0;
   data->req.headerline = 0;
 }
@@ -472,6 +467,17 @@ struct Curl_cwriter *Curl_cwriter_get_by_name(struct Curl_easy *data,
   struct Curl_cwriter *writer;
   for(writer = data->req.writer_stack; writer; writer = writer->next) {
     if(!strcmp(name, writer->cwt->name))
+      return writer;
+  }
+  return NULL;
+}
+
+struct Curl_cwriter *Curl_cwriter_get_by_type(struct Curl_easy *data,
+                                              const struct Curl_cwtype *cwt)
+{
+  struct Curl_cwriter *writer;
+  for(writer = data->req.writer_stack; writer; writer = writer->next) {
+    if(writer->cwt == cwt)
       return writer;
   }
   return NULL;

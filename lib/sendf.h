@@ -141,6 +141,13 @@ size_t Curl_cwriter_count(struct Curl_easy *data, Curl_cwriter_phase phase);
 CURLcode Curl_cwriter_add(struct Curl_easy *data,
                           struct Curl_cwriter *writer);
 
+/**
+ * Look up an installed client writer on `data` by its type.
+ * @return first writer with that type or NULL
+ */
+struct Curl_cwriter *Curl_cwriter_get_by_type(struct Curl_easy *data,
+                                              const struct Curl_cwtype *cwt);
+
 void Curl_cwriter_remove_by_name(struct Curl_easy *data,
                                  const char *name);
 
