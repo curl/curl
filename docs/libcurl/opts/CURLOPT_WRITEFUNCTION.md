@@ -38,7 +38,7 @@ The data passed to this function is not null-terminated.
 
 The callback function is passed as much data as possible in all invokes, but
 you must not make any assumptions. It may be one byte, it may be
-thousands. The maximum amount of body data that is be passed to the write
+thousands. The maximum amount of body data that is passed to the write
 callback is defined in the curl.h header file: *CURL_MAX_WRITE_SIZE* (the
 usual default is 16K). If CURLOPT_HEADER(3) is enabled, which makes header
 data get passed to the write callback, you can get up to
