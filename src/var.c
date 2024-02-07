@@ -355,6 +355,7 @@ static ParameterError addvariable(struct GlobalConfig *global,
 {
   struct var *p;
   const struct var *check = varcontent(global, name, nlen);
+  DEBUGASSERT(nlen);
   if(check)
     notef(global, "Overwriting variable '%s'", check->name);
 
@@ -363,7 +364,6 @@ static ParameterError addvariable(struct GlobalConfig *global,
     return PARAM_NO_MEM;
 
   memcpy(p->name, name, nlen);
-  p->name[nlen] = 0;
 
   p->content = contalloc ? content: Memdup(content, clen);
   if(!p->content)
