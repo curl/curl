@@ -63,7 +63,6 @@ void varcleanup(struct GlobalConfig *global)
     struct var *t = list;
     list = list->next;
     free((char *)t->content);
-    free((char *)t->name);
     free(t);
   }
 }
@@ -359,13 +358,12 @@ static ParameterError addvariable(struct GlobalConfig *global,
   if(check)
     notef(global, "Overwriting variable '%s'", check->name);
 
-  p = calloc(1, sizeof(struct var));
+  p = calloc(1, sizeof(struct var) + nlen);
   if(!p)
     return PARAM_NO_MEM;
 
-  p->name = Memdup(name, nlen);
-  if(!p->name)
-    goto err;
+  memcpy(p->name, name, nlen);
+  p->name[nlen] = 0;
 
   p->content = contalloc ? content: Memdup(content, clen);
   if(!p->content)
@@ -377,7 +375,6 @@ static ParameterError addvariable(struct GlobalConfig *global,
   return PARAM_OK;
 err:
   free((char *)p->content);
-  free((char *)p->name);
   free(p);
   return PARAM_NO_MEM;
 }
