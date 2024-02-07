@@ -134,6 +134,7 @@ LIB_CFILES =         \
   curl_range.c       \
   curl_rtmp.c        \
   curl_sasl.c        \
+  curl_sha512_256.c  \
   curl_sspi.c        \
   curl_threads.c     \
   curl_trc.c         \
@@ -277,6 +278,7 @@ LIB_HFILES =         \
   curl_setup.h       \
   curl_setup_once.h  \
   curl_sha256.h      \
+  curl_sha512_256.h  \
   curl_sspi.h        \
   curl_threads.h     \
   curl_trc.h         \
