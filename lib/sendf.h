@@ -59,13 +59,6 @@ CURLcode Curl_client_write(struct Curl_easy *data, int type, const char *ptr,
                            size_t len) WARN_UNUSED_RESULT;
 
 /**
- * For a paused transfer, there might be buffered data held back.
- * Attempt to flush this data to the client. This *may* trigger
- * another pause of the transfer.
- */
-CURLcode Curl_client_unpause(struct Curl_easy *data);
-
-/**
  * Free all resources related to client writing.
  */
 void Curl_client_cleanup(struct Curl_easy *data);

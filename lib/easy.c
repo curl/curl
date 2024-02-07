@@ -58,6 +58,7 @@
 #include "multiif.h"
 #include "select.h"
 #include "cfilters.h"
+#include "cw-out.h"
 #include "sendf.h" /* for failf function prototype */
 #include "connect.h" /* for Curl_getconnectinfo */
 #include "slist.h"
