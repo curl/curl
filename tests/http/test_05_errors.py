@@ -108,3 +108,19 @@ class TestErrors:
         r.check_response(http_status=200, count=1)
         # check that we did a downgrade
         assert r.stats[0]['http_version'] == '1.1', r.dump_logs()
+
+    # download 1 file
+    @pytest.mark.parametrize("proto", ['http/1.0', 'http/1.1', 'h2'])
+    def test_05_04_unclean_tls_shutdown(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        count = 10 if proto == 'h2' else 1
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}'\
+                f'/curltest/shutdown_unclean?id=[0-{count-1}]&chunks=4'
+        r = curl.http_download(urls=[url], alpn_proto=proto, extra_args=[
+            '--parallel',
+        ])
+        r.check_exit_code(0)
+        r.check_response(http_status=200, count=count)
+
