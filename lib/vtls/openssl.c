@@ -310,8 +310,6 @@ struct ossl_ssl_backend_data {
   bool     keylog_done;
 #endif
   bool x509_store_setup;            /* x509 store has been set up */
-  bool io_read_zero;       /* TRUE iff BIO_read read a 0-length, no error
-                            * indicative that the connection was closed */
 };
 
 #if defined(HAVE_SSL_X509_STORE_SHARE)
@@ -767,7 +765,6 @@ static int ossl_bio_cf_in_read(BIO *bio, char *buf, int blen)
               blen, (int)nread, result);
   BIO_clear_retry_flags(bio);
   backend->io_result = result;
-  backend->io_read_zero = (nread == 0);
   if(nread < 0) {
     if(CURLE_AGAIN == result)
       BIO_set_retry_read(bio);
@@ -4702,28 +4699,6 @@ static ssize_t ossl_recv(struct Curl_cfilter *cf,
         *curlcode = CURLE_AGAIN;
         nread = -1;
         goto out;
-      }
-      if(backend->io_read_zero && (err == SSL_ERROR_SYSCALL)) {
-        /* OpenSSL reports an error on seeing the connection closed.
-         * This is most likely caused by the server not performing
-         * a proper TLS shutdown. OpenSSL 3.2+ changed its default
-         * behaviour on this, it used to ignore it.
-         * The reason for the change is that TLS shutdown is needed
-         * for detecting truncation attacks, e.g. if it was really the
-         * server that closed the connection and not some middlemen
-         * messing with us. We need this protection, UNLESS we run a
-         * protocol that is safe against such attacks.
-         * HTTP/2 is always safe, HTTP/1.x may not be, FTP/IMAP etc.
-         * are not. (HTTP/1.1 is safe on most situations, because
-         * server SHOULD use Content-Length or Transfer-Encoding chunked,
-         * but this is only a SHOULD. */
-        if(Curl_conn_is_multiplex(cf->conn, cf->sockindex)) {
-          CURL_TRC_CF(data, cf, "ossl_recv: suppressing SSL error %d on "
-                      "connection close on multiplexed connection", err);
-          *curlcode = CURLE_OK;
-          nread = 0;
-          goto out;
-        }
       }
       sslerror = ERR_get_error();
       if((nread < 0) || sslerror) {

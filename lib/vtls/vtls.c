@@ -1719,7 +1719,13 @@ static ssize_t ssl_cf_recv(struct Curl_cfilter *cf,
   CF_DATA_SAVE(save, cf, data);
   *err = CURLE_OK;
   nread = Curl_ssl->recv_plain(cf, data, buf, len, err);
-
+  if(nread > 0) {
+    DEBUGASSERT((size_t)nread <= len);
+  }
+  else if(nread == 0) {
+    /* eof */
+    *err = CURLE_OK;
+  }
   CURL_TRC_CF(data, cf, "cf_recv(len=%zu) -> %zd, %d", len,
               nread, *err);
   CF_DATA_RESTORE(cf, save);
