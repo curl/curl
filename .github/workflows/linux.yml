@@ -40,7 +40,6 @@ concurrency:
 permissions: {}
 
 env:
-  shell: bash
   MAKEFLAGS: -j 3
   bearssl-version: 0.6
   libressl-version: v3.7.3
@@ -184,7 +183,7 @@ jobs:
             singleuse: --unit
 
           - name: Arch Linux
-            configure: --enable-debug --enable-websockets --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl
+            configure: --prefix='/usr' --mandir='/usr/share/man' --disable-ldap --disable-ldaps --disable-manual --enable-ipv6 --enable-threaded-resolver --with-gssapi --with-libssh2 --with-random='/dev/urandom' --with-ca-bundle='/etc/ssl/certs/ca-certificates.crt'
             container: 'archlinux/archlinux:base-devel'
             singleuse: --unit
     steps:
