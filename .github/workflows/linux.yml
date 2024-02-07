@@ -201,7 +201,8 @@ jobs:
 
       - if: startsWith(matrix.build.container, 'archlinux/archlinux')
         run: |
-          pacman -Sy autoconf automake libtool perl openssl libssh2 zlib brotli zstd libidn2 openldap heimdall libpsl impacket libtasn1 python-pycryptodomex perl openssh stunnel git --noconfirm
+          pacman -Syyu autoconf automake libtool perl openssl libssh2 zlib brotli zstd libidn2 openldap heimdall libpsl impacket libtasn1 python-pycryptodomex perl openssh stunnel git --noconfirm
+          locale-gen "en_US.UTF-8"
         name: 'install dependencies'
 
       - uses: actions/checkout@v4
