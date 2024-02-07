@@ -202,7 +202,7 @@ jobs:
       - if: startsWith(matrix.build.container, 'archlinux/archlinux')
         run: |
           pacman -Syyu openldap heimdall impacket python-pycryptodomex openssh stunnel git --noconfirm
-          pacman -Rcns perl --noconfirm
+          pacman -R perl --noconfirm
         name: 'install dependencies'
 
       - uses: actions/checkout@v4
