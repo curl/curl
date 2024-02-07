@@ -183,7 +183,7 @@ jobs:
             singleuse: --unit
 
           - name: Arch Linux
-            configure: CFLAGS=-Wno-error --prefix='/usr' --mandir='/usr/share/man' --disable-ldap --disable-ldaps --disable-manual --enable-ipv6 --enable-threaded-resolver --with-gssapi --with-libssh2 --with-openssl --with-random='/dev/urandom' --with-ca-bundle='/etc/ssl/certs/ca-certificates.crt'
+            configure: --prefix='/usr' --mandir='/usr/share/man' --disable-ldap --disable-ldaps --disable-manual --enable-ipv6 --enable-threaded-resolver --with-gssapi --with-libssh2 --with-openssl --with-random='/dev/urandom' --with-ca-bundle='/etc/ssl/certs/ca-certificates.crt'
             container: 'archlinux/archlinux:base-devel'
             singleuse: --unit
     steps:
@@ -201,7 +201,7 @@ jobs:
 
       - if: startsWith(matrix.build.container, 'archlinux/archlinux')
         run: |
-          pacman -Syyu autoconf automake libtool perl openssl libssh2 zlib brotli zstd libidn2 openldap heimdall libpsl impacket libtasn1 python-pycryptodomex perl openssh stunnel git --noconfirm
+          pacman -Syyu openldap heimdall impacket python-pycryptodomex openssh stunnel git --noconfirm
         name: 'install dependencies'
 
       - uses: actions/checkout@v4
