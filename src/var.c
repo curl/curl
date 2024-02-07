@@ -366,15 +366,13 @@ static ParameterError addvariable(struct GlobalConfig *global,
   memcpy(p->name, name, nlen);
 
   p->content = contalloc ? content: Memdup(content, clen);
-  if(!p->content)
-    goto err;
-  p->clen = clen;
+  if(p->content) {
+    p->clen = clen;
 
-  p->next = global->variables;
-  global->variables = p;
-  return PARAM_OK;
-err:
-  free((char *)p->content);
+    p->next = global->variables;
+    global->variables = p;
+    return PARAM_OK;
+  }
   free(p);
   return PARAM_NO_MEM;
 }
