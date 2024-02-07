@@ -360,20 +360,19 @@ static ParameterError addvariable(struct GlobalConfig *global,
     notef(global, "Overwriting variable '%s'", check->name);
 
   p = calloc(1, sizeof(struct var) + nlen);
-  if(!p)
-    return PARAM_NO_MEM;
+  if(p) {
+    memcpy(p->name, name, nlen);
 
-  memcpy(p->name, name, nlen);
+    p->content = contalloc ? content: Memdup(content, clen);
+    if(p->content) {
+      p->clen = clen;
 
-  p->content = contalloc ? content: Memdup(content, clen);
-  if(p->content) {
-    p->clen = clen;
-
-    p->next = global->variables;
-    global->variables = p;
-    return PARAM_OK;
+      p->next = global->variables;
+      global->variables = p;
+      return PARAM_OK;
+    }
+    free(p);
   }
-  free(p);
   return PARAM_NO_MEM;
 }
 
