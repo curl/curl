@@ -4,7 +4,6 @@ SPDX-License-Identifier: curl
 Long: secure
 Protocols: TLS SFTP SCP
 Help: Enforce secure server connections
-Arg: <name>
 Added: 8.7.0
 Category: tls sftp scp
 Multi: custom
