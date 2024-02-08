@@ -775,6 +775,7 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
   peercert = mbedtls_ssl_get_peer_cert(&backend->ssl);
 
   if(peercert && data->set.verbose) {
+#ifndef MBEDTLS_X509_REMOVE_INFO
     const size_t bufsize = 16384;
     char *buffer = malloc(bufsize);
 
@@ -787,6 +788,9 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
       infof(data, "Unable to dump certificate information");
 
     free(buffer);
+#else
+    infof(data, "Unable to dump certificate information");
+#endif
   }
 
   if(pinnedpubkey) {
