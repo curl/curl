@@ -3483,10 +3483,10 @@ AS_HELP_STRING([--with-zsh-functions-dir=PATH],[Install zsh completions to PATH]
 AS_HELP_STRING([--without-zsh-functions-dir],[Do not install zsh completions]),
   [OPT_ZSH_FPATH=$withval])
 case "$OPT_ZSH_FPATH" in
-  no)
+  default|no)
     dnl --without-zsh-functions-dir option used
     ;;
-  default|yes)
+  yes)
     dnl --with-zsh-functions-dir option used without path
     ZSH_FUNCTIONS_DIR="$datarootdir/zsh/site-functions"
     AC_SUBST(ZSH_FUNCTIONS_DIR)
@@ -3497,6 +3497,7 @@ case "$OPT_ZSH_FPATH" in
     AC_SUBST(ZSH_FUNCTIONS_DIR)
     ;;
 esac
+AM_CONDITIONAL(USE_ZSH_COMPLETION, test x"$ZSH_FUNCTIONS_DIR" != x)
 
 dnl **********************************************************************
 dnl Check for fish completion path
@@ -3508,10 +3509,10 @@ AS_HELP_STRING([--with-fish-functions-dir=PATH],[Install fish completions to PAT
 AS_HELP_STRING([--without-fish-functions-dir],[Do not install fish completions]),
   [OPT_FISH_FPATH=$withval])
 case "$OPT_FISH_FPATH" in
-  no)
+  default|no)
     dnl --without-fish-functions-dir option used
     ;;
-  default|yes)
+  yes)
     dnl --with-fish-functions-dir option used without path
     CURL_CHECK_PKGCONFIG(fish)
     if test "$PKGCONFIG" != "no" ; then
@@ -3527,6 +3528,7 @@ case "$OPT_FISH_FPATH" in
     AC_SUBST(FISH_FUNCTIONS_DIR)
     ;;
 esac
+AM_CONDITIONAL(USE_FISH_COMPLETION, test x"$FISH_FUNCTIONS_DIR" != x)
 
 dnl Now check for the very most basic headers. Then we can use these
 dnl ones as default-headers when checking for the rest!
