@@ -20,7 +20,7 @@
  1.1 TFO support on Windows
  1.2 Consult %APPDATA% also for .netrc
  1.3 struct lifreq
- 1.4 alt-svc sharing
+ 1.4 Better and more sharing
  1.5 get rid of PATH_MAX
  1.6 native IDN support on macOS
  1.8 CURLOPT_RESOLVE for any port number
