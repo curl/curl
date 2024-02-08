@@ -44,7 +44,7 @@ sub scanconf {
     my ($f)=@_;
     open S, "<$f";
     while(<S>) {
-        if(/(CURL_DISABLE_[A-Z_]+)/g) {
+        if(/(CURL_DISABLE_[A-Z0-9_]+)/g) {
             my ($sym)=($1);
             $disable{$sym} = 1;
         }
@@ -67,9 +67,9 @@ sub scanconf_cmake {
     my ($f)=@_;
     open S, "<$f";
     while(<S>) {
-        if(/(CURL_DISABLE_[A-Z_]+)/g) {
+        if(/(CURL_DISABLE_[A-Z0-9_]+)/g) {
             my ($sym)=($1);
-            if(not $sym =~ /(CURL_DISABLE_INSTALL|CURL_DISABLE_TESTS|CURL_DISABLE_SRP)/) {
+            if(not $sym =~ /^(CURL_DISABLE_INSTALL|CURL_DISABLE_TESTS|CURL_DISABLE_SRP)$/) {
                 $disable_cmake{$sym} = 1;
             }
         }
@@ -85,7 +85,7 @@ sub scan_file {
     my ($source)=@_;
     open F, "<$source";
     while(<F>) {
-        while(s/(CURL_DISABLE_[A-Z_]+)//) {
+        while(s/(CURL_DISABLE_[A-Z0-9_]+)//) {
             my ($sym)=($1);
             $file{$sym} = $source;
         }
@@ -115,7 +115,7 @@ sub scan_docs {
     my $line = 0;
     while(<F>) {
         $line++;
-        if(/^## `(CURL_DISABLE_[A-Z_]+)/g) {
+        if(/^## `(CURL_DISABLE_[A-Z0-9_]+)`/g) {
             my ($sym)=($1);
             $docs{$sym} = $line;
         }
