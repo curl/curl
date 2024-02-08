@@ -720,6 +720,12 @@ if(USE_MSH3)
   list(APPEND CURL_LIBS ${MSH3_LIBRARIES})
 endif()
 
+if(USE_MBEDTLS OR
+   USE_BEARSSL OR
+   USE_SECTRANSP)
+  message(WARNING "A selected TLS library does not support TLS 1.3.")
+endif()
+
 if(CURL_WITH_MULTI_SSL AND (USE_NGTCP2 OR USE_QUICHE OR USE_MSH3))
   message(FATAL_ERROR "MultiSSL cannot be enabled with HTTP/3 and vice versa.")
 endif()
