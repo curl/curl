@@ -12,7 +12,7 @@ See-also:
   - doh-insecure
   - proxy-insecure
 Example:
-  - --secure $URL
+  - --secure
 ---
 
 # `--secure`
