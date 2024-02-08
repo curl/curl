@@ -428,8 +428,8 @@ jobs:
         name: 'make tests'
 
       - if: startsWith(matrix.build.container, 'archlinux/archlinux')
+        shell: bash
         run: |
-          PERL_BADLANG=0
           make V=1 test-ci
         name: 'run tests'
 
