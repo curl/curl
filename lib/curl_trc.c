@@ -134,7 +134,11 @@ void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
     va_list ap;
     int len;
     char buffer[MAXINFO + 2];
-    len = msnprintf(buffer, MAXINFO, "[%s] ", cf->cft->name);
+    if(cf->sockindex)
+      len = msnprintf(buffer, MAXINFO, "[%s-%d] ",
+                      cf->cft->name, cf->sockindex);
+    else
+      len = msnprintf(buffer, MAXINFO, "[%s] ", cf->cft->name);
     va_start(ap, fmt);
     len += mvsnprintf(buffer + len, MAXINFO - len, fmt, ap);
     va_end(ap);
