@@ -880,8 +880,9 @@ static ssize_t nw_in_read(void *reader_ctx,
       nread = -1;
     }
   }
-  CURL_TRC_CF(rctx->data, rctx->cf, "nw_in_read(len=%zu) -> %d, err=%d",
-              len, (int)nread, *err);
+  CURL_TRC_CF(rctx->data, rctx->cf, "nw_in_read(len=%zu, fd=%"
+              CURL_FORMAT_SOCKET_T ") -> %d, err=%d",
+              len, ctx->sock, (int)nread, *err);
   return nread;
 }
 
@@ -1248,11 +1249,13 @@ static void cf_socket_adjust_pollset(struct Curl_cfilter *cf,
   if(ctx->sock != CURL_SOCKET_BAD) {
     if(!cf->connected) {
       Curl_pollset_set_out_only(data, ps, ctx->sock);
-      CURL_TRC_CF(data, cf, "adjust_pollset(!connected) -> %d socks", ps->num);
+      CURL_TRC_CF(data, cf, "adjust_pollset, !connected, POLLOUT fd=%"
+                  CURL_FORMAT_SOCKET_T, ctx->sock);
     }
     else if(!ctx->active) {
       Curl_pollset_add_in(data, ps, ctx->sock);
-      CURL_TRC_CF(data, cf, "adjust_pollset(!active) -> %d socks", ps->num);
+      CURL_TRC_CF(data, cf, "adjust_pollset, !active, POLLIN fd=%"
+                  CURL_FORMAT_SOCKET_T, ctx->sock);
     }
   }
 }
