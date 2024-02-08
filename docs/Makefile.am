@@ -35,7 +35,7 @@ endif
 # but distribute it (using the relative file name) in the next variable
 man_MANS = $(abs_builddir)/curl.1
 noinst_man_MANS = curl.1 $(MK_CA_DOCS)
-dist_man_MANS = $(CURLCONF_DOCS) $(MK_CA_DOCS)
+dist_man_MANS = $(CURLCONF_DOCS) $(MK_CA_DOCS) curl.1
 CURLPAGES = curl-config.md mk-ca-bundle.md
 
 # Build targets in this file (.) before cmdline-opts to ensure that
