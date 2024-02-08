@@ -302,7 +302,7 @@ static CURLcode cw_download_write(struct Curl_easy *data,
   /* Update stats, write and report progress */
   data->req.bytecount += nwrite;
   ++data->req.bodywrites;
-  if(!data->req.ignorebody && nwrite) {
+  if(!data->req.ignorebody && (nwrite || (type & CLIENTWRITE_EOS))) {
     result = Curl_cwriter_write(data, writer->next, type, buf, nwrite);
     if(result)
       return result;

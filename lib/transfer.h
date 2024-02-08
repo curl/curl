@@ -85,4 +85,10 @@ Curl_setup_transfer (struct Curl_easy *data,
                                            disables */
   );
 
+/**
+ * Multi has set transfer to DONE. Last chance to trigger
+ * missing response things like writing an EOS to the client.
+ */
+CURLcode Curl_xfer_write_done(struct Curl_easy *data, bool premature);
+
 #endif /* HEADER_CURL_TRANSFER_H */

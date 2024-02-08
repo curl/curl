@@ -645,7 +645,7 @@ static CURLcode multi_done(struct Curl_easy *data,
                                                 after an error was detected */
                            bool premature)
 {
-  CURLcode result;
+  CURLcode result, r2;
   struct connectdata *conn = data->conn;
 
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
@@ -695,6 +695,11 @@ static CURLcode multi_done(struct Curl_easy *data,
     if(!result && rc)
       result = CURLE_ABORTED_BY_CALLBACK;
   }
+
+  /* Make sure that transfer client writes are really done now. */
+  r2 = Curl_xfer_write_done(data, premature);
+  if(r2 && !result)
+    result = r2;
 
   /* Inform connection filters that this transfer is done */
   Curl_conn_ev_data_done(data, premature);

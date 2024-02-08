@@ -63,6 +63,7 @@
 #include "content_encoding.h"
 #include "hostip.h"
 #include "cfilters.h"
+#include "cw-out.h"
 #include "transfer.h"
 #include "sendf.h"
 #include "speedcheck.h"
@@ -1719,4 +1720,10 @@ CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
     data->req.download_done = TRUE;
   }
   return result;
+}
+
+CURLcode Curl_xfer_write_done(struct Curl_easy *data, bool premature)
+{
+  (void)premature;
+  return Curl_cw_out_done(data);
 }

@@ -1118,7 +1118,7 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
 
   if(!(newstate & KEEP_RECV_PAUSE)) {
     Curl_conn_ev_data_pause(data, FALSE);
-    result = Curl_cw_out_unpause(data);
+    result = Curl_cw_out_flush(data);
     if(result)
       return result;
   }
