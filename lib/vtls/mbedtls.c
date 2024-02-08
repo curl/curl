@@ -237,6 +237,23 @@ static const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_fr =
 #define PUB_DER_MAX_BYTES   (RSA_PUB_DER_MAX_BYTES > ECP_PUB_DER_MAX_BYTES ? \
                              RSA_PUB_DER_MAX_BYTES : ECP_PUB_DER_MAX_BYTES)
 
+#if MBEDTLS_VERSION_NUMBER >= 0x03020000
+static CURLcode mbedtls_version_from_curl(
+  mbedtls_ssl_protocol_version* mbedver, long version)
+{
+  switch(version) {
+  case CURL_SSLVERSION_TLSv1_0:
+  case CURL_SSLVERSION_TLSv1_1:
+  case CURL_SSLVERSION_TLSv1_2:
+    *mbedver = MBEDTLS_SSL_VERSION_TLS1_2;
+    return CURLE_OK;
+  case CURL_SSLVERSION_TLSv1_3:
+    break;
+  }
+
+  return CURLE_SSL_CONNECT_ERROR;
+}
+#else
 static CURLcode mbedtls_version_from_curl(int *mbedver, long version)
 {
 #if MBEDTLS_VERSION_NUMBER >= 0x03000000
@@ -267,6 +284,7 @@ static CURLcode mbedtls_version_from_curl(int *mbedver, long version)
 
   return CURLE_SSL_CONNECT_ERROR;
 }
+#endif
 
 static CURLcode
 set_ssl_version_min_max(struct Curl_cfilter *cf, struct Curl_easy *data)
@@ -275,7 +293,10 @@ set_ssl_version_min_max(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct mbed_ssl_backend_data *backend =
     (struct mbed_ssl_backend_data *)connssl->backend;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-#if MBEDTLS_VERSION_NUMBER >= 0x03000000
+#if MBEDTLS_VERSION_NUMBER >= 0x03020000
+  mbedtls_ssl_protocol_version mbedtls_ver_min = MBEDTLS_SSL_VERSION_TLS1_2;
+  mbedtls_ssl_protocol_version mbedtls_ver_max = MBEDTLS_SSL_VERSION_TLS1_2;
+#elif MBEDTLS_VERSION_NUMBER >= 0x03000000
   int mbedtls_ver_min = MBEDTLS_SSL_MINOR_VERSION_3;
   int mbedtls_ver_max = MBEDTLS_SSL_MINOR_VERSION_3;
 #else
@@ -313,10 +334,15 @@ set_ssl_version_min_max(struct Curl_cfilter *cf, struct Curl_easy *data)
     return result;
   }
 
+#if MBEDTLS_VERSION_NUMBER >= 0x03020000
+  mbedtls_ssl_conf_min_tls_version(&backend->config, mbedtls_ver_min);
+  mbedtls_ssl_conf_max_tls_version(&backend->config, mbedtls_ver_max);
+#else
   mbedtls_ssl_conf_min_version(&backend->config, MBEDTLS_SSL_MAJOR_VERSION_3,
                                mbedtls_ver_min);
   mbedtls_ssl_conf_max_version(&backend->config, MBEDTLS_SSL_MAJOR_VERSION_3,
                                mbedtls_ver_max);
+#endif
 
   return result;
 }
