@@ -211,7 +211,7 @@ static CURLcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
   size_t wlen, nwritten;
 
   (void)ctx;
-  /* write callbacks may get NULLed by the client inbetween calls. */
+  /* write callbacks may get NULLed by the client between calls. */
   cw_get_writefunc(data, otype, &wcb, &wcb_data, &max_write, &min_write);
   if(!wcb) {
     *pconsumed = blen;
