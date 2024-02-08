@@ -198,7 +198,7 @@ Build curl:
 
 # OpenSSL version
 
-quiche QUIC support is **EXPERIMENTAL**
+QUIC support is **EXPERIMENTAL**
 
 Build OpenSSL 3.2.0
 
