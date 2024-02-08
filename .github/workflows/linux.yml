@@ -184,7 +184,7 @@ jobs:
 
           - name: Fedora Latest
             configure: --disable-ldap --disable-ldaps --disable-manual --enable-ipv6 --enable-threaded-resolver --with-gssapi --with-libssh2 --with-openssl --with-libpsl
-            container: 'fedoara:latest'
+            container: 'fedora:latest'
             singleuse: --unit
 
     steps:
