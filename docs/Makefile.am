@@ -34,8 +34,8 @@ endif
 # EXTRA_DIST breaks with $(abs_builddir) so build it using this variable
 # but distribute it (using the relative file name) in the next variable
 man_MANS = $(abs_builddir)/curl.1
-noinst_man_MANS = curl.1 $(MK_CA_DOCS)
-dist_man_MANS = $(CURLCONF_DOCS) $(MK_CA_DOCS) $(builddir)/curl.1
+noinst_man_MANS = $(MK_CA_DOCS)
+dist_man_MANS = $(CURLCONF_DOCS) $(MK_CA_DOCS)
 CURLPAGES = curl-config.md mk-ca-bundle.md
 
 # Build targets in this file (.) before cmdline-opts to ensure that
@@ -135,3 +135,6 @@ curl-config.1: curl-config.md
 
 distclean:
 	rm -f $(CLEANFILES)
+
+dist-hook:
+	cp $(builddir)/curl.1 $(builddir)/curl.1.dist
