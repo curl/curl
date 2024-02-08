@@ -203,7 +203,7 @@ jobs:
       - if: startsWith(matrix.build.container, 'fedora')
         run: |
           dnf upgrade -y
-          dnf install autoconf automake -y
+          dnf install autoconf automake libtool -y
         name: 'install dependencies'
 
       - uses: actions/checkout@v4
