@@ -18,10 +18,10 @@ Example:
 # `--write-out`
 
 Make curl display information on stdout after a completed transfer. The format
-is a string that may contain plain text mixed with any number of
-variables. The format can be specified as a literal "string", or you can have
-curl read the format from a file with "@filename" and to tell curl to read the
-format from stdin you write "@-".
+is a string that may contain plain text mixed with any number of variables.
+The format can be specified as a literal "string", or you can have curl read
+the format from a file with "@filename" and to tell curl to read the format
+from stdin you write "@-".
 
 The variables present in the output format are substituted by the value or
 text that curl thinks fit, as described below. All variables are specified as
@@ -45,11 +45,17 @@ the file name cannot be created, curl leaves the output destination to the one
 used prior to the *%output{}* instruction. Use *%output{\>\>name}* to append
 data to an existing file.
 
-**NOTE:**
-In Windows the %-symbol is a special symbol used to expand environment
-variables. In batch files all occurrences of % must be doubled when using this
-option to properly escape. If this option is used at the command prompt then
-the % cannot be escaped and unintended expansion is possible.
+This output is done independently of if the file transfer was successful or
+not.
+
+If the specified action or output specified with this option fails in any way,
+it will not make curl return a (different) error.
+
+**NOTE:** On Windows, the %-symbol is a special symbol used to expand
+environment variables. In batch files, all occurrences of % must be doubled
+when using this option to properly escape. If this option is used at the
+command prompt then the % cannot be escaped and unintended expansion is
+possible.
 
 The variables available are:
 
