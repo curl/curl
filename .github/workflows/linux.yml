@@ -203,7 +203,7 @@ jobs:
       - if: startsWith(matrix.build.container, 'fedora')
         run: |
           dnf upgrade -y
-          dnf install autoconf automake libtool -y
+          dnf install autoconf automake libtool openssl -y
         name: 'install dependencies'
 
       - uses: actions/checkout@v4
