@@ -182,6 +182,11 @@ jobs:
             container: 'alpine:3.18'
             singleuse: --unit
 
+          - name: Fedora Latest
+            configure: --disable-ldap --disable-ldaps --disable-manual --enable-ipv6 --enable-threaded-resolver --with-gssapi --with-libssh2 --with-openssl --with-libpsl
+            container: 'fedoara:latest'
+            singleuse: --unit
+
     steps:
       - if: matrix.build.container == null
         run: |
@@ -193,6 +198,11 @@ jobs:
       - if: startsWith(matrix.build.container, 'alpine')
         run: |
           apk add --no-cache build-base autoconf automake libtool perl openssl-dev libssh2-dev zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev heimdal-dev libpsl-dev py3-impacket py3-asn1 py3-six py3-pycryptodomex perl-time-hires openssh stunnel sudo git
+        name: 'install dependencies'
+
+      - if: startsWith(matrix.build.container, 'fedora')
+        run: |
+          dnf upgrade -y
         name: 'install dependencies'
 
       - uses: actions/checkout@v4
