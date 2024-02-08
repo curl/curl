@@ -52,6 +52,7 @@ http
 <features>
 !SSPI
 crypto
+sha512-256
 </features>
 <name>
 HTTP POST --digest with SHA-512-256, userhash=false and user-specified Content-Length header
@@ -76,7 +77,7 @@ Content-Type: application/x-www-form-urlencoded
 
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/%TESTNUMBER", response="4bc9c97a72f1856bcec9b0e1518c6b7ee28773f91357d56840bdc30bd89ca68f", algorithm=SHA-512-256
+Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/%TESTNUMBER", response="0ba2f7ec8045446588eea82bb0c3812aedb05f4eac8883ea65040a52e9c5629e", algorithm=SHA-512-256
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 11
