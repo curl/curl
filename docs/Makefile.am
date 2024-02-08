@@ -112,8 +112,6 @@ CD2_ = $(CD2_0)
 
 SUFFIXES = .1 .md
 
-$(builddir)/curl.1: $(abs_builddir)/curl.1
-
 # $(abs_builddir) is to disable VPATH when searching for this file, which
 # would otherwise find the copy in $(srcdir) which breaks the $(HUGE)
 # rule in src/Makefile.am in out-of-tree builds that references the file in the
