@@ -4999,6 +4999,14 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   Protocols:        ${SUPPORT_PROTOCOLS}
   Features:         ${SUPPORT_FEATURES}
 ])
+
+non13=`echo "$TLSCHOICE" | grep -Ei 'bearssl|secure-transport|mbedtls'`;
+if test -n "$non13"; then
+ cat >&2 << _EOF
+  WARNING: A selected TLS library ($TLSCHOICE) does not support TLS 1.3!
+_EOF
+fi
+
 if test -n "$experimental"; then
  cat >&2 << _EOF
   WARNING: $experimental enabled but marked EXPERIMENTAL. Use with caution!
