@@ -24,6 +24,42 @@
 
 SUBDIRS = clients
 
+TESTENV =                             \
+testenv/__init__.py                   \
+testenv/caddy.py                      \
+testenv/certs.py                      \
+testenv/client.py                     \
+testenv/curl.py                       \
+testenv/env.py                        \
+testenv/httpd.py                      \
+testenv/mod_curltest/mod_curltest.c   \
+testenv/nghttpx.py                    \
+testenv/ports.py                      \
+testenv/ws_echo_server.py
+
+EXTRA_DIST =           \
+config.ini.in          \
+conftest.py            \
+requirements.txt       \
+scorecard.py           \
+test_01_basic.py       \
+test_02_download.py    \
+test_03_goaway.py      \
+test_04_stuttered.py   \
+test_05_errors.py      \
+test_06_eyeballs.py    \
+test_07_upload.py      \
+test_08_caddy.py       \
+test_09_push.py        \
+test_10_proxy.py       \
+test_11_unix.py        \
+test_12_reuse.py       \
+test_13_proxy_auth.py  \
+test_14_auth.py        \
+test_15_tracing.py     \
+test_20_websockets.py  \
+$(TESTENV)
+
 clean-local:
 	rm -rf *.pyc __pycache__
 	rm -rf gen
