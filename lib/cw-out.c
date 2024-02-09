@@ -169,25 +169,16 @@ static void cw_get_writefunc(struct Curl_easy *data, cw_out_type otype,
     *pwcb = data->set.fwrite_func;
     *pwcb_data = data->set.out;
     *pmax_write = CURL_MAX_WRITE_SIZE;
-    /*
-     * Enable small writes buffering for body data iff
-     * - it is not the first batch that arrives. Client use the first
-     *   bytes often as trigger for further actions
-     * - the transfer has no speed limit on receiving. On slowed transfers,
-     *   it might be very long between writes if we buffer.
-     * - the transfer has not paused sending. Clients then often monitor
-     *   incoming data to decide on further actions.
-     */
-    *pmin_write = (data->req.bytecount &&
-                   !data->set.max_recv_speed &&
-                   !(data->req.keepon & KEEP_SEND_PAUSE))?
-                  CURL_MAX_WRITE_SIZE : 0;
+    /* if we ever want buffering of BODY output, we can set `min_write`
+     * the preferred size. The default should always be to pass data
+     * to the client as it comes without delay */
+    *pmin_write = 0;
     break;
   case CW_OUT_HDS:
     *pwcb = data->set.fwrite_header? data->set.fwrite_header :
              (data->set.writeheader? data->set.fwrite_func : NULL);
     *pwcb_data = data->set.writeheader;
-    *pmax_write = CURL_MAX_HTTP_HEADER;
+    *pmax_write = 0; /* do not chunk-write headers, write them as they are */
     *pmin_write = 0;
     break;
   default:
@@ -222,7 +213,7 @@ static CURLcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
   while(blen && !(data->req.keepon & KEEP_RECV_PAUSE)) {
     if(!flush_all && blen < min_write)
       break;
-    wlen = CURLMIN(blen, max_write);
+    wlen = max_write? CURLMIN(blen, max_write) : blen;
     Curl_set_in_callback(data, TRUE);
     nwritten = wcb((char *)buf, 1, wlen, wcb_data);
     Curl_set_in_callback(data, FALSE);
@@ -295,16 +286,21 @@ static CURLcode cw_out_flush_chain(struct cw_out_ctx *ctx,
   if(data->req.keepon & KEEP_RECV_PAUSE)
     return CURLE_OK;
 
-  if(cwbuf->next) {
-    result = cw_out_flush_chain(ctx, data, &cwbuf->next, TRUE);
+  /* write the end of the chain until it blocks or gets empty */
+  while(cwbuf->next) {
+    struct cw_out_buf **plast = &cwbuf->next;
+    while((*plast)->next)
+      plast = &(*plast)->next;
+    result = cw_out_flush_chain(ctx, data, plast, flush_all);
     if(result)
       return result;
-    if(cwbuf->next) {
-      /* could not write all, paused again? */
+    if(*plast) {
+      /* could not write last, paused again? */
       DEBUGASSERT(data->req.keepon & KEEP_RECV_PAUSE);
       return CURLE_OK;
     }
   }
+
   result = cw_out_buf_flush(ctx, data, cwbuf, flush_all);
   if(result)
     return result;
@@ -322,7 +318,10 @@ static CURLcode cw_out_append(struct cw_out_ctx *ctx,
   if(cw_out_bufs_len(ctx) + blen > DYN_PAUSE_BUFFER)
     return CURLE_TOO_LARGE;
 
-  if(!ctx->buf || ctx->buf->type != otype) {
+  /* if we do not have a buffer, or it is of another type, make a new one.
+   * And for CW_OUT_HDS always make a new one, so we "replay" headers
+   * exactly as they came in */
+  if(!ctx->buf || (ctx->buf->type != otype) || (otype == CW_OUT_HDS)) {
     struct cw_out_buf *cwbuf = cw_out_buf_create(otype);
     if(!cwbuf)
       return CURLE_OUT_OF_MEMORY;
