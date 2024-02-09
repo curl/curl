@@ -203,7 +203,8 @@ jobs:
       - if: startsWith(matrix.build.container, 'fedora')
         run: |
           dnf upgrade -y
-          dnf install autoconf automake libtool openssl-devel libpsl-devel libssh2-devel perl-Memoize libidn2-devel openldap-devel git -y
+          dnf install autoconf automake libtool openssl-devel libpsl-devel libssh2-devel zlib-devel perl-Memoize libidn2-devel brotli-devel libzstd-devel openldap-devel heimdal-devel git -y
+          sysctl -w net.ipv6.ip_forward=1
         name: 'install dependencies'
 
       - uses: actions/checkout@v4
