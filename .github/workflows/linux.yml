@@ -183,7 +183,7 @@ jobs:
             singleuse: --unit
 
           - name: Fedora Latest
-            configure: --disable-ldap --disable-ldaps --disable-manual --enable-ipv6 --enable-threaded-resolver --with-gssapi --with-libssh2 --with-openssl --with-libpsl
+            configure: --enable-debug --enable-websockets --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl
             container: 'fedora:latest'
             singleuse: --unit
 
@@ -203,7 +203,7 @@ jobs:
       - if: startsWith(matrix.build.container, 'fedora')
         run: |
           dnf upgrade -y
-          dnf install autoconf automake libtool openssl-devel libpsl-devel libssh2-devel perl-Memoize git -y
+          dnf install autoconf automake libtool openssl-devel libpsl-devel libssh2-devel perl-Memoize libidn2-devel git -y
         name: 'install dependencies'
 
       - uses: actions/checkout@v4
