@@ -89,7 +89,7 @@ sub githubactions {
                 $job{'install'} = $1;
             }
             elsif($m >= 0) {
-                if($_ =~ /^        - name: (.*)/) {
+                if($_ =~ /^          - name: (.*)/) {
                     # matrix job
                     #print "name: $1\n";
                     $job{'name'} = $1;
@@ -165,7 +165,7 @@ sub azurepipelines {
     $job{'file'} = ".azure-pipelines.yml";
     $job{'service'} = "azure";
     while(<G>) {
-        if($_ =~ /^      vmImage: (.*)/) {
+        if($_ =~ /^          vmImage: (.*)/) {
             my $i = $1;
             if($i =~ /ubuntu/) {
                 $os = "linux";
@@ -174,7 +174,7 @@ sub azurepipelines {
                 $os = "windows";
             }
         }
-        elsif($_ =~ /^- stage: (.*)/) {
+        elsif($_ =~ /^  - stage: (.*)/) {
             my $topname = $1;
             if($topname !~ /(windows|linux)/) {
                 $job{'name'} = $topname;
@@ -194,7 +194,7 @@ sub azurepipelines {
             $j = 0;
         }
         elsif($m >= 0) {
-            if($_ =~ /^          name: (.*)/) {
+            if($_ =~ /^              name: (.*)/) {
                 # single matrix list entry job
                 $j++;
                 $job{'name'} = $1;
@@ -205,7 +205,7 @@ sub azurepipelines {
                 # disable matrix mode
                 $m = -1;
             }
-            elsif($_ =~ /^          configure: (.*)/) {
+            elsif($_ =~ /^              configure: (.*)/) {
                 $job{'configure'} = $1;
                 $job{'line'}=$line;
                 $job{'os'}=$os;
