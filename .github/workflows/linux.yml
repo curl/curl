@@ -204,7 +204,10 @@ jobs:
         run: |
           dnf upgrade -y
           dnf install autoconf automake libtool openssl-devel libpsl-devel libssh2-devel zlib-devel perl-Memoize libidn2-devel brotli-devel libzstd-devel openldap-devel heimdal-devel git -y
-          sysctl -w net.ipv6.ip_forward=1
+          echo "NETWORKING_IPV6=yes" >> /etc/sysconfig/network
+          echo "IPV6_DEFAULTDEV=tun6to4">> /etc/sysconfig/network
+          echo "IPV6INIT=yes" >> /etc/sysconfig/network-scripts/ifcfg-eth0
+          echo "IPV6TO4INIT=yes">> /etc/sysconfig/network-scripts/ifcfg-eth0
         name: 'install dependencies'
 
       - uses: actions/checkout@v4
