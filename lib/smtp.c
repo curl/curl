@@ -690,6 +690,7 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data)
     }
   }
 
+#ifndef CURL_DISABLE_MIME
   /* Prepare the mime data if some. */
   if(data->set.mimepost.kind != MIMEKIND_NONE) {
     /* Use the whole structure as data. */
@@ -722,6 +723,7 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data)
     data->state.fread_func = (curl_read_callback) Curl_mime_read;
     data->state.in = (void *) &data->set.mimepost;
   }
+#endif
 
   /* Calculate the optional SIZE parameter */
   if(conn->proto.smtpc.size_supported && data->state.infilesize > 0) {
@@ -1410,7 +1412,7 @@ static CURLcode smtp_done(struct Curl_easy *data, CURLcode status,
     result = status;         /* use the already set error code */
   }
   else if(!data->set.connect_only && data->set.mail_rcpt &&
-          (data->state.upload || data->set.mimepost.kind)) {
+          (data->state.upload || IS_MIME_POST(data))) {
     /* Calculate the EOB taking into account any terminating CRLF from the
        previous line of the email or the CRLF of the DATA command when there
        is "no mail data". RFC-5321, sect. 4.1.1.4.
@@ -1502,7 +1504,7 @@ static CURLcode smtp_perform(struct Curl_easy *data, bool *connected,
   smtp->eob = 2;
 
   /* Start the first command in the DO phase */
-  if((data->state.upload || data->set.mimepost.kind) && data->set.mail_rcpt)
+  if((data->state.upload || IS_MIME_POST(data)) && data->set.mail_rcpt)
     /* MAIL transfer */
     result = smtp_perform_mail(data);
   else

@@ -1812,7 +1812,9 @@ static CURLcode protocol_connect(struct Curl_easy *data,
  */
 static CURLcode readrewind(struct Curl_easy *data)
 {
+#if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
   curl_mimepart *mimepart = &data->set.mimepost;
+#endif
   DEBUGASSERT(data->conn);
 
   data->state.rewindbeforesend = FALSE; /* we rewind now */
@@ -1826,7 +1828,7 @@ static CURLcode readrewind(struct Curl_easy *data)
   /* We have sent away data. If not using CURLOPT_POSTFIELDS or
      CURLOPT_HTTPPOST, call app to rewind
   */
-#ifndef CURL_DISABLE_HTTP
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_MIME)
   if(data->conn->handler->protocol & PROTO_FAMILY_HTTP) {
     if(data->state.mimepost)
       mimepart = data->state.mimepost;
@@ -1836,6 +1838,7 @@ static CURLcode readrewind(struct Curl_easy *data)
      (data->state.httpreq == HTTPREQ_GET) ||
      (data->state.httpreq == HTTPREQ_HEAD))
     ; /* no need to rewind */
+#if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
   else if(data->state.httpreq == HTTPREQ_POST_MIME ||
           data->state.httpreq == HTTPREQ_POST_FORM) {
     CURLcode result = Curl_mime_rewind(mimepart);
@@ -1844,6 +1847,7 @@ static CURLcode readrewind(struct Curl_easy *data)
       return result;
     }
   }
+#endif
   else {
     if(data->set.seek_func) {
       int err;

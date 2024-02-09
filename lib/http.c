@@ -2344,9 +2344,11 @@ CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
   http->postsize = 0;
 
   switch(httpreq) {
+#ifndef CURL_DISABLE_MIME
   case HTTPREQ_POST_MIME:
     data->state.mimepost = &data->set.mimepost;
     break;
+#endif
 #ifndef CURL_DISABLE_FORM_API
   case HTTPREQ_POST_FORM:
     /* Convert the form structure into a mime structure, then keep
@@ -2514,6 +2516,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
       return result;
     break;
 
+#if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
   case HTTPREQ_POST_FORM:
   case HTTPREQ_POST_MIME:
     /* This is form posting using mime data. */
@@ -2594,7 +2597,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
       return result;
 
     break;
-
+#endif
   case HTTPREQ_POST:
     /* this is the simple POST, using x-www-form-urlencoded style */
 

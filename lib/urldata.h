@@ -1426,8 +1426,10 @@ struct UrlState {
                                  this should be dealt with in pretransfer */
 #ifndef CURL_DISABLE_HTTP
   curl_mimepart *mimepost;
+#ifndef CURL_DISABLE_FORM_API
   curl_mimepart *formp; /* storage for old API form-posting, allocated on
                            demand */
+#endif
   size_t trailers_bytes_sent;
   struct dynbuf trailers_buf; /* a buffer containing the compiled trailing
                                  headers */
@@ -1724,7 +1726,9 @@ struct UserDefined {
   curl_off_t set_resume_from;  /* continue [ftp] transfer from here */
   struct curl_slist *headers; /* linked list of extra headers */
   struct curl_httppost *httppost;  /* linked list of old POST data */
+#if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
   curl_mimepart mimepost;  /* MIME/POST data. */
+#endif
 #ifndef CURL_DISABLE_TELNET
   struct curl_slist *telnet_options; /* linked list of telnet options */
 #endif
@@ -1936,6 +1940,12 @@ struct UserDefined {
   BIT(ws_raw_mode);
 #endif
 };
+
+#ifndef CURL_DISABLE_MIME
+#define IS_MIME_POST(a) ((a)->set.mimepost.kind != MIMEKIND_NONE)
+#else
+#define IS_MIME_POST(a) FALSE
+#endif
 
 struct Names {
   struct Curl_hash *hostcache;
