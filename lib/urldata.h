@@ -722,10 +722,6 @@ struct SingleRequest {
 #ifndef CURL_DISABLE_DOH
   struct dohdata *doh; /* DoH specific data for this request */
 #endif
-#if defined(_WIN32) && defined(USE_WINSOCK)
-  struct curltime last_sndbuf_update;  /* last time readwrite_upload called
-                                          win_update_buffer_size */
-#endif
   char fread_eof[2]; /* the body read callback (index 0) returned EOF or
                         the trailer read callback (index 1) returned EOF */
 #ifndef CURL_DISABLE_COOKIES
@@ -996,6 +992,11 @@ struct connectdata {
   /*************** Request - specific items ************/
 #if defined(USE_WINDOWS_SSPI) && defined(SECPKG_ATTR_ENDPOINT_BINDINGS)
   CtxtHandle *sslContext;
+#endif
+
+#if defined(_WIN32) && defined(USE_WINSOCK)
+  struct curltime last_sndbuf_update;  /* last time readwrite_upload called
+                                          win_update_buffer_size */
 #endif
 
 #ifdef USE_GSASL
