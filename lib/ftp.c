@@ -937,24 +937,18 @@ static int ftp_domore_getsock(struct Curl_easy *data,
    * remote site, or we could wait for that site to connect to us. Or just
    * handle ordinary commands.
    */
-
   DEBUGF(infof(data, "ftp_domore_getsock()"));
-  if(conn->cfilter[SECONDARYSOCKET]
-     && !Curl_conn_is_connected(conn, SECONDARYSOCKET))
-    return 0;
 
   if(FTP_STOP == ftpc->state) {
-    int bits = GETSOCK_READSOCK(0);
-
     /* if stopped and still in this state, then we're also waiting for a
        connect on the secondary connection */
+    DEBUGASSERT(conn->sock[SECONDARYSOCKET] != CURL_SOCKET_BAD ||
+               (conn->cfilter[SECONDARYSOCKET] &&
+                !Curl_conn_is_connected(conn, SECONDARYSOCKET)));
     socks[0] = conn->sock[FIRSTSOCKET];
-    if(conn->sock[SECONDARYSOCKET] != CURL_SOCKET_BAD) {
-      socks[1] = conn->sock[SECONDARYSOCKET];
-      bits |= GETSOCK_WRITESOCK(1) | GETSOCK_READSOCK(1);
-    }
-
-    return bits;
+    /* An unconnected SECONDARY will add its socket by itself
+     * via its adjust_pollset() */
+    return GETSOCK_READSOCK(0);
   }
   return Curl_pp_getsock(data, &conn->proto.ftpc.pp, socks);
 }
