@@ -2133,7 +2133,6 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     infof(data, "schannel: server indicated shutdown in a prior call");
     goto cleanup;
   }
-
   /* It's debatable what to return when !len. Regardless we can't return
      immediately because there may be data to decrypt (in the case we want to
      decrypt all encrypted cached data) so handle !len later in cleanup.
@@ -2317,10 +2316,10 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
         /* In Windows 2000 SEC_I_CONTEXT_EXPIRED (close_notify) is not
            returned so we have to work around that in cleanup. */
         backend->recv_sspi_close_notify = true;
-        if(!backend->recv_connection_closed) {
+        if(!backend->recv_connection_closed)
           backend->recv_connection_closed = true;
-          infof(data, "schannel: server closed the connection");
-        }
+        infof(data,
+              "schannel: server close notification received (close_notify)");
         goto cleanup;
       }
     }
@@ -2443,7 +2442,10 @@ static bool schannel_data_pending(struct Curl_cfilter *cf,
 
   if(backend->ctxt) /* SSL/TLS is in use */
     return (backend->decdata_offset > 0 ||
-            (backend->encdata_offset > 0 && !backend->encdata_is_incomplete));
+            (backend->encdata_offset > 0 && !backend->encdata_is_incomplete) ||
+            backend->recv_connection_closed ||
+            backend->recv_sspi_close_notify ||
+            backend->recv_unrecoverable_err);
   else
     return FALSE;
 }
