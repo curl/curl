@@ -9,6 +9,7 @@ configure.ac eol=lf
 *.in eol=lf
 *.am eol=lf
 *.sh eol=lf
+.checksrc eol=lf
 *.[ch] whitespace=tab-in-indent
 
 # Batch files (bat,btm,cmd) must be run with CRLF line endings.
