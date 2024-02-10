@@ -60,6 +60,7 @@ problems may have been fixed or changed somewhat since this was written.
  6.13 Negotiate against Hadoop HDFS
 
  7. FTP
+ 7.1 FTP upload fails if remebered dir is deleted
  7.3 FTP with NOBODY and FAILONERROR
  7.4 FTP with ACCT
  7.11 FTPS upload data loss with TLS 1.3
@@ -372,6 +373,14 @@ problems may have been fixed or changed somewhat since this was written.
  https://github.com/curl/curl/issues/8264
 
 7. FTP
+
+7.1 FTP upload fails if remebered dir is deleted
+
+ curl's FTP code assumes that the directory it entered in a previous transfer
+ still exists when it comes back to do a second transfer, and does not respond
+ well if it was indeed deleted in the mean time.
+
+ https://github.com/curl/curl/issues/12181
 
 7.3 FTP with NOBODY and FAILONERROR
 
