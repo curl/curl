@@ -2938,7 +2938,8 @@ typedef enum {
   CURLINFO_XFER_ID          = CURLINFO_OFF_T + 63,
   CURLINFO_CONN_ID          = CURLINFO_OFF_T + 64,
   CURLINFO_QUEUE_TIME_T     = CURLINFO_OFF_T + 65,
-  CURLINFO_LASTONE          = 65
+  CURLINFO_USED_PROXY       = CURLINFO_LONG + 66,
+  CURLINFO_LASTONE          = 66
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as

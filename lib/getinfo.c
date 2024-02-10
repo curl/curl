@@ -180,7 +180,6 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
     *param_charp = NULL;
 #endif
     break;
-
   default:
     return CURLE_UNKNOWN_OPTION;
   }
@@ -333,6 +332,15 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
     break;
   case CURLINFO_PROTOCOL:
     *param_longp = data->info.conn_protocol;
+    break;
+  case CURLINFO_USED_PROXY:
+    *param_longp =
+#ifdef CURL_DISABLE_PROXY
+      0
+#else
+      data->info.used_proxy
+#endif
+      ;
     break;
   default:
     return CURLE_UNKNOWN_OPTION;

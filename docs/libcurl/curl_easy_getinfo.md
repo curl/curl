@@ -120,6 +120,10 @@ See CURLINFO_PRETRANSFER_TIME_T(3)
 Time during which this transfer was held in a waiting queue.
 See CURLINFO_QUEUE_TIME_T(3)
 
+## CURLINFO_USED_PROXY
+
+Whether the proxy was used (Added in 8.7.0). See CURLINFO_USED_PROXY(3)
+
 ## CURLINFO_STARTTRANSFER_TIME
 
 Time from start until just when the first byte is received.
