@@ -25,7 +25,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_POSTQUOTE,
 # DESCRIPTION
 
 Pass a pointer to a linked list of FTP or SFTP commands to pass to the server
-after your FTP transfer request. The commands are only issues if no error
+after your FTP transfer request. The commands are only issued if no error
 occur. The linked list should be a fully valid list of struct curl_slist
 structs properly filled in as described for CURLOPT_QUOTE(3).
 
