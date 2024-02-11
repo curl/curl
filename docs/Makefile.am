@@ -43,7 +43,7 @@ SUBDIRS = . cmdline-opts libcurl
 DIST_SUBDIRS = $(SUBDIRS) examples
 
 CLEANFILES = $(man_MANS) curl.1 $(CURLCONF_DOCS) $(MK_CA_DOCS)
-nodist_MANS = $(CLEANFILES)
+
 
 EXTRA_DIST =                                    \
  $(CURLPAGES)                                   \
