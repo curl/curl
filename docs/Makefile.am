@@ -26,7 +26,7 @@ AUTOMAKE_OPTIONS = foreign no-dependencies
 
 if BUILD_DOCS
 # if we disable man page building, ignore these
-MK_CA_DOCS = mk-ca-bundle.1
+
 CURLCONF_DOCS = curl-config.1
 endif
 
