@@ -34,7 +34,6 @@ endif
 # EXTRA_DIST breaks with $(abs_builddir) so build it using this variable
 # but distribute it (using the relative file name) in the next variable
 man_MANS = $(abs_builddir)/curl.1
-noinst_man_MANS = $(MK_CA_DOCS)
 dist_man_MANS = $(CURLCONF_DOCS) $(MK_CA_DOCS)
 CURLPAGES = curl-config.md mk-ca-bundle.md
 
