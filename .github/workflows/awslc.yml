@@ -41,7 +41,7 @@ concurrency:
 permissions: {}
 
 env:
-  MAKEFLAGS: -j 3
+  MAKEFLAGS: -j 4
 
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
   awslc-version: 1.28.0
