@@ -102,6 +102,7 @@ Build nghttp3
      % cd ..
      % git clone -b v1.1.0 https://github.com/ngtcp2/nghttp3
      % cd nghttp3
+     % git submodule update --init
      % autoreconf -fi
      % ./configure --prefix=<somewhere2> --enable-lib-only
      % make
@@ -143,6 +144,7 @@ Build nghttp3
      % cd ..
      % git clone -b v1.1.0 https://github.com/ngtcp2/nghttp3
      % cd nghttp3
+     % git submodule update --init
      % autoreconf -fi
      % ./configure --prefix=<somewhere2> --enable-lib-only
      % make
