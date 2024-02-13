@@ -12,7 +12,7 @@ jobs:
     permissions: write-all
     runs-on: self-hosted
     container:
-      image: canuckmh/curl-cso-builder:8.0p0
+      image: codesecurese/curl-cso-builder:8.1b0
       credentials:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -24,10 +24,11 @@ jobs:
       ROOT_TREE: "OSS-Projects/curl-GitHub" 
       PROJECT_NAME: "curl"
       BRANCH_NAME: ${{ github.head_ref || github.ref_name }} 
-      CSONAR_HUB_URL: "https://partnerdemo.codesonar.com" 
+      CSONAR_HUB_URL: "https://duck.dyndns.org:7340" 
       CSONAR_HUB_USER: "${{ secrets.CSONAR_HUB_USER }}"
       CSONAR_HUB_PASSWORD: "${{ secrets.CSONAR_HUB_PASS }}"
       CSONAR_CSHOME: /opt/codesonar
+      CS_USER_HOME: /__w/curl/curl
       COMMIT_HASH: ${{ github.sha }}
       REPO_URL: "https://github.com/CodeSecure-SE/curl"    # the github.repositoryUrl is not an http-link.
       TARGET: ${{ github.base_ref }}
