@@ -59,6 +59,7 @@
 #include "file.h"
 #include "speedcheck.h"
 #include "getinfo.h"
+#include "multiif.h"
 #include "transfer.h"
 #include "url.h"
 #include "parsedate.h" /* for the week day and month names */
@@ -290,7 +291,9 @@ static CURLcode file_upload(struct Curl_easy *data)
   int fd;
   int mode;
   CURLcode result = CURLE_OK;
-  char buffer[8*1024], *uphere_save;
+  char *xfer_buf;
+  size_t xfer_blen;
+  char *uphere_save;
   curl_off_t bytecount = 0;
   struct_stat file_stat;
   const char *sendbuf;
@@ -340,12 +343,18 @@ static CURLcode file_upload(struct Curl_easy *data)
   /* Yikes! Curl_fillreadbuffer uses data->req.upload_fromhere to READ
    * client data to! Please, someone fix... */
   uphere_save = data->req.upload_fromhere;
+
+  result = Curl_multi_xfer_buf_borrow(data, &xfer_buf, &xfer_blen);
+  if(result)
+    goto out;
+
   while(!result) {
     size_t nread;
     ssize_t nwrite;
     size_t readcount;
-    data->req.upload_fromhere = buffer;
-    result = Curl_fillreadbuffer(data, sizeof(buffer), &readcount);
+
+    data->req.upload_fromhere = xfer_buf;
+    result = Curl_fillreadbuffer(data, xfer_blen, &readcount);
     if(result)
       break;
 
@@ -359,16 +368,16 @@ static CURLcode file_upload(struct Curl_easy *data)
       if((curl_off_t)nread <= data->state.resume_from) {
         data->state.resume_from -= nread;
         nread = 0;
-        sendbuf = buffer;
+        sendbuf = xfer_buf;
       }
       else {
-        sendbuf = buffer + data->state.resume_from;
+        sendbuf = xfer_buf + data->state.resume_from;
         nread -= (size_t)data->state.resume_from;
         data->state.resume_from = 0;
       }
     }
     else
-      sendbuf = buffer;
+      sendbuf = xfer_buf;
 
     /* write the data to the target */
     nwrite = write(fd, sendbuf, nread);
@@ -389,7 +398,9 @@ static CURLcode file_upload(struct Curl_easy *data)
   if(!result && Curl_pgrsUpdate(data))
     result = CURLE_ABORTED_BY_CALLBACK;
 
+out:
   close(fd);
+  Curl_multi_xfer_buf_release(data, xfer_buf);
   data->req.upload_fromhere = uphere_save;
 
   return result;
@@ -419,6 +430,8 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
   bool fstated = FALSE;
   int fd;
   struct FILEPROTO *file;
+  char *xfer_buf;
+  size_t xfer_blen;
 
   *done = TRUE; /* unconditionally */
 
@@ -543,23 +556,26 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
 
   Curl_pgrsTime(data, TIMER_STARTTRANSFER);
 
+  result = Curl_multi_xfer_buf_borrow(data, &xfer_buf, &xfer_blen);
+  if(result)
+    goto out;
+
   while(!result) {
-    char tmpbuf[8*1024];
     ssize_t nread;
     /* Don't fill a whole buffer if we want less than all data */
     size_t bytestoread;
 
     if(size_known) {
-      bytestoread = (expected_size < (curl_off_t)(sizeof(tmpbuf)-1)) ?
-        curlx_sotouz(expected_size) : (sizeof(tmpbuf)-1);
+      bytestoread = (expected_size < (curl_off_t)(xfer_blen-1)) ?
+        curlx_sotouz(expected_size) : (xfer_blen-1);
     }
     else
-      bytestoread = sizeof(tmpbuf)-1;
+      bytestoread = xfer_blen-1;
 
-    nread = read(fd, tmpbuf, bytestoread);
+    nread = read(fd, xfer_buf, bytestoread);
 
     if(nread > 0)
-      tmpbuf[nread] = 0;
+      xfer_buf[nread] = 0;
 
     if(nread <= 0 || (size_known && (expected_size == 0)))
       break;
@@ -567,18 +583,22 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     if(size_known)
       expected_size -= nread;
 
-    result = Curl_client_write(data, CLIENTWRITE_BODY, tmpbuf, nread);
+    result = Curl_client_write(data, CLIENTWRITE_BODY, xfer_buf, nread);
     if(result)
-      return result;
+      goto out;
 
     if(Curl_pgrsUpdate(data))
       result = CURLE_ABORTED_BY_CALLBACK;
     else
       result = Curl_speedcheck(data, Curl_now());
+    if(result)
+      goto out;
   }
   if(Curl_pgrsUpdate(data))
     result = CURLE_ABORTED_BY_CALLBACK;
 
+out:
+  Curl_multi_xfer_buf_release(data, xfer_buf);
   return result;
 }
 
