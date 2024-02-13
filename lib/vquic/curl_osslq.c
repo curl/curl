@@ -1109,6 +1109,16 @@ static CURLcode cf_osslq_ctx_start(struct Curl_cfilter *cf,
     goto out;
   }
 
+#ifdef SSL_VALUE_QUIC_IDLE_TIMEOUT
+  /* Added in OpenSSL v3.3.x */
+  if(!SSL_set_feature_request_uint(ctx->tls.ssl, SSL_VALUE_QUIC_IDLE_TIMEOUT,
+                                   CURL_QUIC_MAX_IDLE_MS)) {
+    CURL_TRC_CF(data, cf, "error setting idle timeout, ");
+    result = CURLE_FAILED_INIT;
+    goto out;
+  }
+#endif
+
   SSL_set_bio(ctx->tls.ssl, bio, bio);
   bio = NULL;
   SSL_set_connect_state(ctx->tls.ssl);
@@ -1375,7 +1385,7 @@ static CURLcode h3_send_streams(struct Curl_cfilter *cf,
     size_t written;
     int eos, ok, rv;
     size_t total_len, acked_len = 0;
-    bool blocked = FALSE;
+    bool blocked = FALSE, eos_written = FALSE;
 
     n = nghttp3_conn_writev_stream(ctx->h3.conn, &stream_id, &eos,
                                    vec, ARRAYSIZE(vec));
@@ -1406,9 +1416,19 @@ static CURLcode h3_send_streams(struct Curl_cfilter *cf,
     for(i = 0; (i < n) && !blocked; ++i) {
       /* Without stream->s.ssl, we closed that already, so
        * pretend the write did succeed. */
+#ifdef SSL_WRITE_FLAG_CONCLUDE
+      /* Since OpenSSL v3.3.x, on last chunk set EOS if needed  */
+      uint64_t flags = (eos && ((i + 1) == n))? SSL_WRITE_FLAG_CONCLUDE : 0;
+      written = vec[i].len;
+      ok = !s->ssl || SSL_write_ex2(s->ssl, vec[i].base, vec[i].len, flags,
+                                   &written);
+      if(ok && flags & SSL_WRITE_FLAG_CONCLUDE)
+        eos_written = TRUE;
+#else
       written = vec[i].len;
       ok = !s->ssl || SSL_write_ex(s->ssl, vec[i].base, vec[i].len,
                                    &written);
+#endif
       if(ok) {
         /* As OpenSSL buffers the data, we count this as acknowledged
          * from nghttp3's point of view */
@@ -1440,6 +1460,7 @@ static CURLcode h3_send_streams(struct Curl_cfilter *cf,
     if(acked_len > 0 || (eos && !s->send_blocked)) {
       /* Since QUIC buffers the data written internally, we can tell
        * nghttp3 that it can move forward on it */
+      ctx->q.last_io = Curl_now();
       rv = nghttp3_conn_add_write_offset(ctx->h3.conn, s->id, acked_len);
       if(rv && rv != NGHTTP3_ERR_STREAM_NOT_FOUND) {
         failf(data, "nghttp3_conn_add_write_offset returned error: %s\n",
@@ -1458,7 +1479,7 @@ static CURLcode h3_send_streams(struct Curl_cfilter *cf,
                   "to QUIC, eos=%d", s->id, acked_len, total_len, eos);
     }
 
-    if(eos && !s->send_blocked) {
+    if(eos && !s->send_blocked && !eos_written) {
       /* wrote everything and H3 indicates end of stream */
       CURL_TRC_CF(data, cf, "[%" PRId64 "] closing QUIC stream", s->id);
       SSL_stream_conclude(s->ssl, 0);
@@ -1583,6 +1604,7 @@ static CURLcode cf_osslq_connect(struct Curl_cfilter *cf,
   if(err == 1) {
     /* connected */
     ctx->handshake_at = now;
+    ctx->q.last_io = now;
     CURL_TRC_CF(data, cf, "handshake complete after %dms",
                (int)Curl_timediff(now, ctx->started_at));
     result = cf_osslq_verify_peer(cf, data);
@@ -1598,15 +1620,18 @@ static CURLcode cf_osslq_connect(struct Curl_cfilter *cf,
     int detail = SSL_get_error(ctx->tls.ssl, err);
     switch(detail) {
     case SSL_ERROR_WANT_READ:
+      ctx->q.last_io = now;
       CURL_TRC_CF(data, cf, "QUIC SSL_connect() -> WANT_RECV");
       result = Curl_vquic_tls_before_recv(&ctx->tls, cf, data);
       goto out;
     case SSL_ERROR_WANT_WRITE:
+      ctx->q.last_io = now;
       CURL_TRC_CF(data, cf, "QUIC SSL_connect() -> WANT_SEND");
       result = CURLE_OK;
       goto out;
 #ifdef SSL_ERROR_WANT_ASYNC
     case SSL_ERROR_WANT_ASYNC:
+      ctx->q.last_io = now;
       CURL_TRC_CF(data, cf, "QUIC SSL_connect() -> WANT_ASYNC");
       result = CURLE_OK;
       goto out;
@@ -2069,7 +2094,24 @@ static bool cf_osslq_conn_is_alive(struct Curl_cfilter *cf,
   if(!ctx->tls.ssl)
     goto out;
 
-  /* TODO: how to check negotiated connection idle time? */
+#ifdef SSL_VALUE_QUIC_IDLE_TIMEOUT
+  /* Added in OpenSSL v3.3.x */
+  {
+    timediff_t idletime;
+    uint64_t idle_ms = ctx->max_idle_ms;
+    if(!SSL_get_value_uint(ctx->tls.ssl, SSL_VALUE_CLASS_FEATURE_NEGOTIATED,
+                           SSL_VALUE_QUIC_IDLE_TIMEOUT, &idle_ms)) {
+      CURL_TRC_CF(data, cf, "error getting negotiated idle timeout, "
+                  "assume connection is dead.");
+      goto out;
+    }
+    CURL_TRC_CF(data, cf, "negotiated idle timeout: %zums", (size_t)idle_ms);
+    idletime = Curl_timediff(Curl_now(), ctx->q.last_io);
+    if(idletime > 0 && (uint64_t)idletime > idle_ms)
+      goto out;
+  }
+
+#endif
 
   if(!cf->next || !cf->next->cft->is_alive(cf->next, data, input_pending))
     goto out;
@@ -2125,15 +2167,24 @@ static CURLcode cf_osslq_query(struct Curl_cfilter *cf,
                                int query, int *pres1, void *pres2)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
-  struct cf_call_data save;
 
   switch(query) {
   case CF_QUERY_MAX_CONCURRENT: {
-    /* TODO: how to get this? */
-    CF_DATA_SAVE(save, cf, data);
+#ifdef SSL_VALUE_QUIC_STREAM_BIDI_LOCAL_AVAIL
+    /* Added in OpenSSL v3.3.x */
+    uint64_t v;
+    if(!SSL_get_value_uint(ctx->tls.ssl, SSL_VALUE_CLASS_GENERIC,
+                           SSL_VALUE_QUIC_STREAM_BIDI_LOCAL_AVAIL, &v)) {
+      CURL_TRC_CF(data, cf, "error getting available local bidi streams");
+      return CURLE_HTTP3;
+    }
+    /* we report avail + in_use */
+    v += CONN_INUSE(cf->conn);
+    *pres1 = (v > INT_MAX)? INT_MAX : (int)v;
+#else
     *pres1 = 100;
+#endif
     CURL_TRC_CF(data, cf, "query max_conncurrent -> %d", *pres1);
-    CF_DATA_RESTORE(cf, save);
     return CURLE_OK;
   }
   case CF_QUERY_CONNECT_REPLY_MS:
