@@ -28,7 +28,7 @@ jobs:
       CSONAR_HUB_USER: "${{ secrets.CSONAR_HUB_USER }}"
       CSONAR_HUB_PASSWORD: "${{ secrets.CSONAR_HUB_PASS }}"
       CSONAR_CSHOME: /opt/codesonar
-      CS_USER_HOME: /github/home
+      CS_USER_HOME: /__w/curl/curl
       COMMIT_HASH: ${{ github.sha }}
       REPO_URL: "https://github.com/CodeSecure-SE/curl"    # the github.repositoryUrl is not an http-link.
       TARGET: ${{ github.base_ref }}
