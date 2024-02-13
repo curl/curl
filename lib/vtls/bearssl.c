@@ -707,7 +707,7 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
     infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
   }
 
-  if(connssl->peer.is_ip_address) {
+  if(connssl->peer.type != CURL_SSL_PEER_DNS) {
     if(verifyhost) {
       failf(data, "BearSSL: "
             "host verification of IP address is not supported");

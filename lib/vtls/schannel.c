@@ -1159,7 +1159,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
   /* Warn if SNI is disabled due to use of an IP address */
-  if(connssl->peer.is_ip_address) {
+  if(connssl->peer.type != CURL_SSL_PEER_DNS) {
     infof(data, "schannel: using IP address, SNI is not supported by OS.");
   }
 
