@@ -2008,7 +2008,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
       return CURLE_SSL_CONNECT_ERROR;
     }
 
-    if(connssl->peer.is_ip_address) {
+    if(connssl->peer.type != CURL_SSL_PEER_DNS) {
       infof(data, "WARNING: using IP address, SNI is being disabled by "
             "the OS.");
     }

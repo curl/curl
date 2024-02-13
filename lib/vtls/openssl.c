@@ -2134,7 +2134,7 @@ CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
                               struct ssl_peer *peer, X509 *server_cert)
 {
   bool matched = FALSE;
-  int target = GEN_DNS; /* target type, GEN_DNS or GEN_IPADD */
+  int target; /* target type, GEN_DNS or GEN_IPADD */
   size_t addrlen = 0;
   STACK_OF(GENERAL_NAME) *altnames;
 #ifdef ENABLE_IPV6
@@ -2149,19 +2149,28 @@ CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
 
   (void)conn;
   hostlen = strlen(peer->hostname);
-  if(peer->is_ip_address) {
+  switch(peer->type) {
+  case CURL_SSL_PEER_IPV4:
+    if(!Curl_inet_pton(AF_INET, peer->hostname, &addr))
+      return CURLE_PEER_FAILED_VERIFICATION;
+    target = GEN_IPADD;
+    addrlen = sizeof(struct in_addr);
+    break;
 #ifdef ENABLE_IPV6
-    if(conn->bits.ipv6_ip &&
-       Curl_inet_pton(AF_INET6, peer->hostname, &addr)) {
-      target = GEN_IPADD;
-      addrlen = sizeof(struct in6_addr);
-    }
-    else
+  case CURL_SSL_PEER_IPV6:
+    if(!Curl_inet_pton(AF_INET6, peer->hostname, &addr))
+      return CURLE_PEER_FAILED_VERIFICATION;
+    target = GEN_IPADD;
+    addrlen = sizeof(struct in6_addr);
+    break;
 #endif
-      if(Curl_inet_pton(AF_INET, peer->hostname, &addr)) {
-        target = GEN_IPADD;
-        addrlen = sizeof(struct in_addr);
-      }
+  case CURL_SSL_PEER_DNS:
+    target = GEN_DNS;
+    break;
+  default:
+    DEBUGASSERT(0);
+    failf(data, "unexpected ssl peer type: %d", peer->type);
+    return CURLE_PEER_FAILED_VERIFICATION;
   }
 
   /* get a "list" of alternative names */
@@ -2242,11 +2251,12 @@ CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
     /* an alternative name matched */
     ;
   else if(dNSName || iPAddress) {
-    infof(data, " subjectAltName does not match %s %s",
-          peer->is_ip_address? "ip address" : "host name", peer->dispname);
+    const char *tname = (peer->type == CURL_SSL_PEER_DNS) ? "host name" :
+                        (peer->type == CURL_SSL_PEER_IPV4) ?
+                        "ipv4 address" : "ipv6 address";
+    infof(data, " subjectAltName does not match %s %s", tname, peer->dispname);
     failf(data, "SSL: no alternative certificate subject name matches "
-          "target %s '%s'",
-          peer->is_ip_address? "ip address" : "host name", peer->dispname);
+          "target %s '%s'", tname, peer->dispname);
     result = CURLE_PEER_FAILED_VERIFICATION;
   }
   else {

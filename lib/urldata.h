@@ -266,11 +266,17 @@ typedef enum {
 /* SSL backend-specific data; declared differently by each SSL backend */
 struct ssl_backend_data;
 
+typedef enum {
+  CURL_SSL_PEER_DNS,
+  CURL_SSL_PEER_IPV4,
+  CURL_SSL_PEER_IPV6
+} ssl_peer_type;
+
 struct ssl_peer {
   char *hostname;        /* hostname for verification */
   char *dispname;        /* display version of hostname */
   char *sni;             /* SNI version of hostname or NULL if not usable */
-  BIT(is_ip_address);    /* if hostname is an IPv4|6 address */
+  ssl_peer_type type;    /* type of the peer information */
 };
 
 struct ssl_primary_config {
