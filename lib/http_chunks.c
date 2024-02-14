@@ -152,6 +152,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
         ch->hexbuffer[ch->hexindex++] = *buf;
         buf++;
         blen--;
+        (*pconsumed)++;
       }
       else {
         char *endptr;
@@ -189,6 +190,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
 
       buf++;
       blen--;
+      (*pconsumed)++;
       break;
 
     case CHUNK_DATA:
@@ -236,6 +238,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
       }
       buf++;
       blen--;
+      (*pconsumed)++;
       break;
 
     case CHUNK_TRAILER:
@@ -293,6 +296,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
       }
       buf++;
       blen--;
+      (*pconsumed)++;
       break;
 
     case CHUNK_TRAILER_CR:
@@ -300,6 +304,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
         ch->state = CHUNK_TRAILER_POSTCR;
         buf++;
         blen--;
+        (*pconsumed)++;
       }
       else {
         ch->state = CHUNK_FAILED;
@@ -320,6 +325,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
         /* skip if CR */
         buf++;
         blen--;
+        (*pconsumed)++;
       }
       /* now wait for the final LF */
       ch->state = CHUNK_STOP;
@@ -328,6 +334,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
     case CHUNK_STOP:
       if(*buf == 0x0a) {
         blen--;
+        (*pconsumed)++;
         /* Record the length of any data left in the end of the buffer
            even if there's no more chunks to read */
         ch->datasize = blen;
