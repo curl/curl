@@ -201,6 +201,7 @@ LIB_CFILES =         \
   psl.c              \
   rand.c             \
   rename.c           \
+  request.c          \
   rtsp.c             \
   select.c           \
   sendf.c            \
@@ -337,6 +338,7 @@ LIB_HFILES =         \
   psl.h              \
   rand.h             \
   rename.h           \
+  request.h          \
   rtsp.h             \
   select.h           \
   sendf.h            \

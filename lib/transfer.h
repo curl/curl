@@ -75,8 +75,7 @@ CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
                               bool is_eos, bool *done);
 
 /* This sets up a forthcoming transfer */
-void
-Curl_setup_transfer (struct Curl_easy *data,
+void Curl_xfer_setup(struct Curl_easy *data,
                      int sockindex,     /* socket index to read from or -1 */
                      curl_off_t size,   /* -1 if unknown at this point */
                      bool getheader,    /* TRUE if header parsing is wanted */
@@ -90,5 +89,23 @@ Curl_setup_transfer (struct Curl_easy *data,
  * missing response things like writing an EOS to the client.
  */
 CURLcode Curl_xfer_write_done(struct Curl_easy *data, bool premature);
+
+/**
+ * Send data on the socket/connection filter designated
+ * for transfer's outgoing data.
+ * Will return CURLE_OK on blocking with (*pnwritten == 0).
+ */
+CURLcode Curl_xfer_send(struct Curl_easy *data,
+                        const void *buf, size_t blen,
+                        ssize_t *pnwritten);
+
+/**
+ * Receive data on the socket/connection filter designated
+ * for transfer's incoming data.
+ * Will return CURLE_AGAIN on blocking with (*pnrcvd == 0).
+ */
+CURLcode Curl_xfer_recv(struct Curl_easy *data,
+                        char *buf, size_t blen,
+                        ssize_t *pnrcvd);
 
 #endif /* HEADER_CURL_TRANSFER_H */

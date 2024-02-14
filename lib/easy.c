@@ -1038,7 +1038,7 @@ fail:
  */
 void curl_easy_reset(struct Curl_easy *data)
 {
-  Curl_free_request_state(data);
+  Curl_req_reset(&data->req, data);
 
   /* zero out UserDefined data: */
   Curl_freeset(data);
@@ -1166,9 +1166,11 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
 }
 
 
-static CURLcode easy_connection(struct Curl_easy *data, curl_socket_t *sfd,
+static CURLcode easy_connection(struct Curl_easy *data,
                                 struct connectdata **connp)
 {
+  curl_socket_t sfd;
+
   if(!data)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
@@ -1178,9 +1180,9 @@ static CURLcode easy_connection(struct Curl_easy *data, curl_socket_t *sfd,
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
 
-  *sfd = Curl_getconnectinfo(data, connp);
+  sfd = Curl_getconnectinfo(data, connp);
 
-  if(*sfd == CURL_SOCKET_BAD) {
+  if(sfd == CURL_SOCKET_BAD) {
     failf(data, "Failed to get recent socket");
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
@@ -1196,7 +1198,6 @@ static CURLcode easy_connection(struct Curl_easy *data, curl_socket_t *sfd,
 CURLcode curl_easy_recv(struct Curl_easy *data, void *buffer, size_t buflen,
                         size_t *n)
 {
-  curl_socket_t sfd;
   CURLcode result;
   ssize_t n1;
   struct connectdata *c;
@@ -1204,7 +1205,7 @@ CURLcode curl_easy_recv(struct Curl_easy *data, void *buffer, size_t buflen,
   if(Curl_is_in_callback(data))
     return CURLE_RECURSIVE_API_CALL;
 
-  result = easy_connection(data, &sfd, &c);
+  result = easy_connection(data, &c);
   if(result)
     return result;
 
@@ -1214,7 +1215,7 @@ CURLcode curl_easy_recv(struct Curl_easy *data, void *buffer, size_t buflen,
     Curl_attach_connection(data, c);
 
   *n = 0;
-  result = Curl_read(data, sfd, buffer, buflen, &n1);
+  result = Curl_conn_recv(data, FIRSTSOCKET, buffer, buflen, &n1);
 
   if(result)
     return result;
@@ -1226,11 +1227,10 @@ CURLcode curl_easy_recv(struct Curl_easy *data, void *buffer, size_t buflen,
 #ifdef USE_WEBSOCKETS
 CURLcode Curl_connect_only_attach(struct Curl_easy *data)
 {
-  curl_socket_t sfd;
   CURLcode result;
   struct connectdata *c = NULL;
 
-  result = easy_connection(data, &sfd, &c);
+  result = easy_connection(data, &c);
   if(result)
     return result;
 
@@ -1251,13 +1251,12 @@ CURLcode Curl_connect_only_attach(struct Curl_easy *data)
 CURLcode Curl_senddata(struct Curl_easy *data, const void *buffer,
                        size_t buflen, ssize_t *n)
 {
-  curl_socket_t sfd;
   CURLcode result;
-  ssize_t n1;
   struct connectdata *c = NULL;
   SIGPIPE_VARIABLE(pipe_st);
 
-  result = easy_connection(data, &sfd, &c);
+  *n = 0;
+  result = easy_connection(data, &c);
   if(result)
     return result;
 
@@ -1266,20 +1265,12 @@ CURLcode Curl_senddata(struct Curl_easy *data, const void *buffer,
        needs to be reattached */
     Curl_attach_connection(data, c);
 
-  *n = 0;
   sigpipe_ignore(data, &pipe_st);
-  result = Curl_write(data, sfd, buffer, buflen, &n1);
+  result = Curl_conn_send(data, FIRSTSOCKET, buffer, buflen, n);
   sigpipe_restore(&pipe_st);
 
-  if(n1 == -1)
+  if(result && result != CURLE_AGAIN)
     return CURLE_SEND_ERROR;
-
-  /* detect EAGAIN */
-  if(!result && !n1)
-    return CURLE_AGAIN;
-
-  *n = n1;
-
   return result;
 }
 

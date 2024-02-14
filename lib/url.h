@@ -41,7 +41,6 @@ void Curl_disconnect(struct Curl_easy *data,
                      struct connectdata *, bool dead_connection);
 CURLcode Curl_setup_conn(struct Curl_easy *data,
                          bool *protocol_done);
-void Curl_free_request_state(struct Curl_easy *data);
 CURLcode Curl_parse_login_details(const char *login, const size_t len,
                                   char **userptr, char **passwdptr,
                                   char **optionsptr);

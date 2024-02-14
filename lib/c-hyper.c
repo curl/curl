@@ -53,6 +53,7 @@
 
 #include <hyper.h>
 #include "urldata.h"
+#include "cfilters.h"
 #include "sendf.h"
 #include "headers.h"
 #include "transfer.h"
@@ -74,7 +75,8 @@ typedef enum {
 size_t Curl_hyper_recv(void *userp, hyper_context *ctx,
                        uint8_t *buf, size_t buflen)
 {
-  struct Curl_easy *data = userp;
+  struct hyp_io_ctx *io_ctx = userp;
+  struct Curl_easy *data = io_ctx->data;
   struct connectdata *conn = data->conn;
   CURLcode result;
   ssize_t nread;
@@ -82,7 +84,8 @@ size_t Curl_hyper_recv(void *userp, hyper_context *ctx,
   (void)ctx;
 
   DEBUGF(infof(data, "Curl_hyper_recv(%zu)", buflen));
-  result = Curl_read(data, conn->sockfd, (char *)buf, buflen, &nread);
+  result = Curl_conn_recv(data, io_ctx->sockindex,
+                          (char *)buf, buflen, &nread);
   if(result == CURLE_AGAIN) {
     /* would block, register interest */
     DEBUGF(infof(data, "Curl_hyper_recv(%zu) -> EAGAIN", buflen));
@@ -106,15 +109,14 @@ size_t Curl_hyper_recv(void *userp, hyper_context *ctx,
 size_t Curl_hyper_send(void *userp, hyper_context *ctx,
                        const uint8_t *buf, size_t buflen)
 {
-  struct Curl_easy *data = userp;
-  struct connectdata *conn = data->conn;
+  struct hyp_io_ctx *io_ctx = userp;
+  struct Curl_easy *data = io_ctx->data;
   CURLcode result;
   ssize_t nwrote;
 
   DEBUGF(infof(data, "Curl_hyper_send(%zu)", buflen));
-  result = Curl_write(data, conn->sockfd, (void *)buf, buflen, &nwrote);
-  if(!result && !nwrote)
-    result = CURLE_AGAIN;
+  result = Curl_conn_send(data, io_ctx->sockindex,
+                          (void *)buf, buflen, &nwrote);
   if(result == CURLE_AGAIN) {
     DEBUGF(infof(data, "Curl_hyper_send(%zu) -> EAGAIN", buflen));
     /* would block, register interest */
@@ -885,7 +887,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
      may be parts of the request that is not yet sent, since we can deal with
      the rest of the request in the PERFORM phase. */
   *done = TRUE;
-  Curl_client_cleanup(data);
+  Curl_cw_reset(data);
 
   /* Add collecting of headers written to client. For a new connection,
    * we might have done that already, but reuse
@@ -939,7 +941,9 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     goto error;
   }
   /* tell Hyper how to read/write network data */
-  hyper_io_set_userdata(io, data);
+  h->io_ctx.data = data;
+  h->io_ctx.sockindex = FIRSTSOCKET;
+  hyper_io_set_userdata(io, &h->io_ctx);
   hyper_io_set_read(io, Curl_hyper_recv);
   hyper_io_set_write(io, Curl_hyper_send);
 
@@ -1200,7 +1204,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   if((httpreq == HTTPREQ_GET) || (httpreq == HTTPREQ_HEAD)) {
     /* HTTP GET/HEAD download */
     Curl_pgrsSetUploadSize(data, 0); /* nothing */
-    Curl_setup_transfer(data, FIRSTSOCKET, -1, TRUE, -1);
+    Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, -1);
   }
   conn->datastream = Curl_hyper_stream;
   if(data->state.expect100header)

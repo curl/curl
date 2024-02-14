@@ -199,8 +199,11 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
 #ifdef HAVE_GSSAPI
   conn->data_prot = PROT_CMD;
 #endif
-  result = Curl_nwrite(data, FIRSTSOCKET, s, write_len, &bytes_written);
-  if(result)
+  result = Curl_conn_send(data, FIRSTSOCKET, s, write_len, &bytes_written);
+  if(result == CURLE_AGAIN) {
+    bytes_written = 0;
+  }
+  else if(result)
     return result;
 #ifdef HAVE_GSSAPI
   data_sec = conn->data_prot;
@@ -251,7 +254,7 @@ CURLcode Curl_pp_sendf(struct Curl_easy *data, struct pingpong *pp,
 }
 
 static CURLcode pingpong_read(struct Curl_easy *data,
-                              curl_socket_t sockfd,
+                              int sockindex,
                               char *buffer,
                               size_t buflen,
                               ssize_t *nread)
@@ -261,7 +264,7 @@ static CURLcode pingpong_read(struct Curl_easy *data,
   enum protection_level prot = data->conn->data_prot;
   data->conn->data_prot = PROT_CLEAR;
 #endif
-  result = Curl_read(data, sockfd, buffer, buflen, nread);
+  result = Curl_conn_recv(data, sockindex, buffer, buflen, nread);
 #ifdef HAVE_GSSAPI
   DEBUGASSERT(prot  > PROT_NONE && prot < PROT_LAST);
   data->conn->data_prot = (unsigned char)prot;
@@ -275,7 +278,7 @@ static CURLcode pingpong_read(struct Curl_easy *data,
  * Reads a piece of a server response.
  */
 CURLcode Curl_pp_readresp(struct Curl_easy *data,
-                          curl_socket_t sockfd,
+                          int sockindex,
                           struct pingpong *pp,
                           int *code, /* return the server code if done */
                           size_t *size) /* size of the response */
@@ -300,7 +303,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
     ssize_t gotbytes = 0;
     char buffer[900];
 
-    result = pingpong_read(data, sockfd, buffer, sizeof(buffer), &gotbytes);
+    result = pingpong_read(data, sockindex, buffer, sizeof(buffer), &gotbytes);
     if(result == CURLE_AGAIN)
       return CURLE_OK;
 
@@ -396,9 +399,15 @@ CURLcode Curl_pp_flushsend(struct Curl_easy *data,
 {
   /* we have a piece of a command still left to send */
   ssize_t written;
-  CURLcode result = Curl_nwrite(data, FIRSTSOCKET,
-                                pp->sendthis + pp->sendsize - pp->sendleft,
-                                pp->sendleft, &written);
+  CURLcode result;
+
+  result = Curl_conn_send(data, FIRSTSOCKET,
+                          pp->sendthis + pp->sendsize - pp->sendleft,
+                          pp->sendleft, &written);
+  if(result == CURLE_AGAIN) {
+    result = CURLE_OK;
+    written = 0;
+  }
   if(result)
     return result;
 

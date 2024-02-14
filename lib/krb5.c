@@ -52,6 +52,7 @@
 #include "ftp.h"
 #include "curl_gssapi.h"
 #include "sendf.h"
+#include "transfer.h"
 #include "curl_krb5.h"
 #include "warnless.h"
 #include "strcase.h"
@@ -90,8 +91,7 @@ static CURLcode ftpsend(struct Curl_easy *data, struct connectdata *conn,
 #ifdef HAVE_GSSAPI
     conn->data_prot = PROT_CMD;
 #endif
-    result = Curl_nwrite(data, FIRSTSOCKET, sptr, write_len,
-                        &bytes_written);
+    result = Curl_xfer_send(data, sptr, write_len, &bytes_written);
 #ifdef HAVE_GSSAPI
     DEBUGASSERT(data_sec > PROT_NONE && data_sec < PROT_LAST);
     conn->data_prot = data_sec;
@@ -470,7 +470,7 @@ socket_read(struct Curl_easy *data, int sockindex, void *to, size_t len)
   ssize_t nread = 0;
 
   while(len > 0) {
-    nread = Curl_conn_recv(data, sockindex, to_p, len, &result);
+    result = Curl_conn_recv(data, sockindex, to_p, len, &nread);
     if(nread > 0) {
       len -= nread;
       to_p += nread;
@@ -497,8 +497,8 @@ socket_write(struct Curl_easy *data, int sockindex, const void *to,
   ssize_t written;
 
   while(len > 0) {
-    written = Curl_conn_send(data, sockindex, to_p, len, &result);
-    if(written > 0) {
+    result = Curl_conn_send(data, sockindex, to_p, len, &written);
+    if(!result && written > 0) {
       len -= written;
       to_p += written;
     }
@@ -567,8 +567,11 @@ static ssize_t sec_recv(struct Curl_easy *data, int sockindex,
   *err = CURLE_OK;
 
   /* Handle clear text response. */
-  if(conn->sec_complete == 0 || conn->data_prot == PROT_CLEAR)
-    return Curl_conn_recv(data, sockindex, buffer, len, err);
+  if(conn->sec_complete == 0 || conn->data_prot == PROT_CLEAR) {
+    ssize_t nread;
+    *err = Curl_conn_recv(data, sockindex, buffer, len, &nread);
+    return nread;
+  }
 
   if(conn->in_buffer.eof_flag) {
     conn->in_buffer.eof_flag = 0;
