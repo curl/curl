@@ -61,7 +61,7 @@ CURLcode Curl_client_write(struct Curl_easy *data, int type, const char *ptr,
 /**
  * Free all resources related to client writing.
  */
-void Curl_client_cleanup(struct Curl_easy *data);
+void Curl_cw_reset(struct Curl_easy *data);
 
 /**
  * Client Writers - a chain passing transfer BODY data to the client.

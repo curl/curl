@@ -706,9 +706,10 @@ static CURLcode multi_done(struct Curl_easy *data,
 
   process_pending_handles(data->multi); /* connection / multiplex */
 
-  Curl_safefree(data->state.ulbuf);
+  if(!result)
+    result = Curl_req_done(&data->req, data, premature);
 
-  Curl_client_cleanup(data);
+  Curl_safefree(data->state.ulbuf);
 
   CONNCACHE_LOCK(data);
   Curl_detach_connection(data);

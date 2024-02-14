@@ -1038,7 +1038,7 @@ fail:
  */
 void curl_easy_reset(struct Curl_easy *data)
 {
-  Curl_free_request_state(data);
+  Curl_req_reset(&data->req, data);
 
   /* zero out UserDefined data: */
   Curl_freeset(data);
