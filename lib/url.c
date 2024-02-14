@@ -261,17 +261,13 @@ CURLcode Curl_close(struct Curl_easy **datap)
     free(data->state.range);
 
   /* freed here just in case DONE wasn't called */
-  Curl_free_request_state(data);
+  Curl_req_free(&data->req, data);
 
   /* Close down all open SSL info and sessions */
   Curl_ssl_close_all(data);
   Curl_safefree(data->state.first_host);
   Curl_safefree(data->state.scratch);
   Curl_ssl_free_certinfo(data);
-
-  /* Cleanup possible redirect junk */
-  free(data->req.newurl);
-  data->req.newurl = NULL;
 
   if(data->state.referer_alloc) {
     Curl_safefree(data->state.referer);
@@ -324,15 +320,6 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_safefree(data->state.aptr.passwd);
   Curl_safefree(data->state.aptr.proxyuser);
   Curl_safefree(data->state.aptr.proxypasswd);
-
-#ifndef CURL_DISABLE_DOH
-  if(data->req.doh) {
-    Curl_dyn_free(&data->req.doh->probe[0].serverdoh);
-    Curl_dyn_free(&data->req.doh->probe[1].serverdoh);
-    curl_slist_free_all(data->req.doh->headers);
-    Curl_safefree(data->req.doh);
-  }
-#endif
 
 #ifndef CURL_DISABLE_HTTP
   Curl_mime_cleanpart(data->state.formp);
@@ -519,9 +506,17 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
   data->magic = CURLEASY_MAGIC_NUMBER;
 
+  result = Curl_req_init(&data->req);
+  if(result) {
+    DEBUGF(fprintf(stderr, "Error: request init failed\n"));
+    free(data);
+    return result;
+  }
+
   result = Curl_resolver_init(data, &data->state.async.resolver);
   if(result) {
     DEBUGF(fprintf(stderr, "Error: resolver_init failed\n"));
+    Curl_req_free(&data->req, data);
     free(data);
     return result;
   }
@@ -545,6 +540,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
     Curl_resolver_cleanup(data->state.async.resolver);
     Curl_dyn_free(&data->state.headerb);
     Curl_freeset(data);
+    Curl_req_free(&data->req, data);
     free(data);
     data = NULL;
   }
@@ -2052,24 +2048,6 @@ static CURLcode setup_connection_internals(struct Curl_easy *data,
     conn->port = p->defport;
 
   return CURLE_OK;
-}
-
-/*
- * Curl_free_request_state() should free temp data that was allocated in the
- * Curl_easy for this single request.
- */
-
-void Curl_free_request_state(struct Curl_easy *data)
-{
-  Curl_safefree(data->req.p.http);
-  Curl_safefree(data->req.newurl);
-#ifndef CURL_DISABLE_DOH
-  if(data->req.doh) {
-    Curl_close(&data->req.doh->probe[0].easy);
-    Curl_close(&data->req.doh->probe[1].easy);
-  }
-#endif
-  Curl_client_cleanup(data);
 }
 
 
@@ -3863,7 +3841,7 @@ CURLcode Curl_connect(struct Curl_easy *data,
   *asyncp = FALSE; /* assume synchronous resolves by default */
 
   /* init the single-transfer specific data */
-  Curl_free_request_state(data);
+  Curl_req_reset(&data->req, data);
   memset(&data->req, 0, sizeof(struct SingleRequest));
   data->req.size = data->req.maxdownload = -1;
   data->req.no_body = data->set.opt_no_body;
@@ -3932,12 +3910,14 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
     /* in HTTP lingo, no body means using the HEAD request... */
     data->state.httpreq = HTTPREQ_HEAD;
 
-  k->start = Curl_now(); /* start time */
+  result = Curl_req_start(&data->req, data);
+  if(result)
+    return result;
+
   k->header = TRUE; /* assume header */
   k->bytecount = 0;
   k->ignorebody = FALSE;
 
-  Curl_client_cleanup(data);
   Curl_speedinit(data);
   Curl_pgrsSetUploadCounter(data, 0);
   Curl_pgrsSetDownloadCounter(data, 0);

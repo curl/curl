@@ -351,7 +351,7 @@ CURLcode Curl_client_unpause(struct Curl_easy *data)
   return result;
 }
 
-void Curl_client_cleanup(struct Curl_easy *data)
+void Curl_cw_reset(struct Curl_easy *data)
 {
   struct Curl_cwriter *writer = data->req.writer_stack;
   size_t i;
