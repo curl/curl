@@ -754,13 +754,26 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
   DEBUGASSERT(data->conn);
   ws = data->conn->proto.ws;
   if(!ws) {
+    size_t chunk_size = WS_CHUNK_SIZE;
     ws = calloc(1, sizeof(*ws));
     if(!ws)
       return CURLE_OUT_OF_MEMORY;
     data->conn->proto.ws = ws;
-    Curl_bufq_init2(&ws->recvbuf, WS_CHUNK_SIZE, WS_CHUNK_COUNT,
+#ifdef DEBUGBUILD
+    {
+      char *p = getenv("CURL_WS_CHUNK_SIZE");
+      if(p) {
+        long l = strtol(p, NULL, 10);
+        if(l > 0 && l <= (1*1024*1024)) {
+          chunk_size = (size_t)l;
+        }
+      }
+    }
+#endif
+    DEBUGF(infof(data, "WS, using chunk size %zu", chunk_size));
+    Curl_bufq_init2(&ws->recvbuf, chunk_size, WS_CHUNK_COUNT,
                     BUFQ_OPT_SOFT_LIMIT);
-    Curl_bufq_init2(&ws->sendbuf, WS_CHUNK_SIZE, WS_CHUNK_COUNT,
+    Curl_bufq_init2(&ws->sendbuf, chunk_size, WS_CHUNK_COUNT,
                     BUFQ_OPT_SOFT_LIMIT);
     ws_dec_init(&ws->dec);
     ws_enc_init(&ws->enc);
@@ -834,7 +847,7 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
 
 struct ws_collect {
   struct Curl_easy *data;
-  void *buffer;
+  unsigned char *buffer;
   size_t buflen;
   size_t bufidx;
   int frame_age;
@@ -886,7 +899,7 @@ static ssize_t ws_client_collect(const unsigned char *buf, size_t buflen,
       return -1;
     }
     *err = CURLE_OK;
-    memcpy(ctx->buffer, buf, nwritten);
+    memcpy(ctx->buffer + ctx->bufidx, buf, nwritten);
     ctx->bufidx += nwritten;
   }
   return nwritten;

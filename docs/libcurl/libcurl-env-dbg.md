@@ -116,3 +116,8 @@ Debug-version of the *ntlm-wb* executable.
 
 OpenLDAP tracing is enabled if this variable exists and its value is 1 or
 greater. There is a number of debug levels, refer to *openldap.c* comments.
+
+## CURL_WS_CHUNK_SIZE
+
+Used to influence the buffer chunk size used for WebSocket encoding and
+decoding.
