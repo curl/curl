@@ -366,7 +366,6 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
 {
   CURLcode result = CURLE_OK;
   struct SingleRequest *k = &data->req;
-  curl_socket_t tunnelsocket = Curl_conn_cf_get_socket(cf, data);
   char *linep;
   size_t line_len;
   int error, writetype;
@@ -386,7 +385,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
 
     /* Read one byte at a time to avoid a race condition. Wait at most one
        second before looping to ensure continuous pgrsUpdates. */
-    result = Curl_read(data, tunnelsocket, &byte, 1, &nread);
+    result = Curl_conn_recv(data, cf->sockindex, &byte, 1, &nread);
     if(result == CURLE_AGAIN)
       /* socket buffer drained, return */
       return CURLE_OK;

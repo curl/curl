@@ -1240,7 +1240,7 @@ static CURLcode tftp_multi_statemach(struct Curl_easy *data, bool *done)
     *done = (state->state == TFTP_STATE_FIN) ? TRUE : FALSE;
     if(*done)
       /* Tell curl we're done */
-      Curl_setup_transfer(data, -1, -1, FALSE, -1);
+      Curl_xfer_setup(data, -1, -1, FALSE, -1);
   }
   else {
     /* no timeouts to handle, check our socket */
@@ -1263,7 +1263,7 @@ static CURLcode tftp_multi_statemach(struct Curl_easy *data, bool *done)
       *done = (state->state == TFTP_STATE_FIN) ? TRUE : FALSE;
       if(*done)
         /* Tell curl we're done */
-        Curl_setup_transfer(data, -1, -1, FALSE, -1);
+        Curl_xfer_setup(data, -1, -1, FALSE, -1);
     }
     /* if rc == 0, then select() timed out */
   }

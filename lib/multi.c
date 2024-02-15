@@ -1008,7 +1008,7 @@ static int connecting_getsock(struct Curl_easy *data, curl_socket_t *socks)
 {
   struct connectdata *conn = data->conn;
   (void)socks;
-  /* Not using `conn->sockfd` as `Curl_setup_transfer()` initializes
+  /* Not using `conn->sockfd` as `Curl_xfer_setup()` initializes
    * that *after* the connect. */
   if(conn && conn->sock[FIRSTSOCKET] != CURL_SOCKET_BAD) {
     /* Default is to wait to something from the server */

@@ -175,22 +175,4 @@ void Curl_cwriter_def_close(struct Curl_easy *data,
                             struct Curl_cwriter *writer);
 
 
-/* internal read-function, does plain socket, SSL and krb4 */
-CURLcode Curl_read(struct Curl_easy *data, curl_socket_t sockfd,
-                   char *buf, size_t buffersize,
-                   ssize_t *n);
-
-/* internal write-function, does plain socket, SSL, SCP, SFTP and krb4 */
-CURLcode Curl_write(struct Curl_easy *data,
-                    curl_socket_t sockfd,
-                    const void *mem, size_t len,
-                    ssize_t *written);
-
-/* internal write-function, using sockindex for connection destination */
-CURLcode Curl_nwrite(struct Curl_easy *data,
-                     int sockindex,
-                     const void *buf,
-                     size_t blen,
-                     ssize_t *pnwritten);
-
 #endif /* HEADER_CURL_SENDF_H */

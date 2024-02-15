@@ -1020,8 +1020,12 @@ static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
     while(Curl_bufq_peek(&ws->sendbuf, &out, &outlen)) {
       if(data->set.connect_only)
         result = Curl_senddata(data, out, outlen, &n);
-      else
-        result = Curl_write(data, data->conn->writesockfd, out, outlen, &n);
+      else {
+        result = Curl_xfer_send(data, out, outlen, &n);
+        if(!result && !n && outlen)
+          result = CURLE_AGAIN;
+      }
+
       if(result) {
         if(result == CURLE_AGAIN) {
           if(!complete) {
@@ -1086,8 +1090,7 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *data, const void *buffer,
     /* raw mode sends exactly what was requested, and this is from within
        the write callback */
     if(Curl_is_in_callback(data)) {
-      result = Curl_write(data, data->conn->writesockfd, buffer, buflen,
-                          &nwritten);
+      result = Curl_xfer_send(data, buffer, buflen, &nwritten);
     }
     else
       result = Curl_senddata(data, buffer, buflen, &nwritten);
@@ -1104,7 +1107,7 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *data, const void *buffer,
     return result;
 
   /* TODO: the current design does not allow partial writes, afaict.
-   * It is not clear who the application is supposed to react. */
+   * It is not clear how the application is supposed to react. */
   space = Curl_bufq_space(&ws->sendbuf);
   DEBUGF(infof(data, "curl_ws_send(len=%zu), sendbuf len=%zu space %zu",
                buflen, Curl_bufq_len(&ws->sendbuf), space));

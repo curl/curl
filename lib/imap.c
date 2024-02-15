@@ -1213,14 +1213,14 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
 
     if(data->req.bytecount == size)
       /* The entire data is already transferred! */
-      Curl_setup_transfer(data, -1, -1, FALSE, -1);
+      Curl_xfer_setup(data, -1, -1, FALSE, -1);
     else {
       /* IMAP download */
       data->req.maxdownload = size;
       /* force a recv/send check of this connection, as the data might've been
        read off the socket already */
       data->state.select_bits = CURL_CSELECT_IN;
-      Curl_setup_transfer(data, FIRSTSOCKET, size, FALSE, -1);
+      Curl_xfer_setup(data, FIRSTSOCKET, size, FALSE, -1);
     }
   }
   else {
@@ -1268,7 +1268,7 @@ static CURLcode imap_state_append_resp(struct Curl_easy *data, int imapcode,
     Curl_pgrsSetUploadSize(data, data->state.infilesize);
 
     /* IMAP upload */
-    Curl_setup_transfer(data, -1, -1, FALSE, FIRSTSOCKET);
+    Curl_xfer_setup(data, -1, -1, FALSE, FIRSTSOCKET);
 
     /* End of DO phase */
     imap_state(data, IMAP_STOP);
@@ -1299,7 +1299,6 @@ static CURLcode imap_statemachine(struct Curl_easy *data,
                                   struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  curl_socket_t sock = conn->sock[FIRSTSOCKET];
   int imapcode;
   struct imap_conn *imapc = &conn->proto.imapc;
   struct pingpong *pp = &imapc->pp;
@@ -1316,7 +1315,7 @@ static CURLcode imap_statemachine(struct Curl_easy *data,
 
   do {
     /* Read the response from the server */
-    result = Curl_pp_readresp(data, sock, pp, &imapcode, &nread);
+    result = Curl_pp_readresp(data, FIRSTSOCKET, pp, &imapcode, &nread);
     if(result)
       return result;
 
@@ -1694,7 +1693,7 @@ static CURLcode imap_dophase_done(struct Curl_easy *data, bool connected)
 
   if(imap->transfer != PPTRANSFER_BODY)
     /* no data to transfer */
-    Curl_setup_transfer(data, -1, -1, FALSE, -1);
+    Curl_xfer_setup(data, -1, -1, FALSE, -1);
 
   return CURLE_OK;
 }
