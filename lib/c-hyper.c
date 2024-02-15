@@ -84,8 +84,7 @@ size_t Curl_hyper_recv(void *userp, hyper_context *ctx,
   (void)ctx;
 
   DEBUGF(infof(data, "Curl_hyper_recv(%zu)", buflen));
-  result = Curl_conn_recv(data, io_ctx->sockindex,
-                          (char *)buf, buflen, &nread);
+  result = Curl_xfer_recv(data, (char *)buf, buflen, &nread);
   if(result == CURLE_AGAIN) {
     /* would block, register interest */
     DEBUGF(infof(data, "Curl_hyper_recv(%zu) -> EAGAIN", buflen));
