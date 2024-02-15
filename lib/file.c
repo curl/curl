@@ -293,10 +293,10 @@ static CURLcode file_upload(struct Curl_easy *data)
   CURLcode result = CURLE_OK;
   char *xfer_buf;
   size_t xfer_blen;
-  char *uphere_save;
   curl_off_t bytecount = 0;
   struct_stat file_stat;
   const char *sendbuf;
+  bool eos = FALSE;
 
   /*
    * Since FILE: doesn't do the full init, we need to provide some extra
@@ -340,21 +340,16 @@ static CURLcode file_upload(struct Curl_easy *data)
     data->state.resume_from = (curl_off_t)file_stat.st_size;
   }
 
-  /* Yikes! Curl_fillreadbuffer uses data->req.upload_fromhere to READ
-   * client data to! Please, someone fix... */
-  uphere_save = data->req.upload_fromhere;
-
   result = Curl_multi_xfer_buf_borrow(data, &xfer_buf, &xfer_blen);
   if(result)
     goto out;
 
-  while(!result) {
+  while(!result && !eos) {
     size_t nread;
     ssize_t nwrite;
     size_t readcount;
 
-    data->req.upload_fromhere = xfer_buf;
-    result = Curl_fillreadbuffer(data, xfer_blen, &readcount);
+    result = Curl_client_read(data, xfer_buf, xfer_blen, &readcount, &eos);
     if(result)
       break;
 
@@ -401,7 +396,6 @@ static CURLcode file_upload(struct Curl_easy *data)
 out:
   close(fd);
   Curl_multi_xfer_buf_release(data, xfer_buf);
-  data->req.upload_fromhere = uphere_save;
 
   return result;
 }

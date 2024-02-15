@@ -94,10 +94,6 @@ CURLcode Curl_dynhds_add_custom(struct Curl_easy *data,
                                 bool is_connect,
                                 struct dynhds *hds);
 
-CURLcode Curl_http_compile_trailers(struct curl_slist *trailers,
-                                    struct dynbuf *buf,
-                                    struct Curl_easy *handle);
-
 void Curl_http_method(struct Curl_easy *data, struct connectdata *conn,
                       const char **method, Curl_HttpReq *);
 CURLcode Curl_http_useragent(struct Curl_easy *data);
@@ -112,8 +108,8 @@ CURLcode Curl_transferencode(struct Curl_easy *data);
 CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
                         Curl_HttpReq httpreq,
                         const char **teep);
-CURLcode Curl_http_req_send(struct Curl_easy *data,
-                            struct dynbuf *r, Curl_HttpReq httpreq);
+CURLcode Curl_http_req_complete(struct Curl_easy *data,
+                                struct dynbuf *r, Curl_HttpReq httpreq);
 bool Curl_use_http_1_1plus(const struct Curl_easy *data,
                            const struct connectdata *conn);
 #ifndef CURL_DISABLE_COOKIES

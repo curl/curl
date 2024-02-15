@@ -27,10 +27,12 @@
 #ifndef CURL_DISABLE_HTTP
 
 #include "urldata.h" /* it includes http_chunks.h */
+#include "curl_printf.h"
 #include "sendf.h"   /* for the client write stuff */
 #include "dynbuf.h"
 #include "content_encoding.h"
 #include "http.h"
+#include "multiif.h"
 #include "strtoofft.h"
 #include "warnless.h"
 
@@ -457,5 +459,194 @@ const struct Curl_cwtype Curl_httpchunk_unencoder = {
   cw_chunked_close,
   sizeof(struct chunked_writer)
 };
+
+/* max length of a HTTP chunk that we want to generate */
+#define CURL_CHUNKED_MINLEN   (1024)
+#define CURL_CHUNKED_MAXLEN   (64 * 1024)
+
+struct chunked_reader {
+  struct Curl_creader super;
+  struct bufq chunkbuf;
+  BIT(read_eos);  /* we read an EOS from the next reader */
+  BIT(eos);       /* we have returned an EOS */
+};
+
+static CURLcode cr_chunked_init(struct Curl_easy *data,
+                                struct Curl_creader *reader)
+{
+  struct chunked_reader *ctx = (struct chunked_reader *)reader;
+  (void)data;
+  Curl_bufq_init2(&ctx->chunkbuf, CURL_CHUNKED_MAXLEN, 2, BUFQ_OPT_SOFT_LIMIT);
+  return CURLE_OK;
+}
+
+static void cr_chunked_close(struct Curl_easy *data,
+                             struct Curl_creader *reader)
+{
+  struct chunked_reader *ctx = (struct chunked_reader *)reader;
+  (void)data;
+  Curl_bufq_free(&ctx->chunkbuf);
+}
+
+static CURLcode add_last_chunk(struct Curl_easy *data,
+                               struct Curl_creader *reader)
+{
+  struct chunked_reader *ctx = (struct chunked_reader *)reader;
+  struct curl_slist *trailers = NULL, *tr;
+  CURLcode result;
+  size_t n;
+  int rc;
+
+  if(!data->set.trailer_callback) {
+    return Curl_bufq_cwrite(&ctx->chunkbuf, STRCONST("0\r\n\r\n"), &n);
+  }
+
+  result = Curl_bufq_cwrite(&ctx->chunkbuf, STRCONST("0\r\n"), &n);
+  if(result)
+    goto out;
+
+  Curl_set_in_callback(data, true);
+  rc = data->set.trailer_callback(&trailers, data->set.trailer_data);
+  Curl_set_in_callback(data, false);
+
+  if(rc != CURL_TRAILERFUNC_OK) {
+    failf(data, "operation aborted by trailing headers callback");
+    result = CURLE_ABORTED_BY_CALLBACK;
+    goto out;
+  }
+
+  for(tr = trailers; tr; tr = tr->next) {
+    /* only add correctly formatted trailers */
+    char *ptr = strchr(tr->data, ':');
+    if(!ptr || *(ptr + 1) != ' ') {
+      infof(data, "Malformatted trailing header, skipping trailer");
+      continue;
+    }
+
+    result = Curl_bufq_cwrite(&ctx->chunkbuf, tr->data,
+                              strlen(tr->data), &n);
+    if(!result)
+      result = Curl_bufq_cwrite(&ctx->chunkbuf, STRCONST("\r\n"), &n);
+    if(result)
+      goto out;
+  }
+
+  result = Curl_bufq_cwrite(&ctx->chunkbuf, STRCONST("\r\n"), &n);
+
+out:
+  curl_slist_free_all(trailers);
+  return result;
+}
+
+static CURLcode add_chunk(struct Curl_easy *data,
+                          struct Curl_creader *reader,
+                          char *buf, size_t blen)
+{
+  struct chunked_reader *ctx = (struct chunked_reader *)reader;
+  CURLcode result;
+  char tmp[CURL_CHUNKED_MINLEN];
+  size_t nread;
+  bool eos;
+
+  DEBUGASSERT(!ctx->read_eos);
+  blen = CURLMIN(blen, CURL_CHUNKED_MAXLEN); /* respect our buffer pref */
+  if(blen < sizeof(tmp)) {
+    /* small read, make a chunk of decent size */
+    buf = tmp;
+    blen = sizeof(tmp);
+  }
+  else {
+    /* larger read, make a chunk that will fit when read back */
+    blen -= (8 + 2 + 2); /* deduct max overhead, 8 hex + 2*crlf */
+  }
+
+  result = Curl_creader_read(data, reader->next, buf, blen, &nread, &eos);
+  if(result)
+    return result;
+  if(eos)
+    ctx->read_eos = TRUE;
+
+  if(nread) {
+    /* actually got bytes, wrap them into the chunkbuf */
+    char hd[11] = "";
+    int hdlen;
+    size_t n;
+
+    hdlen = msnprintf(hd, sizeof(hd), "%zx\r\n", nread);
+    if(hdlen <= 0)
+      return CURLE_READ_ERROR;
+    /* On a soft-limited bufq, we do not need to check that all was written */
+    result = Curl_bufq_cwrite(&ctx->chunkbuf, hd, hdlen, &n);
+    if(!result)
+      result = Curl_bufq_cwrite(&ctx->chunkbuf, buf, nread, &n);
+    if(!result)
+      result = Curl_bufq_cwrite(&ctx->chunkbuf, "\r\n", 2, &n);
+    if(result)
+      return result;
+  }
+
+  if(ctx->read_eos)
+    return add_last_chunk(data, reader);
+  return CURLE_OK;
+}
+
+static CURLcode cr_chunked_read(struct Curl_easy *data,
+                                struct Curl_creader *reader,
+                                char *buf, size_t blen,
+                                size_t *pnread, bool *peos)
+{
+  struct chunked_reader *ctx = (struct chunked_reader *)reader;
+  CURLcode result = CURLE_READ_ERROR;
+
+  *pnread = 0;
+  *peos = ctx->eos;
+
+  if(!ctx->eos) {
+    if(!ctx->read_eos && Curl_bufq_is_empty(&ctx->chunkbuf)) {
+      /* Still getting data form the next reader, buffer is empty */
+      result = add_chunk(data, reader, buf, blen);
+      if(result)
+        return result;
+    }
+
+    if(!Curl_bufq_is_empty(&ctx->chunkbuf)) {
+      result = Curl_bufq_cread(&ctx->chunkbuf, buf, blen, pnread);
+      if(!result && ctx->read_eos && Curl_bufq_is_empty(&ctx->chunkbuf)) {
+        /* no more data, read all, done. */
+        ctx->eos = TRUE;
+        *peos = TRUE;
+      }
+      return result;
+    }
+  }
+  /* We may get here, because we are done or because callbacks paused */
+  DEBUGASSERT(ctx->eos || !ctx->read_eos);
+  return CURLE_OK;
+}
+
+/* HTTP chunked Transfer-Encoding encoder */
+const struct Curl_crtype Curl_httpchunk_encoder = {
+  "chunked",
+  cr_chunked_init,
+  cr_chunked_read,
+  cr_chunked_close,
+  Curl_creader_def_needs_rewind,
+  sizeof(struct chunked_reader)
+};
+
+CURLcode Curl_httpchunk_add_reader(struct Curl_easy *data)
+{
+  struct Curl_creader *reader = NULL;
+  CURLcode result;
+
+  result = Curl_creader_create(&reader, data, &Curl_httpchunk_encoder,
+                               CURL_CR_TRANSFER_ENCODE);
+  if(!result)
+    result = Curl_creader_add(data, reader);
+
+  if(result && reader)
+    Curl_creader_free(data, reader);
+  return result;
+}
 
 #endif /* CURL_DISABLE_HTTP */

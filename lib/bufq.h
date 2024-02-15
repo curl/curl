@@ -178,6 +178,10 @@ ssize_t Curl_bufq_write(struct bufq *q,
                         const unsigned char *buf, size_t len,
                         CURLcode *err);
 
+CURLcode Curl_bufq_cwrite(struct bufq *q,
+                         const char *buf, size_t len,
+                         size_t *pnwritten);
+
 /**
  * Read buf from the start of the buffer queue. The buf is copied
  * and the amount of copied bytes is returned.
@@ -186,6 +190,9 @@ ssize_t Curl_bufq_write(struct bufq *q,
  */
 ssize_t Curl_bufq_read(struct bufq *q, unsigned char *buf, size_t len,
                         CURLcode *err);
+
+CURLcode Curl_bufq_cread(struct bufq *q, char *buf, size_t len,
+                         size_t *pnread);
 
 /**
  * Peek at the head chunk in the buffer queue. Returns a pointer to

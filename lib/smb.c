@@ -811,8 +811,9 @@ static CURLcode smb_send_and_recv(struct Curl_easy *data, void **msg)
   if(!smbc->send_size && smbc->upload_size) {
     size_t nread = smbc->upload_size > (size_t)data->set.upload_buffer_size ?
       (size_t)data->set.upload_buffer_size : smbc->upload_size;
-    data->req.upload_fromhere = data->state.ulbuf;
-    result = Curl_fillreadbuffer(data, nread, &nread);
+    bool eos;
+
+    result = Curl_client_read(data, data->state.ulbuf, nread, &nread, &eos);
     if(result && result != CURLE_AGAIN)
       return result;
     if(!nread)

@@ -417,6 +417,17 @@ ssize_t Curl_bufq_write(struct bufq *q,
   return nwritten;
 }
 
+CURLcode Curl_bufq_cwrite(struct bufq *q,
+                          const char *buf, size_t len,
+                          size_t *pnwritten)
+{
+  ssize_t n;
+  CURLcode result;
+  n = Curl_bufq_write(q, (const unsigned char *)buf, len, &result);
+  *pnwritten = (n < 0)? 0 : (size_t)n;
+  return result;
+}
+
 ssize_t Curl_bufq_read(struct bufq *q, unsigned char *buf, size_t len,
                        CURLcode *err)
 {
@@ -438,6 +449,16 @@ ssize_t Curl_bufq_read(struct bufq *q, unsigned char *buf, size_t len,
     return -1;
   }
   return nread;
+}
+
+CURLcode Curl_bufq_cread(struct bufq *q, char *buf, size_t len,
+                         size_t *pnread)
+{
+  ssize_t n;
+  CURLcode result;
+  n = Curl_bufq_read(q, (unsigned char *)buf, len, &result);
+  *pnread = (n < 0)? 0 : (size_t)n;
+  return result;
 }
 
 bool Curl_bufq_peek(struct bufq *q,

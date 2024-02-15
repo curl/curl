@@ -1013,7 +1013,7 @@ out:
     data->req.header = TRUE; /* assume header */
     data->req.bytecount = 0;
     data->req.ignorebody = FALSE;
-    Curl_cw_reset(data);
+    Curl_client_reset(data);
     Curl_pgrsSetUploadCounter(data, 0);
     Curl_pgrsSetDownloadCounter(data, 0);
 

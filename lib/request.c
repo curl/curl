@@ -27,6 +27,7 @@
 #include "urldata.h"
 #include "dynbuf.h"
 #include "doh.h"
+#include "multiif.h"
 #include "progress.h"
 #include "request.h"
 #include "sendf.h"
@@ -48,7 +49,7 @@ CURLcode Curl_req_start(struct SingleRequest *req,
                         struct Curl_easy *data)
 {
   req->start = Curl_now();
-  Curl_cw_reset(data);
+  Curl_client_reset(data);
   if(!req->sendbuf_init) {
     Curl_bufq_init2(&req->sendbuf, data->set.upload_buffer_size, 1,
                     BUFQ_OPT_SOFT_LIMIT);
@@ -72,7 +73,7 @@ CURLcode Curl_req_done(struct SingleRequest *req,
   (void)req;
   if(!aborted)
     (void)Curl_req_flush(data);
-  Curl_cw_reset(data);
+  Curl_client_reset(data);
   return CURLE_OK;
 }
 
@@ -85,7 +86,7 @@ void Curl_req_reset(struct SingleRequest *req, struct Curl_easy *data)
    * free this safely without leaks. */
   Curl_safefree(req->p.http);
   Curl_safefree(req->newurl);
-  Curl_cw_reset(data);
+  Curl_client_reset(data);
 
 #ifndef CURL_DISABLE_DOH
   if(req->doh) {
@@ -114,7 +115,7 @@ void Curl_req_free(struct SingleRequest *req, struct Curl_easy *data)
   Curl_safefree(req->newurl);
   if(req->sendbuf_init)
     Curl_bufq_free(&req->sendbuf);
-  Curl_cw_reset(data);
+  Curl_client_reset(data);
 
 #ifndef CURL_DISABLE_DOH
   if(req->doh) {
@@ -171,22 +172,6 @@ static CURLcode req_send(struct Curl_easy *data,
   return result;
 }
 
-static CURLcode req_send_buffer_add(struct Curl_easy *data,
-                                    const char *buf, size_t blen,
-                                    size_t hds_len)
-{
-  CURLcode result = CURLE_OK;
-  ssize_t n;
-  n = Curl_bufq_write(&data->req.sendbuf,
-                      (const unsigned char *)buf, blen, &result);
-  if(n < 0)
-    return result;
-  /* We rely on a SOFTLIMIT on sendbuf, so it can take all data in */
-  DEBUGASSERT((size_t)n == blen);
-  data->req.sendbuf_hds_len += hds_len;
-  return CURLE_OK;
-}
-
 static CURLcode req_send_buffer_flush(struct Curl_easy *data)
 {
   CURLcode result = CURLE_OK;
@@ -200,8 +185,19 @@ static CURLcode req_send_buffer_flush(struct Curl_easy *data)
       break;
 
     Curl_bufq_skip(&data->req.sendbuf, nwritten);
-    if(hds_len)
+    if(hds_len) {
       data->req.sendbuf_hds_len -= CURLMIN(hds_len, nwritten);
+      if(!data->req.sendbuf_hds_len) {
+        /* all request headers sent */
+        if(data->req.exp100 == EXP100_SENDING_REQUEST) {
+          /* We are now waiting for a reply from the server or
+           * a timeout on our side */
+          data->req.exp100 = EXP100_AWAITING_CONTINUE;
+          data->req.start100 = Curl_now();
+          Curl_expire(data, data->set.expect_100_timeout, EXPIRE_100_TIMEOUT);
+        }
+      }
+    }
     /* leave if we could not send all. Maybe network blocking or
      * speed limits on transfer */
     if(nwritten < blen)
@@ -228,9 +224,41 @@ CURLcode Curl_req_flush(struct Curl_easy *data)
   return CURLE_OK;
 }
 
-CURLcode Curl_req_send(struct Curl_easy *data,
-                       const char *buf, size_t blen,
-                       size_t hds_len)
+#ifndef USE_HYPER
+
+static CURLcode req_send_buffer_add(struct Curl_easy *data,
+                                    const char *buf, size_t blen,
+                                    size_t hds_len)
+{
+  CURLcode result = CURLE_OK;
+  ssize_t n;
+  n = Curl_bufq_write(&data->req.sendbuf,
+                      (const unsigned char *)buf, blen, &result);
+  if(n < 0)
+    return result;
+  /* We rely on a SOFTLIMIT on sendbuf, so it can take all data in */
+  DEBUGASSERT((size_t)n == blen);
+  data->req.sendbuf_hds_len += hds_len;
+  return CURLE_OK;
+}
+
+static ssize_t add_from_client(void *reader_ctx,
+                               unsigned char *buf, size_t buflen,
+                               CURLcode *err)
+{
+  struct Curl_easy *data = reader_ctx;
+  size_t nread;
+  bool eos;
+
+  *err = Curl_client_read(data, (char *)buf, buflen, &nread, &eos);
+  if(*err)
+    return -1;
+  if(eos)
+    data->req.eos_read = TRUE;
+  return (ssize_t)nread;
+}
+
+CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *buf)
 {
   CURLcode result;
 
@@ -242,14 +270,25 @@ CURLcode Curl_req_send(struct Curl_easy *data,
    * important for TLS libraries that expect this.
    * We *could* optimized for non-TLS transfers, but that would mean
    * separate code paths and seems not worth it. */
-  result = req_send_buffer_add(data, buf, blen, hds_len);
+  result = req_send_buffer_add(data, Curl_dyn_ptr(buf), Curl_dyn_len(buf),
+                               Curl_dyn_len(buf));
   if(result)
     return result;
+
+  if((data->req.exp100 == EXP100_SEND_DATA) &&
+     !Curl_bufq_is_full(&data->req.sendbuf)) {
+    ssize_t nread = Curl_bufq_sipn(&data->req.sendbuf, 0,
+                                   add_from_client, data, &result);
+    if(nread < 0 && result != CURLE_AGAIN)
+      return result;
+  }
+
   result = req_send_buffer_flush(data);
   if(result == CURLE_AGAIN)
     result = CURLE_OK;
   return result;
 }
+#endif /* !USE_HYPER */
 
 bool Curl_req_want_send(struct Curl_easy *data)
 {
