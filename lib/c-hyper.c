@@ -84,8 +84,7 @@ size_t Curl_hyper_recv(void *userp, hyper_context *ctx,
   (void)ctx;
 
   DEBUGF(infof(data, "Curl_hyper_recv(%zu)", buflen));
-  result = Curl_conn_recv(data, io_ctx->sockindex,
-                          (char *)buf, buflen, &nread);
+  result = Curl_xfer_recv(data, (char *)buf, buflen, &nread);
   if(result == CURLE_AGAIN) {
     /* would block, register interest */
     DEBUGF(infof(data, "Curl_hyper_recv(%zu) -> EAGAIN", buflen));
@@ -115,8 +114,9 @@ size_t Curl_hyper_send(void *userp, hyper_context *ctx,
   size_t nwrote;
 
   DEBUGF(infof(data, "Curl_hyper_send(%zu)", buflen));
-  result = Curl_conn_send(data, io_ctx->sockindex,
-                          (void *)buf, buflen, &nwrote);
+  result = Curl_xfer_send(data, (void *)buf, buflen, &nwrote);
+  if(!result && !nwrote)
+    result = CURLE_AGAIN;
   if(result == CURLE_AGAIN) {
     DEBUGF(infof(data, "Curl_hyper_send(%zu) -> EAGAIN", buflen));
     /* would block, register interest */
