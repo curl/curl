@@ -151,7 +151,7 @@ static CURLcode wc_statemach(struct Curl_easy *data);
 static void wc_data_dtor(void *ptr);
 static CURLcode ftp_state_retr(struct Curl_easy *data, curl_off_t filesize);
 static CURLcode ftp_readresp(struct Curl_easy *data,
-                             curl_socket_t sockfd,
+                             int sockindex,
                              struct pingpong *pp,
                              int *ftpcode,
                              size_t *size);
@@ -581,12 +581,12 @@ static CURLcode InitiateTransfer(struct Curl_easy *data)
     /* set the SO_SNDBUF for the secondary socket for those who need it */
     Curl_sndbufset(conn->sock[SECONDARYSOCKET]);
 
-    Curl_setup_transfer(data, -1, -1, FALSE, SECONDARYSOCKET);
+    Curl_xfer_setup(data, -1, -1, FALSE, SECONDARYSOCKET);
   }
   else {
     /* FTP download: */
-    Curl_setup_transfer(data, SECONDARYSOCKET,
-                        conn->proto.ftpc.retr_size_saved, FALSE, -1);
+    Curl_xfer_setup(data, SECONDARYSOCKET,
+                    conn->proto.ftpc.retr_size_saved, FALSE, -1);
   }
 
   conn->proto.ftpc.pp.pending_resp = TRUE; /* expect server response */
@@ -664,13 +664,13 @@ static bool ftp_endofresp(struct Curl_easy *data, struct connectdata *conn,
 }
 
 static CURLcode ftp_readresp(struct Curl_easy *data,
-                             curl_socket_t sockfd,
+                             int sockindex,
                              struct pingpong *pp,
                              int *ftpcode, /* return the ftp-code if done */
                              size_t *size) /* size of the response */
 {
   int code;
-  CURLcode result = Curl_pp_readresp(data, sockfd, pp, &code, size);
+  CURLcode result = Curl_pp_readresp(data, sockindex, pp, &code, size);
 
 #ifdef HAVE_GSSAPI
   {
@@ -805,7 +805,7 @@ CURLcode Curl_GetFTPResponse(struct Curl_easy *data,
         break;
       }
     }
-    result = ftp_readresp(data, sockfd, pp, ftpcode, &nread);
+    result = ftp_readresp(data, FIRSTSOCKET, pp, ftpcode, &nread);
     if(result)
       break;
 
@@ -1725,7 +1725,7 @@ static CURLcode ftp_state_ul_setup(struct Curl_easy *data,
         infof(data, "File already completely uploaded");
 
         /* no data to transfer */
-        Curl_setup_transfer(data, -1, -1, FALSE, -1);
+        Curl_xfer_setup(data, -1, -1, FALSE, -1);
 
         /* Set ->transfer so that we won't get any error in
          * ftp_done() because we didn't transfer anything! */
@@ -2396,7 +2396,7 @@ static CURLcode ftp_state_retr(struct Curl_easy *data,
 
     if(ftp->downloadsize == 0) {
       /* no data to transfer */
-      Curl_setup_transfer(data, -1, -1, FALSE, -1);
+      Curl_xfer_setup(data, -1, -1, FALSE, -1);
       infof(data, "File already completely downloaded");
 
       /* Set ->transfer so that we won't get any error in ftp_done()
@@ -2803,7 +2803,6 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
                                  struct connectdata *conn)
 {
   CURLcode result;
-  curl_socket_t sock = conn->sock[FIRSTSOCKET];
   int ftpcode;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   struct pingpong *pp = &ftpc->pp;
@@ -2813,7 +2812,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
   if(pp->sendleft)
     return Curl_pp_flushsend(data, pp);
 
-  result = ftp_readresp(data, sock, pp, &ftpcode, &nread);
+  result = ftp_readresp(data, FIRSTSOCKET, pp, &ftpcode, &nread);
   if(result)
     return result;
 
@@ -3813,7 +3812,7 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
   }
 
   /* no data to transfer */
-  Curl_setup_transfer(data, -1, -1, FALSE, -1);
+  Curl_xfer_setup(data, -1, -1, FALSE, -1);
 
   if(!ftpc->wait_data_conn) {
     /* no waiting for the data connection so this is now complete */
@@ -4415,7 +4414,7 @@ static CURLcode ftp_dophase_done(struct Curl_easy *data, bool connected)
 
   if(ftp->transfer != PPTRANSFER_BODY)
     /* no data to transfer */
-    Curl_setup_transfer(data, -1, -1, FALSE, -1);
+    Curl_xfer_setup(data, -1, -1, FALSE, -1);
   else if(!connected)
     /* since we didn't connect now, we want do_more to get called */
     conn->bits.do_more = TRUE;

@@ -1355,7 +1355,11 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
       sendsize = (size_t)data->set.upload_buffer_size;
   }
 
-  result = Curl_nwrite(data, sockindex, ptr, sendsize, &amount);
+  result = Curl_conn_send(data, sockindex, ptr, sendsize, &amount);
+  if(result == CURLE_AGAIN) {
+    result = CURLE_OK;
+    amount = 0;
+  }
 
   if(!result) {
     /*
@@ -2508,8 +2512,8 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
       failf(data, "Failed sending PUT request");
     else
       /* prepare for transfer */
-      Curl_setup_transfer(data, FIRSTSOCKET, -1, TRUE,
-                          http->postsize?FIRSTSOCKET:-1);
+      Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE,
+                      http->postsize?FIRSTSOCKET:-1);
     if(result)
       return result;
     break;
@@ -2530,7 +2534,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
         failf(data, "Failed sending POST request");
       else
         /* setup variables for the upcoming transfer */
-        Curl_setup_transfer(data, FIRSTSOCKET, -1, TRUE, -1);
+        Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, -1);
       break;
     }
 
@@ -2588,8 +2592,8 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
       failf(data, "Failed sending POST request");
     else
       /* prepare for transfer */
-      Curl_setup_transfer(data, FIRSTSOCKET, -1, TRUE,
-                          http->postsize?FIRSTSOCKET:-1);
+      Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE,
+                      http->postsize?FIRSTSOCKET:-1);
     if(result)
       return result;
 
@@ -2731,8 +2735,8 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
     if(result)
       failf(data, "Failed sending HTTP POST request");
     else
-      Curl_setup_transfer(data, FIRSTSOCKET, -1, TRUE,
-                          http->postdata?FIRSTSOCKET:-1);
+      Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE,
+                      http->postdata?FIRSTSOCKET:-1);
     break;
 
   default:
@@ -2751,11 +2755,11 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
             !(data->set.connect_only))
       /* Set up the transfer for two-way since without CONNECT_ONLY set, this
          request probably wants to send data too post upgrade */
-      Curl_setup_transfer(data, FIRSTSOCKET, -1, TRUE, FIRSTSOCKET);
+      Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, FIRSTSOCKET);
 #endif
     else
       /* HTTP GET/HEAD download: */
-      Curl_setup_transfer(data, FIRSTSOCKET, -1, TRUE, -1);
+      Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, -1);
   }
 
   return result;

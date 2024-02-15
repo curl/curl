@@ -934,7 +934,7 @@ static CURLcode pop3_state_command_resp(struct Curl_easy *data,
 
   if(pop3->transfer == PPTRANSFER_BODY) {
     /* POP3 download */
-    Curl_setup_transfer(data, FIRSTSOCKET, -1, FALSE, -1);
+    Curl_xfer_setup(data, FIRSTSOCKET, -1, FALSE, -1);
 
     if(pp->overflow) {
       /* The recv buffer contains data that is actually body content so send
@@ -970,7 +970,6 @@ static CURLcode pop3_statemachine(struct Curl_easy *data,
                                   struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  curl_socket_t sock = conn->sock[FIRSTSOCKET];
   int pop3code;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   struct pingpong *pp = &pop3c->pp;
@@ -987,7 +986,7 @@ static CURLcode pop3_statemachine(struct Curl_easy *data,
 
  do {
     /* Read the response from the server */
-   result = Curl_pp_readresp(data, sock, pp, &pop3code, &nread);
+   result = Curl_pp_readresp(data, FIRSTSOCKET, pp, &pop3code, &nread);
    if(result)
      return result;
 

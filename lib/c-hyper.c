@@ -81,7 +81,7 @@ size_t Curl_hyper_recv(void *userp, hyper_context *ctx,
   (void)ctx;
 
   DEBUGF(infof(data, "Curl_hyper_recv(%zu)", buflen));
-  result = Curl_read(data, conn->sockfd, (char *)buf, buflen, &nread);
+  result = Curl_xfer_recv(data, (char *)buf, buflen, &nread);
   if(result == CURLE_AGAIN) {
     /* would block, register interest */
     DEBUGF(infof(data, "Curl_hyper_recv(%zu) -> EAGAIN", buflen));
@@ -111,7 +111,7 @@ size_t Curl_hyper_send(void *userp, hyper_context *ctx,
   ssize_t nwrote;
 
   DEBUGF(infof(data, "Curl_hyper_send(%zu)", buflen));
-  result = Curl_write(data, conn->sockfd, (void *)buf, buflen, &nwrote);
+  result = Curl_xfer_send(data, (void *)buf, buflen, &nwrote);
   if(!result && !nwrote)
     result = CURLE_AGAIN;
   if(result == CURLE_AGAIN) {
@@ -1193,7 +1193,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   if((httpreq == HTTPREQ_GET) || (httpreq == HTTPREQ_HEAD)) {
     /* HTTP GET/HEAD download */
     Curl_pgrsSetUploadSize(data, 0); /* nothing */
-    Curl_setup_transfer(data, FIRSTSOCKET, -1, TRUE, -1);
+    Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, -1);
   }
   conn->datastream = Curl_hyper_stream;
   if(data->state.expect100header)
