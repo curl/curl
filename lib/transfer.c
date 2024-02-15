@@ -778,6 +778,9 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
          that instead of reading more data */
     }
 
+    if(!Curl_bufq_is_empty(&k->sendbuf)) {
+      DEBUGASSERT(0);
+    }
     /* write to socket (send away data) */
     result = Curl_xfer_send(data,
                             k->upload_fromhere, /* buffer pointer */
