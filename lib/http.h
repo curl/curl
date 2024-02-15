@@ -74,12 +74,6 @@ char *Curl_checkProxyheaders(struct Curl_easy *data,
                              const char *thisheader,
                              const size_t thislen);
 struct HTTP; /* see below */
-CURLcode Curl_buffer_send(struct dynbuf *in,
-                          struct Curl_easy *data,
-                          struct HTTP *http,
-                          curl_off_t *bytes_written,
-                          curl_off_t included_body_bytes,
-                          int socketindex);
 
 CURLcode Curl_add_timecondition(struct Curl_easy *data,
 #ifndef USE_HYPER
@@ -118,7 +112,7 @@ CURLcode Curl_transferencode(struct Curl_easy *data);
 CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
                         Curl_HttpReq httpreq,
                         const char **teep);
-CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
+CURLcode Curl_http_req_send(struct Curl_easy *data,
                             struct dynbuf *r, Curl_HttpReq httpreq);
 bool Curl_use_http_1_1plus(const struct Curl_easy *data,
                            const struct connectdata *conn);

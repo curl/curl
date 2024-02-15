@@ -1231,20 +1231,24 @@ process_iac:
 static CURLcode send_telnet_data(struct Curl_easy *data,
                                  char *buffer, ssize_t nread)
 {
-  ssize_t i, outlen;
+  size_t i, outlen;
   unsigned char *outbuf;
   CURLcode result = CURLE_OK;
-  ssize_t bytes_written, total_written = 0;
+  size_t bytes_written;
+  size_t total_written = 0;
   struct connectdata *conn = data->conn;
   struct TELNET *tn = data->req.p.telnet;
 
   DEBUGASSERT(tn);
+  DEBUGASSERT(nread > 0);
+  if(nread < 0)
+    return CURLE_TOO_LARGE;
 
   if(memchr(buffer, CURL_IAC, nread)) {
     /* only use the escape buffer when necessary */
     Curl_dyn_reset(&tn->out);
 
-    for(i = 0; i < nread && !result; i++) {
+    for(i = 0; i < (size_t)nread && !result; i++) {
       result = Curl_dyn_addn(&tn->out, &buffer[i], 1);
       if(!result && ((unsigned char)buffer[i] == CURL_IAC))
         /* IAC is FF in hex */
@@ -1255,7 +1259,7 @@ static CURLcode send_telnet_data(struct Curl_easy *data,
     outbuf = Curl_dyn_uptr(&tn->out);
   }
   else {
-    outlen = nread;
+    outlen = (size_t)nread;
     outbuf = (unsigned char *)buffer;
   }
   while(!result && total_written < outlen) {

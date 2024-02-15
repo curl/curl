@@ -119,12 +119,12 @@ static CURLcode mqtt_send(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
   struct MQTT *mq = data->req.p.mqtt;
-  ssize_t n;
+  size_t n;
   result = Curl_xfer_send(data, buf, len, &n);
   if(result)
     return result;
   Curl_debug(data, CURLINFO_HEADER_OUT, buf, (size_t)n);
-  if(len != (size_t)n) {
+  if(len != n) {
     size_t nsend = len - n;
     char *sendleftovers = Curl_memdup(&buf[n], nsend);
     if(!sendleftovers)

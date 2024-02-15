@@ -139,8 +139,8 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
   char *sel = NULL;
   char *sel_org = NULL;
   timediff_t timeout_ms;
-  ssize_t amount, k;
-  size_t len;
+  ssize_t k;
+  size_t amount, len;
   int what;
 
   *done = TRUE; /* unconditionally */

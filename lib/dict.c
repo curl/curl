@@ -127,7 +127,7 @@ static CURLcode sendf(struct Curl_easy *data,
 
 static CURLcode sendf(struct Curl_easy *data, const char *fmt, ...)
 {
-  ssize_t bytes_written;
+  size_t bytes_written;
   size_t write_len;
   CURLcode result = CURLE_OK;
   char *s;

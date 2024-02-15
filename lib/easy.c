@@ -1251,7 +1251,7 @@ CURLcode Curl_connect_only_attach(struct Curl_easy *data)
  * This is the private internal version of curl_easy_send()
  */
 CURLcode Curl_senddata(struct Curl_easy *data, const void *buffer,
-                       size_t buflen, ssize_t *n)
+                       size_t buflen, size_t *n)
 {
   CURLcode result;
   struct connectdata *c = NULL;
@@ -1283,13 +1283,13 @@ CURLcode Curl_senddata(struct Curl_easy *data, const void *buffer,
 CURLcode curl_easy_send(struct Curl_easy *data, const void *buffer,
                         size_t buflen, size_t *n)
 {
-  ssize_t written = 0;
+  size_t written = 0;
   CURLcode result;
   if(Curl_is_in_callback(data))
     return CURLE_RECURSIVE_API_CALL;
 
   result = Curl_senddata(data, buffer, buflen, &written);
-  *n = (size_t)written;
+  *n = written;
   return result;
 }
 

@@ -518,7 +518,7 @@ CURLcode Curl_conn_recv(struct Curl_easy *data, int sockindex,
  */
 CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
                         const void *buf, size_t blen,
-                        ssize_t *pnwritten);
+                        size_t *pnwritten);
 
 
 void Curl_pollset_reset(struct Curl_easy *data,

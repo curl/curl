@@ -1395,8 +1395,7 @@ static CURLcode smtp_done(struct Curl_easy *data, CURLcode status,
   struct SMTP *smtp = data->req.p.smtp;
   struct pingpong *pp = &conn->proto.smtpc.pp;
   char *eob;
-  ssize_t len;
-  ssize_t bytes_written;
+  size_t len, bytes_written;
 
   (void)premature;
 

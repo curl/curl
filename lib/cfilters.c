@@ -694,7 +694,7 @@ CURLcode Curl_conn_recv(struct Curl_easy *data, int sockindex,
 
 CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
                         const void *buf, size_t blen,
-                        ssize_t *pnwritten)
+                        size_t *pnwritten)
 {
   ssize_t nwritten;
   CURLcode result = CURLE_OK;
@@ -719,7 +719,7 @@ CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
 #endif
   nwritten = conn->send[sockindex](data, sockindex, buf, blen, &result);
   DEBUGASSERT((nwritten >= 0) || result);
-  *pnwritten = nwritten;
+  *pnwritten = (nwritten < 0)? 0 : (size_t)nwritten;
   return result;
 }
 

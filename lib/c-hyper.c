@@ -112,11 +112,13 @@ size_t Curl_hyper_send(void *userp, hyper_context *ctx,
   struct hyp_io_ctx *io_ctx = userp;
   struct Curl_easy *data = io_ctx->data;
   CURLcode result;
-  ssize_t nwrote;
+  size_t nwrote;
 
   DEBUGF(infof(data, "Curl_hyper_send(%zu)", buflen));
   result = Curl_conn_send(data, io_ctx->sockindex,
                           (void *)buf, buflen, &nwrote);
+  if(!result && !nwrote)
+    result = CURLE_AGAIN;
   if(result == CURLE_AGAIN) {
     DEBUGF(infof(data, "Curl_hyper_send(%zu) -> EAGAIN", buflen));
     /* would block, register interest */
@@ -759,7 +761,6 @@ static int uploadstreamed(void *userdata, hyper_context *ctx,
  */
 
 static CURLcode bodysend(struct Curl_easy *data,
-                         struct connectdata *conn,
                          hyper_headers *headers,
                          hyper_request *hyperreq,
                          Curl_HttpReq httpreq)
@@ -772,7 +773,7 @@ static CURLcode bodysend(struct Curl_easy *data,
   else {
     hyper_body *body;
     Curl_dyn_init(&req, DYN_HTTP_REQUEST);
-    result = Curl_http_bodysend(data, conn, &req, httpreq);
+    result = Curl_http_req_send(data, &req, httpreq);
 
     if(!result)
       result = Curl_hyper_header(data, headers, Curl_dyn_ptr(&req));
@@ -1171,7 +1172,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   if(result)
     goto error;
 
-  result = bodysend(data, conn, headers, req, httpreq);
+  result = bodysend(data, headers, req, httpreq);
   if(result)
     goto error;
 

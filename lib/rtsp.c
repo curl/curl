@@ -566,8 +566,9 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   }
 
   /* issue the request */
-  result = Curl_buffer_send(&req_buffer, data, data->req.p.http,
-                            &data->info.request_size, 0, FIRSTSOCKET);
+  result = Curl_req_send_hds(data, Curl_dyn_ptr(&req_buffer),
+                             Curl_dyn_len(&req_buffer));
+  Curl_dyn_free(&req_buffer);
   if(result) {
     failf(data, "Failed sending RTSP request");
     return result;

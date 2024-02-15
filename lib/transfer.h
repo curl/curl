@@ -97,7 +97,7 @@ CURLcode Curl_xfer_write_done(struct Curl_easy *data, bool premature);
  */
 CURLcode Curl_xfer_send(struct Curl_easy *data,
                         const void *buf, size_t blen,
-                        ssize_t *pnwritten);
+                        size_t *pnwritten);
 
 /**
  * Receive data on the socket/connection filter designated
