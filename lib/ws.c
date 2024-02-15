@@ -834,7 +834,7 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
 
 struct ws_collect {
   struct Curl_easy *data;
-  void *buffer;
+  unsigned char *buffer;
   size_t buflen;
   size_t bufidx;
   int frame_age;
