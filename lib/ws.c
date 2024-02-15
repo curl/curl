@@ -886,7 +886,7 @@ static ssize_t ws_client_collect(const unsigned char *buf, size_t buflen,
       return -1;
     }
     *err = CURLE_OK;
-    memcpy(ctx->buffer, buf, nwritten);
+    memcpy(ctx->buffer + ctx->bufidx, buf, nwritten);
     ctx->bufidx += nwritten;
   }
   return nwritten;
