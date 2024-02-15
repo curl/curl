@@ -168,7 +168,7 @@ CURLcode Curl_req_start(struct SingleRequest *req,
                         struct Curl_easy *data);
 
 /**
- * The reuqest is done. If not aborted, make sure that buffers are
+ * The request is done. If not aborted, make sure that buffers are
  * flushed to the client.
  * @param req        the request
  * @param data       the transfer

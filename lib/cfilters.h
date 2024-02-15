@@ -506,7 +506,7 @@ int Curl_conn_sockindex(struct Curl_easy *data, curl_socket_t sockfd);
 
 /*
  * Receive data on the connection, using FIRSTSOCKET/SECONDARYSOCKET.
- * Will return CURLE_AGAIN iff blocked on receiving anyting.
+ * Will return CURLE_AGAIN iff blocked on receiving.
  */
 CURLcode Curl_conn_recv(struct Curl_easy *data, int sockindex,
                         char *buf, size_t buffersize,
@@ -514,7 +514,7 @@ CURLcode Curl_conn_recv(struct Curl_easy *data, int sockindex,
 
 /*
  * Send data on the connection, using FIRSTSOCKET/SECONDARYSOCKET.
- * Will return CURLE_AGAIN iff blocked on sending anything.
+ * Will return CURLE_AGAIN iff blocked on sending.
  */
 CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
                         const void *buf, size_t blen,
