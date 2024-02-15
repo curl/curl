@@ -2075,19 +2075,74 @@ dnl **********************************************************************
 dnl Check for libpsl
 dnl **********************************************************************
 
-AC_ARG_WITH(libpsl,
-           AS_HELP_STRING([--without-libpsl],
-           [disable support for libpsl]),
-           with_libpsl=$withval,
-           with_libpsl=yes)
-curl_psl_msg="no      (libpsl disabled)"
-if test $with_libpsl != "no"; then
-  AC_SEARCH_LIBS(psl_builtin, psl,
-    [curl_psl_msg="enabled";
-     AC_DEFINE([USE_LIBPSL], [1], [PSL support enabled])
-     ],
-    [AC_MSG_ERROR([libpsl was not found]) ]
+dnl Default to compiler & linker defaults for LIBPSL files & libraries.
+OPT_LIBPSL=off
+AC_ARG_WITH(libpsl,dnl
+AS_HELP_STRING([--with-libpsl=PATH],[Where to look for libpsl, PATH points to the LIBPSL installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AS_HELP_STRING([--without-libpsl], [disable LIBPSL]),
+  OPT_LIBPSL=$withval)
+
+if test X"$OPT_LIBPSL" != Xno; then
+  dnl backup the pre-libpsl variables
+  CLEANLDFLAGS="$LDFLAGS"
+  CLEANCPPFLAGS="$CPPFLAGS"
+  CLEANLIBS="$LIBS"
+
+  case "$OPT_LIBPSL" in
+  yes)
+    dnl --with-libpsl (without path) used
+    CURL_CHECK_PKGCONFIG(libpsl)
+
+    if test "$PKGCONFIG" != "no" ; then
+      LIB_PSL=`$PKGCONFIG --libs-only-l libpsl`
+      LD_PSL=`$PKGCONFIG --libs-only-L libpsl`
+      CPP_PSL=`$PKGCONFIG --cflags-only-I libpsl`
+    else
+      dnl no libpsl pkg-config found
+      LIB_PSL="-lpsl"
+    fi
+
+    ;;
+  off)
+    dnl no --with-libpsl option given, just check default places
+    LIB_PSL="-lpsl"
+    ;;
+  *)
+    dnl use the given --with-libpsl spot
+    LIB_PSL="-lpsl"
+    PREFIX_PSL=$OPT_LIBPSL
+    ;;
+  esac
+
+  dnl if given with a prefix, we set -L and -I based on that
+  if test -n "$PREFIX_PSL"; then
+    LD_PSL=-L${PREFIX_PSL}/lib$libsuff
+    CPP_PSL=-I${PREFIX_PSL}/include
+  fi
+
+  LDFLAGS="$LDFLAGS $LD_PSL"
+  CPPFLAGS="$CPPFLAGS $CPP_PSL"
+  LIBS="$LIB_PSL $LIBS"
+
+  AC_CHECK_LIB(psl, psl_builtin,
+    [
+     AC_CHECK_HEADERS(libpsl.h,
+        curl_psl_msg="enabled"
+        LIBPSL_ENABLED=1
+        AC_DEFINE(USE_LIBPSL, 1, [if libpsl is in use])
+        AC_SUBST(USE_LIBPSL, [1])
+     )
+    ],
+      dnl not found, revert back to clean variables
+      LDFLAGS=$CLEANLDFLAGS
+      CPPFLAGS=$CLEANCPPFLAGS
+      LIBS=$CLEANLIBS
   )
+
+  if test X"$OPT_LIBPSL" != Xoff &&
+     test "$LIBPSL_ENABLED" != "1"; then
+    AC_MSG_ERROR([libpsl libs and/or directories were not found where specified!])
+  fi
 fi
 AM_CONDITIONAL([USE_LIBPSL], [test "$curl_psl_msg" = "enabled"])
 
