@@ -446,7 +446,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
 
   bytessent = data->req.writebytecount;
 
-  if(conn->bits.authneg) {
+  if(data->req.authneg) {
     /* This is a state where we are known to be negotiating and we don't send
        any data then. */
     expectsend = 0;
@@ -488,7 +488,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
            data left to send, keep on sending. */
 
         /* rewind data when completely done sending! */
-        if(!conn->bits.authneg && (conn->writesockfd != CURL_SOCKET_BAD)) {
+        if(!data->req.authneg && (conn->writesockfd != CURL_SOCKET_BAD)) {
           data->state.rewindbeforesend = TRUE;
           infof(data, "Rewind stream before next send");
         }
@@ -516,7 +516,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
         there is just a little (<2K) data left to send, keep on sending. */
 
         /* rewind data when completely done sending! */
-        if(!conn->bits.authneg && (conn->writesockfd != CURL_SOCKET_BAD)) {
+        if(!data->req.authneg && (conn->writesockfd != CURL_SOCKET_BAD)) {
           data->state.rewindbeforesend = TRUE;
           infof(data, "Rewind stream before next send");
         }
@@ -578,7 +578,7 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
 
   if((data->state.aptr.user || data->set.str[STRING_BEARER]) &&
      ((data->req.httpcode == 401) ||
-      (conn->bits.authneg && data->req.httpcode < 300))) {
+      (data->req.authneg && data->req.httpcode < 300))) {
     pickhost = pickoneauth(&data->state.authhost, authmask);
     if(!pickhost)
       data->state.authproblem = TRUE;
@@ -592,7 +592,7 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
 #ifndef CURL_DISABLE_PROXY
   if(conn->bits.proxy_user_passwd &&
      ((data->req.httpcode == 407) ||
-      (conn->bits.authneg && data->req.httpcode < 300))) {
+      (data->req.authneg && data->req.httpcode < 300))) {
     pickproxy = pickoneauth(&data->state.authproxy,
                             authmask & ~CURLAUTH_BEARER);
     if(!pickproxy)
@@ -618,7 +618,7 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
   }
   else if((data->req.httpcode < 300) &&
           (!data->state.authhost.done) &&
-          conn->bits.authneg) {
+          data->req.authneg) {
     /* no (known) authentication available,
        authentication is not "done" yet and
        no authentication seems to be required and
@@ -863,10 +863,10 @@ Curl_http_output_auth(struct Curl_easy *data,
      (httpreq != HTTPREQ_HEAD)) {
     /* Auth is required and we are not authenticated yet. Make a PUT or POST
        with content-length zero as a "probe". */
-    conn->bits.authneg = TRUE;
+    data->req.authneg = TRUE;
   }
   else
-    conn->bits.authneg = FALSE;
+    data->req.authneg = FALSE;
 
   return result;
 }
@@ -1808,7 +1808,7 @@ CURLcode Curl_dynhds_add_custom(struct Curl_easy *data,
               /* this header is sent later */
               hd_name_eq(name, namelen, STRCONST("Content-Type:")))
         ;
-      else if(conn->bits.authneg &&
+      else if(data->req.authneg &&
               /* while doing auth neg, don't allow the custom length since
                  we will force length zero then */
               hd_name_eq(name, namelen, STRCONST("Content-Length:")))
@@ -1954,7 +1954,7 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
                   /* this header is sent later */
                   checkprefix("Content-Type:", compare))
             ;
-          else if(conn->bits.authneg &&
+          else if(data->req.authneg &&
                   /* while doing auth neg, don't allow the custom length since
                      we will force length zero then */
                   checkprefix("Content-Length:", compare))
@@ -2410,7 +2410,7 @@ CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
          http->postsize < 0) ||
         ((data->state.upload || httpreq == HTTPREQ_POST) &&
          data->state.infilesize == -1))) {
-      if(conn->bits.authneg)
+      if(data->req.authneg)
         /* don't enable chunked during auth neg */
         ;
       else if(Curl_use_http_1_1plus(data, conn)) {
@@ -2473,13 +2473,13 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
   switch(httpreq) {
   case HTTPREQ_PUT: /* Let's PUT the data to the server! */
 
-    if(conn->bits.authneg)
+    if(data->req.authneg)
       http->postsize = 0;
     else
       http->postsize = data->state.infilesize;
 
     if((http->postsize != -1) && !data->req.upload_chunky &&
-       (conn->bits.authneg ||
+       (data->req.authneg ||
         !Curl_checkheaders(data, STRCONST("Content-Length")))) {
       /* only add Content-Length if not uploading chunked */
       result = Curl_dyn_addf(r, "Content-Length: %" CURL_FORMAT_CURL_OFF_T
@@ -2517,7 +2517,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
   case HTTPREQ_POST_FORM:
   case HTTPREQ_POST_MIME:
     /* This is form posting using mime data. */
-    if(conn->bits.authneg) {
+    if(data->req.authneg) {
       /* nothing to post! */
       result = Curl_dyn_addn(r, STRCONST("Content-Length: 0\r\n\r\n"));
       if(result)
@@ -2598,7 +2598,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
   case HTTPREQ_POST:
     /* this is the simple POST, using x-www-form-urlencoded style */
 
-    if(conn->bits.authneg)
+    if(data->req.authneg)
       http->postsize = 0;
     else
       /* the size of the post body */
@@ -2608,7 +2608,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
        we don't upload data chunked, as RFC2616 forbids us to set both
        kinds of headers (Transfer-Encoding: chunked and Content-Length) */
     if((http->postsize != -1) && !data->req.upload_chunky &&
-       (conn->bits.authneg ||
+       (data->req.authneg ||
         !Curl_checkheaders(data, STRCONST("Content-Length")))) {
       /* we allow replacing this header if not during auth negotiation,
          although it isn't very wise to actually set your own */
@@ -2704,7 +2704,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
       if(result)
         return result;
 
-      if(data->req.upload_chunky && conn->bits.authneg) {
+      if(data->req.upload_chunky && data->req.authneg) {
         /* Chunky upload is selected and we're negotiating auth still, send
            end-of-data only */
         result = Curl_dyn_addn(r, (char *)STRCONST("\x30\x0d\x0a\x0d\x0a"));
@@ -2719,7 +2719,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
 
         /* set the pointer to mark that we will send the post body using the
            read callback, but only if we're not in authenticate negotiation */
-        if(!conn->bits.authneg)
+        if(!data->req.authneg)
           http->postdata = (char *)&http->postdata;
       }
     }
@@ -4188,7 +4188,7 @@ static CURLcode http_rw_headers(struct Curl_easy *data,
         return result;
 
       if(k->httpcode >= 300) {
-        if((!conn->bits.authneg) && !conn->bits.close &&
+        if((!data->req.authneg) && !conn->bits.close &&
            !data->state.rewindbeforesend) {
           /*
            * General treatment of errors when about to send data. Including :
