@@ -695,7 +695,6 @@ static int uploadstreamed(void *userdata, hyper_context *ctx,
 {
   size_t fillcount;
   struct Curl_easy *data = (struct Curl_easy *)userdata;
-  struct connectdata *conn = (struct connectdata *)data->conn;
   CURLcode result;
   (void)ctx;
 
