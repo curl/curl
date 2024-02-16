@@ -527,10 +527,6 @@ struct ConnectBits {
                          the TCP layer connect */
   BIT(retry);         /* this connection is about to get closed and then
                          re-attempted at another connection. */
-  BIT(authneg);       /* TRUE when the auth phase has started, which means
-                         that we are creating a request with an auth header,
-                         but it is not the final request in the auth
-                         negotiation. */
 #ifndef CURL_DISABLE_FTP
   BIT(ftp_use_epsv);  /* As set with CURLOPT_FTP_USE_EPSV, but if we find out
                          EPSV doesn't work we disable it for the forthcoming
@@ -753,6 +749,10 @@ struct SingleRequest {
                         specific upload buffers. See readmoredata() in http.c
                         for details. */
   BIT(no_body);      /* the response has no body */
+  BIT(authneg);      /* TRUE when the auth phase has started, which means
+                        that we are creating a request with an auth header,
+                        but it is not the final request in the auth
+                        negotiation. */
 };
 
 /*
