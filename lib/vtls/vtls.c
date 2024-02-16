@@ -1574,6 +1574,11 @@ CURLcode Curl_ssl_peer_init(struct ssl_peer *peer, struct Curl_cfilter *cf)
     eport = cf->conn->remote_port;
   }
 
+  /* There is some inherited weirdness here. We should never get
+   * a hostname that is the empty string (I believe). We check
+   * for it, but it should not be necessary. Let's catch those
+   * conditions, if they exist, in debug builds. */
+  DEBUGASSERT(!ehostname || ehostname[0]);
   /* change if ehostname changed */
   if(ehostname && (!peer->hostname
                    || strcmp(ehostname, peer->hostname))) {
@@ -1595,7 +1600,7 @@ CURLcode Curl_ssl_peer_init(struct ssl_peer *peer, struct Curl_cfilter *cf)
 
     peer->sni = NULL;
     peer->type = get_peer_type(peer->hostname);
-    if(peer->type == CURL_SSL_PEER_DNS) {
+    if(peer->type == CURL_SSL_PEER_DNS && peer->hostname[0]) {
       /* not an IP address, normalize according to RCC 6066 ch. 3,
        * max len of SNI is 2^16-1, no trailing dot */
       size_t len = strlen(peer->hostname);
