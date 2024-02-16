@@ -1245,8 +1245,7 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
                              counter */
                           curl_off_t *bytes_written,
                           /* how much of the buffer contains body data */
-                          curl_off_t included_body_bytes,
-                          int sockindex)
+                          curl_off_t included_body_bytes)
 {
   ssize_t amount;
   CURLcode result;
@@ -1255,8 +1254,6 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
   struct connectdata *conn = data->conn;
   size_t sendsize;
   size_t headersize;
-
-  DEBUGASSERT(sockindex <= SECONDARYSOCKET && sockindex >= 0);
 
   /* The looping below is required since we use non-blocking sockets, but due
      to the circumstances we will just loop and try again and again etc */
@@ -1356,11 +1353,7 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
       sendsize = (size_t)data->set.upload_buffer_size;
   }
 
-  result = Curl_conn_send(data, sockindex, ptr, sendsize, &amount);
-  if(result == CURLE_AGAIN) {
-    result = CURLE_OK;
-    amount = 0;
-  }
+  result = Curl_xfer_send(data, ptr, sendsize, &amount);
 
   if(!result) {
     /*
@@ -1619,13 +1612,12 @@ static const char *get_http_string(const struct Curl_easy *data,
 #endif
 
 /* check and possibly add an Expect: header */
-static CURLcode expect100(struct Curl_easy *data,
-                          struct connectdata *conn,
-                          struct dynbuf *req)
+static CURLcode expect100(struct Curl_easy *data, struct dynbuf *req)
 {
   CURLcode result = CURLE_OK;
-  if(!data->state.disableexpect && Curl_use_http_1_1plus(data, conn) &&
-     (conn->httpversion < 20)) {
+  if(!data->state.disableexpect &&
+     Curl_use_http_1_1plus(data, data->conn) &&
+     (data->conn->httpversion < 20)) {
     /* if not doing HTTP 1.0 or version 2, or disabled explicitly, we add an
        Expect: 100-continue to the headers which actually speeds up post
        operations (as there is one packet coming back from the web server) */
@@ -2441,8 +2433,7 @@ CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
   return result;
 }
 
-static CURLcode addexpect(struct Curl_easy *data, struct connectdata *conn,
-                          struct dynbuf *r)
+static CURLcode addexpect(struct Curl_easy *data, struct dynbuf *r)
 {
   data->state.expect100header = FALSE;
   /* Avoid Expect: 100-continue if Upgrade: is used */
@@ -2459,12 +2450,12 @@ static CURLcode addexpect(struct Curl_easy *data, struct connectdata *conn,
                            STRCONST("100-continue"));
     }
     else if(http->postsize > EXPECT_100_THRESHOLD || http->postsize < 0)
-      return expect100(data, conn, r);
+      return expect100(data, r);
   }
   return CURLE_OK;
 }
 
-CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
+CURLcode Curl_http_req_send(struct Curl_easy *data,
                             struct dynbuf *r, Curl_HttpReq httpreq)
 {
 #ifndef USE_HYPER
@@ -2472,11 +2463,12 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
   curl_off_t included_body = 0;
 #else
   /* from this point down, this function should not be used */
-#define Curl_buffer_send(a,b,c,d,e,f) CURLE_OK
+#define Curl_buffer_send(a,b,c,d,e) CURLE_OK
 #endif
   CURLcode result = CURLE_OK;
   struct HTTP *http = data->req.p.http;
 
+  DEBUGASSERT(data->conn);
   switch(httpreq) {
   case HTTPREQ_PUT: /* Let's PUT the data to the server! */
 
@@ -2495,7 +2487,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
         return result;
     }
 
-    result = addexpect(data, conn, r);
+    result = addexpect(data, r);
     if(result)
       return result;
 
@@ -2509,8 +2501,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
 
     /* this sends the buffer and frees all the buffer resources */
     result = Curl_buffer_send(r, data, data->req.p.http,
-                              &data->info.request_size, 0,
-                              FIRSTSOCKET);
+                              &data->info.request_size, 0);
     if(result)
       failf(data, "Failed sending PUT request");
     else
@@ -2532,8 +2523,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
         return result;
 
       result = Curl_buffer_send(r, data, data->req.p.http,
-                                &data->info.request_size, 0,
-                                FIRSTSOCKET);
+                                &data->info.request_size, 0);
       if(result)
         failf(data, "Failed sending POST request");
       else
@@ -2571,7 +2561,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
     }
 #endif
 
-    result = addexpect(data, conn, r);
+    result = addexpect(data, r);
     if(result)
       return result;
 
@@ -2590,8 +2580,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
 
     /* this sends the buffer and frees all the buffer resources */
     result = Curl_buffer_send(r, data, data->req.p.http,
-                              &data->info.request_size, 0,
-                              FIRSTSOCKET);
+                              &data->info.request_size, 0);
     if(result)
       failf(data, "Failed sending POST request");
     else
@@ -2633,7 +2622,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
         return result;
     }
 
-    result = addexpect(data, conn, r);
+    result = addexpect(data, r);
     if(result)
       return result;
 
@@ -2733,8 +2722,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
     }
     /* issue the request */
     result = Curl_buffer_send(r, data, data->req.p.http,
-                              &data->info.request_size, included_body,
-                              FIRSTSOCKET);
+                              &data->info.request_size, included_body);
 
     if(result)
       failf(data, "Failed sending HTTP POST request");
@@ -2750,12 +2738,11 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
 
     /* issue the request */
     result = Curl_buffer_send(r, data, data->req.p.http,
-                              &data->info.request_size, 0,
-                              FIRSTSOCKET);
+                              &data->info.request_size, 0);
     if(result)
       failf(data, "Failed sending HTTP request");
 #ifdef USE_WEBSOCKETS
-    else if((conn->handler->protocol & (CURLPROTO_WS|CURLPROTO_WSS)) &&
+    else if((data->conn->handler->protocol & (CURLPROTO_WS|CURLPROTO_WSS)) &&
             !(data->set.connect_only))
       /* Set up the transfer for two-way since without CONNECT_ONLY set, this
          request probably wants to send data too post upgrade */
@@ -3329,8 +3316,8 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
        (httpreq == HTTPREQ_HEAD))
       Curl_pgrsSetUploadSize(data, 0); /* nothing */
 
-    /* bodysend takes ownership of the 'req' memory on success */
-    result = Curl_http_bodysend(data, conn, &req, httpreq);
+    /* req_send takes ownership of the 'req' memory on success */
+    result = Curl_http_req_send(data, &req, httpreq);
   }
   if(result) {
     Curl_dyn_free(&req);
