@@ -266,7 +266,7 @@ sub single {
         if(/^## (.*)/) {
             my $word = $1;
             # if there are enclosing quotes, remove them first
-            $word =~ s/[\"\'](.*)[\"\']\z/$1/;
+            $word =~ s/[\"\'\`](.*)[\"\'\`]\z/$1/;
 
             # enclose in double quotes if there is a space present
             if($word =~ / /) {
