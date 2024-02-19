@@ -12,10 +12,10 @@ jobs:
     permissions: write-all
     runs-on: self-hosted
     container:
-      image: codesecurese/curl-cso-builder:8.1b0
+      image: ghcr.io/codesecure-se/curl-cso-builder:8.1b0
       credentials:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.github_token }}
     env:
       CAFILE: ".github/github.cert.pem" 
       TOKEN: "${{ secrets.GITHUB_TOKEN }}"
