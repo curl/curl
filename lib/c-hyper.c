@@ -107,7 +107,6 @@ size_t Curl_hyper_send(void *userp, hyper_context *ctx,
                        const uint8_t *buf, size_t buflen)
 {
   struct Curl_easy *data = userp;
-  struct connectdata *conn = data->conn;
   CURLcode result;
   ssize_t nwrote;
 
