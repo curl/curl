@@ -3,38 +3,31 @@
 #
 # SPDX-License-Identifier: curl
 #
-# Input: a libcurl nroff man page
-# Output: the same file, minus the SYNOPSIS and the EXAMPLE sections
+# Given: a libcurl curldown man page
+# Outputs: the same file, minus the SYNOPSIS and the EXAMPLE sections
 #
 
 my $f = $ARGV[0];
-my $o = $ARGV[1];
 
 open(F, "<$f") or die;
-open(O, ">$o") or die;
 
+my @out;
 my $ignore = 0;
 while(<F>) {
-    if($_ =~ /^.SH (SYNOPSIS|EXAMPLE|\"SEE ALSO\"|SEE ALSO)/) {
+    if($_ =~ /^# (SYNOPSIS|EXAMPLE)/) {
         $ignore = 1;
     }
-    elsif($ignore && ($_ =~ /^.SH/)) {
+    elsif($ignore && ($_ =~ /^# [A-Z]/)) {
         $ignore = 0;
     }
     elsif(!$ignore) {
-        # filter out mentioned CURLE_ names
+        # **bold**
+        $_ =~ s/\*\*(\S.*?)\*\*//g;
+        # *italics*
+        $_ =~ s/\*(\S.*?)\*//g;
+
         $_ =~ s/CURL(M|SH|U|H)code//g;
-        $_ =~ s/CURL_(READ|WRITE)FUNC_[A-Z0-9_]*//g;
-        $_ =~ s/CURL_CSELECT_[A-Z0-9_]*//g;
-        $_ =~ s/CURL_DISABLE_[A-Z0-9_]*//g;
-        $_ =~ s/CURL_FORMADD_[A-Z0-9_]*//g;
-        $_ =~ s/CURL_HET_DEFAULT//g;
-        $_ =~ s/CURL_IPRESOLVE_[A-Z0-9_]*//g;
-        $_ =~ s/CURL_PROGRESSFUNC_CONTINUE//g;
-        $_ =~ s/CURL_REDIR_[A-Z0-9_]*//g;
-        $_ =~ s/CURL_RTSPREQ_[A-Z0-9_]*//g;
-        $_ =~ s/CURL_TIMECOND_[A-Z0-9_]*//g;
-        $_ =~ s/CURL_VERSION_[A-Z0-9_]*//g;
+        $_ =~ s/CURL_[A-Z0-9_]*//g;
         $_ =~ s/CURLALTSVC_[A-Z0-9_]*//g;
         $_ =~ s/CURLAUTH_[A-Z0-9_]*//g;
         $_ =~ s/CURLE_[A-Z0-9_]*//g;
@@ -56,25 +49,38 @@ while(<F>) {
         $_ =~ s/CURLPX_[A-Z0-9_]*//g;
         $_ =~ s/CURLSHE_[A-Z0-9_]*//g;
         $_ =~ s/CURLSHOPT_[A-Z0-9_]*//g;
+        $_ =~ s/CURLSSLOPT_[A-Z0-9_]*//g;
         $_ =~ s/CURLSSH_[A-Z0-9_]*//g;
         $_ =~ s/CURLSSLBACKEND_[A-Z0-9_]*//g;
         $_ =~ s/CURLU_[A-Z0-9_]*//g;
+        $_ =~ s/CURLUPART_[A-Z0-9_]*//g;
+        #$_ =~ s/\bCURLU\b//g; # stand-alone CURLU
         $_ =~ s/CURLUE_[A-Z0-9_]*//g;
+        $_ =~ s/CURLHE_[A-Z0-9_]*//g;
+        $_ =~ s/CURLWS_[A-Z0-9_]*//g;
+        $_ =~ s/CURLKH[A-Z0-9_]*//g;
         $_ =~ s/CURLUPART_[A-Z0-9_]*//g;
         $_ =~ s/CURLUSESSL_[A-Z0-9_]*//g;
-        $_ =~ s/curl_global_(init_mem|sslset|cleanup)//g;
+        $_ =~ s/CURLPAUSE_[A-Z0-9_]*//g;
+        $_ =~ s/CURLHSTS_[A-Z0-9_]*//g;
+        $_ =~ s/curl_global_([a-z_]*)//g;
         $_ =~ s/curl_(strequal|strnequal|formadd|waitfd|formget|getdate|formfree)//g;
-        $_ =~ s/curl_easy_(nextheader|duphandle)//g;
-        $_ =~ s/curl_multi_fdset//g;
+        $_ =~ s/curl_easy_([a-z]*)//g;
+        $_ =~ s/curl_multi_([a-z_]*)//g;
         $_ =~ s/curl_mime_(subparts|addpart|filedata|data_cb)//g;
         $_ =~ s/curl_ws_(send|recv|meta)//g;
         $_ =~ s/curl_url_(dup)//g;
         $_ =~ s/curl_pushheader_by(name|num)//g;
         $_ =~ s/libcurl-(env|ws)//g;
         $_ =~ s/libcurl\\-(env|ws)//g;
-        $_ =~ s/(^|\W)((tftp|https|http|ftp):\/\/[a-z0-9\-._~%:\/?\#\[\]\@!\$&'()*+,;=]+)//gi;
-        print O $_;
+        $_ =~ s/(^|\W)((tftp|https|http|ftp):\/\/[a-z0-9\-._~%:\/?\#\[\]\@!\$&'()*+,;=\\]+)//gi;
+        push @out, $_;
     }
 }
 close(F);
+
+open(O, ">$f") or die;
+for my $l (@out) {
+    print O $l;
+}
 close(O);
