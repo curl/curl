@@ -30,7 +30,6 @@ include Makefile.inc
 CURLPAGES = $(man_MANS:.3=.md)
 endif
 CLEANFILES = $(man_MANS)
-nodist_MANS = $(man_MANS)
 
 EXTRA_DIST = $(CURLPAGES) CMakeLists.txt
 

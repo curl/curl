@@ -36,7 +36,6 @@ m4macrodir = $(datadir)/aclocal
 dist_m4macro_DATA = libcurl.m4
 
 CLEANFILES = $(man_MANS) libcurl-symbols.md
-nodist_MANS = $(man_MANS)
 
 EXTRA_DIST = $(CURLPAGES) ABI.md symbols-in-versions symbols.pl  \
   mksymbolsmanpage.pl CMakeLists.txt

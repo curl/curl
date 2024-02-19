@@ -30,12 +30,7 @@ MK_CA_DOCS = mk-ca-bundle.1
 CURLCONF_DOCS = curl-config.1
 endif
 
-
-# EXTRA_DIST breaks with $(abs_builddir) so build it using this variable
-# but distribute it (using the relative file name) in the next variable
-man_MANS = $(abs_builddir)/curl.1
-noinst_man_MANS = $(MK_CA_DOCS)
-dist_man_MANS = $(CURLCONF_DOCS) $(MK_CA_DOCS)
+man_MANS = $(abs_builddir)/curl.1 curl-config.1
 CURLPAGES = curl-config.md mk-ca-bundle.md
 
 # Build targets in this file (.) before cmdline-opts to ensure that
@@ -43,11 +38,13 @@ CURLPAGES = curl-config.md mk-ca-bundle.md
 SUBDIRS = . cmdline-opts libcurl
 DIST_SUBDIRS = $(SUBDIRS) examples
 
-CLEANFILES = $(man_MANS) curl.1 $(CURLCONF_DOCS) $(MK_CA_DOCS)
-nodist_MANS = $(CLEANFILES)
+if BUILD_DOCS
+CLEANFILES = curl.1 mk-ca-bundle.1 curl-config.1
+endif
 
 EXTRA_DIST =                                    \
  $(CURLPAGES)                                   \
+ $(CURLCONF_DOCS)                               \
  ALTSVC.md                                      \
  BINDINGS.md                                    \
  BUFREF.md                                      \
@@ -112,6 +109,8 @@ CD2_ = $(CD2_0)
 
 SUFFIXES = .1 .md
 
+all: $(MK_CA_DOCS)
+
 # $(abs_builddir) is to disable VPATH when searching for this file, which
 # would otherwise find the copy in $(srcdir) which breaks the $(HUGE)
 # rule in src/Makefile.am in out-of-tree builds that references the file in the
@@ -130,6 +129,8 @@ $(abs_builddir)/curl.1:
 	$(CD2)$(CD2NROFF)
 
 curl-config.1: curl-config.md
+
+mk-ca-bundle.1: mk-ca-bundle.md
 
 distclean:
 	rm -f $(CLEANFILES)
