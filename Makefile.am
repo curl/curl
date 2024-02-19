@@ -249,6 +249,7 @@ install-data-hook:
 else
 install-data-hook:
 	(cd include && $(MAKE) install)
+	(cd docs && $(MAKE) install)
 endif
 
 # We extend the standard uninstall with a custom hook:
