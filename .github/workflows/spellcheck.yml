@@ -29,9 +29,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: install pandoc
-        run: sudo apt-get install pandoc
-
       - name: trim all man page *.md files
         run: find docs -name "*.md" ! -name "_*" | xargs -n1 ./.github/scripts/cleancmd.pl
 
