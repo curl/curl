@@ -139,7 +139,6 @@ static CURLcode cf_haproxy_connect(struct Curl_cfilter *cf,
       }
       else if(result)
         goto out;
-      DEBUGASSERT(written >= 0);
       Curl_dyn_tail(&ctx->data_out, len - written);
       if(Curl_dyn_len(&ctx->data_out) > 0) {
         result = CURLE_OK;
