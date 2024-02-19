@@ -28,10 +28,10 @@ Pass a long specifying whether the *TCP_NODELAY* option is to be set or
 cleared (1L = set, 0 = clear). The option is set by default. This has no
 effect after the connection has been established.
 
-Setting this option to 1L disables TCP's Nagle algorithm on connections
-created using this handle. The purpose of this algorithm is to try to minimize
-the number of small packets on the network (where "small packets" means TCP
-segments less than the Maximum Segment Size for the network).
+Setting this option to 1L disables the Nagle algorithm on connections created
+using this handle. The purpose of this algorithm is to minimize the number of
+small packets on the network (where "small packets" means TCP segments less
+than the Maximum Segment Size for the network).
 
 Maximizing the amount of data sent per TCP segment is good because it
 amortizes the overhead of the send. However, in some cases small segments may

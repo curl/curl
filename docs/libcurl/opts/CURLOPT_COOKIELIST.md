@@ -29,37 +29,37 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_COOKIELIST,
 Pass a char pointer to a *cookie* string.
 
 Such a cookie can be either a single line in Netscape / Mozilla format or just
-regular HTTP-style header (Set-Cookie: ...) format. This option also enables
-the cookie engine. This adds that single cookie to the internal cookie store.
+regular HTTP-style header (`Set-Cookie:`) format. This option also enables the
+cookie engine. This adds that single cookie to the internal cookie store.
 
 We strongly advice against loading cookies from an HTTP header file, as that
 is an inferior data exchange format.
 
 Exercise caution if you are using this option and multiple transfers may
-occur. If you use the Set-Cookie format and the string does not specify a
+occur. If you use the `Set-Cookie` format and the string does not specify a
 domain, then the cookie is sent for any domain (even after redirects are
 followed) and cannot be modified by a server-set cookie. If a server sets a
 cookie of the same name (or maybe you have imported one) then both are sent on
 future transfers to that server, likely not what you intended. To address
-these issues set a domain in Set-Cookie (doing that includes subdomains) or
+these issues set a domain in `Set-Cookie` (doing that includes subdomains) or
 much better: use the Netscape file format.
 
 Additionally, there are commands available that perform actions if you pass in
 these exact strings:
 
-## ALL
+## `ALL`
 
 erases all cookies held in memory
 
-## SESS
+## `SESS`
 
 erases all session cookies held in memory
 
-## FLUSH
+## `FLUSH`
 
 writes all known cookies to the file specified by CURLOPT_COOKIEJAR(3)
 
-## RELOAD
+## `RELOAD`
 
 loads all cookies from the files specified by CURLOPT_COOKIEFILE(3)
 

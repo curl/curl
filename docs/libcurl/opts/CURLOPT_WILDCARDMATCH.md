@@ -40,8 +40,8 @@ A brief introduction of its syntax follows:
 
     ftp://example.com/some/path/*.txt
 
-for all txt's from the root directory. Only two asterisks are allowed within
-the same pattern string.
+matches all `.txt` files in the root directory. Only two asterisks are allowed
+within the same pattern string.
 
 ## ? - QUESTION MARK
 
