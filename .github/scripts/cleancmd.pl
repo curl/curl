@@ -47,6 +47,8 @@ while(<F>) {
 }
 close(F);
 
-open(O, ">$f") or die;
-print O @out;
-close(O);
+if(!$ignore) {
+    open(O, ">$f") or die;
+    print O @out;
+    close(O);
+}
