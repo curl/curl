@@ -27,7 +27,7 @@ A data **pointer** to pass to the timer callback set with the
 CURLMOPT_TIMERFUNCTION(3) option.
 
 This pointer is not touched by libcurl but is only be passed in to the timer
-callbacks's **clientp** argument.
+callback's **clientp** argument.
 
 # DEFAULT
 

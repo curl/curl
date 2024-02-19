@@ -52,30 +52,30 @@ The callback function must return *CURL_PREREQFUNC_OK* on success, or
 
 This function is passed the following arguments:
 
-## conn_primary_ip
+## `conn_primary_ip`
 
 A null-terminated pointer to a C string containing the primary IP of the
 remote server established with this connection. For FTP, this is the IP for
 the control connection. IPv6 addresses are represented without surrounding
 brackets.
 
-## conn_local_ip
+## `conn_local_ip`
 
 A null-terminated pointer to a C string containing the originating IP for this
 connection. IPv6 addresses are represented without surrounding brackets.
 
-## conn_primary_port
+## `conn_primary_port`
 
 The primary port number on the remote server established with this connection.
 For FTP, this is the port for the control connection. This can be a TCP or a
 UDP port number depending on the protocol.
 
-## conn_local_port
+## `conn_local_port`
 
 The originating port number for this connection. This can be a TCP or a UDP
 port number depending on the protocol.
 
-## clientp
+## `clientp`
 
 The pointer you set with CURLOPT_PREREQDATA(3).
 

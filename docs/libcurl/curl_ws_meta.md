@@ -51,25 +51,24 @@ struct curl_ws_frame {
 };
 ~~~
 
-## age
+## `age`
 
 This field specify the age of this struct. It is always zero for now.
 
-## flags
+## `flags`
 
-This is a bitmask with individual bits set that describes the WebSocket
-data. See the list below.
+This is a bitmask with individual bits set that describes the WebSocket data.
+See the list below.
 
-## offset
+## `offset`
 
 When this frame is a continuation of fragment data already delivered, this is
 the offset into the final fragment where this piece belongs.
 
-## bytesleft
+## `bytesleft`
 
-If this is not a complete fragment, the *bytesleft* field informs about
-how many additional bytes are expected to arrive before this fragment is
-complete.
+If this is not a complete fragment, the *bytesleft* field informs about how
+many additional bytes are expected to arrive before this fragment is complete.
 
 # FLAGS
 

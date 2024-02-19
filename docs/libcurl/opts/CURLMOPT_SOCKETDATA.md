@@ -28,7 +28,7 @@ A data *pointer* to pass to the socket callback set with the
 CURLMOPT_SOCKETFUNCTION(3) option.
 
 This pointer is not touched by libcurl but is only passed in as the socket
-callbacks's **clientp** argument.
+callback's **clientp** argument.
 
 # DEFAULT
 
