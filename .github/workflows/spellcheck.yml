@@ -11,7 +11,7 @@ on:
       - '**.md'
       - '**/spellcheck.yml'
       - '**/spellcheck.yaml'
-      - '**/wordlist.txt'
+      - '.github/scripts/*'
   pull_request:
     branches:
       - master
@@ -19,7 +19,7 @@ on:
       - '**.md'
       - '**/spellcheck.yml'
       - '**/spellcheck.yaml'
-      - '**/wordlist.txt'
+      - '.github/scripts/*'
 
 permissions: {}
 
