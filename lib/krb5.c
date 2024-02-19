@@ -66,7 +66,7 @@
 static CURLcode ftpsend(struct Curl_easy *data, struct connectdata *conn,
                         const char *cmd)
 {
-  ssize_t bytes_written;
+  size_t bytes_written;
 #define SBUF_SIZE 1024
   char s[SBUF_SIZE];
   size_t write_len;
@@ -100,9 +100,9 @@ static CURLcode ftpsend(struct Curl_easy *data, struct connectdata *conn,
     if(result)
       break;
 
-    Curl_debug(data, CURLINFO_HEADER_OUT, sptr, (size_t)bytes_written);
+    Curl_debug(data, CURLINFO_HEADER_OUT, sptr, bytes_written);
 
-    if(bytes_written != (ssize_t)write_len) {
+    if(bytes_written != write_len) {
       write_len -= bytes_written;
       sptr += bytes_written;
     }
@@ -494,7 +494,7 @@ socket_write(struct Curl_easy *data, int sockindex, const void *to,
 {
   const char *to_p = to;
   CURLcode result;
-  ssize_t written;
+  size_t written;
 
   while(len > 0) {
     result = Curl_conn_send(data, sockindex, to_p, len, &written);

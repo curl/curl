@@ -1247,7 +1247,7 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
                           /* how much of the buffer contains body data */
                           curl_off_t included_body_bytes)
 {
-  ssize_t amount;
+  size_t amount;
   CURLcode result;
   char *ptr;
   size_t size;
@@ -2737,8 +2737,8 @@ CURLcode Curl_http_req_send(struct Curl_easy *data,
       return result;
 
     /* issue the request */
-    result = Curl_buffer_send(r, data, data->req.p.http,
-                              &data->info.request_size, 0);
+    result = Curl_req_send_hds(data, Curl_dyn_ptr(r), Curl_dyn_len(r));
+    Curl_dyn_free(r);
     if(result)
       failf(data, "Failed sending HTTP request");
 #ifdef USE_WEBSOCKETS

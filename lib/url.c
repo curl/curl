@@ -3845,9 +3845,6 @@ CURLcode Curl_connect(struct Curl_easy *data,
 
   /* init the single-transfer specific data */
   Curl_req_reset(&data->req, data);
-  memset(&data->req, 0, sizeof(struct SingleRequest));
-  data->req.size = data->req.maxdownload = -1;
-  data->req.no_body = data->set.opt_no_body;
 
   /* call the stuff that needs to be called */
   result = create_conn(data, &conn, asyncp);

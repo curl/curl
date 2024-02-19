@@ -97,7 +97,7 @@ CURLcode Curl_xfer_write_done(struct Curl_easy *data, bool premature);
  */
 CURLcode Curl_xfer_send(struct Curl_easy *data,
                         const void *buf, size_t blen,
-                        ssize_t *pnwritten);
+                        size_t *pnwritten);
 
 /**
  * Receive data on the socket/connection filter designated
@@ -107,15 +107,5 @@ CURLcode Curl_xfer_send(struct Curl_easy *data,
 CURLcode Curl_xfer_recv(struct Curl_easy *data,
                         char *buf, size_t blen,
                         ssize_t *pnrcvd);
-
-/**
- * Send data on the socket/connection filter designated
- * for transfer's outgoing data. If the data could not be
- * sent immediately, it will be buffered.
- * Will never return CURLE_AGAIN.
- */
-CURLcode Curl_xfer_send_buffered(struct Curl_easy *data,
-                                 const void *buf, size_t blen);
-
 
 #endif /* HEADER_CURL_TRANSFER_H */

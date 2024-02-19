@@ -212,6 +212,11 @@ static void tunnel_free(struct Curl_cfilter *cf,
   }
 }
 
+static bool tunnel_want_send(struct h1_tunnel_state *ts)
+{
+  return (ts->tunnel_state == H1_TUNNEL_CONNECT);
+}
+
 #ifndef USE_HYPER
 static CURLcode start_CONNECT(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
@@ -1032,7 +1037,7 @@ static void cf_h1_proxy_adjust_pollset(struct Curl_cfilter *cf,
          wait for the socket to become readable to be able to get the
          response headers or if we're still sending the request, wait
          for write. */
-      if(ts->CONNECT.sending == HTTPSEND_REQUEST)
+      if(tunnel_want_send(ts))
         Curl_pollset_set_out_only(data, ps, sock);
       else
         Curl_pollset_set_in_only(data, ps, sock);

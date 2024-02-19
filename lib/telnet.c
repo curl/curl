@@ -1234,7 +1234,8 @@ static CURLcode send_telnet_data(struct Curl_easy *data,
   ssize_t i, outlen;
   unsigned char *outbuf;
   CURLcode result = CURLE_OK;
-  ssize_t bytes_written, total_written = 0;
+  size_t bytes_written;
+  curl_off_t total_written = 0;
   struct connectdata *conn = data->conn;
   struct TELNET *tn = data->req.p.telnet;
 

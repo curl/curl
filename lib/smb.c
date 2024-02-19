@@ -559,12 +559,12 @@ static void smb_format_message(struct Curl_easy *data, struct smb_header *h,
   h->pid = smb_swap16((unsigned short) pid);
 }
 
-static CURLcode smb_send(struct Curl_easy *data, ssize_t len,
+static CURLcode smb_send(struct Curl_easy *data, size_t len,
                          size_t upload_size)
 {
   struct connectdata *conn = data->conn;
   struct smb_conn *smbc = &conn->proto.smbc;
-  ssize_t bytes_written;
+  size_t bytes_written;
   CURLcode result;
 
   result = Curl_xfer_send(data, data->state.ulbuf, len, &bytes_written);
@@ -585,8 +585,8 @@ static CURLcode smb_flush(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
   struct smb_conn *smbc = &conn->proto.smbc;
-  ssize_t bytes_written;
-  ssize_t len = smbc->send_size - smbc->sent;
+  size_t bytes_written;
+  size_t len = smbc->send_size - smbc->sent;
   CURLcode result;
 
   if(!smbc->send_size)

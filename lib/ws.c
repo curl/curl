@@ -1014,8 +1014,7 @@ static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
   if(!Curl_bufq_is_empty(&ws->sendbuf)) {
     CURLcode result;
     const unsigned char *out;
-    size_t outlen;
-    ssize_t n;
+    size_t outlen, n;
 
     while(Curl_bufq_peek(&ws->sendbuf, &out, &outlen)) {
       if(data->set.connect_only)
@@ -1044,8 +1043,8 @@ static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
         }
       }
       else {
-        infof(data, "WS: flushed %zu bytes", (size_t)n);
-        Curl_bufq_skip(&ws->sendbuf, (size_t)n);
+        infof(data, "WS: flushed %zu bytes", n);
+        Curl_bufq_skip(&ws->sendbuf, n);
       }
     }
   }
@@ -1058,8 +1057,8 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *data, const void *buffer,
                                   unsigned int flags)
 {
   struct websocket *ws;
-  ssize_t nwritten, n;
-  size_t space;
+  ssize_t n;
+  size_t nwritten, space;
   CURLcode result;
 
   *sent = 0;
@@ -1097,7 +1096,7 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *data, const void *buffer,
 
     infof(data, "WS: wanted to send %zu bytes, sent %zu bytes",
           buflen, nwritten);
-    *sent = (nwritten >= 0)? (size_t)nwritten : 0;
+    *sent = nwritten;
     return result;
   }
 

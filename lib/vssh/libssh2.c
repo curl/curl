@@ -3213,7 +3213,7 @@ static ssize_t ssh_tls_send(libssh2_socket_t sock, const void *buffer,
                             size_t length, int flags, void **abstract)
 {
   struct Curl_easy *data = (struct Curl_easy *)*abstract;
-  ssize_t nwrite;
+  size_t nwrite;
   CURLcode result;
   struct connectdata *conn = data->conn;
   Curl_send *backup = conn->send[0];
@@ -3230,8 +3230,8 @@ static ssize_t ssh_tls_send(libssh2_socket_t sock, const void *buffer,
     return -EAGAIN; /* magic return code for libssh2 */
   else if(result)
     return -1; /* error */
-  Curl_debug(data, CURLINFO_DATA_OUT, (char *)buffer, (size_t)nwrite);
-  return nwrite;
+  Curl_debug(data, CURLINFO_DATA_OUT, (char *)buffer, nwrite);
+  return (ssize_t)nwrite;
 }
 #endif
 

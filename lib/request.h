@@ -64,7 +64,7 @@ struct SingleRequest {
   curl_off_t bytecount;         /* total number of bytes read */
   curl_off_t writebytecount;    /* number of bytes written */
 
-  curl_off_t pendingheader;      /* this many bytes left to send is actually
+  size_t pendingheader;         /* this many bytes left to send is actually
                                     header and not body */
   struct curltime start;         /* transfer started at this time */
   unsigned int headerbytecount;  /* received server headers (not CONNECT
@@ -91,6 +91,7 @@ struct SingleRequest {
    * checks, pausing by client callbacks. */
   struct Curl_cwriter *writer_stack;
   struct bufq sendbuf; /* data which needs to be send to the server */
+  size_t sendbuf_hds_len; /* amount of header bytes in sendbuf */
   time_t timeofdoc;
   long bodywrites;
   char *location;   /* This points to an allocated version of the Location:
@@ -100,7 +101,7 @@ struct SingleRequest {
 
   /* 'upload_present' is used to keep a byte counter of how much data there is
      still left in the buffer, aimed for upload. */
-  ssize_t upload_present;
+  size_t upload_present;
 
   /* 'upload_fromhere' is used as a read-pointer when we uploaded parts of a
      buffer, so the next read should read from where this pointer points to,
@@ -154,6 +155,7 @@ struct SingleRequest {
                         that we are creating a request with an auth header,
                         but it is not the final request in the auth
                         negotiation. */
+  BIT(sendbuf_init); /* sendbuf is initialized */
 };
 
 /**
@@ -188,5 +190,43 @@ void Curl_req_free(struct SingleRequest *req, struct Curl_easy *data);
  */
 void Curl_req_reset(struct SingleRequest *req, struct Curl_easy *data);
 
+
+/**
+ * Send request bytes for transfer. If not all could be sent
+ * they will be buffered. Use `Curl_req_flush()` to make sure
+ * bytes are really send.
+ * @param data      the transfer making the request
+ * @param buf       the bytes to send
+ * @param blen      the number of bytes to send
+ * @param hds_len   the number of bytes from the start that are headers
+ * @return CURLE_OK (on blocking with *pnwritten == 0) or error.
+ */
+CURLcode Curl_req_send(struct Curl_easy *data,
+                        const char *buf, size_t blen,
+                        size_t hds_len);
+
+/**
+ * Send request header bytes for transfer. If not all could be sent
+ * they will be buffered. Use `Curl_req_flush()` to make sure
+ * bytes are really send.
+ * @param data      the transfer making the request
+ * @param buf       the header bytes to send
+ * @param blen      the number of header bytes to send
+ * @return CURLE_OK (on blocking with *pnwritten == 0) or error.
+ */
+CURLcode Curl_req_send_hds(struct Curl_easy *data,
+                           const char *buf, size_t blen);
+
+/**
+ * Flush all buffered request bytes.
+ * @return CURLE_OK on success, CURLE_AGAIN if sending was blocked,
+ *         or the error on the sending.
+ */
+CURLcode Curl_req_flush(struct Curl_easy *data);
+
+/**
+ * TRUE iff the request wants to send, e.g. has buffered bytes.
+ */
+bool Curl_req_want_send(struct Curl_easy *data);
 
 #endif /* HEADER_CURL_REQUEST_H */

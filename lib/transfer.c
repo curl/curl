@@ -607,7 +607,7 @@ static void win_update_buffer_size(curl_socket_t sockfd)
 #endif
 
 #define curl_upload_refill_watermark(data) \
-        ((ssize_t)((data)->set.upload_buffer_size >> 5))
+        ((size_t)((data)->set.upload_buffer_size >> 5))
 
 /*
  * Send data to upload to the server, when the socket is writable.
@@ -617,13 +617,21 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
                                  int *didwhat)
 {
   ssize_t i, si;
-  ssize_t bytes_written;
+  size_t bytes_written;
   CURLcode result;
   ssize_t nread; /* number of bytes read */
   bool sending_http_headers = FALSE;
   struct SingleRequest *k = &data->req;
 
   *didwhat |= KEEP_SEND;
+
+  if(!(k->keepon & KEEP_SEND_PAUSE)) {
+    result = Curl_req_flush(data);
+    if(result == CURLE_AGAIN) /* unable to send all we have */
+      return CURLE_OK;
+    else if(result)
+      return result;
+  }
 
   do {
     curl_off_t nbody;
@@ -633,8 +641,8 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
        k->upload_present < curl_upload_refill_watermark(data) &&
        !k->upload_chunky &&/*(variable sized chunked header; append not safe)*/
        !k->upload_done &&  /*!(k->upload_done once k->upload_present sent)*/
-       !(k->writebytecount + k->upload_present - k->pendingheader ==
-         data->state.infilesize)) {
+       !(k->writebytecount + (curl_off_t)k->upload_present -
+         (curl_off_t)k->pendingheader == data->state.infilesize)) {
       offset = k->upload_present;
     }
 
@@ -770,9 +778,6 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
          that instead of reading more data */
     }
 
-    if(!Curl_bufq_is_empty(&k->sendbuf)) {
-      DEBUGASSERT(0);
-    }
     /* write to socket (send away data) */
     result = Curl_xfer_send(data,
                             k->upload_fromhere, /* buffer pointer */
@@ -793,9 +798,9 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
 
     if(k->pendingheader) {
       /* parts of what was sent was header */
-      curl_off_t n = CURLMIN(k->pendingheader, bytes_written);
+      size_t n = CURLMIN(k->pendingheader, bytes_written);
       /* show the data before we change the pointer upload_fromhere */
-      Curl_debug(data, CURLINFO_HEADER_OUT, k->upload_fromhere, (size_t)n);
+      Curl_debug(data, CURLINFO_HEADER_OUT, k->upload_fromhere, n);
       k->pendingheader -= n;
       nbody = bytes_written - n; /* size of the written body part */
     }
@@ -1607,22 +1612,19 @@ void Curl_xfer_setup(
   struct SingleRequest *k = &data->req;
   struct connectdata *conn = data->conn;
   struct HTTP *http = data->req.p.http;
-  bool httpsending;
+  bool want_send = Curl_req_want_send(data);
 
   DEBUGASSERT(conn != NULL);
   DEBUGASSERT((sockindex <= 1) && (sockindex >= -1));
   DEBUGASSERT((writesockindex <= 1) && (writesockindex >= -1));
 
-  httpsending = ((conn->handler->protocol&PROTO_FAMILY_HTTP) &&
-                 (http->sending == HTTPSEND_REQUEST));
-
-  if(conn->bits.multiplex || conn->httpversion >= 20 || httpsending) {
+  if(conn->bits.multiplex || conn->httpversion >= 20 || want_send) {
     /* when multiplexing, the read/write sockets need to be the same! */
     conn->sockfd = sockindex == -1 ?
       ((writesockindex == -1 ? CURL_SOCKET_BAD : conn->sock[writesockindex])) :
       conn->sock[sockindex];
     conn->writesockfd = conn->sockfd;
-    if(httpsending)
+    if(want_send)
       /* special and very HTTP-specific */
       writesockindex = FIRSTSOCKET;
   }
@@ -1732,7 +1734,7 @@ CURLcode Curl_xfer_write_done(struct Curl_easy *data, bool premature)
 
 CURLcode Curl_xfer_send(struct Curl_easy *data,
                         const void *buf, size_t blen,
-                        ssize_t *pnwritten)
+                        size_t *pnwritten)
 {
   CURLcode result;
   int sockindex;

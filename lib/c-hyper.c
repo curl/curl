@@ -111,7 +111,7 @@ size_t Curl_hyper_send(void *userp, hyper_context *ctx,
   struct hyp_io_ctx *io_ctx = userp;
   struct Curl_easy *data = io_ctx->data;
   CURLcode result;
-  ssize_t nwrote;
+  size_t nwrote;
 
   DEBUGF(infof(data, "Curl_hyper_send(%zu)", buflen));
   result = Curl_xfer_send(data, (void *)buf, buflen, &nwrote);
