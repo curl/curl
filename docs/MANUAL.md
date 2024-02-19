@@ -395,7 +395,7 @@ used on the command line. It is especially useful to fool or trick stupid
 servers or CGI scripts that rely on that information being available or
 contain certain data.
 
-    curl -e www.exomaple.org http://www.example.com/
+    curl -e www.example.org http://www.example.com/
 
 ## User Agent
 
