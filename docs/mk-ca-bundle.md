@@ -14,19 +14,18 @@ mk-ca-bundle - convert Mozilla's certificate bundle to PEM format
 
 # SYNOPSIS
 
-mk-ca-bundle [options]
-*[outputfile]*
+mk-ca-bundle [options] [output]
 
 # DESCRIPTION
 
-The mk-ca-bundle tool downloads the *certdata.txt* file from Mozilla's source
-tree over HTTPS, then parses *certdata.txt* and extracts certificates into PEM
-format. By default, only CA root certificates trusted to issue SSL server
+This tool downloads the *certdata.txt* file from Mozilla's source tree over
+HTTPS, then parses it and extracts the included certificates into PEM format.
+By default, only CA root certificates trusted to issue SSL server
 authentication certificates are extracted. These are then processed with the
-OpenSSL command line tool to produce the final ca-bundle file.
+OpenSSL command line tool to produce the final ca-bundle output file.
 
-The default *outputfile* name is **ca-bundle.crt**. By setting it to '-' (a
-single dash) you will get the output sent to STDOUT instead of a file.
+The default *output* name is **ca-bundle.crt**. By setting it to '-' (a single
+dash) you will get the output sent to STDOUT instead of a file.
 
 The PEM format this scripts uses for output makes the result readily available
 for use by just about all OpenSSL or GnuTLS powered applications, such as curl
@@ -38,14 +37,14 @@ The following options are supported:
 
 ## -b
 
-backup an existing version of *outputfilename*
+backup an existing version of *output*
 
 ## -d [name]
 
-specify which Mozilla tree to pull *certdata.txt* from (or a custom
-URL). Valid names are: aurora, beta, central, Mozilla, nss, release
-(default). They are shortcuts for which source tree to get the certificates
-data from.
+specify which Mozilla tree to pull *certdata.txt* from (or a custom URL).
+Valid names are: **aurora**, **beta**, **central**, **Mozilla**, **nss**,
+**release** (default). They are shortcuts for which source tree to get the
+certificate data from.
 
 ## -f
 
@@ -74,7 +73,7 @@ to the output file. The meta data is not parsed in any way by mk-ca-bundle.
 
 ## -n
 
-no download of *certdata.txt* (to use existing)
+Do not download *certdata.txt* - use the existing.
 
 ## -p [purposes]:[levels]
 
@@ -83,14 +82,14 @@ output. Takes the form of a comma separated list of purposes, a colon, and a
 comma separated list of levels. The default is to include all certificates
 trusted to issue SSL Server certificates (*SERVER_AUTH:TRUSTED_DELEGATOR*).
 
-Valid purposes are: *ALL*, *DIGITAL_SIGNATURE*, *NON_REPUDIATION*,
-*KEY_ENCIPHERMENT*, *DATA_ENCIPHERMENT*, *KEY_AGREEMENT*, *KEY_CERT_SIGN*,
-*CRL_SIGN*, *SERVER_AUTH* (default), *CLIENT_AUTH*, *CODE_SIGNING*,
-*EMAIL_PROTECTION*, *IPSEC_END_SYSTEM*, *IPSEC_TUNNEL*, *IPSEC_USER*,
-*TIME_STAMPING*, *STEP_UP_APPROVED*
+Valid purposes are: **ALL**, **DIGITAL_SIGNATURE**, **NON_REPUDIATION**,
+**KEY_ENCIPHERMENT**, **DATA_ENCIPHERMENT**, **KEY_AGREEMENT**,
+**KEY_CERT_SIGN**, **CRL_SIGN**, **SERVER_AUTH** (default), **CLIENT_AUTH**,
+**CODE_SIGNING**, **EMAIL_PROTECTION**, **IPSEC_END_SYSTEM**,
+**IPSEC_TUNNEL**, **IPSEC_USER**, **TIME_STAMPING**, **STEP_UP_APPROVED**
 
-Valid trust levels are: *ALL*, *TRUSTED_DELEGATOR* (default), *NOT_TRUSTED*,
-*MUST_VERIFY_TRUST*, *TRUSTED*
+Valid trust levels are: **ALL**, **TRUSTED_DELEGATOR** (default), **NOT_TRUSTED**,
+**MUST_VERIFY_TRUST**, **TRUSTED**
 
 ## -q
 
@@ -102,7 +101,7 @@ include plain text listing of certificates
 
 ## -s [algorithms]
 
-comma separated list of signature algorithms with which to hash/fingerprint
+A comma separated list of signature algorithms with which to hash/fingerprint
 each certificate and output when run in plain text mode.
 
 Valid algorithms are:
@@ -123,6 +122,5 @@ Returns 0 on success. Returns 1 if it fails to download data.
 # FILE FORMAT
 
 The file format used by Mozilla for this trust information is documented here:
-~~~c
+
 https://p11-glue.freedesktop.org/doc/storing-trust-policy/storing-trust-existing.html
-~~~
