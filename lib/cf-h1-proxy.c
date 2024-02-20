@@ -592,7 +592,9 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
     goto error;
   }
   /* tell Hyper how to read/write network data */
-  hyper_io_set_userdata(io, data);
+  h->io_ctx.data = data;
+  h->io_ctx.sockindex = cf->sockindex;
+  hyper_io_set_userdata(io, &h->io_ctx);
   hyper_io_set_read(io, Curl_hyper_recv);
   hyper_io_set_write(io, Curl_hyper_send);
   conn->sockfd = tunnelsocket;
