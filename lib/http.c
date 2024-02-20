@@ -1174,6 +1174,7 @@ static bool http_should_fail(struct Curl_easy *data)
   return data->state.authproblem;
 }
 
+#ifndef USE_HYPER
 /*
  * readmoredata() is a "fread() emulation" to provide POST and/or request
  * data. It is used when a huge POST is to be made and the entire chunk wasn't
@@ -1232,7 +1233,6 @@ static size_t readmoredata(char *buffer,
   return fullsize;
 }
 
-#ifndef USE_HYPER
 /*
  * Curl_buffer_send() sends a header buffer and frees all associated
  * memory.  Body data may be appended to the header data if desired.
