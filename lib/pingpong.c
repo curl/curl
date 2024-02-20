@@ -201,7 +201,6 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
 #endif
   result = Curl_conn_send(data, FIRSTSOCKET, s, write_len, &bytes_written);
   if(result == CURLE_AGAIN) {
-    result = CURLE_OK;
     bytes_written = 0;
   }
   else if(result)
