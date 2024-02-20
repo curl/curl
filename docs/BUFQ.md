@@ -144,5 +144,5 @@ The pool gets the size and the mount of spares to keep. The `bufq` gets the pool
 
 A pool can be shared between many `bufq`s, as long as all of them operate in the same thread. In curl that would be true for all transfers using the same multi handle. The advantages of a pool are:
 
-* when all `bufq`s are empty, only memory for `max_spare` chunks in the pool is used. Empty `bufq`s will hold no memory.
+* when all `bufq`s are empty, only memory for `max_spare` chunks in the pool is used. Empty `bufq` will hold no memory.
 * the latest spare chunk is the first to be handed out again, no matter which `bufq` needs it. This keeps the footprint of "recently used" memory smaller.
