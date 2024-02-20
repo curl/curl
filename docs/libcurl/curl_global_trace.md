@@ -93,7 +93,7 @@ trace.
 
 ## `doh`
 
-Tracing of DNS-over-HTTP operations to resolve host names.
+Tracing of DNS-over-HTTP operations to resolve hostnames.
 
 # EXAMPLE
 
