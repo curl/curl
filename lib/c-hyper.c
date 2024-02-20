@@ -759,7 +759,6 @@ static int uploadstreamed(void *userdata, hyper_context *ctx,
  */
 
 static CURLcode bodysend(struct Curl_easy *data,
-                         struct connectdata *conn,
                          hyper_headers *headers,
                          hyper_request *hyperreq,
                          Curl_HttpReq httpreq)
@@ -1171,7 +1170,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   if(result)
     goto error;
 
-  result = bodysend(data, conn, headers, req, httpreq);
+  result = bodysend(data, headers, req, httpreq);
   if(result)
     goto error;
 
