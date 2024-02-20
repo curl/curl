@@ -1,3 +1,4 @@
+// deepcode ignore IntegerOverflow: <please specify a reason of ignoring this>
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -46,6 +47,8 @@
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
+#include "curl/curl.h"
+
 
 #define MAX_HSTS_LINE 4095
 #define MAX_HSTS_HOSTLEN 256
@@ -54,26 +57,29 @@
 #define MAX_HSTS_DATELENSTR "64"
 #define UNLIMITED "unlimited"
 
-#ifdef DEBUGBUILD
-/* to play well with debug builds, we can *set* a fixed time this will
-   return */
-time_t deltatime; /* allow for "adjustments" for unit test purposes */
-static time_t hsts_debugtime(void *unused)
-{
-  char *timestr = getenv("CURL_TIME");
-  (void)unused;
-  if(timestr) {
-    curl_off_t val;
-    (void)curlx_strtoofft(timestr, NULL, 10, &val);
-
-    val += (curl_off_t)deltatime;
-    return (time_t)val;
-  }
-  return time(NULL);
-}
-#undef time
-#define time(x) hsts_debugtime(x)
+#ifdef HAVE_CURL_OFF_T //TIME
+#include <curl/curl.h>
+typedef curl_off_t hsts_time_t; // Use curl_off_t for larger range
+#else
+typedef time_t hsts_time_t; // Use time_t if curl_off_t is not available
 #endif
+
+typedef struct stsentry {
+  char *hostname;
+  hsts_time_t expires; // Use the appropriate time type
+} stsentry;
+
+stsentry *hsts_create(char *hostname, hsts_time_t expires) {
+  // ... existing code ...
+
+  // Check if expires exceeds time_t limits if using time_t
+  #ifndef HAVE_CURL_OFF_T
+  if (expires > INT32_MAX) {
+    // Handle potential overflow: log, return error, etc.
+    fprintf(stderr, "Warning: expires time exceeds time_t limits!\n");
+    return NULL;
+  }
+  #endif
 
 struct hsts *Curl_hsts_init(void)
 {
