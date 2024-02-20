@@ -1238,14 +1238,14 @@ static size_t readmoredata(char *buffer,
  *
  * Returns CURLcode
  */
-CURLcode Curl_buffer_send(struct dynbuf *in,
-                          struct Curl_easy *data,
-                          struct HTTP *http,
-                          /* add the number of sent bytes to this
-                             counter */
-                          curl_off_t *bytes_written,
-                          /* how much of the buffer contains body data */
-                          curl_off_t included_body_bytes)
+static CURLcode buffer_send(struct dynbuf *in,
+                            struct Curl_easy *data,
+                            struct HTTP *http,
+                            /* add the number of sent bytes to this
+                               counter */
+                            curl_off_t *bytes_written,
+                            /* how much of the buffer contains body data */
+                            curl_off_t included_body_bytes)
 {
   size_t amount;
   CURLcode result;
@@ -2463,7 +2463,7 @@ CURLcode Curl_http_req_send(struct Curl_easy *data,
   curl_off_t included_body = 0;
 #else
   /* from this point down, this function should not be used */
-#define Curl_buffer_send(a,b,c,d,e) CURLE_OK
+#define buffer_send(a,b,c,d,e) CURLE_OK
 #endif
   CURLcode result = CURLE_OK;
   struct HTTP *http = data->req.p.http;
@@ -2500,8 +2500,8 @@ CURLcode Curl_http_req_send(struct Curl_easy *data,
     Curl_pgrsSetUploadSize(data, http->postsize);
 
     /* this sends the buffer and frees all the buffer resources */
-    result = Curl_buffer_send(r, data, data->req.p.http,
-                              &data->info.request_size, 0);
+    result = buffer_send(r, data, data->req.p.http,
+                         &data->info.request_size, 0);
     if(result)
       failf(data, "Failed sending PUT request");
     else
@@ -2522,8 +2522,8 @@ CURLcode Curl_http_req_send(struct Curl_easy *data,
       if(result)
         return result;
 
-      result = Curl_buffer_send(r, data, data->req.p.http,
-                                &data->info.request_size, 0);
+      result = buffer_send(r, data, data->req.p.http,
+                           &data->info.request_size, 0);
       if(result)
         failf(data, "Failed sending POST request");
       else
@@ -2579,8 +2579,8 @@ CURLcode Curl_http_req_send(struct Curl_easy *data,
     http->sending = HTTPSEND_BODY;
 
     /* this sends the buffer and frees all the buffer resources */
-    result = Curl_buffer_send(r, data, data->req.p.http,
-                              &data->info.request_size, 0);
+    result = buffer_send(r, data, data->req.p.http,
+                         &data->info.request_size, 0);
     if(result)
       failf(data, "Failed sending POST request");
     else
@@ -2721,8 +2721,8 @@ CURLcode Curl_http_req_send(struct Curl_easy *data,
       }
     }
     /* issue the request */
-    result = Curl_buffer_send(r, data, data->req.p.http,
-                              &data->info.request_size, included_body);
+    result = buffer_send(r, data, data->req.p.http,
+                         &data->info.request_size, included_body);
 
     if(result)
       failf(data, "Failed sending HTTP POST request");

@@ -205,17 +205,9 @@ CURLcode Curl_req_send(struct Curl_easy *data,
                         const char *buf, size_t blen,
                         size_t hds_len);
 
-/**
- * Send request header bytes for transfer. If not all could be sent
- * they will be buffered. Use `Curl_req_flush()` to make sure
- * bytes are really send.
- * @param data      the transfer making the request
- * @param buf       the header bytes to send
- * @param blen      the number of header bytes to send
- * @return CURLE_OK (on blocking with *pnwritten == 0) or error.
- */
-CURLcode Curl_req_send_hds(struct Curl_easy *data,
-                           const char *buf, size_t blen);
+/* Convenience for sending only header bytes */
+#define Curl_req_send_hds(data, buf, blen) \
+          Curl_req_send((data), (buf), (blen), (blen))
 
 /**
  * Flush all buffered request bytes.

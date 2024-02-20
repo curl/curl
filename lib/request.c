@@ -251,12 +251,6 @@ CURLcode Curl_req_send(struct Curl_easy *data,
   return result;
 }
 
-CURLcode Curl_req_send_hds(struct Curl_easy *data,
-                           const char *buf, size_t blen)
-{
-  return Curl_req_send(data, buf, blen, blen);
-}
-
 bool Curl_req_want_send(struct Curl_easy *data)
 {
   return data->req.sendbuf_init && !Curl_bufq_is_empty(&data->req.sendbuf);
