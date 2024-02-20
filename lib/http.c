@@ -1232,6 +1232,7 @@ static size_t readmoredata(char *buffer,
   return fullsize;
 }
 
+#ifndef USE_HYPER
 /*
  * Curl_buffer_send() sends a header buffer and frees all associated
  * memory.  Body data may be appended to the header data if desired.
@@ -1436,6 +1437,11 @@ static CURLcode buffer_send(struct dynbuf *in,
 
 /* end of the add_buffer functions */
 /* ------------------------------------------------------------------------- */
+#else /* !USE_HYPER */
+  /* In hyper, this is an ugly NOP */
+#define buffer_send(a,b,c,d,e) CURLE_OK
+
+#endif /* !USE_HYPER(else) */
 
 
 
@@ -2461,9 +2467,6 @@ CURLcode Curl_http_req_send(struct Curl_easy *data,
 #ifndef USE_HYPER
   /* Hyper always handles the body separately */
   curl_off_t included_body = 0;
-#else
-  /* from this point down, this function should not be used */
-#define buffer_send(a,b,c,d,e) CURLE_OK
 #endif
   CURLcode result = CURLE_OK;
   struct HTTP *http = data->req.p.http;
