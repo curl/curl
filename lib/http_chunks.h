@@ -133,6 +133,8 @@ bool Curl_httpchunk_is_done(struct Curl_easy *data, struct Curl_chunker *ch);
 
 extern const struct Curl_cwtype Curl_httpchunk_unencoder;
 
+extern const struct Curl_crtype Curl_httpchunk_encoder;
+
 #endif /* !CURL_DISABLE_HTTP */
 
 #endif /* HEADER_CURL_HTTP_CHUNKS_H */

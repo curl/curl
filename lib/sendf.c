@@ -59,7 +59,7 @@
 #include "memdebug.h"
 
 
-static CURLcode do_init_stack(struct Curl_easy *data);
+static CURLcode do_init_writer_stack(struct Curl_easy *data);
 
 /* Curl_client_write() sends data to the write callback(s)
 
@@ -81,7 +81,7 @@ CURLcode Curl_client_write(struct Curl_easy *data,
               ((type & ~(CLIENTWRITE_INFO|CLIENTWRITE_EOS)) == 0));
 
   if(!data->req.writer_stack) {
-    result = do_init_stack(data);
+    result = do_init_writer_stack(data);
     if(result)
       return result;
     DEBUGASSERT(data->req.writer_stack);
@@ -338,7 +338,7 @@ size_t Curl_cwriter_count(struct Curl_easy *data, Curl_cwriter_phase phase)
   return n;
 }
 
-static CURLcode do_init_stack(struct Curl_easy *data)
+static CURLcode do_init_writer_stack(struct Curl_easy *data)
 {
   struct Curl_cwriter *writer;
   CURLcode result;
@@ -374,7 +374,7 @@ CURLcode Curl_cwriter_add(struct Curl_easy *data,
   struct Curl_cwriter **anchor = &data->req.writer_stack;
 
   if(!*anchor) {
-    result = do_init_stack(data);
+    result = do_init_writer_stack(data);
     if(result)
       return result;
   }
@@ -426,3 +426,195 @@ void Curl_cwriter_remove_by_name(struct Curl_easy *data,
   }
 }
 
+CURLcode Curl_creader_read(struct Curl_easy *data,
+                           struct Curl_creader *reader,
+                           char *buf, size_t blen, size_t *nread, bool *eos)
+{
+  if(!reader)
+    return CURLE_READ_ERROR;
+  return reader->crt->do_read(data, reader, buf, blen, nread, eos);
+}
+
+CURLcode Curl_creader_def_init(struct Curl_easy *data,
+                               struct Curl_creader *reader)
+{
+  (void)data;
+  (void)reader;
+  return CURLE_OK;
+}
+
+CURLcode Curl_creader_def_read(struct Curl_easy *data,
+                               struct Curl_creader *reader, char *buf,
+                               size_t blen, size_t *nread, bool *eos)
+{
+  return Curl_creader_read(data, reader->next, buf, blen, nread, eos);
+}
+
+void Curl_creader_def_close(struct Curl_easy *data,
+                            struct Curl_creader *reader)
+{
+  (void)data;
+  (void)reader;
+}
+
+struct cr_in_ctx {
+  struct Curl_creader super;
+  CURLcode error_result;
+  BIT(seen_eos);
+  BIT(errored);
+};
+
+/* Real client reader to installed client callbacks. */
+static CURLcode cr_in_read(struct Curl_easy *data,
+                           struct Curl_creader *reader,
+                           char *buf, size_t blen,
+                           size_t *pnread, bool *peos)
+{
+  struct cr_in_ctx *ctx = (struct cr_in_ctx *)reader;
+  size_t nread;
+
+  /* Once we have errored, we will return the same error forever */
+  if(ctx->errored) {
+    *pnread = 0;
+    *peos = FALSE;
+    return ctx->error_result;
+  }
+  if(ctx->seen_eos) {
+    *pnread = 0;
+    *peos = TRUE;
+    return CURLE_OK;
+  }
+
+  /* no read callback installed, simulate empty read */
+  nread = 0;
+  if(data->state.fread_func) {
+    Curl_set_in_callback(data, true);
+    nread = data->state.fread_func(buf, 1, blen, data->state.in);
+    Curl_set_in_callback(data, false);
+  }
+
+  switch(nread) {
+  case 0:
+    *pnread = 0;
+    *peos = ctx->seen_eos = TRUE;
+    return CURLE_OK;
+
+  case CURL_READFUNC_ABORT:
+    failf(data, "operation aborted by callback");
+    *pnread = 0;
+    *peos = FALSE;
+    ctx->errored = TRUE;
+    ctx->error_result = CURLE_ABORTED_BY_CALLBACK;
+    return CURLE_ABORTED_BY_CALLBACK;
+
+  case CURL_READFUNC_PAUSE:
+    if(data->conn->handler->flags & PROTOPT_NONETWORK) {
+      /* protocols that work without network cannot be paused. This is
+         actually only FILE:// just now, and it can't pause since the transfer
+         isn't done using the "normal" procedure. */
+      failf(data, "Read callback asked for PAUSE when not supported");
+      return CURLE_READ_ERROR;
+    }
+    /* CURL_READFUNC_PAUSE pauses read callbacks that feed socket writes */
+    data->req.keepon |= KEEP_SEND_PAUSE; /* mark socket send as paused */
+    *pnread = 0;
+    *peos = FALSE;
+    return CURLE_OK; /* nothing was read */
+
+  default:
+    if(nread > blen) {
+      /* the read function returned a too large value */
+      failf(data, "read function returned funny value");
+      *pnread = 0;
+      *peos = FALSE;
+      ctx->errored = TRUE;
+      ctx->error_result = CURLE_READ_ERROR;
+      return CURLE_READ_ERROR;
+    }
+    *pnread = nread;
+    *peos = FALSE;
+    break;
+  }
+  return CURLE_OK;
+}
+
+static const struct Curl_crtype cr_in = {
+  "cr-in",
+  Curl_creader_def_init,
+  cr_in_read,
+  Curl_creader_def_close,
+  sizeof(struct cr_in_ctx)
+};
+
+CURLcode Curl_creader_create(struct Curl_creader **preader,
+                             struct Curl_easy *data,
+                             const struct Curl_crtype *crt,
+                             Curl_cwriter_phase phase)
+{
+  struct Curl_creader *reader;
+  CURLcode result = CURLE_OUT_OF_MEMORY;
+
+  DEBUGASSERT(crt->creader_size >= sizeof(struct Curl_creader));
+  reader = (struct Curl_creader *) calloc(1, crt->creader_size);
+  if(!reader)
+    goto out;
+
+  reader->crt = crt;
+  reader->phase = phase;
+  result = crt->do_init(data, reader);
+
+out:
+  *preader = result? NULL : reader;
+  if(result)
+    free(reader);
+  return result;
+}
+
+static CURLcode do_init_reader_stack(struct Curl_easy *data)
+{
+  DEBUGASSERT(!data->req.writer_stack);
+  return Curl_creader_create(&data->req.reader_stack,
+                             data, &cr_in, CURL_CW_CLIENT);
+}
+
+CURLcode Curl_creader_add(struct Curl_easy *data,
+                          struct Curl_creader *reader)
+{
+  CURLcode result;
+  struct Curl_creader **anchor = &data->req.reader_stack;
+
+  if(!*anchor) {
+    result = do_init_reader_stack(data);
+    if(result)
+      return result;
+  }
+
+  /* Insert the writer as first in its phase.
+   * Skip existing readers of higher phases. */
+  while(*anchor && (*anchor)->phase > reader->phase)
+    anchor = &((*anchor)->next);
+  reader->next = *anchor;
+  *anchor = reader;
+  return CURLE_OK;
+}
+
+CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
+                          size_t *nread, bool *eos)
+{
+  CURLcode result;
+
+  DEBUGASSERT(buf);
+  DEBUGASSERT(blen);
+  DEBUGASSERT(nread);
+  DEBUGASSERT(eos);
+
+  if(!data->req.reader_stack) {
+    result = do_init_reader_stack(data);
+    if(result)
+      return result;
+    DEBUGASSERT(data->req.reader_stack);
+  }
+
+  return Curl_creader_read(data, data->req.reader_stack, buf, blen,
+                           nread, eos);
+}

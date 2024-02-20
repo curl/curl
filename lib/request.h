@@ -87,9 +87,12 @@ struct SingleRequest {
   enum expect100 exp100;        /* expect 100 continue state */
   enum upgrade101 upgr101;      /* 101 upgrade state */
 
-  /* Client Writer stack, handles trasnfer- and content-encodings, protocol
+  /* Client Writer stack, handles transfer- and content-encodings, protocol
    * checks, pausing by client callbacks. */
   struct Curl_cwriter *writer_stack;
+  /* Client Reader stack, handles transfer- and content-encodings, protocol
+   * checks, pausing by client callbacks. */
+  struct Curl_creader *reader_stack;
   struct bufq sendbuf; /* data which needs to be send to the server */
   size_t sendbuf_hds_len; /* amount of header bytes in sendbuf */
   time_t timeofdoc;

@@ -175,4 +175,74 @@ void Curl_cwriter_def_close(struct Curl_easy *data,
                             struct Curl_cwriter *writer);
 
 
+/* Client Reader Type, provides the implementation */
+struct Curl_crtype {
+  const char *name;        /* writer name. */
+  CURLcode (*do_init)(struct Curl_easy *data,
+                      struct Curl_creader *writer);
+  CURLcode (*do_read)(struct Curl_easy *data,
+                      struct Curl_creader *reader,
+                      char *buf, size_t blen, size_t *nread, bool *eos);
+  void (*do_close)(struct Curl_easy *data,
+                   struct Curl_creader *reader);
+  size_t creader_size;  /* sizeof() allocated struct Curl_creader */
+};
+
+/* Client reader instance */
+struct Curl_creader {
+  const struct Curl_crtype *crt;  /* type implementation */
+  struct Curl_creader *next;  /* Downstream reader. */
+  Curl_cwriter_phase phase; /* phase at which it operates */
+};
+
+/**
+ * Default implementations for do_init, do_write, do_close that
+ * do nothing and pass the data through.
+ */
+CURLcode Curl_creader_def_init(struct Curl_easy *data,
+                               struct Curl_creader *reader);
+CURLcode Curl_creader_def_read(struct Curl_easy *data,
+                               struct Curl_creader *reader, char *buf,
+                               size_t blen, size_t *nread, bool *eos);
+void Curl_creader_def_close(struct Curl_easy *data,
+                            struct Curl_creader *reader);
+
+/**
+ * Convenience method for calling `reader->do_read()` that
+ * checks for NULL reader.
+ */
+CURLcode Curl_creader_read(struct Curl_easy *data,
+                           struct Curl_creader *reader,
+                           char *buf, size_t blen, size_t *nread, bool *eos);
+
+/**
+ * Create a new creader instance with given type and phase. Is not
+ * inserted into the writer chain by this call.
+ * Invokes `reader->do_init()`.
+ */
+CURLcode Curl_creader_create(struct Curl_creader **preader,
+                             struct Curl_easy *data,
+                             const struct Curl_crtype *cr_handler,
+                             Curl_cwriter_phase phase);
+
+/**
+ * Adds a reader to the transfer's reader chain.
+ * The readers `phase` determines where in the chain it is inserted.
+ */
+CURLcode Curl_creader_add(struct Curl_easy *data,
+                          struct Curl_creader *reader);
+
+/**
+ * Read at most `blen` bytes at `buf` from the client.
+ * @param date    the transfer to read client bytes for
+ * @param buf     the memory location to read to
+ * @param blen    the amount of memory at `buf`
+ * @param nread   on return the number of bytes read into `buf`
+ * @param eos     TRUE iff bytes are the end of data from client
+ * @return CURLE_OK on successful read (even 0 length) or error
+ */
+CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
+                          size_t *nread, bool *eos) WARN_UNUSED_RESULT;
+
+
 #endif /* HEADER_CURL_SENDF_H */
