@@ -117,8 +117,6 @@ size_t Curl_hyper_send(void *userp, hyper_context *ctx,
   DEBUGF(infof(data, "Curl_hyper_send(%zu)", buflen));
   result = Curl_conn_send(data, io_ctx->sockindex,
                           (void *)buf, buflen, &nwrote);
-  if(!result && !nwrote)
-    result = CURLE_AGAIN;
   if(result == CURLE_AGAIN) {
     DEBUGF(infof(data, "Curl_hyper_send(%zu) -> EAGAIN", buflen));
     /* would block, register interest */
