@@ -1233,7 +1233,6 @@ static size_t readmoredata(char *buffer,
   return fullsize;
 }
 
-#ifndef USE_HYPER
 /*
  * Curl_buffer_send() sends a header buffer and frees all associated
  * memory.  Body data may be appended to the header data if desired.
