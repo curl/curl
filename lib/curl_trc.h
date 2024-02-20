@@ -77,14 +77,10 @@ void Curl_failf(struct Curl_easy *data,
 #define CURL_TRC_CF(data, cf, ...) \
   do { if(Curl_trc_cf_is_verbose(cf, data)) \
          Curl_trc_cf_infof(data, cf, __VA_ARGS__); } while(0)
-#define CURL_TRC_FT(data, ft, ...) \
-  do { if(Curl_trc_ft_is_verbose(data, ft)) \
-         Curl_trc_ft_infof(data, ft, __VA_ARGS__); } while(0)
 
 #else
 #define infof Curl_infof
 #define CURL_TRC_CF Curl_trc_cf_infof
-#define CURL_TRC_FT Curl_trc_ft_infof
 #endif
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
@@ -119,15 +115,6 @@ void Curl_infof(struct Curl_easy *data,
 void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
                        const char *fmt, ...) CURL_PRINTF(3, 4);
 
-void Curl_trc_ft_infof(struct Curl_easy *data, struct curl_trc_feat *ft,
-#if defined(__GNUC__) && !defined(printf) && defined(CURL_HAVE_C99) && \
-  !defined(__MINGW32__)
-                      const char *fmt, ...)
-                      __attribute__((format(printf, 3, 4)));
-#else
-                      const char *fmt, ...);
-#endif
-
 #else /* defined(CURL_DISABLE_VERBOSE_STRINGS) */
 /* All informational messages are not compiled in for size savings */
 
@@ -145,13 +132,6 @@ static void Curl_trc_cf_infof(struct Curl_easy *data,
                               const char *fmt, ...)
 {
   (void)data; (void)cf; (void)fmt;
-}
-
-static void Curl_trc_ft_infof(struct Curl_easy *data,
-                              struct Curl_trc_ft *ft,
-                              const char *fmt, ...)
-{
-  (void)data; (void)ft; (void)fmt;
 }
 
 #endif /* !defined(CURL_DISABLE_VERBOSE_STRINGS) */
