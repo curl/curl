@@ -511,7 +511,6 @@
 #  endif
 #  define CURL_UINT64_SUFFIX  CURL_SUFFIX_CURL_OFF_TU
 #  define CURL_UINT64_C(val)  CURL_CONC_MACROS(val,CURL_UINT64_SUFFIX)
-#  define CURL_UINT64_CAST(expr) ((curl_uint64_t)(expr))
 #endif
 
 #if (SIZEOF_TIME_T == 4)
