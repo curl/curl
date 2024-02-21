@@ -390,6 +390,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
   ssize_t nread; /* number of bytes read */
   struct SingleRequest *k = &data->req;
 
+  (void)conn;
   *didwhat |= KEEP_SEND;
 
   if(!(k->keepon & KEEP_SEND_PAUSE)) {
