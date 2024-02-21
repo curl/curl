@@ -1444,51 +1444,6 @@ enum proxy_use {
   HEADER_CONNECT  /* sending CONNECT to a proxy */
 };
 
-/* used to compile the provided trailers into one buffer
-   will return an error code if one of the headers is
-   not formatted correctly */
-CURLcode Curl_http_compile_trailers(struct curl_slist *trailers,
-                                    struct dynbuf *b,
-                                    struct Curl_easy *handle)
-{
-  char *ptr = NULL;
-  CURLcode result = CURLE_OK;
-  const char *endofline_native = NULL;
-  const char *endofline_network = NULL;
-
-  if(
-#ifdef CURL_DO_LINEEND_CONV
-     (handle->state.prefer_ascii) ||
-#endif
-     (handle->set.crlf)) {
-    /* \n will become \r\n later on */
-    endofline_native  = "\n";
-    endofline_network = "\x0a";
-  }
-  else {
-    endofline_native  = "\r\n";
-    endofline_network = "\x0d\x0a";
-  }
-
-  while(trailers) {
-    /* only add correctly formatted trailers */
-    ptr = strchr(trailers->data, ':');
-    if(ptr && *(ptr + 1) == ' ') {
-      result = Curl_dyn_add(b, trailers->data);
-      if(result)
-        return result;
-      result = Curl_dyn_add(b, endofline_native);
-      if(result)
-        return result;
-    }
-    else
-      infof(handle, "Malformatted trailing header, skipping trailer");
-    trailers = trailers->next;
-  }
-  result = Curl_dyn_add(b, endofline_network);
-  return result;
-}
-
 static bool hd_name_eq(const char *n1, size_t n1len,
                        const char *n2, size_t n2len)
 {

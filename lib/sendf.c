@@ -452,13 +452,6 @@ CURLcode Curl_creader_def_init(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-CURLcode Curl_creader_def_read(struct Curl_easy *data,
-                               struct Curl_creader *reader, char *buf,
-                               size_t blen, size_t *nread, bool *eos)
-{
-  return Curl_creader_read(data, reader->next, buf, blen, nread, eos);
-}
-
 void Curl_creader_def_close(struct Curl_easy *data,
                             struct Curl_creader *reader)
 {
@@ -505,7 +498,8 @@ static CURLcode cr_in_read(struct Curl_easy *data,
   switch(nread) {
   case 0:
     *pnread = 0;
-    *peos = ctx->seen_eos = TRUE;
+    *peos = TRUE;
+    ctx->seen_eos = TRUE;
     break;
 
   case CURL_READFUNC_ABORT:

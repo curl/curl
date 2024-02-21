@@ -94,10 +94,6 @@ CURLcode Curl_dynhds_add_custom(struct Curl_easy *data,
                                 bool is_connect,
                                 struct dynhds *hds);
 
-CURLcode Curl_http_compile_trailers(struct curl_slist *trailers,
-                                    struct dynbuf *buf,
-                                    struct Curl_easy *handle);
-
 void Curl_http_method(struct Curl_easy *data, struct connectdata *conn,
                       const char **method, Curl_HttpReq *);
 CURLcode Curl_http_useragent(struct Curl_easy *data);

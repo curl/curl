@@ -210,9 +210,6 @@ struct Curl_creader {
  */
 CURLcode Curl_creader_def_init(struct Curl_easy *data,
                                struct Curl_creader *reader);
-CURLcode Curl_creader_def_read(struct Curl_easy *data,
-                               struct Curl_creader *reader, char *buf,
-                               size_t blen, size_t *nread, bool *eos);
 void Curl_creader_def_close(struct Curl_easy *data,
                             struct Curl_creader *reader);
 
