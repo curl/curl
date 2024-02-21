@@ -90,15 +90,24 @@ CURLcode Curl_client_write(struct Curl_easy *data,
   return Curl_cwriter_write(data, data->req.writer_stack, type, buf, blen);
 }
 
-void Curl_cw_reset(struct Curl_easy *data)
+void Curl_client_reset(struct Curl_easy *data)
 {
   struct Curl_cwriter *writer = data->req.writer_stack;
+  struct Curl_creader *reader = data->req.reader_stack;
+  size_t i;
 
   while(writer) {
     data->req.writer_stack = writer->next;
     writer->cwt->do_close(data, writer);
     free(writer);
     writer = data->req.writer_stack;
+  }
+
+  while(reader) {
+    data->req.reader_stack = reader->next;
+    reader->crt->do_close(data, reader);
+    free(reader);
+    reader = data->req.reader_stack;
   }
 
   data->req.bytecount = 0;
@@ -487,7 +496,7 @@ static CURLcode cr_in_read(struct Curl_easy *data,
 
   /* no read callback installed, simulate empty read */
   nread = 0;
-  if(data->state.fread_func) {
+  if(data->state.fread_func && data->state.infilesize) {
     Curl_set_in_callback(data, true);
     nread = data->state.fread_func(buf, 1, blen, data->state.in);
     Curl_set_in_callback(data, false);
@@ -497,7 +506,7 @@ static CURLcode cr_in_read(struct Curl_easy *data,
   case 0:
     *pnread = 0;
     *peos = ctx->seen_eos = TRUE;
-    return CURLE_OK;
+    break;
 
   case CURL_READFUNC_ABORT:
     failf(data, "operation aborted by callback");
@@ -519,7 +528,7 @@ static CURLcode cr_in_read(struct Curl_easy *data,
     data->req.keepon |= KEEP_SEND_PAUSE; /* mark socket send as paused */
     *pnread = 0;
     *peos = FALSE;
-    return CURLE_OK; /* nothing was read */
+    break; /* nothing was read */
 
   default:
     if(nread > blen) {
@@ -535,6 +544,8 @@ static CURLcode cr_in_read(struct Curl_easy *data,
     *peos = FALSE;
     break;
   }
+  DEBUGF(infof(data, "cr_in_read(len=%zu) -> %d, %zu, %d",
+               blen, CURLE_OK, *pnread, *peos));
   return CURLE_OK;
 }
 
@@ -549,7 +560,7 @@ static const struct Curl_crtype cr_in = {
 CURLcode Curl_creader_create(struct Curl_creader **preader,
                              struct Curl_easy *data,
                              const struct Curl_crtype *crt,
-                             Curl_cwriter_phase phase)
+                             Curl_creader_phase phase)
 {
   struct Curl_creader *reader;
   CURLcode result = CURLE_OUT_OF_MEMORY;
@@ -570,11 +581,152 @@ out:
   return result;
 }
 
+void Curl_creader_free(struct Curl_easy *data, struct Curl_creader *reader)
+{
+  if(reader) {
+    reader->crt->do_close(data, reader);
+    free(reader);
+  }
+}
+
+struct cr_lc_ctx {
+  struct Curl_creader super;
+  struct bufq buf;
+  BIT(read_eos);  /* we read an EOS from the next reader */
+  BIT(eos);       /* we have returned an EOS */
+};
+
+static CURLcode cr_lc_init(struct Curl_easy *data, struct Curl_creader *reader)
+{
+  struct cr_lc_ctx *ctx = (struct cr_lc_ctx *)reader;
+  (void)data;
+  Curl_bufq_init2(&ctx->buf, (16 * 1024), 1, BUFQ_OPT_SOFT_LIMIT);
+  return CURLE_OK;
+}
+
+static void cr_lc_close(struct Curl_easy *data, struct Curl_creader *reader)
+{
+  struct cr_lc_ctx *ctx = (struct cr_lc_ctx *)reader;
+  (void)data;
+  Curl_bufq_free(&ctx->buf);
+}
+
+/* client reader doing line end conversions. */
+static CURLcode cr_lc_read(struct Curl_easy *data,
+                           struct Curl_creader *reader,
+                           char *buf, size_t blen,
+                           size_t *pnread, bool *peos)
+{
+  struct cr_lc_ctx *ctx = (struct cr_lc_ctx *)reader;
+  CURLcode result;
+  size_t nread, i, start, n;
+  bool eos;
+
+  if(ctx->eos) {
+    *pnread = 0;
+    *peos = TRUE;
+    return CURLE_OK;
+  }
+
+  if(Curl_bufq_is_empty(&ctx->buf)) {
+    if(ctx->read_eos) {
+      ctx->eos = TRUE;
+      *pnread = 0;
+      *peos = TRUE;
+      return CURLE_OK;
+    }
+    /* Still getting data form the next reader, ctx->buf is empty */
+    result = Curl_creader_read(data, reader->next, buf, blen, &nread, &eos);
+    if(result)
+      return result;
+    ctx->read_eos = eos;
+
+    if(!nread || !memchr(buf, '\n', nread)) {
+      /* nothing to convert, return this right away */
+      if(ctx->read_eos)
+        ctx->eos = TRUE;
+      *pnread = nread;
+      *peos = ctx->eos;
+      return CURLE_OK;
+    }
+
+    /* at least one \n needs conversion to '\r\n', place into ctx->buf */
+    for(i = start = 0; i < nread; ++i) {
+      if(buf[i] != '\n')
+        continue;
+      /* on a soft limit bufq, we do not need to check length */
+      result = Curl_bufq_cwrite(&ctx->buf, buf + start, i - start, &n);
+      if(!result)
+        result = Curl_bufq_cwrite(&ctx->buf, STRCONST("\r\n"), &n);
+      if(result)
+        return result;
+      start = i + 1;
+      if(!data->set.crlf && (data->state.infilesize != -1)) {
+        /* we're here only because FTP is in ASCII mode...
+           bump infilesize for the LF we just added */
+        data->state.infilesize++;
+        /* comment: this might work for FTP, but in HTTP we could not change
+         * the content length after having started the request... */
+      }
+    }
+  }
+
+  DEBUGASSERT(!Curl_bufq_is_empty(&ctx->buf));
+  *peos = FALSE;
+  result = Curl_bufq_cread(&ctx->buf, buf, blen, pnread);
+  if(!result && ctx->read_eos && Curl_bufq_is_empty(&ctx->buf)) {
+    /* no more data, read all, done. */
+    ctx->eos = TRUE;
+    *peos = TRUE;
+  }
+  return result;
+}
+
+static const struct Curl_crtype cr_lc = {
+  "cr-lineconv",
+  cr_lc_init,
+  cr_lc_read,
+  cr_lc_close,
+  sizeof(struct cr_lc_ctx)
+};
+
+static CURLcode cr_lc_add(struct Curl_easy *data)
+{
+  struct Curl_creader *reader = NULL;
+  CURLcode result;
+
+  result = Curl_creader_create(&reader, data, &cr_lc,
+                               CURL_CR_TRANSFER_ENCODE);
+  if(!result)
+    result = Curl_creader_add(data, reader);
+
+  if(result && reader)
+    Curl_creader_free(data, reader);
+  return result;
+}
+
 static CURLcode do_init_reader_stack(struct Curl_easy *data)
 {
-  DEBUGASSERT(!data->req.writer_stack);
-  return Curl_creader_create(&data->req.reader_stack,
-                             data, &cr_in, CURL_CW_CLIENT);
+  CURLcode result;
+
+  DEBUGASSERT(!data->req.reader_stack);
+  result = Curl_creader_create(&data->req.reader_stack,
+                               data, &cr_in, CURL_CR_CLIENT);
+  if(result)
+    return result;
+
+
+  if(data->set.crlf
+#ifdef CURL_DO_LINEEND_CONV
+     || data->state.prefer_ascii
+#endif
+    ) {
+    result = cr_lc_add(data);
+    if(result)
+      return result;
+  }
+
+  return result;
 }
 
 CURLcode Curl_creader_add(struct Curl_easy *data,
@@ -590,8 +742,8 @@ CURLcode Curl_creader_add(struct Curl_easy *data,
   }
 
   /* Insert the writer as first in its phase.
-   * Skip existing readers of higher phases. */
-  while(*anchor && (*anchor)->phase > reader->phase)
+   * Skip existing readers of lower phases. */
+  while(*anchor && (*anchor)->phase < reader->phase)
     anchor = &((*anchor)->next);
   reader->next = *anchor;
   *anchor = reader;
@@ -615,6 +767,7 @@ CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
     DEBUGASSERT(data->req.reader_stack);
   }
 
-  return Curl_creader_read(data, data->req.reader_stack, buf, blen,
-                           nread, eos);
+  result = Curl_creader_read(data, data->req.reader_stack, buf, blen,
+                             nread, eos);
+  return result;
 }

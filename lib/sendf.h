@@ -61,7 +61,7 @@ CURLcode Curl_client_write(struct Curl_easy *data, int type, const char *ptr,
 /**
  * Free all resources related to client writing.
  */
-void Curl_cw_reset(struct Curl_easy *data);
+void Curl_client_reset(struct Curl_easy *data);
 
 /**
  * Client Writers - a chain passing transfer BODY data to the client.
@@ -188,11 +188,20 @@ struct Curl_crtype {
   size_t creader_size;  /* sizeof() allocated struct Curl_creader */
 };
 
+/* Phase a reader operates at. */
+typedef enum {
+  CURL_CR_NET,  /* data send to the network (connection filters) */
+  CURL_CR_TRANSFER_ENCODE, /* add transfer-encodings */
+  CURL_CR_PROTOCOL, /* before transfer, but after content decoding */
+  CURL_CR_CONTENT_ENCODE, /* add content-encodings */
+  CURL_CR_CLIENT  /* data read from client */
+} Curl_creader_phase;
+
 /* Client reader instance */
 struct Curl_creader {
   const struct Curl_crtype *crt;  /* type implementation */
   struct Curl_creader *next;  /* Downstream reader. */
-  Curl_cwriter_phase phase; /* phase at which it operates */
+  Curl_creader_phase phase; /* phase at which it operates */
 };
 
 /**
@@ -223,7 +232,13 @@ CURLcode Curl_creader_read(struct Curl_easy *data,
 CURLcode Curl_creader_create(struct Curl_creader **preader,
                              struct Curl_easy *data,
                              const struct Curl_crtype *cr_handler,
-                             Curl_cwriter_phase phase);
+                             Curl_creader_phase phase);
+
+/**
+ * Free a creader instance.
+ * Invokes `reader->do_close()`.
+ */
+void Curl_creader_free(struct Curl_easy *data, struct Curl_creader *reader);
 
 /**
  * Adds a reader to the transfer's reader chain.

@@ -48,7 +48,7 @@ CURLcode Curl_req_start(struct SingleRequest *req,
                         struct Curl_easy *data)
 {
   req->start = Curl_now();
-  Curl_cw_reset(data);
+  Curl_client_reset(data);
   if(!req->sendbuf_init) {
     Curl_bufq_init2(&req->sendbuf, data->set.upload_buffer_size, 1,
                     BUFQ_OPT_SOFT_LIMIT);
@@ -72,7 +72,7 @@ CURLcode Curl_req_done(struct SingleRequest *req,
   (void)req;
   if(!aborted)
     (void)Curl_req_flush(data);
-  Curl_cw_reset(data);
+  Curl_client_reset(data);
   return CURLE_OK;
 }
 
@@ -85,7 +85,7 @@ void Curl_req_reset(struct SingleRequest *req, struct Curl_easy *data)
    * free this safely without leaks. */
   Curl_safefree(req->p.http);
   Curl_safefree(req->newurl);
-  Curl_cw_reset(data);
+  Curl_client_reset(data);
 
 #ifndef CURL_DISABLE_DOH
   if(req->doh) {
@@ -114,7 +114,7 @@ void Curl_req_free(struct SingleRequest *req, struct Curl_easy *data)
   Curl_safefree(req->newurl);
   if(req->sendbuf_init)
     Curl_bufq_free(&req->sendbuf);
-  Curl_cw_reset(data);
+  Curl_client_reset(data);
 
 #ifndef CURL_DISABLE_DOH
   if(req->doh) {

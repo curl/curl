@@ -572,7 +572,7 @@ static CURLcode add_chunk(struct Curl_easy *data,
     int hdlen;
     size_t n;
 
-    hdlen = msnprintf(hd, sizeof(hd), "%zx\r\n", blen);
+    hdlen = msnprintf(hd, sizeof(hd), "%zx\r\n", nread);
     if(hdlen <= 0)
       return CURLE_READ_ERROR;
     /* On a soft-limited bufq, we do not need to check that all was written */
@@ -632,5 +632,20 @@ const struct Curl_crtype Curl_httpchunk_encoder = {
   cr_chunked_close,
   sizeof(struct chunked_reader)
 };
+
+CURLcode Curl_httpchunk_add_reader(struct Curl_easy *data)
+{
+  struct Curl_creader *reader = NULL;
+  CURLcode result;
+
+  result = Curl_creader_create(&reader, data, &Curl_httpchunk_encoder,
+                               CURL_CR_TRANSFER_ENCODE);
+  if(!result)
+    result = Curl_creader_add(data, reader);
+
+  if(result && reader)
+    Curl_creader_free(data, reader);
+  return result;
+}
 
 #endif /* CURL_DISABLE_HTTP */
