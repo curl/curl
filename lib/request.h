@@ -193,7 +193,7 @@ void Curl_req_free(struct SingleRequest *req, struct Curl_easy *data);
  */
 void Curl_req_reset(struct SingleRequest *req, struct Curl_easy *data);
 
-
+#ifndef USE_HYPER
 /**
  * Send request bytes for transfer. If not all could be sent
  * they will be buffered. Use `Curl_req_flush()` to make sure
@@ -211,6 +211,8 @@ CURLcode Curl_req_send(struct Curl_easy *data,
 /* Convenience for sending only header bytes */
 #define Curl_req_send_hds(data, buf, blen) \
           Curl_req_send((data), (buf), (blen), (blen))
+
+#endif /* !USE_HYPER */
 
 /**
  * Flush all buffered request bytes.

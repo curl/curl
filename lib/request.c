@@ -171,22 +171,6 @@ static CURLcode req_send(struct Curl_easy *data,
   return result;
 }
 
-static CURLcode req_send_buffer_add(struct Curl_easy *data,
-                                    const char *buf, size_t blen,
-                                    size_t hds_len)
-{
-  CURLcode result = CURLE_OK;
-  ssize_t n;
-  n = Curl_bufq_write(&data->req.sendbuf,
-                      (const unsigned char *)buf, blen, &result);
-  if(n < 0)
-    return result;
-  /* We rely on a SOFTLIMIT on sendbuf, so it can take all data in */
-  DEBUGASSERT((size_t)n == blen);
-  data->req.sendbuf_hds_len += hds_len;
-  return CURLE_OK;
-}
-
 static CURLcode req_send_buffer_flush(struct Curl_easy *data)
 {
   CURLcode result = CURLE_OK;
@@ -228,6 +212,24 @@ CURLcode Curl_req_flush(struct Curl_easy *data)
   return CURLE_OK;
 }
 
+#ifndef USE_HYPER
+
+static CURLcode req_send_buffer_add(struct Curl_easy *data,
+                                    const char *buf, size_t blen,
+                                    size_t hds_len)
+{
+  CURLcode result = CURLE_OK;
+  ssize_t n;
+  n = Curl_bufq_write(&data->req.sendbuf,
+                      (const unsigned char *)buf, blen, &result);
+  if(n < 0)
+    return result;
+  /* We rely on a SOFTLIMIT on sendbuf, so it can take all data in */
+  DEBUGASSERT((size_t)n == blen);
+  data->req.sendbuf_hds_len += hds_len;
+  return CURLE_OK;
+}
+
 CURLcode Curl_req_send(struct Curl_easy *data,
                        const char *buf, size_t blen,
                        size_t hds_len)
@@ -250,6 +252,7 @@ CURLcode Curl_req_send(struct Curl_easy *data,
     result = CURLE_OK;
   return result;
 }
+#endif /* !USE_HYPER */
 
 bool Curl_req_want_send(struct Curl_easy *data)
 {
