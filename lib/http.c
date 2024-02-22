@@ -2212,17 +2212,11 @@ static CURLcode addexpect(struct Curl_easy *data, struct dynbuf *r)
   return CURLE_OK;
 }
 
-CURLcode Curl_http_req_send(struct Curl_easy *data,
-                            struct dynbuf *r, Curl_HttpReq httpreq)
+CURLcode Curl_http_req_complete(struct Curl_easy *data,
+                                struct dynbuf *r, Curl_HttpReq httpreq)
 {
   CURLcode result = CURLE_OK;
   struct HTTP *http = data->req.p.http;
-
-  if(data->req.upload_chunky) {
-    result = Curl_httpchunk_add_reader(data);
-    if(result)
-      return result;
-  }
 
   DEBUGASSERT(data->conn);
   switch(httpreq) {
@@ -2255,15 +2249,9 @@ CURLcode Curl_http_req_send(struct Curl_easy *data,
     /* set the upload size to the progress meter */
     Curl_pgrsSetUploadSize(data, http->postsize);
 
-    /* this sends the buffer and frees all the buffer resources */
-    result = Curl_req_send_hds(data, Curl_dyn_ptr(r), Curl_dyn_len(r));
-    Curl_dyn_free(r);
-    if(result)
-      failf(data, "Failed sending PUT request");
-    else
-      /* prepare for transfer */
-      Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE,
-                      http->postsize?FIRSTSOCKET:-1);
+    /* prepare for transfer */
+    Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE,
+                    http->postsize?FIRSTSOCKET:-1);
     if(result)
       return result;
     break;
@@ -2277,14 +2265,8 @@ CURLcode Curl_http_req_send(struct Curl_easy *data,
       result = Curl_dyn_addn(r, STRCONST("Content-Length: 0\r\n\r\n"));
       if(result)
         return result;
-
-      result = Curl_req_send_hds(data, Curl_dyn_ptr(r), Curl_dyn_len(r));
-      Curl_dyn_free(r);
-      if(result)
-        failf(data, "Failed sending POST request");
-      else
-        /* setup variables for the upcoming transfer */
-        Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, -1);
+      /* setup variables for the upcoming transfer */
+      Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, -1);
       break;
     }
 
@@ -2334,18 +2316,9 @@ CURLcode Curl_http_req_send(struct Curl_easy *data,
     data->state.in = (void *) data->state.mimepost;
     http->sending = HTTPSEND_BODY;
 
-    /* this sends the buffer and frees all the buffer resources */
-    result = Curl_req_send_hds(data, Curl_dyn_ptr(r), Curl_dyn_len(r));
-    Curl_dyn_free(r);
-    if(result)
-      failf(data, "Failed sending POST request");
-    else
-      /* prepare for transfer */
-      Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE,
-                      http->postsize?FIRSTSOCKET:-1);
-    if(result)
-      return result;
-
+    /* prepare for transfer */
+    Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE,
+                    http->postsize?FIRSTSOCKET:-1);
     break;
 #endif
   case HTTPREQ_POST:
@@ -2426,14 +2399,8 @@ CURLcode Curl_http_req_send(struct Curl_easy *data,
           http->postdata = (char *)&http->postdata;
       }
     }
-    /* issue the request */
-    result = Curl_req_send_hds(data, Curl_dyn_ptr(r), Curl_dyn_len(r));
-    Curl_dyn_free(r);
-    if(result)
-      failf(data, "Failed sending HTTP POST request");
-    else
-      Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE,
-                      http->postdata?FIRSTSOCKET:-1);
+    Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE,
+                    http->postdata?FIRSTSOCKET:-1);
     break;
 
   default:
@@ -2441,21 +2408,18 @@ CURLcode Curl_http_req_send(struct Curl_easy *data,
     if(result)
       return result;
 
-    /* issue the request */
-    result = Curl_req_send_hds(data, Curl_dyn_ptr(r), Curl_dyn_len(r));
-    Curl_dyn_free(r);
-    if(result)
-      failf(data, "Failed sending HTTP request");
 #ifdef USE_WEBSOCKETS
-    else if((data->conn->handler->protocol & (CURLPROTO_WS|CURLPROTO_WSS)) &&
-            !(data->set.connect_only))
+    if((data->conn->handler->protocol & (CURLPROTO_WS|CURLPROTO_WSS)) &&
+            !(data->set.connect_only)) {
       /* Set up the transfer for two-way since without CONNECT_ONLY set, this
          request probably wants to send data too post upgrade */
       Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, FIRSTSOCKET);
-#endif
+    }
     else
+#endif
       /* HTTP GET/HEAD download: */
-      Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, -1);
+    Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, -1);
+    break;
   }
 
   return result;
@@ -3022,12 +2986,15 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
       Curl_pgrsSetUploadSize(data, 0); /* nothing */
 
     /* req_send takes ownership of the 'req' memory on success */
-    result = Curl_http_req_send(data, &req, httpreq);
+    result = Curl_http_req_complete(data, &req, httpreq);
+    if(!result && data->req.upload_chunky)
+      result = Curl_httpchunk_add_reader(data);
+    if(!result)
+      result = Curl_req_send_hds(data, Curl_dyn_ptr(&req), Curl_dyn_len(&req));
   }
-  if(result) {
-    Curl_dyn_free(&req);
+  Curl_dyn_free(&req);
+  if(result)
     goto fail;
-  }
 
   if(data->req.writebytecount) {
     /* if a request-body has been sent off, we make sure this progress is noted

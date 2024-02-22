@@ -489,7 +489,8 @@ static CURLcode cr_in_read(struct Curl_easy *data,
 
   /* no read callback installed, simulate empty read */
   nread = 0;
-  if(data->state.fread_func && data->state.infilesize) {
+  if(data->state.fread_func && data->state.infilesize &&
+     !data->req.authneg) {
     Curl_set_in_callback(data, true);
     nread = data->state.fread_func(buf, 1, blen, data->state.in);
     Curl_set_in_callback(data, false);

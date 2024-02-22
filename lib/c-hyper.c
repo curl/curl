@@ -771,7 +771,7 @@ static CURLcode bodysend(struct Curl_easy *data,
   else {
     hyper_body *body;
     Curl_dyn_init(&req, DYN_HTTP_REQUEST);
-    result = Curl_http_req_send(data, &req, httpreq);
+    result = Curl_http_req_complete(data, &req, httpreq);
 
     if(!result)
       result = Curl_hyper_header(data, headers, Curl_dyn_ptr(&req));
