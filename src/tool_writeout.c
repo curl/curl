@@ -95,6 +95,7 @@ static const struct writeoutvar variables[] = {
   {"onerror", VAR_ONERROR, CURLINFO_NONE, NULL},
   {"proxy_ssl_verify_result", VAR_PROXY_SSL_VERIFY_RESULT,
    CURLINFO_PROXY_SSL_VERIFYRESULT, writeLong},
+  {"proxy_used", VAR_PROXY_USED, CURLINFO_USED_PROXY, writeLong},
   {"redirect_url", VAR_REDIRECT_URL, CURLINFO_REDIRECT_URL, writeString},
   {"referer", VAR_REFERER, CURLINFO_REFERER, writeString},
   {"remote_ip", VAR_PRIMARY_IP, CURLINFO_PRIMARY_IP, writeString},
