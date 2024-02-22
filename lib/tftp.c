@@ -708,6 +708,8 @@ static CURLcode tftp_tx(struct tftp_state_data *state, tftp_event_t event)
   struct SingleRequest *k = &data->req;
   size_t cb; /* Bytes currently read */
   char buffer[STRERROR_LEN];
+  char *bufptr;
+  bool eos;
 
   switch(event) {
 
@@ -771,13 +773,14 @@ static CURLcode tftp_tx(struct tftp_state_data *state, tftp_event_t event)
      * data block.
      * */
     state->sbytes = 0;
-    state->data->req.upload_fromhere = (char *)state->spacket.data + 4;
+    bufptr = (char *)state->spacket.data + 4;
     do {
-      result = Curl_fillreadbuffer(data, state->blksize - state->sbytes, &cb);
+      result = Curl_client_read(data, bufptr, state->blksize - state->sbytes,
+                                &cb, &eos);
       if(result)
         return result;
       state->sbytes += (int)cb;
-      state->data->req.upload_fromhere += cb;
+      bufptr += cb;
     } while(state->sbytes < state->blksize && cb);
 
     sbytes = sendto(state->sockfd, (void *) state->spacket.data,

@@ -125,19 +125,6 @@ CURLcode Curl_get_upload_buffer(struct Curl_easy *data)
   return CURLE_OK;
 }
 
-CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t len,
-                             size_t *pnread)
-{
-  char *buf = data->req.upload_fromhere;
-  CURLcode result;
-  bool eos;
-
-  result = Curl_client_read(data, buf, len, pnread, &eos);
-  DEBUGF(infof(data, "Curl_fillreadbuffer(len=%zu) -> %d, %zu, %d",
-         len, result, *pnread, eos));
-  return result;
-}
-
 static int data_pending(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
@@ -404,6 +391,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
   do {
     curl_off_t nbody;
     ssize_t offset = 0;
+    bool eos;
 
     if(0 != k->upload_present &&
        k->upload_present < curl_upload_refill_watermark(data) &&
@@ -444,8 +432,9 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
         }
 
         k->upload_fromhere += offset;
-        result = Curl_fillreadbuffer(data, data->set.upload_buffer_size-offset,
-                                     &fillcount);
+        result = Curl_client_read(data, k->upload_fromhere,
+                                  data->set.upload_buffer_size-offset,
+                                  &fillcount, &eos);
         k->upload_fromhere -= offset;
         if(result)
           return result;

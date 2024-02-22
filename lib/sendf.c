@@ -730,13 +730,14 @@ static CURLcode cr_lc_add(struct Curl_easy *data)
   return result;
 }
 
-static CURLcode do_init_reader_stack(struct Curl_easy *data)
+static CURLcode do_init_reader_stack(struct Curl_easy *data,
+                                     const struct Curl_crtype *crt)
 {
   CURLcode result;
 
   DEBUGASSERT(!data->req.reader_stack);
   result = Curl_creader_create(&data->req.reader_stack,
-                               data, &cr_in, CURL_CR_CLIENT);
+                               data, crt, CURL_CR_CLIENT);
   if(result)
     return result;
 
@@ -761,7 +762,7 @@ CURLcode Curl_creader_add(struct Curl_easy *data,
   struct Curl_creader **anchor = &data->req.reader_stack;
 
   if(!*anchor) {
-    result = do_init_reader_stack(data);
+    result = do_init_reader_stack(data, &cr_in);
     if(result)
       return result;
   }
@@ -786,7 +787,7 @@ CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
   DEBUGASSERT(eos);
 
   if(!data->req.reader_stack) {
-    result = do_init_reader_stack(data);
+    result = do_init_reader_stack(data, &cr_in);
     if(result)
       return result;
     DEBUGASSERT(data->req.reader_stack);
@@ -834,6 +835,77 @@ static const struct Curl_crtype cr_null = {
 CURLcode Client_reader_set_null(struct Curl_easy *data)
 {
   cl_reset_reader(data);
-  return Curl_creader_create(&data->req.reader_stack,
-                             data, &cr_null, CURL_CR_CLIENT);
+  return do_init_reader_stack(data, &cr_null);
+}
+
+CURLcode Client_reader_set_fread(struct Curl_easy *data)
+{
+  cl_reset_reader(data);
+  return do_init_reader_stack(data, &cr_in);
+}
+
+struct cr_buf_ctx {
+  struct Curl_creader super;
+  const char *buf;
+  size_t blen;
+  size_t index;
+};
+
+static CURLcode cr_buf_read(struct Curl_easy *data,
+                            struct Curl_creader *reader,
+                            char *buf, size_t blen,
+                            size_t *pnread, bool *peos)
+{
+  struct cr_buf_ctx *ctx = (struct cr_buf_ctx *)reader;
+  size_t nread = ctx->blen - ctx->index;
+
+  (void)data;
+  if(!nread || !ctx->buf) {
+    *pnread = 0;
+    *peos = TRUE;
+  }
+  else {
+    if(nread > blen)
+      nread = blen;
+    memcpy(buf, ctx->buf + ctx->index, nread);
+    *pnread = nread;
+    ctx->index += nread;
+    *peos = (ctx->index == ctx->blen);
+  }
+  return CURLE_OK;
+}
+
+static bool cr_buf_needs_rewind(struct Curl_easy *data,
+                                struct Curl_creader *reader)
+{
+  struct cr_buf_ctx *ctx = (struct cr_buf_ctx *)reader;
+  (void)data;
+  return ctx->index > 0;
+}
+
+static const struct Curl_crtype cr_buf = {
+  "cr-buf",
+  Curl_creader_def_init,
+  cr_buf_read,
+  Curl_creader_def_close,
+  cr_buf_needs_rewind,
+  sizeof(struct cr_buf_ctx)
+};
+
+CURLcode Client_reader_set_buf(struct Curl_easy *data,
+                               const char *buf, size_t blen)
+{
+  CURLcode result;
+
+  cl_reset_reader(data);
+  result = do_init_reader_stack(data, &cr_buf);
+  if(!result) {
+    struct cr_buf_ctx *ctx = (struct cr_buf_ctx *)data->req.reader_stack;
+    DEBUGASSERT(data->req.reader_stack);
+    DEBUGASSERT(data->req.reader_stack->crt == &cr_buf);
+    ctx->buf = buf;
+    ctx->blen = blen;
+    ctx->index = 0;
+  }
+  return result;
 }

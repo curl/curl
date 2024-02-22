@@ -657,48 +657,13 @@ static CURLcode request_target(struct Curl_easy *data,
   return result;
 }
 
-static int uploadpostfields(void *userdata, hyper_context *ctx,
-                            hyper_buf **chunk)
-{
-  struct Curl_easy *data = (struct Curl_easy *)userdata;
-  (void)ctx;
-  if(data->req.exp100 > EXP100_SEND_DATA) {
-    if(data->req.exp100 == EXP100_FAILED)
-      return HYPER_POLL_ERROR;
-
-    /* still waiting confirmation */
-    if(data->hyp.exp100_waker)
-      hyper_waker_free(data->hyp.exp100_waker);
-    data->hyp.exp100_waker = hyper_context_waker(ctx);
-    return HYPER_POLL_PENDING;
-  }
-  if(data->req.upload_done)
-    *chunk = NULL; /* nothing more to deliver */
-  else {
-    /* send everything off in a single go */
-    hyper_buf *copy = hyper_buf_copy(data->set.postfields,
-                                     (size_t)data->req.p.http->postsize);
-    if(copy)
-      *chunk = copy;
-    else {
-      data->state.hresult = CURLE_OUT_OF_MEMORY;
-      return HYPER_POLL_ERROR;
-    }
-    /* increasing the writebytecount here is a little premature but we
-       don't know exactly when the body is sent */
-    data->req.writebytecount += (size_t)data->req.p.http->postsize;
-    Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
-    data->req.upload_done = TRUE;
-  }
-  return HYPER_POLL_READY;
-}
-
 static int uploadstreamed(void *userdata, hyper_context *ctx,
                           hyper_buf **chunk)
 {
   size_t fillcount;
   struct Curl_easy *data = (struct Curl_easy *)userdata;
   CURLcode result;
+  bool eos;
   (void)ctx;
 
   if(data->req.exp100 > EXP100_SEND_DATA) {
@@ -712,32 +677,15 @@ static int uploadstreamed(void *userdata, hyper_context *ctx,
     return HYPER_POLL_PENDING;
   }
 
-  if(data->req.upload_chunky && data->req.authneg) {
-    fillcount = 0;
-    data->req.upload_chunky = FALSE;
-    result = CURLE_OK;
-  }
-  else {
-    result = Curl_fillreadbuffer(data, data->set.upload_buffer_size,
-                                 &fillcount);
-  }
+  result = Curl_client_read(data, data->state.ulbuf,
+                            data->set.upload_buffer_size,
+                            &fillcount, &eos);
   if(result) {
     data->state.hresult = result;
     return HYPER_POLL_ERROR;
   }
-  if(!fillcount) {
-    if((data->req.keepon & KEEP_SEND_PAUSE) != KEEP_SEND_PAUSE)
-      /* done! */
-      *chunk = NULL;
-    else {
-      /* paused, save a waker */
-      if(data->hyp.send_body_waker)
-        hyper_waker_free(data->hyp.send_body_waker);
-      data->hyp.send_body_waker = hyper_context_waker(ctx);
-      return HYPER_POLL_PENDING;
-    }
-  }
-  else {
+
+  if(fillcount) {
     hyper_buf *copy = hyper_buf_copy((uint8_t *)data->state.ulbuf, fillcount);
     if(copy)
       *chunk = copy;
@@ -749,8 +697,19 @@ static int uploadstreamed(void *userdata, hyper_context *ctx,
        don't know exactly when the body is sent */
     data->req.writebytecount += fillcount;
     Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
+    return HYPER_POLL_READY;
   }
-  return HYPER_POLL_READY;
+  else if(eos) {
+    *chunk = NULL;
+    return HYPER_POLL_READY;
+  }
+  else {
+    /* paused, save a waker */
+    if(data->hyp.send_body_waker)
+      hyper_waker_free(data->hyp.send_body_waker);
+    data->hyp.send_body_waker = hyper_context_waker(ctx);
+    return HYPER_POLL_PENDING;
+  }
 }
 
 /*
@@ -780,18 +739,15 @@ static CURLcode bodysend(struct Curl_easy *data,
 
     body = hyper_body_new();
     hyper_body_set_userdata(body, data);
-    if(data->set.postfields)
-      hyper_body_set_data_func(body, uploadpostfields);
-    else {
-      result = Curl_get_upload_buffer(data);
-      if(result) {
-        hyper_body_free(body);
-        return result;
-      }
-      /* init the "upload from here" pointer */
-      data->req.upload_fromhere = data->state.ulbuf;
-      hyper_body_set_data_func(body, uploadstreamed);
+    result = Curl_get_upload_buffer(data);
+    if(result) {
+      hyper_body_free(body);
+      return result;
     }
+    /* init the "upload from here" pointer */
+    data->req.upload_fromhere = data->state.ulbuf;
+    hyper_body_set_data_func(body, uploadstreamed);
+
     if(HYPERE_OK != hyper_request_set_body(hyperreq, body)) {
       /* fail */
       result = CURLE_OUT_OF_MEMORY;

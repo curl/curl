@@ -1174,73 +1174,6 @@ static bool http_should_fail(struct Curl_easy *data)
   return data->state.authproblem;
 }
 
-#ifndef USE_HYPER
-/*
- * readmoredata() is a "fread() emulation" to provide POST and/or request
- * data. It is used when a huge POST is to be made and the entire chunk wasn't
- * sent in the first send(). This function will then be called from the
- * transfer.c loop when more data is to be sent to the peer.
- *
- * Returns the amount of bytes it filled the buffer with.
- */
-static size_t readmoredata(char *buffer,
-                           size_t size,
-                           size_t nitems,
-                           void *userp)
-{
-  struct HTTP *http = (struct HTTP *)userp;
-  struct Curl_easy *data = http->backup.data;
-  size_t fullsize = size * nitems;
-
-  if(!http->postsize)
-    /* nothing to return */
-    return 0;
-
-  /* make sure that an HTTP request is never sent away chunked! */
-  data->req.forbidchunk = (http->sending == HTTPSEND_REQUEST)?TRUE:FALSE;
-
-  if(data->set.max_send_speed &&
-     (data->set.max_send_speed < (curl_off_t)fullsize) &&
-     (data->set.max_send_speed < http->postsize))
-    /* speed limit */
-    fullsize = (size_t)data->set.max_send_speed;
-
-  else if(http->postsize <= (curl_off_t)fullsize) {
-    memcpy(buffer, http->postdata, (size_t)http->postsize);
-    fullsize = (size_t)http->postsize;
-
-    if(http->backup.postsize) {
-      /* move backup data into focus and continue on that */
-      http->postdata = http->backup.postdata;
-      http->postsize = http->backup.postsize;
-      data->state.fread_func = http->backup.fread_func;
-      data->state.in = http->backup.fread_in;
-
-      http->sending++; /* move one step up */
-
-      http->backup.postsize = 0;
-    }
-    else
-      http->postsize = 0;
-
-    return fullsize;
-  }
-
-  memcpy(buffer, http->postdata, fullsize);
-  http->postdata += fullsize;
-  http->postsize -= fullsize;
-
-  return fullsize;
-}
-
-#else /* !USE_HYPER */
-  /* In hyper, this is an ugly NOP */
-#define buffer_send(a,b,c,d,e) CURLE_OK
-
-#endif /* !USE_HYPER(else) */
-
-
-
 /*
  * Curl_compareheader()
  *
@@ -2234,25 +2167,24 @@ CURLcode Curl_http_req_complete(struct Curl_easy *data,
       result = Curl_dyn_addf(r, "Content-Length: %" CURL_FORMAT_CURL_OFF_T
                              "\r\n", http->postsize);
       if(result)
-        return result;
+        goto out;
     }
 
     result = addexpect(data, r);
     if(result)
-      return result;
+      goto out;
 
     /* end of headers */
     result = Curl_dyn_addn(r, STRCONST("\r\n"));
     if(result)
-      return result;
+      goto out;
 
     /* set the upload size to the progress meter */
     Curl_pgrsSetUploadSize(data, http->postsize);
-
-    /* prepare for transfer */
-    Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, FIRSTSOCKET);
-    if(result)
-      return result;
+    if(!http->postsize)
+      result = Client_reader_set_null(data);
+    else
+      result = Client_reader_set_fread(data);
     break;
 
 #if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
@@ -2282,7 +2214,7 @@ CURLcode Curl_http_req_complete(struct Curl_easy *data,
                              "Content-Length: %" CURL_FORMAT_CURL_OFF_T
                              "\r\n", http->postsize);
       if(result)
-        return result;
+        goto out;
     }
 
 #ifndef CURL_DISABLE_MIME
@@ -2293,30 +2225,32 @@ CURLcode Curl_http_req_complete(struct Curl_easy *data,
       for(hdr = data->state.mimepost->curlheaders; hdr; hdr = hdr->next) {
         result = Curl_dyn_addf(r, "%s\r\n", hdr->data);
         if(result)
-          return result;
+          goto out;
       }
     }
 #endif
 
     result = addexpect(data, r);
     if(result)
-      return result;
+      goto out;
 
     /* make the request end in a true CRLF */
     result = Curl_dyn_addn(r, STRCONST("\r\n"));
     if(result)
-      return result;
+      goto out;
 
     /* set the upload size to the progress meter */
     Curl_pgrsSetUploadSize(data, http->postsize);
-
-    /* Read from mime structure. */
-    data->state.fread_func = (curl_read_callback) Curl_mime_read;
-    data->state.in = (void *) data->state.mimepost;
+    if(!http->postsize)
+      result = Client_reader_set_null(data);
+    else {
+      /* Read from mime structure. We could do a special client reader
+       * for this, but replacing the callback seems to work fine. */
+      data->state.fread_func = (curl_read_callback) Curl_mime_read;
+      data->state.in = (void *) data->state.mimepost;
+      result = Client_reader_set_fread(data);
+    }
     http->sending = HTTPSEND_BODY;
-
-    /* prepare for transfer */
-    Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, FIRSTSOCKET);
     break;
 #endif
   case HTTPREQ_POST:
@@ -2339,40 +2273,34 @@ CURLcode Curl_http_req_complete(struct Curl_easy *data,
       result = Curl_dyn_addf(r, "Content-Length: %" CURL_FORMAT_CURL_OFF_T
                              "\r\n", http->postsize);
       if(result)
-        return result;
+        goto out;
     }
 
     if(!Curl_checkheaders(data, STRCONST("Content-Type"))) {
       result = Curl_dyn_addn(r, STRCONST("Content-Type: application/"
                                          "x-www-form-urlencoded\r\n"));
       if(result)
-        return result;
+        goto out;
     }
 
     result = addexpect(data, r);
     if(result)
-      return result;
+      goto out;
 
-#ifndef USE_HYPER
-    /* With Hyper the body is always passed on separately */
-    if(data->set.postfields) {
-      http->postdata = data->set.postfields;
-      http->sending = HTTPSEND_BODY;
-      http->backup.data = data;
-      data->state.fread_func = (curl_read_callback)readmoredata;
-      data->state.in = (void *)http;
+    result = Curl_dyn_addn(r, STRCONST("\r\n"));
+    if(result)
+      goto out;
 
-      /* set the upload size to the progress meter */
-      Curl_pgrsSetUploadSize(data, http->postsize);
-
-      /* end of headers! */
-      result = Curl_dyn_addn(r, STRCONST("\r\n"));
-      if(result)
-        return result;
+    if(!http->postsize) {
+      Curl_pgrsSetUploadSize(data, -1);
+      result = Client_reader_set_null(data);
     }
-    else
-#endif
-    {
+    else if(data->set.postfields) {  /* we have the bytes */
+      Curl_pgrsSetUploadSize(data, http->postsize);
+      result = Client_reader_set_buf(data, data->set.postfields,
+                                     (size_t)http->postsize);
+    }
+    else {
        /* end of headers! */
       result = Curl_dyn_addn(r, STRCONST("\r\n"));
       if(result)
@@ -2397,21 +2325,22 @@ CURLcode Curl_http_req_complete(struct Curl_easy *data,
           http->postdata = (char *)&http->postdata;
       }
     }
-    Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, FIRSTSOCKET);
+    http->sending = HTTPSEND_BODY;
     break;
 
   default:
+    /* HTTP GET/HEAD download, has no body, needs no Content-Length */
     result = Curl_dyn_addn(r, STRCONST("\r\n"));
-    if(result)
-      return result;
-    result = Client_reader_set_null(data);
-    if(result)
-      return result;
-      /* HTTP GET/HEAD download: */
-    Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, FIRSTSOCKET);
+    if(!result)
+      result = Client_reader_set_null(data);
     break;
   }
 
+out:
+  if(!result) {
+    /* setup variables for the upcoming transfer */
+    Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, FIRSTSOCKET);
+  }
   return result;
 }
 

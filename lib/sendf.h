@@ -267,4 +267,15 @@ bool Curl_client_read_needs_rewind(struct Curl_easy *data);
  */
 CURLcode Client_reader_set_null(struct Curl_easy *data);
 
+/**
+ * Set the client reader the reads from fread callback.
+ */
+CURLcode Client_reader_set_fread(struct Curl_easy *data);
+
+/**
+ * Set the client reader the reads from the supplied buf (NOT COPIED).
+ */
+CURLcode Client_reader_set_buf(struct Curl_easy *data,
+                               const char *buf, size_t blen);
+
 #endif /* HEADER_CURL_SENDF_H */
