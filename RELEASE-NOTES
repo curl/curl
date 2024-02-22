@@ -4,17 +4,23 @@ curl and libcurl 8.6.1
  Command line options:         258
  curl_easy_setopt() options:   304
  Public functions in libcurl:  93
- Contributors:                 3094
+ Contributors:                 3095
 
 This release includes the following changes:
 
  o configure: add --disable-docs flag [16]
+ o CURLINFO_USED_PROXY: return bool whether the proxy was used [24]
+ o digest: support SHA-512/256
+ o DoH: add trace configuration [61]
+ o write-out: add '%{proxy_used}'
 
 This release includes the following bugfixes:
 
  o ALTSVC.md: correct a typo [14]
  o asyn-thread: use wakeup_close to close the read descriptor [1]
  o badwords: use hostname, not host name [46]
+ o BINDINGS: add mcurl, the python binding [67]
+ o cd2nroff: remove backticks from titles
  o checksrc.pl: fix handling .checksrc with CRLF [43]
  o cmake: add warning for using TLS libraries without 1.3 support [25]
  o cmake: fix function description in comment [47]
@@ -27,15 +33,15 @@ This release includes the following bugfixes:
  o cookie.md: provide an example sending a fixed cookie [13]
  o curl: exit on config file parser errors [40]
  o curl: when allocating variables, add the name into the struct [37]
+ o curl_setup.h: add curl_uint64_t internal type
  o CURLOPT_POSTQUOTE.md: fix typo [36]
  o CURLOPT_WRITEFUNCTION.md: typo fix [41]
  o dist: make sure the http tests are in the tarball [29]
  o docs: add missing slashes to SChannel client certificate documentation [11]
- o docs: add mk-ca-bundle.1 to dist [49]
  o docs: add necessary setup for nghttp3 [51]
+ o docs: dist curl*.1 and install without perl [64]
  o docs: make curldown do angle brackets like markdown [54]
  o docs: make sure curl.1 is included in dist tarballs [35]
- o docs: remove `mk-ca-bundle.1` from `man_MANS` [21]
  o file: use xfer buf for file:// transfers [23]
  o form-string.md: correct the example [4]
  o ftp: do lineend conversions in client writer [32]
@@ -49,12 +55,15 @@ This release includes the following bugfixes:
  o https-proxy: use IP address and cert with ip in alt names [50]
  o lib582: remove code causing warning that is never run [38]
  o lib: convert Curl_get_line to use dynbuf [42]
+ o libcurl-docs: cleanups
  o libcurl-security.md: Active FTP passes on the local IP address [6]
+ o MANUAL.md: fix typo [66]
  o mbedtls: fix building when MBEDTLS_X509_REMOVE_INFO flag is defined [27]
  o mbedtls: use mbedtls_ssl_conf_{min|max}_tls_version [59]
  o md4: include strdup.h for the memdup proto [10]
  o multi: add xfer_buf to multi handle [30]
  o ntml_wb: fix buffer type typo [2]
+ o OpenSSL QUIC: adapt to v3.3.x [65]
  o openssl-quic: check on Windows that socket conv to int is possible [8]
  o OS400: avoid using awk in the build scripts [20]
  o proxy1.0.md: fix example [15]
@@ -70,6 +79,7 @@ This release includes the following bugfixes:
  o version: allow building with ancient libpsl [52]
  o vtls: fix tls proxy peer verification [55]
  o vtls: revert "receive max buffer" + add test case [39]
+ o websocket: fix curl_ws_recv() [62]
  o write-out.md: clarify error handling details [31]
 
 This release includes the following known bugs:
@@ -90,10 +100,11 @@ advice from friends like these:
   edmcln on github, Erik Schnetter, Evgeny Grin (Karlson2k), Fabian Vogt,
   Faraz Fallahi, Harry Sintonen, HsiehYuho on github, Jan Macku, Jiawen Geng,
   Joel Depooter, Jon Rumsey, Karthikdasari0423, Konstantin Vlasov,
-  Lars Kellogg-Stedman, LeeRiva, Lukáš Zaoral, Michael Kaufmann,
-  Michał Antoniak, Patrick Monnerat, Peter Krefting, Ray Satiro,
-  Richard Levitte, Ryan Carsten Schmidt, Scott Mutter, Sergey Bronnikov,
-  Stefan Eissing, Viktor Szakats
+  Lars Kellogg-Stedman, LeeRiva, Lukáš Zaoral, Michael Forney,
+  Michael Kaufmann, Michał Antoniak, Patrick Monnerat, Peter Krefting,
+  Ramiro Garcia, Ray Satiro, Richard Levitte, Ryan Carsten Schmidt,
+  Scott Mutter, Sergey Bronnikov, Stefan Eissing, Viktor Szakats
+  (38 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -120,6 +131,7 @@ References to bug reports and discussions on issues:
  [21] = https://curl.se/bug/?i=12843
  [22] = https://curl.se/bug/?i=12937
  [23] = https://curl.se/bug/?i=12750
+ [24] = https://curl.se/bug/?i=12719
  [25] = https://curl.se/bug/?i=12900
  [26] = https://curl.se/bug/?i=12900
  [27] = https://curl.se/bug/?i=12904
@@ -155,3 +167,9 @@ References to bug reports and discussions on issues:
  [57] = https://curl.se/bug/?i=12894
  [59] = https://curl.se/bug/?i=12905
  [60] = https://curl.se/bug/?i=12903
+ [61] = https://curl.se/bug/?i=12411
+ [62] = https://curl.se/bug/?i=12945
+ [64] = https://curl.se/bug/?i=12921
+ [65] = https://curl.se/bug/?i=12933
+ [66] = https://curl.se/bug/?i=12965
+ [67] = https://curl.se/bug/?i=12962
