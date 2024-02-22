@@ -1167,6 +1167,7 @@ struct PureInfo {
   CURLproxycode pxcode;
   BIT(timecond);  /* set to TRUE if the time condition didn't match, which
                      thus made the document NOT get fetched */
+  BIT(used_proxy); /* the transfer used a proxy */
 };
 
 
