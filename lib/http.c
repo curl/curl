@@ -543,7 +543,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
        closure so we can safely do the rewind right now */
   }
 
-  if(bytessent) {
+  if(Curl_client_read_needs_rewind(data)) {
     /* mark for rewind since if we already sent something */
     data->state.rewindbeforesend = TRUE;
     infof(data, "Please rewind output before next send");
@@ -2250,8 +2250,7 @@ CURLcode Curl_http_req_complete(struct Curl_easy *data,
     Curl_pgrsSetUploadSize(data, http->postsize);
 
     /* prepare for transfer */
-    Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE,
-                    http->postsize?FIRSTSOCKET:-1);
+    Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, FIRSTSOCKET);
     if(result)
       return result;
     break;
@@ -2317,8 +2316,7 @@ CURLcode Curl_http_req_complete(struct Curl_easy *data,
     http->sending = HTTPSEND_BODY;
 
     /* prepare for transfer */
-    Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE,
-                    http->postsize?FIRSTSOCKET:-1);
+    Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, FIRSTSOCKET);
     break;
 #endif
   case HTTPREQ_POST:
@@ -2399,26 +2397,18 @@ CURLcode Curl_http_req_complete(struct Curl_easy *data,
           http->postdata = (char *)&http->postdata;
       }
     }
-    Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE,
-                    http->postdata?FIRSTSOCKET:-1);
+    Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, FIRSTSOCKET);
     break;
 
   default:
     result = Curl_dyn_addn(r, STRCONST("\r\n"));
     if(result)
       return result;
-
-#ifdef USE_WEBSOCKETS
-    if((data->conn->handler->protocol & (CURLPROTO_WS|CURLPROTO_WSS)) &&
-            !(data->set.connect_only)) {
-      /* Set up the transfer for two-way since without CONNECT_ONLY set, this
-         request probably wants to send data too post upgrade */
-      Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, FIRSTSOCKET);
-    }
-    else
-#endif
+    result = Client_reader_set_null(data);
+    if(result)
+      return result;
       /* HTTP GET/HEAD download: */
-    Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, -1);
+    Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, FIRSTSOCKET);
     break;
   }
 

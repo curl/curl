@@ -90,25 +90,35 @@ CURLcode Curl_client_write(struct Curl_easy *data,
   return Curl_cwriter_write(data, data->req.writer_stack, type, buf, blen);
 }
 
-void Curl_client_reset(struct Curl_easy *data)
+static void cl_reset_writer(struct Curl_easy *data)
 {
   struct Curl_cwriter *writer = data->req.writer_stack;
-  struct Curl_creader *reader = data->req.reader_stack;
-  size_t i;
-
   while(writer) {
     data->req.writer_stack = writer->next;
     writer->cwt->do_close(data, writer);
     free(writer);
     writer = data->req.writer_stack;
   }
+}
 
+static void cl_reset_reader(struct Curl_easy *data)
+{
+  struct Curl_creader *reader = data->req.reader_stack;
   while(reader) {
     data->req.reader_stack = reader->next;
     reader->crt->do_close(data, reader);
     free(reader);
     reader = data->req.reader_stack;
   }
+}
+
+void Curl_client_reset(struct Curl_easy *data)
+{
+  size_t i;
+
+  DEBUGF(infof(data, "Curl_client_reset()"));
+  cl_reset_reader(data);
+  cl_reset_writer(data);
 
   data->req.bytecount = 0;
   data->req.headerline = 0;
@@ -459,11 +469,20 @@ void Curl_creader_def_close(struct Curl_easy *data,
   (void)reader;
 }
 
+bool Curl_creader_def_needs_rewind(struct Curl_easy *data,
+                                   struct Curl_creader *reader)
+{
+  (void)data;
+  (void)reader;
+  return FALSE;
+}
+
 struct cr_in_ctx {
   struct Curl_creader super;
   CURLcode error_result;
   BIT(seen_eos);
   BIT(errored);
+  BIT(has_used_cb);
 };
 
 /* Real client reader to installed client callbacks. */
@@ -494,6 +513,7 @@ static CURLcode cr_in_read(struct Curl_easy *data,
     Curl_set_in_callback(data, true);
     nread = data->state.fread_func(buf, 1, blen, data->state.in);
     Curl_set_in_callback(data, false);
+    ctx->has_used_cb = TRUE;
   }
 
   switch(nread) {
@@ -544,11 +564,20 @@ static CURLcode cr_in_read(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+static bool cr_in_needs_rewind(struct Curl_easy *data,
+                               struct Curl_creader *reader)
+{
+  struct cr_in_ctx *ctx = (struct cr_in_ctx *)reader;
+  (void)data;
+  return ctx->has_used_cb;
+}
+
 static const struct Curl_crtype cr_in = {
   "cr-in",
   Curl_creader_def_init,
   cr_in_read,
   Curl_creader_def_close,
+  cr_in_needs_rewind,
   sizeof(struct cr_in_ctx)
 };
 
@@ -682,6 +711,7 @@ static const struct Curl_crtype cr_lc = {
   cr_lc_init,
   cr_lc_read,
   cr_lc_close,
+  Curl_creader_def_needs_rewind,
   sizeof(struct cr_lc_ctx)
 };
 
@@ -765,4 +795,45 @@ CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
   result = Curl_creader_read(data, data->req.reader_stack, buf, blen,
                              nread, eos);
   return result;
+}
+
+bool Curl_client_read_needs_rewind(struct Curl_easy *data)
+{
+  struct Curl_creader *reader = data->req.reader_stack;
+  while(reader) {
+    if(reader->crt->needs_rewind(data, reader))
+      return TRUE;
+    reader = reader->next;
+  }
+  return FALSE;
+}
+
+static CURLcode cr_null_read(struct Curl_easy *data,
+                             struct Curl_creader *reader,
+                             char *buf, size_t blen,
+                             size_t *pnread, bool *peos)
+{
+  (void)data;
+  (void)reader;
+  (void)buf;
+  (void)blen;
+  *pnread = 0;
+  *peos = TRUE;
+  return CURLE_OK;
+}
+
+static const struct Curl_crtype cr_null = {
+  "cr-null",
+  Curl_creader_def_init,
+  cr_null_read,
+  Curl_creader_def_close,
+  Curl_creader_def_needs_rewind,
+  sizeof(struct Curl_creader)
+};
+
+CURLcode Client_reader_set_null(struct Curl_easy *data)
+{
+  cl_reset_reader(data);
+  return Curl_creader_create(&data->req.reader_stack,
+                             data, &cr_null, CURL_CR_CLIENT);
 }

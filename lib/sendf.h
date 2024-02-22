@@ -178,13 +178,11 @@ void Curl_cwriter_def_close(struct Curl_easy *data,
 /* Client Reader Type, provides the implementation */
 struct Curl_crtype {
   const char *name;        /* writer name. */
-  CURLcode (*do_init)(struct Curl_easy *data,
-                      struct Curl_creader *writer);
-  CURLcode (*do_read)(struct Curl_easy *data,
-                      struct Curl_creader *reader,
+  CURLcode (*do_init)(struct Curl_easy *data, struct Curl_creader *writer);
+  CURLcode (*do_read)(struct Curl_easy *data, struct Curl_creader *reader,
                       char *buf, size_t blen, size_t *nread, bool *eos);
-  void (*do_close)(struct Curl_easy *data,
-                   struct Curl_creader *reader);
+  void (*do_close)(struct Curl_easy *data, struct Curl_creader *reader);
+  bool (*needs_rewind)(struct Curl_easy *data, struct Curl_creader *reader);
   size_t creader_size;  /* sizeof() allocated struct Curl_creader */
 };
 
@@ -212,6 +210,8 @@ CURLcode Curl_creader_def_init(struct Curl_easy *data,
                                struct Curl_creader *reader);
 void Curl_creader_def_close(struct Curl_easy *data,
                             struct Curl_creader *reader);
+bool Curl_creader_def_needs_rewind(struct Curl_easy *data,
+                                   struct Curl_creader *reader);
 
 /**
  * Convenience method for calling `reader->do_read()` that
@@ -256,5 +256,15 @@ CURLcode Curl_creader_add(struct Curl_easy *data,
 CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
                           size_t *nread, bool *eos) WARN_UNUSED_RESULT;
 
+/**
+ * TRUE iff client reader needs rewing before it can be used for
+ * a retry request.
+ */
+bool Curl_client_read_needs_rewind(struct Curl_easy *data);
+
+/**
+ * Set the client reader to provide 0 bytes, immediate EOS.
+ */
+CURLcode Client_reader_set_null(struct Curl_easy *data);
 
 #endif /* HEADER_CURL_SENDF_H */

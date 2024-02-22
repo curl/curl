@@ -1290,8 +1290,7 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
                                 transferred! */
 
 
-    if((conn->handler->protocol&PROTO_FAMILY_HTTP) &&
-       data->req.writebytecount) {
+    if(Curl_client_read_needs_rewind(data)) {
       data->state.rewindbeforesend = TRUE;
       infof(data, "state.rewindbeforesend = TRUE");
     }

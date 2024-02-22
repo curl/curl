@@ -630,6 +630,7 @@ const struct Curl_crtype Curl_httpchunk_encoder = {
   cr_chunked_init,
   cr_chunked_read,
   cr_chunked_close,
+  Curl_creader_def_needs_rewind,
   sizeof(struct chunked_reader)
 };
 
