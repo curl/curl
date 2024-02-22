@@ -48,6 +48,9 @@ their bounty from the [Internet Bug Bounty](https://hackerone.com/ibb).
 Bounties need to be requested within twelve months from the publication of the
 vulnerability.
 
+The curl security team reserves themselves the right to deny or allow bug
+bounty payouts on its own discretion. There is no appeals process.
+
 ## Product vulnerabilities only
 
 This bug bounty only concerns the curl and libcurl products and thus their
