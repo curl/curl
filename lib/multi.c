@@ -3243,7 +3243,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
 
         if(data->conn && !(data->conn->handler->flags & PROTOPT_DIRLOCK))
           /* set socket event bitmask if they're not locked */
-          data->state.select_bits = (unsigned char)ev_bitmask;
+          data->state.select_bits |= (unsigned char)ev_bitmask;
 
         Curl_expire(data, 0, EXPIRE_RUN_NOW);
       }
