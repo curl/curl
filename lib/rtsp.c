@@ -500,13 +500,24 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     if(data->state.upload) {
       putsize = data->state.infilesize;
       data->state.httpreq = HTTPREQ_PUT;
-
+      result = Client_reader_set_fread(data, putsize);
+      if(result)
+        return result;
     }
     else {
       postsize = (data->state.infilesize != -1)?
         data->state.infilesize:
         (data->set.postfields? (curl_off_t)strlen(data->set.postfields):0);
       data->state.httpreq = HTTPREQ_POST;
+      if(postsize > 0 && data->set.postfields)
+        result = Client_reader_set_buf(data, data->set.postfields,
+                                       (size_t)postsize);
+      else if(!postsize)
+        result = Client_reader_set_null(data);
+      else
+        result = Client_reader_set_fread(data, postsize);
+      if(result)
+        return result;
     }
 
     if(putsize > 0 || postsize > 0) {
@@ -550,6 +561,11 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
       data->req.no_body = TRUE;
     }
   }
+  else {
+    result = Client_reader_set_null(data);
+    if(result)
+      return result;
+  }
 
   /* RTSP never allows chunked transfer */
   data->req.forbidchunk = TRUE;
@@ -557,13 +573,6 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   result = Curl_dyn_addn(&req_buffer, STRCONST("\r\n"));
   if(result)
     return result;
-
-  if(postsize > 0) {
-    result = Client_reader_set_buf(data, data->set.postfields,
-                                   (size_t)postsize);
-    if(result)
-      return result;
-  }
 
   /* issue the request */
   result = Curl_req_send(data, &req_buffer);
@@ -573,7 +582,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     return result;
   }
 
-  Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, putsize?FIRSTSOCKET:-1);
+  Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, FIRSTSOCKET);
 
   /* Increment the CSeq on success */
   data->state.rtsp_next_client_CSeq++;
