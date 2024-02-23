@@ -40,7 +40,7 @@ struct Curl_creader {
 };
 ```
 
-`Curl_creader` is a reader instance with a `next`pointer to form the chain. It as a type `crt`which provides the implementation. The main callback is `do_read()` which provides the data to the caller. The others are for setup and teardown. `needs_rewind()` is explained further below.
+`Curl_creader` is a reader instance with a `next`pointer to form the chain. It as a type `crt`which provides the implementation. The main callback is `do_read()` which provides the data to the caller. The others are for setup and tear down. `needs_rewind()` is explained further below.
 
 ## Phases and Ordering
 
@@ -58,21 +58,21 @@ typedef enum {
 
 If a reader for phase `PROTOCOL` is added to the chain, it is always added *after* any `NET` or `TRANSFER_ENCODE` readers and *before* and `CONTENT_ENCODE` and `CLIENT` readers. If there is already a reader for the same phase, the new reader will be added before the existing one(s).
 
-### Example: 'chunked' reader
+### Example: `chunked` reader
 
 In `http_chunks.c` a client reader for chunked uploads is implemented. This one operates at phase `CURL_CR_TRANSFER_ENCODE`. Any data coming from the reader "below" will have the HTTP/1.1 chunk handling applied and returned to the caller.
 
 When this reader sees an `eos` from below, it generates the terminal chunk, adding trailers if provided by the application. When that last chunk is fully returned, it also sets `eos` to the caller.
 
-### Example: 'lineconv' reader
+### Example: `lineconv` reader
 
 In `sendf.c` a client reader that does line-end conversions is implemented. It operates at `CURL_CR_CONTENT_ENCODE` and converts any "\n" to "\r\n". This is used for FTP ASCII uploads or when the general `crlf` options has been set.
 
-### Example: 'null' reader
+### Example: `null` reader
 
 Implemented in `sendf.c` for phase `CURL_CR_CLIENT`, this reader has the simple job of providing transfer bytes of length 0 to the caller, immediately indicating an `eos`. This reader is installed by HTTP for all GET/HEAD requests and when authentication is being negotiated.
 
-### Example: 'buf' reader
+### Example: `buf` reader
 
 Implemented in `sendf.c` for phase `CURL_CR_CLIENT`, this reader get a buffer pointer and a length and will provide exactly these bytes. This one is used in HTTP for sending `postfields` provided by the application.
 
