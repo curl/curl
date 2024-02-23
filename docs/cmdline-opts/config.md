@@ -28,9 +28,9 @@ is specified with one or two dashes, there can be no colon or equals character
 between the option and its parameter.
 
 If the parameter contains whitespace or starts with a colon (:) or equals sign
-(=), it must be specified enclosed within double quotes ("). Within double
-quotes the following escape sequences are available: \\, \", \t, \n, \r and
-\v. A backslash preceding any other letter is ignored.
+(=), it must be specified enclosed within double quotes ("like this"). Within
+double quotes the following escape sequences are available: \\, \", \t, \n, \r
+and \v. A backslash preceding any other letter is ignored.
 
 If the first non-blank column of a config line is a '#' character, that line
 is treated as a comment.

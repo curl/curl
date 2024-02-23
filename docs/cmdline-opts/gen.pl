@@ -262,24 +262,8 @@ sub render {
         $d =~ s/`%VERSION`/$version/g;
         $d =~ s/`%GLOBALS`/$globals/g;
 
-        # convert single backslahes to doubles
-        $d =~ s/\\/\\\\/g;
-
         # convert backticks to double quotes
         $d =~ s/\`/\"/g;
-
-        if(!$quote && $d =~ /--/) {
-            # scan for options in longest-names first order
-            for my $k (sort {length($b) <=> length($a)} keys %optlong) {
-                # --tlsv1 is complicated since --tlsv1.2 etc are also
-                # acceptable options!
-                if(($k eq "tlsv1") && ($d =~ /--tlsv1\.[0-9]\\f/)) {
-                    next;
-                }
-                my $l = manpageify($k);
-                $d =~ s/\-\-$k([^a-z0-9-])/$l$1/g;
-            }
-        }
 
         if($d =~ /\(Added in ([0-9.]+)\)/i) {
             my $ver = $1;
@@ -300,7 +284,23 @@ sub render {
             }
         }
         # convert backslash-'<' or '> to just the second character
-        $d =~ s/\\([<<])/$1/g;
+        $d =~ s/\\([><])/$1/g;
+        # convert single backslash to double-backslash
+        $d =~ s/\\/\\\\/g;
+
+        if(!$quote && $d =~ /--/) {
+            # scan for options in longest-names first order
+            for my $k (sort {length($b) <=> length($a)} keys %optlong) {
+                # --tlsv1 is complicated since --tlsv1.2 etc are also
+                # acceptable options!
+                if(($k eq "tlsv1") && ($d =~ /--tlsv1\.[0-9]\\f/)) {
+                    next;
+                }
+                my $l = manpageify($k);
+                $d =~ s/--$k([^a-z0-9-])/$l$1/g;
+            }
+        }
+
         # quote minuses in the output
         $d =~ s/([^\\])-/$1\\-/g;
         # replace single quotes
