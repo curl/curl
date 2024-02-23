@@ -19,7 +19,7 @@ CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
 ```
 The arguments are the transfer to read for, a buffer to hold the read data, its length, the actual number of bytes placed into the buffer and the `eos` flag indicating that no more data will be available. The `eos` flag may be set for a read amount, if that amount was the last. That way curl can avoid to read an additional time.
 
-The implementation of `Curl_client_read()` uses a chain of *client reader* instances to get the data. This is very similar to the design of *client writers*. The chain of readers allows processing of the data to send.
+The implementation of `Curl_client_read()` uses a chain of *client reader* instances to get the data. This is similar to the design of *client writers*. The chain of readers allows processing of the data to send.
 
 The definition of a reader is:
 
