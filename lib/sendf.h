@@ -270,7 +270,7 @@ CURLcode Client_reader_set_null(struct Curl_easy *data);
 /**
  * Set the client reader the reads from fread callback.
  */
-CURLcode Client_reader_set_fread(struct Curl_easy *data);
+CURLcode Client_reader_set_fread(struct Curl_easy *data, curl_off_t len);
 
 /**
  * Set the client reader the reads from the supplied buf (NOT COPIED).

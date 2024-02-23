@@ -559,15 +559,14 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     return result;
 
   if(postsize > 0) {
-    result = Curl_dyn_addn(&req_buffer, data->set.postfields,
-                           (size_t)postsize);
+    result = Client_reader_set_buf(data, data->set.postfields,
+                                   (size_t)postsize);
     if(result)
       return result;
   }
 
   /* issue the request */
-  result = Curl_req_send_hds(data, Curl_dyn_ptr(&req_buffer),
-                             Curl_dyn_len(&req_buffer));
+  result = Curl_req_send(data, &req_buffer);
   Curl_dyn_free(&req_buffer);
   if(result) {
     failf(data, "Failed sending RTSP request");

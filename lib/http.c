@@ -2184,7 +2184,7 @@ CURLcode Curl_http_req_complete(struct Curl_easy *data,
     if(!http->postsize)
       result = Client_reader_set_null(data);
     else
-      result = Client_reader_set_fread(data);
+      result = Client_reader_set_fread(data, data->state.infilesize);
     break;
 
 #if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
@@ -2194,6 +2194,8 @@ CURLcode Curl_http_req_complete(struct Curl_easy *data,
     if(data->req.authneg) {
       /* nothing to post! */
       result = Curl_dyn_addn(r, STRCONST("Content-Length: 0\r\n\r\n"));
+      if(!result)
+        result = Client_reader_set_null(data);
       if(result)
         return result;
       /* setup variables for the upcoming transfer */
@@ -2248,7 +2250,7 @@ CURLcode Curl_http_req_complete(struct Curl_easy *data,
        * for this, but replacing the callback seems to work fine. */
       data->state.fread_func = (curl_read_callback) Curl_mime_read;
       data->state.in = (void *) data->state.mimepost;
-      result = Client_reader_set_fread(data);
+      result = Client_reader_set_fread(data, data->state.infilesize);
     }
     http->sending = HTTPSEND_BODY;
     break;
@@ -2300,30 +2302,9 @@ CURLcode Curl_http_req_complete(struct Curl_easy *data,
       result = Client_reader_set_buf(data, data->set.postfields,
                                      (size_t)http->postsize);
     }
-    else {
-       /* end of headers! */
-      result = Curl_dyn_addn(r, STRCONST("\r\n"));
-      if(result)
-        return result;
-
-      if(data->req.upload_chunky && data->req.authneg) {
-        /* Chunky upload is selected and we're negotiating auth still, send
-           end-of-data only */
-        result = Curl_dyn_addn(r, (char *)STRCONST("\x30\x0d\x0a\x0d\x0a"));
-        /* 0  CR  LF  CR  LF */
-        if(result)
-          return result;
-      }
-
-      else if(data->state.infilesize) {
-        /* set the upload size to the progress meter */
-        Curl_pgrsSetUploadSize(data, http->postsize?http->postsize:-1);
-
-        /* set the pointer to mark that we will send the post body using the
-           read callback, but only if we're not in authenticate negotiation */
-        if(!data->req.authneg)
-          http->postdata = (char *)&http->postdata;
-      }
+    else { /* we read the bytes from the callback */
+      Curl_pgrsSetUploadSize(data, http->postsize);
+      result = Client_reader_set_fread(data, http->postsize);
     }
     http->sending = HTTPSEND_BODY;
     break;
@@ -2909,7 +2890,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     if(!result && data->req.upload_chunky)
       result = Curl_httpchunk_add_reader(data);
     if(!result)
-      result = Curl_req_send_hds(data, Curl_dyn_ptr(&req), Curl_dyn_len(&req));
+      result = Curl_req_send(data, &req);
   }
   Curl_dyn_free(&req);
   if(result)

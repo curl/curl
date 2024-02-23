@@ -64,8 +64,6 @@ struct SingleRequest {
   curl_off_t bytecount;         /* total number of bytes read */
   curl_off_t writebytecount;    /* number of bytes written */
 
-  size_t pendingheader;         /* this many bytes left to send is actually
-                                    header and not body */
   struct curltime start;         /* transfer started at this time */
   unsigned int headerbytecount;  /* received server headers (not CONNECT
                                     headers) */
@@ -140,6 +138,7 @@ struct SingleRequest {
   BIT(content_range); /* set TRUE if Content-Range: was found */
   BIT(download_done); /* set to TRUE when download is complete */
   BIT(eos_written);   /* iff EOS has been written to client */
+  BIT(eos_read);      /* iff EOS has been read from the client */
   BIT(upload_done);   /* set to TRUE when doing chunked transfer-encoding
                          upload and we're uploading the last chunk */
   BIT(ignorebody);    /* we read a response-body but we ignore it! */
@@ -195,22 +194,14 @@ void Curl_req_reset(struct SingleRequest *req, struct Curl_easy *data);
 
 #ifndef USE_HYPER
 /**
- * Send request bytes for transfer. If not all could be sent
+ * Send request headers. If not all could be sent
  * they will be buffered. Use `Curl_req_flush()` to make sure
  * bytes are really send.
  * @param data      the transfer making the request
- * @param buf       the bytes to send
- * @param blen      the number of bytes to send
- * @param hds_len   the number of bytes from the start that are headers
+ * @param buf       the complete header bytes, no body
  * @return CURLE_OK (on blocking with *pnwritten == 0) or error.
  */
-CURLcode Curl_req_send(struct Curl_easy *data,
-                        const char *buf, size_t blen,
-                        size_t hds_len);
-
-/* Convenience for sending only header bytes */
-#define Curl_req_send_hds(data, buf, blen) \
-          Curl_req_send((data), (buf), (blen), (blen))
+CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *buf);
 
 #endif /* !USE_HYPER */
 

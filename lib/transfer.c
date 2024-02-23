@@ -397,8 +397,8 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
        k->upload_present < curl_upload_refill_watermark(data) &&
        !k->upload_chunky &&/*(variable sized chunked header; append not safe)*/
        !k->upload_done &&  /*!(k->upload_done once k->upload_present sent)*/
-       !(k->writebytecount + (curl_off_t)k->upload_present -
-         (curl_off_t)k->pendingheader == data->state.infilesize)) {
+       !(k->writebytecount + (curl_off_t)k->upload_present ==
+         data->state.infilesize)) {
       offset = k->upload_present;
     }
 
@@ -489,17 +489,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
     }
 #endif
 
-    if(k->pendingheader) {
-      /* parts of what was sent was header */
-      size_t n = CURLMIN(k->pendingheader, bytes_written);
-      /* show the data before we change the pointer upload_fromhere */
-      Curl_debug(data, CURLINFO_HEADER_OUT, k->upload_fromhere, n);
-      k->pendingheader -= n;
-      nbody = bytes_written - n; /* size of the written body part */
-    }
-    else
-      nbody = bytes_written;
-
+    nbody = bytes_written;
     if(nbody) {
       /* show the data before we change the pointer upload_fromhere */
       Curl_debug(data, CURLINFO_DATA_OUT,
