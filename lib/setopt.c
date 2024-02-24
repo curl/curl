@@ -2870,7 +2870,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_TLSAUTH_TYPE:
     argptr = va_arg(param, char *);
-    if(argptr || !strncasecompare(argptr, "SRP", strlen("SRP")))
+    if(argptr && !strncasecompare(argptr, "SRP", strlen("SRP")))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     break;
 #endif
