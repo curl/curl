@@ -1665,6 +1665,8 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
             size = 0;
           }
           else {
+            if((to - from) == CURL_OFF_T_MAX)
+              return CURLE_RANGE_ERROR;
             size = to - from + 1;
           }
 
