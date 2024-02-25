@@ -375,8 +375,8 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct rustls_connection *rconn = NULL;
   struct rustls_client_config_builder *config_builder = NULL;
   const struct rustls_root_cert_store *roots = NULL;
-  struct rustls_root_cert_store_builder *root_cert_store_builder = NULL;
-  struct rustls_web_pki_server_cert_verifier_builder *server_cert_verifier_builder = NULL;
+  struct rustls_root_cert_store_builder *roots_builder = NULL;
+  struct rustls_web_pki_server_cert_verifier_builder *verifier_builder = NULL;
   struct rustls_server_cert_verifier *server_cert_verifier = NULL;
   const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
   const char * const ssl_cafile =
@@ -418,46 +418,38 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
       hostname = "example.invalid";
     }
   }
-  else if(ca_info_blob) {
-    root_cert_store_builder = rustls_root_cert_store_builder_new();
+  else if(ca_info_blob || ssl_cafile) {
+    roots_builder = rustls_root_cert_store_builder_new();
 
-    /* Enable strict parsing only if verification isn't disabled. */
-    result = rustls_root_cert_store_builder_add_pem(root_cert_store_builder, ca_info_blob->data,
-                                                    ca_info_blob->len, verifypeer);
-    if(result != RUSTLS_RESULT_OK) {
-      failf(data, "rustls: failed to parse trusted certificates from blob");
-      rustls_root_cert_store_builder_free(root_cert_store_builder);
-      rustls_client_config_free(
-        rustls_client_config_builder_build(config_builder));
-      return CURLE_SSL_CACERT_BADFILE;
+    if(ca_info_blob) {
+      /* Enable strict parsing only if verification isn't disabled. */
+      result = rustls_root_cert_store_builder_add_pem(roots_builder,
+                                                      ca_info_blob->data,
+                                                      ca_info_blob->len,
+                                                      verifypeer);
+      if(result != RUSTLS_RESULT_OK) {
+        failf(data, "rustls: failed to parse trusted certificates from blob");
+        rustls_root_cert_store_builder_free(roots_builder);
+        rustls_client_config_free(
+          rustls_client_config_builder_build(config_builder));
+        return CURLE_SSL_CACERT_BADFILE;
+      }
+    }
+    else if(ssl_cafile) {
+      /* Enable strict parsing only if verification isn't disabled. */
+      result = rustls_root_cert_store_builder_load_roots_from_file(
+        roots_builder, ssl_cafile, verifypeer);
+      if(result != RUSTLS_RESULT_OK) {
+        failf(data, "rustls: failed to load trusted certificates");
+        rustls_root_cert_store_builder_free(roots_builder);
+        rustls_client_config_free(
+          rustls_client_config_builder_build(config_builder));
+        return CURLE_SSL_CACERT_BADFILE;
+      }
     }
 
-    result = rustls_root_cert_store_builder_build(root_cert_store_builder, &roots);
-    rustls_root_cert_store_builder_free(root_cert_store_builder);
-    if(result != RUSTLS_RESULT_OK) {
-      failf(data, "rustls: failed to load trusted certificates");
-      rustls_client_config_free(
-        rustls_client_config_builder_build(config_builder));
-      return CURLE_SSL_CACERT_BADFILE;
-    }
-
-    server_cert_verifier_builder = rustls_web_pki_server_cert_verifier_builder_new(roots);
-
-    result = rustls_web_pki_server_cert_verifier_builder_build(server_cert_verifier_builder, &server_cert_verifier);
-    if(result != RUSTLS_RESULT_OK) {
-      failf(data, "rustls: failed to load trusted certificates");
-      rustls_client_config_free(
-        rustls_client_config_builder_build(config_builder));
-      return CURLE_SSL_CACERT_BADFILE;
-    }
-
-    rustls_client_config_builder_set_server_verifier(config_builder, server_cert_verifier);
-  }
-  else if(ssl_cafile) {
-    root_cert_store_builder = rustls_root_cert_store_builder_new();
-
-    /* Enable strict parsing only if verification isn't disabled. */
-    result = rustls_root_cert_store_builder_load_roots_from_file(root_cert_store_builder, ssl_cafile, verifypeer);
+    result = rustls_root_cert_store_builder_build(roots_builder, &roots);
+    rustls_root_cert_store_builder_free(roots_builder);
     if(result != RUSTLS_RESULT_OK) {
       failf(data, "rustls: failed to load trusted certificates");
       rustls_client_config_free(
@@ -465,26 +457,21 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
       return CURLE_SSL_CACERT_BADFILE;
     }
 
-    result = rustls_root_cert_store_builder_build(root_cert_store_builder, &roots);
-    rustls_root_cert_store_builder_free(root_cert_store_builder);
+    verifier_builder = rustls_web_pki_server_cert_verifier_builder_new(roots);
+
+    result = rustls_web_pki_server_cert_verifier_builder_build(
+      verifier_builder, &server_cert_verifier);
+    rustls_web_pki_server_cert_verifier_builder_free(verifier_builder);
     if(result != RUSTLS_RESULT_OK) {
       failf(data, "rustls: failed to load trusted certificates");
+      rustls_server_cert_verifier_free(server_cert_verifier);
       rustls_client_config_free(
         rustls_client_config_builder_build(config_builder));
       return CURLE_SSL_CACERT_BADFILE;
     }
 
-    server_cert_verifier_builder = rustls_web_pki_server_cert_verifier_builder_new(roots);
-
-    result = rustls_web_pki_server_cert_verifier_builder_build(server_cert_verifier_builder, &server_cert_verifier);
-    if(result != RUSTLS_RESULT_OK) {
-      failf(data, "rustls: failed to load trusted certificates");
-      rustls_client_config_free(
-        rustls_client_config_builder_build(config_builder));
-      return CURLE_SSL_CACERT_BADFILE;
-    }
-
-    rustls_client_config_builder_set_server_verifier(config_builder, server_cert_verifier);
+    rustls_client_config_builder_set_server_verifier(config_builder,
+                                                     server_cert_verifier);
   }
 
   backend->config = rustls_client_config_builder_build(config_builder);
