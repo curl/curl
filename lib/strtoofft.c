@@ -132,7 +132,7 @@ static curl_off_t strtooff(const char *nptr, char **endptr, int base)
       i != -1;
       end++, i = get_char(end[0], base)) {
 
-    if(value > CURL_OFF_T_MAX / base - i) {
+    if(value > (CURL_OFF_T_MAX - i) / base) {
       overflow = TRUE;
       break;
     }
