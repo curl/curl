@@ -114,8 +114,6 @@ static void cl_reset_reader(struct Curl_easy *data)
 
 void Curl_client_reset(struct Curl_easy *data)
 {
-  size_t i;
-
   DEBUGF(infof(data, "Curl_client_reset()"));
   cl_reset_reader(data);
   cl_reset_writer(data);
