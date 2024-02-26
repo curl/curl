@@ -741,7 +741,6 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
     multi = Curl_multi_handle(1, 3, 7);
     if(!multi)
       return CURLE_OUT_OF_MEMORY;
-    data->multi_easy = multi;
   }
 
   if(multi->in_callback)
@@ -758,6 +757,9 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
       return CURLE_OUT_OF_MEMORY;
     return CURLE_FAILED_INIT;
   }
+
+  /* assign this after curl_multi_add_handle() */
+  data->multi_easy = multi;
 
   sigpipe_ignore(data, &pipe_st);
 
