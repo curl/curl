@@ -530,6 +530,13 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
     multi->dead = FALSE;
   }
 
+  if(data->multi_easy) {
+    /* if this easy handle was previously used for curl_easy_perform(), there
+       is a private multi handle here that we can kill */
+    curl_multi_cleanup(data->multi_easy);
+    data->multi_easy = NULL;
+  }
+
   /* Initialize timeout list for this handle */
   Curl_llist_init(&data->state.timeoutlist, NULL);
 
