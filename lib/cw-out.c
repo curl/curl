@@ -382,21 +382,6 @@ static CURLcode cw_out_write(struct Curl_easy *data,
   CURLcode result;
   bool flush_all;
 
-#ifndef CURL_DISABLE_HTTP
-  /* HTTP header, but not status-line */
-  if(data->conn && (data->conn->handler->protocol & PROTO_FAMILY_HTTP) &&
-     (type & CLIENTWRITE_HEADER) && !(type & CLIENTWRITE_STATUS) ) {
-    unsigned char htype = (unsigned char)
-      (type & CLIENTWRITE_CONNECT ? CURLH_CONNECT :
-       (type & CLIENTWRITE_1XX ? CURLH_1XX :
-        (type & CLIENTWRITE_TRAILER ? CURLH_TRAILER :
-         CURLH_HEADER)));
-    result = Curl_headers_push(data, buf, htype);
-    if(result)
-      return result;
-  }
-#endif
-
   flush_all = (type & CLIENTWRITE_EOS)? TRUE:FALSE;
   if((type & CLIENTWRITE_BODY) ||
      ((type & CLIENTWRITE_HEADER) && data->set.include_header)) {
