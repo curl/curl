@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLMOPT_PIPELINING_SITE_BL
 Section: 3

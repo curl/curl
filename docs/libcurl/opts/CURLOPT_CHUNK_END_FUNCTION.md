@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_CHUNK_END_FUNCTION
 Section: 3

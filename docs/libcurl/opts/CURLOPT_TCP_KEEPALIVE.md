@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_TCP_KEEPALIVE
 Section: 3

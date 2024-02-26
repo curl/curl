@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_SSH_AUTH_TYPES
 Section: 3
