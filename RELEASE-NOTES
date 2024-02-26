@@ -4,7 +4,7 @@ curl and libcurl 8.7.0
  Command line options:         258
  curl_easy_setopt() options:   304
  Public functions in libcurl:  93
- Contributors:                 3095
+ Contributors:                 3102
 
 This release includes the following changes:
 
@@ -20,6 +20,8 @@ This release includes the following bugfixes:
  o asyn-thread: use wakeup_close to close the read descriptor [1]
  o badwords: use hostname, not host name [46]
  o BINDINGS: add mcurl, the python binding [67]
+ o c-hyper: add header collection writer in hyper builds [70]
+ o cd2nroff: gen: make `\>` in input to render as plain '>' in output
  o cd2nroff: remove backticks from titles
  o checksrc.pl: fix handling .checksrc with CRLF [43]
  o cmake: add warning for using TLS libraries without 1.3 support [25]
@@ -27,6 +29,7 @@ This release includes the following bugfixes:
  o cmake: fix install for older CMake versions [53]
  o cmdline-docs/Makefile: avoid using a fixed temp file name [5]
  o cmdline-docs: quote and angle bracket cleanup [45]
+ o configure.ac: find libpsl with pkg-config [79]
  o configure: add warning for using TLS libraries without 1.3 support [26]
  o configure: do not link with nghttp3 unless necessary [7]
  o connect.c: fix typo [17]
@@ -48,34 +51,46 @@ This release includes the following bugfixes:
  o ftp: fix socket wait activity in ftp_domore_getsock [28]
  o ftp: tracing improvements [33]
  o ftp: treat a 226 arriving before data as a signal to read data [19]
+ o gen: make `\>` in input to render as plain '>' in output [78]
  o header.md: remove backslash, make nicer markdown [48]
  o HTTP/2: write response directly [12]
  o HTTP3.md: adjust the OpenSSL QUIC install instructions [34]
+ o http: move headers collecting to writer [71]
  o http_chunks: fix the accounting of consumed bytes [22]
+ o http_chunks: remove unused 'endptr' variable [58]
  o https-proxy: use IP address and cert with ip in alt names [50]
  o lib582: remove code causing warning that is never run [38]
  o lib: convert Curl_get_line to use dynbuf [42]
+ o lib: initialize output pointers to NULL before calling strto[ff,l,ul] [63]
+ o lib: remove curl_mimepart object when CURL_DISABLE_MIME [72]
  o libcurl-docs: cleanups
  o libcurl-security.md: Active FTP passes on the local IP address [6]
+ o libssh/libssh2: return error on too big range [75]
  o MANUAL.md: fix typo [66]
  o mbedtls: fix building when MBEDTLS_X509_REMOVE_INFO flag is defined [27]
  o mbedtls: use mbedtls_ssl_conf_{min|max}_tls_version [59]
  o md4: include strdup.h for the memdup proto [10]
+ o mprintf: fix format prefix I32/I64 for windows compilers [77]
  o multi: add xfer_buf to multi handle [30]
+ o multi: fix multi_sock handling of select_bits [81]
  o ntml_wb: fix buffer type typo [2]
  o OpenSSL QUIC: adapt to v3.3.x [65]
  o openssl-quic: check on Windows that socket conv to int is possible [8]
  o OS400: avoid using awk in the build scripts [20]
  o proxy1.0.md: fix example [15]
+ o rustls: make curl compile with 0.12.0 [73]
  o schannel: fix hang on unexpected server close [57]
  o scripts: fix cijobs.pl for Azure and GHA
  o sendf: ignore response body to HEAD [18]
+ o setopt: fix check for CURLOPT_PROXY_TLSAUTH_TYPE value [76]
+ o strtoofft: fix the overflow check [74]
  o test1165: improve pattern matching [60]
  o tests: support setting/using blank content env variables
  o tool_cb_hdr: only parse etag + content-disposition for 2xx [9]
  o tool_operate: change precedence of server Retry-After time [44]
  o tool_operate: do not set CURLOPT_QUICK_EXIT in debug builds [3]
  o transfer: improve Windows SO_SNDBUF update limit [56]
+ o urldata: move authneg bit from conn to Curl_easy [69]
  o version: allow building with ancient libpsl [52]
  o vtls: fix tls proxy peer verification [55]
  o vtls: revert "receive max buffer" + add test case [39]
@@ -95,16 +110,18 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Boris Verkhovskiy, Brett Buddin, Chris Webb, Dan Fandrich, Daniel Gustafsson,
-  Daniel Stenberg, Daniel Szmulewicz, Dirk Hünniger, Dmitry Tretyakov,
-  edmcln on github, Erik Schnetter, Evgeny Grin (Karlson2k), Fabian Vogt,
-  Faraz Fallahi, Harry Sintonen, HsiehYuho on github, Jan Macku, Jiawen Geng,
-  Joel Depooter, Jon Rumsey, Karthikdasari0423, Konstantin Vlasov,
-  Lars Kellogg-Stedman, LeeRiva, Lukáš Zaoral, Michael Forney,
-  Michael Kaufmann, Michał Antoniak, Patrick Monnerat, Peter Krefting,
-  Ramiro Garcia, Ray Satiro, Richard Levitte, Ryan Carsten Schmidt,
-  Scott Mutter, Sergey Bronnikov, Stefan Eissing, Viktor Szakats
-  (38 contributors)
+  5533asdg on github, Boris Verkhovskiy, Brett Buddin, Chris Webb,
+  Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, Daniel Szmulewicz,
+  Dirk Hünniger, Dmitry Tretyakov, edmcln on github, Erik Schnetter,
+  Evgeny Grin (Karlson2k), Fabian Vogt, Fabrice Fontaine, Faraz Fallahi,
+  Gisle Vanem, Harry Sintonen, HsiehYuho on github, Jan Macku, Jiawen Geng,
+  Joel Depooter, Jon Rumsey, Karthikdasari0423, Konstantin Vlasov, kpcyrd,
+  Lars Kellogg-Stedman, LeeRiva, Louis Solofrizzo, Lukáš Zaoral,
+  Michael Forney, Michael Kaufmann, Michał Antoniak, Patrick Monnerat,
+  Paweł Witas, Peter Krefting, Ramiro Garcia, Ray Satiro, Richard Levitte,
+  Ryan Carsten Schmidt, Scott Mutter, Scott Talbert, Sergey Bronnikov,
+  Stefan Eissing, Viktor Szakats, vulnerabilityspotter on hackerone
+  (46 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -128,7 +145,6 @@ References to bug reports and discussions on issues:
  [18] = https://curl.se/mail/lib-2024-02/0000.html
  [19] = https://curl.se/bug/?i=12823
  [20] = https://curl.se/bug/?i=12826
- [21] = https://curl.se/bug/?i=12843
  [22] = https://curl.se/bug/?i=12937
  [23] = https://curl.se/bug/?i=12750
  [24] = https://curl.se/bug/?i=12719
@@ -156,7 +172,6 @@ References to bug reports and discussions on issues:
  [46] = https://curl.se/bug/?i=12888
  [47] = https://curl.se/bug/?i=12879
  [48] = https://curl.se/bug/?i=12877
- [49] = https://curl.se/bug/?i=12875
  [50] = https://curl.se/bug/?i=12838
  [51] = https://curl.se/bug/?i=12859
  [52] = https://curl.se/mail/archive-2024-02/0004.html
@@ -165,11 +180,25 @@ References to bug reports and discussions on issues:
  [55] = https://curl.se/bug/?i=12831
  [56] = https://curl.se/bug/?i=12911
  [57] = https://curl.se/bug/?i=12894
+ [58] = https://curl.se/bug/?i=12996
  [59] = https://curl.se/bug/?i=12905
  [60] = https://curl.se/bug/?i=12903
  [61] = https://curl.se/bug/?i=12411
  [62] = https://curl.se/bug/?i=12945
+ [63] = https://curl.se/bug/?i=12995
  [64] = https://curl.se/bug/?i=12921
  [65] = https://curl.se/bug/?i=12933
  [66] = https://curl.se/bug/?i=12965
  [67] = https://curl.se/bug/?i=12962
+ [69] = https://curl.se/bug/?i=12949
+ [70] = https://curl.se/bug/?i=12880
+ [71] = https://curl.se/bug/?i=12880
+ [72] = https://curl.se/bug/?i=12948
+ [73] = https://curl.se/bug/?i=12989
+ [74] = https://curl.se/bug/?i=12990
+ [75] = https://curl.se/bug/?i=12983
+ [76] = https://curl.se/bug/?i=12981
+ [77] = https://curl.se/bug/?i=12944
+ [78] = https://curl.se/bug/?i=12977
+ [79] = https://curl.se/bug/?i=12947
+ [81] = https://curl.se/bug/?i=12971
