@@ -41,8 +41,8 @@ the perform operation returns the callback's error code. Set the *clientp*
 argument passed in to this callback with the CURLOPT_SSL_CTX_DATA(3) option.
 
 This function gets called for all new connections made to a server, during the
-SSL negotiation. The *ssl_ctx* points to a newly initialized object each time,
-but the pointer may still be the same as in a prior call.
+SSL negotiation. While *ssl_ctx* points to a newly initialized object each
+time, the pointer may still be the same as in a prior call.
 
 To use this callback, a non-trivial amount of knowledge of your SSL library is
 necessary. For example, you can use this function to call library-specific
@@ -166,5 +166,3 @@ No other SSL backend is supported.
 CURLE_OK if supported; or an error such as:
 
 CURLE_NOT_BUILT_IN - Not supported by the SSL backend
-
-CURLE_UNKNOWN_OPTION
