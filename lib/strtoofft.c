@@ -212,7 +212,7 @@ static int get_char(char c, int base)
 CURLofft curlx_strtoofft(const char *str, char **endp, int base,
                          curl_off_t *num)
 {
-  char *end;
+  char *end = NULL;
   curl_off_t number;
   errno = 0;
   *num = 0; /* clear by default */
