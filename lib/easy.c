@@ -749,6 +749,7 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
   /* Copy the MAXCONNECTS option to the multi handle */
   curl_multi_setopt(multi, CURLMOPT_MAXCONNECTS, (long)data->set.maxconnects);
 
+  data->multi_easy = NULL; /* pretend it does not exist */
   mcode = curl_multi_add_handle(multi, data);
   if(mcode) {
     curl_multi_cleanup(multi);
