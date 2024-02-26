@@ -61,79 +61,6 @@
 
 static CURLcode do_init_stack(struct Curl_easy *data);
 
-/*
- * Curl_nwrite() is an internal write function that sends data to the
- * server. Works with a socket index for the connection.
- *
- * If the write would block (CURLE_AGAIN), it returns CURLE_OK and
- * (*nwritten == 0). Otherwise we return regular CURLcode value.
- */
-CURLcode Curl_nwrite(struct Curl_easy *data,
-                     int sockindex,
-                     const void *buf,
-                     size_t blen,
-                     ssize_t *pnwritten)
-{
-  ssize_t nwritten;
-  CURLcode result = CURLE_OK;
-  struct connectdata *conn;
-
-  DEBUGASSERT(sockindex >= 0 && sockindex < 2);
-  DEBUGASSERT(pnwritten);
-  DEBUGASSERT(data);
-  DEBUGASSERT(data->conn);
-  conn = data->conn;
-#ifdef CURLDEBUG
-  {
-    /* Allow debug builds to override this logic to force short sends
-    */
-    char *p = getenv("CURL_SMALLSENDS");
-    if(p) {
-      size_t altsize = (size_t)strtoul(p, NULL, 10);
-      if(altsize)
-        blen = CURLMIN(blen, altsize);
-    }
-  }
-#endif
-  nwritten = conn->send[sockindex](data, sockindex, buf, blen, &result);
-  if(result == CURLE_AGAIN) {
-    nwritten = 0;
-    result = CURLE_OK;
-  }
-  else if(result) {
-    nwritten = -1; /* make sure */
-  }
-  else {
-    DEBUGASSERT(nwritten >= 0);
-  }
-
-  *pnwritten = nwritten;
-  return result;
-}
-
-/*
- * Curl_write() is an internal write function that sends data to the
- * server. Works with plain sockets, SCP, SSL or kerberos.
- *
- * If the write would block (CURLE_AGAIN), we return CURLE_OK and
- * (*written == 0). Otherwise we return regular CURLcode value.
- */
-CURLcode Curl_write(struct Curl_easy *data,
-                    curl_socket_t sockfd,
-                    const void *mem,
-                    size_t len,
-                    ssize_t *written)
-{
-  struct connectdata *conn;
-  int num;
-
-  DEBUGASSERT(data);
-  DEBUGASSERT(data->conn);
-  conn = data->conn;
-  num = (sockfd != CURL_SOCKET_BAD && sockfd == conn->sock[SECONDARYSOCKET]);
-  return Curl_nwrite(data, num, mem, len, written);
-}
-
 /* Curl_client_write() sends data to the write callback(s)
 
    The bit pattern defines to what "streams" to write to. Body and/or header.
@@ -163,7 +90,7 @@ CURLcode Curl_client_write(struct Curl_easy *data,
   return Curl_cwriter_write(data, data->req.writer_stack, type, buf, blen);
 }
 
-void Curl_client_cleanup(struct Curl_easy *data)
+void Curl_cw_reset(struct Curl_easy *data)
 {
   struct Curl_cwriter *writer = data->req.writer_stack;
 
