@@ -155,7 +155,6 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
         (*pconsumed)++;
       }
       else {
-        char *endptr;
         if(0 == ch->hexindex) {
           /* This is illegal data, we received junk where we expected
              a hexadecimal digit. */
@@ -167,7 +166,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
 
         /* blen and buf are unmodified */
         ch->hexbuffer[ch->hexindex] = 0;
-        if(curlx_strtoofft(ch->hexbuffer, &endptr, 16, &ch->datasize)) {
+        if(curlx_strtoofft(ch->hexbuffer, NULL, 16, &ch->datasize)) {
           failf(data, "chunk hex-length not valid: '%s'", ch->hexbuffer);
           ch->state = CHUNK_FAILED;
           ch->last_code = CHUNKE_ILLEGAL_HEX;
