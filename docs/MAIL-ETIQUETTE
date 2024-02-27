@@ -40,13 +40,13 @@ MAIL ETIQUETTE
   please use the one or the ones that suit you the most.
 
   Each mailing list has hundreds up to thousands of readers, meaning that each
-  mail sent will be received and read by a large number of people. People
-  from various cultures, regions, religions and continents.
+  mail sent is received and read by a large number of people. People from
+  various cultures, regions, religions and continents.
 
   1.2 Netiquette
 
   Netiquette is a common term for how to behave on the Internet. Of course, in
-  each particular group and subculture there will be differences in what is
+  each particular group and subculture there are differences in what is
   acceptable and what is considered good manners.
 
   This document outlines what we in the curl project consider to be good
@@ -71,8 +71,8 @@ MAIL ETIQUETTE
   through to all the subscribers.
 
   If you post without being subscribed (or from a different mail address than
-  the one you are subscribed with), your mail will simply be silently
-  discarded. You have to subscribe first, then post.
+  the one you are subscribed with), your mail is simply silently discarded.
+  You have to subscribe first, then post.
 
   The reason for this unfortunate and strict subscription policy is of course
   to stop spam from pestering the lists.
@@ -80,14 +80,13 @@ MAIL ETIQUETTE
   1.5 Moderation of new posters
 
   Several of the curl mailing lists automatically make all posts from new
-  subscribers be moderated. This means that after you have subscribed and
-  sent your first mail to a list, that mail will not be let through to the
-  list until a mailing list administrator has verified that it is OK and
-  permits it to get posted.
+  subscribers be moderated. After you have subscribed and sent your first mail
+  to a list, that mail is not let through to the list until a mailing list
+  administrator has verified that it is OK and permits it to get posted.
 
   Once a first post has been made that proves the sender is actually talking
-  about curl-related subjects, the moderation "flag" will be switched off and
-  future posts will go through without being moderated.
+  about curl-related subjects, the moderation "flag" is switched off and
+  future posts go through without being moderated.
 
   The reason for this moderation policy is that we do suffer from spammers who
   actually subscribe and send spam to our lists.
@@ -95,8 +94,8 @@ MAIL ETIQUETTE
   1.6 Handling trolls and spam
 
   Despite our good intentions and hard work to keep spam off the lists and to
-  maintain a friendly and positive atmosphere, there will be times when spam
-  and or trolls get through.
+  maintain a friendly and positive atmosphere, there are times when spam and
+  or trolls get through.
 
   Troll - "someone who posts inflammatory, extraneous, or off-topic messages
   in an online community"
@@ -106,10 +105,10 @@ MAIL ETIQUETTE
 
   No matter what, we NEVER EVER respond to trolls or spammers on the list. If
   you believe the list admin should do something in particular, contact them
-  off-list. The subject will be taken care of as much as possible to prevent
-  repeated offenses, but responding on the list to such messages never leads to
-  anything good and only puts the light even more on the offender: which was
-  the entire purpose of it getting sent to the list in the first place.
+  off-list. The subject is taken care of as much as possible to prevent
+  repeated offenses, but responding on the list to such messages never leads
+  to anything good and only puts the light even more on the offender: which
+  was the entire purpose of it getting sent to the list in the first place.
 
   Do not feed the trolls.
 
@@ -130,7 +129,7 @@ MAIL ETIQUETTE
   1.8 I posted, now what?
 
   If you are not subscribed with the same email address that you used to send
-  the email, your post will just be silently discarded.
+  the email, your post is silently discarded.
 
   If you posted for the first time to the mailing list, you first need to wait
   for an administrator to allow your email to go through (moderated). This
@@ -151,28 +150,28 @@ MAIL ETIQUETTE
   what you did with details enough to allow others to help point out the
   problem or repeat the steps in their locations.
 
-  Failing to include details will only delay responses and make people respond
-  and ask for more details and you will have to send a follow-up email that
-  includes them.
+  Failing to include details only delays responses and make people respond and
+  ask for more details and you have to send follow-up emails that include
+  them.
 
   Expect the responses to primarily help YOU debug the issue, or ask YOU
   questions that can lead you or others towards a solution or explanation to
   whatever you experience.
 
   If you are a repeat offender to the guidelines outlined in this document,
-  chances are that people will ignore you at will and your chances to get
-  responses in the future will greatly diminish.
+  chances are that people ignore you and your chances to get responses in the
+  future greatly diminish.
 
   1.9 Your emails are public
 
   Your email, its contents and all its headers and the details in those
-  headers will be received by every subscriber of the mailing list that you
-  send your email to.
+  headers are received by every subscriber of the mailing list that you send
+  your email to.
 
-  Your email as sent to a curl mailing list will end up in mail archives, on
-  the curl website and elsewhere, for others to see and read. Today and in
-  the future. In addition to the archives, the mail is sent out to thousands
-  of individuals. There is no way to undo a sent email.
+  Your email as sent to a curl mailing list ends up in mail archives, on the
+  curl website and elsewhere, for others to see and read. Today and in the
+  future. In addition to the archives, the mail is sent out to thousands of
+  individuals. There is no way to undo a sent email.
 
   When sending emails to a curl mailing list, do not include sensitive
   information such as user names and passwords; use fake ones, temporary ones

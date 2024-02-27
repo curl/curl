@@ -37,9 +37,9 @@ You must send syntactically correct FTP commands as RFC 959 defines to FTP
 servers, or one of the commands listed below to SFTP servers.
 
 SFTP is a binary protocol. Unlike for FTP, curl interprets SFTP quote commands
-itself before sending them to the server. File names may be quoted
-shell-style to embed spaces or special characters. Following is the list of
-all supported SFTP quote commands:
+itself before sending them to the server. Filenames may be quoted shell-style
+to embed spaces or special characters. Following is the list of all supported
+SFTP quote commands:
 
 ## atime date file
 The atime command sets the last access time of the file named by the file

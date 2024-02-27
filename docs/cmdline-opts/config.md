@@ -77,7 +77,7 @@ config file is checked for in the following places in this order:
 7) Non-Windows: use getpwuid to find the home directory
 
 8) On Windows, if it finds no *.curlrc* file in the sequence described above, it
-checks for one in the same dir the curl executable is placed.
+checks for one in the same directory the curl executable is placed.
 
 On Windows two filenames are checked per location: *.curlrc* and *_curlrc*,
 preferring the former. Older versions on Windows checked for *_curlrc* only.

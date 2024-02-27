@@ -32,7 +32,7 @@ e.g. **eth0** to specify which interface's IP address you want to use (Unix only
 ## IP address
 e.g. **192.168.10.1** to specify the exact IP address
 
-## host name
+## hostname
 e.g. **my.host.domain** to specify the machine
 
 ## -

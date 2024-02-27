@@ -22,7 +22,7 @@ Specify to which file you want curl to write all cookies after a completed
 operation. Curl writes all cookies from its in-memory cookie storage to the
 given file at the end of operations. If no cookies are known, no data is
 written. The file is created using the Netscape cookie file format. If you set
-the file name to a single dash, "-", the cookies are written to stdout.
+the filename to a single dash, "-", the cookies are written to stdout.
 
 The file specified with --cookie-jar is only used for output. No cookies are
 read from the file. To read cookies, use the --cookie option. Both options

@@ -24,4 +24,4 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: check
-      run: ./.github/scripts/badwords.pl < .github/scripts/badwords.txt docs/*.md docs/libcurl/*.md docs/libcurl/opts/*.md
+      run: ./.github/scripts/badwords.pl < .github/scripts/badwords.txt docs/*.md docs/libcurl/*.md docs/libcurl/opts/*.md docs/cmdline-opts/*.md

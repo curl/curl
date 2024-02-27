@@ -135,7 +135,7 @@ Sending the data requires a rewind that failed.
 ## 66
 Failed to initialize SSL Engine.
 ## 67
-The user name, password, or similar was not accepted and curl failed to log in.
+The username, password, or similar was not accepted and curl failed to log in.
 ## 68
 File not found on TFTP server.
 ## 69

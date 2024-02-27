@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: netrc
 Short: n
-Help: Must read .netrc for user name and password
+Help: Must read .netrc for username and password
 Category: curl
 Added: 4.6
 Mutexed: netrc-file netrc-optional
@@ -30,8 +30,8 @@ On Windows two filenames in the home directory are checked: *.netrc* and
 only.
 
 A quick and simple example of how to setup a *.netrc* to allow curl to FTP to
-the machine host.domain.com with user name 'myself' and password 'secret'
-could look similar to:
+the machine host.domain.com with username 'myself' and password 'secret' could
+look similar to:
 
     machine host.domain.com
     login myself

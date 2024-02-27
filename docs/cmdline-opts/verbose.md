@@ -32,5 +32,5 @@ If you think this option still does not give you enough details, consider using
 --trace or --trace-ascii instead.
 
 Note that verbose output of curl activities and network traffic might contain
-sensitive data, including user names, credentials or secret data content. Be
+sensitive data, including usernames, credentials or secret data content. Be
 aware and be careful when sharing trace logs with others.

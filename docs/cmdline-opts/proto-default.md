@@ -23,5 +23,5 @@ An unknown or unsupported protocol causes error
 
 This option does not change the default proxy protocol (http).
 
-Without this option set, curl guesses protocol based on the host name, see
+Without this option set, curl guesses protocol based on the hostname, see
 --url for details.
