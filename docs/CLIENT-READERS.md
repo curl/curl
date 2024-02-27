@@ -11,13 +11,13 @@ With this naming established, client readers are concerned with providing data f
 
 ## Invoking
 
-The transfer loop that sends and receives, will use `Curl_client_read()` to get more data to send for a transfer. If no specific reader has been installed yet, the default one that uses `CURLOPT_READFUNCTION`, will be added. The prototype is
+The transfer loop that sends and receives, is using `Curl_client_read()` to get more data to send for a transfer. If no specific reader has been installed yet, the default one that uses `CURLOPT_READFUNCTION` is added. The prototype is
 
 ```
 CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
                           size_t *nread, bool *eos);
 ```
-The arguments are the transfer to read for, a buffer to hold the read data, its length, the actual number of bytes placed into the buffer and the `eos` flag indicating that no more data will be available. The `eos` flag may be set for a read amount, if that amount was the last. That way curl can avoid to read an additional time.
+The arguments are the transfer to read for, a buffer to hold the read data, its length, the actual number of bytes placed into the buffer and the `eos` flag indicating that no more data is available. The `eos` flag may be set for a read amount, if that amount was the last. That way curl can avoid to read an additional time.
 
 The implementation of `Curl_client_read()` uses a chain of *client reader* instances to get the data. This is similar to the design of *client writers*. The chain of readers allows processing of the data to send.
 
@@ -56,11 +56,11 @@ typedef enum {
 } Curl_creader_phase;
 ```
 
-If a reader for phase `PROTOCOL` is added to the chain, it is always added *after* any `NET` or `TRANSFER_ENCODE` readers and *before* and `CONTENT_ENCODE` and `CLIENT` readers. If there is already a reader for the same phase, the new reader will be added before the existing one(s).
+If a reader for phase `PROTOCOL` is added to the chain, it is always added *after* any `NET` or `TRANSFER_ENCODE` readers and *before* and `CONTENT_ENCODE` and `CLIENT` readers. If there is already a reader for the same phase, the new reader is added before the existing one(s).
 
 ### Example: `chunked` reader
 
-In `http_chunks.c` a client reader for chunked uploads is implemented. This one operates at phase `CURL_CR_TRANSFER_ENCODE`. Any data coming from the reader "below" will have the HTTP/1.1 chunk handling applied and returned to the caller.
+In `http_chunks.c` a client reader for chunked uploads is implemented. This one operates at phase `CURL_CR_TRANSFER_ENCODE`. Any data coming from the reader "below" has the HTTP/1.1 chunk handling applied and returned to the caller.
 
 When this reader sees an `eos` from below, it generates the terminal chunk, adding trailers if provided by the application. When that last chunk is fully returned, it also sets `eos` to the caller.
 
@@ -74,11 +74,11 @@ Implemented in `sendf.c` for phase `CURL_CR_CLIENT`, this reader has the simple 
 
 ### Example: `buf` reader
 
-Implemented in `sendf.c` for phase `CURL_CR_CLIENT`, this reader get a buffer pointer and a length and will provide exactly these bytes. This one is used in HTTP for sending `postfields` provided by the application.
+Implemented in `sendf.c` for phase `CURL_CR_CLIENT`, this reader get a buffer pointer and a length and provides exactly these bytes. This one is used in HTTP for sending `postfields` provided by the application.
 
 ## Request retries
 
-Sometimes it is necessary to send a request with client data again. Transfer handling can inquire via `Curl_client_read_needs_rewind()` if a rewind (e.g. a reset of the client data) is necessary. This will ask all installed readers if they need it and give `FALSE` of none does.
+Sometimes it is necessary to send a request with client data again. Transfer handling can inquire via `Curl_client_read_needs_rewind()` if a rewind (e.g. a reset of the client data) is necessary. This asks all installed readers if they need it and give `FALSE` of none does.
 
 ## Summary and Outlook
 
