@@ -34,9 +34,9 @@ engine which makes curl record incoming cookies, which may be handy if you are
 using this in combination with the --location option or do multiple URL
 transfers on the same invoke.
 
-If the file name is exactly a minus ("-"), curl instead reads the contents from
-stdin. If the file name is an empty string ("") and is the only cookie input,
-curl will activate the cookie engine without any cookies.
+If the filename is exactly a minus ("-"), curl instead reads the contents from
+stdin. If the filename is an empty string ("") and is the only cookie input,
+curl activates the cookie engine without any cookies.
 
 The file format of the file to read cookies from should be plain HTTP headers
 (Set-Cookie style) or the Netscape/Mozilla cookie file format.

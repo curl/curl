@@ -16,7 +16,7 @@ Example:
 # `--interface`
 
 Perform an operation using a specified interface. You can enter interface
-name, IP address or host name. An example could look like:
+name, IP address or hostname. An example could look like:
 
     curl --interface eth0:1 https://www.example.com/
 

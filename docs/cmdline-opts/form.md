@@ -28,9 +28,9 @@ For SMTP and IMAP protocols, this is the means to compose a multipart mail
 message to transmit.
 
 This enables uploading of binary files etc. To force the 'content' part to be
-a file, prefix the file name with an @ sign. To just get the content part from
-a file, prefix the file name with the symbol \<. The difference between @ and
-< is then that @ makes a file get attached in the post as a file upload, while
+a file, prefix the filename with an @ sign. To just get the content part from
+a file, prefix the filename with the symbol \<. The difference between @ and <
+is then that @ makes a file get attached in the post as a file upload, while
 the \< makes a text field and just get the contents for that text field from a
 file.
 

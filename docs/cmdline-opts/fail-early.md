@@ -21,7 +21,7 @@ Fail and exit on the first detected transfer error.
 When curl is used to do multiple transfers on the command line, it attempts to
 operate on each given URL, one by one. By default, it ignores errors if there
 are more URLs given and the last URL's success determines the error code curl
-returns. So early failures are "hidden" by subsequent successful transfers.
+returns. Early failures are "hidden" by subsequent successful transfers.
 
 Using this option, curl instead returns an error on the first transfer that
 fails, independent of the amount of URLs that are given on the command

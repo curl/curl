@@ -22,7 +22,7 @@ Example:
 
 Tells curl to use a separate operation for the following URL and associated
 options. This allows you to send several URL requests, each with their own
-specific options, for example, such as different user names or custom requests
+specific options, for example, such as different usernames or custom requests
 for each.
 
 --next resets all local options and only global ones have their values survive

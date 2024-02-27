@@ -16,12 +16,12 @@ Example:
 
 # `--mail-rcpt`
 
-Specify a single email address, user name or mailing list name. Repeat this
+Specify a single email address, username or mailing list name. Repeat this
 option several times to send to multiple recipients.
 
-When performing an address verification (**VRFY** command), the recipient should be
-specified as the user name or user name and domain (as per Section 3.5 of
-RFC 5321). (Added in 7.34.0)
+When performing an address verification (**VRFY** command), the recipient
+should be specified as the username or username and domain (as per Section 3.5
+of RFC 5321). (Added in 7.34.0)
 
 When performing a mailing list expand (EXPN command), the recipient should be
 specified using the mailing list name, such as "Friends" or "London-Office".

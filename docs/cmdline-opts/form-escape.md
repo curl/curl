@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: form-escape
-Help: Escape multipart form field/file names using backslash
+Help: Escape multipart form field/filenames using backslash
 Protocols: HTTP
 Added: 7.81.0
 Category: http upload

@@ -6,8 +6,8 @@ RFC 3986.
 
 If you provide a URL without a leading **protocol://** scheme, curl guesses
 what protocol you want. It then defaults to HTTP but assumes others based on
-often-used host name prefixes. For example, for host names starting with
-`ftp.` curl assumes you want FTP.
+often-used hostname prefixes. For example, for hostnames starting with `ftp.`
+curl assumes you want FTP.
 
 You can specify any amount of URLs on the command line. They are fetched in a
 sequential manner in the specified order unless you use --parallel. You can

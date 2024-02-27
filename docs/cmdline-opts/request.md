@@ -34,7 +34,7 @@ Normally you do not need this option. All sorts of *GET*, *HEAD*, *POST* and
 *PUT* requests are rather invoked by using dedicated command line options.
 
 This option only changes the actual word used in the HTTP request, it does not
-alter the way curl behaves. So for example if you want to make a proper HEAD
+alter the way curl behaves. For example if you want to make a proper HEAD
 request, using -X HEAD does not suffice. You need to use the --head option.
 
 The method string you set with --request is used for all requests, which

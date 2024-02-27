@@ -26,19 +26,19 @@ This transfers the specified local file to the remote URL.
 If there is no file part in the specified URL, curl appends the local file
 name to the end of the URL before the operation starts. You must use a
 trailing slash (/) on the last directory to prove to curl that there is no
-file name or curl thinks that your last directory name is the remote file name
+filename or curl thinks that your last directory name is the remote filename
 to use.
 
-When putting the local file name at the end of the URL, curl ignores what is
-on the left side of any slash (/) or backslash (\) used in the file name and
-only appends what is on the right side of the rightmost such character.
+When putting the local filename at the end of the URL, curl ignores what is on
+the left side of any slash (/) or backslash (\) used in the filename and only
+appends what is on the right side of the rightmost such character.
 
-Use the file name `-` (a single dash) to use stdin instead of a given file.
-Alternately, the file name `.` (a single period) may be specified instead of
+Use the filename `-` (a single dash) to use stdin instead of a given file.
+Alternately, the filename `.` (a single period) may be specified instead of
 `-` to use stdin in non-blocking mode to allow reading server output while
 stdin is being uploaded.
 
-If this option is used with a HTTP(S) URL, the PUT method is used.
+If this option is used with an HTTP(S) URL, the PUT method is used.
 
 You can specify one --upload-file for each URL on the command line. Each
 --upload-file + URL pair specifies what to upload and to where. curl also

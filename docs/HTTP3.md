@@ -196,7 +196,8 @@ Build curl:
      % make
      % make install
 
- If `make install` results in `Permission denied` error, you will need to prepend it with `sudo`.
+ If `make install` results in `Permission denied` error, you need to prepend
+ it with `sudo`.
 
 # OpenSSL version
 
@@ -232,7 +233,8 @@ Build curl:
      % make
      % make install
 
- If `make install` results in `Permission denied` error, you will need to prepend it with `sudo`.
+ If `make install` results in `Permission denied` error, you need to prepend
+ it with `sudo`.
 
 # msh3 (msquic) version
 

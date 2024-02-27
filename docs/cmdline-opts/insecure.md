@@ -24,14 +24,14 @@ and proceed without checking.
 
 When this option is not used for protocols using TLS, curl verifies the
 server's TLS certificate before it continues: that the certificate contains
-the right name which matches the host name used in the URL and that the
-certificate has been signed by a CA certificate present in the cert store.
-See this online resource for further details:
+the right name which matches the hostname used in the URL and that the
+certificate has been signed by a CA certificate present in the cert store. See
+this online resource for further details:
 **https://curl.se/docs/sslcerts.html**
 
 For SFTP and SCP, this option makes curl skip the *known_hosts* verification.
 *known_hosts* is a file normally stored in the user's home directory in the
-".ssh" subdirectory, which contains host names and their public keys.
+".ssh" subdirectory, which contains hostnames and their public keys.
 
 **WARNING**: using this option makes the transfer insecure.
 

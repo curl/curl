@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: doh-url
 Arg: <URL>
-Help: Resolve host names over DoH
+Help: Resolve hostnames over DoH
 Added: 7.62.0
 Category: dns
 Multi: single

@@ -41,8 +41,8 @@ host name\b:hostname
 host names\b:hostnames
 file name\b:filename
 file names\b:filenames
-user name\b:username
-user names\b:usernames
+\buser name\b:username
+\buser names\b:usernames
 didn't:did not
 doesn't:does not
 won't:will not

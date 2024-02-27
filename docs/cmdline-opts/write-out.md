@@ -38,10 +38,10 @@ colon). The header contents are exactly as sent over the network, with leading
 and trailing whitespace trimmed (added in 7.84.0).
 
 Select a specific target destination file to write the output to, by using
-*%output{name}* (added in curl 8.3.0) where *name* is the full file name. The
+*%output{name}* (added in curl 8.3.0) where *name* is the full filename. The
 output following that instruction is then written to that file. More than one
 *%output{}* instruction can be specified in the same write-out argument. If
-the file name cannot be created, curl leaves the output destination to the one
+the filename cannot be created, curl leaves the output destination to the one
 used prior to the *%output{}* instruction. Use *%output{\>\>name}* to append
 data to an existing file.
 
@@ -49,7 +49,7 @@ This output is done independently of if the file transfer was successful or
 not.
 
 If the specified action or output specified with this option fails in any way,
-it will not make curl return a (different) error.
+it does not make curl return a (different) error.
 
 **NOTE:** On Windows, the %-symbol is a special symbol used to expand
 environment variables. In batch files, all occurrences of % must be doubled
@@ -74,9 +74,9 @@ The numerical exit code of the transfer. (Added in 7.75.0)
 
 ## `filename_effective`
 The ultimate filename that curl writes out to. This is only meaningful if curl
-is told to write to a file with the --remote-name or --output
-option. It's most useful in combination with the --remote-header-name
-option. (Added in 7.26.0)
+is told to write to a file with the --remote-name or --output option. It is
+most useful in combination with the --remote-header-name option. (Added in
+7.26.0)
 
 ## `ftp_entry_path`
 The initial path curl ended up in when logging on to the remote FTP
