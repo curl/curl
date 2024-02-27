@@ -103,7 +103,7 @@ int main(void)
   /* This is the URL for your mailserver */
   curl_easy_setopt(curl, CURLOPT_URL, "smtp://mail.example.com");
 
-  /* Note that this option is not strictly required, omitting it will result in
+  /* Note that this option is not strictly required, omitting it results in
    * libcurl sending the MAIL FROM command with empty sender data. All
    * autoresponses should have an empty reverse-path, and should be directed
    * to the address in the reverse-path which triggered them. Otherwise, they

@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 /* <DESC>
- * GET a range only of a HTTP resource
+ * GET a range only of an HTTP resource
  * </DESC>
  */
 #include <curl/curl.h>

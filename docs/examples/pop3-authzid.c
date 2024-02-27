@@ -53,7 +53,7 @@ int main(void)
     /* Force PLAIN authentication */
     curl_easy_setopt(curl, CURLOPT_LOGIN_OPTIONS, "AUTH=PLAIN");
 
-    /* This will retrieve message 1 from the user's mailbox */
+    /* This retrieves message 1 from the user's mailbox */
     curl_easy_setopt(curl, CURLOPT_URL, "pop3://pop.example.com/1");
 
     /* Perform the retr */

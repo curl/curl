@@ -57,8 +57,8 @@ int main(void)
   curl_share_setopt(share, CURLSHOPT_LOCKFUNC, my_lock);
   curl_share_setopt(share, CURLSHOPT_UNLOCKFUNC, my_unlock);
 
-  /* Loop the transfer and cleanup the handle properly every lap. This will
-     still reuse connections since the pool is in the shared object! */
+  /* Loop the transfer and cleanup the handle properly every lap. This still
+     reuses connections since the pool is in the shared object! */
 
   for(i = 0; i < 3; i++) {
     CURL *curl = curl_easy_init();
@@ -70,7 +70,7 @@ int main(void)
       /* use the share object */
       curl_easy_setopt(curl, CURLOPT_SHARE, share);
 
-      /* Perform the request, res will get the return code */
+      /* Perform the request, res gets the return code */
       res = curl_easy_perform(curl);
       /* Check for errors */
       if(res != CURLE_OK)

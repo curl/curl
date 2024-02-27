@@ -100,8 +100,7 @@ int main(void)
       return 1;
     }
 
-    /* Extract the socket from the curl handle - we will need it for
-       waiting. */
+    /* Extract the socket from the curl handle - we need it for waiting. */
     res = curl_easy_getinfo(curl, CURLINFO_ACTIVESOCKET, &sockfd);
 
     if(res != CURLE_OK) {

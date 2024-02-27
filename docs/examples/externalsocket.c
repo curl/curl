@@ -106,8 +106,8 @@ int main(void)
   curl = curl_easy_init();
   if(curl) {
     /*
-     * Note that libcurl will internally think that you connect to the host
-     * and port that you specify in the URL option.
+     * Note that libcurl internally thinks that you connect to the host and
+     * port that you specify in the URL option.
      */
     curl_easy_setopt(curl, CURLOPT_URL, "http://99.99.99.99:9999");
 

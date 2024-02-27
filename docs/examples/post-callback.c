@@ -73,7 +73,7 @@ int main(void)
   wt.readptr = data;
   wt.sizeleft = strlen(data);
 
-  /* In windows, this will init the winsock stuff */
+  /* In windows, this inits the winsock stuff */
   res = curl_global_init(CURL_GLOBAL_DEFAULT);
   /* Check for errors */
   if(res != CURLE_OK) {
@@ -141,7 +141,7 @@ int main(void)
     }
 #endif
 
-    /* Perform the request, res will get the return code */
+    /* Perform the request, res gets the return code */
     res = curl_easy_perform(curl);
     /* Check for errors */
     if(res != CURLE_OK)

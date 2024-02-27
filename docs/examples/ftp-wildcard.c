@@ -70,7 +70,7 @@ int main(int argc, char **argv)
   /* callback is called after data from the file have been transferred */
   curl_easy_setopt(handle, CURLOPT_CHUNK_END_FUNCTION, file_is_downloaded);
 
-  /* this callback will write contents into files */
+  /* this callback writes contents into files */
   curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, write_it);
 
   /* put transfer data into callbacks */
