@@ -32,9 +32,9 @@ the **http_proxy** one which is only used lowercase. Note also that some
 systems actually have a case insensitive handling of environment variables and
 then of course **HTTP_PROXY** still works.
 
-An exception exists for the WebSocket **ws** and **wss** URL schemes,
-where libcurl first checks **ws_proxy** or **wss_proxy** but if they are
-not set, it will fall back and try the http and https versions instead if set.
+An exception exists for the WebSocket **ws** and **wss** URL schemes, where
+libcurl first checks **ws_proxy** or **wss_proxy** but if they are not set, it
+falls back and tries the http and https versions instead if set.
 
 ## `ALL_PROXY`
 

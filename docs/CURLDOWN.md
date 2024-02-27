@@ -106,12 +106,12 @@ Write italics like:
     This is *italics*.
 
 Due to how man pages do not support backticks especially formatted, such
-occurrences in the source will instead just use italics in the generated
+occurrences in the source are instead just using italics in the generated
 output:
 
     This `word` appears in italics.
 
-When generating the nroff output, the tooling will remove superfluous newlines,
+When generating the nroff output, the tooling removes superfluous newlines,
 meaning they can be used freely in the source file to make the text more
 readable.
 
@@ -121,10 +121,10 @@ occurrences of `<` or `>` need to be escaped by a leading backslash.
 ## symbols
 
 All mentioned curl symbols that have their own man pages, like
-`curl_easy_perform(3)` will automatically be rendered using italics in the
-output without having to enclose it with asterisks. This helps ensuring that
-they get converted to links properly later in the HTML version on the website,
-as converted with `roffit`. This makes the curldown text easier to read even
-when mentioning many curl symbols.
+`curl_easy_perform(3)` are automatically rendered using italics in the output
+without having to enclose it with asterisks. This helps ensuring that they get
+converted to links properly later in the HTML version on the website, as
+converted with `roffit`. This makes the curldown text easier to read even when
+mentioning many curl symbols.
 
 This auto-linking works for patterns matching `(lib|)curl[^ ]*(3)`.

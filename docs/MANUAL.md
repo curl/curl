@@ -68,8 +68,7 @@ Get a webpage and store in a local file with a specific name:
     curl -o thatpage.html http://www.example.com/
 
 Get a webpage and store in a local file, make the local file get the name of
-the remote document (if no filename part is specified in the URL, this will
-fail):
+the remote document (if no filename part is specified in the URL, this fails):
 
     curl -O http://www.example.com/index.html
 
@@ -104,7 +103,7 @@ This is similar to FTP, but you can use the `--key` option to specify a
 private key to use instead of a password. Note that the private key may itself
 be protected by a password that is unrelated to the login password of the
 remote system; this password is specified using the `--pass` option.
-Typically, curl will automatically extract the public key from the private key
+Typically, curl automatically extracts the public key from the private key
 file, but in cases where curl does not have the proper library support, a
 matching public key file must be specified using the `--pubkey` option.
 
@@ -126,7 +125,7 @@ secure ones out of the ones that the server accepts for the given URL, by
 using `--anyauth`.
 
 **Note**! According to the URL specification, HTTP URLs can not contain a user
-and password, so that style will not work when using curl via a proxy, even
+and password, so that style does not work when using curl via a proxy, even
 though curl allows it at other times. When using a proxy, you _must_ use the
 `-u` style for user and password.
 
@@ -161,7 +160,7 @@ specified as:
     curl --noproxy example.com -x my-proxy:888 http://www.example.com/
 
 If the proxy is specified with `--proxy1.0` instead of `--proxy` or `-x`, then
-curl will use HTTP/1.0 instead of HTTP/1.1 for any `CONNECT` attempts.
+curl uses HTTP/1.0 instead of HTTP/1.1 for any `CONNECT` attempts.
 
 curl also supports SOCKS4 and SOCKS5 proxies with `--socks4` and `--socks5`.
 
@@ -257,11 +256,11 @@ For other ways to do HTTP data upload, see the POST section below.
 
 ## Verbose / Debug
 
-If curl fails where it is not supposed to, if the servers do not let you in, if
-you cannot understand the responses: use the `-v` flag to get verbose
-fetching. Curl will output lots of info and what it sends and receives in
-order to let the user see all client-server interaction (but it will not show you
-the actual data).
+If curl fails where it is not supposed to, if the servers do not let you in,
+if you cannot understand the responses: use the `-v` flag to get verbose
+fetching. Curl outputs lots of info and what it sends and receives in order to
+let the user see all client-server interaction (but it does not show you the
+actual data).
 
     curl -v ftp://ftp.example.com/
 
@@ -283,7 +282,7 @@ extensive.
 For HTTP, you can get the header information (the same as `-I` would show)
 shown before the data by using `-i`/`--include`. Curl understands the
 `-D`/`--dump-header` option when getting files from both FTP and HTTP, and it
-will then store the headers in the specified file.
+then stores the headers in the specified file.
 
 Store the HTTP headers in a separate file (headers.txt in the example):
 
@@ -354,9 +353,9 @@ different content types using the following syntax:
     curl -F "coolfiles=@fil1.gif;type=image/gif,fil2.txt,fil3.html"
       http://www.example.com/postit.cgi
 
-If the content-type is not specified, curl will try to guess from the file
+If the content-type is not specified, curl tries to guess from the file
 extension (it only knows a few), or use the previously specified type (from an
-earlier file if several files are specified in a list) or else it will use the
+earlier file if several files are specified in a list) or else it uses the
 default type `application/octet-stream`.
 
 Emulate a fill-in form with `-F`. Let's say you fill in three fields in a
@@ -475,11 +474,11 @@ non-existing file to trigger the cookie awareness like:
     curl -L -b empty.txt www.example.com
 
 The file to read cookies from must be formatted using plain HTTP headers OR as
-Netscape's cookie file. Curl will determine what kind it is based on the file
-contents. In the above command, curl will parse the header and store the
-cookies received from www.example.com. curl will send to the server the stored
-cookies which match the request as it follows the location. The file
-`empty.txt` may be a nonexistent file.
+Netscape's cookie file. Curl determines what kind it is based on the file
+contents. In the above command, curl parses the header and store the cookies
+received from www.example.com. curl sends the stored cookies which match the
+request to the server as it follows the location. The file `empty.txt` may be
+a nonexistent file.
 
 To read and write cookies from a Netscape cookie file, you can set both `-b`
 and `-c` to use the same file:
@@ -511,8 +510,8 @@ From left-to-right:
  - `Curr.Speed`  - the average transfer speed the last 5 seconds (the first
                    5 seconds of a transfer is based on less time of course.)
 
-The `-#` option will display a totally different progress bar that does not
-need much explanation!
+The `-#` option displays a totally different progress bar that does not need
+much explanation!
 
 ## Speed Limit
 
@@ -549,9 +548,9 @@ Or prevent curl from uploading data faster than 1 megabyte per second:
     curl -T upload --limit-rate 1M ftp://uploads.example.com
 
 When using the `--limit-rate` option, the transfer rate is regulated on a
-per-second basis, which will cause the total transfer speed to become lower
-than the given number. Sometimes of course substantially lower, if your
-transfer stalls during periods.
+per-second basis, which causes the total transfer speed to become lower than
+the given number. Sometimes of course substantially lower, if your transfer
+stalls during periods.
 
 ## Config File
 
@@ -592,9 +591,9 @@ URL by making a config file similar to:
     url = "http://help.with.curl.example.com/curlhelp.html"
 
 You can specify another config file to be read by using the `-K`/`--config`
-flag. If you set config filename to `-` it will read the config from stdin,
-which can be handy if you want to hide options from being visible in process
-tables etc:
+flag. If you set config filename to `-` it reads the config from stdin, which
+can be handy if you want to hide options from being visible in process tables
+etc:
 
     echo "user = user:passwd" | curl -K - http://that.secret.example.com
 
@@ -707,8 +706,8 @@ personal password:
 
     curl -E /path/to/cert.pem:password https://secure.example.com/
 
-If you neglect to specify the password on the command line, you will be
-prompted for the correct password before any data can be received.
+If you neglect to specify the password on the command line, you are prompted
+for the correct password before any data can be received.
 
 Many older HTTPS servers have problems with specific SSL or TLS versions,
 which newer versions of OpenSSL etc use, therefore it is sometimes useful to
@@ -716,7 +715,7 @@ specify what TLS version curl should use.:
 
     curl --tlv1.0 https://secure.example.com/
 
-Otherwise, curl will attempt to use a sensible TLS default version.
+Otherwise, curl attempts to use a sensible TLS default version.
 
 ## Resuming File Transfers
 
@@ -783,11 +782,11 @@ Authentication support is still missing
 ## LDAP
 
 If you have installed the OpenLDAP library, curl can take advantage of it and
-offer `ldap://` support. On Windows, curl will use WinLDAP from Platform SDK
-by default.
+offer `ldap://` support. On Windows, curl uses WinLDAP from Platform SDK by
+default.
 
-Default protocol version used by curl is LDAP version 3. Version 2 will be
-used as a fallback mechanism in case version 3 fails to connect.
+Default protocol version used by curl is LDAP version 3. Version 2 is used as
+a fallback mechanism in case version 3 fails to connect.
 
 LDAP is a complex thing and writing an LDAP query is not an easy
 task. Familiarize yourself with the exact syntax description elsewhere. One
@@ -804,14 +803,14 @@ You also can use authentication when accessing LDAP catalog:
     curl -u user:passwd "ldap://ldap.example.com/o=frontec??sub?mail=*"
     curl "ldap://user:passwd@ldap.example.com/o=frontec??sub?mail=*"
 
-By default, if user and password are provided, OpenLDAP/WinLDAP will use basic
+By default, if user and password are provided, OpenLDAP/WinLDAP uses basic
 authentication. On Windows you can control this behavior by providing one of
 `--basic`, `--ntlm` or `--digest` option in curl command line
 
     curl --ntlm "ldap://user:passwd@ldap.example.com/o=frontec??sub?mail=*"
 
-On Windows, if no user/password specified, auto-negotiation mechanism will be
-used with current logon credentials (SSPI/SPNEGO).
+On Windows, if no user/password specified, auto-negotiation mechanism is used
+with current logon credentials (SSPI/SPNEGO).
 
 ## Environment Variables
 
@@ -830,7 +829,7 @@ set in (only an asterisk, `*` matches all hosts)
     NO_PROXY
 
 If the hostname matches one of these strings, or the host is within the domain
-of one of these strings, transactions with that node will not be done over
+of one of these strings, transactions with that node is not done over the
 proxy. When a domain is used, it needs to start with a period. A user can
 specify that both www.example.com and foo.example.com should not use a proxy
 by setting `NO_PROXY` to `.example.com`. By including the full name you can
@@ -845,7 +844,7 @@ Unix introduced the `.netrc` concept a long time ago. It is a way for a user
 to specify name and password for commonly visited FTP sites in a file so that
 you do not have to type them in each time you visit those sites. You realize
 this is a big security risk if someone else gets hold of your passwords,
-therefore most Unix programs will not read this file unless it is only readable
+therefore most Unix programs do not read this file unless it is only readable
 by yourself (curl does not care though).
 
 Curl supports `.netrc` files if told to (using the `-n`/`--netrc` and
@@ -877,8 +876,8 @@ Then use curl in way similar to:
 
     curl --krb private ftp://krb4site.example.com -u username:fakepwd
 
-There is no use for a password on the `-u` switch, but a blank one will make
-curl ask for one and you already entered the real password to `kinit`/`kauth`.
+There is no use for a password on the `-u` switch, but a blank one makes curl
+ask for one and you already entered the real password to `kinit`/`kauth`.
 
 ## TELNET
 
@@ -888,8 +887,8 @@ command line similar to:
 
     curl telnet://remote.example.com
 
-Enter the data to pass to the server on stdin. The result will be sent to
-stdout or to the file you specify with `-o`.
+Enter the data to pass to the server on stdin. The result is sent to stdout or
+to the file you specify with `-o`.
 
 You might want the `-N`/`--no-buffer` option to switch off the buffered output
 for slow connections or similar.
@@ -911,20 +910,20 @@ accordingly.
 
 ## Persistent Connections
 
-Specifying multiple files on a single command line will make curl transfer all
-of them, one after the other in the specified order.
+Specifying multiple files on a single command line makes curl transfer all of
+them, one after the other in the specified order.
 
-libcurl will attempt to use persistent connections for the transfers so that
-the second transfer to the same host can use the same connection that was
-already initiated and was left open in the previous transfer. This greatly
-decreases connection time for all but the first transfer and it makes a far
-better use of the network.
+libcurl attempts to use persistent connections for the transfers so that the
+second transfer to the same host can use the same connection that was already
+initiated and was left open in the previous transfer. This greatly decreases
+connection time for all but the first transfer and it makes a far better use
+of the network.
 
 Note that curl cannot use persistent connections for transfers that are used
 in subsequent curl invokes. Try to stuff as many URLs as possible on the same
-command line if they are using the same host, as that will make the transfers
+command line if they are using the same host, as that makes the transfers
 faster. If you use an HTTP proxy for file transfers, practically all transfers
-will be persistent.
+are persistent.
 
 ## Multiple Transfers With A Single Command Line
 
@@ -945,11 +944,10 @@ You can also upload multiple files in a similar fashion:
 
 ## IPv6
 
-curl will connect to a server with IPv6 when a host lookup returns an IPv6
-address and fall back to IPv4 if the connection fails. The `--ipv4` and
-`--ipv6` options can specify which address to use when both are
-available. IPv6 addresses can also be specified directly in URLs using the
-syntax:
+curl connects to a server with IPv6 when a host lookup returns an IPv6 address
+and fall back to IPv4 if the connection fails. The `--ipv4` and `--ipv6`
+options can specify which address to use when both are available. IPv6
+addresses can also be specified directly in URLs using the syntax:
 
     http://[2001:1890:1112:1::20]/overview.html
 

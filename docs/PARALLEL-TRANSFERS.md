@@ -5,9 +5,9 @@ parallel.
 
 ## -Z, --parallel
 
-When this command line option is used, curl will perform the transfers given
-to it at the same time. It will do up to `--parallel-max` concurrent
-transfers, with a default value of 50.
+When this command line option is used, curl performs the transfers given to it
+at the same time. It does up to `--parallel-max` concurrent transfers, with a
+default value of 50.
 
 ## Progress meter
 

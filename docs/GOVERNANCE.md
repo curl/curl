@@ -10,9 +10,8 @@ BDFL (Benevolent Dictator For Life) style project.
 
 This setup has been used due to convenience and the fact that it has worked
 fine this far. It is not because someone thinks of it as a superior project
-leadership model. It will also only continue working as long as Daniel manages
-to listen in to what the project and the general user population wants and
-expects from us.
+leadership model. It also only works as long as Daniel manages to listen in to
+what the project and the general user population wants and expects from us.
 
 ## Legal entity
 
@@ -29,13 +28,13 @@ that wrote those parts of the code.
 The curl project is not a democracy, but everyone is entitled to state their
 opinion and may argue for their sake within the community.
 
-All and any changes that have been done or will be done are eligible to bring
-up for discussion, to object to or to praise. Ideally, we find consensus for
-the appropriate way forward in any given situation or challenge.
+All and any changes that have been done or are done are eligible to bring up
+for discussion, to object to or to praise. Ideally, we find consensus for the
+appropriate way forward in any given situation or challenge.
 
 If there is no obvious consensus, a maintainer who's knowledgeable in the
-specific area will take an "executive" decision that they think is the right
-for the project.
+specific area takes an "executive" decision that they think is the right for
+the project.
 
 ## Donations
 
@@ -81,17 +80,17 @@ curl source code repository. Committers are recorded as `Author` in git.
 A maintainer in the curl project is an individual who has been given
 permissions to push commits to one of the git repositories.
 
-Maintainers are free to push commits to the repositories at their own will.
+Maintainers are free to push commits to the repositories at they see fit.
 Maintainers are however expected to listen to feedback from users and any
 change that is non-trivial in size or nature *should* be brought to the
 project as a Pull-Request (PR) to allow others to comment/object before merge.
 
 ## Former maintainers
 
-A maintainer who stops being active in the project will at some point get
-their push permissions removed. We do this for security reasons but also to
-make sure that we always have the list of maintainers as "the team that push
-stuff to curl".
+A maintainer who stops being active in the project gets their push permissions
+removed at some point. We do this for security reasons but also to make sure
+that we always have the list of maintainers as "the team that push stuff to
+curl".
 
 Getting push permissions removed is not a punishment. Everyone who ever worked
 on maintaining curl is considered a hero, for all time hereafter.
@@ -100,7 +99,7 @@ on maintaining curl is considered a hero, for all time hereafter.
 
 We have a security team. That is the team of people who are subscribed to the
 curl-security mailing list; the receivers of security reports from users and
-developers. This list of people will vary over time but should be skilled
+developers. This list of people varies over time but they are all skilled
 developers familiar with the curl project.
 
 The security team works best when it consists of a small set of active
@@ -172,9 +171,8 @@ different individuals and over time.
 If you think you can help making the project better by shouldering some
 maintaining responsibilities, then please get in touch.
 
-You will be expected to be familiar with the curl project and its ways of
-working. You need to have gotten a few quality patches merged as a proof of
-this.
+You are expected to be familiar with the curl project and its ways of working.
+You need to have gotten a few quality patches merged as a proof of this.
 
 ### Stop being a maintainer
 

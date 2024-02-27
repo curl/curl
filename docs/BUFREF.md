@@ -44,8 +44,7 @@ void Curl_bufref_set(struct bufref *br, const void *buffer, size_t length,
 
 Releases the previously referenced buffer, then assigns the new `buffer` to
 the structure, associated with its `destructor` function. The latter can be
-specified as `NULL`: this will be the case when the referenced buffer is
-static.
+specified as `NULL`: this is the case when the referenced buffer is static.
 
 if `buffer` is NULL, `length` must be zero.
 

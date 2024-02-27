@@ -25,7 +25,7 @@ authentication certificates are extracted. These are then processed with the
 OpenSSL command line tool to produce the final ca-bundle output file.
 
 The default *output* name is **ca-bundle.crt**. By setting it to '-' (a single
-dash) you will get the output sent to STDOUT instead of a file.
+dash) you get the output sent to STDOUT instead of a file.
 
 The PEM format this scripts uses for output makes the result readily available
 for use by just about all OpenSSL or GnuTLS powered applications, such as curl
@@ -56,8 +56,8 @@ print version info about used modules
 
 ## -k
 
-Allow insecure data transfer. By default (since 1.27) this command will fail
-if the HTTPS transfer fails. This overrides that decision (and opens for
+Allow insecure data transfer. By default (since 1.27) this command fails if
+the HTTPS transfer fails. This overrides that decision (and opens for
 man-in-the-middle attacks).
 
 ## -l
@@ -68,8 +68,8 @@ print license info about *certdata.txt*
 
 (Added in 1.26) Include meta data comments in the output. The meta data is
 specific information about each certificate that is stored in the original
-file as comments and using this option will make those comments get passed on
-to the output file. The meta data is not parsed in any way by mk-ca-bundle.
+file as comments and using this option makes those comments get passed on to
+the output file. The meta data is not parsed in any way by mk-ca-bundle.
 
 ## -n
 

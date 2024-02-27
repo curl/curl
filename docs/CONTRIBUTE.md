@@ -35,14 +35,14 @@ must use "GPL compatible" licenses (as we want to allow users to use libcurl
 properly in GPL licensed environments).
 
 When changing existing source code, you do not alter the copyright of the
-original file(s). The copyright will still be owned by the original creator(s)
-or those who have been assigned copyright by the original author(s).
+original file(s). The copyright is still owned by the original creator(s) or
+those who have been assigned copyright by the original author(s).
 
 By submitting a patch to the curl project, you are assumed to have the right
 to the code and to be allowed by your employer or whatever to hand over that
-patch/code to us. We will credit you for your changes as far as possible, to
-give credit but also to keep a trace back to who made what changes. Please
-always provide us with your full real name when contributing,
+patch/code to us. We credit you for your changes as far as possible, to give
+credit but also to keep a trace back to who made what changes. Please always
+provide us with your full real name when contributing,
 
 ## What To Read
 
@@ -50,10 +50,10 @@ Source code, the man pages, the [INTERNALS
 document](https://curl.se/dev/internals.html),
 [TODO](https://curl.se/docs/todo.html),
 [KNOWN_BUGS](https://curl.se/docs/knownbugs.html) and the [most recent
-changes](https://curl.se/dev/sourceactivity.html) in git. Just lurking on
-the [curl-library mailing
-list](https://curl.se/mail/list.cgi?list=curl-library) will give you a
-lot of insights on what's going on right now. Asking there is a good idea too.
+changes](https://curl.se/dev/sourceactivity.html) in git. Just lurking on the
+[curl-library mailing list](https://curl.se/mail/list.cgi?list=curl-library)
+gives you a lot of insights on what's going on right now. Asking there is a
+good idea too.
 
 ## Write a good patch
 
@@ -113,10 +113,10 @@ generated from the nroff/ASCII versions.
 
 Since the introduction of the test suite, we can quickly verify that the main
 features are working as they are supposed to. To maintain this situation and
-improve it, all new features and functions that are added need to be tested
-in the test suite. Every feature that is added should get at least one valid
-test case that verifies that it works as documented. If every submitter also
-posts a few test cases, it will not end up as a heavy burden on a single person.
+improve it, all new features and functions that are added need to be tested in
+the test suite. Every feature that is added should get at least one valid test
+case that verifies that it works as documented. If every submitter also posts
+a few test cases, it does not end up a heavy burden on a single person.
 
 If you do not have test cases or perhaps you have done something that is hard
 to write tests for, do explain exactly how you have otherwise tested and
@@ -131,19 +131,19 @@ GitHub](https://github.com/curl/curl/pulls), but you can also send your plain
 patch to [the curl-library mailing
 list](https://curl.se/mail/list.cgi?list=curl-library).
 
-If you opt to post a patch on the mailing list, chances are someone will
-convert it into a pull request for you, to have the CI jobs verify it proper
-before it can be merged. Be prepared that some feedback on the proposed change
-might then come on GitHub.
+If you opt to post a patch on the mailing list, chances are someone converts
+it into a pull request for you, to have the CI jobs verify it proper before it
+can be merged. Be prepared that some feedback on the proposed change might
+then come on GitHub.
 
-Your change will be reviewed and discussed and you will be expected to correct
-flaws pointed out and update accordingly, or the change risks stalling and
+Your changes be reviewed and discussed and you are expected to correct flaws
+pointed out and update accordingly, or the change risks stalling and
 eventually just getting deleted without action. As a submitter of a change,
 you are the owner of that change until it has been merged.
 
 Respond on the list or on GitHub about the change and answer questions and/or
-fix nits/flaws. This is important. We will take lack of replies as a sign that
-you are not anxious to get your patch accepted and we tend to simply drop such
+fix nits/flaws. This is important. We take lack of replies as a sign that you
+are not anxious to get your patch accepted and we tend to simply drop such
 changes.
 
 ### About pull requests
@@ -157,7 +157,7 @@ git commit that is easy to merge and they are easy to track and not that easy
 to lose in the flood of many emails, like they sometimes do on the mailing
 lists.
 
-Every pull request submitted will automatically be tested in several different
+Every pull request submitted is automatically tested in several different
 ways. [See the CI document for more
 information](https://github.com/curl/curl/blob/master/tests/CI.md).
 
@@ -219,10 +219,10 @@ A short guide to how to write git commit messages in the curl project.
                   has already been closed]
     [Ref: URL to more information about the commit; use Bug: instead for
         a reference to a bug on another bug tracker]
-    [Fixes #1234 - if this closes a GitHub issue; GitHub will actually
-        close the issue once this commit is merged]
-    [Closes #1234 - if this closes a GitHub PR; GitHub will actually
-        close the PR once this commit is merged]
+    [Fixes #1234 - if this closes a GitHub issue; GitHub closes the issue once
+        this commit is merged]
+    [Closes #1234 - if this closes a GitHub PR; GitHub closes the PR once this
+        commit is merged]
     ---- stop ----
 
 The first line is a succinct description of the change:
@@ -248,10 +248,10 @@ a previous commit; saying `{userid} on github` is OK.
 ### Write Access to git Repository
 
 If you are a frequent contributor, you may be given push access to the git
-repository and then you will be able to push your changes straight into the git
+repository and then you are able to push your changes straight into the git
 repo instead of sending changes as pull requests or by mail as patches.
 
-Just ask if this is what you would want. You will be required to have posted
+Just ask if this is what you would want. You are required to have posted
 several high quality patches first, before you can be granted push access.
 
 ### How To Make a Patch with git
@@ -302,9 +302,9 @@ all kinds of Unixes and Windows.
 
 ## Update copyright and license information
 
-There is a CI job called **REUSE compliance / check** that will run on every
-pull request and commit to verify that the *REUSE state* of all files are
-still fine.
+There is a CI job called **REUSE compliance / check** that runs on every pull
+request and commit to verify that the *REUSE state* of all files are still
+fine.
 
 This means that all files need to have their license and copyright information
 clearly stated. Ideally by having the standard curl source code header, with

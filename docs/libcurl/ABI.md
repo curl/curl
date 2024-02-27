@@ -28,13 +28,13 @@ ABI - Application Binary Interface
 
 ## SONAME Bumps
 
- Whenever there are changes done to the library that will cause an ABI
- breakage, that may require your application to get attention or possibly be
- changed to adhere to new things, we will bump the SONAME. Then the library
- will get a different output name and thus can in fact be installed in
- parallel with an older installed lib (on most systems). Thus, old
- applications built against the previous ABI version will remain working and
- using the older lib, while newer applications build and use the newer one.
+ Whenever there are changes done to the library that causes an ABI breakage,
+ that may require your application to get attention or possibly be changed to
+ adhere to new things, we bump the SONAME. Then the library gets a different
+ output name and thus can in fact be installed in parallel with an older
+ installed lib (on most systems). Thus, old applications built against the
+ previous ABI version remains working and using the older lib, while newer
+ applications build and use the newer one.
 
  During the first seven years of libcurl releases, there have only been four
  ABI breakages.
@@ -46,7 +46,7 @@ ABI - Application Binary Interface
 
  Going to an older libcurl version from one you are currently using can be a
  tricky thing. Mostly we add features and options to newer libcurls as that
- will not break ABI or hamper existing applications. This has the implication
+ does not break ABI or hamper existing applications. This has the implication
  that going backwards may get you in a situation where you pick a libcurl that
  does not support the options your application needs. Or possibly you even
  downgrade so far so you cross an ABI break border and thus a different

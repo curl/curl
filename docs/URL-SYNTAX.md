@@ -30,8 +30,8 @@ same behavior!
 
 For example, if you use one parser to check if a URL uses a good hostname or
 the correct auth field, and then pass on that same URL to a *second* parser,
-there will always be a risk it treats the same URL differently. There is no
-right and wrong in URL land, only differences of opinions.
+there is always a risk it treats the same URL differently. There is no right
+and wrong in URL land, only differences of opinions.
 
 libcurl offers a separate API to its URL parser for this reason, among others.
 
@@ -55,8 +55,8 @@ security concerns:
 ## "RFC 3986 plus"
 
 curl recognizes a URL syntax that we call "RFC 3986 plus". It is grounded on
-the well established RFC 3986 to make sure previously written command lines and
-curl using scripts will remain working.
+the well established RFC 3986 to make sure previously written command lines
+and curl using scripts remain working.
 
 curl's URL parser allows a few deviations from the spec in order to
 inter-operate better with URLs that appear in the wild.
@@ -92,8 +92,7 @@ curl supports "URLs" that do not start with a scheme. This is not supported by
 any of the specifications. This is a shortcut to entering URLs that was
 supported by browsers early on and has been mimicked by curl.
 
-Based on what the hostname starts with, curl will "guess" what protocol to
-use:
+Based on what the hostname starts with, curl "guesses" what protocol to use:
 
  - `ftp.` means FTP
  - `dict.` means DICT
@@ -201,8 +200,8 @@ If there is a colon after the hostname, that should be followed by the port
 number to use. 1 - 65535. curl also supports a blank port number field - but
 only if the URL starts with a scheme.
 
-If the port number is not specified in the URL, curl will used a default port
-based on the provide scheme:
+If the port number is not specified in the URL, curl uses a default port
+number based on the provide scheme:
 
 DICT 2628, FTP 21, FTPS 990, GOPHER 70, GOPHERS 70, HTTP 80, HTTPS 443,
 IMAP 132, IMAPS 993, LDAP 369, LDAPS 636, MQTT 1883, POP3 110, POP3S 995,
@@ -216,7 +215,7 @@ SMTP 25, SMTPS 465, TELNET 23, TFTP 69
 The path part of an FTP request specifies the file to retrieve and from which
 directory. If the file part is omitted then libcurl downloads the directory
 listing for the directory specified. If the directory is omitted then the
-directory listing for the root / home directory will be returned.
+directory listing for the root / home directory is returned.
 
 FTP servers typically put the user in its "home directory" after login, which
 then differs between users. To explicitly specify the root directory of an FTP
@@ -231,14 +230,14 @@ to read or write such a path.
 
 curl only allows the hostname part of a FILE URL to be one out of these three
 alternatives: `localhost`, `127.0.0.1` or blank ("", zero characters).
-Anything else will make curl fail to parse the URL.
+Anything else makes curl fail to parse the URL.
 
 ### Windows-specific FILE details
 
 curl accepts that the FILE URL's path starts with a "drive letter". That is a
 single letter `a` to `z` followed by a colon or a pipe character (`|`).
 
-The Windows operating system itself will convert some file accesses to perform
+The Windows operating system itself converts some file accesses to perform
 network accesses over SMB/CIFS, through several different file path patterns.
 This way, a `file://` URL passed to curl *might* be converted into a network
 access inadvertently and unknowingly to curl. This is a Windows feature curl
@@ -321,7 +320,7 @@ Search for the `DN` as `My Organization`:
 
     ldap://ldap.example.com/o=My%20Organization
 
-the same search but will only return `postalAddress` attributes:
+the same search but only return `postalAddress` attributes:
 
     ldap://ldap.example.com/o=My%20Organization?postalAddress
 
@@ -352,7 +351,7 @@ To specify a path relative to the user's home directory on the server, prepend
 The path part of an SFTP URL specifies the file to retrieve or upload. If the
 path ends with a slash (`/`) then a directory listing is returned instead of a
 file. If the path is omitted entirely then the directory listing for the root
-/ home directory will be returned.
+/ home directory is returned.
 
 ## SMB
 The path part of a SMB request specifies the file to retrieve and from what
@@ -368,8 +367,8 @@ curl supports SMB version 1 (only)
 ## SMTP
 
 The path part of a SMTP request specifies the hostname to present during
-communication with the mail server. If the path is omitted, then libcurl will
-attempt to resolve the local computer's hostname. However, this may not
+communication with the mail server. If the path is omitted, then libcurl
+attempts to resolve the local computer's hostname. However, this may not
 return the fully qualified domain name that is required by some mail servers
 and specifying this path allows you to set an alternative name, such as your
 machine's fully qualified domain name, which you might have obtained from an
@@ -385,7 +384,6 @@ traditional URL, followed by a space and a series of space-separated
 `name=value` pairs.
 
 While space is not typically a "legal" letter, libcurl accepts them. When a
-user wants to pass in a `#` (hash) character it will be treated as a fragment
-and get cut off by libcurl if provided literally. You will instead have to
-escape it by providing it as backslash and its ASCII value in hexadecimal:
-`\23`.
+user wants to pass in a `#` (hash) character it is treated as a fragment and
+it gets cut off by libcurl if provided literally. You have to escape it by
+providing it as backslash and its ASCII value in hexadecimal: `\23`.

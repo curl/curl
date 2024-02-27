@@ -25,8 +25,8 @@ HTTP/3 support in curl is considered **EXPERIMENTAL** until further notice
 when built to use *quiche* or *msh3*. Only the *ngtcp2* backend is not
 experimental.
 
-Further development and tweaking of the HTTP/3 support in curl will happen in
-the master branch using pull-requests, just like ordinary changes.
+Further development and tweaking of the HTTP/3 support in curl happens in the
+master branch using pull-requests, just like ordinary changes.
 
 To fix before we remove the experimental label:
 
@@ -273,11 +273,10 @@ Build msh3:
      % cmake --build . --config Release
      % cmake --install . --config Release
 
-**Note** - On Windows, Schannel will be used for TLS support by default. If
-you with to use (the quictls fork of) OpenSSL, specify the
-`-DQUIC_TLS=openssl` option to the generate command above. Also note that
-OpenSSL brings with it an additional set of build dependencies not specified
-here.
+**Note** - On Windows, Schannel is used for TLS support by default. If you
+with to use (the quictls fork of) OpenSSL, specify the `-DQUIC_TLS=openssl`
+option to the generate command above. Also note that OpenSSL brings with it an
+additional set of build dependencies not specified here.
 
 Build curl (in [Visual Studio Command
 prompt](../winbuild/README.md#open-a-command-prompt)):
@@ -314,10 +313,10 @@ See this [list of public HTTP/3 servers](https://bagder.github.io/HTTP3-test/)
 
 ### HTTPS eyeballing
 
-With option `--http3` curl will attempt earlier HTTP versions as well should
-the connect attempt via HTTP/3 not succeed "fast enough". This strategy is
-similar to IPv4/6 happy eyeballing where the alternate address family is used
-in parallel after a short delay.
+With option `--http3` curl attempts earlier HTTP versions as well should the
+connect attempt via HTTP/3 not succeed "fast enough". This strategy is similar
+to IPv4/6 happy eyeballing where the alternate address family is used in
+parallel after a short delay.
 
 The IPv4/6 eyeballing has a default of 200ms and you may override that via
 `--happy-eyeballs-timeout-ms value`. Since HTTP/3 is still relatively new, we
@@ -336,8 +335,8 @@ So, without you specifying anything, the hard timeout is 200ms and the soft is 1
    in less than 100ms.
  * When QUIC is not supported (or UDP does not work for this network path), no
    reply is seen and the HTTP/2 TLS+TCP connection starts 100ms later.
- * In the worst case, UDP replies start before 100ms, but drag on. This will
-   start the TLS+TCP connection after 200ms.
+ * In the worst case, UDP replies start before 100ms, but drag on. This starts
+   the TLS+TCP connection after 200ms.
  * When the QUIC handshake fails, the TLS+TCP connection is attempted right
    away. For example, when the QUIC server presents the wrong certificate.
 
@@ -345,9 +344,9 @@ The whole transfer only fails, when **both** QUIC and TLS+TCP fail to
 handshake or time out.
 
 Note that all this happens in addition to IP version happy eyeballing. If the
-name resolution for the server gives more than one IP address, curl will try
-all those until one succeeds - just as with all other protocols. If those IP
-addresses contain both IPv6 and IPv4, those attempts will happen, delayed, in
+name resolution for the server gives more than one IP address, curl tries all
+those until one succeeds - just as with all other protocols. If those IP
+addresses contain both IPv6 and IPv4, those attempts happen, delayed, in
 parallel (the actual eyeballing).
 
 ## Known Bugs

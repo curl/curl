@@ -9,11 +9,11 @@
 # Building with CMake
 
 This document describes how to configure, build and install curl and libcurl
-from source code using the CMake build tool. To build with CMake, you will
-of course have to first install CMake. The minimum required version of CMake
-is specified in the file `CMakeLists.txt` found in the top of the curl
-source tree. Once the correct version of CMake is installed you can follow
-the instructions below for the platform you are building on.
+from source code using the CMake build tool. To build with CMake, you of
+course first have to install CMake. The minimum required version of CMake is
+specified in the file `CMakeLists.txt` found in the top of the curl source
+tree. Once the correct version of CMake is installed you can follow the
+instructions below for the platform you are building on.
 
 CMake builds can be configured either from the command line, or from one of
 CMake's GUIs.
@@ -50,7 +50,7 @@ that is apart from the source tree.
        $ cmake -B .
 
  - Build in a separate directory (parallel to the curl source tree in this
-   example). The build directory will be created for you.
+   example). The build directory is created for you.
 
        $ cmake -B ../curl-build
 
@@ -74,9 +74,9 @@ CMake comes with a curses based interface called `ccmake`. To run `ccmake`
 on a curl use the instructions for the command line cmake, but substitute
 `ccmake` for `cmake`.
 
-This will bring up a curses interface with instructions on the bottom of the
-screen. You can press the "c" key to configure the project, and the "g" key
-to generate the project. After the project is generated, you can run make.
+This brings up a curses interface with instructions on the bottom of the
+screen. You can press the "c" key to configure the project, and the "g" key to
+generate the project. After the project is generated, you can run make.
 
 ## Using `cmake-gui`
 

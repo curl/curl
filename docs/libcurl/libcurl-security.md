@@ -365,7 +365,7 @@ hard to avoid.
 
 # Active FTP passes on the local IP address
 
-If you use curl/libcurl to do *active* FTP transfers, curl will pass on the
+If you use curl/libcurl to do *active* FTP transfers, curl passes on the
 address of your local IP to the remote server - even when for example using a
 SOCKS or HTTP proxy in between curl and the target server.
 

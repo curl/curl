@@ -21,8 +21,8 @@ security vulnerabilities. The amount of money that is rewarded depends on how
 serious the flaw is determined to be.
 
 Since 2021, the Bug Bounty is managed in association with the Internet Bug
-Bounty and they will set the reward amounts. If it would turn out that they
-set amounts that are way lower than we can accept, the curl project intends to
+Bounty and they set the reward amounts. If it would turn out that they set
+amounts that are way lower than we can accept, the curl project intends to
 "top up" rewards.
 
 In 2022, typical "Medium" rated vulnerabilities have been rewarded 2,400 USD
@@ -40,7 +40,7 @@ Vulnerabilities in features that are off by default and documented as
 experimental are not eligible for a reward.
 
 The vulnerability has to be fixed and publicly announced (by the curl project)
-before a bug bounty will be considered.
+before a bug bounty is considered.
 
 Once the vulnerability has been published by curl, the researcher can request
 their bounty from the [Internet Bug Bounty](https://hackerone.com/ibb).
@@ -63,9 +63,9 @@ bounty or not.
 
 ## How are vulnerabilities graded?
 
-The grading of each reported vulnerability that makes a reward claim will be
-performed by the curl security team. The grading will be based on the CVSS
-(Common Vulnerability Scoring System) 3.0.
+The grading of each reported vulnerability that makes a reward claim is
+performed by the curl security team. The grading is based on the CVSS (Common
+Vulnerability Scoring System) 3.0.
 
 ## How are reward amounts determined?
 

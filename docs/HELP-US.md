@@ -40,8 +40,8 @@ In the issue tracker we occasionally mark bugs with [help
 wanted](https://github.com/curl/curl/labels/help%20wanted), as a sign that the
 bug is acknowledged to exist and that there is nobody known to work on this
 issue for the moment. Those are bugs that are fine to "grab" and provide a
-pull request for. The complexity level of these will of course vary, so pick
-one that piques your interest.
+pull request for. The complexity level of these of course varies, so pick one
+that piques your interest.
 
 ## Work on known bugs
 
@@ -77,13 +77,12 @@ brainstorming on specific ways to do the implementation etc.
 
 You can also come up with a completely new thing you think we should do. Or
 not do. Or fix. Or add to the project. You then either bring it to the mailing
-list first to see if people will shoot down the idea at once, or you bring a
-first draft of the idea as a pull request and take the discussion there around
-the specific implementation. Either way is fine.
+list first to see if people shoot down the idea at once, or you bring a first
+draft of the idea as a pull request and take the discussion there around the
+specific implementation. Either way is fine.
 
 ## CONTRIBUTE
 
-We offer [guidelines](https://curl.se/dev/contribute.html) that are
-suitable to be familiar with before you decide to contribute to curl. If
-you are used to open source development, you will probably not find many
-surprises there.
+We offer [guidelines](https://curl.se/dev/contribute.html) that are suitable
+to be familiar with before you decide to contribute to curl. If you are used
+to open source development, you probably do not find many surprises there.
