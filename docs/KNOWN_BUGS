@@ -61,6 +61,7 @@ problems may have been fixed or changed somewhat since this was written.
 
  7. FTP
  7.1 FTP upload fails if remebered dir is deleted
+ 7.2 Implicit FTPS upload timeout
  7.3 FTP with NOBODY and FAILONERROR
  7.4 FTP with ACCT
  7.11 FTPS upload data loss with TLS 1.3
@@ -382,6 +383,10 @@ problems may have been fixed or changed somewhat since this was written.
  well if it was indeed deleted in the mean time.
 
  https://github.com/curl/curl/issues/12181
+
+7.2 Implicit FTPS upload timeout
+
+ https://github.com/curl/curl/issues/11720
 
 7.3 FTP with NOBODY and FAILONERROR
 
