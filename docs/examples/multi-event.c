@@ -98,7 +98,7 @@ static void check_multi_info(void)
     case CURLMSG_DONE:
       /* Do not use message data after calling curl_multi_remove_handle() and
          curl_easy_cleanup(). As per curl_multi_info_read() docs:
-         "WARNING: The data the returned pointer points to will not survive
+         "WARNING: The data the returned pointer points to does not survive
          calling curl_multi_cleanup, curl_multi_remove_handle or
          curl_easy_cleanup." */
       easy_handle = message->easy_handle;
@@ -155,8 +155,7 @@ static int start_timeout(CURLM *multi, long timeout_ms, void *userp)
   }
   else {
     if(timeout_ms == 0)
-      timeout_ms = 1; /* 0 means directly call socket_action, but we will do it
-                         in a bit */
+      timeout_ms = 1; /* 0 means call socket_action asap */
     struct timeval tv;
     tv.tv_sec = timeout_ms / 1000;
     tv.tv_usec = (timeout_ms % 1000) * 1000;

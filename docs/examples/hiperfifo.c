@@ -358,8 +358,8 @@ static void new_conn(char *url, GlobalInfo *g)
   rc = curl_multi_add_handle(g->multi, conn->easy);
   mcode_or_die("new_conn: curl_multi_add_handle", rc);
 
-  /* note that the add_handle() will set a time-out to trigger soon so that
-     the necessary socket_action() call will be called by this app */
+  /* note that the add_handle() sets a time-out to trigger soon so that
+     the necessary socket_action() gets called */
 }
 
 /* This gets called whenever data is received from the fifo */
@@ -454,8 +454,9 @@ int main(int argc, char **argv)
 
   event_base_dispatch(g.evbase);
 
-  /* this, of course, will not get called since only way to stop this program
-     is via ctrl-C, but it is here to show how cleanup /would/ be done. */
+  /* this, of course, does not get called since the only way to stop this
+     program is via ctrl-C, but it is here to show how cleanup /would/ be
+     done. */
   clean_fifo(&g);
   event_del(&g.timer_event);
   event_base_free(g.evbase);

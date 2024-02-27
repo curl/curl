@@ -47,10 +47,10 @@ int main(void)
   FILE *ftpfile;
   FILE *respfile;
 
-  /* local file name to store the file as */
+  /* local filename to store the file as */
   ftpfile = fopen(FTPBODY, "wb"); /* b is binary, needed on win32 */
 
-  /* local file name to store the FTP server's response lines in */
+  /* local filename to store the FTP server's response lines in */
   respfile = fopen(FTPHEADERS, "wb"); /* b is binary, needed on win32 */
 
   curl = curl_easy_init();

@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 /* <DESC>
- * Use CURLOPT_CONNECT_TO to connect to "wrong" host name
+ * Use CURLOPT_CONNECT_TO to connect to "wrong" hostname
  * </DESC>
  */
 #include <stdio.h>
@@ -39,8 +39,8 @@ int main(void)
     request, PORT is the port of the request, CONNECT-TO-HOST is the host name
     to connect to, and CONNECT-TO-PORT is the port to connect to.
    */
-  /* instead of curl.se:443, it will resolve and use example.com:443 but in
-     other aspects work as if it still is curl.se */
+  /* instead of curl.se:443, it resolves and uses example.com:443 but in other
+     aspects work as if it still is curl.se */
   struct curl_slist *host = curl_slist_append(NULL,
                                               "curl.se:443:example.com:443");
 
@@ -51,13 +51,13 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL, "https://curl.se/");
 
     /* since this connects to the wrong host, checking the host name in the
-       server certificate will fail, so unless we disable the check libcurl
+       server certificate fails, so unless we disable the check libcurl
        returns CURLE_PEER_FAILED_VERIFICATION */
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
     /* Letting the wrong host name in the certificate be okay, the transfer
-       goes through but will (most likely) cause a 404 or similar because it
-       sends an unknown name in the Host: header field */
+       goes through but (most likely) causes a 404 or similar because it sends
+       an unknown name in the Host: header field */
     res = curl_easy_perform(curl);
 
     /* always cleanup */
