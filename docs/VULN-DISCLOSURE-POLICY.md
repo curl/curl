@@ -17,8 +17,8 @@ The typical process for handling a new security vulnerability is as follows.
 
 No information should be made public about a vulnerability until it is
 formally announced at the end of this process. That means, for example, that a
-bug tracker entry must NOT be created to track the issue since that will make
-the issue public and it should not be discussed on any of the project's public
+bug tracker entry must NOT be created to track the issue since that makes the
+issue public and it should not be discussed on any of the project's public
 mailing lists. Messages associated with any commits should not make any
 reference to the security nature of the commit if done prior to the public
 announcement.
@@ -108,7 +108,7 @@ its way of working. You must have been around for a good while and you should
 have no plans of vanishing in the near future.
 
 We do not make the list of participants public mostly because it tends to vary
-somewhat over time and a list somewhere will only risk getting outdated.
+somewhat over time and a list somewhere only risks getting outdated.
 
 ## Publishing Security Advisories
 
@@ -255,8 +255,8 @@ data. We consider this functionality a best-effort and omissions are not
 security vulnerabilities.
 
  - not all systems allow the arguments to be blanked in the first place
- - since curl blanks the argument itself they will be readable for a short
-   moment no matter what
+ - since curl blanks the argument itself they area readable for a short moment
+   no matter what
  - virtually every argument can contain sensitive data, depending on use
  - blanking all arguments would make it impractical for users to differentiate
    curl command lines in process listings

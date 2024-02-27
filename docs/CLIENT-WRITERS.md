@@ -82,13 +82,27 @@ With these writers always in place, libcurl's protocol handlers automatically ha
 
 ## Enhanced Use
 
-HTTP is the protocol in curl that makes use of the client writer chain by adding writers to it. When the `libcurl` application set `CURLOPT_ACCEPT_ENCODING` (as `curl` does with `--compressed`), the server is offered an `Accept-Encoding` header with the algorithms supported. The server then may choose to send the response body compressed. For example using `gzip` or `brotli` or even both.
+HTTP is the protocol in curl that makes use of the client writer chain by
+adding writers to it. When the `libcurl` application set
+`CURLOPT_ACCEPT_ENCODING` (as `curl` does with `--compressed`), the server is
+offered an `Accept-Encoding` header with the algorithms supported. The server
+then may choose to send the response body compressed. For example using `gzip`
+or `brotli` or even both.
 
-In the server's response, there then will be a `Content-Encoding` header listing the encoding applied. If supported by `libcurl` it will then decompress the content before writing it out to the client. How does it do that?
+In the server's response, if there is a `Content-Encoding` header listing the
+encoding applied. If supported by `libcurl` it then decompresses the content
+before writing it out to the client. How does it do that?
 
-The HTTP protocol will add client writers in phase `CURL_CW_CONTENT_DECODE` on seeing such a header. For each encoding listed, it will add the corresponding writer. The response from the server is then passed through `Curl_client_write()` to the writers that decode it. If several encodings had been applied the writer chain decodes them in the proper order.
+The HTTP protocol adds client writers in phase `CURL_CW_CONTENT_DECODE` on
+seeing such a header. For each encoding listed, it adds the corresponding
+writer. The response from the server is then passed through
+`Curl_client_write()` to the writers that decode it. If several encodings had
+been applied the writer chain decodes them in the proper order.
 
-When the server provides a `Content-Length` header, that value applies to the *compressed* content. So length checks on the response bytes must happen *before* it gets decoded. That is why this check happens in phase `CURL_CW_PROTOCOL` which always is ordered before writers in phase `CURL_CW_CONTENT_DECODE`.
+When the server provides a `Content-Length` header, that value applies to the
+*compressed* content. Length checks on the response bytes must happen *before*
+it gets decoded. That is why this check happens in phase `CURL_CW_PROTOCOL`
+which always is ordered before writers in phase `CURL_CW_CONTENT_DECODE`.
 
 What else?
 

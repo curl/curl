@@ -123,26 +123,26 @@ server, do one of the following:
 
 Neglecting to use one of the above methods when dealing with a server using a
 certificate that is not signed by one of the certificates in the installed CA
-certificate store, will cause SSL to report an error ("certificate verify
-failed") during the handshake and SSL will then refuse further communication
-with that server.
+certificate store, causes SSL to report an error (`certificate verify failed`)
+during the handshake and SSL then refuses further communication with that
+server.
 
 Certificate Verification with Schannel and Secure Transport
 -----------------------------------------------------------
 
 If libcurl was built with Schannel (Microsoft's native TLS engine) or Secure
-Transport (Apple's native TLS engine) support, then libcurl will still perform
-peer certificate verification, but instead of using a CA cert bundle, it will
-use the certificates that are built into the OS. These are the same
-certificates that appear in the Internet Options control panel (under Windows)
-or Keychain Access application (under OS X). Any custom security rules for
-certificates will be honored.
+Transport (Apple's native TLS engine) support, then libcurl still performs
+peer certificate verification, but instead of using a CA cert bundle, it uses
+the certificates that are built into the OS. These are the same certificates
+that appear in the Internet Options control panel (under Windows) or Keychain
+Access application (under OS X). Any custom security rules for certificates
+are honored.
 
-Schannel will run CRL checks on certificates unless peer verification is
-disabled. Secure Transport on iOS will run OCSP checks on certificates unless
-peer verification is disabled. Secure Transport on OS X will run either OCSP
-or CRL checks on certificates if those features are enabled, and this behavior
-can be adjusted in the preferences of Keychain Access.
+Schannel runs CRL checks on certificates unless peer verification is disabled.
+Secure Transport on iOS runs OCSP checks on certificates unless peer
+verification is disabled. Secure Transport on OS X runs either OCSP or CRL
+checks on certificates if those features are enabled, and this behavior can be
+adjusted in the preferences of Keychain Access.
 
 HTTPS proxy
 -----------

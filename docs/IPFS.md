@@ -60,21 +60,22 @@ If the `IPFS_GATEWAY` environment variable is found, its value is used as
 gateway.
 
 ### Automatic gateway detection
-When you provide no additional details to cURL then cURL will:
 
-1. First look for the `IPFS_GATEWAY` environment variable and use that if it
+When you provide no additional details to cURL then it:
+
+1. First looks for the `IPFS_GATEWAY` environment variable and use that if it
    is set.
-2. Look for the file: `~/.ipfs/gateway`. If it can find that file then it
+2. Looks for the file: `~/.ipfs/gateway`. If it can find that file then it
    means that you have a local gateway running and that file contains the URL
    to your local gateway.
 
-If cURL fails you will be presented with an error message and a link to this
-page to the option most applicable to solving the issue.
+If cURL fails, you are presented with an error message and a link to this page
+to the option most applicable to solving the issue.
 
 ### `--ipfs-gateway` argument
 
 You can also provide a `--ipfs-gateway` argument to cURL. This overrules any
-other gateway setting. curl will not fallback to the other options if the
+other gateway setting. curl does not fallback to the other options if the
 provided gateway did not work.
 
 ## Gateway redirects
@@ -91,11 +92,12 @@ Which would be translated to:
 
     https://dweb.link/ipfs/bafybeigagd5nmnn2iys2f3doro7ydrevyr2mzarwidgadawmamiteydbzi
 
-Will redirect to:
+redirects to:
 
     https://bafybeigagd5nmnn2iys2f3doro7ydrevyr2mzarwidgadawmamiteydbzi.ipfs.dweb.link
 
-If you trust this behavior from your gateway of choice then passing the `-L` option will follow the redirect.
+If you trust this behavior from your gateway of choice then passing the `-L`
+option follows the redirect.
 
 ## Error messages and hints
 

@@ -73,7 +73,7 @@ warnings are:
 - `FOPENMODE`: `fopen()` needs a macro for the mode string, use it
 
 - `INDENTATION`: detected a wrong start column for code. Note that this
-   warning only checks some specific places and will certainly miss many bad
+   warning only checks some specific places and can certainly miss many bad
    indentations.
 
 - `LONGLINE`: A line is longer than 79 columns.
@@ -158,21 +158,21 @@ Example
 
     /* !checksrc! disable LONGLINE all */
 
-This will ignore the warning for overly long lines until it is re-enabled with:
+This ignores the warning for overly long lines until it is re-enabled with:
 
     /* !checksrc! enable LONGLINE */
 
-If the enabling is not performed before the end of the file, it will be enabled
-automatically for the next file.
+If the enabling is not performed before the end of the file, it is enabled
+again automatically for the next file.
 
 You can also opt to ignore just N violations so that if you have a single long
 line you just cannot shorten and is agreed to be fine anyway:
 
     /* !checksrc! disable LONGLINE 1 */
 
-... and the warning for long lines will be enabled again automatically after
-it has ignored that single warning. The number `1` can of course be changed to
-any other integer number. It can be used to make sure only the exact intended
+... and the warning for long lines is enabled again automatically after it has
+ignored that single warning. The number `1` can of course be changed to any
+other integer number. It can be used to make sure only the exact intended
 instances are ignored and nothing extra.
 
 ### Directory wide ignore patterns

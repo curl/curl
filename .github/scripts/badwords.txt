@@ -47,3 +47,4 @@ didn't:did not
 doesn't:does not
 won't:will not
 couldn't:could not
+\bwill\b:rewrite to present tense
