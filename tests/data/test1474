@@ -1,0 +1,42 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+--proto
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+http
+</features>
+<name>
+--proto -all disables all protocols
+</name>
+<command>
+--proto -all http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# 1 - Protocol "http" disabled
+<errorcode>
+1
+</errorcode>
+</verify>
+</testcase>
