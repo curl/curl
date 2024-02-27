@@ -118,8 +118,8 @@ struct Curl_cfilter {
 The filter type `cft` is a singleton, one static struct for each type of
 filter. The `ctx` is where a filter holds its specific data. That varies by
 filter type. An http-proxy filter keeps the ongoing state of the CONNECT here,
-but free it after its has been established. The SSL filter keeps the `SSL*`
-(if OpenSSL is used) here until the connection is closed. So, this varies.
+free it after its has been established. The SSL filter keeps the `SSL*` (if
+OpenSSL is used) here until the connection is closed. So, this varies.
 
 `conn` is a reference to the connection this filter belongs to, so nothing
 extra besides the pointer itself.
@@ -144,7 +144,7 @@ The `recv` implementation is equivalent.
 
 ## Filter Types
 
-The currently existing filter types (curl 8.5.0) are: 
+The currently existing filter types (curl 8.5.0) are:
 
 * `TCP`, `UDP`, `UNIX`: filters that operate on a socket, providing raw I/O.
 * `SOCKET-ACCEPT`: special TCP socket that has a socket that has been
@@ -157,8 +157,10 @@ The currently existing filter types (curl 8.5.0) are:
 * `SOCKS-PROXY`: filter for the various SOCKS proxy protocol variations
 * `HAPROXY`: filter for the protocol of the same name, providing client IP
   information to a server.
-* `HTTP/2`: filter for handling multiplexed transfers over an HTTP/2 connection
-* `HTTP/3`: filter for handling multiplexed transfers over an HTTP/3+QUIC connection
+* `HTTP/2`: filter for handling multiplexed transfers over an HTTP/2
+  connection
+* `HTTP/3`: filter for handling multiplexed transfers over an HTTP/3+QUIC
+  connection
 * `HAPPY-EYEBALLS`: meta filter that implements IPv4/IPv6 "happy eyeballing".
   It creates up to 2 sub-filters that race each other for a connection.
 * `SETUP`: meta filter that manages the creation of sub-filter chains for a
