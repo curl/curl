@@ -189,27 +189,10 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data);
  ***************************************************************************/
 struct HTTP {
   curl_off_t postsize; /* off_t to handle large file sizes */
-  const char *postdata;
-  struct back {
-    curl_read_callback fread_func; /* backup storage for fread pointer */
-    void *fread_in;           /* backup storage for fread_in pointer */
-    const char *postdata;
-    curl_off_t postsize;
-    struct Curl_easy *data;
-  } backup;
-
-  enum {
-    HTTPSEND_NADA,    /* init */
-    HTTPSEND_REQUEST, /* sending a request */
-    HTTPSEND_BODY     /* sending body */
-  } sending;
 
 #ifndef CURL_DISABLE_HTTP
   void *h2_ctx;              /* HTTP/2 implementation context */
   void *h3_ctx;              /* HTTP/3 implementation context */
-  struct dynbuf send_buffer; /* used if the request couldn't be sent in one
-                                chunk, points to an allocated send_buffer
-                                struct */
 #endif
 };
 

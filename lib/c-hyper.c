@@ -761,7 +761,6 @@ static CURLcode bodysend(struct Curl_easy *data,
       result = CURLE_OUT_OF_MEMORY;
     }
   }
-  http->sending = HTTPSEND_BODY;
   return result;
 }
 

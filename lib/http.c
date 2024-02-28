@@ -1283,7 +1283,6 @@ CURLcode Curl_http_done(struct Curl_easy *data,
   if(!http)
     return CURLE_OK;
 
-  Curl_dyn_free(&http->send_buffer);
   Curl_dyn_reset(&data->state.headerb);
   Curl_hyper_done(data);
   Curl_ws_done(data);
@@ -2258,7 +2257,6 @@ CURLcode Curl_http_req_complete(struct Curl_easy *data,
       data->state.in = (void *) data->state.mimepost;
       result = Client_reader_set_fread(data, data->state.infilesize);
     }
-    http->sending = HTTPSEND_BODY;
     break;
 #endif
   case HTTPREQ_POST:
@@ -2300,19 +2298,21 @@ CURLcode Curl_http_req_complete(struct Curl_easy *data,
       goto out;
 
     if(!http->postsize) {
-      Curl_pgrsSetUploadSize(data, -1);
+      Curl_pgrsSetUploadSize(data, 0);
       result = Client_reader_set_null(data);
     }
-    else if(data->set.postfields) {  /* we have the bytes */
+    else if(data->set.postfields) {
       Curl_pgrsSetUploadSize(data, http->postsize);
-      result = Client_reader_set_buf(data, data->set.postfields,
-                                     (size_t)http->postsize);
+      if(http->postsize > 0)
+        result = Client_reader_set_buf(data, data->set.postfields,
+                                       (size_t)http->postsize);
+      else
+        result = Client_reader_set_null(data);
     }
     else { /* we read the bytes from the callback */
       Curl_pgrsSetUploadSize(data, http->postsize);
       result = Client_reader_set_fread(data, http->postsize);
     }
-    http->sending = HTTPSEND_BODY;
     break;
 
   default:
@@ -2886,7 +2886,6 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     result = Curl_add_custom_headers(data, FALSE, &req);
 
   if(!result) {
-    http->postdata = NULL;  /* nothing to post at this point */
     if((httpreq == HTTPREQ_GET) ||
        (httpreq == HTTPREQ_HEAD))
       Curl_pgrsSetUploadSize(data, 0); /* nothing */
