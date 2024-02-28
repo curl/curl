@@ -17,7 +17,7 @@ The transfer loop that sends and receives, is using `Curl_client_read()` to get 
 CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
                           size_t *nread, bool *eos);
 ```
-The arguments are the transfer to read for, a buffer to hold the read data, its length, the actual number of bytes placed into the buffer and the `eos` flag indicating that no more data is available. The `eos` flag may be set for a read amount, if that amount was the last. That way curl can avoid to read an additional time.
+The arguments are the transfer to read for, a buffer to hold the read data, its length, the actual number of bytes placed into the buffer and the `eos` (*end of stream*) flag indicating that no more data is available. The `eos` flag may be set for a read amount, if that amount was the last. That way curl can avoid to read an additional time.
 
 The implementation of `Curl_client_read()` uses a chain of *client reader* instances to get the data. This is similar to the design of *client writers*. The chain of readers allows processing of the data to send.
 
