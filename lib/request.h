@@ -197,18 +197,6 @@ CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *buf);
 #endif /* !USE_HYPER */
 
 /**
- * Flush all buffered request bytes.
- * @return CURLE_OK on success, CURLE_AGAIN if sending was blocked,
- *         or the error on the sending.
- */
-CURLcode Curl_req_flush(struct Curl_easy *data);
-
-/**
- * TRUE iff the request wants to send, e.g. has buffered bytes.
- */
-bool Curl_req_want_send(struct Curl_easy *data);
-
-/**
  * TRUE iff the request has sent all request headers and data.
  */
 bool Curl_req_done_sending(struct Curl_easy *data);
@@ -219,13 +207,6 @@ bool Curl_req_done_sending(struct Curl_easy *data);
  *         Never returns CURLE_AGAIN.
  */
 CURLcode Curl_req_send_more(struct Curl_easy *data);
-
-/**
- * Flush all buffered request bytes.
- * @return CURLE_OK on success, CURLE_AGAIN if sending was blocked,
- *         or the error on the sending.
- */
-CURLcode Curl_req_flush(struct Curl_easy *data);
 
 /**
  * TRUE iff the request wants to send, e.g. has buffered bytes.

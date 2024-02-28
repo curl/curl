@@ -68,12 +68,14 @@ CURLcode Curl_req_start(struct SingleRequest *req,
   return CURLE_OK;
 }
 
+static CURLcode req_flush(struct Curl_easy *data);
+
 CURLcode Curl_req_done(struct SingleRequest *req,
                        struct Curl_easy *data, bool aborted)
 {
   (void)req;
   if(!aborted)
-    (void)Curl_req_flush(data);
+    (void)req_flush(data);
   Curl_client_reset(data);
   return CURLE_OK;
 }
@@ -233,7 +235,7 @@ static CURLcode req_set_upload_done(struct Curl_easy *data)
   return Curl_xfer_send_close(data);
 }
 
-CURLcode Curl_req_flush(struct Curl_easy *data)
+static CURLcode req_flush(struct Curl_easy *data)
 {
   CURLcode result;
 
@@ -330,7 +332,7 @@ CURLcode Curl_req_send_more(struct Curl_easy *data)
   CURLcode result;
 
   /* Fill our send buffer if more from client can be read and
-   * we are not in a "expect-100" situration. */
+   * we are not in a "expect-100" situation. */
   if(!data->req.eos_read && !Curl_bufq_is_full(&data->req.sendbuf) &&
      (data->req.exp100 == EXP100_SEND_DATA)) {
     ssize_t nread = Curl_bufq_sipn(&data->req.sendbuf, 0,
@@ -339,7 +341,7 @@ CURLcode Curl_req_send_more(struct Curl_easy *data)
       return result;
   }
 
-  result = Curl_req_flush(data);
+  result = req_flush(data);
   if(result == CURLE_AGAIN)
     result = CURLE_OK;
   return result;
