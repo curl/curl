@@ -730,7 +730,6 @@ static CURLcode bodysend(struct Curl_easy *data,
                          hyper_request *hyperreq,
                          Curl_HttpReq httpreq)
 {
-  struct HTTP *http = data->req.p.http;
   CURLcode result = CURLE_OK;
   struct dynbuf req;
   if((httpreq == HTTPREQ_GET) || (httpreq == HTTPREQ_HEAD))
