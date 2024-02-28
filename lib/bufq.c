@@ -418,8 +418,8 @@ ssize_t Curl_bufq_write(struct bufq *q,
 }
 
 CURLcode Curl_bufq_cwrite(struct bufq *q,
-                         const char *buf, size_t len,
-                         size_t *pnwritten)
+                          const char *buf, size_t len,
+                          size_t *pnwritten)
 {
   ssize_t n;
   CURLcode result;

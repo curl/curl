@@ -5,7 +5,7 @@ in curl v8.7.0. This document describes the concepts, its high level implementat
 
 ## Naming
 
-`libcurl` operates between clients and servers. A *client* is the application using libcurl, like the command line tool `curl` itself. Data to be uploaded to a server is **read** from the client and **send** to the server, the servers response is **received** by `libcurl` and then **written** to the client.
+`libcurl` operates between clients and servers. A *client* is the application using libcurl, like the command line tool `curl` itself. Data to be uploaded to a server is **read** from the client and **sent** to the server, the servers response is **received** by `libcurl` and then **written** to the client.
 
 With this naming established, client readers are concerned with providing data from the application to the server. Applications register callbacks via `CURLOPT_READFUNCTION`, data via `CURLOPT_POSTFIELDS` and other options to be used by `libcurl` when the request is send.
 
@@ -40,7 +40,7 @@ struct Curl_creader {
 };
 ```
 
-`Curl_creader` is a reader instance with a `next`pointer to form the chain. It as a type `crt`which provides the implementation. The main callback is `do_read()` which provides the data to the caller. The others are for setup and tear down. `needs_rewind()` is explained further below.
+`Curl_creader` is a reader instance with a `next` pointer to form the chain. It as a type `crt` which provides the implementation. The main callback is `do_read()` which provides the data to the caller. The others are for setup and tear down. `needs_rewind()` is explained further below.
 
 ## Phases and Ordering
 
