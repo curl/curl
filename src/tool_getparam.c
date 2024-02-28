@@ -1593,6 +1593,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         url->flags |= GETOUT_URL;
       }
       break;
+    case C_FTP_SSL: /* --ftp-ssl */
     case C_SSL: /* --ssl */
       if(toggle && !feature_ssl)
         err = PARAM_LIBCURL_DOESNT_SUPPORT;
