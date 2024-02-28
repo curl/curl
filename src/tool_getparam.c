@@ -1601,7 +1601,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         config->ftp_ssl = toggle;
         if(config->ftp_ssl)
           warnf(global,
-                "--ssl is an insecure option, consider --ssl-reqd instead");
+                "--%s is an insecure option, consider --ssl-reqd instead",
+                a->lname);
       }
       break;
     case C_FTP_PASV: /* --ftp-pasv */
