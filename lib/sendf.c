@@ -576,8 +576,10 @@ static CURLcode cr_in_read(struct Curl_easy *data,
       return CURLE_READ_ERROR;
     }
     ctx->read_len += nread;
+    if(ctx->total_len >= 0)
+      ctx->seen_eos = (ctx->read_len >= ctx->total_len);
     *pnread = nread;
-    *peos = FALSE;
+    *peos = ctx->seen_eos;
     break;
   }
   DEBUGF(infof(data, "cr_in_read(len=%zu, total=%"CURL_FORMAT_CURL_OFF_T
@@ -743,7 +745,7 @@ static CURLcode cr_lc_add(struct Curl_easy *data)
   CURLcode result;
 
   result = Curl_creader_create(&reader, data, &cr_lc,
-                               CURL_CR_TRANSFER_ENCODE);
+                               CURL_CR_CONTENT_ENCODE);
   if(!result)
     result = Curl_creader_add(data, reader);
 

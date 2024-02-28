@@ -577,14 +577,14 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   if(result)
     goto out;
 
+  Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, FIRSTSOCKET);
+
   /* issue the request */
   result = Curl_req_send(data, &req_buffer);
   if(result) {
     failf(data, "Failed sending RTSP request");
     goto out;
   }
-
-  Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, FIRSTSOCKET);
 
   /* Increment the CSeq on success */
   data->state.rtsp_next_client_CSeq++;

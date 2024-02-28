@@ -50,10 +50,6 @@ int Curl_single_getsock(struct Curl_easy *data,
                         struct connectdata *conn, curl_socket_t *socks);
 CURLcode Curl_retry_request(struct Curl_easy *data, char **url);
 bool Curl_meets_timecondition(struct Curl_easy *data, time_t timeofdoc);
-CURLcode Curl_get_upload_buffer(struct Curl_easy *data);
-
-CURLcode Curl_done_sending(struct Curl_easy *data,
-                           struct SingleRequest *k);
 
 /**
  * Write the transfer raw response bytes, as received from the connection.
@@ -105,5 +101,7 @@ CURLcode Curl_xfer_send(struct Curl_easy *data,
 CURLcode Curl_xfer_recv(struct Curl_easy *data,
                         char *buf, size_t blen,
                         ssize_t *pnrcvd);
+
+CURLcode Curl_xfer_send_close(struct Curl_easy *data);
 
 #endif /* HEADER_CURL_TRANSFER_H */
