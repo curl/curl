@@ -62,7 +62,7 @@ the nroff format does not carry a distinction.
 Each curldown starts with a header with meta-data:
 
     ---
-    c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+    c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
     SPDX-License-Identifier: curl
     Title: CURLOPT_AWS_SIGV4
     Section: 3
