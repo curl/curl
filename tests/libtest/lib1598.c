@@ -31,27 +31,6 @@
 #include <stdio.h>
 #include "memdebug.h"
 
-static char data [] = "Hello Cloud!\r\n";
-static size_t consumed = 0;
-
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
-{
-  size_t  amount = nmemb * size; /* Total bytes curl wants */
-
-  if(consumed == strlen(data)) {
-    return 0;
-  }
-
-  if(amount > strlen(data)-consumed) {
-    amount = strlen(data);
-  }
-
-  consumed += amount;
-  (void)stream;
-  memcpy(ptr, data, amount);
-  return amount;
-}
-
 /*
  * carefully not leak memory on OOM
  */
@@ -73,11 +52,7 @@ static int trailers_callback(struct curl_slist **list, void *userdata)
   }
 }
 
-#if 0
 static const char *post_data = "xxx=yyy&aaa=bbbbb";
-#else
-static const char post_data[12];
-#endif
 
 int test(char *URL)
 {
@@ -101,7 +76,7 @@ int test(char *URL)
 
   hhl = curl_slist_append(hhl, "Trailer: my-super-awesome-trailer,"
                                " my-other-awesome-trailer");
-  if(hhl && FALSE)
+  if(hhl)
     hhl = curl_slist_append(hhl, "Transfer-Encoding: chunked");
   if(!hhl) {
     goto test_cleanup;
@@ -109,9 +84,8 @@ int test(char *URL)
 
   test_setopt(curl, CURLOPT_URL, URL);
   test_setopt(curl, CURLOPT_HTTPHEADER, hhl);
-  test_setopt(curl, CURLOPT_POSTFIELDSIZE, sizeof(post_data));
+  test_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(post_data));
   test_setopt(curl, CURLOPT_POSTFIELDS, post_data);
-  test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
   test_setopt(curl, CURLOPT_TRAILERFUNCTION, trailers_callback);
   test_setopt(curl, CURLOPT_TRAILERDATA, NULL);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
