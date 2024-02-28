@@ -114,17 +114,11 @@ static CURLcode tunnel_init(struct Curl_cfilter *cf,
                             struct h1_tunnel_state **pts)
 {
   struct h1_tunnel_state *ts;
-  CURLcode result;
 
   if(cf->conn->handler->flags & PROTOPT_NOTCPPROXY) {
     failf(data, "%s cannot be done over CONNECT", cf->conn->handler->scheme);
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
-
-  /* we might need the upload buffer for streaming a partial request */
-  result = Curl_get_upload_buffer(data);
-  if(result)
-    return result;
 
   ts = calloc(1, sizeof(*ts));
   if(!ts)

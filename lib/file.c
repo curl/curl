@@ -291,8 +291,8 @@ static CURLcode file_upload(struct Curl_easy *data)
   int fd;
   int mode;
   CURLcode result = CURLE_OK;
-  char *xfer_buf;
-  size_t xfer_blen;
+  char *xfer_ulbuf;
+  size_t xfer_ulblen;
   curl_off_t bytecount = 0;
   struct_stat file_stat;
   const char *sendbuf;
@@ -340,7 +340,7 @@ static CURLcode file_upload(struct Curl_easy *data)
     data->state.resume_from = (curl_off_t)file_stat.st_size;
   }
 
-  result = Curl_multi_xfer_buf_borrow(data, &xfer_buf, &xfer_blen);
+  result = Curl_multi_xfer_ulbuf_borrow(data, &xfer_ulbuf, &xfer_ulblen);
   if(result)
     goto out;
 
@@ -349,7 +349,7 @@ static CURLcode file_upload(struct Curl_easy *data)
     ssize_t nwrite;
     size_t readcount;
 
-    result = Curl_client_read(data, xfer_buf, xfer_blen, &readcount, &eos);
+    result = Curl_client_read(data, xfer_ulbuf, xfer_ulblen, &readcount, &eos);
     if(result)
       break;
 
@@ -363,16 +363,16 @@ static CURLcode file_upload(struct Curl_easy *data)
       if((curl_off_t)nread <= data->state.resume_from) {
         data->state.resume_from -= nread;
         nread = 0;
-        sendbuf = xfer_buf;
+        sendbuf = xfer_ulbuf;
       }
       else {
-        sendbuf = xfer_buf + data->state.resume_from;
+        sendbuf = xfer_ulbuf + data->state.resume_from;
         nread -= (size_t)data->state.resume_from;
         data->state.resume_from = 0;
       }
     }
     else
-      sendbuf = xfer_buf;
+      sendbuf = xfer_ulbuf;
 
     /* write the data to the target */
     nwrite = write(fd, sendbuf, nread);
@@ -395,7 +395,7 @@ static CURLcode file_upload(struct Curl_easy *data)
 
 out:
   close(fd);
-  Curl_multi_xfer_buf_release(data, xfer_buf);
+  Curl_multi_xfer_ulbuf_release(data, xfer_ulbuf);
 
   return result;
 }

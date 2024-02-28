@@ -115,16 +115,6 @@ char *Curl_checkheaders(const struct Curl_easy *data,
 }
 #endif
 
-CURLcode Curl_get_upload_buffer(struct Curl_easy *data)
-{
-  if(!data->state.ulbuf) {
-    data->state.ulbuf = malloc(data->set.upload_buffer_size);
-    if(!data->state.ulbuf)
-      return CURLE_OUT_OF_MEMORY;
-  }
-  return CURLE_OK;
-}
-
 static int data_pending(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
@@ -330,17 +320,6 @@ out:
   return result;
 }
 
-CURLcode Curl_done_sending(struct Curl_easy *data,
-                           struct SingleRequest *k)
-{
-  k->keepon &= ~KEEP_SEND; /* we're done writing */
-
-  /* These functions should be moved into the handler struct! */
-  Curl_conn_ev_data_done_send(data);
-
-  return CURLE_OK;
-}
-
 #if defined(_WIN32) && defined(USE_WINSOCK)
 #ifndef SIO_IDEAL_SEND_BACKLOG_QUERY
 #define SIO_IDEAL_SEND_BACKLOG_QUERY 0x4004747B
@@ -368,174 +347,37 @@ static void win_update_buffer_size(curl_socket_t sockfd)
 /*
  * Send data to upload to the server, when the socket is writable.
  */
-static CURLcode readwrite_upload(struct Curl_easy *data,
-                                 struct connectdata *conn,
-                                 int *didwhat)
+static CURLcode readwrite_upload(struct Curl_easy *data, int *didwhat)
 {
-  size_t bytes_written;
-  CURLcode result;
-  ssize_t nread; /* number of bytes read */
-  struct SingleRequest *k = &data->req;
+  CURLcode result = CURLE_OK;
 
-  (void)conn;
-  *didwhat |= KEEP_SEND;
+  if((data->req.keepon & KEEP_SEND_PAUSE))
+    return CURLE_OK;
 
-  if(!(k->keepon & KEEP_SEND_PAUSE)) {
-    result = Curl_req_flush(data);
-    if(result == CURLE_AGAIN) /* unable to send all we have */
-      return CURLE_OK;
-    else if(result)
-      return result;
-  }
+  /* We should not get here when the sending is already done. It
+   * probably means that someone set `data-req.keepon |= KEEP_SEND`
+   * when it should not. */
+  DEBUGASSERT(!Curl_req_done_sending(data));
 
-  do {
-    curl_off_t nbody;
-    ssize_t offset = 0;
-    bool eos;
-
-    if(0 != k->upload_present &&
-       k->upload_present < curl_upload_refill_watermark(data) &&
-       !k->upload_chunky &&/*(variable sized chunked header; append not safe)*/
-       !k->upload_done &&  /*!(k->upload_done once k->upload_present sent)*/
-       !(k->writebytecount + (curl_off_t)k->upload_present ==
-         data->state.infilesize)) {
-      offset = k->upload_present;
-    }
-
-    /* only read more data if there's no upload data already
-       present in the upload buffer, or if appending to upload buffer */
-    if(0 == k->upload_present || offset) {
-      result = Curl_get_upload_buffer(data);
-      if(result)
-        return result;
-      if(offset && k->upload_fromhere != data->state.ulbuf)
-        memmove(data->state.ulbuf, k->upload_fromhere, offset);
-      /* init the "upload from here" pointer */
-      k->upload_fromhere = data->state.ulbuf;
-
-      if(!k->upload_done) {
-        /* HTTP pollution, this should be written nicer to become more
-           protocol agnostic. */
-        size_t fillcount;
-
-        if(k->exp100 == EXP100_SENDING_REQUEST) {
-          /* If this call is to send body data, we must take some action:
-             We have sent off the full HTTP 1.1 request, and we shall now
-             go into the Expect: 100 state and await such a header */
-          k->exp100 = EXP100_AWAITING_CONTINUE; /* wait for the header */
-          k->keepon &= ~KEEP_SEND;         /* disable writing */
-          k->start100 = Curl_now();       /* timeout count starts now */
-          *didwhat &= ~KEEP_SEND;  /* we didn't write anything actually */
-          /* set a timeout for the multi interface */
-          Curl_expire(data, data->set.expect_100_timeout, EXPIRE_100_TIMEOUT);
-          break;
-        }
-
-        k->upload_fromhere += offset;
-        result = Curl_client_read(data, k->upload_fromhere,
-                                  data->set.upload_buffer_size-offset,
-                                  &fillcount, &eos);
-        k->upload_fromhere -= offset;
-        if(result)
-          return result;
-
-        nread = offset + fillcount;
-      }
-      else
-        nread = 0; /* we're done uploading/reading */
-
-      if(!nread && (k->keepon & KEEP_SEND_PAUSE)) {
-        /* this is a paused transfer */
-        break;
-      }
-      if(nread <= 0) {
-        result = Curl_done_sending(data, k);
-        if(result)
-          return result;
-        break;
-      }
-
-      /* store number of bytes available for upload */
-      k->upload_present = nread;
-
-#ifndef CURL_DISABLE_SMTP
-      if(conn->handler->protocol & PROTO_FAMILY_SMTP) {
-        result = Curl_smtp_escape_eob(data, nread, offset);
-        if(result)
-          return result;
-      }
-#endif /* CURL_DISABLE_SMTP */
-    } /* if 0 == k->upload_present or appended to upload buffer */
-    else {
-      /* We have a partial buffer left from a previous "round". Use
-         that instead of reading more data */
-    }
-
-    /* write to socket (send away data) */
-    result = Curl_xfer_send(data,
-                            k->upload_fromhere, /* buffer pointer */
-                            k->upload_present,  /* buffer size */
-                            &bytes_written);    /* actually sent */
+  if(!Curl_req_done_sending(data)) {
+    *didwhat |= KEEP_SEND;
+    result = Curl_req_send_more(data);
     if(result)
       return result;
 
 #if defined(_WIN32) && defined(USE_WINSOCK)
+    /* FIXME: this looks like it would fit better into cf-socket.c
+     * but then I do not know enough Windows to say... */
     {
       struct curltime n = Curl_now();
-      if(Curl_timediff(n, conn->last_sndbuf_update) > 1000) {
-        win_update_buffer_size(conn->writesockfd);
-        conn->last_sndbuf_update = n;
+      if(Curl_timediff(n, data->conn->last_sndbuf_update) > 1000) {
+        win_update_buffer_size(data->conn->writesockfd);
+        data->conn->last_sndbuf_update = n;
       }
     }
 #endif
-
-    nbody = bytes_written;
-    if(nbody) {
-      /* show the data before we change the pointer upload_fromhere */
-      Curl_debug(data, CURLINFO_DATA_OUT,
-                 &k->upload_fromhere[bytes_written - nbody],
-                 (size_t)nbody);
-
-      k->writebytecount += nbody;
-      Curl_pgrsSetUploadCounter(data, k->writebytecount);
-    }
-
-    if((!k->upload_chunky || k->forbidchunk) &&
-       (k->writebytecount == data->state.infilesize)) {
-      /* we have sent all data we were supposed to */
-      k->upload_done = TRUE;
-      infof(data, "We are completely uploaded and fine");
-    }
-
-    if(k->upload_present != bytes_written) {
-      /* we only wrote a part of the buffer (if anything), deal with it! */
-
-      /* store the amount of bytes left in the buffer to write */
-      k->upload_present -= bytes_written;
-
-      /* advance the pointer where to find the buffer when the next send
-         is to happen */
-      k->upload_fromhere += bytes_written;
-    }
-    else {
-      /* we've uploaded that buffer now */
-      result = Curl_get_upload_buffer(data);
-      if(result)
-        return result;
-      k->upload_fromhere = data->state.ulbuf;
-      k->upload_present = 0; /* no more bytes left */
-
-      if(k->upload_done) {
-        result = Curl_done_sending(data, k);
-        if(result)
-          return result;
-      }
-    }
-
-
-  } while(0); /* just to break out from! */
-
-  return CURLE_OK;
+  }
+  return result;
 }
 
 static int select_bits_paused(struct Curl_easy *data, int select_bits)
@@ -626,7 +468,7 @@ CURLcode Curl_readwrite(struct Curl_easy *data,
   if((k->keepon & KEEP_SEND) && (select_bits & CURL_CSELECT_OUT)) {
     /* write */
 
-    result = readwrite_upload(data, conn, &didwhat);
+    result = readwrite_upload(data, &didwhat);
     if(result)
       goto out;
   }
@@ -1457,4 +1299,10 @@ CURLcode Curl_xfer_recv(struct Curl_easy *data,
   if(data->set.buffer_size > 0 && (size_t)data->set.buffer_size < blen)
     blen = (size_t)data->set.buffer_size;
   return Curl_conn_recv(data, sockindex, buf, blen, pnrcvd);
+}
+
+CURLcode Curl_xfer_send_close(struct Curl_easy *data)
+{
+  Curl_conn_ev_data_done_send(data);
+  return CURLE_OK;
 }
