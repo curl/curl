@@ -59,7 +59,7 @@ int test(char *URL)
   CURL *curl = NULL;
   CURLcode res = CURLE_FAILED_INIT;
   /* http and proxy header list */
-  struct curl_slist *hhl = NULL;
+  struct curl_slist *hhl = NULL, *list;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
@@ -76,10 +76,13 @@ int test(char *URL)
 
   hhl = curl_slist_append(hhl, "Trailer: my-super-awesome-trailer,"
                                " my-other-awesome-trailer");
-  if(hhl)
-    hhl = curl_slist_append(hhl, "Transfer-Encoding: chunked");
-  if(!hhl) {
+  if(!hhl)
     goto test_cleanup;
+  if(hhl) {
+    list = curl_slist_append(hhl, "Transfer-Encoding: chunked");
+    if(!list)
+      goto test_cleanup;
+    hhl = list;
   }
 
   test_setopt(curl, CURLOPT_URL, URL);
