@@ -2653,7 +2653,6 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
 {
   struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
-  struct HTTP *http;
   Curl_HttpReq httpreq;
   const char *te = ""; /* transfer-encoding */
   const char *request;
@@ -2704,9 +2703,6 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   result = Curl_headers_init(data);
   if(result)
     goto fail;
-
-  http = data->req.p.http;
-  DEBUGASSERT(http);
 
   result = Curl_http_host(data, conn);
   if(result)
