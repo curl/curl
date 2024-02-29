@@ -185,6 +185,8 @@ struct Curl_crtype {
   bool (*needs_rewind)(struct Curl_easy *data, struct Curl_creader *reader);
   curl_off_t (*total_length)(struct Curl_easy *data,
                              struct Curl_creader *reader);
+  CURLcode (*resume_from)(struct Curl_easy *data,
+                          struct Curl_creader *reader, curl_off_t offset);
   size_t creader_size;  /* sizeof() allocated struct Curl_creader */
 };
 
@@ -216,6 +218,9 @@ bool Curl_creader_def_needs_rewind(struct Curl_easy *data,
                                    struct Curl_creader *reader);
 curl_off_t Curl_creader_def_total_length(struct Curl_easy *data,
                                          struct Curl_creader *reader);
+CURLcode Curl_creader_def_resume_from(struct Curl_easy *data,
+                                      struct Curl_creader *reader,
+                                      curl_off_t offset);
 
 /**
  * Convenience method for calling `reader->do_read()` that
@@ -268,10 +273,35 @@ bool Curl_creader_needs_rewind(struct Curl_easy *data);
 
 /**
  * Get the total length of bytes provided by the installed readers.
- * This is independant of the amount already delivered.
+ * This is independant of the amount already delivered and is calculated
+ * by all readers in the stack. If a reader like "chunked" or
+ * "crlf conversion" is installed, the returned length will be -1.
  * @return -1 if length is indeterminate
  */
 curl_off_t Curl_creader_total_length(struct Curl_easy *data);
+
+/**
+ * Get the total length of bytes provided by the reader at phase
+ * CURL_CR_CLIENT. This may not match the amount of bytes read
+ * for a request, depending if other, encoding readers are also installed.
+ * However it allows for rough estimation of the overall length.
+ * @return -1 if length is indeterminate
+ */
+curl_off_t Curl_creader_client_length(struct Curl_easy *data);
+
+/**
+ * Ask the installed reader at phase CURL_CR_CLIENT to start
+ * reading from the given offset. On success, this will reduce
+ * the `total_length()` by the amount.
+ * @param date    the transfer to read client bytes for
+ * param offset   the offset where to start reads from, negative
+ *                values will be ignored.
+ * @return CURLE_OK if offset could be set
+ *         CURLE_READ_ERROR if not supported by reader or seek/read failed
+ *                          of offset larger then total length
+ *         CURLE_PARTIAL_FILE if offset led to 0 total length
+ */
+CURLcode Curl_creader_resume_from(struct Curl_easy *data, curl_off_t offset);
 
 /**
  * Set the client reader to provide 0 bytes, immediate EOS.

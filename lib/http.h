@@ -105,9 +105,9 @@ CURLcode Curl_http_statusline(struct Curl_easy *data,
 CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
                           char *headp);
 CURLcode Curl_transferencode(struct Curl_easy *data);
-CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
-                        Curl_HttpReq httpreq,
-                        const char **teep);
+CURLcode Curl_http_req_set_reader(struct Curl_easy *data,
+                                  Curl_HttpReq httpreq,
+                                  const char **tep);
 CURLcode Curl_http_req_complete(struct Curl_easy *data,
                                 struct dynbuf *r, Curl_HttpReq httpreq);
 bool Curl_use_http_1_1plus(const struct Curl_easy *data,
@@ -119,9 +119,6 @@ CURLcode Curl_http_cookies(struct Curl_easy *data,
 #else
 #define Curl_http_cookies(a,b,c) CURLE_OK
 #endif
-CURLcode Curl_http_resume(struct Curl_easy *data,
-                          struct connectdata *conn,
-                          Curl_HttpReq httpreq);
 CURLcode Curl_http_range(struct Curl_easy *data,
                          Curl_HttpReq httpreq);
 CURLcode Curl_http_firstwrite(struct Curl_easy *data,
@@ -188,11 +185,11 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data);
  * HTTP unique setup
  ***************************************************************************/
 struct HTTP {
-  curl_off_t postsize; /* off_t to handle large file sizes */
-
 #ifndef CURL_DISABLE_HTTP
   void *h2_ctx;              /* HTTP/2 implementation context */
   void *h3_ctx;              /* HTTP/3 implementation context */
+#else
+  char unused;
 #endif
 };
 

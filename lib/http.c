@@ -1994,13 +1994,11 @@ CURLcode Curl_http_target(struct Curl_easy *data,
   return result;
 }
 
-CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
-                        Curl_HttpReq httpreq, const char **tep)
+#if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
+static CURLcode set_post_reader(struct Curl_easy *data, Curl_HttpReq httpreq)
 {
-  CURLcode result = CURLE_OK;
-  const char *ptr;
-  struct HTTP *http = data->req.p.http;
-  http->postsize = 0;
+  curl_off_t postsize = 0;
+  CURLcode result;
 
   switch(httpreq) {
 #ifndef CURL_DISABLE_MIME
@@ -2029,6 +2027,7 @@ CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
 #endif
   default:
     data->state.mimepost = NULL;
+    break;
   }
 
 #ifndef CURL_DISABLE_MIME
@@ -2054,9 +2053,136 @@ CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
       result = Curl_mime_rewind(data->state.mimepost);
     if(result)
       return result;
-    http->postsize = Curl_mime_size(data->state.mimepost);
+    postsize = Curl_mime_size(data->state.mimepost);
   }
 #endif
+
+  switch(httpreq) {
+  case HTTPREQ_POST_FORM:
+  case HTTPREQ_POST_MIME:
+    /* This is form posting using mime data. */
+    data->state.infilesize = postsize;
+    if(!postsize)
+      result = Curl_creader_set_null(data);
+    else {
+      /* Read from mime structure. We could do a special client reader
+       * for this, but replacing the callback seems to work fine. */
+      data->state.fread_func = (curl_read_callback) Curl_mime_read;
+      data->state.in = (void *) data->state.mimepost;
+      result = Curl_creader_set_fread(data, postsize);
+    }
+    return result;
+  default:
+    if(!postsize)
+      result = Curl_creader_set_null(data);
+    else
+      result = Curl_creader_set_fread(data, postsize);
+    return result;
+  }
+  /* never reached */
+}
+#endif
+
+static CURLcode set_reader(struct Curl_easy *data, Curl_HttpReq httpreq)
+{
+  CURLcode result = CURLE_OK;
+  curl_off_t postsize = data->state.infilesize;
+
+  DEBUGASSERT(data->conn);
+
+  if(data->req.authneg) {
+    return Curl_creader_set_null(data);
+  }
+
+  switch(httpreq) {
+  case HTTPREQ_PUT: /* Let's PUT the data to the server! */
+    if(!postsize)
+      result = Curl_creader_set_null(data);
+    else
+      result = Curl_creader_set_fread(data, postsize);
+    return result;
+
+#if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
+  case HTTPREQ_POST_FORM:
+  case HTTPREQ_POST_MIME:
+    return set_post_reader(data, httpreq);
+#endif
+
+  case HTTPREQ_POST:
+    /* this is the simple POST, using x-www-form-urlencoded style */
+    /* the size of the post body */
+    if(!postsize) {
+      result = Curl_creader_set_null(data);
+    }
+    else if(data->set.postfields) {
+      if(postsize > 0)
+        result = Curl_creader_set_buf(data, data->set.postfields,
+                                      (size_t)postsize);
+      else
+        result = Curl_creader_set_null(data);
+    }
+    else { /* we read the bytes from the callback */
+      result = Curl_creader_set_fread(data, postsize);
+    }
+    return result;
+
+  default:
+    /* HTTP GET/HEAD download, has no body, needs no Content-Length */
+    data->state.infilesize = 0;
+    return Curl_creader_set_null(data);
+  }
+  /* not reached */
+}
+
+static CURLcode http_resume(struct Curl_easy *data, Curl_HttpReq httpreq)
+{
+  if((HTTPREQ_POST == httpreq || HTTPREQ_PUT == httpreq) &&
+     data->state.resume_from) {
+    /**********************************************************************
+     * Resuming upload in HTTP means that we PUT or POST and that we have
+     * got a resume_from value set. The resume value has already created
+     * a Range: header that will be passed along. We need to "fast forward"
+     * the file the given number of bytes and decrease the assume upload
+     * file size before we continue this venture in the dark lands of HTTP.
+     * Resuming mime/form posting at an offset > 0 has no sense and is ignored.
+     *********************************************************************/
+
+    if(data->state.resume_from < 0) {
+      /*
+       * This is meant to get the size of the present remote-file by itself.
+       * We don't support this now. Bail out!
+       */
+      data->state.resume_from = 0;
+    }
+
+    if(data->state.resume_from && !data->req.authneg) {
+      /* only act on the first request */
+      CURLcode result;
+      result = Curl_creader_resume_from(data, data->state.resume_from);
+      if(result) {
+        failf(data, "Unable to resume from offset %" CURL_FORMAT_CURL_OFF_T,
+              data->state.resume_from);
+        return result;
+      }
+    }
+  }
+  return CURLE_OK;
+}
+
+CURLcode Curl_http_req_set_reader(struct Curl_easy *data,
+                                  Curl_HttpReq httpreq,
+                                  const char **tep)
+{
+  CURLcode result = CURLE_OK;
+  const char *ptr;
+
+  result = set_reader(data, httpreq);
+  if(result)
+    return result;
+
+  result = http_resume(data, httpreq);
+  if(result)
+    return result;
 
   ptr = Curl_checkheaders(data, STRCONST("Transfer-Encoding"));
   if(ptr) {
@@ -2066,18 +2192,14 @@ CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
                          STRCONST("Transfer-Encoding:"), STRCONST("chunked"));
   }
   else {
-    if((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
-       (((httpreq == HTTPREQ_POST_MIME || httpreq == HTTPREQ_POST_FORM) &&
-         http->postsize < 0) ||
-        ((data->state.upload || httpreq == HTTPREQ_POST) &&
-         data->state.infilesize == -1))) {
-      if(data->req.authneg)
-        /* don't enable chunked during auth neg */
-        ;
-      else if(Curl_use_http_1_1plus(data, conn)) {
-        if(conn->httpversion < 20)
-          /* HTTP, upload, unknown file size and not HTTP 1.0 */
-          data->req.upload_chunky = TRUE;
+    curl_off_t req_clen = Curl_creader_total_length(data);
+
+    if(req_clen < 0) {
+      /* indeterminate request content length */
+      if(Curl_use_http_1_1plus(data, data->conn)) {
+        /* On HTTP/1.1, enable chunked, on HTTP/2 and later we do not
+         * need it */
+        data->req.upload_chunky = (data->conn->httpversion < 20);
       }
       else {
         failf(data, "Chunky upload is not supported by HTTP 1.0");
@@ -2100,7 +2222,6 @@ static CURLcode addexpect(struct Curl_easy *data, struct dynbuf *r)
   data->state.expect100header = FALSE;
   /* Avoid Expect: 100-continue if Upgrade: is used */
   if(data->req.upgr101 == UPGR101_INIT) {
-    struct HTTP *http = data->req.p.http;
     /* For really small puts we don't use Expect: headers at all, and for
        the somewhat bigger ones we allow the app to disable it. Just make
        sure that the expect100header is always set to the preferred value
@@ -2111,8 +2232,11 @@ static CURLcode addexpect(struct Curl_easy *data, struct dynbuf *r)
         Curl_compareheader(ptr, STRCONST("Expect:"),
                            STRCONST("100-continue"));
     }
-    else if(http->postsize > EXPECT_100_THRESHOLD || http->postsize < 0)
-      return expect100(data, r);
+    else {
+      curl_off_t client_len = Curl_creader_client_length(data);
+      if(client_len > EXPECT_100_THRESHOLD || client_len < 0)
+        return expect100(data, r);
+      }
   }
   return CURLE_OK;
 }
@@ -2121,85 +2245,48 @@ CURLcode Curl_http_req_complete(struct Curl_easy *data,
                                 struct dynbuf *r, Curl_HttpReq httpreq)
 {
   CURLcode result = CURLE_OK;
-  struct HTTP *http = data->req.p.http;
+  curl_off_t req_clen;
 
+  DEBUGASSERT(data->conn);
+#ifndef USE_HYPER
   if(data->req.upload_chunky) {
     result = Curl_httpchunk_add_reader(data);
     if(result)
       return result;
   }
+#endif
 
-  DEBUGASSERT(data->conn);
+  /* Get the request body length that has been set up */
+  req_clen = Curl_creader_total_length(data);
   switch(httpreq) {
-  case HTTPREQ_PUT: /* Let's PUT the data to the server! */
-
-    if(data->req.authneg)
-      http->postsize = 0;
-    else
-      http->postsize = data->state.infilesize;
-
-    if((http->postsize != -1) && !data->req.upload_chunky &&
-       (data->req.authneg ||
-        !Curl_checkheaders(data, STRCONST("Content-Length")))) {
-      /* only add Content-Length if not uploading chunked */
-      result = Curl_dyn_addf(r, "Content-Length: %" CURL_FORMAT_CURL_OFF_T
-                             "\r\n", http->postsize);
-      if(result)
-        goto out;
-    }
-
-    result = addexpect(data, r);
-    if(result)
-      goto out;
-
-    /* end of headers */
-    result = Curl_dyn_addn(r, STRCONST("\r\n"));
-    if(result)
-      goto out;
-
-    /* set the upload size to the progress meter */
-    Curl_pgrsSetUploadSize(data, http->postsize);
-    if(!http->postsize)
-      result = Curl_creader_set_null(data);
-    else
-      result = Curl_creader_set_fread(data, data->state.infilesize);
-    break;
-
+  case HTTPREQ_PUT:
+  case HTTPREQ_POST:
 #if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
   case HTTPREQ_POST_FORM:
   case HTTPREQ_POST_MIME:
-    /* This is form posting using mime data. */
-    if(data->req.authneg) {
-      /* nothing to post! */
-      result = Curl_dyn_addn(r, STRCONST("Content-Length: 0\r\n\r\n"));
-      if(!result)
-        result = Curl_creader_set_null(data);
-      if(result)
-        return result;
-      /* setup variables for the upcoming transfer */
-      Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, -1);
-      break;
-    }
-
-    data->state.infilesize = http->postsize;
-
+#endif
     /* We only set Content-Length and allow a custom Content-Length if
        we don't upload data chunked, as RFC2616 forbids us to set both
-       kinds of headers (Transfer-Encoding: chunked and Content-Length) */
-    if(http->postsize != -1 && !data->req.upload_chunky &&
-       (!Curl_checkheaders(data, STRCONST("Content-Length")))) {
+       kinds of headers (Transfer-Encoding: chunked and Content-Length).
+       We do not override a custom "Content-Length" header, but during
+       authentication negotiation that header is suppressed.
+     */
+    if(req_clen >= 0 && !data->req.upload_chunky &&
+       (data->req.authneg ||
+        !Curl_checkheaders(data, STRCONST("Content-Length")))) {
       /* we allow replacing this header if not during auth negotiation,
          although it isn't very wise to actually set your own */
       result = Curl_dyn_addf(r,
                              "Content-Length: %" CURL_FORMAT_CURL_OFF_T
-                             "\r\n", http->postsize);
-      if(result)
-        goto out;
+                             "\r\n", req_clen);
     }
+    if(result)
+      goto out;
 
 #ifndef CURL_DISABLE_MIME
     /* Output mime-generated headers. */
-    {
+    if(data->state.mimepost &&
+       ((httpreq == HTTPREQ_POST_FORM) || (httpreq == HTTPREQ_POST_MIME))) {
       struct curl_slist *hdr;
 
       for(hdr = data->state.mimepost->curlheaders; hdr; hdr = hdr->next) {
@@ -2209,92 +2296,23 @@ CURLcode Curl_http_req_complete(struct Curl_easy *data,
       }
     }
 #endif
-
+    if(httpreq == HTTPREQ_POST) {
+      if(!Curl_checkheaders(data, STRCONST("Content-Type"))) {
+        result = Curl_dyn_addn(r, STRCONST("Content-Type: application/"
+                                           "x-www-form-urlencoded\r\n"));
+        if(result)
+          goto out;
+      }
+    }
     result = addexpect(data, r);
-    if(result)
-      goto out;
-
-    /* make the request end in a true CRLF */
-    result = Curl_dyn_addn(r, STRCONST("\r\n"));
-    if(result)
-      goto out;
-
-    /* set the upload size to the progress meter */
-    Curl_pgrsSetUploadSize(data, http->postsize);
-    if(!http->postsize)
-      result = Curl_creader_set_null(data);
-    else {
-      /* Read from mime structure. We could do a special client reader
-       * for this, but replacing the callback seems to work fine. */
-      data->state.fread_func = (curl_read_callback) Curl_mime_read;
-      data->state.in = (void *) data->state.mimepost;
-      result = Curl_creader_set_fread(data, data->state.infilesize);
-    }
     break;
-#endif
-  case HTTPREQ_POST:
-    /* this is the simple POST, using x-www-form-urlencoded style */
-
-    if(data->req.authneg)
-      http->postsize = 0;
-    else
-      /* the size of the post body */
-      http->postsize = data->state.infilesize;
-
-    /* We only set Content-Length and allow a custom Content-Length if
-       we don't upload data chunked, as RFC2616 forbids us to set both
-       kinds of headers (Transfer-Encoding: chunked and Content-Length) */
-    if((http->postsize != -1) && !data->req.upload_chunky &&
-       (data->req.authneg ||
-        !Curl_checkheaders(data, STRCONST("Content-Length")))) {
-      /* we allow replacing this header if not during auth negotiation,
-         although it isn't very wise to actually set your own */
-      result = Curl_dyn_addf(r, "Content-Length: %" CURL_FORMAT_CURL_OFF_T
-                             "\r\n", http->postsize);
-      if(result)
-        goto out;
-    }
-
-    if(!Curl_checkheaders(data, STRCONST("Content-Type"))) {
-      result = Curl_dyn_addn(r, STRCONST("Content-Type: application/"
-                                         "x-www-form-urlencoded\r\n"));
-      if(result)
-        goto out;
-    }
-
-    result = addexpect(data, r);
-    if(result)
-      goto out;
-
-    result = Curl_dyn_addn(r, STRCONST("\r\n"));
-    if(result)
-      goto out;
-
-    if(!http->postsize) {
-      Curl_pgrsSetUploadSize(data, 0);
-      result = Curl_creader_set_null(data);
-    }
-    else if(data->set.postfields) {
-      Curl_pgrsSetUploadSize(data, http->postsize);
-      if(http->postsize > 0)
-        result = Curl_creader_set_buf(data, data->set.postfields,
-                                       (size_t)http->postsize);
-      else
-        result = Curl_creader_set_null(data);
-    }
-    else { /* we read the bytes from the callback */
-      Curl_pgrsSetUploadSize(data, http->postsize);
-      result = Curl_creader_set_fread(data, http->postsize);
-    }
-    break;
-
   default:
-    /* HTTP GET/HEAD download, has no body, needs no Content-Length */
-    result = Curl_dyn_addn(r, STRCONST("\r\n"));
-    if(!result)
-      result = Curl_creader_set_null(data);
     break;
   }
+
+  /* end of headers */
+  result = Curl_dyn_addn(r, STRCONST("\r\n"));
+  Curl_pgrsSetUploadSize(data, req_clen);
 
 out:
   if(!result) {
@@ -2400,7 +2418,7 @@ CURLcode Curl_http_range(struct Curl_easy *data,
     }
     else if((httpreq == HTTPREQ_POST || httpreq == HTTPREQ_PUT) &&
             !Curl_checkheaders(data, STRCONST("Content-Range"))) {
-
+      curl_off_t req_clen = Curl_creader_total_length(data);
       /* if a line like this was already allocated, free the previous one */
       free(data->state.aptr.rangeline);
 
@@ -2411,109 +2429,31 @@ CURLcode Curl_http_range(struct Curl_easy *data,
         data->state.aptr.rangeline =
           aprintf("Content-Range: bytes 0-%" CURL_FORMAT_CURL_OFF_T
                   "/%" CURL_FORMAT_CURL_OFF_T "\r\n",
-                  data->state.infilesize - 1, data->state.infilesize);
+                  req_clen - 1, req_clen);
 
       }
       else if(data->state.resume_from) {
         /* This is because "resume" was selected */
-        curl_off_t total_expected_size =
-          data->state.resume_from + data->state.infilesize;
+        /* TODO: not sure if we want to send this header during authentication
+         * negotiation, but test1084 checks for it. In which case we have a
+         * "null" client reader installed that gives an unexpected length. */
+        curl_off_t total_len = data->req.authneg?
+                               data->state.infilesize :
+                               (data->state.resume_from + req_clen);
         data->state.aptr.rangeline =
           aprintf("Content-Range: bytes %s%" CURL_FORMAT_CURL_OFF_T
                   "/%" CURL_FORMAT_CURL_OFF_T "\r\n",
-                  data->state.range, total_expected_size-1,
-                  total_expected_size);
+                  data->state.range, total_len-1, total_len);
       }
       else {
         /* Range was selected and then we just pass the incoming range and
            append total size */
         data->state.aptr.rangeline =
           aprintf("Content-Range: bytes %s/%" CURL_FORMAT_CURL_OFF_T "\r\n",
-                  data->state.range, data->state.infilesize);
+                  data->state.range, req_clen);
       }
       if(!data->state.aptr.rangeline)
         return CURLE_OUT_OF_MEMORY;
-    }
-  }
-  return CURLE_OK;
-}
-
-CURLcode Curl_http_resume(struct Curl_easy *data,
-                          struct connectdata *conn,
-                          Curl_HttpReq httpreq)
-{
-  if((HTTPREQ_POST == httpreq || HTTPREQ_PUT == httpreq) &&
-     data->state.resume_from) {
-    /**********************************************************************
-     * Resuming upload in HTTP means that we PUT or POST and that we have
-     * got a resume_from value set. The resume value has already created
-     * a Range: header that will be passed along. We need to "fast forward"
-     * the file the given number of bytes and decrease the assume upload
-     * file size before we continue this venture in the dark lands of HTTP.
-     * Resuming mime/form posting at an offset > 0 has no sense and is ignored.
-     *********************************************************************/
-
-    if(data->state.resume_from < 0) {
-      /*
-       * This is meant to get the size of the present remote-file by itself.
-       * We don't support this now. Bail out!
-       */
-      data->state.resume_from = 0;
-    }
-
-    if(data->state.resume_from && !data->state.followlocation) {
-      /* only act on the first request */
-
-      /* Now, let's read off the proper amount of bytes from the
-         input. */
-      int seekerr = CURL_SEEKFUNC_CANTSEEK;
-      if(conn->seek_func) {
-        Curl_set_in_callback(data, true);
-        seekerr = conn->seek_func(conn->seek_client, data->state.resume_from,
-                                  SEEK_SET);
-        Curl_set_in_callback(data, false);
-      }
-
-      if(seekerr != CURL_SEEKFUNC_OK) {
-        curl_off_t passed = 0;
-
-        if(seekerr != CURL_SEEKFUNC_CANTSEEK) {
-          failf(data, "Could not seek stream");
-          return CURLE_READ_ERROR;
-        }
-        /* when seekerr == CURL_SEEKFUNC_CANTSEEK (can't seek to offset) */
-        do {
-          char scratch[4*1024];
-          size_t readthisamountnow =
-            (data->state.resume_from - passed > (curl_off_t)sizeof(scratch)) ?
-            sizeof(scratch) :
-            curlx_sotouz(data->state.resume_from - passed);
-
-          size_t actuallyread =
-            data->state.fread_func(scratch, 1, readthisamountnow,
-                                   data->state.in);
-
-          passed += actuallyread;
-          if((actuallyread == 0) || (actuallyread > readthisamountnow)) {
-            /* this checks for greater-than only to make sure that the
-               CURL_READFUNC_ABORT return code still aborts */
-            failf(data, "Could only read %" CURL_FORMAT_CURL_OFF_T
-                  " bytes from the input", passed);
-            return CURLE_READ_ERROR;
-          }
-        } while(passed < data->state.resume_from);
-      }
-
-      /* now, decrease the size of the read */
-      if(data->state.infilesize>0) {
-        data->state.infilesize -= data->state.resume_from;
-
-        if(data->state.infilesize <= 0) {
-          failf(data, "File already completely uploaded");
-          return CURLE_PARTIAL_FILE;
-        }
-      }
-      /* we've passed, proceed as normal */
     }
   }
   return CURLE_OK;
@@ -2727,16 +2667,12 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     goto fail;
 #endif
 
-  result = Curl_http_body(data, conn, httpreq, &te);
+  result = Curl_http_req_set_reader(data, httpreq, &te);
   if(result)
     goto fail;
 
   p_accept = Curl_checkheaders(data,
                                STRCONST("Accept"))?NULL:"Accept: */*\r\n";
-
-  result = Curl_http_resume(data, conn, httpreq);
-  if(result)
-    goto fail;
 
   result = Curl_http_range(data, httpreq);
   if(result)
@@ -2855,14 +2791,8 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     result = Curl_add_custom_headers(data, FALSE, &req);
 
   if(!result) {
-    if((httpreq == HTTPREQ_GET) ||
-       (httpreq == HTTPREQ_HEAD))
-      Curl_pgrsSetUploadSize(data, 0); /* nothing */
-
     /* req_send takes ownership of the 'req' memory on success */
     result = Curl_http_req_complete(data, &req, httpreq);
-    if(!result && data->req.upload_chunky)
-      result = Curl_httpchunk_add_reader(data);
     if(!result)
       result = Curl_req_send(data, &req);
   }

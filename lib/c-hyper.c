@@ -883,9 +883,9 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
       return result;
   }
 
-  result = Curl_http_resume(data, conn, httpreq);
+  result = Curl_http_req_set_reader(data, httpreq, &te);
   if(result)
-    return result;
+    goto error;
 
   result = Curl_http_range(data, httpreq);
   if(result)
@@ -1005,10 +1005,6 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     result = CURLE_OUT_OF_MEMORY;
     goto error;
   }
-
-  result = Curl_http_body(data, conn, httpreq, &te);
-  if(result)
-    goto error;
 
   if(data->state.aptr.host) {
     result = Curl_hyper_header(data, headers, data->state.aptr.host);
