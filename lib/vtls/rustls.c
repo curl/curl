@@ -751,6 +751,7 @@ const struct Curl_ssl Curl_ssl_rustls = {
   NULL,                            /* free_multi_ssl_backend_data */
   cr_recv,                         /* recv decrypted data */
   cr_send,                         /* send data to encrypt */
+  NULL,                            /* get_tls_server_end_point */
 };
 
 #endif /* USE_RUSTLS */

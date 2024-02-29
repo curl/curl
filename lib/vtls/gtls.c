@@ -1672,6 +1672,7 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   NULL,                          /* free_multi_ssl_backend_data */
   gtls_recv,                     /* recv decrypted data */
   gtls_send,                     /* send data to encrypt */
+  NULL,                          /* get_tls_server_end_point */
 };
 
 #endif /* USE_GNUTLS */
