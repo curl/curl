@@ -1769,7 +1769,7 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
   }
 
   /* In UDP, there is a maximum theoretical packet paload length and
-   * a minimum payload length that is "guarantueed" to work.
+   * a minimum payload length that is "guaranteed" to work.
    * To detect if this minimum payload can be increased, ngtcp2 sends
    * now and then a packet payload larger than the minimum. It that
    * is ACKed by the peer, both parties know that it works and

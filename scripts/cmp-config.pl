@@ -31,7 +31,7 @@ if(!$cmake) {
     exit;
 }
 
-# this lists complete lines that will be removed from the the output if
+# this lists complete lines that will be removed from the output if
 # matching
 my %remove = (
     '#define _FILE_OFFSET_BITS 64' => 1,

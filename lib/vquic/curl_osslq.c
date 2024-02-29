@@ -426,7 +426,7 @@ static CURLcode cf_osslq_ssl_err(struct Curl_cfilter *cf,
 #endif
   else if((lib == ERR_LIB_SSL) && (reason == SSL_R_PROTOCOL_IS_SHUTDOWN)) {
     ctx->protocol_shutdown = TRUE;
-    err_descr = "QUIC connectin has been shut down";
+    err_descr = "QUIC connection has been shut down";
     result = def_result;
   }
   else {

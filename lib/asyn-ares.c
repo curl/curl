@@ -850,7 +850,7 @@ CURLcode Curl_set_dns_servers(struct Curl_easy *data,
   /* If server is NULL or empty, this would purge all DNS servers
    * from ares library, which will cause any and all queries to fail.
    * So, just return OK if none are configured and don't actually make
-   * any changes to c-ares.  This lets c-ares use it's defaults, which
+   * any changes to c-ares.  This lets c-ares use its defaults, which
    * it gets from the OS (for instance from /etc/resolv.conf on Linux).
    */
   if(!(servers && servers[0]))

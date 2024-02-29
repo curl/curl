@@ -88,7 +88,7 @@ Angle brackets (`<>`) need to be escaped when used in text like `\<` and
 
 ### Headers
 
-The `#` header can be used by non-option files and it produces produces a
+The `#` header can be used by non-option files and it produces a
 `.SH` output.
 
 If the `#` header is used for a command line option file, that header is
