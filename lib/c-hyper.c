@@ -363,7 +363,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
       k->exp100 = EXP100_SEND_DATA;
       k->keepon |= KEEP_SEND;
       Curl_expire_done(data, EXPIRE_100_TIMEOUT);
-      infof(data, "Done waiting for 100-continue");
+      infof(data, "Done waiting for 100-continue after %ldms", (long)ms);
       if(data->hyp.exp100_waker) {
         hyper_waker_wake(data->hyp.exp100_waker);
         data->hyp.exp100_waker = NULL;
@@ -848,7 +848,9 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
      may be parts of the request that is not yet sent, since we can deal with
      the rest of the request in the PERFORM phase. */
   *done = TRUE;
-  Curl_client_reset(data);
+  result = Curl_client_start(data);
+  if(result)
+    return result;
 
   /* Add collecting of headers written to client. For a new connection,
    * we might have done that already, but reuse
@@ -883,9 +885,9 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
       return result;
   }
 
-  result = Curl_http_resume(data, conn, httpreq);
+  result = Curl_http_req_set_reader(data, httpreq, &te);
   if(result)
-    return result;
+    goto error;
 
   result = Curl_http_range(data, httpreq);
   if(result)
@@ -1005,10 +1007,6 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     result = CURLE_OUT_OF_MEMORY;
     goto error;
   }
-
-  result = Curl_http_body(data, conn, httpreq, &te);
-  if(result)
-    goto error;
 
   if(data->state.aptr.host) {
     result = Curl_hyper_header(data, headers, data->state.aptr.host);

@@ -51,6 +51,7 @@
 #include "strdup.h"
 #include "http2.h"
 #include "progress.h"
+#include "warnless.h"
 #include "ws.h"
 
 /* The last 3 #include files should be in this order */
@@ -112,14 +113,62 @@ static void cl_reset_reader(struct Curl_easy *data)
   }
 }
 
-void Curl_client_reset(struct Curl_easy *data)
+void Curl_client_cleanup(struct Curl_easy *data)
 {
-  DEBUGF(infof(data, "Curl_client_reset()"));
+  DEBUGF(infof(data, "Curl_client_cleanup()"));
   cl_reset_reader(data);
   cl_reset_writer(data);
 
   data->req.bytecount = 0;
   data->req.headerline = 0;
+}
+
+void Curl_client_reset(struct Curl_easy *data)
+{
+  if(data->req.rewind_read) {
+    /* already requested */
+    DEBUGF(infof(data, "Curl_client_reset(), will rewind_read"));
+  }
+  else {
+    DEBUGF(infof(data, "Curl_client_reset(), clear readers"));
+    cl_reset_reader(data);
+  }
+  cl_reset_writer(data);
+
+  data->req.bytecount = 0;
+  data->req.headerline = 0;
+}
+
+CURLcode Curl_client_start(struct Curl_easy *data)
+{
+  if(data->req.rewind_read) {
+    struct Curl_creader *r = data->req.reader_stack;
+    CURLcode result = CURLE_OK;
+
+    DEBUGF(infof(data, "client start, rewind readers"));
+    while(r) {
+      result = r->crt->rewind(data, r);
+      if(result) {
+        failf(data, "rewind of client reader '%s' failed: %d",
+              r->crt->name, result);
+        return result;
+      }
+      r = r->next;
+    }
+    data->req.rewind_read = FALSE;
+    cl_reset_reader(data);
+  }
+  return CURLE_OK;
+}
+
+bool Curl_creader_will_rewind(struct Curl_easy *data)
+{
+  return data->req.rewind_read;
+}
+
+void Curl_creader_set_rewind(struct Curl_easy *data, bool enable)
+{
+  data->req.rewind_read = !!enable;
 }
 
 /* Write data using an unencoding writer stack. "nbytes" is not
@@ -475,8 +524,35 @@ bool Curl_creader_def_needs_rewind(struct Curl_easy *data,
   return FALSE;
 }
 
+curl_off_t Curl_creader_def_total_length(struct Curl_easy *data,
+                                         struct Curl_creader *reader)
+{
+  return reader->next?
+         reader->next->crt->total_length(data, reader->next) : -1;
+}
+
+CURLcode Curl_creader_def_resume_from(struct Curl_easy *data,
+                                      struct Curl_creader *reader,
+                                      curl_off_t offset)
+{
+  (void)data;
+  (void)reader;
+  (void)offset;
+  return CURLE_READ_ERROR;
+}
+
+CURLcode Curl_creader_def_rewind(struct Curl_easy *data,
+                                 struct Curl_creader *reader)
+{
+  (void)data;
+  (void)reader;
+  return CURLE_OK;
+}
+
 struct cr_in_ctx {
   struct Curl_creader super;
+  curl_read_callback read_cb;
+  void *cb_user_data;
   curl_off_t total_len;
   curl_off_t read_len;
   CURLcode error_result;
@@ -489,6 +565,8 @@ static CURLcode cr_in_init(struct Curl_easy *data, struct Curl_creader *reader)
 {
   struct cr_in_ctx *ctx = (struct cr_in_ctx *)reader;
   (void)data;
+  ctx->read_cb = data->state.fread_func;
+  ctx->cb_user_data = data->state.in;
   ctx->total_len = -1;
   ctx->read_len = 0;
   return CURLE_OK;
@@ -523,9 +601,9 @@ static CURLcode cr_in_read(struct Curl_easy *data,
       blen = (size_t)remain;
   }
   nread = 0;
-  if(data->state.fread_func && blen) {
+  if(ctx->read_cb && blen) {
     Curl_set_in_callback(data, true);
-    nread = data->state.fread_func(buf, 1, blen, data->state.in);
+    nread = ctx->read_cb(buf, 1, blen, ctx->cb_user_data);
     Curl_set_in_callback(data, false);
     ctx->has_used_cb = TRUE;
   }
@@ -596,12 +674,167 @@ static bool cr_in_needs_rewind(struct Curl_easy *data,
   return ctx->has_used_cb;
 }
 
+static curl_off_t cr_in_total_length(struct Curl_easy *data,
+                                     struct Curl_creader *reader)
+{
+  struct cr_in_ctx *ctx = (struct cr_in_ctx *)reader;
+  (void)data;
+  return ctx->total_len;
+}
+
+static CURLcode cr_in_resume_from(struct Curl_easy *data,
+                                  struct Curl_creader *reader,
+                                  curl_off_t offset)
+{
+  struct cr_in_ctx *ctx = (struct cr_in_ctx *)reader;
+  int seekerr = CURL_SEEKFUNC_CANTSEEK;
+
+  DEBUGASSERT(data->conn);
+  /* already started reading? */
+  if(ctx->read_len)
+    return CURLE_READ_ERROR;
+
+  if(data->conn->seek_func) {
+    Curl_set_in_callback(data, true);
+    seekerr = data->conn->seek_func(data->conn->seek_client, offset, SEEK_SET);
+    Curl_set_in_callback(data, false);
+  }
+
+  if(seekerr != CURL_SEEKFUNC_OK) {
+    curl_off_t passed = 0;
+
+    if(seekerr != CURL_SEEKFUNC_CANTSEEK) {
+      failf(data, "Could not seek stream");
+      return CURLE_READ_ERROR;
+    }
+    /* when seekerr == CURL_SEEKFUNC_CANTSEEK (can't seek to offset) */
+    do {
+      char scratch[4*1024];
+      size_t readthisamountnow =
+        (offset - passed > (curl_off_t)sizeof(scratch)) ?
+        sizeof(scratch) :
+        curlx_sotouz(offset - passed);
+      size_t actuallyread;
+
+      Curl_set_in_callback(data, true);
+      actuallyread = ctx->read_cb(scratch, 1, readthisamountnow,
+                                  ctx->cb_user_data);
+      Curl_set_in_callback(data, false);
+
+      passed += actuallyread;
+      if((actuallyread == 0) || (actuallyread > readthisamountnow)) {
+        /* this checks for greater-than only to make sure that the
+           CURL_READFUNC_ABORT return code still aborts */
+        failf(data, "Could only read %" CURL_FORMAT_CURL_OFF_T
+              " bytes from the input", passed);
+        return CURLE_READ_ERROR;
+      }
+    } while(passed < offset);
+  }
+
+  /* now, decrease the size of the read */
+  if(ctx->total_len > 0) {
+    ctx->total_len -= offset;
+
+    if(ctx->total_len <= 0) {
+      failf(data, "File already completely uploaded");
+      return CURLE_PARTIAL_FILE;
+    }
+  }
+  /* we've passed, proceed as normal */
+  return CURLE_OK;
+}
+
+static CURLcode cr_in_rewind(struct Curl_easy *data,
+                             struct Curl_creader *reader)
+{
+  struct cr_in_ctx *ctx = (struct cr_in_ctx *)reader;
+  /* TODO: I wonder if we should rather give mime its own client
+   * reader type. This is messy. */
+#if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
+  curl_mimepart *mimepart = &data->set.mimepost;
+#endif
+
+  /* If we never invoked the callback, there is noting to rewind */
+  if(!ctx->has_used_cb)
+    return CURLE_OK;
+
+  /* We have sent away data. If not using CURLOPT_POSTFIELDS or
+     CURLOPT_HTTPPOST, call app to rewind
+  */
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_MIME)
+  if(data->conn->handler->protocol & PROTO_FAMILY_HTTP) {
+    if(data->state.mimepost)
+      mimepart = data->state.mimepost;
+  }
+#endif
+#if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
+  if(ctx->read_cb == (curl_read_callback)Curl_mime_read) {
+    CURLcode result = Curl_mime_rewind(mimepart);
+    DEBUGF(infof(data, "cr_in, rewind mime/post data -> %d", result));
+    if(result) {
+      failf(data, "Cannot rewind mime/post data");
+    }
+    return result;
+  }
+#endif
+
+  /* With mime out of the way, handle "normal" fread callbacks */
+  if(data->set.seek_func) {
+    int err;
+
+    Curl_set_in_callback(data, true);
+    err = (data->set.seek_func)(data->set.seek_client, 0, SEEK_SET);
+    Curl_set_in_callback(data, false);
+    DEBUGF(infof(data, "cr_in, rewind via set.seek_func -> %d", err));
+    if(err) {
+      failf(data, "seek callback returned error %d", (int)err);
+      return CURLE_SEND_FAIL_REWIND;
+    }
+  }
+  else if(data->set.ioctl_func) {
+    curlioerr err;
+
+    Curl_set_in_callback(data, true);
+    err = (data->set.ioctl_func)(data, CURLIOCMD_RESTARTREAD,
+                                 data->set.ioctl_client);
+    Curl_set_in_callback(data, false);
+    DEBUGF(infof(data, "cr_in, rewind via set.ioctl_func -> %d", (int)err));
+    if(err) {
+      failf(data, "ioctl callback returned error %d", (int)err);
+      return CURLE_SEND_FAIL_REWIND;
+    }
+  }
+  else {
+    /* If no CURLOPT_READFUNCTION is used, we know that we operate on a
+       given FILE * stream and we can actually attempt to rewind that
+       ourselves with fseek() */
+    if(data->state.fread_func == (curl_read_callback)fread) {
+      int err = fseek(data->state.in, 0, SEEK_SET);
+      DEBUGF(infof(data, "cr_in, rewind via fseek -> %d(%d)",
+             (int)err, (int)errno));
+      if(-1 != err)
+        /* successful rewind */
+        return CURLE_OK;
+    }
+
+    /* no callback set or failure above, makes us fail at once */
+    failf(data, "necessary data rewind wasn't possible");
+    return CURLE_SEND_FAIL_REWIND;
+  }
+  return CURLE_OK;
+}
+
+
 static const struct Curl_crtype cr_in = {
   "cr-in",
   cr_in_init,
   cr_in_read,
   Curl_creader_def_close,
   cr_in_needs_rewind,
+  cr_in_total_length,
+  cr_in_resume_from,
+  cr_in_rewind,
   sizeof(struct cr_in_ctx)
 };
 
@@ -730,12 +963,24 @@ static CURLcode cr_lc_read(struct Curl_easy *data,
   return result;
 }
 
+static curl_off_t cr_lc_total_length(struct Curl_easy *data,
+                                     struct Curl_creader *reader)
+{
+  /* this reader changes length depending on input */
+  (void)data;
+  (void)reader;
+  return -1;
+}
+
 static const struct Curl_crtype cr_lc = {
   "cr-lineconv",
   cr_lc_init,
   cr_lc_read,
   cr_lc_close,
   Curl_creader_def_needs_rewind,
+  cr_lc_total_length,
+  Curl_creader_def_resume_from,
+  Curl_creader_def_rewind,
   sizeof(struct cr_lc_ctx)
 };
 
@@ -756,7 +1001,8 @@ static CURLcode cr_lc_add(struct Curl_easy *data)
 
 static CURLcode do_init_reader_stack(struct Curl_easy *data,
                                      const struct Curl_crtype *crt,
-                                     struct Curl_creader **preader)
+                                     struct Curl_creader **preader,
+                                     curl_off_t clen)
 {
   CURLcode result;
 
@@ -766,11 +1012,13 @@ static CURLcode do_init_reader_stack(struct Curl_easy *data,
     return result;
   data->req.reader_stack = *preader;
 
-  if(data->set.crlf
+  /* if we do not have 0 length init, and crlf conversion is wanted,
+   * add the reader for it */
+  if(clen && (data->set.crlf
 #ifdef CURL_DO_LINEEND_CONV
      || data->state.prefer_ascii
 #endif
-    ) {
+    )) {
     result = cr_lc_add(data);
     if(result)
       return result;
@@ -779,13 +1027,13 @@ static CURLcode do_init_reader_stack(struct Curl_easy *data,
   return result;
 }
 
-CURLcode Client_reader_set_fread(struct Curl_easy *data, curl_off_t len)
+CURLcode Curl_creader_set_fread(struct Curl_easy *data, curl_off_t len)
 {
   CURLcode result;
   struct Curl_creader *r;
 
   cl_reset_reader(data);
-  result = do_init_reader_stack(data, &cr_in, &r);
+  result = do_init_reader_stack(data, &cr_in, &r, len);
   if(!result && r) {
     struct cr_in_ctx *ctx = (struct cr_in_ctx *)r;
     DEBUGASSERT(r->crt == &cr_in);
@@ -801,7 +1049,7 @@ CURLcode Curl_creader_add(struct Curl_easy *data,
   struct Curl_creader **anchor = &data->req.reader_stack;
 
   if(!*anchor) {
-    result = Client_reader_set_fread(data, data->state.infilesize);
+    result = Curl_creader_set_fread(data, data->state.infilesize);
     if(result)
       return result;
   }
@@ -826,7 +1074,7 @@ CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
   DEBUGASSERT(eos);
 
   if(!data->req.reader_stack) {
-    result = Client_reader_set_fread(data, data->state.infilesize);
+    result = Curl_creader_set_fread(data, data->state.infilesize);
     if(result)
       return result;
     DEBUGASSERT(data->req.reader_stack);
@@ -837,7 +1085,7 @@ CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
   return result;
 }
 
-bool Curl_client_read_needs_rewind(struct Curl_easy *data)
+bool Curl_creader_needs_rewind(struct Curl_easy *data)
 {
   struct Curl_creader *reader = data->req.reader_stack;
   while(reader) {
@@ -862,21 +1110,33 @@ static CURLcode cr_null_read(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+static curl_off_t cr_null_total_length(struct Curl_easy *data,
+                                       struct Curl_creader *reader)
+{
+  /* this reader changes length depending on input */
+  (void)data;
+  (void)reader;
+  return 0;
+}
+
 static const struct Curl_crtype cr_null = {
   "cr-null",
   Curl_creader_def_init,
   cr_null_read,
   Curl_creader_def_close,
   Curl_creader_def_needs_rewind,
+  cr_null_total_length,
+  Curl_creader_def_resume_from,
+  Curl_creader_def_rewind,
   sizeof(struct Curl_creader)
 };
 
-CURLcode Client_reader_set_null(struct Curl_easy *data)
+CURLcode Curl_creader_set_null(struct Curl_easy *data)
 {
   struct Curl_creader *r;
 
   cl_reset_reader(data);
-  return do_init_reader_stack(data, &cr_null, &r);
+  return do_init_reader_stack(data, &cr_null, &r, 0);
 }
 
 struct cr_buf_ctx {
@@ -918,23 +1178,57 @@ static bool cr_buf_needs_rewind(struct Curl_easy *data,
   return ctx->index > 0;
 }
 
+static curl_off_t cr_buf_total_length(struct Curl_easy *data,
+                                      struct Curl_creader *reader)
+{
+  struct cr_buf_ctx *ctx = (struct cr_buf_ctx *)reader;
+  (void)data;
+  return (curl_off_t)ctx->blen;
+}
+
+static CURLcode cr_buf_resume_from(struct Curl_easy *data,
+                                   struct Curl_creader *reader,
+                                   curl_off_t offset)
+{
+  struct cr_buf_ctx *ctx = (struct cr_buf_ctx *)reader;
+  size_t boffset;
+
+  (void)data;
+  DEBUGASSERT(data->conn);
+  /* already started reading? */
+  if(ctx->index)
+    return CURLE_READ_ERROR;
+  if(offset <= 0)
+    return CURLE_OK;
+  boffset = (size_t)offset;
+  if(boffset > ctx->blen)
+    return CURLE_READ_ERROR;
+
+  ctx->buf += boffset;
+  ctx->blen -= boffset;
+  return CURLE_OK;
+}
+
 static const struct Curl_crtype cr_buf = {
   "cr-buf",
   Curl_creader_def_init,
   cr_buf_read,
   Curl_creader_def_close,
   cr_buf_needs_rewind,
+  cr_buf_total_length,
+  cr_buf_resume_from,
+  Curl_creader_def_rewind,
   sizeof(struct cr_buf_ctx)
 };
 
-CURLcode Client_reader_set_buf(struct Curl_easy *data,
+CURLcode Curl_creader_set_buf(struct Curl_easy *data,
                                const char *buf, size_t blen)
 {
   CURLcode result;
   struct Curl_creader *r;
 
   cl_reset_reader(data);
-  result = do_init_reader_stack(data, &cr_buf, &r);
+  result = do_init_reader_stack(data, &cr_buf, &r, blen);
   if(!result && r) {
     struct cr_buf_ctx *ctx = (struct cr_buf_ctx *)r;
     DEBUGASSERT(r->crt == &cr_buf);
@@ -943,4 +1237,26 @@ CURLcode Client_reader_set_buf(struct Curl_easy *data,
     ctx->index = 0;
   }
   return result;
+}
+
+curl_off_t Curl_creader_total_length(struct Curl_easy *data)
+{
+  struct Curl_creader *r = data->req.reader_stack;
+  return r? r->crt->total_length(data, r) : -1;
+}
+
+curl_off_t Curl_creader_client_length(struct Curl_easy *data)
+{
+  struct Curl_creader *r = data->req.reader_stack;
+  while(r && r->phase != CURL_CR_CLIENT)
+    r = r->next;
+  return r? r->crt->total_length(data, r) : -1;
+}
+
+CURLcode Curl_creader_resume_from(struct Curl_easy *data, curl_off_t offset)
+{
+  struct Curl_creader *r = data->req.reader_stack;
+  while(r && r->phase != CURL_CR_CLIENT)
+    r = r->next;
+  return r? r->crt->resume_from(data, r, offset) : CURLE_READ_ERROR;
 }

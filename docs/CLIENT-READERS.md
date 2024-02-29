@@ -31,6 +31,11 @@ struct Curl_crtype {
                       char *buf, size_t blen, size_t *nread, bool *eos);
   void (*do_close)(struct Curl_easy *data, struct Curl_creader *reader);
   bool (*needs_rewind)(struct Curl_easy *data, struct Curl_creader *reader);
+  curl_off_t (*total_length)(struct Curl_easy *data,
+                             struct Curl_creader *reader);
+  CURLcode (*resume_from)(struct Curl_easy *data,
+                          struct Curl_creader *reader, curl_off_t offset);
+  CURLcode (*rewind)(struct Curl_easy *data, struct Curl_creader *reader);
 };
 
 struct Curl_creader {
@@ -80,6 +85,36 @@ Implemented in `sendf.c` for phase `CURL_CR_CLIENT`, this reader get a buffer po
 
 Sometimes it is necessary to send a request with client data again. Transfer handling can inquire via `Curl_client_read_needs_rewind()` if a rewind (e.g. a reset of the client data) is necessary. This asks all installed readers if they need it and give `FALSE` of none does.
 
+## Upload Size
+
+Many protocols need to know the amount of bytes delivered by the client readers in advance. They may invoke `Curl_creader_total_length(data)` to retrieve that. However, not all reader chains know the exact value beforehand. In that case, the call returns `-1` for "unknown".
+
+Even if the length of the "raw" data is known, the length that is send may not. Example: with option `--crlf` the uploaded content undergoes line-end conversion. The line converting reader does not know in advance how many newlines it may encounter. Therefore it must return `-1` for any positive raw content length.
+
+In HTTP, once the correct client readers are installed, the protocol asks the readers for the total length. If that is known, it can set `Content-Length:` accordingly. If not, it may choose to add an HTTP "chunked" reader.
+
+In addition, there is `Curl_creader_client_length(data)` which gives the total length as reported by the reader in phase `CURL_CR_CLIENT` without asking other readers that may transform the raw data. This is useful in estimating the size of an upload. The HTTP protocol uses this to determine if `Expect: 100-continue` shall be done.
+
+## Resuming
+
+Uploads can start at a specific offset, if so requested. The "resume from" that offset. This applies to the reader in phase `CURL_CR_CLIENT` that delivers the "raw" content. Resumption can fail if the installed reader does not support it or if the offset is too large.
+
+The total length reported by the reader changes when resuming. Example: resuming an upload of 100 bytes by 25 reports a total length of 75 afterwards.
+
+If `resume_from()` is invoked twice, it is additive. There is currently no way to undo a resume.
+
+## Rewinding
+
+When a request is retried, installed client readers are discarded and replaced by new ones. This works only if the new readers upload the same data. For many readers, this is not an issue. The "null" reader always does the same. Also the `buf` reader, initialized with the same buffer, does this.
+
+Readers operating on callbacks to the application need to "rewind" the underlying content. For example, when reading from a `FILE*`, the reader needs to `fseek()` to the beginning. The following methods are used:
+
+1. `Curl_creader_needs_rewind(data)`: tells if a rewind is necessary, given the current state of the reader chain. If nothing really has been read so far, this returns `FALSE`.
+2. `Curl_creader_will_rewind(data)`: tells if the reader chain rewinds at the start of the next request.
+3. `Curl_creader_set_rewind(data, TRUE)`: marks the reader chain for rewinding at the start of the next request.
+4. `Curl_client_start(data)`: tells the readers that a new request starts and they need to rewind if requested.
+
+
 ## Summary and Outlook
 
 By adding the client reader interface, any protocol can control how/if it wants the curl transfer to send bytes for a request. The transfer loop becomes then blissfully ignorant of the specifics. 
@@ -87,7 +122,5 @@ By adding the client reader interface, any protocol can control how/if it wants 
 The protocols on the other hand no longer have to care to package data most efficiently. At any time, should more data be needed, it can be read from the client. This is used when sending HTTP requests headers to add as much request body data to the initial sending as there is room for.
 
 Future enhancements based on the client readers:
-* delegate the actual "rewinding" to the readers. The should know how it is done, eliminating the `readrewind.c` protocol specifics in `multi.c`.
 * `expect-100` handling: place that into a HTTP specific reader at `CURL_CR_PROTOCOL` and eliminate the checks in the generic transfer parts.
-* `eos` detection: `upload_done` is partly triggered now by comparing the number of bytes sent to a known size. This is no longer necessary since the core readers obey length restrictions.
 * `eos forwarding`: transfer should forward an `eos` flag to the connection filters. Filters like HTTP/2 and HTTP/3 can make use of that, terminating streams early. This would also eliminate length checks in stream handling.

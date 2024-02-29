@@ -61,7 +61,19 @@ CURLcode Curl_client_write(struct Curl_easy *data, int type, const char *ptr,
 /**
  * Free all resources related to client writing.
  */
+void Curl_client_cleanup(struct Curl_easy *data);
+
+/**
+ * Reset readers and writer chains, keep rewind information
+ * when necessary.
+ */
 void Curl_client_reset(struct Curl_easy *data);
+
+/**
+ * A new request is starting, perform any ops like rewinding
+ * previous readers when needed.
+ */
+CURLcode Curl_client_start(struct Curl_easy *data);
 
 /**
  * Client Writers - a chain passing transfer BODY data to the client.
@@ -178,11 +190,16 @@ void Curl_cwriter_def_close(struct Curl_easy *data,
 /* Client Reader Type, provides the implementation */
 struct Curl_crtype {
   const char *name;        /* writer name. */
-  CURLcode (*do_init)(struct Curl_easy *data, struct Curl_creader *writer);
+  CURLcode (*do_init)(struct Curl_easy *data, struct Curl_creader *reader);
   CURLcode (*do_read)(struct Curl_easy *data, struct Curl_creader *reader,
                       char *buf, size_t blen, size_t *nread, bool *eos);
   void (*do_close)(struct Curl_easy *data, struct Curl_creader *reader);
   bool (*needs_rewind)(struct Curl_easy *data, struct Curl_creader *reader);
+  curl_off_t (*total_length)(struct Curl_easy *data,
+                             struct Curl_creader *reader);
+  CURLcode (*resume_from)(struct Curl_easy *data,
+                          struct Curl_creader *reader, curl_off_t offset);
+  CURLcode (*rewind)(struct Curl_easy *data, struct Curl_creader *reader);
   size_t creader_size;  /* sizeof() allocated struct Curl_creader */
 };
 
@@ -212,6 +229,13 @@ void Curl_creader_def_close(struct Curl_easy *data,
                             struct Curl_creader *reader);
 bool Curl_creader_def_needs_rewind(struct Curl_easy *data,
                                    struct Curl_creader *reader);
+curl_off_t Curl_creader_def_total_length(struct Curl_easy *data,
+                                         struct Curl_creader *reader);
+CURLcode Curl_creader_def_resume_from(struct Curl_easy *data,
+                                      struct Curl_creader *reader,
+                                      curl_off_t offset);
+CURLcode Curl_creader_def_rewind(struct Curl_easy *data,
+                                 struct Curl_creader *reader);
 
 /**
  * Convenience method for calling `reader->do_read()` that
@@ -260,22 +284,64 @@ CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
  * TRUE iff client reader needs rewing before it can be used for
  * a retry request.
  */
-bool Curl_client_read_needs_rewind(struct Curl_easy *data);
+bool Curl_creader_needs_rewind(struct Curl_easy *data);
+
+/**
+ * TRUE iff client reader will rewind at next start
+ */
+bool Curl_creader_will_rewind(struct Curl_easy *data);
+
+/**
+ * En-/disable rewind of client reader at next start.
+ */
+void Curl_creader_set_rewind(struct Curl_easy *data, bool enable);
+
+/**
+ * Get the total length of bytes provided by the installed readers.
+ * This is independent of the amount already delivered and is calculated
+ * by all readers in the stack. If a reader like "chunked" or
+ * "crlf conversion" is installed, the returned length will be -1.
+ * @return -1 if length is indeterminate
+ */
+curl_off_t Curl_creader_total_length(struct Curl_easy *data);
+
+/**
+ * Get the total length of bytes provided by the reader at phase
+ * CURL_CR_CLIENT. This may not match the amount of bytes read
+ * for a request, depending if other, encoding readers are also installed.
+ * However it allows for rough estimation of the overall length.
+ * @return -1 if length is indeterminate
+ */
+curl_off_t Curl_creader_client_length(struct Curl_easy *data);
+
+/**
+ * Ask the installed reader at phase CURL_CR_CLIENT to start
+ * reading from the given offset. On success, this will reduce
+ * the `total_length()` by the amount.
+ * @param date    the transfer to read client bytes for
+ * param offset   the offset where to start reads from, negative
+ *                values will be ignored.
+ * @return CURLE_OK if offset could be set
+ *         CURLE_READ_ERROR if not supported by reader or seek/read failed
+ *                          of offset larger then total length
+ *         CURLE_PARTIAL_FILE if offset led to 0 total length
+ */
+CURLcode Curl_creader_resume_from(struct Curl_easy *data, curl_off_t offset);
 
 /**
  * Set the client reader to provide 0 bytes, immediate EOS.
  */
-CURLcode Client_reader_set_null(struct Curl_easy *data);
+CURLcode Curl_creader_set_null(struct Curl_easy *data);
 
 /**
  * Set the client reader the reads from fread callback.
  */
-CURLcode Client_reader_set_fread(struct Curl_easy *data, curl_off_t len);
+CURLcode Curl_creader_set_fread(struct Curl_easy *data, curl_off_t len);
 
 /**
  * Set the client reader the reads from the supplied buf (NOT COPIED).
  */
-CURLcode Client_reader_set_buf(struct Curl_easy *data,
-                               const char *buf, size_t blen);
+CURLcode Curl_creader_set_buf(struct Curl_easy *data,
+                              const char *buf, size_t blen);
 
 #endif /* HEADER_CURL_SENDF_H */

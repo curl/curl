@@ -982,6 +982,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
        && !(data->set.keep_post & CURL_REDIR_POST_301)) {
       infof(data, "Switch from POST to GET");
       data->state.httpreq = HTTPREQ_GET;
+      Curl_creader_set_rewind(data, FALSE);
     }
     break;
   case 302: /* Found */
@@ -1007,6 +1008,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
        && !(data->set.keep_post & CURL_REDIR_POST_302)) {
       infof(data, "Switch from POST to GET");
       data->state.httpreq = HTTPREQ_GET;
+      Curl_creader_set_rewind(data, FALSE);
     }
     break;
 
@@ -1109,12 +1111,7 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
                                 prevent i.e HTTP transfers to return
                                 error just because nothing has been
                                 transferred! */
-
-
-    if(Curl_client_read_needs_rewind(data)) {
-      data->state.rewindbeforesend = TRUE;
-      infof(data, "state.rewindbeforesend = TRUE");
-    }
+    Curl_creader_set_rewind(data, TRUE);
   }
   return CURLE_OK;
 }

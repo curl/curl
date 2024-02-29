@@ -49,8 +49,13 @@ CURLcode Curl_req_init(struct SingleRequest *req)
 CURLcode Curl_req_start(struct SingleRequest *req,
                         struct Curl_easy *data)
 {
+  CURLcode result;
+
   req->start = Curl_now();
-  Curl_client_reset(data);
+  result = Curl_client_start(data);
+  if(result)
+    return result;
+
   if(!req->sendbuf_init) {
     Curl_bufq_init2(&req->sendbuf, data->set.upload_buffer_size, 1,
                     BUFQ_OPT_SOFT_LIMIT);
@@ -82,14 +87,15 @@ CURLcode Curl_req_done(struct SingleRequest *req,
 
 void Curl_req_reset(struct SingleRequest *req, struct Curl_easy *data)
 {
-  struct bufq savebuf;
-  bool save_init;
+  struct curltime t0 = {0, 0};
 
   /* This is a bit ugly. `req->p` is a union and we assume we can
    * free this safely without leaks. */
   Curl_safefree(req->p.http);
   Curl_safefree(req->newurl);
   Curl_client_reset(data);
+  if(req->sendbuf_init)
+    Curl_bufq_reset(&req->sendbuf);
 
 #ifndef CURL_DISABLE_DOH
   if(req->doh) {
@@ -97,17 +103,45 @@ void Curl_req_reset(struct SingleRequest *req, struct Curl_easy *data)
     Curl_close(&req->doh->probe[1].easy);
   }
 #endif
-
-  savebuf = req->sendbuf;
-  save_init = req->sendbuf_init;
-
-  memset(req, 0, sizeof(*req));
-  data->req.size = data->req.maxdownload = -1;
-  data->req.no_body = data->set.opt_no_body;
-  if(save_init) {
-    req->sendbuf = savebuf;
-    req->sendbuf_init = save_init;
-  }
+  /* Can no longer memset() this struct as we need to keep some state */
+  req->size = -1;
+  req->maxdownload = -1;
+  req->bytecount = 0;
+  req->writebytecount = 0;
+  req->start = t0;
+  req->headerbytecount = 0;
+  req->allheadercount =  0;
+  req->deductheadercount = 0;
+  req->headerline = 0;
+  req->offset = 0;
+  req->httpcode = 0;
+  req->keepon = 0;
+  req->start100 = t0;
+  req->exp100 = EXP100_SEND_DATA;
+  req->upgr101 = UPGR101_INIT;
+  req->timeofdoc = 0;
+  req->bodywrites = 0;
+  req->location = NULL;
+  req->newurl = NULL;
+#ifndef CURL_DISABLE_COOKIES
+  req->setcookies = 0;
+#endif
+  req->header = FALSE;
+  req->content_range = FALSE;
+  req->download_done = FALSE;
+  req->eos_written = FALSE;
+  req->eos_read = FALSE;
+  req->upload_done = FALSE;
+  req->upload_aborted = FALSE;
+  req->ignorebody = FALSE;
+  req->http_bodyless = FALSE;
+  req->chunk = FALSE;
+  req->ignore_cl = FALSE;
+  req->upload_chunky = FALSE;
+  req->getheader = FALSE;
+  req->forbidchunk = FALSE;
+  req->no_body = data->set.opt_no_body;
+  req->authneg = FALSE;
 }
 
 void Curl_req_free(struct SingleRequest *req, struct Curl_easy *data)
@@ -118,7 +152,7 @@ void Curl_req_free(struct SingleRequest *req, struct Curl_easy *data)
   Curl_safefree(req->newurl);
   if(req->sendbuf_init)
     Curl_bufq_free(&req->sendbuf);
-  Curl_client_reset(data);
+  Curl_client_cleanup(data);
 
 #ifndef CURL_DISABLE_DOH
   if(req->doh) {

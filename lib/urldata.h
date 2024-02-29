@@ -1387,9 +1387,6 @@ struct UrlState {
   BIT(url_alloc);   /* URL string is malloc()'ed */
   BIT(referer_alloc); /* referer string is malloc()ed */
   BIT(wildcard_resolve); /* Set to true if any resolve change is a wildcard */
-  BIT(rewindbeforesend);/* TRUE when the sending couldn't be stopped even
-                           though it will be discarded. We must call the data
-                           rewind callback before trying to send again. */
   BIT(upload);         /* upload request */
   BIT(internal); /* internal: true if this easy handle was created for
                     internal use and the user does not have ownership of the
