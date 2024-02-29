@@ -619,7 +619,7 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data)
     result = smtp_parse_address(data->set.str[STRING_MAIL_FROM],
                                 &address, &host);
     if(result)
-      return result;
+      goto out;
 
     /* Establish whether we should report SMTPUTF8 to the server for this
        mailbox as per RFC-6531 sect. 3.1 point 4 and sect. 3.4 */
@@ -643,8 +643,10 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data)
     /* Null reverse-path, RFC-5321, sect. 3.6.3 */
     from = strdup("<>");
 
-  if(!from)
-    return CURLE_OUT_OF_MEMORY;
+  if(!from) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
 
   /* Calculate the optional AUTH parameter */
   if(data->set.str[STRING_MAIL_AUTH] && conn->proto.smtpc.sasl.authused) {
@@ -656,10 +658,8 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data)
          converting the host name to an IDN A-label if necessary */
       result = smtp_parse_address(data->set.str[STRING_MAIL_AUTH],
                                   &address, &host);
-      if(result) {
-        free(from);
-        return result;
-      }
+      if(result)
+        goto out;
 
       /* Establish whether we should report SMTPUTF8 to the server for this
          mailbox as per RFC-6531 sect. 3.1 point 4 and sect. 3.4 */
@@ -677,17 +677,14 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data)
         /* An invalid mailbox was provided but we'll simply let the server
            worry about it */
         auth = aprintf("<%s>", address);
-
-      free(address);
     }
     else
       /* Empty AUTH, RFC-2554, sect. 5 */
       auth = strdup("<>");
 
     if(!auth) {
-      free(from);
-
-      return CURLE_OUT_OF_MEMORY;
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
     }
   }
 
@@ -711,12 +708,8 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data)
     if(!result)
       result = Curl_mime_rewind(&data->set.mimepost);
 
-    if(result) {
-      free(from);
-      free(auth);
-
-      return result;
-    }
+    if(result)
+      goto out;
 
     data->state.infilesize = Curl_mime_size(&data->set.mimepost);
 
@@ -731,10 +724,8 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data)
     size = aprintf("%" CURL_FORMAT_CURL_OFF_T, data->state.infilesize);
 
     if(!size) {
-      free(from);
-      free(auth);
-
-      return CURLE_OUT_OF_MEMORY;
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
     }
   }
 
@@ -758,11 +749,11 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data)
   /* Setup client reader for size and EOB conversion */
   result = Client_reader_set_fread(data, data->state.infilesize);
   if(result)
-    return result;
+    goto out;
   /* Add the client reader doing STMP EOB escaping */
   result = cr_eob_add(data);
   if(result)
-    return result;
+    goto out;
 
   /* Send the MAIL command */
   result = Curl_pp_sendf(data, &conn->proto.smtpc.pp,
@@ -775,6 +766,7 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data)
                          utf8 ? " SMTPUTF8"    /* Internationalised mailbox */
                                : "");          /* included in our envelope  */
 
+out:
   free(from);
   free(auth);
   free(size);
