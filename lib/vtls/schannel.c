@@ -2996,6 +2996,7 @@ const struct Curl_ssl Curl_ssl_schannel = {
   NULL,                              /* disassociate_connection */
   schannel_recv,                     /* recv decrypted data */
   schannel_send,                     /* send data to encrypt */
+  NULL,                              /* get_tls_server_end_point */
 };
 
 #endif /* USE_SCHANNEL */

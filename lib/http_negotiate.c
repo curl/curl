@@ -30,6 +30,7 @@
 #include "sendf.h"
 #include "http_negotiate.h"
 #include "vauth/vauth.h"
+#include "vtls/vtls.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -106,10 +107,23 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
 #if defined(USE_WINDOWS_SSPI) && defined(SECPKG_ATTR_ENDPOINT_BINDINGS)
   neg_ctx->sslContext = conn->sslContext;
 #endif
+#ifdef HAVE_GSSAPI
+  result = Curl_ssl_get_tls_server_end_point(
+      data, FIRSTSOCKET, &neg_ctx->channel_binding_data,
+      &neg_ctx->channel_binding_data_len);
+  if(result) {
+    Curl_http_auth_cleanup_negotiate(conn);
+    return result;
+  }
+#endif
 
   /* Initialize the security context and decode our challenge */
   result = Curl_auth_decode_spnego_message(data, userp, passwdp, service,
                                            host, header, neg_ctx);
+
+#ifdef HAVE_GSSAPI
+  free(neg_ctx->channel_binding_data);
+#endif
 
   if(result)
     Curl_http_auth_cleanup_negotiate(conn);
