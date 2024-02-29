@@ -370,9 +370,9 @@ static CURLcode readwrite_upload(struct Curl_easy *data, int *didwhat)
      * but then I do not know enough Windows to say... */
     {
       struct curltime n = Curl_now();
-      if(Curl_timediff(n, conn->last_sndbuf_update) > 1000) {
-        win_update_buffer_size(conn->writesockfd);
-        conn->last_sndbuf_update = n;
+      if(Curl_timediff(n, data->conn->last_sndbuf_update) > 1000) {
+        win_update_buffer_size(data->conn->writesockfd);
+        data->conn->last_sndbuf_update = n;
       }
     }
 #endif
