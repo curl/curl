@@ -169,7 +169,7 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
            LIBS="$LIBCURL $LIBS"
 
            AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <curl/curl.h>]],[[
-/* Try and use a few common options to force a failure if we are
+/* Try to use a few common options to force a failure if we are
    missing symbols or cannot link. */
 int x;
 curl_easy_setopt(NULL,CURLOPT_URL,NULL);

@@ -897,7 +897,7 @@ HEADER
         my $f = $_;
         chomp $f;
         if($f =~ /^#/) {
-            # stardard comment
+            # standard comment
             next;
         }
         if(/^%options/) {

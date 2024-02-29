@@ -3272,7 +3272,7 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
 #endif /* CURL_LIBSSH2_DEBUG */
 
   /* libcurl MUST to set custom memory functions so that the kbd_callback
-     funciton's memory allocations can be properled freed */
+     function's memory allocations can be properly freed */
   sshc->ssh_session = libssh2_session_init_ex(my_libssh2_malloc,
                                               my_libssh2_free,
                                               my_libssh2_realloc, data);

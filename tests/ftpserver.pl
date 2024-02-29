@@ -672,7 +672,7 @@ sub protocolsetup {
 
 # Perform the disconnecgt handshake with sockfilt on the secondary connection
 # (the only connection we actively disconnect).
-# This involves waiting for the disconnect acknowledgmeent after the DISC
+# This involves waiting for the disconnect acknowledgment after the DISC
 # command, while throwing away anything else that might come in before
 # that.
 sub disc_handshake {

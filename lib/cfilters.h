@@ -402,7 +402,7 @@ void Curl_conn_adjust_pollset(struct Curl_easy *data,
 /**
  * Receive data through the filter chain at `sockindex` for connection
  * `data->conn`. Copy at most `len` bytes into `buf`. Return the
- * actuel number of bytes copied or a negative value on error.
+ * actual number of bytes copied or a negative value on error.
  * The error code is placed into `*code`.
  */
 ssize_t Curl_cf_recv(struct Curl_easy *data, int sockindex, char *buf,

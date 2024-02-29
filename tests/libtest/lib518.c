@@ -432,7 +432,7 @@ static int rlimit(int keep_open)
   }
 
   /* free the chunk of memory we were reserving so that it
-     becomes becomes available to the test */
+     becomes available to the test */
 
   free(memchunk);
 

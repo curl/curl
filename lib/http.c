@@ -4125,7 +4125,7 @@ CURLcode Curl_http_write_resp(struct Curl_easy *data,
   blen -= consumed;
   buf += consumed;
   /* either all was consumed in header parsing, or we have data left
-   * and are done with heders, e.g. it is BODY data */
+   * and are done with headers, e.g. it is BODY data */
   DEBUGASSERT(!blen || !data->req.header);
   if(!data->req.header && (blen || is_eos)) {
     /* BODY data after header been parsed, write and consume */
