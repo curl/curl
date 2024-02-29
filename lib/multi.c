@@ -2090,6 +2090,17 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       if(!dns)
         result = Curl_resolv_check(data, &dns);
 
+#ifndef CURL_DISABLE_PROXY
+      if (CURLE_COULDNT_RESOLVE_PROXY == result) {
+          rc = CURLM_CALL_MULTI_PERFORM;
+          data->state.proxy_unresolvable = TRUE;
+          result = CURLE_OK;
+          infof(data, "Proxy '%s' was not resolvable, attempting to bypass", hostname);
+          multi_done(data, CURLE_OK, FALSE);  // try again without proxy
+          multistate(data, MSTATE_CONNECT);
+      }
+#endif
+
       /* Update sockets here, because the socket(s) may have been
          closed and the application thus needs to be told, even if it
          is likely that the same socket(s) will again be used further

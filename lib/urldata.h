@@ -1395,6 +1395,11 @@ struct UrlState {
   BIT(internal); /* internal: true if this easy handle was created for
                     internal use and the user does not have ownership of the
                     handle. */
+#ifndef CURL_DISABLE_PROXY
+  BIT(proxy_unresolvable); /* proxy_unresolvable: true if a proxy was detected but was
+                            unresol
+                         */
+#endif
 };
 
 /*

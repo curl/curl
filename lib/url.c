@@ -1373,7 +1373,8 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
 
   /* note that these two proxy bits are now just on what looks to be
      requested, they may be altered down the road */
-  conn->bits.proxy = (data->set.str[STRING_PROXY] &&
+  conn->bits.proxy = (!data->state.proxy_unresolvable &&
+                       data->set.str[STRING_PROXY] &&
                       *data->set.str[STRING_PROXY]) ? TRUE : FALSE;
   conn->bits.httpproxy = (conn->bits.proxy &&
                           (conn->http_proxy.proxytype == CURLPROXY_HTTP ||
@@ -3465,16 +3466,18 @@ static CURLcode create_conn(struct Curl_easy *data,
   /* After the unix socket init but before the proxy vars are used, parse and
      initialize the proxy vars */
 #ifndef CURL_DISABLE_PROXY
-  result = create_conn_helper_init_proxy(data, conn);
-  if(result)
-    goto out;
+  if(!data->state.proxy_unresolvable) {
+     result = create_conn_helper_init_proxy(data, conn);
+     if(result)
+       goto out;
 
-  /*************************************************************
-   * If the protocol is using SSL and HTTP proxy is used, we set
-   * the tunnel_proxy bit.
-   *************************************************************/
-  if((conn->given->flags&PROTOPT_SSL) && conn->bits.httpproxy)
-    conn->bits.tunnel_proxy = TRUE;
+    /*************************************************************
+      * If the protocol is using SSL and HTTP proxy is used, we set
+      * the tunnel_proxy bit.
+      *************************************************************/
+     if((conn->given->flags&PROTOPT_SSL) && conn->bits.httpproxy)
+       conn->bits.tunnel_proxy = TRUE;
+  }
 #endif
 
   /*************************************************************
