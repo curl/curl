@@ -75,13 +75,13 @@ cookies:
   - all:
       - changed-files:
           - any-glob-to-all-files:
-              - '{docs/HTTP-COOKIES.md,docs/cmdline-opts/cookie*,docs/cmdline-opts/junk-session-cookies.d,docs/libcurl/opts/CURLINFO_COOKIE*,docs/libcurl/opts/CURLOPT_COOKIE*,docs/examples/cookie_interface.c,lib/cookie.*,lib/psl.*}'
+              - '{docs/HTTP-COOKIES.md,docs/cmdline-opts/cookie*,docs/cmdline-opts/junk-session-cookies.md,docs/libcurl/opts/CURLINFO_COOKIE*,docs/libcurl/opts/CURLOPT_COOKIE*,docs/examples/cookie_interface.c,lib/cookie.*,lib/psl.*}'
 
 cryptography:
   - all:
       - changed-files:
           - any-glob-to-all-files:
-              - '{docs/CIPHERS.md,docs/RUSTLS.md,docs/libcurl/opts/CURLOPT_EGDSOCKET*,lib/*sha256*,lib/curl_des.*,lib/curl_hmac.*,lib/curl_md?.*,lib/md?.*,lib/rand.*}'
+              - '{docs/CIPHERS.md,docs/RUSTLS.md,docs/libcurl/opts/CURLOPT_EGDSOCKET*,lib/*sha256*,lib/*sha512*,lib/curl_des.*,lib/curl_hmac.*,lib/curl_md?.*,lib/md?.*,lib/rand.*}'
 
 DICT:
   - all:
@@ -93,7 +93,7 @@ documentation:
   - all:
       - changed-files:
           - any-glob-to-all-files:
-              - '{**/*.md,**/*.txt,**/*.1,**/*.3,CHANGES,docs/**,GIT-INFO,LICENSES/**,README,RELEASE-NOTES}'
+              - '{.github/workflows/badwords.yml,.github/workflows/man-examples.yml,.github/workflows/synopsis.yml,.github/scripts/badwords.*,.github/scripts/cd2cd,.github/scripts/cd2nroff,.github/scripts/cdall.pl,.github/scripts/nroff2cd,.github/scripts/verify-examples.pl,.github/scripts/verify-synopsis.pl,**/*.md,**/*.txt,**/*.1,CHANGES,docs/**,GIT-INFO,LICENSES/**,README,RELEASE-NOTES,scripts/cd*}'
           - all-globs-to-all-files:
               # negative matches
               - '!**/CMakeLists.txt'
@@ -127,7 +127,7 @@ HTTP/3:
   - all:
       - changed-files:
           - any-glob-to-all-files:
-              - '{.github/workflows/ngtcp2*,.github/workflows/quiche*,CMake/FindMSH3.cmake,CMake/FindNGHTTP3.cmake,CMake/FindNGTCP2.cmake,docs/HTTP3.md,docs/examples/http3*,lib/vquic/**,tests/http3-server.pl,tests/nghttpx.conf}'
+              - '{.github/workflows/ngtcp2*,.github/workflows/quiche*,.github/workflows/osslq*,CMake/FindMSH3.cmake,CMake/FindNGHTTP3.cmake,CMake/FindNGTCP2.cmake,docs/HTTP3.md,docs/examples/http3*,lib/vquic/**,tests/http3-server.pl,tests/nghttpx.conf}'
 
 Hyper:
   - all:
@@ -152,7 +152,7 @@ libcurl API:
       - changed-files:
           - any-glob-to-any-file:
               - 'docs/libcurl/ABI.md'
-              - 'docs/libcurl/curl_*.3'
+              - 'docs/libcurl/curl_*.md'
               - 'include/curl/**'
 
 logging:
