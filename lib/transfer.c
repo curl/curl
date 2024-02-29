@@ -1111,7 +1111,7 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
                                 transferred! */
 
 
-    if(Curl_client_read_needs_rewind(data)) {
+    if(Curl_creader_needs_rewind(data)) {
       data->state.rewindbeforesend = TRUE;
       infof(data, "state.rewindbeforesend = TRUE");
     }

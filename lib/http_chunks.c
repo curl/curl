@@ -624,6 +624,15 @@ static CURLcode cr_chunked_read(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+static curl_off_t cr_chunked_total_length(struct Curl_easy *data,
+                                          struct Curl_creader *reader)
+{
+  /* this reader changes length depending on input */
+  (void)data;
+  (void)reader;
+  return -1;
+}
+
 /* HTTP chunked Transfer-Encoding encoder */
 const struct Curl_crtype Curl_httpchunk_encoder = {
   "chunked",
@@ -631,6 +640,7 @@ const struct Curl_crtype Curl_httpchunk_encoder = {
   cr_chunked_read,
   cr_chunked_close,
   Curl_creader_def_needs_rewind,
+  cr_chunked_total_length,
   sizeof(struct chunked_reader)
 };
 

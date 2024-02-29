@@ -430,49 +430,22 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
 {
   struct HTTP *http = data->req.p.http;
   curl_off_t bytessent;
-  curl_off_t expectsend = -1; /* default is unknown */
+  curl_off_t expectsend = Curl_creader_total_length(data);
 
   if(!http)
     /* If this is still NULL, we have not reach very far and we can safely
        skip this rewinding stuff */
     return CURLE_OK;
 
-  switch(data->state.httpreq) {
-  case HTTPREQ_GET:
-  case HTTPREQ_HEAD:
+  if(!expectsend)
+    /* not sending any body */
     return CURLE_OK;
-  default:
-    break;
-  }
 
-  bytessent = data->req.writebytecount;
-
-  if(data->req.authneg) {
-    /* This is a state where we are known to be negotiating and we don't send
-       any data then. */
-    expectsend = 0;
-  }
-  else if(!conn->bits.protoconnstart) {
+  if(!conn->bits.protoconnstart)
     /* HTTP CONNECT in progress: there is no body */
     expectsend = 0;
-  }
-  else {
-    /* figure out how much data we are expected to send */
-    switch(data->state.httpreq) {
-    case HTTPREQ_POST:
-    case HTTPREQ_PUT:
-      if(data->state.infilesize != -1)
-        expectsend = data->state.infilesize;
-      break;
-    case HTTPREQ_POST_FORM:
-    case HTTPREQ_POST_MIME:
-      expectsend = http->postsize;
-      break;
-    default:
-      break;
-    }
-  }
 
+  bytessent = data->req.writebytecount;
   data->state.rewindbeforesend = FALSE; /* default */
 
   if((expectsend == -1) || (expectsend > bytessent)) {
@@ -543,7 +516,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
        closure so we can safely do the rewind right now */
   }
 
-  if(Curl_client_read_needs_rewind(data)) {
+  if(Curl_creader_needs_rewind(data)) {
     /* mark for rewind since if we already sent something */
     data->state.rewindbeforesend = TRUE;
     infof(data, "Please rewind output before next send");

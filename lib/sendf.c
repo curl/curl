@@ -475,6 +475,13 @@ bool Curl_creader_def_needs_rewind(struct Curl_easy *data,
   return FALSE;
 }
 
+curl_off_t Curl_creader_def_total_length(struct Curl_easy *data,
+                                         struct Curl_creader *reader)
+{
+  return reader->next?
+         reader->next->crt->total_length(data, reader->next) : -1;
+}
+
 struct cr_in_ctx {
   struct Curl_creader super;
   curl_off_t total_len;
@@ -596,12 +603,21 @@ static bool cr_in_needs_rewind(struct Curl_easy *data,
   return ctx->has_used_cb;
 }
 
+static curl_off_t cr_in_total_length(struct Curl_easy *data,
+                                     struct Curl_creader *reader)
+{
+  struct cr_in_ctx *ctx = (struct cr_in_ctx *)reader;
+  (void)data;
+  return ctx->total_len;
+}
+
 static const struct Curl_crtype cr_in = {
   "cr-in",
   cr_in_init,
   cr_in_read,
   Curl_creader_def_close,
   cr_in_needs_rewind,
+  cr_in_total_length,
   sizeof(struct cr_in_ctx)
 };
 
@@ -730,12 +746,22 @@ static CURLcode cr_lc_read(struct Curl_easy *data,
   return result;
 }
 
+static curl_off_t cr_lc_total_length(struct Curl_easy *data,
+                                     struct Curl_creader *reader)
+{
+  /* this reader changes length depending on input */
+  (void)data;
+  (void)reader;
+  return -1;
+}
+
 static const struct Curl_crtype cr_lc = {
   "cr-lineconv",
   cr_lc_init,
   cr_lc_read,
   cr_lc_close,
   Curl_creader_def_needs_rewind,
+  cr_lc_total_length,
   sizeof(struct cr_lc_ctx)
 };
 
@@ -837,7 +863,7 @@ CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
   return result;
 }
 
-bool Curl_client_read_needs_rewind(struct Curl_easy *data)
+bool Curl_creader_needs_rewind(struct Curl_easy *data)
 {
   struct Curl_creader *reader = data->req.reader_stack;
   while(reader) {
@@ -862,12 +888,22 @@ static CURLcode cr_null_read(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+static curl_off_t cr_null_total_length(struct Curl_easy *data,
+                                       struct Curl_creader *reader)
+{
+  /* this reader changes length depending on input */
+  (void)data;
+  (void)reader;
+  return 0;
+}
+
 static const struct Curl_crtype cr_null = {
   "cr-null",
   Curl_creader_def_init,
   cr_null_read,
   Curl_creader_def_close,
   Curl_creader_def_needs_rewind,
+  cr_null_total_length,
   sizeof(struct Curl_creader)
 };
 
@@ -918,12 +954,21 @@ static bool cr_buf_needs_rewind(struct Curl_easy *data,
   return ctx->index > 0;
 }
 
+static curl_off_t cr_buf_total_length(struct Curl_easy *data,
+                                      struct Curl_creader *reader)
+{
+  struct cr_buf_ctx *ctx = (struct cr_buf_ctx *)reader;
+  (void)data;
+  return (curl_off_t)ctx->blen;
+}
+
 static const struct Curl_crtype cr_buf = {
   "cr-buf",
   Curl_creader_def_init,
   cr_buf_read,
   Curl_creader_def_close,
   cr_buf_needs_rewind,
+  cr_buf_total_length,
   sizeof(struct cr_buf_ctx)
 };
 
@@ -943,4 +988,10 @@ CURLcode Curl_creader_set_buf(struct Curl_easy *data,
     ctx->index = 0;
   }
   return result;
+}
+
+curl_off_t Curl_creader_total_length(struct Curl_easy *data)
+{
+  struct Curl_creader *r = data->req.reader_stack;
+  return r? r->crt->total_length(data, r) : -1;
 }

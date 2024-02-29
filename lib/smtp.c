@@ -1908,12 +1908,22 @@ static CURLcode cr_eob_read(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+static curl_off_t cr_eob_total_length(struct Curl_easy *data,
+                                      struct Curl_creader *reader)
+{
+  /* this reader changes length depending on input */
+  (void)data;
+  (void)reader;
+  return -1;
+}
+
 static const struct Curl_crtype cr_eob = {
   "cr-smtp-eob",
   cr_eob_init,
   cr_eob_read,
   cr_eob_close,
   Curl_creader_def_needs_rewind,
+  cr_eob_total_length,
   sizeof(struct cr_eob_ctx)
 };
 

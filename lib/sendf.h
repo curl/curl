@@ -183,6 +183,8 @@ struct Curl_crtype {
                       char *buf, size_t blen, size_t *nread, bool *eos);
   void (*do_close)(struct Curl_easy *data, struct Curl_creader *reader);
   bool (*needs_rewind)(struct Curl_easy *data, struct Curl_creader *reader);
+  curl_off_t (*total_length)(struct Curl_easy *data,
+                             struct Curl_creader *reader);
   size_t creader_size;  /* sizeof() allocated struct Curl_creader */
 };
 
@@ -212,6 +214,8 @@ void Curl_creader_def_close(struct Curl_easy *data,
                             struct Curl_creader *reader);
 bool Curl_creader_def_needs_rewind(struct Curl_easy *data,
                                    struct Curl_creader *reader);
+curl_off_t Curl_creader_def_total_length(struct Curl_easy *data,
+                                         struct Curl_creader *reader);
 
 /**
  * Convenience method for calling `reader->do_read()` that
@@ -260,7 +264,14 @@ CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
  * TRUE iff client reader needs rewing before it can be used for
  * a retry request.
  */
-bool Curl_client_read_needs_rewind(struct Curl_easy *data);
+bool Curl_creader_needs_rewind(struct Curl_easy *data);
+
+/**
+ * Get the total length of bytes provided by the installed readers.
+ * This is independant of the amount already delivered.
+ * @return -1 if length is indeterminate
+ */
+curl_off_t Curl_creader_total_length(struct Curl_easy *data);
 
 /**
  * Set the client reader to provide 0 bytes, immediate EOS.
