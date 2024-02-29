@@ -139,7 +139,6 @@ void Curl_req_reset(struct SingleRequest *req, struct Curl_easy *data)
   req->ignore_cl = FALSE;
   req->upload_chunky = FALSE;
   req->getheader = FALSE;
-  req->forbidchunk = FALSE;
   req->no_body = data->set.opt_no_body;
   req->authneg = FALSE;
 }

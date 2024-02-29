@@ -571,8 +571,6 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
       goto out;
   }
 
-  /* RTSP never allows chunked transfer */
-  data->req.forbidchunk = TRUE;
   /* Finish the request buffer */
   result = Curl_dyn_addn(&req_buffer, STRCONST("\r\n"));
   if(result)

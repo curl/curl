@@ -705,20 +705,19 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data)
         result = Curl_mime_add_header(&data->set.mimepost.curlheaders,
                                       "Mime-Version: 1.0");
 
-    /* Make sure we will read the entire mime structure. */
     if(!result)
-      result = Curl_mime_rewind(&data->set.mimepost);
-
+      result = Curl_creader_set_mime(data, &data->set.mimepost);
     if(result)
       goto out;
-
-    data->state.infilesize = Curl_mime_size(&data->set.mimepost);
-
-    /* Read from mime structure. */
-    data->state.fread_func = (curl_read_callback) Curl_mime_read;
-    data->state.in = (void *) &data->set.mimepost;
+    data->state.infilesize = Curl_creader_total_length(data);
   }
+  else
 #endif
+  {
+    result = Curl_creader_set_fread(data, data->state.infilesize);
+    if(result)
+      goto out;
+  }
 
   /* Calculate the optional SIZE parameter */
   if(conn->proto.smtpc.size_supported && data->state.infilesize > 0) {
@@ -747,10 +746,6 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data)
     }
   }
 
-  /* Setup client reader for size and EOB conversion */
-  result = Curl_creader_set_fread(data, data->state.infilesize);
-  if(result)
-    goto out;
   /* Add the client reader doing STMP EOB escaping */
   result = cr_eob_add(data);
   if(result)
@@ -1927,6 +1922,7 @@ static const struct Curl_crtype cr_eob = {
   cr_eob_total_length,
   Curl_creader_def_resume_from,
   Curl_creader_def_rewind,
+  Curl_creader_def_unpause,
   sizeof(struct cr_eob_ctx)
 };
 

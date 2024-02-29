@@ -2030,47 +2030,41 @@ static CURLcode set_post_reader(struct Curl_easy *data, Curl_HttpReq httpreq)
     break;
   }
 
-#ifndef CURL_DISABLE_MIME
-  if(data->state.mimepost) {
-    const char *cthdr = Curl_checkheaders(data, STRCONST("Content-Type"));
-
-    /* Read and seek body only. */
-    data->state.mimepost->flags |= MIME_BODY_ONLY;
-
-    /* Prepare the mime structure headers & set content type. */
-
-    if(cthdr)
-      for(cthdr += 13; *cthdr == ' '; cthdr++)
-        ;
-    else if(data->state.mimepost->kind == MIMEKIND_MULTIPART)
-      cthdr = "multipart/form-data";
-
-    curl_mime_headers(data->state.mimepost, data->set.headers, 0);
-    result = Curl_mime_prepare_headers(data, data->state.mimepost, cthdr,
-                                       NULL, MIMESTRATEGY_FORM);
-    curl_mime_headers(data->state.mimepost, NULL, 0);
-    if(!result)
-      result = Curl_mime_rewind(data->state.mimepost);
-    if(result)
-      return result;
-    postsize = Curl_mime_size(data->state.mimepost);
-  }
-#endif
-
   switch(httpreq) {
   case HTTPREQ_POST_FORM:
   case HTTPREQ_POST_MIME:
     /* This is form posting using mime data. */
-    data->state.infilesize = postsize;
-    if(!postsize)
-      result = Curl_creader_set_null(data);
-    else {
-      /* Read from mime structure. We could do a special client reader
-       * for this, but replacing the callback seems to work fine. */
-      data->state.fread_func = (curl_read_callback) Curl_mime_read;
-      data->state.in = (void *) data->state.mimepost;
-      result = Curl_creader_set_fread(data, postsize);
+#ifndef CURL_DISABLE_MIME
+    if(data->state.mimepost) {
+      const char *cthdr = Curl_checkheaders(data, STRCONST("Content-Type"));
+
+      /* Read and seek body only. */
+      data->state.mimepost->flags |= MIME_BODY_ONLY;
+
+      /* Prepare the mime structure headers & set content type. */
+
+      if(cthdr)
+        for(cthdr += 13; *cthdr == ' '; cthdr++)
+          ;
+      else if(data->state.mimepost->kind == MIMEKIND_MULTIPART)
+        cthdr = "multipart/form-data";
+
+      curl_mime_headers(data->state.mimepost, data->set.headers, 0);
+      result = Curl_mime_prepare_headers(data, data->state.mimepost, cthdr,
+                                         NULL, MIMESTRATEGY_FORM);
+      if(result)
+        return result;
+      curl_mime_headers(data->state.mimepost, NULL, 0);
+      result = Curl_creader_set_mime(data, data->state.mimepost);
+      if(result)
+        return result;
     }
+    else
+#endif
+    {
+      result = Curl_creader_set_null(data);
+    }
+    data->state.infilesize = Curl_creader_total_length(data);
     return result;
   default:
     if(!postsize)
