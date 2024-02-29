@@ -2187,9 +2187,9 @@ CURLcode Curl_http_req_complete(struct Curl_easy *data,
     /* set the upload size to the progress meter */
     Curl_pgrsSetUploadSize(data, http->postsize);
     if(!http->postsize)
-      result = Client_reader_set_null(data);
+      result = Curl_creader_set_null(data);
     else
-      result = Client_reader_set_fread(data, data->state.infilesize);
+      result = Curl_creader_set_fread(data, data->state.infilesize);
     break;
 
 #if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
@@ -2200,7 +2200,7 @@ CURLcode Curl_http_req_complete(struct Curl_easy *data,
       /* nothing to post! */
       result = Curl_dyn_addn(r, STRCONST("Content-Length: 0\r\n\r\n"));
       if(!result)
-        result = Client_reader_set_null(data);
+        result = Curl_creader_set_null(data);
       if(result)
         return result;
       /* setup variables for the upcoming transfer */
@@ -2249,13 +2249,13 @@ CURLcode Curl_http_req_complete(struct Curl_easy *data,
     /* set the upload size to the progress meter */
     Curl_pgrsSetUploadSize(data, http->postsize);
     if(!http->postsize)
-      result = Client_reader_set_null(data);
+      result = Curl_creader_set_null(data);
     else {
       /* Read from mime structure. We could do a special client reader
        * for this, but replacing the callback seems to work fine. */
       data->state.fread_func = (curl_read_callback) Curl_mime_read;
       data->state.in = (void *) data->state.mimepost;
-      result = Client_reader_set_fread(data, data->state.infilesize);
+      result = Curl_creader_set_fread(data, data->state.infilesize);
     }
     break;
 #endif
@@ -2299,19 +2299,19 @@ CURLcode Curl_http_req_complete(struct Curl_easy *data,
 
     if(!http->postsize) {
       Curl_pgrsSetUploadSize(data, 0);
-      result = Client_reader_set_null(data);
+      result = Curl_creader_set_null(data);
     }
     else if(data->set.postfields) {
       Curl_pgrsSetUploadSize(data, http->postsize);
       if(http->postsize > 0)
-        result = Client_reader_set_buf(data, data->set.postfields,
+        result = Curl_creader_set_buf(data, data->set.postfields,
                                        (size_t)http->postsize);
       else
-        result = Client_reader_set_null(data);
+        result = Curl_creader_set_null(data);
     }
     else { /* we read the bytes from the callback */
       Curl_pgrsSetUploadSize(data, http->postsize);
-      result = Client_reader_set_fread(data, http->postsize);
+      result = Curl_creader_set_fread(data, http->postsize);
     }
     break;
 
@@ -2319,7 +2319,7 @@ CURLcode Curl_http_req_complete(struct Curl_easy *data,
     /* HTTP GET/HEAD download, has no body, needs no Content-Length */
     result = Curl_dyn_addn(r, STRCONST("\r\n"));
     if(!result)
-      result = Client_reader_set_null(data);
+      result = Curl_creader_set_null(data);
     break;
   }
 

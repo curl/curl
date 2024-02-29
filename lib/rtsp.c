@@ -504,22 +504,22 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     if(data->state.upload) {
       req_clen = data->state.infilesize;
       data->state.httpreq = HTTPREQ_PUT;
-      result = Client_reader_set_fread(data, req_clen);
+      result = Curl_creader_set_fread(data, req_clen);
       if(result)
         goto out;
     }
     else {
       if(data->set.postfields) {
         req_clen = (curl_off_t)strlen(data->set.postfields);
-        result = Client_reader_set_buf(data, data->set.postfields, req_clen);
+        result = Curl_creader_set_buf(data, data->set.postfields, req_clen);
       }
       else if(data->state.infilesize >= 0) {
         req_clen = data->state.infilesize;
-        result = Client_reader_set_fread(data, req_clen);
+        result = Curl_creader_set_fread(data, req_clen);
       }
       else {
         req_clen = 0;
-        result = Client_reader_set_null(data);
+        result = Curl_creader_set_null(data);
       }
       if(result)
         goto out;
@@ -567,7 +567,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     }
   }
   else {
-    result = Client_reader_set_null(data);
+    result = Curl_creader_set_null(data);
     if(result)
       goto out;
   }

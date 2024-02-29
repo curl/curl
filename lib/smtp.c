@@ -747,7 +747,7 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data)
   }
 
   /* Setup client reader for size and EOB conversion */
-  result = Client_reader_set_fread(data, data->state.infilesize);
+  result = Curl_creader_set_fread(data, data->state.infilesize);
   if(result)
     goto out;
   /* Add the client reader doing STMP EOB escaping */

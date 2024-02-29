@@ -779,7 +779,7 @@ static CURLcode do_init_reader_stack(struct Curl_easy *data,
   return result;
 }
 
-CURLcode Client_reader_set_fread(struct Curl_easy *data, curl_off_t len)
+CURLcode Curl_creader_set_fread(struct Curl_easy *data, curl_off_t len)
 {
   CURLcode result;
   struct Curl_creader *r;
@@ -801,7 +801,7 @@ CURLcode Curl_creader_add(struct Curl_easy *data,
   struct Curl_creader **anchor = &data->req.reader_stack;
 
   if(!*anchor) {
-    result = Client_reader_set_fread(data, data->state.infilesize);
+    result = Curl_creader_set_fread(data, data->state.infilesize);
     if(result)
       return result;
   }
@@ -826,7 +826,7 @@ CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
   DEBUGASSERT(eos);
 
   if(!data->req.reader_stack) {
-    result = Client_reader_set_fread(data, data->state.infilesize);
+    result = Curl_creader_set_fread(data, data->state.infilesize);
     if(result)
       return result;
     DEBUGASSERT(data->req.reader_stack);
@@ -871,7 +871,7 @@ static const struct Curl_crtype cr_null = {
   sizeof(struct Curl_creader)
 };
 
-CURLcode Client_reader_set_null(struct Curl_easy *data)
+CURLcode Curl_creader_set_null(struct Curl_easy *data)
 {
   struct Curl_creader *r;
 
@@ -927,7 +927,7 @@ static const struct Curl_crtype cr_buf = {
   sizeof(struct cr_buf_ctx)
 };
 
-CURLcode Client_reader_set_buf(struct Curl_easy *data,
+CURLcode Curl_creader_set_buf(struct Curl_easy *data,
                                const char *buf, size_t blen)
 {
   CURLcode result;
