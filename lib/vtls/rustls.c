@@ -292,7 +292,7 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   DEBUGASSERT(backend);
   rconn = backend->conn;
 
-  CURL_TRC_CF(data, cf, "cf_send: %ld plain bytes", plainlen);
+  CURL_TRC_CF(data, cf, "cf_send: %zu plain bytes", plainlen);
 
   io_ctx.cf = cf;
   io_ctx.data = data;
@@ -343,7 +343,7 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
 /* A server certificate verify callback for rustls that always returns
    RUSTLS_RESULT_OK, or in other words disable certificate verification. */
-static enum rustls_result
+static uint32_t
 cr_verify_none(void *userdata UNUSED_PARAM,
                const rustls_verify_server_cert_params *params UNUSED_PARAM)
 {
