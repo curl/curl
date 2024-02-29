@@ -225,8 +225,8 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   Curl_RtspReq rtspreq = data->set.rtspreq;
   struct RTSP *rtsp = data->req.p.rtsp;
   struct dynbuf req_buffer;
-  curl_off_t postsize = 0; /* for ANNOUNCE and SET_PARAMETER */
-  curl_off_t putsize = 0; /* for ANNOUNCE and SET_PARAMETER */
+  curl_off_t req_clen = 0; /* request content length,
+                              for ANNOUNCE and SET_PARAMETER */
 
   const char *p_request = NULL;
   const char *p_session_id = NULL;
@@ -496,41 +496,43 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   if(result)
     goto out;
 
+  req_clen = 0;
   if(rtspreq == RTSPREQ_ANNOUNCE ||
      rtspreq == RTSPREQ_SET_PARAMETER ||
      rtspreq == RTSPREQ_GET_PARAMETER) {
 
     if(data->state.upload) {
-      putsize = data->state.infilesize;
+      req_clen = data->state.infilesize;
       data->state.httpreq = HTTPREQ_PUT;
-      result = Client_reader_set_fread(data, putsize);
+      result = Client_reader_set_fread(data, req_clen);
       if(result)
         goto out;
     }
     else {
-      postsize = (data->state.infilesize != -1)?
-        data->state.infilesize:
-        (data->set.postfields? (curl_off_t)strlen(data->set.postfields):0);
-      data->state.httpreq = HTTPREQ_POST;
-      if(postsize > 0 && data->set.postfields)
-        result = Client_reader_set_buf(data, data->set.postfields,
-                                       (size_t)postsize);
-      else if(!postsize)
+      if(data->set.postfields) {
+        req_clen = (curl_off_t)strlen(data->set.postfields);
+        result = Client_reader_set_buf(data, data->set.postfields, req_clen);
+      }
+      else if(data->state.infilesize >= 0) {
+        req_clen = data->state.infilesize;
+        result = Client_reader_set_fread(data, req_clen);
+      }
+      else {
+        req_clen = 0;
         result = Client_reader_set_null(data);
-      else
-        result = Client_reader_set_fread(data, postsize);
+      }
       if(result)
         goto out;
     }
 
-    if(putsize > 0 || postsize > 0) {
+    if(req_clen > 0) {
       /* As stated in the http comments, it is probably not wise to
        * actually set a custom Content-Length in the headers */
       if(!Curl_checkheaders(data, STRCONST("Content-Length"))) {
         result =
           Curl_dyn_addf(&req_buffer,
                         "Content-Length: %" CURL_FORMAT_CURL_OFF_T"\r\n",
-                        (data->state.upload ? putsize : postsize));
+                        req_clen);
         if(result)
           goto out;
       }
