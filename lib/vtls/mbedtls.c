@@ -1754,6 +1754,7 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   NULL,                             /* disassociate_connection */
   mbed_recv,                        /* recv decrypted data */
   mbed_send,                        /* send data to encrypt */
+  NULL,                             /* get_channel_binding */
 };
 
 #endif /* USE_MBEDTLS */

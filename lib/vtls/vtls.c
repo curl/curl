@@ -749,6 +749,14 @@ out:
   return CURLE_OK;
 }
 
+CURLcode Curl_ssl_get_channel_binding(struct Curl_easy *data, int sockindex,
+                                       struct dynbuf *binding)
+{
+  if(Curl_ssl->get_channel_binding)
+    return Curl_ssl->get_channel_binding(data, sockindex, binding);
+  return CURLE_OK;
+}
+
 void Curl_ssl_close_all(struct Curl_easy *data)
 {
   /* kill the session ID cache if not shared */
@@ -1338,6 +1346,7 @@ static const struct Curl_ssl Curl_ssl_multi = {
   NULL,                              /* disassociate_connection */
   multissl_recv_plain,               /* recv decrypted data */
   multissl_send_plain,               /* send data to encrypt */
+  NULL,                              /* get_channel_binding */
 };
 
 const struct Curl_ssl *Curl_ssl =

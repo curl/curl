@@ -2020,6 +2020,7 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   NULL,                          /* disassociate_connection */
   gtls_recv,                     /* recv decrypted data */
   gtls_send,                     /* send data to encrypt */
+  NULL,                          /* get_channel_binding */
 };
 
 #endif /* USE_GNUTLS */
