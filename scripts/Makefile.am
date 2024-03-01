@@ -40,16 +40,16 @@ $(ZSH_COMPLETION_FUNCTION_FILENAME): completion.pl
 if CROSSCOMPILING
 	@echo "NOTICE: we can't generate zsh completion when cross-compiling!"
 else # if not cross-compiling:
-	@if ! test -x "$(PERL)"; then echo "No perl: can't install completion script"; exit 0; fi
-	$(PERL) $(srcdir)/completion.pl --curl $(top_builddir)/src/curl$(EXEEXT) --shell zsh > $@
+	if test -z "$(PERL)"; then echo "No perl: can't install completion script"; else \
+	$(PERL) $(srcdir)/completion.pl --curl $(top_builddir)/src/curl$(EXEEXT) --shell zsh > $@ ; fi
 endif
 
 $(FISH_COMPLETION_FUNCTION_FILENAME): completion.pl
 if CROSSCOMPILING
 	@echo "NOTICE: we can't generate fish completion when cross-compiling!"
 else # if not cross-compiling:
-	@if ! test -x "$(PERL)"; then echo "No perl: can't install completion scriptl"; exit 0; fi
-	$(PERL) $(srcdir)/completion.pl --curl $(top_builddir)/src/curl$(EXEEXT) --shell fish > $@
+	if test -z "$(PERL)"; then echo "No perl: can't install completion script"; else \
+	$(PERL) $(srcdir)/completion.pl --curl $(top_builddir)/src/curl$(EXEEXT) --shell fish > $@ ; fi
 endif
 
 install-data-local:
@@ -57,11 +57,15 @@ if CROSSCOMPILING
 	@echo "NOTICE: we can't install completion scripts when cross-compiling!"
 else # if not cross-compiling:
 if USE_ZSH_COMPLETION
-	$(MKDIR_P) $(DESTDIR)$(ZSH_FUNCTIONS_DIR)
-	$(INSTALL_DATA) $(ZSH_COMPLETION_FUNCTION_FILENAME) $(DESTDIR)$(ZSH_FUNCTIONS_DIR)/$(ZSH_COMPLETION_FUNCTION_FILENAME)
+	if test -n "$(PERL)"; then \
+	  $(MKDIR_P) $(DESTDIR)$(ZSH_FUNCTIONS_DIR); \
+	  $(INSTALL_DATA) $(ZSH_COMPLETION_FUNCTION_FILENAME) $(DESTDIR)$(ZSH_FUNCTIONS_DIR)/$(ZSH_COMPLETION_FUNCTION_FILENAME) ; \
+  fi
 endif
 if USE_FISH_COMPLETION
-	$(MKDIR_P) $(DESTDIR)$(FISH_FUNCTIONS_DIR)
-	$(INSTALL_DATA) $(FISH_COMPLETION_FUNCTION_FILENAME) $(DESTDIR)$(FISH_FUNCTIONS_DIR)/$(FISH_COMPLETION_FUNCTION_FILENAME)
+	if test -n "$(PERL)"; then \
+	  $(MKDIR_P) $(DESTDIR)$(FISH_FUNCTIONS_DIR); \
+	  $(INSTALL_DATA) $(FISH_COMPLETION_FUNCTION_FILENAME) $(DESTDIR)$(FISH_FUNCTIONS_DIR)/$(FISH_COMPLETION_FUNCTION_FILENAME) ; \
+  fi
 endif
 endif
