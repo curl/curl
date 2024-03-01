@@ -396,7 +396,7 @@ ssize_t Curl_bufq_write(struct bufq *q,
   while(len) {
     tail = get_non_full_tail(q);
     if(!tail) {
-      if(q->chunk_count < q->max_chunks) {
+      if((q->chunk_count < q->max_chunks) || (q->opts & BUFQ_OPT_SOFT_LIMIT)) {
         *err = CURLE_OUT_OF_MEMORY;
         return -1;
       }
