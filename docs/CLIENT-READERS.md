@@ -105,7 +105,7 @@ If `resume_from()` is invoked twice, it is additive. There is currently no way t
 
 ## Rewinding
 
-When a request is retried, installed client readers are discarded and replaced by new ones. This works only if the new readers upload the same data. For many readers, this is not an issue. The "null" reader always does the same. Also the "buf" reader, initialized with the same buffer, does this.
+When a request is retried, installed client readers are discarded and replaced by new ones. This works only if the new readers upload the same data. For many readers, this is not an issue. The "null" reader always does the same. Also the `buf` reader, initialized with the same buffer, does this.
 
 Readers operating on callbacks to the application need to "rewind" the underlying content. For example, when reading from a `FILE*`, the reader needs to `fseek()` to the beginning. The following methods are used:
 

@@ -117,8 +117,8 @@ void Curl_req_reset(struct SingleRequest *req, struct Curl_easy *data)
   req->httpcode = 0;
   req->keepon = 0;
   req->start100 = t0;
-  req->exp100 = 0;
-  req->upgr101 = 0;
+  req->exp100 = EXP100_SEND_DATA;
+  req->upgr101 = UPGR101_INIT;
   req->timeofdoc = 0;
   req->bodywrites = 0;
   req->location = NULL;
