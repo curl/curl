@@ -110,6 +110,7 @@ struct SingleRequest {
     struct MQTT *mqtt;
     struct POP3 *pop3;
     struct RTSP *rtsp;
+    struct SIEVE *sieve;
     struct smb_request *smb;
     struct SMTP *smtp;
     struct SSHPROTO *ssh;

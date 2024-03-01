@@ -142,6 +142,10 @@ Disable the RTSP protocol.
 
 Disable the shuffle DNS feature
 
+## `CURL_DISABLE_SIEVE`
+
+Disable the SIEVE protocol
+
 ## `CURL_DISABLE_SMB`
 
 Disable the SMB(S) protocols
