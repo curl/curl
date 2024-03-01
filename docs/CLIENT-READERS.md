@@ -91,7 +91,7 @@ Many protocols need to know the amount of bytes delivered by the client readers 
 
 Even if the length of the "raw" data is known, the length that is send may not. Example: with option `--crlf` the uploaded content undergoes line-end conversion. The line converting reader does not know in advance how many newlines it may encounter. Therefore it must return `-1` for any positive raw content length.
 
-In HTTP, once the correct client readers are installed, the protocol asks the readers for the total length. If that is known, it can set `Content-Length:` accordingly. If not, it may choose to add a HTTP "chunked" reader.
+In HTTP, once the correct client readers are installed, the protocol asks the readers for the total length. If that is known, it can set `Content-Length:` accordingly. If not, it may choose to add an HTTP "chunked" reader.
 
 In addition, there is `Curl_creader_client_length(data)` which gives the total length as reported by the reader in phase `CURL_CR_CLIENT` without asking other readers that may transform the raw data. This is useful in estimating the size of an upload. The HTTP protocol uses this to determine if `Expect: 100-continue` shall be done.
 
@@ -109,8 +109,8 @@ When a request is retried, installed client readers are discarded and replaced b
 
 Readers operating on callbacks to the application need to "rewind" the underlying content. For example, when reading from a `FILE*`, the reader needs to `fseek()` to the beginning. The following methods are used:
 
-1. `Curl_creader_needs_rewind(data)`: tells iff a rewind is necessary, given the current state of the reader chain. If nothing really has been read so far, this returns `FALSE`.
-2. `Curl_creader_will_rewind(data)`: tells iff the reader chain rewinds at the start of the next request.
+1. `Curl_creader_needs_rewind(data)`: tells if a rewind is necessary, given the current state of the reader chain. If nothing really has been read so far, this returns `FALSE`.
+2. `Curl_creader_will_rewind(data)`: tells if the reader chain rewinds at the start of the next request.
 3. `Curl_creader_set_rewind(data, TRUE)`: marks the reader chain for rewinding at the start of the next request.
 4. `Curl_client_start(data)`: tells the readers that a new request starts and they need to rewind if requested.
 

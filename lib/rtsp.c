@@ -510,8 +510,9 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     }
     else {
       if(data->set.postfields) {
-        req_clen = (curl_off_t)strlen(data->set.postfields);
-        result = Curl_creader_set_buf(data, data->set.postfields, req_clen);
+        size_t plen = strlen(data->set.postfields);
+        req_clen = (curl_off_t)plen;
+        result = Curl_creader_set_buf(data, data->set.postfields, plen);
       }
       else if(data->state.infilesize >= 0) {
         req_clen = data->state.infilesize;

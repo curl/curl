@@ -298,7 +298,7 @@ void Curl_creader_set_rewind(struct Curl_easy *data, bool enable);
 
 /**
  * Get the total length of bytes provided by the installed readers.
- * This is independant of the amount already delivered and is calculated
+ * This is independent of the amount already delivered and is calculated
  * by all readers in the stack. If a reader like "chunked" or
  * "crlf conversion" is installed, the returned length will be -1.
  * @return -1 if length is indeterminate

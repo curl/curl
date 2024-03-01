@@ -1186,6 +1186,7 @@ static CURLcode cr_buf_resume_from(struct Curl_easy *data,
   struct cr_buf_ctx *ctx = (struct cr_buf_ctx *)reader;
   size_t boffset;
 
+  (void)data;
   DEBUGASSERT(data->conn);
   /* already started reading? */
   if(ctx->index)
