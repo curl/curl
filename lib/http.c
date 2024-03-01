@@ -2305,6 +2305,8 @@ CURLcode Curl_http_req_complete(struct Curl_easy *data,
       }
     }
     result = addexpect(data, r);
+    if(result)
+      goto out;
     break;
   default:
     break;
