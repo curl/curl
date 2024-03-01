@@ -363,7 +363,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
       k->exp100 = EXP100_SEND_DATA;
       k->keepon |= KEEP_SEND;
       Curl_expire_done(data, EXPIRE_100_TIMEOUT);
-      infof(data, "Done waiting for 100-continue");
+      infof(data, "Done waiting for 100-continue after %ldms", (long)ms);
       if(data->hyp.exp100_waker) {
         hyper_waker_wake(data->hyp.exp100_waker);
         data->hyp.exp100_waker = NULL;

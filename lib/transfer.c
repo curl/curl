@@ -982,6 +982,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
        && !(data->set.keep_post & CURL_REDIR_POST_301)) {
       infof(data, "Switch from POST to GET");
       data->state.httpreq = HTTPREQ_GET;
+      Curl_creader_set_rewind(data, FALSE);
     }
     break;
   case 302: /* Found */
@@ -1007,6 +1008,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
        && !(data->set.keep_post & CURL_REDIR_POST_302)) {
       infof(data, "Switch from POST to GET");
       data->state.httpreq = HTTPREQ_GET;
+      Curl_creader_set_rewind(data, FALSE);
     }
     break;
 

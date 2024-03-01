@@ -145,7 +145,7 @@ CURLcode Curl_client_start(struct Curl_easy *data)
     struct Curl_creader *r = data->req.reader_stack;
     CURLcode result = CURLE_OK;
 
-    DEBUGF(infof(data, "client start, rewind read -> %d", result));
+    DEBUGF(infof(data, "client start, rewind readers"));
     while(r) {
       result = r->crt->rewind(data, r);
       if(result) {
@@ -551,6 +551,8 @@ CURLcode Curl_creader_def_rewind(struct Curl_easy *data,
 
 struct cr_in_ctx {
   struct Curl_creader super;
+  curl_read_callback read_cb;
+  void *cb_user_data;
   curl_off_t total_len;
   curl_off_t read_len;
   CURLcode error_result;
@@ -563,6 +565,8 @@ static CURLcode cr_in_init(struct Curl_easy *data, struct Curl_creader *reader)
 {
   struct cr_in_ctx *ctx = (struct cr_in_ctx *)reader;
   (void)data;
+  ctx->read_cb = data->state.fread_func;
+  ctx->cb_user_data = data->state.in;
   ctx->total_len = -1;
   ctx->read_len = 0;
   return CURLE_OK;
@@ -597,9 +601,9 @@ static CURLcode cr_in_read(struct Curl_easy *data,
       blen = (size_t)remain;
   }
   nread = 0;
-  if(data->state.fread_func && blen) {
+  if(ctx->read_cb && blen) {
     Curl_set_in_callback(data, true);
-    nread = data->state.fread_func(buf, 1, blen, data->state.in);
+    nread = ctx->read_cb(buf, 1, blen, ctx->cb_user_data);
     Curl_set_in_callback(data, false);
     ctx->has_used_cb = TRUE;
   }
@@ -713,8 +717,8 @@ static CURLcode cr_in_resume_from(struct Curl_easy *data,
       size_t actuallyread;
 
       Curl_set_in_callback(data, true);
-      actuallyread = data->state.fread_func(scratch, 1, readthisamountnow,
-                                            data->state.in);
+      actuallyread = ctx->read_cb(scratch, 1, readthisamountnow,
+                                  ctx->cb_user_data);
       Curl_set_in_callback(data, false);
 
       passed += actuallyread;
@@ -765,9 +769,9 @@ static CURLcode cr_in_rewind(struct Curl_easy *data,
   }
 #endif
 #if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
-  if(data->state.httpreq == HTTPREQ_POST_MIME ||
-     data->state.httpreq == HTTPREQ_POST_FORM) {
+  if(ctx->read_cb == (curl_read_callback)Curl_mime_read) {
     CURLcode result = Curl_mime_rewind(mimepart);
+    DEBUGF(infof(data, "cr_in, rewind mime/post data -> %d", result));
     if(result) {
       failf(data, "Cannot rewind mime/post data");
     }
@@ -782,6 +786,7 @@ static CURLcode cr_in_rewind(struct Curl_easy *data,
     Curl_set_in_callback(data, true);
     err = (data->set.seek_func)(data->set.seek_client, 0, SEEK_SET);
     Curl_set_in_callback(data, false);
+    DEBUGF(infof(data, "cr_in, rewind via set.seek_func -> %d", err));
     if(err) {
       failf(data, "seek callback returned error %d", (int)err);
       return CURLE_SEND_FAIL_REWIND;
@@ -794,8 +799,7 @@ static CURLcode cr_in_rewind(struct Curl_easy *data,
     err = (data->set.ioctl_func)(data, CURLIOCMD_RESTARTREAD,
                                  data->set.ioctl_client);
     Curl_set_in_callback(data, false);
-    infof(data, "the ioctl callback returned %d", (int)err);
-
+    DEBUGF(infof(data, "cr_in, rewind via set.ioctl_func -> %d", (int)err));
     if(err) {
       failf(data, "ioctl callback returned error %d", (int)err);
       return CURLE_SEND_FAIL_REWIND;
@@ -806,7 +810,10 @@ static CURLcode cr_in_rewind(struct Curl_easy *data,
        given FILE * stream and we can actually attempt to rewind that
        ourselves with fseek() */
     if(data->state.fread_func == (curl_read_callback)fread) {
-      if(-1 != fseek(data->state.in, 0, SEEK_SET))
+      int err = fseek(data->state.in, 0, SEEK_SET);
+      DEBUGF(infof(data, "cr_in, rewind via fseek -> %d(%d)",
+             (int)err, (int)errno));
+      if(-1 != err)
         /* successful rewind */
         return CURLE_OK;
     }
