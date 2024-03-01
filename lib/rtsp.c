@@ -225,8 +225,6 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   Curl_RtspReq rtspreq = data->set.rtspreq;
   struct RTSP *rtsp = data->req.p.rtsp;
   struct dynbuf req_buffer;
-  curl_off_t req_clen = 0; /* request content length,
-                              for ANNOUNCE and SET_PARAMETER */
 
   const char *p_request = NULL;
   const char *p_session_id = NULL;
@@ -496,10 +494,10 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   if(result)
     goto out;
 
-  req_clen = 0;
   if(rtspreq == RTSPREQ_ANNOUNCE ||
      rtspreq == RTSPREQ_SET_PARAMETER ||
      rtspreq == RTSPREQ_GET_PARAMETER) {
+    curl_off_t req_clen; /* request content length */
 
     if(data->state.upload) {
       req_clen = data->state.infilesize;
