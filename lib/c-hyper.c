@@ -848,7 +848,9 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
      may be parts of the request that is not yet sent, since we can deal with
      the rest of the request in the PERFORM phase. */
   *done = TRUE;
-  Curl_client_reset(data);
+  result = Curl_client_start(data);
+  if(result)
+    return result;
 
   /* Add collecting of headers written to client. For a new connection,
    * we might have done that already, but reuse

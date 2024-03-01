@@ -1109,12 +1109,7 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
                                 prevent i.e HTTP transfers to return
                                 error just because nothing has been
                                 transferred! */
-
-
-    if(Curl_creader_needs_rewind(data)) {
-      data->state.rewindbeforesend = TRUE;
-      infof(data, "state.rewindbeforesend = TRUE");
-    }
+    Curl_creader_set_rewind(data, TRUE);
   }
   return CURLE_OK;
 }

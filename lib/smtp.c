@@ -1925,6 +1925,7 @@ static const struct Curl_crtype cr_eob = {
   Curl_creader_def_needs_rewind,
   cr_eob_total_length,
   Curl_creader_def_resume_from,
+  Curl_creader_def_rewind,
   sizeof(struct cr_eob_ctx)
 };
 

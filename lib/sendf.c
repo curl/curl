@@ -113,14 +113,62 @@ static void cl_reset_reader(struct Curl_easy *data)
   }
 }
 
-void Curl_client_reset(struct Curl_easy *data)
+void Curl_client_cleanup(struct Curl_easy *data)
 {
-  DEBUGF(infof(data, "Curl_client_reset()"));
+  DEBUGF(infof(data, "Curl_client_cleanup()"));
   cl_reset_reader(data);
   cl_reset_writer(data);
 
   data->req.bytecount = 0;
   data->req.headerline = 0;
+}
+
+void Curl_client_reset(struct Curl_easy *data)
+{
+  if(data->req.rewind_read) {
+    /* already requested */
+    DEBUGF(infof(data, "Curl_client_reset(), will rewind_read"));
+  }
+  else {
+    DEBUGF(infof(data, "Curl_client_reset(), clear readers"));
+    cl_reset_reader(data);
+  }
+  cl_reset_writer(data);
+
+  data->req.bytecount = 0;
+  data->req.headerline = 0;
+}
+
+CURLcode Curl_client_start(struct Curl_easy *data)
+{
+  if(data->req.rewind_read) {
+    struct Curl_creader *r = data->req.reader_stack;
+    CURLcode result = CURLE_OK;
+
+    DEBUGF(infof(data, "client start, rewind read -> %d", result));
+    while(r) {
+      result = r->crt->rewind(data, r);
+      if(result) {
+        failf(data, "rewind of client reader '%s' failed: %d",
+              r->crt->name, result);
+        return result;
+      }
+      r = r->next;
+    }
+    data->req.rewind_read = FALSE;
+    cl_reset_reader(data);
+  }
+  return CURLE_OK;
+}
+
+bool Curl_creader_will_rewind(struct Curl_easy *data)
+{
+  return data->req.rewind_read;
+}
+
+void Curl_creader_set_rewind(struct Curl_easy *data, bool enable)
+{
+  data->req.rewind_read = !!enable;
 }
 
 /* Write data using an unencoding writer stack. "nbytes" is not
@@ -493,6 +541,14 @@ CURLcode Curl_creader_def_resume_from(struct Curl_easy *data,
   return CURLE_READ_ERROR;
 }
 
+CURLcode Curl_creader_def_rewind(struct Curl_easy *data,
+                                 struct Curl_creader *reader)
+{
+  (void)data;
+  (void)reader;
+  return CURLE_OK;
+}
+
 struct cr_in_ctx {
   struct Curl_creader super;
   curl_off_t total_len;
@@ -685,6 +741,84 @@ static CURLcode cr_in_resume_from(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+static CURLcode cr_in_rewind(struct Curl_easy *data,
+                             struct Curl_creader *reader)
+{
+  struct cr_in_ctx *ctx = (struct cr_in_ctx *)reader;
+  /* TODO: I wonder if we should rather give mime its own client
+   * reader type. This is messy. */
+#if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
+  curl_mimepart *mimepart = &data->set.mimepost;
+#endif
+
+  /* If we never invoked the callback, there is noting to rewind */
+  if(!ctx->has_used_cb)
+    return CURLE_OK;
+
+  /* We have sent away data. If not using CURLOPT_POSTFIELDS or
+     CURLOPT_HTTPPOST, call app to rewind
+  */
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_MIME)
+  if(data->conn->handler->protocol & PROTO_FAMILY_HTTP) {
+    if(data->state.mimepost)
+      mimepart = data->state.mimepost;
+  }
+#endif
+#if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
+  if(data->state.httpreq == HTTPREQ_POST_MIME ||
+     data->state.httpreq == HTTPREQ_POST_FORM) {
+    CURLcode result = Curl_mime_rewind(mimepart);
+    if(result) {
+      failf(data, "Cannot rewind mime/post data");
+    }
+    return result;
+  }
+#endif
+
+  /* With mime out of the way, handle "normal" fread callbacks */
+  if(data->set.seek_func) {
+    int err;
+
+    Curl_set_in_callback(data, true);
+    err = (data->set.seek_func)(data->set.seek_client, 0, SEEK_SET);
+    Curl_set_in_callback(data, false);
+    if(err) {
+      failf(data, "seek callback returned error %d", (int)err);
+      return CURLE_SEND_FAIL_REWIND;
+    }
+  }
+  else if(data->set.ioctl_func) {
+    curlioerr err;
+
+    Curl_set_in_callback(data, true);
+    err = (data->set.ioctl_func)(data, CURLIOCMD_RESTARTREAD,
+                                 data->set.ioctl_client);
+    Curl_set_in_callback(data, false);
+    infof(data, "the ioctl callback returned %d", (int)err);
+
+    if(err) {
+      failf(data, "ioctl callback returned error %d", (int)err);
+      return CURLE_SEND_FAIL_REWIND;
+    }
+  }
+  else {
+    /* If no CURLOPT_READFUNCTION is used, we know that we operate on a
+       given FILE * stream and we can actually attempt to rewind that
+       ourselves with fseek() */
+    if(data->state.fread_func == (curl_read_callback)fread) {
+      if(-1 != fseek(data->state.in, 0, SEEK_SET))
+        /* successful rewind */
+        return CURLE_OK;
+    }
+
+    /* no callback set or failure above, makes us fail at once */
+    failf(data, "necessary data rewind wasn't possible");
+    return CURLE_SEND_FAIL_REWIND;
+  }
+  return CURLE_OK;
+}
+
+
 static const struct Curl_crtype cr_in = {
   "cr-in",
   cr_in_init,
@@ -693,6 +827,7 @@ static const struct Curl_crtype cr_in = {
   cr_in_needs_rewind,
   cr_in_total_length,
   cr_in_resume_from,
+  cr_in_rewind,
   sizeof(struct cr_in_ctx)
 };
 
@@ -838,6 +973,7 @@ static const struct Curl_crtype cr_lc = {
   Curl_creader_def_needs_rewind,
   cr_lc_total_length,
   Curl_creader_def_resume_from,
+  Curl_creader_def_rewind,
   sizeof(struct cr_lc_ctx)
 };
 
@@ -984,6 +1120,7 @@ static const struct Curl_crtype cr_null = {
   Curl_creader_def_needs_rewind,
   cr_null_total_length,
   Curl_creader_def_resume_from,
+  Curl_creader_def_rewind,
   sizeof(struct Curl_creader)
 };
 
@@ -1072,6 +1209,7 @@ static const struct Curl_crtype cr_buf = {
   cr_buf_needs_rewind,
   cr_buf_total_length,
   cr_buf_resume_from,
+  Curl_creader_def_rewind,
   sizeof(struct cr_buf_ctx)
 };
 

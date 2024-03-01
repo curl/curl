@@ -446,7 +446,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
     expectsend = 0;
 
   bytessent = data->req.writebytecount;
-  data->state.rewindbeforesend = FALSE; /* default */
+  Curl_creader_set_rewind(data, FALSE);
 
   if((expectsend == -1) || (expectsend > bytessent)) {
 #if defined(USE_NTLM)
@@ -463,7 +463,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
 
         /* rewind data when completely done sending! */
         if(!data->req.authneg && (conn->writesockfd != CURL_SOCKET_BAD)) {
-          data->state.rewindbeforesend = TRUE;
+          Curl_creader_set_rewind(data, TRUE);
           infof(data, "Rewind stream before next send");
         }
 
@@ -491,7 +491,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
 
         /* rewind data when completely done sending! */
         if(!data->req.authneg && (conn->writesockfd != CURL_SOCKET_BAD)) {
-          data->state.rewindbeforesend = TRUE;
+          Curl_creader_set_rewind(data, TRUE);
           infof(data, "Rewind stream before next send");
         }
 
@@ -518,7 +518,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
 
   if(Curl_creader_needs_rewind(data)) {
     /* mark for rewind since if we already sent something */
-    data->state.rewindbeforesend = TRUE;
+    Curl_creader_set_rewind(data, TRUE);
     infof(data, "Please rewind output before next send");
   }
 
@@ -577,7 +577,7 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
   if(pickhost || pickproxy) {
     if((data->state.httpreq != HTTPREQ_GET) &&
        (data->state.httpreq != HTTPREQ_HEAD) &&
-       !data->state.rewindbeforesend) {
+       !Curl_creader_will_rewind(data)) {
       result = http_perhapsrewind(data, conn);
       if(result)
         return result;
@@ -3639,7 +3639,7 @@ static CURLcode http_rw_headers(struct Curl_easy *data,
 
       if(k->httpcode >= 300) {
         if((!data->req.authneg) && !conn->bits.close &&
-           !data->state.rewindbeforesend) {
+           !Curl_creader_will_rewind(data)) {
           /*
            * General treatment of errors when about to send data. Including :
            * "417 Expectation Failed", while waiting for 100-continue.
@@ -3708,7 +3708,7 @@ static CURLcode http_rw_headers(struct Curl_easy *data,
           }
         }
 
-        if(data->state.rewindbeforesend && !Curl_req_done_sending(data)) {
+        if(Curl_creader_will_rewind(data) && !Curl_req_done_sending(data)) {
           /* We rewind before next send, continue sending now */
           infof(data, "Keep sending data to get tossed away");
           k->keepon |= KEEP_SEND;
