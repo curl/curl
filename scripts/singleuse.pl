@@ -46,7 +46,8 @@ my %wl = (
     'Curl_xfer_write_resp' => 'internal api',
     'Curl_creader_def_init' => 'internal api',
     'Curl_creader_def_close' => 'internal api',
-    );
+    'Curl_creader_def_total_length' => 'internal api',
+);
 
 my %api = (
     'curl_easy_cleanup' => 'API',
