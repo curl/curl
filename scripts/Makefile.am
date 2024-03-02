@@ -29,13 +29,18 @@ ZSH_FUNCTIONS_DIR = @ZSH_FUNCTIONS_DIR@
 FISH_FUNCTIONS_DIR = @FISH_FUNCTIONS_DIR@
 PERL = @PERL@
 
+if USE_ZSH_COMPLETION
 ZSH_COMPLETION_FUNCTION_FILENAME = _curl
+endif
+if USE_FISH_COMPLETION
 FISH_COMPLETION_FUNCTION_FILENAME = curl.fish
+endif
 
 CLEANFILES = $(ZSH_COMPLETION_FUNCTION_FILENAME) $(FISH_COMPLETION_FUNCTION_FILENAME)
 
 all-local: $(ZSH_COMPLETION_FUNCTION_FILENAME) $(FISH_COMPLETION_FUNCTION_FILENAME)
 
+if USE_ZSH_COMPLETION
 $(ZSH_COMPLETION_FUNCTION_FILENAME): completion.pl
 if CROSSCOMPILING
 	@echo "NOTICE: we can't generate zsh completion when cross-compiling!"
@@ -43,13 +48,16 @@ else # if not cross-compiling:
 	if test -z "$(PERL)"; then echo "No perl: can't install completion script"; else \
 	$(PERL) $(srcdir)/completion.pl --curl $(top_builddir)/src/curl$(EXEEXT) --shell zsh > $@ ; fi
 endif
+endif
 
+if USE_FISH_COMPLETION
 $(FISH_COMPLETION_FUNCTION_FILENAME): completion.pl
 if CROSSCOMPILING
 	@echo "NOTICE: we can't generate fish completion when cross-compiling!"
 else # if not cross-compiling:
 	if test -z "$(PERL)"; then echo "No perl: can't install completion script"; else \
 	$(PERL) $(srcdir)/completion.pl --curl $(top_builddir)/src/curl$(EXEEXT) --shell fish > $@ ; fi
+endif
 endif
 
 install-data-local:
