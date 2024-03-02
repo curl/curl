@@ -4,7 +4,6 @@ SPDX-License-Identifier: curl
 Long: trace-config
 Arg: <string>
 Help: Details to log in trace/verbose output
-Mutexed: trace verbose
 Category: verbose
 Added: 8.3.0
 Multi: append
