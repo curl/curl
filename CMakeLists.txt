@@ -720,13 +720,26 @@ if(USE_MSH3)
   list(APPEND CURL_LIBS ${MSH3_LIBRARIES})
 endif()
 
+option(USE_OPENSSL_QUIC "Use openssl and nghttp3 libraries for HTTP/3 support" OFF)
+if(USE_OPENSSL_QUIC)
+  if(USE_NGTCP2 OR USE_QUICHE OR USE_MSH3)
+    message(FATAL_ERROR "Only one HTTP/3 backend can be selected!")
+  endif()
+  find_package(OpenSSL 3.2.0 REQUIRED)
+
+  find_package(NGHTTP3 REQUIRED)
+  set(USE_NGHTTP3 ON)
+  include_directories(${NGHTTP3_INCLUDE_DIRS})
+  list(APPEND CURL_LIBS ${NGHTTP3_LIBRARIES})
+endif()
+
 if(USE_MBEDTLS OR
    USE_BEARSSL OR
    USE_SECTRANSP)
   message(WARNING "A selected TLS library does not support TLS 1.3.")
 endif()
 
-if(CURL_WITH_MULTI_SSL AND (USE_NGTCP2 OR USE_QUICHE OR USE_MSH3))
+if(CURL_WITH_MULTI_SSL AND (USE_NGTCP2 OR USE_QUICHE OR USE_MSH3 OR USE_OPENSSL_QUIC))
   message(FATAL_ERROR "MultiSSL cannot be enabled with HTTP/3 and vice versa.")
 endif()
 
@@ -1548,7 +1561,7 @@ if(NOT CURL_DISABLE_INSTALL)
                           NOT CURL_DISABLE_HTTP AND NTLM_WB_ENABLED)
   _add_if("TLS-SRP"       USE_TLS_SRP)
   _add_if("HTTP2"         USE_NGHTTP2)
-  _add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE)
+  _add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE OR USE_OPENSSL_QUIC)
   _add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
   # TODO wolfSSL only support this from v5.0.0 onwards
   _add_if("HTTPS-proxy"   SSL_ENABLED AND (USE_OPENSSL OR USE_GNUTLS
