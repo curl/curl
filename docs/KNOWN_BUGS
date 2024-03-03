@@ -22,7 +22,6 @@ problems may have been fixed or changed somewhat since this was written.
  2.5 Client cert handling with Issuer DN differs between backends
  2.7 Client cert (MTLS) issues with Schannel
  2.11 Schannel TLS 1.2 handshake bug in old Windows versions
- 2.12 FTPS with Schannel times out file list operation
  2.13 CURLOPT_CERTINFO results in CURLE_OUT_OF_MEMORY with Schannel
 
  3. Email protocols
@@ -170,12 +169,6 @@ problems may have been fixed or changed somewhat since this was written.
  fail, resulting in error SEC_E_BUFFER_TOO_SMALL or SEC_E_MESSAGE_ALTERED.
 
  https://github.com/curl/curl/issues/5488
-
-2.12 FTPS with Schannel times out file list operation
-
- "Instead of the command completing, it just sits there until the timeout
- expires." - the same command line seems to work with other TLS backends and
- other operating systems. See https://github.com/curl/curl/issues/5284.
 
 2.13 CURLOPT_CERTINFO results in CURLE_OUT_OF_MEMORY with Schannel
 
@@ -431,9 +424,16 @@ problems may have been fixed or changed somewhat since this was written.
 
  https://github.com/curl/curl/issues/6149
 
-7.12 FTPS directory listing hangs on Windows with Schannel
+7.12 FTPS server compatibility on Windows with Schannel
 
- https://github.com/curl/curl/issues/9161
+ FTPS is not widely used with the Schannel TLS backend and so there may be more
+ bugs compared to other TLS backends such as OpenSSL. In the past users have
+ reported hanging and failed connections. It's very likely some changes to curl
+ since then fixed the issues. None of the reported issues can be reproduced any
+ longer.
+
+ If you encounter an issue connecting to your server via FTPS with the latest
+ curl and Schannel then please search for open issues or file a new issue.
 
 9. SFTP and SCP
 
