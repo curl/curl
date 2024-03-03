@@ -233,6 +233,15 @@ Build curl:
      % make
      % make install
 
+You can build curl with cmake:
+
+     % cd ..
+     % git clone https://github.com/curl/curl
+     % cd curl
+     % cmake . -B build -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
+     % cmake --build build
+     % cmake --install build
+
  If `make install` results in `Permission denied` error, you need to prepend
  it with `sudo`.
 
