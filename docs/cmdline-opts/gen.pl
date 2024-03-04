@@ -72,16 +72,23 @@ close(INC);
 sub manpageify {
     my ($k)=@_;
     my $l;
+    my $trail;
+    # the matching pattern might include a trailing dot that cannot be part of
+    # the option name
+    if($k =~ s/\.$//) {
+        # cut off trailing dot
+        $trail = ".";
+    }
     my $klong = $k;
     # quote "bare" minuses in the long name
     $klong =~ s/-/\\-/g;
-    if($optlong{$k} ne "") {
+    if($optlong{$k}) {
         # both short + long
-        $l = "\\fI-".$optlong{$k}.", \\-\\-$klong\\fP";
+        $l = "\\fI-".$optlong{$k}.", \\-\\-$klong\\fP$trail";
     }
     else {
         # only long
-        $l = "\\fI\\-\\-$klong\\fP";
+        $l = "\\fI\\-\\-$klong\\fP$trail";
     }
     return $l;
 }
@@ -289,16 +296,7 @@ sub render {
         $d =~ s/\\/\\\\/g;
 
         if(!$quote && $d =~ /--/) {
-            # scan for options in longest-names first order
-            for my $k (sort {length($b) <=> length($a)} keys %optlong) {
-                # --tlsv1 is complicated since --tlsv1.2 etc are also
-                # acceptable options!
-                if(($k eq "tlsv1") && ($d =~ /--tlsv1\.[0-9]\\f/)) {
-                    next;
-                }
-                my $l = manpageify($k);
-                $d =~ s/--$k([^a-z0-9-])/$l$1/g;
-            }
+            $d =~ s/--([a-z0-9.-]+)/manpageify($1)/ge;
         }
 
         # quote minuses in the output
