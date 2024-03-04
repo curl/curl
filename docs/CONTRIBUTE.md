@@ -105,9 +105,10 @@ projects but someone's gotta do it. It makes things a lot easier if you submit
 a small description of your fix or your new features with every contribution
 so that it can be swiftly added to the package documentation.
 
-The documentation is always made in man pages (nroff formatted) or plain
-ASCII files. All HTML files on the website and in the release archives are
-generated from the nroff/ASCII versions.
+Documentation is mostly provided as manpages or plain ASCII files. The
+manpages are rendered from their source files that are usually written using
+markdown. Most HTML files on the website and in the release archives are
+generated from corresponding markdown and ASCII files.
 
 ### Test Cases
 
