@@ -2122,8 +2122,10 @@ CURLcode Curl_creader_set_mime(struct Curl_easy *data, curl_mimepart *part)
   ctx->part = part;
   /* Make sure we will read the entire mime structure. */
   result = mime_rewind(ctx->part);
-  if(result)
+  if(result) {
+    Curl_creader_free(data, r);
     return result;
+  }
   ctx->total_len = mime_size(ctx->part);
 
   return Curl_creader_set(data, r);

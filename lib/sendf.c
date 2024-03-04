@@ -1050,12 +1050,17 @@ CURLcode Curl_creader_add(struct Curl_easy *data,
 
 CURLcode Curl_creader_set(struct Curl_easy *data, struct Curl_creader *r)
 {
+  CURLcode result;
+
   DEBUGASSERT(r);
   DEBUGASSERT(r->crt);
   DEBUGASSERT(r->phase == CURL_CR_CLIENT);
 
   cl_reset_reader(data);
-  return do_init_reader_stack(data, r);
+  result = do_init_reader_stack(data, r);
+  if(result)
+    Curl_creader_free(data, r);
+  return result;
 }
 
 CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,

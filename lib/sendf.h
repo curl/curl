@@ -276,6 +276,7 @@ CURLcode Curl_creader_add(struct Curl_easy *data,
  * Set the given reader, which needs to be of type CURL_CR_CLIENT,
  * as the new first reader. Discard any installed readers and init
  * the reader chain anew.
+ * The function takes ownership of `r`.
  */
 CURLcode Curl_creader_set(struct Curl_easy *data, struct Curl_creader *r);
 
