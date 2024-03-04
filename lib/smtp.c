@@ -677,6 +677,7 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data)
         /* An invalid mailbox was provided but we'll simply let the server
            worry about it */
         auth = aprintf("<%s>", address);
+      free(address);
     }
     else
       /* Empty AUTH, RFC-2554, sect. 5 */
