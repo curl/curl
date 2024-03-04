@@ -3410,6 +3410,10 @@ static CURLcode http_rw_headers(struct Curl_easy *data,
           /* this is not the beginning of a protocol first header line */
           k->header = FALSE;
           streamclose(conn, "bad HTTP: No end-of-message indicator");
+          if(conn->httpversion >= 10) {
+            failf(data, "Invalid status line");
+            return CURLE_WEIRD_SERVER_REPLY;
+          }
           if(!data->set.http09_allowed) {
             failf(data, "Received HTTP/0.9 when not allowed");
             return CURLE_UNSUPPORTED_PROTOCOL;
@@ -3443,6 +3447,10 @@ static CURLcode http_rw_headers(struct Curl_easy *data,
       if(st == STATUS_BAD) {
         streamclose(conn, "bad HTTP: No end-of-message indicator");
         /* this is not the beginning of a protocol first header line */
+        if(conn->httpversion >= 10) {
+          failf(data, "Invalid status line");
+          return CURLE_WEIRD_SERVER_REPLY;
+        }
         if(!data->set.http09_allowed) {
           failf(data, "Received HTTP/0.9 when not allowed");
           return CURLE_UNSUPPORTED_PROTOCOL;
