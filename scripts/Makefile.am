@@ -77,3 +77,6 @@ if USE_FISH_COMPLETION
   fi
 endif
 endif
+
+distclean:
+	rm -f $(CLEANFILES)
