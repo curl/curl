@@ -1092,7 +1092,6 @@ static CURLcode cf_osslq_ctx_start(struct Curl_cfilter *cf,
 #else
   bio = BIO_new_dgram(ctx->q.sockfd, BIO_NOCLOSE);
 #endif
-  bio = BIO_new_dgram(ctx->q.sockfd, BIO_NOCLOSE);
   if(!bio) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
