@@ -716,7 +716,7 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data)
   {
     result = Curl_creader_set_fread(data, data->state.infilesize);
     if(result)
-      return result;
+      goto out;
   }
 
   /* Calculate the optional SIZE parameter */
