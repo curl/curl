@@ -17,7 +17,7 @@ options *-O*, *-L* and *-v* at once as *-OLv*.
 In general, all boolean options are enabled with --**option** and yet again
 disabled with --**no-**option. That is, you use the same option name but
 prefix it with `no-`. However, in this list we mostly only list and show the
-*--option* version of them.
+--**option** version of them.
 
 When --next is used, it resets the parser state and you start again with a
 clean option state, except for the options that are global. Global options
