@@ -4,7 +4,7 @@ curl and libcurl 8.7.0
  Command line options:         258
  curl_easy_setopt() options:   304
  Public functions in libcurl:  93
- Contributors:                 3102
+ Contributors:                 3105
 
 This release includes the following changes:
 
@@ -20,6 +20,7 @@ This release includes the following bugfixes:
  o asyn-thread: use wakeup_close to close the read descriptor [1]
  o badwords: use hostname, not host name [46]
  o BINDINGS: add mcurl, the python binding [67]
+ o bufq: writing into a softlimit queue cannot be partial [49]
  o c-hyper: add header collection writer in hyper builds [70]
  o cd2nroff: gen: make `\>` in input to render as plain '>' in output
  o cd2nroff: remove backticks from titles
@@ -29,15 +30,22 @@ This release includes the following bugfixes:
  o cmake: fix install for older CMake versions [53]
  o cmdline-docs/Makefile: avoid using a fixed temp file name [5]
  o cmdline-docs: quote and angle bracket cleanup [45]
+ o cmdline-opts/_EXITCODES: sync with libcurl-errors [80]
+ o cmdline-opts/_VERSION: provide %VERSION correctly [87]
  o configure.ac: find libpsl with pkg-config [79]
  o configure: add warning for using TLS libraries without 1.3 support [26]
+ o configure: build & install shell completions when enabled [85]
  o configure: do not link with nghttp3 unless necessary [7]
+ o configure: Don't build shell completions when disabled [68]
+ o configure: Don't make shell completions without perl [83]
  o connect.c: fix typo [17]
  o cookie.md: provide an example sending a fixed cookie [13]
  o curl: exit on config file parser errors [40]
  o curl: when allocating variables, add the name into the struct [37]
  o curl_setup.h: add curl_uint64_t internal type
+ o curldown: fix email address in Copyright [89]
  o CURLOPT_POSTQUOTE.md: fix typo [36]
+ o CURLOPT_SSL_CTX_FUNCTION.md: no promises of lifetime after return [104]
  o CURLOPT_WRITEFUNCTION.md: typo fix [41]
  o dist: make sure the http tests are in the tarball [29]
  o docs: add missing slashes to SChannel client certificate documentation [11]
@@ -45,13 +53,18 @@ This release includes the following bugfixes:
  o docs: dist curl*.1 and install without perl [64]
  o docs: make curldown do angle brackets like markdown [54]
  o docs: make sure curl.1 is included in dist tarballs [35]
+ o docs: update minimal binary size in INSTALL.md
+ o docs: use present tense [103]
+ o examples: use present tense in comments [97]
  o file: use xfer buf for file:// transfers [23]
+ o fopen: fix narrowing conversion warning on 32-bit Android [100]
  o form-string.md: correct the example [4]
  o ftp: do lineend conversions in client writer [32]
  o ftp: fix socket wait activity in ftp_domore_getsock [28]
  o ftp: tracing improvements [33]
  o ftp: treat a 226 arriving before data as a signal to read data [19]
  o gen: make `\>` in input to render as plain '>' in output [78]
+ o getparam: make --ftp-ssl work again [90]
  o header.md: remove backslash, make nicer markdown [48]
  o HTTP/2: write response directly [12]
  o HTTP3.md: adjust the OpenSSL QUIC install instructions [34]
@@ -61,6 +74,7 @@ This release includes the following bugfixes:
  o https-proxy: use IP address and cert with ip in alt names [50]
  o lib582: remove code causing warning that is never run [38]
  o lib: convert Curl_get_line to use dynbuf [42]
+ o lib: Curl_read/Curl_write clarifications [101]
  o lib: initialize output pointers to NULL before calling strto[ff,l,ul] [63]
  o lib: remove curl_mimepart object when CURL_DISABLE_MIME [72]
  o libcurl-docs: cleanups
@@ -70,9 +84,11 @@ This release includes the following bugfixes:
  o mbedtls: fix building when MBEDTLS_X509_REMOVE_INFO flag is defined [27]
  o mbedtls: use mbedtls_ssl_conf_{min|max}_tls_version [59]
  o md4: include strdup.h for the memdup proto [10]
+ o misc: fix typos in docs and lib [84]
  o mprintf: fix format prefix I32/I64 for windows compilers [77]
  o multi: add xfer_buf to multi handle [30]
  o multi: fix multi_sock handling of select_bits [81]
+ o multi: make add_handle free any multi_easy [102]
  o ntml_wb: fix buffer type typo [2]
  o OpenSSL QUIC: adapt to v3.3.x [65]
  o openssl-quic: check on Windows that socket conv to int is possible [8]
@@ -83,6 +99,7 @@ This release includes the following bugfixes:
  o scripts: fix cijobs.pl for Azure and GHA
  o sendf: ignore response body to HEAD [18]
  o setopt: fix check for CURLOPT_PROXY_TLSAUTH_TYPE value [76]
+ o setopt: fix disabling all protocols [99]
  o strtoofft: fix the overflow check [74]
  o test1165: improve pattern matching [60]
  o tests: support setting/using blank content env variables
@@ -110,18 +127,19 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  5533asdg on github, Boris Verkhovskiy, Brett Buddin, Chris Webb,
-  Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, Daniel Szmulewicz,
-  Dirk Hünniger, Dmitry Tretyakov, edmcln on github, Erik Schnetter,
-  Evgeny Grin (Karlson2k), Fabian Vogt, Fabrice Fontaine, Faraz Fallahi,
-  Gisle Vanem, Harry Sintonen, HsiehYuho on github, Jan Macku, Jiawen Geng,
-  Joel Depooter, Jon Rumsey, Karthikdasari0423, Konstantin Vlasov, kpcyrd,
-  Lars Kellogg-Stedman, LeeRiva, Louis Solofrizzo, Lukáš Zaoral,
-  Michael Forney, Michael Kaufmann, Michał Antoniak, Patrick Monnerat,
-  Paweł Witas, Peter Krefting, Ramiro Garcia, Ray Satiro, Richard Levitte,
-  Ryan Carsten Schmidt, Scott Mutter, Scott Talbert, Sergey Bronnikov,
-  Stefan Eissing, Viktor Szakats, vulnerabilityspotter on hackerone
-  (46 contributors)
+  5533asdg on github, Andreas Kiefer, av223119 on github, Boris Verkhovskiy,
+  Brett Buddin, Chris Webb, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
+  Daniel Szmulewicz, Dirk Hünniger, Dmitry Tretyakov, edmcln on github,
+  Erik Schnetter, Evgeny Grin (Karlson2k), Fabian Vogt, Fabrice Fontaine,
+  Faraz Fallahi, Gisle Vanem, Harry Sintonen, HsiehYuho on github, Jan Macku,
+  Jiawen Geng, Joel Depooter, Jon Rumsey, Jordan Brown, Karthikdasari0423,
+  Konstantin Vlasov, kpcyrd, Lars Kellogg-Stedman, LeeRiva, Louis Solofrizzo,
+  Lukáš Zaoral, Marcel Raad, Michael Forney, Michael Kaufmann, Michał Antoniak,
+  Patrick Monnerat, Paweł Witas, Peter Krefting, RainRat, Ramiro Garcia,
+  Ray Satiro, Richard Levitte, Ryan Carsten Schmidt, Scott Mutter,
+  Scott Talbert, Sergey Bronnikov, Stefan Eissing, Viktor Szakats,
+  vulnerabilityspotter on hackerone
+  (51 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -172,6 +190,7 @@ References to bug reports and discussions on issues:
  [46] = https://curl.se/bug/?i=12888
  [47] = https://curl.se/bug/?i=12879
  [48] = https://curl.se/bug/?i=12877
+ [49] = https://curl.se/bug/?i=13020
  [50] = https://curl.se/bug/?i=12838
  [51] = https://curl.se/bug/?i=12859
  [52] = https://curl.se/mail/archive-2024-02/0004.html
@@ -190,6 +209,7 @@ References to bug reports and discussions on issues:
  [65] = https://curl.se/bug/?i=12933
  [66] = https://curl.se/bug/?i=12965
  [67] = https://curl.se/bug/?i=12962
+ [68] = https://curl.se/bug/?i=13027
  [69] = https://curl.se/bug/?i=12949
  [70] = https://curl.se/bug/?i=12880
  [71] = https://curl.se/bug/?i=12880
@@ -201,4 +221,18 @@ References to bug reports and discussions on issues:
  [77] = https://curl.se/bug/?i=12944
  [78] = https://curl.se/bug/?i=12977
  [79] = https://curl.se/bug/?i=12947
+ [80] = https://curl.se/bug/?i=13015
  [81] = https://curl.se/bug/?i=12971
+ [83] = https://curl.se/bug/?i=13022
+ [84] = https://curl.se/bug/?i=13019
+ [85] = https://curl.se/bug/?i=12906
+ [87] = https://curl.se/bug/?i=13008
+ [89] = https://curl.se/bug/?i=12997
+ [90] = https://curl.se/bug/?i=13006
+ [97] = https://curl.se/bug/?i=13003
+ [99] = https://curl.se/bug/?i=13004
+ [100] = https://curl.se/bug/?i=12998
+ [101] = https://curl.se/bug/?i=12964
+ [102] = https://curl.se/bug/?i=12992
+ [103] = https://curl.se/bug/?i=13001
+ [104] = https://curl.se/bug/?i=12999
