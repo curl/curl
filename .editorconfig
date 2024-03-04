@@ -1,7 +1,15 @@
+# EditorConfig: https://EditorConfig.org
+
+# top-most EditorConfig file
 root = true
 
 [*]
+charset = utf-8
+spelling_language = en-US
+
+# Unix-style newlines
 end_of_line = lf
+
 insert_final_newline = true
 trim_trailing_whitespace = true
 
