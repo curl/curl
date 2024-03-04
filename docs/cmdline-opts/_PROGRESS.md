@@ -1,6 +1,6 @@
 <!-- Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al. -->
 <!-- SPDX-License-Identifier: curl -->
-# "PROGRESS METER"
+# PROGRESS METER
 
 curl normally displays a progress meter during operations, indicating the
 amount of transferred data, transfer speeds and estimated time left, etc. The

@@ -44,45 +44,8 @@ push @out, "                             \\___|\\___/|_| \\_\\_____|\n";
 my $olen=0;
 while (<STDIN>) {
     my $line = $_;
-
-    # this should be removed:
-    $line =~ s/(.|_)//g;
-
-    # remove trailing CR from line. msysgit checks out files as line+CRLF
-    $line =~ s/\r$//;
-
-    $line =~ s/\x1b\x5b[0-9]+m//g; # escape sequence
-    if($line =~ /^([ \t]*\n|curl)/i) {
-        # cut off headers and empty lines
-        $wline++; # count number of cut off lines
-        next;
-    }
-
-    my $text = $line;
-    $text =~ s/^\s+//g; # cut off preceding...
-    $text =~ s/\s+$//g; # and trailing whitespaces
-
-    $tlen = length($text);
-
-    if($wline && ($olen == $tlen)) {
-        # if the previous line with contents was exactly as long as
-        # this line, then we ignore the newlines!
-
-        # We do this magic because a header may abort a paragraph at
-        # any line, but we don't want that to be noticed in the output
-        # here
-        $wline=0;
-    }
-    $olen = $tlen;
-
-    if($wline) {
-        # we only make one empty line max
-        $wline = 0;
-        push @out, "\n";
-    }
     push @out, $line;
 }
-push @out, "\n"; # just an extra newline
 
 print <<HEAD
 /*

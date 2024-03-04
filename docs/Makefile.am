@@ -30,16 +30,14 @@ MK_CA_DOCS = mk-ca-bundle.1
 CURLCONF_DOCS = curl-config.1
 endif
 
-man_MANS = $(abs_builddir)/curl.1 curl-config.1
+man_MANS = curl-config.1
 CURLPAGES = curl-config.md mk-ca-bundle.md
 
-# Build targets in this file (.) before cmdline-opts to ensure that
-# the curl.1 rule below runs first
 SUBDIRS = . cmdline-opts libcurl
 DIST_SUBDIRS = $(SUBDIRS) examples
 
 if BUILD_DOCS
-CLEANFILES = curl.1 mk-ca-bundle.1 curl-config.1
+CLEANFILES = mk-ca-bundle.1 curl-config.1
 endif
 
 EXTRA_DIST =                                    \
@@ -112,20 +110,6 @@ SUFFIXES = .1 .md
 
 all: $(MK_CA_DOCS)
 
-# $(abs_builddir) is to disable VPATH when searching for this file, which
-# would otherwise find the copy in $(srcdir) which breaks the $(HUGE)
-# rule in src/Makefile.am in out-of-tree builds that references the file in the
-# build directory.
-#
-# First, seed the used copy of curl.1 with the prebuilt copy (in an out-of-tree
-# build), then run make recursively to rebuild it only if its dependencies
-# have changed.
-$(abs_builddir)/curl.1:
-	if test "$(top_builddir)x" != "$(top_srcdir)x" -a -e "$(srcdir)/curl.1"; then \
-		$(INSTALL_DATA) "$(srcdir)/curl.1" $@ \
-		&& touch -r "$(srcdir)/curl.1" $@; fi
-	cd cmdline-opts && $(MAKE)
-
 .md.1:
 	$(CD2)$(CD2NROFF)
 
@@ -135,6 +119,3 @@ mk-ca-bundle.1: mk-ca-bundle.md
 
 distclean:
 	rm -f $(CLEANFILES)
-
-dist-hook:
-	cp $(builddir)/curl.1 $(builddir)/curl.1.dist

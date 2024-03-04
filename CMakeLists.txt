@@ -312,13 +312,10 @@ option(ENABLE_CURL_MANUAL "to build the man page for curl and enable its -M/--ma
 
 if(ENABLE_CURL_MANUAL OR BUILD_LIBCURL_DOCS)
   if(PERL_FOUND)
-    curl_nroff_check()
-    if(NROFF_USEFUL)
-      set(HAVE_MANUAL_TOOLS ON)
-    endif()
+    set(HAVE_MANUAL_TOOLS ON)
   endif()
   if(NOT HAVE_MANUAL_TOOLS)
-    message(WARNING "Perl not found, or nroff not useful. Will not build manuals.")
+    message(WARNING "Perl not found. Will not build manuals.")
   endif()
 endif()
 

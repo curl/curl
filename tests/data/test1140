@@ -15,7 +15,7 @@ none
 </server>
 
 <name>
-Verify the nroff of man pages
+Verify the nroff of manpages
 </name>
 
 <command type="perl">

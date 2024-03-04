@@ -177,7 +177,6 @@
  18.29 --retry and transfer timeouts
 
  19. Build
- 19.1 avoid nroff
  19.2 Enable PIE and RELRO by default
  19.3 Do not use GNU libtool on OpenBSD
  19.4 Package curl for Windows in a signed installer
@@ -1290,14 +1289,6 @@
 
 
 19. Build
-
-19.1 avoid nroff
-
- With the switch to the markdown-like documentation format since curl 8.6.0,
- it should (with a manageable amount of work) be possible to render an ASCII
- version of the man page without involving nroff and thus remove that
- dependency for building the hugehelp file, used to build in the man page into
- the curl command line tool.
 
 19.2 Enable PIE and RELRO by default
 
