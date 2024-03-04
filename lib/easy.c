@@ -1110,9 +1110,10 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
   /* Unpause parts in active mime tree. */
   if((k->keepon & ~newstate & KEEP_SEND_PAUSE) &&
      (data->mstate == MSTATE_PERFORMING ||
-      data->mstate == MSTATE_RATELIMITING) &&
-     data->state.fread_func == (curl_read_callback) Curl_mime_read) {
-    Curl_mime_unpause(data->state.in);
+      data->mstate == MSTATE_RATELIMITING)) {
+    result = Curl_creader_unpause(data);
+    if(result)
+      return result;
   }
 
   /* put it back in the keepon */

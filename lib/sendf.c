@@ -549,6 +549,14 @@ CURLcode Curl_creader_def_rewind(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+CURLcode Curl_creader_def_unpause(struct Curl_easy *data,
+                                  struct Curl_creader *reader)
+{
+  (void)data;
+  (void)reader;
+  return CURLE_OK;
+}
+
 struct cr_in_ctx {
   struct Curl_creader super;
   curl_read_callback read_cb;
@@ -749,37 +757,11 @@ static CURLcode cr_in_rewind(struct Curl_easy *data,
                              struct Curl_creader *reader)
 {
   struct cr_in_ctx *ctx = (struct cr_in_ctx *)reader;
-  /* TODO: I wonder if we should rather give mime its own client
-   * reader type. This is messy. */
-#if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
-  curl_mimepart *mimepart = &data->set.mimepost;
-#endif
 
   /* If we never invoked the callback, there is noting to rewind */
   if(!ctx->has_used_cb)
     return CURLE_OK;
 
-  /* We have sent away data. If not using CURLOPT_POSTFIELDS or
-     CURLOPT_HTTPPOST, call app to rewind
-  */
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_MIME)
-  if(data->conn->handler->protocol & PROTO_FAMILY_HTTP) {
-    if(data->state.mimepost)
-      mimepart = data->state.mimepost;
-  }
-#endif
-#if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
-  if(ctx->read_cb == (curl_read_callback)Curl_mime_read) {
-    CURLcode result = Curl_mime_rewind(mimepart);
-    DEBUGF(infof(data, "cr_in, rewind mime/post data -> %d", result));
-    if(result) {
-      failf(data, "Cannot rewind mime/post data");
-    }
-    return result;
-  }
-#endif
-
-  /* With mime out of the way, handle "normal" fread callbacks */
   if(data->set.seek_func) {
     int err;
 
@@ -835,6 +817,7 @@ static const struct Curl_crtype cr_in = {
   cr_in_total_length,
   cr_in_resume_from,
   cr_in_rewind,
+  Curl_creader_def_unpause,
   sizeof(struct cr_in_ctx)
 };
 
@@ -981,6 +964,7 @@ static const struct Curl_crtype cr_lc = {
   cr_lc_total_length,
   Curl_creader_def_resume_from,
   Curl_creader_def_rewind,
+  Curl_creader_def_unpause,
   sizeof(struct cr_lc_ctx)
 };
 
@@ -1000,18 +984,18 @@ static CURLcode cr_lc_add(struct Curl_easy *data)
 }
 
 static CURLcode do_init_reader_stack(struct Curl_easy *data,
-                                     const struct Curl_crtype *crt,
-                                     struct Curl_creader **preader,
-                                     curl_off_t clen)
+                                     struct Curl_creader *r)
 {
-  CURLcode result;
+  CURLcode result = CURLE_OK;
+  curl_off_t clen;
 
+  DEBUGASSERT(r);
+  DEBUGASSERT(r->crt);
+  DEBUGASSERT(r->phase == CURL_CR_CLIENT);
   DEBUGASSERT(!data->req.reader_stack);
-  result = Curl_creader_create(preader, data, crt, CURL_CR_CLIENT);
-  if(result)
-    return result;
-  data->req.reader_stack = *preader;
 
+  data->req.reader_stack = r;
+  clen = r->crt->total_length(data, r);
   /* if we do not have 0 length init, and crlf conversion is wanted,
    * add the reader for it */
   if(clen && (data->set.crlf
@@ -1031,15 +1015,16 @@ CURLcode Curl_creader_set_fread(struct Curl_easy *data, curl_off_t len)
 {
   CURLcode result;
   struct Curl_creader *r;
+  struct cr_in_ctx *ctx;
+
+  result = Curl_creader_create(&r, data, &cr_in, CURL_CR_CLIENT);
+  if(result)
+    return result;
+  ctx = (struct cr_in_ctx *)r;
+  ctx->total_len = len;
 
   cl_reset_reader(data);
-  result = do_init_reader_stack(data, &cr_in, &r, len);
-  if(!result && r) {
-    struct cr_in_ctx *ctx = (struct cr_in_ctx *)r;
-    DEBUGASSERT(r->crt == &cr_in);
-    ctx->total_len = len;
-  }
-  return result;
+  return do_init_reader_stack(data, r);
 }
 
 CURLcode Curl_creader_add(struct Curl_easy *data,
@@ -1061,6 +1046,16 @@ CURLcode Curl_creader_add(struct Curl_easy *data,
   reader->next = *anchor;
   *anchor = reader;
   return CURLE_OK;
+}
+
+CURLcode Curl_creader_set(struct Curl_easy *data, struct Curl_creader *r)
+{
+  DEBUGASSERT(r);
+  DEBUGASSERT(r->crt);
+  DEBUGASSERT(r->phase = CURL_CR_CLIENT);
+
+  cl_reset_reader(data);
+  return do_init_reader_stack(data, r);
 }
 
 CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
@@ -1128,15 +1123,21 @@ static const struct Curl_crtype cr_null = {
   cr_null_total_length,
   Curl_creader_def_resume_from,
   Curl_creader_def_rewind,
+  Curl_creader_def_unpause,
   sizeof(struct Curl_creader)
 };
 
 CURLcode Curl_creader_set_null(struct Curl_easy *data)
 {
   struct Curl_creader *r;
+  CURLcode result;
+
+  result = Curl_creader_create(&r, data, &cr_null, CURL_CR_CLIENT);
+  if(result)
+    return result;
 
   cl_reset_reader(data);
-  return do_init_reader_stack(data, &cr_null, &r, 0);
+  return do_init_reader_stack(data, r);
 }
 
 struct cr_buf_ctx {
@@ -1218,6 +1219,7 @@ static const struct Curl_crtype cr_buf = {
   cr_buf_total_length,
   cr_buf_resume_from,
   Curl_creader_def_rewind,
+  Curl_creader_def_unpause,
   sizeof(struct cr_buf_ctx)
 };
 
@@ -1226,17 +1228,18 @@ CURLcode Curl_creader_set_buf(struct Curl_easy *data,
 {
   CURLcode result;
   struct Curl_creader *r;
+  struct cr_buf_ctx *ctx;
+
+  result = Curl_creader_create(&r, data, &cr_buf, CURL_CR_CLIENT);
+  if(result)
+    return result;
+  ctx = (struct cr_buf_ctx *)r;
+  ctx->buf = buf;
+  ctx->blen = blen;
+  ctx->index = 0;
 
   cl_reset_reader(data);
-  result = do_init_reader_stack(data, &cr_buf, &r, blen);
-  if(!result && r) {
-    struct cr_buf_ctx *ctx = (struct cr_buf_ctx *)r;
-    DEBUGASSERT(r->crt == &cr_buf);
-    ctx->buf = buf;
-    ctx->blen = blen;
-    ctx->index = 0;
-  }
-  return result;
+  return do_init_reader_stack(data, r);
 }
 
 curl_off_t Curl_creader_total_length(struct Curl_easy *data)
@@ -1259,4 +1262,18 @@ CURLcode Curl_creader_resume_from(struct Curl_easy *data, curl_off_t offset)
   while(r && r->phase != CURL_CR_CLIENT)
     r = r->next;
   return r? r->crt->resume_from(data, r, offset) : CURLE_READ_ERROR;
+}
+
+CURLcode Curl_creader_unpause(struct Curl_easy *data)
+{
+  struct Curl_creader *reader = data->req.reader_stack;
+  CURLcode result = CURLE_OK;
+
+  while(reader) {
+    result = reader->crt->unpause(data, reader);
+    if(result)
+      break;
+    reader = reader->next;
+  }
+  return result;
 }

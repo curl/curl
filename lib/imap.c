@@ -786,20 +786,19 @@ static CURLcode imap_perform_append(struct Curl_easy *data)
         result = Curl_mime_add_header(&data->set.mimepost.curlheaders,
                                       "Mime-Version: 1.0");
 
-    /* Make sure we will read the entire mime structure. */
     if(!result)
-      result = Curl_mime_rewind(&data->set.mimepost);
-
+      result = Curl_creader_set_mime(data, &data->set.mimepost);
     if(result)
       return result;
-
-    data->state.infilesize = Curl_mime_size(&data->set.mimepost);
-
-    /* Read from mime structure. */
-    data->state.fread_func = (curl_read_callback) Curl_mime_read;
-    data->state.in = (void *) &data->set.mimepost;
+    data->state.infilesize = Curl_creader_client_length(data);
   }
+  else
 #endif
+  {
+    result = Curl_creader_set_fread(data, data->state.infilesize);
+    if(result)
+      return result;
+  }
 
   /* Check we know the size of the upload */
   if(data->state.infilesize < 0) {
