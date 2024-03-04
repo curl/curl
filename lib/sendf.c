@@ -1052,7 +1052,7 @@ CURLcode Curl_creader_set(struct Curl_easy *data, struct Curl_creader *r)
 {
   DEBUGASSERT(r);
   DEBUGASSERT(r->crt);
-  DEBUGASSERT(r->phase = CURL_CR_CLIENT);
+  DEBUGASSERT(r->phase == CURL_CR_CLIENT);
 
   cl_reset_reader(data);
   return do_init_reader_stack(data, r);
