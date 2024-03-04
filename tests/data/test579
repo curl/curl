@@ -77,6 +77,8 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/ip%TESTNUMBER
 <verify>
 <file name="%LOGDIR/ip%TESTNUMBER">
 Progress callback called with UL 0 out of 0
+Progress callback called with UL 5 out of 0
+Progress callback called with UL 0 out of 0
 Progress callback called with UL 8 out of 0
 Progress callback called with UL 16 out of 0
 Progress callback called with UL 26 out of 0

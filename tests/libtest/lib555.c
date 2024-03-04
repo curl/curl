@@ -54,7 +54,7 @@ static size_t readcallback(char  *ptr,
   }
   (*counter)++; /* bump */
 
-  if(size * nmemb > strlen(uploadthis)) {
+  if(size * nmemb >= strlen(uploadthis)) {
     fprintf(stderr, "READ!\n");
     strcpy(ptr, uploadthis);
     return strlen(uploadthis);

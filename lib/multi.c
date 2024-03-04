@@ -94,7 +94,7 @@ static CURLMcode add_next_timeout(struct curltime now,
 static CURLMcode multi_timeout(struct Curl_multi *multi,
                                long *timeout_ms);
 static void process_pending_handles(struct Curl_multi *multi);
-static void multi_xfer_buf_free(struct Curl_multi *multi);
+static void multi_xfer_bufs_free(struct Curl_multi *multi);
 
 #ifdef DEBUGBUILD
 static const char * const multi_statename[]={
@@ -192,7 +192,7 @@ static void mstate(struct Curl_easy *data, CURLMstate state
     data->multi->num_alive--;
     if(!data->multi->num_alive) {
       /* free the transfer buffer when we have no more active transfers */
-      multi_xfer_buf_free(data->multi);
+      multi_xfer_bufs_free(data->multi);
     }
   }
 
@@ -715,8 +715,6 @@ static CURLcode multi_done(struct Curl_easy *data,
 
   if(!result)
     result = Curl_req_done(&data->req, data, premature);
-
-  Curl_safefree(data->state.ulbuf);
 
   CONNCACHE_LOCK(data);
   Curl_detach_connection(data);
@@ -2900,7 +2898,7 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
     Curl_free_multi_ssl_backend_data(multi->ssl_backend_data);
 #endif
 
-    multi_xfer_buf_free(multi);
+    multi_xfer_bufs_free(multi);
     free(multi);
 
     return CURLM_OK;
@@ -3891,10 +3889,66 @@ void Curl_multi_xfer_buf_release(struct Curl_easy *data, char *buf)
   data->multi->xfer_buf_borrowed = FALSE;
 }
 
-static void multi_xfer_buf_free(struct Curl_multi *multi)
+CURLcode Curl_multi_xfer_ulbuf_borrow(struct Curl_easy *data,
+                                      char **pbuf, size_t *pbuflen)
+{
+  DEBUGASSERT(data);
+  DEBUGASSERT(data->multi);
+  *pbuf = NULL;
+  *pbuflen = 0;
+  if(!data->multi) {
+    failf(data, "transfer has no multi handle");
+    return CURLE_FAILED_INIT;
+  }
+  if(!data->set.upload_buffer_size) {
+    failf(data, "transfer upload buffer size is 0");
+    return CURLE_FAILED_INIT;
+  }
+  if(data->multi->xfer_ulbuf_borrowed) {
+    failf(data, "attempt to borrow xfer_ulbuf when already borrowed");
+    return CURLE_AGAIN;
+  }
+
+  if(data->multi->xfer_ulbuf &&
+     data->set.upload_buffer_size > data->multi->xfer_ulbuf_len) {
+    /* not large enough, get a new one */
+    free(data->multi->xfer_ulbuf);
+    data->multi->xfer_ulbuf = NULL;
+    data->multi->xfer_ulbuf_len = 0;
+  }
+
+  if(!data->multi->xfer_ulbuf) {
+    data->multi->xfer_ulbuf = malloc((size_t)data->set.upload_buffer_size);
+    if(!data->multi->xfer_ulbuf) {
+      failf(data, "could not allocate xfer_ulbuf of %zu bytes",
+            (size_t)data->set.upload_buffer_size);
+      return CURLE_OUT_OF_MEMORY;
+    }
+    data->multi->xfer_ulbuf_len = data->set.upload_buffer_size;
+  }
+
+  data->multi->xfer_ulbuf_borrowed = TRUE;
+  *pbuf = data->multi->xfer_ulbuf;
+  *pbuflen = data->multi->xfer_ulbuf_len;
+  return CURLE_OK;
+}
+
+void Curl_multi_xfer_ulbuf_release(struct Curl_easy *data, char *buf)
+{
+  (void)buf;
+  DEBUGASSERT(data);
+  DEBUGASSERT(data->multi);
+  DEBUGASSERT(!buf || data->multi->xfer_ulbuf == buf);
+  data->multi->xfer_ulbuf_borrowed = FALSE;
+}
+
+static void multi_xfer_bufs_free(struct Curl_multi *multi)
 {
   DEBUGASSERT(multi);
   Curl_safefree(multi->xfer_buf);
   multi->xfer_buf_len = 0;
   multi->xfer_buf_borrowed = FALSE;
+  Curl_safefree(multi->xfer_ulbuf);
+  multi->xfer_ulbuf_len = 0;
+  multi->xfer_ulbuf_borrowed = FALSE;
 }

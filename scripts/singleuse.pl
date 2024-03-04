@@ -44,6 +44,8 @@ my $file = $ARGV[0];
 my %wl = (
     'curlx_uztoso' => 'cmdline tool use',
     'Curl_xfer_write_resp' => 'internal api',
+    'Curl_creader_def_init' => 'internal api',
+    'Curl_creader_def_close' => 'internal api',
     );
 
 my %api = (

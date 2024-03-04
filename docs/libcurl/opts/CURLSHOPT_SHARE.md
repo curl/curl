@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLSHOPT_SHARE
 Section: 3
@@ -27,7 +27,7 @@ CURLSHcode curl_share_setopt(CURLSH *share, CURLSHOPT_SHARE, long type);
 
 The *type* parameter specifies what specific data that should be shared
 and kept in the share object that was created with curl_share_init(3).
-The given *type* must be be one of the values described below. You can set
+The given *type* must be one of the values described below. You can set
 CURLSHOPT_SHARE(3) multiple times with different data arguments to have
 the share object share multiple types of data. Unset a type again by setting
 CURLSHOPT_UNSHARE(3).

@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLSHOPT_UNSHARE
 Section: 3
@@ -28,7 +28,7 @@ CURLSHcode curl_share_setopt(CURLSH *share, CURLSHOPT_UNSHARE, long type);
 The *type* parameter specifies what specific data that should no longer be
 shared and kept in the share object that was created with
 curl_share_init(3). In other words, stop sharing that data in this
-shared object. The given *type* must be be one of the values described
+shared object. The given *type* must be one of the values described
 below. You can set CURLSHOPT_UNSHARE(3) multiple times with different
 data arguments to remove multiple types from the shared object. Add data to
 share again with CURLSHOPT_SHARE(3).

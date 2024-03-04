@@ -94,10 +94,6 @@ CURLcode Curl_dynhds_add_custom(struct Curl_easy *data,
                                 bool is_connect,
                                 struct dynhds *hds);
 
-CURLcode Curl_http_compile_trailers(struct curl_slist *trailers,
-                                    struct dynbuf *buf,
-                                    struct Curl_easy *handle);
-
 void Curl_http_method(struct Curl_easy *data, struct connectdata *conn,
                       const char **method, Curl_HttpReq *);
 CURLcode Curl_http_useragent(struct Curl_easy *data);
@@ -112,8 +108,8 @@ CURLcode Curl_transferencode(struct Curl_easy *data);
 CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
                         Curl_HttpReq httpreq,
                         const char **teep);
-CURLcode Curl_http_req_send(struct Curl_easy *data,
-                            struct dynbuf *r, Curl_HttpReq httpreq);
+CURLcode Curl_http_req_complete(struct Curl_easy *data,
+                                struct dynbuf *r, Curl_HttpReq httpreq);
 bool Curl_use_http_1_1plus(const struct Curl_easy *data,
                            const struct connectdata *conn);
 #ifndef CURL_DISABLE_COOKIES
@@ -193,27 +189,10 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data);
  ***************************************************************************/
 struct HTTP {
   curl_off_t postsize; /* off_t to handle large file sizes */
-  const char *postdata;
-  struct back {
-    curl_read_callback fread_func; /* backup storage for fread pointer */
-    void *fread_in;           /* backup storage for fread_in pointer */
-    const char *postdata;
-    curl_off_t postsize;
-    struct Curl_easy *data;
-  } backup;
-
-  enum {
-    HTTPSEND_NADA,    /* init */
-    HTTPSEND_REQUEST, /* sending a request */
-    HTTPSEND_BODY     /* sending body */
-  } sending;
 
 #ifndef CURL_DISABLE_HTTP
   void *h2_ctx;              /* HTTP/2 implementation context */
   void *h3_ctx;              /* HTTP/3 implementation context */
-  struct dynbuf send_buffer; /* used if the request couldn't be sent in one
-                                chunk, points to an allocated send_buffer
-                                struct */
 #endif
 };
 

@@ -642,7 +642,7 @@ static int parsefmt(const char *format,
  * On success, the input array describes the type of all arguments and their
  * values.
  *
- * The function then iterates over the output sengments and outputs them one
+ * The function then iterates over the output segments and outputs them one
  * by one until done. Using the appropriate input arguments (if any).
  *
  * All output is sent to the 'stream()' callback, one byte at a time.

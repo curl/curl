@@ -118,4 +118,29 @@ CURLcode Curl_multi_xfer_buf_borrow(struct Curl_easy *data,
  */
 void Curl_multi_xfer_buf_release(struct Curl_easy *data, char *buf);
 
+/**
+ * Borrow the upload buffer from the multi, suitable
+ * for the given transfer `data`. The buffer may only be used in one
+ * multi processing of the easy handle. It MUST be returned to the
+ * multi before it can be borrowed again.
+ * Pointers into the buffer remain only valid as long as it is borrowed.
+ *
+ * @param data    the easy handle
+ * @param pbuf    on return, the buffer to use or NULL on error
+ * @param pbuflen on return, the size of *pbuf or 0 on error
+ * @return CURLE_OK when buffer is available and is returned.
+ *         CURLE_OUT_OF_MEMORy on failure to allocate the buffer,
+ *         CURLE_FAILED_INIT if the easy handle is without multi.
+ *         CURLE_AGAIN if the buffer is borrowed already.
+ */
+CURLcode Curl_multi_xfer_ulbuf_borrow(struct Curl_easy *data,
+                                      char **pbuf, size_t *pbuflen);
+
+/**
+ * Release the borrowed upload buffer. All references into the buffer become
+ * invalid after this.
+ * @param buf the upload buffer pointer borrowed for coding error checks.
+ */
+void Curl_multi_xfer_ulbuf_release(struct Curl_easy *data, char *buf);
+
 #endif /* HEADER_CURL_MULTIIF_H */

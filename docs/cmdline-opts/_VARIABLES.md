@@ -41,4 +41,4 @@ as POST data:
     --expand-data "{{fix:trim:url}}"
     https://example.com/
 
-Command line variables and expansions were added in in 8.3.0.
+Command line variables and expansions were added in 8.3.0.

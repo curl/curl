@@ -64,8 +64,6 @@ struct SingleRequest {
   curl_off_t bytecount;         /* total number of bytes read */
   curl_off_t writebytecount;    /* number of bytes written */
 
-  size_t pendingheader;         /* this many bytes left to send is actually
-                                    header and not body */
   struct curltime start;         /* transfer started at this time */
   unsigned int headerbytecount;  /* received server headers (not CONNECT
                                     headers) */
@@ -87,9 +85,12 @@ struct SingleRequest {
   enum expect100 exp100;        /* expect 100 continue state */
   enum upgrade101 upgr101;      /* 101 upgrade state */
 
-  /* Client Writer stack, handles trasnfer- and content-encodings, protocol
+  /* Client Writer stack, handles transfer- and content-encodings, protocol
    * checks, pausing by client callbacks. */
   struct Curl_cwriter *writer_stack;
+  /* Client Reader stack, handles transfer- and content-encodings, protocol
+   * checks, pausing by client callbacks. */
+  struct Curl_creader *reader_stack;
   struct bufq sendbuf; /* data which needs to be send to the server */
   size_t sendbuf_hds_len; /* amount of header bytes in sendbuf */
   time_t timeofdoc;
@@ -98,16 +99,6 @@ struct SingleRequest {
                        header data */
   char *newurl;     /* Set to the new URL to use when a redirect or a retry is
                        wanted */
-
-  /* 'upload_present' is used to keep a byte counter of how much data there is
-     still left in the buffer, aimed for upload. */
-  size_t upload_present;
-
-  /* 'upload_fromhere' is used as a read-pointer when we uploaded parts of a
-     buffer, so the next read should read from where this pointer points to,
-     and the 'upload_present' contains the number of bytes available at this
-     position */
-  char *upload_fromhere;
 
   /* Allocated protocol-specific data. Each protocol handler makes sure this
      points to data it needs. */
@@ -137,8 +128,10 @@ struct SingleRequest {
   BIT(content_range); /* set TRUE if Content-Range: was found */
   BIT(download_done); /* set to TRUE when download is complete */
   BIT(eos_written);   /* iff EOS has been written to client */
-  BIT(upload_done);   /* set to TRUE when doing chunked transfer-encoding
-                         upload and we're uploading the last chunk */
+  BIT(eos_read);      /* iff EOS has been read from the client */
+  BIT(upload_done);   /* set to TRUE when all request data has been sent */
+  BIT(upload_aborted); /* set to TRUE when upload was aborted. Will also
+                        * show `upload_done` as TRUE. */
   BIT(ignorebody);    /* we read a response-body but we ignore it! */
   BIT(http_bodyless); /* HTTP response status code is between 100 and 199,
                          204 or 304 */
@@ -190,35 +183,40 @@ void Curl_req_free(struct SingleRequest *req, struct Curl_easy *data);
  */
 void Curl_req_reset(struct SingleRequest *req, struct Curl_easy *data);
 
-
+#ifndef USE_HYPER
 /**
- * Send request bytes for transfer. If not all could be sent
+ * Send request headers. If not all could be sent
  * they will be buffered. Use `Curl_req_flush()` to make sure
  * bytes are really send.
  * @param data      the transfer making the request
- * @param buf       the bytes to send
- * @param blen      the number of bytes to send
- * @param hds_len   the number of bytes from the start that are headers
+ * @param buf       the complete header bytes, no body
  * @return CURLE_OK (on blocking with *pnwritten == 0) or error.
  */
-CURLcode Curl_req_send(struct Curl_easy *data,
-                        const char *buf, size_t blen,
-                        size_t hds_len);
+CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *buf);
 
-/* Convenience for sending only header bytes */
-#define Curl_req_send_hds(data, buf, blen) \
-          Curl_req_send((data), (buf), (blen), (blen))
+#endif /* !USE_HYPER */
 
 /**
- * Flush all buffered request bytes.
- * @return CURLE_OK on success, CURLE_AGAIN if sending was blocked,
- *         or the error on the sending.
+ * TRUE iff the request has sent all request headers and data.
  */
-CURLcode Curl_req_flush(struct Curl_easy *data);
+bool Curl_req_done_sending(struct Curl_easy *data);
+
+/*
+ * Read more from client and flush all buffered request bytes.
+ * @return CURLE_OK on success or the error on the sending.
+ *         Never returns CURLE_AGAIN.
+ */
+CURLcode Curl_req_send_more(struct Curl_easy *data);
 
 /**
  * TRUE iff the request wants to send, e.g. has buffered bytes.
  */
 bool Curl_req_want_send(struct Curl_easy *data);
+
+/**
+ * Stop sending any more request data to the server.
+ * Will clear the send buffer and mark request sending as done.
+ */
+CURLcode Curl_req_abort_sending(struct Curl_easy *data);
 
 #endif /* HEADER_CURL_REQUEST_H */
