@@ -183,7 +183,6 @@
  19.4 Package curl for Windows in a signed installer
  19.5 make configure use --cache-file more and better
  19.6 build curl with Windows Unicode support
- 19.7 build HTTP/3 with OpenSSL and nghttp3 using cmake
 
  20. Test suite
  20.1 SSL tunnel
@@ -1339,10 +1338,6 @@
  Unicode support, like ./configure --enable-windows-unicode
 
  See https://github.com/curl/curl/issues/7229
-
-19.7 build HTTP/3 with OpenSSL and nghttp3 using cmake
-
- https://github.com/curl/curl/issues/12988
 
 20. Test suite
 
