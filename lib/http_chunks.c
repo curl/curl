@@ -391,6 +391,17 @@ struct chunked_writer {
   struct Curl_chunker ch;
 };
 
+#if defined(__GNUC__)
+/* Ignore cast-align warnings (on 32 bit arm):
+
+   error: cast increases required alignment of target type [-Werror=cast-align]
+        |   struct chunked_writer *ctx = (struct chunked_writer *)writer;
+                                         ^
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
+#endif
+
 static CURLcode cw_chunked_init(struct Curl_easy *data,
                                 struct Curl_cwriter *writer)
 {
@@ -413,6 +424,10 @@ static CURLcode cw_chunked_write(struct Curl_easy *data,
                                  const char *buf, size_t blen)
 {
   struct chunked_writer *ctx = (struct chunked_writer *)writer;
+#if defined(__GNUC__)
+/* Stop ignoring cast-align warnings */
+#pragma GCC diagnostic pop
+#endif
   CURLcode result;
   size_t consumed;
 
