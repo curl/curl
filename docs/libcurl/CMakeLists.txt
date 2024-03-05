@@ -32,7 +32,7 @@ function(add_manual_pages _listname)
       # Special case, an auto-generated file.
       string(REPLACE ".3" ".md" _mdfile "${CMAKE_CURRENT_BINARY_DIR}/${_file}")
     else()
-      string(REPLACE ".3" ".md" _mdfile "${_file}")
+      string(REPLACE ".3" ".md" _mdfile "${CMAKE_CURRENT_SOURCE_DIR}/${_file}")
     endif()
     add_custom_command(OUTPUT "${_rofffile}"
       COMMAND ${PROJECT_SOURCE_DIR}/scripts/cd2nroff ${_mdfile} > ${_rofffile}
