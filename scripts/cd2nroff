@@ -113,7 +113,7 @@ sub single {
 
     if(defined($f)) {
         if(!open($fh, "<:crlf", "$f")) {
-            print STDERR "Failed to open $f : $!\n";
+            print STDERR "cd2nroff failed to open '$f' for reading: $!\n";
             return 1;
         }
     }
