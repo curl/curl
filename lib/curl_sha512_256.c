@@ -29,15 +29,132 @@
 #include "curl_sha512_256.h"
 #include "warnless.h"
 
-#if defined(USE_GNUTLS)
+/* The recommended order of the TLS backends:
+ * * OpenSSL
+ * * GnuTLS
+ * * wolfSSL
+ * * Schannel SSPI
+ * * SecureTransport (Darwin)
+ * * mbedTLS
+ * * BearSSL
+ * * rustls
+ * Skip the backend if it does not support the required algorithm */
+
+#if defined(USE_OPENSSL)
+#  include <openssl/opensslv.h>
+#  if (!defined(LIBRESSL_VERSION_NUMBER) && \
+        defined(OPENSSL_VERSION_NUMBER) && \
+        (OPENSSL_VERSION_NUMBER >= 0x10100010L)) || \
+      (defined(LIBRESSL_VERSION_NUMBER) && \
+        (LIBRESSL_VERSION_NUMBER >= 0x3080000fL))
+#    include <openssl/opensslconf.h>
+#    if !defined(OPENSSL_NO_SHA) && !defined(OPENSSL_NO_SHA512)
+#      include <openssl/evp.h>
+#      define USE_OPENSSL_SHA512_256          1
+#      define HAS_SHA512_256_IMPLEMENTATION   1
+#    endif
+#  endif
+#endif /* USE_OPENSSL */
+
+
+#if !defined(HAS_SHA512_256_IMPLEMENTATION) && defined(USE_GNUTLS)
 #  include <nettle/sha.h>
 #  if defined(SHA512_256_DIGEST_SIZE)
 #    define USE_GNUTLS_SHA512_256           1
 #    define HAS_SHA512_256_IMPLEMENTATION   1
 #  endif
-#endif
+#endif /* ! HAS_SHA512_256_IMPLEMENTATION && USE_GNUTLS */
 
-#if defined(USE_GNUTLS_SHA512_256)
+#if defined(USE_OPENSSL_SHA512_256)
+
+/* OpenSSL does not provide macros for SHA-512/256 sizes */
+
+/**
+ * Size of the SHA-512/256 single processing block in bytes.
+ */
+#define SHA512_256_BLOCK_SIZE 128
+
+/**
+ * Size of the SHA-512/256 resulting digest in bytes.
+ * This is the final digest size, not intermediate hash.
+ */
+#define SHA512_256_DIGEST_SIZE SHA512_256_DIGEST_LENGTH
+
+/**
+ * Context type used for SHA-512/256 calculations
+ */
+typedef EVP_MD_CTX *impl_sha512_256_ctx;
+
+/**
+ * Initialise structure for SHA-512/256 calculation.
+ *
+ * @param context the calculation context
+ * @return CURLE_OK if succeed,
+ *         error code otherwise
+ */
+static CURLcode
+MHDx_sha512_256_init(void *context)
+{
+  impl_sha512_256_ctx *const ctx = (impl_sha512_256_ctx *)context;
+
+  *ctx = EVP_MD_CTX_create();
+  if(!*ctx)
+    return CURLE_OUT_OF_MEMORY;
+
+  if(EVP_DigestInit_ex(*ctx, EVP_sha512_256(), NULL)) {
+    /* Check whether the header and this file use the same numbers */
+    DEBUGASSERT(EVP_MD_CTX_size(*ctx) == SHA512_256_DIGEST_SIZE);
+    /* Check whether the block size is correct */
+    DEBUGASSERT(EVP_MD_CTX_block_size(*ctx) == SHA512_256_BLOCK_SIZE);
+
+    return CURLE_OK; /* Success */
+  }
+
+  /* Cleanup */
+  EVP_MD_CTX_destroy(*ctx);
+  return CURLE_FAILED_INIT;
+}
+
+
+/**
+ * Process portion of bytes.
+ *
+ * @param context the calculation context
+ * @param data bytes to add to hash
+ * @param length number of bytes in @a data
+ */
+static void
+MHDx_sha512_256_update(void *context,
+                       const unsigned char *data,
+                       unsigned int length)
+{
+  impl_sha512_256_ctx *const ctx = (impl_sha512_256_ctx *) context;
+
+  /* Hypothetically the function may fail, but assume it does not */
+  (void) EVP_DigestUpdate(*ctx, data, length);
+}
+
+
+/**
+ * Finalise SHA-512/256 calculation, return digest.
+ *
+ * @param context the calculation context
+ * @param[out] digest set to the hash, must be #SHA512_256_DIGEST_SIZE bytes
+ */
+static void
+MHDx_sha512_256_finish(unsigned char *digest,
+                       void *context)
+{
+  impl_sha512_256_ctx *const ctx = (impl_sha512_256_ctx *) context;
+
+  /* Hypothetically the function may fail, but assume it does not */
+  (void) EVP_DigestFinal_ex(*ctx, digest, NULL);
+
+  EVP_MD_CTX_destroy(*ctx);
+  *ctx = NULL;
+}
+
+#elif defined(USE_GNUTLS_SHA512_256)
 
 /**
  * Context type used for SHA-512/256 calculations
@@ -205,7 +322,7 @@ MHDx_rotr64(curl_uint64_t value, unsigned int bits)
 #define SHA512_256_HASH_SIZE_WORDS 8
 
 /**
- * Size of the SHA-512/256 resulting digest in bytes.
+ * Size of the SHA-512/256 resulting digest in words.
  * This is the final digest size, not intermediate hash.
  */
 #define SHA512_256_DIGEST_SIZE_WORDS (SHA512_256_HASH_SIZE_WORDS  / 2)
@@ -637,8 +754,11 @@ Curl_sha512_256it(unsigned char *output, const unsigned char *input,
 {
   impl_sha512_256_ctx ctx;
   static const unsigned int max_step_size = (unsigned int)(-1);
+  CURLcode res;
 
-  (void) MHDx_sha512_256_init(&ctx); /* Always succeed */
+  res = MHDx_sha512_256_init(&ctx);
+  if(res != CURLE_OK)
+    return res;
 
   while(input_size >= max_step_size) {
     MHDx_sha512_256_update(&ctx, (const void *) input, max_step_size);
