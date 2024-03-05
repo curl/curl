@@ -226,26 +226,30 @@ static size_t get_max_body_write_len(struct Curl_easy *data, curl_off_t limit)
   return SIZE_T_MAX;
 }
 
+struct cw_download_ctx {
+  struct Curl_cwriter super;
+  BIT(started_response);
+};
 /* Download client writer in phase CURL_CW_PROTOCOL that
  * sees the "real" download body data. */
 static CURLcode cw_download_write(struct Curl_easy *data,
                                   struct Curl_cwriter *writer, int type,
                                   const char *buf, size_t nbytes)
 {
+  struct cw_download_ctx *ctx = (struct cw_download_ctx *)writer;
   CURLcode result;
   size_t nwrite, excess_len = 0;
+  bool is_connect = !!(type & CLIENTWRITE_CONNECT);
 
-  if(!(type & CLIENTWRITE_BODY)) {
-    if((type & CLIENTWRITE_CONNECT) && data->set.suppress_connect_headers)
-      return CURLE_OK;
-    return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
+  if(!is_connect && !ctx->started_response) {
+    Curl_pgrsTime(data, TIMER_STARTTRANSFER);
+    ctx->started_response = TRUE;
   }
 
-  if(!data->req.bytecount) {
-    Curl_pgrsTime(data, TIMER_STARTTRANSFER);
-    if(data->req.exp100 > EXP100_SEND_DATA)
-      /* set time stamp to compare with when waiting for the 100 */
-      data->req.start100 = Curl_now();
+  if(!(type & CLIENTWRITE_BODY)) {
+    if(is_connect && data->set.suppress_connect_headers)
+      return CURLE_OK;
+    return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
   }
 
   /* Here, we deal with REAL BODY bytes. All filtering and transfer
@@ -334,7 +338,7 @@ static const struct Curl_cwtype cw_download = {
   Curl_cwriter_def_init,
   cw_download_write,
   Curl_cwriter_def_close,
-  sizeof(struct Curl_cwriter)
+  sizeof(struct cw_download_ctx)
 };
 
 /* RAW client writer in phase CURL_CW_RAW that
