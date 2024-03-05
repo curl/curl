@@ -41,7 +41,7 @@ function(add_manual_pages _listname)
 
   add_custom_command(OUTPUT ${_rofffiles}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMAND ${PROJECT_SOURCE_DIR}/scripts/cd2nroff -k -d "${CMAKE_CURRENT_BINARY_DIR}" ${_mdfiles}
+    COMMAND "${PERL_EXECUTABLE}" ${PROJECT_SOURCE_DIR}/scripts/cd2nroff -k -d "${CMAKE_CURRENT_BINARY_DIR}" ${_mdfiles}
     DEPENDS ${_mdfiles}
     VERBATIM
   )
