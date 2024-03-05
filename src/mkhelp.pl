@@ -35,11 +35,11 @@ if($ARGV[0] eq "-c") {
     shift @ARGV;
 }
 
-push @out, "                                  _   _ ____  _\n";
-push @out, "  Project                     ___| | | |  _ \\| |\n";
-push @out, "                             / __| | | | |_) | |\n";
-push @out, "                            | (__| |_| |  _ <| |___\n";
-push @out, "                             \\___|\\___/|_| \\_\\_____|\n";
+push @out, "          _   _ ____  _\n";
+push @out, "      ___| | | |  _ \\| |\n";
+push @out, "     / __| | | | |_) | |\n";
+push @out, "    | (__| |_| |  _ <| |___\n";
+push @out, "     \\___|\\___/|_| \\_\\_____|\n";
 
 my $olen=0;
 while (<STDIN>) {
@@ -157,40 +157,43 @@ exit;
 }
 else {
     print <<HEAD
+static const char * const m[] = {
+HEAD
+        ;
+}
+
+my $blank;
+for my $n (@out) {
+    chomp $n;
+    $n =~ s/\\/\\\\/g;
+    $n =~ s/\"/\\\"/g;
+
+    if(!$n) {
+        $blank++;
+    }
+    else {
+        $n =~ s/        /\\t/g;
+        printf("  \"%s%s\",\n", $blank?"\\n":"", $n);
+        $blank = 0;
+    }
+}
+
+print <<ENDLINE
+  NULL
+};
 void hugehelp(void)
 {
-   fputs(
-HEAD
-         ;
+  int i = 0;
+  while(m[i])
+    puts(m[i++]);
 }
-
-$outsize=0;
-for(@out) {
-    chop;
-
-    $new = $_;
-
-    $outsize += length($new)+1; # one for the newline
-
-    $new =~ s/\\/\\\\/g;
-    $new =~ s/\"/\\\"/g;
-
-    # gcc 2.96 claims ISO C89 only is required to support 509 letter strings
-    if($outsize > 500) {
-        # terminate and make another fputs() call here
-        print ", stdout);\n fputs(\n";
-        $outsize=length($new)+1;
-    }
-    printf("\"%s\\n\"\n", $new);
-
-}
-
-print ", stdout) ;\n}\n";
+ENDLINE
+    ;
 
 foot();
 
 sub foot {
-  print <<FOOT
+    print <<FOOT
 #endif /* USE_MANUAL */
 FOOT
   ;
