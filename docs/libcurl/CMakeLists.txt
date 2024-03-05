@@ -35,7 +35,7 @@ function(add_manual_pages _listname)
       string(REPLACE ".3" ".md" _mdfile "${CMAKE_CURRENT_SOURCE_DIR}/${_file}")
     endif()
     add_custom_command(OUTPUT "${_rofffile}"
-      COMMAND ${PROJECT_SOURCE_DIR}/scripts/cd2nroff ${_mdfile} > ${_rofffile}
+      COMMAND "${PERL_EXECUTABLE}" ${PROJECT_SOURCE_DIR}/scripts/cd2nroff ${_mdfile} > ${_rofffile}
       DEPENDS "${_mdfile}"
       VERBATIM
     )
