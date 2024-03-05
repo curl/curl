@@ -432,7 +432,7 @@ CURLcode Curl_pp_disconnect(struct pingpong *pp)
 
 bool Curl_pp_moredata(struct pingpong *pp)
 {
-  return (!pp->sendleft && Curl_dyn_len(&pp->recvbuf));
+  return (!pp->sendleft && Curl_dyn_len(&pp->recvbuf) > pp->nfinal);
 }
 
 #endif
