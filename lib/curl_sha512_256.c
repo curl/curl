@@ -29,6 +29,81 @@
 #include "curl_sha512_256.h"
 #include "warnless.h"
 
+#if defined(USE_GNUTLS)
+#  include <nettle/sha.h>
+#  if defined(SHA512_256_DIGEST_SIZE)
+#    define USE_GNUTLS_SHA512_256           1
+#    define HAS_SHA512_256_IMPLEMENTATION   1
+#  endif
+#endif
+
+#if defined(USE_GNUTLS_SHA512_256)
+
+/**
+ * Context type used for SHA-512/256 calculations
+ */
+typedef struct sha512_256_ctx impl_sha512_256_ctx;
+
+/**
+ * Initialise structure for SHA-512/256 calculation.
+ *
+ * @param context the calculation context
+ * @return always CURLE_OK
+ */
+static CURLcode
+MHDx_sha512_256_init(void *context)
+{
+  impl_sha512_256_ctx *const ctx = (impl_sha512_256_ctx *) context;
+
+  /* Check whether the header and this file use the same numbers */
+  DEBUGASSERT(SHA512_256_DIGEST_LENGTH == SHA512_256_DIGEST_SIZE);
+
+  sha512_256_init(ctx);
+
+  return CURLE_OK;
+}
+
+
+/**
+ * Process portion of bytes.
+ *
+ * @param context the calculation context
+ * @param data bytes to add to hash
+ * @param length number of bytes in @a data
+ */
+static void
+MHDx_sha512_256_update(void *context,
+                       const unsigned char *data,
+                       unsigned int length)
+{
+  impl_sha512_256_ctx *const ctx = (impl_sha512_256_ctx *) context;
+
+  DEBUGASSERT((data != NULL) || (length == 0));
+
+  sha512_256_update(ctx, (size_t) length, (const uint8_t *)data);
+}
+
+
+/**
+ * Finalise SHA-512/256 calculation, return digest.
+ *
+ * @param context the calculation context
+ * @param[out] digest set to the hash, must be #SHA512_256_DIGEST_SIZE bytes
+ */
+static void
+MHDx_sha512_256_finish(unsigned char *digest,
+                       void *context)
+{
+  impl_sha512_256_ctx *const ctx = (impl_sha512_256_ctx *) context;
+
+  sha512_256_digest(ctx, (size_t)SHA512_256_DIGEST_SIZE, (uint8_t *)digest);
+}
+
+#else /* No system or TLS backend SHA-512/256 implementation available */
+
+/* Use local implementation */
+#define HAS_SHA512_256_IMPLEMENTATION   1
+
 /* ** This implementation of SHA-512/256 hash calculation was originally ** *
  * ** written by Evgeny Grin (Karlson2k) for GNU libmicrohttpd.          ** *
  * ** The author ported the code to libcurl. The ported code is provided ** *
@@ -185,6 +260,11 @@ struct Sha512_256Ctx
    */
   curl_uint64_t count_bits_hi;
 };
+
+/**
+ * Context type used for SHA-512/256 calculations
+ */
+typedef struct Sha512_256Ctx impl_sha512_256_ctx;
 
 
 /**
@@ -541,6 +621,8 @@ MHDx_sha512_256_finish(unsigned char *digest,
   memset(ctx, 0, sizeof(struct Sha512_256Ctx));
 }
 
+#endif /* Local SHA-512/256 code */
+
 
 /**
  * Compute SHA-512/256 hash for the given data in one function call
@@ -553,7 +635,7 @@ CURLcode
 Curl_sha512_256it(unsigned char *output, const unsigned char *input,
                   size_t input_size)
 {
-  struct Sha512_256Ctx ctx;
+  impl_sha512_256_ctx ctx;
   static const unsigned int max_step_size = (unsigned int)(-1);
 
   (void) MHDx_sha512_256_init(&ctx); /* Always succeed */
@@ -563,8 +645,9 @@ Curl_sha512_256it(unsigned char *output, const unsigned char *input,
     input += max_step_size;
     input_size -= max_step_size;
   }
-  MHDx_sha512_256_update(&ctx, (const void *) input,
-                          curlx_uztoui(input_size));
+  if(input_size)
+    MHDx_sha512_256_update(&ctx, (const void *) input,
+                            curlx_uztoui(input_size));
 
   MHDx_sha512_256_finish(output, &ctx);
 
@@ -581,13 +664,12 @@ const struct HMAC_params Curl_HMAC_SHA512_256[] = {
     /* Get final result procedure. */
     MHDx_sha512_256_finish,
     /* Context structure size. */
-    sizeof(struct Sha512_256Ctx),
+    sizeof(impl_sha512_256_ctx),
     /* Maximum key length (bytes). */
     SHA512_256_BLOCK_SIZE,
     /* Result length (bytes). */
     SHA512_256_DIGEST_SIZE
   }
 };
-
 
 #endif /* !CURL_DISABLE_DIGEST_AUTH && !CURL_DISABLE_SHA512_256 */
