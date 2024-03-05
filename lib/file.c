@@ -548,8 +548,6 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
       return CURLE_BAD_DOWNLOAD_RESUME;
   }
 
-  Curl_pgrsTime(data, TIMER_STARTTRANSFER);
-
   result = Curl_multi_xfer_buf_borrow(data, &xfer_buf, &xfer_blen);
   if(result)
     goto out;

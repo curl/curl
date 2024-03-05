@@ -155,9 +155,6 @@ static int hyper_each_header(void *userdata,
     return HYPER_ITER_BREAK;
   }
 
-  if(!data->req.bytecount)
-    Curl_pgrsTime(data, TIMER_STARTTRANSFER);
-
   Curl_dyn_reset(&data->state.headerb);
   if(name_len) {
     if(Curl_dyn_addf(&data->state.headerb, "%.*s: %.*s\r\n",
