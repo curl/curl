@@ -61,7 +61,7 @@ problems may have been fixed or changed somewhat since this was written.
  6.13 Negotiate against Hadoop HDFS
 
  7. FTP
- 7.1 FTP upload fails if remebered dir is deleted
+ 7.1 FTP upload fails if remembered dir is deleted
  7.2 Implicit FTPS upload timeout
  7.3 FTP with NOBODY and FAILONERROR
  7.4 FTP with ACCT
@@ -382,7 +382,7 @@ problems may have been fixed or changed somewhat since this was written.
 
 7. FTP
 
-7.1 FTP upload fails if remebered dir is deleted
+7.1 FTP upload fails if remembered dir is deleted
 
  curl's FTP code assumes that the directory it entered in a previous transfer
  still exists when it comes back to do a second transfer, and does not respond
