@@ -363,7 +363,7 @@ struct ws_cw_ctx {
 static CURLcode ws_cw_init(struct Curl_easy *data,
                            struct Curl_cwriter *writer)
 {
-  struct ws_cw_ctx *ctx = (struct ws_cw_ctx *)writer;
+  struct ws_cw_ctx *ctx = writer->ctx;
   (void)data;
   Curl_bufq_init2(&ctx->buf, WS_CHUNK_SIZE, 1, BUFQ_OPT_SOFT_LIMIT);
   return CURLE_OK;
@@ -371,7 +371,7 @@ static CURLcode ws_cw_init(struct Curl_easy *data,
 
 static void ws_cw_close(struct Curl_easy *data, struct Curl_cwriter *writer)
 {
-  struct ws_cw_ctx *ctx = (struct ws_cw_ctx *)writer;
+  struct ws_cw_ctx *ctx = writer->ctx;
   (void) data;
   Curl_bufq_free(&ctx->buf);
 }
@@ -423,7 +423,7 @@ static CURLcode ws_cw_write(struct Curl_easy *data,
                             struct Curl_cwriter *writer, int type,
                             const char *buf, size_t nbytes)
 {
-  struct ws_cw_ctx *ctx = (struct ws_cw_ctx *)writer;
+  struct ws_cw_ctx *ctx = writer->ctx;
   struct websocket *ws;
   CURLcode result;
 

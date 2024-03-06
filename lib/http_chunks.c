@@ -394,7 +394,7 @@ struct chunked_writer {
 static CURLcode cw_chunked_init(struct Curl_easy *data,
                                 struct Curl_cwriter *writer)
 {
-  struct chunked_writer *ctx = (struct chunked_writer *)writer;
+  struct chunked_writer *ctx = writer->ctx;
 
   data->req.chunk = TRUE;      /* chunks coming our way. */
   Curl_httpchunk_init(data, &ctx->ch, FALSE);
@@ -404,7 +404,7 @@ static CURLcode cw_chunked_init(struct Curl_easy *data,
 static void cw_chunked_close(struct Curl_easy *data,
                              struct Curl_cwriter *writer)
 {
-  struct chunked_writer *ctx = (struct chunked_writer *)writer;
+  struct chunked_writer *ctx = writer->ctx;
   Curl_httpchunk_free(data, &ctx->ch);
 }
 
@@ -412,7 +412,7 @@ static CURLcode cw_chunked_write(struct Curl_easy *data,
                                  struct Curl_cwriter *writer, int type,
                                  const char *buf, size_t blen)
 {
-  struct chunked_writer *ctx = (struct chunked_writer *)writer;
+  struct chunked_writer *ctx = writer->ctx;
   CURLcode result;
   size_t consumed;
 
@@ -474,7 +474,7 @@ struct chunked_reader {
 static CURLcode cr_chunked_init(struct Curl_easy *data,
                                 struct Curl_creader *reader)
 {
-  struct chunked_reader *ctx = (struct chunked_reader *)reader;
+  struct chunked_reader *ctx = reader->ctx;
   (void)data;
   Curl_bufq_init2(&ctx->chunkbuf, CURL_CHUNKED_MAXLEN, 2, BUFQ_OPT_SOFT_LIMIT);
   return CURLE_OK;
@@ -483,7 +483,7 @@ static CURLcode cr_chunked_init(struct Curl_easy *data,
 static void cr_chunked_close(struct Curl_easy *data,
                              struct Curl_creader *reader)
 {
-  struct chunked_reader *ctx = (struct chunked_reader *)reader;
+  struct chunked_reader *ctx = reader->ctx;
   (void)data;
   Curl_bufq_free(&ctx->chunkbuf);
 }
@@ -491,7 +491,7 @@ static void cr_chunked_close(struct Curl_easy *data,
 static CURLcode add_last_chunk(struct Curl_easy *data,
                                struct Curl_creader *reader)
 {
-  struct chunked_reader *ctx = (struct chunked_reader *)reader;
+  struct chunked_reader *ctx = reader->ctx;
   struct curl_slist *trailers = NULL, *tr;
   CURLcode result;
   size_t n;
@@ -542,7 +542,7 @@ static CURLcode add_chunk(struct Curl_easy *data,
                           struct Curl_creader *reader,
                           char *buf, size_t blen)
 {
-  struct chunked_reader *ctx = (struct chunked_reader *)reader;
+  struct chunked_reader *ctx = reader->ctx;
   CURLcode result;
   char tmp[CURL_CHUNKED_MINLEN];
   size_t nread;
@@ -595,7 +595,7 @@ static CURLcode cr_chunked_read(struct Curl_easy *data,
                                 char *buf, size_t blen,
                                 size_t *pnread, bool *peos)
 {
-  struct chunked_reader *ctx = (struct chunked_reader *)reader;
+  struct chunked_reader *ctx = reader->ctx;
   CURLcode result = CURLE_READ_ERROR;
 
   *pnread = 0;
