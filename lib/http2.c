@@ -276,8 +276,7 @@ static void free_push_headers(struct h2_stream_ctx *stream)
   size_t i;
   for(i = 0; i<stream->push_headers_used; i++)
     free(stream->push_headers[i]);
-  free(stream->push_headers);
-  stream->push_headers = NULL;
+  Curl_safefree(stream->push_headers);
   stream->push_headers_used = 0;
 }
 
