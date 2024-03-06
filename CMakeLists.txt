@@ -307,8 +307,7 @@ endif()
 find_package(Perl)
 
 option(BUILD_LIBCURL_DOCS "to build libcurl man pages" ON)
-# curl source release tarballs come with the curl man page pre-built.
-option(ENABLE_CURL_MANUAL "to build the man page for curl and enable its -M/--manual option" OFF)
+option(ENABLE_CURL_MANUAL "to build the man page for curl and enable its -M/--manual option" ON)
 
 if(ENABLE_CURL_MANUAL OR BUILD_LIBCURL_DOCS)
   if(PERL_FOUND)
