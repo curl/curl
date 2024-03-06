@@ -839,9 +839,8 @@ fail:
 static void discard_newhandle(struct Curl_cfilter *cf,
                               struct Curl_easy *newhandle)
 {
-  if(!newhandle->req.p.http) {
+  if(newhandle->req.p.http) {
     http2_data_done(cf, newhandle, TRUE);
-    newhandle->req.p.http = NULL;
   }
   (void)Curl_close(&newhandle);
 }
