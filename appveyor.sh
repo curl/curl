@@ -60,7 +60,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     '-DCMAKE_INSTALL_PREFIX=C:/CURL' \
     "-DCMAKE_BUILD_TYPE=${PRJ_CFG}"
   # shellcheck disable=SC2086
-  cmake --build _bld --config "${PRJ_CFG}" -- ${BUILD_OPT:-}
+  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --clean-first -- ${BUILD_OPT:-}
   if [ "${SHARED}" = 'ON' ]; then
     cp -f -p _bld/lib/*.dll _bld/src/
   fi
