@@ -271,6 +271,15 @@ static CURLcode http2_data_setup(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
+static void free_push_headers(struct h2_stream_ctx *stream)
+{
+  size_t i;
+  for(i = 0; i<stream->push_headers_used; i++)
+    free(stream->push_headers[i]);
+  Curl_safefree(stream->push_headers);
+  stream->push_headers_used = 0;
+}
+
 static void http2_data_done(struct Curl_cfilter *cf,
                             struct Curl_easy *data, bool premature)
 {
@@ -306,15 +315,7 @@ static void http2_data_done(struct Curl_cfilter *cf,
   Curl_bufq_free(&stream->sendbuf);
   Curl_h1_req_parse_free(&stream->h1);
   Curl_dynhds_free(&stream->resp_trailers);
-  if(stream->push_headers) {
-    /* if they weren't used and then freed before */
-    for(; stream->push_headers_used > 0; --stream->push_headers_used) {
-      free(stream->push_headers[stream->push_headers_used - 1]);
-    }
-    free(stream->push_headers);
-    stream->push_headers = NULL;
-  }
-
+  free_push_headers(stream);
   free(stream);
   H2_STREAM_LCTX(data) = NULL;
 }
@@ -860,7 +861,6 @@ static int push_promise(struct Curl_cfilter *cf,
     struct curl_pushheaders heads;
     CURLMcode rc;
     CURLcode result;
-    size_t i;
     /* clone the parent */
     struct Curl_easy *newhandle = h2_duphandle(cf, data);
     if(!newhandle) {
@@ -905,11 +905,7 @@ static int push_promise(struct Curl_cfilter *cf,
     Curl_set_in_callback(data, false);
 
     /* free the headers again */
-    for(i = 0; i<stream->push_headers_used; i++)
-      free(stream->push_headers[i]);
-    free(stream->push_headers);
-    stream->push_headers = NULL;
-    stream->push_headers_used = 0;
+    free_push_headers(stream);
 
     if(rv) {
       DEBUGASSERT((rv > CURL_PUSH_OK) && (rv <= CURL_PUSH_ERROROUT));
@@ -1430,14 +1426,14 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
       if(stream->push_headers_alloc > 1000) {
         /* this is beyond crazy many headers, bail out */
         failf(data_s, "Too many PUSH_PROMISE headers");
-        Curl_safefree(stream->push_headers);
+        free_push_headers(stream);
         return NGHTTP2_ERR_TEMPORAL_CALLBACK_FAILURE;
       }
       stream->push_headers_alloc *= 2;
-      headp = Curl_saferealloc(stream->push_headers,
-                               stream->push_headers_alloc * sizeof(char *));
+      headp = realloc(stream->push_headers,
+                      stream->push_headers_alloc * sizeof(char *));
       if(!headp) {
-        stream->push_headers = NULL;
+        free_push_headers(stream);
         return NGHTTP2_ERR_TEMPORAL_CALLBACK_FAILURE;
       }
       stream->push_headers = headp;
