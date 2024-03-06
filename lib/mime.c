@@ -1928,7 +1928,7 @@ struct cr_mime_ctx {
 static CURLcode cr_mime_init(struct Curl_easy *data,
                              struct Curl_creader *reader)
 {
-  struct cr_mime_ctx *ctx = (struct cr_mime_ctx *)reader;
+  struct cr_mime_ctx *ctx = reader->ctx;
   (void)data;
   ctx->total_len = -1;
   ctx->read_len = 0;
@@ -1941,7 +1941,7 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
                              char *buf, size_t blen,
                              size_t *pnread, bool *peos)
 {
-  struct cr_mime_ctx *ctx = (struct cr_mime_ctx *)reader;
+  struct cr_mime_ctx *ctx = reader->ctx;
   size_t nread;
 
   /* Once we have errored, we will return the same error forever */
@@ -2022,7 +2022,7 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
 static bool cr_mime_needs_rewind(struct Curl_easy *data,
                                  struct Curl_creader *reader)
 {
-  struct cr_mime_ctx *ctx = (struct cr_mime_ctx *)reader;
+  struct cr_mime_ctx *ctx = reader->ctx;
   (void)data;
   return ctx->read_len > 0;
 }
@@ -2030,7 +2030,7 @@ static bool cr_mime_needs_rewind(struct Curl_easy *data,
 static curl_off_t cr_mime_total_length(struct Curl_easy *data,
                                        struct Curl_creader *reader)
 {
-  struct cr_mime_ctx *ctx = (struct cr_mime_ctx *)reader;
+  struct cr_mime_ctx *ctx = reader->ctx;
   (void)data;
   return ctx->total_len;
 }
@@ -2039,7 +2039,7 @@ static CURLcode cr_mime_resume_from(struct Curl_easy *data,
                                     struct Curl_creader *reader,
                                     curl_off_t offset)
 {
-  struct cr_mime_ctx *ctx = (struct cr_mime_ctx *)reader;
+  struct cr_mime_ctx *ctx = reader->ctx;
 
   if(offset > 0) {
     curl_off_t passed = 0;
@@ -2080,7 +2080,7 @@ static CURLcode cr_mime_resume_from(struct Curl_easy *data,
 static CURLcode cr_mime_rewind(struct Curl_easy *data,
                                struct Curl_creader *reader)
 {
-  struct cr_mime_ctx *ctx = (struct cr_mime_ctx *)reader;
+  struct cr_mime_ctx *ctx = reader->ctx;
   CURLcode result = mime_rewind(ctx->part);
   if(result)
     failf(data, "Cannot rewind mime/post data");
@@ -2090,7 +2090,7 @@ static CURLcode cr_mime_rewind(struct Curl_easy *data,
 static CURLcode cr_mime_unpause(struct Curl_easy *data,
                                 struct Curl_creader *reader)
 {
-  struct cr_mime_ctx *ctx = (struct cr_mime_ctx *)reader;
+  struct cr_mime_ctx *ctx = reader->ctx;
   (void)data;
   mime_unpause(ctx->part);
   return CURLE_OK;
@@ -2118,7 +2118,7 @@ CURLcode Curl_creader_set_mime(struct Curl_easy *data, curl_mimepart *part)
   result = Curl_creader_create(&r, data, &cr_mime, CURL_CR_CLIENT);
   if(result)
     return result;
-  ctx = (struct cr_mime_ctx *)r;
+  ctx = r->ctx;
   ctx->part = part;
   /* Make sure we will read the entire mime structure. */
   result = mime_rewind(ctx->part);

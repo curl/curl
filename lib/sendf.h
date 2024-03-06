@@ -117,10 +117,16 @@ struct Curl_cwtype {
   size_t cwriter_size;  /* sizeof() allocated struct Curl_cwriter */
 };
 
-/* Client writer instance */
+/* Client writer instance, allocated on creation.
+ * `void *ctx` is the pointer from the allocation of
+ * the `struct Curl_cwriter` itself. This is suitable for "downcasting"
+ * by the writers implementation. See https://github.com/curl/curl/pull/13054
+ * for the alignment problems that arise otherwise.
+ */
 struct Curl_cwriter {
   const struct Curl_cwtype *cwt;  /* type implementation */
   struct Curl_cwriter *next;  /* Downstream writer. */
+  void *ctx;                  /* allocated instance pointer */
   Curl_cwriter_phase phase; /* phase at which it operates */
 };
 
@@ -214,10 +220,16 @@ typedef enum {
   CURL_CR_CLIENT  /* data read from client */
 } Curl_creader_phase;
 
-/* Client reader instance */
+/* Client reader instance, allocated on creation.
+ * `void *ctx` is the pointer from the allocation of
+ * the `struct Curl_cwriter` itself. This is suitable for "downcasting"
+ * by the writers implementation. See https://github.com/curl/curl/pull/13054
+ * for the alignment problems that arise otherwise.
+ */
 struct Curl_creader {
   const struct Curl_crtype *crt;  /* type implementation */
   struct Curl_creader *next;  /* Downstream reader. */
+  void *ctx;
   Curl_creader_phase phase; /* phase at which it operates */
 };
 

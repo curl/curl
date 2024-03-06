@@ -273,7 +273,7 @@ static CURLcode ftp_cw_lc_write(struct Curl_easy *data,
                                 const char *buf, size_t blen)
 {
   static const char nl = '\n';
-  struct ftp_cw_lc_ctx *ctx = (struct ftp_cw_lc_ctx *)writer;
+  struct ftp_cw_lc_ctx *ctx = writer->ctx;
 
   if(!(type & CLIENTWRITE_BODY) ||
      data->conn->proto.ftpc.transfertype != 'A')

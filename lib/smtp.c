@@ -1786,7 +1786,7 @@ struct cr_eob_ctx {
 static CURLcode cr_eob_init(struct Curl_easy *data,
                             struct Curl_creader *reader)
 {
-  struct cr_eob_ctx *ctx = (struct cr_eob_ctx *)reader;
+  struct cr_eob_ctx *ctx = reader->ctx;
   (void)data;
   /* The first char we read is the first on a line, as if we had
    * read CRLF just before */
@@ -1797,7 +1797,7 @@ static CURLcode cr_eob_init(struct Curl_easy *data,
 
 static void cr_eob_close(struct Curl_easy *data, struct Curl_creader *reader)
 {
-  struct cr_eob_ctx *ctx = (struct cr_eob_ctx *)reader;
+  struct cr_eob_ctx *ctx = reader->ctx;
   (void)data;
   Curl_bufq_free(&ctx->buf);
 }
@@ -1812,7 +1812,7 @@ static CURLcode cr_eob_read(struct Curl_easy *data,
                             char *buf, size_t blen,
                             size_t *pnread, bool *peos)
 {
-  struct cr_eob_ctx *ctx = (struct cr_eob_ctx *)reader;
+  struct cr_eob_ctx *ctx = reader->ctx;
   CURLcode result = CURLE_OK;
   size_t nread, i, start, n;
   bool eos;

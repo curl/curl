@@ -123,7 +123,7 @@ struct Curl_cwtype Curl_cwt_out = {
 static CURLcode cw_out_init(struct Curl_easy *data,
                             struct Curl_cwriter *writer)
 {
-  struct cw_out_ctx *ctx = (struct cw_out_ctx *)writer;
+  struct cw_out_ctx *ctx = writer->ctx;
   (void)data;
   ctx->buf = NULL;
   return CURLE_OK;
@@ -151,7 +151,7 @@ static size_t cw_out_bufs_len(struct cw_out_ctx *ctx)
 
 static void cw_out_close(struct Curl_easy *data, struct Curl_cwriter *writer)
 {
-  struct cw_out_ctx *ctx = (struct cw_out_ctx *)writer;
+  struct cw_out_ctx *ctx = writer->ctx;
 
   (void)data;
   cw_out_bufs_free(ctx);
@@ -378,7 +378,7 @@ static CURLcode cw_out_write(struct Curl_easy *data,
                              struct Curl_cwriter *writer, int type,
                              const char *buf, size_t blen)
 {
-  struct cw_out_ctx *ctx = (struct cw_out_ctx *)writer;
+  struct cw_out_ctx *ctx = writer->ctx;
   CURLcode result;
   bool flush_all;
 
