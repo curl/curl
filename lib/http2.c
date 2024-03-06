@@ -1431,10 +1431,10 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
         return NGHTTP2_ERR_TEMPORAL_CALLBACK_FAILURE;
       }
       stream->push_headers_alloc *= 2;
-      headp = Curl_saferealloc(stream->push_headers,
-                               stream->push_headers_alloc * sizeof(char *));
+      headp = realloc(stream->push_headers,
+                      stream->push_headers_alloc * sizeof(char *));
       if(!headp) {
-        stream->push_headers = NULL;
+        free_push_headers(stream);
         return NGHTTP2_ERR_TEMPORAL_CALLBACK_FAILURE;
       }
       stream->push_headers = headp;
