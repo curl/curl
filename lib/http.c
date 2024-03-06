@@ -1997,7 +1997,6 @@ CURLcode Curl_http_target(struct Curl_easy *data,
 #if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
 static CURLcode set_post_reader(struct Curl_easy *data, Curl_HttpReq httpreq)
 {
-  curl_off_t postsize = 0;
   CURLcode result;
 
   switch(httpreq) {
@@ -2066,12 +2065,9 @@ static CURLcode set_post_reader(struct Curl_easy *data, Curl_HttpReq httpreq)
     }
     data->state.infilesize = Curl_creader_total_length(data);
     return result;
+
   default:
-    if(!postsize)
-      result = Curl_creader_set_null(data);
-    else
-      result = Curl_creader_set_fread(data, postsize);
-    return result;
+    return Curl_creader_set_null(data);
   }
   /* never reached */
 }
