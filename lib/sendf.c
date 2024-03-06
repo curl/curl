@@ -368,15 +368,18 @@ CURLcode Curl_cwriter_create(struct Curl_cwriter **pwriter,
                                    const struct Curl_cwtype *cwt,
                                    Curl_cwriter_phase phase)
 {
-  struct Curl_cwriter *writer;
+  struct Curl_cwriter *writer = NULL;
   CURLcode result = CURLE_OUT_OF_MEMORY;
+  void *p;
 
   DEBUGASSERT(cwt->cwriter_size >= sizeof(struct Curl_cwriter));
-  writer = (struct Curl_cwriter *) calloc(1, cwt->cwriter_size);
-  if(!writer)
+  p = calloc(1, cwt->cwriter_size);
+  if(!p)
     goto out;
 
+  writer = (struct Curl_cwriter *)p;
   writer->cwt = cwt;
+  writer->ctx = p;
   writer->phase = phase;
   result = cwt->do_init(data, writer);
 
@@ -830,15 +833,18 @@ CURLcode Curl_creader_create(struct Curl_creader **preader,
                              const struct Curl_crtype *crt,
                              Curl_creader_phase phase)
 {
-  struct Curl_creader *reader;
+  struct Curl_creader *reader = NULL;
   CURLcode result = CURLE_OUT_OF_MEMORY;
+  void *p;
 
   DEBUGASSERT(crt->creader_size >= sizeof(struct Curl_creader));
-  reader = (struct Curl_creader *) calloc(1, crt->creader_size);
-  if(!reader)
+  p = calloc(1, crt->creader_size);
+  if(!p)
     goto out;
 
+  reader = (struct Curl_creader *)p;
   reader->crt = crt;
+  reader->ctx = p;
   reader->phase = phase;
   result = crt->do_init(data, reader);
 
