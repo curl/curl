@@ -728,8 +728,10 @@ static CURLcode auth_create_digest_http_message(
     if(!hashthis)
       return CURLE_OUT_OF_MEMORY;
 
-    hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
+    result = hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
     free(hashthis);
+    if(result)
+      return result;
     convert_to_ascii(hashbuf, (unsigned char *)userh);
   }
 
@@ -749,8 +751,10 @@ static CURLcode auth_create_digest_http_message(
   if(!hashthis)
     return CURLE_OUT_OF_MEMORY;
 
-  hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
+  result = hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
   free(hashthis);
+  if(result)
+    return result;
   convert_to_ascii(hashbuf, ha1);
 
   if(digest->algo & SESSION_ALGO) {
@@ -759,8 +763,10 @@ static CURLcode auth_create_digest_http_message(
     if(!tmp)
       return CURLE_OUT_OF_MEMORY;
 
-    hash(hashbuf, (unsigned char *) tmp, strlen(tmp));
+    result = hash(hashbuf, (unsigned char *) tmp, strlen(tmp));
     free(tmp);
+    if(result)
+      return result;
     convert_to_ascii(hashbuf, ha1);
   }
 
@@ -786,7 +792,11 @@ static CURLcode auth_create_digest_http_message(
     char hashed[65];
     char *hashthis2;
 
-    hash(hashbuf, (const unsigned char *)"", 0);
+    result = hash(hashbuf, (const unsigned char *)"", 0);
+    if(result) {
+      free(hashthis);
+      return result;
+    }
     convert_to_ascii(hashbuf, (unsigned char *)hashed);
 
     hashthis2 = aprintf("%s:%s", hashthis, hashed);
@@ -797,8 +807,10 @@ static CURLcode auth_create_digest_http_message(
   if(!hashthis)
     return CURLE_OUT_OF_MEMORY;
 
-  hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
+  result = hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
   free(hashthis);
+  if(result)
+    return result;
   convert_to_ascii(hashbuf, ha2);
 
   if(digest->qop) {
@@ -812,8 +824,10 @@ static CURLcode auth_create_digest_http_message(
   if(!hashthis)
     return CURLE_OUT_OF_MEMORY;
 
-  hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
+  result = hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
   free(hashthis);
+  if(result)
+    return result;
   convert_to_ascii(hashbuf, request_digest);
 
   /* For test case 64 (snooped from a Mozilla 1.3a request)
