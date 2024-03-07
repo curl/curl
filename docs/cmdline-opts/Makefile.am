@@ -53,6 +53,3 @@ $(ASCIIPAGE): $(DPAGES) $(SUPPORT) mainpage.idx Makefile.inc gen.pl
 
 listhelp:
 	./gen.pl listhelp $(DPAGES) > $(top_builddir)/src/tool_listhelp.c
-
-dist-hook: $(MANPAGE)
-	cp $(MANPAGE) $(MANPAGE).dist
