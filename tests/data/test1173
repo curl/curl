@@ -19,7 +19,7 @@ Man page syntax checks
 </name>
 
 <command type="perl">
-%SRCDIR/test1173.pl %SRCDIR/../docs/libcurl/symbols-in-versions %PWD/../docs/*.1  %PWD/../docs/libcurl/*.3 %PWD/../docs/libcurl/opts/*.3
+%SRCDIR/test1173.pl %SRCDIR/../docs/libcurl/symbols-in-versions %PWD/../docs/*.1  %PWD/../docs/cmdline-opts/*.1 %PWD/../docs/libcurl/*.3 %PWD/../docs/libcurl/opts/*.3
 </command>
 </client>
 
