@@ -38,7 +38,7 @@ rem
   cd /d "%~0\.." 1>NUL 2>&1
 
   rem Check we are running from a curl git repository
-  if not exist GIT-INFO goto norepo
+  if not exist GIT-INFO.md goto norepo
 
   rem Detect programs. HAVE_<PROGNAME>
   rem When not found the variable is set undefined. The undefined pattern

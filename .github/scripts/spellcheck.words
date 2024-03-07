@@ -41,6 +41,7 @@ autobuilds
 Autoconf
 autoconf
 Automake
+automake
 Autotools
 autotools
 AVR
@@ -426,6 +427,7 @@ libssh
 libSSH
 libssh2
 Libtool
+libtool
 libuv
 libWebSocket
 libz
