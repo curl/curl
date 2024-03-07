@@ -1417,7 +1417,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
       stream->push_headers = malloc(stream->push_headers_alloc *
                                     sizeof(char *));
       if(!stream->push_headers)
-        return NGHTTP2_ERR_TEMPORAL_CALLBACK_FAILURE;
+        return NGHTTP2_ERR_CALLBACK_FAILURE;
       stream->push_headers_used = 0;
     }
     else if(stream->push_headers_used ==
@@ -1427,14 +1427,14 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
         /* this is beyond crazy many headers, bail out */
         failf(data_s, "Too many PUSH_PROMISE headers");
         free_push_headers(stream);
-        return NGHTTP2_ERR_TEMPORAL_CALLBACK_FAILURE;
+        return NGHTTP2_ERR_CALLBACK_FAILURE;
       }
       stream->push_headers_alloc *= 2;
       headp = realloc(stream->push_headers,
                       stream->push_headers_alloc * sizeof(char *));
       if(!headp) {
         free_push_headers(stream);
-        return NGHTTP2_ERR_TEMPORAL_CALLBACK_FAILURE;
+        return NGHTTP2_ERR_CALLBACK_FAILURE;
       }
       stream->push_headers = headp;
     }
