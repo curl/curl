@@ -67,6 +67,9 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+
+static CURLcode cr_hyper_add(struct Curl_easy *data);
+
 typedef enum {
     USERDATA_NOT_SET = 0, /* for tasks with no userdata set; must be zero */
     USERDATA_RESP_BODY
@@ -718,14 +721,12 @@ out:
 }
 
 /*
- * bodysend() sets up headers in the outgoing request for an HTTP transfer that
- * sends a body
+ * finalize_request() sets up last headers and optional body settings
  */
-
-static CURLcode bodysend(struct Curl_easy *data,
-                         hyper_headers *headers,
-                         hyper_request *hyperreq,
-                         Curl_HttpReq httpreq)
+static CURLcode finalize_request(struct Curl_easy *data,
+                                 hyper_headers *headers,
+                                 hyper_request *hyperreq,
+                                 Curl_HttpReq httpreq)
 {
   CURLcode result = CURLE_OK;
   struct dynbuf req;
@@ -757,7 +758,8 @@ static CURLcode bodysend(struct Curl_easy *data,
       result = CURLE_OUT_OF_MEMORY;
     }
   }
-  return result;
+
+  return cr_hyper_add(data);
 }
 
 static CURLcode cookies(struct Curl_easy *data,
@@ -1127,7 +1129,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   if(result)
     goto error;
 
-  result = bodysend(data, headers, req, httpreq);
+  result = finalize_request(data, headers, req, httpreq);
   if(result)
     goto error;
 
@@ -1212,6 +1214,50 @@ void Curl_hyper_done(struct Curl_easy *data)
     hyper_waker_free(h->exp100_waker);
     h->exp100_waker = NULL;
   }
+  if(h->send_body_waker) {
+    hyper_waker_free(h->send_body_waker);
+    h->send_body_waker = NULL;
+  }
+}
+
+static CURLcode cr_hyper_unpause(struct Curl_easy *data,
+                                 struct Curl_creader *reader)
+{
+  (void)reader;
+  if(data->hyp.send_body_waker) {
+    hyper_waker_wake(data->hyp.send_body_waker);
+    data->hyp.send_body_waker = NULL;
+  }
+  return CURLE_OK;
+}
+
+/* Hyper client reader, handling unpausing */
+static const struct Curl_crtype cr_hyper_protocol = {
+  "cr-hyper",
+  Curl_creader_def_init,
+  Curl_creader_def_read,
+  Curl_creader_def_close,
+  Curl_creader_def_needs_rewind,
+  Curl_creader_def_total_length,
+  Curl_creader_def_resume_from,
+  Curl_creader_def_rewind,
+  cr_hyper_unpause,
+  sizeof(struct Curl_creader)
+};
+
+static CURLcode cr_hyper_add(struct Curl_easy *data)
+{
+  struct Curl_creader *reader = NULL;
+  CURLcode result;
+
+  result = Curl_creader_create(&reader, data, &cr_hyper_protocol,
+                               CURL_CR_PROTOCOL);
+  if(!result)
+    result = Curl_creader_add(data, reader);
+
+  if(result && reader)
+    Curl_creader_free(data, reader);
+  return result;
 }
 
 #endif /* !defined(CURL_DISABLE_HTTP) && defined(USE_HYPER) */
