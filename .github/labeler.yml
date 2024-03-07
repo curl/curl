@@ -93,7 +93,7 @@ documentation:
   - all:
       - changed-files:
           - any-glob-to-all-files:
-              - '{.github/workflows/badwords.yml,.github/workflows/man-examples.yml,.github/workflows/synopsis.yml,.github/scripts/badwords.*,.github/scripts/cd2cd,.github/scripts/cd2nroff,.github/scripts/cdall.pl,.github/scripts/nroff2cd,.github/scripts/verify-examples.pl,.github/scripts/verify-synopsis.pl,**/*.md,**/*.txt,**/*.1,CHANGES,docs/**,GIT-INFO,LICENSES/**,README,RELEASE-NOTES,scripts/cd*}'
+              - '{.github/workflows/badwords.yml,.github/workflows/man-examples.yml,.github/workflows/synopsis.yml,.github/scripts/badwords.*,.github/scripts/cd2cd,.github/scripts/cd2nroff,.github/scripts/cdall.pl,.github/scripts/nroff2cd,.github/scripts/verify-examples.pl,.github/scripts/verify-synopsis.pl,**/*.md,**/*.txt,**/*.1,CHANGES,docs/**,LICENSES/**,README,RELEASE-NOTES,scripts/cd*}'
           - all-globs-to-all-files:
               # negative matches
               - '!**/CMakeLists.txt'
