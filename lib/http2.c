@@ -121,7 +121,6 @@ static ssize_t populate_binsettings(uint8_t *binsettings,
 
 struct cf_h2_ctx {
   nghttp2_session *h2;
-  uint32_t max_concurrent_streams;
   /* The easy handle used in the current filter call, cleared at return */
   struct cf_call_data call_data;
 
@@ -130,6 +129,7 @@ struct cf_h2_ctx {
   struct bufc_pool stream_bufcp; /* spares for stream buffers */
 
   size_t drain_total; /* sum of all stream's UrlState drain */
+  uint32_t max_concurrent_streams;
   int32_t goaway_error;
   int32_t last_stream_id;
   BIT(conn_closed);
@@ -172,7 +172,6 @@ static CURLcode h2_progress_egress(struct Curl_cfilter *cf,
  * All about the H2 internals of a stream
  */
 struct h2_stream_ctx {
-  int32_t id; /* HTTP/2 protocol identifier for stream */
   struct bufq recvbuf; /* response buffer */
   struct bufq sendbuf; /* request buffer */
   struct h1_req_parser h1; /* parsing the request */
@@ -189,13 +188,14 @@ struct h2_stream_ctx {
   int status_code; /* HTTP response status code */
   uint32_t error; /* stream error code */
   uint32_t local_window_size; /* the local recv window size */
-  bool resp_hds_complete; /* we have a complete, final response */
-  bool closed; /* TRUE on stream close */
-  bool reset;  /* TRUE on stream reset */
-  bool close_handled; /* TRUE if stream closure is handled by libcurl */
-  bool bodystarted;
-  bool send_closed; /* transfer is done sending, we might have still
-                        buffered data in stream->sendbuf to upload. */
+  int32_t id; /* HTTP/2 protocol identifier for stream */
+  BIT(resp_hds_complete); /* we have a complete, final response */
+  BIT(closed); /* TRUE on stream close */
+  BIT(reset);  /* TRUE on stream reset */
+  BIT(close_handled); /* TRUE if stream closure is handled by libcurl */
+  BIT(bodystarted);
+  BIT(send_closed); /* transfer is done sending, we might have still
+                       buffered data in stream->sendbuf to upload. */
 };
 
 #define H2_STREAM_CTX(d)    ((struct h2_stream_ctx *)(((d) && \
