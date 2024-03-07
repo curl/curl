@@ -874,8 +874,6 @@ struct connectdata {
 #endif                        /* however, some of them are ftp specific. */
 
   struct Curl_llist easyq;    /* List of easy handles using this connection */
-  curl_seek_callback seek_func; /* function that seeks the input */
-  void *seek_client;            /* pointer to pass to the seek() above */
 
   /*************** Request - specific items ************/
 #if defined(USE_WINDOWS_SSPI) && defined(SECPKG_ATTR_ENDPOINT_BINDINGS)

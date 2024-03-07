@@ -1683,10 +1683,10 @@ static CURLcode ftp_state_ul_setup(struct Curl_easy *data,
     append = TRUE;
 
     /* Let's read off the proper amount of bytes from the input. */
-    if(conn->seek_func) {
+    if(data->set.seek_func) {
       Curl_set_in_callback(data, true);
-      seekerr = conn->seek_func(conn->seek_client, data->state.resume_from,
-                                SEEK_SET);
+      seekerr = data->set.seek_func(data->set.seek_client,
+                                    data->state.resume_from, SEEK_SET);
       Curl_set_in_callback(data, false);
     }
 
