@@ -30,6 +30,7 @@ problems may have been fixed or changed somewhat since this was written.
  3.3 POP3 expects "CRLF.CRLF" eob for some single-line responses
  3.4 AUTH PLAIN for SMTP is not working on all servers
  3.5 APOP authentication fails on POP3
+ 3.6 POP3 issue when reading small chunks
 
  4. Command line
 
@@ -203,6 +204,12 @@ problems may have been fixed or changed somewhat since this was written.
 3.5 APOP authentication fails on POP3
 
  See https://github.com/curl/curl/issues/10073
+
+3.6 POP3 issue when reading small chunks
+
+ CURL_DBG_SOCK_RMAX=4 ./runtests.pl -v 982
+
+ See https://github.com/curl/curl/issues/12063
 
 4. Command line
 
