@@ -1163,11 +1163,6 @@ static CURLcode ws_setup_conn(struct Curl_easy *data,
 }
 
 
-void Curl_ws_done(struct Curl_easy *data)
-{
-  (void)data;
-}
-
 static CURLcode ws_disconnect(struct Curl_easy *data,
                               struct connectdata *conn,
                               bool dead_connection)

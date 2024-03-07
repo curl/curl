@@ -724,9 +724,9 @@ static CURLcode cr_in_resume_from(struct Curl_easy *data,
   if(ctx->read_len)
     return CURLE_READ_ERROR;
 
-  if(data->conn->seek_func) {
+  if(data->set.seek_func) {
     Curl_set_in_callback(data, true);
-    seekerr = data->conn->seek_func(data->conn->seek_client, offset, SEEK_SET);
+    seekerr = data->set.seek_func(data->set.seek_client, offset, SEEK_SET);
     Curl_set_in_callback(data, false);
   }
 

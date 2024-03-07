@@ -1249,16 +1249,11 @@ CURLcode Curl_http_done(struct Curl_easy *data,
   data->state.authhost.multipass = FALSE;
   data->state.authproxy.multipass = FALSE;
 
-  /* set the proper values (possibly modified on POST) */
-  conn->seek_func = data->set.seek_func; /* restore */
-  conn->seek_client = data->set.seek_client; /* restore */
-
   if(!http)
     return CURLE_OK;
 
   Curl_dyn_reset(&data->state.headerb);
   Curl_hyper_done(data);
-  Curl_ws_done(data);
 
   if(status)
     return status;
