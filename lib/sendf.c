@@ -523,6 +523,21 @@ void Curl_creader_def_close(struct Curl_easy *data,
   (void)reader;
 }
 
+CURLcode Curl_creader_def_read(struct Curl_easy *data,
+                               struct Curl_creader *reader,
+                               char *buf, size_t blen,
+                               size_t *nread, bool *eos)
+{
+  if(reader->next)
+    return reader->next->crt->do_read(data, reader->next, buf, blen,
+                                      nread, eos);
+  else {
+    *nread = 0;
+    *eos = FALSE;
+    return CURLE_READ_ERROR;
+  }
+}
+
 bool Curl_creader_def_needs_rewind(struct Curl_easy *data,
                                    struct Curl_creader *reader)
 {
