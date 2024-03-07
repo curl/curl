@@ -157,7 +157,7 @@ exit;
 }
 else {
     print <<HEAD
-static const char * const m[] = {
+static const char * const curlman[] = {
 HEAD
         ;
 }
@@ -184,8 +184,8 @@ print <<ENDLINE
 void hugehelp(void)
 {
   int i = 0;
-  while(m[i])
-    puts(m[i++]);
+  while(curlman[i])
+    puts(curlman[i++]);
 }
 ENDLINE
     ;
