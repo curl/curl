@@ -12,7 +12,7 @@ jobs:
     permissions: write-all
     runs-on: self-hosted
     container:
-      image: ghcr.io/codesecure-se/curl-cso-builder:8.1b0
+      image: ghcr.io/codesecure-se/curl-cso-builder:8.1b1
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.github_token }}
