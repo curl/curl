@@ -103,11 +103,16 @@ getting spellchecked by CI jobs): `%DATE`, `%VERSION` and `%GLOBALS`.
 
 ## Generate
 
-`./gen.pl mainpage`
+`managen mainpage [list of markdown option file names]`
 
 This command outputs a single huge nroff file, meant to become `curl.1`. The
 full curl man page.
 
-`./gen.pl listhelp`
+`managen ascii [list of markdown option file names]`
+
+This command outputs a single text file, meant to become `curl.txt`. The full
+curl man page in text format, used to build `tool_hugehelp.c`.
+
+`managen listhelp`
 
 Generates a full `curl --help` output for all known command line options.

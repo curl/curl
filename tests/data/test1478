@@ -19,7 +19,7 @@ src/tool_listhelp.c is in sync with docs/cmdline-opts
 </name>
 
 <command type="perl">
-%SRCDIR/../docs/cmdline-opts/gen.pl listhelp %SRCDIR/../docs/cmdline-opts/*.md
+%SRCDIR/../scripts/managen listhelp %SRCDIR/../docs/cmdline-opts/*.md
 </command>
 </client>
 
