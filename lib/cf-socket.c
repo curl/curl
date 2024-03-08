@@ -1435,39 +1435,29 @@ out:
   return nread;
 }
 
-static void conn_set_ip(struct Curl_cfilter *cf, struct Curl_easy *data)
-{
-  struct cf_socket_ctx *ctx = cf->ctx;
-
-  (void)data;
-  if(cf->sockindex == SECONDARYSOCKET)
-    cf->conn->secondary = ctx->ip;
-  else
-    cf->conn->primary = ctx->ip;
-}
-
 static void cf_socket_active(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
 
   /* use this socket from now on */
   cf->conn->sock[cf->sockindex] = ctx->sock;
-  /* the first socket info gets set at conn and data */
+  set_local_ip(cf, data);
+  if(cf->sockindex == SECONDARYSOCKET)
+    cf->conn->secondary = ctx->ip;
+  else
+    cf->conn->primary = ctx->ip;
+  /* the first socket info gets some specials */
   if(cf->sockindex == FIRSTSOCKET) {
     cf->conn->remote_addr = &ctx->addr;
   #ifdef ENABLE_IPV6
     cf->conn->bits.ipv6 = (ctx->addr.family == AF_INET6)? TRUE : FALSE;
   #endif
-    conn_set_ip(cf, data);
-    set_local_ip(cf, data);
     Curl_persistconninfo(data, cf->conn, &ctx->ip);
     /* buffering is currently disabled by default because we have stalls
      * in parallel transfers where not all buffered data is consumed and no
      * socket events happen.
      */
     ctx->buffer_recv = FALSE;
-  }
-  else {
   }
   ctx->active = TRUE;
 }
