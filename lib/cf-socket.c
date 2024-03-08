@@ -1467,6 +1467,8 @@ static void cf_socket_active(struct Curl_cfilter *cf, struct Curl_easy *data)
      */
     ctx->buffer_recv = FALSE;
   }
+  else {
+  }
   ctx->active = TRUE;
 }
 

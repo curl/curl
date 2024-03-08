@@ -1175,7 +1175,7 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
   result = connect_SOCKS(cf, sx, data);
   if(!result && sx->state == CONNECT_DONE) {
     cf->connected = TRUE;
-    Curl_verboseconnect(data, conn);
+    Curl_verboseconnect(data, conn, cf->sockindex);
     socks_proxy_cf_free(cf);
   }
 

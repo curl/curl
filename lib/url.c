@@ -1328,9 +1328,9 @@ ConnectionExists(struct Curl_easy *data,
  */
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 void Curl_verboseconnect(struct Curl_easy *data,
-                         struct connectdata *conn)
+                         struct connectdata *conn, int sockindex)
 {
-  if(data->set.verbose)
+  if(data->set.verbose && sockindex == FIRSTSOCKET)
     infof(data, "Connected to %s (%s) port %u",
           CURL_CONN_HOST_DISPNAME(conn), conn->primary_ip, conn->port);
 }

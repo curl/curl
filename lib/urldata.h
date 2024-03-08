@@ -1005,6 +1005,13 @@ struct connectdata {
 
 /* The end of connectdata. */
 
+struct conn_info {
+  char remote_ip[MAX_IPADR_LEN];
+  char local_ip[MAX_IPADR_LEN];
+  int remote_port;
+  int local_port;
+};
+
 /*
  * Struct to keep statistical and informational data.
  * All variables in this struct must be initialized/reset in Curl_initinfo().
@@ -1031,15 +1038,10 @@ struct PureInfo {
      allow curl_easy_reset() to clear this information from the session handle
      without disturbing information which is still alive, and that might be
      reused, in the connection cache. */
-
-  char conn_primary_ip[MAX_IPADR_LEN];
-  int conn_primary_port; /* this is the destination port to the connection,
-                            which might have been a proxy */
+  struct conn_info primary;
   int conn_remote_port;  /* this is the "remote port", which is the port
                             number of the used URL, independent of proxy or
                             not */
-  char conn_local_ip[MAX_IPADR_LEN];
-  int conn_local_port;
   const char *conn_scheme;
   unsigned int conn_protocol;
   struct curl_certinfo certs; /* info about the certs. Asked for with

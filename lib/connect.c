@@ -147,17 +147,17 @@ timediff_t Curl_timeleft(struct Curl_easy *data,
 void Curl_persistconninfo(struct Curl_easy *data, struct connectdata *conn,
                           char *local_ip, int local_port)
 {
-  memcpy(data->info.conn_primary_ip, conn->primary_ip, MAX_IPADR_LEN);
+  memcpy(data->info.primary.remote_ip, conn->primary_ip, MAX_IPADR_LEN);
   if(local_ip && local_ip[0])
-    memcpy(data->info.conn_local_ip, local_ip, MAX_IPADR_LEN);
+    memcpy(data->info.primary.local_ip, local_ip, MAX_IPADR_LEN);
   else
-    data->info.conn_local_ip[0] = 0;
+    data->info.primary.local_ip[0] = 0;
   data->info.conn_scheme = conn->handler->scheme;
   /* conn_protocol can only provide "old" protocols */
   data->info.conn_protocol = (conn->handler->protocol) & CURLPROTO_MASK;
-  data->info.conn_primary_port = conn->port;
+  data->info.primary.remote_port = conn->port;
   data->info.conn_remote_port = conn->remote_port;
-  data->info.conn_local_port = local_port;
+  data->info.primary.local_port = local_port;
   data->info.used_proxy =
 #ifdef CURL_DISABLE_PROXY
     0
@@ -918,7 +918,7 @@ static CURLcode cf_he_connect(struct Curl_cfilter *cf,
 
         if(cf->conn->handler->protocol & PROTO_FAMILY_SSH)
           Curl_pgrsTime(data, TIMER_APPCONNECT); /* we're connected already */
-        Curl_verboseconnect(data, cf->conn);
+        Curl_verboseconnect(data, cf->conn, cf->sockindex);
         data->info.numconnects++; /* to track the # of connections made */
       }
       break;

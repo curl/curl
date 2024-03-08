@@ -58,9 +58,10 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
                                              specified */
 
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
-#define Curl_verboseconnect(x,y)  Curl_nop_stmt
+#define Curl_verboseconnect(x,y,z)  Curl_nop_stmt
 #else
-void Curl_verboseconnect(struct Curl_easy *data, struct connectdata *conn);
+void Curl_verboseconnect(struct Curl_easy *data, struct connectdata *conn,
+                         int sockindex);
 #endif
 
 #if defined(USE_HTTP2) || defined(USE_HTTP3)
