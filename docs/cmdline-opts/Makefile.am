@@ -38,7 +38,7 @@ GN_0 = @echo "  GENERATE" $@;
 GN_1 =
 GN_ = $(GN_0)
 
-MANAGEN=$(top_srcdir)/scripts/managen
+MANAGEN=$(abs_top_srcdir)/scripts/managen
 
 if BUILD_DOCS
 CLEANFILES = $(MANPAGE) $(ASCIIPAGE)
