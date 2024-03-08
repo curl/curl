@@ -148,7 +148,7 @@ void Curl_persistconninfo(struct Curl_easy *data, struct connectdata *conn,
                           struct ip_quadruple *ip)
 {
   if(ip)
-    memcpy(&data->info.primary, ip, sizeof(data->info.primary));
+    data->info.primary = *ip;
   else {
     memset(&data->info.primary, 0, sizeof(data->info.primary));
     data->info.primary.remote_port = -1;

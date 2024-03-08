@@ -1441,9 +1441,9 @@ static void conn_set_ip(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   (void)data;
   if(cf->sockindex == SECONDARYSOCKET)
-    memcpy(&cf->conn->secondary, &ctx->ip, sizeof(cf->conn->secondary));
+    cf->conn->secondary = ctx->ip;
   else
-    memcpy(&cf->conn->primary, &ctx->ip, sizeof(cf->conn->primary));
+    cf->conn->primary = ctx->ip;
 }
 
 static void cf_socket_active(struct Curl_cfilter *cf, struct Curl_easy *data)
@@ -1975,7 +1975,7 @@ CURLcode Curl_cf_socket_peek(struct Curl_cfilter *cf,
     if(paddr)
       *paddr = &ctx->addr;
     if(pip)
-      memcpy(pip, &ctx->ip, sizeof(*pip));
+      *pip = ctx->ip;
     return CURLE_OK;
   }
   return CURLE_FAILED_INIT;
