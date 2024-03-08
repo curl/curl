@@ -1899,10 +1899,30 @@ static void ossl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
       /* Maybe the server has already sent a close notify alert.
          Read it to avoid an RST on the TCP connection. */
-      (void)SSL_read(backend->handle, buf, (int)sizeof(buf));
+      ERR_clear_error();
+      nread = SSL_read(backend->handle, buf, (int)sizeof(buf));
+      err = SSL_get_error(backend->handle, nread);
+      if(!nread && err == SSL_ERROR_ZERO_RETURN) {
+        CURLcode result;
+        ssize_t n;
+        size_t blen = sizeof(buf);
+        CURL_TRC_CF(data, cf, "peer has shutdown TLS");
+        /* SSL_read() will not longer touch the socket, let's receive
+         * directly from the next filter to see if the underlying
+         * connection has also been closed. */
+        n = Curl_conn_cf_recv(cf->next, data, buf, blen, &result);
+        if(!n) {
+          connssl->peer_closed = TRUE;
+          CURL_TRC_CF(data, cf, "peer closed connection");
+        }
+      }
       ERR_clear_error();
       if(connssl->peer_closed) {
-        CURL_TRC_CF(data, cf, "peer closed connection");
+        /* As the peer closed, we do not expect it to read anything more we
+         * may send. It may be harmful, leading to TCP RST and delaying
+         * a lingering close. Just leave. */
+        CURL_TRC_CF(data, cf, "not from sending TLS shutdown on "
+                    "connection closed by peer");
       }
       else if(SSL_shutdown(backend->handle) == 1) {
         CURL_TRC_CF(data, cf, "SSL shutdown finished");
