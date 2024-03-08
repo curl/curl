@@ -59,8 +59,8 @@ announcement.
   [SECURITY-ADVISORY](https://curl.se/dev/advisory.html) for help on creating
   the advisory.
 
-- Request a CVE Id for the issue. curl is a CNA and can request its own
-  numbers.
+- Request a CVE Id for the issue. curl is a CNA (CVE Numbering Authority) and
+  can request its own numbers.
 
 - Update the "security advisory" with the CVE number.
 
