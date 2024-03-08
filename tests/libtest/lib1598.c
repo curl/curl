@@ -87,7 +87,7 @@ int test(char *URL)
 
   test_setopt(curl, CURLOPT_URL, URL);
   test_setopt(curl, CURLOPT_HTTPHEADER, hhl);
-  test_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(post_data));
+  test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(post_data));
   test_setopt(curl, CURLOPT_POSTFIELDS, post_data);
   test_setopt(curl, CURLOPT_TRAILERFUNCTION, trailers_callback);
   test_setopt(curl, CURLOPT_TRAILERDATA, NULL);
