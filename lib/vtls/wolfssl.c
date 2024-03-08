@@ -321,6 +321,8 @@ static int wolfssl_bio_cf_in_read(WOLFSSL_BIO *bio, char *buf, int blen)
   wolfSSL_BIO_clear_retry_flags(bio);
   if(nread < 0 && CURLE_AGAIN == result)
     BIO_set_retry_read(bio);
+  else if(nread == 0)
+    connssl->peer_closed = TRUE;
   return (int)nread;
 }
 
@@ -1059,7 +1061,8 @@ static void wolfssl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     /* Maybe the server has already sent a close notify alert.
        Read it to avoid an RST on the TCP connection. */
     (void)wolfSSL_read(backend->handle, buf, (int)sizeof(buf));
-    (void)wolfSSL_shutdown(backend->handle);
+    if(!connssl->peer_closed)
+      (void)wolfSSL_shutdown(backend->handle);
     wolfSSL_free(backend->handle);
     backend->handle = NULL;
   }
