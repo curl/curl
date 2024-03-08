@@ -371,7 +371,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 #ifdef HAVE_LDAP_SSL
 #ifdef USE_WIN32_LDAP
     /* Win32 LDAP SDK doesn't support insecure mode without CA! */
-    server = ldap_sslinit(host, conn->port, 1);
+    server = ldap_sslinit(host, conn->primary.remote_port, 1);
     ldap_set_option(server, LDAP_OPT_SSL, LDAP_OPT_ON);
 #else
     int ldap_option;
@@ -417,10 +417,10 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
       result = CURLE_SSL_CERTPROBLEM;
       goto quit;
     }
-    server = ldapssl_init(host, conn->port, 1);
+    server = ldapssl_init(host, conn->primary.remote_port, 1);
     if(!server) {
       failf(data, "LDAP local: Cannot connect to %s:%u",
-            conn->host.dispname, conn->port);
+            conn->host.dispname, conn->primary.remote_port);
       result = CURLE_COULDNT_CONNECT;
       goto quit;
     }
@@ -458,10 +458,10 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
       result = CURLE_SSL_CERTPROBLEM;
       goto quit;
     }
-    server = ldap_init(host, conn->port);
+    server = ldap_init(host, conn->primary.remote_port);
     if(!server) {
       failf(data, "LDAP local: Cannot connect to %s:%u",
-            conn->host.dispname, conn->port);
+            conn->host.dispname, conn->primary.remote_port);
       result = CURLE_COULDNT_CONNECT;
       goto quit;
     }
@@ -499,10 +499,10 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     goto quit;
   }
   else {
-    server = ldap_init(host, conn->port);
+    server = ldap_init(host, conn->primary.remote_port);
     if(!server) {
       failf(data, "LDAP local: Cannot connect to %s:%u",
-            conn->host.dispname, conn->port);
+            conn->host.dispname, conn->primary.remote_port);
       result = CURLE_COULDNT_CONNECT;
       goto quit;
     }

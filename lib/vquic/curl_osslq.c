@@ -443,16 +443,14 @@ static CURLcode cf_osslq_ssl_err(struct Curl_cfilter *cf,
   if(CURLE_SSL_CONNECT_ERROR == result && errdetail == 0) {
     char extramsg[80]="";
     int sockerr = SOCKERRNO;
-    const char *r_ip = NULL;
-    int r_port = 0;
+    struct ip_quadruple ip;
 
-    Curl_cf_socket_peek(cf->next, data, NULL, NULL,
-                        &r_ip, &r_port, NULL, NULL);
+    Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
     if(sockerr && detail == SSL_ERROR_SYSCALL)
       Curl_strerror(sockerr, extramsg, sizeof(extramsg));
     failf(data, "QUIC connect: %s in connection to %s:%d (%s)",
           extramsg[0] ? extramsg : osslq_SSL_ERROR_to_str(detail),
-          ctx->peer.dispname, r_port, r_ip);
+          ctx->peer.dispname, ip.remote_port, ip.remote_ip);
   }
   else {
     /* Could be a CERT problem */
@@ -1039,7 +1037,6 @@ static CURLcode cf_osslq_ctx_start(struct Curl_cfilter *cf,
   CURLcode result;
   int rv;
   const struct Curl_sockaddr_ex *peer_addr = NULL;
-  int peer_port;
   BIO *bio = NULL;
   BIO_ADDR *baddr = NULL;
 
@@ -1061,8 +1058,7 @@ static CURLcode cf_osslq_ctx_start(struct Curl_cfilter *cf,
     goto out;
 
   result = CURLE_QUIC_CONNECT_ERROR;
-  Curl_cf_socket_peek(cf->next, data, &ctx->q.sockfd,
-                      &peer_addr, NULL, &peer_port, NULL, NULL);
+  Curl_cf_socket_peek(cf->next, data, &ctx->q.sockfd, &peer_addr, NULL);
   if(!peer_addr)
     goto out;
 
@@ -1657,13 +1653,11 @@ out:
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   if(result) {
-    const char *r_ip = NULL;
-    int r_port = 0;
+    struct ip_quadruple ip;
 
-    Curl_cf_socket_peek(cf->next, data, NULL, NULL,
-                        &r_ip, &r_port, NULL, NULL);
+    Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
     infof(data, "QUIC connect to %s port %u failed: %s",
-          r_ip, r_port, curl_easy_strerror(result));
+          ip.remote_ip, ip.remote_port, curl_easy_strerror(result));
   }
 #endif
   if(!result)

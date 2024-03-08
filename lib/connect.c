@@ -145,19 +145,19 @@ timediff_t Curl_timeleft(struct Curl_easy *data,
 /* Copies connection info into the transfer handle to make it available when
    the transfer handle is no longer associated with the connection. */
 void Curl_persistconninfo(struct Curl_easy *data, struct connectdata *conn,
-                          char *local_ip, int local_port)
+                          struct ip_quadruple *ip)
 {
-  memcpy(data->info.conn_primary_ip, conn->primary_ip, MAX_IPADR_LEN);
-  if(local_ip && local_ip[0])
-    memcpy(data->info.conn_local_ip, local_ip, MAX_IPADR_LEN);
-  else
-    data->info.conn_local_ip[0] = 0;
+  if(ip)
+    data->info.primary = *ip;
+  else {
+    memset(&data->info.primary, 0, sizeof(data->info.primary));
+    data->info.primary.remote_port = -1;
+    data->info.primary.local_port = -1;
+  }
   data->info.conn_scheme = conn->handler->scheme;
   /* conn_protocol can only provide "old" protocols */
   data->info.conn_protocol = (conn->handler->protocol) & CURLPROTO_MASK;
-  data->info.conn_primary_port = conn->port;
   data->info.conn_remote_port = conn->remote_port;
-  data->info.conn_local_port = local_port;
   data->info.used_proxy =
 #ifdef CURL_DISABLE_PROXY
     0
@@ -728,7 +728,7 @@ evaluate:
 
   failf(data, "Failed to connect to %s port %u after "
         "%" CURL_FORMAT_TIMEDIFF_T " ms: %s",
-        hostname, conn->port,
+        hostname, conn->primary.remote_port,
         Curl_timediff(now, data->progress.t_startsingle),
         curl_easy_strerror(result));
 
@@ -918,7 +918,7 @@ static CURLcode cf_he_connect(struct Curl_cfilter *cf,
 
         if(cf->conn->handler->protocol & PROTO_FAMILY_SSH)
           Curl_pgrsTime(data, TIMER_APPCONNECT); /* we're connected already */
-        Curl_verboseconnect(data, cf->conn);
+        Curl_verboseconnect(data, cf->conn, cf->sockindex);
         data->info.numconnects++; /* to track the # of connections made */
       }
       break;
