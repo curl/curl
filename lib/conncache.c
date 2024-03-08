@@ -131,7 +131,7 @@ static void hashkey(struct connectdata *conn, char *buf, size_t len)
 #ifndef CURL_DISABLE_PROXY
   if(conn->bits.httpproxy && !conn->bits.tunnel_proxy) {
     hostname = conn->http_proxy.host.name;
-    port = conn->port;
+    port = conn->primary.remote_port;
   }
   else
 #endif

@@ -67,7 +67,7 @@ void Curl_cf_def_get_host(struct Curl_cfilter *cf, struct Curl_easy *data,
   else {
     *phost = cf->conn->host.name;
     *pdisplay_host = cf->conn->host.dispname;
-    *pport = cf->conn->port;
+    *pport = cf->conn->primary.remote_port;
   }
 }
 

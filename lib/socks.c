@@ -341,7 +341,7 @@ static CURLproxycode do_SOCKS4(struct Curl_cfilter *cf,
 
   case CONNECT_RESOLVING:
     /* check if we have the name resolved by now */
-    dns = Curl_fetch_addr(data, sx->hostname, (int)conn->port);
+    dns = Curl_fetch_addr(data, sx->hostname, conn->primary.remote_port);
 
     if(dns) {
 #ifdef CURLRES_ASYNCH
