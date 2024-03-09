@@ -1258,6 +1258,7 @@ static int mbedtls_init(void)
 #ifdef THREADING_SUPPORT
   entropy_init_mutex(&ts_entropy);
 #endif
+  return 1;
 }
 
 static void mbedtls_cleanup(void)
