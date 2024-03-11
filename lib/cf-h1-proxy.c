@@ -918,7 +918,7 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
          * If the other side indicated a connection close, or if someone
          * else told us to close this connection, do so now.
          */
-        data->req.done = FALSE;
+        Curl_req_soft_reset(&data->req, data);
         if(ts->close_connection || conn->bits.close) {
           /* Close this filter and the sub-chain, re-connect the
            * sub-chain and continue. Closing this filter will

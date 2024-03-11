@@ -936,8 +936,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
 
   data->state.url = newurl;
   data->state.url_alloc = TRUE;
-  data->req.done = FALSE;
-
+  Curl_req_soft_reset(&data->req, data);
   infof(data, "Issue another request to this URL: '%s'", data->state.url);
 
   /*
