@@ -219,17 +219,16 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
       Curl_safefree(data->req.newurl);
     }
 #endif
-    if(data->state.expect100header) {
-      Curl_expire_done(data, EXPIRE_100_TIMEOUT);
+    if(Curl_http_exp100_is_selected(data)) {
       if(data->req.httpcode < 400) {
-        k->exp100 = EXP100_SEND_DATA;
-        if(data->hyp.exp100_waker) {
-          hyper_waker_wake(data->hyp.exp100_waker);
-          data->hyp.exp100_waker = NULL;
+        Curl_http_exp100_got100(data);
+        if(data->hyp.send_body_waker) {
+          hyper_waker_wake(data->hyp.send_body_waker);
+          data->hyp.send_body_waker = NULL;
         }
       }
       else { /* >= 4xx */
-        k->exp100 = EXP100_FAILED;
+        Curl_req_abort_sending(data);
       }
     }
     if(data->state.hconnect && (data->req.httpcode/100 != 2) &&
@@ -353,20 +352,9 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
   struct SingleRequest *k = &data->req;
   (void)conn;
 
-  if(k->exp100 > EXP100_SEND_DATA) {
-    struct curltime now = Curl_now();
-    timediff_t ms = Curl_timediff(now, k->start100);
-    if(ms >= data->set.expect_100_timeout) {
-      /* we've waited long enough, continue anyway */
-      k->exp100 = EXP100_SEND_DATA;
-      k->keepon |= KEEP_SEND;
-      Curl_expire_done(data, EXPIRE_100_TIMEOUT);
-      infof(data, "Done waiting for 100-continue after %ldms", (long)ms);
-      if(data->hyp.exp100_waker) {
-        hyper_waker_wake(data->hyp.exp100_waker);
-        data->hyp.exp100_waker = NULL;
-      }
-    }
+  if(data->hyp.send_body_waker) {
+    hyper_waker_wake(data->hyp.send_body_waker);
+    data->hyp.send_body_waker = NULL;
   }
 
   if(select_res & CURL_CSELECT_IN) {
@@ -461,7 +449,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
     reasonp = hyper_response_reason_phrase(resp);
     reason_len = hyper_response_reason_phrase_len(resp);
 
-    if(http_status == 417 && data->state.expect100header) {
+    if(http_status == 417 && Curl_http_exp100_is_selected(data)) {
       infof(data, "Got 417 while waiting for a 100");
       data->state.disableexpect = TRUE;
       data->req.newurl = strdup(data->state.url);
@@ -664,17 +652,6 @@ static int uploadstreamed(void *userdata, hyper_context *ctx,
   bool eos;
   int rc = HYPER_POLL_ERROR;
   (void)ctx;
-
-  if(data->req.exp100 > EXP100_SEND_DATA) {
-    if(data->req.exp100 == EXP100_FAILED)
-      return HYPER_POLL_ERROR;
-
-    /* still waiting confirmation */
-    if(data->hyp.exp100_waker)
-      hyper_waker_free(data->hyp.exp100_waker);
-    data->hyp.exp100_waker = hyper_context_waker(ctx);
-    return HYPER_POLL_PENDING;
-  }
 
   result = Curl_multi_xfer_ulbuf_borrow(data, &xfer_ulbuf, &xfer_ulblen);
   if(result)
@@ -974,11 +951,6 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
       goto error;
     }
   }
-  else {
-    if(!data->state.disableexpect) {
-      data->state.expect100header = TRUE;
-    }
-  }
 
   if(hyper_request_set_method(req, (uint8_t *)method, strlen(method))) {
     failf(data, "error setting method");
@@ -1158,13 +1130,10 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   if((httpreq == HTTPREQ_GET) || (httpreq == HTTPREQ_HEAD)) {
     /* HTTP GET/HEAD download */
     Curl_pgrsSetUploadSize(data, 0); /* nothing */
-    Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, -1);
   }
+
+  Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, FIRSTSOCKET);
   conn->datastream = Curl_hyper_stream;
-  if(data->state.expect100header)
-    /* Timeout count starts now since with Hyper we don't know exactly when
-       the full request has been sent. */
-    data->req.start100 = Curl_now();
 
   /* clear userpwd and proxyuserpwd to avoid reusing old credentials
    * from reused connections */
@@ -1206,10 +1175,6 @@ void Curl_hyper_done(struct Curl_easy *data)
     hyper_waker_free(h->write_waker);
     h->write_waker = NULL;
   }
-  if(h->exp100_waker) {
-    hyper_waker_free(h->exp100_waker);
-    h->exp100_waker = NULL;
-  }
   if(h->send_body_waker) {
     hyper_waker_free(h->send_body_waker);
     h->send_body_waker = NULL;
@@ -1238,6 +1203,7 @@ static const struct Curl_crtype cr_hyper_protocol = {
   Curl_creader_def_resume_from,
   Curl_creader_def_rewind,
   cr_hyper_unpause,
+  Curl_creader_def_done,
   sizeof(struct Curl_creader)
 };
 

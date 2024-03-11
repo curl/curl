@@ -81,8 +81,6 @@ struct SingleRequest {
   int httpcode;                 /* error code from the 'HTTP/1.? XXX' or
                                    'RTSP/1.? XXX' line */
   int keepon;
-  struct curltime start100;      /* time stamp to wait for the 100 code from */
-  enum expect100 exp100;        /* expect 100 continue state */
   enum upgrade101 upgr101;      /* 101 upgrade state */
 
   /* Client Writer stack, handles transfer- and content-encodings, protocol

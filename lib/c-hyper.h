@@ -39,7 +39,6 @@ struct hyptransfer {
   hyper_waker *write_waker;
   hyper_waker *read_waker;
   const hyper_executor *exec;
-  hyper_waker *exp100_waker;
   hyper_waker *send_body_waker;
   struct hyp_io_ctx io_ctx;
 };

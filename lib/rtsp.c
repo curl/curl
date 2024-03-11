@@ -555,8 +555,6 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
             goto out;
         }
       }
-
-      data->state.expect100header = FALSE; /* RTSP posts are simple/small */
     }
     else if(rtspreq == RTSPREQ_GET_PARAMETER) {
       /* Check for an empty GET_PARAMETER (heartbeat) request */

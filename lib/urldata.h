@@ -579,6 +579,14 @@ struct hostname {
 #define KEEP_RECV_PAUSE (1<<4) /* reading is paused */
 #define KEEP_SEND_PAUSE (1<<5) /* writing is paused */
 
+/* KEEP_SEND_TIMED is set when the transfer should attempt sending
+ * at timer (or other) events. A transfer waiting on a timer will
+  * remove KEEP_SEND to suppress POLLOUTs of the connection.
+  * Adding KEEP_SEND_TIMED will then attempt to send whenever the transfer
+  * enters the "readwrite" loop, e.g. when a timer fires.
+  * This is used in HTTP for 'Expect: 100-continue' waiting. */
+#define KEEP_SEND_TIMED (1<<6)
+
 #define KEEP_RECVBITS (KEEP_RECV | KEEP_RECV_HOLD | KEEP_RECV_PAUSE)
 #define KEEP_SENDBITS (KEEP_SEND | KEEP_SEND_HOLD | KEEP_SEND_PAUSE)
 
@@ -1364,7 +1372,6 @@ struct UrlState {
   BIT(authproblem); /* TRUE if there's some problem authenticating */
   /* set after initial USER failure, to prevent an authentication loop */
   BIT(wildcardmatch); /* enable wildcard matching */
-  BIT(expect100header);  /* TRUE if we added Expect: 100-continue */
   BIT(disableexpect);    /* TRUE if Expect: is disabled due to a previous
                             417 response */
   BIT(use_range);

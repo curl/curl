@@ -579,6 +579,14 @@ CURLcode Curl_creader_def_unpause(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+void Curl_creader_def_done(struct Curl_easy *data,
+                           struct Curl_creader *reader, int premature)
+{
+  (void)data;
+  (void)reader;
+  (void)premature;
+}
+
 struct cr_in_ctx {
   struct Curl_creader super;
   curl_read_callback read_cb;
@@ -840,6 +848,7 @@ static const struct Curl_crtype cr_in = {
   cr_in_resume_from,
   cr_in_rewind,
   Curl_creader_def_unpause,
+  Curl_creader_def_done,
   sizeof(struct cr_in_ctx)
 };
 
@@ -990,6 +999,7 @@ static const struct Curl_crtype cr_lc = {
   Curl_creader_def_resume_from,
   Curl_creader_def_rewind,
   Curl_creader_def_unpause,
+  Curl_creader_def_done,
   sizeof(struct cr_lc_ctx)
 };
 
@@ -1154,6 +1164,7 @@ static const struct Curl_crtype cr_null = {
   Curl_creader_def_resume_from,
   Curl_creader_def_rewind,
   Curl_creader_def_unpause,
+  Curl_creader_def_done,
   sizeof(struct Curl_creader)
 };
 
@@ -1250,6 +1261,7 @@ static const struct Curl_crtype cr_buf = {
   cr_buf_resume_from,
   Curl_creader_def_rewind,
   Curl_creader_def_unpause,
+  Curl_creader_def_done,
   sizeof(struct cr_buf_ctx)
 };
 
@@ -1306,4 +1318,25 @@ CURLcode Curl_creader_unpause(struct Curl_easy *data)
     reader = reader->next;
   }
   return result;
+}
+
+void Curl_creader_done(struct Curl_easy *data, int premature)
+{
+  struct Curl_creader *reader = data->req.reader_stack;
+  while(reader) {
+    reader->crt->done(data, reader, premature);
+    reader = reader->next;
+  }
+}
+
+struct Curl_creader *Curl_creader_get_by_type(struct Curl_easy *data,
+                                              const struct Curl_crtype *crt)
+{
+  struct Curl_creader *r;
+  for(r = data->req.reader_stack; r; r = r->next) {
+    if(r->crt == crt)
+      return r;
+  }
+  return NULL;
+
 }

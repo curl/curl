@@ -134,8 +134,6 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
   req->offset = 0;
   req->httpcode = 0;
   req->keepon = 0;
-  req->start100 = t0;
-  req->exp100 = EXP100_SEND_DATA;
   req->upgr101 = UPGR101_INIT;
   req->timeofdoc = 0;
   req->bodywrites = 0;
@@ -241,16 +239,6 @@ static CURLcode req_send_buffer_flush(struct Curl_easy *data)
     Curl_bufq_skip(&data->req.sendbuf, nwritten);
     if(hds_len) {
       data->req.sendbuf_hds_len -= CURLMIN(hds_len, nwritten);
-      if(!data->req.sendbuf_hds_len) {
-        /* all request headers sent */
-        if(data->req.exp100 == EXP100_SENDING_REQUEST) {
-          /* We are now waiting for a reply from the server or
-           * a timeout on our side */
-          data->req.exp100 = EXP100_AWAITING_CONTINUE;
-          data->req.start100 = Curl_now();
-          Curl_expire(data, data->set.expect_100_timeout, EXPIRE_100_TIMEOUT);
-        }
-      }
     }
     /* leave if we could not send all. Maybe network blocking or
      * speed limits on transfer */
@@ -264,11 +252,9 @@ static CURLcode req_set_upload_done(struct Curl_easy *data)
 {
   DEBUGASSERT(!data->req.upload_done);
   data->req.upload_done = TRUE;
-  data->req.keepon &= ~KEEP_SEND; /* we're done sending */
+  data->req.keepon &= ~(KEEP_SEND|KEEP_SEND_TIMED); /* we're done sending */
 
-  /* FIXME: http specific stuff, need to go somewhere else */
-  data->req.exp100 = EXP100_SEND_DATA;
-  Curl_expire_done(data, EXPIRE_100_TIMEOUT);
+  Curl_creader_done(data, data->req.upload_aborted);
 
   if(data->req.upload_aborted) {
     if(data->req.writebytecount)
@@ -384,10 +370,8 @@ CURLcode Curl_req_send_more(struct Curl_easy *data)
 {
   CURLcode result;
 
-  /* Fill our send buffer if more from client can be read and
-   * we are not in a "expect-100" situation. */
-  if(!data->req.eos_read && !Curl_bufq_is_full(&data->req.sendbuf) &&
-     (data->req.exp100 == EXP100_SEND_DATA)) {
+  /* Fill our send buffer if more from client can be read. */
+  if(!data->req.eos_read && !Curl_bufq_is_full(&data->req.sendbuf)) {
     ssize_t nread = Curl_bufq_sipn(&data->req.sendbuf, 0,
                                    add_from_client, data, &result);
     if(nread < 0 && result != CURLE_AGAIN)
