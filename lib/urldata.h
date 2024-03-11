@@ -1364,7 +1364,6 @@ struct UrlState {
   BIT(authproblem); /* TRUE if there's some problem authenticating */
   /* set after initial USER failure, to prevent an authentication loop */
   BIT(wildcardmatch); /* enable wildcard matching */
-  BIT(expect100header);  /* TRUE if we added Expect: 100-continue */
   BIT(disableexpect);    /* TRUE if Expect: is disabled due to a previous
                             417 response */
   BIT(use_range);

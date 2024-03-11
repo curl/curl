@@ -159,6 +159,7 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
   req->getheader = FALSE;
   req->no_body = data->set.opt_no_body;
   req->authneg = FALSE;
+  req->expect100header = FALSE;
 }
 
 void Curl_req_free(struct SingleRequest *req, struct Curl_easy *data)

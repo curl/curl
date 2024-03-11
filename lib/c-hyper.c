@@ -219,7 +219,7 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
       Curl_safefree(data->req.newurl);
     }
 #endif
-    if(data->state.expect100header) {
+    if(data->req.expect100header) {
       Curl_expire_done(data, EXPIRE_100_TIMEOUT);
       if(data->req.httpcode < 400) {
         k->exp100 = EXP100_SEND_DATA;
@@ -461,7 +461,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
     reasonp = hyper_response_reason_phrase(resp);
     reason_len = hyper_response_reason_phrase_len(resp);
 
-    if(http_status == 417 && data->state.expect100header) {
+    if(http_status == 417 && data->req.expect100header) {
       infof(data, "Got 417 while waiting for a 100");
       data->state.disableexpect = TRUE;
       data->req.newurl = strdup(data->state.url);
@@ -976,7 +976,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   }
   else {
     if(!data->state.disableexpect) {
-      data->state.expect100header = TRUE;
+      data->req.expect100header = TRUE;
     }
   }
 
@@ -1158,13 +1158,10 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   if((httpreq == HTTPREQ_GET) || (httpreq == HTTPREQ_HEAD)) {
     /* HTTP GET/HEAD download */
     Curl_pgrsSetUploadSize(data, 0); /* nothing */
-    Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, -1);
   }
+
+  Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, FIRSTSOCKET);
   conn->datastream = Curl_hyper_stream;
-  if(data->state.expect100header)
-    /* Timeout count starts now since with Hyper we don't know exactly when
-       the full request has been sent. */
-    data->req.start100 = Curl_now();
 
   /* clear userpwd and proxyuserpwd to avoid reusing old credentials
    * from reused connections */

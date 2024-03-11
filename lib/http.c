@@ -1313,31 +1313,6 @@ static const char *get_http_string(const struct Curl_easy *data,
 }
 #endif
 
-/* check and possibly add an Expect: header */
-static CURLcode expect100(struct Curl_easy *data, struct dynbuf *req)
-{
-  CURLcode result = CURLE_OK;
-  if(!data->state.disableexpect &&
-     Curl_use_http_1_1plus(data, data->conn) &&
-     (data->conn->httpversion < 20)) {
-    /* if not doing HTTP 1.0 or version 2, or disabled explicitly, we add an
-       Expect: 100-continue to the headers which actually speeds up post
-       operations (as there is one packet coming back from the web server) */
-    const char *ptr = Curl_checkheaders(data, STRCONST("Expect"));
-    if(ptr) {
-      data->state.expect100header =
-        Curl_compareheader(ptr, STRCONST("Expect:"), STRCONST("100-continue"));
-    }
-    else {
-      result = Curl_dyn_addn(req, STRCONST("Expect: 100-continue\r\n"));
-      if(!result)
-        data->state.expect100header = TRUE;
-    }
-  }
-
-  return result;
-}
-
 enum proxy_use {
   HEADER_SERVER,  /* direct to server */
   HEADER_PROXY,   /* regular request to proxy */
@@ -2204,24 +2179,36 @@ CURLcode Curl_http_req_set_reader(struct Curl_easy *data,
 
 static CURLcode addexpect(struct Curl_easy *data, struct dynbuf *r)
 {
-  data->state.expect100header = FALSE;
+  CURLcode result;
+  char *ptr;
+
+  data->req.expect100header = FALSE;
   /* Avoid Expect: 100-continue if Upgrade: is used */
-  if(data->req.upgr101 == UPGR101_INIT) {
-    /* For really small puts we don't use Expect: headers at all, and for
-       the somewhat bigger ones we allow the app to disable it. Just make
-       sure that the expect100header is always set to the preferred value
-       here. */
-    char *ptr = Curl_checkheaders(data, STRCONST("Expect"));
-    if(ptr) {
-      data->state.expect100header =
-        Curl_compareheader(ptr, STRCONST("Expect:"),
-                           STRCONST("100-continue"));
+  if(data->req.upgr101 != UPGR101_INIT)
+    return CURLE_OK;
+
+  /* For really small puts we don't use Expect: headers at all, and for
+     the somewhat bigger ones we allow the app to disable it. Just make
+     sure that the expect100header is always set to the preferred value
+     here. */
+  ptr = Curl_checkheaders(data, STRCONST("Expect"));
+  if(ptr) {
+    data->req.expect100header =
+      Curl_compareheader(ptr, STRCONST("Expect:"), STRCONST("100-continue"));
+  }
+  else if(!data->state.disableexpect &&
+          Curl_use_http_1_1plus(data, data->conn) &&
+          (data->conn->httpversion < 20)) {
+    /* if not doing HTTP 1.0 or version 2, or disabled explicitly, we add an
+       Expect: 100-continue to the headers which actually speeds up post
+       operations (as there is one packet coming back from the web server) */
+    curl_off_t client_len = Curl_creader_client_length(data);
+    if(client_len > EXPECT_100_THRESHOLD || client_len < 0) {
+      result = Curl_dyn_addn(r, STRCONST("Expect: 100-continue\r\n"));
+      if(result)
+        return result;
+      data->req.expect100header = TRUE;
     }
-    else {
-      curl_off_t client_len = Curl_creader_client_length(data);
-      if(client_len > EXPECT_100_THRESHOLD || client_len < 0)
-        return expect100(data, r);
-      }
   }
   return CURLE_OK;
 }
@@ -3657,7 +3644,7 @@ static CURLcode http_rw_headers(struct Curl_easy *data,
              */
             Curl_expire_done(data, EXPIRE_100_TIMEOUT);
             if(!Curl_req_done_sending(data)) {
-              if((k->httpcode == 417) && data->state.expect100header) {
+              if((k->httpcode == 417) && k->expect100header) {
                 /* 417 Expectation Failed - try again without the Expect
                    header */
                 if(!k->writebytecount &&
@@ -3690,7 +3677,7 @@ static CURLcode http_rw_headers(struct Curl_easy *data,
                 result = Curl_req_abort_sending(data);
                 if(result)
                   return result;
-                if(data->state.expect100header)
+                if(k->expect100header)
                   k->exp100 = EXP100_FAILED;
               }
             }

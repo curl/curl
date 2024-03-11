@@ -1182,8 +1182,8 @@ void Curl_xfer_setup(
          Thus, we must check if the request has been sent before we set the
          state info where we wait for the 100-return code
       */
-      if((data->state.expect100header) &&
-         (conn->handler->protocol&PROTO_FAMILY_HTTP)) {
+      if(k->expect100header) {
+        DEBUGASSERT(conn->handler->protocol&PROTO_FAMILY_HTTP);
         /* wait with write until we either got 100-continue or a timeout */
         k->exp100 = EXP100_AWAITING_CONTINUE;
         k->start100 = Curl_now();
@@ -1193,11 +1193,6 @@ void Curl_xfer_setup(
         Curl_expire(data, data->set.expect_100_timeout, EXPIRE_100_TIMEOUT);
       }
       else {
-        if(data->state.expect100header)
-          /* when we've sent off the rest of the headers, we must await a
-             100-continue but first finish sending the request */
-          k->exp100 = EXP100_SENDING_REQUEST;
-
         /* enable the write bit when we're not waiting for continue */
         k->keepon |= KEEP_SEND;
       }
