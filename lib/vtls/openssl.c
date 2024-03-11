@@ -5093,7 +5093,7 @@ static CURLcode ossl_get_tls_server_end_point(struct Curl_easy *data,
     return CURLE_SSL_ENGINE_INITFAILED;
   }
 
-  cert = SSL_get_peer_certificate(backend->handle);
+  cert = SSL_get1_peer_certificate(backend->handle);
   if(!cert) {
     /* No server certificate, don't do channel binding */
     *binding = NULL;
