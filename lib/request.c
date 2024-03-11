@@ -263,7 +263,9 @@ static CURLcode req_set_upload_done(struct Curl_easy *data)
     infof(data, "upload completely sent off: %" CURL_FORMAT_CURL_OFF_T
           " bytes", data->req.writebytecount);
   else
-    infof(data, "We are completely uploaded and fine");
+    infof(data, Curl_creader_total_length(data)?
+                "We are completely uploaded and fine" :
+                "Request completely sent off");
 
   return Curl_xfer_send_close(data);
 }
