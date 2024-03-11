@@ -4,15 +4,15 @@ curl and libcurl 8.7.0
  Command line options:         258
  curl_easy_setopt() options:   304
  Public functions in libcurl:  93
- Contributors:                 3112
+ Contributors:                 3113
 
 This release includes the following changes:
 
  o configure: add --disable-docs flag [16]
  o CURLINFO_USED_PROXY: return bool whether the proxy was used [24]
- o digest: support SHA-512/256
+ o digest: support SHA-512/256 [118]
  o DoH: add trace configuration [61]
- o write-out: add '%{proxy_used}'
+ o write-out: add '%{proxy_used}' [24]
 
 This release includes the following bugfixes:
 
@@ -80,6 +80,8 @@ This release includes the following bugfixes:
  o header.md: remove backslash, make nicer markdown [48]
  o HTTP/2: write response directly [12]
  o http2: fix push discard [124]
+ o http2: memory errors in the push callbacks are fatal [132]
+ o http2: minor tweaks to optimize two struct sizes [130]
  o http2: push headers better cleanup [113]
  o HTTP3.md: adjust the OpenSSL QUIC install instructions [34]
  o http: better error message for HTTP/1.x response without status line [86]
@@ -88,12 +90,15 @@ This release includes the following bugfixes:
  o http_chunks: remove unused 'endptr' variable [58]
  o https-proxy: use IP address and cert with ip in alt names [50]
  o hyper: implement unpausing via client reader [98]
+ o KNOWN_BUGS: POP3 issue when reading small chunks [134]
+ o lib1598: fix `CURLOPT_POSTFIELDSIZE` usage [128]
  o lib582: remove code causing warning that is never run [38]
  o lib: add `void *ctx` to reader/writer instances [122]
  o lib: convert Curl_get_line to use dynbuf [42]
  o lib: Curl_read/Curl_write clarifications [101]
  o lib: enhance client reader resume + rewind [92]
  o lib: initialize output pointers to NULL before calling strto[ff,l,ul] [63]
+ o lib: keep conn IP information together [109]
  o lib: remove curl_mimepart object when CURL_DISABLE_MIME [72]
  o libcurl-docs: cleanups
  o libcurl-security.md: Active FTP passes on the local IP address [6]
@@ -141,6 +146,7 @@ This release includes the following bugfixes:
  o version: allow building with ancient libpsl [52]
  o vtls: fix tls proxy peer verification [55]
  o vtls: revert "receive max buffer" + add test case [39]
+ o VULN-DISCLOSURE-POLICY.md: update detail about CVE requests [123]
  o websocket: fix curl_ws_recv() [62]
  o write-out.md: clarify error handling details [31]
 
@@ -159,19 +165,19 @@ advice from friends like these:
 
   5533asdg on github, Andreas Kiefer, av223119 on github, Boris Verkhovskiy,
   Brett Buddin, Chris Webb, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
-  Daniel Szmulewicz, dependabot[bot], Dirk Hünniger, Dmitry Karpov,
-  Dmitry Tretyakov, edmcln on github, Erik Schnetter, Evgeny Grin (Karlson2k),
-  Fabian Vogt, Fabrice Fontaine, Faraz Fallahi, Gisle Vanem, Harry Sintonen,
-  HsiehYuho on github, Jan Macku, Jiawen Geng, Joel Depooter, Jon Rumsey,
-  Jordan Brown, Karthikdasari0423, Konstantin Vlasov, kpcyrd,
-  Lars Kellogg-Stedman, LeeRiva, Louis Solofrizzo, Lukáš Zaoral, Marcel Raad,
-  Michael Forney, Michael Kaufmann, Michał Antoniak, Nikita Taranov,
-  Patrick Monnerat, Paweł Witas, Peter Krefting, RainRat, Ramiro Garcia,
-  Ray Satiro, Richard Levitte, Robert Moreton, Rudi Heitbaum,
+  Daniel Szmulewicz, DasKutti on github, dependabot[bot], Dirk Hünniger,
+  Dmitry Karpov, Dmitry Tretyakov, edmcln on github, Erik Schnetter,
+  Evgeny Grin (Karlson2k), Fabian Vogt, Fabrice Fontaine, Faraz Fallahi,
+  Gisle Vanem, Harry Sintonen, HsiehYuho on github, Jan Macku, Jiawen Geng,
+  Joel Depooter, Jon Rumsey, Jordan Brown, Karthikdasari0423,
+  Konstantin Vlasov, kpcyrd, Lars Kellogg-Stedman, LeeRiva, Louis Solofrizzo,
+  Lukáš Zaoral, Marcel Raad, Michael Forney, Michael Kaufmann, Michał Antoniak,
+  Nikita Taranov, Patrick Monnerat, Paweł Witas, Peter Krefting, RainRat,
+  Ramiro Garcia, Ray Satiro, Richard Levitte, Robert Moreton, Rudi Heitbaum,
   Ryan Carsten Schmidt, Scott Mutter, Scott Talbert, Sebastian Neubauer,
   Sergey Bronnikov, Simon K, Stefan Eissing, Tal Regev, Viktor Szakats,
   vulnerabilityspotter on hackerone
-  (59 contributors)
+  (60 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -283,6 +289,7 @@ References to bug reports and discussions on issues:
  [106] = https://curl.se/bug/?i=13037
  [107] = https://curl.se/bug/?i=13033
  [108] = https://curl.se/bug/?i=13073
+ [109] = https://curl.se/bug/?i=13084
  [110] = https://curl.se/bug/?i=13070
  [111] = https://curl.se/bug/?i=13072
  [112] = https://curl.se/bug/?i=13028
@@ -291,10 +298,16 @@ References to bug reports and discussions on issues:
  [115] = https://curl.se/bug/?i=6169
  [116] = https://curl.se/bug/?i=13063
  [117] = https://curl.se/bug/?i=13061
+ [118] = https://curl.se/bug/?i=13070
  [119] = https://curl.se/bug/?i=13031
  [120] = https://curl.se/bug/?i=13047
  [121] = https://curl.se/bug/?i=13047
  [122] = https://curl.se/bug/?i=13035
+ [123] = https://curl.se/bug/?i=13088
  [124] = https://curl.se/bug/?i=13055
  [125] = https://curl.se/mail/lib-2024-03/0001.html
  [126] = https://curl.se/bug/?i=13039
+ [128] = https://curl.se/bug/?i=13085
+ [130] = https://curl.se/bug/?i=13082
+ [132] = https://curl.se/bug/?i=13081
+ [134] = https://curl.se/bug/?i=12063
