@@ -832,9 +832,9 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
   int didwhat;
 
   (void)ts;
-  *done = FALSE;
-  result = Curl_hyper_stream(data, cf->conn, &didwhat, done,
+  result = Curl_hyper_stream(data, cf->conn, &didwhat,
                              CURL_CSELECT_IN | CURL_CSELECT_OUT);
+  *done = data->req.done;
   if(result || !*done)
     return result;
   if(h->exec) {
@@ -918,6 +918,7 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
          * If the other side indicated a connection close, or if someone
          * else told us to close this connection, do so now.
          */
+        Curl_req_soft_reset(&data->req, data);
         if(ts->close_connection || conn->bits.close) {
           /* Close this filter and the sub-chain, re-connect the
            * sub-chain and continue. Closing this filter will
@@ -1003,10 +1004,8 @@ out:
   *done = (result == CURLE_OK) && tunnel_is_established(cf->ctx);
   if(*done) {
     cf->connected = TRUE;
-    /* Restore `data->req` fields that may habe been touched */
-    data->req.header = TRUE; /* assume header */
-    data->req.bytecount = 0;
-    data->req.ignorebody = FALSE;
+    /* The real request will follow the CONNECT, reset request partially */
+    Curl_req_soft_reset(&data->req, data);
     Curl_client_reset(data);
     Curl_pgrsSetUploadCounter(data, 0);
     Curl_pgrsSetDownloadCounter(data, 0);

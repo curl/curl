@@ -45,7 +45,7 @@ typedef enum {
 
 CURLcode Curl_follow(struct Curl_easy *data, char *newurl,
                      followtype type);
-CURLcode Curl_readwrite(struct Curl_easy *data, bool *done);
+CURLcode Curl_readwrite(struct Curl_easy *data);
 int Curl_single_getsock(struct Curl_easy *data,
                         struct connectdata *conn, curl_socket_t *socks);
 CURLcode Curl_retry_request(struct Curl_easy *data, char **url);
@@ -66,7 +66,7 @@ bool Curl_meets_timecondition(struct Curl_easy *data, time_t timeofdoc);
  */
 CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
                               char *buf, size_t blen,
-                              bool is_eos, bool *done);
+                              bool is_eos);
 
 /* This sets up a forthcoming transfer */
 void Curl_xfer_setup(struct Curl_easy *data,

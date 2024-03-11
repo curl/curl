@@ -209,7 +209,7 @@ static ssize_t Curl_xfer_recv_resp(struct Curl_easy *data,
  */
 static CURLcode readwrite_data(struct Curl_easy *data,
                                struct SingleRequest *k,
-                               int *didwhat, bool *done)
+                               int *didwhat)
 {
   struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
@@ -218,8 +218,6 @@ static CURLcode readwrite_data(struct Curl_easy *data,
   int maxloops = 10;
   curl_off_t total_received = 0;
   bool is_multiplex = FALSE;
-
-  *done = FALSE;
 
   result = Curl_multi_xfer_buf_borrow(data, &xfer_buf, &xfer_blen);
   if(result)
@@ -281,8 +279,8 @@ static CURLcode readwrite_data(struct Curl_easy *data,
     }
     total_received += blen;
 
-    result = Curl_xfer_write_resp(data, buf, blen, is_eos, done);
-    if(result || *done)
+    result = Curl_xfer_write_resp(data, buf, blen, is_eos);
+    if(result || data->req.done)
       goto out;
 
     /* if we are done, we stop receiving. On multiplexed connections,
@@ -403,8 +401,7 @@ static int select_bits_paused(struct Curl_easy *data, int select_bits)
  * Curl_readwrite() is the low-level function to be called when data is to
  * be read and written to/from the connection.
  */
-CURLcode Curl_readwrite(struct Curl_easy *data,
-                        bool *done)
+CURLcode Curl_readwrite(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
   struct SingleRequest *k = &data->req;
@@ -450,8 +447,8 @@ CURLcode Curl_readwrite(struct Curl_easy *data,
 
 #ifdef USE_HYPER
   if(conn->datastream) {
-    result = conn->datastream(data, conn, &didwhat, done, select_bits);
-    if(result || *done)
+    result = conn->datastream(data, conn, &didwhat, select_bits);
+    if(result || data->req.done)
       goto out;
   }
   else {
@@ -460,8 +457,8 @@ CURLcode Curl_readwrite(struct Curl_easy *data,
      the stream was rewound (in which case we have data in a
      buffer) */
   if((k->keepon & KEEP_RECV) && (select_bits & CURL_CSELECT_IN)) {
-    result = readwrite_data(data, k, &didwhat, done);
-    if(result || *done)
+    result = readwrite_data(data, k, &didwhat);
+    if(result || data->req.done)
       goto out;
   }
 
@@ -561,8 +558,10 @@ CURLcode Curl_readwrite(struct Curl_easy *data,
     }
   }
 
-  /* Now update the "done" boolean we return */
-  *done = (0 == (k->keepon&(KEEP_RECVBITS|KEEP_SENDBITS))) ? TRUE : FALSE;
+  /* If there is nothing more to send/recv, the request is done */
+  if(0 == (k->keepon&(KEEP_RECVBITS|KEEP_SENDBITS)))
+    data->req.done = TRUE;
+
 out:
   if(result)
     DEBUGF(infof(data, "Curl_readwrite() -> %d", result));
@@ -937,7 +936,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
 
   data->state.url = newurl;
   data->state.url_alloc = TRUE;
-
+  Curl_req_soft_reset(&data->req, data);
   infof(data, "Issue another request to this URL: '%s'", data->state.url);
 
   /*
@@ -1209,14 +1208,14 @@ void Curl_xfer_setup(
 
 CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
                               char *buf, size_t blen,
-                              bool is_eos, bool *done)
+                              bool is_eos)
 {
   CURLcode result = CURLE_OK;
 
   if(data->conn->handler->write_resp) {
     /* protocol handlers offering this function take full responsibility
      * for writing all received download data to the client. */
-    result = data->conn->handler->write_resp(data, buf, blen, is_eos, done);
+    result = data->conn->handler->write_resp(data, buf, blen, is_eos);
   }
   else {
     /* No special handling by protocol handler, write all received data
