@@ -1009,7 +1009,8 @@ static const struct LongShort *single(char letter)
 {
   static const struct LongShort *singles[128 - ' ']; /* ASCII => pointer */
   static bool singles_done = FALSE;
-  DEBUGASSERT((letter < 127) && (letter > ' '));
+  if((letter >= 127) || (letter <= ' '))
+    return NULL;
 
   if(!singles_done) {
     unsigned int j;
