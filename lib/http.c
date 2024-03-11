@@ -2446,19 +2446,17 @@ CURLcode Curl_http_range(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-CURLcode Curl_http_firstwrite(struct Curl_easy *data,
-                              struct connectdata *conn,
-                              bool *done)
+CURLcode Curl_http_firstwrite(struct Curl_easy *data)
 {
+  struct connectdata *conn = data->conn;
   struct SingleRequest *k = &data->req;
 
-  *done = FALSE;
   if(data->req.newurl) {
     if(conn->bits.close) {
       /* Abort after the headers if "follow Location" is set
          and we're set to close anyway. */
       k->keepon &= ~KEEP_RECV;
-      *done = TRUE;
+      k->done = TRUE;
       return CURLE_OK;
     }
     /* We have a new url to load, but since we want to be able to reuse this
@@ -2477,7 +2475,7 @@ CURLcode Curl_http_firstwrite(struct Curl_easy *data,
       streamclose(conn, "already downloaded");
       /* Abort download */
       k->keepon &= ~KEEP_RECV;
-      *done = TRUE;
+      k->done = TRUE;
       return CURLE_OK;
     }
 
@@ -2495,7 +2493,7 @@ CURLcode Curl_http_firstwrite(struct Curl_easy *data,
        action for an HTTP/1.1 client */
 
     if(!Curl_meets_timecondition(data, k->timeofdoc)) {
-      *done = TRUE;
+      k->done = TRUE;
       /* We're simulating an HTTP 304 from server so we return
          what should have been returned from the server */
       data->info.httpcode = 304;
@@ -3951,10 +3949,8 @@ out:
  */
 CURLcode Curl_http_write_resp_hds(struct Curl_easy *data,
                                   const char *buf, size_t blen,
-                                  size_t *pconsumed,
-                                  bool *done)
+                                  size_t *pconsumed)
 {
-  *done = FALSE;
   if(!data->req.header) {
     *pconsumed = 0;
     return CURLE_OK;
@@ -3965,7 +3961,7 @@ CURLcode Curl_http_write_resp_hds(struct Curl_easy *data,
     result = http_rw_headers(data, buf, blen, pconsumed);
     if(!result && !data->req.header) {
       /* we have successfully finished parsing the HEADERs */
-      result = Curl_http_firstwrite(data, data->conn, done);
+      result = Curl_http_firstwrite(data);
 
       if(!data->req.no_body && Curl_dyn_len(&data->state.headerb)) {
         /* leftover from parsing something that turned out not
@@ -3983,16 +3979,14 @@ CURLcode Curl_http_write_resp_hds(struct Curl_easy *data,
 
 CURLcode Curl_http_write_resp(struct Curl_easy *data,
                               const char *buf, size_t blen,
-                              bool is_eos,
-                              bool *done)
+                              bool is_eos)
 {
   CURLcode result;
   size_t consumed;
   int flags;
 
-  *done = FALSE;
-  result = Curl_http_write_resp_hds(data, buf, blen, &consumed, done);
-  if(result || *done)
+  result = Curl_http_write_resp_hds(data, buf, blen, &consumed);
+  if(result || data->req.done)
     goto out;
 
   DEBUGASSERT(consumed <= blen);

@@ -51,7 +51,6 @@ size_t Curl_hyper_send(void *userp, hyper_context *ctx,
 CURLcode Curl_hyper_stream(struct Curl_easy *data,
                            struct connectdata *conn,
                            int *didwhat,
-                           bool *done,
                            int select_res);
 
 CURLcode Curl_hyper_header(struct Curl_easy *data, hyper_headers *headers,

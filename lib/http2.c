@@ -951,10 +951,8 @@ static CURLcode recvbuf_write_hds(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   const char *buf, size_t blen)
 {
-  bool done;
-
   (void)cf;
-  return Curl_xfer_write_resp(data, (char *)buf, blen, FALSE, &done);
+  return Curl_xfer_write_resp(data, (char *)buf, blen, FALSE);
 }
 
 static CURLcode on_stream_frame(struct Curl_cfilter *cf,
@@ -1234,7 +1232,6 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   struct h2_stream_ctx *stream;
   struct Curl_easy *data_s;
   CURLcode result;
-  bool done;
   (void)flags;
 
   DEBUGASSERT(stream_id); /* should never be a zero stream ID here */
@@ -1257,7 +1254,7 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   if(!stream)
     return NGHTTP2_ERR_CALLBACK_FAILURE;
 
-  result = Curl_xfer_write_resp(data_s, (char *)mem, len, FALSE, &done);
+  result = Curl_xfer_write_resp(data_s, (char *)mem, len, FALSE);
   if(result && result != CURLE_AGAIN)
     return NGHTTP2_ERR_CALLBACK_FAILURE;
 

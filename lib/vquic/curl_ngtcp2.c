@@ -762,8 +762,7 @@ static int cb_h3_stream_close(nghttp3_conn *conn, int64_t stream_id,
 static CURLcode write_resp_hds(struct Curl_easy *data,
                                const char *buf, size_t blen)
 {
-  bool done;
-  return Curl_xfer_write_resp(data, (char *)buf, blen, FALSE, &done);
+  return Curl_xfer_write_resp(data, (char *)buf, blen, FALSE);
 }
 
 static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream3_id,
@@ -775,7 +774,6 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream3_id,
   struct Curl_easy *data = stream_user_data;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
   CURLcode result;
-  bool done;
 
   (void)conn;
   (void)stream3_id;
@@ -783,7 +781,7 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream3_id,
   if(!stream)
     return NGHTTP3_ERR_CALLBACK_FAILURE;
 
-  result = Curl_xfer_write_resp(data, (char *)buf, blen, FALSE, &done);
+  result = Curl_xfer_write_resp(data, (char *)buf, blen, FALSE);
   if(result) {
     CURL_TRC_CF(data, cf, "[%" PRId64 "] DATA len=%zu, ERROR receiving %d",
                 stream->id, blen, result);

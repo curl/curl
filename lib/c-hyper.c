@@ -207,7 +207,6 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
   CURLcode result = CURLE_OK;
 
   if(0 == k->bodywrites) {
-    bool done = FALSE;
 #if defined(USE_NTLM)
     struct connectdata *conn = data->conn;
     if(conn->bits.close &&
@@ -235,12 +234,12 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
     }
     if(data->state.hconnect && (data->req.httpcode/100 != 2) &&
        data->state.authproxy.done) {
-      done = TRUE;
+      data->req.done = TRUE;
       result = CURLE_OK;
     }
     else
-      result = Curl_http_firstwrite(data, data->conn, &done);
-    if(result || done) {
+      result = Curl_http_firstwrite(data);
+    if(result || data->req.done) {
       infof(data, "Return early from hyper_body_chunk");
       data->state.hresult = result;
       return HYPER_ITER_BREAK;
@@ -338,7 +337,6 @@ static CURLcode empty_header(struct Curl_easy *data)
 CURLcode Curl_hyper_stream(struct Curl_easy *data,
                            struct connectdata *conn,
                            int *didwhat,
-                           bool *done,
                            int select_res)
 {
   hyper_response *resp = NULL;
@@ -382,7 +380,6 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
     h->write_waker = NULL;
   }
 
-  *done = FALSE;
   do {
     hyper_task_return_type t;
     task = hyper_executor_poll(h->exec);
@@ -425,7 +422,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
           break;
         }
       }
-      *done = TRUE;
+      data->req.done = TRUE;
       hyper_error_free(hypererr);
       break;
     }
@@ -434,12 +431,11 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
       hyper_task_free(task);
       if((userdata_t)userdata == USERDATA_RESP_BODY) {
         /* end of transfer */
-        *done = TRUE;
+        data->req.done = TRUE;
         infof(data, "hyperstream is done");
         if(!k->bodywrites) {
           /* hyper doesn't always call the body write callback */
-          bool stilldone;
-          result = Curl_http_firstwrite(data, data->conn, &stilldone);
+          result = Curl_http_firstwrite(data);
         }
         break;
       }

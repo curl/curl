@@ -46,12 +46,23 @@ CURLcode Curl_req_init(struct SingleRequest *req)
   return CURLE_OK;
 }
 
-CURLcode Curl_req_start(struct SingleRequest *req,
-                        struct Curl_easy *data)
+CURLcode Curl_req_soft_reset(struct SingleRequest *req,
+                             struct Curl_easy *data)
 {
   CURLcode result;
 
-  req->start = Curl_now();
+  req->done = FALSE;
+  req->upload_done = FALSE;
+  req->download_done = FALSE;
+  req->ignorebody = FALSE;
+  req->bytecount = 0;
+  req->writebytecount = 0;
+  req->header = TRUE; /* assume header */
+  req->headerline = 0;
+  req->headerbytecount = 0;
+  req->allheadercount =  0;
+  req->deductheadercount = 0;
+
   result = Curl_client_start(data);
   if(result)
     return result;
@@ -73,6 +84,13 @@ CURLcode Curl_req_start(struct SingleRequest *req,
   return CURLE_OK;
 }
 
+CURLcode Curl_req_start(struct SingleRequest *req,
+                        struct Curl_easy *data)
+{
+  req->start = Curl_now();
+  return Curl_req_soft_reset(req, data);
+}
+
 static CURLcode req_flush(struct Curl_easy *data);
 
 CURLcode Curl_req_done(struct SingleRequest *req,
@@ -85,7 +103,7 @@ CURLcode Curl_req_done(struct SingleRequest *req,
   return CURLE_OK;
 }
 
-void Curl_req_reset(struct SingleRequest *req, struct Curl_easy *data)
+void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
 {
   struct curltime t0 = {0, 0};
 
