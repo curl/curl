@@ -232,7 +232,7 @@ sub protocols {
         return ".SH \"PROTOCOLS\"\n$data\n";
     }
     else {
-        return " ($data) " if($manpage);
+        return "($data) " if($manpage);
         return "[1]($data) " if(!$manpage);
     }
 }
