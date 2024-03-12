@@ -4399,6 +4399,11 @@ static CURLcode cr_exp100_read(struct Curl_easy *data,
     *nread = 0;
     *eos = FALSE;
     return CURLE_OK;
+  case EXP100_FAILED:
+    DEBUGF(infof(data, "cr_exp100_read, expectation failed, error"));
+    *nread = 0;
+    *eos = FALSE;
+    return CURLE_READ_ERROR;
   case EXP100_AWAITING_CONTINUE:
     ms = Curl_timediff(Curl_now(), ctx->start);
     if(ms < data->set.expect_100_timeout) {
