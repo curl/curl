@@ -18,8 +18,8 @@ Example:
 
 # `--cert-type`
 
-Tells curl what type the provided client certificate is using. PEM, DER, ENG
-and P12 are recognized types.
+Set type of the provided client certificate. PEM, DER, ENG and P12 are
+recognized types.
 
 The default type depends on the TLS backend and is usually PEM, however for
 Secure Transport and Schannel it is P12. If --cert is a pkcs11: URI then ENG is

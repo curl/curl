@@ -38,7 +38,8 @@ is treated as a comment.
 Only write one option per physical line in the config file. A single line is
 required to be no more than 10 megabytes (since 8.2.0).
 
-Specify the filename to --config as '-' to make curl read the file from stdin.
+Specify the filename to --config as minus "-" to make curl read the file from
+stdin.
 
 Note that to be able to specify a URL in the config file, you need to specify
 it using the --url option, and not by simply writing the URL on its own

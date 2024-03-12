@@ -16,10 +16,10 @@ Example:
 
 # `--curves`
 
-Tells curl to request specific curves to use during SSL session establishment
-according to RFC 8422, 5.1. Multiple algorithms can be provided by separating
-them with `:` (e.g. `X25519:P-521`). The parameter is available identically in
-the OpenSSL `s_client` and `s_server` utilities.
+Set specific curves to use during SSL session establishment according to RFC
+8422, 5.1. Multiple algorithms can be provided by separating them with `:`
+(e.g. `X25519:P-521`). The parameter is available identically in the OpenSSL
+`s_client` and `s_server` utilities.
 
 --curves allows a OpenSSL powered curl to make SSL-connections with exactly
 the (EC) curve requested by the client, avoiding nontransparent client/server

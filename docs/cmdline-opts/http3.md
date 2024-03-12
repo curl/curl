@@ -19,9 +19,9 @@ Example:
 
 # `--http3`
 
-Tells curl to try HTTP/3 to the host in the URL, but fallback to earlier
-HTTP versions if the HTTP/3 connection establishment fails. HTTP/3 is only
-available for HTTPS and not for HTTP URLs.
+Attempt HTTP/3 to the host in the URL, but fallback to earlier HTTP versions
+if the HTTP/3 connection establishment fails. HTTP/3 is only available for
+HTTPS and not for HTTP URLs.
 
 This option allows a user to avoid using the Alt-Svc method of upgrading to
 HTTP/3 when you know that the target speaks HTTP/3 on the given host and port.

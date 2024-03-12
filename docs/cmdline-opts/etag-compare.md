@@ -17,9 +17,8 @@ Example:
 
 # `--etag-compare`
 
-This option makes a conditional HTTP request for the specific ETag read
-from the given file by sending a custom If-None-Match header using the
-stored ETag.
+Make a conditional HTTP request for the specific ETag read from the given file
+by sending a custom If-None-Match header using the stored ETag.
 
 For correct results, make sure that the specified file contains only a
 single line with the desired ETag. An empty file is parsed as an empty

@@ -15,5 +15,5 @@ Example:
 
 # `--form-escape`
 
-Tells curl to pass on names of multipart form fields and files using
-backslash-escaping instead of percent-encoding.
+Pass on names of multipart form fields and files using backslash-escaping
+instead of percent-encoding.

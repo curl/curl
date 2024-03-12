@@ -15,10 +15,9 @@ Example:
 
 # `--false-start`
 
-Tells curl to use false start during the TLS handshake. False start is a mode
-where a TLS client starts sending application data before verifying the
-server's Finished message, thus saving a round trip when performing a full
-handshake.
+Use false start during the TLS handshake. False start is a mode where a TLS
+client starts sending application data before verifying the server's Finished
+message, thus saving a round trip when performing a full handshake.
 
-This is currently only implemented in the Secure Transport (on iOS 7.0 or
-later, or OS X 10.9 or later) backend.
+This functionality is currently only implemented in the Secure Transport (on
+iOS 7.0 or later, or OS X 10.9 or later) backend.

@@ -16,6 +16,5 @@ Example:
 
 # `--ssl-revoke-best-effort`
 
-(Schannel) This option tells curl to ignore certificate revocation checks when
-they failed due to missing/offline distribution points for the revocation check
-lists.
+(Schannel) Ignore certificate revocation checks when they failed due to
+missing/offline distribution points for the revocation check lists.

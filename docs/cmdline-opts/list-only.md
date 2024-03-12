@@ -17,23 +17,20 @@ Example:
 
 # `--list-only`
 
-(FTP)
-When listing an FTP directory, this switch forces a name-only view. This is
-especially useful if the user wants to machine-parse the contents of an FTP
-directory since the normal directory view does not use a standard look or
-format. When used like this, the option causes an NLST command to be sent to
-the server instead of LIST.
+When listing an FTP directory, force a name-only view. Maybe particularly
+useful if the user wants to machine-parse the contents of an FTP directory
+since the normal directory view does not use a standard look or format. When
+used like this, the option causes an NLST command to be sent to the server
+instead of LIST.
 
 Note: Some FTP servers list only files in their response to NLST; they do not
 include sub-directories and symbolic links.
 
-(SFTP)
 When listing an SFTP directory, this switch forces a name-only view, one per
 line. This is especially useful if the user wants to machine-parse the
 contents of an SFTP directory since the normal directory view provides more
 information than just filenames.
 
-(POP3)
 When retrieving a specific email from POP3, this switch forces a LIST command
 to be performed instead of RETR. This is particularly useful if the user wants
 to see if a specific message-id exists on the server and what size it is.

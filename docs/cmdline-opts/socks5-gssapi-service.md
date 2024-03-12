@@ -15,5 +15,4 @@ Example:
 
 # `--socks5-gssapi-service`
 
-The default service name for a socks server is **rcmd/server-fqdn**. This option
-allows you to change it.
+Set the service name for a socks server. Default is **rcmd/server-fqdn**.

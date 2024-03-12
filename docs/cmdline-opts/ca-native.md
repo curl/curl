@@ -17,10 +17,10 @@ Example:
 
 # `--ca-native`
 
-Tells curl to use the CA store from the native operating system to verify the
-peer. By default, curl otherwise uses a CA store provided in a single file or
-directory, but when using this option it interfaces the operating system's
-own vault.
+Use the CA store from the native operating system to verify the peer. By
+default, curl otherwise uses a CA store provided in a single file or
+directory, but when using this option it interfaces the operating system's own
+vault.
 
 This option works for curl on Windows when built to use OpenSSL, wolfSSL
 (added in 8.3.0) or GnuTLS (added in 8.5.0). When curl on Windows is built to

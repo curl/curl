@@ -6,7 +6,7 @@
 
 # curl man page generator
 
-This is the curl man page generator. It generates a single nroff man page
+`managen` is the curl man page generator. It generates a single nroff man page
 output from the set of sources files in this directory.
 
 The `mainpage.idx` file lists all files that are rendered in that order to

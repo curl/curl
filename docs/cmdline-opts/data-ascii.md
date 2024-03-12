@@ -18,4 +18,4 @@ Example:
 
 # `--data-ascii`
 
-This is just an alias for --data.
+This option is just an alias for --data.

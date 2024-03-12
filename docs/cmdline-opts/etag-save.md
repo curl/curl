@@ -16,7 +16,7 @@ Example:
 
 # `--etag-save`
 
-This option saves an HTTP ETag to the specified file. An ETag is a
-caching related header, usually returned in a response.
+Save an HTTP ETag to the specified file. An ETag is a caching related header,
+usually returned in a response.
 
 If no ETag is sent by the server, an empty file is created.

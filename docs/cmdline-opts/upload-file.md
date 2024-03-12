@@ -21,7 +21,7 @@ Example:
 
 # `--upload-file`
 
-This transfers the specified local file to the remote URL.
+Upload the specified local file to the remote URL.
 
 If there is no file part in the specified URL, curl appends the local file
 name to the end of the URL before the operation starts. You must use a
