@@ -300,4 +300,3 @@ conn[curl.se] --> HTTPS-CONNECT --> NULL
 conn[curl.se] --> HTTPS-CONNECT --> SETUP[QUIC] --> HAPPY-EYEBALLS --> HTTP/3[151.101.1.91]:443
 * transfer
 ```
-

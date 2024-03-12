@@ -115,4 +115,3 @@ That is why transfer decoding writers are added for phase `CURL_CW_TRANSFER_DECO
 By adding the common behavior of all protocols into `Curl_client_write()` we make sure that they do apply everywhere. Protocol handler have less to worry about. Changes to default behavior can be done without affecting handler implementations.
 
 Having a writer chain as implementation allows protocol handlers with extra needs, like HTTP, to add to this for special behavior. The common way of writing the actual response data stays the same.
-
