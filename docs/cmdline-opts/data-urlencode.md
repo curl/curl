@@ -20,32 +20,32 @@ Example:
 
 # `--data-urlencode`
 
-This posts data, similar to the other --data options with the exception
-that this performs URL-encoding.
+Post data, similar to the other --data options with the exception that this
+performs URL-encoding.
 
 To be CGI-compliant, the \<data\> part should begin with a *name* followed by
 a separator and a content specification. The \<data\> part can be passed to
 curl using one of the following syntaxes:
 
 ## content
-This makes curl URL-encode the content and pass that on. Just be careful
-so that the content does not contain any = or @ symbols, as that makes
-the syntax match one of the other cases below!
+URL-encode the content and pass that on. Just be careful so that the content
+does not contain any `=` or `@` symbols, as that makes the syntax match one of
+the other cases below!
 
 ## =content
-This makes curl URL-encode the content and pass that on. The preceding =
-symbol is not included in the data.
+URL-encode the content and pass that on. The preceding `=` symbol is not
+included in the data.
 
 ## name=content
-This makes curl URL-encode the content part and pass that on. Note that
-the name part is expected to be URL-encoded already.
+URL-encode the content part and pass that on. Note that the name part is
+expected to be URL-encoded already.
 
 ## @filename
-This makes curl load data from the given file (including any newlines),
-URL-encode that data and pass it on in the POST.
+load data from the given file (including any newlines), URL-encode that data
+and pass it on in the POST.
 
 ## name@filename
-This makes curl load data from the given file (including any newlines),
-URL-encode that data and pass it on in the POST. The name part gets an equal
-sign appended, resulting in *name=urlencoded-file-content*. Note that the
-name is expected to be URL-encoded already.
+load data from the given file (including any newlines), URL-encode that data
+and pass it on in the POST. The name part gets an equal sign appended,
+resulting in *name=urlencoded-file-content*. Note that the name is expected to
+be URL-encoded already.

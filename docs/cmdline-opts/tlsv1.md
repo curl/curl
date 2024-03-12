@@ -20,5 +20,5 @@ Example:
 
 # `--tlsv1`
 
-Tells curl to use at least TLS version 1.x when negotiating with a remote TLS
-server. That means TLS version 1.0 or higher
+Use at least TLS version 1.x when negotiating with a remote TLS server. That
+means TLS version 1.0 or higher

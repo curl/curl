@@ -18,7 +18,7 @@ Example:
 
 # `--negotiate`
 
-Enables Negotiate (SPNEGO) authentication.
+Enable Negotiate (SPNEGO) authentication.
 
 This option requires a library built with GSS-API or SSPI support. Use
 --version to see if your curl supports GSS-API/SSPI or SPNEGO.

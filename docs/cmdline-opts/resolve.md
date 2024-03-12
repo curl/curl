@@ -24,7 +24,7 @@ the number used for the specific protocol the host is used for. It means
 you need several entries if you want to provide address for the same host but
 different ports.
 
-By specifying '*' as host you can tell curl to resolve any host and specific
+By specifying `*` as host you can tell curl to resolve any host and specific
 port pair to the specified address. Wildcard is resolved last so any --resolve
 with a specific host and port is used first.
 

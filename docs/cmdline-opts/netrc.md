@@ -18,7 +18,7 @@ Example:
 
 # `--netrc`
 
-Makes curl scan the *.netrc* file in the user's home directory for login name
+Make curl scan the *.netrc* file in the user's home directory for login name
 and password. This is typically used for FTP on Unix. If used with HTTP, curl
 enables user authentication. See *netrc(5)* and *ftp(1)* for details on the
 file format. Curl does not complain if that file does not have the right

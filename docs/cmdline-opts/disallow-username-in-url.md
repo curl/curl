@@ -14,5 +14,5 @@ Example:
 
 # `--disallow-username-in-url`
 
-This tells curl to exit if passed a URL containing a username. This is probably
-most useful when the URL is being provided at runtime or similar.
+Exit with error if passed a URL containing a username. Probably most useful
+when the URL is being provided at runtime or similar.

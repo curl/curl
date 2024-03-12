@@ -17,7 +17,7 @@ Example:
 
 # `--ntlm`
 
-Enables NTLM authentication. The NTLM authentication method was designed by
+Use NTLM authentication. The NTLM authentication method was designed by
 Microsoft and is used by IIS web servers. It is a proprietary protocol,
 reverse-engineered by clever people and implemented in curl based on their
 efforts. This kind of behavior should not be endorsed, you should encourage

@@ -16,5 +16,5 @@ Example:
 
 # `--proxy-digest`
 
-Tells curl to use HTTP Digest authentication when communicating with the given
-proxy. Use --digest for enabling HTTP Digest with a remote host.
+Use HTTP Digest authentication when communicating with the given proxy. Use
+--digest for enabling HTTP Digest with a remote host.

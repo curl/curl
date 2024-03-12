@@ -51,7 +51,6 @@ sub checkfile {
         if(($l == 1) && ($line =~ /^---/)) {
             # first line is a meta-data divider, skip to the next one
             $metadata = 1;
-            print STDERR "skip meta-data in $f\n";
             next;
         }
         elsif($metadata) {

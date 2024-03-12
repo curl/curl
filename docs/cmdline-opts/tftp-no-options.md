@@ -15,8 +15,6 @@ Example:
 
 # `--tftp-no-options`
 
-Tells curl not to send TFTP options requests.
-
-This option improves interop with some legacy servers that do not acknowledge
-or properly implement TFTP options. When this option is used --tftp-blksize is
-ignored.
+Do not to send TFTP options requests. This improves interop with some legacy
+servers that do not acknowledge or properly implement TFTP options. When this
+option is used --tftp-blksize is ignored.

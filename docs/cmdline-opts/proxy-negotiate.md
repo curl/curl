@@ -15,6 +15,6 @@ Example:
 
 # `--proxy-negotiate`
 
-Tells curl to use HTTP Negotiate (SPNEGO) authentication when communicating
-with the given proxy. Use --negotiate for enabling HTTP Negotiate (SPNEGO)
-with a remote host.
+Use HTTP Negotiate (SPNEGO) authentication when communicating with the given
+proxy. Use --negotiate for enabling HTTP Negotiate (SPNEGO) with a remote
+host.

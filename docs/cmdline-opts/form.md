@@ -20,12 +20,12 @@ Example:
 
 # `--form`
 
-For HTTP protocol family, this lets curl emulate a filled-in form in which a
-user has pressed the submit button. This causes curl to POST data using the
-Content-Type multipart/form-data according to RFC 2388.
+For the HTTP protocol family, emulate a filled-in form in which a user has
+pressed the submit button. This makes curl POST data using the Content-Type
+multipart/form-data according to RFC 2388.
 
-For SMTP and IMAP protocols, this is the means to compose a multipart mail
-message to transmit.
+For SMTP and IMAP protocols, this composes a multipart mail message to
+transmit.
 
 This enables uploading of binary files etc. To force the 'content' part to be
 a file, prefix the filename with an @ sign. To just get the content part from
@@ -34,11 +34,11 @@ a file, prefix the filename with the symbol \<. The difference between @ and
 while the \< makes a text field and just get the contents for that text field
 from a file.
 
-Tell curl to read content from stdin instead of a file by using - as
-filename. This goes for both @ and \< constructs. When stdin is used, the
-contents is buffered in memory first by curl to determine its size and allow a
-possible resend. Defining a part's data from a named non-regular file (such as
-a named pipe or similar) is not subject to buffering and is instead read at
+Read content from stdin instead of a file by using a single "-" as filename.
+This goes for both @ and \< constructs. When stdin is used, the contents is
+buffered in memory first by curl to determine its size and allow a possible
+resend. Defining a part's data from a named non-regular file (such as a named
+pipe or similar) is not subject to buffering and is instead read at
 transmission time; since the full size is unknown before the transfer starts,
 such data is sent as chunks by HTTP and rejected by IMAP.
 
@@ -56,8 +56,8 @@ text field, but get the contents for it from a local file:
 
     curl -F "story=<hugefile.txt" https://example.com/
 
-You can also tell curl what Content-Type to use by using 'type=', in a manner
-similar to:
+You can also instruct curl what Content-Type to use by using `type=`, in a
+manner similar to:
 
     curl -F "web=@index.html;type=text/html" example.com
 

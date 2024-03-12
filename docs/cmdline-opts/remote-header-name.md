@@ -16,10 +16,9 @@ Example:
 
 # `--remote-header-name`
 
-This option tells the --remote-name option to use the server-specified
-Content-Disposition filename instead of extracting a filename from the URL. If
-the server-provided filename contains a path, that is stripped off before the
-filename is used.
+Tell the --remote-name option to use the server-specified Content-Disposition
+filename instead of extracting a filename from the URL. If the server-provided
+filename contains a path, that is stripped off before the filename is used.
 
 The file is saved in the current directory, or in the directory specified with
 --output-dir.

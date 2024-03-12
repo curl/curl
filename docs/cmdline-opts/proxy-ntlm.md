@@ -15,5 +15,5 @@ Example:
 
 # `--proxy-ntlm`
 
-Tells curl to use HTTP NTLM authentication when communicating with the given
-proxy. Use --ntlm for enabling NTLM with a remote host.
+Use HTTP NTLM authentication when communicating with the given proxy. Use
+--ntlm for enabling NTLM with a remote host.

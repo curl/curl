@@ -19,13 +19,13 @@ Example:
 
 # `--cert`
 
-Tells curl to use the specified client certificate file when getting a file
-with HTTPS, FTPS or another SSL-based protocol. The certificate must be in
-PKCS#12 format if using Secure Transport, or PEM format if using any other
-engine. If the optional password is not specified, it is queried for on
-the terminal. Note that this option assumes a certificate file that is the
-private key and the client certificate concatenated. See --cert and --key to
-specify them independently.
+Use the specified client certificate file when getting a file with HTTPS, FTPS
+or another SSL-based protocol. The certificate must be in PKCS#12 format if
+using Secure Transport, or PEM format if using any other engine. If the
+optional password is not specified, it is queried for on the terminal. Note
+that this option assumes a certificate file that is the private key and the
+client certificate concatenated. See --cert and --key to specify them
+independently.
 
 In the \<certificate\> portion of the argument, you must escape the character
 `:` as `\:` so that it is not recognized as the password delimiter. Similarly,

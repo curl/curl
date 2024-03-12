@@ -17,8 +17,8 @@ Example:
 
 # `--post301`
 
-Tells curl to respect RFC 7231/6.4.2 and not convert POST requests into GET
-requests when following a 301 redirection. The non-RFC behavior is ubiquitous
-in web browsers, so curl does the conversion by default to maintain
-consistency. However, a server may require a POST to remain a POST after such
-a redirection. This option is meaningful only when using --location.
+Respect RFC 7231/6.4.2 and do not convert POST requests into GET requests when
+following a 301 redirect. The non-RFC behavior is ubiquitous in web browsers,
+so curl does the conversion by default to maintain consistency. However, a
+server may require a POST to remain a POST after such a redirection. This
+option is meaningful only when using --location.
