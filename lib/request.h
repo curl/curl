@@ -81,8 +81,6 @@ struct SingleRequest {
   int httpcode;                 /* error code from the 'HTTP/1.? XXX' or
                                    'RTSP/1.? XXX' line */
   int keepon;
-  struct curltime start100;      /* time stamp to wait for the 100 code from */
-  enum expect100 exp100;        /* expect 100 continue state */
   enum upgrade101 upgr101;      /* 101 upgrade state */
 
   /* Client Writer stack, handles transfer- and content-encodings, protocol
@@ -148,7 +146,6 @@ struct SingleRequest {
                         but it is not the final request in the auth
                         negotiation. */
   BIT(sendbuf_init); /* sendbuf is initialized */
-  BIT(expect100header); /* TRUE if we added Expect: 100-continue */
 };
 
 /**

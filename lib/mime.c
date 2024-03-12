@@ -2106,6 +2106,7 @@ static const struct Curl_crtype cr_mime = {
   cr_mime_resume_from,
   cr_mime_rewind,
   cr_mime_unpause,
+  Curl_creader_def_done,
   sizeof(struct cr_mime_ctx)
 };
 

@@ -425,7 +425,7 @@ static int curltest_put_handler(request_rec *r)
   apr_off_t rbody_len = 0;
   const char *s_rbody_len;
   const char *request_id = "none";
-  apr_time_t chunk_delay = 0;
+  apr_time_t read_delay = 0, chunk_delay = 0;
   apr_array_header_t *args = NULL;
   long l;
   int i;
@@ -449,6 +449,12 @@ static int curltest_put_handler(request_rec *r)
           /* just an id for repeated requests with curl's url globbing */
           request_id = val;
           continue;
+        }
+        else if(!strcmp("read_delay", arg)) {
+          rv = duration_parse(&read_delay, val, "s");
+          if(APR_SUCCESS == rv) {
+            continue;
+          }
         }
         else if(!strcmp("chunk_delay", arg)) {
           rv = duration_parse(&chunk_delay, val, "s");
@@ -478,6 +484,9 @@ static int curltest_put_handler(request_rec *r)
   ct = apr_table_get(r->headers_in, "content-type");
   ap_set_content_type(r, ct? ct : "text/plain");
 
+  if(read_delay) {
+    apr_sleep(read_delay);
+  }
   bb = apr_brigade_create(r->pool, c->bucket_alloc);
   /* copy any request body into the response */
   if((rv = ap_setup_client_block(r, REQUEST_CHUNKED_DECHUNK))) goto cleanup;

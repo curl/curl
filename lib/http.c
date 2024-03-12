@@ -102,6 +102,9 @@
  */
 
 static bool http_should_fail(struct Curl_easy *data);
+static bool http_exp100_is_waiting(struct Curl_easy *data);
+static CURLcode http_exp100_add_reader(struct Curl_easy *data);
+static void http_exp100_send_anyway(struct Curl_easy *data);
 
 /*
  * HTTP handler interface.
@@ -2177,12 +2180,13 @@ CURLcode Curl_http_req_set_reader(struct Curl_easy *data,
   return result;
 }
 
-static CURLcode addexpect(struct Curl_easy *data, struct dynbuf *r)
+static CURLcode addexpect(struct Curl_easy *data, struct dynbuf *r,
+                          bool *announced_exp100)
 {
   CURLcode result;
   char *ptr;
 
-  data->req.expect100header = FALSE;
+  *announced_exp100 = FALSE;
   /* Avoid Expect: 100-continue if Upgrade: is used */
   if(data->req.upgr101 != UPGR101_INIT)
     return CURLE_OK;
@@ -2193,7 +2197,7 @@ static CURLcode addexpect(struct Curl_easy *data, struct dynbuf *r)
      here. */
   ptr = Curl_checkheaders(data, STRCONST("Expect"));
   if(ptr) {
-    data->req.expect100header =
+    *announced_exp100 =
       Curl_compareheader(ptr, STRCONST("Expect:"), STRCONST("100-continue"));
   }
   else if(!data->state.disableexpect &&
@@ -2207,7 +2211,7 @@ static CURLcode addexpect(struct Curl_easy *data, struct dynbuf *r)
       result = Curl_dyn_addn(r, STRCONST("Expect: 100-continue\r\n"));
       if(result)
         return result;
-      data->req.expect100header = TRUE;
+      *announced_exp100 = TRUE;
     }
   }
   return CURLE_OK;
@@ -2218,6 +2222,7 @@ CURLcode Curl_http_req_complete(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
   curl_off_t req_clen;
+  bool announced_exp100 = FALSE;
 
   DEBUGASSERT(data->conn);
 #ifndef USE_HYPER
@@ -2276,7 +2281,7 @@ CURLcode Curl_http_req_complete(struct Curl_easy *data,
           goto out;
       }
     }
-    result = addexpect(data, r);
+    result = addexpect(data, r, &announced_exp100);
     if(result)
       goto out;
     break;
@@ -2287,6 +2292,8 @@ CURLcode Curl_http_req_complete(struct Curl_easy *data,
   /* end of headers */
   result = Curl_dyn_addn(r, STRCONST("\r\n"));
   Curl_pgrsSetUploadSize(data, req_clen);
+  if(announced_exp100)
+    result = http_exp100_add_reader(data);
 
 out:
   if(!result) {
@@ -3459,11 +3466,7 @@ static CURLcode http_rw_headers(struct Curl_easy *data,
           k->headerline = 0; /* restart the header line counter */
 
           /* if we did wait for this do enable write now! */
-          if(k->exp100 > EXP100_SEND_DATA) {
-            k->exp100 = EXP100_SEND_DATA;
-            k->keepon |= KEEP_SEND;
-            Curl_expire_done(data, EXPIRE_100_TIMEOUT);
-          }
+          Curl_http_exp100_got100(data);
           break;
         case 101:
           if(conn->httpversion == 11) {
@@ -3642,13 +3645,11 @@ static CURLcode http_rw_headers(struct Curl_easy *data,
              * request body has been sent we stop sending and mark the
              * connection for closure after we've read the entire response.
              */
-            Curl_expire_done(data, EXPIRE_100_TIMEOUT);
             if(!Curl_req_done_sending(data)) {
-              if((k->httpcode == 417) && k->expect100header) {
+              if((k->httpcode == 417) && Curl_http_exp100_is_selected(data)) {
                 /* 417 Expectation Failed - try again without the Expect
                    header */
-                if(!k->writebytecount &&
-                   k->exp100 == EXP100_AWAITING_CONTINUE) {
+                if(!k->writebytecount && http_exp100_is_waiting(data)) {
                   infof(data, "Got HTTP failure 417 while waiting for a 100");
                 }
                 else {
@@ -3666,10 +3667,7 @@ static CURLcode http_rw_headers(struct Curl_easy *data,
               }
               else if(data->set.http_keep_sending_on_error) {
                 infof(data, "HTTP error before end of send, keep sending");
-                if(k->exp100 > EXP100_SEND_DATA) {
-                  k->exp100 = EXP100_SEND_DATA;
-                  k->keepon |= KEEP_SEND;
-                }
+                http_exp100_send_anyway(data);
               }
               else {
                 infof(data, "HTTP error before end of send, stop sending");
@@ -3677,8 +3675,6 @@ static CURLcode http_rw_headers(struct Curl_easy *data,
                 result = Curl_req_abort_sending(data);
                 if(result)
                   return result;
-                if(k->expect100header)
-                  k->exp100 = EXP100_FAILED;
               }
             }
             break;
@@ -4360,6 +4356,139 @@ void Curl_http_resp_free(struct http_resp *resp)
       Curl_http_resp_free(resp->prev);
     free(resp);
   }
+}
+
+struct cr_exp100_ctx {
+  struct Curl_creader super;
+  struct curltime start; /* time started waiting */
+  enum expect100 state;
+};
+
+/* Expect: 100-continue client reader, blocking uploads */
+
+static void http_exp100_continue(struct Curl_easy *data,
+                                 struct Curl_creader *reader)
+{
+  struct cr_exp100_ctx *ctx = reader->ctx;
+  if(ctx->state > EXP100_SEND_DATA) {
+    ctx->state = EXP100_SEND_DATA;
+    data->req.keepon |= KEEP_SEND;
+    data->req.keepon &= ~KEEP_SEND_TIMED;
+    Curl_expire_done(data, EXPIRE_100_TIMEOUT);
+  }
+}
+
+static CURLcode cr_exp100_read(struct Curl_easy *data,
+                               struct Curl_creader *reader,
+                               char *buf, size_t blen,
+                               size_t *nread, bool *eos)
+{
+  struct cr_exp100_ctx *ctx = reader->ctx;
+  timediff_t ms;
+
+  switch(ctx->state) {
+  case EXP100_SENDING_REQUEST:
+    /* We are now waiting for a reply from the server or
+     * a timeout on our side */
+    DEBUGF(infof(data, "cr_exp100_read, start AWAITING_CONTINUE"));
+    ctx->state = EXP100_AWAITING_CONTINUE;
+    ctx->start = Curl_now();
+    Curl_expire(data, data->set.expect_100_timeout, EXPIRE_100_TIMEOUT);
+    data->req.keepon &= ~KEEP_SEND;
+    data->req.keepon |= KEEP_SEND_TIMED;
+    *nread = 0;
+    *eos = FALSE;
+    return CURLE_OK;
+  case EXP100_AWAITING_CONTINUE:
+    ms = Curl_timediff(Curl_now(), ctx->start);
+    if(ms < data->set.expect_100_timeout) {
+      DEBUGF(infof(data, "cr_exp100_read, AWAITING_CONTINUE, not expired"));
+      data->req.keepon &= ~KEEP_SEND;
+      data->req.keepon |= KEEP_SEND_TIMED;
+      *nread = 0;
+      *eos = FALSE;
+      return CURLE_OK;
+    }
+    /* we've waited long enough, continue anyway */
+    http_exp100_continue(data, reader);
+    infof(data, "Done waiting for 100-continue");
+    FALLTHROUGH();
+  default:
+    DEBUGF(infof(data, "cr_exp100_read, pass through"));
+    return Curl_creader_read(data, reader->next, buf, blen, nread, eos);
+  }
+}
+
+static void cr_exp100_done(struct Curl_easy *data,
+                           struct Curl_creader *reader, int premature)
+{
+  struct cr_exp100_ctx *ctx = reader->ctx;
+  ctx->state = premature? EXP100_FAILED : EXP100_SEND_DATA;
+  data->req.keepon &= ~KEEP_SEND_TIMED;
+  Curl_expire_done(data, EXPIRE_100_TIMEOUT);
+}
+
+static const struct Curl_crtype cr_exp100 = {
+  "cr-exp100",
+  Curl_creader_def_init,
+  cr_exp100_read,
+  Curl_creader_def_close,
+  Curl_creader_def_needs_rewind,
+  Curl_creader_def_total_length,
+  Curl_creader_def_resume_from,
+  Curl_creader_def_rewind,
+  Curl_creader_def_unpause,
+  cr_exp100_done,
+  sizeof(struct cr_exp100_ctx)
+};
+
+static CURLcode http_exp100_add_reader(struct Curl_easy *data)
+{
+  struct Curl_creader *reader = NULL;
+  CURLcode result;
+
+  result = Curl_creader_create(&reader, data, &cr_exp100,
+                               CURL_CR_PROTOCOL);
+  if(!result)
+    result = Curl_creader_add(data, reader);
+  if(!result) {
+    struct cr_exp100_ctx *ctx = reader->ctx;
+    ctx->state = EXP100_SENDING_REQUEST;
+  }
+
+  if(result && reader)
+    Curl_creader_free(data, reader);
+  return result;
+}
+
+void Curl_http_exp100_got100(struct Curl_easy *data)
+{
+  struct Curl_creader *r = Curl_creader_get_by_type(data, &cr_exp100);
+  if(r)
+    http_exp100_continue(data, r);
+}
+
+static bool http_exp100_is_waiting(struct Curl_easy *data)
+{
+  struct Curl_creader *r = Curl_creader_get_by_type(data, &cr_exp100);
+  if(r) {
+    struct cr_exp100_ctx *ctx = r->ctx;
+    return (ctx->state == EXP100_AWAITING_CONTINUE);
+  }
+  return FALSE;
+}
+
+static void http_exp100_send_anyway(struct Curl_easy *data)
+{
+  struct Curl_creader *r = Curl_creader_get_by_type(data, &cr_exp100);
+  if(r)
+    http_exp100_continue(data, r);
+}
+
+bool Curl_http_exp100_is_selected(struct Curl_easy *data)
+{
+  struct Curl_creader *r = Curl_creader_get_by_type(data, &cr_exp100);
+  return r? TRUE : FALSE;
 }
 
 #endif /* CURL_DISABLE_HTTP */

@@ -208,6 +208,8 @@ struct Curl_crtype {
                           struct Curl_creader *reader, curl_off_t offset);
   CURLcode (*rewind)(struct Curl_easy *data, struct Curl_creader *reader);
   CURLcode (*unpause)(struct Curl_easy *data, struct Curl_creader *reader);
+  void (*done)(struct Curl_easy *data,
+               struct Curl_creader *reader, int premature);
   size_t creader_size;  /* sizeof() allocated struct Curl_creader */
 };
 
@@ -256,6 +258,8 @@ CURLcode Curl_creader_def_rewind(struct Curl_easy *data,
                                  struct Curl_creader *reader);
 CURLcode Curl_creader_def_unpause(struct Curl_easy *data,
                                   struct Curl_creader *reader);
+void Curl_creader_def_done(struct Curl_easy *data,
+                           struct Curl_creader *reader, int premature);
 
 /**
  * Convenience method for calling `reader->do_read()` that
@@ -360,6 +364,19 @@ CURLcode Curl_creader_resume_from(struct Curl_easy *data, curl_off_t offset);
  * Unpause all installed readers.
  */
 CURLcode Curl_creader_unpause(struct Curl_easy *data);
+
+/**
+ * Tell all client readers that they are done.
+ */
+void Curl_creader_done(struct Curl_easy *data, int premature);
+
+/**
+ * Look up an installed client reader on `data` by its type.
+ * @return first reader with that type or NULL
+ */
+struct Curl_creader *Curl_creader_get_by_type(struct Curl_easy *data,
+                                              const struct Curl_crtype *crt);
+
 
 /**
  * Set the client reader to provide 0 bytes, immediate EOS.
