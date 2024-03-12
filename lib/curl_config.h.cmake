@@ -741,6 +741,9 @@ ${SIZEOF_TIME_T_CODE}
 /* to enable Windows SSL  */
 #cmakedefine USE_SCHANNEL 1
 
+/* Use standard certificate store of operating system */
+#cmakedefine USE_CA_NATIVE 1
+
 /* enable multiple SSL backends */
 #cmakedefine CURL_WITH_MULTI_SSL 1
 

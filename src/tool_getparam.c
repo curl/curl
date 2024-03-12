@@ -2749,7 +2749,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     a = NULL;
 
   } while(!longopt && !singleopt && *++parse && !*usedarg && !err);
-
+#ifdef USE_CA_NATIVE
+  config->native_ca_store = true;
+#endif
 error:
   if(nextalloc)
     free(nextarg);

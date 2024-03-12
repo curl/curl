@@ -399,6 +399,11 @@ cmake_dependent_option(CURL_USE_BEARSSL "Enable BearSSL for SSL/TLS" OFF CURL_EN
 cmake_dependent_option(CURL_USE_WOLFSSL "Enable wolfSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 cmake_dependent_option(CURL_USE_GNUTLS "Enable GnuTLS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 
+option(CURL_USE_CA_NATIVE "Use standard certificate store of operating system" OFF)
+if(CURL_USE_CA_NATIVE)
+  set(USE_CA_NATIVE ON)
+endif()
+
 set(openssl_default ON)
 if(WIN32 OR CURL_USE_SECTRANSP OR CURL_USE_SCHANNEL OR CURL_USE_MBEDTLS OR CURL_USE_WOLFSSL)
   set(openssl_default OFF)
