@@ -16,7 +16,7 @@ Example:
 
 # `--globoff`
 
-Switch off the URL globbing funcionality. When you set this option, you can
+Switch off the URL globbing function. When you set this option, you can
 specify URLs that contain the letters {}[] without having curl itself
 interpret them. Note that these letters are not normal legal URL contents but
 they should be encoded according to the URI standard.
