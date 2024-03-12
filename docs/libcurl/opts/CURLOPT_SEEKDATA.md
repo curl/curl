@@ -68,4 +68,3 @@ int main(void)
 Added in 7.18.0
 
 # RETURN VALUE
-
