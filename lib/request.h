@@ -146,7 +146,6 @@ struct SingleRequest {
                         but it is not the final request in the auth
                         negotiation. */
   BIT(sendbuf_init); /* sendbuf is initialized */
-  BIT(expect100header); /* TRUE if we added Expect: 100-continue */
 };
 
 /**
