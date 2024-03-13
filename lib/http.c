@@ -419,7 +419,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
   bool little_upload_remains = (upload_remain >= 0 && upload_remain < 2000);
   bool needs_rewind = Curl_creader_needs_rewind(data);
   /* By default, we'd like to abort the transfer when little or
-   * unknown amount remains. But this may be overrided by authentications
+   * unknown amount remains. But this may be overridden by authentications
    * further below! */
   bool abort_upload = (!data->req.upload_done && !little_upload_remains);
   const char *ongoing_auth = NULL;
