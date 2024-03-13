@@ -30,12 +30,12 @@ page](https://curl.se/sponsors.html).
 
 A named level sponsor is entitled a logo and link on the curl website assuming
 the company, brand and link are not deemed unsuitable. The curl team reserves
-the right to make that decision at it's own discretion.
+the right to make that decision at its own discretion.
 
 Sponsors may be denied a website presence for example if involved with drugs,
 gambling, pornography, social media manipulation etc.
 
 ## Past Sponsors
 
-Sponsors that stop paying are considered *Past Sponsors* and will not be
-displayed on the sponsor page anymore. We thank you for your contributions!
+Sponsors that stop paying are considered *Past Sponsors* and are not displayed
+on the sponsor page anymore. We thank you for your contributions!
