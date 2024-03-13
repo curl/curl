@@ -417,7 +417,7 @@ static CURLcode curl_wssl_init_ctx(struct quic_tls_ctx *ctx,
               "  CAfile: %s CApath: %s",
               ssl_cafile ? ssl_cafile : "none",
               ssl_capath ? ssl_capath : "none");
-        result = CURLE_SSL_CACERT;
+        result = CURLE_SSL_CACERT_BADFILE;
         goto out;
       }
       infof(data, " CAfile: %s", ssl_cafile ? ssl_cafile : "none");
