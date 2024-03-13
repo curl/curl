@@ -4,7 +4,7 @@ A sponsor is someone who donates money or resources to the curl project for no
 specific service in return.
 
 curl accepts donations via [GitHub sponsors](https://github.com/sponsors/curl)
-and Open Collective(https://opencollective.com/curl).
+and [Open Collective](https://opencollective.com/curl).
 
 An even better way to contribute to the project might be to pay an engineer or
 two to spend work hours on curl related tasks.
