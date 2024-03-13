@@ -9,7 +9,7 @@ and [Open Collective](https://opencollective.com/curl).
 An even better way to contribute to the project might be to pay an engineer or
 two to spend work hours on curl related tasks.
 
-We plea to use donated funds for things and activities that we believe are
+We promise to use donated funds for things and activities that we believe are
 beneficial for the project and its development. That includes but is not
 limited to bug-bounties, developer conferences, infrastructure, development,
 services and hardware.
