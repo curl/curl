@@ -405,68 +405,52 @@ static bool pickoneauth(struct auth *pick, unsigned long mask)
 /*
  * http_perhapsrewind()
  *
- * If we are doing POST or PUT {
- *   If we have more data to send {
- *     If we are doing NTLM {
- *       Keep sending since we must not disconnect
- *     }
- *     else {
- *       If there is more than just a little data left to send, close
- *       the current connection by force.
- *     }
- *   }
- *   If we have sent any data {
- *     If we don't have track of all the data {
- *       call app to tell it to rewind
- *     }
- *     else {
- *       rewind internally so that the operation can restart fine
- *     }
- *   }
- * }
+ * The current request needs to be done again - maybe due to a follow
+ * or authentication negotiation. Check if:
+ * 1) a rewind of the data sent to the server is necessary
+ * 2) the current transfer should continue or be stopped early
  */
 static CURLcode http_perhapsrewind(struct Curl_easy *data,
                                    struct connectdata *conn)
 {
-  struct HTTP *http = data->req.p.http;
-  curl_off_t bytessent;
+  curl_off_t bytessent = data->req.writebytecount;
   curl_off_t expectsend = Curl_creader_total_length(data);
+  bool little_upload_remains = (expectsend >= 0 &&
+                                (expectsend - bytessent) < 2000);
 
-  if(!http)
-    /* If this is still NULL, we have not reach very far and we can safely
-       skip this rewinding stuff */
+  /* If the client readers do not need a rewind, it means they
+   * can be started again without further action. This may be due
+   * them relying on static data, not data at all or just because
+   * they have not provided any bytes yet.
+   * Note: this will be TRUE on all requests that do not upload
+   * anything (GET/HEAD) or pseudo POSTs for authentication. */
+  if(!Curl_creader_needs_rewind(data))
     return CURLE_OK;
 
-  if(!expectsend)
-    /* not sending any body */
-    return CURLE_OK;
+  /* We need a rewind before uploading client read data again. The
+   * checks below just influence of the uplaod is to be continued
+   * or aborted early.
+   * This depends on how much remains to be sent and in what state
+   * the authentication is. Some auth schemes such as NTLM do not work
+   * for a new connection. */
+  Curl_creader_set_rewind(data, TRUE);
 
-  if(!conn->bits.protoconnstart)
-    /* HTTP CONNECT in progress: there is no body */
-    expectsend = 0;
+  if(!data->req.upload_done) {
+    if(little_upload_remains) {
+      infof(data, "Rewind stream before next send");
+      return CURLE_OK;
+    }
 
-  bytessent = data->req.writebytecount;
-  Curl_creader_set_rewind(data, FALSE);
-
-  if((expectsend == -1) || (expectsend > bytessent)) {
 #if defined(USE_NTLM)
     /* There is still data left to send */
     if((data->state.authproxy.picked == CURLAUTH_NTLM) ||
        (data->state.authhost.picked == CURLAUTH_NTLM) ||
        (data->state.authproxy.picked == CURLAUTH_NTLM_WB) ||
        (data->state.authhost.picked == CURLAUTH_NTLM_WB)) {
-      if(((expectsend - bytessent) < 2000) ||
-         (conn->http_ntlm_state != NTLMSTATE_NONE) ||
+      if((conn->http_ntlm_state != NTLMSTATE_NONE) ||
          (conn->proxy_ntlm_state != NTLMSTATE_NONE)) {
-        /* The NTLM-negotiation has started *OR* there is just a little (<2K)
-           data left to send, keep on sending. */
-
-        /* rewind data when completely done sending! */
-        if(!data->req.authneg && (conn->writesockfd != CURL_SOCKET_BAD)) {
-          Curl_creader_set_rewind(data, TRUE);
-          infof(data, "Rewind stream before next send");
-        }
-
+        /* The NTLM-negotiation has started, keep on sending. */
+        infof(data, "Rewind stream before next send");
         return CURLE_OK;
       }
 
@@ -483,18 +467,10 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
     /* There is still data left to send */
     if((data->state.authproxy.picked == CURLAUTH_NEGOTIATE) ||
        (data->state.authhost.picked == CURLAUTH_NEGOTIATE)) {
-      if(((expectsend - bytessent) < 2000) ||
-         (conn->http_negotiate_state != GSS_AUTHNONE) ||
+      if((conn->http_negotiate_state != GSS_AUTHNONE) ||
          (conn->proxy_negotiate_state != GSS_AUTHNONE)) {
-        /* The NEGOTIATE-negotiation has started *OR*
-        there is just a little (<2K) data left to send, keep on sending. */
-
-        /* rewind data when completely done sending! */
-        if(!data->req.authneg && (conn->writesockfd != CURL_SOCKET_BAD)) {
-          Curl_creader_set_rewind(data, TRUE);
-          infof(data, "Rewind stream before next send");
-        }
-
+        /* The NEGOTIATE-negotiation has started, keep on sending. */
+        infof(data, "Rewind stream before next send");
         return CURLE_OK;
       }
 
@@ -508,20 +484,14 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
     }
 #endif
 
-    /* This is not NEGOTIATE/NTLM or many bytes left to send: close */
+    /* We have too much (or unknown) amounts to send and
+     * no auth scheme requires this transfer to continue. */
     streamclose(conn, "Mid-auth HTTP and much data left to send");
+    /* FIXME: questionable manipulation here */
     data->req.size = 0; /* don't download any more than 0 bytes */
-
-    /* There still is data left to send, but this connection is marked for
-       closure so we can safely do the rewind right now */
   }
 
-  if(Curl_creader_needs_rewind(data)) {
-    /* mark for rewind since if we already sent something */
-    Curl_creader_set_rewind(data, TRUE);
-    infof(data, "Please rewind output before next send");
-  }
-
+  infof(data, "Please rewind output before next send");
   return CURLE_OK;
 }
 
@@ -575,13 +545,10 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
 #endif
 
   if(pickhost || pickproxy) {
-    if((data->state.httpreq != HTTPREQ_GET) &&
-       (data->state.httpreq != HTTPREQ_HEAD) &&
-       !Curl_creader_will_rewind(data)) {
-      result = http_perhapsrewind(data, conn);
-      if(result)
-        return result;
-    }
+    result = http_perhapsrewind(data, conn);
+    if(result)
+      return result;
+
     /* In case this is GSS auth, the newurl field is already allocated so
        we must make sure to free it before allocating a new one. As figured
        out in bug #2284386 */
