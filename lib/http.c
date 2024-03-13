@@ -428,7 +428,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
     return CURLE_OK;
 
   /* We need a rewind before uploading client read data again. The
-   * checks below just influence of the uplaod is to be continued
+   * checks below just influence of the upload is to be continued
    * or aborted early.
    * This depends on how much remains to be sent and in what state
    * the authentication is. Some auth schemes such as NTLM do not work
