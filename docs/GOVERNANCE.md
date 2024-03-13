@@ -113,8 +113,9 @@ There is a curl core team. It currently has the same set of members as the
 security team. It can also be reached on the security email address.
 
 The core team nominates and invites new members to the team when it sees fit.
-There is no open member voting or formal candidateship. Active participants in
-the curl project who want to join the core team can ask to join.
+There is no open member voting or formal ways to be a candidate. Active
+participants in the curl project who want to join the core team can ask to
+join.
 
 The core team is a board of advisors. It deals with project management
 subjects that need confidentiality or for other reasons cannot be dealt with
