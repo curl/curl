@@ -415,17 +415,14 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
 {
   curl_off_t bytessent = data->req.writebytecount;
   curl_off_t expectsend = Curl_creader_total_length(data);
-  bool little_upload_remains = (expectsend >= 0 &&
-                                (expectsend - bytessent) < 2000);
-
-  /* If the client readers do not need a rewind, it means they
-   * can be started again without further action. This may be due
-   * them relying on static data, not data at all or just because
-   * they have not provided any bytes yet.
-   * Note: this will be TRUE on all requests that do not upload
-   * anything (GET/HEAD) or pseudo POSTs for authentication. */
-  if(!Curl_creader_needs_rewind(data))
-    return CURLE_OK;
+  curl_off_t upload_remain = (expectsend >= 0)? (expectsend - bytessent) : -1;
+  bool little_upload_remains = (upload_remain >= 0 && upload_remain < 2000);
+  bool needs_rewind = Curl_creader_needs_rewind(data);
+  /* By default, we'd like to abort the transfer when little or
+   * unknown amount remains. But this may be overrided by authentications
+   * further below! */
+  bool abort_upload = (!data->req.upload_done && !little_upload_remains);
+  const char *ongoing_auth = NULL;
 
   /* We need a rewind before uploading client read data again. The
    * checks below just influence of the upload is to be continued
@@ -433,65 +430,63 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
    * This depends on how much remains to be sent and in what state
    * the authentication is. Some auth schemes such as NTLM do not work
    * for a new connection. */
-  Curl_creader_set_rewind(data, TRUE);
+  if(needs_rewind) {
+    infof(data, "Need to rewind upload for next request");
+    Curl_creader_set_rewind(data, TRUE);
+  }
 
-  if(!data->req.upload_done) {
-    if(little_upload_remains) {
-      infof(data, "Rewind stream before next send");
-      return CURLE_OK;
-    }
+  if(conn->bits.close)
+    /* If we already decided to close this connection, we cannot veto. */
+    return CURLE_OK;
 
+  if(abort_upload) {
+    /* We'd like to abort the upload - but should we? */
 #if defined(USE_NTLM)
-    /* There is still data left to send */
     if((data->state.authproxy.picked == CURLAUTH_NTLM) ||
        (data->state.authhost.picked == CURLAUTH_NTLM) ||
        (data->state.authproxy.picked == CURLAUTH_NTLM_WB) ||
        (data->state.authhost.picked == CURLAUTH_NTLM_WB)) {
+      ongoing_auth = "NTML";
       if((conn->http_ntlm_state != NTLMSTATE_NONE) ||
          (conn->proxy_ntlm_state != NTLMSTATE_NONE)) {
-        /* The NTLM-negotiation has started, keep on sending. */
-        infof(data, "Rewind stream before next send");
-        return CURLE_OK;
+        /* The NTLM-negotiation has started, keep on sending.
+         * Need to do further work on same connection */
+        abort_upload = FALSE;
       }
-
-      if(conn->bits.close)
-        /* this is already marked to get closed */
-        return CURLE_OK;
-
-      infof(data, "NTLM send, close instead of sending %"
-            CURL_FORMAT_CURL_OFF_T " bytes",
-            (curl_off_t)(expectsend - bytessent));
     }
 #endif
 #if defined(USE_SPNEGO)
     /* There is still data left to send */
     if((data->state.authproxy.picked == CURLAUTH_NEGOTIATE) ||
        (data->state.authhost.picked == CURLAUTH_NEGOTIATE)) {
+      ongoing_auth = "NEGOTIATE";
       if((conn->http_negotiate_state != GSS_AUTHNONE) ||
          (conn->proxy_negotiate_state != GSS_AUTHNONE)) {
-        /* The NEGOTIATE-negotiation has started, keep on sending. */
-        infof(data, "Rewind stream before next send");
-        return CURLE_OK;
+        /* The NEGOTIATE-negotiation has started, keep on sending.
+         * Need to do further work on same connection */
+        abort_upload = FALSE;
       }
-
-      if(conn->bits.close)
-        /* this is already marked to get closed */
-        return CURLE_OK;
-
-      infof(data, "NEGOTIATE send, close instead of sending %"
-        CURL_FORMAT_CURL_OFF_T " bytes",
-        (curl_off_t)(expectsend - bytessent));
     }
 #endif
-
-    /* We have too much (or unknown) amounts to send and
-     * no auth scheme requires this transfer to continue. */
-    streamclose(conn, "Mid-auth HTTP and much data left to send");
-    /* FIXME: questionable manipulation here */
-    data->req.size = 0; /* don't download any more than 0 bytes */
   }
 
-  infof(data, "Please rewind output before next send");
+  if(abort_upload) {
+    if(upload_remain >= 0)
+      infof(data, "%s%sclose instead of sending %"
+        CURL_FORMAT_CURL_OFF_T " more bytes",
+        ongoing_auth? ongoing_auth : "",
+        ongoing_auth? " send, " : "",
+        upload_remain);
+    else
+      infof(data, "%s%sclose instead of sending unknown amount "
+        "of more bytes",
+        ongoing_auth? ongoing_auth : "",
+        ongoing_auth? " send, " : "");
+    /* We decided to abort the ongoing transfer */
+    streamclose(conn, "Mid-auth HTTP and much data left to send");
+    /* FIXME: questionable manipulation here, can we do this differently? */
+    data->req.size = 0; /* don't download any more than 0 bytes */
+  }
   return CURLE_OK;
 }
 

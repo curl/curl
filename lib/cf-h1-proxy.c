@@ -237,6 +237,8 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
   http_minor = (cf->conn->http_proxy.proxytype == CURLPROXY_HTTP_1_0) ? 0 : 1;
 
   result = Curl_h1_req_write_head(req, http_minor, &ts->request_data);
+  if(!result)
+    result = Curl_creader_set_null(data);
 
 out:
   if(result)
@@ -746,6 +748,10 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
   }
 
   result = Curl_add_custom_headers(data, TRUE, headers);
+  if(result)
+    goto error;
+
+  result = Curl_creader_set_null(data);
   if(result)
     goto error;
 
