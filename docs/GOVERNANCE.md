@@ -107,6 +107,22 @@ persons. We invite new members when the team seems to need it, and we also
 expect to retire security team members as they "drift off" from the project or
 just find themselves unable to perform their duties there.
 
+## Core team
+
+There is a curl core team. It currently has the same set of members as the
+security team. It can also be reached on the security email address.
+
+The core team nominates and invites new members to the team when it sees fit.
+There is no open member voting or formal ways to be a candidate. Active
+participants in the curl project who want to join the core team can ask to
+join.
+
+The core team is a board of advisors. It deals with project management
+subjects that need confidentiality or for other reasons cannot be dealt with
+and discussed in the open (for example reports of code of conduct violations).
+Project matters should always as far as possible be discussed on open mailing
+lists.
+
 ## Server admins
 
 We run a web server, a mailing list and more on the curl project's primary
