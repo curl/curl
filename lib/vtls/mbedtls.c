@@ -75,6 +75,7 @@
 #include "mbedtls.h"
 #include "vtls.h"
 #include "vtls_int.h"
+#include "x509asn1.h"
 #include "parsedate.h"
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
@@ -922,6 +923,60 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   return CURLE_OK;
 }
 
+static int count_server_cert(const mbedtls_x509_crt *peercert)
+{
+  int count = 1;
+
+  DEBUGASSERT(peercert);
+
+  while(peercert->next) {
+    ++count;
+    peercert = peercert->next;
+  }
+  return count;
+}
+
+static CURLcode collect_server_cert_single(struct Curl_easy *data,
+                                           const mbedtls_x509_crt *server_cert,
+                                           int idx)
+{
+  const char *beg, *end;
+
+  DEBUGASSERT(server_cert);
+
+  beg = (const char *)server_cert->raw.p;
+  end = beg + server_cert->raw.len;
+  return Curl_extract_certinfo(data, idx, beg, end);
+}
+
+static CURLcode collect_server_cert(struct Curl_cfilter *cf,
+                                    struct Curl_easy *data,
+                                    const struct mbedtls_x509_crt *peercert)
+{
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+  const bool show_verbose_server_cert = data->set.verbose;
+#else
+  const bool show_verbose_server_cert = false;
+#endif
+  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+  CURLcode result = CURLE_PEER_FAILED_VERIFICATION;
+  int i, count;
+
+  if(!show_verbose_server_cert && !ssl_config->certinfo)
+    return CURLE_OK;
+
+  if(!peercert)
+    return result;
+
+  count = count_server_cert(peercert);
+  result = Curl_ssl_init_certinfo(data, count);
+  for(i = 0 ; !result && peercert ; i++) {
+    result = collect_server_cert_single(data, peercert, i);
+    peercert = peercert->next;
+  }
+  return result;
+}
+
 static CURLcode
 mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
@@ -1003,6 +1058,12 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
   peercert = mbedtls_ssl_get_peer_cert(&backend->ssl);
+
+  if(peercert) {
+    const CURLcode result = collect_server_cert(cf, data, peercert);
+    if(result)
+      return result;
+  }
 
   if(peercert && data->set.verbose) {
 #ifndef MBEDTLS_X509_REMOVE_INFO
@@ -1611,6 +1672,7 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
 
   SSLSUPP_CA_PATH |
   SSLSUPP_CAINFO_BLOB |
+  SSLSUPP_CERTINFO |
   SSLSUPP_PINNEDPUBKEY |
   SSLSUPP_SSL_CTX |
   SSLSUPP_HTTPS_PROXY,
