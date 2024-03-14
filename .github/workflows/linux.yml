@@ -139,7 +139,7 @@ jobs:
               CFLAGS="-fsanitize=memory -Wformat -Werror=format-security -Werror=array-bounds -g"
               LDFLAGS="-fsanitize=memory"
               LIBS="-ldl"
-              --without-ssl --without-zlib --without-brotli --without-zstd --without-libpsl --without-nghttp2 --enable-debug --enable-websocketsx
+              --without-ssl --without-zlib --without-brotli --without-zstd --without-libpsl --without-nghttp2 --enable-debug --enable-websockets
             singleuse: --unit
 
           - name: event-based
@@ -196,6 +196,14 @@ jobs:
         name: 'install dependencies'
 
       - uses: actions/checkout@v4
+
+      - name: Fix kernel mmap rnd bits
+        # Asan in llvm 14 provided in ubuntu 22.04 is incompatible with
+        # high-entropy ASLR in much newer kernels that GitHub runners are
+        # using leading to random crashes: https://reviews.llvm.org/D148280
+        # See https://github.com/actions/runner-images/issues/9491
+        continue-on-error: true
+        run: sudo sysctl vm.mmap_rnd_bits=28
 
       - if: contains(matrix.build.install_steps, 'gcc-11')
         run: |
