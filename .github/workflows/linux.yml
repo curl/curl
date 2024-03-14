@@ -202,6 +202,7 @@ jobs:
         # high-entropy ASLR in much newer kernels that GitHub runners are
         # using leading to random crashes: https://reviews.llvm.org/D148280
         # See https://github.com/actions/runner-images/issues/9491
+        continue-on-error: true
         run: sudo sysctl vm.mmap_rnd_bits=28
 
       - if: contains(matrix.build.install_steps, 'gcc-11')
