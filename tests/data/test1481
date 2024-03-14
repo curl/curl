@@ -24,6 +24,9 @@ Connection: close
 <server>
 http
 </server>
+<features>
+proxy
+</features>
 <name>
 --libcurl with TLS version options
 </name>
