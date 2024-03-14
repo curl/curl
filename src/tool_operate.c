@@ -1763,11 +1763,11 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           if(config->falsestart)
             my_setopt(curl, CURLOPT_SSL_FALSESTART, 1L);
 
-          my_setopt_enum(curl, CURLOPT_SSLVERSION,
-                         config->ssl_version | config->ssl_version_max);
+          my_setopt_SSLVERSION(curl, CURLOPT_SSLVERSION,
+                               config->ssl_version | config->ssl_version_max);
           if(config->proxy)
-            my_setopt_enum(curl, CURLOPT_PROXY_SSLVERSION,
-                           config->proxy_ssl_version);
+            my_setopt_SSLVERSION(curl, CURLOPT_PROXY_SSLVERSION,
+                                 config->proxy_ssl_version);
 
           {
             long mask =
