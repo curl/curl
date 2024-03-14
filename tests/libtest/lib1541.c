@@ -69,7 +69,7 @@ static void check_time0(CURL *easy, int key, const char *name,
                         const char *where)
 {
   curl_off_t tval;
-  CURLcode res = curl_easy_getinfo(easy, key, &tval);
+  CURLcode res = curl_easy_getinfo(easy, (CURLINFO)key, &tval);
   if(res) {
     geterr(name, res, __LINE__);
   }
