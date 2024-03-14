@@ -4,7 +4,7 @@ curl and libcurl 8.7.0
  Command line options:         258
  curl_easy_setopt() options:   304
  Public functions in libcurl:  93
- Contributors:                 3113
+ Contributors:                 3115
 
 This release includes the following changes:
 
@@ -16,7 +16,6 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o _VARIABLES.md: improve the description [105]
  o ALTSVC.md: correct a typo [14]
  o asyn-ares: fix data race warning [88]
  o asyn-thread: use wakeup_close to close the read descriptor [1]
@@ -37,6 +36,7 @@ This release includes the following bugfixes:
  o cmdline-docs/Makefile: avoid using a fixed temp file name [5]
  o cmdline-docs: quote and angle bracket cleanup [45]
  o cmdline-opts/_EXITCODES: sync with libcurl-errors [80]
+ o cmdline-opts/_VARIABLES.md: improve the description [105]
  o cmdline-opts/_VERSION: provide %VERSION correctly [87]
  o configure.ac: find libpsl with pkg-config [79]
  o configure: add warning for using TLS libraries without 1.3 support [26]
@@ -49,6 +49,7 @@ This release includes the following bugfixes:
  o cookie.md: provide an example sending a fixed cookie [13]
  o cookie: if psl fails, reject the cookie [107]
  o curl: exit on config file parser errors [40]
+ o curl: make --libcurl output better CURLOPT_*SSLVERSION [127]
  o curl: when allocating variables, add the name into the struct [37]
  o curl_setup.h: add curl_uint64_t internal type
  o curldown: fix email address in Copyright [89]
@@ -76,7 +77,9 @@ This release includes the following bugfixes:
  o gen.pl: make the "manpageification" faster [95]
  o gen: make `\>` in input to render as plain '>' in output [78]
  o getparam: make --ftp-ssl work again [90]
+ o GHA/linux: add sysctl trick to work-around GitHub runner issue [129]
  o GIT-INFO: convert to markdown [114]
+ o GOVERNANCE: document the core team [133]
  o header.md: remove backslash, make nicer markdown [48]
  o HTTP/2: write response directly [12]
  o http2: fix push discard [124]
@@ -99,12 +102,14 @@ This release includes the following bugfixes:
  o lib: enhance client reader resume + rewind [92]
  o lib: initialize output pointers to NULL before calling strto[ff,l,ul] [63]
  o lib: keep conn IP information together [109]
+ o lib: move 'done' parameter to SingleRequests [142]
  o lib: remove curl_mimepart object when CURL_DISABLE_MIME [72]
  o libcurl-docs: cleanups
  o libcurl-security.md: Active FTP passes on the local IP address [6]
  o libssh/libssh2: return error on too big range [75]
  o MANUAL.md: fix typo [66]
  o mbedtls: fix building when MBEDTLS_X509_REMOVE_INFO flag is defined [27]
+ o mbedtls: properly cleanup the thread-shared entropy [140]
  o mbedtls: use mbedtls_ssl_conf_{min|max}_tls_version [59]
  o md4: include strdup.h for the memdup proto [10]
  o mime: add client reader [126]
@@ -124,6 +129,7 @@ This release includes the following bugfixes:
  o paramhlp: fix CRLF-stripping files with "-d @file" [116]
  o proxy1.0.md: fix example [15]
  o pytest: adapt to API change [106]
+ o request: clarify message when request has been sent off [143]
  o rustls: make curl compile with 0.12.0 [73]
  o schannel: fix hang on unexpected server close [57]
  o scripts: fix cijobs.pl for Azure and GHA
@@ -132,11 +138,13 @@ This release includes the following bugfixes:
  o setopt: fix disabling all protocols [99]
  o sha512_256: add support for GnuTLS and OpenSSL [110]
  o smtp: fix STARTTLS [91]
+ o SPONSORS: describe the basics [131]
  o strtoofft: fix the overflow check [74]
  o test1165: improve pattern matching [60]
  o tests: support setting/using blank content env variables
  o TIMER_STARTTRANSFER: set the same for everyone [82]
  o tool_cb_hdr: only parse etag + content-disposition for 2xx [9]
+ o tool_getparam: handle non-existing (out of range) short-options [141]
  o tool_operate: change precedence of server Retry-After time [44]
  o tool_operate: do not set CURLOPT_QUICK_EXIT in debug builds [3]
  o trace-config.md: remove the mutexed options list [119]
@@ -144,6 +152,7 @@ This release includes the following bugfixes:
  o transfer: improve Windows SO_SNDBUF update limit [56]
  o urldata: move authneg bit from conn to Curl_easy [69]
  o version: allow building with ancient libpsl [52]
+ o vquic-tls: fix the error code returned for bad CA file [135]
  o vtls: fix tls proxy peer verification [55]
  o vtls: revert "receive max buffer" + add test case [39]
  o VULN-DISCLOSURE-POLICY.md: update detail about CVE requests [123]
@@ -163,21 +172,22 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  5533asdg on github, Andreas Kiefer, av223119 on github, Boris Verkhovskiy,
-  Brett Buddin, Chris Webb, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
-  Daniel Szmulewicz, DasKutti on github, dependabot[bot], Dirk Hünniger,
+  5533asdg on github, Andreas Kiefer, av223119 on github,
+  awesomekosm on github, Boris Verkhovskiy, Brett Buddin, Chris Webb,
+  Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, Daniel Szmulewicz,
+  DasKutti on github, dependabot[bot], Dexter Gerig, Dirk Hünniger,
   Dmitry Karpov, Dmitry Tretyakov, edmcln on github, Erik Schnetter,
   Evgeny Grin (Karlson2k), Fabian Vogt, Fabrice Fontaine, Faraz Fallahi,
-  Gisle Vanem, Harry Sintonen, HsiehYuho on github, Jan Macku, Jiawen Geng,
-  Joel Depooter, Jon Rumsey, Jordan Brown, Karthikdasari0423,
-  Konstantin Vlasov, kpcyrd, Lars Kellogg-Stedman, LeeRiva, Louis Solofrizzo,
-  Lukáš Zaoral, Marcel Raad, Michael Forney, Michael Kaufmann, Michał Antoniak,
-  Nikita Taranov, Patrick Monnerat, Paweł Witas, Peter Krefting, RainRat,
-  Ramiro Garcia, Ray Satiro, Richard Levitte, Robert Moreton, Rudi Heitbaum,
-  Ryan Carsten Schmidt, Scott Mutter, Scott Talbert, Sebastian Neubauer,
-  Sergey Bronnikov, Simon K, Stefan Eissing, Tal Regev, Viktor Szakats,
-  vulnerabilityspotter on hackerone
-  (60 contributors)
+  Geeknik Labs, Gisle Vanem, Harry Sintonen, HsiehYuho on github, Jan Macku,
+  Jiawen Geng, Joel Depooter, Jon Rumsey, Jordan Brown, Karthikdasari0423,
+  Karthikdasari0423 on github, Konstantin Vlasov, kpcyrd, Lars Kellogg-Stedman,
+  LeeRiva, Louis Solofrizzo, Lukáš Zaoral, Marcel Raad, Michael Forney,
+  Michael Kaufmann, Michał Antoniak, Nikita Taranov, Patrick Monnerat,
+  Paweł Witas, Peter Krefting, RainRat, Ramiro Garcia, Ray Satiro,
+  Richard Levitte, Robert Moreton, Rudi Heitbaum, Ryan Carsten Schmidt,
+  Scott Mutter, Scott Talbert, Sebastian Neubauer, Sergey Bronnikov, Simon K,
+  Stefan Eissing, Tal Regev, Viktor Szakats, vulnerabilityspotter on hackerone
+  (64 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -307,7 +317,16 @@ References to bug reports and discussions on issues:
  [124] = https://curl.se/bug/?i=13055
  [125] = https://curl.se/mail/lib-2024-03/0001.html
  [126] = https://curl.se/bug/?i=13039
+ [127] = https://curl.se/bug/?i=13127
  [128] = https://curl.se/bug/?i=13085
+ [129] = https://curl.se/bug/?i=13124
  [130] = https://curl.se/bug/?i=13082
+ [131] = https://curl.se/bug/?i=13119
  [132] = https://curl.se/bug/?i=13081
+ [133] = https://curl.se/bug/?i=13118
  [134] = https://curl.se/bug/?i=12063
+ [135] = https://curl.se/bug/?i=13115
+ [140] = https://curl.se/bug/?i=11919
+ [141] = https://curl.se/bug/?i=13101
+ [142] = https://curl.se/bug/?i=13096
+ [143] = https://curl.se/bug/?i=13093
