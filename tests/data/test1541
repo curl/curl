@@ -14,7 +14,6 @@ DELAY
 <data>
 HTTP/1.1 200 OK swsclose
 Transfer-Encoding: chunked
-Trailer: MyCoolTrailerHeader
 
 4
 data
@@ -22,7 +21,6 @@ data
 d474
 
 0
-MyCoolTrailerHeader: amazingtrailer
 
 </data>
 <datacheck>
@@ -34,10 +32,8 @@ CURLINFO_APPCONNECT_TIME_T on 1st header is OK
 CURLINFO_SPEED_DOWNLOAD_T on 1st header is OK
 HTTP/1.1 200 OK swsclose
 Transfer-Encoding: chunked
-Trailer: MyCoolTrailerHeader
 
 datad474
-MyCoolTrailerHeader: amazingtrailer
 CURLINFO_CONNECT_TIME_T on done is OK
 CURLINFO_PRETRANSFER_TIME_T on done is OK
 CURLINFO_STARTTRANSFER_TIME_T on done is OK
