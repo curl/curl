@@ -107,6 +107,16 @@ const struct NameValue setopt_nv_CURL_SSLVERSION[] = {
   NVEND,
 };
 
+const struct NameValue setopt_nv_CURL_SSLVERSION_MAX[] = {
+  NV(CURL_SSLVERSION_MAX_NONE),
+  NV(CURL_SSLVERSION_MAX_DEFAULT),
+  NV(CURL_SSLVERSION_MAX_TLSv1_0),
+  NV(CURL_SSLVERSION_MAX_TLSv1_1),
+  NV(CURL_SSLVERSION_MAX_TLSv1_2),
+  NV(CURL_SSLVERSION_MAX_TLSv1_3),
+  NVEND,
+};
+
 const struct NameValue setopt_nv_CURL_TIMECOND[] = {
   NV(CURL_TIMECOND_IFMODSINCE),
   NV(CURL_TIMECOND_IFUNMODSINCE),
@@ -285,6 +295,50 @@ CURLcode tool_setopt_enum(CURL *curl, struct GlobalConfig *config,
     }
     else {
       CODE2("curl_easy_setopt(hnd, %s, (long)%s);", name, nv->name);
+    }
+  }
+
+#ifdef DEBUGBUILD
+  if(ret)
+    warnf(config, "option %s returned error (%d)", name, (int)ret);
+#endif
+nomem:
+  return ret;
+}
+
+/* setopt wrapper for CURLOPT_SSLVERSION */
+CURLcode tool_setopt_SSLVERSION(CURL *curl, struct GlobalConfig *config,
+                                const char *name, CURLoption tag,
+                                long lval)
+{
+  CURLcode ret = CURLE_OK;
+  bool skip = FALSE;
+
+  ret = curl_easy_setopt(curl, tag, lval);
+  if(!lval)
+    skip = TRUE;
+
+  if(config->libcurl && !skip && !ret) {
+    /* we only use this for real if --libcurl was used */
+    const struct NameValue *nv = NULL;
+    const struct NameValue *nv2 = NULL;
+    for(nv = setopt_nv_CURL_SSLVERSION; nv->name; nv++) {
+      if(nv->value == (lval & 0xffff))
+        break; /* found it */
+    }
+    for(nv2 = setopt_nv_CURL_SSLVERSION_MAX; nv2->name; nv2++) {
+      if(nv2->value == (lval & ~0xffff))
+        break; /* found it */
+    }
+    if(!nv->name) {
+      /* If no definition was found, output an explicit value.
+       * This could happen if new values are defined and used
+       * but the NameValue list is not updated. */
+      CODE2("curl_easy_setopt(hnd, %s, %ldL);", name, lval);
+    }
+    else {
+      CODE3("curl_easy_setopt(hnd, %s, (long)(%s | %s));",
+            name, nv->name, nv2->name);
     }
   }
 
