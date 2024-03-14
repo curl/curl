@@ -50,7 +50,7 @@ static void report_time(const char *key, const char *where, curl_off_t time,
     printf("%s on %s is OK\n", key, where);
   else
     printf("%s on %s is WRONG: %" CURL_FORMAT_CURL_OFF_T "\n",
-           key, where, (long)time);
+           key, where, time);
 }
 
 static void check_time(CURL *easy, int key, const char *name,
