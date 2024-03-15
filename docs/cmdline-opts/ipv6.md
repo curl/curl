@@ -22,3 +22,7 @@ Example:
 
 Use IPv6 addresses only when resolving hostnames, and not for example try
 IPv4.
+
+Your resolver may respond to an IPv6-only resolve request by returning IPv6
+addresses that contain "mapped" IPv4 addresses for compatibility purposes.
+macOS is known to do this.
