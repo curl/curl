@@ -280,7 +280,7 @@ static CURLcode status_line(struct Curl_easy *data,
     /* CONNECT */
     data->info.httpproxycode = http_status;
   else {
-    conn->httpversion = data->req.httpversion;
+    conn->httpversion = (unsigned char)data->req.httpversion;
     if(http_version == HYPER_HTTP_VERSION_1_0)
       data->state.httpwant = CURL_HTTP_VERSION_1_0;
 
