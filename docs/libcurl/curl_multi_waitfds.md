@@ -40,8 +40,8 @@ written to.
 
 libcurl fills provided *ufds* array up to the *size*.
 If a number of descriptors used by the multi_handle is greater than the
-*size* parameter then libcurl will fill the *ufds* up to the *size*
-and will return CURLM_OUT_OF_MEMORY error.
+*size* parameter then libcurl fills the *ufds* up to the *size*
+and returns CURLM_OUT_OF_MEMORY error.
 
 If the *fd_count* argument is not a null pointer, it points to a variable
 that on returns specifies the number of descriptors used by the multi_handle to
