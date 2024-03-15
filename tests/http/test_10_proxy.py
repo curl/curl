@@ -362,6 +362,10 @@ class TestProxy:
         xargs = curl.get_proxy_args(proto=proto, use_ip=True)
         r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
                                extra_args=xargs)
-        r.check_response(count=1, http_status=200,
-                         protocol='HTTP/2' if proto == 'h2' else 'HTTP/1.1')
+        if env.curl_uses_lib('mbedtls') and \
+                not env.curl_lib_version_at_least('mbedtls', '3.5.0'):
+            r.check_exit_code(60) # CURLE_PEER_FAILED_VERIFICATION
+        else:
+            r.check_response(count=1, http_status=200,
+                             protocol='HTTP/2' if proto == 'h2' else 'HTTP/1.1')
 
