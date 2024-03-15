@@ -114,6 +114,7 @@ my %api = (
     'curl_multi_strerror' => 'API',
     'curl_multi_timeout' => 'API',
     'curl_multi_wait' => 'API',
+    'curl_multi_waitfds' => 'API',
     'curl_multi_wakeup' => 'API',
     'curl_mvaprintf' => 'API',
     'curl_mvfprintf' => 'API',
