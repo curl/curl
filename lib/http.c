@@ -3377,6 +3377,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
   struct SingleRequest *k = &data->req;
   bool switch_to_h2 = FALSE;
 
+  (void)buf; /* not used without HTTP2 enabled */
   *pconsumed = 0;
 
   if(k->upgr101 == UPGR101_RECEIVED) {
