@@ -3565,7 +3565,8 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
     return CURLE_OUT_OF_MEMORY;
   }
 
-#ifdef SSL_MODE_RELEASE_BUFFERS
+#if defined(SSL_MODE_RELEASE_BUFFERS) && \
+  !defined(DISABLE_SSL_MODE_RELEASE_BUFFERS)
   SSL_CTX_set_mode(backend->ctx, SSL_MODE_RELEASE_BUFFERS);
 #endif
 
