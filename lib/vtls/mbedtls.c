@@ -687,14 +687,13 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
                               &backend->clicert, &backend->pk);
   }
 
-  if(connssl->peer.sni) {
-    if(mbedtls_ssl_set_hostname(&backend->ssl, connssl->peer.sni)) {
-      /* mbedtls_ssl_set_hostname() sets the name to use in CN/SAN checks and
-         the name to set in the SNI extension. So even if curl connects to a
-         host specified as an IP address, this function must be used. */
-      failf(data, "Failed to set SNI");
-      return CURLE_SSL_CONNECT_ERROR;
-    }
+  if(mbedtls_ssl_set_hostname(&backend->ssl, connssl->peer.sni?
+                              connssl->peer.sni : connssl->peer.hostname)) {
+    /* mbedtls_ssl_set_hostname() sets the name to use in CN/SAN checks and
+       the name to set in the SNI extension. So even if curl connects to a
+       host specified as an IP address, this function must be used. */
+    failf(data, "Failed to set SNI");
+    return CURLE_SSL_CONNECT_ERROR;
   }
 
 #ifdef HAS_ALPN
