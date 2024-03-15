@@ -28,7 +28,7 @@
  *  empty multi handle (expected zero descriptors),
  *  HTTP1 amd HTTP2 (no multiplexing) two transfers (expected two descriptors),
  *  HTTP2 with multiplexing (expected one descriptors)
- *  
+ *
  *  It is also expected that all transfers run by multi-handle should complete
  *  successfully.
  */
@@ -60,21 +60,19 @@
 
  /* ---------------------------------------------------------------- */
 
-
-//////////////////////////////////////////////////////////////////////////
-
 enum {
   TEST_USE_HTTP1 = 0,
   TEST_USE_HTTP2,
   TEST_USE_HTTP2_MPLEX,
 };
 
-static size_t emptyWriteFunc(void* ptr, size_t size, size_t nmemb, void* data) {
+static size_t emptyWriteFunc(void *ptr, size_t size, size_t nmemb,
+    void *data) {
   (void)ptr; (void)data;
   return size * nmemb;
 }
 
-static int set_easy(char* URL, CURL* easy, long option)
+static int set_easy(char *URL, CURL *easy, long option)
 {
   int res = CURLE_OK;
 
@@ -84,7 +82,7 @@ static int set_easy(char* URL, CURL* easy, long option)
   /* get verbose debug output please */
   easy_setopt(easy, CURLOPT_VERBOSE, 1L);
 
-  switch (option) {
+  switch(option) {
   case TEST_USE_HTTP1:
     /* go http1 */
     easy_setopt(easy, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
@@ -116,19 +114,19 @@ test_cleanup:
   return res;
 }
 
-static int test_run(char* URL, long option, unsigned int* max_fd_count)
+static int test_run(char *URL, long option, unsigned int *max_fd_count)
 {
   CURLMcode mc = CURLM_OK;
-  CURLM* multi = NULL;
-  CURLM* multi1 = NULL;
+  CURLM *multi = NULL;
+  CURLM *multi1 = NULL;
 
-  CURL* easy1 = NULL;
-  CURL* easy2 = NULL;
+  CURL *easy1 = NULL;
+  CURL *easy2 = NULL;
 
   unsigned int max_count = 0;
 
   int still_running; /* keep number of running handles */
-  CURLMsg* msg; /* for picking up messages with the transfer status */
+  CURLMsg *msg; /* for picking up messages with the transfer status */
   int msgs_left; /* how many messages are left */
 
   CURLcode result;
@@ -144,8 +142,8 @@ static int test_run(char* URL, long option, unsigned int* max_fd_count)
   if(set_easy(URL, easy1, option) != CURLE_OK)
     goto test_cleanup;
 
-  if (set_easy(URL, easy2, option) != CURLE_OK)
-      goto test_cleanup;
+  if(set_easy(URL, easy2, option) != CURLE_OK)
+    goto test_cleanup;
 
   multi_init(multi);
   multi_init(multi1);
@@ -201,12 +199,12 @@ static int test_run(char* URL, long option, unsigned int* max_fd_count)
   for(;;) {
     msg = curl_multi_info_read(multi, &msgs_left);
     if(!msg)
-        break;
+      break;
     if(msg->msg == CURLMSG_DONE) {
-        result = msg->data.result;
+      result = msg->data.result;
 
-        if(!res)
-          res = (int)result;
+      if(!res)
+        res = (int)result;
     }
   }
 
@@ -225,10 +223,11 @@ test_cleanup:
   return res;
 }
 
-static int empty_multi_test() {
+static int empty_multi_test(void)
+{
   CURLMcode mc = CURLM_OK;
-  CURLM* multi = NULL;
-  CURL* easy = NULL;
+  CURLM *multi = NULL;
+  CURL *easy = NULL;
 
   struct curl_waitfd ufds[10];
 
@@ -255,7 +254,7 @@ static int empty_multi_test() {
   /* calling curl_multi_waitfds() on multi handle with added easy handle. */
   easy_init(easy);
 
-  if(set_easy((char*)"http://example.com", easy, TEST_USE_HTTP1) != CURLE_OK)
+  if(set_easy((char *)"http://example.com", easy, TEST_USE_HTTP1) != CURLE_OK)
     goto test_cleanup;
 
   multi_add_handle(multi, easy);
@@ -282,7 +281,7 @@ test_cleanup:
   return res;
 }
 
-int test(char* URL)
+int test(char *URL)
 {
   int res = CURLE_OK;
   unsigned int fd_count = 0;
