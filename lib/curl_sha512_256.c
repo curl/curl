@@ -153,7 +153,17 @@ Curl_sha512_256_finish(unsigned char *digest,
   CURLcode ret;
   Curl_sha512_256_ctx *const ctx = (Curl_sha512_256_ctx *)context;
 
+#ifdef __NetBSD__
+  /* Use a larger buffer to work around a bug in NetBSD:
+     https://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=58039 */
+  unsigned char tmp_digest[SHA512_256_DIGEST_SIZE * 2];
+  ret = EVP_DigestFinal_ex(*ctx,
+                           tmp_digest, NULL) ? CURLE_OK : CURLE_SSL_CIPHER;
+  if(ret == CURLE_OK)
+    memcpy(digest, tmp_digest, SHA512_256_DIGEST_SIZE);
+#else  /* ! __NetBSD__ */
   ret = EVP_DigestFinal_ex(*ctx, digest, NULL) ? CURLE_OK : CURLE_SSL_CIPHER;
+#endif /* ! __NetBSD__ */
 
   EVP_MD_CTX_destroy(*ctx);
   *ctx = NULL;
