@@ -1,0 +1,51 @@
+<testcase>
+<info>
+<keywords>
+multi
+HTTP
+HTTP/2
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6007
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+%repeat[1000 x foobar]%
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+http/2
+</server>
+<tool>
+lib%TESTNUMBER
+</tool>
+<name>
+checking curl_multi_waitfds functionality
+</name>
+<command>
+http://%HOSTIP:%HTTP2PORT/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+</protocol>
+</verify>
+</testcase>
