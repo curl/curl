@@ -54,16 +54,17 @@
     goto test_cleanup; \
   }
 
-#define test_run_check(option, expected_fds) \
+#define test_run_check(option, expected_fds) do { \
   res = test_run(URL, option, &fd_count); \
-  test_check(expected_fds);
+  test_check(expected_fds); \
+} while(0)
 
  /* ---------------------------------------------------------------- */
 
 enum {
   TEST_USE_HTTP1 = 0,
   TEST_USE_HTTP2,
-  TEST_USE_HTTP2_MPLEX,
+  TEST_USE_HTTP2_MPLEX
 };
 
 static size_t emptyWriteFunc(void *ptr, size_t size, size_t nmemb,
