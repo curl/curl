@@ -101,7 +101,7 @@ int main(void)
 
 # AVAILABILITY
 
-Added in 8.7.0
+Added in 8.8.0
 
 # RETURN VALUE
 
