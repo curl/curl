@@ -39,6 +39,7 @@ Usage: curl [options...] <url>
 file: FILE protocol options
      --create-file-mode <mode>  File mode for created files
  -I, --head                     Show document info only
+ -l, --list-only                List only mode
  -r, --range <range>            Retrieve only the bytes within RANGE
 </stdout>
 </verify>

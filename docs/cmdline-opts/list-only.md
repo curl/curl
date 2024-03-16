@@ -3,10 +3,10 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: list-only
 Short: l
-Protocols: FTP POP3 SFTP
+Protocols: FTP POP3 SFTP FILE
 Help: List only mode
 Added: 4.0
-Category: ftp pop3 sftp
+Category: ftp pop3 sftp file
 Multi: boolean
 See-also:
   - quote
@@ -34,6 +34,9 @@ information than just filenames.
 When retrieving a specific email from POP3, this switch forces a LIST command
 to be performed instead of RETR. This is particularly useful if the user wants
 to see if a specific message-id exists on the server and what size it is.
+
+For FILE, this option has no effect yet as directories are always listed in
+this mode.
 
 Note: When combined with --request, this option can be used to send a UIDL
 command instead, so the user may use the email's unique identifier rather than

@@ -338,7 +338,7 @@ const struct helptxt helptext[] = {
    CURLHELP_CONNECTION},
   {"-l, --list-only",
    "List only mode",
-   CURLHELP_FTP | CURLHELP_POP3 | CURLHELP_SFTP},
+   CURLHELP_FTP | CURLHELP_POP3 | CURLHELP_SFTP | CURLHELP_FILE},
   {"    --local-port <range>",
    "Use a local port number within RANGE",
    CURLHELP_CONNECTION},
