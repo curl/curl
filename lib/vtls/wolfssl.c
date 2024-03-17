@@ -232,7 +232,6 @@ static const struct group_name_map gnm[] = {
 static int wolfssl_bio_cf_create(WOLFSSL_BIO *bio)
 {
   wolfSSL_BIO_set_shutdown(bio, 1);
-  wolfSSL_BIO_set_init(bio, 1);
   wolfSSL_BIO_set_data(bio, NULL);
   return 1;
 }
