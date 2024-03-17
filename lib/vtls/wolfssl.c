@@ -898,6 +898,7 @@ wolfssl_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
                                   pinnedpubkey,
                                   (const unsigned char *)pubkey->header,
                                   (size_t)(pubkey->end - pubkey->header));
+    wolfSSL_FreeX509(x509);
     if(result) {
       failf(data, "SSL: public key does not match pinned public key");
       return result;
