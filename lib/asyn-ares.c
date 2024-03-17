@@ -174,7 +174,7 @@ static void sock_state_cb(void *data, ares_socket_t socket_fd,
 CURLcode Curl_resolver_init(struct Curl_easy *easy, void **resolver)
 {
   int status;
-  struct ares_options options;
+  struct ares_options options = { 0 };
   int optmask = ARES_OPT_SOCK_STATE_CB;
   options.sock_state_cb = sock_state_cb;
   options.sock_state_cb_data = easy;
