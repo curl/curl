@@ -20,6 +20,7 @@ HTTP GET
 <features>
 SSL
 !bearssl
+!mbedtls
 !rustls
 !wolfssl
 </features>
