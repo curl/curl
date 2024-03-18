@@ -2658,7 +2658,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           warnf(global, "Failed to read %s", fname);
       }
       else
-        err = getstr(&config->writeout, nextarg, DENY_BLANK);
+        err = getstr(&config->writeout, nextarg, ALLOW_BLANK);
       break;
     case C_PREPROXY: /* --preproxy */
       err = getstr(&config->preproxy, nextarg, DENY_BLANK);
