@@ -103,7 +103,7 @@ CURLcode Curl_http_target(struct Curl_easy *data, struct connectdata *conn,
 CURLcode Curl_http_statusline(struct Curl_easy *data,
                               struct connectdata *conn);
 CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
-                          char *headp);
+                          char *headp, size_t hdlen);
 CURLcode Curl_transferencode(struct Curl_easy *data);
 CURLcode Curl_http_req_set_reader(struct Curl_easy *data,
                                   Curl_HttpReq httpreq,
