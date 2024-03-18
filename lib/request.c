@@ -331,24 +331,38 @@ static CURLcode req_send_buffer_add(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *buf)
+CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *req)
 {
   CURLcode result;
+  const char *buf;
+  size_t blen, nwritten;
 
   if(!data || !data->conn)
     return CURLE_FAILED_INIT;
 
-  /* We always buffer and send from there. The reason is that on
-   * blocking, we can retry using the same memory address. This is
-   * important for TLS libraries that expect this.
-   * We *could* optimized for non-TLS transfers, but that would mean
-   * separate code paths and seems not worth it. */
-  result = req_send_buffer_add(data, Curl_dyn_ptr(buf), Curl_dyn_len(buf),
-                               Curl_dyn_len(buf));
-  if(result)
-    return result;
+  buf = Curl_dyn_ptr(req);
+  blen = Curl_dyn_len(req);
+  if(!Curl_creader_total_length(data)) {
+    /* Request without body. Try to send directly from the buf given. */
+    data->req.eos_read = TRUE;
+    result = xfer_send(data, buf, blen, blen, &nwritten);
+    if(result)
+      return result;
+    buf += nwritten;
+    blen -= nwritten;
+  }
 
-  return Curl_req_send_more(data);
+  if(blen) {
+    /* Either we have a request body, or we could not send the complete
+     * request in one go. Buffer the remainder and try to add as much
+     * body bytes as room is left in the buffer. Then flush. */
+    result = req_send_buffer_add(data, buf, blen, blen);
+    if(result)
+      return result;
+
+    return Curl_req_send_more(data);
+  }
+  return CURLE_OK;
 }
 #endif /* !USE_HYPER */
 

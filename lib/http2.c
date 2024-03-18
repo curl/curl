@@ -1970,7 +1970,8 @@ out:
 
 static ssize_t h2_submit(struct h2_stream_ctx **pstream,
                          struct Curl_cfilter *cf, struct Curl_easy *data,
-                         const void *buf, size_t len, CURLcode *err)
+                         const void *buf, size_t len,
+                         size_t *phdslen, CURLcode *err)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
   struct h2_stream_ctx *stream = NULL;
@@ -1983,6 +1984,7 @@ static ssize_t h2_submit(struct h2_stream_ctx **pstream,
   nghttp2_priority_spec pri_spec;
   ssize_t nwritten;
 
+  *phdslen = 0;
   Curl_dynhds_init(&h2_headers, 0, DYN_HTTP_REQUEST);
 
   *err = http2_data_setup(cf, data, &stream);
@@ -1994,6 +1996,7 @@ static ssize_t h2_submit(struct h2_stream_ctx **pstream,
   nwritten = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL, 0, err);
   if(nwritten < 0)
     goto out;
+  *phdslen = (size_t)nwritten;
   if(!stream->h1.done) {
     /* need more data */
     goto out;
@@ -2116,6 +2119,7 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct cf_call_data save;
   int rv;
   ssize_t nwritten;
+  size_t hdslen = 0;
   CURLcode result;
   int blocked = 0, was_blocked = 0;
 
@@ -2179,11 +2183,12 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
   }
   else {
-    nwritten = h2_submit(&stream, cf, data, buf, len, err);
+    nwritten = h2_submit(&stream, cf, data, buf, len, &hdslen, err);
     if(nwritten < 0) {
       goto out;
     }
     DEBUGASSERT(stream);
+    DEBUGASSERT(hdslen <= (size_t)nwritten);
   }
 
   /* Call the nghttp2 send loop and flush to write ALL buffered data,
@@ -2218,18 +2223,26 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
      * frame buffer or our network out buffer. */
     size_t rwin = nghttp2_session_get_stream_remote_window_size(ctx->h2,
                                                                 stream->id);
-    /* Whatever the cause, we need to return CURL_EAGAIN for this call.
-     * We have unwritten state that needs us being invoked again and EAGAIN
-     * is the only way to ensure that. */
-    stream->upload_blocked_len = nwritten;
+    /* At the start of a stream, we are called with request headers
+     * and, possibly, parts of the body. Later, only body data.
+     * If we cannot send pure body data, we EAGAIN. If there had been
+     * header, we return that *they* have been written and remember the
+     * block on the data length only. */
+    stream->upload_blocked_len = ((size_t)nwritten) - hdslen;
     CURL_TRC_CF(data, cf, "[%d] cf_send(len=%zu) BLOCK: win %u/%zu "
-                "blocked_len=%zu",
+                "hds_len=%zu blocked_len=%zu",
                 stream->id, len,
                 nghttp2_session_get_remote_window_size(ctx->h2), rwin,
-                nwritten);
-    *err = CURLE_AGAIN;
-    nwritten = -1;
-    goto out;
+                hdslen, stream->upload_blocked_len);
+    if(hdslen) {
+      *err = CURLE_OK;
+      nwritten = hdslen;
+    }
+    else {
+      *err = CURLE_AGAIN;
+      nwritten = -1;
+      goto out;
+    }
   }
   else if(should_close_session(ctx)) {
     /* nghttp2 thinks this session is done. If the stream has not been
