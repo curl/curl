@@ -3645,7 +3645,6 @@ static CURLcode http_on_response(struct Curl_easy *data,
     if(result)
       return result;
     *pconsumed += blen;
-    blen = 0;
   }
 
   return CURLE_OK;
