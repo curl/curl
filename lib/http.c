@@ -2826,6 +2826,9 @@ checkprotoprefix(struct Curl_easy *data, struct connectdata *conn,
 
 /* HTTP header has field name `n` (a string constant) */
 #define HD_IS(hd, hdlen, n) \
+  (((hdlen) >= (sizeof(n)-1)) && curl_strnequal((n), (hd), (sizeof(n)-1)))
+
+#define HD_VAL(hd, hdlen, n) \
   ((((hdlen) >= (sizeof(n)-1)) && \
     curl_strnequal((n), (hd), (sizeof(n)-1)))? (hd + (sizeof(n)-1)) : NULL)
 
@@ -2858,7 +2861,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
 #else
           0
 #endif
-        ))? HD_IS(hd, hdlen, "Alt-Svc:") : NULL;
+        ))? HD_VAL(hd, hdlen, "Alt-Svc:") : NULL;
     if(v) {
       /* the ALPN of the current request */
       enum alpnid id = (conn->httpversion == 30)? ALPN_h3 :
@@ -2872,7 +2875,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
   case 'C':
     /* Check for Content-Length: header lines to get size */
     v = (!k->http_bodyless && !data->set.ignorecl)?
-        HD_IS(hd, hdlen, "Content-Length:") : NULL;
+        HD_VAL(hd, hdlen, "Content-Length:") : NULL;
     if(v) {
       curl_off_t contentlength;
       CURLofft offt = curlx_strtoofft(v, NULL, 10, &contentlength);
@@ -2898,7 +2901,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
       return CURLE_OK;
     }
     v = (!k->http_bodyless && data->set.str[STRING_ENCODING])?
-        HD_IS(hd, hdlen, "Content-Encoding:") : NULL;
+        HD_VAL(hd, hdlen, "Content-Encoding:") : NULL;
     if(v) {
       /*
        * Process Content-Encoding. Look for the values: identity,
@@ -2910,7 +2913,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
       return Curl_build_unencoding_stack(data, v, FALSE);
     }
     /* check for Content-Type: header lines to get the MIME-type */
-    v = HD_IS(hd, hdlen, "Content-Type:");
+    v = HD_VAL(hd, hdlen, "Content-Type:");
     if(v) {
       char *contenttype = Curl_copy_header_value(hd);
       if(!contenttype)
@@ -2946,7 +2949,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
       infof(data, "HTTP/1.0 connection set to keep alive");
       return CURLE_OK;
     }
-    v = !k->http_bodyless? HD_IS(hd, hdlen, "Content-Range:") : NULL;
+    v = !k->http_bodyless? HD_VAL(hd, hdlen, "Content-Range:") : NULL;
     if(v) {
       /* Content-Range: bytes [num]-
          Content-Range: bytes: [num]-
@@ -2981,7 +2984,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
   case 'L':
     v = (!k->http_bodyless &&
          (data->set.timecondition || data->set.get_filetime))?
-        HD_IS(hd, hdlen, "Last-Modified:") : NULL;
+        HD_VAL(hd, hdlen, "Last-Modified:") : NULL;
     if(v) {
       k->timeofdoc = Curl_getdate_capped(v);
       if(data->set.get_filetime)
@@ -3022,7 +3025,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
   case 'p':
   case 'P':
 #ifndef CURL_DISABLE_PROXY
-    v = HD_IS(hd, hdlen, "Proxy-Connection:");
+    v = HD_VAL(hd, hdlen, "Proxy-Connection:");
     if(v) {
       if((conn->httpversion == 10) && conn->bits.httpproxy &&
          HD_IS_AND_SAYS(hd, hdlen, "Proxy-Connection:", "keep-alive")) {
@@ -3075,7 +3078,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
     break;
   case 'r':
   case 'R':
-    v = HD_IS(hd, hdlen, "Retry-After:");
+    v = HD_VAL(hd, hdlen, "Retry-After:");
     if(v) {
       /* Retry-After = HTTP-date / delay-seconds */
       curl_off_t retry_after = 0; /* zero for unknown or "now" */
@@ -3095,7 +3098,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
   case 'S':
 #if !defined(CURL_DISABLE_COOKIES)
     v = (data->cookies && data->state.cookie_engine)?
-        HD_IS(hd, hdlen, "Set-Cookie:") : NULL;
+        HD_VAL(hd, hdlen, "Set-Cookie:") : NULL;
     if(v) {
       /* If there is a custom-set Host: name, use it here, or else use
        * real peer host name. */
@@ -3126,7 +3129,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
            0
 #endif
             )
-        )? HD_IS(hd, hdlen, "Strict-Transport-Security:") : NULL;
+        )? HD_VAL(hd, hdlen, "Strict-Transport-Security:") : NULL;
     if(v) {
       CURLcode check =
         Curl_hsts_parse(data->hsts, conn->host.name, v);
@@ -3142,7 +3145,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
     break;
   case 't':
   case 'T':
-    v = !k->http_bodyless? HD_IS(hd, hdlen, "Transfer-Encoding:") : NULL;
+    v = !k->http_bodyless? HD_VAL(hd, hdlen, "Transfer-Encoding:") : NULL;
     if(v) {
       /* One or more encodings. We check for chunked and/or a compression
          algorithm. */
