@@ -1668,7 +1668,7 @@ static ssize_t http2_handle_stream_close(struct Curl_cfilter *cf,
   }
   else if(stream->reset) {
     failf(data, "HTTP/2 stream %u was reset", stream->id);
-    *err = stream->bodystarted? CURLE_PARTIAL_FILE : CURLE_RECV_ERROR;
+    *err = data->req.bytecount? CURLE_PARTIAL_FILE : CURLE_HTTP2;
     return -1;
   }
 
@@ -1809,7 +1809,7 @@ static ssize_t stream_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
           (ctx->conn_closed && Curl_bufq_is_empty(&ctx->inbufq)) ||
           (ctx->goaway && ctx->last_stream_id < stream->id)) {
     CURL_TRC_CF(data, cf, "[%d] returning ERR", stream->id);
-    *err = stream->bodystarted? CURLE_PARTIAL_FILE : CURLE_RECV_ERROR;
+    *err = data->req.bytecount? CURLE_PARTIAL_FILE : CURLE_HTTP2;
     nread = -1;
   }
 
