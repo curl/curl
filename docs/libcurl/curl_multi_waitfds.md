@@ -5,11 +5,10 @@ Title: curl_multi_waitfds
 Section: 3
 Source: libcurl
 See-also:
-  - curl_multi_cleanup (3)
-  - curl_multi_init (3)
   - curl_multi_perform (3)
   - curl_multi_poll (3)
   - curl_multi_wait (3)
+  - curl_multi_fdset (3)
 ---
 
 # NAME
@@ -40,8 +39,7 @@ written to.
 
 libcurl fills provided *ufds* array up to the *size*.
 If a number of descriptors used by the multi_handle is greater than the
-*size* parameter then libcurl fills the *ufds* up to the *size*
-and returns CURLM_OUT_OF_MEMORY error.
+*size* parameter then libcurl returns CURLM_OUT_OF_MEMORY error.
 
 If the *fd_count* argument is not a null pointer, it points to a variable
 that on returns specifies the number of descriptors used by the multi_handle to
