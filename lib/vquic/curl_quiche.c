@@ -732,7 +732,7 @@ static ssize_t recv_closed_stream(struct Curl_cfilter *cf,
   if(stream->reset) {
     failf(data,
           "HTTP/3 stream %" PRId64 " reset by server", stream->id);
-    *err = stream->resp_got_header? CURLE_PARTIAL_FILE : CURLE_HTTP3;
+    *err = data->req.bytecount? CURLE_PARTIAL_FILE : CURLE_HTTP3;
     CURL_TRC_CF(data, cf, "[%" PRId64 "] cf_recv, was reset -> %d",
                 stream->id, *err);
   }
