@@ -1383,8 +1383,8 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
         events |= POLLOUT;
       }
       if(events) {
-        if(ps.sockets[i] == ufds[nfds].fd) {
-          ufds[nfds].events |= events;
+        if(nfds && ps.sockets[i] == ufds[nfds-1].fd) {
+          ufds[nfds-1].events |= events;
         }
         else {
           if(nfds >= ufds_len) {
