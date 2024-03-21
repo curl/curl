@@ -788,6 +788,7 @@ struct ldapconninfo;
 #define TRNSPRT_UDP 4
 #define TRNSPRT_QUIC 5
 #define TRNSPRT_UNIX 6
+#define TRNSPRT_MPTCP 7
 
 /*
  * The connectdata struct contains all fields and variables that should be
@@ -1811,6 +1812,7 @@ struct UserDefined {
 #ifdef USE_WEBSOCKETS
   BIT(ws_raw_mode);
 #endif
+  bool mptcp; /* enable MPTCP support */
 };
 
 #ifndef CURL_DISABLE_MIME

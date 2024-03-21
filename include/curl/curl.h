@@ -2206,6 +2206,9 @@ typedef enum {
   /* millisecond version */
   CURLOPT(CURLOPT_SERVER_RESPONSE_TIMEOUT_MS, CURLOPTTYPE_LONG, 324),
 
+  /* Set MPTCP */
+  CURLOPT(CURLOPT_MPTCP, CURLOPTTYPE_LONG, 325),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

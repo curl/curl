@@ -125,6 +125,7 @@
 --max-redirs                         7.5
 --max-time (-m)                      4.0
 --metalink                           7.27.0
+--mptcp                              8.7.0
 --negotiate                          7.10.6
 --netrc (-n)                         4.6
 --netrc-file                         7.21.5

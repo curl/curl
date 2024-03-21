@@ -28,6 +28,10 @@
 #include "nonblock.h" /* for curlx_nonblock(), formerly Curl_nonblock() */
 #include "sockaddr.h"
 
+#ifndef IPPROTO_MPTCP
+#define IPPROTO_MPTCP 262
+#endif
+
 struct Curl_addrinfo;
 struct Curl_cfilter;
 struct Curl_easy;

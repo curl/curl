@@ -423,6 +423,10 @@ Path to a Unix domain socket. See CURLOPT_UNIX_SOCKET_PATH(3)
 
 Path to an abstract Unix domain socket. See CURLOPT_ABSTRACT_UNIX_SOCKET(3)
 
+## CURLOPT_MPTCP
+
+Enable Multipath TCP (MPTCP). See CURLOPT_MPTCP(3)
+
 # NAMES and PASSWORDS OPTIONS (Authentication)
 
 ## CURLOPT_NETRC
