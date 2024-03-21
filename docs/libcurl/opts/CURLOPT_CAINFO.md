@@ -79,9 +79,7 @@ int main(void)
 
 # AVAILABILITY
 
-For the SSL engines that do not support certificate files the
-CURLOPT_CAINFO(3) option is ignored. Schannel support added in libcurl
-7.60.
+Schannel support added in libcurl 7.60.
 
 # RETURN VALUE
 
