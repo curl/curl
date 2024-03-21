@@ -92,6 +92,7 @@ extern const struct Curl_handler Curl_handler_pop3s;
 
 /* This function scans the body after the end-of-body and writes everything
  * until the end is found */
-CURLcode Curl_pop3_write(struct Curl_easy *data, char *str, size_t nread);
+CURLcode Curl_pop3_write(struct Curl_easy *data,
+                         const char *str, size_t nread);
 
 #endif /* HEADER_CURL_POP3_H */
