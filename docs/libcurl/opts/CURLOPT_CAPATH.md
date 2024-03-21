@@ -67,8 +67,7 @@ int main(void)
 
 # AVAILABILITY
 
-This option is supported by the OpenSSL, GnuTLS and mbedTLS (since 7.56.0)
-backends.
+This option is supported by the OpenSSL, GnuTLS, mbedTLS and wolfSSL backends.
 
 # RETURN VALUE
 
