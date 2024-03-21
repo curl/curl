@@ -701,11 +701,17 @@ struct Curl_handler {
   CURLcode (*disconnect)(struct Curl_easy *, struct connectdata *,
                          bool dead_connection);
 
-  /* If used, this function gets called from transfer.c:readwrite_data() to
+  /* If used, this function gets called from transfer.c to
      allow the protocol to do extra handling in writing response to
      the client. */
   CURLcode (*write_resp)(struct Curl_easy *data, const char *buf, size_t blen,
                          bool is_eos);
+
+  /* If used, this function gets called from transfer.c to
+     allow the protocol to do extra handling in writing a single response
+     header line to the client. */
+  CURLcode (*write_resp_hd)(struct Curl_easy *data,
+                            const char *hd, size_t hdlen, bool is_eos);
 
   /* This function can perform various checks on the connection. See
      CONNCHECK_* for more information about the checks that can be performed,

@@ -123,6 +123,7 @@ const struct Curl_handler Curl_handler_http = {
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   Curl_http_write_resp,                 /* write_resp */
+  Curl_http_write_resp_hd,              /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_HTTP,                            /* defport */
@@ -151,6 +152,7 @@ const struct Curl_handler Curl_handler_https = {
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   Curl_http_write_resp,                 /* write_resp */
+  Curl_http_write_resp_hd,              /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_HTTPS,                           /* defport */
@@ -2836,9 +2838,10 @@ checkprotoprefix(struct Curl_easy *data, struct connectdata *conn,
 /*
  * Curl_http_header() parses a single response header.
  */
-CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
-                          char *hd, size_t hdlen)
+CURLcode Curl_http_header(struct Curl_easy *data,
+                          const char *hd, size_t hdlen)
 {
+  struct connectdata *conn = data->conn;
   CURLcode result;
   struct SingleRequest *k = &data->req;
   const char *v;
@@ -3641,26 +3644,213 @@ static CURLcode http_on_response(struct Curl_easy *data,
 
   return CURLE_OK;
 }
+
+static CURLcode http_rw_hd(struct Curl_easy *data,
+                           const char *hd, size_t hdlen,
+                           const char *buf_remain, size_t blen,
+                           size_t *pconsumed)
+{
+  CURLcode result = CURLE_OK;
+  struct SingleRequest *k = &data->req;
+  int writetype;
+
+  *pconsumed = 0;
+  if((0x0a == *hd) || (0x0d == *hd)) {
+    /* Empty header line means end of headers! */
+    size_t consumed;
+
+    /* now, only output this if the header AND body are requested:
+     */
+    Curl_debug(data, CURLINFO_HEADER_IN, (char *)hd, hdlen);
+
+    writetype = CLIENTWRITE_HEADER |
+      ((k->httpcode/100 == 1) ? CLIENTWRITE_1XX : 0);
+
+    result = Curl_client_write(data, writetype, hd, hdlen);
+    if(result)
+      return result;
+
+    result = Curl_bump_headersize(data, hdlen, FALSE);
+    if(result)
+      return result;
+
+    data->req.deductheadercount =
+      (100 <= k->httpcode && 199 >= k->httpcode)?data->req.headerbytecount:0;
+
+    /* analyze the response to find out what to do. */
+    /* Caveat: we clear anything in the header brigade, because a
+     * response might switch HTTP version which may call use recursively.
+     * Not nice, but that is currently the way of things. */
+    Curl_dyn_reset(&data->state.headerb);
+    result = http_on_response(data, buf_remain, blen, &consumed);
+    if(result)
+      return result;
+    *pconsumed += consumed;
+    return CURLE_OK;
+  }
+
+  /*
+   * Checks for special headers coming up.
+   */
+
+  writetype = CLIENTWRITE_HEADER;
+  if(!k->headerline++) {
+    /* This is the first header, it MUST be the error code line
+       or else we consider this to be the body right away! */
+    bool fine_statusline = FALSE;
+
+    k->httpversion = 0; /* Don't know yet */
+    if(data->conn->handler->protocol & PROTO_FAMILY_HTTP) {
+      /*
+       * https://datatracker.ietf.org/doc/html/rfc7230#section-3.1.2
+       *
+       * The response code is always a three-digit number in HTTP as the spec
+       * says. We allow any three-digit number here, but we cannot make
+       * guarantees on future behaviors since it isn't within the protocol.
+       */
+      const char *p = hd;
+
+      while(*p && ISBLANK(*p))
+        p++;
+      if(!strncmp(p, "HTTP/", 5)) {
+        p += 5;
+        switch(*p) {
+        case '1':
+          p++;
+          if((p[0] == '.') && (p[1] == '0' || p[1] == '1')) {
+            if(ISBLANK(p[2])) {
+              k->httpversion = 10 + (p[1] - '0');
+              p += 3;
+              if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
+                k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
+                  (p[2] - '0');
+                p += 3;
+                if(ISSPACE(*p))
+                  fine_statusline = TRUE;
+              }
+            }
+          }
+          if(!fine_statusline) {
+            failf(data, "Unsupported HTTP/1 subversion in response");
+            return CURLE_UNSUPPORTED_PROTOCOL;
+          }
+          break;
+        case '2':
+        case '3':
+          if(!ISBLANK(p[1]))
+            break;
+          k->httpversion = (*p - '0') * 10;
+          p += 2;
+          if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
+            k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
+              (p[2] - '0');
+            p += 3;
+            if(!ISSPACE(*p))
+              break;
+            fine_statusline = TRUE;
+          }
+          break;
+        default: /* unsupported */
+          failf(data, "Unsupported HTTP version in response");
+          return CURLE_UNSUPPORTED_PROTOCOL;
+        }
+      }
+
+      if(!fine_statusline) {
+        /* If user has set option HTTP200ALIASES,
+           compare header line against list of aliases
+        */
+        statusline check = checkhttpprefix(data, hd, hdlen);
+        if(check == STATUS_DONE) {
+          fine_statusline = TRUE;
+          k->httpcode = 200;
+          k->httpversion = 10;
+        }
+      }
+    }
+    else if(data->conn->handler->protocol & CURLPROTO_RTSP) {
+      const char *p = hd;
+      while(*p && ISBLANK(*p))
+        p++;
+      if(!strncmp(p, "RTSP/", 5)) {
+        p += 5;
+        if(ISDIGIT(*p)) {
+          p++;
+          if((p[0] == '.') && ISDIGIT(p[1])) {
+            if(ISBLANK(p[2])) {
+              p += 3;
+              if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
+                k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
+                  (p[2] - '0');
+                p += 3;
+                if(ISSPACE(*p)) {
+                  fine_statusline = TRUE;
+                  k->httpversion = 11; /* RTSP acts like HTTP 1.1 */
+                }
+              }
+            }
+          }
+        }
+        if(!fine_statusline)
+          return CURLE_WEIRD_SERVER_REPLY;
+      }
+    }
+
+    if(fine_statusline) {
+      result = Curl_http_statusline(data, data->conn);
+      if(result)
+        return result;
+      writetype |= CLIENTWRITE_STATUS;
+    }
+    else {
+      k->header = FALSE;   /* this is not a header line */
+      return CURLE_WEIRD_SERVER_REPLY;
+    }
+  }
+
+  result = verify_header(data);
+  if(result)
+    return result;
+
+  result = Curl_http_header(data, hd, hdlen);
+  if(result)
+    return result;
+
+  /*
+   * Taken in one (more) header. Write it to the client.
+   */
+  Curl_debug(data, CURLINFO_HEADER_IN, (char *)hd, hdlen);
+
+  if(k->httpcode/100 == 1)
+    writetype |= CLIENTWRITE_1XX;
+  result = Curl_client_write(data, writetype, hd, hdlen);
+  if(result)
+    return result;
+
+  result = Curl_bump_headersize(data, hdlen, FALSE);
+  if(result)
+    return result;
+
+  return CURLE_OK;
+}
+
 /*
  * Read any HTTP header lines from the server and pass them to the client app.
  */
-static CURLcode http_rw_headers(struct Curl_easy *data,
-                                const char *buf, size_t blen,
-                                size_t *pconsumed)
+static CURLcode http_parse_headers(struct Curl_easy *data,
+                                   const char *buf, size_t blen,
+                                   size_t *pconsumed)
 {
   struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
   struct SingleRequest *k = &data->req;
-  char *hd;
-  size_t hdlen;
   char *end_ptr;
   bool leftover_body = FALSE;
 
   /* header line within buffer loop */
   *pconsumed = 0;
-  do {
-    size_t line_length;
-    int writetype;
+  while(blen && k->header) {
+    size_t consumed;
 
     /* data is in network encoding so use 0x0a instead of '\n' */
     end_ptr = memchr(buf, 0x0a, blen);
@@ -3700,14 +3890,13 @@ static CURLcode http_rw_headers(struct Curl_easy *data,
     }
 
     /* decrease the size of the remaining (supposed) header line */
-    line_length = (end_ptr - buf) + 1;
-    result = Curl_dyn_addn(&data->state.headerb, buf, line_length);
+    consumed = (end_ptr - buf) + 1;
+    result = Curl_dyn_addn(&data->state.headerb, buf, consumed);
     if(result)
       return result;
-
-    blen -= line_length;
-    buf += line_length;
-    *pconsumed += line_length;
+    blen -= consumed;
+    buf += consumed;
+    *pconsumed += consumed;
 
     /****
      * We now have a FULL header line in 'headerb'.
@@ -3735,195 +3924,21 @@ static CURLcode http_rw_headers(struct Curl_easy *data,
       }
     }
 
-    /* headers are in network encoding so use 0x0a and 0x0d instead of '\n'
-       and '\r' */
-    hd = Curl_dyn_ptr(&data->state.headerb);
-    hdlen = Curl_dyn_len(&data->state.headerb);
-    if((0x0a == *hd) || (0x0d == *hd)) {
-      /* Empty header line means end of headers! */
-      size_t consumed;
-
-      /* now, only output this if the header AND body are requested:
-       */
-      Curl_debug(data, CURLINFO_HEADER_IN, hd, hdlen);
-
-      writetype = CLIENTWRITE_HEADER |
-        ((k->httpcode/100 == 1) ? CLIENTWRITE_1XX : 0);
-
-      result = Curl_client_write(data, writetype, hd, hdlen);
-      if(result)
-        return result;
-
-      result = Curl_bump_headersize(data, hdlen, FALSE);
-      if(result)
-        return result;
-      /* We are done with this line. We reset because response
-       * processing might switch to HTTP/2 and that might call us
-       * directly again. */
-      Curl_dyn_reset(&data->state.headerb);
-
-      data->req.deductheadercount =
-        (100 <= k->httpcode && 199 >= k->httpcode)?data->req.headerbytecount:0;
-
-      /* analyze the response to find out what to do */
-      result = http_on_response(data, buf, blen, &consumed);
-      if(result)
-        return result;
-      *pconsumed += consumed;
+    result = http_rw_hd(data, Curl_dyn_ptr(&data->state.headerb),
+                        Curl_dyn_len(&data->state.headerb),
+                        buf, blen, &consumed);
+    /* We are done with this line. We reset because response
+     * processing might switch to HTTP/2 and that might call us
+     * directly again. */
+    Curl_dyn_reset(&data->state.headerb);
+    if(consumed) {
       blen -= consumed;
       buf += consumed;
-
-      if(!k->header || !blen)
-        goto out; /* exit header line loop */
-
-      continue;
+      *pconsumed += consumed;
     }
-
-    /*
-     * Checks for special headers coming up.
-     */
-
-    writetype = CLIENTWRITE_HEADER;
-    if(!k->headerline++) {
-      /* This is the first header, it MUST be the error code line
-         or else we consider this to be the body right away! */
-      bool fine_statusline = FALSE;
-
-      k->httpversion = 0; /* Don't know yet */
-      if(conn->handler->protocol & PROTO_FAMILY_HTTP) {
-        /*
-         * https://datatracker.ietf.org/doc/html/rfc7230#section-3.1.2
-         *
-         * The response code is always a three-digit number in HTTP as the spec
-         * says. We allow any three-digit number here, but we cannot make
-         * guarantees on future behaviors since it isn't within the protocol.
-         */
-        char *p = hd;
-
-        while(*p && ISBLANK(*p))
-          p++;
-        if(!strncmp(p, "HTTP/", 5)) {
-          p += 5;
-          switch(*p) {
-          case '1':
-            p++;
-            if((p[0] == '.') && (p[1] == '0' || p[1] == '1')) {
-              if(ISBLANK(p[2])) {
-                k->httpversion = 10 + (p[1] - '0');
-                p += 3;
-                if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
-                  k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
-                    (p[2] - '0');
-                  p += 3;
-                  if(ISSPACE(*p))
-                    fine_statusline = TRUE;
-                }
-              }
-            }
-            if(!fine_statusline) {
-              failf(data, "Unsupported HTTP/1 subversion in response");
-              return CURLE_UNSUPPORTED_PROTOCOL;
-            }
-            break;
-          case '2':
-          case '3':
-            if(!ISBLANK(p[1]))
-              break;
-            k->httpversion = (*p - '0') * 10;
-            p += 2;
-            if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
-              k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
-                (p[2] - '0');
-              p += 3;
-              if(!ISSPACE(*p))
-                break;
-              fine_statusline = TRUE;
-            }
-            break;
-          default: /* unsupported */
-            failf(data, "Unsupported HTTP version in response");
-            return CURLE_UNSUPPORTED_PROTOCOL;
-          }
-        }
-
-        if(!fine_statusline) {
-          /* If user has set option HTTP200ALIASES,
-             compare header line against list of aliases
-          */
-          statusline check = checkhttpprefix(data, hd, hdlen);
-          if(check == STATUS_DONE) {
-            fine_statusline = TRUE;
-            k->httpcode = 200;
-            k->httpversion = 10;
-          }
-        }
-      }
-      else if(conn->handler->protocol & CURLPROTO_RTSP) {
-        char *p = hd;
-        while(*p && ISBLANK(*p))
-          p++;
-        if(!strncmp(p, "RTSP/", 5)) {
-          p += 5;
-          if(ISDIGIT(*p)) {
-            p++;
-            if((p[0] == '.') && ISDIGIT(p[1])) {
-              if(ISBLANK(p[2])) {
-                p += 3;
-                if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
-                  k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
-                    (p[2] - '0');
-                  p += 3;
-                  if(ISSPACE(*p)) {
-                    fine_statusline = TRUE;
-                    k->httpversion = 11; /* RTSP acts like HTTP 1.1 */
-                  }
-                }
-              }
-            }
-          }
-          if(!fine_statusline)
-            return CURLE_WEIRD_SERVER_REPLY;
-        }
-      }
-
-      if(fine_statusline) {
-        result = Curl_http_statusline(data, conn);
-        if(result)
-          return result;
-        writetype |= CLIENTWRITE_STATUS;
-      }
-      else {
-        k->header = FALSE;   /* this is not a header line */
-        break;
-      }
-    }
-
-    result = verify_header(data);
     if(result)
       return result;
-
-    result = Curl_http_header(data, conn, hd, hdlen);
-    if(result)
-      return result;
-
-    /*
-     * Taken in one (more) header. Write it to the client.
-     */
-    Curl_debug(data, CURLINFO_HEADER_IN, hd, hdlen);
-
-    if(k->httpcode/100 == 1)
-      writetype |= CLIENTWRITE_1XX;
-    result = Curl_client_write(data, writetype, hd, hdlen);
-    if(result)
-      return result;
-
-    result = Curl_bump_headersize(data, hdlen, FALSE);
-    if(result)
-      return result;
-
-    Curl_dyn_reset(&data->state.headerb);
   }
-  while(blen);
 
   /* We might have reached the end of the header part here, but
      there might be a non-header part left in the end of the read
@@ -3933,6 +3948,22 @@ out:
     Curl_dyn_free(&data->state.headerb);
   }
   return CURLE_OK;
+}
+
+CURLcode Curl_http_write_resp_hd(struct Curl_easy *data,
+                                 const char *hd, size_t hdlen,
+                                 bool is_eos)
+{
+  CURLcode result;
+  size_t consumed;
+  char tmp[1];
+
+  result = http_rw_hd(data, hd, hdlen, tmp, 0, &consumed);
+  if(!result && is_eos) {
+    result = Curl_client_write(data, (CLIENTWRITE_BODY|CLIENTWRITE_EOS),
+                               tmp, 0);
+  }
+  return result;
 }
 
 /*
@@ -3950,7 +3981,7 @@ CURLcode Curl_http_write_resp_hds(struct Curl_easy *data,
   else {
     CURLcode result;
 
-    result = http_rw_headers(data, buf, blen, pconsumed);
+    result = http_parse_headers(data, buf, blen, pconsumed);
     if(!result && !data->req.header) {
       /* we have successfully finished parsing the HEADERs */
       result = Curl_http_firstwrite(data);
