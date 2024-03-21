@@ -77,10 +77,10 @@ Each curldown starts with a header with meta-data:
 All curldown files *must* have all the headers present and at least one
 `See-also:` entry specified.
 
-The `Protocol` list must contain at least one protocol, which can be `*` if
-the option is virtually for everything. If `*` is used, it must be the only
-listed protocol. Recognized protocols are either URL schemes (in uppercase) or
-`TLS`.
+If the man page is for section 3 (library related). The `Protocol` list must
+contain at least one protocol, which can be `*` if the option is virtually for
+everything. If `*` is used, it must be the only listed protocol. Recognized
+protocols are either URL schemes (in uppercase) or `TLS`.
 
 Following the header in the file, is the manual page using markdown-like
 syntax:
