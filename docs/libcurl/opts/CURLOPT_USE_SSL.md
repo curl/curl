@@ -8,6 +8,11 @@ See-also:
   - CURLOPT_PROXY_SSLVERSION (3)
   - CURLOPT_SSLVERSION (3)
   - CURLOPT_SSL_OPTIONS (3)
+Protocol:
+  - FTP
+  - SMTP
+  - POP3
+  - IMAP
 ---
 
 # NAME

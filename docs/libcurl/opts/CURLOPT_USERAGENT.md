@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_HTTPHEADER (3)
   - CURLOPT_REFERER (3)
   - CURLOPT_REQUEST_TARGET (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

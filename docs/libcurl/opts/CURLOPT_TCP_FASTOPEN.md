@@ -6,6 +6,8 @@ Section: 3
 Source: libcurl
 See-also:
   - CURLOPT_SSL_FALSESTART (3)
+Protocol:
+  - *
 ---
 
 # NAME

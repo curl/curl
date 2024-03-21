@@ -8,6 +8,8 @@ See-also:
   - CURLINFO_CONTENT_LENGTH_UPLOAD_T (3)
   - CURLOPT_INFILESIZE_LARGE (3)
   - CURLOPT_UPLOAD (3)
+Protocol:
+  - *
 ---
 
 # NAME

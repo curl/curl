@@ -8,6 +8,11 @@ See-also:
   - CURLINFO_HTTP_CONNECTCODE (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - HTTP
+  - FTP
+  - SMTP
+  - LDAP
 ---
 
 # NAME

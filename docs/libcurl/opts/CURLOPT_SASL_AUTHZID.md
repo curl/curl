@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_PASSWORD (3)
   - CURLOPT_USERNAME (3)
   - CURLOPT_USERPWD (3)
+Protocol:
+  - IMAP
 ---
 
 # NAME

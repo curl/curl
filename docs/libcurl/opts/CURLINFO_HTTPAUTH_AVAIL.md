@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_HTTPAUTH (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

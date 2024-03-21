@@ -11,6 +11,8 @@ See-also:
   - CURLOPT_UPLOAD (3)
   - CURLOPT_UPLOAD_BUFFERSIZE (3)
   - CURLOPT_WRITEFUNCTION (3)
+Protocol:
+  - *
 ---
 
 # NAME

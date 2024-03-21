@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE (3)
   - CURLMOPT_PIPELINING (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLMOPT_PUSHFUNCTION (3)
   - curl_pushheader_bynum (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

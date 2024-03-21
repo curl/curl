@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_PROXY_CAINFO (3)
   - CURLOPT_PROXY_SSL_VERIFYPEER (3)
   - CURLOPT_SSL_VERIFYPEER (3)
+Protocol:
+  - TLS
 ---
 
 # NAME

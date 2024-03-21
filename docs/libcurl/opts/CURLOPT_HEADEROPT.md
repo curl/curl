@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_HEADEROPT
 Section: 3
 Source: libcurl
+Protocol:
+  - HTTP
 See-also:
   - CURLOPT_HTTPHEADER (3)
   - CURLOPT_PROXYHEADER (3)

@@ -8,6 +8,10 @@ See-also:
   - curl_mime_addpart (3)
   - curl_mime_data (3)
   - curl_mime_type (3)
+Protocol:
+  - HTTP
+  - IMAP
+  - SMTP
 ---
 
 # NAME

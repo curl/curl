@@ -10,6 +10,8 @@ See-also:
   - CURLOPT_MAXREDIRS (3)
   - CURLOPT_REDIR_PROTOCOLS_STR (3)
   - CURLOPT_USERPWD (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

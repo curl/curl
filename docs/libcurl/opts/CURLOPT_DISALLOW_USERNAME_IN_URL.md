@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_URL (3)
   - curl_url_set (3)
   - libcurl-security (3)
+Protocol:
+  - *
 ---
 
 # NAME

@@ -6,6 +6,9 @@ Section: 3
 Source: libcurl
 See-also:
   - CURLOPT_SSH_HOSTKEYFUNCTION (3)
+Protocol:
+  - SFTP
+  - SCP
 ---
 
 # NAME

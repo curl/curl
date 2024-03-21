@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_PROXYPASSWORD (3)
   - CURLOPT_PROXYTYPE (3)
   - CURLOPT_PROXYUSERNAME (3)
+Protocol:
+  - *
 ---
 
 # NAME

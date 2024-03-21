@@ -8,6 +8,13 @@ See-also:
   - CURLOPT_CONNECTTIMEOUT (3)
   - CURLOPT_LOW_SPEED_LIMIT (3)
   - CURLOPT_TIMEOUT (3)
+Protocol:
+  - FTP
+  - IMAP
+  - POP3
+  - SMTP
+  - SFTP
+  - SCP
 ---
 
 # NAME

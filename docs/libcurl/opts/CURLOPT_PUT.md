@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_MIMEPOST (3)
   - CURLOPT_POSTFIELDS (3)
   - CURLOPT_UPLOAD (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

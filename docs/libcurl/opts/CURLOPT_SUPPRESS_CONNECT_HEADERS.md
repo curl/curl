@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_HEADER (3)
   - CURLOPT_HTTPPROXYTUNNEL (3)
   - CURLOPT_PROXY (3)
+Protocol:
+  - *
 ---
 
 # NAME

@@ -9,6 +9,10 @@ See-also:
   - CURLOPT_POSTFIELDS (3)
   - CURLOPT_PUT (3)
   - curl_mime_init (3)
+Protocol:
+  - HTTP
+  - SMTP
+  - IMAP
 ---
 
 # NAME

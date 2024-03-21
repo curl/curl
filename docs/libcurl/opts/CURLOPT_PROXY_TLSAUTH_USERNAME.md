@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_PROXY_TLSAUTH_TYPE (3)
   - CURLOPT_TLSAUTH_PASSWORD (3)
   - CURLOPT_TLSAUTH_TYPE (3)
+Protocol:
+  - TLS
 ---
 
 # NAME

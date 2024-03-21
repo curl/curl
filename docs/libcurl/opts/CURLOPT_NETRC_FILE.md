@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_NETRC (3)
   - CURLOPT_PASSWORD (3)
   - CURLOPT_USERNAME (3)
+Protocol:
+  - *
 ---
 
 # NAME

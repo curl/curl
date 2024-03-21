@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_BUFFERSIZE (3)
   - CURLOPT_SOCKOPTFUNCTION (3)
   - CURLOPT_TCP_KEEPALIVE (3)
+Protocol:
+  - *
 ---
 
 # NAME

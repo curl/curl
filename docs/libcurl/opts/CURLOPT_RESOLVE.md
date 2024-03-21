@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_CONNECT_TO (3)
   - CURLOPT_DNS_CACHE_TIMEOUT (3)
   - CURLOPT_IPRESOLVE (3)
+Protocol:
+  - *
 ---
 
 # NAME

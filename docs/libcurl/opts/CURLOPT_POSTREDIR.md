@@ -10,6 +10,8 @@ See-also:
   - CURLOPT_FOLLOWLOCATION (3)
   - CURLOPT_MAXREDIRS (3)
   - CURLOPT_POSTFIELDS (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

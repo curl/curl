@@ -7,6 +7,9 @@ Source: libcurl
 See-also:
   - CURLOPT_ACCEPT_ENCODING (3)
   - CURLOPT_TRANSFER_ENCODING (3)
+Protocol:
+  - SFTP
+  - SCP
 ---
 
 # NAME

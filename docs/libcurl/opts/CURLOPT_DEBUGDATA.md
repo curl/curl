@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_DEBUGFUNCTION (3)
   - CURLOPT_STDERR (3)
+Protocol:
+  - *
 ---
 
 # NAME

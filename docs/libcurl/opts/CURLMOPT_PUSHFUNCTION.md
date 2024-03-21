@@ -9,6 +9,8 @@ See-also:
   - CURLMOPT_PUSHDATA (3)
   - CURLOPT_PIPEWAIT (3)
   - RFC 7540
+Protocol:
+  - HTTP
 ---
 
 # NAME

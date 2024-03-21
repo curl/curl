@@ -10,6 +10,8 @@ See-also:
   - curl_easy_nextheader (3)
   - curl_easy_perform (3)
   - libcurl-errors (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_ABSTRACT_UNIX_SOCKET (3)
   - CURLOPT_OPENSOCKETFUNCTION (3)
   - unix (7)
+Protocol:
+  - *
 ---
 
 # NAME

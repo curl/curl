@@ -10,6 +10,8 @@ See-also:
   - CURLOPT_SSLCERT (3)
   - CURLOPT_SSLKEY (3)
   - CURLOPT_SSLKEYTYPE (3)
+Protocol:
+  - TLS
 ---
 
 # NAME

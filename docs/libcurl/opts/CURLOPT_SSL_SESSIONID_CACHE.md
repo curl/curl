@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_MAXAGE_CONN (3)
   - CURLOPT_MAXLIFETIME_CONN (3)
   - CURLOPT_SSLVERSION (3)
+Protocol:
+  - TLS
 ---
 
 # NAME

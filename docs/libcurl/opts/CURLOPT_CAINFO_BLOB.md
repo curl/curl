@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_CAINFO_BLOB
 Section: 3
 Source: libcurl
+Protocol:
+  - TLS
 See-also:
   - CURLOPT_CAINFO (3)
   - CURLOPT_CAPATH (3)

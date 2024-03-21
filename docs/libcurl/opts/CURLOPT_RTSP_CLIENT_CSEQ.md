@@ -9,6 +9,8 @@ See-also:
   - CURLINFO_RTSP_SERVER_CSEQ (3)
   - CURLOPT_RTSP_REQUEST (3)
   - CURLOPT_RTSP_SERVER_CSEQ (3)
+Protocol:
+  - RTSP
 ---
 
 # NAME

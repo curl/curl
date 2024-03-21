@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_FTP_CREATE_MISSING_DIRS
 Section: 3
 Source: libcurl
+Protocol:
+  - FTP
 See-also:
   - CURLOPT_FTP_FILEMETHOD (3)
   - CURLOPT_FTP_USE_EPSV (3)

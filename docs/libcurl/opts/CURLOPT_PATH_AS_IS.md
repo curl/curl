@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_STDERR (3)
   - CURLOPT_URL (3)
   - curl_url_set (3)
+Protocol:
+  - *
 ---
 
 # NAME

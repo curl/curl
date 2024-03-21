@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_CHUNK_END_FUNCTION (3)
   - CURLOPT_FNMATCH_FUNCTION (3)
   - CURLOPT_URL (3)
+Protocol:
+  - FTP
 ---
 
 # NAME

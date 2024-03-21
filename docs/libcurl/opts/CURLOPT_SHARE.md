@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_COOKIE (3)
   - CURLSHOPT_SHARE (3)
+Protocol:
+  - *
 ---
 
 # NAME

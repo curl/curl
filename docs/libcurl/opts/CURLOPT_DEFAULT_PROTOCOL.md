@@ -8,6 +8,8 @@ See-also:
   - CURLINFO_PROTOCOL (3)
   - CURLINFO_SCHEME (3)
   - CURLOPT_URL (3)
+Protocol:
+  - *
 ---
 
 # NAME

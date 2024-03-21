@@ -8,6 +8,8 @@ See-also:
   - CURLINFO_HTTPAUTH_AVAIL (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

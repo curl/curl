@@ -8,6 +8,8 @@ See-also:
   - CURLINFO_PRIMARY_PORT (3)
   - CURLOPT_STDERR (3)
   - CURLOPT_URL (3)
+Protocol:
+  - *
 ---
 
 # NAME

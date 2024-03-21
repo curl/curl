@@ -10,6 +10,8 @@ See-also:
   - CURLOPT_PROXY_CAINFO (3)
   - CURLOPT_PROXY_SSL_VERIFYHOST (3)
   - CURLOPT_STDERR (3)
+Protocol:
+  - TLS
 ---
 
 # NAME

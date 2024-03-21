@@ -7,6 +7,9 @@ Source: libcurl
 See-also:
   - CURLOPT_SSH_AUTH_TYPES (3)
   - CURLOPT_SSH_PUBLIC_KEYFILE (3)
+Protocol:
+  - SFTP
+  - SCP
 ---
 
 # NAME

@@ -7,6 +7,10 @@ Source: libcurl
 See-also:
   - CURLOPT_NEW_DIRECTORY_PERMS (3)
   - CURLOPT_UPLOAD (3)
+Protocol:
+  - SFTP
+  - SCP
+  - FILE
 ---
 
 # NAME

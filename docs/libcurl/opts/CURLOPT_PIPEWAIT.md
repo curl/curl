@@ -9,6 +9,8 @@ See-also:
   - CURLMOPT_PIPELINING (3)
   - CURLOPT_FORBID_REUSE (3)
   - CURLOPT_FRESH_CONNECT (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

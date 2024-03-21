@@ -8,6 +8,8 @@ See-also:
   - CURLINFO_LOCAL_PORT (3)
   - CURLOPT_INTERFACE (3)
   - CURLOPT_LOCALPORTRANGE (3)
+Protocol:
+  - *
 ---
 
 # NAME

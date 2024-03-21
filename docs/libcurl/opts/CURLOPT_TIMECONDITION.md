@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLINFO_FILETIME (3)
   - CURLOPT_TIMEVALUE (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

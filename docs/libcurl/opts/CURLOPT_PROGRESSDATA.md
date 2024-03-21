@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_PROGRESSFUNCTION (3)
   - CURLOPT_XFERINFOFUNCTION (3)
+Protocol:
+  - *
 ---
 
 # NAME

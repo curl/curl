@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_DEFAULT_PROTOCOL (3)
   - CURLOPT_REDIR_PROTOCOLS (3)
   - CURLOPT_URL (3)
+Protocol:
+  - *
 ---
 
 # NAME

@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_CHUNK_BGN_FUNCTION (3)
   - CURLOPT_WILDCARDMATCH (3)
+Protocol:
+  - FTP
 ---
 
 # NAME

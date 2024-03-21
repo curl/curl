@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_FTP_USE_EPRT (3)
   - CURLOPT_FTP_USE_EPSV (3)
+Protocol:
+  - FTP
 ---
 
 # NAME

@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_SSLVERSION (3)
   - CURLOPT_SSL_CTX_FUNCTION (3)
+Protocol:
+  - TLS
 ---
 
 # NAME

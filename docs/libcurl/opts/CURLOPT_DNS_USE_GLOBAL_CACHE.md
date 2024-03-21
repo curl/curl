@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_DNS_CACHE_TIMEOUT (3)
   - CURLOPT_SHARE (3)
+Protocol:
+  - *
 ---
 
 # NAME

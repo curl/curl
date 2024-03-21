@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_PROXYAUTH (3)
   - CURLOPT_USERNAME (3)
   - CURLOPT_USERPWD (3)
+Protocol:
+  - *
 ---
 
 # NAME

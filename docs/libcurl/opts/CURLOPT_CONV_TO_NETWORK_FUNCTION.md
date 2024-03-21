@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_CONV_FROM_NETWORK_FUNCTION (3)
   - CURLOPT_CONV_FROM_UTF8_FUNCTION (3)
+Protocol:
+  - *
 ---
 
 # NAME

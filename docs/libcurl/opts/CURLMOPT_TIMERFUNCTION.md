@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLMOPT_SOCKETFUNCTION (3)
   - CURLMOPT_TIMERDATA (3)
+Protocol:
+  - *
 ---
 
 # NAME

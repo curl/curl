@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_CAINFO (3)
   - CURLOPT_DEBUGFUNCTION (3)
   - CURLOPT_STDERR (3)
+Protocol:
+  - TLS
 ---
 
 # NAME

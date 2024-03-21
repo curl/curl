@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_RTSP_REQUEST (3)
   - CURLOPT_RTSP_SESSION_ID (3)
+Protocol:
+  - RTSP
 ---
 
 # NAME

@@ -6,6 +6,8 @@ Section: 3
 Source: libcurl
 See-also:
   - CURLOPT_TCP_KEEPALIVE (3)
+Protocol:
+  - *
 ---
 
 # NAME

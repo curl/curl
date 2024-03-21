@@ -10,6 +10,8 @@ See-also:
   - CURLOPT_DNS_USE_GLOBAL_CACHE (3)
   - CURLOPT_MAXAGE_CONN (3)
   - CURLOPT_RESOLVE (3)
+Protocol:
+  - *
 ---
 
 # NAME

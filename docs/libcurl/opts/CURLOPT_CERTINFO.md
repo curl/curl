@@ -10,6 +10,8 @@ See-also:
   - CURLINFO_CERTINFO (3)
   - CURLOPT_CAINFO (3)
   - CURLOPT_SSL_VERIFYPEER (3)
+Protocol:
+  - TLS
 ---
 
 # NAME

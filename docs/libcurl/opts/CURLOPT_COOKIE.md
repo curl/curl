@@ -10,6 +10,8 @@ See-also:
   - CURLOPT_COOKIEJAR (3)
   - CURLOPT_COOKIELIST (3)
   - CURLOPT_HTTPHEADER (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

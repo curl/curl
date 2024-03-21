@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_HEADERFUNCTION (3)
   - CURLOPT_READFUNCTION (3)
   - CURLOPT_WRITEDATA (3)
+Protocol:
+  - *
 ---
 
 # NAME

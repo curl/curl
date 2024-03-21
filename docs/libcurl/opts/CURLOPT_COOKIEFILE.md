@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_COOKIE (3)
   - CURLOPT_COOKIEJAR (3)
   - CURLOPT_COOKIESESSION (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

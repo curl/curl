@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_LOW_SPEED_LIMIT (3)
   - CURLOPT_MAX_RECV_SPEED_LARGE (3)
+Protocol:
+  - *
 ---
 
 # NAME

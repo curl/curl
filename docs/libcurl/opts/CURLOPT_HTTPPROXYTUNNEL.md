@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_HTTPPROXYTUNNEL
 Section: 3
 Source: libcurl
+Protocol:
+  - *
 See-also:
   - CURLOPT_PROXY (3)
   - CURLOPT_PROXYPORT (3)

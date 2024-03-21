@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_DIRLISTONLY (3)
   - CURLOPT_RESUME_FROM (3)
   - CURLOPT_UPLOAD (3)
+Protocol:
+  - FTP
 ---
 
 # NAME

@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_NOPROGRESS (3)
   - CURLOPT_VERBOSE (3)
   - CURLOPT_XFERINFOFUNCTION (3)
+Protocol:
+  - *
 ---
 
 # NAME

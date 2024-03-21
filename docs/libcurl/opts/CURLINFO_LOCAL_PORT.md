@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLINFO_LOCAL_PORT
 Section: 3
 Source: libcurl
+Protocol:
+  - TCP
 See-also:
   - CURLINFO_LOCAL_IP (3)
   - CURLINFO_PRIMARY_PORT (3)

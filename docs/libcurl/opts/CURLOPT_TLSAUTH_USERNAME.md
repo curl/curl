@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_TLSAUTH_PASSWORD (3)
   - CURLOPT_TLSAUTH_TYPE (3)
+Protocol:
+  - TLS
 ---
 
 # NAME

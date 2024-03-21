@@ -8,6 +8,8 @@ See-also:
   - CURLINFO_SSL_ENGINES (3)
   - CURLOPT_SSLENGINE_DEFAULT (3)
   - CURLOPT_SSLKEY (3)
+Protocol:
+  - TLS
 ---
 
 # NAME

@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_LOW_SPEED_LIMIT (3)
   - CURLOPT_TCP_KEEPALIVE (3)
   - CURLOPT_TIMEOUT_MS (3)
+Protocol:
+  - *
 ---
 
 # NAME

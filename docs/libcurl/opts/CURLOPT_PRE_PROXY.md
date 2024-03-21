@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_HTTPPROXYTUNNEL (3)
   - CURLOPT_PROXY (3)
+Protocol:
+  - *
 ---
 
 # NAME

@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_VERBOSE (3)
   - curl_easy_recv (3)
   - curl_easy_send (3)
+Protocol:
+  - *
 ---
 
 # NAME

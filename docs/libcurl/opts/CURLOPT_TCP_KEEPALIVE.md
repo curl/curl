@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_MAX_RECV_SPEED_LARGE (3)
   - CURLOPT_TCP_KEEPIDLE (3)
   - CURLOPT_TCP_KEEPINTVL (3)
+Protocol:
+  - *
 ---
 
 # NAME

@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_CLOSESOCKETFUNCTION (3)
   - CURLOPT_OPENSOCKETFUNCTION (3)
+Protocol:
+  - *
 ---
 
 # NAME
