@@ -4,7 +4,7 @@ curl and libcurl 8.7.0
  Command line options:         258
  curl_easy_setopt() options:   304
  Public functions in libcurl:  93
- Contributors:                 3115
+ Contributors:                 3120
 
 This release includes the following changes:
 
@@ -53,6 +53,7 @@ This release includes the following bugfixes:
  o curl: when allocating variables, add the name into the struct [37]
  o curl_setup.h: add curl_uint64_t internal type
  o curldown: fix email address in Copyright [89]
+ o CURLOPT_INTERFACE.md: remove spurious amp, add see-also [137]
  o CURLOPT_POSTQUOTE.md: fix typo [36]
  o CURLOPT_SSL_CTX_FUNCTION.md: no promises of lifetime after return [104]
  o CURLOPT_WRITEFUNCTION.md: typo fix [41]
@@ -88,11 +89,13 @@ This release includes the following bugfixes:
  o http2: push headers better cleanup [113]
  o HTTP3.md: adjust the OpenSSL QUIC install instructions [34]
  o http: better error message for HTTP/1.x response without status line [86]
+ o http: improve response header handling, save cpu cycles [138]
  o http: move headers collecting to writer [71]
  o http_chunks: fix the accounting of consumed bytes [22]
  o http_chunks: remove unused 'endptr' variable [58]
  o https-proxy: use IP address and cert with ip in alt names [50]
  o hyper: implement unpausing via client reader [98]
+ o ipv6.md: mention IPv4 mapped addresses [147]
  o KNOWN_BUGS: POP3 issue when reading small chunks [134]
  o lib1598: fix `CURLOPT_POSTFIELDSIZE` usage [128]
  o lib582: remove code causing warning that is never run [38]
@@ -109,6 +112,7 @@ This release includes the following bugfixes:
  o libssh/libssh2: return error on too big range [75]
  o MANUAL.md: fix typo [66]
  o mbedtls: fix building when MBEDTLS_X509_REMOVE_INFO flag is defined [27]
+ o mbedtls: fix pytest for newer versions [146]
  o mbedtls: properly cleanup the thread-shared entropy [140]
  o mbedtls: use mbedtls_ssl_conf_{min|max}_tls_version [59]
  o md4: include strdup.h for the memdup proto [10]
@@ -140,10 +144,13 @@ This release includes the following bugfixes:
  o smtp: fix STARTTLS [91]
  o SPONSORS: describe the basics [131]
  o strtoofft: fix the overflow check [74]
+ o test 1541: verify getinfo values on first header callback [149]
  o test1165: improve pattern matching [60]
  o tests: support setting/using blank content env variables
  o TIMER_STARTTRANSFER: set the same for everyone [82]
+ o TLS: start shutdown only when peer did not already close [150]
  o tool_cb_hdr: only parse etag + content-disposition for 2xx [9]
+ o tool_getparam: accept a blank -w "" [139]
  o tool_getparam: handle non-existing (out of range) short-options [141]
  o tool_operate: change precedence of server Retry-After time [44]
  o tool_operate: do not set CURLOPT_QUICK_EXIT in debug builds [3]
@@ -173,21 +180,23 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   5533asdg on github, Andreas Kiefer, av223119 on github,
-  awesomekosm on github, Boris Verkhovskiy, Brett Buddin, Chris Webb,
-  Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, Daniel Szmulewicz,
-  DasKutti on github, dependabot[bot], Dexter Gerig, Dirk Hünniger,
-  Dmitry Karpov, Dmitry Tretyakov, edmcln on github, Erik Schnetter,
-  Evgeny Grin (Karlson2k), Fabian Vogt, Fabrice Fontaine, Faraz Fallahi,
-  Geeknik Labs, Gisle Vanem, Harry Sintonen, HsiehYuho on github, Jan Macku,
-  Jiawen Geng, Joel Depooter, Jon Rumsey, Jordan Brown, Karthikdasari0423,
+  awesomekosm on github, Boris Verkhovskiy, Brett Buddin,
+  chensong1211 on github, Chris Webb, Dan Fandrich, Daniel Gustafsson,
+  Daniel Stenberg, Daniel Szmulewicz, DasKutti on github, dependabot[bot],
+  Dexter Gerig, dfdity on github, Dirk Hünniger, Dmitry Karpov,
+  Dmitry Tretyakov, edmcln on github, Erik Schnetter, Evgeny Grin (Karlson2k),
+  Fabian Vogt, Fabrice Fontaine, Faraz Fallahi, Geeknik Labs, Gisle Vanem,
+  Harry Sintonen, HsiehYuho on github, Jan Macku, Jiawen Geng, Jiří Bok,
+  Joel Depooter, Jon Rumsey, Jordan Brown, Josh Soref, Karthikdasari0423,
   Karthikdasari0423 on github, Konstantin Vlasov, kpcyrd, Lars Kellogg-Stedman,
   LeeRiva, Louis Solofrizzo, Lukáš Zaoral, Marcel Raad, Michael Forney,
   Michael Kaufmann, Michał Antoniak, Nikita Taranov, Patrick Monnerat,
-  Paweł Witas, Peter Krefting, RainRat, Ramiro Garcia, Ray Satiro,
-  Richard Levitte, Robert Moreton, Rudi Heitbaum, Ryan Carsten Schmidt,
-  Scott Mutter, Scott Talbert, Sebastian Neubauer, Sergey Bronnikov, Simon K,
-  Stefan Eissing, Tal Regev, Viktor Szakats, vulnerabilityspotter on hackerone
-  (64 contributors)
+  Paweł Witas, Pēteris Caune, Peter Krefting, RainRat, Ramiro Garcia,
+  Ray Satiro, Richard Levitte, Robert Moreton, Rudi Heitbaum,
+  Ryan Carsten Schmidt, Scott Mutter, Scott Talbert, Sebastian Neubauer,
+  Sergey Bronnikov, Simon K, Stefan Eissing, Tal Regev, Thomas Pyle,
+  Viktor Szakats, vulnerabilityspotter on hackerone
+  (70 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -326,7 +335,14 @@ References to bug reports and discussions on issues:
  [133] = https://curl.se/bug/?i=13118
  [134] = https://curl.se/bug/?i=12063
  [135] = https://curl.se/bug/?i=13115
+ [137] = https://curl.se/bug/?i=13149
+ [138] = https://curl.se/bug/?i=13143
+ [139] = https://curl.se/bug/?i=13144
  [140] = https://curl.se/bug/?i=11919
  [141] = https://curl.se/bug/?i=13101
  [142] = https://curl.se/bug/?i=13096
  [143] = https://curl.se/bug/?i=13093
+ [146] = https://curl.se/bug/?i=13132
+ [147] = https://curl.se/bug/?i=13112
+ [149] = https://curl.se/bug/?i=13128
+ [150] = https://curl.se/bug/?i=10290
