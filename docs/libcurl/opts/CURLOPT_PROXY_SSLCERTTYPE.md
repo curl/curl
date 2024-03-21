@@ -10,6 +10,13 @@ See-also:
   - CURLOPT_SSLCERTTYPE (3)
 Protocol:
   - TLS
+TLS-backend:
+  - OpenSSL
+  - GnuTLS
+  - mbedTLS
+  - Schannel
+  - Secure Transport
+  - wolfSSL
 ---
 
 # NAME

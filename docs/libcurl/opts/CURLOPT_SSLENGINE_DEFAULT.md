@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_SSLENGINE (3)
 Protocol:
   - TLS
+TLS-backend:
+  - OpenSSL
 ---
 
 # NAME

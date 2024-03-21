@@ -11,7 +11,7 @@ See-also:
   - curl_ws_send (3)
   - libcurl-ws (3)
 Protocol:
-  - Ws
+  - WS
 ---
 
 # NAME

@@ -96,17 +96,64 @@ sub outseealso {
     return @o;
 }
 
+my %knownprotos = (
+    'DICT' => 1,
+    'FILE' => 1,
+    'FTP' => 1,
+    'FTPS' => 1,
+    'GOPHER' => 1,
+    'GOPHERS' => 1,
+    'HTTP' => 1,
+    'HTTPS' => 1,
+    'IMAP' => 1,
+    'IMAPS' => 1,
+    'LDAP' => 1,
+    'LDAPS' => 1,
+    'MQTT' => 1,
+    'POP3' => 1,
+    'POP3S' => 1,
+    'RTMP' => 1,
+    'RTMPS' => 1,
+    'RTSP' => 1,
+    'SCP' => 1,
+    'SFTP' => 1,
+    'SMB' => 1,
+    'SMBS' => 1,
+    'SMTP' => 1,
+    'SMTPS' => 1,
+    'TELNET' => 1,
+    'TFTP' => 1,
+    'WS' => 1,
+    'WSS' => 1,
+    'TLS' => 1,
+    'TCP' => 1,
+    '*' => 1
+    );
+
+my %knowntls = (
+    'BearSSL' => 1,
+    'GnuTLS' => 1,
+    'mbedTLS' => 1,
+    'OpenSSL' => 1,
+    'rustls' => 1,
+    'Schannel' => 1,
+    'Secure Transport' => 1,
+    'wolfSSL' => 1,
+    'All' => 1,
+    );
+
 sub single {
     my @seealso;
     my @proto;
+    my @tls;
     my $d;
     my ($f)=@_;
     my $copyright;
     my $errors = 0;
     my $fh;
     my $line;
-    my $salist;
-    my $protolist;
+    my $list;
+    my $tlslist;
     my $section;
     my $source;
     my $spdx;
@@ -143,7 +190,7 @@ sub single {
             $source=$1;
         }
         elsif(/^See-also: +(.*)/i) {
-            $salist = 0;
+            $list = 1; # 1 for see-also
             push @seealso, $1;
         }
         elsif(/^See-also: */i) {
@@ -151,20 +198,24 @@ sub single {
                 print STDERR "$f:$line:1:ERROR: bad See-Also, needs list\n";
                 return 2;
             }
-            $salist = 1;
-            $protolist = 0;
+            $list = 1; # 1 for see-also
         }
         elsif(/^Protocol:/i) {
-            $salist = 0;
-            $protolist = 1;
+            $list = 2; # 2 for protocol
+        }
+        elsif(/^TLS-backend:/i) {
+            $list = 3; # 3 for TLS backend
         }
         elsif(/^ +- (.*)/i) {
             # the only lists we support are see-also and protocol
-            if($salist) {
+            if($list == 1) {
                 push @seealso, $1;
             }
-            elsif($protolist) {
+            elsif($list == 2) {
                 push @proto, $1;
+            }
+            elsif($list == 3) {
+                push @tls, $1;
             }
             else {
                 print STDERR "$f:$line:1:ERROR: list item without owner?\n";
@@ -201,9 +252,34 @@ sub single {
                 print STDERR "$f:$line:1:ERROR: no 'SPDX-License-Identifier:' field present\n";
                 return 2;
             }
-            if(!$proto[0] && ($section == 3)) {
-                printf STDERR "$f:$line:1:ERROR: missing Protocol:\n";
-                exit 2;
+            if($section == 3) {
+                if(!$proto[0]) {
+                    printf STDERR "$f:$line:1:ERROR: missing Protocol:\n";
+                    exit 2;
+                }
+                my $tls = 0;
+                for my $p (@proto) {
+                    if($p eq "TLS") {
+                        $tls = 1;
+                    }
+                    if(!$knownprotos{$p}) {
+                        printf STDERR "$f:$line:1:ERROR: invalid protocol used: $p:\n";
+                        exit 2;
+                    }
+                }
+                # This is for TLS, require TLS-backend:
+                if($tls) {
+                    if(!$tls[0]) {
+                        printf STDERR "$f:$line:1:ERROR: missing TLS-backend:\n";
+                        exit 2;
+                    }
+                    for my $t (@tls) {
+                        if(!$knowntls{$t}) {
+                            printf STDERR "$f:$line:1:ERROR: invalid TLS backend: $t:\n";
+                            exit 2;
+                        }
+                    }
+                }
             }
             last;
         }

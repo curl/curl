@@ -11,6 +11,9 @@ See-also:
   - CURLOPT_TLSAUTH_TYPE (3)
 Protocol:
   - TLS
+TLS-backend:
+  - OpenSSL
+  - GnuTLS
 ---
 
 # NAME

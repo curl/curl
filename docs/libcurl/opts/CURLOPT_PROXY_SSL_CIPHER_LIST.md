@@ -12,6 +12,13 @@ See-also:
   - CURLOPT_TLS13_CIPHERS (3)
 Protocol:
   - TLS
+TLS-backend:
+  - OpenSSL
+  - BearSSL
+  - Schannel
+  - Secure Transport
+  - wolfSSL
+  - GnuTLS
 ---
 
 # NAME

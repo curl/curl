@@ -10,6 +10,14 @@ See-also:
   - curl_easy_setopt (3)
 Protocol:
   - TLS
+TLS-backend:
+  - BearSSL
+  - GnuTLS
+  - mbedTLS
+  - OpenSSL
+  - Schannel
+  - Secure Transport
+  - wolfSSL
 ---
 
 # NAME

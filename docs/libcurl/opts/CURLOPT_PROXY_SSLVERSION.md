@@ -11,6 +11,8 @@ See-also:
   - CURLOPT_USE_SSL (3)
 Protocol:
   - TLS
+TLS-backend:
+  - All
 ---
 
 # NAME

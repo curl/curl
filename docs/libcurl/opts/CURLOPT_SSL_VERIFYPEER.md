@@ -13,6 +13,8 @@ See-also:
   - CURLOPT_SSL_VERIFYHOST (3)
 Protocol:
   - TLS
+TLS-backend:
+  - All
 ---
 
 # NAME

@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_TCP_FASTOPEN (3)
 Protocol:
   - TLS
+TLS-backend:
+  - Secure Transport
 ---
 
 # NAME

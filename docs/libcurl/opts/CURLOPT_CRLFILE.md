@@ -10,6 +10,10 @@ See-also:
   - CURLOPT_SSL_VERIFYPEER (3)
 Protocol:
   - TLS
+TLS-backend:
+  - GnuTLS
+  - mbedTLS
+  - OpenSSL
 ---
 
 # NAME

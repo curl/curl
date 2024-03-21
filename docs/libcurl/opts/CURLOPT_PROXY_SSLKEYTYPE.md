@@ -10,6 +10,10 @@ See-also:
   - CURLOPT_SSLKEYTYPE (3)
 Protocol:
   - TLS
+TLS-backend:
+  - OpenSSL
+  - BearSSL
+  - wolfSSL
 ---
 
 # NAME

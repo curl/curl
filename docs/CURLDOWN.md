@@ -72,6 +72,8 @@ Each curldown starts with a header with meta-data:
     See-also:
       - CURLOPT_HEADEROPT (3)
       - CURLOPT_HTTPAUTH (3)
+    TLS-backend:
+      - [name]
     ---
 
 All curldown files *must* have all the headers present and at least one
@@ -80,7 +82,21 @@ All curldown files *must* have all the headers present and at least one
 If the man page is for section 3 (library related). The `Protocol` list must
 contain at least one protocol, which can be `*` if the option is virtually for
 everything. If `*` is used, it must be the only listed protocol. Recognized
-protocols are either URL schemes (in uppercase) or `TLS`.
+protocols are either URL schemes (in uppercase), `TLS` or `TCP`.
+
+If the `Protocol` list contains `TLS`, then there must also be a `TLS-backend`
+list, specifying `*` or a list of what TLS backends that work with this
+option. The available TLS backends are:
+
+- `BearSSL`
+- `GnuTLS`
+- `mbedTLS`
+- `OpenSSL` (also covers BoringSSL, libressl, quictls, AWS-LC and AmiSSL)
+- `rustls`
+- `Schannel`
+- `Secure Transport`
+- `wolfSSL`
+- `All`: all TLS backends
 
 Following the header in the file, is the manual page using markdown-like
 syntax:

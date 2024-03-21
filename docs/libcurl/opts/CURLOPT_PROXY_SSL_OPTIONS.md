@@ -11,6 +11,8 @@ See-also:
   - CURLOPT_SSL_CIPHER_LIST (3)
 Protocol:
   - TLS
+TLS-backend:
+  - All
 ---
 
 # NAME

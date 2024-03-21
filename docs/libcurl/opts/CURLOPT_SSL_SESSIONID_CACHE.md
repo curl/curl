@@ -11,6 +11,8 @@ See-also:
   - CURLOPT_SSLVERSION (3)
 Protocol:
   - TLS
+TLS-backend:
+  - All
 ---
 
 # NAME
