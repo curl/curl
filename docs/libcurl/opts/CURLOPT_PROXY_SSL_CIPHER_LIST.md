@@ -18,6 +18,7 @@ TLS-backend:
   - Schannel
   - Secure Transport
   - wolfSSL
+  - GnuTLS
 ---
 
 # NAME
