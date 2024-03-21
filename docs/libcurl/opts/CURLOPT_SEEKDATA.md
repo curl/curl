@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_IOCTLFUNCTION (3)
   - CURLOPT_SEEKFUNCTION (3)
   - CURLOPT_STDERR (3)
+Protocol:
+  - *
 ---
 
 # NAME

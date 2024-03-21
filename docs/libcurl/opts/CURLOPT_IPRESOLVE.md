@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_HTTP_VERSION (3)
   - CURLOPT_RESOLVE (3)
   - CURLOPT_SSLVERSION (3)
+Protocol:
+  - *
 ---
 
 # NAME

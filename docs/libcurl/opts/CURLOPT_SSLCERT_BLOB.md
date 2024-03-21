@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_KEYPASSWD (3)
   - CURLOPT_SSLCERTTYPE (3)
   - CURLOPT_SSLKEY (3)
+Protocol:
+  - TLS
 ---
 
 # NAME

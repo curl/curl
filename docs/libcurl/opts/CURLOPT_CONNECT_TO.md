@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_HTTPPROXYTUNNEL (3)
   - CURLOPT_RESOLVE (3)
   - CURLOPT_URL (3)
+Protocol:
+  - *
 ---
 
 # NAME

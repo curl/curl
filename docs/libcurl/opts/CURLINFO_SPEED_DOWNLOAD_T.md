@@ -9,6 +9,8 @@ See-also:
   - CURLINFO_SPEED_UPLOAD_T (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - *
 ---
 
 # NAME

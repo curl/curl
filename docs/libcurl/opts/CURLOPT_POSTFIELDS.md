@@ -10,6 +10,8 @@ See-also:
   - CURLOPT_POSTFIELDSIZE (3)
   - CURLOPT_READFUNCTION (3)
   - CURLOPT_UPLOAD (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

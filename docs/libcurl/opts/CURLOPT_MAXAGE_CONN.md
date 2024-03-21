@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_FRESH_CONNECT (3)
   - CURLOPT_MAXLIFETIME_CONN (3)
   - CURLOPT_TIMEOUT (3)
+Protocol:
+  - *
 ---
 
 # NAME

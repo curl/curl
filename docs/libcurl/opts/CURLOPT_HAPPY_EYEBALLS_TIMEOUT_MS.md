@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS
 Section: 3
 Source: libcurl
+Protocol:
+  - *
 See-also:
   - CURLOPT_CONNECTTIMEOUT_MS (3)
   - CURLOPT_LOW_SPEED_LIMIT (3)

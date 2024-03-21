@@ -8,6 +8,8 @@ See-also:
   - CURLINFO_RTSP_SERVER_CSEQ (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - RTSP
 ---
 
 # NAME

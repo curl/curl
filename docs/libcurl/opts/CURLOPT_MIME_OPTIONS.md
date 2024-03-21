@@ -7,6 +7,10 @@ Source: libcurl
 See-also:
   - CURLOPT_HTTPPOST (3)
   - CURLOPT_MIMEPOST (3)
+Protocol:
+  - HTTP
+  - IMAP
+  - SMTP
 ---
 
 # NAME

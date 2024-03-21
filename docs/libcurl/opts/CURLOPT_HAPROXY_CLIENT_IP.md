@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_HAPROXY_CLIENT_IP
 Section: 3
 Source: libcurl
+Protocol:
+  - *
 See-also:
   - CURLOPT_HAPROXYPROTOCOL (3)
   - CURLOPT_PROXY (3)

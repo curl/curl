@@ -8,6 +8,8 @@ See-also:
   - curl_easy_setopt (3)
   - curl_formfree (3)
   - curl_mime_init (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

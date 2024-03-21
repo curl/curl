@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_HEADEROPT (3)
   - CURLOPT_HTTPHEADER (3)
+Protocol:
+  - *
 ---
 
 # NAME

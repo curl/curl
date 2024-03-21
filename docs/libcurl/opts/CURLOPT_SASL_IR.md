@@ -8,6 +8,9 @@ See-also:
   - CURLOPT_MAIL_AUTH (3)
   - CURLOPT_MAIL_FROM (3)
   - CURLOPT_SASL_AUTHZID (3)
+Protocol:
+  - SMTP
+  - IMAP
 ---
 
 # NAME

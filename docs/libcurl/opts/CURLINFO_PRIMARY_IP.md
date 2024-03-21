@@ -10,6 +10,8 @@ See-also:
   - CURLINFO_PRIMARY_PORT (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - *
 ---
 
 # NAME

@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_PRE_PROXY (3)
   - CURLOPT_PROXYPORT (3)
   - CURLOPT_PROXYTYPE (3)
+Protocol:
+  - *
 ---
 
 # NAME

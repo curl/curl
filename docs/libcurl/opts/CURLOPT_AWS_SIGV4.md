@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_HTTPAUTH (3)
   - CURLOPT_HTTPHEADER (3)
   - CURLOPT_PROXYAUTH (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

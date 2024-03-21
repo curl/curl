@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_FTP_ALTERNATIVE_TO_USER
 Section: 3
 Source: libcurl
+Protocol:
+  - FTP
 See-also:
   - CURLOPT_FTP_ACCOUNT (3)
   - CURLOPT_FTP_SKIP_PASV_IP (3)

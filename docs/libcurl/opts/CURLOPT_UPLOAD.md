@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_INFILESIZE_LARGE (3)
   - CURLOPT_PUT (3)
   - CURLOPT_READFUNCTION (3)
+Protocol:
+  - *
 ---
 
 # NAME

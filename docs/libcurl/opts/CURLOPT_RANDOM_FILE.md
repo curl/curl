@@ -6,6 +6,8 @@ Section: 3
 Source: libcurl
 See-also:
   - CURLOPT_EGDSOCKET (3)
+Protocol:
+  - TLS
 ---
 
 # NAME

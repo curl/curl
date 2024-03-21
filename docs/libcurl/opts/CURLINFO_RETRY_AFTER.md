@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_HEADERFUNCTION (3)
   - CURLOPT_STDERR (3)
   - curl_easy_header (3)
+Protocol:
+  - *
 ---
 
 # NAME

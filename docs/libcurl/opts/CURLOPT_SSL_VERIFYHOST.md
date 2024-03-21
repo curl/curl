@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_CAINFO (3)
   - CURLOPT_PINNEDPUBLICKEY (3)
   - CURLOPT_SSL_VERIFYPEER (3)
+Protocol:
+  - TLS
 ---
 
 # NAME

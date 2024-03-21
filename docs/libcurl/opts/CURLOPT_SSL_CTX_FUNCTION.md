@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_SSL_CTX_DATA (3)
   - CURLOPT_SSL_VERIFYPEER (3)
   - CURLOPT_CAINFO (3)
+Protocol:
+  - TLS
 ---
 
 # NAME

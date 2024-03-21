@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_DEFAULT_PROTOCOL (3)
   - CURLOPT_PROTOCOLS (3)
   - CURLOPT_REDIR_PROTOCOLS_STR (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

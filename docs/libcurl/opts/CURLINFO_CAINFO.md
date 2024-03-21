@@ -8,6 +8,8 @@ See-also:
   - CURLINFO_CAPATH (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - TLS
 ---
 
 # NAME

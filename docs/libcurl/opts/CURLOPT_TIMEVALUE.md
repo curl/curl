@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_TIMECONDITION (3)
   - CURLOPT_TIMEVALUE_LARGE (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

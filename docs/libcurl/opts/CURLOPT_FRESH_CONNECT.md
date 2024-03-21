@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_FRESH_CONNECT
 Section: 3
 Source: libcurl
+Protocol:
+  - *
 See-also:
   - CURLOPT_FORBID_REUSE (3)
   - CURLOPT_MAXAGE_CONN (3)

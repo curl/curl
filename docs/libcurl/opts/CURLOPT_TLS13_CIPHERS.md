@@ -11,6 +11,8 @@ See-also:
   - CURLOPT_SSLVERSION (3)
   - CURLOPT_SSL_CIPHER_LIST (3)
   - CURLOPT_USE_SSL (3)
+Protocol:
+  - TLS
 ---
 
 # NAME

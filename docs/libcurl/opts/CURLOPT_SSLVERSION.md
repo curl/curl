@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_IPRESOLVE (3)
   - CURLOPT_PROXY_SSLVERSION (3)
   - CURLOPT_USE_SSL (3)
+Protocol:
+  - TLS
 ---
 
 # NAME

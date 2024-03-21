@@ -10,6 +10,8 @@ See-also:
   - CURLOPT_PROXYPORT (3)
   - CURLOPT_PROXYTYPE (3)
   - CURLOPT_PROXYUSERPWD (3)
+Protocol:
+  - *
 ---
 
 # NAME

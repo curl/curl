@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_SSH_PRIVATE_KEYFILE (3)
   - CURLOPT_SSLKEY (3)
+Protocol:
+  - TLS
 ---
 
 # NAME

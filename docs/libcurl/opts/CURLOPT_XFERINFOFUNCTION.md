@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_NOPROGRESS (3)
   - CURLOPT_XFERINFODATA (3)
+Protocol:
+  - *
 ---
 
 # NAME

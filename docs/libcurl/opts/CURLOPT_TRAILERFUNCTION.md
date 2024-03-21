@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_TRAILERDATA (3)
   - CURLOPT_WRITEFUNCTION (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

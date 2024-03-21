@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_FOLLOWLOCATION (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

@@ -8,6 +8,8 @@ See-also:
   - CURLINFO_RESPONSE_CODE (3)
   - CURLOPT_FAILONERROR (3)
   - CURLOPT_HTTPHEADER (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

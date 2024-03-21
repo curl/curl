@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_ALTSVC (3)
   - CURLOPT_CONNECT_TO (3)
   - CURLOPT_RESOLVE (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_DNS_LOCAL_IP6 (3)
   - CURLOPT_DNS_SERVERS (3)
   - CURLOPT_INTERFACE (3)
+Protocol:
+  - *
 ---
 
 # NAME

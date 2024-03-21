@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_PIPEWAIT (3)
   - CURLOPT_STREAM_DEPENDS (3)
   - CURLOPT_STREAM_DEPENDS_E (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

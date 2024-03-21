@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_HSTSREADDATA
 Section: 3
 Source: libcurl
+Protocol:
+  - HTTP
 See-also:
   - CURLOPT_HSTS (3)
   - CURLOPT_HSTSREADFUNCTION (3)

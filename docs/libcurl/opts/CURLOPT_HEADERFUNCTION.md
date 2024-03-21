@@ -8,6 +8,12 @@ See-also:
   - CURLOPT_HEADERDATA (3)
   - CURLOPT_WRITEFUNCTION (3)
   - curl_easy_header (3)
+Protocol:
+  - HTTP
+  - FTP
+  - POP3
+  - IMAP
+  - SMTP
 ---
 
 # NAME

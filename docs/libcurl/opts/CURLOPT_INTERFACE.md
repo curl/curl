@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_INTERFACE
 Section: 3
 Source: libcurl
+Protocol:
+  - *
 See-also:
   - CURLOPT_SOCKOPTFUNCTION (3)
   - CURLOPT_TCP_NODELAY (3)

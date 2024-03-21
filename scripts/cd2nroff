@@ -98,6 +98,7 @@ sub outseealso {
 
 sub single {
     my @seealso;
+    my @proto;
     my $d;
     my ($f)=@_;
     my $copyright;
@@ -105,6 +106,7 @@ sub single {
     my $fh;
     my $line;
     my $salist;
+    my $protolist;
     my $section;
     my $source;
     my $spdx;
@@ -150,11 +152,23 @@ sub single {
                 return 2;
             }
             $salist = 1;
+            $protolist = 0;
+        }
+        elsif(/^Protocol:/i) {
+            $salist = 0;
+            $protolist = 1;
         }
         elsif(/^ +- (.*)/i) {
-            # the only list we support is the see-also
+            # the only lists we support are see-also and protocol
             if($salist) {
                 push @seealso, $1;
+            }
+            elsif($protolist) {
+                push @proto, $1;
+            }
+            else {
+                print STDERR "$f:$line:1:ERROR: list item without owner?\n";
+                return 2;
             }
         }
         # REUSE-IgnoreStart
@@ -186,6 +200,10 @@ sub single {
             if(!$spdx) {
                 print STDERR "$f:$line:1:ERROR: no 'SPDX-License-Identifier:' field present\n";
                 return 2;
+            }
+            if(!$proto[0] && ($section == 3)) {
+                printf STDERR "$f:$line:1:ERROR: missing Protocol:\n";
+                exit 2;
             }
             last;
         }

@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_INFILESIZE_LARGE (3)
   - CURLOPT_RANGE (3)
   - CURLOPT_RESUME_FROM (3)
+Protocol:
+  - *
 ---
 
 # NAME

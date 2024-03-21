@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_INTERFACE (3)
   - CURLOPT_LOCALPORT (3)
+Protocol:
+  - *
 ---
 
 # NAME

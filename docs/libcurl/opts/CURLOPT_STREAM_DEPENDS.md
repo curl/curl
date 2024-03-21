@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_HTTP_VERSION (3)
   - CURLOPT_STREAM_DEPENDS_E (3)
   - CURLOPT_STREAM_WEIGHT (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

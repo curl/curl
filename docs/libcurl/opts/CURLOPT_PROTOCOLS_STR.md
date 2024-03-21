@@ -10,6 +10,8 @@ See-also:
   - CURLOPT_REDIR_PROTOCOLS_STR (3)
   - CURLOPT_URL (3)
   - curl_version_info (3)
+Protocol:
+  - *
 ---
 
 # NAME

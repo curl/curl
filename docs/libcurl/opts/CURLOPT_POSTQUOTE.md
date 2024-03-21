@@ -7,6 +7,9 @@ Source: libcurl
 See-also:
   - CURLOPT_PREQUOTE (3)
   - CURLOPT_QUOTE (3)
+Protocol:
+  - FTP
+  - SFTP
 ---
 
 # NAME

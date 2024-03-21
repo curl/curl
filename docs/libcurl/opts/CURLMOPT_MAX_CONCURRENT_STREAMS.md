@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLMOPT_MAXCONNECTS (3)
   - CURLOPT_MAXCONNECTS (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

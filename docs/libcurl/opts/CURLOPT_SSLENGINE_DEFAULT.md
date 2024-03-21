@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_SSLCERT (3)
   - CURLOPT_SSLENGINE (3)
+Protocol:
+  - TLS
 ---
 
 # NAME

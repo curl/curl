@@ -8,6 +8,8 @@ See-also:
   - CURLINFO_REDIRECT_COUNT (3)
   - CURLINFO_REDIRECT_URL (3)
   - CURLOPT_FOLLOWLOCATION (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

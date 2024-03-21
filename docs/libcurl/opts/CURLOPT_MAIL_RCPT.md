@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_MAIL_AUTH (3)
   - CURLOPT_MAIL_FROM (3)
+Protocol:
+  - SMTP
 ---
 
 # NAME

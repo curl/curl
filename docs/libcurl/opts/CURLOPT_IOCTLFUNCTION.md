@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_IOCTLFUNCTION
 Section: 3
 Source: libcurl
+Protocol:
+  - *
 See-also:
   - CURLOPT_IOCTLDATA (3)
   - CURLOPT_SEEKFUNCTION (3)

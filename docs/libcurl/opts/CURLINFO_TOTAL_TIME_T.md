@@ -9,8 +9,9 @@ See-also:
   - CURLOPT_TIMEOUT (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - *
 ---
-
 # NAME
 
 CURLINFO_TOTAL_TIME_T - get total time of previous transfer in microseconds

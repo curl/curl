@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_COPYPOSTFIELDS (3)
   - CURLOPT_POSTFIELDS (3)
   - CURLOPT_POSTFIELDSIZE (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

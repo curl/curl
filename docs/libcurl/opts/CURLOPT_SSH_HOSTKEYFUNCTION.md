@@ -7,6 +7,9 @@ Source: libcurl
 See-also:
   - CURLOPT_SSH_HOSTKEYDATA (3)
   - CURLOPT_SSH_KNOWNHOSTS (3)
+Protocol:
+  - SFTP
+  - SCP
 ---
 
 # NAME

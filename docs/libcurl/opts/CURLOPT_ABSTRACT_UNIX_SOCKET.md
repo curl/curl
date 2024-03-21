@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_UNIX_SOCKET_PATH (3)
   - unix (7)
+Protocol:
+  - *
 ---
 
 # NAME

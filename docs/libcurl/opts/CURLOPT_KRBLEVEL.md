@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_KRBLEVEL (3)
   - CURLOPT_USE_SSL (3)
+Protocol:
+  - FTP
 ---
 
 # NAME

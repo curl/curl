@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_OPENSOCKETFUNCTION (3)
   - CURLOPT_SEEKFUNCTION (3)
   - CURLOPT_SOCKOPTDATA (3)
+Protocol:
+  - *
 ---
 
 # NAME

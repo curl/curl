@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_CONNECT_TO (3)
   - CURLOPT_COOKIEFILE (3)
   - CURLOPT_RESOLVE (3)
+Protocol:
+  - HTTP
 ---
 <!-- markdown-link-check-disable -->
 # NAME

@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_HTTPGET
 Section: 3
 Source: libcurl
+Protocol:
+  - HTTP
 See-also:
   - CURLOPT_NOBODY (3)
   - CURLOPT_POST (3)

@@ -4,6 +4,10 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_HTTPHEADER
 Section: 3
 Source: libcurl
+Protocol:
+  - HTTP
+  - SMTP
+  - IMAP
 See-also:
   - CURLOPT_CUSTOMREQUEST (3)
   - CURLOPT_HEADER (3)

@@ -7,6 +7,10 @@ Source: libcurl
 See-also:
   - curl_free (3)
   - curl_mime_init (3)
+Protocol:
+  - HTTP
+  - IMAP
+  - SMTP
 ---
 
 # NAME

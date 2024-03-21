@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_GSSAPI_DELEGATION
 Section: 3
 Source: libcurl
+Protocol:
+  - HTTP
 See-also:
   - CURLOPT_HTTPAUTH (3)
   - CURLOPT_PROXYAUTH (3)

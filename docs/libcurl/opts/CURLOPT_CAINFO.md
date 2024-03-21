@@ -11,6 +11,8 @@ See-also:
   - CURLOPT_CA_CACHE_TIMEOUT (3)
   - CURLOPT_SSL_VERIFYHOST (3)
   - CURLOPT_SSL_VERIFYPEER (3)
+Protocol:
+  - TLS
 ---
 
 # NAME

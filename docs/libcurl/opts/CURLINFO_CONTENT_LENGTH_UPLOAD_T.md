@@ -8,6 +8,8 @@ See-also:
   - CURLINFO_CONTENT_LENGTH_DOWNLOAD_T (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - *
 ---
 
 # NAME

@@ -8,6 +8,8 @@ See-also:
   - CURLINFO_CONNECT_TIME_T (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - *
 ---
 
 # NAME

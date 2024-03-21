@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - curl_easy_header (3)
   - curl_easy_perform (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

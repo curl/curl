@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_HTTP_VERSION
 Section: 3
 Source: libcurl
+Protocol:
+  - HTTP
 See-also:
   - CURLOPT_ALTSVC (3)
   - CURLOPT_HTTP09_ALLOWED (3)

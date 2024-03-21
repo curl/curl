@@ -14,6 +14,8 @@ See-also:
   - curl_easy_perform (3)
   - curl_url_get (3)
   - curl_url_set (3)
+Protocol:
+  - *
 ---
 
 # NAME

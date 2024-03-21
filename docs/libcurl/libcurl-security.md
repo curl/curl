@@ -6,6 +6,8 @@ Section: 3
 Source: libcurl
 See-also:
   - libcurl-thread (3)
+Protocol:
+  - *
 ---
 <!-- markdown-link-check-disable -->
 # NAME

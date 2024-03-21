@@ -10,6 +10,8 @@ See-also:
   - CURLINFO_REFERER (3)
   - CURLOPT_FOLLOWLOCATION (3)
   - CURLOPT_REFERER (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

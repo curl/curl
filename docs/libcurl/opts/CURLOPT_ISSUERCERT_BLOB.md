@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_ISSUERCERT (3)
   - CURLOPT_SSL_VERIFYHOST (3)
   - CURLOPT_SSL_VERIFYPEER (3)
+Protocol:
+  - TLS
 ---
 
 # NAME

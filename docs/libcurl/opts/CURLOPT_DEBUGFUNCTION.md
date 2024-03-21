@@ -10,6 +10,8 @@ See-also:
   - CURLOPT_DEBUGDATA (3)
   - CURLOPT_VERBOSE (3)
   - curl_global_trace (3)
+Protocol:
+  - *
 ---
 
 # NAME

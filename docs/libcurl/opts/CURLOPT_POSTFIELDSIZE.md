@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_POSTFIELDS (3)
   - CURLOPT_POSTFIELDSIZE_LARGE (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

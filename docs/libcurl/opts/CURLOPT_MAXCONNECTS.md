@@ -9,6 +9,8 @@ See-also:
   - CURLMOPT_MAX_HOST_CONNECTIONS (3)
   - CURLMOPT_MAX_TOTAL_CONNECTIONS (3)
   - CURLOPT_MAXREDIRS (3)
+Protocol:
+  - *
 ---
 
 # NAME

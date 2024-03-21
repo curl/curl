@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_DNS_INTERFACE (3)
   - CURLOPT_DNS_LOCAL_IP4 (3)
   - CURLOPT_DNS_SERVERS (3)
+Protocol:
+  - *
 ---
 
 # NAME

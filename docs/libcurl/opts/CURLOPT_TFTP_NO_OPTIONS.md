@@ -6,6 +6,8 @@ Section: 3
 Source: libcurl
 See-also:
   - CURLOPT_TFTP_BLKSIZE (3)
+Protocol:
+  - TFTP
 ---
 
 # NAME
