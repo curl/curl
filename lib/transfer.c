@@ -1156,7 +1156,7 @@ void Curl_xfer_setup(
 }
 
 CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
-                              char *buf, size_t blen,
+                              const char *buf, size_t blen,
                               bool is_eos)
 {
   CURLcode result = CURLE_OK;
@@ -1193,6 +1193,18 @@ CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
   CURL_TRC_WRITE(data, "xfer_write_resp(len=%zu, eos=%d) -> %d",
                  blen, is_eos, result);
   return result;
+}
+
+CURLcode Curl_xfer_write_resp_hd(struct Curl_easy *data,
+                                 const char *hd0, size_t hdlen, bool is_eos)
+{
+  if(data->conn->handler->write_resp_hd) {
+    /* protocol handlers offering this function take full responsibility
+     * for writing all received download data to the client. */
+    return data->conn->handler->write_resp_hd(data, hd0, hdlen, is_eos);
+  }
+  /* No special handling by protocol handler, write as response bytes */
+  return Curl_xfer_write_resp(data, hd0, hdlen, is_eos);
 }
 
 CURLcode Curl_xfer_write_done(struct Curl_easy *data, bool premature)

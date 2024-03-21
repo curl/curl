@@ -266,7 +266,7 @@ static CURLcode req_set_upload_done(struct Curl_easy *data)
   else if(data->req.writebytecount)
     infof(data, "upload completely sent off: %" CURL_FORMAT_CURL_OFF_T
           " bytes", data->req.writebytecount);
-  else
+  else if(!data->req.download_done)
     infof(data, Curl_creader_total_length(data)?
                 "We are completely uploaded and fine" :
                 "Request completely sent off");

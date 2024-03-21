@@ -100,7 +100,7 @@
  * Forward declarations.
  */
 
-static bool http_should_fail(struct Curl_easy *data);
+static bool http_should_fail(struct Curl_easy *data, int httpcode);
 static bool http_exp100_is_waiting(struct Curl_easy *data);
 static CURLcode http_exp100_add_reader(struct Curl_easy *data);
 static void http_exp100_send_anyway(struct Curl_easy *data);
@@ -123,6 +123,7 @@ const struct Curl_handler Curl_handler_http = {
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   Curl_http_write_resp,                 /* write_resp */
+  Curl_http_write_resp_hd,              /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_HTTP,                            /* defport */
@@ -151,6 +152,7 @@ const struct Curl_handler Curl_handler_https = {
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   Curl_http_write_resp,                 /* write_resp */
+  Curl_http_write_resp_hd,              /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_HTTPS,                           /* defport */
@@ -243,8 +245,6 @@ char *Curl_copy_header_value(const char *header)
   while(*start && ISSPACE(*start))
     start++;
 
-  /* data is in the host encoding so
-     use '\r' and '\n' instead of 0x0d and 0x0a */
   end = strchr(start, '\r');
   if(!end)
     end = strchr(start, '\n');
@@ -565,7 +565,7 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
       data->state.authhost.done = TRUE;
     }
   }
-  if(http_should_fail(data)) {
+  if(http_should_fail(data, data->req.httpcode)) {
     failf(data, "The requested URL returned error: %d",
           data->req.httpcode);
     result = CURLE_HTTP_RETURNED_ERROR;
@@ -1006,20 +1006,17 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
 }
 
 /**
- * http_should_fail() determines whether an HTTP response has gotten us
+ * http_should_fail() determines whether an HTTP response code has gotten us
  * into an error state or not.
  *
  * @retval FALSE communications should continue
  *
  * @retval TRUE communications should not continue
  */
-static bool http_should_fail(struct Curl_easy *data)
+static bool http_should_fail(struct Curl_easy *data, int httpcode)
 {
-  int httpcode;
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
-
-  httpcode = data->req.httpcode;
 
   /*
   ** If we haven't been asked to fail on error,
@@ -2836,9 +2833,10 @@ checkprotoprefix(struct Curl_easy *data, struct connectdata *conn,
 /*
  * Curl_http_header() parses a single response header.
  */
-CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
-                          char *hd, size_t hdlen)
+CURLcode Curl_http_header(struct Curl_easy *data,
+                          const char *hd, size_t hdlen)
 {
+  struct connectdata *conn = data->conn;
   CURLcode result;
   struct SingleRequest *k = &data->req;
   const char *v;
@@ -2848,7 +2846,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
   case 'A':
 #ifndef CURL_DISABLE_ALTSVC
     v = (data->asi &&
-         ((conn->handler->flags & PROTOPT_SSL) ||
+         ((data->conn->handler->flags & PROTOPT_SSL) ||
 #ifdef CURLDEBUG
           /* allow debug builds to circumvent the HTTPS restriction */
           getenv("CURL_ALTSVC_HTTP")
@@ -3306,12 +3304,11 @@ CURLcode Curl_http_size(struct Curl_easy *data)
   return CURLE_OK;
 }
 
-static CURLcode verify_header(struct Curl_easy *data)
+static CURLcode verify_header(struct Curl_easy *data,
+                              const char *hd, size_t hdlen)
 {
   struct SingleRequest *k = &data->req;
-  const char *header = Curl_dyn_ptr(&data->state.headerb);
-  size_t hlen = Curl_dyn_len(&data->state.headerb);
-  char *ptr = memchr(header, 0x00, hlen);
+  char *ptr = memchr(hd, 0x00, hdlen);
   if(ptr) {
     /* this is bad, bail out */
     failf(data, "Nul byte in header");
@@ -3320,11 +3317,11 @@ static CURLcode verify_header(struct Curl_easy *data)
   if(k->headerline < 2)
     /* the first "header" is the status-line and it has no colon */
     return CURLE_OK;
-  if(((header[0] == ' ') || (header[0] == '\t')) && k->headerline > 2)
+  if(((hd[0] == ' ') || (hd[0] == '\t')) && k->headerline > 2)
     /* line folding, can't happen on line 2 */
     ;
   else {
-    ptr = memchr(header, ':', hlen);
+    ptr = memchr(hd, ':', hdlen);
     if(!ptr) {
       /* this is bad, bail out */
       failf(data, "Header without colon");
@@ -3369,7 +3366,6 @@ static CURLcode http_on_response(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
   struct SingleRequest *k = &data->req;
-  bool switch_to_h2 = FALSE;
 
   (void)buf; /* not used without HTTP2 enabled */
   *pconsumed = 0;
@@ -3388,96 +3384,92 @@ static CURLcode http_on_response(struct Curl_easy *data,
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
   else if(k->httpcode < 200) {
-    /* "A user agent MAY ignore unexpected 1xx status responses." */
+    /* "A user agent MAY ignore unexpected 1xx status responses."
+     * By default, we expect to get more responses after this one. */
+    k->header = TRUE;
+    k->headerline = 0; /* restart the header line counter */
+
     switch(k->httpcode) {
     case 100:
       /*
        * We have made an HTTP PUT or POST and this is 1.1-lingo
        * that tells us that the server is OK with this and ready
        * to receive the data.
-       * However, we'll get more headers now so we must get
-       * back into the header-parsing state!
        */
-      k->header = TRUE;
-      k->headerline = 0; /* restart the header line counter */
-
-      /* if we did wait for this do enable write now! */
       Curl_http_exp100_got100(data);
       break;
     case 101:
-      if(conn->httpversion == 11) {
-        /* Switching Protocols only allowed from HTTP/1.1 */
-        if(k->upgr101 == UPGR101_H2) {
-          /* Switching to HTTP/2 */
-          infof(data, "Received 101, Switching to HTTP/2");
-          k->upgr101 = UPGR101_RECEIVED;
-
-          /* we'll get more headers (HTTP/2 response) */
-          k->header = TRUE;
-          k->headerline = 0; /* restart the header line counter */
-          switch_to_h2 = TRUE;
-        }
-#ifdef USE_WEBSOCKETS
-        else if(k->upgr101 == UPGR101_WS) {
-          /* verify the response */
-          result = Curl_ws_accept(data, buf, blen);
-          if(result)
-            return result;
-          k->header = FALSE; /* no more header to parse! */
-          *pconsumed += blen; /* ws accept handled the data */
-          blen = 0;
-          if(data->set.connect_only)
-            k->keepon &= ~KEEP_RECV; /* read no more content */
-        }
-#endif
-        else {
-          /* Not switching to another protocol */
-          k->header = FALSE; /* no more header to parse! */
-        }
-      }
-      else {
+      /* Switching Protocols only allowed from HTTP/1.1 */
+      if(conn->httpversion != 11) {
         /* invalid for other HTTP versions */
         failf(data, "unexpected 101 response code");
         return CURLE_WEIRD_SERVER_REPLY;
       }
+      if(k->upgr101 == UPGR101_H2) {
+        /* Switching to HTTP/2, where we will get more responses */
+        infof(data, "Received 101, Switching to HTTP/2");
+        k->upgr101 = UPGR101_RECEIVED;
+        /* We expect more response from HTTP/2 later */
+        k->header = TRUE;
+        k->headerline = 0; /* restart the header line counter */
+        /* Any remaining `buf` bytes are already HTTP/2 and passed to
+         * be processed. */
+        result = Curl_http2_upgrade(data, conn, FIRSTSOCKET, buf, blen);
+        if(result)
+          return result;
+        *pconsumed += blen;
+      }
+#ifdef USE_WEBSOCKETS
+      else if(k->upgr101 == UPGR101_WS) {
+        /* verify the response. Any passed `buf` bytes are already in
+         * WebSockets format and taken in by the protocol handler. */
+        result = Curl_ws_accept(data, buf, blen);
+        if(result)
+          return result;
+        *pconsumed += blen; /* ws accept handled the data */
+        k->header = FALSE; /* we will not get more responses */
+        if(data->set.connect_only)
+          k->keepon &= ~KEEP_RECV; /* read no more content */
+      }
+#endif
+      else {
+        /* We silently accept this as the final response.
+         * TODO: this looks, uhm, wrong. What are we switching to if we
+         * did not ask for an Upgrade? Maybe the application provided an
+         * `Upgrade: xxx` header? */
+        k->header = FALSE;
+      }
       break;
     default:
-      /* the status code 1xx indicates a provisional response, so
-         we'll get another set of headers */
-      k->header = TRUE;
-      k->headerline = 0; /* restart the header line counter */
+      /* The server may send us other 1xx responses, like informative
+       * 103. This have no influence on request processing and we expect
+       * to receive a final response eventually. */
       break;
     }
-  }
-  else {
-    /* k->httpcode >= 200, final response */
-    k->header = FALSE;
-
-    if(k->upgr101 == UPGR101_H2) {
-      /* A requested upgrade was denied, poke the multi handle to possibly
-         allow a pending pipewait to continue */
-      Curl_multi_connchanged(data->multi);
-    }
-
-    if((k->size == -1) && !k->chunk && !conn->bits.close &&
-       (conn->httpversion == 11) &&
-       !(conn->handler->protocol & CURLPROTO_RTSP) &&
-       data->state.httpreq != HTTPREQ_HEAD) {
-      /* On HTTP 1.1, when connection is not to get closed, but no
-         Content-Length nor Transfer-Encoding chunked have been
-         received, according to RFC2616 section 4.4 point 5, we
-         assume that the server will close the connection to
-         signal the end of the document. */
-      infof(data, "no chunk, no close, no size. Assume close to "
-            "signal end");
-      streamclose(conn, "HTTP: No end-of-message indicator");
-    }
+    return result;
   }
 
-  if(!k->header) {
-    result = Curl_http_size(data);
-    if(result)
-      return result;
+  /* k->httpcode >= 200, final response */
+  k->header = FALSE;
+
+  if(k->upgr101 == UPGR101_H2) {
+    /* A requested upgrade was denied, poke the multi handle to possibly
+       allow a pending pipewait to continue */
+    Curl_multi_connchanged(data->multi);
+  }
+
+  if((k->size == -1) && !k->chunk && !conn->bits.close &&
+     (conn->httpversion == 11) &&
+     !(conn->handler->protocol & CURLPROTO_RTSP) &&
+     data->state.httpreq != HTTPREQ_HEAD) {
+    /* On HTTP 1.1, when connection is not to get closed, but no
+       Content-Length nor Transfer-Encoding chunked have been
+       received, according to RFC2616 section 4.4 point 5, we
+       assume that the server will close the connection to
+       signal the end of the document. */
+    infof(data, "no chunk, no close, no size. Assume close to "
+          "signal end");
+    streamclose(conn, "HTTP: No end-of-message indicator");
   }
 
   /* At this point we have some idea about the fate of the connection.
@@ -3511,31 +3503,25 @@ static CURLcode http_on_response(struct Curl_easy *data,
   }
 #endif
 
-  /*
-   * When all the headers have been parsed, see if we should give
-   * up and return an error.
-   */
-  if(http_should_fail(data)) {
-    failf(data, "The requested URL returned error: %d",
-          k->httpcode);
-    return CURLE_HTTP_RETURNED_ERROR;
-  }
-
 #ifdef USE_WEBSOCKETS
-  /* All non-101 HTTP status codes are bad when wanting to upgrade to
-     websockets */
+  /* All >=200 HTTP status codes are errors when wanting websockets */
   if(data->req.upgr101 == UPGR101_WS) {
     failf(data, "Refused WebSockets upgrade: %d", k->httpcode);
     return CURLE_HTTP_RETURNED_ERROR;
   }
 #endif
 
+  /* Check if this response means the transfer errored. */
+  if(http_should_fail(data, data->req.httpcode)) {
+    failf(data, "The requested URL returned error: %d",
+          k->httpcode);
+    return CURLE_HTTP_RETURNED_ERROR;
+  }
 
   /* Curl_http_auth_act() checks what authentication methods
    * that are available and decides which one (if any) to
    * use. It will set 'newurl' if an auth method was picked. */
   result = Curl_http_auth_act(data);
-
   if(result)
     return result;
 
@@ -3606,65 +3592,244 @@ static CURLcode http_on_response(struct Curl_easy *data,
       infof(data, "Keep sending data to get tossed away");
       k->keepon |= KEEP_SEND;
     }
+
   }
 
-  if(!k->header) {
-    /*
-     * really end-of-headers.
-     *
-     * If we requested a "no body", this is a good time to get
-     * out and return home.
+  /* This is the last response that we will got for the current request.
+   * Check on the body size and determine if the response is complete.
+   */
+  result = Curl_http_size(data);
+  if(result)
+    return result;
+
+  /* If we requested a "no body", this is a good time to get
+   * out and return home.
+   */
+  if(data->req.no_body)
+    k->download_done = TRUE;
+
+  /* If max download size is *zero* (nothing) we already have
+     nothing and can safely return ok now!  But for HTTP/2, we'd
+     like to call http2_handle_stream_close to properly close a
+     stream.  In order to do this, we keep reading until we
+     close the stream. */
+  if(0 == k->maxdownload
+     && !Curl_conn_is_http2(data, conn, FIRSTSOCKET)
+     && !Curl_conn_is_http3(data, conn, FIRSTSOCKET))
+    k->download_done = TRUE;
+
+  /* final response without error, prepare to receive the body */
+  return Curl_http_firstwrite(data);
+}
+
+static CURLcode http_rw_hd(struct Curl_easy *data,
+                           const char *hd, size_t hdlen,
+                           const char *buf_remain, size_t blen,
+                           size_t *pconsumed)
+{
+  CURLcode result = CURLE_OK;
+  struct SingleRequest *k = &data->req;
+  int writetype;
+
+  *pconsumed = 0;
+  if((0x0a == *hd) || (0x0d == *hd)) {
+    /* Empty header line means end of headers! */
+    size_t consumed;
+
+    /* now, only output this if the header AND body are requested:
      */
-    if(data->req.no_body)
-      k->download_done = TRUE;
+    Curl_debug(data, CURLINFO_HEADER_IN, (char *)hd, hdlen);
 
-    /* If max download size is *zero* (nothing) we already have
-       nothing and can safely return ok now!  But for HTTP/2, we'd
-       like to call http2_handle_stream_close to properly close a
-       stream.  In order to do this, we keep reading until we
-       close the stream. */
-    if(0 == k->maxdownload
-       && !Curl_conn_is_http2(data, conn, FIRSTSOCKET)
-       && !Curl_conn_is_http3(data, conn, FIRSTSOCKET))
-      k->download_done = TRUE;
-  }
+    writetype = CLIENTWRITE_HEADER |
+      ((k->httpcode/100 == 1) ? CLIENTWRITE_1XX : 0);
 
-  if(switch_to_h2) {
-    /* Having handled the headers, we can do the HTTP/2 switch.
-     * Any remaining `buf` bytes are already HTTP/2 and passed to
-     * be processed. */
-    result = Curl_http2_upgrade(data, conn, FIRSTSOCKET, buf, blen);
+    result = Curl_client_write(data, writetype, hd, hdlen);
     if(result)
       return result;
-    *pconsumed += blen;
+
+    result = Curl_bump_headersize(data, hdlen, FALSE);
+    if(result)
+      return result;
+
+    data->req.deductheadercount =
+      (100 <= k->httpcode && 199 >= k->httpcode)?data->req.headerbytecount:0;
+
+    /* analyze the response to find out what to do. */
+    /* Caveat: we clear anything in the header brigade, because a
+     * response might switch HTTP version which may call use recursively.
+     * Not nice, but that is currently the way of things. */
+    Curl_dyn_reset(&data->state.headerb);
+    result = http_on_response(data, buf_remain, blen, &consumed);
+    if(result)
+      return result;
+    *pconsumed += consumed;
+    return CURLE_OK;
   }
+
+  /*
+   * Checks for special headers coming up.
+   */
+
+  writetype = CLIENTWRITE_HEADER;
+  if(!k->headerline++) {
+    /* This is the first header, it MUST be the error code line
+       or else we consider this to be the body right away! */
+    bool fine_statusline = FALSE;
+
+    k->httpversion = 0; /* Don't know yet */
+    if(data->conn->handler->protocol & PROTO_FAMILY_HTTP) {
+      /*
+       * https://datatracker.ietf.org/doc/html/rfc7230#section-3.1.2
+       *
+       * The response code is always a three-digit number in HTTP as the spec
+       * says. We allow any three-digit number here, but we cannot make
+       * guarantees on future behaviors since it isn't within the protocol.
+       */
+      const char *p = hd;
+
+      while(*p && ISBLANK(*p))
+        p++;
+      if(!strncmp(p, "HTTP/", 5)) {
+        p += 5;
+        switch(*p) {
+        case '1':
+          p++;
+          if((p[0] == '.') && (p[1] == '0' || p[1] == '1')) {
+            if(ISBLANK(p[2])) {
+              k->httpversion = 10 + (p[1] - '0');
+              p += 3;
+              if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
+                k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
+                  (p[2] - '0');
+                p += 3;
+                if(ISSPACE(*p))
+                  fine_statusline = TRUE;
+              }
+            }
+          }
+          if(!fine_statusline) {
+            failf(data, "Unsupported HTTP/1 subversion in response");
+            return CURLE_UNSUPPORTED_PROTOCOL;
+          }
+          break;
+        case '2':
+        case '3':
+          if(!ISBLANK(p[1]))
+            break;
+          k->httpversion = (*p - '0') * 10;
+          p += 2;
+          if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
+            k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
+              (p[2] - '0');
+            p += 3;
+            if(!ISSPACE(*p))
+              break;
+            fine_statusline = TRUE;
+          }
+          break;
+        default: /* unsupported */
+          failf(data, "Unsupported HTTP version in response");
+          return CURLE_UNSUPPORTED_PROTOCOL;
+        }
+      }
+
+      if(!fine_statusline) {
+        /* If user has set option HTTP200ALIASES,
+           compare header line against list of aliases
+        */
+        statusline check = checkhttpprefix(data, hd, hdlen);
+        if(check == STATUS_DONE) {
+          fine_statusline = TRUE;
+          k->httpcode = 200;
+          k->httpversion = 10;
+        }
+      }
+    }
+    else if(data->conn->handler->protocol & CURLPROTO_RTSP) {
+      const char *p = hd;
+      while(*p && ISBLANK(*p))
+        p++;
+      if(!strncmp(p, "RTSP/", 5)) {
+        p += 5;
+        if(ISDIGIT(*p)) {
+          p++;
+          if((p[0] == '.') && ISDIGIT(p[1])) {
+            if(ISBLANK(p[2])) {
+              p += 3;
+              if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
+                k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
+                  (p[2] - '0');
+                p += 3;
+                if(ISSPACE(*p)) {
+                  fine_statusline = TRUE;
+                  k->httpversion = 11; /* RTSP acts like HTTP 1.1 */
+                }
+              }
+            }
+          }
+        }
+        if(!fine_statusline)
+          return CURLE_WEIRD_SERVER_REPLY;
+      }
+    }
+
+    if(fine_statusline) {
+      result = Curl_http_statusline(data, data->conn);
+      if(result)
+        return result;
+      writetype |= CLIENTWRITE_STATUS;
+    }
+    else {
+      k->header = FALSE;   /* this is not a header line */
+      return CURLE_WEIRD_SERVER_REPLY;
+    }
+  }
+
+  result = verify_header(data, hd, hdlen);
+  if(result)
+    return result;
+
+  result = Curl_http_header(data, hd, hdlen);
+  if(result)
+    return result;
+
+  /*
+   * Taken in one (more) header. Write it to the client.
+   */
+  Curl_debug(data, CURLINFO_HEADER_IN, (char *)hd, hdlen);
+
+  if(k->httpcode/100 == 1)
+    writetype |= CLIENTWRITE_1XX;
+  result = Curl_client_write(data, writetype, hd, hdlen);
+  if(result)
+    return result;
+
+  result = Curl_bump_headersize(data, hdlen, FALSE);
+  if(result)
+    return result;
 
   return CURLE_OK;
 }
+
 /*
  * Read any HTTP header lines from the server and pass them to the client app.
  */
-static CURLcode http_rw_headers(struct Curl_easy *data,
-                                const char *buf, size_t blen,
-                                size_t *pconsumed)
+static CURLcode http_parse_headers(struct Curl_easy *data,
+                                   const char *buf, size_t blen,
+                                   size_t *pconsumed)
 {
   struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
   struct SingleRequest *k = &data->req;
-  char *hd;
-  size_t hdlen;
   char *end_ptr;
   bool leftover_body = FALSE;
 
   /* header line within buffer loop */
   *pconsumed = 0;
-  do {
-    size_t line_length;
-    int writetype;
+  while(blen && k->header) {
+    size_t consumed;
 
-    /* data is in network encoding so use 0x0a instead of '\n' */
-    end_ptr = memchr(buf, 0x0a, blen);
-
+    end_ptr = memchr(buf, '\n', blen);
     if(!end_ptr) {
       /* Not a complete header line within buffer, append the data to
          the end of the headerbuff. */
@@ -3700,14 +3865,13 @@ static CURLcode http_rw_headers(struct Curl_easy *data,
     }
 
     /* decrease the size of the remaining (supposed) header line */
-    line_length = (end_ptr - buf) + 1;
-    result = Curl_dyn_addn(&data->state.headerb, buf, line_length);
+    consumed = (end_ptr - buf) + 1;
+    result = Curl_dyn_addn(&data->state.headerb, buf, consumed);
     if(result)
       return result;
-
-    blen -= line_length;
-    buf += line_length;
-    *pconsumed += line_length;
+    blen -= consumed;
+    buf += consumed;
+    *pconsumed += consumed;
 
     /****
      * We now have a FULL header line in 'headerb'.
@@ -3735,195 +3899,21 @@ static CURLcode http_rw_headers(struct Curl_easy *data,
       }
     }
 
-    /* headers are in network encoding so use 0x0a and 0x0d instead of '\n'
-       and '\r' */
-    hd = Curl_dyn_ptr(&data->state.headerb);
-    hdlen = Curl_dyn_len(&data->state.headerb);
-    if((0x0a == *hd) || (0x0d == *hd)) {
-      /* Empty header line means end of headers! */
-      size_t consumed;
-
-      /* now, only output this if the header AND body are requested:
-       */
-      Curl_debug(data, CURLINFO_HEADER_IN, hd, hdlen);
-
-      writetype = CLIENTWRITE_HEADER |
-        ((k->httpcode/100 == 1) ? CLIENTWRITE_1XX : 0);
-
-      result = Curl_client_write(data, writetype, hd, hdlen);
-      if(result)
-        return result;
-
-      result = Curl_bump_headersize(data, hdlen, FALSE);
-      if(result)
-        return result;
-      /* We are done with this line. We reset because response
-       * processing might switch to HTTP/2 and that might call us
-       * directly again. */
-      Curl_dyn_reset(&data->state.headerb);
-
-      data->req.deductheadercount =
-        (100 <= k->httpcode && 199 >= k->httpcode)?data->req.headerbytecount:0;
-
-      /* analyze the response to find out what to do */
-      result = http_on_response(data, buf, blen, &consumed);
-      if(result)
-        return result;
-      *pconsumed += consumed;
+    result = http_rw_hd(data, Curl_dyn_ptr(&data->state.headerb),
+                        Curl_dyn_len(&data->state.headerb),
+                        buf, blen, &consumed);
+    /* We are done with this line. We reset because response
+     * processing might switch to HTTP/2 and that might call us
+     * directly again. */
+    Curl_dyn_reset(&data->state.headerb);
+    if(consumed) {
       blen -= consumed;
       buf += consumed;
-
-      if(!k->header || !blen)
-        goto out; /* exit header line loop */
-
-      continue;
+      *pconsumed += consumed;
     }
-
-    /*
-     * Checks for special headers coming up.
-     */
-
-    writetype = CLIENTWRITE_HEADER;
-    if(!k->headerline++) {
-      /* This is the first header, it MUST be the error code line
-         or else we consider this to be the body right away! */
-      bool fine_statusline = FALSE;
-
-      k->httpversion = 0; /* Don't know yet */
-      if(conn->handler->protocol & PROTO_FAMILY_HTTP) {
-        /*
-         * https://datatracker.ietf.org/doc/html/rfc7230#section-3.1.2
-         *
-         * The response code is always a three-digit number in HTTP as the spec
-         * says. We allow any three-digit number here, but we cannot make
-         * guarantees on future behaviors since it isn't within the protocol.
-         */
-        char *p = hd;
-
-        while(*p && ISBLANK(*p))
-          p++;
-        if(!strncmp(p, "HTTP/", 5)) {
-          p += 5;
-          switch(*p) {
-          case '1':
-            p++;
-            if((p[0] == '.') && (p[1] == '0' || p[1] == '1')) {
-              if(ISBLANK(p[2])) {
-                k->httpversion = 10 + (p[1] - '0');
-                p += 3;
-                if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
-                  k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
-                    (p[2] - '0');
-                  p += 3;
-                  if(ISSPACE(*p))
-                    fine_statusline = TRUE;
-                }
-              }
-            }
-            if(!fine_statusline) {
-              failf(data, "Unsupported HTTP/1 subversion in response");
-              return CURLE_UNSUPPORTED_PROTOCOL;
-            }
-            break;
-          case '2':
-          case '3':
-            if(!ISBLANK(p[1]))
-              break;
-            k->httpversion = (*p - '0') * 10;
-            p += 2;
-            if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
-              k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
-                (p[2] - '0');
-              p += 3;
-              if(!ISSPACE(*p))
-                break;
-              fine_statusline = TRUE;
-            }
-            break;
-          default: /* unsupported */
-            failf(data, "Unsupported HTTP version in response");
-            return CURLE_UNSUPPORTED_PROTOCOL;
-          }
-        }
-
-        if(!fine_statusline) {
-          /* If user has set option HTTP200ALIASES,
-             compare header line against list of aliases
-          */
-          statusline check = checkhttpprefix(data, hd, hdlen);
-          if(check == STATUS_DONE) {
-            fine_statusline = TRUE;
-            k->httpcode = 200;
-            k->httpversion = 10;
-          }
-        }
-      }
-      else if(conn->handler->protocol & CURLPROTO_RTSP) {
-        char *p = hd;
-        while(*p && ISBLANK(*p))
-          p++;
-        if(!strncmp(p, "RTSP/", 5)) {
-          p += 5;
-          if(ISDIGIT(*p)) {
-            p++;
-            if((p[0] == '.') && ISDIGIT(p[1])) {
-              if(ISBLANK(p[2])) {
-                p += 3;
-                if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
-                  k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
-                    (p[2] - '0');
-                  p += 3;
-                  if(ISSPACE(*p)) {
-                    fine_statusline = TRUE;
-                    k->httpversion = 11; /* RTSP acts like HTTP 1.1 */
-                  }
-                }
-              }
-            }
-          }
-          if(!fine_statusline)
-            return CURLE_WEIRD_SERVER_REPLY;
-        }
-      }
-
-      if(fine_statusline) {
-        result = Curl_http_statusline(data, conn);
-        if(result)
-          return result;
-        writetype |= CLIENTWRITE_STATUS;
-      }
-      else {
-        k->header = FALSE;   /* this is not a header line */
-        break;
-      }
-    }
-
-    result = verify_header(data);
     if(result)
       return result;
-
-    result = Curl_http_header(data, conn, hd, hdlen);
-    if(result)
-      return result;
-
-    /*
-     * Taken in one (more) header. Write it to the client.
-     */
-    Curl_debug(data, CURLINFO_HEADER_IN, hd, hdlen);
-
-    if(k->httpcode/100 == 1)
-      writetype |= CLIENTWRITE_1XX;
-    result = Curl_client_write(data, writetype, hd, hdlen);
-    if(result)
-      return result;
-
-    result = Curl_bump_headersize(data, hdlen, FALSE);
-    if(result)
-      return result;
-
-    Curl_dyn_reset(&data->state.headerb);
   }
-  while(blen);
 
   /* We might have reached the end of the header part here, but
      there might be a non-header part left in the end of the read
@@ -3933,6 +3923,22 @@ out:
     Curl_dyn_free(&data->state.headerb);
   }
   return CURLE_OK;
+}
+
+CURLcode Curl_http_write_resp_hd(struct Curl_easy *data,
+                                 const char *hd, size_t hdlen,
+                                 bool is_eos)
+{
+  CURLcode result;
+  size_t consumed;
+  char tmp = 0;
+
+  result = http_rw_hd(data, hd, hdlen, &tmp, 0, &consumed);
+  if(!result && is_eos) {
+    result = Curl_client_write(data, (CLIENTWRITE_BODY|CLIENTWRITE_EOS),
+                               &tmp, 0);
+  }
+  return result;
 }
 
 /*
@@ -3950,11 +3956,8 @@ CURLcode Curl_http_write_resp_hds(struct Curl_easy *data,
   else {
     CURLcode result;
 
-    result = http_rw_headers(data, buf, blen, pconsumed);
+    result = http_parse_headers(data, buf, blen, pconsumed);
     if(!result && !data->req.header) {
-      /* we have successfully finished parsing the HEADERs */
-      result = Curl_http_firstwrite(data);
-
       if(!data->req.no_body && Curl_dyn_len(&data->state.headerb)) {
         /* leftover from parsing something that turned out not
          * to be a header, only happens if we allow for

@@ -62,11 +62,19 @@ bool Curl_meets_timecondition(struct Curl_easy *data, time_t timeofdoc);
  * @param blen     the amount of bytes in `buf`
  * @param is_eos   TRUE iff the connection indicates this to be the last
  *                 bytes of the response
- * @param done     on returnm, TRUE iff the response is complete
  */
 CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
-                              char *buf, size_t blen,
+                              const char *buf, size_t blen,
                               bool is_eos);
+
+/**
+ * Write a single "header" line from a server response.
+ * @param hd0      the 0-terminated, single header line
+ * @param hdlen    the length of the header line
+ * @param is_eos   TRUE iff this is the end of the response
+ */
+CURLcode Curl_xfer_write_resp_hd(struct Curl_easy *data,
+                                 const char *hd0, size_t hdlen, bool is_eos);
 
 /* This sets up a forthcoming transfer */
 void Curl_xfer_setup(struct Curl_easy *data,
