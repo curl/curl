@@ -31,7 +31,7 @@
 
 extern const struct Curl_handler Curl_handler_rtsp;
 
-CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, char *header);
+CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header);
 
 #else
 /* disabled */

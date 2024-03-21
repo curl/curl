@@ -126,6 +126,7 @@ const struct Curl_handler Curl_handler_pop3 = {
   ZERO_NULL,                        /* perform_getsock */
   pop3_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* write_resp */
+  ZERO_NULL,                        /* write_resp_hd */
   ZERO_NULL,                        /* connection_check */
   ZERO_NULL,                        /* attach connection */
   PORT_POP3,                        /* defport */
@@ -155,6 +156,7 @@ const struct Curl_handler Curl_handler_pop3s = {
   ZERO_NULL,                        /* perform_getsock */
   pop3_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* write_resp */
+  ZERO_NULL,                        /* write_resp_hd */
   ZERO_NULL,                        /* connection_check */
   ZERO_NULL,                        /* attach connection */
   PORT_POP3S,                       /* defport */
