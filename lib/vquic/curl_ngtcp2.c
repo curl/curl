@@ -766,12 +766,6 @@ static int cb_h3_stream_close(nghttp3_conn *conn, int64_t sid,
   return 0;
 }
 
-static CURLcode write_resp_hds(struct Curl_easy *data,
-                               const char *buf, size_t blen)
-{
-  return Curl_xfer_write_resp(data, (char *)buf, blen, FALSE);
-}
-
 static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream3_id,
                            const uint8_t *buf, size_t blen,
                            void *user_data, void *stream_user_data)
@@ -836,7 +830,7 @@ static int cb_h3_end_headers(nghttp3_conn *conn, int64_t sid,
   if(!stream)
     return 0;
   /* add a CRLF only if we've received some headers */
-  result = write_resp_hds(data, STRCONST("\r\n"));
+  result = Curl_xfer_write_resp_hd(data, STRCONST("\r\n"), stream->closed);
   if(result) {
     return -1;
   }
@@ -887,8 +881,8 @@ static int cb_h3_recv_header(nghttp3_conn *conn, int64_t sid,
     if(!result)
       result = Curl_dyn_addn(&ctx->scratch, STRCONST(" \r\n"));
     if(!result)
-      result = write_resp_hds(data, Curl_dyn_ptr(&ctx->scratch),
-                              Curl_dyn_len(&ctx->scratch));
+      result = Curl_xfer_write_resp_hd(data, Curl_dyn_ptr(&ctx->scratch),
+                                       Curl_dyn_len(&ctx->scratch), FALSE);
     CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] status: %s",
                 stream_id, Curl_dyn_ptr(&ctx->scratch));
     if(result) {
@@ -911,8 +905,8 @@ static int cb_h3_recv_header(nghttp3_conn *conn, int64_t sid,
     if(!result)
       result = Curl_dyn_addn(&ctx->scratch, STRCONST("\r\n"));
     if(!result)
-      result = write_resp_hds(data, Curl_dyn_ptr(&ctx->scratch),
-                              Curl_dyn_len(&ctx->scratch));
+      result = Curl_xfer_write_resp_hd(data, Curl_dyn_ptr(&ctx->scratch),
+                                       Curl_dyn_len(&ctx->scratch), FALSE);
     if(result) {
       return -1;
     }

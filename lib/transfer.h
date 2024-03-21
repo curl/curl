@@ -64,7 +64,7 @@ bool Curl_meets_timecondition(struct Curl_easy *data, time_t timeofdoc);
  *                 bytes of the response
  */
 CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
-                              char *buf, size_t blen,
+                              const char *buf, size_t blen,
                               bool is_eos);
 
 /**
@@ -74,7 +74,7 @@ CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
  * @param is_eos   TRUE iff this is the end of the response
  */
 CURLcode Curl_xfer_write_resp_hd(struct Curl_easy *data,
-                                 char *hd0, size_t hdlen, bool is_eos);
+                                 const char *hd0, size_t hdlen, bool is_eos);
 
 /* This sets up a forthcoming transfer */
 void Curl_xfer_setup(struct Curl_easy *data,

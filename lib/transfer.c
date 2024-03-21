@@ -1156,7 +1156,7 @@ void Curl_xfer_setup(
 }
 
 CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
-                              char *buf, size_t blen,
+                              const char *buf, size_t blen,
                               bool is_eos)
 {
   CURLcode result = CURLE_OK;
@@ -1196,7 +1196,7 @@ CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
 }
 
 CURLcode Curl_xfer_write_resp_hd(struct Curl_easy *data,
-                                 char *hd0, size_t hdlen, bool is_eos)
+                                 const char *hd0, size_t hdlen, bool is_eos)
 {
   if(data->conn->handler->write_resp_hd) {
     /* protocol handlers offering this function take full responsibility

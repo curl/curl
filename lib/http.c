@@ -3618,7 +3618,8 @@ static CURLcode http_on_response(struct Curl_easy *data,
      && !Curl_conn_is_http3(data, conn, FIRSTSOCKET))
     k->download_done = TRUE;
 
-  return CURLE_OK;
+  /* final response without error, prepare to receive the body */
+  return Curl_http_firstwrite(data);
 }
 
 static CURLcode http_rw_hd(struct Curl_easy *data,
@@ -3957,9 +3958,6 @@ CURLcode Curl_http_write_resp_hds(struct Curl_easy *data,
 
     result = http_parse_headers(data, buf, blen, pconsumed);
     if(!result && !data->req.header) {
-      /* we have successfully finished parsing the HEADERs */
-      result = Curl_http_firstwrite(data);
-
       if(!data->req.no_body && Curl_dyn_len(&data->state.headerb)) {
         /* leftover from parsing something that turned out not
          * to be a header, only happens if we allow for

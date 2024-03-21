@@ -1452,7 +1452,7 @@ static CURLcode pop3_parse_custom_request(struct Curl_easy *data)
  * This function scans the body after the end-of-body and writes everything
  * until the end is found.
  */
-CURLcode Curl_pop3_write(struct Curl_easy *data, char *str, size_t nread)
+CURLcode Curl_pop3_write(struct Curl_easy *data, const char *str, size_t nread)
 {
   /* This code could be made into a special function in the handler struct */
   CURLcode result = CURLE_OK;

@@ -948,14 +948,6 @@ fail:
   return rv;
 }
 
-static CURLcode recvbuf_write_hds(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  const char *buf, size_t blen)
-{
-  (void)cf;
-  return Curl_xfer_write_resp(data, (char *)buf, blen, FALSE);
-}
-
 static CURLcode on_stream_frame(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 const nghttp2_frame *frame)
@@ -1011,7 +1003,7 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
       stream->status_code = -1;
     }
 
-    result = recvbuf_write_hds(cf, data, STRCONST("\r\n"));
+    result = Curl_xfer_write_resp_hd(data, STRCONST("\r\n"), stream->closed);
     if(result)
       return result;
 
@@ -1479,8 +1471,8 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     if(!result)
       result = Curl_dyn_addn(&ctx->scratch, STRCONST(" \r\n"));
     if(!result)
-      result = recvbuf_write_hds(cf, data_s, Curl_dyn_ptr(&ctx->scratch),
-                                 Curl_dyn_len(&ctx->scratch));
+      result = Curl_xfer_write_resp_hd(data_s, Curl_dyn_ptr(&ctx->scratch),
+                                       Curl_dyn_len(&ctx->scratch), FALSE);
     if(result)
       return NGHTTP2_ERR_CALLBACK_FAILURE;
     /* if we receive data for another handle, wake that up */
@@ -1504,8 +1496,8 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   if(!result)
     result = Curl_dyn_addn(&ctx->scratch, STRCONST("\r\n"));
   if(!result)
-    result = recvbuf_write_hds(cf, data_s, Curl_dyn_ptr(&ctx->scratch),
-                               Curl_dyn_len(&ctx->scratch));
+    result = Curl_xfer_write_resp_hd(data_s, Curl_dyn_ptr(&ctx->scratch),
+                                     Curl_dyn_len(&ctx->scratch), FALSE);
   if(result)
     return NGHTTP2_ERR_CALLBACK_FAILURE;
   /* if we receive data for another handle, wake that up */
