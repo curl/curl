@@ -9,6 +9,11 @@ See-also:
   - CURLOPT_SSL_CTX_FUNCTION (3)
 Protocol:
   - TLS
+TLS-backend:
+  - OpenSSL
+  - wolfSSL
+  - mbedTLS
+  - BearSSL
 ---
 
 # NAME

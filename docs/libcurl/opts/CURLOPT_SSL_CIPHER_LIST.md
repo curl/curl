@@ -12,6 +12,12 @@ See-also:
   - CURLOPT_USE_SSL (3)
 Protocol:
   - TLS
+TLS-backend:
+  - OpenSSL
+  - BearSSL
+  - Schannel
+  - Secure Transport
+  - wolfSSL
 ---
 
 # NAME

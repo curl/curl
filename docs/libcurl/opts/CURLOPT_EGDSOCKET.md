@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_RANDOM_FILE (3)
 Protocol:
   - TLS
+TLS-backend:
+  - OpenSSL
 ---
 
 # NAME

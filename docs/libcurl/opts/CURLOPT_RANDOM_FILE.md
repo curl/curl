@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_EGDSOCKET (3)
 Protocol:
   - TLS
+TLS-backend:
+  - OpenSSL
 ---
 
 # NAME

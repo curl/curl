@@ -12,6 +12,10 @@ See-also:
   - CURLOPT_STDERR (3)
 Protocol:
   - TLS
+TLS-backend:
+  - OpenSSL
+  - GnuTLS
+  - mbedTLS
 ---
 
 # NAME

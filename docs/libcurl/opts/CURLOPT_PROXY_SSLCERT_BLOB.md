@@ -11,6 +11,10 @@ See-also:
   - CURLOPT_SSLCERT_BLOB (3)
 Protocol:
   - TLS
+TLS-backend:
+  - OpenSSL
+  - Schannel
+  - Secure Transport
 ---
 
 # NAME

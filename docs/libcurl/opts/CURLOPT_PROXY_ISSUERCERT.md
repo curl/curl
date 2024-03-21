@@ -12,6 +12,9 @@ See-also:
   - CURLOPT_SSL_VERIFYPEER (3)
 Protocol:
   - TLS
+TLS-backend:
+  - OpenSSL
+  - GnuTLS
 ---
 
 # NAME
@@ -76,7 +79,7 @@ int main(void)
 
 # AVAILABILITY
 
-Added in 7.71.0. This option is supported by the OpenSSL backends.
+Added in 7.71.0. This option is supported by the OpenSSL and GnuTLS backends.
 
 # RETURN VALUE
 

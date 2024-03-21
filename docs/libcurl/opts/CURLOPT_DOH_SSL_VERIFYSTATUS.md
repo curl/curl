@@ -10,6 +10,9 @@ See-also:
   - CURLOPT_SSL_VERIFYSTATUS (3)
 Protocol:
   - TLS
+TLS-backend:
+  - OpenSSL
+  - GnuTLS
 ---
 
 # NAME

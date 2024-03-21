@@ -9,7 +9,7 @@ See-also:
   - CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256 (3)
   - CURLOPT_SSH_PUBLIC_KEYFILE (3)
 Protocol:
-  - SFP
+  - SFTP
   - SCP
 ---
 

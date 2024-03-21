@@ -10,6 +10,11 @@ See-also:
   - CURLOPT_CAINFO (3)
 Protocol:
   - TLS
+TLS-backend:
+  - OpenSSL
+  - wolfSSL
+  - mbedTLS
+  - BearSSL
 ---
 
 # NAME
