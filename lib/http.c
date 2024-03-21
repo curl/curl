@@ -3443,7 +3443,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
     default:
       /* The server may send us other 1xx responses, like informative
        * 103. This have no influence on request processing and we expect
-       * to recieve a final response eventually. */
+       * to receive a final response eventually. */
       break;
     }
     return result;
@@ -3931,12 +3931,12 @@ CURLcode Curl_http_write_resp_hd(struct Curl_easy *data,
 {
   CURLcode result;
   size_t consumed;
-  char tmp[1];
+  char tmp = 0;
 
-  result = http_rw_hd(data, hd, hdlen, tmp, 0, &consumed);
+  result = http_rw_hd(data, hd, hdlen, &tmp, 0, &consumed);
   if(!result && is_eos) {
     result = Curl_client_write(data, (CLIENTWRITE_BODY|CLIENTWRITE_EOS),
-                               tmp, 0);
+                               &tmp, 0);
   }
   return result;
 }
