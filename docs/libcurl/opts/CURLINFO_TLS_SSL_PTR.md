@@ -63,10 +63,6 @@ the active ("in use") SSL connection, with the following underlying types:
 
 **gnutls_session_t**
 
-## NSS
-
-**PRFileDesc ***
-
 ## OpenSSL
 
 CURLINFO_TLS_SESSION(3): **SSL_CTX ***
