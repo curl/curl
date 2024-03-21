@@ -127,6 +127,7 @@ struct cf_h2_ctx {
   struct bufq inbufq;           /* network input */
   struct bufq outbufq;          /* network output */
   struct bufc_pool stream_bufcp; /* spares for stream buffers */
+  struct dynbuf scratch;        /* scratch buffer for temp use */
 
   size_t drain_total; /* sum of all stream's UrlState drain */
   uint32_t max_concurrent_streams;
@@ -153,6 +154,7 @@ static void cf_h2_ctx_clear(struct cf_h2_ctx *ctx)
   Curl_bufq_free(&ctx->inbufq);
   Curl_bufq_free(&ctx->outbufq);
   Curl_bufcp_free(&ctx->stream_bufcp);
+  Curl_dyn_free(&ctx->scratch);
   memset(ctx, 0, sizeof(*ctx));
   ctx->call_data = save;
 }
@@ -408,6 +410,7 @@ static CURLcode cf_h2_ctx_init(struct Curl_cfilter *cf,
   Curl_bufcp_init(&ctx->stream_bufcp, H2_CHUNK_SIZE, H2_STREAM_POOL_SPARES);
   Curl_bufq_initp(&ctx->inbufq, &ctx->stream_bufcp, H2_NW_RECV_CHUNKS, 0);
   Curl_bufq_initp(&ctx->outbufq, &ctx->stream_bufcp, H2_NW_SEND_CHUNKS, 0);
+  Curl_dyn_init(&ctx->scratch, CURL_MAX_HTTP_HEADER);
   ctx->last_stream_id = 2147483647;
 
   rc = nghttp2_session_callbacks_new(&cbs);
@@ -1359,6 +1362,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
                      void *userp)
 {
   struct Curl_cfilter *cf = userp;
+  struct cf_h2_ctx *ctx = cf->ctx;
   struct h2_stream_ctx *stream;
   struct Curl_easy *data_s;
   int32_t stream_id = frame->hd.stream_id;
@@ -1468,14 +1472,15 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     result = Curl_headers_push(data_s, buffer, CURLH_PSEUDO);
     if(result)
       return NGHTTP2_ERR_CALLBACK_FAILURE;
-    result = recvbuf_write_hds(cf, data_s, STRCONST("HTTP/2 "));
-    if(result)
-      return NGHTTP2_ERR_CALLBACK_FAILURE;
-    result = recvbuf_write_hds(cf, data_s, (const char *)value, valuelen);
-    if(result)
-      return NGHTTP2_ERR_CALLBACK_FAILURE;
-    /* the space character after the status code is mandatory */
-    result = recvbuf_write_hds(cf, data_s, STRCONST(" \r\n"));
+    Curl_dyn_reset(&ctx->scratch);
+    result = Curl_dyn_addn(&ctx->scratch, STRCONST("HTTP/2 "));
+    if(!result)
+      result = Curl_dyn_addn(&ctx->scratch, value, valuelen);
+    if(!result)
+      result = Curl_dyn_addn(&ctx->scratch, STRCONST(" \r\n"));
+    if(!result)
+      result = recvbuf_write_hds(cf, data_s, Curl_dyn_ptr(&ctx->scratch),
+                                 Curl_dyn_len(&ctx->scratch));
     if(result)
       return NGHTTP2_ERR_CALLBACK_FAILURE;
     /* if we receive data for another handle, wake that up */
@@ -1490,16 +1495,17 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   /* nghttp2 guarantees that namelen > 0, and :status was already
      received, and this is not pseudo-header field . */
   /* convert to an HTTP1-style header */
-  result = recvbuf_write_hds(cf, data_s, (const char *)name, namelen);
-  if(result)
-    return NGHTTP2_ERR_CALLBACK_FAILURE;
-  result = recvbuf_write_hds(cf, data_s, STRCONST(": "));
-  if(result)
-    return NGHTTP2_ERR_CALLBACK_FAILURE;
-  result = recvbuf_write_hds(cf, data_s, (const char *)value, valuelen);
-  if(result)
-    return NGHTTP2_ERR_CALLBACK_FAILURE;
-  result = recvbuf_write_hds(cf, data_s, STRCONST("\r\n"));
+  Curl_dyn_reset(&ctx->scratch);
+  result = Curl_dyn_addn(&ctx->scratch, (const char *)name, namelen);
+  if(!result)
+    result = Curl_dyn_addn(&ctx->scratch, STRCONST(": "));
+  if(!result)
+    result = Curl_dyn_addn(&ctx->scratch, (const char *)value, valuelen);
+  if(!result)
+    result = Curl_dyn_addn(&ctx->scratch, STRCONST("\r\n"));
+  if(!result)
+    result = recvbuf_write_hds(cf, data_s, Curl_dyn_ptr(&ctx->scratch),
+                               Curl_dyn_len(&ctx->scratch));
   if(result)
     return NGHTTP2_ERR_CALLBACK_FAILURE;
   /* if we receive data for another handle, wake that up */

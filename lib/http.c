@@ -100,7 +100,7 @@
  * Forward declarations.
  */
 
-static bool http_should_fail(struct Curl_easy *data);
+static bool http_should_fail(struct Curl_easy *data, int httpcode);
 static bool http_exp100_is_waiting(struct Curl_easy *data);
 static CURLcode http_exp100_add_reader(struct Curl_easy *data);
 static void http_exp100_send_anyway(struct Curl_easy *data);
@@ -245,8 +245,6 @@ char *Curl_copy_header_value(const char *header)
   while(*start && ISSPACE(*start))
     start++;
 
-  /* data is in the host encoding so
-     use '\r' and '\n' instead of 0x0d and 0x0a */
   end = strchr(start, '\r');
   if(!end)
     end = strchr(start, '\n');
@@ -567,7 +565,7 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
       data->state.authhost.done = TRUE;
     }
   }
-  if(http_should_fail(data)) {
+  if(http_should_fail(data, data->req.httpcode)) {
     failf(data, "The requested URL returned error: %d",
           data->req.httpcode);
     result = CURLE_HTTP_RETURNED_ERROR;
@@ -1008,20 +1006,17 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
 }
 
 /**
- * http_should_fail() determines whether an HTTP response has gotten us
+ * http_should_fail() determines whether an HTTP response code has gotten us
  * into an error state or not.
  *
  * @retval FALSE communications should continue
  *
  * @retval TRUE communications should not continue
  */
-static bool http_should_fail(struct Curl_easy *data)
+static bool http_should_fail(struct Curl_easy *data, int httpcode)
 {
-  int httpcode;
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
-
-  httpcode = data->req.httpcode;
 
   /*
   ** If we haven't been asked to fail on error,
@@ -2851,7 +2846,7 @@ CURLcode Curl_http_header(struct Curl_easy *data,
   case 'A':
 #ifndef CURL_DISABLE_ALTSVC
     v = (data->asi &&
-         ((conn->handler->flags & PROTOPT_SSL) ||
+         ((data->conn->handler->flags & PROTOPT_SSL) ||
 #ifdef CURLDEBUG
           /* allow debug builds to circumvent the HTTPS restriction */
           getenv("CURL_ALTSVC_HTTP")
@@ -3309,12 +3304,11 @@ CURLcode Curl_http_size(struct Curl_easy *data)
   return CURLE_OK;
 }
 
-static CURLcode verify_header(struct Curl_easy *data)
+static CURLcode verify_header(struct Curl_easy *data,
+                              const char *hd, size_t hdlen)
 {
   struct SingleRequest *k = &data->req;
-  const char *header = Curl_dyn_ptr(&data->state.headerb);
-  size_t hlen = Curl_dyn_len(&data->state.headerb);
-  char *ptr = memchr(header, 0x00, hlen);
+  char *ptr = memchr(hd, 0x00, hdlen);
   if(ptr) {
     /* this is bad, bail out */
     failf(data, "Nul byte in header");
@@ -3323,11 +3317,11 @@ static CURLcode verify_header(struct Curl_easy *data)
   if(k->headerline < 2)
     /* the first "header" is the status-line and it has no colon */
     return CURLE_OK;
-  if(((header[0] == ' ') || (header[0] == '\t')) && k->headerline > 2)
+  if(((hd[0] == ' ') || (hd[0] == '\t')) && k->headerline > 2)
     /* line folding, can't happen on line 2 */
     ;
   else {
-    ptr = memchr(header, ':', hlen);
+    ptr = memchr(hd, ':', hdlen);
     if(!ptr) {
       /* this is bad, bail out */
       failf(data, "Header without colon");
@@ -3372,7 +3366,6 @@ static CURLcode http_on_response(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
   struct SingleRequest *k = &data->req;
-  bool switch_to_h2 = FALSE;
 
   (void)buf; /* not used without HTTP2 enabled */
   *pconsumed = 0;
@@ -3391,96 +3384,92 @@ static CURLcode http_on_response(struct Curl_easy *data,
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
   else if(k->httpcode < 200) {
-    /* "A user agent MAY ignore unexpected 1xx status responses." */
+    /* "A user agent MAY ignore unexpected 1xx status responses."
+     * By default, we expect to get more responses after this one. */
+    k->header = TRUE;
+    k->headerline = 0; /* restart the header line counter */
+
     switch(k->httpcode) {
     case 100:
       /*
        * We have made an HTTP PUT or POST and this is 1.1-lingo
        * that tells us that the server is OK with this and ready
        * to receive the data.
-       * However, we'll get more headers now so we must get
-       * back into the header-parsing state!
        */
-      k->header = TRUE;
-      k->headerline = 0; /* restart the header line counter */
-
-      /* if we did wait for this do enable write now! */
       Curl_http_exp100_got100(data);
       break;
     case 101:
-      if(conn->httpversion == 11) {
-        /* Switching Protocols only allowed from HTTP/1.1 */
-        if(k->upgr101 == UPGR101_H2) {
-          /* Switching to HTTP/2 */
-          infof(data, "Received 101, Switching to HTTP/2");
-          k->upgr101 = UPGR101_RECEIVED;
-
-          /* we'll get more headers (HTTP/2 response) */
-          k->header = TRUE;
-          k->headerline = 0; /* restart the header line counter */
-          switch_to_h2 = TRUE;
-        }
-#ifdef USE_WEBSOCKETS
-        else if(k->upgr101 == UPGR101_WS) {
-          /* verify the response */
-          result = Curl_ws_accept(data, buf, blen);
-          if(result)
-            return result;
-          k->header = FALSE; /* no more header to parse! */
-          *pconsumed += blen; /* ws accept handled the data */
-          blen = 0;
-          if(data->set.connect_only)
-            k->keepon &= ~KEEP_RECV; /* read no more content */
-        }
-#endif
-        else {
-          /* Not switching to another protocol */
-          k->header = FALSE; /* no more header to parse! */
-        }
-      }
-      else {
+      /* Switching Protocols only allowed from HTTP/1.1 */
+      if(conn->httpversion != 11) {
         /* invalid for other HTTP versions */
         failf(data, "unexpected 101 response code");
         return CURLE_WEIRD_SERVER_REPLY;
       }
+      if(k->upgr101 == UPGR101_H2) {
+        /* Switching to HTTP/2, where we will get more responses */
+        infof(data, "Received 101, Switching to HTTP/2");
+        k->upgr101 = UPGR101_RECEIVED;
+        /* We expect more response from HTTP/2 later */
+        k->header = TRUE;
+        k->headerline = 0; /* restart the header line counter */
+        /* Any remaining `buf` bytes are already HTTP/2 and passed to
+         * be processed. */
+        result = Curl_http2_upgrade(data, conn, FIRSTSOCKET, buf, blen);
+        if(result)
+          return result;
+        *pconsumed += blen;
+      }
+#ifdef USE_WEBSOCKETS
+      else if(k->upgr101 == UPGR101_WS) {
+        /* verify the response. Any passed `buf` bytes are already in
+         * WebSockets format and taken in by the protocol handler. */
+        result = Curl_ws_accept(data, buf, blen);
+        if(result)
+          return result;
+        *pconsumed += blen; /* ws accept handled the data */
+        k->header = FALSE; /* we will not get more responses */
+        if(data->set.connect_only)
+          k->keepon &= ~KEEP_RECV; /* read no more content */
+      }
+#endif
+      else {
+        /* We silently accept this as the final response.
+         * TODO: this looks, uhm, wrong. What are we switching to if we
+         * did not ask for an Upgrade? Maybe the application provided an
+         * `Upgrade: xxx` header? */
+        k->header = FALSE;
+      }
       break;
     default:
-      /* the status code 1xx indicates a provisional response, so
-         we'll get another set of headers */
-      k->header = TRUE;
-      k->headerline = 0; /* restart the header line counter */
+      /* The server may send us other 1xx responses, like informative
+       * 103. This have no influence on request processing and we expect
+       * to recieve a final response eventually. */
       break;
     }
-  }
-  else {
-    /* k->httpcode >= 200, final response */
-    k->header = FALSE;
-
-    if(k->upgr101 == UPGR101_H2) {
-      /* A requested upgrade was denied, poke the multi handle to possibly
-         allow a pending pipewait to continue */
-      Curl_multi_connchanged(data->multi);
-    }
-
-    if((k->size == -1) && !k->chunk && !conn->bits.close &&
-       (conn->httpversion == 11) &&
-       !(conn->handler->protocol & CURLPROTO_RTSP) &&
-       data->state.httpreq != HTTPREQ_HEAD) {
-      /* On HTTP 1.1, when connection is not to get closed, but no
-         Content-Length nor Transfer-Encoding chunked have been
-         received, according to RFC2616 section 4.4 point 5, we
-         assume that the server will close the connection to
-         signal the end of the document. */
-      infof(data, "no chunk, no close, no size. Assume close to "
-            "signal end");
-      streamclose(conn, "HTTP: No end-of-message indicator");
-    }
+    return result;
   }
 
-  if(!k->header) {
-    result = Curl_http_size(data);
-    if(result)
-      return result;
+  /* k->httpcode >= 200, final response */
+  k->header = FALSE;
+
+  if(k->upgr101 == UPGR101_H2) {
+    /* A requested upgrade was denied, poke the multi handle to possibly
+       allow a pending pipewait to continue */
+    Curl_multi_connchanged(data->multi);
+  }
+
+  if((k->size == -1) && !k->chunk && !conn->bits.close &&
+     (conn->httpversion == 11) &&
+     !(conn->handler->protocol & CURLPROTO_RTSP) &&
+     data->state.httpreq != HTTPREQ_HEAD) {
+    /* On HTTP 1.1, when connection is not to get closed, but no
+       Content-Length nor Transfer-Encoding chunked have been
+       received, according to RFC2616 section 4.4 point 5, we
+       assume that the server will close the connection to
+       signal the end of the document. */
+    infof(data, "no chunk, no close, no size. Assume close to "
+          "signal end");
+    streamclose(conn, "HTTP: No end-of-message indicator");
   }
 
   /* At this point we have some idea about the fate of the connection.
@@ -3514,31 +3503,25 @@ static CURLcode http_on_response(struct Curl_easy *data,
   }
 #endif
 
-  /*
-   * When all the headers have been parsed, see if we should give
-   * up and return an error.
-   */
-  if(http_should_fail(data)) {
-    failf(data, "The requested URL returned error: %d",
-          k->httpcode);
-    return CURLE_HTTP_RETURNED_ERROR;
-  }
-
 #ifdef USE_WEBSOCKETS
-  /* All non-101 HTTP status codes are bad when wanting to upgrade to
-     websockets */
+  /* All >=200 HTTP status codes are errors when wanting websockets */
   if(data->req.upgr101 == UPGR101_WS) {
     failf(data, "Refused WebSockets upgrade: %d", k->httpcode);
     return CURLE_HTTP_RETURNED_ERROR;
   }
 #endif
 
+  /* Check if this response means the transfer errored. */
+  if(http_should_fail(data, data->req.httpcode)) {
+    failf(data, "The requested URL returned error: %d",
+          k->httpcode);
+    return CURLE_HTTP_RETURNED_ERROR;
+  }
 
   /* Curl_http_auth_act() checks what authentication methods
    * that are available and decides which one (if any) to
    * use. It will set 'newurl' if an auth method was picked. */
   result = Curl_http_auth_act(data);
-
   if(result)
     return result;
 
@@ -3609,38 +3592,31 @@ static CURLcode http_on_response(struct Curl_easy *data,
       infof(data, "Keep sending data to get tossed away");
       k->keepon |= KEEP_SEND;
     }
+
   }
 
-  if(!k->header) {
-    /*
-     * really end-of-headers.
-     *
-     * If we requested a "no body", this is a good time to get
-     * out and return home.
-     */
-    if(data->req.no_body)
-      k->download_done = TRUE;
+  /* This is the last response that we will got for the current request.
+   * Check on the body size and determine if the response is complete.
+   */
+  result = Curl_http_size(data);
+  if(result)
+    return result;
 
-    /* If max download size is *zero* (nothing) we already have
-       nothing and can safely return ok now!  But for HTTP/2, we'd
-       like to call http2_handle_stream_close to properly close a
-       stream.  In order to do this, we keep reading until we
-       close the stream. */
-    if(0 == k->maxdownload
-       && !Curl_conn_is_http2(data, conn, FIRSTSOCKET)
-       && !Curl_conn_is_http3(data, conn, FIRSTSOCKET))
-      k->download_done = TRUE;
-  }
+  /* If we requested a "no body", this is a good time to get
+   * out and return home.
+   */
+  if(data->req.no_body)
+    k->download_done = TRUE;
 
-  if(switch_to_h2) {
-    /* Having handled the headers, we can do the HTTP/2 switch.
-     * Any remaining `buf` bytes are already HTTP/2 and passed to
-     * be processed. */
-    result = Curl_http2_upgrade(data, conn, FIRSTSOCKET, buf, blen);
-    if(result)
-      return result;
-    *pconsumed += blen;
-  }
+  /* If max download size is *zero* (nothing) we already have
+     nothing and can safely return ok now!  But for HTTP/2, we'd
+     like to call http2_handle_stream_close to properly close a
+     stream.  In order to do this, we keep reading until we
+     close the stream. */
+  if(0 == k->maxdownload
+     && !Curl_conn_is_http2(data, conn, FIRSTSOCKET)
+     && !Curl_conn_is_http3(data, conn, FIRSTSOCKET))
+    k->download_done = TRUE;
 
   return CURLE_OK;
 }
@@ -3808,7 +3784,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
     }
   }
 
-  result = verify_header(data);
+  result = verify_header(data, hd, hdlen);
   if(result)
     return result;
 
@@ -3852,9 +3828,7 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
   while(blen && k->header) {
     size_t consumed;
 
-    /* data is in network encoding so use 0x0a instead of '\n' */
-    end_ptr = memchr(buf, 0x0a, blen);
-
+    end_ptr = memchr(buf, '\n', blen);
     if(!end_ptr) {
       /* Not a complete header line within buffer, append the data to
          the end of the headerbuff. */
