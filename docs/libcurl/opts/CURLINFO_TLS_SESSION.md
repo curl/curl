@@ -69,8 +69,8 @@ int main(void)
 
 # AVAILABILITY
 
-Added in 7.34.0. Deprecated since 7.48.0 and supported OpenSSL, GnuTLS, and
-NSS only up until this version was released.
+Added in 7.34.0. Deprecated since 7.48.0 and supported by OpenSSL and GnuTLS
+only up until this version was released.
 
 # RETURN VALUE
 
