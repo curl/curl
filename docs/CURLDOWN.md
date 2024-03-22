@@ -96,7 +96,7 @@ option. The available TLS backends are:
 - `Schannel`
 - `Secure Transport`
 - `wolfSSL`
-- `*`: all TLS backends
+- `All`: all TLS backends
 
 Following the header in the file, is the manual page using markdown-like
 syntax:

@@ -11,7 +11,7 @@ See-also:
 Protocol:
   - TLS
 TLS-backend:
-  - *
+  - All
 ---
 
 # NAME

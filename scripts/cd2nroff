@@ -139,7 +139,7 @@ my %knowntls = (
     'Schannel' => 1,
     'Secure Transport' => 1,
     'wolfSSL' => 1,
-    '*' => 1,
+    'All' => 1,
     );
 
 sub single {
