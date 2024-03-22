@@ -1289,8 +1289,8 @@ static void reset_socket_fdwrite(curl_socket_t s)
 }
 #endif
 
-static CURLMcode ufds_resize(struct pollfd **pfds, unsigned int *pfds_len,
-                             unsigned int inc, bool *is_malloced)
+static CURLMcode ufds_increase(struct pollfd **pfds, unsigned int *pfds_len,
+                               unsigned int inc, bool *is_malloced)
 {
   struct pollfd *new_fds, *old_fds = *pfds;
   unsigned int new_len = *pfds_len + inc;
@@ -1388,7 +1388,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
         }
         else {
           if(nfds >= ufds_len) {
-            if(ufds_resize(&ufds, &ufds_len, 100, &ufds_malloc))
+            if(ufds_increase(&ufds, &ufds_len, 100, &ufds_malloc))
               return CURLM_OUT_OF_MEMORY;
           }
           DEBUGASSERT(nfds < ufds_len);
@@ -1430,7 +1430,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
     }
 #endif
     if(nfds >= ufds_len) {
-      if(ufds_resize(&ufds, &ufds_len, 100, &ufds_malloc))
+      if(ufds_increase(&ufds, &ufds_len, 100, &ufds_malloc))
         return CURLM_OUT_OF_MEMORY;
     }
     DEBUGASSERT(nfds < ufds_len);
@@ -1449,7 +1449,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
 #ifndef USE_WINSOCK
   if(use_wakeup && multi->wakeup_pair[0] != CURL_SOCKET_BAD) {
     if(nfds >= ufds_len) {
-      if(ufds_resize(&ufds, &ufds_len, 100, &ufds_malloc))
+      if(ufds_increase(&ufds, &ufds_len, 100, &ufds_malloc))
         return CURLM_OUT_OF_MEMORY;
     }
     DEBUGASSERT(nfds < ufds_len);
