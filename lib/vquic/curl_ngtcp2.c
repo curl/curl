@@ -1983,6 +1983,10 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   if(result)
     return result;
 
+#ifdef USE_OPENSSL
+    SSL_set_quic_use_legacy_codepoint(ctx->tls.ossl.ssl, 0);
+#endif
+
   ctx->dcid.datalen = NGTCP2_MAX_CIDLEN;
   result = Curl_rand(data, ctx->dcid.data, NGTCP2_MAX_CIDLEN);
   if(result)

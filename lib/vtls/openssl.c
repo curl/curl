@@ -3817,12 +3817,6 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
   SSL_set_connect_state(octx->ssl);
 
-  if(transport == TRNSPRT_QUIC) {
-#ifndef USE_OPENSSL_QUIC
-    SSL_set_quic_use_legacy_codepoint(octx->ssl, 0);
-#endif
-  }
-
   octx->server_cert = 0x0;
 #ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
   if(peer->sni) {
