@@ -113,7 +113,7 @@ void Curl_ngtcp2_ver(char *p, size_t len)
 struct cf_ngtcp2_ctx {
   struct cf_quic_ctx q;
   struct ssl_peer peer;
-  struct quic_tls_ctx tls;
+  struct curl_tls_ctx tls;
   ngtcp2_path connected_path;
   ngtcp2_conn *qconn;
   ngtcp2_cid dcid;
@@ -1919,19 +1919,21 @@ static void cf_ngtcp2_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
   (void)save;
 }
 
-static CURLcode tls_ctx_setup(struct quic_tls_ctx *ctx,
-                              struct Curl_cfilter *cf,
-                              struct Curl_easy *data)
+static CURLcode tls_ctx_setup(struct Curl_cfilter *cf,
+                              struct Curl_easy *data,
+                              void *user_data)
 {
+  struct curl_tls_ctx *ctx = user_data;
   (void)cf;
 #ifdef USE_OPENSSL
 #if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
-  if(ngtcp2_crypto_boringssl_configure_client_context(ctx->ssl_ctx) != 0) {
+  if(ngtcp2_crypto_boringssl_configure_client_context(ctx->ossl.ssl_ctx)
+     != 0) {
     failf(data, "ngtcp2_crypto_boringssl_configure_client_context failed");
     return CURLE_FAILED_INIT;
   }
 #else
-  if(ngtcp2_crypto_quictls_configure_client_context(ctx->ssl_ctx) != 0) {
+  if(ngtcp2_crypto_quictls_configure_client_context(ctx->ossl.ssl_ctx) != 0) {
     failf(data, "ngtcp2_crypto_quictls_configure_client_context failed");
     return CURLE_FAILED_INIT;
   }
@@ -1977,7 +1979,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
 #define H3_ALPN "\x2h3\x5h3-29"
   result = Curl_vquic_tls_init(&ctx->tls, cf, data, &ctx->peer,
                                H3_ALPN, sizeof(H3_ALPN) - 1,
-                               tls_ctx_setup, &ctx->conn_ref);
+                               tls_ctx_setup, &ctx->tls, &ctx->conn_ref);
   if(result)
     return result;
 
@@ -2022,7 +2024,9 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   if(rc)
     return CURLE_QUIC_CONNECT_ERROR;
 
-#ifdef USE_GNUTLS
+#ifdef USE_OPENSSL
+  ngtcp2_conn_set_tls_native_handle(ctx->qconn, ctx->tls.ossl.ssl);
+#elif defined(USE_GNUTLS)
   ngtcp2_conn_set_tls_native_handle(ctx->qconn, ctx->tls.gtls->session);
 #else
   ngtcp2_conn_set_tls_native_handle(ctx->qconn, ctx->tls.ssl);

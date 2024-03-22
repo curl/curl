@@ -36,6 +36,35 @@
 
 #include "urldata.h"
 
+/* Struct to hold a Curl OpenSSL instance */
+struct ossl_ctx {
+  /* these ones requires specific SSL-types */
+  SSL_CTX* ssl_ctx;
+  SSL*     ssl;
+  X509*    server_cert;
+  BIO_METHOD *bio_method;
+  CURLcode io_result;       /* result of last BIO cfilter operation */
+#ifndef HAVE_KEYLOG_CALLBACK
+  /* Set to true once a valid keylog entry has been created to avoid dupes. */
+  bool     keylog_done;
+#endif
+  bool x509_store_setup;            /* x509 store has been set up */
+  BIT(reused_session);              /* session-ID was reused for this */
+};
+
+typedef CURLcode Curl_ossl_ctx_setup_cb(struct Curl_cfilter *cf,
+                                        struct Curl_easy *data,
+                                        void *user_data);
+
+CURLcode Curl_ossl_ctx_init(struct ossl_ctx *ctx,
+                            struct Curl_cfilter *cf,
+                            struct Curl_easy *data,
+                            struct ssl_peer *peer,
+                            int transport, /* TCP or QUIC */
+                            const unsigned char *alpn, size_t alpn_len,
+                            Curl_ossl_ctx_setup_cb *cb_setup,
+                            void *cb_user_data, void *ssl_user_data);
+
 #if (OPENSSL_VERSION_NUMBER < 0x30000000L)
 #define SSL_get1_peer_certificate SSL_get_peer_certificate
 #endif

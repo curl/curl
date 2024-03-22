@@ -281,7 +281,7 @@ static void cf_osslq_h3conn_cleanup(struct cf_osslq_h3conn *h3)
 struct cf_osslq_ctx {
   struct cf_quic_ctx q;
   struct ssl_peer peer;
-  struct quic_tls_ctx tls;
+  struct curl_tls_ctx tls;
   struct cf_call_data call_data;
   struct cf_osslq_h3conn h3;
   struct curltime started_at;        /* time the current attempt started */
@@ -1062,7 +1062,7 @@ static CURLcode cf_osslq_ctx_start(struct Curl_cfilter *cf,
 #define H3_ALPN "\x2h3"
   result = Curl_vquic_tls_init(&ctx->tls, cf, data, &ctx->peer,
                                H3_ALPN, sizeof(H3_ALPN) - 1,
-                               NULL, NULL);
+                               NULL, NULL, NULL);
   if(result)
     goto out;
 

@@ -88,7 +88,7 @@ void Curl_quiche_ver(char *p, size_t len)
 struct cf_quiche_ctx {
   struct cf_quic_ctx q;
   struct ssl_peer peer;
-  struct quic_tls_ctx tls;
+  struct curl_tls_ctx tls;
   quiche_conn *qconn;
   quiche_config *cfg;
   quiche_h3_conn *h3c;
@@ -1235,7 +1235,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   result = Curl_vquic_tls_init(&ctx->tls, cf, data, &ctx->peer,
                                QUICHE_H3_APPLICATION_PROTOCOL,
                                sizeof(QUICHE_H3_APPLICATION_PROTOCOL) - 1,
-                               NULL, cf);
+                               NULL, NULL, cf);
   if(result)
     return result;
 

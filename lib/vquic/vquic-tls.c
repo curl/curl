@@ -80,165 +80,7 @@
 #endif
 
 
-#ifdef USE_OPENSSL
-
-static void keylog_callback(const SSL *ssl, const char *line)
-{
-  (void)ssl;
-  Curl_tls_keylog_write_line(line);
-}
-
-static CURLcode curl_ossl_init_ctx(struct quic_tls_ctx *ctx,
-                                   struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
-                                   Curl_vquic_tls_ctx_setup *ctx_setup)
-{
-  struct ssl_primary_config *conn_config;
-  CURLcode result = CURLE_FAILED_INIT;
-
-  DEBUGASSERT(!ctx->ssl_ctx);
-#ifdef USE_OPENSSL_QUIC
-  ctx->ssl_ctx = SSL_CTX_new(OSSL_QUIC_client_method());
-#else
-  ctx->ssl_ctx = SSL_CTX_new(TLS_method());
-#endif
-  if(!ctx->ssl_ctx) {
-    result = CURLE_OUT_OF_MEMORY;
-    goto out;
-  }
-  conn_config = Curl_ssl_cf_get_primary_config(cf);
-  if(!conn_config) {
-    result = CURLE_FAILED_INIT;
-    goto out;
-  }
-
-  if(ctx_setup) {
-    result = ctx_setup(ctx, cf, data);
-    if(result)
-      goto out;
-  }
-
-  SSL_CTX_set_default_verify_paths(ctx->ssl_ctx);
-
-  {
-    const char *curves = conn_config->curves ?
-      conn_config->curves : QUIC_GROUPS;
-    if(!SSL_CTX_set1_curves_list(ctx->ssl_ctx, curves)) {
-      failf(data, "failed setting curves list for QUIC: '%s'", curves);
-      return CURLE_SSL_CIPHER;
-    }
-  }
-
-#ifndef OPENSSL_IS_BORINGSSL
-  {
-    const char *ciphers13 = conn_config->cipher_list13 ?
-      conn_config->cipher_list13 : QUIC_CIPHERS;
-    if(SSL_CTX_set_ciphersuites(ctx->ssl_ctx, ciphers13) != 1) {
-      failf(data, "failed setting QUIC cipher suite: %s", ciphers13);
-      return CURLE_SSL_CIPHER;
-    }
-    infof(data, "QUIC cipher selection: %s", ciphers13);
-  }
-#endif
-
-  /* Open the file if a TLS or QUIC backend has not done this before. */
-  Curl_tls_keylog_open();
-  if(Curl_tls_keylog_enabled()) {
-    SSL_CTX_set_keylog_callback(ctx->ssl_ctx, keylog_callback);
-  }
-
-  /* OpenSSL always tries to verify the peer, this only says whether it should
-   * fail to connect if the verification fails, or if it should continue
-   * anyway. In the latter case the result of the verification is checked with
-   * SSL_get_verify_result() below. */
-  SSL_CTX_set_verify(ctx->ssl_ctx, conn_config->verifypeer ?
-                     SSL_VERIFY_PEER : SSL_VERIFY_NONE, NULL);
-
-  /* give application a chance to interfere with SSL set up. */
-  if(data->set.ssl.fsslctx) {
-    /* When a user callback is installed to modify the SSL_CTX,
-     * we need to do the full initialization before calling it.
-     * See: #11800 */
-    if(!ctx->x509_store_setup) {
-      result = Curl_ssl_setup_x509_store(cf, data, ctx->ssl_ctx);
-      if(result)
-        goto out;
-      ctx->x509_store_setup = TRUE;
-    }
-    Curl_set_in_callback(data, true);
-    result = (*data->set.ssl.fsslctx)(data, ctx->ssl_ctx,
-                                      data->set.ssl.fsslctxp);
-    Curl_set_in_callback(data, false);
-    if(result) {
-      failf(data, "error signaled by ssl ctx callback");
-      goto out;
-    }
-  }
-  result = CURLE_OK;
-
-out:
-  if(result && ctx->ssl_ctx) {
-    SSL_CTX_free(ctx->ssl_ctx);
-    ctx->ssl_ctx = NULL;
-  }
-  return result;
-}
-
-static CURLcode curl_ossl_set_client_cert(struct quic_tls_ctx *ctx,
-                                     struct Curl_cfilter *cf,
-                                     struct Curl_easy *data)
-{
-  SSL_CTX *ssl_ctx = ctx->ssl_ctx;
-  const struct ssl_config_data *ssl_config;
-
-  ssl_config = Curl_ssl_cf_get_config(cf, data);
-  DEBUGASSERT(ssl_config);
-
-  if(ssl_config->primary.clientcert ||
-     ssl_config->primary.cert_blob ||
-     ssl_config->cert_type) {
-    return Curl_ossl_set_client_cert(
-        data, ssl_ctx, ssl_config->primary.clientcert,
-        ssl_config->primary.cert_blob, ssl_config->cert_type,
-        ssl_config->key, ssl_config->key_blob,
-        ssl_config->key_type, ssl_config->key_passwd);
-  }
-
-  return CURLE_OK;
-}
-
-/** SSL callbacks ***/
-
-static CURLcode curl_ossl_init_ssl(struct quic_tls_ctx *ctx,
-                                   struct Curl_easy *data,
-                                   struct ssl_peer *peer,
-                                   const char *alpn, size_t alpn_len,
-                                   void *user_data)
-{
-  DEBUGASSERT(!ctx->ssl);
-  ctx->ssl = SSL_new(ctx->ssl_ctx);
-
-  SSL_set_app_data(ctx->ssl, user_data);
-  SSL_set_connect_state(ctx->ssl);
-#ifndef USE_OPENSSL_QUIC
-  SSL_set_quic_use_legacy_codepoint(ctx->ssl, 0);
-#endif
-
-  if(alpn)
-    SSL_set_alpn_protos(ctx->ssl, (const uint8_t *)alpn, (int)alpn_len);
-
-  if(peer->sni) {
-    if(!SSL_set_tlsext_host_name(ctx->ssl, peer->sni)) {
-      failf(data, "Failed set SNI");
-      SSL_free(ctx->ssl);
-      ctx->ssl = NULL;
-      return CURLE_QUIC_CONNECT_ERROR;
-    }
-  }
-  return CURLE_OK;
-}
-
-#elif defined(USE_GNUTLS)
+#if defined(USE_GNUTLS)
 static int keylog_callback(gnutls_session_t session, const char *label,
                     const gnutls_datum_t *secret)
 {
@@ -254,13 +96,13 @@ static int keylog_callback(gnutls_session_t session, const char *label,
   return 0;
 }
 
-static CURLcode curl_gtls_init_ctx(struct quic_tls_ctx *ctx,
+static CURLcode curl_gtls_init_ctx(struct curl_tls_ctx *ctx,
                                    struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    struct ssl_peer *peer,
                                    const char *alpn, size_t alpn_len,
-                                   Curl_vquic_tls_ctx_setup *ctx_setup,
-                                   void *user_data)
+                                   Curl_vquic_tls_ctx_setup *cb_setup,
+                                   void *cb_user_data, void *ssl_user_data)
 {
   struct ssl_primary_config *conn_config;
   CURLcode result;
@@ -283,10 +125,10 @@ static CURLcode curl_gtls_init_ctx(struct quic_tls_ctx *ctx,
   if(result)
     return result;
 
-  gnutls_session_set_ptr(ctx->gtls->session, user_data);
+  gnutls_session_set_ptr(ctx->gtls->session, ssl_user_data);
 
-  if(ctx_setup) {
-    result = ctx_setup(ctx, cf, data);
+  if(cb_setup) {
+    result = cb_setup(cf, data, cb_user_data);
     if(result)
       return result;
   }
@@ -341,10 +183,11 @@ static void keylog_callback(const WOLFSSL *ssl, const char *line)
 }
 #endif
 
-static CURLcode curl_wssl_init_ctx(struct quic_tls_ctx *ctx,
+static CURLcode curl_wssl_init_ctx(struct curl_tls_ctx *ctx,
                                    struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
-                                   Curl_vquic_tls_ctx_setup *ctx_setup)
+                                   Curl_vquic_tls_ctx_setup *cb_setup,
+                                   void *cb_user_data)
 {
   struct ssl_primary_config *conn_config;
   CURLcode result = CURLE_FAILED_INIT;
@@ -361,8 +204,8 @@ static CURLcode curl_wssl_init_ctx(struct quic_tls_ctx *ctx,
     goto out;
   }
 
-  if(ctx_setup) {
-    result = ctx_setup(ctx, cf, data);
+  if(cb_setup) {
+    result = cb_setup(cf, data, cb_user_data);
     if(result)
       goto out;
   }
@@ -458,7 +301,7 @@ out:
 
 /** SSL callbacks ***/
 
-static CURLcode curl_wssl_init_ssl(struct quic_tls_ctx *ctx,
+static CURLcode curl_wssl_init_ssl(struct curl_tls_ctx *ctx,
                                    struct Curl_easy *data,
                                    struct ssl_peer *peer,
                                    const char *alpn, size_t alpn_len,
@@ -486,49 +329,44 @@ static CURLcode curl_wssl_init_ssl(struct quic_tls_ctx *ctx,
 }
 #endif /* defined(USE_WOLFSSL) */
 
-CURLcode Curl_vquic_tls_init(struct quic_tls_ctx *ctx,
+CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
                              struct Curl_cfilter *cf,
                              struct Curl_easy *data,
                              struct ssl_peer *peer,
                              const char *alpn, size_t alpn_len,
-                             Curl_vquic_tls_ctx_setup *ctx_setup,
-                             void *user_data)
+                             Curl_vquic_tls_ctx_setup *cb_setup,
+                             void *cb_user_data, void *ssl_user_data)
 {
   CURLcode result;
 
 #ifdef USE_OPENSSL
-  result = curl_ossl_init_ctx(ctx, cf, data, ctx_setup);
-  if(result)
-    return result;
-
-  result = curl_ossl_set_client_cert(ctx, cf, data);
-  if(result)
-    return result;
-
-  return curl_ossl_init_ssl(ctx, data, peer, alpn, alpn_len, user_data);
+  (void)result;
+  return Curl_ossl_ctx_init(&ctx->ossl, cf, data, peer, TRNSPRT_QUIC,
+                            (const unsigned char *)alpn, alpn_len,
+                            cb_setup, cb_user_data, ssl_user_data);
 #elif defined(USE_GNUTLS)
   (void)result;
   return curl_gtls_init_ctx(ctx, cf, data, peer, alpn, alpn_len,
-                            ctx_setup, user_data);
+                            cb_setup, cb_user_data, ssl_user_data);
 #elif defined(USE_WOLFSSL)
-  result = curl_wssl_init_ctx(ctx, cf, data, ctx_setup);
+  result = curl_wssl_init_ctx(ctx, cf, data, cb_setup, cb_user_data);
   if(result)
     return result;
 
-  return curl_wssl_init_ssl(ctx, data, peer, alpn, alpn_len, user_data);
+  return curl_wssl_init_ssl(ctx, data, peer, alpn, alpn_len, ssl_user_data);
 #else
 #error "no TLS lib in used, should not happen"
   return CURLE_FAILED_INIT;
 #endif
 }
 
-void Curl_vquic_tls_cleanup(struct quic_tls_ctx *ctx)
+void Curl_vquic_tls_cleanup(struct curl_tls_ctx *ctx)
 {
 #ifdef USE_OPENSSL
-  if(ctx->ssl)
-    SSL_free(ctx->ssl);
-  if(ctx->ssl_ctx)
-    SSL_CTX_free(ctx->ssl_ctx);
+  if(ctx->ossl.ssl)
+    SSL_free(ctx->ossl.ssl);
+  if(ctx->ossl.ssl_ctx)
+    SSL_CTX_free(ctx->ossl.ssl_ctx);
 #elif defined(USE_GNUTLS)
   if(ctx->gtls) {
     if(ctx->gtls->cred)
@@ -546,16 +384,16 @@ void Curl_vquic_tls_cleanup(struct quic_tls_ctx *ctx)
   memset(ctx, 0, sizeof(*ctx));
 }
 
-CURLcode Curl_vquic_tls_before_recv(struct quic_tls_ctx *ctx,
+CURLcode Curl_vquic_tls_before_recv(struct curl_tls_ctx *ctx,
                                     struct Curl_cfilter *cf,
                                     struct Curl_easy *data)
 {
 #ifdef USE_OPENSSL
-  if(!ctx->x509_store_setup) {
-    CURLcode result = Curl_ssl_setup_x509_store(cf, data, ctx->ssl_ctx);
+  if(!ctx->ossl.x509_store_setup) {
+    CURLcode result = Curl_ssl_setup_x509_store(cf, data, ctx->ossl.ssl_ctx);
     if(result)
       return result;
-    ctx->x509_store_setup = TRUE;
+    ctx->ossl.x509_store_setup = TRUE;
   }
 #else
   (void)ctx; (void)cf; (void)data;
@@ -563,7 +401,7 @@ CURLcode Curl_vquic_tls_before_recv(struct quic_tls_ctx *ctx,
   return CURLE_OK;
 }
 
-CURLcode Curl_vquic_tls_verify_peer(struct quic_tls_ctx *ctx,
+CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
                                     struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
                                     struct ssl_peer *peer)
@@ -578,7 +416,7 @@ CURLcode Curl_vquic_tls_verify_peer(struct quic_tls_ctx *ctx,
   if(conn_config->verifyhost) {
 #ifdef USE_OPENSSL
     X509 *server_cert;
-    server_cert = SSL_get1_peer_certificate(ctx->ssl);
+    server_cert = SSL_get1_peer_certificate(ctx->ossl.ssl);
     if(!server_cert) {
       return CURLE_PEER_FAILED_VERIFICATION;
     }
@@ -604,7 +442,7 @@ CURLcode Curl_vquic_tls_verify_peer(struct quic_tls_ctx *ctx,
 #ifdef USE_OPENSSL
   if(data->set.ssl.certinfo)
     /* asked to gather certificate info */
-    (void)Curl_ossl_certchain(data, ctx->ssl);
+    (void)Curl_ossl_certchain(data, ctx->ossl.ssl);
 #endif
   return result;
 }
