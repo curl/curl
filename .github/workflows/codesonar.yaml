@@ -49,7 +49,7 @@ jobs:
           ref: main
           path: cso-scripts
       - name: Build and Analyze
-        run: python3 cso-scripts/build_and_analyze.py -noupload codesonar.conf make -j $PARALLEL
+        run: python3 cso-scripts/build_and_analyze.py -misra -noupload codesonar.conf make -j $PARALLEL
       - name: Upload SARIF to GitHub #Use this if you do not have GitHub Enterprise
         if: ${{ github.event.pull_request }}
         uses: actions/upload-artifact@v3
