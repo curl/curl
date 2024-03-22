@@ -13,7 +13,7 @@ See-also:
   - curl_multi_wait (3)
   - libcurl-errors (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME

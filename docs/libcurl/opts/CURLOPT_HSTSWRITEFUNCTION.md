@@ -67,10 +67,6 @@ do that.
 
 NULL - no callback.
 
-# PROTOCOLS
-
-This feature is only used for HTTP(S) transfer.
-
 # EXAMPLE
 
 ~~~c

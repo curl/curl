@@ -86,10 +86,6 @@ may be inaccessible if SNI is not sent.
 
 2
 
-# PROTOCOLS
-
-All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
-
 # EXAMPLE
 
 ~~~c

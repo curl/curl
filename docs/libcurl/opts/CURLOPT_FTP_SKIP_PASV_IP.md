@@ -42,10 +42,6 @@ This option has no effect if PORT, EPRT or EPSV is used instead of PASV.
 
 1 since 7.74.0, was 0 before then.
 
-# PROTOCOLS
-
-FTP
-
 # EXAMPLE
 
 ~~~c

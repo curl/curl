@@ -8,7 +8,7 @@ See-also:
   - CURLMOPT_SOCKETFUNCTION (3)
   - CURLMOPT_TIMERDATA (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -62,10 +62,6 @@ callback with a zero timeout...
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

@@ -43,10 +43,6 @@ option.
 
 "*"
 
-# PROTOCOLS
-
-RTSP
-
 # EXAMPLE
 
 ~~~c

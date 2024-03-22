@@ -38,10 +38,6 @@ the format of your private key. Supported formats are "PEM", "DER" and "ENG".
 The application does not have to keep the string around after setting this
 option.
 
-# PROTOCOLS
-
-Used with HTTPS proxy
-
 # EXAMPLE
 
 ~~~c

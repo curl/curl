@@ -96,6 +96,47 @@ sub outseealso {
     return @o;
 }
 
+sub outprotocols {
+    my (@p) = @_;
+    my $comma = 0;
+    my @o;
+    push @o, ".SH PROTOCOLS\n";
+
+    if($p[0] eq "TLS") {
+        push @o, "All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.";
+    }
+    else {
+        my @s = sort @p;
+        for my $e (sort @s) {
+            push @o, sprintf "%s$e",
+                $comma ? (($e eq $s[-1]) ? " and " : ", "): "";
+            $comma = 1;
+        }
+    }
+    push @o, "\n";
+    return @o;
+}
+
+sub outtls {
+    my (@t) = @_;
+    my $comma = 0;
+    my @o;
+    if($t[0] eq "All") {
+        push @o, "\nAll TLS backends support this option.";
+    }
+    else {
+        push @o, "\nThis option works only with the following TLS backends:\n";
+        my @s = sort @t;
+        for my $e (@s) {
+            push @o, sprintf "%s$e",
+                $comma ? (($e eq $s[-1]) ? " and " : ", "): "";
+            $comma = 1;
+        }
+    }
+    push @o, "\n";
+    return @o;
+}
+
 my %knownprotos = (
     'DICT' => 1,
     'FILE' => 1,
@@ -127,7 +168,7 @@ my %knownprotos = (
     'WSS' => 1,
     'TLS' => 1,
     'TCP' => 1,
-    '*' => 1
+    'All' => 1
     );
 
 my %knowntls = (
@@ -375,6 +416,18 @@ sub single {
             my $word = $1;
             # if there are enclosing quotes, remove them first
             $word =~ s/[\"\'](.*)[\"\']\z/$1/;
+
+            if($word eq "PROTOCOLS") {
+                print STDERR "$f:$line:1:WARN: PROTOCOLS section in source file\n";
+            }
+            elsif($word eq "EXAMPLE") {
+                # insert the generated PROTOCOLS section before EXAMPLE
+                push @desc, outprotocols(@proto);
+
+                if($proto[0] eq "TLS") {
+                    push @desc, outtls(@tls);
+                }
+            }
             push @desc, ".SH $word\n";
             $header = 1;
         }

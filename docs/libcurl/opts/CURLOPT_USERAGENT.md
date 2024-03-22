@@ -38,10 +38,6 @@ option.
 
 NULL, no User-Agent: header is used by default.
 
-# PROTOCOLS
-
-HTTP, HTTPS
-
 # EXAMPLE
 
 ~~~c

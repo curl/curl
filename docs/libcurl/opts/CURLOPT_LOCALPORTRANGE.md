@@ -8,7 +8,7 @@ See-also:
   - CURLOPT_INTERFACE (3)
   - CURLOPT_LOCALPORT (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -37,10 +37,6 @@ setup failures.
 # DEFAULT
 
 1
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

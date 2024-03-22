@@ -41,10 +41,6 @@ If the server is an IPv6 host, this option has no effect.
 
 1
 
-# PROTOCOLS
-
-FTP
-
 # EXAMPLE
 
 ~~~c

@@ -48,10 +48,6 @@ This is the millisecond version of CURLOPT_SERVER_RESPONSE_TIMEOUT(3).
 
 None
 
-# PROTOCOLS
-
-FTP, IMAP, POP3, SMTP, and SSH
-
 # EXAMPLE
 
 ~~~c

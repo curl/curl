@@ -38,10 +38,6 @@ option.
 
 NULL, not used
 
-# PROTOCOLS
-
-All
-
 # EXAMPLE
 
 ~~~c

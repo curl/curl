@@ -37,10 +37,6 @@ other safe guards. That includes white space and control characters.
 
 NULL
 
-# PROTOCOLS
-
-HTTP
-
 # EXAMPLE
 
 ~~~c

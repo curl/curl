@@ -41,10 +41,6 @@ the same session.
 
 0
 
-# PROTOCOLS
-
-HTTP
-
 # EXAMPLE
 
 ~~~c

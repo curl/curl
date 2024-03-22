@@ -67,10 +67,6 @@ option.
 
 NULL, use internal default
 
-# PROTOCOLS
-
-All
-
 # EXAMPLE
 
 ~~~c

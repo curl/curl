@@ -7,7 +7,7 @@ Source: libcurl
 See-also:
   - curl_version (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME

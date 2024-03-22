@@ -36,10 +36,6 @@ option).
 
 0 is a positive result. Non-zero is an error.
 
-# PROTOCOLS
-
-All using TLS
-
 # EXAMPLE
 
 ~~~c

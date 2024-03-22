@@ -34,10 +34,6 @@ unimplemented.
 
 0
 
-# PROTOCOLS
-
-RTSP
-
 # EXAMPLE
 
 ~~~c

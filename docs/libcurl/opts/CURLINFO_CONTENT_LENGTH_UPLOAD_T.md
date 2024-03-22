@@ -9,7 +9,7 @@ See-also:
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -29,10 +29,6 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_CONTENT_LENGTH_UPLOAD_T,
 
 Pass a pointer to a *curl_off_t* to receive the specified size of the
 upload. Stores -1 if the size is not known.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

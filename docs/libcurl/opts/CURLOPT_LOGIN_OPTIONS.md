@@ -51,10 +51,6 @@ option.
 
 NULL
 
-# PROTOCOLS
-
-Only IMAP, LDAP, POP3 and SMTP support login options.
-
 # EXAMPLE
 
 ~~~c

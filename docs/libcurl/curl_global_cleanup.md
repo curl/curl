@@ -9,7 +9,7 @@ See-also:
   - libcurl (3)
   - libcurl-thread (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME

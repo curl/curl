@@ -46,10 +46,6 @@ the verification fails.
 
 0
 
-# PROTOCOLS
-
-DoH
-
 # EXAMPLE
 
 ~~~c

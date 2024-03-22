@@ -50,10 +50,6 @@ option to have an actual effect.
 
 NULL
 
-# PROTOCOLS
-
-HTTP/2
-
 # EXAMPLE
 
 ~~~c

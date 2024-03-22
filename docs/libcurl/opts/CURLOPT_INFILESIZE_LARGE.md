@@ -9,7 +9,7 @@ See-also:
   - CURLOPT_INFILESIZE (3)
   - CURLOPT_UPLOAD (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -46,10 +46,6 @@ and sending a different amount may lead to errors.
 # DEFAULT
 
 Unset
-
-# PROTOCOLS
-
-Many
 
 # EXAMPLE
 

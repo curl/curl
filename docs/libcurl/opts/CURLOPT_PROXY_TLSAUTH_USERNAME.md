@@ -43,10 +43,6 @@ option.
 
 NULL
 
-# PROTOCOLS
-
-All
-
 # EXAMPLE
 
 ~~~c

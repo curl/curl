@@ -37,10 +37,6 @@ instead.
 
 0
 
-# PROTOCOLS
-
-HTTP, FTP, RTSP, and FILE
-
 # EXAMPLE
 
 ~~~c

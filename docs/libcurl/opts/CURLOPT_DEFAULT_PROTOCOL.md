@@ -9,7 +9,7 @@ See-also:
   - CURLINFO_SCHEME (3)
   - CURLOPT_URL (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -54,10 +54,6 @@ option.
 # DEFAULT
 
 NULL (make a guess based on the host)
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

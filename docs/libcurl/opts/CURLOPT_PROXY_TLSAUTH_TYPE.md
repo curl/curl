@@ -50,10 +50,6 @@ option.
 
 blank
 
-# PROTOCOLS
-
-All
-
 # EXAMPLE
 
 ~~~c

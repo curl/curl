@@ -58,10 +58,6 @@ option.
 
 NULL
 
-# PROTOCOLS
-
-HTTP, FTP, FILE, RTSP and SFTP.
-
 # EXAMPLE
 
 ~~~c

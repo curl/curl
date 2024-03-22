@@ -8,7 +8,7 @@ See-also:
   - curl_free (3)
   - curl_unescape (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME

@@ -59,10 +59,6 @@ without any interruptions.
 
 NULL
 
-# PROTOCOLS
-
-HTTP
-
 # EXAMPLE
 ~~~c
 static int trailer_cb(struct curl_slist **tr, void *data)

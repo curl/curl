@@ -89,10 +89,6 @@ Since curl 7.62.0: CURL_HTTP_VERSION_2TLS
 
 Before that: CURL_HTTP_VERSION_1_1
 
-# PROTOCOLS
-
-HTTP
-
 # EXAMPLE
 
 ~~~c

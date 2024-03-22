@@ -10,7 +10,7 @@ See-also:
   - CURLOPT_USERNAME (3)
   - CURLOPT_USERPWD (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -39,10 +39,6 @@ option.
 # DEFAULT
 
 blank
-
-# PROTOCOLS
-
-Most
 
 # EXAMPLE
 

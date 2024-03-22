@@ -34,10 +34,6 @@ Pass a pointer to a long to receive the result of the certificate verification
 that was requested (using the CURLOPT_PROXY_SSL_VERIFYPEER(3)
 option. This is only used for HTTPS proxies.
 
-# PROTOCOLS
-
-All
-
 # EXAMPLE
 
 ~~~c

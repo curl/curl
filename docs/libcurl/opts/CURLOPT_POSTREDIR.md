@@ -48,10 +48,6 @@ when setting CURLOPT_FOLLOWLOCATION(3).
 
 0
 
-# PROTOCOLS
-
-HTTP(S)
-
 # EXAMPLE
 
 ~~~c

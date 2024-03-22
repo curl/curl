@@ -44,10 +44,6 @@ threshold.
 
 None
 
-# PROTOCOLS
-
-FTP, HTTP and MQTT
-
 # EXAMPLE
 
 ~~~c

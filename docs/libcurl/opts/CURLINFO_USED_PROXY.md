@@ -10,7 +10,7 @@ See-also:
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -30,10 +30,6 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_USED_PROXY,
 
 Pass a pointer to a long. It gets set to zero set if no proxy was used in the
 previous transfer or a non-zero value if a proxy was used.
-
-# PROTOCOLS
-
-HTTP(S)
 
 # EXAMPLE
 

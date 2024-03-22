@@ -48,10 +48,6 @@ TLS SRP does not work with TLS 1.3.
 
 blank
 
-# PROTOCOLS
-
-All TLS-based protocols
-
 # EXAMPLE
 
 ~~~c

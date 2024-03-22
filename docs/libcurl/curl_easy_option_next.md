@@ -9,7 +9,7 @@ See-also:
   - curl_easy_option_by_name (3)
   - curl_easy_setopt (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME

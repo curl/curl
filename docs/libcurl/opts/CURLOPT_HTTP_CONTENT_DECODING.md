@@ -36,10 +36,6 @@ CURLOPT_ACCEPT_ENCODING(3) for that.
 
 1
 
-# PROTOCOLS
-
-HTTP
-
 # EXAMPLE
 
 ~~~c

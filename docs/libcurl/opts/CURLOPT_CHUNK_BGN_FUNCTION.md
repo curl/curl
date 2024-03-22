@@ -83,10 +83,6 @@ Return *CURL_CHUNK_BGN_FUNC_OK* if everything is fine,
 
 NULL
 
-# PROTOCOLS
-
-FTP
-
 # EXAMPLE
 
 ~~~c

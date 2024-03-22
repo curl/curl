@@ -49,10 +49,6 @@ expects a filename as input.
 
 NULL
 
-# PROTOCOLS
-
-Used with HTTPS proxy
-
 # EXAMPLE
 
 ~~~c

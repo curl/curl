@@ -31,10 +31,6 @@ connection done using this handle. The returned value is
 CURL_HTTP_VERSION_1_0, CURL_HTTP_VERSION_1_1, CURL_HTTP_VERSION_2_0,
 CURL_HTTP_VERSION_3 or 0 if the version cannot be determined.
 
-# PROTOCOLS
-
-HTTP
-
 # EXAMPLE
 
 ~~~c

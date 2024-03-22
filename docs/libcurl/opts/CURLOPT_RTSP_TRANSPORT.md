@@ -38,10 +38,6 @@ option.
 
 NULL
 
-# PROTOCOLS
-
-RTSP
-
 # EXAMPLE
 
 ~~~c

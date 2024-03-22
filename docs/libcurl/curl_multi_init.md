@@ -11,7 +11,7 @@ See-also:
   - curl_multi_cleanup (3)
   - curl_multi_get_handles (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME

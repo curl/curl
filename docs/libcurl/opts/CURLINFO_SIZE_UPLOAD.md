@@ -10,7 +10,7 @@ See-also:
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -33,10 +33,6 @@ uploaded.
 
 CURLINFO_SIZE_UPLOAD_T(3) is a newer replacement that returns a more
 sensible variable type.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

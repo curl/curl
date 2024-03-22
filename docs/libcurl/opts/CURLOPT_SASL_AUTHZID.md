@@ -43,10 +43,6 @@ access to, or a shared mailbox for example.
 
 blank
 
-# PROTOCOLS
-
-IMAP, LDAP, POP3 and SMTP
-
 # EXAMPLE
 
 ~~~c

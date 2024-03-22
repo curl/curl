@@ -53,10 +53,6 @@ option.
 
 NULL
 
-# PROTOCOLS
-
-HTTP
-
 # EXAMPLE
 
 ~~~c

@@ -9,7 +9,7 @@ See-also:
   - CURLMOPT_TIMERFUNCTION (3)
   - curl_multi_socket_action (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -35,10 +35,6 @@ callback's **clientp** argument.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

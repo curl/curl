@@ -33,10 +33,6 @@ callback set with CURLOPT_SSH_KEYFUNCTION(3).
 
 NULL
 
-# PROTOCOLS
-
-SFTP and SCP
-
 # EXAMPLE
 
 ~~~c

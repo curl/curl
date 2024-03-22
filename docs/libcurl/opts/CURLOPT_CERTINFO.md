@@ -43,10 +43,6 @@ its option CURLINFO_CERTINFO(3).
 
 0
 
-# PROTOCOLS
-
-All TLS-based
-
 # EXAMPLE
 
 ~~~c

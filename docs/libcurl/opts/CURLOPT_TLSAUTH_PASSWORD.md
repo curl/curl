@@ -43,10 +43,6 @@ This feature relies in TLS SRP which does not work with TLS 1.3.
 
 NULL
 
-# PROTOCOLS
-
-All TLS-based protocols
-
 # EXAMPLE
 
 ~~~c

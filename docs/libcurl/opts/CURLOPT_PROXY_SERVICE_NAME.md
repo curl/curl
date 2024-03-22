@@ -9,7 +9,7 @@ See-also:
   - CURLOPT_PROXYTYPE (3)
   - CURLOPT_SERVICE_NAME (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -37,10 +37,6 @@ option.
 # DEFAULT
 
 See above
-
-# PROTOCOLS
-
-All network protocols
 
 # EXAMPLE
 

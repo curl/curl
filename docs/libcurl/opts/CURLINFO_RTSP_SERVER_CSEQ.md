@@ -35,10 +35,6 @@ Listening for server initiated requests is not implemented!
 Applications wishing to resume an RTSP session on another connection should
 retrieve this info before closing the active connection.
 
-# PROTOCOLS
-
-RTSP
-
 # EXAMPLE
 
 ~~~c

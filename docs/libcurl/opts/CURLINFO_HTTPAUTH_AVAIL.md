@@ -32,10 +32,6 @@ method(s) available according to the previous response. The meaning of the
 bits is explained in the CURLOPT_HTTPAUTH(3) option for
 curl_easy_setopt(3).
 
-# PROTOCOLS
-
-HTTP(S)
-
 # EXAMPLE
 
 ~~~c

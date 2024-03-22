@@ -50,10 +50,6 @@ streams).
 If nothing is set, the HTTP/2 protocol itself uses its own default which is
 16.
 
-# PROTOCOLS
-
-HTTP/2
-
 # EXAMPLE
 
 ~~~c

@@ -35,10 +35,6 @@ is used.
 
 512
 
-# PROTOCOLS
-
-TFTP
-
 # EXAMPLE
 
 ~~~c

@@ -7,7 +7,7 @@ Source: libcurl
 See-also:
   - CURLOPT_TIMEOUT (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -47,10 +47,6 @@ raised.
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

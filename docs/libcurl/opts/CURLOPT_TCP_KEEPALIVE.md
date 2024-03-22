@@ -10,7 +10,7 @@ See-also:
   - CURLOPT_TCP_KEEPIDLE (3)
   - CURLOPT_TCP_KEEPINTVL (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -36,10 +36,6 @@ disable keepalive probes
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

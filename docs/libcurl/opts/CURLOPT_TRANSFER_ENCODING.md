@@ -43,10 +43,6 @@ by both HTTP clients and HTTP servers.
 
 0
 
-# PROTOCOLS
-
-HTTP
-
 # EXAMPLE
 
 ~~~c

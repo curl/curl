@@ -9,7 +9,7 @@ See-also:
   - CURLOPT_RANGE (3)
   - CURLOPT_RESUME_FROM (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -40,10 +40,6 @@ file to the remote target file.
 # DEFAULT
 
 0, not used
-
-# PROTOCOLS
-
-HTTP, FTP, SFTP, FILE
 
 # EXAMPLE
 

@@ -35,10 +35,6 @@ CURLOPT_TFTP_BLKSIZE(3) is ignored.
 
 0
 
-# PROTOCOLS
-
-TFTP
-
 # EXAMPLE
 
 ~~~c

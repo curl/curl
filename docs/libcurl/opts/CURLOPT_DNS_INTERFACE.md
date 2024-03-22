@@ -10,7 +10,7 @@ See-also:
   - CURLOPT_DNS_SERVERS (3)
   - CURLOPT_INTERFACE (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -38,10 +38,6 @@ option.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All protocols except file:// - protocols that resolve hostnames.
 
 # EXAMPLE
 

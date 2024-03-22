@@ -55,10 +55,6 @@ option.
 
 NULL
 
-# PROTOCOLS
-
-All TLS-based protocols
-
 # EXAMPLE
 
 ~~~c

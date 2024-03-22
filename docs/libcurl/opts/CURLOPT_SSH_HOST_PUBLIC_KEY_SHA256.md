@@ -36,10 +36,6 @@ does not match the hash the remote host provides.
 
 NULL
 
-# PROTOCOLS
-
-SCP and SFTP
-
 # EXAMPLE
 
 ~~~c

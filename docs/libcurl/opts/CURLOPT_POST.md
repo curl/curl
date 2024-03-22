@@ -71,10 +71,6 @@ you should set a new request type explicitly as described above.
 
 0, disabled
 
-# PROTOCOLS
-
-HTTP
-
 # EXAMPLE
 
 ~~~c

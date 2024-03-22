@@ -72,10 +72,6 @@ CURLOPT_ALTSVC_CTRL(3) has a default value corresponding to
 CURLALTSVC_H1 | CURLALTSVC_H2 | CURLALTSVC_H3 - the HTTP/2 and HTTP/3 bits are
 only set if libcurl was built with support for those versions.
 
-# PROTOCOLS
-
-HTTPS
-
 # EXAMPLE
 
 ~~~c

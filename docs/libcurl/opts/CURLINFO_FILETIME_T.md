@@ -43,10 +43,6 @@ This option is an alternative to CURLINFO_FILETIME(3) to allow systems
 with 32 bit long variables to extract dates outside of the 32bit timestamp
 range.
 
-# PROTOCOLS
-
-HTTP(S), FTP(S), SFTP
-
 # EXAMPLE
 
 ~~~c

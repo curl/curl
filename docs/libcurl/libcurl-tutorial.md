@@ -10,7 +10,7 @@ See-also:
   - libcurl-multi (3)
   - libcurl-url (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME

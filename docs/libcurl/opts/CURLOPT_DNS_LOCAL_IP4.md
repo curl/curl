@@ -9,7 +9,7 @@ See-also:
   - CURLOPT_DNS_LOCAL_IP6 (3)
   - CURLOPT_DNS_SERVERS (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -37,10 +37,6 @@ option.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

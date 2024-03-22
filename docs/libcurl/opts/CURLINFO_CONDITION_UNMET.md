@@ -36,10 +36,6 @@ gets a zero stored if the condition instead was met. This can also return 1 if
 the server responded with a 304 HTTP status code, for example after sending a
 custom "If-Match-*" header.
 
-# PROTOCOLS
-
-HTTP and some
-
 # EXAMPLE
 
 ~~~c

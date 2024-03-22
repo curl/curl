@@ -33,10 +33,6 @@ server to connect back to libcurl when an active FTP connection is used.
 
 60000 milliseconds
 
-# PROTOCOLS
-
-FTP
-
 # EXAMPLE
 
 ~~~c

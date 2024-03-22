@@ -37,10 +37,6 @@ available at compile-time.
 
 CURLGSSAPI_DELEGATION_NONE
 
-# PROTOCOLS
-
-HTTP
-
 # EXAMPLE
 
 ~~~c

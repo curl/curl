@@ -46,10 +46,6 @@ store remain forever. By default, libcurl caches this info for 24 hours.
 
 86400 (24 hours)
 
-# PROTOCOLS
-
-All
-
 # EXAMPLE
 
 ~~~c

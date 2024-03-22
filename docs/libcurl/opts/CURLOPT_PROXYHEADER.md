@@ -8,7 +8,7 @@ See-also:
   - CURLOPT_HEADEROPT (3)
   - CURLOPT_HTTPHEADER (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -43,10 +43,6 @@ Pass a NULL to this to reset back to no custom headers.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

@@ -52,10 +52,6 @@ again and again as the following hosts can keep redirecting to new hosts.
 
 0
 
-# PROTOCOLS
-
-HTTP
-
 # EXAMPLE
 
 ~~~c

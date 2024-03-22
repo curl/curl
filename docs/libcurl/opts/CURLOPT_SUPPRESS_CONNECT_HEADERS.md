@@ -9,7 +9,7 @@ See-also:
   - CURLOPT_HTTPPROXYTUNNEL (3)
   - CURLOPT_PROXY (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -69,10 +69,6 @@ Content-Type: application/json
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

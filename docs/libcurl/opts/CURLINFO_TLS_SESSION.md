@@ -47,10 +47,6 @@ function *SSL_get_SSL_CTX(3)*. Therefore unless you need compatibility
 with older versions of libcurl use CURLINFO_TLS_SSL_PTR(3). Refer to
 that document for more information.
 
-# PROTOCOLS
-
-All TLS-based
-
 # EXAMPLE
 
 ~~~c

@@ -9,7 +9,7 @@ See-also:
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -34,10 +34,6 @@ has been started yet for the handle.
 The transfer id is unique among all transfers performed using the same
 connection cache. This is implicitly the case for all transfers in the
 same multi handle.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

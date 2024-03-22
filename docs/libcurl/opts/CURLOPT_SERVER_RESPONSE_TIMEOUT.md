@@ -46,10 +46,6 @@ This option was formerly known as CURLOPT_FTP_RESPONSE_TIMEOUT.
 
 None
 
-# PROTOCOLS
-
-FTP, IMAP, POP3, SMTP, and SSH
-
 # EXAMPLE
 
 ~~~c

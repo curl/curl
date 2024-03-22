@@ -43,10 +43,6 @@ This is a path identifying a directory.
 
 The **path** pointer is set to NULL if there is no default path.
 
-# PROTOCOLS
-
-All
-
 # EXAMPLE
 
 ~~~c

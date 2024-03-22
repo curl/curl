@@ -47,10 +47,6 @@ The default value for this can be figured out with CURLINFO_CAPATH(3).
 
 NULL
 
-# PROTOCOLS
-
-Everything used over an HTTPS proxy
-
 # EXAMPLE
 
 ~~~c

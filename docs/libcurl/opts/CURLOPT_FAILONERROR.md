@@ -45,10 +45,6 @@ get closed and *CURLE_HTTP_RETURNED_ERROR* is returned.
 
 0, do not fail on error
 
-# PROTOCOLS
-
-HTTP
-
 # EXAMPLE
 
 ~~~c

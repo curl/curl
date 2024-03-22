@@ -9,7 +9,7 @@ See-also:
   - CURLOPT_PROXYTYPE (3)
   - CURLOPT_PROXY_SERVICE_NAME (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -37,10 +37,6 @@ option.
 # DEFAULT
 
 See above
-
-# PROTOCOLS
-
-HTTP, FTP, IMAP, LDAP, POP3 and SMTP
 
 # EXAMPLE
 

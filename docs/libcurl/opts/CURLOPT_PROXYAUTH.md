@@ -11,7 +11,7 @@ See-also:
   - CURLOPT_PROXYTYPE (3)
   - CURLOPT_PROXYUSERPWD (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -42,10 +42,6 @@ CURLOPT_HTTPAUTH(3) man page.
 # DEFAULT
 
 CURLAUTH_BASIC
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

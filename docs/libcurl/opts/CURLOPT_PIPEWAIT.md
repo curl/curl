@@ -52,10 +52,6 @@ and support level.
 
 0 (off)
 
-# PROTOCOLS
-
-HTTP(S)
-
 # EXAMPLE
 
 ~~~c

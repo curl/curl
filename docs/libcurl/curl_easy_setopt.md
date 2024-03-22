@@ -14,7 +14,7 @@ See-also:
   - curl_easy_reset (3)
   - curl_multi_setopt (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME

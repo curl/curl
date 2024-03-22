@@ -10,7 +10,7 @@ See-also:
   - curl_easy_init (3)
   - curl_easy_setopt (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME

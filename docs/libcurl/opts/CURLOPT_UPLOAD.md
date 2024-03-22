@@ -9,7 +9,7 @@ See-also:
   - CURLOPT_PUT (3)
   - CURLOPT_READFUNCTION (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -44,10 +44,6 @@ CURLOPT_INFILESIZE(3) or CURLOPT_INFILESIZE_LARGE(3).
 # DEFAULT
 
 0, default is download
-
-# PROTOCOLS
-
-Most
 
 # EXAMPLE
 

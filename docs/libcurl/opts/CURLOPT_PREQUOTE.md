@@ -42,10 +42,6 @@ this option does not.
 
 NULL
 
-# PROTOCOLS
-
-FTP
-
 # EXAMPLE
 
 ~~~c

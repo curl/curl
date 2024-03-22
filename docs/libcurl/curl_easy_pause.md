@@ -8,7 +8,7 @@ See-also:
   - curl_easy_cleanup (3)
   - curl_easy_reset (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME

@@ -8,7 +8,7 @@ See-also:
   - CURLMOPT_MAXCONNECTS (3)
   - CURLMOPT_MAX_HOST_CONNECTIONS (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -47,10 +47,6 @@ timeout is however treated as a per-connect timeout.
 
 The default value is 0, which means that there is no limit. It is then simply
 controlled by the number of easy handles added.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

@@ -41,10 +41,6 @@ you this unconditionally gets a -1 back.
 Consider using CURLINFO_FILETIME_T(3) to be able to extract dates beyond
 the year 2038 on systems using 32 bit longs (Windows).
 
-# PROTOCOLS
-
-HTTP(S), FTP(S), SFTP
-
 # EXAMPLE
 
 ~~~c
