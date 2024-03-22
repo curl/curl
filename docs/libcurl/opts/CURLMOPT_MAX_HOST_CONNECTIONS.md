@@ -47,9 +47,9 @@ Even in the queued up situation, the CURLOPT_CONNECTTIMEOUT_MS(3) timeout is
 however treated as a per-connect timeout.
 
 Changing this value when there are transfers in progress is possible, and the
-new value will then be used the next time checks are performed. Lowering the
-value will however not close down any active transfers, it will just not allow
-new ones to get made.
+new value is then used the next time checks are performed. Lowering the value
+does however not close down any active transfers, it simply does not allow new
+ones to get made.
 
 # DEFAULT
 
