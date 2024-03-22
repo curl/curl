@@ -892,7 +892,9 @@
 
  Some TLS related options to the command line tool and libcurl are only
  provided for the server and not for HTTPS proxies. --proxy-tls-max,
- --proxy-tlsv1.3, --proxy-curves and a few more.a
+ --proxy-tlsv1.3, --proxy-curves and a few more.
+ For more Documentation on this see:
+ https://curl.se/libcurl/c/tls-options.html
 
  https://github.com/curl/curl/issues/12286
 
