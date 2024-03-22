@@ -98,9 +98,9 @@ static void print_category(curlhelp_t category, unsigned int cols)
     if(helptext[i].categories & category) {
       int opt = (int)longopt;
       size_t desclen = strlen(helptext[i].desc);
-      if(opt + desclen >= (BORDER -1)) {
-        if(desclen < (BORDER -1))
-          opt = (BORDER -2) - (int)desclen;
+      if(opt + desclen >= (cols - 2)) {
+        if(desclen < (cols - 2))
+          opt = (cols - 3) - (int)desclen;
         else
           opt = 0;
       }
