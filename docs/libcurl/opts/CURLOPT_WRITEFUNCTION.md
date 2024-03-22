@@ -9,7 +9,7 @@ See-also:
   - CURLOPT_READFUNCTION (3)
   - CURLOPT_WRITEDATA (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -73,10 +73,6 @@ do that.
 # DEFAULT
 
 libcurl uses 'fwrite' as a callback by default.
-
-# PROTOCOLS
-
-For all protocols
 
 # EXAMPLE
 

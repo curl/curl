@@ -127,10 +127,6 @@ See ln.
 
 NULL
 
-# PROTOCOLS
-
-SFTP and FTP
-
 # EXAMPLE
 
 ~~~c

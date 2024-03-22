@@ -39,10 +39,6 @@ than CURLMOPT_MAX_PIPELINE_LENGTH(3).
 
 The default value is 0, which means that the penalization is inactive.
 
-# PROTOCOLS
-
-HTTP(S)
-
 # EXAMPLE
 
 ~~~c

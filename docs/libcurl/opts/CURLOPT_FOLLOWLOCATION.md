@@ -65,10 +65,6 @@ would otherwise select internally.
 
 0, disabled
 
-# PROTOCOLS
-
-HTTP(S)
-
 # EXAMPLE
 
 ~~~c

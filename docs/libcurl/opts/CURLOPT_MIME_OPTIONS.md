@@ -56,10 +56,6 @@ containing multipart form is sent, this is normally transmitted as
 
 0, meaning disabled.
 
-# PROTOCOLS
-
-HTTP, IMAP, SMTP
-
 # EXAMPLE
 
 ~~~c

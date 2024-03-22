@@ -59,10 +59,6 @@ of the DoH server certificate.
 
 2
 
-# PROTOCOLS
-
-DoH
-
 # EXAMPLE
 
 ~~~c

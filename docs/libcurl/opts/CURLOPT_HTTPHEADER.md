@@ -148,10 +148,6 @@ with the CURLOPT_UNRESTRICTED_AUTH(3) option.
 
 NULL
 
-# PROTOCOLS
-
-HTTP, IMAP and SMTP
-
 # EXAMPLE
 
 ~~~c

@@ -111,10 +111,6 @@ application a chance to run.
 
 # DEFAULT
 
-# PROTOCOLS
-
-RTSP
-
 # EXAMPLE
 
 ~~~c

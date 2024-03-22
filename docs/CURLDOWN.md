@@ -85,7 +85,7 @@ everything. If `*` is used, it must be the only listed protocol. Recognized
 protocols are either URL schemes (in uppercase), `TLS` or `TCP`.
 
 If the `Protocol` list contains `TLS`, then there must also be a `TLS-backend`
-list, specifying `*` or a list of what TLS backends that work with this
+list, specifying `All` or a list of what TLS backends that work with this
 option. The available TLS backends are:
 
 - `BearSSL`

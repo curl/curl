@@ -10,7 +10,7 @@ See-also:
   - libcurl-security (3)
   - libcurl-thread (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME

@@ -49,10 +49,6 @@ Initiate the shutdown and wait for a reply.
 
 CURLFTPSSL_CCC_NONE
 
-# PROTOCOLS
-
-FTP
-
 # EXAMPLE
 
 ~~~c

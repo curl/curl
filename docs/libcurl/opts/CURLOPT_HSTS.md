@@ -59,10 +59,6 @@ currently no length or size limit.
 
 NULL, no filename
 
-# PROTOCOLS
-
-HTTPS and HTTP
-
 # EXAMPLE
 
 ~~~c

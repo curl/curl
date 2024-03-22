@@ -9,7 +9,7 @@ See-also:
   - CURLOPT_READDATA (3)
   - CURLOPT_WRITEFUNCTION (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -42,10 +42,6 @@ crashes.
 # DEFAULT
 
 By default, this is a FILE * to stdout.
-
-# PROTOCOLS
-
-Used for all protocols.
 
 # EXAMPLE
 

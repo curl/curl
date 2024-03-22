@@ -38,10 +38,6 @@ option.
 
 NULL
 
-# PROTOCOLS
-
-All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
-
 # EXAMPLE
 
 ~~~c
@@ -60,7 +56,7 @@ int main(void)
 
 # AVAILABILITY
 
-Only if the SSL backend is OpenSSL built with engine support.
+Only if OpenSSL is built with engine support.
 
 # RETURN VALUE
 

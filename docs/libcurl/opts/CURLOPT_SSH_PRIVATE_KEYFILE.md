@@ -47,10 +47,6 @@ option.
 
 As explained above
 
-# PROTOCOLS
-
-SFTP and SCP
-
 # EXAMPLE
 
 ~~~c

@@ -9,7 +9,7 @@ See-also:
   - CURLOPT_VERBOSE (3)
   - CURLOPT_XFERINFOFUNCTION (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -76,10 +76,6 @@ get called.
 
 By default, libcurl has an internal progress meter. That is rarely wanted by
 users.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

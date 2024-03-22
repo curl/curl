@@ -9,7 +9,7 @@ See-also:
   - CURLOPT_USERNAME (3)
   - CURLOPT_USERPWD (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -114,10 +114,6 @@ done with "macdef" that it finds.
 # DEFAULT
 
 CURL_NETRC_IGNORED
-
-# PROTOCOLS
-
-Most
 
 # EXAMPLE
 

@@ -39,10 +39,6 @@ to be used to set dates beyond the year 2038.
 
 0
 
-# PROTOCOLS
-
-HTTP, FTP, RTSP, and FILE
-
 # EXAMPLE
 
 ~~~c

@@ -8,7 +8,7 @@ See-also:
   - CURLOPT_COOKIE (3)
   - CURLSHOPT_SHARE (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -46,10 +46,6 @@ Set this option to NULL again to stop using that share object.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

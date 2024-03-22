@@ -8,7 +8,7 @@ See-also:
   - CURLOPT_LOW_SPEED_LIMIT (3)
   - CURLOPT_TIMEOUT (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -33,10 +33,6 @@ library to consider it too slow and abort.
 # DEFAULT
 
 0, disabled
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

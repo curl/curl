@@ -54,10 +54,6 @@ Since 7.62.0, **CURLPIPE_MULTIPLEX** is enabled by default.
 
 Before that, default was **CURLPIPE_NOTHING**.
 
-# PROTOCOLS
-
-HTTP(S)
-
 # EXAMPLE
 
 ~~~c

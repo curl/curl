@@ -31,10 +31,6 @@ Pass a pointer to a *curl_off_t* to receive the content-length of the
 download. This is the value read from the Content-Length: field. Stores -1 if
 the size is not known.
 
-# PROTOCOLS
-
-HTTP(S)
-
 # EXAMPLE
 
 ~~~c

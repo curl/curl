@@ -43,10 +43,6 @@ referer header after the transfer.
 
 0, disabled
 
-# PROTOCOLS
-
-HTTP
-
 # EXAMPLE
 
 ~~~c

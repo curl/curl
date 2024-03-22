@@ -13,7 +13,7 @@ See-also:
   - curl_url_set (3)
   - curl_url_strerror (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -45,10 +45,6 @@ updated contents is used.
 # DEFAULT
 
 The default value of this parameter is NULL.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

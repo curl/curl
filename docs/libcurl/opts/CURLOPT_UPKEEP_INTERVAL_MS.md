@@ -7,7 +7,7 @@ Source: libcurl
 See-also:
   - CURLOPT_TCP_KEEPALIVE (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -40,10 +40,6 @@ is called, an HTTP/2 PING frame is sent on the connection.
 # DEFAULT
 
 CURL_UPKEEP_INTERVAL_DEFAULT (currently defined as 60000L, which is 60 seconds)
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

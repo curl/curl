@@ -5,7 +5,7 @@ Title: CURLOPT_INTERFACE
 Section: 3
 Source: libcurl
 Protocol:
-  - *
+  - All
 See-also:
   - CURLOPT_SOCKOPTFUNCTION (3)
   - CURLOPT_TCP_NODELAY (3)
@@ -52,10 +52,6 @@ option.
 # DEFAULT
 
 NULL, use whatever the TCP stack finds suitable
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

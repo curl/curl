@@ -49,10 +49,6 @@ expects a filename as input.
 
 NULL
 
-# PROTOCOLS
-
-Used with HTTPS proxy
-
 # EXAMPLE
 
 ~~~c
@@ -82,8 +78,7 @@ int main(void)
 
 # AVAILABILITY
 
-Added in 7.71.0. This option is supported by the OpenSSL, Secure Transport and
-Schannel backends.
+Added in 7.71.0.
 
 # RETURN VALUE
 

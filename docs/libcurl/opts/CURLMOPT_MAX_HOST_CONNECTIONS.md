@@ -8,7 +8,7 @@ See-also:
   - CURLMOPT_MAXCONNECTS (3)
   - CURLMOPT_MAX_TOTAL_CONNECTIONS (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -54,10 +54,6 @@ ones to get made.
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-HTTP(S)
 
 # EXAMPLE
 

@@ -43,10 +43,6 @@ its option CURLINFO_CERTINFO(3).
 
 0
 
-# PROTOCOLS
-
-All TLS-based
-
 # EXAMPLE
 
 ~~~c
@@ -88,9 +84,7 @@ int main(void)
 
 # AVAILABILITY
 
-This option is supported by the OpenSSL, GnuTLS, Schannel and Secure
-Transport backends. Schannel support added in 7.50.0. Secure Transport support
-added in 7.79.0.
+Schannel support added in 7.50.0. Secure Transport support added in 7.79.0.
 
 # RETURN VALUE
 

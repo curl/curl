@@ -50,10 +50,6 @@ The default value for this can be figured out with CURLINFO_CAPATH(3).
 
 A default path detected at build time.
 
-# PROTOCOLS
-
-All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
-
 # EXAMPLE
 
 ~~~c

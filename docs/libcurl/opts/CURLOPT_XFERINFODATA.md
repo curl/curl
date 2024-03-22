@@ -9,7 +9,7 @@ See-also:
   - CURLOPT_VERBOSE (3)
   - CURLOPT_XFERINFOFUNCTION (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -34,10 +34,6 @@ This is an alias for CURLOPT_PROGRESSDATA(3).
 # DEFAULT
 
 The default value of this parameter is NULL.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

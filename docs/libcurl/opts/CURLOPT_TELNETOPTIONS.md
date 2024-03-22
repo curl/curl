@@ -35,10 +35,6 @@ standard for details.
 
 NULL
 
-# PROTOCOLS
-
-TELNET
-
 # EXAMPLE
 
 ~~~c

@@ -7,7 +7,7 @@ Source: libcurl
 See-also:
   - libcurl-security (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME

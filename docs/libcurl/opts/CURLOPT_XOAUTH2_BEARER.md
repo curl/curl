@@ -43,10 +43,6 @@ option.
 
 NULL
 
-# PROTOCOLS
-
-HTTP, IMAP, LDAP, POP3 and SMTP
-
 # EXAMPLE
 
 ~~~c

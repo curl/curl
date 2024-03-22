@@ -8,7 +8,7 @@ See-also:
   - CURLOPT_TCP_KEEPALIVE (3)
   - CURLOPT_TCP_KEEPIDLE (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME

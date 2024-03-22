@@ -35,10 +35,6 @@ increments from this new number henceforth.
 
 0
 
-# PROTOCOLS
-
-RTSP
-
 # EXAMPLE
 
 ~~~c

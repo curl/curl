@@ -41,7 +41,7 @@ Title: libcurl-symbols
 Section: 3
 Source: libcurl
 Protocol:
-  - *
+  - All
 See-also:
   - libcurl (3)
   - libcurl-easy (3)

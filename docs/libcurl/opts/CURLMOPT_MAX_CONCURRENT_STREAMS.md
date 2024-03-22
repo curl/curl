@@ -37,10 +37,6 @@ value passed here would be honored based on other system resources properties.
 
 100
 
-# PROTOCOLS
-
-All
-
 # EXAMPLE
 
 ~~~c

@@ -5,7 +5,7 @@ Title: CURLOPT_FRESH_CONNECT
 Section: 3
 Source: libcurl
 Protocol:
-  - *
+  - All
 See-also:
   - CURLOPT_FORBID_REUSE (3)
   - CURLOPT_MAXAGE_CONN (3)
@@ -40,10 +40,6 @@ Set *fresh* to 0 to have libcurl attempt reusing an existing connection
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-Most
 
 # EXAMPLE
 

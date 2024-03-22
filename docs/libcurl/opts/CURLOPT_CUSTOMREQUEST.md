@@ -102,10 +102,6 @@ option.
 
 NULL
 
-# PROTOCOLS
-
-HTTP, FTP, IMAP, POP3 and SMTP
-
 # EXAMPLE
 
 ~~~c

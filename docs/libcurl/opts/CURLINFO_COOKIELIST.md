@@ -36,10 +36,6 @@ received) the 'struct curl_slist *' is made a NULL pointer.
 Since 7.43.0 cookies that were imported in the Set-Cookie format without a
 domain name are not exported by this option.
 
-# PROTOCOLS
-
-HTTP(S)
-
 # EXAMPLE
 
 ~~~c

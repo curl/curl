@@ -10,7 +10,7 @@ See-also:
   - CURLMOPT_MAX_TOTAL_CONNECTIONS (3)
   - CURLOPT_MAXREDIRS (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -47,10 +47,6 @@ CURLMOPT_MAXCONNECTS(3) option.
 # DEFAULT
 
 5
-
-# PROTOCOLS
-
-Most
 
 # EXAMPLE
 

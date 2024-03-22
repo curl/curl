@@ -10,7 +10,7 @@ See-also:
   - CURLOPT_PROXY (3)
   - CURLOPT_PROXYTYPE (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -39,10 +39,6 @@ than 65535.
 # DEFAULT
 
 0, not specified which makes it use the default port
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

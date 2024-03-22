@@ -41,10 +41,6 @@ option.
 
 blank
 
-# PROTOCOLS
-
-SMTP
-
 # EXAMPLE
 
 ~~~c

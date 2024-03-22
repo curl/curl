@@ -8,7 +8,7 @@ See-also:
   - CURLOPT_FAILONERROR (3)
   - CURLOPT_RESOLVE (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -36,10 +36,6 @@ possible (though short-lived) leak of associated resources.
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

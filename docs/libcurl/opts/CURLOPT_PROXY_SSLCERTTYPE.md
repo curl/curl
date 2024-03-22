@@ -48,10 +48,6 @@ option.
 
 "PEM"
 
-# PROTOCOLS
-
-All
-
 # EXAMPLE
 
 ~~~c

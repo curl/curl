@@ -109,10 +109,6 @@ up from scratch again.
 
 NULL
 
-# PROTOCOLS
-
-SFTP and SCP
-
 # EXAMPLE
 
 ~~~c

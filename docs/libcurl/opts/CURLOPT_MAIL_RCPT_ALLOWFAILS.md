@@ -44,10 +44,6 @@ RCPT TO command.
 
 0
 
-# PROTOCOLS
-
-SMTP
-
 # EXAMPLE
 
 ~~~c

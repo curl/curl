@@ -70,10 +70,6 @@ option.
 
 NULL
 
-# PROTOCOLS
-
-FTP
-
 # EXAMPLE
 
 ~~~c

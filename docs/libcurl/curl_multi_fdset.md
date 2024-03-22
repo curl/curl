@@ -12,7 +12,7 @@ See-also:
   - curl_multi_wait (3)
   - select (2)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME

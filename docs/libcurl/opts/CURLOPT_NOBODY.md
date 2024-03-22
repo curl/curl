@@ -11,7 +11,7 @@ See-also:
   - CURLOPT_REQUEST_TARGET (3)
   - CURLOPT_UPLOAD (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -48,10 +48,6 @@ URL you request).
 # DEFAULT
 
 0, the body is transferred
-
-# PROTOCOLS
-
-Most
 
 # EXAMPLE
 

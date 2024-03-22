@@ -71,10 +71,6 @@ the correct end-point.
 
 1
 
-# PROTOCOLS
-
-DoH
-
 # EXAMPLE
 
 ~~~c

@@ -7,7 +7,7 @@ Source: libcurl
 See-also:
   - curl_slist_append (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME

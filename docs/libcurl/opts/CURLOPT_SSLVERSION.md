@@ -111,10 +111,6 @@ inconsistent depending on the TLS library.
 
 CURL_SSLVERSION_DEFAULT
 
-# PROTOCOLS
-
-All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
-
 # EXAMPLE
 
 ~~~c

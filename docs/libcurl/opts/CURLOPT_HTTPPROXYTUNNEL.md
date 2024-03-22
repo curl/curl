@@ -5,7 +5,7 @@ Title: CURLOPT_HTTPPROXYTUNNEL
 Section: 3
 Source: libcurl
 Protocol:
-  - *
+  - All
 See-also:
   - CURLOPT_PROXY (3)
   - CURLOPT_PROXYPORT (3)
@@ -48,10 +48,6 @@ rarely works through the proxy anyway).
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-All network protocols
 
 # EXAMPLE
 

@@ -8,7 +8,7 @@ See-also:
   - CURLMOPT_MAX_HOST_CONNECTIONS (3)
   - CURLMOPT_PIPELINING (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -41,10 +41,6 @@ CURLMOPT_MAX_PIPELINE_LENGTH(3).
 # DEFAULT
 
 5
-
-# PROTOCOLS
-
-HTTP(S)
 
 # EXAMPLE
 

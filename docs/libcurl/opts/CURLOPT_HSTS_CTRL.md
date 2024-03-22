@@ -54,10 +54,6 @@ to the file when closing the handle.
 
 0. HSTS is disabled by default.
 
-# PROTOCOLS
-
-HTTPS and HTTP
-
 # EXAMPLE
 
 ~~~c

@@ -9,7 +9,7 @@ See-also:
   - CURLOPT_STDERR (3)
   - CURLOPT_URL (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -44,10 +44,6 @@ and therefore using a port number lower than zero or over 65535 causes a
 
 By default this is 0 which makes it not used. This also makes port number zero
 impossible to set with this API.
-
-# PROTOCOLS
-
-Used for all protocols that speak to a port number.
 
 # EXAMPLE
 

@@ -10,7 +10,7 @@ See-also:
   - CURLOPT_RESOLVE (3)
   - CURLOPT_URL (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -78,10 +78,6 @@ a transfer before you call curl_slist_free_all(3) on the list.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

@@ -46,10 +46,6 @@ the verification fails.
 
 0
 
-# PROTOCOLS
-
-DoH
-
 # EXAMPLE
 
 ~~~c
@@ -72,8 +68,7 @@ int main(void)
 
 # AVAILABILITY
 
-Added in 7.76.0. This option is currently only supported by the OpenSSL, and
-GnuTLS TLS backends.
+Added in 7.76.0.
 
 # RETURN VALUE
 

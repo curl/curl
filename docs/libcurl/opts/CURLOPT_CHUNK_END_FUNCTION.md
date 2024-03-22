@@ -41,10 +41,6 @@ Return *CURL_CHUNK_END_FUNC_OK* if everything is fine or
 
 NULL
 
-# PROTOCOLS
-
-FTP
-
 # EXAMPLE
 
 ~~~c

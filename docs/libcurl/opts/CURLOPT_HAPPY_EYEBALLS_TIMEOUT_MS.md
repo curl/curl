@@ -5,7 +5,7 @@ Title: CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS
 Section: 3
 Source: libcurl
 Protocol:
-  - *
+  - All
 See-also:
   - CURLOPT_CONNECTTIMEOUT_MS (3)
   - CURLOPT_LOW_SPEED_LIMIT (3)
@@ -41,10 +41,6 @@ currently defaults to 200 ms. Firefox and Chrome currently default to 300 ms.
 # DEFAULT
 
 CURL_HET_DEFAULT (currently defined as 200L)
-
-# PROTOCOLS
-
-All except FILE
 
 # EXAMPLE
 

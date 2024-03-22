@@ -7,7 +7,7 @@ Source: libcurl
 See-also:
   - CURLOPT_PROXY (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -37,10 +37,6 @@ Most applications do not need this option.
 # DEFAULT
 
 0, do not send any HAProxy PROXY protocol header
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

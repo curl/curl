@@ -8,7 +8,7 @@ See-also:
   - curl_share_cleanup (3)
   - curl_share_setopt (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME

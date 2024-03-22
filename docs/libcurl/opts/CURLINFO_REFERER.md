@@ -34,10 +34,6 @@ The **hdrp** pointer is NULL or points to private memory you MUST NOT free -
 it gets freed when you call curl_easy_cleanup(3) on the corresponding
 CURL handle.
 
-# PROTOCOLS
-
-HTTP(S)
-
 # EXAMPLE
 
 ~~~c

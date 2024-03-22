@@ -38,10 +38,6 @@ this are *sftp://*, *scp://*, and *file://*.
 
 0755
 
-# PROTOCOLS
-
-SFTP, SCP and FILE
-
 # EXAMPLE
 
 ~~~c

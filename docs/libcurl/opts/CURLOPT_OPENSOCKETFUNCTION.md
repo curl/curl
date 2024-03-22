@@ -9,7 +9,7 @@ See-also:
   - CURLOPT_OPENSOCKETFUNCTION (3)
   - CURLOPT_SOCKOPTFUNCTION (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -74,10 +74,6 @@ The default behavior is the equivalent of this:
 ~~~c
    return socket(addr->family, addr->socktype, addr->protocol);
 ~~~
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

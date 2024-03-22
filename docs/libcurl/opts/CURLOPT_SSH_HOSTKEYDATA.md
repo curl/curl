@@ -32,10 +32,6 @@ the callback set with CURLOPT_SSH_HOSTKEYFUNCTION(3).
 
 NULL
 
-# PROTOCOLS
-
-SCP and SFTP
-
 # EXAMPLE
 
 ~~~c

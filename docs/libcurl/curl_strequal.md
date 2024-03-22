@@ -8,7 +8,7 @@ See-also:
   - strcasecmp (3)
   - strcmp (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME

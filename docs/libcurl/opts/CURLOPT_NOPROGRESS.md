@@ -10,7 +10,7 @@ See-also:
   - CURLOPT_VERBOSE (3)
   - CURLOPT_XFERINFOFUNCTION (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -35,10 +35,6 @@ getting called.
 # DEFAULT
 
 1, meaning it normally runs without a progress meter.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

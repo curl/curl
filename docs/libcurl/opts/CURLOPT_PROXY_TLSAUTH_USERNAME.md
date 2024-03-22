@@ -43,10 +43,6 @@ option.
 
 NULL
 
-# PROTOCOLS
-
-All
-
 # EXAMPLE
 
 ~~~c
@@ -68,7 +64,7 @@ int main(void)
 
 # AVAILABILITY
 
-Added in 7.52.0, with the OpenSSL and GnuTLS backends only.
+Added in 7.52.0.
 
 # RETURN VALUE
 

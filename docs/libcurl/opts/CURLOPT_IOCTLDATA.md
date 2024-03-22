@@ -8,7 +8,7 @@ See-also:
   - CURLOPT_IOCTLFUNCTION (3)
   - CURLOPT_SEEKFUNCTION (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -31,10 +31,6 @@ argument in the ioctl callback set with CURLOPT_IOCTLFUNCTION(3).
 # DEFAULT
 
 By default, the value of this parameter is NULL.
-
-# PROTOCOLS
-
-Used with HTTP
 
 # EXAMPLE
 

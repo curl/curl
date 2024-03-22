@@ -35,10 +35,6 @@ may or may not do it.
 
 0, disabled
 
-# PROTOCOLS
-
-All SSH based protocols: SCP, SFTP
-
 # EXAMPLE
 
 ~~~c

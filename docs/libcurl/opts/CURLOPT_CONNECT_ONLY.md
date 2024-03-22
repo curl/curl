@@ -10,7 +10,7 @@ See-also:
   - curl_easy_recv (3)
   - curl_easy_send (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -54,10 +54,6 @@ curl_easy_recv(3) do not function.
 
 0
 
-# PROTOCOLS
-
-HTTP, SMTP, POP3 and IMAP. For WS and WSS starting in 7.86.0.
-
 # EXAMPLE
 
 ~~~c
@@ -78,7 +74,7 @@ int main(void)
 
 # AVAILABILITY
 
-Added in 7.15.2
+Added in 7.15.2. WS and WSS support added in 7.86.0.
 
 # RETURN VALUE
 

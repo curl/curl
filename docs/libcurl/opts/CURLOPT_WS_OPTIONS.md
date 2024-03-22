@@ -47,10 +47,6 @@ application.
 
 0
 
-# PROTOCOLS
-
-WebSocket
-
 # EXAMPLE
 
 ~~~c

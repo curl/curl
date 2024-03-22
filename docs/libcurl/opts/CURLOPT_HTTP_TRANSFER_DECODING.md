@@ -34,10 +34,6 @@ does chunked transfer decoding by default unless this option is set to zero.
 
 1
 
-# PROTOCOLS
-
-HTTP
-
 # EXAMPLE
 
 ~~~c

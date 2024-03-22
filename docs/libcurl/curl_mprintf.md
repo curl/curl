@@ -10,7 +10,7 @@ See-also:
   - sprintf (3)
   - vprintf (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME

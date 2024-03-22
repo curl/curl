@@ -48,10 +48,6 @@ option.
 
 NULL
 
-# PROTOCOLS
-
-SMTP
-
 # EXAMPLE
 
 ~~~c

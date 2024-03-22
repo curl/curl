@@ -7,7 +7,7 @@ Source: libcurl
 See-also:
   - libcurl-env-dbg (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME

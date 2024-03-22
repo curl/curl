@@ -11,7 +11,7 @@ See-also:
   - curl_multi_perform (3)
   - libcurl-errors (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME

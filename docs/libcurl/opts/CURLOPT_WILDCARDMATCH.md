@@ -76,10 +76,6 @@ Using the rules above, a filename pattern can be constructed:
 
     ftp://example.com/some/path/[a-z[:upper:]\\].jpg
 
-# PROTOCOLS
-
-This feature is only supported for FTP download.
-
 # EXAMPLE
 
 ~~~c

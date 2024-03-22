@@ -39,10 +39,6 @@ transfer to extract the received time (if any).
 
 0
 
-# PROTOCOLS
-
-HTTP(S), FTP(S), SFTP, FILE, SMB(S)
-
 # EXAMPLE
 
 ~~~c

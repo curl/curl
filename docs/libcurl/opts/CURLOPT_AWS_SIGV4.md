@@ -68,10 +68,6 @@ By default, the value of this parameter is NULL.
 Calling CURLOPT_HTTPAUTH(3) with CURLAUTH_AWS_SIGV4 is the same
 as calling this with **"aws:amz"** in parameter.
 
-# PROTOCOLS
-
-HTTP
-
 # EXAMPLE
 
 ~~~c

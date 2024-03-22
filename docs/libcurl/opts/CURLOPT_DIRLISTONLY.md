@@ -50,10 +50,6 @@ effectively breaks that feature.
 
 0, disabled
 
-# PROTOCOLS
-
-FTP, SFTP and POP3
-
 # EXAMPLE
 
 ~~~c

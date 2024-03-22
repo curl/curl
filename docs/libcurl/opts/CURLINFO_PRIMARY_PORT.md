@@ -10,7 +10,7 @@ See-also:
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -34,10 +34,6 @@ This is the destination port of the actual TCP or UDP connection libcurl used.
 If a proxy was used for the most recent transfer, this is the port number of
 the proxy, if no proxy was used it is the port number of the most recently
 accessed URL.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

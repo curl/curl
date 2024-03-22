@@ -43,10 +43,6 @@ option.
 
 NULL
 
-# PROTOCOLS
-
-SCP and SFTP
-
 # EXAMPLE
 
 ~~~c

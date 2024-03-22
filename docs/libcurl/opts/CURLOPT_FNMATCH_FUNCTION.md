@@ -44,10 +44,6 @@ error occurred.
 
 NULL == an internal function for wildcard matching.
 
-# PROTOCOLS
-
-FTP
-
 # EXAMPLE
 
 ~~~c

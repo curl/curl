@@ -9,7 +9,7 @@ See-also:
   - CURLOPT_READFUNCTION (3)
   - CURLOPT_TCP_NODELAY (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -48,10 +48,6 @@ transfer as that may lead to unintended consequences.
 # DEFAULT
 
 65536 bytes
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

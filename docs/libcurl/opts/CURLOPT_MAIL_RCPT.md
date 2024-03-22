@@ -48,10 +48,6 @@ should be specified using the mailing list name, such as `Friends` or
 
 NULL
 
-# PROTOCOLS
-
-SMTP
-
 # EXAMPLE
 
 ~~~c

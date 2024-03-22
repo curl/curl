@@ -58,10 +58,6 @@ the host key is rejected, the connection is canceled.
 
 NULL
 
-# PROTOCOLS
-
-SCP and SFTP
-
 # EXAMPLE
 
 ~~~c

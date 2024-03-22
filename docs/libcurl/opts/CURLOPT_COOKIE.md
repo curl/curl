@@ -69,10 +69,6 @@ ability to stop super cookies. PSL support is identified by the
 
 NULL, no cookies
 
-# PROTOCOLS
-
-HTTP
-
 # EXAMPLE
 
 ~~~c

@@ -7,7 +7,7 @@ Source: libcurl
 See-also:
   - CURLOPT_SSL_FALSESTART (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -36,10 +36,6 @@ Fast Open is also known to be problematic on or across certain networks.
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

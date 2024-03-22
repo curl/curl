@@ -34,10 +34,6 @@ anywhere.
 
 NULL
 
-# PROTOCOLS
-
-RTSP
-
 # EXAMPLE
 
 ~~~c

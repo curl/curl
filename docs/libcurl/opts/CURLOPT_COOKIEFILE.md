@@ -67,10 +67,6 @@ run.
 
 NULL
 
-# PROTOCOLS
-
-HTTP
-
 # EXAMPLE
 
 ~~~c

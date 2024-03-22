@@ -64,10 +64,6 @@ of the proxy certificate.
 
 2
 
-# PROTOCOLS
-
-All protocols when used over an HTTPS proxy.
-
 # EXAMPLE
 
 ~~~c

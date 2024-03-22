@@ -10,7 +10,7 @@ See-also:
   - CURLOPT_TCP_KEEPALIVE (3)
   - CURLOPT_TIMEOUT (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -35,10 +35,6 @@ See CURLOPT_TIMEOUT(3) for details.
 # DEFAULT
 
 Default timeout is 0 (zero) which means it never times out during transfer.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

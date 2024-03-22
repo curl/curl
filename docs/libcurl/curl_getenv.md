@@ -7,7 +7,7 @@ Source: libcurl
 See-also:
   - getenv (3C)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME

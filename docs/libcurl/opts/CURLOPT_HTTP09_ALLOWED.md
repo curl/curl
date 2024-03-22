@@ -38,10 +38,6 @@ curl allowed HTTP/0.9 responses by default before 7.66.0
 Since 7.66.0, libcurl requires this option set to 1L to allow HTTP/0.9
 responses.
 
-# PROTOCOLS
-
-HTTP
-
 # EXAMPLE
 
 ~~~c

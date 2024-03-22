@@ -9,7 +9,7 @@ See-also:
   - CURLOPT_REDIR_PROTOCOLS (3)
   - CURLOPT_URL (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -72,10 +72,6 @@ CURLPROTO_TFTP
 # DEFAULT
 
 All protocols built-in.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

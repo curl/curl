@@ -59,10 +59,6 @@ instead expects a filename as input.
 
 NULL
 
-# PROTOCOLS
-
-All TLS-based protocols
-
 # EXAMPLE
 
 ~~~c

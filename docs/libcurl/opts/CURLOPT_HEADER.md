@@ -53,10 +53,6 @@ custom HTTP headers!
 
 0
 
-# PROTOCOLS
-
-Most
-
 # EXAMPLE
 
 ~~~c

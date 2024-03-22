@@ -100,11 +100,6 @@ although strictly they are just continuations of the previous lines.
 
 Nothing.
 
-# PROTOCOLS
-
-Used for all protocols with headers or meta-data concept: HTTP, FTP, POP3,
-IMAP, SMTP and more.
-
 # EXAMPLE
 
 ~~~c

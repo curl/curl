@@ -46,10 +46,6 @@ option.
 
 NULL
 
-# PROTOCOLS
-
-Used with HTTPS proxy
-
 # EXAMPLE
 
 ~~~c

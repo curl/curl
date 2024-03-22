@@ -10,7 +10,7 @@ See-also:
   - CURLOPT_MAX_SEND_SPEED_LARGE (3)
   - CURLOPT_TIMEOUT (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -36,10 +36,6 @@ slow and abort.
 # DEFAULT
 
 0, disabled
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

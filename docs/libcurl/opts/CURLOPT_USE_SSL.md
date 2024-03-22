@@ -58,10 +58,6 @@ Require SSL for all communication or fail with *CURLE_USE_SSL_FAILED*.
 
 CURLUSESSL_NONE
 
-# PROTOCOLS
-
-FTP, SMTP, POP3, IMAP, LDAP
-
 # EXAMPLE
 
 ~~~c

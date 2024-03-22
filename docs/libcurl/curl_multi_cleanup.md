@@ -10,7 +10,7 @@ See-also:
   - curl_multi_get_handles (3)
   - curl_multi_init (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME

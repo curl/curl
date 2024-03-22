@@ -66,10 +66,6 @@ the correct end-point.
 
 1
 
-# PROTOCOLS
-
-All
-
 # EXAMPLE
 
 ~~~c

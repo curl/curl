@@ -10,7 +10,7 @@ See-also:
   - curl_url_set (3)
   - libcurl-security (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -37,10 +37,6 @@ curl_url_set(3) function.
 # DEFAULT
 
 0 (disabled) - usernames are allowed by default.
-
-# PROTOCOLS
-
-Several
 
 # EXAMPLE
 

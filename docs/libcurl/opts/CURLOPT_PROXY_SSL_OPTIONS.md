@@ -91,10 +91,6 @@ could be a privacy violation and unexpected.
 
 0
 
-# PROTOCOLS
-
-All TLS-based protocols
-
 # EXAMPLE
 
 ~~~c

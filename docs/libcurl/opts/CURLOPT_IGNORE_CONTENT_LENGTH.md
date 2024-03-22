@@ -45,10 +45,6 @@ Only use this option if strictly necessary.
 
 0
 
-# PROTOCOLS
-
-HTTP
-
 # EXAMPLE
 
 ~~~c

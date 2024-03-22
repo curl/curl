@@ -9,7 +9,7 @@ See-also:
   - CURLMOPT_TIMERFUNCTION (3)
   - curl_multi_socket_action (3)
 Protocol:
-  - *
+  - All
 ---
 
 # NAME
@@ -88,10 +88,6 @@ active transfer. It might soon be added again.
 # DEFAULT
 
 NULL (no callback)
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

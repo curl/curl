@@ -38,10 +38,6 @@ Disable this operation again by setting a NULL to this option.
 
 NULL
 
-# PROTOCOLS
-
-SFTP and FTP
-
 # EXAMPLE
 
 ~~~c
