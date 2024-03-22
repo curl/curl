@@ -686,7 +686,7 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
 
     CURL_TRC_CF(data, cf, "connect_step1, check session cache");
     Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(cf, data, &session, NULL)) {
+    if(!Curl_ssl_getsessionid(cf, data, &connssl->peer, &session, NULL)) {
       br_ssl_engine_set_session_parameters(&backend->ctx.eng, session);
       session_set = 1;
       infof(data, "BearSSL: reusing session ID");
@@ -905,10 +905,11 @@ static CURLcode bearssl_connect_step3(struct Curl_cfilter *cf,
       return CURLE_OUT_OF_MEMORY;
     br_ssl_engine_get_session_parameters(&backend->ctx.eng, session);
     Curl_ssl_sessionid_lock(data);
-    incache = !(Curl_ssl_getsessionid(cf, data, &oldsession, NULL));
+    incache = !(Curl_ssl_getsessionid(cf, data, &connssl->peer,
+                                      &oldsession, NULL));
     if(incache)
       Curl_ssl_delsessionid(data, oldsession);
-    ret = Curl_ssl_addsessionid(cf, data, session, 0, &added);
+    ret = Curl_ssl_addsessionid(cf, data, &connssl->peer, session, 0, &added);
     Curl_ssl_sessionid_unlock(data);
     if(!added)
       free(session);

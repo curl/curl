@@ -434,13 +434,14 @@ class TestDownload:
         assert r.exit_code == 0, f'{client.dump_logs()}'
 
     # Special client that tests TLS session reuse in parallel transfers
-    def test_02_26_session_shared_reuse(self, env: Env, httpd, repeat):
-        curl = CurlClient(env=env)
-        url = f'https://{env.domain1}:{env.https_port}/data-100k'
+    # TODO: just uses a single connection for h2/h3. Not sure how to prevent that
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_02_26_session_shared_reuse(self, env: Env, proto, httpd, nghttpx, repeat):
+        url = f'https://{env.authority_for(env.domain1, proto)}/data-100k'
         client = LocalClient(name='tls-session-reuse', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
-        r = client.run(args=[url])
+        r = client.run(args=[proto, url])
         r.check_exit_code(0)
 
     # test on paused transfers, based on issue #11982

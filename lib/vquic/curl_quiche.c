@@ -88,7 +88,7 @@ void Curl_quiche_ver(char *p, size_t len)
 struct cf_quiche_ctx {
   struct cf_quic_ctx q;
   struct ssl_peer peer;
-  struct quic_tls_ctx tls;
+  struct curl_tls_ctx tls;
   quiche_conn *qconn;
   quiche_config *cfg;
   quiche_h3_conn *h3c;
@@ -123,8 +123,8 @@ static void cf_quiche_ctx_clear(struct cf_quiche_ctx *ctx)
       quiche_conn_free(ctx->qconn);
     if(ctx->cfg)
       quiche_config_free(ctx->cfg);
-    /* quiche just freed ctx->tls.ssl */
-    ctx->tls.ssl = NULL;
+    /* quiche just freed it */
+    ctx->tls.ossl.ssl = NULL;
     Curl_vquic_tls_cleanup(&ctx->tls);
     Curl_ssl_peer_cleanup(&ctx->peer);
     vquic_ctx_free(&ctx->q);
@@ -565,7 +565,7 @@ static CURLcode recv_pkt(const unsigned char *pkt, size_t pktlen,
       return CURLE_OK;
     }
     else if(QUICHE_ERR_TLS_FAIL == nread) {
-      long verify_ok = SSL_get_verify_result(ctx->tls.ssl);
+      long verify_ok = SSL_get_verify_result(ctx->tls.ossl.ssl);
       if(verify_ok != X509_V_OK) {
         failf(r->data, "SSL certificate problem: %s",
               X509_verify_cert_error_string(verify_ok));
@@ -1202,7 +1202,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   if(result)
     return result;
 
-  result = Curl_ssl_peer_init(&ctx->peer, cf);
+  result = Curl_ssl_peer_init(&ctx->peer, cf, TRNSPRT_QUIC);
   if(result)
     return result;
 
@@ -1237,7 +1237,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   result = Curl_vquic_tls_init(&ctx->tls, cf, data, &ctx->peer,
                                QUICHE_H3_APPLICATION_PROTOCOL,
                                sizeof(QUICHE_H3_APPLICATION_PROTOCOL) - 1,
-                               NULL, cf);
+                               NULL, NULL, cf);
   if(result)
     return result;
 
@@ -1257,7 +1257,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
                                       (struct sockaddr *)&ctx->q.local_addr,
                                       ctx->q.local_addrlen,
                                       &sockaddr->sa_addr, sockaddr->addrlen,
-                                      ctx->cfg, ctx->tls.ssl, false);
+                                      ctx->cfg, ctx->tls.ossl.ssl, false);
   if(!ctx->qconn) {
     failf(data, "can't create quiche connection");
     return CURLE_OUT_OF_MEMORY;

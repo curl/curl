@@ -409,11 +409,11 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 #if defined(WOLFSSL_ALLOW_TLSV10) && !defined(NO_OLD_TLS)
     req_method = TLSv1_client_method();
     use_sni(TRUE);
+    break;
 #else
     failf(data, "wolfSSL does not support TLS 1.0");
     return CURLE_NOT_BUILT_IN;
 #endif
-    break;
   case CURL_SSLVERSION_TLSv1_1:
 #ifndef NO_OLD_TLS
     req_method = TLSv1_1_client_method();
@@ -481,6 +481,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       return CURLE_SSL_CONNECT_ERROR;
     }
 #endif
+    FALLTHROUGH();
   default:
     break;
   }
@@ -711,7 +712,8 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     void *ssl_sessionid = NULL;
 
     Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(cf, data, &ssl_sessionid, NULL)) {
+    if(!Curl_ssl_getsessionid(cf, data, &connssl->peer,
+                              &ssl_sessionid, NULL)) {
       /* we got a session id, use it! */
       if(!SSL_set_session(backend->handle, ssl_sessionid)) {
         Curl_ssl_delsessionid(data, ssl_sessionid);
@@ -968,7 +970,8 @@ wolfssl_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
 
     if(our_ssl_sessionid) {
       Curl_ssl_sessionid_lock(data);
-      incache = !(Curl_ssl_getsessionid(cf, data, &old_ssl_sessionid, NULL));
+      incache = !(Curl_ssl_getsessionid(cf, data, &connssl->peer,
+                                        &old_ssl_sessionid, NULL));
       if(incache) {
         if(old_ssl_sessionid != our_ssl_sessionid) {
           infof(data, "old SSL session ID is stale, removing");
@@ -978,7 +981,8 @@ wolfssl_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
       }
 
       if(!incache) {
-        result = Curl_ssl_addsessionid(cf, data, our_ssl_sessionid, 0, NULL);
+        result = Curl_ssl_addsessionid(cf, data, &connssl->peer,
+                                       our_ssl_sessionid, 0, NULL);
         if(result) {
           Curl_ssl_sessionid_unlock(data);
           wolfSSL_SESSION_free(our_ssl_sessionid);

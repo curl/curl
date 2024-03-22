@@ -26,21 +26,20 @@
 
 #include "curl_setup.h"
 #include "bufq.h"
+#include "vtls/openssl.h"
 
 #if defined(ENABLE_QUIC) && \
   (defined(USE_OPENSSL) || defined(USE_GNUTLS) || defined(USE_WOLFSSL))
 
-struct quic_tls_ctx {
+struct curl_tls_ctx {
 #ifdef USE_OPENSSL
-  SSL_CTX *ssl_ctx;
-  SSL *ssl;
+  struct ossl_ctx ossl;
 #elif defined(USE_GNUTLS)
-  struct gtls_instance *gtls;
+  struct gtls_ctx gtls;
 #elif defined(USE_WOLFSSL)
   WOLFSSL_CTX *ssl_ctx;
   WOLFSSL *ssl;
 #endif
-  BIT(x509_store_setup);             /* if x509 store has been set up */
 };
 
 /**
@@ -50,9 +49,9 @@ struct quic_tls_ctx {
  * - openssl/wolfssl: SSL_CTX* has just been created
  * - gnutls: gtls_client_init() has run
  */
-typedef CURLcode Curl_vquic_tls_ctx_setup(struct quic_tls_ctx *ctx,
-                                          struct Curl_cfilter *cf,
-                                          struct Curl_easy *data);
+typedef CURLcode Curl_vquic_tls_ctx_setup(struct Curl_cfilter *cf,
+                                          struct Curl_easy *data,
+                                          void *cb_user_data);
 
 /**
  * Initialize the QUIC TLS instances based of the SSL configurations
@@ -64,23 +63,25 @@ typedef CURLcode Curl_vquic_tls_ctx_setup(struct quic_tls_ctx *ctx,
  * @param alpn        the ALPN string in protocol format ((len+bytes+)+),
  *                    may be NULL
  * @param alpn_len    the overall number of bytes in `alpn`
- * @param ctx_setup   optional callback for very early TLS config
- * @param user_data   optional pointer to set in TLS application context
+ * @param cb_setup    optional callback for very early TLS config
+ ± @param cb_user_data user_data param for callback
+ * @param ssl_user_data  optional pointer to set in TLS application context
  */
-CURLcode Curl_vquic_tls_init(struct quic_tls_ctx *ctx,
+CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
                              struct Curl_cfilter *cf,
                              struct Curl_easy *data,
                              struct ssl_peer *peer,
                              const char *alpn, size_t alpn_len,
-                             Curl_vquic_tls_ctx_setup *ctx_setup,
-                             void *user_data);
+                             Curl_vquic_tls_ctx_setup *cb_setup,
+                             void *cb_user_data,
+                             void *ssl_user_data);
 
 /**
  * Cleanup all data that has been initialized.
  */
-void Curl_vquic_tls_cleanup(struct quic_tls_ctx *ctx);
+void Curl_vquic_tls_cleanup(struct curl_tls_ctx *ctx);
 
-CURLcode Curl_vquic_tls_before_recv(struct quic_tls_ctx *ctx,
+CURLcode Curl_vquic_tls_before_recv(struct curl_tls_ctx *ctx,
                                     struct Curl_cfilter *cf,
                                     struct Curl_easy *data);
 
@@ -88,7 +89,7 @@ CURLcode Curl_vquic_tls_before_recv(struct quic_tls_ctx *ctx,
  * After the QUIC basic handshake has been, verify that the peer
  * (and its certificate) fulfill our requirements.
  */
-CURLcode Curl_vquic_tls_verify_peer(struct quic_tls_ctx *ctx,
+CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
                                     struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
                                     struct ssl_peer *peer);
