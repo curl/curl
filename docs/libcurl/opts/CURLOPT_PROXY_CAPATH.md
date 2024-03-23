@@ -69,8 +69,7 @@ int main(void)
 
 Added in 7.52.0
 
-This option is supported by the OpenSSL, GnuTLS, and mbedTLS (since 7.56.0)
-backends.
+mbedTLS support added in 7.56.0.
 
 # RETURN VALUE
 

@@ -9,7 +9,12 @@ See-also:
   - CURLOPT_PROXYTYPE (3)
   - CURLOPT_PROXY_SERVICE_NAME (3)
 Protocol:
-  - All
+  - HTTP
+  - FTP
+  - IMAP
+  - POP3
+  - SMTP
+  - LDAP
 ---
 
 # NAME

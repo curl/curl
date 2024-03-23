@@ -159,10 +159,8 @@ int main(void)
 
 # AVAILABILITY
 
-libcurl built with OpenSSL (added in 7.11.0), wolfSSL (added in 7.42.0), mbedTLS
-(added in 7.54.0) or BearSSL (added in 7.83.0)
-
-No other SSL backend is supported.
+OpenSSL (added in 7.11.0), wolfSSL (added in 7.42.0), mbedTLS (added in
+7.54.0) or BearSSL (added in 7.83.0)
 
 # RETURN VALUE
 

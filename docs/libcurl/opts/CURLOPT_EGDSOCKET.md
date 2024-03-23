@@ -56,8 +56,7 @@ int main(void)
 
 # AVAILABILITY
 
-If built with TLS enabled. Only the OpenSSL backend uses this, and only with
-OpenSSL versions before 1.1.0.
+Only with OpenSSL versions before 1.1.0.
 
 This option was deprecated in 7.84.0.
 
