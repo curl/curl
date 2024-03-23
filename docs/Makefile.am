@@ -61,6 +61,7 @@ EXTRA_DIST =                                    \
  CURL-DISABLE.md                                \
  CURLDOWN.md                                    \
  DEPRECATE.md                                   \
+ DISTROS.md                                     \
  DYNBUF.md                                      \
  EARLY-RELEASE.md                               \
  EXPERIMENTAL.md                                \
