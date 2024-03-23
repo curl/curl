@@ -29,4 +29,4 @@ matrix:
             - 'strong'
             - 'em'
     sources:
-      - '**/*.md|!docs/BINDINGS.md'
+      - '**/*.md|!docs/BINDINGS.md|!docs/DISTROS.md'
