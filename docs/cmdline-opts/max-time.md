@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: max-time
 Short: m
-Arg: <fractional seconds>
+Arg: <seconds>
 Help: Maximum time allowed for transfer
 Category: connection
 Added: 4.0

@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: ntlm
-Help: Use HTTP NTLM authentication
+Help: HTTP NTLM authentication
 Mutexed: basic negotiate digest anyauth
 Protocols: HTTP
 Requires: TLS

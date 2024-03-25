@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: globoff
 Short: g
-Help: Disable URL sequences and ranges using {} and []
+Help: Disable URL globbing with {} and []
 Category: curl
 Added: 7.6
 Multi: boolean

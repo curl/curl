@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: post302
-Help: Do not switch to GET after following a 302
+Help: Do not switch to GET after a 302 redirect
 Protocols: HTTP
 Added: 7.19.1
 Category: http post

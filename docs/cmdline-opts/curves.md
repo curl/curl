@@ -2,8 +2,8 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: curves
-Arg: <algorithm list>
-Help: (EC) TLS key exchange algorithm(s) to request
+Arg: <list>
+Help: (EC) TLS key exchange algorithms to request
 Protocols: TLS
 Added: 7.73.0
 Category: tls

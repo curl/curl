@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: resolve
 Arg: <[+]host:port:addr[,addr]...>
-Help: Resolve the host+port to this address
+Help: Resolve host+port to address
 Added: 7.21.3
 Category: connection dns
 Multi: append

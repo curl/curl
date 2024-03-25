@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: ftp-port
 Arg: <address>
-Help: Use PORT instead of PASV
+Help: Send PORT instead of PASV
 Short: P
 Protocols: FTP
 Category: ftp

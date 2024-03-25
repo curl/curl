@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: ntlm-wb
-Help: Use HTTP NTLM authentication with winbind
+Help: HTTP NTLM authentication with winbind
 Protocols: HTTP
 Category: auth http
 Added: 7.22.0

@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: location-trusted
-Help: Like --location, and send auth to other hosts
+Help: Like --location, but send auth to other hosts
 Protocols: HTTP
 Category: http auth
 Added: 7.10.4

@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: hostpubsha256
 Arg: <sha256>
-Help: Acceptable SHA256 hash of the host public key
+Help: Acceptable SHA256 hash of host public key
 Protocols: SFTP SCP
 Added: 7.80.0
 Category: sftp scp

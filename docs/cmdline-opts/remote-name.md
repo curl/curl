@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: remote-name
 Short: O
-Help: Write output to a file named as the remote file
+Help: Write output to file named as remote file
 Category: important output
 Added: 4.0
 Multi: append

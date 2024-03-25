@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: retry-connrefused
-Help: Retry on connection refused (use with --retry)
+Help: Retry on connection refused (with --retry)
 Added: 7.52.0
 Category: curl
 Multi: boolean

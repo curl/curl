@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: post301
-Help: Do not switch to GET after following a 301
+Help: Do not switch to GET after a 301 redirect
 Protocols: HTTP
 Added: 7.17.1
 Category: http post

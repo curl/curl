@@ -5,7 +5,7 @@ Short: b
 Long: cookie
 Arg: <data|filename>
 Protocols: HTTP
-Help: Send cookies from string/file
+Help: Send cookies from string/load from file
 Category: http
 Added: 4.9
 Multi: append
