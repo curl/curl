@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: digest
-Help: Use HTTP Digest Authentication
+Help: HTTP Digest Authentication
 Protocols: HTTP
 Mutexed: basic ntlm negotiate
 Category: proxy auth http

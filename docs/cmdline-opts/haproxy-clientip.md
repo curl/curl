@@ -2,8 +2,8 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: haproxy-clientip
-Arg: <IP address>
-Help: Sets client IP in HAProxy PROXY protocol v1 header
+Arg: <ip>
+Help: Set address in HAProxy PROXY
 Protocols: HTTP
 Added: 8.2.0
 Category: http proxy

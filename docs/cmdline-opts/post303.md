@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: post303
-Help: Do not switch to GET after following a 303
+Help: Do not switch to GET after a 303 redirect
 Protocols: HTTP
 Added: 7.26.0
 Category: http post

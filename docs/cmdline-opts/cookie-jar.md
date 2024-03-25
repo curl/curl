@@ -5,7 +5,7 @@ Short: c
 Long: cookie-jar
 Arg: <filename>
 Protocols: HTTP
-Help: Write cookies to <filename> after operation
+Help: Save cookies to <filename> after operation
 Category: http
 Added: 7.9
 Multi: single

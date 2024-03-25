@@ -4,7 +4,7 @@ SPDX-License-Identifier: curl
 Long: crlfile
 Arg: <file>
 Protocols: TLS
-Help: Use this CRL list
+Help: Certificate Revocation list
 Added: 7.19.7
 Category: tls
 Multi: single

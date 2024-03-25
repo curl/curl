@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: proxy-ntlm
-Help: Use NTLM authentication on the proxy
+Help: NTLM authentication with the proxy
 Category: proxy auth
 Added: 7.10.7
 Multi: mutex

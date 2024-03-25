@@ -2,8 +2,8 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: happy-eyeballs-timeout-ms
-Arg: <milliseconds>
-Help: Time for IPv6 before trying IPv4
+Arg: <ms>
+Help: Time for IPv6 before IPv4
 Added: 7.59.0
 Category: connection
 Multi: single

@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: etag-save
 Arg: <file>
-Help: Parse ETag from a request and save it to a file
+Help: Parse incoming ETag and save to a file
 Protocols: HTTP
 Added: 7.68.0
 Category: http

@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: ssl
-Help: Try SSL/TLS
+Help: Try enabling TLS
 Protocols: FTP IMAP POP3 SMTP LDAP
 Added: 7.20.0
 Category: tls

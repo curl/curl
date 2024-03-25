@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: basic
-Help: Use HTTP Basic Authentication
+Help: HTTP Basic Authentication
 Protocols: HTTP
 Category: auth
 Added: 7.10.6
