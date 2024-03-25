@@ -52,8 +52,8 @@ hosts, it does not send the user and password to those. This is enforced to
 prevent accidental information leakage.
 
 Use CURLOPT_HTTPAUTH(3) to specify the authentication method for HTTP
-based connections or CURLOPT_LOGIN_OPTIONS(3) to control IMAP, POP3 and
-SMTP options.
+based connections or CURLOPT_LOGIN_OPTIONS(3) to control IMAP,
+POP3, SIEVE and SMTP options.
 
 The user and password strings are not URL decoded, so there is no way to send
 in a username containing a colon using this option. Use CURLOPT_USERNAME(3)

@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_FOLLOWLOCATION (3)
 Protocol:
   - HTTP
+  - SIEVE
 ---
 
 # NAME

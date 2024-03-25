@@ -13,6 +13,7 @@ Protocol:
   - SMTP
   - POP3
   - IMAP
+  - SIEVE
 ---
 
 # NAME

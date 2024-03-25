@@ -11,6 +11,7 @@ Protocol:
   - IMAP
   - LDAP
   - POP3
+  - SIEVE
   - SMTP
 ---
 

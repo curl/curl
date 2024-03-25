@@ -3,10 +3,10 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: login-options
 Arg: <options>
-Protocols: IMAP LDAP POP3 SMTP
+Protocols: IMAP LDAP POP3 SIEVE SMTP
 Help: Server login options
 Added: 7.34.0
-Category: imap pop3 smtp auth
+Category: imap pop3 smtp sieve auth
 Multi: single
 See-also:
   - user

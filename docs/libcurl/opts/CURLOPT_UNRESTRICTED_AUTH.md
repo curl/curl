@@ -69,8 +69,9 @@ int main(void)
 
 # AVAILABILITY
 
-Along with HTTP
+Along with HTTP and SIEVE.
 
 # RETURN VALUE
 
-Returns CURLE_OK if HTTP is supported, and CURLE_UNKNOWN_OPTION if not.
+Returns CURLE_OK if HTTP or SIEVE are supported, and CURLE_UNKNOWN_OPTION
+if not.

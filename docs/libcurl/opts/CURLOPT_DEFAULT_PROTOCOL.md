@@ -34,7 +34,7 @@ name.
 Use one of these protocol (scheme) names:
 
 dict, file, ftp, ftps, gopher, http, https, imap, imaps, ldap, ldaps, pop3,
-pop3s, rtsp, scp, sftp, smb, smbs, smtp, smtps, telnet, tftp
+pop3s, rtsp, scp, sftp, sieve, smb, smbs, smtp, smtps, telnet, tftp
 
 An unknown or unsupported protocol causes error
 *CURLE_UNSUPPORTED_PROTOCOL* when libcurl parses a URL without a

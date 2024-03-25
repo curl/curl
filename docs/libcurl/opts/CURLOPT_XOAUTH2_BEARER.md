@@ -12,6 +12,7 @@ Protocol:
   - IMAP
   - LDAP
   - POP3
+  - SIEVE
   - SMTP
 ---
 
@@ -30,11 +31,11 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_XOAUTH2_BEARER, char *token);
 # DESCRIPTION
 
 Pass a char pointer as parameter, which should point to the null-terminated
-OAuth 2.0 Bearer Access Token for use with HTTP, IMAP, LDAP, POP3 and SMTP
-servers that support the OAuth 2.0 Authorization Framework.
+OAuth 2.0 Bearer Access Token for use with HTTP, IMAP, LDAP, POP3, SIEVE and
+SMTP servers that support the OAuth 2.0 Authorization Framework.
 
-Note: For IMAP, LDAP, POP3 and SMTP, the username used to generate the Bearer
-Token should be supplied via the CURLOPT_USERNAME(3) option.
+Note: For IMAP, LDAP, POP3, SIEVE and SMTP, the username used to generate the
+Bearer Token should be supplied via the CURLOPT_USERNAME(3) option.
 
 The application does not have to keep the string around after setting this
 option.
