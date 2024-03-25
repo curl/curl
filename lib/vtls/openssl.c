@@ -3532,7 +3532,11 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
     }
     break;
   case TRNSPRT_QUIC:
-    /* TODO: should probably check invalid version specs here also */
+    if((ssl_version != CURL_SSLVERSION_DEFAULT) &&
+       (ssl_version < CURL_SSLVERSION_TLSv1_3)) {
+      failf(data, "QUIC needs at least TLS version 1.3");
+      return CURLE_SSL_CONNECT_ERROR;
+     }
 #ifdef USE_OPENSSL_QUIC
     req_method = OSSL_QUIC_client_method();
 #else
