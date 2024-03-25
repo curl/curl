@@ -726,7 +726,8 @@ gtls_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     size_t ssl_idsize;
 
     Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(cf, data, &ssl_sessionid, &ssl_idsize)) {
+    if(!Curl_ssl_getsessionid(cf, data, &connssl->peer,
+                              &ssl_sessionid, &ssl_idsize)) {
       /* we got a session id, use it! */
       gnutls_session_set_data(backend->gtls.session,
                               ssl_sessionid, ssl_idsize);
@@ -1287,7 +1288,8 @@ static CURLcode gtls_verifyserver(struct Curl_cfilter *cf,
       gnutls_session_get_data(session, connect_sessionid, &connect_idsize);
 
       Curl_ssl_sessionid_lock(data);
-      incache = !(Curl_ssl_getsessionid(cf, data, &ssl_sessionid, NULL));
+      incache = !(Curl_ssl_getsessionid(cf, data, &connssl->peer,
+                                        &ssl_sessionid, NULL));
       if(incache) {
         /* there was one before in the cache, so instead of risking that the
            previous one was rejected, we just kill that and store the new */
@@ -1295,8 +1297,9 @@ static CURLcode gtls_verifyserver(struct Curl_cfilter *cf,
       }
 
       /* store this session id */
-      result = Curl_ssl_addsessionid(cf, data, connect_sessionid,
-                                     connect_idsize, &added);
+      result = Curl_ssl_addsessionid(cf, data, &connssl->peer,
+                                     connect_sessionid, connect_idsize,
+                                     &added);
       Curl_ssl_sessionid_unlock(data);
       if(!added)
         free(connect_sessionid);

@@ -1244,7 +1244,7 @@ static void socks_cf_get_host(struct Curl_cfilter *cf,
 
 struct Curl_cftype Curl_cft_socks_proxy = {
   "SOCKS-PROXYY",
-  CF_TYPE_IP_CONNECT,
+  CF_TYPE_IP_CONNECT|CF_TYPE_PROXY,
   0,
   socks_proxy_cf_destroy,
   socks_proxy_cf_connect,

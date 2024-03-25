@@ -189,7 +189,7 @@ static void cf_haproxy_adjust_pollset(struct Curl_cfilter *cf,
 
 struct Curl_cftype Curl_cft_haproxy = {
   "HAPROXY",
-  0,
+  CF_TYPE_PROXY,
   0,
   cf_haproxy_destroy,
   cf_haproxy_connect,

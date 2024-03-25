@@ -279,6 +279,8 @@ struct ssl_peer {
   char *dispname;        /* display version of hostname */
   char *sni;             /* SNI version of hostname or NULL if not usable */
   ssl_peer_type type;    /* type of the peer information */
+  int port;              /* port we are talking to */
+  int transport;         /* TCP or QUIC */
 };
 
 struct ssl_primary_config {
@@ -344,6 +346,7 @@ struct Curl_ssl_session {
   long age;         /* just a number, the higher the more recent */
   int remote_port;  /* remote port */
   int conn_to_port; /* remote port for the connection (may be -1) */
+  int transport;    /* TCP or QUIC */
   struct ssl_primary_config ssl_config; /* setup for this session */
 };
 
