@@ -368,6 +368,10 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
   enabledmechs = sasl->authmechs & sasl->prefmech;
   *progress = SASL_IDLE;
 
+  /* Handle unsafe mechanisms. */
+  if(!Curl_auth_use_unsafe(data, FALSE))
+    enabledmechs &= SASL_SAFE_MECHS;
+
   /* Calculate the supported authentication mechanism, by decreasing order of
      security, as well as the initial response where appropriate */
   if((enabledmechs & SASL_MECH_EXTERNAL) && !conn->passwd[0]) {

@@ -1,0 +1,85 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP proxy
+HTTP proxy Digest auth
+SAFEAUTH
+</keywords>
+</info>
+
+# Server-side
+<reply>
+
+<data>
+HTTP/1.1 407 Authorization Required to proxy me my dear swsclose
+Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
+Content-Length: 34
+
+And you should ignore this data.
+</data>
+
+# This is supposed to be returned when the server gets the Digest
+# Authorization: line passed-in from the client
+<data1000>
+HTTP/1.1 200 Things are fine in proxy land swsclose
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 42
+
+Contents of that page you requested, sir.
+</data1000>
+
+<datacheck>
+HTTP/1.1 407 Authorization Required to proxy me my dear swsclose
+Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
+Content-Length: 34
+
+HTTP/1.1 200 Things are fine in proxy land swsclose
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 42
+
+Contents of that page you requested, sir.
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# tool to use
+<features>
+!SSPI
+crypto
+proxy
+</features>
+ <name>
+HTTP proxy auth Digest with clear proxy password disabled
+ </name>
+ <command>
+ -U fake@user:secret --proxy-anyauth --proxy-safe-auth -x %HOSTIP:%HTTPPORT http://we.want.that.site.com/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET http://we.want.that.site.com/%TESTNUMBER HTTP/1.1
+Host: we.want.that.site.com
+User-Agent: curl/%VERSION
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+GET http://we.want.that.site.com/%TESTNUMBER HTTP/1.1
+Host: we.want.that.site.com
+Proxy-Authorization: Digest username="fake@user", realm="weirdorealm", nonce="12345", uri="/%TESTNUMBER", response="c8d7a706c55a01b2f8bc5afc54299c47"
+User-Agent: curl/%VERSION
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+</protocol>
+</verify>
+</testcase>
