@@ -2921,24 +2921,17 @@ ossl_set_ssl_version_min_max_legacy(ctx_option_t *ctx_options,
 }
 #endif
 
-/* The "new session" callback must return zero if the session can be removed
- * or non-zero if the session has been put into the session cache.
- */
-static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
+CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
+                               struct Curl_easy *data,
+                               const struct ssl_peer *peer,
+                               SSL_SESSION *ssl_sessionid)
 {
-  int res = 0;
-  struct Curl_easy *data;
-  struct Curl_cfilter *cf;
   const struct ssl_config_data *config;
-  struct ssl_connect_data *connssl;
   bool isproxy;
+  CURLcode result = CURLE_WRITE_ERROR;
 
-  cf = (struct Curl_cfilter*) SSL_get_app_data(ssl);
-  connssl = cf? cf->ctx : NULL;
-  data = connssl? CF_DATA_CURRENT(cf) : NULL;
-  /* The sockindex has been stored as a pointer to an array element */
   if(!cf || !data)
-    return 0;
+    return result;
 
   isproxy = Curl_ssl_cf_is_proxy(cf);
 
@@ -2952,7 +2945,8 @@ static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
     if(isproxy)
       incache = FALSE;
     else
-      incache = !(Curl_ssl_getsessionid(cf, data, &old_ssl_sessionid, NULL));
+      incache = !(Curl_ssl_getsessionid(cf, data, peer,
+                                        &old_ssl_sessionid, NULL));
     if(incache) {
       if(old_ssl_sessionid != ssl_sessionid) {
         infof(data, "old SSL session ID is stale, removing");
@@ -2962,11 +2956,11 @@ static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
     }
 
     if(!incache) {
-      if(!Curl_ssl_addsessionid(cf, data, ssl_sessionid,
+      if(!Curl_ssl_addsessionid(cf, data, peer, ssl_sessionid,
                                 0 /* unknown size */, &added)) {
         if(added) {
           /* the session has been put into the session cache */
-          res = 1;
+          result = CURLE_OK;
         }
       }
       else
@@ -2975,7 +2969,24 @@ static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
     Curl_ssl_sessionid_unlock(data);
   }
 
-  return res;
+  return result;
+}
+
+/* The "new session" callback must return zero if the session can be removed
+ * or non-zero if the session has been put into the session cache.
+ */
+static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
+{
+  struct Curl_cfilter *cf;
+  struct Curl_easy *data;
+  struct ssl_connect_data *connssl;
+  CURLcode result;
+
+  cf = (struct Curl_cfilter*) SSL_get_app_data(ssl);
+  connssl = cf? cf->ctx : NULL;
+  data = connssl? CF_DATA_CURRENT(cf) : NULL;
+  result = Curl_ossl_add_session(cf, data, &connssl->peer, ssl_sessionid);
+  return result? 0 : 1;
 }
 
 static CURLcode load_cacert_from_memory(X509_STORE *store,
@@ -3477,10 +3488,12 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
                             struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             struct ssl_peer *peer,
-                            int transport,
+                            int transport, /* TCP or QUIC */
                             const unsigned char *alpn, size_t alpn_len,
                             Curl_ossl_ctx_setup_cb *cb_setup,
-                            void *cb_user_data, void *ssl_user_data)
+                            void *cb_user_data,
+                            Curl_ossl_new_session_cb *cb_new_session,
+                            void *ssl_user_data)
 {
   CURLcode result = CURLE_OK;
   char *ciphers;
@@ -3764,8 +3777,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   }
 #endif
 
-  /* TODO: only works for this transport */
-  if(transport == TRNSPRT_TCP) {
+  if(cb_new_session) {
     /* Enable the session cache because it's a prerequisite for the
      * "new session" callback. Use the "external storage" mode to prevent
      * OpenSSL from creating an internal session cache.
@@ -3773,7 +3785,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
     SSL_CTX_set_session_cache_mode(octx->ssl_ctx,
                                    SSL_SESS_CACHE_CLIENT |
                                    SSL_SESS_CACHE_NO_INTERNAL);
-    SSL_CTX_sess_set_new_cb(octx->ssl_ctx, ossl_new_session_cb);
+    SSL_CTX_sess_set_new_cb(octx->ssl_ctx, cb_new_session);
   }
 
   /* give application a chance to interfere with SSL set up. */
@@ -3834,7 +3846,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   octx->reused_session = FALSE;
   if(ssl_config->primary.sessionid && transport == TRNSPRT_TCP) {
     Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(cf, data, &ssl_sessionid, NULL)) {
+    if(!Curl_ssl_getsessionid(cf, data, peer, &ssl_sessionid, NULL)) {
       /* we got a session id, use it! */
       if(!SSL_set_session(octx->ssl, ssl_sessionid)) {
         Curl_ssl_sessionid_unlock(data);
@@ -3876,7 +3888,8 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
 #endif
 
   result = Curl_ossl_ctx_init(octx, cf, data, &connssl->peer, TRNSPRT_TCP,
-                              proto.data, proto.len, NULL, NULL, cf);
+                              proto.data, proto.len, NULL, NULL,
+                              ossl_new_session_cb, cf);
   if(result)
     return result;
 
@@ -4039,7 +4052,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
           Curl_strerror(sockerr, extramsg, sizeof(extramsg));
         failf(data, OSSL_PACKAGE " SSL_connect: %s in connection to %s:%d ",
               extramsg[0] ? extramsg : SSL_ERROR_to_str(detail),
-              connssl->peer.hostname, connssl->port);
+              connssl->peer.hostname, connssl->peer.port);
         return result;
       }
 
@@ -4419,7 +4432,8 @@ static CURLcode servercert(struct Curl_cfilter *cf,
         void *old_ssl_sessionid = NULL;
         bool incache;
         Curl_ssl_sessionid_lock(data);
-        incache = !(Curl_ssl_getsessionid(cf, data, &old_ssl_sessionid, NULL));
+        incache = !(Curl_ssl_getsessionid(cf, data, &connssl->peer,
+                                          &old_ssl_sessionid, NULL));
         if(incache) {
           infof(data, "Remove session ID again from cache");
           Curl_ssl_delsessionid(data, old_ssl_sessionid);

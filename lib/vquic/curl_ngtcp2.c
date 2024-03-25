@@ -1919,6 +1919,30 @@ static void cf_ngtcp2_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
   (void)save;
 }
 
+#ifdef USE_OPENSSL
+/* The "new session" callback must return zero if the session can be removed
+ * or non-zero if the session has been put into the session cache.
+ */
+static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
+{
+  struct Curl_cfilter *cf;
+  struct cf_ngtcp2_ctx *ctx;
+  struct Curl_easy *data;
+  ngtcp2_crypto_conn_ref *cref;
+
+  cref = (ngtcp2_crypto_conn_ref *)SSL_get_app_data(ssl);
+  cf = cref? cref->user_data : NULL;
+  ctx = cf? cf->ctx : NULL;
+  data = cf? CF_DATA_CURRENT(cf) : NULL;
+  if(cf && data && ctx) {
+    CURLcode result = Curl_ossl_add_session(cf, data, &ctx->peer,
+                                            ssl_sessionid);
+    return result? 0 : 1;
+  }
+  return 0;
+}
+#endif /* USE_OPENSSL */
+
 static CURLcode tls_ctx_setup(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
                               void *user_data)
@@ -1938,6 +1962,15 @@ static CURLcode tls_ctx_setup(struct Curl_cfilter *cf,
     return CURLE_FAILED_INIT;
   }
 #endif /* !OPENSSL_IS_BORINGSSL && !OPENSSL_IS_AWSLC */
+  /* Enable the session cache because it's a prerequisite for the
+   * "new session" callback. Use the "external storage" mode to prevent
+   * OpenSSL from creating an internal session cache.
+   */
+  SSL_CTX_set_session_cache_mode(ctx->ossl.ssl_ctx,
+                                 SSL_SESS_CACHE_CLIENT |
+                                 SSL_SESS_CACHE_NO_INTERNAL);
+  SSL_CTX_sess_set_new_cb(ctx->ossl.ssl_ctx, ossl_new_session_cb);
+
 #elif defined(USE_GNUTLS)
   if(ngtcp2_crypto_gnutls_configure_client_session(ctx->gtls->session) != 0) {
     failf(data, "ngtcp2_crypto_gnutls_configure_client_session failed");
@@ -1972,7 +2005,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
                   H3_STREAM_POOL_SPARES);
 
-  result = Curl_ssl_peer_init(&ctx->peer, cf);
+  result = Curl_ssl_peer_init(&ctx->peer, cf, TRNSPRT_QUIC);
   if(result)
     return result;
 
@@ -1984,7 +2017,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
     return result;
 
 #ifdef USE_OPENSSL
-    SSL_set_quic_use_legacy_codepoint(ctx->tls.ossl.ssl, 0);
+  SSL_set_quic_use_legacy_codepoint(ctx->tls.ossl.ssl, 0);
 #endif
 
   ctx->dcid.datalen = NGTCP2_MAX_CIDLEN;

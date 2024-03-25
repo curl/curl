@@ -343,7 +343,7 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
   (void)result;
   return Curl_ossl_ctx_init(&ctx->ossl, cf, data, peer, TRNSPRT_QUIC,
                             (const unsigned char *)alpn, alpn_len,
-                            cb_setup, cb_user_data, ssl_user_data);
+                            cb_setup, cb_user_data, NULL, ssl_user_data);
 #elif defined(USE_GNUTLS)
   (void)result;
   return curl_gtls_init_ctx(ctx, cf, data, peer, alpn, alpn_len,

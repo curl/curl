@@ -1055,7 +1055,7 @@ static CURLcode cf_osslq_ctx_start(struct Curl_cfilter *cf,
 
   Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
                   H3_STREAM_POOL_SPARES);
-  result = Curl_ssl_peer_init(&ctx->peer, cf);
+  result = Curl_ssl_peer_init(&ctx->peer, cf, TRNSPRT_QUIC);
   if(result)
     goto out;
 
