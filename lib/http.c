@@ -3557,8 +3557,6 @@ static CURLcode http_on_response(struct Curl_easy *data,
        * something else should've considered the big picture and we
        * avoid this check.
        *
-       * rewindbeforesend indicates that something has told libcurl to
-       * continue sending even if it gets discarded
        */
 
       switch(data->state.httpreq) {
