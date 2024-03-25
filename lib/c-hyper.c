@@ -980,11 +980,13 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
       goto error;
   }
 
+#ifndef CURL_DISABLE_PROXY
   if(data->state.aptr.proxyuserpwd) {
     result = Curl_hyper_header(data, headers, data->state.aptr.proxyuserpwd);
     if(result)
       goto error;
   }
+#endif
 
   if(data->state.aptr.userpwd) {
     result = Curl_hyper_header(data, headers, data->state.aptr.userpwd);
@@ -1137,7 +1139,9 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   /* clear userpwd and proxyuserpwd to avoid reusing old credentials
    * from reused connections */
   Curl_safefree(data->state.aptr.userpwd);
+#ifndef CURL_DISABLE_PROXY
   Curl_safefree(data->state.aptr.proxyuserpwd);
+#endif
   return CURLE_OK;
 error:
   DEBUGASSERT(result);
