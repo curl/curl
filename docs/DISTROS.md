@@ -135,6 +135,12 @@ can also be used on other distributions
 - curl issues: [URL]
 - curl patches: [URL]
 
+## Rocky Linux
+
+- curl: https://git.rockylinux.org/staging/rpms/curl/-/blob/r9/SPECS/curl.spec
+- curl issues: https://bugs.rockylinux.org
+- curl patches: https://git.rockylinux.org/staging/rpms/curl/-/tree/r9/SOURCES
+
 ## SmartOS
 
 - curl: https://github.com/TritonDataCenter/illumos-extra/tree/master/curl
