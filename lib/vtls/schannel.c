@@ -1071,7 +1071,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   DEBUGASSERT(backend);
   DEBUGF(infof(data,
                "schannel: SSL/TLS connection with %s port %d (step 1/3)",
-               connssl->peer.hostname, connssl->port));
+               connssl->peer.hostname, connssl->peer.port));
 
   if(curlx_verify_windows_version(5, 1, 0, PLATFORM_WINNT,
                                   VERSION_LESS_THAN_EQUAL)) {
@@ -1336,7 +1336,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   DEBUGF(infof(data,
                "schannel: SSL/TLS connection with %s port %d (step 2/3)",
-               connssl->peer.hostname, connssl->port));
+               connssl->peer.hostname, connssl->peer.port));
 
   if(!backend->cred || !backend->ctxt)
     return CURLE_SSL_CONNECT_ERROR;
@@ -1690,7 +1690,7 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   DEBUGF(infof(data,
                "schannel: SSL/TLS connection with %s port %d (step 3/3)",
-               connssl->peer.hostname, connssl->port));
+               connssl->peer.hostname, connssl->peer.port));
 
   if(!backend->cred)
     return CURLE_SSL_CONNECT_ERROR;
@@ -1764,7 +1764,7 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
       }
     }
     if(!incache) {
-      result = Curl_ssl_addsessionid(cf, &connssl->peer, data, backend->cred,
+      result = Curl_ssl_addsessionid(cf, data, &connssl->peer, backend->cred,
                                      sizeof(struct Curl_schannel_cred),
                                      &added);
       if(result) {
@@ -2491,7 +2491,7 @@ static int schannel_shutdown(struct Curl_cfilter *cf,
 
   if(backend->ctxt) {
     infof(data, "schannel: shutting down SSL/TLS connection with %s port %d",
-          connssl->peer.hostname, connssl->port);
+          connssl->peer.hostname, connssl->peer.port);
   }
 
   if(backend->cred && backend->ctxt) {
