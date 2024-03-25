@@ -1,0 +1,48 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP Basic auth
+SAFEAUTH
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 401 Authorization Required
+Server: testcurl
+WWW-Authenticate: Basic realm="gimme all yer s3cr3ts"
+Content-Type: text/plain
+Content-Length: 0
+
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP GET with user and clear password protection upon server request
+ </name>
+ <command>
+ -u fake:user --safe-auth http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

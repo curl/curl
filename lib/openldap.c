@@ -43,6 +43,7 @@
 #include "urldata.h"
 #include <curl/curl.h>
 #include "sendf.h"
+#include "vauth/vauth.h"
 #include "vtls/vtls.h"
 #include "transfer.h"
 #include "curl_ldap.h"
@@ -419,6 +420,8 @@ static CURLcode oldap_perform_bind(struct Curl_easy *data, ldapstate newstate)
   passwd.bv_len = 0;
 
   if(data->state.aptr.user) {
+    if(!Curl_auth_use_unsafe(data, FALSE))
+      return CURLE_LOGIN_DENIED;
     binddn = conn->user;
     passwd.bv_val = conn->passwd;
     passwd.bv_len = strlen(passwd.bv_val);
@@ -687,8 +690,10 @@ static CURLcode oldap_state_sasl_resp(struct Curl_easy *data,
   }
   else {
     result = Curl_sasl_continue(&li->sasl, data, code, &progress);
-    if(!result && progress != SASL_INPROGRESS)
+    if(!result && progress != SASL_INPROGRESS) {
+      result = CURLE_LOGIN_DENIED;
       oldap_state(data, OLDAP_STOP);
+    }
   }
 
   if(li->servercred)

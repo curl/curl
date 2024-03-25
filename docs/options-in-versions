@@ -181,6 +181,7 @@
 --proxy-ntlm                         7.10.7
 --proxy-pass                         7.52.0
 --proxy-pinnedpubkey                 7.59.0
+--proxy-safe-auth                    8.xx.x
 --proxy-service-name                 7.43.0
 --proxy-ssl-allow-beast              7.52.0
 --proxy-ssl-auto-client-cert         7.77.0
@@ -212,6 +213,7 @@
 --retry-connrefused                  7.52.0
 --retry-delay                        7.12.3
 --retry-max-time                     7.12.3
+--safe-auth                          8.xx.x
 --sasl-authzid                       7.66.0
 --sasl-ir                            7.31.0
 --service-name                       7.43.0

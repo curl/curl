@@ -47,6 +47,7 @@ while(<F>) {
         $_ =~ s/CURLPROTO_[A-Z0-9_]*//g;
         $_ =~ s/CURLPROXY_[A-Z0-9_]*//g;
         $_ =~ s/CURLPX_[A-Z0-9_]*//g;
+        $_ =~ s/CURLSAFE_[A-Z0-9_]*//g;
         $_ =~ s/CURLSHE_[A-Z0-9_]*//g;
         $_ =~ s/CURLSHOPT_[A-Z0-9_]*//g;
         $_ =~ s/CURLSSLOPT_[A-Z0-9_]*//g;

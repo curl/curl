@@ -44,6 +44,12 @@ struct connectdata;
 #define SASL_MECH_SCRAM_SHA_1       (1 << 9)
 #define SASL_MECH_SCRAM_SHA_256     (1 << 10)
 
+#define SASL_SAFE_MECHS (SASL_MECH_CRAM_MD5 | SASL_MECH_DIGEST_MD5 |    \
+                         SASL_MECH_GSSAPI | SASL_MECH_EXTERNAL |        \
+                         SASL_MECH_NTLM | SASL_MECH_XOAUTH2 |           \
+                         SASL_MECH_OAUTHBEARER |                        \
+                         SASL_MECH_SCRAM_SHA_1 | SASL_MECH_SCRAM_SHA_256)
+
 /* Authentication mechanism values */
 #define SASL_AUTH_NONE          0
 #define SASL_AUTH_ANY           0xffff

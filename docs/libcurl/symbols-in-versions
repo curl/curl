@@ -800,6 +800,7 @@ CURLOPT_RTSP_SESSION_ID         7.20.0
 CURLOPT_RTSP_STREAM_URI         7.20.0
 CURLOPT_RTSP_TRANSPORT          7.20.0
 CURLOPT_RTSPHEADER              7.20.0
+CURLOPT_SAFE_AUTH               8.xx.x
 CURLOPT_SASL_AUTHZID            7.66.0
 CURLOPT_SASL_IR                 7.31.0
 CURLOPT_SEEKDATA                7.18.0
@@ -1004,6 +1005,8 @@ CURLPX_SEND_REQUEST             7.73.0
 CURLPX_UNKNOWN_FAIL             7.73.0
 CURLPX_UNKNOWN_MODE             7.73.0
 CURLPX_USER_REJECTED            7.73.0
+CURLSAFE_AUTH                   8.xx.x
+CURLSAFE_PROXYAUTH              8.xx.x
 CURLSHE_BAD_OPTION              7.10.3
 CURLSHE_IN_USE                  7.10.3
 CURLSHE_INVALID                 7.10.3

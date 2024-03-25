@@ -1569,6 +1569,14 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
                             va_arg(param, char *));
     break;
 
+  case CURLOPT_SAFE_AUTH:
+    /*
+     * Disable unsafe authentication mechanisms (those that transfer clear
+     * credentials.
+     */
+    data->set.safe_auth = (unsigned short) va_arg(param, long);
+    break;
+
   case CURLOPT_RESOLVE:
     /*
      * List of HOST:PORT:[addresses] strings to populate the DNS cache with

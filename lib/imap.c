@@ -66,6 +66,7 @@
 #include "mime.h"
 #include "strtoofft.h"
 #include "strcase.h"
+#include "vauth/vauth.h"
 #include "vtls/vtls.h"
 #include "cfilters.h"
 #include "connect.h"
@@ -518,6 +519,9 @@ static CURLcode imap_perform_login(struct Curl_easy *data,
 
     return result;
   }
+
+  if(!Curl_auth_use_unsafe(data, FALSE))
+    return CURLE_LOGIN_DENIED;
 
   /* Make sure the username and password are in the correct atom format */
   user = imap_atom(conn->user, false);

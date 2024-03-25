@@ -830,6 +830,10 @@ typedef enum {
 #define CURLAUTH_ANY          (~CURLAUTH_DIGEST_IE)
 #define CURLAUTH_ANYSAFE      (~(CURLAUTH_BASIC|CURLAUTH_DIGEST_IE))
 
+/* Bitmasks for CURLOPT_SAFE_AUTH. */
+#define CURLSAFE_AUTH         ((unsigned long)1 << 0) /* No unsafe mechs */
+#define CURLSAFE_PROXYAUTH    ((unsigned long)1 << 1) /* Same for proxy */
+
 #define CURLSSH_AUTH_ANY       ~0     /* all types supported by the server */
 #define CURLSSH_AUTH_NONE      0      /* none allowed, silly but complete */
 #define CURLSSH_AUTH_PUBLICKEY (1<<0) /* public/private key files */
@@ -2223,6 +2227,9 @@ typedef enum {
 
   /* maximum number of keepalive probes (Linux, *BSD, macOS, etc.) */
   CURLOPT(CURLOPT_TCP_KEEPCNT, CURLOPTTYPE_LONG, 326),
+
+  /* Set secure authentication mechanisms flags. */
+  CURLOPT(CURLOPT_SAFE_AUTH, CURLOPTTYPE_LONG, 327),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

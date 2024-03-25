@@ -516,7 +516,11 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
   if((data->state.aptr.user || data->set.str[STRING_BEARER]) &&
      ((data->req.httpcode == 401) ||
       (data->req.authneg && data->req.httpcode < 300))) {
-    pickhost = pickoneauth(&data->state.authhost, authmask);
+    unsigned long am = ~0UL;
+
+    if(!Curl_auth_use_unsafe(data, FALSE))
+      am = CURLAUTH_ANYSAFE;
+    pickhost = pickoneauth(&data->state.authhost, authmask & am);
     if(!pickhost)
       data->state.authproblem = TRUE;
     if(data->state.authhost.picked == CURLAUTH_NTLM &&
@@ -530,8 +534,12 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
   if(conn->bits.proxy_user_passwd &&
      ((data->req.httpcode == 407) ||
       (data->req.authneg && data->req.httpcode < 300))) {
+    unsigned long am = ~0UL;
+
+    if(!Curl_auth_use_unsafe(data, TRUE))
+      am = CURLAUTH_ANYSAFE;
     pickproxy = pickoneauth(&data->state.authproxy,
-                            authmask & ~CURLAUTH_BEARER);
+                            authmask & am & ~CURLAUTH_BEARER);
     if(!pickproxy)
       data->state.authproblem = TRUE;
   }
@@ -743,17 +751,23 @@ Curl_http_output_auth(struct Curl_easy *data,
     return CURLE_OK; /* no authentication with no user or password */
   }
 
-  if(authhost->want && !authhost->picked)
+  if(authhost->want && !authhost->picked) {
     /* The app has selected one or more methods, but none has been picked
        so far by a server round-trip. Then we set the picked one to the
        want one, and if this is one single bit it'll be used instantly. */
     authhost->picked = authhost->want;
+    if(!Curl_auth_use_unsafe(data, FALSE))
+      authhost->picked &= CURLAUTH_ANYSAFE;
+  }
 
-  if(authproxy->want && !authproxy->picked)
+  if(authproxy->want && !authproxy->picked) {
     /* The app has selected one or more methods, but none has been picked so
        far by a proxy round-trip. Then we set the picked one to the want one,
        and if this is one single bit it'll be used instantly. */
     authproxy->picked = authproxy->want;
+    if(!Curl_auth_use_unsafe(data, TRUE))
+      authproxy->picked &= CURLAUTH_ANYSAFE;
+  }
 
 #ifndef CURL_DISABLE_PROXY
   /* Send proxy authentication header if needed */

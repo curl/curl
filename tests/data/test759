@@ -1,0 +1,50 @@
+<testcase>
+<info>
+<keywords>
+POP3
+Clear Text
+RETR
+SAFEAUTH
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+From: me@somewhere
+To: fake@nowhere
+
+body
+
+--
+  yours sincerely
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+pop3
+</server>
+ <name>
+POP3 RETR message with clear password disabled
+ </name>
+ <command>
+pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret --safe-auth
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# 67 is CURLE_LOGIN_DENIED
+<errorcode>
+67
+</errorcode>
+<protocol>
+CAPA
+</protocol>
+</verify>
+</testcase>

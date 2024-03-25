@@ -56,6 +56,7 @@
 #include "curl_krb5.h"
 #include "strtoofft.h"
 #include "strcase.h"
+#include "vauth/vauth.h"
 #include "vtls/vtls.h"
 #include "cfilters.h"
 #include "cf-socket.h"
@@ -2746,8 +2747,12 @@ static CURLcode ftp_state_user_resp(struct Curl_easy *data,
   if((ftpcode == 331) && (ftpc->state == FTP_USER)) {
     /* 331 Password required for ...
        (the server requires to send the user's password too) */
-    result = Curl_pp_sendf(data, &ftpc->pp, "PASS %s",
-                           conn->passwd?conn->passwd:"");
+    if(!Curl_auth_use_unsafe(data, FALSE) &&
+       conn->passwd && conn->user && strcmp(conn->user, CURL_DEFAULT_USER))
+      result = CURLE_LOGIN_DENIED;
+    else
+      result = Curl_pp_sendf(data, &ftpc->pp, "PASS %s",
+                             conn->passwd?conn->passwd:"");
     if(!result)
       ftp_state(data, FTP_PASS);
   }
