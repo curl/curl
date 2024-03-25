@@ -14,6 +14,7 @@ Protocol:
   - FTP
   - IMAP
   - POP3
+  - SIEVE
   - SMTP
 ---
 
@@ -77,6 +78,10 @@ Instead of LIST when issuing IMAP based requests.
 
 Instead of LIST and RETR when issuing POP3 based requests.
 
+## SIEVE
+
+Instead of LISTSCRIPTS and PUTSCRIPT when issuing SIEVE based requests.
+
 For example:
 
 When you tell libcurl to use a custom request it behaves like a LIST or RETR
@@ -124,7 +129,8 @@ int main(void)
 
 # AVAILABILITY
 
-IMAP is supported since 7.30.0, POP3 since 7.26.0 and SMTP since 7.34.0.
+IMAP is supported since 7.30.0, POP3 since 7.26.0, SIEVE since 8.xx.x and
+SMTP since 7.34.0.
 
 # RETURN VALUE
 

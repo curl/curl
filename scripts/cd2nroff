@@ -158,6 +158,7 @@ my %knownprotos = (
     'RTSP' => 1,
     'SCP' => 1,
     'SFTP' => 1,
+    'SIEVE' => 1,
     'SMB' => 1,
     'SMBS' => 1,
     'SMTP' => 1,

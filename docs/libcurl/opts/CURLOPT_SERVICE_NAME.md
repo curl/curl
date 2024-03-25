@@ -13,6 +13,7 @@ Protocol:
   - FTP
   - IMAP
   - POP3
+  - SIEVE
   - SMTP
   - LDAP
 ---
@@ -33,8 +34,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SERVICE_NAME, char *name);
 
 Pass a char pointer as parameter to a string holding the *name* of the service
 for DIGEST-MD5, SPNEGO and Kerberos 5 authentication mechanisms. The default
-service names are "ftp", "HTTP", "imap", "ldap", "pop" and "smtp". This option
-allows you to change them.
+service names are "ftp", "HTTP", "imap", "ldap", "pop", "sieve" and "smtp".
+This option allows you to change them.
 
 The application does not have to keep the string around after setting this
 option.
@@ -61,7 +62,7 @@ int main(void)
 # AVAILABILITY
 
 Added in 7.43.0 for HTTP, 7.49.0 for FTP, IMAP, POP3 and SMTP,
-7.82.0 for OpenLDAP.
+7.82.0 for OpenLDAP, 8.xx.x for SIEVE.
 
 # RETURN VALUE
 

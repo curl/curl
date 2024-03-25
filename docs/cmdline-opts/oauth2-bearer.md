@@ -4,7 +4,7 @@ SPDX-License-Identifier: curl
 Long: oauth2-bearer
 Help: OAuth 2 Bearer Token
 Arg: <token>
-Protocols: IMAP LDAP POP3 SMTP HTTP
+Protocols: IMAP LDAP POP3 SIEVE SMTP HTTP
 Category: auth
 Added: 7.33.0
 Multi: single
