@@ -161,7 +161,11 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
     *param_charp = data->info.primary.local_ip;
     break;
   case CURLINFO_RTSP_SESSION_ID:
+#ifndef CURL_DISABLE_RTSP
     *param_charp = data->set.str[STRING_RTSP_SESSION_ID];
+#else
+    *param_charp = NULL;
+#endif
     break;
   case CURLINFO_SCHEME:
     *param_charp = data->info.conn_scheme;

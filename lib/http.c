@@ -2684,8 +2684,12 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
 
                   httpstring,
                   (data->state.aptr.host?data->state.aptr.host:""),
+#ifndef CURL_DISABLE_PROXY
                   data->state.aptr.proxyuserpwd?
                   data->state.aptr.proxyuserpwd:"",
+#else
+                  "",
+#endif
                   data->state.aptr.userpwd?data->state.aptr.userpwd:"",
                   (data->state.use_range && data->state.aptr.rangeline)?
                   data->state.aptr.rangeline:"",
@@ -2719,7 +2723,9 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   /* clear userpwd and proxyuserpwd to avoid reusing old credentials
    * from reused connections */
   Curl_safefree(data->state.aptr.userpwd);
+#ifndef CURL_DISABLE_PROXY
   Curl_safefree(data->state.aptr.proxyuserpwd);
+#endif
   free(altused);
 
   if(result) {

@@ -393,7 +393,9 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   if(result)
     goto out;
 
+#ifndef CURL_DISABLE_PROXY
   p_proxyuserpwd = data->state.aptr.proxyuserpwd;
+#endif
   p_userpwd = data->state.aptr.userpwd;
 
   /* Referrer */

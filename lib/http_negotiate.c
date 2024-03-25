@@ -120,15 +120,28 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
 CURLcode Curl_output_negotiate(struct Curl_easy *data,
                                struct connectdata *conn, bool proxy)
 {
-  struct negotiatedata *neg_ctx = proxy ? &conn->proxyneg :
-    &conn->negotiate;
-  struct auth *authp = proxy ? &data->state.authproxy : &data->state.authhost;
-  curlnegotiate *state = proxy ? &conn->proxy_negotiate_state :
-    &conn->http_negotiate_state;
+  struct negotiatedata *neg_ctx;
+  struct auth *authp;
+  curlnegotiate *state;
   char *base64 = NULL;
   size_t len = 0;
   char *userp;
   CURLcode result;
+
+  if(proxy) {
+#ifndef CURL_DISABLE_PROXY
+    neg_ctx = &conn->proxyneg;
+    authp = &data->state.authproxy;
+    state = &conn->proxy_negotiate_state;
+#else
+    return CURLE_NOT_BUILT_IN;
+#endif
+  }
+  else {
+    neg_ctx = &conn->negotiate;
+    authp = &data->state.authhost;
+    state = &conn->http_negotiate_state;
+  }
 
   authp->done = FALSE;
 
