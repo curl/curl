@@ -66,3 +66,5 @@ Thank you to all our backers! 🙏 [Become a backer](https://opencollective.com/
 ## Sponsors
 
 Support this project by becoming a [sponsor](https://curl.se/sponsors.html).
+
+Adding some cool feature.
