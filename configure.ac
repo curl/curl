@@ -999,28 +999,6 @@ AS_HELP_STRING([--disable-mqtt],[Disable MQTT support]),
 )
 
 dnl **********************************************************************
-dnl Check whether to build documentation
-dnl **********************************************************************
-
-AC_MSG_CHECKING([whether to build documentation])
-AC_ARG_ENABLE(docs,
-AS_HELP_STRING([--enable-docs],[Enable documentation])
-AS_HELP_STRING([--disable-docs],[Disable documentation]),
-[ case "$enableval" in
-  no)
-       AC_MSG_RESULT(no)
-       BUILD_DOCS=0
-       curl_docs_msg="no"
-       ;;
-  *)   AC_MSG_RESULT(yes)
-       BUILD_DOCS=1
-       ;;
-  esac ],
-       AC_MSG_RESULT(yes)
-       BUILD_DOCS=1
-)
-
-dnl **********************************************************************
 dnl Check for built-in manual
 dnl **********************************************************************
 
@@ -1041,6 +1019,31 @@ AS_HELP_STRING([--disable-manual],[Disable built-in manual]),
 )
 dnl The actual use of the USE_MANUAL variable is done much later in this
 dnl script to allow other actions to disable it as well.
+
+dnl **********************************************************************
+dnl Check whether to build documentation
+dnl **********************************************************************
+
+AC_MSG_CHECKING([whether to build documentation])
+AC_ARG_ENABLE(docs,
+AS_HELP_STRING([--enable-docs],[Enable documentation])
+AS_HELP_STRING([--disable-docs],[Disable documentation]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       BUILD_DOCS=0
+       dnl disable manual too because it needs built documentation
+       USE_MANUAL=0
+       curl_docs_msg="no"
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       BUILD_DOCS=1
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+       BUILD_DOCS=1
+)
+
 
 dnl ************************************************************
 dnl disable C code generation support
