@@ -206,6 +206,7 @@ CURLcode init_telnet(struct Curl_easy *data)
     return CURLE_OUT_OF_MEMORY;
 
   Curl_dyn_init(&tn->out, 0xffff);
+  data->req.handler = data->conn->handler;
   data->req.p.telnet = tn; /* make us known */
 
   tn->telrcv_state = CURL_TS_DATA;

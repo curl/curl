@@ -4519,6 +4519,7 @@ static CURLcode ftp_setup_connection(struct Curl_easy *data,
       return CURLE_OUT_OF_MEMORY;
     }
   }
+  data->req.handler = conn->handler;
   data->req.p.ftp = ftp;
 
   ftp->path = &data->state.up.path[1]; /* don't include the initial slash */

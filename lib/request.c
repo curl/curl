@@ -109,6 +109,7 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
 
   /* This is a bit ugly. `req->p` is a union and we assume we can
    * free this safely without leaks. */
+  data->req.handler = NULL;
   Curl_safefree(req->p.http);
   Curl_safefree(req->newurl);
   Curl_client_reset(data);

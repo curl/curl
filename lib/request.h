@@ -101,6 +101,7 @@ struct SingleRequest {
 
   /* Allocated protocol-specific data. Each protocol handler makes sure this
      points to data it needs. */
+  const struct Curl_handler *handler;
   union {
     struct FILEPROTO *file;
     struct FTP *ftp;

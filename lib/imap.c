@@ -1419,11 +1419,12 @@ static CURLcode imap_block_statemach(struct Curl_easy *data,
 
 /* Allocate and initialize the struct IMAP for the current Curl_easy if
    required */
-static CURLcode imap_init(struct Curl_easy *data)
+static CURLcode imap_init(struct Curl_easy *data, struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct IMAP *imap;
 
+  data->req.handler = conn->handler;
   imap = data->req.p.imap = calloc(1, sizeof(struct IMAP));
   if(!imap)
     result = CURLE_OUT_OF_MEMORY;
@@ -1751,7 +1752,7 @@ static CURLcode imap_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn)
 {
   /* Initialise the IMAP layer */
-  CURLcode result = imap_init(data);
+  CURLcode result = imap_init(data, conn);
   if(result)
     return result;
 

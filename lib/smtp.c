@@ -1309,11 +1309,12 @@ static CURLcode smtp_block_statemach(struct Curl_easy *data,
 
 /* Allocate and initialize the SMTP struct for the current Curl_easy if
    required */
-static CURLcode smtp_init(struct Curl_easy *data)
+static CURLcode smtp_init(struct Curl_easy *data, struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct SMTP *smtp;
 
+  data->req.handler = conn->handler;
   smtp = data->req.p.smtp = calloc(1, sizeof(struct SMTP));
   if(!smtp)
     result = CURLE_OUT_OF_MEMORY;
@@ -1612,7 +1613,7 @@ static CURLcode smtp_setup_connection(struct Curl_easy *data,
   conn->bits.tls_upgraded = FALSE;
 
   /* Initialise the SMTP layer */
-  result = smtp_init(data);
+  result = smtp_init(data, conn);
   if(result)
     return result;
 

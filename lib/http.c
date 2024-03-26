@@ -175,6 +175,7 @@ CURLcode Curl_http_setup_conn(struct Curl_easy *data,
   if(!http)
     return CURLE_OUT_OF_MEMORY;
 
+  data->req.handler = conn->handler;
   data->req.p.http = http;
   connkeep(conn, "HTTP default");
 

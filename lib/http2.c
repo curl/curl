@@ -198,10 +198,11 @@ struct h2_stream_ctx {
                        buffered data in stream->sendbuf to upload. */
 };
 
-#define H2_STREAM_CTX(d)    ((struct h2_stream_ctx *)(((d) && \
-                              (d)->req.p.http)? \
-                             ((struct HTTP *)(d)->req.p.http)->h2_ctx \
-                               : NULL))
+#define REQ_IS_HTTP(d)      ((d) && (d)->req.handler && \
+                             ((d)->req.handler->protocol & PROTO_FAMILY_HTTP))
+#define H2_STREAM_CTX(d)    ((struct h2_stream_ctx *)( \
+                             (REQ_IS_HTTP(d) && (d)->req.p.http)? \
+                              (d)->req.p.http->h2_ctx : NULL))
 #define H2_STREAM_LCTX(d)   ((struct HTTP *)(d)->req.p.http)->h2_ctx
 #define H2_STREAM_ID(d)     (H2_STREAM_CTX(d)? \
                              H2_STREAM_CTX(d)->id : -2)

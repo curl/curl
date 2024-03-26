@@ -915,6 +915,7 @@ static CURLcode oldap_do(struct Curl_easy *data, bool *done)
       }
       else {
         lr->msgid = msgid;
+        data->req.handler = conn->handler;
         data->req.p.ldap = lr;
         Curl_xfer_setup(data, FIRSTSOCKET, -1, FALSE, -1);
         *done = TRUE;

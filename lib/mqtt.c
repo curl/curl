@@ -110,6 +110,7 @@ static CURLcode mqtt_setup_conn(struct Curl_easy *data,
   if(!mq)
     return CURLE_OUT_OF_MEMORY;
   Curl_dyn_init(&mq->recvbuf, DYN_MQTT_RECV);
+  data->req.handler = conn->handler;
   data->req.p.mqtt = mq;
   return CURLE_OK;
 }

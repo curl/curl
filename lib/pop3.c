@@ -1079,11 +1079,12 @@ static CURLcode pop3_block_statemach(struct Curl_easy *data,
 
 /* Allocate and initialize the POP3 struct for the current Curl_easy if
    required */
-static CURLcode pop3_init(struct Curl_easy *data)
+static CURLcode pop3_init(struct Curl_easy *data, struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct POP3 *pop3;
 
+  data->req.handler = conn->handler;
   pop3 = data->req.p.pop3 = calloc(1, sizeof(struct POP3));
   if(!pop3)
     result = CURLE_OUT_OF_MEMORY;
@@ -1341,7 +1342,7 @@ static CURLcode pop3_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn)
 {
   /* Initialise the POP3 layer */
-  CURLcode result = pop3_init(data);
+  CURLcode result = pop3_init(data, conn);
   if(result)
     return result;
 

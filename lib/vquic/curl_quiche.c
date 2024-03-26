@@ -151,7 +151,10 @@ struct stream_ctx {
   BIT(quic_flow_blocked); /* stream is blocked by QUIC flow control */
 };
 
-#define H3_STREAM_CTX(d)    ((struct stream_ctx *)(((d) && (d)->req.p.http)? \
+#define REQ_IS_HTTP(d)      ((d) && (d)->req.handler && \
+                             ((d)->req.handler->protocol & PROTO_FAMILY_HTTP))
+#define H3_STREAM_CTX(d)    ((struct stream_ctx *)(\
+                             (REQ_IS_HTTP(d) && (d)->req.p.http)? \
                              ((struct HTTP *)(d)->req.p.http)->h3_ctx \
                                : NULL))
 #define H3_STREAM_LCTX(d)   ((struct HTTP *)(d)->req.p.http)->h3_ctx
