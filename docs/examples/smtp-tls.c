@@ -105,10 +105,10 @@ int main(void)
      * matches your server configuration. */
     curl_easy_setopt(curl, CURLOPT_URL, "smtp://mainserver.example.net:587");
 
-    /* In this example, we will start with a plain text connection, and upgrade
-     * to Transport Layer Security (TLS) using the STARTTLS command. Be careful
-     * of using CURLUSESSL_TRY here, because if TLS upgrade fails, the transfer
-     * will continue anyway - see the security discussion in the libcurl
+    /* In this example, we start with a plain text connection, and upgrade to
+     * Transport Layer Security (TLS) using the STARTTLS command. Be careful
+     * of using CURLUSESSL_TRY here, because if TLS upgrade fails, the
+     * transfer continues anyway - see the security discussion in the libcurl
      * tutorial for more details. */
     curl_easy_setopt(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
 
@@ -125,8 +125,8 @@ int main(void)
      * for more information. */
     curl_easy_setopt(curl, CURLOPT_CAINFO, "/path/to/certificate.pem");
 
-    /* Note that this option is not strictly required, omitting it will result
-     * in libcurl sending the MAIL FROM command with empty sender data. All
+    /* Note that this option is not strictly required, omitting it results in
+     * libcurl sending the MAIL FROM command with empty sender data. All
      * autoresponses should have an empty reverse-path, and should be directed
      * to the address in the reverse-path which triggered them. Otherwise,
      * they could cause an endless loop. See RFC 5321 Section 4.5.5 for more
@@ -148,7 +148,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
-    /* Since the traffic will be encrypted, it is useful to turn on debug
+    /* Since the traffic is encrypted, it is useful to turn on debug
      * information within libcurl to see what is happening during the
      * transfer.
      */

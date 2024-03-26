@@ -1,11 +1,13 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: curl_getenv
 Section: 3
 Source: libcurl
 See-also:
   - getenv (3C)
+Protocol:
+  - All
 ---
 
 # NAME

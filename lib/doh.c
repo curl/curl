@@ -69,7 +69,12 @@ static const char *doh_strerror(DOHcode code)
     return errors[code];
   return "bad error code";
 }
-#endif
+
+struct curl_trc_feat Curl_doh_trc = {
+  "DoH",
+  CURL_LOG_LVL_NONE,
+};
+#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
 
 /* @unittest 1655
  */
@@ -189,9 +194,9 @@ static int doh_done(struct Curl_easy *doh, CURLcode result)
   struct dohdata *dohp = data->req.doh;
   /* so one of the DoH request done for the 'data' transfer is now complete! */
   dohp->pending--;
-  infof(data, "a DoH request is completed, %u to go", dohp->pending);
+  infof(doh, "a DoH request is completed, %u to go", dohp->pending);
   if(result)
-    infof(data, "DoH request %s", curl_easy_strerror(result));
+    infof(doh, "DoH request %s", curl_easy_strerror(result));
 
   if(!dohp->pending) {
     /* DoH completed */
@@ -242,6 +247,9 @@ static CURLcode dohprobe(struct Curl_easy *data,
        the gcc typecheck helpers */
     struct dynbuf *resp = &p->serverdoh;
     doh->state.internal = true;
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+    doh->state.feat = &Curl_doh_trc;
+#endif
     ERROR_CHECK_SETOPT(CURLOPT_URL, url);
     ERROR_CHECK_SETOPT(CURLOPT_DEFAULT_PROTOCOL, "https");
     ERROR_CHECK_SETOPT(CURLOPT_WRITEFUNCTION, doh_write_cb);
@@ -264,7 +272,7 @@ static CURLcode dohprobe(struct Curl_easy *data,
     ERROR_CHECK_SETOPT(CURLOPT_SHARE, data->share);
     if(data->set.err && data->set.err != stderr)
       ERROR_CHECK_SETOPT(CURLOPT_STDERR, data->set.err);
-    if(data->set.verbose)
+    if(Curl_trc_ft_is_verbose(data, &Curl_doh_trc))
       ERROR_CHECK_SETOPT(CURLOPT_VERBOSE, 1L);
     if(data->set.no_signal)
       ERROR_CHECK_SETOPT(CURLOPT_NOSIGNAL, 1L);
@@ -741,11 +749,11 @@ static void showdoh(struct Curl_easy *data,
                     const struct dohentry *d)
 {
   int i;
-  infof(data, "TTL: %u seconds", d->ttl);
+  infof(data, "[DoH] TTL: %u seconds", d->ttl);
   for(i = 0; i < d->numaddr; i++) {
     const struct dohaddr *a = &d->addr[i];
     if(a->type == DNS_TYPE_A) {
-      infof(data, "DoH A: %u.%u.%u.%u",
+      infof(data, "[DoH] A: %u.%u.%u.%u",
             a->ip.v4[0], a->ip.v4[1],
             a->ip.v4[2], a->ip.v4[3]);
     }
@@ -754,9 +762,9 @@ static void showdoh(struct Curl_easy *data,
       char buffer[128];
       char *ptr;
       size_t len;
-      msnprintf(buffer, 128, "DoH AAAA: ");
-      ptr = &buffer[10];
-      len = 118;
+      len = msnprintf(buffer, 128, "[DoH] AAAA: ");
+      ptr = &buffer[len];
+      len = sizeof(buffer) - len;
       for(j = 0; j < 16; j += 2) {
         size_t l;
         msnprintf(ptr, len, "%s%02x%02x", j?":":"", d->addr[i].ip.v6[j],
@@ -950,8 +958,11 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
       struct Curl_dns_entry *dns;
       struct Curl_addrinfo *ai;
 
-      infof(data, "DoH Host name: %s", dohp->host);
-      showdoh(data, &de);
+
+      if(Curl_trc_ft_is_verbose(data, &Curl_doh_trc)) {
+        infof(data, "[DoH] Host name: %s", dohp->host);
+        showdoh(data, &de);
+      }
 
       result = doh2ai(&de, dohp->host, dohp->port, &ai);
       if(result) {

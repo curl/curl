@@ -96,7 +96,7 @@ EXTRA_DIST = mkhelp.pl \
  Makefile.mk curl.rc Makefile.inc CMakeLists.txt .checksrc
 
 # Use absolute directory to disable VPATH
-MANPAGE=$(abs_top_builddir)/docs/curl.1
+ASCIIPAGE=$(abs_top_builddir)/docs/cmdline-opts/curl.txt
 MKHELP=$(top_srcdir)/src/mkhelp.pl
 HUGE=tool_hugehelp.c
 
@@ -113,24 +113,24 @@ CS_ = $(CS_0)
 if USE_MANUAL
 # Here are the stuff to create a built-in manual
 
-$(MANPAGE):
+$(ASCIIPAGE):
 	cd $(top_builddir)/docs && $(MAKE)
 
 if HAVE_LIBZ
 # This generates the tool_hugehelp.c file in both uncompressed and
 # compressed formats.
-$(HUGE): $(MANPAGE) $(MKHELP)
+$(HUGE): $(ASCIIPAGE) $(MKHELP)
 	$(HUGECMD) (echo '#include "tool_setup.h"' > $(HUGE);   \
 	echo '#ifndef HAVE_LIBZ' >> $(HUGE);                    \
-	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) >> $(HUGE);     \
+	$(PERL) $(MKHELP) < $(ASCIIPAGE) >> $(HUGE);     \
 	echo '#else' >> $(HUGE);                                \
-	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) -c >> $(HUGE);  \
+	$(PERL) $(MKHELP) -c < $(ASCIIPAGE) >> $(HUGE);  \
 	echo '#endif /* HAVE_LIBZ */' >> $(HUGE) )
 else # HAVE_LIBZ
 # This generates the tool_hugehelp.c file uncompressed only
-$(HUGE): $(MANPAGE) $(MKHELP)
+$(HUGE): $(ASCIIPAGE) $(MKHELP)
 	$(HUGECMD)(echo '#include "tool_setup.h"' > $(HUGE);    \
-	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) >> $(HUGE) )
+	$(PERL) $(MKHELP) < $(ASCIIPAGE) >> $(HUGE) )
 endif
 
 else # USE_MANUAL

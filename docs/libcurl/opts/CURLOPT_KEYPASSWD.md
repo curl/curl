@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_KEYPASSWD
 Section: 3
@@ -7,6 +7,13 @@ Source: libcurl
 See-also:
   - CURLOPT_SSH_PRIVATE_KEYFILE (3)
   - CURLOPT_SSLKEY (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
+  - mbedTLS
+  - Schannel
+  - wolfSSL
 ---
 
 # NAME
@@ -34,10 +41,6 @@ option.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
 
 # EXAMPLE
 

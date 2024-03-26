@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_MAIL_RCPT
 Section: 3
@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_MAIL_AUTH (3)
   - CURLOPT_MAIL_FROM (3)
+Protocol:
+  - SMTP
 ---
 
 # NAME
@@ -26,30 +28,25 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MAIL_RCPT,
 
 Pass a pointer to a linked list of recipients to pass to the server in your
 SMTP mail request. The linked list should be a fully valid list of
-**struct curl_slist** structs properly filled in. Use
-curl_slist_append(3) to create the list and curl_slist_free_all(3)
-to clean up an entire list.
+**struct curl_slist** structs properly filled in. Use curl_slist_append(3) to
+create the list and curl_slist_free_all(3) to clean up an entire list.
 
 When performing a mail transfer, each recipient should be specified within a
-pair of angled brackets (<>), however, should you not use an angled bracket as
-the first character libcurl assumes you provided a single email address and
+pair of angled brackets (\<\>), however, should you not use an angled bracket
+as the first character libcurl assumes you provided a single email address and
 encloses that address within brackets for you.
 
 When performing an address verification (**VRFY** command), each recipient
-should be specified as the user name or user name and domain (as per Section
+should be specified as the username or username plus domain (as per Section
 3.5 of RFC 5321).
 
 When performing a mailing list expand (**EXPN** command), each recipient
-should be specified using the mailing list name, such as "Friends" or
-"London-Office".
+should be specified using the mailing list name, such as `Friends` or
+`London-Office`.
 
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-SMTP
 
 # EXAMPLE
 

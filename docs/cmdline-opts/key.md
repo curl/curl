@@ -4,7 +4,7 @@ SPDX-License-Identifier: curl
 Long: key
 Arg: <key>
 Protocols: TLS SSH
-Help: Private key file name
+Help: Private key filename
 Category: tls ssh
 Added: 7.9.3
 Multi: single
@@ -17,7 +17,7 @@ Example:
 
 # `--key`
 
-Private key file name. Allows you to provide your private key in this separate
+Private key filename. Allows you to provide your private key in this separate
 file. For SSH, if not specified, curl tries the following candidates in order:
 `~/.ssh/id_rsa`, `~/.ssh/id_dsa`, `./id_rsa`, `./id_dsa`.
 

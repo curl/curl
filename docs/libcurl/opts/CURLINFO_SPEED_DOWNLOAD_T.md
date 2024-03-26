@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLINFO_SPEED_DOWNLOAD_T
 Section: 3
@@ -9,6 +9,8 @@ See-also:
   - CURLINFO_SPEED_UPLOAD_T (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -28,8 +30,6 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_SPEED_DOWNLOAD_T,
 
 Pass a pointer to a *curl_off_t* to receive the average download speed
 that curl measured for the complete download. Measured in bytes/second.
-
-# PROTOCOLS
 
 # EXAMPLE
 

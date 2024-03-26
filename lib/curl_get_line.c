@@ -33,14 +33,16 @@
 #include "memdebug.h"
 
 /*
- * Curl_get_line() makes sure to only return complete whole lines that fit in
- * 'len' bytes and end with a newline.
+ * Curl_get_line() makes sure to only return complete whole lines that end
+ * newlines.
  */
-char *Curl_get_line(char *buf, int len, FILE *input)
+int Curl_get_line(struct dynbuf *buf, FILE *input)
 {
-  bool partial = FALSE;
+  CURLcode result;
+  char buffer[128];
+  Curl_dyn_reset(buf);
   while(1) {
-    char *b = fgets(buf, len, input);
+    char *b = fgets(buffer, sizeof(buffer), input);
 
     if(b) {
       size_t rlen = strlen(b);
@@ -48,39 +50,28 @@ char *Curl_get_line(char *buf, int len, FILE *input)
       if(!rlen)
         break;
 
-      if(b[rlen-1] == '\n') {
-        /* b is \n terminated */
-        if(partial) {
-          partial = FALSE;
-          continue;
-        }
-        return b;
-      }
-      else if(feof(input)) {
-        if(partial)
-          /* Line is already too large to return, ignore rest */
-          break;
+      result = Curl_dyn_addn(buf, b, rlen);
+      if(result)
+        /* too long line or out of memory */
+        return 0; /* error */
 
-        if(rlen + 1 < (size_t) len) {
-          /* b is EOF terminated, insert missing \n */
-          b[rlen] = '\n';
-          b[rlen + 1] = '\0';
-          return b;
-        }
-        else
-          /* Maximum buffersize reached + EOF
-           * This line is impossible to add a \n to so we'll ignore it
-           */
-          break;
+      else if(b[rlen-1] == '\n')
+        /* end of the line */
+        return 1; /* all good */
+
+      else if(feof(input)) {
+        /* append a newline */
+        result = Curl_dyn_addn(buf, "\n", 1);
+        if(result)
+          /* too long line or out of memory */
+          return 0; /* error */
+        return 1; /* all good */
       }
-      else
-        /* Maximum buffersize reached */
-        partial = TRUE;
     }
     else
       break;
   }
-  return NULL;
+  return 0;
 }
 
 #endif /* if not disabled */

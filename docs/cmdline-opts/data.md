@@ -24,7 +24,7 @@ Example:
 
 Sends the specified data in a POST request to the HTTP server, in the same way
 that a browser does when a user has filled in an HTML form and presses the
-submit button. This makes curl pass the data to the server using the
+submit button. This option makes curl pass the data to the server using the
 content-type application/x-www-form-urlencoded. Compare to --form.
 
 --data-raw is almost the same but does not have a special interpretation of
@@ -37,11 +37,11 @@ data pieces specified are merged with a separating &-symbol. Thus, using
 '-d name=daniel -d skill=lousy' would generate a post chunk that looks like
 'name=daniel&skill=lousy'.
 
-If you start the data with the letter @, the rest should be a file name to
-read the data from, or - if you want curl to read the data from stdin. Posting
-data from a file named 'foobar' would thus be done with --data @foobar. When
---data is told to read from a file like that, carriage returns and newlines
-are stripped out. If you do not want the @ character to have a special
+If you start the data with the letter @, the rest should be a filename to read
+the data from, or - if you want curl to read the data from stdin. Posting data
+from a file named 'foobar' would thus be done with --data @foobar. When --data
+is told to read from a file like that, carriage returns, newlines and null
+bytes are stripped out. If you do not want the @ character to have a special
 interpretation use --data-raw instead.
 
 The data for this option is passed on to the server exactly as provided on the

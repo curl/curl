@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_SSH_KNOWNHOSTS
 Section: 3
@@ -7,6 +7,9 @@ Source: libcurl
 See-also:
   - CURLOPT_SSH_AUTH_TYPES (3)
   - CURLOPT_SSH_HOST_PUBLIC_KEY_MD5 (3)
+Protocol:
+  - SFTP
+  - SCP
 ---
 
 # NAME
@@ -36,10 +39,6 @@ option.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-SFTP and SCP
 
 # EXAMPLE
 

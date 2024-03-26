@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_DEBUGDATA
 Section: 3
@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_DEBUGFUNCTION (3)
   - CURLOPT_STDERR (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -30,10 +32,6 @@ not used by libcurl, it is only passed to the callback.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

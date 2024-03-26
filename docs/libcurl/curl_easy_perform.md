@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: curl_easy_perform
 Section: 3
@@ -10,6 +10,8 @@ See-also:
   - curl_multi_add_handle (3)
   - curl_multi_perform (3)
   - libcurl-errors (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -78,6 +80,6 @@ Always
 # RETURN VALUE
 
 CURLE_OK (0) means everything was OK, non-zero means an error occurred as
-*<curl/curl.h>* defines - see libcurl-errors(3). If the CURLOPT_ERRORBUFFER(3)
-was set with curl_easy_setopt(3) there is a readable error message stored in
-the error buffer when non-zero is returned.
+*\<curl/curl.h\>* defines - see libcurl-errors(3). If CURLOPT_ERRORBUFFER(3)
+was set with curl_easy_setopt(3) there is an error message stored in the error
+buffer when non-zero is returned.

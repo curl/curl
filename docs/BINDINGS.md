@@ -96,6 +96,8 @@ Bailiff and Bálint Szilakszi,
 
 [Python](http://pycurl.io/) PycURL by Kjetil Jacobsen
 
+[Python](https://pypi.org/project/pymcurl/) mcurl by Ganesh Viswanathan
+
 [Q](https://q-lang.sourceforge.net/) The libcurl module is part of the default install
 
 [R](https://cran.r-project.org/package=curl)

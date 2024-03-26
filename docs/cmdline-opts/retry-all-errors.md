@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: retry-all-errors
-Help: Retry all errors (use with --retry)
+Help: Retry all errors (with --retry)
 Added: 7.71.0
 Category: curl
 Multi: boolean
@@ -19,14 +19,14 @@ Retry on any error. This option is used together with --retry.
 This option is the "sledgehammer" of retrying. Do not use this option by
 default (for example in your **curlrc**), there may be unintended consequences
 such as sending or receiving duplicate data. Do not use with redirected input
-or output. You'd be much better off handling your unique problems in shell
+or output. You might be better off handling your unique problems in a shell
 script. Please read the example below.
 
 **WARNING**: For server compatibility curl attempts to retry failed flaky
 transfers as close as possible to how they were started, but this is not
 possible with redirected input or output. For example, before retrying it
 removes output data from a failed partial transfer that was written to an
-output file. However this is not true of data redirected to a | pipe or >
+output file. However this is not true of data redirected to a | pipe or \>
 file, which are not reset. We strongly suggest you do not parse or record
 output via redirect in combination with this option, since you may receive
 duplicate data.

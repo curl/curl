@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: curl_global_init
 Section: 3
@@ -11,6 +11,8 @@ See-also:
   - curl_global_sslset (3)
   - curl_global_trace (3)
   - libcurl (3)
+Protocol:
+  - All
 ---
 
 # NAME

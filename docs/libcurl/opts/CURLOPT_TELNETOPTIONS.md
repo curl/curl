@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_TELNETOPTIONS
 Section: 3
@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_HTTPHEADER (3)
   - CURLOPT_QUOTE (3)
+Protocol:
+  - TELNET
 ---
 
 # NAME
@@ -25,17 +27,13 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TELNETOPTIONS,
 # DESCRIPTION
 
 Provide a pointer to a curl_slist with variables to pass to the telnet
-negotiations. The variables should be in the format <option=value>. libcurl
-supports the options **TTYPE**, **XDISPLOC** and **NEW_ENV**. See the
-TELNET standard for details.
+negotiations. The variables should be in the format \<option=value\>. libcurl
+supports the options **TTYPE**, **XDISPLOC** and **NEW_ENV**. See the TELNET
+standard for details.
 
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-TELNET
 
 # EXAMPLE
 

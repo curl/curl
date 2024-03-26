@@ -1,0 +1,73 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+chunked Transfer-Encoding
+Trailer:
+DELAY
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK swsclose
+Transfer-Encoding: chunked
+
+4
+data
+5
+d474
+
+0
+
+</data>
+<datacheck>
+CURLINFO_CONNECT_TIME_T on 1st header is OK
+CURLINFO_PRETRANSFER_TIME_T on 1st header is OK
+CURLINFO_STARTTRANSFER_TIME_T on 1st header is OK
+CURLINFO_TOTAL_TIME_T on 1st header is OK
+CURLINFO_APPCONNECT_TIME_T on 1st header is OK
+CURLINFO_SPEED_DOWNLOAD_T on 1st header is OK
+HTTP/1.1 200 OK swsclose
+Transfer-Encoding: chunked
+
+datad474
+CURLINFO_CONNECT_TIME_T on done is OK
+CURLINFO_PRETRANSFER_TIME_T on done is OK
+CURLINFO_STARTTRANSFER_TIME_T on done is OK
+CURLINFO_APPCONNECT_TIME_T on done is OK
+CURLINFO_SPEED_DOWNLOAD_T on done is OK
+CURLINFO_TOTAL_TIME_T on done is OK
+</datacheck>
+<servercmd>
+writedelay: 10
+</servercmd>
+</reply>
+# Client-side
+<client>
+<server>
+http
+</server>
+<tool>
+lib%TESTNUMBER
+</tool>
+<name>
+chunked with trailers and pausing the receive
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

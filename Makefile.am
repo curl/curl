@@ -134,7 +134,7 @@ CLEANFILES = $(VC14_LIBVCXPROJ) $(VC14_SRCVCXPROJ) \
 
 bin_SCRIPTS = curl-config
 
-SUBDIRS = lib src
+SUBDIRS = lib docs src scripts
 DIST_SUBDIRS = $(SUBDIRS) tests packages scripts include docs
 
 pkgconfigdir = $(libdir)/pkgconfig
@@ -249,6 +249,7 @@ install-data-hook:
 else
 install-data-hook:
 	(cd include && $(MAKE) install)
+	(cd docs && $(MAKE) install)
 endif
 
 # We extend the standard uninstall with a custom hook:

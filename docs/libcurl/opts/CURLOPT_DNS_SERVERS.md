@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_DNS_SERVERS
 Section: 3
@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_DNS_CACHE_TIMEOUT (3)
   - CURLOPT_DNS_LOCAL_IP4 (3)
   - CURLOPT_DNS_LOCAL_IP6 (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -39,10 +41,6 @@ option.
 # DEFAULT
 
 NULL - use system default
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

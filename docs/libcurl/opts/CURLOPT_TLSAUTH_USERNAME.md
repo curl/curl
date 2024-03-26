@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_TLSAUTH_USERNAME
 Section: 3
@@ -7,11 +7,16 @@ Source: libcurl
 See-also:
   - CURLOPT_TLSAUTH_PASSWORD (3)
   - CURLOPT_TLSAUTH_TYPE (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
+  - GnuTLS
 ---
 
 # NAME
 
-CURLOPT_TLSAUTH_USERNAME - user name to use for TLS authentication
+CURLOPT_TLSAUTH_USERNAME - username to use for TLS authentication
 
 # SYNOPSIS
 
@@ -36,10 +41,6 @@ This feature relies in TLS SRP which does not work with TLS 1.3.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All TLS-based protocols
 
 # EXAMPLE
 

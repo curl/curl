@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_FTP_USE_PRET
 Section: 3
@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_FTP_USE_EPRT (3)
   - CURLOPT_FTP_USE_EPSV (3)
+Protocol:
+  - FTP
 ---
 
 # NAME
@@ -31,10 +33,6 @@ no effect when using the active FTP transfers mode.
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-FTP
 
 # EXAMPLE
 

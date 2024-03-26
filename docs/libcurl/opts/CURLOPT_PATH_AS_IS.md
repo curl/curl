@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_PATH_AS_IS
 Section: 3
@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_STDERR (3)
   - CURLOPT_URL (3)
   - curl_url_set (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -44,10 +46,6 @@ The corresponding flag for the curl_url_set(3) function is called
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

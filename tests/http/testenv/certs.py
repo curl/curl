@@ -24,6 +24,7 @@
 #
 ###########################################################################
 #
+import ipaddress
 import os
 import re
 from datetime import timedelta, datetime
@@ -79,6 +80,7 @@ class CertificateSpec:
                  valid_from: timedelta = timedelta(days=-1),
                  valid_to: timedelta = timedelta(days=89),
                  client: bool = False,
+                 check_valid: bool = True,
                  sub_specs: Optional[List['CertificateSpec']] = None):
         self._name = name
         self.domains = domains
@@ -89,6 +91,7 @@ class CertificateSpec:
         self.valid_from = valid_from
         self.valid_to = valid_to
         self.sub_specs = sub_specs
+        self.check_valid = check_valid
 
     @property
     def name(self) -> Optional[str]:
@@ -202,7 +205,8 @@ class Credentials:
         creds = None
         if self._store:
             creds = self._store.load_credentials(
-                name=spec.name, key_type=key_type, single_file=spec.single_file, issuer=self)
+                name=spec.name, key_type=key_type, single_file=spec.single_file,
+                issuer=self, check_valid=spec.check_valid)
         if creds is None:
             creds = TestCA.create_credentials(spec=spec, issuer=self, key_type=key_type,
                                               valid_from=spec.valid_from, valid_to=spec.valid_to)
@@ -303,13 +307,18 @@ class CertStore:
 
     def load_credentials(self, name: str, key_type=None,
                          single_file: bool = False,
-                         issuer: Optional[Credentials] = None):
+                         issuer: Optional[Credentials] = None,
+                         check_valid: bool = False):
         cert_file = self.get_cert_file(name=name, key_type=key_type)
         pkey_file = cert_file if single_file else self.get_pkey_file(name=name, key_type=key_type)
         comb_file = self.get_combined_file(name=name, key_type=key_type)
         if os.path.isfile(cert_file) and os.path.isfile(pkey_file):
             cert = self.load_pem_cert(cert_file)
             pkey = self.load_pem_pkey(pkey_file)
+            if check_valid and \
+                ((cert.not_valid_after < datetime.now()) or
+                 (cert.not_valid_before > datetime.now())):
+                return None
             creds = Credentials(name=name, cert=cert, pkey=pkey, issuer=issuer)
             creds.set_store(self)
             creds.set_files(cert_file, pkey_file, comb_file)
@@ -426,6 +435,13 @@ class TestCA:
 
     @staticmethod
     def _add_leaf_usages(csr: Any, domains: List[str], issuer: Credentials) -> Any:
+        names = []
+        for name in domains:
+            try:
+                names.append(x509.IPAddress(ipaddress.ip_address(name)))
+            except:
+                names.append(x509.DNSName(name))
+
         return csr.add_extension(
             x509.BasicConstraints(ca=False, path_length=None),
             critical=True,
@@ -435,8 +451,7 @@ class TestCA:
                     x509.SubjectKeyIdentifier).value),
             critical=False
         ).add_extension(
-            x509.SubjectAlternativeName([x509.DNSName(domain) for domain in domains]),
-            critical=True,
+            x509.SubjectAlternativeName(names), critical=True,
         ).add_extension(
             x509.ExtendedKeyUsage([
                 ExtendedKeyUsageOID.SERVER_AUTH,

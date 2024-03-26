@@ -1,9 +1,11 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_HTTP_CONTENT_DECODING
 Section: 3
 Source: libcurl
+Protocol:
+  - HTTP
 See-also:
   - CURLOPT_ACCEPT_ENCODING (3)
   - CURLOPT_DEBUGFUNCTION (3)
@@ -33,10 +35,6 @@ CURLOPT_ACCEPT_ENCODING(3) for that.
 # DEFAULT
 
 1
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

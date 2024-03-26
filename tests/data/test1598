@@ -1,0 +1,59 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+CURLOPT_HTTPTRAILER_FUNCTION
+CURLOPT_HTTPTRAILER_DATA
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.0 200 OK swsclose
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+</data>
+</reply>
+# Client-side
+<client>
+<features>
+http
+</features>
+<server>
+http
+</server>
+<name>
+HTTP POST with trailers at the end
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+<command>
+http://%HOSTIP:%HTTPPORT/bzz/%TESTNUMBER
+</command>
+<stdin>
+more than one byte
+</stdin>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+POST /bzz/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Trailer: my-super-awesome-trailer, my-other-awesome-trailer
+Transfer-Encoding: chunked
+Content-Type: application/x-www-form-urlencoded
+
+11
+xxx=yyy&aaa=bbbbb
+0
+my-super-awesome-trailer: trail1
+my-other-awesome-trailer: trail2
+
+</protocol>
+</verify>
+</testcase>

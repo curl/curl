@@ -220,8 +220,8 @@ close($r);
 #########################################################################
 # parse the curl.1 man page, extract all documented command line options
 # The man page may or may not be rebuilt, so check both possible locations
-open($r, "<", "$buildroot/docs/curl.1") || open($r, "<", "$root/docs/curl.1") ||
-    die "no input file";
+open($r, "<", "$buildroot/docs/cmdline-opts/curl.1") || open($r, "<", "$root/docs/cmdline-opts/curl.1") ||
+    die "failed getting curl.1";
 my @manpage; # store all parsed parameters
 while(<$r>) {
     chomp;

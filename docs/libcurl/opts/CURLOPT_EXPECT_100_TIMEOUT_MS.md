@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_EXPECT_100_TIMEOUT_MS
 Section: 3
@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_HTTPPOST (3)
   - CURLOPT_POST (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -33,10 +35,6 @@ sent anyway.
 # DEFAULT
 
 1000 milliseconds
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

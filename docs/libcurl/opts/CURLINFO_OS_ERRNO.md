@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLINFO_OS_ERRNO
 Section: 3
@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -26,10 +28,6 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_OS_ERRNO, long *errnop);
 Pass a pointer to a long to receive the errno variable from a connect failure.
 Note that the value is only set on failure, it is not reset upon a successful
 operation. The number is OS and system specific.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

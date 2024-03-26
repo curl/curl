@@ -393,20 +393,22 @@ class CurlClient:
             return os.makedirs(path)
 
     def get_proxy_args(self, proto: str = 'http/1.1',
-                       proxys: bool = True, tunnel: bool = False):
+                       proxys: bool = True, tunnel: bool = False,
+                       use_ip: bool = False):
+        proxy_name = '127.0.0.1' if use_ip else self.env.proxy_domain
         if proxys:
             pport = self.env.pts_port(proto) if tunnel else self.env.proxys_port
             xargs = [
-                '--proxy', f'https://{self.env.proxy_domain}:{pport}/',
-                '--resolve', f'{self.env.proxy_domain}:{pport}:127.0.0.1',
+                '--proxy', f'https://{proxy_name}:{pport}/',
+                '--resolve', f'{proxy_name}:{pport}:127.0.0.1',
                 '--proxy-cacert', self.env.ca.cert_file,
             ]
             if proto == 'h2':
                 xargs.append('--proxy-http2')
         else:
             xargs = [
-                '--proxy', f'http://{self.env.proxy_domain}:{self.env.proxy_port}/',
-                '--resolve', f'{self.env.proxy_domain}:{self.env.proxy_port}:127.0.0.1',
+                '--proxy', f'http://{proxy_name}:{self.env.proxy_port}/',
+                '--resolve', f'{proxy_name}:{self.env.proxy_port}:127.0.0.1',
             ]
         if tunnel:
             xargs.append('--proxytunnel')

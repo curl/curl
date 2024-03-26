@@ -1,14 +1,24 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_CAINFO_BLOB
 Section: 3
 Source: libcurl
+Protocol:
+  - TLS
 See-also:
   - CURLOPT_CAINFO (3)
   - CURLOPT_CAPATH (3)
   - CURLOPT_SSL_VERIFYHOST (3)
   - CURLOPT_SSL_VERIFYPEER (3)
+TLS-backend:
+  - BearSSL
+  - OpenSSL
+  - mbedTLS
+  - rustls
+  - wolfSSL
+  - Secure Transport
+  - Schannel
 ---
 
 # NAME
@@ -42,10 +52,6 @@ This option overrides CURLOPT_CAINFO(3).
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
 
 # EXAMPLE
 

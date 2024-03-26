@@ -16,7 +16,7 @@ Example:
 
 # `--socks5`
 
-Use the specified SOCKS5 proxy - but resolve the host name locally. If the
+Use the specified SOCKS5 proxy - but resolve the hostname locally. If the
 port number is not specified, it is assumed at port 1080.
 
 To specify proxy on a unix domain socket, use localhost for host, e.g.

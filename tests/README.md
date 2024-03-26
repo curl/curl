@@ -52,7 +52,6 @@ SPDX-License-Identifier: curl
   - stunnel (for HTTPS and FTPS tests)
   - OpenSSH or SunSSH (for SCP and SFTP tests)
   - nghttpx (for HTTP/2 and HTTP/3 tests)
-  - nroff (for --manual tests)
   - An available `en_US.UTF-8` locale
 
 ### Installation of python-impacket

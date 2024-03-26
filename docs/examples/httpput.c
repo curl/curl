@@ -82,7 +82,7 @@ int main(int argc, char **argv)
      an example! */
   hd_src = fopen(file, "rb");
 
-  /* In windows, this will init the winsock stuff */
+  /* In windows, this inits the winsock stuff */
   curl_global_init(CURL_GLOBAL_ALL);
 
   /* get a curl handle */

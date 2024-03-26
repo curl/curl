@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_FNMATCH_DATA
 Section: 3
@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_FNMATCH_FUNCTION (3)
   - CURLOPT_WILDCARDMATCH (3)
+Protocol:
+  - FTP
 ---
 
 # NAME
@@ -30,10 +32,6 @@ the CURLOPT_FNMATCH_FUNCTION(3).
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-FTP
 
 # EXAMPLE
 

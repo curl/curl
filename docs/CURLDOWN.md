@@ -62,18 +62,41 @@ the nroff format does not carry a distinction.
 Each curldown starts with a header with meta-data:
 
     ---
-    c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+    c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
     SPDX-License-Identifier: curl
     Title: CURLOPT_AWS_SIGV4
     Section: 3
     Source: libcurl
+    Protocol:
+      - HTTP
     See-also:
       - CURLOPT_HEADEROPT (3)
       - CURLOPT_HTTPAUTH (3)
+    TLS-backend:
+      - [name]
     ---
 
 All curldown files *must* have all the headers present and at least one
 `See-also:` entry specified.
+
+If the man page is for section 3 (library related). The `Protocol` list must
+contain at least one protocol, which can be `*` if the option is virtually for
+everything. If `*` is used, it must be the only listed protocol. Recognized
+protocols are either URL schemes (in uppercase), `TLS` or `TCP`.
+
+If the `Protocol` list contains `TLS`, then there must also be a `TLS-backend`
+list, specifying `All` or a list of what TLS backends that work with this
+option. The available TLS backends are:
+
+- `BearSSL`
+- `GnuTLS`
+- `mbedTLS`
+- `OpenSSL` (also covers BoringSSL, libressl, quictls, AWS-LC and AmiSSL)
+- `rustls`
+- `Schannel`
+- `Secure Transport`
+- `wolfSSL`
+- `All`: all TLS backends
 
 Following the header in the file, is the manual page using markdown-like
 syntax:
@@ -106,20 +129,25 @@ Write italics like:
     This is *italics*.
 
 Due to how man pages do not support backticks especially formatted, such
-occurrences in the source will instead just use italics in the generated
+occurrences in the source are instead just using italics in the generated
 output:
 
     This `word` appears in italics.
 
-When generating the nroff output, the tooling will remove superfluous newlines,
+When generating the nroff output, the tooling removes superfluous newlines,
 meaning they can be used freely in the source file to make the text more
 readable.
 
+To make sure curldown documents render correctly as markdown, all literal
+occurrences of `<` or `>` need to be escaped by a leading backslash.
+
+## symbols
+
 All mentioned curl symbols that have their own man pages, like
-`curl_easy_perform(3)` will automatically be rendered using italics in the
-output without having to enclose it with asterisks. This helps ensuring that
-they get converted to links properly later in the HTML version on the website,
-as converted with `roffit`. This makes the curldown text easier to read even
-when mentioning many curl symbols.
+`curl_easy_perform(3)` are automatically rendered using italics in the output
+without having to enclose it with asterisks. This helps ensuring that they get
+converted to links properly later in the HTML version on the website, as
+converted with `roffit`. This makes the curldown text easier to read even when
+mentioning many curl symbols.
 
 This auto-linking works for patterns matching `(lib|)curl[^ ]*(3)`.

@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_PROXYHEADER
 Section: 3
@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_HEADEROPT (3)
   - CURLOPT_HTTPHEADER (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -41,10 +43,6 @@ Pass a NULL to this to reset back to no custom headers.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

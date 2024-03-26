@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_XFERINFOFUNCTION
 Section: 3
@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_NOPROGRESS (3)
   - CURLOPT_XFERINFODATA (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -70,10 +72,6 @@ get called.
 
 By default, libcurl has an internal progress meter. That is rarely wanted by
 users.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

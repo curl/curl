@@ -24,4 +24,4 @@ Remaining limitations:
  - Only QoS level 0 is implemented for publish
  - No way to set retain flag for publish
  - No TLS (mqtts) support
- - Naive EAGAIN handling will not handle split messages
+ - Naive EAGAIN handling does not handle split messages

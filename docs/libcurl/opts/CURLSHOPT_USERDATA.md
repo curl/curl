@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLSHOPT_USERDATA
 Section: 3
@@ -9,6 +9,8 @@ See-also:
   - curl_share_cleanup (3)
   - curl_share_init (3)
   - curl_share_setopt (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -28,10 +30,6 @@ CURLSHcode curl_share_setopt(CURLSH *share, CURLSHOPT_USERDATA, void *clientp);
 The *clientp* parameter is held verbatim by libcurl and is passed on as
 the *clientp* argument to the callbacks set with
 CURLSHOPT_LOCKFUNC(3) and CURLSHOPT_UNLOCKFUNC(3).
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

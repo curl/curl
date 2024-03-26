@@ -1,11 +1,13 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: curl_easy_getinfo
 Section: 3
 Source: libcurl
 See-also:
   - curl_easy_setopt (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -119,6 +121,10 @@ See CURLINFO_PRETRANSFER_TIME_T(3)
 
 Time during which this transfer was held in a waiting queue.
 See CURLINFO_QUEUE_TIME_T(3)
+
+## CURLINFO_USED_PROXY
+
+Whether the proxy was used (Added in 8.7.0). See CURLINFO_USED_PROXY(3)
 
 ## CURLINFO_STARTTRANSFER_TIME
 
@@ -388,59 +394,57 @@ See CURLINFO_XFER_ID(3)
 
 An overview of the time values available from curl_easy_getinfo(3)
 
-~~~
-curl_easy_perform()
-    |
-    |--QUEUE_TIME
-    |--|--NAMELOOKUP
-    |--|--|--CONNECT
-    |--|--|--|--APPCONNECT
-    |--|--|--|--|--PRETRANSFER
-    |--|--|--|--|--|--STARTTRANSFER
-    |--|--|--|--|--|--|--TOTAL
-    |--|--|--|--|--|--|--REDIRECT
-~~~
+    curl_easy_perform()
+        |
+        |--QUEUE
+        |--|--NAMELOOKUP
+        |--|--|--CONNECT
+        |--|--|--|--APPCONNECT
+        |--|--|--|--|--PRETRANSFER
+        |--|--|--|--|--|--STARTTRANSFER
+        |--|--|--|--|--|--|--TOTAL
+        |--|--|--|--|--|--|--REDIRECT
 
-## QUEUE_TIME
+## CURLINFO_QUEUE_TIME
 
 CURLINFO_QUEUE_TIME_T(3). The time during which the transfer was held in a
 waiting queue before it could start for real. (Added in 8.6.0)
 
-## NAMELOOKUP
+## CURLINFO_NAMELOOKUP_TIME
 
 CURLINFO_NAMELOOKUP_TIME(3) and CURLINFO_NAMELOOKUP_TIME_T(3). The time it
 took from the start until the name resolving was completed.
 
-## CONNECT
+## CURLINFO_CONNECT_TIME
 
 CURLINFO_CONNECT_TIME(3) and CURLINFO_CONNECT_TIME_T(3). The time it took from
 the start until the connect to the remote host (or proxy) was completed.
 
-## APPCONNECT
+## CURLINFO_APPCONNECT_TIME
 
 CURLINFO_APPCONNECT_TIME(3) and CURLINFO_APPCONNECT_TIME_T(3). The time it
 took from the start until the SSL connect/handshake with the remote host was
 completed. (Added in 7.19.0) The latter is the integer version (measuring
 microseconds). (Added in 7.60.0)
 
-## PRETRANSFER
+## CURLINFO_PRETRANSFER_TIME
 
 CURLINFO_PRETRANSFER_TIME(3) and CURLINFO_PRETRANSFER_TIME_T(3). The time it
 took from the start until the file transfer is just about to begin. This
 includes all pre-transfer commands and negotiations that are specific to the
 particular protocol(s) involved.
 
-## STARTTRANSFER
+## CURLINFO_STARTTRANSFER_TIME
 
 CURLINFO_STARTTRANSFER_TIME(3) and CURLINFO_STARTTRANSFER_TIME_T(3). The time
 it took from the start until the first byte is received by libcurl.
 
-## TOTAL
+## CURLINFO_TOTAL_TIME
 
 CURLINFO_TOTAL_TIME(3) and CURLINFO_TOTAL_TIME_T(3). Total time
 of the previous request.
 
-## REDIRECT
+## CURLINFO_REDIRECT_TIME
 
 CURLINFO_REDIRECT_TIME(3) and CURLINFO_REDIRECT_TIME_T(3). The time it took
 for all redirection steps include name lookup, connect, pretransfer and

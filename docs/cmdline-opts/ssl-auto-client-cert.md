@@ -15,7 +15,7 @@ Example:
 
 # `--ssl-auto-client-cert`
 
-(Schannel) Tell libcurl to automatically locate and use a client certificate
-for authentication, when requested by the server. Since the server can request
-any certificate that supports client authentication in the OS certificate
-store it could be a privacy violation and unexpected.
+(Schannel) Automatically locate and use a client certificate for
+authentication, when requested by the server. Since the server can request any
+certificate that supports client authentication in the OS certificate store it
+could be a privacy violation and unexpected.

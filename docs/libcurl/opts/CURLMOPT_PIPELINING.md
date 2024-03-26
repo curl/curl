@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLMOPT_PIPELINING
 Section: 3
@@ -11,6 +11,8 @@ See-also:
   - CURLMOPT_MAX_HOST_CONNECTIONS (3)
   - CURLMOPT_MAX_PIPELINE_LENGTH (3)
   - CURLMOPT_PIPELINING_SITE_BL (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -51,10 +53,6 @@ existing connection if possible. This requires HTTP/2 or HTTP/3.
 Since 7.62.0, **CURLPIPE_MULTIPLEX** is enabled by default.
 
 Before that, default was **CURLPIPE_NOTHING**.
-
-# PROTOCOLS
-
-HTTP(S)
 
 # EXAMPLE
 

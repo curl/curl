@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLINFO_HTTP_VERSION
 Section: 3
@@ -8,6 +8,8 @@ See-also:
   - CURLINFO_RESPONSE_CODE (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -28,10 +30,6 @@ Pass a pointer to a long to receive the version used in the last http
 connection done using this handle. The returned value is
 CURL_HTTP_VERSION_1_0, CURL_HTTP_VERSION_1_1, CURL_HTTP_VERSION_2_0,
 CURL_HTTP_VERSION_3 or 0 if the version cannot be determined.
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

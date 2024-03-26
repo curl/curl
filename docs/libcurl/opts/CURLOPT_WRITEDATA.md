@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_WRITEDATA
 Section: 3
@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_HEADERDATA (3)
   - CURLOPT_READDATA (3)
   - CURLOPT_WRITEFUNCTION (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -40,10 +42,6 @@ crashes.
 # DEFAULT
 
 By default, this is a FILE * to stdout.
-
-# PROTOCOLS
-
-Used for all protocols.
 
 # EXAMPLE
 

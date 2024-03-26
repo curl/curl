@@ -67,7 +67,7 @@ void Curl_cf_def_get_host(struct Curl_cfilter *cf, struct Curl_easy *data,
   else {
     *phost = cf->conn->host.name;
     *pdisplay_host = cf->conn->host.dispname;
-    *pport = cf->conn->port;
+    *pport = cf->conn->primary.remote_port;
   }
 }
 
@@ -168,38 +168,46 @@ void Curl_conn_close(struct Curl_easy *data, int index)
   }
 }
 
-ssize_t Curl_conn_recv(struct Curl_easy *data, int num, char *buf,
-                       size_t len, CURLcode *code)
+ssize_t Curl_cf_recv(struct Curl_easy *data, int num, char *buf,
+                     size_t len, CURLcode *code)
 {
   struct Curl_cfilter *cf;
 
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
+  *code = CURLE_OK;
   cf = data->conn->cfilter[num];
   while(cf && !cf->connected) {
     cf = cf->next;
   }
   if(cf) {
-    return cf->cft->do_recv(cf, data, buf, len, code);
+    ssize_t nread = cf->cft->do_recv(cf, data, buf, len, code);
+    DEBUGASSERT(nread >= 0 || *code);
+    DEBUGASSERT(nread < 0 || !*code);
+    return nread;
   }
   failf(data, "recv: no filter connected");
   *code = CURLE_FAILED_INIT;
   return -1;
 }
 
-ssize_t Curl_conn_send(struct Curl_easy *data, int num,
-                       const void *mem, size_t len, CURLcode *code)
+ssize_t Curl_cf_send(struct Curl_easy *data, int num,
+                     const void *mem, size_t len, CURLcode *code)
 {
   struct Curl_cfilter *cf;
 
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
+  *code = CURLE_OK;
   cf = data->conn->cfilter[num];
   while(cf && !cf->connected) {
     cf = cf->next;
   }
   if(cf) {
-    return cf->cft->do_send(cf, data, mem, len, code);
+    ssize_t nwritten = cf->cft->do_send(cf, data, mem, len, code);
+    DEBUGASSERT(nwritten >= 0 || *code);
+    DEBUGASSERT(nwritten < 0 || !*code || !len);
+    return nwritten;
   }
   failf(data, "send: no filter connected");
   DEBUGASSERT(0);
@@ -662,6 +670,58 @@ size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
   return (result || n <= 0)? 1 : (size_t)n;
 }
 
+int Curl_conn_sockindex(struct Curl_easy *data, curl_socket_t sockfd)
+{
+  if(data && data->conn &&
+     sockfd != CURL_SOCKET_BAD && sockfd == data->conn->sock[SECONDARYSOCKET])
+    return SECONDARYSOCKET;
+  return FIRSTSOCKET;
+}
+
+CURLcode Curl_conn_recv(struct Curl_easy *data, int sockindex,
+                        char *buf, size_t blen, ssize_t *n)
+{
+  CURLcode result = CURLE_OK;
+  ssize_t nread;
+
+  DEBUGASSERT(data->conn);
+  nread = data->conn->recv[sockindex](data, sockindex, buf, blen, &result);
+  DEBUGASSERT(nread >= 0 || result);
+  DEBUGASSERT(nread < 0 || !result);
+  *n = (nread >= 0)? (size_t)nread : 0;
+  return result;
+}
+
+CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
+                        const void *buf, size_t blen,
+                        size_t *pnwritten)
+{
+  ssize_t nwritten;
+  CURLcode result = CURLE_OK;
+  struct connectdata *conn;
+
+  DEBUGASSERT(sockindex >= 0 && sockindex < 2);
+  DEBUGASSERT(pnwritten);
+  DEBUGASSERT(data);
+  DEBUGASSERT(data->conn);
+  conn = data->conn;
+#ifdef CURLDEBUG
+  {
+    /* Allow debug builds to override this logic to force short sends
+    */
+    char *p = getenv("CURL_SMALLSENDS");
+    if(p) {
+      size_t altsize = (size_t)strtoul(p, NULL, 10);
+      if(altsize)
+        blen = CURLMIN(blen, altsize);
+    }
+  }
+#endif
+  nwritten = conn->send[sockindex](data, sockindex, buf, blen, &result);
+  DEBUGASSERT((nwritten >= 0) || result);
+  *pnwritten = (nwritten < 0)? 0 : (size_t)nwritten;
+  return result;
+}
 
 void Curl_pollset_reset(struct Curl_easy *data,
                         struct easy_pollset *ps)

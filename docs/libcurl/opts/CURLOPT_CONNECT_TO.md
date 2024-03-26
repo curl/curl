@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_CONNECT_TO
 Section: 3
@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_HTTPPROXYTUNNEL (3)
   - CURLOPT_RESOLVE (3)
   - CURLOPT_URL (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -76,10 +78,6 @@ a transfer before you call curl_slist_free_all(3) on the list.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

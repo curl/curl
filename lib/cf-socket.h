@@ -33,6 +33,7 @@ struct Curl_cfilter;
 struct Curl_easy;
 struct connectdata;
 struct Curl_sockaddr_ex;
+struct ip_quadruple;
 
 /*
  * The Curl_sockaddr_ex structure is basically libcurl's external API
@@ -153,18 +154,14 @@ CURLcode Curl_conn_tcp_accepted_set(struct Curl_easy *data,
  * The filter owns all returned values.
  * @param psock             pointer to hold socket descriptor or NULL
  * @param paddr             pointer to hold addr reference or NULL
- * @param pr_ip_str         pointer to hold remote addr as string or NULL
- * @param pr_port           pointer to hold remote port number or NULL
- * @param pl_ip_str         pointer to hold local addr as string or NULL
- * @param pl_port           pointer to hold local port number or NULL
+ * @param pip               pointer to get IP quadruple or NULL
  * Returns error if the filter is of invalid type.
  */
 CURLcode Curl_cf_socket_peek(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
                              curl_socket_t *psock,
                              const struct Curl_sockaddr_ex **paddr,
-                             const char **pr_ip_str, int *pr_port,
-                             const char **pl_ip_str, int *pl_port);
+                             struct ip_quadruple *pip);
 
 extern struct Curl_cftype Curl_cft_tcp;
 extern struct Curl_cftype Curl_cft_udp;

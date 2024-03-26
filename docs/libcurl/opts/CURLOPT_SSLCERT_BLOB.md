@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_SSLCERT_BLOB
 Section: 3
@@ -8,6 +8,13 @@ See-also:
   - CURLOPT_KEYPASSWD (3)
   - CURLOPT_SSLCERTTYPE (3)
   - CURLOPT_SSLKEY (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
+  - Secure Transport
+  - Schannel
+  - mbedTLS
 ---
 
 # NAME
@@ -41,10 +48,6 @@ expects a filename as input.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
 
 # EXAMPLE
 

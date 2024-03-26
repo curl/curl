@@ -28,9 +28,9 @@ is specified with one or two dashes, there can be no colon or equals character
 between the option and its parameter.
 
 If the parameter contains whitespace or starts with a colon (:) or equals sign
-(=), it must be specified enclosed within double quotes ("). Within double
-quotes the following escape sequences are available: \\, \", \t, \n, \r and
-\v. A backslash preceding any other letter is ignored.
+(=), it must be specified enclosed within double quotes ("like this"). Within
+double quotes the following escape sequences are available: \\, \", \t, \n, \r
+and \v. A backslash preceding any other letter is ignored.
 
 If the first non-blank column of a config line is a '#' character, that line
 is treated as a comment.
@@ -38,7 +38,8 @@ is treated as a comment.
 Only write one option per physical line in the config file. A single line is
 required to be no more than 10 megabytes (since 8.2.0).
 
-Specify the filename to --config as '-' to make curl read the file from stdin.
+Specify the filename to --config as minus "-" to make curl read the file from
+stdin.
 
 Note that to be able to specify a URL in the config file, you need to specify
 it using the --url option, and not by simply writing the URL on its own
@@ -77,7 +78,7 @@ config file is checked for in the following places in this order:
 7) Non-Windows: use getpwuid to find the home directory
 
 8) On Windows, if it finds no *.curlrc* file in the sequence described above, it
-checks for one in the same dir the curl executable is placed.
+checks for one in the same directory the curl executable is placed.
 
 On Windows two filenames are checked per location: *.curlrc* and *_curlrc*,
 preferring the former. Older versions on Windows checked for *_curlrc* only.

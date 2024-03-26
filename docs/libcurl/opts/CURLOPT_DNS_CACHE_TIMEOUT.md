@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_DNS_CACHE_TIMEOUT
 Section: 3
@@ -10,6 +10,8 @@ See-also:
   - CURLOPT_DNS_USE_GLOBAL_CACHE (3)
   - CURLOPT_MAXAGE_CONN (3)
   - CURLOPT_RESOLVE (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -33,8 +35,7 @@ default, libcurl caches this info for 60 seconds.
 
 We recommend users not to tamper with this option unless strictly necessary.
 If you do, be careful of using large values that can make the cache size grow
-significantly if many different host names are used within that timeout
-period.
+significantly if many different hostnames are used within that timeout period.
 
 The name resolve functions of various libc implementations do not re-read name
 server information unless explicitly told so (for example, by calling
@@ -52,10 +53,6 @@ Since version 8.1.0, libcurl prunes entries from the DNS cache if it exceeds
 # DEFAULT
 
 60
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

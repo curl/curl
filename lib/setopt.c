@@ -155,6 +155,12 @@ static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp)
 
 static CURLcode protocol2num(const char *str, curl_prot_t *val)
 {
+  /*
+   * We are asked to cherry-pick protocols, so play it safe and disallow all
+   * protocols to start with, and re-add the wanted ones back in.
+   */
+  *val = 0;
+
   if(!str)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
@@ -162,8 +168,6 @@ static CURLcode protocol2num(const char *str, curl_prot_t *val)
     *val = ~(curl_prot_t) 0;
     return CURLE_OK;
   }
-
-  *val = 0;
 
   do {
     const char *token = str;
@@ -2210,9 +2214,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * The application kindly asks for a differently sized receive buffer.
      * If it seems reasonable, we'll use it.
      */
-    if(data->state.buffer)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-
     arg = va_arg(param, long);
 
     if(arg > READBUFFER_MAX)
@@ -2238,7 +2239,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       arg = UPLOADBUFFER_MIN;
 
     data->set.upload_buffer_size = (unsigned int)arg;
-    Curl_safefree(data->state.ulbuf); /* force a realloc next opportunity */
     break;
 
   case CURLOPT_NOSIGNAL:
@@ -2657,22 +2657,18 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
 
   case CURLOPT_PROTOCOLS_STR: {
-    curl_prot_t prot;
     argptr = va_arg(param, char *);
-    result = protocol2num(argptr, &prot);
+    result = protocol2num(argptr, &data->set.allowed_protocols);
     if(result)
       return result;
-    data->set.allowed_protocols = prot;
     break;
   }
 
   case CURLOPT_REDIR_PROTOCOLS_STR: {
-    curl_prot_t prot;
     argptr = va_arg(param, char *);
-    result = protocol2num(argptr, &prot);
+    result = protocol2num(argptr, &data->set.redir_protocols);
     if(result)
       return result;
-    data->set.redir_protocols = prot;
     break;
   }
 
@@ -2867,13 +2863,13 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 #endif
   case CURLOPT_TLSAUTH_TYPE:
     argptr = va_arg(param, char *);
-    if(argptr && !strncasecompare(argptr, "SRP", strlen("SRP")))
+    if(argptr && !strcasecompare(argptr, "SRP"))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     break;
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_TLSAUTH_TYPE:
     argptr = va_arg(param, char *);
-    if(argptr || !strncasecompare(argptr, "SRP", strlen("SRP")))
+    if(argptr && !strcasecompare(argptr, "SRP"))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     break;
 #endif

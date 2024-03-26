@@ -42,10 +42,10 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_REQUEST_TARGET, "*");
 
     /* if this operation fails, allow risking a memory leak and do quick exit
-       from libcurl as this will exit() anyway */
+       from libcurl as this exits anyway */
     curl_easy_setopt(curl, CURLOPT_QUICK_EXIT, 1L);
 
-    /* Perform the request, res will get the return code */
+    /* Perform the request, res gets the return code */
     res = curl_easy_perform(curl);
     /* Check for errors */
     if(res != CURLE_OK)

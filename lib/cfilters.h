@@ -402,11 +402,11 @@ void Curl_conn_adjust_pollset(struct Curl_easy *data,
 /**
  * Receive data through the filter chain at `sockindex` for connection
  * `data->conn`. Copy at most `len` bytes into `buf`. Return the
- * actuel number of bytes copied or a negative value on error.
+ * actual number of bytes copied or a negative value on error.
  * The error code is placed into `*code`.
  */
-ssize_t Curl_conn_recv(struct Curl_easy *data, int sockindex, char *buf,
-                       size_t len, CURLcode *code);
+ssize_t Curl_cf_recv(struct Curl_easy *data, int sockindex, char *buf,
+                     size_t len, CURLcode *code);
 
 /**
  * Send `len` bytes of data from `buf` through the filter chain `sockindex`
@@ -414,8 +414,8 @@ ssize_t Curl_conn_recv(struct Curl_easy *data, int sockindex, char *buf,
  * or a negative value on error.
  * The error code is placed into `*code`.
  */
-ssize_t Curl_conn_send(struct Curl_easy *data, int sockindex,
-                       const void *buf, size_t len, CURLcode *code);
+ssize_t Curl_cf_send(struct Curl_easy *data, int sockindex,
+                     const void *buf, size_t len, CURLcode *code);
 
 /**
  * The easy handle `data` is being attached to `conn`. This does
@@ -495,6 +495,30 @@ void Curl_conn_get_host(struct Curl_easy *data, int sockindex,
 size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
                                     struct connectdata *conn,
                                     int sockindex);
+
+
+/**
+ * Get the index of the given socket in the connection's sockets.
+ * Useful in calling `Curl_conn_send()/Curl_conn_recv()` with the
+ * correct socket index.
+ */
+int Curl_conn_sockindex(struct Curl_easy *data, curl_socket_t sockfd);
+
+/*
+ * Receive data on the connection, using FIRSTSOCKET/SECONDARYSOCKET.
+ * Will return CURLE_AGAIN iff blocked on receiving.
+ */
+CURLcode Curl_conn_recv(struct Curl_easy *data, int sockindex,
+                        char *buf, size_t buffersize,
+                        ssize_t *pnread);
+
+/*
+ * Send data on the connection, using FIRSTSOCKET/SECONDARYSOCKET.
+ * Will return CURLE_AGAIN iff blocked on sending.
+ */
+CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
+                        const void *buf, size_t blen,
+                        size_t *pnwritten);
 
 
 void Curl_pollset_reset(struct Curl_easy *data,

@@ -209,7 +209,6 @@ static CURLcode altsvc_add(struct altsvcinfo *asi, char *line)
 static CURLcode altsvc_load(struct altsvcinfo *asi, const char *file)
 {
   CURLcode result = CURLE_OK;
-  char *line = NULL;
   FILE *fp;
 
   /* we need a private copy of the file name so that the altsvc cache file
@@ -221,11 +220,10 @@ static CURLcode altsvc_load(struct altsvcinfo *asi, const char *file)
 
   fp = fopen(file, FOPEN_READTEXT);
   if(fp) {
-    line = malloc(MAX_ALTSVC_LINE);
-    if(!line)
-      goto fail;
-    while(Curl_get_line(line, MAX_ALTSVC_LINE, fp)) {
-      char *lineptr = line;
+    struct dynbuf buf;
+    Curl_dyn_init(&buf, MAX_ALTSVC_LINE);
+    while(Curl_get_line(&buf, fp)) {
+      char *lineptr = Curl_dyn_ptr(&buf);
       while(*lineptr && ISBLANK(*lineptr))
         lineptr++;
       if(*lineptr == '#')
@@ -234,16 +232,10 @@ static CURLcode altsvc_load(struct altsvcinfo *asi, const char *file)
 
       altsvc_add(asi, lineptr);
     }
-    free(line); /* free the line buffer */
+    Curl_dyn_free(&buf); /* free the line buffer */
     fclose(fp);
   }
   return result;
-
-fail:
-  Curl_safefree(asi->filename);
-  free(line);
-  fclose(fp);
-  return CURLE_OUT_OF_MEMORY;
 }
 
 /*

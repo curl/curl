@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_HEADERDATA
 Section: 3
@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_HEADERFUNCTION (3)
   - CURLOPT_WRITEFUNCTION (3)
   - curl_easy_header (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -40,10 +42,6 @@ this option or you might experience crashes.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

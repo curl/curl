@@ -86,10 +86,21 @@ void Curl_failf(struct Curl_easy *data,
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 /* informational messages enabled */
 
-#define Curl_trc_is_verbose(data)    ((data) && (data)->set.verbose)
+struct curl_trc_feat {
+  const char *name;
+  int log_level;
+};
+
+#define Curl_trc_is_verbose(data) \
+            ((data) && (data)->set.verbose && \
+            (!(data)->state.feat || \
+             ((data)->state.feat->log_level >= CURL_LOG_LVL_INFO)))
 #define Curl_trc_cf_is_verbose(cf, data) \
-                            ((data) && (data)->set.verbose && \
-                            (cf) && (cf)->cft->log_level >= CURL_LOG_LVL_INFO)
+            (Curl_trc_is_verbose(data) && \
+            (cf) && (cf)->cft->log_level >= CURL_LOG_LVL_INFO)
+#define Curl_trc_ft_is_verbose(data, ft) \
+                            (Curl_trc_is_verbose(data) && \
+                            (ft)->log_level >= CURL_LOG_LVL_INFO)
 
 /**
  * Output an informational message when transfer's verbose logging is enabled.
@@ -109,6 +120,7 @@ void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
 
 #define Curl_trc_is_verbose(d)        ((void)(d), FALSE)
 #define Curl_trc_cf_is_verbose(x,y)   ((void)(x), (void)(y), FALSE)
+#define Curl_trc_ft_is_verbose(x,y)   ((void)(x), (void)(y), FALSE)
 
 static void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
 {

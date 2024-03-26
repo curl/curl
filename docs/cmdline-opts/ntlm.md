@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: ntlm
-Help: Use HTTP NTLM authentication
+Help: HTTP NTLM authentication
 Mutexed: basic negotiate digest anyauth
 Protocols: HTTP
 Requires: TLS
@@ -17,7 +17,7 @@ Example:
 
 # `--ntlm`
 
-Enables NTLM authentication. The NTLM authentication method was designed by
+Use NTLM authentication. The NTLM authentication method was designed by
 Microsoft and is used by IIS web servers. It is a proprietary protocol,
 reverse-engineered by clever people and implemented in curl based on their
 efforts. This kind of behavior should not be endorsed, you should encourage

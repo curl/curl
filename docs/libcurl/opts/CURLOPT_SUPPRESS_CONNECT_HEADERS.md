@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_SUPPRESS_CONNECT_HEADERS
 Section: 3
@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_HEADER (3)
   - CURLOPT_HTTPPROXYTUNNEL (3)
   - CURLOPT_PROXY (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -67,10 +69,6 @@ Content-Type: application/json
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

@@ -1,9 +1,11 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_HTTP_VERSION
 Section: 3
 Source: libcurl
+Protocol:
+  - HTTP
 See-also:
   - CURLOPT_ALTSVC (3)
   - CURLOPT_HTTP09_ALLOWED (3)
@@ -86,10 +88,6 @@ server does not support HTTP/3.
 Since curl 7.62.0: CURL_HTTP_VERSION_2TLS
 
 Before that: CURL_HTTP_VERSION_1_1
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

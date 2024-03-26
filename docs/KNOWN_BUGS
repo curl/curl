@@ -16,12 +16,12 @@ problems may have been fixed or changed somewhat since this was written.
  1.5 Expect-100 meets 417
 
  2. TLS
+ 2.1 IMAPS connection fails with rustls error
  2.3 Unable to use PKCS12 certificate with Secure Transport
  2.4 Secure Transport will not import PKCS#12 client certificates without a password
  2.5 Client cert handling with Issuer DN differs between backends
  2.7 Client cert (MTLS) issues with Schannel
  2.11 Schannel TLS 1.2 handshake bug in old Windows versions
- 2.12 FTPS with Schannel times out file list operation
  2.13 CURLOPT_CERTINFO results in CURLE_OUT_OF_MEMORY with Schannel
 
  3. Email protocols
@@ -30,6 +30,7 @@ problems may have been fixed or changed somewhat since this was written.
  3.3 POP3 expects "CRLF.CRLF" eob for some single-line responses
  3.4 AUTH PLAIN for SMTP is not working on all servers
  3.5 APOP authentication fails on POP3
+ 3.6 POP3 issue when reading small chunks
 
  4. Command line
 
@@ -44,6 +45,7 @@ problems may have been fixed or changed somewhat since this was written.
  5.12 flaky CI builds
  5.13 long paths are not fully supported on Windows
  5.14 Windows Unicode builds use homedir in current locale
+ 5.15 Unicode on Windows
 
  6. Authentication
  6.1 NTLM authentication and unicode
@@ -59,8 +61,11 @@ problems may have been fixed or changed somewhat since this was written.
  6.13 Negotiate against Hadoop HDFS
 
  7. FTP
+ 7.1 FTP upload fails if remembered dir is deleted
+ 7.2 Implicit FTPS upload timeout
  7.3 FTP with NOBODY and FAILONERROR
  7.4 FTP with ACCT
+ 7.5 FTPS upload, FileZilla, GnuTLS and close_notify
  7.11 FTPS upload data loss with TLS 1.3
  7.12 FTPS directory listing hangs on Windows with Schannel
 
@@ -94,7 +99,6 @@ problems may have been fixed or changed somewhat since this was written.
  15.3 unusable tool_hugehelp.c with MinGW
  15.6 uses -lpthread instead of Threads::Threads
  15.7 generated .pc file contains strange entries
- 15.8 libcurl.pc uses absolute library paths
  15.11 ExternalProject_Add does not set CURL_CA_PATH
  15.13 CMake build with MIT Kerberos does not work
 
@@ -103,6 +107,7 @@ problems may have been fixed or changed somewhat since this was written.
  16.6 aws-sigv4 does not behave well with AWS VPC Lattice
 
  17. HTTP/2
+ 17.1 HTTP/2 prior knowledge over proxy
  17.2 HTTP/2 frames while in the connection pool kill reuse
  17.3 ENHANCE_YOUR_CALM causes infinite retries
 
@@ -130,6 +135,10 @@ problems may have been fixed or changed somewhat since this was written.
  https://curl.se/mail/archive-2008-02/0043.html
 
 2. TLS
+
+2.1 IMAPS connection fails with rustls error
+
+ https://github.com/curl/curl/issues/10457
 
 2.3 Unable to use PKCS12 certificate with Secure Transport
 
@@ -160,12 +169,6 @@ problems may have been fixed or changed somewhat since this was written.
  fail, resulting in error SEC_E_BUFFER_TOO_SMALL or SEC_E_MESSAGE_ALTERED.
 
  https://github.com/curl/curl/issues/5488
-
-2.12 FTPS with Schannel times out file list operation
-
- "Instead of the command completing, it just sits there until the timeout
- expires." - the same command line seems to work with other TLS backends and
- other operating systems. See https://github.com/curl/curl/issues/5284.
 
 2.13 CURLOPT_CERTINFO results in CURLE_OUT_OF_MEMORY with Schannel
 
@@ -201,6 +204,12 @@ problems may have been fixed or changed somewhat since this was written.
 3.5 APOP authentication fails on POP3
 
  See https://github.com/curl/curl/issues/10073
+
+3.6 POP3 issue when reading small chunks
+
+ CURL_DBG_SOCK_RMAX=4 ./runtests.pl -v 982
+
+ See https://github.com/curl/curl/issues/12063
 
 4. Command line
 
@@ -283,6 +292,16 @@ problems may have been fixed or changed somewhat since this was written.
  See https://github.com/curl/curl/pull/7252 and
      https://github.com/curl/curl/pull/7281
 
+5.15 Unicode on Windows
+
+ Passing in a unicode filename with -o:
+
+ https://github.com/curl/curl/issues/11461
+
+ Passing in unicode character with -d:
+
+ https://github.com/curl/curl/issues/12231
+
 6. Authentication
 
 6.1 NTLM authentication and unicode
@@ -362,6 +381,18 @@ problems may have been fixed or changed somewhat since this was written.
 
 7. FTP
 
+7.1 FTP upload fails if remembered dir is deleted
+
+ curl's FTP code assumes that the directory it entered in a previous transfer
+ still exists when it comes back to do a second transfer, and does not respond
+ well if it was indeed deleted in the mean time.
+
+ https://github.com/curl/curl/issues/12181
+
+7.2 Implicit FTPS upload timeout
+
+ https://github.com/curl/curl/issues/11720
+
 7.3 FTP with NOBODY and FAILONERROR
 
  It seems sensible to be able to use CURLOPT_NOBODY and CURLOPT_FAILONERROR
@@ -374,6 +405,13 @@ problems may have been fixed or changed somewhat since this was written.
  logging in), the operation will fail since libcurl does not detect this and
  thus fails to issue the correct command:
  https://curl.se/bug/view.cgi?id=635
+
+7.5 FTPS upload, FileZilla, GnuTLS and close_notify
+
+ An issue where curl does not send the TLS alert close_notify, which triggers
+ the wrath of GnuTLS in FileZilla server, and a FTP reply 426 ECONNABORTED.
+
+ https://github.com/curl/curl/issues/11383
 
 7.11 FTPS upload data loss with TLS 1.3
 
@@ -392,9 +430,16 @@ problems may have been fixed or changed somewhat since this was written.
 
  https://github.com/curl/curl/issues/6149
 
-7.12 FTPS directory listing hangs on Windows with Schannel
+7.12 FTPS server compatibility on Windows with Schannel
 
- https://github.com/curl/curl/issues/9161
+ FTPS is not widely used with the Schannel TLS backend and so there may be more
+ bugs compared to other TLS backends such as OpenSSL. In the past users have
+ reported hanging and failed connections. It's very likely some changes to curl
+ since then fixed the issues. None of the reported issues can be reproduced any
+ longer.
+
+ If you encounter an issue connecting to your server via FTPS with the latest
+ curl and Schannel then please search for open issues or file a new issue.
 
 9. SFTP and SCP
 
@@ -538,14 +583,6 @@ problems may have been fixed or changed somewhat since this was written.
 
  See https://github.com/curl/curl/issues/6167
 
-15.8 libcurl.pc uses absolute library paths
-
- The libcurl.pc file generated by cmake contains things like Libs.private:
- /usr/lib64/libssl.so /usr/lib64/libcrypto.so /usr/lib64/libz.so. The
- autotools equivalent would say Libs.private: -lssl -lcrypto -lz
-
- See https://github.com/curl/curl/issues/6169
-
 15.11 ExternalProject_Add does not set CURL_CA_PATH
 
  CURL_CA_BUNDLE and CURL_CA_PATH are not set properly when cmake's
@@ -575,6 +612,10 @@ problems may have been fixed or changed somewhat since this was written.
  https://github.com/curl/curl/issues/11007
 
 17. HTTP/2
+
+17.1 HTTP/2 prior knowledge over proxy
+
+ https://github.com/curl/curl/issues/12641
 
 17.2 HTTP/2 frames while in the connection pool kill reuse
 

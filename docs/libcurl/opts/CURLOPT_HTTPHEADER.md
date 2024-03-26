@@ -1,9 +1,13 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_HTTPHEADER
 Section: 3
 Source: libcurl
+Protocol:
+  - HTTP
+  - SMTP
+  - IMAP
 See-also:
   - CURLOPT_CUSTOMREQUEST (3)
   - CURLOPT_HEADER (3)
@@ -143,10 +147,6 @@ with the CURLOPT_UNRESTRICTED_AUTH(3) option.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-HTTP, IMAP and SMTP
 
 # EXAMPLE
 

@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_PROXY_ISSUERCERT
 Section: 3
@@ -10,6 +10,11 @@ See-also:
   - CURLOPT_PROXY_SSL_VERIFYPEER (3)
   - CURLOPT_SSL_VERIFYHOST (3)
   - CURLOPT_SSL_VERIFYPEER (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
+  - GnuTLS
 ---
 
 # NAME
@@ -50,10 +55,6 @@ option.
 
 NULL
 
-# PROTOCOLS
-
-All TLS-based protocols
-
 # EXAMPLE
 
 ~~~c
@@ -74,7 +75,7 @@ int main(void)
 
 # AVAILABILITY
 
-Added in 7.71.0. This option is supported by the OpenSSL backends.
+Added in 7.71.0. This option is supported by the OpenSSL and GnuTLS backends.
 
 # RETURN VALUE
 

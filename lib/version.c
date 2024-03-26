@@ -212,9 +212,15 @@ char *curl_version(void)
 
 #ifdef USE_LIBPSL
   {
+#if defined(PSL_VERSION_MAJOR) && (PSL_VERSION_MAJOR > 0 ||     \
+                                   PSL_VERSION_MINOR >= 11)
     int num = psl_check_version_number(0);
     msnprintf(psl_version, sizeof(psl_version), "libpsl/%d.%d.%d",
               num >> 16, (num >> 8) & 0xff, num & 0xff);
+#else
+    msnprintf(psl_version, sizeof(psl_version), "libpsl/%s",
+              psl_get_version());
+#endif
     src[i++] = psl_version;
   }
 #endif

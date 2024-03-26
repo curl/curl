@@ -36,7 +36,7 @@
  * Curl_des_set_odd_parity()
  *
  * This is used to apply odd parity to the given byte array. It is typically
- * used by when a cryptography engines doesn't have it's own version.
+ * used by when a cryptography engine doesn't have its own version.
  *
  * The function is a port of the Java based oddParity() function over at:
  *

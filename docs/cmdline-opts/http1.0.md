@@ -19,5 +19,4 @@ Example:
 
 # `--http1.0`
 
-Tells curl to use HTTP version 1.0 instead of using its internally preferred
-HTTP version.
+Use HTTP version 1.0 instead of using its internally preferred HTTP version.

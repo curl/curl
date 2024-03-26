@@ -135,7 +135,7 @@ Sending the data requires a rewind that failed.
 ## 66
 Failed to initialize SSL Engine.
 ## 67
-The user name, password, or similar was not accepted and curl failed to log in.
+The username, password, or similar was not accepted and curl failed to log in.
 ## 68
 File not found on TFTP server.
 ## 69
@@ -196,6 +196,8 @@ Proxy handshake error.
 A client-side certificate is required to complete the TLS handshake.
 ## 99
 Poll or select returned fatal error.
+## 100
+A value or data field grew larger than allowed.
 ## XX
 More error codes might appear here in future releases. The existing ones are
 meant to never change.

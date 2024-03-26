@@ -19,7 +19,7 @@ Example:
 # `--oauth2-bearer`
 
 Specify the Bearer Token for OAUTH 2.0 server authentication. The Bearer Token
-is used in conjunction with the user name which can be specified as part of
-the --url or --user options.
+is used in conjunction with the username which can be specified as part of the
+--url or --user options.
 
-The Bearer Token and user name are formatted according to RFC 6750.
+The Bearer Token and username are formatted according to RFC 6750.

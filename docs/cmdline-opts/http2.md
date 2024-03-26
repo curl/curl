@@ -20,7 +20,7 @@ Example:
 
 # `--http2`
 
-Tells curl to use HTTP version 2.
+Use HTTP/2.
 
 For HTTPS, this means curl negotiates HTTP/2 in the TLS handshake. curl does
 this by default.

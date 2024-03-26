@@ -290,9 +290,9 @@ next section.
 
 There is also the case that the selected algorithm is not supported by the
 protocol or does not match the ciphers offered by the server during the SSL
-negotiation. In this case curl will return error
+negotiation. In this case curl returns error
 `CURLE_SSL_CONNECT_ERROR (35) SEC_E_ALGORITHM_MISMATCH`
-and the request will fail.
+and the request fails.
 
 `CALG_MD2`,
 `CALG_MD4`,
@@ -353,7 +353,7 @@ are running an outdated OS you might still be supporting weak ciphers.
 You can set TLS 1.3 ciphers for Schannel by using `CURLOPT_TLS13_CIPHERS` or
 `--tls13-ciphers` with the names below.
 
-If TLS 1.3 cipher suites are set then libcurl will add or restrict Schannel TLS
+If TLS 1.3 cipher suites are set then libcurl adds or restricts Schannel TLS
 1.3 algorithms automatically. Essentially, libcurl is emulating support for
 individual TLS 1.3 cipher suites since Schannel does not support it directly.
 

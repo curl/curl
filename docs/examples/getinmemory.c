@@ -66,7 +66,7 @@ int main(void)
 
   struct MemoryStruct chunk;
 
-  chunk.memory = malloc(1);  /* will be grown as needed by the realloc above */
+  chunk.memory = malloc(1);  /* grown as needed by the realloc above */
   chunk.size = 0;    /* no data at this point */
 
   curl_global_init(CURL_GLOBAL_ALL);

@@ -1,0 +1,60 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+--write-out
+--config
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes" crlf="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+set -w in config, then reset -w to blank on cmdline
+</name>
+<file name="%LOGDIR/cmd%TESTNUMBER">
+-w "output\n"
+</file>
+<command option="no-include">
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -K %LOGDIR/cmd%TESTNUMBER -w ""
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="yes">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<stdout>
+-foo-
+</stdout>
+</verify>
+</testcase>

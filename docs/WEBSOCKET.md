@@ -13,8 +13,7 @@ using the `ws://` or `wss://` URL schemes. The latter one being the secure
 version done over HTTPS.
 
 When using `wss://` to do WebSocket over HTTPS, the standard TLS and HTTPS
-options will be acknowledged for the CA, verification of server certificate
-etc.
+options are acknowledged for the CA, verification of server certificate etc.
 
 WebSocket communication is done by upgrading a connection from either HTTP or
 HTTPS. When given a WebSocket URL to work with, libcurl considers it a
@@ -64,7 +63,7 @@ directions.
 
 If the given WebSocket URL (using `ws://` or `wss://`) fails to get upgraded
 via a 101 response code and instead gets another response code back from the
-HTTP server - the transfer will return `CURLE_HTTP_RETURNED_ERROR` for that
+HTTP server - the transfer returns `CURLE_HTTP_RETURNED_ERROR` for that
 transfer. Note then that even 2xx response codes are then considered error
 since it failed to provide a WebSocket transfer.
 

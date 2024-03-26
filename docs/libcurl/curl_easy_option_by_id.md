@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: curl_easy_option_by_id
 Section: 3
@@ -8,6 +8,8 @@ See-also:
   - curl_easy_option_by_name (3)
   - curl_easy_option_next (3)
   - curl_easy_setopt (3)
+Protocol:
+  - All
 ---
 
 # NAME

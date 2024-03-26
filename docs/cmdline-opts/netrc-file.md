@@ -18,8 +18,7 @@ Example:
 
 # `--netrc-file`
 
-This option is similar to --netrc, except that you provide the path (absolute
-or relative) to the netrc file that curl should use. You can only specify one
-netrc file per invocation.
+Set the netrc file to use. Similar to --netrc, except that you also provide
+the path (absolute or relative).
 
 It abides by --netrc-optional if specified.

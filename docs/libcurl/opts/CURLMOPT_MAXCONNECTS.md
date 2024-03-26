@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLMOPT_MAXCONNECTS
 Section: 3
@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLMOPT_MAX_HOST_CONNECTIONS (3)
   - CURLOPT_MAXCONNECTS (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -41,13 +43,14 @@ you should instead use the CURLOPT_MAXCONNECTS(3) option.
 See CURLMOPT_MAX_TOTAL_CONNECTIONS(3) for limiting the number of active
 connections.
 
+Changing this value when there are transfers in progress is possible, and the
+new value is then used the next time checks are performed. Lowering the value
+does however not close down any active transfers, it simply does not allow new
+ones to get made.
+
 # DEFAULT
 
 See DESCRIPTION
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

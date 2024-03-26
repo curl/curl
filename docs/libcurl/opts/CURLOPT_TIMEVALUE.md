@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_TIMEVALUE
 Section: 3
@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_TIMECONDITION (3)
   - CURLOPT_TIMEVALUE_LARGE (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -34,10 +36,6 @@ instead.
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-HTTP, FTP, RTSP, and FILE
 
 # EXAMPLE
 

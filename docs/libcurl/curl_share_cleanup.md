@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: curl_share_cleanup
 Section: 3
@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - curl_share_init (3)
   - curl_share_setopt (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -49,6 +51,6 @@ Added in 7.10
 # RETURN VALUE
 
 CURLSHE_OK (zero) means that the option was set properly, non-zero means an
-error occurred as *<curl/curl.h>* defines. See the libcurl-errors(3)
-man page for the full list with descriptions. If an error occurs, then the
-share object is not deleted.
+error occurred as *\<curl/curl.h\>* defines. See the libcurl-errors(3) man
+page for the full list with descriptions. If an error occurs, then the share
+object is not deleted.

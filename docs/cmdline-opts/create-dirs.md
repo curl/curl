@@ -18,7 +18,7 @@ Example:
 When used in conjunction with the --output option, curl creates the necessary
 local directory hierarchy as needed. This option creates the directories
 mentioned with the --output option combined with the path possibly set with
---output-dir. If the combined output file name uses no directory, or if the
+--output-dir. If the combined output filename uses no directory, or if the
 directories it mentions already exist, no directories are created.
 
 Created directories are made with mode 0750 on unix style file systems.

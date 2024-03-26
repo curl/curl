@@ -16,6 +16,6 @@ Example:
 
 # `--ftp-pret`
 
-Tell curl to send a PRET command before PASV (and EPSV). Certain FTP servers,
-mainly drftpd, require this non-standard command for directory listings as
-well as up and downloads in PASV mode.
+Send a PRET command before PASV (and EPSV). Certain FTP servers, mainly
+drftpd, require this non-standard command for directory listings as well as up
+and downloads in PASV mode.

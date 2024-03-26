@@ -3,6 +3,7 @@
 <keywords>
 HTTP
 variables
+--config
 </keywords>
 </info>
 
@@ -28,6 +29,14 @@ Funny-head: yesyes
 #
 # Client-side
 <client>
+
+# For unknown reasons, a number of CI jobs on Appveyor keep returning NULL to
+# getenv() for the blank environment variable which makes the test fail.
+# Unfortunately, this makes me disable the test completely on Windows.
+
+<features>
+!win32
+</features>
 <server>
 http
 </server>

@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLMOPT_TIMERDATA
 Section: 3
@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLMOPT_SOCKETFUNCTION (3)
   - CURLMOPT_TIMERFUNCTION (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -27,15 +29,11 @@ A data **pointer** to pass to the timer callback set with the
 CURLMOPT_TIMERFUNCTION(3) option.
 
 This pointer is not touched by libcurl but is only be passed in to the timer
-callbacks's **clientp** argument.
+callback's **clientp** argument.
 
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

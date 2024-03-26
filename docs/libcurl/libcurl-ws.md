@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: libcurl
 Section: 3
@@ -12,6 +12,8 @@ See-also:
   - curl_ws_meta (3)
   - curl_ws_recv (3)
   - curl_ws_send (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -25,7 +27,7 @@ data.
 
 # INCLUDE
 
-You still only include <curl/curl.h> in your code.
+You still only include \<curl/curl.h\> in your code.
 
 # SETUP
 

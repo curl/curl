@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_NETRC
 Section: 3
@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_NETRC_FILE (3)
   - CURLOPT_USERNAME (3)
   - CURLOPT_USERPWD (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -25,8 +27,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_NETRC, long level);
 # DESCRIPTION
 
 This parameter controls the preference *level* of libcurl between using
-user names and passwords from your *~/.netrc* file, relative to user names
-and passwords in the URL supplied with CURLOPT_URL(3).
+usernames and passwords from your *~/.netrc* file, relative to usernames and
+passwords in the URL supplied with CURLOPT_URL(3).
 
 On Windows, libcurl uses the file as *%HOME%/_netrc*. If *%HOME%* is
 not set on Windows, libcurl falls back to *%USERPROFILE%*.
@@ -34,11 +36,11 @@ not set on Windows, libcurl falls back to *%USERPROFILE%*.
 You can also tell libcurl a different filename to use with
 CURLOPT_NETRC_FILE(3).
 
-libcurl uses a user name (and supplied or prompted password) supplied with
+libcurl uses a username (and supplied or prompted password) supplied with
 CURLOPT_USERPWD(3) or CURLOPT_USERNAME(3) in preference to any of
 the options controlled by this parameter.
 
-Only machine name, user name and password are taken into account (init macros
+Only machine name, username and password are taken into account (init macros
 and similar things are not supported).
 
 libcurl does not verify that the file has the correct properties set (as the
@@ -53,15 +55,15 @@ libcurl ignores the *.netrc* file. This is the default.
 ## CURL_NETRC_OPTIONAL (1)
 
 The use of the *.netrc* file is optional, and information in the URL is to
-be preferred. The file is scanned for the host and user name (to find the
-password only) or for the host only, to find the first user name and password
+be preferred. The file is scanned for the host and username (to find the
+password only) or for the host only, to find the first username and password
 after that *machine*, which ever information is not specified.
 
 ## CURL_NETRC_REQUIRED (2)
 
 The use of the *.netrc* file is required, and any credential information
-present in the URL is ignored. The file is scanned for the host and user name
-(to find the password only) or for the host only, to find the first user name
+present in the URL is ignored. The file is scanned for the host and username
+(to find the password only) or for the host only, to find the first username
 and password after that *machine*, which ever information is not
 specified.
 
@@ -74,9 +76,9 @@ Each field is provided as a sequence of letters that ends with a space or
 newline. Starting in 7.84.0, libcurl also supports quoted strings. They start
 and end with double quotes and support the escaped special letters ", n,
 r, and t. Quoted strings are the only way a space character can be used in
-a user name or password.
+a username or password.
 
-## machine <name>
+## machine \<name\>
 
 Provides credentials for a host called **name**. libcurl searches the .netrc
 file for a machine token that matches the hostname specified in the URL. Once
@@ -85,25 +87,25 @@ file is reached or another "machine" is encountered.
 
 ## default
 
-This is the same as "machine" name except that default matches any name. There
+This is the same as machine name except that default matches any name. There
 can be only one default token, and it must be after all machine tokens. To
 provide a default anonymous login for hosts that are not otherwise matched,
 add a line similar to this in the end:
 
- default login anonymous password user@domain
+    default login anonymous password user@domain
 
-## login <name>
+## login \<name\>
 
-The user name string for the remote machine.
+The username string for the remote machine.
 
-## password <secret>
+## password \<secret\>
 
 Supply a password. If this token is present, curl supplies the specified
 string if the remote server requires a password as part of the login process.
 Note that if this token is present in the .netrc file you really should make
 sure the file is not readable by anyone besides the user.
 
-## macdef <name>
+## macdef \<name\>
 
 Define a macro. This feature is not supported by libcurl. In order for the
 rest of the .netrc to still work fine, libcurl properly skips every definition
@@ -112,10 +114,6 @@ done with "macdef" that it finds.
 # DEFAULT
 
 CURL_NETRC_IGNORED
-
-# PROTOCOLS
-
-Most
 
 # EXAMPLE
 

@@ -9,7 +9,7 @@
   Cookies are either "session cookies" which typically are forgotten when the
   session is over which is often translated to equal when browser quits, or
   the cookies are not session cookies they have expiration dates after which
-  the client will throw them away.
+  the client throws them away.
 
   Cookies are set to the client with the Set-Cookie: header and are sent to
   servers with the Cookie: header.
@@ -30,9 +30,9 @@
   implemented by curl.
 
   curl considers `http://localhost` to be a *secure context*, meaning that it
-  will allow and use cookies marked with the `secure` keyword even when done
-  over plain HTTP for this host. curl does this to match how popular browsers
-  work with secure cookies.
+  allows and uses cookies marked with the `secure` keyword even when done over
+  plain HTTP for this host. curl does this to match how popular browsers work
+  with secure cookies.
 
 ## Super cookies
 
@@ -65,8 +65,7 @@
   TAB. That file is called the cookie jar in curl terminology.
 
   When libcurl saves a cookie jar, it creates a file header of its own in
-  which there is a URL mention that will link to the web version of this
-  document.
+  which there is a URL mention that links to the web version of this document.
 
 ## Cookie file format
 
@@ -101,13 +100,13 @@
   `-b, --cookie`
 
   tell curl a file to read cookies from and start the cookie engine, or if it
-  is not a file it will pass on the given string. `-b name=var` works and so
-  does `-b cookiefile`.
+  is not a file it passes on the given string. `-b name=var` works and so does
+  `-b cookiefile`.
 
   `-j, --junk-session-cookies`
 
-  when used in combination with -b, it will skip all "session cookies" on load
-  so as to appear to start a new cookie session.
+  when used in combination with -b, it skips all "session cookies" on load so
+  as to appear to start a new cookie session.
 
   `-c, --cookie-jar`
 
@@ -159,7 +158,7 @@
   can also set and access cookies.
 
   Since curl and libcurl are plain HTTP clients without any knowledge of or
-  capability to handle JavaScript, such cookies will not be detected or used.
+  capability to handle JavaScript, such cookies are not detected or used.
 
   Often, if you want to mimic what a browser does on such websites, you can
   record web browser HTTP traffic when using such a site and then repeat the

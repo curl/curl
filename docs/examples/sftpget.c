@@ -34,10 +34,10 @@
 #undef DISABLE_SSH_AGENT
 
 /*
- * This is an example showing how to get a single file from an SFTP server.
- * It delays the actual destination file creation until the first write
- * callback so that it will not create an empty file in case the remote file
- * does not exist or something else fails.
+ * This is an example showing how to get a single file from an SFTP server. It
+ * delays the actual destination file creation until the first write callback
+ * so that it does not create an empty file in case the remote file does not
+ * exist or something else fails.
  */
 
 struct FtpFile {

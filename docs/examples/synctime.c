@@ -50,7 +50,7 @@
  * using HTTP protocol which has no problem with firewall/proxy.
  *
  * For this software to work, you should take note of these items.
- * 1. Your firewall/proxy must allow your computer to surf internet.
+ * 1. Your firewall/proxy must allow your computer to surf Internet.
  * 2. Webserver system time must in sync with the NTP time server,
  *    or at least provide an accurate time keeping.
  * 3. Webserver HTTP header does not provide the milliseconds units,
@@ -59,7 +59,7 @@
  *    as Round-Trip delay time is not taken into consideration.
  *    Compensation of network, firewall/proxy delay cannot be simply divide
  *    the Round-Trip delay time by half.
- * 5. Win32 SetSystemTime() API will set your computer clock according to
+ * 5. Win32 SetSystemTime() API sets your computer clock according to
  *    GMT/UTC time. Therefore your computer timezone must be properly set.
  * 6. Webserver data should not be cached by the proxy server. Some
  *    webserver provide Cache-Control to prevent caching.
@@ -71,7 +71,7 @@
  *    tf.nist.gov/timefreq/service/firewall.htm
  *
  * Usage:
- * This software will synchronise your computer clock only when you issue
+ * This software synchronises your computer clock only when you issue
  * it with --synctime. By default, it only display the webserver's clock.
  *
  * Written by: Frank (contributed to libcurl)
@@ -171,7 +171,7 @@ size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
               break;
             }
           }
-          AutoSyncTime = 3;       /* Computer clock will be adjusted */
+          AutoSyncTime = 3;       /* Computer clock is adjusted */
         }
         else {
           AutoSyncTime = 0;       /* Error in sscanf() fields conversion */

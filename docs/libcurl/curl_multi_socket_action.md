@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: curl_multi_socket_action
 Section: 3
@@ -10,6 +10,8 @@ See-also:
   - curl_multi_info_read (3)
   - curl_multi_init (3)
   - the hiperfifo.c example
+Protocol:
+  - All
 ---
 
 # NAME

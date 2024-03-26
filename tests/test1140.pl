@@ -23,13 +23,13 @@
 #
 ###########################################################################
 #
-# scan nroff pages to find basic syntactic problems such as unbalanced \f
+# scan manpages to find basic syntactic problems such as unbalanced \f
 # codes or references to non-existing curl man pages.
 
 my $docsroot = $ARGV[0];
 
 if(!$docsroot || ($docsroot eq "-g")) {
-    print "Usage: nroff-scan.pl <docs root dir> [nroff files]\n";
+    print "Usage: test1140.pl <docs root dir> [manpages]\n";
     exit;
 }
 
@@ -57,7 +57,7 @@ sub manpresent {
 sub file {
     my ($f) = @_;
     open(my $fh, "<", "$f") ||
-        die "no file";
+        die "test1140.pl could not open $f";
     my $line = 1;
     while(<$fh>) {
         chomp;

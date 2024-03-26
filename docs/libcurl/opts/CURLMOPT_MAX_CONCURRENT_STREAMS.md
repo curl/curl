@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLMOPT_MAX_CONCURRENT_STREAMS
 Section: 3
@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLMOPT_MAXCONNECTS (3)
   - CURLOPT_MAXCONNECTS (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -34,10 +36,6 @@ value passed here would be honored based on other system resources properties.
 # DEFAULT
 
 100
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 
