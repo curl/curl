@@ -12,6 +12,7 @@ See-also:
   - CURLOPT_UPLOAD (3)
 Protocol:
   - HTTP
+  - MQTT
 ---
 
 # NAME
@@ -29,9 +30,10 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_POSTFIELDS, char *postdata);
 # DESCRIPTION
 
 Pass a char pointer as parameter, pointing to the data buffer to use in an
-HTTP POST operation. The data must be formatted and encoded the way you want
-the server to receive it. libcurl does not convert or encode it in any
-way. For example, the web server may assume that this data is URL encoded.
+HTTP POST operation or an MQTT subscribe. The data must be formatted and
+encoded the way you want the server to receive it. libcurl does not convert or
+encode it in any way. For example, a web server may assume that this data is
+URL encoded.
 
 The data pointed to is NOT copied by the library: as a consequence, it must be
 preserved by the calling application until the associated transfer finishes.
@@ -49,10 +51,10 @@ necessary. It returns a pointer to an encoded string that can be passed as
 
 Using CURLOPT_POSTFIELDS(3) implies setting CURLOPT_POST(3) to 1.
 
-If CURLOPT_POSTFIELDS(3) is explicitly set to NULL then libcurl gets the
-POST data from the read callback. If you want to send a zero-byte POST set
-CURLOPT_POSTFIELDS(3) to an empty string, or set CURLOPT_POST(3)
-to 1 and CURLOPT_POSTFIELDSIZE(3) to 0.
+If CURLOPT_POSTFIELDS(3) is explicitly set to NULL then libcurl gets the POST
+data from the read callback. To send a zero-length (empty) POST, set
+CURLOPT_POSTFIELDS(3) to an empty string, or set CURLOPT_POST(3) to 1 and
+CURLOPT_POSTFIELDSIZE(3) to 0.
 
 libcurl assumes this option points to a null-terminated string unless you also
 set CURLOPT_POSTFIELDSIZE(3) to specify the length of the provided data,
