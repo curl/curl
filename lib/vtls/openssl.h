@@ -107,5 +107,15 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
                                const struct ssl_peer *peer,
                                SSL_SESSION *ssl_sessionid);
 
+/*
+ * Get the server cert, verify it and show it, etc., only call failf() if
+ * ssl config verifypeer or -host is set. Otherwise all this is for
+ * informational purposes only!
+ */
+CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  struct ossl_ctx *octx,
+                                  struct ssl_peer *peer);
+
 #endif /* USE_OPENSSL */
 #endif /* HEADER_CURL_SSLUSE_H */

@@ -43,6 +43,7 @@
 #include "urldata.h"
 #include "sendf.h"
 #include "inet_pton.h"
+#include "keylog.h"
 #include "gtls.h"
 #include "vtls.h"
 #include "vtls_int.h"
@@ -58,6 +59,16 @@
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
+
+#ifndef ARRAYSIZE
+#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
+#endif
+
+#define QUIC_PRIORITY \
+  "NORMAL:-VERS-ALL:+VERS-TLS1.3:-CIPHER-ALL:+AES-128-GCM:+AES-256-GCM:" \
+  "+CHACHA20-POLY1305:+AES-128-CCM:-GROUP-ALL:+GROUP-SECP256R1:" \
+  "+GROUP-X25519:+GROUP-SECP384R1:+GROUP-SECP521R1:" \
+  "%DISABLE_TLS13_COMPAT_MODE"
 
 /* Enable GnuTLS debugging by defining GTLSDEBUG */
 /*#define GTLSDEBUG */
@@ -77,7 +88,7 @@ static bool gtls_inited = FALSE;
 # include <gnutls/ocsp.h>
 
 struct gtls_ssl_backend_data {
-  struct gtls_instance gtls;
+  struct gtls_ctx gtls;
 };
 
 static ssize_t gtls_push(void *s, const void *buf, size_t blen)
@@ -330,12 +341,23 @@ static gnutls_x509_crt_fmt_t do_file_type(const char *type)
 
 static CURLcode
 set_ssl_version_min_max(struct Curl_easy *data,
+                        struct ssl_peer *peer,
                         struct ssl_primary_config *conn_config,
                         const char **prioritylist,
                         const char *tls13support)
 {
   long ssl_version = conn_config->version;
   long ssl_version_max = conn_config->version_max;
+
+  if(peer->transport == TRNSPRT_QUIC) {
+    if((ssl_version != CURL_SSLVERSION_DEFAULT) &&
+       (ssl_version < CURL_SSLVERSION_TLSv1_3)) {
+      failf(data, "QUIC needs at least TLS version 1.3");
+      return CURLE_SSL_CONNECT_ERROR;
+     }
+    *prioritylist = QUIC_PRIORITY;
+    return CURLE_OK;
+  }
 
   if((ssl_version == CURL_SSLVERSION_DEFAULT) ||
      (ssl_version == CURL_SSLVERSION_TLSv1))
@@ -401,12 +423,12 @@ set_ssl_version_min_max(struct Curl_easy *data,
   return CURLE_SSL_CONNECT_ERROR;
 }
 
-CURLcode gtls_client_init(struct Curl_easy *data,
-                          struct ssl_primary_config *config,
-                          struct ssl_config_data *ssl_config,
-                          struct ssl_peer *peer,
-                          struct gtls_instance *gtls,
-                          long *pverifyresult)
+static CURLcode gtls_client_init(struct Curl_easy *data,
+                                 struct ssl_primary_config *config,
+                                 struct ssl_config_data *ssl_config,
+                                 struct ssl_peer *peer,
+                                 struct gtls_ctx *gtls,
+                                 long *pverifyresult)
 {
   unsigned int init_flags;
   int rc;
@@ -578,7 +600,8 @@ CURLcode gtls_client_init(struct Curl_easy *data,
   }
 
   /* At this point we know we have a supported TLS version, so set it */
-  result = set_ssl_version_min_max(data, config, &prioritylist, tls13support);
+  result = set_ssl_version_min_max(data, peer,
+                                   config, &prioritylist, tls13support);
   if(result)
     return result;
 
@@ -677,46 +700,81 @@ CURLcode gtls_client_init(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode
-gtls_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
+static int keylog_callback(gnutls_session_t session, const char *label,
+                           const gnutls_datum_t *secret)
 {
-  struct ssl_connect_data *connssl = cf->ctx;
-  struct gtls_ssl_backend_data *backend =
-    (struct gtls_ssl_backend_data *)connssl->backend;
+  gnutls_datum_t crandom;
+  gnutls_datum_t srandom;
+
+  gnutls_session_get_random(session, &crandom, &srandom);
+  if(crandom.size != 32) {
+    return -1;
+  }
+
+  Curl_tls_keylog_write(label, crandom.data, secret->data, secret->size);
+  return 0;
+}
+
+CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
+                            struct Curl_cfilter *cf,
+                            struct Curl_easy *data,
+                            struct ssl_peer *peer,
+                            const unsigned char *alpn, size_t alpn_len,
+                            Curl_gtls_ctx_setup_cb *cb_setup,
+                            void *cb_user_data,
+                            void *ssl_user_data)
+{
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   long * const pverifyresult = &ssl_config->certverifyresult;
   CURLcode result;
 
-  DEBUGASSERT(backend);
+  DEBUGASSERT(gctx);
 
-  if(connssl->state == ssl_connection_complete)
-    /* to make us tolerant against being called more than once for the
-       same connection */
-    return CURLE_OK;
-
-  result = gtls_client_init(data, conn_config, ssl_config,
-                            &connssl->peer,
-                            &backend->gtls, pverifyresult);
+  result = gtls_client_init(data, conn_config, ssl_config, peer,
+                            gctx, pverifyresult);
   if(result)
     return result;
 
-  if(connssl->alpn) {
-    struct alpn_proto_buf proto;
-    gnutls_datum_t alpn[ALPN_ENTRIES_MAX];
-    size_t i;
+  gnutls_session_set_ptr(gctx->session, ssl_user_data);
 
-    for(i = 0; i < connssl->alpn->count; ++i) {
-      alpn[i].data = (unsigned char *)connssl->alpn->entries[i];
-      alpn[i].size = (unsigned)strlen(connssl->alpn->entries[i]);
+  if(cb_setup) {
+    result = cb_setup(cf, data, cb_user_data);
+    if(result)
+      return result;
+  }
+
+  /* Open the file if a TLS or QUIC backend has not done this before. */
+  Curl_tls_keylog_open();
+  if(Curl_tls_keylog_enabled()) {
+    gnutls_session_set_keylog_function(gctx->session, keylog_callback);
+  }
+
+  /* convert the ALPN string from our arguments to a list of strings
+   * that gnutls wants and will convert internally back to this very
+   * string for sending to the server. nice. */
+  if(alpn) {
+    gnutls_datum_t alpns[5];
+    size_t i, alen = alpn_len;
+    unsigned char *s = (unsigned char *)alpn;
+    unsigned char slen;
+    for(i = 0; (i < ARRAYSIZE(alpns)) && alen; ++i) {
+      slen = s[0];
+      if(slen >= alen)
+        return CURLE_FAILED_INIT;
+      alpns[i].data = s + 1;
+      alpns[i].size = slen;
+      s += slen + 1;
+      alen -= (size_t)slen + 1;
     }
-    if(gnutls_alpn_set_protocols(backend->gtls.session, alpn,
-                                 (unsigned)connssl->alpn->count, 0)) {
+    if(alen) /* not all alpn chars used, wrong format or too many */
+        return CURLE_FAILED_INIT;
+    if(i && gnutls_alpn_set_protocols(gctx->session,
+                                      alpns, (unsigned int)i,
+                                      GNUTLS_ALPN_MANDATORY)) {
       failf(data, "failed setting ALPN");
       return CURLE_SSL_CONNECT_ERROR;
     }
-    Curl_alpn_to_proto_str(&proto, connssl->alpn);
-    infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
   }
 
   /* This might be a reconnect, so we check for a session ID in the cache
@@ -726,17 +784,49 @@ gtls_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     size_t ssl_idsize;
 
     Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(cf, data, &connssl->peer,
-                              &ssl_sessionid, &ssl_idsize)) {
+    if(!Curl_ssl_getsessionid(cf, data, peer, &ssl_sessionid, &ssl_idsize)) {
       /* we got a session id, use it! */
-      gnutls_session_set_data(backend->gtls.session,
-                              ssl_sessionid, ssl_idsize);
+      gnutls_session_set_data(gctx->session, ssl_sessionid, ssl_idsize);
 
       /* Informational message */
       infof(data, "SSL reusing session ID");
     }
     Curl_ssl_sessionid_unlock(data);
   }
+  return CURLE_OK;
+}
+
+static CURLcode
+gtls_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
+{
+  struct ssl_connect_data *connssl = cf->ctx;
+  struct gtls_ssl_backend_data *backend =
+    (struct gtls_ssl_backend_data *)connssl->backend;
+  struct alpn_proto_buf proto;
+  CURLcode result;
+
+  DEBUGASSERT(backend);
+  DEBUGASSERT(ssl_connect_1 == connssl->connecting_state);
+
+  if(connssl->state == ssl_connection_complete)
+    /* to make us tolerant against being called more than once for the
+       same connection */
+    return CURLE_OK;
+
+  memset(&proto, 0, sizeof(proto));
+  if(connssl->alpn) {
+    result = Curl_alpn_to_proto_buf(&proto, connssl->alpn);
+    if(result) {
+      failf(data, "Error determining ALPN");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+  }
+
+  result = Curl_gtls_ctx_init(&backend->gtls, cf, data, &connssl->peer,
+                              proto.data, proto.len, NULL, NULL, cf);
+  if(result)
+    return result;
+
 
   /* register callback functions and handle to send and receive data. */
   gnutls_transport_set_ptr(backend->gtls.session, cf);

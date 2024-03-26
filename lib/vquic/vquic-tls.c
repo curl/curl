@@ -61,119 +61,7 @@
 #define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
 #endif
 
-#ifdef USE_OPENSSL
-#define QUIC_CIPHERS                                                          \
-  "TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_"               \
-  "POLY1305_SHA256:TLS_AES_128_CCM_SHA256"
-#define QUIC_GROUPS "P-256:X25519:P-384:P-521"
-#elif defined(USE_GNUTLS)
-#define QUIC_PRIORITY \
-  "NORMAL:-VERS-ALL:+VERS-TLS1.3:-CIPHER-ALL:+AES-128-GCM:+AES-256-GCM:" \
-  "+CHACHA20-POLY1305:+AES-128-CCM:-GROUP-ALL:+GROUP-SECP256R1:" \
-  "+GROUP-X25519:+GROUP-SECP384R1:+GROUP-SECP521R1:" \
-  "%DISABLE_TLS13_COMPAT_MODE"
-#elif defined(USE_WOLFSSL)
-#define QUIC_CIPHERS                                                          \
-  "TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_"               \
-  "POLY1305_SHA256:TLS_AES_128_CCM_SHA256"
-#define QUIC_GROUPS "P-256:P-384:P-521"
-#endif
-
-
-#if defined(USE_GNUTLS)
-static int keylog_callback(gnutls_session_t session, const char *label,
-                    const gnutls_datum_t *secret)
-{
-  gnutls_datum_t crandom;
-  gnutls_datum_t srandom;
-
-  gnutls_session_get_random(session, &crandom, &srandom);
-  if(crandom.size != 32) {
-    return -1;
-  }
-
-  Curl_tls_keylog_write(label, crandom.data, secret->data, secret->size);
-  return 0;
-}
-
-static CURLcode curl_gtls_init_ctx(struct curl_tls_ctx *ctx,
-                                   struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
-                                   struct ssl_peer *peer,
-                                   const char *alpn, size_t alpn_len,
-                                   Curl_vquic_tls_ctx_setup *cb_setup,
-                                   void *cb_user_data, void *ssl_user_data)
-{
-  struct ssl_primary_config *conn_config;
-  CURLcode result;
-  gnutls_datum_t alpns[5];
-  /* this will need some attention when HTTPS proxy over QUIC get fixed */
-  long * const pverifyresult = &data->set.ssl.certverifyresult;
-  int rc;
-
-  conn_config = Curl_ssl_cf_get_primary_config(cf);
-  if(!conn_config)
-    return CURLE_FAILED_INIT;
-
-  DEBUGASSERT(ctx->gtls == NULL);
-  ctx->gtls = calloc(1, sizeof(*(ctx->gtls)));
-  if(!ctx->gtls)
-    return CURLE_OUT_OF_MEMORY;
-
-  result = gtls_client_init(data, conn_config, &data->set.ssl,
-                            peer, ctx->gtls, pverifyresult);
-  if(result)
-    return result;
-
-  gnutls_session_set_ptr(ctx->gtls->session, ssl_user_data);
-
-  if(cb_setup) {
-    result = cb_setup(cf, data, cb_user_data);
-    if(result)
-      return result;
-  }
-
-  rc = gnutls_priority_set_direct(ctx->gtls->session, QUIC_PRIORITY, NULL);
-  if(rc < 0) {
-    CURL_TRC_CF(data, cf, "gnutls_priority_set_direct failed: %s\n",
-                gnutls_strerror(rc));
-    return CURLE_QUIC_CONNECT_ERROR;
-  }
-
-  /* Open the file if a TLS or QUIC backend has not done this before. */
-  Curl_tls_keylog_open();
-  if(Curl_tls_keylog_enabled()) {
-    gnutls_session_set_keylog_function(ctx->gtls->session, keylog_callback);
-  }
-
-  /* convert the ALPN string from our arguments to a list of strings
-   * that gnutls wants and will convert internally back to this very
-   * string for sending to the server. nice. */
-  if(alpn) {
-    size_t i, alen = alpn_len;
-    unsigned char *s = (unsigned char *)alpn;
-    unsigned char slen;
-    for(i = 0; (i < ARRAYSIZE(alpns)) && alen; ++i) {
-      slen = s[0];
-      if(slen >= alen)
-        return CURLE_FAILED_INIT;
-      alpns[i].data = s + 1;
-      alpns[i].size = slen;
-      s += slen + 1;
-      alen -= (size_t)slen + 1;
-    }
-    if(alen) /* not all alpn chars used, wrong format or too many */
-        return CURLE_FAILED_INIT;
-    if(i) {
-      gnutls_alpn_set_protocols(ctx->gtls->session,
-                                alpns, (unsigned int)i,
-                                GNUTLS_ALPN_MANDATORY);
-    }
-  }
-
-  return CURLE_OK;
-}
-#elif defined(USE_WOLFSSL)
+#if defined(USE_WOLFSSL)
 
 #if defined(HAVE_SECRET_CALLBACK)
 static void keylog_callback(const WOLFSSL *ssl, const char *line)
@@ -346,7 +234,8 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
                             cb_setup, cb_user_data, NULL, ssl_user_data);
 #elif defined(USE_GNUTLS)
   (void)result;
-  return curl_gtls_init_ctx(ctx, cf, data, peer, alpn, alpn_len,
+  return Curl_gtls_ctx_init(&ctx->gtls, cf, data, peer,
+                            (const unsigned char *)alpn, alpn_len,
                             cb_setup, cb_user_data, ssl_user_data);
 #elif defined(USE_WOLFSSL)
   result = curl_wssl_init_ctx(ctx, cf, data, cb_setup, cb_user_data);
@@ -368,13 +257,10 @@ void Curl_vquic_tls_cleanup(struct curl_tls_ctx *ctx)
   if(ctx->ossl.ssl_ctx)
     SSL_CTX_free(ctx->ossl.ssl_ctx);
 #elif defined(USE_GNUTLS)
-  if(ctx->gtls) {
-    if(ctx->gtls->cred)
-      gnutls_certificate_free_credentials(ctx->gtls->cred);
-    if(ctx->gtls->session)
-      gnutls_deinit(ctx->gtls->session);
-    free(ctx->gtls);
-  }
+  if(ctx->gtls.cred)
+    gnutls_certificate_free_credentials(ctx->gtls.cred);
+  if(ctx->gtls.session)
+    gnutls_deinit(ctx->gtls.session);
 #elif defined(USE_WOLFSSL)
   if(ctx->ssl)
     wolfSSL_free(ctx->ssl);
@@ -413,36 +299,23 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
   if(!conn_config)
     return CURLE_FAILED_INIT;
 
-  if(conn_config->verifyhost) {
 #ifdef USE_OPENSSL
-    X509 *server_cert;
-    server_cert = SSL_get1_peer_certificate(ctx->ossl.ssl);
-    if(!server_cert) {
-      return CURLE_PEER_FAILED_VERIFICATION;
-    }
-    result = Curl_ossl_verifyhost(data, cf->conn, peer, server_cert);
-    X509_free(server_cert);
-    if(result)
-      return result;
+  (void)conn_config;
+  result = Curl_oss_check_peer_cert(cf, data, &ctx->ossl, peer);
 #elif defined(USE_GNUTLS)
-    result = Curl_gtls_verifyserver(data, ctx->gtls->session,
+  if(conn_config->verifyhost) {
+    result = Curl_gtls_verifyserver(data, ctx->gtls.session,
                                     conn_config, &data->set.ssl, peer,
                                     data->set.str[STRING_SSL_PINNEDPUBLICKEY]);
     if(result)
       return result;
+  }
 #elif defined(USE_WOLFSSL)
+  if(conn_config->verifyhost) {
     if(!peer->sni ||
        wolfSSL_check_domain_name(ctx->ssl, peer->sni) == SSL_FAILURE)
       return CURLE_PEER_FAILED_VERIFICATION;
-#endif
-    infof(data, "Verified certificate just fine");
   }
-  else
-    infof(data, "Skipped certificate verification");
-#ifdef USE_OPENSSL
-  if(data->set.ssl.certinfo)
-    /* asked to gather certificate info */
-    (void)Curl_ossl_certchain(data, ctx->ossl.ssl);
 #endif
   return result;
 }
