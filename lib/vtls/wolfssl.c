@@ -409,11 +409,11 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 #if defined(WOLFSSL_ALLOW_TLSV10) && !defined(NO_OLD_TLS)
     req_method = TLSv1_client_method();
     use_sni(TRUE);
+    break;
 #else
     failf(data, "wolfSSL does not support TLS 1.0");
     return CURLE_NOT_BUILT_IN;
 #endif
-    break;
   case CURL_SSLVERSION_TLSv1_1:
 #ifndef NO_OLD_TLS
     req_method = TLSv1_1_client_method();
@@ -481,6 +481,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       return CURLE_SSL_CONNECT_ERROR;
     }
 #endif
+    FALLTHROUGH();
   default:
     break;
   }

@@ -63,6 +63,11 @@
 
 #if defined(USE_WOLFSSL)
 
+#define QUIC_CIPHERS                                                          \
+  "TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_"               \
+  "POLY1305_SHA256:TLS_AES_128_CCM_SHA256"
+#define QUIC_GROUPS "P-256:P-384:P-521"
+
 #if defined(HAVE_SECRET_CALLBACK)
 static void keylog_callback(const WOLFSSL *ssl, const char *line)
 {
@@ -311,6 +316,7 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
       return result;
   }
 #elif defined(USE_WOLFSSL)
+  (void)data;
   if(conn_config->verifyhost) {
     if(!peer->sni ||
        wolfSSL_check_domain_name(ctx->ssl, peer->sni) == SSL_FAILURE)
