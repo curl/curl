@@ -3698,9 +3698,8 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   }
 
   ciphers = conn_config->cipher_list;
-  if(!ciphers)
-    ciphers = (peer->transport == TRNSPRT_QUIC)?
-              NULL : DEFAULT_CIPHER_SELECTION;
+  if(!ciphers && (peer->transport != TRNSPRT_QUIC))
+    ciphers = DEFAULT_CIPHER_SELECTION;
   if(ciphers) {
     if(!SSL_CTX_set_cipher_list(octx->ssl_ctx, ciphers)) {
       failf(data, "failed setting cipher list: %s", ciphers);
@@ -4465,7 +4464,6 @@ static CURLcode ossl_connect_step3(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
   struct ssl_connect_data *connssl = cf->ctx;
   struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
 
