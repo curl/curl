@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLMOPT_PUSHFUNCTION
 Section: 3
@@ -9,6 +9,8 @@ See-also:
   - CURLMOPT_PUSHDATA (3)
   - CURLOPT_PIPEWAIT (3)
   - RFC 7540
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -94,16 +96,12 @@ All other return codes are reserved for future use.
 
 NULL, no callback
 
-# PROTOCOLS
-
-HTTP(S) (HTTP/2 only)
-
 # EXAMPLE
 
 ~~~c
 #include <string.h>
 
-/* only allow pushes for file names starting with "push-" */
+/* only allow pushes for filenames starting with "push-" */
 int push_callback(CURL *parent,
                   CURL *easy,
                   size_t num_headers,

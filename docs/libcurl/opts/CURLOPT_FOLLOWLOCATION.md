@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_FOLLOWLOCATION
 Section: 3
@@ -10,6 +10,8 @@ See-also:
   - CURLOPT_POSTREDIR (3)
   - CURLOPT_PROTOCOLS (3)
   - CURLOPT_REDIR_PROTOCOLS (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -62,10 +64,6 @@ would otherwise select internally.
 # DEFAULT
 
 0, disabled
-
-# PROTOCOLS
-
-HTTP(S)
 
 # EXAMPLE
 

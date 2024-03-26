@@ -19,7 +19,7 @@ Example:
 
 # `--http2-prior-knowledge`
 
-Tells curl to issue its non-TLS HTTP requests using HTTP/2 without HTTP/1.1
-Upgrade. It requires prior knowledge that the server supports HTTP/2 straight
-away. HTTPS requests still do HTTP/2 the standard way with negotiated protocol
+Issue a non-TLS HTTP requests using HTTP/2 directly without HTTP/1.1 Upgrade.
+It requires prior knowledge that the server supports HTTP/2 straight away.
+HTTPS requests still do HTTP/2 the standard way with negotiated protocol
 version in the TLS handshake.

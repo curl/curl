@@ -23,9 +23,9 @@ SMTP, LDAP, etc.
 Sets the proxy server to use if no protocol-specific proxy is set.
 
 ## `NO_PROXY` <comma-separated list of hosts/domains>
-list of host names that should not go through any proxy. If set to an asterisk
-'*' only, it matches all hosts. Each name in this list is matched as either
-a domain name which contains the hostname, or the hostname itself.
+list of hostnames that should not go through any proxy. If set to an asterisk
+'*' only, it matches all hosts. Each name in this list is matched as either a
+domain name which contains the hostname, or the hostname itself.
 
 This environment variable disables use of the proxy even when specified with
 the --proxy option. That is
@@ -40,7 +40,7 @@ accesses the target URL directly, and
 
 accesses the target URL through the proxy.
 
-The list of host names can also be include numerical IP addresses, and IPv6
+The list of hostnames can also be include numerical IP addresses, and IPv6
 versions should then be given without enclosing brackets.
 
 IP addresses can be specified using CIDR notation: an appended slash and
@@ -97,8 +97,8 @@ if Schannel is used as the TLS backend.
 If set, it is used as the --cacert value. This environment variable is ignored
 if Schannel is used as the TLS backend.
 
-## `SSLKEYLOGFILE` <file name>
-If you set this environment variable to a file name, curl stores TLS secrets
+## `SSLKEYLOGFILE` <filename>
+If you set this environment variable to a filename, curl stores TLS secrets
 from its connections in that file when invoked to enable you to analyze the
 TLS traffic in real time using network analyzing tools such as Wireshark. This
 works with the following TLS backends: OpenSSL, libressl, BoringSSL, GnuTLS

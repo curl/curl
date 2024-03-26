@@ -17,8 +17,7 @@ Example:
 
 # `--delegation`
 
-Set LEVEL to tell the server what it is allowed to delegate when it
-comes to user credentials.
+Set LEVEL what curl is allowed to delegate when it comes to user credentials.
 
 ## none
 Do not allow any delegation.

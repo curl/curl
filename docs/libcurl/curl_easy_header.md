@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: curl_easy_header
 Section: 3
@@ -10,6 +10,8 @@ See-also:
   - curl_easy_nextheader (3)
   - curl_easy_perform (3)
   - libcurl-errors (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

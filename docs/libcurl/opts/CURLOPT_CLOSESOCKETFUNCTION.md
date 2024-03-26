@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_CLOSESOCKETFUNCTION
 Section: 3
@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_CLOSESOCKETDATA (3)
   - CURLOPT_OPENSOCKETFUNCTION (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -42,10 +44,6 @@ closed.
 # DEFAULT
 
 By default libcurl uses the standard socket close function.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

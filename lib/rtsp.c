@@ -70,8 +70,7 @@ static int rtsp_getsock_do(struct Curl_easy *data,
 static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
                                     const char *buf,
                                     size_t blen,
-                                    bool is_eos,
-                                    bool *done);
+                                    bool is_eos);
 
 static CURLcode rtsp_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn);
@@ -225,8 +224,6 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   Curl_RtspReq rtspreq = data->set.rtspreq;
   struct RTSP *rtsp = data->req.p.rtsp;
   struct dynbuf req_buffer;
-  curl_off_t postsize = 0; /* for ANNOUNCE and SET_PARAMETER */
-  curl_off_t putsize = 0; /* for ANNOUNCE and SET_PARAMETER */
 
   const char *p_request = NULL;
   const char *p_session_id = NULL;
@@ -241,6 +238,8 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   const char *p_userpwd = NULL;
 
   *done = TRUE;
+  /* Initialize a dynamic send buffer */
+  Curl_dyn_init(&req_buffer, DYN_RTSP_REQ_HEADER);
 
   rtsp->CSeq_sent = data->state.rtsp_next_client_CSeq;
   rtsp->CSeq_recv = 0;
@@ -310,9 +309,8 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   }
 
   if(rtspreq == RTSPREQ_RECEIVE) {
-    Curl_setup_transfer(data, FIRSTSOCKET, -1, TRUE, -1);
-
-    return result;
+    Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, -1);
+    goto out;
   }
 
   p_session_id = data->set.str[STRING_RTSP_SESSION_ID];
@@ -320,7 +318,8 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
      (rtspreq & ~(RTSPREQ_OPTIONS | RTSPREQ_DESCRIBE | RTSPREQ_SETUP))) {
     failf(data, "Refusing to issue an RTSP request [%s] without a session ID.",
           p_request);
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    result = CURLE_BAD_FUNCTION_ARGUMENT;
+    goto out;
   }
 
   /* Stream URI. Default to server '*' if not specified */
@@ -347,7 +346,8 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     else {
       failf(data,
             "Refusing to issue an RTSP SETUP without a Transport: header.");
-      return CURLE_BAD_FUNCTION_ARGUMENT;
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      goto out;
     }
 
     p_transport = data->state.aptr.rtsp_transport;
@@ -366,9 +366,10 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
       data->state.aptr.accept_encoding =
         aprintf("Accept-Encoding: %s\r\n", data->set.str[STRING_ENCODING]);
 
-      if(!data->state.aptr.accept_encoding)
-        return CURLE_OUT_OF_MEMORY;
-
+      if(!data->state.aptr.accept_encoding) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto out;
+      }
       p_accept_encoding = data->state.aptr.accept_encoding;
     }
   }
@@ -390,7 +391,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   result = Curl_http_output_auth(data, conn, p_request, HTTPREQ_GET,
                                  p_stream_uri, FALSE);
   if(result)
-    return result;
+    goto out;
 
   p_proxyuserpwd = data->state.aptr.proxyuserpwd;
   p_userpwd = data->state.aptr.userpwd;
@@ -424,15 +425,14 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
    */
   if(Curl_checkheaders(data, STRCONST("CSeq"))) {
     failf(data, "CSeq cannot be set as a custom header.");
-    return CURLE_RTSP_CSEQ_ERROR;
+    result = CURLE_RTSP_CSEQ_ERROR;
+    goto out;
   }
   if(Curl_checkheaders(data, STRCONST("Session"))) {
     failf(data, "Session ID cannot be set as a custom header.");
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    result = CURLE_BAD_FUNCTION_ARGUMENT;
+    goto out;
   }
-
-  /* Initialize a dynamic send buffer */
-  Curl_dyn_init(&req_buffer, DYN_RTSP_REQ_HEADER);
 
   result =
     Curl_dyn_addf(&req_buffer,
@@ -440,7 +440,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
                   "CSeq: %ld\r\n", /* CSeq */
                   p_request, p_stream_uri, rtsp->CSeq_sent);
   if(result)
-    return result;
+    goto out;
 
   /*
    * Rather than do a normal alloc line, keep the session_id unformatted
@@ -449,7 +449,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   if(p_session_id) {
     result = Curl_dyn_addf(&req_buffer, "Session: %s\r\n", p_session_id);
     if(result)
-      return result;
+      goto out;
   }
 
   /*
@@ -481,44 +481,58 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   Curl_safefree(data->state.aptr.userpwd);
 
   if(result)
-    return result;
+    goto out;
 
   if((rtspreq == RTSPREQ_SETUP) || (rtspreq == RTSPREQ_DESCRIBE)) {
     result = Curl_add_timecondition(data, &req_buffer);
     if(result)
-      return result;
+      goto out;
   }
 
   result = Curl_add_custom_headers(data, FALSE, &req_buffer);
   if(result)
-    return result;
+    goto out;
 
   if(rtspreq == RTSPREQ_ANNOUNCE ||
      rtspreq == RTSPREQ_SET_PARAMETER ||
      rtspreq == RTSPREQ_GET_PARAMETER) {
+    curl_off_t req_clen; /* request content length */
 
     if(data->state.upload) {
-      putsize = data->state.infilesize;
+      req_clen = data->state.infilesize;
       data->state.httpreq = HTTPREQ_PUT;
-
+      result = Curl_creader_set_fread(data, req_clen);
+      if(result)
+        goto out;
     }
     else {
-      postsize = (data->state.infilesize != -1)?
-        data->state.infilesize:
-        (data->set.postfields? (curl_off_t)strlen(data->set.postfields):0);
-      data->state.httpreq = HTTPREQ_POST;
+      if(data->set.postfields) {
+        size_t plen = strlen(data->set.postfields);
+        req_clen = (curl_off_t)plen;
+        result = Curl_creader_set_buf(data, data->set.postfields, plen);
+      }
+      else if(data->state.infilesize >= 0) {
+        req_clen = data->state.infilesize;
+        result = Curl_creader_set_fread(data, req_clen);
+      }
+      else {
+        req_clen = 0;
+        result = Curl_creader_set_null(data);
+      }
+      if(result)
+        goto out;
     }
 
-    if(putsize > 0 || postsize > 0) {
+    if(req_clen > 0) {
       /* As stated in the http comments, it is probably not wise to
        * actually set a custom Content-Length in the headers */
       if(!Curl_checkheaders(data, STRCONST("Content-Length"))) {
         result =
           Curl_dyn_addf(&req_buffer,
                         "Content-Length: %" CURL_FORMAT_CURL_OFF_T"\r\n",
-                        (data->state.upload ? putsize : postsize));
+                        req_clen);
         if(result)
-          return result;
+          goto out;
       }
 
       if(rtspreq == RTSPREQ_SET_PARAMETER ||
@@ -528,7 +542,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
                                  STRCONST("Content-Type: "
                                           "text/parameters\r\n"));
           if(result)
-            return result;
+            goto out;
         }
       }
 
@@ -538,11 +552,9 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
                                  STRCONST("Content-Type: "
                                           "application/sdp\r\n"));
           if(result)
-            return result;
+            goto out;
         }
       }
-
-      data->state.expect100header = FALSE; /* RTSP posts are simple/small */
     }
     else if(rtspreq == RTSPREQ_GET_PARAMETER) {
       /* Check for an empty GET_PARAMETER (heartbeat) request */
@@ -550,30 +562,25 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
       data->req.no_body = TRUE;
     }
   }
+  else {
+    result = Curl_creader_set_null(data);
+    if(result)
+      goto out;
+  }
 
-  /* RTSP never allows chunked transfer */
-  data->req.forbidchunk = TRUE;
   /* Finish the request buffer */
   result = Curl_dyn_addn(&req_buffer, STRCONST("\r\n"));
   if(result)
-    return result;
+    goto out;
 
-  if(postsize > 0) {
-    result = Curl_dyn_addn(&req_buffer, data->set.postfields,
-                           (size_t)postsize);
-    if(result)
-      return result;
-  }
+  Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, FIRSTSOCKET);
 
   /* issue the request */
-  result = Curl_buffer_send(&req_buffer, data, data->req.p.http,
-                            &data->info.request_size, 0, FIRSTSOCKET);
+  result = Curl_req_send(data, &req_buffer);
   if(result) {
     failf(data, "Failed sending RTSP request");
-    return result;
+    goto out;
   }
-
-  Curl_setup_transfer(data, FIRSTSOCKET, -1, TRUE, putsize?FIRSTSOCKET:-1);
 
   /* Increment the CSeq on success */
   data->state.rtsp_next_client_CSeq++;
@@ -585,7 +592,8 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     if(Curl_pgrsUpdate(data))
       result = CURLE_ABORTED_BY_CALLBACK;
   }
-
+out:
+  Curl_dyn_free(&req_buffer);
   return result;
 }
 
@@ -779,8 +787,7 @@ out:
 static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
                                     const char *buf,
                                     size_t blen,
-                                    bool is_eos,
-                                    bool *done)
+                                    bool is_eos)
 {
   struct rtsp_conn *rtspc = &(data->conn->proto.rtspc);
   CURLcode result = CURLE_OK;
@@ -788,7 +795,6 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
 
   if(!data->req.header)
     rtspc->in_header = FALSE;
-  *done = FALSE;
   if(!blen) {
     goto out;
   }
@@ -812,7 +818,7 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
   /* we want to parse headers, do so */
   if(data->req.header && blen) {
     rtspc->in_header = TRUE;
-    result = Curl_http_write_resp_hds(data, buf, blen, &consumed, done);
+    result = Curl_http_write_resp_hds(data, buf, blen, &consumed);
     if(result)
       goto out;
 
@@ -838,13 +844,14 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
   }
 
   if(rtspc->state != RTP_PARSE_SKIP)
-    *done = FALSE;
+    data->req.done = FALSE;
   /* we SHOULD have consumed all bytes, unless the response is borked.
    * In which case we write out the left over bytes, letting the client
    * writer deal with it (it will report EXCESS and fail the transfer). */
   DEBUGF(infof(data, "rtsp_rtp_write_resp(len=%zu, in_header=%d, done=%d "
                " rtspc->state=%d, req.size=%" CURL_FORMAT_CURL_OFF_T ")",
-               blen, rtspc->in_header, *done, rtspc->state, data->req.size));
+               blen, rtspc->in_header, data->req.done, rtspc->state,
+               data->req.size));
   if(!result && (is_eos || blen)) {
     result = Curl_client_write(data, CLIENTWRITE_BODY|
                                (is_eos? CLIENTWRITE_EOS:0),

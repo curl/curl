@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: curl_formfree
 Section: 3
@@ -8,6 +8,8 @@ See-also:
   - curl_formadd (3)
   - curl_mime_free (3)
   - curl_mime_init (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: curl_ws_recv
 Section: 3
@@ -10,6 +10,8 @@ See-also:
   - curl_easy_setopt (3)
   - curl_ws_send (3)
   - libcurl-ws (3)
+Protocol:
+  - WS
 ---
 
 # NAME

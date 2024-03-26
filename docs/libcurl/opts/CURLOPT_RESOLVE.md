@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_RESOLVE
 Section: 3
@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_CONNECT_TO (3)
   - CURLOPT_DNS_CACHE_TIMEOUT (3)
   - CURLOPT_IPRESOLVE (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -70,10 +72,6 @@ number must exactly match what was added previously.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

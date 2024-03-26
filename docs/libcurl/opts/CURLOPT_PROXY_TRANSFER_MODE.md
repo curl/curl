@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_PROXY_TRANSFER_MODE
 Section: 3
@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_HTTPPROXYTUNNEL (3)
   - CURLOPT_PROXY (3)
   - CURLOPT_TRANSFERTEXT (3)
+Protocol:
+    - All
 ---
 
 # NAME
@@ -35,10 +37,6 @@ doing FTP via a proxy. Beware that not all proxies support this feature.
 # DEFAULT
 
 0, disabled
-
-# PROTOCOLS
-
-FTP over proxy
 
 # EXAMPLE
 

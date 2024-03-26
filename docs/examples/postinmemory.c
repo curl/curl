@@ -63,7 +63,7 @@ int main(void)
   struct MemoryStruct chunk;
   static const char *postthis = "Field=1&Field=2&Field=3";
 
-  chunk.memory = malloc(1);  /* will be grown as needed by realloc above */
+  chunk.memory = malloc(1);  /* grown as needed by realloc above */
   chunk.size = 0;    /* no data at this point */
 
   curl_global_init(CURL_GLOBAL_ALL);
@@ -83,11 +83,10 @@ int main(void)
 
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postthis);
 
-    /* if we do not provide POSTFIELDSIZE, libcurl will strlen() by
-       itself */
+    /* if we do not provide POSTFIELDSIZE, libcurl calls strlen() by itself */
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(postthis));
 
-    /* Perform the request, res will get the return code */
+    /* Perform the request, res gets the return code */
     res = curl_easy_perform(curl);
     /* Check for errors */
     if(res != CURLE_OK) {

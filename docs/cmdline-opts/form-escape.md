@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: form-escape
-Help: Escape multipart form field/file names using backslash
+Help: Escape form fields using backslash
 Protocols: HTTP
 Added: 7.81.0
 Category: http upload
@@ -15,5 +15,5 @@ Example:
 
 # `--form-escape`
 
-Tells curl to pass on names of multipart form fields and files using
-backslash-escaping instead of percent-encoding.
+Pass on names of multipart form fields and files using backslash-escaping
+instead of percent-encoding.

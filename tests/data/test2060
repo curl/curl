@@ -67,6 +67,7 @@ http
 !SSPI
 crypto
 proxy
+sha512-256
 </features>
 <name>
 HTTP POST --digest with PUT, resumed upload, modified method, SHA-512-256 and userhash=false
@@ -92,7 +93,7 @@ Content-Length: 0
 
 GET http://%HOSTIP:%HTTPPORT/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/%TESTNUMBER", response="3ce1e25ffa611bdbe90e2ab367b9602fa223db9f6de76ac667f0d6157e2178a6", algorithm=SHA-512-256
+Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/%TESTNUMBER", response="691867f4a06c79fd0a175c1857e3df7015f6fff3ce8676497d2f1f805b5a8eca", algorithm=SHA-512-256
 Content-Range: bytes 2-4/5
 User-Agent: curl/%VERSION
 Accept: */*

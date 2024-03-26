@@ -32,7 +32,7 @@ Files: CHANGES
 Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
 
-Files: GIT-INFO
+Files: GIT-INFO.md
 Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
 

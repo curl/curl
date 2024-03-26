@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_KEEP_SENDING_ON_ERROR
 Section: 3
@@ -8,11 +8,13 @@ See-also:
   - CURLINFO_RESPONSE_CODE (3)
   - CURLOPT_FAILONERROR (3)
   - CURLOPT_HTTPHEADER (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
 
-CURLOPT_KEEP_SENDING_ON_ERROR - keep sending on early HTTP response >= 300
+CURLOPT_KEEP_SENDING_ON_ERROR - keep sending on early HTTP response \>= 300
 
 # SYNOPSIS
 
@@ -38,10 +40,6 @@ Most applications do not need this option.
 # DEFAULT
 
 0, stop sending on error
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

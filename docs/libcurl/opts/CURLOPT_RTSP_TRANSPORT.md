@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_RTSP_TRANSPORT
 Section: 3
@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_RTSP_REQUEST (3)
   - CURLOPT_RTSP_SESSION_ID (3)
+Protocol:
+  - RTSP
 ---
 
 # NAME
@@ -35,10 +37,6 @@ option.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-RTSP
 
 # EXAMPLE
 

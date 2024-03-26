@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_PROXYUSERNAME
 Section: 3
@@ -9,11 +9,13 @@ See-also:
   - CURLOPT_PROXYAUTH (3)
   - CURLOPT_PROXYPASSWORD (3)
   - CURLOPT_USERNAME (3)
+Protocol:
+  - All
 ---
 
 # NAME
 
-CURLOPT_PROXYUSERNAME - user name to use for proxy authentication
+CURLOPT_PROXYUSERNAME - username to use for proxy authentication
 
 # SYNOPSIS
 
@@ -27,9 +29,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXYUSERNAME,
 # DESCRIPTION
 
 Pass a char pointer as parameter, which should be pointing to the
-null-terminated user name to use for the transfer.
+null-terminated username to use for the transfer.
 
-CURLOPT_PROXYUSERNAME(3) sets the user name to be used in protocol
+CURLOPT_PROXYUSERNAME(3) sets the username to be used in protocol
 authentication with the proxy.
 
 To specify the proxy password use the CURLOPT_PROXYPASSWORD(3).
@@ -40,10 +42,6 @@ option.
 # DEFAULT
 
 blank
-
-# PROTOCOLS
-
-Most
 
 # EXAMPLE
 

@@ -1231,20 +1231,24 @@ process_iac:
 static CURLcode send_telnet_data(struct Curl_easy *data,
                                  char *buffer, ssize_t nread)
 {
-  ssize_t i, outlen;
+  size_t i, outlen;
   unsigned char *outbuf;
   CURLcode result = CURLE_OK;
-  ssize_t bytes_written, total_written = 0;
+  size_t bytes_written;
+  size_t total_written = 0;
   struct connectdata *conn = data->conn;
   struct TELNET *tn = data->req.p.telnet;
 
   DEBUGASSERT(tn);
+  DEBUGASSERT(nread > 0);
+  if(nread < 0)
+    return CURLE_TOO_LARGE;
 
   if(memchr(buffer, CURL_IAC, nread)) {
     /* only use the escape buffer when necessary */
     Curl_dyn_reset(&tn->out);
 
-    for(i = 0; i < nread && !result; i++) {
+    for(i = 0; i < (size_t)nread && !result; i++) {
       result = Curl_dyn_addn(&tn->out, &buffer[i], 1);
       if(!result && ((unsigned char)buffer[i] == CURL_IAC))
         /* IAC is FF in hex */
@@ -1255,7 +1259,7 @@ static CURLcode send_telnet_data(struct Curl_easy *data,
     outbuf = Curl_dyn_uptr(&tn->out);
   }
   else {
-    outlen = nread;
+    outlen = (size_t)nread;
     outbuf = (unsigned char *)buffer;
   }
   while(!result && total_written < outlen) {
@@ -1270,8 +1274,8 @@ static CURLcode send_telnet_data(struct Curl_easy *data,
         break;
       default:                    /* write! */
         bytes_written = 0;
-        result = Curl_nwrite(data, FIRSTSOCKET, outbuf + total_written,
-                             outlen - total_written, &bytes_written);
+        result = Curl_xfer_send(data, outbuf + total_written,
+                                outlen - total_written, &bytes_written);
         total_written += bytes_written;
         break;
     }
@@ -1464,7 +1468,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
       }
       if(events.lNetworkEvents & FD_READ) {
         /* read data from network */
-        result = Curl_read(data, sockfd, buffer, sizeof(buffer), &nread);
+        result = Curl_xfer_recv(data, buffer, sizeof(buffer), &nread);
         /* read would've blocked. Loop again */
         if(result == CURLE_AGAIN)
           break;
@@ -1545,7 +1549,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
     default:                    /* read! */
       if(pfd[0].revents & POLLIN) {
         /* read data from network */
-        result = Curl_read(data, sockfd, buffer, sizeof(buffer), &nread);
+        result = Curl_xfer_recv(data, buffer, sizeof(buffer), &nread);
         /* read would've blocked. Loop again */
         if(result == CURLE_AGAIN)
           break;
@@ -1635,7 +1639,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
   }
 #endif
   /* mark this as "no further transfer wanted" */
-  Curl_setup_transfer(data, -1, -1, FALSE, -1);
+  Curl_xfer_setup(data, -1, -1, FALSE, -1);
 
   return result;
 }

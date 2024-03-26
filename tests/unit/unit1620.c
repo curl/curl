@@ -84,8 +84,6 @@ UNITTEST_START
                 "Curl_free() did not set to NULL");
   }
 
-  Curl_free_request_state(empty);
-
   rc = Curl_close(&empty);
   fail_unless(rc == CURLE_OK, "Curl_close() failed");
 

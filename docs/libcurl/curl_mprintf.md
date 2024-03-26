@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: curl_printf
 Section: 3
@@ -9,6 +9,8 @@ See-also:
   - printf (3)
   - sprintf (3)
   - vprintf (3)
+Protocol:
+  - All
 ---
 
 # NAME

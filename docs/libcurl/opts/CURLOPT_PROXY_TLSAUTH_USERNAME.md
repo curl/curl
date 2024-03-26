@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_PROXY_TLSAUTH_USERNAME
 Section: 3
@@ -9,11 +9,16 @@ See-also:
   - CURLOPT_PROXY_TLSAUTH_TYPE (3)
   - CURLOPT_TLSAUTH_PASSWORD (3)
   - CURLOPT_TLSAUTH_TYPE (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
+  - GnuTLS
 ---
 
 # NAME
 
-CURLOPT_PROXY_TLSAUTH_USERNAME - user name to use for proxy TLS authentication
+CURLOPT_PROXY_TLSAUTH_USERNAME - username to use for proxy TLS authentication
 
 # SYNOPSIS
 
@@ -38,10 +43,6 @@ option.
 
 NULL
 
-# PROTOCOLS
-
-All
-
 # EXAMPLE
 
 ~~~c
@@ -63,7 +64,7 @@ int main(void)
 
 # AVAILABILITY
 
-Added in 7.52.0, with the OpenSSL and GnuTLS backends only.
+Added in 7.52.0.
 
 # RETURN VALUE
 

@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_TRAILERFUNCTION
 Section: 3
@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_TRAILERDATA (3)
   - CURLOPT_WRITEFUNCTION (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -56,10 +58,6 @@ without any interruptions.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 ~~~c

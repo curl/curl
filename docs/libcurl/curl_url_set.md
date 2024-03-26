@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: curl_url_set
 Section: 3
@@ -11,6 +11,8 @@ See-also:
   - curl_url_dup (3)
   - curl_url_get (3)
   - curl_url_strerror (3)
+Protocol:
+  - All
 ---
 
 # NAME

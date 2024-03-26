@@ -648,15 +648,15 @@ sub singletest_setenv {
     my @setenv = getpart("client", "setenv");
     foreach my $s (@setenv) {
         chomp $s;
-        if($s =~ /([^=]*)=(.*)/) {
+        if($s =~ /([^=]*)(.*)/) {
             my ($var, $content) = ($1, $2);
             # remember current setting, to restore it once test runs
             $oldenv{$var} = ($ENV{$var})?"$ENV{$var}":'notset';
-            # set new value
-            if(!$content) {
-                delete $ENV{$var} if($ENV{$var});
-            }
-            else {
+
+            if($content =~ /^=(.*)/) {
+                # assign it
+                $content = $1;
+
                 if($var =~ /^LD_PRELOAD/) {
                     if(exe_ext('TOOL') && (exe_ext('TOOL') eq '.exe')) {
                         logmsg "Skipping LD_PRELOAD due to lack of OS support\n" if($verbose);
@@ -670,6 +670,11 @@ sub singletest_setenv {
                 $ENV{$var} = "$content";
                 logmsg "setenv $var = $content\n" if($verbose);
             }
+            else {
+                # remove it
+                delete $ENV{$var} if($ENV{$var});
+            }
+
         }
     }
     if($proxy_address) {

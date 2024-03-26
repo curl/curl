@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: libcurl
 Section: 3
@@ -11,6 +11,8 @@ See-also:
   - libcurl (3)
   - libcurl-errors (3)
   - libcurl-multi (3)
+Protocol:
+  - All
 ---
 
 # NAME

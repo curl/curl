@@ -4,7 +4,7 @@ SPDX-License-Identifier: curl
 Long: write-out
 Short: w
 Arg: <format>
-Help: Use output FORMAT after completion
+Help: Output FORMAT after completion
 Category: verbose
 Added: 6.5
 Multi: single
@@ -18,10 +18,10 @@ Example:
 # `--write-out`
 
 Make curl display information on stdout after a completed transfer. The format
-is a string that may contain plain text mixed with any number of
-variables. The format can be specified as a literal "string", or you can have
-curl read the format from a file with "@filename" and to tell curl to read the
-format from stdin you write "@-".
+is a string that may contain plain text mixed with any number of variables.
+The format can be specified as a literal "string", or you can have curl read
+the format from a file with "@filename" and to tell curl to read the format
+from stdin you write "@-".
 
 The variables present in the output format are substituted by the value or
 text that curl thinks fit, as described below. All variables are specified as
@@ -38,18 +38,24 @@ colon). The header contents are exactly as sent over the network, with leading
 and trailing whitespace trimmed (added in 7.84.0).
 
 Select a specific target destination file to write the output to, by using
-*%output{name}* (added in curl 8.3.0) where *name* is the full file name. The
+*%output{name}* (added in curl 8.3.0) where *name* is the full filename. The
 output following that instruction is then written to that file. More than one
 *%output{}* instruction can be specified in the same write-out argument. If
-the file name cannot be created, curl leaves the output destination to the one
-used prior to the *%output{}* instruction. Use *%output{>>name}* to append
+the filename cannot be created, curl leaves the output destination to the one
+used prior to the *%output{}* instruction. Use *%output{\>\>name}* to append
 data to an existing file.
 
-**NOTE:**
-In Windows the %-symbol is a special symbol used to expand environment
-variables. In batch files all occurrences of % must be doubled when using this
-option to properly escape. If this option is used at the command prompt then
-the % cannot be escaped and unintended expansion is possible.
+This output is done independently of if the file transfer was successful or
+not.
+
+If the specified action or output specified with this option fails in any way,
+it does not make curl return a (different) error.
+
+**NOTE:** On Windows, the %-symbol is a special symbol used to expand
+environment variables. In batch files, all occurrences of % must be doubled
+when using this option to properly escape. If this option is used at the
+command prompt then the % cannot be escaped and unintended expansion is
+possible.
 
 The variables available are:
 
@@ -68,9 +74,9 @@ The numerical exit code of the transfer. (Added in 7.75.0)
 
 ## `filename_effective`
 The ultimate filename that curl writes out to. This is only meaningful if curl
-is told to write to a file with the --remote-name or --output
-option. It's most useful in combination with the --remote-header-name
-option. (Added in 7.26.0)
+is told to write to a file with the --remote-name or --output option. It is
+most useful in combination with the --remote-header-name option. (Added in
+7.26.0)
 
 ## `ftp_entry_path`
 The initial path curl ended up in when logging on to the remote FTP
@@ -131,6 +137,11 @@ The rest of the output is only shown if the transfer returned a non-zero error.
 ## `proxy_ssl_verify_result`
 The result of the HTTPS proxy's SSL peer certificate verification that was
 requested. 0 means the verification was successful. (Added in 7.52.0)
+
+## `proxy_used`
+Returns 1 if the previous transfer used a proxy, otherwise 0. Useful to for
+example determine if a `NOPROXY` pattern matched the hostname or not. (Added
+in 8.7.0)
 
 ## `redirect_url`
 When an HTTP request was made without --location to follow redirects (or when

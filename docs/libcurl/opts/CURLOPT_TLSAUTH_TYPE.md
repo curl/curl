@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_TLSAUTH_TYPE
 Section: 3
@@ -7,6 +7,11 @@ Source: libcurl
 See-also:
   - CURLOPT_TLSAUTH_PASSWORD (3)
   - CURLOPT_TLSAUTH_USERNAME (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
+  - GnuTLS
 ---
 
 # NAME
@@ -42,10 +47,6 @@ TLS SRP does not work with TLS 1.3.
 # DEFAULT
 
 blank
-
-# PROTOCOLS
-
-All TLS-based protocols
 
 # EXAMPLE
 

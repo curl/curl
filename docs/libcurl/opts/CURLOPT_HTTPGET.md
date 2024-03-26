@@ -1,9 +1,11 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_HTTPGET
 Section: 3
 Source: libcurl
+Protocol:
+  - HTTP
 See-also:
   - CURLOPT_NOBODY (3)
   - CURLOPT_POST (3)
@@ -39,10 +41,6 @@ reset a handle to default method, consider curl_easy_reset(3).
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-HTTP(S)
 
 # EXAMPLE
 

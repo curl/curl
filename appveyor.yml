@@ -292,7 +292,7 @@ branches:
 skip_commits:
   files:
     - '.azure-pipelines.yml'
-    - '.circleci/**/*'
+    - '.circleci/*'
     - '.cirrus.yml'
     - '.github/**/*'
     - 'packages/**/*'

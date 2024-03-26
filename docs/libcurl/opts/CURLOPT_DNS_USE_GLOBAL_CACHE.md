@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_DNS_USE_GLOBAL_CACHE
 Section: 3
@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_DNS_CACHE_TIMEOUT (3)
   - CURLOPT_SHARE (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -30,16 +32,12 @@ Pass a long. If the *enable* value is 1, it tells curl to use a global DNS
 cache that survives between easy handle creations and deletions. This is not
 thread-safe and this uses a global variable.
 
-See CURLOPT_SHARE(3) and curl_share_init(3) for the correct way to
-share DNS cache between transfers.
+See CURLOPT_SHARE(3) and curl_share_init(3) for the correct way to share DNS
+cache between transfers.
 
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

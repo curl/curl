@@ -23,14 +23,13 @@ isn't:is not
  a http: an http
  a ftp: an ftp
  url =URL
-internet\W=Internet
+internet\b=Internet
 isation:ization
 it's:it is
 there's:there is
 [^.]\. And: Rewrite it somehow?
 ^(And|So|But) = Rewrite it somehow?
 \. But: Rewrite it somehow?
-file name :filename
 \. So : Rewrite without "so" ?
  dir :directory
 you'd:you would
@@ -38,9 +37,14 @@ you'll:you will
 can't:cannot
 that's:that is
 web page:webpage
-host name\W:hostname
-file name\W:filename
+host name\b:hostname
+host names\b:hostnames
+file name\b:filename
+file names\b:filenames
+\buser name\b:username
+\buser names\b:usernames
 didn't:did not
 doesn't:does not
 won't:will not
 couldn't:could not
+\bwill\b:rewrite to present tense

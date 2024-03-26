@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_COOKIEFILE
 Section: 3
@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_COOKIE (3)
   - CURLOPT_COOKIEJAR (3)
   - CURLOPT_COOKIESESSION (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -64,10 +66,6 @@ run.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

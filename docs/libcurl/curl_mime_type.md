@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: curl_mime_type
 Section: 3
@@ -8,6 +8,10 @@ See-also:
   - curl_mime_addpart (3)
   - curl_mime_data (3)
   - curl_mime_name (3)
+Protocol:
+  - HTTP
+  - IMAP
+  - SMTP
 ---
 
 # NAME
@@ -42,7 +46,7 @@ a default mime type is determined by the context:
 
 - application/form-data for an HTTP form post.
 
-- If a remote filename is set, the mime type is taken from the file name
+- If a remote filename is set, the mime type is taken from the filename
 extension, or application/octet-stream by default.
 
 - For a multipart part, multipart/mixed.

@@ -33,7 +33,7 @@ int main(void)
   CURL *curl;
   CURLcode res;
 
-  /* In windows, this will init the winsock stuff */
+  /* In windows, this inits the winsock stuff */
   curl_global_init(CURL_GLOBAL_ALL);
 
   /* get a curl handle */
@@ -46,7 +46,7 @@ int main(void)
     /* Now specify the POST data */
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "name=daniel&project=curl");
 
-    /* Perform the request, res will get the return code */
+    /* Perform the request, res gets the return code */
     res = curl_easy_perform(curl);
     /* Check for errors */
     if(res != CURLE_OK)

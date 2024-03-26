@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: curl_multi_add_handle
 Section: 3
@@ -10,6 +10,8 @@ See-also:
   - curl_multi_init (3)
   - curl_multi_setopt (3)
   - curl_multi_socket_action (3)
+Protocol:
+  - All
 ---
 
 # NAME

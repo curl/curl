@@ -40,8 +40,7 @@ struct helptxt {
 /*
  * The bitmask output is generated with the following command
  ------------------------------------------------------------
-  cd $srcroot/docs/cmdline-opts
-  ./gen.pl listcats *.d
+  make -C docs/cmdline-opts listcats
  */
 
 #define CURLHELP_HIDDEN 1u << 0u

@@ -266,6 +266,13 @@
 
 #include <curl/system.h>
 
+/* Helper macro to expand and concatenate two macros.
+ * Direct macros concatenation does not work because macros
+ * are not expanded before direct concatenation.
+ */
+#define CURL_CONC_MACROS_(A,B) A ## B
+#define CURL_CONC_MACROS(A,B) CURL_CONC_MACROS_(A,B)
+
 /* curl uses its own printf() function internally. It understands the GNU
  * format. Use this format, so that is matches the GNU format attribute we
  * use with the mingw compiler, allowing it to verify them at compile-time.
@@ -494,6 +501,17 @@
 #  define CURL_OFF_T_MAX CURL_OFF_T_C(0x7FFFFFFFFFFFFFFF)
 #endif
 #define CURL_OFF_T_MIN (-CURL_OFF_T_MAX - CURL_OFF_T_C(1))
+
+#if (SIZEOF_CURL_OFF_T != 8)
+#  error "curl_off_t must be exactly 64 bits"
+#else
+  typedef unsigned CURL_TYPEOF_CURL_OFF_T curl_uint64_t;
+#  ifndef CURL_SUFFIX_CURL_OFF_TU
+#    error "CURL_SUFFIX_CURL_OFF_TU must be defined"
+#  endif
+#  define CURL_UINT64_SUFFIX  CURL_SUFFIX_CURL_OFF_TU
+#  define CURL_UINT64_C(val)  CURL_CONC_MACROS(val,CURL_UINT64_SUFFIX)
+#endif
 
 #if (SIZEOF_TIME_T == 4)
 #  ifdef HAVE_TIME_T_UNSIGNED

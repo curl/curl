@@ -2,8 +2,8 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: local-port
-Arg: <num/range>
-Help: Force use of RANGE for local port numbers
+Arg: <range>
+Help: Use a local port number within RANGE
 Added: 7.15.2
 Category: connection
 Multi: single

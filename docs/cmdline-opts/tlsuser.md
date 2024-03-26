@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: tlsuser
 Arg: <name>
-Help: TLS user name
+Help: TLS username
 Added: 7.21.4
 Protocols: TLS
 Category: tls auth

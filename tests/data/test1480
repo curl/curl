@@ -1,0 +1,58 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 100 Continue
+Foo: Bar
+
+Data
+Data
+Data
+</data>
+<datacheck>
+</datacheck>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP Continue response without final response
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+
+# Hyper curl returns unsupported protocol
+# built-in curl returns weird_server_reply
+<errorcode>
+%if hyper
+1
+%else
+8
+%endif
+</errorcode>
+</verify>
+</testcase>

@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: libcurl-tutorial
 Section: 3
@@ -9,6 +9,8 @@ See-also:
   - libcurl-errors (3)
   - libcurl-multi (3)
   - libcurl-url (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -350,7 +352,7 @@ buffer. Returning 0 signals the end of the upload.
 
 # Passwords
 
-Many protocols use or even require that user name and password are provided
+Many protocols use or even require that username and password are provided
 to be able to download or upload the data of your choice. libcurl offers
 several ways to specify them.
 
@@ -360,10 +362,10 @@ this:
 ~~~c
  protocol://user:password@example.com/path/
 ~~~
-If you need any odd letters in your user name or password, you should enter
+If you need any odd letters in your username or password, you should enter
 them URL encoded, as %XX where XX is a two-digit hexadecimal number.
 
-libcurl also provides options to set various passwords. The user name and
+libcurl also provides options to set various passwords. The username and
 password as shown embedded in the URL can instead get set with the
 CURLOPT_USERPWD(3) option. The argument passed to libcurl should be a
 char * to a string in the format "user:password". In a manner like this:
@@ -381,13 +383,13 @@ to the CURLOPT_USERPWD(3) option like this:
  curl_easy_setopt(handle, CURLOPT_PROXYUSERPWD, "myname:thesecret");
 ~~~
 
-There is a long time Unix "standard" way of storing FTP user names and
+There is a long time Unix "standard" way of storing FTP usernames and
 passwords, namely in the $HOME/.netrc file (on Windows, libcurl also checks
 the *%USERPROFILE% environment* variable if *%HOME%* is unset, and tries
 "_netrc" as name). The file should be made private so that only the user may
 read it (see also the "Security Considerations" chapter), as it might contain
 the password in plain text. libcurl has the ability to use this file to figure
-out what set of user name and password to use for a particular host. As an
+out what set of username and password to use for a particular host. As an
 extension to the normal functionality, libcurl also supports this file for
 non-FTP protocols such as HTTP. To make curl use this file, use the
 CURLOPT_NETRC(3) option:
@@ -416,7 +418,7 @@ To pass the known private key password to libcurl:
 
 # HTTP Authentication
 
-The previous chapter showed how to set user name and password for getting URLs
+The previous chapter showed how to set username and password for getting URLs
 that require authentication. When using the HTTP protocol, there are many
 different ways a client can provide those credentials to the server and you
 can control which way libcurl uses them. The default HTTP authentication
@@ -461,7 +463,7 @@ proper way. This chapter thus includes examples using both different versions
 of HTTP POST that libcurl supports.
 
 The first version is the simple POST, the most common version, that most HTML
-pages using the <form> tag uses. We provide a pointer to the data and tell
+pages using the \<form\> tag uses. We provide a pointer to the data and tell
 libcurl to post it all to the remote site:
 
 ~~~c
@@ -675,10 +677,10 @@ becomes:
  curl_mime_data_cb(part, (curl_off_t) -1, fread, fseek, NULL, stdin);
 ~~~
 
-curl_mime_name(3) always copies the field name. The special file name
-"-" is not supported by curl_mime_filename(3): to read an open file, use
-a callback source using fread(). The transfer is be chunk-encoded since the
-data size is unknown.
+curl_mime_name(3) always copies the field name. The special filename "-" is
+not supported by curl_mime_filename(3): to read an open file, use a callback
+source using fread(). The transfer is be chunk-encoded since the data size is
+unknown.
 
 ~~~c
  curl_formadd(&post, &last,
@@ -1021,14 +1023,16 @@ manners. You may need to change words, headers or various data.
 
 libcurl is your friend here too.
 
-## CUSTOMREQUEST
+## CURLOPT_CUSTOMREQUEST
 
 If just changing the actual HTTP request keyword is what you want, like when
 GET, HEAD or POST is not good enough for you, CURLOPT_CUSTOMREQUEST(3)
 is there for you. It is simple to use:
+
 ~~~c
 curl_easy_setopt(handle, CURLOPT_CUSTOMREQUEST, "MYOWNREQUEST");
 ~~~
+
 When using the custom request, you change the request keyword of the actual
 request you are performing. Thus, by default you make a GET request but you
 can also make a POST operation (as described before) and then replace the POST
@@ -1141,20 +1145,20 @@ The option to enable headers or to run custom FTP commands may be useful to
 combine with CURLOPT_NOBODY(3). If this option is set, no actual file
 content transfer is performed.
 
-## FTP Custom CUSTOMREQUEST
+## FTP Custom CURLOPT_CUSTOMREQUEST
 
 If you do want to list the contents of an FTP directory using your own defined
-FTP command, CURLOPT_CUSTOMREQUEST(3) does just that. "NLST" is the
-default one for listing directories but you are free to pass in your idea of a
-good alternative.
+FTP command, CURLOPT_CUSTOMREQUEST(3) does just that. "NLST" is the default
+one for listing directories but you are free to pass in your idea of a good
+alternative.
 
 # Cookies Without Chocolate Chips
 
 In the HTTP sense, a cookie is a name with an associated value. A server sends
 the name and value to the client, and expects it to get sent back on every
-subsequent request to the server that matches the particular conditions
-set. The conditions include that the domain name and path match and that the
-cookie has not become too old.
+subsequent request to the server that matches the particular conditions set.
+The conditions include that the domain name and path match and that the cookie
+has not become too old.
 
 In real-world cases, servers send new cookies to replace existing ones to
 update them. Server use cookies to "track" users and to keep "sessions".
@@ -1164,12 +1168,14 @@ they are sent from clients to servers with the Cookie: header.
 
 To just send whatever cookie you want to a server, you can use
 CURLOPT_COOKIE(3) to set a cookie string like this:
+
 ~~~c
  curl_easy_setopt(handle, CURLOPT_COOKIE, "name1=var1; name2=var2;");
 ~~~
-In many cases, that is not enough. You might want to dynamically save
-whatever cookies the remote server passes to you, and make sure those cookies
-are then used accordingly on later requests.
+
+In many cases, that is not enough. You might want to dynamically save whatever
+cookies the remote server passes to you, and make sure those cookies are then
+used accordingly on later requests.
 
 One way to do this, is to save all headers you receive in a plain file and
 when you make a request, you tell libcurl to read the previous headers to

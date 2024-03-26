@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: include
 Short: i
-Help: Include protocol response headers in the output
+Help: Include response headers in output
 Protocols: HTTP FTP
 Category: important verbose
 Added: 4.8

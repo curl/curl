@@ -1,9 +1,11 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_HSTS
 Section: 3
 Source: libcurl
+Protocol:
+  - HTTP
 See-also:
   - CURLOPT_ALTSVC (3)
   - CURLOPT_HSTS_CTRL (3)
@@ -12,7 +14,7 @@ See-also:
 
 # NAME
 
-CURLOPT_HSTS - HSTS cache file name
+CURLOPT_HSTS - HSTS cache filename
 
 # SYNOPSIS
 
@@ -55,11 +57,7 @@ currently no length or size limit.
 
 # DEFAULT
 
-NULL, no file name
-
-# PROTOCOLS
-
-HTTPS and HTTP
+NULL, no filename
 
 # EXAMPLE
 

@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_SSL_CTX_FUNCTION
 Section: 3
@@ -7,11 +7,19 @@ Source: libcurl
 See-also:
   - CURLOPT_SSL_CTX_DATA (3)
   - CURLOPT_SSL_VERIFYPEER (3)
+  - CURLOPT_CAINFO (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
+  - wolfSSL
+  - mbedTLS
+  - BearSSL
 ---
 
 # NAME
 
-CURLOPT_SSL_CTX_FUNCTION - SSL context callback for OpenSSL, wolfSSL or mbedTLS
+CURLOPT_SSL_CTX_FUNCTION - SSL context callback
 
 # SYNOPSIS
 
@@ -26,57 +34,53 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_CTX_FUNCTION,
 
 # DESCRIPTION
 
-This option only works for libcurl powered by OpenSSL, wolfSSL, mbedTLS or
-BearSSL. If libcurl was built against another SSL library this functionality
-is absent.
-
 Pass a pointer to your callback function, which should match the prototype
 shown above.
 
 This callback function gets called by libcurl just before the initialization
 of an SSL connection after having processed all other SSL related options to
 give a last chance to an application to modify the behavior of the SSL
-initialization. The *ssl_ctx* parameter is actually a pointer to the SSL
-library's *SSL_CTX* for OpenSSL or wolfSSL, a pointer to
-*mbedtls_ssl_config* for mbedTLS or a pointer to
-*br_ssl_client_context* for BearSSL. If an error is returned from the
-callback no attempt to establish a connection is made and the perform
-operation returns the callback's error code. Set the *clientp* argument
-with the CURLOPT_SSL_CTX_DATA(3) option.
+initialization. The *ssl_ctx* parameter is a pointer to the SSL library's
+*SSL_CTX* for OpenSSL or wolfSSL, a pointer to *mbedtls_ssl_config* for
+mbedTLS or a pointer to *br_ssl_client_context* for BearSSL. If an error is
+returned from the callback no attempt to establish a connection is made and
+the perform operation returns the callback's error code. Set the *clientp*
+argument passed in to this callback with the CURLOPT_SSL_CTX_DATA(3) option.
 
-This function gets called on all new connections made to a server, during the
-SSL negotiation. The *ssl_ctx* points to a newly initialized object each
-time, but note the pointer may be the same as from a prior call.
+This function gets called for all new connections made to a server, during the
+SSL negotiation. While *ssl_ctx* points to a newly initialized object each
+time, the pointer may still be the same as in a prior call.
 
-To use this properly, a non-trivial amount of knowledge of your SSL library is
+To use this callback, a non-trivial amount of knowledge of your SSL library is
 necessary. For example, you can use this function to call library-specific
 callbacks to add additional validation code for certificates, and even to
 change the actual URI of an HTTPS request.
 
-For OpenSSL, asynchronous certificate verification via
-*SSL_set_retry_verify* is supported. (Added in 8.3.0)
+For OpenSSL, asynchronous certificate verification via *SSL_set_retry_verify*
+is supported. (Added in 8.3.0)
 
-WARNING: The CURLOPT_SSL_CTX_FUNCTION(3) callback allows the application
-to reach in and modify SSL details in the connection without libcurl itself
-knowing anything about it, which then subsequently can lead to libcurl
-unknowingly reusing SSL connections with different properties. To remedy this
-you may set CURLOPT_FORBID_REUSE(3) from the callback function.
+The CURLOPT_SSL_CTX_FUNCTION(3) callback allows the application to reach in
+and modify SSL details in the connection without libcurl itself knowing
+anything about it, which then subsequently can lead to libcurl unknowingly
+reusing SSL connections with different properties. To remedy this you may set
+CURLOPT_FORBID_REUSE(3) from the callback function.
 
-WARNING: If you are using DNS-over-HTTPS (DoH) via CURLOPT_DOH_URL(3)
-then this callback is also called for those transfers and the curl handle is
-set to an internal handle. **This behavior is subject to change.** We
-recommend before performing your transfer set CURLOPT_PRIVATE(3) on your
-curl handle so you can identify it in the context callback. If you have a
-reason to modify DoH SSL context please let us know on the curl-library
-mailing list because we are considering removing this capability.
+If you are using DNS-over-HTTPS (DoH) via CURLOPT_DOH_URL(3) then this
+callback is also called for those transfers and the curl handle is set to an
+internal handle. **This behavior is subject to change.** We recommend setting
+CURLOPT_PRIVATE(3) on your curl handle so you can identify it correctly in the
+context callback. If you have a reason to modify DoH SSL context please let us
+know on the curl-library mailing list because we are considering removing this
+capability.
+
+libcurl does not guarantee the lifetime of the passed in object once this
+callback function has returned. Your application must not assume that it can
+keep using the SSL context or data derived from it once this function is
+completed.
 
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
 
 # EXAMPLE
 
@@ -155,13 +159,11 @@ int main(void)
 
 # AVAILABILITY
 
-Added in 7.11.0 for OpenSSL, in 7.42.0 for wolfSSL, in 7.54.0 for mbedTLS,
-in 7.83.0 in BearSSL. Other SSL backends are not supported.
+OpenSSL (added in 7.11.0), wolfSSL (added in 7.42.0), mbedTLS (added in
+7.54.0) or BearSSL (added in 7.83.0)
 
 # RETURN VALUE
 
 CURLE_OK if supported; or an error such as:
 
 CURLE_NOT_BUILT_IN - Not supported by the SSL backend
-
-CURLE_UNKNOWN_OPTION

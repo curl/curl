@@ -1,9 +1,12 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_IGNORE_CONTENT_LENGTH
 Section: 3
 Source: libcurl
+Protocol:
+  - HTTP
+  - FTP
 See-also:
   - CURLOPT_HTTP_VERSION (3)
   - CURLOPT_MAXFILESIZE_LARGE (3)
@@ -41,10 +44,6 @@ Only use this option if strictly necessary.
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

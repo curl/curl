@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_KRBLEVEL
 Section: 3
@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_KRBLEVEL (3)
   - CURLOPT_USE_SSL (3)
+Protocol:
+  - FTP
 ---
 
 # NAME
@@ -35,10 +37,6 @@ option.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-FTP
 
 # EXAMPLE
 

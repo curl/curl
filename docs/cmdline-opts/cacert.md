@@ -17,10 +17,10 @@ Example:
 
 # `--cacert`
 
-Tells curl to use the specified certificate file to verify the peer. The file
-may contain multiple CA certificates. The certificate(s) must be in PEM
-format. Normally curl is built to use a default file for this, so this option
-is typically used to alter that default file.
+Use the specified certificate file to verify the peer. The file may contain
+multiple CA certificates. The certificate(s) must be in PEM format. Normally
+curl is built to use a default file for this, so this option is typically used
+to alter that default file.
 
 curl recognizes the environment variable named 'CURL_CA_BUNDLE' if it is set
 and the TLS backend is not Schannel, and uses the given path as a path to a CA

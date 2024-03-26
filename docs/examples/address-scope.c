@@ -47,7 +47,7 @@ int main(void)
     my_scope_id = if_nametoindex("eth0");
     curl_easy_setopt(curl, CURLOPT_ADDRESS_SCOPE, my_scope_id);
 
-    /* Perform the request, res will get the return code */
+    /* Perform the request, res gets the return code */
     res = curl_easy_perform(curl);
     /* Check for errors */
     if(res != CURLE_OK)

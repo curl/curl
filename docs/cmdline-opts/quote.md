@@ -37,13 +37,13 @@ You must send syntactically correct FTP commands as RFC 959 defines to FTP
 servers, or one of the commands listed below to SFTP servers.
 
 SFTP is a binary protocol. Unlike for FTP, curl interprets SFTP quote commands
-itself before sending them to the server. File names may be quoted
-shell-style to embed spaces or special characters. Following is the list of
-all supported SFTP quote commands:
+itself before sending them to the server. Filenames may be quoted shell-style
+to embed spaces or special characters. Following is the list of all supported
+SFTP quote commands:
 
 ## atime date file
 The atime command sets the last access time of the file named by the file
-operand. The <date expression> can be all sorts of date strings, see the
+operand. The date expression can be all sorts of date strings, see the
 *curl_getdate(3)* man page for date expression details. (Added in 7.73.0)
 
 ## chgrp group file
@@ -69,7 +69,7 @@ The mkdir command creates the directory named by the directory_name operand.
 
 ## mtime date file
 The mtime command sets the last modification time of the file named by the
-file operand. The <date expression> can be all sorts of date strings, see the
+file operand. The date expression can be all sorts of date strings, see the
 *curl_getdate(3)* man page for date expression details. (Added in 7.73.0)
 
 ## pwd

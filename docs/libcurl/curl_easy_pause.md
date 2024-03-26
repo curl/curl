@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: curl_easy_pause
 Section: 3
@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - curl_easy_cleanup (3)
   - curl_easy_reset (3)
+Protocol:
+  - All
 ---
 
 # NAME

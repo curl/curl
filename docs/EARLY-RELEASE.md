@@ -28,7 +28,7 @@ big and we never release just a patch. There is only "release".
  - Is there a security advisory rated high or critical?
  - Is there a data corruption bug?
  - Did the bug cause an API/ABI breakage?
- - Will the problem annoy a significant share of the user population?
+ - Does the problem annoy a significant share of the user population?
 
 If the answer is yes to one or more of the above, an early release might be
 warranted.

@@ -1,11 +1,14 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_SSH_KEYDATA
 Section: 3
 Source: libcurl
 See-also:
   - CURLOPT_SSH_HOSTKEYFUNCTION (3)
+Protocol:
+  - SFTP
+  - SCP
 ---
 
 # NAME
@@ -28,10 +31,6 @@ the callback set with CURLOPT_SSH_HOSTKEYFUNCTION(3).
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-SCP and SFTP
 
 # EXAMPLE
 

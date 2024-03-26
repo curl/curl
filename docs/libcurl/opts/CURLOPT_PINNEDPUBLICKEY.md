@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_PINNEDPUBLICKEY
 Section: 3
@@ -9,6 +9,15 @@ See-also:
   - CURLOPT_CAPATH (3)
   - CURLOPT_SSL_VERIFYHOST (3)
   - CURLOPT_SSL_VERIFYPEER (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
+  - GnuTLS
+  - wolfSSL
+  - mbedTLS
+  - Secure Transport
+  - Schannel
 ---
 
 # NAME
@@ -47,10 +56,6 @@ option.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
 
 # EXAMPLE
 

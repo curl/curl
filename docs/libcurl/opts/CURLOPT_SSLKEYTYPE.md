@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_SSLKEYTYPE
 Section: 3
@@ -8,6 +8,12 @@ See-also:
   - CURLOPT_PROXY_SSLKEYTYPE (3)
   - CURLOPT_SSLCERT (3)
   - CURLOPT_SSLKEY (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
+  - BearSSL
+  - wolfSSL
 ---
 
 # NAME
@@ -38,10 +44,6 @@ option.
 # DEFAULT
 
 "PEM"
-
-# PROTOCOLS
-
-All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
 
 # EXAMPLE
 

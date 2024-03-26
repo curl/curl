@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: remote-time
 Short: R
-Help: Set the remote file's time on the local output
+Help: Set remote file's time on local output
 Category: output
 Added: 7.9
 Multi: boolean

@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_DEFAULT_PROTOCOL
 Section: 3
@@ -8,6 +8,8 @@ See-also:
   - CURLINFO_PROTOCOL (3)
   - CURLINFO_SCHEME (3)
   - CURLOPT_URL (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -52,10 +54,6 @@ option.
 # DEFAULT
 
 NULL (make a guess based on the host)
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

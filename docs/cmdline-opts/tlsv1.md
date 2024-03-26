@@ -8,7 +8,7 @@ Protocols: TLS
 Added: 7.9.2
 Mutexed: tlsv1.1 tlsv1.2 tlsv1.3
 Requires: TLS
-Help: Use TLSv1.0 or greater
+Help: TLSv1.0 or greater
 Category: tls
 Multi: mutex
 See-also:
@@ -20,5 +20,5 @@ Example:
 
 # `--tlsv1`
 
-Tells curl to use at least TLS version 1.x when negotiating with a remote TLS
-server. That means TLS version 1.0 or higher
+Use at least TLS version 1.x when negotiating with a remote TLS server. That
+means TLS version 1.0 or higher

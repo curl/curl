@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_SOCKOPTFUNCTION
 Section: 3
@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_OPENSOCKETFUNCTION (3)
   - CURLOPT_SEEKFUNCTION (3)
   - CURLOPT_SOCKOPTDATA (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -71,10 +73,6 @@ not attempt to connect (again).
 # DEFAULT
 
 By default, this callback is NULL and unused.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

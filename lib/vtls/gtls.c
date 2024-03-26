@@ -117,6 +117,8 @@ static ssize_t gtls_pull(void *s, void *buf, size_t blen)
                                (CURLE_AGAIN == result)? EAGAIN : EINVAL);
     nread = -1;
   }
+  else if(nread == 0)
+    connssl->peer_closed = TRUE;
   return nread;
 }
 
@@ -1489,7 +1491,7 @@ static int gtls_shutdown(struct Curl_cfilter *cf,
     bool done = FALSE;
     char buf[120];
 
-    while(!done) {
+    while(!done && !connssl->peer_closed) {
       int what = SOCKET_READABLE(Curl_conn_cf_get_socket(cf, data),
                                  SSL_SHUTDOWN_TIMEOUT);
       if(what > 0) {

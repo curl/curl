@@ -1,11 +1,13 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_TCP_FASTOPEN
 Section: 3
 Source: libcurl
 See-also:
   - CURLOPT_SSL_FALSESTART (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -34,10 +36,6 @@ Fast Open is also known to be problematic on or across certain networks.
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

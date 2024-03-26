@@ -29,9 +29,9 @@
 
 struct var {
   struct var *next;
-  const char *name;
   const char *content;
   size_t clen; /* content length */
+  char name[1]; /* allocated as part of the struct */
 };
 
 struct GlobalConfig;

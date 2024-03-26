@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_SSL_ENABLE_NPN
 Section: 3
@@ -7,6 +7,10 @@ Source: libcurl
 See-also:
   - CURLOPT_SSL_ENABLE_ALPN (3)
   - CURLOPT_SSL_OPTIONS (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - All
 ---
 
 # NAME
@@ -32,10 +36,6 @@ is built to use supports it), which can be used to negotiate http2.
 # DEFAULT
 
 1, enabled
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

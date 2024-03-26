@@ -67,7 +67,7 @@
  * Chunk size is large enough to take a full DATA frame */
 #define H3_STREAM_WINDOW_SIZE (128 * 1024)
 #define H3_STREAM_CHUNK_SIZE   (16 * 1024)
-/* The pool keeps spares around and half of a full stream windows
+/* The pool keeps spares around and half of a full stream window
  * seems good. More does not seem to improve performance.
  * The benefit of the pool is that stream buffer to not keep
  * spares. So memory consumption goes down when streams run empty,
@@ -100,7 +100,7 @@ typedef unsigned long sslerr_t;
 static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
                                     struct Curl_easy *data);
 
-static const char *SSL_ERROR_to_str(int err)
+static const char *osslq_SSL_ERROR_to_str(int err)
 {
   switch(err) {
   case SSL_ERROR_NONE:
@@ -139,7 +139,7 @@ static const char *SSL_ERROR_to_str(int err)
 }
 
 /* Return error string for last OpenSSL error */
-static char *ossl_strerror(unsigned long error, char *buf, size_t size)
+static char *osslq_strerror(unsigned long error, char *buf, size_t size)
 {
   DEBUGASSERT(size);
   *buf = '\0';
@@ -381,8 +381,8 @@ static CURLcode cf_osslq_h3conn_add_stream(struct cf_osslq_h3conn *h3,
 }
 
 static CURLcode cf_osslq_ssl_err(struct Curl_cfilter *cf,
-                              struct Curl_easy *data,
-                              int detail, CURLcode def_result)
+                                 struct Curl_easy *data,
+                                 int detail, CURLcode def_result)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
   CURLcode result = def_result;
@@ -421,17 +421,17 @@ static CURLcode cf_osslq_ssl_err(struct Curl_cfilter *cf,
     /* If client certificate is required, communicate the
        error to client */
     result = CURLE_SSL_CLIENTCERT;
-    ossl_strerror(errdetail, ebuf, sizeof(ebuf));
+    osslq_strerror(errdetail, ebuf, sizeof(ebuf));
   }
 #endif
   else if((lib == ERR_LIB_SSL) && (reason == SSL_R_PROTOCOL_IS_SHUTDOWN)) {
     ctx->protocol_shutdown = TRUE;
-    err_descr = "QUIC connectin has been shut down";
+    err_descr = "QUIC connection has been shut down";
     result = def_result;
   }
   else {
     result = def_result;
-    ossl_strerror(errdetail, ebuf, sizeof(ebuf));
+    osslq_strerror(errdetail, ebuf, sizeof(ebuf));
   }
 
   /* detail is already set to the SSL error above */
@@ -443,16 +443,14 @@ static CURLcode cf_osslq_ssl_err(struct Curl_cfilter *cf,
   if(CURLE_SSL_CONNECT_ERROR == result && errdetail == 0) {
     char extramsg[80]="";
     int sockerr = SOCKERRNO;
-    const char *r_ip = NULL;
-    int r_port = 0;
+    struct ip_quadruple ip;
 
-    Curl_cf_socket_peek(cf->next, data, NULL, NULL,
-                        &r_ip, &r_port, NULL, NULL);
+    Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
     if(sockerr && detail == SSL_ERROR_SYSCALL)
       Curl_strerror(sockerr, extramsg, sizeof(extramsg));
     failf(data, "QUIC connect: %s in connection to %s:%d (%s)",
-          extramsg[0] ? extramsg : SSL_ERROR_to_str(detail),
-          ctx->peer.dispname, r_port, r_ip);
+          extramsg[0] ? extramsg : osslq_SSL_ERROR_to_str(detail),
+          ctx->peer.dispname, ip.remote_port, ip.remote_ip);
   }
   else {
     /* Could be a CERT problem */
@@ -976,7 +974,7 @@ static nghttp3_callbacks ngh3_callbacks = {
 };
 
 static CURLcode cf_osslq_h3conn_init(struct cf_osslq_ctx *ctx, SSL *conn,
-                                  void *user_data)
+                                     void *user_data)
 {
   struct cf_osslq_h3conn *h3 = &ctx->h3;
   CURLcode result;
@@ -1039,7 +1037,6 @@ static CURLcode cf_osslq_ctx_start(struct Curl_cfilter *cf,
   CURLcode result;
   int rv;
   const struct Curl_sockaddr_ex *peer_addr = NULL;
-  int peer_port;
   BIO *bio = NULL;
   BIO_ADDR *baddr = NULL;
 
@@ -1061,8 +1058,7 @@ static CURLcode cf_osslq_ctx_start(struct Curl_cfilter *cf,
     goto out;
 
   result = CURLE_QUIC_CONNECT_ERROR;
-  Curl_cf_socket_peek(cf->next, data, &ctx->q.sockfd,
-                      &peer_addr, NULL, &peer_port, NULL, NULL);
+  Curl_cf_socket_peek(cf->next, data, &ctx->q.sockfd, &peer_addr, NULL);
   if(!peer_addr)
     goto out;
 
@@ -1083,7 +1079,7 @@ static CURLcode cf_osslq_ctx_start(struct Curl_cfilter *cf,
    */
 #if defined(_WIN32) && !defined(__LWIP_OPT_H__) && !defined(LWIP_HDR_OPT_H)
   if(ctx->q.sockfd > INT_MAX) {
-    failf(data, "windows socket identifier larger than MAX_INT, "
+    failf(data, "Windows socket identifier larger than MAX_INT, "
           "unable to set in OpenSSL dgram API.");
     result = CURLE_QUIC_CONNECT_ERROR;
     goto out;
@@ -1092,7 +1088,6 @@ static CURLcode cf_osslq_ctx_start(struct Curl_cfilter *cf,
 #else
   bio = BIO_new_dgram(ctx->q.sockfd, BIO_NOCLOSE);
 #endif
-  bio = BIO_new_dgram(ctx->q.sockfd, BIO_NOCLOSE);
   if(!bio) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -1108,6 +1103,16 @@ static CURLcode cf_osslq_ctx_start(struct Curl_cfilter *cf,
     result = CURLE_FAILED_INIT;
     goto out;
   }
+
+#ifdef SSL_VALUE_QUIC_IDLE_TIMEOUT
+  /* Added in OpenSSL v3.3.x */
+  if(!SSL_set_feature_request_uint(ctx->tls.ssl, SSL_VALUE_QUIC_IDLE_TIMEOUT,
+                                   CURL_QUIC_MAX_IDLE_MS)) {
+    CURL_TRC_CF(data, cf, "error setting idle timeout, ");
+    result = CURLE_FAILED_INIT;
+    goto out;
+  }
+#endif
 
   SSL_set_bio(ctx->tls.ssl, bio, bio);
   bio = NULL;
@@ -1160,7 +1165,7 @@ static ssize_t h3_quic_recv(void *reader_ctx,
       SSL_get_stream_read_error_code(x->s->ssl, &app_error_code);
       CURL_TRC_CF(x->data, x->cf, "[%" PRId64 "] h3_quic_recv -> RESET, "
                   "rv=%d, app_err=%" PRIu64,
-                   x->s->id, rv, app_error_code);
+                  x->s->id, rv, app_error_code);
       if(app_error_code != NGHTTP3_H3_NO_ERROR) {
         x->s->reset = TRUE;
       }
@@ -1375,7 +1380,7 @@ static CURLcode h3_send_streams(struct Curl_cfilter *cf,
     size_t written;
     int eos, ok, rv;
     size_t total_len, acked_len = 0;
-    bool blocked = FALSE;
+    bool blocked = FALSE, eos_written = FALSE;
 
     n = nghttp3_conn_writev_stream(ctx->h3.conn, &stream_id, &eos,
                                    vec, ARRAYSIZE(vec));
@@ -1406,9 +1411,19 @@ static CURLcode h3_send_streams(struct Curl_cfilter *cf,
     for(i = 0; (i < n) && !blocked; ++i) {
       /* Without stream->s.ssl, we closed that already, so
        * pretend the write did succeed. */
+#ifdef SSL_WRITE_FLAG_CONCLUDE
+      /* Since OpenSSL v3.3.x, on last chunk set EOS if needed  */
+      uint64_t flags = (eos && ((i + 1) == n))? SSL_WRITE_FLAG_CONCLUDE : 0;
+      written = vec[i].len;
+      ok = !s->ssl || SSL_write_ex2(s->ssl, vec[i].base, vec[i].len, flags,
+                                   &written);
+      if(ok && flags & SSL_WRITE_FLAG_CONCLUDE)
+        eos_written = TRUE;
+#else
       written = vec[i].len;
       ok = !s->ssl || SSL_write_ex(s->ssl, vec[i].base, vec[i].len,
                                    &written);
+#endif
       if(ok) {
         /* As OpenSSL buffers the data, we count this as acknowledged
          * from nghttp3's point of view */
@@ -1423,7 +1438,7 @@ static CURLcode h3_send_streams(struct Curl_cfilter *cf,
         case SSL_ERROR_WANT_READ:
           /* QUIC blocked us from writing more */
           CURL_TRC_CF(data, cf, "[%"PRId64"] send %zu bytes to QUIC blocked",
-                s->id, vec[i].len);
+                      s->id, vec[i].len);
           written = 0;
           nghttp3_conn_block_stream(ctx->h3.conn, s->id);
           s->send_blocked = blocked = TRUE;
@@ -1440,6 +1455,7 @@ static CURLcode h3_send_streams(struct Curl_cfilter *cf,
     if(acked_len > 0 || (eos && !s->send_blocked)) {
       /* Since QUIC buffers the data written internally, we can tell
        * nghttp3 that it can move forward on it */
+      ctx->q.last_io = Curl_now();
       rv = nghttp3_conn_add_write_offset(ctx->h3.conn, s->id, acked_len);
       if(rv && rv != NGHTTP3_ERR_STREAM_NOT_FOUND) {
         failf(data, "nghttp3_conn_add_write_offset returned error: %s\n",
@@ -1458,7 +1474,7 @@ static CURLcode h3_send_streams(struct Curl_cfilter *cf,
                   "to QUIC, eos=%d", s->id, acked_len, total_len, eos);
     }
 
-    if(eos && !s->send_blocked) {
+    if(eos && !s->send_blocked && !eos_written) {
       /* wrote everything and H3 indicates end of stream */
       CURL_TRC_CF(data, cf, "[%" PRId64 "] closing QUIC stream", s->id);
       SSL_stream_conclude(s->ssl, 0);
@@ -1583,6 +1599,7 @@ static CURLcode cf_osslq_connect(struct Curl_cfilter *cf,
   if(err == 1) {
     /* connected */
     ctx->handshake_at = now;
+    ctx->q.last_io = now;
     CURL_TRC_CF(data, cf, "handshake complete after %dms",
                (int)Curl_timediff(now, ctx->started_at));
     result = cf_osslq_verify_peer(cf, data);
@@ -1598,15 +1615,18 @@ static CURLcode cf_osslq_connect(struct Curl_cfilter *cf,
     int detail = SSL_get_error(ctx->tls.ssl, err);
     switch(detail) {
     case SSL_ERROR_WANT_READ:
+      ctx->q.last_io = now;
       CURL_TRC_CF(data, cf, "QUIC SSL_connect() -> WANT_RECV");
       result = Curl_vquic_tls_before_recv(&ctx->tls, cf, data);
       goto out;
     case SSL_ERROR_WANT_WRITE:
+      ctx->q.last_io = now;
       CURL_TRC_CF(data, cf, "QUIC SSL_connect() -> WANT_SEND");
       result = CURLE_OK;
       goto out;
 #ifdef SSL_ERROR_WANT_ASYNC
     case SSL_ERROR_WANT_ASYNC:
+      ctx->q.last_io = now;
       CURL_TRC_CF(data, cf, "QUIC SSL_connect() -> WANT_ASYNC");
       result = CURLE_OK;
       goto out;
@@ -1633,13 +1653,11 @@ out:
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   if(result) {
-    const char *r_ip = NULL;
-    int r_port = 0;
+    struct ip_quadruple ip;
 
-    Curl_cf_socket_peek(cf->next, data, NULL, NULL,
-                        &r_ip, &r_port, NULL, NULL);
+    Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
     infof(data, "QUIC connect to %s port %u failed: %s",
-          r_ip, r_port, curl_easy_strerror(result));
+          ip.remote_ip, ip.remote_port, curl_easy_strerror(result));
   }
 #endif
   if(!result)
@@ -1899,7 +1917,7 @@ static ssize_t recv_closed_stream(struct Curl_cfilter *cf,
   if(stream->reset) {
     failf(data,
           "HTTP/3 stream %" PRId64 " reset by server", stream->s.id);
-    *err = stream->resp_hds_complete? CURLE_PARTIAL_FILE : CURLE_HTTP3;
+    *err = data->req.bytecount? CURLE_PARTIAL_FILE : CURLE_HTTP3;
     goto out;
   }
   else if(!stream->resp_hds_complete) {
@@ -2069,7 +2087,24 @@ static bool cf_osslq_conn_is_alive(struct Curl_cfilter *cf,
   if(!ctx->tls.ssl)
     goto out;
 
-  /* TODO: how to check negotiated connection idle time? */
+#ifdef SSL_VALUE_QUIC_IDLE_TIMEOUT
+  /* Added in OpenSSL v3.3.x */
+  {
+    timediff_t idletime;
+    uint64_t idle_ms = ctx->max_idle_ms;
+    if(!SSL_get_value_uint(ctx->tls.ssl, SSL_VALUE_CLASS_FEATURE_NEGOTIATED,
+                           SSL_VALUE_QUIC_IDLE_TIMEOUT, &idle_ms)) {
+      CURL_TRC_CF(data, cf, "error getting negotiated idle timeout, "
+                  "assume connection is dead.");
+      goto out;
+    }
+    CURL_TRC_CF(data, cf, "negotiated idle timeout: %zums", (size_t)idle_ms);
+    idletime = Curl_timediff(Curl_now(), ctx->q.last_io);
+    if(idletime > 0 && (uint64_t)idletime > idle_ms)
+      goto out;
+  }
+
+#endif
 
   if(!cf->next || !cf->next->cft->is_alive(cf->next, data, input_pending))
     goto out;
@@ -2125,15 +2160,24 @@ static CURLcode cf_osslq_query(struct Curl_cfilter *cf,
                                int query, int *pres1, void *pres2)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
-  struct cf_call_data save;
 
   switch(query) {
   case CF_QUERY_MAX_CONCURRENT: {
-    /* TODO: how to get this? */
-    CF_DATA_SAVE(save, cf, data);
+#ifdef SSL_VALUE_QUIC_STREAM_BIDI_LOCAL_AVAIL
+    /* Added in OpenSSL v3.3.x */
+    uint64_t v;
+    if(!SSL_get_value_uint(ctx->tls.ssl, SSL_VALUE_CLASS_GENERIC,
+                           SSL_VALUE_QUIC_STREAM_BIDI_LOCAL_AVAIL, &v)) {
+      CURL_TRC_CF(data, cf, "error getting available local bidi streams");
+      return CURLE_HTTP3;
+    }
+    /* we report avail + in_use */
+    v += CONN_INUSE(cf->conn);
+    *pres1 = (v > INT_MAX)? INT_MAX : (int)v;
+#else
     *pres1 = 100;
+#endif
     CURL_TRC_CF(data, cf, "query max_conncurrent -> %d", *pres1);
-    CF_DATA_RESTORE(cf, save);
     return CURLE_OK;
   }
   case CF_QUERY_CONNECT_REPLY_MS:

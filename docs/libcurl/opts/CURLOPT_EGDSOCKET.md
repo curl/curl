@@ -1,11 +1,15 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_EGDSOCKET
 Section: 3
 Source: libcurl
 See-also:
   - CURLOPT_RANDOM_FILE (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
 ---
 
 # NAME
@@ -34,10 +38,6 @@ option.
 
 NULL
 
-# PROTOCOLS
-
-All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
-
 # EXAMPLE
 
 ~~~c
@@ -56,8 +56,7 @@ int main(void)
 
 # AVAILABILITY
 
-If built with TLS enabled. Only the OpenSSL backend uses this, and only with
-OpenSSL versions before 1.1.0.
+Only with OpenSSL versions before 1.1.0.
 
 This option was deprecated in 7.84.0.
 

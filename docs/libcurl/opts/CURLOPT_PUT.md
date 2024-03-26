@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_PUT
 Section: 3
@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_MIMEPOST (3)
   - CURLOPT_POSTFIELDS (3)
   - CURLOPT_UPLOAD (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -34,10 +36,6 @@ This option is **deprecated** since version 7.12.1. Use CURLOPT_UPLOAD(3).
 # DEFAULT
 
 0, disabled
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

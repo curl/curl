@@ -3,7 +3,7 @@
 ## There are still bugs
 
  Curl and libcurl keep being developed. Adding features and changing code
- means that bugs will sneak in, no matter how hard we try to keep them out.
+ means that bugs sneak in, no matter how hard we try to keep them out.
 
  Of course there are lots of bugs left. Not to mention misfeatures.
 
@@ -34,16 +34,16 @@
  HackerOne](https://hackerone.com/curl).
 
  This ensures that the report reaches the curl security team so that they
- first can deal with the report away from the public to minimize the harm
- and impact it will have on existing users out there who might be using the
- vulnerable versions.
+ first can deal with the report away from the public to minimize the harm and
+ impact it has on existing users out there who might be using the vulnerable
+ versions.
 
  The curl project's process for handling security related issues is
  [documented separately](https://curl.se/dev/secprocess.html).
 
 ## What to report
 
- When reporting a bug, you should include all information that will help us
+ When reporting a bug, you should include all information to help us
  understand what is wrong, what you expected to happen and how to repeat the
  bad behavior. You therefore need to tell us:
 
@@ -58,8 +58,8 @@
  and anything and everything else you think matters. Tell us what you expected
  to happen, tell use what did happen, tell us how you could make it work
  another way. Dig around, try out, test. Then include all the tiny bits and
- pieces in your report. You will benefit from this yourself, as it will enable
- us to help you quicker and more accurately.
+ pieces in your report. You benefit from this yourself, as it enables us to
+ help you quicker and more accurately.
 
  Since curl deals with networks, it often helps us if you include a protocol
  debug dump with your bug report. The output you get by using the `-v` or
@@ -84,15 +84,15 @@
  SCP, the libssh2 version is relevant etc.
 
  Showing us a real source code example repeating your problem is the best way
- to get our attention and it will greatly increase our chances to understand
- your problem and to work on a fix (if we agree it truly is a problem).
+ to get our attention and it greatly increases our chances to understand your
+ problem and to work on a fix (if we agree it truly is a problem).
 
  Lots of problems that appear to be libcurl problems are actually just abuses
  of the libcurl API or other malfunctions in your applications. It is advised
  that you run your problematic program using a memory debug tool like valgrind
  or similar before you post memory-related or "crashing" problems to us.
 
-## Who will fix the problems
+## Who fixes the problems
 
  If the problems or bugs you describe are considered to be bugs, we want to
  have the problems fixed.
@@ -102,11 +102,11 @@
  it out of an ambition to keep curl and libcurl excellent products and out of
  pride.
 
- Please do not assume that you can just lump over something to us and it will
- then magically be fixed after some given time. Most often we need feedback
- and help to understand what you have experienced and how to repeat a
- problem. Then we may only be able to assist YOU to debug the problem and to
- track down the proper fix.
+ Please do not assume that you can just lump over something to us and it then
+ magically gets fixed after some given time. Most often we need feedback and
+ help to understand what you have experienced and how to repeat a problem.
+ Then we may only be able to assist YOU to debug the problem and to track down
+ the proper fix.
 
  We get reports from many people every month and each report can take a
  considerable amount of time to really go to the bottom with.
@@ -119,23 +119,23 @@
 
  Run the program until it cores.
 
- Run your debugger on the core file, like `<debugger> curl
- core`. `<debugger>` should be replaced with the name of your debugger, in
- most cases that will be `gdb`, but `dbx` and others also occur.
+ Run your debugger on the core file, like `<debugger> curl core`. `<debugger>`
+ should be replaced with the name of your debugger, in most cases that is
+ `gdb`, but `dbx` and others also occur.
 
  When the debugger has finished loading the core file and presents you a
  prompt, enter `where` (without quotes) and press return.
 
  The list that is presented is the stack trace. If everything worked, it is
  supposed to contain the chain of functions that were called when curl
- crashed. Include the stack trace with your detailed bug report, it will help a
+ crashed. Include the stack trace with your detailed bug report, it helps a
  lot.
 
 ## Bugs in libcurl bindings
 
- There will of course pop up bugs in libcurl bindings. You should then
- primarily approach the team that works on that particular binding and see
- what you can do to help them fix the problem.
+ There are of course bugs in libcurl bindings. You should then primarily
+ approach the team that works on that particular binding and see what you can
+ do to help them fix the problem.
 
  If you suspect that the problem exists in the underlying libcurl, then please
  convert your program over to plain C and follow the steps outlined above.
@@ -181,13 +181,13 @@
  maybe they are off in the woods hunting. Have patience. Allow at least a few
  days before expecting someone to have responded.
 
- In the issue tracker, you can expect that some labels will be set on the issue
- to help categorize it.
+ In the issue tracker, you can expect that some labels are set on the issue to
+ help categorize it.
 
 ## First response
 
  If your issue/bug report was not perfect at once (and few are), chances are
- that someone will ask follow-up questions. Which version did you use? Which
+ that someone asks follow-up questions. Which version did you use? Which
  options did you use? How often does the problem occur? How can we reproduce
  this problem? Which protocols does it involve? Or perhaps much more specific
  and deep diving questions. It all depends on your specific issue.
@@ -210,8 +210,8 @@
  for discussing possible ways to move forward with the task, we take that as a
  strong suggestion that the bug is unimportant.
 
- Unimportant issues will be closed as inactive sooner or later as they cannot
- be fixed. The inactivity period (waiting for responses) should not be shorter
+ Unimportant issues are closed as inactive sooner or later as they cannot be
+ fixed. The inactivity period (waiting for responses) should not be shorter
  than two weeks but may extend months.
 
 ## Lack of time/interest
@@ -240,9 +240,8 @@
 
  Issues that are filed or reported that are not really bugs but more missing
  features or ideas for future improvements and so on are marked as
- 'enhancement' or 'feature-request' and will be added to the `TODO` document
- and the issues are closed. We do not keep TODO items open in the issue
- tracker.
+ *enhancement* or *feature-request* and get added to the `TODO` document and
+ the issues are closed. We do not keep TODO items open in the issue tracker.
 
  The `TODO` document is full of ideas and suggestions of what we can add or
  fix one day. You are always encouraged and free to grab one of those items and
@@ -255,11 +254,11 @@
 
 ## Closing off stalled bugs
 
- The [issue and pull request trackers](https://github.com/curl/curl) only
- hold "active" entries open (using a non-precise definition of what active
- actually is, but they are at least not completely dead). Those that are
- abandoned or in other ways dormant will be closed and sometimes added to
- `TODO` and `KNOWN_BUGS` instead.
+ The [issue and pull request trackers](https://github.com/curl/curl) only hold
+ "active" entries open (using a non-precise definition of what active actually
+ is, but they are at least not completely dead). Those that are abandoned or
+ in other ways dormant are closed and sometimes added to `TODO` and
+ `KNOWN_BUGS` instead.
 
  This way, we only have "active" issues open on GitHub. Irrelevant issues and
- pull requests will not distract developers or casual visitors.
+ pull requests do not distract developers or casual visitors.

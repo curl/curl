@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_LOCALPORT
 Section: 3
@@ -8,6 +8,8 @@ See-also:
   - CURLINFO_LOCAL_PORT (3)
   - CURLOPT_INTERFACE (3)
   - CURLOPT_LOCALPORTRANGE (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -32,10 +34,6 @@ this option is set. Valid port numbers are 1 - 65535.
 # DEFAULT
 
 0, disabled - use whatever the system thinks is fine
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: max-time
 Short: m
-Arg: <fractional seconds>
+Arg: <seconds>
 Help: Maximum time allowed for transfer
 Category: connection
 Added: 4.0
@@ -18,9 +18,9 @@ Example:
 
 # `--max-time`
 
-Maximum time in seconds that you allow each transfer to take. This is useful
-for preventing your batch jobs from hanging for hours due to slow networks or
-links going down. This option accepts decimal values (added in 7.32.0).
+Set maximum time in seconds that you allow each transfer to take. Prevents
+your batch jobs from hanging for hours due to slow networks or links going
+down. This option accepts decimal values (added in 7.32.0).
 
 If you enable retrying the transfer (--retry) then the maximum time counter is
 reset each time the transfer is retried. You can use --retry-max-time to limit

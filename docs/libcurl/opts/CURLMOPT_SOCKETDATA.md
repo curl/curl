@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLMOPT_SOCKETDATA
 Section: 3
@@ -8,6 +8,8 @@ See-also:
   - CURLMOPT_SOCKETFUNCTION (3)
   - CURLMOPT_TIMERFUNCTION (3)
   - curl_multi_socket_action (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -28,15 +30,11 @@ A data *pointer* to pass to the socket callback set with the
 CURLMOPT_SOCKETFUNCTION(3) option.
 
 This pointer is not touched by libcurl but is only passed in as the socket
-callbacks's **clientp** argument.
+callback's **clientp** argument.
 
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

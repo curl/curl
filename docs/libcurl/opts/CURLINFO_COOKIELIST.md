@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLINFO_COOKIELIST
 Section: 3
@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_COOKIELIST (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -33,10 +35,6 @@ received) the 'struct curl_slist *' is made a NULL pointer.
 
 Since 7.43.0 cookies that were imported in the Set-Cookie format without a
 domain name are not exported by this option.
-
-# PROTOCOLS
-
-HTTP(S)
 
 # EXAMPLE
 

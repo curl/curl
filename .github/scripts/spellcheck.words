@@ -39,7 +39,9 @@ auth
 autobuild
 autobuilds
 Autoconf
+autoconf
 Automake
+automake
 Autotools
 autotools
 AVR
@@ -111,10 +113,11 @@ clientp
 cliget
 closesocket
 CMake
-CMake's
 cmake
+CMake's
 cmake's
 CMakeLists
+CNA
 CodeQL
 codeql
 CODESET
@@ -283,6 +286,7 @@ GPL
 GPLed
 Greear
 groff
+gsasl
 GSKit
 gskit
 GSS
@@ -424,6 +428,7 @@ libssh
 libSSH
 libssh2
 Libtool
+libtool
 libuv
 libWebSocket
 libz
@@ -449,6 +454,7 @@ makefiles
 malloc
 mallocs
 manpage
+manpages
 maprintf
 Marek
 Mavrogiannopoulos
@@ -795,6 +801,7 @@ Tekniska
 testability
 TFTP
 tftp
+threadsafe
 Tizen
 TLS
 tlsv

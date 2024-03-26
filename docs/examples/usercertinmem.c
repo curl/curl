@@ -199,8 +199,7 @@ int main(void)
   curl_easy_setopt(ch, CURLOPT_URL, "https://www.example.com/");
   curl_easy_setopt(ch, CURLOPT_SSLKEYTYPE, "PEM");
 
-  /* first try: retrieve page without user certificate and key -> will fail
-   */
+  /* first try: retrieve page without user certificate and key -> fails */
   rv = curl_easy_perform(ch);
   if(rv == CURLE_OK) {
     printf("*** transfer succeeded ***\n");
@@ -209,7 +208,7 @@ int main(void)
     printf("*** transfer failed ***\n");
   }
 
-  /* second try: retrieve page using user certificate and key -> will succeed
+  /* second try: retrieve page using user certificate and key -> succeeds
    * load the certificate and key by installing a function doing the necessary
    * "modifications" to the SSL CONTEXT just before link init
    */

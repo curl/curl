@@ -30,6 +30,7 @@
 #include "timeval.h"
 
 struct Curl_dns_entry;
+struct ip_quadruple;
 
 /* generic function that returns how much time there's left to run, according
    to the timeouts set */
@@ -52,7 +53,7 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
                       char *addr, int *port);
 
 void Curl_persistconninfo(struct Curl_easy *data, struct connectdata *conn,
-                          char *local_ip, int local_port);
+                          struct ip_quadruple *ip);
 
 /*
  * Curl_conncontrol() marks the end of a connection/stream. The 'closeit'

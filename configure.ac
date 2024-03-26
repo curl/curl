@@ -2075,19 +2075,74 @@ dnl **********************************************************************
 dnl Check for libpsl
 dnl **********************************************************************
 
-AC_ARG_WITH(libpsl,
-           AS_HELP_STRING([--without-libpsl],
-           [disable support for libpsl]),
-           with_libpsl=$withval,
-           with_libpsl=yes)
-curl_psl_msg="no      (libpsl disabled)"
-if test $with_libpsl != "no"; then
-  AC_SEARCH_LIBS(psl_builtin, psl,
-    [curl_psl_msg="enabled";
-     AC_DEFINE([USE_LIBPSL], [1], [PSL support enabled])
-     ],
-    [AC_MSG_ERROR([libpsl was not found]) ]
+dnl Default to compiler & linker defaults for LIBPSL files & libraries.
+OPT_LIBPSL=off
+AC_ARG_WITH(libpsl,dnl
+AS_HELP_STRING([--with-libpsl=PATH],[Where to look for libpsl, PATH points to the LIBPSL installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AS_HELP_STRING([--without-libpsl], [disable LIBPSL]),
+  OPT_LIBPSL=$withval)
+
+if test X"$OPT_LIBPSL" != Xno; then
+  dnl backup the pre-libpsl variables
+  CLEANLDFLAGS="$LDFLAGS"
+  CLEANCPPFLAGS="$CPPFLAGS"
+  CLEANLIBS="$LIBS"
+
+  case "$OPT_LIBPSL" in
+  yes)
+    dnl --with-libpsl (without path) used
+    CURL_CHECK_PKGCONFIG(libpsl)
+
+    if test "$PKGCONFIG" != "no" ; then
+      LIB_PSL=`$PKGCONFIG --libs-only-l libpsl`
+      LD_PSL=`$PKGCONFIG --libs-only-L libpsl`
+      CPP_PSL=`$PKGCONFIG --cflags-only-I libpsl`
+    else
+      dnl no libpsl pkg-config found
+      LIB_PSL="-lpsl"
+    fi
+
+    ;;
+  off)
+    dnl no --with-libpsl option given, just check default places
+    LIB_PSL="-lpsl"
+    ;;
+  *)
+    dnl use the given --with-libpsl spot
+    LIB_PSL="-lpsl"
+    PREFIX_PSL=$OPT_LIBPSL
+    ;;
+  esac
+
+  dnl if given with a prefix, we set -L and -I based on that
+  if test -n "$PREFIX_PSL"; then
+    LD_PSL=-L${PREFIX_PSL}/lib$libsuff
+    CPP_PSL=-I${PREFIX_PSL}/include
+  fi
+
+  LDFLAGS="$LDFLAGS $LD_PSL"
+  CPPFLAGS="$CPPFLAGS $CPP_PSL"
+  LIBS="$LIB_PSL $LIBS"
+
+  AC_CHECK_LIB(psl, psl_builtin,
+    [
+     AC_CHECK_HEADERS(libpsl.h,
+        curl_psl_msg="enabled"
+        LIBPSL_ENABLED=1
+        AC_DEFINE(USE_LIBPSL, 1, [if libpsl is in use])
+        AC_SUBST(USE_LIBPSL, [1])
+     )
+    ],
+      dnl not found, revert back to clean variables
+      LDFLAGS=$CLEANLDFLAGS
+      CPPFLAGS=$CLEANCPPFLAGS
+      LIBS=$CLEANLIBS
   )
+
+  if test X"$OPT_LIBPSL" != Xoff &&
+     test "$LIBPSL_ENABLED" != "1"; then
+    AC_MSG_ERROR([libpsl libs and/or directories were not found where specified!])
+  fi
 fi
 AM_CONDITIONAL([USE_LIBPSL], [test "$curl_psl_msg" = "enabled"])
 
@@ -3428,10 +3483,10 @@ AS_HELP_STRING([--with-zsh-functions-dir=PATH],[Install zsh completions to PATH]
 AS_HELP_STRING([--without-zsh-functions-dir],[Do not install zsh completions]),
   [OPT_ZSH_FPATH=$withval])
 case "$OPT_ZSH_FPATH" in
-  no)
+  default|no)
     dnl --without-zsh-functions-dir option used
     ;;
-  default|yes)
+  yes)
     dnl --with-zsh-functions-dir option used without path
     ZSH_FUNCTIONS_DIR="$datarootdir/zsh/site-functions"
     AC_SUBST(ZSH_FUNCTIONS_DIR)
@@ -3442,6 +3497,7 @@ case "$OPT_ZSH_FPATH" in
     AC_SUBST(ZSH_FUNCTIONS_DIR)
     ;;
 esac
+AM_CONDITIONAL(USE_ZSH_COMPLETION, test x"$ZSH_FUNCTIONS_DIR" != x)
 
 dnl **********************************************************************
 dnl Check for fish completion path
@@ -3453,10 +3509,10 @@ AS_HELP_STRING([--with-fish-functions-dir=PATH],[Install fish completions to PAT
 AS_HELP_STRING([--without-fish-functions-dir],[Do not install fish completions]),
   [OPT_FISH_FPATH=$withval])
 case "$OPT_FISH_FPATH" in
-  no)
+  default|no)
     dnl --without-fish-functions-dir option used
     ;;
-  default|yes)
+  yes)
     dnl --with-fish-functions-dir option used without path
     CURL_CHECK_PKGCONFIG(fish)
     if test "$PKGCONFIG" != "no" ; then
@@ -3472,6 +3528,7 @@ case "$OPT_FISH_FPATH" in
     AC_SUBST(FISH_FUNCTIONS_DIR)
     ;;
 esac
+AM_CONDITIONAL(USE_FISH_COMPLETION, test x"$FISH_FUNCTIONS_DIR" != x)
 
 dnl Now check for the very most basic headers. Then we can use these
 dnl ones as default-headers when checking for the rest!
@@ -3769,10 +3826,6 @@ AC_CHECK_DECL([fseeko],
 
 CURL_CHECK_NONBLOCKING_SOCKET
 
-dnl ************************************************************
-dnl nroff tool stuff
-dnl
-
 AC_PATH_PROG( PERL, perl, ,
   $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin )
 AC_SUBST(PERL)
@@ -3786,40 +3839,6 @@ fi
 
 dnl set variable for use in automakefile(s)
 AM_CONDITIONAL(BUILD_DOCS, test x"$BUILD_DOCS" = x1)
-
-AC_PATH_PROGS( NROFF, gnroff nroff, ,
-  $PATH:/usr/bin/:/usr/local/bin )
-AC_SUBST(NROFF)
-
-if test -n "$NROFF"; then
-  dnl only check for nroff options if an nroff command was found
-
-  AC_MSG_CHECKING([how to use *nroff to get plain text from man pages])
-  MANOPT="-man"
-  mancheck=`echo foo | $NROFF $MANOPT 2>/dev/null`
-  if test -z "$mancheck"; then
-    MANOPT="-mandoc"
-   mancheck=`echo foo | $NROFF $MANOPT 2>/dev/null`
-    if test -z "$mancheck"; then
-      MANOPT=""
-      AC_MSG_RESULT([failed])
-      AC_MSG_WARN([found no *nroff option to get plaintext from man pages])
-    else
-      AC_MSG_RESULT([$MANOPT])
-    fi
-  else
-    AC_MSG_RESULT([$MANOPT])
-  fi
-  AC_SUBST(MANOPT)
-fi
-
-if test -z "$MANOPT"
-then
-  dnl if no nroff tool was found, or no option that could convert man pages
-  dnl was found, then disable the built-in manual stuff
-  AC_MSG_WARN([disabling built-in manual])
-  USE_MANUAL="no";
-fi
 
 dnl *************************************************************************
 dnl If the manual variable still is set, then we go with providing a built-in
@@ -4999,6 +5018,14 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   Protocols:        ${SUPPORT_PROTOCOLS}
   Features:         ${SUPPORT_FEATURES}
 ])
+
+non13=`echo "$TLSCHOICE" | grep -Ei 'bearssl|secure-transport|mbedtls'`;
+if test -n "$non13"; then
+ cat >&2 << _EOF
+  WARNING: A selected TLS library ($TLSCHOICE) does not support TLS 1.3!
+_EOF
+fi
+
 if test -n "$experimental"; then
  cat >&2 << _EOF
   WARNING: $experimental enabled but marked EXPERIMENTAL. Use with caution!

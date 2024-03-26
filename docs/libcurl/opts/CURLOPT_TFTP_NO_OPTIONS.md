@@ -1,11 +1,13 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_TFTP_NO_OPTIONS
 Section: 3
 Source: libcurl
 See-also:
   - CURLOPT_TFTP_BLKSIZE (3)
+Protocol:
+  - TFTP
 ---
 
 # NAME
@@ -32,10 +34,6 @@ CURLOPT_TFTP_BLKSIZE(3) is ignored.
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-TFTP
 
 # EXAMPLE
 

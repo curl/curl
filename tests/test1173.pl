@@ -132,7 +132,8 @@ sub scanmanpage {
     my @separators;
     my @sepline;
 
-    open(my $m, "<", "$file") || die "no such file: $file";
+    open(my $m, "<", "$file") ||
+        die "test1173.pl could not open $file";
     if($file =~ /[\/\\](CURL|curl_)[^\/\\]*.3/) {
         # This is a man page for libcurl. It requires an example!
         $reqex = 1;

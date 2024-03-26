@@ -139,8 +139,8 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
   char *sel = NULL;
   char *sel_org = NULL;
   timediff_t timeout_ms;
-  ssize_t amount, k;
-  size_t len;
+  ssize_t k;
+  size_t amount, len;
   int what;
 
   *done = TRUE; /* unconditionally */
@@ -185,7 +185,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
     if(strlen(sel) < 1)
       break;
 
-    result = Curl_nwrite(data, FIRSTSOCKET, sel, k, &amount);
+    result = Curl_xfer_send(data, sel, k, &amount);
     if(!result) { /* Which may not have written it all! */
       result = Curl_client_write(data, CLIENTWRITE_HEADER, sel, amount);
       if(result)
@@ -227,7 +227,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
   free(sel_org);
 
   if(!result)
-    result = Curl_nwrite(data, FIRSTSOCKET, "\r\n", 2, &amount);
+    result = Curl_xfer_send(data, "\r\n", 2, &amount);
   if(result) {
     failf(data, "Failed sending Gopher request");
     return result;
@@ -236,7 +236,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
   if(result)
     return result;
 
-  Curl_setup_transfer(data, FIRSTSOCKET, -1, FALSE, -1);
+  Curl_xfer_setup(data, FIRSTSOCKET, -1, FALSE, -1);
   return CURLE_OK;
 }
 #endif /* CURL_DISABLE_GOPHER */

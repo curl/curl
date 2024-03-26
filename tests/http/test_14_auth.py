@@ -103,9 +103,9 @@ class TestAuth:
     def test_14_05_basic_large_pw(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        if proto == 'h3' and env.curl_uses_lib('quiche'):
+        if proto == 'h3' and not env.curl_uses_lib('ngtcp2'):
             # See <https://github.com/cloudflare/quiche/issues/1573>
-            pytest.skip("quiche has problems with large requests")
+            pytest.skip("quiche/openssl-quic have problems with large requests")
         # just large enough that nghttp2 will submit
         password = 'x' * (47 * 1024)
         fdata = os.path.join(env.gen_dir, 'data-10m')
@@ -133,7 +133,7 @@ class TestAuth:
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto, extra_args=[
             '--basic', '--user', f'test:{password}'
         ])
-        # Depending on protocl, we might have an error sending or
+        # Depending on protocol, we might have an error sending or
         # the server might shutdown the connection and we see the error
         # on receiving
         assert r.exit_code in [55, 56], f'{self.dump_logs()}'

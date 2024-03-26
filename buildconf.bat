@@ -38,19 +38,7 @@ rem
   cd /d "%~0\.." 1>NUL 2>&1
 
   rem Check we are running from a curl git repository
-  if not exist GIT-INFO goto norepo
-
-  rem Detect programs. HAVE_<PROGNAME>
-  rem When not found the variable is set undefined. The undefined pattern
-  rem allows for statements like "if not defined HAVE_PERL (command)"
-  groff --version <NUL 1>NUL 2>&1
-  if errorlevel 1 (set HAVE_GROFF=) else (set HAVE_GROFF=Y)
-  nroff --version <NUL 1>NUL 2>&1
-  if errorlevel 1 (set HAVE_NROFF=) else (set HAVE_NROFF=Y)
-  perl --version <NUL 1>NUL 2>&1
-  if errorlevel 1 (set HAVE_PERL=) else (set HAVE_PERL=Y)
-  gzip --version <NUL 1>NUL 2>&1
-  if errorlevel 1 (set HAVE_GZIP=) else (set HAVE_GZIP=Y)
+  if not exist GIT-INFO.md goto norepo
 
 :parseArgs
   if "%~1" == "" goto start
@@ -125,15 +113,6 @@ rem
   )
   cmd /c exit 0
 
-  rem Setup c-ares git tree
-  if exist ares\buildconf.bat (
-    echo.
-    echo Configuring c-ares build environment
-    cd ares
-    call buildconf.bat
-    cd ..
-  )
-
   if "%BASIC_HUGEHELP%" == "1" (
     if "%OS%" == "Windows_NT" endlocal
     exit /B 1
@@ -182,47 +161,20 @@ rem
 :genHugeHelp
   if "%OS%" == "Windows_NT" setlocal
   set LC_ALL=C
-  set ROFFCMD=
   set BASIC=1
 
-  if defined HAVE_PERL (
-    if defined HAVE_GROFF (
-      set ROFFCMD=groff -mtty-char -Tascii -P-c -man
-    ) else if defined HAVE_NROFF (
-      set ROFFCMD=nroff -c -Tascii -man
-    )
-  )
-
-  if defined ROFFCMD (
+  if exist src\tool_hugehelp.c.cvs (
+    copy /Y src\tool_hugehelp.c.cvs src\tool_hugehelp.c 1>NUL 2>&1
+  ) else (
     echo #include "tool_setup.h"> src\tool_hugehelp.c
     echo #include "tool_hugehelp.h">> src\tool_hugehelp.c
-
-    if defined HAVE_GZIP (
-      echo #ifndef HAVE_LIBZ>> src\tool_hugehelp.c
-    )
-
-    %ROFFCMD% docs\curl.1 2>NUL | perl src\mkhelp.pl docs\MANUAL >> src\tool_hugehelp.c
-    if defined HAVE_GZIP (
-      echo #else>> src\tool_hugehelp.c
-      %ROFFCMD% docs\curl.1 2>NUL | perl src\mkhelp.pl -c docs\MANUAL >> src\tool_hugehelp.c
-      echo #endif /^* HAVE_LIBZ ^*/>> src\tool_hugehelp.c
-    )
-
-    set BASIC=0
-  ) else (
-    if exist src\tool_hugehelp.c.cvs (
-      copy /Y src\tool_hugehelp.c.cvs src\tool_hugehelp.c 1>NUL 2>&1
-    ) else (
-      echo #include "tool_setup.h"> src\tool_hugehelp.c
-      echo #include "tool_hugehelp.h">> src\tool_hugehelp.c
-      echo.>> src\tool_hugehelp.c
-      echo void hugehelp(void^)>> src\tool_hugehelp.c
-      echo {>> src\tool_hugehelp.c
-      echo #ifdef USE_MANUAL>> src\tool_hugehelp.c
-      echo   fputs("Built-in manual not included\n", stdout^);>> src\tool_hugehelp.c
-      echo #endif>> src\tool_hugehelp.c
-      echo }>> src\tool_hugehelp.c
-    )
+    echo.>> src\tool_hugehelp.c
+    echo void hugehelp(void^)>> src\tool_hugehelp.c
+    echo {>> src\tool_hugehelp.c
+    echo #ifdef USE_MANUAL>> src\tool_hugehelp.c
+    echo   fputs("Built-in manual not included\n", stdout^);>> src\tool_hugehelp.c
+    echo #endif>> src\tool_hugehelp.c
+    echo }>> src\tool_hugehelp.c
   )
 
   findstr "/C:void hugehelp(void)" src\tool_hugehelp.c 1>NUL 2>&1
@@ -244,13 +196,8 @@ rem Windows 9x as setlocal isn't available until Windows NT
 rem
 :dosCleanup
   set MODE=
-  set HAVE_GROFF=
-  set HAVE_NROFF=
-  set HAVE_PERL=
-  set HAVE_GZIP=
   set BASIC_HUGEHELP=
   set LC_ALL
-  set ROFFCMD=
   set BASIC=
 
   exit /B
@@ -296,10 +243,9 @@ rem
 :warning
   echo.
   echo Warning: The curl manual could not be integrated in the source. This means when
-  echo you build curl the manual will not be available (curl --man^). Integration of
+  echo you build curl the manual will not be available (curl --manual^). Integration of
   echo the manual is not required and a summary of the options will still be available
-  echo (curl --help^). To integrate the manual your PATH is required to have
-  echo groff/nroff, perl and optionally gzip for compression.
+  echo (curl --help^). To integrate the manual build with configure or cmake.
   goto success
 
 :error

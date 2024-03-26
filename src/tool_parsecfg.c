@@ -125,11 +125,11 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
     int lineno = 0;
     bool dashed_option;
     struct curlx_dynbuf buf;
-    bool fileerror;
+    bool fileerror = FALSE;
     curlx_dyn_init(&buf, MAX_CONFIG_LINE_LENGTH);
     DEBUGASSERT(filename);
 
-    while(my_get_line(file, &buf, &fileerror)) {
+    while(!rc && my_get_line(file, &buf, &fileerror)) {
       int res;
       bool alloced_param = FALSE;
       lineno++;
@@ -264,8 +264,9 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
            res != PARAM_VERSION_INFO_REQUESTED &&
            res != PARAM_ENGINES_REQUESTED) {
           const char *reason = param2text(res);
-          warnf(operation->global, "%s:%d: warning: '%s' %s",
-                filename, lineno, option, reason);
+          errorf(operation->global, "%s:%d: '%s' %s",
+                 filename, lineno, option, reason);
+          rc = res;
         }
       }
 

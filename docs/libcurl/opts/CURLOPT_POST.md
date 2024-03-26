@@ -1,9 +1,11 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_POST
 Section: 3
 Source: libcurl
+Protocol:
+  - HTTP
 See-also:
   - CURLOPT_HTTPPOST (3)
   - CURLOPT_POSTFIELDS (3)
@@ -68,10 +70,6 @@ you should set a new request type explicitly as described above.
 # DEFAULT
 
 0, disabled
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

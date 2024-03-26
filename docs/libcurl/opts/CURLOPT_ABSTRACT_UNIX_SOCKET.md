@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_ABSTRACT_UNIX_SOCKET
 Section: 3
@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_UNIX_SOCKET_PATH (3)
   - unix (7)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -41,10 +43,6 @@ share the same storage and therefore only one of them can be set per handle.
 # DEFAULT
 
 Default is NULL.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

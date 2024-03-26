@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_MAXFILESIZE
 Section: 3
@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_MAXFILESIZE_LARGE (3)
   - CURLOPT_MAX_RECV_SPEED_LARGE (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -39,10 +41,6 @@ threshold.
 # DEFAULT
 
 None
-
-# PROTOCOLS
-
-FTP, HTTP and MQTT
 
 # EXAMPLE
 

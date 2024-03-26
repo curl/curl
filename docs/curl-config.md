@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: curl-config
 Section: 1
@@ -38,10 +38,10 @@ libcurl. Currently that is only the include path to the curl include files.
 
 ## --checkfor [version]
 
-Specify the oldest possible libcurl version string you want, and this
-script will return 0 if the current installation is new enough or it
-returns 1 and outputs a text saying that the current version is not new
-enough. (Added in 7.15.4)
+Specify the oldest possible libcurl version string you want, and this script
+returns 0 if the current installation is new enough or it returns 1 and
+outputs a text saying that the current version is not new enough. (Added in
+7.15.4)
 
 ## --configure
 
@@ -51,7 +51,7 @@ Displays the arguments given to configure when building curl.
 
 Lists what particular main features the installed libcurl was built with. At
 the time of writing, this list may include SSL, KRB4 or IPv6. Do not assume
-any particular order. The keywords will be separated by newlines. There may be
+any particular order. The keywords are separated by newlines. There may be
 none, one, or several keywords in the list.
 
 ## --help
@@ -60,8 +60,8 @@ Displays the available options.
 
 ## --libs
 
-Shows the complete set of libs and other linker options you will need in order
-to link your application with libcurl.
+Shows the complete set of libs and other linker options you need in order to
+link your application with libcurl.
 
 ## --prefix
 
@@ -74,19 +74,19 @@ on. The prefix is set with "configure --prefix".
 Lists what particular protocols the installed libcurl was built to support. At
 the time of writing, this list may include HTTP, HTTPS, FTP, FTPS, FILE,
 TELNET, LDAP, DICT and many more. Do not assume any particular order. The
-protocols will be listed using uppercase and are separated by newlines. There
-may be none, one, or several protocols in the list. (Added in 7.13.0)
+protocols are listed using uppercase and are separated by newlines. There may
+be none, one, or several protocols in the list. (Added in 7.13.0)
 
 ## --ssl-backends
 
 Lists the SSL backends that were enabled when libcurl was built. It might be
-no, one or several names. If more than one name, they will appear
-comma-separated. (Added in 7.58.0)
+no, one or several names. If more than one name, they appear comma-separated.
+(Added in 7.58.0)
 
 ## --static-libs
 
-Shows the complete set of libs and other linker options you will need in order
-to link your application with libcurl statically. (Added in 7.17.1)
+Shows the complete set of libs and other linker options you need in order to
+link your application with libcurl statically. (Added in 7.17.1)
 
 ## --version
 

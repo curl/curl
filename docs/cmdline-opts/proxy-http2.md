@@ -18,7 +18,7 @@ Example:
 
 # `--proxy-http2`
 
-Tells curl to try negotiate HTTP version 2 with an HTTPS proxy. The proxy might
-still only offer HTTP/1 and then curl sticks to using that version.
+Negotiate HTTP/2 with an HTTPS proxy. The proxy might still only offer HTTP/1
+and then curl sticks to using that version.
 
 This has no effect for any other kinds of proxies.
