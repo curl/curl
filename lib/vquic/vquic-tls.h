@@ -35,7 +35,7 @@ struct curl_tls_ctx {
 #ifdef USE_OPENSSL
   struct ossl_ctx ossl;
 #elif defined(USE_GNUTLS)
-  struct gtls_instance *gtls;
+  struct gtls_ctx gtls;
 #elif defined(USE_WOLFSSL)
   WOLFSSL_CTX *ssl_ctx;
   WOLFSSL *ssl;

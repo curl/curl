@@ -3496,7 +3496,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
                             void *ssl_user_data)
 {
   CURLcode result = CURLE_OK;
-  char *ciphers;
+  const char *ciphers;
   SSL_METHOD_QUAL SSL_METHOD *req_method = NULL;
   ctx_option_t ctx_options = 0;
   void *ssl_sessionid = NULL;
@@ -3699,7 +3699,8 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
   ciphers = conn_config->cipher_list;
   if(!ciphers)
-    ciphers = (char *)DEFAULT_CIPHER_SELECTION;
+    ciphers = (peer->transport == TRNSPRT_QUIC)?
+              NULL : DEFAULT_CIPHER_SELECTION;
   if(ciphers) {
     if(!SSL_CTX_set_cipher_list(octx->ssl_ctx, ciphers)) {
       failf(data, "failed setting cipher list: %s", ciphers);
@@ -3710,7 +3711,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
 #ifdef HAVE_SSL_CTX_SET_CIPHERSUITES
   {
-    char *ciphers13 = conn_config->cipher_list13;
+    const char *ciphers13 = conn_config->cipher_list13;
     if(ciphers13) {
       if(!SSL_CTX_set_ciphersuites(octx->ssl_ctx, ciphers13)) {
         failf(data, "failed setting TLS 1.3 cipher suite: %s", ciphers13);
@@ -3728,7 +3729,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
 #ifdef HAVE_SSL_CTX_SET_EC_CURVES
   {
-    char *curves = conn_config->curves;
+    const char *curves = conn_config->curves;
     if(curves) {
       if(!SSL_CTX_set1_curves_list(octx->ssl_ctx, curves)) {
         failf(data, "failed setting curves list: '%s'", curves);
@@ -4230,20 +4231,12 @@ static void infof_certstack(struct Curl_easy *data, const SSL *ssl)
 #define infof_certstack(data, ssl)
 #endif
 
-/*
- * Get the server cert, verify it and show it, etc., only call failf() if the
- * 'strict' argument is TRUE as otherwise all this is for informational
- * purposes only!
- *
- * We check certificates to authenticate the server; otherwise we risk
- * man-in-the-middle attack.
- */
-static CURLcode servercert(struct Curl_cfilter *cf,
-                           struct Curl_easy *data,
-                           bool strict)
+CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  struct ossl_ctx *octx,
+                                  struct ssl_peer *peer)
 {
   struct connectdata *conn = cf->conn;
-  struct ssl_connect_data *connssl = cf->ctx;
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   CURLcode result = CURLE_OK;
@@ -4255,7 +4248,7 @@ static CURLcode servercert(struct Curl_cfilter *cf,
   char buffer[2048];
   const char *ptr;
   BIO *mem = BIO_new(BIO_s_mem());
-  struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
+  bool strict = (conn_config->verifypeer || conn_config->verifyhost);
 
   DEBUGASSERT(octx);
 
@@ -4307,8 +4300,7 @@ static CURLcode servercert(struct Curl_cfilter *cf,
   BIO_free(mem);
 
   if(conn_config->verifyhost) {
-    result = Curl_ossl_verifyhost(data, conn, &connssl->peer,
-                                  octx->server_cert);
+    result = Curl_ossl_verifyhost(data, conn, peer, octx->server_cert);
     if(result) {
       X509_free(octx->server_cert);
       octx->server_cert = NULL;
@@ -4432,7 +4424,7 @@ static CURLcode servercert(struct Curl_cfilter *cf,
         void *old_ssl_sessionid = NULL;
         bool incache;
         Curl_ssl_sessionid_lock(data);
-        incache = !(Curl_ssl_getsessionid(cf, data, &connssl->peer,
+        incache = !(Curl_ssl_getsessionid(cf, data, peer,
                                           &old_ssl_sessionid, NULL));
         if(incache) {
           infof(data, "Remove session ID again from cache");
@@ -4463,7 +4455,6 @@ static CURLcode servercert(struct Curl_cfilter *cf,
 
   X509_free(octx->server_cert);
   octx->server_cert = NULL;
-  connssl->connecting_state = ssl_connect_done;
 
   return result;
 }
@@ -4473,6 +4464,7 @@ static CURLcode ossl_connect_step3(struct Curl_cfilter *cf,
 {
   CURLcode result = CURLE_OK;
   struct ssl_connect_data *connssl = cf->ctx;
+  struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
@@ -4484,9 +4476,7 @@ static CURLcode ossl_connect_step3(struct Curl_cfilter *cf,
    * operations.
    */
 
-  result = servercert(cf, data, conn_config->verifypeer ||
-                      conn_config->verifyhost);
-
+  result = Curl_oss_check_peer_cert(cf, data, octx, &connssl->peer);
   if(!result)
     connssl->connecting_state = ssl_connect_done;
 

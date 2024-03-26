@@ -1972,7 +1972,7 @@ static CURLcode tls_ctx_setup(struct Curl_cfilter *cf,
   SSL_CTX_sess_set_new_cb(ctx->ossl.ssl_ctx, ossl_new_session_cb);
 
 #elif defined(USE_GNUTLS)
-  if(ngtcp2_crypto_gnutls_configure_client_session(ctx->gtls->session) != 0) {
+  if(ngtcp2_crypto_gnutls_configure_client_session(ctx->gtls.session) != 0) {
     failf(data, "ngtcp2_crypto_gnutls_configure_client_session failed");
     return CURLE_FAILED_INIT;
   }
@@ -2064,7 +2064,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
 #ifdef USE_OPENSSL
   ngtcp2_conn_set_tls_native_handle(ctx->qconn, ctx->tls.ossl.ssl);
 #elif defined(USE_GNUTLS)
-  ngtcp2_conn_set_tls_native_handle(ctx->qconn, ctx->tls.gtls->session);
+  ngtcp2_conn_set_tls_native_handle(ctx->qconn, ctx->tls.gtls.session);
 #else
   ngtcp2_conn_set_tls_native_handle(ctx->qconn, ctx->tls.ssl);
 #endif
