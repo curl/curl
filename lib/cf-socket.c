@@ -946,8 +946,8 @@ static CURLcode set_local_ip(struct Curl_cfilter *cf,
   }
 #else
   (void)data;
-  ctx->l_ip[0] = 0;
-  ctx->l_port = -1;
+  ctx->ip.local_ip[0] = 0;
+  ctx->ip.local_port = -1;
 #endif
   return CURLE_OK;
 }
