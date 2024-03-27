@@ -28,3 +28,17 @@ endif()
 if(ENABLE_CURL_MANUAL AND BUILD_CURL_EXE)
   add_subdirectory(cmdline-opts)
 endif()
+
+if(BUILD_MISC_DOCS)
+  foreach(_man_misc IN ITEMS "curl-config" "mk-ca-bundle")
+    set(_man_target "${CURL_BINARY_DIR}/docs/${_man_misc}.1")
+    add_custom_command(OUTPUT "${_man_target}"
+      COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} && "${PERL_EXECUTABLE}" ${PROJECT_SOURCE_DIR}/scripts/cd2nroff "${_man_misc}.md" > "${_man_target}"
+      VERBATIM
+    )
+    add_custom_target("generate-${_man_misc}.1" ALL DEPENDS "${_man_target}")
+    if(NOT CURL_DISABLE_INSTALL)
+      install(FILES "${_man_target}" DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
+    endif()
+  endforeach()
+endif()

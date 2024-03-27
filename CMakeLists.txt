@@ -307,6 +307,7 @@ endif()
 find_package(Perl)
 
 option(BUILD_LIBCURL_DOCS "to build libcurl man pages" ON)
+option(BUILD_MISC_DOCS "to build misc man pages (e.g. curl-config and mk-ca-bundle)" ON)
 option(ENABLE_CURL_MANUAL "to build the man page for curl and enable its -M/--manual option" ON)
 
 if(ENABLE_CURL_MANUAL OR BUILD_LIBCURL_DOCS)
@@ -1513,6 +1514,13 @@ if(BUILD_TESTING)
 endif()
 
 if(NOT CURL_DISABLE_INSTALL)
+
+  install(FILES "${PROJECT_SOURCE_DIR}/scripts/mk-ca-bundle.pl"
+          DESTINATION ${CMAKE_INSTALL_BINDIR}
+          PERMISSIONS
+            OWNER_READ OWNER_WRITE OWNER_EXECUTE
+            GROUP_READ GROUP_EXECUTE
+            WORLD_READ WORLD_EXECUTE)
 
   # Helper to populate a list (_items) with a label when conditions (the remaining
   # args) are satisfied
