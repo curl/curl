@@ -670,6 +670,19 @@ size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
   return (result || n <= 0)? 1 : (size_t)n;
 }
 
+int Curl_conn_get_stream_error(struct Curl_easy *data,
+                               struct connectdata *conn,
+                               int sockindex)
+{
+  CURLcode result;
+  int n = 0;
+
+  struct Curl_cfilter *cf = conn->cfilter[sockindex];
+  result = cf? cf->cft->query(cf, data, CF_QUERY_STREAM_ERROR,
+                              &n, NULL) : CURLE_UNKNOWN_OPTION;
+  return (result || n < 0)? 0 : n;
+}
+
 int Curl_conn_sockindex(struct Curl_easy *data, curl_socket_t sockfd)
 {
   if(data && data->conn &&
