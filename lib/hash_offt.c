@@ -84,7 +84,7 @@ mk_hash_entry(curl_off_t id, const void *elem)
   return he;
 }
 
-#define FETCH_LIST(x,y) &(x)->table[offt_hash(y, (x)->bits)]
+#define CURL_HASH_OFFT_LIST(x,y) &(x)->table[offt_hash(y, (x)->bits)]
 
 void *Curl_hash_offt_set(struct Curl_hash_offt *h, curl_off_t id, void *elem)
 {
@@ -103,7 +103,7 @@ void *Curl_hash_offt_set(struct Curl_hash_offt *h, curl_off_t id, void *elem)
       Curl_llist_init(&h->table[i], offt_hash_entry_dtor);
   }
 
-  l = FETCH_LIST(h, id);
+  l = CURL_HASH_OFFT_LIST(h, id);
 
   for(le = l->head; le; le = le->next) {
     he = (struct Curl_hash_offt_entry *) le->ptr;
@@ -132,7 +132,7 @@ int Curl_hash_offt_remove(struct Curl_hash_offt *h, curl_off_t id)
   DEBUGASSERT(h);
   DEBUGASSERT(h->slots);
   if(h->table) {
-    l = FETCH_LIST(h, id);
+    l = CURL_HASH_OFFT_LIST(h, id);
 
     for(le = l->head; le; le = le->next) {
       struct Curl_hash_offt_entry *he = le->ptr;
@@ -154,7 +154,7 @@ void *Curl_hash_offt_get(struct Curl_hash_offt *h, curl_off_t id)
   DEBUGASSERT(h);
   if(h->table) {
     DEBUGASSERT(h->slots);
-    l = FETCH_LIST(h, id);
+    l = CURL_HASH_OFFT_LIST(h, id);
     for(le = l->head; le; le = le->next) {
       struct Curl_hash_offt_entry *he = le->ptr;
       if(id == he->id) {
