@@ -534,10 +534,10 @@ void Curl_ssl_sessionid_unlock(struct Curl_easy *data)
  */
 bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
                            struct Curl_easy *data,
+                           const struct ssl_peer *peer,
                            void **ssl_sessionid,
                            size_t *idsize) /* set 0 if unknown */
 {
-  struct ssl_connect_data *connssl = cf->ctx;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   struct Curl_ssl_session *check;
@@ -567,14 +567,15 @@ bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
     if(!check->sessionid)
       /* not session ID means blank entry */
       continue;
-    if(strcasecompare(connssl->peer.hostname, check->name) &&
+    if(strcasecompare(peer->hostname, check->name) &&
        ((!cf->conn->bits.conn_to_host && !check->conn_to_host) ||
         (cf->conn->bits.conn_to_host && check->conn_to_host &&
          strcasecompare(cf->conn->conn_to_host.name, check->conn_to_host))) &&
        ((!cf->conn->bits.conn_to_port && check->conn_to_port == -1) ||
         (cf->conn->bits.conn_to_port && check->conn_to_port != -1 &&
          cf->conn->conn_to_port == check->conn_to_port)) &&
-       (connssl->port == check->remote_port) &&
+       (peer->port == check->remote_port) &&
+       (peer->transport == check->transport) &&
        strcasecompare(cf->conn->handler->scheme, check->scheme) &&
        match_ssl_primary_config(data, conn_config, &check->ssl_config)) {
       /* yes, we have a session ID! */
@@ -591,8 +592,7 @@ bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
   DEBUGF(infof(data, "%s Session ID in cache for %s %s://%s:%d",
                no_match? "Didn't find": "Found",
                Curl_ssl_cf_is_proxy(cf) ? "proxy" : "host",
-               cf->conn->handler->scheme, connssl->peer.hostname,
-               connssl->port));
+               cf->conn->handler->scheme, peer->hostname, peer->port));
   return no_match;
 }
 
@@ -642,11 +642,11 @@ void Curl_ssl_delsessionid(struct Curl_easy *data, void *ssl_sessionid)
  */
 CURLcode Curl_ssl_addsessionid(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
+                               const struct ssl_peer *peer,
                                void *ssl_sessionid,
                                size_t idsize,
                                bool *added)
 {
-  struct ssl_connect_data *connssl = cf->ctx;
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   size_t i;
@@ -668,7 +668,7 @@ CURLcode Curl_ssl_addsessionid(struct Curl_cfilter *cf,
   (void)ssl_config;
   DEBUGASSERT(ssl_config->primary.sessionid);
 
-  clone_host = strdup(connssl->peer.hostname);
+  clone_host = strdup(peer->hostname);
   if(!clone_host)
     return CURLE_OUT_OF_MEMORY; /* bail out */
 
@@ -723,8 +723,9 @@ CURLcode Curl_ssl_addsessionid(struct Curl_cfilter *cf,
   store->conn_to_host = clone_conn_to_host; /* clone connect to host name */
   store->conn_to_port = conn_to_port; /* connect to port number */
   /* port number */
-  store->remote_port = connssl->port;
+  store->remote_port = peer->port;
   store->scheme = cf->conn->handler->scheme;
+  store->transport = peer->transport;
 
   if(!clone_ssl_primary_config(conn_config, &store->ssl_config)) {
     Curl_free_primary_ssl_config(&store->ssl_config);
@@ -1549,9 +1550,9 @@ static ssl_peer_type get_peer_type(const char *hostname)
   return CURL_SSL_PEER_DNS;
 }
 
-CURLcode Curl_ssl_peer_init(struct ssl_peer *peer, struct Curl_cfilter *cf)
+CURLcode Curl_ssl_peer_init(struct ssl_peer *peer, struct Curl_cfilter *cf,
+                            int transport)
 {
-  struct ssl_connect_data *connssl = cf->ctx;
   const char *ehostname, *edispname;
   int eport;
 
@@ -1614,7 +1615,8 @@ CURLcode Curl_ssl_peer_init(struct ssl_peer *peer, struct Curl_cfilter *cf)
     }
 
   }
-  connssl->port = eport;
+  peer->port = eport;
+  peer->transport = transport;
   return CURLE_OK;
 }
 
@@ -1667,7 +1669,7 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
     goto out;
 
   *done = FALSE;
-  result = Curl_ssl_peer_init(&connssl->peer, cf);
+  result = Curl_ssl_peer_init(&connssl->peer, cf, TRNSPRT_TCP);
   if(result)
     goto out;
 
@@ -1857,7 +1859,7 @@ struct Curl_cftype Curl_cft_ssl = {
 
 struct Curl_cftype Curl_cft_ssl_proxy = {
   "SSL-PROXY",
-  CF_TYPE_SSL,
+  CF_TYPE_SSL|CF_TYPE_PROXY,
   CURL_LOG_LVL_NONE,
   ssl_cf_destroy,
   ssl_cf_connect,
@@ -2033,12 +2035,7 @@ CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
 
 bool Curl_ssl_cf_is_proxy(struct Curl_cfilter *cf)
 {
-#ifndef CURL_DISABLE_PROXY
-  return (cf->cft == &Curl_cft_ssl_proxy);
-#else
-  (void)cf;
-  return FALSE;
-#endif
+  return (cf->cft->flags & CF_TYPE_SSL) && (cf->cft->flags & CF_TYPE_PROXY);
 }
 
 struct ssl_config_data *
