@@ -160,6 +160,7 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
 #define CF_QUERY_SOCKET             3  /* -          curl_socket_t */
 #define CF_QUERY_TIMER_CONNECT      4  /* -          struct curltime */
 #define CF_QUERY_TIMER_APPCONNECT   5  /* -          struct curltime */
+#define CF_QUERY_STREAM_ERROR       6  /* error code - */
 
 /**
  * Query the cfilter for properties. Filters ignorant of a query will
@@ -498,6 +499,12 @@ size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
                                     struct connectdata *conn,
                                     int sockindex);
 
+/**
+ * Get the underlying error code for a transfer stream or 0 if not known.
+ */
+int Curl_conn_get_stream_error(struct Curl_easy *data,
+                               struct connectdata *conn,
+                               int sockindex);
 
 /**
  * Get the index of the given socket in the connection's sockets.
