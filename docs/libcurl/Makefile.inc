@@ -87,6 +87,7 @@ man_MANS = \
  curl_multi_timeout.3 \
  curl_multi_wakeup.3 \
  curl_multi_wait.3 \
+ curl_multi_waitfds.3 \
  curl_pushheader_bynum.3 \
  curl_pushheader_byname.3 \
  curl_share_cleanup.3 \

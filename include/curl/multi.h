@@ -464,6 +464,20 @@ typedef int (*curl_push_callback)(CURL *parent,
                                   struct curl_pushheaders *headers,
                                   void *userp);
 
+/*
+ * Name:    curl_multi_waitfds()
+ *
+ * Desc:    Ask curl for fds for polling. The app can use these to poll on.
+ *          We want curl_multi_perform() called as soon as one of them are
+ *          ready. Passing zero size allows to get just a number of fds.
+ *
+ * Returns: CURLMcode type, general multi error code.
+ */
+CURL_EXTERN CURLMcode curl_multi_waitfds(CURLM *multi,
+                                         struct curl_waitfd *ufds,
+                                         unsigned int size,
+                                         unsigned int *fd_count);
+
 #ifdef __cplusplus
 } /* end of extern "C" */
 #endif

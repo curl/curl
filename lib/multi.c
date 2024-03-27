@@ -1208,6 +1208,68 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
   return CURLM_OK;
 }
 
+CURLMcode curl_multi_waitfds(struct Curl_multi *multi,
+                             struct curl_waitfd *ufds,
+                             unsigned int size,
+                             unsigned int *fd_count)
+{
+  struct Curl_easy *data;
+  unsigned int nfds = 0;
+  struct easy_pollset ps;
+  unsigned int i;
+  CURLMcode result = CURLM_OK;
+  struct curl_waitfd *ufd;
+  unsigned int j;
+
+  if(!ufds)
+    return CURLM_BAD_FUNCTION_ARGUMENT;
+
+  if(!GOOD_MULTI_HANDLE(multi))
+    return CURLM_BAD_HANDLE;
+
+  if(multi->in_callback)
+    return CURLM_RECURSIVE_API_CALL;
+
+  memset(&ps, 0, sizeof(ps));
+  for(data = multi->easyp; data; data = data->next) {
+    multi_getsock(data, &ps);
+
+    for(i = 0; i < ps.num; i++) {
+      if(nfds < size) {
+        curl_socket_t fd = ps.sockets[i];
+        int fd_idx = -1;
+
+        /* Simple linear search to skip an already added descriptor */
+        for(j = 0; j < nfds; j++) {
+          if(ufds[j].fd == fd) {
+            fd_idx = (int)j;
+            break;
+          }
+        }
+
+        if(fd_idx < 0) {
+          ufd = &ufds[nfds++];
+          ufd->fd = ps.sockets[i];
+          ufd->events = 0;
+        }
+        else
+          ufd = &ufds[fd_idx];
+
+        if(ps.actions[i] & CURL_POLL_IN)
+          ufd->events |= CURL_WAIT_POLLIN;
+        if(ps.actions[i] & CURL_POLL_OUT)
+          ufd->events |= CURL_WAIT_POLLOUT;
+      }
+      else
+        return CURLM_OUT_OF_MEMORY;
+    }
+  }
+
+  if(fd_count)
+    *fd_count = nfds;
+  return result;
+}
+
 #ifdef USE_WINSOCK
 /* Reset FD_WRITE for TCP sockets. Nothing is actually sent. UDP sockets can't
  * be reset this way because an empty datagram would be sent. #9203
