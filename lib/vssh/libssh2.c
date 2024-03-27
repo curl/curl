@@ -201,7 +201,8 @@ kbd_callback(const char *name, int name_len, const char *instruction,
   if(num_prompts == 1) {
     struct connectdata *conn = data->conn;
     responses[0].text = strdup(conn->passwd);
-    responses[0].length = curlx_uztoui(strlen(conn->passwd));
+    responses[0].length =
+      responses[0].text == NULL ? 0 : curlx_uztoui(strlen(conn->passwd));
   }
   (void)prompts;
 } /* kbd_callback */
