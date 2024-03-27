@@ -142,6 +142,10 @@ if test "x$OPT_RUSTLS" != xno; then
       LIBS="$SSL_LIBS $LIBS"
       USE_RUSTLS="yes"
       ssl_msg="rustls"
+      AC_DEFINE(USE_RUSTLS, 1, [if rustls is enabled])
+      AC_SUBST(USE_RUSTLS, [1])
+      RUSTLS_ENABLED=1
+      test rustls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
     else
       AC_MSG_ERROR([pkg-config: Could not find rustls])
     fi
@@ -174,5 +178,15 @@ if test "x$OPT_RUSTLS" != xno; then
   fi
 
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
+
+  if test X"$OPT_RUSTLS" != Xno &&
+    test "$RUSTLS_ENABLED" != "1"; then
+    AC_MSG_NOTICE([OPT_RUSTLS: $OPT_RUSTLS])
+    AC_MSG_NOTICE([RUSTLS_ENABLED: $RUSTLS_ENABLED])
+    AC_MSG_ERROR([--with-rustls was given but Rustls could not be detected])
+  fi
 fi
 ])
+
+
+RUSTLS_ENABLED
