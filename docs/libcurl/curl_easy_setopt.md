@@ -451,6 +451,10 @@ Username. See CURLOPT_USERNAME(3)
 
 Password. See CURLOPT_PASSWORD(3)
 
+## CURLOPT_SAFE_AUTH
+
+Disable clear password. See CURLOPT_SAFE_AUTH(3)
+
 ## CURLOPT_LOGIN_OPTIONS
 
 Login options. See CURLOPT_LOGIN_OPTIONS(3)

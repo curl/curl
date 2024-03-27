@@ -1,0 +1,51 @@
+<testcase>
+<info>
+<keywords>
+HTTPS
+HTTP GET
+HTTP Basic auth
+SAFEAUTH
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Content-Type: text/html
+
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+SSL
+</features>
+<server>
+https
+</server>
+ <name>
+HTTPS GET with user and clear password protection
+ </name>
+ <command>
+ -u fake:user --safe-auth -k https://%HOSTIP:%HTTPSPORT/%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPSPORT
+Authorization: Basic ZmFrZTp1c2Vy
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

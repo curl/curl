@@ -1,0 +1,49 @@
+<testcase>
+<info>
+<keywords>
+IMAP
+Clear Text
+SAFEAUTH
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+From: me@somewhere
+To: fake@nowhere
+
+body
+
+--
+  yours sincerely
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+imap
+</server>
+ <name>
+IMAP login with clear password disabled
+ </name>
+ <command>
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user:secret --safe-auth
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# 67 is CURLE_LOGIN_DENIED
+<errorcode>
+67
+</errorcode>
+<protocol>
+A001 CAPABILITY
+</protocol>
+</verify>
+</testcase>
