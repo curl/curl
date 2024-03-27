@@ -156,6 +156,7 @@ LIB_CFILES =         \
   getinfo.c          \
   gopher.c           \
   hash.c             \
+  hash_offt.c        \
   headers.c          \
   hmac.c             \
   hostasyn.c         \
@@ -302,6 +303,7 @@ LIB_HFILES =         \
   getinfo.h          \
   gopher.h           \
   hash.h             \
+  hash_offt.h        \
   headers.h          \
   hostip.h           \
   hsts.h             \
