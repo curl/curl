@@ -1221,6 +1221,7 @@ const struct Curl_ssl Curl_ssl_bearssl = {
   NULL,                            /* free_multi_ssl_backend_data */
   bearssl_recv,                    /* recv decrypted data */
   bearssl_send,                    /* send data to encrypt */
+  NULL,                            /* get_tls_server_end_point */
 };
 
 #endif /* USE_BEARSSL */
