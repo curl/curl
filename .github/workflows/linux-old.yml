@@ -1,0 +1,91 @@
+# Copyright (C) Daniel Fandrich, <dan@coneharvesters.com>, et al.
+#
+# SPDX-License-Identifier: curl
+#
+# Compile on an old version of Linux that has barely the minimal build
+# requirements for CMake.
+# Debian stretch is chosen as it closely matches some of the oldest major
+# versions we support (especially cmake); see docs/INTERNALS.md.
+# stretch has ELTS support from Feexian until 2027-06-30
+# For ELTS info see https://www.freexian.com/lts/extended/docs/how-to-use-extended-lts/
+# The Debian key will expire 2025-05-20, after which package signature
+# verification may need to be disabled.
+# httrack is one of the smallest downloaders, needed to bootstrap ELTS,
+# and won't conflict with the curl we're building.
+
+name: Old Linux
+
+on:
+  push:
+    branches:
+      - master
+      - '*/ci'
+    paths-ignore:
+      - '**/*.md'
+      - '.azure-pipelines.yml'
+      - '.circleci/**'
+      - '.cirrus.yml'
+      - 'appveyor.*'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+      - 'winbuild/**'
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - '**/*.md'
+      - '.azure-pipelines.yml'
+      - '.circleci/**'
+      - '.cirrus.yml'
+      - 'appveyor.*'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+      - 'winbuild/**'
+
+permissions: {}
+
+env:
+  MAKEFLAGS: -j 3
+  DEBIAN_FRONTEND: noninteractive
+
+jobs:
+  cmake:
+    name: linux (cmake)
+    runs-on: 'ubuntu-latest'
+    container: 'debian:stretch'
+
+    steps:
+      - name: 'install prereqs'
+        # Remember, this shell is dash, not bash
+        run: |
+          sed -E -i -e s@[a-z]+\.debian\.org/@archive.debian.org/debian-archive/@ -e '/ stretch-updates /d' /etc/apt/sources.list
+          apt-get update
+          apt-get install -y --no-install-suggests --no-install-recommends httrack
+          httrack --get https://deb.freexian.com/extended-lts/pool/main/f/freexian-archive-keyring/freexian-archive-keyring_2022.06.08_all.deb
+          dpkg -i freexian-archive-keyring_2022.06.08_all.deb
+          echo 'deb http://deb.freexian.com/extended-lts stretch-lts main contrib non-free' | tee /etc/apt/sources.list.d/extended-lts.list
+          apt-get update
+          apt-get install -y --no-install-suggests --no-install-recommends cmake make gcc pkg-config libpsl-dev libzstd-dev zlib1g-dev libssl1.0-dev libssh-dev libc-ares-dev heimdal-dev libldap2-dev stunnel4 groff
+          # GitHub's actions/checkout needs a newer glibc. This one is the
+          # latest available for buster, the next stable release after stretch.
+          httrack --get https://deb.debian.org/debian/pool/main/g/glibc/libc6_2.28-10+deb10u1_amd64.deb
+          dpkg -i libc6_2.28-10+deb10u1_amd64.deb
+
+      - uses: actions/checkout@v4
+
+      - name: 'cmake generate out-of-tree'
+        run: |
+          mkdir build
+          cd build
+          cmake -DBUILD_SHARED_LIBS=ON -DENABLE_ARES=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH=ON -DCURL_USE_GSSAPI=ON ..
+
+      - name: 'build'
+        run: make -C build
+
+      - name: 'install'
+        run: make -C build install
+
+      - name: 'tests'
+        run: make -C build test-ci

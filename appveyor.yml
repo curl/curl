@@ -84,7 +84,7 @@ environment:
       ENABLE_UNICODE: 'OFF'
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
-      DISABLED_TESTS: '!1139 !1501 !1140 !1173 !1177 !1477'
+      DISABLED_TESTS: '!1139 !1501 !1177 !1477'
     - job_name: 'CMake, VS2022, Debug, x64, Schannel, Static, Unicode'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
@@ -95,7 +95,7 @@ environment:
       ENABLE_UNICODE: 'ON'
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
-      DISABLED_TESTS: '!1139 !1501 !1140 !1173 !1177 !1477'
+      DISABLED_TESTS: '!1139 !1501 !1177 !1477'
     - job_name: 'CMake, VS2022, Debug, x64, no SSL, Static'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
@@ -106,7 +106,7 @@ environment:
       ENABLE_UNICODE: 'OFF'
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
-      DISABLED_TESTS: '!1139 !1501 !1140 !1173 !1177 !1477'
+      DISABLED_TESTS: '!1139 !1501 !1177 !1477'
     - job_name: 'CMake, VS2022, Debug, x64, no SSL, Static, HTTP only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
@@ -117,7 +117,7 @@ environment:
       ENABLE_UNICODE: 'OFF'
       HTTP_ONLY: 'ON'
       TESTING: 'ON'
-      DISABLED_TESTS: '!1139 !1501 !1140 !1173 !1177 !1477'
+      DISABLED_TESTS: '!1139 !1501 !1177 !1477'
     # generated CMake-based MSYS Makefiles builds (mingw cross-compiling)
     - job_name: 'CMake, mingw-w64, gcc 13, Debug, x64, Schannel, Static, Unicode, Unity'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
@@ -128,7 +128,7 @@ environment:
       ENABLE_UNICODE: 'ON'
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
-      DISABLED_TESTS: '!1086 !1139 !1451 !1501 !1140 !1173 !1177 !1477'
+      DISABLED_TESTS: '!1086 !1139 !1451 !1501 !1177 !1477'
       ADD_PATH: 'C:/msys64/mingw64/bin'
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
@@ -142,7 +142,7 @@ environment:
       ENABLE_UNICODE: 'ON'
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
-      DISABLED_TESTS: '!1086 !1139 !1451 !1501 !1140 !1173 !1177 !1477'
+      DISABLED_TESTS: '!1086 !1139 !1451 !1501 !1177 !1477'
       ADD_PATH: 'C:/mingw-w64/x86_64-7.2.0-posix-seh-rt_v5-rev1/mingw64/bin'
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
@@ -156,7 +156,7 @@ environment:
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
       # test 286 disabled due to https://github.com/curl/curl/issues/12040
-      DISABLED_TESTS: '~286 !1086 !1139 !1451 !1501 !1140 !1173 !1177 !1477'
+      DISABLED_TESTS: '~286 !1086 !1139 !1451 !1501 !1177 !1477'
       ADD_PATH: 'C:/msys64/mingw64/bin'
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
@@ -170,7 +170,7 @@ environment:
       ENABLE_UNICODE: 'OFF'
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
-      DISABLED_TESTS: '!1086 !1139 !1451 !1501 !1140 !1173 !1177 !1477'
+      DISABLED_TESTS: '!1086 !1139 !1451 !1501 !1177 !1477'
       ADD_PATH: 'C:/mingw-w64/i686-6.3.0-posix-dwarf-rt_v5-rev1/mingw32/bin'
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
