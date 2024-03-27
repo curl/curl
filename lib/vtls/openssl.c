@@ -3390,7 +3390,7 @@ static bool cached_x509_store_different(
 static X509_STORE *get_cached_x509_store(struct Curl_cfilter *cf,
                                          const struct Curl_easy *data)
 {
-  struct Curl_multi *multi = data->multi_easy ? data->multi_easy : data->multi;
+  struct Curl_multi *multi = data->multi;
   X509_STORE *store = NULL;
 
   DEBUGASSERT(multi);
@@ -3410,7 +3410,7 @@ static void set_cached_x509_store(struct Curl_cfilter *cf,
                                   X509_STORE *store)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  struct Curl_multi *multi = data->multi_easy ? data->multi_easy : data->multi;
+  struct Curl_multi *multi = data->multi;
   struct multi_ssl_backend_data *mbackend;
 
   DEBUGASSERT(multi);
