@@ -171,7 +171,7 @@ static int hyper_each_header(void *userdata,
   len = Curl_dyn_len(&data->state.headerb);
   headp = Curl_dyn_ptr(&data->state.headerb);
 
-  result = Curl_http_header(data, data->conn, headp, len);
+  result = Curl_http_header(data, headp, len);
   if(result) {
     data->state.hresult = result;
     return HYPER_ITER_BREAK;

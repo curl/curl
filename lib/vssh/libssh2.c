@@ -139,6 +139,7 @@ const struct Curl_handler Curl_handler_scp = {
   ssh_getsock,                          /* perform_getsock */
   scp_disconnect,                       /* disconnect */
   ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ssh_attach,                           /* attach */
   PORT_SSH,                             /* defport */
@@ -168,6 +169,7 @@ const struct Curl_handler Curl_handler_sftp = {
   ssh_getsock,                          /* perform_getsock */
   sftp_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ssh_attach,                           /* attach */
   PORT_SSH,                             /* defport */

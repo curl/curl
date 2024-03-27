@@ -1198,6 +1198,7 @@ const struct Curl_handler Curl_handler_ws = {
   ZERO_NULL,                            /* perform_getsock */
   ws_disconnect,                        /* disconnect */
   Curl_http_write_resp,                 /* write_resp */
+  Curl_http_write_resp_hd,              /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_HTTP,                            /* defport */
@@ -1223,6 +1224,7 @@ const struct Curl_handler Curl_handler_wss = {
   ZERO_NULL,                            /* perform_getsock */
   ws_disconnect,                        /* disconnect */
   Curl_http_write_resp,                 /* write_resp */
+  Curl_http_write_resp_hd,              /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_HTTPS,                           /* defport */
