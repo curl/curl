@@ -33,7 +33,9 @@ if(BUILD_MISC_DOCS)
   foreach(_man_misc IN ITEMS "curl-config" "mk-ca-bundle")
     set(_man_target "${CURL_BINARY_DIR}/docs/${_man_misc}.1")
     add_custom_command(OUTPUT "${_man_target}"
-      COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} && "${PERL_EXECUTABLE}" ${PROJECT_SOURCE_DIR}/scripts/cd2nroff "${_man_misc}.md" > "${_man_target}"
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+      COMMAND "${PERL_EXECUTABLE}" ${PROJECT_SOURCE_DIR}/scripts/cd2nroff "${_man_misc}.md" > "${_man_target}"
+      DEPENDS ${_man_target}
       VERBATIM
     )
     add_custom_target("generate-${_man_misc}.1" ALL DEPENDS "${_man_target}")
