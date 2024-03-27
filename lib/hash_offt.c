@@ -69,7 +69,7 @@ void Curl_hash_offt_init(struct Curl_hash_offt *h,
   h->dtor_user_data = dtor_user_data;
   h->size = 0;
   h->bits = bits;
-  h->slots = (1 << bits);
+  h->slots = (unsigned int)(1 << bits);
 }
 
 static struct Curl_hash_offt_entry *
