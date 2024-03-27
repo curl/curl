@@ -2928,6 +2928,7 @@ const struct Curl_ssl Curl_ssl_schannel = {
   schannel_free_multi_ssl_backend_data, /* free_multi_ssl_backend_data */
   schannel_recv,                     /* recv decrypted data */
   schannel_send,                     /* send data to encrypt */
+  schannel_sha1sum,                  /* sha1sum */ //AMARTZ TODO:
 };
 
 #endif /* USE_SCHANNEL */

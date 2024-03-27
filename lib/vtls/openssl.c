@@ -4989,6 +4989,7 @@ const struct Curl_ssl Curl_ssl_openssl = {
   ossl_free_multi_ssl_backend_data, /* free_multi_ssl_backend_data */
   ossl_recv,                /* recv decrypted data */
   ossl_send,                /* send data to encrypt */
+  ossl_sha1sum,             /* sha1sum */ //AMARTZ TODO:
 };
 
 #endif /* USE_OPENSSL */

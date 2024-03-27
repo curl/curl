@@ -61,6 +61,10 @@ CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
 #define MAX_PINNED_PUBKEY_SIZE 1048576 /* 1MB */
 #endif
 
+#ifndef CURL_SHA1_DIGEST_LENGTH
+#define CURL_SHA1_DIGEST_LENGTH 20 /* fixed size */
+#endif
+
 #ifndef CURL_SHA256_DIGEST_LENGTH
 #define CURL_SHA256_DIGEST_LENGTH 32 /* fixed size */
 #endif

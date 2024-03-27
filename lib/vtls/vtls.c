@@ -1064,6 +1064,74 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     return result;
   }
 
+  /* only do this if pinnedpubkey starts with "sha1//", length 6 */
+  if(strncmp(pinnedpubkey, "sha1//", 6) == 0) {
+    CURLcode encode;
+    size_t encodedlen = 0;
+    char *encoded = NULL, *pinkeycopy, *begin_pos, *end_pos;
+    unsigned char *sha1sumdigest;
+
+    if(!Curl_ssl->sha1sum) {
+      /* without sha1 support, this cannot match */
+      return result;
+    }
+
+    /* compute sha1sum of public key */
+    sha1sumdigest = malloc(CURL_SHA1_DIGEST_LENGTH);
+    if(!sha1sumdigest)
+      return CURLE_OUT_OF_MEMORY;
+    encode = Curl_ssl->sha1sum(pubkey, pubkeylen,
+                                 sha1sumdigest, CURL_SHA1_DIGEST_LENGTH);
+
+    if(!encode)
+      encode = Curl_base64_encode((char *)sha1sumdigest,
+                                  CURL_SHA1_DIGEST_LENGTH, &encoded,
+                                  &encodedlen);
+    Curl_safefree(sha1sumdigest);
+
+    if(encode)
+      return encode;
+
+    infof(data, " public key hash: sha1//%s", encoded);
+
+    /* it starts with sha1//, copy so we can modify it */
+    pinkeycopy = strdup(pinnedpubkey);
+    if(!pinkeycopy) {
+      Curl_safefree(encoded);
+      return CURLE_OUT_OF_MEMORY;
+    }
+    /* point begin_pos to the copy, and start extracting keys */
+    begin_pos = pinkeycopy;
+    do {
+      end_pos = strstr(begin_pos, ";sha1//");
+      /*
+       * if there is an end_pos, null terminate,
+       * otherwise it'll go to the end of the original string
+       */
+      if(end_pos)
+        end_pos[0] = '\0';
+
+      /* compare base64 sha1 digests, 6 is the length of "sha1//" */
+      if(encodedlen == strlen(begin_pos + 6) &&
+         !memcmp(encoded, begin_pos + 6, encodedlen)) {
+        result = CURLE_OK;
+        break;
+      }
+
+      /*
+       * change back the null-terminator we changed earlier,
+       * and look for next begin
+       */
+      if(end_pos) {
+        end_pos[0] = ';';
+        begin_pos = strstr(end_pos, "sha1//");
+      }
+    } while(end_pos && begin_pos);
+    Curl_safefree(encoded);
+    Curl_safefree(pinkeycopy);
+    return result;
+  }
+
   fp = fopen(pinnedpubkey, "rb");
   if(!fp)
     return result;
@@ -1333,6 +1401,7 @@ static const struct Curl_ssl Curl_ssl_multi = {
   NULL,                              /* free_multi_ssl_backend_data */
   multissl_recv_plain,               /* recv decrypted data */
   multissl_send_plain,               /* send data to encrypt */
+  NULL,                              /* sha1sum */
 };
 
 const struct Curl_ssl *Curl_ssl =

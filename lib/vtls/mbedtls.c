@@ -1347,6 +1347,7 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   NULL,                             /* free_multi_ssl_backend_data */
   mbed_recv,                        /* recv decrypted data */
   mbed_send,                        /* send data to encrypt */
+  mbedtls_sha1sum,                  /* sha1sum */ //AMARTZ TODO:
 };
 
 #endif /* USE_MBEDTLS */

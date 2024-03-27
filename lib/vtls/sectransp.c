@@ -3480,6 +3480,7 @@ const struct Curl_ssl Curl_ssl_sectransp = {
   NULL,                               /* free_multi_ssl_backend_data */
   sectransp_recv,                     /* recv decrypted data */
   sectransp_send,                     /* send data to encrypt */
+  sectransp_sha1sum,                  /* sha1sum */ //AMARTZ TODO:
 };
 
 #ifdef __GNUC__

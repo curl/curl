@@ -1674,6 +1674,7 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   NULL,                          /* free_multi_ssl_backend_data */
   gtls_recv,                     /* recv decrypted data */
   gtls_send,                     /* send data to encrypt */
+  gtls_sha1sum,                  /* sha1sum */ //AMARTZ TODO:
 };
 
 #endif /* USE_GNUTLS */
