@@ -44,7 +44,7 @@
 #  include <openssl/opensslv.h>
 #  if (!defined(LIBRESSL_VERSION_NUMBER) && \
         defined(OPENSSL_VERSION_NUMBER) && \
-        (OPENSSL_VERSION_NUMBER >= 0x10100010L)) || \
+        (OPENSSL_VERSION_NUMBER >= 0x10101000L)) || \
       (defined(LIBRESSL_VERSION_NUMBER) && \
         (LIBRESSL_VERSION_NUMBER >= 0x3080000fL))
 #    include <openssl/opensslconf.h>
