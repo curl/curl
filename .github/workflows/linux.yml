@@ -40,7 +40,7 @@ concurrency:
 permissions: {}
 
 env:
-  MAKEFLAGS: -j 3
+  MAKEFLAGS: -j 4
   bearssl-version: 0.6
   libressl-version: v3.7.3
   mbedtls-version: v3.5.0

@@ -45,7 +45,7 @@ concurrency:
 permissions: {}
 
 env:
-  MAKEFLAGS: -j 3
+  MAKEFLAGS: -j 4
   quictls-version: 3.1.4+quic
   gnutls-version: 3.8.3
   wolfssl-version: master

@@ -41,7 +41,7 @@ concurrency:
 permissions: {}
 
 env:
-  MAKEFLAGS: -j 3
+  MAKEFLAGS: -j 4
   awslc-version: 1.13.0
 
 jobs:

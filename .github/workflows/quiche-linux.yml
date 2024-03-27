@@ -45,7 +45,7 @@ concurrency:
 permissions: {}
 
 env:
-  MAKEFLAGS: -j 3
+  MAKEFLAGS: -j 4
   openssl-version: 3.1.4+quic
   nghttp3-version: v1.1.0
   ngtcp2-version: v1.2.0
