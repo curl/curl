@@ -632,6 +632,7 @@ typedef enum {
   CURLE_SSL_CLIENTCERT,          /* 98 - client-side certificate required */
   CURLE_UNRECOVERABLE_POLL,      /* 99 - poll/select returned fatal error */
   CURLE_TOO_LARGE,               /* 100 - a value/data met its maximum */
+  CURLE_ECH_REQUIRED,            /* 101 - ECH tried but failed */
   CURL_LAST /* never use! */
 } CURLcode;
 
@@ -2206,6 +2207,9 @@ typedef enum {
   /* millisecond version */
   CURLOPT(CURLOPT_SERVER_RESPONSE_TIMEOUT_MS, CURLOPTTYPE_LONG, 324),
 
+  /* set ECH configuration  */
+  CURLOPT(CURLOPT_ECH, CURLOPTTYPE_STRINGPOINT, 325),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -3154,7 +3158,7 @@ typedef struct curl_version_info_data curl_version_info_data;
 #define CURL_VERSION_GSASL        (1<<29) /* libgsasl is supported */
 #define CURL_VERSION_THREADSAFE   (1<<30) /* libcurl API is thread-safe */
 
- /*
+/*
  * NAME curl_version_info()
  *
  * DESCRIPTION

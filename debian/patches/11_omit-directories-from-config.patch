@@ -1,0 +1,55 @@
+Description: In order to (partially) multi-arch-ify curl-config, remove all
+ mention of @includedir@ and @libdir@ from the script.  On Debian, the actual
+ header and library directories are architecture-dependent, but will always be
+ in the C compiler's default search path, so -I and -L options are not
+ necessary (and may be harmful in multi-arch environments.)
+Origin: vendor
+Bug-Debian: http://bugs.debian.org/731998
+Forwarded: not-needed
+Author: Benjamin Moody <benjamin.moody@gmail.com>
+Reviewed-by: Alessandro Ghedini <ghedo@debian.org>
+Last-Update: 2017-01-10
+
+Index: curl/curl-config.in
+===================================================================
+--- curl.orig/curl-config.in
++++ curl/curl-config.in
+@@ -25,7 +25,6 @@
+ 
+ prefix="@prefix@"
+ exec_prefix=@exec_prefix@
+-includedir=@includedir@
+ cppflag_curl_staticlib=@CPPFLAG_CURL_STATICLIB@
+ 
+ usage()
+@@ -149,19 +148,11 @@ while test $# -gt 0; do
+         else
+           CPPFLAG_CURL_STATICLIB=""
+         fi
+-        if test "X@includedir@" = "X/usr/include"; then
+-          echo "$CPPFLAG_CURL_STATICLIB"
+-        else
+-          echo "${CPPFLAG_CURL_STATICLIB}-I@includedir@"
+-        fi
++        echo "$CPPFLAG_CURL_STATICLIB"
+         ;;
+ 
+     --libs)
+-        if test "X@libdir@" != "X/usr/lib" -a "X@libdir@" != "X/usr/lib64"; then
+-           CURLLIBDIR="-L@libdir@ "
+-        else
+-           CURLLIBDIR=""
+-        fi
++        CURLLIBDIR=""
+         if test "X@ENABLE_SHARED@" = "Xno"; then
+           echo ${CURLLIBDIR}-lcurl @LIBCURL_LIBS@
+         else
+@@ -174,7 +165,7 @@ while test $# -gt 0; do
+ 
+     --static-libs)
+         if test "X@ENABLE_STATIC@" != "Xno" ; then
+-          echo "@libdir@/libcurl.@libext@" @LDFLAGS@ @LIBCURL_LIBS@
++          echo -Wl,-Bstatic -lcurl -Wl,-Bdynamic @LDFLAGS@ @LIBCURL_LIBS@
+         else
+           echo "curl was built with static libraries disabled" >&2
+           exit 1

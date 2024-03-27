@@ -54,6 +54,7 @@ Invalid category provided, here is a list of all categories:
  telnet      TELNET protocol options
  tftp        TFTP protocol options
  tls         All TLS/SSL related options
+ ech         All Encrypted Client Hello (ECH) options
  upload      All options for uploads
  verbose     Options related to any kind of command line output of curl
 </stdout>

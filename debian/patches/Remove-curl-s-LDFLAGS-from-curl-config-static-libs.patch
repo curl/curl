@@ -1,0 +1,42 @@
+From: Simon McVittie <smcv@collabora.com>
+Date: Tue, 22 Nov 2022 21:20:51 +0000
+Subject: Remove curl's LDFLAGS from curl-config --static-libs
+
+On current Debian bookworm, the LDFLAGS consist of
+-L/usr/lib/${triplet}/mit-krb5 originating from
+`pkg-config --libs-only-L mit-krb5-gssapi` from krb5-multidev, plus
+some linker options that are intended for curl itself rather than for
+dependent packages. None of these are really desirable, and they create
+divergence between architectures that would prevent libcurl-*-dev from
+being Multi-Arch: same.
+
+The -L flag is not really needed, for the same reason that -L@libdir@
+isn't. curl Build-Depends on libkrb5-dev, which doesn't need a special
+-L flag to find libgssapi_krb5, and the various libcurl-*-dev packages
+have Suggests on libkrb5-dev rather than on krb5-multidev for static
+linking.
+
+The other options (currently `-Wl,-z-relro -Wl,-z,now`) are intended
+for libcurl itself, and if dependent packages want those options then
+they should set them from their own packaging.
+
+Bug-Debian: https://bugs.debian.org/1024668
+Forwarded: not-needed
+Signed-off-by: Simon McVittie <smcv@collabora.com>
+---
+ curl-config.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+Index: curl/curl-config.in
+===================================================================
+--- curl.orig/curl-config.in
++++ curl/curl-config.in
+@@ -165,7 +165,7 @@ while test $# -gt 0; do
+ 
+     --static-libs)
+         if test "X@ENABLE_STATIC@" != "Xno" ; then
+-          echo -Wl,-Bstatic -lcurl -Wl,-Bdynamic @LDFLAGS@ @LIBCURL_LIBS@
++          echo -Wl,-Bstatic -lcurl -Wl,-Bdynamic @LIBCURL_LIBS@
+         else
+           echo "curl was built with static libraries disabled" >&2
+           exit 1

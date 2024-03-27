@@ -123,6 +123,7 @@ typedef enum {
   C_DOH_INSECURE,
   C_DOH_URL,
   C_DUMP_HEADER,
+  C_ECH,
   C_EGD_FILE,
   C_ENGINE,
   C_EPRT,
@@ -404,6 +405,7 @@ static const struct LongShort aliases[]= {
   {"doh-insecure",               ARG_BOOL, ' ', C_DOH_INSECURE},
   {"doh-url"        ,            ARG_STRG, ' ', C_DOH_URL},
   {"dump-header",                ARG_FILE, 'D', C_DUMP_HEADER},
+  {"ech",                        ARG_STRG, ' ', C_ECH},
   {"egd-file",                   ARG_STRG, ' ', C_EGD_FILE},
   {"engine",                     ARG_STRG, ' ', C_ENGINE},
   {"eprt",                       ARG_BOOL, ' ', C_EPRT},
@@ -2080,6 +2082,57 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         err = PARAM_ENGINES_REQUESTED;
       }
       break;
+#ifndef USE_ECH
+    case C_ECH: /* --ech, not implemented by default */
+      err = PARAM_LIBCURL_DOESNT_SUPPORT;
+      break;
+#else
+    case C_ECH: /* --ech */
+      if(strlen(nextarg) > 4 && strncasecompare("pn:", nextarg, 3)) {
+        /* a public_name */
+        err = getstr(&config->ech_public, nextarg, DENY_BLANK);
+      }
+      else if(strlen(nextarg) > 5 && strncasecompare("ecl:", nextarg, 4)) {
+        /* an ECHConfigList */
+        if('@' != *(nextarg + 4)) {
+          err = getstr(&config->ech_config, nextarg, DENY_BLANK);
+        }
+        else {
+          /* Indirect case: @filename or @- for stdin */
+          char *tmpcfg = NULL;
+          FILE *file;
+
+          nextarg++;        /* skip over '@' */
+          if(!strcmp("-", nextarg)) {
+            file = stdin;
+          }
+          else {
+            file = fopen(nextarg, FOPEN_READTEXT);
+          }
+          if(!file) {
+            warnf(global,
+                  "Couldn't read file \"%s\" "
+                  "specified for \"--ech ecl:\" option",
+                  nextarg);
+            return PARAM_BAD_USE; /*  */
+          }
+          err = file2string(&tmpcfg, file);
+          if(file != stdin)
+            fclose(file);
+          if(err)
+            return err;
+          config->ech_config = aprintf("ecl:%s",tmpcfg);
+          if(!config->ech_config)
+            return PARAM_NO_MEM;
+          free(tmpcfg);
+      } /* file done */
+    }
+    else {
+      /* Simple case: just a string, with a keyword */
+      err = getstr(&config->ech, nextarg, DENY_BLANK);
+    }
+    break;
+#endif
     case C_CAPATH: /* --capath */
       err = getstr(&config->capath, nextarg, DENY_BLANK);
       break;

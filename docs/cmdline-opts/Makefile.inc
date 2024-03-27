@@ -90,6 +90,7 @@ DPAGES = \
   doh-insecure.md \
   doh-url.md \
   dump-header.md \
+  ech.md \
   egd-file.md \
   engine.md \
   etag-compare.md \

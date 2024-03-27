@@ -1,0 +1,190 @@
+From: Ramakrishnan Muthukrishnan <vu3rdd@gmail.com>
+Date: Thu, 3 Aug 2023 18:35:34 -0400
+Subject: Build with GnuTLS.
+
+Origin: vendor
+Forwarded: not-needed
+Reviewed-by: Alessandro Ghedini <ghedo@debian.org>
+Last-Update: 2018-05-23
+---
+ docs/examples/Makefile.am      |  4 ++--
+ lib/Makefile.am                | 42 +++++++++++++++++++++---------------------
+ lib/libcurl.vers.in            |  2 +-
+ src/Makefile.am                |  4 ++--
+ tests/http/clients/Makefile.am |  4 ++--
+ tests/http/clients/Makefile.in | 20 ++++++++++----------
+ tests/libtest/Makefile.am      |  8 ++++----
+ 7 files changed, 42 insertions(+), 42 deletions(-)
+
+--- a/docs/examples/Makefile.am
++++ b/docs/examples/Makefile.am
+@@ -51,9 +51,9 @@ LIBS = $(BLANK_AT_MAKETIME)
+ 
+ # Dependencies
+ if USE_EXPLICIT_LIB_DEPS
+-LDADD = $(LIBDIR)/libcurl.la @LIBCURL_LIBS@
++LDADD = $(LIBDIR)/libcurl-gnutls.la @LIBCURL_LIBS@
+ else
+-LDADD = $(LIBDIR)/libcurl.la
++LDADD = $(LIBDIR)/libcurl-gnutls.la
+ endif
+ 
+ # This might hold -Werror
+--- a/lib/Makefile.am
++++ b/lib/Makefile.am
+@@ -31,7 +31,7 @@ EXTRA_DIST = Makefile.mk config-win32.h config-win32ce.h config-plan9.h    \
+  config-os400.h setup-os400.h $(CMAKE_DIST) setup-win32.h .checksrc \
+  Makefile.soname
+ 
+-lib_LTLIBRARIES = libcurl.la
++lib_LTLIBRARIES = libcurl-gnutls.la
+ 
+ if BUILD_UNITTESTS
+ noinst_LTLIBRARIES = libcurlu.la
+@@ -67,55 +67,55 @@ AM_CFLAGS =
+ # Makefile.inc provides the CSOURCES and HHEADERS defines
+ include Makefile.inc
+ 
+-libcurl_la_SOURCES = $(CSOURCES) $(HHEADERS)
+-libcurlu_la_SOURCES = $(CSOURCES) $(HHEADERS)
++libcurl_gnutls_la_SOURCES = $(CSOURCES) $(HHEADERS)
++libcurlu_gnutls_la_SOURCES = $(CSOURCES) $(HHEADERS)
+ 
+-libcurl_la_CPPFLAGS_EXTRA =
+-libcurl_la_LDFLAGS_EXTRA =
+-libcurl_la_CFLAGS_EXTRA =
++libcurl_gnutls_la_CPPFLAGS_EXTRA =
++libcurl_gnutls_la_LDFLAGS_EXTRA =
++libcurl_gnutls_la_CFLAGS_EXTRA =
+ 
+ if CURL_LT_SHLIB_USE_VERSION_INFO
+-libcurl_la_LDFLAGS_EXTRA += $(VERSIONINFO)
++libcurl_gnutls_la_LDFLAGS_EXTRA += $(VERSIONINFO)
+ endif
+ 
+ if CURL_LT_SHLIB_USE_NO_UNDEFINED
+-libcurl_la_LDFLAGS_EXTRA += -no-undefined
++libcurl_gnutls_la_LDFLAGS_EXTRA += -no-undefined
+ endif
+ 
+ if CURL_LT_SHLIB_USE_MIMPURE_TEXT
+-libcurl_la_LDFLAGS_EXTRA += -mimpure-text
++libcurl_gnutls_la_LDFLAGS_EXTRA += -mimpure-text
+ endif
+ 
+ if CURL_LT_SHLIB_USE_VERSIONED_SYMBOLS
+-libcurl_la_LDFLAGS_EXTRA += -Wl,--version-script=libcurl.vers
++libcurl_gnutls_la_LDFLAGS_EXTRA += -Wl,--version-script=libcurl.vers
+ else
+ # if symbol-hiding is enabled, hide them!
+ if DOING_CURL_SYMBOL_HIDING
+-libcurl_la_LDFLAGS_EXTRA += -export-symbols-regex '^curl_.*'
++libcurl_gnutls_la_LDFLAGS_EXTRA += -export-symbols-regex '^curl_.*'
+ endif
+ endif
+ 
+ if USE_CPPFLAG_CURL_STATICLIB
+-libcurl_la_CPPFLAGS_EXTRA += -DCURL_STATICLIB
++libcurl_gnutls_la_CPPFLAGS_EXTRA += -DCURL_STATICLIB
+ else
+ if HAVE_WINDRES
+-libcurl_la_SOURCES += $(LIB_RCFILES)
++libcurl_gnutls_la_SOURCES += $(LIB_RCFILES)
+ $(LIB_RCFILES): $(top_srcdir)/include/curl/curlver.h
+ endif
+ endif
+ 
+ if DOING_CURL_SYMBOL_HIDING
+-libcurl_la_CPPFLAGS_EXTRA += -DCURL_HIDDEN_SYMBOLS
+-libcurl_la_CFLAGS_EXTRA += $(CFLAG_CURL_SYMBOL_HIDING)
++libcurl_gnutls_la_CPPFLAGS_EXTRA += -DCURL_HIDDEN_SYMBOLS
++libcurl_gnutls_la_CFLAGS_EXTRA += $(CFLAG_CURL_SYMBOL_HIDING)
+ endif
+ 
+-libcurl_la_CPPFLAGS = $(AM_CPPFLAGS) $(libcurl_la_CPPFLAGS_EXTRA)
+-libcurl_la_LDFLAGS = $(AM_LDFLAGS) $(libcurl_la_LDFLAGS_EXTRA) $(CURL_LDFLAGS_LIB) $(LIBCURL_LIBS)
+-libcurl_la_CFLAGS = $(AM_CFLAGS) $(libcurl_la_CFLAGS_EXTRA)
++libcurl_gnutls_la_CPPFLAGS = $(AM_CPPFLAGS) $(libcurl_gnutls_la_CPPFLAGS_EXTRA)
++libcurl_gnutls_la_LDFLAGS = $(AM_LDFLAGS) $(libcurl_gnutls_la_LDFLAGS_EXTRA) $(CURL_LDFLAGS_LIB) $(LIBCURL_LIBS)
++libcurl_gnutls_la_CFLAGS = $(AM_CFLAGS) $(libcurl_gnutls_la_CFLAGS_EXTRA)
+ 
+-libcurlu_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB -DUNITTESTS
+-libcurlu_la_LDFLAGS = $(AM_LDFLAGS) -static $(LIBCURL_LIBS)
+-libcurlu_la_CFLAGS = $(AM_CFLAGS)
++libcurlu_gnutls_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB -DUNITTESTS
++libcurlu_gnutls_la_LDFLAGS = $(AM_LDFLAGS) -static $(LIBCURL_LIBS)
++libcurlu_gnutls_la_CFLAGS = $(AM_CFLAGS)
+ 
+ CHECKSRC = $(CS_$(V))
+ CS_0 = @echo "  RUN     " $@;
+--- a/lib/libcurl.vers.in
++++ b/lib/libcurl.vers.in
+@@ -6,7 +6,7 @@ HIDDEN
+     _save*;
+ };
+ 
+-CURL_@CURL_LT_SHLIB_VERSIONED_FLAVOUR@4
++CURL_@CURL_LT_SHLIB_VERSIONED_FLAVOUR@3
+ {
+   global: curl_*;
+   local: *;
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -70,9 +70,9 @@ CFLAGS += @CURL_CFLAG_EXTRAS@
+ LIBS = $(BLANK_AT_MAKETIME)
+ 
+ if USE_EXPLICIT_LIB_DEPS
+-curl_LDADD = $(top_builddir)/lib/libcurl.la @LIBCURL_LIBS@
++curl_LDADD = $(top_builddir)/lib/libcurl-gnutls.la @LIBCURL_LIBS@
+ else
+-curl_LDADD = $(top_builddir)/lib/libcurl.la @SSL_LIBS@ @ZLIB_LIBS@ @CURL_NETWORK_AND_TIME_LIBS@
++curl_LDADD = $(top_builddir)/lib/libcurl-gnutls.la @SSL_LIBS@ @ZLIB_LIBS@ @CURL_NETWORK_AND_TIME_LIBS@
+ endif
+ 
+ # if unit tests are enabled, build a static library to link them with
+--- a/tests/data/test1538
++++ b/tests/data/test1538
+@@ -133,8 +133,7 @@ e97: proxy handshake error
+ e98: SSL Client Certificate required
+ e99: Unrecoverable error in select/poll
+ e100: A value or data field grew larger than allowed
+-e101: ECH attempted but failed
+-e102: Unknown error
++e101: Unknown error
+ m-1: Please call curl_multi_perform() soon
+ m0: No error
+ m1: Invalid multi handle
+diff --git a/tests/http/clients/Makefile.am b/tests/http/clients/Makefile.am
+index 8fdc190..ddc9be4 100644
+--- a/tests/http/clients/Makefile.am
++++ b/tests/http/clients/Makefile.am
+@@ -51,9 +51,9 @@ LIBS = $(BLANK_AT_MAKETIME)
+ 
+ # Dependencies
+ if USE_EXPLICIT_LIB_DEPS
+-LDADD = $(LIBDIR)/libcurl.la @LIBCURL_LIBS@
++LDADD = $(LIBDIR)/libcurl-gnutls.la @LIBCURL_LIBS@
+ else
+-LDADD = $(LIBDIR)/libcurl.la
++LDADD = $(LIBDIR)/libcurl-gnutls.la
+ endif
+ 
+ # This might hold -Werror
+--- a/tests/libtest/Makefile.am
++++ b/tests/libtest/Makefile.am
+@@ -49,11 +49,11 @@ CLEANFILES = lib1521.c
+ LIBS = $(BLANK_AT_MAKETIME)
+ 
+ if USE_EXPLICIT_LIB_DEPS
+-SUPPORTFILES_LIBS = $(top_builddir)/lib/libcurl.la @LIBCURL_LIBS@
+-TESTUTIL_LIBS = $(top_builddir)/lib/libcurl.la @LIBCURL_LIBS@
++SUPPORTFILES_LIBS = $(top_builddir)/lib/libcurl-gnutls.la @LIBCURL_LIBS@
++TESTUTIL_LIBS = $(top_builddir)/lib/libcurl-gnutls.la @LIBCURL_LIBS@
+ else
+-SUPPORTFILES_LIBS = $(top_builddir)/lib/libcurl.la @CURL_NETWORK_LIBS@
+-TESTUTIL_LIBS = $(top_builddir)/lib/libcurl.la @CURL_NETWORK_AND_TIME_LIBS@
++SUPPORTFILES_LIBS = $(top_builddir)/lib/libcurl-gnutls.la @CURL_NETWORK_LIBS@
++TESTUTIL_LIBS = $(top_builddir)/lib/libcurl-gnutls.la @CURL_NETWORK_AND_TIME_LIBS@
+ endif
+ 
+ # Dependencies (may need to be overridden)

@@ -74,6 +74,14 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#ifdef USE_ECH
+# include "curl_base64.h"
+# define ECH_ENABLED(__data__) \
+    (__data__->set.tls_ech && \
+     !(__data__->set.tls_ech & (1 << CURLECH_DISABLE))\
+    )
+#endif /* USE_ECH */
+
 /* KEEP_PEER_CERT is a product of the presence of build time symbol
    OPENSSL_EXTRA without NO_CERTS, depending on the version. KEEP_PEER_CERT is
    in wolfSSL's settings.h, and the latter two are build time symbols in
@@ -723,6 +731,82 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     Curl_ssl_sessionid_unlock(data);
   }
 
+#ifdef USE_ECH
+  if(ECH_ENABLED(data)) {
+    int trying_ech_now = 0;
+
+    if(data->set.str[STRING_ECH_PUBLIC]) {
+      infof(data, "ECH: outername not (yet) supported with WolfSSL");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+    if(data->set.tls_ech == CURLECH_GREASE) {
+      infof(data, "ECH: GREASE'd ECH not yet supported for wolfSSL");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+    if(data->set.tls_ech == CURLECH_CLA_CFG
+       && data->set.str[STRING_ECH_CONFIG]) {
+      char *b64val = data->set.str[STRING_ECH_CONFIG];
+      word32 b64len = 0;
+
+      b64len = (word32) strlen(b64val);
+      if(b64len
+         && wolfSSL_SetEchConfigsBase64(backend->handle, b64val, b64len)
+              != WOLFSSL_SUCCESS) {
+        if(data->set.tls_ech == CURLECH_HARD)
+          return CURLE_SSL_CONNECT_ERROR;
+      }
+      else {
+       trying_ech_now = 1;
+       infof(data, "ECH: ECHConfig from command line");
+      }
+    }
+    else {
+      struct Curl_dns_entry *dns = NULL;
+
+      dns = Curl_fetch_addr(data, connssl->peer.hostname, connssl->port);
+      if(!dns) {
+        infof(data, "ECH: requested but no DNS info available");
+        if(data->set.tls_ech == CURLECH_HARD)
+          return CURLE_SSL_CONNECT_ERROR;
+      }
+      else {
+        struct Curl_https_rrinfo *rinfo = NULL;
+
+        rinfo = dns->hinfo;
+        if(rinfo && rinfo->echconfiglist) {
+          unsigned char *ecl = rinfo->echconfiglist;
+          size_t elen = rinfo->echconfiglist_len;
+
+          infof(data, "ECH: ECHConfig from DoH HTTPS RR");
+          if(wolfSSL_SetEchConfigs(backend->handle, ecl, (word32) elen) !=
+                WOLFSSL_SUCCESS) {
+            infof(data, "ECH: wolfSSL_SetEchConfigs failed");
+            if(data->set.tls_ech == CURLECH_HARD)
+              return CURLE_SSL_CONNECT_ERROR;
+          }
+          else {
+            trying_ech_now = 1;
+            infof(data, "ECH: imported ECHConfigList of length %ld", elen);
+          }
+        }
+        else {
+          infof(data, "ECH: requested but no ECHConfig available");
+          if(data->set.tls_ech == CURLECH_HARD)
+            return CURLE_SSL_CONNECT_ERROR;
+        }
+        Curl_resolv_unlock(data, dns);
+      }
+    }
+
+    if(trying_ech_now
+       && SSL_set_min_proto_version(backend->handle, TLS1_3_VERSION) != 1) {
+      infof(data, "ECH: Can't force TLSv1.3 [ERROR]");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+
+  }
+#endif  /* USE_ECH */
+
 #ifdef USE_BIO_CHAIN
   {
     WOLFSSL_BIO *bio;
@@ -850,6 +934,31 @@ wolfssl_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
            verification is required. */
         infof(data, "CA signer not available for verification, "
                     "continuing anyway");
+      }
+    }
+#endif
+#ifdef USE_ECH
+    else if(-1 == detail) {
+      /* try access a retry_config ECHConfigList for tracing */
+      byte echConfigs[1000];
+      word32 echConfigsLen = 1000;
+      int rv = 0;
+
+      /* this currently doesn't produce the retry_configs */
+      rv = wolfSSL_GetEchConfigs(backend->handle, echConfigs,
+                                 &echConfigsLen);
+      if(rv != WOLFSSL_SUCCESS) {
+        infof(data, "Failed to get ECHConfigs");
+      }
+      else {
+        char *b64str = NULL;
+        size_t blen = 0;
+
+        rv = Curl_base64_encode((const char *)echConfigs, echConfigsLen,
+                                &b64str, &blen);
+        if(!rv && b64str)
+          infof(data, "ECH: (not yet) retry_configs %s", b64str);
+        free(b64str);
       }
     }
 #endif

@@ -1,0 +1,10 @@
+# Packaging patches.
+08_enable-zsh.patch
+build-Divide-mit-krb5-gssapi-link-flags-between-LDFLAGS-a.patch
+11_omit-directories-from-config.patch
+Remove-curl-s-LDFLAGS-from-curl-config-static-libs.patch
+
+# Do not add patches below.
+# Used to generate packages for the other crypto libraries.
+add_errorcodes_upstream_file.patch
+90_gnutls.patch

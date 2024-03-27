@@ -3133,6 +3133,49 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
   }
 #endif
+#ifdef USE_ECH
+  case CURLOPT_ECH: {
+    size_t plen = 0;
+
+    argptr = va_arg(param, char *);
+    if(!argptr) {
+      data->set.tls_ech = CURLECH_DISABLE;
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      return result;
+    }
+    plen = strlen(argptr);
+    if(plen > CURL_MAX_INPUT_LENGTH) {
+      data->set.tls_ech = CURLECH_DISABLE;
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      return result;
+    }
+    /* set tls_ech flag value, preserving CLA_CFG bit */
+    if(plen == 5 && strcasecompare(argptr, "FALSE"))
+      data->set.tls_ech = (1 << CURLECH_DISABLE)
+                          | (data->set.tls_ech & (1 << CURLECH_CLA_CFG));
+    else if(plen == 6 && strcasecompare(argptr, "GREASE"))
+      data->set.tls_ech = (1 << CURLECH_GREASE)
+                          | (data->set.tls_ech & (1 << CURLECH_CLA_CFG));
+    else if(plen == 4 && strcasecompare(argptr, "TRUE"))
+      data->set.tls_ech = (1 << CURLECH_ENABLE)
+                          | (data->set.tls_ech & (1 << CURLECH_CLA_CFG));
+    else if(plen == 4 && strcasecompare(argptr, "HARD"))
+      data->set.tls_ech = (1 << CURLECH_HARD)
+                          | (data->set.tls_ech & (1 << CURLECH_CLA_CFG));
+    else if(plen > 5 && strncasecompare(argptr, "ECL:", 4)) {
+      result = Curl_setstropt(&data->set.str[STRING_ECH_CONFIG], argptr + 4);
+      if(result)
+        return result;
+      data->set.tls_ech |= (1 << CURLECH_CLA_CFG);
+    }
+    else if(plen > 4 && strncasecompare(argptr, "PN:", 3)) {
+      result = Curl_setstropt(&data->set.str[STRING_ECH_PUBLIC], argptr + 3);
+      if(result)
+        return result;
+    }
+    break;
+  }
+#endif
   case CURLOPT_QUICK_EXIT:
     data->set.quick_exit = (0 != va_arg(param, long)) ? 1L:0L;
     break;

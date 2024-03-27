@@ -1,0 +1,22 @@
+Description: Enable zsh completion generation
+Origin: vendor
+Forwarded: not-needed
+Author: Alessandro Ghedini <ghedo@debian.org>
+Reviewed-by: Alessandro Ghedini <ghedo@debian.org>
+Last-Update: 2016-08-03
+
+Index: curl/Makefile.am
+===================================================================
+--- curl.orig/Makefile.am
++++ curl/Makefile.am
+@@ -133,8 +133,8 @@ CLEANFILES = $(VC14_LIBVCXPROJ) \
+ 
+ bin_SCRIPTS = curl-config
+ 
+-SUBDIRS = lib src
+-DIST_SUBDIRS = $(SUBDIRS) tests packages scripts include docs
++SUBDIRS = lib src scripts
++DIST_SUBDIRS = $(SUBDIRS) tests packages include docs
+ 
+ pkgconfigdir = $(libdir)/pkgconfig
+ pkgconfig_DATA = libcurl.pc

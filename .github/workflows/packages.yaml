@@ -1,0 +1,82 @@
+name: builder
+
+on:
+  workflow_dispatch:
+  push:
+  schedule:
+    - cron: '30 5 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: merge upstream
+        run: |
+          git remote add upstream https://github.com/curl/curl.git
+          git fetch upstream
+          git -c user.name=Github -c user.email=none merge upstream/master
+
+      - name: Cache ccache
+        uses: actions/cache@v3
+        with:
+          path: /home/runner/.cache/ccache
+          key: ccache
+
+      - name: Prepare build environment
+        run: |
+          sudo add-apt-repository -y ppa:v-launchpad-jochen-sprickerhof-de/sbuild
+          sudo DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends sbuild mmdebstrap debian-archive-keyring ccache uidmap
+
+          mkdir -p "$HOME/.cache/sbuild"
+          mmdebstrap --variant=buildd --include=apt,ccache,ca-certificates \
+            --customize-hook='chroot "$1" update-ccache-symlinks' \
+            unstable "$HOME/.cache/sbuild/unstable-amd64.tar"
+
+          ccache --zero-stats --max-size=10.0G
+          chmod a+X "$HOME" "$HOME/.cache"
+          chmod -R a+rwX "$HOME/.cache/ccache"
+
+          cat << "EOF" > "$HOME/.sbuildrc"
+          $build_environment = { "CCACHE_DIR" => "/build/ccache" };
+          $path = "/usr/lib/ccache:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games";
+          $build_path = "/build/package/";
+          $dsc_dir = "package";
+          $unshare_bind_mounts = [ { directory => "$HOME/.cache/ccache", mountpoint => "/build/ccache" } ];
+          $verbose = 1;
+          EOF
+          mkdir "$HOME/apt_repo"
+
+      - name: Run sbuild
+        run: |
+          sed -i "1 s/([^)]*)/($(git describe --tags | sed 's/^[^0-9]*//;s/-/./g;s/_/./g')-$(date -u '+%Y%m%d.%H%M%S%N'))/" debian/changelog
+          sbuild -d unstable --chroot-mode=unshare --no-clean-source --no-run-lintian \
+            --extra-repository="deb [trusted=yes] https://github.com/defo-project/openssl/raw/packages/ ./" \
+            --dpkg-source-opts="-Zgzip -z1 --format=1.0 -sn" --build-dir="$HOME/apt_repo"
+          cd "$HOME/apt_repo"
+          apt-ftparchive packages . > Packages
+          apt-ftparchive release . > Release
+
+      - name: Test packages
+        run: |
+          mmdebstrap --chrooted-customize-hook="curl --ech true --doh-url 'https://1.1.1.1/dns-query' 'https://defo.ie/ech-check.php' | grep 'SSL_ECH_STATUS: success'" \
+            --variant=essential --include=ca-certificates,curl unstable /dev/null \
+            "deb [signed-by=/usr/share/keyrings/debian-archive-keyring.gpg] http://deb.debian.org/debian unstable main" \
+            "deb [trusted=yes] https://github.com/defo-project/openssl/raw/packages/ /" \
+            "deb [trusted=yes] copy:/$HOME/apt_repo /"
+
+      - name: Upload apt repository
+        run: |
+          cd "$HOME/apt_repo"
+          BRANCH=packages
+          REPOSITORY="$(printf "%s" "$GITHUB_REPOSITORY" | tr / _)"
+          echo "echo \"deb [trusted=yes] $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/raw/$BRANCH/ /\" | sudo tee /etc/apt/sources.list.d/$REPOSITORY.list" >> README.md
+          git init -b "$BRANCH"
+          git remote add origin "$(echo "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git" | sed "s#https://#https://x-access-token:${{ secrets.GITHUB_TOKEN }}@#")"
+          git add .
+          git -c user.name=Github -c user.email=none commit --message="Generated with $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          git push --force origin "$BRANCH"

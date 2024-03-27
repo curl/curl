@@ -22,3 +22,4 @@ Experimental support in curl means:
  - HTTP/3 support (using the quiche or msh3 backends)
  - The rustls backend
  - WebSocket
+ - Use of the HTTPS resource record and Encrypted Client Hello (ECH) when using DoH

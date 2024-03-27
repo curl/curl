@@ -1,0 +1,6 @@
+---
+include:
+  - https://salsa.debian.org/salsa-ci-team/pipeline/raw/master/recipes/debian.yml
+
+variables:
+  DEB_BUILD_OPTIONS: nocheck

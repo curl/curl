@@ -1,0 +1,9 @@
+Adding New Patches
+==================
+
+Note that when adding new patches they must be applied *before* 90_gnutls.patch
+and 99_nss.patch. This is needed by curl's package byzantine build process,
+which builds the source multiple times with different TLS libraries.
+
+This basically means that when adding new patches to the debian/patches/series
+file, they must be listed before the aformentioned patches.

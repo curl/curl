@@ -631,6 +631,42 @@ AC_DEFUN([CURL_CHECK_NTLM_WB], [
   fi
 ])
 
+dnl CURL_CHECK_OPTION_HTTPSRR
+dnl -----------------------------------------------------
+dnl Verify whether configure has been invoked with option
+dnl --enable-httpsrr or --disable-httpsrr, and set
+dnl shell variable want_httpsrr as appropriate.
+
+AC_DEFUN([CURL_CHECK_OPTION_HTTPSRR], [
+  AC_MSG_CHECKING([whether to enable HTTPSRR support])
+  OPT_HTTPSRR="default"
+  AC_ARG_ENABLE(httpsrr,
+AS_HELP_STRING([--enable-httpsrr],[Enable HTTPSRR support])
+AS_HELP_STRING([--disable-httpsrr],[Disable HTTPSRR support]),
+  OPT_HTTPSRR=$enableval)
+  case "$OPT_HTTPSRR" in
+    no)
+      dnl --disable-httpsrr option used
+      want_httpsrr="no"
+      curl_httpsrr_msg="no      (--enable-httpsrr)"
+      AC_MSG_RESULT([no])
+      ;;
+    default)
+      dnl configure option not specified
+      want_httpsrr="no"
+      curl_httpsrr_msg="no      (--enable-httpsrr)"
+      AC_MSG_RESULT([no])
+      ;;
+    *)
+      dnl --enable-httpsrr option used
+      want_httpsrr="yes"
+      curl_httpsrr_msg="enabled (--disable-httpsrr)"
+      experimental="httpsrr"
+      AC_MSG_RESULT([yes])
+      ;;
+  esac
+])
+
 dnl CURL_CHECK_OPTION_ECH
 dnl -----------------------------------------------------
 dnl Verify whether configure has been invoked with option
@@ -665,4 +701,5 @@ AS_HELP_STRING([--disable-ech],[Disable ECH support]),
       AC_MSG_RESULT([yes])
       ;;
   esac
+])
 ])

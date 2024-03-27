@@ -1,0 +1,32 @@
+From: Simon McVittie <smcv@collabora.com>
+Date: Tue, 22 Nov 2022 20:43:41 +0000
+Subject: build: Divide mit-krb5-gssapi link flags between LDFLAGS and LIBS
+
+From the comments nearby about not having --libs-only-L, it looks as
+though the intention was to apply a split like this to all dependency
+libraries where possible, and the only reason it was not done for
+Kerberos is that krb5-config doesn't have that feature and pkg-config
+was originally not supported here. For example, zlib, libssh and librtmp
+all have their flags from pkg-config split in this way.
+
+Now that pkg-config is supported here, we can do the intended split.
+
+Signed-off-by: Simon McVittie <smcv@collabora.com>
+---
+ configure.ac | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+Index: curl/configure.ac
+===================================================================
+--- curl.orig/configure.ac
++++ curl/configure.ac
+@@ -1890,7 +1890,8 @@ if test x"$want_gss" = xyes; then
+            gss_libs=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --libs gssapi`
+            LIBS="$gss_libs $LIBS"
+         elif test "$PKGCONFIG" != "no" ; then
+-           gss_libs=`$PKGCONFIG --libs mit-krb5-gssapi`
++           LDFLAGS="$LDFLAGS `$PKGCONFIG --libs-only-L mit-krb5-gssapi`"
++           gss_libs=`$PKGCONFIG --libs-only-l mit-krb5-gssapi`
+            LIBS="$gss_libs $LIBS"
+         elif test -f "$KRB5CONFIG"; then
+            dnl krb5-config doesn't have --libs-only-L or similar, put everything

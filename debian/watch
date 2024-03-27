@@ -1,0 +1,3 @@
+version=4
+opts=pgpmode=auto \
+  https://curl.se/download/ download/curl-([\d\.]+).tar.gz

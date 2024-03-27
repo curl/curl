@@ -1,0 +1,24 @@
+#!/bin/sh
+
+set -e
+
+cleanup() {
+    if [ $? -ne 0 ]; then
+        set +e
+        echo "## Something failed, gathering logs"
+        echo
+        echo "## syslog"
+        tail -n 50 /var/log/syslog
+        echo
+        echo "## slapd journal"
+        journalctl -u slapd
+    fi
+}
+
+trap cleanup EXIT
+
+echo "## Building ldap-test app"
+gcc debian/tests/LDAP-bindata.c $(pkgconf --cflags --libs ldap libcurl) -o "$AUTOPKGTEST_TMP"/ldap-test
+
+echo "## calling ldap-test"
+"$AUTOPKGTEST_TMP"/ldap-test

@@ -67,6 +67,7 @@ static const struct category_descriptors categories[] = {
   {"telnet", "TELNET protocol options", CURLHELP_TELNET},
   {"tftp", "TFTP protocol options", CURLHELP_TFTP},
   {"tls", "All TLS/SSL related options", CURLHELP_TLS},
+  {"ech", "All Encrypted Client Hello (ECH) options", CURLHELP_ECH},
   {"upload", "All options for uploads",
    CURLHELP_UPLOAD},
   {"verbose", "Options related to any kind of command line output of curl",

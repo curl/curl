@@ -487,6 +487,10 @@ An internal call to poll() or select() returned error that is not recoverable.
 
 A value or data field grew larger than allowed.
 
+## CURLE_ECH_REQUIRED (101)"
+
+ECH was attempted but failed.
+
 # CURLMcode
 
 This is the generic return code used by functions in the libcurl multi

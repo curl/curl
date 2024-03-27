@@ -68,6 +68,7 @@ struct helptxt {
 #define CURLHELP_TLS 1u << 22u
 #define CURLHELP_UPLOAD 1u << 23u
 #define CURLHELP_VERBOSE 1u << 24u
+#define CURLHELP_ECH 1u << 25u
 
 extern const struct helptxt helptext[];
 
