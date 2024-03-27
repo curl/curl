@@ -1,0 +1,8 @@
+# Copyright (C) James May, <fowl@fowlsmurf.net>, et al.
+# SPDX-License-Identifier: curl
+
+# EditorConfig: https://EditorConfig.org
+
+# set as top-most EditorConfig with no configuration file 
+# to help prevent erroneous reformatting of test data
+root = true
