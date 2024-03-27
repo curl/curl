@@ -10,6 +10,10 @@ See-also:
   - CURLOPT_USERPWD (3)
 Protocol:
   - IMAP
+  - LDAP
+  - POP3
+  - SIEVE
+  - SMTP
 ---
 
 # NAME
@@ -38,6 +42,8 @@ it then uses internally.
 When the *authzid* is specified, the use of which is server dependent, it
 can be used to access another user's inbox, that the user has been granted
 access to, or a shared mailbox for example.
+
+Specifying an owner in a SIEVE URL's path supersedes this option.
 
 # DEFAULT
 

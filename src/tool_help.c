@@ -62,6 +62,7 @@ static const struct category_descriptors categories[] = {
   {"proxy", "All options related to proxies", CURLHELP_PROXY},
   {"scp", "SCP protocol options", CURLHELP_SCP},
   {"sftp", "SFTP protocol options", CURLHELP_SFTP},
+  {"sieve", "SIEVE protocol options", CURLHELP_SIEVE},
   {"smtp", "SMTP protocol options", CURLHELP_SMTP},
   {"ssh", "SSH protocol options", CURLHELP_SSH},
   {"telnet", "TELNET protocol options", CURLHELP_TELNET},

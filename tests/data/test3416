@@ -1,0 +1,30 @@
+<testcase>
+<info>
+<keywords>
+SIEVE
+DELETESCRIPT
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+sieve
+</server>
+ <name>
+SIEVE non-existent script deletion
+ </name>
+ <command>
+sieve://%HOSTIP:%SIEVEPORT/nosuchscript --request DELETESCRIPT
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+DELETESCRIPT "nosuchscript"
+LOGOUT
+</protocol>
+</testcase>

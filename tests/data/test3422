@@ -1,0 +1,47 @@
+<testcase>
+<info>
+<keywords>
+SIEVE
+redirect_url
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+CAPB "SIEVE" "fileinto vacation"
+REPLY CAPABILITY NO (REFERRAL \"sieve://%HOSTIP:%SIEVEPORT\") \"Redirected\"
+COUNT CAPABILITY 1
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+sieve
+</server>
+ <name>
+SIEVE URL redirection
+ </name>
+ <command>
+sieve://%HOSTIP:%SIEVEPORT/ --location --max-redirs 3 --request CAPABILITY
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+CAPABILITY
+LOGOUT
+CAPABILITY
+LOGOUT
+</protocol>
+<stdout>
+"SIEVE" "fileinto vacation"
+"SASL" ""
+</stdout>
+</verify>
+</testcase>

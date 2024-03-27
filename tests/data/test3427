@@ -1,0 +1,65 @@
+<testcase>
+<info>
+<keywords>
+SIEVE
+SASL
+SASL AUTH NTLM
+NTLM
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+REPLY welcome \"SASL\" \"NTLM\"\r\nOK
+REPLY AUTHENTICATE \"TlRMTVNTUAACAAAAAgACADAAAACGggEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==\"
+REPLY TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAALAAsAeAAAAAAAAAAAAAAAhoIBAFpkQwKRCZFMhjj0tw47wEjKHRHlvzfxQamFcheMuv8v+xeqphEO5V41xRd7R9deOXRlc3R1c2VyV09SS1NUQVRJT04= OK \"Logged in\"
+</servercmd>
+<data>
+require "fileinto";
+if header :comparator "i;ascii-casemap" :contains "X-Spam-Level" "*****"  {
+    fileinto "Junk";
+    stop;
+}
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+sieve
+</server>
+<features>
+NTLM
+SSL
+!SSPI
+debug
+</features>
+ <name>
+SIEVE NTLM authentication
+ </name>
+ <setenv>
+# we force our own host name, in order to make the test machine independent
+CURL_GETHOSTNAME=curlhost
+# we try to use the LD_PRELOAD hack, if not a debug build
+LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
+ </setenv>
+ <command>
+sieve://%HOSTIP:%SIEVEPORT/script%TESTNUMBER -u testuser:testpass
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+AUTHENTICATE "NTLM" "TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA="
+"TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAALAAsAeAAAAAAAAAAAAAAAhoIBAFpkQwKRCZFMhjj0tw47wEjKHRHlvzfxQamFcheMuv8v+xeqphEO5V41xRd7R9deOXRlc3R1c2VyV09SS1NUQVRJT04="
+CAPABILITY
+GETSCRIPT "script%TESTNUMBER"
+LOGOUT
+</protocol>
+</verify>
+</testcase>

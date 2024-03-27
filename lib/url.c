@@ -104,6 +104,7 @@
 #include "curl_ldap.h"
 #include "vssh/ssh.h"
 #include "imap.h"
+#include "sieve.h"
 #include "url.h"
 #include "connect.h"
 #include "inet_ntop.h"
@@ -1461,76 +1462,110 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
      schemetable.c
      7. if needed, adjust the #ifdefs in schemetable.c and rerun
      */
-  static const struct Curl_handler * const protocols[67] = {
-#ifndef CURL_DISABLE_FILE
-    &Curl_handler_file,
+  static const struct Curl_handler * const protocols[70] = {
+    NULL,
+#if defined(USE_SSL) && !defined(CURL_DISABLE_SMTP)
+    &Curl_handler_smtps,
 #else
     NULL,
 #endif
     NULL, NULL,
-#if defined(USE_SSL) && !defined(CURL_DISABLE_GOPHER)
-    &Curl_handler_gophers,
-#else
-    NULL,
-#endif
-    NULL,
-#ifdef USE_LIBRTMP
-    &Curl_handler_rtmpe,
-#else
-    NULL,
-#endif
-#ifndef CURL_DISABLE_SMTP
-    &Curl_handler_smtp,
-#else
-    NULL,
-#endif
-#if defined(USE_SSH)
-    &Curl_handler_sftp,
-#else
-    NULL,
-#endif
 #if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE) && \
   (SIZEOF_CURL_OFF_T > 4)
     &Curl_handler_smb,
 #else
     NULL,
 #endif
-#if defined(USE_SSL) && !defined(CURL_DISABLE_SMTP)
-    &Curl_handler_smtps,
+    NULL,
+#ifndef CURL_DISABLE_RTSP
+    &Curl_handler_rtsp,
 #else
     NULL,
 #endif
-#ifndef CURL_DISABLE_TELNET
-    &Curl_handler_telnet,
+    NULL,
+#ifdef USE_LIBRTMP
+    &Curl_handler_rtmp,
 #else
     NULL,
 #endif
-#ifndef CURL_DISABLE_GOPHER
-    &Curl_handler_gopher,
+#ifdef USE_LIBRTMP
+    &Curl_handler_rtmpte,
 #else
     NULL,
 #endif
-#ifndef CURL_DISABLE_TFTP
-    &Curl_handler_tftp,
+    NULL,
+#if !defined(CURL_DISABLE_LDAP) && \
+  !defined(CURL_DISABLE_LDAPS) && \
+  ((defined(USE_OPENLDAP) && defined(USE_SSL)) || \
+   (!defined(USE_OPENLDAP) && defined(HAVE_LDAP_SSL)))
+    &Curl_handler_ldaps,
+#else
+    NULL,
+#endif
+    NULL,
+#if defined(USE_SSL) && !defined(CURL_DISABLE_POP3)
+    &Curl_handler_pop3s,
+#else
+    NULL,
+#endif
+    NULL, NULL,
+#ifndef CURL_DISABLE_MQTT
+    &Curl_handler_mqtt,
+#else
+    NULL,
+#endif
+    NULL, NULL, NULL, NULL,
+#if defined(USE_SSL) && !defined(CURL_DISABLE_IMAP)
+    &Curl_handler_imaps,
+#else
+    NULL,
+#endif
+#ifndef CURL_DISABLE_FTP
+    &Curl_handler_ftp,
+#else
+    NULL,
+#endif
+#ifdef USE_LIBRTMP
+    &Curl_handler_rtmpts,
+#else
+    NULL,
+#endif
+    NULL,
+#if defined(USE_SSL) && !defined(CURL_DISABLE_HTTP)
+    &Curl_handler_https,
+#else
+    NULL,
+#endif
+#ifndef CURL_DISABLE_LDAP
+    &Curl_handler_ldap,
+#else
+    NULL,
+#endif
+#ifdef USE_LIBRTMP
+    &Curl_handler_rtmpe,
+#else
+    NULL,
+#endif
+    NULL, NULL,
+#if defined(USE_SSH)
+    &Curl_handler_sftp,
+#else
+    NULL,
+#endif
+    NULL, NULL, NULL, NULL,
+#if defined(USE_WEBSOCKETS) && \
+  defined(USE_SSL) && !defined(CURL_DISABLE_HTTP)
+    &Curl_handler_wss,
 #else
     NULL,
 #endif
     NULL, NULL, NULL,
-#if defined(USE_SSL) && !defined(CURL_DISABLE_FTP)
-    &Curl_handler_ftps,
+#if defined(USE_SSL) && !defined(CURL_DISABLE_GOPHER)
+    &Curl_handler_gophers,
 #else
     NULL,
 #endif
-#ifndef CURL_DISABLE_HTTP
-    &Curl_handler_http,
-#else
     NULL,
-#endif
-#ifndef CURL_DISABLE_IMAP
-    &Curl_handler_imap,
-#else
-    NULL,
-#endif
 #ifdef USE_LIBRTMP
     &Curl_handler_rtmps,
 #else
@@ -1541,29 +1576,69 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
 #else
     NULL,
 #endif
-    NULL, NULL, NULL,
-#if !defined(CURL_DISABLE_LDAP) && \
-  !defined(CURL_DISABLE_LDAPS) && \
-  ((defined(USE_OPENLDAP) && defined(USE_SSL)) || \
-   (!defined(USE_OPENLDAP) && defined(HAVE_LDAP_SSL)))
-    &Curl_handler_ldaps,
+    NULL, NULL, NULL, NULL,
+#ifndef CURL_DISABLE_SIEVE
+    &Curl_handler_sieve,
 #else
     NULL,
 #endif
-#if defined(USE_WEBSOCKETS) && \
-  defined(USE_SSL) && !defined(CURL_DISABLE_HTTP)
-    &Curl_handler_wss,
+    NULL, NULL,
+#ifndef CURL_DISABLE_TELNET
+    &Curl_handler_telnet,
 #else
     NULL,
 #endif
-#if defined(USE_SSL) && !defined(CURL_DISABLE_HTTP)
-    &Curl_handler_https,
+#ifndef CURL_DISABLE_FILE
+    &Curl_handler_file,
 #else
     NULL,
 #endif
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-#ifndef CURL_DISABLE_RTSP
-    &Curl_handler_rtsp,
+#ifndef CURL_DISABLE_TFTP
+    &Curl_handler_tftp,
+#else
+    NULL,
+#endif
+    NULL,
+#ifndef CURL_DISABLE_HTTP
+    &Curl_handler_http,
+#else
+    NULL,
+#endif
+    NULL, NULL,
+#ifndef CURL_DISABLE_POP3
+    &Curl_handler_pop3,
+#else
+    NULL,
+#endif
+#ifndef CURL_DISABLE_SMTP
+    &Curl_handler_smtp,
+#else
+    NULL,
+#endif
+    NULL,
+#ifndef CURL_DISABLE_DICT
+    &Curl_handler_dict,
+#else
+    NULL,
+#endif
+#if defined(USE_SSL) && !defined(CURL_DISABLE_FTP)
+    &Curl_handler_ftps,
+#else
+    NULL,
+#endif
+#ifndef CURL_DISABLE_GOPHER
+    &Curl_handler_gopher,
+#else
+    NULL,
+#endif
+    NULL, NULL,
+#if defined(USE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
+    &Curl_handler_ws,
+#else
+    NULL,
+#endif
+#ifndef CURL_DISABLE_IMAP
+    &Curl_handler_imap,
 #else
     NULL,
 #endif
@@ -1578,84 +1653,22 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
 #else
     NULL,
 #endif
-    NULL, NULL, NULL,
-#ifndef CURL_DISABLE_POP3
-    &Curl_handler_pop3,
-#else
     NULL,
-#endif
-    NULL, NULL,
-#ifdef USE_LIBRTMP
-    &Curl_handler_rtmp,
-#else
-    NULL,
-#endif
-    NULL, NULL, NULL,
-#ifdef USE_LIBRTMP
-    &Curl_handler_rtmpte,
-#else
-    NULL,
-#endif
-    NULL, NULL, NULL,
-#ifndef CURL_DISABLE_DICT
-    &Curl_handler_dict,
-#else
-    NULL,
-#endif
-    NULL, NULL, NULL,
-#ifndef CURL_DISABLE_MQTT
-    &Curl_handler_mqtt,
-#else
-    NULL,
-#endif
-#if defined(USE_SSL) && !defined(CURL_DISABLE_POP3)
-    &Curl_handler_pop3s,
-#else
-    NULL,
-#endif
-#if defined(USE_SSL) && !defined(CURL_DISABLE_IMAP)
-    &Curl_handler_imaps,
-#else
-    NULL,
-#endif
-    NULL,
-#if defined(USE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
-    &Curl_handler_ws,
-#else
-    NULL,
-#endif
-    NULL,
-#ifdef USE_LIBRTMP
-    &Curl_handler_rtmpts,
-#else
-    NULL,
-#endif
-#ifndef CURL_DISABLE_LDAP
-    &Curl_handler_ldap,
-#else
-    NULL,
-#endif
-    NULL, NULL,
-#ifndef CURL_DISABLE_FTP
-    &Curl_handler_ftp,
-#else
-    NULL,
-#endif
   };
 
   if(len && (len <= 7)) {
     const char *s = scheme;
     size_t l = len;
     const struct Curl_handler *h;
-    unsigned int c = 978;
+    unsigned int c = 12;
     while(l) {
-      c <<= 5;
+      c <<= 7;
       c += Curl_raw_tolower(*s);
       s++;
       l--;
     }
 
-    h = protocols[c % 67];
+    h = protocols[c % 70];
     if(h && strncasecompare(scheme, h->scheme, len) && !h->scheme[len])
       return h;
   }
@@ -1674,7 +1687,7 @@ static CURLcode findprotocol(struct Curl_easy *data,
     /* it is allowed for "normal" request, now do an extra check if this is
        the result of a redirect */
     if(data->state.this_is_a_follow &&
-       !(data->set.redir_protocols & p->protocol))
+       !(data->state.redir_protocols & p->protocol))
       /* nope, get out */
       ;
     else {

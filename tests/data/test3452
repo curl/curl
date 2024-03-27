@@ -1,0 +1,34 @@
+<testcase>
+<info>
+<keywords>
+SIEVE
+STARTTLS
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<features>
+SSL
+</features>
+<server>
+sieve
+</server>
+ <name>
+SIEVE required STARTTLS unimplemented
+ </name>
+ <command>
+sieve://%HOSTIP:%SIEVEPORT/ --ssl-reqd
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# 64 is CURLE_USE_SSL_FAILED
+<errorcode>
+64
+</errorcode>
+</verify>
+</testcase>

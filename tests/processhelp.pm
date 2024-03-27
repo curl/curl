@@ -344,7 +344,7 @@ sub killsockfilters {
     my $pidfile;
     my $pid;
 
-    return if($proto !~ /^(ftp|imap|pop3|smtp)$/);
+    return if($proto !~ /^(ftp|imap|pop3|sieve|smtp)$/);
 
     die "unsupported sockfilter: $which"
         if($which && ($which !~ /^(main|data)$/));
@@ -384,7 +384,7 @@ sub killsockfilters {
 sub killallsockfilters {
     my ($piddir, $verbose) = @_;
 
-    for my $proto (('ftp', 'imap', 'pop3', 'smtp')) {
+    for my $proto (('ftp', 'imap', 'pop3', 'sieve', 'smtp')) {
         for my $ipvnum (('4', '6')) {
             for my $idnum (('1', '2')) {
                 killsockfilters($piddir, $proto, $ipvnum, $idnum, $verbose);

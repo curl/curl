@@ -1,0 +1,56 @@
+<testcase>
+<info>
+<keywords>
+SIEVE
+multi
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+REPLY welcome \"SASL\" \"PLAIN\"\r\nOK
+REPLY AUTHENTICATE OK \"Logged in\"
+REPLY GETSCRIPT NO (REFERRAL \"sieve://%HOSTIP:%SIEVEPORT\")
+COUNT GETSCRIPT 1
+</servercmd>
+<data>
+require "fileinto";
+if header :comparator "i;ascii-casemap" :contains "X-Spam-Level" "*****"  {
+    fileinto "Junk";
+    stop;
+}
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+sieve
+</server>
+ <name>
+SIEVE multiple requests with referral on negative response
+ </name>
+ <command>
+'sieve://%HOSTIP:%SIEVEPORT/{script,anotherscript}%TESTNUMBER' -u user:secret --location-trusted
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+AUTHENTICATE "PLAIN" "%b64[%00user%00secret]b64%"
+CAPABILITY
+GETSCRIPT "script%TESTNUMBER"
+LOGOUT
+AUTHENTICATE "PLAIN" "%b64[%00user%00secret]b64%"
+CAPABILITY
+GETSCRIPT "script%TESTNUMBER"
+GETSCRIPT "anotherscript%TESTNUMBER"
+LOGOUT
+</protocol>
+</verify>
+</testcase>

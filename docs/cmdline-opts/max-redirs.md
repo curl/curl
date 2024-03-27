@@ -4,8 +4,8 @@ SPDX-License-Identifier: curl
 Long: max-redirs
 Arg: <num>
 Help: Maximum number of redirects allowed
-Protocols: HTTP
-Category: http
+Protocols: HTTP SIEVE
+Category: http sieve
 Added: 7.5
 Multi: single
 See-also:

@@ -39,6 +39,11 @@ curl supports RTSP 1.0 downloads.
 curl supports SSH version 2 scp transfers.
 ## SFTP
 curl supports SFTP (draft 5) done over SSH version 2.
+## SIEVE
+The official protocol name is ManageSieve. As its scheme is simply "sieve",
+it is named as such within curl.
+Using the SIEVE protocol, curl can upload and download mail redirection
+sieve scripts for you.
 ## SMB(S)
 curl supports SMB version 1 for upload and download.
 ## SMTP(S)

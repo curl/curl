@@ -5,6 +5,7 @@ Long: request
 Short: X
 Arg: <method>
 Help: Specify request method to use
+Protocols: FTP HTTP IMAP POP3 SIEVE SMTP
 Category: connection
 Added: 6.0
 Multi: single
@@ -55,3 +56,7 @@ Specifies a custom IMAP command to use instead of *LIST*. (Added in 7.30.0)
 
 ## SMTP
 Specifies a custom SMTP command to use instead of *HELP* or **VRFY**. (Added in 7.34.0)
+
+## SIEVE
+Specifies a custom SIEVE command to use instead of *LISTSCRIPTS* or
+*PUTSCRIPT*. (Added in 8.xx.x)

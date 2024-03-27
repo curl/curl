@@ -1,0 +1,56 @@
+<testcase>
+<info>
+<keywords>
+SIEVE
+PUTSCRIPT
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+sieve
+</server>
+ <name>
+SIEVE upload script with warnings
+ </name>
+ <command>
+sieve://%HOSTIP:%SIEVEPORT/script%TESTNUMBER --upload-file %LOGDIR/test%TESTNUMBER.txt
+</command>
+# We create this file before the command is invoked!
+<file name="%LOGDIR/test%TESTNUMBER.txt">
+@CODE@WARNINGS@
+@RESPONSE@This script is meaningless\nDon't rely on it !\n@
+foo-
+This is a moo-
+bar
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+PUTSCRIPT "script%TESTNUMBER" {100+}
+@CODE@WARNINGS@
+@RESPONSE@This script is meaningless\nDon't rely on it !\n@
+foo-
+This is a moo-
+bar
+
+LOGOUT
+</protocol>
+<file name="%LOGDIR/upload.script%TESTNUMBER">
+@CODE@WARNINGS@
+@RESPONSE@This script is meaningless\nDon't rely on it !\n@
+foo-
+This is a moo-
+bar
+</file>
+<stdout>
+This script is meaningless
+Don't rely on it !
+</stdout>
+</verify>
+</testcase>

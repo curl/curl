@@ -255,6 +255,9 @@ $write cvh "#endif"
 $write cvh "#ifdef CURL_DISABLE_IMAP"
 $write cvh "#undef CURL_DISABLE_IMAP"
 $write cvh "#endif"
+$write cvh "#ifdef CURL_DISABLE_SIEVE"
+$write cvh "#undef CURL_DISABLE_SIEVE"
+$write cvh "#endif"
 $if .not. noldap
 $then
 $   write cvh "#ifdef CURL_DISABLE_LDAP"
