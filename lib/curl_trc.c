@@ -111,21 +111,30 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
 /* Curl_infof() is for info message along the way */
 #define MAXINFO 2048
 
+static void trc_infof(struct Curl_easy *data, struct curl_trc_feat *feat,
+                      const char * const fmt, va_list ap)  CURL_PRINTF(3, 0);
+
+static void trc_infof(struct Curl_easy *data, struct curl_trc_feat *feat,
+                      const char * const fmt, va_list ap)
+{
+  int len = 0;
+  char buffer[MAXINFO + 2];
+  if(feat)
+    len = msnprintf(buffer, MAXINFO, "[%s] ", feat->name);
+  len += mvsnprintf(buffer + len, MAXINFO - len, fmt, ap);
+  buffer[len++] = '\n';
+  buffer[len] = '\0';
+  Curl_debug(data, CURLINFO_TEXT, buffer, len);
+}
+
 void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
 {
   DEBUGASSERT(!strchr(fmt, '\n'));
   if(Curl_trc_is_verbose(data)) {
     va_list ap;
-    int len = 0;
-    char buffer[MAXINFO + 2];
-    if(data->state.feat)
-      len = msnprintf(buffer, MAXINFO, "[%s] ", data->state.feat->name);
     va_start(ap, fmt);
-    len += mvsnprintf(buffer + len, MAXINFO - len, fmt, ap);
+    trc_infof(data, data->state.feat, fmt, ap);
     va_end(ap);
-    buffer[len++] = '\n';
-    buffer[len] = '\0';
-    Curl_debug(data, CURLINFO_TEXT, buffer, len);
   }
 }
 
@@ -154,7 +163,40 @@ void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
   }
 }
 
+struct curl_trc_feat Curl_trc_feat_read = {
+  "READ",
+  CURL_LOG_LVL_NONE,
+};
+struct curl_trc_feat Curl_trc_feat_write = {
+  "WRITE",
+  CURL_LOG_LVL_NONE,
+};
+
+void Curl_trc_read(struct Curl_easy *data, const char *fmt, ...)
+{
+  DEBUGASSERT(!strchr(fmt, '\n'));
+  if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_read)) {
+    va_list ap;
+    va_start(ap, fmt);
+    trc_infof(data, &Curl_trc_feat_read, fmt, ap);
+    va_end(ap);
+  }
+}
+
+void Curl_trc_write(struct Curl_easy *data, const char *fmt, ...)
+{
+  DEBUGASSERT(!strchr(fmt, '\n'));
+  if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_write)) {
+    va_list ap;
+    va_start(ap, fmt);
+    trc_infof(data, &Curl_trc_feat_write, fmt, ap);
+    va_end(ap);
+  }
+}
+
 static struct curl_trc_feat *trc_feats[] = {
+  &Curl_trc_feat_read,
+  &Curl_trc_feat_write,
 #ifndef CURL_DISABLE_DOH
   &Curl_doh_trc,
 #endif

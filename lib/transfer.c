@@ -1189,6 +1189,8 @@ CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
     data->req.eos_written = TRUE;
     data->req.download_done = TRUE;
   }
+  CURL_TRC_WRITE(data, "xfer_write_resp(len=%zu, eos=%d) -> %d",
+                 blen, is_eos, result);
   return result;
 }
 
