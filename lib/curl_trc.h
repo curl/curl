@@ -88,6 +88,7 @@ void Curl_failf(struct Curl_easy *data,
 #define infof Curl_infof
 #define CURL_TRC_CF Curl_trc_cf_infof
 #define CURL_TRC_WRITE Curl_trc_write
+#define CURL_TRC_READ  Curl_trc_read
 #endif
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
