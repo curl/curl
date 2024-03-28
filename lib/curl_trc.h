@@ -82,7 +82,7 @@ void Curl_failf(struct Curl_easy *data,
          Curl_trc_write(data, __VA_ARGS__); } while(0)
 #define CURL_TRC_READ(data, ...) \
   do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_read)) \
-         Curl_trc_write(data, __VA_ARGS__); } while(0)
+         Curl_trc_read(data, __VA_ARGS__); } while(0)
 
 #else
 #define infof Curl_infof
