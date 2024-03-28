@@ -31,7 +31,6 @@ runs all test cases that have `test_01_02` in their name. This does not have to 
 
 Depending on your setup, some test cases may be skipped and appear as `s` in the output. If you run pytest verbose, it will also give you the reason for skipping.
 
-
 # Prerequisites
 
 You will need:
