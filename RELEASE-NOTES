@@ -4,15 +4,24 @@ curl and libcurl 8.7.2
  Command line options:         258
  curl_easy_setopt() options:   304
  Public functions in libcurl:  93
- Contributors:                 3134
+ Contributors:                 3133
 
 This release includes the following changes:
 
 
 This release includes the following bugfixes:
 
- o configure: make --disable-docs imply --disable-manual [2]
+ o cf-socket: remove references to l_ip, l_port [9]
  o cmdline-docs: fix make install with configure --disable-docs [1]
+ o configure: make --disable-docs imply --disable-manual [2]
+ o content_encoding: brotli and others, pass through 0-length writes [5]
+ o curl: make --help adapt to the terminal width [11]
+ o curl_sha512_255: fix detection of OpenSSL 1.1.1 or later [8]
+ o libssh2: set length to 0 if strdup failed [6]
+ o openssl: do not set SSL_MODE_RELEASE_BUFFERS [10]
+ o RELEASE-PROCEDURE: mention an initial working build [7]
+ o tool_xattr: "guess" URL scheme if none is provided [3]
+ o tool_xattr: in debug builds, act normally if CURL_FAKE_XATTR is not set [4]
 
 This release includes the following known bugs:
 
@@ -27,10 +36,20 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Chris Webb, Daniel Stenberg, Harry Sintonen
-  (3 contributors)
+  Chris Webb, Dagfinn Ilmari Mannsåker, Daniel Stenberg, Harry Sintonen,
+  Paul Howarth, Robert Moreton, Stefan Eissing, Tobias Stoeckmann
+  (8 contributors)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.se/bug/?i=13198
  [2] = https://curl.se/bug/?i=13191
+ [3] = https://curl.se/bug/?i=13205
+ [4] = https://curl.se/bug/?i=13220
+ [5] = https://curl.se/bug/?i=13209
+ [6] = https://curl.se/bug/?i=13213
+ [7] = https://curl.se/bug/?i=13216
+ [8] = https://curl.se/bug/?i=13208
+ [9] = https://curl.se/bug/?i=13210
+ [10] = https://curl.se/bug/?i=13203
+ [11] = https://curl.se/bug/?i=13171
