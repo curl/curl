@@ -129,10 +129,11 @@ class EnvConfig:
         self.htdocs_dir = os.path.join(self.gen_dir, 'htdocs')
         self.tld = 'http.curl.se'
         self.domain1 = f"one.{self.tld}"
+        self.domain1brotli = f"brotli.one.{self.tld}"
         self.domain2 = f"two.{self.tld}"
         self.proxy_domain = f"proxy.{self.tld}"
         self.cert_specs = [
-            CertificateSpec(domains=[self.domain1, 'localhost'], key_type='rsa2048'),
+            CertificateSpec(domains=[self.domain1, self.domain1brotli, 'localhost'], key_type='rsa2048'),
             CertificateSpec(domains=[self.domain2], key_type='rsa2048'),
             CertificateSpec(domains=[self.proxy_domain, '127.0.0.1'], key_type='rsa2048'),
             CertificateSpec(name="clientsX", sub_specs=[
@@ -375,6 +376,10 @@ class Env:
     @property
     def domain1(self) -> str:
         return self.CONFIG.domain1
+
+    @property
+    def domain1brotli(self) -> str:
+        return self.CONFIG.domain1brotli
 
     @property
     def domain2(self) -> str:
