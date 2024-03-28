@@ -28,6 +28,7 @@
 
 #include "urldata.h" /* it includes http_chunks.h */
 #include "curl_printf.h"
+#include "curl_trc.h"
 #include "sendf.h"   /* for the client write stuff */
 #include "dynbuf.h"
 #include "content_encoding.h"
