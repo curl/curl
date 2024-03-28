@@ -68,7 +68,7 @@ that.
 
 ## `tcp`
 
-Tracing of TCP socket handling: connect, reads, writes.
+Tracing of TCP socket handling: connect, sends, receives.
 
 ## `ssl`
 
@@ -95,6 +95,14 @@ trace.
 ## `doh`
 
 Tracing of DNS-over-HTTP operations to resolve hostnames.
+
+## `read`
+
+Traces reading of upload data from the application in order to send it to the server.
+
+## `write`
+
+Traces writing of download data, received from the server, to the application.
 
 # EXAMPLE
 

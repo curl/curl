@@ -114,23 +114,23 @@ static void ws_dec_info(struct ws_decoder *dec, struct Curl_easy *data,
   case 0:
     break;
   case 1:
-    infof(data, "WS-DEC: %s [%s%s]", msg,
-          ws_frame_name_of_op(dec->head[0]),
-          (dec->head[0] & WSBIT_FIN)? "" : " NON-FINAL");
+    CURL_TRC_WRITE(data, "websocket, decoded %s [%s%s]", msg,
+                   ws_frame_name_of_op(dec->head[0]),
+                   (dec->head[0] & WSBIT_FIN)? "" : " NON-FINAL");
     break;
   default:
     if(dec->head_len < dec->head_total) {
-      infof(data, "WS-DEC: %s [%s%s](%d/%d)", msg,
-            ws_frame_name_of_op(dec->head[0]),
-            (dec->head[0] & WSBIT_FIN)? "" : " NON-FINAL",
-            dec->head_len, dec->head_total);
+      CURL_TRC_WRITE(data, "websocket, decoded %s [%s%s](%d/%d)", msg,
+                     ws_frame_name_of_op(dec->head[0]),
+                     (dec->head[0] & WSBIT_FIN)? "" : " NON-FINAL",
+                     dec->head_len, dec->head_total);
     }
     else {
-      infof(data, "WS-DEC: %s [%s%s payload=%" CURL_FORMAT_CURL_OFF_T
-                  "/%" CURL_FORMAT_CURL_OFF_T "]",
-            msg, ws_frame_name_of_op(dec->head[0]),
-            (dec->head[0] & WSBIT_FIN)? "" : " NON-FINAL",
-            dec->payload_offset, dec->payload_len);
+      CURL_TRC_WRITE(data, "websocket, decoded %s [%s%s payload=%"
+                     CURL_FORMAT_CURL_OFF_T "/%" CURL_FORMAT_CURL_OFF_T "]",
+                     msg, ws_frame_name_of_op(dec->head[0]),
+                     (dec->head[0] & WSBIT_FIN)? "" : " NON-FINAL",
+                     dec->payload_offset, dec->payload_len);
     }
     break;
   }
@@ -277,9 +277,8 @@ static CURLcode ws_dec_pass_payload(struct ws_decoder *dec,
     Curl_bufq_skip(inraw, (size_t)nwritten);
     dec->payload_offset += (curl_off_t)nwritten;
     remain = dec->payload_len - dec->payload_offset;
-    /* infof(data, "WS-DEC: passed  %zd bytes payload, %"
-             CURL_FORMAT_CURL_OFF_T " remain",
-             nwritten, remain); */
+    CURL_TRC_WRITE(data, "websocket, passed %zd bytes payload, %"
+                   CURL_FORMAT_CURL_OFF_T " remain", nwritten, remain);
   }
 
   return remain? CURLE_AGAIN : CURLE_OK;
@@ -454,10 +453,12 @@ static CURLcode ws_cw_write(struct Curl_easy *data,
     pass_ctx.cw_type = type;
     result = ws_dec_pass(&ws->dec, data, &ctx->buf,
                          ws_cw_dec_next, &pass_ctx);
-    if(result == CURLE_AGAIN)
+    if(result == CURLE_AGAIN) {
       /* insufficient amount of data, keep it for later.
        * we pretend to have written all since we have a copy */
+      CURL_TRC_WRITE(data, "websocket, buffered incomplete frame head");
       return CURLE_OK;
+    }
     else if(result) {
       infof(data, "WS: decode error %d", (int)result);
       return result;
