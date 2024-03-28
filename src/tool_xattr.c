@@ -55,7 +55,7 @@ char *stripcredentials(const char *url)
   char *nurl;
   u = curl_url();
   if(u) {
-    uc = curl_url_set(u, CURLUPART_URL, url, 0);
+    uc = curl_url_set(u, CURLUPART_URL, url, CURLU_GUESS_SCHEME);
     if(uc)
       goto error;
 
