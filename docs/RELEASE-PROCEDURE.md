@@ -4,7 +4,8 @@ curl release procedure - how to do a release
 in the source code repo
 -----------------------
 
-- run `./scripts/copyright.pl` and correct possible omissions
+- do a *regular build* with a sensible build config to make sure the
+  `src/tool_hugehelp.c` file etc is correctly generated
 
 - edit `RELEASE-NOTES` to be accurate
 
