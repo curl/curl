@@ -300,7 +300,7 @@ static CURLcode deflate_do_write(struct Curl_easy *data,
   struct zlib_writer *zp = (struct zlib_writer *) writer;
   z_stream *z = &zp->z;     /* zlib state structure */
 
-  if(!(type & CLIENTWRITE_BODY))
+  if(!(type & CLIENTWRITE_BODY) || !nbytes)
     return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
 
   /* Set the compressed input when this function is called */
@@ -457,7 +457,7 @@ static CURLcode gzip_do_write(struct Curl_easy *data,
   struct zlib_writer *zp = (struct zlib_writer *) writer;
   z_stream *z = &zp->z;     /* zlib state structure */
 
-  if(!(type & CLIENTWRITE_BODY))
+  if(!(type & CLIENTWRITE_BODY) || !nbytes)
     return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
 
   if(zp->zlib_init == ZLIB_INIT_GZIP) {
@@ -669,7 +669,7 @@ static CURLcode brotli_do_write(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   BrotliDecoderResult r = BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT;
 
-  if(!(type & CLIENTWRITE_BODY))
+  if(!(type & CLIENTWRITE_BODY) || !nbytes)
     return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
 
   if(!bp->br)
@@ -762,7 +762,7 @@ static CURLcode zstd_do_write(struct Curl_easy *data,
   ZSTD_outBuffer out;
   size_t errorCode;
 
-  if(!(type & CLIENTWRITE_BODY))
+  if(!(type & CLIENTWRITE_BODY) || !nbytes)
     return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
 
   if(!zp->decomp) {
@@ -916,7 +916,7 @@ static CURLcode error_do_write(struct Curl_easy *data,
   (void) buf;
   (void) nbytes;
 
-  if(!(type & CLIENTWRITE_BODY))
+  if(!(type & CLIENTWRITE_BODY) || !nbytes)
     return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
 
   failf(data, "Unrecognized content encoding type. "
