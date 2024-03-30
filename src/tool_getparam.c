@@ -1337,6 +1337,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         warnf(global, "The file name argument '%s' looks like a flag.",
               nextarg);
       }
+      else if(!strncmp("\xe2\x80\x9c", nextarg, 3)) {
+        warnf(global, "The argument '%s' starts with a unicode quote where "
+              "maybe an ASCII \" was intended?",
+              nextarg);
+      }
     }
     else if((a->desc == ARG_NONE) && !toggle) {
       err = PARAM_NO_PREFIX;
