@@ -235,7 +235,7 @@ CURLcode get_url_file_name(char **filename, const char *url)
        */
 #ifdef DEBUGBUILD
       {
-        char *tdir = curlx_getenv("CURL_TESTDIR");
+        char *tdir = curl_getenv("CURL_TESTDIR");
         if(tdir) {
           char *alt = aprintf("%s/%s", tdir, *filename);
           Curl_safefree(*filename);
