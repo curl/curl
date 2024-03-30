@@ -158,6 +158,9 @@ make -s vc-ide
 echo "produce CHANGES"
 git log --pretty=fuller --no-color --date=short --decorate=full -1000 | ./scripts/log2changes.pl > CHANGES.dist
 
+echo "produce RELEASE-TOOLS.md"
+./scripts/release-tools.sh > docs/RELEASE-TOOLS.md.dist
+
 ############################################################################
 #
 # Now run make dist to generate a tar.gz archive
