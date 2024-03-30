@@ -548,9 +548,12 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
       return result;
   }
 
-  hosturl = aprintf("ldap%s://%s:%d",
-                    conn->handler->flags & PROTOPT_SSL? "s": "",
-                    conn->host.name, conn->remote_port);
+  hosturl = aprintf("%s://%s%s%s:%d",
+                    conn->handler->scheme,
+                    conn->bits.ipv6_ip? "[": "",
+                    conn->host.name,
+                    conn->bits.ipv6_ip? "]": "",
+                    conn->remote_port);
   if(!hosturl)
     return CURLE_OUT_OF_MEMORY;
 
