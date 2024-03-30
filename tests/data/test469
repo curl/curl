@@ -28,6 +28,9 @@ Funny-head: yesyes
 #
 # Client-side
 <client>
+<features>
+!win32
+</features>
 <server>
 http
 </server>
