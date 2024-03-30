@@ -2605,7 +2605,6 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
             errorf(global, "out of memory");
             return CURLE_OUT_OF_MEMORY;
           }
-          curl_free(env);
           capath_from_env = true;
         }
         env = curl_getenv("SSL_CERT_FILE");
