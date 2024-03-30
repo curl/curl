@@ -53,6 +53,16 @@
 #      define USE_OPENSSL_SHA512_256          1
 #      define HAS_SHA512_256_IMPLEMENTATION   1
 #      ifdef __NetBSD__
+/* Some NetBSD versions has a bug in SHA-512/256.
+ * See https://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=58039
+ * The problematic versions:
+ * - NetBSD before 9.4
+ * - NetBSD 9 all development versions (9.99.x)
+ * - NetBSD 10 development versions (10.99.x) before 10.99.11
+ * The bug was fixed in NetBSD 9.4 release, NetBSD 10.0 release,
+ * NetBSD 10.99.11 development.
+ * It is safe to apply the workaround even if the bug is not present, as
+ * the workaround just reduces performance slightly. */
 #        include <sys/param.h>
 #        if  __NetBSD_Version__ <   904000000 ||  \
             (__NetBSD_Version__ >=  999000000 &&  \
