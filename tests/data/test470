@@ -28,6 +28,9 @@ Funny-head: yesyes
 #
 # Client-side
 <client>
+<features>
+!hyper
+</features>
 <server>
 http
 </server>
