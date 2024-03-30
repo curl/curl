@@ -267,20 +267,11 @@ CURLcode Curl_idnconvert_hostname(struct hostname *host)
   /* Check name for non-ASCII and convert hostname if we can */
   if(!Curl_is_ASCII_name(host->name)) {
     char *decoded;
-    CURLcode result = idn_decode(host->name, &decoded);
-    if(!result) {
-      if(!*decoded) {
-        /* zero length is a bad host name */
-        Curl_idn_free(decoded);
-        return CURLE_URL_MALFORMAT;
-      }
-      /* successful */
-      host->encalloc = decoded;
-      /* change the name pointer to point to the encoded hostname */
-      host->name = host->encalloc;
-    }
-    else
+    CURLcode result = Curl_idn_decode(host->name, &decoded);
+    if(result)
       return result;
+    /* successful */
+    host->name = host->encalloc = decoded;
   }
 #endif
   return CURLE_OK;
