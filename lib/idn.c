@@ -181,6 +181,18 @@ static CURLcode idn_decode(const char *input, char **output)
     result = CURLE_NOT_BUILT_IN;
 #elif defined(USE_WIN32_IDN)
   result = win32_idn_to_ascii(input, &decoded);
+#elif defined(HAVE_NETDB_H) && defined(__APPLE__)
+    /* let MacOS/iOS do this as part of DNS service */
+    struct hostent *p = gethostbyname(input);
+    if(p) {
+      if(p->h_name && (p->h_name[0])) {
+        /* host name is idn encoded by MacOS */
+        char *name = strdup(p->h_name);
+        if(name) {
+          decoded = name;
+        }
+      }
+    }
 #endif
   if(!result)
     *output = decoded;
