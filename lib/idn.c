@@ -246,11 +246,7 @@ CURLcode Curl_idn_encode(const char *puny, char **output)
  */
 void Curl_free_idnconverted_hostname(struct hostname *host)
 {
-  if(host->encalloc) {
-    /* must be freed with idn2_free() if allocated by libidn */
-    Curl_idn_free(host->encalloc);
-    host->encalloc = NULL;
-  }
+  free(host->encalloc);
 }
 
 #endif /* USE_IDN */
