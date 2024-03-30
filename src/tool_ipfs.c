@@ -78,12 +78,10 @@ static char *ipfs_gateway(void)
   ipfs_path = curl_getenv("IPFS_PATH");
 
   if(!ipfs_path) {
-    char *home = curl_getenv("HOME");
+    char *home = getenv("HOME");
     if(home && *home)
       ipfs_path = aprintf("%s/.ipfs/", home);
     /* fallback to "~/.ipfs", as that's the default location. */
-
-    curl_free(home);
   }
 
   if(!ipfs_path || ensure_trailing_slash(&ipfs_path))
