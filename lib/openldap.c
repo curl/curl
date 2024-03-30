@@ -522,6 +522,7 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
   static const int version = LDAP_VERSION3;
   int rc;
   char *hosturl;
+  char *hostname_quoted;
 #ifdef CURL_OPENLDAP_DEBUG
   static int do_trace = -1;
 #endif
@@ -548,9 +549,23 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
       return result;
   }
 
+  hostname_quoted = aprintf("%s", conn->host.name);
+  if(!hostname_quoted)
+    return CURLE_OUT_OF_MEMORY;
+#ifdef CURLRES_IPV6
+  if((conn->ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data)) {
+    free(hostname_quoted);
+    hostname_quoted = aprintf("[%s]", conn->host.name);
+    if(!hostname_quoted)
+      return CURLE_OUT_OF_MEMORY;
+  }
+#endif /* CURLRES_IPV6 */
+
   hosturl = aprintf("ldap%s://%s:%d",
                     conn->handler->flags & PROTOPT_SSL? "s": "",
-                    conn->host.name, conn->remote_port);
+                    hostname_quoted, conn->remote_port);
+  free(hostname_quoted);
+  hostname_quoted = NULL;
   if(!hosturl)
     return CURLE_OUT_OF_MEMORY;
 
