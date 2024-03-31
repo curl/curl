@@ -84,6 +84,8 @@ option to work, or build libcurl on Windows with SSPI support.
 
 ## CURLAUTH_NTLM_WB
 
+Support for this is removed since libcurl 8.8.0.
+
 NTLM delegating to winbind helper. Authentication is performed by a separate
 binary application that is executed when needed. The name of the application
 is specified at compile time but is typically **/usr/bin/ntlm_auth**.

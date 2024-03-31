@@ -1024,9 +1024,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /* switch off bits we can't support */
 #ifndef USE_NTLM
     auth &= ~CURLAUTH_NTLM;    /* no NTLM support */
-    auth &= ~CURLAUTH_NTLM_WB; /* no NTLM_WB support */
-#elif !defined(NTLM_WB_ENABLED)
-    auth &= ~CURLAUTH_NTLM_WB; /* no NTLM_WB support */
 #endif
 #ifndef USE_SPNEGO
     auth &= ~CURLAUTH_NEGOTIATE; /* no Negotiate (SPNEGO) auth without
@@ -1105,9 +1102,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /* switch off bits we can't support */
 #ifndef USE_NTLM
     auth &= ~CURLAUTH_NTLM;    /* no NTLM support */
-    auth &= ~CURLAUTH_NTLM_WB; /* no NTLM_WB support */
-#elif !defined(NTLM_WB_ENABLED)
-    auth &= ~CURLAUTH_NTLM_WB; /* no NTLM_WB support */
 #endif
 #ifndef USE_SPNEGO
     auth &= ~CURLAUTH_NEGOTIATE; /* no Negotiate (SPNEGO) auth without

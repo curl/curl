@@ -1559,9 +1559,6 @@ if(NOT CURL_DISABLE_INSTALL)
                           (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
   _add_if("NTLM"          NOT (CURL_DISABLE_NTLM) AND
                           (use_curl_ntlm_core OR USE_WINDOWS_SSPI))
-  _add_if("NTLM_WB"       NOT (CURL_DISABLE_NTLM) AND
-                          (use_curl_ntlm_core OR USE_WINDOWS_SSPI) AND
-                          NOT CURL_DISABLE_HTTP AND NTLM_WB_ENABLED)
   _add_if("TLS-SRP"       USE_TLS_SRP)
   _add_if("HTTP2"         USE_NGHTTP2)
   _add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE OR USE_OPENSSL_QUIC)

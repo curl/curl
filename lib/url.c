@@ -937,13 +937,12 @@ ConnectionExists(struct Curl_easy *data,
   struct Curl_llist_element *curr;
 
 #ifdef USE_NTLM
-  bool wantNTLMhttp = ((data->state.authhost.want &
-                        (CURLAUTH_NTLM | CURLAUTH_NTLM_WB)) &&
+  bool wantNTLMhttp = ((data->state.authhost.want & CURLAUTH_NTLM) &&
                        (needle->handler->protocol & PROTO_FAMILY_HTTP));
 #ifndef CURL_DISABLE_PROXY
   bool wantProxyNTLMhttp = (needle->bits.proxy_user_passwd &&
                             ((data->state.authproxy.want &
-                              (CURLAUTH_NTLM | CURLAUTH_NTLM_WB)) &&
+                              CURLAUTH_NTLM) &&
                              (needle->handler->protocol & PROTO_FAMILY_HTTP)));
 #else
   bool wantProxyNTLMhttp = FALSE;
@@ -1414,12 +1413,6 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->ip_version = data->set.ipver;
   conn->connect_only = data->set.connect_only;
   conn->transport = TRNSPRT_TCP; /* most of them are TCP streams */
-
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM) && \
-    defined(NTLM_WB_ENABLED)
-  conn->ntlm.ntlm_auth_hlpr_socket = CURL_SOCKET_BAD;
-  conn->proxyntlm.ntlm_auth_hlpr_socket = CURL_SOCKET_BAD;
-#endif
 
   /* Initialize the easy handle list */
   Curl_llist_init(&conn->easyq, NULL);
@@ -3752,14 +3745,14 @@ static CURLcode create_conn(struct Curl_easy *data,
     /* If NTLM is requested in a part of this connection, make sure we don't
        assume the state is fine as this is a fresh connection and NTLM is
        connection based. */
-    if((data->state.authhost.picked & (CURLAUTH_NTLM | CURLAUTH_NTLM_WB)) &&
+    if((data->state.authhost.picked & CURLAUTH_NTLM) &&
        data->state.authhost.done) {
       infof(data, "NTLM picked AND auth done set, clear picked");
       data->state.authhost.picked = CURLAUTH_NONE;
       data->state.authhost.done = FALSE;
     }
 
-    if((data->state.authproxy.picked & (CURLAUTH_NTLM | CURLAUTH_NTLM_WB)) &&
+    if((data->state.authproxy.picked & CURLAUTH_NTLM) &&
        data->state.authproxy.done) {
       infof(data, "NTLM-proxy picked AND auth done set, clear picked");
       data->state.authproxy.picked = CURLAUTH_NONE;
