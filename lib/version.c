@@ -209,6 +209,8 @@ char *curl_version(void)
   src[i++] = idn_version;
 #elif defined(USE_WIN32_IDN)
   src[i++] = (char *)"WinIDN";
+#elif defined(USE_APPLE_IDN)
+  src[i++] = (char *)"AppleIDN";
 #endif
 
 #ifdef USE_LIBPSL
@@ -475,7 +477,7 @@ static const struct feat features_table[] = {
   !defined(CURL_DISABLE_HTTP)
   FEATURE("HTTPS-proxy", https_proxy_present, CURL_VERSION_HTTPS_PROXY),
 #endif
-#if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN)
+#if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN) || defined(USE_APPLE_IDN)
   FEATURE("IDN",         idn_present,         CURL_VERSION_IDN),
 #endif
 #ifdef USE_IPV6

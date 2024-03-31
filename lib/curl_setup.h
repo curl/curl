@@ -649,13 +649,14 @@
 
 /* ---------------------------------------------------------------- */
 
-#if defined(HAVE_LIBIDN2) && defined(HAVE_IDN2_H) && !defined(USE_WIN32_IDN)
+#if defined(HAVE_LIBIDN2) && defined(HAVE_IDN2_H) && \
+  !defined(USE_WIN32_IDN) && !defined(USE_APPLE_IDN)
 /* The lib and header are present */
 #define USE_LIBIDN2
 #endif
 
-#if defined(USE_LIBIDN2) && defined(USE_WIN32_IDN)
-#error "Both libidn2 and WinIDN are enabled, choose one."
+#if defined(USE_LIBIDN2) && (defined(USE_WIN32_IDN) || defined(USE_APPLE_IDN))
+#error "libidn2 cannot be enabled with WinIDN or AppleIDN, choose one."
 #endif
 
 #define LIBIDN_REQUIRED_VERSION "0.4.1"
