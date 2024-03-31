@@ -1,3 +1,9 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 # Adding a new protocol?
 
 Every once in a while, someone comes up with the idea of adding support for yet

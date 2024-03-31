@@ -1,3 +1,9 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 # Rustls
 
 [Rustls is a TLS backend written in Rust](https://docs.rs/rustls/). Curl can

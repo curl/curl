@@ -1,3 +1,9 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 # curl the next few years - perhaps
 
 Roadmap of things Daniel Stenberg wants to work on next. It is intended to

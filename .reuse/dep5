@@ -8,13 +8,8 @@ Files: tests/data/test* tests/certs/* tests/stunnel.pem tests/valgrind.supp
 Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
 
-# Markdown documentation in docs/
-Files: docs/*.md
-Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
-License: curl
-
 # Docs in docs/
-Files: docs/FAQ docs/INSTALL docs/INSTALL.cmake docs/KNOWN_BUGS docs/MAIL-ETIQUETTE docs/THANKS docs/TODO docs/cmdline-opts/page-footer docs/libcurl/curl_multi_socket_all.3 docs/libcurl/curl_strnequal.3 docs/libcurl/symbols-in-versions docs/options-in-versions
+Files: docs/FAQ docs/INSTALL docs/KNOWN_BUGS docs/MAIL-ETIQUETTE docs/THANKS docs/TODO docs/libcurl/symbols-in-versions docs/options-in-versions
 Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
 
@@ -89,14 +84,6 @@ Files: README
 Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
 
-Files: .github/ISSUE_TEMPLATE/bug_report.md
-Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
-License: curl
-
 Files: .mailmap
-Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
-License: curl
-
-Files: .github/dependabot.yml
 Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl

@@ -1,8 +1,8 @@
-                                  _   _ ____  _
-                              ___| | | |  _ \| |
-                             / __| | | | |_) | |
-                            | (__| |_| |  _ <| |___
-                             \___|\___/|_| \_\_____|
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
 
 # SSL problems
 

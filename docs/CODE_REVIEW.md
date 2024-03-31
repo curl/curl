@@ -1,3 +1,9 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 # How to do code reviews for curl
 
 Anyone and everyone is encouraged and welcome to review code submissions in
