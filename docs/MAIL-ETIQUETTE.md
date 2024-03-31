@@ -39,7 +39,7 @@ way to read the reply, but to ask the one person the question. The one person
 consequently gets overloaded with mail.
 
 If you really want to contact an individual and perhaps pay for his or her
-services, by all means go ahead, but if it's just another curl question, take
+services, by all means go ahead, but if it is just another curl question, take
 it to a suitable list instead.
 
 ### Subscription Required
@@ -149,7 +149,7 @@ future. In addition to the archives, the mail is sent out to thousands of
 individuals. There is no way to undo a sent email.
 
 When sending emails to a curl mailing list, do not include sensitive
-information such as user names and passwords; use fake ones, temporary ones or
+information such as usernames and passwords; use fake ones, temporary ones or
 just remove them completely from the mail. Note that this includes base64
 encoded HTTP Basic auth headers.
 
