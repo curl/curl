@@ -31,7 +31,7 @@ produce this release tarball.
 
 MOO
 
-exists=`which dpkg`;
+exists=`which dpkg`
 if test ! -e "$exists"; then
     echo "(unknown, could not find dpkg)"
     exit
