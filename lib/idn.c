@@ -52,7 +52,10 @@
 
 #if defined(__APPLE__)
 /* for macOS and iOS targets */
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 170000 || __MAC_OS_X_VERSION_MAX_ALLOWED >= 140000
+/* headers included in Xcode 15, so we check for the SDK versions */
 #include <unicode/uidna.h>
+#define HaveAppleIDN 1
 
 static CURLcode mac_idn_to_ascii(const char *in, char **out)
 {
@@ -109,6 +112,7 @@ static CURLcode mac_ascii_to_idn(const char *in, char **out)
     }
   }
 }
+#endif
 #endif
 
 #ifdef USE_WIN32_IDN
@@ -242,7 +246,7 @@ static CURLcode idn_decode(const char *input, char **output)
     result = CURLE_NOT_BUILT_IN;
 #elif defined(USE_WIN32_IDN)
   result = win32_idn_to_ascii(input, &decoded);
-#elif defined(__APPLE__)
+#elif defined(HaveAppleIDN)
   result = mac_idn_to_ascii(input, &decoded);
 #endif
   if(!result)
@@ -261,7 +265,7 @@ static CURLcode idn_encode(const char *puny, char **output)
   CURLcode result = win32_ascii_to_idn(puny, &enc);
   if(result)
     return result;
-#elif defined(__APPLE__)
+#elif defined(HaveAppleIDN)
   CURLcode result = mac_ascii_to_idn(puny, &enc);
   if(result)
     return result;
