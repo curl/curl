@@ -81,7 +81,7 @@ if (defined($ENV{SOURCE_DATE_EPOCH})) {
 } else {
     @ts = localtime;
 }
-my $date = strftime "%B %d %Y", @ts;
+my $date = strftime "%Y-%m-%d", @ts;
 
 sub outseealso {
     my (@sa) = @_;
