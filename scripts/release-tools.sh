@@ -34,7 +34,7 @@ MOO
 exists=`which dpkg`
 if test ! -e "$exists"; then
     echo "(unknown, could not find dpkg)"
-    exit
+    exit 1
 fi
 
 debian() {
