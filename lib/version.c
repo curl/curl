@@ -478,7 +478,7 @@ static const struct feat features_table[] = {
   !defined(CURL_DISABLE_HTTP)
   FEATURE("HTTPS-proxy", https_proxy_present, CURL_VERSION_HTTPS_PROXY),
 #endif
-#if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN) || defined(__APPLE__)
+#if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN) || defined(HAVE_APPLE_IDN)
   FEATURE("IDN",         idn_present,         CURL_VERSION_IDN),
 #endif
 #ifdef USE_IPV6
