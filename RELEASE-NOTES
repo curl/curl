@@ -4,7 +4,7 @@ curl and libcurl 8.7.2
  Command line options:         258
  curl_easy_setopt() options:   304
  Public functions in libcurl:  93
- Contributors:                 3133
+ Contributors:                 3137
 
 This release includes the following changes:
 
@@ -15,13 +15,23 @@ This release includes the following bugfixes:
  o cmdline-docs: fix make install with configure --disable-docs [1]
  o configure: make --disable-docs imply --disable-manual [2]
  o content_encoding: brotli and others, pass through 0-length writes [5]
+ o curl-confopts.m4: define CARES_NO_DEPRECATED when c-ares is used [17]
  o curl: make --help adapt to the terminal width [11]
+ o curl: use curl_getenv instead of the curlx_ version [20]
  o curl_sha512_255: fix detection of OpenSSL 1.1.1 or later [8]
+ o curl_sha512_256: do not use workaround for NetBSD when not needed [21]
+ o docs/MAIL-ETIQUETTE: convert to markdown [12]
+ o idn: make Curl_idnconvert_hostname() use Curl_idn_decode() [16]
  o libssh2: set length to 0 if strdup failed [6]
+ o m4: fix rustls pkg-config codepath [22]
+ o openldap: create ldap URLs correctly for IPv6 addresses [19]
  o openssl: do not set SSL_MODE_RELEASE_BUFFERS [10]
  o RELEASE-PROCEDURE: mention an initial working build [7]
+ o reuse: add copyright + license info to individual docs/*.md files [13]
+ o tool_getparam: output warning for leading unicode quote character [14]
  o tool_xattr: "guess" URL scheme if none is provided [3]
  o tool_xattr: in debug builds, act normally if CURL_FAKE_XATTR is not set [4]
+ o vquic: use CURL_FORMAT_CURL_OFF_T for 64 bit printf output [18]
 
 This release includes the following known bugs:
 
@@ -36,9 +46,12 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Chris Webb, Dagfinn Ilmari Mannsåker, Daniel Stenberg, Harry Sintonen,
-  Paul Howarth, Robert Moreton, Stefan Eissing, Tobias Stoeckmann
-  (8 contributors)
+  Chris Webb, Dagfinn Ilmari Mannsåker, Daniel McCarney, Daniel Stenberg,
+  Emanuele Torre, Evgeny Grin (Karlson2k), Harry Sintonen,
+  Keitagit-kun on github, kpcyrd on github, Matt Jolly, Michael Kaufmann,
+  Paul Howarth, riastradh on github, Robert Moreton, Sanjay Pujare,
+  Sergio Durigan Junior, Stefan Eissing, Tobias Stoeckmann
+  (18 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -53,3 +66,13 @@ References to bug reports and discussions on issues:
  [9] = https://curl.se/bug/?i=13210
  [10] = https://curl.se/bug/?i=13203
  [11] = https://curl.se/bug/?i=13171
+ [12] = https://curl.se/bug/?i=13247
+ [13] = https://curl.se/bug/?i=13245
+ [14] = https://curl.se/bug/?i=13214
+ [16] = https://curl.se/bug/?i=13236
+ [17] = https://curl.se/bug/?i=13240
+ [18] = https://curl.se/bug/?i=13224
+ [19] = https://curl.se/bug/?i=13228
+ [20] = https://curl.se/bug/?i=13230
+ [21] = https://curl.se/bug/?i=13225
+ [22] = https://curl.se/bug/?i=13200
