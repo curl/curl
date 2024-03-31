@@ -1,0 +1,39 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: Creates release tarballs
+
+on:
+  push:
+    #tags:
+    #  - 'curl-*_*_*'
+
+jobs:
+  release:
+    name: release
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: docker build
+        run: docker build -t curl/curl .
+
+      - name: autoreconf
+        run: docker run --rm -v $(pwd):/usr/src -w /usr/src curl/curl autoreconf -fi
+
+      - name: configure
+        run: docker run --rm -v $(pwd):/usr/src -w /usr/src curl/curl ./configure --without-ssl --without-libpsl
+
+      - name: make
+        run: docker run --rm -v $(pwd):/usr/src -w /usr/src curl/curl make -j2
+
+      - name: maketgz
+        run: docker run --rm -v $(pwd):/usr/src -w /usr/src curl/curl ./maketgz 8.7.1
+
+# TODO:
+# - parse git tag and pass to maketgz
+# - gpg sign the tarballs with an automation signing key
+# - have an action to upload the release tarballs
