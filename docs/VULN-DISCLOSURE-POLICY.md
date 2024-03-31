@@ -1,3 +1,9 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 # curl vulnerability disclosure policy
 
 This document describes how security vulnerabilities are handled in the curl

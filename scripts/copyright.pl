@@ -135,7 +135,13 @@ sub dep5 {
     while(<F>) {
         $line++;
         if(/^Files: (.*)/i) {
-            push @files, `git ls-files $1`;
+            my @all = `git ls-files $1`;
+            if(!$all[0]) {
+                print STDERR "$1 matches no files\n";
+            }
+            else {
+                push @files, @all;
+            }
         }
         elsif(/^Copyright: (.*)/i) {
             $copy = $1;
