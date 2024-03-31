@@ -54,15 +54,19 @@
 /* for macOS and iOS targets */
 
 /* headers included in Xcode 15, so we check for the SDK versions */
+#if defined(__IPHONE_OS_VERSION_MAX_ALLOWED)
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= 170000
 #define XCODE15 1
 #endif
+#endif
 
+#if defined(__MAC_OS_X_VERSION_MAX_ALLOWED)
 #if __MAC_OS_X_VERSION_MAX_ALLOWED >= 140000
 #define XCODE15 1
 #endif
+#endif
 
-#if XCODE15
+#if defined(XCODE15)
 #include <unicode/uidna.h>
 #define HAVE_APPLE_IDN 1
 
