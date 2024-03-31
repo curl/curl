@@ -26,8 +26,10 @@
 
 /* for macOS and iOS targets */
 #if defined(__APPLE__)
+#if defined __has_include
 #if __has_include(<unicode/uidna.h>)
 #define HAVE_APPLE_IDN 1
+#endif
 #endif
 #endif
 
