@@ -19,4 +19,4 @@ Example:
 Deprecated option (added in 8.8.0).
 
 Enabled NTLM much in the style --ntlm does, but handed over the authentication
-to the separate binary ntlmauth application that was executed when needed.
+to a separate executable that was executed when needed.
