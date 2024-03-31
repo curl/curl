@@ -137,10 +137,10 @@ if test "x$OPT_RUSTLS" != xno; then
       dnl additional libs may be necessary.  Hope that we
       dnl don't need any.
       LIBS="$SSL_LIBS $LIBS"
-      USE_RUSTLS="yes"
       ssl_msg="rustls"
       AC_DEFINE(USE_RUSTLS, 1, [if rustls is enabled])
       AC_SUBST(USE_RUSTLS, [1])
+      USE_RUSTLS="yes"
       RUSTLS_ENABLED=1
       test rustls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
     else
