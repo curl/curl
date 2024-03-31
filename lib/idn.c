@@ -74,7 +74,6 @@ static CURLcode mac_idn_to_ascii(const char *in, char **out)
     }
     else {
       *out = strdup(buffer);
-      fprintf(stderr, "%s: %s\n", __FUNCTION__, *out);
       if(*out)
         return CURLE_OK;
       else
@@ -103,7 +102,6 @@ static CURLcode mac_ascii_to_idn(const char *in, char **out)
     }
     else {
       *out = strdup(buffer);
-      fprintf(stderr, "%s: %s\n", __FUNCTION__, *out);
       if(*out)
         return CURLE_OK;
       else
