@@ -11,7 +11,7 @@ SPDX-License-Identifier: curl
 ### Mailing Lists
 
 The mailing lists we have are all listed and described at
-https://curl.se/mail/
+<https://curl.se/mail/>
 
 Each mailing list is targeted to a specific set of users and subjects, please
 use the one or the ones that suit you the most.
@@ -223,8 +223,7 @@ mails to your friends. We speak plain text mails.
 
 Quote as little as possible. Just enough to provide the context you cannot
 eave out. A lengthy description can be found here:
-
-    https://www.netmeister.org/news/learn2quote.html
+<https://www.netmeister.org/news/learn2quote.html>
 
 ### Digest
 
