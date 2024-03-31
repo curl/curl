@@ -64,9 +64,7 @@ static CURLcode mac_idn_to_ascii(const char *in, char **out)
   else {
     UIDNAInfo info = UIDNA_INFO_INITIALIZER;
     char buffer[256] = {0};
-    int32_t inlength = -1; /* zero terminated */
-
-    int32_t len = uidna_nameToASCII_UTF8(idna, in, inlength, buffer,
+    int32_t len = uidna_nameToASCII_UTF8(idna, in, -1, buffer,
       sizeof(buffer), &info, &err);
     uidna_close(idna);
     if(U_FAILURE(err)) {
@@ -92,9 +90,7 @@ static CURLcode mac_ascii_to_idn(const char *in, char **out)
   else {
     UIDNAInfo info = UIDNA_INFO_INITIALIZER;
     char buffer[256] = {0};
-    int32_t inlength = -1; /* zero terminated */
-
-    int32_t len = uidna_nameToUnicodeUTF8(idna, in, inlength, buffer,
+    int32_t len = uidna_nameToUnicodeUTF8(idna, in, -1, buffer,
       sizeof(buffer), &info, &err);
     uidna_close(idna);
     if(U_FAILURE(err)) {
