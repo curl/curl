@@ -1067,12 +1067,16 @@ CURLcode Curl_creader_set_fread(struct Curl_easy *data, curl_off_t len)
 
   result = Curl_creader_create(&r, data, &cr_in, CURL_CR_CLIENT);
   if(result)
-    return result;
+    goto out;
   ctx = r->ctx;
   ctx->total_len = len;
 
   cl_reset_reader(data);
-  return do_init_reader_stack(data, r);
+  result = do_init_reader_stack(data, r);
+out:
+  CURL_TRC_READ(data, "add fread reader, len=%"CURL_FORMAT_CURL_OFF_T
+                " -> %d", len, result);
+  return result;
 }
 
 CURLcode Curl_creader_add(struct Curl_easy *data,
@@ -1293,14 +1297,18 @@ CURLcode Curl_creader_set_buf(struct Curl_easy *data,
 
   result = Curl_creader_create(&r, data, &cr_buf, CURL_CR_CLIENT);
   if(result)
-    return result;
+    goto out;
   ctx = r->ctx;
   ctx->buf = buf;
   ctx->blen = blen;
   ctx->index = 0;
 
   cl_reset_reader(data);
-  return do_init_reader_stack(data, r);
+  result = do_init_reader_stack(data, r);
+out:
+  CURL_TRC_READ(data, "add buf reader, len=%"CURL_FORMAT_CURL_OFF_T
+                " -> %d", blen, result);
+  return result;
 }
 
 curl_off_t Curl_creader_total_length(struct Curl_easy *data)
