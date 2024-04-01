@@ -2046,8 +2046,13 @@ static CURLcode set_reader(struct Curl_easy *data, Curl_HttpReq httpreq)
       else
         result = Curl_creader_set_null(data);
     }
-    else { /* we read the bytes from the callback */
-      result = Curl_creader_set_fread(data, postsize);
+    else {
+      /* we read the bytes from the callback. In case "chunked" encoding
+       * is forced by the application, we disregard `postsize`. This is
+       * a backward compatibility decision to earlier versions where
+       * chunking disregarded this. See issue #13229. */
+      bool chunked = !!Curl_checkheaders(data, STRCONST("Transfer-Encoding"));
+      result = Curl_creader_set_fread(data, chunked? -1 : postsize);
     }
     return result;
 
