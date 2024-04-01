@@ -17,7 +17,7 @@ Protocol:
 
 # NAME
 
-CURLMOPT_PIPELINING - enable HTTP pipelining and multiplexing
+CURLMOPT_PIPELINING - enable HTTP multiplexing
 
 # SYNOPSIS
 
@@ -29,8 +29,8 @@ CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_PIPELINING, long bitmask);
 
 # DESCRIPTION
 
-Pass in the correct value in the **bitmask** parameter to instruct libcurl
-to enable multiplexing for this multi handle.
+Pass in the correct value in the **bitmask** parameter to instruct libcurl to
+enable multiplexing for this multi handle.
 
 With multiplexing enabled, libcurl attempts to do multiple transfers over the
 same connection when doing parallel transfers to the same hosts.
