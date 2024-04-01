@@ -2046,8 +2046,19 @@ static CURLcode set_reader(struct Curl_easy *data, Curl_HttpReq httpreq)
       else
         result = Curl_creader_set_null(data);
     }
-    else { /* we read the bytes from the callback */
-      result = Curl_creader_set_fread(data, postsize);
+    else {
+      /* we read the bytes from the callback. In case "chunked" encoding
+       * is forced by the application, we disregard `postsize`. This is
+       * a backward compatibility decision to earlier versions where
+       * chunking disregarded this. See issue #13229. */
+      bool chunked = FALSE;
+      char *ptr = Curl_checkheaders(data, STRCONST("Transfer-Encoding"));
+      if(ptr) {
+        /* Some kind of TE is requested, check if 'chunked' is chosen */
+        chunked = Curl_compareheader(ptr, STRCONST("Transfer-Encoding:"),
+                                     STRCONST("chunked"));
+      }
+      result = Curl_creader_set_fread(data, chunked? -1 : postsize);
     }
     return result;
 
@@ -2115,6 +2126,13 @@ CURLcode Curl_http_req_set_reader(struct Curl_easy *data,
     data->req.upload_chunky =
       Curl_compareheader(ptr,
                          STRCONST("Transfer-Encoding:"), STRCONST("chunked"));
+    if(data->req.upload_chunky &&
+       Curl_use_http_1_1plus(data, data->conn) &&
+       (data->conn->httpversion >= 20)) {
+       infof(data, "suppressing chunked transfer encoding on connection "
+             "using HTTP version 2 or higher");
+       data->req.upload_chunky = FALSE;
+    }
   }
   else {
     curl_off_t req_clen = Curl_creader_total_length(data);
