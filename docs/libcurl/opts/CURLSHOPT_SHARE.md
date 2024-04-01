@@ -61,9 +61,9 @@ this share object share the connection cache.
 
 It is not supported to share connections between multiple concurrent threads.
 
-Connections that are used for HTTP/1.1 Pipelining or HTTP/2 multiplexing only
-get additional transfers added to them if the existing connection is held by
-the same multi or easy handle. libcurl does not support doing HTTP/2 streams
+Connections that are used for HTTP/2 or HTTP/3 multiplexing only get
+additional transfers added to them if the existing connection is held by the
+same multi or easy handle. libcurl does not support doing multiplexed streams
 in different threads using a shared connection.
 
 Support for **CURL_LOCK_DATA_CONNECT** was added in 7.57.0, but the symbol
