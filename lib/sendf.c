@@ -1306,8 +1306,7 @@ CURLcode Curl_creader_set_buf(struct Curl_easy *data,
   cl_reset_reader(data);
   result = do_init_reader_stack(data, r);
 out:
-  CURL_TRC_READ(data, "add buf reader, len=%"CURL_FORMAT_CURL_OFF_T
-                " -> %d", blen, result);
+  CURL_TRC_READ(data, "add buf reader, len=%zu -> %d", blen, result);
   return result;
 }
 
