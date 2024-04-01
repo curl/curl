@@ -2120,6 +2120,13 @@ CURLcode Curl_http_req_set_reader(struct Curl_easy *data,
     data->req.upload_chunky =
       Curl_compareheader(ptr,
                          STRCONST("Transfer-Encoding:"), STRCONST("chunked"));
+    if(data->req.upload_chunky &&
+       Curl_use_http_1_1plus(data, data->conn) &&
+       (data->conn->httpversion >= 20)) {
+       infof(data, "suppressing chunked transfer encoding on connection "
+             "using HTTP version 2 or higher");
+       data->req.upload_chunky = FALSE;
+    }
   }
   else {
     curl_off_t req_clen = Curl_creader_total_length(data);
