@@ -2051,7 +2051,13 @@ static CURLcode set_reader(struct Curl_easy *data, Curl_HttpReq httpreq)
        * is forced by the application, we disregard `postsize`. This is
        * a backward compatibility decision to earlier versions where
        * chunking disregarded this. See issue #13229. */
-      bool chunked = !!Curl_checkheaders(data, STRCONST("Transfer-Encoding"));
+      bool chunked = FALSE;
+      char *ptr = Curl_checkheaders(data, STRCONST("Transfer-Encoding"));
+      if(ptr) {
+        /* Some kind of TE is requested, check if 'chunked' is chosen */
+        chunked = Curl_compareheader(ptr, STRCONST("Transfer-Encoding:"),
+                                     STRCONST("chunked"));
+      }
       result = Curl_creader_set_fread(data, chunked? -1 : postsize);
     }
     return result;
