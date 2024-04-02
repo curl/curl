@@ -1301,6 +1301,28 @@ static CURLcode mbedtls_sha256sum(const unsigned char *input,
   return CURLE_OK;
 }
 
+static CURLcode mbedtls_sha1sum(const unsigned char* input,
+	size_t inputlen,
+	unsigned char* sha256sum,
+	size_t sha256len UNUSED_PARAM)
+{
+    //AMARTZ TODO:
+//	/* TODO: explain this for different mbedtls 2.x vs 3 version */
+//	(void)sha256len;
+//#if MBEDTLS_VERSION_NUMBER < 0x02070000
+//	mbedtls_sha256(input, inputlen, sha256sum, 0);
+//#else
+//	/* returns 0 on success, otherwise failure */
+//#if MBEDTLS_VERSION_NUMBER >= 0x03000000
+//	if (mbedtls_sha256(input, inputlen, sha256sum, 0) != 0)
+//#else
+//	if (mbedtls_sha256_ret(input, inputlen, sha256sum, 0) != 0)
+//#endif
+//		return CURLE_BAD_FUNCTION_ARGUMENT;
+//#endif
+	return CURLE_OK;
+}
+
 static void *mbedtls_get_internals(struct ssl_connect_data *connssl,
                                    CURLINFO info UNUSED_PARAM)
 {
@@ -1347,7 +1369,7 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   NULL,                             /* free_multi_ssl_backend_data */
   mbed_recv,                        /* recv decrypted data */
   mbed_send,                        /* send data to encrypt */
-  mbedtls_sha1sum,                  /* sha1sum */ //AMARTZ TODO:
+  mbedtls_sha1sum,                  /* sha1sum */
 };
 
 #endif /* USE_MBEDTLS */

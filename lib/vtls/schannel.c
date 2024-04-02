@@ -2735,6 +2735,16 @@ static CURLcode schannel_sha256sum(const unsigned char *input,
   return CURLE_OK;
 }
 
+static CURLcode schannel_sha1sum(const unsigned char* input,
+	size_t inputlen,
+	unsigned char* sha1sum,
+	size_t sha1len)
+{
+	schannel_checksum(input, inputlen, sha1sum, sha1len,
+		PROV_RSA_AES, CALG_SHA1);
+	return CURLE_OK;
+}
+
 static void *schannel_get_internals(struct ssl_connect_data *connssl,
                                     CURLINFO info UNUSED_PARAM)
 {
@@ -2928,7 +2938,7 @@ const struct Curl_ssl Curl_ssl_schannel = {
   schannel_free_multi_ssl_backend_data, /* free_multi_ssl_backend_data */
   schannel_recv,                     /* recv decrypted data */
   schannel_send,                     /* send data to encrypt */
-  schannel_sha1sum,                  /* sha1sum */ //AMARTZ TODO:
+  schannel_sha1sum,                  /* sha1sum */
 };
 
 #endif /* USE_SCHANNEL */

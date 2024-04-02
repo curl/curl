@@ -1221,7 +1221,7 @@ const struct Curl_ssl Curl_ssl_bearssl = {
   NULL,                            /* free_multi_ssl_backend_data */
   bearssl_recv,                    /* recv decrypted data */
   bearssl_send,                    /* send data to encrypt */
-  bearssl_sha1sum,                 /* sha1sum */ //AMARTZ TODO:
+  bearssl_sha1sum,                 /* sha1sum */
 };
 
 #endif /* USE_BEARSSL */

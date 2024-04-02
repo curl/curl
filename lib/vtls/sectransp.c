@@ -3295,6 +3295,18 @@ static CURLcode sectransp_sha256sum(const unsigned char *tmp, /* input */
   return CURLE_OK;
 }
 
+static CURLcode sectransp_sha1sum(const unsigned char* tmp, /* input */
+	size_t tmplen,
+	unsigned char* sha256sum, /* output */
+	size_t sha256len)
+{
+    //AMARTZ TODO:
+	/*(void)sha256len;
+	assert(sha256len >= CURL_SHA256_DIGEST_LENGTH);
+	(void)CC_SHA256(tmp, (CC_LONG)tmplen, sha256sum);*/
+	return CURLE_OK;
+}
+
 static bool sectransp_false_start(void)
 {
 #if CURL_BUILD_MAC_10_9 || CURL_BUILD_IOS_7
@@ -3480,7 +3492,7 @@ const struct Curl_ssl Curl_ssl_sectransp = {
   NULL,                               /* free_multi_ssl_backend_data */
   sectransp_recv,                     /* recv decrypted data */
   sectransp_send,                     /* send data to encrypt */
-  sectransp_sha1sum,                  /* sha1sum */ //AMARTZ TODO:
+  sectransp_sha1sum,                  /* sha1sum */
 };
 
 #ifdef __GNUC__

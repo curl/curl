@@ -4910,6 +4910,28 @@ static CURLcode ossl_sha256sum(const unsigned char *tmp, /* input */
 }
 #endif
 
+static CURLcode ossl_sha1sum(const unsigned char* tmp, /* input */
+	size_t tmplen,
+	unsigned char* sha1sum /* output */,
+	size_t unused)
+{
+	EVP_MD_CTX* mdctx;
+	unsigned int len = 0;
+	(void)unused;
+
+	mdctx = EVP_MD_CTX_create();
+	if (!mdctx)
+		return CURLE_OUT_OF_MEMORY;
+	if (!EVP_DigestInit(mdctx, EVP_sha1())) {
+		EVP_MD_CTX_destroy(mdctx);
+		return CURLE_FAILED_INIT;
+	}
+	EVP_DigestUpdate(mdctx, tmp, tmplen);
+	EVP_DigestFinal_ex(mdctx, sha1sum, &len);
+	EVP_MD_CTX_destroy(mdctx);
+	return CURLE_OK;
+}
+
 static bool ossl_cert_status_request(void)
 {
 #if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_TLSEXT) && \
@@ -4989,7 +5011,7 @@ const struct Curl_ssl Curl_ssl_openssl = {
   ossl_free_multi_ssl_backend_data, /* free_multi_ssl_backend_data */
   ossl_recv,                /* recv decrypted data */
   ossl_send,                /* send data to encrypt */
-  ossl_sha1sum,             /* sha1sum */ //AMARTZ TODO:
+  ossl_sha1sum,             /* sha1sum */
 };
 
 #endif /* USE_OPENSSL */

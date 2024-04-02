@@ -1624,6 +1624,19 @@ static CURLcode gtls_sha256sum(const unsigned char *tmp, /* input */
   return CURLE_OK;
 }
 
+static CURLcode gtls_sha1sum(const unsigned char* tmp, /* input */
+	size_t tmplen,
+	unsigned char* sha256sum, /* output */
+	size_t sha256len)
+{
+    //AMARTZ TODO:
+	/*struct sha256_ctx SHA256pw;
+	sha256_init(&SHA256pw);
+	sha256_update(&SHA256pw, (unsigned int)tmplen, tmp);
+	sha256_digest(&SHA256pw, (unsigned int)sha256len, sha256sum);*/
+	return CURLE_OK;
+}
+
 static bool gtls_cert_status_request(void)
 {
   return TRUE;
@@ -1674,7 +1687,7 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   NULL,                          /* free_multi_ssl_backend_data */
   gtls_recv,                     /* recv decrypted data */
   gtls_send,                     /* send data to encrypt */
-  gtls_sha1sum,                  /* sha1sum */ //AMARTZ TODO:
+  gtls_sha1sum,                  /* sha1sum */
 };
 
 #endif /* USE_GNUTLS */
