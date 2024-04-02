@@ -1300,8 +1300,9 @@ if(HAVE_FILE_OFFSET_BITS)
 endif()
 check_type_size("off_t"  SIZEOF_OFF_T)
 
-# fseeko may not exist with _FILE_OFFSET_BITS=64 but can exist with _FILE_OFFSET_BITS unset or 32 (e.g. Android ARMv7 with NDK 26b and API level < 24)
-# so we need to test fseeko after testing for _FILE_OFFSEt_BITS
+# fseeko may not exist with _FILE_OFFSET_BITS=64 but can exist with
+# _FILE_OFFSET_BITS unset or 32 (e.g. Android ARMv7 with NDK 26b and API level < 24)
+# so we need to test fseeko after testing for _FILE_OFFSET_BITS
 check_symbol_exists(fseeko         "${CURL_INCLUDES};stdio.h" HAVE_FSEEKO)
 
 if(HAVE_FSEEKO)
