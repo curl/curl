@@ -13,7 +13,7 @@ Protocol:
 
 # NAME
 
-curl_global_trace - Global libcurl logging configuration
+curl_global_trace - log configuration
 
 # SYNOPSIS
 
@@ -25,8 +25,8 @@ CURLcode curl_global_trace(const char *config);
 
 # DESCRIPTION
 
-This function configures the logging behavior, allowing to make some
-parts of curl more verbose or silent than others.
+This function configures the logging behavior, allowing to make some parts of
+curl more verbose or silent than others.
 
 This function may be called during the initialization phase of a program. It
 does not have to be. It can be called several times even, possibly overwriting
