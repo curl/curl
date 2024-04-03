@@ -129,8 +129,6 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
     curlx_dyn_init(&buf, MAX_CONFIG_LINE_LENGTH);
     DEBUGASSERT(filename);
 
-    warnf(operation->global, "read options from '%s'", filename);
-
     while(!rc && my_get_line(file, &buf, &fileerror)) {
       int res;
       bool alloced_param = FALSE;
