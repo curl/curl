@@ -31,7 +31,7 @@ import os
 import time
 import pytest
 
-from testenv import Env, CurlClient
+from testenv import Env, CurlClient, LocalClient
 
 
 log = logging.getLogger(__name__)
@@ -463,6 +463,21 @@ class TestUpload:
                                                     tofile=dfile,
                                                     n=1))
                 assert False, f'download {dfile} differs:\n{diff}'
+
+    # upload large data, let connection die while doing it
+    # issues #11769 #13260
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_07_42_upload_disconnect(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 fails here")
+        client = LocalClient(name='upload-pausing', env=env, timeout=60)
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        url = f'http://{env.domain1}:{env.http_port}/curltest/echo?id=[0-0]&die_after=10'
+        r = client.run([url])
+        r.check_exit_code(18)  # PARTIAL_FILE
 
     # speed limited on put handler
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])

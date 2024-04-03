@@ -395,6 +395,7 @@ CURLcode Curl_req_send_more(struct Curl_easy *data)
   result = req_flush(data);
   if(result == CURLE_AGAIN)
     result = CURLE_OK;
+
   return result;
 }
 
