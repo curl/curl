@@ -53,7 +53,8 @@ int test(char *URL)
   easy_setopt(c, CURLOPT_PROXY, libtest_arg2); /* set in first.c */
   easy_setopt(c, CURLOPT_URL, URL);
   easy_setopt(c, CURLOPT_USERPWD, "test:ing");
-  easy_setopt(c, CURLOPT_PROXYUSERPWD, "test:ing");
+  easy_setopt(c, CURLOPT_PROXYUSERNAME, "test%20");
+  easy_setopt(c, CURLOPT_PROXYPASSWORD, "ing%41");
   easy_setopt(c, CURLOPT_HTTPPROXYTUNNEL, 1L);
   easy_setopt(c, CURLOPT_HEADER, 1L);
   easy_setopt(c, CURLOPT_VERBOSE, 1L);
