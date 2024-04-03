@@ -30,7 +30,6 @@ MK_CA_DOCS = mk-ca-bundle.1
 CURLCONF_DOCS = curl-config.1
 endif
 
-man_MANS = curl-config.1
 CURLPAGES = curl-config.md mk-ca-bundle.md
 
 SUBDIRS = . cmdline-opts libcurl
@@ -42,7 +41,6 @@ endif
 
 EXTRA_DIST =                                    \
  $(CURLPAGES)                                   \
- $(CURLCONF_DOCS)                               \
  ALTSVC.md                                      \
  BINDINGS.md                                    \
  BUFREF.md                                      \
@@ -110,7 +108,7 @@ CD2_ = $(CD2_0)
 
 SUFFIXES = .1 .md
 
-all: $(MK_CA_DOCS)
+all: $(MK_CA_DOCS) $(CURLCONF_DOCS)
 
 .md.1:
 	$(CD2)$(CD2NROFF)
