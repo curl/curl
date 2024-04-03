@@ -48,7 +48,7 @@ environment:
       SHARED: 'ON'
       TESTING: 'OFF'
       DISABLED_TESTS: ''
-    - job_name: 'CMake, VS2022, Release, x64, OpenSSL 3, WebSockets, Unity, Build-only'
+    - job_name: 'CMake, VS2022, Release, x64, OpenSSL 1.1.1, WebSockets, Unity, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'Visual Studio 17 2022'
