@@ -52,6 +52,8 @@
 #include "hsts.h"
 #include "tftp.h"
 #include "strdup.h"
+#include "escape.h"
+
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -1593,13 +1595,24 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
 
 #ifndef CURL_DISABLE_PROXY
-  case CURLOPT_PROXYUSERPWD:
+  case CURLOPT_PROXYUSERPWD: {
     /*
      * user:password needed to use the proxy
      */
-    result = setstropt_userpwd(va_arg(param, char *),
-                               &data->set.str[STRING_PROXYUSERNAME],
-                               &data->set.str[STRING_PROXYPASSWORD]);
+    char *u = NULL;
+    char *p = NULL;
+    result = setstropt_userpwd(va_arg(param, char *), &u, &p);
+
+    /* URL decode the components */
+    if(!result && u)
+      result = Curl_urldecode(u, 0, &data->set.str[STRING_PROXYUSERNAME], NULL,
+                              REJECT_ZERO);
+    if(!result && p)
+      result = Curl_urldecode(p, 0, &data->set.str[STRING_PROXYPASSWORD], NULL,
+                              REJECT_ZERO);
+    free(u);
+    free(p);
+  }
     break;
   case CURLOPT_PROXYUSERNAME:
     /*
