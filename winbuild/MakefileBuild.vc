@@ -690,7 +690,7 @@ $(CURL_DIROBJ)\dynbuf.obj: ../lib/dynbuf.c
 $(CURL_DIROBJ)\base64.obj: ../lib/base64.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/base64.c
 $(CURL_DIROBJ)\curl.res: $(CURL_SRC_DIR)\curl.rc
-	rc $(CURL_RC_FLAGS)
+	$(RC) $(CURL_RC_FLAGS)
 
 !ENDIF  # End of case where a config was provided.
 
