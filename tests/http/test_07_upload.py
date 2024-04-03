@@ -477,7 +477,7 @@ class TestUpload:
             pytest.skip(f'example client not built: {client.name}')
         url = f'http://{env.domain1}:{env.http_port}/curltest/echo?id=[0-0]&die_after=10'
         r = client.run([url])
-        r.check_exit_code(55)
+        r.check_exit_code(18)  # PARTIAL_FILE
 
     # speed limited on put handler
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])

@@ -272,10 +272,9 @@ static CURLcode readwrite_data(struct Curl_easy *data,
         DEBUGF(infof(data, "nread == 0, stream closed, bailing"));
       else
         DEBUGF(infof(data, "nread <= 0, server closed connection, bailing"));
-      if(k->eos_written) { /* already did write this to client, leave */
-        k->keepon = 0; /* stop sending as well */
+      k->keepon = 0; /* stop sending as well */
+      if(k->eos_written) /* already did write this to client, leave */
         break;
-      }
     }
     total_received += blen;
 

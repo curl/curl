@@ -396,34 +396,6 @@ CURLcode Curl_req_send_more(struct Curl_easy *data)
   if(result == CURLE_AGAIN)
     result = CURLE_OK;
 
-  if(!result && (data->req.keepon & KEEP_SEND_PAUSE) &&
-     data->req.download_done) {
-    char tmp[1];
-    ssize_t nread;
-    CURLcode r2;
-    /* download is done, sending is PAUSED, we need to detect if the
-     * connection is still healthy and open. Since download is done, we
-     * should *not* receive more data.
-     * This is related to issues #11769 and #13260. Overall it seems a
-     * somewhat questionable design that transmits the complete response
-     * before the upload is done. */
-    r2 = Curl_xfer_recv(data, tmp, 1, &nread);
-    if(r2 == CURLE_AGAIN) {
-      /* healthy connection, continue */
-    }
-    else if(!r2) {
-      if(nread)
-        failf(data, "send paused, download done, server still sends, abort");
-      else
-        failf(data, "send paused on closed connection, abort");
-      result = CURLE_SEND_ERROR;
-    }
-    else {
-      failf(data, "send paused on errored connection, abort");
-      result = r2;
-    }
-  }
-
   return result;
 }
 

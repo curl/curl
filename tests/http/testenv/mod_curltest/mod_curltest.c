@@ -212,9 +212,16 @@ static int curltest_echo_handler(request_rec *r)
   }
 
   r->status = 200;
-  r->clength = -1;
-  r->chunked = 1;
-  apr_table_unset(r->headers_out, "Content-Length");
+  if(die_after_len >= 0) {
+    r->clength = die_after_len + 1;
+    r->chunked = 0;
+    apr_table_set(r->headers_out, "Content-Length", apr_ltoa(r->pool, (long)r->clength));
+  }
+  else {
+    r->clength = -1;
+    r->chunked = 1;
+    apr_table_unset(r->headers_out, "Content-Length");
+  }
   /* Discourage content-encodings */
   apr_table_unset(r->headers_out, "Content-Encoding");
   apr_table_setn(r->subprocess_env, "no-brotli", "1");
