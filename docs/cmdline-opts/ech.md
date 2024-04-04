@@ -16,7 +16,7 @@ Example:
 # `--ech`
 
 When multiple ``--ech`` options are supplied then the most-recent value for
-true/false/hard/grease value will be used, as will the most-recent
+true/false/hard/grease value is used, as is the most-recent
 ``ecl:\<b64string\>`` value, and ``pn:\<name\>`` value, if either of those were
 provided.
 
@@ -32,17 +32,17 @@ Send a GREASE ECH extension
 ## "true"
 
 Attempt ECH if possible, but don't fail if ECH is not attempted.
-(The connection will fail if ECH is attempted but fails.)
+(The connection fails if ECH is attempted but fails.)
 
 ## "hard"
 
-Attempt ECH and fail if that's not possible.
+Attempt ECH and fail if that is not possible.
 ECH only works with TLS 1.3 and also requires using
 DoH or providing an ECHConfigList on the command line.
 
 ## "ecl:<b64val>"
 
-A base64 encoded ECHConfigList that will be used for ECH.
+A base64 encoded ECHConfigList that is used for ECH.
 
 ## "pn:<name>"
 

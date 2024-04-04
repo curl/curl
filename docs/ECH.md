@@ -1,3 +1,8 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
 
 # Building curl with HTTPS-RR and ECH support
 
@@ -124,7 +129,7 @@ We currently support the following new curl command line arguments/options:
 
 Note that in the above "attempt ECH" means the client emitting a TLS
 ClientHello with a "real" ECH extension, but that does not mean that the
-relevant server will succeed in decrypting, as things can fail for other
+relevant server can succeed in decrypting, as things can fail for other
 reasons.
 
 ## Supplying an ECHConfigList on the command line
@@ -193,7 +198,7 @@ Note that when you use the system's curl command (rather than our ECH-enabled
 build), it is liable to warn that ``ech`` is an unknown option. If that is an
 issue (e.g. if some script re-directs stdout and stderr somewhere) then adding
 the ``silent`` line above seems to be a good enough fix. (Though of
-course, yet another script could depend on non-silent behavior, so you will have
+course, yet another script could depend on non-silent behavior, so you may have
 to figure out what you prefer yourself.) That seems to have changed with the
 latest build, previously ``silent=TRUE`` was what I used in ``~/.curlrc`` but
 now that seems to cause a problem, so that the following line(s) are ignored.
@@ -206,7 +211,7 @@ in the environment:
 ```
 
 Note that when you do that, there can be a mismatch between OpenSSL versions
-for applications that check that. A ``git push`` for example will fail so you
+for applications that check that. A ``git push`` for example fails so you
 should unset ``LD_LIBRARY_PATH`` before doing that or use a different shell.
 
 ```bash
@@ -224,7 +229,7 @@ With all that setup as above the command line gets simpler:
     ...
 ```
 
-The ``--ech true`` option is opportunistic, so will try to do ECH but will not fail if
+The ``--ech true`` option is opportunistic, so tries to do ECH but does not fail if
 the client for example cannot find any ECHConfig values. The ``--ech hard``
 option hard-fails if there is no ECHConfig found in DNS, so for now, that is not
 a good option to set as a default.
@@ -248,7 +253,7 @@ arguments which aren't described here, but should be fairly clear.
 
 As shown in the ``configure`` usage above, there are ``configure.ac`` changes
 that allow separately dis/enabling ``USE_HTTPSRR`` and ``USE_ECH``. If ``USE_ECH``
-is enabled, then ``USE_HTTPSRR`` will be forced. In both cases ``USE_DOH``
+is enabled, then ``USE_HTTPSRR`` is forced. In both cases ``USE_DOH``
 is required. (There may be some configuration conflicts available for the
 determined:-)
 

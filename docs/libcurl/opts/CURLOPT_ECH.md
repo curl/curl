@@ -32,7 +32,7 @@ The keywords supported are:
 Turns off ECH.
 ## grease
 Instructs client to emit a GREASE ECH extension.
-(The connection will fail if ECH is attempted but fails.)
+(The connection fails if ECH is attempted but fails.)
 ## true
 Instructs client to attempt ECH, if possible, but to not fail if attempting ECH is not possible.
 ## hard
@@ -43,7 +43,7 @@ ECHConfigList that is used for ECH rather than attempting to download such a val
 the DNS.
 ## pn:\<name\>
 If the string starts with "pn:" then the remainder of the string should be a DNS/hostname
-that is used to over-ride the public_name field of the ECHConfigList that will be used
+that is used to over-ride the public_name field of the ECHConfigList that is used
 for ECH.
 
 # DEFAULT
