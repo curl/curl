@@ -167,6 +167,9 @@ jobs:
 
       - uses: actions/checkout@v4
 
+      - run: rm -f $HOME/.curlrc
+        name: remove $HOME/.curlrc
+
       - run: autoreconf -fi
         name: 'autoreconf'
 
