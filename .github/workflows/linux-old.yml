@@ -83,7 +83,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake -DCMAKE_UNITY_BUILD=ON -DBUILD_SHARED_LIBS=ON -DENABLE_ARES=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH=ON -DCURL_USE_GSSAPI=ON ..
+          cmake -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON -DENABLE_ARES=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH=ON -DCURL_USE_GSSAPI=ON ..
 
       - name: 'build'
         run: make -C build
