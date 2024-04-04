@@ -82,6 +82,17 @@
 #include <openssl/tls1.h>
 #include <openssl/evp.h>
 
+#ifdef USE_ECH
+# ifndef OPENSSL_IS_BORINGSSL
+#  include <openssl/ech.h>
+# endif
+# include "curl_base64.h"
+# define ECH_ENABLED(__data__) \
+    (__data__->set.tls_ech && \
+     !(__data__->set.tls_ech & CURLECH_DISABLE)\
+    )
+#endif /* USE_ECH */
+
 #if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_OCSP)
 #include <openssl/ocsp.h>
 #endif
@@ -3508,6 +3519,9 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   const char * const ssl_cert_type = ssl_config->cert_type;
   const bool verifypeer = conn_config->verifypeer;
   char error_buffer[256];
+#ifdef USE_ECH
+  struct ssl_connect_data *connssl = cf->ctx;
+#endif
 
   /* Make funny stuff to get random input */
   result = ossl_seed(data);
@@ -3843,6 +3857,135 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
+
+#ifdef USE_ECH
+  if(ECH_ENABLED(data)) {
+    unsigned char *ech_config = NULL;
+    size_t ech_config_len = 0;
+    char *outername = data->set.str[STRING_ECH_PUBLIC];
+    int trying_ech_now = 0;
+
+    if(data->set.tls_ech & CURLECH_GREASE) {
+      infof(data, "ECH: will GREASE ClientHello");
+# ifdef OPENSSL_IS_BORINGSSL
+      SSL_set_enable_ech_grease(octx->ssl, 1);
+# else
+      SSL_set_options(octx->ssl, SSL_OP_ECH_GREASE);
+# endif
+    }
+    else if(data->set.tls_ech & CURLECH_CLA_CFG) {
+# ifdef OPENSSL_IS_BORINGSSL
+      /* have to do base64 decode here for boring */
+      const char *b64 = data->set.str[STRING_ECH_CONFIG];
+
+      if(!b64) {
+        infof(data, "ECH: ECHConfig from command line empty");
+        return CURLE_SSL_CONNECT_ERROR;
+      }
+      ech_config_len = 2 * strlen(b64);
+      result = Curl_base64_decode(b64, &ech_config, &ech_config_len);
+      if(result || !ech_config) {
+        infof(data, "ECH: can't base64 decode ECHConfig from command line");
+        if(data->set.tls_ech & CURLECH_HARD)
+          return result;
+      }
+      if(SSL_set1_ech_config_list(octx->ssl, ech_config,
+                                  ech_config_len) != 1) {
+        infof(data, "ECH: SSL_ECH_set1_echconfig failed");
+        if(data->set.tls_ech & CURLECH_HARD) {
+          free(ech_config);
+          return CURLE_SSL_CONNECT_ERROR;
+        }
+      }
+      free(ech_config);
+      trying_ech_now = 1;
+# else
+      ech_config = (unsigned char *) data->set.str[STRING_ECH_CONFIG];
+      if(!ech_config) {
+        infof(data, "ECH: ECHConfig from command line empty");
+        return CURLE_SSL_CONNECT_ERROR;
+      }
+      ech_config_len = strlen(data->set.str[STRING_ECH_CONFIG]);
+      if(SSL_ech_set1_echconfig(octx->ssl, ech_config, ech_config_len) != 1) {
+        infof(data, "ECH: SSL_ECH_set1_echconfig failed");
+        if(data->set.tls_ech & CURLECH_HARD)
+          return CURLE_SSL_CONNECT_ERROR;
+      }
+      else
+        trying_ech_now = 1;
+# endif
+      infof(data, "ECH: ECHConfig from command line");
+    }
+    else {
+      struct Curl_dns_entry *dns = NULL;
+
+      dns = Curl_fetch_addr(data, connssl->peer.hostname, connssl->peer.port);
+      if(!dns) {
+        infof(data, "ECH: requested but no DNS info available");
+        if(data->set.tls_ech & CURLECH_HARD)
+          return CURLE_SSL_CONNECT_ERROR;
+      }
+      else {
+        struct Curl_https_rrinfo *rinfo = NULL;
+
+        rinfo = dns->hinfo;
+        if(rinfo && rinfo->echconfiglist) {
+          unsigned char *ecl = rinfo->echconfiglist;
+          size_t elen = rinfo->echconfiglist_len;
+
+          infof(data, "ECH: ECHConfig from DoH HTTPS RR");
+# ifndef OPENSSL_IS_BORINGSSL
+          if(SSL_ech_set1_echconfig(octx->ssl, ecl, elen) != 1) {
+            infof(data, "ECH: SSL_ECH_set1_echconfig failed");
+            if(data->set.tls_ech & CURLECH_HARD)
+              return CURLE_SSL_CONNECT_ERROR;
+          }
+# else
+          if(SSL_set1_ech_config_list(octx->ssl, ecl, elen) != 1) {
+            infof(data, "ECH: SSL_set1_ech_config_list failed (boring)");
+            if(data->set.tls_ech & CURLECH_HARD)
+              return CURLE_SSL_CONNECT_ERROR;
+          }
+# endif
+          else {
+            trying_ech_now = 1;
+            infof(data, "ECH: imported ECHConfigList of length %ld", elen);
+          }
+        }
+        else {
+          infof(data, "ECH: requested but no ECHConfig available");
+          if(data->set.tls_ech & CURLECH_HARD)
+            return CURLE_SSL_CONNECT_ERROR;
+        }
+        Curl_resolv_unlock(data, dns);
+      }
+    }
+# ifdef OPENSSL_IS_BORINGSSL
+    if(trying_ech_now && outername) {
+      infof(data, "ECH: setting public_name not supported with boringssl");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+# else
+    if(trying_ech_now && outername) {
+      infof(data, "ECH: inner: '%s', outer: '%s'",
+            connssl->peer.hostname, outername);
+      result = SSL_ech_set_server_names(octx->ssl,
+                                        connssl->peer.hostname, outername,
+                                        0 /* do send outer */);
+      if(result != 1) {
+        infof(data, "ECH: rv failed to set server name(s) %d [ERROR]", result);
+        return CURLE_SSL_CONNECT_ERROR;
+      }
+    }
+# endif  /* not BORING */
+    if(trying_ech_now
+       && SSL_set_min_proto_version(octx->ssl, TLS1_3_VERSION) != 1) {
+      infof(data, "ECH: Can't force TLSv1.3 [ERROR]");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+  }
+#endif  /* USE_ECH */
+
 #endif
 
   octx->reused_session = FALSE;
@@ -3925,6 +4068,70 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
   connssl->connecting_state = ssl_connect_2;
   return CURLE_OK;
 }
+
+#ifdef USE_ECH
+/* If we have retry configs, then trace those out */
+static void ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL* ssl,
+                                         int reason)
+{
+  CURLcode result = CURLE_OK;
+  size_t rcl = 0;
+  int rv = 1;
+# ifndef OPENSSL_IS_BORINGSSL
+  char *inner = NULL;
+  unsigned char *rcs = NULL;
+  char *outer = NULL;
+# else
+  const char *inner = NULL;
+  const uint8_t *rcs = NULL;
+  const char *outer = NULL;
+  size_t out_name_len = 0;
+  int servername_type = 0;
+# endif
+
+  /* nothing to trace if not doing ECH */
+  if(!ECH_ENABLED(data))
+    return;
+# ifndef OPENSSL_IS_BORINGSSL
+  rv = SSL_ech_get_retry_config(ssl, &rcs, &rcl);
+# else
+  SSL_get0_ech_retry_configs(ssl, &rcs, &rcl);
+  rv = (int)rcl;
+# endif
+
+  if(rv && rcs) {
+# define HEXSTR_MAX 800
+    char *b64str = NULL;
+    size_t blen = 0;
+
+    result = Curl_base64_encode((const char *)rcs, rcl,
+                                &b64str, &blen);
+    if(!result && b64str)
+      infof(data, "ECH: retry_configs %s", b64str);
+    free(b64str);
+# ifndef OPENSSL_IS_BORINGSSL
+    rv = SSL_ech_get_status(ssl, &inner, &outer);
+    infof(data, "ECH: retry_configs for %s from %s, %d %d",
+          inner ? inner : "NULL", outer ? outer : "NULL", reason, rv);
+#else
+    rv = SSL_ech_accepted(ssl);
+    servername_type = SSL_get_servername_type(ssl);
+    inner = SSL_get_servername(ssl, servername_type);
+    SSL_get0_ech_name_override(ssl, &outer, &out_name_len);
+    /* TODO: get the inner from boring */
+    infof(data, "ECH: retry_configs for %s from %s, %d %d",
+          inner ? inner : "NULL", outer ? outer : "NULL", reason, rv);
+#endif
+  }
+  else
+    infof(data, "ECH: no retry_configs (rv = %d)", rv);
+# ifndef OPENSSL_IS_BORINGSSL
+  OPENSSL_free((void *)rcs);
+# endif
+  return;
+}
+
+#endif
 
 static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
                                    struct Curl_easy *data)
@@ -4039,6 +4246,21 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
         ossl_strerror(errdetail, error_buffer, sizeof(error_buffer));
       }
 #endif
+#ifdef USE_ECH
+      else if((lib == ERR_LIB_SSL) &&
+# ifndef OPENSSL_IS_BORINGSSL
+              (reason == SSL_R_ECH_REQUIRED)) {
+# else
+              (reason == SSL_R_ECH_REJECTED)) {
+# endif
+
+        /* trace retry_configs if we got some */
+        ossl_trace_ech_retry_configs(data, octx->ssl, reason);
+
+        result = CURLE_ECH_REQUIRED;
+        ossl_strerror(errdetail, error_buffer, sizeof(error_buffer));
+      }
+#endif
       else {
         result = CURLE_SSL_CONNECT_ERROR;
         ossl_strerror(errdetail, error_buffer, sizeof(error_buffer));
@@ -4091,6 +4313,68 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
           SSL_get_cipher(octx->ssl),
           negotiated_group_name? negotiated_group_name : "[blank]",
           OBJ_nid2sn(psigtype_nid));
+
+#ifdef USE_ECH
+# ifndef OPENSSL_IS_BORINGSSL
+    if(ECH_ENABLED(data)) {
+      char *inner = NULL, *outer = NULL;
+      const char *status = NULL;
+      int rv;
+
+      rv = SSL_ech_get_status(octx->ssl, &inner, &outer);
+      switch(rv) {
+      case SSL_ECH_STATUS_SUCCESS:
+        status = "succeeded";
+        break;
+      case SSL_ECH_STATUS_GREASE_ECH:
+        status = "sent GREASE, got retry-configs";
+        break;
+      case SSL_ECH_STATUS_GREASE:
+        status = "sent GREASE";
+        break;
+      case SSL_ECH_STATUS_NOT_TRIED:
+        status = "not attempted";
+        break;
+      case SSL_ECH_STATUS_NOT_CONFIGURED:
+        status = "not configured";
+        break;
+      case SSL_ECH_STATUS_BACKEND:
+        status = "backend (unexpected)";
+        break;
+      case SSL_ECH_STATUS_FAILED:
+        status = "failed";
+        break;
+      case SSL_ECH_STATUS_BAD_CALL:
+        status = "bad call (unexpected)";
+        break;
+      case SSL_ECH_STATUS_BAD_NAME:
+        status = "bad name (unexpected)";
+        break;
+      default:
+        status = "unexpected status";
+        infof(data, "ECH: unexpected status %d",rv);
+      }
+      infof(data, "ECH: result: status is %s, inner is %s, outer is %s",
+             (status?status:"NULL"),
+             (inner?inner:"NULL"),
+             (outer?outer:"NULL"));
+      OPENSSL_free(inner);
+      OPENSSL_free(outer);
+      if(rv == SSL_ECH_STATUS_GREASE_ECH) {
+        /* trace retry_configs if we got some */
+        ossl_trace_ech_retry_configs(data, octx->ssl, 0);
+      }
+      if(rv != SSL_ECH_STATUS_SUCCESS
+         && data->set.tls_ech & CURLECH_HARD) {
+        infof(data, "ECH: ech-hard failed");
+        return CURLE_SSL_CONNECT_ERROR;
+      }
+   }
+   else {
+      infof(data, "ECH: result: status is not attempted");
+   }
+# endif  /* BORING */
+#endif  /* USE_ECH */
 
 #ifdef HAS_ALPN
     /* Sets data and len to negotiated protocol, len is 0 if no protocol was

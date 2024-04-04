@@ -55,6 +55,15 @@
 
 struct curl_trc_featt;
 
+#ifdef USE_ECH
+/* CURLECH_ bits for the tls_ech option */
+# define CURLECH_DISABLE    (1<<0)
+# define CURLECH_GREASE     (1<<1)
+# define CURLECH_ENABLE     (1<<2)
+# define CURLECH_HARD       (1<<3)
+# define CURLECH_CLA_CFG    (1<<4)
+#endif
+
 #ifdef USE_WEBSOCKETS
 /* CURLPROTO_GOPHERS (29) is the highest publicly used protocol bit number,
  * the rest are internal information. If we use higher bits we only do this on
@@ -627,6 +636,9 @@ enum doh_slots {
   DOH_PROBE_SLOT_IPADDR_V6 = 1, /* 'V6' likewise */
 
   /* Space here for (possibly build-specific) additional slot definitions */
+#ifdef USE_HTTPSRR
+  DOH_PROBE_SLOT_HTTPS = 2,     /* for HTTPS RR */
+#endif
 
   /* for example */
   /* #ifdef WANT_DOH_FOOBAR_TXT */
@@ -1532,6 +1544,8 @@ enum dupstring {
 #ifndef CURL_DISABLE_PROXY
   STRING_HAPROXY_CLIENT_IP,     /* CURLOPT_HAPROXY_CLIENT_IP */
 #endif
+  STRING_ECH_CONFIG,            /* CURLOPT_ECH_CONFIG */
+  STRING_ECH_PUBLIC,            /* CURLOPT_ECH_PUBLIC */
 
   /* -- end of null-terminated strings -- */
 
@@ -1858,6 +1872,9 @@ struct UserDefined {
   BIT(http09_allowed); /* allow HTTP/0.9 responses */
 #ifdef USE_WEBSOCKETS
   BIT(ws_raw_mode);
+#endif
+#ifdef USE_ECH
+  int tls_ech;      /* TLS ECH configuration  */
 #endif
 };
 
