@@ -4,26 +4,38 @@ curl and libcurl 8.7.2
  Command line options:         258
  curl_easy_setopt() options:   304
  Public functions in libcurl:  93
- Contributors:                 3137
+ Contributors:                 3139
 
 This release includes the following changes:
 
 
 This release includes the following bugfixes:
 
+ o appveyor: OpenSSL 3 no longer found by CMake, revert to 1.1.1 [26]
+ o cd2nroff/manage: use UTC when SOURCE_DATE_EPOCH is set [36]
  o cf-socket: remove references to l_ip, l_port [9]
+ o cmake: generate misc manpages and install `mk-ca-bundle.pl` [24]
+ o cmake: speed up libcurl doc building again [15]
+ o cmake: tidy-up to use `WORKING_DIRECTORY` [23]
  o cmdline-docs: fix make install with configure --disable-docs [1]
  o configure: make --disable-docs imply --disable-manual [2]
  o content_encoding: brotli and others, pass through 0-length writes [5]
  o curl-confopts.m4: define CARES_NO_DEPRECATED when c-ares is used [17]
  o curl: make --help adapt to the terminal width [11]
  o curl: use curl_getenv instead of the curlx_ version [20]
+ o curl_global_trace.md: shorten the description [29]
  o curl_sha512_255: fix detection of OpenSSL 1.1.1 or later [8]
  o curl_sha512_256: do not use workaround for NetBSD when not needed [21]
+ o dist: remove the curl-config.1 from the tarball [28]
  o docs/MAIL-ETIQUETTE: convert to markdown [12]
+ o http: with chunked POST forced, disable length check on read callback [31]
  o idn: make Curl_idnconvert_hostname() use Curl_idn_decode() [16]
+ o INSTALL-CMAKE.md: explain `cmake -G <generator-name>` [32]
+ o libcurl-opts: mention pipelining less [33]
  o libssh2: set length to 0 if strdup failed [6]
  o m4: fix rustls pkg-config codepath [22]
+ o m4: reposition USE_RUSTLS="yes" for pkg-config [34]
+ o maketgz: put docs/RELEASE-TOOL.md into the tarball [35]
  o openldap: create ldap URLs correctly for IPv6 addresses [19]
  o openssl: do not set SSL_MODE_RELEASE_BUFFERS [10]
  o RELEASE-PROCEDURE: mention an initial working build [7]
@@ -32,6 +44,8 @@ This release includes the following bugfixes:
  o tool_xattr: "guess" URL scheme if none is provided [3]
  o tool_xattr: in debug builds, act normally if CURL_FAKE_XATTR is not set [4]
  o vquic: use CURL_FORMAT_CURL_OFF_T for 64 bit printf output [18]
+ o winbuild: use $(RC) correctly [27]
+ o wolfssl: plug memory leak in wolfssl_connect_step2() [25]
 
 This release includes the following known bugs:
 
@@ -46,12 +60,14 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Chris Webb, Dagfinn Ilmari Mannsåker, Daniel McCarney, Daniel Stenberg,
-  Emanuele Torre, Evgeny Grin (Karlson2k), Harry Sintonen,
-  Keitagit-kun on github, kpcyrd on github, Matt Jolly, Michael Kaufmann,
-  Paul Howarth, riastradh on github, Robert Moreton, Sanjay Pujare,
-  Sergio Durigan Junior, Stefan Eissing, Tobias Stoeckmann
-  (18 contributors)
+  Carlos Henrique Lima Melara, Chris Webb, Dagfinn Ilmari Mannsåker,
+  Dan Fandrich, Daniel McCarney, Daniel Stenberg, Emanuele Torre,
+  Evgeny Grin (Karlson2k), Fabian Keil, Harry Sintonen, hongfei.li, Jeff King,
+  kalvdans on github, Keitagit-kun on github, kpcyrd on github, Matt Jolly,
+  Michael Kaufmann, Paul Howarth, Ray Satiro, riastradh on github,
+  Robert Moreton, Sanjay Pujare, Sergio Durigan Junior, Stefan Eissing,
+  Tobias Stoeckmann, Viktor Szakats
+  (26 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -69,6 +85,7 @@ References to bug reports and discussions on issues:
  [12] = https://curl.se/bug/?i=13247
  [13] = https://curl.se/bug/?i=13245
  [14] = https://curl.se/bug/?i=13214
+ [15] = https://curl.se/bug/?i=13207
  [16] = https://curl.se/bug/?i=13236
  [17] = https://curl.se/bug/?i=13240
  [18] = https://curl.se/bug/?i=13224
@@ -76,3 +93,16 @@ References to bug reports and discussions on issues:
  [20] = https://curl.se/bug/?i=13230
  [21] = https://curl.se/bug/?i=13225
  [22] = https://curl.se/bug/?i=13200
+ [23] = https://curl.se/bug/?i=13206
+ [24] = https://curl.se/bug/?i=13197
+ [25] = https://curl.se/bug/?i=13272
+ [26] = https://curl.se/bug/?i=13266
+ [27] = https://curl.se/bug/?i=13267
+ [28] = https://curl.se/bug/?i=13268
+ [29] = https://curl.se/bug/?i=13263
+ [31] = https://curl.se/bug/?i=13229
+ [32] = https://curl.se/bug/?i=13244
+ [33] = https://curl.se/bug/?i=13254
+ [34] = https://curl.se/bug/?i=13248
+ [35] = https://curl.se/bug/?i=13239
+ [36] = https://curl.se/bug/?i=13242
