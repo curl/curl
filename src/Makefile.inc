@@ -67,6 +67,7 @@ CURL_CFILES = \
   tool_cb_prg.c \
   tool_cb_rea.c \
   tool_cb_see.c \
+  tool_cb_soc.c \
   tool_cb_wrt.c \
   tool_cfgable.c \
   tool_dirhie.c \
@@ -112,6 +113,7 @@ CURL_HFILES = \
   tool_cb_prg.h \
   tool_cb_rea.h \
   tool_cb_see.h \
+  tool_cb_soc.h \
   tool_cb_wrt.h \
   tool_cfgable.h \
   tool_dirhie.h \

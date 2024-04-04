@@ -508,6 +508,7 @@ monospace
 MorphOS
 MPE
 MPL
+MPTCP
 mprintf
 MQTT
 mqtt
@@ -528,6 +529,7 @@ mTLS
 MUA
 multicwd
 multiparts
+multipath
 MultiSSL
 mumbo
 musedev
