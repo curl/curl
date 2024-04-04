@@ -26,6 +26,8 @@
 #
 ###########################################################################
 
+export TZ=UTC
+
 version=$1
 
 if [ -z "$version" ]; then
@@ -78,7 +80,8 @@ if test -z "$only"; then
 fi
 
 # requires a date command that knows + for format
-datestamp=`date +"%F"`
+timestamp=${SOURCE_DATE_EPOCH:-`date +"%s"`}
+datestamp=`date -d @$timestamp +"%F"`
 
 # Replace version number in header file:
 sed -i.bak \
