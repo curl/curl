@@ -141,7 +141,7 @@ jobs:
 
       - uses: actions/checkout@v4
 
-      - run: cmake -Bbuild -DOPENSSL_ROOT_DIR=$HOME/awslc -DBUILD_SHARED_LIBS=ON -DCURL_WERROR=ON .
+      - run: cmake -Bbuild -DCMAKE_UNITY_BUILD=ON -DOPENSSL_ROOT_DIR=$HOME/awslc -DBUILD_SHARED_LIBS=ON -DCURL_WERROR=ON .
         name: 'cmake generate out-of-tree'
 
       - run: cmake --build build --parallel
