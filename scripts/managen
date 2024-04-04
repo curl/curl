@@ -59,15 +59,6 @@ my $year = strftime "%Y", @ts;
 my $version = "unknown";
 my $globals;
 
-open(INC, "<../../include/curl/curlver.h");
-while(<INC>) {
-    if($_ =~ /^#define LIBCURL_VERSION \"([0-9.]*)/) {
-        $version = $1;
-        last;
-    }
-}
-close(INC);
-
 # get the long name version, return the man page string
 sub manpageify {
     my ($k)=@_;
@@ -448,10 +439,10 @@ sub render {
 }
 
 sub single {
-    my ($manpage, $f, $standalone)=@_;
+    my ($dir, $manpage, $f, $standalone)=@_;
     my $fh;
-    open($fh, "<:crlf", "$f") ||
-        return 1;
+    open($fh, "<:crlf", "$dir/$f") ||
+        die "could not find $dir/$f";
     my $short;
     my $long;
     my $tags;
@@ -781,8 +772,10 @@ sub single {
 }
 
 sub getshortlong {
-    my ($f)=@_;
-    open(F, "<:crlf", "$f");
+    my ($dir, $f)=@_;
+    $f =~ s/^.*\///;
+    open(F, "<:crlf", "$dir/$f") ||
+        die "could not find $dir/$f";
     my $short;
     my $long;
     my $help;
@@ -833,16 +826,17 @@ sub getshortlong {
 }
 
 sub indexoptions {
-    my (@files) = @_;
+    my ($dir, @files) = @_;
     foreach my $f (@files) {
-        getshortlong($f);
+        getshortlong($dir, $f);
     }
 }
 
 sub header {
-    my ($manpage, $f)=@_;
+    my ($dir, $manpage, $f)=@_;
     my $fh;
-    open($fh, "<:crlf", "$f");
+    open($fh, "<:crlf", "$dir/$f") ||
+        die "could not find $dir/$f";
     my @d = render($manpage, $fh, $f, 1);
     close($fh);
     printdesc($manpage, 0, @d);
@@ -952,13 +946,13 @@ sub listcats {
 }
 
 sub listglobals {
-    my (@files) = @_;
+    my ($dir, @files) = @_;
     my @globalopts;
 
     # Find all global options and output them
     foreach my $f (sort @files) {
-        open(F, "<:crlf", "$f") ||
-            next;
+        open(F, "<:crlf", "$dir/$f") ||
+            die "could not read $dir/$f";
         my $long;
         my $start = 0;
         while(<F>) {
@@ -999,12 +993,12 @@ sub sortnames {
 }
 
 sub mainpage {
-    my ($manpage, @files) = @_;
+    my ($dir, $manpage, @files) = @_;
     # $manpage is 1 for nroff, 0 for ASCII
     my $ret;
     my $fh;
-    open($fh, "<:crlf", "mainpage.idx") ||
-        return 1;
+    open($fh, "<:crlf", "$dir/mainpage.idx") ||
+        die "no $dir/mainpage.idx file";
 
     print <<HEADER
 .\\" **************************************************************************
@@ -1047,12 +1041,12 @@ HEADER
         if(/^%options/) {
             # output docs for all options
             foreach my $f (sort sortnames @files) {
-                $ret += single($manpage, $f, 0);
+                $ret += single($dir, $manpage, $f, 0);
             }
         }
         else {
             # render the file
-            header($manpage, $f);
+            header($dir, $manpage, $f);
         }
     }
     close($fh);
@@ -1080,15 +1074,15 @@ sub showprotocols {
 }
 
 sub getargs {
-    my ($f, @s) = @_;
+    my ($dir, $f, @s) = @_;
     if($f eq "mainpage") {
-        listglobals(@s);
-        mainpage(1, @s);
+        listglobals($dir, @s);
+        mainpage($dir, 1, @s);
         return;
     }
     elsif($f eq "ascii") {
-        listglobals(@s);
-        mainpage(0, @s);
+        listglobals($dir, @s);
+        mainpage($dir, 0, @s);
         return;
     }
     elsif($f eq "listhelp") {
@@ -1108,15 +1102,42 @@ sub getargs {
         return;
     }
 
-    print "Usage: managen <mainpage/ascii/listhelp/single FILE/protos/listcats> [files]\n";
+    print "Usage: managen ".
+        "[-d dir] <mainpage/ascii/listhelp/single FILE/protos/listcats> [files]\n";
 }
 
 #------------------------------------------------------------------------
 
+my $dir = ".";
+my $include = "../../include";
 my $cmd = shift @ARGV;
+
+ check:
+if($cmd eq "-d") {
+    # specifies source directory
+    $dir = shift @ARGV;
+    $cmd = shift @ARGV;
+    goto check;
+}
+elsif($cmd eq "-I") {
+    # include path root
+    $include = shift @ARGV;
+    $cmd = shift @ARGV;
+    goto check;
+}
+
 my @files = @ARGV; # the rest are the files
 
-# learn all existing options
-indexoptions(@files);
+open(INC, "<$include/curl/curlver.h");
+while(<INC>) {
+    if($_ =~ /^#define LIBCURL_VERSION \"([0-9.]*)/) {
+        $version = $1;
+        last;
+    }
+}
+close(INC);
 
-getargs($cmd, @files);
+# learn all existing options
+indexoptions($dir, @files);
+
+getargs($dir, $cmd, @files);
