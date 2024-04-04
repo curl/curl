@@ -25,7 +25,10 @@ include(CheckCCompilerFlag)
 
 unset(WPICKY)
 
-if(CURL_WERROR AND CMAKE_COMPILER_IS_GNUCC AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0)
+if(CURL_WERROR AND
+   CMAKE_COMPILER_IS_GNUCC AND
+   NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0 AND
+   NOT CMAKE_VERSION VERSION_LESS 3.23.0)  # check_symbol_exists() incompatible with GCC -pedantic-errors in earlier CMake versions
   set(WPICKY "${WPICKY} -pedantic-errors")
 endif()
 
