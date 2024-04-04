@@ -42,8 +42,12 @@
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
+#include "escape.h"
 
 #define DNS_CLASS_IN 0x01
+
+/* local_print_buf truncates if the hex string will be more than this */
+#define LOCAL_PB_HEXMAX 400
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 static const char * const errors[]={
@@ -186,6 +190,26 @@ doh_write_cb(const void *contents, size_t size, size_t nmemb, void *userp)
 
   return realsize;
 }
+
+#if defined(USE_HTTPSRR) && defined(CURLDEBUG)
+static void local_print_buf(struct Curl_easy *data,
+                            const char *prefix,
+                            unsigned char *buf, size_t len)
+{
+  unsigned char hexstr[LOCAL_PB_HEXMAX];
+  size_t hlen = LOCAL_PB_HEXMAX;
+  bool truncated = false;
+
+  if(len > (LOCAL_PB_HEXMAX / 2))
+    truncated = true;
+  Curl_hexencode(buf, len, hexstr, hlen);
+  if(!truncated)
+    infof(data, "%s: len=%d, val=%s", prefix, (int)len, hexstr);
+  else
+    infof(data, "%s: len=%d (truncated)val=%s", prefix, (int)len, hexstr);
+  return;
+}
+#endif
 
 /* called from multi.c when this DoH transfer is complete */
 static int doh_done(struct Curl_easy *doh, CURLcode result)
@@ -379,6 +403,12 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
   int slot;
   struct dohdata *dohp;
   struct connectdata *conn = data->conn;
+#ifdef USE_HTTPSRR
+  /* for now, this is only used when ECH is enabled */
+# ifdef USE_ECH
+  char *qname = NULL;
+# endif
+#endif
   *waitp = FALSE;
   (void)hostname;
   (void)port;
@@ -418,6 +448,37 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
       goto error;
     dohp->pending++;
   }
+#endif
+
+#ifdef USE_HTTPSRR
+  /*
+   * TODO: Figure out the conditions under which we want to make
+   * a request for an HTTPS RR when we are not doing ECH. For now,
+   * making this request breaks a bunch of DoH tests, e.g. test2100,
+   * where the addiitonal request doesn't match the pre-cooked data
+   * files, so there's a bit of work attached to making the request
+   * in a non-ECH use-case. For the present, we'll only make the
+   * request when ECH is enabled in the build and is being used for
+   * the curl operation.
+   */
+# ifdef USE_ECH
+  if(data->set.tls_ech & (1 << CURLECH_ENABLE)
+     || data->set.tls_ech & (1 << CURLECH_HARD)) {
+    if(port == 443)
+      qname = strdup(hostname);
+    else
+      qname = aprintf("_%d._https.%s", port, hostname);
+    if(!qname)
+      goto error;
+    result = dohprobe(data, &dohp->probe[DOH_PROBE_SLOT_HTTPS],
+                      DNS_TYPE_HTTPS, qname, data->set.str[STRING_DOH],
+                      data->multi, dohp->headers);
+    free(qname);
+    if(result)
+      goto error;
+    dohp->pending++;
+  }
+# endif
 #endif
   *waitp = TRUE; /* this never returns synchronously */
   return NULL;
@@ -501,6 +562,25 @@ static DOHcode store_aaaa(const unsigned char *doh,
   return DOH_OK;
 }
 
+#ifdef USE_HTTPSRR
+static DOHcode store_https(const unsigned char *doh,
+                           int index,
+                           struct dohentry *d,
+                           uint16_t len)
+{
+  /* silently ignore RRs over the limit */
+  if(d->numhttps_rrs < DOH_MAX_HTTPS) {
+    struct dohhttps_rr *h = &d->https_rrs[d->numhttps_rrs];
+    h->val = Curl_memdup(&doh[index], len);
+    if(!h->val)
+      return DOH_OUT_OF_MEM;
+    h->len = len;
+    d->numhttps_rrs++;
+  }
+  return DOH_OK;
+}
+#endif
+
 static DOHcode store_cname(const unsigned char *doh,
                            size_t dohlen,
                            unsigned int index,
@@ -563,7 +643,8 @@ static DOHcode rdata(const unsigned char *doh,
   /* RDATA
      - A (TYPE 1):  4 bytes
      - AAAA (TYPE 28): 16 bytes
-     - NS (TYPE 2): N bytes */
+     - NS (TYPE 2): N bytes
+     - HTTPS (TYPE 65): N bytes */
   DOHcode rc;
 
   switch(type) {
@@ -581,6 +662,13 @@ static DOHcode rdata(const unsigned char *doh,
     if(rc)
       return rc;
     break;
+#ifdef USE_HTTPSRR
+  case DNS_TYPE_HTTPS:
+    rc = store_https(doh, index, d, rdlength);
+    if(rc)
+      return rc;
+    break;
+#endif
   case DNS_TYPE_CNAME:
     rc = store_cname(doh, dohlen, index, d);
     if(rc)
@@ -737,7 +825,11 @@ UNITTEST DOHcode doh_decode(const unsigned char *doh,
   if(index != dohlen)
     return DOH_DNS_MALFORMAT; /* something is wrong */
 
+#ifdef USE_HTTTPS
+  if((type != DNS_TYPE_NS) && !d->numcname && !d->numaddr && !d->numhttps_rrs)
+#else
   if((type != DNS_TYPE_NS) && !d->numcname && !d->numaddr)
+#endif
     /* nothing stored! */
     return DOH_NO_CONTENT;
 
@@ -776,6 +868,16 @@ static void showdoh(struct Curl_easy *data,
       infof(data, "%s", buffer);
     }
   }
+#ifdef USE_HTTPSRR
+  for(i = 0; i < d->numhttps_rrs; i++) {
+# ifdef CURLDEBUG
+    local_print_buf(data, "DoH HTTPS",
+                    d->https_rrs[i].val, d->https_rrs[i].len);
+# else
+    infof(data, "DoH HTTPS RR: length %d", d->https_rrs[i].len);
+# endif
+  }
+#endif
   for(i = 0; i < d->numcname; i++) {
     infof(data, "CNAME: %s", Curl_dyn_ptr(&d->cname[i]));
   }
@@ -895,7 +997,18 @@ static CURLcode doh2ai(const struct dohentry *de, const char *hostname,
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 static const char *type2name(DNStype dnstype)
 {
-  return (dnstype == DNS_TYPE_A)?"A":"AAAA";
+  switch(dnstype) {
+    case DNS_TYPE_A:
+      return "A";
+    case DNS_TYPE_AAAA:
+      return "AAAA";
+#ifdef USE_HTTPSRR
+    case DNS_TYPE_HTTPS:
+      return "HTTPS";
+#endif
+    default:
+       return "unknown";
+  }
 }
 #endif
 
@@ -905,7 +1018,281 @@ UNITTEST void de_cleanup(struct dohentry *d)
   for(i = 0; i < d->numcname; i++) {
     Curl_dyn_free(&d->cname[i]);
   }
+#ifdef USE_HTTPSRR
+  for(i = 0; i < d->numhttps_rrs; i++)
+    free(d->https_rrs[i].val);
+#endif
 }
+
+#ifdef USE_HTTPSRR
+
+/*
+ * @brief decode the DNS name in a binary RRData
+ * @param buf points to the buffer (in/out)
+ * @param remaining points to the remaining buffer length (in/out)
+ * @param dnsname returns the string form name on success
+ * @return is 1 for success, error otherwise
+ *
+ * The encoding here is defined in
+ * https://tools.ietf.org/html/rfc1035#section-3.1
+ *
+ * The input buffer pointer will be modified so it points to
+ * just after the end of the DNS name encoding on output. (And
+ * that's why it's an "unsigned char **" :-)
+ */
+static CURLcode local_decode_rdata_name(unsigned char **buf, size_t *remaining,
+                                        char **dnsname)
+{
+  unsigned char *cp = NULL;
+  int rem = 0;
+  char *thename = NULL, *tp = NULL;
+  unsigned char clen = 0; /* chunk len */
+
+  if(!buf || !remaining || !dnsname)
+    return CURLE_OUT_OF_MEMORY;
+  rem = (int)*remaining;
+  thename = calloc(1, CURL_MAXLEN_host_name);
+  if(!thename)
+    return CURLE_OUT_OF_MEMORY;
+  cp = *buf;
+  tp = thename;
+  clen = *cp++;
+  if(clen == 0) {
+    /* special case - return "." as name */
+    thename[0] = '.';
+    thename[1] = 0x00;
+  }
+  while(clen) {
+    if(clen >= rem) {
+      free(thename);
+      return CURLE_OUT_OF_MEMORY;
+    }
+    if(((tp - thename) + clen) > CURL_MAXLEN_host_name) {
+      free(thename);
+      return CURLE_OUT_OF_MEMORY;
+    }
+    memcpy(tp, cp, clen);
+    tp += clen;
+    *tp++ = '.';
+    cp += clen;
+    rem -= (clen + 1);
+    if(rem <= 0) {
+      free(thename);
+      return CURLE_OUT_OF_MEMORY;
+    }
+    clen = *cp++;
+  }
+  *buf = cp;
+  if(rem <= 0) {
+    free(thename);
+    return CURLE_OUT_OF_MEMORY;
+  }
+  *remaining = rem - 1;
+  *dnsname = thename;
+  return CURLE_OK;
+}
+
+static CURLcode local_decode_rdata_alpn(unsigned char *rrval, size_t len,
+                                        char **alpns)
+{
+  /*
+   * spec here is as per draft-ietf-dnsop-svcb-https, section-7.1.1
+   * encoding is catenated list of strings each preceded by a one
+   * octet length
+   * output is comma-sep list of the strings
+   * implementations may or may not handle quoting of comma within
+   * string values, so we might see a comma within the wire format
+   * version of a string, in which case we'll precede that by a
+   * backslash - same goes for a backslash character, and of course
+   * we need to use two backslashes in strings when we mean one;-)
+   */
+  int remaining = (int) len;
+  char *oval;
+  size_t olen = 0, i;
+  unsigned char *cp = rrval;
+  struct dynbuf dval;
+
+  if(!alpns)
+    return CURLE_OUT_OF_MEMORY;
+  Curl_dyn_init(&dval, DYN_DOH_RESPONSE);
+  remaining = (int)len;
+  cp = rrval;
+  while(remaining > 0) {
+    size_t tlen = (size_t) *cp++;
+
+    /* if not 1st time, add comma */
+    if(remaining != (int)len && Curl_dyn_addn(&dval, ",", 1))
+      goto err;
+    remaining--;
+    if(tlen > (size_t)remaining)
+      goto err;
+    /* add escape char if needed, clunky but easier to read */
+    for(i = 0; i != tlen; i++) {
+      if('\\' == *cp || ',' == *cp) {
+        if(Curl_dyn_addn(&dval, "\\", 1))
+          goto err;
+      }
+      if(Curl_dyn_addn(&dval, cp++, 1))
+        goto err;
+    }
+    remaining -= (int)tlen;
+  }
+  olen = Curl_dyn_len(&dval);
+  /* I think the + 1 here is ok but it could trigger a read error */
+  oval = (char *)Curl_memdup(Curl_dyn_ptr(&dval), olen + 1);
+  if(!oval)
+    goto err;
+  Curl_dyn_free(&dval);
+  oval[olen]='\0';
+  *alpns = oval;
+  return CURLE_OK;
+err:
+  Curl_dyn_free(&dval);
+  return CURLE_BAD_CONTENT_ENCODING;
+}
+
+#ifdef CURLDEBUG
+static CURLcode test_alpn_escapes(void)
+{
+  /* we'll use an example from draft-ietf-dnsop-svcb, figure 10 */
+  static unsigned char example[] = {
+    0x08,                                           /* length 8 */
+    0x66, 0x5c, 0x6f, 0x6f, 0x2c, 0x62, 0x61, 0x72, /* value "f\\oo,bar" */
+    0x02,                                           /* length 2 */
+    0x68, 0x32                                      /* value "h2" */
+  };
+  size_t example_len = sizeof(example);
+  char *aval = NULL;
+  static const char *expected = "f\\\\oo\\,bar,h2";
+
+  if(local_decode_rdata_alpn(example, example_len, &aval) != CURLE_OK)
+    return CURLE_BAD_CONTENT_ENCODING;
+  if(strlen(aval) != strlen(expected))
+    return CURLE_BAD_CONTENT_ENCODING;
+  if(memcmp(aval, expected, strlen(aval)))
+    return CURLE_BAD_CONTENT_ENCODING;
+  return CURLE_OK;
+}
+#endif
+
+static CURLcode Curl_doh_decode_httpsrr(unsigned char *rrval, size_t len,
+                                        struct Curl_https_rrinfo **hrr)
+{
+  size_t remaining = len;
+  unsigned char *cp = rrval;
+  uint16_t pcode = 0, plen = 0;
+  struct Curl_https_rrinfo *lhrr = NULL;
+  char *dnsname = NULL;
+
+#ifdef CURLDEBUG
+  /* a few tests of escaping, shouldn't be here but ok for now */
+  if(test_alpn_escapes() != CURLE_OK)
+    return CURLE_OUT_OF_MEMORY;
+#endif
+  lhrr = calloc(1, sizeof(struct Curl_https_rrinfo));
+  if(!lhrr)
+    return CURLE_OUT_OF_MEMORY;
+  lhrr->val = calloc(1, len);
+  if(!lhrr->val)
+    goto err;
+  lhrr->len = len;
+  memcpy(lhrr->val, rrval, len);
+  if(remaining <= 2)
+    goto err;
+  lhrr->priority = (uint16_t)((cp[0] << 8) + cp[1]);
+  cp += 2;
+  remaining -= (uint16_t)2;
+  if(local_decode_rdata_name(&cp, &remaining, &dnsname) != CURLE_OK)
+    goto err;
+  lhrr->target = dnsname;
+  while(remaining >= 4) {
+    pcode = (uint16_t)((*cp << 8) + (*(cp + 1)));
+    cp += 2;
+    plen = (uint16_t)((*cp << 8) + (*(cp + 1)));
+    cp += 2;
+    remaining -= 4;
+    if(pcode == HTTPS_RR_CODE_ALPN) {
+      if(local_decode_rdata_alpn(cp, plen, &lhrr->alpns) != CURLE_OK)
+        goto err;
+    }
+    if(pcode == HTTPS_RR_CODE_NO_DEF_ALPN)
+      lhrr->no_def_alpn = TRUE;
+    else if(pcode == HTTPS_RR_CODE_IPV4) {
+      lhrr->ipv4hints = Curl_memdup(cp, plen);
+      if(!lhrr->ipv4hints)
+        goto err;
+      lhrr->ipv4hints_len = (size_t)plen;
+    }
+    else if(pcode == HTTPS_RR_CODE_ECH) {
+      lhrr->echconfiglist = Curl_memdup(cp, plen);
+      if(!lhrr->echconfiglist)
+        goto err;
+      lhrr->echconfiglist_len = (size_t)plen;
+    }
+    else if(pcode == HTTPS_RR_CODE_IPV6) {
+      lhrr->ipv6hints = Curl_memdup(cp, plen);
+      if(!lhrr->ipv6hints)
+        goto err;
+      lhrr->ipv6hints_len = (size_t)plen;
+    }
+    if(plen > 0 && plen <= remaining) {
+      cp += plen;
+      remaining -= plen;
+    }
+  }
+  DEBUGASSERT(!remaining);
+  *hrr = lhrr;
+  return CURLE_OK;
+err:
+  if(lhrr) {
+    if(lhrr->target)
+      free(lhrr->target);
+    if(lhrr->echconfiglist)
+      free(lhrr->echconfiglist);
+    if(lhrr->val)
+      free(lhrr->val);
+    free(lhrr);
+  }
+  return CURLE_OUT_OF_MEMORY;
+}
+
+# ifdef CURLDEBUG
+static void local_print_httpsrr(struct Curl_easy *data,
+                                struct Curl_https_rrinfo *hrr)
+{
+  DEBUGASSERT(hrr);
+  infof(data, "HTTPS RR: priority %d, target: %s",
+        hrr->priority, hrr->target);
+  if(hrr->alpns)
+    infof(data, "HTTPS RR: alpns %s", hrr->alpns);
+  else
+    infof(data, "HTTPS RR: no alpns");
+  if(hrr->no_def_alpn)
+    infof(data, "HTTPS RR: no_def_alpn set");
+  else
+    infof(data, "HTTPS RR: no_def_alpn not set");
+  if(hrr->ipv4hints) {
+    local_print_buf(data, "HTTPS RR: ipv4hints",
+                    hrr->ipv4hints, hrr->ipv4hints_len);
+  }
+  else
+    infof(data, "HTTPS RR: no ipv4hints");
+  if(hrr->echconfiglist) {
+    local_print_buf(data, "HTTPS RR: ECHConfigList",
+                    hrr->echconfiglist, hrr->echconfiglist_len);
+  }
+  else
+    infof(data, "HTTPS RR: no ECHConfigList");
+  if(hrr->ipv6hints) {
+    local_print_buf(data, "HTTPS RR: ipv6hint",
+                    hrr->ipv6hints, hrr->ipv6hints_len);
+  }
+  else
+    infof(data, "HTTPS RR: no ipv6hints");
+  return;
+}
+# endif
+#endif
 
 CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
                               struct Curl_dns_entry **dnsp)
@@ -923,9 +1310,15 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
       CURLE_COULDNT_RESOLVE_HOST;
   }
   else if(!dohp->pending) {
+#ifndef USE_HTTPSRR
     DOHcode rc[DOH_PROBE_SLOTS] = {
       DOH_OK, DOH_OK
     };
+#else
+    DOHcode rc[DOH_PROBE_SLOTS] = {
+      DOH_OK, DOH_OK, DOH_OK
+    };
+#endif
     struct dohentry de;
     int slot;
     /* remove DoH handles from multi handle and close them */
@@ -991,6 +1384,22 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
     } /* address processing done */
 
     /* Now process any build-specific attributes retrieved from DNS */
+#ifdef USE_HTTPSRR
+    if(de.numhttps_rrs > 0 && result == CURLE_OK && *dnsp) {
+      struct Curl_https_rrinfo *hrr = NULL;
+      result = Curl_doh_decode_httpsrr(de.https_rrs->val, de.https_rrs->len,
+                                       &hrr);
+      if(result) {
+        infof(data, "Failed to decode HTTPS RR");
+        return result;
+      }
+      infof(data, "Some HTTPS RR to process");
+# ifdef CURLDEBUG
+      local_print_httpsrr(data, hrr);
+# endif
+      (*dnsp)->hinfo = hrr;
+    }
+#endif
 
     /* All done */
     de_cleanup(&de);

@@ -1,0 +1,184 @@
+#! /usr/bin/make -f
+
+# Include pkg-info to make use of DEB_VERSION
+include /usr/share/dpkg/pkg-info.mk
+
+# enable all hardening options (see #763372)
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+
+CONFIGURE_ARGS = -- --disable-dependency-tracking		\
+	--disable-symbol-hiding --enable-versioned-symbols	\
+	--enable-threaded-resolver --with-lber-lib=lber		\
+	--with-gssapi=/usr --with-nghttp2	\
+	--includedir=/usr/include/$(DEB_HOST_MULTIARCH)		\
+	--with-zsh-functions-dir=/usr/share/zsh/vendor-completions
+
+# disable libssh2 on Ubuntu (see #888449)
+ifeq ($(shell dpkg-vendor --derives-from Ubuntu && echo yes),yes)
+	CONFIGURE_ARGS += --with-libssh --without-libssh2
+else
+	CONFIGURE_ARGS += --without-libssh --with-libssh2
+endif
+
+
+ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+  NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+  MAKEFLAGS += -j$(NUMJOBS)
+endif
+
+export DEB_CFLAGS_MAINT_APPEND = -D_DEB_HOST_ARCH=\"$(DEB_HOST_MULTIARCH)\" -DCURL_PATCHSTAMP=\"$(DEB_VERSION)\"
+export DEB_CXXFLAGS_MAINT_APPEND = -D_DEB_HOST_ARCH=\"$(DEB_HOST_MULTIARCH)\" -DCURL_PATCHSTAMP=\"$(DEB_VERSION)\"
+
+ifneq ($(filter pkg.curl.openssl-only,$(DEB_BUILD_PROFILES)),)
+	DEB_BUILD_PROFILES += pkg.curl.no-gnutls
+endif
+ifneq ($(filter pkg.curl.gnutls-only,$(DEB_BUILD_PROFILES)),)
+	DEB_BUILD_PROFILES += pkg.curl.no-openssl
+endif
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+ifeq ($(filter pkg.curl.no-openssl,$(DEB_BUILD_PROFILES)),)
+	mkdir -p debian/build
+endif
+ifeq ($(filter pkg.curl.no-gnutls,$(DEB_BUILD_PROFILES)),)
+	mkdir -p debian/build-gnutls
+endif
+# pop the last patch (gnutls)
+	quilt pop
+ifeq ($(filter pkg.curl.no-openssl,$(DEB_BUILD_PROFILES)),)
+# get the source without gnutls patch
+	tar -cf - --exclude=debian/build* --exclude=.pc . \
+		| tar -xf - -C debian/build
+endif
+# push the last patch which must be gnutls
+	quilt push
+ifeq ($(filter pkg.curl.no-gnutls,$(DEB_BUILD_PROFILES)),)
+# get the source with gnutls patch applied
+	tar -cf - --exclude=debian/build* --exclude=.pc . \
+		| tar -xf - -C debian/build-gnutls
+endif
+ifeq ($(filter pkg.curl.no-openssl,$(DEB_BUILD_PROFILES)),)
+	cd debian/build && \
+	./buildconf && \
+	cp ../../ltmain.sh . && \
+	dh_auto_configure ${CONFIGURE_ARGS} --with-openssl \
+		--with-ca-path=/etc/ssl/certs \
+	        --enable-ech --enable-httpsrr \
+		--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt
+endif
+ifeq ($(filter pkg.curl.no-gnutls,$(DEB_BUILD_PROFILES)),)
+	cd debian/build-gnutls && \
+	./buildconf && \
+	cp ../../ltmain.sh . && \
+	dh_auto_configure ${CONFIGURE_ARGS} --with-gnutls \
+		--with-ca-path=/etc/ssl/certs
+endif
+
+override_dh_auto_build:
+ifeq ($(filter pkg.curl.no-openssl,$(DEB_BUILD_PROFILES)),)
+	cd debian/build && dh_auto_build
+endif
+ifeq ($(filter pkg.curl.no-gnutls,$(DEB_BUILD_PROFILES)),)
+	cd debian/build-gnutls && dh_auto_build
+endif
+
+# Test parameters that are passed to runtests.pl.
+# -n disables valgrind usage
+TESTS_GENERAL_PARAMETERS += -n
+
+# These tests fail if a IPv6-only builder is used:
+# https://bugs.debian.org/1032343
+# https://github.com/curl/curl/issues/10682
+TESTS_FAILS_ON_IPV6_ONLY_MACHINES ?= $(addprefix ~, 300 301 303 304 306 309 310 325 364 400 401 403 406 407 408 409 410 414 417 560 678 987 988 989 1112 1272 1470 1561 1562 1630 1631 1632 2034 2037 2041 3000 3001 3102)
+
+TESTS_GENERAL_PARAMETERS += $(TESTS_FAILS_ON_IPV6_ONLY_MACHINES)
+
+# ignore ECH symbol
+TESTS_GENERAL_PARAMETERS += ~1119 ~1139 ~1477 ~1478 ~1538
+
+override_dh_auto_test:
+ifeq ($(filter nocheck,$(DEB_BUILD_PROFILES)),)
+ifeq ($(filter pkg.curl.no-openssl,$(DEB_BUILD_PROFILES)),)
+# OpenSSL tests.
+	cd debian/build && VERBOSE=1 \
+		TFLAGS="$(TESTS_GENERAL_PARAMETERS)" \
+		$(MAKE) test-nonflaky
+endif
+ifeq ($(filter pkg.curl.no-gnutls,$(DEB_BUILD_PROFILES)),)
+# GnuTLS tests.
+	cd debian/build-gnutls && VERBOSE=1 \
+		TFLAGS="$(TESTS_GENERAL_PARAMETERS)" \
+		$(MAKE) test-nonflaky
+endif
+endif
+
+override_dh_install:
+ifeq ($(filter pkg.curl.no-openssl,$(DEB_BUILD_PROFILES)),)
+	${MAKE} -C debian/build					\
+		DESTDIR=$(shell pwd)/debian/tmp install
+endif
+ifeq ($(filter pkg.curl.no-gnutls,$(DEB_BUILD_PROFILES)),)
+	${MAKE} -C debian/build-gnutls				\
+		DESTDIR=$(shell pwd)/debian/tmp-gnutls install
+endif
+	find debian/tmp* -name '*.la' -delete
+ifeq ($(filter pkg.curl.no-openssl,$(DEB_BUILD_PROFILES)),)
+	dh_install -pcurl -plibcurl4 -plibcurl4-openssl-dev -plibcurl4-doc \
+		--sourcedir=debian/tmp
+endif
+ifeq ($(filter pkg.curl.no-gnutls,$(DEB_BUILD_PROFILES)),)
+	dh_install -plibcurl3-gnutls -plibcurl4-gnutls-dev	\
+		--sourcedir=debian/tmp-gnutls
+endif
+# Modify curl-config to make it architecture-independent:
+# 1. In --static-libs output, replace the output of krb5-config (which
+#    currently includes architecture-specific paths) with a call at
+#    runtime to krb5-config.  Of course, this will only work correctly
+#    if the installed libkrb5-dev matches the architecture of the
+#    program you're linking, or if libkrb5-dev is made
+#    multiarch-compatible at some point in the future.  For dynamic
+#    linking this has no impact.
+# 2. In --configure output, replace the architecture-specific paths
+#    used for --libdir and --libexecdir with a literal backquoted call
+#    to dpkg-architecture.  This is functionally equivalent to the way
+#    debhelper actually invokes configure, and indicates to the user
+#    (who runs curl-config --configure in order to learn about how the
+#    library was compiled) that they are in fact using a multi-arch
+#    package.
+# 3. Likewise, replace the architecture name used for --build (and
+#    build_alias) with a literal backquoted call to dpkg-architecture.
+# 4. In --configure output, remove
+#    -fdebug-prefix-map=/buildd/specific/random/path=. and
+#    -ffile-prefix-map=/buildd/specific/random/path=.
+# 5. Remove -D_DEB_HOST_ARCH from CFLAGS.  This is a (hopefully
+#    temporary) hack needed to properly build curl with NSS PEM
+#    support in Debian.
+	sed -e "/-lcurl /s|`krb5-config --libs gssapi`|\`krb5-config --libs gssapi\`|" \
+	    -e "/--prefix/s|/$(DEB_HOST_MULTIARCH)'|/'\\\\\`dpkg-architecture -qDEB_HOST_MULTIARCH\\\\\`|g" \
+	    -e "/--prefix/s|=$(DEB_BUILD_GNU_TYPE)'|='\\\\\`dpkg-architecture -qDEB_BUILD_GNU_TYPE\\\\\`|g" \
+	    -e "/-fdebug-prefix-map=/s|\(-fdebug-prefix-map=\)/[^ ]*=.||" \
+	    -e "/-ffile-prefix-map=/s|\(-ffile-prefix-map=\)/[^ ]*=.||" \
+	    -e "/-D_DEB_HOST_ARCH=/s|-D_DEB_HOST_ARCH=\\\\\"[^ ']*\\\\\"||" \
+	    -i `find . -name curl-config`
+# When we get here, everything has been properly installed.  Because
+# of debhelper-compat 13, we have to remove some files that are
+# otherwise flagged as not installed and will cause the build to fail.
+	rm -rfv debian/tmp/usr/share/man/* \
+		debian/tmp/usr/share/fish/* \
+		debian/tmp/usr/share/aclocal/*
+
+override_dh_installchangelogs:
+	dh_installchangelogs CHANGES
+
+override_dh_compress:
+	dh_compress -X.pdf
+
+override_dh_auto_clean:
+	$(RM) -r debian/build* debian/tmp*
+	dh_auto_clean

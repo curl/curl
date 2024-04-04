@@ -1,0 +1,40 @@
+Description: Work around libtool --as-needed reordering bug
+Origin: vendor
+Bug-Debian: http://bugs.debian.org/347650
+Forwarded: not-needed
+Author: Alessandro Ghedini <ghedo@debian.org>
+Reviewed-by: Alessandro Ghedini <ghedo@debian.org>
+Last-Update: 2016-08-03
+
+Index: curl/ltmain.sh
+===================================================================
+--- curl.orig/ltmain.sh
++++ curl/ltmain.sh
+@@ -7488,6 +7488,11 @@ func_mode_link ()
+ 	arg=$func_stripname_result
+ 	;;
+ 
++      -Wl,--as-needed|-Wl,--no-as-needed)
++	deplibs="$arg $deplibs"
++	continue
++	;;
++
+       -Wl,*)
+ 	func_stripname '-Wl,' '' "$arg"
+ 	args=$func_stripname_result
+@@ -7887,6 +7892,15 @@ func_mode_link ()
+ 	lib=
+ 	found=false
+ 	case $deplib in
++	-Wl,--as-needed|-Wl,--no-as-needed)
++	  if test "$linkmode,$pass" = "prog,link"; then
++	    compile_deplibs="$deplib $compile_deplibs"
++	    finalize_deplibs="$deplib $finalize_deplibs"
++	  else
++	    deplibs="$deplib $deplibs"
++	  fi
++	  continue
++	  ;;
+ 	-mt|-mthreads|-kthread|-Kthread|-pthread|-pthreads|--thread-safe \
+         |-threads|-fopenmp|-openmp|-mp|-xopenmp|-omp|-qsmp=*)
+ 	  if test prog,link = "$linkmode,$pass"; then

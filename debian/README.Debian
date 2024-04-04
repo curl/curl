@@ -1,0 +1,11 @@
+README for curl Debian package
+==============================
+
+Maintaining curl is not an easy task so it's important to have multiple people
+taking care of it. With that in mind, the Debian Curl Maintainers team was
+created to ease the maintenance burden. We also decided to keep the package
+under the Debian namespace on Salsa because of its importance. Nonetheless, if
+you would like to make changes to the package please try to reach us first
+before committing and uploading.
+
+ -- Carlos Henrique Lima Melara <charlesmelara@riseup.net>  Sun, 26 Nov 2023 22:54:15 -0300

@@ -1,0 +1,6 @@
+usr/bin/curl-config
+usr/lib/*/libcurl-gnutls.a
+usr/lib/*/libcurl-gnutls.so
+usr/lib/*/pkgconfig/libcurl.pc
+usr/include
+../../docs/libcurl/libcurl.m4	usr/share/aclocal

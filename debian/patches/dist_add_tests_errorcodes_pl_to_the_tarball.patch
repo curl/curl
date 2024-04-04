@@ -1,0 +1,46 @@
+From da8c1d15782c8161b455a7ee90197c16ae5edb90 Mon Sep 17 00:00:00 2001
+From: Daniel Stenberg <daniel@haxx.se>
+Date: Wed, 6 Dec 2023 09:40:30 +0100
+Subject: [PATCH] dist: add tests/errorcodes.pl to the tarball
+
+Used by test 1477
+
+Reported-by: Xi Ruoyao
+Follow-up to 0ca3a4ec9a7
+Fixes #12462
+Closes #12463
+---
+ tests/Makefile.am | 20 +++++++++++---------
+ 1 file changed, 11 insertions(+), 9 deletions(-)
+
+diff --git a/tests/Makefile.am b/tests/Makefile.am
+index 17e9ad04938ebb..c6ae7a97afd93e 100644
+--- a/tests/Makefile.am
++++ b/tests/Makefile.am
+@@ -26,15 +26,17 @@ HTMLPAGES = testcurl.html runtests.html
+ PDFPAGES = testcurl.pdf runtests.pdf
+ MANDISTPAGES = runtests.1.dist testcurl.1.dist
+ 
+-EXTRA_DIST = appveyor.pm azure.pm badsymbols.pl check-deprecated.pl CMakeLists.txt \
+- devtest.pl dictserver.py directories.pm disable-scan.pl error-codes.pl extern-scan.pl FILEFORMAT.md \
+- processhelp.pm ftpserver.pl getpart.pm globalconfig.pm http-server.pl http2-server.pl \
+- http3-server.pl manpage-scan.pl manpage-syntax.pl markdown-uppercase.pl mem-include-scan.pl \
+- memanalyze.pl negtelnetserver.py nroff-scan.pl option-check.pl options-scan.pl \
+- pathhelp.pm README.md rtspserver.pl runner.pm runtests.1 runtests.pl secureserver.pl \
+- serverhelp.pm servers.pm smbserver.py sshhelp.pm sshserver.pl stunnel.pem symbol-scan.pl \
+- testcurl.1 testcurl.pl testutil.pm tftpserver.pl util.py valgrind.pm \
+- valgrind.supp version-scan.pl check-translatable-options.pl
++EXTRA_DIST = appveyor.pm azure.pm badsymbols.pl check-deprecated.pl           \
++ CMakeLists.txt devtest.pl dictserver.py directories.pm disable-scan.pl       \
++ error-codes.pl extern-scan.pl FILEFORMAT.md processhelp.pm ftpserver.pl      \
++ getpart.pm globalconfig.pm http-server.pl http2-server.pl http3-server.pl    \
++ manpage-scan.pl manpage-syntax.pl markdown-uppercase.pl mem-include-scan.pl  \
++ memanalyze.pl negtelnetserver.py nroff-scan.pl option-check.pl               \
++ options-scan.pl pathhelp.pm README.md rtspserver.pl runner.pm runtests.1     \
++ runtests.pl secureserver.pl serverhelp.pm servers.pm smbserver.py sshhelp.pm \
++ sshserver.pl stunnel.pem symbol-scan.pl testcurl.1 testcurl.pl testutil.pm   \
++ tftpserver.pl util.py valgrind.pm valgrind.supp version-scan.pl              \
++ check-translatable-options.pl errorcodes.pl
+ 
+ DISTCLEANFILES = configurehelp.pm
+ 

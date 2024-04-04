@@ -1097,6 +1097,9 @@ curl_easy_setopt_ccsid(CURL *easy, CURLoption tag, ...)
   case CURLOPT_DNS_LOCAL_IP6:
   case CURLOPT_DNS_SERVERS:
   case CURLOPT_DOH_URL:
+#ifdef USE_ECH
+  case CURLOPT_ECH:
+#endif
   case CURLOPT_EGDSOCKET:
   case CURLOPT_FTPPORT:
   case CURLOPT_FTP_ACCOUNT:

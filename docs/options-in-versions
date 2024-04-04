@@ -55,6 +55,7 @@
 --doh-insecure                       7.76.0
 --doh-url                            7.62.0
 --dump-header (-D)                   5.7
+--ech                                8.6.1
 --egd-file                           7.7
 --engine                             7.9.3
 --etag-compare                       7.68.0

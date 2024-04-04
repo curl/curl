@@ -568,6 +568,105 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
   fi
 ])
 
+dnl CURL_CHECK_OPTION_NTLM_WB
+dnl -------------------------------------------------
+dnl Verify if configure has been invoked with option
+dnl --enable-ntlm-wb or --disable-ntlm-wb, and set
+dnl shell variable want_ntlm_wb and want_ntlm_wb_file
+dnl as appropriate.
+
+AC_DEFUN([CURL_CHECK_OPTION_NTLM_WB], [
+  AC_BEFORE([$0],[CURL_CHECK_NTLM_WB])dnl
+  OPT_NTLM_WB="default"
+  AC_ARG_ENABLE(ntlm-wb,
+AS_HELP_STRING([--enable-ntlm-wb@<:@=FILE@:>@],[Enable NTLM delegation to winbind's ntlm_auth helper, where FILE is ntlm_auth's absolute filename (default: /usr/bin/ntlm_auth)])
+AS_HELP_STRING([--disable-ntlm-wb],[Disable NTLM delegation to winbind's ntlm_auth helper]),
+  OPT_NTLM_WB=$enableval)
+  want_ntlm_wb_file="/usr/bin/ntlm_auth"
+  case "$OPT_NTLM_WB" in
+    no)
+      dnl --disable-ntlm-wb option used
+      want_ntlm_wb="no"
+      ;;
+    default)
+      dnl configure option not specified
+      want_ntlm_wb="yes"
+      ;;
+    *)
+      dnl --enable-ntlm-wb option used
+      want_ntlm_wb="yes"
+      if test -n "$enableval" && test "$enableval" != "yes"; then
+        want_ntlm_wb_file="$enableval"
+      fi
+      ;;
+  esac
+])
+
+
+dnl CURL_CHECK_NTLM_WB
+dnl -------------------------------------------------
+dnl Check if support for NTLM delegation to winbind's
+dnl ntlm_auth helper will finally be enabled depending
+dnl on given configure options and target platform.
+
+AC_DEFUN([CURL_CHECK_NTLM_WB], [
+  AC_REQUIRE([CURL_CHECK_OPTION_NTLM_WB])dnl
+  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
+  AC_MSG_CHECKING([whether to enable NTLM delegation to winbind's helper])
+  if test "$curl_cv_native_windows" = "yes" ||
+    test "x$SSL_ENABLED" = "x"; then
+    want_ntlm_wb_file=""
+    want_ntlm_wb="no"
+  elif test "x$ac_cv_func_fork" != "xyes"; then
+    dnl ntlm_wb requires fork
+    want_ntlm_wb="no"
+  fi
+  AC_MSG_RESULT([$want_ntlm_wb])
+  if test "$want_ntlm_wb" = "yes"; then
+    AC_DEFINE(NTLM_WB_ENABLED, 1,
+      [Define to enable NTLM delegation to winbind's ntlm_auth helper.])
+    AC_DEFINE_UNQUOTED(NTLM_WB_FILE, "$want_ntlm_wb_file",
+      [Define absolute filename for winbind's ntlm_auth helper.])
+    NTLM_WB_ENABLED=1
+  fi
+])
+
+dnl CURL_CHECK_OPTION_HTTPSRR
+dnl -----------------------------------------------------
+dnl Verify whether configure has been invoked with option
+dnl --enable-httpsrr or --disable-httpsrr, and set
+dnl shell variable want_httpsrr as appropriate.
+
+AC_DEFUN([CURL_CHECK_OPTION_HTTPSRR], [
+  AC_MSG_CHECKING([whether to enable HTTPSRR support])
+  OPT_HTTPSRR="default"
+  AC_ARG_ENABLE(httpsrr,
+AS_HELP_STRING([--enable-httpsrr],[Enable HTTPSRR support])
+AS_HELP_STRING([--disable-httpsrr],[Disable HTTPSRR support]),
+  OPT_HTTPSRR=$enableval)
+  case "$OPT_HTTPSRR" in
+    no)
+      dnl --disable-httpsrr option used
+      want_httpsrr="no"
+      curl_httpsrr_msg="no      (--enable-httpsrr)"
+      AC_MSG_RESULT([no])
+      ;;
+    default)
+      dnl configure option not specified
+      want_httpsrr="no"
+      curl_httpsrr_msg="no      (--enable-httpsrr)"
+      AC_MSG_RESULT([no])
+      ;;
+    *)
+      dnl --enable-httpsrr option used
+      want_httpsrr="yes"
+      curl_httpsrr_msg="enabled (--disable-httpsrr)"
+      experimental="httpsrr"
+      AC_MSG_RESULT([yes])
+      ;;
+  esac
+])
+
 dnl CURL_CHECK_OPTION_ECH
 dnl -----------------------------------------------------
 dnl Verify whether configure has been invoked with option
@@ -602,4 +701,5 @@ AS_HELP_STRING([--disable-ech],[Disable ECH support]),
       AC_MSG_RESULT([yes])
       ;;
   esac
+])
 ])

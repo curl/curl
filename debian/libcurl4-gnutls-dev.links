@@ -1,0 +1,4 @@
+#!/bin/sh
+
+echo /usr/lib/$DEB_HOST_MULTIARCH/libcurl-gnutls.a /usr/lib/$DEB_HOST_MULTIARCH/libcurl.a
+echo /usr/lib/$DEB_HOST_MULTIARCH/libcurl-gnutls.so /usr/lib/$DEB_HOST_MULTIARCH/libcurl.so

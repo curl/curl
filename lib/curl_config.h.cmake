@@ -796,3 +796,9 @@ ${SIZEOF_TIME_T_CODE}
 
 /* Define to 1 to enable TLS-SRP support. */
 #cmakedefine USE_TLS_SRP 1
+
+/* Define to 1 to query for HTTPSRR when using DoH */
+#cmakedefine USE_HTTPSRR 1
+
+/* if ECH support is available */
+#cmakedefine USE_ECH 1

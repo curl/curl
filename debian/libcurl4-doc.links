@@ -1,0 +1,10 @@
+/usr/share/man/man3/curl_strequal.3 /usr/share/man/man3/curl_strnequal.3
+/usr/share/man/man3/curl_mprintf.3 /usr/share/man/man3/curl_maprintf.3
+/usr/share/man/man3/curl_mprintf.3 /usr/share/man/man3/curl_mfprintf.3
+/usr/share/man/man3/curl_mprintf.3 /usr/share/man/man3/curl_msnprintf.3
+/usr/share/man/man3/curl_mprintf.3 /usr/share/man/man3/curl_msprintf.3
+/usr/share/man/man3/curl_mprintf.3 /usr/share/man/man3/curl_mvaprintf.3
+/usr/share/man/man3/curl_mprintf.3 /usr/share/man/man3/curl_mvfprintf.3
+/usr/share/man/man3/curl_mprintf.3 /usr/share/man/man3/curl_mvprintf.3
+/usr/share/man/man3/curl_mprintf.3 /usr/share/man/man3/curl_mvsnprintf.3
+/usr/share/man/man3/curl_mprintf.3 /usr/share/man/man3/curl_mvsprintf.3

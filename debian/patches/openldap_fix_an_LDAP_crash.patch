@@ -1,0 +1,35 @@
+From fa6e123929de94064f1b1cb135f30b0a945ba399 Mon Sep 17 00:00:00 2001
+From: Patrick Monnerat <patrick@monnerat.net>
+Date: Wed, 27 Dec 2023 11:19:17 +0100
+Subject: [PATCH] openldap: fix an LDAP crash
+
+Reported-by: Ozan Cansel
+Fixes #12593
+Closes #12600
+---
+ lib/openldap.c | 12 ++++++++----
+ 1 file changed, 8 insertions(+), 4 deletions(-)
+
+diff --git a/lib/openldap.c b/lib/openldap.c
+index c9417fbe2a1c2b..fcc9f91f44c3d9 100644
+--- a/lib/openldap.c
++++ b/lib/openldap.c
+@@ -887,10 +887,14 @@ static CURLcode oldap_do(struct Curl_easy *data, bool *done)
+ 
+   result = oldap_url_parse(data, &lud);
+   if(!result) {
+-    Sockbuf *sb;
+-    /* re-install the libcurl SSL handlers into the sockbuf. */
+-    ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb);
+-    ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, data);
++#ifdef USE_SSL
++    if(ssl_installed(conn)) {
++      Sockbuf *sb;
++      /* re-install the libcurl SSL handlers into the sockbuf. */
++      ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb);
++      ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, data);
++    }
++#endif
+ 
+     rc = ldap_search_ext(li->ld, lud->lud_dn, lud->lud_scope,
+                          lud->lud_filter, lud->lud_attrs, 0,
