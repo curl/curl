@@ -200,6 +200,7 @@ typedef enum {
   C_MAX_REDIRS,
   C_MAX_TIME,
   C_METALINK,
+  C_MPTCP,
   C_NEGOTIATE,
   C_NETRC,
   C_NETRC_FILE,
@@ -482,6 +483,7 @@ static const struct LongShort aliases[]= {
   {"max-redirs",                 ARG_STRG, ' ', C_MAX_REDIRS},
   {"max-time",                   ARG_STRG, 'm', C_MAX_TIME},
   {"metalink",                   ARG_BOOL, ' ', C_METALINK},
+  {"mptcp",                      ARG_BOOL, ' ', C_MPTCP},
   {"negotiate",                  ARG_BOOL, ' ', C_NEGOTIATE},
   {"netrc",                      ARG_BOOL, 'n', C_NETRC},
   {"netrc-file",                 ARG_FILE, ' ', C_NETRC_FILE},
@@ -2792,6 +2794,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
                 "See curl_getdate(3) for valid date syntax.");
         }
       }
+      break;
+    case C_MPTCP: /* --mptcp */
+      config->mptcp = TRUE;
       break;
     default: /* unknown flag */
       err = PARAM_OPTION_UNKNOWN;

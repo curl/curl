@@ -56,6 +56,7 @@
 #include "tool_cb_prg.h"
 #include "tool_cb_rea.h"
 #include "tool_cb_see.h"
+#include "tool_cb_soc.h"
 #include "tool_cb_wrt.h"
 #include "tool_dirhie.h"
 #include "tool_doswin.h"
@@ -1288,6 +1289,10 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
         if(config->tcp_fastopen)
           my_setopt(curl, CURLOPT_TCP_FASTOPEN, 1L);
+
+        if(config->mptcp)
+          my_setopt(curl, CURLOPT_OPENSOCKETFUNCTION,
+                    tool_socket_open_mptcp_cb);
 
         /* where to store */
         my_setopt(curl, CURLOPT_WRITEDATA, per);

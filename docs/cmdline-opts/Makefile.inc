@@ -161,6 +161,7 @@ DPAGES = \
   max-redirs.md \
   max-time.md \
   metalink.md \
+  mptcp.md \
   negotiate.md \
   netrc-file.md \
   netrc-optional.md \
