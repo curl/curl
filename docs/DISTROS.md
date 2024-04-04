@@ -83,6 +83,13 @@ Issues and patches for this are managed in the main curl project.
 
 - curl: https://cygwin.com/cgit/cygwin-packages/curl/tree/curl.cygport
 - curl patches: https://cygwin.com/cgit/cygwin-packages/curl/tree
+- curl issues: https://inbox.sourceware.org/cygwin/?q=s%3Acurl
+
+## Cygwin (cross mingw64)
+
+- mingw64-x86_64-curl: https://cygwin.com/cgit/cygwin-packages/mingw64-x86_64-curl/tree/mingw64-x86_64-curl.cygport
+- mingw64-x86_64-curl patches: https://cygwin.com/cgit/cygwin-packages/mingw64-x86_64-curl/tree
+- mingw64-x86_64-curl issues: https://inbox.sourceware.org/cygwin/?q=s%3Amingw64-x86_64-curl
 
 ## Debian
 
