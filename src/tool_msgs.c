@@ -102,6 +102,18 @@ void notef(struct GlobalConfig *config, const char *fmt, ...)
 }
 
 /*
+ * Generic prefixed message.
+ */
+void msgf(struct GlobalConfig *config, const char *prefix,
+          const char *fmt, ...)
+{
+  va_list ap;
+  va_start(ap, fmt);
+  voutf(config, prefix, fmt, ap);
+  va_end(ap);
+}
+
+/*
  * Emit warning formatted message on configured 'errors' stream unless
  * mute (--silent) was selected.
  */

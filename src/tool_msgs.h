@@ -34,5 +34,8 @@ void helpf(FILE *errors, const char *fmt, ...)
   CURL_PRINTF(2, 3);
 void errorf(struct GlobalConfig *config, const char *fmt, ...)
   CURL_PRINTF(2, 3);
+void msgf(struct GlobalConfig *config, const char *prefix,
+          const char *fmt, ...)
+  CURL_PRINTF(3, 4);
 
 #endif /* HEADER_CURL_TOOL_MSGS_H */

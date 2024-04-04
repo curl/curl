@@ -77,6 +77,9 @@ static FILE *execpath(const char *filename, char **pathp)
 }
 #endif
 
+bool configdebug = FALSE;
+
+#define DEBUGPREFIX "config: "
 
 /* return 0 on everything-is-fine, and non-zero otherwise */
 int parseconfig(const char *filename, struct GlobalConfig *global)
@@ -128,6 +131,9 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
     bool fileerror = FALSE;
     curlx_dyn_init(&buf, MAX_CONFIG_LINE_LENGTH);
     DEBUGASSERT(filename);
+
+    if(configdebug)
+      msgf(operation->global, DEBUGPREFIX, "Reading %s", filename);
 
     while(!rc && my_get_line(file, &buf, &fileerror)) {
       int res;
@@ -221,9 +227,16 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
           param = NULL;
       }
 
-#ifdef DEBUG_CONFIG
-      fprintf(tool_stderr, "PARAM: \"%s\"\n",(param ? param : "(null)"));
-#endif
+      if(configdebug) {
+        const char *d = "";
+        if(option[0] != '-')
+          d = "--";
+        if(param)
+          msgf(operation->global, DEBUGPREFIX, "%s%s \"%s\"",
+               d, option, param);
+        else
+          msgf(operation->global, DEBUGPREFIX, "%s%s", d, option);
+      }
       res = getparameter(option, param, NULL, &usedarg, global, operation);
       operation = global->last;
 
