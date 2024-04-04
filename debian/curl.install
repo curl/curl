@@ -1,3 +1,0 @@
-#!/usr/bin/dh-exec
-usr/bin/curl
-<!cross> usr/share/zsh/*
