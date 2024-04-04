@@ -95,7 +95,7 @@ Issues and patches for this are managed in the main curl project.
 ## Cygwin Cross Mingw Devel (GNU Toolchain Windows Builds)
 
 - mingw64-x86_64-curl source: https://cygwin.com/packages/summary/mingw64-x86_64-curl-src.html
-- mingw64-x86_64-curl package repo:	https://cygwin.com/cgit/cygwin-packages/mingw64-x86_64-curl/
+- mingw64-x86_64-curl package repo: https://cygwin.com/cgit/cygwin-packages/mingw64-x86_64-curl/
 - mingw64-x86_64-curl patches: https://cygwin.com/cgit/cygwin-packages/mingw64-x86_64-curl/tree
 - mingw64-x86_64-curl package build: https://cygwin.com/cgit/cygwin-packages/mingw64-x86_64-curl/tree/mingw64-x86_64-curl.cygport
 - mingw64-x86_64-curl package summary: https://cygwin.com/packages/summary/mingw64-x86_64-curl.html
