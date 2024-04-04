@@ -31,7 +31,7 @@ Send a GREASE ECH extension
 
 ## "true"
 
-Attempt ECH if possible, but don't fail if ECH is not attempted.
+Attempt ECH if possible, but do not fail if ECH is not attempted.
 (The connection fails if ECH is attempted but fails.)
 
 ## "hard"
