@@ -392,6 +392,7 @@ class Httpd:
         lines = []
         if Httpd.MOD_CURLTEST is not None:
             lines.extend([
+                f'    Redirect 302 /data.json.302 /data.json',
                 f'    Redirect 301 /curltest/echo301 /curltest/echo',
                 f'    Redirect 302 /curltest/echo302 /curltest/echo',
                 f'    Redirect 303 /curltest/echo303 /curltest/echo',

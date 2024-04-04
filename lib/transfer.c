@@ -1236,6 +1236,9 @@ CURLcode Curl_xfer_send(struct Curl_easy *data,
     result = CURLE_OK;
     *pnwritten = 0;
   }
+  else if(!result && *pnwritten)
+    data->info.request_size += *pnwritten;
+
   return result;
 }
 
