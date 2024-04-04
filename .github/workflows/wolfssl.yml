@@ -61,7 +61,7 @@ jobs:
             configure: LDFLAGS="-Wl,-rpath,$HOME/wssl/lib" --with-wolfssl=$HOME/wssl --enable-debug
             wolfssl-configure: --enable-all
           - name: wolfssl (configured with --enable-opensslextra)
-            install:
+            install: valgrind
             configure: LDFLAGS="-Wl,-rpath,$HOME/wssl/lib" --with-wolfssl=$HOME/wssl --enable-debug
             wolfssl-configure: --enable-opensslextra
 
