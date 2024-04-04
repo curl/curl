@@ -68,7 +68,7 @@ jobs:
     steps:
       - run: |
           sudo apt-get update
-          sudo apt-get install libtool autoconf automake pkg-config stunnel4 libpsl-dev ${{ matrix.build.install }}
+          sudo apt-get install libtool autoconf automake pkg-config stunnel4 libpsl-dev valgrind ${{ matrix.build.install }}
           sudo python3 -m pip install impacket
         name: 'install prereqs and impacket'
 
