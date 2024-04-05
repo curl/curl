@@ -28,18 +28,22 @@
 
 # shellcheck disable=SC2250
 
+set -eu
+
 export TZ=UTC
 
-version=$1
+version="${1:-}"
 
 if [ -z "$version" ]; then
   echo "Specify a version number!"
   exit
 fi
 
-if [ "only" = "$2" ]; then
+if [ "only" = "${2:-}" ]; then
   echo "Setup version number only!"
   only=1
+else
+  only=
 fi
 
 libversion="$version"
