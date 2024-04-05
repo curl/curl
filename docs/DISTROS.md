@@ -84,7 +84,6 @@ Issues and patches for this are managed in the main curl project.
 - curl source: https://cygwin.com/packages/summary/curl-src.html
 - curl package repo: https://cygwin.com/cgit/cygwin-packages/curl/
 - curl patches: https://cygwin.com/cgit/cygwin-packages/curl/tree
-- curl package build: https://cygwin.com/cgit/cygwin-packages/curl/tree/curl.cygport
 - curl package summary: https://cygwin.com/packages/summary/curl.html
 - libcurl-doc package summary: https://cygwin.com/packages/summary/libcurl-doc.html
 - libcurl-devel package summary: https://cygwin.com/packages/summary/libcurl-devel.html
