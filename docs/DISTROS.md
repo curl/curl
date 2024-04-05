@@ -81,15 +81,15 @@ Issues and patches for this are managed in the main curl project.
 
 ## Cygwin
 
- - curl: https://cygwin.com/cgit/cygwin-packages/curl/tree/curl.cygport
- - curl patches: https://cygwin.com/cgit/cygwin-packages/curl/tree
- - curl issues: https://inbox.sourceware.org/cygwin/?q=s%3Acurl
+- curl: https://cygwin.com/cgit/cygwin-packages/curl/tree/curl.cygport
+- curl patches: https://cygwin.com/cgit/cygwin-packages/curl/tree
+- curl issues: https://inbox.sourceware.org/cygwin/?q=s%3Acurl
 
- ## Cygwin Cross Mingw Devel (GNU Toolchain Windows Builds)
+## Cygwin Cross Mingw Devel (GNU Toolchain Windows Builds)
 
- - mingw64-x86_64-curl: https://cygwin.com/cgit/cygwin-packages/mingw64-x86_64-curl/tree/mingw64-x86_64-curl.cygport
- - mingw64-x86_64-curl patches: https://cygwin.com/cgit/cygwin-packages/mingw64-x86_64-curl/tree
- - mingw64-x86_64-curl issues: https://inbox.sourceware.org/cygwin/?q=s%3Amingw64-x86_64-curl
+- mingw64-x86_64-curl: https://cygwin.com/cgit/cygwin-packages/mingw64-x86_64-curl/tree/mingw64-x86_64-curl.cygport
+- mingw64-x86_64-curl patches: https://cygwin.com/cgit/cygwin-packages/mingw64-x86_64-curl/tree
+- mingw64-x86_64-curl issues: https://inbox.sourceware.org/cygwin/?q=s%3Amingw64-x86_64-curl
 
 ## Debian
 
