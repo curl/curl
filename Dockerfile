@@ -24,7 +24,7 @@ FROM debian:bookworm-slim@sha256:993f5593466f84c9200e3e877ab5902dfc0e4a792f291c2
 # git 2.39.2
 
 RUN apt-get update -qq && apt-get install -qq -y --no-install-recommends \
-    build-essential make autoconf automake libtool git perl zip zlib1g-dev && \
+    build-essential make autoconf automake libtool git perl zip zlib1g-dev gawk && \
     rm -rf /var/lib/apt/lists/*
 
 # >>> from datetime import datetime
