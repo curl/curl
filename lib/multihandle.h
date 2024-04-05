@@ -44,24 +44,25 @@ struct Curl_message {
 typedef enum {
   MSTATE_INIT,         /* 0 - start in this state */
   MSTATE_PENDING,      /* 1 - no connections, waiting for one */
-  MSTATE_CONNECT,      /* 2 - resolve/connect has been sent off */
-  MSTATE_RESOLVING,    /* 3 - awaiting the resolve to finalize */
-  MSTATE_CONNECTING,   /* 4 - awaiting the TCP connect to finalize */
-  MSTATE_TUNNELING,    /* 5 - awaiting HTTPS proxy SSL initialization to
+  MSTATE_SETUP,        /* 2 - start a new transfer */
+  MSTATE_CONNECT,      /* 3 - resolve/connect has been sent off */
+  MSTATE_RESOLVING,    /* 4 - awaiting the resolve to finalize */
+  MSTATE_CONNECTING,   /* 5 - awaiting the TCP connect to finalize */
+  MSTATE_TUNNELING,    /* 6 - awaiting HTTPS proxy SSL initialization to
                           complete and/or proxy CONNECT to finalize */
-  MSTATE_PROTOCONNECT, /* 6 - initiate protocol connect procedure */
-  MSTATE_PROTOCONNECTING, /* 7 - completing the protocol-specific connect
+  MSTATE_PROTOCONNECT, /* 7 - initiate protocol connect procedure */
+  MSTATE_PROTOCONNECTING, /* 8 - completing the protocol-specific connect
                              phase */
-  MSTATE_DO,           /* 8 - start send off the request (part 1) */
-  MSTATE_DOING,        /* 9 - sending off the request (part 1) */
-  MSTATE_DOING_MORE,   /* 10 - send off the request (part 2) */
-  MSTATE_DID,          /* 11 - done sending off request */
-  MSTATE_PERFORMING,   /* 12 - transfer data */
-  MSTATE_RATELIMITING, /* 13 - wait because limit-rate exceeded */
-  MSTATE_DONE,         /* 14 - post data transfer operation */
-  MSTATE_COMPLETED,    /* 15 - operation complete */
-  MSTATE_MSGSENT,      /* 16 - the operation complete message is sent */
-  MSTATE_LAST          /* 17 - not a true state, never use this */
+  MSTATE_DO,           /* 9 - start send off the request (part 1) */
+  MSTATE_DOING,        /* 10 - sending off the request (part 1) */
+  MSTATE_DOING_MORE,   /* 11 - send off the request (part 2) */
+  MSTATE_DID,          /* 12 - done sending off request */
+  MSTATE_PERFORMING,   /* 13 - transfer data */
+  MSTATE_RATELIMITING, /* 14 - wait because limit-rate exceeded */
+  MSTATE_DONE,         /* 15 - post data transfer operation */
+  MSTATE_COMPLETED,    /* 16 - operation complete */
+  MSTATE_MSGSENT,      /* 17 - the operation complete message is sent */
+  MSTATE_LAST          /* 18 - not a true state, never use this */
 } CURLMstate;
 
 /* we support N sockets per easy handle. Set the corresponding bit to what
