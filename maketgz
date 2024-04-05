@@ -30,6 +30,7 @@
 
 set -eu
 
+export LC_ALL=C
 export TZ=UTC
 
 version="${1:-}"
@@ -213,7 +214,7 @@ makezip() {
   mkdir "$tempdir"
   cd "$tempdir"
   gzip -dc "../$targz" | tar -xf -
-  find . | zip "$zip" -@ >/dev/null
+  find . | sort | zip -9 -X "$zip" -@ >/dev/null
   mv "$zip" ../
   cd ..
   rm -rf "$tempdir"
