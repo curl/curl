@@ -46,12 +46,6 @@ rem ***************************************************************************
 
   if /i "%~1" == "pre" (
     set VERSION=PRE
-  ) else if /i "%~1" == "vc10" (
-    set VERSION=VC10
-  ) else if /i "%~1" == "vc11" (
-    set VERSION=VC11
-  ) else if /i "%~1" == "vc12" (
-    set VERSION=VC12
   ) else if /i "%~1" == "vc14" (
     set VERSION=VC14
   ) else if /i "%~1" == "vc14.10" (
@@ -85,58 +79,10 @@ rem ***************************************************************************
     )
   )
   if "%VERSION%" == "PRE" goto success
-  if "%VERSION%" == "VC10" goto vc10
-  if "%VERSION%" == "VC11" goto vc11
-  if "%VERSION%" == "VC12" goto vc12
   if "%VERSION%" == "VC14" goto vc14
   if "%VERSION%" == "VC14.10" goto vc14.10
   if "%VERSION%" == "VC14.20" goto vc14.20
   if "%VERSION%" == "VC14.30" goto vc14.30
-
-:vc10
-  echo.
-
-  if "%MODE%" == "GENERATE" (
-    echo Generating VC10 project files
-    call :generate vcxproj Windows\VC10\src\curl.tmpl Windows\VC10\src\curl.vcxproj
-    call :generate vcxproj Windows\VC10\lib\libcurl.tmpl Windows\VC10\lib\libcurl.vcxproj
-  ) else (
-    echo Removing VC10 project files
-    call :clean Windows\VC10\src\curl.vcxproj
-    call :clean Windows\VC10\lib\libcurl.vcxproj
-  )
-
-  if not "%VERSION%" == "ALL" goto success
-
-:vc11
-  echo.
-
-  if "%MODE%" == "GENERATE" (
-    echo Generating VC11 project files
-    call :generate vcxproj Windows\VC11\src\curl.tmpl Windows\VC11\src\curl.vcxproj
-    call :generate vcxproj Windows\VC11\lib\libcurl.tmpl Windows\VC11\lib\libcurl.vcxproj
-  ) else (
-    echo Removing VC11 project files
-    call :clean Windows\VC11\src\curl.vcxproj
-    call :clean Windows\VC11\lib\libcurl.vcxproj
-  )
-
-  if not "%VERSION%" == "ALL" goto success
-
-:vc12
-  echo.
-
-  if "%MODE%" == "GENERATE" (
-    echo Generating VC12 project files
-    call :generate vcxproj Windows\VC12\src\curl.tmpl Windows\VC12\src\curl.vcxproj
-    call :generate vcxproj Windows\VC12\lib\libcurl.tmpl Windows\VC12\lib\libcurl.vcxproj
-  ) else (
-    echo Removing VC12 project files
-    call :clean Windows\VC12\src\curl.vcxproj
-    call :clean Windows\VC12\lib\libcurl.vcxproj
-  )
-
-  if not "%VERSION%" == "ALL" goto success
 
 :vc14
   echo.
@@ -281,7 +227,7 @@ rem
 
 rem Generates a single file xml element.
 rem
-rem %1 - Project Type (vcxproj for VC10, VC11, VC12, VC14, VC14.10, VC14.20 and VC14.30)
+rem %1 - Project Type (vcxproj for VC14, VC14.10, VC14.20 and VC14.30)
 rem %2 - Directory (src, lib, lib\vauth, lib\vquic, lib\vssh, lib\vtls)
 rem %3 - Source filename
 rem %4 - Output project file
@@ -372,9 +318,6 @@ rem
   echo What to generate:
   echo.
   echo pre       - Prerequisites only
-  echo vc10      - Use Visual Studio 2010
-  echo vc11      - Use Visual Studio 2012
-  echo vc12      - Use Visual Studio 2013
   echo vc14      - Use Visual Studio 2015
   echo vc14.10   - Use Visual Studio 2017
   echo vc14.20   - Use Visual Studio 2019
