@@ -85,7 +85,7 @@ if test -z "$only"; then
   PLIST="$PLIST$ext"
 fi
 
-# requires a date command that knows + for format
+# requires a date command that knows + for format and -d for date input
 timestamp=${SOURCE_DATE_EPOCH:-$(date +"%s")}
 datestamp=$(date -d "@$timestamp" +"%F")
 
