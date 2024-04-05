@@ -93,13 +93,13 @@ datestamp=$(date -d "@$timestamp" +"%F")
 
 # Replace version number in header file:
 sed -i.bak \
-    -e "s/^#define LIBCURL_VERSION .*/#define LIBCURL_VERSION \"$libversion\"/g" \
-    -e "s/^#define LIBCURL_VERSION_NUM .*/#define LIBCURL_VERSION_NUM 0x$numeric/g" \
-    -e "s/^#define LIBCURL_VERSION_MAJOR .*/#define LIBCURL_VERSION_MAJOR $major/g" \
-    -e "s/^#define LIBCURL_VERSION_MINOR .*/#define LIBCURL_VERSION_MINOR $minor/g" \
-    -e "s/^#define LIBCURL_VERSION_PATCH .*/#define LIBCURL_VERSION_PATCH $patch/g" \
-    -e "s/^#define LIBCURL_TIMESTAMP .*/#define LIBCURL_TIMESTAMP \"$datestamp\"/g" \
-    "$HEADER"
+  -e "s/^#define LIBCURL_VERSION .*/#define LIBCURL_VERSION \"$libversion\"/g" \
+  -e "s/^#define LIBCURL_VERSION_NUM .*/#define LIBCURL_VERSION_NUM 0x$numeric/g" \
+  -e "s/^#define LIBCURL_VERSION_MAJOR .*/#define LIBCURL_VERSION_MAJOR $major/g" \
+  -e "s/^#define LIBCURL_VERSION_MINOR .*/#define LIBCURL_VERSION_MINOR $minor/g" \
+  -e "s/^#define LIBCURL_VERSION_PATCH .*/#define LIBCURL_VERSION_PATCH $patch/g" \
+  -e "s/^#define LIBCURL_TIMESTAMP .*/#define LIBCURL_TIMESTAMP \"$datestamp\"/g" \
+  "$HEADER"
 rm -f "$HEADER.bak"
 
 # Replace version number in header file:
@@ -183,8 +183,8 @@ make -sj dist "VERSION=$version"
 res=$?
 
 if test "$res" != 0; then
-    echo "make dist failed"
-    exit 2
+  echo "make dist failed"
+  exit 2
 fi
 
 ############################################################################
