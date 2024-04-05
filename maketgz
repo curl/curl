@@ -85,9 +85,9 @@ if test -z "$only"; then
   PLIST="$PLIST$ext"
 fi
 
-# requires a date command that knows + for format and -d for date input
+# requires a date command that knows + for format
 timestamp=${SOURCE_DATE_EPOCH:-$(date +"%s")}
-datestamp=$(date -d "@$timestamp" +"%F")
+datestamp=$(date -d "@$timestamp" +"%F" 2>/dev/null || date -r "$timestamp" +"%F" 2>/dev/null)
 
 # Replace version number in header file:
 sed -i.bak \
