@@ -152,7 +152,7 @@ static size_t my_write_cb(char *buf, size_t nitems, size_t buflen,
 
 static int my_progress_cb(void *userdata,
                           curl_off_t dltotal, curl_off_t dlnow,
-		          curl_off_t ultotal, curl_off_t ulnow)
+                          curl_off_t ultotal, curl_off_t ulnow)
 {
   struct transfer *t = userdata;
   (void)ultotal;
