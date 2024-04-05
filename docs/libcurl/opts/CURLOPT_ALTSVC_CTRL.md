@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_ALTSVC (3)
   - CURLOPT_CONNECT_TO (3)
   - CURLOPT_RESOLVE (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -69,10 +71,6 @@ Alt-Svc handling is disabled by default. If CURLOPT_ALTSVC(3) is set,
 CURLOPT_ALTSVC_CTRL(3) has a default value corresponding to
 CURLALTSVC_H1 | CURLALTSVC_H2 | CURLALTSVC_H3 - the HTTP/2 and HTTP/3 bits are
 only set if libcurl was built with support for those versions.
-
-# PROTOCOLS
-
-HTTPS
 
 # EXAMPLE
 

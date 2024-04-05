@@ -8,6 +8,11 @@ See-also:
   - CURLOPT_PROXY_SSLVERSION (3)
   - CURLOPT_SSLVERSION (3)
   - CURLOPT_SSL_OPTIONS (3)
+Protocol:
+  - FTP
+  - SMTP
+  - POP3
+  - IMAP
 ---
 
 # NAME
@@ -52,10 +57,6 @@ Require SSL for all communication or fail with *CURLE_USE_SSL_FAILED*.
 # DEFAULT
 
 CURLUSESSL_NONE
-
-# PROTOCOLS
-
-FTP, SMTP, POP3, IMAP, LDAP
 
 # EXAMPLE
 

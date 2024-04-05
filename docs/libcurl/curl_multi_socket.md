@@ -10,6 +10,8 @@ See-also:
   - curl_multi_info_read (3)
   - curl_multi_init (3)
   - the hiperfifo.c example
+Protocol:
+  - All
 ---
 
 # NAME

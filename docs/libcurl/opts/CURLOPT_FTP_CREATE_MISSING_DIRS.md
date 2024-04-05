@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_FTP_CREATE_MISSING_DIRS
 Section: 3
 Source: libcurl
+Protocol:
+  - FTP
 See-also:
   - CURLOPT_FTP_FILEMETHOD (3)
   - CURLOPT_FTP_USE_EPSV (3)
@@ -52,10 +54,6 @@ but then another connection does **MKD** before this connection and thus
 # DEFAULT
 
 CURLFTP_CREATE_DIR_NONE (0)
-
-# PROTOCOLS
-
-FTP and SFTP
 
 # EXAMPLE
 

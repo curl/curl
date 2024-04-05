@@ -7,7 +7,7 @@ Tags: Versions
 Protocols: TLS
 Added: 7.54.0
 Requires: TLS
-Help: Set maximum allowed TLS version
+Help: Maximum allowed TLS version
 Category: tls
 Multi: single
 See-also:

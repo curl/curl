@@ -10,6 +10,8 @@ See-also:
   - CURLOPT_MAXREDIRS (3)
   - CURLOPT_REDIR_PROTOCOLS_STR (3)
   - CURLOPT_USERPWD (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -49,10 +51,6 @@ again and again as the following hosts can keep redirecting to new hosts.
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

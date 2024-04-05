@@ -1,0 +1,60 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+CURLOPT_READFUNCTION
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data crlf="yes" nocheck="yes">
+HTTP/1.1 200 OK
+Content-Length: 6
+Content-Type: text/html
+
+-foo-
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+
+<name>
+Chunked HTTP POST from callback with CURLOPT_POSTFIELDSIZE set
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+
+<command>
+http://%HOSTIP:%HTTPPORT/boom
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="yes">
+POST /boom HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Transfer-Encoding: chunked
+Content-Type: application/x-www-form-urlencoded
+
+3
+one
+3
+two
+5
+three
+4
+four
+0
+
+</protocol>
+</verify>
+</testcase>

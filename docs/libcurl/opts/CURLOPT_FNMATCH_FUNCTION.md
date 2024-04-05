@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_DEBUGFUNCTION (3)
   - CURLOPT_FNMATCH_DATA (3)
   - CURLOPT_WILDCARDMATCH (3)
+Protocol:
+  - FTP
 ---
 
 # NAME
@@ -41,10 +43,6 @@ error occurred.
 # DEFAULT
 
 NULL == an internal function for wildcard matching.
-
-# PROTOCOLS
-
-FTP
 
 # EXAMPLE
 

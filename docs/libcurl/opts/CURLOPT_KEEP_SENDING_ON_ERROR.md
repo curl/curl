@@ -8,6 +8,8 @@ See-also:
   - CURLINFO_RESPONSE_CODE (3)
   - CURLOPT_FAILONERROR (3)
   - CURLOPT_HTTPHEADER (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -38,10 +40,6 @@ Most applications do not need this option.
 # DEFAULT
 
 0, stop sending on error
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

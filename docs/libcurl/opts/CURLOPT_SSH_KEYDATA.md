@@ -7,6 +7,9 @@ Source: libcurl
 See-also:
   - CURLOPT_SSH_KEYDATA (3)
   - CURLOPT_SSH_KNOWNHOSTS (3)
+Protocol:
+  - SFTP
+  - SCP
 ---
 
 # NAME
@@ -29,10 +32,6 @@ callback set with CURLOPT_SSH_KEYFUNCTION(3).
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-SFTP and SCP
 
 # EXAMPLE
 

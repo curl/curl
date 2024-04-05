@@ -8,6 +8,10 @@ See-also:
   - CURLINFO_SSL_ENGINES (3)
   - CURLOPT_SSLENGINE_DEFAULT (3)
   - CURLOPT_SSLKEY (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
 ---
 
 # NAME
@@ -34,10 +38,6 @@ option.
 
 NULL
 
-# PROTOCOLS
-
-All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
-
 # EXAMPLE
 
 ~~~c
@@ -56,7 +56,7 @@ int main(void)
 
 # AVAILABILITY
 
-Only if the SSL backend is OpenSSL built with engine support.
+Only if OpenSSL is built with engine support.
 
 # RETURN VALUE
 

@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_MAX_RECV_SPEED_LARGE (3)
   - CURLOPT_UPLOAD_BUFFERSIZE (3)
   - CURLOPT_WRITEFUNCTION (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -50,10 +52,6 @@ allocated as long as there are active transfers.
 # DEFAULT
 
 CURL_MAX_WRITE_SIZE (16kB)
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: fail-early
-Help: Fail on first transfer error, do not continue
+Help: Fail on first transfer error
 Added: 7.52.0
 Category: curl
 Multi: boolean

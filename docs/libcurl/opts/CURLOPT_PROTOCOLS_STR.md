@@ -10,6 +10,8 @@ See-also:
   - CURLOPT_REDIR_PROTOCOLS_STR (3)
   - CURLOPT_URL (3)
   - curl_version_info (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -53,10 +55,6 @@ way to figure out the protocol used in a previous transfer.
 # DEFAULT
 
 All protocols built-in
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

@@ -1,3 +1,9 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 # curl connection filters
 
 Connection filters is a design in the internals of curl, not visible in its
@@ -300,4 +306,3 @@ conn[curl.se] --> HTTPS-CONNECT --> NULL
 conn[curl.se] --> HTTPS-CONNECT --> SETUP[QUIC] --> HAPPY-EYEBALLS --> HTTP/3[151.101.1.91]:443
 * transfer
 ```
-

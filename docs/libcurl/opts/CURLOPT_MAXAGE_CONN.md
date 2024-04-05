@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_FRESH_CONNECT (3)
   - CURLOPT_MAXLIFETIME_CONN (3)
   - CURLOPT_TIMEOUT (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -40,10 +42,6 @@ cache that is older than this set *age*, it is closed instead.
 # DEFAULT
 
 Default maximum age is set to 118 seconds.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

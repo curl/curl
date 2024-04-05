@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_PRE_PROXY (3)
   - CURLOPT_PROXYPORT (3)
   - CURLOPT_PROXYTYPE (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -111,10 +113,6 @@ Default is NULL, meaning no proxy is used.
 
 When you set a hostname to use, do not assume that there is any particular
 single port number used widely for proxies. Specify it!
-
-# PROTOCOLS
-
-All except file://. Note that some protocols do not work well over proxy.
 
 # EXAMPLE
 

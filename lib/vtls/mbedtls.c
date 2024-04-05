@@ -110,7 +110,8 @@ struct mbed_ssl_backend_data {
 };
 
 /* apply threading? */
-#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+#if (defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)) || \
+    defined(_WIN32)
 #define THREADING_SUPPORT
 #endif
 
@@ -123,7 +124,6 @@ static mbedtls_entropy_context ts_entropy;
 
 static int entropy_init_initialized = 0;
 
-/* start of entropy_init_mutex() */
 static void entropy_init_mutex(mbedtls_entropy_context *ctx)
 {
   /* lock 0 = entropy_init_mutex() */
@@ -134,9 +134,18 @@ static void entropy_init_mutex(mbedtls_entropy_context *ctx)
   }
   Curl_mbedtlsthreadlock_unlock_function(0);
 }
-/* end of entropy_init_mutex() */
 
-/* start of entropy_func_mutex() */
+static void entropy_cleanup_mutex(mbedtls_entropy_context *ctx)
+{
+  /* lock 0 = use same lock as init */
+  Curl_mbedtlsthreadlock_lock_function(0);
+  if(entropy_init_initialized == 1) {
+    mbedtls_entropy_free(ctx);
+    entropy_init_initialized = 0;
+  }
+  Curl_mbedtlsthreadlock_unlock_function(0);
+}
+
 static int entropy_func_mutex(void *data, unsigned char *output, size_t len)
 {
   int ret;
@@ -147,7 +156,6 @@ static int entropy_func_mutex(void *data, unsigned char *output, size_t len)
 
   return ret;
 }
-/* end of entropy_func_mutex() */
 
 #endif /* THREADING_SUPPORT */
 
@@ -377,7 +385,6 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
 #ifdef THREADING_SUPPORT
-  entropy_init_mutex(&ts_entropy);
   mbedtls_ctr_drbg_init(&backend->ctr_drbg);
 
   ret = mbedtls_ctr_drbg_seed(&backend->ctr_drbg, entropy_func_mutex,
@@ -680,14 +687,13 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
                               &backend->clicert, &backend->pk);
   }
 
-  if(connssl->peer.sni) {
-    if(mbedtls_ssl_set_hostname(&backend->ssl, connssl->peer.sni)) {
-      /* mbedtls_ssl_set_hostname() sets the name to use in CN/SAN checks and
-         the name to set in the SNI extension. So even if curl connects to a
-         host specified as an IP address, this function must be used. */
-      failf(data, "Failed to set SNI");
-      return CURLE_SSL_CONNECT_ERROR;
-    }
+  if(mbedtls_ssl_set_hostname(&backend->ssl, connssl->peer.sni?
+                              connssl->peer.sni : connssl->peer.hostname)) {
+    /* mbedtls_ssl_set_hostname() sets the name to use in CN/SAN checks and
+       the name to set in the SNI extension. So even if curl connects to a
+       host specified as an IP address, this function must be used. */
+    failf(data, "Failed to set SNI");
+    return CURLE_SSL_CONNECT_ERROR;
   }
 
 #ifdef HAS_ALPN
@@ -1246,14 +1252,19 @@ static CURLcode mbedtls_connect(struct Curl_cfilter *cf,
  */
 static int mbedtls_init(void)
 {
-  return Curl_mbedtlsthreadlock_thread_setup();
+  if(!Curl_mbedtlsthreadlock_thread_setup())
+    return 0;
+#ifdef THREADING_SUPPORT
+  entropy_init_mutex(&ts_entropy);
+#endif
+  return 1;
 }
 
 static void mbedtls_cleanup(void)
 {
 #ifdef THREADING_SUPPORT
-  mbedtls_entropy_free(&ts_entropy);
-#endif /* THREADING_SUPPORT */
+  entropy_cleanup_mutex(&ts_entropy);
+#endif
   (void)Curl_mbedtlsthreadlock_thread_cleanup();
 }
 

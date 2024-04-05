@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_FNMATCH_FUNCTION (3)
   - CURLOPT_WILDCARDMATCH (3)
+Protocol:
+  - FTP
 ---
 
 # NAME
@@ -30,10 +32,6 @@ the CURLOPT_FNMATCH_FUNCTION(3).
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-FTP
 
 # EXAMPLE
 

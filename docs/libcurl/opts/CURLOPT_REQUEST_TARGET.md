@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_HTTPGET (3)
   - CURLOPT_PATH_AS_IS (3)
   - CURLOPT_URL (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -34,10 +36,6 @@ other safe guards. That includes white space and control characters.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

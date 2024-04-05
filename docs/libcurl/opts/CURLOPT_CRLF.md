@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_CONV_FROM_NETWORK_FUNCTION (3)
   - CURLOPT_CONV_TO_NETWORK_FUNCTION (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -32,10 +34,6 @@ This is a legacy option of questionable use.
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

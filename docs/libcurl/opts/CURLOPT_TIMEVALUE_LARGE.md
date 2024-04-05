@@ -8,6 +8,8 @@ See-also:
   - CURLINFO_FILETIME (3)
   - CURLOPT_TIMECONDITION (3)
   - CURLOPT_TIMEVALUE (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -36,10 +38,6 @@ to be used to set dates beyond the year 2038.
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-HTTP, FTP, RTSP, and FILE
 
 # EXAMPLE
 

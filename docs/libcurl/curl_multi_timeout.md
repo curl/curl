@@ -9,6 +9,8 @@ See-also:
   - curl_multi_info_read (3)
   - curl_multi_setopt (3)
   - curl_multi_socket (3)
+Protocol:
+  - All
 ---
 
 # NAME

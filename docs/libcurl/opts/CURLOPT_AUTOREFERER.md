@@ -10,6 +10,8 @@ See-also:
   - CURLINFO_REFERER (3)
   - CURLOPT_FOLLOWLOCATION (3)
   - CURLOPT_REFERER (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -40,10 +42,6 @@ referer header after the transfer.
 # DEFAULT
 
 0, disabled
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

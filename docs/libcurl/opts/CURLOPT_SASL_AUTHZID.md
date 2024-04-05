@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_PASSWORD (3)
   - CURLOPT_USERNAME (3)
   - CURLOPT_USERPWD (3)
+Protocol:
+  - IMAP
 ---
 
 # NAME
@@ -40,10 +42,6 @@ access to, or a shared mailbox for example.
 # DEFAULT
 
 blank
-
-# PROTOCOLS
-
-IMAP, LDAP, POP3 and SMTP
 
 # EXAMPLE
 

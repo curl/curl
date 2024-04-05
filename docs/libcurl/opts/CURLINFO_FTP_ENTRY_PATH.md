@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - FTP
 ---
 
 # NAME
@@ -31,10 +33,6 @@ something is wrong.
 The **path** pointer is NULL or points to private memory. You MUST NOT free
 - it gets freed when you call curl_easy_cleanup(3) on the corresponding
 CURL handle.
-
-# PROTOCOLS
-
-FTP(S) and SFTP
 
 # EXAMPLE
 

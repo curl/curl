@@ -1,3 +1,9 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 # curldown
 
 A markdown-like syntax for libcurl man pages.
@@ -67,13 +73,36 @@ Each curldown starts with a header with meta-data:
     Title: CURLOPT_AWS_SIGV4
     Section: 3
     Source: libcurl
+    Protocol:
+      - HTTP
     See-also:
       - CURLOPT_HEADEROPT (3)
       - CURLOPT_HTTPAUTH (3)
+    TLS-backend:
+      - [name]
     ---
 
 All curldown files *must* have all the headers present and at least one
 `See-also:` entry specified.
+
+If the man page is for section 3 (library related). The `Protocol` list must
+contain at least one protocol, which can be `*` if the option is virtually for
+everything. If `*` is used, it must be the only listed protocol. Recognized
+protocols are either URL schemes (in uppercase), `TLS` or `TCP`.
+
+If the `Protocol` list contains `TLS`, then there must also be a `TLS-backend`
+list, specifying `All` or a list of what TLS backends that work with this
+option. The available TLS backends are:
+
+- `BearSSL`
+- `GnuTLS`
+- `mbedTLS`
+- `OpenSSL` (also covers BoringSSL, libressl, quictls, AWS-LC and AmiSSL)
+- `rustls`
+- `Schannel`
+- `Secure Transport`
+- `wolfSSL`
+- `All`: all TLS backends
 
 Following the header in the file, is the manual page using markdown-like
 syntax:

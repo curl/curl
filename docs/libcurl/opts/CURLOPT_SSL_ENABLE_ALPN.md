@@ -7,6 +7,10 @@ Source: libcurl
 See-also:
   - CURLOPT_SSL_ENABLE_NPN (3)
   - CURLOPT_SSL_OPTIONS (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - All
 ---
 
 # NAME
@@ -30,10 +34,6 @@ is built to use supports it), which can be used to negotiate http2.
 # DEFAULT
 
 1, enabled
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

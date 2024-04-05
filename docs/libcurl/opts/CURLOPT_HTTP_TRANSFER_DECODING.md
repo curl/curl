@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_HTTP_TRANSFER_DECODING
 Section: 3
 Source: libcurl
+Protocol:
+  - HTTP
 See-also:
   - CURLOPT_ACCEPT_ENCODING (3)
   - CURLOPT_HTTP_CONTENT_DECODING (3)
@@ -31,10 +33,6 @@ does chunked transfer decoding by default unless this option is set to zero.
 # DEFAULT
 
 1
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

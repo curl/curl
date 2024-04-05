@@ -6,6 +6,9 @@ Section: 3
 Source: libcurl
 See-also:
   - CURLOPT_SSH_HOSTKEYFUNCTION (3)
+Protocol:
+  - SFTP
+  - SCP
 ---
 
 # NAME
@@ -28,10 +31,6 @@ the callback set with CURLOPT_SSH_HOSTKEYFUNCTION(3).
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-SCP and SFTP
 
 # EXAMPLE
 

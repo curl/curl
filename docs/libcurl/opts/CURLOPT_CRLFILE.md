@@ -8,6 +8,12 @@ See-also:
   - CURLOPT_PROXY_CRLFILE (3)
   - CURLOPT_SSL_VERIFYHOST (3)
   - CURLOPT_SSL_VERIFYPEER (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - GnuTLS
+  - mbedTLS
+  - OpenSSL
 ---
 
 # NAME
@@ -51,10 +57,6 @@ option.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All TLS-based protocols
 
 # EXAMPLE
 

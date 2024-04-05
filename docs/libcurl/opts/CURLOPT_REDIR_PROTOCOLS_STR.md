@@ -10,6 +10,8 @@ See-also:
   - CURLOPT_PROTOCOLS (3)
   - CURLOPT_PROTOCOLS_STR (3)
   - CURLOPT_REDIR_PROTOCOLS (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -59,10 +61,6 @@ HTTP, HTTPS, FTP and FTPS (Added in 7.65.2).
 
 Older versions defaulted to all protocols except FILE, SCP and since 7.40.0
 SMB and SMBS.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

@@ -17,9 +17,9 @@ Example:
 
 # `--alt-svc`
 
-This option enables the alt-svc parser in curl. If the filename points to an
-existing alt-svc cache file, that gets used. After a completed transfer, the
-cache is saved to the filename again if it has been modified.
+Enable the alt-svc parser. If the filename points to an existing alt-svc cache
+file, that gets used. After a completed transfer, the cache is saved to the
+filename again if it has been modified.
 
 Specify a "" filename (zero length) to avoid loading/saving and make curl just
 handle the cache in memory.

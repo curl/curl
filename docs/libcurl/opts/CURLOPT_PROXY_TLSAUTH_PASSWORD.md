@@ -9,6 +9,11 @@ See-also:
   - CURLOPT_PROXY_TLSAUTH_USERNAME (3)
   - CURLOPT_TLSAUTH_TYPE (3)
   - CURLOPT_TLSAUTH_USERNAME (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
+  - GnuTLS
 ---
 
 # NAME
@@ -38,10 +43,6 @@ option.
 
 NULL
 
-# PROTOCOLS
-
-All
-
 # EXAMPLE
 
 ~~~c
@@ -63,7 +64,7 @@ int main(void)
 
 # AVAILABILITY
 
-Added in 7.52.0, with the OpenSSL and GnuTLS backends only
+Added in 7.52.0.
 
 # RETURN VALUE
 

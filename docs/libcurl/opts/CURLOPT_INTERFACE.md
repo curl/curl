@@ -4,9 +4,12 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_INTERFACE
 Section: 3
 Source: libcurl
+Protocol:
+  - All
 See-also:
   - CURLOPT_SOCKOPTFUNCTION (3)
   - CURLOPT_TCP_NODELAY (3)
+  - CURLOPT_LOCALPORT (3)
 ---
 
 # NAME
@@ -28,12 +31,12 @@ outgoing network interface. The name can be an interface name, an IP address,
 or a hostname.
 
 If the parameter starts with "if!" then it is treated only as an interface
-name. If the parameter starts with &"host!" it is treated as either an IP
+name. If the parameter starts with "host!" it is treated as either an IP
 address or a hostname.
 
 If "if!" is specified but the parameter does not match an existing interface,
-*CURLE_INTERFACE_FAILED* is returned from the libcurl function used to
-perform the transfer.
+*CURLE_INTERFACE_FAILED* is returned from the libcurl function used to perform
+the transfer.
 
 libcurl does not support using network interface names for this option on
 Windows.
@@ -49,10 +52,6 @@ option.
 # DEFAULT
 
 NULL, use whatever the TCP stack finds suitable
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

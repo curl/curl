@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLINFO_FILETIME (3)
   - CURLOPT_TIMEVALUE (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -36,10 +38,6 @@ option can be used after a transfer to learn if a zero-byte successful
 # DEFAULT
 
 CURL_TIMECOND_NONE (0)
-
-# PROTOCOLS
-
-HTTP, FTP, RTSP, and FILE
 
 # EXAMPLE
 

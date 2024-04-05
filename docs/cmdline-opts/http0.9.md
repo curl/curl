@@ -18,7 +18,7 @@ Example:
 
 # `--http0.9`
 
-Tells curl to be fine with HTTP version 0.9 response.
+Accept an HTTP version 0.9 response.
 
 HTTP/0.9 is a response without headers and therefore you can also connect with
 this to non-HTTP servers and still get a response since curl simply

@@ -11,6 +11,8 @@ See-also:
   - libcurl-easy (3)
   - libcurl-errors (3)
   - libcurl-multi (3)
+Protocol:
+  - All
 ---
 
 # NAME

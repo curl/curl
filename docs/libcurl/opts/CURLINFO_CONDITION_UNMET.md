@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_TIMEVALUE (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -33,10 +35,6 @@ because it did not fulfill the condition. The long this argument points to
 gets a zero stored if the condition instead was met. This can also return 1 if
 the server responded with a 304 HTTP status code, for example after sending a
 custom "If-Match-*" header.
-
-# PROTOCOLS
-
-HTTP and some
 
 # EXAMPLE
 

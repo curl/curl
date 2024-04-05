@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_FTP_SSL_CCC
 Section: 3
 Source: libcurl
+Protocol:
+  - FTP
 See-also:
   - CURLOPT_FTPSSLAUTH (3)
   - CURLOPT_PROTOCOLS_STR (3)
@@ -46,10 +48,6 @@ Initiate the shutdown and wait for a reply.
 # DEFAULT
 
 CURLFTPSSL_CCC_NONE
-
-# PROTOCOLS
-
-FTP
 
 # EXAMPLE
 

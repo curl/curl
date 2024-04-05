@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_FOLLOWLOCATION (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -35,10 +37,6 @@ the same method the first request would use.
 The **methodp** pointer is NULL or points to private memory. You MUST NOT
 free - it gets freed when you call curl_easy_cleanup(3) on the
 corresponding CURL handle.
-
-# PROTOCOLS
-
-HTTP(S)
 
 # EXAMPLE
 

@@ -6,6 +6,8 @@ Section: 3
 Source: libcurl
 See-also:
   - curl_easy_setopt (3)
+Protocol:
+  - All
 ---
 
 # NAME

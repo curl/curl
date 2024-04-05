@@ -8,6 +8,16 @@ See-also:
   - CURLINFO_TLS_SESSION (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - BearSSL
+  - GnuTLS
+  - mbedTLS
+  - OpenSSL
+  - Schannel
+  - Secure Transport
+  - wolfSSL
 ---
 
 # NAME
@@ -60,10 +70,6 @@ the active ("in use") SSL connection, with the following underlying types:
 ## GnuTLS
 
 **gnutls_session_t**
-
-## NSS
-
-**PRFileDesc ***
 
 ## OpenSSL
 
@@ -124,10 +130,6 @@ That is safer and does not suffer from any of the problems above.
 How are you using this option? Are you affected by any of these limitations?
 Please let us know by making a comment at
 https://github.com/curl/curl/issues/685
-
-# PROTOCOLS
-
-All TLS-based
 
 # EXAMPLE
 

@@ -10,6 +10,15 @@ See-also:
   - CURLOPT_SSLVERSION (3)
   - CURLOPT_SSL_CIPHER_LIST (3)
   - CURLOPT_TLS13_CIPHERS (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
+  - BearSSL
+  - Schannel
+  - Secure Transport
+  - wolfSSL
+  - GnuTLS
 ---
 
 # NAME
@@ -57,10 +66,6 @@ option.
 # DEFAULT
 
 NULL, use internal default
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

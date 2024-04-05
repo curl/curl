@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_HTTPPOST (3)
   - CURLOPT_POST (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -33,10 +35,6 @@ sent anyway.
 # DEFAULT
 
 1000 milliseconds
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

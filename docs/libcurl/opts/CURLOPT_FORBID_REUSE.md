@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_FRESH_CONNECT (3)
   - CURLOPT_MAXCONNECTS (3)
   - CURLOPT_MAXLIFETIME_CONN (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -36,10 +38,6 @@ Set to 0 to have libcurl keep the connection open for possible later reuse
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-Most
 
 # EXAMPLE
 

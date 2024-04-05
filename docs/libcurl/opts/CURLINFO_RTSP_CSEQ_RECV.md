@@ -8,6 +8,8 @@ See-also:
   - CURLINFO_RTSP_SERVER_CSEQ (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - RTSP
 ---
 
 # NAME
@@ -28,10 +30,6 @@ Pass a pointer to a long to receive the most recently received CSeq from the
 server. If your application encounters a *CURLE_RTSP_CSEQ_ERROR* then you
 may wish to troubleshoot and/or fix the CSeq mismatch by peeking at this
 value.
-
-# PROTOCOLS
-
-RTSP
 
 # EXAMPLE
 

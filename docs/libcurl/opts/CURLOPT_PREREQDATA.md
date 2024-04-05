@@ -8,6 +8,8 @@ See-also:
   - CURLINFO_PRIMARY_IP (3)
   - CURLINFO_PRIMARY_PORT (3)
   - CURLOPT_PREREQFUNCTION (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -30,10 +32,6 @@ argument in the pre-request callback set with CURLOPT_PREREQFUNCTION(3).
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

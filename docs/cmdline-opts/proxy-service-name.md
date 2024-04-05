@@ -16,4 +16,4 @@ Example:
 
 # `--proxy-service-name`
 
-This option allows you to change the service name for proxy negotiation.
+Set the service name for proxy negotiation.

@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_CONNECT_ONLY (3)
   - curl_ws_recv (3)
   - curl_ws_send (3)
+Protocol:
+  - WS
 ---
 
 # NAME
@@ -44,10 +46,6 @@ application.
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-WebSocket
 
 # EXAMPLE
 

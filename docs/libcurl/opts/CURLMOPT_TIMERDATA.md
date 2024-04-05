@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLMOPT_SOCKETFUNCTION (3)
   - CURLMOPT_TIMERFUNCTION (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -32,10 +34,6 @@ callback's **clientp** argument.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

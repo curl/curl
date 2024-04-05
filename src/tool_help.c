@@ -30,6 +30,7 @@
 #include "tool_libinfo.h"
 #include "tool_util.h"
 #include "tool_version.h"
+#include "tool_cb_prg.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -73,8 +74,7 @@ static const struct category_descriptors categories[] = {
   {NULL, NULL, CURLHELP_HIDDEN}
 };
 
-
-static void print_category(curlhelp_t category)
+static void print_category(curlhelp_t category, unsigned int cols)
 {
   unsigned int i;
   size_t longopt = 5;
@@ -91,23 +91,31 @@ static void print_category(curlhelp_t category)
     if(len > longdesc)
       longdesc = len;
   }
-  if(longopt + longdesc > 80)
-    longopt = 80 - longdesc;
+  if(longopt + longdesc > cols)
+    longopt = cols - longdesc;
 
   for(i = 0; helptext[i].opt; ++i)
     if(helptext[i].categories & category) {
-      printf(" %-*s %s\n", (int)longopt, helptext[i].opt, helptext[i].desc);
+      int opt = (int)longopt;
+      size_t desclen = strlen(helptext[i].desc);
+      if(opt + desclen >= (cols - 2)) {
+        if(desclen < (cols - 2))
+          opt = (cols - 3) - (int)desclen;
+        else
+          opt = 0;
+      }
+      printf(" %-*s  %s\n", opt, helptext[i].opt, helptext[i].desc);
     }
 }
 
 /* Prints category if found. If not, it returns 1 */
-static int get_category_content(const char *category)
+static int get_category_content(const char *category, unsigned int cols)
 {
   unsigned int i;
   for(i = 0; categories[i].opt; ++i)
     if(curl_strequal(categories[i].opt, category)) {
       printf("%s: %s\n", categories[i].opt, categories[i].desc);
-      print_category(categories[i].category);
+      print_category(categories[i].category, cols);
       return 0;
     }
   return 1;
@@ -124,6 +132,7 @@ static void get_categories(void)
 
 void tool_help(char *category)
 {
+  unsigned int cols = get_terminal_columns();
   puts("Usage: curl [options...] <url>");
   /* If no category was provided */
   if(!category) {
@@ -131,18 +140,18 @@ void tool_help(char *category)
       "menu is stripped into categories.\nUse \"--help category\" to get "
       "an overview of all categories.\nFor all options use the manual"
       " or \"--help all\".";
-    print_category(CURLHELP_IMPORTANT);
+    print_category(CURLHELP_IMPORTANT, cols);
     puts(category_note);
   }
   /* Lets print everything if "all" was provided */
   else if(curl_strequal(category, "all"))
     /* Print everything except hidden */
-    print_category(~(CURLHELP_HIDDEN));
+    print_category(~(CURLHELP_HIDDEN), cols);
   /* Lets handle the string "category" differently to not print an errormsg */
   else if(curl_strequal(category, "category"))
     get_categories();
   /* Otherwise print category and handle the case if the cat was not found */
-  else if(get_category_content(category)) {
+  else if(get_category_content(category, cols)) {
     puts("Invalid category provided, here is a list of all categories:\n");
     get_categories();
   }

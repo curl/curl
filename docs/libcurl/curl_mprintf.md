@@ -9,6 +9,8 @@ See-also:
   - printf (3)
   - sprintf (3)
   - vprintf (3)
+Protocol:
+  - All
 ---
 
 # NAME

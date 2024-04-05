@@ -8,6 +8,11 @@ See-also:
   - CURLINFO_HTTP_CONNECTCODE (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - HTTP
+  - FTP
+  - SMTP
+  - LDAP
 ---
 
 # NAME
@@ -31,10 +36,6 @@ no server response code has been received.
 
 Note that a proxy's CONNECT response should be read with
 CURLINFO_HTTP_CONNECTCODE(3) and not this.
-
-# PROTOCOLS
-
-HTTP, FTP, SMTP and LDAP
 
 # EXAMPLE
 

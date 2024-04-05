@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_HTTP200ALIASES
 Section: 3
 Source: libcurl
+Protocol:
+  - HTTP
 See-also:
   - CURLOPT_HTTP09_ALLOWED (3)
   - CURLOPT_HTTP_VERSION (3)
@@ -41,10 +43,6 @@ assumed to match HTTP 1.0 when an alias match.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

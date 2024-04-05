@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_HEADEROPT
 Section: 3
 Source: libcurl
+Protocol:
+  - HTTP
 See-also:
   - CURLOPT_HTTPHEADER (3)
   - CURLOPT_PROXYHEADER (3)
@@ -41,10 +43,6 @@ proxy and then CURLOPT_HTTPHEADER(3) headers only to the server.
 # DEFAULT
 
 CURLHEADER_SEPARATE (changed in 7.42.1, used CURLHEADER_UNIFIED before then)
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

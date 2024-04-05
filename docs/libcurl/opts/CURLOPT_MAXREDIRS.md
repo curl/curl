@@ -8,6 +8,8 @@ See-also:
   - CURLINFO_REDIRECT_COUNT (3)
   - CURLINFO_REDIRECT_URL (3)
   - CURLOPT_FOLLOWLOCATION (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -37,10 +39,6 @@ to get stuck in never-ending redirect loops.
 # DEFAULT
 
 30 (since 8.3.0), it was previously unlimited.
-
-# PROTOCOLS
-
-HTTP(S)
 
 # EXAMPLE
 

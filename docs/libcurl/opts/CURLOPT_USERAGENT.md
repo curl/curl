@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_HTTPHEADER (3)
   - CURLOPT_REFERER (3)
   - CURLOPT_REQUEST_TARGET (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -35,10 +37,6 @@ option.
 # DEFAULT
 
 NULL, no User-Agent: header is used by default.
-
-# PROTOCOLS
-
-HTTP, HTTPS
 
 # EXAMPLE
 

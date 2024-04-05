@@ -8,6 +8,8 @@ See-also:
   - CURLINFO_RTSP_CSEQ_RECV (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - RTSP
 ---
 
 # NAME
@@ -33,10 +35,6 @@ retrieve this info before closing the active connection.
 The **id** pointer is NULL or points to private memory. You MUST NOT free -
 it gets freed when you call curl_easy_cleanup(3) on the corresponding
 CURL handle.
-
-# PROTOCOLS
-
-RTSP
 
 # EXAMPLE
 

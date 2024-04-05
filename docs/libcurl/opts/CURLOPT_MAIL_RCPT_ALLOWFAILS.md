@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_MAIL_FROM (3)
   - CURLOPT_MAIL_RCPT (3)
+Protocol:
+  - SMTP
 ---
 
 # NAME
@@ -41,10 +43,6 @@ RCPT TO command.
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-SMTP
 
 # EXAMPLE
 

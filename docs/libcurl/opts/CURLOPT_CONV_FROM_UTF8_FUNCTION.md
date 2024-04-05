@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_CONV_FROM_UTF8_FUNCTION
 Section: 3
 Source: libcurl
+Protocol:
+  - All
 See-also:
   - CURLOPT_CONV_FROM_NETWORK_FUNCTION (3)
   - CURLOPT_CONV_TO_NETWORK_FUNCTION (3)
@@ -66,10 +68,6 @@ You need to override these definitions if they are different on your system.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-TLS-based protocols.
 
 # EXAMPLE
 

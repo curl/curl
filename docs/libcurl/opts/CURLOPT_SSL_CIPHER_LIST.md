@@ -10,6 +10,15 @@ See-also:
   - CURLOPT_SSLVERSION (3)
   - CURLOPT_TLS13_CIPHERS (3)
   - CURLOPT_USE_SSL (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
+  - BearSSL
+  - Schannel
+  - Secure Transport
+  - wolfSSL
+  - GnuTLS
 ---
 
 # NAME
@@ -59,10 +68,6 @@ option.
 # DEFAULT
 
 NULL, use internal default
-
-# PROTOCOLS
-
-All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
 
 # EXAMPLE
 

@@ -8,6 +8,13 @@ See-also:
   - CURLINFO_CAINFO (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
+  - GnuTLS
+  - mbedTLS
+  - wolfSSL
 ---
 
 # NAME
@@ -35,10 +42,6 @@ currently set to be used does not support CURLOPT_CAPATH(3).
 This is a path identifying a directory.
 
 The **path** pointer is set to NULL if there is no default path.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

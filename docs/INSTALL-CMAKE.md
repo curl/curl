@@ -1,10 +1,8 @@
-                                  _   _ ____  _
-                              ___| | | |  _ \| |
-                             / __| | | | |_) | |
-                            | (__| |_| |  _ <| |___
-                             \___|\___/|_| \_\_____|
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-                                How To Compile with CMake
+SPDX-License-Identifier: curl
+-->
 
 # Building with CMake
 
@@ -67,6 +65,13 @@ from there:
 If you want to build in the source tree, it is enough to do this:
 
     $ cmake .
+
+### Build system generator selection
+
+You can override CMake's default by using `-G <generator-name>`. For example
+on Windows with multiple build systems if you have MinGW-w64 then you could use
+`-G "MinGW Makefiles"`.
+[List of generator names](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html).
 
 ## Using `ccmake`
 

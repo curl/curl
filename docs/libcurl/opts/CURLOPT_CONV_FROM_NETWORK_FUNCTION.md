@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_CONV_FROM_UTF8_FUNCTION (3)
   - CURLOPT_CONV_TO_NETWORK_FUNCTION (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -69,10 +71,6 @@ You need to override these definitions if they are different on your system.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-FTP, SMTP, IMAP, POP3
 
 # EXAMPLE
 

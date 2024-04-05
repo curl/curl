@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_POSTFIELDS (3)
   - CURLOPT_POSTFIELDSIZE_LARGE (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -34,10 +36,6 @@ If you post more than 2GB, use CURLOPT_POSTFIELDSIZE_LARGE(3).
 # DEFAULT
 
 -1
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

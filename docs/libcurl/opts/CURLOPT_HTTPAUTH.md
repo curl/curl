@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_HTTPAUTH
 Section: 3
 Source: libcurl
+Protocol:
+  - HTTP
 See-also:
   - CURLOPT_PASSWORD (3)
   - CURLOPT_PROXYAUTH (3)
@@ -120,10 +122,6 @@ see CURLOPT_AWS_SIGV4(3).
 # DEFAULT
 
 CURLAUTH_BASIC
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

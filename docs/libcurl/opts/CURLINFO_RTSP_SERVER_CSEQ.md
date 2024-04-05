@@ -8,6 +8,8 @@ See-also:
   - CURLINFO_RTSP_CSEQ_RECV (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - RTSP
 ---
 
 # NAME
@@ -32,10 +34,6 @@ Listening for server initiated requests is not implemented!
 
 Applications wishing to resume an RTSP session on another connection should
 retrieve this info before closing the active connection.
-
-# PROTOCOLS
-
-RTSP
 
 # EXAMPLE
 

@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: hostpubmd5
 Arg: <md5>
-Help: Acceptable MD5 hash of the host public key
+Help: Acceptable MD5 hash of host public key
 Protocols: SFTP SCP
 Added: 7.17.1
 Category: sftp scp

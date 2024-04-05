@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -29,10 +31,6 @@ counted). Combined with CURLINFO_REDIRECT_COUNT(3) you are able to know how
 many times libcurl successfully reused existing connection(s) or not. See the
 connection options of curl_easy_setopt(3) to see how libcurl tries to make
 persistent connections to save time.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

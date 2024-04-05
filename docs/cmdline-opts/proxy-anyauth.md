@@ -16,5 +16,5 @@ Example:
 
 # `--proxy-anyauth`
 
-Tells curl to pick a suitable authentication method when communicating with
+Automatically pick a suitable authentication method when communicating with
 the given HTTP proxy. This might cause an extra request/response round-trip.

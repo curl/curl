@@ -9,6 +9,13 @@ See-also:
   - CURLOPT_PROXY_SSLKEY (3)
   - CURLOPT_SSH_PRIVATE_KEYFILE (3)
   - CURLOPT_SSLKEY (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
+  - mbedTLS
+  - Schannel
+  - wolfSSL
 ---
 
 # NAME
@@ -38,10 +45,6 @@ option.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-Used with HTTPS proxy
 
 # EXAMPLE
 

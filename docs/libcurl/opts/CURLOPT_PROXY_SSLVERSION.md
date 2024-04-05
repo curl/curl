@@ -9,6 +9,10 @@ See-also:
   - CURLOPT_IPRESOLVE (3)
   - CURLOPT_SSLVERSION (3)
   - CURLOPT_USE_SSL (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - All
 ---
 
 # NAME
@@ -93,10 +97,6 @@ inconsistent depending on the TLS library.
 # DEFAULT
 
 CURL_SSLVERSION_DEFAULT
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

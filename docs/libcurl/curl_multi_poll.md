@@ -9,6 +9,8 @@ See-also:
   - curl_multi_perform (3)
   - curl_multi_wait (3)
   - curl_multi_wakeup (3)
+Protocol:
+  - All
 ---
 
 # NAME

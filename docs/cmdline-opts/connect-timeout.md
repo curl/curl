@@ -2,8 +2,8 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: connect-timeout
-Arg: <fractional seconds>
-Help: Maximum time allowed for connection
+Arg: <seconds>
+Help: Maximum time allowed to connect
 Category: connection
 Added: 7.7
 Multi: single

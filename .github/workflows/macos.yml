@@ -209,7 +209,7 @@ jobs:
             generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9
           - name: LibreSSL
             install: nghttp2 libressl
-            generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DCMAKE_UNITY_BUILD=ON
+            generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
           - name: libssh2
             install: nghttp2 openssl libssh2
             generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCURL_USE_LIBSSH2=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON
@@ -236,7 +236,7 @@ jobs:
 
       - uses: actions/checkout@v4
 
-      - run: cmake -S. -Bbuild -DCURL_WERROR=ON -DPICKY_COMPILER=ON ${{ matrix.build.generate }}
+      - run: cmake -S. -Bbuild -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON ${{ matrix.build.generate }}
         name: 'cmake generate'
 
       - run: cmake --build build

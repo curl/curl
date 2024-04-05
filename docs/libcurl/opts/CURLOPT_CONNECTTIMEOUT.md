@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_LOW_SPEED_LIMIT (3)
   - CURLOPT_MAX_RECV_SPEED_LARGE (3)
   - CURLOPT_TIMEOUT (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -57,10 +59,6 @@ signals to be used unless CURLOPT_NOSIGNAL(3) is set.
 # DEFAULT
 
 300
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

@@ -9,6 +9,8 @@ See-also:
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
   - libcurl-errors (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -68,10 +70,6 @@ transfer returned a **CURLE_PROXY** error. That error code matches the
 **CURLproxycode** set.
 
 The error code is zero (**CURLPX_OK**) if no response code was available.
-
-# PROTOCOLS
-
-All that can be done over SOCKS
 
 # EXAMPLE
 

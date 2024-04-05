@@ -1,3 +1,9 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 # How to get started helping out in the curl project
 
 We are always in need of more help. If you are new to the project and are

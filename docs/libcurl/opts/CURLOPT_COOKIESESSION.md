@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_COOKIE (3)
   - CURLOPT_COOKIEFILE (3)
   - CURLOPT_COOKIEJAR (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -38,10 +40,6 @@ the same session.
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

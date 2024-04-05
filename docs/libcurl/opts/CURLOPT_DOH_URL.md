@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_DNS_CACHE_TIMEOUT (3)
   - CURLOPT_RESOLVE (3)
   - CURLOPT_VERBOSE (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -63,10 +65,6 @@ CURLOPT_FTPPORT(3), a proxy type set to **CURLPROXY_SOCKS4** or
 
 NULL - there is no default DoH URL. If this option is not set, libcurl uses
 the default name resolver.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

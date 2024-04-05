@@ -1,3 +1,9 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 # Features -- what curl can do
 
 ## curl tool

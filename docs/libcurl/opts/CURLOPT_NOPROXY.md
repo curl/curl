@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_NOPROXY
 Section: 3
 Source: libcurl
+Protocol:
+  - All
 See-also:
   - CURLOPT_PROXY (3)
   - CURLOPT_PROXYAUTH (3)
@@ -57,10 +59,6 @@ the same way.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-Most
 
 # EXAMPLE
 

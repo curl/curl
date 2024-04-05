@@ -8,6 +8,13 @@ See-also:
   - CURLINFO_CAPATH (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
+  - GnuTLS
+  - Schannel
+  - Secure Transport
 ---
 
 # NAME
@@ -42,10 +49,6 @@ which is the number of elements in the array. Each certificate's list has
 items with textual information in the format "name:content" such as
 "Subject:Foo", "Issuer:Bar", etc. The items in each list varies depending on
 the SSL backend and the certificate.
-
-# PROTOCOLS
-
-All TLS-based
 
 # EXAMPLE
 

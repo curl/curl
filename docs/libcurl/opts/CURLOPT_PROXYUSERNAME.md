@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_PROXYAUTH (3)
   - CURLOPT_PROXYPASSWORD (3)
   - CURLOPT_USERNAME (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -40,10 +42,6 @@ option.
 # DEFAULT
 
 blank
-
-# PROTOCOLS
-
-Most
 
 # EXAMPLE
 

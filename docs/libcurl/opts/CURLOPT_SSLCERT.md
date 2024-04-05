@@ -8,6 +8,15 @@ See-also:
   - CURLOPT_KEYPASSWD (3)
   - CURLOPT_SSLCERTTYPE (3)
   - CURLOPT_SSLKEY (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
+  - GnuTLS
+  - mbedTLS
+  - Schannel
+  - Secure Transport
+  - wolfSSL
 ---
 
 # NAME
@@ -55,10 +64,6 @@ option.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
 
 # EXAMPLE
 

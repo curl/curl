@@ -8,6 +8,13 @@ See-also:
   - CURLOPT_SSL_CTX_DATA (3)
   - CURLOPT_SSL_VERIFYPEER (3)
   - CURLOPT_CAINFO (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
+  - wolfSSL
+  - mbedTLS
+  - BearSSL
 ---
 
 # NAME
@@ -74,10 +81,6 @@ completed.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
 
 # EXAMPLE
 
@@ -156,10 +159,8 @@ int main(void)
 
 # AVAILABILITY
 
-libcurl built with OpenSSL (added in 7.11.0), wolfSSL (added in 7.42.0), mbedTLS
-(added in 7.54.0) or BearSSL (added in 7.83.0)
-
-No other SSL backend is supported.
+OpenSSL (added in 7.11.0), wolfSSL (added in 7.42.0), mbedTLS (added in
+7.54.0) or BearSSL (added in 7.83.0)
 
 # RETURN VALUE
 

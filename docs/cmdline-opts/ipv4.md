@@ -20,5 +20,5 @@ Example:
 
 # `--ipv4`
 
-This option tells curl to use IPv4 addresses only when resolving hostnames,
-and not for example try IPv6.
+Use IPv4 addresses only when resolving hostnames, and not for example try
+IPv6.

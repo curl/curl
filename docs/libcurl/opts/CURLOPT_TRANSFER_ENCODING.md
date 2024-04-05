@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_ACCEPT_ENCODING (3)
   - CURLOPT_HTTP_TRANSFER_DECODING (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -40,10 +42,6 @@ by both HTTP clients and HTTP servers.
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

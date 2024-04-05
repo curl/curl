@@ -8,6 +8,8 @@ See-also:
   - CURLINFO_PRIMARY_IP (3)
   - CURLINFO_PRIMARY_PORT (3)
   - CURLOPT_PREREQDATA (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -82,10 +84,6 @@ The pointer you set with CURLOPT_PREREQDATA(3).
 # DEFAULT
 
 By default, this is NULL and unused.
-
-# PROTOCOLS
-
-ALL
 
 # EXAMPLE
 

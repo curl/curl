@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: tcp-nodelay
-Help: Use the TCP_NODELAY option
+Help: Set TCP_NODELAY
 Added: 7.11.2
 Category: connection
 Multi: boolean

@@ -10,6 +10,8 @@ See-also:
   - CURLOPT_DNS_USE_GLOBAL_CACHE (3)
   - CURLOPT_MAXAGE_CONN (3)
   - CURLOPT_RESOLVE (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -51,10 +53,6 @@ Since version 8.1.0, libcurl prunes entries from the DNS cache if it exceeds
 # DEFAULT
 
 60
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

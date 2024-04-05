@@ -14,6 +14,8 @@ See-also:
   - curl_easy_perform (3)
   - curl_url_get (3)
   - curl_url_set (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -112,10 +114,6 @@ common ones. Restrict what accept with CURLOPT_PROTOCOLS(3).
 User provided URLs can also be made to point to sites that redirect further on
 (possibly to other protocols too). Consider your
 CURLOPT_FOLLOWLOCATION(3) and CURLOPT_REDIR_PROTOCOLS(3) settings.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

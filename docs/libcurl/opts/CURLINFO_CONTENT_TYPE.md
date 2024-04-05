@@ -9,6 +9,8 @@ See-also:
   - curl_easy_getinfo (3)
   - curl_easy_header (3)
   - curl_easy_setopt (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -36,10 +38,6 @@ corresponding CURL handle.
 
 The modern way to get this header from a response is to instead use the
 curl_easy_header(3) function.
-
-# PROTOCOLS
-
-HTTP(S)
 
 # EXAMPLE
 

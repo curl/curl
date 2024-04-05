@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_INTERLEAVEDATA
 Section: 3
 Source: libcurl
+Protocol:
+  - RTSP
 See-also:
   - CURLOPT_INTERLEAVEFUNCTION (3)
   - CURLOPT_RTSP_REQUEST (3)
@@ -31,10 +33,6 @@ anywhere.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-RTSP
 
 # EXAMPLE
 

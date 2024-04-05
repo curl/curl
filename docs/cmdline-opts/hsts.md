@@ -16,9 +16,9 @@ Example:
 
 # `--hsts`
 
-This option enables HSTS for the transfer. If the filename points to an
-existing HSTS cache file, that is used. After a completed transfer, the cache
-is saved to the filename again if it has been modified.
+Enable HSTS for the transfer. If the filename points to an existing HSTS cache
+file, that is used. After a completed transfer, the cache is saved to the
+filename again if it has been modified.
 
 If curl is told to use HTTP:// for a transfer involving a hostname that exists
 in the HSTS cache, it upgrades the transfer to use HTTPS. Each HSTS cache

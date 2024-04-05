@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_HTTPHEADER (3)
   - CURLOPT_HTTP_CONTENT_DECODING (3)
   - CURLOPT_TRANSFER_ENCODING (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -72,10 +74,6 @@ option.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

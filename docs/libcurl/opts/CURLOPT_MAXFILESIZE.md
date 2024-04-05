@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_MAXFILESIZE_LARGE (3)
   - CURLOPT_MAX_RECV_SPEED_LARGE (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -39,10 +41,6 @@ threshold.
 # DEFAULT
 
 None
-
-# PROTOCOLS
-
-FTP, HTTP and MQTT
 
 # EXAMPLE
 

@@ -6,6 +6,8 @@ Section: 3
 Source: libcurl
 See-also:
   - curl_version_info (3)
+Protocol:
+  - All
 ---
 
 # NAME

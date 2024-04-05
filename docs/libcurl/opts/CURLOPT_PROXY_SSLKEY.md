@@ -10,6 +10,13 @@ See-also:
   - CURLOPT_SSLCERT (3)
   - CURLOPT_SSLKEY (3)
   - CURLOPT_SSLKEYTYPE (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
+  - mbedTLS
+  - Schannel
+  - wolfSSL
 ---
 
 # NAME
@@ -41,10 +48,6 @@ option.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

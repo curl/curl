@@ -11,6 +11,8 @@ See-also:
   - CURLOPT_UPLOAD (3)
   - CURLOPT_UPLOAD_BUFFERSIZE (3)
   - CURLOPT_WRITEFUNCTION (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -71,10 +73,6 @@ and it allows for better error checking.
 # DEFAULT
 
 The default internal read callback is fread().
-
-# PROTOCOLS
-
-This is used for all protocols when doing uploads.
 
 # EXAMPLE
 

@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_FTP_FILEMETHOD
 Section: 3
 Source: libcurl
+Protocol:
+  - FTP
 See-also:
   - CURLOPT_DIRLISTONLY (3)
   - CURLOPT_FTP_SKIP_PASV_IP (3)
@@ -53,10 +55,6 @@ compliant than 'nocwd' but without the full penalty of 'multicwd'.
 # DEFAULT
 
 CURLFTPMETHOD_MULTICWD
-
-# PROTOCOLS
-
-FTP
 
 # EXAMPLE
 

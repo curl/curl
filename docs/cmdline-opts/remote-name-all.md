@@ -14,7 +14,7 @@ Example:
 
 # `--remote-name-all`
 
-This option changes the default action for all given URLs to be dealt with as
-if --remote-name were used for each one. If you want to disable that for a
+Change the default action for all given URLs to be dealt with as if
+--remote-name were used for each one. If you want to disable that for a
 specific URL after --remote-name-all has been used, you must use "-o -" or
 --no-remote-name.

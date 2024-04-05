@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_PASSWORD (3)
   - CURLOPT_PROXYUSERPWD (3)
   - CURLOPT_USERNAME (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -63,10 +65,6 @@ option.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-Most
 
 # EXAMPLE
 

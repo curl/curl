@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_FTP_SKIP_PASV_IP
 Section: 3
 Source: libcurl
+Protocol:
+  - FTP
 See-also:
   - CURLOPT_FTPPORT (3)
   - CURLOPT_FTP_USE_EPRT (3)
@@ -39,10 +41,6 @@ This option has no effect if PORT, EPRT or EPSV is used instead of PASV.
 # DEFAULT
 
 1 since 7.74.0, was 0 before then.
-
-# PROTOCOLS
-
-FTP
 
 # EXAMPLE
 

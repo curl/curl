@@ -9,6 +9,10 @@ See-also:
   - CURLOPT_MAXAGE_CONN (3)
   - CURLOPT_MAXLIFETIME_CONN (3)
   - CURLOPT_SSLVERSION (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - All
 ---
 
 # NAME
@@ -35,10 +39,6 @@ wild that may require you to disable this in order for you to succeed.
 # DEFAULT
 
 1
-
-# PROTOCOLS
-
-All TLS-based
 
 # EXAMPLE
 

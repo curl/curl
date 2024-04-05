@@ -8,6 +8,11 @@ See-also:
   - CURLINFO_TLS_SSL_PTR (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
+  - GnuTLS
 ---
 
 # NAME
@@ -42,10 +47,6 @@ function *SSL_get_SSL_CTX(3)*. Therefore unless you need compatibility
 with older versions of libcurl use CURLINFO_TLS_SSL_PTR(3). Refer to
 that document for more information.
 
-# PROTOCOLS
-
-All TLS-based
-
 # EXAMPLE
 
 ~~~c
@@ -67,8 +68,8 @@ int main(void)
 
 # AVAILABILITY
 
-Added in 7.34.0. Deprecated since 7.48.0 and supported OpenSSL, GnuTLS, and
-NSS only up until this version was released.
+Added in 7.34.0. Deprecated since 7.48.0 and supported by OpenSSL and GnuTLS
+only up until this version was released.
 
 # RETURN VALUE
 

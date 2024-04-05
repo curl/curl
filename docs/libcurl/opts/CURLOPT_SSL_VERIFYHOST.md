@@ -8,6 +8,10 @@ See-also:
   - CURLOPT_CAINFO (3)
   - CURLOPT_PINNEDPUBLICKEY (3)
   - CURLOPT_SSL_VERIFYPEER (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - All
 ---
 
 # NAME
@@ -81,10 +85,6 @@ may be inaccessible if SNI is not sent.
 # DEFAULT
 
 2
-
-# PROTOCOLS
-
-All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
 
 # EXAMPLE
 

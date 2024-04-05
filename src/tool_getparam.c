@@ -1009,7 +1009,8 @@ static const struct LongShort *single(char letter)
 {
   static const struct LongShort *singles[128 - ' ']; /* ASCII => pointer */
   static bool singles_done = FALSE;
-  DEBUGASSERT((letter < 127) && (letter > ' '));
+  if((letter >= 127) || (letter <= ' '))
+    return NULL;
 
   if(!singles_done) {
     unsigned int j;
@@ -1334,6 +1335,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
          (nextarg[0] == '-') && nextarg[1]) {
         /* if the file name looks like a command line option */
         warnf(global, "The file name argument '%s' looks like a flag.",
+              nextarg);
+      }
+      else if(!strncmp("\xe2\x80\x9c", nextarg, 3)) {
+        warnf(global, "The argument '%s' starts with a unicode quote where "
+              "maybe an ASCII \" was intended?",
               nextarg);
       }
     }
@@ -2657,7 +2663,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           warnf(global, "Failed to read %s", fname);
       }
       else
-        err = getstr(&config->writeout, nextarg, DENY_BLANK);
+        err = getstr(&config->writeout, nextarg, ALLOW_BLANK);
       break;
     case C_PREPROXY: /* --preproxy */
       err = getstr(&config->preproxy, nextarg, DENY_BLANK);

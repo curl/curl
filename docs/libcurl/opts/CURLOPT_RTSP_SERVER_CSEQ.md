@@ -8,6 +8,8 @@ See-also:
   - CURLINFO_RTSP_SERVER_CSEQ (3)
   - CURLOPT_RTSP_CLIENT_CSEQ (3)
   - CURLOPT_RTSP_STREAM_URI (3)
+Protocol:
+  - RTSP
 ---
 
 # NAME
@@ -31,10 +33,6 @@ unimplemented.
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-RTSP
 
 # EXAMPLE
 

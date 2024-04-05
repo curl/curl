@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_LOW_SPEED_LIMIT (3)
   - CURLOPT_MAX_RECV_SPEED_LARGE (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -41,10 +43,6 @@ This option does not affect transfer speeds done with FILE:// URLs.
 # DEFAULT
 
 0, disabled
-
-# PROTOCOLS
-
-All except file://
 
 # EXAMPLE
 

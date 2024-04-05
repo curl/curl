@@ -9,6 +9,13 @@ See-also:
   - CURLOPT_CAINFO (3)
   - CURLOPT_DEBUGFUNCTION (3)
   - CURLOPT_STDERR (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
+  - GnuTLS
+  - mbedTLS
+  - wolfSSL
 ---
 
 # NAME
@@ -43,10 +50,6 @@ The default value for this can be figured out with CURLINFO_CAPATH(3).
 
 A default path detected at build time.
 
-# PROTOCOLS
-
-All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
-
 # EXAMPLE
 
 ~~~c
@@ -65,8 +68,7 @@ int main(void)
 
 # AVAILABILITY
 
-This option is supported by the OpenSSL, GnuTLS and mbedTLS (since 7.56.0)
-backends.
+This option is supported by the OpenSSL, GnuTLS, mbedTLS and wolfSSL backends.
 
 # RETURN VALUE
 

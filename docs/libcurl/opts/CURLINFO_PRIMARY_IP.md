@@ -10,6 +10,8 @@ See-also:
   - CURLINFO_PRIMARY_PORT (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -35,10 +37,6 @@ copy the string if you want to keep the information.
 The **ip** pointer is NULL or points to private memory. You MUST NOT free -
 it gets freed when you call curl_easy_cleanup(3) on the corresponding
 CURL handle.
-
-# PROTOCOLS
-
-All network based ones
 
 # EXAMPLE
 

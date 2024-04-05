@@ -10,6 +10,10 @@ See-also:
   - CURLOPT_PROXY_SSL_VERIFYPEER (3)
   - CURLOPT_SSL_VERIFYHOST (3)
   - CURLOPT_SSL_VERIFYPEER (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - All
 ---
 
 # NAME
@@ -54,10 +58,6 @@ of the DoH server certificate.
 # DEFAULT
 
 2
-
-# PROTOCOLS
-
-DoH
 
 # EXAMPLE
 

@@ -103,7 +103,7 @@ CURLcode Curl_http_target(struct Curl_easy *data, struct connectdata *conn,
 CURLcode Curl_http_statusline(struct Curl_easy *data,
                               struct connectdata *conn);
 CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
-                          char *headp);
+                          char *headp, size_t hdlen);
 CURLcode Curl_transferencode(struct Curl_easy *data);
 CURLcode Curl_http_req_set_reader(struct Curl_easy *data,
                                   Curl_HttpReq httpreq,
@@ -121,9 +121,7 @@ CURLcode Curl_http_cookies(struct Curl_easy *data,
 #endif
 CURLcode Curl_http_range(struct Curl_easy *data,
                          Curl_HttpReq httpreq);
-CURLcode Curl_http_firstwrite(struct Curl_easy *data,
-                              struct connectdata *conn,
-                              bool *done);
+CURLcode Curl_http_firstwrite(struct Curl_easy *data);
 
 /* protocol-specific functions set up to be called by the main engine */
 CURLcode Curl_http_setup_conn(struct Curl_easy *data,
@@ -135,8 +133,7 @@ int Curl_http_getsock_do(struct Curl_easy *data, struct connectdata *conn,
                          curl_socket_t *socks);
 CURLcode Curl_http_write_resp(struct Curl_easy *data,
                               const char *buf, size_t blen,
-                              bool is_eos,
-                              bool *done);
+                              bool is_eos);
 
 /* These functions are in http.c */
 CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
@@ -179,6 +176,9 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data);
    version. This count includes CONNECT response headers. */
 #define MAX_HTTP_RESP_HEADER_SIZE (300*1024)
 
+bool Curl_http_exp100_is_selected(struct Curl_easy *data);
+void Curl_http_exp100_got100(struct Curl_easy *data);
+
 #endif /* CURL_DISABLE_HTTP */
 
 /****************************************************************************
@@ -197,8 +197,7 @@ CURLcode Curl_http_size(struct Curl_easy *data);
 
 CURLcode Curl_http_write_resp_hds(struct Curl_easy *data,
                                   const char *buf, size_t blen,
-                                  size_t *pconsumed,
-                                  bool *done);
+                                  size_t *pconsumed);
 
 /**
  * Curl_http_output_auth() setups the authentication headers for the

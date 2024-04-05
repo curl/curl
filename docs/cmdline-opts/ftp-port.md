@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: ftp-port
 Arg: <address>
-Help: Use PORT instead of PASV
+Help: Send PORT instead of PASV
 Short: P
 Protocols: FTP
 Category: ftp
@@ -21,10 +21,10 @@ Example:
 # `--ftp-port`
 
 Reverses the default initiator/listener roles when connecting with FTP. This
-option makes curl use active mode. curl then tells the server to connect back
-to the client's specified address and port, while passive mode asks the server
-to setup an IP address and port for it to connect to. \<address\> should be
-one of:
+option makes curl use active mode. curl then commands the server to connect
+back to the client's specified address and port, while passive mode asks the
+server to setup an IP address and port for it to connect to. \<address\>
+should be one of:
 
 ## interface
 e.g. **eth0** to specify which interface's IP address you want to use (Unix only)

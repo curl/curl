@@ -6,6 +6,10 @@ Section: 3
 Source: libcurl
 See-also:
   - CURLOPT_TCP_FASTOPEN (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - Secure Transport
 ---
 
 # NAME
@@ -32,10 +36,6 @@ when performing a full handshake.
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
 
 # EXAMPLE
 

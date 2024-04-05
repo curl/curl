@@ -11,6 +11,8 @@ See-also:
   - curl_url_get (3)
   - curl_url_set (3)
   - libcurl-errors (3)
+Protocol:
+  - All
 ---
 
 # NAME

@@ -8,7 +8,7 @@ Protocols: SSL
 Added: 5.9
 Mutexed: sslv2 tlsv1 tlsv1.1 tlsv1.2
 Requires: TLS
-Help: Use SSLv3
+Help: SSLv3
 Category: tls
 Multi: mutex
 See-also:

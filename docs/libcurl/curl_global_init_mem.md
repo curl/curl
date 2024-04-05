@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - curl_global_cleanup (3)
   - curl_global_init (3)
+Protocol:
+  - All
 ---
 
 # NAME

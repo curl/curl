@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: post303
-Help: Do not switch to GET after following a 303
+Help: Do not switch to GET after a 303 redirect
 Protocols: HTTP
 Added: 7.26.0
 Category: http post
@@ -17,7 +17,6 @@ Example:
 
 # `--post303`
 
-Tells curl to violate RFC 7231/6.4.4 and not convert POST requests into GET
-requests when following 303 redirections. A server may require a POST to
-remain a POST after a 303 redirection. This option is meaningful only when
-using --location.
+Violate RFC 7231/6.4.4 and do not convert POST requests into GET requests when
+following 303 redirect. A server may require a POST to remain a POST after a
+303 redirection. This option is meaningful only when using --location.

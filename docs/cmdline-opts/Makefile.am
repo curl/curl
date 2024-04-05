@@ -27,8 +27,6 @@ AUTOMAKE_OPTIONS = foreign no-dependencies
 MANPAGE = curl.1
 ASCIIPAGE = curl.txt
 
-man_MANS = $(MANPAGE)
-
 include Makefile.inc
 
 EXTRA_DIST = $(DPAGES) MANPAGE.md $(SUPPORT) CMakeLists.txt mainpage.idx
@@ -42,6 +40,7 @@ MANAGEN=$(abs_top_srcdir)/scripts/managen
 
 if BUILD_DOCS
 CLEANFILES = $(MANPAGE) $(ASCIIPAGE)
+man_MANS = $(MANPAGE)
 
 all: $(MANPAGE) $(ASCIIPAGE)
 

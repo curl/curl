@@ -11,6 +11,10 @@ See-also:
   - CURLOPT_PROXY_SSL_VERIFYHOST (3)
   - CURLOPT_PROXY_SSL_VERIFYPEER (3)
   - CURLOPT_SSL_VERIFYHOST (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - All
 ---
 
 # NAME
@@ -67,10 +71,6 @@ malicious servers.
 # DEFAULT
 
 1 - enabled
-
-# PROTOCOLS
-
-All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
 
 # EXAMPLE
 

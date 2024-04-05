@@ -10,6 +10,8 @@ See-also:
   - CURLOPT_DEBUGDATA (3)
   - CURLOPT_VERBOSE (3)
   - curl_global_trace (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -98,10 +100,6 @@ set CURLOPT_PRIVATE(3) on your handle.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

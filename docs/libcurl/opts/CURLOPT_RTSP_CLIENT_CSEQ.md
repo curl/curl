@@ -9,6 +9,8 @@ See-also:
   - CURLINFO_RTSP_SERVER_CSEQ (3)
   - CURLOPT_RTSP_REQUEST (3)
   - CURLOPT_RTSP_SERVER_CSEQ (3)
+Protocol:
+  - RTSP
 ---
 
 # NAME
@@ -32,10 +34,6 @@ increments from this new number henceforth.
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-RTSP
 
 # EXAMPLE
 

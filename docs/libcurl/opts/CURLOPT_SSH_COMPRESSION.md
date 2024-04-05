@@ -7,6 +7,9 @@ Source: libcurl
 See-also:
   - CURLOPT_ACCEPT_ENCODING (3)
   - CURLOPT_TRANSFER_ENCODING (3)
+Protocol:
+  - SFTP
+  - SCP
 ---
 
 # NAME
@@ -31,10 +34,6 @@ may or may not do it.
 # DEFAULT
 
 0, disabled
-
-# PROTOCOLS
-
-All SSH based protocols: SCP, SFTP
 
 # EXAMPLE
 

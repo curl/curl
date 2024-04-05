@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: retry-all-errors
-Help: Retry all errors (use with --retry)
+Help: Retry all errors (with --retry)
 Added: 7.71.0
 Category: curl
 Multi: boolean

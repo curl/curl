@@ -7,6 +7,12 @@ Source: libcurl
 See-also:
   - CURLOPT_MAIL_AUTH (3)
   - CURLOPT_USERNAME (3)
+Protocol:
+  - HTTP
+  - IMAP
+  - LDAP
+  - POP3
+  - SMTP
 ---
 
 # NAME
@@ -36,10 +42,6 @@ option.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-HTTP, IMAP, LDAP, POP3 and SMTP
 
 # EXAMPLE
 

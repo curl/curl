@@ -7,6 +7,9 @@ Source: libcurl
 See-also:
   - CURLOPT_SSH_KEYDATA (3)
   - CURLOPT_SSH_KNOWNHOSTS (3)
+Protocol:
+  - SFTP
+  - SCP
 ---
 
 # NAME
@@ -105,10 +108,6 @@ up from scratch again.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-SFTP and SCP
 
 # EXAMPLE
 

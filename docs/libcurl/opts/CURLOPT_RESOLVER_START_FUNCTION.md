@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_PREREQFUNCTION (3)
   - CURLOPT_RESOLVER_START_DATA (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -49,10 +51,6 @@ resolve to fail.
 # DEFAULT
 
 NULL (No callback)
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

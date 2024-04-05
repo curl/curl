@@ -11,6 +11,10 @@ See-also:
   - CURLOPT_CA_CACHE_TIMEOUT (3)
   - CURLOPT_SSL_VERIFYHOST (3)
   - CURLOPT_SSL_VERIFYPEER (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - All
 ---
 
 # NAME
@@ -56,10 +60,6 @@ The default value for this can be figured out with CURLINFO_CAINFO(3).
 Built-in system specific. When curl is built with Secure Transport or
 Schannel, this option is not set by default.
 
-# PROTOCOLS
-
-All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
-
 # EXAMPLE
 
 ~~~c
@@ -77,9 +77,7 @@ int main(void)
 
 # AVAILABILITY
 
-For the SSL engines that do not support certificate files the
-CURLOPT_CAINFO(3) option is ignored. Schannel support added in libcurl
-7.60.
+Schannel support added in libcurl 7.60.
 
 # RETURN VALUE
 

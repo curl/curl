@@ -86,6 +86,7 @@ static int
 read_cb(void *userdata, uint8_t *buf, uintptr_t len, uintptr_t *out_n)
 {
   struct io_ctx *io_ctx = userdata;
+  struct ssl_connect_data *const connssl = io_ctx->cf->ctx;
   CURLcode result;
   int ret = 0;
   ssize_t nread = Curl_conn_cf_recv(io_ctx->cf->next, io_ctx->data,
@@ -97,6 +98,8 @@ read_cb(void *userdata, uint8_t *buf, uintptr_t len, uintptr_t *out_n)
     else
       ret = EINVAL;
   }
+  else if(nread == 0)
+    connssl->peer_closed = TRUE;
   *out_n = (int)nread;
   return ret;
 }
@@ -697,7 +700,7 @@ cr_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   DEBUGASSERT(backend);
 
-  if(backend->conn) {
+  if(backend->conn && !connssl->peer_closed) {
     rustls_connection_send_close_notify(backend->conn);
     n = cr_send(cf, data, NULL, 0, &tmperr);
     if(n < 0) {

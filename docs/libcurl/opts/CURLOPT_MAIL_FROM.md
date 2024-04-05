@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_MAIL_AUTH (3)
   - CURLOPT_MAIL_RCPT (3)
+Protocol:
+  - SMTP
 ---
 
 # NAME
@@ -38,10 +40,6 @@ option.
 # DEFAULT
 
 blank
-
-# PROTOCOLS
-
-SMTP
 
 # EXAMPLE
 

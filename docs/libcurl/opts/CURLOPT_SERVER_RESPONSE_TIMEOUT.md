@@ -8,6 +8,13 @@ See-also:
   - CURLOPT_CONNECTTIMEOUT (3)
   - CURLOPT_LOW_SPEED_LIMIT (3)
   - CURLOPT_TIMEOUT (3)
+Protocol:
+  - FTP
+  - IMAP
+  - POP3
+  - SMTP
+  - SFTP
+  - SCP
 ---
 
 # NAME
@@ -38,10 +45,6 @@ This option was formerly known as CURLOPT_FTP_RESPONSE_TIMEOUT.
 # DEFAULT
 
 None
-
-# PROTOCOLS
-
-FTP, IMAP, POP3, SMTP, and SSH
 
 # EXAMPLE
 

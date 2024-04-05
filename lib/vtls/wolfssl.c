@@ -232,7 +232,6 @@ static const struct group_name_map gnm[] = {
 static int wolfssl_bio_cf_create(WOLFSSL_BIO *bio)
 {
   wolfSSL_BIO_set_shutdown(bio, 1);
-  wolfSSL_BIO_set_init(bio, 1);
   wolfSSL_BIO_set_data(bio, NULL);
   return 1;
 }
@@ -321,6 +320,8 @@ static int wolfssl_bio_cf_in_read(WOLFSSL_BIO *bio, char *buf, int blen)
   wolfSSL_BIO_clear_retry_flags(bio);
   if(nread < 0 && CURLE_AGAIN == result)
     BIO_set_retry_read(bio);
+  else if(nread == 0)
+    connssl->peer_closed = TRUE;
   return (int)nread;
 }
 
@@ -897,6 +898,7 @@ wolfssl_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
                                   pinnedpubkey,
                                   (const unsigned char *)pubkey->header,
                                   (size_t)(pubkey->end - pubkey->header));
+    wolfSSL_FreeX509(x509);
     if(result) {
       failf(data, "SSL: public key does not match pinned public key");
       return result;
@@ -1059,7 +1061,8 @@ static void wolfssl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     /* Maybe the server has already sent a close notify alert.
        Read it to avoid an RST on the TCP connection. */
     (void)wolfSSL_read(backend->handle, buf, (int)sizeof(buf));
-    (void)wolfSSL_shutdown(backend->handle);
+    if(!connssl->peer_closed)
+      (void)wolfSSL_shutdown(backend->handle);
     wolfSSL_free(backend->handle);
     backend->handle = NULL;
   }

@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_INTERLEAVEDATA (3)
   - CURLOPT_RTSP_REQUEST (3)
+Protocol:
+  - RTSP
 ---
 
 # NAME
@@ -62,10 +64,6 @@ You can also abort the transfer by returning CURL_WRITEFUNC_ERROR. (7.87.0)
 
 NULL, the interleave data is then passed to the regular write function:
 CURLOPT_WRITEFUNCTION(3).
-
-# PROTOCOLS
-
-RTSP
 
 # EXAMPLE
 

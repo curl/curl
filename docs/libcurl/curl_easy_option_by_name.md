@@ -8,6 +8,8 @@ See-also:
   - curl_easy_option_by_id (3)
   - curl_easy_option_next (3)
   - curl_easy_setopt (3)
+Protocol:
+  - All
 ---
 
 # NAME

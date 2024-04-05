@@ -8,6 +8,10 @@ See-also:
   - CURLOPT_SSLENGINE (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
 ---
 
 # NAME
@@ -31,10 +35,6 @@ in separate dynamic libraries. Hence not all the returned engines may be
 available at runtime. **NOTE:** you must call curl_slist_free_all(3)
 on the list pointer once you are done with it, as libcurl does not free this
 data for you.
-
-# PROTOCOLS
-
-All TLS based ones.
 
 # EXAMPLE
 

@@ -8,6 +8,10 @@ See-also:
   - CURLOPT_FTP_CREATE_MISSING_DIRS (3)
   - CURLOPT_NEW_FILE_PERMS (3)
   - CURLOPT_UPLOAD (3)
+Protocol:
+  - SFTP
+  - SCP
+  - FILE
 ---
 
 # NAME
@@ -33,10 +37,6 @@ this are *sftp://*, *scp://*, and *file://*.
 # DEFAULT
 
 0755
-
-# PROTOCOLS
-
-SFTP, SCP and FILE
 
 # EXAMPLE
 

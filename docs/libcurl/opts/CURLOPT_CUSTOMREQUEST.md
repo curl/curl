@@ -9,6 +9,12 @@ See-also:
   - CURLOPT_HTTPHEADER (3)
   - CURLOPT_NOBODY (3)
   - CURLOPT_REQUEST_TARGET (3)
+Protocol:
+  - HTTP
+  - FTP
+  - IMAP
+  - POP3
+  - SMTP
 ---
 
 # NAME
@@ -95,10 +101,6 @@ option.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-HTTP, FTP, IMAP, POP3 and SMTP
 
 # EXAMPLE
 

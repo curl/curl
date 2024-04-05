@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: proxytunnel
 Short: p
-Help: Operate through an HTTP proxy tunnel (using CONNECT)
+Help: HTTP proxy tunnel (using CONNECT)
 Category: proxy
 Added: 7.3
 Multi: boolean

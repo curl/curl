@@ -8,6 +8,12 @@ See-also:
   - CURLOPT_HEADERDATA (3)
   - CURLOPT_WRITEFUNCTION (3)
   - curl_easy_header (3)
+Protocol:
+  - HTTP
+  - FTP
+  - POP3
+  - IMAP
+  - SMTP
 ---
 
 # NAME
@@ -93,11 +99,6 @@ although strictly they are just continuations of the previous lines.
 # DEFAULT
 
 Nothing.
-
-# PROTOCOLS
-
-Used for all protocols with headers or meta-data concept: HTTP, FTP, POP3,
-IMAP, SMTP and more.
 
 # EXAMPLE
 

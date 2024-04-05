@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_FTPPORT
 Section: 3
 Source: libcurl
+Protocol:
+  - FTP
 See-also:
   - CURLOPT_FTP_USE_EPRT (3)
   - CURLOPT_FTP_USE_EPSV (3)
@@ -67,10 +69,6 @@ option.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-FTP
 
 # EXAMPLE
 

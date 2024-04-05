@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_COPYPOSTFIELDS (3)
   - CURLOPT_POSTFIELDS (3)
   - CURLOPT_POSTFIELDSIZE (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -34,10 +36,6 @@ CURLOPT_READFUNCTION(3) (if used) to signal the end of data.
 # DEFAULT
 
 -1
-
-# PROTOCOLS
-
-HTTP(S)
 
 # EXAMPLE
 

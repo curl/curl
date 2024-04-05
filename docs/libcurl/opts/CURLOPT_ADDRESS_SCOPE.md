@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_DEBUGFUNCTION (3)
   - CURLOPT_STDERR (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -28,10 +30,6 @@ Pass a long specifying the scope id value to use when connecting to IPv6 address
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-All, when using IPv6
 
 # EXAMPLE
 

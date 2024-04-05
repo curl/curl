@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_IOCTLFUNCTION
 Section: 3
 Source: libcurl
+Protocol:
+  - All
 See-also:
   - CURLOPT_IOCTLDATA (3)
   - CURLOPT_SEEKFUNCTION (3)
@@ -60,10 +62,6 @@ parameter is ignored when seeking.
 # DEFAULT
 
 By default, this parameter is set to NULL. Not used.
-
-# PROTOCOLS
-
-Used with HTTP
 
 # EXAMPLE
 

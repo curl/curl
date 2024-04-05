@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_MIMEPOST (3)
   - CURLOPT_POSTFIELDS (3)
   - CURLOPT_UPLOAD (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -34,10 +36,6 @@ This option is **deprecated** since version 7.12.1. Use CURLOPT_UPLOAD(3).
 # DEFAULT
 
 0, disabled
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

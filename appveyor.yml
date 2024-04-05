@@ -31,7 +31,7 @@
 version: 7.50.0.{build}
 
 environment:
-  UNITY: 'OFF'
+  UNITY: 'ON'
   OPENSSL: 'OFF'
   DEBUG: 'ON'
   SHARED: 'OFF'
@@ -48,7 +48,7 @@ environment:
       SHARED: 'ON'
       TESTING: 'OFF'
       DISABLED_TESTS: ''
-    - job_name: 'CMake, VS2022, Release, x64, OpenSSL 3, WebSockets, Unity, Build-only'
+    - job_name: 'CMake, VS2022, Release, x64, OpenSSL 1.1.1, WebSockets, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'Visual Studio 17 2022'
@@ -62,7 +62,6 @@ environment:
       TESTING: 'OFF'
       DISABLED_TESTS: ''
       WEBSOCKETS: 'ON'
-      UNITY: 'ON'
     - job_name: 'CMake, VS2022, Release, arm64, Schannel, Static, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
@@ -84,7 +83,7 @@ environment:
       ENABLE_UNICODE: 'OFF'
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
-      DISABLED_TESTS: '!1139 !1501 !1140 !1173 !1177 !1477'
+      DISABLED_TESTS: '!1139 !1501 !1177 !1477'
     - job_name: 'CMake, VS2022, Debug, x64, Schannel, Static, Unicode'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
@@ -95,7 +94,7 @@ environment:
       ENABLE_UNICODE: 'ON'
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
-      DISABLED_TESTS: '!1139 !1501 !1140 !1173 !1177 !1477'
+      DISABLED_TESTS: '!1139 !1501 !1177 !1477'
     - job_name: 'CMake, VS2022, Debug, x64, no SSL, Static'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
@@ -106,7 +105,7 @@ environment:
       ENABLE_UNICODE: 'OFF'
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
-      DISABLED_TESTS: '!1139 !1501 !1140 !1173 !1177 !1477'
+      DISABLED_TESTS: '!1139 !1501 !1177 !1477'
     - job_name: 'CMake, VS2022, Debug, x64, no SSL, Static, HTTP only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
@@ -117,9 +116,9 @@ environment:
       ENABLE_UNICODE: 'OFF'
       HTTP_ONLY: 'ON'
       TESTING: 'ON'
-      DISABLED_TESTS: '!1139 !1501 !1140 !1173 !1177 !1477'
+      DISABLED_TESTS: '!1139 !1501 !1177 !1477'
     # generated CMake-based MSYS Makefiles builds (mingw cross-compiling)
-    - job_name: 'CMake, mingw-w64, gcc 13, Debug, x64, Schannel, Static, Unicode, Unity'
+    - job_name: 'CMake, mingw-w64, gcc 13, Debug, x64, Schannel, Static, Unicode'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'MSYS Makefiles'
@@ -128,11 +127,10 @@ environment:
       ENABLE_UNICODE: 'ON'
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
-      DISABLED_TESTS: '!1086 !1139 !1451 !1501 !1140 !1173 !1177 !1477'
+      DISABLED_TESTS: '!1086 !1139 !1451 !1501 !1177 !1477'
       ADD_PATH: 'C:/msys64/mingw64/bin'
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
-      UNITY: 'ON'
     - job_name: 'CMake, mingw-w64, gcc 7, Debug, x64, Schannel, Static, Unicode'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: CMake
@@ -142,11 +140,11 @@ environment:
       ENABLE_UNICODE: 'ON'
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
-      DISABLED_TESTS: '!1086 !1139 !1451 !1501 !1140 !1173 !1177 !1477'
+      DISABLED_TESTS: '!1086 !1139 !1451 !1501 !1177 !1477'
       ADD_PATH: 'C:/mingw-w64/x86_64-7.2.0-posix-seh-rt_v5-rev1/mingw64/bin'
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
-    - job_name: 'CMake, mingw-w64, gcc 9, Debug, x64, Schannel, Static, Unity'
+    - job_name: 'CMake, mingw-w64, gcc 9, Debug, x64, Schannel, Static'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'MSYS Makefiles'
@@ -156,12 +154,11 @@ environment:
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
       # test 286 disabled due to https://github.com/curl/curl/issues/12040
-      DISABLED_TESTS: '~286 !1086 !1139 !1451 !1501 !1140 !1173 !1177 !1477'
+      DISABLED_TESTS: '~286 !1086 !1139 !1451 !1501 !1177 !1477'
       ADD_PATH: 'C:/msys64/mingw64/bin'
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
-      UNITY: 'ON'
-    - job_name: 'CMake, mingw-w64, gcc 6, Debug, x86, Schannel, Static'
+    - job_name: 'CMake, mingw-w64, gcc 6, Debug, x86, Schannel, Static, no-unity'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'MSYS Makefiles'
@@ -170,10 +167,11 @@ environment:
       ENABLE_UNICODE: 'OFF'
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
-      DISABLED_TESTS: '!1086 !1139 !1451 !1501 !1140 !1173 !1177 !1477'
+      DISABLED_TESTS: '!1086 !1139 !1451 !1501 !1177 !1477'
       ADD_PATH: 'C:/mingw-w64/i686-6.3.0-posix-dwarf-rt_v5-rev1/mingw32/bin'
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
+      UNITY: 'OFF'
     # winbuild-based builds
     - job_name: 'winbuild, VS2015, Debug, x64, OpenSSL 1.1.1, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
@@ -250,13 +248,13 @@ environment:
       BUILD_SYSTEM: autotools
       TESTING: 'ON'
       DISABLED_TESTS: '!19 !504 !704 !705 !1233'
-      CONFIG_ARGS: '--enable-debug --enable-werror --disable-threaded-resolver --without-ssl --enable-websockets  --without-libpsl'
+      CONFIG_ARGS: '--enable-debug --enable-werror --disable-threaded-resolver --without-ssl --enable-websockets --without-libpsl'
     - job_name: 'autotools, msys2, Release, x86_64, no SSL'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: autotools
       TESTING: 'ON'
       DISABLED_TESTS: '!19 !504 !704 !705 !1233'
-      CONFIG_ARGS: '--enable-warnings --enable-werror --without-ssl --enable-websockets  --without-libpsl'
+      CONFIG_ARGS: '--enable-warnings --enable-werror --without-ssl --enable-websockets --without-libpsl'
     # autotools-based Cygwin build
     - job_name: 'autotools, cygwin, Debug, x86_64, no SSL'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
@@ -264,7 +262,7 @@ environment:
       TESTING: 'ON'
       DISABLED_TESTS: ''
       ADD_SHELL: 'C:/cygwin64/bin'
-      CONFIG_ARGS: '--enable-debug --enable-werror --disable-threaded-resolver --without-ssl --enable-websockets  --without-libpsl'
+      CONFIG_ARGS: '--enable-debug --enable-werror --disable-threaded-resolver --without-ssl --enable-websockets --without-libpsl'
 
 install:
   - ps: |

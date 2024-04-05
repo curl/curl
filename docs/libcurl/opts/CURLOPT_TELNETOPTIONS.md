@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_HTTPHEADER (3)
   - CURLOPT_QUOTE (3)
+Protocol:
+  - TELNET
 ---
 
 # NAME
@@ -32,10 +34,6 @@ standard for details.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-TELNET
 
 # EXAMPLE
 

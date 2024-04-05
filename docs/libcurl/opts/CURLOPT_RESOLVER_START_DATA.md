@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_PREREQFUNCTION (3)
   - CURLOPT_RESOLVER_START_FUNCTION (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -31,10 +33,6 @@ CURLOPT_RESOLVER_START_FUNCTION(3).
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

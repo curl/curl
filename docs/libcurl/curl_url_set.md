@@ -11,6 +11,8 @@ See-also:
   - curl_url_dup (3)
   - curl_url_get (3)
   - curl_url_strerror (3)
+Protocol:
+  - All
 ---
 
 # NAME

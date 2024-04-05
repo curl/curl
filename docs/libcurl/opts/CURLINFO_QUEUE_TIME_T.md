@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_TIMEOUT (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -32,10 +34,6 @@ might be put in a queue if after getting started, it cannot create a new
 connection etc due to set conditions and limits imposed by the application.
 
 See also the TIMES overview in the curl_easy_getinfo(3) man page.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

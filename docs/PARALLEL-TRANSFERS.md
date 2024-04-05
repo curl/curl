@@ -1,3 +1,9 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 # Parallel transfers
 
 curl 7.66.0 introduced support for doing multiple transfers simultaneously; in

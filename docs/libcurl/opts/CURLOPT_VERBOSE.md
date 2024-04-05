@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_ERRORBUFFER (3)
   - CURLOPT_STDERR (3)
   - curl_global_trace (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -39,10 +41,6 @@ CURLOPT_DEBUGFUNCTION(3).
 # DEFAULT
 
 0, meaning disabled.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_HSTSWRITEDATA
 Section: 3
 Source: libcurl
+Protocol:
+  - HTTP
 See-also:
   - CURLOPT_HSTS (3)
   - CURLOPT_HSTSREADDATA (3)
@@ -35,10 +37,6 @@ do that.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-This feature is only used for HTTP(S) transfer.
 
 # EXAMPLE
 

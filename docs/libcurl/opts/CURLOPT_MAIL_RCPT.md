@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_MAIL_AUTH (3)
   - CURLOPT_MAIL_FROM (3)
+Protocol:
+  - SMTP
 ---
 
 # NAME
@@ -45,10 +47,6 @@ should be specified using the mailing list name, such as `Friends` or
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-SMTP
 
 # EXAMPLE
 

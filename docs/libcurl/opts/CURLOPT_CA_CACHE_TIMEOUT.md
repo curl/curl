@@ -10,6 +10,10 @@ See-also:
   - CURLOPT_CAPATH (3)
   - CURLOPT_SSL_VERIFYHOST (3)
   - CURLOPT_SSL_VERIFYPEER (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
 ---
 
 # NAME
@@ -41,10 +45,6 @@ store remain forever. By default, libcurl caches this info for 24 hours.
 # DEFAULT
 
 86400 (24 hours)
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

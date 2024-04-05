@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_CHUNK_END_FUNCTION (3)
   - CURLOPT_FNMATCH_FUNCTION (3)
   - CURLOPT_URL (3)
+Protocol:
+  - FTP
 ---
 
 # NAME
@@ -73,10 +75,6 @@ characters have no special purpose.
 Using the rules above, a filename pattern can be constructed:
 
     ftp://example.com/some/path/[a-z[:upper:]\\].jpg
-
-# PROTOCOLS
-
-This feature is only supported for FTP download.
 
 # EXAMPLE
 

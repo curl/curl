@@ -4,7 +4,7 @@ SPDX-License-Identifier: curl
 Long: write-out
 Short: w
 Arg: <format>
-Help: Use output FORMAT after completion
+Help: Output FORMAT after completion
 Category: verbose
 Added: 6.5
 Multi: single

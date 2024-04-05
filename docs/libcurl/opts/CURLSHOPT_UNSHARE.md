@@ -9,6 +9,8 @@ See-also:
   - curl_share_cleanup (3)
   - curl_share_init (3)
   - curl_share_setopt (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -55,10 +57,6 @@ The connection cache is no longer shared.
 ## CURL_LOCK_DATA_PSL
 
 The Public Suffix List is no longer shared.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

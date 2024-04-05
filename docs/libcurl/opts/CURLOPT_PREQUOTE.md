@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_POSTQUOTE (3)
   - CURLOPT_QUOTE (3)
+Protocol:
+  - FTP
 ---
 
 # NAME
@@ -39,10 +41,6 @@ this option does not.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-FTP
 
 # EXAMPLE
 

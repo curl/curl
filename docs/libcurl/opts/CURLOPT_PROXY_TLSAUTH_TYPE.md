@@ -9,6 +9,11 @@ See-also:
   - CURLOPT_PROXY_TLSAUTH_USERNAME (3)
   - CURLOPT_TLSAUTH_PASSWORD (3)
   - CURLOPT_TLSAUTH_USERNAME (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
+  - GnuTLS
 ---
 
 # NAME
@@ -44,10 +49,6 @@ option.
 # DEFAULT
 
 blank
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

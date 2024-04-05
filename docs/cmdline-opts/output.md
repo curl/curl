@@ -55,3 +55,8 @@ To suppress response bodies, you can redirect output to /dev/null:
 Or for Windows:
 
     curl example.com -o nul
+
+Specify the filename as single minus to force the output to stdout, to
+override curl's internal binary output in terminal prevention:
+
+    curl https://example.com/jpeg -o -

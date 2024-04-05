@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_RTSP_REQUEST (3)
   - CURLOPT_RTSP_TRANSPORT (3)
+Protocol:
+  - RTSP
 ---
 
 # NAME
@@ -40,10 +42,6 @@ option.
 # DEFAULT
 
 "*"
-
-# PROTOCOLS
-
-RTSP
 
 # EXAMPLE
 

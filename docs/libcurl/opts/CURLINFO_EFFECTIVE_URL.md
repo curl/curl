@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_FOLLOWLOCATION (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -32,10 +34,6 @@ value you set with CURLOPT_URL(3).
 The **urlp** pointer is NULL or points to private memory. You MUST NOT free
 - it gets freed when you call curl_easy_cleanup(3) on the corresponding
 CURL handle.
-
-# PROTOCOLS
-
-HTTP(S)
 
 # EXAMPLE
 

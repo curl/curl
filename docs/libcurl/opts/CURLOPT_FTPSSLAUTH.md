@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLOPT_FTPSSLAUTH
 Section: 3
 Source: libcurl
+Protocol:
+  - FTP
 See-also:
   - CURLOPT_FTP_SSL_CCC (3)
   - CURLOPT_USE_SSL (3)
@@ -44,10 +46,6 @@ Try "AUTH TLS" first, and only if that fails try "AUTH SSL".
 # DEFAULT
 
 CURLFTPAUTH_DEFAULT
-
-# PROTOCOLS
-
-FTP
 
 # EXAMPLE
 

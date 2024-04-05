@@ -8,6 +8,11 @@ See-also:
   - CURLOPT_PROXY_TLSAUTH_PASSWORD (3)
   - CURLOPT_TLSAUTH_TYPE (3)
   - CURLOPT_TLSAUTH_USERNAME (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
+  - GnuTLS
 ---
 
 # NAME
@@ -37,10 +42,6 @@ This feature relies in TLS SRP which does not work with TLS 1.3.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All TLS-based protocols
 
 # EXAMPLE
 

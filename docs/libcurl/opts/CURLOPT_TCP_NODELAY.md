@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_BUFFERSIZE (3)
   - CURLOPT_SOCKOPTFUNCTION (3)
   - CURLOPT_TCP_KEEPALIVE (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -42,10 +44,6 @@ overdone.
 # DEFAULT
 
 1
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

@@ -10,6 +10,8 @@ See-also:
   - curl_easy_reset (3)
   - curl_multi_cleanup (3)
   - curl_multi_remove_handle (3)
+Protocol:
+  - All
 ---
 
 # NAME

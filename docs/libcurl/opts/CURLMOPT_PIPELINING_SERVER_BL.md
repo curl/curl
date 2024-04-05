@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLMOPT_PIPELINING (3)
   - CURLMOPT_PIPELINING_SITE_BL (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -40,8 +42,6 @@ Pass a NULL pointer to clear the block list.
 # DEFAULT
 
 The default value is NULL, which means that there is no block list.
-
-# PROTOCOLS
 
 # EXAMPLE
 

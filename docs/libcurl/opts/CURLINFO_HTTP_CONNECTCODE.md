@@ -8,6 +8,8 @@ See-also:
   - CURLINFO_RESPONSE_CODE (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -27,10 +29,6 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_HTTP_CONNECTCODE, long *p);
 Pass a pointer to a long to receive the last received HTTP proxy response code
 to a CONNECT request. The returned value is zero if no such response code was
 available.
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

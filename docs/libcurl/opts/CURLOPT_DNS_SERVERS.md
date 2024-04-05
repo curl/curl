@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_DNS_CACHE_TIMEOUT (3)
   - CURLOPT_DNS_LOCAL_IP4 (3)
   - CURLOPT_DNS_LOCAL_IP6 (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -39,10 +41,6 @@ option.
 # DEFAULT
 
 NULL - use system default
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

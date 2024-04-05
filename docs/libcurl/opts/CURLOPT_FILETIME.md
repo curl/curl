@@ -7,6 +7,12 @@ Source: libcurl
 See-also:
   - CURLINFO_FILETIME (3)
   - curl_easy_getinfo (3)
+Protocol:
+  - HTTP
+  - FTP
+  - SFTP
+  - FILE
+  - SMB
 ---
 
 # NAME
@@ -32,10 +38,6 @@ transfer to extract the received time (if any).
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-HTTP(S), FTP(S), SFTP, FILE, SMB(S)
 
 # EXAMPLE
 

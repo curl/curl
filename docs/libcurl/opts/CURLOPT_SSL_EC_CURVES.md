@@ -8,6 +8,11 @@ See-also:
   - CURLOPT_SSL_CIPHER_LIST (3)
   - CURLOPT_SSL_OPTIONS (3)
   - CURLOPT_TLS13_CIPHERS (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
+  - wolfSSL
 ---
 
 # NAME
@@ -31,10 +36,6 @@ the SSL backend libcurl is built to use supports it).
 # DEFAULT
 
 "", embedded in SSL backend
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

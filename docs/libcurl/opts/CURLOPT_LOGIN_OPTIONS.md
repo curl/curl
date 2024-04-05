@@ -7,6 +7,11 @@ Source: libcurl
 See-also:
   - CURLOPT_PASSWORD (3)
   - CURLOPT_USERNAME (3)
+Protocol:
+  - IMAP
+  - LDAP
+  - POP3
+  - SMTP
 ---
 
 # NAME
@@ -45,10 +50,6 @@ option.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-Only IMAP, LDAP, POP3 and SMTP support login options.
 
 # EXAMPLE
 

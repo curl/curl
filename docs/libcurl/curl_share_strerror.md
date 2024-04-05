@@ -9,6 +9,8 @@ See-also:
   - curl_multi_strerror (3)
   - curl_url_strerror (3)
   - libcurl-errors (3)
+Protocol:
+  - All
 ---
 
 # NAME

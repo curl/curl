@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_DNS_CACHE_TIMEOUT (3)
   - CURLOPT_IPRESOLVE (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -43,10 +45,6 @@ performance impacts and may cause IPv4 to be used before IPv6 or vice versa.
 # DEFAULT
 
 0 (disabled)
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

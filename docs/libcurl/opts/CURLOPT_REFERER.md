@@ -9,6 +9,8 @@ See-also:
   - CURLINFO_REFERER (3)
   - CURLOPT_HTTPHEADER (3)
   - CURLOPT_USERAGENT (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -35,10 +37,6 @@ option.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

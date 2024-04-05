@@ -8,6 +8,10 @@ See-also:
   - CURLOPT_PROXY_SSL_OPTIONS (3)
   - CURLOPT_SSLVERSION (3)
   - CURLOPT_SSL_CIPHER_LIST (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - All
 ---
 
 # NAME
@@ -84,10 +88,6 @@ could be a privacy violation and unexpected.
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-All TLS-based protocols
 
 # EXAMPLE
 

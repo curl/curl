@@ -45,7 +45,7 @@ curl supports SMB version 1 for upload and download.
 Uploading contents to an SMTP server means sending an email. With or without
 TLS.
 ## TELNET
-Telling curl to fetch a telnet URL starts an interactive session where it
-sends what it reads on stdin and outputs what the server sends it.
+Fetching a telnet URL starts an interactive session where it sends what it
+reads on stdin and outputs what the server sends it.
 ## TFTP
 curl can do TFTP downloads and uploads.

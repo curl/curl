@@ -8,6 +8,8 @@ See-also:
   - CURLINFO_HTTPAUTH_AVAIL (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -29,10 +31,6 @@ Pass a pointer to a long to receive a bitmask indicating the authentication
 method(s) available according to the previous response. The meaning of the
 bits is explained in the CURLOPT_PROXYAUTH(3) option for
 curl_easy_setopt(3).
-
-# PROTOCOLS
-
-HTTP(S)
 
 # EXAMPLE
 

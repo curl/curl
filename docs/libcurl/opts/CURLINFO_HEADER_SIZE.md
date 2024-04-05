@@ -9,6 +9,8 @@ See-also:
   - CURLINFO_SIZE_DOWNLOAD (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -30,10 +32,6 @@ received. Measured in number of bytes.
 
 The total includes the size of any received headers suppressed by
 CURLOPT_SUPPRESS_CONNECT_HEADERS(3).
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

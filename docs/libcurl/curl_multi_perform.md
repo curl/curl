@@ -12,6 +12,8 @@ See-also:
   - curl_multi_init (3)
   - curl_multi_wait (3)
   - libcurl-errors (3)
+Protocol:
+  - All
 ---
 
 # NAME

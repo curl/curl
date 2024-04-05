@@ -10,6 +10,8 @@ See-also:
   - curl_easy_setopt (3)
   - curl_ws_send (3)
   - libcurl-ws (3)
+Protocol:
+  - WS
 ---
 
 # NAME

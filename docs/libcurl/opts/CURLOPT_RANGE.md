@@ -9,6 +9,12 @@ See-also:
   - CURLOPT_MAXFILESIZE_LARGE (3)
   - CURLOPT_MAX_RECV_SPEED_LARGE (3)
   - CURLOPT_RESUME_FROM (3)
+Protocol:
+  - HTTP
+  - FTP
+  - FILE
+  - RTSP
+  - SFTP
 ---
 
 # NAME
@@ -51,10 +57,6 @@ option.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-HTTP, FTP, FILE, RTSP and SFTP.
 
 # EXAMPLE
 

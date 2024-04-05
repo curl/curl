@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_PROXYPASSWORD (3)
   - CURLOPT_PROXYTYPE (3)
   - CURLOPT_PROXYUSERNAME (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -39,10 +41,6 @@ option.
 # DEFAULT
 
 This is NULL by default.
-
-# PROTOCOLS
-
-Used with all protocols that can use a proxy
 
 # EXAMPLE
 

@@ -31,6 +31,7 @@ my $errors;
 
 my %accepted=('curl' => 1,
               'libcurl' => 1,
+              'macOS' => 1,
               'c-ares' => 1);
 
 sub checkfile {
@@ -51,7 +52,6 @@ sub checkfile {
         if(($l == 1) && ($line =~ /^---/)) {
             # first line is a meta-data divider, skip to the next one
             $metadata = 1;
-            print STDERR "skip meta-data in $f\n";
             next;
         }
         elsif($metadata) {
@@ -66,7 +66,7 @@ sub checkfile {
             $ignore ^= 1;
         }
         if(!$ignore) {
-            if(($prevl =~ /\.\z/) && ($line =~ /^( *)([a-z-]+)/)) {
+            if(($prevl =~ /\.\z/) && ($line =~ /^( *)([a-z][A-Za-z-]*)/)) {
                 my ($prefix, $word) = ($1, $2);
                 if($word =~ /^[a-z]/ && !$accepted{$word}) {
                     my $c = length($prefix);

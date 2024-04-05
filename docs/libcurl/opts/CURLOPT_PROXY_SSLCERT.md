@@ -8,6 +8,15 @@ See-also:
   - CURLOPT_PROXY_SSLCERTTYPE (3)
   - CURLOPT_PROXY_SSLKEY (3)
   - CURLOPT_SSLCERT (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
+  - GnuTLS
+  - mbedTLS
+  - Schannel
+  - Secure Transport
+  - wolfSSL
 ---
 
 # NAME
@@ -45,10 +54,6 @@ option.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-Used with HTTPS proxy
 
 # EXAMPLE
 

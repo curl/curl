@@ -8,6 +8,10 @@ See-also:
   - CURLOPT_FILETIME (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - HTTP
+  - FTP
+  - SFTP
 ---
 
 # NAME
@@ -36,10 +40,6 @@ you this unconditionally gets a -1 back.
 
 Consider using CURLINFO_FILETIME_T(3) to be able to extract dates beyond
 the year 2038 on systems using 32 bit longs (Windows).
-
-# PROTOCOLS
-
-HTTP(S), FTP(S), SFTP
 
 # EXAMPLE
 

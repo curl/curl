@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_RTSP_SESSION_ID (3)
   - CURLOPT_RTSP_STREAM_URI (3)
+Protocol:
+  - RTSP
 ---
 
 # NAME
@@ -108,10 +110,6 @@ data. It returns after processing one read buffer of data in order to give the
 application a chance to run.
 
 # DEFAULT
-
-# PROTOCOLS
-
-RTSP
 
 # EXAMPLE
 

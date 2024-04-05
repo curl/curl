@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_CONNECTTIMEOUT (3)
   - CURLOPT_LOW_SPEED_LIMIT (3)
   - CURLOPT_TIMEOUT (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -33,10 +35,6 @@ See CURLOPT_CONNECTTIMEOUT(3) for details.
 # DEFAULT
 
 300000
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

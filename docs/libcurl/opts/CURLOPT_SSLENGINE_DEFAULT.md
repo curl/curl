@@ -7,6 +7,10 @@ Source: libcurl
 See-also:
   - CURLOPT_SSLCERT (3)
   - CURLOPT_SSLENGINE (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
 ---
 
 # NAME
@@ -31,10 +35,6 @@ This option has no effect unless set after CURLOPT_SSLENGINE(3).
 # DEFAULT
 
 None
-
-# PROTOCOLS
-
-All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
 
 # EXAMPLE
 

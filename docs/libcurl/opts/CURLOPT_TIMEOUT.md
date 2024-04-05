@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_LOW_SPEED_LIMIT (3)
   - CURLOPT_TCP_KEEPALIVE (3)
   - CURLOPT_TIMEOUT_MS (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -58,10 +60,6 @@ signals to be used unless CURLOPT_NOSIGNAL(3) is set.
 # DEFAULT
 
 Default timeout is 0 (zero) which means it never times out during transfer.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

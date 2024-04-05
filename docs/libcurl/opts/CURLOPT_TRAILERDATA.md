@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_TRAILERFUNCTION (3)
   - CURLOPT_WRITEFUNCTION (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -28,10 +30,6 @@ Data pointer to be passed to the HTTP trailer callback function.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

@@ -8,6 +8,11 @@ See-also:
   - CURLINFO_SSL_VERIFYRESULT (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
+  - GnuTLS
 ---
 
 # NAME
@@ -28,10 +33,6 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_PROXY_SSL_VERIFYRESULT,
 Pass a pointer to a long to receive the result of the certificate verification
 that was requested (using the CURLOPT_PROXY_SSL_VERIFYPEER(3)
 option. This is only used for HTTPS proxies.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

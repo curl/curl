@@ -4,6 +4,8 @@ SPDX-License-Identifier: curl
 Title: CURLINFO_LOCAL_PORT
 Section: 3
 Source: libcurl
+Protocol:
+  - TCP
 See-also:
   - CURLINFO_LOCAL_IP (3)
   - CURLINFO_PRIMARY_PORT (3)
@@ -27,10 +29,6 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_LOCAL_PORT, long *portp);
 
 Pass a pointer to a long to receive the local port number of the most recent
 connection done with this **curl** handle.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

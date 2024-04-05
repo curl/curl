@@ -10,6 +10,8 @@ See-also:
   - CURLINFO_REDIRECT_URL (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -34,10 +36,6 @@ CURLINFO_REDIRECT_TIME_T(3) holds the complete execution time for
 multiple redirections.
 
 See also the TIMES overview in the curl_easy_getinfo(3) man page.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

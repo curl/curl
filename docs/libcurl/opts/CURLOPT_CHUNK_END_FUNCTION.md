@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_CHUNK_BGN_FUNCTION (3)
   - CURLOPT_WILDCARDMATCH (3)
+Protocol:
+  - FTP
 ---
 
 # NAME
@@ -38,10 +40,6 @@ Return *CURL_CHUNK_END_FUNC_OK* if everything is fine or
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-FTP
 
 # EXAMPLE
 

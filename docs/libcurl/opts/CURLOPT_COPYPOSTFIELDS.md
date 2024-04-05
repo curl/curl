@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_POSTFIELDS (3)
   - CURLOPT_POSTFIELDSIZE (3)
   - CURLOPT_UPLOAD (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -42,10 +44,6 @@ CURLOPT_COPYPOSTFIELDS(3) option is issued.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-HTTP(S)
 
 # EXAMPLE
 

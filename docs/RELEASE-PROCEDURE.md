@@ -1,10 +1,17 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 curl release procedure - how to do a release
 ============================================
 
 in the source code repo
 -----------------------
 
-- run `./scripts/copyright.pl` and correct possible omissions
+- do a *regular build* with a sensible build config to make sure the
+  `src/tool_hugehelp.c` file etc is correctly generated
 
 - edit `RELEASE-NOTES` to be accurate
 
@@ -106,11 +113,11 @@ Coming dates
 Based on the description above, here are some planned release dates (at the
 time of this writing):
 
-- October 11, 2023
-- December 6, 2023
-- January 31, 2024
-- March 27, 2024
 - May 22, 2024
 - July 17, 2024
 - September 11, 2024
 - November 6, 2024
+- January 8, 2025
+- March 5, 2025
+- April 30, 2025
+- June 25, 2025

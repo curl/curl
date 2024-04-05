@@ -7,6 +7,9 @@ Source: libcurl
 See-also:
   - CURLOPT_PREQUOTE (3)
   - CURLOPT_QUOTE (3)
+Protocol:
+  - FTP
+  - SFTP
 ---
 
 # NAME
@@ -34,10 +37,6 @@ Disable this operation again by setting a NULL to this option.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-SFTP and FTP
 
 # EXAMPLE
 

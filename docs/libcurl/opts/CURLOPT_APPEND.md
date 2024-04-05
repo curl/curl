@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_DIRLISTONLY (3)
   - CURLOPT_RESUME_FROM (3)
   - CURLOPT_UPLOAD (3)
+Protocol:
+  - FTP
 ---
 
 # NAME
@@ -30,10 +32,6 @@ instead of overwrite it. This is only useful when uploading to an FTP site.
 # DEFAULT
 
 0 (disabled)
-
-# PROTOCOLS
-
-FTP
 
 # EXAMPLE
 

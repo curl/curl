@@ -7,6 +7,10 @@ Source: libcurl
 See-also:
   - CURLOPT_HTTPPOST (3)
   - CURLOPT_MIMEPOST (3)
+Protocol:
+  - HTTP
+  - IMAP
+  - SMTP
 ---
 
 # NAME
@@ -51,10 +55,6 @@ containing multipart form is sent, this is normally transmitted as
 # DEFAULT
 
 0, meaning disabled.
-
-# PROTOCOLS
-
-HTTP, IMAP, SMTP
 
 # EXAMPLE
 

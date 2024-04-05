@@ -10,6 +10,8 @@ See-also:
   - CURLOPT_MAXFILESIZE (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -31,10 +33,6 @@ Pass a pointer to a *curl_off_t* to receive the total amount of bytes that
 were downloaded. The amount is only for the latest transfer and gets reset
 again for each new transfer. This counts actual payload data, what's also
 commonly called body. All meta and header data is excluded from this amount.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

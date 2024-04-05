@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_CONNECT_TO (3)
   - CURLOPT_COOKIEFILE (3)
   - CURLOPT_RESOLVE (3)
+Protocol:
+  - HTTP
 ---
 <!-- markdown-link-check-disable -->
 # NAME
@@ -35,10 +37,6 @@ Specify a blank filename ("") to make libcurl not load from a file at all.
 # DEFAULT
 
 NULL. The alt-svc cache is not read nor written to file.
-
-# PROTOCOLS
-
-HTTPS
 
 # EXAMPLE
 

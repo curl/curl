@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_COOKIE (3)
   - CURLOPT_COOKIEFILE (3)
   - CURLOPT_COOKIELIST (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -50,10 +52,6 @@ option.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

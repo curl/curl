@@ -78,11 +78,10 @@ struct SingleRequest {
                                    first one */
   curl_off_t offset;            /* possible resume offset read from the
                                    Content-Range: header */
+  int httpversion;              /* Version in response (09, 10, 11, etc.) */
   int httpcode;                 /* error code from the 'HTTP/1.? XXX' or
                                    'RTSP/1.? XXX' line */
   int keepon;
-  struct curltime start100;      /* time stamp to wait for the 100 code from */
-  enum expect100 exp100;        /* expect 100 continue state */
   enum upgrade101 upgr101;      /* 101 upgrade state */
 
   /* Client Writer stack, handles transfer- and content-encodings, protocol
@@ -123,6 +122,9 @@ struct SingleRequest {
   unsigned char setcookies;
 #endif
   BIT(header);        /* incoming data has HTTP header */
+  BIT(done);          /* request is done, e.g. no more send/recv should
+                       * happen. This can be TRUE before `upload_done` or
+                       * `download_done` is TRUE. */
   BIT(content_range); /* set TRUE if Content-Range: was found */
   BIT(download_done); /* set to TRUE when download is complete */
   BIT(eos_written);   /* iff EOS has been written to client */
@@ -153,10 +155,17 @@ struct SingleRequest {
 CURLcode Curl_req_init(struct SingleRequest *req);
 
 /**
- * The request is about to start.
+ * The request is about to start. Record time and do a soft reset.
  */
 CURLcode Curl_req_start(struct SingleRequest *req,
                         struct Curl_easy *data);
+
+/**
+ * The request may continue with a follow up. Reset
+ * members, but keep start time for overall duration calc.
+ */
+CURLcode Curl_req_soft_reset(struct SingleRequest *req,
+                             struct Curl_easy *data);
 
 /**
  * The request is done. If not aborted, make sure that buffers are
@@ -174,10 +183,10 @@ CURLcode Curl_req_done(struct SingleRequest *req,
 void Curl_req_free(struct SingleRequest *req, struct Curl_easy *data);
 
 /**
- * Reset the state of the request for new use, given the
- * settings.
+ * Hard reset the state of the request to virgin state base on
+ * transfer settings.
  */
-void Curl_req_reset(struct SingleRequest *req, struct Curl_easy *data);
+void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data);
 
 #ifndef USE_HYPER
 /**

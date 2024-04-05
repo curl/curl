@@ -14,6 +14,13 @@ See-also:
   - CURLOPT_PROXY_SSL_VERIFYPEER (3)
   - CURLOPT_SSL_VERIFYHOST (3)
   - CURLOPT_SSL_VERIFYPEER (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
+  - rustls
+  - Secure Transport
+  - Schannel
 ---
 
 # NAME
@@ -49,10 +56,6 @@ This option overrides CURLOPT_PROXY_CAINFO(3).
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-Used with HTTPS proxy
 
 # EXAMPLE
 

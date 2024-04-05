@@ -70,8 +70,7 @@ static int rtsp_getsock_do(struct Curl_easy *data,
 static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
                                     const char *buf,
                                     size_t blen,
-                                    bool is_eos,
-                                    bool *done);
+                                    bool is_eos);
 
 static CURLcode rtsp_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn);
@@ -556,8 +555,6 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
             goto out;
         }
       }
-
-      data->state.expect100header = FALSE; /* RTSP posts are simple/small */
     }
     else if(rtspreq == RTSPREQ_GET_PARAMETER) {
       /* Check for an empty GET_PARAMETER (heartbeat) request */
@@ -790,8 +787,7 @@ out:
 static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
                                     const char *buf,
                                     size_t blen,
-                                    bool is_eos,
-                                    bool *done)
+                                    bool is_eos)
 {
   struct rtsp_conn *rtspc = &(data->conn->proto.rtspc);
   CURLcode result = CURLE_OK;
@@ -799,7 +795,6 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
 
   if(!data->req.header)
     rtspc->in_header = FALSE;
-  *done = FALSE;
   if(!blen) {
     goto out;
   }
@@ -823,7 +818,7 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
   /* we want to parse headers, do so */
   if(data->req.header && blen) {
     rtspc->in_header = TRUE;
-    result = Curl_http_write_resp_hds(data, buf, blen, &consumed, done);
+    result = Curl_http_write_resp_hds(data, buf, blen, &consumed);
     if(result)
       goto out;
 
@@ -849,13 +844,14 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
   }
 
   if(rtspc->state != RTP_PARSE_SKIP)
-    *done = FALSE;
+    data->req.done = FALSE;
   /* we SHOULD have consumed all bytes, unless the response is borked.
    * In which case we write out the left over bytes, letting the client
    * writer deal with it (it will report EXCESS and fail the transfer). */
   DEBUGF(infof(data, "rtsp_rtp_write_resp(len=%zu, in_header=%d, done=%d "
                " rtspc->state=%d, req.size=%" CURL_FORMAT_CURL_OFF_T ")",
-               blen, rtspc->in_header, *done, rtspc->state, data->req.size));
+               blen, rtspc->in_header, data->req.done, rtspc->state,
+               data->req.size));
   if(!result && (is_eos || blen)) {
     result = Curl_client_write(data, CLIENTWRITE_BODY|
                                (is_eos? CLIENTWRITE_EOS:0),

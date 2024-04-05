@@ -2366,17 +2366,16 @@ static CURLcode parse_proxy_auth(struct Curl_easy *data,
     data->state.aptr.proxyuser : "";
   const char *proxypasswd = data->state.aptr.proxypasswd ?
     data->state.aptr.proxypasswd : "";
-  CURLcode result = Curl_urldecode(proxyuser, 0, &conn->http_proxy.user, NULL,
-                                   REJECT_ZERO);
-  if(!result)
-    result = Curl_setstropt(&data->state.aptr.proxyuser,
-                            conn->http_proxy.user);
-  if(!result)
-    result = Curl_urldecode(proxypasswd, 0, &conn->http_proxy.passwd,
-                            NULL, REJECT_ZERO);
-  if(!result)
-    result = Curl_setstropt(&data->state.aptr.proxypasswd,
-                            conn->http_proxy.passwd);
+  CURLcode result = CURLE_OUT_OF_MEMORY;
+
+  conn->http_proxy.user = strdup(proxyuser);
+  if(conn->http_proxy.user) {
+    conn->http_proxy.passwd = strdup(proxypasswd);
+    if(conn->http_proxy.passwd)
+      result = CURLE_OK;
+    else
+      Curl_safefree(conn->http_proxy.user);
+  }
   return result;
 }
 
@@ -3839,8 +3838,8 @@ CURLcode Curl_connect(struct Curl_easy *data,
 
   *asyncp = FALSE; /* assume synchronous resolves by default */
 
-  /* init the single-transfer specific data */
-  Curl_req_reset(&data->req, data);
+  /* Set the request to virgin state based on transfer settings */
+  Curl_req_hard_reset(&data->req, data);
 
   /* call the stuff that needs to be called */
   result = create_conn(data, &conn, asyncp);
@@ -3883,8 +3882,6 @@ CURLcode Curl_connect(struct Curl_easy *data,
 
 CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
 {
-  struct SingleRequest *k = &data->req;
-
   /* if this is a pushed stream, we need this: */
   CURLcode result = Curl_preconnect(data);
   if(result)
@@ -3900,7 +3897,6 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
   }
 
   data->state.done = FALSE; /* *_done() is not called yet */
-  data->state.expect100header = FALSE;
 
   if(data->req.no_body)
     /* in HTTP lingo, no body means using the HEAD request... */
@@ -3909,10 +3905,6 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
   result = Curl_req_start(&data->req, data);
   if(result)
     return result;
-
-  k->header = TRUE; /* assume header */
-  k->bytecount = 0;
-  k->ignorebody = FALSE;
 
   Curl_speedinit(data);
   Curl_pgrsSetUploadCounter(data, 0);

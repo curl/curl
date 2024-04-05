@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_INFILESIZE (3)
   - CURLOPT_RANGE (3)
   - CURLOPT_RESUME_FROM_LARGE (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -40,10 +42,6 @@ CURLOPT_RESUME_FROM_LARGE(3) instead.
 # DEFAULT
 
 0, not used
-
-# PROTOCOLS
-
-HTTP, FTP, SFTP, FILE
 
 # EXAMPLE
 

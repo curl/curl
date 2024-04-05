@@ -8,6 +8,10 @@ See-also:
   - CURLINFO_CAPATH (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - All
 ---
 
 # NAME
@@ -35,10 +39,6 @@ currently set to be used does not support CURLOPT_CAINFO(3).
 This is a path identifying a single file containing CA certificates.
 
 The **path** pointer is set to NULL if there is no default path.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

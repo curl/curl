@@ -10,6 +10,8 @@ See-also:
   - CURLOPT_POSTREDIR (3)
   - CURLOPT_PROTOCOLS (3)
   - CURLOPT_REDIR_PROTOCOLS (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -62,10 +64,6 @@ would otherwise select internally.
 # DEFAULT
 
 0, disabled
-
-# PROTOCOLS
-
-HTTP(S)
 
 # EXAMPLE
 

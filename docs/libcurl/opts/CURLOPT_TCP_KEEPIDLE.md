@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_TCP_KEEPALIVE (3)
   - CURLOPT_TCP_KEEPINTVL (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -33,10 +35,6 @@ this amount.
 # DEFAULT
 
 60
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

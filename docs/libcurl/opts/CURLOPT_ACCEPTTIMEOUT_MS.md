@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_CONNECTTIMEOUT_MS (3)
   - CURLOPT_DEBUGFUNCTION (3)
   - CURLOPT_STDERR (3)
+Protocol:
+  - FTP
 ---
 
 # NAME
@@ -30,10 +32,6 @@ server to connect back to libcurl when an active FTP connection is used.
 # DEFAULT
 
 60000 milliseconds
-
-# PROTOCOLS
-
-FTP
 
 # EXAMPLE
 

@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_HTTP_VERSION (3)
   - CURLOPT_STREAM_DEPENDS (3)
   - CURLOPT_STREAM_WEIGHT (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -47,10 +49,6 @@ option to have an actual effect.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-HTTP/2
 
 # EXAMPLE
 

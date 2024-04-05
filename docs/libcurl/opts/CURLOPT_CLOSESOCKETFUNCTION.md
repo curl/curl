@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_CLOSESOCKETDATA (3)
   - CURLOPT_OPENSOCKETFUNCTION (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -42,10 +44,6 @@ closed.
 # DEFAULT
 
 By default libcurl uses the standard socket close function.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

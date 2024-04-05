@@ -8,6 +8,10 @@ See-also:
   - CURLOPT_FILETIME (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - HTTP
+  - FTP
+  - SFTP
 ---
 
 # NAME
@@ -38,10 +42,6 @@ you unconditionally get a -1 back.
 This option is an alternative to CURLINFO_FILETIME(3) to allow systems
 with 32 bit long variables to extract dates outside of the 32bit timestamp
 range.
-
-# PROTOCOLS
-
-HTTP(S), FTP(S), SFTP
 
 # EXAMPLE
 

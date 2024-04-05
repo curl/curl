@@ -12,6 +12,8 @@ See-also:
   - curl_multi_strerror (3)
   - curl_share_strerror (3)
   - curl_url_strerror (3)
+Protocol:
+  - All
 ---
 
 # NAME

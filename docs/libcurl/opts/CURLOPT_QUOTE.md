@@ -9,6 +9,9 @@ See-also:
   - CURLOPT_DIRLISTONLY (3)
   - CURLOPT_POSTQUOTE (3)
   - CURLOPT_PREQUOTE (3)
+Protocol:
+  - FTP
+  - SFTP
 ---
 
 # NAME
@@ -123,10 +126,6 @@ See ln.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-SFTP and FTP
 
 # EXAMPLE
 

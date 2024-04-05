@@ -14,6 +14,6 @@ Example:
 
 # `--path-as-is`
 
-Tell curl to not handle sequences of /../ or /./ in the given URL
-path. Normally curl squashes or merges them according to standards but with
-this option set you tell it not to do that.
+Do not handle sequences of /../ or /./ in the given URL path. Normally curl
+squashes or merges them according to standards but with this option set you
+tell it not to do that.

@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_NETRC (3)
   - CURLOPT_PASSWORD (3)
   - CURLOPT_USERNAME (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -35,10 +37,6 @@ option.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

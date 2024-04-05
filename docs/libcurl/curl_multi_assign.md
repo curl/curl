@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - curl_multi_setopt (3)
   - curl_multi_socket_action (3)
+Protocol:
+  - All
 ---
 
 # NAME
