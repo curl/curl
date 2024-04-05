@@ -506,11 +506,14 @@
 #  error "curl_off_t must be exactly 64 bits"
 #else
   typedef unsigned CURL_TYPEOF_CURL_OFF_T curl_uint64_t;
+  typedef CURL_TYPEOF_CURL_OFF_T  curl_int64_t;
 #  ifndef CURL_SUFFIX_CURL_OFF_TU
 #    error "CURL_SUFFIX_CURL_OFF_TU must be defined"
 #  endif
 #  define CURL_UINT64_SUFFIX  CURL_SUFFIX_CURL_OFF_TU
 #  define CURL_UINT64_C(val)  CURL_CONC_MACROS(val,CURL_UINT64_SUFFIX)
+# define CURL_PRId64  CURL_FORMAT_CURL_OFF_T
+# define CURL_PRIu64  CURL_FORMAT_CURL_OFF_TU
 #endif
 
 #if (SIZEOF_TIME_T == 4)
