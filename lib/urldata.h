@@ -1386,7 +1386,6 @@ struct UrlState {
   BIT(done); /* set to FALSE when Curl_init_do() is called and set to TRUE
                 when multi_done() is called, to prevent multi_done() to get
                 invoked twice when the multi interface is used. */
-  BIT(previouslypending); /* this transfer WAS in the multi->pending queue */
 #ifndef CURL_DISABLE_COOKIES
   BIT(cookie_engine);
 #endif
