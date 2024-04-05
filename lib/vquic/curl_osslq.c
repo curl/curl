@@ -1447,7 +1447,7 @@ static CURLcode h3_send_streams(struct Curl_cfilter *cf,
         default:
           failf(data, "[%"CURL_PRId64 "] send %zu bytes to QUIC, SSL error %d",
                 s->id, vec[i].len, detail);
-          result = cf_osslq_ssl_err(cf, data, detail, CURLE_SEND_ERROR);
+          result = cf_osslq_ssl_err(cf, data, detail, CURLE_HTTP3);
           goto out;
         }
       }
