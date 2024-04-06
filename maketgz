@@ -88,6 +88,7 @@ fi
 # requires a date command that knows + for format and -d for date input
 timestamp=${SOURCE_DATE_EPOCH:-$(date +"%s")}
 datestamp=$(date -d "@$timestamp" +"%F")
+filestamp=$(date -d "@$timestamp" +"%Y%m%d%H%M.%S")
 
 # Replace version number in header file:
 sed -i.bak \
@@ -185,6 +186,23 @@ if test "$res" != 0; then
   exit 2
 fi
 
+retar() {
+  tempdir=$1
+  rm -rf "$tempdir"
+  mkdir "$tempdir"
+  cd "$tempdir"
+  gzip -dc "../$targz" | tar -xf -
+  find curl-* -type f -exec touch -c -t "$filestamp" '{}' +
+  find curl-* -type f | sort | tar --create --format=ustar --owner=0 --group=0 --numeric-owner --files-from - | gzip --best --no-name > out.tar.gz
+  mv out.tar.gz ../
+  cd ..
+  rm -rf "$tempdir"
+}
+
+retar ".tarbuild"
+echo "replace $targz with out.tar.gz"
+mv out.tar.gz "$targz"
+
 ############################################################################
 #
 # Now make a bz2 archive from the tar.gz original
@@ -222,6 +240,9 @@ zip="curl-$version.zip"
 echo "Generating $zip"
 tempdir=".builddir"
 makezip
+
+# Set deterministic timestamp
+touch -c -t "$filestamp" "$targz" "$bzip2" "$zip" "$xz"
 
 echo "------------------"
 echo "maketgz report:"
