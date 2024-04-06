@@ -55,7 +55,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: SARIF file
-          path: warnings-translate.sarif
+          path: warnings.sarif
       - name: Push Summary Report
         if: ${{ github.event.pull_request }}
         uses: thollander/actions-comment-pull-request@v2
@@ -64,5 +64,5 @@ jobs:
       - name: Upload SARIF results
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: warnings-translate.sarif
+          sarif_file: warnings.sarif
           category: "CodeSecure CodeSonar"            
