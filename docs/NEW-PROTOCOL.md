@@ -13,10 +13,10 @@ How do you proceed to add a new protocol and what are the requirements?
 
 This document is an attempt to describe things to consider. There is no
 checklist of the twenty-seven things you need to cross off. We view the entire
-effort as a whole and then judge if it seems to be the right thing - for
-now. The more things that look right, fit our patterns and are done in ways
-that align with our thinking, the better are the chances that we will agree
-that supporting this protocol is a grand idea.
+effort as a whole and then judge if it seems to be the right thing - for now.
+The more things that look right, fit our patterns and are done in ways that
+align with our thinking, the better are the chances that we agree that
+supporting this protocol is a grand idea.
 
 ## Mutual benefit is preferred
 
@@ -93,18 +93,18 @@ protocol - but it might require a bit of an effort to make it happen.
 We cannot assume that users are particularly familiar with details and
 peculiarities of the protocol. It needs documentation.
 
-Maybe it even needs some internal documentation so that the developers who
-will try to debug something five years from now can figure out functionality a
-little easier!
+Maybe it even needs some internal documentation so that the developers who try
+to debug something five years from now can figure out functionality a little
+easier!
 
 The protocol specification itself should be freely available without requiring
 a non-disclosure agreement or similar.
 
 ## Do not compare
 
-We are constantly raising the bar and we are constantly improving the
-project. A lot of things we did in the past would not be acceptable if done
-today. Therefore, you might be tempted to use shortcuts or "hacks" you can
-spot other - existing - protocol implementations have used, but there is
-nothing to gain from that. The bar has been raised. Former "cheats" will not be
-tolerated anymore.
+We are constantly raising the bar and we are constantly improving the project.
+A lot of things we did in the past would not be acceptable if done today.
+Therefore, you might be tempted to use shortcuts or "hacks" you can spot
+other - existing - protocol implementations have used, but there is nothing to
+gain from that. The bar has been raised. Former "cheats" may not tolerated
+anymore.

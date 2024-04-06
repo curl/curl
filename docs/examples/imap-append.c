@@ -99,7 +99,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
     curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
 
-    /* This will create a new message in folder "Sent". */
+    /* This creates a new message in folder "Sent". */
     curl_easy_setopt(curl, CURLOPT_URL, "imap://imap.example.com/Sent");
 
     /* In this case, we are using a callback function to specify the data. You

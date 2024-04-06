@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLINFO_SSL_VERIFYRESULT
 Section: 3
@@ -8,6 +8,11 @@ See-also:
   - CURLINFO_PROXY_SSL_VERIFYRESULT (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
+  - GnuTLS
 ---
 
 # NAME
@@ -30,10 +35,6 @@ verification that was requested (using the CURLOPT_SSL_VERIFYPEER(3)
 option).
 
 0 is a positive result. Non-zero is an error.
-
-# PROTOCOLS
-
-All using TLS
 
 # EXAMPLE
 

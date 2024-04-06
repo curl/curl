@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: curl_pushheader_byname
 Section: 3
@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLMOPT_PUSHFUNCTION (3)
   - curl_pushheader_bynum (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME

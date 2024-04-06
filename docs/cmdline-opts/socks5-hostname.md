@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: socks5-hostname
 Arg: <host[:port]>
-Help: SOCKS5 proxy, pass host name to proxy
+Help: SOCKS5 proxy, pass hostname to proxy
 Added: 7.18.0
 Category: proxy
 Multi: single
@@ -16,7 +16,7 @@ Example:
 
 # `--socks5-hostname`
 
-Use the specified SOCKS5 proxy (and let the proxy resolve the host name). If
+Use the specified SOCKS5 proxy (and let the proxy resolve the hostname). If
 the port number is not specified, it is assumed at port 1080.
 
 To specify proxy on a unix domain socket, use localhost for host, e.g.

@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_DOH_SSL_VERIFYSTATUS
 Section: 3
@@ -8,6 +8,11 @@ See-also:
   - CURLOPT_DOH_SSL_VERIFYHOST (3)
   - CURLOPT_DOH_SSL_VERIFYPEER (3)
   - CURLOPT_SSL_VERIFYSTATUS (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - OpenSSL
+  - GnuTLS
 ---
 
 # NAME
@@ -41,10 +46,6 @@ the verification fails.
 
 0
 
-# PROTOCOLS
-
-DoH
-
 # EXAMPLE
 
 ~~~c
@@ -67,8 +68,7 @@ int main(void)
 
 # AVAILABILITY
 
-Added in 7.76.0. This option is currently only supported by the OpenSSL, and
-GnuTLS TLS backends.
+Added in 7.76.0.
 
 # RETURN VALUE
 

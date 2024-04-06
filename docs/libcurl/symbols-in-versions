@@ -506,6 +506,7 @@ CURLINFO_TLS_SSL_PTR            7.48.0
 CURLINFO_TOTAL_TIME             7.4.1
 CURLINFO_TOTAL_TIME_T           7.61.0
 CURLINFO_TYPEMASK               7.4.1
+CURLINFO_USED_PROXY             8.7.0
 CURLINFO_XFER_ID                8.2.0
 CURLIOCMD_NOP                   7.12.3
 CURLIOCMD_RESTARTREAD           7.12.3

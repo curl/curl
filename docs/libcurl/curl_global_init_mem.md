@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: curl_global_init_mem
 Section: 3
@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - curl_global_cleanup (3)
   - curl_global_init (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -40,23 +42,23 @@ default) so we strongly urge you to make your callback functions thread safe.
 All callback arguments must be set to valid function pointers. The
 prototypes for the given callbacks must match these:
 
-## void *malloc_callback(size_t size);
+## `void *malloc_callback(size_t size);`
 
 To replace malloc()
 
-## void free_callback(void *ptr);
+## `void free_callback(void *ptr);`
 
 To replace free()
 
-## void *realloc_callback(void *ptr, size_t size);
+## `void *realloc_callback(void *ptr, size_t size);`
 
 To replace realloc()
 
-## char *strdup_callback(const char *str);
+## `char *strdup_callback(const char *str);`
 
 To replace strdup()
 
-## void *calloc_callback(size_t nmemb, size_t size);
+## `void *calloc_callback(size_t nmemb, size_t size);`
 
 To replace calloc()
 
@@ -92,4 +94,4 @@ Added in 7.12.0
 # RETURN VALUE
 
 CURLE_OK (0) means everything was OK, non-zero means an error occurred as
-*<curl/curl.h>* defines - see libcurl-errors(3).
+*\<curl/curl.h\>* defines - see libcurl-errors(3).

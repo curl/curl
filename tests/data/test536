@@ -1,0 +1,76 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP proxy
+CURLOPT_PROXY
+CURLOPT_NOBODY
+CURLINFO_USED_PROXY
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK swsclose
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+
+hello
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<tool>
+lib%TESTNUMBER
+</tool>
+<name>
+CURLINFO_USED_PROXY
+</name>
+
+# provides:
+# 0 - the proxy URL
+# 1 - the non-proxy using URL
+# 2 - the CURLOPT_RESOLVE string to change IP for the name
+#
+<command>
+http://%HOSTIP:%HTTPPORT goingdirect.com:%HTTPPORT goingdirect.com:%HTTPPORT:%HOSTIP
+</command>
+<features>
+proxy
+</features>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="yes">
+GET http://usingproxy.com/ HTTP/1.1
+Host: usingproxy.com
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+GET / HTTP/1.1
+Host: goingdirect.com:%HTTPPORT
+Accept: */*
+
+</protocol>
+<stdout mode="text">
+hello
+This used the proxy
+hello
+This DID NOT use the proxy
+</stdout>
+</verify>
+</testcase>

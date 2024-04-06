@@ -2,7 +2,7 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/cpp
 {
 	"name": "curl - CodeSonar ",
-	"image": "codesecurese/curl-cso-builder:8.0p0",
+	"image": "ghcr.io/codesecure-se/curl-cso-builder:8.1p0",
 	"mounts" : [
 	"source=${localEnv:HOME}/.csurf,target=/home/user/.csurf,type=bind",
 	"source=${localEnv:HOME}/.ssh,target=/home/user/.ssh,type=bind",

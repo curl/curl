@@ -47,7 +47,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
     curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
 
-    /* This will list every message of the given mailbox */
+    /* This lists every message of the given mailbox */
     curl_easy_setopt(curl, CURLOPT_URL, "pop3://pop.example.com");
 
     /* Perform the list */

@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLSHOPT_UNLOCKFUNC
 Section: 3
@@ -9,6 +9,8 @@ See-also:
   - curl_share_cleanup (3)
   - curl_share_init (3)
   - curl_share_setopt (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -41,10 +43,6 @@ sure that the callback uses a different lock for each kind of data.
 
 *clientp* is the private pointer you set with CURLSHOPT_USERDATA(3).
 This pointer is not used by libcurl itself.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

@@ -893,7 +893,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
 
 
 /* Perform the disconnect handshake with sockfilt
- * This involves waiting for the disconnect acknowledgmeent after the DISC
+ * This involves waiting for the disconnect acknowledgment after the DISC
  * command, while throwing away anything else that might come in before
  * that.
  */

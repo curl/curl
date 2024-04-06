@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_PIPEWAIT
 Section: 3
@@ -9,6 +9,8 @@ See-also:
   - CURLMOPT_PIPELINING (3)
   - CURLOPT_FORBID_REUSE (3)
   - CURLOPT_FRESH_CONNECT (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -49,10 +51,6 @@ and support level.
 # DEFAULT
 
 0 (off)
-
-# PROTOCOLS
-
-HTTP(S)
 
 # EXAMPLE
 

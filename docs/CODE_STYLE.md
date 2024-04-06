@@ -19,7 +19,7 @@ particularly unusual rules in our set of rules.
 
 We also work hard on writing code that are warning-free on all the major
 platforms and in general on as many platforms as possible. Code that obviously
-will cause warnings will not be accepted as-is.
+causes warnings is not accepted as-is.
 
 ## Naming
 
@@ -218,7 +218,7 @@ int size = sizeof(int);
 
 Some statements cannot be completed on a single line because the line would be
 too long, the statement too hard to read, or due to other style guidelines
-above. In such a case the statement will span multiple lines.
+above. In such a case the statement spans multiple lines.
 
 If a continuation line is part of an expression or sub-expression then you
 should align on the appropriate column so that it is easy to tell what part of

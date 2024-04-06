@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: resolve
 Arg: <[+]host:port:addr[,addr]...>
-Help: Resolve the host+port to this address
+Help: Resolve host+port to address
 Added: 7.21.3
 Category: connection dns
 Multi: append
@@ -24,7 +24,7 @@ the number used for the specific protocol the host is used for. It means
 you need several entries if you want to provide address for the same host but
 different ports.
 
-By specifying '*' as host you can tell curl to resolve any host and specific
+By specifying `*` as host you can tell curl to resolve any host and specific
 port pair to the specified address. Wildcard is resolved last so any --resolve
 with a specific host and port is used first.
 
@@ -43,4 +43,4 @@ Support for providing multiple IP addresses per entry was added in 7.59.0.
 
 Support for resolving with wildcard was added in 7.64.0.
 
-Support for the '+' prefix was was added in 7.75.0.
+Support for the '+' prefix was added in 7.75.0.

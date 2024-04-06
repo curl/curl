@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_COPYPOSTFIELDS
 Section: 3
@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_POSTFIELDS (3)
   - CURLOPT_POSTFIELDSIZE (3)
   - CURLOPT_UPLOAD (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -42,10 +44,6 @@ CURLOPT_COPYPOSTFIELDS(3) option is issued.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-HTTP(S)
 
 # EXAMPLE
 

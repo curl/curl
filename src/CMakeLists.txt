@@ -26,23 +26,18 @@ add_definitions(-DBUILDING_CURL)
 
 if(ENABLE_CURL_MANUAL AND HAVE_MANUAL_TOOLS)
   add_definitions("-DUSE_MANUAL")
-  # Use the C locale to ensure that only ASCII characters appear in the
-  # embedded text. NROFF and MANOPT are set in the parent CMakeLists.txt
   add_custom_command(
     OUTPUT tool_hugehelp.c
     COMMAND ${CMAKE_COMMAND} -E echo "#include \"tool_setup.h\"" > tool_hugehelp.c
     COMMAND ${CMAKE_COMMAND} -E echo "#ifndef HAVE_LIBZ" >> tool_hugehelp.c
-    COMMAND env LC_ALL=C "${NROFF}" ${NROFF_MANOPT}
-            "${CURL_BINARY_DIR}/docs/curl.1" |
-            "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/mkhelp.pl" >> tool_hugehelp.c
+    COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/mkhelp.pl" < "${CURL_BINARY_DIR}/docs/cmdline-opts/curl.txt" >> tool_hugehelp.c
+
     COMMAND ${CMAKE_COMMAND} -E echo "#else" >> tool_hugehelp.c
-    COMMAND env LC_ALL=C "${NROFF}" ${NROFF_MANOPT}
-            "${CURL_BINARY_DIR}/docs/curl.1" |
-            "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/mkhelp.pl" -c >> tool_hugehelp.c
+    COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/mkhelp.pl" -c < "${CURL_BINARY_DIR}/docs/cmdline-opts/curl.txt" >> tool_hugehelp.c
     COMMAND ${CMAKE_COMMAND} -E echo "#endif /* HAVE_LIBZ */" >> tool_hugehelp.c
     DEPENDS
       generate-curl.1
-      "${CURL_BINARY_DIR}/docs/curl.1"
+      "${CURL_BINARY_DIR}/docs/cmdline-opts/curl.1"
       "${CMAKE_CURRENT_SOURCE_DIR}/mkhelp.pl"
       "${CMAKE_CURRENT_SOURCE_DIR}/tool_hugehelp.h"
     VERBATIM)

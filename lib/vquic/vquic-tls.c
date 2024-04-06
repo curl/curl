@@ -375,6 +375,7 @@ static CURLcode curl_wssl_init_ctx(struct quic_tls_ctx *ctx,
     char error_buffer[256];
     ERR_error_string_n(ERR_get_error(), error_buffer, sizeof(error_buffer));
     failf(data, "wolfSSL failed to set ciphers: %s", error_buffer);
+    result = CURLE_BAD_FUNCTION_ARGUMENT;
     goto out;
   }
 
@@ -382,6 +383,7 @@ static CURLcode curl_wssl_init_ctx(struct quic_tls_ctx *ctx,
                                   conn_config->curves :
                                   (char *)QUIC_GROUPS) != 1) {
     failf(data, "wolfSSL failed to set curves");
+    result = CURLE_BAD_FUNCTION_ARGUMENT;
     goto out;
   }
 
@@ -392,6 +394,7 @@ static CURLcode curl_wssl_init_ctx(struct quic_tls_ctx *ctx,
     wolfSSL_CTX_set_keylog_callback(ctx->ssl_ctx, keylog_callback);
 #else
     failf(data, "wolfSSL was built without keylog callback");
+    result = CURLE_NOT_BUILT_IN;
     goto out;
 #endif
   }
@@ -414,6 +417,7 @@ static CURLcode curl_wssl_init_ctx(struct quic_tls_ctx *ctx,
               "  CAfile: %s CApath: %s",
               ssl_cafile ? ssl_cafile : "none",
               ssl_capath ? ssl_capath : "none");
+        result = CURLE_SSL_CACERT_BADFILE;
         goto out;
       }
       infof(data, " CAfile: %s", ssl_cafile ? ssl_cafile : "none");

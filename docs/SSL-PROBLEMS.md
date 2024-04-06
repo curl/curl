@@ -22,14 +22,14 @@
 
 ## CA bundle missing intermediate certificates
 
-  When using said CA bundle to verify a server cert, you will experience
+  When using said CA bundle to verify a server cert, you may experience
   problems if your CA store does not contain the certificates for the
   intermediates if the server does not provide them.
 
   The TLS protocol mandates that the intermediate certificates are sent in the
   handshake, but as browsers have ways to survive or work around such
-  omissions, missing intermediates in TLS handshakes still happen that
-  browser-users will not notice.
+  omissions, missing intermediates in TLS handshakes still happen that browser
+  users do not notice.
 
   Browsers work around this problem in two ways: they cache intermediate
   certificates from previous transfers and some implement the TLS "AIA"

@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_DISALLOW_USERNAME_IN_URL
 Section: 3
@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_URL (3)
   - curl_url_set (3)
   - libcurl-security (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -34,11 +36,7 @@ curl_url_set(3) function.
 
 # DEFAULT
 
-0 (disabled) - user names are allowed by default.
-
-# PROTOCOLS
-
-Several
+0 (disabled) - usernames are allowed by default.
 
 # EXAMPLE
 

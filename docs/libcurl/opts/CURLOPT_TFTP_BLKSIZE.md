@@ -1,11 +1,13 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_TFTP_BLKSIZE
 Section: 3
 Source: libcurl
 See-also:
   - CURLOPT_MAXFILESIZE (3)
+Protocol:
+  - TFTP
 ---
 
 # NAME
@@ -32,10 +34,6 @@ is used.
 # DEFAULT
 
 512
-
-# PROTOCOLS
-
-TFTP
 
 # EXAMPLE
 

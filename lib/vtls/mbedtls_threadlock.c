@@ -26,12 +26,12 @@
 
 #if defined(USE_MBEDTLS) &&                                     \
   ((defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)) ||   \
-    defined(USE_THREADS_WIN32))
+    defined(_WIN32))
 
 #if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
 #  include <pthread.h>
 #  define MBEDTLS_MUTEX_T pthread_mutex_t
-#elif defined(USE_THREADS_WIN32)
+#elif defined(_WIN32)
 #  define MBEDTLS_MUTEX_T HANDLE
 #endif
 
@@ -59,7 +59,7 @@ int Curl_mbedtlsthreadlock_thread_setup(void)
 #if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
     if(pthread_mutex_init(&mutex_buf[i], NULL))
       return 0; /* pthread_mutex_init failed */
-#elif defined(USE_THREADS_WIN32)
+#elif defined(_WIN32)
     mutex_buf[i] = CreateMutex(0, FALSE, 0);
     if(mutex_buf[i] == 0)
       return 0;  /* CreateMutex failed */
@@ -80,7 +80,7 @@ int Curl_mbedtlsthreadlock_thread_cleanup(void)
 #if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
     if(pthread_mutex_destroy(&mutex_buf[i]))
       return 0; /* pthread_mutex_destroy failed */
-#elif defined(USE_THREADS_WIN32)
+#elif defined(_WIN32)
     if(!CloseHandle(mutex_buf[i]))
       return 0; /* CloseHandle failed */
 #endif /* USE_THREADS_POSIX && HAVE_PTHREAD_H */
@@ -100,7 +100,7 @@ int Curl_mbedtlsthreadlock_lock_function(int n)
                      "Error: mbedtlsthreadlock_lock_function failed\n"));
       return 0; /* pthread_mutex_lock failed */
     }
-#elif defined(USE_THREADS_WIN32)
+#elif defined(_WIN32)
     if(WaitForSingleObject(mutex_buf[n], INFINITE) == WAIT_FAILED) {
       DEBUGF(fprintf(stderr,
                      "Error: mbedtlsthreadlock_lock_function failed\n"));
@@ -120,7 +120,7 @@ int Curl_mbedtlsthreadlock_unlock_function(int n)
                      "Error: mbedtlsthreadlock_unlock_function failed\n"));
       return 0; /* pthread_mutex_unlock failed */
     }
-#elif defined(USE_THREADS_WIN32)
+#elif defined(_WIN32)
     if(!ReleaseMutex(mutex_buf[n])) {
       DEBUGF(fprintf(stderr,
                      "Error: mbedtlsthreadlock_unlock_function failed\n"));

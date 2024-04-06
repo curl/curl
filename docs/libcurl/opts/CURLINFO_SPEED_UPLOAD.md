@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLINFO_SPEED_UPLOAD
 Section: 3
@@ -8,6 +8,8 @@ See-also:
   - CURLINFO_SPEED_DOWNLOAD_T (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -29,8 +31,6 @@ measured for the complete upload. Measured in bytes/second.
 
 CURLINFO_SPEED_UPLOAD_T(3) is a newer replacement that returns a more
 sensible variable type.
-
-# PROTOCOLS
 
 # EXAMPLE
 

@@ -129,3 +129,14 @@ class TestWebsockets:
         url = f'ws://localhost:{env.ws_port}/'
         r = client.run(args=[url, str(65535 - 5), str(65535 + 5)])
         r.check_exit_code(0)
+
+    # the python websocket server does not like 'large' control frames
+    def test_20_07_data_large_small_recv(self, env: Env, ws_echo, repeat):
+        client = LocalClient(env=env, name='ws-data', run_env={
+            'CURL_WS_CHUNK_SIZE': '1024',
+        })
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        url = f'ws://localhost:{env.ws_port}/'
+        r = client.run(args=[url, str(65535 - 5), str(65535 + 5)])
+        r.check_exit_code(0)

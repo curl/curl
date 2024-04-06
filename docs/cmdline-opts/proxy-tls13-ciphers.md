@@ -18,9 +18,9 @@ Example:
 
 # `--proxy-tls13-ciphers`
 
-Specifies which cipher suites to use in the connection to your HTTPS proxy
-when it negotiates TLS 1.3. The list of ciphers suites must specify valid
-ciphers. Read up on TLS 1.3 cipher suite details on this URL:
+Specify which cipher suites to use in the connection to your HTTPS proxy when
+it negotiates TLS 1.3. The list of ciphers suites must specify valid ciphers.
+Read up on TLS 1.3 cipher suite details on this URL:
 
 https://curl.se/docs/ssl-ciphers.html
 

@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_SOCKS5_GSSAPI_NEC
 Section: 3
@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_PROXY (3)
   - CURLOPT_SOCKS5_GSSAPI_SERVICE (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -32,10 +34,6 @@ negotiation.
 # DEFAULT
 
 ?
-
-# PROTOCOLS
-
-Most
 
 # EXAMPLE
 

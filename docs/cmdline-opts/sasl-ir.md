@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: sasl-ir
-Help: Enable initial response in SASL authentication
+Help: Initial response in SASL authentication
 Added: 7.31.0
 Category: auth
 Multi: boolean

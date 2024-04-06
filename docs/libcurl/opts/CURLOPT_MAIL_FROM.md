@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_MAIL_FROM
 Section: 3
@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_MAIL_AUTH (3)
   - CURLOPT_MAIL_RCPT (3)
+Protocol:
+  - SMTP
 ---
 
 # NAME
@@ -26,7 +28,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MAIL_FROM, char *from);
 Pass a pointer to a null-terminated string as parameter. This should be used
 to specify the sender's email address when sending SMTP mail with libcurl.
 
-An originator email address should be specified with angled brackets (<>)
+An originator email address should be specified with angled brackets (\<\>)
 around it, which if not specified are added automatically.
 
 If this parameter is not specified then an empty address is sent to the SMTP
@@ -38,10 +40,6 @@ option.
 # DEFAULT
 
 blank
-
-# PROTOCOLS
-
-SMTP
 
 # EXAMPLE
 

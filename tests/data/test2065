@@ -54,6 +54,7 @@ http
 <features>
 !SSPI
 crypto
+sha512-256
 </features>
 <name>
 HTTP with RFC7616 Digest authorization with bad password, SHA-512-256 and userhash=false
@@ -73,7 +74,7 @@ Accept: */*
 
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="2053604145", uri="/%TESTNUMBER", response="5a5f20b0e601aeddc6f96422c2332d49ff431c49ab143b5f836ef76e9ac78f5e", algorithm=SHA-512-256
+Authorization: Digest username="testuser", realm="testrealm", nonce="2053604145", uri="/%TESTNUMBER", response="0373a49d7d352ff54884faaf762fc6c89281b4112ad8fcbbe1d1ee52dcf7a802", algorithm=SHA-512-256
 User-Agent: curl/%VERSION
 Accept: */*
 

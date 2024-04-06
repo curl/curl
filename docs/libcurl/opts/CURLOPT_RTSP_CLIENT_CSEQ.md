@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_RTSP_CLIENT_CSEQ
 Section: 3
@@ -9,6 +9,8 @@ See-also:
   - CURLINFO_RTSP_SERVER_CSEQ (3)
   - CURLOPT_RTSP_REQUEST (3)
   - CURLOPT_RTSP_SERVER_CSEQ (3)
+Protocol:
+  - RTSP
 ---
 
 # NAME
@@ -32,10 +34,6 @@ increments from this new number henceforth.
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-RTSP
 
 # EXAMPLE
 

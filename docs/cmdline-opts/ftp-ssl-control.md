@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: ftp-ssl-control
-Help: Require SSL/TLS for FTP login, clear for transfer
+Help: Require TLS for login, clear for transfer
 Protocols: FTP
 Added: 7.16.0
 Category: ftp tls

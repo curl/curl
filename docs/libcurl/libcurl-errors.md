@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: libcurl-errors
 Section: 3
@@ -12,6 +12,8 @@ See-also:
   - curl_multi_strerror (3)
   - curl_share_strerror (3)
   - curl_url_strerror (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -145,8 +147,8 @@ indicated unsuccessful completion of the command.
 
 ## CURLE_HTTP_RETURNED_ERROR (22)
 
-This is returned if CURLOPT_FAILONERROR(3) is set TRUE and the HTTP
-server returns an error code that is >= 400.
+This is returned if CURLOPT_FAILONERROR(3) is set TRUE and the HTTP server
+returns an error code that is \>= 400.
 
 ## CURLE_WRITE_ERROR (23)
 

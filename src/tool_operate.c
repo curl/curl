@@ -554,7 +554,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
           /* store in a 'long', make sure it doesn't overflow */
           if(retry_after > LONG_MAX/1000)
             sleeptime = LONG_MAX;
-          else
+          else if((retry_after * 1000) > sleeptime)
             sleeptime = (long)retry_after * 1000; /* milliseconds */
 
           /* if adding retry_after seconds to the process would exceed the
@@ -1763,11 +1763,11 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           if(config->falsestart)
             my_setopt(curl, CURLOPT_SSL_FALSESTART, 1L);
 
-          my_setopt_enum(curl, CURLOPT_SSLVERSION,
-                         config->ssl_version | config->ssl_version_max);
+          my_setopt_SSLVERSION(curl, CURLOPT_SSLVERSION,
+                               config->ssl_version | config->ssl_version_max);
           if(config->proxy)
-            my_setopt_enum(curl, CURLOPT_PROXY_SSLVERSION,
-                           config->proxy_ssl_version);
+            my_setopt_SSLVERSION(curl, CURLOPT_PROXY_SSLVERSION,
+                                 config->proxy_ssl_version);
 
           {
             long mask =

@@ -1,9 +1,11 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_HSTSWRITEFUNCTION
 Section: 3
 Source: libcurl
+Protocol:
+  - HTTP
 See-also:
   - CURLOPT_HSTS (3)
   - CURLOPT_HSTSWRITEDATA (3)
@@ -64,10 +66,6 @@ do that.
 # DEFAULT
 
 NULL - no callback.
-
-# PROTOCOLS
-
-This feature is only used for HTTP(S) transfer.
 
 # EXAMPLE
 

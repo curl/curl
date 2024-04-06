@@ -48,14 +48,14 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
     curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
 
-    /* This will retrieve message 1 from the user's mailbox */
+    /* This retrieves message 1 from the user's mailbox */
     curl_easy_setopt(curl, CURLOPT_URL, "pop3://pop.example.com/1");
 
-    /* In this example, we will start with a plain text connection, and upgrade
-     * to Transport Layer Security (TLS) using the STLS command. Be careful of
+    /* In this example, we start with a plain text connection, and upgrade to
+     * Transport Layer Security (TLS) using the STLS command. Be careful of
      * using CURLUSESSL_TRY here, because if TLS upgrade fails, the transfer
-     * will continue anyway - see the security discussion in the libcurl
-     * tutorial for more details. */
+     * continues anyway - see the security discussion in the libcurl tutorial
+     * for more details. */
     curl_easy_setopt(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
 
     /* If your server does not have a valid certificate, then you can disable
@@ -72,7 +72,7 @@ int main(void)
      * for more information. */
     curl_easy_setopt(curl, CURLOPT_CAINFO, "/path/to/certificate.pem");
 
-    /* Since the traffic will be encrypted, it is useful to turn on debug
+    /* Since the traffic is encrypted, it is useful to turn on debug
      * information within libcurl to see what is happening during the
      * transfer */
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);

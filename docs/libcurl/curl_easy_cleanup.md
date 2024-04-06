@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: curl_easy_cleanup
 Section: 3
@@ -10,6 +10,8 @@ See-also:
   - curl_easy_reset (3)
   - curl_multi_cleanup (3)
   - curl_multi_remove_handle (3)
+Protocol:
+  - All
 ---
 
 # NAME

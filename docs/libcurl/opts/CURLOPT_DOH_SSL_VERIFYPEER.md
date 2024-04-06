@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_DOH_SSL_VERIFYPEER
 Section: 3
@@ -12,6 +12,10 @@ See-also:
   - CURLOPT_PROXY_SSL_VERIFYPEER (3)
   - CURLOPT_SSL_VERIFYHOST (3)
   - CURLOPT_SSL_VERIFYPEER (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - All
 ---
 
 # NAME
@@ -66,10 +70,6 @@ the correct end-point.
 # DEFAULT
 
 1
-
-# PROTOCOLS
-
-DoH
 
 # EXAMPLE
 

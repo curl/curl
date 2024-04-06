@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_PROGRESSDATA
 Section: 3
@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_PROGRESSFUNCTION (3)
   - CURLOPT_XFERINFOFUNCTION (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -29,10 +31,6 @@ argument in the progress callback set with CURLOPT_PROGRESSFUNCTION(3).
 # DEFAULT
 
 The default value of this parameter is NULL.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

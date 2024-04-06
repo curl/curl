@@ -12,10 +12,10 @@ jobs:
     permissions: write-all
     runs-on: self-hosted
     container:
-      image: codesecurese/curl-cso-builder:8.0p0
+      image: ghcr.io/codesecure-se/curl-cso-builder:8.1p0
       credentials:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.github_token }}
     env:
       CAFILE: ".github/github.cert.pem" 
       TOKEN: "${{ secrets.GITHUB_TOKEN }}"
@@ -24,10 +24,11 @@ jobs:
       ROOT_TREE: "OSS-Projects/curl-GitHub" 
       PROJECT_NAME: "curl"
       BRANCH_NAME: ${{ github.head_ref || github.ref_name }} 
-      CSONAR_HUB_URL: "https://partnerdemo.codesonar.com" 
+      CSONAR_HUB_URL: "https://partnerdemo.codesonar.com/" 
       CSONAR_HUB_USER: "${{ secrets.CSONAR_HUB_USER }}"
       CSONAR_HUB_PASSWORD: "${{ secrets.CSONAR_HUB_PASS }}"
       CSONAR_CSHOME: /opt/codesonar
+      CS_USER_HOME: /__w/curl/curl
       COMMIT_HASH: ${{ github.sha }}
       REPO_URL: "https://github.com/CodeSecure-SE/curl"    # the github.repositoryUrl is not an http-link.
       TARGET: ${{ github.base_ref }}
@@ -48,13 +49,13 @@ jobs:
           ref: main
           path: cso-scripts
       - name: Build and Analyze
-        run: python3 cso-scripts/build_and_analyze.py  codesonar.conf make -j $PARALLEL
+        run: python3 cso-scripts/build_and_analyze.py codesonar.conf make -j $PARALLEL
       - name: Upload SARIF to GitHub #Use this if you do not have GitHub Enterprise
         if: ${{ github.event.pull_request }}
         uses: actions/upload-artifact@v3
         with:
           name: SARIF file
-          path: warnings.sarif
+          path: warnings-translate.sarif
       - name: Push Summary Report
         if: ${{ github.event.pull_request }}
         uses: thollander/actions-comment-pull-request@v2
@@ -63,5 +64,5 @@ jobs:
       - name: Upload SARIF results
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: warnings.sarif
+          sarif_file: warnings-translate.sarif
           category: "CodeSecure CodeSonar"            

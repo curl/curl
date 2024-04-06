@@ -47,8 +47,8 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
     curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
 
-    /* This will list the folders within the user's mailbox. If you want to
-     * list the folders within a specific folder, for example the inbox, then
+    /* This lists the folders within the user's mailbox. If you want to list
+     * the folders within a specific folder, for example the inbox, then
      * specify the folder as a path in the URL such as /INBOX */
     curl_easy_setopt(curl, CURLOPT_URL, "imap://imap.example.com");
 

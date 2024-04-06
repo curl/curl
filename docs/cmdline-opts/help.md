@@ -16,10 +16,9 @@ Example:
 
 # `--help`
 
-Usage help. This lists all curl command line options within the given
-**category**.
+Usage help. List all curl command line options within the given **category**.
 
-If no argument is provided, curl displays only the most important command line
+If no argument is provided, curl displays the most important command line
 arguments.
 
 For category **all**, curl displays help for all options.

@@ -1,11 +1,13 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_TRANSFERTEXT
 Section: 3
 Source: libcurl
 See-also:
   - CURLOPT_CRLF (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -35,10 +37,6 @@ simply sets the mode to ASCII and performs a standard transfer.
 # DEFAULT
 
 0, disabled
-
-# PROTOCOLS
-
-FTP
 
 # EXAMPLE
 

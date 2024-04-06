@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_POSTQUOTE
 Section: 3
@@ -7,6 +7,9 @@ Source: libcurl
 See-also:
   - CURLOPT_PREQUOTE (3)
   - CURLOPT_QUOTE (3)
+Protocol:
+  - FTP
+  - SFTP
 ---
 
 # NAME
@@ -25,7 +28,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_POSTQUOTE,
 # DESCRIPTION
 
 Pass a pointer to a linked list of FTP or SFTP commands to pass to the server
-after your FTP transfer request. The commands are only issues if no error
+after your FTP transfer request. The commands are only issued if no error
 occur. The linked list should be a fully valid list of struct curl_slist
 structs properly filled in as described for CURLOPT_QUOTE(3).
 
@@ -34,10 +37,6 @@ Disable this operation again by setting a NULL to this option.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-SFTP and FTP
 
 # EXAMPLE
 

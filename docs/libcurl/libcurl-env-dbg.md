@@ -1,11 +1,13 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: libcurl-env-dbg
 Section: 3
 Source: libcurl
 See-also:
   - libcurl-env (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -116,3 +118,8 @@ Debug-version of the *ntlm-wb* executable.
 
 OpenLDAP tracing is enabled if this variable exists and its value is 1 or
 greater. There is a number of debug levels, refer to *openldap.c* comments.
+
+## CURL_WS_CHUNK_SIZE
+
+Used to influence the buffer chunk size used for WebSocket encoding and
+decoding.

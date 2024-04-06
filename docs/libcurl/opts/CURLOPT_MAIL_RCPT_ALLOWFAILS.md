@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_MAIL_RCPT_ALLOWFAILS
 Section: 3
@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - CURLOPT_MAIL_FROM (3)
   - CURLOPT_MAIL_RCPT (3)
+Protocol:
+  - SMTP
 ---
 
 # NAME
@@ -41,10 +43,6 @@ RCPT TO command.
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-SMTP
 
 # EXAMPLE
 

@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_PROXY_CAINFO
 Section: 3
@@ -14,6 +14,10 @@ See-also:
   - CURLOPT_PROXY_SSL_VERIFYPEER (3)
   - CURLOPT_SSL_VERIFYHOST (3)
   - CURLOPT_SSL_VERIFYPEER (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - All
 ---
 
 # NAME
@@ -56,10 +60,6 @@ The default value for this can be figured out with CURLINFO_CAINFO(3).
 # DEFAULT
 
 Built-in system specific
-
-# PROTOCOLS
-
-Used with HTTPS proxy
 
 # EXAMPLE
 

@@ -1,11 +1,13 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_NOSIGNAL
 Section: 3
 Source: libcurl
 See-also:
   - CURLOPT_TIMEOUT (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -45,10 +47,6 @@ raised.
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

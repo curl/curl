@@ -9,21 +9,17 @@ on:
       - master
     paths:
       - '**.md'
-      - '**.3'
-      - '**.1'
       - '**/spellcheck.yml'
       - '**/spellcheck.yaml'
-      - '**/wordlist.txt'
+      - '.github/scripts/*'
   pull_request:
     branches:
       - master
     paths:
       - '**.md'
-      - '**.3'
-      - '**.1'
       - '**/spellcheck.yml'
       - '**/spellcheck.yaml'
-      - '**/wordlist.txt'
+      - '.github/scripts/*'
 
 permissions: {}
 
@@ -33,34 +29,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: install pandoc
-        run: sudo apt-get install pandoc
+      - name: trim all man page *.md files
+        run: find docs -name "*.md" ! -name "_*" | xargs -n1 ./.github/scripts/cleancmd.pl
 
-      - name: build curl.1
-        run: |
-           autoreconf -fi
-           ./configure --without-ssl --without-libpsl
-           make -C docs
+      - name: trim libcurl man page *.md files
+        run: find docs/libcurl -name "curl_*.md" -o -name "libcurl*.md" | xargs -n1 ./.github/scripts/cleanspell.pl
 
-      - name: strip "uncheckable" sections from .3 pages
-        run: find docs -name "*.3" -size +40c | sed 's/\.3//' | xargs -t -n1 -I OO  ./.github/scripts/cleanspell.pl OO.3 OO.33
+      - name: trim libcurl option man page *.md files
+        run: find docs/libcurl/opts -name "CURL*.md" | xargs -n1 ./.github/scripts/cleanspell.pl
 
-      - name: convert .3 man pages to markdown
-        run: find docs -name "*.33" -size +40c | sed 's/\.33//' | xargs -t -n1 -I OO pandoc -f man -t markdown OO.33 -o OO.md
-
-      - name: convert .1 man pages to markdown
-        run: find docs -name "*.1" -size +40c | sed 's/\.1//' | xargs -t -n1 -I OO pandoc OO.1 -o OO.md
-
-      - name: trim the curl.1 markdown file
-        run: |
-          perl -pi -e 's/^    .*//' docs/curl.md
-          perl -pi -e 's/\-\-[\a-z0-9-]*//ig' docs/curl.md
-          perl -pi -e 's!https://[a-z0-9%/.-]*!!ig' docs/curl.md
-
-      - name: trim the cmdline docs markdown files
-        run: find docs/cmdline-opts -name "*.md" ! -name "_*" ! -name MANPAGE.md | xargs -n1 ./.github/scripts/cleancmd.pl
-
-      - name: trim the cmdline docs markdown _*.md files
+      - name: trim cmdline docs markdown _*.md files
         run: find docs/cmdline-opts -name "_*.md" | xargs -n1 ./.github/scripts/cleancmd.pl --no-header
 
       - name: setup the custom wordlist

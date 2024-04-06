@@ -14,7 +14,7 @@ Example:
 
 # `--socks5-gssapi`
 
-Tells curl to use GSS-API authentication when connecting to a SOCKS5 proxy.
-The GSS-API authentication is enabled by default (if curl is compiled with
-GSS-API support). Use --socks5-basic to force username/password authentication
-to SOCKS5 proxies.
+Use GSS-API authentication when connecting to a SOCKS5 proxy. The GSS-API
+authentication is enabled by default (if curl is compiled with GSS-API
+support). Use --socks5-basic to force username/password authentication to
+SOCKS5 proxies.

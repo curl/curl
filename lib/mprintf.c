@@ -49,16 +49,6 @@
 #endif
 
 /*
- * Non-ANSI integer extensions
- */
-
-#if (defined(_WIN32_WCE)) || \
-    (defined(__MINGW32__)) || \
-    (defined(_MSC_VER) && (_MSC_VER >= 900) && (_INTEGRAL_MAX_BITS >= 64))
-#  define MP_HAVE_INT_EXTENSIONS
-#endif
-
-/*
  * Max integer data types that mprintf.c is capable
  */
 
@@ -349,8 +339,9 @@ static int parsefmt(const char *format,
         case 'h':
           flags |= FLAGS_SHORT;
           break;
-#if defined(MP_HAVE_INT_EXTENSIONS)
+#if defined(_WIN32) || defined(_WIN32_WCE)
         case 'I':
+          /* Non-ANSI integer extensions I32 I64 */
           if((fmt[0] == '3') && (fmt[1] == '2')) {
             flags |= FLAGS_LONG;
             fmt += 2;
@@ -367,7 +358,7 @@ static int parsefmt(const char *format,
 #endif
           }
           break;
-#endif
+#endif /* _WIN32 || _WIN32_WCE */
         case 'l':
           if(flags & FLAGS_LONG)
             flags |= FLAGS_LONGLONG;
@@ -651,7 +642,7 @@ static int parsefmt(const char *format,
  * On success, the input array describes the type of all arguments and their
  * values.
  *
- * The function then iterates over the output sengments and outputs them one
+ * The function then iterates over the output segments and outputs them one
  * by one until done. Using the appropriate input arguments (if any).
  *
  * All output is sent to the 'stream()' callback, one byte at a time.

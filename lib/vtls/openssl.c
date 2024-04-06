@@ -769,6 +769,9 @@ static int ossl_bio_cf_in_read(BIO *bio, char *buf, int blen)
     if(CURLE_AGAIN == result)
       BIO_set_retry_read(bio);
   }
+  else if(nread == 0) {
+    connssl->peer_closed = TRUE;
+  }
 
   /* Before returning server replies to the SSL instance, we need
    * to have setup the x509 store or verification will fail. */
@@ -1887,16 +1890,41 @@ static void ossl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   DEBUGASSERT(backend);
 
   if(backend->handle) {
-    if(cf->next && cf->next->connected) {
+    /* Send the TLS shutdown if we are still connected *and* if
+     * the peer did not already close the connection. */
+    if(cf->next && cf->next->connected && !connssl->peer_closed) {
       char buf[1024];
       int nread, err;
       long sslerr;
 
       /* Maybe the server has already sent a close notify alert.
          Read it to avoid an RST on the TCP connection. */
-      (void)SSL_read(backend->handle, buf, (int)sizeof(buf));
       ERR_clear_error();
-      if(SSL_shutdown(backend->handle) == 1) {
+      nread = SSL_read(backend->handle, buf, (int)sizeof(buf));
+      err = SSL_get_error(backend->handle, nread);
+      if(!nread && err == SSL_ERROR_ZERO_RETURN) {
+        CURLcode result;
+        ssize_t n;
+        size_t blen = sizeof(buf);
+        CURL_TRC_CF(data, cf, "peer has shutdown TLS");
+        /* SSL_read() will not longer touch the socket, let's receive
+         * directly from the next filter to see if the underlying
+         * connection has also been closed. */
+        n = Curl_conn_cf_recv(cf->next, data, buf, blen, &result);
+        if(!n) {
+          connssl->peer_closed = TRUE;
+          CURL_TRC_CF(data, cf, "peer closed connection");
+        }
+      }
+      ERR_clear_error();
+      if(connssl->peer_closed) {
+        /* As the peer closed, we do not expect it to read anything more we
+         * may send. It may be harmful, leading to TCP RST and delaying
+         * a lingering close. Just leave. */
+        CURL_TRC_CF(data, cf, "not from sending TLS shutdown on "
+                    "connection closed by peer");
+      }
+      else if(SSL_shutdown(backend->handle) == 1) {
         CURL_TRC_CF(data, cf, "SSL shutdown finished");
       }
       else {
@@ -2134,7 +2162,7 @@ CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
                               struct ssl_peer *peer, X509 *server_cert)
 {
   bool matched = FALSE;
-  int target = GEN_DNS; /* target type, GEN_DNS or GEN_IPADD */
+  int target; /* target type, GEN_DNS or GEN_IPADD */
   size_t addrlen = 0;
   STACK_OF(GENERAL_NAME) *altnames;
 #ifdef ENABLE_IPV6
@@ -2149,19 +2177,28 @@ CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
 
   (void)conn;
   hostlen = strlen(peer->hostname);
-  if(peer->is_ip_address) {
+  switch(peer->type) {
+  case CURL_SSL_PEER_IPV4:
+    if(!Curl_inet_pton(AF_INET, peer->hostname, &addr))
+      return CURLE_PEER_FAILED_VERIFICATION;
+    target = GEN_IPADD;
+    addrlen = sizeof(struct in_addr);
+    break;
 #ifdef ENABLE_IPV6
-    if(conn->bits.ipv6_ip &&
-       Curl_inet_pton(AF_INET6, peer->hostname, &addr)) {
-      target = GEN_IPADD;
-      addrlen = sizeof(struct in6_addr);
-    }
-    else
+  case CURL_SSL_PEER_IPV6:
+    if(!Curl_inet_pton(AF_INET6, peer->hostname, &addr))
+      return CURLE_PEER_FAILED_VERIFICATION;
+    target = GEN_IPADD;
+    addrlen = sizeof(struct in6_addr);
+    break;
 #endif
-      if(Curl_inet_pton(AF_INET, peer->hostname, &addr)) {
-        target = GEN_IPADD;
-        addrlen = sizeof(struct in_addr);
-      }
+  case CURL_SSL_PEER_DNS:
+    target = GEN_DNS;
+    break;
+  default:
+    DEBUGASSERT(0);
+    failf(data, "unexpected ssl peer type: %d", peer->type);
+    return CURLE_PEER_FAILED_VERIFICATION;
   }
 
   /* get a "list" of alternative names */
@@ -2242,9 +2279,12 @@ CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
     /* an alternative name matched */
     ;
   else if(dNSName || iPAddress) {
-    infof(data, " subjectAltName does not match %s", peer->dispname);
+    const char *tname = (peer->type == CURL_SSL_PEER_DNS) ? "host name" :
+                        (peer->type == CURL_SSL_PEER_IPV4) ?
+                        "ipv4 address" : "ipv6 address";
+    infof(data, " subjectAltName does not match %s %s", tname, peer->dispname);
     failf(data, "SSL: no alternative certificate subject name matches "
-          "target host name '%s'", peer->dispname);
+          "target %s '%s'", tname, peer->dispname);
     result = CURLE_PEER_FAILED_VERIFICATION;
   }
   else {

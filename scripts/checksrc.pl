@@ -120,6 +120,7 @@ sub readlocalfile {
     open(my $rcfile, "<", "$dir/.checksrc") or return;
 
     while(<$rcfile>) {
+        $windows_os ? $_ =~ s/\r?\n$// : chomp;
         $i++;
 
         # Lines starting with '#' are considered comments

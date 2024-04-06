@@ -16,8 +16,8 @@ Example:
 
 # `--output-dir`
 
-This option specifies the directory in which files should be stored, when
---remote-name or --output are used.
+Specify the directory in which files should be stored, when --remote-name or
+--output are used.
 
 The given output directory is used for all URLs and output options on the
 command line, up until the first --next.

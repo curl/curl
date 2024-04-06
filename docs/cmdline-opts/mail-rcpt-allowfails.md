@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: mail-rcpt-allowfails
-Help: Allow RCPT TO command to fail for some recipients
+Help: Allow RCPT TO command to fail
 Protocols: SMTP
 Added: 7.69.0
 Category: smtp

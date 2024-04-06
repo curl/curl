@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_SSH_HOSTKEYFUNCTION
 Section: 3
@@ -7,6 +7,9 @@ Source: libcurl
 See-also:
   - CURLOPT_SSH_HOSTKEYDATA (3)
   - CURLOPT_SSH_KNOWNHOSTS (3)
+Protocol:
+  - SFTP
+  - SCP
 ---
 
 # NAME
@@ -54,10 +57,6 @@ the host key is rejected, the connection is canceled.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-SCP and SFTP
 
 # EXAMPLE
 

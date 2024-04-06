@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: curl_easy_setopt
 Section: 3
@@ -13,6 +13,8 @@ See-also:
   - curl_easy_option_next (3)
   - curl_easy_reset (3)
   - curl_multi_setopt (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -267,7 +269,7 @@ Fail on HTTP 4xx errors. CURLOPT_FAILONERROR(3)
 
 ## CURLOPT_KEEP_SENDING_ON_ERROR
 
-Keep sending on HTTP >= 300 errors. CURLOPT_KEEP_SENDING_ON_ERROR(3)
+Keep sending on HTTP \>= 300 errors. CURLOPT_KEEP_SENDING_ON_ERROR(3)
 
 # NETWORK OPTIONS
 
@@ -435,15 +437,15 @@ Enable .netrc parsing. See CURLOPT_NETRC(3)
 
 ## CURLOPT_USERPWD
 
-User name and password. See CURLOPT_USERPWD(3)
+Username and password. See CURLOPT_USERPWD(3)
 
 ## CURLOPT_PROXYUSERPWD
 
-Proxy user name and password. See CURLOPT_PROXYUSERPWD(3)
+Proxy username and password. See CURLOPT_PROXYUSERPWD(3)
 
 ## CURLOPT_USERNAME
 
-User name. See CURLOPT_USERNAME(3)
+Username. See CURLOPT_USERNAME(3)
 
 ## CURLOPT_PASSWORD
 
@@ -455,7 +457,7 @@ Login options. See CURLOPT_LOGIN_OPTIONS(3)
 
 ## CURLOPT_PROXYUSERNAME
 
-Proxy user name. See CURLOPT_PROXYUSERNAME(3)
+Proxy username. See CURLOPT_PROXYUSERNAME(3)
 
 ## CURLOPT_PROXYPASSWORD
 
@@ -467,11 +469,11 @@ HTTP server authentication methods. See CURLOPT_HTTPAUTH(3)
 
 ## CURLOPT_TLSAUTH_USERNAME
 
-TLS authentication user name. See CURLOPT_TLSAUTH_USERNAME(3)
+TLS authentication username. See CURLOPT_TLSAUTH_USERNAME(3)
 
 ## CURLOPT_PROXY_TLSAUTH_USERNAME
 
-Proxy TLS authentication user name. See CURLOPT_PROXY_TLSAUTH_USERNAME(3)
+Proxy TLS authentication username. See CURLOPT_PROXY_TLSAUTH_USERNAME(3)
 
 ## CURLOPT_TLSAUTH_PASSWORD
 
@@ -826,7 +828,7 @@ Client CSEQ number. See CURLOPT_RTSP_CLIENT_CSEQ(3)
 
 ## CURLOPT_RTSP_SERVER_CSEQ
 
-CSEQ number for RTSP Server->Client request. See CURLOPT_RTSP_SERVER_CSEQ(3)
+CSEQ number for RTSP Server-\>Client request. See CURLOPT_RTSP_SERVER_CSEQ(3)
 
 ## CURLOPT_AWS_SIGV4
 
@@ -1366,8 +1368,8 @@ Always
 # RETURN VALUE
 
 *CURLE_OK* (zero) means that the option was set properly, non-zero means an
-error occurred as *<curl/curl.h>* defines. See the libcurl-errors(3) man page
-for the full list with descriptions.
+error occurred as *\<curl/curl.h\>* defines. See the libcurl-errors(3) man
+page for the full list with descriptions.
 
 Strings passed on to libcurl must be shorter than 8000000 bytes, otherwise
 curl_easy_setopt(3) returns **CURLE_BAD_FUNCTION_ARGUMENT** (added in 7.65.0).

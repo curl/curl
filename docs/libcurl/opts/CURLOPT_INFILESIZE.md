@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_INFILESIZE
 Section: 3
@@ -8,6 +8,8 @@ See-also:
   - CURLINFO_CONTENT_LENGTH_UPLOAD_T (3)
   - CURLOPT_INFILESIZE_LARGE (3)
   - CURLOPT_UPLOAD (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -47,10 +49,6 @@ and sending a different amount may lead to errors.
 # DEFAULT
 
 Unset
-
-# PROTOCOLS
-
-Many
 
 # EXAMPLE
 

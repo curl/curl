@@ -3,8 +3,8 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: aws-sigv4
 Protocols: HTTP
-Arg: <provider1[:provider2[:region[:service]]]>
-Help: Use AWS V4 signature authentication
+Arg: <provider1[:prvdr2[:reg[:srv]]]>
+Help: AWS V4 signature auth
 Category: auth http
 Added: 7.75.0
 Multi: single

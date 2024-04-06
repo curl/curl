@@ -69,7 +69,7 @@ static const char *filecontents[] = {
   "LINE1\n"
   C4096 "SOME EXTRA TEXT",
 
-  /* First and third line should be read */
+  /* Only first should be read */
   "LINE1\n"
   C4096 "SOME EXTRA TEXT\n"
   "LINE3\n",
@@ -84,11 +84,13 @@ static const char *filecontents[] = {
 
 UNITTEST_START
   size_t i;
+  int rc = 0;
   for(i = 0; i < NUMTESTS; i++) {
     FILE *fp;
-    char buf[4096];
+    struct dynbuf buf;
     int len = 4096;
     char *line;
+    Curl_dyn_init(&buf, len);
 
     fp = fopen(arg, "wb");
     abort_unless(fp != NULL, "Cannot open testfile");
@@ -101,65 +103,73 @@ UNITTEST_START
     fprintf(stderr, "Test %zd...", i);
     switch(i) {
       case 0:
-        line = Curl_get_line(buf, len, fp);
+        rc = Curl_get_line(&buf, fp);
+        line = Curl_dyn_ptr(&buf);
         fail_unless(line && !strcmp("LINE1\n", line),
-          "First line failed (1)");
-        line = Curl_get_line(buf, len, fp);
+                    "First line failed (1)");
+        rc = Curl_get_line(&buf, fp);
+        line = Curl_dyn_ptr(&buf);
         fail_unless(line && !strcmp("LINE2 NEWLINE\n", line),
-          "Second line failed (1)");
-        line = Curl_get_line(buf, len, fp);
-        abort_unless(line == NULL, "Missed EOF (1)");
+                    "Second line failed (1)");
+        rc = Curl_get_line(&buf, fp);
+        abort_unless(!Curl_dyn_len(&buf), "Missed EOF (1)");
         break;
       case 1:
-        line = Curl_get_line(buf, len, fp);
+        rc = Curl_get_line(&buf, fp);
+        line = Curl_dyn_ptr(&buf);
         fail_unless(line && !strcmp("LINE1\n", line),
-          "First line failed (2)");
-        line = Curl_get_line(buf, len, fp);
+                    "First line failed (2)");
+        rc = Curl_get_line(&buf, fp);
+        line = Curl_dyn_ptr(&buf);
         fail_unless(line && !strcmp("LINE2 NONEWLINE\n", line),
-          "Second line failed (2)");
-        line = Curl_get_line(buf, len, fp);
-        abort_unless(line == NULL, "Missed EOF (2)");
+                    "Second line failed (2)");
+        rc = Curl_get_line(&buf, fp);
+        abort_unless(!Curl_dyn_len(&buf), "Missed EOF (2)");
         break;
       case 2:
-        line = Curl_get_line(buf, len, fp);
+        rc = Curl_get_line(&buf, fp);
+        line = Curl_dyn_ptr(&buf);
         fail_unless(line && !strcmp("LINE1\n", line),
-          "First line failed (3)");
-        line = Curl_get_line(buf, len, fp);
-        fail_unless(line == NULL,
-          "Did not detect max read on EOF (3)");
+                    "First line failed (3)");
+        rc = Curl_get_line(&buf, fp);
+        fail_unless(!Curl_dyn_len(&buf),
+                    "Did not detect max read on EOF (3)");
         break;
       case 3:
-        line = Curl_get_line(buf, len, fp);
+        rc = Curl_get_line(&buf, fp);
+        line = Curl_dyn_ptr(&buf);
         fail_unless(line && !strcmp("LINE1\n", line),
-          "First line failed (4)");
-        line = Curl_get_line(buf, len, fp);
-        fail_unless(line == NULL,
-          "Did not ignore partial on EOF (4)");
+                    "First line failed (4)");
+        rc = Curl_get_line(&buf, fp);
+        fail_unless(!Curl_dyn_len(&buf),
+                    "Did not ignore partial on EOF (4)");
         break;
       case 4:
-        line = Curl_get_line(buf, len, fp);
+        rc = Curl_get_line(&buf, fp);
+        line = Curl_dyn_ptr(&buf);
         fail_unless(line && !strcmp("LINE1\n", line),
-          "First line failed (5)");
-        line = Curl_get_line(buf, len, fp);
-        fail_unless(line && !strcmp("LINE3\n", line),
-          "Third line failed (5)");
-        line = Curl_get_line(buf, len, fp);
-        abort_unless(line == NULL, "Missed EOF (5)");
+                    "First line failed (5)");
+        rc = Curl_get_line(&buf, fp);
+        fail_unless(!Curl_dyn_len(&buf),
+                    "Did not bail out on too long line");
         break;
       case 5:
-        line = Curl_get_line(buf, len, fp);
+        rc = Curl_get_line(&buf, fp);
+        line = Curl_dyn_ptr(&buf);
         fail_unless(line && !strcmp("LINE1\x1aTEST\n", line),
-          "Missed/Misinterpreted ^Z (6)");
-        line = Curl_get_line(buf, len, fp);
-        abort_unless(line == NULL, "Missed EOF (6)");
+                    "Missed/Misinterpreted ^Z (6)");
+        rc = Curl_get_line(&buf, fp);
+        abort_unless(!Curl_dyn_len(&buf), "Missed EOF (6)");
         break;
       default:
         abort_unless(1, "Unknown case");
         break;
     }
+    Curl_dyn_free(&buf);
     fclose(fp);
     fprintf(stderr, "OK\n");
   }
+  return rc;
 UNITTEST_STOP
 
 #ifdef __GNUC__

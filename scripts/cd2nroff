@@ -96,15 +96,105 @@ sub outseealso {
     return @o;
 }
 
+sub outprotocols {
+    my (@p) = @_;
+    my $comma = 0;
+    my @o;
+    push @o, ".SH PROTOCOLS\n";
+
+    if($p[0] eq "TLS") {
+        push @o, "All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.";
+    }
+    else {
+        my @s = sort @p;
+        for my $e (sort @s) {
+            push @o, sprintf "%s$e",
+                $comma ? (($e eq $s[-1]) ? " and " : ", "): "";
+            $comma = 1;
+        }
+    }
+    push @o, "\n";
+    return @o;
+}
+
+sub outtls {
+    my (@t) = @_;
+    my $comma = 0;
+    my @o;
+    if($t[0] eq "All") {
+        push @o, "\nAll TLS backends support this option.";
+    }
+    else {
+        push @o, "\nThis option works only with the following TLS backends:\n";
+        my @s = sort @t;
+        for my $e (@s) {
+            push @o, sprintf "%s$e",
+                $comma ? (($e eq $s[-1]) ? " and " : ", "): "";
+            $comma = 1;
+        }
+    }
+    push @o, "\n";
+    return @o;
+}
+
+my %knownprotos = (
+    'DICT' => 1,
+    'FILE' => 1,
+    'FTP' => 1,
+    'FTPS' => 1,
+    'GOPHER' => 1,
+    'GOPHERS' => 1,
+    'HTTP' => 1,
+    'HTTPS' => 1,
+    'IMAP' => 1,
+    'IMAPS' => 1,
+    'LDAP' => 1,
+    'LDAPS' => 1,
+    'MQTT' => 1,
+    'POP3' => 1,
+    'POP3S' => 1,
+    'RTMP' => 1,
+    'RTMPS' => 1,
+    'RTSP' => 1,
+    'SCP' => 1,
+    'SFTP' => 1,
+    'SMB' => 1,
+    'SMBS' => 1,
+    'SMTP' => 1,
+    'SMTPS' => 1,
+    'TELNET' => 1,
+    'TFTP' => 1,
+    'WS' => 1,
+    'WSS' => 1,
+    'TLS' => 1,
+    'TCP' => 1,
+    'All' => 1
+    );
+
+my %knowntls = (
+    'BearSSL' => 1,
+    'GnuTLS' => 1,
+    'mbedTLS' => 1,
+    'OpenSSL' => 1,
+    'rustls' => 1,
+    'Schannel' => 1,
+    'Secure Transport' => 1,
+    'wolfSSL' => 1,
+    'All' => 1,
+    );
+
 sub single {
     my @seealso;
+    my @proto;
+    my @tls;
     my $d;
     my ($f)=@_;
     my $copyright;
     my $errors = 0;
     my $fh;
     my $line;
-    my $salist;
+    my $list;
+    my $tlslist;
     my $section;
     my $source;
     my $spdx;
@@ -113,7 +203,7 @@ sub single {
 
     if(defined($f)) {
         if(!open($fh, "<:crlf", "$f")) {
-            print STDERR "Failed to open $f : $!\n";
+            print STDERR "cd2nroff failed to open '$f' for reading: $!\n";
             return 1;
         }
     }
@@ -141,7 +231,7 @@ sub single {
             $source=$1;
         }
         elsif(/^See-also: +(.*)/i) {
-            $salist = 0;
+            $list = 1; # 1 for see-also
             push @seealso, $1;
         }
         elsif(/^See-also: */i) {
@@ -149,12 +239,28 @@ sub single {
                 print STDERR "$f:$line:1:ERROR: bad See-Also, needs list\n";
                 return 2;
             }
-            $salist = 1;
+            $list = 1; # 1 for see-also
+        }
+        elsif(/^Protocol:/i) {
+            $list = 2; # 2 for protocol
+        }
+        elsif(/^TLS-backend:/i) {
+            $list = 3; # 3 for TLS backend
         }
         elsif(/^ +- (.*)/i) {
-            # the only list we support is the see-also
-            if($salist) {
+            # the only lists we support are see-also and protocol
+            if($list == 1) {
                 push @seealso, $1;
+            }
+            elsif($list == 2) {
+                push @proto, $1;
+            }
+            elsif($list == 3) {
+                push @tls, $1;
+            }
+            else {
+                print STDERR "$f:$line:1:ERROR: list item without owner?\n";
+                return 2;
             }
         }
         # REUSE-IgnoreStart
@@ -186,6 +292,35 @@ sub single {
             if(!$spdx) {
                 print STDERR "$f:$line:1:ERROR: no 'SPDX-License-Identifier:' field present\n";
                 return 2;
+            }
+            if($section == 3) {
+                if(!$proto[0]) {
+                    printf STDERR "$f:$line:1:ERROR: missing Protocol:\n";
+                    exit 2;
+                }
+                my $tls = 0;
+                for my $p (@proto) {
+                    if($p eq "TLS") {
+                        $tls = 1;
+                    }
+                    if(!$knownprotos{$p}) {
+                        printf STDERR "$f:$line:1:ERROR: invalid protocol used: $p:\n";
+                        exit 2;
+                    }
+                }
+                # This is for TLS, require TLS-backend:
+                if($tls) {
+                    if(!$tls[0]) {
+                        printf STDERR "$f:$line:1:ERROR: missing TLS-backend:\n";
+                        exit 2;
+                    }
+                    for my $t (@tls) {
+                        if(!$knowntls{$t}) {
+                            printf STDERR "$f:$line:1:ERROR: invalid TLS backend: $t:\n";
+                            exit 2;
+                        }
+                    }
+                }
             }
             last;
         }
@@ -243,10 +378,19 @@ sub single {
             next;
         }
 
+        # remove single line HTML comments
+        $d =~ s/<!--.*?-->//g;
+
         # **bold**
         $d =~ s/\*\*(\S.*?)\*\*/\\fB$1\\fP/g;
         # *italics*
         $d =~ s/\*(\S.*?)\*/\\fI$1\\fP/g;
+
+        if($d =~ /[^\\][\<\>]/) {
+            print STDERR "$f:$line:1:WARN: un-escaped < or > used\n";
+        }
+        # convert backslash-'<' or '> to just the second character
+        $d =~ s/\\([<>])/$1/g;
 
         # mentions of curl symbols with man pages use italics by default
         $d =~ s/((lib|)curl([^ ]*\(3\)))/\\fI$1\\fP/gi;
@@ -257,7 +401,7 @@ sub single {
         if(/^## (.*)/) {
             my $word = $1;
             # if there are enclosing quotes, remove them first
-            $word =~ s/[\"\'](.*)[\"\']\z/$1/;
+            $word =~ s/[\"\'\`](.*)[\"\'\`]\z/$1/;
 
             # enclose in double quotes if there is a space present
             if($word =~ / /) {
@@ -272,6 +416,18 @@ sub single {
             my $word = $1;
             # if there are enclosing quotes, remove them first
             $word =~ s/[\"\'](.*)[\"\']\z/$1/;
+
+            if($word eq "PROTOCOLS") {
+                print STDERR "$f:$line:1:WARN: PROTOCOLS section in source file\n";
+            }
+            elsif($word eq "EXAMPLE") {
+                # insert the generated PROTOCOLS section before EXAMPLE
+                push @desc, outprotocols(@proto);
+
+                if($proto[0] eq "TLS") {
+                    push @desc, outtls(@tls);
+                }
+            }
             push @desc, ".SH $word\n";
             $header = 1;
         }
@@ -306,9 +462,6 @@ sub single {
             push @desc, "\n" if($blankline && !$header);
             $blankline = 0;
             $header = 0;
-
-            # remove single line HTML comments
-            $d =~ s/<!--.*?-->//g;
 
             # quote minuses in the output
             $d =~ s/([^\\])-/$1\\-/g;

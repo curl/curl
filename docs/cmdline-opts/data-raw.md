@@ -17,5 +17,5 @@ Example:
 
 # `--data-raw`
 
-This posts data similarly to --data but without the special
-interpretation of the @ character.
+Post data similarly to --data but without the special interpretation of the @
+character.

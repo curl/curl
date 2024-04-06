@@ -47,7 +47,7 @@ class Httpd:
         'authn_core', 'authn_file',
         'authz_user', 'authz_core', 'authz_host',
         'auth_basic', 'auth_digest',
-        'alias', 'env', 'filter', 'headers', 'mime',
+        'alias', 'env', 'filter', 'headers', 'mime', 'setenvif',
         'socache_shmcb',
         'rewrite', 'http2', 'ssl', 'proxy', 'proxy_http', 'proxy_connect',
         'mpm_event',
@@ -389,6 +389,11 @@ class Httpd:
                 f'    <Location /curltest/1_1>',
                 f'      SetHandler curltest-1_1-required',
                 f'    </Location>',
+                f'    <Location /curltest/shutdown_unclean>',
+                f'      SetHandler curltest-tweak',
+                f'      SetEnv force-response-1.0 1',
+                f'    </Location>',
+                f'    SetEnvIf Request_URI "/shutdown_unclean" ssl-unclean=1',
             ])
         if self._auth_digest:
             lines.extend([

@@ -46,6 +46,7 @@ class TestUpload:
         env.make_data_file(indir=env.gen_dir, fname="data-63k", fsize=63*1024)
         env.make_data_file(indir=env.gen_dir, fname="data-64k", fsize=64*1024)
         env.make_data_file(indir=env.gen_dir, fname="data-100k", fsize=100*1024)
+        env.make_data_file(indir=env.gen_dir, fname="data-1m+", fsize=(1024*1024)+1)
         env.make_data_file(indir=env.gen_dir, fname="data-10m", fsize=10*1024*1024)
         httpd.clear_extra_configs()
         httpd.reload()
@@ -500,4 +501,30 @@ class TestUpload:
         r.check_response(count=count, http_status=200)
         up_speed = r.stats[0]['speed_upload']
         assert (speed_limit * 0.5) <= up_speed <= (speed_limit * 1.5), f'{r.stats[0]}'
+
+    # upload larger data, triggering "Expect: 100-continue" code paths
+    @pytest.mark.parametrize("proto", ['http/1.1'])
+    def test_07_60_upload_exp100(self, env: Env, httpd, nghttpx, repeat, proto):
+        fdata = os.path.join(env.gen_dir, 'data-1m+')
+        read_delay = 1
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?id=[0-0]'\
+              f'&read_delay={read_delay}s'
+        r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto, extra_args=[
+            '--expect100-timeout', f'{read_delay+1}'
+        ])
+        r.check_stats(count=1, http_status=200, exitcode=0)
+
+    # upload larger data, triggering "Expect: 100-continue" code paths
+    @pytest.mark.parametrize("proto", ['http/1.1'])
+    def test_07_61_upload_exp100_timeout(self, env: Env, httpd, nghttpx, repeat, proto):
+        fdata = os.path.join(env.gen_dir, 'data-1m+')
+        read_delay = 2
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?id=[0-0]'\
+              f'&read_delay={read_delay}s'
+        r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto, extra_args=[
+            '--expect100-timeout', f'{read_delay-1}'
+        ])
+        r.check_stats(count=1, http_status=200, exitcode=0)
 

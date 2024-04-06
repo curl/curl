@@ -1,9 +1,11 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_HTTPAUTH
 Section: 3
 Source: libcurl
+Protocol:
+  - HTTP
 See-also:
   - CURLOPT_PASSWORD (3)
   - CURLOPT_PROXYAUTH (3)
@@ -40,7 +42,7 @@ For authentication with a proxy, see CURLOPT_PROXYAUTH(3).
 
 HTTP Basic authentication. This is the default choice, and the only method
 that is in wide-spread use and supported virtually everywhere. This sends
-the user name and password over the network in plain text, easily captured by
+the username and password over the network in plain text, easily captured by
 others.
 
 ## CURLAUTH_DIGEST
@@ -120,10 +122,6 @@ see CURLOPT_AWS_SIGV4(3).
 # DEFAULT
 
 CURLAUTH_BASIC
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 

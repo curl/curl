@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: curl_mime_init
 Section: 3
@@ -9,6 +9,10 @@ See-also:
   - curl_mime_addpart (3)
   - curl_mime_free (3)
   - curl_mime_subparts (3)
+Protocol:
+  - HTTP
+  - IMAP
+  - SMTP
 ---
 
 # NAME

@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: proxy-cacert
-Help: CA certificate to verify peer against for proxy
+Help: CA certificates to verify proxy against
 Arg: <file>
 Added: 7.52.0
 Category: proxy tls

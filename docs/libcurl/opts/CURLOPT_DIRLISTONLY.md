@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_DIRLISTONLY
 Section: 3
@@ -7,6 +7,10 @@ Source: libcurl
 See-also:
   - CURLOPT_CUSTOMREQUEST (3)
   - CURLOPT_WILDCARDMATCH (3)
+Protocol:
+  - FTP
+  - SFTP
+  - POP3
 ---
 
 # NAME
@@ -45,10 +49,6 @@ effectively breaks that feature.
 # DEFAULT
 
 0, disabled
-
-# PROTOCOLS
-
-FTP, SFTP and POP3
 
 # EXAMPLE
 

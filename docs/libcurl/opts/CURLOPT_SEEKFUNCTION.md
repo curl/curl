@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_SEEKFUNCTION
 Section: 3
@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_IOCTLFUNCTION (3)
   - CURLOPT_SEEKDATA (3)
   - CURLOPT_STDERR (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -62,10 +64,6 @@ many systems!
 # DEFAULT
 
 By default, this is NULL and unused.
-
-# PROTOCOLS
-
-HTTP, FTP, SFTP
 
 # EXAMPLE
 

@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: curl_easy_reset
 Section: 3
@@ -9,6 +9,8 @@ See-also:
   - curl_easy_duphandle (3)
   - curl_easy_init (3)
   - curl_easy_setopt (3)
+Protocol:
+  - All
 ---
 
 # NAME

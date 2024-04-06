@@ -18,6 +18,6 @@ Example:
 
 # `--dns-ipv6-addr`
 
-Tell curl to bind to a specific IP address when making IPv6 DNS requests, so
-that the DNS requests originate from this address. The argument should be a
-single IPv6 address.
+Bind to a specific IP address when making IPv6 DNS requests, so that the DNS
+requests originate from this address. The argument should be a single IPv6
+address.

@@ -41,11 +41,10 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postthis);
 
-    /* if we do not provide POSTFIELDSIZE, libcurl will strlen() by
-       itself */
+    /* if we do not provide POSTFIELDSIZE, libcurl calls strlen() by itself */
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(postthis));
 
-    /* Perform the request, res will get the return code */
+    /* Perform the request, res gets the return code */
     res = curl_easy_perform(curl);
     /* Check for errors */
     if(res != CURLE_OK)

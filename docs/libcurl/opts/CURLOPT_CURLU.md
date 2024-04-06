@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_CURLU
 Section: 3
@@ -12,6 +12,8 @@ See-also:
   - curl_url_get (3)
   - curl_url_set (3)
   - curl_url_strerror (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -43,10 +45,6 @@ updated contents is used.
 # DEFAULT
 
 The default value of this parameter is NULL.
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

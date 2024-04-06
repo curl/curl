@@ -1,11 +1,15 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_SSL_FALSESTART
 Section: 3
 Source: libcurl
 See-also:
   - CURLOPT_TCP_FASTOPEN (3)
+Protocol:
+  - TLS
+TLS-backend:
+  - Secure Transport
 ---
 
 # NAME
@@ -32,10 +36,6 @@ when performing a full handshake.
 # DEFAULT
 
 0
-
-# PROTOCOLS
-
-All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
 
 # EXAMPLE
 

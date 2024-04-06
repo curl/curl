@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: ftp-pasv
-Help: Use PASV/EPSV instead of PORT
+Help: Send PASV/EPSV instead of PORT
 Protocols: FTP
 Added: 7.11.0
 Category: ftp

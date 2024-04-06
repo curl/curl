@@ -27,6 +27,7 @@
 #include "urldata.h"
 #include "strdup.h"
 #include "strcase.h"
+#include "sendf.h"
 #include "headers.h"
 
 /* The last 3 #include files should be in this order */
@@ -337,12 +338,66 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
 }
 
 /*
- * Curl_headers_init(). Init the headers subsystem.
+ * Curl_headers_reset(). Reset the headers subsystem.
  */
-static void headers_init(struct Curl_easy *data)
+static void headers_reset(struct Curl_easy *data)
 {
   Curl_llist_init(&data->state.httphdrs, NULL);
   data->state.prevhead = NULL;
+}
+
+struct hds_cw_collect_ctx {
+  struct Curl_cwriter super;
+};
+
+static CURLcode hds_cw_collect_write(struct Curl_easy *data,
+                                     struct Curl_cwriter *writer, int type,
+                                     const char *buf, size_t blen)
+{
+  if((type & CLIENTWRITE_HEADER) && !(type & CLIENTWRITE_STATUS)) {
+    unsigned char htype = (unsigned char)
+      (type & CLIENTWRITE_CONNECT ? CURLH_CONNECT :
+       (type & CLIENTWRITE_1XX ? CURLH_1XX :
+        (type & CLIENTWRITE_TRAILER ? CURLH_TRAILER :
+         CURLH_HEADER)));
+    CURLcode result = Curl_headers_push(data, buf, htype);
+    if(result)
+      return result;
+  }
+  return Curl_cwriter_write(data, writer->next, type, buf, blen);
+}
+
+static const struct Curl_cwtype hds_cw_collect = {
+  "hds-collect",
+  NULL,
+  Curl_cwriter_def_init,
+  hds_cw_collect_write,
+  Curl_cwriter_def_close,
+  sizeof(struct hds_cw_collect_ctx)
+};
+
+CURLcode Curl_headers_init(struct Curl_easy *data)
+{
+  struct Curl_cwriter *writer;
+  CURLcode result;
+
+  if(data->conn && (data->conn->handler->protocol & PROTO_FAMILY_HTTP)) {
+    /* avoid installing it twice */
+    if(Curl_cwriter_get_by_name(data, hds_cw_collect.name))
+      return CURLE_OK;
+
+    result = Curl_cwriter_create(&writer, data, &hds_cw_collect,
+                                 CURL_CW_PROTOCOL);
+    if(result)
+      return result;
+
+    result = Curl_cwriter_add(data, writer);
+    if(result) {
+      Curl_cwriter_free(data, writer);
+      return result;
+    }
+  }
+  return CURLE_OK;
 }
 
 /*
@@ -358,7 +413,7 @@ CURLcode Curl_headers_cleanup(struct Curl_easy *data)
     n = e->next;
     free(hs);
   }
-  headers_init(data);
+  headers_reset(data);
   return CURLE_OK;
 }
 

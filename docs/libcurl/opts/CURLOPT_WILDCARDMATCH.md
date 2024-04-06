@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_WILDCARDMATCH
 Section: 3
@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_CHUNK_END_FUNCTION (3)
   - CURLOPT_FNMATCH_FUNCTION (3)
   - CURLOPT_URL (3)
+Protocol:
+  - FTP
 ---
 
 # NAME
@@ -40,8 +42,8 @@ A brief introduction of its syntax follows:
 
     ftp://example.com/some/path/*.txt
 
-for all txt's from the root directory. Only two asterisks are allowed within
-the same pattern string.
+matches all `.txt` files in the root directory. Only two asterisks are allowed
+within the same pattern string.
 
 ## ? - QUESTION MARK
 
@@ -73,10 +75,6 @@ characters have no special purpose.
 Using the rules above, a filename pattern can be constructed:
 
     ftp://example.com/some/path/[a-z[:upper:]\\].jpg
-
-# PROTOCOLS
-
-This feature is only supported for FTP download.
 
 # EXAMPLE
 

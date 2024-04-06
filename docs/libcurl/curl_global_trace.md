@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: curl_global_trace
 Section: 3
@@ -7,6 +7,8 @@ Source: libcurl
 See-also:
   - curl_global_init (3)
   - libcurl (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -65,23 +67,23 @@ on how to control that.
 
 # TRACE COMPONENTS
 
-## tcp
+## `tcp`
 
 Tracing of TCP socket handling: connect, reads, writes.
 
-## ssl
+## `ssl`
 
 Tracing of SSL/TLS operations, whichever SSL backend is used in your build.
 
-## http/2
+## `http/2`
 
 Details about HTTP/2 handling: frames, events, I/O, etc.
 
-## http/3
+## `http/3`
 
 Details about HTTP/3 handling: connect, frames, events, I/O etc.
 
-## http-proxy
+## `http-proxy`
 
 Involved when transfers are tunneled through an HTTP proxy. "h1-proxy" or
 "h2-proxy" are also involved, depending on the HTTP version negotiated with
@@ -90,6 +92,10 @@ the proxy.
 In order to find out all components involved in a transfer, run it with "all"
 configured. You can then see all names involved in your libcurl version in the
 trace.
+
+## `doh`
+
+Tracing of DNS-over-HTTP operations to resolve hostnames.
 
 # EXAMPLE
 

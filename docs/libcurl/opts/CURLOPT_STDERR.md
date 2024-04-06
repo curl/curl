@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_STDERR
 Section: 3
@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_DEBUGFUNCTION (3)
   - CURLOPT_NOPROGRESS (3)
   - CURLOPT_VERBOSE (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -35,10 +37,6 @@ application. A work-around is to instead use CURLOPT_DEBUGFUNCTION(3).
 # DEFAULT
 
 stderr
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_DEBUGFUNCTION
 Section: 3
@@ -10,6 +10,8 @@ See-also:
   - CURLOPT_DEBUGDATA (3)
   - CURLOPT_VERBOSE (3)
   - curl_global_trace (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -73,7 +75,7 @@ The data is header (or header-like) data sent to the peer.
 ## CURLINFO_DATA_IN
 
 The data is the unprocessed protocol data received from the peer. Even if the
-data is encoded or compressed, it is not not provided decoded nor decompressed
+data is encoded or compressed, it is not provided decoded nor decompressed
 to this callback. If you need the data in decoded and decompressed form, use
 CURLOPT_WRITEFUNCTION(3).
 
@@ -98,10 +100,6 @@ set CURLOPT_PRIVATE(3) on your handle.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

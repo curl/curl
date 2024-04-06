@@ -15,9 +15,8 @@ Example:
 
 # `--proto-redir`
 
-Tells curl to limit what protocols it may use on redirect. Protocols denied by
---proto are not overridden by this option. See --proto for how protocols are
-represented.
+Limit what protocols to allow on redirects. Protocols denied by --proto are
+not overridden by this option. See --proto for how protocols are represented.
 
 Example, allow only HTTP and HTTPS on redirect:
 

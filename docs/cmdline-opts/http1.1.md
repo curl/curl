@@ -18,4 +18,4 @@ Example:
 
 # `--http1.1`
 
-Tells curl to use HTTP version 1.1.
+Use HTTP version 1.1. This is the default with HTTP:// URLs.

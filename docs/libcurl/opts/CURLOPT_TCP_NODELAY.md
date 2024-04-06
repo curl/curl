@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_TCP_NODELAY
 Section: 3
@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_BUFFERSIZE (3)
   - CURLOPT_SOCKOPTFUNCTION (3)
   - CURLOPT_TCP_KEEPALIVE (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -28,10 +30,10 @@ Pass a long specifying whether the *TCP_NODELAY* option is to be set or
 cleared (1L = set, 0 = clear). The option is set by default. This has no
 effect after the connection has been established.
 
-Setting this option to 1L disables TCP's Nagle algorithm on connections
-created using this handle. The purpose of this algorithm is to try to minimize
-the number of small packets on the network (where "small packets" means TCP
-segments less than the Maximum Segment Size for the network).
+Setting this option to 1L disables the Nagle algorithm on connections created
+using this handle. The purpose of this algorithm is to minimize the number of
+small packets on the network (where "small packets" means TCP segments less
+than the Maximum Segment Size for the network).
 
 Maximizing the amount of data sent per TCP segment is good because it
 amortizes the overhead of the send. However, in some cases small segments may
@@ -42,10 +44,6 @@ overdone.
 # DEFAULT
 
 1
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

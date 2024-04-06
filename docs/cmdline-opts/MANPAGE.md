@@ -6,7 +6,7 @@
 
 # curl man page generator
 
-This is the curl man page generator. It generates a single nroff man page
+`managen` is the curl man page generator. It generates a single nroff man page
 output from the set of sources files in this directory.
 
 The `mainpage.idx` file lists all files that are rendered in that order to
@@ -22,8 +22,8 @@ to markdown which is why it uses `.md` file extensions.
 ## Option files
 
 Each command line option is described in a file named `<long name>.d`, where
-option name is written without any prefixing dashes. Like the file name for
-the `-v, --verbose` option is named `verbose.d`.
+option name is written without any prefixing dashes. Like the filename for the
+`-v, --verbose` option is named `verbose.d`.
 
 Each file has a set of meta-data in the top of the file, followed by a body of
 text.
@@ -83,9 +83,12 @@ explicitly with an empty "header":
 
     ##
 
+Angle brackets (`<>`) need to be escaped when used in text like `\<` and
+`\>`. This, to ensure that the text renders nicely as markdown.
+
 ### Headers
 
-The `#` header can be used by non-option files and it produces produces a
+The `#` header can be used by non-option files and it produces a
 `.SH` output.
 
 If the `#` header is used for a command line option file, that header is
@@ -100,11 +103,16 @@ getting spellchecked by CI jobs): `%DATE`, `%VERSION` and `%GLOBALS`.
 
 ## Generate
 
-`./gen.pl mainpage`
+`managen mainpage [list of markdown option file names]`
 
 This command outputs a single huge nroff file, meant to become `curl.1`. The
 full curl man page.
 
-`./gen.pl listhelp`
+`managen ascii [list of markdown option file names]`
+
+This command outputs a single text file, meant to become `curl.txt`. The full
+curl man page in text format, used to build `tool_hugehelp.c`.
+
+`managen listhelp`
 
 Generates a full `curl --help` output for all known command line options.

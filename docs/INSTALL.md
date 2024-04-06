@@ -24,8 +24,8 @@ or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
 ## Building from git
 
 If you get your code off a git repository instead of a release tarball, see
-the `GIT-INFO` file in the root directory for specific instructions on how to
-proceed.
+the `GIT-INFO.md` file in the root directory for specific instructions on how
+to proceed.
 
 # Unix
 
@@ -110,10 +110,10 @@ Figuring out all the dependency libraries for a given library is hard, as it
 might involve figuring out the dependencies of the dependencies and they vary
 between platforms and change between versions.
 
-When using static dependencies, the build scripts will mostly assume that you,
-the user, will provide all the necessary additional dependency libraries as
-additional arguments in the build. With configure, by setting `LIBS` or
-`LDFLAGS` on the command line.
+When using static dependencies, the build scripts mostly assume that you, the
+user, provide all the necessary additional dependency libraries as additional
+arguments in the build. With configure, by setting `LIBS` or `LDFLAGS` on the
+command line.
 
 Building statically is not for the faint of heart.
 
@@ -123,8 +123,8 @@ If you are a curl developer and use gcc, you might want to enable more debug
 options with the `--enable-debug` option.
 
 curl can be built to use a whole range of libraries to provide various useful
-services, and configure will try to auto-detect a decent default. If you want
-to alter it, you can select how to deal with each individual library.
+services, and configure tries to auto-detect a decent default. If you want to
+alter it, you can select how to deal with each individual library.
 
 ## Select TLS backend
 
@@ -189,7 +189,7 @@ multi-threaded dynamic C runtime.
 
 Almost identical to the Unix installation. Run the configure script in the
 curl source tree root with `sh configure`. Make sure you have the `sh`
-executable in `/bin/` or you will see the configure fail toward the end.
+executable in `/bin/` or you see the configure fail toward the end.
 
 Run `make`
 
@@ -267,16 +267,16 @@ might yet need some additional adjustment.
 ## Important static libcurl usage note
 
 When building an application that uses the static libcurl library on Windows,
-you must add `-DCURL_STATICLIB` to your `CFLAGS`. Otherwise the linker will
-look for dynamic import symbols.
+you must add `-DCURL_STATICLIB` to your `CFLAGS`. Otherwise the linker looks
+for dynamic import symbols.
 
 ## Legacy Windows and SSL
 
 Schannel (from Windows SSPI), is the native SSL library in Windows. However,
-Schannel in Windows <= XP is unable to connect to servers that
-no longer support the legacy handshakes and algorithms used by those
-versions. If you will be using curl in one of those earlier versions of
-Windows you should choose another SSL backend such as OpenSSL.
+Schannel in Windows <= XP is unable to connect to servers that no longer
+support the legacy handshakes and algorithms used by those versions. If you
+are using curl in one of those earlier versions of Windows you should choose
+another SSL backend such as OpenSSL.
 
 # Apple Platforms (macOS, iOS, tvOS, watchOS, and their simulator counterparts)
 
@@ -285,10 +285,10 @@ implementation, Secure Transport, instead of OpenSSL. To build with Secure
 Transport for SSL/TLS, use the configure option `--with-secure-transport`.
 
 When Secure Transport is in use, the curl options `--cacert` and `--capath`
-and their libcurl equivalents, will be ignored, because Secure Transport uses
-the certificates stored in the Keychain to evaluate whether or not to trust
-the server. This, of course, includes the root certificates that ship with the
-OS. The `--cert` and `--engine` options, and their libcurl equivalents, are
+and their libcurl equivalents, are ignored, because Secure Transport uses the
+certificates stored in the Keychain to evaluate whether or not to trust the
+server. This, of course, includes the root certificates that ship with the OS.
+The `--cert` and `--engine` options, and their libcurl equivalents, are
 currently unimplemented in curl with Secure Transport.
 
 In general, a curl build for an Apple `ARCH/SDK/DEPLOYMENT_TARGET` combination
@@ -307,7 +307,8 @@ make -j8
 make install
 ```
 
-Above will build curl for macOS platform with `x86_64` architecture and `10.8` as deployment target.
+The above command lines build curl for macOS platform with `x86_64`
+architecture and `10.8` as deployment target.
 
 Here is an example for iOS device:
 
@@ -367,8 +368,8 @@ to adjust those variables accordingly. After that you can build curl like this:
 
     ./configure --host aarch64-linux-android --with-pic --disable-shared
 
-Note that this will not give you SSL/TLS support. If you need SSL/TLS, you
-have to build curl against a SSL/TLS layer, e.g. OpenSSL, because it is
+Note that this does not give you SSL/TLS support. If you need SSL/TLS, you
+have to build curl with a SSL/TLS library, e.g. OpenSSL, because it is
 impossible for curl to access Android's native SSL/TLS layer. To build curl
 for Android using OpenSSL, follow the OpenSSL build instructions and then
 install `libssl.a` and `libcrypto.a` to `$TOOLCHAIN/sysroot/usr/lib` and copy
@@ -376,7 +377,7 @@ install `libssl.a` and `libcrypto.a` to `$TOOLCHAIN/sysroot/usr/lib` and copy
 for Android using OpenSSL like this:
 
 ```bash
-LIBS="-lssl -lcrypto -lc++" # For OpenSSL/BoringSSL. In general, you will need to the SSL/TLS layer's transitive dependencies if you are linking statically.
+LIBS="-lssl -lcrypto -lc++" # For OpenSSL/BoringSSL. In general, you need to the SSL/TLS layer's transitive dependencies if you are linking statically.
 ./configure --host aarch64-linux-android --with-pic --disable-shared --with-openssl="$TOOLCHAIN/sysroot/usr"
 ```
 
@@ -386,22 +387,22 @@ For IBM i (formerly OS/400), you can use curl in two different ways:
 
 - Natively, running in the **ILE**. The obvious use is being able to call curl
   from ILE C or RPG applications.
-  - You will need to build this from source. See `packages/OS400/README` for
-    the ILE specific build instructions.
-- In the **PASE** environment, which runs AIX programs. curl will be built as
-  it would be on AIX.
-  - IBM provides builds of curl in their Yum repository for PASE software.
-  - To build from source, follow the Unix instructions.
+- You need to build this from source. See `packages/OS400/README` for the ILE
+  specific build instructions.
+- In the **PASE** environment, which runs AIX programs. curl is built as it
+  would be on AIX.
+- IBM provides builds of curl in their Yum repository for PASE software.
+- To build from source, follow the Unix instructions.
 
 There are some additional limitations and quirks with curl on this platform;
 they affect both environments.
 
 ## Multi-threading notes
 
-By default, jobs in IBM i will not start with threading enabled. (Exceptions
+By default, jobs in IBM i does not start with threading enabled. (Exceptions
 include interactive PASE sessions started by `QP2TERM` or SSH.) If you use
 curl in an environment without threading when options like asynchronous DNS
-were enabled, you will get messages like:
+were enabled, you get messages like:
 
 ```
 getaddrinfo() thread failed to start
@@ -446,9 +447,9 @@ export NM=ppc_405-nm
 
 You may also need to provide a parameter like `--with-random=/dev/urandom` to
 configure as it cannot detect the presence of a random number generating
-device for a target system. The `--prefix` parameter specifies where curl
-will be installed. If `configure` completes successfully, do `make` and `make
-install` as usual.
+device for a target system. The `--prefix` parameter specifies where curl gets
+installed. If `configure` completes successfully, do `make` and `make install`
+as usual.
 
 In some cases, you may be able to simplify the above commands to as little as:
 
@@ -460,10 +461,16 @@ There are a number of configure options that can be used to reduce the size of
 libcurl for embedded applications where binary size is an important factor.
 First, be sure to set the `CFLAGS` variable when configuring with any relevant
 compiler optimization flags to reduce the size of the binary. For gcc, this
-would mean at minimum the -Os option, and potentially the `-march=X`,
-`-mdynamic-no-pic` and `-flto` options as well, e.g.
+would mean at minimum the `-Os` option, and others like the following that
+may be relevant in some environments: `-march=X`, `-mthumb`, `-m32`,
+`-mdynamic-no-pic`, `-flto`, `-fdata-sections`, `-ffunction-sections`,
+`-fno-unwind-tables`, `-fno-asynchronous-unwind-tables`,
+`-fno-record-gcc-switches`, `-fsection-anchors`, `-fno-plt`,
+`-Wl,--gc-sections`, `-Wl,-Bsymbolic`, `-Wl,-s`,
 
-    ./configure CFLAGS='-Os' LDFLAGS='-Wl,-Bsymbolic'...
+For example, this is how to combine a few of these options:
+
+    ./configure CC=gcc CFLAGS='-Os -ffunction-sections' LDFLAGS='-Wl,--gc-sections'...
 
 Note that newer compilers often produce smaller code than older versions
 due to improved optimization.
@@ -471,9 +478,9 @@ due to improved optimization.
 Be sure to specify as many `--disable-` and `--without-` flags on the
 configure command-line as you can to disable all the libcurl features that you
 know your application is not going to need. Besides specifying the
-`--disable-PROTOCOL` flags for all the types of URLs your application will not
+`--disable-PROTOCOL` flags for all the types of URLs your application do not
 use, here are some other flags that can reduce the size of the library by
-disabling support for some feature:
+disabling support for some feature (run `./configure --help` to see them all):
 
  - `--disable-alt-svc` (HTTP Alt-Svc)
  - `--disable-ares` (the C-ARES DNS library)
@@ -487,13 +494,17 @@ disabling support for some feature:
  - `--disable-dateparse` (date parsing for time conditionals)
  - `--disable-dnsshuffle` (internal server load spreading)
  - `--disable-doh` (DNS-over-HTTP)
+ - `--disable-form-api` (POST form API)
  - `--disable-get-easy-options` (lookup easy options at runtime)
+ - `--disable-headers-api` (API to access headers)
  - `--disable-hsts` (HTTP Strict Transport Security)
  - `--disable-http-auth` (all HTTP authentication)
  - `--disable-ipv6` (IPv6)
  - `--disable-libcurl-option` (--libcurl C code generation support)
- - `--disable-manual` (built-in documentation)
+ - `--disable-manual` (--manual built-in documentation)
+ - `--disable-mime` (MIME API)
  - `--disable-netrc`  (.netrc file)
+ - `--disable-ntlm` (NTLM authentication)
  - `--disable-ntlm-wb` (NTLM WinBind)
  - `--disable-progress-meter` (graphical progress meter in library)
  - `--disable-proxy` (HTTP and SOCKS proxies)
@@ -515,30 +526,21 @@ disabling support for some feature:
  - `--without-ssl` (SSL/TLS)
  - `--without-zlib` (on-the-fly decompression)
 
-The GNU compiler and linker have a number of options that can reduce the
-size of the libcurl dynamic libraries on some platforms even further.
-Specify them by providing appropriate `CFLAGS` and `LDFLAGS` variables on
-the configure command-line, e.g.
-
-    CFLAGS="-Os -ffunction-sections -fdata-sections
-            -fno-unwind-tables -fno-asynchronous-unwind-tables -flto"
-    LDFLAGS="-Wl,-s -Wl,-Bsymbolic -Wl,--gc-sections"
-
 Be sure also to strip debugging symbols from your binaries after compiling
-using 'strip' (or the appropriate variant if cross-compiling). If space is
-really tight, you may be able to remove some unneeded sections of the shared
-library using the -R option to objcopy (e.g. the .comment section).
+using 'strip' or an option like `-s`. If space is really tight, you may be able
+to gain a few bytes by removing some unneeded sections of the shared library
+using the -R option to objcopy (e.g. the .comment section).
 
 Using these techniques it is possible to create a basic HTTP-only libcurl
-shared library for i386 Linux platforms that is only 133 KiB in size
-(as of libcurl version 7.80.0, using gcc 11.2.0).
+shared library for i386 Linux platforms that is only 130 KiB in size
+(as of libcurl version 8.6.0, using gcc 13.2.0).
 
-You may find that statically linking libcurl to your application will result
-in a lower total size than dynamically linking.
+You may find that statically linking libcurl to your application results in a
+lower total size than dynamically linking.
 
-Note that the curl test harness can detect the use of some, but not all, of
-the `--disable` statements suggested above. Use will cause tests relying on
-those features to fail. The test harness can be manually forced to skip the
+The curl test harness can detect the use of some, but not all, of the
+`--disable` statements suggested above. Use of these can cause tests relying
+on those features to fail. The test harness can be manually forced to skip the
 relevant tests by specifying certain key words on the `runtests.pl` command
 line. Following is a list of appropriate key words for those configure options
 that are not automatically detected:

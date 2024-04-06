@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_POSTFIELDSIZE_LARGE
 Section: 3
@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_COPYPOSTFIELDS (3)
   - CURLOPT_POSTFIELDS (3)
   - CURLOPT_POSTFIELDSIZE (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
@@ -34,10 +36,6 @@ CURLOPT_READFUNCTION(3) (if used) to signal the end of data.
 # DEFAULT
 
 -1
-
-# PROTOCOLS
-
-HTTP(S)
 
 # EXAMPLE
 

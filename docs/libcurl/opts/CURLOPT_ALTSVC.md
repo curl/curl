@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_ALTSVC
 Section: 3
@@ -9,11 +9,13 @@ See-also:
   - CURLOPT_CONNECT_TO (3)
   - CURLOPT_COOKIEFILE (3)
   - CURLOPT_RESOLVE (3)
+Protocol:
+  - HTTP
 ---
 <!-- markdown-link-check-disable -->
 # NAME
 
-CURLOPT_ALTSVC - alt-svc cache file name
+CURLOPT_ALTSVC - alt-svc cache filename
 
 # SYNOPSIS
 
@@ -35,10 +37,6 @@ Specify a blank filename ("") to make libcurl not load from a file at all.
 # DEFAULT
 
 NULL. The alt-svc cache is not read nor written to file.
-
-# PROTOCOLS
-
-HTTPS
 
 # EXAMPLE
 

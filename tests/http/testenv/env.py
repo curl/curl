@@ -31,6 +31,7 @@ import socket
 import subprocess
 import sys
 from configparser import ConfigParser, ExtendedInterpolation
+from datetime import timedelta
 from typing import Optional
 
 import pytest
@@ -133,7 +134,7 @@ class EnvConfig:
         self.cert_specs = [
             CertificateSpec(domains=[self.domain1, 'localhost'], key_type='rsa2048'),
             CertificateSpec(domains=[self.domain2], key_type='rsa2048'),
-            CertificateSpec(domains=[self.proxy_domain], key_type='rsa2048'),
+            CertificateSpec(domains=[self.proxy_domain, '127.0.0.1'], key_type='rsa2048'),
             CertificateSpec(name="clientsX", sub_specs=[
                CertificateSpec(name="user1", client=True),
             ]),
@@ -184,15 +185,15 @@ class EnvConfig:
                 log.error(f'{self.apxs} failed to run: {e}')
         return self._httpd_version
 
-    def _versiontuple(self, v):
+    def versiontuple(self, v):
         v = re.sub(r'(\d+\.\d+(\.\d+)?)(-\S+)?', r'\1', v)
         return tuple(map(int, v.split('.')))
 
     def httpd_is_at_least(self, minv):
         if self.httpd_version is None:
             return False
-        hv = self._versiontuple(self.httpd_version)
-        return hv >= self._versiontuple(minv)
+        hv = self.versiontuple(self.httpd_version)
+        return hv >= self.versiontuple(minv)
 
     def is_complete(self) -> bool:
         return os.path.isfile(self.httpd) and \
@@ -273,6 +274,14 @@ class Env:
             if lversion.startswith(prefix):
                 return lversion[len(prefix):]
         return 'unknown'
+
+    @staticmethod
+    def curl_lib_version_at_least(libname: str, min_version) -> str:
+        lversion = Env.curl_lib_version(libname)
+        if lversion != 'unknown':
+            return Env.CONFIG.versiontuple(min_version) <= \
+                   Env.CONFIG.versiontuple(lversion)
+        return False
 
     @staticmethod
     def curl_os() -> str:

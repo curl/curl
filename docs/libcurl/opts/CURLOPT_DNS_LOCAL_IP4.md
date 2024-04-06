@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_DNS_LOCAL_IP4
 Section: 3
@@ -8,6 +8,8 @@ See-also:
   - CURLOPT_DNS_INTERFACE (3)
   - CURLOPT_DNS_LOCAL_IP6 (3)
   - CURLOPT_DNS_SERVERS (3)
+Protocol:
+  - All
 ---
 
 # NAME
@@ -35,10 +37,6 @@ option.
 # DEFAULT
 
 NULL
-
-# PROTOCOLS
-
-All
 
 # EXAMPLE
 

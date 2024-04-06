@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_NEW_FILE_PERMS
 Section: 3
@@ -7,6 +7,10 @@ Source: libcurl
 See-also:
   - CURLOPT_NEW_DIRECTORY_PERMS (3)
   - CURLOPT_UPLOAD (3)
+Protocol:
+  - SFTP
+  - SCP
+  - FILE
 ---
 
 # NAME
@@ -31,10 +35,6 @@ The only protocols that can use this are *sftp://*, *scp://*, and *file://*.
 # DEFAULT
 
 0644
-
-# PROTOCOLS
-
-SFTP, SCP and FILE
 
 # EXAMPLE
 

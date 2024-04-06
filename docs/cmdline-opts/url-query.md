@@ -21,9 +21,9 @@ Example:
 
 # `--url-query`
 
-This option adds a piece of data, usually a name + value pair, to the end of
-the URL query part. The syntax is identical to that used for --data-urlencode
-with one extension:
+Add a piece of data, usually a name + value pair, to the end of the URL query
+part. The syntax is identical to that used for --data-urlencode with one
+extension:
 
 If the argument starts with a '+' (plus), the rest of the string is provided
 as-is unencoded.

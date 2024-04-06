@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: CURLOPT_FAILONERROR
 Section: 3
@@ -8,11 +8,13 @@ See-also:
   - CURLINFO_RESPONSE_CODE (3)
   - CURLOPT_HTTP200ALIASES (3)
   - CURLOPT_KEEP_SENDING_ON_ERROR (3)
+Protocol:
+  - HTTP
 ---
 
 # NAME
 
-CURLOPT_FAILONERROR - request failure on HTTP response >= 400
+CURLOPT_FAILONERROR - request failure on HTTP response \>= 400
 
 # SYNOPSIS
 
@@ -42,10 +44,6 @@ get closed and *CURLE_HTTP_RETURNED_ERROR* is returned.
 # DEFAULT
 
 0, do not fail on error
-
-# PROTOCOLS
-
-HTTP
 
 # EXAMPLE
 
