@@ -24,7 +24,7 @@ jobs:
       ROOT_TREE: "OSS-Projects/curl-GitHub" 
       PROJECT_NAME: "curl"
       BRANCH_NAME: ${{ github.head_ref || github.ref_name }} 
-      CSONAR_HUB_URL: "https://partnerdemo.codesonar.com/" 
+      CSONAR_HUB_URL: "https://partnerdemo.codesonar.com" 
       CSONAR_HUB_USER: "${{ secrets.CSONAR_HUB_USER }}"
       CSONAR_HUB_PASSWORD: "${{ secrets.CSONAR_HUB_PASS }}"
       CSONAR_CSHOME: /opt/codesonar
