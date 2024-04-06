@@ -168,7 +168,7 @@ static void websocket_close(CURL *curl)
 
 static CURLcode data_echo(CURL *curl, size_t plen_min, size_t plen_max)
 {
-  CURLcode res;
+  CURLcode res = CURLE_OK;
   size_t len;
   char *send_buf;
   size_t i;
