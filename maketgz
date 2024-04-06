@@ -31,13 +31,6 @@ set -eu
 export LC_ALL=C
 export TZ=UTC
 
-case "$(uname)" in
-  Darwin*)
-    date() { gdate "$@"; }
-    tar() { gtar "$@"; }
-    ;;
-esac
-
 version="${1:-}"
 
 if [ -z "$version" ]; then
