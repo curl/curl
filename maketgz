@@ -230,6 +230,7 @@ makezip() {
   mkdir "$tempdir"
   cd "$tempdir"
   gzip -dc "../$targz" | tar -xf -
+  find . -depth -type d -exec touch -c -t "$filestamp" '{}' +
   find . | sort | zip -9 -X "$zip" -@ >/dev/null
   mv "$zip" ../
   cd ..
