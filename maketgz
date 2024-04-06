@@ -257,5 +257,7 @@ echo "maketgz report:"
 echo ""
 ls -l "$targz" "$bzip2" "$zip" "$xz"
 
+command -v openssl >/dev/null 2>&1 && openssl dgst -sha256 "$targz" "$bzip2" "$zip" "$xz"
+
 echo "Run this:"
 echo "gpg -b -a '$targz' && gpg -b -a '$bzip2' && gpg -b -a '$zip' && gpg -b -a '$xz'"
