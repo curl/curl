@@ -20,6 +20,8 @@ on:
       - 'src/**'
       - 'include/**'
 
+permissions: {}
+
 jobs:
   codespell:
     runs-on: ubuntu-latest

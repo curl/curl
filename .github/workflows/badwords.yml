@@ -15,6 +15,8 @@ on:
     branches:
     - master
 
+permissions: {}
+
 jobs:
   check:
 
