@@ -29,20 +29,22 @@
 # RELEASE-NOTES.
 #
 
-start=$1
+set -eu
+
+start="${1:-}"
 
 if test "$start" = "-h"; then
-    echo "Usage: $0 <since this tag/hash> [--releasenotes]"
-    exit
+  echo "Usage: $0 <since this tag/hash> [--releasenotes]"
+  exit
 fi
 if test -z "$start"; then
-    start=`git tag --sort=taggerdate | grep "^curl-" | tail -1`;
-    echo "Since $start:"
+  start=$(git tag --sort=taggerdate | grep "^curl-" | tail -1)
+  echo "Since $start:"
 fi
 
 # We also include curl-www if possible. Override by setting CURLWWW
-if [ -z "$CURLWWW" ] ; then
-    CURLWWW=../curl-www
+if [ -z "${CURLWWW:-}" ] ; then
+  CURLWWW=../curl-www
 fi
 
 # filter out Author:, Commit: and *by: lines
@@ -55,31 +57,30 @@ fi
 # sort all unique names
 # awk them into RELEASE-NOTES format
 
-(
- (
-  git log --pretty=full --use-mailmap $start..HEAD
-  if [ -d "$CURLWWW" ]
-  then
-   git -C "$CURLWWW" log --pretty=full --use-mailmap $start..HEAD
-  fi
- ) | \
-grep -Eai '(^Author|^Commit|by):' | \
-cut -d: -f2- | \
-cut '-d(' -f1 | \
-cut '-d<' -f1 | \
-tr , '\012' | \
-sed 's/ at github/ on github/' | \
-sed 's/ and /\n/' | \
-sed -e 's/^ *//' -e 's/ $//g' -e 's/@users.noreply.github.com$/ on github/'
+{
+  {
+    git log --pretty=full --use-mailmap "$start..HEAD"
+    if [ -d "$CURLWWW" ]; then
+      git -C "$CURLWWW" log --pretty=full --use-mailmap "$start..HEAD"
+    fi
+  } | \
+  grep -Eai '(^Author|^Commit|by):' | \
+  cut -d: -f2- | \
+  cut '-d(' -f1 | \
+  cut '-d<' -f1 | \
+  tr , '\012' | \
+  sed 's/ at github/ on github/' | \
+  sed 's/ and /\n/' | \
+  sed -e 's/^ *//' -e 's/ $//g' -e 's/@users.noreply.github.com$/ on github/'
 
-grep -a "^  [^ \(]" RELEASE-NOTES| \
-sed 's/, */\n/g'| \
-sed 's/^ *//'
-
-)| \
+  grep -a "^  [^ \(]" RELEASE-NOTES| \
+  sed 's/, */\n/g'| \
+  sed 's/^ *//'
+} | \
 sed -f ./docs/THANKS-filter | \
 sort -fu | \
-awk '{
+awk '
+{
  if(length($0)) {
    num++;
    n = sprintf("%s%s%s,", n, length(n)?" ":"", $0);
@@ -92,10 +93,9 @@ awk '{
  }
 }
 
- END {
-   pp=substr(p,1,length(p)-1);
-   printf("  %s\n", pp);
-   printf("  (%d contributors)\n", num);
- }
-
+END {
+  pp=substr(p,1,length(p)-1);
+  printf("  %s\n", pp);
+  printf("  (%d contributors)\n", num);
+}
 '
