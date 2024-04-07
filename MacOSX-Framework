@@ -131,11 +131,11 @@ if test ! -z "$SDK32"; then
   ln -fs "${FRAMEWORK_VERSION}/Headers" Headers
   cd Versions
   ln -fs "$(basename "${FRAMEWORK_VERSION}")" Current
+  popd
 
   echo Testing for SDK64
   if test -d "$SDK64_DIR"; then
     echo entering...
-    popd
     make clean
     echo "----Configuring libcurl for 64-bit universal framework..."
     ./configure --disable-dependency-tracking --disable-static --with-gssapi --with-secure-transport \
