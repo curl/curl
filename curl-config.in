@@ -63,19 +63,6 @@ fi
 
 while test "$#" -gt 0; do
   case "$1" in
-    # this deals with options in the style
-    # --option=value and extracts the value part
-    # [not currently used]
-    -*=*)
-      value=$(echo "$1" | sed 's/[-_a-zA-Z0-9]*=//')
-      ;;
-    *)
-      # shellcheck disable=2034
-      value=
-      ;;
-  esac
-
-  case "$1" in
   --built-shared)
     echo '@ENABLE_SHARED@'
     ;;
