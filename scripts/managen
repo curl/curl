@@ -773,6 +773,7 @@ sub single {
 
 sub getshortlong {
     my ($dir, $f)=@_;
+    $f =~ s/^.*\///;
     open(F, "<:crlf", "$dir/$f") ||
         die "could not find $dir/$f";
     my $short;
@@ -1116,14 +1117,12 @@ if($cmd eq "-d") {
     # specifies source directory
     $dir = shift @ARGV;
     $cmd = shift @ARGV;
-    print STDERR "man page file source dir: $dir\n";
     goto check;
 }
 elsif($cmd eq "-I") {
     # include path root
     $include = shift @ARGV;
     $cmd = shift @ARGV;
-    print STDERR "include file path: $include\n";
     goto check;
 }
 
