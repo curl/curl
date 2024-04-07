@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -33,14 +33,14 @@ setenv()
 {
         #       Define and export.
 
-        eval ${1}="${2}"
-        export ${1}
+        eval "${1}=${2}"
+        export "${1?}"
 }
 
 
 case "${SCRIPTDIR}" in
 /*)     ;;
-*)      SCRIPTDIR="`pwd`/${SCRIPTDIR}"
+*)      SCRIPTDIR="$(pwd)/${SCRIPTDIR}"
 esac
 
 while true
@@ -52,14 +52,14 @@ done
 
 #  The script directory is supposed to be in $TOPDIR/packages/os400.
 
-TOPDIR=`dirname "${SCRIPTDIR}"`
-TOPDIR=`dirname "${TOPDIR}"`
+TOPDIR=$(dirname "${SCRIPTDIR}")
+TOPDIR=$(dirname "${TOPDIR}")
 export SCRIPTDIR TOPDIR
 
 #  Extract the SONAME from the library makefile.
 
-SONAME=`sed -e '/^VERSIONCHANGE=/!d;s/^.*=\([0-9]*\).*/\1/'             \
-                                        < "${TOPDIR}/lib/Makefile.soname"`
+SONAME="$(sed -e '/^VERSIONCHANGE=/!d;s/^.*=\([0-9]*\).*/\1/'           \
+                                        < "${TOPDIR}/lib/Makefile.soname")"
 export SONAME
 
 #       Get OS/400 configuration parameters.
@@ -71,24 +71,24 @@ fi
 
 #       Need to get the version definitions.
 
-LIBCURL_VERSION=`grep '^#define  *LIBCURL_VERSION '                     \
+LIBCURL_VERSION=$(grep '^#define  *LIBCURL_VERSION '                    \
                         "${TOPDIR}/include/curl/curlver.h"              |
-                sed 's/.*"\(.*\)".*/\1/'`
-LIBCURL_VERSION_MAJOR=`grep '^#define  *LIBCURL_VERSION_MAJOR '         \
+                sed 's/.*"\(.*\)".*/\1/')
+LIBCURL_VERSION_MAJOR=$(grep '^#define  *LIBCURL_VERSION_MAJOR '        \
                         "${TOPDIR}/include/curl/curlver.h"              |
-                sed 's/^#define  *LIBCURL_VERSION_MAJOR  *\([^ ]*\).*/\1/'`
-LIBCURL_VERSION_MINOR=`grep '^#define  *LIBCURL_VERSION_MINOR '         \
+                sed 's/^#define  *LIBCURL_VERSION_MAJOR  *\([^ ]*\).*/\1/')
+LIBCURL_VERSION_MINOR=$(grep '^#define  *LIBCURL_VERSION_MINOR '        \
                         "${TOPDIR}/include/curl/curlver.h"              |
-                sed 's/^#define  *LIBCURL_VERSION_MINOR  *\([^ ]*\).*/\1/'`
-LIBCURL_VERSION_PATCH=`grep '^#define  *LIBCURL_VERSION_PATCH '         \
+                sed 's/^#define  *LIBCURL_VERSION_MINOR  *\([^ ]*\).*/\1/')
+LIBCURL_VERSION_PATCH=$(grep '^#define  *LIBCURL_VERSION_PATCH '        \
                         "${TOPDIR}/include/curl/curlver.h"              |
-                sed 's/^#define  *LIBCURL_VERSION_PATCH  *\([^ ]*\).*/\1/'`
-LIBCURL_VERSION_NUM=`grep '^#define  *LIBCURL_VERSION_NUM '             \
+                sed 's/^#define  *LIBCURL_VERSION_PATCH  *\([^ ]*\).*/\1/')
+LIBCURL_VERSION_NUM=$(grep '^#define  *LIBCURL_VERSION_NUM '            \
                         "${TOPDIR}/include/curl/curlver.h"              |
-                sed 's/^#define  *LIBCURL_VERSION_NUM  *0x\([^ ]*\).*/\1/'`
-LIBCURL_TIMESTAMP=`grep '^#define  *LIBCURL_TIMESTAMP '                 \
+                sed 's/^#define  *LIBCURL_VERSION_NUM  *0x\([^ ]*\).*/\1/')
+LIBCURL_TIMESTAMP=$(grep '^#define  *LIBCURL_TIMESTAMP '                \
                         "${TOPDIR}/include/curl/curlver.h"              |
-                sed 's/.*"\(.*\)".*/\1/'`
+                sed 's/.*"\(.*\)".*/\1/')
 export LIBCURL_VERSION
 export LIBCURL_VERSION_MAJOR LIBCURL_VERSION_MINOR LIBCURL_VERSION_PATCH
 export LIBCURL_VERSION_NUM LIBCURL_TIMESTAMP
@@ -119,7 +119,7 @@ action_needed()
 
 {
         [ ! -e "${1}" ] && return 0
-        [ "${2}" ] || return 1
+        [ -n "${2}" ] || return 1
         [ "${1}" -ot "${2}" ] && return 0
         return 1
 }
@@ -136,7 +136,7 @@ canonicalize_path()
 {
         if expr "${1}" : '^/' > /dev/null
         then    P="${1}"
-        else    P="`pwd`/${1}"
+        else    P="$(pwd)/${1}"
         fi
 
         R=
@@ -147,7 +147,8 @@ canonicalize_path()
         do      IFS="${IFSSAVE}"
                 case "${C}" in
                 .)      ;;
-                ..)     R=`expr "${R}" : '^\(.*/\)..*'`
+                ..)     R=$(expr \
+                                 "${R}" : '^\(.*/\)..*')
                         ;;
                 ?*)     R="${R}${C}/"
                         ;;
@@ -156,7 +157,7 @@ canonicalize_path()
         done
 
         IFS="${IFSSAVE}"
-        echo "/`expr "${R}" : '^\(.*\)/'`"
+        echo "/$(expr "${R}" : '^\(.*\)/')"
 }
 
 
@@ -172,7 +173,8 @@ make_module()
         MODULES="${MODULES} ${1}"
         MODIFSNAME="${LIBIFSNAME}/${1}.MODULE"
         action_needed "${MODIFSNAME}" "${2}" || return 0;
-        SRCDIR=`dirname \`canonicalize_path "${2}"\``
+        SRCDIR="$(dirname \
+                          "$(canonicalize_path "${2}")")"
 
         #       #pragma convert has to be in the source file itself, i.e.
         #               putting it in an include file makes it only active
@@ -180,10 +182,12 @@ make_module()
         #       Thus we build a temporary file with the pragma prepended to
         #               the source file and we compile that temporary file.
 
-        echo "#line 1 \"${2}\"" > __tmpsrcf.c
-        echo "#pragma convert(819)" >> __tmpsrcf.c
-        echo "#line 1" >> __tmpsrcf.c
-        cat "${2}" >> __tmpsrcf.c
+        {
+                echo "#line 1 \"${2}\""
+                echo "#pragma convert(819)"
+                echo "#line 1"
+                cat "${2}"
+        } > __tmpsrcf.c
         CMD="CRTCMOD MODULE(${TARGETLIB}/${1}) SRCSTMF('__tmpsrcf.c')"
         CMD="${CMD} SYSIFCOPT(*IFS64IO *ASYNCSIGNAL)"
 #       CMD="${CMD} OPTION(*INCDIRFIRST *SHOWINC *SHOWSYS)"
@@ -217,12 +221,13 @@ make_module()
         then    DEFINES="${DEFINES} USE_LIBSSH2"
         fi
 
-        if [ "${DEFINES}" ]
+        if [ -n "${DEFINES}" ]
         then    CMD="${CMD} DEFINE(${DEFINES})"
         fi
 
         CLcommand "${CMD}"
         rm -f __tmpsrcf.c
+        # shellcheck disable=SC2034
         LINK=YES
 }
 
@@ -272,7 +277,7 @@ versioned_copy()
 get_make_vars()
 
 {
-        eval "`sed -e ': begin'                                         \
+        eval "$(sed -e ': begin'                                        \
                 -e '/\\\\$/{'                                           \
                 -e 'N'                                                  \
                 -e 's/\\\\\\n/ /'                                       \
@@ -283,5 +288,5 @@ get_make_vars()
                 -e 's/[[:space:]]*=[[:space:]]*/=/'                     \
                 -e 's/=\\(.*[^[:space:]]\\)[[:space:]]*$/=\\"\\1\\"/'   \
                 -e 's/\\\$(\\([^)]*\\))/\${\\1}/g'                      \
-                < \"${1}\"`"
+                < \""${1}"\")"
 }

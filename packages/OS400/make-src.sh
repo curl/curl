@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -25,9 +25,9 @@
 #
 #       Command line interface tool compilation script for the OS/400.
 
-SCRIPTDIR=`dirname "${0}"`
+SCRIPTDIR=$(dirname "${0}")
 . "${SCRIPTDIR}/initscript.sh"
-cd "${TOPDIR}/src"
+cd "${TOPDIR}/src" || exit 1
 
 
 #       Get source lists.
@@ -40,25 +40,27 @@ get_make_vars Makefile.inc
 
 #       Compile the sources into modules.
 
+# shellcheck disable=SC2034
 LINK=
 MODULES=
+# shellcheck disable=SC2034
 INCLUDES="'${TOPDIR}/lib'"
 
 for SRC in ${CURLX_CFILES}
-do      MODULE=`db2_name "${SRC}"`
-        MODULE=`db2_name "X${MODULE}"`
+do      MODULE=$(db2_name "${SRC}")
+        MODULE=$(db2_name "X${MODULE}")
         make_module "${MODULE}" "${SRC}"
 done
 
 for SRC in ${CURL_CFILES}
-do      MODULE=`db2_name "${SRC}"`
+do      MODULE=$(db2_name "${SRC}")
         make_module "${MODULE}" "${SRC}"
 done
 
 
 #       Link modules into program.
 
-MODULES="`echo \"${MODULES}\" | sed \"s/[^ ][^ ]*/${TARGETLIB}\/&/g\"`"
+MODULES="$(echo "${MODULES}" | sed "s/[^ ][^ ]*/${TARGETLIB}\/&/g")"
 CMD="CRTPGM PGM(${TARGETLIB}/${CURLPGM})"
 CMD="${CMD} ENTMOD(${TARGETLIB}/CURLMAIN)"
 CMD="${CMD} MODULE(${MODULES})"

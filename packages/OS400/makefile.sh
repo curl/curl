@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -28,9 +28,9 @@
 #
 #       This is a shell script since make is not a standard component of OS/400.
 
-SCRIPTDIR=`dirname "${0}"`
+SCRIPTDIR=$(dirname "${0}")
 . "${SCRIPTDIR}/initscript.sh"
-cd "${TOPDIR}"
+cd "${TOPDIR}" || exit 1
 
 
 #       Create the OS/400 library if it does not exist.
@@ -57,9 +57,9 @@ for TEXT in "${TOPDIR}/COPYING" "${SCRIPTDIR}/README.OS400"             \
     "${TOPDIR}/docs/FEATURES" "${TOPDIR}/docs/SSLCERTS.md"              \
     "${TOPDIR}/docs/RESOURCES" "${TOPDIR}/docs/VERSIONS.md"             \
     "${TOPDIR}/docs/HISTORY.md"
-do      MEMBER="`basename \"${TEXT}\" .OS400`"
-        MEMBER="`basename \"${MEMBER}\" .md`"
-        MEMBER="${LIBIFSNAME}/DOCS.FILE/`db2_name \"${MEMBER}\"`.MBR"
+do      MEMBER="$(basename "${TEXT}" .OS400)"
+        MEMBER="$(basename "${MEMBER}" .md)"
+        MEMBER="${LIBIFSNAME}/DOCS.FILE/$(db2_name "${MEMBER}").MBR"
 
         [ -e "${TEXT}" ] || continue
 
@@ -83,8 +83,8 @@ fi
 #       Copy RPG examples if needed.
 
 for EXAMPLE in "${SCRIPTDIR}/rpg-examples"/*
-do      MEMBER="`basename \"${EXAMPLE}\"`"
-        IFSMEMBER="${LIBIFSNAME}/RPGXAMPLES.FILE/`db2_name \"${MEMBER}\"`.MBR"
+do      MEMBER="$(basename "${EXAMPLE}")"
+        IFSMEMBER="${LIBIFSNAME}/RPGXAMPLES.FILE/$(db2_name "${MEMBER}").MBR"
 
         [ -e "${EXAMPLE}" ] || continue
 
@@ -92,8 +92,8 @@ do      MEMBER="`basename \"${EXAMPLE}\"`"
         then    CMD="CPY OBJ('${EXAMPLE}') TOOBJ('${IFSMEMBER}')"
                 CMD="${CMD} TOCCSID(${TGTCCSID}) DTAFMT(*TEXT) REPLACE(*YES)"
                 CLcommand "${CMD}"
-                MBRTEXT=`sed -e '1!d;/^      \*/!d;s/^ *\* *//'         \
-                             -e 's/ *$//;s/'"'"'/&&/g' < "${EXAMPLE}"`
+                MBRTEXT=$(sed -e '1!d;/^      \*/!d;s/^ *\* *//'        \
+                              -e 's/ *$//;s/'"'"'/&&/g' < "${EXAMPLE}")
                 CMD="CHGPFM FILE(${TARGETLIB}/RPGXAMPLES) MBR(${MEMBER})"
                 CMD="${CMD} SRCTYPE(RPGLE) TEXT('${MBRTEXT}')"
                 CLcommand "${CMD}"
