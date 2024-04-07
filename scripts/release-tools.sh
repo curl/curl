@@ -23,6 +23,8 @@
 #
 ###########################################################################
 
+set -eu
+
 cat <<MOO
 # Release tools
 
@@ -31,14 +33,14 @@ produce this release tarball.
 
 MOO
 
-exists=`which dpkg`;
+exists=$(command -v dpkg 2>/dev/null)
 if test ! -e "$exists"; then
-    echo "(unknown, could not find dpkg)"
-    exit
+  echo "(unknown, could not find dpkg)"
+  exit
 fi
 
 debian() {
-    echo - $1: `dpkg -l $1 | grep ^ii | awk '{print $3}'`
+  echo "- $1: $(dpkg -l "$1" | grep ^ii | awk '{print $3}')"
 }
 debian autoconf
 debian automake
