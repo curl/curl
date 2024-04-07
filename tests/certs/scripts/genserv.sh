@@ -68,7 +68,7 @@ else
     NOTOK=1
   fi
   if [ ! -f "$CAPREFIX-ca.key" ]; then
-    echo No "$CAPREFIX key"
+    echo "No $CAPREFIX key"
     NOTOK=1
   fi
 fi
