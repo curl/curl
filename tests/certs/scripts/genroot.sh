@@ -41,6 +41,8 @@ DURATION=6000
 # The -sha256 option was introduced in OpenSSL 1.0.1
 DIGESTALGO=-sha256
 
+NOTOK=
+
 PREFIX="${1:-}"
 if [ -z "$PREFIX" ]; then
   echo 'No configuration prefix'
@@ -52,13 +54,13 @@ else
   fi
 fi
 
-if [ -z "$NOTOK" ]; then
+if [ -n "$NOTOK" ]; then
   echo 'Sorry, I cannot do that for you.'
   $USAGE
   exit
 fi
 
-GETSERIAL="\$t = time ;\$d =  \$t . substr(\$t+$$ ,-4,4)-1;print \$d"
+GETSERIAL="\$t = time; \$d = \$t . substr(\$t+$$,-4,4)-1; print \$d"
 SERIAL=$(/usr/bin/env perl -e "$GETSERIAL")
 
 echo "SERIAL=$SERIAL PREFIX=$PREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE"

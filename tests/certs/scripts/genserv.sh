@@ -45,6 +45,8 @@ REQ=YES
 P12=NO
 DHP=NO
 
+NOTOK=
+
 PREFIX="${1:-}"
 if [ -z "$PREFIX" ]; then
   echo 'No configuration prefix'
@@ -71,14 +73,14 @@ else
   fi
 fi
 
-if [ "$NOTOK" != '' ]; then
+if [ -n "$NOTOK" ]; then
   echo 'Sorry, I cannot do that for you.'
   $USAGE
   exit
 fi
 
-if [ ".$SERIAL" = . ]; then
-  GETSERIAL="\$t = time ;\$d =  \$t . substr(\$t+$$ ,-4,4)-1;print \$d"
+if [ -z "${SERIAL:-}" ]; then
+  GETSERIAL="\$t = time; \$d = \$t . substr(\$t+$$,-4,4)-1; print \$d"
   SERIAL=$(/usr/bin/env perl -e "$GETSERIAL")
 fi
 
