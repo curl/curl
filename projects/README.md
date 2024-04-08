@@ -8,10 +8,17 @@ Building via IDE Project Files
 ==============================
 
 This document describes how to compile, build and install curl and libcurl
-from sources using an IDE based development tool such as Visual Studio.
+from sources using legacy versions of Visual Studio 2010 - 2013.
 
-Project files are available for several different Visual C++ versions. The
-following directory structure has been used to cater for this:
+You will need to generate the project files before using them. Please run
+"generate -help" for usage details.
+
+To generate project files for recent versions of Visual Studio instead, use
+cmake. Refer to INSTALL-CMAKE in the docs directory.
+
+## Directory Structure
+
+The following directory structure is used for the legacy project files:
 
     somedirectory\
      |_curl
@@ -78,17 +85,14 @@ has a default version of Visual C++. We offer these versions:
  - VC10      (Visual Studio 2010 Version 10.0)
  - VC11      (Visual Studio 2012 Version 11.0)
  - VC12      (Visual Studio 2013 Version 12.0)
- - VC14      (Visual Studio 2015 Version 14.0)
- - VC14.10   (Visual Studio 2017 Version 15.0)
- - VC14.30   (Visual Studio 2022 Version 17.0)
 
 Separate solutions are provided for both libcurl and the curl command line
 tool as well as a solution that includes both projects. libcurl.sln, curl.sln
 and curl-all.sln, respectively. We recommend using curl-all.sln to build both
 projects.
 
-For example, if you are using Visual Studio 2022 then you should be able to
-use `VC14.30\curl-all.sln` to build curl and libcurl.
+For example, if you are using Visual Studio 2010 then you should be able to
+use `VC10\curl-all.sln` to build curl and libcurl.
 
 ## Running DLL based configurations
 
@@ -138,10 +142,6 @@ The following keywords have been used in the directory hierarchy:
  - `<architecture>`  - The platform architecture (For example: Win32, Win64)
  - `<configuration>` - The target configuration (For example: DLL Debug, LIB
    Release - LIB OpenSSL)
-
-If you are using the source code from the git repository, rather than a
-release archive or nightly build, you will need to generate the project
-files. Please run "generate -help" for usage details.
 
 Should you wish to help out with some of the items on the TODO list, or find
 bugs in the project files that need correcting, and would like to submit

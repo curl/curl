@@ -146,18 +146,6 @@ else
   automake --include-deps Makefile >/dev/null
 fi
 
-############################################################################
-#
-# make the generated file newer than the man page
-
-touch src/tool_hugehelp.c
-
-############################################################################
-#
-# Update the IDE files
-echo "make vc-ide"
-make -s vc-ide
-
 echo "produce CHANGES"
 git log --pretty=fuller --no-color --date=short --decorate=full -1000 | ./scripts/log2changes.pl > CHANGES.dist
 
