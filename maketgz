@@ -70,18 +70,15 @@ numeric="$(printf "%02x%02x%02x\n" "$major" "$minor" "$patch")"
 
 HEADER=include/curl/curlver.h
 CHEADER=src/tool_version.h
-PLIST=lib/libcurl.plist
-PLISTO=$PLIST
 
 if test -z "$only"; then
   ext=".dist"
   # when not setting up version numbers locally
-  for a in $HEADER $CHEADER $PLIST; do
+  for a in $HEADER $CHEADER; do
     cp "$a" "$a$ext"
   done
   HEADER="$HEADER$ext"
   CHEADER="$CHEADER$ext"
-  PLIST="$PLIST$ext"
 fi
 
 # requires a date command that knows + for format and -d for date input
@@ -103,9 +100,6 @@ rm -f "$HEADER.bak"
 # Replace version number in header file:
 sed -i.bak "s/#define CURL_VERSION .*/#define CURL_VERSION \"$curlversion\"/g" "$CHEADER"
 rm -f "$CHEADER.bak"
-
-# Replace version number in plist file:
-sed "s/@CURL_PLIST_VERSION@/$curlversion/g" < "$PLISTO.in" > "$PLIST"
 
 if test -n "$only"; then
   # done!

@@ -25,11 +25,10 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 
 CMAKE_DIST = CMakeLists.txt curl_config.h.cmake
 
-EXTRA_DIST = Makefile.mk config-win32.h config-win32ce.h config-plan9.h    \
- config-riscos.h config-mac.h curl_config.h.in config-dos.h                \
- libcurl.plist libcurl.rc config-amigaos.h config-win32ce.h                \
- config-os400.h setup-os400.h $(CMAKE_DIST) setup-win32.h .checksrc \
- Makefile.soname
+EXTRA_DIST = Makefile.mk config-win32.h config-win32ce.h config-plan9.h \
+ config-riscos.h config-mac.h curl_config.h.in config-dos.h libcurl.rc  \
+ config-amigaos.h config-win32ce.h config-os400.h setup-os400.h         \
+ $(CMAKE_DIST) setup-win32.h .checksrc Makefile.soname
 
 lib_LTLIBRARIES = libcurl.la
 

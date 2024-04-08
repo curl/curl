@@ -24,7 +24,7 @@ appleOS:
   - all:
       - changed-files:
           - any-glob-to-all-files:
-              - '{.github/workflows/macos.yml,lib/config-mac.h,lib/macos*,lib/vtls/sectransp*,m4/curl-sectransp.m4,MacOSX-Framework}'
+              - '{.github/workflows/macos.yml,lib/config-mac.h,lib/macos*,lib/vtls/sectransp*,m4/curl-sectransp.m4}'
 
 authentication:
   - all:
@@ -36,7 +36,7 @@ build:
   - all:
       - changed-files:
           - any-glob-to-all-files:
-              - '{**/CMakeLists.txt,**/Makefile.am,**/Makefile.inc,**/Makefile.mk,**/*.m4,**/*.mk,*.m4,docs/INSTALL.cmake,lib/curl_config.h.cmake,lib/libcurl*.in,CMake/**,CMakeLists.txt,configure.ac,m4/**,MacOSX-Framework,Makefile.*,packages/**,plan9/**,projects/**,winbuild/**,libcurl.def}'
+              - '{**/CMakeLists.txt,**/Makefile.am,**/Makefile.inc,**/Makefile.mk,**/*.m4,**/*.mk,*.m4,docs/INSTALL.cmake,lib/curl_config.h.cmake,lib/libcurl*.in,CMake/**,CMakeLists.txt,configure.ac,m4/**,Makefile.*,packages/**,plan9/**,projects/**,winbuild/**,libcurl.def}'
 
 CI:
   - all:
