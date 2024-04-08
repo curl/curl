@@ -54,7 +54,7 @@ jobs:
         run: sed "s|\"partnerdemo|\"https://partnerdemo|g" warnings.sarif | sed "s|(partnerdemo|(https://partnerdemo|g" > t && mv t warnings.sarif
       - name: Upload SARIF to GitHub #Use this if you do not have GitHub Enterprise
         if: ${{ github.event.pull_request }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: SARIF file
           path: warnings.sarif
