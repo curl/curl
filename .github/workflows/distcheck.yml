@@ -60,9 +60,9 @@ jobs:
           tar xvf curl-99.98.97.tar.gz
           pushd curl-99.98.97
           ./configure --prefix=$HOME/temp --without-ssl --without-libpsl
-          make
-          make test-ci
-          make install
+          make -j3
+          make -j3 test-ci
+          make -j3 install
           popd
           # basic check of the installed files
           bash scripts/installcheck.sh $HOME/temp
@@ -85,8 +85,8 @@ jobs:
           mkdir build
           pushd build
           ../curl-99.98.97/configure --without-ssl --without-libpsl
-          make
-          make test-ci
+          make -j3
+          make -j3 test-ci
           popd
           rm -rf build
           rm -rf curl-99.98.97
@@ -126,8 +126,6 @@ jobs:
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
           pushd curl-99.98.97
-          mkdir build
-          pushd build
-          cmake ..
-          make
+          cmake -B build -DCURL_WERROR=ON
+          make -C build -j3
         name: 'verify out-of-tree cmake build'

@@ -239,8 +239,8 @@ jobs:
 
       - uses: actions/checkout@v4
 
-      - run: cmake -S. -Bbuild -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON ${{ matrix.build.generate }}
+      - run: cmake -B build -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON ${{ matrix.build.generate }}
         name: 'cmake generate'
 
-      - run: cmake --build build
+      - run: cmake --build build --parallel 3
         name: 'cmake build'
