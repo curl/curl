@@ -175,7 +175,8 @@ make_module()
         MODULES="${MODULES} ${1}"
         MODIFSNAME="${LIBIFSNAME}/${1}.MODULE"
         action_needed "${MODIFSNAME}" "${2}" || return 0;
-        SRCDIR="$(dirname "$(canonicalize_path "${2}")")"
+        SRCDIR="$(dirname \
+                          "$(canonicalize_path "${2}")")"
 
         #       #pragma convert has to be in the source file itself, i.e.
         #               putting it in an include file makes it only active
@@ -184,10 +185,10 @@ make_module()
         #               the source file and we compile that temporary file.
 
         {
-          echo "#line 1 \"${2}\""
-          echo "#pragma convert(819)"
-          echo "#line 1"
-          cat "${2}"
+                echo "#line 1 \"${2}\""
+                echo "#pragma convert(819)"
+                echo "#line 1"
+                cat "${2}"
         } > __tmpsrcf.c
         CMD="CRTCMOD MODULE(${TARGETLIB}/${1}) SRCSTMF('__tmpsrcf.c')"
         CMD="${CMD} SYSIFCOPT(*IFS64IO *ASYNCSIGNAL)"

@@ -41,10 +41,10 @@ fi
 #      Create and compile the identification source file.
 
 {
-  echo '#pragma comment(user, "libcurl version '"${LIBCURL_VERSION}"'")'
-  echo '#pragma comment(user, __DATE__)'
-  echo '#pragma comment(user, __TIME__)'
-  echo '#pragma comment(copyright, "Copyright (C) Daniel Stenberg et al. OS/400 version by P. Monnerat")'
+        echo '#pragma comment(user, "libcurl version '"${LIBCURL_VERSION}"'")'
+        echo '#pragma comment(user, __DATE__)'
+        echo '#pragma comment(user, __TIME__)'
+        echo '#pragma comment(copyright, "Copyright (C) Daniel Stenberg et al. OS/400 version by P. Monnerat")'
 } > os400.c
 make_module     OS400           os400.c         BUILDING_LIBCURL
 LINK=                           # No need to rebuild service program yet.
