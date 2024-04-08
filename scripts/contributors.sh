@@ -43,9 +43,7 @@ if test -z "$start"; then
 fi
 
 # We also include curl-www if possible. Override by setting CURLWWW
-if [ -z "${CURLWWW:-}" ] ; then
-  CURLWWW=../curl-www
-fi
+CURLWWW="${CURLWWW:-../curl-www}"
 
 # filter out Author:, Commit: and *by: lines
 # cut off the email parts

@@ -40,11 +40,8 @@ if test -z "$start"; then
   start=$(git tag --sort=taggerdate | grep "^curl-" | tail -1)
 fi
 
-
 # We also include curl-www if possible. Override by setting CURLWWW
-if [ -z "${CURLWWW:-}" ] ; then
-  CURLWWW=../curl-www
-fi
+CURLWWW="${CURLWWW:-../curl-www}"
 
 cat ./docs/THANKS
 
