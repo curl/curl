@@ -138,9 +138,9 @@ void Curl_trc_read(struct Curl_easy *data,
 #else /* defined(CURL_DISABLE_VERBOSE_STRINGS) */
 /* All informational messages are not compiled in for size savings */
 
-#define Curl_trc_is_verbose(d)        ((void)(d), FALSE)
-#define Curl_trc_cf_is_verbose(x,y)   ((void)(x), (void)(y), FALSE)
-#define Curl_trc_ft_is_verbose(x,y)   ((void)(x), (void)(y), FALSE)
+#define Curl_trc_is_verbose(d)        (FALSE)
+#define Curl_trc_cf_is_verbose(x,y)   (FALSE)
+#define Curl_trc_ft_is_verbose(x,y)   (FALSE)
 
 static void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
 {
@@ -153,6 +153,8 @@ static void Curl_trc_cf_infof(struct Curl_easy *data,
 {
   (void)data; (void)cf; (void)fmt;
 }
+
+struct curl_trc_feat;
 
 static void Curl_trc_ft_infof(struct Curl_easy *data,
                               struct curl_trc_feat *ft,
