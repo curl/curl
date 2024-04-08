@@ -49,7 +49,7 @@ cat ./docs/THANKS
   {
     git log --use-mailmap "$start..HEAD"
     if [ -d "$CURLWWW" ]; then
-      git -C ../curl-www log --use-mailmap "$start..HEAD"
+      git -C "$CURLWWW" log --use-mailmap "$start..HEAD"
     fi
   } | \
   grep -Eai '(^Author|^Commit|by):' | \
