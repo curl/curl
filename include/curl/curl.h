@@ -811,7 +811,10 @@ typedef enum {
 #define CURLAUTH_GSSAPI CURLAUTH_NEGOTIATE
 #define CURLAUTH_NTLM         (((unsigned long)1)<<3)
 #define CURLAUTH_DIGEST_IE    (((unsigned long)1)<<4)
+#ifndef CURL_NO_OLDIES
+  /* functionality removed since 8.8.0 */
 #define CURLAUTH_NTLM_WB      (((unsigned long)1)<<5)
+#endif
 #define CURLAUTH_BEARER       (((unsigned long)1)<<6)
 #define CURLAUTH_AWS_SIGV4    (((unsigned long)1)<<7)
 #define CURLAUTH_ONLY         (((unsigned long)1)<<31)

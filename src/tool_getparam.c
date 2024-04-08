@@ -1356,6 +1356,12 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       nextarg = (char *)"";
 
     switch(cmd) {
+    case C_RANDOM_FILE: /* --random-file */
+    case C_EGD_FILE: /* --egd-file */
+    case C_NTLM_WB: /* --ntlm-wb */
+      warnf(global, "--%s is deprecated and has no function anymore",
+            a->lname);
+      break;
     case C_DNS_IPV4_ADDR: /* --dns-ipv4-addr */
       if(!curlinfo->ares_num) /* c-ares is needed for this */
         err = PARAM_LIBCURL_DOESNT_SUPPORT;
@@ -1369,10 +1375,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       else
         /* addr in dot notation */
         err = getstr(&config->dns_ipv6_addr, nextarg, DENY_BLANK);
-      break;
-    case C_RANDOM_FILE: /* --random-file */
-      break;
-    case C_EGD_FILE: /* --egd-file */
       break;
     case C_OAUTH2_BEARER: /* --oauth2-bearer */
       err = getstr(&config->oauth_bearer, nextarg, DENY_BLANK);
@@ -1477,14 +1479,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         config->authtype &= ~CURLAUTH_NTLM;
       else if(feature_ntlm)
         config->authtype |= CURLAUTH_NTLM;
-      else
-        err = PARAM_LIBCURL_DOESNT_SUPPORT;
-      break;
-    case C_NTLM_WB: /* --ntlm-wb */
-      if(!toggle)
-        config->authtype &= ~CURLAUTH_NTLM_WB;
-      else if(feature_ntlm_wb)
-        config->authtype |= CURLAUTH_NTLM_WB;
       else
         err = PARAM_LIBCURL_DOESNT_SUPPORT;
       break;

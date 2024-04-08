@@ -17,6 +17,8 @@ on:
     paths:
       - 'docs/libcurl/curl_*.3'
 
+permissions: {}
+
 jobs:
   verify:
     runs-on: ubuntu-latest

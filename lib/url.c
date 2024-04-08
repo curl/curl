@@ -278,10 +278,12 @@ CURLcode Curl_close(struct Curl_easy **datap)
   up_free(data);
   Curl_dyn_free(&data->state.headerb);
   Curl_flush_cookies(data, TRUE);
+#ifndef CURL_DISABLE_ALTSVC
   Curl_altsvc_save(data, data->asi, data->set.str[STRING_ALTSVC]);
   Curl_altsvc_cleanup(&data->asi);
-  Curl_hsts_save(data, data->hsts, data->set.str[STRING_HSTS]);
+#endif
 #ifndef CURL_DISABLE_HSTS
+  Curl_hsts_save(data, data->hsts, data->set.str[STRING_HSTS]);
   if(!data->share || !data->share->hsts)
     Curl_hsts_cleanup(&data->hsts);
   curl_slist_free_all(data->state.hstslist); /* clean up list */
@@ -305,7 +307,9 @@ CURLcode Curl_close(struct Curl_easy **datap)
     Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
   }
 
+#ifndef CURL_DISABLE_PROXY
   Curl_safefree(data->state.aptr.proxyuserpwd);
+#endif
   Curl_safefree(data->state.aptr.uagent);
   Curl_safefree(data->state.aptr.userpwd);
   Curl_safefree(data->state.aptr.accept_encoding);
@@ -313,12 +317,18 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_safefree(data->state.aptr.rangeline);
   Curl_safefree(data->state.aptr.ref);
   Curl_safefree(data->state.aptr.host);
+#ifndef CURL_DISABLE_COOKIES
   Curl_safefree(data->state.aptr.cookiehost);
+#endif
+#ifndef CURL_DISABLE_RTSP
   Curl_safefree(data->state.aptr.rtsp_transport);
+#endif
   Curl_safefree(data->state.aptr.user);
   Curl_safefree(data->state.aptr.passwd);
+#ifndef CURL_DISABLE_PROXY
   Curl_safefree(data->state.aptr.proxyuser);
   Curl_safefree(data->state.aptr.proxypasswd);
+#endif
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_FORM_API)
   Curl_mime_cleanpart(data->state.formp);
@@ -429,20 +439,22 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
     result = Curl_setstropt(&set->str[STRING_SSL_CAFILE], CURL_CA_BUNDLE);
     if(result)
       return result;
-
+#ifndef CURL_DISABLE_PROXY
     result = Curl_setstropt(&set->str[STRING_SSL_CAFILE_PROXY],
                             CURL_CA_BUNDLE);
     if(result)
       return result;
 #endif
+#endif
 #if defined(CURL_CA_PATH)
     result = Curl_setstropt(&set->str[STRING_SSL_CAPATH], CURL_CA_PATH);
     if(result)
       return result;
-
+#ifndef CURL_DISABLE_PROXY
     result = Curl_setstropt(&set->str[STRING_SSL_CAPATH_PROXY], CURL_CA_PATH);
     if(result)
       return result;
+#endif
 #endif
   }
 
@@ -925,13 +937,12 @@ ConnectionExists(struct Curl_easy *data,
   struct Curl_llist_element *curr;
 
 #ifdef USE_NTLM
-  bool wantNTLMhttp = ((data->state.authhost.want &
-                        (CURLAUTH_NTLM | CURLAUTH_NTLM_WB)) &&
+  bool wantNTLMhttp = ((data->state.authhost.want & CURLAUTH_NTLM) &&
                        (needle->handler->protocol & PROTO_FAMILY_HTTP));
 #ifndef CURL_DISABLE_PROXY
   bool wantProxyNTLMhttp = (needle->bits.proxy_user_passwd &&
                             ((data->state.authproxy.want &
-                              (CURLAUTH_NTLM | CURLAUTH_NTLM_WB)) &&
+                              CURLAUTH_NTLM) &&
                              (needle->handler->protocol & PROTO_FAMILY_HTTP)));
 #else
   bool wantProxyNTLMhttp = FALSE;
@@ -1402,12 +1413,6 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->ip_version = data->set.ipver;
   conn->connect_only = data->set.connect_only;
   conn->transport = TRNSPRT_TCP; /* most of them are TCP streams */
-
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM) && \
-    defined(NTLM_WB_ENABLED)
-  conn->ntlm.ntlm_auth_hlpr_socket = CURL_SOCKET_BAD;
-  conn->proxyntlm.ntlm_auth_hlpr_socket = CURL_SOCKET_BAD;
-#endif
 
   /* Initialize the easy handle list */
   Curl_llist_init(&conn->easyq, NULL);
@@ -3740,14 +3745,14 @@ static CURLcode create_conn(struct Curl_easy *data,
     /* If NTLM is requested in a part of this connection, make sure we don't
        assume the state is fine as this is a fresh connection and NTLM is
        connection based. */
-    if((data->state.authhost.picked & (CURLAUTH_NTLM | CURLAUTH_NTLM_WB)) &&
+    if((data->state.authhost.picked & CURLAUTH_NTLM) &&
        data->state.authhost.done) {
       infof(data, "NTLM picked AND auth done set, clear picked");
       data->state.authhost.picked = CURLAUTH_NONE;
       data->state.authhost.done = FALSE;
     }
 
-    if((data->state.authproxy.picked & (CURLAUTH_NTLM | CURLAUTH_NTLM_WB)) &&
+    if((data->state.authproxy.picked & CURLAUTH_NTLM) &&
        data->state.authproxy.done) {
       infof(data, "NTLM-proxy picked AND auth done set, clear picked");
       data->state.authproxy.picked = CURLAUTH_NONE;

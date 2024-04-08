@@ -705,12 +705,14 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   if(!result)
     result = Curl_setstropt(&data->state.aptr.passwd,
                             data->set.str[STRING_PASSWORD]);
+#ifndef CURL_DISABLE_PROXY
   if(!result)
     result = Curl_setstropt(&data->state.aptr.proxyuser,
                             data->set.str[STRING_PROXYUSERNAME]);
   if(!result)
     result = Curl_setstropt(&data->state.aptr.proxypasswd,
                             data->set.str[STRING_PROXYPASSWORD]);
+#endif
 
   data->req.headerbytecount = 0;
   Curl_headers_cleanup(data);
@@ -1188,6 +1190,8 @@ CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
     data->req.eos_written = TRUE;
     data->req.download_done = TRUE;
   }
+  CURL_TRC_WRITE(data, "xfer_write_resp(len=%zu, eos=%d) -> %d",
+                 blen, is_eos, result);
   return result;
 }
 

@@ -497,10 +497,6 @@ static const struct feat features_table[] = {
 #ifdef USE_NTLM
   FEATURE("NTLM",        NULL,                CURL_VERSION_NTLM),
 #endif
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM) && \
-  defined(NTLM_WB_ENABLED)
-  FEATURE("NTLM_WB",     NULL,                CURL_VERSION_NTLM_WB),
-#endif
 #if defined(USE_LIBPSL)
   FEATURE("PSL",         NULL,                CURL_VERSION_PSL),
 #endif

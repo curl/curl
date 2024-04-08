@@ -1569,9 +1569,13 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     DEBUGF(infof(data, "schannel: SSL/TLS handshake complete"));
   }
 
+#ifndef CURL_DISABLE_PROXY
   pubkey_ptr = Curl_ssl_cf_is_proxy(cf)?
     data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY]:
     data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+#else
+  pubkey_ptr = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+#endif
   if(pubkey_ptr) {
     result = schannel_pkp_pin_peer_pubkey(cf, data, pubkey_ptr);
     if(result) {
@@ -2749,7 +2753,7 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
                                                const struct Curl_easy *data)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  struct Curl_multi *multi = data->multi_easy ? data->multi_easy : data->multi;
+  struct Curl_multi *multi = data->multi;
   const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
   struct schannel_multi_ssl_backend_data *mbackend;
   const struct ssl_general_config *cfg = &data->set.general_ssl;
@@ -2818,7 +2822,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
                                          HCERTSTORE cert_store)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  struct Curl_multi *multi = data->multi_easy ? data->multi_easy : data->multi;
+  struct Curl_multi *multi = data->multi;
   const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
   struct schannel_multi_ssl_backend_data *mbackend;
   unsigned char *CAinfo_blob_digest = NULL;

@@ -21,6 +21,8 @@ on:
       - 'docs/libcurl/opts/*.3'
       - '.github/scripts/verify-examples.pl'
 
+permissions: {}
+
 jobs:
   verify:
     runs-on: ubuntu-latest

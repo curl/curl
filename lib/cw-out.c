@@ -217,6 +217,9 @@ static CURLcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
     Curl_set_in_callback(data, TRUE);
     nwritten = wcb((char *)buf, 1, wlen, wcb_data);
     Curl_set_in_callback(data, FALSE);
+    CURL_TRC_WRITE(data, "cw_out, wrote %zu %s bytes -> %zu",
+                   wlen, (otype == CW_OUT_BODY)? "body" : "header",
+                   nwritten);
     if(CURL_WRITEFUNC_PAUSE == nwritten) {
       if(data->conn && data->conn->handler->flags & PROTOPT_NONETWORK) {
         /* Protocols that work without network cannot be paused. This is
@@ -227,6 +230,7 @@ static CURLcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
       }
       /* mark the connection as RECV paused */
       data->req.keepon |= KEEP_RECV_PAUSE;
+      CURL_TRC_WRITE(data, "cw_out, PAUSE requested by client");
       break;
     }
     if(nwritten != wlen) {

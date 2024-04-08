@@ -602,10 +602,6 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
   mbedtls_ssl_init(&backend->ssl);
-  if(mbedtls_ssl_setup(&backend->ssl, &backend->config)) {
-    failf(data, "mbedTLS: ssl_init failed");
-    return CURLE_SSL_CONNECT_ERROR;
-  }
 
   /* new profile with RSA min key len = 1024 ... */
   mbedtls_ssl_conf_cert_profile(&backend->config,
@@ -639,6 +635,15 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   mbedtls_ssl_conf_rng(&backend->config, mbedtls_ctr_drbg_random,
                        &backend->ctr_drbg);
+
+  ret = mbedtls_ssl_setup(&backend->ssl, &backend->config);
+  if(ret) {
+    mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
+    failf(data, "ssl_setup failed - mbedTLS: (-0x%04X) %s",
+          -ret, errorbuf);
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+
   mbedtls_ssl_set_bio(&backend->ssl, cf,
                       mbedtls_bio_cf_write,
                       mbedtls_bio_cf_read,
@@ -752,9 +757,13 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     (struct mbed_ssl_backend_data *)connssl->backend;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   const mbedtls_x509_crt *peercert;
+#ifndef CURL_DISABLE_PROXY
   const char * const pinnedpubkey = Curl_ssl_cf_is_proxy(cf)?
     data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY]:
     data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+#else
+  const char * const pinnedpubkey = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+#endif
 
   DEBUGASSERT(backend);
 

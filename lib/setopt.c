@@ -1024,9 +1024,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /* switch off bits we can't support */
 #ifndef USE_NTLM
     auth &= ~CURLAUTH_NTLM;    /* no NTLM support */
-    auth &= ~CURLAUTH_NTLM_WB; /* no NTLM_WB support */
-#elif !defined(NTLM_WB_ENABLED)
-    auth &= ~CURLAUTH_NTLM_WB; /* no NTLM_WB support */
 #endif
 #ifndef USE_SPNEGO
     auth &= ~CURLAUTH_NEGOTIATE; /* no Negotiate (SPNEGO) auth without
@@ -1105,9 +1102,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /* switch off bits we can't support */
 #ifndef USE_NTLM
     auth &= ~CURLAUTH_NTLM;    /* no NTLM support */
-    auth &= ~CURLAUTH_NTLM_WB; /* no NTLM_WB support */
-#elif !defined(NTLM_WB_ENABLED)
-    auth &= ~CURLAUTH_NTLM_WB; /* no NTLM_WB support */
 #endif
 #ifndef USE_SPNEGO
     auth &= ~CURLAUTH_NEGOTIATE; /* no Negotiate (SPNEGO) auth without
@@ -1320,6 +1314,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.ftpsslauth = (unsigned char)(curl_ftpauth)arg;
     break;
+#ifdef HAVE_GSSAPI
   case CURLOPT_KRBLEVEL:
     /*
      * A string that defines the kerberos security level.
@@ -1328,6 +1323,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
                             va_arg(param, char *));
     data->set.krb = !!(data->set.str[STRING_KRB_LEVEL]);
     break;
+#endif
 #endif
 #if !defined(CURL_DISABLE_FTP) || defined(USE_SSH)
   case CURLOPT_FTP_CREATE_MISSING_DIRS:

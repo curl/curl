@@ -120,9 +120,9 @@ static CURLcode load_cafile(struct cafile_source *source,
   br_x509_pkey *pkey;
   FILE *fp = 0;
   unsigned char buf[BUFSIZ];
-  const unsigned char *p;
+  const unsigned char *p = NULL;
   const char *name;
-  size_t n, i, pushed;
+  size_t n = 0, i, pushed;
 
   DEBUGASSERT(source->type == CAFILE_SOURCE_PATH
               || source->type == CAFILE_SOURCE_BLOB);

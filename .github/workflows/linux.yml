@@ -44,7 +44,7 @@ env:
   bearssl-version: 0.6
   libressl-version: v3.7.3
   mbedtls-version: v3.5.0
-  mod_h2-version: v2.0.26
+  mod_h2-version: v2.0.27
   msh3-version: v0.6.0
   openssl3-version: openssl-3.1.3
   quictls-version: 3.1.4+quic

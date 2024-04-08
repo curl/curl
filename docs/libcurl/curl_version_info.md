@@ -267,7 +267,7 @@ supports HTTP NTLM (added in 7.10.6)
 *features* mask bit: CURL_VERSION_NTLM_WB
 
 libcurl was built with support for NTLM delegation to a winbind helper.
-(Added in 7.22.0)
+(Added in 7.22.0) This feature was removed from curl in 8.8.0.
 
 ## PSL
 

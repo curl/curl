@@ -3390,7 +3390,7 @@ static bool cached_x509_store_different(
 static X509_STORE *get_cached_x509_store(struct Curl_cfilter *cf,
                                          const struct Curl_easy *data)
 {
-  struct Curl_multi *multi = data->multi_easy ? data->multi_easy : data->multi;
+  struct Curl_multi *multi = data->multi;
   X509_STORE *store = NULL;
 
   DEBUGASSERT(multi);
@@ -3410,7 +3410,7 @@ static void set_cached_x509_store(struct Curl_cfilter *cf,
                                   X509_STORE *store)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  struct Curl_multi *multi = data->multi_easy ? data->multi_easy : data->multi;
+  struct Curl_multi *multi = data->multi;
   struct multi_ssl_backend_data *mbackend;
 
   DEBUGASSERT(multi);
@@ -4412,9 +4412,13 @@ static CURLcode servercert(struct Curl_cfilter *cf,
     /* when not strict, we don't bother about the verify cert problems */
     result = CURLE_OK;
 
+#ifndef CURL_DISABLE_PROXY
   ptr = Curl_ssl_cf_is_proxy(cf)?
     data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY]:
     data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+#else
+  ptr = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+#endif
   if(!result && ptr) {
     result = ossl_pkp_pin_peer_pubkey(data, backend->server_cert, ptr);
     if(result)

@@ -40,10 +40,6 @@ Files: lib/.checksrc src/.checksrc docs/examples/.checksrc tests/libtest/.checks
 Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
 
-Files: lib/libcurl.plist.in
-Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
-License: curl
-
 Files: lib/libcurl.vers.in
 Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
