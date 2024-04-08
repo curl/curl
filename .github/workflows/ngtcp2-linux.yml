@@ -185,6 +185,7 @@ jobs:
           cd $HOME
           git clone --quiet --depth=1 -b ${{ env.nghttp3-version }} https://github.com/ngtcp2/nghttp3
           cd nghttp3
+          git submodule update --init
           autoreconf -fi
           ./configure --prefix=$HOME/nghttpx PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" --enable-lib-only
           make
