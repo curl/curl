@@ -60,8 +60,7 @@ if [ -n "$NOTOK" ]; then
   exit
 fi
 
-GETSERIAL="\$t = time; \$d = \$t . substr(\$t+$$,-4,4)-1; print \$d"
-SERIAL=$(/usr/bin/env perl -e "$GETSERIAL")
+SERIAL="$(date +'%s')${RANDOM:(-4)}"
 
 echo "SERIAL=$SERIAL PREFIX=$PREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE"
 

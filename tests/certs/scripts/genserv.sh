@@ -80,8 +80,7 @@ if [ -n "$NOTOK" ]; then
 fi
 
 if [ -z "${SERIAL:-}" ]; then
-  GETSERIAL="\$t = time; \$d = \$t . substr(\$t+$$,-4,4)-1; print \$d"
-  SERIAL=$(/usr/bin/env perl -e "$GETSERIAL")
+  SERIAL="$(date +'%s')${RANDOM:(-4)}"
 fi
 
 echo "SERIAL=$SERIAL PREFIX=$PREFIX CAPREFIX=$CAPREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE"
