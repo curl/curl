@@ -186,7 +186,8 @@ retar() {
   cd "$tempdir"
   gzip -dc "../$targz" | tar -xf -
   find curl-* -type f -exec touch -c -t "$filestamp" '{}' +
-  find curl-* -type f | sort | tar --create --format=ustar --owner=0 --group=0 --numeric-owner --files-from - | gzip --best --no-name > out.tar.gz
+  find curl-* -depth -type d -exec touch -c -t "$filestamp" '{}' +
+  find curl-* | sort | tar --create --format=ustar --owner=0 --group=0 --numeric-owner --no-recursion --files-from - | gzip --best --no-name > out.tar.gz
   mv out.tar.gz ../
   cd ..
   rm -rf "$tempdir"
@@ -223,7 +224,6 @@ makezip() {
   mkdir "$tempdir"
   cd "$tempdir"
   gzip -dc "../$targz" | tar -xf -
-  find . -depth -type d -exec touch -c -t "$filestamp" '{}' +
   find . | sort | zip -9 -X "$zip" -@ >/dev/null
   mv "$zip" ../
   cd ..
