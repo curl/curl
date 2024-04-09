@@ -119,20 +119,20 @@ static size_t my_write_cb(char *buf, size_t nitems, size_t buflen,
 
   fprintf(stderr, "[t-%d] RECV %ld bytes, total=%ld, pause_at=%ld\n",
           t->idx, (long)blen, (long)t->recv_size, (long)t->pause_at);
-  if(!t->resumed &&
-     t->recv_size < t->pause_at &&
-     ((t->recv_size + (curl_off_t)blen) >= t->pause_at)) {
-    fprintf(stderr, "[t-%d] PAUSE\n", t->idx);
-    t->paused = 1;
-    return CURL_WRITEFUNC_PAUSE;
-  }
-
   if(!t->out) {
     curl_msnprintf(t->filename, sizeof(t->filename)-1, "download_%u.data",
                    t->idx);
     t->out = fopen(t->filename, "wb");
     if(!t->out)
       return 0;
+  }
+
+  if(!t->resumed &&
+     t->recv_size < t->pause_at &&
+     ((t->recv_size + (curl_off_t)blen) >= t->pause_at)) {
+    fprintf(stderr, "[t-%d] PAUSE\n", t->idx);
+    t->paused = 1;
+    return CURL_WRITEFUNC_PAUSE;
   }
 
   nwritten = fwrite(buf, nitems, buflen, t->out);
@@ -200,6 +200,7 @@ static void usage(const char *msg)
   fprintf(stderr,
     "usage: [options] url\n"
     "  download a url with following options:\n"
+    "  -a         abort paused transfer\n"
     "  -m number  max parallel downloads\n"
     "  -n number  total downloads\n"
     "  -A number  abort transfer after `number` response bytes\n"
