@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -120,8 +120,6 @@ action_needed()
 {
         [ ! -e "${1}" ] && return 0
         [ -n "${2}" ] || return 1
-        # FIXME: not POSIX
-        # shellcheck disable=SC3013
         [ "${1}" -ot "${2}" ] && return 0
         return 1
 }
