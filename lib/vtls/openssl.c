@@ -3552,8 +3552,10 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
      }
 #ifdef USE_OPENSSL_QUIC
     req_method = OSSL_QUIC_client_method();
-#else
+#elif (OPENSSL_VERSION_NUMBER >= 0x10100000L)
     req_method = TLS_method();
+#else
+      req_method = SSLv23_client_method();
 #endif
     break;
   default:
@@ -3952,7 +3954,9 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
     /* If key logging is enabled, wait for the handshake to complete and then
      * proceed with logging secrets (for TLS 1.2 or older).
      */
-    ossl_log_tls12_secret(octx->ssl, &octx->keylog_done);
+    bool done = FALSE;
+    ossl_log_tls12_secret(octx->ssl, &done);
+    octx->keylog_done = done;
   }
 #endif
 
