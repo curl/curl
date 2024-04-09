@@ -130,7 +130,7 @@ if false; then
 fi
 
 if [ "${TESTING}" = 'ON' ] && [ "${BUILD_SYSTEM}" = 'CMake' ]; then
-  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target curl-testdeps
+  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
 fi
 
 # test

@@ -36,7 +36,7 @@ include_directories(
 if (ENABLE_CURLDEBUG) # running unittests require curl to compiled with CURLDEBUG
   foreach(_testfile ${UNITPROGS})
     add_executable(${_testfile} EXCLUDE_FROM_ALL ${_testfile}.c ${UNITFILES})
-    add_dependencies(curl-testdeps ${_testfile})
+    add_dependencies(testdeps ${_testfile})
     target_link_libraries(${_testfile} curltool curlu)
   endforeach()
 endif()

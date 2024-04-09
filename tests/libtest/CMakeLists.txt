@@ -31,7 +31,7 @@ function(setup_test TEST_NAME)          # ARGN are the files in the test
   endif()
 
   add_executable(${TEST_NAME} EXCLUDE_FROM_ALL ${ARGN})
-  add_dependencies(curl-testdeps ${TEST_NAME})
+  add_dependencies(testdeps ${TEST_NAME})
   string(TOUPPER ${TEST_NAME} UPPER_TEST_NAME)
 
   include_directories(
@@ -68,7 +68,7 @@ endforeach()
 # TODO this cmake build assumes a shared build, detect static linking here!
 if(NOT WIN32)
   add_library(hostname MODULE EXCLUDE_FROM_ALL sethostname.c)
-  add_dependencies(curl-testdeps hostname)
+  add_dependencies(testdeps hostname)
   # Output to .libs for compatibility with autotools, the test data expects a
   # library at (tests)/libtest/.libs/libhostname.so
   set_target_properties(hostname PROPERTIES
