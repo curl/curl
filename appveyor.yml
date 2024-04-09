@@ -36,6 +36,13 @@ environment:
   DEBUG: 'ON'
   SHARED: 'OFF'
   matrix:
+    # generated VisualStudioSolution-based builds
+    - job_name: 'VisualStudioSolution, VS2013, Debug, x86, Schannel, Build-only'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
+      BUILD_SYSTEM: VisualStudioSolution
+      PRJ_CFG: 'DLL Debug - DLL Windows SSPI - DLL WinIDN'
+      TESTING: 'OFF'
+      VC_VERSION: VC12
     # generated CMake-based Visual Studio Release builds
     - job_name: 'CMake, VS2008, Release, x86, Schannel, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
@@ -229,13 +236,6 @@ environment:
       PATHPART: release
       TESTING: 'OFF'
       ENABLE_UNICODE: 'yes'
-    # generated VisualStudioSolution-based builds
-    - job_name: 'VisualStudioSolution, VS2013, Debug, x86, Schannel, Build-only'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      BUILD_SYSTEM: VisualStudioSolution
-      PRJ_CFG: 'DLL Debug - DLL Windows SSPI - DLL WinIDN'
-      TESTING: 'OFF'
-      VC_VERSION: VC12
     # autotools-based builds (NOT mingw cross-compiling, but msys2 native)
     - job_name: 'autotools, msys2, Debug, x86_64, no Proxy, no SSL'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
