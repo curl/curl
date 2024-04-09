@@ -293,7 +293,6 @@ if(ENABLE_IPV6 AND NOT WIN32)
   endif()
 
   if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    list(APPEND CURL_LIBS "-licucore")
     if(NOT ENABLE_ARES)
       set(use_core_foundation_and_core_services ON)
 
@@ -308,6 +307,10 @@ if(ENABLE_IPV6 AND NOT WIN32)
 endif()
 if(ENABLE_IPV6)
   set(USE_IPV6 ON)
+endif()
+
+if(APPLE)
+  list(APPEND CURL_LIBS "-licucore")
 endif()
 
 find_package(Perl)
