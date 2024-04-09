@@ -45,10 +45,10 @@ jobs:
 
       - name: 'maketgz reproducibility test'
         run: |
-          mkdir run1; mv ./curl-99.98.97.* run1
+          mkdir run1; mv ./curl-99.98.97.* run1/
           make V=1 && make V=1 clean
           ./maketgz 99.98.97
-          mkdir run2; cp -p ./curl-99.98.97.* run2
+          mkdir run2; cp -p ./curl-99.98.97.* run2/
           diff run1 run2
 
       - uses: actions/upload-artifact@v4
