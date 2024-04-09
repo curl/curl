@@ -9,6 +9,8 @@ See-also:
   - curl_multi_poll (3)
   - curl_multi_wait (3)
   - curl_multi_fdset (3)
+Protocol:
+  - All
 ---
 
 # NAME
