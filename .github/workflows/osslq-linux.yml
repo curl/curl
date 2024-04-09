@@ -96,8 +96,9 @@ jobs:
         run: |
           git clone --quiet --depth=1 -b ${{ env.openssl3-version }} https://github.com/openssl/openssl
           cd openssl
-          ./config --prefix=$HOME/openssl3 --libdir=$HOME/openssl3/lib
+          ./config --prefix=$HOME/openssl3
           make -j1 install_sw
+          cat exporters/openssl.pc
 
       - name: cache quictls
         if: contains(matrix.build.install_steps, 'quictls')
