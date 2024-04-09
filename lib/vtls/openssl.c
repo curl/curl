@@ -3555,7 +3555,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 #elif (OPENSSL_VERSION_NUMBER >= 0x10100000L)
     req_method = TLS_method();
 #else
-      req_method = SSLv23_client_method();
+    req_method = SSLv23_client_method();
 #endif
     break;
   default:
