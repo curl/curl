@@ -3679,7 +3679,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   SSL_CTX_set_options(octx->ssl_ctx, ctx_options);
 
 #ifdef HAS_ALPN
-  if(alpn) {
+  if(alpn && alpn_len) {
     if(SSL_CTX_set_alpn_protos(octx->ssl_ctx, alpn, (int)alpn_len)) {
       failf(data, "Error setting ALPN");
       return CURLE_SSL_CONNECT_ERROR;
@@ -3916,10 +3916,12 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
   SSL_set_bio(octx->ssl, bio, bio);
 #endif
 
+#ifdef HAS_ALPN
   if(connssl->alpn) {
     Curl_alpn_to_proto_str(&proto, connssl->alpn);
     infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
   }
+#endif
   connssl->connecting_state = ssl_connect_2;
   return CURLE_OK;
 }

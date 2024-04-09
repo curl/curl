@@ -753,7 +753,7 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
   /* convert the ALPN string from our arguments to a list of strings
    * that gnutls wants and will convert internally back to this very
    * string for sending to the server. nice. */
-  if(alpn) {
+  if(alpn && alpn_len) {
     gnutls_datum_t alpns[5];
     size_t i, alen = alpn_len;
     unsigned char *s = (unsigned char *)alpn;
