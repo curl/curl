@@ -294,7 +294,7 @@ if(ENABLE_IPV6 AND NOT WIN32)
 
   if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     list(APPEND CURL_LIBS "-licucore")
-    if (NOT ENABLE_ARES)
+    if(NOT ENABLE_ARES)
       set(use_core_foundation_and_core_services ON)
 
       find_library(SYSTEMCONFIGURATION_FRAMEWORK "SystemConfiguration")
