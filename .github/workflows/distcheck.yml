@@ -38,8 +38,17 @@ jobs:
       - run: make V=1 && make V=1 clean
         name: 'make and clean'
 
-      - run: ./maketgz 99.98.97
-        name: 'maketgz'
+      - name: 'maketgz'
+        run: |
+          SOURCE_DATE_EPOCH=1711526400 ./maketgz 99.98.97
+
+      - name: 'maketgz reproducibility test'
+        run: |
+          mkdir run1; mv ./curl-99.98.97.* run1/
+          make V=1 && make V=1 clean
+          SOURCE_DATE_EPOCH=1711526400 ./maketgz 99.98.97
+          mkdir run2; cp -p ./curl-99.98.97.* run2/
+          diff run1 run2
 
       - uses: actions/upload-artifact@v4
         with:
