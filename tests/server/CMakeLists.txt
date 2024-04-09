@@ -29,7 +29,7 @@ endif()
 
 function(SETUP_EXECUTABLE TEST_NAME)    # ARGN are the files in the test
   add_executable(${TEST_NAME} EXCLUDE_FROM_ALL ${ARGN})
-  add_dependencies(testdeps ${TEST_NAME})
+  add_dependencies(curl-testdeps ${TEST_NAME})
   string(TOUPPER ${TEST_NAME} UPPER_TEST_NAME)
 
   include_directories(

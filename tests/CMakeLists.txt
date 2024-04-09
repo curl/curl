@@ -23,7 +23,7 @@
 ###########################################################################
 set(CMAKE_UNITY_BUILD OFF)
 
-add_custom_target(testdeps)
+add_custom_target(curl-testdeps)
 add_subdirectory(data)
 add_subdirectory(libtest)
 add_subdirectory(server)
@@ -40,7 +40,7 @@ function(add_runtests targetname test_flags)
       "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/runtests.pl"
       ${test_flags_list}
       "\$TFLAGS"
-    DEPENDS testdeps
+    DEPENDS curl-testdeps
     VERBATIM USES_TERMINAL
   )
 endfunction()
