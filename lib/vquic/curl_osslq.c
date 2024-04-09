@@ -32,7 +32,7 @@
 #include <nghttp3/nghttp3.h>
 
 #include "urldata.h"
-#include "hash_offt.h"
+#include "hash.h"
 #include "sendf.h"
 #include "strdup.h"
 #include "rand.h"
@@ -290,7 +290,7 @@ struct cf_osslq_ctx {
   struct curltime first_byte_at;     /* when first byte was recvd */
   struct curltime reconnect_at;      /* time the next attempt should start */
   struct bufc_pool stream_bufcp;     /* chunk pool for streams */
-  struct Curl_hash_offt streams;     /* hash `data->id` to `h3_stream_ctx` */
+  struct Curl_hash streams;          /* hash `data->id` to `h3_stream_ctx` */
   size_t max_stream_window;          /* max flow window for one stream */
   uint64_t max_idle_ms;              /* max idle time for QUIC connection */
   BIT(got_first_byte);               /* if first byte was received */
@@ -308,7 +308,8 @@ static void cf_osslq_ctx_clear(struct cf_osslq_ctx *ctx)
   Curl_vquic_tls_cleanup(&ctx->tls);
   vquic_ctx_free(&ctx->q);
   Curl_bufcp_free(&ctx->stream_bufcp);
-  Curl_hash_offt_destroy(&ctx->streams);
+  Curl_hash_clean(&ctx->streams);
+  Curl_hash_destroy(&ctx->streams);
   Curl_ssl_peer_cleanup(&ctx->peer);
 
   memset(ctx, 0, sizeof(*ctx));
@@ -508,9 +509,8 @@ static void h3_stream_ctx_free(struct h3_stream_ctx *stream)
   free(stream);
 }
 
-static void h3_stream_hash_free(void *stream, void *user_data)
+static void h3_stream_hash_free(void *stream)
 {
-  (void)user_data;
   DEBUGASSERT(stream);
   h3_stream_ctx_free((struct h3_stream_ctx *)stream);
 }
@@ -1074,7 +1074,7 @@ static CURLcode cf_osslq_ctx_start(struct Curl_cfilter *cf,
 
   Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
                   H3_STREAM_POOL_SPARES);
-  Curl_hash_offt_init(&ctx->streams, 7, h3_stream_hash_free, ctx);
+  Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
   result = Curl_ssl_peer_init(&ctx->peer, cf, TRNSPRT_QUIC);
   if(result)
     goto out;

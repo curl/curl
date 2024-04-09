@@ -27,7 +27,7 @@
 #ifdef USE_MSH3
 
 #include "urldata.h"
-#include "hash_offt.h"
+#include "hash.h"
 #include "timeval.h"
 #include "multiif.h"
 #include "sendf.h"
@@ -119,7 +119,7 @@ struct cf_msh3_ctx {
   struct cf_call_data call_data;
   struct curltime connect_started;   /* time the current attempt started */
   struct curltime handshake_at;      /* time connect handshake finished */
-  struct Curl_hash_offt streams;     /* hash `data->id` to `stream_ctx` */
+  struct Curl_hash streams;          /* hash `data->id` to `stream_ctx` */
   /* Flags written by msh3/msquic thread */
   bool handshake_complete;
   bool handshake_succeeded;
@@ -166,9 +166,8 @@ static void h3_stream_ctx_free(struct stream_ctx *stream)
   free(stream);
 }
 
-static void h3_stream_hash_free(void *stream, void *user_data)
+static void h3_stream_hash_free(void *stream)
 {
-  (void)user_data;
   DEBUGASSERT(stream);
   h3_stream_ctx_free((struct stream_ctx *)stream);
 }
@@ -814,7 +813,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   CURLcode result;
   bool verify;
 
-  Curl_hash_offt_init(&ctx->streams, 7, h3_stream_hash_free, ctx);
+  Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
   conn_config = Curl_ssl_cf_get_primary_config(cf);
   if(!conn_config)
     return CURLE_FAILED_INIT;
@@ -941,7 +940,7 @@ static void cf_msh3_close(struct Curl_cfilter *cf, struct Curl_easy *data)
       MsH3ApiClose(ctx->api);
       ctx->api = NULL;
     }
-    Curl_hash_offt_destroy(&ctx->streams);
+    Curl_hash_destroy(&ctx->streams);
 
     if(ctx->active) {
       /* We share our socket at cf->conn->sock[cf->sockindex] when active.

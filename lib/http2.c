@@ -29,7 +29,7 @@
 #include <nghttp2/nghttp2.h>
 #include "urldata.h"
 #include "bufq.h"
-#include "hash_offt.h"
+#include "hash.h"
 #include "http1.h"
 #include "http2.h"
 #include "http.h"
@@ -130,7 +130,7 @@ struct cf_h2_ctx {
   struct bufc_pool stream_bufcp; /* spares for stream buffers */
   struct dynbuf scratch;        /* scratch buffer for temp use */
 
-  struct Curl_hash_offt streams; /* hash of `data->id` to `h2_stream_ctx` */
+  struct Curl_hash streams; /* hash of `data->id` to `h2_stream_ctx` */
   size_t drain_total; /* sum of all stream's UrlState drain */
   uint32_t max_concurrent_streams;
   int32_t goaway_error;
@@ -157,7 +157,8 @@ static void cf_h2_ctx_clear(struct cf_h2_ctx *ctx)
   Curl_bufq_free(&ctx->outbufq);
   Curl_bufcp_free(&ctx->stream_bufcp);
   Curl_dyn_free(&ctx->scratch);
-  Curl_hash_offt_destroy(&ctx->streams);
+  Curl_hash_clean(&ctx->streams);
+  Curl_hash_destroy(&ctx->streams);
   memset(ctx, 0, sizeof(*ctx));
   ctx->call_data = save;
 }
@@ -250,9 +251,8 @@ static void h2_stream_ctx_free(struct h2_stream_ctx *stream)
   free(stream);
 }
 
-static void h2_stream_hash_free(void *stream, void *user_data)
+static void h2_stream_hash_free(void *stream)
 {
-  (void)user_data;
   DEBUGASSERT(stream);
   h2_stream_ctx_free((struct h2_stream_ctx *)stream);
 }
@@ -435,7 +435,7 @@ static CURLcode cf_h2_ctx_init(struct Curl_cfilter *cf,
   Curl_bufq_initp(&ctx->inbufq, &ctx->stream_bufcp, H2_NW_RECV_CHUNKS, 0);
   Curl_bufq_initp(&ctx->outbufq, &ctx->stream_bufcp, H2_NW_SEND_CHUNKS, 0);
   Curl_dyn_init(&ctx->scratch, CURL_MAX_HTTP_HEADER);
-  Curl_hash_offt_init(&ctx->streams, 7, h2_stream_hash_free, ctx);
+  Curl_hash_offt_init(&ctx->streams, 63, h2_stream_hash_free);
   ctx->last_stream_id = 2147483647;
 
   rc = nghttp2_session_callbacks_new(&cbs);

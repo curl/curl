@@ -29,7 +29,7 @@
 #include <openssl/err.h>
 #include <openssl/ssl.h>
 #include "bufq.h"
-#include "hash_offt.h"
+#include "hash.h"
 #include "urldata.h"
 #include "cfilters.h"
 #include "cf-socket.h"
@@ -99,7 +99,7 @@ struct cf_quiche_ctx {
   struct curltime handshake_at;      /* time connect handshake finished */
   struct curltime reconnect_at;      /* time the next attempt should start */
   struct bufc_pool stream_bufcp;     /* chunk pool for streams */
-  struct Curl_hash_offt streams;     /* hash `data->id` to `stream_ctx` */
+  struct Curl_hash streams;          /* hash `data->id` to `stream_ctx` */
   curl_off_t data_recvd;
   curl_uint64_t max_idle_ms;         /* max idle time for QUIC conn */
   BIT(goaway);                       /* got GOAWAY from server */
@@ -131,7 +131,8 @@ static void cf_quiche_ctx_clear(struct cf_quiche_ctx *ctx)
     Curl_ssl_peer_cleanup(&ctx->peer);
     vquic_ctx_free(&ctx->q);
     Curl_bufcp_free(&ctx->stream_bufcp);
-    Curl_hash_offt_destroy(&ctx->streams);
+    Curl_hash_clean(&ctx->streams);
+    Curl_hash_destroy(&ctx->streams);
 
     memset(ctx, 0, sizeof(*ctx));
   }
@@ -165,9 +166,8 @@ static void h3_stream_ctx_free(struct stream_ctx *stream)
   free(stream);
 }
 
-static void h3_stream_hash_free(void *stream, void *user_data)
+static void h3_stream_hash_free(void *stream)
 {
-  (void)user_data;
   DEBUGASSERT(stream);
   h3_stream_ctx_free((struct stream_ctx *)stream);
 }
@@ -259,8 +259,7 @@ static void drain_stream(struct Curl_cfilter *cf,
 
 static struct Curl_easy *get_stream_easy(struct Curl_cfilter *cf,
                                          struct Curl_easy *data,
-                                         curl_uint64_t stream3_id,
-                                         int64_t stream_id,
+                                         curl_uint64_t stream_id,
                                          struct stream_ctx **pstream)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
@@ -1225,7 +1224,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   ctx->max_idle_ms = CURL_QUIC_MAX_IDLE_MS;
   Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
                   H3_STREAM_POOL_SPARES);
-  Curl_hash_offt_init(&ctx->streams, 7, h3_stream_hash_free, ctx);
+  Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
   ctx->data_recvd = 0;
 
   result = vquic_ctx_init(&ctx->q);

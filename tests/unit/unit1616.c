@@ -26,28 +26,27 @@
 #define ENABLE_CURLX_PRINTF
 #include "curlx.h"
 
-#include "hash_offt.h"
+#include "hash.h"
 
 #include "memdebug.h" /* LAST include file */
 
-static struct Curl_hash_offt hash_static;
+static struct Curl_hash hash_static;
 
-static void mydtor(void *elem, void *user_data)
+static void mydtor(void *elem)
 {
   int *ptr = (int *)elem;
   free(ptr);
-  (void)user_data;
 }
 
 static CURLcode unit_setup(void)
 {
-  Curl_hash_offt_init(&hash_static, 4, mydtor, NULL);
+  Curl_hash_offt_init(&hash_static, 15, mydtor);
   return CURLE_OK;
 }
 
 static void unit_stop(void)
 {
-  Curl_hash_offt_destroy(&hash_static);
+  Curl_hash_destroy(&hash_static);
 }
 
 UNITTEST_START
@@ -70,7 +69,7 @@ UNITTEST_START
   abort_unless(v == value, "lookup present entry failed");
   v = Curl_hash_offt_get(&hash_static, key2);
   abort_unless(!v, "lookup missing entry failed");
-  Curl_hash_offt_reset(&hash_static);
+  Curl_hash_clean(&hash_static);
 
   /* Attempt to add another key/value pair */
   value2 = malloc(sizeof(int));
