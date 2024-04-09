@@ -3552,8 +3552,10 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
      }
 #ifdef USE_OPENSSL_QUIC
     req_method = OSSL_QUIC_client_method();
-#else
+#elif (OPENSSL_VERSION_NUMBER >= 0x10100000L)
     req_method = TLS_method();
+#else
+    req_method = SSLv23_client_method();
 #endif
     break;
   default:
@@ -3677,7 +3679,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   SSL_CTX_set_options(octx->ssl_ctx, ctx_options);
 
 #ifdef HAS_ALPN
-  if(alpn) {
+  if(alpn && alpn_len) {
     if(SSL_CTX_set_alpn_protos(octx->ssl_ctx, alpn, (int)alpn_len)) {
       failf(data, "Error setting ALPN");
       return CURLE_SSL_CONNECT_ERROR;
@@ -3914,10 +3916,12 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
   SSL_set_bio(octx->ssl, bio, bio);
 #endif
 
+#ifdef HAS_ALPN
   if(connssl->alpn) {
     Curl_alpn_to_proto_str(&proto, connssl->alpn);
     infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
   }
+#endif
   connssl->connecting_state = ssl_connect_2;
   return CURLE_OK;
 }
@@ -3952,7 +3956,9 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
     /* If key logging is enabled, wait for the handshake to complete and then
      * proceed with logging secrets (for TLS 1.2 or older).
      */
-    ossl_log_tls12_secret(octx->ssl, &octx->keylog_done);
+    bool done = FALSE;
+    ossl_log_tls12_secret(octx->ssl, &done);
+    octx->keylog_done = done;
   }
 #endif
 
