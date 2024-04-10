@@ -10,7 +10,8 @@ SPDX-License-Identifier: curl
 
 Lots of organizations distribute curl packages to end users. This is a
 collection of pointers to where to learn more about curl on and with each
-distro.
+distro. Those marked *Rolling Release* typically run the latest version of curl
+and are therefore less likely to have back-ported patches to older versions.
 
 We discuss curl distro issues, patches and collaboration on the [curl-distros
 mailing list](https://lists.haxx.se/listinfo/curl-distros).
@@ -36,12 +37,16 @@ mailing list](https://lists.haxx.se/listinfo/curl-distros).
 
 ## Arch Linux
 
+*Rolling Release*
+
 - curl: https://archlinux.org/packages/core/x86_64/curl/
 - curl issues: https://gitlab.archlinux.org/archlinux/packaging/packages/curl/-/issues
 - curl security: https://security.archlinux.org/package/curl
 - curl wiki: https://wiki.archlinux.org/title/CURL
 
 ## Buildroot
+
+*Rolling Release*
 
 - curl package source and patches: https://git.buildroot.net/buildroot/tree/package/libcurl
 - curl issues: https://bugs.buildroot.org/buglist.cgi?quicksearch=curl
@@ -51,6 +56,8 @@ mailing list](https://lists.haxx.se/listinfo/curl-distros).
 - curl package source and patches: https://github.com/chimera-linux/cports/tree/master/main/curl
 
 ## Clear Linux
+
+*Rolling Release*
 
 - curl: https://github.com/clearlinux-pkgs/curl
 - curl issues: https://github.com/clearlinux/distribution/issues
@@ -74,6 +81,8 @@ mailing list](https://lists.haxx.se/listinfo/curl-distros).
 ## curl-for-win
 
 (this is the official curl binaries for Windows shipped by the curl project)
+
+*Rolling Release*
 
 - curl: https://curl.se/windows/
 
@@ -112,16 +121,22 @@ Issues and patches for this are managed in the main curl project.
 
 ## Gentoo Linux
 
+*Rolling Release*
+
 - curl: https://packages.gentoo.org/packages/net-misc/curl
 - curl issues: https://bugs.gentoo.org/buglist.cgi?quicksearch=net-misc/curl
 - curl package sources and patches: https://gitweb.gentoo.org/repo/gentoo.git/tree/net-misc/curl/
 
 ## GNU Guix
 
+*Rolling Release*
+
 - curl: https://git.savannah.gnu.org/gitweb/?p=guix.git;a=blob;f=gnu/packages/curl.scm;hb=HEAD
 - curl issues: https://issues.guix.gnu.org/search?query=curl
 
 ## Homebrew
+
+*Rolling Release*
 
 - curl: https://formulae.brew.sh/formula/curl
 
@@ -129,6 +144,8 @@ Homebrew's policy is that all patches and issues should be submitted upstream
 unless it is very specific to Homebrew's way of packaging software.
 
 ## MacPorts
+
+*Rolling Release*
 
 - curl: https://github.com/macports/macports-ports/tree/master/net/curl
 - curl issues: https://trac.macports.org/query?0_port=curl&0_port_mode=%7E&0_status=%21closed
@@ -144,11 +161,15 @@ unless it is very specific to Homebrew's way of packaging software.
 
 ## MSYS2
 
+*Rolling Release*
+
 - curl: https://github.com/msys2/MINGW-packages/tree/master/mingw-w64-curl
 - curl issues: https://github.com/msys2/MINGW-packages/issues
 - curl patches: https://github.com/msys2/MINGW-packages/tree/master/mingw-w64-curl (`*.patch`)
 
 ## Muldersoft
+
+*Rolling Release*
 
 - curl: https://github.com/lordmulder/cURL-build-win32
 - curl issues: https://github.com/lordmulder/cURL-build-win32/issues
@@ -185,6 +206,8 @@ can also be used on other distributions
 - curl patches: https://github.com/oracle/solaris-userland/tree/master/components/curl/patches
 
 ## OpenEmbedded / Yocto Project
+
+*Rolling Release*
 
 - curl: https://layers.openembedded.org/layerindex/recipe/5765/
 - curl issues: https://bugzilla.yoctoproject.org/
@@ -231,16 +254,22 @@ can also be used on other distributions
 
 ## vcpkg
 
+*Rolling Release*
+
 - curl: https://github.com/microsoft/vcpkg/tree/master/ports/curl
 - curl issues: https://github.com/microsoft/vcpkg/issues
 - curl patches: https://github.com/microsoft/vcpkg/tree/master/ports/curl (`*.patch`)
 
 ## Void Linux
 
+*Rolling Release*
+
 - curl: https://github.com/void-linux/void-packages/tree/master/srcpkgs/curl
 - curl issues: https://github.com/void-linux/void-packages/issues
 - curl patches: https://github.com/void-linux/void-packages/tree/master/srcpkgs/curl/patches
 
 ## Wolfi
+
+*Rolling Release*
 
 - curl: https://github.com/wolfi-dev/os/blob/main/curl.yaml
