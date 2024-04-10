@@ -179,7 +179,7 @@ struct Curl_multi {
   BIT(dead); /* a callback returned error, everything needs to crash and
                 burn */
   BIT(xfer_buf_borrowed);      /* xfer_buf is currently being borrowed */
-  BIT(xfer_ulbuf_borrowed);      /* xfer_buf is currently being borrowed */
+  BIT(xfer_ulbuf_borrowed);    /* xfer_ulbuf is currently being borrowed */
 #ifdef DEBUGBUILD
   BIT(warned);                 /* true after user warned of DEBUGBUILD */
 #endif

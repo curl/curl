@@ -89,6 +89,22 @@ Curl_llist_insert_next(struct Curl_llist *list, struct Curl_llist_element *e,
 }
 
 /*
+ * Curl_llist_append()
+ *
+ * Adds a new list element to the end of the list.
+ *
+ * The 'ne' argument should be a pointer into the object to store.
+ *
+ * @unittest: 1300
+ */
+void
+Curl_llist_append(struct Curl_llist *list, const void *p,
+                  struct Curl_llist_element *ne)
+{
+  Curl_llist_insert_next(list, list->tail, p, ne);
+}
+
+/*
  * @unittest: 1300
  */
 void

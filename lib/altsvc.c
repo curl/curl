@@ -191,7 +191,7 @@ static CURLcode altsvc_add(struct altsvcinfo *asi, char *line)
       as->expires = expires;
       as->prio = prio;
       as->persist = persist ? 1 : 0;
-      Curl_llist_insert_next(&asi->list, asi->list.tail, as, &as->node);
+      Curl_llist_append(&asi->list, as, &as->node);
     }
   }
 
@@ -643,7 +643,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
                account. [See RFC 7838 section 3.1] */
             as->expires = maxage + time(NULL);
             as->persist = persist;
-            Curl_llist_insert_next(&asi->list, asi->list.tail, as, &as->node);
+            Curl_llist_append(&asi->list, as, &as->node);
             infof(data, "Added alt-svc: %s:%d over %s", dsthost, dstport,
                   Curl_alpnid2str(dstalpnid));
           }

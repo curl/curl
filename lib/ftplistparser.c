@@ -349,7 +349,7 @@ static CURLcode ftp_pl_insert_finfo(struct Curl_easy *data,
   Curl_set_in_callback(data, false);
 
   if(add) {
-    Curl_llist_insert_next(llist, llist->tail, finfo, &infop->list);
+    Curl_llist_append(llist, finfo, &infop->list);
   }
   else {
     Curl_fileinfo_cleanup(infop);
