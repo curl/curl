@@ -3887,7 +3887,8 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
         if(data->set.tls_ech & (1 << CURLECH_HARD))
           return result;
       }
-      if(SSL_set1_ech_config_list(octx->ssl, ech_config, ech_config_len) != 1) {
+      if(SSL_set1_ech_config_list(octx->ssl, ech_config,
+                                  ech_config_len) != 1) {
         infof(data, "ECH: SSL_ECH_set1_echconfig failed");
         if(data->set.tls_ech & (1 << CURLECH_HARD)) {
           free(ech_config);
