@@ -374,8 +374,7 @@ static void sh_init(struct Curl_hash *hash, int hashsize)
  */
 static void multi_addmsg(struct Curl_multi *multi, struct Curl_message *msg)
 {
-  Curl_llist_insert_next(&multi->msglist, multi->msglist.tail, msg,
-                         &msg->list);
+  Curl_llist_append(&multi->msglist, msg, &msg->list);
 }
 
 struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
@@ -1002,8 +1001,7 @@ void Curl_attach_connection(struct Curl_easy *data,
   DEBUGASSERT(!data->conn);
   DEBUGASSERT(conn);
   data->conn = conn;
-  Curl_llist_insert_next(&conn->easyq, conn->easyq.tail, data,
-                         &data->conn_queue);
+  Curl_llist_append(&conn->easyq, data, &data->conn_queue);
   if(conn->handler && conn->handler->attach)
     conn->handler->attach(data, conn);
   Curl_conn_ev_data_attach(conn, data);
@@ -1996,8 +1994,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         multistate(data, MSTATE_PENDING);
 
         /* add this handle to the list of connect-pending handles */
-        Curl_llist_insert_next(&multi->pending, multi->pending.tail, data,
-                               &data->connect_queue);
+        Curl_llist_append(&multi->pending, data, &data->connect_queue);
         /* unlink from the main list */
         unlink_easy(multi, data);
         result = CURLE_OK;
@@ -2720,8 +2717,7 @@ statemachine_end:
       multistate(data, MSTATE_MSGSENT);
 
       /* add this handle to the list of msgsent handles */
-      Curl_llist_insert_next(&multi->msgsent, multi->msgsent.tail, data,
-                             &data->connect_queue);
+      Curl_llist_append(&multi->msgsent, data, &data->connect_queue);
       /* unlink from the main list */
       unlink_easy(multi, data);
       return CURLM_OK;
