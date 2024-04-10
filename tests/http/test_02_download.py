@@ -445,12 +445,30 @@ class TestDownload:
         r.check_exit_code(0)
 
     # test on paused transfers, based on issue #11982
-    def test_02_27_paused_no_cl(self, env: Env, httpd, nghttpx, repeat):
-        proto = 'h2'
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_02_27a_paused_no_cl(self, env: Env, httpd, nghttpx, proto, repeat):
         url = f'https://{env.authority_for(env.domain1, proto)}' \
-            '/tweak?&chunks=2&chunk_size=16000'
+            '/curltest/tweak/?&chunks=6&chunk_size=8000'
         client = LocalClient(env=env, name='h2-pausing')
-        r = client.run(args=[url])
+        r = client.run(args=['-V', proto, url])
+        r.check_exit_code(0)
+
+    # test on paused transfers, based on issue #11982
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_02_27b_paused_no_cl(self, env: Env, httpd, nghttpx, proto, repeat):
+        url = f'https://{env.authority_for(env.domain1, proto)}' \
+            '/curltest/tweak/?error=502'
+        client = LocalClient(env=env, name='h2-pausing')
+        r = client.run(args=['-V', proto, url])
+        r.check_exit_code(0)
+
+    # test on paused transfers, based on issue #11982
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_02_27c_paused_no_cl(self, env: Env, httpd, nghttpx, proto, repeat):
+        url = f'https://{env.authority_for(env.domain1, proto)}' \
+            '/curltest/tweak/?status=200&chunks=1&chunk_size=100'
+        client = LocalClient(env=env, name='h2-pausing')
+        r = client.run(args=['-V', proto, url])
         r.check_exit_code(0)
 
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])

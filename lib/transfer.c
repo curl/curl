@@ -272,7 +272,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
         DEBUGF(infof(data, "nread == 0, stream closed, bailing"));
       else
         DEBUGF(infof(data, "nread <= 0, server closed connection, bailing"));
-      k->keepon = 0; /* stop sending as well */
+      k->keepon &= ~(KEEP_RECV|KEEP_SEND); /* stop sending as well */
       if(k->eos_written) /* already did write this to client, leave */
         break;
     }
@@ -408,6 +408,14 @@ CURLcode Curl_readwrite(struct Curl_easy *data)
   struct curltime now;
   int didwhat = 0;
   int select_bits;
+
+  /* Check if client writes had been paused and can resume now. */
+  if(!(k->keepon & KEEP_RECV_PAUSE) && Curl_cwriter_is_paused(data)) {
+    Curl_conn_ev_data_pause(data, FALSE);
+    result = Curl_cwriter_unpause(data);
+    if(result)
+      goto out;
+  }
 
   if(data->state.select_bits) {
     if(select_bits_paused(data, data->state.select_bits)) {

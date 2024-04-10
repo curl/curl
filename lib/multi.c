@@ -2521,7 +2521,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         Curl_posttransfer(data);
         multi_done(data, result, TRUE);
       }
-      else if(data->req.done) {
+      else if(data->req.done && !Curl_cwriter_is_paused(data)) {
 
         /* call this even if the readwrite function returned error */
         Curl_posttransfer(data);

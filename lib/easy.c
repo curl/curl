@@ -58,7 +58,6 @@
 #include "multiif.h"
 #include "select.h"
 #include "cfilters.h"
-#include "cw-out.h"
 #include "sendf.h" /* for failf function prototype */
 #include "connect.h" /* for Curl_getconnectinfo */
 #include "slist.h"
@@ -1086,6 +1085,7 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
   int oldstate;
   int newstate;
   bool recursive = FALSE;
+  bool keep_changed, unpause_read, not_all_paused;
 
   if(!GOOD_EASY_HANDLE(data) || !data->conn)
     /* crazy input, don't continue */
@@ -1101,51 +1101,47 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
     ((action & CURLPAUSE_RECV)?KEEP_RECV_PAUSE:0) |
     ((action & CURLPAUSE_SEND)?KEEP_SEND_PAUSE:0);
 
-  if((newstate & (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE)) == oldstate) {
-    /* Not changing any pause state, return */
-    DEBUGF(infof(data, "pause: no change, early return"));
-    return CURLE_OK;
-  }
+  keep_changed = ((newstate & (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE)) != oldstate);
+  not_all_paused = (newstate & (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) !=
+                   (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE);
+  unpause_read = ((k->keepon & ~newstate & KEEP_SEND_PAUSE) &&
+                  (data->mstate == MSTATE_PERFORMING ||
+                   data->mstate == MSTATE_RATELIMITING));
+  /* Unpausing writes is detected on the next run in
+   * transfer.c:Curl_readwrite(). This is because this may result
+   * in a transfer error if the application's callbacks fail */
 
-  /* Unpause parts in active mime tree. */
-  if((k->keepon & ~newstate & KEEP_SEND_PAUSE) &&
-     (data->mstate == MSTATE_PERFORMING ||
-      data->mstate == MSTATE_RATELIMITING)) {
-    result = Curl_creader_unpause(data);
-    if(result)
-      return result;
-  }
-
-  /* put it back in the keepon */
+  /* Set the new keepon state, so it takes effect no matter what error
+   * may happen afterwards. */
   k->keepon = newstate;
 
-  if(!(newstate & KEEP_RECV_PAUSE)) {
-    Curl_conn_ev_data_pause(data, FALSE);
-    result = Curl_cw_out_flush(data);
-    if(result)
-      return result;
-  }
-
-  /* if there's no error and we're not pausing both directions, we want
-     to have this handle checked soon */
-  if((newstate & (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) !=
-     (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) {
-    Curl_expire(data, 0, EXPIRE_RUN_NOW); /* get this handle going again */
-
+  /* If not completely pausing both directions now, run again in any case. */
+  if(not_all_paused) {
+    Curl_expire(data, 0, EXPIRE_RUN_NOW);
     /* reset the too-slow time keeper */
     data->state.keeps_speed.tv_sec = 0;
-
-    if(!Curl_cw_out_is_paused(data))
-      /* if not pausing again, force a recv/send check of this connection as
-         the data might've been read off the socket already */
-      data->state.select_bits = CURL_CSELECT_IN | CURL_CSELECT_OUT;
-    if(data->multi) {
-      if(Curl_update_timer(data->multi))
-        return CURLE_ABORTED_BY_CALLBACK;
+    /* Simulate socket events on next run for unpaused directions */
+    if(!(newstate & KEEP_SEND_PAUSE))
+      data->state.select_bits |= CURL_CSELECT_OUT;
+    if(!(newstate & KEEP_RECV_PAUSE))
+      data->state.select_bits |= CURL_CSELECT_IN;
+    /* On changes, tell application to update its timers. */
+    if(keep_changed && data->multi) {
+      if(Curl_update_timer(data->multi)) {
+        result = CURLE_ABORTED_BY_CALLBACK;
+        goto out;
+      }
     }
   }
 
-  if(!data->state.done)
+  if(unpause_read) {
+    result = Curl_creader_unpause(data);
+    if(result)
+      goto out;
+  }
+
+out:
+  if(!result && !data->state.done && keep_changed)
     /* This transfer may have been moved in or out of the bundle, update the
        corresponding socket callback, if used */
     result = Curl_updatesocket(data);

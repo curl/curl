@@ -181,6 +181,16 @@ CURLcode Curl_cwriter_write(struct Curl_easy *data,
                             const char *buf, size_t nbytes);
 
 /**
+ * Return TRUE iff client writer is paused.
+ */
+bool Curl_cwriter_is_paused(struct Curl_easy *data);
+
+/**
+ * Unpause client writer and flush any buffered date to the client.
+ */
+CURLcode Curl_cwriter_unpause(struct Curl_easy *data);
+
+/**
  * Default implementations for do_init, do_write, do_close that
  * do nothing and pass the data through.
  */
