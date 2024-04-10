@@ -1913,7 +1913,7 @@ static void cf_ngtcp2_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 /* The "new session" callback must return zero if the session can be removed
  * or non-zero if the session has been put into the session cache.
  */
-static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
+static int quic_ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
 {
   struct Curl_cfilter *cf;
   struct cf_ngtcp2_ctx *ctx;
@@ -1959,7 +1959,7 @@ static CURLcode tls_ctx_setup(struct Curl_cfilter *cf,
   SSL_CTX_set_session_cache_mode(ctx->ossl.ssl_ctx,
                                  SSL_SESS_CACHE_CLIENT |
                                  SSL_SESS_CACHE_NO_INTERNAL);
-  SSL_CTX_sess_set_new_cb(ctx->ossl.ssl_ctx, ossl_new_session_cb);
+  SSL_CTX_sess_set_new_cb(ctx->ossl.ssl_ctx, quic_ossl_new_session_cb);
 
 #elif defined(USE_GNUTLS)
   if(ngtcp2_crypto_gnutls_configure_client_session(ctx->gtls.session) != 0) {
