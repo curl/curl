@@ -102,7 +102,7 @@ $ define/job decc$system_include prj_root:[.include.curl],-
     gnv$zlib_include:,-
     sys$sysroot:[kerberos.include]
 $!
-$! Set up a include list for the compiler to find all the header files
+$! Set up an include list for the compiler to find all the header files
 $! that they need.
 $!
 $ define/job decc$user_include src_root:[.include.curl]

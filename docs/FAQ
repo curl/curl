@@ -407,7 +407,7 @@ FAQ
   The reason why static libraries is much harder to deal with is that for them
   we do not get any help but the script itself must know or check what more
   libraries that are needed (with shared libraries, that dependency "chain" is
-  handled automatically). This is a error-prone process and one that also
+  handled automatically). This is an error-prone process and one that also
   tends to vary over time depending on the release versions of the involved
   components and may also differ between operating systems.
 

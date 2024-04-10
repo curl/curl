@@ -590,7 +590,7 @@ CURLcode Curl_conn_ev_data_idle(struct Curl_easy *data)
 
 /**
  * Notify connection filters that the transfer represented by `data`
- * is donw with sending data (e.g. has uploaded everything).
+ * is done with sending data (e.g. has uploaded everything).
  */
 void Curl_conn_ev_data_done_send(struct Curl_easy *data)
 {

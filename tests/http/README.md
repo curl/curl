@@ -36,7 +36,7 @@ Depending on your setup, some test cases may be skipped and appear as `s` in the
 You will need:
 
 1. a recent Python, the `cryptography` module and, of course, `pytest`
-2. a apache httpd development version. On Debian/Ubuntu, the package `apache2-dev` has this.
+2. an apache httpd development version. On Debian/Ubuntu, the package `apache2-dev` has this.
 3. a local `curl` project build
 3. optionally, a `nghttpx` with HTTP/3 enabled or h3 test cases will be skipped.
 

@@ -2154,7 +2154,7 @@ CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
 #endif
   CURLcode result = CURLE_OK;
   bool dNSName = FALSE; /* if a dNSName field exists in the cert */
-  bool iPAddress = FALSE; /* if a iPAddress field exists in the cert */
+  bool iPAddress = FALSE; /* if an iPAddress field exists in the cert */
   size_t hostlen;
 
   (void)conn;
