@@ -27,6 +27,7 @@
  */
 /* This is based on the poc client of issue #11982
  */
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/time.h>
@@ -146,6 +147,8 @@ struct handle
   int idx;
   int paused;
   int resumed;
+  int errored;
+  int fail_write;
   CURL *h;
 };
 
@@ -166,6 +169,12 @@ static size_t cb(void *data, size_t size, size_t nmemb, void *clientp)
     fprintf(stderr, "INFO: [%d] write, PAUSING %d time on %lu bytes\n",
             handle->idx, handle->paused, (long)realsize);
     return CURL_WRITEFUNC_PAUSE;
+  }
+  if(handle->fail_write) {
+    ++handle->errored;
+    fprintf(stderr, "INFO: [%d] FAIL write of %lu bytes, %d time\n",
+            handle->idx, (long)realsize, handle->errored);
+    return CURL_WRITEFUNC_ERROR;
   }
   fprintf(stderr, "INFO: [%d] write, accepting %lu bytes\n",
           handle->idx, (long)realsize);
@@ -222,6 +231,8 @@ int main(int argc, char *argv[])
     handles[i].idx = i;
     handles[i].paused = 0;
     handles[i].resumed = 0;
+    handles[i].errored = 0;
+    handles[i].fail_write = 1;
     handles[i].h = curl_easy_init();
     if(!handles[i].h ||
       curl_easy_setopt(handles[i].h, CURLOPT_WRITEFUNCTION, cb) != CURLE_OK ||
@@ -267,6 +278,11 @@ int main(int argc, char *argv[])
         }
         else if(!handles[i].resumed) {
           fprintf(stderr, "ERROR: [%d] NOT resumed!\n", i);
+          as_expected = 0;
+        }
+        else if(handles[i].errored != 1) {
+          fprintf(stderr, "ERROR: [%d] NOT errored once, %d instead!\n",
+                  i, handles[i].errored);
           as_expected = 0;
         }
       }
