@@ -39,7 +39,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/curl/curl-for-win
           mv curl-for-win/* .
-          export CW_CONFIG='-dev-werror-linux-musl-x64'
+          export CW_CONFIG='-main-werror-linux-musl-x64'
           export CW_REVISION='${{ github.sha }}'
           . ./_versions.sh
           docker trust inspect --pretty "${DOCKER_IMAGE}"
@@ -66,7 +66,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/curl/curl-for-win
           mv curl-for-win/* .
-          export CW_CONFIG='-dev-werror-mac-x64'
+          export CW_CONFIG='-main-werror-mac-x64'
           export CW_REVISION='${{ github.sha }}'
           sh -c ./_ci-mac-homebrew.sh
 
@@ -84,7 +84,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/curl/curl-for-win
           mv curl-for-win/* .
-          export CW_CONFIG='-dev-werror-win-x64'
+          export CW_CONFIG='-main-werror-win-x64'
           export CW_REVISION='${{ github.sha }}'
           . ./_versions.sh
           docker trust inspect --pretty "${DOCKER_IMAGE}"
