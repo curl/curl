@@ -51,9 +51,6 @@ jobs:
             "${DOCKER_IMAGE}" \
             sh -c ./_ci-linux-debian.sh
 
-      - name: 'list dependencies'
-        run: cat urls.txt
-
   mac-clang:
     runs-on: macos-latest
     timeout-minutes: 30
@@ -69,9 +66,6 @@ jobs:
           export CW_CONFIG='-main-werror-mac-x64'
           export CW_REVISION='${{ github.sha }}'
           sh -c ./_ci-mac-homebrew.sh
-
-      - name: 'list dependencies'
-        run: cat urls.txt
 
   win-llvm:
     runs-on: ubuntu-latest
@@ -95,6 +89,3 @@ jobs:
               '^(CW_|GITHUB_)') \
             "${DOCKER_IMAGE}" \
             sh -c ./_ci-linux-debian.sh
-
-      - name: 'list dependencies'
-        run: cat urls.txt
