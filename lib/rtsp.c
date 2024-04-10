@@ -805,7 +805,7 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
   DEBUGF(infof(data, "rtsp_rtp_write_resp(len=%zu, in_header=%d, eos=%d)",
                blen, rtspc->in_header, is_eos));
 
-  /* If header parsing is not onging, extract RTP messages */
+  /* If header parsing is not ongoing, extract RTP messages */
   if(!rtspc->in_header) {
     result = rtsp_filter_rtp(data, buf, blen, &consumed);
     if(result)
