@@ -220,7 +220,8 @@ makezip() {
 zip="curl-$version.zip"
 echo "Generating $zip"
 tempdir=".builddir"
-makezip
+# FIXME: add zip package to stagex
+#makezip
 
 # Set deterministic timestamp
 touch -c -t "$filestamp" "$targz" "$bzip2" "$xz" "$zip"
@@ -228,8 +229,11 @@ touch -c -t "$filestamp" "$targz" "$bzip2" "$xz" "$zip"
 echo "------------------"
 echo "maketgz report:"
 echo ""
-ls -l "$targz" "$bzip2" "$xz" "$zip"
-sha256sum "$targz" "$bzip2" "$xz" "$zip"
+# FIXME: add zip package to stagex
+#ls -l "$targz" "$bzip2" "$xz" "$zip"
+ls -l "$targz" "$bzip2" "$xz"
+#sha256sum "$targz" "$bzip2" "$xz" "$zip"
+sha256sum "$targz" "$bzip2" "$xz"
 
 echo "Run this:"
 echo "gpg -b -a '$targz' && gpg -b -a '$bzip2' && gpg -b -a '$xz' && gpg -b -a '$zip'"
