@@ -291,7 +291,6 @@ CURLcode Curl_vquic_tls_before_recv(struct curl_tls_ctx *ctx,
     CURLcode result = Curl_gtls_client_trust_setup(cf, data, &ctx->gtls);
     if(result)
       return result;
-    ctx->gtls.trust_setup = TRUE;
   }
 #else
   (void)ctx; (void)cf; (void)data;

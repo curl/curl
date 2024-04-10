@@ -132,7 +132,6 @@ static ssize_t gtls_pull(void *s, void *buf, size_t blen)
       backend->gtls.io_result = result;
       return -1;
     }
-    backend->gtls.trust_setup = TRUE;
   }
 
   nread = Curl_conn_cf_recv(cf->next, data, buf, blen, &result);
@@ -304,7 +303,6 @@ static CURLcode handshake(struct Curl_cfilter *cf,
       CURLcode result = Curl_gtls_client_trust_setup(cf, data, &backend->gtls);
       if(result)
         return result;
-      backend->gtls.trust_setup = TRUE;
     }
 
     if((rc == GNUTLS_E_AGAIN) || (rc == GNUTLS_E_INTERRUPTED)) {
@@ -676,6 +674,11 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
   }
 
   if(config->clientcert) {
+    if(!gtls->trust_setup) {
+      result = Curl_gtls_client_trust_setup(cf, data, gtls);
+      if(result)
+        return result;
+    }
     if(ssl_config->key_passwd) {
       const unsigned int supported_key_encryption_algorithms =
         GNUTLS_PKCS_USE_PKCS12_3DES | GNUTLS_PKCS_USE_PKCS12_ARCFOUR |
