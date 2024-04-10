@@ -286,6 +286,12 @@ CURLcode Curl_vquic_tls_before_recv(struct curl_tls_ctx *ctx,
       return result;
     ctx->ossl.x509_store_setup = TRUE;
   }
+#elif defined(USE_GNUTLS)
+  if(!ctx->gtls.trust_setup) {
+    CURLcode result = Curl_gtls_client_trust_setup(cf, data, &ctx->gtls);
+    if(result)
+      return result;
+  }
 #else
   (void)ctx; (void)cf; (void)data;
 #endif

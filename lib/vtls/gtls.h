@@ -51,6 +51,8 @@ struct gtls_ctx {
 #ifdef USE_GNUTLS_SRP
   gnutls_srp_client_credentials_t srp_client_cred;
 #endif
+  CURLcode io_result; /* result of last IO cfilter operation */
+  BIT(trust_setup); /* x509 anchors + CRLs have been set up */
 };
 
 typedef CURLcode Curl_gtls_ctx_setup_cb(struct Curl_cfilter *cf,
@@ -66,13 +68,16 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
                             void *cb_user_data,
                             void *ssl_user_data);
 
-CURLcode
-Curl_gtls_verifyserver(struct Curl_easy *data,
-                       gnutls_session_t session,
-                       struct ssl_primary_config *config,
-                       struct ssl_config_data *ssl_config,
-                       struct ssl_peer *peer,
-                       const char *pinned_key);
+CURLcode Curl_gtls_client_trust_setup(struct Curl_cfilter *cf,
+                                      struct Curl_easy *data,
+                                      struct gtls_ctx *gtls);
+
+CURLcode Curl_gtls_verifyserver(struct Curl_easy *data,
+                                gnutls_session_t session,
+                                struct ssl_primary_config *config,
+                                struct ssl_config_data *ssl_config,
+                                struct ssl_peer *peer,
+                                const char *pinned_key);
 
 extern const struct Curl_ssl Curl_ssl_gnutls;
 
