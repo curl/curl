@@ -8,6 +8,7 @@ FROM stagex/automake@sha256:749940b3c06e7e1f80f667a0870d59a00c86298e865530f6d11c
 FROM stagex/pkgconf@sha256:470052019202f89aa8a63cf227364beb2e23e3e5d3e15d413c7df48cdb891aef as pkgconf
 FROM stagex/libtool@sha256:40037dd8aba84b58e9c08390043e53cc90b4d6e2f4abfb4978674030f63fe219 as libtool
 FROM stagex/file@sha256:1195ad7a437d5a2b2cfe8f5319945111d730baf62838718f5d4aa5b54240d3af as file
+FROM stagex/zlib@sha256:d5c4a74d4c0a71fece685ec5e8f8a7d37b14fbbe79d00611585030c6b0542182 as zlib
 FROM stagex/m4@sha256:2c8b055ce71cc5452b519b5b0540ce5e0ef9d36fc14164d5609e35dff85d2ce9 as m4
 FROM stagex/gcc@sha256:a5c3774cb42719d308f98fc9311fea3a73f638353a7ed81bc9bef39803c8dadd as gcc
 FROM stagex/bzip2@sha256:79b9f18b94fe2dd27709ff5960849c7b40482b64ed8a64c6f5c1992e0c08d85a as bzip2
@@ -26,6 +27,7 @@ COPY --from=automake . /
 COPY --from=libtool . /
 COPY --from=m4 . /
 COPY --from=file . /
+COPY --from=zlib . /
 COPY --from=gcc . /
 COPY --from=bzip2 . /
 COPY --from=xz . /
@@ -37,10 +39,10 @@ RUN --network=none <<-EOF
     set -eux
     autoreconf -fvi
     ./configure --without-ssl --without-libpsl
+    make
     ./maketgz ${VERSION}
     mkdir /rootfs
     mv curl-${VERSION}.* /rootfs
-    find /rootfs -exec touch -hcd "@0" "{}" +
 EOF
 
 FROM scratch as package
