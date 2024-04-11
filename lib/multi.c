@@ -368,7 +368,10 @@ static void sh_init(struct Curl_hash *hash, int hashsize)
 
 /* multi->proto_hash destructor. Should never be called as elements
  * MUST be added with their own destructor */
-CURL_NORETURN static void ph_freeentry(void *p)
+#ifdef DEBUGBUILD
+CURL_NORETURN
+#endif
+static void ph_freeentry(void *p)
 {
   (void)p;
   DEBUGASSERT(0);
