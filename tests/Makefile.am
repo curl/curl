@@ -43,14 +43,15 @@ TESTSCRIPTS = \
  test1544.pl  \
  test971.pl
 
-EXTRA_DIST = appveyor.pm azure.pm CMakeLists.txt devtest.pl             \
+EXTRA_DIST = appveyor.pm azure.pm conftest.py CMakeLists.txt devtest.pl \
  dictserver.py directories.pm FILEFORMAT.md processhelp.pm ftpserver.pl \
  getpart.pm globalconfig.pm http-server.pl http2-server.pl              \
- http3-server.pl memanalyze.pl negtelnetserver.py pathhelp.pm README.md \
- rtspserver.pl runner.pm runtests.1 runtests.pl secureserver.pl         \
- serverhelp.pm servers.pm smbserver.py sshhelp.pm sshserver.pl          \
- stunnel.pem testcurl.1 testcurl.pl testutil.pm tftpserver.pl util.py   \
- valgrind.pm valgrind.supp $(TESTSCRIPTS)
+ http3-server.pl memanalyze.pl negtelnetserver.py nghttpx.conf          \
+ pathhelp.pm README.md requirements.txt rtspserver.pl runner.pm         \
+ runtests.1 runtests.pl secureserver.pl serverhelp.pm servers.pm        \
+ smbserver.py sshhelp.pm sshserver.pl stunnel.pem testcurl.1            \
+ testcurl.pl testutil.pm tftpserver.pl util.py valgrind.pm              \
+ valgrind.supp $(TESTSCRIPTS)
 
 DISTCLEANFILES = configurehelp.pm
 
