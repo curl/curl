@@ -2788,7 +2788,7 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
   timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
   if(timeout_ms >= 0) {
     now = Curl_now();
-    elapsed_ms = Curl_timediff(now, mbackend->time);
+    elapsed_ms = Curl_timediff(now, share->time);
     if(elapsed_ms >= timeout_ms) {
       return NULL;
     }
@@ -2823,7 +2823,7 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
 
 static void schannel_cert_share_free(void *key, size_t key_len, void *p)
 {
-  struct ossl_x509_share *share = p;
+  struct schannel_cert_share *share = p;
   DEBUGASSERT(key_len == (sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY)-1));
   DEBUGASSERT(!memcmp(MPROTO_SCHANNEL_CERT_SHARE_KEY, key, key_len));
   (void)key;
@@ -2867,7 +2867,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
                        sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY)-1,
                        share, schannel_cert_share_free)) {
       free(share);
-      return;
+      return false;
     }
   }
 
