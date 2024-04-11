@@ -362,7 +362,7 @@ static CURLcode AcceptServerConnect(struct Curl_easy *data)
   struct connectdata *conn = data->conn;
   curl_socket_t sock = conn->sock[SECONDARYSOCKET];
   curl_socket_t s = CURL_SOCKET_BAD;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   struct Curl_sockaddr_storage add;
 #else
   struct sockaddr_in add;
@@ -1029,7 +1029,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   char hbuf[NI_MAXHOST];
   struct sockaddr *sa = (struct sockaddr *)&ss;
   struct sockaddr_in * const sa4 = (void *)sa;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   struct sockaddr_in6 * const sa6 = (void *)sa;
 #endif
   static const char mode[][5] = { "EPRT", "PORT" };
@@ -1056,7 +1056,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
      (strlen(data->set.str[STRING_FTPPORT]) > 1)) {
     char *ip_end = NULL;
 
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     if(*string_ftpport == '[') {
       /* [ipv6]:port(-range) */
       char *ip_start = string_ftpport + 1;
@@ -1078,7 +1078,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
         if(ip_end) {
           /* either ipv6 or (ipv4|domain|interface):port(-range) */
           addrlen = ip_end - string_ftpport;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
           if(Curl_inet_pton(AF_INET6, string_ftpport, &sa6->sin6_addr) == 1) {
             /* ipv6 */
             port_min = port_max = 0;
@@ -1124,7 +1124,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
 
       /* attempt to get the address of the given interface name */
       switch(Curl_if2ip(conn->remote_addr->family,
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
                         Curl_ipv6_scope(&conn->remote_addr->sa_addr),
                         conn->scope_id,
 #endif
@@ -1156,7 +1156,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
       goto out;
     }
     switch(sa->sa_family) {
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     case AF_INET6:
       r = Curl_inet_ntop(sa->sa_family, &sa6->sin6_addr, hbuf, sizeof(hbuf));
       break;
@@ -1216,7 +1216,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   for(port = port_min; port <= port_max;) {
     if(sa->sa_family == AF_INET)
       sa4->sin_port = htons(port);
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     else
       sa6->sin6_port = htons(port);
 #endif
@@ -1284,7 +1284,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
      below */
   Curl_printable_address(ai, myhost, sizeof(myhost));
 
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   if(!conn->bits.ftp_use_eprt && conn->bits.ipv6)
     /* EPRT is disabled but we are connected to a IPv6 host, so we ignore the
        request and enable EPRT again! */
@@ -1311,7 +1311,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
     case AF_INET:
       port = ntohs(sa4->sin_port);
       break;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     case AF_INET6:
       port = ntohs(sa6->sin6_port);
       break;

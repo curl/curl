@@ -130,7 +130,7 @@ Curl_getaddrinfo_ex(const char *nodename,
     /* settle family-specific sockaddr structure size.  */
     if(ai->ai_family == AF_INET)
       ss_size = sizeof(struct sockaddr_in);
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     else if(ai->ai_family == AF_INET6)
       ss_size = sizeof(struct sockaddr_in6);
 #endif
@@ -259,7 +259,7 @@ Curl_he2ai(const struct hostent *he, int port)
   struct Curl_addrinfo *prevai = NULL;
   struct Curl_addrinfo *firstai = NULL;
   struct sockaddr_in *addr;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   struct sockaddr_in6 *addr6;
 #endif
   CURLcode result = CURLE_OK;
@@ -275,7 +275,7 @@ Curl_he2ai(const struct hostent *he, int port)
   for(i = 0; (curr = he->h_addr_list[i]) != NULL; i++) {
     size_t ss_size;
     size_t namelen = strlen(he->h_name) + 1; /* include null-terminator */
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     if(he->h_addrtype == AF_INET6)
       ss_size = sizeof(struct sockaddr_in6);
     else
@@ -321,7 +321,7 @@ Curl_he2ai(const struct hostent *he, int port)
       addr->sin_port = htons((unsigned short)port);
       break;
 
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     case AF_INET6:
       addr6 = (void *)ai->ai_addr; /* storage area for this info */
 
@@ -348,7 +348,7 @@ struct namebuff {
   struct hostent hostentry;
   union {
     struct in_addr  ina4;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     struct in6_addr ina6;
 #endif
   } addrentry;
@@ -401,7 +401,7 @@ Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port)
     addrentry = (void *)&buf->addrentry.ina4;
     memcpy(addrentry, inaddr, sizeof(struct in_addr));
     break;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   case AF_INET6:
     addrsize = sizeof(struct in6_addr);
     addrentry = (void *)&buf->addrentry.ina6;
@@ -447,7 +447,7 @@ struct Curl_addrinfo *Curl_str2addr(char *address, int port)
   if(Curl_inet_pton(AF_INET, address, &in) > 0)
     /* This is a dotted IP address 123.123.123.123-style */
     return Curl_ip2addr(AF_INET, &in, address, port);
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   {
     struct in6_addr in6;
     if(Curl_inet_pton(AF_INET6, address, &in6) > 0)
@@ -570,7 +570,7 @@ void Curl_addrinfo_set_port(struct Curl_addrinfo *addrinfo, int port)
 {
   struct Curl_addrinfo *ca;
   struct sockaddr_in *addr;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   struct sockaddr_in6 *addr6;
 #endif
   for(ca = addrinfo; ca != NULL; ca = ca->ai_next) {
@@ -580,7 +580,7 @@ void Curl_addrinfo_set_port(struct Curl_addrinfo *addrinfo, int port)
       addr->sin_port = htons((unsigned short)port);
       break;
 
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     case AF_INET6:
       addr6 = (void *)ca->ai_addr; /* storage area for this info */
       addr6->sin6_port = htons((unsigned short)port);

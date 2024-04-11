@@ -140,7 +140,7 @@ static void hashkey(struct connectdata *conn, char *buf, size_t len)
     hostname = conn->host.name;
 
   /* put the numbers first so that the hostname gets cut off if too long */
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   msnprintf(buf, len, "%u/%ld/%s", conn->scope_id, port, hostname);
 #else
   msnprintf(buf, len, "%ld/%s", port, hostname);

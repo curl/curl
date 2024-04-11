@@ -32,7 +32,7 @@
 #define IPV6_SCOPE_UNIQUELOCAL  3       /* Unique local */
 #define IPV6_SCOPE_NODELOCAL    4       /* Loopback. */
 
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
 unsigned int Curl_ipv6_scope(const struct sockaddr *sa);
 #else
 #define Curl_ipv6_scope(x) 0
@@ -45,7 +45,7 @@ typedef enum {
 } if2ip_result_t;
 
 if2ip_result_t Curl_if2ip(int af,
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
                           unsigned int remote_scope,
                           unsigned int local_scope_id,
 #endif

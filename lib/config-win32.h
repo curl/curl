@@ -509,9 +509,4 @@ Vista
 /* If you want to build curl with the built-in manual */
 #define USE_MANUAL 1
 
-/* Compatibility */
-#if defined(USE_IPV6)
-#  define ENABLE_IPV6 1
-#endif
-
 #endif /* HEADER_CURL_CONFIG_WIN32_H */

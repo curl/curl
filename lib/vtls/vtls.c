@@ -1534,14 +1534,14 @@ static void cf_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 static ssl_peer_type get_peer_type(const char *hostname)
 {
   if(hostname && hostname[0]) {
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     struct in6_addr addr;
 #else
     struct in_addr addr;
 #endif
     if(Curl_inet_pton(AF_INET, hostname, &addr))
       return CURL_SSL_PEER_IPV4;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     else if(Curl_inet_pton(AF_INET6, hostname, &addr)) {
       return CURL_SSL_PEER_IPV6;
     }

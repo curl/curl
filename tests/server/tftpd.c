@@ -201,7 +201,7 @@ static curl_socket_t peer = CURL_SOCKET_BAD;
 static unsigned int timeout;
 static unsigned int maxtimeout = 5 * TIMEOUT;
 
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
 static bool use_ipv6 = FALSE;
 #endif
 static const char *ipv_inuse = "IPv4";
@@ -530,11 +530,11 @@ static int synchnet(curl_socket_t f /* socket to flush */)
 #endif
     if(i) {
       j++;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
       if(!use_ipv6)
 #endif
         fromaddrlen = sizeof(fromaddr.sa4);
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
       else
         fromaddrlen = sizeof(fromaddr.sa6);
 #endif
@@ -566,7 +566,7 @@ int main(int argc, char **argv)
   while(argc>arg) {
     if(!strcmp("--version", argv[arg])) {
       printf("tftpd IPv4%s\n",
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
              "/IPv6"
 #else
              ""
@@ -595,14 +595,14 @@ int main(int argc, char **argv)
         logdir = argv[arg++];
     }
     else if(!strcmp("--ipv4", argv[arg])) {
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
       ipv_inuse = "IPv4";
       use_ipv6 = FALSE;
 #endif
       arg++;
     }
     else if(!strcmp("--ipv6", argv[arg])) {
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
       ipv_inuse = "IPv6";
       use_ipv6 = TRUE;
 #endif
@@ -649,11 +649,11 @@ int main(int argc, char **argv)
 
   install_signal_handlers(true);
 
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   if(!use_ipv6)
 #endif
     sock = socket(AF_INET, SOCK_DGRAM, 0);
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   else
     sock = socket(AF_INET6, SOCK_DGRAM, 0);
 #endif
@@ -675,7 +675,7 @@ int main(int argc, char **argv)
     goto tftpd_cleanup;
   }
 
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   if(!use_ipv6) {
 #endif
     memset(&me.sa4, 0, sizeof(me.sa4));
@@ -683,7 +683,7 @@ int main(int argc, char **argv)
     me.sa4.sin_addr.s_addr = INADDR_ANY;
     me.sa4.sin_port = htons(port);
     rc = bind(sock, &me.sa, sizeof(me.sa4));
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   }
   else {
     memset(&me.sa6, 0, sizeof(me.sa6));
@@ -692,7 +692,7 @@ int main(int argc, char **argv)
     me.sa6.sin6_port = htons(port);
     rc = bind(sock, &me.sa, sizeof(me.sa6));
   }
-#endif /* ENABLE_IPV6 */
+#endif /* USE_IPV6 */
   if(0 != rc) {
     error = SOCKERRNO;
     logmsg("Error binding socket on port %hu: (%d) %s", port, error,
@@ -706,11 +706,11 @@ int main(int argc, char **argv)
        port we actually got and update the listener port value with it. */
     curl_socklen_t la_size;
     srvr_sockaddr_union_t localaddr;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     if(!use_ipv6)
 #endif
       la_size = sizeof(localaddr.sa4);
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     else
       la_size = sizeof(localaddr.sa6);
 #endif
@@ -726,7 +726,7 @@ int main(int argc, char **argv)
     case AF_INET:
       port = ntohs(localaddr.sa4.sin_port);
       break;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     case AF_INET6:
       port = ntohs(localaddr.sa6.sin6_port);
       break;
@@ -763,11 +763,11 @@ int main(int argc, char **argv)
 
   for(;;) {
     fromlen = sizeof(from);
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     if(!use_ipv6)
 #endif
       fromlen = sizeof(from.sa4);
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     else
       fromlen = sizeof(from.sa6);
 #endif
@@ -784,7 +784,7 @@ int main(int argc, char **argv)
     set_advisor_read_lock(loglockfile);
     serverlogslocked = 1;
 
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     if(!use_ipv6) {
 #endif
       from.sa4.sin_family = AF_INET;
@@ -799,7 +799,7 @@ int main(int argc, char **argv)
         result = 1;
         break;
       }
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     }
     else {
       from.sa6.sin6_family = AF_INET6;

@@ -32,7 +32,7 @@
 typedef union {
   struct sockaddr      sa;
   struct sockaddr_in   sa4;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   struct sockaddr_in6  sa6;
 #endif
 #ifdef USE_UNIX_SOCKETS

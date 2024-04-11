@@ -252,7 +252,7 @@ static CURLcode altsvc_out(struct altsvc *as, FILE *fp)
   CURLcode result = Curl_gmtime(as->expires, &stamp);
   if(result)
     return result;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   else {
     char ipv6_unused[16];
     if(1 == Curl_inet_pton(AF_INET6, as->dst.host, ipv6_unused)) {

@@ -539,7 +539,7 @@ static void compound_results(struct thread_data *res,
   if(!ai)
     return;
 
-#ifdef ENABLE_IPV6 /* CURLRES_IPV6 */
+#ifdef USE_IPV6 /* CURLRES_IPV6 */
   if(res->temp_ai && res->temp_ai->ai_family == PF_INET6) {
     /* We have results already, put the new IPv6 entries at the head of the
        list. */
@@ -684,7 +684,7 @@ static struct Curl_addrinfo *ares2addr(struct ares_addrinfo_node *node)
     /* settle family-specific sockaddr structure size.  */
     if(ai->ai_family == AF_INET)
       ss_size = sizeof(struct sockaddr_in);
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     else if(ai->ai_family == AF_INET6)
       ss_size = sizeof(struct sockaddr_in6);
 #endif
@@ -932,7 +932,7 @@ CURLcode Curl_set_dns_local_ip4(struct Curl_easy *data,
 CURLcode Curl_set_dns_local_ip6(struct Curl_easy *data,
                                 const char *local_ip6)
 {
-#if defined(HAVE_CARES_SET_LOCAL) && defined(ENABLE_IPV6)
+#if defined(HAVE_CARES_SET_LOCAL) && defined(USE_IPV6)
   unsigned char a6[INET6_ADDRSTRLEN];
 
   if((!local_ip6) || (local_ip6[0] == 0)) {
