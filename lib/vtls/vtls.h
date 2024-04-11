@@ -52,7 +52,6 @@ struct Curl_ssl_session;
 
 /* Curl_multi SSL backend-specific data; declared differently by each SSL
    backend */
-struct multi_ssl_backend_data;
 struct Curl_cfilter;
 
 CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
@@ -180,8 +179,6 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
 bool Curl_ssl_cert_status_request(void);
 
 bool Curl_ssl_false_start(struct Curl_easy *data);
-
-void Curl_free_multi_ssl_backend_data(struct multi_ssl_backend_data *mbackend);
 
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 

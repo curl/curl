@@ -1518,7 +1518,6 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
   wolfssl_sha256sum,               /* sha256sum */
   NULL,                            /* associate_connection */
   NULL,                            /* disassociate_connection */
-  NULL,                            /* free_multi_ssl_backend_data */
   wolfssl_recv,                    /* recv decrypted data */
   wolfssl_send,                    /* send data to encrypt */
 };

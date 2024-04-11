@@ -370,6 +370,17 @@ static void sh_init(struct Curl_hash *hash, size_t hashsize)
                  sh_freeentry);
 }
 
+/* multi->proto_hash destructor. Should never be called as elements
+ * MUST be added with their own destructor */
+static void ph_freeentry(void *p)
+{
+  (void)p;
+  /* Will always be FALSE. Cannot use a 0 assert here since compilers
+   * are not in agreement if they then want a NORETURN attribute or
+   * not. *sigh* */
+  DEBUGASSERT(p == NULL);
+}
+
 /*
  * multi_addmsg()
  *
@@ -395,6 +406,9 @@ struct Curl_multi *Curl_multi_handle(size_t hashsize, /* socket hash */
   Curl_init_dnscache(&multi->hostcache, dnssize);
 
   sh_init(&multi->sockhash, hashsize);
+
+  Curl_hash_init(&multi->proto_hash, 23,
+                 Curl_hash_str, Curl_str_key_compare, ph_freeentry);
 
   if(Curl_conncache_init(&multi->conn_cache, chashsize))
     goto error;
@@ -431,6 +445,7 @@ struct Curl_multi *Curl_multi_handle(size_t hashsize, /* socket hash */
 error:
 
   sockhash_destroy(&multi->sockhash);
+  Curl_hash_destroy(&multi->proto_hash);
   Curl_hash_destroy(&multi->hostcache);
   Curl_conncache_destroy(&multi->conn_cache);
   free(multi);
@@ -2856,6 +2871,7 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
     Curl_conncache_close_all_connections(&multi->conn_cache);
 
     sockhash_destroy(&multi->sockhash);
+    Curl_hash_destroy(&multi->proto_hash);
     Curl_conncache_destroy(&multi->conn_cache);
     Curl_hash_destroy(&multi->hostcache);
     Curl_psl_destroy(&multi->psl);
@@ -2867,10 +2883,6 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
     wakeup_close(multi->wakeup_pair[0]);
     wakeup_close(multi->wakeup_pair[1]);
 #endif
-#endif
-
-#ifdef USE_SSL
-    Curl_free_multi_ssl_backend_data(multi->ssl_backend_data);
 #endif
 
     multi_xfer_bufs_free(multi);

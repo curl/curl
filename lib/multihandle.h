@@ -80,10 +80,6 @@ typedef enum {
 /* value for MAXIMUM CONCURRENT STREAMS upper limit */
 #define INITIAL_MAX_CONCURRENT_STREAMS ((1U << 31) - 1)
 
-/* Curl_multi SSL backend-specific data; declared differently by each SSL
-   backend */
-struct multi_ssl_backend_data;
-
 /* This is the struct known as CURLM on the outside */
 struct Curl_multi {
   /* First a simple identifier to easier detect if a user mix up
@@ -132,14 +128,17 @@ struct Curl_multi {
   char *xfer_ulbuf; /* the actual buffer */
   size_t xfer_ulbuf_len;      /* the allocated length */
 
-#if defined(USE_SSL)
-  struct multi_ssl_backend_data *ssl_backend_data;
-#endif
-
   /* 'sockhash' is the lookup hash for socket descriptor => easy handles (note
      the pluralis form, there can be more than one easy handle waiting on the
      same actual socket) */
   struct Curl_hash sockhash;
+  /* `proto_hash` is a general key-value store for protocol implementations
+   * with the lifetime of the multi handle. The number of elements kept here
+   * should be in the order of supported protocols (and sub-protocols like
+   * TLS), *not* in the order of connections or current transfers!
+   * Elements need to be added with their own destructor to be invoked when
+   * the multi handle is cleaned up (see Curl_hash_add2()).*/
+  struct Curl_hash proto_hash;
 
   /* Shared connection cache (bundles)*/
   struct conncache conn_cache;

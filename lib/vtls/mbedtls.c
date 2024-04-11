@@ -1515,7 +1515,6 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   mbedtls_sha256sum,                /* sha256sum */
   NULL,                             /* associate_connection */
   NULL,                             /* disassociate_connection */
-  NULL,                             /* free_multi_ssl_backend_data */
   mbed_recv,                        /* recv decrypted data */
   mbed_send,                        /* send data to encrypt */
 };
