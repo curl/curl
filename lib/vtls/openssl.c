@@ -3360,6 +3360,8 @@ static void oss_x509_share_free(void *key, size_t key_len, void *p)
   struct ossl_x509_share *share = p;
   DEBUGASSERT(key_len == (sizeof(MPROTO_OSSL_X509_KEY)-1));
   DEBUGASSERT(!memcmp(MPROTO_OSSL_X509_KEY, key, key_len));
+  (void)key;
+  (void)key_len;
   if(share->store) {
     X509_STORE_free(share->store);
   }

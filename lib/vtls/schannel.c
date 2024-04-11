@@ -2826,6 +2826,8 @@ static void schannel_cert_share_free(void *key, size_t key_len, void *p)
   struct ossl_x509_share *share = p;
   DEBUGASSERT(key_len == (sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY)-1));
   DEBUGASSERT(!memcmp(MPROTO_SCHANNEL_CERT_SHARE_KEY, key, key_len));
+  (void)key;
+  (void)key_len;
   if(share->cert_store) {
     CertCloseStore(share->cert_store, 0);
   }
