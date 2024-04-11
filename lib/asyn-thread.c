@@ -325,7 +325,7 @@ query_complete(DWORD err, DWORD bytes, LPWSAOVERLAPPED overlapped)
       /* settle family-specific sockaddr structure size.  */
       if(ai->ai_family == AF_INET)
         ss_size = sizeof(struct sockaddr_in);
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
       else if(ai->ai_family == AF_INET6)
         ss_size = sizeof(struct sockaddr_in6);
 #endif
@@ -444,7 +444,7 @@ query_complete(DWORD err, DWORD bytes, LPWSAOVERLAPPED overlapped)
 /*
  * getaddrinfo_thread() resolves a name and then exits.
  *
- * For builds without ARES, but with ENABLE_IPV6, create a resolver thread
+ * For builds without ARES, but with USE_IPV6, create a resolver thread
  * and wait on it.
  */
 static unsigned int CURL_STDCALL getaddrinfo_thread(void *arg)

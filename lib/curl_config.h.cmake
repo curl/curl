@@ -163,7 +163,7 @@
 #cmakedefine USE_WIN32_LDAP 1
 
 /* Define if you want to enable IPv6 support */
-#cmakedefine ENABLE_IPV6 1
+#cmakedefine USE_IPV6 1
 
 /* Define to 1 if you have the alarm function. */
 #cmakedefine HAVE_ALARM 1

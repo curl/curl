@@ -408,7 +408,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
     goto error;
   dohp->pending++;
 
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   if((conn->ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data)) {
     /* create IPv6 DoH request */
     result = dohprobe(data, &dohp->probe[DOH_PROBE_SLOT_IPADDR_V6],
@@ -804,7 +804,7 @@ static CURLcode doh2ai(const struct dohentry *de, const char *hostname,
   struct Curl_addrinfo *prevai = NULL;
   struct Curl_addrinfo *firstai = NULL;
   struct sockaddr_in *addr;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   struct sockaddr_in6 *addr6;
 #endif
   CURLcode result = CURLE_OK;
@@ -820,7 +820,7 @@ static CURLcode doh2ai(const struct dohentry *de, const char *hostname,
     size_t ss_size;
     CURL_SA_FAMILY_T addrtype;
     if(de->addr[i].type == DNS_TYPE_AAAA) {
-#ifndef ENABLE_IPV6
+#ifndef USE_IPV6
       /* we can't handle IPv6 addresses */
       continue;
 #else
@@ -869,7 +869,7 @@ static CURLcode doh2ai(const struct dohentry *de, const char *hostname,
       addr->sin_port = htons((unsigned short)port);
       break;
 
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     case AF_INET6:
       addr6 = (void *)ai->ai_addr; /* storage area for this info */
       DEBUGASSERT(sizeof(struct in6_addr) == sizeof(de->addr[i].ip.v6));

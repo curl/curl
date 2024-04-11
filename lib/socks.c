@@ -838,7 +838,7 @@ CONNECT_RESOLVED:
     struct Curl_addrinfo *hp = NULL;
     if(dns)
       hp = dns->addr;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     if(data->set.ipver != CURL_IPRESOLVE_WHATEVER) {
       int wanted_family = data->set.ipver == CURL_IPRESOLVE_V4 ?
         AF_INET : AF_INET6;
@@ -872,7 +872,7 @@ CONNECT_RESOLVED:
       infof(data, "SOCKS5 connect to %s:%d (locally resolved)", dest,
             sx->remote_port);
     }
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     else if(hp->ai_family == AF_INET6) {
       int i;
       struct sockaddr_in6 *saddr_in6;
@@ -909,7 +909,7 @@ CONNECT_RESOLVE_REMOTE:
          IPv6 == 4,
          IPv4 == 1 */
       unsigned char ip4[4];
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
       if(conn->bits.ipv6_ip) {
         char ip6[16];
         if(1 != Curl_inet_pton(AF_INET6, sx->hostname, ip6))

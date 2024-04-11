@@ -303,6 +303,9 @@ if(ENABLE_IPV6 AND NOT WIN32)
     list(APPEND CURL_LIBS "-framework SystemConfiguration")
   endif()
 endif()
+if(ENABLE_IPV6)
+  set(USE_IPV6 ON)
+endif()
 
 find_package(Perl)
 

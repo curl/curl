@@ -39,11 +39,11 @@
 #define INT16SZ          2
 
 /*
- * If ENABLE_IPV6 is disabled, we still want to parse IPv6 addresses, so make
+ * If USE_IPV6 is disabled, we still want to parse IPv6 addresses, so make
  * sure we have _some_ value for AF_INET6 without polluting our fake value
  * everywhere.
  */
-#if !defined(ENABLE_IPV6) && !defined(AF_INET6)
+#if !defined(USE_IPV6) && !defined(AF_INET6)
 #define AF_INET6 (AF_INET + 1)
 #endif
 

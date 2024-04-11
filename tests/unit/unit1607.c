@@ -62,7 +62,7 @@ struct testcase {
 /* In builds without IPv6 support CURLOPT_RESOLVE should skip over those
    addresses, so we have to do that as well. */
 static const char skip = 0;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
 #define IPV6ONLY(x) x
 #else
 #define IPV6ONLY(x) &skip

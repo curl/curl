@@ -182,7 +182,7 @@ static CURLcode make_bio_addr(BIO_ADDR **pbio_addr,
     result = CURLE_OK;
     break;
   }
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   case AF_INET6: {
     struct sockaddr_in6 * const sin =
       (struct sockaddr_in6 * const)(void *)&addr->sa_addr;
@@ -192,7 +192,7 @@ static CURLcode make_bio_addr(BIO_ADDR **pbio_addr,
     result = CURLE_OK;
     break;
   }
-#endif /* ENABLE_IPV6 */
+#endif /* USE_IPV6 */
   default:
     /* sunsupported */
     DEBUGASSERT(0);

@@ -1204,7 +1204,7 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
   /* Before 3.3.6, gnutls_x509_crt_check_hostname() didn't check IP
      addresses. */
   if(!rc) {
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     #define use_addr in6_addr
 #else
     #define use_addr in_addr
@@ -1214,7 +1214,7 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
 
     if(Curl_inet_pton(AF_INET, peer->hostname, addrbuf) > 0)
       addrlen = 4;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     else if(Curl_inet_pton(AF_INET6, peer->hostname, addrbuf) > 0)
       addrlen = 16;
 #endif

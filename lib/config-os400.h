@@ -57,7 +57,7 @@
 #undef NEED_REENTRANT
 
 /* Define if you want to enable IPv6 support */
-#define ENABLE_IPV6
+#define USE_IPV6
 
 /* Define if struct sockaddr_in6 has the sin6_scope_id member */
 #define HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID 1

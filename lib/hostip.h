@@ -96,7 +96,7 @@ enum resolve_t Curl_resolv_timeout(struct Curl_easy *data,
                                    struct Curl_dns_entry **dnsentry,
                                    timediff_t timeoutms);
 
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
 /*
  * Curl_ipv6works() returns TRUE if IPv6 seems to work.
  */
