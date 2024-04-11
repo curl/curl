@@ -776,12 +776,6 @@ ${SIZEOF_TIME_T_CODE}
 /* Type to use in place of in_addr_t when system does not provide it. */
 #cmakedefine in_addr_t ${in_addr_t}
 
-/* Define to `__inline__' or `__inline' if that's what the C compiler
-   calls it, or to nothing if 'inline' is not supported under any name.  */
-#ifndef __cplusplus
-#undef inline
-#endif
-
 /* Define to `unsigned int' if <sys/types.h> does not define. */
 #cmakedefine size_t ${size_t}
 

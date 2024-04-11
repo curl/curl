@@ -286,29 +286,13 @@ Curl_sha512_256_finish(unsigned char *digest,
   defined(_MSC_VER) && !defined(__GNUC__) && !defined(__clang__)
 #  if _MSC_VER >= 1400
 #    define MHDX_INLINE __forceinline
-#  else
-#    define MHDX_INLINE /* empty */
 #  endif
 #endif
 
 #if !defined(MHDX_INLINE)
-#  if defined(inline)
-     /* Assume that 'inline' macro was already defined correctly by
-      * the build system. */
-#    define MHDX_INLINE inline
-#  elif defined(__cplusplus)
-     /* The code is compiled with C++ compiler.
-      * C++ always supports 'inline'. */
-#    define MHDX_INLINE inline
-#  elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901
-     /* C99 (and later) supports 'inline' keyword */
-#    define MHDX_INLINE inline
-#  elif defined(__GNUC__) && __GNUC__ >= 3
-     /* GCC supports '__inline__' as an extension */
-#    define MHDX_INLINE __inline__
-#  else
-#    define MHDX_INLINE /* empty */
-#  endif
+   /* Assume that 'inline' keyword works or the
+    * macro was already defined correctly. */
+#  define MHDX_INLINE inline
 #endif
 
 /* Bits manipulation macros and functions.
