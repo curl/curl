@@ -1,3 +1,7 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
 FROM stagex/busybox@sha256:2006bf09c974d842ebc62476074f01181c092022b2a1fdfa63b32d6aed5db323 as busybox
 FROM stagex/make@sha256:e9aef80a9b2bd7003c7fb040cb875d4cee94eab777de93a798ed000ea5ee5fc1 as make
 FROM stagex/musl@sha256:e52da07cf7e2824fcfc7563e5b8792edc296e8ee37dcb59397ad183e742a6dc0 as musl
