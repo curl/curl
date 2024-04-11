@@ -1117,7 +1117,7 @@ const
 #endif
 struct transport_provider transport_providers[] = {
   { TRNSPRT_TCP, Curl_cf_tcp_create },
-#ifdef ENABLE_QUIC
+#ifdef USE_HTTP3
   { TRNSPRT_QUIC, Curl_cf_quic_create },
 #endif
 #ifndef CURL_DISABLE_TFTP

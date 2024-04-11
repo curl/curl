@@ -28,7 +28,7 @@
 #include "bufq.h"
 #include "vtls/openssl.h"
 
-#if defined(ENABLE_QUIC) && \
+#if defined(USE_HTTP3) && \
   (defined(USE_OPENSSL) || defined(USE_GNUTLS) || defined(USE_WOLFSSL))
 
 struct curl_tls_ctx {
@@ -94,6 +94,6 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
                                     struct Curl_easy *data,
                                     struct ssl_peer *peer);
 
-#endif /* !ENABLE_QUIC && (USE_OPENSSL || USE_GNUTLS || USE_WOLFSSL) */
+#endif /* !USE_HTTP3 && (USE_OPENSSL || USE_GNUTLS || USE_WOLFSSL) */
 
 #endif /* HEADER_CURL_VQUIC_TLS_H */

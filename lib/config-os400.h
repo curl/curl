@@ -237,7 +237,7 @@
 
 /* Define to enable HTTP3 support (experimental, requires NGTCP2, QUICHE or
    MSH3) */
-#undef ENABLE_QUIC
+#undef USE_HTTP3
 
 /* Version number of package */
 #undef VERSION

@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#if defined(ENABLE_QUIC) && \
+#if defined(USE_HTTP3) && \
   (defined(USE_OPENSSL) || defined(USE_GNUTLS) || defined(USE_WOLFSSL))
 
 #ifdef USE_OPENSSL
@@ -333,4 +333,4 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
 }
 
 
-#endif /* !ENABLE_QUIC && (USE_OPENSSL || USE_GNUTLS || USE_WOLFSSL) */
+#endif /* !USE_HTTP3 && (USE_OPENSSL || USE_GNUTLS || USE_WOLFSSL) */
