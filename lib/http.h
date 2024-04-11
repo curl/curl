@@ -44,7 +44,7 @@ typedef enum {
 
 #ifndef CURL_DISABLE_HTTP
 
-#if defined(ENABLE_QUIC)
+#if defined(USE_HTTP3)
 #include <stdint.h>
 #endif
 

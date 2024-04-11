@@ -303,7 +303,7 @@ struct altsvcinfo *Curl_altsvc_init(void)
 #ifdef USE_HTTP2
     | CURLALTSVC_H2
 #endif
-#ifdef ENABLE_QUIC
+#ifdef USE_HTTP3
     | CURLALTSVC_H3
 #endif
     ;

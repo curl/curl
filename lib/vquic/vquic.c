@@ -59,7 +59,7 @@
 #include "memdebug.h"
 
 
-#ifdef ENABLE_QUIC
+#ifdef USE_HTTP3
 
 #ifdef O_BINARY
 #define QLOGMODE O_WRONLY|O_CREAT|O_BINARY
@@ -663,7 +663,7 @@ CURLcode Curl_conn_may_http3(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-#else /* ENABLE_QUIC */
+#else /* USE_HTTP3 */
 
 CURLcode Curl_conn_may_http3(struct Curl_easy *data,
                              const struct connectdata *conn)
@@ -674,4 +674,4 @@ CURLcode Curl_conn_may_http3(struct Curl_easy *data,
   return CURLE_NOT_BUILT_IN;
 }
 
-#endif /* !ENABLE_QUIC */
+#endif /* !USE_HTTP3 */

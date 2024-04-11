@@ -3199,7 +3199,7 @@ CURLcode Curl_http_statusline(struct Curl_easy *data,
 #ifdef USE_HTTP2
   case 20:
 #endif
-#ifdef ENABLE_QUIC
+#ifdef USE_HTTP3
   case 30:
 #endif
     /* TODO: we should verify that responses do not switch major

@@ -855,7 +855,6 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #error "Multi-SSL combined with QUIC is not supported"
 #endif
 
-#define ENABLE_QUIC
 #define USE_HTTP3
 #endif
 
