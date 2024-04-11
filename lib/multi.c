@@ -368,13 +368,13 @@ static void sh_init(struct Curl_hash *hash, int hashsize)
 
 /* multi->proto_hash destructor. Should never be called as elements
  * MUST be added with their own destructor */
-#ifdef DEBUGBUILD
-CURL_NORETURN
-#endif
 static void ph_freeentry(void *p)
 {
   (void)p;
-  DEBUGASSERT(0);
+  /* Will always be FALSE. Cannot use a 0 assert here since compilers
+   * are not in agreement if they then want a NORETURN attribute or
+   * not. *sigh* */
+  DEBUGASSERT(p == NULL);
 }
 
 /*
