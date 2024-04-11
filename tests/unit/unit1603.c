@@ -39,6 +39,16 @@ static void mydtor(void *p)
  (void)p; /* unused */
 }
 
+static size_t elem_dtor_calls;
+
+static void my_elem_dtor(void *key, size_t key_len, void *p)
+{
+  (void)p; /* unused */
+  (void)key; /* unused */
+  (void)key_len; /* unused */
+  ++elem_dtor_calls;
+}
+
 static CURLcode unit_setup(void)
 {
   Curl_hash_init(&hash_static, slots, Curl_hash_str,
@@ -146,6 +156,22 @@ UNITTEST_START
   fail_unless(nodep == key2, "hash retrieval failed");
   nodep = Curl_hash_pick(&hash_static, &key3, strlen(key3));
   fail_unless(nodep == key3, "hash retrieval failed");
+
+  /* Add element with own destructor */
+  nodep = Curl_hash_add2(&hash_static, &key1, strlen(key1), &key1,
+                         my_elem_dtor);
+  fail_unless(nodep, "add2 insertion into hash failed");
+  fail_unless(elem_dtor_calls == 0, "element destructor count should be 0");
+  /* Add it again, should invoke destructor on first */
+  nodep = Curl_hash_add2(&hash_static, &key1, strlen(key1), &key1,
+                         my_elem_dtor);
+  fail_unless(nodep, "add2 again, insertion into hash failed");
+  fail_unless(elem_dtor_calls == 1, "element destructor count should be 1");
+  /* remove, should invoke destructor */
+  rc = Curl_hash_delete(&hash_static, &key1, strlen(key1));
+  fail_unless(rc == 0, "hash delete failed");
+  fail_unless(elem_dtor_calls == 2, "element destructor count should be 1");
+
 
   /* Clean up */
   Curl_hash_clean(&hash_static);

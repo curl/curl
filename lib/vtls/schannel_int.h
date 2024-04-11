@@ -159,7 +159,10 @@ struct schannel_ssl_backend_data {
 #endif
 };
 
-struct schannel_multi_ssl_backend_data {
+/* key to use at `multi->proto_hash` */
+#define MPROTO_SCHANNEL_CERT_SHARE_KEY   "tls:schannel:cert:share"
+
+struct schannel_cert_share {
   unsigned char *CAinfo_blob_digest; /* CA info blob digest */
   size_t CAinfo_blob_size;           /* CA info blob size */
   char *CAfile;                      /* CAfile path used to generate

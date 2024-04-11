@@ -744,12 +744,6 @@ CURLcode Curl_ssl_addsessionid(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-void Curl_free_multi_ssl_backend_data(struct multi_ssl_backend_data *mbackend)
-{
-  if(Curl_ssl->free_multi_ssl_backend_data && mbackend)
-    Curl_ssl->free_multi_ssl_backend_data(mbackend);
-}
-
 void Curl_ssl_close_all(struct Curl_easy *data)
 {
   /* kill the session ID cache if not shared */
@@ -1331,7 +1325,6 @@ static const struct Curl_ssl Curl_ssl_multi = {
   NULL,                              /* sha256sum */
   NULL,                              /* associate_connection */
   NULL,                              /* disassociate_connection */
-  NULL,                              /* free_multi_ssl_backend_data */
   multissl_recv_plain,               /* recv decrypted data */
   multissl_send_plain,               /* send data to encrypt */
 };
