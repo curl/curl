@@ -32,7 +32,7 @@ To build our ECH-enabled OpenSSL fork:
     ...stuff (maybe go for coffee)...
 ```
 
-To build our ECH-enabled curl fork, making use of the above:
+To build curl ECH-enabled, making use of the above:
 
 ```bash
     cd $HOME/code
