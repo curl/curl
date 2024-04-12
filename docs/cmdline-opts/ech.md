@@ -15,10 +15,7 @@ Example:
 
 # `--ech`
 
-When multiple ``--ech`` options are supplied then the most-recent value for
-true/false/hard/grease value is used, as is the most-recent
-``ecl:\<b64string\>`` value, and ``pn:\<name\>`` value, if either of those were
-provided.
+Specifies how to do ECH (Encrypted Client Hello).
 
 The values allowed for \<config\> can be:
 
