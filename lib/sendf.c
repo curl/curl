@@ -506,6 +506,16 @@ void Curl_cwriter_remove_by_name(struct Curl_easy *data,
   }
 }
 
+bool Curl_cwriter_is_paused(struct Curl_easy *data)
+{
+  return Curl_cw_out_is_paused(data);
+}
+
+CURLcode Curl_cwriter_unpause(struct Curl_easy *data)
+{
+  return Curl_cw_out_unpause(data);
+}
+
 CURLcode Curl_creader_read(struct Curl_easy *data,
                            struct Curl_creader *reader,
                            char *buf, size_t blen, size_t *nread, bool *eos)

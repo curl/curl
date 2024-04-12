@@ -58,7 +58,6 @@
 #include "multiif.h"
 #include "select.h"
 #include "cfilters.h"
-#include "cw-out.h"
 #include "sendf.h" /* for failf function prototype */
 #include "connect.h" /* for Curl_getconnectinfo */
 #include "slist.h"
@@ -1086,6 +1085,7 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
   int oldstate;
   int newstate;
   bool recursive = FALSE;
+  bool keep_changed, unpause_read, unpause_write;
 
   if(!GOOD_EASY_HANDLE(data) || !data->conn)
     /* crazy input, don't continue */
@@ -1101,16 +1101,26 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
     ((action & CURLPAUSE_RECV)?KEEP_RECV_PAUSE:0) |
     ((action & CURLPAUSE_SEND)?KEEP_SEND_PAUSE:0);
 
-  if((newstate & (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE)) == oldstate) {
-    /* Not changing any pause state, return */
+  keep_changed = ((newstate & (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE)) != oldstate);
+  unpause_read = ((k->keepon & ~newstate & KEEP_SEND_PAUSE) &&
+                  (data->mstate == MSTATE_PERFORMING ||
+                   data->mstate == MSTATE_RATELIMITING));
+  unpause_write = !(newstate & KEEP_RECV_PAUSE);
+
+  if(!keep_changed) {
+    /* Not changing any recv/send state, check out writer and return */
+    if(unpause_write && Curl_cwriter_is_paused(data)) {
+      /* This happens if the send/recv part of the transfer is finished,
+       * but we have still paused data in the client writer. */
+      Curl_expire(data, 0, EXPIRE_RUN_NOW);
+      return Curl_cwriter_unpause(data);
+    }
     DEBUGF(infof(data, "pause: no change, early return"));
     return CURLE_OK;
   }
 
   /* Unpause parts in active mime tree. */
-  if((k->keepon & ~newstate & KEEP_SEND_PAUSE) &&
-     (data->mstate == MSTATE_PERFORMING ||
-      data->mstate == MSTATE_RATELIMITING)) {
+  if(unpause_read) {
     result = Curl_creader_unpause(data);
     if(result)
       return result;
@@ -1119,9 +1129,9 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
   /* put it back in the keepon */
   k->keepon = newstate;
 
-  if(!(newstate & KEEP_RECV_PAUSE)) {
+  if(unpause_write) {
     Curl_conn_ev_data_pause(data, FALSE);
-    result = Curl_cw_out_flush(data);
+    result = Curl_cwriter_unpause(data);
     if(result)
       return result;
   }
@@ -1135,7 +1145,7 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
     /* reset the too-slow time keeper */
     data->state.keeps_speed.tv_sec = 0;
 
-    if(!Curl_cw_out_is_paused(data))
+    if(!Curl_cwriter_is_paused(data))
       /* if not pausing again, force a recv/send check of this connection as
          the data might've been read off the socket already */
       data->state.select_bits = CURL_CSELECT_IN | CURL_CSELECT_OUT;

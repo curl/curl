@@ -168,6 +168,7 @@ static size_t cb(void *data, size_t size, size_t nmemb, void *clientp)
     ++handle->paused;
     fprintf(stderr, "INFO: [%d] write, PAUSING %d time on %lu bytes\n",
             handle->idx, handle->paused, (long)realsize);
+    assert(handle->paused == 1);
     return CURL_WRITEFUNC_PAUSE;
   }
   if(handle->fail_write) {
@@ -244,6 +245,7 @@ int main(int argc, char *argv[])
         != CURLE_OK ||
       curl_easy_setopt(handles[i].h, CURLOPT_SSL_VERIFYPEER, 0L) != CURLE_OK ||
       curl_easy_setopt(handles[i].h, CURLOPT_RESOLVE, resolve) != CURLE_OK ||
+      curl_easy_setopt(handles[i].h, CURLOPT_PIPEWAIT, 1L) ||
       curl_easy_setopt(handles[i].h, CURLOPT_URL, url) != CURLE_OK) {
       err();
     }
@@ -324,7 +326,7 @@ int main(int argc, char *argv[])
       if(all_paused) {
         fprintf(stderr, "INFO: all transfers paused\n");
         /* give transfer some rounds to mess things up */
-        resume_round = rounds + 3;
+        resume_round = rounds + 2;
       }
     }
     if(resume_round > 0 && rounds == resume_round) {

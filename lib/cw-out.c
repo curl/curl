@@ -102,6 +102,7 @@ static void cw_out_buf_free(struct cw_out_buf *cwbuf)
 struct cw_out_ctx {
   struct Curl_cwriter super;
   struct cw_out_buf *buf;
+  BIT(paused);
   BIT(errored);
 };
 
@@ -214,7 +215,7 @@ static CURLcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
   }
 
   *pconsumed = 0;
-  while(blen && !(data->req.keepon & KEEP_RECV_PAUSE)) {
+  while(blen && !ctx->paused) {
     if(!flush_all && blen < min_write)
       break;
     wlen = max_write? CURLMIN(blen, max_write) : blen;
@@ -234,6 +235,7 @@ static CURLcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
       }
       /* mark the connection as RECV paused */
       data->req.keepon |= KEEP_RECV_PAUSE;
+      ctx->paused = TRUE;
       CURL_TRC_WRITE(data, "cw_out, PAUSE requested by client");
       break;
     }
@@ -429,10 +431,12 @@ bool Curl_cw_out_is_paused(struct Curl_easy *data)
     return FALSE;
 
   ctx = (struct cw_out_ctx *)cw_out;
-  return cw_out_bufs_len(ctx) > 0;
+  CURL_TRC_WRITE(data, "cw-out is%spaused", ctx->paused? "" : " not");
+  return ctx->paused;
 }
 
-static CURLcode cw_out_flush(struct Curl_easy *data, bool flush_all)
+static CURLcode cw_out_flush(struct Curl_easy *data,
+                             bool unpause, bool flush_all)
 {
   struct Curl_cwriter *cw_out;
   CURLcode result = CURLE_OK;
@@ -442,6 +446,10 @@ static CURLcode cw_out_flush(struct Curl_easy *data, bool flush_all)
     struct cw_out_ctx *ctx = (struct cw_out_ctx *)cw_out;
     if(ctx->errored)
       return CURLE_WRITE_ERROR;
+    if(unpause && ctx->paused)
+      ctx->paused = FALSE;
+    if(ctx->paused)
+      return CURLE_OK;  /* not doing it */
 
     result = cw_out_flush_chain(ctx, data, &ctx->buf, flush_all);
     if(result) {
@@ -453,12 +461,14 @@ static CURLcode cw_out_flush(struct Curl_easy *data, bool flush_all)
   return result;
 }
 
-CURLcode Curl_cw_out_flush(struct Curl_easy *data)
+CURLcode Curl_cw_out_unpause(struct Curl_easy *data)
 {
-  return cw_out_flush(data, FALSE);
+  CURL_TRC_WRITE(data, "cw-out unpause");
+  return cw_out_flush(data, TRUE, FALSE);
 }
 
 CURLcode Curl_cw_out_done(struct Curl_easy *data)
 {
-  return cw_out_flush(data, TRUE);
+  CURL_TRC_WRITE(data, "cw-out done");
+  return cw_out_flush(data, FALSE, TRUE);
 }
