@@ -11,7 +11,7 @@ published in the DNS, if curl is using DoH, or else can accept the relevant
 ECHConfigList values from the command line. That works with OpenSSL,
 WolfSSL or boringssl as the TLS provider, depending on how you build curl.
 
-This has not been tested. DO NOT USE.
+This feature is EXPERIMENTAL. DO NOT USE IN PRODUCTION.
 
 This should however provide enough of a proof-of-concept to prompt an informed
 discussion about a good path forward for ECH support in curl, when using
