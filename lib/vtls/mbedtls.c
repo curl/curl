@@ -163,15 +163,18 @@ static int entropy_func_mutex(void *data, unsigned char *output, size_t len)
 static void mbed_debug(void *context, int level, const char *f_name,
                        int line_nb, const char *line)
 {
-  struct Curl_easy *data = NULL;
-
-  if(!context)
-    return;
-
-  data = (struct Curl_easy *)context;
-
-  infof(data, "%s", line);
+  struct Curl_easy *data = (struct Curl_easy *)context;
   (void) level;
+  (void) line_nb;
+  (void) f_name;
+
+  if(data) {
+    size_t len = strlen(line);
+    if(len && (line[len - 1] == '\n'))
+      /* discount any trailing newline */
+      len--;
+    infof(data, "%.*s", (int)len, line);
+  }
 }
 #endif
 
