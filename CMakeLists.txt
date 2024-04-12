@@ -37,7 +37,7 @@
 #   HAVE_GNUTLS_SRP: `gnutls_srp_verifier` present in GnuTLS
 #   HAVE_SSL_CTX_SET_QUIC_METHOD: `SSL_CTX_set_quic_method` present in OpenSSL/wolfSSL
 #   HAVE_QUICHE_CONN_SET_QLOG_FD: `quiche_conn_set_qlog_fd` present in QUICHE
-#   HAVE_ECH: ECH API checks for OpenSSL, boriingssl or wolfSSL
+#   HAVE_ECH: ECH API checks for OpenSSL, boringssl or wolfSSL
 #
 # For each of the above variables, if the variable is DEFINED (either
 # to ON or OFF), the symbol detection will be skipped.  If the
