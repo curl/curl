@@ -4,20 +4,21 @@ curl and libcurl 8.8.0
  Command line options:         258
  curl_easy_setopt() options:   304
  Public functions in libcurl:  94
- Contributors:                 3143
+ Contributors:                 3146
 
 This release includes the following changes:
 
+ o file: add support for directory listings [63]
  o lib: add curl_multi_waitfds [34]
  o NTLM_WB: drop support [67]
 
 This release includes the following bugfixes:
 
- o appveyor: OpenSSL 3 no longer found by CMake, revert to 1.1.1 [26]
  o bearssl: fix compiler warnings [43]
  o build: remove MacOSX-Framework script [60]
  o cd2nroff/manage: use UTC when SOURCE_DATE_EPOCH is set [36]
  o cf-socket: remove references to l_ip, l_port [9]
+ o ci: add curl-for-win builds: Linux MUSL, macOS, Windows [68]
  o CMake: check fseeko after detecting HAVE_FILE_OFFSET_BITS [64]
  o cmake: enable `-pedantic-errors` for clang when `CURL_WERROR=ON` [47]
  o cmake: fix `CURL_WERROR=ON` for old CMake and use it in GHA/linux-old [48]
@@ -25,6 +26,7 @@ This release includes the following bugfixes:
  o cmake: generate misc manpages and install `mk-ca-bundle.pl` [24]
  o cmake: speed up libcurl doc building again [15]
  o cmake: tidy-up to use `WORKING_DIRECTORY` [23]
+ o cmake: use namespaced custom target names [80]
  o cmdline-docs: fix make install with configure --disable-docs [1]
  o configure: make --disable-docs imply --disable-manual [2]
  o content_encoding: brotli and others, pass through 0-length writes [5]
@@ -35,7 +37,9 @@ This release includes the following bugfixes:
  o curl_global_trace.md: shorten the description [29]
  o curl_sha512_255: fix detection of OpenSSL 1.1.1 or later [8]
  o curl_sha512_256: do not use workaround for NetBSD when not needed [21]
+ o CURLINFO_REQUEST_SIZE: fixed, add tests for transfer infos reported [52]
  o dist: `set -eu`, fix shellcheck, make reproducible and smaller tarballs [38]
+ o dist: add files missing from release tarball [53]
  o dist: add reproducible dir entries to tarballs [56]
  o dist: do not require Perl in `maketgz` [71]
  o dist: remove the curl-config.1 from the tarball [28]
@@ -44,9 +48,11 @@ This release includes the following bugfixes:
  o doc: pytest `--repeat` -> `--count` [58]
  o docs/cmdline-opts: invoke managen using a relative path [30]
  o docs/MAIL-ETIQUETTE: convert to markdown [12]
+ o docs: add CURLOPT_NOPROGRESS to CURLOPT_XFERINFOFUNCTION example [61]
  o GHA: add shellcheck job and fix warnings, shell tidy-ups [70]
  o GHA: add valgrind to a wolfSSL build [37]
  o GHA: on macOS remove $HOME/.curlrc [50]
+ o gnutls: lazy init the trust settings [75]
  o http2: emit RST when client write fails [65]
  o http: with chunked POST forced, disable length check on read callback [31]
  o idn: make Curl_idnconvert_hostname() use Curl_idn_decode() [16]
@@ -60,8 +66,12 @@ This release includes the following bugfixes:
  o makefile: remove the sorting from the vc-ide action [42]
  o maketgz: put docs/RELEASE-TOOL.md into the tarball [35]
  o mbedtls: call mbedtls_ssl_setup() after RNG callback is set [66]
+ o misc: fix typos [62]
  o openldap: create ldap URLs correctly for IPv6 addresses [19]
  o openssl: do not set SSL_MODE_RELEASE_BUFFERS [10]
+ o OS400: fix shellcheck warnings in scripts [72]
+ o projects: drop MSVC project files for recent versions [79]
+ o quic: fixup duplicate static function name (for cmake unity) [77]
  o RELEASE-PROCEDURE: mention an initial working build [7]
  o request: paused upload on completed download, assess connection [54]
  o reuse: add copyright + license info to individual docs/*.md files [13]
@@ -89,16 +99,17 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Brian Inglis, Carlos Henrique Lima Melara, Chris Webb,
+  Brian Inglis, Carlos Henrique Lima Melara, Chris Webb, Colin Leroy-Mira,
   Dagfinn Ilmari Mannsåker, Dan Fandrich, Daniel J. H., Daniel McCarney,
   Daniel Stenberg, Dmitry Karpov, Emanuele Torre, Evgeny Grin (Karlson2k),
-  Fabian Keil, Gisle Vanem, Harry Sintonen, hongfei.li, Jan Macku, Jeff King,
-  Jérôme Leclercq, Kailun Qin, kalvdans on github, Keitagit-kun on github,
-  Konstantin Kuzov, kpcyrd on github, Matt Jolly, Michael Kaufmann,
-  Michał Antoniak, Paul Howarth, Ray Satiro, riastradh on github,
-  Robert Moreton, Sanjay Pujare, Sergey Bronnikov, Sergey Ogryzkov,
-  Sergio Durigan Junior, Stefan Eissing, Tobias Stoeckmann, Viktor Szakats
-  (37 contributors)
+  Fabian Keil, Gisle Vanem, hammlee96 on github, Harry Sintonen, hongfei.li,
+  Jan Macku, Jeff King, Jérôme Leclercq, Jonatan Vela, Kailun Qin,
+  kalvdans on github, Keitagit-kun on github, Konstantin Kuzov,
+  kpcyrd on github, Marcel Raad, Matt Jolly, Michael Kaufmann, Michał Antoniak,
+  Paul Howarth, RainRat, Ray Satiro, riastradh on github, Robert Moreton,
+  Sanjay Pujare, Sergey Bronnikov, Sergey Ogryzkov, Sergio Durigan Junior,
+  Stefan Eissing, Tobias Stoeckmann, Toon Claes, Viktor Szakats
+  (43 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -127,7 +138,6 @@ References to bug reports and discussions on issues:
  [23] = https://curl.se/bug/?i=13206
  [24] = https://curl.se/bug/?i=13197
  [25] = https://curl.se/bug/?i=13272
- [26] = https://curl.se/bug/?i=13266
  [27] = https://curl.se/bug/?i=13267
  [28] = https://curl.se/bug/?i=13268
  [29] = https://curl.se/bug/?i=13263
@@ -153,16 +163,27 @@ References to bug reports and discussions on issues:
  [49] = https://curl.se/bug/?i=13287
  [50] = https://curl.se/bug/?i=13284
  [51] = https://curl.se/bug/?i=13283
+ [52] = https://curl.se/bug/?i=13269
+ [53] = https://curl.se/bug/?i=13346
  [54] = https://curl.se/bug/?i=13260
  [55] = https://curl.se/bug/?i=13265
  [56] = https://curl.se/bug/?i=13322
  [57] = https://curl.se/bug/?i=13172
  [58] = https://curl.se/bug/?i=13218
  [60] = https://curl.se/bug/?i=13313
+ [61] = https://curl.se/bug/?i=13348
+ [62] = https://curl.se/bug/?i=13344
+ [63] = https://curl.se/bug/?i=13137
  [64] = https://curl.se/bug/?i=13264
  [65] = https://curl.se/bug/?i=13292
  [66] = https://curl.se/bug/?i=13314
  [67] = https://curl.se/bug/?i=13249
+ [68] = https://curl.se/bug/?i=13335
  [69] = https://curl.se/bug/?i=13315
  [70] = https://curl.se/bug/?i=13307
  [71] = https://curl.se/bug/?i=13310
+ [72] = https://curl.se/bug/?i=13309
+ [75] = https://curl.se/bug/?i=13339
+ [77] = https://curl.se/bug/?i=13332
+ [79] = https://curl.se/bug/?i=13311
+ [80] = https://curl.se/bug/?i=13324
