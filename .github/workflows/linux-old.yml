@@ -71,7 +71,7 @@ jobs:
           dpkg -i freexian-archive-keyring_2022.06.08_all.deb
           echo 'deb http://deb.freexian.com/extended-lts stretch-lts main contrib non-free' | tee /etc/apt/sources.list.d/extended-lts.list
           apt-get update
-          apt-get install -y --no-install-suggests --no-install-recommends cmake make gcc pkg-config libpsl-dev libzstd-dev zlib1g-dev libssl1.0-dev libssh-dev libc-ares-dev heimdal-dev libldap2-dev stunnel4 groff
+          apt-get install -y --no-install-suggests --no-install-recommends cmake make gcc pkg-config libpsl-dev libzstd-dev zlib1g-dev libssl1.0-dev libssh-dev libssh2-1-dev libc-ares-dev heimdal-dev libldap2-dev stunnel4 groff
           # GitHub's actions/checkout needs a newer glibc. This one is the
           # latest available for buster, the next stable release after stretch.
           httrack --get https://security.debian.org/debian-security/pool/updates/main/g/glibc/libc6_2.28-10+deb10u2_amd64.deb
@@ -79,17 +79,28 @@ jobs:
 
       - uses: actions/checkout@v4
 
-      - name: 'cmake generate out-of-tree'
+      - name: 'cmake build-only (out-of-tree, libssh2)'
         run: |
-          mkdir build
-          cd build
-          cmake -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON -DENABLE_ARES=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH=ON -DCURL_USE_GSSAPI=ON ..
+          mkdir bld-1
+          cd bld-1
+          cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON -DENABLE_ARES=OFF -DCURL_ZSTD=OFF -DCURL_USE_GSSAPI=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_LIBSSH=OFF
+          make install
+          src/curl --disable --version
+
+      - name: 'cmake generate (out-of-tree, c-ares, libssh, zstd, gssapi)'
+        run: |
+          mkdir bld-cares
+          cd bld-cares
+          cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON -DENABLE_ARES=ON -DCURL_ZSTD=ON -DCURL_USE_GSSAPI=ON -DCURL_USE_LIBSSH2=OFF \
+            -DUSE_LIBSSH=ON '-DCMAKE_C_FLAGS=-I/usr/include -L/usr/lib -lssh'
 
       - name: 'build'
-        run: make -C build
+        run: |
+          make -C bld-cares
+          bld-cares/src/curl --disable --version
 
       - name: 'install'
-        run: make -C build install
+        run: make -C bld-cares install
 
       - name: 'tests'
-        run: make -C build test-ci
+        run: make -C bld-cares test-ci
