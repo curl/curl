@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -120,6 +120,7 @@ action_needed()
 {
         [ ! -e "${1}" ] && return 0
         [ -n "${2}" ] || return 1
+        # shellcheck disable=SC3013
         [ "${1}" -ot "${2}" ] && return 0
         return 1
 }
