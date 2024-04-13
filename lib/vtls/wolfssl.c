@@ -78,7 +78,7 @@
 # include "curl_base64.h"
 # define ECH_ENABLED(__data__) \
     (__data__->set.tls_ech && \
-     !(__data__->set.tls_ech & (1 << CURLECH_DISABLE))\
+     !(__data__->set.tls_ech & CURLECH_DISABLE)\
     )
 #endif /* USE_ECH */
 
@@ -745,7 +745,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       infof(data, "ECH: GREASE'd ECH not yet supported for wolfSSL");
       return CURLE_SSL_CONNECT_ERROR;
     }
-    if(data->set.tls_ech == CURLECH_CLA_CFG
+    if(data->set.tls_ech & CURLECH_CLA_CFG
        && data->set.str[STRING_ECH_CONFIG]) {
       char *b64val = data->set.str[STRING_ECH_CONFIG];
       word32 b64len = 0;
@@ -754,7 +754,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       if(b64len
          && wolfSSL_SetEchConfigsBase64(backend->handle, b64val, b64len)
               != WOLFSSL_SUCCESS) {
-        if(data->set.tls_ech == CURLECH_HARD)
+        if(data->set.tls_ech & CURLECH_HARD)
           return CURLE_SSL_CONNECT_ERROR;
       }
       else {
@@ -768,7 +768,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       dns = Curl_fetch_addr(data, connssl->peer.hostname, connssl->port);
       if(!dns) {
         infof(data, "ECH: requested but no DNS info available");
-        if(data->set.tls_ech == CURLECH_HARD)
+        if(data->set.tls_ech & CURLECH_HARD)
           return CURLE_SSL_CONNECT_ERROR;
       }
       else {
@@ -783,7 +783,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
           if(wolfSSL_SetEchConfigs(backend->handle, ecl, (word32) elen) !=
                 WOLFSSL_SUCCESS) {
             infof(data, "ECH: wolfSSL_SetEchConfigs failed");
-            if(data->set.tls_ech == CURLECH_HARD)
+            if(data->set.tls_ech & CURLECH_HARD)
               return CURLE_SSL_CONNECT_ERROR;
           }
           else {
@@ -793,7 +793,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
         }
         else {
           infof(data, "ECH: requested but no ECHConfig available");
-          if(data->set.tls_ech == CURLECH_HARD)
+          if(data->set.tls_ech & CURLECH_HARD)
             return CURLE_SSL_CONNECT_ERROR;
         }
         Curl_resolv_unlock(data, dns);

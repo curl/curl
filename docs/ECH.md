@@ -36,9 +36,8 @@ To build curl ECH-enabled, making use of the above:
 
 ```bash
     cd $HOME/code
-    git clone https://github.com/sftcd/curl
+    git clone https://github.com/curl/curl
     cd curl
-    git checkout ECH-experimental
     autoreconf -fi
     export LD_LIBRARY_PATH=$HOME/code/openssl
     LDFLAGS="-L$HOME/code/openssl" ./configure --with-ssl=$HOME/code/openssl --enable-ech --enable-httpsrr
@@ -53,16 +52,13 @@ is not enabled, so go back some steps and re-do whatever needs re-doing:-) If yo
 want to debug curl then you should add ``--enable-debug`` to the ``configure``
 command.
 
-You may need to install some libraries to get ``configrure`` to
-work, e.g. I recently had to add  ``sudo apt install libpsl-dev``
-
 ## Building with cmake
 
 This is not working cleanly yet, but to build with cmake:
 
 ```bash
     cd $HOME/code
-    git clone https://github.com/sftcd/curl
+    git clone https://github.com/curl/curl
     cd curl
     mkdir build
     cd build
@@ -236,9 +232,7 @@ a good option to set as a default.
 
 ## Code changes for ECH support when using DoH
 
-All code changes are in a new ``ECH-experimental`` branch of our fork
-([here](https://github.com/sftcd/curl/tree/ECH-experimental)) and are
-``#ifdef`` protected via ``USE_ECH`` or ``USE_HTTPSRR``:
+Code changes are ``#ifdef`` protected via ``USE_ECH`` or ``USE_HTTPSRR``:
 
 - ``USE_HTTPSRR`` is used for HTTPS RR retrieval code that could be generically
   used should non-ECH uses for HTTPS RRs be identified, e.g. use of ALPN values
@@ -330,7 +324,7 @@ used by curl, so here's how:
 
 ```bash
     cd $HOME/code
-    git clone https://github.com/sftcd/wolfssl
+    git clone https://github.com/curl/wolfssl
     cd wolfssl
     ./autogen.sh
     ./configure --prefix=$HOME/code/wolfssl/inst --enable-ech --enable-debug --enable-opensslextra
@@ -353,7 +347,7 @@ Let's use that to build curl...
 
 ```bash
     cd $HOME/code
-    git clone https://github.com/sftcd/curl
+    git clone https://github.com/curl/curl
     cd curl
     git checkout ECH-experimental
     autoreconf -fi
@@ -434,7 +428,7 @@ Then:
 
 ```bash
     cd $HOME/code
-    git clone https://github.com/sftcd/curl
+    git clone https://github.com/curl/curl
     cd curl
     git checkout ECH-experimental
     autoreconf -fi

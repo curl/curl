@@ -89,7 +89,7 @@
 # include "curl_base64.h"
 # define ECH_ENABLED(__data__) \
     (__data__->set.tls_ech && \
-     !(__data__->set.tls_ech & (1 << CURLECH_DISABLE))\
+     !(__data__->set.tls_ech & CURLECH_DISABLE)\
     )
 #endif /* USE_ECH */
 
@@ -3863,7 +3863,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
     char *outername = data->set.str[STRING_ECH_PUBLIC];
     int trying_ech_now = 0;
 
-    if(data->set.tls_ech & (1 << CURLECH_GREASE)) {
+    if(data->set.tls_ech & CURLECH_GREASE) {
       infof(data, "ECH: will GREASE ClientHello");
 # ifdef OPENSSL_IS_BORINGSSL
       SSL_set_enable_ech_grease(octx->ssl, 1);
@@ -3871,7 +3871,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
       SSL_set_options(octx->ssl, SSL_OP_ECH_GREASE);
 # endif
     }
-    else if(data->set.tls_ech & (1 << CURLECH_CLA_CFG)) {
+    else if(data->set.tls_ech & CURLECH_CLA_CFG) {
 # ifdef OPENSSL_IS_BORINGSSL
       /* have to do base64 decode here for boring */
       const char *b64 = data->set.str[STRING_ECH_CONFIG];
@@ -3884,13 +3884,13 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
       result = Curl_base64_decode(b64, &ech_config, &ech_config_len);
       if(result || !ech_config) {
         infof(data, "ECH: can't base64 decode ECHConfig from command line");
-        if(data->set.tls_ech & (1 << CURLECH_HARD))
+        if(data->set.tls_ech & CURLECH_HARD)
           return result;
       }
       if(SSL_set1_ech_config_list(octx->ssl, ech_config,
                                   ech_config_len) != 1) {
         infof(data, "ECH: SSL_ECH_set1_echconfig failed");
-        if(data->set.tls_ech & (1 << CURLECH_HARD)) {
+        if(data->set.tls_ech & CURLECH_HARD) {
           free(ech_config);
           return CURLE_SSL_CONNECT_ERROR;
         }
@@ -3906,7 +3906,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
       ech_config_len = strlen(data->set.str[STRING_ECH_CONFIG]);
       if(SSL_ech_set1_echconfig(octx->ssl, ech_config, ech_config_len) != 1) {
         infof(data, "ECH: SSL_ECH_set1_echconfig failed");
-        if(data->set.tls_ech & (1 << CURLECH_HARD))
+        if(data->set.tls_ech & CURLECH_HARD)
           return CURLE_SSL_CONNECT_ERROR;
       }
       else
@@ -3920,7 +3920,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
       dns = Curl_fetch_addr(data, connssl->peer.hostname, connssl->peer.port);
       if(!dns) {
         infof(data, "ECH: requested but no DNS info available");
-        if(data->set.tls_ech & (1 << CURLECH_HARD))
+        if(data->set.tls_ech & CURLECH_HARD)
           return CURLE_SSL_CONNECT_ERROR;
       }
       else {
@@ -3935,13 +3935,13 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 # ifndef OPENSSL_IS_BORINGSSL
           if(SSL_ech_set1_echconfig(octx->ssl, ecl, elen) != 1) {
             infof(data, "ECH: SSL_ECH_set1_echconfig failed");
-            if(data->set.tls_ech & (1 << CURLECH_HARD))
+            if(data->set.tls_ech & CURLECH_HARD)
               return CURLE_SSL_CONNECT_ERROR;
           }
 # else
           if(SSL_set1_ech_config_list(octx->ssl, ecl, elen) != 1) {
             infof(data, "ECH: SSL_set1_ech_config_list failed (boring)");
-            if(data->set.tls_ech & (1 << CURLECH_HARD))
+            if(data->set.tls_ech & CURLECH_HARD)
               return CURLE_SSL_CONNECT_ERROR;
           }
 # endif
@@ -3952,7 +3952,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
         }
         else {
           infof(data, "ECH: requested but no ECHConfig available");
-          if(data->set.tls_ech & (1 << CURLECH_HARD))
+          if(data->set.tls_ech & CURLECH_HARD)
             return CURLE_SSL_CONNECT_ERROR;
         }
         Curl_resolv_unlock(data, dns);
@@ -4359,7 +4359,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
         ossl_trace_ech_retry_configs(data, octx->ssl, 0);
       }
       if(rv != SSL_ECH_STATUS_SUCCESS
-         && data->set.tls_ech & (1 << CURLECH_HARD)) {
+         && data->set.tls_ech & CURLECH_HARD) {
         infof(data, "ECH: ech-hard failed");
         return CURLE_SSL_CONNECT_ERROR;
       }

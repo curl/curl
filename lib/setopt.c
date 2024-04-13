@@ -3159,25 +3159,25 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       return result;
     }
     /* set tls_ech flag value, preserving CLA_CFG bit */
-    if(plen == 5 && strcasecompare(argptr, "FALSE"))
-      data->set.tls_ech = (1 << CURLECH_DISABLE)
-                          | (data->set.tls_ech & (1 << CURLECH_CLA_CFG));
-    else if(plen == 6 && strcasecompare(argptr, "GREASE"))
-      data->set.tls_ech = (1 << CURLECH_GREASE)
-                          | (data->set.tls_ech & (1 << CURLECH_CLA_CFG));
-    else if(plen == 4 && strcasecompare(argptr, "TRUE"))
-      data->set.tls_ech = (1 << CURLECH_ENABLE)
-                          | (data->set.tls_ech & (1 << CURLECH_CLA_CFG));
-    else if(plen == 4 && strcasecompare(argptr, "HARD"))
-      data->set.tls_ech = (1 << CURLECH_HARD)
-                          | (data->set.tls_ech & (1 << CURLECH_CLA_CFG));
-    else if(plen > 5 && strncasecompare(argptr, "ECL:", 4)) {
+    if(plen == 5 && !strcmp(argptr, "false"))
+      data->set.tls_ech = CURLECH_DISABLE
+                          | (data->set.tls_ech & CURLECH_CLA_CFG);
+    else if(plen == 6 && !strcmp(argptr, "grease"))
+      data->set.tls_ech = CURLECH_GREASE
+                          | (data->set.tls_ech & CURLECH_CLA_CFG);
+    else if(plen == 4 && !strcmp(argptr, "true"))
+      data->set.tls_ech = CURLECH_ENABLE
+                          | (data->set.tls_ech & CURLECH_CLA_CFG);
+    else if(plen == 4 && !strcmp(argptr, "hard"))
+      data->set.tls_ech = CURLECH_HARD
+                          | (data->set.tls_ech & CURLECH_CLA_CFG);
+    else if(plen > 5 && !strncmp(argptr, "ecl:", 4)) {
       result = Curl_setstropt(&data->set.str[STRING_ECH_CONFIG], argptr + 4);
       if(result)
         return result;
-      data->set.tls_ech |= (1 << CURLECH_CLA_CFG);
+      data->set.tls_ech |= CURLECH_CLA_CFG;
     }
-    else if(plen > 4 && strncasecompare(argptr, "PN:", 3)) {
+    else if(plen > 4 && !strncmp(argptr, "pn:", 3)) {
       result = Curl_setstropt(&data->set.str[STRING_ECH_PUBLIC], argptr + 3);
       if(result)
         return result;

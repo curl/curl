@@ -462,8 +462,8 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
    * the curl operation.
    */
 # ifdef USE_ECH
-  if(data->set.tls_ech & (1 << CURLECH_ENABLE)
-     || data->set.tls_ech & (1 << CURLECH_HARD)) {
+  if(data->set.tls_ech & CURLECH_ENABLE
+     || data->set.tls_ech & CURLECH_HARD) {
     if(port == 443)
       qname = strdup(hostname);
     else

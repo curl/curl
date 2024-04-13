@@ -7,7 +7,10 @@ Source: libcurl
 See-also:
   - CURLOPT_DOH_URL (3)
 Protocol:
-  - HTTPS
+  - TLS
+TLS-backend:
+  - OpenSSL
+  - wolfSSL
 ---
 
 # NAME
@@ -23,6 +26,16 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ECH, char *config);
 ~~~
 
 # DESCRIPTION
+
+ECH is only compatible with TLSv1.3.
+
+This experimental feature requires a special build of OpenSSL, as ECH is not
+yet supported in OpenSSL releases. In contrast ECH is supported by the latest
+boringSSL and wolfSSL releases. See [ECH.md](../../ECH.md) for details of how
+to build such an OpenSSL library.
+
+There is also a known issue with using wolfSSL which does not support ECH
+when the HelloRetryRequest mechanism is used.
 
 Pass a string that specifies configuration details for ECH.
 In all cases, if ECH is attempted, it may fail for various reasons.
@@ -65,7 +78,7 @@ if(curl) {
 
 # AVAILABILITY
 
-Added in 8.6.0
+Added in 8.8.0
 
 # RETURN VALUE
 
