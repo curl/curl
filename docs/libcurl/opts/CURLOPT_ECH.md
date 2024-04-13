@@ -5,7 +5,7 @@ Title: CURLOPT_ECH
 Section: 3
 Source: libcurl
 See-also:
-  - CURLOPT_DOH_URL (3)
+  -  (3)
 Protocol:
   - TLS
 TLS-backend:
@@ -31,7 +31,7 @@ ECH is only compatible with TLSv1.3.
 
 This experimental feature requires a special build of OpenSSL, as ECH is not
 yet supported in OpenSSL releases. In contrast ECH is supported by the latest
-boringSSL and wolfSSL releases. See [ECH.md](../../ECH.md) for details of how
+BoringSSL and wolfSSL releases. See [ECH.md](../../ECH.md) for details of how
 to build such an OpenSSL library.
 
 There is also a known issue with using wolfSSL which does not support ECH
@@ -74,8 +74,6 @@ if(curl) {
   curl_easy_perform(curl);
 }
 ~~~
-
-
 # AVAILABILITY
 
 Added in 8.8.0
