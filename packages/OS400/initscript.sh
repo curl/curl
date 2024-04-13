@@ -147,8 +147,7 @@ canonicalize_path()
         do      IFS="${IFSSAVE}"
                 case "${C}" in
                 .)      ;;
-                ..)     R=$(expr \
-                                 "${R}" : '^\(.*/\)..*')
+                ..)     R="$(expr "${R}" : '^\(.*/\)..*')"
                         ;;
                 ?*)     R="${R}${C}/"
                         ;;
@@ -173,8 +172,7 @@ make_module()
         MODULES="${MODULES} ${1}"
         MODIFSNAME="${LIBIFSNAME}/${1}.MODULE"
         action_needed "${MODIFSNAME}" "${2}" || return 0;
-        SRCDIR="$(dirname \
-                          "$(canonicalize_path "${2}")")"
+        SRCDIR="$(dirname "$(canonicalize_path "${2}")")"
 
         #       #pragma convert has to be in the source file itself, i.e.
         #               putting it in an include file makes it only active
