@@ -710,6 +710,9 @@ ${SIZEOF_TIME_T_CODE}
 /* if OpenSSL is in use */
 #cmakedefine USE_OPENSSL 1
 
+/* if librtmp/rtmpdump is in use */
+#cmakedefine USE_LIBRTMP 1
+
 /* Define to 1 if you don't want the OpenSSL configuration to be loaded
    automatically */
 #cmakedefine CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG 1
