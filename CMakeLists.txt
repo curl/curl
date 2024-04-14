@@ -856,7 +856,7 @@ if(CURL_DISABLE_LDAP)
 endif()
 
 # Check for idn2
-option(USE_LIBIDN2 "Use libidn2 for IDN support" ON)
+option(USE_LIBIDN2 "Use libidn2 for IDN support" OFF)
 if(USE_LIBIDN2)
   check_library_exists("idn2" "idn2_lookup_ul" "" HAVE_LIBIDN2)
   if(HAVE_LIBIDN2)
