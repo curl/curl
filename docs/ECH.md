@@ -252,27 +252,21 @@ is required. (There may be some configuration conflicts available for the
 determined:-)
 
 The main functional change, as you would expect, is in ``lib/vtls/openssl.c``
-([here](https://github.com/sftcd/curl/blob/ECH-experimental/lib/vtls/openssl.c#L3768))
 where an ECHConfig, if available from command line or DNS cache, is fed into
 the OpenSSL library via the new APIs implemented in our OpenSSL fork for that
 purpose. This code also implements the opportunistic (``--ech true``) or hard-fail
 (``--ech hard``) logic.
 
 Other than that, the main additions are in ``lib/doh.c``
-([here](https://github.com/sftcd/curl/blob/ECH-experimental/lib/doh.c#L418))
 where we re-use ``dohprobe()`` to retrieve an HTTPS RR value for the target
 domain. If such a value is found, that is stored using a new ``store_https()``
-function
-([here](https://github.com/sftcd/curl/blob/ECH-experimental/lib/doh.c#L527)) in
-a new field in the ``dohentry`` structure.
+function in a new field in the ``dohentry`` structure.
 
 The qname for the DoH query is modified if the port number is not 443, as
 defined in the SVCB specification.
-([here](https://github.com/sftcd/curl/blob/ECH-experimental/lib/doh.c#L418))
 
 When the DoH process has worked, ``Curl_doh_is_resolved()`` now also returns
 the relevant HTTPS RR value data in the ``Curl_dns_entry`` structure.
-([here](https://github.com/sftcd/curl/blob/ECH-experimental/lib/doh.c#L1086))
 That is later accessed when the TLS session is being established, if ECH is
 enabled (from ``lib/vtls/openssl.c`` as described above).
 
@@ -349,7 +343,6 @@ Let's use that to build curl...
     cd $HOME/code
     git clone https://github.com/curl/curl
     cd curl
-    git checkout ECH-experimental
     autoreconf -fi
     ./configure --with-wolfssl=$HOME/code/wolfssl/inst --enable-ech --enable-httpsrr
     make
@@ -430,7 +423,6 @@ Then:
     cd $HOME/code
     git clone https://github.com/curl/curl
     cd curl
-    git checkout ECH-experimental
     autoreconf -fi
     ./configure --with-ssl=$HOME/code/boringssl/inst --enable-ech --enable-httpsrr
     ...lots of output...
