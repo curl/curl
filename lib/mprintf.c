@@ -1160,9 +1160,7 @@ static int fputc_wrapper(unsigned char outc, void *f)
   int out = outc;
   FILE *s = f;
   int rc = fputc(out, s);
-  if(rc == out)
-    return 0;
-  return 1;
+  return rc == EOF;
 }
 
 int curl_mprintf(const char *format, ...)
