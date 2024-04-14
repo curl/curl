@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -104,10 +104,10 @@ build_all_programs()
 
                 if [ -n "${LINK}" ]
                 then    PGMLDADD="$(eval echo "\${${PGM}_LDADD}")"
-                        for ARG in ${PGMLDADD}
-                        do      case "${ARG}" in
+                        for M in ${PGMLDADD}
+                        do      case "${M}" in
                                 -*)     ;;              # Ignore non-module.
-                                *)      MODULES="${MODULES} $(db2_name "${ARG}")"
+                                *)      MODULES="${MODULES} $(db2_name "${M}")"
                                         ;;
                                 esac
                         done
