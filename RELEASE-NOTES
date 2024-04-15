@@ -4,10 +4,11 @@ curl and libcurl 8.8.0
  Command line options:         258
  curl_easy_setopt() options:   304
  Public functions in libcurl:  94
- Contributors:                 3146
+ Contributors:                 3148
 
 This release includes the following changes:
 
+ o curl_version_info: provide librtmp version [73]
  o file: add support for directory listings [63]
  o lib: add curl_multi_waitfds [34]
  o NTLM_WB: drop support [67]
@@ -15,6 +16,7 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o bearssl: fix compiler warnings [43]
+ o build: prefer `USE_IPV6` macro internally (was: `ENABLE_IPV6`) [85]
  o build: remove MacOSX-Framework script [60]
  o cd2nroff/manage: use UTC when SOURCE_DATE_EPOCH is set [36]
  o cf-socket: remove references to l_ip, l_port [9]
@@ -23,6 +25,7 @@ This release includes the following bugfixes:
  o cmake: enable `-pedantic-errors` for clang when `CURL_WERROR=ON` [47]
  o cmake: fix `CURL_WERROR=ON` for old CMake and use it in GHA/linux-old [48]
  o cmake: fixup `DEPENDS` filename [51]
+ o cmake: forward `USE_LIBRTMP` option to C [59]
  o cmake: generate misc manpages and install `mk-ca-bundle.pl` [24]
  o cmake: speed up libcurl doc building again [15]
  o cmake: tidy-up to use `WORKING_DIRECTORY` [23]
@@ -49,6 +52,7 @@ This release includes the following bugfixes:
  o docs/cmdline-opts: invoke managen using a relative path [30]
  o docs/MAIL-ETIQUETTE: convert to markdown [12]
  o docs: add CURLOPT_NOPROGRESS to CURLOPT_XFERINFOFUNCTION example [61]
+ o docs: clarify CURLOPT_MAXFILESIZE and CURLOPT_MAXFILESIZE_LARGE [74]
  o GHA: add shellcheck job and fix warnings, shell tidy-ups [70]
  o GHA: add valgrind to a wolfSSL build [37]
  o GHA: on macOS remove $HOME/.curlrc [50]
@@ -58,6 +62,7 @@ This release includes the following bugfixes:
  o idn: make Curl_idnconvert_hostname() use Curl_idn_decode() [16]
  o INSTALL-CMAKE.md: explain `cmake -G <generator-name>` [32]
  o lib: add trace support for client reads and writes [45]
+ o lib: merge `ENABLE_QUIC` C macro into `USE_HTTP3` [84]
  o lib: use `#error` instead of invalid syntax in `curl_setup_once.h` [49]
  o lib: use multi instead of multi_easy for the active multi [41]
  o libcurl-opts: mention pipelining less [33]
@@ -66,7 +71,11 @@ This release includes the following bugfixes:
  o makefile: remove the sorting from the vc-ide action [42]
  o maketgz: put docs/RELEASE-TOOL.md into the tarball [35]
  o mbedtls: call mbedtls_ssl_setup() after RNG callback is set [66]
+ o mbedtls: cut off trailing newlines from debug logs [87]
  o misc: fix typos [62]
+ o mprintf: check fputc error rather than matching returned character [82]
+ o multi: introduce SETUP state for better timeouts [26]
+ o multi: timeout handles even without connection [81]
  o openldap: create ldap URLs correctly for IPv6 addresses [19]
  o openssl: do not set SSL_MODE_RELEASE_BUFFERS [10]
  o OS400: fix shellcheck warnings in scripts [72]
@@ -99,17 +108,18 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Brian Inglis, Carlos Henrique Lima Melara, Chris Webb, Colin Leroy-Mira,
-  Dagfinn Ilmari Mannsåker, Dan Fandrich, Daniel J. H., Daniel McCarney,
-  Daniel Stenberg, Dmitry Karpov, Emanuele Torre, Evgeny Grin (Karlson2k),
-  Fabian Keil, Gisle Vanem, hammlee96 on github, Harry Sintonen, hongfei.li,
-  Jan Macku, Jeff King, Jérôme Leclercq, Jonatan Vela, Kailun Qin,
-  kalvdans on github, Keitagit-kun on github, Konstantin Kuzov,
-  kpcyrd on github, Marcel Raad, Matt Jolly, Michael Kaufmann, Michał Antoniak,
-  Paul Howarth, RainRat, Ray Satiro, riastradh on github, Robert Moreton,
+  blankie, Brian Inglis, Carlos Henrique Lima Melara, Chris Webb,
+  Colin Leroy-Mira, Dagfinn Ilmari Mannsåker, Dan Fandrich, Daniel J. H.,
+  Daniel McCarney, Daniel Stenberg, Dmitry Karpov, Emanuele Torre,
+  Evgeny Grin (Karlson2k), Fabian Keil, Gisle Vanem, hammlee96 on github,
+  Harry Sintonen, hongfei.li, Jan Macku, Jeff King, Jérôme Leclercq,
+  Jonatan Vela, Kailun Qin, kalvdans on github, Keitagit-kun on github,
+  Konstantin Kuzov, kpcyrd on github, Marcel Raad, Matt Jolly,
+  Michael Kaufmann, Michał Antoniak, Patrick Monnerat, Paul Howarth,
+  Rahul Krishna M, RainRat, Ray Satiro, riastradh on github, Robert Moreton,
   Sanjay Pujare, Sergey Bronnikov, Sergey Ogryzkov, Sergio Durigan Junior,
-  Stefan Eissing, Tobias Stoeckmann, Toon Claes, Viktor Szakats
-  (43 contributors)
+  Stefan Eissing, Tal Regev, Tobias Stoeckmann, Toon Claes, Viktor Szakats
+  (47 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -138,6 +148,7 @@ References to bug reports and discussions on issues:
  [23] = https://curl.se/bug/?i=13206
  [24] = https://curl.se/bug/?i=13197
  [25] = https://curl.se/bug/?i=13272
+ [26] = https://curl.se/bug/?i=13371
  [27] = https://curl.se/bug/?i=13267
  [28] = https://curl.se/bug/?i=13268
  [29] = https://curl.se/bug/?i=13263
@@ -170,6 +181,7 @@ References to bug reports and discussions on issues:
  [56] = https://curl.se/bug/?i=13322
  [57] = https://curl.se/bug/?i=13172
  [58] = https://curl.se/bug/?i=13218
+ [59] = https://curl.se/bug/?i=13364
  [60] = https://curl.se/bug/?i=13313
  [61] = https://curl.se/bug/?i=13348
  [62] = https://curl.se/bug/?i=13344
@@ -183,7 +195,14 @@ References to bug reports and discussions on issues:
  [70] = https://curl.se/bug/?i=13307
  [71] = https://curl.se/bug/?i=13310
  [72] = https://curl.se/bug/?i=13309
+ [73] = https://curl.se/bug/?i=13368
+ [74] = https://curl.se/bug/?i=13372
  [75] = https://curl.se/bug/?i=13339
  [77] = https://curl.se/bug/?i=13332
  [79] = https://curl.se/bug/?i=13311
  [80] = https://curl.se/bug/?i=13324
+ [81] = https://curl.se/bug/?i=13276
+ [82] = https://curl.se/bug/?i=13367
+ [84] = https://curl.se/bug/?i=13352
+ [85] = https://curl.se/bug/?i=13349
+ [87] = https://curl.se/bug/?i=13321
