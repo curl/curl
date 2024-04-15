@@ -276,12 +276,12 @@ recently.)
 tool.
 
 - We have not yet implemented tests as part of the usual curl test harness as
-  doing so would seem to require re-implementing an ECH-enabled server as part
-of the curl test harness.  For now, we have a ``./tests/ech_test.sh`` script
+doing so would seem to require re-implementing an ECH-enabled server as part
+of the curl test harness. For now, we have a ``./tests/ech_test.sh`` script
 that attempts ECH with various test servers and with many combinations of the
 allowed command line options. While that is a useful test and has find issues,
 it is not comprehensive and we're not (as yet) sure what would be the right
-level of coverage.  When running that script you should not have a
+level of coverage. When running that script you should not have a
 ``$HOME/.curlrc`` file that affects ECH or some of the negative tests could
 produce spurious failures.
 
