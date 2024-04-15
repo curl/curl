@@ -1965,7 +1965,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       /* after init, go SETUP */
       multistate(data, MSTATE_SETUP);
       (void)Curl_pgrsTime(data, TIMER_STARTOP);
-      /* FALLTHROUGH */
+      FALLTHROUGH();
 
     case MSTATE_SETUP:
       /* Transitional state. Setup things for a new transfer. The handle
@@ -1980,7 +1980,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         Curl_expire(data, data->set.connecttimeout, EXPIRE_CONNECTTIMEOUT);
 
       multistate(data, MSTATE_CONNECT);
-      /* FALLTHROUGH */
+      FALLTHROUGH();
 
     case MSTATE_CONNECT:
       /* Connect. We want to get a connection identifier filled in. This state
