@@ -44,41 +44,101 @@
 
 static int verbose = 1;
 
-static
-int my_trace(CURL *handle, curl_infotype type,
-             char *data, size_t size,
-             void *userp)
+static void log_line_start(FILE *log, const char *idsbuf, curl_infotype type)
 {
-  const char *text;
-  (void)handle; /* prevent compiler warning */
-  (void)userp;
+  /*
+   * This is the trace look that is similar to what libcurl makes on its
+   * own.
+   */
+  static const char * const s_infotype[] = {
+    "* ", "< ", "> ", "{ ", "} ", "{ ", "} "
+  };
+  if(idsbuf && *idsbuf)
+    fprintf(log, "%s%s", idsbuf, s_infotype[type]);
+  else
+    fputs(s_infotype[type], log);
+}
+
+#define TRC_IDS_FORMAT_IDS_1  "[%" CURL_FORMAT_CURL_OFF_T "-x] "
+#define TRC_IDS_FORMAT_IDS_2  "[%" CURL_FORMAT_CURL_OFF_T "-%" \
+                                   CURL_FORMAT_CURL_OFF_T "] "
+/*
+** callback for CURLOPT_DEBUGFUNCTION
+*/
+static int debug_cb(CURL *handle, curl_infotype type,
+                    char *data, size_t size,
+                    void *userdata)
+{
+  FILE *output = stderr;
+  static int newl = 0;
+  static int traced_data = 0;
+  char idsbuf[60];
+  curl_off_t xfer_id, conn_id;
+
+  (void)handle; /* not used */
+  (void)userdata;
+
+  if(!curl_easy_getinfo(handle, CURLINFO_XFER_ID, &xfer_id) && xfer_id >= 0) {
+    if(!curl_easy_getinfo(handle, CURLINFO_CONN_ID, &conn_id) &&
+        conn_id >= 0) {
+      curl_msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_2,
+                     xfer_id, conn_id);
+    }
+    else {
+      curl_msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_1, xfer_id);
+    }
+  }
+  else
+    idsbuf[0] = 0;
 
   switch(type) {
-  case CURLINFO_TEXT:
-    fprintf(stderr, "== Info: %s", data);
-    return 0;
   case CURLINFO_HEADER_OUT:
-    text = "=> Send header";
+    if(size > 0) {
+      size_t st = 0;
+      size_t i;
+      for(i = 0; i < size - 1; i++) {
+        if(data[i] == '\n') { /* LF */
+          if(!newl) {
+            log_line_start(output, idsbuf, type);
+          }
+          (void)fwrite(data + st, i - st + 1, 1, output);
+          st = i + 1;
+          newl = 0;
+        }
+      }
+      if(!newl)
+        log_line_start(output, idsbuf, type);
+      (void)fwrite(data + st, i - st + 1, 1, output);
+    }
+    newl = (size && (data[size - 1] != '\n')) ? 1 : 0;
+    traced_data = 0;
+    break;
+  case CURLINFO_TEXT:
+  case CURLINFO_HEADER_IN:
+    if(!newl)
+      log_line_start(output, idsbuf, type);
+    (void)fwrite(data, size, 1, output);
+    newl = (size && (data[size - 1] != '\n')) ? 1 : 0;
+    traced_data = 0;
     break;
   case CURLINFO_DATA_OUT:
-    if(verbose <= 1)
-      return 0;
-    text = "=> Send data";
-    break;
-  case CURLINFO_HEADER_IN:
-    text = "<= Recv header";
-    break;
   case CURLINFO_DATA_IN:
-    if(verbose <= 1)
-      return 0;
-    text = "<= Recv data";
+  case CURLINFO_SSL_DATA_IN:
+  case CURLINFO_SSL_DATA_OUT:
+    if(!traced_data) {
+      if(!newl)
+        log_line_start(output, idsbuf, type);
+      fprintf(output, "[%ld bytes data]\n", (long)size);
+      newl = 0;
+      traced_data = 1;
+    }
     break;
-  default: /* in case a new one is introduced to shock us */
-    return 0;
+  default: /* nada */
+    newl = 0;
+    traced_data = 1;
+    break;
   }
 
-  fprintf(stderr, "%s, %lu bytes (0x%lx)\n",
-          text, (unsigned long)size, (unsigned long)size);
   return 0;
 }
 
@@ -183,7 +243,7 @@ static int setup(CURL *hnd, const char *url, struct transfer *t,
   /* please be verbose */
   if(verbose) {
     curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
-    curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, my_trace);
+    curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, debug_cb);
   }
 
 #if (CURLPIPE_MULTIPLEX > 0)
@@ -271,6 +331,9 @@ int main(int argc, char *argv[])
   }
   argc -= optind;
   argv += optind;
+
+  curl_global_init(CURL_GLOBAL_DEFAULT);
+  curl_global_trace("ids,time,http/2,http/3");
 
   if(argc != 1) {
     usage("not enough arguments");

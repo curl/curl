@@ -328,9 +328,11 @@ class TestDownload:
         self.check_downloads(client, srcfile, count)
 
     # download, several at a time, pause and abort paused
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_23a_lib_abort_paused(self, env: Env, httpd, nghttpx, proto, repeat):
-        if proto == 'h2':
+        if proto == 'h3' and env.curl_uses_ossl_quic():
+            pytest.skip('OpenSSL QUIC fails here')
+        if proto in ['h2', 'h3']:
             count = 200
             max_parallel = 100
             pause_offset = 64 * 1024
@@ -353,9 +355,11 @@ class TestDownload:
         self.check_downloads(client, srcfile, count, complete=False)
 
     # download, several at a time, abort after n bytes
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_23b_lib_abort_offset(self, env: Env, httpd, nghttpx, proto, repeat):
-        if proto == 'h2':
+        if proto == 'h3' and env.curl_uses_ossl_quic():
+            pytest.skip('OpenSSL QUIC fails here')
+        if proto in ['h2', 'h3']:
             count = 200
             max_parallel = 100
             abort_offset = 64 * 1024
@@ -378,9 +382,11 @@ class TestDownload:
         self.check_downloads(client, srcfile, count, complete=False)
 
     # download, several at a time, abort after n bytes
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_23c_lib_fail_offset(self, env: Env, httpd, nghttpx, proto, repeat):
-        if proto == 'h2':
+        if proto == 'h3' and env.curl_uses_ossl_quic():
+            pytest.skip('OpenSSL QUIC fails here')
+        if proto in ['h2', 'h3']:
             count = 200
             max_parallel = 100
             fail_offset = 64 * 1024
