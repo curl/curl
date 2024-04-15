@@ -5270,6 +5270,9 @@ const struct Curl_ssl Curl_ssl_openssl = {
 #ifdef HAVE_SSL_CTX_SET_CIPHERSUITES
   SSLSUPP_TLS13_CIPHERSUITES |
 #endif
+#ifdef USE_ECH
+  SSLSUPP_ECH |
+#endif
   SSLSUPP_HTTPS_PROXY,
 
   sizeof(struct ossl_ctx),

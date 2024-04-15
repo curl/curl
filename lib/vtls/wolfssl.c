@@ -1504,6 +1504,9 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
 #endif
   SSLSUPP_CA_PATH |
   SSLSUPP_CAINFO_BLOB |
+#ifdef USE_ECH
+  SSLSUPP_ECH |
+#endif
   SSLSUPP_SSL_CTX,
 
   sizeof(struct wolfssl_ssl_backend_data),

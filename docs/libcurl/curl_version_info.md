@@ -176,6 +176,12 @@ supports HTTP Brotli content encoding using libbrotlidec (Added in 7.57.0)
 
 libcurl was built with debug capabilities (added in 7.10.6)
 
+## ECH
+
+*features* mask bit: non-existent
+
+libcurl was built with ECH support (experimental, added in 8.8.0)
+
 ## gsasl
 
 *features* mask bit: CURL_VERSION_GSASL
