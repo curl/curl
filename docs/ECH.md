@@ -23,24 +23,24 @@ To build our ECH-enabled OpenSSL fork:
 
 ```bash
     cd $HOME/code
-    git clone https://github.com/sftcd/openssl
+    git clone
     cd openssl
     git checkout ECH-draft-13c
-    ./config
+    ./config --libdir=lib --prefix=$HOME/code/openssl-local-inst
     ...stuff...
     make -j8
     ...stuff (maybe go for coffee)...
+    make install_sw
 ```
 
 To build curl ECH-enabled, making use of the above:
 
 ```bash
     cd $HOME/code
-    git clone https://github.com/curl/curl
+    git clone
     cd curl
     autoreconf -fi
-    export LD_LIBRARY_PATH=$HOME/code/openssl
-    LDFLAGS="-L$HOME/code/openssl" ./configure --with-ssl=$HOME/code/openssl --enable-ech --enable-httpsrr
+    LDFLAGS="-Wl,-rpath,$HOME/code/openss-local-inst/lib/" ./configure  --with-ssl=$HOME/code/openssl-local-inst  --enable-ech --enable-httpsrr
     ...lots of output...
     WARNING: ech ECH HTTPSRR enabled but marked EXPERIMENTAL...
     make
@@ -52,13 +52,16 @@ is not enabled, so go back some steps and re-do whatever needs re-doing:-) If yo
 want to debug curl then you should add ``--enable-debug`` to the ``configure``
 command.
 
+With the above build, I still need to set ``LD_LIBRARY_PATH`` to run the
+built version of curl in my development environment (ubuntu 23.10).
+
 ## Building with cmake
 
 This is not working cleanly yet, but to build with cmake:
 
 ```bash
     cd $HOME/code
-    git clone https://github.com/curl/curl
+    git clone
     cd curl
     mkdir build
     cd build
@@ -91,7 +94,7 @@ retrieval of HTTPS RRs in that situation. To use ECH and DoH together:
 
 ```bash
     cd $HOME/code/curl
-    LD_LIBRARY_PATH=$HOME/code/openssl ./src/curl --ech true --doh-url https://1.1.1.1/dns-query https://defo.ie/ech-check.php
+    LD_LIBRARY_PATH=$HOME/code/openssl-local-inst/lib ./src/curl --ech true --doh-url
     ...
     SSL_ECH_STATUS: success <img src="greentick-small.png" alt="good" /> <br/>
     ...
@@ -102,11 +105,11 @@ The output snippet above is within the HTML for the webpage, when things work.
 The above works for these test sites:
 
 ```bash
-    https://defo.ie/ech-check.php
-    https://draft-13.esni.defo.ie:8413/stats
-    https://draft-13.esni.defo.ie:8414/stats
-    https://crypto.cloudflare.com/cdn-cgi/trace
-    https://tls-ech.dev
+   
+   
+   
+   
+   
 ```
 
 We seem to have the basic thing functioning now. That list has 4 different
@@ -141,7 +144,7 @@ cut-and-paste, e.g.:
 Then paste the base64 encoded ECHConfigList onto the curl command line:
 
 ```bash
-    LD_LIBRARY_PATH=$HOME/code/openssl ./src/curl --ech ecl:AED+DQA8PAAgACD8WhlS7VwEt5bf3lekhHvXrQBGDrZh03n/LsNtAodbUAAEAAEAAQANY292ZXIuZGVmby5pZQAA https://defo.ie/ech-check.php
+    LD_LIBRARY_PATH=$HOME/code/openssl ./src/curl --ech ecl:AED+DQA8PAAgACD8WhlS7VwEt5bf3lekhHvXrQBGDrZh03n/LsNtAodbUAAEAAEAAQANY292ZXIuZGVmby5pZQAA
     ...
     SSL_ECH_STATUS: success <img src="greentick-small.png" alt="good" /> <br/>
     ...
@@ -153,7 +156,7 @@ If you paste in the wrong ECHConfigList (it changes hourly for ``defo.ie``) you
 should get an error like this:
 
 ```bash
-    LD_LIBRARY_PATH=$HOME/code/openssl ./src/curl -vvv --ech ecl:AED+DQA8yAAgACDRMQo+qYNsNRNj+vfuQfFIkrrUFmM4vogucxKj/4nzYgAEAAEAAQANY292ZXIuZGVmby5pZQAA https://defo.ie/ech-check.php
+    LD_LIBRARY_PATH=$HOME/code/openssl ./src/curl -vvv --ech ecl:AED+DQA8yAAgACDRMQo+qYNsNRNj+vfuQfFIkrrUFmM4vogucxKj/4nzYgAEAAEAAQANY292ZXIuZGVmby5pZQAA
     ...
     * OpenSSL/3.2.0: error:0A00054B:SSL routines::ech required
     ...
@@ -161,14 +164,14 @@ should get an error like this:
 
 There is a reason to keep this command line option - for use before publishing
 the ECHConfigList in the DNS (e.g. as per the Internet-draft
-[A well-known URI for publishing ECHConfigList values](https://datatracker.ietf.org/doc/draft-ietf-tls-wkech/).
+[A well-known URI for publishing ECHConfigList values]
 
 If you do use a wrong ECHConfigList value, then the server might return a
 good value, via the ``retry_configs`` mechanism. You can see that value in
 the verbose output, e.g.:
 
 ```bash
-    LD_LIBRARY_PATH=$HOME/code/openssl ./src/curl -vvv --ech ecl:AED+DQA8yAAgACDRMQo+qYNsNRNj+vfuQfFIkrrUFmM4vogucxKj/4nzYgAEAAEAAQANY292ZXIuZGVmby5pZQAA https://defo.ie/ech-check.php
+    LD_LIBRARY_PATH=$HOME/code/openssl ./src/curl -vvv --ech ecl:AED+DQA8yAAgACDRMQo+qYNsNRNj+vfuQfFIkrrUFmM4vogucxKj/4nzYgAEAAEAAQANY292ZXIuZGVmby5pZQAA
     ...
 * ECH: retry_configs AQD+DQA8DAAgACBvYqJy+Hgk33wh/ZLBzKSPgwxeop7gvojQzfASq7zeZQAEAAEAAQANY292ZXIuZGVmby5pZQAA/g0APEMAIAAgXkT5r4cYs8z19q5rdittyIX8gfQ3ENW4wj1fVoiJZBoABAABAAEADWNvdmVyLmRlZm8uaWUAAP4NADw2ACAAINXSE9EdXzEQIJZA7vpwCIQsWqsFohZARXChgPsnfI1kAAQAAQABAA1jb3Zlci5kZWZvLmllAAD+DQA8cQAgACASeiD5F+UoSnVoHvA2l1EifUVMFtbVZ76xwDqmMPraHQAEAAEAAQANY292ZXIuZGVmby5pZQAA
 * ECH: retry_configs for defo.ie from cover.defo.ie, 319
@@ -185,7 +188,7 @@ so one can set the DoH URL and enable ECH that way:
 
 ```bash
     cat ~/.curlrc
-    doh-url=https://one.one.one.one/dns-query
+    doh-url
     silent
     ech=TRUE
 ```
@@ -219,7 +222,7 @@ should unset ``LD_LIBRARY_PATH`` before doing that or use a different shell.
 With all that setup as above the command line gets simpler:
 
 ```bash
-    ./src/curl https://defo.ie/ech-check.php
+    ./src/curl
     ...
     SSL_ECH_STATUS: success <img src="greentick-small.png" alt="good" /> <br/>
     ...
@@ -318,7 +321,7 @@ used by curl, so here's how:
 
 ```bash
     cd $HOME/code
-    git clone https://github.com/curl/wolfssl
+    git clone
     cd wolfssl
     ./autogen.sh
     ./configure --prefix=$HOME/code/wolfssl/inst --enable-ech --enable-debug --enable-opensslextra
@@ -333,15 +336,15 @@ important or else we get build problems with curl below.
 
 Probably, a basic WolfSSL install would work but we made a fork in
 case we wanted to change something, e.g. see
-[this issue](https://github.com/wolfSSL/wolfssl/issues/6774) or
-[this bug](https://github.com/wolfSSL/wolfssl/issues/6791) - the latter
+[this issue] or
+[this bug] - the latter
 does currently require a change.
 
 Let's use that to build curl...
 
 ```bash
     cd $HOME/code
-    git clone https://github.com/curl/curl
+    git clone
     cd curl
     autoreconf -fi
     ./configure --with-wolfssl=$HOME/code/wolfssl/inst --enable-ech --enable-httpsrr
@@ -349,8 +352,8 @@ Let's use that to build curl...
 ```
 
 Right now, this works almost the same as the OpenSSL variant, but not with
-[this web site](https://tls-ech.dev), (see [same
-issue](https://github.com/wolfSSL/wolfssl/issues/6774), and for some reason
+[this web site] (see [same
+issue] and for some reason
 ``--insecure`` is needed.
 
 To run against a localhost ``s_server`` for testing:
@@ -365,7 +368,7 @@ In another window:
 
 ```bash
     cd $HOME/code/curl-wo/
-    ./src/curl -vvv --insecure  --connect-to foo.example.com:8443:localhost:8443  https://foo.example.com:8443/stats --ech ecl:AD7+DQA6uwAgACBix2B78sX+EQhEbxMspDOc8Z3xVS5aQpYP0Cxpc2AWPAAEAAEAAQALZXhhbXBsZS5jb20AAA==
+    ./src/curl -vvv --insecure  --connect-to foo.example.com:8443:localhost:8443  --ech ecl:AD7+DQA6uwAgACBix2B78sX+EQhEbxMspDOc8Z3xVS5aQpYP0Cxpc2AWPAAEAAEAAQALZXhhbXBsZS5jb20AAA==
 ```
 
 ### Changes to support WolfSSL
@@ -394,7 +397,7 @@ a compile time choice for wolfSSL, but a runtime choice for OpenSSL or
 boringssl. (Both are reasonable.)
 
 There is also a current
-[bug/issue](https://github.com/wolfSSL/wolfssl/issues/6802) that the wolfSSL
+[bug/issue] that the wolfSSL
 client support for ECH seems to not correctly support HelloRetryRequest.
 WolfSSL also seems to send a GREASE ECH extension regardless of the
 ``--ech false`` setting as of now.
@@ -409,7 +412,7 @@ one of those:
 
 ```bash
     cd $HOME/code
-    git clone https://boringssl.googlesource.com/boringssl
+    git clone
     cd boringssl
     cmake -DCMAKE_INSTALL_PREFIX:PATH=$HOME/code/boringssl/inst -DBUILD_SHARED_LIBS=1
     make
@@ -421,7 +424,7 @@ Then:
 
 ```bash
     cd $HOME/code
-    git clone https://github.com/curl/curl
+    git clone
     cd curl
     autoreconf -fi
     ./configure --with-ssl=$HOME/code/boringssl/inst --enable-ech --enable-httpsrr
