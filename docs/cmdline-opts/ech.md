@@ -4,7 +4,7 @@ SPDX-License-Identifier: curl
 Long: ech
 Arg: <config>
 Help: Configure Encrypted Client Hello (ECH) for use with the TLS session
-Added: 8.6.1
+Added: 8.8.0
 Category: tls ECH
 Multi: single
 See-also:
