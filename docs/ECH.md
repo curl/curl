@@ -277,7 +277,7 @@ tool.
 
 - We have not yet implemented tests as part of the usual curl test harness as
   doing so would seem to require re-implementing an ECH-enabled server as part
-of the curl test haress.  For now, we have a ``./tests/ech_test.sh`` script
+of the curl test harness.  For now, we have a ``./tests/ech_test.sh`` script
 that attempts ECH with various test servers and with many combinations of the
 allowed command line options. While that is a useful test and has find issues,
 it is not comprehensive and we're not (as yet) sure what would be the right
@@ -376,7 +376,7 @@ There are some known issues with the ECH implementation in WolfSSL:
   [this ECH test web site](https://tls-ech.dev) and any other similarly configured
   sites.
 - There is also an issue related to so-called middlebox compatibility mode.
-  [Middlebox compatibility issue](https://github.com/wolfSSL/wolfssl/issues/6774) 
+  [middlebox compatibility issue](https://github.com/wolfSSL/wolfssl/issues/6774) 
 
 ### Code changes to support WolfSSL
 
@@ -446,7 +446,7 @@ LD_LIBRARY_PATH=$HOME/code/openssl:./lib/.libs gdb ./src/.libs/curl
 
 It can be useful to be able to run against a localhost OpenSSL ``s_server``
 for testing. We have published instructions for such 
-[localhosts tests](https://github.com/defo-project/ech-dev-utils/blob/main/howtos/localhost-tests.md)
+[localhost tests](https://github.com/defo-project/ech-dev-utils/blob/main/howtos/localhost-tests.md)
 in another repository. Once you have that set up, you can start a server
 and then run curl against that:
 
