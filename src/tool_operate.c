@@ -2721,10 +2721,14 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
                      !strcmp(first_arg, "--verbose"))) {
       configdebug = TRUE;
     }
-    parseconfig(curlrc, global); /* ignore possible failure */
+    if(parseconfig(curlrc, global)) {
+      if(curlrc)
+        errorf(global, "The config file provided in CURL_RC trigged an error");
+      result = CURLE_FAILED_INIT;
+    }
 
     /* If we had no arguments then make sure a url was specified in .curlrc */
-    if((argc < 2) && (!global->first->url_list)) {
+    else if((argc < 2) && (!global->first->url_list)) {
       helpf(tool_stderr, NULL);
       result = CURLE_FAILED_INIT;
     }
