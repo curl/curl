@@ -35,8 +35,10 @@
 #include "warnless.h"
 #include <curl/curl.h>
 #include <librtmp/rtmp.h>
+
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
 #include "curl_memory.h"
-/* The last #include file should be: */
 #include "memdebug.h"
 
 #if defined(_WIN32) && !defined(USE_LWIPSOCK)
@@ -341,4 +343,20 @@ static ssize_t rtmp_send(struct Curl_easy *data, int sockindex,
 
   return num;
 }
+
+void Curl_rtmp_version(char *version, size_t len)
+{
+  char suff[2];
+  if(RTMP_LIB_VERSION & 0xff) {
+    suff[0] = (RTMP_LIB_VERSION & 0xff) + 'a' - 1;
+    suff[1] = '\0';
+  }
+  else
+    suff[0] = '\0';
+
+  msnprintf(version, len, "librtmp/%d.%d%s",
+            RTMP_LIB_VERSION >> 16, (RTMP_LIB_VERSION >> 8) & 0xff,
+            suff);
+}
+
 #endif  /* USE_LIBRTMP */

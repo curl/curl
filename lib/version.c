@@ -55,6 +55,7 @@
 
 #ifdef USE_LIBRTMP
 #include <librtmp/rtmp.h>
+#include "curl_rtmp.h"
 #endif
 
 #ifdef HAVE_LIBZ
@@ -238,20 +239,8 @@ char *curl_version(void)
   src[i++] = h3_version;
 #endif
 #ifdef USE_LIBRTMP
-  {
-    char suff[2];
-    if(RTMP_LIB_VERSION & 0xff) {
-      suff[0] = (RTMP_LIB_VERSION & 0xff) + 'a' - 1;
-      suff[1] = '\0';
-    }
-    else
-      suff[0] = '\0';
-
-    msnprintf(rtmp_version, sizeof(rtmp_version), "librtmp/%d.%d%s",
-              RTMP_LIB_VERSION >> 16, (RTMP_LIB_VERSION >> 8) & 0xff,
-              suff);
-    src[i++] = rtmp_version;
-  }
+  Curl_rtmp_version(rtmp_version, sizeof(rtmp_version));
+  src[i++] = rtmp_version;
 #endif
 #ifdef USE_HYPER
   msnprintf(hyper_buf, sizeof(hyper_buf), "Hyper/%s", hyper_version());
@@ -568,7 +557,8 @@ static curl_version_info_data version_info = {
   NULL, /* zstd version */
   NULL, /* Hyper version */
   NULL, /* gsasl version */
-  feature_names
+  feature_names,
+  NULL  /* rtmp version */
 };
 
 curl_version_info_data *curl_version_info(CURLversion stamp)
@@ -675,6 +665,14 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
 
   feature_names[n] = NULL;  /* Terminate array. */
   version_info.features = features;
+
+#ifdef USE_LIBRTMP
+  {
+    static char rtmp_version[30];
+    Curl_rtmp_version(rtmp_version, sizeof(rtmp_version));
+    version_info.rtmp_version = rtmp_version;
+  }
+#endif
 
   return &version_info;
 }

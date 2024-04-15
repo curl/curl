@@ -104,6 +104,9 @@ typedef struct {
   /* when 'age' is CURLVERSION_ELEVENTH or higher (>= 7.87.0), the members
      below exist */
   const char *const *feature_names; /* Feature names. */
+  /* when 'age' is CURLVERSION_TWELFTH or higher (>= 8.8.0), the members
+     below exist */
+  const char *const *rtmp_version; /* human readable string */
 } curl_version_info_data;
 ~~~
 
@@ -380,4 +383,3 @@ Added in 7.10
 # RETURN VALUE
 
 A pointer to a curl_version_info_data struct.
-curl_version(3)
