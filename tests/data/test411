@@ -28,7 +28,7 @@ none
 # Verify data after the test has been "shot"
 <verify>
 <stderr mode="text">
-curl: cannot read config from '%LOGDIR/missing'
+config: could not read '%LOGDIR/missing'
 curl: option -K: error encountered when reading a file
 %if manual
 curl: try 'curl --help' or 'curl --manual' for more information

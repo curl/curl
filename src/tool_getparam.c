@@ -2376,10 +2376,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       config->doh_insecure_ok = toggle;
       break;
     case C_CONFIG: /* --config */
-      if(parseconfig(nextarg, global)) {
-        errorf(global, "cannot read config from '%s'", nextarg);
+      if(parseconfig(nextarg, global))
         err = PARAM_READ_ERROR;
-      }
       break;
     case C_LIST_ONLY: /* --list-only */
       config->dirlistonly = toggle; /* only list the names of the FTP dir */
