@@ -24,18 +24,9 @@
  *
  ***************************************************************************/
 
-/* for macOS and iOS targets */
-#if defined(__APPLE__)
-#if defined __has_include
-#if __has_include(<unicode/uidna.h>)
-#define HAVE_APPLE_IDN 1
-#endif
-#endif
-#endif
-
 bool Curl_is_ASCII_name(const char *hostname);
 CURLcode Curl_idnconvert_hostname(struct hostname *host);
-#if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN) || defined(HAVE_APPLE_IDN)
+#if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN) || defined(USE_APPLE_IDN)
 #define USE_IDN
 void Curl_free_idnconverted_hostname(struct hostname *host);
 CURLcode Curl_idn_decode(const char *input, char **output);

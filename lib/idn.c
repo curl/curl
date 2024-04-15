@@ -51,7 +51,7 @@
 #include "memdebug.h"
 
 /* for macOS and iOS targets */
-#if defined(HAVE_APPLE_IDN)
+#if defined(USE_APPLE_IDN)
 #include <unicode/uidna.h>
 
 static CURLcode mac_idn_to_ascii(const char *in, char **out)
@@ -238,7 +238,7 @@ static CURLcode idn_decode(const char *input, char **output)
     result = CURLE_NOT_BUILT_IN;
 #elif defined(USE_WIN32_IDN)
   result = win32_idn_to_ascii(input, &decoded);
-#elif defined(HAVE_APPLE_IDN)
+#elif defined(USE_APPLE_IDN)
   result = mac_idn_to_ascii(input, &decoded);
 #endif
   if(!result)
@@ -257,7 +257,7 @@ static CURLcode idn_encode(const char *puny, char **output)
   CURLcode result = win32_ascii_to_idn(puny, &enc);
   if(result)
     return result;
-#elif defined(HAVE_APPLE_IDN)
+#elif defined(USE_APPLE_IDN)
   CURLcode result = mac_ascii_to_idn(puny, &enc);
   if(result)
     return result;
