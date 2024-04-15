@@ -1085,7 +1085,7 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
   int oldstate;
   int newstate;
   bool recursive = FALSE;
-  bool keep_changed, unpause_read, unpause_write;
+  bool keep_changed, unpause_read, unpause_write, not_all_paused;
 
   if(!GOOD_EASY_HANDLE(data) || !data->conn)
     /* crazy input, don't continue */
@@ -1102,60 +1102,55 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
     ((action & CURLPAUSE_SEND)?KEEP_SEND_PAUSE:0);
 
   keep_changed = ((newstate & (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE)) != oldstate);
+  not_all_paused = (newstate & (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) !=
+                   (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE);
   unpause_read = ((k->keepon & ~newstate & KEEP_SEND_PAUSE) &&
                   (data->mstate == MSTATE_PERFORMING ||
                    data->mstate == MSTATE_RATELIMITING));
-  unpause_write = !(newstate & KEEP_RECV_PAUSE);
+  unpause_write = !(newstate & KEEP_RECV_PAUSE) &&
+                  Curl_cwriter_is_paused(data);
 
-  if(!keep_changed) {
-    /* Not changing any recv/send state, check out writer and return */
-    if(unpause_write && Curl_cwriter_is_paused(data)) {
-      /* This happens if the send/recv part of the transfer is finished,
-       * but we have still paused data in the client writer. */
-      Curl_expire(data, 0, EXPIRE_RUN_NOW);
-      return Curl_cwriter_unpause(data);
+  /* Set the new keepon state, so it takes effect no matter what error
+   * may happen afterwards. */
+  k->keepon = newstate;
+
+  /* If not completely pausing both directions now, run again in any case. */
+  if(not_all_paused) {
+    Curl_expire(data, 0, EXPIRE_RUN_NOW);
+    /* reset the too-slow time keeper */
+    data->state.keeps_speed.tv_sec = 0;
+    /* Simulate socket events on next run for unpaused directions */
+    if(!(newstate & KEEP_SEND_PAUSE))
+      data->state.select_bits |= CURL_CSELECT_OUT;
+    if(!(newstate & KEEP_RECV_PAUSE))
+      data->state.select_bits |= CURL_CSELECT_IN;
+    /* Tell application to update its timers. */
+    if(data->multi) {
+      if(Curl_update_timer(data->multi)) {
+        result = CURLE_ABORTED_BY_CALLBACK;
+        goto out;
+      }
     }
-    DEBUGF(infof(data, "pause: no change, early return"));
-    return CURLE_OK;
   }
 
-  /* Unpause parts in active mime tree. */
+  /* Unpause client reader first. This does not invoke app callbacks and
+   * errors are least expected. */
   if(unpause_read) {
     result = Curl_creader_unpause(data);
     if(result)
-      return result;
+      goto out;
   }
-
-  /* put it back in the keepon */
-  k->keepon = newstate;
-
+  /* Unpause writer which tries to flush buffered data, calling possible
+   * application callbacks that may error. */
   if(unpause_write) {
     Curl_conn_ev_data_pause(data, FALSE);
     result = Curl_cwriter_unpause(data);
     if(result)
-      return result;
+      goto out;
   }
 
-  /* if there's no error and we're not pausing both directions, we want
-     to have this handle checked soon */
-  if((newstate & (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) !=
-     (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) {
-    Curl_expire(data, 0, EXPIRE_RUN_NOW); /* get this handle going again */
-
-    /* reset the too-slow time keeper */
-    data->state.keeps_speed.tv_sec = 0;
-
-    if(!Curl_cwriter_is_paused(data))
-      /* if not pausing again, force a recv/send check of this connection as
-         the data might've been read off the socket already */
-      data->state.select_bits = CURL_CSELECT_IN | CURL_CSELECT_OUT;
-    if(data->multi) {
-      if(Curl_update_timer(data->multi))
-        return CURLE_ABORTED_BY_CALLBACK;
-    }
-  }
-
-  if(!data->state.done)
+out:
+  if(!result && !data->state.done && keep_changed)
     /* This transfer may have been moved in or out of the bundle, update the
        corresponding socket callback, if used */
     result = Curl_updatesocket(data);
