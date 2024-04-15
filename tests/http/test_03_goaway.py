@@ -85,6 +85,8 @@ class TestGoAway:
             pytest.skip("msh3 stalls here")
         if proto == 'h3' and env.curl_uses_lib('quiche'):
             pytest.skip("does not work in CI, but locally for some reason")
+        if proto == 'h3' and env.curl_uses_ossl_quic():
+            pytest.skip('OpenSSL QUIC fails here')
         count = 3
         self.r = None
         def long_run():

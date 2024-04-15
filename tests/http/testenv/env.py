@@ -261,6 +261,12 @@ class Env:
         return libname.lower() in Env.CONFIG.curl_props['libs']
 
     @staticmethod
+    def curl_uses_ossl_quic() -> bool:
+        if Env.have_h3_curl():
+            return not Env.curl_uses_lib('ngtcp2') and Env.curl_uses_lib('nghttp3')
+        return False
+
+    @staticmethod
     def curl_has_feature(feature: str) -> bool:
         return feature.lower() in Env.CONFIG.curl_props['features']
 

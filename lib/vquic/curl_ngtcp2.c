@@ -393,6 +393,7 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
   nghttp3_ssize nconsumed;
   int fin = (flags & NGTCP2_STREAM_DATA_FLAG_FIN) ? 1 : 0;
   struct Curl_easy *data = stream_user_data;
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
   (void)offset;
   (void)data;
 
@@ -401,10 +402,14 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
   CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] read_stream(len=%zu) -> %zd",
               stream_id, buflen, nconsumed);
   if(nconsumed < 0) {
-    if(!data) {
+    /* consume all bytes */
+    ngtcp2_conn_extend_max_stream_offset(tconn, stream_id, buflen);
+    ngtcp2_conn_extend_max_offset(tconn, buflen);
+    if(!data || (stream && stream->reset) ||
+      NGHTTP3_ERR_H3_STREAM_CREATION_ERROR == (int)nconsumed) {
       struct Curl_easy *cdata = CF_DATA_CURRENT(cf);
-      CURL_TRC_CF(cdata, cf, "[%" CURL_PRId64 "] nghttp3 error on stream not "
-                  "used by us, ignored", stream_id);
+      CURL_TRC_CF(cdata, cf, "[%" CURL_PRId64 "] discard data for stream %s",
+                  stream_id, (data && stream)? "reset" : "unknown");
       return 0;
     }
     ngtcp2_ccerr_set_application_error(
@@ -786,7 +791,11 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream3_id,
   if(result) {
     CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] DATA len=%zu, ERROR %d",
                 stream->id, blen, result);
-    return NGHTTP3_ERR_CALLBACK_FAILURE;
+    nghttp3_conn_close_stream(ctx->h3conn, stream->id,
+                              NGHTTP3_H3_REQUEST_CANCELLED);
+    ngtcp2_conn_extend_max_stream_offset(ctx->qconn, stream->id, blen);
+    ngtcp2_conn_extend_max_offset(ctx->qconn, blen);
+    return 0;
   }
   if(blen) {
     CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] ACK %zu bytes of DATA",
@@ -1288,6 +1297,7 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
   if(rc) {
     failf(data, "can get bidi streams");
     *err = CURLE_SEND_ERROR;
+    nwritten = -1;
     goto out;
   }
   stream->id = (curl_int64_t)sid;
