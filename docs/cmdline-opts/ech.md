@@ -6,6 +6,7 @@ Arg: <config>
 Help: Configure Encrypted Client Hello (ECH) for use with the TLS session
 Added: 8.8.0
 Category: tls ECH
+Protocols: HTTPS
 Multi: single
 See-also:
   - doh-url
