@@ -142,6 +142,17 @@ static int err(void)
   exit(2);
 }
 
+static void usage(const char *msg)
+{
+  if(msg)
+    fprintf(stderr, "%s\n", msg);
+  fprintf(stderr,
+    "usage: [options] url\n"
+    "  pause downloads with following options:\n"
+    "  -V http_version (http/1.1, h2, h3) http version to use\n"
+  );
+}
+
 struct handle
 {
   int idx;
@@ -196,15 +207,43 @@ int main(int argc, char *argv[])
   char *url, *host = NULL, *port = NULL;
   int all_paused = 0;
   int resume_round = -1;
+  int http_version = CURL_HTTP_VERSION_2_0;
+  char ch;
 
-  if(argc != 2) {
+  while((ch = getopt(argc, argv, "hV:")) != -1) {
+    switch(ch) {
+    case 'h':
+      usage(NULL);
+      return 2;
+    case 'V': {
+      if(!strcmp("http/1.1", optarg))
+        http_version = CURL_HTTP_VERSION_1_1;
+      else if(!strcmp("h2", optarg))
+        http_version = CURL_HTTP_VERSION_2_0;
+      else if(!strcmp("h3", optarg))
+        http_version = CURL_HTTP_VERSION_3ONLY;
+      else {
+        usage("invalid http version");
+        return 1;
+      }
+      break;
+    }
+    default:
+     usage("invalid option");
+     return 1;
+    }
+  }
+  argc -= optind;
+  argv += optind;
+
+  if(argc != 1) {
     fprintf(stderr, "ERROR: need URL as argument\n");
     return 2;
   }
-  url = argv[1];
+  url = argv[0];
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
-  curl_global_trace("ids,time,http/2");
+  curl_global_trace("ids,time,http/2,http/3");
 
   cu = curl_url();
   if(!cu) {
@@ -236,6 +275,7 @@ int main(int argc, char *argv[])
     handles[i].fail_write = 1;
     handles[i].h = curl_easy_init();
     if(!handles[i].h ||
+      curl_easy_setopt(handles[i].h, CURLOPT_HTTP_VERSION, http_version) ||
       curl_easy_setopt(handles[i].h, CURLOPT_WRITEFUNCTION, cb) != CURLE_OK ||
       curl_easy_setopt(handles[i].h, CURLOPT_WRITEDATA, &handles[i])
         != CURLE_OK ||
