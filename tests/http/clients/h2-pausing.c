@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
   int all_paused = 0;
   int resume_round = -1;
   int http_version = CURL_HTTP_VERSION_2_0;
-  char ch;
+  int ch;
 
   while((ch = getopt(argc, argv, "hV:")) != -1) {
     switch(ch) {
