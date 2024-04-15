@@ -53,7 +53,7 @@ want to debug curl then you should add ``--enable-debug`` to the ``configure``
 command.
 
 With the above build, I still need to set ``LD_LIBRARY_PATH`` to run the
-built version of curl in my development environment (ubuntu 23.10).
+built version of curl in my development environment (Ubuntu 23.10).
 
 ## Building with cmake
 
