@@ -409,7 +409,7 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
       NGHTTP3_ERR_H3_STREAM_CREATION_ERROR == (int)nconsumed) {
       struct Curl_easy *cdata = CF_DATA_CURRENT(cf);
       CURL_TRC_CF(cdata, cf, "[%" CURL_PRId64 "] discard data for stream %s",
-                  stream_id, (data && stream)? "reset" : "unkown");
+                  stream_id, (data && stream)? "reset" : "unknown");
       return 0;
     }
     ngtcp2_ccerr_set_application_error(
