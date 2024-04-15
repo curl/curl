@@ -23,7 +23,7 @@ To build our ECH-enabled OpenSSL fork:
 
 ```bash
     cd $HOME/code
-    git clone
+    git clone https://github.com/defo-projec/openssl
     cd openssl
     git checkout ECH-draft-13c
     ./config --libdir=lib --prefix=$HOME/code/openssl-local-inst
@@ -37,7 +37,7 @@ To build curl ECH-enabled, making use of the above:
 
 ```bash
     cd $HOME/code
-    git clone
+    git clone https://github.com/curl/curl
     cd curl
     autoreconf -fi
     LDFLAGS="-Wl,-rpath,$HOME/code/openss-local-inst/lib/" ./configure  --with-ssl=$HOME/code/openssl-local-inst  --enable-ech --enable-httpsrr
@@ -53,39 +53,27 @@ want to debug curl then you should add ``--enable-debug`` to the ``configure``
 command.
 
 With the above build, I still need to set ``LD_LIBRARY_PATH`` to run the
-built version of curl in my development environment (Ubuntu 23.10).
+version of curl built against OpenSSL in my development environment (Ubuntu
+23.10).
 
 ## Building with cmake
 
-This is not working cleanly yet, but to build with cmake:
+To build with cmake:
 
 ```bash
     cd $HOME/code
-    git clone
+    git clone https://github.com/curl/curl
     cd curl
     mkdir build
     cd build
-    cmake -DOPENSSL_ROOT_DIR=$HOME/code/openssl -DUSE_ECH=1 -DUSE_HTTPSRR=1 -DUSE_MANUAL=1 ..
+    cmake -DOPENSSL_ROOT_DIR=$HOME/code/openssl -DUSE_ECH=1 -DUSE_HTTPSRR=1 ..
     ...
-    make
-    ...
-    [85%] Generating ../curl.1
-    .../code/curl/docs/cmdline-opts::1:ERROR: unrecognized Multi: ''
-```
-
-The ``USE_MANUAL`` above avoids what seems an odd error with
-``tool_hugehelp.c`` The build still however fails when trying to make
-``docs/curl.1`` so I fixed that manually for now:
-
-```bash
-    cd $HOME/code/curl/build
-    $HOME/code/curl/docs/cmdline-opts/gen.pl mainpage $HOME/code/ $HOME/code/curl/docs/cmdline-opts/*.d >docs/curl.1
     make
     ...
     [100%] Built target curl
 ```
 
-We finally get a binary, and our ``tests/ech_test.sh`` script seems happy.
+Our ``tests/ech_test.sh`` script also seems happy with this build.
 
 ## Using ECH and DoH
 
@@ -94,7 +82,7 @@ retrieval of HTTPS RRs in that situation. To use ECH and DoH together:
 
 ```bash
     cd $HOME/code/curl
-    LD_LIBRARY_PATH=$HOME/code/openssl-local-inst/lib ./src/curl --ech true --doh-url
+    LD_LIBRARY_PATH=$HOME/code/openssl ./src/curl --ech true --doh-url
     ...
     SSL_ECH_STATUS: success <img src="greentick-small.png" alt="good" /> <br/>
     ...
@@ -321,7 +309,7 @@ used by curl, so here's how:
 
 ```bash
     cd $HOME/code
-    git clone
+    git clone https://github.com/sftcd/wolfssl
     cd wolfssl
     ./autogen.sh
     ./configure --prefix=$HOME/code/wolfssl/inst --enable-ech --enable-debug --enable-opensslextra
@@ -336,24 +324,23 @@ important or else we get build problems with curl below.
 
 Probably, a basic WolfSSL install would work but we made a fork in
 case we wanted to change something, e.g. see
-[this issue] or
-[this bug] - the latter
+[this issue](https://github.com/wolfSSL/wolfssl/issues/6774) or
+[this bug](https://github.com/wolfSSL/wolfssl/issues/6791) - the latter
 does currently require a change.
 
 Let's use that to build curl...
 
 ```bash
     cd $HOME/code
-    git clone
+    git clone https://github.com/curl/curl
     cd curl
     autoreconf -fi
     ./configure --with-wolfssl=$HOME/code/wolfssl/inst --enable-ech --enable-httpsrr
     make
 ```
-
 Right now, this works almost the same as the OpenSSL variant, but not with
-[this web site] (see [same
-issue] and for some reason
+[this web site](https://tls-ech.dev), (see [same
+issue](https://github.com/wolfSSL/wolfssl/issues/6774), and for some reason
 ``--insecure`` is needed.
 
 To run against a localhost ``s_server`` for testing:
@@ -397,7 +384,7 @@ a compile time choice for wolfSSL, but a runtime choice for OpenSSL or
 boringssl. (Both are reasonable.)
 
 There is also a current
-[bug/issue] that the wolfSSL
+[bug/issue](https://github.com/wolfSSL/wolfssl/issues/6802) that the wolfSSL
 client support for ECH seems to not correctly support HelloRetryRequest.
 WolfSSL also seems to send a GREASE ECH extension regardless of the
 ``--ech false`` setting as of now.
@@ -412,7 +399,7 @@ one of those:
 
 ```bash
     cd $HOME/code
-    git clone
+    git clone https://boringssl.googlesource.com/boringssl
     cd boringssl
     cmake -DCMAKE_INSTALL_PREFIX:PATH=$HOME/code/boringssl/inst -DBUILD_SHARED_LIBS=1
     make
@@ -424,7 +411,7 @@ Then:
 
 ```bash
     cd $HOME/code
-    git clone
+    git clone https://github.com/curl/curl
     cd curl
     autoreconf -fi
     ./configure --with-ssl=$HOME/code/boringssl/inst --enable-ech --enable-httpsrr
@@ -432,9 +419,6 @@ Then:
     WARNING: ech ECH HTTPSRR enabled but marked EXPERIMENTAL. Use with caution!
     make
 ```
-
-To use that you need ``LD_LIBRARY_PATH=$HOME/code/boringssl/inst/lib`` set in
-the environment, but then it works.
 
 ## Supporting ECH without DoH
 
@@ -473,15 +457,13 @@ Just a note to self as remembering this is a nuisance:
 LD_LIBRARY_PATH=$HOME/code/openssl:./lib/.libs gdb ./src/.libs/curl
 ```
 
-## Not supported so far...
+## Automated use of ``retry_configs`` not supported so far...
 
-As of now we have not:
-
-- added support for using ``retry_config`` handling in the application - for a
-  command line tool, one can just use ``dig`` (or ``kdig``) to get the HTTPS
-  RR and pass the ECHConfigList from that on the command line, if needed, or
-  one can access the value from command line output in verbose more and then
-  re-use that in another invocation.
+As of now we have not added support for using ``retry_config`` handling in the
+application - for a command line tool, one can just use ``dig`` (or ``kdig``)
+to get the HTTPS RR and pass the ECHConfigList from that on the command line,
+if needed, or one can access the value from command line output in verbose more
+and then re-use that in another invocation.
 
 Both our OpenSSL fork and boringssl have APIs for both controlling GREASE and
 accessing and logging ``retry_configs``, it seems WolfSSL has neither.
