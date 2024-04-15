@@ -275,7 +275,6 @@ int main(int argc, char *argv[])
     handles[i].fail_write = 1;
     handles[i].h = curl_easy_init();
     if(!handles[i].h ||
-      curl_easy_setopt(handles[i].h, CURLOPT_HTTP_VERSION, http_version) ||
       curl_easy_setopt(handles[i].h, CURLOPT_WRITEFUNCTION, cb) != CURLE_OK ||
       curl_easy_setopt(handles[i].h, CURLOPT_WRITEDATA, &handles[i])
         != CURLE_OK ||
@@ -289,6 +288,7 @@ int main(int argc, char *argv[])
       curl_easy_setopt(handles[i].h, CURLOPT_URL, url) != CURLE_OK) {
       err();
     }
+    curl_easy_setopt(handles[i].h, CURLOPT_HTTP_VERSION, (long)http_version);
   }
 
   multi_handle = curl_multi_init();
