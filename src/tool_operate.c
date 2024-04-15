@@ -2821,7 +2821,8 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
     }
     if(parseconfig(curlrc, global)) {
       if(curlrc)
-        errorf(global, "The config file provided in CURL_RC trigged an error");
+        errorf(global,
+               "The config file provided in CURL_RC triggered an error");
       result = CURLE_FAILED_INIT;
     }
 
