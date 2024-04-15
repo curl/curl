@@ -115,8 +115,14 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
 #endif
   }
   else {
-    if(strcmp(filename, "-"))
+    if(strcmp(filename, "-")) {
       file = fopen(filename, FOPEN_READTEXT);
+
+      if(!file) {
+        msgf(global, "config: ", "could not read '%s'", filename);
+        rc = 1;
+      }
+    }
     else
       file = stdin;
   }
@@ -294,8 +300,6 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
     if(fileerror)
       rc = 1;
   }
-  else
-    rc = 1; /* couldn't open the file */
 
   free(pathalloc);
   return rc;
