@@ -22,7 +22,6 @@
  1.3 struct lifreq
  1.4 Better and more sharing
  1.5 get rid of PATH_MAX
- 1.6 native IDN support on macOS
  1.8 CURLOPT_RESOLVE for any port number
  1.9 Cache negative name resolves
  1.10 auto-detect proxy
@@ -250,16 +249,6 @@
  Currently the libssh2 SSH based code uses it, but to remove PATH_MAX from
  there we need libssh2 to properly tell us when we pass in a too small buffer
  and its current API (as of libssh2 1.2.7) does not.
-
-1.6 native IDN support on macOS
-
- On recent macOS versions, the getaddrinfo() function itself has built-in IDN
- support. By setting the AI_CANONNAME flag, the function will return the
- encoded name in the ai_canonname struct field in the returned information.
- This could be used by curl on macOS when built without a separate IDN library
- and an IDN host name is used in a URL.
-
- See initial work in https://github.com/curl/curl/pull/5371
 
 1.8 CURLOPT_RESOLVE for any port number
 
