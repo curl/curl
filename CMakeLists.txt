@@ -875,7 +875,7 @@ if(WIN32)
 endif()
 
 if(APPLE)
-  option(USE_APPLE_IDN "Use Apple built-in IDN support" ON)
+  option(USE_APPLE_IDN "Use Apple built-in IDN support" OFF)
   if(USE_APPLE_IDN)
     cmake_push_check_state()
     set(CMAKE_REQUIRED_LIBRARIES "icucore")
