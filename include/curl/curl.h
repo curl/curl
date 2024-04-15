@@ -3038,17 +3038,18 @@ CURL_EXTERN CURLSHcode curl_share_cleanup(CURLSH *share);
  */
 
 typedef enum {
-  CURLVERSION_FIRST,
-  CURLVERSION_SECOND,
-  CURLVERSION_THIRD,
-  CURLVERSION_FOURTH,
-  CURLVERSION_FIFTH,
-  CURLVERSION_SIXTH,
-  CURLVERSION_SEVENTH,
-  CURLVERSION_EIGHTH,
-  CURLVERSION_NINTH,
-  CURLVERSION_TENTH,
-  CURLVERSION_ELEVENTH,
+  CURLVERSION_FIRST,    /* 7.10 */
+  CURLVERSION_SECOND,   /* 7.11.1 */
+  CURLVERSION_THIRD,    /* 7.12.0 */
+  CURLVERSION_FOURTH,   /* 7.16.1 */
+  CURLVERSION_FIFTH,    /* 7.57.0 */
+  CURLVERSION_SIXTH,    /* 7.66.0 */
+  CURLVERSION_SEVENTH,  /* 7.70.0 */
+  CURLVERSION_EIGHTH,   /* 7.72.0 */
+  CURLVERSION_NINTH,    /* 7.75.0 */
+  CURLVERSION_TENTH,    /* 7.77.0 */
+  CURLVERSION_ELEVENTH, /* 7.87.0 */
+  CURLVERSION_TWELFTH,  /* 8.8.0 */
   CURLVERSION_LAST /* never actually use this */
 } CURLversion;
 
@@ -3057,7 +3058,7 @@ typedef enum {
    meant to be a built-in version number for what kind of struct the caller
    expects. If the struct ever changes, we redefine the NOW to another enum
    from above. */
-#define CURLVERSION_NOW CURLVERSION_ELEVENTH
+#define CURLVERSION_NOW CURLVERSION_TWELFTH
 
 struct curl_version_info_data {
   CURLversion age;          /* age of the returned struct */
@@ -3117,6 +3118,9 @@ struct curl_version_info_data {
   /* These fields were added in CURLVERSION_ELEVENTH */
   /* feature_names is terminated by an entry with a NULL feature name */
   const char * const *feature_names;
+
+  /* These fields were added in CURLVERSION_TWELFTH */
+  const char *rtmp_version; /* human readable string. */
 };
 typedef struct curl_version_info_data curl_version_info_data;
 

@@ -1130,6 +1130,7 @@ CURLVERSION_SEVENTH             7.70.0
 CURLVERSION_SIXTH               7.66.0
 CURLVERSION_TENTH               7.77.0
 CURLVERSION_THIRD               7.12.0
+CURLVERSION_TWELFTH             8.8.0
 CURLWARNING                     7.66.0
 CURLWS_BINARY                   7.86.0
 CURLWS_CLOSE                    7.86.0
