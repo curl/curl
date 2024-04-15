@@ -417,6 +417,14 @@ static int https_proxy_present(curl_version_info_data *info)
 }
 #endif
 
+#if defined(USE_SSL) && defined(USE_ECH)
+static int ech_present(curl_version_info_data *info)
+{
+  (void) info;
+  return Curl_ssl_supports(NULL, SSLSUPP_ECH);
+}
+#endif
+
 /*
  * Features table.
  *
@@ -444,6 +452,9 @@ static const struct feat features_table[] = {
 #endif
 #ifdef DEBUGBUILD
   FEATURE("Debug",       NULL,                CURL_VERSION_DEBUG),
+#endif
+#if defined(USE_SSL) && defined(USE_ECH)
+  FEATURE("ECH",         ech_present,         0),
 #endif
 #ifdef USE_GSASL
   FEATURE("gsasl",       NULL,                CURL_VERSION_GSASL),
