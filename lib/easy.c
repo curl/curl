@@ -1085,7 +1085,7 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
   int oldstate;
   int newstate;
   bool recursive = FALSE;
-  bool keep_changed, unpause_read, unpause_write, not_all_paused;
+  bool keep_changed, unpause_read, not_all_paused;
 
   if(!GOOD_EASY_HANDLE(data) || !data->conn)
     /* crazy input, don't continue */
@@ -1107,8 +1107,9 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
   unpause_read = ((k->keepon & ~newstate & KEEP_SEND_PAUSE) &&
                   (data->mstate == MSTATE_PERFORMING ||
                    data->mstate == MSTATE_RATELIMITING));
-  unpause_write = !(newstate & KEEP_RECV_PAUSE) &&
-                  Curl_cwriter_is_paused(data);
+  /* Unpausing writes is detected on the next run in
+   * transfer.c:Curl_readwrite(). This is because this may result
+   * in a transfer error if the application's callbacks fail */
 
   /* Set the new keepon state, so it takes effect no matter what error
    * may happen afterwards. */
@@ -1124,8 +1125,8 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
       data->state.select_bits |= CURL_CSELECT_OUT;
     if(!(newstate & KEEP_RECV_PAUSE))
       data->state.select_bits |= CURL_CSELECT_IN;
-    /* Tell application to update its timers. */
-    if(data->multi) {
+    /* On changes, tell application to update its timers. */
+    if(keep_changed && data->multi) {
       if(Curl_update_timer(data->multi)) {
         result = CURLE_ABORTED_BY_CALLBACK;
         goto out;
@@ -1133,18 +1134,8 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
     }
   }
 
-  /* Unpause client reader first. This does not invoke app callbacks and
-   * errors are least expected. */
   if(unpause_read) {
     result = Curl_creader_unpause(data);
-    if(result)
-      goto out;
-  }
-  /* Unpause writer which tries to flush buffered data, calling possible
-   * application callbacks that may error. */
-  if(unpause_write) {
-    Curl_conn_ev_data_pause(data, FALSE);
-    result = Curl_cwriter_unpause(data);
     if(result)
       goto out;
   }

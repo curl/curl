@@ -297,7 +297,7 @@ static CURLcode cw_out_flush_chain(struct cw_out_ctx *ctx,
 
   if(!cwbuf)
     return CURLE_OK;
-  if(data->req.keepon & KEEP_RECV_PAUSE)
+  if(ctx->paused)
     return CURLE_OK;
 
   /* write the end of the chain until it blocks or gets empty */
@@ -310,7 +310,7 @@ static CURLcode cw_out_flush_chain(struct cw_out_ctx *ctx,
       return result;
     if(*plast) {
       /* could not write last, paused again? */
-      DEBUGASSERT(data->req.keepon & KEEP_RECV_PAUSE);
+      DEBUGASSERT(ctx->paused);
       return CURLE_OK;
     }
   }
