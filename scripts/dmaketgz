@@ -25,6 +25,8 @@
 #
 ###########################################################################
 
+set -eu
+
 version="${1:-}"
 
 if [ -z "$version" ]; then
@@ -39,14 +41,10 @@ docker build \
        --build-arg GID="$(id -g)" \
        -t curl/curl .
 
-run="run --rm -it -u $(id -u):$(id -g) -v $(pwd):/usr/src -w /usr/src curl/curl"
-
-# shellcheck disable=SC2086
-# "Double quote to prevent globbing and word splitting" on the $run use below
-docker $run autoreconf -fi
-# shellcheck disable=SC2086
-docker $run ./configure --without-ssl --without-libpsl
-# shellcheck disable=SC2086
-docker $run make -sj8
-# shellcheck disable=SC2086
-docker $run ./maketgz $version
+docker run --rm -it -u "$(id -u):$(id -g)" \
+       -v "$(pwd):/usr/src" -w /usr/src curl/curl sh -c "
+  set -e
+  autoreconf -fi
+  ./configure --without-ssl --without-libpsl
+  make -sj8
+  ./maketgz $version"
