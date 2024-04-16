@@ -63,6 +63,7 @@ EXTRA_DIST =                                    \
  DISTROS.md                                     \
  DYNBUF.md                                      \
  EARLY-RELEASE.md                               \
+ ECH.md                                         \
  EXPERIMENTAL.md                                \
  FAQ                                            \
  FEATURES.md                                    \
