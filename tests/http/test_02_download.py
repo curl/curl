@@ -495,4 +495,3 @@ class TestDownload:
         r.check_exit_code(0)
         srcfile = os.path.join(httpd.docs_dir, docname)
         self.check_downloads(client, srcfile, count)
-

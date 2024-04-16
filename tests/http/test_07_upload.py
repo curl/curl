@@ -542,4 +542,3 @@ class TestUpload:
             '--expect100-timeout', f'{read_delay-1}'
         ])
         r.check_stats(count=1, http_status=200, exitcode=0)
-

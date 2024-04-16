@@ -27,16 +27,16 @@
 # Python3 program to print all combination of size r in an array of size n.
 # This is used to generate test lines in tests/ech_test.sh.
 # This will be discarded in the process of moving from experimental,
-# but is worth preserving for the moment in case of changes to the 
+# but is worth preserving for the moment in case of changes to the
 # ECH command line args
 
 def CombinationRepetitionUtil(chosen, arr, badarr, index,
                             r, start, end):
-                                
+
     # Current combination is ready,
     # print it
     if index == r:
-        # figure out if result should be good or bad and 
+        # figure out if result should be good or bad and
         # print prefix, assuming $turl does support ECH so
         # should work if given "positive" parameters
         res = 1
@@ -51,19 +51,19 @@ def CombinationRepetitionUtil(chosen, arr, badarr, index,
         for j in range(r):
             if j != 0 and chosen[j] != chosen[j-1]:
                 print(chosen[j], end = " ")
-            
+
         print()
         return
-        
+
     # When no more elements are
     # there to put in chosen[]
     if start > n:
         return
-        
+
     # Current is included, put
     # next at next location
     chosen[index] = arr[start]
-    
+
     # Current is excluded, replace it
     # with next (Note that i+1 is passed,
     # but index is not changed)
@@ -77,7 +77,7 @@ def CombinationRepetitionUtil(chosen, arr, badarr, index,
 # size n. This function mainly uses
 # CombinationRepetitionUtil()
 def CombinationRepetition(arr, badarr, n, r):
-    
+
     # A temporary array to store
     # all combination one by one
     chosen = [0] * r
@@ -96,4 +96,3 @@ n = len(arr) - 1
 CombinationRepetition(arr, badarr, n, r)
 
 # This code is contributed by Vaibhav Kumar 12.
-

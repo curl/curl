@@ -368,4 +368,3 @@ class TestProxy:
         else:
             r.check_response(count=1, http_status=200,
                              protocol='HTTP/2' if proto == 'h2' else 'HTTP/1.1')
-

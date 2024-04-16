@@ -476,4 +476,3 @@ and then re-use that in another invocation.
 
 Both our OpenSSL fork and boringssl have APIs for both controlling GREASE and
 accessing and logging ``retry_configs``, it seems WolfSSL has neither.
-

@@ -356,7 +356,7 @@ then
 # basic ECH good/bad
 for targ in "${!ech_targets[@]}"
 do
-    if [[ "$using_wolf" == "yes" ]] 
+    if [[ "$using_wolf" == "yes" ]]
     then
         case $targ in
             "draft-13.esni.defo.ie:8414" | "tls-ech.dev" | \
@@ -376,7 +376,7 @@ do
     path=${ech_targets[$targ]}
     turl="https://$host:$port/$path"
     echo "ECH check for $turl"
-    { 
+    {
         echo ""
         echo "ECH check for $turl"
     } >> "$logfile"
@@ -415,7 +415,7 @@ then
         path=${ech_targets[$targ]}
         turl="https://$host:$port/$path"
         echo "PN override check for $turl"
-        { 
+        {
             echo ""
             echo "PN override check for $turl"
         } >> "$logfile"
@@ -553,7 +553,7 @@ then
     echo "more cli_test with $turl" >> "$logfile"
 
     # The combinatorics here are handled via the tests/ech_combos.py script
-    # which produces all the relevant combinations or inputs and orders 
+    # which produces all the relevant combinations or inputs and orders
     # thereof. We have to manually assess whether or not ECH is expected to
     # work for each case.
     cli_test "$turl" 0 0
@@ -1148,4 +1148,3 @@ fi
 # add to list of bad runs (updating file age)
 echo "ECH badness at $NOW" >>"$LTOP"/bad_runs
 exit 2
-
