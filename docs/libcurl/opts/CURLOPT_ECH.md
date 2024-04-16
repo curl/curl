@@ -5,7 +5,7 @@ Title: CURLOPT_ECH
 Section: 3
 Source: libcurl
 See-also:
-  -  (3)
+  - CURLOPT_DOH_URL (3)
 Protocol:
   - TLS
 TLS-backend:
@@ -31,33 +31,43 @@ ECH is only compatible with TLSv1.3.
 
 This experimental feature requires a special build of OpenSSL, as ECH is not
 yet supported in OpenSSL releases. In contrast ECH is supported by the latest
-BoringSSL and wolfSSL releases. See [ECH.md](../../ECH.md) for details of how
-to build such an OpenSSL library.
+BoringSSL and wolfSSL releases.
 
-There is also a known issue with using wolfSSL which does not support ECH
-when the HelloRetryRequest mechanism is used.
+There is also a known issue with using wolfSSL which does not support ECH when
+the HelloRetryRequest mechanism is used.
 
-Pass a string that specifies configuration details for ECH.
-In all cases, if ECH is attempted, it may fail for various reasons.
-The keywords supported are:
+Pass a string that specifies configuration details for ECH. In all cases, if
+ECH is attempted, it may fail for various reasons. The keywords supported are:
 
 ## false
+
 Turns off ECH.
+
 ## grease
-Instructs client to emit a GREASE ECH extension.
-(The connection fails if ECH is attempted but fails.)
+
+Instructs client to emit a GREASE ECH extension. (The connection fails if ECH
+is attempted but fails.)
+
 ## true
-Instructs client to attempt ECH, if possible, but to not fail if attempting ECH is not possible.
+
+Instructs client to attempt ECH, if possible, but to not fail if attempting
+ECH is not possible.
+
 ## hard
+
 Instructs client to attempt ECH and fail if if attempting ECH is not possible.
+
 ## ecl:\<base64-value\>
-If the string starts with "ecl:" then the remainder of the string should be a base64-encoded
-ECHConfigList that is used for ECH rather than attempting to download such a value from
-the DNS.
+
+If the string starts with `ecl:` then the remainder of the string should be a
+base64-encoded ECHConfigList that is used for ECH rather than attempting to
+download such a value from the DNS.
+
 ## pn:\<name\>
-If the string starts with "pn:" then the remainder of the string should be a DNS/hostname
-that is used to over-ride the public_name field of the ECHConfigList that is used
-for ECH.
+
+If the string starts with `pn:` then the remainder of the string should be a
+DNS/hostname that is used to over-ride the public_name field of the
+ECHConfigList that is used for ECH.
 
 # DEFAULT
 
@@ -80,4 +90,5 @@ Added in 8.8.0
 
 # RETURN VALUE
 
-Returns CURLE_OK on success or CURLE_OUT_OF_MEMORY if there was insufficient heap space.
+Returns CURLE_OK on success or CURLE_OUT_OF_MEMORY if there was insufficient
+heap space.
