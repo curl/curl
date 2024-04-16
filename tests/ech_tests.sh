@@ -557,277 +557,277 @@ then
     # thereof. We have to manually assess whether or not ECH is expected to
     # work for each case.
     cli_test "$turl" 0 0
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech ecl:"$badecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 1 1 --ech ecl:"$badecl" --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech ecl:"$badecl" --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech ecl:"$badecl" --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech hard
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 1 1 --ech ecl:"$badecl" --ech hard --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech ecl:"$badecl" --ech hard --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech hard --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech ecl:"$badecl" --ech hard --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech hard --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech hard --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 1 1 --ech ecl:"$badecl" --ech hard --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech ecl:"$badecl" --ech hard --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech hard --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:$badpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech ecl:"$badecl" --ech pn:$badpn --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech ecl:"$badecl" --ech pn:$badpn --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:$badpn --ech hard
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech ecl:"$badecl" --ech pn:$badpn --ech hard --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech ecl:"$badecl" --ech pn:$badpn --ech hard --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:$badpn --ech hard --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:$badpn --ech hard --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech ecl:"$badecl" --ech pn:$badpn --ech hard --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech ecl:"$badecl" --ech pn:$badpn --ech hard --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:$badpn --ech hard --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:$badpn --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:$badpn --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech ecl:"$badecl" --ech pn:$badpn --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech ecl:"$badecl" --ech pn:$badpn --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" - 0 --ech ecl:"$badecl" --ech pn:$badpn --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech ecl:"$badecl" --ech hard --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech hard --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:"$badpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech ecl:"$badecl" --ech pn:"$badpn" --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech ecl:"$badecl" --ech pn:"$badpn" --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard --ech true
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard --ech true --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:"$badpn" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:"$badpn" --ech true
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech ecl:"$badecl" --ech pn:"$badpn" --ech true --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech ecl:"$badecl" --ech pn:"$badpn" --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" - 0 --ech ecl:"$badecl" --ech pn:"$badpn" --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 1 1 --ech ecl:"$badecl" --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech ecl:"$badecl" --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech ecl:"$badecl" --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 1 1 --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 1 0 --ech false
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 1 0 --ech false --ech ecl:"$badecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 1 0 --ech false --ech ecl:"$badecl" --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 0 --ech false --ech ecl:"$badecl" --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 0 --ech false --ech ecl:"$badecl" --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech hard
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 1 1 --ech false --ech ecl:"$badecl" --ech hard --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech false --ech ecl:"$badecl" --ech hard --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech hard --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech false --ech ecl:"$badecl" --ech hard --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech hard --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech hard --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 1 1 --ech false --ech ecl:"$badecl" --ech hard --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech false --ech ecl:"$badecl" --ech hard --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech hard --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 0 --ech false --ech ecl:"$badecl" --ech pn:$badpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 0 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 0 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech hard
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech hard --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech hard --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech hard --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech hard --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech hard --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech hard --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech hard --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 0 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 0 --ech false --ech ecl:"$badecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech false --ech ecl:"$badecl" --ech hard --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech hard --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 0 --ech false --ech ecl:"$badecl" --ech pn:"$badpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 0 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 0 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard --ech true
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard --ech true --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 0 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech true
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech true --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 0 --ech false --ech ecl:"$badecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 1 1 --ech false --ech ecl:"$badecl" --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech false --ech ecl:"$badecl" --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech false --ech ecl:"$badecl" --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 1 0 --ech false --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 0 --ech false --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 0 --ech false --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 1 1 --ech false --ech hard
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 1 1 --ech false --ech hard --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech false --ech hard --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech false --ech hard --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech false --ech hard --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech false --ech hard --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 1 1 --ech false --ech hard --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 1 1 --ech false --ech hard --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech false --ech hard --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech false --ech hard --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 0 --ech false --ech pn:$badpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 0 --ech false --ech pn:$badpn --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 0 --ech false --ech pn:$badpn --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech false --ech pn:$badpn --ech hard
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech false --ech pn:$badpn --ech hard --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech false --ech pn:$badpn --ech hard --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech false --ech pn:$badpn --ech hard --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech false --ech pn:$badpn --ech hard --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech false --ech pn:$badpn --ech hard --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech false --ech pn:$badpn --ech hard --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech false --ech pn:$badpn --ech hard --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 0 --ech false --ech pn:$badpn --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech false --ech pn:$badpn --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech false --ech pn:$badpn --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech false --ech pn:$badpn --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech false --ech pn:$badpn --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 0 --ech false --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech false --ech hard --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech false --ech hard --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 0 --ech false --ech pn:"$badpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 0 --ech false --ech pn:"$badpn" --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 0 --ech false --ech pn:"$badpn" --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech false --ech pn:"$badpn" --ech hard
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech false --ech pn:"$badpn" --ech hard --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech false --ech pn:"$badpn" --ech hard --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech false --ech pn:"$badpn" --ech hard --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech false --ech pn:"$badpn" --ech hard --ech true
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech false --ech pn:"$badpn" --ech hard --ech true --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech false --ech pn:"$badpn" --ech hard --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech false --ech pn:"$badpn" --ech hard --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 0 --ech false --ech pn:"$badpn" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech false --ech pn:"$badpn" --ech true
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech false --ech pn:"$badpn" --ech true --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech false --ech pn:"$badpn" --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech false --ech pn:"$badpn" --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 0 --ech false --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 1 1 --ech false --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 1 1 --ech false --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech false --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech false --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech false --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech false --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 1 1 --ech hard
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 1 1 --ech hard --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech hard --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech hard --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech hard --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech hard --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 1 1 --ech hard --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 1 1 --ech hard --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech hard --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech hard --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 0 --ech pn:$badpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech pn:$badpn --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech pn:$badpn --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech pn:$badpn --ech hard
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech pn:$badpn --ech hard --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech pn:$badpn --ech hard --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech pn:$badpn --ech hard --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech pn:$badpn --ech hard --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech pn:$badpn --ech hard --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech pn:$badpn --ech hard --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech pn:$badpn --ech hard --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 0 --ech pn:$badpn --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech pn:$badpn --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech pn:$badpn --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech pn:$badpn --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech pn:$badpn --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 0 --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech hard --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech hard --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 0 --ech pn:"$badpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech pn:"$badpn" --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech pn:"$badpn" --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech pn:"$badpn" --ech hard
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech pn:"$badpn" --ech hard --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech pn:"$badpn" --ech hard --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech pn:"$badpn" --ech hard --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech pn:"$badpn" --ech hard --ech true
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech pn:"$badpn" --ech hard --ech true --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech pn:"$badpn" --ech hard --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech pn:"$badpn" --ech hard --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 0 --ech pn:"$badpn" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech pn:"$badpn" --ech true
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech pn:"$badpn" --ech true --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech pn:"$badpn" --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech pn:"$badpn" --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 0 --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 1 1 --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 1 1 --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 1 0
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 1 1 --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 0 --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 0 --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 1 1 --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 1 1 --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 1 1 --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 1 1 --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
 
     # a target URL that doesn't support ECH
     turl="https://tcd.ie"
@@ -840,277 +840,277 @@ then
     goodpn="tcd.ie"
     badpn="tcd.ie"
     cli_test "$turl" 1 0
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech ecl:"$badecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech hard
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech hard --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech hard --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech hard --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech hard --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech hard --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech hard --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech hard --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech hard --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech hard --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:$badpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:$badpn --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:$badpn --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:$badpn --ech hard
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:$badpn --ech hard --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:$badpn --ech hard --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:$badpn --ech hard --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:$badpn --ech hard --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:$badpn --ech hard --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:$badpn --ech hard --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:$badpn --ech hard --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:$badpn --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:$badpn --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:$badpn --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:$badpn --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:$badpn --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech hard --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech hard --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:"$badpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:"$badpn" --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:"$badpn" --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard --ech true
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard --ech true --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:"$badpn" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:"$badpn" --ech true
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:"$badpn" --ech true --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:"$badpn" --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:"$badpn" --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$badecl" --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech false
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech hard
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech hard --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech hard --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech hard --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech hard --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech hard --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech hard --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech hard --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech hard --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech hard --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:$badpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech hard
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech hard --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech hard --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech hard --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech hard --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech hard --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech hard --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech hard --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:$badpn --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech hard --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech hard --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:"$badpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard --ech true
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard --ech true --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech hard --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech true
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech true --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:"$badpn" --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$badecl" --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech false --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech false --ech hard
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech false --ech hard --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech hard --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech hard --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech hard --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech hard --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech false --ech hard --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech false --ech hard --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech hard --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech hard --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech pn:$badpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech pn:$badpn --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech pn:$badpn --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech pn:$badpn --ech hard
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech pn:$badpn --ech hard --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech pn:$badpn --ech hard --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech pn:$badpn --ech hard --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech pn:$badpn --ech hard --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech pn:$badpn --ech hard --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech pn:$badpn --ech hard --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech pn:$badpn --ech hard --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech pn:$badpn --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech pn:$badpn --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech pn:$badpn --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech pn:$badpn --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech pn:$badpn --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech hard --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech hard --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech pn:"$badpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech pn:"$badpn" --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech pn:"$badpn" --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech pn:"$badpn" --ech hard
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech pn:"$badpn" --ech hard --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech pn:"$badpn" --ech hard --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech pn:"$badpn" --ech hard --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech pn:"$badpn" --ech hard --ech true
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech pn:"$badpn" --ech hard --ech true --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech pn:"$badpn" --ech hard --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech pn:"$badpn" --ech hard --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech pn:"$badpn" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech pn:"$badpn" --ech true
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech pn:"$badpn" --ech true --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech pn:"$badpn" --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech pn:"$badpn" --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech false --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech false --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech false --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech false --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech hard
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech hard --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech hard --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech hard --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech hard --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech hard --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech hard --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech hard --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech hard --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech hard --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech pn:$badpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech pn:$badpn --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech pn:$badpn --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech pn:$badpn --ech hard
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech pn:$badpn --ech hard --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech pn:$badpn --ech hard --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech pn:$badpn --ech hard --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech pn:$badpn --ech hard --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech pn:$badpn --ech hard --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech pn:$badpn --ech hard --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech pn:$badpn --ech hard --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech pn:$badpn --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech pn:$badpn --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech pn:$badpn --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech pn:$badpn --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech pn:$badpn --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech hard --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech hard --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech pn:"$badpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech pn:"$badpn" --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech pn:"$badpn" --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech pn:"$badpn" --ech hard
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech pn:"$badpn" --ech hard --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech pn:"$badpn" --ech hard --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech pn:"$badpn" --ech hard --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech pn:"$badpn" --ech hard --ech true
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech pn:"$badpn" --ech hard --ech true --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech pn:"$badpn" --ech hard --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech pn:"$badpn" --ech hard --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech pn:"$badpn" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech pn:"$badpn" --ech true
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech pn:"$badpn" --ech true --ech ecl:"$goodecl"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech pn:"$badpn" --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech pn:"$badpn" --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech true
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
     cli_test "$turl" 0 0 --ech true --ech ecl:"$goodecl"
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech true --ech ecl:"$goodecl" --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
-    cli_test "$turl" 0 0 --ech true --ech pn:$goodpn
-    if [[ "$allgood" != "yes" ]]; then echo $LINENO; fi
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech true --ech ecl:"$goodecl" --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
+    cli_test "$turl" 0 0 --ech true --ech pn:"$goodpn"
+    if [[ "$allgood" != "yes" ]]; then echo "$LINENO"; fi
 fi
 
 
