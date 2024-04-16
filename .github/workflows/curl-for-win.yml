@@ -51,7 +51,7 @@ jobs:
             "${DOCKER_IMAGE}" \
             sh -c ./_ci-linux-debian.sh
 
-  linux-musl-llvm-openssl:
+  linux-musl-llvm-boringssl:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -63,7 +63,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/curl/curl-for-win
           mv curl-for-win/* .
-          export CW_CONFIG='-main-werror-linux-musl-x64-openssl'
+          export CW_CONFIG='-main-werror-linux-musl-x64-boringssl'
           export CW_REVISION='${{ github.sha }}'
           . ./_versions.sh
           docker trust inspect --pretty "${DOCKER_IMAGE}"
