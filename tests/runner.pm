@@ -919,7 +919,7 @@ sub singletest_run {
     }
 
     if(!$tool) {
-        $CMDLINE=shell_quote($CURL);
+        $CMDLINE=shell_quote($CURL)." -q";
     }
 
     if(use_valgrind() && !$disablevalgrind) {
