@@ -39,7 +39,8 @@ docker build \
        --build-arg GID="$(id -g)" \
        -t curl/curl .
 
-docker run --rm -it -u $(id -u):$(id -g) -v $(pwd):/usr/src -w /usr/src curl/curl sh -c "
+docker run --rm -it -u "$(id -u):$(id -g)" \
+       -v $(pwd):/usr/src -w /usr/src curl/curl sh -c "
   set -e
   autoreconf -fi
   ./configure --without-ssl --without-libpsl
