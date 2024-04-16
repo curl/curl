@@ -178,7 +178,7 @@ libcurl was built with debug capabilities (added in 7.10.6)
 
 ## ECH
 
-*features* mask bit: non-existant
+*features* mask bit: non-existent
 
 libcurl was built with ECH support (experimental, added in 8.8.0)
 
