@@ -32,13 +32,11 @@ if [ -z "$version" ]; then
   exit
 fi
 
-user="$(id -u):$(id -u)"
-
 make distclean
 docker build \
-       --build-arg SOURCE_DATE_EPOCH=$(date -u +%s) \
-       --build-arg UID=$(id -u) \
-       --build-arg GID=$(id -g) \
+       --build-arg SOURCE_DATE_EPOCH="$(date -u +%s)" \
+       --build-arg UID="$(id -u)" \
+       --build-arg GID="$(id -g)" \
        -t curl/curl .
 
 run="run --rm -it -u $(id -u):$(id -g) -v $(pwd):/usr/src -w /usr/src curl/curl"
