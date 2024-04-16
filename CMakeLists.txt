@@ -37,7 +37,7 @@
 #   HAVE_GNUTLS_SRP: `gnutls_srp_verifier` present in GnuTLS
 #   HAVE_SSL_CTX_SET_QUIC_METHOD: `SSL_CTX_set_quic_method` present in OpenSSL/wolfSSL
 #   HAVE_QUICHE_CONN_SET_QLOG_FD: `quiche_conn_set_qlog_fd` present in QUICHE
-#   HAVE_ECH: ECH API checks for OpenSSL, boringssl or wolfSSL
+#   HAVE_ECH: ECH API checks for OpenSSL, BoringSSL or wolfSSL
 #
 # For each of the above variables, if the variable is DEFINED (either
 # to ON or OFF), the symbol detection will be skipped.  If the
@@ -438,7 +438,7 @@ if(CURL_USE_SECTRANSP)
 
   find_library(SECURITY_FRAMEWORK "Security")
   if(NOT SECURITY_FRAMEWORK)
-     message(FATAL_ERROR "Security framework not found")
+    message(FATAL_ERROR "Security framework not found")
   endif()
 
   set(SSL_ENABLED ON)
@@ -455,10 +455,10 @@ if(use_core_foundation_and_core_services)
   find_library(CORESERVICES_FRAMEWORK "CoreServices")
 
   if(NOT COREFOUNDATION_FRAMEWORK)
-      message(FATAL_ERROR "CoreFoundation framework not found")
+    message(FATAL_ERROR "CoreFoundation framework not found")
   endif()
   if(NOT CORESERVICES_FRAMEWORK)
-      message(FATAL_ERROR "CoreServices framework not found")
+    message(FATAL_ERROR "CoreServices framework not found")
   endif()
 
   list(APPEND CURL_LIBS "-framework CoreFoundation -framework CoreServices")
@@ -659,26 +659,25 @@ option(USE_HTTPSRR "Enable HTTPS RR support for ECH (experimental)" OFF)
 option(USE_ECH "Enable ECH support" OFF)
 if(USE_ECH)
   if(USE_OPENSSL OR USE_WOLFSSL)
-    # Be sure that the OpenSSL/wolfSSL library actually supports ECH.
+    # Be sure that the TLS library actually supports ECH.
     if(NOT DEFINED HAVE_ECH)
       if(USE_OPENSSL AND HAVE_BORINGSSL)
-        openssl_check_symbol_exists(SSL_set1_ech_config_list "openssl/ssl.h" HAVE_ECH)
+        openssl_check_symbol_exists(SSL_set1_ech_config_list "openssl/ssl.h" HAVE_ECH "")
       elseif(USE_OPENSSL)
-        openssl_check_symbol_exists(SSL_ech_set1_echconfig "openssl/ech.h" HAVE_ECH)
+        openssl_check_symbol_exists(SSL_ech_set1_echconfig "openssl/ech.h" HAVE_ECH "")
       elseif(USE_WOLFSSL)
-        openssl_check_symbol_exists(wolfSSL_CTX_GenerateEchConfig "wolfssl/options.h;wolfssl/ssl.h" HAVE_ECH)
+        openssl_check_symbol_exists(wolfSSL_CTX_GenerateEchConfig "wolfssl/options.h;wolfssl/ssl.h" HAVE_ECH "")
       endif()
     endif()
     if(NOT HAVE_ECH)
       message(FATAL_ERROR "ECH support missing in OpenSSL/BoringSSL/wolfSSL")
     else()
-      message("ECH enabled.")
+      message(STATUS "ECH enabled.")
     endif()
   else()
     message(FATAL_ERROR "ECH requires ECH-enablded OpenSSL, BoringSSL or wolfSSL")
   endif()
 endif()
-
 
 option(USE_NGHTTP2 "Use nghttp2 library" OFF)
 if(USE_NGHTTP2)
