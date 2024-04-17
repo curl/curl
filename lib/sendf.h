@@ -312,7 +312,7 @@ CURLcode Curl_creader_set(struct Curl_easy *data, struct Curl_creader *r);
 
 /**
  * Read at most `blen` bytes at `buf` from the client.
- * @param date    the transfer to read client bytes for
+ * @param data    the transfer to read client bytes for
  * @param buf     the memory location to read to
  * @param blen    the amount of memory at `buf`
  * @param nread   on return the number of bytes read into `buf`
@@ -360,8 +360,8 @@ curl_off_t Curl_creader_client_length(struct Curl_easy *data);
  * Ask the installed reader at phase CURL_CR_CLIENT to start
  * reading from the given offset. On success, this will reduce
  * the `total_length()` by the amount.
- * @param date    the transfer to read client bytes for
- * param offset   the offset where to start reads from, negative
+ * @param data    the transfer to read client bytes for
+ * @param offset  the offset where to start reads from, negative
  *                values will be ignored.
  * @return CURLE_OK if offset could be set
  *         CURLE_READ_ERROR if not supported by reader or seek/read failed
