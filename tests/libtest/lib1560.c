@@ -151,6 +151,21 @@ struct clearurlcase {
 };
 
 static const struct testcase get_parts_list[] ={
+  {"https://curl.se/#",
+   "https | [11] | [12] | [13] | curl.se | [15] | / | [16] | ",
+   0, CURLU_GET_EMPTY, CURLUE_OK},
+  {"https://curl.se/?#",
+   "https | [11] | [12] | [13] | curl.se | [15] | / |  | ",
+   0, CURLU_GET_EMPTY, CURLUE_OK},
+  {"https://curl.se/?",
+   "https | [11] | [12] | [13] | curl.se | [15] | / |  | [17]",
+   0, CURLU_GET_EMPTY, CURLUE_OK},
+  {"https://curl.se/?",
+   "https | [11] | [12] | [13] | curl.se | [15] | / | [16] | [17]",
+   0, 0, CURLUE_OK},
+  {"https://curl.se/?#",
+   "https | [11] | [12] | [13] | curl.se | [15] | / | [16] | [17]",
+   0, 0, CURLUE_OK},
   {"https://curl.se/#  ",
    "https | [11] | [12] | [13] | curl.se | [15] | / | [16] | %20%20",
    CURLU_URLENCODE|CURLU_ALLOW_SPACE, 0, CURLUE_OK},
@@ -508,6 +523,9 @@ static const struct testcase get_parts_list[] ={
 };
 
 static const struct urltestcase get_url_list[] = {
+  {"http://user@example.com?#",
+   "http://user@example.com/?#",
+   0, CURLU_GET_EMPTY, CURLUE_OK},
   /* WHATWG disgrees, it wants "https:/0.0.0.0/" */
   {"https://0x.0x.0", "https://0x.0x.0/", 0, 0, CURLUE_OK},
 
@@ -781,6 +799,18 @@ static int checkurl(const char *org, const char *url, const char *out)
    3. Extract all components (not URL)
 */
 static const struct setgetcase setget_parts_list[] = {
+  {"https://example.com/",
+   "query=\"\",",
+   "https | [11] | [12] | [13] | example.com | [15] | / |  | [17]",
+   0, 0, CURLU_GET_EMPTY, CURLUE_OK},
+  {"https://example.com/",
+   "fragment=\"\",",
+   "https | [11] | [12] | [13] | example.com | [15] | / | [16] | ",
+   0, 0, CURLU_GET_EMPTY, CURLUE_OK},
+  {"https://example.com/",
+   "query=\"\",",
+   "https | [11] | [12] | [13] | example.com | [15] | / | [16] | [17]",
+   0, 0, 0, CURLUE_OK},
   {"https://example.com",
    "path=get,",
    "https | [11] | [12] | [13] | example.com | [15] | /get | [16] | [17]",
