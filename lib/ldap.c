@@ -546,7 +546,8 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     goto quit;
   }
 
-  for(num = 0, entryIterator = ldap_first_entry(server, ldapmsg);
+  num = 0;
+  for(entryIterator = ldap_first_entry(server, ldapmsg);
       entryIterator;
       entryIterator = ldap_next_entry(server, entryIterator), num++) {
     BerElement *ber = NULL;
