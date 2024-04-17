@@ -361,7 +361,7 @@ curl_off_t Curl_creader_client_length(struct Curl_easy *data);
  * reading from the given offset. On success, this will reduce
  * the `total_length()` by the amount.
  * @param data    the transfer to read client bytes for
- * param offset   the offset where to start reads from, negative
+ * @param offset  the offset where to start reads from, negative
  *                values will be ignored.
  * @return CURLE_OK if offset could be set
  *         CURLE_READ_ERROR if not supported by reader or seek/read failed
