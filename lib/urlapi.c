@@ -79,7 +79,9 @@ struct Curl_URL {
   char *path;
   char *query;
   char *fragment;
-  long portnum; /* the numerical version */
+  unsigned short portnum; /* the numerical version */
+  BIT(query_present);    /* to support blank */
+  BIT(fragment_present); /* to support blank */
 };
 
 #define DEFAULT_SCHEME "https"
@@ -561,7 +563,7 @@ UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
     if(rest[0])
       return CURLUE_BAD_PORT_NUMBER;
 
-    u->portnum = port;
+    u->portnum = (unsigned short) port;
     /* generate a new port number string to get rid of leading zeroes etc */
     free(u->port);
     u->port = aprintf("%ld", port);
@@ -1245,6 +1247,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
   fragment = strchr(path, '#');
   if(fragment) {
     fraglen = pathlen - (fragment - path);
+    u->fragment_present = TRUE;
     if(fraglen > 1) {
       /* skip the leading '#' in the copy but include the terminating null */
       if(flags & CURLU_URLENCODE) {
@@ -1272,6 +1275,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     size_t qlen = fragment ? (size_t)(fragment - query) :
       pathlen - (query - path);
     pathlen -= qlen;
+    u->query_present = TRUE;
     if(qlen > 1) {
       if(flags & CURLU_URLENCODE) {
         struct dynbuf enc;
@@ -1407,6 +1411,8 @@ CURLU *curl_url_dup(const CURLU *in)
     DUP(u, in, fragment);
     DUP(u, in, zoneid);
     u->portnum = in->portnum;
+    u->fragment_present = in->fragment_present;
+    u->query_present = in->query_present;
   }
   return u;
 fail:
@@ -1491,10 +1497,16 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
     ptr = u->query;
     ifmissing = CURLUE_NO_QUERY;
     plusdecode = urldecode;
+    if(ptr && !ptr[0] && !(flags & CURLU_GET_EMPTY))
+      /* there was a blank query and the user do not ask for it */
+      ptr = NULL;
     break;
   case CURLUPART_FRAGMENT:
     ptr = u->fragment;
     ifmissing = CURLUE_NO_FRAGMENT;
+    if(!ptr && u->fragment_present && flags & CURLU_GET_EMPTY)
+      /* there was a blank fragment and the user asks for it */
+      ptr = "";
     break;
   case CURLUPART_URL: {
     char *url;
@@ -1502,13 +1514,18 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
     char *options = u->options;
     char *port = u->port;
     char *allochost = NULL;
+    bool show_fragment =
+      u->fragment || (u->fragment_present && flags & CURLU_GET_EMPTY);
+    bool show_query =
+      (u->query && u->query[0]) ||
+      (u->query_present && flags & CURLU_GET_EMPTY);
     punycode = (flags & CURLU_PUNYCODE)?1:0;
     depunyfy = (flags & CURLU_PUNY2IDN)?1:0;
     if(u->scheme && strcasecompare("file", u->scheme)) {
       url = aprintf("file://%s%s%s",
                     u->path,
-                    u->fragment? "#": "",
-                    u->fragment? u->fragment : "");
+                    show_fragment ? "#": "",
+                    u->fragment ? u->fragment : "");
     }
     else if(!u->host)
       return CURLUE_NO_HOST;
@@ -1596,9 +1613,9 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
                     port ? ":": "",
                     port ? port : "",
                     u->path ? u->path : "/",
-                    (u->query && u->query[0]) ? "?": "",
-                    (u->query && u->query[0]) ? u->query : "",
-                    u->fragment? "#": "",
+                    show_query ? "?": "",
+                    u->query ? u->query : "",
+                    show_fragment ? "#": "",
                     u->fragment? u->fragment : "");
       free(allochost);
     }
@@ -1733,9 +1750,11 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
       break;
     case CURLUPART_QUERY:
       storep = &u->query;
+      u->query_present = FALSE;
       break;
     case CURLUPART_FRAGMENT:
       storep = &u->fragment;
+      u->fragment_present = FALSE;
       break;
     default:
       return CURLUE_UNKNOWN_PART;
@@ -1819,9 +1838,11 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     appendquery = (flags & CURLU_APPENDQUERY)?1:0;
     equalsencode = appendquery;
     storep = &u->query;
+    u->query_present = TRUE;
     break;
   case CURLUPART_FRAGMENT:
     storep = &u->fragment;
+    u->fragment_present = TRUE;
     break;
   case CURLUPART_URL: {
     /*
@@ -1972,6 +1993,6 @@ nomem:
   /* set after the string, to make it not assigned if the allocation above
      fails */
   if(port)
-    u->portnum = port;
+    u->portnum = (unsigned short)port;
   return CURLUE_OK;
 }

@@ -113,6 +113,18 @@ punycode.
 
 (Added in curl 8.3.0)
 
+## CURLU_GET_EMPTY
+
+When this flag is used in curl_url_get(), it makes the function return empty
+query and fragments parts or when used in the full URL. By default, libcurl
+otherwise considers empty parts non-existing.
+
+An empty query part is one where this is nothing following the question mark
+(before the possible fragment). An empty fragments part is one where there is
+nothing following the hash sign.
+
+(Added in curl 8.8.0)
+
 # PARTS
 
 ## CURLUPART_URL
