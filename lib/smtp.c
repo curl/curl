@@ -1892,8 +1892,6 @@ static CURLcode cr_eob_read(struct Curl_easy *data,
   *peos = FALSE;
   if(!Curl_bufq_is_empty(&ctx->buf)) {
     result = Curl_bufq_cread(&ctx->buf, buf, blen, pnread);
-    if(result)
-      return result;
   }
   else
     *pnread = 0;
@@ -1905,7 +1903,7 @@ static CURLcode cr_eob_read(struct Curl_easy *data,
   *peos = ctx->eos;
   DEBUGF(infof(data, "cr_eob_read(%zu) -> %d, %zd, %d",
          blen, result, *pnread, *peos));
-  return CURLE_OK;
+  return result;
 }
 
 static curl_off_t cr_eob_total_length(struct Curl_easy *data,
