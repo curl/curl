@@ -264,6 +264,7 @@ static CURLcode concat_url(char *base, const char *relurl, char **newurl)
   const char *useurl = relurl;
   CURLcode result = CURLE_OK;
   CURLUcode uc;
+  bool skip_slash = FALSE;
   *newurl = NULL;
 
   /* protsep points to the start of the host name */
@@ -283,48 +284,50 @@ static CURLcode concat_url(char *base, const char *relurl, char **newurl)
       *pathsep = 0;
 
     /* we have a relative path to append to the last slash if there's one
-       available, or if the new URL is just a query string (starts with a
-       '?')  we append the new one at the end of the entire currently worked
-       out URL */
-    if(useurl[0] != '?') {
+       available, or the new URL is just a query string (starts with a '?') or
+       a fragment (starts with '#') we append the new one at the end of the
+       current URL */
+    if((useurl[0] != '?') && (useurl[0] != '#')) {
       pathsep = strrchr(protsep, '/');
       if(pathsep)
         *pathsep = 0;
-    }
 
-    /* Check if there's any slash after the host name, and if so, remember
-       that position instead */
-    pathsep = strchr(protsep, '/');
-    if(pathsep)
-      protsep = pathsep + 1;
-    else
-      protsep = NULL;
+      /* Check if there's any slash after the host name, and if so, remember
+         that position instead */
+      pathsep = strchr(protsep, '/');
+      if(pathsep)
+        protsep = pathsep + 1;
+      else
+        protsep = NULL;
 
-    /* now deal with one "./" or any amount of "../" in the newurl
-       and act accordingly */
+      /* now deal with one "./" or any amount of "../" in the newurl
+         and act accordingly */
 
-    if((useurl[0] == '.') && (useurl[1] == '/'))
-      useurl += 2; /* just skip the "./" */
+      if((useurl[0] == '.') && (useurl[1] == '/'))
+        useurl += 2; /* just skip the "./" */
 
-    while((useurl[0] == '.') &&
-          (useurl[1] == '.') &&
-          (useurl[2] == '/')) {
-      level++;
-      useurl += 3; /* pass the "../" */
-    }
+      while((useurl[0] == '.') &&
+            (useurl[1] == '.') &&
+            (useurl[2] == '/')) {
+        level++;
+        useurl += 3; /* pass the "../" */
+      }
 
-    if(protsep) {
-      while(level--) {
-        /* cut off one more level from the right of the original URL */
-        pathsep = strrchr(protsep, '/');
-        if(pathsep)
-          *pathsep = 0;
-        else {
-          *protsep = 0;
-          break;
+      if(protsep) {
+        while(level--) {
+          /* cut off one more level from the right of the original URL */
+          pathsep = strrchr(protsep, '/');
+          if(pathsep)
+            *pathsep = 0;
+          else {
+            *protsep = 0;
+            break;
+          }
         }
       }
     }
+    else
+      skip_slash = TRUE;
   }
   else {
     /* We got a new absolute path for this server */
@@ -370,7 +373,7 @@ static CURLcode concat_url(char *base, const char *relurl, char **newurl)
     return result;
 
   /* check if we need to append a slash */
-  if(('/' == useurl[0]) || (protsep && !*protsep) || ('?' == useurl[0]))
+  if(('/' == useurl[0]) || (protsep && !*protsep) || skip_slash)
     ;
   else {
     result = Curl_dyn_addn(&newest, "/", 1);

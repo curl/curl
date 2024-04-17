@@ -1081,6 +1081,42 @@ static CURLUcode updateurl(CURLU *u, const char *cmd, unsigned int setflags)
 }
 
 static const struct redircase set_url_list[] = {
+  {"http://example.org/foo/bar",
+   ":23",
+   "http://example.org/foo/:23",
+   0, 0, CURLUE_OK},
+  {"http://example.org/foo/bar",
+   "\\x",
+   "http://example.org/foo/\\x",
+   /* WHATWG disagrees */
+   0, 0, CURLUE_OK},
+  {"http://example.org/foo/bar",
+   "#/",
+   "http://example.org/foo/bar#/",
+   0, 0, CURLUE_OK},
+  {"http://example.org/foo/bar",
+   "?/",
+   "http://example.org/foo/bar?/",
+   0, 0, CURLUE_OK},
+  {"http://example.org/foo/bar",
+   "#;?",
+   "http://example.org/foo/bar#;?",
+   0, 0, CURLUE_OK},
+  {"http://example.org/foo/bar",
+   "#",
+   "http://example.org/foo/bar",
+   /* This happens because the parser removes empty fragments */
+   0, 0, CURLUE_OK},
+  {"http://example.org/foo/bar",
+   "?",
+   "http://example.org/foo/bar",
+   /* This happens because the parser removes empty queries */
+   0, 0, CURLUE_OK},
+  {"http://example.org/foo/bar",
+   "?#",
+   "http://example.org/foo/bar",
+   /* This happens because the parser removes empty queries and fragments */
+   0, 0, CURLUE_OK},
   {"http://example.com/please/../gimme/%TESTNUMBER?foobar#hello",
    "http://example.net/there/it/is/../../tes t case=/%TESTNUMBER0002? yes no",
    "http://example.net/there/tes%20t%20case=/%TESTNUMBER0002?+yes+no",
