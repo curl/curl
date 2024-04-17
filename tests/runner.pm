@@ -920,7 +920,7 @@ sub singletest_run {
 
     if(!$tool) {
         $CMDLINE=shell_quote($CURL);
-        if($cmdhash{'option'} !~ /no-q/) {
+        if((!$cmdhash{'option'}) || ($cmdhash{'option'} !~ /no-q/)) {
             $CMDLINE .= " -q";
         }
     }
