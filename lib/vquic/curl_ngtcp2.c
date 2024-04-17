@@ -416,7 +416,7 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
   nghttp3_ssize nconsumed;
   int fin = (flags & NGTCP2_STREAM_DATA_FLAG_FIN) ? 1 : 0;
   struct Curl_easy *data = stream_user_data;
-  struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   (void)offset;
   (void)data;
 
