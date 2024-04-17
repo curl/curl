@@ -508,6 +508,17 @@ static const struct testcase get_parts_list[] ={
 };
 
 static const struct urltestcase get_url_list[] = {
+  /* WHATWG disgrees, it wants "https:/0.0.0.0/" */
+  {"https://0x.0x.0", "https://0x.0x.0/", 0, 0, CURLUE_OK},
+
+  {"https://example.com:000000000000000000000443/foo",
+   "https://example.com/foo",
+   0, CURLU_NO_DEFAULT_PORT, CURLUE_OK},
+  {"https://example.com:000000000000000000000/foo",
+   "https://example.com:0/foo",
+   0, CURLU_NO_DEFAULT_PORT, CURLUE_OK},
+  {"https://192.0x0000A80001", "https://192.168.0.1/", 0, 0, CURLUE_OK},
+  {"https://0xffffffff", "https://255.255.255.255/", 0, 0, CURLUE_OK},
   {"https://1.0x1000000", "https://1.0x1000000/", 0, 0, CURLUE_OK},
   {"https://0x7f.1", "https://127.0.0.1/", 0, 0, CURLUE_OK},
   {"https://1.2.3.256.com", "https://1.2.3.256.com/", 0, 0, CURLUE_OK},
