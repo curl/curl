@@ -886,7 +886,8 @@ Curl_cookie_add(struct Curl_easy *data,
      * Now loop through the fields and init the struct we already have
      * allocated
      */
-    for(ptr = firstptr, fields = 0; ptr && !badcookie;
+    fields = 0;
+    for(ptr = firstptr; ptr && !badcookie;
         ptr = strtok_r(NULL, "\t", &tok_buf), fields++) {
       switch(fields) {
       case 0:
