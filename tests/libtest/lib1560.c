@@ -1081,6 +1081,18 @@ static CURLUcode updateurl(CURLU *u, const char *cmd, unsigned int setflags)
 }
 
 static const struct redircase set_url_list[] = {
+  {"http://example.org/",
+   "../path/././../../moo",
+   "http://example.org/moo",
+   0, 0, CURLUE_OK},
+  {"http://example.org/",
+   "//example.org/../path/../../",
+   "http://example.org/",
+   0, 0, CURLUE_OK},
+  {"http://example.org/",
+   "///example.org/../path/../../",
+   "http://example.org/",
+   0, 0, CURLUE_OK},
   {"http://example.org/foo/bar",
    ":23",
    "http://example.org/foo/:23",
