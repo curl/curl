@@ -1903,7 +1903,7 @@ static CURLcode cr_eob_read(struct Curl_easy *data,
   *peos = ctx->eos;
   DEBUGF(infof(data, "cr_eob_read(%zu) -> %d, %zd, %d",
          blen, result, *pnread, *peos));
-  return CURLE_OK;
+  return result;
 }
 
 static curl_off_t cr_eob_total_length(struct Curl_easy *data,
