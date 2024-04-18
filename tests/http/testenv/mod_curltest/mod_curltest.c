@@ -21,6 +21,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include <assert.h>
+
 #include <apr_optional.h>
 #include <apr_optional_hooks.h>
 #include <apr_strings.h>
@@ -181,6 +183,7 @@ static int curltest_echo_handler(request_rec *r)
   apr_status_t rv;
   char buffer[8192];
   const char *ct;
+  apr_off_t die_after_len = -1, total_read_len = 0;
   long l;
 
   if(strcmp(r->handler, "curltest-echo")) {
@@ -191,10 +194,34 @@ static int curltest_echo_handler(request_rec *r)
   }
 
   ap_log_rerror(APLOG_MARK, APLOG_TRACE1, 0, r, "echo_handler: processing");
+  if(r->args) {
+    apr_array_header_t *args = NULL;
+    int i;
+    args = apr_cstr_split(r->args, "&", 1, r->pool);
+    for(i = 0; i < args->nelts; ++i) {
+      char *s, *val, *arg = APR_ARRAY_IDX(args, i, char*);
+      s = strchr(arg, '=');
+      if(s) {
+        *s = '\0';
+        val = s + 1;
+        if(!strcmp("die_after", arg)) {
+          die_after_len = (apr_off_t)apr_atoi64(val);
+        }
+      }
+    }
+  }
+
   r->status = 200;
-  r->clength = -1;
-  r->chunked = 1;
-  apr_table_unset(r->headers_out, "Content-Length");
+  if(die_after_len >= 0) {
+    r->clength = die_after_len + 1;
+    r->chunked = 0;
+    apr_table_set(r->headers_out, "Content-Length", apr_ltoa(r->pool, (long)r->clength));
+  }
+  else {
+    r->clength = -1;
+    r->chunked = 1;
+    apr_table_unset(r->headers_out, "Content-Length");
+  }
   /* Discourage content-encodings */
   apr_table_unset(r->headers_out, "Content-Encoding");
   apr_table_setn(r->subprocess_env, "no-brotli", "1");
@@ -208,6 +235,14 @@ static int curltest_echo_handler(request_rec *r)
   if((rv = ap_setup_client_block(r, REQUEST_CHUNKED_DECHUNK))) goto cleanup;
   if(ap_should_client_block(r)) {
     while(0 < (l = ap_get_client_block(r, &buffer[0], sizeof(buffer)))) {
+      total_read_len += l;
+      if(die_after_len >= 0 && total_read_len >= die_after_len) {
+        ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r,
+                      "echo_handler: dying after %ld bytes as requested",
+                      (long)total_read_len);
+        r->connection->keepalive = AP_CONN_CLOSE;
+        return DONE;
+      }
       ap_log_rerror(APLOG_MARK, APLOG_TRACE1, 0, r,
                     "echo_handler: copying %ld bytes from request body", l);
       rv = apr_brigade_write(bb, NULL, NULL, buffer, l);

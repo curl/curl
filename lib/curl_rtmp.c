@@ -35,8 +35,10 @@
 #include "warnless.h"
 #include <curl/curl.h>
 #include <librtmp/rtmp.h>
+
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
 #include "curl_memory.h"
-/* The last #include file should be: */
 #include "memdebug.h"
 
 #if defined(_WIN32) && !defined(USE_LWIPSOCK)
@@ -80,6 +82,7 @@ const struct Curl_handler Curl_handler_rtmp = {
   ZERO_NULL,                            /* perform_getsock */
   rtmp_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_RTMP,                            /* defport */
@@ -103,6 +106,7 @@ const struct Curl_handler Curl_handler_rtmpt = {
   ZERO_NULL,                            /* perform_getsock */
   rtmp_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_RTMPT,                           /* defport */
@@ -126,6 +130,7 @@ const struct Curl_handler Curl_handler_rtmpe = {
   ZERO_NULL,                            /* perform_getsock */
   rtmp_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_RTMP,                            /* defport */
@@ -149,6 +154,7 @@ const struct Curl_handler Curl_handler_rtmpte = {
   ZERO_NULL,                            /* perform_getsock */
   rtmp_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_RTMPT,                           /* defport */
@@ -172,6 +178,7 @@ const struct Curl_handler Curl_handler_rtmps = {
   ZERO_NULL,                            /* perform_getsock */
   rtmp_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_RTMPS,                           /* defport */
@@ -195,6 +202,7 @@ const struct Curl_handler Curl_handler_rtmpts = {
   ZERO_NULL,                            /* perform_getsock */
   rtmp_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_RTMPS,                           /* defport */
@@ -335,4 +343,20 @@ static ssize_t rtmp_send(struct Curl_easy *data, int sockindex,
 
   return num;
 }
+
+void Curl_rtmp_version(char *version, size_t len)
+{
+  char suff[2];
+  if(RTMP_LIB_VERSION & 0xff) {
+    suff[0] = (RTMP_LIB_VERSION & 0xff) + 'a' - 1;
+    suff[1] = '\0';
+  }
+  else
+    suff[0] = '\0';
+
+  msnprintf(version, len, "librtmp/%d.%d%s",
+            RTMP_LIB_VERSION >> 16, (RTMP_LIB_VERSION >> 8) & 0xff,
+            suff);
+}
+
 #endif  /* USE_LIBRTMP */

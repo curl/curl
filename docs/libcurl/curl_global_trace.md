@@ -13,7 +13,7 @@ Protocol:
 
 # NAME
 
-curl_global_trace - Global libcurl logging configuration
+curl_global_trace - log configuration
 
 # SYNOPSIS
 
@@ -25,35 +25,34 @@ CURLcode curl_global_trace(const char *config);
 
 # DESCRIPTION
 
-This function configures the logging behavior, allowing to make some
-parts of curl more verbose or silent than others.
+This function configures the logging behavior to make some parts of curl more
+verbose or silent than others.
 
 This function may be called during the initialization phase of a program. It
 does not have to be. It can be called several times even, possibly overwriting
 settings of previous calls.
 
-Calling this function after transfers have been started is undefined. On
-some platforms/architectures it might take effect, on others not.
+Calling this function after transfers have been started is undefined. On some
+platforms/architectures it might take effect, on others not.
 
-This function is thread-safe since libcurl 8.3.0 if
-curl_version_info(3) has the CURL_VERSION_THREADSAFE feature bit set
-(most platforms).
+This function is thread-safe since libcurl 8.3.0 if curl_version_info(3) has
+the CURL_VERSION_THREADSAFE feature bit set (most platforms).
 
 If this is not thread-safe, you must not call this function when any other
-thread in the program (i.e. a thread sharing the same memory) is running.
-This does not just mean no other thread that is using libcurl. Because
-curl_global_init(3) may call functions of other libraries that are
-similarly thread unsafe, it could conflict with any other thread that uses
-these other libraries.
+thread in the program (i.e. a thread sharing the same memory) is running. This
+does not just mean no other thread that is using libcurl. Because
+curl_global_init(3) may call functions of other libraries that are similarly
+thread unsafe, it could conflict with any other thread that uses these other
+libraries.
 
 If you are initializing libcurl from a Windows DLL you should not initialize
 it from *DllMain* or a static initializer because Windows holds the loader
 lock during that time and it could cause a deadlock.
 
-The *config* string is a list of comma-separated component names. Names
-are case-insensitive and unknown names are ignored. The special name "all"
-applies to all components. Names may be prefixed with '+' or '-' to enable
-or disable detailed logging for a component.
+The *config* string is a list of comma-separated component names. Names are
+case-insensitive and unknown names are ignored. The special name "all" applies
+to all components. Names may be prefixed with '+' or '-' to enable or disable
+detailed logging for a component.
 
 The list of component names is not part of curl's public API. Names may be
 added or disappear in future versions of libcurl. Since unknown names are
@@ -61,15 +60,15 @@ silently ignored, outdated log configurations does not cause errors when
 upgrading libcurl. Given that, some names can be expected to be fairly stable
 and are listed below for easy reference.
 
-Note that log configuration applies only to transfers where debug logging
-is enabled. See CURLOPT_VERBOSE(3) or CURLOPT_DEBUGFUNCTION(3)
-on how to control that.
+Note that log configuration applies only to transfers where debug logging is
+enabled. See CURLOPT_VERBOSE(3) or CURLOPT_DEBUGFUNCTION(3) on how to control
+that.
 
 # TRACE COMPONENTS
 
 ## `tcp`
 
-Tracing of TCP socket handling: connect, reads, writes.
+Tracing of TCP socket handling: connect, sends, receives.
 
 ## `ssl`
 
@@ -96,6 +95,14 @@ trace.
 ## `doh`
 
 Tracing of DNS-over-HTTP operations to resolve hostnames.
+
+## `read`
+
+Traces reading of upload data from the application in order to send it to the server.
+
+## `write`
+
+Traces writing of download data, received from the server, to the application.
 
 # EXAMPLE
 

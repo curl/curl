@@ -64,6 +64,7 @@ curl_multi_socket_all
 curl_multi_strerror
 curl_multi_timeout
 curl_multi_wait
+curl_multi_waitfds
 curl_multi_wakeup
 curl_mvaprintf
 curl_mvfprintf

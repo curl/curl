@@ -1,0 +1,91 @@
+# Copyright (C) Viktor Szakats
+#
+# SPDX-License-Identifier: curl
+---
+name: curl-for-win
+
+on:
+  push:
+    branches:
+      - master
+      - '*/ci'
+  pull_request:
+    branches:
+      - master
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions: {}
+
+env:
+  CW_NOGET: 'curl trurl'
+  CW_MAP: '0'
+  CW_JOBS: '3'
+  CW_NOPKG: '1'
+  DOCKER_CONTENT_TRUST: '1'
+
+jobs:
+  linux-musl-llvm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: 'curl'
+          fetch-depth: 8
+      - name: 'build'
+        run: |
+          git clone --depth 1 https://github.com/curl/curl-for-win
+          mv curl-for-win/* .
+          export CW_CONFIG='-main-werror-linux-musl-x64'
+          export CW_REVISION='${{ github.sha }}'
+          . ./_versions.sh
+          docker trust inspect --pretty "${DOCKER_IMAGE}"
+          time docker pull "${DOCKER_IMAGE}"
+          docker images --digests
+          time docker run --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
+            --env-file <(env | grep -a -E \
+              '^(CW_|GITHUB_)') \
+            "${DOCKER_IMAGE}" \
+            sh -c ./_ci-linux-debian.sh
+
+  mac-clang:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: 'curl'
+          fetch-depth: 8
+      - name: 'build'
+        run: |
+          git clone --depth 1 https://github.com/curl/curl-for-win
+          mv curl-for-win/* .
+          export CW_CONFIG='-main-werror-mac-x64'
+          export CW_REVISION='${{ github.sha }}'
+          sh -c ./_ci-mac-homebrew.sh
+
+  win-llvm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: 'curl'
+          fetch-depth: 8
+      - name: 'build'
+        run: |
+          git clone --depth 1 https://github.com/curl/curl-for-win
+          mv curl-for-win/* .
+          export CW_CONFIG='-main-werror-win-x64'
+          export CW_REVISION='${{ github.sha }}'
+          . ./_versions.sh
+          docker trust inspect --pretty "${DOCKER_IMAGE}"
+          time docker pull "${DOCKER_IMAGE}"
+          docker images --digests
+          time docker run --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
+            --env-file <(env | grep -a -E \
+              '^(CW_|GITHUB_)') \
+            "${DOCKER_IMAGE}" \
+            sh -c ./_ci-linux-debian.sh

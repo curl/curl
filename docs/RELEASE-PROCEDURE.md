@@ -1,10 +1,17 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 curl release procedure - how to do a release
 ============================================
 
 in the source code repo
 -----------------------
 
-- run `./scripts/copyright.pl` and correct possible omissions
+- do a *regular build* with a sensible build config to make sure the
+  `src/tool_hugehelp.c` file etc is correctly generated
 
 - edit `RELEASE-NOTES` to be accurate
 
@@ -16,9 +23,7 @@ in the source code repo
   tag and we use underscores instead of dots in the version number. Make sure
   the tag is GPG signed (using -s).
 
-- run `./maketgz 7.34.0` to build the release tarballs. It is important that
-  you run this on a machine with the correct set of autotools etc installed as
-  this is what is shipped and used by most users on \*nix like systems.
+- run `./scripts/dmaketgz 7.34.0` to build the release tarballs.
 
 - push the git commits and the new tag
 

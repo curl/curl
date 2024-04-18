@@ -134,4 +134,3 @@ class TestErrors:
         else:
             r.check_exit_code(0)
             r.check_response(http_status=200, count=count)
-

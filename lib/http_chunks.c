@@ -28,6 +28,7 @@
 
 #include "urldata.h" /* it includes http_chunks.h */
 #include "curl_printf.h"
+#include "curl_trc.h"
 #include "sendf.h"   /* for the client write stuff */
 #include "dynbuf.h"
 #include "content_encoding.h"
@@ -185,8 +186,11 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
         if(0 == ch->datasize) {
           ch->state = CHUNK_TRAILER; /* now check for trailers */
         }
-        else
+        else {
           ch->state = CHUNK_DATA;
+          CURL_TRC_WRITE(data, "http_chunked, chunk start of %"
+                         CURL_FORMAT_CURL_OFF_T " bytes", ch->datasize);
+        }
       }
 
       buf++;
@@ -221,6 +225,9 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
       ch->datasize -= piece; /* decrease amount left to expect */
       buf += piece;    /* move read pointer forward */
       blen -= piece;   /* decrease space left in this round */
+      CURL_TRC_WRITE(data, "http_chunked, write %zu body bytes, %"
+                     CURL_FORMAT_CURL_OFF_T " bytes in chunk remain",
+                     piece, ch->datasize);
 
       if(0 == ch->datasize)
         /* end of data this round, we now expect a trailing CRLF */
@@ -340,11 +347,14 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
            even if there's no more chunks to read */
         ch->datasize = blen;
         ch->state = CHUNK_DONE;
+        CURL_TRC_WRITE(data, "http_chunk, response complete");
         return CURLE_OK;
       }
       else {
         ch->state = CHUNK_FAILED;
         ch->last_code = CHUNKE_BAD_CHUNK;
+        CURL_TRC_WRITE(data, "http_chunk error, expected 0x0a, seeing 0x%ux",
+                       (unsigned int)*buf);
         return CURLE_RECV_ERROR;
       }
     case CHUNK_DONE:
@@ -498,6 +508,7 @@ static CURLcode add_last_chunk(struct Curl_easy *data,
   int rc;
 
   if(!data->set.trailer_callback) {
+    CURL_TRC_READ(data, "http_chunk, added last, empty chunk");
     return Curl_bufq_cwrite(&ctx->chunkbuf, STRCONST("0\r\n\r\n"), &n);
   }
 
@@ -535,6 +546,8 @@ static CURLcode add_last_chunk(struct Curl_easy *data,
 
 out:
   curl_slist_free_all(trailers);
+  CURL_TRC_READ(data, "http_chunk, added last chunk with trailers "
+                "from client -> %d", result);
   return result;
 }
 
@@ -581,6 +594,8 @@ static CURLcode add_chunk(struct Curl_easy *data,
       result = Curl_bufq_cwrite(&ctx->chunkbuf, buf, nread, &n);
     if(!result)
       result = Curl_bufq_cwrite(&ctx->chunkbuf, "\r\n", 2, &n);
+    CURL_TRC_READ(data, "http_chunk, made chunk of %zu bytes -> %d",
+                 nread, result);
     if(result)
       return result;
   }

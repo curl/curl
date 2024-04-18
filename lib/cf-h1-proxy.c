@@ -1068,7 +1068,7 @@ static void cf_h1_proxy_close(struct Curl_cfilter *cf,
 
 struct Curl_cftype Curl_cft_h1_proxy = {
   "H1-PROXY",
-  CF_TYPE_IP_CONNECT,
+  CF_TYPE_IP_CONNECT|CF_TYPE_PROXY,
   0,
   cf_h1_proxy_destroy,
   cf_h1_proxy_connect,

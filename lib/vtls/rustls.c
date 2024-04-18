@@ -357,12 +357,12 @@ static bool
 cr_hostname_is_ip(const char *hostname)
 {
   struct in_addr in;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   struct in6_addr in6;
   if(Curl_inet_pton(AF_INET6, hostname, &in6) > 0) {
     return true;
   }
-#endif /* ENABLE_IPV6 */
+#endif /* USE_IPV6 */
   if(Curl_inet_pton(AF_INET, hostname, &in) > 0) {
     return true;
   }

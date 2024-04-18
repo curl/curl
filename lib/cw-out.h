@@ -43,7 +43,7 @@ bool Curl_cw_out_is_paused(struct Curl_easy *data);
 /**
  * Flush any buffered date to the client, chunk collation still applies.
  */
-CURLcode Curl_cw_out_flush(struct Curl_easy *data);
+CURLcode Curl_cw_out_unpause(struct Curl_easy *data);
 
 /**
  * Mark EndOfStream reached and flush ALL data to the client.

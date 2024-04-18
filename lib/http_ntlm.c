@@ -40,7 +40,6 @@
 #include "strcase.h"
 #include "http_ntlm.h"
 #include "curl_ntlm_core.h"
-#include "curl_ntlm_wb.h"
 #include "curl_base64.h"
 #include "vauth/vauth.h"
 #include "url.h"
@@ -266,10 +265,6 @@ void Curl_http_auth_cleanup_ntlm(struct connectdata *conn)
 {
   Curl_auth_cleanup_ntlm(&conn->ntlm);
   Curl_auth_cleanup_ntlm(&conn->proxyntlm);
-
-#if defined(NTLM_WB_ENABLED)
-  Curl_http_auth_cleanup_ntlm_wb(conn);
-#endif
 }
 
 #endif /* !CURL_DISABLE_HTTP && USE_NTLM */

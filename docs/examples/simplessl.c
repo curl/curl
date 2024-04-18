@@ -94,7 +94,7 @@ int main(void)
         if(curl_easy_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1L) != CURLE_OK) {
           /* set the crypto engine as default */
           /* only needed for the first time you load
-             a engine in a curl object... */
+             an engine in a curl object... */
           fprintf(stderr, "cannot set crypto engine as default\n");
           break;
         }

@@ -1,3 +1,9 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 # Experimental
 
 Some features and functionality in curl and libcurl are considered
@@ -22,3 +28,4 @@ Experimental support in curl means:
  - HTTP/3 support (using the quiche or msh3 backends)
  - The rustls backend
  - WebSocket
+ - Use of the HTTPS resource record and Encrypted Client Hello (ECH) when using DoH

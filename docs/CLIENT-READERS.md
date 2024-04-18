@@ -1,3 +1,9 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 # curl client readers
 
 Client readers is a design in the internals of libcurl, not visible in its public API. They were started

@@ -254,7 +254,7 @@ endif
 endif
 
 ifneq ($(findstring -ipv6,$(CFG)),)
-  CPPFLAGS += -DENABLE_IPV6
+  CPPFLAGS += -DUSE_IPV6
 endif
 
 ifneq ($(findstring -watt,$(CFG))$(MSDOS),)

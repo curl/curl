@@ -144,7 +144,7 @@ void Curl_printable_address(const struct Curl_addrinfo *ai, char *buf,
     (void)Curl_inet_ntop(ai->ai_family, (const void *)ipaddr4, buf, bufsize);
     break;
   }
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   case AF_INET6: {
     const struct sockaddr_in6 *sa6 = (const void *)ai->ai_addr;
     const struct in6_addr *ipaddr6 = &sa6->sin6_addr;
@@ -523,7 +523,7 @@ Curl_cache_addr(struct Curl_easy *data,
   return dns;
 }
 
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
 /* return a static IPv6 ::1 for the name */
 static struct Curl_addrinfo *get_localhost6(int port, const char *name)
 {
@@ -600,7 +600,7 @@ static struct Curl_addrinfo *get_localhost(int port, const char *name)
   return ca6;
 }
 
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
 /*
  * Curl_ipv6works() returns TRUE if IPv6 seems to work.
  */
@@ -632,7 +632,7 @@ bool Curl_ipv6works(struct Curl_easy *data)
     return (ipv6_works>0)?TRUE:FALSE;
   }
 }
-#endif /* ENABLE_IPV6 */
+#endif /* USE_IPV6 */
 
 /*
  * Curl_host_is_ipnum() returns TRUE if the given string is a numerical IPv4
@@ -641,11 +641,11 @@ bool Curl_ipv6works(struct Curl_easy *data)
 bool Curl_host_is_ipnum(const char *hostname)
 {
   struct in_addr in;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   struct in6_addr in6;
 #endif
   if(Curl_inet_pton(AF_INET, hostname, &in) > 0
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
      || Curl_inet_pton(AF_INET6, hostname, &in6) > 0
 #endif
     )
@@ -760,7 +760,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
       if(!addr)
         return CURLRESOLV_ERROR;
     }
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     else {
       struct in6_addr in6;
       /* check if this is an IPv6 address string */
@@ -771,7 +771,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
           return CURLRESOLV_ERROR;
       }
     }
-#endif /* ENABLE_IPV6 */
+#endif /* USE_IPV6 */
 
 #else /* if USE_RESOLVE_ON_IPS */
 #ifndef CURL_DISABLE_DOH
@@ -779,7 +779,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
     if(Curl_inet_pton(AF_INET, hostname, &in) > 0)
       /* This is a dotted IP address 123.123.123.123-style */
       ipnum = TRUE;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     else {
       struct in6_addr in6;
       /* check if this is an IPv6 address string */
@@ -787,7 +787,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
         /* This is an IPv6 address literal */
         ipnum = TRUE;
     }
-#endif /* ENABLE_IPV6 */
+#endif /* USE_IPV6 */
 #endif /* CURL_DISABLE_DOH */
 
 #endif /* !USE_RESOLVE_ON_IPS */
@@ -1070,6 +1070,23 @@ static void freednsentry(void *freethis)
   dns->inuse--;
   if(dns->inuse == 0) {
     Curl_freeaddrinfo(dns->addr);
+#ifdef USE_HTTPSRR
+    if(dns->hinfo) {
+      if(dns->hinfo->target)
+        free(dns->hinfo->target);
+      if(dns->hinfo->alpns)
+        free(dns->hinfo->alpns);
+      if(dns->hinfo->ipv4hints)
+        free(dns->hinfo->ipv4hints);
+      if(dns->hinfo->echconfiglist)
+        free(dns->hinfo->echconfiglist);
+      if(dns->hinfo->ipv6hints)
+        free(dns->hinfo->ipv6hints);
+      if(dns->hinfo->val)
+        free(dns->hinfo->val);
+      free(dns->hinfo);
+    }
+#endif
     free(dns);
   }
 }
@@ -1210,7 +1227,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
         memcpy(address, addr_begin, alen);
         address[alen] = '\0';
 
-#ifndef ENABLE_IPV6
+#ifndef USE_IPV6
         if(strchr(address, ':')) {
           infof(data, "Ignoring resolve address '%s', missing IPv6 support.",
                 address);

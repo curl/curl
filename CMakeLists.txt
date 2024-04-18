@@ -37,6 +37,7 @@
 #   HAVE_GNUTLS_SRP: `gnutls_srp_verifier` present in GnuTLS
 #   HAVE_SSL_CTX_SET_QUIC_METHOD: `SSL_CTX_set_quic_method` present in OpenSSL/wolfSSL
 #   HAVE_QUICHE_CONN_SET_QLOG_FD: `quiche_conn_set_qlog_fd` present in QUICHE
+#   HAVE_ECH: ECH API checks for OpenSSL, BoringSSL or wolfSSL
 #
 # For each of the above variables, if the variable is DEFINED (either
 # to ON or OFF), the symbol detection will be skipped.  If the
@@ -303,10 +304,14 @@ if(ENABLE_IPV6 AND NOT WIN32)
     list(APPEND CURL_LIBS "-framework SystemConfiguration")
   endif()
 endif()
+if(ENABLE_IPV6)
+  set(USE_IPV6 ON)
+endif()
 
 find_package(Perl)
 
 option(BUILD_LIBCURL_DOCS "to build libcurl man pages" ON)
+option(BUILD_MISC_DOCS "to build misc man pages (e.g. curl-config and mk-ca-bundle)" ON)
 option(ENABLE_CURL_MANUAL "to build the man page for curl and enable its -M/--manual option" ON)
 
 if(ENABLE_CURL_MANUAL OR BUILD_LIBCURL_DOCS)
@@ -375,9 +380,6 @@ check_function_exists(gethostname HAVE_GETHOSTNAME)
 
 if(WIN32)
   list(APPEND CURL_LIBS "ws2_32" "bcrypt")
-  if(USE_LIBRTMP)
-    list(APPEND CURL_LIBS "winmm")
-  endif()
 endif()
 
 # check SSL libraries
@@ -436,7 +438,7 @@ if(CURL_USE_SECTRANSP)
 
   find_library(SECURITY_FRAMEWORK "Security")
   if(NOT SECURITY_FRAMEWORK)
-     message(FATAL_ERROR "Security framework not found")
+    message(FATAL_ERROR "Security framework not found")
   endif()
 
   set(SSL_ENABLED ON)
@@ -453,10 +455,10 @@ if(use_core_foundation_and_core_services)
   find_library(CORESERVICES_FRAMEWORK "CoreServices")
 
   if(NOT COREFOUNDATION_FRAMEWORK)
-      message(FATAL_ERROR "CoreFoundation framework not found")
+    message(FATAL_ERROR "CoreFoundation framework not found")
   endif()
   if(NOT CORESERVICES_FRAMEWORK)
-      message(FATAL_ERROR "CoreServices framework not found")
+    message(FATAL_ERROR "CoreServices framework not found")
   endif()
 
   list(APPEND CURL_LIBS "-framework CoreFoundation -framework CoreServices")
@@ -598,8 +600,8 @@ if(CURL_ZSTD)
   endif()
 endif()
 
-# Check symbol in OpenSSL-like TLS backends.
-macro(openssl_check_symbol_exists SYMBOL FILES VARIABLE)
+# Check symbol in an OpenSSL-like TLS backend, or in EXTRA_LIBS depending on it.
+macro(openssl_check_symbol_exists SYMBOL FILES VARIABLE EXTRA_LIBS)
   cmake_push_check_state()
   if(USE_OPENSSL)
     set(CMAKE_REQUIRED_INCLUDES   "${OPENSSL_INCLUDE_DIR}")
@@ -623,6 +625,9 @@ macro(openssl_check_symbol_exists SYMBOL FILES VARIABLE)
     endif()
     list(APPEND CMAKE_REQUIRED_DEFINITIONS -DHAVE_UINTPTR_T)  # to pull in stdint.h (as of wolfSSL v5.5.4)
   endif()
+  if(NOT "${EXTRA_LIBS}" STREQUAL "")
+    list(APPEND CMAKE_REQUIRED_LIBRARIES "${EXTRA_LIBS}")
+  endif()
   check_symbol_exists("${SYMBOL}" "${FILES}" "${VARIABLE}")
   cmake_pop_check_state()
 endmacro()
@@ -631,9 +636,9 @@ endmacro()
 macro(openssl_check_quic)
   if(NOT DEFINED HAVE_SSL_CTX_SET_QUIC_METHOD)
     if(USE_OPENSSL)
-      openssl_check_symbol_exists(SSL_CTX_set_quic_method "openssl/ssl.h" HAVE_SSL_CTX_SET_QUIC_METHOD)
+      openssl_check_symbol_exists(SSL_CTX_set_quic_method "openssl/ssl.h" HAVE_SSL_CTX_SET_QUIC_METHOD "")
     elseif(USE_WOLFSSL)
-      openssl_check_symbol_exists(wolfSSL_set_quic_method "wolfssl/options.h;wolfssl/openssl/ssl.h" HAVE_SSL_CTX_SET_QUIC_METHOD)
+      openssl_check_symbol_exists(wolfSSL_set_quic_method "wolfssl/options.h;wolfssl/openssl/ssl.h" HAVE_SSL_CTX_SET_QUIC_METHOD "")
     endif()
   endif()
   if(NOT HAVE_SSL_CTX_SET_QUIC_METHOD)
@@ -643,10 +648,34 @@ endmacro()
 
 if(USE_OPENSSL OR USE_WOLFSSL)
   if(NOT DEFINED HAVE_SSL_SET0_WBIO)
-    openssl_check_symbol_exists(SSL_set0_wbio "openssl/ssl.h" HAVE_SSL_SET0_WBIO)
+    openssl_check_symbol_exists(SSL_set0_wbio "openssl/ssl.h" HAVE_SSL_SET0_WBIO "")
   endif()
   if(NOT DEFINED HAVE_OPENSSL_SRP AND NOT CURL_DISABLE_SRP)
-    openssl_check_symbol_exists(SSL_CTX_set_srp_username "openssl/ssl.h" HAVE_OPENSSL_SRP)
+    openssl_check_symbol_exists(SSL_CTX_set_srp_username "openssl/ssl.h" HAVE_OPENSSL_SRP "")
+  endif()
+endif()
+
+option(USE_HTTPSRR "Enable HTTPS RR support for ECH (experimental)" OFF)
+option(USE_ECH "Enable ECH support" OFF)
+if(USE_ECH)
+  if(USE_OPENSSL OR USE_WOLFSSL)
+    # Be sure that the TLS library actually supports ECH.
+    if(NOT DEFINED HAVE_ECH)
+      if(USE_OPENSSL AND HAVE_BORINGSSL)
+        openssl_check_symbol_exists(SSL_set1_ech_config_list "openssl/ssl.h" HAVE_ECH "")
+      elseif(USE_OPENSSL)
+        openssl_check_symbol_exists(SSL_ech_set1_echconfig "openssl/ech.h" HAVE_ECH "")
+      elseif(USE_WOLFSSL)
+        openssl_check_symbol_exists(wolfSSL_CTX_GenerateEchConfig "wolfssl/options.h;wolfssl/ssl.h" HAVE_ECH "")
+      endif()
+    endif()
+    if(NOT HAVE_ECH)
+      message(FATAL_ERROR "ECH support missing in OpenSSL/BoringSSL/wolfSSL")
+    else()
+      message(STATUS "ECH enabled.")
+    endif()
+  else()
+    message(FATAL_ERROR "ECH requires ECH-enablded OpenSSL, BoringSSL or wolfSSL")
   endif()
 endif()
 
@@ -870,6 +899,21 @@ if(WIN32)
   endif()
 endif()
 
+if(APPLE)
+  option(USE_APPLE_IDN "Use Apple built-in IDN support" OFF)
+  if(USE_APPLE_IDN)
+    cmake_push_check_state()
+    set(CMAKE_REQUIRED_LIBRARIES "icucore")
+    check_symbol_exists("uidna_openUTS46" "unicode/uidna.h" HAVE_APPLE_IDN)
+    cmake_pop_check_state()
+    if(HAVE_APPLE_IDN)
+      list(APPEND CURL_LIBS "icucore")
+    else()
+      set(USE_APPLE_IDN OFF)
+    endif()
+  endif()
+endif()
+
 #libpsl
 option(CURL_USE_LIBPSL "Use libPSL" ON)
 mark_as_advanced(CURL_USE_LIBPSL)
@@ -971,6 +1015,26 @@ if(CURL_USE_GSSAPI)
 
   else()
     message(WARNING "GSSAPI support has been requested but no supporting libraries found. Skipping.")
+  endif()
+endif()
+
+option(USE_LIBRTMP "Enable librtmp from rtmpdump" OFF)
+if(USE_LIBRTMP)
+  cmake_push_check_state()
+  set(_extra_libs "rtmp")
+  if(WIN32)
+    list(APPEND _extra_libs "winmm")
+  endif()
+  openssl_check_symbol_exists("RTMP_Init" "librtmp/rtmp.h" HAVE_LIBRTMP "${_extra_libs}")
+  cmake_pop_check_state()
+  if(HAVE_LIBRTMP)
+    list(APPEND CURL_LIBS "rtmp")
+    if(WIN32)
+      list(APPEND CURL_LIBS "winmm")
+    endif()
+  else()
+    message(WARNING "librtmp requested, but not found or missing OpenSSL. Skipping.")
+    set(USE_LIBRTMP OFF)
   endif()
 endif()
 
@@ -1125,6 +1189,7 @@ check_include_file_concat("sys/un.h"         HAVE_SYS_UN_H)
 check_include_file_concat("sys/utime.h"      HAVE_SYS_UTIME_H)
 check_include_file_concat("sys/xattr.h"      HAVE_SYS_XATTR_H)
 check_include_file_concat("arpa/inet.h"      HAVE_ARPA_INET_H)
+check_include_file_concat("dirent.h"         HAVE_DIRENT_H)
 check_include_file_concat("fcntl.h"          HAVE_FCNTL_H)
 check_include_file_concat("ifaddrs.h"        HAVE_IFADDRS_H)
 check_include_file_concat("io.h"             HAVE_IO_H)
@@ -1187,6 +1252,7 @@ endif()
 
 check_symbol_exists(fnmatch       "${CURL_INCLUDES};fnmatch.h" HAVE_FNMATCH)
 check_symbol_exists(basename      "${CURL_INCLUDES};string.h" HAVE_BASENAME)
+check_symbol_exists(opendir       "${CURL_INCLUDES};dirent.h" HAVE_OPENDIR)
 check_symbol_exists(socket        "${CURL_INCLUDES}" HAVE_SOCKET)
 check_symbol_exists(sched_yield   "${CURL_INCLUDES};sched.h" HAVE_SCHED_YIELD)
 check_symbol_exists(socketpair    "${CURL_INCLUDES}" HAVE_SOCKETPAIR)
@@ -1228,7 +1294,6 @@ check_symbol_exists(getifaddrs     "${CURL_INCLUDES};stdlib.h" HAVE_GETIFADDRS)
 check_symbol_exists(freeaddrinfo   "${CURL_INCLUDES}" HAVE_FREEADDRINFO)
 check_symbol_exists(pipe           "${CURL_INCLUDES}" HAVE_PIPE)
 check_symbol_exists(ftruncate      "${CURL_INCLUDES}" HAVE_FTRUNCATE)
-check_symbol_exists(fseeko         "${CURL_INCLUDES};stdio.h" HAVE_FSEEKO)
 check_symbol_exists(_fseeki64      "${CURL_INCLUDES};stdio.h" HAVE__FSEEKI64)
 check_symbol_exists(getpeername    "${CURL_INCLUDES}" HAVE_GETPEERNAME)
 check_symbol_exists(getsockname    "${CURL_INCLUDES}" HAVE_GETSOCKNAME)
@@ -1237,10 +1302,6 @@ check_symbol_exists(getrlimit      "${CURL_INCLUDES}" HAVE_GETRLIMIT)
 check_symbol_exists(setlocale      "${CURL_INCLUDES}" HAVE_SETLOCALE)
 check_symbol_exists(setmode        "${CURL_INCLUDES}" HAVE_SETMODE)
 check_symbol_exists(setrlimit      "${CURL_INCLUDES}" HAVE_SETRLIMIT)
-
-if(HAVE_FSEEKO)
-  set(HAVE_DECL_FSEEKO 1)
-endif()
 
 if(NOT MSVC OR (MSVC_VERSION GREATER_EQUAL 1900))
   # earlier MSVC compilers had faulty snprintf implementations
@@ -1303,6 +1364,15 @@ if(HAVE_FILE_OFFSET_BITS)
   set(CMAKE_REQUIRED_FLAGS "-D_FILE_OFFSET_BITS=64")
 endif()
 check_type_size("off_t"  SIZEOF_OFF_T)
+
+# fseeko may not exist with _FILE_OFFSET_BITS=64 but can exist with
+# _FILE_OFFSET_BITS unset or 32 (e.g. Android ARMv7 with NDK 26b and API level < 24)
+# so we need to test fseeko after testing for _FILE_OFFSET_BITS
+check_symbol_exists(fseeko         "${CURL_INCLUDES};stdio.h" HAVE_FSEEKO)
+
+if(HAVE_FSEEKO)
+  set(HAVE_DECL_FSEEKO 1)
+endif()
 
 # include this header to get the type
 set(CMAKE_REQUIRED_INCLUDES "${CURL_SOURCE_DIR}/include")
@@ -1514,6 +1584,13 @@ endif()
 
 if(NOT CURL_DISABLE_INSTALL)
 
+  install(FILES "${PROJECT_SOURCE_DIR}/scripts/mk-ca-bundle.pl"
+          DESTINATION ${CMAKE_INSTALL_BINDIR}
+          PERMISSIONS
+            OWNER_READ OWNER_WRITE OWNER_EXECUTE
+            GROUP_READ GROUP_EXECUTE
+            WORLD_READ WORLD_EXECUTE)
+
   # Helper to populate a list (_items) with a label when conditions (the remaining
   # args) are satisfied
   macro(_add_if label)
@@ -1538,7 +1615,7 @@ if(NOT CURL_DISABLE_INSTALL)
   _add_if("brotli"        HAVE_BROTLI)
   _add_if("zstd"          HAVE_ZSTD)
   _add_if("AsynchDNS"     USE_ARES OR USE_THREADS_POSIX OR USE_THREADS_WIN32)
-  _add_if("IDN"           HAVE_LIBIDN2 OR USE_WIN32_IDN)
+  _add_if("IDN"           HAVE_LIBIDN2 OR USE_WIN32_IDN OR USE_APPLE_IDN)
   _add_if("Largefile"     (SIZEOF_CURL_OFF_T GREATER 4) AND
                           ((SIZEOF_OFF_T GREATER 4) OR USE_WIN32_LARGE_FILES))
   _add_if("SSPI"          USE_WINDOWS_SSPI)
@@ -1551,9 +1628,6 @@ if(NOT CURL_DISABLE_INSTALL)
                           (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
   _add_if("NTLM"          NOT (CURL_DISABLE_NTLM) AND
                           (use_curl_ntlm_core OR USE_WINDOWS_SSPI))
-  _add_if("NTLM_WB"       NOT (CURL_DISABLE_NTLM) AND
-                          (use_curl_ntlm_core OR USE_WINDOWS_SSPI) AND
-                          NOT CURL_DISABLE_HTTP AND NTLM_WB_ENABLED)
   _add_if("TLS-SRP"       USE_TLS_SRP)
   _add_if("HTTP2"         USE_NGHTTP2)
   _add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE OR USE_OPENSSL_QUIC)
@@ -1576,6 +1650,8 @@ if(NOT CURL_DISABLE_INSTALL)
   _add_if("IPFS"          NOT CURL_DISABLE_HTTP)
   _add_if("IPNS"          NOT CURL_DISABLE_HTTP)
   _add_if("HTTPS"         NOT CURL_DISABLE_HTTP AND SSL_ENABLED)
+  _add_if("ECH"           HAVE_ECH)
+  _add_if("HTTPSRR"       HAVE_ECH)
   _add_if("FTP"           NOT CURL_DISABLE_FTP)
   _add_if("FTPS"          NOT CURL_DISABLE_FTP AND SSL_ENABLED)
   _add_if("FILE"          NOT CURL_DISABLE_FILE)

@@ -30,4 +30,5 @@ check_PROGRAMS = \
   ws-pingpong \
   h2-upgrade-extreme \
   tls-session-reuse \
-  h2-pausing
+  h2-pausing \
+  upload-pausing

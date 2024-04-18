@@ -55,7 +55,7 @@
 #undef NEED_REENTRANT
 
 /* Define if you want to enable IPv6 support */
-#undef ENABLE_IPV6
+#undef USE_IPV6
 
 /* Define if struct sockaddr_in6 has the sin6_scope_id member */
 #define HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID 1
@@ -65,9 +65,6 @@
 
 /* Define this as a suitable file to read random data from */
 #undef RANDOM_FILE
-
-/* Define if you want to enable IPv6 support */
-#undef ENABLE_IPV6
 
 /* Define if you have the alarm function. */
 #define HAVE_ALARM

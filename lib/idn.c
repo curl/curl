@@ -50,6 +50,63 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+/* for macOS and iOS targets */
+#if defined(USE_APPLE_IDN)
+#include <unicode/uidna.h>
+
+static CURLcode mac_idn_to_ascii(const char *in, char **out)
+{
+  UErrorCode err = U_ZERO_ERROR;
+  UIDNA* idna = uidna_openUTS46(UIDNA_CHECK_BIDI, &err);
+  if(U_FAILURE(err)) {
+    return CURLE_OUT_OF_MEMORY;
+  }
+  else {
+    UIDNAInfo info = UIDNA_INFO_INITIALIZER;
+    char buffer[256] = {0};
+    (void)uidna_nameToASCII_UTF8(idna, in, -1, buffer,
+      sizeof(buffer), &info, &err);
+    uidna_close(idna);
+    if(U_FAILURE(err)) {
+      return CURLE_URL_MALFORMAT;
+    }
+    else {
+      *out = strdup(buffer);
+      if(*out)
+        return CURLE_OK;
+      else
+        return CURLE_OUT_OF_MEMORY;
+    }
+  }
+}
+
+static CURLcode mac_ascii_to_idn(const char *in, char **out)
+{
+  UErrorCode err = U_ZERO_ERROR;
+  UIDNA* idna = uidna_openUTS46(UIDNA_CHECK_BIDI, &err);
+  if(U_FAILURE(err)) {
+    return CURLE_OUT_OF_MEMORY;
+  }
+  else {
+    UIDNAInfo info = UIDNA_INFO_INITIALIZER;
+    char buffer[256] = {0};
+    (void)uidna_nameToUnicodeUTF8(idna, in, -1, buffer,
+      sizeof(buffer), &info, &err);
+    uidna_close(idna);
+    if(U_FAILURE(err)) {
+      return CURLE_URL_MALFORMAT;
+    }
+    else {
+      *out = strdup(buffer);
+      if(*out)
+        return CURLE_OK;
+      else
+        return CURLE_OUT_OF_MEMORY;
+    }
+  }
+}
+#endif
+
 #ifdef USE_WIN32_IDN
 /* using Windows kernel32 and normaliz libraries. */
 
@@ -181,6 +238,8 @@ static CURLcode idn_decode(const char *input, char **output)
     result = CURLE_NOT_BUILT_IN;
 #elif defined(USE_WIN32_IDN)
   result = win32_idn_to_ascii(input, &decoded);
+#elif defined(USE_APPLE_IDN)
+  result = mac_idn_to_ascii(input, &decoded);
 #endif
   if(!result)
     *output = decoded;
@@ -196,6 +255,10 @@ static CURLcode idn_encode(const char *puny, char **output)
     return rc == IDNA_MALLOC_ERROR ? CURLE_OUT_OF_MEMORY : CURLE_URL_MALFORMAT;
 #elif defined(USE_WIN32_IDN)
   CURLcode result = win32_ascii_to_idn(puny, &enc);
+  if(result)
+    return result;
+#elif defined(USE_APPLE_IDN)
+  CURLcode result = mac_ascii_to_idn(puny, &enc);
   if(result)
     return result;
 #endif
@@ -246,11 +309,7 @@ CURLcode Curl_idn_encode(const char *puny, char **output)
  */
 void Curl_free_idnconverted_hostname(struct hostname *host)
 {
-  if(host->encalloc) {
-    /* must be freed with idn2_free() if allocated by libidn */
-    Curl_idn_free(host->encalloc);
-    host->encalloc = NULL;
-  }
+  Curl_safefree(host->encalloc);
 }
 
 #endif /* USE_IDN */
@@ -267,20 +326,11 @@ CURLcode Curl_idnconvert_hostname(struct hostname *host)
   /* Check name for non-ASCII and convert hostname if we can */
   if(!Curl_is_ASCII_name(host->name)) {
     char *decoded;
-    CURLcode result = idn_decode(host->name, &decoded);
-    if(!result) {
-      if(!*decoded) {
-        /* zero length is a bad host name */
-        Curl_idn_free(decoded);
-        return CURLE_URL_MALFORMAT;
-      }
-      /* successful */
-      host->encalloc = decoded;
-      /* change the name pointer to point to the encoded hostname */
-      host->name = host->encalloc;
-    }
-    else
+    CURLcode result = Curl_idn_decode(host->name, &decoded);
+    if(result)
       return result;
+    /* successful */
+    host->name = host->encalloc = decoded;
   }
 #endif
   return CURLE_OK;

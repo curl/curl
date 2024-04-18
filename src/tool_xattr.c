@@ -55,7 +55,7 @@ char *stripcredentials(const char *url)
   char *nurl;
   u = curl_url();
   if(u) {
-    uc = curl_url_set(u, CURLUPART_URL, url, 0);
+    uc = curl_url_set(u, CURLUPART_URL, url, CURLU_GUESS_SCHEME);
     if(uc)
       goto error;
 
@@ -87,12 +87,11 @@ static int xattr(int fd,
   int err = 0;
   if(value) {
 #ifdef DEBUGBUILD
-    (void)fd;
     if(getenv("CURL_FAKE_XATTR")) {
       printf("%s => %s\n", attr, value);
+      return 0;
     }
-    return 0;
-#else
+#endif
 #ifdef HAVE_FSETXATTR_6
     err = fsetxattr(fd, attr, value, strlen(value), 0, 0);
 #elif defined(HAVE_FSETXATTR_5)
@@ -105,7 +104,6 @@ static int xattr(int fd,
          attribute */
       err = (rc < 0 ? -1 : 0);
     }
-#endif
 #endif
   }
   return err;

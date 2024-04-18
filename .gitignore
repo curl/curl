@@ -65,3 +65,4 @@ curl_fuzzer_seed_corpus.zip
 libstandaloneengine.a
 tests/string
 tests/config
+tests/ech-log/

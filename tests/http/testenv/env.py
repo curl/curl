@@ -129,10 +129,11 @@ class EnvConfig:
         self.htdocs_dir = os.path.join(self.gen_dir, 'htdocs')
         self.tld = 'http.curl.se'
         self.domain1 = f"one.{self.tld}"
+        self.domain1brotli = f"brotli.one.{self.tld}"
         self.domain2 = f"two.{self.tld}"
         self.proxy_domain = f"proxy.{self.tld}"
         self.cert_specs = [
-            CertificateSpec(domains=[self.domain1, 'localhost'], key_type='rsa2048'),
+            CertificateSpec(domains=[self.domain1, self.domain1brotli, 'localhost'], key_type='rsa2048'),
             CertificateSpec(domains=[self.domain2], key_type='rsa2048'),
             CertificateSpec(domains=[self.proxy_domain, '127.0.0.1'], key_type='rsa2048'),
             CertificateSpec(name="clientsX", sub_specs=[
@@ -167,7 +168,11 @@ class EnvConfig:
                 if p.returncode != 0:
                     # not a working caddy
                     self.caddy = None
-                self._caddy_version = re.sub(r' .*', '', p.stdout.strip())
+                m = re.match(r'v?(\d+\.\d+\.\d+) .*', p.stdout)
+                if m:
+                    self._caddy_version = m.group(1)
+                else:
+                    raise f'Unable to determine cadd version from: {p.stdout}'
             except:
                 self.caddy = None
 
@@ -193,6 +198,12 @@ class EnvConfig:
         if self.httpd_version is None:
             return False
         hv = self.versiontuple(self.httpd_version)
+        return hv >= self.versiontuple(minv)
+
+    def caddy_is_at_least(self, minv):
+        if self.caddy_version is None:
+            return False
+        hv = self.versiontuple(self.caddy_version)
         return hv >= self.versiontuple(minv)
 
     def is_complete(self) -> bool:
@@ -260,6 +271,12 @@ class Env:
         return libname.lower() in Env.CONFIG.curl_props['libs']
 
     @staticmethod
+    def curl_uses_ossl_quic() -> bool:
+        if Env.have_h3_curl():
+            return not Env.curl_uses_lib('ngtcp2') and Env.curl_uses_lib('nghttp3')
+        return False
+
+    @staticmethod
     def curl_has_feature(feature: str) -> bool:
         return feature.lower() in Env.CONFIG.curl_props['features']
 
@@ -310,6 +327,10 @@ class Env:
     @staticmethod
     def caddy_version() -> str:
         return Env.CONFIG.caddy_version
+
+    @staticmethod
+    def caddy_is_at_least(minv) -> bool:
+        return Env.CONFIG.caddy_is_at_least(minv)
 
     @staticmethod
     def httpd_is_at_least(minv) -> bool:
@@ -375,6 +396,10 @@ class Env:
     @property
     def domain1(self) -> str:
         return self.CONFIG.domain1
+
+    @property
+    def domain1brotli(self) -> str:
+        return self.CONFIG.domain1brotli
 
     @property
     def domain2(self) -> str:

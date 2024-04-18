@@ -31,13 +31,12 @@ runs all test cases that have `test_01_02` in their name. This does not have to 
 
 Depending on your setup, some test cases may be skipped and appear as `s` in the output. If you run pytest verbose, it will also give you the reason for skipping.
 
-
 # Prerequisites
 
 You will need:
 
 1. a recent Python, the `cryptography` module and, of course, `pytest`
-2. a apache httpd development version. On Debian/Ubuntu, the package `apache2-dev` has this.
+2. an apache httpd development version. On Debian/Ubuntu, the package `apache2-dev` has this.
 3. a local `curl` project build
 3. optionally, a `nghttpx` with HTTP/3 enabled or h3 test cases will be skipped.
 
@@ -56,22 +55,22 @@ Several test cases are parameterized, for example with the HTTP version to use. 
 curl> pytest -k "test_02_06 and h2"
 ```
 
-Several test cases can be repeated, they all have the `repeat` parameter. To make this work, you have to start `pytest` in the test directory itself (for some unknown reason). Like in:
+Several test cases can be repeated, they all have the `repeat` parameter (install `pytest-repeat` module). To make this work, you have to start `pytest` in the test directory itself (for some unknown reason). Like in:
 
 ```
-curl/tests/http> pytest -k "test_02_06 and h2" --repeat=100
+curl/tests/http> pytest -k "test_02_06 and h2" --count=100
 ```
 
 which then runs this test case a hundred times. In case of flaky tests, you can make pytest stop on the first one with:
 
 ```
-curl/tests/http> pytest -k "test_02_06 and h2" --repeat=100 --maxfail=1
+curl/tests/http> pytest -k "test_02_06 and h2" --count=100 --maxfail=1
 ```
 
 which allow you to inspect output and log files for the failed run. Speaking of log files, the verbosity of pytest is also used to collect curl trace output. If you specify `-v` three times, the `curl` command is started with `--trace`:
 
 ```
-curl/tests/http> pytest -vvv -k "test_02_06 and h2" --repeat=100 --maxfail=1
+curl/tests/http> pytest -vvv -k "test_02_06 and h2" --count=100 --maxfail=1
 ```
 
 all of curl's output and trace file are found in `tests/http/gen/curl`.

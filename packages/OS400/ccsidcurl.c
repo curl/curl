@@ -437,7 +437,8 @@ curl_version_info_ccsid(CURLversion stamp, unsigned int ccsid)
     offsetof(curl_version_info_data, zstd_version),
     offsetof(curl_version_info_data, hyper_version),
     offsetof(curl_version_info_data, gsasl_version),
-    offsetof(curl_version_info_data, feature_names)
+    offsetof(curl_version_info_data, feature_names),
+    offsetof(curl_version_info_data, rtmp_version)
   };
 
   /* The assertion below is possible, because although the second operand
@@ -1097,6 +1098,7 @@ curl_easy_setopt_ccsid(CURL *easy, CURLoption tag, ...)
   case CURLOPT_DNS_LOCAL_IP6:
   case CURLOPT_DNS_SERVERS:
   case CURLOPT_DOH_URL:
+  case CURLOPT_ECH:
   case CURLOPT_EGDSOCKET:
   case CURLOPT_FTPPORT:
   case CURLOPT_FTP_ACCOUNT:

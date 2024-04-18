@@ -1,3 +1,9 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 # curl client writers
 
 Client writers is a design in the internals of libcurl, not visible in its public API. They were started

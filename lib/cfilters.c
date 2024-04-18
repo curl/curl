@@ -590,7 +590,7 @@ CURLcode Curl_conn_ev_data_idle(struct Curl_easy *data)
 
 /**
  * Notify connection filters that the transfer represented by `data`
- * is donw with sending data (e.g. has uploaded everything).
+ * is done with sending data (e.g. has uploaded everything).
  */
 void Curl_conn_ev_data_done_send(struct Curl_easy *data)
 {
@@ -668,6 +668,19 @@ size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
   result = cf? cf->cft->query(cf, data, CF_QUERY_MAX_CONCURRENT,
                               &n, NULL) : CURLE_UNKNOWN_OPTION;
   return (result || n <= 0)? 1 : (size_t)n;
+}
+
+int Curl_conn_get_stream_error(struct Curl_easy *data,
+                               struct connectdata *conn,
+                               int sockindex)
+{
+  CURLcode result;
+  int n = 0;
+
+  struct Curl_cfilter *cf = conn->cfilter[sockindex];
+  result = cf? cf->cft->query(cf, data, CF_QUERY_STREAM_ERROR,
+                              &n, NULL) : CURLE_UNKNOWN_OPTION;
+  return (result || n < 0)? 0 : n;
 }
 
 int Curl_conn_sockindex(struct Curl_easy *data, curl_socket_t sockfd)

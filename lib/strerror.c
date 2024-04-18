@@ -322,6 +322,9 @@ curl_easy_strerror(CURLcode error)
   case CURLE_TOO_LARGE:
     return "A value or data field grew larger than allowed";
 
+  case CURLE_ECH_REQUIRED:
+    return "ECH attempted but failed";
+
     /* error codes not used by current libcurl */
   case CURLE_OBSOLETE20:
   case CURLE_OBSOLETE24:

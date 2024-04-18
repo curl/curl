@@ -100,9 +100,6 @@ if test "x$OPT_RUSTLS" != xno; then
           AC_MSG_ERROR([--with-rustls was specified but could not find rustls.]),
           -lpthread -ldl -lm)
 
-        USE_RUSTLS="yes"
-        ssl_msg="rustls"
-
         LIB_RUSTLS="$PREFIX_RUSTLS/lib$libsuff"
         if test "$PREFIX_RUSTLS" != "/usr" ; then
           SSL_LDFLAGS="-L$LIB_RUSTLS"
@@ -140,8 +137,12 @@ if test "x$OPT_RUSTLS" != xno; then
       dnl additional libs may be necessary.  Hope that we
       dnl don't need any.
       LIBS="$SSL_LIBS $LIBS"
-      USE_RUSTLS="yes"
       ssl_msg="rustls"
+      AC_DEFINE(USE_RUSTLS, 1, [if rustls is enabled])
+      AC_SUBST(USE_RUSTLS, [1])
+      USE_RUSTLS="yes"
+      RUSTLS_ENABLED=1
+      test rustls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
     else
       AC_MSG_ERROR([pkg-config: Could not find rustls])
     fi
@@ -174,5 +175,15 @@ if test "x$OPT_RUSTLS" != xno; then
   fi
 
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
+
+  if test X"$OPT_RUSTLS" != Xno &&
+    test "$RUSTLS_ENABLED" != "1"; then
+    AC_MSG_NOTICE([OPT_RUSTLS: $OPT_RUSTLS])
+    AC_MSG_NOTICE([RUSTLS_ENABLED: $RUSTLS_ENABLED])
+    AC_MSG_ERROR([--with-rustls was given but Rustls could not be detected])
+  fi
 fi
 ])
+
+
+RUSTLS_ENABLED

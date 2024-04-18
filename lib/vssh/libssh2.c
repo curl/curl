@@ -139,6 +139,7 @@ const struct Curl_handler Curl_handler_scp = {
   ssh_getsock,                          /* perform_getsock */
   scp_disconnect,                       /* disconnect */
   ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ssh_attach,                           /* attach */
   PORT_SSH,                             /* defport */
@@ -168,6 +169,7 @@ const struct Curl_handler Curl_handler_sftp = {
   ssh_getsock,                          /* perform_getsock */
   sftp_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ssh_attach,                           /* attach */
   PORT_SSH,                             /* defport */
@@ -201,7 +203,8 @@ kbd_callback(const char *name, int name_len, const char *instruction,
   if(num_prompts == 1) {
     struct connectdata *conn = data->conn;
     responses[0].text = strdup(conn->passwd);
-    responses[0].length = curlx_uztoui(strlen(conn->passwd));
+    responses[0].length =
+      responses[0].text == NULL ? 0 : curlx_uztoui(strlen(conn->passwd));
   }
   (void)prompts;
 } /* kbd_callback */

@@ -50,6 +50,14 @@
 #include <fcntl.h>
 #endif
 
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
+#ifdef HAVE_DIRENT_H
+#include <dirent.h>
+#endif
+
 #include "strtoofft.h"
 #include "urldata.h"
 #include <curl/curl.h>
@@ -115,6 +123,7 @@ const struct Curl_handler Curl_handler_file = {
   ZERO_NULL,                            /* perform_getsock */
   file_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   0,                                    /* defport */
@@ -543,49 +552,85 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     Curl_pgrsSetDownloadSize(data, expected_size);
 
   if(data->state.resume_from) {
-    if(data->state.resume_from !=
-       lseek(fd, data->state.resume_from, SEEK_SET))
+    if(!S_ISDIR(statbuf.st_mode)) {
+      if(data->state.resume_from !=
+          lseek(fd, data->state.resume_from, SEEK_SET))
+        return CURLE_BAD_DOWNLOAD_RESUME;
+    }
+    else {
       return CURLE_BAD_DOWNLOAD_RESUME;
+    }
   }
 
   result = Curl_multi_xfer_buf_borrow(data, &xfer_buf, &xfer_blen);
   if(result)
     goto out;
 
-  while(!result) {
-    ssize_t nread;
-    /* Don't fill a whole buffer if we want less than all data */
-    size_t bytestoread;
+  if(!S_ISDIR(statbuf.st_mode)) {
+    while(!result) {
+      ssize_t nread;
+      /* Don't fill a whole buffer if we want less than all data */
+      size_t bytestoread;
 
-    if(size_known) {
-      bytestoread = (expected_size < (curl_off_t)(xfer_blen-1)) ?
-        curlx_sotouz(expected_size) : (xfer_blen-1);
+      if(size_known) {
+        bytestoread = (expected_size < (curl_off_t)(xfer_blen-1)) ?
+          curlx_sotouz(expected_size) : (xfer_blen-1);
+      }
+      else
+        bytestoread = xfer_blen-1;
+
+      nread = read(fd, xfer_buf, bytestoread);
+
+      if(nread > 0)
+        xfer_buf[nread] = 0;
+
+      if(nread <= 0 || (size_known && (expected_size == 0)))
+        break;
+
+      if(size_known)
+        expected_size -= nread;
+
+      result = Curl_client_write(data, CLIENTWRITE_BODY, xfer_buf, nread);
+      if(result)
+        goto out;
+
+      if(Curl_pgrsUpdate(data))
+        result = CURLE_ABORTED_BY_CALLBACK;
+      else
+        result = Curl_speedcheck(data, Curl_now());
+      if(result)
+        goto out;
     }
-    else
-      bytestoread = xfer_blen-1;
-
-    nread = read(fd, xfer_buf, bytestoread);
-
-    if(nread > 0)
-      xfer_buf[nread] = 0;
-
-    if(nread <= 0 || (size_known && (expected_size == 0)))
-      break;
-
-    if(size_known)
-      expected_size -= nread;
-
-    result = Curl_client_write(data, CLIENTWRITE_BODY, xfer_buf, nread);
-    if(result)
-      goto out;
-
-    if(Curl_pgrsUpdate(data))
-      result = CURLE_ABORTED_BY_CALLBACK;
-    else
-      result = Curl_speedcheck(data, Curl_now());
-    if(result)
-      goto out;
   }
+  else {
+#ifdef HAVE_OPENDIR
+    DIR *dir = opendir(file->path);
+    struct dirent *entry;
+
+    if(!dir) {
+      result = CURLE_READ_ERROR;
+      goto out;
+    }
+    else {
+      while((entry = readdir(dir))) {
+        if(entry->d_name[0] != '.') {
+          result = Curl_client_write(data, CLIENTWRITE_BODY,
+                   entry->d_name, strlen(entry->d_name));
+          if(result)
+            break;
+          result = Curl_client_write(data, CLIENTWRITE_BODY, "\n", 1);
+          if(result)
+            break;
+        }
+      }
+      closedir(dir);
+    }
+#else
+    failf(data, "Directory listing not yet implemented on this platform.");
+    result = CURLE_READ_ERROR;
+#endif
+  }
+
   if(Curl_pgrsUpdate(data))
     result = CURLE_ABORTED_BY_CALLBACK;
 

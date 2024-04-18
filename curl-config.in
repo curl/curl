@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/sh
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -24,173 +24,170 @@
 ###########################################################################
 
 prefix="@prefix@"
+# Used in @libdir@
+# shellcheck disable=SC2034
 exec_prefix=@exec_prefix@
+# shellcheck disable=SC2034
 includedir=@includedir@
 cppflag_curl_staticlib=@CPPFLAG_CURL_STATICLIB@
 
 usage()
 {
-    cat <<EOF
+  cat <<EOF
 Usage: curl-config [OPTION]
 
 Available values for OPTION include:
 
   --built-shared says 'yes' if libcurl was built shared
-  --ca        ca bundle install path
-  --cc        compiler
-  --cflags    pre-processor and compiler flags
-  --checkfor [version] check for (lib)curl of the specified version
-  --configure the arguments given to configure when building curl
-  --features  newline separated list of enabled features
-  --help      display this help and exit
-  --libs      library linking information
-  --prefix    curl install prefix
-  --protocols newline separated list of enabled protocols
-  --ssl-backends output the SSL backends libcurl was built to support
-  --static-libs static libcurl library linking information
-  --version   output version information
-  --vernum    output the version information as a number (hexadecimal)
+  --ca                  CA bundle install path
+  --cc                  compiler
+  --cflags              preprocessor and compiler flags
+  --checkfor [version]  check for (lib)curl of the specified version
+  --configure           the arguments given to configure when building curl
+  --features            newline separated list of enabled features
+  --help                display this help and exit
+  --libs                library linking information
+  --prefix              curl install prefix
+  --protocols           newline separated list of enabled protocols
+  --ssl-backends        output the SSL backends libcurl was built to support
+  --static-libs         static libcurl library linking information
+  --version             output version information
+  --vernum              output version as a hexadecimal number
 EOF
 
-    exit $1
+  exit "$1"
 }
 
-if test $# -eq 0; then
-    usage 1
+if test "$#" -eq 0; then
+  usage 1
 fi
 
-while test $# -gt 0; do
-    case "$1" in
-    # this deals with options in the style
-    # --option=value and extracts the value part
-    # [not currently used]
-    -*=*) value=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
-    *) value= ;;
-    esac
+while test "$#" -gt 0; do
+  case "$1" in
+  --built-shared)
+    echo '@ENABLE_SHARED@'
+    ;;
 
-    case "$1" in
-    --built-shared)
-        echo @ENABLE_SHARED@
-        ;;
+  --ca)
+    echo '@CURL_CA_BUNDLE@'
+    ;;
 
-    --ca)
-        echo @CURL_CA_BUNDLE@
-        ;;
+  --cc)
+    echo '@CC@'
+    ;;
 
-    --cc)
-        echo "@CC@"
-        ;;
+  --prefix)
+    echo "$prefix"
+    ;;
 
-    --prefix)
-        echo "$prefix"
-        ;;
+  --feature|--features)
+    for feature in @SUPPORT_FEATURES@ ""; do
+      test -n "$feature" && echo "$feature"
+    done
+    ;;
 
-    --feature|--features)
-        for feature in @SUPPORT_FEATURES@ ""; do
-            test -n "$feature" && echo "$feature"
-        done
-        ;;
+  --protocols)
+    # shellcheck disable=SC2043
+    for protocol in @SUPPORT_PROTOCOLS@; do
+      echo "$protocol"
+    done
+    ;;
 
-    --protocols)
-        for protocol in @SUPPORT_PROTOCOLS@; do
-            echo "$protocol"
-        done
-        ;;
+  --version)
+    echo 'libcurl @CURLVERSION@'
+    exit 0
+    ;;
 
-    --version)
-        echo libcurl @CURLVERSION@
+  --checkfor)
+    checkfor=$2
+    cmajor=$(echo "$checkfor" | cut -d. -f1)
+    cminor=$(echo "$checkfor" | cut -d. -f2)
+    # when extracting the patch part we strip off everything after a
+    # dash as that's used for things like version 1.2.3-pre1
+    cpatch=$(echo "$checkfor" | cut -d. -f3 | cut -d- -f1)
+
+    vmajor=$(echo '@CURLVERSION@' | cut -d. -f1)
+    vminor=$(echo '@CURLVERSION@' | cut -d. -f2)
+    # when extracting the patch part we strip off everything after a
+    # dash as that's used for things like version 1.2.3-pre1
+    vpatch=$(echo '@CURLVERSION@' | cut -d. -f3 | cut -d- -f1)
+
+    if test "$vmajor" -gt "$cmajor"; then
+      exit 0
+    fi
+    if test "$vmajor" -eq "$cmajor"; then
+      if test "$vminor" -gt "$cminor"; then
         exit 0
-        ;;
-
-    --checkfor)
-        checkfor=$2
-        cmajor=`echo $checkfor | cut -d. -f1`
-        cminor=`echo $checkfor | cut -d. -f2`
-        # when extracting the patch part we strip off everything after a
-        # dash as that's used for things like version 1.2.3-CVS
-        cpatch=`echo $checkfor | cut -d. -f3 | cut -d- -f1`
-
-        vmajor=`echo @CURLVERSION@ | cut -d. -f1`
-        vminor=`echo @CURLVERSION@ | cut -d. -f2`
-        # when extracting the patch part we strip off everything after a
-        # dash as that's used for things like version 1.2.3-CVS
-        vpatch=`echo @CURLVERSION@ | cut -d. -f3 | cut -d- -f1`
-
-        if test "$vmajor" -gt "$cmajor"; then
-            exit 0;
+      fi
+      if test "$vminor" -eq "$cminor"; then
+        if test "$cpatch" -le "$vpatch"; then
+          exit 0
         fi
-        if test "$vmajor" -eq "$cmajor"; then
-            if test "$vminor" -gt "$cminor"; then
-                exit 0
-            fi
-            if test "$vminor" -eq "$cminor"; then
-                if test "$cpatch" -le "$vpatch"; then
-                    exit 0
-                fi
-            fi
-        fi
+      fi
+    fi
 
-        echo "requested version $checkfor is newer than existing @CURLVERSION@"
-        exit 1
-        ;;
+    echo "requested version $checkfor is newer than existing @CURLVERSION@"
+    exit 1
+    ;;
 
-    --vernum)
-        echo @VERSIONNUM@
-        exit 0
-        ;;
+  --vernum)
+    echo '@VERSIONNUM@'
+    exit 0
+    ;;
 
-    --help)
-        usage 0
-        ;;
+  --help)
+    usage 0
+    ;;
 
-    --cflags)
-        if test "X$cppflag_curl_staticlib" = "X-DCURL_STATICLIB"; then
-          CPPFLAG_CURL_STATICLIB="-DCURL_STATICLIB "
-        else
-          CPPFLAG_CURL_STATICLIB=""
-        fi
-        if test "X@includedir@" = "X/usr/include"; then
-          echo "$CPPFLAG_CURL_STATICLIB"
-        else
-          echo "${CPPFLAG_CURL_STATICLIB}-I@includedir@"
-        fi
-        ;;
+  --cflags)
+    if test "X$cppflag_curl_staticlib" = "X-DCURL_STATICLIB"; then
+      CPPFLAG_CURL_STATICLIB="-DCURL_STATICLIB "
+    else
+      CPPFLAG_CURL_STATICLIB=""
+    fi
+    if test "X@includedir@" = "X/usr/include"; then
+      echo "${CPPFLAG_CURL_STATICLIB}"
+    else
+      echo "${CPPFLAG_CURL_STATICLIB}-I@includedir@"
+    fi
+    ;;
 
-    --libs)
-        if test "X@libdir@" != "X/usr/lib" -a "X@libdir@" != "X/usr/lib64"; then
-           CURLLIBDIR="-L@libdir@ "
-        else
-           CURLLIBDIR=""
-        fi
-        if test "X@ENABLE_SHARED@" = "Xno"; then
-          echo ${CURLLIBDIR}-lcurl @LIBCURL_LIBS@
-        else
-          echo ${CURLLIBDIR}-lcurl
-        fi
-        ;;
-    --ssl-backends)
-        echo "@SSL_BACKENDS@"
-        ;;
+  --libs)
+    if test "X@libdir@" != "X/usr/lib" -a "X@libdir@" != "X/usr/lib64"; then
+      CURLLIBDIR="-L@libdir@ "
+    else
+      CURLLIBDIR=""
+    fi
+    if test "X@ENABLE_SHARED@" = "Xno"; then
+      echo "${CURLLIBDIR}-lcurl @LIBCURL_LIBS@"
+    else
+      echo "${CURLLIBDIR}-lcurl"
+    fi
+    ;;
 
-    --static-libs)
-        if test "X@ENABLE_STATIC@" != "Xno" ; then
-          echo "@libdir@/libcurl.@libext@" @LDFLAGS@ @LIBCURL_LIBS@
-        else
-          echo "curl was built with static libraries disabled" >&2
-          exit 1
-        fi
-        ;;
+  --ssl-backends)
+    echo '@SSL_BACKENDS@'
+    ;;
 
-    --configure)
-        echo @CONFIGURE_OPTIONS@
-        ;;
+  --static-libs)
+    if test "X@ENABLE_STATIC@" != "Xno" ; then
+      echo "@libdir@/libcurl.@libext@" @LDFLAGS@ @LIBCURL_LIBS@
+    else
+      echo 'curl was built with static libraries disabled' >&2
+      exit 1
+    fi
+    ;;
 
-    *)
-        echo "unknown option: $1"
-        usage 1
-        ;;
-    esac
-    shift
+  --configure)
+    echo @CONFIGURE_OPTIONS@
+    ;;
+
+  *)
+    echo "unknown option: $1"
+    usage 1
+    ;;
+  esac
+  shift
 done
 
 exit 0

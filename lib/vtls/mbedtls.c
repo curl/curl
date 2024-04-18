@@ -163,15 +163,18 @@ static int entropy_func_mutex(void *data, unsigned char *output, size_t len)
 static void mbed_debug(void *context, int level, const char *f_name,
                        int line_nb, const char *line)
 {
-  struct Curl_easy *data = NULL;
-
-  if(!context)
-    return;
-
-  data = (struct Curl_easy *)context;
-
-  infof(data, "%s", line);
+  struct Curl_easy *data = (struct Curl_easy *)context;
   (void) level;
+  (void) line_nb;
+  (void) f_name;
+
+  if(data) {
+    size_t len = strlen(line);
+    if(len && (line[len - 1] == '\n'))
+      /* discount any trailing newline */
+      len--;
+    infof(data, "%.*s", (int)len, line);
+  }
 }
 #endif
 
@@ -589,7 +592,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 #endif
 
-  infof(data, "mbedTLS: Connecting to %s:%d", hostname, connssl->port);
+  infof(data, "mbedTLS: Connecting to %s:%d", hostname, connssl->peer.port);
 
   mbedtls_ssl_config_init(&backend->config);
   ret = mbedtls_ssl_config_defaults(&backend->config,
@@ -602,10 +605,6 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
   mbedtls_ssl_init(&backend->ssl);
-  if(mbedtls_ssl_setup(&backend->ssl, &backend->config)) {
-    failf(data, "mbedTLS: ssl_init failed");
-    return CURLE_SSL_CONNECT_ERROR;
-  }
 
   /* new profile with RSA min key len = 1024 ... */
   mbedtls_ssl_conf_cert_profile(&backend->config,
@@ -639,6 +638,15 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   mbedtls_ssl_conf_rng(&backend->config, mbedtls_ctr_drbg_random,
                        &backend->ctr_drbg);
+
+  ret = mbedtls_ssl_setup(&backend->ssl, &backend->config);
+  if(ret) {
+    mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
+    failf(data, "ssl_setup failed - mbedTLS: (-0x%04X) %s",
+          -ret, errorbuf);
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+
   mbedtls_ssl_set_bio(&backend->ssl, cf,
                       mbedtls_bio_cf_write,
                       mbedtls_bio_cf_read,
@@ -662,7 +670,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     void *old_session = NULL;
 
     Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(cf, data, &old_session, NULL)) {
+    if(!Curl_ssl_getsessionid(cf, data, &connssl->peer, &old_session, NULL)) {
       ret = mbedtls_ssl_set_session(&backend->ssl, old_session);
       if(ret) {
         Curl_ssl_sessionid_unlock(data);
@@ -752,9 +760,13 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     (struct mbed_ssl_backend_data *)connssl->backend;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   const mbedtls_x509_crt *peercert;
+#ifndef CURL_DISABLE_PROXY
   const char * const pinnedpubkey = Curl_ssl_cf_is_proxy(cf)?
     data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY]:
     data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+#else
+  const char * const pinnedpubkey = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+#endif
 
   DEBUGASSERT(backend);
 
@@ -946,11 +958,12 @@ mbed_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
 
     /* If there's already a matching session in the cache, delete it */
     Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(cf, data, &old_ssl_sessionid, NULL))
+    if(!Curl_ssl_getsessionid(cf, data, &connssl->peer,
+                              &old_ssl_sessionid, NULL))
       Curl_ssl_delsessionid(data, old_ssl_sessionid);
 
-    retcode = Curl_ssl_addsessionid(cf, data, our_ssl_sessionid,
-                                    0, &added);
+    retcode = Curl_ssl_addsessionid(cf, data, &connssl->peer,
+                                    our_ssl_sessionid, 0, &added);
     Curl_ssl_sessionid_unlock(data);
     if(!added) {
       mbedtls_ssl_session_free(our_ssl_sessionid);

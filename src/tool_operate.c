@@ -2187,6 +2187,16 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(config->hsts)
           my_setopt_str(curl, CURLOPT_HSTS, config->hsts);
 
+#ifdef USE_ECH
+        /* only if enabled in configure */
+        if(config->ech) /* only if set (optional) */
+          my_setopt_str(curl, CURLOPT_ECH, config->ech);
+        if(config->ech_public) /* only if set (optional) */
+          my_setopt_str(curl, CURLOPT_ECH, config->ech_public);
+        if(config->ech_config) /* only if set (optional) */
+          my_setopt_str(curl, CURLOPT_ECH, config->ech_config);
+#endif
+
         /* initialize retry vars for loop below */
         per->retry_sleep_default = (config->retry_delay) ?
           config->retry_delay*1000L : RETRY_SLEEP_DEFAULT; /* ms */
@@ -2585,34 +2595,33 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
      */
     if(tls_backend_info->backend != CURLSSLBACKEND_SCHANNEL) {
       char *env;
-      env = curlx_getenv("CURL_CA_BUNDLE");
+      env = curl_getenv("CURL_CA_BUNDLE");
       if(env) {
         config->cacert = strdup(env);
+        curl_free(env);
         if(!config->cacert) {
-          curl_free(env);
           curl_easy_cleanup(curltls);
           errorf(global, "out of memory");
           return CURLE_OUT_OF_MEMORY;
         }
       }
       else {
-        env = curlx_getenv("SSL_CERT_DIR");
+        env = curl_getenv("SSL_CERT_DIR");
         if(env) {
           config->capath = strdup(env);
+          curl_free(env);
           if(!config->capath) {
-            curl_free(env);
             curl_easy_cleanup(curltls);
             errorf(global, "out of memory");
             return CURLE_OUT_OF_MEMORY;
           }
-          curl_free(env);
           capath_from_env = true;
         }
-        env = curlx_getenv("SSL_CERT_FILE");
+        env = curl_getenv("SSL_CERT_FILE");
         if(env) {
           config->cacert = strdup(env);
+          curl_free(env);
           if(!config->cacert) {
-            curl_free(env);
             if(capath_from_env)
               free(config->capath);
             curl_easy_cleanup(curltls);
@@ -2622,13 +2631,10 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
         }
       }
 
-      if(env)
-        curl_free(env);
 #ifdef _WIN32
-      else {
+      if(!env)
         result = FindWin32CACert(config, tls_backend_info->backend,
                                  TEXT("curl-ca-bundle.crt"));
-      }
 #endif
     }
     curl_easy_cleanup(curltls);

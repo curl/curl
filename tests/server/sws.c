@@ -70,7 +70,7 @@
 
 static enum {
   socket_domain_inet = AF_INET
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   , socket_domain_inet6 = AF_INET6
 #endif
 #ifdef USE_UNIX_SOCKETS
@@ -229,7 +229,7 @@ static bool socket_domain_is_ip(void)
 {
   switch(socket_domain) {
   case AF_INET:
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   case AF_INET6:
 #endif
     return true;
@@ -1290,7 +1290,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
   const char *op_br = "";
   const char *cl_br = "";
 
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   if(socket_domain == AF_INET6) {
     op_br = "[";
     cl_br = "]";
@@ -1335,7 +1335,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
 
     rc = connect(serverfd, &serveraddr.sa, sizeof(serveraddr.sa4));
     break;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   case AF_INET6:
     memset(&serveraddr.sa6, 0, sizeof(serveraddr.sa6));
     serveraddr.sa6.sin6_family = AF_INET6;
@@ -1348,7 +1348,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
 
     rc = connect(serverfd, &serveraddr.sa, sizeof(serveraddr.sa6));
     break;
-#endif /* ENABLE_IPV6 */
+#endif /* USE_IPV6 */
 #ifdef USE_UNIX_SOCKETS
   case AF_UNIX:
     logmsg("Proxying through Unix socket is not (yet?) supported.");
@@ -1976,7 +1976,7 @@ int main(int argc, char *argv[])
   while(argc>arg) {
     if(!strcmp("--version", argv[arg])) {
       puts("sws IPv4"
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
              "/IPv6"
 #endif
 #ifdef USE_UNIX_SOCKETS
@@ -2023,7 +2023,7 @@ int main(int argc, char *argv[])
       arg++;
     }
     else if(!strcmp("--ipv6", argv[arg])) {
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
       socket_type = "IPv6";
       socket_domain = AF_INET6;
       location_str = port_str;
@@ -2164,7 +2164,7 @@ int main(int argc, char *argv[])
     me.sa4.sin_port = htons(port);
     rc = bind(sock, &me.sa, sizeof(me.sa4));
     break;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   case AF_INET6:
     memset(&me.sa6, 0, sizeof(me.sa6));
     me.sa6.sin6_family = AF_INET6;
@@ -2172,7 +2172,7 @@ int main(int argc, char *argv[])
     me.sa6.sin6_port = htons(port);
     rc = bind(sock, &me.sa, sizeof(me.sa6));
     break;
-#endif /* ENABLE_IPV6 */
+#endif /* USE_IPV6 */
 #ifdef USE_UNIX_SOCKETS
   case AF_UNIX:
     rc = bind_unix_socket(sock, unix_socket, &me.sau);
@@ -2196,11 +2196,11 @@ int main(int argc, char *argv[])
        port we actually got and update the listener port value with it. */
     curl_socklen_t la_size;
     srvr_sockaddr_union_t localaddr;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     if(socket_domain != AF_INET6)
 #endif
       la_size = sizeof(localaddr.sa4);
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     else
       la_size = sizeof(localaddr.sa6);
 #endif
@@ -2216,7 +2216,7 @@ int main(int argc, char *argv[])
     case AF_INET:
       port = ntohs(localaddr.sa4.sin_port);
       break;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     case AF_INET6:
       port = ntohs(localaddr.sa6.sin6_port);
       break;

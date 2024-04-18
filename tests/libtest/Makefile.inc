@@ -66,7 +66,7 @@ noinst_PROGRAMS = chkhostname libauthretry libntlmconnect libprereq      \
  \
  lib1662 \
  \
- lib1900 \
+ lib1900 lib1901 \
  lib1903 lib1905 lib1906 lib1907 lib1908 lib1910 lib1911 lib1912 lib1913 \
          lib1915 lib1916 lib1917 lib1918 lib1919 \
  lib1933 lib1934 lib1935 lib1936 lib1937 lib1938 lib1939 lib1940 \
@@ -74,7 +74,7 @@ noinst_PROGRAMS = chkhostname libauthretry libntlmconnect libprereq      \
  lib1960 lib1964 \
  lib1970 lib1971 lib1972 lib1973 lib1974 lib1975 \
  lib2301 lib2302 lib2304 lib2305 lib2306 \
- lib2402 lib2404 \
+ lib2402 lib2404 lib2405 \
  lib2502 \
  lib3010 lib3025 lib3026 lib3027 \
  lib3100 lib3101 lib3102 lib3103
@@ -545,6 +545,8 @@ lib1662_LDADD = $(TESTUTIL_LIBS)
 
 lib1900_SOURCES = lib1900.c $(SUPPORTFILES)
 
+lib1901_SOURCES = lib1901.c $(SUPPORTFILES)
+
 lib1903_SOURCES = lib1903.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib1903_LDADD = $(TESTUTIL_LIBS)
 
@@ -680,6 +682,9 @@ lib2402_LDADD = $(TESTUTIL_LIBS)
 
 lib2404_SOURCES = lib2404.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib2404_LDADD = $(TESTUTIL_LIBS)
+
+lib2405_SOURCES = lib2405.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
+lib2405_LDADD = $(TESTUTIL_LIBS)
 
 lib2502_SOURCES = lib2502.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib2502_LDADD = $(TESTUTIL_LIBS)

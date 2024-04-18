@@ -195,7 +195,7 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
                       char *addr, int *port)
 {
   struct sockaddr_in *si = NULL;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   struct sockaddr_in6 *si6 = NULL;
 #endif
 #if (defined(HAVE_SYS_UN_H) || defined(WIN32_SOCKADDR_UN)) && defined(AF_UNIX)
@@ -214,7 +214,7 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
         return TRUE;
       }
       break;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     case AF_INET6:
       si6 = (struct sockaddr_in6 *)(void *) sa;
       if(Curl_inet_ntop(sa->sa_family, &si6->sin6_addr,
@@ -401,7 +401,7 @@ static CURLcode eyeballer_new(struct eyeballer **pballer,
     return CURLE_OUT_OF_MEMORY;
 
   baller->name = ((ai_family == AF_INET)? "ipv4" : (
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
                   (ai_family == AF_INET6)? "ipv6" :
 #endif
                   "ip"));
@@ -779,7 +779,7 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
     /* any IP version is allowed */
     ai_family0 = remotehost->addr?
       remotehost->addr->ai_family : 0;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     ai_family1 = ai_family0 == AF_INET6 ?
       AF_INET : AF_INET6;
 #else
@@ -790,7 +790,7 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
     /* only one IP version is allowed */
     ai_family0 = (conn->ip_version == CURL_IPRESOLVE_V4) ?
       AF_INET :
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
       AF_INET6;
 #else
       AF_UNSPEC;
@@ -1117,7 +1117,7 @@ const
 #endif
 struct transport_provider transport_providers[] = {
   { TRNSPRT_TCP, Curl_cf_tcp_create },
-#ifdef ENABLE_QUIC
+#ifdef USE_HTTP3
   { TRNSPRT_QUIC, Curl_cf_quic_create },
 #endif
 #ifndef CURL_DISABLE_TFTP

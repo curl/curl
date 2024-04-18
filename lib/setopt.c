@@ -52,6 +52,8 @@
 #include "hsts.h"
 #include "tftp.h"
 #include "strdup.h"
+#include "escape.h"
+
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -913,7 +915,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       /* accepted */
       break;
 #endif
-#ifdef ENABLE_QUIC
+#ifdef USE_HTTP3
     case CURL_HTTP_VERSION_3:
     case CURL_HTTP_VERSION_3ONLY:
       /* accepted */
@@ -1022,9 +1024,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /* switch off bits we can't support */
 #ifndef USE_NTLM
     auth &= ~CURLAUTH_NTLM;    /* no NTLM support */
-    auth &= ~CURLAUTH_NTLM_WB; /* no NTLM_WB support */
-#elif !defined(NTLM_WB_ENABLED)
-    auth &= ~CURLAUTH_NTLM_WB; /* no NTLM_WB support */
 #endif
 #ifndef USE_SPNEGO
     auth &= ~CURLAUTH_NEGOTIATE; /* no Negotiate (SPNEGO) auth without
@@ -1103,9 +1102,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /* switch off bits we can't support */
 #ifndef USE_NTLM
     auth &= ~CURLAUTH_NTLM;    /* no NTLM support */
-    auth &= ~CURLAUTH_NTLM_WB; /* no NTLM_WB support */
-#elif !defined(NTLM_WB_ENABLED)
-    auth &= ~CURLAUTH_NTLM_WB; /* no NTLM_WB support */
 #endif
 #ifndef USE_SPNEGO
     auth &= ~CURLAUTH_NEGOTIATE; /* no Negotiate (SPNEGO) auth without
@@ -1318,6 +1314,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.ftpsslauth = (unsigned char)(curl_ftpauth)arg;
     break;
+#ifdef HAVE_GSSAPI
   case CURLOPT_KRBLEVEL:
     /*
      * A string that defines the kerberos security level.
@@ -1326,6 +1323,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
                             va_arg(param, char *));
     data->set.krb = !!(data->set.str[STRING_KRB_LEVEL]);
     break;
+#endif
 #endif
 #if !defined(CURL_DISABLE_FTP) || defined(USE_SSH)
   case CURLOPT_FTP_CREATE_MISSING_DIRS:
@@ -1593,13 +1591,24 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
 
 #ifndef CURL_DISABLE_PROXY
-  case CURLOPT_PROXYUSERPWD:
+  case CURLOPT_PROXYUSERPWD: {
     /*
      * user:password needed to use the proxy
      */
-    result = setstropt_userpwd(va_arg(param, char *),
-                               &data->set.str[STRING_PROXYUSERNAME],
-                               &data->set.str[STRING_PROXYPASSWORD]);
+    char *u = NULL;
+    char *p = NULL;
+    result = setstropt_userpwd(va_arg(param, char *), &u, &p);
+
+    /* URL decode the components */
+    if(!result && u)
+      result = Curl_urldecode(u, 0, &data->set.str[STRING_PROXYUSERNAME], NULL,
+                              REJECT_ZERO);
+    if(!result && p)
+      result = Curl_urldecode(p, 0, &data->set.str[STRING_PROXYPASSWORD], NULL,
+                              REJECT_ZERO);
+    free(u);
+    free(p);
+  }
     break;
   case CURLOPT_PROXYUSERNAME:
     /*
@@ -2625,7 +2634,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
 #endif
 
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   case CURLOPT_ADDRESS_SCOPE:
     /*
      * Use this scope id when using IPv6
@@ -3130,6 +3139,49 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     arg = va_arg(param, long);
     raw = (arg & CURLWS_RAW_MODE);
     data->set.ws_raw_mode = raw;
+    break;
+  }
+#endif
+#ifdef USE_ECH
+  case CURLOPT_ECH: {
+    size_t plen = 0;
+
+    argptr = va_arg(param, char *);
+    if(!argptr) {
+      data->set.tls_ech = CURLECH_DISABLE;
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      return result;
+    }
+    plen = strlen(argptr);
+    if(plen > CURL_MAX_INPUT_LENGTH) {
+      data->set.tls_ech = CURLECH_DISABLE;
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      return result;
+    }
+    /* set tls_ech flag value, preserving CLA_CFG bit */
+    if(plen == 5 && !strcmp(argptr, "false"))
+      data->set.tls_ech = CURLECH_DISABLE
+                          | (data->set.tls_ech & CURLECH_CLA_CFG);
+    else if(plen == 6 && !strcmp(argptr, "grease"))
+      data->set.tls_ech = CURLECH_GREASE
+                          | (data->set.tls_ech & CURLECH_CLA_CFG);
+    else if(plen == 4 && !strcmp(argptr, "true"))
+      data->set.tls_ech = CURLECH_ENABLE
+                          | (data->set.tls_ech & CURLECH_CLA_CFG);
+    else if(plen == 4 && !strcmp(argptr, "hard"))
+      data->set.tls_ech = CURLECH_HARD
+                          | (data->set.tls_ech & CURLECH_CLA_CFG);
+    else if(plen > 5 && !strncmp(argptr, "ecl:", 4)) {
+      result = Curl_setstropt(&data->set.str[STRING_ECH_CONFIG], argptr + 4);
+      if(result)
+        return result;
+      data->set.tls_ech |= CURLECH_CLA_CFG;
+    }
+    else if(plen > 4 && !strncmp(argptr, "pn:", 3)) {
+      result = Curl_setstropt(&data->set.str[STRING_ECH_PUBLIC], argptr + 3);
+      if(result)
+        return result;
+    }
     break;
   }
 #endif

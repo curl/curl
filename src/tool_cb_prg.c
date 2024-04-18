@@ -237,7 +237,7 @@ int tool_progress_cb(void *clientp,
 unsigned int get_terminal_columns(void)
 {
   unsigned int width = 0;
-  char *colp = curlx_getenv("COLUMNS");
+  char *colp = curl_getenv("COLUMNS");
   if(colp) {
     char *endptr;
     long num = strtol(colp, &endptr, 10);

@@ -141,8 +141,7 @@ jobs:
 
       - uses: actions/checkout@v4
 
-      # CMAKE_COMPILE_WARNING_AS_ERROR is available in cmake 3.24 or later
-      - run: cmake -Bbuild -DOPENSSL_ROOT_DIR=$HOME/awslc -DBUILD_SHARED_LIBS=ON -DCMAKE_COMPILE_WARNING_AS_ERROR=ON .
+      - run: cmake -Bbuild -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DOPENSSL_ROOT_DIR=$HOME/awslc -DBUILD_SHARED_LIBS=ON .
         name: 'cmake generate out-of-tree'
 
       - run: cmake --build build --parallel

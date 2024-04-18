@@ -272,10 +272,9 @@ static CURLcode readwrite_data(struct Curl_easy *data,
         DEBUGF(infof(data, "nread == 0, stream closed, bailing"));
       else
         DEBUGF(infof(data, "nread <= 0, server closed connection, bailing"));
-      if(k->eos_written) { /* already did write this to client, leave */
-        k->keepon = 0; /* stop sending as well */
+      k->keepon &= ~(KEEP_RECV|KEEP_SEND); /* stop sending as well */
+      if(k->eos_written) /* already did write this to client, leave */
         break;
-      }
     }
     total_received += blen;
 
@@ -409,6 +408,14 @@ CURLcode Curl_readwrite(struct Curl_easy *data)
   struct curltime now;
   int didwhat = 0;
   int select_bits;
+
+  /* Check if client writes had been paused and can resume now. */
+  if(!(k->keepon & KEEP_RECV_PAUSE) && Curl_cwriter_is_paused(data)) {
+    Curl_conn_ev_data_pause(data, FALSE);
+    result = Curl_cwriter_unpause(data);
+    if(result)
+      goto out;
+  }
 
   if(data->state.select_bits) {
     if(select_bits_paused(data, data->state.select_bits)) {
@@ -706,12 +713,14 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   if(!result)
     result = Curl_setstropt(&data->state.aptr.passwd,
                             data->set.str[STRING_PASSWORD]);
+#ifndef CURL_DISABLE_PROXY
   if(!result)
     result = Curl_setstropt(&data->state.aptr.proxyuser,
                             data->set.str[STRING_PROXYUSERNAME]);
   if(!result)
     result = Curl_setstropt(&data->state.aptr.proxypasswd,
                             data->set.str[STRING_PROXYPASSWORD]);
+#endif
 
   data->req.headerbytecount = 0;
   Curl_headers_cleanup(data);
@@ -1155,7 +1164,7 @@ void Curl_xfer_setup(
 }
 
 CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
-                              char *buf, size_t blen,
+                              const char *buf, size_t blen,
                               bool is_eos)
 {
   CURLcode result = CURLE_OK;
@@ -1189,7 +1198,21 @@ CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
     data->req.eos_written = TRUE;
     data->req.download_done = TRUE;
   }
+  CURL_TRC_WRITE(data, "xfer_write_resp(len=%zu, eos=%d) -> %d",
+                 blen, is_eos, result);
   return result;
+}
+
+CURLcode Curl_xfer_write_resp_hd(struct Curl_easy *data,
+                                 const char *hd0, size_t hdlen, bool is_eos)
+{
+  if(data->conn->handler->write_resp_hd) {
+    /* protocol handlers offering this function take full responsibility
+     * for writing all received download data to the client. */
+    return data->conn->handler->write_resp_hd(data, hd0, hdlen, is_eos);
+  }
+  /* No special handling by protocol handler, write as response bytes */
+  return Curl_xfer_write_resp(data, hd0, hdlen, is_eos);
 }
 
 CURLcode Curl_xfer_write_done(struct Curl_easy *data, bool premature)
@@ -1221,6 +1244,9 @@ CURLcode Curl_xfer_send(struct Curl_easy *data,
     result = CURLE_OK;
     *pnwritten = 0;
   }
+  else if(!result && *pnwritten)
+    data->info.request_size += *pnwritten;
+
   return result;
 }
 

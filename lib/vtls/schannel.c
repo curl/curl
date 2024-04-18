@@ -1071,7 +1071,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   DEBUGASSERT(backend);
   DEBUGF(infof(data,
                "schannel: SSL/TLS connection with %s port %d (step 1/3)",
-               connssl->peer.hostname, connssl->port));
+               connssl->peer.hostname, connssl->peer.port));
 
   if(curlx_verify_windows_version(5, 1, 0, PLATFORM_WINNT,
                                   VERSION_LESS_THAN_EQUAL)) {
@@ -1129,7 +1129,8 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   /* check for an existing reusable credential handle */
   if(ssl_config->primary.sessionid) {
     Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(cf, data, (void **)&old_cred, NULL)) {
+    if(!Curl_ssl_getsessionid(cf, data, &connssl->peer,
+                              (void **)&old_cred, NULL)) {
       backend->cred = old_cred;
       DEBUGF(infof(data, "schannel: reusing existing credential handle"));
 
@@ -1335,7 +1336,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   DEBUGF(infof(data,
                "schannel: SSL/TLS connection with %s port %d (step 2/3)",
-               connssl->peer.hostname, connssl->port));
+               connssl->peer.hostname, connssl->peer.port));
 
   if(!backend->cred || !backend->ctxt)
     return CURLE_SSL_CONNECT_ERROR;
@@ -1569,9 +1570,13 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     DEBUGF(infof(data, "schannel: SSL/TLS handshake complete"));
   }
 
+#ifndef CURL_DISABLE_PROXY
   pubkey_ptr = Curl_ssl_cf_is_proxy(cf)?
     data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY]:
     data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+#else
+  pubkey_ptr = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+#endif
   if(pubkey_ptr) {
     result = schannel_pkp_pin_peer_pubkey(cf, data, pubkey_ptr);
     if(result) {
@@ -1689,7 +1694,7 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   DEBUGF(infof(data,
                "schannel: SSL/TLS connection with %s port %d (step 3/3)",
-               connssl->peer.hostname, connssl->port));
+               connssl->peer.hostname, connssl->peer.port));
 
   if(!backend->cred)
     return CURLE_SSL_CONNECT_ERROR;
@@ -1751,7 +1756,8 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
     struct Curl_schannel_cred *old_cred = NULL;
 
     Curl_ssl_sessionid_lock(data);
-    incache = !(Curl_ssl_getsessionid(cf, data, (void **)&old_cred, NULL));
+    incache = !(Curl_ssl_getsessionid(cf, data, &connssl->peer,
+                                      (void **)&old_cred, NULL));
     if(incache) {
       if(old_cred != backend->cred) {
         DEBUGF(infof(data,
@@ -1762,7 +1768,7 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
       }
     }
     if(!incache) {
-      result = Curl_ssl_addsessionid(cf, data, backend->cred,
+      result = Curl_ssl_addsessionid(cf, data, &connssl->peer, backend->cred,
                                      sizeof(struct Curl_schannel_cred),
                                      &added);
       if(result) {
@@ -2489,7 +2495,7 @@ static int schannel_shutdown(struct Curl_cfilter *cf,
 
   if(backend->ctxt) {
     infof(data, "schannel: shutting down SSL/TLS connection with %s port %d",
-          connssl->peer.hostname, connssl->port);
+          connssl->peer.hostname, connssl->peer.port);
   }
 
   if(backend->cred && backend->ctxt) {
@@ -2759,7 +2765,7 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
                                                const struct Curl_easy *data)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  struct Curl_multi *multi = data->multi_easy ? data->multi_easy : data->multi;
+  struct Curl_multi *multi = data->multi;
   const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
   struct schannel_multi_ssl_backend_data *mbackend;
   const struct ssl_general_config *cfg = &data->set.general_ssl;
@@ -2828,7 +2834,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
                                          HCERTSTORE cert_store)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  struct Curl_multi *multi = data->multi_easy ? data->multi_easy : data->multi;
+  struct Curl_multi *multi = data->multi;
   const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
   struct schannel_multi_ssl_backend_data *mbackend;
   unsigned char *CAinfo_blob_digest = NULL;

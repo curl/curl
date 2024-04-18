@@ -1,3 +1,9 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 # Items to be removed from future curl releases
 
 If any of these deprecated features is a cause for concern for you, please
@@ -5,21 +11,6 @@ email the
 [curl-library mailing list](https://lists.haxx.se/listinfo/curl-library)
 as soon as possible and explain to us why this is a problem for you and
 how your use case cannot be satisfied properly using a workaround.
-
-## NTLM_WB auth
-
-This NTLM authentication method is powered by a separate tool,
-`ntlm_auth`. Barely anyone uses this method. It was always a quirky
-implementation (including fork + exec), it has limited portability and we do
-not test it in the test suite and CI.
-
-We keep the native NTLM implementation.
-
-Due to a mistake, the `NTLM_WB` functionality is missing in builds since 8.4.0
-(October 2023). It needs to be manually patched to work. See [PR
-12479](https://github.com/curl/curl/pull/12479).
-
-curl removes the support for NTLM_WB auth in April 2024.
 
 ## space-separated `NOPROXY` patterns
 
@@ -50,3 +41,4 @@ curl removes the support for space-separated names in July 2024.
  - NSS
  - gskit
  - mingw v1
+ - NTLM_WB

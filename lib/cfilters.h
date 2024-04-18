@@ -160,6 +160,7 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
 #define CF_QUERY_SOCKET             3  /* -          curl_socket_t */
 #define CF_QUERY_TIMER_CONNECT      4  /* -          struct curltime */
 #define CF_QUERY_TIMER_APPCONNECT   5  /* -          struct curltime */
+#define CF_QUERY_STREAM_ERROR       6  /* error code - */
 
 /**
  * Query the cfilter for properties. Filters ignorant of a query will
@@ -178,10 +179,12 @@ typedef CURLcode Curl_cft_query(struct Curl_cfilter *cf,
  *                     connection, etc.
  * CF_TYPE_SSL:        provide SSL/TLS
  * CF_TYPE_MULTIPLEX:  provides multiplexing of easy handles
+ * CF_TYPE_PROXY       provides proxying
  */
 #define CF_TYPE_IP_CONNECT  (1 << 0)
 #define CF_TYPE_SSL         (1 << 1)
 #define CF_TYPE_MULTIPLEX   (1 << 2)
+#define CF_TYPE_PROXY       (1 << 3)
 
 /* A connection filter type, e.g. specific implementation. */
 struct Curl_cftype {
@@ -449,7 +452,7 @@ CURLcode Curl_conn_ev_data_idle(struct Curl_easy *data);
 
 /**
  * Notify connection filters that the transfer represented by `data`
- * is donw with sending data (e.g. has uploaded everything).
+ * is done with sending data (e.g. has uploaded everything).
  */
 void Curl_conn_ev_data_done_send(struct Curl_easy *data);
 
@@ -496,6 +499,12 @@ size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
                                     struct connectdata *conn,
                                     int sockindex);
 
+/**
+ * Get the underlying error code for a transfer stream or 0 if not known.
+ */
+int Curl_conn_get_stream_error(struct Curl_easy *data,
+                               struct connectdata *conn,
+                               int sockindex);
 
 /**
  * Get the index of the given socket in the connection's sockets.

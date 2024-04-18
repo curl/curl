@@ -25,7 +25,7 @@ gopher
 Gopher selector
 </name>
 <command>
-gopher://%HOSTIP:%GOPHERPORT/1/selector/SELECTOR/%TESTNUMBER?
+gopher://%HOSTIP:%GOPHERPORT/1/selector/SELECTOR/%TESTNUMBER
 </command>
 </client>
 
@@ -33,7 +33,7 @@ gopher://%HOSTIP:%GOPHERPORT/1/selector/SELECTOR/%TESTNUMBER?
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-/selector/SELECTOR/%TESTNUMBER?
+/selector/SELECTOR/%TESTNUMBER
 </protocol>
 </verify>
 </testcase>

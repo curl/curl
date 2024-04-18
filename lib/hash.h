@@ -98,5 +98,14 @@ Curl_hash_next_element(struct Curl_hash_iterator *iter);
 void Curl_hash_print(struct Curl_hash *h,
                      void (*func)(void *));
 
+/* Hash for `curl_off_t` as key */
+void Curl_hash_offt_init(struct Curl_hash *h,
+                         unsigned int slots,
+                         Curl_hash_dtor dtor);
+
+void *Curl_hash_offt_set(struct Curl_hash *h, curl_off_t id, void *elem);
+int Curl_hash_offt_remove(struct Curl_hash *h, curl_off_t id);
+void *Curl_hash_offt_get(struct Curl_hash *h, curl_off_t id);
+
 
 #endif /* HEADER_CURL_HASH_H */

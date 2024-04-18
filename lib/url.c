@@ -278,10 +278,12 @@ CURLcode Curl_close(struct Curl_easy **datap)
   up_free(data);
   Curl_dyn_free(&data->state.headerb);
   Curl_flush_cookies(data, TRUE);
+#ifndef CURL_DISABLE_ALTSVC
   Curl_altsvc_save(data, data->asi, data->set.str[STRING_ALTSVC]);
   Curl_altsvc_cleanup(&data->asi);
-  Curl_hsts_save(data, data->hsts, data->set.str[STRING_HSTS]);
+#endif
 #ifndef CURL_DISABLE_HSTS
+  Curl_hsts_save(data, data->hsts, data->set.str[STRING_HSTS]);
   if(!data->share || !data->share->hsts)
     Curl_hsts_cleanup(&data->hsts);
   curl_slist_free_all(data->state.hstslist); /* clean up list */
@@ -305,7 +307,9 @@ CURLcode Curl_close(struct Curl_easy **datap)
     Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
   }
 
+#ifndef CURL_DISABLE_PROXY
   Curl_safefree(data->state.aptr.proxyuserpwd);
+#endif
   Curl_safefree(data->state.aptr.uagent);
   Curl_safefree(data->state.aptr.userpwd);
   Curl_safefree(data->state.aptr.accept_encoding);
@@ -313,12 +317,18 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_safefree(data->state.aptr.rangeline);
   Curl_safefree(data->state.aptr.ref);
   Curl_safefree(data->state.aptr.host);
+#ifndef CURL_DISABLE_COOKIES
   Curl_safefree(data->state.aptr.cookiehost);
+#endif
+#ifndef CURL_DISABLE_RTSP
   Curl_safefree(data->state.aptr.rtsp_transport);
+#endif
   Curl_safefree(data->state.aptr.user);
   Curl_safefree(data->state.aptr.passwd);
+#ifndef CURL_DISABLE_PROXY
   Curl_safefree(data->state.aptr.proxyuser);
   Curl_safefree(data->state.aptr.proxypasswd);
+#endif
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_FORM_API)
   Curl_mime_cleanpart(data->state.formp);
@@ -429,20 +439,22 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
     result = Curl_setstropt(&set->str[STRING_SSL_CAFILE], CURL_CA_BUNDLE);
     if(result)
       return result;
-
+#ifndef CURL_DISABLE_PROXY
     result = Curl_setstropt(&set->str[STRING_SSL_CAFILE_PROXY],
                             CURL_CA_BUNDLE);
     if(result)
       return result;
 #endif
+#endif
 #if defined(CURL_CA_PATH)
     result = Curl_setstropt(&set->str[STRING_SSL_CAPATH], CURL_CA_PATH);
     if(result)
       return result;
-
+#ifndef CURL_DISABLE_PROXY
     result = Curl_setstropt(&set->str[STRING_SSL_CAPATH_PROXY], CURL_CA_PATH);
     if(result)
       return result;
+#endif
 #endif
   }
 
@@ -803,7 +815,7 @@ static bool extract_if_dead(struct connectdata *conn,
 
     }
     else {
-      bool input_pending;
+      bool input_pending = FALSE;
 
       Curl_attach_connection(data, conn);
       dead = !Curl_conn_is_alive(data, conn, &input_pending);
@@ -925,13 +937,12 @@ ConnectionExists(struct Curl_easy *data,
   struct Curl_llist_element *curr;
 
 #ifdef USE_NTLM
-  bool wantNTLMhttp = ((data->state.authhost.want &
-                        (CURLAUTH_NTLM | CURLAUTH_NTLM_WB)) &&
+  bool wantNTLMhttp = ((data->state.authhost.want & CURLAUTH_NTLM) &&
                        (needle->handler->protocol & PROTO_FAMILY_HTTP));
 #ifndef CURL_DISABLE_PROXY
   bool wantProxyNTLMhttp = (needle->bits.proxy_user_passwd &&
                             ((data->state.authproxy.want &
-                              (CURLAUTH_NTLM | CURLAUTH_NTLM_WB)) &&
+                              CURLAUTH_NTLM) &&
                              (needle->handler->protocol & PROTO_FAMILY_HTTP)));
 #else
   bool wantProxyNTLMhttp = FALSE;
@@ -1403,12 +1414,6 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->connect_only = data->set.connect_only;
   conn->transport = TRNSPRT_TCP; /* most of them are TCP streams */
 
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM) && \
-    defined(NTLM_WB_ENABLED)
-  conn->ntlm.ntlm_auth_hlpr_socket = CURL_SOCKET_BAD;
-  conn->proxyntlm.ntlm_auth_hlpr_socket = CURL_SOCKET_BAD;
-#endif
-
   /* Initialize the easy handle list */
   Curl_llist_init(&conn->easyq, NULL);
 
@@ -1710,7 +1715,7 @@ CURLcode Curl_uc_to_curlcode(CURLUcode uc)
   }
 }
 
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
 /*
  * If the URL was set with an IPv6 numerical address with a zone id part, set
  * the scope_id based on that!
@@ -1975,7 +1980,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
 
   (void)curl_url_get(uh, CURLUPART_QUERY, &data->state.up.query, 0);
 
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   if(data->set.scope_id)
     /* Override any scope that was set above.  */
     conn->scope_id = data->set.scope_id;
@@ -2366,17 +2371,16 @@ static CURLcode parse_proxy_auth(struct Curl_easy *data,
     data->state.aptr.proxyuser : "";
   const char *proxypasswd = data->state.aptr.proxypasswd ?
     data->state.aptr.proxypasswd : "";
-  CURLcode result = Curl_urldecode(proxyuser, 0, &conn->http_proxy.user, NULL,
-                                   REJECT_ZERO);
-  if(!result)
-    result = Curl_setstropt(&data->state.aptr.proxyuser,
-                            conn->http_proxy.user);
-  if(!result)
-    result = Curl_urldecode(proxypasswd, 0, &conn->http_proxy.passwd,
-                            NULL, REJECT_ZERO);
-  if(!result)
-    result = Curl_setstropt(&data->state.aptr.proxypasswd,
-                            conn->http_proxy.passwd);
+  CURLcode result = CURLE_OUT_OF_MEMORY;
+
+  conn->http_proxy.user = strdup(proxyuser);
+  if(conn->http_proxy.user) {
+    conn->http_proxy.passwd = strdup(proxypasswd);
+    if(conn->http_proxy.passwd)
+      result = CURLE_OK;
+    else
+      Curl_safefree(conn->http_proxy.user);
+  }
   return result;
 }
 
@@ -2883,7 +2887,7 @@ static CURLcode parse_connect_to_host_port(struct Curl_easy *data,
 
   /* detect and extract RFC6874-style IPv6-addresses */
   if(*hostptr == '[') {
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     char *ptr = ++hostptr; /* advance beyond the initial bracket */
     while(*ptr && (ISXDIGIT(*ptr) || (*ptr == ':') || (*ptr == '.')))
       ptr++;
@@ -3081,7 +3085,7 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
 #ifdef USE_HTTP2
                                    | ALPN_h2
 #endif
-#ifdef ENABLE_QUIC
+#ifdef USE_HTTP3
                                    | ALPN_h3
 #endif
       ) & data->asi->flags;
@@ -3741,14 +3745,14 @@ static CURLcode create_conn(struct Curl_easy *data,
     /* If NTLM is requested in a part of this connection, make sure we don't
        assume the state is fine as this is a fresh connection and NTLM is
        connection based. */
-    if((data->state.authhost.picked & (CURLAUTH_NTLM | CURLAUTH_NTLM_WB)) &&
+    if((data->state.authhost.picked & CURLAUTH_NTLM) &&
        data->state.authhost.done) {
       infof(data, "NTLM picked AND auth done set, clear picked");
       data->state.authhost.picked = CURLAUTH_NONE;
       data->state.authhost.done = FALSE;
     }
 
-    if((data->state.authproxy.picked & (CURLAUTH_NTLM | CURLAUTH_NTLM_WB)) &&
+    if((data->state.authproxy.picked & CURLAUTH_NTLM) &&
        data->state.authproxy.done) {
       infof(data, "NTLM-proxy picked AND auth done set, clear picked");
       data->state.authproxy.picked = CURLAUTH_NONE;

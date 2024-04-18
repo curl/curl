@@ -44,7 +44,7 @@
 #  include <openssl/opensslv.h>
 #  if (!defined(LIBRESSL_VERSION_NUMBER) && \
         defined(OPENSSL_VERSION_NUMBER) && \
-        (OPENSSL_VERSION_NUMBER >= 0x10100010L)) || \
+        (OPENSSL_VERSION_NUMBER >= 0x10101000L)) || \
       (defined(LIBRESSL_VERSION_NUMBER) && \
         (LIBRESSL_VERSION_NUMBER >= 0x3080000fL))
 #    include <openssl/opensslconf.h>
@@ -52,6 +52,27 @@
 #      include <openssl/evp.h>
 #      define USE_OPENSSL_SHA512_256          1
 #      define HAS_SHA512_256_IMPLEMENTATION   1
+#      ifdef __NetBSD__
+/* Some NetBSD versions has a bug in SHA-512/256.
+ * See https://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=58039
+ * The problematic versions:
+ * - NetBSD before 9.4
+ * - NetBSD 9 all development versions (9.99.x)
+ * - NetBSD 10 development versions (10.99.x) before 10.99.11
+ * The bug was fixed in NetBSD 9.4 release, NetBSD 10.0 release,
+ * NetBSD 10.99.11 development.
+ * It is safe to apply the workaround even if the bug is not present, as
+ * the workaround just reduces performance slightly. */
+#        include <sys/param.h>
+#        if  __NetBSD_Version__ <   904000000 ||  \
+            (__NetBSD_Version__ >=  999000000 &&  \
+             __NetBSD_Version__ <  1000000000) || \
+            (__NetBSD_Version__ >= 1099000000 &&  \
+             __NetBSD_Version__ <  1099001100)
+#          define NEED_NETBSD_SHA512_256_WORKAROUND 1
+#          include <string.h>
+#        endif
+#      endif
 #    endif
 #  endif
 #endif /* USE_OPENSSL */
@@ -153,7 +174,7 @@ Curl_sha512_256_finish(unsigned char *digest,
   CURLcode ret;
   Curl_sha512_256_ctx *const ctx = (Curl_sha512_256_ctx *)context;
 
-#ifdef __NetBSD__
+#ifdef NEED_NETBSD_SHA512_256_WORKAROUND
   /* Use a larger buffer to work around a bug in NetBSD:
      https://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=58039 */
   unsigned char tmp_digest[SHA512_256_DIGEST_SIZE * 2];
@@ -161,9 +182,10 @@ Curl_sha512_256_finish(unsigned char *digest,
                            tmp_digest, NULL) ? CURLE_OK : CURLE_SSL_CIPHER;
   if(ret == CURLE_OK)
     memcpy(digest, tmp_digest, SHA512_256_DIGEST_SIZE);
-#else  /* ! __NetBSD__ */
+  explicit_memset(tmp_digest, 0, sizeof(tmp_digest));
+#else  /* ! NEED_NETBSD_SHA512_256_WORKAROUND */
   ret = EVP_DigestFinal_ex(*ctx, digest, NULL) ? CURLE_OK : CURLE_SSL_CIPHER;
-#endif /* ! __NetBSD__ */
+#endif /* ! NEED_NETBSD_SHA512_256_WORKAROUND */
 
   EVP_MD_CTX_destroy(*ctx);
   *ctx = NULL;

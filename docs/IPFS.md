@@ -1,3 +1,9 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 # IPFS
 For an overview about IPFS, visit the [IPFS project site](https://ipfs.tech/).
 

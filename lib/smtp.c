@@ -132,6 +132,7 @@ const struct Curl_handler Curl_handler_smtp = {
   ZERO_NULL,                        /* perform_getsock */
   smtp_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* write_resp */
+  ZERO_NULL,                        /* write_resp_hd */
   ZERO_NULL,                        /* connection_check */
   ZERO_NULL,                        /* attach connection */
   PORT_SMTP,                        /* defport */
@@ -161,6 +162,7 @@ const struct Curl_handler Curl_handler_smtps = {
   ZERO_NULL,                        /* perform_getsock */
   smtp_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* write_resp */
+  ZERO_NULL,                        /* write_resp_hd */
   ZERO_NULL,                        /* connection_check */
   ZERO_NULL,                        /* attach connection */
   PORT_SMTPS,                       /* defport */
@@ -1901,7 +1903,7 @@ static CURLcode cr_eob_read(struct Curl_easy *data,
   *peos = ctx->eos;
   DEBUGF(infof(data, "cr_eob_read(%zu) -> %d, %zd, %d",
          blen, result, *pnread, *peos));
-  return CURLE_OK;
+  return result;
 }
 
 static curl_off_t cr_eob_total_length(struct Curl_easy *data,

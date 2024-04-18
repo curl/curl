@@ -632,6 +632,7 @@ typedef enum {
   CURLE_SSL_CLIENTCERT,          /* 98 - client-side certificate required */
   CURLE_UNRECOVERABLE_POLL,      /* 99 - poll/select returned fatal error */
   CURLE_TOO_LARGE,               /* 100 - a value/data met its maximum */
+  CURLE_ECH_REQUIRED,            /* 101 - ECH tried but failed */
   CURL_LAST /* never use! */
 } CURLcode;
 
@@ -811,7 +812,10 @@ typedef enum {
 #define CURLAUTH_GSSAPI CURLAUTH_NEGOTIATE
 #define CURLAUTH_NTLM         (((unsigned long)1)<<3)
 #define CURLAUTH_DIGEST_IE    (((unsigned long)1)<<4)
+#ifndef CURL_NO_OLDIES
+  /* functionality removed since 8.8.0 */
 #define CURLAUTH_NTLM_WB      (((unsigned long)1)<<5)
+#endif
 #define CURLAUTH_BEARER       (((unsigned long)1)<<6)
 #define CURLAUTH_AWS_SIGV4    (((unsigned long)1)<<7)
 #define CURLAUTH_ONLY         (((unsigned long)1)<<31)
@@ -2206,6 +2210,9 @@ typedef enum {
   /* millisecond version */
   CURLOPT(CURLOPT_SERVER_RESPONSE_TIMEOUT_MS, CURLOPTTYPE_LONG, 324),
 
+  /* set ECH configuration  */
+  CURLOPT(CURLOPT_ECH, CURLOPTTYPE_STRINGPOINT, 325),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -3035,17 +3042,18 @@ CURL_EXTERN CURLSHcode curl_share_cleanup(CURLSH *share);
  */
 
 typedef enum {
-  CURLVERSION_FIRST,
-  CURLVERSION_SECOND,
-  CURLVERSION_THIRD,
-  CURLVERSION_FOURTH,
-  CURLVERSION_FIFTH,
-  CURLVERSION_SIXTH,
-  CURLVERSION_SEVENTH,
-  CURLVERSION_EIGHTH,
-  CURLVERSION_NINTH,
-  CURLVERSION_TENTH,
-  CURLVERSION_ELEVENTH,
+  CURLVERSION_FIRST,    /* 7.10 */
+  CURLVERSION_SECOND,   /* 7.11.1 */
+  CURLVERSION_THIRD,    /* 7.12.0 */
+  CURLVERSION_FOURTH,   /* 7.16.1 */
+  CURLVERSION_FIFTH,    /* 7.57.0 */
+  CURLVERSION_SIXTH,    /* 7.66.0 */
+  CURLVERSION_SEVENTH,  /* 7.70.0 */
+  CURLVERSION_EIGHTH,   /* 7.72.0 */
+  CURLVERSION_NINTH,    /* 7.75.0 */
+  CURLVERSION_TENTH,    /* 7.77.0 */
+  CURLVERSION_ELEVENTH, /* 7.87.0 */
+  CURLVERSION_TWELFTH,  /* 8.8.0 */
   CURLVERSION_LAST /* never actually use this */
 } CURLversion;
 
@@ -3054,7 +3062,7 @@ typedef enum {
    meant to be a built-in version number for what kind of struct the caller
    expects. If the struct ever changes, we redefine the NOW to another enum
    from above. */
-#define CURLVERSION_NOW CURLVERSION_ELEVENTH
+#define CURLVERSION_NOW CURLVERSION_TWELFTH
 
 struct curl_version_info_data {
   CURLversion age;          /* age of the returned struct */
@@ -3114,6 +3122,9 @@ struct curl_version_info_data {
   /* These fields were added in CURLVERSION_ELEVENTH */
   /* feature_names is terminated by an entry with a NULL feature name */
   const char * const *feature_names;
+
+  /* These fields were added in CURLVERSION_TWELFTH */
+  const char *rtmp_version; /* human readable string. */
 };
 typedef struct curl_version_info_data curl_version_info_data;
 
@@ -3154,7 +3165,7 @@ typedef struct curl_version_info_data curl_version_info_data;
 #define CURL_VERSION_GSASL        (1<<29) /* libgsasl is supported */
 #define CURL_VERSION_THREADSAFE   (1<<30) /* libcurl API is thread-safe */
 
- /*
+/*
  * NAME curl_version_info()
  *
  * DESCRIPTION

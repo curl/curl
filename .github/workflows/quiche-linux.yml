@@ -47,11 +47,11 @@ permissions: {}
 env:
   MAKEFLAGS: -j 3
   openssl-version: 3.1.4+quic
-  nghttp3-version: v1.1.0
-  ngtcp2-version: v1.2.0
-  nghttp2-version: v1.59.0
+  nghttp3-version: v1.2.0
+  ngtcp2-version: v1.4.0
+  nghttp2-version: v1.61.0
   quiche-version: 0.20.0
-  mod_h2-version: v2.0.26
+  mod_h2-version: v2.0.27
 
 jobs:
   autotools:
@@ -102,6 +102,7 @@ jobs:
         run: |
           git clone --quiet --depth=1 -b ${{ env.nghttp3-version }} https://github.com/ngtcp2/nghttp3
           cd nghttp3
+          git submodule update --init
           autoreconf -fi
           ./configure --prefix=$HOME/nghttpx PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" --enable-lib-only
           make install

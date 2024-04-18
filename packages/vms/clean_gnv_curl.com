@@ -179,9 +179,6 @@ $!
 $ file = "lcl_root:[.lib]libcurl.vers"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.lib]libcurl.plist"
-$ if f$search(file) .nes. "" then delete 'file';*
-$!
 $ file = "lcl_root:[]ca-bundle.h"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!

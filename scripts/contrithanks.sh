@@ -28,50 +28,46 @@
 # puts them at the end of the THANKS document on stdout
 #
 
-start=$1
+set -eu
+
+start="${1:-}"
 
 if test "$start" = "-h"; then
   echo "Usage: $0 <since this tag/hash>"
   exit
 fi
 if test -z "$start"; then
-  start=`git tag --sort=taggerdate | grep "^curl-" | tail -1`;
+  start=$(git tag --sort=taggerdate | grep "^curl-" | tail -1)
 fi
-
 
 # We also include curl-www if possible. Override by setting CURLWWW
-if [ -z "$CURLWWW" ] ; then
-    CURLWWW=../curl-www
-fi
+CURLWWW="${CURLWWW:-../curl-www}"
 
 cat ./docs/THANKS
 
-(
- (
-  git log --use-mailmap $start..HEAD
-  if [ -d "$CURLWWW" ]
-  then
-   git -C ../curl-www log --use-mailmap $start..HEAD
-  fi
- ) | \
+{
+  {
+    git log --use-mailmap "$start..HEAD"
+    if [ -d "$CURLWWW" ]; then
+      git -C "$CURLWWW" log --use-mailmap "$start..HEAD"
+    fi
+  } | \
+  grep -Eai '(^Author|^Commit|by):' | \
+  cut -d: -f2- | \
+  cut '-d(' -f1 | \
+  cut '-d<' -f1 | \
+  tr , '\012' | \
+  sed 's/ at github/ on github/' | \
+  sed 's/ and /\n/' | \
+  sed -e 's/^ //' -e 's/ $//g' -e 's/@users.noreply.github.com$/ on github/'
 
-grep -Eai '(^Author|^Commit|by):' | \
-cut -d: -f2- | \
-cut '-d(' -f1 | \
-cut '-d<' -f1 | \
-tr , '\012' | \
-sed 's/ at github/ on github/' | \
-sed 's/ and /\n/' | \
-sed -e 's/^ //' -e 's/ $//g' -e 's/@users.noreply.github.com$/ on github/'
-
-# grep out the list of names from RELEASE-NOTES
-# split on ", "
-# remove leading whitespace
-grep -a "^  [^ (]" RELEASE-NOTES| \
-sed 's/, */\n/g'| \
-sed 's/^ *//'
-
-)| \
+  # grep out the list of names from RELEASE-NOTES
+  # split on ", "
+  # remove leading whitespace
+  grep -a "^  [^ (]" RELEASE-NOTES| \
+  sed 's/, */\n/g'| \
+  sed 's/^ *//'
+} | \
 sed -f ./docs/THANKS-filter | \
 sort -fu | \
 grep -aixvf ./docs/THANKS

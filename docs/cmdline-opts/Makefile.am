@@ -36,7 +36,8 @@ GN_0 = @echo "  GENERATE" $@;
 GN_1 =
 GN_ = $(GN_0)
 
-MANAGEN=$(abs_top_srcdir)/scripts/managen
+MANAGEN=$(top_srcdir)/scripts/managen
+INCDIR=$(top_srcdir)/include
 
 if BUILD_DOCS
 CLEANFILES = $(MANPAGE) $(ASCIIPAGE)
@@ -47,10 +48,10 @@ all: $(MANPAGE) $(ASCIIPAGE)
 endif
 
 $(MANPAGE): $(DPAGES) $(SUPPORT) mainpage.idx Makefile.inc $(MANAGEN)
-	$(GEN)(rm -f $(MANPAGE) && (cd $(srcdir) && @PERL@ $(MANAGEN) mainpage $(DPAGES)) > manpage.tmp.$$$$ && mv manpage.tmp.$$$$ $(MANPAGE))
+	$(GEN)(rm -f $(MANPAGE) && @PERL@ $(MANAGEN) -d $(srcdir) -I $(INCDIR) mainpage $(DPAGES) > manpage.tmp.$$$$ && mv manpage.tmp.$$$$ $(MANPAGE))
 
 $(ASCIIPAGE): $(DPAGES) $(SUPPORT) mainpage.idx Makefile.inc $(MANAGEN)
-	$(GEN)(rm -f $(ASCIIPAGE) && (cd $(srcdir) && @PERL@ $(MANAGEN) ascii $(DPAGES)) > asciipage.tmp.$$$$ && mv asciipage.tmp.$$$$ $(ASCIIPAGE))
+	$(GEN)(rm -f $(ASCIIPAGE) && @PERL@ $(MANAGEN) -d $(srcdir) -I $(INCDIR) ascii $(DPAGES) > asciipage.tmp.$$$$ && mv asciipage.tmp.$$$$ $(ASCIIPAGE))
 
 listhelp:
 	$(MANAGEN) listhelp $(DPAGES) > $(top_builddir)/src/tool_listhelp.c

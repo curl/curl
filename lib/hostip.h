@@ -32,6 +32,10 @@
 
 #include <setjmp.h>
 
+#ifdef USE_HTTPSRR
+# include <stdint.h>
+#endif
+
 /* Allocate enough memory to hold the full name information structs and
  * everything. OSF1 is known to require at least 8872 bytes. The buffer
  * required for storing all possible aliases and IP numbers is according to
@@ -58,8 +62,41 @@ struct connectdata;
  */
 struct Curl_hash *Curl_global_host_cache_init(void);
 
+#ifdef USE_HTTPSRR
+
+#define CURL_MAXLEN_host_name 253
+
+struct Curl_https_rrinfo {
+  size_t len; /* raw encoded length */
+  unsigned char *val; /* raw encoded octets */
+  /*
+   * fields from HTTPS RR, with the mandatory fields
+   * first (priority, target), then the others in the
+   * order of the keytag numbers defined at
+   * https://datatracker.ietf.org/doc/html/rfc9460#section-14.3.2
+   */
+  uint16_t priority;
+  char *target;
+  char *alpns; /* keytag = 1 */
+  bool no_def_alpn; /* keytag = 2 */
+  /*
+   * we don't support ports (keytag = 3) as we don't support
+   * port-switching yet
+   */
+  unsigned char *ipv4hints; /* keytag = 4 */
+  size_t ipv4hints_len;
+  unsigned char *echconfiglist; /* keytag = 5 */
+  size_t echconfiglist_len;
+  unsigned char *ipv6hints; /* keytag = 6 */
+  size_t ipv6hints_len;
+};
+#endif
+
 struct Curl_dns_entry {
   struct Curl_addrinfo *addr;
+#ifdef USE_HTTPSRR
+  struct Curl_https_rrinfo *hinfo;
+#endif
   /* timestamp == 0 -- permanent CURLOPT_RESOLVE entry (doesn't time out) */
   time_t timestamp;
   /* use-counter, use Curl_resolv_unlock to release reference */
@@ -96,7 +133,7 @@ enum resolve_t Curl_resolv_timeout(struct Curl_easy *data,
                                    struct Curl_dns_entry **dnsentry,
                                    timediff_t timeoutms);
 
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
 /*
  * Curl_ipv6works() returns TRUE if IPv6 seems to work.
  */

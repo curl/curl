@@ -68,8 +68,7 @@ static void bundle_destroy(struct connectbundle *bundle)
 static void bundle_add_conn(struct connectbundle *bundle,
                             struct connectdata *conn)
 {
-  Curl_llist_insert_next(&bundle->conn_list, bundle->conn_list.tail, conn,
-                         &conn->bundle_node);
+  Curl_llist_append(&bundle->conn_list, conn, &conn->bundle_node);
   conn->bundle = bundle;
   bundle->num_connections++;
 }
@@ -141,7 +140,7 @@ static void hashkey(struct connectdata *conn, char *buf, size_t len)
     hostname = conn->host.name;
 
   /* put the numbers first so that the hostname gets cut off if too long */
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   msnprintf(buf, len, "%u/%ld/%s", conn->scope_id, port, hostname);
 #else
   msnprintf(buf, len, "%ld/%s", port, hostname);

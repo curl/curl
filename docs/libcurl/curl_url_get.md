@@ -113,16 +113,31 @@ punycode.
 
 (Added in curl 8.3.0)
 
+## CURLU_GET_EMPTY
+
+When this flag is used in curl_url_get(), it makes the function return empty
+query and fragments parts or when used in the full URL. By default, libcurl
+otherwise considers empty parts non-existing.
+
+An empty query part is one where this is nothing following the question mark
+(before the possible fragment). An empty fragments part is one where there is
+nothing following the hash sign.
+
+(Added in curl 8.8.0)
+
 # PARTS
 
 ## CURLUPART_URL
 
-When asked to return the full URL, curl_url_get(3) returns a normalized
-and possibly cleaned up version using all available URL parts.
+When asked to return the full URL, curl_url_get(3) returns a normalized and
+possibly cleaned up version using all available URL parts.
 
-We advise using the *CURLU_PUNYCODE* option to get the URL as "normalized"
-as possible since IDN allows hostnames to be written in many different ways
-that still end up the same punycode version.
+We advise using the *CURLU_PUNYCODE* option to get the URL as "normalized" as
+possible since IDN allows hostnames to be written in many different ways that
+still end up the same punycode version.
+
+Zero-length queries and fragments are excluded from the URL unless
+CURLU_GET_EMPTY is set.
 
 ## CURLUPART_SCHEME
 
@@ -169,7 +184,8 @@ The initial question mark that denotes the beginning of the query part is a
 delimiter only. It is not part of the query contents.
 
 A not-present query returns *part* set to NULL.
-A zero-length query returns *part* as a zero-length string.
+
+A zero-length query returns *part* as NULL unless CURLU_GET_EMPTY is set.
 
 The query part gets pluses converted to space when asked to URL decode on get
 with the CURLU_URLDECODE bit.
@@ -178,6 +194,10 @@ with the CURLU_URLDECODE bit.
 
 The initial hash sign that denotes the beginning of the fragment is a
 delimiter only. It is not part of the fragment contents.
+
+A not-present fragment returns *part* set to NULL.
+
+A zero-length fragment returns *part* as NULL unless CURLU_GET_EMPTY is set.
 
 # EXAMPLE
 
