@@ -891,4 +891,14 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #define OPENSSL_SUPPRESS_DEPRECATED
 #endif
 
+/* Optionally #include a user-defined header, whereby compilation options
+   may be set prior to where they take effect, but after platform setup.
+   If CURL_CUSTOM_INCLUDE=? is defined, its value names the #include
+   file. */
+#ifdef CURL_CUSTOM_INCLUDE
+#  define INC_STRINGIFY_(f) #f
+#  define INC_STRINGIFY(f) INC_STRINGIFY_(f)
+#  include INC_STRINGIFY(CURL_CUSTOM_INCLUDE)
+#endif
+
 #endif /* HEADER_CURL_SETUP_H */
