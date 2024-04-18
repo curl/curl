@@ -832,7 +832,7 @@ static int set_transfer_url(struct Curl_easy *data,
 
   v = curl_pushheader_byname(hp, HTTP_PSEUDO_AUTHORITY);
   if(v) {
-    uc = Curl_url_set_authority(u, v, CURLU_DISALLOW_USER);
+    uc = Curl_url_set_authority(u, v);
     if(uc) {
       rc = 2;
       goto fail;

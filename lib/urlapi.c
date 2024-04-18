@@ -851,8 +851,8 @@ out:
   return uc;
 }
 
-CURLUcode Curl_url_set_authority(CURLU *u, const char *authority,
-                                 unsigned int flags)
+/* used for HTTP/2 server push */
+CURLUcode Curl_url_set_authority(CURLU *u, const char *authority)
 {
   CURLUcode result;
   struct dynbuf host;
@@ -860,8 +860,8 @@ CURLUcode Curl_url_set_authority(CURLU *u, const char *authority,
   DEBUGASSERT(authority);
   Curl_dyn_init(&host, CURL_MAX_INPUT_LENGTH);
 
-  result = parse_authority(u, authority, strlen(authority), flags,
-                           &host, !!u->scheme);
+  result = parse_authority(u, authority, strlen(authority),
+                           CURLU_DISALLOW_USER, &host, !!u->scheme);
   if(result)
     Curl_dyn_free(&host);
   else {
