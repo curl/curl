@@ -12,7 +12,7 @@ contact_links:
     about: Send question to the suitable mailing list
   - name: Commercial support
     url: https://curl.se/support.html
-    about: Several companies are offering paid support for curl/libcurl
+    about: Pay for fast quality support for and help with curl/libcurl
   - name: Feature request
     url: https://curl.se/mail/
     about: To propose new features or enhancements, please bring that discussion to a suitable curl mailing list.
