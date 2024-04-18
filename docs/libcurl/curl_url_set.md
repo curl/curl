@@ -110,6 +110,9 @@ encoded as your locale says or UTF-8 (when WinIDN is used). If it is a
 bracketed IPv6 numeric address it may contain a zone id (or you can use
 *CURLUPART_ZONEID*).
 
+Note that if you set an IPv6 address, it will get ruined (and cause an error)
+if you also set the CURLU_URLENCODE flag.
+
 Unless *CURLU_NO_AUTHORITY* is set, a blank hostname is not allowed to set.
 
 ## CURLUPART_ZONEID
@@ -162,12 +165,13 @@ If set, allows curl_url_set(3) to set a non-supported scheme.
 ## CURLU_URLENCODE
 
 When set, curl_url_set(3) URL encodes the part on entry, except for
-scheme, port and URL.
+**scheme**, **port** and **URL**.
 
 When setting the path component with URL encoding enabled, the slash character
-is be skipped.
+is skipped.
 
-The query part gets space-to-plus conversion before the URL conversion.
+The query part gets space-to-plus converted before the URL conversion is
+applied.
 
 This URL encoding is charset unaware and converts the input in a byte-by-byte
 manner.
