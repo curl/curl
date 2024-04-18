@@ -43,7 +43,7 @@ below) to set or change, with *content* pointing to a null-terminated
 string with the new contents for that URL part. The contents should be in the
 form and encoding they would use in a URL: URL encoded.
 
-When setting part in the URL object that was previously already set, it
+When setting a part in the URL object that was previously already set, it
 replaces the data that was previously stored for that part with the new
 *content*.
 
@@ -61,12 +61,13 @@ schemes it does not recognize.
 
 This function has an 8 MB maximum length limit for all provided input strings.
 In the real world, excessively long fields in URLs cause problems even if this
-API accepts them.
+function accepts them.
 
-When setting or updating contents of individual URL parts, this API might
-accept data that would not be otherwise possible to set in the string when it
-gets populated as a result of a full URL parse. Beware. If done so, extracting
-a full URL later on from such components might render an invalid URL.
+When setting or updating contents of individual URL parts, curl_url_set(3)
+might accept data that would not be otherwise possible to set in the string
+when it gets populated as a result of a full URL parse. Beware. If done so,
+extracting a full URL later on from such components might render an invalid
+URL.
 
 The *flags* argument is a bitmask with independent features.
 
