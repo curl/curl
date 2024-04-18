@@ -38,10 +38,10 @@ handle previously created by curl_url(3) or curl_url_dup(3).
 This function sets or updates individual URL components, or parts, held by the
 URL object the handle identifies.
 
-The *part* argument should identify the particular URL part (see list
-below) to set or change, with *content* pointing to a null-terminated
-string with the new contents for that URL part. The contents should be in the
-form and encoding they would use in a URL: URL encoded.
+The *part* argument should identify the particular URL part (see list below)
+to set or change, with *content* pointing to a null-terminated string with the
+new contents for that URL part. The contents should be in the form and
+encoding they would use in a URL: URL encoded.
 
 When setting a part in the URL object that was previously already set, it
 replaces the data that was previously stored for that part with the new
@@ -50,14 +50,8 @@ replaces the data that was previously stored for that part with the new
 The caller does not have to keep *content* around after a successful call
 as this function copies the content.
 
-Setting a part to a NULL pointer removes that part's contents from the
-*CURLU* handle.
-
-By default, this API only accepts URLs using schemes for protocols that are
-supported built-in. To make libcurl parse URLs generically even for schemes it
-does not know about, the **CURLU_NON_SUPPORT_SCHEME** flags bit must be
-set. Otherwise, this function returns *CURLUE_UNSUPPORTED_SCHEME* for URL
-schemes it does not recognize.
+Setting a part to a NULL pointer removes that part's contents from the *CURLU*
+handle.
 
 This function has an 8 MB maximum length limit for all provided input strings.
 In the real world, excessively long fields in URLs cause problems even if this
@@ -84,6 +78,12 @@ is replaced with the components of the newly set URL.
 Pass a pointer to a null-terminated string to the *url* parameter. The
 string must point to a correctly formatted "RFC 3986+" URL or be a NULL
 pointer.
+
+By default, this API only accepts setting URLs using schemes for protocols
+that are supported built-in. To make libcurl parse URLs generically even for
+schemes it does not know about, the **CURLU_NON_SUPPORT_SCHEME** flags bit
+must be set. Otherwise, this function returns *CURLUE_UNSUPPORTED_SCHEME* for
+URL schemes it does not recognize.
 
 Unless *CURLU_NO_AUTHORITY* is set, a blank hostname is not allowed in
 the URL.
