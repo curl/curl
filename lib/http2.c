@@ -193,6 +193,7 @@ struct h2_stream_ctx {
 
   int status_code; /* HTTP response status code */
   uint32_t error; /* stream error code */
+  CURLcode xfer_result; /* Result of writing out response */
   uint32_t local_window_size; /* the local recv window size */
   int32_t id; /* HTTP/2 protocol identifier for stream */
   BIT(resp_hds_complete); /* we have a complete, final response */
@@ -975,6 +976,41 @@ fail:
   return rv;
 }
 
+static void h2_xfer_write_resp_hd(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  struct h2_stream_ctx *stream,
+                                  const char *buf, size_t blen, bool eos)
+{
+
+  /* If we already encountered an error, skip further writes */
+  if(!stream->xfer_result) {
+    stream->xfer_result = Curl_xfer_write_resp_hd(data, buf, blen, eos);
+    if(stream->xfer_result)
+      CURL_TRC_CF(data, cf, "[%d] error %d writing %zu bytes of headers",
+                  stream->id, stream->xfer_result, blen);
+  }
+}
+
+static void h2_xfer_write_resp(struct Curl_cfilter *cf,
+                               struct Curl_easy *data,
+                               struct h2_stream_ctx *stream,
+                               const char *buf, size_t blen, bool eos)
+{
+
+  /* If we already encountered an error, skip further writes */
+  if(!stream->xfer_result)
+    stream->xfer_result = Curl_xfer_write_resp(data, buf, blen, eos);
+  /* If the transfer write is errored, we do not want any more data */
+  if(stream->xfer_result) {
+    struct cf_h2_ctx *ctx = cf->ctx;
+    CURL_TRC_CF(data, cf, "[%d] error %d writing %zu bytes of data, "
+                "RST-ing stream",
+                stream->id, stream->xfer_result, blen);
+    nghttp2_submit_rst_stream(ctx->h2, 0, stream->id,
+                              NGHTTP2_ERR_CALLBACK_FAILURE);
+  }
+}
+
 static CURLcode on_stream_frame(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 const nghttp2_frame *frame)
@@ -982,7 +1018,6 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
   struct cf_h2_ctx *ctx = cf->ctx;
   struct h2_stream_ctx *stream = H2_STREAM_CTX(ctx, data);
   int32_t stream_id = frame->hd.stream_id;
-  CURLcode result;
   int rv;
 
   if(!stream) {
@@ -1030,9 +1065,7 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
       stream->status_code = -1;
     }
 
-    result = Curl_xfer_write_resp_hd(data, STRCONST("\r\n"), stream->closed);
-    if(result)
-      return result;
+    h2_xfer_write_resp_hd(cf, data, stream, STRCONST("\r\n"), stream->closed);
 
     if(stream->status_code / 100 != 1) {
       stream->resp_hds_complete = TRUE;
@@ -1251,7 +1284,6 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   struct cf_h2_ctx *ctx = cf->ctx;
   struct h2_stream_ctx *stream;
   struct Curl_easy *data_s;
-  CURLcode result;
   (void)flags;
 
   DEBUGASSERT(stream_id); /* should never be a zero stream ID here */
@@ -1274,12 +1306,7 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   if(!stream)
     return NGHTTP2_ERR_CALLBACK_FAILURE;
 
-  result = Curl_xfer_write_resp(data_s, (char *)mem, len, FALSE);
-  if(result && result != CURLE_AGAIN) {
-    nghttp2_submit_rst_stream(ctx->h2, 0, stream->id,
-                              NGHTTP2_ERR_CALLBACK_FAILURE);
-    return 0;
-  }
+  h2_xfer_write_resp(cf, data_s, stream, (char *)mem, len, FALSE);
 
   nghttp2_session_consume(ctx->h2, stream_id, len);
   stream->nrcvd_data += (curl_off_t)len;
@@ -1500,8 +1527,8 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     if(!result)
       result = Curl_dyn_addn(&ctx->scratch, STRCONST(" \r\n"));
     if(!result)
-      result = Curl_xfer_write_resp_hd(data_s, Curl_dyn_ptr(&ctx->scratch),
-                                       Curl_dyn_len(&ctx->scratch), FALSE);
+      h2_xfer_write_resp_hd(cf, data_s, stream, Curl_dyn_ptr(&ctx->scratch),
+                            Curl_dyn_len(&ctx->scratch), FALSE);
     if(result)
       return NGHTTP2_ERR_CALLBACK_FAILURE;
     /* if we receive data for another handle, wake that up */
@@ -1525,8 +1552,8 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   if(!result)
     result = Curl_dyn_addn(&ctx->scratch, STRCONST("\r\n"));
   if(!result)
-    result = Curl_xfer_write_resp_hd(data_s, Curl_dyn_ptr(&ctx->scratch),
-                                     Curl_dyn_len(&ctx->scratch), FALSE);
+    h2_xfer_write_resp_hd(cf, data_s, stream, Curl_dyn_ptr(&ctx->scratch),
+                          Curl_dyn_len(&ctx->scratch), FALSE);
   if(result)
     return NGHTTP2_ERR_CALLBACK_FAILURE;
   /* if we receive data for another handle, wake that up */
@@ -1831,7 +1858,12 @@ static ssize_t stream_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   (void)buf;
   *err = CURLE_AGAIN;
-  if(stream->closed) {
+  if(stream->xfer_result) {
+    CURL_TRC_CF(data, cf, "[%d] xfer write failed", stream->id);
+    *err = stream->xfer_result;
+    nread = -1;
+  }
+  else if(stream->closed) {
     CURL_TRC_CF(data, cf, "[%d] returning CLOSE", stream->id);
     nread = http2_handle_stream_close(cf, data, stream, err);
   }

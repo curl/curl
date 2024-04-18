@@ -257,6 +257,34 @@ class TestDownload:
         ])
         r.check_response(count=count, http_status=200)
 
+    @pytest.mark.parametrize("proto", ['h2', 'h3'])
+    def test_02_14_not_found(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 stalls here")
+        count = 10
+        urln = f'https://{env.authority_for(env.domain1, proto)}/not-found?[0-{count-1}]'
+        curl = CurlClient(env=env)
+        r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
+            '--parallel'
+        ])
+        r.check_stats(count=count, http_status=404, exitcode=0)
+
+    @pytest.mark.parametrize("proto", ['h2', 'h3'])
+    def test_02_15_fail_not_found(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 stalls here")
+        count = 10
+        urln = f'https://{env.authority_for(env.domain1, proto)}/not-found?[0-{count-1}]'
+        curl = CurlClient(env=env)
+        r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
+            '--fail'
+        ])
+        r.check_stats(count=count, http_status=404, exitcode=22)
+
     @pytest.mark.skipif(condition=Env().slow_network, reason="not suitable for slow network tests")
     @pytest.mark.skipif(condition=Env().ci_run, reason="not suitable for CI runs")
     def test_02_20_h2_small_frames(self, env: Env, httpd, repeat):
