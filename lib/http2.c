@@ -135,6 +135,7 @@ struct cf_h2_ctx {
   uint32_t max_concurrent_streams;
   int32_t goaway_error;
   int32_t last_stream_id;
+  CURLcode real_result; /* pass errors back from a failing nghttp2 callback */
   BIT(conn_closed);
   BIT(goaway);
   BIT(enable_push);
@@ -569,7 +570,7 @@ static int h2_process_pending_input(struct Curl_cfilter *cf,
       failf(data,
             "process_pending_input: nghttp2_session_mem_recv() returned "
             "%zd:%s", rv, nghttp2_strerror((int)rv));
-      *err = CURLE_RECV_ERROR;
+      *err = ctx->real_result;
       return -1;
     }
     Curl_bufq_skip(&ctx->inbufq, (size_t)rv);
@@ -1240,7 +1241,8 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     return 0;
   }
 
-  return on_stream_frame(cf, data_s, frame)? NGHTTP2_ERR_CALLBACK_FAILURE : 0;
+  ctx->real_result = on_stream_frame(cf, data_s, frame);
+  return ctx->real_result ? NGHTTP2_ERR_CALLBACK_FAILURE : 0;
 }
 
 static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
