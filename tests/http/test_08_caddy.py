@@ -179,4 +179,5 @@ class TestCaddy:
         url = f'https://{env.domain1}:{caddy.port}/data10.data?[0-{count-1}]'
         r = curl.http_upload(urls=[url], data=data, alpn_proto=proto,
                              extra_args=['--parallel'])
-        r.check_stats(count=count, http_status=200, exitcode=0)
+        exp_status = 405 if env.caddy_is_at_least('2.7.0') else 200
+        r.check_stats(count=count, http_status=exp_status, exitcode=0)

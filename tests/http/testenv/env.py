@@ -168,7 +168,11 @@ class EnvConfig:
                 if p.returncode != 0:
                     # not a working caddy
                     self.caddy = None
-                self._caddy_version = re.sub(r' .*', '', p.stdout.strip())
+                m = re.match(r'v?(\d+\.\d+\.\d+) .*', p.stdout)
+                if m:
+                    self._caddy_version = m.group(1)
+                else:
+                    raise f'Unable to determine cadd version from: {p.stdout}'
             except:
                 self.caddy = None
 
@@ -194,6 +198,12 @@ class EnvConfig:
         if self.httpd_version is None:
             return False
         hv = self.versiontuple(self.httpd_version)
+        return hv >= self.versiontuple(minv)
+
+    def caddy_is_at_least(self, minv):
+        if self.caddy_version is None:
+            return False
+        hv = self.versiontuple(self.caddy_version)
         return hv >= self.versiontuple(minv)
 
     def is_complete(self) -> bool:
@@ -317,6 +327,10 @@ class Env:
     @staticmethod
     def caddy_version() -> str:
         return Env.CONFIG.caddy_version
+
+    @staticmethod
+    def caddy_is_at_least(minv) -> bool:
+        return Env.CONFIG.caddy_is_at_least(minv)
 
     @staticmethod
     def httpd_is_at_least(minv) -> bool:
