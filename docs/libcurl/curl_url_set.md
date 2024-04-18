@@ -110,8 +110,8 @@ encoded as your locale says or UTF-8 (when WinIDN is used). If it is a
 bracketed IPv6 numeric address it may contain a zone id (or you can use
 *CURLUPART_ZONEID*).
 
-Note that if you set an IPv6 address, it will get ruined (and cause an error)
-if you also set the CURLU_URLENCODE flag.
+Note that if you set an IPv6 address, it gets ruined and causes an error if
+you also set the CURLU_URLENCODE flag.
 
 Unless *CURLU_NO_AUTHORITY* is set, a blank hostname is not allowed to set.
 
