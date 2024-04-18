@@ -95,7 +95,13 @@ to 40 bytes long.
 
 ## CURLUPART_USER
 
+If only the user part is set and not the password, the URL will be represented
+with a blank password.
+
 ## CURLUPART_PASSWORD
+
+If only the password part is set and not the user, the URL will be represented
+with a blank user.
 
 ## CURLUPART_OPTIONS
 
