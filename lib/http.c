@@ -3202,10 +3202,13 @@ CURLcode Curl_http_statusline(struct Curl_easy *data,
 #ifdef USE_HTTP3
   case 30:
 #endif
-    /* TODO: we should verify that responses do not switch major
-     * HTTP version of the connection. Now, it seems we might accept
-     * a HTTP/2 response on a HTTP/1.1 connection, which is wrong. */
-    conn->httpversion = (unsigned char)k->httpversion;
+    /* no major version switch mid-connection */
+    if(conn->httpversion &&
+       (k->httpversion/10 != conn->httpversion/10)) {
+      failf(data, "Version mismatch (from HTTP/%u to HTTP/%u)",
+            conn->httpversion/10, k->httpversion/10);
+      return CURLE_UNSUPPORTED_PROTOCOL;
+    }
     break;
   default:
     failf(data, "Unsupported HTTP version (%u.%d) in response",
