@@ -520,6 +520,8 @@ CURLcode Curl_creader_read(struct Curl_easy *data,
                            struct Curl_creader *reader,
                            char *buf, size_t blen, size_t *nread, bool *eos)
 {
+  *nread = 0;
+  *eos = FALSE;
   if(!reader)
     return CURLE_READ_ERROR;
   return reader->crt->do_read(data, reader, buf, blen, nread, eos);
@@ -1142,8 +1144,6 @@ CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
     DEBUGASSERT(data->req.reader_stack);
   }
 
-  *nread = 0;
-  *eos = FALSE;
   result = Curl_creader_read(data, data->req.reader_stack, buf, blen,
                              nread, eos);
   CURL_TRC_READ(data, "client_read(len=%zu) -> %d, nread=%zu, eos=%d",
