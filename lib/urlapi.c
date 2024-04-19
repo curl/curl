@@ -79,7 +79,7 @@ struct Curl_URL {
   char *path;
   char *query;
   char *fragment;
-  unsigned short portnum; /* the numerical version */
+  unsigned short portnum; /* the numerical version (if 'port' is set) */
   BIT(query_present);    /* to support blank */
   BIT(fragment_present); /* to support blank */
 };
@@ -537,7 +537,7 @@ UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
 
   if(portptr) {
     char *rest = NULL;
-    long port;
+    unsigned long port;
     size_t keep = portptr - hostname;
 
     /* Browser behavior adaptation. If there's a colon with no digits after,
@@ -555,12 +555,10 @@ UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
     if(!ISDIGIT(*portptr))
       return CURLUE_BAD_PORT_NUMBER;
 
-    port = strtol(portptr, &rest, 10);  /* Port number must be decimal */
+    errno = 0;
+    port = strtoul(portptr, &rest, 10);  /* Port number must be decimal */
 
-    if(port > 0xffff)
-      return CURLUE_BAD_PORT_NUMBER;
-
-    if(rest[0])
+    if(errno || (port > 0xffff) || *rest)
       return CURLUE_BAD_PORT_NUMBER;
 
     u->portnum = (unsigned short) port;
@@ -685,6 +683,7 @@ static int ipv4_normalize(struct dynbuf *host)
   if(*c == '[')
     return HOST_IPV6;
 
+  errno = 0; /* for strtoul */
   while(!done) {
     char *endp = NULL;
     unsigned long l;
@@ -692,6 +691,13 @@ static int ipv4_normalize(struct dynbuf *host)
       /* most importantly this doesn't allow a leading plus or minus */
       return HOST_NAME;
     l = strtoul(c, &endp, 0);
+    if(errno)
+      return HOST_NAME;
+#if SIZEOF_LONG > 4
+    /* a value larger than 32 bits */
+    if(l > UINT_MAX)
+      return HOST_NAME;
+#endif
 
     parts[n] = l;
     c = endp;
@@ -711,16 +717,6 @@ static int ipv4_normalize(struct dynbuf *host)
     default:
       return HOST_NAME;
     }
-
-    /* overflow */
-    if((l == ULONG_MAX) && (errno == ERANGE))
-      return HOST_NAME;
-
-#if SIZEOF_LONG > 4
-    /* a value larger than 32 bits */
-    if(l > UINT_MAX)
-      return HOST_NAME;
-#endif
   }
 
   switch(n) {
@@ -1707,7 +1703,6 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
                        const char *part, unsigned int flags)
 {
   char **storep = NULL;
-  long port = 0;
   bool urlencode = (flags & CURLU_URLENCODE)? 1 : 0;
   bool plusencode = FALSE;
   bool urlskipslash = FALSE;
@@ -1816,18 +1811,26 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     storep = &u->zoneid;
     break;
   case CURLUPART_PORT:
-  {
-    char *endp;
-    urlencode = FALSE; /* never */
-    port = strtol(part, &endp, 10);  /* Port number must be decimal */
-    if((port <= 0) || (port > 0xffff))
+    if(!ISDIGIT(part[0]))
+      /* not a number */
       return CURLUE_BAD_PORT_NUMBER;
-    if(*endp)
-      /* weirdly provided number, not good! */
-      return CURLUE_BAD_PORT_NUMBER;
-    storep = &u->port;
-  }
-  break;
+    else {
+      char *tmp;
+      char *endp;
+      unsigned long port;
+      errno = 0;
+      port = strtoul(part, &endp, 10);  /* must be decimal */
+      if(errno || (port > 0xffff) || *endp)
+        /* weirdly provided number, not good! */
+        return CURLUE_BAD_PORT_NUMBER;
+      tmp = strdup(part);
+      if(!tmp)
+        return CURLUE_OUT_OF_MEMORY;
+      free(u->port);
+      u->port = tmp;
+      u->portnum = (unsigned short)port;
+      return CURLUE_OK;
+    }
   case CURLUPART_PATH:
     urlskipslash = TRUE;
     leadingslash = TRUE; /* enforce */
@@ -1990,9 +1993,5 @@ nomem:
     free(*storep);
     *storep = (char *)newp;
   }
-  /* set after the string, to make it not assigned if the allocation above
-     fails */
-  if(port)
-    u->portnum = (unsigned short)port;
   return CURLUE_OK;
 }
