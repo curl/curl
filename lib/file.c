@@ -455,12 +455,9 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     fstated = TRUE;
   }
 
-  if(fstated && !data->state.range && data->set.timecondition) {
-    if(!Curl_meets_timecondition(data, data->info.filetime)) {
-      *done = TRUE;
-      return CURLE_OK;
-    }
-  }
+  if(fstated && !data->state.range && data->set.timecondition &&
+     !Curl_meets_timecondition(data, data->info.filetime))
+    return CURLE_OK;
 
   if(fstated) {
     time_t filetime;
