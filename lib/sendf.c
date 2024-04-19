@@ -1142,6 +1142,8 @@ CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
     DEBUGASSERT(data->req.reader_stack);
   }
 
+  *nread = 0;
+  *eos = FALSE;
   result = Curl_creader_read(data, data->req.reader_stack, buf, blen,
                              nread, eos);
   CURL_TRC_READ(data, "client_read(len=%zu) -> %d, nread=%zu, eos=%d",
