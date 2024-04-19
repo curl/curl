@@ -388,8 +388,10 @@ static CURLcode AcceptServerConnect(struct Curl_easy *data)
   (void)curlx_nonblock(s, TRUE); /* enable non-blocking */
   /* Replace any filter on SECONDARY with one listening on this socket */
   result = Curl_conn_tcp_accepted_set(data, conn, SECONDARYSOCKET, &s);
-  if(result)
+  if(result) {
+    sclose(s);
     return result;
+  }
 
   if(data->set.fsockopt) {
     int error = 0;
