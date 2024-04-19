@@ -158,10 +158,7 @@ static CURLcode make_headers(struct Curl_easy *data,
   msnprintf(date_full_hdr, DATE_FULL_HDR_LEN,
             "x-%s-date:%s", provider1, timestamp);
 
-  if(Curl_checkheaders(data, STRCONST("Host"))) {
-    head = NULL;
-  }
-  else {
+  if(!Curl_checkheaders(data, STRCONST("Host"))) {
     char full_host[FULL_HOST_LEN + 1];
 
     if(data->state.aptr.host) {
