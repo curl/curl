@@ -56,7 +56,6 @@
 
 #include <MacTypes.h>
 #include <Security/Security.h>
-#include <Security/SecCertificate.h>
 /* For some reason, when building for iOS, the omnibus header above does
  * not include SecureTransport.h as of iOS SDK 5.1. */
 #include <Security/SecureTransport.h>
