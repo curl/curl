@@ -516,12 +516,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
   data->magic = CURLEASY_MAGIC_NUMBER;
 
-  result = Curl_req_init(&data->req);
-  if(result) {
-    DEBUGF(fprintf(stderr, "Error: request init failed\n"));
-    free(data);
-    return result;
-  }
+  Curl_req_init(&data->req);
 
   result = Curl_resolver_init(data, &data->state.async.resolver);
   if(result) {

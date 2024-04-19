@@ -40,10 +40,9 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-CURLcode Curl_req_init(struct SingleRequest *req)
+void Curl_req_init(struct SingleRequest *req)
 {
   memset(req, 0, sizeof(*req));
-  return CURLE_OK;
 }
 
 CURLcode Curl_req_soft_reset(struct SingleRequest *req,

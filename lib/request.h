@@ -152,7 +152,7 @@ struct SingleRequest {
 /**
  * Initialize the state of the request for first use.
  */
-CURLcode Curl_req_init(struct SingleRequest *req);
+void Curl_req_init(struct SingleRequest *req);
 
 /**
  * The request is about to start. Record time and do a soft reset.
