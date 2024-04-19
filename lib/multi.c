@@ -1881,19 +1881,6 @@ static CURLcode protocol_connect(struct Curl_easy *data,
   return result; /* pass back status */
 }
 
-/*
- * Curl_preconnect() is called immediately before a connect starts. When a
- * redirect is followed, this is then called multiple times during a single
- * transfer.
- */
-CURLcode Curl_preconnect(struct Curl_easy *data)
-{
-  /* this used to do data->state.buffer allocation,
-     maybe remove completely now? */
-  (void)data;
-  return CURLE_OK;
-}
-
 static void set_in_callback(struct Curl_multi *multi, bool value)
 {
   multi->in_callback = value;
@@ -1985,10 +1972,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     case MSTATE_CONNECT:
       /* Connect. We want to get a connection identifier filled in. This state
          can be entered from SETUP and from PENDING. */
-      result = Curl_preconnect(data);
-      if(result)
-        break;
-
       result = Curl_connect(data, &async, &connected);
       if(CURLE_NO_CONNECTION_AVAILABLE == result) {
         /* There was no connection available. We will go to the pending
