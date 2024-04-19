@@ -155,6 +155,7 @@ struct h3_stream_ctx {
   curl_uint64_t error3; /* HTTP/3 stream error code */
   curl_off_t upload_left; /* number of request bytes left to upload */
   int status_code; /* HTTP status code */
+  CURLcode xfer_result; /* result from xfer_resp_write(_hd) */
   bool resp_hds_complete; /* we have a complete, final response */
   bool closed; /* TRUE on stream close */
   bool reset;  /* TRUE on stream reset */
@@ -795,6 +796,41 @@ static int cb_h3_stream_close(nghttp3_conn *conn, int64_t sid,
   return 0;
 }
 
+static void h3_xfer_write_resp_hd(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  struct h3_stream_ctx *stream,
+                                  const char *buf, size_t blen, bool eos)
+{
+
+  /* If we already encountered an error, skip further writes */
+  if(!stream->xfer_result) {
+    stream->xfer_result = Curl_xfer_write_resp_hd(data, buf, blen, eos);
+    if(stream->xfer_result)
+      CURL_TRC_CF(data, cf, "[%"CURL_PRId64"] error %d writing %zu "
+                  "bytes of headers", stream->id, stream->xfer_result, blen);
+  }
+}
+
+static void h3_xfer_write_resp(struct Curl_cfilter *cf,
+                               struct Curl_easy *data,
+                               struct h3_stream_ctx *stream,
+                               const char *buf, size_t blen, bool eos)
+{
+
+  /* If we already encountered an error, skip further writes */
+  if(!stream->xfer_result)
+    stream->xfer_result = Curl_xfer_write_resp(data, buf, blen, eos);
+  /* If the transfer write is errored, we do not want any more data */
+  if(stream->xfer_result) {
+    struct cf_ngtcp2_ctx *ctx = cf->ctx;
+    CURL_TRC_CF(data, cf, "[%"CURL_PRId64"] error %d writing %zu bytes "
+                "of data, cancelling stream",
+                stream->id, stream->xfer_result, blen);
+    nghttp3_conn_close_stream(ctx->h3conn, stream->id,
+                              NGHTTP3_H3_REQUEST_CANCELLED);
+  }
+}
+
 static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream3_id,
                            const uint8_t *buf, size_t blen,
                            void *user_data, void *stream_user_data)
@@ -803,7 +839,6 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream3_id,
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
   struct Curl_easy *data = stream_user_data;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
-  CURLcode result;
 
   (void)conn;
   (void)stream3_id;
@@ -811,16 +846,7 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream3_id,
   if(!stream)
     return NGHTTP3_ERR_CALLBACK_FAILURE;
 
-  result = Curl_xfer_write_resp(data, (char *)buf, blen, FALSE);
-  if(result) {
-    CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] DATA len=%zu, ERROR %d",
-                stream->id, blen, result);
-    nghttp3_conn_close_stream(ctx->h3conn, stream->id,
-                              NGHTTP3_H3_REQUEST_CANCELLED);
-    ngtcp2_conn_extend_max_stream_offset(ctx->qconn, stream->id, blen);
-    ngtcp2_conn_extend_max_offset(ctx->qconn, blen);
-    return 0;
-  }
+  h3_xfer_write_resp(cf, data, stream, (char *)buf, blen, FALSE);
   if(blen) {
     CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] ACK %zu bytes of DATA",
                 stream->id, blen);
@@ -855,7 +881,6 @@ static int cb_h3_end_headers(nghttp3_conn *conn, int64_t sid,
   struct Curl_easy *data = stream_user_data;
   curl_int64_t stream_id = (curl_int64_t)sid;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
-  CURLcode result = CURLE_OK;
   (void)conn;
   (void)stream_id;
   (void)fin;
@@ -864,10 +889,7 @@ static int cb_h3_end_headers(nghttp3_conn *conn, int64_t sid,
   if(!stream)
     return 0;
   /* add a CRLF only if we've received some headers */
-  result = Curl_xfer_write_resp_hd(data, STRCONST("\r\n"), stream->closed);
-  if(result) {
-    return -1;
-  }
+  h3_xfer_write_resp_hd(cf, data, stream, STRCONST("\r\n"), stream->closed);
 
   CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] end_headers, status=%d",
               stream_id, stream->status_code);
@@ -915,8 +937,8 @@ static int cb_h3_recv_header(nghttp3_conn *conn, int64_t sid,
     if(!result)
       result = Curl_dyn_addn(&ctx->scratch, STRCONST(" \r\n"));
     if(!result)
-      result = Curl_xfer_write_resp_hd(data, Curl_dyn_ptr(&ctx->scratch),
-                                       Curl_dyn_len(&ctx->scratch), FALSE);
+      h3_xfer_write_resp_hd(cf, data, stream, Curl_dyn_ptr(&ctx->scratch),
+                            Curl_dyn_len(&ctx->scratch), FALSE);
     CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] status: %s",
                 stream_id, Curl_dyn_ptr(&ctx->scratch));
     if(result) {
@@ -939,11 +961,8 @@ static int cb_h3_recv_header(nghttp3_conn *conn, int64_t sid,
     if(!result)
       result = Curl_dyn_addn(&ctx->scratch, STRCONST("\r\n"));
     if(!result)
-      result = Curl_xfer_write_resp_hd(data, Curl_dyn_ptr(&ctx->scratch),
-                                       Curl_dyn_len(&ctx->scratch), FALSE);
-    if(result) {
-      return -1;
-    }
+      h3_xfer_write_resp_hd(cf, data, stream, Curl_dyn_ptr(&ctx->scratch),
+                            Curl_dyn_len(&ctx->scratch), FALSE);
   }
   return 0;
 }
@@ -1128,7 +1147,13 @@ static ssize_t cf_ngtcp2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     goto out;
   }
 
-  if(stream->closed) {
+  if(stream->xfer_result) {
+    CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] xfer write failed", stream->id);
+    *err = stream->xfer_result;
+    nread = -1;
+    goto out;
+  }
+  else if(stream->closed) {
     nread = recv_closed_stream(cf, data, stream, err);
     goto out;
   }
