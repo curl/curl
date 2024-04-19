@@ -151,6 +151,9 @@ struct clearurlcase {
 };
 
 static const struct testcase get_parts_list[] ={
+  {"https://curl.se:0/#",
+   "https | [11] | [12] | [13] | curl.se | 0 | / | [16] | ",
+   0, CURLU_GET_EMPTY, CURLUE_OK},
   {"https://curl.se/#",
    "https | [11] | [12] | [13] | curl.se | [15] | / | [16] | ",
    0, CURLU_GET_EMPTY, CURLUE_OK},
@@ -941,8 +944,8 @@ static const struct setcase set_parts_list[] = {
    0, 0, CURLUE_OK, CURLUE_BAD_PORT_NUMBER},
   {"https://host:1234/",
    "port=0,",
-   "https://host:1234/",
-   0, 0, CURLUE_OK, CURLUE_BAD_PORT_NUMBER},
+   "https://host:0/",
+   0, 0, CURLUE_OK, CURLUE_OK},
   {"https://host:1234/",
    "port=65535,",
    "https://host:65535/",
