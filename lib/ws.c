@@ -950,10 +950,6 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
 
   *nread = 0;
   *metap = NULL;
-  /* get a download buffer */
-  result = Curl_preconnect(data);
-  if(result)
-    return result;
 
   memset(&ctx, 0, sizeof(ctx));
   ctx.data = data;
