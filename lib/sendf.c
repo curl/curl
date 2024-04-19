@@ -520,6 +520,8 @@ CURLcode Curl_creader_read(struct Curl_easy *data,
                            struct Curl_creader *reader,
                            char *buf, size_t blen, size_t *nread, bool *eos)
 {
+  *nread = 0;
+  *eos = FALSE;
   if(!reader)
     return CURLE_READ_ERROR;
   return reader->crt->do_read(data, reader, buf, blen, nread, eos);
