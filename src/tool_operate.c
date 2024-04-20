@@ -925,7 +925,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(config->etag_save_file) {
           /* open file for output: */
           if(strcmp(config->etag_save_file, "-")) {
-            FILE *newfile = fopen(config->etag_save_file, "wb");
+            FILE *newfile = fopen(config->etag_save_file, "ab");
             if(!newfile) {
               warnf(global, "Failed creating file for saving etags: \"%s\". "
                     "Skip this transfer", config->etag_save_file);
