@@ -1,0 +1,52 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 304 Not Modified
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+ETag: "21025-dc7-39462498"
+
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+Use --etag-compare and --etag-save on an existing file
+</name>
+<file name="%LOGDIR/etag%TESTNUMBER">
+"21025-dc7-39462498"
+</file>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --etag-compare %LOGDIR/etag%TESTNUMBER --etag-save %LOGDIR/etag%TESTNUMBER
+</command>
+</client>
+
+# Verify that the file still exists with the correct etag value.
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+If-None-Match: "21025-dc7-39462498"
+
+</protocol>
+<file name="%LOGDIR/etag%TESTNUMBER">
+"21025-dc7-39462498"
+</file>
+</verify>
+</testcase>
