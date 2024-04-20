@@ -80,7 +80,7 @@ static size_t memcrlf(char *orig,
                                          if we count non-CRLF */
                       size_t max)
 {
-  char *ptr = orig;
+  char *ptr;
   size_t total = max;
   for(ptr = orig; max; max--, ptr++) {
     bool crlf = ISCRLF(*ptr);
