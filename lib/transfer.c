@@ -198,7 +198,6 @@ static ssize_t Curl_xfer_recv_resp(struct Curl_easy *data,
   if(*err)
     return -1;
   DEBUGASSERT(nread >= 0);
-  *err = CURLE_OK;
   return nread;
 }
 
