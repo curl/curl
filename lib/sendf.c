@@ -965,7 +965,6 @@ static CURLcode cr_lc_read(struct Curl_easy *data,
         ctx->eos = TRUE;
       *pnread = nread;
       *peos = ctx->eos;
-      result = CURLE_OK;
       goto out;
     }
 
