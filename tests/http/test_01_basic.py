@@ -97,3 +97,27 @@ class TestBasic:
         r.check_stats(http_status=200, count=1)
         assert r.stats[0]['time_connect'] > 0, f'{r.stats[0]}'
         assert r.stats[0]['time_appconnect'] > 0, f'{r.stats[0]}'
+
+    # use host name with trailing dot, verify handshake
+    @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason=f"curl without SSL")
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_01_07_trailing_dot(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        curl = CurlClient(env=env)
+        domain = f'{env.domain1}.'
+        url = f'https://{env.authority_for(domain, proto)}/data.json'
+        r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True)
+        r.check_stats(http_status=200, count=1)
+
+    # use host name with double trailing dot, verify handshake
+    @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason=f"curl without SSL")
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_01_08_double_dot(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        curl = CurlClient(env=env)
+        domain = f'{env.domain1}..'
+        url = f'https://{env.authority_for(domain, proto)}/data.json'
+        r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True)
+        r.check_stats(exitcode=60, count=1)

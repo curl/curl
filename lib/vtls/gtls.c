@@ -962,6 +962,9 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
   gnutls_protocol_t version = gnutls_protocol_get_version(session);
 #endif
   long * const certverifyresult = &ssl_config->certverifyresult;
+  /* if we have use SNI, verify the certificate with that. If not, e.g.
+   * the hostname is an IP address, use the hostname */
+  const char *verify_name = peer->sni? peer->sni : peer->hostname;
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   /* the name of the cipher suite used, e.g. ECDHE_RSA_AES_256_GCM_SHA384. */
@@ -1199,7 +1202,8 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
      in RFC2818 (HTTPS), which takes into account wildcards, and the subject
      alternative name PKIX extension. Returns non zero on success, and zero on
      failure. */
-  rc = gnutls_x509_crt_check_hostname(x509_cert, peer->hostname);
+  rc = gnutls_x509_crt_check_hostname(x509_cert, verify_name);
+  DEBUGF(infof(data, "glts check hostname '%s' -> %d", verify_name, rc));
 #if GNUTLS_VERSION_NUMBER < 0x030306
   /* Before 3.3.6, gnutls_x509_crt_check_hostname() didn't check IP
      addresses. */
@@ -1212,10 +1216,10 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
     unsigned char addrbuf[sizeof(struct use_addr)];
     size_t addrlen = 0;
 
-    if(Curl_inet_pton(AF_INET, peer->hostname, addrbuf) > 0)
+    if(Curl_inet_pton(AF_INET, verify_name, addrbuf) > 0)
       addrlen = 4;
 #ifdef USE_IPV6
-    else if(Curl_inet_pton(AF_INET6, peer->hostname, addrbuf) > 0)
+    else if(Curl_inet_pton(AF_INET6, verify_name, addrbuf) > 0)
       addrlen = 16;
 #endif
 
