@@ -489,7 +489,7 @@ static const struct st_cipher ciphertable[] = {
 #define NUM_OF_CIPHERS (sizeof(ciphertable) / sizeof(ciphertable[0]))
 #define CIPHER_NAME_BUF_LEN 64
 
-static bool is_separator(char c)
+static bool bearssl_is_separator(char c)
 {
   /* Return whether character is a cipher list separator. */
   switch(c) {
@@ -521,12 +521,12 @@ static CURLcode bearssl_set_selected_ciphers(struct Curl_easy *data,
     size_t clen;
 
     /* Extract the next cipher name from the ciphers string */
-    while(is_separator(*cipher_start))
+    while(bearssl_is_separator(*cipher_start))
       ++cipher_start;
     if(!*cipher_start)
       break;
     cipher_end = cipher_start;
-    while(*cipher_end && !is_separator(*cipher_end))
+    while(*cipher_end && !bearssl_is_separator(*cipher_end))
       ++cipher_end;
 
     clen = cipher_end - cipher_start;

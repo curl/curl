@@ -1453,7 +1453,7 @@ static bool is_cipher_suite_strong(SSLCipherSuite suite_num)
   return true;
 }
 
-static bool is_separator(char c)
+static bool sectransp_is_separator(char c)
 {
   /* Return whether character is a cipher list separator. */
   switch(c) {
@@ -1547,7 +1547,7 @@ static CURLcode sectransp_set_selected_ciphers(struct Curl_easy *data,
   if(!ciphers)
     return CURLE_OK;
 
-  while(is_separator(*ciphers))     /* Skip initial separators. */
+  while(sectransp_is_separator(*ciphers))  /* Skip initial separators. */
     ciphers++;
   if(!*ciphers)
     return CURLE_OK;
@@ -1561,14 +1561,14 @@ static CURLcode sectransp_set_selected_ciphers(struct Curl_easy *data,
     size_t i;
 
     /* Skip separators */
-    while(is_separator(*cipher_start))
+    while(sectransp_is_separator(*cipher_start))
       cipher_start++;
     if(*cipher_start == '\0') {
       break;
     }
     /* Find last position of a cipher in the ciphers string */
     cipher_end = cipher_start;
-    while(*cipher_end != '\0' && !is_separator(*cipher_end)) {
+    while(*cipher_end != '\0' && !sectransp_is_separator(*cipher_end)) {
       ++cipher_end;
     }
 
