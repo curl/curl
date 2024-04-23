@@ -5071,14 +5071,14 @@ static CURLcode ossl_get_tls_server_end_point(struct Curl_easy *data,
   const char prefix[] = "tls-server-end-point:";
   struct connectdata *conn = data->conn;
   struct Curl_cfilter *cf = conn->cfilter[sockindex];
-  struct ossl_ssl_backend_data *backend = NULL;
+  struct ossl_ctx *octx = NULL;
 
   do {
     const struct Curl_cftype *cft = cf->cft;
     struct ssl_connect_data *connssl = cf->ctx;
 
     if(cft->name && !strcmp(cft->name, "SSL")) {
-      backend = (struct ossl_ssl_backend_data *)connssl->backend;
+      octx = (struct ossl_ctx *)connssl->backend;
       break;
     }
 
@@ -5087,13 +5087,13 @@ static CURLcode ossl_get_tls_server_end_point(struct Curl_easy *data,
 
   } while(cf->next);
 
-  if(!backend) {
+  if(!octx) {
     failf(data,
           "Failed to find SSL backend for endpoint");
     return CURLE_SSL_ENGINE_INITFAILED;
   }
 
-  cert = SSL_get1_peer_certificate(backend->handle);
+  cert = SSL_get1_peer_certificate(octx->ssl);
   if(!cert) {
     /* No server certificate, don't do channel binding */
     *binding = NULL;
