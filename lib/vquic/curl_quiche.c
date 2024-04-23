@@ -288,6 +288,20 @@ static struct Curl_easy *get_stream_easy(struct Curl_cfilter *cf,
   return NULL;
 }
 
+static void cf_quiche_expire_conn_transfers(struct Curl_cfilter *cf,
+                                            struct Curl_easy *data)
+{
+  struct Curl_easy *sdata;
+
+  DEBUGASSERT(data->multi);
+  CURL_TRC_CF(data, cf, "expiring all transfers on this connection");
+  for(sdata = data->multi->easyp; sdata; sdata = sdata->next) {
+    if(sdata == data || sdata->conn != data->conn)
+      continue;
+    Curl_expire(sdata, 0, EXPIRE_RUN_NOW);
+  }
+}
+
 /*
  * write_resp_raw() copies response data in raw format to the `data`'s
   * receive buffer. If not enough space is available, it appends to the
@@ -686,7 +700,13 @@ static CURLcode cf_flush_egress(struct Curl_cfilter *cf,
   if(!expiry_ns) {
     quiche_conn_on_timeout(ctx->qconn);
     if(quiche_conn_is_closed(ctx->qconn)) {
-      failf(data, "quiche_conn_on_timeout closed the connection");
+      if(quiche_conn_is_timed_out(ctx->qconn))
+        failf(data, "connection closed by idle timeout");
+      else
+        failf(data, "connection closed by server");
+      /* Connection timed out, expire all transfers belonging to it
+       * as will not get any more POLL events here. */
+      cf_quiche_expire_conn_transfers(cf, data);
       return CURLE_SEND_ERROR;
     }
   }
