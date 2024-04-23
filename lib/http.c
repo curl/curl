@@ -2238,9 +2238,11 @@ CURLcode Curl_http_req_complete(struct Curl_easy *data,
 
   /* end of headers */
   result = Curl_dyn_addn(r, STRCONST("\r\n"));
-  Curl_pgrsSetUploadSize(data, req_clen);
-  if(announced_exp100)
-    result = http_exp100_add_reader(data);
+  if(!result) {
+    Curl_pgrsSetUploadSize(data, req_clen);
+    if(announced_exp100)
+      result = http_exp100_add_reader(data);
+  }
 
 out:
   if(!result) {

@@ -24,6 +24,9 @@
 #include "tool_setup.h"
 
 #include "strcase.h"
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
@@ -130,6 +133,19 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 
         if(eot >= etag_h) {
           size_t etag_length = eot - etag_h + 1;
+          /*
+           * Truncate the etag save stream, it can have an existing etag value.
+           */
+#ifdef HAVE_FTRUNCATE
+          if(ftruncate(fileno(etag_save->stream), 0)) {
+            return CURL_WRITEFUNC_ERROR;
+          }
+#else
+          if(fseek(etag_save->stream, 0, SEEK_SET)) {
+            return CURL_WRITEFUNC_ERROR;
+          }
+#endif
+
           fwrite(etag_h, size, etag_length, etag_save->stream);
           /* terminate with newline */
           fputc('\n', etag_save->stream);
