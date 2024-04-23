@@ -725,7 +725,6 @@ static size_t cr_version(char *buffer, size_t size)
 const struct Curl_ssl Curl_ssl_rustls = {
   { CURLSSLBACKEND_RUSTLS, "rustls" },
   SSLSUPP_CAINFO_BLOB |            /* supports */
-  SSLSUPP_TLS13_CIPHERSUITES |
   SSLSUPP_HTTPS_PROXY,
   sizeof(struct rustls_ssl_backend_data),
 
