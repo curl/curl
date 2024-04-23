@@ -5066,7 +5066,7 @@ static CURLcode ossl_get_tls_server_end_point(struct Curl_easy *data,
   const EVP_MD *algo_type;
   const char *algo_name;
   unsigned int length;
-  u_char buf[EVP_MAX_MD_SIZE];
+  unsigned char buf[EVP_MAX_MD_SIZE];
 
   const char prefix[] = "tls-server-end-point:";
   struct connectdata *conn = data->conn;
