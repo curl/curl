@@ -19,6 +19,7 @@ TLS-backend:
   - Secure Transport
   - wolfSSL
   - GnuTLS
+  - mbedTLS
 ---
 
 # NAME
@@ -48,12 +49,13 @@ you compile OpenSSL.
 For WolfSSL, valid examples of cipher lists include **ECDHE-RSA-RC4-SHA**,
 **AES256-SHA:AES256-SHA256**, etc.
 
-For BearSSL, valid examples of cipher lists include
+For mbedTLS and BearSSL, valid examples of cipher lists include
 **ECDHE-RSA-CHACHA20-POLY1305:ECDHE-RSA-AES128-GCM-SHA256**, or when using
 IANA names
 **TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256:TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256**,
-etc. With BearSSL you do not add/remove ciphers. If one uses this option then
-all known ciphers are disabled and only those passed in are enabled.
+etc. With mbedTLS and BearSSL you do not add/remove ciphers. If one uses this
+option then all known ciphers are disabled and only those passed in are
+enabled.
 
 For Schannel, you can use this option to set algorithms but not specific
 cipher suites. Refer to the ciphers lists document for algorithms.
@@ -87,7 +89,7 @@ int main(void)
 
 # AVAILABILITY
 
-Added in 7.9, in 7.83.0 for BearSSL
+Added in 7.9, in 7.83.0 for BearSSL, in 8.8.0 for mbedTLS
 
 If built TLS enabled.
 
