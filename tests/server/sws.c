@@ -403,7 +403,7 @@ static int ProcessRequest(struct httprequest *req)
                         &prot_minor) == 2) {
         /* between the request keyword and HTTP/ there's a path */
         httppath = line + strlen(request);
-        npath = http - httppath;
+        npath = (size_t)(http - httppath);
 
         /* trim leading spaces */
         while(npath && ISSPACE(*httppath)) {
@@ -516,7 +516,7 @@ static int ProcessRequest(struct httprequest *req)
             else
               portp = p + 1;
 
-            req->testno = part;
+            req->testno = (long)part;
           }
           else
             portp = strchr(doc, ':');
@@ -642,7 +642,7 @@ static int ProcessRequest(struct httprequest *req)
       if(req->skipall)
         req->cl = 0;
       else
-        req->cl = clen - req->skip;
+        req->cl = (size_t)clen - (size_t)req->skip;
 
       logmsg("Found Content-Length: %lu in the request", clen);
       if(req->skip)
@@ -755,7 +755,7 @@ static int ProcessRequest(struct httprequest *req)
       !strncmp(req->reqbuf, "HEAD", strlen("HEAD")))) {
     /* If we have a persistent connection, HTTP version >= 1.1
        and GET/HEAD request, enable pipelining. */
-    req->checkindex = (end - req->reqbuf) + strlen(end_of_headers);
+    req->checkindex = (size_t)(end - req->reqbuf) + strlen(end_of_headers);
   }
 
   /* If authentication is required and no auth was provided, end now. This
@@ -775,7 +775,8 @@ static int ProcessRequest(struct httprequest *req)
   }
 
   if(req->cl > 0) {
-    if(req->cl <= req->offset - (end - req->reqbuf) - strlen(end_of_headers))
+    if(req->cl <= req->offset -
+                  (size_t)(end - req->reqbuf) - strlen(end_of_headers))
       return 1; /* done */
     else
       return 0; /* not complete yet */
@@ -895,8 +896,8 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
       do {
         got = sread(sock, reqbuf + req->offset, REQBUFSIZ - req->offset);
         if(got > 0) {
-          req->offset += got;
-          logmsg("Got %zu bytes from client", got);
+          req->offset += (size_t)got;
+          logmsg("Got %zu bytes from client", (size_t)got);
         }
 
         if((got == -1) && ((EAGAIN == errno) || (EWOULDBLOCK == errno))) {
@@ -1190,8 +1191,8 @@ retry:
     /* write to file as well */
     fwrite(buffer, 1, (size_t)written, dump);
 
-    count -= written;
-    buffer += written;
+    count -= (size_t)written;
+    buffer += (size_t)written;
 
     if(req->writedelay) {
       int msecs_left = req->writedelay;
@@ -1588,7 +1589,7 @@ static void http_connect(curl_socket_t *infdp,
       for(i = 0; i <= max_tunnel_idx; i++) {
         size_t len;
         if(clientfd[i] != CURL_SOCKET_BAD) {
-          len = sizeof(readclient[i]) - tos[i];
+          len = sizeof(readclient[i]) - (size_t)tos[i];
           if(len && FD_ISSET(clientfd[i], &input)) {
             /* read from client */
             rc = sread(clientfd[i], &readclient[i][tos[i]], len);
@@ -1600,13 +1601,13 @@ static void http_connect(curl_socket_t *infdp,
             else {
               logmsg("[%s] READ %zd bytes from client", data_or_ctrl(i), rc);
               logmsg("[%s] READ \"%s\"", data_or_ctrl(i),
-                     data_to_hex(&readclient[i][tos[i]], rc));
+                     data_to_hex(&readclient[i][tos[i]], (size_t)rc));
               tos[i] += rc;
             }
           }
         }
         if(serverfd[i] != CURL_SOCKET_BAD) {
-          len = sizeof(readserver[i])-toc[i];
+          len = sizeof(readserver[i]) - (size_t)toc[i];
           if(len && FD_ISSET(serverfd[i], &input)) {
             /* read from server */
             rc = sread(serverfd[i], &readserver[i][toc[i]], len);
@@ -1618,7 +1619,7 @@ static void http_connect(curl_socket_t *infdp,
             else {
               logmsg("[%s] READ %zd bytes from server", data_or_ctrl(i), rc);
               logmsg("[%s] READ \"%s\"", data_or_ctrl(i),
-                     data_to_hex(&readserver[i][toc[i]], rc));
+                     data_to_hex(&readserver[i][toc[i]], (size_t)rc));
               toc[i] += rc;
             }
           }
@@ -1636,9 +1637,10 @@ static void http_connect(curl_socket_t *infdp,
             else {
               logmsg("[%s] SENT %zd bytes to client", data_or_ctrl(i), rc);
               logmsg("[%s] SENT \"%s\"", data_or_ctrl(i),
-                     data_to_hex(readserver[i], rc));
+                     data_to_hex(readserver[i], (size_t)rc));
               if(toc[i] - rc)
-                memmove(&readserver[i][0], &readserver[i][rc], toc[i]-rc);
+                memmove(&readserver[i][0], &readserver[i][rc],
+                        (size_t)(toc[i] - rc));
               toc[i] -= rc;
             }
           }
@@ -1656,9 +1658,10 @@ static void http_connect(curl_socket_t *infdp,
             else {
               logmsg("[%s] SENT %zd bytes to server", data_or_ctrl(i), rc);
               logmsg("[%s] SENT \"%s\"", data_or_ctrl(i),
-                     data_to_hex(readclient[i], rc));
+                     data_to_hex(readclient[i], (size_t)rc));
               if(tos[i] - rc)
-                memmove(&readclient[i][0], &readclient[i][rc], tos[i]-rc);
+                memmove(&readclient[i][0], &readclient[i][rc],
+                        (size_t)(tos[i] - rc));
               tos[i] -= rc;
             }
           }
@@ -2287,7 +2290,7 @@ int main(int argc, char *argv[])
         char *dst = (char *) (all_sockets + socket_idx);
         char *src = (char *) (all_sockets + socket_idx + 1);
         char *end = (char *) (all_sockets + num_sockets);
-        memmove(dst, src, end - src);
+        memmove(dst, src, (size_t)(end - src));
         num_sockets -= 1;
       }
     }
