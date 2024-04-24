@@ -89,10 +89,10 @@ typedef enum {
   RPROT_HTTP = 2
 } reqprot_t;
 
-#define SET_RTP_PKT_CHN(p,c)  ((p)[1] = (unsigned char)((c) & 0xFF))
+#define SET_RTP_PKT_CHN(p,c)  ((p)[1] = (char)((c) & 0xFF))
 
-#define SET_RTP_PKT_LEN(p,l) (((p)[2] = (unsigned char)(((l) >> 8) & 0xFF)), \
-                              ((p)[3] = (unsigned char)((l) & 0xFF)))
+#define SET_RTP_PKT_LEN(p,l) (((p)[2] = (char)(((l) >> 8) & 0xFF)), \
+                              ((p)[3] = (char)((l) & 0xFF)))
 
 struct httprequest {
   char reqbuf[REQBUFSIZ]; /* buffer area for the incoming request */
@@ -359,7 +359,7 @@ static int ProcessRequest(struct httprequest *req)
 
                 /* Make our scratch buffer enough to fit all the
                  * desired data and one for padding */
-                rtp_scratch = malloc(rtp_size + 4 + RTP_DATA_SIZE);
+                rtp_scratch = malloc((size_t)(rtp_size + 4 + RTP_DATA_SIZE));
 
                 /* RTP is signalled with a $ */
                 rtp_scratch[0] = '$';
@@ -377,15 +377,15 @@ static int ProcessRequest(struct httprequest *req)
 
                 if(!req->rtp_buffer) {
                   req->rtp_buffer = rtp_scratch;
-                  req->rtp_buffersize = rtp_size + 4;
+                  req->rtp_buffersize = (size_t)rtp_size + 4;
                 }
                 else {
                   req->rtp_buffer = realloc(req->rtp_buffer,
                                             req->rtp_buffersize +
-                                            rtp_size + 4);
+                                            (size_t)rtp_size + 4);
                   memcpy(req->rtp_buffer + req->rtp_buffersize, rtp_scratch,
-                         rtp_size + 4);
-                  req->rtp_buffersize += rtp_size + 4;
+                         (size_t)rtp_size + 4);
+                  req->rtp_buffersize += (size_t)rtp_size + 4;
                   free(rtp_scratch);
                 }
                 logmsg("rtp_buffersize is %zu, rtp_size is %d.",
@@ -450,7 +450,7 @@ static int ProcessRequest(struct httprequest *req)
   if(req->pipe)
     /* we do have a full set, advance the checkindex to after the end of the
        headers, for the pipelining case mostly */
-    req->checkindex += (end - line) + strlen(END_OF_HEADERS);
+    req->checkindex += (size_t)(end - line) + strlen(END_OF_HEADERS);
 
   /* **** Persistence ****
    *
@@ -486,7 +486,7 @@ static int ProcessRequest(struct httprequest *req)
         req->open = FALSE; /* closes connection */
         return 1; /* done */
       }
-      req->cl = clen - req->skip;
+      req->cl = (size_t)clen - (size_t)req->skip;
 
       logmsg("Found Content-Length: %lu in the request", clen);
       if(req->skip)
@@ -563,7 +563,7 @@ static int ProcessRequest(struct httprequest *req)
       !strncmp(req->reqbuf, "HEAD", strlen("HEAD")))) {
     /* If we have a persistent connection, HTTP version >= 1.1
        and GET/HEAD request, enable pipelining. */
-    req->checkindex = (end - req->reqbuf) + strlen(END_OF_HEADERS);
+    req->checkindex = (size_t)(end - req->reqbuf) + strlen(END_OF_HEADERS);
     req->pipelining = TRUE;
   }
 
@@ -575,7 +575,7 @@ static int ProcessRequest(struct httprequest *req)
     end = strstr(line, END_OF_HEADERS);
     if(!end)
       break;
-    req->checkindex += (end - line) + strlen(END_OF_HEADERS);
+    req->checkindex += (size_t)(end - line) + strlen(END_OF_HEADERS);
     req->pipe--;
   }
 
@@ -587,7 +587,8 @@ static int ProcessRequest(struct httprequest *req)
     return 1; /* done */
 
   if(req->cl > 0) {
-    if(req->cl <= req->offset - (end - req->reqbuf) - strlen(END_OF_HEADERS))
+    if(req->cl <= req->offset -
+                  (size_t)(end - req->reqbuf) - strlen(END_OF_HEADERS))
       return 1; /* done */
     else
       return 0; /* not complete yet */
@@ -954,8 +955,8 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     if(got_exit_signal)
       break;
 
-    count -= written;
-    buffer += written;
+    count -= (size_t)written;
+    buffer += (size_t)written;
   } while(count>0);
 
   /* Send out any RTP data */
@@ -972,7 +973,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
         sendfailure = TRUE;
         break;
       }
-      count -= written;
+      count -= (size_t)written;
     } while(count > 0);
 
     free(req->rtp_buffer);
