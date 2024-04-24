@@ -10,7 +10,7 @@ on:
 jobs:
   CodeSonar_Analyze:
     permissions: write-all
-    runs-on: self-hosted
+    runs-on: codesecure-runner-set
     container:
       image: ghcr.io/codesecure-se/curl-cso-builder:8.1p0
       credentials:
