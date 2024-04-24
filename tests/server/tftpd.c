@@ -241,7 +241,8 @@ static int synchnet(curl_socket_t);
 
 static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size);
 
-static int validate_access(struct testcase *test, const char *fname, int mode);
+static int validate_access(struct testcase *test,
+                           const char *filename, unsigned short mode);
 
 static void sendtftp(struct testcase *test, const struct formats *pf);
 
@@ -477,7 +478,7 @@ static ssize_t write_behind(struct testcase *test, int convert)
     return -1;                    /* nak logic? */
 
   if(convert == 0)
-    return write(test->ofile, writebuf, count);
+    return write(test->ofile, writebuf, (size_t)count);
 
   p = writebuf;
   ct = count;
@@ -1073,7 +1074,7 @@ static int parse_servercmd(struct testcase *req)
  * Validate file access.
  */
 static int validate_access(struct testcase *test,
-                           const char *filename, int mode)
+                           const char *filename, unsigned short mode)
 {
   char *ptr;
 
@@ -1081,8 +1082,9 @@ static int validate_access(struct testcase *test,
 
   if(!strncmp("verifiedserver", filename, 14)) {
     char weare[128];
-    size_t count = msnprintf(weare, sizeof(weare), "WE ROOLZ: %"
-                             CURL_FORMAT_CURL_OFF_T "\r\n", our_getpid());
+    size_t count = (size_t)msnprintf(weare, sizeof(weare), "WE ROOLZ: %"
+                                     CURL_FORMAT_CURL_OFF_T "\r\n",
+                                     our_getpid());
 
     logmsg("Are-we-friendly question received");
     test->buffer = strdup(weare);
@@ -1183,7 +1185,7 @@ static void sendtftp(struct testcase *test, const struct formats *pf)
       nak(errno + 100);
       return;
     }
-    sdp->th_opcode = htons((unsigned short)opcode_DATA);
+    sdp->th_opcode = htons(opcode_DATA);
     sdp->th_block = htons(sendblock);
     timeout = 0;
 #ifdef HAVE_SIGSETJMP
@@ -1218,7 +1220,7 @@ send_data:
         logmsg("read: fail");
         return;
       }
-      sap->th_opcode = ntohs((unsigned short)sap->th_opcode);
+      sap->th_opcode = ntohs(sap->th_opcode);
       sap->th_block = ntohs(sap->th_block);
 
       if(sap->th_opcode == opcode_ERROR) {
@@ -1261,7 +1263,7 @@ static void recvtftp(struct testcase *test, const struct formats *pf)
   rap = &ackbuf.hdr;
   do {
     timeout = 0;
-    rap->th_opcode = htons((unsigned short)opcode_ACK);
+    rap->th_opcode = htons(opcode_ACK);
     rap->th_block = htons(recvblock);
     recvblock++;
 #ifdef HAVE_SIGSETJMP
@@ -1290,7 +1292,7 @@ send_ack:
         logmsg("read: fail");
         goto abort;
       }
-      rdp->th_opcode = ntohs((unsigned short)rdp->th_opcode);
+      rdp->th_opcode = ntohs(rdp->th_opcode);
       rdp->th_block = ntohs(rdp->th_block);
       if(rdp->th_opcode == opcode_ERROR)
         goto abort;
@@ -1321,8 +1323,7 @@ send_ack:
     test->ofile = 0;
   }
 
-  rap->th_opcode = htons((unsigned short)opcode_ACK);  /* send the "final"
-                                                          ack */
+  rap->th_opcode = htons(opcode_ACK);  /* send the "final" ack */
   rap->th_block = htons(recvblock);
   (void) swrite(peer, &ackbuf.storage[0], 4);
 #if defined(HAVE_ALARM) && defined(SIGALRM)
@@ -1361,7 +1362,7 @@ static void nak(int error)
   struct errmsg *pe;
 
   tp = &buf.hdr;
-  tp->th_opcode = htons((unsigned short)opcode_ERROR);
+  tp->th_opcode = htons(opcode_ERROR);
   tp->th_code = htons((unsigned short)error);
   for(pe = errmsgs; pe->e_code >= 0; pe++)
     if(pe->e_code == error)
@@ -1374,7 +1375,7 @@ static void nak(int error)
 
   /* we use memcpy() instead of strcpy() in order to avoid buffer overflow
    * report from glibc with FORTIFY_SOURCE */
-  memcpy(tp->th_msg, pe->e_msg, length + 1);
+  memcpy(tp->th_msg, pe->e_msg, (size_t)(length + 1));
   length += 5;
   if(swrite(peer, &buf.storage[0], length) != length)
     logmsg("nak: fail\n");

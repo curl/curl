@@ -193,10 +193,10 @@ static void loghex(unsigned char *buffer, ssize_t len)
   unsigned char *ptr = buffer;
   char *optr = data;
   ssize_t width = 0;
-  int left = sizeof(data);
+  ssize_t left = sizeof(data);
 
   for(i = 0; i<len && (left >= 0); i++) {
-    msnprintf(optr, left, "%02x", ptr[i]);
+    msnprintf(optr, (size_t)left, "%02x", ptr[i]);
     width += 2;
     optr += 2;
     left -= 2;
@@ -219,10 +219,10 @@ static void logprotocol(mqttdir dir,
   ssize_t i;
   unsigned char *ptr = buffer;
   char *optr = data;
-  int left = sizeof(data);
+  ssize_t left = sizeof(data);
 
   for(i = 0; i<len && (left >= 0); i++) {
-    msnprintf(optr, left, "%02x", ptr[i]);
+    msnprintf(optr, (size_t)left, "%02x", ptr[i]);
     optr += 2;
     left -= 2;
   }
@@ -343,10 +343,10 @@ static int disconnect(FILE *dump, curl_socket_t fd)
 */
 
 /* return number of bytes used */
-static int encode_length(size_t packetlen,
-                         unsigned char *remlength) /* 4 bytes */
+static size_t encode_length(size_t packetlen,
+                            unsigned char *remlength) /* 4 bytes */
 {
-  int bytes = 0;
+  size_t bytes = 0;
   unsigned char encode;
 
   do {
@@ -396,12 +396,12 @@ static int publish(FILE *dump,
   size_t topiclen = strlen(topic);
   unsigned char *packet;
   size_t payloadindex;
-  ssize_t remaininglength = topiclen + 2 + payloadlen;
-  ssize_t packetlen;
-  ssize_t sendamount;
+  size_t remaininglength = topiclen + 2 + payloadlen;
+  size_t packetlen;
+  size_t sendamount;
   ssize_t rc;
   unsigned char rembuffer[4];
-  int encodedlen;
+  size_t encodedlen;
 
   if(config.excessive_remaining) {
     /* manually set illegal remaining length */
@@ -443,7 +443,7 @@ static int publish(FILE *dump,
     loghex(packet, rc);
     logprotocol(FROM_SERVER, "PUBLISH", remaininglength, dump, packet, rc);
   }
-  if(rc == packetlen)
+  if((size_t)rc == packetlen)
     return 0;
   return 1;
 }
@@ -463,7 +463,7 @@ static int fixedheader(curl_socket_t fd,
 
   /* get the first two bytes */
   ssize_t rc = sread(fd, (char *)buffer, 2);
-  int i;
+  size_t i;
   if(rc < 2) {
     logmsg("READ %zd bytes [SHORT!]", rc);
     return 1; /* fail */

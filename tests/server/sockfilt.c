@@ -235,7 +235,8 @@ static ssize_t fullread(int filedes, void *buffer, size_t nbytes)
 
   do {
     ssize_t rc = read(filedes,
-                      (unsigned char *)buffer + nread, nbytes - nread);
+                      (unsigned char *)buffer + nread,
+                      nbytes - (size_t)nread);
 
     if(got_exit_signal) {
       logmsg("signalled to die");
@@ -281,7 +282,7 @@ static ssize_t fullwrite(int filedes, const void *buffer, size_t nbytes)
 
   do {
     ssize_t wc = write(filedes, (const unsigned char *)buffer + nwrite,
-                       nbytes - nwrite);
+                       nbytes - (size_t)nwrite);
 
     if(got_exit_signal) {
       logmsg("signalled to die");
@@ -354,7 +355,7 @@ static void lograw(unsigned char *buffer, ssize_t len)
   unsigned char *ptr = buffer;
   char *optr = data;
   ssize_t width = 0;
-  int left = sizeof(data);
+  size_t left = sizeof(data);
 
   for(i = 0; i<len; i++) {
     switch(ptr[i]) {
@@ -411,7 +412,7 @@ static bool read_data_block(unsigned char *buffer, ssize_t maxlen,
   }
   logmsg("> %zd bytes data, server => client", *buffer_len);
 
-  if(!read_stdin(buffer, *buffer_len))
+  if(!read_stdin(buffer, (size_t)*buffer_len))
     return FALSE;
 
   lograw(buffer, *buffer_len);
@@ -1104,7 +1105,7 @@ static bool juggle(curl_socket_t *sockfdp,
       msnprintf(data, sizeof(data), "PORT\n%04zx\n", buffer_len);
       if(!write_stdout(data, 10))
         return FALSE;
-      if(!write_stdout(buffer, buffer_len))
+      if(!write_stdout(buffer, (size_t)buffer_len))
         return FALSE;
     }
     else if(!memcmp("QUIT", buffer, 4)) {
@@ -1179,7 +1180,7 @@ static bool juggle(curl_socket_t *sockfdp,
       msnprintf(data, sizeof(data), "DATA\n%04zx\n", nread_socket);
       if(!write_stdout(data, 10))
         return FALSE;
-      if(!write_stdout(buffer, nread_socket))
+      if(!write_stdout(buffer, (size_t)nread_socket))
         return FALSE;
 
       logmsg("< %zd bytes data, client => server", nread_socket);
