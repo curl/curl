@@ -34,7 +34,7 @@ static void unit_stop(void)
 {
 }
 
-#if defined(USE_MBEDTLS)
+#if defined(USE_MBEDTLS) || defined(USE_BEARSSL)
 
 struct test_cs_entry {
   uint16_t id;
@@ -106,7 +106,7 @@ static const struct test_cs_entry test_cs_list[] = {
             "ECDHE-RSA-CHACHA20-POLY1305" },
   { 0xCCA9, "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256",
             "ECDHE-ECDSA-CHACHA20-POLY1305" },
-
+#if defined(USE_MBEDTLS)
   { 0x0001, "TLS_RSA_WITH_NULL_MD5",
             "NULL-MD5" },
   { 0x0002, "TLS_RSA_WITH_NULL_SHA",
@@ -203,7 +203,19 @@ static const struct test_cs_entry test_cs_list[] = {
             "ECDHE-PSK-AES256-CBC-SHA" },
   { 0xCCAB, "TLS_PSK_WITH_CHACHA20_POLY1305_SHA256",
             "PSK-CHACHA20-POLY1305" },
-
+#endif
+#if defined(USE_BEARSSL)
+  { 0x000A, "TLS_RSA_WITH_3DES_EDE_CBC_SHA",
+            "DES-CBC3-SHA" },
+  { 0xC003, "TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA",
+            "ECDH-ECDSA-DES-CBC3-SHA" },
+  { 0xC008, "TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA",
+            "ECDHE-ECDSA-DES-CBC3-SHA" },
+  { 0xC00D, "TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA",
+            "ECDH-RSA-DES-CBC3-SHA" },
+  { 0xC012, "TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA",
+            "ECDHE-RSA-DES-CBC3-SHA" },
+#endif
   { 0xC09C, "TLS_RSA_WITH_AES_128_CCM",
             "AES128-CCM" },
   { 0xC09D, "TLS_RSA_WITH_AES_256_CCM",
@@ -220,7 +232,7 @@ static const struct test_cs_entry test_cs_list[] = {
             "ECDHE-ECDSA-AES128-CCM8" },
   { 0xC0AF, "TLS_ECDHE_ECDSA_WITH_AES_256_CCM_8",
             "ECDHE-ECDSA-AES256-CCM8" },
-
+#if defined(USE_MBEDTLS)
   /* entries marked ns are non-"standard", they are not in openssl */
   { 0x0041, "TLS_RSA_WITH_CAMELLIA_128_CBC_SHA",
             "CAMELLIA128-SHA" },
@@ -424,6 +436,7 @@ static const struct test_cs_entry test_cs_list[] = {
             "DHE-PSK-CHACHA20-POLY1305" },
   { 0xCCAE, "TLS_RSA_PSK_WITH_CHACHA20_POLY1305_SHA256",
             "RSA-PSK-CHACHA20-POLY1305" },
+#endif
 };
 #define TEST_CS_LIST_LEN (sizeof(test_cs_list) / sizeof(test_cs_list[0]))
 
@@ -448,18 +461,30 @@ struct test_str_entry {
   const char *str;
 };
 static const struct test_str_entry test_str_list[] = {
+#if defined(USE_MBEDTLS)
   { 0x1301, "TLS_AES_128_GCM_SHA256"},
   { 0x1302, "TLS_AES_256_GCM_SHA384"},
   { 0x1303, "TLS_CHACHA20_POLY1305_SHA256"},
+#else
+  { 0x0000, "TLS_AES_128_GCM_SHA256"},
+  { 0x0000, "TLS_AES_256_GCM_SHA384"},
+  { 0x0000, "TLS_CHACHA20_POLY1305_SHA256"},
+#endif
   { 0xC02B, "ECDHE-ECDSA-AES128-GCM-SHA256"},
   { 0xC02F, "ECDHE-RSA-AES128-GCM-SHA256"},
   { 0xC02C, "ECDHE-ECDSA-AES256-GCM-SHA384"},
   { 0xC030, "ECDHE-RSA-AES256-GCM-SHA384"},
   { 0xCCA9, "ECDHE-ECDSA-CHACHA20-POLY1305"},
   { 0xCCA8, "ECDHE-RSA-CHACHA20-POLY1305"},
+#if defined(USE_MBEDTLS)
   { 0x009E, "DHE-RSA-AES128-GCM-SHA256"},
   { 0x009F, "DHE-RSA-AES256-GCM-SHA384"},
   { 0xCCAA, "DHE-RSA-CHACHA20-POLY1305"},
+#else
+  { 0x0000, "DHE-RSA-AES128-GCM-SHA256"},
+  { 0x0000, "DHE-RSA-AES256-GCM-SHA384"},
+  { 0x0000, "DHE-RSA-CHACHA20-POLY1305"},
+#endif
   { 0xC023, "ECDHE-ECDSA-AES128-SHA256" },
   { 0xC027, "ECDHE-RSA-AES128-SHA256" },
   { 0xC009, "ECDHE-ECDSA-AES128-SHA" },
@@ -468,15 +493,24 @@ static const struct test_str_entry test_str_list[] = {
   { 0xC028, "ECDHE-RSA-AES256-SHA384" },
   { 0xC00A, "ECDHE-ECDSA-AES256-SHA" },
   { 0xC014, "ECDHE-RSA-AES256-SHA" },
+#if defined(USE_MBEDTLS)
   { 0x0067, "DHE-RSA-AES128-SHA256" },
   { 0x006B, "DHE-RSA-AES256-SHA256" },
+#else
+  { 0x0000, "DHE-RSA-AES128-SHA256" },
+  { 0x0000, "DHE-RSA-AES256-SHA256" },
+#endif
   { 0x009C, "AES128-GCM-SHA256" },
   { 0x009D, "AES256-GCM-SHA384" },
   { 0x003C, "AES128-SHA256" },
   { 0x003D, "AES256-SHA256" },
   { 0x002F, "AES128-SHA" },
   { 0x0035, "AES256-SHA" },
+#if defined(USE_BEARSSL)
+  { 0x000A, "DES-CBC3-SHA" },
+#else
   { 0x0000, "DES-CBC3-SHA" },
+#endif
   { 0x0000, "GIBBERISH" },
   { 0x0000, "" },
 };
@@ -573,9 +607,9 @@ UNITTEST_START
 }
 UNITTEST_STOP
 
-#else /* defined(USE_MBEDTLS) */
+#else /* defined(USE_MBEDTLS) || defined(USE_BEARSSL) */
 
 UNITTEST_START
 UNITTEST_STOP
 
-#endif /* defined(USE_MBEDTLS) */
+#endif /* defined(USE_MBEDTLS) || defined(USE_BEARSSL) */
