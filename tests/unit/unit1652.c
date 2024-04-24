@@ -89,7 +89,7 @@ static int verify(const char *info, const char *two)
   char *nl = strchr(info, '\n');
   if(!nl)
     return 1; /* nope */
-  return strncmp(info, two, nl - info);
+  return strncmp(info, two, (size_t)(nl - info));
 }
 
 UNITTEST_START

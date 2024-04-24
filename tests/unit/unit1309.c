@@ -87,7 +87,7 @@ UNITTEST_START
 
     key.tv_sec = 0;
     key.tv_usec = (541*i)%1023;
-    storage[i] = key.tv_usec;
+    storage[i] = (size_t)key.tv_usec;
     nodes[i].payload = &storage[i];
     root = Curl_splayinsert(key, root, &nodes[i]);
   }
@@ -120,7 +120,7 @@ UNITTEST_START
 
     /* add some nodes with the same key */
     for(j = 0; j <= i % 3; j++) {
-      storage[i * 3 + j] = key.tv_usec*10 + j;
+      storage[i * 3 + j] = (size_t)(key.tv_usec*10 + j);
       nodes[i * 3 + j].payload = &storage[i * 3 + j];
       root = Curl_splayinsert(key, root, &nodes[i * 3 + j]);
     }

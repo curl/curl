@@ -225,8 +225,8 @@ int main(int argc, char *argv[])
     fprintf(stderr, "maxlen must be >= 0, got %ld\n", l2);
     return 2;
   }
-  plen_min = l1;
-  plen_max = l2;
+  plen_min = (size_t)l1;
+  plen_max = (size_t)l2;
   if(plen_max < plen_min) {
     fprintf(stderr, "maxlen must be >= minlen, got %ld-%ld\n",
             (long)plen_min, (long)plen_max);

@@ -88,7 +88,8 @@ CURLcode test(char *URL)
       res = TEST_ERR_FAILURE;
       goto test_cleanup;
     }
-    n += msnprintf(protolist + n, sizeof(protolist) - n, ",%s", *proto);
+    n += msnprintf(protolist + n, sizeof(protolist) - (size_t)n, ",%s",
+                   *proto);
     if(curl_strequal(*proto, "http"))
       httpcode = CURLE_OK;
     if(curl_strequal(*proto, "https"))

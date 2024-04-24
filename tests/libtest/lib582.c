@@ -57,7 +57,7 @@ static void removeFd(struct Sockets *sockets, curl_socket_t fd, int mention)
     if(sockets->sockets[i] == fd) {
       if(i < sockets->count - 1)
         memmove(&sockets->sockets[i], &sockets->sockets[i + 1],
-              sizeof(curl_socket_t) * (sockets->count - (i + 1)));
+              sizeof(curl_socket_t) * (size_t)(sockets->count - (i + 1)));
       --sockets->count;
     }
   }
