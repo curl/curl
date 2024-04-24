@@ -409,7 +409,7 @@ static CURLcode getalnum(const char **ptr, char *alpnbuf, size_t buflen)
   protop = p;
   while(*p && !ISBLANK(*p) && (*p != ';') && (*p != '='))
     p++;
-  len = p - protop;
+  len = (size_t)(p - protop);
   *ptr = p;
 
   if(!len || (len >= buflen))
@@ -546,7 +546,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
           else {
             while(*p && (ISALNUM(*p) || (*p == '.') || (*p == '-')))
               p++;
-            len = p - hostp;
+            len = (size_t)(p - hostp);
           }
           if(!len || (len >= MAX_ALTSVC_HOSTLEN)) {
             infof(data, "Excessive alt-svc host name, ignoring.");
