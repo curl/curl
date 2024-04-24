@@ -249,10 +249,10 @@ static void loghex(unsigned char *buffer, ssize_t len)
   unsigned char *ptr = buffer;
   char *optr = data;
   ssize_t width = 0;
-  int left = sizeof(data);
+  ssize_t left = sizeof(data);
 
   for(i = 0; i<len && (left >= 0); i++) {
-    msnprintf(optr, left, "%02x", ptr[i]);
+    msnprintf(optr, (size_t)left, "%02x", ptr[i]);
     width += 2;
     optr += 2;
     left -= 2;
@@ -659,7 +659,7 @@ static int tunnel(struct perclient *cp, fd_set *fds)
                     (SEND_TYPE_ARG3)nread, 0);
       if(nwrite != nread)
         return 1;
-      cp->fromclient += nwrite;
+      cp->fromclient += (size_t)nwrite;
     }
     else
       return 1;
@@ -672,7 +672,7 @@ static int tunnel(struct perclient *cp, fd_set *fds)
                     (SEND_TYPE_ARG3)nread, 0);
       if(nwrite != nread)
         return 1;
-      cp->fromremote += nwrite;
+      cp->fromremote += (size_t)nwrite;
     }
     else
       return 1;

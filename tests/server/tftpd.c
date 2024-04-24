@@ -478,7 +478,7 @@ static ssize_t write_behind(struct testcase *test, int convert)
     return -1;                    /* nak logic? */
 
   if(convert == 0)
-    return write(test->ofile, writebuf, count);
+    return write(test->ofile, writebuf, (size_t)count);
 
   p = writebuf;
   ct = count;
@@ -1082,8 +1082,9 @@ static int validate_access(struct testcase *test,
 
   if(!strncmp("verifiedserver", filename, 14)) {
     char weare[128];
-    size_t count = msnprintf(weare, sizeof(weare), "WE ROOLZ: %"
-                             CURL_FORMAT_CURL_OFF_T "\r\n", our_getpid());
+    size_t count = (size_t)msnprintf(weare, sizeof(weare), "WE ROOLZ: %"
+                                     CURL_FORMAT_CURL_OFF_T "\r\n",
+                                     our_getpid());
 
     logmsg("Are-we-friendly question received");
     test->buffer = strdup(weare);
@@ -1374,7 +1375,7 @@ static void nak(int error)
 
   /* we use memcpy() instead of strcpy() in order to avoid buffer overflow
    * report from glibc with FORTIFY_SOURCE */
-  memcpy(tp->th_msg, pe->e_msg, length + 1);
+  memcpy(tp->th_msg, pe->e_msg, (size_t)(length + 1));
   length += 5;
   if(swrite(peer, &buf.storage[0], length) != length)
     logmsg("nak: fail\n");
