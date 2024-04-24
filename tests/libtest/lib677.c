@@ -82,7 +82,8 @@ CURLcode test(char *URL)
 
       if(!state) {
         CURLcode ec;
-        ec = curl_easy_send(curl, cmd + pos, sizeof(cmd) - 1 - pos, &len);
+        ec = curl_easy_send(curl, cmd + pos, sizeof(cmd) - 1 - (size_t)pos,
+                            &len);
         if(ec != CURLE_OK) {
           fprintf(stderr, "curl_easy_send() failed, with code %d (%s)\n",
                   (int)ec, curl_easy_strerror(ec));
@@ -90,7 +91,7 @@ CURLcode test(char *URL)
           goto test_cleanup;
         }
         if(len > 0)
-          pos += len;
+          pos += (ssize_t)len;
         else
           pos = 0;
         if(pos == sizeof(cmd) - 1) {
@@ -100,7 +101,7 @@ CURLcode test(char *URL)
       }
       else if(pos < (ssize_t)sizeof(buf)) {
         CURLcode ec;
-        ec = curl_easy_recv(curl, buf + pos, sizeof(buf) - pos, &len);
+        ec = curl_easy_recv(curl, buf + pos, sizeof(buf) - (size_t)pos, &len);
         if(ec != CURLE_OK) {
           fprintf(stderr, "curl_easy_recv() failed, with code %d (%s)\n",
                   (int)ec, curl_easy_strerror(ec));
@@ -108,7 +109,7 @@ CURLcode test(char *URL)
           goto test_cleanup;
         }
         if(len > 0)
-          pos += len;
+          pos += (ssize_t)len;
       }
       if(len <= 0)
         sock = CURL_SOCKET_BAD;
@@ -116,7 +117,7 @@ CURLcode test(char *URL)
   }
 
   if(state) {
-    fwrite(buf, pos, 1, stdout);
+    fwrite(buf, (size_t)pos, 1, stdout);
     putchar('\n');
   }
 

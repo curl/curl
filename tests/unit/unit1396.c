@@ -91,7 +91,7 @@ UNITTEST_START
 
     abort_unless(out != NULL, "returned NULL!");
     fail_unless(outlen == list1[i].outlen, "wrong output length returned");
-    fail_unless(!memcmp(out, list1[i].out, list1[i].outlen),
+    fail_unless(!memcmp(out, list1[i].out, (size_t)list1[i].outlen),
                 "bad output data returned");
 
     printf("curl_easy_unescape test %d DONE\n", i);
@@ -106,7 +106,7 @@ UNITTEST_START
 
     outlen = (int)strlen(out);
     fail_unless(outlen == list2[i].outlen, "wrong output length returned");
-    fail_unless(!memcmp(out, list2[i].out, list2[i].outlen),
+    fail_unless(!memcmp(out, list2[i].out, (size_t)list2[i].outlen),
                 "bad output data returned");
 
     printf("curl_easy_escape test %d DONE (%s)\n", i, out);

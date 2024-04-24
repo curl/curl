@@ -58,7 +58,7 @@ CURLcode test(char *URL)
   raw = curl_easy_unescape(NULL, ptr, (int)strlen(ptr), &outlen);
   printf("outlen == %d\n", outlen);
   printf("unescape == original? %s\n",
-         memcmp(raw, a, outlen) ? "no" : "YES");
+         memcmp(raw, a, (size_t)outlen) ? "no" : "YES");
   curl_free(raw);
 
   /* deprecated API */
@@ -70,7 +70,7 @@ CURLcode test(char *URL)
   outlen = (int)strlen(raw);
   printf("[old] outlen == %d\n", outlen);
   printf("[old] unescape == original? %s\n",
-         memcmp(raw, a, outlen) ? "no" : "YES");
+         memcmp(raw, a, (size_t)outlen) ? "no" : "YES");
   curl_free(raw);
   curl_free(ptr);
 

@@ -80,7 +80,7 @@ static size_t rtp_write(void *ptr, size_t size, size_t nmemb, void *stream)
       }
     }
     else {
-      if(memcmp(RTP_DATA, data + i, message_size - i) != 0) {
+      if(memcmp(RTP_DATA, data + i, (size_t)(message_size - i)) != 0) {
         printf("RTP PAYLOAD END CORRUPTED (%d), [%s]\n",
                message_size - i, data + i);
         /* return failure; */
