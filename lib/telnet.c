@@ -1536,7 +1536,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
     poll_cnt = 2;
     interval_ms = 1 * 1000;
     if(pfd[1].fd < 0) {
-      failf(data, "cannnot read input");
+      failf(data, "cannot read input");
       result = CURLE_RECV_ERROR;
       keepon = FALSE;
     }
