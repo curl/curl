@@ -189,7 +189,7 @@ static CURLcode altsvc_add(struct altsvcinfo *asi, char *line)
     as = altsvc_create(srchost, dsthost, srcalpn, dstalpn, srcport, dstport);
     if(as) {
       as->expires = expires;
-      as->prio = prio;
+      as->prio = (int)prio;
       as->persist = persist ? 1 : 0;
       Curl_llist_append(&asi->list, as, &as->node);
     }
@@ -409,7 +409,7 @@ static CURLcode getalnum(const char **ptr, char *alpnbuf, size_t buflen)
   protop = p;
   while(*p && !ISBLANK(*p) && (*p != ';') && (*p != '='))
     p++;
-  len = p - protop;
+  len = (size_t)(p - protop);
   *ptr = p;
 
   if(!len || (len >= buflen))
@@ -462,7 +462,7 @@ static time_t altsvc_debugtime(void *unused)
   char *timestr = getenv("CURL_TIME");
   (void)unused;
   if(timestr) {
-    unsigned long val = strtol(timestr, NULL, 10);
+    long val = strtol(timestr, NULL, 10);
     return (time_t)val;
   }
   return time(NULL);
@@ -546,7 +546,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
           else {
             while(*p && (ISALNUM(*p) || (*p == '.') || (*p == '-')))
               p++;
-            len = p - hostp;
+            len = (size_t)(p - hostp);
           }
           if(!len || (len >= MAX_ALTSVC_HOSTLEN)) {
             infof(data, "Excessive alt-svc host name, ignoring.");
@@ -624,7 +624,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
           num = strtoul(value_ptr, &end_ptr, 10);
           if((end_ptr != value_ptr) && (num < ULONG_MAX)) {
             if(strcasecompare("ma", option))
-              maxage = num;
+              maxage = (time_t)num;
             else if(strcasecompare("persist", option) && (num == 1))
               persist = TRUE;
           }
@@ -696,7 +696,7 @@ bool Curl_altsvc_lookup(struct altsvcinfo *asi,
     if((as->src.alpnid == srcalpnid) &&
        hostcompare(srchost, as->src.host) &&
        (as->src.port == srcport) &&
-       (versions & as->dst.alpnid)) {
+       (versions & (int)as->dst.alpnid)) {
       /* match */
       *dstentry = as;
       return TRUE;
