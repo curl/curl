@@ -10,7 +10,7 @@ on:
 jobs:
   CodeSonar_Analyze:
     permissions: write-all
-    runs-on: self-hosted
+    runs-on: codesecure-runner-set
     container:
       image: ghcr.io/codesecure-se/curl-cso-builder:8.1p0
       credentials:
@@ -50,14 +50,12 @@ jobs:
           path: cso-scripts
       - name: Build and Analyze
         run: python3 cso-scripts/build_and_analyze.py codesonar.conf make -j $PARALLEL
-      - name: Temp fix for CSO4240
-        run: sed "s|\"partnerdemo|\"https://partnerdemo|g" warnings.sarif | sed "s|(partnerdemo|(https://partnerdemo|g" > t && mv t warnings.sarif
-      - name: Upload SARIF to GitHub #Use this if you do not have GitHub Enterprise
-        if: ${{ github.event.pull_request }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: SARIF file
-          path: warnings.sarif
+#      - name: Upload SARIF to GitHub #Use this if you do not have GitHub Enterprise
+#        if: ${{ github.event.pull_request }}
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: SARIF file
+#          path: warnings.sarif
       - name: Push Summary Report
         if: ${{ github.event.pull_request }}
         uses: thollander/actions-comment-pull-request@v2
