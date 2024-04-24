@@ -168,7 +168,11 @@ class EnvConfig:
                 if p.returncode != 0:
                     # not a working caddy
                     self.caddy = None
-                self._caddy_version = re.sub(r' .*', '', p.stdout.strip())
+                m = re.match(r'v?(\d+\.\d+\.\d+) .*', p.stdout)
+                if m:
+                    self._caddy_version = m.group(1)
+                else:
+                    raise f'Unable to determine cadd version from: {p.stdout}'
             except:
                 self.caddy = None
 
@@ -194,6 +198,12 @@ class EnvConfig:
         if self.httpd_version is None:
             return False
         hv = self.versiontuple(self.httpd_version)
+        return hv >= self.versiontuple(minv)
+
+    def caddy_is_at_least(self, minv):
+        if self.caddy_version is None:
+            return False
+        hv = self.versiontuple(self.caddy_version)
         return hv >= self.versiontuple(minv)
 
     def is_complete(self) -> bool:
@@ -261,6 +271,12 @@ class Env:
         return libname.lower() in Env.CONFIG.curl_props['libs']
 
     @staticmethod
+    def curl_uses_ossl_quic() -> bool:
+        if Env.have_h3_curl():
+            return not Env.curl_uses_lib('ngtcp2') and Env.curl_uses_lib('nghttp3')
+        return False
+
+    @staticmethod
     def curl_has_feature(feature: str) -> bool:
         return feature.lower() in Env.CONFIG.curl_props['features']
 
@@ -311,6 +327,10 @@ class Env:
     @staticmethod
     def caddy_version() -> str:
         return Env.CONFIG.caddy_version
+
+    @staticmethod
+    def caddy_is_at_least(minv) -> bool:
+        return Env.CONFIG.caddy_is_at_least(minv)
 
     @staticmethod
     def httpd_is_at_least(minv) -> bool:

@@ -132,7 +132,7 @@ Curl_hash_add(struct Curl_hash *h, void *key, size_t key_len, void *p)
 
   he = mk_hash_element(key, key_len, p);
   if(he) {
-    Curl_llist_insert_next(l, l->tail, he, &he->list);
+    Curl_llist_append(l, he, &he->list);
     ++h->size;
     return p; /* return the new entry */
   }
@@ -368,3 +368,25 @@ void Curl_hash_print(struct Curl_hash *h,
   fprintf(stderr, "\n");
 }
 #endif
+
+void Curl_hash_offt_init(struct Curl_hash *h,
+                         unsigned int slots,
+                         Curl_hash_dtor dtor)
+{
+  Curl_hash_init(h, slots, Curl_hash_str, Curl_str_key_compare, dtor);
+}
+
+void *Curl_hash_offt_set(struct Curl_hash *h, curl_off_t id, void *elem)
+{
+  return Curl_hash_add(h, &id, sizeof(id), elem);
+}
+
+int Curl_hash_offt_remove(struct Curl_hash *h, curl_off_t id)
+{
+  return Curl_hash_delete(h, &id, sizeof(id));
+}
+
+void *Curl_hash_offt_get(struct Curl_hash *h, curl_off_t id)
+{
+  return Curl_hash_pick(h, &id, sizeof(id));
+}

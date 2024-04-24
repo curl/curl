@@ -140,7 +140,7 @@ static CURLcode hsts_create(struct hsts *h,
     sts->host = duphost;
     sts->expires = expires;
     sts->includeSubDomains = subdomains;
-    Curl_llist_insert_next(&h->list, h->list.tail, sts, &sts->node);
+    Curl_llist_append(&h->list, sts, &sts->node);
   }
   return CURLE_OK;
 }

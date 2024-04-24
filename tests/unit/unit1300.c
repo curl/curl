@@ -217,6 +217,54 @@ UNITTEST_START
   fail_unless(llist.tail == NULL,
               "llist tail is not NULL while the llist is empty");
 
+  /**
+   * testing Curl_llist_append
+   * case 1:
+   * list is empty
+   * @assumptions:
+   * 1: the element next to head should be our newly created element
+   * 2: the list tail should different from newly created element
+   */
+  Curl_llist_append(&llist, &unusedData_case1, &case1_list);
+  fail_unless(Curl_llist_count(&llist) == 1,
+              "List size should be 1 after appending a new element");
+  /* test that the list head data holds my unusedData */
+  fail_unless(llist.head->ptr == &unusedData_case1,
+              "head ptr should be first entry");
+  /* same goes for the list tail */
+  fail_unless(llist.tail == llist.head,
+              "tail and head should be the same");
+
+  /**
+   * testing Curl_llist_append
+   * case 2:
+   * list is not empty
+   * @assumptions:
+   * 1: the list head-next should be the newly created element
+   * 2: the list tail should be the newly created element
+   */
+  Curl_llist_append(&llist, &unusedData_case2, &case2_list);
+  fail_unless(llist.head->next->ptr == &unusedData_case2,
+              "the node next to head is not getting set correctly");
+  fail_unless(llist.tail->ptr == &unusedData_case2,
+              "the list tail is not getting set correctly");
+
+  /**
+   * testing Curl_llist_append
+   * case 3:
+   * list is has 2 members
+   * @assumptions:
+   * 1: the list head-next should remain the same
+   * 2: the list tail should be the newly created element
+   */
+  Curl_llist_append(&llist, &unusedData_case3, &case3_list);
+  fail_unless(llist.head->next->ptr == &unusedData_case2,
+              "the node next to head did not stay the same");
+  fail_unless(llist.tail->ptr == &unusedData_case3,
+              "the list tail is not getting set correctly");
+
+
+
   Curl_llist_destroy(&llist, NULL);
   Curl_llist_destroy(&llist_destination, NULL);
 }

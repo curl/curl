@@ -915,7 +915,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       /* accepted */
       break;
 #endif
-#ifdef ENABLE_QUIC
+#ifdef USE_HTTP3
     case CURL_HTTP_VERSION_3:
     case CURL_HTTP_VERSION_3ONLY:
       /* accepted */
@@ -2634,7 +2634,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
 #endif
 
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   case CURLOPT_ADDRESS_SCOPE:
     /*
      * Use this scope id when using IPv6
@@ -3139,6 +3139,49 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     arg = va_arg(param, long);
     raw = (arg & CURLWS_RAW_MODE);
     data->set.ws_raw_mode = raw;
+    break;
+  }
+#endif
+#ifdef USE_ECH
+  case CURLOPT_ECH: {
+    size_t plen = 0;
+
+    argptr = va_arg(param, char *);
+    if(!argptr) {
+      data->set.tls_ech = CURLECH_DISABLE;
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      return result;
+    }
+    plen = strlen(argptr);
+    if(plen > CURL_MAX_INPUT_LENGTH) {
+      data->set.tls_ech = CURLECH_DISABLE;
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      return result;
+    }
+    /* set tls_ech flag value, preserving CLA_CFG bit */
+    if(plen == 5 && !strcmp(argptr, "false"))
+      data->set.tls_ech = CURLECH_DISABLE
+                          | (data->set.tls_ech & CURLECH_CLA_CFG);
+    else if(plen == 6 && !strcmp(argptr, "grease"))
+      data->set.tls_ech = CURLECH_GREASE
+                          | (data->set.tls_ech & CURLECH_CLA_CFG);
+    else if(plen == 4 && !strcmp(argptr, "true"))
+      data->set.tls_ech = CURLECH_ENABLE
+                          | (data->set.tls_ech & CURLECH_CLA_CFG);
+    else if(plen == 4 && !strcmp(argptr, "hard"))
+      data->set.tls_ech = CURLECH_HARD
+                          | (data->set.tls_ech & CURLECH_CLA_CFG);
+    else if(plen > 5 && !strncmp(argptr, "ecl:", 4)) {
+      result = Curl_setstropt(&data->set.str[STRING_ECH_CONFIG], argptr + 4);
+      if(result)
+        return result;
+      data->set.tls_ech |= CURLECH_CLA_CFG;
+    }
+    else if(plen > 4 && !strncmp(argptr, "pn:", 3)) {
+      result = Curl_setstropt(&data->set.str[STRING_ECH_PUBLIC], argptr + 3);
+      if(result)
+        return result;
+    }
     break;
   }
 #endif

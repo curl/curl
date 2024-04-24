@@ -104,6 +104,9 @@ int main(void)
     /* pass struct to callback  */
     curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &data);
 
+    /* enable progress callback getting called */
+    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+
     curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, progress_callback);
   }
 }

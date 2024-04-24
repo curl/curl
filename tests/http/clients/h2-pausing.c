@@ -27,6 +27,7 @@
  */
 /* This is based on the poc client of issue #11982
  */
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/time.h>
@@ -141,11 +142,24 @@ static int err(void)
   exit(2);
 }
 
+static void usage(const char *msg)
+{
+  if(msg)
+    fprintf(stderr, "%s\n", msg);
+  fprintf(stderr,
+    "usage: [options] url\n"
+    "  pause downloads with following options:\n"
+    "  -V http_version (http/1.1, h2, h3) http version to use\n"
+  );
+}
+
 struct handle
 {
   int idx;
   int paused;
   int resumed;
+  int errored;
+  int fail_write;
   CURL *h;
 };
 
@@ -165,7 +179,14 @@ static size_t cb(void *data, size_t size, size_t nmemb, void *clientp)
     ++handle->paused;
     fprintf(stderr, "INFO: [%d] write, PAUSING %d time on %lu bytes\n",
             handle->idx, handle->paused, (long)realsize);
+    assert(handle->paused == 1);
     return CURL_WRITEFUNC_PAUSE;
+  }
+  if(handle->fail_write) {
+    ++handle->errored;
+    fprintf(stderr, "INFO: [%d] FAIL write of %lu bytes, %d time\n",
+            handle->idx, (long)realsize, handle->errored);
+    return CURL_WRITEFUNC_ERROR;
   }
   fprintf(stderr, "INFO: [%d] write, accepting %lu bytes\n",
           handle->idx, (long)realsize);
@@ -186,15 +207,43 @@ int main(int argc, char *argv[])
   char *url, *host = NULL, *port = NULL;
   int all_paused = 0;
   int resume_round = -1;
+  int http_version = CURL_HTTP_VERSION_2_0;
+  int ch;
 
-  if(argc != 2) {
+  while((ch = getopt(argc, argv, "hV:")) != -1) {
+    switch(ch) {
+    case 'h':
+      usage(NULL);
+      return 2;
+    case 'V': {
+      if(!strcmp("http/1.1", optarg))
+        http_version = CURL_HTTP_VERSION_1_1;
+      else if(!strcmp("h2", optarg))
+        http_version = CURL_HTTP_VERSION_2_0;
+      else if(!strcmp("h3", optarg))
+        http_version = CURL_HTTP_VERSION_3ONLY;
+      else {
+        usage("invalid http version");
+        return 1;
+      }
+      break;
+    }
+    default:
+     usage("invalid option");
+     return 1;
+    }
+  }
+  argc -= optind;
+  argv += optind;
+
+  if(argc != 1) {
     fprintf(stderr, "ERROR: need URL as argument\n");
     return 2;
   }
-  url = argv[1];
+  url = argv[0];
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
-  curl_global_trace("ids,time,http/2");
+  curl_global_trace("ids,time,http/2,http/3");
 
   cu = curl_url();
   if(!cu) {
@@ -222,6 +271,8 @@ int main(int argc, char *argv[])
     handles[i].idx = i;
     handles[i].paused = 0;
     handles[i].resumed = 0;
+    handles[i].errored = 0;
+    handles[i].fail_write = 1;
     handles[i].h = curl_easy_init();
     if(!handles[i].h ||
       curl_easy_setopt(handles[i].h, CURLOPT_WRITEFUNCTION, cb) != CURLE_OK ||
@@ -233,9 +284,11 @@ int main(int argc, char *argv[])
         != CURLE_OK ||
       curl_easy_setopt(handles[i].h, CURLOPT_SSL_VERIFYPEER, 0L) != CURLE_OK ||
       curl_easy_setopt(handles[i].h, CURLOPT_RESOLVE, resolve) != CURLE_OK ||
+      curl_easy_setopt(handles[i].h, CURLOPT_PIPEWAIT, 1L) ||
       curl_easy_setopt(handles[i].h, CURLOPT_URL, url) != CURLE_OK) {
       err();
     }
+    curl_easy_setopt(handles[i].h, CURLOPT_HTTP_VERSION, (long)http_version);
   }
 
   multi_handle = curl_multi_init();
@@ -267,6 +320,11 @@ int main(int argc, char *argv[])
         }
         else if(!handles[i].resumed) {
           fprintf(stderr, "ERROR: [%d] NOT resumed!\n", i);
+          as_expected = 0;
+        }
+        else if(handles[i].errored != 1) {
+          fprintf(stderr, "ERROR: [%d] NOT errored once, %d instead!\n",
+                  i, handles[i].errored);
           as_expected = 0;
         }
       }
@@ -308,7 +366,7 @@ int main(int argc, char *argv[])
       if(all_paused) {
         fprintf(stderr, "INFO: all transfers paused\n");
         /* give transfer some rounds to mess things up */
-        resume_round = rounds + 3;
+        resume_round = rounds + 2;
       }
     }
     if(resume_round > 0 && rounds == resume_round) {

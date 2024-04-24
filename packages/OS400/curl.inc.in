@@ -206,8 +206,10 @@
      d CURLAUTH_NTLM   c                   X'00000008'
      d CURLAUTH_DIGEST_IE...
      d                 c                   X'00000010'
+      /if not defined(CURL_NO_OLDIES)
      d CURLAUTH_NTLM_WB...
      d                 c                   X'00000020'
+      /endif
      d CURLAUTH_BEARER...
      d                 c                   X'00000040'
      d CURLAUTH_AWS_SIGV4...
@@ -669,6 +671,8 @@
      d                 c                   99
      d  CURLE_TOO_LARGE...
      d                 c                   100
+     d  CURLE_ECH_REQUIRED...
+     d                 c                   101
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLE_URL_MALFORMAT_USER...
@@ -1661,6 +1665,7 @@
      d                 c                   10323
      d  CURLOPT_SERVER_RESPONSE_TIMEOUT_MS...
      d                 c                   00324
+     d  CURLOPT_ECH    c                   10325
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001
@@ -1902,6 +1907,8 @@
      d                 c                   X'00600040'
      d  CURLINFO_QUEUE_TIME_T...                                                CURLINFO_OFF_T  + 65
      d                 c                   X'00600041'
+     d  CURLINFO_USED_PROXY...                                                  CURLINFO_LONG + 66
+     d                 c                   X'00200042'
       *
      d  CURLINFO_HTTP_CODE...                                                   Old ...RESPONSE_CODE
      d                 c                   X'00200002'
@@ -2065,8 +2072,10 @@
      d                 c                   9
      d  CURLVERSION_ELEVENTH...
      d                 c                   10
+     d  CURLVERSION_TWELFTH...
+     d                 c                   11
      d  CURLVERSION_NOW...
-     d                 c                   10                                   CURLVERSION_ELEVENTH
+     d                 c                   11                                   CURLVERSION_ELEVENTH
       *
      d CURLHcode       s             10i 0 based(######ptr######)               Enum
      d  CURLHE_OK      c                   0
@@ -2413,6 +2422,8 @@
      d  gsasl_version...
      d                                 *                                        const char *
      d  feature_names...
+     d                                 *                                        const char *
+     d  rtmp_version...
      d                                 *                                        const char *
       *
      d curl_certinfo   ds                  based(######ptr######)
@@ -3014,6 +3025,14 @@
      d  s                                  value like(curl_socket_t)
      d  running_handles...
      d                               10i 0
+      *
+     d curl_multi_waitfds...
+     d                 pr                  extproc('curl_multi_waitfds')
+     d                                     like(CURLMcode)
+     d  multi                          *   value                                CURLM *
+     d  ufds                           *   value                                curl_waitfd *
+     d  size                         10u 0 value
+     d  fd_count                     10u 0
       *
      d curl_multi_socket_action...
      d                 pr                  extproc('curl_multi_socket_action')

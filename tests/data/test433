@@ -36,7 +36,7 @@ CURL_HOME=
 <name>
 Verify XDG_CONFIG_HOME use to find .curlrc
 </name>
-<command>
+<command option="no-q">
 %HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

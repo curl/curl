@@ -46,7 +46,7 @@ permissions: {}
 
 env:
   MAKEFLAGS: -j 3
-  openssl3-version: openssl-3.2.0
+  openssl3-version: openssl-3.3.0
   quictls-version: 3.1.4+quic
   nghttp3-version: v1.2.0
   ngtcp2-version: v1.4.0
@@ -64,7 +64,7 @@ jobs:
         build:
           - name: openssl-quic
             configure: >-
-              PKG_CONFIG_PATH="$HOME/openssl3/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib"
+              PKG_CONFIG_PATH="$HOME/openssl3/lib64/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64"
               --enable-warnings --enable-werror --enable-debug --disable-ntlm
               --with-test-nghttpx="$HOME/nghttpx/bin/nghttpx"
               --with-openssl=$HOME/openssl3 --with-openssl-quic
@@ -96,8 +96,9 @@ jobs:
         run: |
           git clone --quiet --depth=1 -b ${{ env.openssl3-version }} https://github.com/openssl/openssl
           cd openssl
-          ./config --prefix=$HOME/openssl3 --libdir=$HOME/openssl3/lib
+          ./config --prefix=$HOME/openssl3
           make -j1 install_sw
+          cat exporters/openssl.pc
 
       - name: cache quictls
         if: contains(matrix.build.install_steps, 'quictls')
@@ -223,9 +224,6 @@ jobs:
 
       - run: make V=1 test-ci
         name: 'run tests'
-        env:
-          # 2500 and 25002 fail atm due to fin handling
-          TFLAGS: "!http/3"
 
       - run: pytest -v tests
         name: 'run pytest'

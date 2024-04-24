@@ -176,7 +176,7 @@ static unsigned short shortval(char *value)
 
 static enum {
   socket_domain_inet = AF_INET
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   , socket_domain_inet6 = AF_INET6
 #endif
 #ifdef USE_UNIX_SOCKETS
@@ -865,7 +865,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
       listener.sa4.sin_port = htons(*listenport);
       rc = bind(sock, &listener.sa, sizeof(listener.sa4));
       break;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     case AF_INET6:
       memset(&listener.sa6, 0, sizeof(listener.sa6));
       listener.sa6.sin6_family = AF_INET6;
@@ -873,7 +873,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
       listener.sa6.sin6_port = htons(*listenport);
       rc = bind(sock, &listener.sa, sizeof(listener.sa6));
       break;
-#endif /* ENABLE_IPV6 */
+#endif /* USE_IPV6 */
 #ifdef USE_UNIX_SOCKETS
     case AF_UNIX:
     rc = bind_unix_socket(sock, unix_socket, &listener.sau);
@@ -903,7 +903,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
        port we actually got and update the listener port value with it. */
     curl_socklen_t la_size;
     srvr_sockaddr_union_t localaddr;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     if(socket_domain == AF_INET6)
       la_size = sizeof(localaddr.sa6);
     else
@@ -921,7 +921,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
     case AF_INET:
       *listenport = ntohs(localaddr.sa4.sin_port);
       break;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     case AF_INET6:
       *listenport = ntohs(localaddr.sa6.sin6_port);
       break;
@@ -974,7 +974,7 @@ int main(int argc, char *argv[])
   while(argc>arg) {
     if(!strcmp("--version", argv[arg])) {
       printf("socksd IPv4%s\n",
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
              "/IPv6"
 #else
              ""
@@ -1018,7 +1018,7 @@ int main(int argc, char *argv[])
         reqlogfile = argv[arg++];
     }
     else if(!strcmp("--ipv6", argv[arg])) {
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
       socket_domain = AF_INET6;
       socket_type = "IPv6";
 #endif
@@ -1026,7 +1026,7 @@ int main(int argc, char *argv[])
     }
     else if(!strcmp("--ipv4", argv[arg])) {
       /* for completeness, we support this option as well */
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
       socket_type = "IPv4";
 #endif
       arg++;

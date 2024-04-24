@@ -38,35 +38,30 @@ handle previously created by curl_url(3) or curl_url_dup(3).
 This function sets or updates individual URL components, or parts, held by the
 URL object the handle identifies.
 
-The *part* argument should identify the particular URL part (see list
-below) to set or change, with *content* pointing to a null-terminated
-string with the new contents for that URL part. The contents should be in the
-form and encoding they would use in a URL: URL encoded.
+The *part* argument should identify the particular URL part (see list below)
+to set or change, with *content* pointing to a null-terminated string with the
+new contents for that URL part. The contents should be in the form and
+encoding they would use in a URL: URL encoded.
 
-When setting part in the URL object that was previously already set, it
+When setting a part in the URL object that was previously already set, it
 replaces the data that was previously stored for that part with the new
 *content*.
 
 The caller does not have to keep *content* around after a successful call
 as this function copies the content.
 
-Setting a part to a NULL pointer removes that part's contents from the
-*CURLU* handle.
-
-By default, this API only accepts URLs using schemes for protocols that are
-supported built-in. To make libcurl parse URLs generically even for schemes it
-does not know about, the **CURLU_NON_SUPPORT_SCHEME** flags bit must be
-set. Otherwise, this function returns *CURLUE_UNSUPPORTED_SCHEME* for URL
-schemes it does not recognize.
+Setting a part to a NULL pointer removes that part's contents from the *CURLU*
+handle.
 
 This function has an 8 MB maximum length limit for all provided input strings.
 In the real world, excessively long fields in URLs cause problems even if this
-API accepts them.
+function accepts them.
 
-When setting or updating contents of individual URL parts, this API might
-accept data that would not be otherwise possible to set in the string when it
-gets populated as a result of a full URL parse. Beware. If done so, extracting
-a full URL later on from such components might render an invalid URL.
+When setting or updating contents of individual URL parts, curl_url_set(3)
+might accept data that would not be otherwise possible to set in the string
+when it gets populated as a result of a full URL parse. Beware. If done so,
+extracting a full URL later on from such components might render an invalid
+URL.
 
 The *flags* argument is a bitmask with independent features.
 
@@ -84,6 +79,12 @@ Pass a pointer to a null-terminated string to the *url* parameter. The
 string must point to a correctly formatted "RFC 3986+" URL or be a NULL
 pointer.
 
+By default, this API only accepts setting URLs using schemes for protocols
+that are supported built-in. To make libcurl parse URLs generically even for
+schemes it does not know about, the **CURLU_NON_SUPPORT_SCHEME** flags bit
+must be set. Otherwise, this function returns *CURLUE_UNSUPPORTED_SCHEME* for
+URL schemes it does not recognize.
+
 Unless *CURLU_NO_AUTHORITY* is set, a blank hostname is not allowed in
 the URL.
 
@@ -94,7 +95,13 @@ to 40 bytes long.
 
 ## CURLUPART_USER
 
+If only the user part is set and not the password, the URL is represented with
+a blank password.
+
 ## CURLUPART_PASSWORD
+
+If only the password part is set and not the user, the URL is represented with
+a blank user.
 
 ## CURLUPART_OPTIONS
 
@@ -109,6 +116,9 @@ The hostname. If it is International Domain Name (IDN) the string must then be
 encoded as your locale says or UTF-8 (when WinIDN is used). If it is a
 bracketed IPv6 numeric address it may contain a zone id (or you can use
 *CURLUPART_ZONEID*).
+
+Note that if you set an IPv6 address, it gets ruined and causes an error if
+you also set the CURLU_URLENCODE flag.
 
 Unless *CURLU_NO_AUTHORITY* is set, a blank hostname is not allowed to set.
 
@@ -162,12 +172,13 @@ If set, allows curl_url_set(3) to set a non-supported scheme.
 ## CURLU_URLENCODE
 
 When set, curl_url_set(3) URL encodes the part on entry, except for
-scheme, port and URL.
+**scheme**, **port** and **URL**.
 
 When setting the path component with URL encoding enabled, the slash character
-is be skipped.
+is skipped.
 
-The query part gets space-to-plus conversion before the URL conversion.
+The query part gets space-to-plus converted before the URL conversion is
+applied.
 
 This URL encoding is charset unaware and converts the input in a byte-by-byte
 manner.

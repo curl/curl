@@ -230,7 +230,7 @@ static struct Curl_cftype *cf_types[] = {
   &Curl_cft_haproxy,
   &Curl_cft_socks_proxy,
 #endif /* !CURL_DISABLE_PROXY */
-#ifdef ENABLE_QUIC
+#ifdef USE_HTTP3
   &Curl_cft_http3,
 #endif
 #if !defined(CURL_DISABLE_HTTP) && !defined(USE_HYPER)

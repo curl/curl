@@ -1,46 +1,82 @@
-curl and libcurl 8.7.2
+curl and libcurl 8.8.0
 
  Public curl releases:         257
- Command line options:         258
- curl_easy_setopt() options:   304
- Public functions in libcurl:  93
- Contributors:                 3140
+ Command line options:         259
+ curl_easy_setopt() options:   305
+ Public functions in libcurl:  94
+ Contributors:                 3151
 
 This release includes the following changes:
 
+ o curl_version_info: provide librtmp version [73]
+ o file: add support for directory listings [63]
+ o idn: add native AppleIDN (icucore) support for macOS/iOS [95]
+ o lib: add curl_multi_waitfds [34]
+ o NTLM_WB: drop support [67]
+ o TLS: add support for ECH (Encrypted Client Hello) [109]
+ o urlapi: add CURLU_GET_EMPTY for empty queries and fragments [111]
 
 This release includes the following bugfixes:
 
- o appveyor: OpenSSL 3 no longer found by CMake, revert to 1.1.1 [26]
  o bearssl: fix compiler warnings [43]
+ o build: prefer `USE_IPV6` macro internally (was: `ENABLE_IPV6`) [85]
+ o build: remove MacOSX-Framework script [60]
  o cd2nroff/manage: use UTC when SOURCE_DATE_EPOCH is set [36]
  o cf-socket: remove references to l_ip, l_port [9]
+ o ci: add curl-for-win builds: Linux MUSL, macOS, Windows [68]
+ o cmake: add librtmp/rtmpdump option and detection [108]
+ o CMake: check fseeko after detecting HAVE_FILE_OFFSET_BITS [64]
  o cmake: enable `-pedantic-errors` for clang when `CURL_WERROR=ON` [47]
  o cmake: fix `CURL_WERROR=ON` for old CMake and use it in GHA/linux-old [48]
  o cmake: fixup `DEPENDS` filename [51]
+ o cmake: forward `USE_LIBRTMP` option to C [59]
  o cmake: generate misc manpages and install `mk-ca-bundle.pl` [24]
  o cmake: speed up libcurl doc building again [15]
  o cmake: tidy-up to use `WORKING_DIRECTORY` [23]
+ o cmake: use namespaced custom target names [80]
  o cmdline-docs: fix make install with configure --disable-docs [1]
  o configure: make --disable-docs imply --disable-manual [2]
  o content_encoding: brotli and others, pass through 0-length writes [5]
+ o contrithanks: honor `CURLWWW` variable [69]
  o curl-confopts.m4: define CARES_NO_DEPRECATED when c-ares is used [17]
  o curl: make --help adapt to the terminal width [11]
  o curl: use curl_getenv instead of the curlx_ version [20]
+ o Curl_creader_read: init two variables to avoid using them uninited [99]
  o curl_global_trace.md: shorten the description [29]
- o curl_sha512_255: fix detection of OpenSSL 1.1.1 or later [8]
  o curl_sha512_256: do not use workaround for NetBSD when not needed [21]
+ o curl_sha512_256: fix detection of OpenSSL 1.1.1 or later [8]
+ o curl_url_get.md: clarify queries and fragments and CURLU_GET_EMPTY [105]
+ o CURLINFO_REQUEST_SIZE: fixed, add tests for transfer infos reported [52]
+ o cw-out: improved error handling [104]
  o dist: `set -eu`, fix shellcheck, make reproducible and smaller tarballs [38]
+ o dist: add files missing from release tarball [53]
+ o dist: add reproducible dir entries to tarballs [56]
+ o dist: do not require Perl in `maketgz` [71]
  o dist: remove the curl-config.1 from the tarball [28]
+ o dist: verify tarball reproducibility in CI [40]
  o DISTROS: Cygwin updates [44]
+ o doc: pytest `--repeat` -> `--count` [58]
  o docs/cmdline-opts: invoke managen using a relative path [30]
  o docs/MAIL-ETIQUETTE: convert to markdown [12]
+ o docs: add CURLOPT_NOPROGRESS to CURLOPT_XFERINFOFUNCTION example [61]
+ o docs: clarify CURLOPT_MAXFILESIZE and CURLOPT_MAXFILESIZE_LARGE [74]
+ o file: remove useless assignment [89]
+ o ftp: fix socket leak on rare error [102]
+ o GHA: add shellcheck job and fix warnings, shell tidy-ups [70]
  o GHA: add valgrind to a wolfSSL build [37]
  o GHA: on macOS remove $HOME/.curlrc [50]
+ o gnutls: lazy init the trust settings [75]
+ o http/2, http/3: decouple stream state from easy handle [92]
+ o http2 + ngtcp2: pass CURLcode errors from callbacks [94]
+ o http2: emit RST when client write fails [65]
+ o http: reject HTTP major version switch mid connection [100]
  o http: with chunked POST forced, disable length check on read callback [31]
+ o http_aws_sigv4: remove useless assignment [88]
  o idn: make Curl_idnconvert_hostname() use Curl_idn_decode() [16]
  o INSTALL-CMAKE.md: explain `cmake -G <generator-name>` [32]
  o lib: add trace support for client reads and writes [45]
+ o lib: merge `ENABLE_QUIC` C macro into `USE_HTTP3` [84]
+ o lib: silence warnings on comma misuse [91]
  o lib: use `#error` instead of invalid syntax in `curl_setup_once.h` [49]
  o lib: use multi instead of multi_easy for the active multi [41]
  o libcurl-opts: mention pipelining less [33]
@@ -48,18 +84,41 @@ This release includes the following bugfixes:
  o m4: fix rustls pkg-config codepath [22]
  o makefile: remove the sorting from the vc-ide action [42]
  o maketgz: put docs/RELEASE-TOOL.md into the tarball [35]
+ o mbedtls: call mbedtls_ssl_setup() after RNG callback is set [66]
+ o mbedtls: cut off trailing newlines from debug logs [87]
+ o mbedtls: fix building with v3 in CMake Unity mode [107]
+ o misc: fix typos [62]
+ o mprintf: check fputc error rather than matching returned character [82]
+ o mqtt: when Curl_xfer_recv returns error, don't use nread [101]
+ o multi: introduce SETUP state for better timeouts [26]
+ o multi: remove the unused Curl_preconnect function [98]
+ o multi: timeout handles even without connection [81]
  o openldap: create ldap URLs correctly for IPv6 addresses [19]
  o openssl: do not set SSL_MODE_RELEASE_BUFFERS [10]
+ o OS400: fix shellcheck warnings in scripts [72]
+ o projects: drop MSVC project files for recent versions [79]
+ o quic: fixup duplicate static function name (for cmake unity) [77]
  o RELEASE-PROCEDURE: mention an initial working build [7]
+ o request: make Curl_req_init return void [96]
  o request: paused upload on completed download, assess connection [54]
  o reuse: add copyright + license info to individual docs/*.md files [13]
+ o ROADMAP: remove completed entries, mention websocket
+ o sendf: fix two typos in comments [90]
+ o smtp: result of Curl_bufq_cread was not used [78]
  o tests/http: fix compiler warning [39]
+ o tests: add -q as first option when invoking curl for tests [97]
+ o tests: check caddy server version to match test expectations [106]
+ o tls: use shared init code for TCP+QUIC [57]
  o tool_getparam: output warning for leading unicode quote character [14]
  o tool_xattr: "guess" URL scheme if none is provided [3]
  o tool_xattr: in debug builds, act normally if CURL_FAKE_XATTR is not set [4]
  o url: do not URL decode proxy crendentials [55]
+ o url: fix use of an uninitialized variable [86]
+ o urlapi: allow setting port number zero [76]
+ o urlapi: fix relative redirects to fragment-only [83]
  o urldata: remove fields not used depending on used features [46]
  o vquic: use CURL_FORMAT_CURL_OFF_T for 64 bit printf output [18]
+ o winbuild: add ENABLE_WEBSOCKETS option [93]
  o winbuild: use $(RC) correctly [27]
  o wolfssl: plug memory leak in wolfssl_connect_step2() [25]
 
@@ -76,15 +135,19 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Brian Inglis, Carlos Henrique Lima Melara, Chris Webb,
-  Dagfinn Ilmari Mannsåker, Dan Fandrich, Daniel J. H., Daniel McCarney,
-  Daniel Stenberg, Emanuele Torre, Evgeny Grin (Karlson2k), Fabian Keil,
-  Gisle Vanem, Harry Sintonen, hongfei.li, Jeff King, kalvdans on github,
-  Keitagit-kun on github, kpcyrd on github, Matt Jolly, Michael Kaufmann,
-  Michał Antoniak, Paul Howarth, Ray Satiro, riastradh on github,
-  Robert Moreton, Sanjay Pujare, Sergey Bronnikov, Sergey Ogryzkov,
-  Sergio Durigan Junior, Stefan Eissing, Tobias Stoeckmann, Viktor Szakats
-  (32 contributors)
+  blankie, Brian Inglis, Carlos Henrique Lima Melara, Christian Schmitz,
+  Chris Webb, Colin Leroy-Mira, Dagfinn Ilmari Mannsåker, Dan Fandrich,
+  Daniel J. H., Daniel McCarney, Daniel Stenberg, Dmitry Karpov,
+  Emanuele Torre, Evgeny Grin (Karlson2k), Fabian Keil, Gisle Vanem,
+  hammlee96 on github, Harry Sintonen, Hongfei Li, Jan Macku, Jeff King,
+  Jérôme Leclercq, Jiwoo Park, Jonatan Vela, Kailun Qin, kalvdans on github,
+  Keitagit-kun on github, Konstantin Kuzov, kpcyrd on github, Laramie Leavitt,
+  Marcel Raad, Matt Jolly, Michael Kaufmann, Michał Antoniak, Patrick Monnerat,
+  Paul Howarth, Pavel Kropachev, Rahul Krishna M, RainRat, Ray Satiro,
+  riastradh on github, Robert Moreton, Sanjay Pujare, Sergey Bronnikov,
+  Sergey Ogryzkov, Sergio Durigan Junior, Stefan Eissing, Stephen Farrell,
+  Tal Regev, Tobias Stoeckmann, Toon Claes, Viktor Szakats
+  (52 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -113,7 +176,7 @@ References to bug reports and discussions on issues:
  [23] = https://curl.se/bug/?i=13206
  [24] = https://curl.se/bug/?i=13197
  [25] = https://curl.se/bug/?i=13272
- [26] = https://curl.se/bug/?i=13266
+ [26] = https://curl.se/bug/?i=13371
  [27] = https://curl.se/bug/?i=13267
  [28] = https://curl.se/bug/?i=13268
  [29] = https://curl.se/bug/?i=13263
@@ -121,11 +184,13 @@ References to bug reports and discussions on issues:
  [31] = https://curl.se/bug/?i=13229
  [32] = https://curl.se/bug/?i=13244
  [33] = https://curl.se/bug/?i=13254
+ [34] = https://curl.se/bug/?i=13135
  [35] = https://curl.se/bug/?i=13239
  [36] = https://curl.se/bug/?i=13242
  [37] = https://curl.se/bug/?i=13274
  [38] = https://curl.se/bug/?i=13299
  [39] = https://curl.se/bug/?i=13301
+ [40] = https://curl.se/bug/?i=13327
  [41] = https://curl.se/bug/?i=12665
  [42] = https://curl.se/bug/?i=13294
  [43] = https://curl.se/bug/?i=13290
@@ -137,5 +202,61 @@ References to bug reports and discussions on issues:
  [49] = https://curl.se/bug/?i=13287
  [50] = https://curl.se/bug/?i=13284
  [51] = https://curl.se/bug/?i=13283
+ [52] = https://curl.se/bug/?i=13269
+ [53] = https://curl.se/bug/?i=13346
  [54] = https://curl.se/bug/?i=13260
  [55] = https://curl.se/bug/?i=13265
+ [56] = https://curl.se/bug/?i=13322
+ [57] = https://curl.se/bug/?i=13172
+ [58] = https://curl.se/bug/?i=13218
+ [59] = https://curl.se/bug/?i=13364
+ [60] = https://curl.se/bug/?i=13313
+ [61] = https://curl.se/bug/?i=13348
+ [62] = https://curl.se/bug/?i=13344
+ [63] = https://curl.se/bug/?i=13137
+ [64] = https://curl.se/bug/?i=13264
+ [65] = https://curl.se/bug/?i=13292
+ [66] = https://curl.se/bug/?i=13314
+ [67] = https://curl.se/bug/?i=13249
+ [68] = https://curl.se/bug/?i=13335
+ [69] = https://curl.se/bug/?i=13315
+ [70] = https://curl.se/bug/?i=13307
+ [71] = https://curl.se/bug/?i=13310
+ [72] = https://curl.se/bug/?i=13309
+ [73] = https://curl.se/bug/?i=13368
+ [74] = https://curl.se/bug/?i=13372
+ [75] = https://curl.se/bug/?i=13339
+ [76] = https://curl.se/bug/?i=13427
+ [77] = https://curl.se/bug/?i=13332
+ [78] = https://curl.se/bug/?i=13398
+ [79] = https://curl.se/bug/?i=13311
+ [80] = https://curl.se/bug/?i=13324
+ [81] = https://curl.se/bug/?i=13276
+ [82] = https://curl.se/bug/?i=13367
+ [83] = https://curl.se/bug/?i=13394
+ [84] = https://curl.se/bug/?i=13352
+ [85] = https://curl.se/bug/?i=13349
+ [86] = https://curl.se/bug/?i=13399
+ [87] = https://curl.se/bug/?i=13321
+ [88] = https://curl.se/bug/?i=13426
+ [89] = https://curl.se/bug/?i=13425
+ [90] = https://curl.se/bug/?i=13393
+ [91] = https://curl.se/bug/?i=13392
+ [92] = https://curl.se/bug/?i=13204
+ [93] = https://curl.se/bug/?i=13232
+ [94] = https://curl.se/bug/?i=13411
+ [95] = https://curl.se/bug/?i=13246
+ [96] = https://curl.se/bug/?i=13423
+ [97] = https://curl.se/bug/?i=13387
+ [98] = https://curl.se/bug/?i=13422
+ [99] = https://curl.se/bug/?i=13419
+ [100] = https://curl.se/bug/?i=13421
+ [101] = https://curl.se/bug/?i=13418
+ [102] = https://curl.se/bug/?i=13417
+ [104] = https://curl.se/bug/?i=13337
+ [105] = https://curl.se/bug/?i=13407
+ [106] = https://curl.se/bug/?i=13405
+ [107] = https://curl.se/bug/?i=13377
+ [108] = https://curl.se/bug/?i=13373
+ [109] = https://curl.se/bug/?i=11922
+ [111] = https://curl.se/bug/?i=13396

@@ -89,6 +89,7 @@ const struct Curl_handler Curl_handler_mqtt = {
   ZERO_NULL,                          /* perform_getsock */
   ZERO_NULL,                          /* disconnect */
   ZERO_NULL,                          /* write_resp */
+  ZERO_NULL,                          /* write_resp_hd */
   ZERO_NULL,                          /* connection_check */
   ZERO_NULL,                          /* attach connection */
   PORT_MQTT,                          /* defport */
@@ -776,12 +777,12 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
   case MQTT_REMAINING_LENGTH:
     do {
       result = Curl_xfer_recv(data, (char *)&byte, 1, &nread);
-      if(!nread)
+      if(result || !nread)
         break;
       Curl_debug(data, CURLINFO_HEADER_IN, (char *)&byte, 1);
       mq->pkt_hd[mq->npacket++] = byte;
     } while((byte & 0x80) && (mq->npacket < 4));
-    if(nread && (byte & 0x80))
+    if(!result && nread && (byte & 0x80))
       /* MQTT supports up to 127 * 128^0 + 127 * 128^1 + 127 * 128^2 +
          127 * 128^3 bytes. server tried to send more */
       result = CURLE_WEIRD_SERVER_REPLY;

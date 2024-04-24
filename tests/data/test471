@@ -1,0 +1,74 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+globbing
+{} list
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+<data1>
+HTTP/2 200 OK
+Content-Type: text/html
+Funny-head: swsclose
+Connection: close
+
+crap data
+</data1>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+http/2
+http
+</features>
+<server>
+http
+</server>
+<name>
+Reject HTTP/1.1 to HTTP/2 switch on the same connection
+</name>
+ <command option="no-output">
+"http://%HOSTIP:%HTTPPORT/{%TESTNUMBER,%TESTNUMBER0001}" -o "%LOGDIR/dumpit#1.dump"
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER0001 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+# curl: (1) Version mismatch (from HTTP/1 to HTTP/2)
+<errorcode>
+1
+</errorcode>
+</verify>
+</testcase>

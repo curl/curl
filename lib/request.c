@@ -40,10 +40,9 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-CURLcode Curl_req_init(struct SingleRequest *req)
+void Curl_req_init(struct SingleRequest *req)
 {
   memset(req, 0, sizeof(*req));
-  return CURLE_OK;
 }
 
 CURLcode Curl_req_soft_reset(struct SingleRequest *req,
@@ -266,7 +265,7 @@ static CURLcode req_set_upload_done(struct Curl_easy *data)
   else if(data->req.writebytecount)
     infof(data, "upload completely sent off: %" CURL_FORMAT_CURL_OFF_T
           " bytes", data->req.writebytecount);
-  else
+  else if(!data->req.download_done)
     infof(data, Curl_creader_total_length(data)?
                 "We are completely uploaded and fine" :
                 "Request completely sent off");

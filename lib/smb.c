@@ -273,6 +273,7 @@ const struct Curl_handler Curl_handler_smb = {
   ZERO_NULL,                            /* perform_getsock */
   smb_disconnect,                       /* disconnect */
   ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_SMB,                             /* defport */
@@ -300,6 +301,7 @@ const struct Curl_handler Curl_handler_smbs = {
   ZERO_NULL,                            /* perform_getsock */
   smb_disconnect,                       /* disconnect */
   ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_SMBS,                            /* defport */

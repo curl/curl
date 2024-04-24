@@ -55,6 +55,7 @@
 
 #ifdef USE_LIBRTMP
 #include <librtmp/rtmp.h>
+#include "curl_rtmp.h"
 #endif
 
 #ifdef HAVE_LIBZ
@@ -152,7 +153,7 @@ char *curl_version(void)
 #ifdef USE_NGHTTP2
   char h2_version[40];
 #endif
-#ifdef ENABLE_QUIC
+#ifdef USE_HTTP3
   char h3_version[40];
 #endif
 #ifdef USE_LIBRTMP
@@ -208,6 +209,8 @@ char *curl_version(void)
   src[i++] = idn_version;
 #elif defined(USE_WIN32_IDN)
   src[i++] = (char *)"WinIDN";
+#elif defined(USE_APPLE_IDN)
+  src[i++] = (char *)"AppleIDN";
 #endif
 
 #ifdef USE_LIBPSL
@@ -233,25 +236,13 @@ char *curl_version(void)
   Curl_http2_ver(h2_version, sizeof(h2_version));
   src[i++] = h2_version;
 #endif
-#ifdef ENABLE_QUIC
+#ifdef USE_HTTP3
   Curl_quic_ver(h3_version, sizeof(h3_version));
   src[i++] = h3_version;
 #endif
 #ifdef USE_LIBRTMP
-  {
-    char suff[2];
-    if(RTMP_LIB_VERSION & 0xff) {
-      suff[0] = (RTMP_LIB_VERSION & 0xff) + 'a' - 1;
-      suff[1] = '\0';
-    }
-    else
-      suff[0] = '\0';
-
-    msnprintf(rtmp_version, sizeof(rtmp_version), "librtmp/%d.%d%s",
-              RTMP_LIB_VERSION >> 16, (RTMP_LIB_VERSION >> 8) & 0xff,
-              suff);
-    src[i++] = rtmp_version;
-  }
+  Curl_rtmp_version(rtmp_version, sizeof(rtmp_version));
+  src[i++] = rtmp_version;
 #endif
 #ifdef USE_HYPER
   msnprintf(hyper_buf, sizeof(hyper_buf), "Hyper/%s", hyper_version());
@@ -428,6 +419,14 @@ static int https_proxy_present(curl_version_info_data *info)
 }
 #endif
 
+#if defined(USE_SSL) && defined(USE_ECH)
+static int ech_present(curl_version_info_data *info)
+{
+  (void) info;
+  return Curl_ssl_supports(NULL, SSLSUPP_ECH);
+}
+#endif
+
 /*
  * Features table.
  *
@@ -456,6 +455,9 @@ static const struct feat features_table[] = {
 #ifdef DEBUGBUILD
   FEATURE("Debug",       NULL,                CURL_VERSION_DEBUG),
 #endif
+#if defined(USE_SSL) && defined(USE_ECH)
+  FEATURE("ECH",         ech_present,         0),
+#endif
 #ifdef USE_GSASL
   FEATURE("gsasl",       NULL,                CURL_VERSION_GSASL),
 #endif
@@ -468,17 +470,17 @@ static const struct feat features_table[] = {
 #if defined(USE_NGHTTP2)
   FEATURE("HTTP2",       NULL,                CURL_VERSION_HTTP2),
 #endif
-#if defined(ENABLE_QUIC)
+#if defined(USE_HTTP3)
   FEATURE("HTTP3",       NULL,                CURL_VERSION_HTTP3),
 #endif
 #if defined(USE_SSL) && !defined(CURL_DISABLE_PROXY) && \
   !defined(CURL_DISABLE_HTTP)
   FEATURE("HTTPS-proxy", https_proxy_present, CURL_VERSION_HTTPS_PROXY),
 #endif
-#if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN)
+#if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN) || defined(USE_APPLE_IDN)
   FEATURE("IDN",         idn_present,         CURL_VERSION_IDN),
 #endif
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   FEATURE("IPv6",        NULL,                CURL_VERSION_IPV6),
 #endif
 #ifdef USE_KERBEROS5
@@ -568,7 +570,8 @@ static curl_version_info_data version_info = {
   NULL, /* zstd version */
   NULL, /* Hyper version */
   NULL, /* gsasl version */
-  feature_names
+  feature_names,
+  NULL  /* rtmp version */
 };
 
 curl_version_info_data *curl_version_info(CURLversion stamp)
@@ -643,7 +646,7 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
   }
 #endif
 
-#ifdef ENABLE_QUIC
+#ifdef USE_HTTP3
   {
     static char quicbuffer[80];
     Curl_quic_ver(quicbuffer, sizeof(quicbuffer));
@@ -675,6 +678,14 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
 
   feature_names[n] = NULL;  /* Terminate array. */
   version_info.features = features;
+
+#ifdef USE_LIBRTMP
+  {
+    static char rtmp_version[30];
+    Curl_rtmp_version(rtmp_version, sizeof(rtmp_version));
+    version_info.rtmp_version = rtmp_version;
+  }
+#endif
 
   return &version_info;
 }

@@ -264,8 +264,7 @@ static CURLcode unfold_value(struct Curl_easy *data, const char *value,
   newhs->value[olen + vlen] = 0; /* null-terminate at newline */
 
   /* insert this node into the list of headers */
-  Curl_llist_insert_next(&data->state.httphdrs, data->state.httphdrs.tail,
-                         newhs, &newhs->node);
+  Curl_llist_append(&data->state.httphdrs, newhs, &newhs->node);
   data->state.prevhead = newhs;
   return CURLE_OK;
 }
@@ -328,8 +327,7 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
     hs->request = data->state.requests;
 
     /* insert this node into the list of headers */
-    Curl_llist_insert_next(&data->state.httphdrs, data->state.httphdrs.tail,
-                           hs, &hs->node);
+    Curl_llist_append(&data->state.httphdrs, hs, &hs->node);
     data->state.prevhead = hs;
   }
   else

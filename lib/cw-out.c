@@ -102,6 +102,8 @@ static void cw_out_buf_free(struct cw_out_buf *cwbuf)
 struct cw_out_ctx {
   struct Curl_cwriter super;
   struct cw_out_buf *buf;
+  BIT(paused);
+  BIT(errored);
 };
 
 static CURLcode cw_out_write(struct Curl_easy *data,
@@ -201,7 +203,10 @@ static CURLcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
   size_t max_write, min_write;
   size_t wlen, nwritten;
 
-  (void)ctx;
+  /* If we errored once, we do not invoke the client callback  again */
+  if(ctx->errored)
+    return CURLE_WRITE_ERROR;
+
   /* write callbacks may get NULLed by the client between calls. */
   cw_get_writefunc(data, otype, &wcb, &wcb_data, &max_write, &min_write);
   if(!wcb) {
@@ -210,7 +215,7 @@ static CURLcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
   }
 
   *pconsumed = 0;
-  while(blen && !(data->req.keepon & KEEP_RECV_PAUSE)) {
+  while(blen && !ctx->paused) {
     if(!flush_all && blen < min_write)
       break;
     wlen = max_write? CURLMIN(blen, max_write) : blen;
@@ -230,10 +235,15 @@ static CURLcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
       }
       /* mark the connection as RECV paused */
       data->req.keepon |= KEEP_RECV_PAUSE;
+      ctx->paused = TRUE;
       CURL_TRC_WRITE(data, "cw_out, PAUSE requested by client");
       break;
     }
-    if(nwritten != wlen) {
+    else if(CURL_WRITEFUNC_ERROR == nwritten) {
+      failf(data, "client returned ERROR on write of %zu bytes", wlen);
+      return CURLE_WRITE_ERROR;
+    }
+    else if(nwritten != wlen) {
       failf(data, "Failure writing output to destination, "
             "passed %zu returned %zd", wlen, nwritten);
       return CURLE_WRITE_ERROR;
@@ -287,7 +297,7 @@ static CURLcode cw_out_flush_chain(struct cw_out_ctx *ctx,
 
   if(!cwbuf)
     return CURLE_OK;
-  if(data->req.keepon & KEEP_RECV_PAUSE)
+  if(ctx->paused)
     return CURLE_OK;
 
   /* write the end of the chain until it blocks or gets empty */
@@ -300,7 +310,7 @@ static CURLcode cw_out_flush_chain(struct cw_out_ctx *ctx,
       return result;
     if(*plast) {
       /* could not write last, paused again? */
-      DEBUGASSERT(data->req.keepon & KEEP_RECV_PAUSE);
+      DEBUGASSERT(ctx->paused);
       return CURLE_OK;
     }
   }
@@ -342,14 +352,14 @@ static CURLcode cw_out_do_write(struct cw_out_ctx *ctx,
                                 bool flush_all,
                                 const char *buf, size_t blen)
 {
-  CURLcode result;
+  CURLcode result = CURLE_OK;
 
   /* if we have buffered data and it is a different type than what
    * we are writing now, try to flush all */
   if(ctx->buf && ctx->buf->type != otype) {
     result = cw_out_flush_chain(ctx, data, &ctx->buf, TRUE);
     if(result)
-      return result;
+      goto out;
   }
 
   if(ctx->buf) {
@@ -359,7 +369,7 @@ static CURLcode cw_out_do_write(struct cw_out_ctx *ctx,
       return result;
     result = cw_out_flush_chain(ctx, data, &ctx->buf, flush_all);
     if(result)
-      return result;
+      goto out;
   }
   else {
     /* nothing buffered, try direct write */
@@ -372,10 +382,18 @@ static CURLcode cw_out_do_write(struct cw_out_ctx *ctx,
       /* did not write all, append the rest */
       result = cw_out_append(ctx, otype, buf + consumed, blen - consumed);
       if(result)
-        return result;
+        goto out;
     }
   }
-  return CURLE_OK;
+
+out:
+  if(result) {
+    /* We do not want to invoked client callbacks a second time after
+     * encountering an error. See issue #13337 */
+    ctx->errored = TRUE;
+    cw_out_bufs_free(ctx);
+  }
+  return result;
 }
 
 static CURLcode cw_out_write(struct Curl_easy *data,
@@ -413,10 +431,12 @@ bool Curl_cw_out_is_paused(struct Curl_easy *data)
     return FALSE;
 
   ctx = (struct cw_out_ctx *)cw_out;
-  return cw_out_bufs_len(ctx) > 0;
+  CURL_TRC_WRITE(data, "cw-out is%spaused", ctx->paused? "" : " not");
+  return ctx->paused;
 }
 
-static CURLcode cw_out_flush(struct Curl_easy *data, bool flush_all)
+static CURLcode cw_out_flush(struct Curl_easy *data,
+                             bool unpause, bool flush_all)
 {
   struct Curl_cwriter *cw_out;
   CURLcode result = CURLE_OK;
@@ -424,18 +444,31 @@ static CURLcode cw_out_flush(struct Curl_easy *data, bool flush_all)
   cw_out = Curl_cwriter_get_by_type(data, &Curl_cwt_out);
   if(cw_out) {
     struct cw_out_ctx *ctx = (struct cw_out_ctx *)cw_out;
+    if(ctx->errored)
+      return CURLE_WRITE_ERROR;
+    if(unpause && ctx->paused)
+      ctx->paused = FALSE;
+    if(ctx->paused)
+      return CURLE_OK;  /* not doing it */
 
     result = cw_out_flush_chain(ctx, data, &ctx->buf, flush_all);
+    if(result) {
+      ctx->errored = TRUE;
+      cw_out_bufs_free(ctx);
+      return result;
+    }
   }
   return result;
 }
 
-CURLcode Curl_cw_out_flush(struct Curl_easy *data)
+CURLcode Curl_cw_out_unpause(struct Curl_easy *data)
 {
-  return cw_out_flush(data, FALSE);
+  CURL_TRC_WRITE(data, "cw-out unpause");
+  return cw_out_flush(data, TRUE, FALSE);
 }
 
 CURLcode Curl_cw_out_done(struct Curl_easy *data)
 {
-  return cw_out_flush(data, TRUE);
+  CURL_TRC_WRITE(data, "cw-out done");
+  return cw_out_flush(data, FALSE, TRUE);
 }

@@ -48,7 +48,7 @@ environment:
       SHARED: 'ON'
       TESTING: 'OFF'
       DISABLED_TESTS: ''
-    - job_name: 'CMake, VS2022, Release, x64, OpenSSL 1.1.1, WebSockets, Build-only'
+    - job_name: 'CMake, VS2022, Release, x64, OpenSSL 3.2, WebSockets, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'Visual Studio 17 2022'
@@ -74,16 +74,16 @@ environment:
       TESTING: 'OFF'
       DISABLED_TESTS: ''
     # generated CMake-based Visual Studio Debug builds
-    - job_name: 'CMake, VS2010, Debug, x64, no SSL, Static'
+    - job_name: 'CMake, VS2010, Debug, x64, Schannel, Static, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'Visual Studio 10 2010 Win64'
       PRJ_CFG: Debug
-      SCHANNEL: 'OFF'
+      SCHANNEL: 'ON'
       ENABLE_UNICODE: 'OFF'
       HTTP_ONLY: 'OFF'
-      TESTING: 'ON'
-      DISABLED_TESTS: '!1139 !1501 !1177 !1477'
+      TESTING: 'OFF'
+      DISABLED_TESTS: ''
     - job_name: 'CMake, VS2022, Debug, x64, Schannel, Static, Unicode'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
@@ -230,12 +230,12 @@ environment:
       TESTING: 'OFF'
       ENABLE_UNICODE: 'yes'
     # generated VisualStudioSolution-based builds
-    - job_name: 'VisualStudioSolution, VS2017, Debug, x86, Schannel, Build-only'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
+    - job_name: 'VisualStudioSolution, VS2013, Debug, x86, Schannel, Build-only'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       BUILD_SYSTEM: VisualStudioSolution
       PRJ_CFG: 'DLL Debug - DLL Windows SSPI - DLL WinIDN'
       TESTING: 'OFF'
-      VC_VERSION: VC14.10
+      VC_VERSION: VC12
     # autotools-based builds (NOT mingw cross-compiling, but msys2 native)
     - job_name: 'autotools, msys2, Debug, x86_64, no Proxy, no SSL'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'

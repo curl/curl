@@ -193,7 +193,7 @@ static CURLcode cf_test_create(struct Curl_cfilter **pcf,
   ctx->ai_family = ai->ai_family;
   ctx->transport = transport;
   ctx->started = Curl_now();
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   if(ctx->ai_family == AF_INET6) {
     ctx->stats = &current_tr->cf6;
     ctx->fail_delay_ms = current_tc->cf6_fail_delay_ms;
@@ -358,7 +358,7 @@ static struct test_case TEST_CASES[] = {
   { 2, TURL, "test.com:123:192.0.2.1,192.0.2.2", CURL_IPRESOLVE_WHATEVER,
     CNCT_TMOT, 150, 200,  200,    2,  0,      400,  TC_TMOT,  R_FAIL, NULL },
   /* 2 ipv4, fails after ~400ms, reports COULDNT_CONNECT   */
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   { 3, TURL, "test.com:123:::1", CURL_IPRESOLVE_WHATEVER,
     CNCT_TMOT, 150, 200,  200,    0,  1,      200,  TC_TMOT,  R_FAIL, NULL },
   /* 1 ipv6, fails after ~200ms, reports COULDNT_CONNECT   */

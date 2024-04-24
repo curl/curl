@@ -197,7 +197,7 @@ int test(char *URL)
   }
 
 
-  /* fetch a another one */
+  /* fetch another one */
   printf("*** run %d\n", i);
   curl = curl_easy_init();
   if(!curl) {

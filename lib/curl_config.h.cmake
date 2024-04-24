@@ -163,7 +163,7 @@
 #cmakedefine USE_WIN32_LDAP 1
 
 /* Define if you want to enable IPv6 support */
-#cmakedefine ENABLE_IPV6 1
+#cmakedefine USE_IPV6 1
 
 /* Define to 1 if you have the alarm function. */
 #cmakedefine HAVE_ALARM 1
@@ -198,6 +198,12 @@
 
 /* Define to 1 if you have the `closesocket' function. */
 #cmakedefine HAVE_CLOSESOCKET 1
+
+/* Define to 1 if you have the <dirent.h> header file. */
+#cmakedefine HAVE_DIRENT_H 1
+
+/* Define to 1 if you have the `opendir' function. */
+#cmakedefine HAVE_OPENDIR 1
 
 /* Define to 1 if you have the fcntl function. */
 #cmakedefine HAVE_FCNTL 1
@@ -704,6 +710,9 @@ ${SIZEOF_TIME_T_CODE}
 /* if OpenSSL is in use */
 #cmakedefine USE_OPENSSL 1
 
+/* if librtmp/rtmpdump is in use */
+#cmakedefine USE_LIBRTMP 1
+
 /* Define to 1 if you don't want the OpenSSL configuration to be loaded
    automatically */
 #cmakedefine CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG 1
@@ -785,6 +794,9 @@ ${SIZEOF_TIME_T_CODE}
 /* to enable Windows IDN */
 #cmakedefine USE_WIN32_IDN 1
 
+/* to enable Apple IDN */
+#cmakedefine USE_APPLE_IDN 1
+
 /* Define to 1 to enable websocket support. */
 #cmakedefine USE_WEBSOCKETS 1
 
@@ -796,3 +808,9 @@ ${SIZEOF_TIME_T_CODE}
 
 /* Define to 1 to enable TLS-SRP support. */
 #cmakedefine USE_TLS_SRP 1
+
+/* Define to 1 to query for HTTPSRR when using DoH */
+#cmakedefine USE_HTTPSRR 1
+
+/* if ECH support is available */
+#cmakedefine USE_ECH 1

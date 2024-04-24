@@ -43,6 +43,7 @@ EXTRA_DIST =                                    \
  $(CURLPAGES)                                   \
  ALTSVC.md                                      \
  BINDINGS.md                                    \
+ BUFQ.md                                        \
  BUFREF.md                                      \
  BUG-BOUNTY.md                                  \
  BUGS.md                                        \
@@ -62,6 +63,7 @@ EXTRA_DIST =                                    \
  DISTROS.md                                     \
  DYNBUF.md                                      \
  EARLY-RELEASE.md                               \
+ ECH.md                                         \
  EXPERIMENTAL.md                                \
  FAQ                                            \
  FEATURES.md                                    \
@@ -77,8 +79,10 @@ EXTRA_DIST =                                    \
  INSTALL-CMAKE.md                               \
  INSTALL.md                                     \
  INTERNALS.md                                   \
+ IPFS.md                                        \
  KNOWN_BUGS                                     \
  MAIL-ETIQUETTE.md                              \
+ MANUAL.md                                      \
  MQTT.md                                        \
  NEW-PROTOCOL.md                                \
  options-in-versions                            \

@@ -53,6 +53,16 @@
 #define CERT_ALT_NAME_IP_ADDRESS 8
 #endif
 
+#if defined(_MSC_VER) && (_MSC_VER <= 1600)
+/* Workaround for warning:
+   'type cast' : conversion from 'int' to 'LPCSTR' of greater size */
+#undef CERT_STORE_PROV_MEMORY
+#undef CERT_STORE_PROV_SYSTEM_A
+#undef CERT_STORE_PROV_SYSTEM_W
+#define CERT_STORE_PROV_MEMORY    ((LPCSTR)(size_t)2)
+#define CERT_STORE_PROV_SYSTEM_A  ((LPCSTR)(size_t)9)
+#define CERT_STORE_PROV_SYSTEM_W  ((LPCSTR)(size_t)10)
+#endif
 
 #ifndef SCH_CREDENTIALS_VERSION
 

@@ -847,7 +847,7 @@ $	    goto cfgh_in_loop1
 $	endif
 $!
 $	if (key2a .eqs. "HAVE") .or. (key2a .eqs. "STAT") .or. -
-	   (key2 .eqs. "ENABLE_IPV6") .or. (key2b .eqs. "LDAP")
+	   (key2 .eqs. "USE_IPV6") .or. (key2b .eqs. "LDAP")
 $	then
 $!
 $!	    Process extra underscores
@@ -866,7 +866,7 @@ $		    double_under = 1
 $		endif
 $	    endif
 $!
-$	    if (key2_h .eqs. "_H") .or. (key2 .eqs. "ENABLE_IPV6") .or. -
+$	    if (key2_h .eqs. "_H") .or. (key2 .eqs. "USE_IPV6") .or. -
 	       (key2b .eqs. "LDAP")
 $	    then
 $!
@@ -892,7 +892,7 @@ $		endif
 $!
 $!		And of course what's life with out some special cases
 $!--------------------------------------------------------------------
-$		if key2 .eqs. "ENABLE_IPV6"
+$		if key2 .eqs. "USE_IPV6"
 $		then
 $		    headf = "in6"
 $		endif

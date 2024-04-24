@@ -29,8 +29,7 @@ set -eux; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 # build
 
 if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2022' ]; then
-  # v31 and v32 not recognized by CMake 3.27.0
-  openssl_root_win='C:/OpenSSL-v111-Win64'
+  openssl_root_win='C:/OpenSSL-v32-Win64'
 else
   openssl_root_win='C:/OpenSSL-v111-Win64'
 fi

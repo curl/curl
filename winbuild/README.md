@@ -101,6 +101,7 @@ where `<options>` is one or many of:
                                  - Enable loading OpenSSL configuration
                                    automatically, defaults to yes
  - `ENABLE_UNICODE=<yes/no>`     - Enable UNICODE support, defaults to no
+ - `ENABLE_WEBSOCKETS=<yes/no>`  - Enable Web Socket support, defaults to no
  - `GEN_PDB=<yes/no>`            - Generate External Program Database
                                    (debug symbols for release build)
  - `DEBUG=<yes/no>`              - Debug builds

@@ -73,9 +73,7 @@ struct ssl_connect_data {
   void *backend;                    /* vtls backend specific props */
   struct cf_call_data call_data;    /* data handle used in current call */
   struct curltime handshake_done;   /* time when handshake finished */
-  int port;                         /* remote port at origin */
   BIT(use_alpn);                    /* if ALPN shall be used in handshake */
-  BIT(reused_session);              /* session-ID was reused for this */
   BIT(peer_closed);                 /* peer has closed connection */
 };
 
@@ -181,6 +179,7 @@ bool Curl_ssl_cf_is_proxy(struct Curl_cfilter *cf);
  */
 bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
                            struct Curl_easy *data,
+                           const struct ssl_peer *peer,
                            void **ssl_sessionid,
                            size_t *idsize); /* set 0 if unknown */
 /* add a new session ID
@@ -190,6 +189,7 @@ bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
  */
 CURLcode Curl_ssl_addsessionid(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
+                               const struct ssl_peer *peer,
                                void *ssl_sessionid,
                                size_t idsize,
                                bool *added);

@@ -104,6 +104,9 @@ typedef struct {
   /* when 'age' is CURLVERSION_ELEVENTH or higher (>= 7.87.0), the members
      below exist */
   const char *const *feature_names; /* Feature names. */
+  /* when 'age' is CURLVERSION_TWELFTH or higher (>= 8.8.0), the members
+     below exist */
+  const char *const *rtmp_version; /* human readable string */
 } curl_version_info_data;
 ~~~
 
@@ -172,6 +175,12 @@ supports HTTP Brotli content encoding using libbrotlidec (Added in 7.57.0)
 *features* mask bit: CURL_VERSION_DEBUG
 
 libcurl was built with debug capabilities (added in 7.10.6)
+
+## ECH
+
+*features* mask bit: non-existent
+
+libcurl was built with ECH support (experimental, added in 8.8.0)
 
 ## gsasl
 
@@ -380,4 +389,3 @@ Added in 7.10
 # RETURN VALUE
 
 A pointer to a curl_version_info_data struct.
-curl_version(3)

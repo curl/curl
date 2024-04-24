@@ -31,7 +31,7 @@
  */
 
 #include "test.h"
-#if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN)
+#if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN) || defined(USE_APPLE_IDN)
 #define USE_IDN
 #endif
 
@@ -151,6 +151,24 @@ struct clearurlcase {
 };
 
 static const struct testcase get_parts_list[] ={
+  {"https://curl.se:0/#",
+   "https | [11] | [12] | [13] | curl.se | 0 | / | [16] | ",
+   0, CURLU_GET_EMPTY, CURLUE_OK},
+  {"https://curl.se/#",
+   "https | [11] | [12] | [13] | curl.se | [15] | / | [16] | ",
+   0, CURLU_GET_EMPTY, CURLUE_OK},
+  {"https://curl.se/?#",
+   "https | [11] | [12] | [13] | curl.se | [15] | / |  | ",
+   0, CURLU_GET_EMPTY, CURLUE_OK},
+  {"https://curl.se/?",
+   "https | [11] | [12] | [13] | curl.se | [15] | / |  | [17]",
+   0, CURLU_GET_EMPTY, CURLUE_OK},
+  {"https://curl.se/?",
+   "https | [11] | [12] | [13] | curl.se | [15] | / | [16] | [17]",
+   0, 0, CURLUE_OK},
+  {"https://curl.se/?#",
+   "https | [11] | [12] | [13] | curl.se | [15] | / | [16] | [17]",
+   0, 0, CURLUE_OK},
   {"https://curl.se/#  ",
    "https | [11] | [12] | [13] | curl.se | [15] | / | [16] | %20%20",
    CURLU_URLENCODE|CURLU_ALLOW_SPACE, 0, CURLUE_OK},
@@ -508,6 +526,20 @@ static const struct testcase get_parts_list[] ={
 };
 
 static const struct urltestcase get_url_list[] = {
+  {"http://user@example.com?#",
+   "http://user@example.com/?#",
+   0, CURLU_GET_EMPTY, CURLUE_OK},
+  /* WHATWG disgrees, it wants "https:/0.0.0.0/" */
+  {"https://0x.0x.0", "https://0x.0x.0/", 0, 0, CURLUE_OK},
+
+  {"https://example.com:000000000000000000000443/foo",
+   "https://example.com/foo",
+   0, CURLU_NO_DEFAULT_PORT, CURLUE_OK},
+  {"https://example.com:000000000000000000000/foo",
+   "https://example.com:0/foo",
+   0, CURLU_NO_DEFAULT_PORT, CURLUE_OK},
+  {"https://192.0x0000A80001", "https://192.168.0.1/", 0, 0, CURLUE_OK},
+  {"https://0xffffffff", "https://255.255.255.255/", 0, 0, CURLUE_OK},
   {"https://1.0x1000000", "https://1.0x1000000/", 0, 0, CURLUE_OK},
   {"https://0x7f.1", "https://127.0.0.1/", 0, 0, CURLUE_OK},
   {"https://1.2.3.256.com", "https://1.2.3.256.com/", 0, 0, CURLUE_OK},
@@ -770,6 +802,18 @@ static int checkurl(const char *org, const char *url, const char *out)
    3. Extract all components (not URL)
 */
 static const struct setgetcase setget_parts_list[] = {
+  {"https://example.com/",
+   "query=\"\",",
+   "https | [11] | [12] | [13] | example.com | [15] | / |  | [17]",
+   0, 0, CURLU_GET_EMPTY, CURLUE_OK},
+  {"https://example.com/",
+   "fragment=\"\",",
+   "https | [11] | [12] | [13] | example.com | [15] | / | [16] | ",
+   0, 0, CURLU_GET_EMPTY, CURLUE_OK},
+  {"https://example.com/",
+   "query=\"\",",
+   "https | [11] | [12] | [13] | example.com | [15] | / | [16] | [17]",
+   0, 0, 0, CURLUE_OK},
   {"https://example.com",
    "path=get,",
    "https | [11] | [12] | [13] | example.com | [15] | /get | [16] | [17]",
@@ -900,8 +944,8 @@ static const struct setcase set_parts_list[] = {
    0, 0, CURLUE_OK, CURLUE_BAD_PORT_NUMBER},
   {"https://host:1234/",
    "port=0,",
-   "https://host:1234/",
-   0, 0, CURLUE_OK, CURLUE_BAD_PORT_NUMBER},
+   "https://host:0/",
+   0, 0, CURLUE_OK, CURLUE_OK},
   {"https://host:1234/",
    "port=65535,",
    "https://host:65535/",
@@ -1081,6 +1125,54 @@ static CURLUcode updateurl(CURLU *u, const char *cmd, unsigned int setflags)
 }
 
 static const struct redircase set_url_list[] = {
+  {"http://example.org/",
+   "../path/././../../moo",
+   "http://example.org/moo",
+   0, 0, CURLUE_OK},
+  {"http://example.org/",
+   "//example.org/../path/../../",
+   "http://example.org/",
+   0, 0, CURLUE_OK},
+  {"http://example.org/",
+   "///example.org/../path/../../",
+   "http://example.org/",
+   0, 0, CURLUE_OK},
+  {"http://example.org/foo/bar",
+   ":23",
+   "http://example.org/foo/:23",
+   0, 0, CURLUE_OK},
+  {"http://example.org/foo/bar",
+   "\\x",
+   "http://example.org/foo/\\x",
+   /* WHATWG disagrees */
+   0, 0, CURLUE_OK},
+  {"http://example.org/foo/bar",
+   "#/",
+   "http://example.org/foo/bar#/",
+   0, 0, CURLUE_OK},
+  {"http://example.org/foo/bar",
+   "?/",
+   "http://example.org/foo/bar?/",
+   0, 0, CURLUE_OK},
+  {"http://example.org/foo/bar",
+   "#;?",
+   "http://example.org/foo/bar#;?",
+   0, 0, CURLUE_OK},
+  {"http://example.org/foo/bar",
+   "#",
+   "http://example.org/foo/bar",
+   /* This happens because the parser removes empty fragments */
+   0, 0, CURLUE_OK},
+  {"http://example.org/foo/bar",
+   "?",
+   "http://example.org/foo/bar",
+   /* This happens because the parser removes empty queries */
+   0, 0, CURLUE_OK},
+  {"http://example.org/foo/bar",
+   "?#",
+   "http://example.org/foo/bar",
+   /* This happens because the parser removes empty queries and fragments */
+   0, 0, CURLUE_OK},
   {"http://example.com/please/../gimme/%TESTNUMBER?foobar#hello",
    "http://example.net/there/it/is/../../tes t case=/%TESTNUMBER0002? yes no",
    "http://example.net/there/tes%20t%20case=/%TESTNUMBER0002?+yes+no",

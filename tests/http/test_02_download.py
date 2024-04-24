@@ -257,6 +257,34 @@ class TestDownload:
         ])
         r.check_response(count=count, http_status=200)
 
+    @pytest.mark.parametrize("proto", ['h2', 'h3'])
+    def test_02_14_not_found(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 stalls here")
+        count = 10
+        urln = f'https://{env.authority_for(env.domain1, proto)}/not-found?[0-{count-1}]'
+        curl = CurlClient(env=env)
+        r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
+            '--parallel'
+        ])
+        r.check_stats(count=count, http_status=404, exitcode=0)
+
+    @pytest.mark.parametrize("proto", ['h2', 'h3'])
+    def test_02_15_fail_not_found(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 stalls here")
+        count = 10
+        urln = f'https://{env.authority_for(env.domain1, proto)}/not-found?[0-{count-1}]'
+        curl = CurlClient(env=env)
+        r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
+            '--fail'
+        ])
+        r.check_stats(count=count, http_status=404, exitcode=22)
+
     @pytest.mark.skipif(condition=Env().slow_network, reason="not suitable for slow network tests")
     @pytest.mark.skipif(condition=Env().ci_run, reason="not suitable for CI runs")
     def test_02_20_h2_small_frames(self, env: Env, httpd, repeat):
@@ -328,9 +356,11 @@ class TestDownload:
         self.check_downloads(client, srcfile, count)
 
     # download, several at a time, pause and abort paused
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_23a_lib_abort_paused(self, env: Env, httpd, nghttpx, proto, repeat):
-        if proto == 'h2':
+        if proto == 'h3' and env.curl_uses_ossl_quic():
+            pytest.skip('OpenSSL QUIC fails here')
+        if proto in ['h2', 'h3']:
             count = 200
             max_parallel = 100
             pause_offset = 64 * 1024
@@ -353,9 +383,11 @@ class TestDownload:
         self.check_downloads(client, srcfile, count, complete=False)
 
     # download, several at a time, abort after n bytes
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_23b_lib_abort_offset(self, env: Env, httpd, nghttpx, proto, repeat):
-        if proto == 'h2':
+        if proto == 'h3' and env.curl_uses_ossl_quic():
+            pytest.skip('OpenSSL QUIC fails here')
+        if proto in ['h2', 'h3']:
             count = 200
             max_parallel = 100
             abort_offset = 64 * 1024
@@ -378,9 +410,11 @@ class TestDownload:
         self.check_downloads(client, srcfile, count, complete=False)
 
     # download, several at a time, abort after n bytes
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_23c_lib_fail_offset(self, env: Env, httpd, nghttpx, proto, repeat):
-        if proto == 'h2':
+        if proto == 'h3' and env.curl_uses_ossl_quic():
+            pytest.skip('OpenSSL QUIC fails here')
+        if proto in ['h2', 'h3']:
             count = 200
             max_parallel = 100
             fail_offset = 64 * 1024
@@ -434,22 +468,41 @@ class TestDownload:
         assert r.exit_code == 0, f'{client.dump_logs()}'
 
     # Special client that tests TLS session reuse in parallel transfers
-    def test_02_26_session_shared_reuse(self, env: Env, httpd, repeat):
-        curl = CurlClient(env=env)
-        url = f'https://{env.domain1}:{env.https_port}/data-100k'
+    # TODO: just uses a single connection for h2/h3. Not sure how to prevent that
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_02_26_session_shared_reuse(self, env: Env, proto, httpd, nghttpx, repeat):
+        url = f'https://{env.authority_for(env.domain1, proto)}/data-100k'
         client = LocalClient(name='tls-session-reuse', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
-        r = client.run(args=[url])
+        r = client.run(args=[proto, url])
         r.check_exit_code(0)
 
     # test on paused transfers, based on issue #11982
-    def test_02_27_paused_no_cl(self, env: Env, httpd, nghttpx, repeat):
-        proto = 'h2'
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_02_27a_paused_no_cl(self, env: Env, httpd, nghttpx, proto, repeat):
         url = f'https://{env.authority_for(env.domain1, proto)}' \
-            '/tweak?&chunks=2&chunk_size=16000'
+            '/curltest/tweak/?&chunks=6&chunk_size=8000'
         client = LocalClient(env=env, name='h2-pausing')
-        r = client.run(args=[url])
+        r = client.run(args=['-V', proto, url])
+        r.check_exit_code(0)
+
+    # test on paused transfers, based on issue #11982
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_02_27b_paused_no_cl(self, env: Env, httpd, nghttpx, proto, repeat):
+        url = f'https://{env.authority_for(env.domain1, proto)}' \
+            '/curltest/tweak/?error=502'
+        client = LocalClient(env=env, name='h2-pausing')
+        r = client.run(args=['-V', proto, url])
+        r.check_exit_code(0)
+
+    # test on paused transfers, based on issue #11982
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_02_27c_paused_no_cl(self, env: Env, httpd, nghttpx, proto, repeat):
+        url = f'https://{env.authority_for(env.domain1, proto)}' \
+            '/curltest/tweak/?status=200&chunks=1&chunk_size=100'
+        client = LocalClient(env=env, name='h2-pausing')
+        r = client.run(args=['-V', proto, url])
         r.check_exit_code(0)
 
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
@@ -494,4 +547,3 @@ class TestDownload:
         r.check_exit_code(0)
         srcfile = os.path.join(httpd.docs_dir, docname)
         self.check_downloads(client, srcfile, count)
-

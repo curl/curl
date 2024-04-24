@@ -73,7 +73,7 @@ add_custom_command(OUTPUT libcurl-symbols.md
 )
 
 add_manual_pages(man_MANS)
-add_custom_target(man ALL DEPENDS ${man_MANS})
+add_custom_target(curl-man ALL DEPENDS ${man_MANS})
 if(NOT CURL_DISABLE_INSTALL)
   unset(_src)
   foreach(_f ${man_MANS})

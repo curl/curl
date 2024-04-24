@@ -531,7 +531,7 @@ command has been run.
 If the variable name has no assignment, no `=`, then that variable is just
 deleted.
 
-### `<command [option="no-output/no-include/force-output/binary-trace"] [timeout="secs"][delay="secs"][type="perl/shell"]>`
+### `<command [option="no-q/no-output/no-include/force-output/binary-trace"] [timeout="secs"][delay="secs"][type="perl/shell"]>`
 Command line to run.
 
 Note that the URL that gets passed to the server actually controls what data
@@ -561,6 +561,9 @@ otherwise written to verify stdout.
 
 Set `option="no-include"` to prevent the test script to slap on the
 `--include` argument.
+
+Set `option="no-q"` avoid using `-q` as the first argument in the curl command
+line.
 
 Set `option="binary-trace"` to use `--trace` instead of `--trace-ascii` for
 tracing. Suitable for binary-oriented protocols such as MQTT.

@@ -97,5 +97,3 @@ class TestBasic:
         r.check_stats(http_status=200, count=1)
         assert r.stats[0]['time_connect'] > 0, f'{r.stats[0]}'
         assert r.stats[0]['time_appconnect'] > 0, f'{r.stats[0]}'
-
-

@@ -38,7 +38,7 @@ if(BUILD_MISC_DOCS)
       DEPENDS "${_man_misc}.md"
       VERBATIM
     )
-    add_custom_target("generate-${_man_misc}.1" ALL DEPENDS "${_man_target}")
+    add_custom_target("curl-generate-${_man_misc}.1" ALL DEPENDS "${_man_target}")
     if(NOT CURL_DISABLE_INSTALL)
       install(FILES "${_man_target}" DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
     endif()

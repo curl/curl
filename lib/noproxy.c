@@ -78,7 +78,7 @@ UNITTEST bool Curl_cidr6_match(const char *ipv6,
                                const char *network,
                                unsigned int bits)
 {
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   int bytes;
   int rest;
   unsigned char address[16];

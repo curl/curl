@@ -379,11 +379,11 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
   struct OperationConfig *config = per->config;
   int rc;
 
-  if(!curl || !config)
-    return result;
-
   *retryp = FALSE;
   *delay = 0; /* for no retry, keep it zero */
+
+  if(!curl || !config)
+    return result;
 
   if(per->infdopen)
     close(per->infd);
@@ -925,7 +925,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(config->etag_save_file) {
           /* open file for output: */
           if(strcmp(config->etag_save_file, "-")) {
-            FILE *newfile = fopen(config->etag_save_file, "wb");
+            FILE *newfile = fopen(config->etag_save_file, "ab");
             if(!newfile) {
               warnf(global, "Failed creating file for saving etags: \"%s\". "
                     "Skip this transfer", config->etag_save_file);
@@ -2186,6 +2186,16 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
         if(config->hsts)
           my_setopt_str(curl, CURLOPT_HSTS, config->hsts);
+
+#ifdef USE_ECH
+        /* only if enabled in configure */
+        if(config->ech) /* only if set (optional) */
+          my_setopt_str(curl, CURLOPT_ECH, config->ech);
+        if(config->ech_public) /* only if set (optional) */
+          my_setopt_str(curl, CURLOPT_ECH, config->ech_public);
+        if(config->ech_config) /* only if set (optional) */
+          my_setopt_str(curl, CURLOPT_ECH, config->ech_config);
+#endif
 
         /* initialize retry vars for loop below */
         per->retry_sleep_default = (config->retry_delay) ?

@@ -163,15 +163,18 @@ static int entropy_func_mutex(void *data, unsigned char *output, size_t len)
 static void mbed_debug(void *context, int level, const char *f_name,
                        int line_nb, const char *line)
 {
-  struct Curl_easy *data = NULL;
-
-  if(!context)
-    return;
-
-  data = (struct Curl_easy *)context;
-
-  infof(data, "%s", line);
+  struct Curl_easy *data = (struct Curl_easy *)context;
   (void) level;
+  (void) line_nb;
+  (void) f_name;
+
+  if(data) {
+    size_t len = strlen(line);
+    if(len && (line[len - 1] == '\n'))
+      /* discount any trailing newline */
+      len--;
+    infof(data, "%.*s", (int)len, line);
+  }
 }
 #endif
 
@@ -589,7 +592,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 #endif
 
-  infof(data, "mbedTLS: Connecting to %s:%d", hostname, connssl->port);
+  infof(data, "mbedTLS: Connecting to %s:%d", hostname, connssl->peer.port);
 
   mbedtls_ssl_config_init(&backend->config);
   ret = mbedtls_ssl_config_defaults(&backend->config,
@@ -667,7 +670,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     void *old_session = NULL;
 
     Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(cf, data, &old_session, NULL)) {
+    if(!Curl_ssl_getsessionid(cf, data, &connssl->peer, &old_session, NULL)) {
       ret = mbedtls_ssl_set_session(&backend->ssl, old_session);
       if(ret) {
         Curl_ssl_sessionid_unlock(data);
@@ -955,11 +958,12 @@ mbed_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
 
     /* If there's already a matching session in the cache, delete it */
     Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(cf, data, &old_ssl_sessionid, NULL))
+    if(!Curl_ssl_getsessionid(cf, data, &connssl->peer,
+                              &old_ssl_sessionid, NULL))
       Curl_ssl_delsessionid(data, old_ssl_sessionid);
 
-    retcode = Curl_ssl_addsessionid(cf, data, our_ssl_sessionid,
-                                    0, &added);
+    retcode = Curl_ssl_addsessionid(cf, data, &connssl->peer,
+                                    our_ssl_sessionid, 0, &added);
     Curl_ssl_sessionid_unlock(data);
     if(!added) {
       mbedtls_ssl_session_free(our_ssl_sessionid);

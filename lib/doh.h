@@ -26,6 +26,9 @@
 
 #include "urldata.h"
 #include "curl_addrinfo.h"
+#ifdef USE_HTTPSRR
+# include <stdint.h>
+#endif
 
 #ifndef CURL_DISABLE_DOH
 
@@ -51,7 +54,8 @@ typedef enum {
   DNS_TYPE_NS = 2,
   DNS_TYPE_CNAME = 5,
   DNS_TYPE_AAAA = 28,
-  DNS_TYPE_DNAME = 39           /* RFC6672 */
+  DNS_TYPE_DNAME = 39,           /* RFC6672 */
+  DNS_TYPE_HTTPS = 65
 } DNStype;
 
 /* one of these for each DoH request */
@@ -88,6 +92,7 @@ int Curl_doh_getsock(struct connectdata *conn, curl_socket_t *socks);
 
 #define DOH_MAX_ADDR 24
 #define DOH_MAX_CNAME 4
+#define DOH_MAX_HTTPS 4
 
 struct dohaddr {
   int type;
@@ -97,12 +102,44 @@ struct dohaddr {
   } ip;
 };
 
+#ifdef USE_HTTPSRR
+
+/*
+ * These are the code points for DNS wire format SvcParams as
+ * per draft-ietf-dnsop-svcb-https
+ * Not all are supported now, and even those that are may need
+ * more work in future to fully support the spec.
+ */
+#define HTTPS_RR_CODE_ALPN            0x01
+#define HTTPS_RR_CODE_NO_DEF_ALPN     0x02
+#define HTTPS_RR_CODE_PORT            0x03
+#define HTTPS_RR_CODE_IPV4            0x04
+#define HTTPS_RR_CODE_ECH             0x05
+#define HTTPS_RR_CODE_IPV6            0x06
+
+/*
+ * These may need escaping when found within an alpn string
+ * value.
+ */
+#define COMMA_CHAR                    ','
+#define BACKSLASH_CHAR                '\\'
+
+struct dohhttps_rr {
+  uint16_t len; /* raw encoded length */
+  unsigned char *val; /* raw encoded octets */
+};
+#endif
+
 struct dohentry {
   struct dynbuf cname[DOH_MAX_CNAME];
   struct dohaddr addr[DOH_MAX_ADDR];
   int numaddr;
   unsigned int ttl;
   int numcname;
+#ifdef USE_HTTPSRR
+  struct dohhttps_rr https_rrs[DOH_MAX_HTTPS];
+  int numhttps_rrs;
+#endif
 };
 
 
