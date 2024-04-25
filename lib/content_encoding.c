@@ -491,10 +491,11 @@ static CURLcode gzip_do_write(struct Curl_easy *data,
     /* Initial call state */
     ssize_t hlen;
 
-    switch(check_gzip_header((unsigned char *) buf, nbytes, &hlen)) {
+    /* FIXME: nbytes cast */
+    switch(check_gzip_header((unsigned char *) buf, (ssize_t)nbytes, &hlen)) {
     case GZIP_OK:
       z->next_in = (Bytef *) buf + hlen;
-      z->avail_in = (uInt) (nbytes - hlen);
+      z->avail_in = (uInt) (nbytes - (size_t)hlen);
       zp->zlib_init = ZLIB_GZIP_INFLATING; /* Inflating stream state */
       break;
 
@@ -988,7 +989,7 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
 
     for(namelen = 0; *enclist && *enclist != ','; enclist++)
       if(!ISSPACE(*enclist))
-        namelen = enclist - name + 1;
+        namelen = (size_t)(enclist - name + 1);
 
     if(namelen) {
       const struct Curl_cwtype *cwt;
