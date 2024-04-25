@@ -153,7 +153,7 @@ static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp)
 }
 
 #define C_SSLVERSION_VALUE(x) (x & 0xffff)
-#define C_SSLVERSION_MAX_VALUE(x) (x & 0xffff0000)
+#define C_SSLVERSION_MAX_VALUE(x) ((unsigned long)x & 0xffff0000)
 
 static CURLcode protocol2num(const char *str, curl_prot_t *val)
 {
@@ -474,7 +474,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       arg = va_arg(param, long);
 
       version = C_SSLVERSION_VALUE(arg);
-      version_max = C_SSLVERSION_MAX_VALUE(arg);
+      version_max = (long)C_SSLVERSION_MAX_VALUE(arg);
 
       if(version < CURL_SSLVERSION_DEFAULT ||
          version == CURL_SSLVERSION_SSLv2 ||
@@ -942,7 +942,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
 
   case CURLOPT_HTTP09_ALLOWED:
-    arg = va_arg(param, unsigned long);
+    arg = (long)va_arg(param, unsigned long);
     if(arg > 1L)
       return CURLE_BAD_FUNCTION_ARGUMENT;
 #ifdef USE_HYPER
@@ -2518,7 +2518,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 #ifdef USE_SSH
     /* we only include SSH options if explicitly built to support SSH */
   case CURLOPT_SSH_AUTH_TYPES:
-    data->set.ssh_auth_types = (unsigned int)va_arg(param, long);
+    data->set.ssh_auth_types = (int)va_arg(param, long);
     break;
 
   case CURLOPT_SSH_PUBLIC_KEYFILE:
