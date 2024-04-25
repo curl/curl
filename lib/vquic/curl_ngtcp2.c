@@ -2268,7 +2268,7 @@ static CURLcode cf_ngtcp2_query(struct Curl_cfilter *cf,
       max_streams += avail_bidi_streams;
       *pres1 = (max_streams > INT_MAX)? INT_MAX : (int)max_streams;
     }
-    else  /* transport params not arrived yet? ake our default */
+    else  /* transport params not arrived yet? take our default. */
       *pres1 = Curl_multi_max_concurrent_streams(data->multi);
     CURL_TRC_CF(data, cf, "query conn[%" CURL_FORMAT_CURL_OFF_T "]: "
                 "MAX_CONCURRENT -> %d (%zu in use)",
