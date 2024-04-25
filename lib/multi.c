@@ -2530,7 +2530,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             multistate(data, MSTATE_SETUP);
             rc = CURLM_CALL_MULTI_PERFORM;
           }
-          free(newurl);
         }
         else {
           /* after the transfer is done, go DONE */
@@ -2542,7 +2541,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             newurl = data->req.location;
             data->req.location = NULL;
             result = Curl_follow(data, newurl, FOLLOW_FAKE);
-            free(newurl);
             if(result) {
               stream_error = TRUE;
               result = multi_done(data, result, TRUE);
@@ -2561,6 +2559,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
            transfers */
         Curl_expire(data, 0, EXPIRE_RUN_NOW);
       }
+      free(newurl);
       break;
     }
 
