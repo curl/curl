@@ -1450,7 +1450,7 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
   }
   if(cf->cft != &Curl_cft_udp && ctx->wpartial_percent > 0 && len > 8) {
-    len = len * ctx->wpartial_percent / 100;
+    len = len * (size_t)ctx->wpartial_percent / 100;
     if(!len)
       len = 1;
     CURL_TRC_CF(data, cf, "send(len=%zu) SIMULATE partial write of %zu bytes",
@@ -2051,7 +2051,7 @@ static void set_accepted_remote_ip(struct Curl_cfilter *cf,
   ctx->ip.remote_ip[0] = 0;
   ctx->ip.remote_port = 0;
   plen = sizeof(ssrem);
-  memset(&ssrem, 0, plen);
+  memset(&ssrem, 0, (size_t)plen);
   if(getpeername(ctx->sock, (struct sockaddr*) &ssrem, &plen)) {
     int error = SOCKERRNO;
     failf(data, "getpeername() failed with errno %d: %s",
