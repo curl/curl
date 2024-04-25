@@ -174,11 +174,11 @@ jobs:
         name: remove $HOME/.curlrc
 
       - run: |
-          /usr/local/opt/m4/bin/m4 --version
+          type -a m4
+          ls /usr/local/opt/
+          ls /usr/local/opt/m4
           autoreconf -fi
         name: 'autoreconf'
-        env:
-          M4: "/usr/local/opt/m4/bin/m4"
 
       - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
         name: 'configure'
