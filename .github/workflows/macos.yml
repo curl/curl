@@ -122,7 +122,7 @@ jobs:
             macosx-version-min: 10.8
           - name: OpenSSL http2
             install: nghttp2 openssl@3
-            configure: --enable-debug --with-openssl=$BREW/opt/openssl@3 --enable-websockets
+            configure: --enable-debug --with-openssl=$BREW/opt/openssl --enable-websockets
             macosx-version-min: 10.9
           - name: LibreSSL http2
             install: nghttp2 libressl
@@ -153,7 +153,8 @@ jobs:
         name: 'brew install'
 
       - run: |
-          which brew
+          ls -l $BREW/opt/
+          ls -l $BREW/opt/openssl/
           case "${{ matrix.build.install }}" in
             *openssl*)
               ;;
