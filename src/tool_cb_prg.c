@@ -77,7 +77,7 @@ static void fly(struct ProgressData *bar, bool moved)
 
   /* bar->width is range checked when assigned */
   DEBUGASSERT(bar->width <= MAX_BARLENGTH);
-  memset(buf, ' ', bar->width);
+  memset(buf, ' ', (size_t)bar->width);
   buf[bar->width] = '\r';
   buf[bar->width + 1] = '\0';
 

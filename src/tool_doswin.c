@@ -198,7 +198,7 @@ SANITIZEcode sanitize_file_name(char **const sanitized, const char *file_name,
 
     if(clip) {
       *clip = '\0';
-      len = clip - target;
+      len = (size_t)(clip - target);
     }
   }
 
@@ -340,7 +340,7 @@ SANITIZEcode msdosify(char **const sanitized, const char *file_name,
   /* Support for Windows 9X VFAT systems, when available. */
   if(_use_lfn(file_name)) {
     illegal_aliens = illegal_chars_w95;
-    len -= (illegal_chars_w95 - illegal_chars_dos);
+    len -= (size_t)(illegal_chars_w95 - illegal_chars_dos);
   }
 
   /* Get past the drive letter, if any. */
@@ -435,7 +435,7 @@ SANITIZEcode msdosify(char **const sanitized, const char *file_name,
        specifically truncating a filename suffixed by an alternate data stream
        or truncating the entire filename is not allowed. */
     if(!(flags & SANITIZE_ALLOW_TRUNCATE) || strpbrk(s, "\\/:") ||
-       truncate_dryrun(dos_name, d - dos_name))
+       truncate_dryrun(dos_name, (size_t)(d - dos_name)))
       return SANITIZE_ERR_INVALID_PATH;
   }
 

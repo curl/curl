@@ -860,7 +860,7 @@ static ParameterError data_urlencode(struct GlobalConfig *global,
     /* there was no '=' letter, check for a '@' instead */
     p = strchr(nextarg, '@');
   if(p) {
-    nlen = p - nextarg; /* length of the name part */
+    nlen = (size_t)(p - nextarg); /* length of the name part */
     is_file = *p++; /* pass the separator */
   }
   else {

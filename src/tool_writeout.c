@@ -546,7 +546,7 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
             fputs("%{", stream);
             continue;
           }
-          vlen = end - ptr;
+          vlen = (size_t)(end - ptr);
           for(i = 0; variables[i].name; i++) {
             if((strlen(variables[i].name) == vlen) &&
                curl_strnequal(ptr, variables[i].name, vlen)) {
@@ -596,7 +596,7 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
           if(end) {
             char hname[256]; /* holds the longest header field name */
             struct curl_header *header;
-            vlen = end - ptr;
+            vlen = (size_t)(end - ptr);
             if(vlen < sizeof(hname)) {
               memcpy(hname, ptr, vlen);
               hname[vlen] = 0;
@@ -619,7 +619,7 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
           end = strchr(ptr, '}');
           if(end) {
             char fname[512]; /* holds the longest file name */
-            size_t flen = end - ptr;
+            size_t flen = (size_t)(end - ptr);
             if(flen < sizeof(fname)) {
               FILE *stream2;
               memcpy(fname, ptr, flen);

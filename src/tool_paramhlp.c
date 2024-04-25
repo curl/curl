@@ -85,7 +85,7 @@ static size_t memcrlf(char *orig,
   for(ptr = orig; max; max--, ptr++) {
     bool crlf = ISCRLF(*ptr);
     if(countcrlf ^ crlf)
-      return ptr - orig;
+      return (size_t)(ptr - orig);
   }
   return total; /* no delimiter found */
 }
@@ -319,7 +319,7 @@ static size_t protoset_index(const char * const *protoset, const char *proto)
   for(; *p; p++)
     if(proto == *p)
       break;
-  return p - protoset;
+  return (size_t)(p - protoset);
 }
 
 /* Include protocol token in set. */

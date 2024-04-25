@@ -222,7 +222,7 @@ ParameterError varexpand(struct GlobalConfig *global,
       /* preceding backslash, we want this verbatim */
 
       /* insert the text up to this point, minus the backslash */
-      result = curlx_dyn_addn(out, line, envp - line - 1);
+      result = curlx_dyn_addn(out, line, (size_t)(envp - line - 1));
       if(result)
         return PARAM_NO_MEM;
 
@@ -250,21 +250,21 @@ ParameterError varexpand(struct GlobalConfig *global,
       envp += 2; /* move over the {{ */
 
       /* if there is a function, it ends the name with a colon */
-      funcp = memchr(envp, ':', clp - envp);
+      funcp = memchr(envp, ':', (size_t)(clp - envp));
       if(funcp)
-        nlen = funcp - envp;
+        nlen = (size_t)(funcp - envp);
       else
-        nlen = clp - envp;
+        nlen = (size_t)(clp - envp);
       if(!nlen || (nlen >= sizeof(name))) {
         warnf(global, "bad variable name length '%s'", input);
         /* insert the text as-is since this is not an env variable */
-        result = curlx_dyn_addn(out, line, clp - line + prefix);
+        result = curlx_dyn_addn(out, line, (size_t)(clp - line) + prefix);
         if(result)
           return PARAM_NO_MEM;
       }
       else {
         /* insert the text up to this point */
-        result = curlx_dyn_addn(out, line, envp - prefix - line);
+        result = curlx_dyn_addn(out, line, (size_t)(envp - line) - prefix);
         if(result)
           return PARAM_NO_MEM;
 
@@ -279,7 +279,7 @@ ParameterError varexpand(struct GlobalConfig *global,
           warnf(global, "bad variable name: %s", name);
           /* insert the text as-is since this is not an env variable */
           result = curlx_dyn_addn(out, envp - prefix,
-                                  clp - envp + prefix + 2);
+                                  (size_t)(clp - envp) + prefix + 2);
           if(result)
             return PARAM_NO_MEM;
         }
@@ -298,7 +298,7 @@ ParameterError varexpand(struct GlobalConfig *global,
           curlx_dyn_init(&buf, MAX_EXPAND_CONTENT);
           if(funcp) {
             /* apply the list of functions on the value */
-            size_t flen = clp - funcp;
+            size_t flen = (size_t)(clp - funcp);
             ParameterError err = varfunc(global, value, vlen, funcp, flen,
                                          &buf);
             if(err)
@@ -397,7 +397,7 @@ ParameterError setvariable(struct GlobalConfig *global,
   name = line;
   while(*line && (ISALNUM(*line) || (*line == '_')))
     line++;
-  nlen = line - name;
+  nlen = (size_t)(line - name);
   if(!nlen || (nlen >= MAX_VAR_LEN)) {
     warnf(global, "Bad variable name length (%zd), skipping", nlen);
     return PARAM_OK;

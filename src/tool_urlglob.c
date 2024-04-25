@@ -229,7 +229,7 @@ static CURLcode glob_range(struct URLGlob *glob, char **patternp,
         pattern += 4;
     }
 
-    *posp += (pattern - *patternp);
+    *posp += (size_t)(pattern - *patternp);
 
     if(rc != 3 || !step || step > (unsigned)INT_MAX ||
        (min_c == max_c && step != 1) ||
@@ -307,7 +307,7 @@ static CURLcode glob_range(struct URLGlob *glob, char **patternp,
     }
 
 fail:
-    *posp += (pattern - *patternp);
+    *posp += (size_t)(pattern - *patternp);
 
     if(!endp || !step_n ||
        (min_n == max_n && step_n != 1) ||
@@ -317,9 +317,10 @@ fail:
 
     /* typecasting to ints are fine here since we make sure above that we
        are within 31 bits */
-    pat->content.NumRange.ptr_n = pat->content.NumRange.min_n = min_n;
-    pat->content.NumRange.max_n = max_n;
-    pat->content.NumRange.step = step_n;
+    pat->content.NumRange.ptr_n = pat->content.NumRange.min_n =
+                                    (curl_off_t)min_n;
+    pat->content.NumRange.max_n = (curl_off_t)max_n;
+    pat->content.NumRange.step = (curl_off_t)step_n;
 
     if(multiply(amount, ((pat->content.NumRange.max_n -
                           pat->content.NumRange.min_n) /
@@ -350,7 +351,7 @@ static bool peek_ipv6(const char *str, size_t *skip)
   if(!endbr)
     return FALSE;
 
-  hlen = endbr - str + 1;
+  hlen = (size_t)(endbr - str + 1);
   if(hlen >= MAX_IP6LEN)
     return FALSE;
 
