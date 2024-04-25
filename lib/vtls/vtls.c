@@ -946,7 +946,7 @@ static CURLcode pubkey_pem_to_der(const char *pem,
   if(!begin_pos)
     return CURLE_BAD_CONTENT_ENCODING;
 
-  pem_count = begin_pos - pem;
+  pem_count = (size_t)(begin_pos - pem);
   /* Invalid if not at beginning AND not directly following \n */
   if(0 != pem_count && '\n' != pem[pem_count - 1])
     return CURLE_BAD_CONTENT_ENCODING;
@@ -959,7 +959,7 @@ static CURLcode pubkey_pem_to_der(const char *pem,
   if(!end_pos)
     return CURLE_BAD_CONTENT_ENCODING;
 
-  pem_len = end_pos - pem;
+  pem_len = (size_t)(end_pos - pem);
 
   stripped_pem = malloc(pem_len - pem_count + 1);
   if(!stripped_pem)
@@ -1418,12 +1418,13 @@ static size_t multissl_version(char *buffer, size_t size)
       bool paren = (selected != available_backends[i]);
 
       if(available_backends[i]->version(vb, sizeof(vb))) {
-        p += msnprintf(p, end - p, "%s%s%s%s", (p != backends ? " " : ""),
+        p += msnprintf(p, (size_t)(end - p), "%s%s%s%s",
+                       (p != backends ? " " : ""),
                        (paren ? "(" : ""), vb, (paren ? ")" : ""));
       }
     }
 
-    backends_len = p - backends;
+    backends_len = (size_t)(p - backends);
   }
 
   if(size) {
@@ -1983,10 +1984,10 @@ CURLcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
 
 #endif /* !CURL_DISABLE_PROXY */
 
-bool Curl_ssl_supports(struct Curl_easy *data, int option)
+bool Curl_ssl_supports(struct Curl_easy *data, unsigned int ssl_option)
 {
   (void)data;
-  return (Curl_ssl->supports & option)? TRUE : FALSE;
+  return (Curl_ssl->supports & ssl_option)? TRUE : FALSE;
 }
 
 static struct Curl_cfilter *get_ssl_filter(struct Curl_cfilter *cf)
