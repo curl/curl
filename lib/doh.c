@@ -144,7 +144,7 @@ UNITTEST DOHcode doh_encode(const char *host,
     size_t labellen;
     char *dot = strchr(hostp, '.');
     if(dot)
-      labellen = dot - hostp;
+      labellen = (size_t)(dot - hostp);
     else
       labellen = strlen(hostp);
     if((labellen > 63) || (!labellen)) {
@@ -171,7 +171,7 @@ UNITTEST DOHcode doh_encode(const char *host,
   *dnsp++ = '\0'; /* upper 8 bit CLASS */
   *dnsp++ = DNS_CLASS_IN; /* IN - "the Internet" */
 
-  *olen = dnsp - orig;
+  *olen = (size_t)(dnsp - orig);
 
   /* verify that our estimation of length is valid, since
    * this has led to buffer overflows in this function */
@@ -854,7 +854,7 @@ static void showdoh(struct Curl_easy *data,
       char buffer[128];
       char *ptr;
       size_t len;
-      len = msnprintf(buffer, 128, "[DoH] AAAA: ");
+      len = (size_t)msnprintf(buffer, 128, "[DoH] AAAA: ");
       ptr = &buffer[len];
       len = sizeof(buffer) - len;
       for(j = 0; j < 16; j += 2) {
