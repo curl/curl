@@ -155,10 +155,14 @@ jobs:
       - run: |
           case "${{ matrix.build.install }}" in
             *openssl*)
-              ls -l $BREW/opt/openssl
-              ls -l $BREW/opt/openssl/lib
-              ls -l $BREW/opt/openssl/lib/pkgconfig
-              cat $BREW/opt/openssl/lib/pkgconfig/libssl.pc
+              (
+                cd $BREW/opt/openssl/lib/pkgconfig/
+                for i in libssl.pc libcrypto.pc; do
+                  cp $i $i.orig
+                  sed 's,libdir=/opt/homebrew/Cellar/openssl@3/3.3.0$,libdir=/opt/homebrew/Cellar/openssl@3/3.3.0/lib,g' < $i.orig > $i
+                  cat $i
+                done
+              )
               ;;
             *)
               if test -d $BREW/include/openssl; then
