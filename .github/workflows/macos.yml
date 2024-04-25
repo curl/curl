@@ -121,8 +121,8 @@ jobs:
             configure: CC=gcc-12 --enable-debug --with-secure-transport --enable-websockets --without-libpsl
             macosx-version-min: 10.8
           - name: OpenSSL http2
-            install: nghttp2 openssl
-            configure: --enable-debug --with-openssl=$BREW/opt/openssl --enable-websockets
+            install: nghttp2 openssl@3
+            configure: --enable-debug --with-openssl=$BREW/opt/openssl@3 --enable-websockets
             macosx-version-min: 10.9
           - name: LibreSSL http2
             install: nghttp2 libressl
