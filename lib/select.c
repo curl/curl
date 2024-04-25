@@ -226,7 +226,7 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
     num++;
   }
 
-  r = Curl_poll(pfd, num, timeout_ms);
+  r = Curl_poll(pfd, (unsigned int)num, timeout_ms);
   if(r <= 0)
     return r;
 
