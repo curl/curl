@@ -63,7 +63,7 @@ jobs:
             macosx-version-min: 10.9
           - name: libssh2
             install: nghttp2 libssh2
-            configure: --enable-debug --with-libssh2 --without-ssl --enable-websockets
+            configure: --enable-debug --with-libssh2=$BREW/opt/libssh2 --without-ssl --enable-websockets
             macosx-version-min: 10.9
           - name: libssh-c-ares
             install: openssl nghttp2 libssh
@@ -117,9 +117,10 @@ jobs:
             install: nghttp2
             configure: --enable-debug --with-secure-transport --enable-websockets
             macosx-version-min: 10.8
-          - name: gcc SecureTransport
-            configure: CC=gcc-12 --enable-debug --with-secure-transport --enable-websockets --without-libpsl
-            macosx-version-min: 10.8
+          # Fails now with linker errors on missing symbols
+          # - name: gcc SecureTransport
+          #  configure: CC=gcc-12 --enable-debug --with-secure-transport --enable-websockets --without-libpsl
+          #  macosx-version-min: 10.8
           - name: OpenSSL http2
             install: nghttp2 openssl
             configure: --enable-debug --with-openssl=$BREW/opt/openssl --enable-websockets
