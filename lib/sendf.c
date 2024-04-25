@@ -173,8 +173,7 @@ void Curl_creader_set_rewind(struct Curl_easy *data, bool enable)
   data->req.rewind_read = !!enable;
 }
 
-/* Write data using an unencoding writer stack. "nbytes" is not
-   allowed to be 0. */
+/* Write data using an unencoding writer stack. */
 CURLcode Curl_cwriter_write(struct Curl_easy *data,
                              struct Curl_cwriter *writer, int type,
                              const char *buf, size_t nbytes)
