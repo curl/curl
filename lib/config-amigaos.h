@@ -30,6 +30,7 @@
 
 #ifdef __AMIGA__ /* Any AmigaOS flavour */
 
+#define HAVE_ACCESS 1
 #define HAVE_ARPA_INET_H 1
 #define HAVE_CLOSESOCKET_CAMEL 1
 #define HAVE_IOCTLSOCKET_CAMEL 1

@@ -68,6 +68,9 @@
 /* Define this as a suitable file to read random data from */
 #undef RANDOM_FILE
 
+/* Define if you have the access function. */
+#define HAVE_ACCESS 1
+
 /* Define to 1 if you have the alarm function. */
 #define HAVE_ALARM 1
 

@@ -74,6 +74,7 @@
 #define SEND_TYPE_ARG4 int
 #define SEND_TYPE_RETV int
 
+#define HAVE_ACCESS 1
 #define HAVE_ALARM 1
 #define HAVE_ARPA_INET_H 1
 #define HAVE_BASENAME 1

@@ -1250,6 +1250,7 @@ elseif(HAVE_LIBSOCKET)
   set(CMAKE_REQUIRED_LIBRARIES socket)
 endif()
 
+check_symbol_exists(access        "${CURL_INCLUDES};stdlib.h" HAVE_ACCESS)
 check_symbol_exists(fnmatch       "${CURL_INCLUDES};fnmatch.h" HAVE_FNMATCH)
 check_symbol_exists(basename      "${CURL_INCLUDES};string.h" HAVE_BASENAME)
 check_symbol_exists(opendir       "${CURL_INCLUDES};dirent.h" HAVE_OPENDIR)

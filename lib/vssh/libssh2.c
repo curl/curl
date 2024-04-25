@@ -301,6 +301,20 @@ static LIBSSH2_FREE_FUNC(my_libssh2_free)
     free(ptr);
 }
 
+static is_file_readable(const char *filename)
+{
+#ifdef HAVE_ACCESS
+  return !access(filename, R_OK);
+#else
+  FILE *fp = fopen(filename, "rb");
+  if(fp) {
+    fclose(fp);
+    return 1;
+  }
+  return 0;
+#endif
+}
+
 /*
  * SSH State machine related code
  */
@@ -1093,12 +1107,12 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
             sshc->rsa = aprintf("%s/.ssh/id_rsa", home);
             if(!sshc->rsa)
               out_of_memory = TRUE;
-            else if(access(sshc->rsa, R_OK) != 0) {
+            else if(!is_file_readable(sshc->rsa)) {
               Curl_safefree(sshc->rsa);
               sshc->rsa = aprintf("%s/.ssh/id_dsa", home);
               if(!sshc->rsa)
                 out_of_memory = TRUE;
-              else if(access(sshc->rsa, R_OK) != 0) {
+              else if(!is_file_readable(sshc->rsa)) {
                 Curl_safefree(sshc->rsa);
               }
             }
@@ -1107,14 +1121,20 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           if(!out_of_memory && !sshc->rsa) {
             /* Nothing found; try the current dir. */
             sshc->rsa = strdup("id_rsa");
-            if(sshc->rsa && access(sshc->rsa, R_OK) != 0) {
+            if(!sshc->rsa)
+              out_of_memory = TRUE;
+            else if(!is_file_readable(sshc->rsa)) {
               Curl_safefree(sshc->rsa);
               sshc->rsa = strdup("id_dsa");
-              if(sshc->rsa && access(sshc->rsa, R_OK) != 0) {
+              if(!sshc->rsa)
+                out_of_memory = TRUE;
+              else if(!is_file_readable(sshc->rsa)) {
                 Curl_safefree(sshc->rsa);
                 /* Out of guesses. Set to the empty string to avoid
                  * surprising info messages. */
                 sshc->rsa = strdup("");
+                if(!sshc->rsa)
+                  out_of_memory = TRUE;
               }
             }
           }

@@ -118,6 +118,9 @@
 /*                             FUNCTIONS                            */
 /* ---------------------------------------------------------------- */
 
+/* Define if you have the access function. */
+#define HAVE_ACCESS 1
+
 /* Define if you have the closesocket function. */
 #define HAVE_CLOSESOCKET 1
 

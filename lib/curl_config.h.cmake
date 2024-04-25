@@ -165,6 +165,9 @@
 /* Define if you want to enable IPv6 support */
 #cmakedefine USE_IPV6 1
 
+/* Define to 1 if you have the access function. */
+#cmakedefine HAVE_ACCESS 1
+
 /* Define to 1 if you have the alarm function. */
 #cmakedefine HAVE_ALARM 1
 

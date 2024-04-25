@@ -1413,8 +1413,21 @@ CURLcode curl_mime_filedata(curl_mimepart *part, const char *filename)
     char *base;
     struct_stat sbuf;
 
-    if(stat(filename, &sbuf) || access(filename, R_OK))
+    if(stat(filename, &sbuf))
       result = CURLE_READ_ERROR;
+
+#ifdef HAVE_ACCESS
+    if(access(filename, R_OK))
+      result = CURLE_READ_ERROR;
+#else
+    {
+      FILE *fp = fopen(filename, "rb");
+      if(fp)
+        fclose(fp);
+      else
+        result = CURLE_READ_ERROR;
+    }
+#endif
 
     part->data = strdup(filename);
     if(!part->data)

@@ -508,6 +508,93 @@ curl_preprocess_callconv="\
 ])
 
 
+dnl CURL_CHECK_FUNC_ACCESS
+dnl -------------------------------------------------
+dnl Verify if access is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable curl_disallow_access, then
+dnl HAVE_ACCESS will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_ACCESS], [
+  AC_REQUIRE([CURL_INCLUDES_STDLIB])dnl
+  AC_REQUIRE([CURL_INCLUDES_UNISTD])dnl
+  #
+  tst_links_access="unknown"
+  tst_proto_access="unknown"
+  tst_compi_access="unknown"
+  tst_allow_access="unknown"
+  #
+  AC_MSG_CHECKING([if access can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([access])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_access="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_access="no"
+  ])
+  #
+  if test "$tst_links_access" = "yes"; then
+    AC_MSG_CHECKING([if access is prototyped])
+    AC_EGREP_CPP([access],[
+      $curl_includes_stdlib
+      $curl_includes_unistd
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_access="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_access="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_access" = "yes"; then
+    AC_MSG_CHECKING([if access is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_stdlib
+      ]],[[
+        if(0 != access(0, 0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_access="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_access="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_access" = "yes"; then
+    AC_MSG_CHECKING([if access usage allowed])
+    if test "x$curl_disallow_access" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_access="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_access="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if access might be used])
+  if test "$tst_links_access" = "yes" &&
+     test "$tst_proto_access" = "yes" &&
+     test "$tst_compi_access" = "yes" &&
+     test "$tst_allow_access" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_ACCESS, 1,
+      [Define to 1 if you have the access function.])
+    curl_cv_func_access="yes"
+  else
+    AC_MSG_RESULT([no])
+    curl_cv_func_access="no"
+  fi
+])
+
+
 dnl CURL_CHECK_FUNC_ALARM
 dnl -------------------------------------------------
 dnl Verify if alarm is available, prototyped, and
@@ -5767,6 +5854,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRTOLL], [
     curl_cv_func_strtoll="no"
   fi
 ])
+
 
 dnl CURL_RUN_IFELSE
 dnl -------------------------------------------------
