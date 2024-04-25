@@ -173,7 +173,9 @@ jobs:
       - run: rm -f $HOME/.curlrc
         name: remove $HOME/.curlrc
 
-      - run: autoreconf -fi
+      - run: |
+          /usr/local/opt/m4/bin/m4 --version
+          autoreconf -fi
         name: 'autoreconf'
         env:
           M4: "/usr/local/opt/m4/bin/m4"
