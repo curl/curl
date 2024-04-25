@@ -695,7 +695,7 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data)
   /* Prepare the mime data if some. */
   if(data->set.mimepost.kind != MIMEKIND_NONE) {
     /* Use the whole structure as data. */
-    data->set.mimepost.flags &= ~MIME_BODY_ONLY;
+    data->set.mimepost.flags &= ~(unsigned int)MIME_BODY_ONLY;
 
     /* Add external headers and mime version. */
     curl_mime_headers(&data->set.mimepost, data->set.headers, 0);
@@ -1647,7 +1647,7 @@ static CURLcode smtp_parse_url_options(struct connectdata *conn)
 
     if(strncasecompare(key, "AUTH=", 5))
       result = Curl_sasl_parse_url_auth_option(&smtpc->sasl,
-                                               value, ptr - value);
+                                               value, (size_t)(ptr - value));
     else
       result = CURLE_URL_MALFORMAT;
 
