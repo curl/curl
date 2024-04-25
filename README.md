@@ -55,7 +55,7 @@ page](https://hackerone.com/curl) and not in public.
 
 ## Notice
 
-Curl contains pieces of source code that is Copyright (c) 1998, 1999 Kungliga
+Curl contains pieces of source code that are Copyright (c) 1998, 1999 Kungliga
 Tekniska Högskolan. This notice is included here to comply with the
 distribution terms.
 
