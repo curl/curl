@@ -175,6 +175,8 @@ jobs:
 
       - run: autoreconf -fi
         name: 'autoreconf'
+        env:
+          M4: "/usr/local/opt/m4/bin/m4"
 
       - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
         name: 'configure'
