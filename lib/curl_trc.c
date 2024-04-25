@@ -101,7 +101,7 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
     }
     error[len++] = '\n';
     error[len] = '\0';
-    Curl_debug(data, CURLINFO_TEXT, error, len);
+    Curl_debug(data, CURLINFO_TEXT, error, (size_t)len);
     va_end(ap);
   }
 }
@@ -121,10 +121,10 @@ static void trc_infof(struct Curl_easy *data, struct curl_trc_feat *feat,
   char buffer[MAXINFO + 2];
   if(feat)
     len = msnprintf(buffer, MAXINFO, "[%s] ", feat->name);
-  len += mvsnprintf(buffer + len, MAXINFO - len, fmt, ap);
+  len += mvsnprintf(buffer + len, (size_t)(MAXINFO - len), fmt, ap);
   buffer[len++] = '\n';
   buffer[len] = '\0';
-  Curl_debug(data, CURLINFO_TEXT, buffer, len);
+  Curl_debug(data, CURLINFO_TEXT, buffer, (size_t)len);
 }
 
 void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
@@ -147,19 +147,20 @@ void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
     int len = 0;
     char buffer[MAXINFO + 2];
     if(data->state.feat)
-      len += msnprintf(buffer + len, MAXINFO - len, "[%s] ",
+      len += msnprintf(buffer + len, (size_t)(MAXINFO - len), "[%s] ",
                        data->state.feat->name);
     if(cf->sockindex)
-      len += msnprintf(buffer + len, MAXINFO - len, "[%s-%d] ",
+      len += msnprintf(buffer + len, (size_t)(MAXINFO - len), "[%s-%d] ",
                       cf->cft->name, cf->sockindex);
     else
-      len += msnprintf(buffer + len, MAXINFO - len, "[%s] ", cf->cft->name);
+      len += msnprintf(buffer + len, (size_t)(MAXINFO - len), "[%s] ",
+                       cf->cft->name);
     va_start(ap, fmt);
-    len += mvsnprintf(buffer + len, MAXINFO - len, fmt, ap);
+    len += mvsnprintf(buffer + len, (size_t)(MAXINFO - len), fmt, ap);
     va_end(ap);
     buffer[len++] = '\n';
     buffer[len] = '\0';
-    Curl_debug(data, CURLINFO_TEXT, buffer, len);
+    Curl_debug(data, CURLINFO_TEXT, buffer, (size_t)len);
   }
 }
 
