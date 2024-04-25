@@ -67,11 +67,11 @@ jobs:
             macosx-version-min: 10.9
           - name: libssh-c-ares
             install: openssl nghttp2 libssh
-            configure: --enable-debug --with-libssh --with-openssl=${{ env.BREW }}/opt/openssl --enable-ares --enable-websockets
+            configure: --enable-debug --with-libssh --with-openssl=$BREW/opt/openssl --enable-ares --enable-websockets
             macosx-version-min: 10.9
           - name: libssh
             install: openssl nghttp2 libssh
-            configure: --enable-debug --with-libssh --with-openssl=${{ env.BREW }}/opt/openssl --enable-websockets
+            configure: --enable-debug --with-libssh --with-openssl=$BREW/opt/openssl --enable-websockets
             macosx-version-min: 10.9
           - name: c-ares
             install: nghttp2
@@ -126,21 +126,21 @@ jobs:
             macosx-version-min: 10.9
           - name: LibreSSL http2
             install: nghttp2 libressl
-            configure: --enable-debug --with-openssl=${{ env.BREW }}/opt/libressl --enable-websockets
+            configure: --enable-debug --with-openssl=$BREW/opt/libressl --enable-websockets
             macosx-version-min: 10.9
           - name: torture
             install: nghttp2 openssl
-            configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=${{ env.BREW }}/opt/openssl --enable-websockets
+            configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=$BREW/opt/openssl --enable-websockets
             tflags: -n -t --shallow=25 !FTP
             macosx-version-min: 10.9
           - name: torture-ftp
             install: nghttp2 openssl
-            configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=${{ env.BREW }}/opt/openssl --enable-websockets
+            configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=$BREW/opt/openssl --enable-websockets
             tflags: -n -t --shallow=20 FTP
             macosx-version-min: 10.9
           - name: macOS 10.15
             install: nghttp2 libssh2 openssl
-            configure: --enable-debug --disable-ldap --with-openssl=${{ env.BREW }}/opt/openssl --enable-websockets
+            configure: --enable-debug --disable-ldap --with-openssl=$BREW/opt/openssl --enable-websockets
             macosx-version-min: 10.15
     steps:
       - run: echo libtool autoconf automake pkg-config libpsl ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
@@ -157,7 +157,7 @@ jobs:
             *openssl*)
               ;;
             *)
-              if test -d ${{ env.BREW }}/include/openssl; then
+              if test -d $BREW/include/openssl; then
                 brew unlink openssl
               fi;;
           esac
@@ -213,16 +213,16 @@ jobs:
         build:
           - name: OpenSSL
             install: nghttp2 openssl
-            generate: -DOPENSSL_ROOT_DIR=${{ env.BREW }}/opt/openssl -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9
+            generate: -DOPENSSL_ROOT_DIR=$BREW/opt/openssl -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9
           - name: LibreSSL
             install: nghttp2 libressl
-            generate: -DOPENSSL_ROOT_DIR=${{ env.BREW }}/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
+            generate: -DOPENSSL_ROOT_DIR=$BREW/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
           - name: libssh2
             install: nghttp2 openssl libssh2
-            generate: -DOPENSSL_ROOT_DIR=${{ env.BREW }}/opt/openssl -DCURL_USE_LIBSSH2=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON
+            generate: -DOPENSSL_ROOT_DIR=$BREW/opt/openssl -DCURL_USE_LIBSSH2=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON
           - name: GnuTLS
             install: gnutls
-            generate: -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DCMAKE_SHARED_LINKER_FLAGS=-L${{ env.BREW }}/lib -DCMAKE_EXE_LINKER_FLAGS=-L${{ env.BREW }}/lib
+            generate: -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DCMAKE_SHARED_LINKER_FLAGS=-L$BREW/lib -DCMAKE_EXE_LINKER_FLAGS=-L$BREW/lib
     steps:
       - run: echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
         name: 'brew bundle'
@@ -235,7 +235,7 @@ jobs:
             *openssl*)
               ;;
             *)
-              if test -d ${{ env.BREW }}/include/openssl; then
+              if test -d $BREW/include/openssl; then
                 brew unlink openssl
               fi;;
           esac
