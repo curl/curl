@@ -142,7 +142,7 @@ jobs:
             configure: --enable-debug --disable-ldap --with-openssl=/usr/local/opt/openssl --enable-websockets
             macosx-version-min: 10.15
     steps:
-      - run: echo libtool autoconf automake pkg-config libpsl ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+      - run: echo libtool gm4 autoconf automake pkg-config libpsl ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
         name: 'brew bundle'
 
       # Run this command with retries because of spurious failures seen
@@ -162,7 +162,10 @@ jobs:
           esac
         name: 'brew unlink openssl'
 
-      - run: python3 -m pip install --break-system-packages impacket
+      - run: |
+          python3 -m venv $HOME/venv
+          source $HOME/venv/bin/activate
+          python3 -m pip install impacket
         name: 'pip3 install'
 
       - uses: actions/checkout@v4
