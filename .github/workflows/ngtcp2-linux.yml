@@ -84,6 +84,7 @@ jobs:
 
     steps:
       - run: |
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get update
           sudo apt-get install libtool autoconf automake pkg-config stunnel4 \
             libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libev-dev libc-ares-dev \
