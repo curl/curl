@@ -178,11 +178,12 @@ jobs:
 
       - run: |
           type -a m4
+          ls -l /Applications
           m4 --version
           autoreconf -fi
         name: 'autoreconf'
         env:
-          M4: "/usr/bin/m4"
+          DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
 
       - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
         name: 'configure'
