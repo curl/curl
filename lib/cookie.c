@@ -236,9 +236,9 @@ static const char *get_top_domain(const char * const domain, size_t *outlen)
     len = strlen(domain);
     last = memrchr(domain, '.', len);
     if(last) {
-      first = memrchr(domain, '.', (last - domain));
+      first = memrchr(domain, '.', (size_t)(last - domain));
       if(first)
-        len -= (++first - domain);
+        len -= (size_t)(++first - domain);
     }
   }
 
@@ -262,8 +262,9 @@ static size_t cookie_hash_domain(const char *domain, const size_t len)
   size_t h = 5381;
 
   while(domain < end) {
+    size_t j = (size_t)Curl_raw_toupper(*domain++);
     h += h << 5;
-    h ^= Curl_raw_toupper(*domain++);
+    h ^= j;
   }
 
   return (h % COOKIE_HASH_SIZE);
@@ -436,7 +437,7 @@ static bool bad_domain(const char *domain, size_t len)
     /* there must be a dot present, but that dot must not be a trailing dot */
     char *dot = memchr(domain, '.', len);
     if(dot) {
-      size_t i = dot - domain;
+      size_t i = (size_t)(dot - domain);
       if((len - i) > 1)
         /* the dot is not the last byte */
         return FALSE;
@@ -820,9 +821,9 @@ Curl_cookie_add(struct Curl_easy *data,
       if(!queryp)
         endslash = strrchr(path, '/');
       else
-        endslash = memrchr(path, '/', (queryp - path));
+        endslash = memrchr(path, '/', (size_t)(queryp - path));
       if(endslash) {
-        size_t pathlen = (endslash-path + 1); /* include end slash */
+        size_t pathlen = (size_t)(endslash-path + 1); /* include end slash */
         co->path = Curl_memdup0(path, pathlen);
         if(co->path) {
           co->spath = sanitize_cookie_path(co->path);
@@ -1087,7 +1088,7 @@ Curl_cookie_add(struct Curl_easy *data,
         sep = strchr(clist->spath + 1, '/');
 
         if(sep)
-          cllen = sep - clist->spath;
+          cllen = (size_t)(sep - clist->spath);
         else
           cllen = strlen(clist->spath);
 
@@ -1646,7 +1647,7 @@ static CURLcode cookie_output(struct Curl_easy *data,
     size_t nvalid = 0;
     struct Cookie **array;
 
-    array = calloc(1, sizeof(struct Cookie *) * c->numcookies);
+    array = calloc(1, sizeof(struct Cookie *) * (size_t)c->numcookies);
     if(!array) {
       error = CURLE_OUT_OF_MEMORY;
       goto error;
