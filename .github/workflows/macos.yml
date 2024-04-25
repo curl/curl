@@ -142,7 +142,7 @@ jobs:
             configure: --enable-debug --disable-ldap --with-openssl=/usr/local/opt/openssl --enable-websockets
             macosx-version-min: 10.15
     steps:
-      - run: xcode-select -switch /Applications/Xcode.app/Contents/Developer
+      - run: sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer
         name: xcode select
 
       - run: echo libtool autoconf automake pkg-config libpsl ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
