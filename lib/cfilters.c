@@ -701,7 +701,7 @@ CURLcode Curl_conn_recv(struct Curl_easy *data, int sockindex,
   nread = data->conn->recv[sockindex](data, sockindex, buf, blen, &result);
   DEBUGASSERT(nread >= 0 || result);
   DEBUGASSERT(nread < 0 || !result);
-  *n = (nread >= 0)? (size_t)nread : 0;
+  *n = (nread >= 0)? nread : 0;
   return result;
 }
 
