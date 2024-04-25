@@ -164,7 +164,7 @@ CURLcode Curl_urldecode(const char *string, size_t length,
 
   if(olen)
     /* store output size */
-    *olen = ns - *ostring;
+    *olen = (size_t)(ns - *ostring);
 
   return CURLE_OK;
 }
