@@ -317,9 +317,9 @@ typedef unsigned long sslerr_t;
 #define push_certinfo(_label, _num)             \
 do {                              \
   long info_len = BIO_get_mem_data(mem, &ptr); \
-  Curl_ssl_push_certinfo_len(data, _num, _label, ptr, info_len); \
-  if(1 != BIO_reset(mem))                                        \
-    break;                                                       \
+  Curl_ssl_push_certinfo_len(data, _num, _label, ptr, (size_t)info_len); \
+  if(1 != BIO_reset(mem))                                                \
+    break;                                                               \
 } while(0)
 
 static void pubkey_show(struct Curl_easy *data,
@@ -866,7 +866,8 @@ ossl_log_tls12_secret(const SSL *ssl, bool *keylog_done)
 #else
   if(ssl->s3 && session->master_key_length > 0) {
     master_key_length = session->master_key_length;
-    memcpy(master_key, session->master_key, session->master_key_length);
+    memcpy(master_key, session->master_key,
+           (size_t)session->master_key_length);
     memcpy(client_random, ssl->s3->client_random, SSL3_RANDOM_SIZE);
   }
 #endif
@@ -879,7 +880,7 @@ ossl_log_tls12_secret(const SSL *ssl, bool *keylog_done)
 
   *keylog_done = true;
   Curl_tls_keylog_write("CLIENT_RANDOM", client_random,
-                        master_key, master_key_length);
+                        master_key, (size_t)master_key_length);
 }
 #endif /* !HAVE_KEYLOG_CALLBACK */
 
@@ -964,7 +965,7 @@ static int passwd_callback(char *buf, int num, int encrypting,
   if(!encrypting && num >= 0) {
     int klen = curlx_uztosi(strlen((char *)global_passwd));
     if(num > klen) {
-      memcpy(buf, global_passwd, klen + 1);
+      memcpy(buf, global_passwd, (size_t)(klen + 1));
       return klen;
     }
   }
@@ -2307,9 +2308,9 @@ CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
         if(ASN1_STRING_type(tmp) == V_ASN1_UTF8STRING) {
           peerlen = ASN1_STRING_length(tmp);
           if(peerlen >= 0) {
-            peer_CN = OPENSSL_malloc(peerlen + 1);
+            peer_CN = OPENSSL_malloc((size_t)(peerlen + 1));
             if(peer_CN) {
-              memcpy(peer_CN, ASN1_STRING_get0_data(tmp), peerlen);
+              memcpy(peer_CN, ASN1_STRING_get0_data(tmp), (size_t)peerlen);
               peer_CN[peerlen] = '\0';
             }
             else
@@ -2337,7 +2338,7 @@ CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
       result = CURLE_PEER_FAILED_VERIFICATION;
     }
     else if(!Curl_cert_hostcheck((const char *)peer_CN,
-                                 peerlen, peer->hostname, hostlen)) {
+                                 (size_t)peerlen, peer->hostname, hostlen)) {
       failf(data, "SSL: certificate subject name '%s' does not match "
             "target host name '%s'", peer_CN, peer->dispname);
       result = CURLE_PEER_FAILED_VERIFICATION;
@@ -3718,7 +3719,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
 #ifdef HAS_ALPN
   if(alpn && alpn_len) {
-    if(SSL_CTX_set_alpn_protos(octx->ssl_ctx, alpn, (int)alpn_len)) {
+    if(SSL_CTX_set_alpn_protos(octx->ssl_ctx, alpn, (unsigned int)alpn_len)) {
       failf(data, "Error setting ALPN");
       return CURLE_SSL_CONNECT_ERROR;
     }
@@ -4058,7 +4059,7 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
 #endif
 
   result = Curl_ossl_ctx_init(octx, cf, data, &connssl->peer, TRNSPRT_TCP,
-                              proto.data, proto.len, NULL, NULL,
+                              proto.data, (size_t)proto.len, NULL, NULL,
                               ossl_new_session_cb, cf);
   if(result)
     return result;
@@ -4445,7 +4446,7 @@ static CURLcode ossl_pkp_pin_peer_pubkey(struct Curl_easy *data, X509* cert,
     if(len1 < 1)
       break; /* failed */
 
-    buff1 = temp = malloc(len1);
+    buff1 = temp = malloc((size_t)len1);
     if(!buff1)
       break; /* failed */
 
@@ -4463,7 +4464,7 @@ static CURLcode ossl_pkp_pin_peer_pubkey(struct Curl_easy *data, X509* cert,
     /* End Gyrations */
 
     /* The one good exit point */
-    result = Curl_pin_peer_pubkey(data, pinnedpubkey, buff1, len1);
+    result = Curl_pin_peer_pubkey(data, pinnedpubkey, buff1, (size_t)len1);
   } while(0);
 
   if(buff1)
@@ -5128,34 +5129,35 @@ static size_t ossl_version(char *buffer, size_t size)
   if(strncasecompare(ver, expected, sizeof(expected) - 1)) {
     ver += sizeof(expected) - 1;
   }
-  count = msnprintf(buffer, size, "%s/%s", OSSL_PACKAGE, ver);
+  count = (size_t)msnprintf(buffer, size, "%s/%s", OSSL_PACKAGE, ver);
   for(p = buffer; *p; ++p) {
     if(ISBLANK(*p))
       *p = '_';
   }
   return count;
 #else
-  return msnprintf(buffer, size, "%s/%lx.%lx.%lx",
-                   OSSL_PACKAGE,
-                   (LIBRESSL_VERSION_NUMBER>>28)&0xf,
-                   (LIBRESSL_VERSION_NUMBER>>20)&0xff,
-                   (LIBRESSL_VERSION_NUMBER>>12)&0xff);
+  return (size_t)msnprintf(buffer, size, "%s/%lx.%lx.%lx",
+                           OSSL_PACKAGE,
+                           (LIBRESSL_VERSION_NUMBER>>28)&0xf,
+                           (LIBRESSL_VERSION_NUMBER>>20)&0xff,
+                           (LIBRESSL_VERSION_NUMBER>>12)&0xff);
 #endif
 #elif defined(OPENSSL_IS_BORINGSSL)
 #ifdef CURL_BORINGSSL_VERSION
-  return msnprintf(buffer, size, "%s/%s",
-                   OSSL_PACKAGE,
-                   CURL_BORINGSSL_VERSION);
+  return (size_t)msnprintf(buffer, size, "%s/%s",
+                           OSSL_PACKAGE,
+                           CURL_BORINGSSL_VERSION);
 #else
-  return msnprintf(buffer, size, OSSL_PACKAGE);
+  return (size_t)msnprintf(buffer, size, OSSL_PACKAGE);
 #endif
 #elif defined(OPENSSL_IS_AWSLC)
-  return msnprintf(buffer, size, "%s/%s",
-                   OSSL_PACKAGE,
-                   AWSLC_VERSION_NUMBER_STRING);
+  return (size_t)msnprintf(buffer, size, "%s/%s",
+                           OSSL_PACKAGE,
+                           AWSLC_VERSION_NUMBER_STRING);
 #elif defined(HAVE_OPENSSL_VERSION) && defined(OPENSSL_VERSION_STRING)
-  return msnprintf(buffer, size, "%s/%s",
-                   OSSL_PACKAGE, OpenSSL_version(OPENSSL_VERSION_STRING));
+  return (size_t)msnprintf(buffer, size, "%s/%s",
+                           OSSL_PACKAGE,
+                           OpenSSL_version(OPENSSL_VERSION_STRING));
 #else
   /* not LibreSSL, BoringSSL and not using OpenSSL_version */
 
@@ -5184,16 +5186,16 @@ static size_t ossl_version(char *buffer, size_t size)
       sub[0]='\0';
   }
 
-  return msnprintf(buffer, size, "%s/%lx.%lx.%lx%s"
+  return (size_t)msnprintf(buffer, size, "%s/%lx.%lx.%lx%s"
 #ifdef OPENSSL_FIPS
-                   "-fips"
+                           "-fips"
 #endif
-                   ,
-                   OSSL_PACKAGE,
-                   (ssleay_value>>28)&0xf,
-                   (ssleay_value>>20)&0xff,
-                   (ssleay_value>>12)&0xff,
-                   sub);
+                           ,
+                           OSSL_PACKAGE,
+                           (ssleay_value>>28)&0xf,
+                           (ssleay_value>>20)&0xff,
+                           (ssleay_value>>12)&0xff,
+                           sub);
 #endif /* OPENSSL_IS_BORINGSSL */
 }
 
