@@ -1011,7 +1011,7 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
       cwt = find_unencode_writer(name, namelen, phase);
       if(is_transfer && cwt && strncasecompare(name, "chunked", 7) &&
          Curl_cwriter_get_by_type(data, cwt)) {
-        /* A 'chunked' transfer encoding has alreay been added.
+        /* A 'chunked' transfer encoding has already been added.
          * Ignore duplicates. See #13451. */
         return CURLE_OK;
       }
