@@ -112,6 +112,7 @@ jobs:
 
     steps:
       - run: |
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get update
           sudo apt-get install cmake stunnel4
           # ensure we don't pick up openssl in this build
