@@ -40,7 +40,7 @@ concurrency:
 permissions: {}
 
 env:
-  DEVELOPER_DIR: /Applications/Xcode_14.0.1.app/Contents/Developer
+  DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
   MAKEFLAGS: -j 5
 
 jobs:
