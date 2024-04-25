@@ -158,8 +158,8 @@ jobs:
               (
                 cd $BREW/opt/openssl/lib/pkgconfig/
                 for i in libssl.pc libcrypto.pc; do
-                  cp $i $i.orig
-                  sed 's,libdir=/opt/homebrew/Cellar/openssl@3/3.3.0$,libdir=/opt/homebrew/Cellar/openssl@3/3.3.0/lib,g' < $i.orig > $i
+                  sudo cp $i $i.orig
+                  sudo sed 's,libdir=/opt/homebrew/Cellar/openssl@3/3.3.0$,libdir=/opt/homebrew/Cellar/openssl@3/3.3.0/lib,g' < $i.orig > $i
                   cat $i
                 done
               )
