@@ -1647,7 +1647,7 @@ static CURLcode smtp_parse_url_options(struct connectdata *conn)
 
     if(strncasecompare(key, "AUTH=", 5))
       result = Curl_sasl_parse_url_auth_option(&smtpc->sasl,
-                                               value, ptr - value);
+                                               value, (size_t)(ptr - value));
     else
       result = CURLE_URL_MALFORMAT;
 
