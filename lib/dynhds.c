@@ -251,7 +251,7 @@ CURLcode Curl_dynhds_h1_add_line(struct dynhds *dynhds,
     if(!p)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     name = line;
-    namelen = p - line;
+    namelen = (size_t)(p - line);
     p++; /* move past the colon */
     for(i = namelen + 1; i < line_len; ++i, ++p) {
       if(!ISBLANK(*p))
