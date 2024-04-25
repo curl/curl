@@ -142,9 +142,6 @@ jobs:
             configure: --enable-debug --disable-ldap --with-openssl=/usr/local/opt/openssl --enable-websockets
             macosx-version-min: 10.15
     steps:
-      - run: sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer
-        name: xcode select
-
       - run: echo libtool autoconf automake pkg-config libpsl ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
         name: 'brew bundle'
 
@@ -155,6 +152,7 @@ jobs:
         name: 'brew install'
 
       - run: |
+          which brew
           case "${{ matrix.build.install }}" in
             *openssl*)
               ;;
@@ -176,14 +174,8 @@ jobs:
       - run: rm -f $HOME/.curlrc
         name: remove $HOME/.curlrc
 
-      - run: |
-          type -a m4
-          ls -l /Applications
-          m4 --version
-          autoreconf -fi
+      - run: autoreconf -fi
         name: 'autoreconf'
-        env:
-          DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
 
       - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
         name: 'configure'
