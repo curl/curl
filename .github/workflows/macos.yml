@@ -142,7 +142,7 @@ jobs:
             configure: --enable-debug --disable-ldap --with-openssl=/usr/local/opt/openssl --enable-websockets
             macosx-version-min: 10.15
     steps:
-      - run: echo m4 libtool autoconf automake pkg-config libpsl ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+      - run: echo libtool autoconf automake pkg-config libpsl ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
         name: 'brew bundle'
 
       # Run this command with retries because of spurious failures seen
@@ -175,10 +175,11 @@ jobs:
 
       - run: |
           type -a m4
-          ls /usr/local/opt/
-          ls /usr/local/opt/m4
+          m4 --version
           autoreconf -fi
         name: 'autoreconf'
+        env:
+          M4: "/usr/bin/m4"
 
       - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
         name: 'configure'
