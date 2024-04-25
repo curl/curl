@@ -112,8 +112,8 @@ static bool hostmatch(const char *hostname,
   else {
     const char *hostname_label_end = memchr(hostname, '.', hostlen);
     if(hostname_label_end) {
-      size_t skiphost = hostname_label_end - hostname;
-      size_t skiplen = pattern_label_end - pattern;
+      size_t skiphost = (size_t)(hostname_label_end - hostname);
+      size_t skiplen = (size_t)(pattern_label_end - pattern);
       return pmatch(hostname_label_end, hostlen - skiphost,
                     pattern_label_end, patternlen - skiplen);
     }
