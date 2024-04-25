@@ -370,7 +370,7 @@ static CURLcode file_upload(struct Curl_easy *data)
     /* skip bytes before resume point */
     if(data->state.resume_from) {
       if((curl_off_t)nread <= data->state.resume_from) {
-        data->state.resume_from -= nread;
+        data->state.resume_from -= (curl_off_t)nread;
         nread = 0;
         sendbuf = xfer_ulbuf;
       }
@@ -390,7 +390,7 @@ static CURLcode file_upload(struct Curl_easy *data)
       break;
     }
 
-    bytecount += nread;
+    bytecount += (curl_off_t)nread;
 
     Curl_pgrsSetUploadCounter(data, bytecount);
 
@@ -470,7 +470,8 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
       headerlen = msnprintf(header, sizeof(header),
                 "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n",
                 expected_size);
-      result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
+      result = Curl_client_write(data, CLIENTWRITE_HEADER,
+                                 header, (size_t)headerlen);
       if(result)
         return result;
 
@@ -496,7 +497,8 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
               tm->tm_min,
               tm->tm_sec,
               data->req.no_body ? "": "\r\n");
-    result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
+    result = Curl_client_write(data, CLIENTWRITE_HEADER,
+                               header, (size_t)headerlen);
     if(result)
       return result;
     /* set the file size to make it available post transfer */
@@ -587,7 +589,8 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
       if(size_known)
         expected_size -= nread;
 
-      result = Curl_client_write(data, CLIENTWRITE_BODY, xfer_buf, nread);
+      result = Curl_client_write(data, CLIENTWRITE_BODY,
+                                 xfer_buf, (size_t)nread);
       if(result)
         goto out;
 
