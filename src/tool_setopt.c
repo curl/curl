@@ -223,7 +223,7 @@ static char *c_escape(const char *str, curl_off_t len)
   curlx_dyn_init(&escaped, 4 * MAX_STRING_LENGTH_OUTPUT + 3);
 
   if(len == ZERO_TERMINATED)
-    len = strlen(str);
+    len = (curl_off_t)strlen(str);
 
   if(len > MAX_STRING_LENGTH_OUTPUT) {
     /* cap ridiculously long strings */
@@ -242,7 +242,7 @@ static char *c_escape(const char *str, curl_off_t len)
     if(!p && ISPRINT(*s))
       continue;
 
-    result = curlx_dyn_addn(&escaped, str, s - str);
+    result = curlx_dyn_addn(&escaped, str, (size_t)(s - str));
     str = s + 1;
 
     if(!result) {
@@ -259,7 +259,7 @@ static char *c_escape(const char *str, curl_off_t len)
   }
 
   if(!result)
-    result = curlx_dyn_addn(&escaped, str, s - str);
+    result = curlx_dyn_addn(&escaped, str, (size_t)(s - str));
 
   if(!result)
     (void) !curlx_dyn_addn(&escaped, "...", cutoff);
@@ -702,7 +702,7 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
       if(escape) {
         curl_off_t len = ZERO_TERMINATED;
         if(tag == CURLOPT_POSTFIELDS)
-          len = curlx_dyn_len(&config->postdata);
+          len = (curl_off_t)curlx_dyn_len(&config->postdata);
         escaped = c_escape(value, len);
         NULL_CHECK(escaped);
         CODE2("curl_easy_setopt(hnd, %s, \"%s\");", name, escaped);

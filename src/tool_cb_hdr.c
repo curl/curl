@@ -132,7 +132,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
           eot--;
 
         if(eot >= etag_h) {
-          size_t etag_length = eot - etag_h + 1;
+          size_t etag_length = (size_t)(eot - etag_h + 1);
           /*
            * Truncate the etag save stream, it can have an existing etag value.
            */
@@ -187,10 +187,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
         }
         p += 9;
 
-        /* this expression below typecasts 'cb' only to avoid
-           warning: signed and unsigned type in conditional expression
-        */
-        len = (ssize_t)cb - (p - str);
+        len = cb - (size_t)(p - str);
         filename = parse_filename(p, len);
         if(filename) {
           if(outs->stream) {
@@ -250,7 +247,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
        hdrcbdata->global->styled_output)
       value = memchr(ptr, ':', cb);
     if(value) {
-      size_t namelen = value - ptr;
+      size_t namelen = (size_t)(value - ptr);
       fprintf(outs->stream, BOLD "%.*s" BOLDOFF ":", (int)namelen, ptr);
 #ifndef LINK
       fwrite(&value[1], cb - namelen - 1, 1, outs->stream);

@@ -97,15 +97,15 @@ static void print_category(curlhelp_t category, unsigned int cols)
 
   for(i = 0; helptext[i].opt; ++i)
     if(helptext[i].categories & category) {
-      int opt = (int)longopt;
+      size_t opt = longopt;
       size_t desclen = strlen(helptext[i].desc);
       if(opt + desclen >= (cols - 2)) {
         if(desclen < (cols - 2))
-          opt = (cols - 3) - (int)desclen;
+          opt = (cols - 3) - desclen;
         else
           opt = 0;
       }
-      printf(" %-*s  %s\n", opt, helptext[i].opt, helptext[i].desc);
+      printf(" %-*s  %s\n", (int)opt, helptext[i].opt, helptext[i].desc);
     }
 }
 

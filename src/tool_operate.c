@@ -975,7 +975,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         *added = TRUE;
         per->config = config;
         per->curl = curl;
-        per->urlnum = urlnode->num;
+        per->urlnum = (unsigned int)urlnode->num;
 
         /* default headers output stream is stdout */
         heads = &per->heads;

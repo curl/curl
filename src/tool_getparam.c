@@ -860,12 +860,13 @@ static ParameterError data_urlencode(struct GlobalConfig *global,
     /* there was no '=' letter, check for a '@' instead */
     p = strchr(nextarg, '@');
   if(p) {
-    nlen = p - nextarg; /* length of the name part */
+    nlen = (size_t)(p - nextarg); /* length of the name part */
     is_file = *p++; /* pass the separator */
   }
   else {
     /* neither @ nor =, so no name and it isn't a file */
-    nlen = is_file = 0;
+    nlen = 0;
+    is_file = 0;
     p = nextarg;
   }
   if('@' == is_file) {
@@ -1018,7 +1019,7 @@ static const struct LongShort *single(char letter)
     unsigned int j;
     for(j = 0; j < sizeof(aliases)/sizeof(aliases[0]); j++) {
       if(aliases[j].letter != ' ') {
-        unsigned char l = aliases[j].letter;
+        unsigned char l = (unsigned char)aliases[j].letter;
         singles[l - ' '] = &aliases[j];
       }
     }

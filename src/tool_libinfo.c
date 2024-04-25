@@ -157,7 +157,7 @@ CURLcode get_libcurl_info(void)
           break;
         }
     }
-    proto_count = builtin - built_in_protos;
+    proto_count = (size_t)(builtin - built_in_protos);
   }
 
   if(curlinfo->age >= CURLVERSION_ELEVENTH && curlinfo->feature_names)

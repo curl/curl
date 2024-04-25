@@ -353,7 +353,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 
   if(bytes == rc)
     /* we added this amount of data to the output */
-    outs->bytes += bytes;
+    outs->bytes += (curl_off_t)bytes;
 
   if(config->readbusy) {
     config->readbusy = FALSE;
