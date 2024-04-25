@@ -162,10 +162,7 @@ jobs:
           esac
         name: 'brew unlink openssl'
 
-      - run: |
-          python3 -m venv $HOME/pyenv
-          source $HOME/pyenv/bin/activate
-          python3 -m pip install impacket
+      - run: python3 -m pip install --break-system-packages impacket
         name: 'pip3 install'
 
       - uses: actions/checkout@v4
@@ -190,9 +187,7 @@ jobs:
       - run: make V=1 -C tests
         name: 'make tests'
 
-      - run: |
-          source $HOME/pyenv/bin/activate
-          make V=1 test-ci
+      - run: make V=1 test-ci
         name: 'run tests'
         env:
           TFLAGS: "${{ matrix.build.tflags }} ~1452"
