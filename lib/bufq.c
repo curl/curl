@@ -109,7 +109,7 @@ static ssize_t chunk_slurpn(struct buf_chunk *chunk, size_t max_len,
   nread = reader(reader_ctx, p, n, err);
   if(nread > 0) {
     DEBUGASSERT((size_t)nread <= n);
-    chunk->w_offset += nread;
+    chunk->w_offset += (size_t)nread;
   }
   return nread;
 }
@@ -405,7 +405,7 @@ ssize_t Curl_bufq_write(struct bufq *q,
     n = chunk_append(tail, buf, len);
     if(!n)
       break;
-    nwritten += n;
+    nwritten += (ssize_t)n;
     buf += n;
     len -= n;
   }
@@ -438,7 +438,7 @@ ssize_t Curl_bufq_read(struct bufq *q, unsigned char *buf, size_t len,
   while(len && q->head) {
     n = chunk_read(q->head, buf, len);
     if(n) {
-      nread += n;
+      nread += (ssize_t)n;
       buf += n;
       len -= n;
     }
@@ -582,7 +582,7 @@ ssize_t Curl_bufq_write_pass(struct bufq *q,
     /* Maybe only part of `data` has been added, continue to loop */
     buf += (size_t)n;
     len -= (size_t)n;
-    nwritten += (size_t)n;
+    nwritten += n;
   }
 
   if(!nwritten && len) {
@@ -656,7 +656,7 @@ static ssize_t bufq_slurpn(struct bufq *q, size_t max_len,
       *err = CURLE_OK;
       break;
     }
-    nread += (size_t)n;
+    nread += n;
     if(max_len) {
       DEBUGASSERT((size_t)n <= max_len);
       max_len -= (size_t)n;
