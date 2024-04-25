@@ -491,10 +491,11 @@ static CURLcode gzip_do_write(struct Curl_easy *data,
     /* Initial call state */
     ssize_t hlen;
 
-    switch(check_gzip_header((unsigned char *) buf, nbytes, &hlen)) {
+    /* FIXME: nbytes cast */
+    switch(check_gzip_header((unsigned char *) buf, (ssize_t)nbytes, &hlen)) {
     case GZIP_OK:
       z->next_in = (Bytef *) buf + hlen;
-      z->avail_in = (uInt) (nbytes - hlen);
+      z->avail_in = (uInt) (nbytes - (size_t)hlen);
       zp->zlib_init = ZLIB_GZIP_INFLATING; /* Inflating stream state */
       break;
 
@@ -536,13 +537,13 @@ static CURLcode gzip_do_write(struct Curl_easy *data,
     /* Append the new block of data to the previous one */
     memcpy(z->next_in + z->avail_in - nbytes, buf, nbytes);
 
-    switch(check_gzip_header(z->next_in, z->avail_in, &hlen)) {
+    switch(check_gzip_header(z->next_in, (ssize_t)z->avail_in, &hlen)) {
     case GZIP_OK:
       /* This is the zlib stream data */
       free(z->next_in);
       /* Don't point into the malloced block since we just freed it */
       z->next_in = (Bytef *) buf + hlen + nbytes - z->avail_in;
-      z->avail_in = (uInt) (z->avail_in - hlen);
+      z->avail_in = z->avail_in - (uInt)hlen;
       zp->zlib_init = ZLIB_GZIP_INFLATING;   /* Inflating stream state */
       break;
 
@@ -987,7 +988,7 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
 
     for(namelen = 0; *enclist && *enclist != ','; enclist++)
       if(!ISSPACE(*enclist))
-        namelen = enclist - name + 1;
+        namelen = (size_t)(enclist - name + 1);
 
     if(namelen) {
       const struct Curl_cwtype *cwt;
