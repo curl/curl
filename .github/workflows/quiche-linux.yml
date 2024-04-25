@@ -76,6 +76,7 @@ jobs:
 
     steps:
       - run: |
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get update
           sudo apt-get install libtool autoconf automake pkg-config stunnel4 ${{ matrix.build.install }}
           sudo apt-get install apache2 apache2-dev libnghttp2-dev
