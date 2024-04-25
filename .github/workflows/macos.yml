@@ -156,10 +156,10 @@ jobs:
           case "${{ matrix.build.install }}" in
             *openssl*)
               (
-                cd $BREW/opt/openssl/lib/pkgconfig/
+                cd $(brew --prefix)/opt/openssl/lib/pkgconfig/
                 for i in libssl.pc libcrypto.pc; do
                   sudo cp $i $i.orig
-                  sudo sed 's,libdir=/opt/homebrew/Cellar/openssl@3/3.3.0$,libdir=/opt/homebrew/Cellar/openssl@3/3.3.0/lib,g' < $i.orig > /tmp/$i
+                  sudo sed s,libdir=$(brew --prefix)'/Cellar/openssl@3/3.3.0$',libdir=$(brew --prefix)/Cellar/openssl@3/3.3.0/lib,g < $i.orig > /tmp/$i
                   sudo cp /tmp/$i $i
                   cat $i
                 done
