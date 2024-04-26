@@ -94,7 +94,7 @@ static ssize_t detect_line(struct h1_req_parser *parser,
     return -1;
   }
   parser->line = buf;
-  parser->line_len = line_end - buf + 1;
+  parser->line_len = (size_t)(line_end - buf) + 1;
   *err = CURLE_OK;
   return (ssize_t)parser->line_len;
 }
@@ -149,7 +149,7 @@ static CURLcode start_req(struct h1_req_parser *parser,
     goto out;
 
   m = parser->line;
-  m_len = p - parser->line;
+  m_len = (size_t)(p - parser->line);
   target = p + 1;
   target_len = hv_len = 0;
   hv = NULL;
@@ -159,7 +159,7 @@ static CURLcode start_req(struct h1_req_parser *parser,
     if(parser->line[i] == ' ') {
       hv = &parser->line[i + 1];
       hv_len = parser->line_len - i;
-      target_len = (hv - target) - 1;
+      target_len = (size_t)(hv - target) - 1;
       break;
     }
   }
@@ -217,7 +217,7 @@ static CURLcode start_req(struct h1_req_parser *parser,
     tmp[target_len] = '\0';
     /* See if treating TARGET as an absolute URL makes sense */
     if(Curl_is_absolute_url(tmp, NULL, 0, FALSE)) {
-      int url_options;
+      unsigned int url_options;
 
       url = curl_url();
       if(!url) {
@@ -277,7 +277,7 @@ ssize_t Curl_h1_req_parse_read(struct h1_req_parser *parser,
     }
 
     /* Consume this line */
-    nread += (size_t)n;
+    nread += (ssize_t)n;
     buf += (size_t)n;
     buflen -= (size_t)n;
 
