@@ -101,4 +101,77 @@ class TestSSLUse:
             else:
                 assert djson['SSL_SESSION_RESUMED'] == exp_resumed, f'{i}: {djson}'
 
+    # use host name with trailing dot, verify handshake
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_17_03_trailing_dot(self, env: Env, httpd, nghttpx, repeat, proto):
+        if env.curl_uses_lib('gnutls'):
+            pytest.skip("gnutls does not match hostnames with trailing dot")
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        curl = CurlClient(env=env)
+        domain = f'{env.domain1}.'
+        url = f'https://{env.authority_for(domain, proto)}/curltest/sslinfo'
+        r = curl.http_get(url=url, alpn_proto=proto)
+        assert r.exit_code == 0, f'{r}'
+        assert r.json, f'{r}'
+        if proto != 'h3':  # we proxy h3
+            # the SNI the server received is without trailing dot
+            assert r.json['SSL_TLS_SNI'] == env.domain1, f'{r.json}'
+
+    # use host name with double trailing dot, verify handshake
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_17_04_double_dot(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('wolfssl'):
+            pytest.skip("wolfSSL HTTP/3 peer verification does not properly check")
+        curl = CurlClient(env=env)
+        domain = f'{env.domain1}..'
+        url = f'https://{env.authority_for(domain, proto)}/curltest/sslinfo'
+        r = curl.http_get(url=url, alpn_proto=proto, extra_args=[
+            '-H', f'Host: {env.domain1}',
+        ])
+        if r.exit_code == 0:
+            assert r.json, f'{r.stdout}'
+            # the SNI the server received is without trailing dot
+            if proto != 'h3':  # we proxy h3
+                assert r.json['SSL_TLS_SNI'] == env.domain1, f'{r.json}'
+            assert False, f'should not have succeeded: {r.json}'
+        # 7 - rustls rejects a servername with .. during setup
+        # 35 - libressl rejects setting an SNI name with trailing dot
+        # 60 - peer name matching failed against certificate
+        assert r.exit_code in [7, 35, 60], f'{r}'
+
+    # use ip address for connect
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_17_05_ip_addr(self, env: Env, httpd, nghttpx, repeat, proto):
+        if env.curl_uses_lib('bearssl'):
+            pytest.skip("bearssl does not support cert verification with IP addresses")
+        if env.curl_uses_lib('mbedtls'):
+            pytest.skip("mbedtls does not support cert verification with IP addresses")
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        curl = CurlClient(env=env)
+        domain = f'127.0.0.1'
+        url = f'https://{env.authority_for(domain, proto)}/curltest/sslinfo'
+        r = curl.http_get(url=url, alpn_proto=proto)
+        assert r.exit_code == 0, f'{r}'
+        assert r.json, f'{r}'
+        if proto != 'h3':  # we proxy h3
+            # the SNI should not have been used
+            assert 'SSL_TLS_SNI' not in r.json, f'{r.json}'
+
+    # use localhost for connect
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_17_06_localhost(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        curl = CurlClient(env=env)
+        domain = f'localhost'
+        url = f'https://{env.authority_for(domain, proto)}/curltest/sslinfo'
+        r = curl.http_get(url=url, alpn_proto=proto)
+        assert r.exit_code == 0, f'{r}'
+        assert r.json, f'{r}'
+        if proto != 'h3':  # we proxy h3
+            assert r.json['SSL_TLS_SNI'] == domain, f'{r.json}'
 

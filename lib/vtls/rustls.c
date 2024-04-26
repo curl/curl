@@ -479,13 +479,8 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   backend->config = rustls_client_config_builder_build(config_builder);
   DEBUGASSERT(rconn == NULL);
-  {
-    /* rustls claims to manage ip address hostnames as well here. So,
-     * if we have an SNI, we use it, otherwise we pass the hostname */
-    char *server = connssl->peer.sni?
-                   connssl->peer.sni : connssl->peer.hostname;
-    result = rustls_client_connection_new(backend->config, server, &rconn);
-  }
+  result = rustls_client_connection_new(backend->config,
+                                        connssl->peer.hostname, &rconn);
   if(result != RUSTLS_RESULT_OK) {
     rustls_error(result, errorbuf, sizeof(errorbuf), &errorlen);
     failf(data, "rustls_client_connection_new: %.*s", (int)errorlen, errorbuf);
