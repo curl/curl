@@ -147,7 +147,7 @@ CURLcode Curl_output_digest(struct Curl_easy *data,
   if(authp->iestyle) {
     tmp = strchr((char *)uripath, '?');
     if(tmp) {
-      size_t urilen = tmp - (char *)uripath;
+      size_t urilen = (size_t)(tmp - (char *)uripath);
       /* typecast is fine here since the value is always less than 32 bits */
       path = (unsigned char *) aprintf("%.*s", (int)urilen, uripath);
     }
