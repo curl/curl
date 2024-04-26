@@ -100,7 +100,7 @@ CURLcode Curl_ossl_ctx_configure(struct Curl_cfilter *cf,
                                  SSL_CTX *ssl_ctx);
 
 /*
- * Add a new session to the cache.
+ * Add a new session to the cache. Takes ownership of the session.
  */
 CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
                                struct Curl_easy *data,

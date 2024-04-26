@@ -2074,10 +2074,11 @@ static int ossl_shutdown(struct Curl_cfilter *cf,
   return retval;
 }
 
-static void ossl_session_free(void *ptr)
+static void ossl_session_free(void *sessionid, size_t idsize)
 {
   /* free the ID */
-  SSL_SESSION_free(ptr);
+  (void)idsize;
+  SSL_SESSION_free(sessionid);
 }
 
 /*
@@ -2935,52 +2936,45 @@ ossl_set_ssl_version_min_max_legacy(ctx_option_t *ctx_options,
 CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
                                const struct ssl_peer *peer,
-                               SSL_SESSION *ssl_sessionid)
+                               SSL_SESSION *session)
 {
   const struct ssl_config_data *config;
   bool isproxy;
-  CURLcode result = CURLE_WRITE_ERROR;
+  bool added = FALSE;
 
   if(!cf || !data)
-    return result;
+    goto out;
 
   isproxy = Curl_ssl_cf_is_proxy(cf);
 
   config = Curl_ssl_cf_get_config(cf, data);
   if(config->primary.sessionid) {
     bool incache;
-    bool added = FALSE;
-    void *old_ssl_sessionid = NULL;
+    void *old_session = NULL;
 
     Curl_ssl_sessionid_lock(data);
     if(isproxy)
       incache = FALSE;
     else
       incache = !(Curl_ssl_getsessionid(cf, data, peer,
-                                        &old_ssl_sessionid, NULL));
-    if(incache) {
-      if(old_ssl_sessionid != ssl_sessionid) {
-        infof(data, "old SSL session ID is stale, removing");
-        Curl_ssl_delsessionid(data, old_ssl_sessionid);
-        incache = FALSE;
-      }
+                                        &old_session, NULL));
+    if(incache && (old_session != session)) {
+      infof(data, "old SSL session ID is stale, removing");
+      Curl_ssl_delsessionid(data, old_session);
+      incache = FALSE;
     }
 
     if(!incache) {
-      if(!Curl_ssl_addsessionid(cf, data, peer, ssl_sessionid,
-                                0 /* unknown size */, &added)) {
-        if(added) {
-          /* the session has been put into the session cache */
-          result = CURLE_OK;
-        }
-      }
-      else
-        failf(data, "failed to store ssl session");
+      added = TRUE;
+      Curl_ssl_addsessionid(cf, data, peer, session, 0, ossl_session_free);
     }
     Curl_ssl_sessionid_unlock(data);
   }
 
-  return result;
+out:
+  if(!added)
+    ossl_session_free(session, 0);
+  return CURLE_OK;
 }
 
 /* The "new session" callback must return zero if the session can be removed
@@ -2991,13 +2985,12 @@ static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
   struct Curl_cfilter *cf;
   struct Curl_easy *data;
   struct ssl_connect_data *connssl;
-  CURLcode result;
 
   cf = (struct Curl_cfilter*) SSL_get_app_data(ssl);
   connssl = cf? cf->ctx : NULL;
   data = connssl? CF_DATA_CURRENT(cf) : NULL;
-  result = Curl_ossl_add_session(cf, data, &connssl->peer, ssl_sessionid);
-  return result? 0 : 1;
+  Curl_ossl_add_session(cf, data, &connssl->peer, ssl_sessionid);
+  return 1;
 }
 
 static CURLcode load_cacert_from_memory(X509_STORE *store,
@@ -5291,7 +5284,6 @@ const struct Curl_ssl Curl_ssl_openssl = {
   ossl_get_internals,       /* get_internals */
   ossl_close,               /* close_one */
   ossl_close_all,           /* close_all */
-  ossl_session_free,        /* session_free */
   ossl_set_engine,          /* set_engine */
   ossl_set_engine_default,  /* set_engine_default */
   ossl_engines_list,        /* engines_list */

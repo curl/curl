@@ -415,9 +415,15 @@ class CurlClient:
         return xargs
 
     def http_get(self, url: str, extra_args: Optional[List[str]] = None,
-                 def_tracing: bool = True, with_profile: bool = False):
-        return self._raw(url, options=extra_args, with_stats=False,
-                         def_tracing=def_tracing, with_profile=with_profile)
+                 alpn_proto: Optional[str] = None,
+                 def_tracing: bool = True,
+                 with_stats: bool = False,
+                 with_profile: bool = False):
+        return self._raw(url, options=extra_args,
+                         with_stats=with_stats,
+                         alpn_proto=alpn_proto,
+                         def_tracing=def_tracing,
+                         with_profile=with_profile)
 
     def http_download(self, urls: List[str],
                       alpn_proto: Optional[str] = None,

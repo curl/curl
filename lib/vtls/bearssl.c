@@ -830,7 +830,7 @@ static CURLcode bearssl_run_until(struct Curl_cfilter *cf,
       CURL_TRC_CF(data, cf, "ssl_recv(len=%zu) -> %zd, %d", len, ret, result);
       if(ret == 0) {
         failf(data, "SSL: EOF without close notify");
-        return CURLE_READ_ERROR;
+        return CURLE_RECV_ERROR;
       }
       if(ret <= 0) {
         return result;
@@ -873,6 +873,12 @@ static CURLcode bearssl_connect_step2(struct Curl_cfilter *cf,
   return ret;
 }
 
+static void bearssl_session_free(void *sessionid, size_t idsize)
+{
+  (void)idsize;
+  free(sessionid);
+}
+
 static CURLcode bearssl_connect_step3(struct Curl_cfilter *cf,
                                       struct Curl_easy *data)
 {
@@ -896,7 +902,6 @@ static CURLcode bearssl_connect_step3(struct Curl_cfilter *cf,
 
   if(ssl_config->primary.sessionid) {
     bool incache;
-    bool added = FALSE;
     void *oldsession;
     br_ssl_session_parameters *session;
 
@@ -909,13 +914,12 @@ static CURLcode bearssl_connect_step3(struct Curl_cfilter *cf,
                                       &oldsession, NULL));
     if(incache)
       Curl_ssl_delsessionid(data, oldsession);
-    ret = Curl_ssl_addsessionid(cf, data, &connssl->peer, session, 0, &added);
+
+    ret = Curl_ssl_addsessionid(cf, data, &connssl->peer, session, 0,
+                                bearssl_session_free);
     Curl_ssl_sessionid_unlock(data);
-    if(!added)
-      free(session);
-    if(ret) {
-      return CURLE_OUT_OF_MEMORY;
-    }
+    if(ret)
+      return ret;
   }
 
   connssl->connecting_state = ssl_connect_done;
@@ -1174,11 +1178,6 @@ static void bearssl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 }
 
-static void bearssl_session_free(void *ptr)
-{
-  free(ptr);
-}
-
 static CURLcode bearssl_sha256sum(const unsigned char *input,
                                   size_t inputlen,
                                   unsigned char *sha256sum,
@@ -1211,7 +1210,6 @@ const struct Curl_ssl Curl_ssl_bearssl = {
   bearssl_get_internals,           /* get_internals */
   bearssl_close,                   /* close_one */
   Curl_none_close_all,             /* close_all */
-  bearssl_session_free,            /* session_free */
   Curl_none_set_engine,            /* set_engine */
   Curl_none_set_engine_default,    /* set_engine_default */
   Curl_none_engines_list,          /* engines_list */

@@ -1992,9 +1992,8 @@ static int quic_ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
   ctx = cf? cf->ctx : NULL;
   data = cf? CF_DATA_CURRENT(cf) : NULL;
   if(cf && data && ctx) {
-    CURLcode result = Curl_ossl_add_session(cf, data, &ctx->peer,
-                                            ssl_sessionid);
-    return result? 0 : 1;
+    Curl_ossl_add_session(cf, data, &ctx->peer, ssl_sessionid);
+    return 1;
   }
   return 0;
 }
