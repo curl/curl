@@ -54,7 +54,7 @@ static void copy_header_external(struct Curl_header_store *hs,
      impossible for applications to do == comparisons, as that would otherwise
      be very tempting and then lead to the reserved bits not being reserved
      anymore. */
-  h->origin = hs->type | (1<<27);
+  h->origin = (unsigned int)(hs->type | (1<<27));
   h->anchor = e;
 }
 
@@ -231,7 +231,7 @@ static CURLcode unfold_value(struct Curl_easy *data, const char *value,
   DEBUGASSERT(data->state.prevhead);
   hs = data->state.prevhead;
   olen = strlen(hs->value);
-  offset = hs->value - hs->buffer;
+  offset = (size_t)(hs->value - hs->buffer);
   oalloc = olen + offset + 1;
 
   /* skip all trailing space letters */
@@ -295,7 +295,7 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
       /* neither CR nor LF as terminator is not a valid header */
       return CURLE_WEIRD_SERVER_REPLY;
   }
-  hlen = end - header;
+  hlen = (size_t)(end - header);
 
   if((header[0] == ' ') || (header[0] == '\t')) {
     if(data->state.prevhead)
