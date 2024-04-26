@@ -141,14 +141,16 @@ void Curl_printable_address(const struct Curl_addrinfo *ai, char *buf,
   case AF_INET: {
     const struct sockaddr_in *sa4 = (const void *)ai->ai_addr;
     const struct in_addr *ipaddr4 = &sa4->sin_addr;
-    (void)Curl_inet_ntop(ai->ai_family, (const void *)ipaddr4, buf, bufsize);
+    (void)Curl_inet_ntop(ai->ai_family, (const void *)ipaddr4,
+                         buf, (size_t)bufsize);
     break;
   }
 #ifdef USE_IPV6
   case AF_INET6: {
     const struct sockaddr_in6 *sa6 = (const void *)ai->ai_addr;
     const struct in6_addr *ipaddr6 = &sa6->sin6_addr;
-    (void)Curl_inet_ntop(ai->ai_family, (const void *)ipaddr6, buf, bufsize);
+    (void)Curl_inet_ntop(ai->ai_family, (const void *)ipaddr6,
+                         buf, (size_t)bufsize);
     break;
   }
 #endif
@@ -172,7 +174,7 @@ create_hostcache_id(const char *name,
     len = buflen - 7;
   /* store and lower case the name */
   Curl_strntolower(ptr, name, len);
-  return msnprintf(&ptr[len], 7, ":%u", port) + len;
+  return (size_t)msnprintf(&ptr[len], 7, ":%u", port) + len;
 }
 
 struct hostcache_prune_data {
@@ -410,11 +412,11 @@ UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
     struct Curl_addrinfo **nodes;
     infof(data, "Shuffling %i addresses", num_addrs);
 
-    nodes = malloc(num_addrs*sizeof(*nodes));
+    nodes = malloc((size_t)num_addrs * sizeof(*nodes));
     if(nodes) {
       int i;
       unsigned int *rnd;
-      const size_t rnd_size = num_addrs * sizeof(*rnd);
+      const size_t rnd_size = (size_t)num_addrs * sizeof(*rnd);
 
       /* build a plain array of Curl_addrinfo pointers */
       nodes[0] = *addr;
@@ -1134,7 +1136,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       host_end = strchr(&hostp->data[1], ':');
 
       if(host_end) {
-        hlen = host_end - &hostp->data[1];
+        hlen = (size_t)(host_end - &hostp->data[1]);
         num = strtoul(++host_end, NULL, 10);
         if(!hlen || (num > 0xffff))
           host_end = NULL;
@@ -1182,7 +1184,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       host_end = strchr(host_begin, ':');
       if(!host_end)
         goto err;
-      hlen = host_end - host_begin;
+      hlen = (size_t)(host_end - host_begin);
 
       port_ptr = host_end + 1;
       tmp_port = strtoul(port_ptr, &end_ptr, 10);
@@ -1212,7 +1214,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
           --addr_end;
         }
 
-        alen = addr_end - addr_begin;
+        alen = (size_t)(addr_end - addr_begin);
         if(!alen)
           continue;
 
