@@ -1197,7 +1197,7 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
         return result;
 
       infof(data, "Written %zu bytes, %" CURL_FORMAT_CURL_OFF_TU
-            " bytes are left for transfer", chunk, size - chunk);
+            " bytes are left for transfer", chunk, size - (curl_off_t)chunk);
 
       /* Have we used the entire overflow or just part of it?*/
       if(pp->overflow > chunk) {
@@ -1915,7 +1915,7 @@ static CURLcode imap_parse_url_options(struct connectdata *conn)
     else if(strncasecompare(key, "AUTH=", 5)) {
       prefer_login = false;
       result = Curl_sasl_parse_url_auth_option(&imapc->sasl,
-                                               value, ptr - value);
+                                               value, (size_t)(ptr - value));
     }
     else {
       prefer_login = false;
@@ -1970,7 +1970,7 @@ static CURLcode imap_parse_url_path(struct Curl_easy *data)
     if(end > begin && end[-1] == '/')
       end--;
 
-    result = Curl_urldecode(begin, end - begin, &imap->mailbox, NULL,
+    result = Curl_urldecode(begin, (size_t)(end - begin), &imap->mailbox, NULL,
                             REJECT_CTRL);
     if(result)
       return result;
@@ -1993,7 +1993,7 @@ static CURLcode imap_parse_url_path(struct Curl_easy *data)
       return CURLE_URL_MALFORMAT;
 
     /* Decode the name parameter */
-    result = Curl_urldecode(begin, ptr - begin, &name, NULL,
+    result = Curl_urldecode(begin, (size_t)(ptr - begin), &name, NULL,
                             REJECT_CTRL);
     if(result)
       return result;
@@ -2004,7 +2004,7 @@ static CURLcode imap_parse_url_path(struct Curl_easy *data)
       ptr++;
 
     /* Decode the value parameter */
-    result = Curl_urldecode(begin, ptr - begin, &value, &valuelen,
+    result = Curl_urldecode(begin, (size_t)(ptr - begin), &value, &valuelen,
                             REJECT_CTRL);
     if(result) {
       free(name);
