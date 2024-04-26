@@ -318,7 +318,8 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
       break;
     case CURLFORM_CONTENTSLENGTH:
       current_form->contentslength =
-        array_state?(size_t)array_value:(size_t)va_arg(params, long);
+        array_state?(curl_off_t)(size_t)array_value:
+                    (curl_off_t)(size_t)va_arg(params, long);
       break;
 
     case CURLFORM_CONTENTLEN:
@@ -842,7 +843,7 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
       if(!part)
         result = CURLE_OUT_OF_MEMORY;
       if(!result)
-        result = setname(part, post->name, post->namelength);
+        result = setname(part, post->name, (size_t)post->namelength);
       if(!result) {
         multipart = curl_mime_init(data);
         if(!multipart)
@@ -869,7 +870,7 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
 
       /* Set field name. */
       if(!result && !post->more)
-        result = setname(part, post->name, post->namelength);
+        result = setname(part, post->name, (size_t)post->namelength);
 
       /* Process contents. */
       if(!result) {
@@ -895,8 +896,8 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
             result = curl_mime_filename(part, NULL);
         }
         else if(post->flags & HTTPPOST_BUFFER)
-          result = curl_mime_data(part, post->buffer,
-                                  post->bufferlength? post->bufferlength: -1);
+          result = curl_mime_data(part, post->buffer, (size_t)
+                                 (post->bufferlength? post->bufferlength: -1));
         else if(post->flags & HTTPPOST_CALLBACK) {
           /* the contents should be read with the callback and the size is set
              with the contentslength */
