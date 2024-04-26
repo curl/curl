@@ -315,13 +315,13 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
       return CURLE_RECV_ERROR;
     }
 
-    result = Curl_dyn_addn(&pp->recvbuf, buffer, gotbytes);
+    result = Curl_dyn_addn(&pp->recvbuf, buffer, (size_t)gotbytes);
     if(result)
       return result;
 
     data->req.headerbytecount += (unsigned int)gotbytes;
 
-    pp->nread_resp += gotbytes;
+    pp->nread_resp += (size_t)gotbytes;
   }
 
   do {
@@ -330,7 +330,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
     if(nl) {
       /* a newline is CRLF in pp-talk, so the CR is ignored as
          the line isn't really terminated until the LF comes */
-      size_t length = nl - line + 1;
+      size_t length = (size_t)(nl - line + 1);
 
       /* output debug output if that is requested */
 #ifdef HAVE_GSSAPI
