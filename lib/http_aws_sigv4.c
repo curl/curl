@@ -325,7 +325,8 @@ static char *parse_content_sha_hdr(struct Curl_easy *data,
   char *value;
   size_t len;
 
-  key_len = msnprintf(key, sizeof(key), "x-%s-content-sha256", provider1);
+  key_len = (size_t)msnprintf(key, sizeof(key), "x-%s-content-sha256",
+                                                provider1);
 
   value = Curl_checkheaders(data, key, key_len);
   if(!value)
@@ -442,7 +443,7 @@ static CURLcode canon_query(struct Curl_easy *data,
     ap->p = p;
     amp = strchr(p, '&');
     if(amp)
-      ap->len = amp - p; /* excluding the ampersand */
+      ap->len = (size_t)(amp - p); /* excluding the ampersand */
     else {
       ap->len = strlen(p);
       break;
@@ -456,7 +457,7 @@ static CURLcode canon_query(struct Curl_easy *data,
     return CURLE_URL_MALFORMAT;
   }
 
-  qsort(&array[0], entry, sizeof(struct pair), compare_func);
+  qsort(&array[0], (size_t)entry, sizeof(struct pair), compare_func);
 
   ap = &array[0];
   for(i = 0; !result && (i < entry); i++, ap++) {
@@ -605,7 +606,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
       result = CURLE_URL_MALFORMAT;
       goto fail;
     }
-    len = hostdot - hostname;
+    len = (size_t)(hostdot - hostname);
     if(len > MAX_SIGV4_LEN) {
       failf(data, "aws-sigv4: service too long in hostname");
       result = CURLE_URL_MALFORMAT;
@@ -624,7 +625,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
         result = CURLE_URL_MALFORMAT;
         goto fail;
       }
-      len = hostreg - reg;
+      len = (size_t)(hostreg - reg);
       if(len > MAX_SIGV4_LEN) {
         failf(data, "aws-sigv4: region too long in hostname");
         result = CURLE_URL_MALFORMAT;
