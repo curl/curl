@@ -118,8 +118,9 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
     long response = 0;
     curl_easy_getinfo(per->curl, CURLINFO_RESPONSE_CODE, &response);
 
-    if(response/100 != 2)
-      /* only care about these headers in 2xx responses */
+    if((response/100 != 2) && (response/100 != 3))
+      /* only care about etag and content-disposition headers in 2xx and 3xx
+         responses */
       ;
     /*
      * Write etag to file when --etag-save option is given.
