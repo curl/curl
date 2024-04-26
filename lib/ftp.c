@@ -379,7 +379,7 @@ static CURLcode ftp_cw_lc_write(struct Curl_easy *data,
       break;
 
     /* write the bytes before the '\r', excluding the '\r' */
-    chunk_len = cp - buf;
+    chunk_len = (size_t)(cp - buf);
     if(chunk_len) {
       result = Curl_cwriter_write(data, writer->next, chunk_type,
                                   buf, chunk_len);
@@ -893,7 +893,7 @@ CURLcode Curl_GetFTPResponse(struct Curl_easy *data,
          counter */
       cache_skip = 0;
 
-    *nreadp += nread;
+    *nreadp += (ssize_t)nread;
 
   } /* while there's buffer left and loop is requested */
 
@@ -1068,7 +1068,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
       char *ip_start = string_ftpport + 1;
       ip_end = strchr(ip_start, ']');
       if(ip_end) {
-        addrlen = ip_end - ip_start;
+        addrlen = (size_t)(ip_end - ip_start);
         addr = ip_start;
       }
     }
@@ -1083,7 +1083,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
         addr = string_ftpport;
         if(ip_end) {
           /* either ipv6 or (ipv4|domain|interface):port(-range) */
-          addrlen = ip_end - string_ftpport;
+          addrlen = (size_t)(ip_end - string_ftpport);
 #ifdef USE_IPV6
           if(Curl_inet_pton(AF_INET6, string_ftpport, &sa6->sin6_addr) == 1) {
             /* ipv6 */
@@ -1217,7 +1217,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
 
   /* step 3, bind to a suitable local address */
 
-  memcpy(sa, ai->ai_addr, ai->ai_addrlen);
+  memcpy(sa, ai->ai_addr, (size_t)ai->ai_addrlen);
   sslen = ai->ai_addrlen;
 
   for(port = port_min; port <= port_max;) {
@@ -1377,7 +1377,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   }
 
   /* store which command was sent */
-  ftpc->count1 = fcmd;
+  ftpc->count1 = (int)fcmd;
 
   ftp_state(data, FTP_PORT);
 
@@ -1557,7 +1557,7 @@ static CURLcode ftp_state_list(struct Curl_easy *data)
     if(slashPos) {
       /* chop off the file part if format is dir/file otherwise remove
          the trailing slash for dir/dir/ except for absolute path / */
-      size_t n = slashPos - rawPath;
+      size_t n = (size_t)(slashPos - rawPath);
       if(n == 0)
         ++n;
 
@@ -1719,7 +1719,7 @@ static CURLcode ftp_state_ul_setup(struct Curl_easy *data,
           data->state.fread_func(scratch, 1, readthisamountnow,
                                  data->state.in);
 
-        passed += actuallyread;
+        passed += (curl_off_t)actuallyread;
         if((actuallyread == 0) || (actuallyread > readthisamountnow)) {
           /* this checks for greater-than only to make sure that the
              CURL_READFUNC_ABORT return code still aborts */
@@ -2269,7 +2269,7 @@ static CURLcode ftp_state_mdtm_resp(struct Curl_easy *data,
                   tm->tm_hour,
                   tm->tm_min,
                   tm->tm_sec);
-        result = client_write_header(data, headerbuf, headerbuflen);
+        result = client_write_header(data, headerbuf, (size_t)headerbuflen);
         if(result)
           return result;
       } /* end of a ridiculous amount of conditionals */
@@ -2480,7 +2480,7 @@ static CURLcode ftp_state_size_resp(struct Curl_easy *data,
       char clbuf[128];
       int clbuflen = msnprintf(clbuf, sizeof(clbuf),
                 "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n", filesize);
-      result = client_write_header(data, clbuf, clbuflen);
+      result = client_write_header(data, clbuf, (size_t)clbuflen);
       if(result)
         return result;
     }
@@ -3092,7 +3092,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
           ptr++;
         for(start = ptr; *ptr && *ptr != ' '; ptr++)
           ;
-        os = Curl_memdup0(start, ptr - start);
+        os = Curl_memdup0(start, (size_t)(ptr - start));
         if(!os)
           return CURLE_OUT_OF_MEMORY;
 
@@ -4306,7 +4306,7 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
       slashPos = strrchr(rawPath, '/');
       if(slashPos) {
         /* get path before last slash, except for / */
-        size_t dirlen = slashPos - rawPath;
+        size_t dirlen = (size_t)(slashPos - rawPath);
         if(dirlen == 0)
           dirlen = 1;
 
@@ -4350,7 +4350,7 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
 
         /* parse the URL path into separate path components */
         while((slashPos = strchr(curPos, '/'))) {
-          size_t compLen = slashPos - curPos;
+          size_t compLen = (size_t)(slashPos - curPos);
 
           /* path starts with a slash: add that as a directory */
           if((compLen == 0) && (ftpc->dirdepth == 0))
