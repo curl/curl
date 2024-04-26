@@ -258,7 +258,7 @@ char *Curl_copy_header_value(const char *header)
     end--;
 
   /* get length of the type */
-  len = end - start + 1;
+  len = (size_t)(end - start) + 1;
 
   return Curl_memdup0(start, len);
 }
@@ -1126,7 +1126,8 @@ Curl_compareheader(const char *headerline, /* line to check */
       end = strchr(start, '\0');
   }
 
-  len = end-start; /* length of the content part of the input line */
+  /* length of the content part of the input line */
+  len = (size_t)(end - start);
 
   /* find the content string in the rest of the line */
   for(; len >= clen; len--, start++) {
@@ -1316,7 +1317,7 @@ CURLcode Curl_dynhds_add_custom(struct Curl_easy *data,
       ptr = strchr(headers->data, ':');
       if(ptr) {
         name = headers->data;
-        namelen = ptr - headers->data;
+        namelen = (size_t)(ptr - headers->data);
         ptr++; /* pass the colon */
         while(*ptr && ISSPACE(*ptr))
           ptr++;
@@ -1339,7 +1340,7 @@ CURLcode Curl_dynhds_add_custom(struct Curl_easy *data,
         }
 
         name = headers->data;
-        namelen = ptr - headers->data;
+        namelen = (size_t)(ptr - headers->data);
         ptr++; /* pass the semicolon */
         while(*ptr && ISSPACE(*ptr))
           ptr++;
@@ -3910,7 +3911,7 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
     }
 
     /* decrease the size of the remaining (supposed) header line */
-    consumed = (end_ptr - buf) + 1;
+    consumed = (size_t)(end_ptr - buf) + 1;
     result = Curl_dyn_addn(&data->state.headerb, buf, consumed);
     if(result)
       return result;
