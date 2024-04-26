@@ -709,6 +709,7 @@ static int curltest_sslinfo_handler(request_rec *r)
   brigade_env_var(r, bb, "SSL_SESSION_RESUMED");
   brigade_env_var(r, bb, "SSL_SRP_USER");
   brigade_env_var(r, bb, "SSL_SRP_USERINFO");
+  brigade_env_var(r, bb, "SSL_TLS_SNI");
   apr_brigade_puts(bb, NULL, NULL, "}\n");
 
   /* flush response */
