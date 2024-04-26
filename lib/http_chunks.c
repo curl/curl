@@ -222,7 +222,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
       }
 
       *pconsumed += piece;
-      ch->datasize -= piece; /* decrease amount left to expect */
+      ch->datasize -= (curl_off_t)piece; /* decrease amount left to expect */
       buf += piece;    /* move read pointer forward */
       blen -= piece;   /* decrease space left in this round */
       CURL_TRC_WRITE(data, "http_chunked, write %zu body bytes, %"
@@ -345,7 +345,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
         (*pconsumed)++;
         /* Record the length of any data left in the end of the buffer
            even if there's no more chunks to read */
-        ch->datasize = blen;
+        ch->datasize = (curl_off_t)blen;
         ch->state = CHUNK_DONE;
         CURL_TRC_WRITE(data, "http_chunk, response complete");
         return CURLE_OK;
@@ -589,7 +589,7 @@ static CURLcode add_chunk(struct Curl_easy *data,
     if(hdlen <= 0)
       return CURLE_READ_ERROR;
     /* On a soft-limited bufq, we do not need to check that all was written */
-    result = Curl_bufq_cwrite(&ctx->chunkbuf, hd, hdlen, &n);
+    result = Curl_bufq_cwrite(&ctx->chunkbuf, hd, (size_t)hdlen, &n);
     if(!result)
       result = Curl_bufq_cwrite(&ctx->chunkbuf, buf, nread, &n);
     if(!result)
