@@ -1033,6 +1033,13 @@ pinnedpubkey_error:
   return CURLE_OK;
 }
 
+static void mbedtls_session_free(void *sessionid, size_t idsize)
+{
+  (void)idsize;
+  mbedtls_ssl_session_free(sessionid);
+  free(sessionid);
+}
+
 static CURLcode
 mbed_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
@@ -1049,7 +1056,6 @@ mbed_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
     int ret;
     mbedtls_ssl_session *our_ssl_sessionid;
     void *old_ssl_sessionid = NULL;
-    bool added = FALSE;
 
     our_ssl_sessionid = malloc(sizeof(mbedtls_ssl_session));
     if(!our_ssl_sessionid)
@@ -1073,16 +1079,11 @@ mbed_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
       Curl_ssl_delsessionid(data, old_ssl_sessionid);
 
     retcode = Curl_ssl_addsessionid(cf, data, &connssl->peer,
-                                    our_ssl_sessionid, 0, &added);
+                                    our_ssl_sessionid, 0,
+                                    mbedtls_session_free);
     Curl_ssl_sessionid_unlock(data);
-    if(!added) {
-      mbedtls_ssl_session_free(our_ssl_sessionid);
-      free(our_ssl_sessionid);
-    }
-    if(retcode) {
-      failf(data, "failed to store ssl session");
+    if(retcode)
       return retcode;
-    }
   }
 
   connssl->connecting_state = ssl_connect_done;
@@ -1174,12 +1175,6 @@ static ssize_t mbed_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   len = ret;
 
   return len;
-}
-
-static void mbedtls_session_free(void *ptr)
-{
-  mbedtls_ssl_session_free(ptr);
-  free(ptr);
 }
 
 static size_t mbedtls_version(char *buffer, size_t size)
@@ -1460,7 +1455,6 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   mbedtls_get_internals,            /* get_internals */
   mbedtls_close,                    /* close_one */
   mbedtls_close_all,                /* close_all */
-  mbedtls_session_free,             /* session_free */
   Curl_none_set_engine,             /* set_engine */
   Curl_none_set_engine_default,     /* set_engine_default */
   Curl_none_engines_list,           /* engines_list */
