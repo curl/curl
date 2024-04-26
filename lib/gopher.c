@@ -187,14 +187,14 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
     if(strlen(sel) < 1)
       break;
 
-    result = Curl_xfer_send(data, sel, k, &amount);
+    result = Curl_xfer_send(data, sel, (size_t)k, &amount);
     if(!result) { /* Which may not have written it all! */
       result = Curl_client_write(data, CLIENTWRITE_HEADER, sel, amount);
       if(result)
         break;
 
-      k -= amount;
-      sel += amount;
+      k -= (ssize_t)amount;
+      sel += (size_t)amount;
       if(k < 1)
         break; /* but it did write it all */
     }
