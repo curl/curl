@@ -558,7 +558,7 @@ static int cs_str_to_zip(const char *cs_str, size_t cs_len,
     /* determine the length of the part */
     cur = nxt;
     for(; nxt < end && *nxt != '\0' && *nxt != separator; nxt++);
-    len = nxt - cur;
+    len = (size_t)(nxt - cur);
 
     /* lookup index for the part (skip empty string at 0) */
     for(idx = 1, entry = cs_txt + 1; idx < CS_TXT_LEN; idx++) {
@@ -624,7 +624,7 @@ static int cs_zip_to_str(const uint8_t zip[6],
 
     if(r < 0)
       return -1;
-    len += r;
+    len += (size_t)r;
   }
 
   return 0;
@@ -667,7 +667,7 @@ uint16_t Curl_cipher_suite_walk_str(const char **str, const char **end)
   /* move end pointer to next separator or end of string */
   for(*end = *str; *end[0] != '\0' && !cs_is_separator(*end[0]); (*end)++);
 
-  return Curl_cipher_suite_lookup_id(*str, *end - *str);
+  return Curl_cipher_suite_lookup_id(*str, (size_t)(*end - *str));
 }
 
 int Curl_cipher_suite_get_str(uint16_t id, char *buf, size_t buf_size,
