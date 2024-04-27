@@ -102,7 +102,7 @@ static unsigned char ws_frame_flags2op(int flags)
   size_t i;
   for(i = 0; i < sizeof(WS_FRAMES)/sizeof(WS_FRAMES[0]); ++i) {
     if(WS_FRAMES[i].flags & flags)
-      return WS_FRAMES[i].proto_opcode;
+      return (unsigned char)WS_FRAMES[i].proto_opcode;
   }
   return 0;
 }
@@ -171,7 +171,7 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
       dec->head[0] = *inbuf;
       Curl_bufq_skip(inraw, 1);
 
-      dec->frame_flags  = ws_frame_op2flags(dec->head[0]);
+      dec->frame_flags = ws_frame_op2flags(dec->head[0]);
       if(!dec->frame_flags) {
         failf(data, "WS: unknown opcode: %x", dec->head[0]);
         ws_dec_reset(dec);
@@ -350,7 +350,7 @@ static void update_meta(struct websocket *ws,
   ws->frame.flags = frame_flags;
   ws->frame.offset = payload_offset;
   ws->frame.len = cur_len;
-  ws->frame.bytesleft = (payload_len - payload_offset - cur_len);
+  ws->frame.bytesleft = payload_len - payload_offset - (curl_off_t)cur_len;
 }
 
 /* WebSockets decoding client writer */
@@ -392,7 +392,7 @@ static ssize_t ws_cw_dec_next(const unsigned char *buf, size_t buflen,
   struct ws_cw_dec_ctx *ctx = user_data;
   struct Curl_easy *data = ctx->data;
   struct websocket *ws = ctx->ws;
-  curl_off_t remain = (payload_len - (payload_offset + buflen));
+  curl_off_t remain = payload_len - (payload_offset + (curl_off_t)buflen);
 
   (void)frame_age;
   if((frame_flags & CURLWS_PING) && !remain) {
@@ -560,7 +560,7 @@ static ssize_t ws_enc_write_head(struct Curl_easy *data,
     return -1;
   }
 
-  opcode = ws_frame_flags2op(flags);
+  opcode = ws_frame_flags2op((int)flags);
   if(!opcode) {
     failf(data, "WS: provided flags not recognized '%x'", flags);
     *err = CURLE_SEND_ERROR;
@@ -867,7 +867,7 @@ static ssize_t ws_client_collect(const unsigned char *buf, size_t buflen,
 {
   struct ws_collect *ctx = userp;
   size_t nwritten;
-  curl_off_t remain = (payload_len - (payload_offset + buflen));
+  curl_off_t remain = payload_len - (payload_offset + (curl_off_t)buflen);
 
   if(!ctx->bufidx) {
     /* first write */
@@ -903,7 +903,7 @@ static ssize_t ws_client_collect(const unsigned char *buf, size_t buflen,
     memcpy(ctx->buffer + ctx->bufidx, buf, nwritten);
     ctx->bufidx += nwritten;
   }
-  return nwritten;
+  return (ssize_t)nwritten;
 }
 
 static ssize_t nw_in_recv(void *reader_ctx,
