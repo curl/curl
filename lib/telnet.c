@@ -79,7 +79,7 @@
   } while(0)
 
 #define  CURL_SB_GET(x) ((*x->subpointer++)&0xff)
-#define  CURL_SB_LEN(x) (x->subend - x->subpointer)
+#define  CURL_SB_LEN(x) ((size_t)(x->subend - x->subpointer))
 
 /* For posterity:
 #define  CURL_SB_PEEK(x) ((*x->subpointer)&0xff)
@@ -823,7 +823,7 @@ static CURLcode check_telnet_options(struct Curl_easy *data)
     char *arg;
     char *sep = strchr(option, '=');
     if(sep) {
-      olen = sep - option;
+      olen = (size_t)(sep - option);
       arg = ++sep;
       if(str_is_nonascii(arg))
         continue;
@@ -980,13 +980,14 @@ static void suboption(struct Curl_easy *data)
         if(len + tmplen < (int)sizeof(temp)-6) {
           char *s = strchr(v->data, ',');
           if(!s)
-            len += msnprintf((char *)&temp[len], sizeof(temp) - len,
-                             "%c%s", CURL_NEW_ENV_VAR, v->data);
+            len += (size_t)msnprintf((char *)&temp[len], sizeof(temp) - len,
+                                     "%c%s", CURL_NEW_ENV_VAR, v->data);
           else {
-            size_t vlen = s - v->data;
-            len += msnprintf((char *)&temp[len], sizeof(temp) - len,
-                             "%c%.*s%c%s", CURL_NEW_ENV_VAR,
-                             (int)vlen, v->data, CURL_NEW_ENV_VALUE, ++s);
+            size_t vlen = (size_t)(s - v->data);
+            len += (size_t)msnprintf((char *)&temp[len], sizeof(temp) - len,
+                                     "%c%.*s%c%s", CURL_NEW_ENV_VAR,
+                                     (int)vlen, v->data, CURL_NEW_ENV_VALUE,
+                                     ++s);
           }
         }
       }
@@ -1082,7 +1083,7 @@ CURLcode telrcv(struct Curl_easy *data,
     result = Curl_client_write(data,                          \
                                CLIENTWRITE_BODY,              \
                                (char *)&inbuf[startwrite],    \
-                               in-startwrite);                \
+                               (size_t)(in - startwrite));    \
     if(result)                                                \
       return result;                                          \
   }                                                           \
@@ -1245,7 +1246,7 @@ static CURLcode send_telnet_data(struct Curl_easy *data,
   if(nread < 0)
     return CURLE_TOO_LARGE;
 
-  if(memchr(buffer, CURL_IAC, nread)) {
+  if(memchr(buffer, CURL_IAC, (size_t)nread)) {
     /* only use the escape buffer when necessary */
     Curl_dyn_reset(&tn->out);
 
@@ -1429,7 +1430,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
           }
         }
 
-        result = send_telnet_data(data, buffer, readfile_read);
+        result = send_telnet_data(data, buffer, (ssize_t)readfile_read);
         if(result) {
           keepon = FALSE;
           break;
@@ -1447,7 +1448,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
         break;
       }
 
-      result = send_telnet_data(data, buffer, readfile_read);
+      result = send_telnet_data(data, buffer, (ssize_t)readfile_read);
       if(result) {
         keepon = FALSE;
         break;
@@ -1544,7 +1545,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
 
   while(keepon) {
     DEBUGF(infof(data, "telnet_do, poll %d fds", poll_cnt));
-    switch(Curl_poll(pfd, poll_cnt, interval_ms)) {
+    switch(Curl_poll(pfd, (unsigned int)poll_cnt, interval_ms)) {
     case -1:                    /* error, stop reading */
       keepon = FALSE;
       continue;
