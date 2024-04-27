@@ -835,7 +835,6 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl Only clang 2.9 or later
           if test "$compiler_num" -ge "209"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [sign-conversion])
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-error=sign-conversion"          # FIXME
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [shift-sign-overflow])
           # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [padded])  # Not used because we cannot change public structs
           fi
@@ -1027,7 +1026,6 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [clobbered ignored-qualifiers])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [conversion trampolines])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [sign-conversion])
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-error=sign-conversion"          # FIXME
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [vla])
             dnl required for -Warray-bounds, included in -Wall
             tmp_CFLAGS="$tmp_CFLAGS -ftree-vrp"

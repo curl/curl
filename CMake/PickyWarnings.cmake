@@ -98,7 +98,6 @@ if(PICKY_COMPILER)
       -Wold-style-definition               # clang  2.7  gcc  3.4
       -Wredundant-decls                    # clang  2.7  gcc  4.1
       -Wsign-conversion                    # clang  2.9  gcc  4.3
-        -Wno-error=sign-conversion                                              # FIXME
       -Wstrict-prototypes                  # clang  1.0  gcc  3.3
     # -Wswitch-enum                        # clang  2.7  gcc  4.1               # Not used because this basically disallows default case
       -Wtype-limits                        # clang  2.7  gcc  4.3
