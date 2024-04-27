@@ -313,7 +313,7 @@ static CURLcode int2str(struct dynbuf *store,
                         const char *beg, const char *end)
 {
   unsigned int val = 0;
-  size_t n = end - beg;
+  size_t n = (size_t)(end - beg);
 
   if(!n)
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -342,8 +342,8 @@ static CURLcode int2str(struct dynbuf *store,
 static CURLcode
 utf8asn1str(struct dynbuf *to, int type, const char *from, const char *end)
 {
-  size_t inlength = end - from;
-  int size = 1;
+  size_t inlength = (size_t)(end - from);
+  size_t size = 1;
   CURLcode result = CURLE_OK;
 
   switch(type) {
@@ -524,7 +524,9 @@ static CURLcode GTime2str(struct dynbuf *store,
       tzp++;
     while(tzp < end && *tzp >= '0' && *tzp <= '9');
     /* Strip leading zeroes in fractional seconds. */
-    for(fracl = tzp - fracp - 1; fracl && fracp[fracl - 1] == '0'; fracl--)
+    for(fracl = (size_t)(tzp - fracp) - 1;
+        fracl && fracp[fracl - 1] == '0';
+        fracl--)
       ;
   }
 
@@ -540,7 +542,7 @@ static CURLcode GTime2str(struct dynbuf *store,
     tzp++;
   }
 
-  tzl = end - tzp;
+  tzl = (size_t)(end - tzp);
   return Curl_dyn_addf(store,
                        "%.4s-%.2s-%.2s %.2s:%.2s:%c%c%s%.*s%s%.*s",
                        beg, beg + 4, beg + 6,
@@ -585,7 +587,7 @@ static CURLcode UTime2str(struct dynbuf *store,
   else
     tzp++;
 
-  tzl = end - tzp;
+  tzl = (size_t)(end - tzp);
   return Curl_dyn_addf(store, "%u%.2s-%.2s-%.2s %.2s:%.2s:%.2s %.*s",
                        20 - (*beg >= '5'), beg, beg + 2, beg + 4,
                        beg + 6, beg + 8, sec,
@@ -954,7 +956,7 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
      * ECC public key is all the data, a value of type BIT STRING mapped to
      * OCTET STRING and should not be parsed as an ASN.1 value.
      */
-    const size_t len = ((pubkey->end - pubkey->beg - 2) * 4);
+    const size_t len = (((size_t)(pubkey->end - pubkey->beg) - 2) * 4);
     if(!certnum)
       infof(data, "   ECC Public Key (%zu bits)", len);
     if(data->set.ssl.certinfo) {
@@ -982,7 +984,7 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
     /* Compute key length. */
     for(q = elem.beg; !*q && q < elem.end; q++)
       ;
-    len = ((elem.end - q) * 8);
+    len = (size_t)(elem.end - q) * 8;
     if(len) {
       unsigned int i;
       for(i = *(unsigned char *) q; !(i & 0x80); i <<= 1)
@@ -1191,7 +1193,8 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
 
   /* Generate PEM certificate. */
   result = Curl_base64_encode(cert.certificate.beg,
-                              cert.certificate.end - cert.certificate.beg,
+                              (size_t)(cert.certificate.end -
+                                       cert.certificate.beg),
                               &certptr, &clen);
   if(result)
     goto done;
