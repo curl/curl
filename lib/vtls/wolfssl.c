@@ -297,7 +297,7 @@ static int wolfssl_bio_cf_out_write(WOLFSSL_BIO *bio,
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(data);
-  nwritten = Curl_conn_cf_send(cf->next, data, buf, blen, &result);
+  nwritten = Curl_conn_cf_send(cf->next, data, buf, (size_t)blen, &result);
   backend->io_result = result;
   CURL_TRC_CF(data, cf, "bio_write(len=%d) -> %zd, %d",
               blen, nwritten, result);
@@ -322,7 +322,7 @@ static int wolfssl_bio_cf_in_read(WOLFSSL_BIO *bio, char *buf, int blen)
   if(!buf)
     return 0;
 
-  nread = Curl_conn_cf_recv(cf->next, data, buf, blen, &result);
+  nread = Curl_conn_cf_recv(cf->next, data, buf, (size_t)blen, &result);
   backend->io_result = result;
   CURL_TRC_CF(data, cf, "bio_read(len=%d) -> %zd, %d", blen, nread, result);
   wolfSSL_BIO_clear_retry_flags(bio);
@@ -540,7 +540,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   /* load certificate blob */
   if(ca_info_blob) {
     if(wolfSSL_CTX_load_verify_buffer(backend->ctx, ca_info_blob->data,
-                                      ca_info_blob->len,
+                                      (long)ca_info_blob->len,
                                       SSL_FILETYPE_PEM) != SSL_SUCCESS) {
       if(imported_native_ca) {
         infof(data, "error importing CA certificate blob, continuing anyway");
@@ -688,7 +688,8 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
     result = Curl_alpn_to_proto_str(&proto, connssl->alpn);
     if(result ||
-       wolfSSL_UseALPN(backend->handle, (char *)proto.data, proto.len,
+       wolfSSL_UseALPN(backend->handle,
+                       (char *)proto.data, (unsigned int)proto.len,
                        WOLFSSL_ALPN_CONTINUE_ON_MISMATCH) != SSL_SUCCESS) {
       failf(data, "SSL: failed setting ALPN protocols");
       return CURLE_SSL_CONNECT_ERROR;
@@ -973,7 +974,7 @@ wolfssl_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     }
     else {
       failf(data, "SSL_connect failed with error %d: %s", detail,
-            wolfSSL_ERR_error_string(detail, error_buffer));
+            wolfSSL_ERR_error_string((unsigned long)detail, error_buffer));
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
@@ -1145,7 +1146,7 @@ static ssize_t wolfssl_send(struct Curl_cfilter *cf,
       }
       CURL_TRC_CF(data, cf, "wolfssl_send(len=%zu) -> %d, %d", len, rc, err);
       failf(data, "SSL write: %s, errno %d",
-            wolfSSL_ERR_error_string(err, error_buffer),
+            wolfSSL_ERR_error_string((unsigned long)err, error_buffer),
             SOCKERRNO);
       *curlcode = CURLE_SEND_ERROR;
       return -1;
@@ -1222,7 +1223,8 @@ static ssize_t wolfssl_recv(struct Curl_cfilter *cf,
         return -1;
       }
       failf(data, "SSL read: %s, errno %d",
-            wolfSSL_ERR_error_string(err, error_buffer), SOCKERRNO);
+            wolfSSL_ERR_error_string((unsigned long)err, error_buffer),
+            SOCKERRNO);
       *curlcode = CURLE_RECV_ERROR;
       return -1;
     }
@@ -1235,9 +1237,9 @@ static ssize_t wolfssl_recv(struct Curl_cfilter *cf,
 static size_t wolfssl_version(char *buffer, size_t size)
 {
 #if LIBWOLFSSL_VERSION_HEX >= 0x03006000
-  return msnprintf(buffer, size, "wolfSSL/%s", wolfSSL_lib_version());
+  return (size_t)msnprintf(buffer, size, "wolfSSL/%s", wolfSSL_lib_version());
 #elif defined(WOLFSSL_VERSION)
-  return msnprintf(buffer, size, "wolfSSL/%s", WOLFSSL_VERSION);
+  return (size_t)msnprintf(buffer, size, "wolfSSL/%s", WOLFSSL_VERSION);
 #endif
 }
 
