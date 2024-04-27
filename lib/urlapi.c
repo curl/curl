@@ -232,7 +232,7 @@ size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen,
        be the host name "data" with a specified port number. */
 
     /* the length of the scheme is the name part only */
-    size_t len = i;
+    size_t len = (size_t)i;
     if(buf) {
       buf[i] = 0;
       while(i--) {
@@ -466,7 +466,7 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
 
   /* We could use the login information in the URL so extract it. Only parse
      options if the handler says we should. Note that 'h' might be NULL! */
-  ccode = Curl_parse_login_details(login, ptr - login - 1,
+  ccode = Curl_parse_login_details(login, (size_t)(ptr - login) - 1,
                                    &userp, &passwdp,
                                    (h && (h->flags & PROTOPT_URLOPTIONS)) ?
                                    &optionsp:NULL);
@@ -496,7 +496,7 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
   }
 
   /* the host name starts at this offset */
-  *offset = ptr - login;
+  *offset = (size_t)(ptr - login);
   return CURLUE_OK;
 
 out:
@@ -538,7 +538,7 @@ UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
   if(portptr) {
     char *rest = NULL;
     unsigned long port;
-    size_t keep = portptr - hostname;
+    size_t keep = (size_t)(portptr - hostname);
 
     /* Browser behavior adaptation. If there's a colon with no digits after,
        just cut off the name there which makes us ignore the colon and just
@@ -1091,7 +1091,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
             goto fail;
           }
 
-          len = path - ptr;
+          len = (size_t)(path - ptr);
           if(len) {
             CURLcode code = Curl_dyn_addn(&host, ptr, len);
             if(code) {
@@ -1112,7 +1112,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
       }
 
       path = ptr;
-      pathlen = urllen - (ptr - url);
+      pathlen = urllen - (size_t)(ptr - url);
     }
 
     if(!uncpath)
@@ -1195,7 +1195,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     path = &hostp[hostlen];
 
     /* this pathlen also contains the query and the fragment */
-    pathlen = urllen - (path - url);
+    pathlen = urllen - (size_t)(path - url);
     if(hostlen) {
 
       result = parse_authority(u, hostp, hostlen, flags, &host, schemelen);
@@ -1242,7 +1242,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
 
   fragment = strchr(path, '#');
   if(fragment) {
-    fraglen = pathlen - (fragment - path);
+    fraglen = pathlen - (size_t)(fragment - path);
     u->fragment_present = TRUE;
     if(fraglen > 1) {
       /* skip the leading '#' in the copy but include the terminating null */
@@ -1269,7 +1269,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
   query = memchr(path, '?', pathlen);
   if(query) {
     size_t qlen = fragment ? (size_t)(fragment - query) :
-      pathlen - (query - path);
+      pathlen - (size_t)(query - path);
     pathlen -= qlen;
     u->query_present = TRUE;
     if(qlen > 1) {
