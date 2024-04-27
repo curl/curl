@@ -154,15 +154,15 @@ static int mqtt_getsock(struct Curl_easy *data,
 
 static int mqtt_encode_len(char *buf, size_t len)
 {
-  unsigned char encoded;
   int i;
 
   for(i = 0; (len > 0) && (i<4); i++) {
+    unsigned char encoded;
     encoded = len % 0x80;
     len /= 0x80;
     if(len)
       encoded |= 0x80;
-    buf[i] = encoded;
+    buf[i] = (char)encoded;
   }
 
   return i;
@@ -173,7 +173,7 @@ static int add_passwd(const char *passwd, const size_t plen,
                        char *pkt, const size_t start, int remain_pos)
 {
   /* magic number that need to be set properly */
-  const size_t conn_flags_pos = remain_pos + 8;
+  const size_t conn_flags_pos = (size_t)remain_pos + 8;
   if(plen > 0xffff)
     return 1;
 
@@ -192,7 +192,7 @@ static int add_user(const char *username, const size_t ulen,
                     unsigned char *pkt, const size_t start, int remain_pos)
 {
   /* magic number that need to be set properly */
-  const size_t conn_flags_pos = remain_pos + 8;
+  const size_t conn_flags_pos = (size_t)remain_pos + 8;
   if(ulen > 0xffff)
     return 1;
 
@@ -224,7 +224,7 @@ static int init_connpack(char *packet, char *remain, int remain_pos)
   /* packet type */
   packet[0] = MQTT_MSG_CONNECT;
   /* remaining length field */
-  memcpy(&packet[1], remain, remain_pos);
+  memcpy(&packet[1], remain, (size_t)remain_pos);
   /* Fixed header ends */
 
   /* Variable header starts */
@@ -284,7 +284,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   remain_pos = mqtt_encode_len(remain, payloadlen + 10);
 
   /* 10 length of variable header and 1 the first byte of the fixed header */
-  packetlen = payloadlen + 10 + remain_pos + 1;
+  packetlen = payloadlen + 10 + (size_t)remain_pos + 1;
 
   /* allocating packet */
   if(packetlen > 268435455)
@@ -300,7 +300,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   result = Curl_rand_alnum(data, (unsigned char *)&client_id[clen],
                            MQTT_CLIENTID_LEN - clen + 1);
   /* add client id */
-  rc = add_client_id(client_id, strlen(client_id), packet, pos + 1);
+  rc = add_client_id(client_id, strlen(client_id), packet, (size_t)pos + 1);
   if(rc) {
     failf(data, "Client ID length mismatched: [%zu]", strlen(client_id));
     result = CURLE_WEIRD_SERVER_REPLY;
@@ -309,7 +309,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   infof(data, "Using client id '%s'", client_id);
 
   /* position where starts the user payload */
-  start_user = pos + 3 + MQTT_CLIENTID_LEN;
+  start_user = (size_t)pos + 3 + MQTT_CLIENTID_LEN;
   /* position where starts the password payload */
   start_pwd = start_user + ulen;
   /* if user name was provided, add it to the packet */
@@ -452,7 +452,7 @@ static CURLcode mqtt_subscribe(struct Curl_easy *data)
 
   packetlen = topiclen + 5; /* packetid + topic (has a two byte length field)
                                + 2 bytes topic length + QoS byte */
-  n = mqtt_encode_len((char *)encodedsize, packetlen);
+  n = (size_t)mqtt_encode_len((char *)encodedsize, packetlen);
   packetlen += n + 1; /* add one for the control packet type byte */
 
   packet = malloc(packetlen);
@@ -538,7 +538,7 @@ static CURLcode mqtt_publish(struct Curl_easy *data)
     goto fail;
 
   remaininglength = payloadlen + 2 + topiclen;
-  encodelen = mqtt_encode_len(encodedbytes, remaininglength);
+  encodelen = (size_t)mqtt_encode_len(encodedbytes, remaininglength);
 
   /* add the control byte and the encoded remaining length */
   pkt = malloc(remaininglength + 1 + encodelen);
@@ -667,9 +667,9 @@ MQTT_SUBACK_COMING:
       result = CURLE_FILESIZE_EXCEEDED;
       goto end;
     }
-    Curl_pgrsSetDownloadSize(data, remlen);
+    Curl_pgrsSetDownloadSize(data, (curl_off_t)remlen);
     data->req.bytecount = 0;
-    data->req.size = remlen;
+    data->req.size = (curl_off_t)remlen;
     mq->npacket = remlen; /* get this many bytes */
     FALLTHROUGH();
   case MQTT_PUB_REMAIN: {
@@ -692,11 +692,11 @@ MQTT_SUBACK_COMING:
     }
 
     /* if QoS is set, message contains packet id */
-    result = Curl_client_write(data, CLIENTWRITE_BODY, buffer, nread);
+    result = Curl_client_write(data, CLIENTWRITE_BODY, buffer, (size_t)nread);
     if(result)
       goto end;
 
-    mq->npacket -= nread;
+    mq->npacket -= (size_t)nread;
     if(!mq->npacket)
       /* no more PUBLISH payload, back to subscribe wait state */
       mqstate(data, MQTT_FIRST, MQTT_PUBWAIT);
