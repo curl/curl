@@ -1433,7 +1433,7 @@ static ssize_t cf_h2_proxy_send(struct Curl_cfilter *cf,
     /* Whatever the cause, we need to return CURL_EAGAIN for this call.
      * We have unwritten state that needs us being invoked again and EAGAIN
      * is the only way to ensure that. */
-    ctx->tunnel.upload_blocked_len = nwritten;
+    ctx->tunnel.upload_blocked_len = (size_t)nwritten;
     CURL_TRC_CF(data, cf, "[%d] cf_send(len=%zu) BLOCK: win %u/%zu "
                 "blocked_len=%zu",
                 ctx->tunnel.stream_id, len,
