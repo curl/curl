@@ -164,7 +164,7 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
 
   if(user.tchar_ptr) {
     domain.tchar_ptr = useranddomain.tchar_ptr;
-    domlen = user.tchar_ptr - useranddomain.tchar_ptr;
+    domlen = (size_t)(user.tchar_ptr - useranddomain.tchar_ptr);
     user.tchar_ptr++;
   }
   else {
