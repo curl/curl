@@ -951,7 +951,7 @@ static ssize_t bearssl_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     if(backend->pending_write) {
       applen = backend->pending_write;
       backend->pending_write = 0;
-      return applen;
+      return (ssize_t)applen;
     }
     if(applen > len)
       applen = len;
@@ -984,7 +984,7 @@ static ssize_t bearssl_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   memcpy(buf, app, applen);
   br_ssl_engine_recvapp_ack(&backend->ctx.eng, applen);
 
-  return applen;
+  return (ssize_t)applen;
 }
 
 static CURLcode bearssl_connect_common(struct Curl_cfilter *cf,
@@ -1091,7 +1091,7 @@ static CURLcode bearssl_connect_common(struct Curl_cfilter *cf,
 
 static size_t bearssl_version(char *buffer, size_t size)
 {
-  return msnprintf(buffer, size, "BearSSL");
+  return (size_t)msnprintf(buffer, size, "BearSSL");
 }
 
 static bool bearssl_data_pending(struct Curl_cfilter *cf,
