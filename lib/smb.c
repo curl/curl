@@ -505,7 +505,7 @@ static CURLcode smb_recv_message(struct Curl_easy *data, void **msg)
   if(!bytes_read)
     return CURLE_OK;
 
-  smbc->got += bytes_read;
+  smbc->got += (size_t)bytes_read;
 
   /* Check for a 32-bit nbt header */
   if(smbc->got < sizeof(unsigned int))
@@ -559,7 +559,7 @@ static void smb_format_message(struct Curl_easy *data, struct smb_header *h,
   h->flags2 = smb_swap16(SMB_FLAGS2_IS_LONG_NAME | SMB_FLAGS2_KNOWS_LONG_NAME);
   h->uid = smb_swap16(smbc->uid);
   h->tid = smb_swap16(req->tid);
-  pid = getpid();
+  pid = (unsigned int)getpid();
   h->pid_high = smb_swap16((unsigned short)(pid >> 16));
   h->pid = smb_swap16((unsigned short) pid);
 }
@@ -671,7 +671,7 @@ static CURLcode smb_send_setup(struct Curl_easy *data)
   MSGCATNULL(smbc->domain);
   MSGCATNULL(OS);
   MSGCATNULL(CLIENTNAME);
-  byte_count = p - msg.bytes;
+  byte_count = (size_t)(p - msg.bytes);
   msg.byte_count = smb_swap16((unsigned short)byte_count);
 
   return smb_send_message(data, SMB_COM_SETUP_ANDX, &msg,
@@ -699,7 +699,7 @@ static CURLcode smb_send_tree_connect(struct Curl_easy *data)
   MSGCAT("\\");
   MSGCATNULL(smbc->share);
   MSGCATNULL(SERVICENAME); /* Match any type of service */
-  byte_count = p - msg.bytes;
+  byte_count = (size_t)(p - msg.bytes);
   msg.byte_count = smb_swap16((unsigned short)byte_count);
 
   return smb_send_message(data, SMB_COM_TREE_CONNECT_ANDX, &msg,
