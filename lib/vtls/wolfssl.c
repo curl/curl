@@ -291,7 +291,7 @@ static int wolfssl_bio_cf_out_write(WOLFSSL_BIO *bio,
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(data);
-  nwritten = Curl_conn_cf_send(cf->next, data, buf, blen, &result);
+  nwritten = Curl_conn_cf_send(cf->next, data, buf, (size_t)blen, &result);
   backend->io_result = result;
   CURL_TRC_CF(data, cf, "bio_write(len=%d) -> %zd, %d",
               blen, nwritten, result);
@@ -316,7 +316,7 @@ static int wolfssl_bio_cf_in_read(WOLFSSL_BIO *bio, char *buf, int blen)
   if(!buf)
     return 0;
 
-  nread = Curl_conn_cf_recv(cf->next, data, buf, blen, &result);
+  nread = Curl_conn_cf_recv(cf->next, data, buf, (size_t)blen, &result);
   backend->io_result = result;
   CURL_TRC_CF(data, cf, "bio_read(len=%d) -> %zd, %d", blen, nread, result);
   wolfSSL_BIO_clear_retry_flags(bio);
@@ -1422,9 +1422,9 @@ static ssize_t wolfssl_recv(struct Curl_cfilter *cf,
 static size_t wolfssl_version(char *buffer, size_t size)
 {
 #if LIBWOLFSSL_VERSION_HEX >= 0x03006000
-  return msnprintf(buffer, size, "wolfSSL/%s", wolfSSL_lib_version());
+  return (size_t)msnprintf(buffer, size, "wolfSSL/%s", wolfSSL_lib_version());
 #elif defined(WOLFSSL_VERSION)
-  return msnprintf(buffer, size, "wolfSSL/%s", WOLFSSL_VERSION);
+  return (size_t)msnprintf(buffer, size, "wolfSSL/%s", WOLFSSL_VERSION);
 #endif
 }
 
