@@ -35,7 +35,7 @@ foreach(example IN LISTS check_PROGRAMS)
     "${CURL_BINARY_DIR}/lib"      # To reach "curl_config.h"
     "${CURL_BINARY_DIR}/include"  # To reach "curl/curl.h"
   )
-  target_link_libraries(${example_target} ${LIB_SELECTED_FOR_EXE} ${CURL_LIBS})
+  target_link_libraries(${example_target} ${LIB_SELECTED} ${CURL_LIBS})
   target_compile_definitions(${example_target} PRIVATE "CURL_NO_OLDIES")
   set_target_properties(${example_target} PROPERTIES OUTPUT_NAME "${example}" UNITY_BUILD OFF)
 endforeach()
