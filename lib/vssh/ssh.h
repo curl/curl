@@ -163,7 +163,7 @@ struct ssh_conn {
   unsigned kbd_state; /* 0 or 1 */
   ssh_key privkey;
   ssh_key pubkey;
-  int auth_methods;
+  unsigned int auth_methods;
   ssh_session ssh_session;
   ssh_scp scp_session;
   sftp_session sftp_session;
