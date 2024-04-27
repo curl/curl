@@ -350,7 +350,7 @@ static int waitperform(struct Curl_easy *data, timediff_t timeout_ms)
   }
 
   if(num) {
-    nfds = Curl_poll(pfd, num, timeout_ms);
+    nfds = Curl_poll(pfd, (unsigned int)num, timeout_ms);
     if(nfds < 0)
       return -1;
   }
