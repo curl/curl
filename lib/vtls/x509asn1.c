@@ -956,7 +956,7 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
       if(ssl_push_certinfo(data, certnum, "ECC Public Key", q))
         return 1;
     }
-    return do_pubkey_field(data, certnum, "ecPublicKey", pubkey);
+    return (int)do_pubkey_field(data, certnum, "ecPublicKey", pubkey);
   }
 
   /* Get the public key (single element). */

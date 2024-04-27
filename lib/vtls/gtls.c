@@ -315,7 +315,7 @@ static CURLcode handshake(struct Curl_cfilter *cf,
       const char *strerr = NULL;
 
       if(rc == GNUTLS_E_WARNING_ALERT_RECEIVED) {
-        int alert = gnutls_alert_get(session);
+        gnutls_alert_description_t alert = gnutls_alert_get(session);
         strerr = gnutls_alert_get_name(alert);
       }
 
@@ -332,7 +332,7 @@ static CURLcode handshake(struct Curl_cfilter *cf,
       const char *strerr = NULL;
 
       if(rc == GNUTLS_E_FATAL_ALERT_RECEIVED) {
-        int alert = gnutls_alert_get(session);
+        gnutls_alert_description_t alert = gnutls_alert_get(session);
         strerr = gnutls_alert_get_name(alert);
       }
 
@@ -950,7 +950,7 @@ gtls_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
   result = Curl_gtls_ctx_init(&backend->gtls, cf, data, &connssl->peer,
-                              proto.data, proto.len, NULL, NULL, cf);
+                              proto.data, (size_t)proto.len, NULL, NULL, cf);
   if(result)
     return result;
 
@@ -1045,7 +1045,7 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   const char *ptr;
-  unsigned int algo;
+  int algo;
   unsigned int bits;
   gnutls_protocol_t version = gnutls_protocol_get_version(session);
 #endif
@@ -1093,7 +1093,7 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
   if(data->set.ssl.certinfo && chainp) {
     unsigned int i;
 
-    result = Curl_ssl_init_certinfo(data, cert_list_size);
+    result = Curl_ssl_init_certinfo(data, (int)cert_list_size);
     if(result)
       return result;
 
@@ -1101,7 +1101,7 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
       const char *beg = (const char *) chainp[i].data;
       const char *end = beg + chainp[i].size;
 
-      result = Curl_extract_certinfo(data, i, beg, end);
+      result = Curl_extract_certinfo(data, (int)i, beg, end);
       if(result)
         return result;
     }
@@ -1258,9 +1258,11 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
     gnutls_x509_crt_init(&x509_issuer);
     issuerp = load_file(config->issuercert);
     gnutls_x509_crt_import(x509_issuer, &issuerp, GNUTLS_X509_FMT_PEM);
-    rc = gnutls_x509_crt_check_issuer(x509_cert, x509_issuer);
+    rc = (int)gnutls_x509_crt_check_issuer(x509_cert, x509_issuer);
     gnutls_x509_crt_deinit(x509_issuer);
     unload_file(issuerp);
+    /* FIXME: error = 0 according to docs, there is no negative returned
+              621c2b901527248b4822895bc0305373a7d2dd63 */
     if(rc <= 0) {
       failf(data, "server certificate issuer check failed (IssuerCert: %s)",
             config->issuercert?config->issuercert:"none");
@@ -1287,7 +1289,7 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
      in RFC2818 (HTTPS), which takes into account wildcards, and the subject
      alternative name PKIX extension. Returns non zero on success, and zero on
      failure. */
-  rc = gnutls_x509_crt_check_hostname(x509_cert, peer->hostname);
+  rc = (int)gnutls_x509_crt_check_hostname(x509_cert, peer->hostname);
 #if GNUTLS_VERSION_NUMBER < 0x030306
   /* Before 3.3.6, gnutls_x509_crt_check_hostname() didn't check IP
      addresses. */
@@ -1421,8 +1423,9 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   /* public key algorithm's parameters */
   algo = gnutls_x509_crt_get_pk_algorithm(x509_cert, &bits);
+  /* FIXME: handle error if algo is negative */
   infof(data, "  certificate public key: %s",
-        gnutls_pk_algorithm_get_name(algo));
+        gnutls_pk_algorithm_get_name((gnutls_pk_algorithm_t)algo));
 
   /* version of the X.509 certificate. */
   infof(data, "  certificate version: #%d",
@@ -1516,7 +1519,7 @@ gtls_connect_common(struct Curl_cfilter *cf,
                     bool *done)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  int rc;
+  CURLcode rc;
   CURLcode result = CURLE_OK;
 
   /* Initiate the connection, if not already done */
@@ -1785,7 +1788,8 @@ out:
 
 static size_t gtls_version(char *buffer, size_t size)
 {
-  return msnprintf(buffer, size, "GnuTLS/%s", gnutls_check_version(NULL));
+  return (size_t)msnprintf(buffer, size, "GnuTLS/%s",
+                           gnutls_check_version(NULL));
 }
 
 /* data might be NULL! */
