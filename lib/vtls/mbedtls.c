@@ -410,7 +410,7 @@ static uint16_t
 mbed_cipher_suite_walk_str(const char **str, const char **end)
 {
   uint16_t id = Curl_cipher_suite_walk_str(str, end);
-  size_t len = *end - *str;
+  size_t len = (size_t)(*end - *str);
 
   if(!id) {
     if(strncasecompare("TLS_ECJPAKE_WITH_AES_128_CCM_8", *str, len))
@@ -976,7 +976,8 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
 #else
   infof(data, "mbedTLS: Handshake complete");
 #endif
-  ret = mbedtls_ssl_get_verify_result(&backend->ssl);
+  ret = (int)mbedtls_ssl_get_verify_result(&backend->ssl);
+  /* FIXME: verify ret: '-1u if the result is not available' */
 
   if(!conn_config->verifyhost)
     /* Ignore hostname errors if verifyhost is disabled */
@@ -1083,7 +1084,8 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     /* mbedtls_pk_write_pubkey_der writes data at the end of the buffer. */
     result = Curl_pin_peer_pubkey(data,
                                   pinnedpubkey,
-                                  &pubkey[PUB_DER_MAX_BYTES - size], size);
+                                  &pubkey[PUB_DER_MAX_BYTES - size],
+                                  (size_t)size);
 pinnedpubkey_error:
     mbedtls_x509_crt_free(p);
     free(p);
@@ -1276,10 +1278,10 @@ static size_t mbedtls_version(char *buffer, size_t size)
 #ifdef MBEDTLS_VERSION_C
   /* if mbedtls_version_get_number() is available it is better */
   unsigned int version = mbedtls_version_get_number();
-  return msnprintf(buffer, size, "mbedTLS/%u.%u.%u", version>>24,
-                   (version>>16)&0xff, (version>>8)&0xff);
+  return (size_t)msnprintf(buffer, size, "mbedTLS/%u.%u.%u", version>>24,
+                           (version>>16)&0xff, (version>>8)&0xff);
 #else
-  return msnprintf(buffer, size, "mbedTLS/%s", MBEDTLS_VERSION_STRING);
+  return (size_t)msnprintf(buffer, size, "mbedTLS/%s", MBEDTLS_VERSION_STRING);
 #endif
 }
 
