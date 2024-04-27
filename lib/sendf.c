@@ -308,7 +308,7 @@ static CURLcode cw_download_write(struct Curl_easy *data,
       return result;
   }
   /* Update stats, write and report progress */
-  data->req.bytecount += nwrite;
+  data->req.bytecount += (curl_off_t)nwrite;
   ++data->req.bodywrites;
   result = Curl_pgrsSetDownloadCounter(data, data->req.bytecount);
   if(result)
@@ -709,7 +709,7 @@ static CURLcode cr_in_read(struct Curl_easy *data,
       ctx->error_result = CURLE_READ_ERROR;
       return CURLE_READ_ERROR;
     }
-    ctx->read_len += nread;
+    ctx->read_len += (curl_off_t)nread;
     if(ctx->total_len >= 0)
       ctx->seen_eos = (ctx->read_len >= ctx->total_len);
     *pnread = nread;
@@ -778,7 +778,7 @@ static CURLcode cr_in_resume_from(struct Curl_easy *data,
                                   ctx->cb_user_data);
       Curl_set_in_callback(data, false);
 
-      passed += actuallyread;
+      passed += (curl_off_t)actuallyread;
       if((actuallyread == 0) || (actuallyread > readthisamountnow)) {
         /* this checks for greater-than only to make sure that the
            CURL_READFUNC_ABORT return code still aborts */
