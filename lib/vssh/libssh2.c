@@ -2067,12 +2067,12 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
             data->state.resume_from = 0;
           }
           else {
-            curl_off_t size = attrs.filesize;
+            curl_off_t size = (curl_off_t)attrs.filesize;
             if(size < 0) {
               failf(data, "Bad file size (%" CURL_FORMAT_CURL_OFF_T ")", size);
               return CURLE_BAD_DOWNLOAD_RESUME;
             }
-            data->state.resume_from = attrs.filesize;
+            data->state.resume_from = (curl_off_t)attrs.filesize;
           }
         }
       }
@@ -2175,7 +2175,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
                                                   data->state.in);
             Curl_set_in_callback(data, false);
 
-            passed += actuallyread;
+            passed += (curl_off_t)actuallyread;
             if((actuallyread == 0) || (actuallyread > readthisamountnow)) {
               /* this checks for greater-than only to make sure that the
                  CURL_READFUNC_ABORT return code still aborts */
@@ -2507,7 +2507,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
         Curl_pgrsSetDownloadSize(data, -1);
       }
       else {
-        curl_off_t size = attrs.filesize;
+        curl_off_t size = (curl_off_t)attrs.filesize;
 
         if(size < 0) {
           failf(data, "Bad file size (%" CURL_FORMAT_CURL_OFF_T ")", size);
@@ -2573,7 +2573,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
             return CURLE_BAD_DOWNLOAD_RESUME;
           }
           /* download from where? */
-          data->state.resume_from += attrs.filesize;
+          data->state.resume_from += (curl_off_t)attrs.filesize;
         }
         else {
           if((curl_off_t)attrs.filesize < data->state.resume_from) {
@@ -2584,10 +2584,10 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           }
         }
         /* Now store the number of bytes we are expected to download */
-        data->req.size = attrs.filesize - data->state.resume_from;
-        data->req.maxdownload = attrs.filesize - data->state.resume_from;
+        data->req.size = data->req.maxdownload =
+          (curl_off_t)attrs.filesize - data->state.resume_from;
         Curl_pgrsSetDownloadSize(data,
-                                 attrs.filesize - data->state.resume_from);
+          (curl_off_t)attrs.filesize - data->state.resume_from);
         SFTP_SEEK(sshc->sftp_handle, data->state.resume_from);
       }
     }
