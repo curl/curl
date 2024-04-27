@@ -1314,7 +1314,7 @@ cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
                             (const unsigned char **)&vec[nvecs].base,
                             &vec[nvecs].len)) {
       stream->sendbuf_len_in_flight += vec[nvecs].len;
-      nwritten += vec[nvecs].len;
+      nwritten += (ssize_t)vec[nvecs].len;
       ++nvecs;
     }
     DEBUGASSERT(nvecs > 0); /* we SHOULD have been be able to peek */
@@ -1587,7 +1587,7 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     /* We have unacknowledged DATA and cannot report success to our
      * caller. Instead we EAGAIN and remember how much we have already
      * "written" into our various internal connection buffers. */
-    stream->upload_blocked_len = sent;
+    stream->upload_blocked_len = (size_t)sent;
     CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] cf_send(len=%zu), "
                 "%zu bytes in flight -> EGAIN", stream->id, len,
                 stream->sendbuf_len_in_flight);
@@ -1735,7 +1735,8 @@ static ssize_t read_pkt_to_send(void *userp,
     n = ngtcp2_conn_writev_stream(ctx->qconn, &x->ps.path,
                                   NULL, buf, buflen,
                                   &ndatalen, flags, stream_id,
-                                  (const ngtcp2_vec *)vec, veccnt, x->ts);
+                                  (const ngtcp2_vec *)vec, (size_t)veccnt,
+                                  x->ts);
     if(n == 0) {
       /* nothing to send */
       *err = CURLE_AGAIN;
@@ -1780,7 +1781,8 @@ static ssize_t read_pkt_to_send(void *userp,
 
     if(ndatalen >= 0) {
       /* we add the amount of data bytes to the flow windows */
-      int rv = nghttp3_conn_add_write_offset(ctx->h3conn, stream_id, ndatalen);
+      int rv = nghttp3_conn_add_write_offset(ctx->h3conn, stream_id,
+                                             (size_t)ndatalen);
       if(rv) {
         failf(x->data, "nghttp3_conn_add_write_offset returned error: %s\n",
               nghttp3_strerror(rv));
@@ -1877,7 +1879,7 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
        * just added were PMTUD and the last one is smaller.
        * Flush the buffer before the last add. */
       curlcode = vquic_send_tail_split(cf, data, &ctx->q,
-                                       gsolen, nread, nread);
+                                       gsolen, (size_t)nread, (size_t)nread);
       if(curlcode) {
         if(curlcode == CURLE_AGAIN) {
           Curl_expire(data, 1, EXPIRE_QUIC);
@@ -1962,7 +1964,7 @@ static CURLcode cf_ngtcp2_data_event(struct Curl_cfilter *cf,
     struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
     if(stream && !stream->send_closed) {
       stream->send_closed = TRUE;
-      stream->upload_left = Curl_bufq_len(&stream->sendbuf);
+      stream->upload_left = (curl_off_t)Curl_bufq_len(&stream->sendbuf);
       (void)nghttp3_conn_resume_stream(ctx->h3conn, stream->id);
     }
     break;
