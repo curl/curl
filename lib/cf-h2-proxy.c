@@ -1418,7 +1418,7 @@ static ssize_t cf_h2_proxy_send(struct Curl_cfilter *cf,
     /* Unable to send all data, due to connection blocked or H2 window
      * exhaustion. Data is left in our stream buffer, or nghttp2's internal
      * frame buffer or our network out buffer. */
-    size_t rwin = nghttp2_session_get_stream_remote_window_size(
+    size_t rwin = (size_t)nghttp2_session_get_stream_remote_window_size(
                     ctx->h2, ctx->tunnel.stream_id);
     if(rwin == 0) {
       /* H2 flow window exhaustion.
@@ -1433,7 +1433,7 @@ static ssize_t cf_h2_proxy_send(struct Curl_cfilter *cf,
     /* Whatever the cause, we need to return CURL_EAGAIN for this call.
      * We have unwritten state that needs us being invoked again and EAGAIN
      * is the only way to ensure that. */
-    ctx->tunnel.upload_blocked_len = nwritten;
+    ctx->tunnel.upload_blocked_len = (size_t)nwritten;
     CURL_TRC_CF(data, cf, "[%d] cf_send(len=%zu) BLOCK: win %u/%zu "
                 "blocked_len=%zu",
                 ctx->tunnel.stream_id, len,
