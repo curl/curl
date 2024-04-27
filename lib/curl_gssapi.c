@@ -108,9 +108,9 @@ static size_t display_gss_error(OM_uint32 status, int type,
                                   &status_string);
     if(maj_stat == GSS_S_COMPLETE && status_string.length > 0) {
       if(GSS_LOG_BUFFER_LEN > len + status_string.length + 3) {
-        len += msnprintf(buf + len, GSS_LOG_BUFFER_LEN - len,
-                         "%.*s. ", (int)status_string.length,
-                         (char *)status_string.value);
+        len += (size_t)msnprintf(buf + len, GSS_LOG_BUFFER_LEN - len,
+                                 "%.*s. ", (int)status_string.length,
+                                 (char *)status_string.value);
       }
     }
     gss_release_buffer(&min_stat, &status_string);
