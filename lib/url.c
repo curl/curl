@@ -1650,7 +1650,7 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
     unsigned int c = 978;
     while(l) {
       c <<= 5;
-      c += Curl_raw_tolower(*s);
+      c += (unsigned int)Curl_raw_tolower(*s);
       s++;
       l--;
     }
@@ -1803,12 +1803,12 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
 
   if(!use_set_uh) {
     char *newurl;
-    uc = curl_url_set(uh, CURLUPART_URL, data->state.url,
-                      CURLU_GUESS_SCHEME |
-                      CURLU_NON_SUPPORT_SCHEME |
-                      (data->set.disallow_username_in_url ?
-                       CURLU_DISALLOW_USER : 0) |
-                      (data->set.path_as_is ? CURLU_PATH_AS_IS : 0));
+    uc = curl_url_set(uh, CURLUPART_URL, data->state.url, (unsigned int)
+                      (CURLU_GUESS_SCHEME |
+                       CURLU_NON_SUPPORT_SCHEME |
+                       (data->set.disallow_username_in_url ?
+                        CURLU_DISALLOW_USER : 0) |
+                       (data->set.path_as_is ? CURLU_PATH_AS_IS : 0)));
     if(uc) {
       failf(data, "URL rejected: %s", curl_url_strerror(uc));
       return Curl_uc_to_curlcode(uc);
