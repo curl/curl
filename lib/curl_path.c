@@ -79,7 +79,8 @@ CURLcode Curl_getworkingpath(struct Curl_easy *data,
         copyfrom = 2;
 
       if(Curl_dyn_addn(&npath,
-                       &working_path[copyfrom], working_path_len - copyfrom)) {
+                       &working_path[copyfrom],
+                       working_path_len - (size_t)copyfrom)) {
         free(working_path);
         return CURLE_OUT_OF_MEMORY;
       }
@@ -188,7 +189,7 @@ CURLcode Curl_get_pathname(const char **cpp, char **path, const char *homedir)
       cp += 3;
     }
     /* Copy path name up until first "whitespace" */
-    result = Curl_dyn_addn(&out, cp, (end - cp));
+    result = Curl_dyn_addn(&out, cp, (size_t)(end - cp));
     if(result)
       return result;
   }
