@@ -1129,7 +1129,7 @@ gtls_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
   result = Curl_gtls_ctx_init(&backend->gtls, cf, data, &connssl->peer,
-                              proto.data, proto.len, NULL, NULL, cf);
+                              proto.data, (size_t)proto.len, NULL, NULL, cf);
   if(result)
     return result;
 
@@ -1440,6 +1440,8 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
     rc = (int)gnutls_x509_crt_check_issuer(x509_cert, x509_issuer);
     gnutls_x509_crt_deinit(x509_issuer);
     unload_file(issuerp);
+    /* FIXME: error = 0 according to docs, there is no negative returned
+              621c2b901527248b4822895bc0305373a7d2dd63 */
     if(rc <= 0) {
       failf(data, "server certificate issuer check failed (IssuerCert: %s)",
             config->issuercert?config->issuercert:"none");
@@ -1600,6 +1602,7 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   /* public key algorithm's parameters */
   algo = gnutls_x509_crt_get_pk_algorithm(x509_cert, &bits);
+  /* FIXME: handle error if algo is negative */
   infof(data, "  certificate public key: %s",
         gnutls_pk_algorithm_get_name((gnutls_pk_algorithm_t)algo));
 
@@ -1967,7 +1970,8 @@ out:
 
 static size_t gtls_version(char *buffer, size_t size)
 {
-  return msnprintf(buffer, size, "GnuTLS/%s", gnutls_check_version(NULL));
+  return (size_t)msnprintf(buffer, size, "GnuTLS/%s",
+                           gnutls_check_version(NULL));
 }
 
 /* data might be NULL! */
