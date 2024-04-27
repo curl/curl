@@ -305,7 +305,8 @@ static CURLcode oldap_parse_login_options(struct connectdata *conn)
       ptr++;
 
     if(checkprefix("AUTH=", key))
-      result = Curl_sasl_parse_url_auth_option(&li->sasl, value, ptr - value);
+      result = Curl_sasl_parse_url_auth_option(&li->sasl,
+                                               value, (size_t)(ptr - value));
     else
       result = CURLE_SETOPT_OPTION_SYNTAX;
 
