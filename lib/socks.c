@@ -123,9 +123,9 @@ int Curl_blockread_all(struct Curl_cfilter *cf,
       result = ~CURLE_OK;
       break;
     }
-    nread = Curl_conn_cf_recv(cf->next, data, buf, buffersize, &err);
+    nread = Curl_conn_cf_recv(cf->next, data, buf, (size_t)buffersize, &err);
     if(nread <= 0) {
-      result = err;
+      result = (int)err;
       if(CURLE_AGAIN == err)
         continue;
       if(err) {
@@ -217,7 +217,7 @@ static CURLproxycode socks_state_send(struct Curl_cfilter *cf,
   CURLcode result;
 
   nwritten = Curl_conn_cf_send(cf->next, data, (char *)sx->outp,
-                               sx->outstanding, &result);
+                               (size_t)sx->outstanding, &result);
   if(nwritten <= 0) {
     if(CURLE_AGAIN == result) {
       return CURLPX_OK;
@@ -248,7 +248,7 @@ static CURLproxycode socks_state_recv(struct Curl_cfilter *cf,
   CURLcode result;
 
   nread = Curl_conn_cf_recv(cf->next, data, (char *)sx->outp,
-                            sx->outstanding, &result);
+                            (size_t)sx->outstanding, &result);
   if(nread <= 0) {
     if(CURLE_AGAIN == result) {
       return CURLPX_OK;
@@ -447,7 +447,7 @@ CONNECT_REQ_INIT:
       }
       sx->outp = socksreq;
       DEBUGASSERT(packetsize <= sizeof(sx->buffer));
-      sx->outstanding = packetsize;
+      sx->outstanding = (ssize_t)packetsize;
       sxstate(sx, data, CONNECT_REQ_SENDING);
     }
     FALLTHROUGH();
@@ -629,7 +629,7 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
 
     sx->outp = socksreq;
     DEBUGASSERT(idx <= sizeof(sx->buffer));
-    sx->outstanding = idx;
+    sx->outstanding = (ssize_t)idx;
     presult = socks_state_send(cf, sx, data, CURLPX_SEND_CONNECT,
                                "initial SOCKS5 request");
     if(CURLPX_OK != presult)
@@ -756,7 +756,7 @@ CONNECT_AUTH_INIT:
     len += proxy_password_len;
     sxstate(sx, data, CONNECT_AUTH_SEND);
     DEBUGASSERT(len <= sizeof(sx->buffer));
-    sx->outstanding = len;
+    sx->outstanding = (ssize_t)len;
     sx->outp = socksreq;
   }
     FALLTHROUGH();
@@ -951,7 +951,7 @@ CONNECT_REQ_SEND:
 #endif
     sx->outp = socksreq;
     DEBUGASSERT(len <= sizeof(sx->buffer));
-    sx->outstanding = len;
+    sx->outstanding = (ssize_t)len;
     sxstate(sx, data, CONNECT_REQ_SENDING);
     FALLTHROUGH();
   case CONNECT_REQ_SENDING:
@@ -1030,7 +1030,7 @@ CONNECT_REQ_SEND:
     if(socksreq[3] == 3) {
       /* domain name */
       int addrlen = (int) socksreq[4];
-      len = 5 + addrlen + 2;
+      len = 5 + (size_t)addrlen + 2;
     }
     else if(socksreq[3] == 4) {
       /* IPv6 */
@@ -1051,7 +1051,7 @@ CONNECT_REQ_SEND:
 #endif
       if(len > 10) {
         DEBUGASSERT(len <= sizeof(sx->buffer));
-        sx->outstanding = len - 10; /* get the rest */
+        sx->outstanding = (ssize_t)len - 10; /* get the rest */
         sx->outp = &socksreq[10];
         sxstate(sx, data, CONNECT_REQ_READ_MORE);
       }
