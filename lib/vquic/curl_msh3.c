@@ -375,8 +375,8 @@ static void MSH3_CALL msh3_header_received(MSH3_REQUEST *Request,
     DEBUGASSERT(!stream->firstheader);
     stream->status_code = decode_status_code(hd->Value, hd->ValueLength);
     DEBUGASSERT(stream->status_code != -1);
-    ncopy = msnprintf(line, sizeof(line), "HTTP/3 %03d \r\n",
-                      stream->status_code);
+    ncopy = (size_t)msnprintf(line, sizeof(line), "HTTP/3 %03d \r\n",
+                              stream->status_code);
     result = write_resp_raw(data, line, ncopy);
     if(result)
       stream->recv_error = result;
@@ -672,7 +672,7 @@ static ssize_t cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       goto out;
     }
     *err = CURLE_OK;
-    nwritten = len;
+    nwritten = (ssize_t)len;
     goto out;
   }
   else {
@@ -691,7 +691,7 @@ static ssize_t cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     /* TODO - msh3/msquic will hold onto this memory until the send complete
        event. How do we make sure curl doesn't free it until then? */
     *err = CURLE_OK;
-    nwritten = len;
+    nwritten = (ssize_t)len;
   }
 
 out:
