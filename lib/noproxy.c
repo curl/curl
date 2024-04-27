@@ -151,7 +151,7 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
       if(!endptr)
         return FALSE;
       name++;
-      namelen = endptr - name;
+      namelen = (size_t)(endptr - name);
       if(namelen >= sizeof(hostip))
         return FALSE;
       memcpy(hostip, name, namelen);
