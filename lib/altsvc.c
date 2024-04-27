@@ -189,7 +189,7 @@ static CURLcode altsvc_add(struct altsvcinfo *asi, char *line)
     as = altsvc_create(srchost, dsthost, srcalpn, dstalpn, srcport, dstport);
     if(as) {
       as->expires = expires;
-      as->prio = (int)prio;
+      as->prio = prio;
       as->persist = persist ? 1 : 0;
       Curl_llist_append(&asi->list, as, &as->node);
     }
@@ -270,7 +270,7 @@ static CURLcode altsvc_out(struct altsvc *as, FILE *fp)
           "%s %s%s%s %u "
           "\"%d%02d%02d "
           "%02d:%02d:%02d\" "
-          "%u %d\n",
+          "%u %u\n",
           Curl_alpnid2str(as->src.alpnid),
           src6_pre, as->src.host, src6_post,
           as->src.port,
