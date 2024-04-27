@@ -232,7 +232,7 @@ static CURLcode cf_osslq_stream_open(struct cf_osslq_stream *s,
   if(!s->ssl) {
     return CURLE_FAILED_INIT;
   }
-  s->id = SSL_get_stream_id(s->ssl);
+  s->id = (curl_int64_t)SSL_get_stream_id(s->ssl);
   SSL_set_app_data(s->ssl, user_data);
   return CURLE_OK;
 }
@@ -355,7 +355,7 @@ static CURLcode cf_osslq_h3conn_add_stream(struct cf_osslq_h3conn *h3,
                                            struct Curl_easy *data)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
-  int64_t stream_id = SSL_get_stream_id(stream_ssl);
+  int64_t stream_id = (int64_t)SSL_get_stream_id(stream_ssl);
 
   if(h3->remote_ctrl_n >= ARRAYSIZE(h3->remote_ctrl)) {
     /* rejected, we are full */
@@ -780,8 +780,8 @@ static int cb_h3_recv_header(nghttp3_conn *conn, int64_t sid,
                                      (const char *)h3val.base, h3val.len);
     if(result)
       return -1;
-    ncopy = msnprintf(line, sizeof(line), "HTTP/3 %03d \r\n",
-                      stream->status_code);
+    ncopy = (size_t)msnprintf(line, sizeof(line), "HTTP/3 %03d \r\n",
+                              stream->status_code);
     CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] status: %s", stream_id, line);
     result = write_resp_raw(cf, data, line, ncopy, FALSE);
     if(result) {
@@ -922,7 +922,7 @@ cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
                             (const unsigned char **)&vec[nvecs].base,
                             &vec[nvecs].len)) {
       stream->sendbuf_len_in_flight += vec[nvecs].len;
-      nwritten += vec[nvecs].len;
+      nwritten += (ssize_t)vec[nvecs].len;
       ++nvecs;
     }
     DEBUGASSERT(nvecs > 0); /* we SHOULD have been be able to peek */
@@ -1923,7 +1923,7 @@ static ssize_t cf_osslq_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     /* We have unacknowledged DATA and cannot report success to our
      * caller. Instead we EAGAIN and remember how much we have already
      * "written" into our various internal connection buffers. */
-    stream->upload_blocked_len = nwritten;
+    stream->upload_blocked_len = (size_t)nwritten;
     CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] cf_send(len=%zu), "
                 "%zu bytes in flight -> EGAIN", stream->s.id, len,
                 stream->sendbuf_len_in_flight);
@@ -2090,7 +2090,7 @@ static CURLcode cf_osslq_data_event(struct Curl_cfilter *cf,
     struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
     if(stream && !stream->send_closed) {
       stream->send_closed = TRUE;
-      stream->upload_left = Curl_bufq_len(&stream->sendbuf);
+      stream->upload_left = (curl_off_t)Curl_bufq_len(&stream->sendbuf);
       (void)nghttp3_conn_resume_stream(ctx->h3.conn, stream->s.id);
     }
     break;
