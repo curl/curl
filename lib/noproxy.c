@@ -79,15 +79,15 @@ UNITTEST bool Curl_cidr6_match(const char *ipv6,
                                unsigned int bits)
 {
 #ifdef USE_IPV6
-  int bytes;
-  int rest;
+  unsigned int bytes;
+  unsigned int rest;
   unsigned char address[16];
   unsigned char check[16];
 
   if(!bits)
     bits = 128;
 
-  bytes = bits/8;
+  bytes = bits / 8;
   rest = bits & 0x07;
   if(1 != Curl_inet_pton(AF_INET6, ipv6, address))
     return FALSE;
@@ -152,7 +152,7 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy,
       if(!endptr)
         return FALSE;
       name++;
-      namelen = endptr - name;
+      namelen = (size_t)(endptr - name);
       if(namelen >= sizeof(hostip))
         return FALSE;
       memcpy(hostip, name, namelen);
@@ -232,7 +232,7 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy,
           slash = strchr(check, '/');
           /* if the slash is part of this token, use it */
           if(slash) {
-            bits = atoi(slash + 1);
+            bits = (unsigned int)atoi(slash + 1);
             *slash = 0; /* null terminate there */
           }
           if(type == TYPE_IPV6)
