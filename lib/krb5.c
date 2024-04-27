@@ -144,7 +144,7 @@ krb5_decode(void *app_data, void *buf, int len,
   (void)conn;
 
   enc.value = buf;
-  enc.length = len;
+  enc.length = (size_t)len;
   maj = gss_unwrap(&min, *context, &enc, &dec, NULL, NULL);
   if(maj != GSS_S_COMPLETE)
     return -1;
@@ -472,7 +472,7 @@ socket_read(struct Curl_easy *data, int sockindex, void *to, size_t len)
   while(len > 0) {
     result = Curl_conn_recv(data, sockindex, to_p, len, &nread);
     if(nread > 0) {
-      len -= nread;
+      len -= (size_t)nread;
       to_p += nread;
     }
     else {
@@ -539,7 +539,7 @@ static CURLcode read_data(struct Curl_easy *data, int sockindex,
     result = socket_read(data, sockindex, buffer, (size_t)nread);
     if(result)
       return result;
-    result = Curl_dyn_addn(&buf->buf, buffer, nread);
+    result = Curl_dyn_addn(&buf->buf, buffer, (size_t)nread);
     if(result)
       return result;
     len -= nread;
@@ -550,7 +550,7 @@ static CURLcode read_data(struct Curl_easy *data, int sockindex,
                              len, conn->data_prot, conn);
   if(nread < 0)
     return CURLE_RECV_ERROR;
-  Curl_dyn_setlen(&buf->buf, nread);
+  Curl_dyn_setlen(&buf->buf, (size_t)nread);
   buf->index = 0;
   return CURLE_OK;
 }
@@ -599,14 +599,14 @@ static ssize_t sec_recv(struct Curl_easy *data, int sockindex,
     if(Curl_dyn_len(&conn->in_buffer.buf) == 0) {
       if(bytes_read > 0)
         conn->in_buffer.eof_flag = 1;
-      return bytes_read;
+      return (ssize_t)bytes_read;
     }
     bytes_read = buffer_read(&conn->in_buffer, buffer, len);
     len -= bytes_read;
     total_read += bytes_read;
     buffer += bytes_read;
   }
-  return total_read;
+  return (ssize_t)total_read;
 }
 
 /* Send |length| bytes from |from| to the |fd| socket taking care of encoding
@@ -668,16 +668,16 @@ static void do_sec_send(struct Curl_easy *data, struct connectdata *conn,
 static ssize_t sec_write(struct Curl_easy *data, struct connectdata *conn,
                          curl_socket_t fd, const char *buffer, size_t length)
 {
-  ssize_t tx = 0, len = conn->buffer_size;
+  ssize_t tx = 0, len = (ssize_t)conn->buffer_size;
 
   if(len <= 0)
-    len = length;
+    len = (ssize_t)length;
   while(length) {
     if(length < (size_t)len)
-      len = length;
+      len = (ssize_t)length;
 
     do_sec_send(data, conn, fd, buffer, curlx_sztosi(len));
-    length -= len;
+    length -= (size_t)len;
     buffer += len;
     tx += len;
   }
@@ -732,7 +732,7 @@ int Curl_sec_read_msg(struct Curl_easy *data, struct connectdata *conn,
 
   {
     buf[decoded_len] = '\n';
-    Curl_debug(data, CURLINFO_HEADER_IN, buf, decoded_len + 1);
+    Curl_debug(data, CURLINFO_HEADER_IN, buf, (size_t)decoded_len + 1);
   }
 
   buf[decoded_len] = '\0';
