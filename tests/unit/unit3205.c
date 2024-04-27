@@ -551,7 +551,7 @@ UNITTEST_START
       abort_if(i == TEST_STR_LIST_LEN, "should have been done");
 
       id = Curl_cipher_suite_walk_str(&ptr, &end);
-      len = end - ptr;
+      len = (size_t)(end - ptr);
 
       if(id != test->id) {
         fprintf(stderr, "Curl_cipher_suite_walk_str FAILED for \"%s\" "
