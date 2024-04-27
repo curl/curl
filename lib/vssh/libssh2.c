@@ -422,20 +422,20 @@ static int sshkeycallback(struct Curl_easy *easy,
 #define SCP_SEND(a,b,c,d) libssh2_scp_send_ex(a, b, (int)(c), (size_t)d, 0, 0)
 #else
 #define SCP_SEND(a,b,c,d) libssh2_scp_send64(a, b, (int)(c),            \
-                                             (libssh2_uint64_t)d, 0, 0)
+                                             (libssh2_int64_t)d, 0, 0)
 #endif
 
 /*
- * libssh2 1.2.8 fixed the problem with 32bit ints used for sockets on win64.
+ * libssh2 1.2.8 fixed the problem with 32-bit ints used for sockets on win64.
  */
 #ifdef HAVE_LIBSSH2_SESSION_HANDSHAKE
 #define session_startup(x,y) libssh2_session_handshake(x, y)
 #else
 #define session_startup(x,y) libssh2_session_startup(x, (int)y)
 #endif
-static int convert_ssh2_keytype(int sshkeytype)
+static enum curl_khtype convert_ssh2_keytype(int sshkeytype)
 {
-  int keytype = CURLKHTYPE_UNKNOWN;
+  enum curl_khtype keytype = CURLKHTYPE_UNKNOWN;
   switch(sshkeytype) {
   case LIBSSH2_HOSTKEY_TYPE_RSA:
     keytype = CURLKHTYPE_RSA;
@@ -780,10 +780,10 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data)
       const char *remotekey = libssh2_session_hostkey(sshc->ssh_session,
                                                       &keylen, &sshkeytype);
       if(remotekey) {
-        int keytype = convert_ssh2_keytype(sshkeytype);
+        enum curl_khtype keytype = convert_ssh2_keytype(sshkeytype);
         Curl_set_in_callback(data, true);
         rc = data->set.ssh_hostkeyfunc(data->set.ssh_hostkeyfunc_userp,
-                                       keytype, remotekey, keylen);
+                                       (int)keytype, remotekey, keylen);
         Curl_set_in_callback(data, false);
         if(rc!= CURLKHMATCH_OK) {
           state(data, SSH_SESSION_FREE);
@@ -1859,7 +1859,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
     case SSH_SFTP_QUOTE_MKDIR:
       rc = libssh2_sftp_mkdir_ex(sshc->sftp_session, sshc->quote_path1,
                                  curlx_uztoui(strlen(sshc->quote_path1)),
-                                 data->set.new_directory_perms);
+                                 (long)data->set.new_directory_perms);
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
       }
@@ -2025,7 +2025,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
         break;
       }
       if(rc == 0) {
-        data->info.filetime = attrs.mtime;
+        data->info.filetime = (time_t)attrs.mtime;
       }
 
       state(data, SSH_SFTP_TRANS_INIT);
@@ -2066,12 +2066,12 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
             data->state.resume_from = 0;
           }
           else {
-            curl_off_t size = attrs.filesize;
+            curl_off_t size = (curl_off_t)attrs.filesize;
             if(size < 0) {
               failf(data, "Bad file size (%" CURL_FORMAT_CURL_OFF_T ")", size);
               return CURLE_BAD_DOWNLOAD_RESUME;
             }
-            data->state.resume_from = attrs.filesize;
+            data->state.resume_from = (curl_off_t)attrs.filesize;
           }
         }
       }
@@ -2089,7 +2089,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       sshc->sftp_handle =
         libssh2_sftp_open_ex(sshc->sftp_session, sshp->path,
                              curlx_uztoui(strlen(sshp->path)),
-                             flags, data->set.new_file_perms,
+                             flags, (long)data->set.new_file_perms,
                              LIBSSH2_SFTP_OPENFILE);
 
       if(!sshc->sftp_handle) {
@@ -2174,7 +2174,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
                                                   data->state.in);
             Curl_set_in_callback(data, false);
 
-            passed += actuallyread;
+            passed += (curl_off_t)actuallyread;
             if((actuallyread == 0) || (actuallyread > readthisamountnow)) {
               /* this checks for greater-than only to make sure that the
                  CURL_READFUNC_ABORT return code still aborts */
@@ -2253,7 +2253,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       /* 'mode' - parameter is preliminary - default to 0644 */
       rc = libssh2_sftp_mkdir_ex(sshc->sftp_session, sshp->path,
                                  curlx_uztoui(strlen(sshp->path)),
-                                 data->set.new_directory_perms);
+                                 (long)data->set.new_directory_perms);
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
       }
@@ -2401,7 +2401,8 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       rc =
         libssh2_sftp_symlink_ex(sshc->sftp_session,
                                 Curl_dyn_ptr(&sshp->readdir_link),
-                                (int)Curl_dyn_len(&sshp->readdir_link),
+                                (unsigned int)
+                                  Curl_dyn_len(&sshp->readdir_link),
                                 sshp->readdir_filename,
                                 PATH_MAX, LIBSSH2_SFTP_READLINK);
       if(rc == LIBSSH2_ERROR_EAGAIN) {
@@ -2462,7 +2463,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       sshc->sftp_handle =
         libssh2_sftp_open_ex(sshc->sftp_session, sshp->path,
                              curlx_uztoui(strlen(sshp->path)),
-                             LIBSSH2_FXF_READ, data->set.new_file_perms,
+                             LIBSSH2_FXF_READ, (long)data->set.new_file_perms,
                              LIBSSH2_SFTP_OPENFILE);
       if(!sshc->sftp_handle) {
         if(libssh2_session_last_errno(sshc->ssh_session) ==
@@ -2505,7 +2506,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
         Curl_pgrsSetDownloadSize(data, -1);
       }
       else {
-        curl_off_t size = attrs.filesize;
+        curl_off_t size = (curl_off_t)attrs.filesize;
 
         if(size < 0) {
           failf(data, "Bad file size (%" CURL_FORMAT_CURL_OFF_T ")", size);
@@ -2571,7 +2572,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
             return CURLE_BAD_DOWNLOAD_RESUME;
           }
           /* download from where? */
-          data->state.resume_from += attrs.filesize;
+          data->state.resume_from += (curl_off_t)attrs.filesize;
         }
         else {
           if((curl_off_t)attrs.filesize < data->state.resume_from) {
@@ -2582,10 +2583,10 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           }
         }
         /* Now store the number of bytes we are expected to download */
-        data->req.size = attrs.filesize - data->state.resume_from;
-        data->req.maxdownload = attrs.filesize - data->state.resume_from;
+        data->req.size = data->req.maxdownload =
+          (curl_off_t)attrs.filesize - data->state.resume_from;
         Curl_pgrsSetDownloadSize(data,
-                                 attrs.filesize - data->state.resume_from);
+          (curl_off_t)attrs.filesize - data->state.resume_from);
         SFTP_SEEK(sshc->sftp_handle, data->state.resume_from);
       }
     }
@@ -3290,7 +3291,7 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
 #if LIBSSH2_VERSION_NUM >= 0x010B00
   if(data->set.server_response_timeout > 0) {
     libssh2_session_set_read_timeout(sshc->ssh_session,
-                                     data->set.server_response_timeout / 1000);
+                             (long)(data->set.server_response_timeout / 1000));
   }
 #endif
 #endif
