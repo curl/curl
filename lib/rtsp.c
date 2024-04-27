@@ -958,7 +958,7 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
     end = start;
     while(*end && *end != ';' && !ISSPACE(*end))
       end++;
-    idlen = end - start;
+    idlen = (size_t)(end - start);
 
     if(data->set.str[STRING_RTSP_SESSION_ID]) {
 
