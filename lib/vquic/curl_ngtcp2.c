@@ -314,8 +314,8 @@ static void pktx_update_time(struct pkt_io_ctx *pktx,
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
 
   vquic_ctx_update_time(&ctx->q);
-  pktx->ts = ctx->q.last_op.tv_sec * NGTCP2_SECONDS +
-             ctx->q.last_op.tv_usec * NGTCP2_MICROSECONDS;
+  pktx->ts = (ngtcp2_tstamp)ctx->q.last_op.tv_sec * NGTCP2_SECONDS +
+             (ngtcp2_tstamp)ctx->q.last_op.tv_usec * NGTCP2_MICROSECONDS;
 }
 
 static void pktx_init(struct pkt_io_ctx *pktx,
@@ -405,7 +405,7 @@ static void quic_settings(struct cf_ngtcp2_ctx *ctx,
   }
 }
 
-static int init_ngh3_conn(struct Curl_cfilter *cf);
+static CURLcode init_ngh3_conn(struct Curl_cfilter *cf);
 
 static int cb_handshake_completed(ngtcp2_conn *tconn, void *user_data)
 {
@@ -453,8 +453,8 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
   /* number of bytes inside buflen which consists of framing overhead
    * including QPACK HEADERS. In other words, it does not consume payload of
    * DATA frame. */
-  ngtcp2_conn_extend_max_stream_offset(tconn, stream_id, nconsumed);
-  ngtcp2_conn_extend_max_offset(tconn, nconsumed);
+  ngtcp2_conn_extend_max_stream_offset(tconn, stream_id, (uint64_t)nconsumed);
+  ngtcp2_conn_extend_max_offset(tconn, (uint64_t)nconsumed);
 
   return 0;
 }
@@ -743,7 +743,8 @@ static CURLcode check_and_set_expiry(struct Curl_cfilter *cf,
       if(timeout % NGTCP2_MILLISECONDS) {
         timeout += NGTCP2_MILLISECONDS;
       }
-      Curl_expire(data, timeout / NGTCP2_MILLISECONDS, EXPIRE_QUIC);
+      Curl_expire(data, (timediff_t)(timeout / NGTCP2_MILLISECONDS),
+                  EXPIRE_QUIC);
     }
   }
   return CURLE_OK;
@@ -1039,7 +1040,7 @@ static nghttp3_callbacks ngh3_callbacks = {
   NULL /* recv_settings */
 };
 
-static int init_ngh3_conn(struct Curl_cfilter *cf)
+static CURLcode init_ngh3_conn(struct Curl_cfilter *cf)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
   CURLcode result;
@@ -1260,7 +1261,7 @@ cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
                             (const unsigned char **)&vec[nvecs].base,
                             &vec[nvecs].len)) {
       stream->sendbuf_len_in_flight += vec[nvecs].len;
-      nwritten += vec[nvecs].len;
+      nwritten += (ssize_t)vec[nvecs].len;
       ++nvecs;
     }
     DEBUGASSERT(nvecs > 0); /* we SHOULD have been be able to peek */
@@ -1514,7 +1515,7 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     /* We have unacknowledged DATA and cannot report success to our
      * caller. Instead we EAGAIN and remember how much we have already
      * "written" into our various internal connection buffers. */
-    stream->upload_blocked_len = sent;
+    stream->upload_blocked_len = (size_t)sent;
     CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] cf_send(len=%zu), "
                 "%zu bytes in flight -> EGAIN", stream->id, len,
                 stream->sendbuf_len_in_flight);
@@ -1559,7 +1560,7 @@ static CURLcode recv_pkt(const unsigned char *pkt, size_t pktlen,
 
   ++pktx->pkt_count;
   ngtcp2_addr_init(&path.local, (struct sockaddr *)&ctx->q.local_addr,
-                   ctx->q.local_addrlen);
+                   (socklen_t)ctx->q.local_addrlen);
   ngtcp2_addr_init(&path.remote, (struct sockaddr *)remote_addr,
                    remote_addrlen);
   pi.ecn = (uint8_t)ecn;
@@ -1673,7 +1674,8 @@ static ssize_t read_pkt_to_send(void *userp,
     n = ngtcp2_conn_writev_stream(ctx->qconn, &x->ps.path,
                                   NULL, buf, buflen,
                                   &ndatalen, flags, stream_id,
-                                  (const ngtcp2_vec *)vec, veccnt, x->ts);
+                                  (const ngtcp2_vec *)vec, (size_t)veccnt,
+                                  x->ts);
     if(n == 0) {
       /* nothing to send */
       *err = CURLE_AGAIN;
@@ -1718,7 +1720,8 @@ static ssize_t read_pkt_to_send(void *userp,
 
     if(ndatalen >= 0) {
       /* we add the amount of data bytes to the flow windows */
-      int rv = nghttp3_conn_add_write_offset(ctx->h3conn, stream_id, ndatalen);
+      int rv = nghttp3_conn_add_write_offset(ctx->h3conn, stream_id,
+                                             (size_t)ndatalen);
       if(rv) {
         failf(x->data, "nghttp3_conn_add_write_offset returned error: %s\n",
               nghttp3_strerror(rv));
@@ -1815,7 +1818,7 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
        * just added were PMTUD and the last one is smaller.
        * Flush the buffer before the last add. */
       curlcode = vquic_send_tail_split(cf, data, &ctx->q,
-                                       gsolen, nread, nread);
+                                       gsolen, (size_t)nread, (size_t)nread);
       if(curlcode) {
         if(curlcode == CURLE_AGAIN) {
           Curl_expire(data, 1, EXPIRE_QUIC);
@@ -1900,7 +1903,7 @@ static CURLcode cf_ngtcp2_data_event(struct Curl_cfilter *cf,
     struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
     if(stream && !stream->send_closed) {
       stream->send_closed = TRUE;
-      stream->upload_left = Curl_bufq_len(&stream->sendbuf);
+      stream->upload_left = (curl_off_t)Curl_bufq_len(&stream->sendbuf);
       (void)nghttp3_conn_resume_stream(ctx->h3conn, stream->id);
     }
     break;
@@ -2124,7 +2127,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
                    (struct sockaddr *)&ctx->q.local_addr,
                    ctx->q.local_addrlen);
   ngtcp2_addr_init(&ctx->connected_path.remote,
-                   &sockaddr->sa_addr, sockaddr->addrlen);
+                   &sockaddr->sa_addr, (socklen_t)sockaddr->addrlen);
 
   rc = ngtcp2_conn_client_new(&ctx->qconn, &ctx->dcid, &ctx->scid,
                               &ctx->connected_path,
@@ -2268,7 +2271,7 @@ static CURLcode cf_ngtcp2_query(struct Curl_cfilter *cf,
       *pres1 = (max_streams > INT_MAX)? INT_MAX : (int)max_streams;
     }
     else  /* transport params not arrived yet? take our default. */
-      *pres1 = Curl_multi_max_concurrent_streams(data->multi);
+      *pres1 = (int)Curl_multi_max_concurrent_streams(data->multi);
     CURL_TRC_CF(data, cf, "query conn[%" CURL_FORMAT_CURL_OFF_T "]: "
                 "MAX_CONCURRENT -> %d (%zu in use)",
                 cf->conn->connection_id, *pres1, CONN_INUSE(cf->conn));
