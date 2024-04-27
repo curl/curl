@@ -50,9 +50,9 @@ int main(int argc, char **argv)
   struct callback_data data = { 0 };
 
   /* global initialization */
-  int rc = curl_global_init(CURL_GLOBAL_ALL);
+  CURLcode rc = curl_global_init(CURL_GLOBAL_ALL);
   if(rc)
-    return rc;
+    return (int)rc;
 
   /* initialization of easy handle */
   handle = curl_easy_init();
@@ -90,7 +90,7 @@ int main(int argc, char **argv)
 
   curl_easy_cleanup(handle);
   curl_global_cleanup();
-  return rc;
+  return (int)rc;
 }
 
 static long file_is_coming(struct curl_fileinfo *finfo,
