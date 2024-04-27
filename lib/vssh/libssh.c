@@ -1239,13 +1239,13 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         if(data->state.resume_from < 0) {
           attrs = sftp_stat(sshc->sftp_session, protop->path);
           if(attrs) {
-            curl_off_t size = attrs->size;
+            curl_off_t size = (curl_off_t)attrs->size;
             if(size < 0) {
               failf(data, "Bad file size (%" CURL_FORMAT_CURL_OFF_T ")", size);
               MOVE_TO_ERROR_STATE(CURLE_BAD_DOWNLOAD_RESUME);
               break;
             }
-            data->state.resume_from = attrs->size;
+            data->state.resume_from = (curl_off_t)attrs->size;
 
             sftp_attributes_free(attrs);
           }
@@ -1319,7 +1319,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
               data->state.fread_func(scratch, 1,
                                      readthisamountnow, data->state.in);
 
-            passed += actuallyread;
+            passed += (curl_off_t)actuallyread;
             if((actuallyread == 0) || (actuallyread > readthisamountnow)) {
               /* this checks for greater-than only to make sure that the
                  CURL_READFUNC_ABORT return code still aborts */
@@ -1339,7 +1339,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
           Curl_pgrsSetUploadSize(data, data->state.infilesize);
         }
 
-        rc = sftp_seek64(sshc->sftp_file, data->state.resume_from);
+        rc = sftp_seek64(sshc->sftp_file, (uint64_t)data->state.resume_from);
         if(rc) {
           MOVE_TO_SFTP_CLOSE_STATE();
           break;
@@ -1621,7 +1621,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         size = 0;
       }
       else {
-        size = attrs->size;
+        size = (curl_off_t)attrs->size;
 
         sftp_attributes_free(attrs);
 
@@ -1671,7 +1671,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
             size = to - from + 1;
           }
 
-          rc = sftp_seek64(sshc->sftp_file, from);
+          rc = sftp_seek64(sshc->sftp_file, (uint64_t)from);
           if(rc) {
             MOVE_TO_SFTP_CLOSE_STATE();
             break;
@@ -1710,7 +1710,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         Curl_pgrsSetDownloadSize(data,
                                  size - data->state.resume_from);
 
-        rc = sftp_seek64(sshc->sftp_file, data->state.resume_from);
+        rc = sftp_seek64(sshc->sftp_file, (uint64_t)data->state.resume_from);
         if(rc) {
           MOVE_TO_SFTP_CLOSE_STATE();
           break;
@@ -1840,7 +1840,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       }
 
       rc = ssh_scp_push_file(sshc->scp_session, protop->path,
-                             data->state.infilesize,
+                             (size_t)data->state.infilesize,
                              (int)data->set.new_file_perms);
       if(rc != SSH_OK) {
         err_msg = ssh_get_error(sshc->ssh_session);
@@ -1892,7 +1892,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         }
 
         /* download data */
-        bytecount = ssh_scp_request_get_size(sshc->scp_session);
+        bytecount = (curl_off_t)ssh_scp_request_get_size(sshc->scp_session);
         data->req.maxdownload = (curl_off_t) bytecount;
         Curl_xfer_setup(data, FIRSTSOCKET, bytecount, FALSE, -1);
 
@@ -2430,7 +2430,7 @@ static ssize_t scp_send(struct Curl_easy *data, int sockindex,
     return -1;
   }
 
-  return len;
+  return (ssize_t)len;
 }
 
 static ssize_t scp_recv(struct Curl_easy *data, int sockindex,
