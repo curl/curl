@@ -669,10 +669,10 @@ static CURLcode pop3_state_servergreet_resp(struct Curl_easy *data,
     lt = memchr(line, '<', len);
     if(lt)
       /* search the remainder for '>' */
-      gt = memchr(lt, '>', len - (lt - line));
+      gt = memchr(lt, '>', len - (size_t)(lt - line));
     if(gt) {
       /* the length of the timestamp, including the brackets */
-      size_t timestamplen = gt - lt + 1;
+      size_t timestamplen = (size_t)(gt - lt) + 1;
       char *at = memchr(lt, '@', timestamplen);
       /* If the timestamp does not contain '@' it is not (as required by
          RFC-1939) conformant to the RFC-822 message id syntax, and we
@@ -1379,9 +1379,9 @@ static CURLcode pop3_parse_url_options(struct connectdata *conn)
 
     if(strncasecompare(key, "AUTH=", 5)) {
       result = Curl_sasl_parse_url_auth_option(&pop3c->sasl,
-                                               value, ptr - value);
+                                               value, (size_t)(ptr - value));
 
-      if(result && strncasecompare(value, "+APOP", ptr - value)) {
+      if(result && strncasecompare(value, "+APOP", (size_t)(ptr - value))) {
         pop3c->preftype = POP3_TYPE_APOP;
         pop3c->sasl.prefmech = SASL_AUTH_NONE;
         result = CURLE_OK;
