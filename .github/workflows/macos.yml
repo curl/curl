@@ -208,24 +208,23 @@ jobs:
   cmake:
     name: cmake ${{ matrix.compiler.CC }} ${{ matrix.build.name }}
     runs-on: 'macos-latest'
-    env: ${{ matrix.compiler }}
+    env:
+      CC: ${{ matrix.compiler.CC }}
+      # '-Wno-deprecated-declarations' required for LDAP and BUILD_EXAMPLES
+      CFLAGS: '-DCMAKE_C_FLAGS=-mmacosx-version-min=10.15 -Wno-deprecated-declarations'
     strategy:
       fail-fast: false
       matrix:
         compiler:
           - CC: clang
-            CXX: clang++
-            CFLAGS: "-mmacosx-version-min=10.15 -Wno-deprecated-declarations"
           - CC: gcc-12
-            CXX: g++-12
-            CFLAGS: "-mmacosx-version-min=10.15 -Wno-error=undef -Wno-error=conversion"
         build:
           - name: OpenSSL
             install: nghttp2 openssl
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/openssl -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9
           - name: LibreSSL
             install: nghttp2 libressl
-            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
+            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DBUILD_EXAMPLES=ON
           - name: libssh2
             install: nghttp2 openssl libssh2
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/openssl -DCURL_USE_LIBSSH2=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON
