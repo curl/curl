@@ -1688,7 +1688,7 @@ static CURLcode http2_data_done_send(struct Curl_cfilter *cf,
     stream->send_closed = TRUE;
     if(stream->upload_left) {
       /* we now know that everything that is buffered is all there is. */
-      stream->upload_left = Curl_bufq_len(&stream->sendbuf);
+      stream->upload_left = (curl_off_t)Curl_bufq_len(&stream->sendbuf);
       /* resume sending here to trigger the callback to get called again so
          that it can signal EOF to nghttp2 */
       (void)nghttp2_session_resume_data(ctx->h2, stream->id);
@@ -2160,7 +2160,7 @@ static ssize_t h2_submit(struct h2_stream_ctx **pstream,
   }
 
   body = (const char *)buf + nwritten;
-  bodylen = len - nwritten;
+  bodylen = len - (size_t)nwritten;
 
   if(bodylen) {
     /* We have request body to send in DATA frame */
@@ -2299,7 +2299,7 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
      * If we cannot send pure body data, we EAGAIN. If there had been
      * header, we return that *they* have been written and remember the
      * block on the data length only. */
-    stream->upload_blocked_len = ((size_t)nwritten) - hdslen;
+    stream->upload_blocked_len = (size_t)nwritten - hdslen;
     CURL_TRC_CF(data, cf, "[%d] cf_send(len=%zu) BLOCK: win %u/%zu "
                 "hds_len=%zu blocked_len=%zu",
                 stream->id, len,
@@ -2307,7 +2307,7 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                 hdslen, stream->upload_blocked_len);
     if(hdslen) {
       *err = CURLE_OK;
-      nwritten = hdslen;
+      nwritten = (ssize_t)hdslen;
     }
     else {
       *err = CURLE_AGAIN;
