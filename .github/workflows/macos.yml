@@ -208,17 +208,16 @@ jobs:
   cmake:
     name: cmake ${{ matrix.compiler.CC }} ${{ matrix.build.name }}
     runs-on: 'macos-latest'
-    env: ${{ matrix.compiler }}
+    env:
+      CC: ${{ matrix.compiler.CC }}
+      # '-Wno-deprecated-declarations' required for LDAP and BUILD_EXAMPLES
+      CFLAGS: '-DCMAKE_C_FLAGS=-mmacosx-version-min=10.15 -Wno-deprecated-declarations'
     strategy:
       fail-fast: false
       matrix:
         compiler:
           - CC: clang
-            CXX: clang++
-            CFLAGS: "-mmacosx-version-min=10.15 -Wno-deprecated-declarations"
           - CC: gcc-12
-            CXX: g++-12
-            CFLAGS: "-mmacosx-version-min=10.15 -Wno-error=undef -Wno-error=conversion"
         build:
           - name: OpenSSL
             install: nghttp2 openssl
