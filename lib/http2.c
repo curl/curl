@@ -93,8 +93,8 @@
 #define H2_SETTINGS_IV_LEN  3
 #define H2_BINSETTINGS_LEN 80
 
-static int populate_settings(nghttp2_settings_entry *iv,
-                             struct Curl_easy *data)
+static size_t populate_settings(nghttp2_settings_entry *iv,
+                                struct Curl_easy *data)
 {
   iv[0].settings_id = NGHTTP2_SETTINGS_MAX_CONCURRENT_STREAMS;
   iv[0].value = Curl_multi_max_concurrent_streams(data->multi);
@@ -112,7 +112,7 @@ static ssize_t populate_binsettings(uint8_t *binsettings,
                                     struct Curl_easy *data)
 {
   nghttp2_settings_entry iv[H2_SETTINGS_IV_LEN];
-  int ivlen;
+  size_t ivlen;
 
   ivlen = populate_settings(iv, data);
   /* this returns number of bytes it wrote or a negative number on error. */
@@ -133,7 +133,7 @@ struct cf_h2_ctx {
   struct Curl_hash streams; /* hash of `data->id` to `h2_stream_ctx` */
   size_t drain_total; /* sum of all stream's UrlState drain */
   uint32_t max_concurrent_streams;
-  int32_t goaway_error;
+  uint32_t goaway_error;
   int32_t last_stream_id;
   BIT(conn_closed);
   BIT(goaway);
@@ -486,7 +486,7 @@ static CURLcode cf_h2_ctx_init(struct Curl_cfilter *cf,
     DEBUGASSERT(stream);
     stream->id = 1;
     /* queue SETTINGS frame (again) */
-    rc = nghttp2_session_upgrade2(ctx->h2, binsettings, binlen,
+    rc = nghttp2_session_upgrade2(ctx->h2, binsettings, (size_t)binlen,
                                   data->state.httpreq == HTTPREQ_HEAD,
                                   NULL);
     if(rc) {
@@ -507,7 +507,7 @@ static CURLcode cf_h2_ctx_init(struct Curl_cfilter *cf,
   }
   else {
     nghttp2_settings_entry iv[H2_SETTINGS_IV_LEN];
-    int ivlen;
+    size_t ivlen;
 
     ivlen = populate_settings(iv, data);
     rc = nghttp2_submit_settings(ctx->h2, NGHTTP2_FLAG_NONE,
@@ -1007,7 +1007,7 @@ static void h2_xfer_write_resp(struct Curl_cfilter *cf,
                 "RST-ing stream",
                 stream->id, stream->xfer_result, blen);
     nghttp2_submit_rst_stream(ctx->h2, 0, stream->id,
-                              NGHTTP2_ERR_CALLBACK_FAILURE);
+                              (uint32_t)NGHTTP2_ERR_CALLBACK_FAILURE);
   }
 }
 
@@ -1256,7 +1256,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
       ctx->goaway_error = frame->goaway.error_code;
       ctx->last_stream_id = frame->goaway.last_stream_id;
       if(data) {
-        infof(data, "received GOAWAY, error=%d, last_stream=%u",
+        infof(data, "received GOAWAY, error=%u, last_stream=%u",
                     ctx->goaway_error, ctx->last_stream_id);
         Curl_multi_connchanged(data->multi);
       }
@@ -1654,7 +1654,7 @@ CURLcode Curl_http2_request_upgrade(struct dynbuf *req,
     return CURLE_FAILED_INIT;
   }
 
-  result = Curl_base64url_encode((const char *)binsettings, binlen,
+  result = Curl_base64url_encode((const char *)binsettings, (size_t)binlen,
                                  &base64, &blen);
   if(result) {
     Curl_dyn_free(req);
@@ -1688,7 +1688,7 @@ static CURLcode http2_data_done_send(struct Curl_cfilter *cf,
     stream->send_closed = TRUE;
     if(stream->upload_left) {
       /* we now know that everything that is buffered is all there is. */
-      stream->upload_left = Curl_bufq_len(&stream->sendbuf);
+      stream->upload_left = (curl_off_t)Curl_bufq_len(&stream->sendbuf);
       /* resume sending here to trigger the callback to get called again so
          that it can signal EOF to nghttp2 */
       (void)nghttp2_session_resume_data(ctx->h2, stream->id);
@@ -2151,7 +2151,7 @@ static ssize_t h2_submit(struct h2_stream_ctx **pstream,
   }
 
   body = (const char *)buf + nwritten;
-  bodylen = len - nwritten;
+  bodylen = len - (size_t)nwritten;
 
   if(bodylen) {
     /* We have request body to send in DATA frame */
@@ -2283,14 +2283,14 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     /* Unable to send all data, due to connection blocked or H2 window
      * exhaustion. Data is left in our stream buffer, or nghttp2's internal
      * frame buffer or our network out buffer. */
-    size_t rwin = nghttp2_session_get_stream_remote_window_size(ctx->h2,
-                                                                stream->id);
+    size_t rwin = (size_t)nghttp2_session_get_stream_remote_window_size(
+                    ctx->h2, stream->id);
     /* At the start of a stream, we are called with request headers
      * and, possibly, parts of the body. Later, only body data.
      * If we cannot send pure body data, we EAGAIN. If there had been
      * header, we return that *they* have been written and remember the
      * block on the data length only. */
-    stream->upload_blocked_len = ((size_t)nwritten) - hdslen;
+    stream->upload_blocked_len = (size_t)nwritten - hdslen;
     CURL_TRC_CF(data, cf, "[%d] cf_send(len=%zu) BLOCK: win %u/%zu "
                 "hds_len=%zu blocked_len=%zu",
                 stream->id, len,
@@ -2298,7 +2298,7 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                 hdslen, stream->upload_blocked_len);
     if(hdslen) {
       *err = CURLE_OK;
-      nwritten = hdslen;
+      nwritten = (ssize_t)hdslen;
     }
     else {
       *err = CURLE_AGAIN;
@@ -2465,10 +2465,10 @@ static CURLcode http2_data_pause(struct Curl_cfilter *cf,
   if(ctx && ctx->h2 && stream) {
     uint32_t window = pause? 0 : stream->local_window_size;
 
-    int rv = nghttp2_session_set_local_window_size(ctx->h2,
-                                                   NGHTTP2_FLAG_NONE,
-                                                   stream->id,
-                                                   window);
+    int rv = (int)nghttp2_session_set_local_window_size(ctx->h2,
+                                                        NGHTTP2_FLAG_NONE,
+                                                        stream->id,
+                                                        (int32_t)window);
     if(rv) {
       failf(data, "nghttp2_session_set_local_window_size() failed: %s(%d)",
             nghttp2_strerror(rv), rv);
@@ -2496,7 +2496,7 @@ static CURLcode http2_data_pause(struct Curl_cfilter *cf,
 #ifdef DEBUGBUILD
     {
       /* read out the stream local window again */
-      uint32_t window2 =
+      uint32_t window2 = (uint32_t)
         nghttp2_session_get_stream_local_window_size(ctx->h2,
                                                      stream->id);
       DEBUGF(infof(data, "HTTP/2 window size is now %u for stream %u",
