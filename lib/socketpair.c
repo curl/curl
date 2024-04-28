@@ -166,7 +166,7 @@ int Curl_socketpair(int domain, int type, int protocol,
         }
         goto error;
       }
-      s -= nread;
+      s -= (size_t)nread;
       if(s) {
         p += nread;
         continue;
