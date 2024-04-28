@@ -694,6 +694,10 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
     FD_ZERO(&writesock);
     FD_ZERO(&exceptsock);
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
     if(FD_ISSET(wsasock, readfds)) {
       FD_SET(wsasock, &readsock);
       wsaevents.lNetworkEvents |= FD_READ|FD_ACCEPT|FD_CLOSE;
@@ -708,6 +712,9 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
       FD_SET(wsasock, &exceptsock);
       wsaevents.lNetworkEvents |= FD_OOB;
     }
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
     /* only wait for events for which we actually care */
     if(wsaevents.lNetworkEvents) {
@@ -755,12 +762,19 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
             if(select(fd + 1, &readsock, &writesock, &exceptsock, tv) == 1) {
               logmsg("[select_ws] socket %d is ready", fd);
               WSASetEvent(wsaevent);
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
               if(FD_ISSET(wsasock, &readsock))
                 data[nfd].wsastate |= FD_READ;
               if(FD_ISSET(wsasock, &writesock))
                 data[nfd].wsastate |= FD_WRITE;
               if(FD_ISSET(wsasock, &exceptsock))
                 data[nfd].wsastate |= FD_OOB;
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
             }
             nfd++;
             nws++;
@@ -852,10 +866,17 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
       }
 
       /* check if the event has not been filtered using specific tests */
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
       if(FD_ISSET(wsasock, readfds) || FD_ISSET(wsasock, writefds) ||
          FD_ISSET(wsasock, exceptfds)) {
         ret++;
       }
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
     }
     else {
       /* remove from all descriptor sets since this handle did not trigger */
@@ -866,12 +887,19 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   }
 
   for(fd = 0; fd < nfds; fd++) {
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
     if(FD_ISSET(fd, readfds))
       logmsg("[select_ws] %d is readable", fd);
     if(FD_ISSET(fd, writefds))
       logmsg("[select_ws] %d is writable", fd);
     if(FD_ISSET(fd, exceptfds))
       logmsg("[select_ws] %d is exceptional", fd);
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
   }
 
   for(i = 0; i < nws; i++) {
@@ -992,6 +1020,10 @@ static bool juggle(curl_socket_t *sockfdp,
   FD_ZERO(&fds_write);
   FD_ZERO(&fds_err);
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
   FD_SET((curl_socket_t)fileno(stdin), &fds_read);
 
   switch(*mode) {
@@ -1042,6 +1074,9 @@ static bool juggle(curl_socket_t *sockfdp,
     break;
 
   } /* switch(*mode) */
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
 
   do {
@@ -1068,7 +1103,14 @@ static bool juggle(curl_socket_t *sockfdp,
     return TRUE;
 
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
   if(FD_ISSET(fileno(stdin), &fds_read)) {
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
     ssize_t buffer_len;
     /* read from stdin, commands/data to be dealt with and possibly passed on
        to the socket
@@ -1152,7 +1194,14 @@ static bool juggle(curl_socket_t *sockfdp,
   }
 
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
   if((sockfd != CURL_SOCKET_BAD) && (FD_ISSET(sockfd, &fds_read)) ) {
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
     ssize_t nread_socket;
     if(*mode == PASSIVE_LISTEN) {
       /* there's no stream set up yet, this is an indication that there's a
