@@ -183,7 +183,7 @@ inet_pton6(const char *src, unsigned char *dst)
       pch = strchr((xdigits = xdigits_u), ch);
     if(pch) {
       val <<= 4;
-      val |= (pch - xdigits);
+      val |= (size_t)(pch - xdigits);
       if(++saw_xdigit > 4)
         return (0);
       continue;
