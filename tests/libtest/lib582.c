@@ -188,7 +188,14 @@ static void updateFdSet(struct Sockets *sockets, fd_set* fdset,
 {
   int i;
   for(i = 0; i < sockets->count; ++i) {
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
     FD_SET(sockets->sockets[i], fdset);
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
     if(*maxFd < sockets->sockets[i] + 1) {
       *maxFd = sockets->sockets[i] + 1;
     }
@@ -214,7 +221,14 @@ static void checkFdSet(CURLM *curl, struct Sockets *sockets, fd_set *fdset,
 {
   int i;
   for(i = 0; i < sockets->count; ++i) {
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
     if(FD_ISSET(sockets->sockets[i], fdset)) {
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
       notifyCurl(curl, sockets->sockets[i], evBitmask, name);
     }
   }
