@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) Viktor Szakats
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -31,9 +31,9 @@ foreach(example IN LISTS check_PROGRAMS)
   set(example_target "curl-example-${example}")
   add_executable(${example_target} "${example}.c")
   target_include_directories(${example_target} PRIVATE
-    "${CURL_SOURCE_DIR}/lib"      # To reach "curl_setup_once.h"
-    "${CURL_BINARY_DIR}/lib"      # To reach "curl_config.h"
-    "${CURL_BINARY_DIR}/include"  # To reach "curl/curl.h"
+    "${CURL_SOURCE_DIR}/lib"      # for "curl_setup_once.h"
+    "${CURL_BINARY_DIR}/lib"      # for "curl_config.h"
+    "${CURL_BINARY_DIR}/include"  # for "curl/curl.h"
   )
   target_link_libraries(${example_target} ${LIB_SELECTED} ${CURL_LIBS})
   target_compile_definitions(${example_target} PRIVATE "CURL_NO_OLDIES")
