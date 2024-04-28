@@ -396,7 +396,7 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
   if(!sep)
     return CURLE_SSL_CERTPROBLEM;
 
-  store_name_len = sep - path;
+  store_name_len = (size_t)(sep - path);
 
   if(_tcsncmp(path, TEXT("CurrentUser"), store_name_len) == 0)
     *store_name = CERT_SYSTEM_STORE_CURRENT_USER;
@@ -1406,7 +1406,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
       }
 
       /* increase encrypted data buffer offset */
-      backend->encdata_offset += nread;
+      backend->encdata_offset += (size_t)nread;
       backend->encdata_is_incomplete = false;
       DEBUGF(infof(data, "schannel: encrypted data got %zd", nread));
     }
@@ -2070,9 +2070,10 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       }
       /* socket is writable */
 
-       this_write = Curl_conn_cf_send(cf->next, data,
-                                      ptr + written, len - written,
-                                      &result);
+      this_write = Curl_conn_cf_send(cf->next, data,
+                                     ptr + (size_t)written,
+                                     len - (size_t)written,
+                                     &result);
       if(result == CURLE_AGAIN)
         continue;
       else if(result != CURLE_OK) {
@@ -2096,7 +2097,7 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(len == (size_t)written)
     /* Encrypted message including header, data and trailer entirely sent.
        The return value is the number of unencrypted bytes that were sent. */
-    written = outbuf[1].cbBuffer;
+    written = (ssize_t)outbuf[1].cbBuffer;
 
   return written;
 }
@@ -2590,7 +2591,7 @@ static void schannel_cleanup(void)
 
 static size_t schannel_version(char *buffer, size_t size)
 {
-  return msnprintf(buffer, size, "Schannel");
+  return (size_t)msnprintf(buffer, size, "Schannel");
 }
 
 static CURLcode schannel_random(struct Curl_easy *data UNUSED_PARAM,
