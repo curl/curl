@@ -910,7 +910,14 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
           FD_ZERO(&input);
           FD_ZERO(&output);
           got = 0;
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
           FD_SET(sock, &input);
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
           do {
             logmsg("Wait until readable");
             rc = select((int)sock + 1, &input, &output, NULL, &timeout);
@@ -1450,6 +1457,12 @@ static void http_connect(curl_socket_t *infdp,
     FD_ZERO(&input);
     FD_ZERO(&output);
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+/* 'error: conversion to 'long unsigned int' from 'int'
+   may change the sign of the result' in FD_SET() calls */
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
     if((clientfd[DATA] == CURL_SOCKET_BAD) &&
        (serverfd[DATA] == CURL_SOCKET_BAD) &&
        poll_client_rd[CTRL] && poll_client_wr[CTRL] &&
@@ -1496,6 +1509,9 @@ static void http_connect(curl_socket_t *infdp,
         }
       }
     }
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
     if(got_exit_signal)
       break;
 
@@ -1514,8 +1530,15 @@ static void http_connect(curl_socket_t *infdp,
       /* ---------------------------------------------------------- */
 
       /* passive mode FTP may establish a secondary tunnel */
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
       if((clientfd[DATA] == CURL_SOCKET_BAD) &&
          (serverfd[DATA] == CURL_SOCKET_BAD) && FD_ISSET(rootfd, &input)) {
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
         /* a new connection on listener socket (most likely from client) */
         curl_socket_t datafd = accept(rootfd, NULL, NULL);
         if(datafd != CURL_SOCKET_BAD) {
@@ -1590,7 +1613,14 @@ static void http_connect(curl_socket_t *infdp,
         size_t len;
         if(clientfd[i] != CURL_SOCKET_BAD) {
           len = sizeof(readclient[i]) - (size_t)tos[i];
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
           if(len && FD_ISSET(clientfd[i], &input)) {
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
             /* read from client */
             rc = sread(clientfd[i], &readclient[i][tos[i]], len);
             if(rc <= 0) {
@@ -1608,7 +1638,14 @@ static void http_connect(curl_socket_t *infdp,
         }
         if(serverfd[i] != CURL_SOCKET_BAD) {
           len = sizeof(readserver[i]) - (size_t)toc[i];
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
           if(len && FD_ISSET(serverfd[i], &input)) {
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
             /* read from server */
             rc = sread(serverfd[i], &readserver[i][toc[i]], len);
             if(rc <= 0) {
@@ -1625,7 +1662,14 @@ static void http_connect(curl_socket_t *infdp,
           }
         }
         if(clientfd[i] != CURL_SOCKET_BAD) {
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
           if(toc[i] && FD_ISSET(clientfd[i], &output)) {
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
             /* write to client */
             rc = swrite(clientfd[i], readserver[i], toc[i]);
             if(rc <= 0) {
@@ -1646,7 +1690,14 @@ static void http_connect(curl_socket_t *infdp,
           }
         }
         if(serverfd[i] != CURL_SOCKET_BAD) {
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
           if(tos[i] && FD_ISSET(serverfd[i], &output)) {
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
             /* write to server */
             rc = swrite(serverfd[i], readclient[i], tos[i]);
             if(rc <= 0) {
@@ -2304,7 +2355,14 @@ int main(int argc, char *argv[])
 
     for(socket_idx = 0; socket_idx < num_sockets; ++socket_idx) {
       /* Listen on all sockets */
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
       FD_SET(all_sockets[socket_idx], &input);
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
       if(all_sockets[socket_idx] > maxfd)
         maxfd = all_sockets[socket_idx];
     }
@@ -2332,7 +2390,14 @@ int main(int argc, char *argv[])
     active = rc; /* a positive number */
 
     /* Check if the listening socket is ready to accept */
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
     if(FD_ISSET(all_sockets[0], &input)) {
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
       /* Service all queued connections */
       curl_socket_t msgsock;
       do {
@@ -2349,7 +2414,14 @@ int main(int argc, char *argv[])
 
     /* Service all connections that are ready */
     for(socket_idx = 1; (socket_idx < num_sockets) && active; ++socket_idx) {
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
       if(FD_ISSET(all_sockets[socket_idx], &input)) {
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
         active--;
         if(got_exit_signal)
           goto sws_cleanup;
