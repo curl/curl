@@ -868,7 +868,7 @@ static OSStatus sectransp_bio_cf_in_read(SSLConnectionRef connection,
   else if((size_t)nread < *dataLength) {
     rtn = errSSLWouldBlock;
   }
-  *dataLength = nread;
+  *dataLength = (size_t)nread;
   return rtn;
 }
 
@@ -902,7 +902,7 @@ static OSStatus sectransp_bio_cf_out_write(SSLConnectionRef connection,
   else if((size_t)nwritten < *dataLength) {
     rtn = errSSLWouldBlock;
   }
-  *dataLength = nwritten;
+  *dataLength = (size_t)nwritten;
   return rtn;
 }
 
@@ -1015,7 +1015,7 @@ static CURLcode CopyCertSubject(struct Curl_easy *data,
     size_t cbuf_size = ((size_t)CFStringGetLength(c) * 4) + 1;
     cbuf = calloc(1, cbuf_size);
     if(cbuf) {
-      if(!CFStringGetCString(c, cbuf, cbuf_size,
+      if(!CFStringGetCString(c, cbuf, (CFIndex)cbuf_size,
                              kCFStringEncodingUTF8)) {
         failf(data, "SSL: invalid CA certificate subject");
         result = CURLE_PEER_FAILED_VERIFICATION;
@@ -1194,7 +1194,8 @@ static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
 
   if(blob) {
     pkcs_data = CFDataCreate(kCFAllocatorDefault,
-                             (const unsigned char *)blob->data, blob->len);
+                             (const unsigned char *)blob->data,
+                             (CFIndex)blob->len);
     status = (pkcs_data != NULL) ? errSecSuccess : errSecAllocate;
     resource_imported = (pkcs_data != NULL);
   }
@@ -1202,7 +1203,7 @@ static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
     pkcs_url =
       CFURLCreateFromFileSystemRepresentation(NULL,
                                               (const UInt8 *)cPath,
-                                              strlen(cPath), false);
+                                              (CFIndex)strlen(cPath), false);
     resource_imported =
       CFURLCreateDataAndPropertiesFromResource(NULL,
                                                pkcs_url, &pkcs_data,
@@ -1581,7 +1582,7 @@ static CURLcode sectransp_set_selected_ciphers(struct Curl_easy *data,
     }
     /* Iterate through the cipher table and look for the cipher, starting
        the cipher number 0x01 because the 0x00 is not the real cipher */
-    cipher_len = cipher_end - cipher_start;
+    cipher_len = (size_t)(cipher_end - cipher_start);
     for(i = 1; i < NUM_OF_CIPHERS; ++i) {
       const char *table_cipher_name = NULL;
       if(tls_name) {
@@ -1665,6 +1666,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
   const struct curl_blob *ssl_cert_blob = ssl_config->primary.cert_blob;
   char *ciphers;
   OSStatus err = noErr;
+  CURLcode result;
 #if CURL_BUILD_MAC
   int darwinver_maj = 0, darwinver_min = 0;
 
@@ -1730,12 +1732,10 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
     case CURL_SSLVERSION_TLSv1_1:
     case CURL_SSLVERSION_TLSv1_2:
     case CURL_SSLVERSION_TLSv1_3:
-      {
-        CURLcode result = set_ssl_version_min_max(cf, data);
-        if(result != CURLE_OK)
-          return result;
-        break;
-      }
+      result = set_ssl_version_min_max(cf, data);
+      if(result != CURLE_OK)
+        return result;
+      break;
     case CURL_SSLVERSION_SSLv3:
     case CURL_SSLVERSION_SSLv2:
       failf(data, "SSL versions not supported");
@@ -1767,12 +1767,10 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
     case CURL_SSLVERSION_TLSv1_1:
     case CURL_SSLVERSION_TLSv1_2:
     case CURL_SSLVERSION_TLSv1_3:
-      {
-        CURLcode result = set_ssl_version_min_max(cf, data);
-        if(result != CURLE_OK)
-          return result;
-        break;
-      }
+      result = set_ssl_version_min_max(cf, data);
+      if(result != CURLE_OK)
+        return result;
+      break;
     case CURL_SSLVERSION_SSLv3:
     case CURL_SSLVERSION_SSLv2:
       failf(data, "SSL versions not supported");
@@ -1886,7 +1884,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
       err = SecIdentityCopyCertificate(cert_and_key, &cert);
       if(err == noErr) {
         char *certp;
-        CURLcode result = CopyCertSubject(data, cert, &certp);
+        result = CopyCertSubject(data, cert, &certp);
         if(!result) {
           infof(data, "Client certificate: %s", certp);
           free(certp);
@@ -2031,14 +2029,14 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
 
   ciphers = conn_config->cipher_list;
   if(ciphers) {
-    err = sectransp_set_selected_ciphers(data, backend->ssl_ctx, ciphers);
+    result = sectransp_set_selected_ciphers(data, backend->ssl_ctx, ciphers);
   }
   else {
-    err = sectransp_set_default_ciphers(data, backend->ssl_ctx);
+    result = sectransp_set_default_ciphers(data, backend->ssl_ctx);
   }
-  if(err != noErr) {
+  if(result != CURLE_OK) {
     failf(data, "SSL: Unable to set ciphers for SSL/TLS handshake. "
-          "Error code: %d", err);
+          "Error code: %d", (int)result);
     return CURLE_SSL_CIPHER;
   }
 
@@ -2074,7 +2072,6 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
     /* If there isn't one, then let's make one up! This has to be done prior
        to starting the handshake. */
     else {
-      CURLcode result;
       ssl_sessionid =
         aprintf("%s:%d:%d:%s:%d",
                 ssl_cafile ? ssl_cafile : "(blob memory)",
@@ -2121,7 +2118,7 @@ static long pem_to_der(const char *in, unsigned char **out, size_t *outlen)
   char *sep_start, *sep_end, *cert_start, *cert_end;
   size_t i, j, err;
   size_t len;
-  unsigned char *b64;
+  char *b64;
 
   /* Jump through the separators at the beginning of the certificate. */
   sep_start = strstr(in, "-----");
@@ -2143,7 +2140,7 @@ static long pem_to_der(const char *in, unsigned char **out, size_t *outlen)
     return -1;
   sep_end += 5;
 
-  len = cert_end - cert_start;
+  len = (size_t)(cert_end - cert_start);
   b64 = malloc(len + 1);
   if(!b64)
     return -1;
@@ -2189,7 +2186,7 @@ static int read_cert(const char *file, unsigned char **out, size_t *outlen)
       Curl_dyn_free(&certs);
       return -1;
     }
-    if(Curl_dyn_addn(&certs, buf, n)) {
+    if(Curl_dyn_addn(&certs, buf, (size_t)n)) {
       close(fd);
       return -1;
     }
@@ -2202,16 +2199,16 @@ static int read_cert(const char *file, unsigned char **out, size_t *outlen)
   return 0;
 }
 
-static int append_cert_to_array(struct Curl_easy *data,
-                                const unsigned char *buf, size_t buflen,
-                                CFMutableArrayRef array)
+static CURLcode append_cert_to_array(struct Curl_easy *data,
+                                     const unsigned char *buf, size_t buflen,
+                                     CFMutableArrayRef array)
 {
     char *certp;
     CURLcode result;
     SecCertificateRef cacert;
     CFDataRef certdata;
 
-    certdata = CFDataCreate(kCFAllocatorDefault, buf, buflen);
+    certdata = CFDataCreate(kCFAllocatorDefault, buf, (CFIndex)buflen);
     if(!certdata) {
       failf(data, "SSL: failed to allocate array for CA certificate");
       return CURLE_OUT_OF_MEMORY;
@@ -2248,7 +2245,8 @@ static CURLcode verify_cert_buf(struct Curl_cfilter *cf,
                                 const unsigned char *certbuf, size_t buflen,
                                 SSLContextRef ctx)
 {
-  int n = 0, rc;
+  int n = 0;
+  CURLcode rc;
   long res;
   unsigned char *der;
   size_t derlen, offset = 0;
@@ -2288,7 +2286,7 @@ static CURLcode verify_cert_buf(struct Curl_cfilter *cf,
       result = CURLE_SSL_CACERT_BADFILE;
       goto out;
     }
-    offset += res;
+    offset += (size_t)res;
 
     if(res == 0 && offset == 0) {
       /* This is not a PEM file, probably a certificate in DER format. */
@@ -2451,17 +2449,17 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
 #elif SECTRANSP_PINNEDPUBKEY_V2
 
     {
-        OSStatus success;
-        success = SecItemExport(keyRef, kSecFormatOpenSSL, 0, NULL,
-                                &publicKeyBits);
-        CFRelease(keyRef);
-        if(success != errSecSuccess || !publicKeyBits)
-          break;
+      OSStatus success;
+      success = SecItemExport(keyRef, kSecFormatOpenSSL, 0, NULL,
+                              &publicKeyBits);
+      CFRelease(keyRef);
+      if(success != errSecSuccess || !publicKeyBits)
+        break;
     }
 
 #endif /* SECTRANSP_PINNEDPUBKEY_V2 */
 
-    pubkeylen = CFDataGetLength(publicKeyBits);
+    pubkeylen = (size_t)CFDataGetLength(publicKeyBits);
     pubkey = (unsigned char *)CFDataGetBytePtr(publicKeyBits);
 
     switch(pubkeylen) {
@@ -3238,7 +3236,7 @@ static int sectransp_shutdown(struct Curl_cfilter *cf,
 
 static size_t sectransp_version(char *buffer, size_t size)
 {
-  return msnprintf(buffer, size, "SecureTransport");
+  return (size_t)msnprintf(buffer, size, "SecureTransport");
 }
 
 static bool sectransp_data_pending(struct Curl_cfilter *cf,
