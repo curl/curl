@@ -176,10 +176,10 @@ static ssize_t read_wincon(int fd, void *buf, size_t count)
     success = ReadFile(handle, buf, curlx_uztoul(count), &rcount, NULL);
   }
   if(success) {
-    return rcount;
+    return (ssize_t)rcount;
   }
 
-  errno = GetLastError();
+  errno = (int)GetLastError();
   return -1;
 }
 #undef  read
@@ -211,10 +211,10 @@ static ssize_t write_wincon(int fd, const void *buf, size_t count)
     success = WriteFile(handle, buf, curlx_uztoul(count), &wcount, NULL);
   }
   if(success) {
-    return wcount;
+    return (ssize_t)wcount;
   }
 
-  errno = GetLastError();
+  errno = (int)GetLastError();
   return -1;
 }
 #undef  write
@@ -484,7 +484,7 @@ static unsigned int WINAPI select_ws_wait_thread(void *lpParameter)
         size.LowPart = GetFileSize(handle, &length);
         if((size.LowPart != INVALID_FILE_SIZE) ||
             (GetLastError() == NO_ERROR)) {
-          size.HighPart = length;
+          size.HighPart = (LONG)length;
           /* get the current position within the file */
           pos.QuadPart = 0;
           pos.LowPart = SetFilePointer(handle, 0, &pos.HighPart, FILE_CURRENT);
@@ -665,7 +665,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   }
 
   /* allocate internal array for the internal data */
-  data = calloc(nfds, sizeof(struct select_ws_data));
+  data = calloc((size_t)nfds, sizeof(struct select_ws_data));
   if(!data) {
     CloseHandle(abort);
     errno = ENOMEM;
@@ -673,7 +673,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   }
 
   /* allocate internal array for the internal event handles */
-  handles = calloc(nfds + 1, sizeof(HANDLE));
+  handles = calloc((size_t)nfds + 1, sizeof(HANDLE));
   if(!handles) {
     CloseHandle(abort);
     free(data);
