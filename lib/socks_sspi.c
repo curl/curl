@@ -303,7 +303,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
       return CURLE_OUT_OF_MEMORY;
     }
     result = Curl_blockread_all(cf, data, (char *)sspi_recv_token.pvBuffer,
-                                sspi_recv_token.cbBuffer, &actualread);
+                                (ssize_t)sspi_recv_token.cbBuffer,
+                                &actualread);
 
     if(result || (actualread != us_length)) {
       failf(data, "Failed to receive SSPI authentication token.");
@@ -542,7 +543,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   }
 
   result = Curl_blockread_all(cf, data, (char *)sspi_w_token[0].pvBuffer,
-                              sspi_w_token[0].cbBuffer, &actualread);
+                              (ssize_t)sspi_w_token[0].cbBuffer,
+                              &actualread);
 
   if(result || (actualread != us_length)) {
     failf(data, "Failed to receive SSPI encryption type.");
