@@ -570,7 +570,7 @@ CURLcode Curl_hyper_header(struct Curl_easy *data, hyper_headers *headers,
     if(!p)
       /* this is fine if we already added at least one header */
       return numh ? CURLE_OK : CURLE_BAD_FUNCTION_ARGUMENT;
-    nlen = p - n;
+    nlen = (size_t)(p - n);
     p++; /* move past the colon */
     while(*p == ' ')
       p++;
@@ -587,8 +587,8 @@ CURLcode Curl_hyper_header(struct Curl_easy *data, hyper_headers *headers,
     }
     else
       linelen = 2; /* CRLF ending */
-    linelen += (p - n);
-    vlen = p - v;
+    linelen += (size_t)(p - n);
+    vlen = (size_t)(p - v);
 
     if(HYPERE_OK != hyper_headers_add(headers, (uint8_t *)n, nlen,
                                       (uint8_t *)v, vlen)) {
@@ -670,7 +670,7 @@ static int uploadstreamed(void *userdata, hyper_context *ctx,
     }
     /* increasing the writebytecount here is a little premature but we
        don't know exactly when the body is sent */
-    data->req.writebytecount += fillcount;
+    data->req.writebytecount += (curl_off_t)fillcount;
     Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
     rc = HYPER_POLL_READY;
   }
