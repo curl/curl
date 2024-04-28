@@ -2858,6 +2858,9 @@ ossl_set_ssl_version_min_max(struct Curl_cfilter *cf, SSL_CTX *ctx)
 typedef uint32_t ctx_option_t;
 #elif OPENSSL_VERSION_NUMBER >= 0x30000000L
 typedef uint64_t ctx_option_t;
+#elif OPENSSL_VERSION_NUMBER >= 0x10100000L && \
+  !defined(LIBRESSL_VERSION_NUMBER)
+typedef unsigned long ctx_option_t;
 #else
 typedef long ctx_option_t;
 #endif
