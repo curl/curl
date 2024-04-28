@@ -118,7 +118,7 @@ static CURLcode add_certs_data_to_store(HCERTSTORE trust_store,
 
   while(more_certs && (current_ca_file_ptr<ca_buffer_limit)) {
     const char *begin_cert_ptr = c_memmem(current_ca_file_ptr,
-                                          ca_buffer_limit-current_ca_file_ptr,
+                               (size_t)(ca_buffer_limit - current_ca_file_ptr),
                                           BEGIN_CERT,
                                           begin_cert_len);
     if(!begin_cert_ptr || !is_cr_or_lf(begin_cert_ptr[begin_cert_len])) {
@@ -126,7 +126,7 @@ static CURLcode add_certs_data_to_store(HCERTSTORE trust_store,
     }
     else {
       const char *end_cert_ptr = c_memmem(begin_cert_ptr,
-                                          ca_buffer_limit-begin_cert_ptr,
+                                    (size_t)(ca_buffer_limit - begin_cert_ptr),
                                           END_CERT,
                                           end_cert_len);
       if(!end_cert_ptr) {
@@ -448,7 +448,7 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
     /* pwszDNSName is in ia5 string format and hence doesn't contain any
      * non-ascii characters. */
     while(*dns_w != '\0') {
-      *current_pos++ = (char)(*dns_w++);
+      *current_pos++ = (TCHAR)(*dns_w++);
     }
     *current_pos++ = '\0';
     actual_length += (DWORD)current_length;
