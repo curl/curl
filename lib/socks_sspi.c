@@ -204,7 +204,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     if(sspi_send_token.cbBuffer) {
       socksreq[0] = 1;    /* GSS-API subnegotiation version */
       socksreq[1] = 1;    /* authentication message type */
-      us_length = htons((short)sspi_send_token.cbBuffer);
+      us_length = htons((unsigned short)sspi_send_token.cbBuffer);
       memcpy(socksreq + 2, &us_length, sizeof(short));
 
       written = Curl_conn_cf_send(cf->next, data, (char *)socksreq, 4, &code);
@@ -303,7 +303,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
       return CURLE_OUT_OF_MEMORY;
     }
     result = Curl_blockread_all(cf, data, (char *)sspi_recv_token.pvBuffer,
-                                sspi_recv_token.cbBuffer, &actualread);
+                                (ssize_t)sspi_recv_token.cbBuffer,
+                                &actualread);
 
     if(result || (actualread != us_length)) {
       failf(data, "Failed to receive SSPI authentication token.");
@@ -389,7 +390,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
    */
 
   if(data->set.socks5_gssapi_nec) {
-    us_length = htons((short)1);
+    us_length = htons((unsigned short)1);
     memcpy(socksreq + 2, &us_length, sizeof(short));
   }
   else {
@@ -472,7 +473,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     sspi_w_token[2].pvBuffer = NULL;
     sspi_w_token[2].cbBuffer = 0;
 
-    us_length = htons((short)sspi_send_token.cbBuffer);
+    us_length = htons((unsigned short)sspi_send_token.cbBuffer);
     memcpy(socksreq + 2, &us_length, sizeof(short));
   }
 
@@ -542,7 +543,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   }
 
   result = Curl_blockread_all(cf, data, (char *)sspi_w_token[0].pvBuffer,
-                              sspi_w_token[0].cbBuffer, &actualread);
+                              (ssize_t)sspi_w_token[0].cbBuffer,
+                              &actualread);
 
   if(result || (actualread != us_length)) {
     failf(data, "Failed to receive SSPI encryption type.");
