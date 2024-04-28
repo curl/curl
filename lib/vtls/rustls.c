@@ -757,7 +757,7 @@ cr_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 static size_t cr_version(char *buffer, size_t size)
 {
   struct rustls_str ver = rustls_version();
-  return msnprintf(buffer, size, "%.*s", (int)ver.len, ver.data);
+  return (size_t)msnprintf(buffer, size, "%.*s", (int)ver.len, ver.data);
 }
 
 const struct Curl_ssl Curl_ssl_rustls = {
