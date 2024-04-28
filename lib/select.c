@@ -347,12 +347,19 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
                          POLLRDNORM|POLLWRNORM|POLLRDBAND)) {
       if(ufds[i].fd > maxfd)
         maxfd = ufds[i].fd;
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
       if(ufds[i].events & (POLLRDNORM|POLLIN))
         FD_SET(ufds[i].fd, &fds_read);
       if(ufds[i].events & (POLLWRNORM|POLLOUT))
         FD_SET(ufds[i].fd, &fds_write);
       if(ufds[i].events & (POLLRDBAND|POLLPRI))
         FD_SET(ufds[i].fd, &fds_err);
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
     }
   }
 
@@ -375,6 +382,10 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
     ufds[i].revents = 0;
     if(ufds[i].fd == CURL_SOCKET_BAD)
       continue;
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
     if(FD_ISSET(ufds[i].fd, &fds_read)) {
       if(ufds[i].events & POLLRDNORM)
         ufds[i].revents |= POLLRDNORM;
@@ -393,6 +404,9 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
       if(ufds[i].events & POLLPRI)
         ufds[i].revents |= POLLPRI;
     }
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
     if(ufds[i].revents)
       r++;
   }
