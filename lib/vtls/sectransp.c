@@ -292,7 +292,7 @@ static OSStatus sectransp_bio_cf_in_read(SSLConnectionRef connection,
   else if((size_t)nread < *dataLength) {
     rtn = errSSLWouldBlock;
   }
-  *dataLength = nread;
+  *dataLength = (size_t)nread;
   return rtn;
 }
 
@@ -326,7 +326,7 @@ static OSStatus sectransp_bio_cf_out_write(SSLConnectionRef connection,
   else if((size_t)nwritten < *dataLength) {
     rtn = errSSLWouldBlock;
   }
-  *dataLength = nwritten;
+  *dataLength = (size_t)nwritten;
   return rtn;
 }
 
@@ -1560,7 +1560,7 @@ static long pem_to_der(const char *in, unsigned char **out, size_t *outlen)
     return -1;
   sep_end += 5;
 
-  len = cert_end - cert_start;
+  len = (size_t)(cert_end - cert_start);
   b64 = malloc(len + 1);
   if(!b64)
     return -1;
@@ -1606,7 +1606,7 @@ static int read_cert(const char *file, unsigned char **out, size_t *outlen)
       Curl_dyn_free(&certs);
       return -1;
     }
-    if(Curl_dyn_addn(&certs, buf, n)) {
+    if(Curl_dyn_addn(&certs, buf, (size_t)n)) {
       close(fd);
       return -1;
     }
@@ -1706,7 +1706,7 @@ static CURLcode verify_cert_buf(struct Curl_cfilter *cf,
       result = CURLE_SSL_CACERT_BADFILE;
       goto out;
     }
-    offset += res;
+    offset += (size_t)res;
 
     if(res == 0 && offset == 0) {
       /* This is not a PEM file, probably a certificate in DER format. */
@@ -2647,7 +2647,7 @@ static int sectransp_shutdown(struct Curl_cfilter *cf,
 
 static size_t sectransp_version(char *buffer, size_t size)
 {
-  return msnprintf(buffer, size, "SecureTransport");
+  return (size_t)msnprintf(buffer, size, "SecureTransport");
 }
 
 static bool sectransp_data_pending(struct Curl_cfilter *cf,
