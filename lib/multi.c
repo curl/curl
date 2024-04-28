@@ -1197,10 +1197,19 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
       if(!FDSET_SOCK(ps.sockets[i]))
         /* pretend it doesn't exist */
         continue;
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+/* error: conversion to 'long unsigned int' from 'curl_socket_t'
+          {aka 'int'} may change the sign of the result */
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
       if(ps.actions[i] & CURL_POLL_IN)
         FD_SET(ps.sockets[i], read_fd_set);
       if(ps.actions[i] & CURL_POLL_OUT)
         FD_SET(ps.sockets[i], write_fd_set);
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
       if((int)ps.sockets[i] > this_max_fd)
         this_max_fd = (int)ps.sockets[i];
     }
