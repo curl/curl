@@ -76,7 +76,16 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
       timeout.tv_usec = (int)((wait%1000)*1000);
 
       FD_ZERO(&bits);
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+/* error: conversion to 'long unsigned int' from 'int'
+          may change the sign of the result */
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
       FD_SET(per->infd, &bits);
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
       if(!select(per->infd + 1, &bits, NULL, NULL, &timeout))
         return 0; /* timeout */
     }
