@@ -171,7 +171,7 @@ schannel_set_ssl_version_min_max(DWORD *enabled_protocols,
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   long ssl_version = conn_config->version;
-  long ssl_version_max = conn_config->version_max;
+  long ssl_version_max = (long)conn_config->version_max;
   long i = ssl_version;
 
   switch(ssl_version_max) {
@@ -364,7 +364,7 @@ set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers,
     if(!alg)
       alg = get_alg_id_by_name(startCur);
     if(alg)
-      algIds[algCount++] = alg;
+      algIds[algCount++] = (ALG_ID)alg;
     else if(!strncmp(startCur, "USE_STRONG_CRYPTO",
                      sizeof("USE_STRONG_CRYPTO") - 1) ||
             !strncmp(startCur, "SCH_USE_STRONG_CRYPTO",
@@ -377,7 +377,7 @@ set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers,
       startCur++;
   }
   schannel_cred->palgSupportedAlgs = algIds;
-  schannel_cred->cSupportedAlgs = algCount;
+  schannel_cred->cSupportedAlgs = (DWORD)algCount;
   return CURLE_OK;
 }
 
@@ -396,7 +396,7 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
   if(!sep)
     return CURLE_SSL_CERTPROBLEM;
 
-  store_name_len = sep - path;
+  store_name_len = (size_t)(sep - path);
 
   if(_tcsncmp(path, TEXT("CurrentUser"), store_name_len) == 0)
     *store_name = CERT_SYSTEM_STORE_CURRENT_USER;
@@ -513,7 +513,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
   }
 
   if(!ssl_config->auto_client_cert) {
-    flags &= ~SCH_CRED_USE_DEFAULT_CREDS;
+    flags &= ~(DWORD)SCH_CRED_USE_DEFAULT_CREDS;
     flags |= SCH_CRED_NO_DEFAULT_CREDS;
     infof(data, "schannel: disabled automatic use of client certificate");
   }
@@ -950,7 +950,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
     tls_parameters.pDisabledCrypto = crypto_settings;
 
     /* The number of blocked suites */
-    tls_parameters.cDisabledCrypto = crypto_settings_idx;
+    tls_parameters.cDisabledCrypto = (DWORD)crypto_settings_idx;
     credentials.pTlsParameters = &tls_parameters;
     credentials.cTlsParameters = 1;
 
@@ -1406,7 +1406,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
       }
 
       /* increase encrypted data buffer offset */
-      backend->encdata_offset += nread;
+      backend->encdata_offset += (size_t)nread;
       backend->encdata_is_incomplete = false;
       DEBUGF(infof(data, "schannel: encrypted data got %zd", nread));
     }
@@ -2076,9 +2076,10 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       }
       /* socket is writable */
 
-       this_write = Curl_conn_cf_send(cf->next, data,
-                                      ptr + written, len - written,
-                                      &result);
+      this_write = Curl_conn_cf_send(cf->next, data,
+                                     ptr + (size_t)written,
+                                     len - (size_t)written,
+                                     &result);
       if(result == CURLE_AGAIN)
         continue;
       else if(result != CURLE_OK) {
@@ -2102,7 +2103,7 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(len == (size_t)written)
     /* Encrypted message including header, data and trailer entirely sent.
        The return value is the number of unencrypted bytes that were sent. */
-    written = outbuf[1].cbBuffer;
+    written = (ssize_t)outbuf[1].cbBuffer;
 
   return written;
 }
@@ -2595,9 +2596,7 @@ static void schannel_cleanup(void)
 
 static size_t schannel_version(char *buffer, size_t size)
 {
-  size = msnprintf(buffer, size, "Schannel");
-
-  return size;
+  return (size_t)msnprintf(buffer, size, "Schannel");
 }
 
 static CURLcode schannel_random(struct Curl_easy *data UNUSED_PARAM,
