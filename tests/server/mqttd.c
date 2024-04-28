@@ -747,8 +747,15 @@ static bool incoming(curl_socket_t listenfd)
     FD_ZERO(&fds_write);
     FD_ZERO(&fds_err);
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
     /* there's always a socket to wait for */
     FD_SET(sockfd, &fds_read);
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
     do {
       /* select() blocking behavior call on blocking descriptors please */
@@ -765,7 +772,14 @@ static bool incoming(curl_socket_t listenfd)
       return FALSE;
     }
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
     if(FD_ISSET(sockfd, &fds_read)) {
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
       curl_socket_t newfd = accept(sockfd, NULL, NULL);
       if(CURL_SOCKET_BAD == newfd) {
         error = SOCKERRNO;
