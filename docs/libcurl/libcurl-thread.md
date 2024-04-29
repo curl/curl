@@ -37,10 +37,28 @@ share API (the connection pool and HSTS cache for example).
 
 # TLS
 
-All current TLS libraries libcurl supports are thread-safe. OpenSSL 1.1.0+ can
-be safely used in multi-threaded applications provided that support for the
-underlying OS threading API is built-in. For older versions of OpenSSL, the
-user must set mutex callbacks.
+All current TLS libraries libcurl supports are thread-safe.
+
+## OpenSSL
+
+OpenSSL 1.1.0+ can be safely used in multi-threaded applications provided that
+support for the underlying OS threading API is built-in. For older versions of
+OpenSSL, the user must set mutex callbacks.
+
+libcurl may not be able to fully clean up after multi-threaded OpenSSL
+depending on how OpenSSL was built and loaded as a library. It is possible in
+some rare circumstances a memory leak could occur unless you implement your own
+OpenSSL thread cleanup.
+
+For example, on Windows if both libcurl and OpenSSL are linked statically to a
+DLL or application then OpenSSL may leak memory unless the DLL or application
+calls OPENSSL_thread_stop() before each thread terminates. If OpenSSL is built
+as a DLL then it does this cleanup automatically and there is no leak. If
+libcurl is built as a DLL and OpenSSL is linked statically to it then libcurl
+does this cleanup automatically and there is no leak (added in libcurl 8.8.0).
+
+Please review the OpenSSL documentation for a full list of circumstances:
+https://www.openssl.org/docs/man3.0/man3/OPENSSL_thread_stop.html#NOTES
 
 # Signals
 

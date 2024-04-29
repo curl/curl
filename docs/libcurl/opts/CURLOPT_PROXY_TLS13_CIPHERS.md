@@ -14,7 +14,6 @@ Protocol:
   - TLS
 TLS-backend:
   - OpenSSL
-  - rustls
   - Schannel
 ---
 

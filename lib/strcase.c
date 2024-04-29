@@ -71,7 +71,7 @@ static const unsigned char tolowermap[256] = {
    altered by the current locale. */
 char Curl_raw_toupper(char in)
 {
-  return touppermap[(unsigned char) in];
+  return (char)touppermap[(unsigned char) in];
 }
 
 
@@ -79,7 +79,7 @@ char Curl_raw_toupper(char in)
    altered by the current locale. */
 char Curl_raw_tolower(char in)
 {
-  return tolowermap[(unsigned char) in];
+  return (char)tolowermap[(unsigned char) in];
 }
 
 /*

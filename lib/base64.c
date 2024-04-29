@@ -243,7 +243,7 @@ static CURLcode base64_encode(const char *table64,
   *outptr = base64data;
 
   /* Return the length of the new data */
-  *outlen = output - base64data;
+  *outlen = (size_t)(output - base64data);
 
   return CURLE_OK;
 }

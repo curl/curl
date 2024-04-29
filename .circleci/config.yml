@@ -36,105 +36,105 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-werror --with-openssl
+            ./configure --enable-warnings --enable-werror --with-openssl || { tail -1000 config.log; false; }
 
   configure-openssl-no-verbose:
     steps:
       - run:
           command: |
             autoreconf -fi
-            ./configure --disable-verbose --enable-werror --with-openssl
+            ./configure --disable-verbose --enable-werror --with-openssl || { tail -1000 config.log; false; }
 
   configure-no-proxy:
     steps:
       - run:
           command: |
             autoreconf -fi
-            ./configure --disable-proxy --enable-werror --with-openssl
+            ./configure --disable-proxy --enable-werror --with-openssl || { tail -1000 config.log; false; }
 
   configure-macos-normal:
     steps:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-websockets --without-ssl CFLAGS='-Wno-vla -mmacosx-version-min=10.9' CPPFLAGS="-I$(brew --prefix libpsl)/include" LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" LIBS="-licuuc -licudata"
+            ./configure --enable-warnings --enable-websockets --without-ssl CFLAGS='-Wno-vla -mmacosx-version-min=10.9' CPPFLAGS="-I$(brew --prefix libpsl)/include" LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" LIBS="-licuuc -licudata" || { tail -1000 config.log; false; }
 
   configure-macos-debug:
     steps:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-websockets --without-ssl --enable-debug CPPFLAGS="-I$(brew --prefix libpsl)/include" CFLAGS='-Wno-vla -mmacosx-version-min=10.9' LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" LIBS="-licuuc -licudata"
+            ./configure --enable-warnings --enable-websockets --without-ssl --enable-debug CPPFLAGS="-I$(brew --prefix libpsl)/include" CFLAGS='-Wno-vla -mmacosx-version-min=10.9' LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" LIBS="-licuuc -licudata" || { tail -1000 config.log; false; }
 
   configure-macos-libssh2:
     steps:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-websockets --without-ssl --with-libssh2=/opt/homebrew/opt/libssh2 --enable-debug CPPFLAGS="-I$(brew --prefix libpsl)/include" CFLAGS='-Wno-vla -mmacosx-version-min=10.9' LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" LIBS="-licuuc -licudata"
+            ./configure --enable-warnings --enable-websockets --without-ssl --with-libssh2=/opt/homebrew/opt/libssh2 --enable-debug CPPFLAGS="-I$(brew --prefix libpsl)/include" CFLAGS='-Wno-vla -mmacosx-version-min=10.9' LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" LIBS="-licuuc -licudata" || { tail -1000 config.log; false; }
 
   configure-macos-libssh-c-ares:
     steps:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-websockets --with-openssl --with-libssh --enable-ares --enable-debug PKG_CONFIG_PATH="$(brew --prefix openssl)/lib/pkgconfig" CPPFLAGS="-I$(brew --prefix libpsl)/include" CFLAGS='-Wno-vla -mmacosx-version-min=10.9' LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" LIBS="-licuuc -licudata"
+            ./configure --enable-warnings --enable-websockets --with-openssl --with-libssh --enable-ares --enable-debug PKG_CONFIG_PATH="$(brew --prefix openssl)/lib/pkgconfig" CPPFLAGS="-I$(brew --prefix libpsl)/include" CFLAGS='-Wno-vla -mmacosx-version-min=10.9' LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" LIBS="-licuuc -licudata" || { tail -1000 config.log; false; }
 
   configure-macos-libssh:
     steps:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-websockets --with-openssl --with-libssh --enable-debug PKG_CONFIG_PATH="$(brew --prefix openssl)/lib/pkgconfig" CPPFLAGS="-I$(brew --prefix libpsl)/include" CFLAGS='-Wno-vla -mmacosx-version-min=10.9' LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" LIBS="-licuuc -licudata" || tail -1000 config.log
+            ./configure --enable-warnings --enable-websockets --with-openssl --with-libssh --enable-debug PKG_CONFIG_PATH="$(brew --prefix openssl)/lib/pkgconfig" CPPFLAGS="-I$(brew --prefix libpsl)/include" CFLAGS='-Wno-vla -mmacosx-version-min=10.9' LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" LIBS="-licuuc -licudata" || { tail -1000 config.log; false; }
 
   configure-macos-c-ares:
     steps:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-websockets --without-ssl --enable-ares --enable-debug CPPFLAGS="-I$(brew --prefix libpsl)/include" CFLAGS='-Wno-vla -mmacosx-version-min=10.9' LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" LIBS="-licuuc -licudata"
+            ./configure --enable-warnings --enable-websockets --without-ssl --enable-ares --enable-debug CPPFLAGS="-I$(brew --prefix libpsl)/include" CFLAGS='-Wno-vla -mmacosx-version-min=10.9' LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" LIBS="-licuuc -licudata" || { tail -1000 config.log; false; }
 
   configure-macos-http-only:
     steps:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-maintainer-mode --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-mqtt --disable-pop3 --disable-rtsp --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets --disable-shared --without-brotli --without-gssapi --without-libidn2 --without-libpsl --without-librtmp --without-libssh2 --without-nghttp2 --without-ssl --without-zlib --enable-debug CFLAGS='-Wno-vla -mmacosx-version-min=10.15'
+            ./configure --enable-warnings --enable-maintainer-mode --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-mqtt --disable-pop3 --disable-rtsp --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets --disable-shared --without-brotli --without-gssapi --without-libidn2 --without-libpsl --without-librtmp --without-libssh2 --without-nghttp2 --without-ssl --without-zlib --enable-debug CFLAGS='-Wno-vla -mmacosx-version-min=10.15' || { tail -1000 config.log; false; }
 
   configure-macos-securetransport-http2:
     steps:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-websockets --with-secure-transport CPPFLAGS="-I$(brew --prefix libpsl)/include" CFLAGS='-Wno-vla -mmacosx-version-min=10.8' LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" LIBS="-licuuc -licudata"
+            ./configure --enable-warnings --enable-websockets --with-secure-transport CPPFLAGS="-I$(brew --prefix libpsl)/include" CFLAGS='-Wno-vla -mmacosx-version-min=10.8' LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" LIBS="-licuuc -licudata" || { tail -1000 config.log; false; }
 
   configure-macos-openssl-http2:
     steps:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-websockets --with-openssl --enable-debug PKG_CONFIG_PATH="$(brew --prefix openssl)/lib/pkgconfig" CPPFLAGS="-I$(brew --prefix libpsl)/include" CFLAGS='-Wno-vla -mmacosx-version-min=10.9' LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" LIBS="-licuuc -licudata"
+            ./configure --enable-warnings --enable-websockets --with-openssl --enable-debug PKG_CONFIG_PATH="$(brew --prefix openssl)/lib/pkgconfig" CPPFLAGS="-I$(brew --prefix libpsl)/include" CFLAGS='-Wno-vla -mmacosx-version-min=10.9' LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" LIBS="-licuuc -licudata" || { tail -1000 config.log; false; }
 
   configure-macos-libressl-http2:
     steps:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-websockets --with-openssl --enable-debug PKG_CONFIG_PATH="$(brew --prefix libressl)/lib/pkgconfig" CPPFLAGS="-I$(brew --prefix libpsl)/include" CFLAGS='-Wno-vla -mmacosx-version-min=10.9' LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" LIBS="-licuuc -licudata"
+            ./configure --enable-warnings --enable-websockets --with-openssl --enable-debug PKG_CONFIG_PATH="$(brew --prefix libressl)/lib/pkgconfig" CPPFLAGS="-I$(brew --prefix libpsl)/include" CFLAGS='-Wno-vla -mmacosx-version-min=10.9' LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" LIBS="-licuuc -licudata" || { tail -1000 config.log; false; }
 
   configure-macos-torture:
     steps:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-websockets --disable-shared --disable-threaded-resolver --with-openssl --enable-debug PKG_CONFIG_PATH="$(brew --prefix openssl)/lib/pkgconfig" CPPFLAGS="-I$(brew --prefix libpsl)/include" CFLAGS='-Wno-vla -mmacosx-version-min=10.9' LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" LIBS="-licuuc -licudata"
+            ./configure --enable-warnings --enable-websockets --disable-shared --disable-threaded-resolver --with-openssl --enable-debug PKG_CONFIG_PATH="$(brew --prefix openssl)/lib/pkgconfig" CPPFLAGS="-I$(brew --prefix libpsl)/include" CFLAGS='-Wno-vla -mmacosx-version-min=10.9' LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" LIBS="-licuuc -licudata" || { tail -1000 config.log; false; }
 
   configure-macos-torture-ftp:
     steps:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-websockets --disable-shared --disable-threaded-resolver --with-openssl --enable-debug PKG_CONFIG_PATH="$(brew --prefix openssl)/lib/pkgconfig" CPPFLAGS="-I$(brew --prefix libpsl)/include" CFLAGS='-Wno-vla -mmacosx-version-min=10.9' LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" LIBS="-licuuc -licudata"
+            ./configure --enable-warnings --enable-websockets --disable-shared --disable-threaded-resolver --with-openssl --enable-debug PKG_CONFIG_PATH="$(brew --prefix openssl)/lib/pkgconfig" CPPFLAGS="-I$(brew --prefix libpsl)/include" CFLAGS='-Wno-vla -mmacosx-version-min=10.9' LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" LIBS="-licuuc -licudata" || { tail -1000 config.log; false; }
 
   install-cares:
     steps:
@@ -169,7 +169,7 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-werror --with-openssl --with-libssh
+            ./configure --enable-warnings --enable-werror --with-openssl --with-libssh || { tail -1000 config.log; false; }
 
   install-wolfssl:
     steps:
@@ -200,21 +200,21 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-werror --with-openssl --enable-ares
+            ./configure --enable-warnings --enable-werror --with-openssl --enable-ares || { tail -1000 config.log; false; }
 
   configure-wolfssh:
     steps:
       - run:
           command: |
             autoreconf -fi
-            LDFLAGS="-Wl,-rpath,$HOME/wssh/lib" ./configure --enable-warnings --enable-werror --with-wolfssl=$HOME/wssl --with-wolfssh=$HOME/wssh
+            LDFLAGS="-Wl,-rpath,$HOME/wssh/lib" ./configure --enable-warnings --enable-werror --with-wolfssl=$HOME/wssl --with-wolfssh=$HOME/wssh || { tail -1000 config.log; false; }
 
   configure-cares-debug:
     steps:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-debug --enable-werror --with-openssl --enable-ares
+            ./configure --enable-debug --enable-werror --with-openssl --enable-ares || { tail -1000 config.log; false; }
 
   build:
     steps:

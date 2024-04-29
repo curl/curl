@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_CB_SEE_H
-#define HEADER_CURL_TOOL_CB_SEE_H
+#ifndef HEADER_CURL_CIPHER_SUITE_H
+#define HEADER_CURL_CIPHER_SUITE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Jan Venekamp, <jan@venekamp.net>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,12 +23,24 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "tool_setup.h"
 
-/*
-** callback for CURLOPT_SEEKFUNCTION
-*/
+#include "curl_setup.h"
 
-int tool_seek_cb(void *userdata, curl_off_t offset, int whence);
+#if defined(USE_MBEDTLS)
+#include <stdint.h>
 
-#endif /* HEADER_CURL_TOOL_CB_SEE_H */
+/* Lookup IANA id for cipher suite string, returns 0 if not recognized */
+uint16_t Curl_cipher_suite_lookup_id(const char *cs_str, size_t cs_len);
+
+/* Walk over cipher suite string, update str and end pointers to next
+   cipher suite in string, returns IANA id of that suite if recognized */
+uint16_t Curl_cipher_suite_walk_str(const char **str, const char **end);
+
+/* Copy openssl or RFC name for cipher suite in supplied buffer.
+   Caller is responsible to supply sufficiently large buffer (size
+   of 64 should suffice), excess bytes are silently truncated. */
+int Curl_cipher_suite_get_str(uint16_t id, char *buf, size_t buf_size,
+                              bool prefer_rfc);
+
+#endif /* defined(USE_MBEDTLS) */
+#endif /* HEADER_CURL_CIPHER_SUITE_H */
