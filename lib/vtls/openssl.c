@@ -3692,11 +3692,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-#if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
-  SSL_CTX_set_options(octx->ssl_ctx, (uint64_t)ctx_options);
-#else
   SSL_CTX_set_options(octx->ssl_ctx, ctx_options);
-#endif
 
 #ifdef HAS_ALPN
   if(alpn && alpn_len) {
