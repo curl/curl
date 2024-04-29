@@ -1356,7 +1356,6 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   if((timeout_internal >= 0) && (timeout_internal < (long)timeout_ms))
     timeout_ms = (int)timeout_internal;
 
-  nfds = 0;
   memset(ufds, 0, ufds_len * sizeof(struct pollfd));
   memset(&ps, 0, sizeof(ps));
 
