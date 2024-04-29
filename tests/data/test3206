@@ -1,0 +1,39 @@
+<testcase>
+<info>
+<keywords>
+FILE
+long_path
+</keywords>
+</info>
+
+<reply>
+<data>
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+file
+</features>
+<name>
+file:// with long path
+</name>
+<command option="no-include">
+file://localhost%FILE_PWD/%LOGDIR/veryloooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooongdir/verylooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooongfile%TESTNUMBER.txt
+</command>
+<file name="%LOGDIR/veryloooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooongdir/verylooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooongfile%TESTNUMBER.txt">
+foo
+</file>
+</client>
+
+# Verify data after the test has been retrieved
+<verify>
+<stdout>
+foo
+</stdout>
+</verify>
+</testcase>

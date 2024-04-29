@@ -91,13 +91,38 @@ char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w)
 int curlx_win32_open(const char *filename, int oflag, ...)
 {
   int pmode = 0;
+  char *filename_long = NULL;
+  va_list param;
+  int result = -1;
 
 #ifdef _UNICODE
-  int result = -1;
   wchar_t *filename_w = curlx_convert_UTF8_to_wchar(filename);
+  if(ISALPHA(filename_w[0]) && filename_w[1] == ':'
+     && wcslen(filename_w) >= MAX_PATH) {
+    /* Legacy DOS path (eg C:\foo) is too long.
+       _wopen() does not support long legacy DOS paths. */
+    filename_long = malloc(strlen(filename) + 4 + 1);
+    if(filename_long) {
+      strcpy(filename_long, "\\\\?\\");
+      strcpy(filename_long + 4, filename);
+      curlx_unicodefree(filename_w);
+      filename_w = curlx_convert_UTF8_to_wchar(filename_long);
+    }
+  }
+#else
+  if(ISALPHA(filename[0]) && filename[1] == ':'
+     && strlen(filename) >= MAX_PATH) {
+    /* Legacy DOS path (eg C:\foo) is too long.
+       _open() does not support long legacy DOS paths. */
+    filename_long = malloc(strlen(filename) + 4 + 1);
+    if(filename_long) {
+      strcpy(filename_long, "\\\\?\\");
+      strcpy(filename_long + 4, filename);
+      filename = filename_long;
+    }
+  }
 #endif
 
-  va_list param;
   va_start(param, oflag);
   if(oflag & O_CREAT)
     pmode = va_arg(param, int);
@@ -110,10 +135,11 @@ int curlx_win32_open(const char *filename, int oflag, ...)
   }
   else
     errno = EINVAL;
-  return result;
 #else
-  return (_open)(filename, oflag, pmode);
+  result = (_open)(filename, oflag, pmode);
 #endif
+  free(filename_long);
+  return result;
 }
 
 FILE *curlx_win32_fopen(const char *filename, const char *mode)
