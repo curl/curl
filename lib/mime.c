@@ -1421,7 +1421,7 @@ CURLcode curl_mime_filedata(curl_mimepart *part, const char *filename)
         result = CURLE_OUT_OF_MEMORY;
 
       part->datasize = -1;
-      if(!result && S_ISREG(sbuf.st_mode)) {
+      if(S_ISREG(sbuf.st_mode)) {
         part->datasize = filesize(filename, sbuf);
         part->seekfunc = mime_file_seek;
       }
