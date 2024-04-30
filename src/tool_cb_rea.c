@@ -133,13 +133,12 @@ int tool_readbusy_cb(void *clientp,
 
     if(ulprev == ulnow) {
       /* it did not upload anything since last call */
-      if(prev.tv_sec) {
-        struct timeval now = tvnow();
+      struct timeval now = tvnow();
+      if(prev.tv_sec)
         /* get a rolling average rate */
         /* rate = rate - rate/4 + tvdiff(now, prev)/4; */
         rate -= rate/4 - tvdiff(now, prev)/4;
-        prev = now;
-      }
+      prev = now;
     }
     else {
       rate = 50;
