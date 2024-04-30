@@ -50,7 +50,7 @@ if2ip_result_t Curl_if2ip(int af,
                           unsigned int local_scope_id,
 #endif
                           const char *interf,
-                          char *buf, int buf_size);
+                          char *buf, size_t buf_size);
 
 #ifdef __INTERIX
 

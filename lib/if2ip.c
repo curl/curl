@@ -102,7 +102,7 @@ if2ip_result_t Curl_if2ip(int af,
                           unsigned int local_scope_id,
 #endif
                           const char *interf,
-                          char *buf, int buf_size)
+                          char *buf, size_t buf_size)
 {
   struct ifaddrs *iface, *head;
   if2ip_result_t res = IF2IP_NOT_FOUND;
@@ -187,7 +187,7 @@ if2ip_result_t Curl_if2ip(int af,
                           unsigned int local_scope_id,
 #endif
                           const char *interf,
-                          char *buf, int buf_size)
+                          char *buf, size_t buf_size)
 {
   struct ifreq req;
   struct in_addr in;
@@ -242,7 +242,7 @@ if2ip_result_t Curl_if2ip(int af,
                           unsigned int local_scope_id,
 #endif
                           const char *interf,
-                          char *buf, int buf_size)
+                          char *buf, size_t buf_size)
 {
     (void) af;
 #ifdef USE_IPV6
