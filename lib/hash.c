@@ -57,7 +57,7 @@ hash_element_dtor(void *user, void *element)
  */
 void
 Curl_hash_init(struct Curl_hash *h,
-               int slots,
+               size_t slots,
                hash_function hfunc,
                comp_function comparator,
                Curl_hash_dtor dtor)
@@ -111,7 +111,7 @@ Curl_hash_add(struct Curl_hash *h, void *key, size_t key_len, void *p)
   DEBUGASSERT(h);
   DEBUGASSERT(h->slots);
   if(!h->table) {
-    int i;
+    size_t i;
     h->table = malloc(h->slots * sizeof(struct Curl_llist));
     if(!h->table)
       return NULL; /* OOM */
@@ -198,7 +198,7 @@ Curl_hash_apply(Curl_hash *h, void *user,
                 void (*cb)(void *user, void *ptr))
 {
   struct Curl_llist_element  *le;
-  int                  i;
+  size_t i;
 
   for(i = 0; i < h->slots; ++i) {
     for(le = (h->table[i])->head;
@@ -222,7 +222,7 @@ void
 Curl_hash_destroy(struct Curl_hash *h)
 {
   if(h->table) {
-    int i;
+    size_t i;
     for(i = 0; i < h->slots; ++i) {
       Curl_llist_destroy(&h->table[i], (void *) h);
     }
@@ -250,7 +250,7 @@ Curl_hash_clean_with_criterium(struct Curl_hash *h, void *user,
   struct Curl_llist_element *le;
   struct Curl_llist_element *lnext;
   struct Curl_llist *list;
-  int i;
+  size_t i;
 
   if(!h || !h->table)
     return;
@@ -316,7 +316,7 @@ Curl_hash_next_element(struct Curl_hash_iterator *iter)
 
   /* If we have reached the end of the list, find the next one */
   if(!iter->current_element) {
-    int i;
+    size_t i;
     for(i = iter->slot_index; i < h->slots; i++) {
       if(h->table[i].head) {
         iter->current_element = h->table[i].head;
@@ -339,7 +339,7 @@ void Curl_hash_print(struct Curl_hash *h,
 {
   struct Curl_hash_iterator iter;
   struct Curl_hash_element *he;
-  int last_index = -1;
+  size_t last_index = ~0;
 
   if(!h)
     return;
@@ -352,7 +352,7 @@ void Curl_hash_print(struct Curl_hash *h,
   while(he) {
     if(iter.slot_index != last_index) {
       fprintf(stderr, "index %d:", iter.slot_index);
-      if(last_index >= 0) {
+      if(last_index != ~0) {
         fprintf(stderr, "\n");
       }
       last_index = iter.slot_index;
@@ -370,7 +370,7 @@ void Curl_hash_print(struct Curl_hash *h,
 #endif
 
 void Curl_hash_offt_init(struct Curl_hash *h,
-                         unsigned int slots,
+                         size_t slots,
                          Curl_hash_dtor dtor)
 {
   Curl_hash_init(h, slots, Curl_hash_str, Curl_str_key_compare, dtor);
