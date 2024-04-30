@@ -102,8 +102,8 @@ struct cf_hc_ctx {
   CURLcode result;          /* overall result */
   struct cf_hc_baller h3_baller;
   struct cf_hc_baller h21_baller;
-  int soft_eyeballs_timeout_ms;
-  int hard_eyeballs_timeout_ms;
+  unsigned int soft_eyeballs_timeout_ms;
+  unsigned int hard_eyeballs_timeout_ms;
 };
 
 static void cf_hc_baller_init(struct cf_hc_baller *b,
