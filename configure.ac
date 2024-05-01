@@ -3823,15 +3823,14 @@ AC_CHECK_DECL([fseeko],
 
 CURL_CHECK_NONBLOCKING_SOCKET
 
-AC_PATH_PROG( PERL, perl, ,
-  $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin )
-AC_SUBST(PERL)
+if test "x$BUILD_DOCS" != "x0" -o "x$USE_MANUAL" != "x0"; then
+  AC_PATH_PROG( PERL, perl, ,
+    $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin )
+  AC_SUBST(PERL)
 
-if test -z "$PERL"; then
-  dnl if perl was not found then disable building docs
-  AC_MSG_WARN([disabling documentation])
-  BUILD_DOCS=0
-  curl_docs_msg="no"
+  if test -z "$PERL"; then
+    AC_MSG_ERROR([perl was not found, needed for docs and manual])
+  fi
 fi
 
 dnl set variable for use in automakefile(s)
