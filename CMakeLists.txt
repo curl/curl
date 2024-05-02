@@ -555,23 +555,27 @@ endif()
 # Keep ZLIB detection after TLS detection,
 # and before calling openssl_check_symbol_exists().
 
-set(HAVE_LIBZ OFF)
-set(USE_ZLIB OFF)
-optional_dependency(ZLIB)
-if(ZLIB_FOUND)
-  set(HAVE_LIBZ ON)
-  set(USE_ZLIB ON)
+if(CURL_USE_SYSROOT_LIBZ)
+  list(APPEND CURL_LIBS "-lz")
+else()
+  set(HAVE_LIBZ OFF)
+  set(USE_ZLIB OFF)
+  optional_dependency(ZLIB)
+  if(ZLIB_FOUND)
+    set(HAVE_LIBZ ON)
+    set(USE_ZLIB ON)
 
-  # Depend on ZLIB via imported targets if supported by the running
-  # version of CMake.  This allows our dependents to get our dependencies
-  # transitively.
-  if(NOT CMAKE_VERSION VERSION_LESS 3.4)
-    list(APPEND CURL_LIBS ZLIB::ZLIB)
-  else()
-    list(APPEND CURL_LIBS ${ZLIB_LIBRARIES})
-    include_directories(${ZLIB_INCLUDE_DIRS})
+    # Depend on ZLIB via imported targets if supported by the running
+    # version of CMake.  This allows our dependents to get our dependencies
+    # transitively.
+    if(NOT CMAKE_VERSION VERSION_LESS 3.4)
+      list(APPEND CURL_LIBS ZLIB::ZLIB)
+    else()
+      list(APPEND CURL_LIBS ${ZLIB_LIBRARIES})
+      include_directories(${ZLIB_INCLUDE_DIRS})
+    endif()
+    list(APPEND CMAKE_REQUIRED_INCLUDES ${ZLIB_INCLUDE_DIRS})
   endif()
-  list(APPEND CMAKE_REQUIRED_INCLUDES ${ZLIB_INCLUDE_DIRS})
 endif()
 
 option(CURL_BROTLI "Set to ON to enable building curl with brotli support." OFF)
@@ -606,7 +610,7 @@ macro(openssl_check_symbol_exists SYMBOL FILES VARIABLE EXTRA_LIBS)
   if(USE_OPENSSL)
     set(CMAKE_REQUIRED_INCLUDES   "${OPENSSL_INCLUDE_DIR}")
     set(CMAKE_REQUIRED_LIBRARIES  "${OPENSSL_LIBRARIES}")
-    if(HAVE_LIBZ)
+    if(HAVE_LIBZ AND NOT CURL_USE_SYSROOT_LIBZ)
       list(APPEND CMAKE_REQUIRED_LIBRARIES "${ZLIB_LIBRARIES}")
     endif()
     if(WIN32)
@@ -616,7 +620,7 @@ macro(openssl_check_symbol_exists SYMBOL FILES VARIABLE EXTRA_LIBS)
   elseif(USE_WOLFSSL)
     set(CMAKE_REQUIRED_INCLUDES   "${WolfSSL_INCLUDE_DIRS}")
     set(CMAKE_REQUIRED_LIBRARIES  "${WolfSSL_LIBRARIES}")
-    if(HAVE_LIBZ)
+    if(HAVE_LIBZ AND NOT CURL_USE_SYSROOT_LIBZ)
       list(APPEND CMAKE_REQUIRED_INCLUDES  "${ZLIB_INCLUDE_DIRS}")  # Public wolfSSL headers require zlib headers
       list(APPEND CMAKE_REQUIRED_LIBRARIES "${ZLIB_LIBRARIES}")
     endif()
