@@ -754,6 +754,13 @@ void Curl_resolver_kill(struct Curl_easy *data)
   /* If we're still resolving, we must wait for the threads to fully clean up,
      unfortunately.  Otherwise, we can simply cancel to clean up any resolver
      data. */
+#ifdef _WIN32
+  if(td && td->complete_ev) {
+    Curl_GetAddrInfoExCancel(&td->tsd.w8.cancel_ev);
+    (void)thread_wait_resolv(data, NULL, FALSE);
+  }
+  else
+#endif
   if(td && td->thread_hnd != curl_thread_t_null
      && (data->set.quick_exit != 1L))
     (void)thread_wait_resolv(data, NULL, FALSE);
