@@ -566,6 +566,7 @@ static void destroy_async_data(struct Curl_async *async)
         Curl_GetAddrInfoExCancel(&td->tsd.w8.cancel_ev);
         WaitForSingleObject(td->complete_ev, INFINITE);
         CloseHandle(td->complete_ev);
+        td->complete_ev = NULL;
       }
 #endif
       if(td->thread_hnd != curl_thread_t_null)
@@ -713,6 +714,7 @@ static CURLcode thread_wait_resolv(struct Curl_easy *data,
   if(td->complete_ev) {
     WaitForSingleObject(td->complete_ev, INFINITE);
     CloseHandle(td->complete_ev);
+    td->complete_ev = NULL;
     if(entry)
       result = getaddrinfo_complete(data);
   }
