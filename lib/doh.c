@@ -455,7 +455,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
    * TODO: Figure out the conditions under which we want to make
    * a request for an HTTPS RR when we are not doing ECH. For now,
    * making this request breaks a bunch of DoH tests, e.g. test2100,
-   * where the addiitonal request doesn't match the pre-cooked data
+   * where the additional request doesn't match the pre-cooked data
    * files, so there's a bit of work attached to making the request
    * in a non-ECH use-case. For the present, we'll only make the
    * request when ECH is enabled in the build and is being used for
