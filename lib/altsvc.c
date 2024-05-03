@@ -56,6 +56,8 @@
 
 #define H3VERSION "h3"
 
+int rob;
+
 static enum alpnid alpn2alpnid(char *name)
 {
   if(strcasecompare(name, "h1"))
