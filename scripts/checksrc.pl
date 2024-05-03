@@ -721,7 +721,7 @@ sub scanfile {
                     v?sprintf|
                     (str|_mbs|_tcs|_wcs)n?cat|
                     LoadLibrary(Ex)?(A|W)?|
-                    access)
+                    _?w?access)
                    \s*\(
                  /x) {
             checkwarn("BANNEDFUNC",
