@@ -276,6 +276,9 @@ static void mysignal(int sig, void (*handler)(int))
   sigaction(sig, &sa, NULL);
 }
 
+#ifdef HAVE_SIGSETJMP
+CURL_NORETURN
+#endif
 static void timer(int signum)
 {
   (void)signum;
