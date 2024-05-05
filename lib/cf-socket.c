@@ -1840,7 +1840,7 @@ struct Curl_cftype Curl_cft_tcp_accept = {
 CURLcode Curl_conn_tcp_listen_set(struct Curl_easy *data,
                                   struct connectdata *conn,
                                   int sockindex,
-                                  const curl_socket_t *s)
+                                  curl_socket_t *s)
 {
   CURLcode result;
   struct Curl_cfilter *cf = NULL;
@@ -1914,7 +1914,7 @@ static void set_accepted_remote_ip(struct Curl_cfilter *cf,
 CURLcode Curl_conn_tcp_accepted_set(struct Curl_easy *data,
                                     struct connectdata *conn,
                                     int sockindex,
-                                    const curl_socket_t *s)
+                                    curl_socket_t *s)
 {
   struct Curl_cfilter *cf = NULL;
   struct cf_socket_ctx *ctx = NULL;

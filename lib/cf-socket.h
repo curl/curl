@@ -139,7 +139,7 @@ CURLcode Curl_cf_unix_create(struct Curl_cfilter **pcf,
 CURLcode Curl_conn_tcp_listen_set(struct Curl_easy *data,
                                   struct connectdata *conn,
                                   int sockindex,
-                                  const curl_socket_t *s);
+                                  curl_socket_t *s);
 
 /**
  * Replace the listen socket with the accept()ed one.
@@ -147,7 +147,7 @@ CURLcode Curl_conn_tcp_listen_set(struct Curl_easy *data,
 CURLcode Curl_conn_tcp_accepted_set(struct Curl_easy *data,
                                     struct connectdata *conn,
                                     int sockindex,
-                                    const curl_socket_t *s);
+                                    curl_socket_t *s);
 
 /**
  * Peek at the socket and remote ip/port the socket filter is using.

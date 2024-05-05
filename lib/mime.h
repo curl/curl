@@ -45,7 +45,7 @@ enum mimekind {
   MIMEKIND_NONE = 0,            /* Part not set. */
   MIMEKIND_DATA,                /* Allocated mime data. */
   MIMEKIND_FILE,                /* Data from file. */
-  MIMEKIND_CALLBACK,            /* Data from `read` callback. */
+  MIMEKIND_CALLBACK,            /* Data from `read' callback. */
   MIMEKIND_MULTIPART,           /* Data is a mime subpart. */
   MIMEKIND_LAST
 };
