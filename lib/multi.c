@@ -364,7 +364,7 @@ static size_t hash_fd(void *key, size_t key_length, size_t slots_num)
  * per call."
  *
  */
-static void sh_init(struct Curl_hash *hash, int hashsize)
+static void sh_init(struct Curl_hash *hash, size_t hashsize)
 {
   Curl_hash_init(hash, hashsize, hash_fd, fd_key_compare,
                  sh_freeentry);
@@ -381,9 +381,9 @@ static void multi_addmsg(struct Curl_multi *multi, struct Curl_message *msg)
   Curl_llist_append(&multi->msglist, msg, &msg->list);
 }
 
-struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
-                                     int chashsize, /* connection hash */
-                                     int dnssize) /* dns hash */
+struct Curl_multi *Curl_multi_handle(size_t hashsize, /* socket hash */
+                                     size_t chashsize, /* connection hash */
+                                     size_t dnssize) /* dns hash */
 {
   struct Curl_multi *multi = calloc(1, sizeof(struct Curl_multi));
 
