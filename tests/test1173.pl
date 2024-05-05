@@ -75,6 +75,8 @@ my %deprecated = (
     CURLINFO_DATA_OUT => 1,
     CURLINFO_SSL_DATA_IN => 1,
     CURLINFO_SSL_DATA_OUT => 1,
+    CURLOPT_EGDSOCKET => 1,
+    CURLOPT_RANDOM_FILE => 1,
     );
 sub allsymbols {
     open(my $f, "<", "$symbolsinversions") ||
