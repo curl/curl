@@ -1052,6 +1052,10 @@ static CURLcode local_decode_rdata_name(unsigned char **buf, size_t *remaining,
   if(!buf || !remaining || !dnsname)
     return CURLE_OUT_OF_MEMORY;
   rem = (int)*remaining;
+  if(rem <= 0) {
+    Curl_dyn_free(&thename);
+    return CURLE_OUT_OF_MEMORY;
+  }
   Curl_dyn_init(&thename, CURL_MAXLEN_host_name);
   cp = *buf;
   clen = *cp++;
@@ -1078,10 +1082,6 @@ static CURLcode local_decode_rdata_name(unsigned char **buf, size_t *remaining,
     clen = *cp++;
   }
   *buf = cp;
-  if(rem <= 0) {
-    Curl_dyn_free(&thename);
-    return CURLE_OUT_OF_MEMORY;
-  }
   *remaining = rem - 1;
   *dnsname = Curl_dyn_ptr(&thename);
   return CURLE_OK;
