@@ -56,17 +56,17 @@ struct Curl_sockaddr_ex {
 
 
 /*
- * Create a socket based on info from 'conn' and 'ai'.
+ * Create a socket based on info from 'data' and 'ai'.
  *
  * Fill in 'addr' and 'sockfd' accordingly if OK is returned. If the open
  * socket callback is set, used that!
  *
  */
 CURLcode Curl_socket_open(struct Curl_easy *data,
-                            const struct Curl_addrinfo *ai,
-                            struct Curl_sockaddr_ex *addr,
-                            int transport,
-                            curl_socket_t *sockfd);
+                          const struct Curl_addrinfo *ai,
+                          struct Curl_sockaddr_ex *addr,
+                          int transport,
+                          curl_socket_t *sockfd);
 
 int Curl_socket_close(struct Curl_easy *data, struct connectdata *conn,
                       curl_socket_t sock);
@@ -139,7 +139,7 @@ CURLcode Curl_cf_unix_create(struct Curl_cfilter **pcf,
 CURLcode Curl_conn_tcp_listen_set(struct Curl_easy *data,
                                   struct connectdata *conn,
                                   int sockindex,
-                                  curl_socket_t *s);
+                                  const curl_socket_t *s);
 
 /**
  * Replace the listen socket with the accept()ed one.
@@ -147,7 +147,7 @@ CURLcode Curl_conn_tcp_listen_set(struct Curl_easy *data,
 CURLcode Curl_conn_tcp_accepted_set(struct Curl_easy *data,
                                     struct connectdata *conn,
                                     int sockindex,
-                                    curl_socket_t *s);
+                                    const curl_socket_t *s);
 
 /**
  * Peek at the socket and remote ip/port the socket filter is using.

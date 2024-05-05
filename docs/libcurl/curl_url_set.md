@@ -129,8 +129,8 @@ If the hostname is a numeric IPv6 address, this field can also be set.
 ## CURLUPART_PORT
 
 The port number cannot be URL encoded on set. The given port number is
-provided as a string and the decimal number in it must be between 0 and
-65535. Anything else returns an error.
+provided as a string and the decimal number in it must be between 0 and 65535. 
+Anything else returns an error.
 
 ## CURLUPART_PATH
 
