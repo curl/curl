@@ -108,7 +108,7 @@ int Curl_conncache_init(struct conncache *connc, int size)
     return 1; /* bad */
   connc->closure_handle->state.internal = true;
 
-  Curl_hash_init(&connc->hash, size, Curl_hash_str,
+  Curl_hash_init(&connc->hash, (size_t)size, Curl_hash_str,
                  Curl_str_key_compare, free_bundle_hash_entry);
   connc->closure_handle->state.conn_cache = connc;
 
