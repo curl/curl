@@ -3286,14 +3286,12 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
     return CURLE_FAILED_INIT;
   }
 
-#ifdef HAVE_LIBSSH2_VERSION
   /* Set the packet read timeout if the libssh2 version supports it */
 #if LIBSSH2_VERSION_NUM >= 0x010B00
   if(data->set.server_response_timeout > 0) {
     libssh2_session_set_read_timeout(sshc->ssh_session,
                                      data->set.server_response_timeout / 1000);
   }
-#endif
 #endif
 
 #ifndef CURL_DISABLE_PROXY
