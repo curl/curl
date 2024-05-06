@@ -380,10 +380,11 @@ CURLOPT_TIMEOUT(3) and/or CURLOPT_LOW_SPEED_LIMIT(3) options can
 be used to mitigate against this.
 
 A malicious server could cause libcurl to download an infinite amount of data,
-potentially causing all of memory or disk to be filled. Setting the
-CURLOPT_MAXFILESIZE_LARGE(3) option is not sufficient to guard against
-this. Instead, applications should monitor the amount of data received within
-the write or progress callback and abort once the limit is reached.
+potentially causing system resources to be exhausted resulting in a system or
+application crash. Setting the CURLOPT_MAXFILESIZE_LARGE(3) option is not
+sufficient to guard against this. Instead, applications should monitor the
+amount of data received within the write or progress callback and abort once
+the limit is reached.
 
 A malicious HTTP server could cause an infinite redirection loop, causing a
 denial-of-service. This can be mitigated by using the

@@ -65,7 +65,7 @@ UTC. Supported formats include: -1200, MST, +0100.
 ## day of the week items
 
 Specifies a day of the week. Days of the week may be spelled out in full
-(using English): `Sunday', `Monday', etc or they may be abbreviated to their
+(using English): 'Sunday', 'Monday', etc or they may be abbreviated to their
 first three letters. This is usually not info that adds anything.
 
 ## pure numbers
