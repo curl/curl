@@ -88,8 +88,6 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
 CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
                               struct Curl_dns_entry **dns);
 
-int Curl_doh_getsock(struct connectdata *conn, curl_socket_t *socks);
-
 #define DOH_MAX_ADDR 24
 #define DOH_MAX_CNAME 4
 #define DOH_MAX_HTTPS 4
