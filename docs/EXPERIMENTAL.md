@@ -21,8 +21,16 @@ Experimental support in curl means:
    to our API/ABI rules as we do for regular features, as long as it is marked
    experimental.
 5. Experimental features are clearly marked so in documentation. Beware.
-6. Experimental features should have a set of documented requirements of
-   what is needed for the feature to graduate.
+
+## Graduation
+
+1. Each experimental feature should have a set of documented requirements of
+   what is needed for that feature to graduate. Graduation means being removed
+   from the list of experiments.
+2. An experiment should NOT graduate if it needs test cases to be disabled,
+   unless they are for minor features that are clearly documented as not
+   provided by the experiment and then the disabling should be managed inside
+   each affected test case.
 
 ## Experimental features right now
 
@@ -30,8 +38,6 @@ Experimental support in curl means:
 
 Graduation requirements:
 
-- no test cases disabled - unless the test features hyper itself just does not
-  support
 - HTTP/1 and HTTP/2 support, including multiplexing
 
 ###  HTTP/3 support (non-ngtcp2 backends)
@@ -46,8 +52,6 @@ Graduation requirements:
 ### The rustls backend
 
 Graduation requirements:
-
-- no test cases disabled for rustls
 
 - a reasonable expectation of a stable API going forward.
 
