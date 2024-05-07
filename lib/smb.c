@@ -259,7 +259,7 @@ static CURLcode smb_parse_url_path(struct Curl_easy *data,
  * SMB handler interface
  */
 const struct Curl_handler Curl_handler_smb = {
-  "SMB",                                /* scheme */
+  "smb",                                /* scheme */
   smb_setup_connection,                 /* setup_connection */
   smb_do,                               /* do_it */
   ZERO_NULL,                            /* done */
@@ -287,7 +287,7 @@ const struct Curl_handler Curl_handler_smb = {
  * SMBS handler interface
  */
 const struct Curl_handler Curl_handler_smbs = {
-  "SMBS",                               /* scheme */
+  "smbs",                               /* scheme */
   smb_setup_connection,                 /* setup_connection */
   smb_do,                               /* do_it */
   ZERO_NULL,                            /* done */

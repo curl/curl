@@ -168,7 +168,7 @@ static CURLcode tftp_translate_code(tftp_error_t error);
  */
 
 const struct Curl_handler Curl_handler_tftp = {
-  "TFTP",                               /* scheme */
+  "tftp",                               /* scheme */
   tftp_setup_connection,                /* setup_connection */
   tftp_do,                              /* do_it */
   tftp_done,                            /* done */

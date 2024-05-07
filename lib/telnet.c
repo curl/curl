@@ -173,7 +173,7 @@ struct TELNET {
  */
 
 const struct Curl_handler Curl_handler_telnet = {
-  "TELNET",                             /* scheme */
+  "telnet",                             /* scheme */
   ZERO_NULL,                            /* setup_connection */
   telnet_do,                            /* do_it */
   telnet_done,                          /* done */

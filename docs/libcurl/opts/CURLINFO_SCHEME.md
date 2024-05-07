@@ -33,8 +33,11 @@ string holding the URL scheme used for the most recent connection done with
 this CURL **handle**.
 
 The **scheme** pointer is NULL or points to private memory. You MUST NOT
-free - it gets freed when you call curl_easy_cleanup(3) on the
-corresponding CURL handle.
+free - it gets freed when you call curl_easy_cleanup(3) on the corresponding
+CURL handle.
+
+The returned scheme might be upper or lowercase. Do comparisons case
+insensitively.
 
 # EXAMPLE
 
