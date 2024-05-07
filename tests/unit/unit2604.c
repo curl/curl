@@ -52,6 +52,7 @@ struct set list[] = {
   { "\"foo\\\"bar\" a", "foo\"bar", "/", CURLE_OK},
   { "\"foo\\\'bar\" b", "foo\'bar", "/", CURLE_OK},
   { "\"foo\\\\bar\" c", "foo\\bar", "/", CURLE_OK},
+  { "\"foo\\pbar\" c", "foo\\bar", "/", CURLE_QUOTE_ERROR},
   { "foo\"", "foo\"", "/", CURLE_OK},
   { "foo \"", "foo", "/", CURLE_OK},
   { NULL, NULL, NULL, CURLE_OK }
