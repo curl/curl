@@ -128,10 +128,9 @@ CURLcode Curl_get_pathname(const char *cp, char **path, const char *homedir)
   CURLcode result;
 
   DEBUGASSERT(homedir);
-  if(!*cp || !homedir) {
-    *path = NULL;
+  *path = NULL;
+  if(!*cp || !homedir)
     return CURLE_QUOTE_ERROR;
-  }
 
   Curl_dyn_init(&out, MAX_PATHLENGTH);
 
