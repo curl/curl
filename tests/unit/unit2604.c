@@ -22,7 +22,6 @@
  *
  ***************************************************************************/
 #include "curlcheck.h"
-
 #include "curl_path.h"
 
 static CURLcode unit_setup(void)
@@ -57,6 +56,7 @@ struct set list[] = {
 };
 
 UNITTEST_START
+#ifdef USE_SSH
 {
   int i;
   int error = 0;
@@ -80,4 +80,6 @@ UNITTEST_START
   }
   return error;
 }
+#endif
+
 UNITTEST_STOP
