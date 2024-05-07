@@ -252,7 +252,7 @@ test2400 test2401 test2402 test2403 test2404 test2405 test2406 \
 \
 test2500 test2501 test2502 test2503 \
 \
-test2600 test2601 test2602 test2603 \
+test2600 test2601 test2602 test2603 test2604 \
 \
 test3000 test3001 test3002 test3003 test3004 test3005 test3006 test3007 \
 test3008 test3009 test3010 test3011 test3012 test3013 test3014 test3015 \
