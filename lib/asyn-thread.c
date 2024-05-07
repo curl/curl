@@ -554,11 +554,15 @@ static void destroy_async_data(struct Curl_async *async)
 
     if(!done) {
 #ifdef _WIN32
-      if(td->complete_ev)
+      if(td->complete_ev) {
         CloseHandle(td->complete_ev);
-      else
+        td->complete_ev = NULL;
+      }
 #endif
-      Curl_thread_destroy(td->thread_hnd);
+      if(td->thread_hnd != curl_thread_t_null) {
+        Curl_thread_destroy(td->thread_hnd);
+        td->thread_hnd = curl_thread_t_null;
+      }
     }
     else {
 #ifdef _WIN32
