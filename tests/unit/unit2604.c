@@ -41,29 +41,29 @@ struct set {
   CURLcode result;
 };
 
-struct set list[] = {
-  { "a a", "a", "/home/", CURLE_OK},
-  { "b a", "b", "/", CURLE_OK},
-  { "a", "a", "/home/", CURLE_OK},
-  { "b", "b", "/", CURLE_OK},
-  { "\"foo bar\"\tb", "foo bar", "/", CURLE_OK},
-  { "/~/hej", "/home/user/hej", "/home/user", CURLE_OK},
-  { "\"foo bar", "", "/", CURLE_QUOTE_ERROR},
-  { "\"foo\\\"bar\" a", "foo\"bar", "/", CURLE_OK},
-  { "\"foo\\\'bar\" b", "foo\'bar", "/", CURLE_OK},
-  { "\"foo\\\\bar\" c", "foo\\bar", "/", CURLE_OK},
-  { "\"foo\\pbar\" c", "foo\\bar", "/", CURLE_QUOTE_ERROR},
-  { "\"\" c", "", "", CURLE_QUOTE_ERROR},
-  { "foo\"", "foo\"", "/", CURLE_OK},
-  { "foo \"", "foo", "/", CURLE_OK},
-  { NULL, NULL, NULL, CURLE_OK }
-};
-
 UNITTEST_START
 #ifdef USE_SSH
 {
   int i;
   int error = 0;
+  struct set list[] = {
+    { "a a", "a", "/home/", CURLE_OK},
+    { "b a", "b", "/", CURLE_OK},
+    { "a", "a", "/home/", CURLE_OK},
+    { "b", "b", "/", CURLE_OK},
+    { "\"foo bar\"\tb", "foo bar", "/", CURLE_OK},
+    { "/~/hej", "/home/user/hej", "/home/user", CURLE_OK},
+    { "\"foo bar", "", "/", CURLE_QUOTE_ERROR},
+    { "\"foo\\\"bar\" a", "foo\"bar", "/", CURLE_OK},
+    { "\"foo\\\'bar\" b", "foo\'bar", "/", CURLE_OK},
+    { "\"foo\\\\bar\" c", "foo\\bar", "/", CURLE_OK},
+    { "\"foo\\pbar\" c", "foo\\bar", "/", CURLE_QUOTE_ERROR},
+    { "\"\" c", "", "", CURLE_QUOTE_ERROR},
+    { "foo\"", "foo\"", "/", CURLE_OK},
+    { "foo \"", "foo", "/", CURLE_OK},
+    { NULL, NULL, NULL, CURLE_OK }
+  };
+
   for(i = 0; list[i].home; i++) {
     char *path;
     CURLcode result = Curl_get_pathname(list[i].cp, &path, list[i].home);
