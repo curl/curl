@@ -44,6 +44,8 @@ struct set {
 struct set list[] = {
   { "a a", "a", "/home/", CURLE_OK},
   { "b a", "b", "/", CURLE_OK},
+  { "a", "a", "/home/", CURLE_OK},
+  { "b", "b", "/", CURLE_OK},
   { "\"foo bar\"\tb", "foo bar", "/", CURLE_OK},
   { "/~/hej", "/home/user/hej", "/home/user", CURLE_OK},
   { "\"foo bar", "", "/", CURLE_QUOTE_ERROR},
