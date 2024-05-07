@@ -118,7 +118,7 @@ static CURLcode cr_eob_add(struct Curl_easy *data);
  */
 
 const struct Curl_handler Curl_handler_smtp = {
-  "SMTP",                           /* scheme */
+  "smtp",                           /* scheme */
   smtp_setup_connection,            /* setup_connection */
   smtp_do,                          /* do_it */
   smtp_done,                        /* done */
@@ -148,7 +148,7 @@ const struct Curl_handler Curl_handler_smtp = {
  */
 
 const struct Curl_handler Curl_handler_smtps = {
-  "SMTPS",                          /* scheme */
+  "smtps",                          /* scheme */
   smtp_setup_connection,            /* setup_connection */
   smtp_do,                          /* do_it */
   smtp_done,                        /* done */

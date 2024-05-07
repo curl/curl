@@ -76,7 +76,7 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done);
  */
 
 const struct Curl_handler Curl_handler_dict = {
-  "DICT",                               /* scheme */
+  "dict",                               /* scheme */
   ZERO_NULL,                            /* setup_connection */
   dict_do,                              /* do_it */
   ZERO_NULL,                            /* done */

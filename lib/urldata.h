@@ -657,7 +657,7 @@ enum doh_slots {
  */
 
 struct Curl_handler {
-  const char *scheme;        /* URL scheme name. */
+  const char *scheme;        /* URL scheme name in lowercase */
 
   /* Complement to setup_connection_internals(). This is done before the
      transfer "owns" the connection. */

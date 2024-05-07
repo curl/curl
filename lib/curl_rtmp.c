@@ -68,7 +68,7 @@ static Curl_send rtmp_send;
  */
 
 const struct Curl_handler Curl_handler_rtmp = {
-  "RTMP",                               /* scheme */
+  "rtmp",                               /* scheme */
   rtmp_setup_connection,                /* setup_connection */
   rtmp_do,                              /* do_it */
   rtmp_done,                            /* done */
@@ -92,7 +92,7 @@ const struct Curl_handler Curl_handler_rtmp = {
 };
 
 const struct Curl_handler Curl_handler_rtmpt = {
-  "RTMPT",                              /* scheme */
+  "rtmpt",                              /* scheme */
   rtmp_setup_connection,                /* setup_connection */
   rtmp_do,                              /* do_it */
   rtmp_done,                            /* done */
@@ -116,7 +116,7 @@ const struct Curl_handler Curl_handler_rtmpt = {
 };
 
 const struct Curl_handler Curl_handler_rtmpe = {
-  "RTMPE",                              /* scheme */
+  "rtmpe",                              /* scheme */
   rtmp_setup_connection,                /* setup_connection */
   rtmp_do,                              /* do_it */
   rtmp_done,                            /* done */
@@ -140,7 +140,7 @@ const struct Curl_handler Curl_handler_rtmpe = {
 };
 
 const struct Curl_handler Curl_handler_rtmpte = {
-  "RTMPTE",                             /* scheme */
+  "rtmpte",                             /* scheme */
   rtmp_setup_connection,                /* setup_connection */
   rtmp_do,                              /* do_it */
   rtmp_done,                            /* done */
@@ -164,7 +164,7 @@ const struct Curl_handler Curl_handler_rtmpte = {
 };
 
 const struct Curl_handler Curl_handler_rtmps = {
-  "RTMPS",                              /* scheme */
+  "rtmps",                              /* scheme */
   rtmp_setup_connection,                /* setup_connection */
   rtmp_do,                              /* do_it */
   rtmp_done,                            /* done */
@@ -188,7 +188,7 @@ const struct Curl_handler Curl_handler_rtmps = {
 };
 
 const struct Curl_handler Curl_handler_rtmpts = {
-  "RTMPTS",                             /* scheme */
+  "rtmpts",                             /* scheme */
   rtmp_setup_connection,                /* setup_connection */
   rtmp_do,                              /* do_it */
   rtmp_done,                            /* done */
