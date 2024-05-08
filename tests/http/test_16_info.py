@@ -62,7 +62,7 @@ class TestInfo:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{count-1}]'
         r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True)
-        r.check_stats(count=count, http_status=200)
+        r.check_stats(count=count, http_status=200, exitcode=0)
         for s in r.stats:
             self.check_stat(s, dl_size=30, ul_size=0)
 
@@ -77,7 +77,7 @@ class TestInfo:
         r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True, extra_args=[
             '--location'
         ])
-        r.check_stats(count=count, http_status=200)
+        r.check_stats(count=count, http_status=200, exitcode=0)
         for s in r.stats:
             self.check_stat(s, dl_size=30, ul_size=0)
 
@@ -93,7 +93,7 @@ class TestInfo:
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto,
                              with_headers=True)
         r.check_response(count=count, http_status=200)
-        r.check_stats(count=count, http_status=200)
+        r.check_stats(count=count, http_status=200, exitcode=0)
         for s in r.stats:
             self.check_stat(s, dl_size=fsize, ul_size=fsize)
 
@@ -104,7 +104,7 @@ class TestInfo:
         curl = CurlClient(env=env)
         url = f'http://{env.domain1}:{env.http_port}/data.json?[0-{count-1}]'
         r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True)
-        r.check_stats(count=count, http_status=200)
+        r.check_stats(count=count, http_status=200, exitcode=0)
         for s in r.stats:
             self.check_stat(s, dl_size=30, ul_size=0)
 
