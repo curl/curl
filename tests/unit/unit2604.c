@@ -36,7 +36,8 @@ static void unit_stop(void)
 
 struct set {
   const char *cp;
-  const char *expect;
+  const char *expect; /* the returned content */
+  const char *next;   /* what cp points to after the call */
   const char *home;
   CURLcode result;
 };
@@ -47,39 +48,46 @@ UNITTEST_START
   int i;
   int error = 0;
   struct set list[] = {
-    { "a a", "a", "/home/", CURLE_OK},
-    { "b a", "b", "/", CURLE_OK},
-    { "a", "a", "/home/", CURLE_OK},
-    { "b", "b", "/", CURLE_OK},
-    { "\"foo bar\"\tb", "foo bar", "/", CURLE_OK},
-    { "/~/hej", "/home/user/hej", "/home/user", CURLE_OK},
-    { "\"foo bar", "", "/", CURLE_QUOTE_ERROR},
-    { "\"foo\\\"bar\" a", "foo\"bar", "/", CURLE_OK},
-    { "\"foo\\\'bar\" b", "foo\'bar", "/", CURLE_OK},
-    { "\"foo\\\\bar\" c", "foo\\bar", "/", CURLE_OK},
-    { "\"foo\\pbar\" c", "foo\\bar", "/", CURLE_QUOTE_ERROR},
-    { "\"\" c", "", "", CURLE_QUOTE_ERROR},
-    { "foo\"", "foo\"", "/", CURLE_OK},
-    { "foo \"", "foo", "/", CURLE_OK},
-    { NULL, NULL, NULL, CURLE_OK }
+    { "a a", "a", "a", "/home/", CURLE_OK},
+    { "b a", "b", "a", "/", CURLE_OK},
+    { "a", "a", "", "/home/", CURLE_OK},
+    { "b", "b", "", "/", CURLE_OK},
+    { "\"foo bar\"\tb", "foo bar", "b", "/", CURLE_OK},
+    { "/~/hej", "/home/user/hej", "", "/home/user", CURLE_OK},
+    { "\"foo bar", "", "", "/", CURLE_QUOTE_ERROR},
+    { "\"foo\\\"bar\" a", "foo\"bar", "a", "/", CURLE_OK},
+    { "\"foo\\\'bar\" b", "foo\'bar", "b", "/", CURLE_OK},
+    { "\"foo\\\\bar\" c", "foo\\bar", "c", "/", CURLE_OK},
+    { "\"foo\\pbar\" c", "foo\\bar", "", "/", CURLE_QUOTE_ERROR},
+    { "\"\" c", "", "", "", CURLE_QUOTE_ERROR},
+    { "foo\"", "foo\"", "", "/", CURLE_OK},
+    { "foo \"", "foo", "\"", "/", CURLE_OK},
+    { NULL, NULL, NULL, NULL, CURLE_OK }
   };
 
   for(i = 0; list[i].home; i++) {
     char *path;
-    CURLcode result = Curl_get_pathname(list[i].cp, &path, list[i].home);
+    const char *cp = list[i].cp;
+    CURLcode result = Curl_get_pathname(&cp, &path, list[i].home);
     printf("%u - Curl_get_pathname(\"%s\", ... \"%s\") == %u\n", i,
            list[i].cp, list[i].home, list[i].result);
     if(result != list[i].result) {
       printf("... returned %d\n", result);
       error++;
     }
-    if(!result && path) {
-      if(strcmp(path, list[i].expect)) {
+    if(!result) {
+      if(cp && strcmp(cp, list[i].next)) {
+        printf("... cp points to '%s', not '%s' as expected \n",
+               cp, list[i].next);
+        error++;
+      }
+      if(path && strcmp(path, list[i].expect)) {
         printf("... gave '%s', not '%s' as expected \n",
                path, list[i].expect);
         error++;
       }
       curl_free(path);
+
     }
   }
   return error;

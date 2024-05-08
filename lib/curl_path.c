@@ -118,9 +118,9 @@ CURLcode Curl_getworkingpath(struct Curl_easy *data,
 
 #define MAX_PATHLENGTH 65535 /* arbitrary long */
 
-CURLcode Curl_get_pathname(const char *cp, char **path, const char *homedir)
+CURLcode Curl_get_pathname(const char **cpp, char **path, const char *homedir)
 {
-  const char *end;
+  const char *cp = *cpp, *end;
   char quot;
   unsigned int i;
   static const char WHITESPACE[] = " \t\r\n";
@@ -129,6 +129,7 @@ CURLcode Curl_get_pathname(const char *cp, char **path, const char *homedir)
 
   DEBUGASSERT(homedir);
   *path = NULL;
+  *cpp = NULL;
   if(!*cp || !homedir)
     return CURLE_QUOTE_ERROR;
 
@@ -164,12 +165,18 @@ CURLcode Curl_get_pathname(const char *cp, char **path, const char *homedir)
 
     if(!Curl_dyn_len(&out))
       goto fail;
+
+    /* return pointer to second parameter if it exists */
+    *cpp = &cp[i] + strspn(&cp[i], WHITESPACE);
   }
   else {
     /* Read to end of filename - either to whitespace or terminator */
     end = strpbrk(cp, WHITESPACE);
     if(!end)
       end = strchr(cp, '\0');
+
+    /* return pointer to second parameter if it exists */
+    *cpp = end + strspn(end, WHITESPACE);
 
     /* Handling for relative path - prepend home directory */
     if(cp[0] == '/' && cp[1] == '~' && cp[2] == '/') {
