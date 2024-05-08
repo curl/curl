@@ -30,6 +30,8 @@
 
 #include "curl_setup.h"
 
+#ifdef USE_SECTRANSP
+
 #include "urldata.h" /* for the Curl_easy definition */
 #include "curl_base64.h"
 #include "strtok.h"
@@ -37,8 +39,7 @@
 #include "strcase.h"
 #include "x509asn1.h"
 #include "strerror.h"
-
-#ifdef USE_SECTRANSP
+#include "cipher_suite.h"
 
 #ifdef __clang__
 #pragma clang diagnostic push
@@ -155,41 +156,30 @@ struct st_ssl_backend_data {
 };
 
 struct st_cipher {
-  const char *name; /* Cipher suite IANA name. It starts with "TLS_" prefix */
-  const char *alias_name; /* Alias name is the same as OpenSSL cipher name */
-  SSLCipherSuite num; /* Cipher suite code/number defined in IANA registry */
+  uint16_t num; /* Cipher suite code/number defined in IANA registry */
   bool weak; /* Flag to mark cipher as weak based on previous implementation
                 of Secure Transport back-end by CURL */
 };
 
-/* Macro to initialize st_cipher data structure: stringify id to name, cipher
-   number/id, 'weak' suite flag
+/* Macro to initialize st_cipher data structure: cipher number/id,
+   'weak' suite flag
  */
-#define CIPHER_DEF(num, alias, weak) \
-  { #num, alias, num, weak }
+#define CIPHER_DEF(num, weak) { num, weak }
 
 /*
- Macro to initialize st_cipher data structure with name, code (IANA cipher
- number/id value), and 'weak' suite flag. The first 28 cipher suite numbers
- have the same IANA code for both SSL and TLS standards: numbers 0x0000 to
- 0x001B. They have different names though. The first 4 letters of the cipher
- suite name are the protocol name: "SSL_" or "TLS_", rest of the IANA name is
- the same for both SSL and TLS cipher suite name.
- The second part of the problem is that macOS/iOS SDKs don't define all TLS
+ The first 28 cipher suite numbers have the same IANA code for both SSL and
+ TLS standards: numbers 0x0000 to 0x001B. They have different names though.
+ The first 4 letters of the cipher suite name are the protocol name: "SSL_" or
+ "TLS_", rest of the IANA name is the same for both SSL and TLS cipher suite
+ name.
+ For the first 28 cipher suite numbers macOS/iOS SDKs don't define all TLS
  codes but only 12 of them. The SDK defines all SSL codes though, i.e. SSL_NUM
  constant is always defined for those 28 ciphers while TLS_NUM is defined only
  for 12 of the first 28 ciphers. Those 12 TLS cipher codes match to
  corresponding SSL enum value and represent the same cipher suite. Therefore
  we'll use the SSL enum value for those cipher suites because it is defined
  for all 28 of them.
- We make internal data consistent and based on TLS names, i.e. all st_cipher
- item names start with the "TLS_" prefix.
- Summarizing all the above, those 28 first ciphers are presented in our table
- with both TLS and SSL names. Their cipher numbers are assigned based on the
- SDK enum value for the SSL cipher, which matches to IANA TLS number.
  */
-#define CIPHER_DEF_SSLTLS(num_wo_prefix, alias, weak) \
-  { "TLS_" #num_wo_prefix, alias, SSL_##num_wo_prefix, weak }
 
 /*
  Cipher suites were marked as weak based on the following:
@@ -235,8 +225,7 @@ struct st_cipher {
 #define CIPHER_STRONG_ENOUGH        FALSE
 
 /* Please do not change the order of the first ciphers available for SSL.
-   Do not insert and do not delete any of them. Code below
-   depends on their order and continuity.
+   Do not insert and do not delete any of them.
    If you add a new cipher, please maintain order by number, i.e.
    insert in between existing items to appropriate place based on
    cipher suite IANA number
@@ -244,233 +233,161 @@ struct st_cipher {
 static const struct st_cipher ciphertable[] = {
   /* SSL version 3.0 and initial TLS 1.0 cipher suites.
      Defined since SDK 10.2.8 */
-  CIPHER_DEF_SSLTLS(NULL_WITH_NULL_NULL,                           /* 0x0000 */
-                    NULL,
-                    CIPHER_WEAK_NOT_ENCRYPTED),
-  CIPHER_DEF_SSLTLS(RSA_WITH_NULL_MD5,                             /* 0x0001 */
-                    "NULL-MD5",
-                    CIPHER_WEAK_NOT_ENCRYPTED),
-  CIPHER_DEF_SSLTLS(RSA_WITH_NULL_SHA,                             /* 0x0002 */
-                    "NULL-SHA",
-                    CIPHER_WEAK_NOT_ENCRYPTED),
-  CIPHER_DEF_SSLTLS(RSA_EXPORT_WITH_RC4_40_MD5,                    /* 0x0003 */
-                    "EXP-RC4-MD5",
-                    CIPHER_WEAK_RC_ENCRYPTION),
-  CIPHER_DEF_SSLTLS(RSA_WITH_RC4_128_MD5,                          /* 0x0004 */
-                    "RC4-MD5",
-                    CIPHER_WEAK_RC_ENCRYPTION),
-  CIPHER_DEF_SSLTLS(RSA_WITH_RC4_128_SHA,                          /* 0x0005 */
-                    "RC4-SHA",
-                    CIPHER_WEAK_RC_ENCRYPTION),
-  CIPHER_DEF_SSLTLS(RSA_EXPORT_WITH_RC2_CBC_40_MD5,                /* 0x0006 */
-                    "EXP-RC2-CBC-MD5",
-                    CIPHER_WEAK_RC_ENCRYPTION),
-  CIPHER_DEF_SSLTLS(RSA_WITH_IDEA_CBC_SHA,                         /* 0x0007 */
-                    "IDEA-CBC-SHA",
-                    CIPHER_WEAK_IDEA_ENCRYPTION),
-  CIPHER_DEF_SSLTLS(RSA_EXPORT_WITH_DES40_CBC_SHA,                 /* 0x0008 */
-                    "EXP-DES-CBC-SHA",
-                    CIPHER_WEAK_DES_ENCRYPTION),
-  CIPHER_DEF_SSLTLS(RSA_WITH_DES_CBC_SHA,                          /* 0x0009 */
-                    "DES-CBC-SHA",
-                    CIPHER_WEAK_DES_ENCRYPTION),
-  CIPHER_DEF_SSLTLS(RSA_WITH_3DES_EDE_CBC_SHA,                     /* 0x000A */
-                    "DES-CBC3-SHA",
-                    CIPHER_WEAK_3DES_ENCRYPTION),
-  CIPHER_DEF_SSLTLS(DH_DSS_EXPORT_WITH_DES40_CBC_SHA,              /* 0x000B */
-                    "EXP-DH-DSS-DES-CBC-SHA",
-                    CIPHER_WEAK_DES_ENCRYPTION),
-  CIPHER_DEF_SSLTLS(DH_DSS_WITH_DES_CBC_SHA,                       /* 0x000C */
-                    "DH-DSS-DES-CBC-SHA",
-                    CIPHER_WEAK_DES_ENCRYPTION),
-  CIPHER_DEF_SSLTLS(DH_DSS_WITH_3DES_EDE_CBC_SHA,                  /* 0x000D */
-                    "DH-DSS-DES-CBC3-SHA",
-                    CIPHER_WEAK_3DES_ENCRYPTION),
-  CIPHER_DEF_SSLTLS(DH_RSA_EXPORT_WITH_DES40_CBC_SHA,              /* 0x000E */
-                    "EXP-DH-RSA-DES-CBC-SHA",
-                    CIPHER_WEAK_DES_ENCRYPTION),
-  CIPHER_DEF_SSLTLS(DH_RSA_WITH_DES_CBC_SHA,                       /* 0x000F */
-                    "DH-RSA-DES-CBC-SHA",
-                    CIPHER_WEAK_DES_ENCRYPTION),
-  CIPHER_DEF_SSLTLS(DH_RSA_WITH_3DES_EDE_CBC_SHA,                  /* 0x0010 */
-                    "DH-RSA-DES-CBC3-SHA",
-                    CIPHER_WEAK_3DES_ENCRYPTION),
-  CIPHER_DEF_SSLTLS(DHE_DSS_EXPORT_WITH_DES40_CBC_SHA,             /* 0x0011 */
-                    "EXP-EDH-DSS-DES-CBC-SHA",
-                    CIPHER_WEAK_DES_ENCRYPTION),
-  CIPHER_DEF_SSLTLS(DHE_DSS_WITH_DES_CBC_SHA,                      /* 0x0012 */
-                    "EDH-DSS-CBC-SHA",
-                    CIPHER_WEAK_DES_ENCRYPTION),
-  CIPHER_DEF_SSLTLS(DHE_DSS_WITH_3DES_EDE_CBC_SHA,                 /* 0x0013 */
-                    "DHE-DSS-DES-CBC3-SHA",
-                    CIPHER_WEAK_3DES_ENCRYPTION),
-  CIPHER_DEF_SSLTLS(DHE_RSA_EXPORT_WITH_DES40_CBC_SHA,             /* 0x0014 */
-                    "EXP-EDH-RSA-DES-CBC-SHA",
-                    CIPHER_WEAK_DES_ENCRYPTION),
-  CIPHER_DEF_SSLTLS(DHE_RSA_WITH_DES_CBC_SHA,                      /* 0x0015 */
-                    "EDH-RSA-DES-CBC-SHA",
-                    CIPHER_WEAK_DES_ENCRYPTION),
-  CIPHER_DEF_SSLTLS(DHE_RSA_WITH_3DES_EDE_CBC_SHA,                 /* 0x0016 */
-                    "DHE-RSA-DES-CBC3-SHA",
-                    CIPHER_WEAK_3DES_ENCRYPTION),
-  CIPHER_DEF_SSLTLS(DH_anon_EXPORT_WITH_RC4_40_MD5,                /* 0x0017 */
-                    "EXP-ADH-RC4-MD5",
-                    CIPHER_WEAK_ANON_AUTH),
-  CIPHER_DEF_SSLTLS(DH_anon_WITH_RC4_128_MD5,                      /* 0x0018 */
-                    "ADH-RC4-MD5",
-                    CIPHER_WEAK_ANON_AUTH),
-  CIPHER_DEF_SSLTLS(DH_anon_EXPORT_WITH_DES40_CBC_SHA,             /* 0x0019 */
-                    "EXP-ADH-DES-CBC-SHA",
-                    CIPHER_WEAK_ANON_AUTH),
-  CIPHER_DEF_SSLTLS(DH_anon_WITH_DES_CBC_SHA,                      /* 0x001A */
-                    "ADH-DES-CBC-SHA",
-                    CIPHER_WEAK_ANON_AUTH),
-  CIPHER_DEF_SSLTLS(DH_anon_WITH_3DES_EDE_CBC_SHA,                 /* 0x001B */
-                    "ADH-DES-CBC3-SHA",
-                    CIPHER_WEAK_3DES_ENCRYPTION),
+  CIPHER_DEF(SSL_RSA_WITH_NULL_MD5,                                /* 0x0001 */
+             CIPHER_WEAK_NOT_ENCRYPTED),
+  CIPHER_DEF(SSL_RSA_WITH_NULL_SHA,                                /* 0x0002 */
+             CIPHER_WEAK_NOT_ENCRYPTED),
+  CIPHER_DEF(SSL_RSA_EXPORT_WITH_RC4_40_MD5,                       /* 0x0003 */
+             CIPHER_WEAK_RC_ENCRYPTION),
+  CIPHER_DEF(SSL_RSA_WITH_RC4_128_MD5,                             /* 0x0004 */
+             CIPHER_WEAK_RC_ENCRYPTION),
+  CIPHER_DEF(SSL_RSA_WITH_RC4_128_SHA,                             /* 0x0005 */
+             CIPHER_WEAK_RC_ENCRYPTION),
+  CIPHER_DEF(SSL_RSA_EXPORT_WITH_RC2_CBC_40_MD5,                   /* 0x0006 */
+             CIPHER_WEAK_RC_ENCRYPTION),
+  CIPHER_DEF(SSL_RSA_WITH_IDEA_CBC_SHA,                            /* 0x0007 */
+             CIPHER_WEAK_IDEA_ENCRYPTION),
+  CIPHER_DEF(SSL_RSA_EXPORT_WITH_DES40_CBC_SHA,                    /* 0x0008 */
+             CIPHER_WEAK_DES_ENCRYPTION),
+  CIPHER_DEF(SSL_RSA_WITH_DES_CBC_SHA,                             /* 0x0009 */
+             CIPHER_WEAK_DES_ENCRYPTION),
+  CIPHER_DEF(SSL_RSA_WITH_3DES_EDE_CBC_SHA,                        /* 0x000A */
+             CIPHER_WEAK_3DES_ENCRYPTION),
+  CIPHER_DEF(SSL_DH_DSS_EXPORT_WITH_DES40_CBC_SHA,                 /* 0x000B */
+             CIPHER_WEAK_DES_ENCRYPTION),
+  CIPHER_DEF(SSL_DH_DSS_WITH_DES_CBC_SHA,                          /* 0x000C */
+             CIPHER_WEAK_DES_ENCRYPTION),
+  CIPHER_DEF(SSL_DH_DSS_WITH_3DES_EDE_CBC_SHA,                     /* 0x000D */
+             CIPHER_WEAK_3DES_ENCRYPTION),
+  CIPHER_DEF(SSL_DH_RSA_EXPORT_WITH_DES40_CBC_SHA,                 /* 0x000E */
+             CIPHER_WEAK_DES_ENCRYPTION),
+  CIPHER_DEF(SSL_DH_RSA_WITH_DES_CBC_SHA,                          /* 0x000F */
+             CIPHER_WEAK_DES_ENCRYPTION),
+  CIPHER_DEF(SSL_DH_RSA_WITH_3DES_EDE_CBC_SHA,                     /* 0x0010 */
+             CIPHER_WEAK_3DES_ENCRYPTION),
+  CIPHER_DEF(SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA,                /* 0x0011 */
+             CIPHER_WEAK_DES_ENCRYPTION),
+  CIPHER_DEF(SSL_DHE_DSS_WITH_DES_CBC_SHA,                         /* 0x0012 */
+             CIPHER_WEAK_DES_ENCRYPTION),
+  CIPHER_DEF(SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA,                    /* 0x0013 */
+             CIPHER_WEAK_3DES_ENCRYPTION),
+  CIPHER_DEF(SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA,                /* 0x0014 */
+             CIPHER_WEAK_DES_ENCRYPTION),
+  CIPHER_DEF(SSL_DHE_RSA_WITH_DES_CBC_SHA,                         /* 0x0015 */
+             CIPHER_WEAK_DES_ENCRYPTION),
+  CIPHER_DEF(SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA,                    /* 0x0016 */
+             CIPHER_WEAK_3DES_ENCRYPTION),
+  CIPHER_DEF(SSL_DH_anon_EXPORT_WITH_RC4_40_MD5,                   /* 0x0017 */
+             CIPHER_WEAK_ANON_AUTH),
+  CIPHER_DEF(SSL_DH_anon_WITH_RC4_128_MD5,                         /* 0x0018 */
+             CIPHER_WEAK_ANON_AUTH),
+  CIPHER_DEF(SSL_DH_anon_EXPORT_WITH_DES40_CBC_SHA,                /* 0x0019 */
+             CIPHER_WEAK_ANON_AUTH),
+  CIPHER_DEF(SSL_DH_anon_WITH_DES_CBC_SHA,                         /* 0x001A */
+             CIPHER_WEAK_ANON_AUTH),
+  CIPHER_DEF(SSL_DH_anon_WITH_3DES_EDE_CBC_SHA,                    /* 0x001B */
+             CIPHER_WEAK_3DES_ENCRYPTION),
   CIPHER_DEF(SSL_FORTEZZA_DMS_WITH_NULL_SHA,                       /* 0x001C */
-             NULL,
              CIPHER_WEAK_NOT_ENCRYPTED),
   CIPHER_DEF(SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA,               /* 0x001D */
-             NULL,
              CIPHER_STRONG_ENOUGH),
 
 #if CURL_BUILD_MAC_10_9 || CURL_BUILD_IOS_7
   /* RFC 4785 - Pre-Shared Key (PSK) Ciphersuites with NULL Encryption */
   CIPHER_DEF(TLS_PSK_WITH_NULL_SHA,                                /* 0x002C */
-             "PSK-NULL-SHA",
              CIPHER_WEAK_NOT_ENCRYPTED),
   CIPHER_DEF(TLS_DHE_PSK_WITH_NULL_SHA,                            /* 0x002D */
-             "DHE-PSK-NULL-SHA",
              CIPHER_WEAK_NOT_ENCRYPTED),
   CIPHER_DEF(TLS_RSA_PSK_WITH_NULL_SHA,                            /* 0x002E */
-             "RSA-PSK-NULL-SHA",
              CIPHER_WEAK_NOT_ENCRYPTED),
 #endif /* CURL_BUILD_MAC_10_9 || CURL_BUILD_IOS_7 */
 
   /* TLS addenda using AES, per RFC 3268. Defined since SDK 10.4u */
   CIPHER_DEF(TLS_RSA_WITH_AES_128_CBC_SHA,                         /* 0x002F */
-             "AES128-SHA",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DH_DSS_WITH_AES_128_CBC_SHA,                      /* 0x0030 */
-             "DH-DSS-AES128-SHA",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DH_RSA_WITH_AES_128_CBC_SHA,                      /* 0x0031 */
-             "DH-RSA-AES128-SHA",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DHE_DSS_WITH_AES_128_CBC_SHA,                     /* 0x0032 */
-             "DHE-DSS-AES128-SHA",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DHE_RSA_WITH_AES_128_CBC_SHA,                     /* 0x0033 */
-             "DHE-RSA-AES128-SHA",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DH_anon_WITH_AES_128_CBC_SHA,                     /* 0x0034 */
-             "ADH-AES128-SHA",
              CIPHER_WEAK_ANON_AUTH),
   CIPHER_DEF(TLS_RSA_WITH_AES_256_CBC_SHA,                         /* 0x0035 */
-             "AES256-SHA",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DH_DSS_WITH_AES_256_CBC_SHA,                      /* 0x0036 */
-             "DH-DSS-AES256-SHA",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DH_RSA_WITH_AES_256_CBC_SHA,                      /* 0x0037 */
-             "DH-RSA-AES256-SHA",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DHE_DSS_WITH_AES_256_CBC_SHA,                     /* 0x0038 */
-             "DHE-DSS-AES256-SHA",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DHE_RSA_WITH_AES_256_CBC_SHA,                     /* 0x0039 */
-             "DHE-RSA-AES256-SHA",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DH_anon_WITH_AES_256_CBC_SHA,                     /* 0x003A */
-             "ADH-AES256-SHA",
              CIPHER_WEAK_ANON_AUTH),
 
 #if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
   /* TLS 1.2 addenda, RFC 5246 */
   /* Server provided RSA certificate for key exchange. */
   CIPHER_DEF(TLS_RSA_WITH_NULL_SHA256,                             /* 0x003B */
-             "NULL-SHA256",
              CIPHER_WEAK_NOT_ENCRYPTED),
   CIPHER_DEF(TLS_RSA_WITH_AES_128_CBC_SHA256,                      /* 0x003C */
-             "AES128-SHA256",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_RSA_WITH_AES_256_CBC_SHA256,                      /* 0x003D */
-             "AES256-SHA256",
              CIPHER_STRONG_ENOUGH),
   /* Server-authenticated (and optionally client-authenticated)
      Diffie-Hellman. */
   CIPHER_DEF(TLS_DH_DSS_WITH_AES_128_CBC_SHA256,                   /* 0x003E */
-             "DH-DSS-AES128-SHA256",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DH_RSA_WITH_AES_128_CBC_SHA256,                   /* 0x003F */
-             "DH-RSA-AES128-SHA256",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DHE_DSS_WITH_AES_128_CBC_SHA256,                  /* 0x0040 */
-             "DHE-DSS-AES128-SHA256",
              CIPHER_STRONG_ENOUGH),
 
   /* TLS 1.2 addenda, RFC 5246 */
   CIPHER_DEF(TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,                  /* 0x0067 */
-             "DHE-RSA-AES128-SHA256",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DH_DSS_WITH_AES_256_CBC_SHA256,                   /* 0x0068 */
-             "DH-DSS-AES256-SHA256",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DH_RSA_WITH_AES_256_CBC_SHA256,                   /* 0x0069 */
-             "DH-RSA-AES256-SHA256",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DHE_DSS_WITH_AES_256_CBC_SHA256,                  /* 0x006A */
-             "DHE-DSS-AES256-SHA256",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DHE_RSA_WITH_AES_256_CBC_SHA256,                  /* 0x006B */
-             "DHE-RSA-AES256-SHA256",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DH_anon_WITH_AES_128_CBC_SHA256,                  /* 0x006C */
-             "ADH-AES128-SHA256",
              CIPHER_WEAK_ANON_AUTH),
   CIPHER_DEF(TLS_DH_anon_WITH_AES_256_CBC_SHA256,                  /* 0x006D */
-             "ADH-AES256-SHA256",
              CIPHER_WEAK_ANON_AUTH),
 #endif /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
 
 #if CURL_BUILD_MAC_10_9 || CURL_BUILD_IOS_7
   /* Addendum from RFC 4279, TLS PSK */
   CIPHER_DEF(TLS_PSK_WITH_RC4_128_SHA,                             /* 0x008A */
-             "PSK-RC4-SHA",
              CIPHER_WEAK_RC_ENCRYPTION),
   CIPHER_DEF(TLS_PSK_WITH_3DES_EDE_CBC_SHA,                        /* 0x008B */
-             "PSK-3DES-EDE-CBC-SHA",
              CIPHER_WEAK_3DES_ENCRYPTION),
   CIPHER_DEF(TLS_PSK_WITH_AES_128_CBC_SHA,                         /* 0x008C */
-             "PSK-AES128-CBC-SHA",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_PSK_WITH_AES_256_CBC_SHA,                         /* 0x008D */
-             "PSK-AES256-CBC-SHA",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DHE_PSK_WITH_RC4_128_SHA,                         /* 0x008E */
-             "DHE-PSK-RC4-SHA",
              CIPHER_WEAK_RC_ENCRYPTION),
   CIPHER_DEF(TLS_DHE_PSK_WITH_3DES_EDE_CBC_SHA,                    /* 0x008F */
-             "DHE-PSK-3DES-EDE-CBC-SHA",
              CIPHER_WEAK_3DES_ENCRYPTION),
   CIPHER_DEF(TLS_DHE_PSK_WITH_AES_128_CBC_SHA,                     /* 0x0090 */
-             "DHE-PSK-AES128-CBC-SHA",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DHE_PSK_WITH_AES_256_CBC_SHA,                     /* 0x0091 */
-             "DHE-PSK-AES256-CBC-SHA",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_RSA_PSK_WITH_RC4_128_SHA,                         /* 0x0092 */
-             "RSA-PSK-RC4-SHA",
              CIPHER_WEAK_RC_ENCRYPTION),
   CIPHER_DEF(TLS_RSA_PSK_WITH_3DES_EDE_CBC_SHA,                    /* 0x0093 */
-             "RSA-PSK-3DES-EDE-CBC-SHA",
              CIPHER_WEAK_3DES_ENCRYPTION),
   CIPHER_DEF(TLS_RSA_PSK_WITH_AES_128_CBC_SHA,                     /* 0x0094 */
-             "RSA-PSK-AES128-CBC-SHA",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_RSA_PSK_WITH_AES_256_CBC_SHA,                     /* 0x0095 */
-             "RSA-PSK-AES256-CBC-SHA",
              CIPHER_STRONG_ENOUGH),
 #endif /* CURL_BUILD_MAC_10_9 || CURL_BUILD_IOS_7 */
 
@@ -478,105 +395,74 @@ static const struct st_cipher ciphertable[] = {
   /* Addenda from rfc 5288 AES Galois Counter Mode (GCM) Cipher Suites
      for TLS. */
   CIPHER_DEF(TLS_RSA_WITH_AES_128_GCM_SHA256,                      /* 0x009C */
-             "AES128-GCM-SHA256",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_RSA_WITH_AES_256_GCM_SHA384,                      /* 0x009D */
-             "AES256-GCM-SHA384",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,                  /* 0x009E */
-             "DHE-RSA-AES128-GCM-SHA256",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,                  /* 0x009F */
-             "DHE-RSA-AES256-GCM-SHA384",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DH_RSA_WITH_AES_128_GCM_SHA256,                   /* 0x00A0 */
-             "DH-RSA-AES128-GCM-SHA256",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DH_RSA_WITH_AES_256_GCM_SHA384,                   /* 0x00A1 */
-             "DH-RSA-AES256-GCM-SHA384",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DHE_DSS_WITH_AES_128_GCM_SHA256,                  /* 0x00A2 */
-             "DHE-DSS-AES128-GCM-SHA256",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DHE_DSS_WITH_AES_256_GCM_SHA384,                  /* 0x00A3 */
-             "DHE-DSS-AES256-GCM-SHA384",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DH_DSS_WITH_AES_128_GCM_SHA256,                   /* 0x00A4 */
-             "DH-DSS-AES128-GCM-SHA256",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DH_DSS_WITH_AES_256_GCM_SHA384,                   /* 0x00A5 */
-             "DH-DSS-AES256-GCM-SHA384",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DH_anon_WITH_AES_128_GCM_SHA256,                  /* 0x00A6 */
-             "ADH-AES128-GCM-SHA256",
              CIPHER_WEAK_ANON_AUTH),
   CIPHER_DEF(TLS_DH_anon_WITH_AES_256_GCM_SHA384,                  /* 0x00A7 */
-             "ADH-AES256-GCM-SHA384",
              CIPHER_WEAK_ANON_AUTH),
 #endif /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
 
 #if CURL_BUILD_MAC_10_9 || CURL_BUILD_IOS_7
   /* RFC 5487 - PSK with SHA-256/384 and AES GCM */
   CIPHER_DEF(TLS_PSK_WITH_AES_128_GCM_SHA256,                      /* 0x00A8 */
-             "PSK-AES128-GCM-SHA256",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_PSK_WITH_AES_256_GCM_SHA384,                      /* 0x00A9 */
-             "PSK-AES256-GCM-SHA384",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DHE_PSK_WITH_AES_128_GCM_SHA256,                  /* 0x00AA */
-             "DHE-PSK-AES128-GCM-SHA256",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DHE_PSK_WITH_AES_256_GCM_SHA384,                  /* 0x00AB */
-             "DHE-PSK-AES256-GCM-SHA384",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_RSA_PSK_WITH_AES_128_GCM_SHA256,                  /* 0x00AC */
-             "RSA-PSK-AES128-GCM-SHA256",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_RSA_PSK_WITH_AES_256_GCM_SHA384,                  /* 0x00AD */
-             "RSA-PSK-AES256-GCM-SHA384",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_PSK_WITH_AES_128_CBC_SHA256,                      /* 0x00AE */
-             "PSK-AES128-CBC-SHA256",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_PSK_WITH_AES_256_CBC_SHA384,                      /* 0x00AF */
-             "PSK-AES256-CBC-SHA384",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_PSK_WITH_NULL_SHA256,                             /* 0x00B0 */
-             "PSK-NULL-SHA256",
              CIPHER_WEAK_NOT_ENCRYPTED),
   CIPHER_DEF(TLS_PSK_WITH_NULL_SHA384,                             /* 0x00B1 */
-             "PSK-NULL-SHA384",
              CIPHER_WEAK_NOT_ENCRYPTED),
   CIPHER_DEF(TLS_DHE_PSK_WITH_AES_128_CBC_SHA256,                  /* 0x00B2 */
-             "DHE-PSK-AES128-CBC-SHA256",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DHE_PSK_WITH_AES_256_CBC_SHA384,                  /* 0x00B3 */
-             "DHE-PSK-AES256-CBC-SHA384",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_DHE_PSK_WITH_NULL_SHA256,                         /* 0x00B4 */
-             "DHE-PSK-NULL-SHA256",
              CIPHER_WEAK_NOT_ENCRYPTED),
   CIPHER_DEF(TLS_DHE_PSK_WITH_NULL_SHA384,                         /* 0x00B5 */
-             "DHE-PSK-NULL-SHA384",
              CIPHER_WEAK_NOT_ENCRYPTED),
   CIPHER_DEF(TLS_RSA_PSK_WITH_AES_128_CBC_SHA256,                  /* 0x00B6 */
-             "RSA-PSK-AES128-CBC-SHA256",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_RSA_PSK_WITH_AES_256_CBC_SHA384,                  /* 0x00B7 */
-             "RSA-PSK-AES256-CBC-SHA384",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_RSA_PSK_WITH_NULL_SHA256,                         /* 0x00B8 */
-             "RSA-PSK-NULL-SHA256",
              CIPHER_WEAK_NOT_ENCRYPTED),
   CIPHER_DEF(TLS_RSA_PSK_WITH_NULL_SHA384,                         /* 0x00B9 */
-             "RSA-PSK-NULL-SHA384",
              CIPHER_WEAK_NOT_ENCRYPTED),
 #endif /* CURL_BUILD_MAC_10_9 || CURL_BUILD_IOS_7 */
 
   /* RFC 5746 - Secure Renegotiation. This is not a real suite,
      it is a response to initiate negotiation again */
   CIPHER_DEF(TLS_EMPTY_RENEGOTIATION_INFO_SCSV,                    /* 0x00FF */
-             NULL,
              CIPHER_STRONG_ENOUGH),
 
 #if CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11
@@ -586,98 +472,68 @@ static const struct st_cipher ciphertable[] = {
      Cipher alias name matches to OpenSSL cipher name, and for
      TLS 1.3 ciphers */
   CIPHER_DEF(TLS_AES_128_GCM_SHA256,                               /* 0x1301 */
-             NULL,  /* The OpenSSL cipher name matches to the IANA name */
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_AES_256_GCM_SHA384,                               /* 0x1302 */
-             NULL,  /* The OpenSSL cipher name matches to the IANA name */
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_CHACHA20_POLY1305_SHA256,                         /* 0x1303 */
-             NULL,  /* The OpenSSL cipher name matches to the IANA name */
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_AES_128_CCM_SHA256,                               /* 0x1304 */
-             NULL,  /* The OpenSSL cipher name matches to the IANA name */
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_AES_128_CCM_8_SHA256,                             /* 0x1305 */
-             NULL,  /* The OpenSSL cipher name matches to the IANA name */
              CIPHER_STRONG_ENOUGH),
 #endif /* CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11 */
 
 #if CURL_BUILD_MAC_10_6 || CURL_BUILD_IOS
   /* ECDSA addenda, RFC 4492 */
   CIPHER_DEF(TLS_ECDH_ECDSA_WITH_NULL_SHA,                         /* 0xC001 */
-             "ECDH-ECDSA-NULL-SHA",
              CIPHER_WEAK_NOT_ENCRYPTED),
   CIPHER_DEF(TLS_ECDH_ECDSA_WITH_RC4_128_SHA,                      /* 0xC002 */
-             "ECDH-ECDSA-RC4-SHA",
              CIPHER_WEAK_RC_ENCRYPTION),
   CIPHER_DEF(TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA,                 /* 0xC003 */
-             "ECDH-ECDSA-DES-CBC3-SHA",
              CIPHER_WEAK_3DES_ENCRYPTION),
   CIPHER_DEF(TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA,                  /* 0xC004 */
-             "ECDH-ECDSA-AES128-SHA",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA,                  /* 0xC005 */
-             "ECDH-ECDSA-AES256-SHA",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_ECDHE_ECDSA_WITH_NULL_SHA,                        /* 0xC006 */
-             "ECDHE-ECDSA-NULL-SHA",
              CIPHER_WEAK_NOT_ENCRYPTED),
   CIPHER_DEF(TLS_ECDHE_ECDSA_WITH_RC4_128_SHA,                     /* 0xC007 */
-             "ECDHE-ECDSA-RC4-SHA",
              CIPHER_WEAK_RC_ENCRYPTION),
   CIPHER_DEF(TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA,                /* 0xC008 */
-             "ECDHE-ECDSA-DES-CBC3-SHA",
              CIPHER_WEAK_3DES_ENCRYPTION),
   CIPHER_DEF(TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,                 /* 0xC009 */
-             "ECDHE-ECDSA-AES128-SHA",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,                 /* 0xC00A */
-             "ECDHE-ECDSA-AES256-SHA",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_ECDH_RSA_WITH_NULL_SHA,                           /* 0xC00B */
-             "ECDH-RSA-NULL-SHA",
              CIPHER_WEAK_NOT_ENCRYPTED),
   CIPHER_DEF(TLS_ECDH_RSA_WITH_RC4_128_SHA,                        /* 0xC00C */
-             "ECDH-RSA-RC4-SHA",
              CIPHER_WEAK_RC_ENCRYPTION),
   CIPHER_DEF(TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA,                   /* 0xC00D */
-             "ECDH-RSA-DES-CBC3-SHA",
              CIPHER_WEAK_3DES_ENCRYPTION),
   CIPHER_DEF(TLS_ECDH_RSA_WITH_AES_128_CBC_SHA,                    /* 0xC00E */
-             "ECDH-RSA-AES128-SHA",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_ECDH_RSA_WITH_AES_256_CBC_SHA,                    /* 0xC00F */
-             "ECDH-RSA-AES256-SHA",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_ECDHE_RSA_WITH_NULL_SHA,                          /* 0xC010 */
-             "ECDHE-RSA-NULL-SHA",
              CIPHER_WEAK_NOT_ENCRYPTED),
   CIPHER_DEF(TLS_ECDHE_RSA_WITH_RC4_128_SHA,                       /* 0xC011 */
-             "ECDHE-RSA-RC4-SHA",
              CIPHER_WEAK_RC_ENCRYPTION),
   CIPHER_DEF(TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA,                  /* 0xC012 */
-             "ECDHE-RSA-DES-CBC3-SHA",
              CIPHER_WEAK_3DES_ENCRYPTION),
   CIPHER_DEF(TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,                   /* 0xC013 */
-             "ECDHE-RSA-AES128-SHA",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,                   /* 0xC014 */
-             "ECDHE-RSA-AES256-SHA",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_ECDH_anon_WITH_NULL_SHA,                          /* 0xC015 */
-             "AECDH-NULL-SHA",
              CIPHER_WEAK_ANON_AUTH),
   CIPHER_DEF(TLS_ECDH_anon_WITH_RC4_128_SHA,                       /* 0xC016 */
-             "AECDH-RC4-SHA",
              CIPHER_WEAK_ANON_AUTH),
   CIPHER_DEF(TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA,                  /* 0xC017 */
-             "AECDH-DES-CBC3-SHA",
              CIPHER_WEAK_3DES_ENCRYPTION),
   CIPHER_DEF(TLS_ECDH_anon_WITH_AES_128_CBC_SHA,                   /* 0xC018 */
-             "AECDH-AES128-SHA",
              CIPHER_WEAK_ANON_AUTH),
   CIPHER_DEF(TLS_ECDH_anon_WITH_AES_256_CBC_SHA,                   /* 0xC019 */
-             "AECDH-AES256-SHA",
              CIPHER_WEAK_ANON_AUTH),
 #endif /* CURL_BUILD_MAC_10_6 || CURL_BUILD_IOS */
 
@@ -685,64 +541,46 @@ static const struct st_cipher ciphertable[] = {
   /* Addenda from rfc 5289  Elliptic Curve Cipher Suites with
      HMAC SHA-256/384. */
   CIPHER_DEF(TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,              /* 0xC023 */
-             "ECDHE-ECDSA-AES128-SHA256",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,              /* 0xC024 */
-             "ECDHE-ECDSA-AES256-SHA384",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256,               /* 0xC025 */
-             "ECDH-ECDSA-AES128-SHA256",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384,               /* 0xC026 */
-             "ECDH-ECDSA-AES256-SHA384",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,                /* 0xC027 */
-             "ECDHE-RSA-AES128-SHA256",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,                /* 0xC028 */
-             "ECDHE-RSA-AES256-SHA384",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256,                 /* 0xC029 */
-             "ECDH-RSA-AES128-SHA256",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384,                 /* 0xC02A */
-             "ECDH-RSA-AES256-SHA384",
              CIPHER_STRONG_ENOUGH),
   /* Addenda from rfc 5289  Elliptic Curve Cipher Suites with
      SHA-256/384 and AES Galois Counter Mode (GCM) */
   CIPHER_DEF(TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,              /* 0xC02B */
-             "ECDHE-ECDSA-AES128-GCM-SHA256",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,              /* 0xC02C */
-             "ECDHE-ECDSA-AES256-GCM-SHA384",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256,               /* 0xC02D */
-             "ECDH-ECDSA-AES128-GCM-SHA256",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384,               /* 0xC02E */
-             "ECDH-ECDSA-AES256-GCM-SHA384",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,                /* 0xC02F */
-             "ECDHE-RSA-AES128-GCM-SHA256",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,                /* 0xC030 */
-             "ECDHE-RSA-AES256-GCM-SHA384",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256,                 /* 0xC031 */
-             "ECDH-RSA-AES128-GCM-SHA256",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384,                 /* 0xC032 */
-             "ECDH-RSA-AES256-GCM-SHA384",
              CIPHER_STRONG_ENOUGH),
 #endif /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
 
 #if CURL_BUILD_MAC_10_15 || CURL_BUILD_IOS_13
   /* ECDHE_PSK Cipher Suites for Transport Layer Security (TLS), RFC 5489 */
   CIPHER_DEF(TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA,                   /* 0xC035 */
-             "ECDHE-PSK-AES128-CBC-SHA",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_ECDHE_PSK_WITH_AES_256_CBC_SHA,                   /* 0xC036 */
-             "ECDHE-PSK-AES256-CBC-SHA",
              CIPHER_STRONG_ENOUGH),
 #endif /* CURL_BUILD_MAC_10_15 || CURL_BUILD_IOS_13 */
 
@@ -750,10 +588,8 @@ static const struct st_cipher ciphertable[] = {
   /* Addenda from rfc 7905  ChaCha20-Poly1305 Cipher Suites for
      Transport Layer Security (TLS). */
   CIPHER_DEF(TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,          /* 0xCCA8 */
-             "ECDHE-RSA-CHACHA20-POLY1305",
              CIPHER_STRONG_ENOUGH),
   CIPHER_DEF(TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,        /* 0xCCA9 */
-             "ECDHE-ECDSA-CHACHA20-POLY1305",
              CIPHER_STRONG_ENOUGH),
 #endif /* CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11 */
 
@@ -761,23 +597,18 @@ static const struct st_cipher ciphertable[] = {
   /* ChaCha20-Poly1305 Cipher Suites for Transport Layer Security (TLS),
      RFC 7905 */
   CIPHER_DEF(TLS_PSK_WITH_CHACHA20_POLY1305_SHA256,                /* 0xCCAB */
-             "PSK-CHACHA20-POLY1305",
              CIPHER_STRONG_ENOUGH),
 #endif /* CURL_BUILD_MAC_10_15 || CURL_BUILD_IOS_13 */
 
   /* Tags for SSL 2 cipher kinds which are not specified for SSL 3.
      Defined since SDK 10.2.8 */
   CIPHER_DEF(SSL_RSA_WITH_RC2_CBC_MD5,                             /* 0xFF80 */
-             NULL,
              CIPHER_WEAK_RC_ENCRYPTION),
   CIPHER_DEF(SSL_RSA_WITH_IDEA_CBC_MD5,                            /* 0xFF81 */
-             NULL,
              CIPHER_WEAK_IDEA_ENCRYPTION),
   CIPHER_DEF(SSL_RSA_WITH_DES_CBC_MD5,                             /* 0xFF82 */
-             NULL,
              CIPHER_WEAK_DES_ENCRYPTION),
   CIPHER_DEF(SSL_RSA_WITH_3DES_EDE_CBC_MD5,                        /* 0xFF83 */
-             NULL,
              CIPHER_WEAK_3DES_ENCRYPTION),
 };
 
@@ -904,25 +735,6 @@ static OSStatus sectransp_bio_cf_out_write(SSLConnectionRef connection,
   }
   *dataLength = nwritten;
   return rtn;
-}
-
-CF_INLINE const char *TLSCipherNameForNumber(SSLCipherSuite cipher)
-{
-  /* The first ciphers in the ciphertable are continuous. Here we do small
-     optimization and instead of loop directly get SSL name by cipher number.
-  */
-  size_t i;
-  if(cipher <= SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA) {
-    return ciphertable[cipher].name;
-  }
-  /* Iterate through the rest of the ciphers */
-  for(i = SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA + 1; i < NUM_OF_CIPHERS;
-      ++i) {
-    if(ciphertable[i].num == cipher) {
-      return ciphertable[i].name;
-    }
-  }
-  return ciphertable[SSL_NULL_WITH_NULL_NULL].name;
 }
 
 #if CURL_BUILD_MAC
@@ -1453,18 +1265,57 @@ static bool is_cipher_suite_strong(SSLCipherSuite suite_num)
   return true;
 }
 
-static bool sectransp_is_separator(char c)
+static int sectransp_cipher_suite_get_str(uint16_t id, char *buf,
+                                          size_t buf_size, bool prefer_rfc)
 {
-  /* Return whether character is a cipher list separator. */
-  switch(c) {
-  case ' ':
-  case '\t':
-  case ':':
-  case ',':
-  case ';':
-    return true;
+  /* are these fortezza suites even supported ? */
+  if(id == SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA)
+    msnprintf(buf, buf_size, "%s", "SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA");
+  else if(id == SSL_FORTEZZA_DMS_WITH_NULL_SHA)
+    msnprintf(buf, buf_size, "%s", "SSL_FORTEZZA_DMS_WITH_NULL_SHA");
+  /* can TLS_EMPTY_RENEGOTIATION_INFO_SCSV even be set ? */
+  else if(id == TLS_EMPTY_RENEGOTIATION_INFO_SCSV)
+    msnprintf(buf, buf_size, "%s", "TLS_EMPTY_RENEGOTIATION_INFO_SCSV");
+  /* do we still need to support these SSL2-only ciphers ? */
+  else if(id == SSL_RSA_WITH_RC2_CBC_MD5)
+    msnprintf(buf, buf_size, "%s", "SSL_RSA_WITH_RC2_CBC_MD5");
+  else if(id == SSL_RSA_WITH_IDEA_CBC_MD5)
+    msnprintf(buf, buf_size, "%s", "SSL_RSA_WITH_IDEA_CBC_MD5");
+  else if(id == SSL_RSA_WITH_DES_CBC_MD5)
+    msnprintf(buf, buf_size, "%s", "SSL_RSA_WITH_DES_CBC_MD5");
+  else if(id == SSL_RSA_WITH_3DES_EDE_CBC_MD5)
+    msnprintf(buf, buf_size, "%s", "SSL_RSA_WITH_3DES_EDE_CBC_MD5");
+  else
+    return Curl_cipher_suite_get_str(id, buf, buf_size, prefer_rfc);
+  return 0;
+}
+
+static uint16_t sectransp_cipher_suite_walk_str(const char **str,
+                                                const char **end)
+{
+  uint16_t id = Curl_cipher_suite_walk_str(str, end);
+  size_t len = *end - *str;
+
+  if(!id) {
+    /* are these fortezza suites even supported ? */
+    if(strncasecompare("SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA", *str, len))
+      id = SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA;
+    else if(strncasecompare("SSL_FORTEZZA_DMS_WITH_NULL_SHA", *str, len))
+      id = SSL_FORTEZZA_DMS_WITH_NULL_SHA;
+    /* can TLS_EMPTY_RENEGOTIATION_INFO_SCSV even be set ? */
+    else if(strncasecompare("TLS_EMPTY_RENEGOTIATION_INFO_SCSV", *str, len))
+      id = TLS_EMPTY_RENEGOTIATION_INFO_SCSV;
+    /* do we still need to support these SSL2-only ciphers ? */
+    else if(strncasecompare("SSL_RSA_WITH_RC2_CBC_MD5", *str, len))
+      id = SSL_RSA_WITH_RC2_CBC_MD5;
+    else if(strncasecompare("SSL_RSA_WITH_IDEA_CBC_MD5", *str, len))
+      id = SSL_RSA_WITH_IDEA_CBC_MD5;
+    else if(strncasecompare("SSL_RSA_WITH_DES_CBC_MD5", *str, len))
+      id = SSL_RSA_WITH_DES_CBC_MD5;
+    else if(strncasecompare("SSL_RSA_WITH_3DES_EDE_CBC_MD5", *str, len))
+      id = SSL_RSA_WITH_3DES_EDE_CBC_MD5;
   }
-  return false;
+  return id;
 }
 
 static CURLcode sectransp_set_default_ciphers(struct Curl_easy *data,
@@ -1539,96 +1390,43 @@ static CURLcode sectransp_set_selected_ciphers(struct Curl_easy *data,
                                                SSLContextRef ssl_ctx,
                                                const char *ciphers)
 {
-  size_t ciphers_count = 0;
-  const char *cipher_start = ciphers;
-  OSStatus err = noErr;
-  SSLCipherSuite selected_ciphers[NUM_OF_CIPHERS];
+  size_t count = 0, i;
+  const char *ptr, *end;
+  OSStatus err;
+  SSLCipherSuite selected[NUM_OF_CIPHERS];
 
-  if(!ciphers)
-    return CURLE_OK;
+  for(ptr = ciphers; ptr[0] != '\0' && count < NUM_OF_CIPHERS; ptr = end) {
+    uint16_t id = sectransp_cipher_suite_walk_str(&ptr, &end);
 
-  while(sectransp_is_separator(*ciphers))  /* Skip initial separators. */
-    ciphers++;
-  if(!*ciphers)
-    return CURLE_OK;
-
-  cipher_start = ciphers;
-  while(*cipher_start && ciphers_count < NUM_OF_CIPHERS) {
-    bool cipher_found = FALSE;
-    size_t cipher_len = 0;
-    const char *cipher_end = NULL;
-    bool tls_name = FALSE;
-    size_t i;
-
-    /* Skip separators */
-    while(sectransp_is_separator(*cipher_start))
-      cipher_start++;
-    if(*cipher_start == '\0') {
-      break;
+    /* Check if cipher is supported */
+    if(id) {
+      for(i = 0; i < NUM_OF_CIPHERS && ciphertable[i].num != id; i++);
+      if(i == NUM_OF_CIPHERS)
+        id = 0;
     }
-    /* Find last position of a cipher in the ciphers string */
-    cipher_end = cipher_start;
-    while(*cipher_end != '\0' && !sectransp_is_separator(*cipher_end)) {
-      ++cipher_end;
-    }
-
-    /* IANA cipher names start with the TLS_ or SSL_ prefix.
-       If the 4th symbol of the cipher is '_' we look for a cipher in the
-       table by its (TLS) name.
-       Otherwise, we try to match cipher by an alias. */
-    if(cipher_start[3] == '_') {
-      tls_name = TRUE;
-    }
-    /* Iterate through the cipher table and look for the cipher, starting
-       the cipher number 0x01 because the 0x00 is not the real cipher */
-    cipher_len = cipher_end - cipher_start;
-    for(i = 1; i < NUM_OF_CIPHERS; ++i) {
-      const char *table_cipher_name = NULL;
-      if(tls_name) {
-        table_cipher_name = ciphertable[i].name;
+    if(!id) {
+      if(ptr[0] != '\0') {
+        infof(data, "SSL: unknown cipher in list: \"%.*s\"", (int) (end - ptr),
+              ptr);
+        /* Perhaps we should be more lenient like the other SSL backends and
+           continue with the ciphers we do recognize. */
+        return CURLE_SSL_CIPHER;
       }
-      else if(ciphertable[i].alias_name) {
-        table_cipher_name = ciphertable[i].alias_name;
-      }
-      else {
-        continue;
-      }
-      /* Compare a part of the string between separators with a cipher name
-         in the table and make sure we matched the whole cipher name */
-      if(strncmp(cipher_start, table_cipher_name, cipher_len) == 0
-          && table_cipher_name[cipher_len] == '\0') {
-        selected_ciphers[ciphers_count] = ciphertable[i].num;
-        ++ciphers_count;
-        cipher_found = TRUE;
-        break;
-      }
+      continue;
     }
-    if(!cipher_found) {
-      /* It would be more human-readable if we print the wrong cipher name
-         but we don't want to allocate any additional memory and copy the name
-         into it, then add it into logs.
-         Also, we do not modify an original cipher list string. We just point
-         to positions where cipher starts and ends in the cipher list string.
-         The message is a bit cryptic and longer than necessary but can be
-         understood by humans. */
-      failf(data, "SSL: cipher string \"%s\" contains unsupported cipher name"
-            " starting position %zd and ending position %zd",
-            ciphers,
-            cipher_start - ciphers,
-            cipher_end - ciphers);
-      return CURLE_SSL_CIPHER;
-    }
-    if(*cipher_end) {
-      cipher_start = cipher_end + 1;
-    }
-    else {
-      break;
-    }
+
+    selected[count++] = id;
   }
+
+  if(count == 0) {
+    failf(data, "SSL: no supported cipher in list");
+    return CURLE_SSL_CIPHER;
+  }
+
   /* All cipher suites in the list are found. Report to logs as-is */
   infof(data, "SSL: Setting cipher suites list \"%s\"", ciphers);
 
-  err = SSLSetEnabledCiphers(ssl_ctx, selected_ciphers, ciphers_count);
+  err = SSLSetEnabledCiphers(ssl_ctx, selected, count);
   if(err != noErr) {
     failf(data, "SSL: SSLSetEnabledCiphers() failed: OSStatus %d", err);
     return CURLE_SSL_CIPHER;
@@ -2759,6 +2557,7 @@ check_handshake:
     return CURLE_SSL_CONNECT_ERROR;
   }
   else {
+    char cipher_str[64];
     /* we have been connected fine, we're not waiting for anything else. */
     connssl->connecting_state = ssl_connect_3;
 
@@ -2777,33 +2576,30 @@ check_handshake:
     /* Informational message */
     (void)SSLGetNegotiatedCipher(backend->ssl_ctx, &cipher);
     (void)SSLGetNegotiatedProtocolVersion(backend->ssl_ctx, &protocol);
+
+    sectransp_cipher_suite_get_str((uint16_t) cipher, cipher_str,
+                                   sizeof(cipher_str), true);
     switch(protocol) {
       case kSSLProtocol2:
-        infof(data, "SSL 2.0 connection using %s",
-              TLSCipherNameForNumber(cipher));
+        infof(data, "SSL 2.0 connection using %s", cipher_str);
         break;
       case kSSLProtocol3:
-        infof(data, "SSL 3.0 connection using %s",
-              TLSCipherNameForNumber(cipher));
+        infof(data, "SSL 3.0 connection using %s", cipher_str);
         break;
       case kTLSProtocol1:
-        infof(data, "TLS 1.0 connection using %s",
-              TLSCipherNameForNumber(cipher));
+        infof(data, "TLS 1.0 connection using %s", cipher_str);
         break;
 #if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
       case kTLSProtocol11:
-        infof(data, "TLS 1.1 connection using %s",
-              TLSCipherNameForNumber(cipher));
+        infof(data, "TLS 1.1 connection using %s", cipher_str);
         break;
       case kTLSProtocol12:
-        infof(data, "TLS 1.2 connection using %s",
-              TLSCipherNameForNumber(cipher));
+        infof(data, "TLS 1.2 connection using %s", cipher_str);
         break;
 #endif /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
 #if CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11
       case kTLSProtocol13:
-        infof(data, "TLS 1.3 connection using %s",
-              TLSCipherNameForNumber(cipher));
+        infof(data, "TLS 1.3 connection using %s", cipher_str);
         break;
 #endif /* CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11 */
       default:

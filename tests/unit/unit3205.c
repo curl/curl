@@ -34,7 +34,7 @@ static void unit_stop(void)
 {
 }
 
-#if defined(USE_MBEDTLS) || defined(USE_BEARSSL)
+#if defined(USE_SECTRANSP) || defined(USE_MBEDTLS) || defined(USE_BEARSSL)
 
 struct test_cs_entry {
   uint16_t id;
@@ -106,7 +106,7 @@ static const struct test_cs_entry test_cs_list[] = {
             "ECDHE-RSA-CHACHA20-POLY1305" },
   { 0xCCA9, "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256",
             "ECDHE-ECDSA-CHACHA20-POLY1305" },
-#if defined(USE_MBEDTLS)
+#if defined(USE_SECTRANSP) || defined(USE_MBEDTLS)
   { 0x0001, "TLS_RSA_WITH_NULL_MD5",
             "NULL-MD5" },
   { 0x0002, "TLS_RSA_WITH_NULL_SHA",
@@ -204,7 +204,7 @@ static const struct test_cs_entry test_cs_list[] = {
   { 0xCCAB, "TLS_PSK_WITH_CHACHA20_POLY1305_SHA256",
             "PSK-CHACHA20-POLY1305" },
 #endif
-#if defined(USE_BEARSSL)
+#if defined(USE_SECTRANSP)  || defined(USE_BEARSSL)
   { 0x000A, "TLS_RSA_WITH_3DES_EDE_CBC_SHA",
             "DES-CBC3-SHA" },
   { 0xC003, "TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA",
@@ -216,6 +216,7 @@ static const struct test_cs_entry test_cs_list[] = {
   { 0xC012, "TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA",
             "ECDHE-RSA-DES-CBC3-SHA" },
 #endif
+#if defined(USE_MBEDTLS) || defined(USE_BEARSSL)
   { 0xC09C, "TLS_RSA_WITH_AES_128_CCM",
             "AES128-CCM" },
   { 0xC09D, "TLS_RSA_WITH_AES_256_CCM",
@@ -232,6 +233,148 @@ static const struct test_cs_entry test_cs_list[] = {
             "ECDHE-ECDSA-AES128-CCM8" },
   { 0xC0AF, "TLS_ECDHE_ECDSA_WITH_AES_256_CCM_8",
             "ECDHE-ECDSA-AES256-CCM8" },
+#endif
+#if defined(USE_SECTRANSP)
+  { 0x0003, "TLS_RSA_EXPORT_WITH_RC4_40_MD5",
+            "EXP-RC4-MD5" },
+  { 0x0004, "TLS_RSA_WITH_RC4_128_MD5",
+            "RC4-MD5" },
+  { 0x0005, "TLS_RSA_WITH_RC4_128_SHA",
+            "RC4-SHA" },
+  { 0x0006, "TLS_RSA_EXPORT_WITH_RC2_CBC_40_MD5",
+            "EXP-RC2-CBC-MD5" },
+  { 0x0007, "TLS_RSA_WITH_IDEA_CBC_SHA",
+            "IDEA-CBC-SHA" },
+  { 0x0008, "TLS_RSA_EXPORT_WITH_DES40_CBC_SHA",
+            "EXP-DES-CBC-SHA" },
+  { 0x0009, "TLS_RSA_WITH_DES_CBC_SHA",
+            "DES-CBC-SHA" },
+  { 0x000B, "TLS_DH_DSS_EXPORT_WITH_DES40_CBC_SHA",
+            "EXP-DH-DSS-DES-CBC-SHA" },
+  { 0x000C, "TLS_DH_DSS_WITH_DES_CBC_SHA",
+            "DH-DSS-DES-CBC-SHA" },
+  { 0x000D, "TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA",
+            "DH-DSS-DES-CBC3-SHA" },
+  { 0x000E, "TLS_DH_RSA_EXPORT_WITH_DES40_CBC_SHA",
+            "EXP-DH-RSA-DES-CBC-SHA" },
+  { 0x000F, "TLS_DH_RSA_WITH_DES_CBC_SHA",
+            "DH-RSA-DES-CBC-SHA" },
+  { 0x0010, "TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA",
+            "DH-RSA-DES-CBC3-SHA" },
+  { 0x0011, "TLS_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA",
+            "EXP-DHE-DSS-DES-CBC-SHA" },
+  { 0x0012, "TLS_DHE_DSS_WITH_DES_CBC_SHA",
+            "DHE-DSS-DES-CBC-SHA" },
+  { 0x0013, "TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA",
+            "DHE-DSS-DES-CBC3-SHA" },
+  { 0x0014, "TLS_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA",
+            "EXP-DHE-RSA-DES-CBC-SHA" },
+  { 0x0015, "TLS_DHE_RSA_WITH_DES_CBC_SHA",
+            "DHE-RSA-DES-CBC-SHA" },
+  { 0x0016, "TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA",
+            "DHE-RSA-DES-CBC3-SHA" },
+  { 0x0017, "TLS_DH_anon_EXPORT_WITH_RC4_40_MD5",
+            "EXP-ADH-RC4-MD5" },
+  { 0x0018, "TLS_DH_anon_WITH_RC4_128_MD5",
+            "ADH-RC4-MD5" },
+  { 0x0019, "TLS_DH_anon_EXPORT_WITH_DES40_CBC_SHA",
+            "EXP-ADH-DES-CBC-SHA" },
+  { 0x001A, "TLS_DH_anon_WITH_DES_CBC_SHA",
+            "ADH-DES-CBC-SHA" },
+  { 0x001B, "TLS_DH_anon_WITH_3DES_EDE_CBC_SHA",
+            "ADH-DES-CBC3-SHA" },
+  { 0x0030, "TLS_DH_DSS_WITH_AES_128_CBC_SHA",
+            "DH-DSS-AES128-SHA" },
+  { 0x0031, "TLS_DH_RSA_WITH_AES_128_CBC_SHA",
+            "DH-RSA-AES128-SHA" },
+  { 0x0032, "TLS_DHE_DSS_WITH_AES_128_CBC_SHA",
+            "DHE-DSS-AES128-SHA" },
+  { 0x0034, "TLS_DH_anon_WITH_AES_128_CBC_SHA",
+            "ADH-AES128-SHA" },
+  { 0x0036, "TLS_DH_DSS_WITH_AES_256_CBC_SHA",
+            "DH-DSS-AES256-SHA" },
+  { 0x0037, "TLS_DH_RSA_WITH_AES_256_CBC_SHA",
+            "DH-RSA-AES256-SHA" },
+  { 0x0038, "TLS_DHE_DSS_WITH_AES_256_CBC_SHA",
+            "DHE-DSS-AES256-SHA" },
+  { 0x003A, "TLS_DH_anon_WITH_AES_256_CBC_SHA",
+            "ADH-AES256-SHA" },
+  { 0x003E, "TLS_DH_DSS_WITH_AES_128_CBC_SHA256",
+            "DH-DSS-AES128-SHA256" },
+  { 0x003F, "TLS_DH_RSA_WITH_AES_128_CBC_SHA256",
+            "DH-RSA-AES128-SHA256" },
+  { 0x0040, "TLS_DHE_DSS_WITH_AES_128_CBC_SHA256",
+            "DHE-DSS-AES128-SHA256" },
+  { 0x0068, "TLS_DH_DSS_WITH_AES_256_CBC_SHA256",
+            "DH-DSS-AES256-SHA256" },
+  { 0x0069, "TLS_DH_RSA_WITH_AES_256_CBC_SHA256",
+            "DH-RSA-AES256-SHA256" },
+  { 0x006A, "TLS_DHE_DSS_WITH_AES_256_CBC_SHA256",
+            "DHE-DSS-AES256-SHA256" },
+  { 0x006C, "TLS_DH_anon_WITH_AES_128_CBC_SHA256",
+            "ADH-AES128-SHA256" },
+  { 0x006D, "TLS_DH_anon_WITH_AES_256_CBC_SHA256",
+            "ADH-AES256-SHA256" },
+  { 0x008A, "TLS_PSK_WITH_RC4_128_SHA",
+            "PSK-RC4-SHA" },
+  { 0x008B, "TLS_PSK_WITH_3DES_EDE_CBC_SHA",
+            "PSK-3DES-EDE-CBC-SHA" },
+  { 0x008E, "TLS_DHE_PSK_WITH_RC4_128_SHA",
+            "DHE-PSK-RC4-SHA" },
+  { 0x008F, "TLS_DHE_PSK_WITH_3DES_EDE_CBC_SHA",
+            "DHE-PSK-3DES-EDE-CBC-SHA" },
+  { 0x0092, "TLS_RSA_PSK_WITH_RC4_128_SHA",
+            "RSA-PSK-RC4-SHA" },
+  { 0x0093, "TLS_RSA_PSK_WITH_3DES_EDE_CBC_SHA",
+            "RSA-PSK-3DES-EDE-CBC-SHA" },
+  { 0x00A0, "TLS_DH_RSA_WITH_AES_128_GCM_SHA256",
+            "DH-RSA-AES128-GCM-SHA256" },
+  { 0x00A1, "TLS_DH_RSA_WITH_AES_256_GCM_SHA384",
+            "DH-RSA-AES256-GCM-SHA384" },
+  { 0x00A2, "TLS_DHE_DSS_WITH_AES_128_GCM_SHA256",
+            "DHE-DSS-AES128-GCM-SHA256" },
+  { 0x00A3, "TLS_DHE_DSS_WITH_AES_256_GCM_SHA384",
+            "DHE-DSS-AES256-GCM-SHA384" },
+  { 0x00A4, "TLS_DH_DSS_WITH_AES_128_GCM_SHA256",
+            "DH-DSS-AES128-GCM-SHA256" },
+  { 0x00A5, "TLS_DH_DSS_WITH_AES_256_GCM_SHA384",
+            "DH-DSS-AES256-GCM-SHA384" },
+  { 0x00A6, "TLS_DH_anon_WITH_AES_128_GCM_SHA256",
+            "ADH-AES128-GCM-SHA256" },
+  { 0x00A7, "TLS_DH_anon_WITH_AES_256_GCM_SHA384",
+            "ADH-AES256-GCM-SHA384" },
+  { 0xC002, "TLS_ECDH_ECDSA_WITH_RC4_128_SHA",
+            "ECDH-ECDSA-RC4-SHA" },
+  { 0xC007, "TLS_ECDHE_ECDSA_WITH_RC4_128_SHA",
+            "ECDHE-ECDSA-RC4-SHA" },
+  { 0xC00C, "TLS_ECDH_RSA_WITH_RC4_128_SHA",
+            "ECDH-RSA-RC4-SHA" },
+  { 0xC011, "TLS_ECDHE_RSA_WITH_RC4_128_SHA",
+            "ECDHE-RSA-RC4-SHA" },
+  { 0xC015, "TLS_ECDH_anon_WITH_NULL_SHA",
+            "AECDH-NULL-SHA" },
+  { 0xC016, "TLS_ECDH_anon_WITH_RC4_128_SHA",
+            "AECDH-RC4-SHA" },
+  { 0xC017, "TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA",
+            "AECDH-DES-CBC3-SHA" },
+  { 0xC018, "TLS_ECDH_anon_WITH_AES_128_CBC_SHA",
+            "AECDH-AES128-SHA" },
+  { 0xC019, "TLS_ECDH_anon_WITH_AES_256_CBC_SHA",
+            "AECDH-AES256-SHA" },
+  /* Backward compatible aliases (EDH vs DHE) */
+  { 0x0011, "TLS_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA",
+            "EXP-EDH-DSS-DES-CBC-SHA" },
+  { 0x0012, "TLS_DHE_DSS_WITH_DES_CBC_SHA",
+            "EDH-DSS-DES-CBC-SHA" },
+  { 0x0013, "TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA",
+            "EDH-DSS-DES-CBC3-SHA" },
+  { 0x0014, "TLS_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA",
+            "EXP-EDH-RSA-DES-CBC-SHA" },
+  { 0x0015, "TLS_DHE_RSA_WITH_DES_CBC_SHA",
+            "EDH-RSA-DES-CBC-SHA" },
+  { 0x0016, "TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA",
+            "EDH-RSA-DES-CBC3-SHA" },
+#endif
 #if defined(USE_MBEDTLS)
   /* entries marked ns are non-"standard", they are not in openssl */
   { 0x0041, "TLS_RSA_WITH_CAMELLIA_128_CBC_SHA",
@@ -461,7 +604,7 @@ struct test_str_entry {
   const char *str;
 };
 static const struct test_str_entry test_str_list[] = {
-#if defined(USE_MBEDTLS)
+#if defined(USE_SECTRANSP) || defined(USE_MBEDTLS)
   { 0x1301, "TLS_AES_128_GCM_SHA256"},
   { 0x1302, "TLS_AES_256_GCM_SHA384"},
   { 0x1303, "TLS_CHACHA20_POLY1305_SHA256"},
@@ -476,13 +619,16 @@ static const struct test_str_entry test_str_list[] = {
   { 0xC030, "ECDHE-RSA-AES256-GCM-SHA384"},
   { 0xCCA9, "ECDHE-ECDSA-CHACHA20-POLY1305"},
   { 0xCCA8, "ECDHE-RSA-CHACHA20-POLY1305"},
-#if defined(USE_MBEDTLS)
+#if defined(USE_SECTRANSP) || defined(USE_MBEDTLS)
   { 0x009E, "DHE-RSA-AES128-GCM-SHA256"},
   { 0x009F, "DHE-RSA-AES256-GCM-SHA384"},
-  { 0xCCAA, "DHE-RSA-CHACHA20-POLY1305"},
 #else
   { 0x0000, "DHE-RSA-AES128-GCM-SHA256"},
   { 0x0000, "DHE-RSA-AES256-GCM-SHA384"},
+#endif
+#if defined(USE_MBEDTLS)
+  { 0xCCAA, "DHE-RSA-CHACHA20-POLY1305"},
+#else
   { 0x0000, "DHE-RSA-CHACHA20-POLY1305"},
 #endif
   { 0xC023, "ECDHE-ECDSA-AES128-SHA256" },
@@ -493,7 +639,7 @@ static const struct test_str_entry test_str_list[] = {
   { 0xC028, "ECDHE-RSA-AES256-SHA384" },
   { 0xC00A, "ECDHE-ECDSA-AES256-SHA" },
   { 0xC014, "ECDHE-RSA-AES256-SHA" },
-#if defined(USE_MBEDTLS)
+#if defined(USE_SECTRANSP) || defined(USE_MBEDTLS)
   { 0x0067, "DHE-RSA-AES128-SHA256" },
   { 0x006B, "DHE-RSA-AES256-SHA256" },
 #else
@@ -506,7 +652,7 @@ static const struct test_str_entry test_str_list[] = {
   { 0x003D, "AES256-SHA256" },
   { 0x002F, "AES128-SHA" },
   { 0x0035, "AES256-SHA" },
-#if defined(USE_BEARSSL)
+#if defined(USE_SECTRANSP) || defined(USE_BEARSSL)
   { 0x000A, "DES-CBC3-SHA" },
 #else
   { 0x0000, "DES-CBC3-SHA" },
@@ -522,6 +668,7 @@ UNITTEST_START
     const struct test_cs_entry *test = &test_cs_list[i];
     const char *expect;
     char buf[64] = "";
+    char alt[64] = "";
     uint16_t id;
 
     /* test Curl_cipher_suite_lookup_id() for rfc name */
@@ -565,6 +712,14 @@ UNITTEST_START
 
     Curl_cipher_suite_get_str(test->id, buf, sizeof(buf), false);
 
+    /* suites matched by EDH alias will return the DHE name */
+    if(test->id >= 0x0011 && test->id < 0x0017) {
+      if(memcmp(expect, "EDH-", 4) == 0)
+        expect = (char *) memcpy(strcpy(alt, expect), "DHE-", 4);
+      if(memcmp(expect + 4, "EDH-", 4) == 0)
+        expect = (char *) memcpy(strcpy(alt, expect) + 4, "DHE-", 4) - 4;
+    }
+
     if(strcmp(buf, expect) != 0) {
       fprintf(stderr, "Curl_cipher_suite_get_str FAILED for 0x%04x, "
                       "result = \"%s\", expected = \"%s\"\n",
@@ -607,9 +762,11 @@ UNITTEST_START
 }
 UNITTEST_STOP
 
-#else /* defined(USE_MBEDTLS) || defined(USE_BEARSSL) */
+#else /* defined(USE_SECTRANSP) || defined(USE_MBEDTLS) || \
+          defined(USE_BEARSSL) */
 
 UNITTEST_START
 UNITTEST_STOP
 
-#endif /* defined(USE_MBEDTLS) || defined(USE_BEARSSL) */
+#endif /* defined(USE_SECTRANSP) || defined(USE_MBEDTLS) || \
+          defined(USE_BEARSSL) */
