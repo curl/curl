@@ -493,7 +493,7 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
                   stream_id, (curl_int64_t)nconsumed);
     }
     if(!data) {
-      CURL_TRC_CF(cdata, cf, "[%" CURL_PRId64 "] discard data for unkown "
+      CURL_TRC_CF(cdata, cf, "[%" CURL_PRId64 "] discard data for unknown "
                   "stream", stream_id);
       return 0;
     }
