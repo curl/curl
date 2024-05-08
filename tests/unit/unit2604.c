@@ -45,17 +45,17 @@ struct set {
 UNITTEST_START
 #ifdef USE_SSH
 {
-#define LONG_A "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-#define LONG_AA LONG_A LONG_A LONG_A LONG_A LONG_A LONG_A LONG_A LONG_A LONG_A
-#define LONG_AAA LONG_AA LONG_AA LONG_AA LONG_AA LONG_AA LONG_AA LONG_AA
-#define LONG_AAAA LONG_AAA LONG_AAA LONG_AAA LONG_AAA LONG_AAA LONG_AAA
-#define LONG_AAAAA LONG_AAAA LONG_AAAA LONG_AAAA LONG_AAAA
+/* 60 a's */
+#define SA60 "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+/* 540 a's */
+#define SA540 SA60 SA60 SA60 SA60 SA60 SA60 SA60 SA60 SA60
   int i;
   int error = 0;
+  size_t too_long = 90720;
   struct set list[] = {
-    { LONG_AAAAA " b", "", "", "", CURLE_TOO_LARGE},
-    { LONG_AA " c", LONG_AA, "c", "/", CURLE_OK},
-    { "\" " LONG_AA "\" c", " " LONG_AA, "c", "/", CURLE_OK},
+    { "-too-long-", "", "", "", CURLE_TOO_LARGE},
+    { SA540 " c", SA540, "c", "/", CURLE_OK},
+    { "\" " SA540 "\" c", " " SA540, "c", "/", CURLE_OK},
     { "a a", "a", "a", "/home/", CURLE_OK},
     { "b a", "b", "a", "/", CURLE_OK},
     { "a", "a", "", "/home/", CURLE_OK},
@@ -72,6 +72,10 @@ UNITTEST_START
     { "foo \"", "foo", "\"", "/", CURLE_OK},
     { NULL, NULL, NULL, NULL, CURLE_OK }
   };
+
+  list[0].cp = calloc(1, too_long + 1);
+  fail_unless(list[0].cp, "could not alloc too long value");
+  memset((void *)list[0].cp, 'a', too_long);
 
   for(i = 0; list[i].home; i++) {
     char *path;
@@ -98,6 +102,8 @@ UNITTEST_START
 
     }
   }
+
+  free((void *)list[0].cp);
   return error;
 }
 #endif
