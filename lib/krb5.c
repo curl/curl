@@ -524,24 +524,33 @@ static CURLcode read_data(struct Curl_easy *data, int sockindex,
     return result;
 
   if(len) {
-    /* only realloc if there was a length */
     len = ntohl(len);
     if(len > CURL_MAX_INPUT_LENGTH)
-      len = 0;
-    else
-      buf->data = Curl_saferealloc(buf->data, len);
-  }
-  if(!len || !buf->data)
-    return CURLE_OUT_OF_MEMORY;
+      return CURLE_TOO_LARGE;
 
-  result = socket_read(data, sockindex, buf->data, len);
-  if(result)
-    return result;
-  nread = conn->mech->decode(conn->app_data, buf->data, len,
-                             conn->data_prot, conn);
+    Curl_dyn_reset(&buf->buf);
+  }
+  else
+    return CURLE_RECV_ERROR;
+
+  do {
+    char buffer[1024];
+    nread = CURLMIN(len, (int)sizeof(buffer));
+    result = socket_read(data, sockindex, buffer, nread);
+    if(result)
+      return result;
+    result = Curl_dyn_addn(&buf->buf, buffer, nread);
+    if(result)
+      return result;
+    len -= nread;
+  } while(len);
+  /* this decodes the dynbuf *in place* */
+  nread = conn->mech->decode(conn->app_data,
+                             Curl_dyn_ptr(&buf->buf),
+                             len, conn->data_prot, conn);
   if(nread < 0)
     return CURLE_RECV_ERROR;
-  buf->size = (size_t)nread;
+  Curl_dyn_setlen(&buf->buf, nread);
   buf->index = 0;
   return CURLE_OK;
 }
@@ -549,9 +558,10 @@ static CURLcode read_data(struct Curl_easy *data, int sockindex,
 static size_t
 buffer_read(struct krb5buffer *buf, void *data, size_t len)
 {
-  if(buf->size - buf->index < len)
-    len = buf->size - buf->index;
-  memcpy(data, (char *)buf->data + buf->index, len);
+  size_t size = Curl_dyn_len(&buf->buf);
+  if(size - buf->index < len)
+    len = size - buf->index;
+  memcpy(data, Curl_dyn_ptr(&buf->buf) + buf->index, len);
   buf->index += len;
   return len;
 }
@@ -586,7 +596,7 @@ static ssize_t sec_recv(struct Curl_easy *data, int sockindex,
   while(len > 0) {
     if(read_data(data, sockindex, &conn->in_buffer))
       return -1;
-    if(conn->in_buffer.size == 0) {
+    if(Curl_dyn_len(&conn->in_buffer.buf) == 0) {
       if(bytes_read > 0)
         conn->in_buffer.eof_flag = 1;
       return bytes_read;
@@ -835,6 +845,7 @@ static CURLcode choose_mech(struct Curl_easy *data, struct connectdata *conn)
             mech->name);
       return CURLE_FAILED_INIT;
     }
+    Curl_dyn_init(&conn->in_buffer.buf, CURL_MAX_INPUT_LENGTH);
   }
 
   infof(data, "Trying mechanism %s...", mech->name);
@@ -899,15 +910,10 @@ Curl_sec_end(struct connectdata *conn)
 {
   if(conn->mech && conn->mech->end)
     conn->mech->end(conn->app_data);
-  free(conn->app_data);
-  conn->app_data = NULL;
-  if(conn->in_buffer.data) {
-    free(conn->in_buffer.data);
-    conn->in_buffer.data = NULL;
-    conn->in_buffer.size = 0;
-    conn->in_buffer.index = 0;
-    conn->in_buffer.eof_flag = 0;
-  }
+  Curl_safefree(conn->app_data);
+  Curl_dyn_free(&conn->in_buffer.buf);
+  conn->in_buffer.index = 0;
+  conn->in_buffer.eof_flag = 0;
   conn->sec_complete = 0;
   conn->data_prot = PROT_CLEAR;
   conn->mech = NULL;
