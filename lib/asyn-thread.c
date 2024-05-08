@@ -554,11 +554,15 @@ static void destroy_async_data(struct Curl_async *async)
 
     if(!done) {
 #ifdef _WIN32
-      if(td->complete_ev)
+      if(td->complete_ev) {
         CloseHandle(td->complete_ev);
-      else
+        td->complete_ev = NULL;
+      }
 #endif
-      Curl_thread_destroy(td->thread_hnd);
+      if(td->thread_hnd != curl_thread_t_null) {
+        Curl_thread_destroy(td->thread_hnd);
+        td->thread_hnd = curl_thread_t_null;
+      }
     }
     else {
 #ifdef _WIN32
@@ -566,6 +570,7 @@ static void destroy_async_data(struct Curl_async *async)
         Curl_GetAddrInfoExCancel(&td->tsd.w8.cancel_ev);
         WaitForSingleObject(td->complete_ev, INFINITE);
         CloseHandle(td->complete_ev);
+        td->complete_ev = NULL;
       }
 #endif
       if(td->thread_hnd != curl_thread_t_null)
@@ -672,7 +677,7 @@ static bool init_resolve_thread(struct Curl_easy *data,
   td->thread_hnd = Curl_thread_create(gethostbyname_thread, &td->tsd);
 #endif
 
-  if(!td->thread_hnd) {
+  if(td->thread_hnd == curl_thread_t_null) {
     /* The thread never started, so mark it as done here for proper cleanup. */
     td->tsd.done = 1;
     err = errno;
@@ -713,6 +718,7 @@ static CURLcode thread_wait_resolv(struct Curl_easy *data,
   if(td->complete_ev) {
     WaitForSingleObject(td->complete_ev, INFINITE);
     CloseHandle(td->complete_ev);
+    td->complete_ev = NULL;
     if(entry)
       result = getaddrinfo_complete(data);
   }
@@ -754,6 +760,13 @@ void Curl_resolver_kill(struct Curl_easy *data)
   /* If we're still resolving, we must wait for the threads to fully clean up,
      unfortunately.  Otherwise, we can simply cancel to clean up any resolver
      data. */
+#ifdef _WIN32
+  if(td && td->complete_ev) {
+    Curl_GetAddrInfoExCancel(&td->tsd.w8.cancel_ev);
+    (void)thread_wait_resolv(data, NULL, FALSE);
+  }
+  else
+#endif
   if(td && td->thread_hnd != curl_thread_t_null
      && (data->set.quick_exit != 1L))
     (void)thread_wait_resolv(data, NULL, FALSE);

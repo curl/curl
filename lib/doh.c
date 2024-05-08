@@ -455,7 +455,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
    * TODO: Figure out the conditions under which we want to make
    * a request for an HTTPS RR when we are not doing ECH. For now,
    * making this request breaks a bunch of DoH tests, e.g. test2100,
-   * where the addiitonal request doesn't match the pre-cooked data
+   * where the additional request doesn't match the pre-cooked data
    * files, so there's a bit of work attached to making the request
    * in a non-ECH use-case. For the present, we'll only make the
    * request when ECH is enabled in the build and is being used for
@@ -1045,50 +1045,45 @@ static CURLcode local_decode_rdata_name(unsigned char **buf, size_t *remaining,
 {
   unsigned char *cp = NULL;
   int rem = 0;
-  char *thename = NULL, *tp = NULL;
   unsigned char clen = 0; /* chunk len */
+  struct dynbuf thename;
 
+  DEBUGASSERT(buf && remaining && dnsname);
   if(!buf || !remaining || !dnsname)
     return CURLE_OUT_OF_MEMORY;
   rem = (int)*remaining;
-  thename = calloc(1, CURL_MAXLEN_host_name);
-  if(!thename)
+  if(rem <= 0) {
+    Curl_dyn_free(&thename);
     return CURLE_OUT_OF_MEMORY;
+  }
+  Curl_dyn_init(&thename, CURL_MAXLEN_host_name);
   cp = *buf;
-  tp = thename;
   clen = *cp++;
   if(clen == 0) {
     /* special case - return "." as name */
-    thename[0] = '.';
-    thename[1] = 0x00;
+    if(Curl_dyn_addn(&thename, ".", 1))
+      return CURLE_OUT_OF_MEMORY;
   }
   while(clen) {
     if(clen >= rem) {
-      free(thename);
+      Curl_dyn_free(&thename);
       return CURLE_OUT_OF_MEMORY;
     }
-    if(((tp - thename) + clen) > CURL_MAXLEN_host_name) {
-      free(thename);
-      return CURLE_OUT_OF_MEMORY;
-    }
-    memcpy(tp, cp, clen);
-    tp += clen;
-    *tp++ = '.';
+    if(Curl_dyn_addn(&thename, cp, clen) ||
+       Curl_dyn_addn(&thename, ".", 1))
+      return CURLE_TOO_LARGE;
+
     cp += clen;
     rem -= (clen + 1);
     if(rem <= 0) {
-      free(thename);
+      Curl_dyn_free(&thename);
       return CURLE_OUT_OF_MEMORY;
     }
     clen = *cp++;
   }
   *buf = cp;
-  if(rem <= 0) {
-    free(thename);
-    return CURLE_OUT_OF_MEMORY;
-  }
   *remaining = rem - 1;
-  *dnsname = thename;
+  *dnsname = Curl_dyn_ptr(&thename);
   return CURLE_OK;
 }
 
@@ -1108,7 +1103,7 @@ static CURLcode local_decode_rdata_alpn(unsigned char *rrval, size_t len,
    */
   int remaining = (int) len;
   char *oval;
-  size_t olen = 0, i;
+  size_t i;
   unsigned char *cp = rrval;
   struct dynbuf dval;
 
@@ -1137,13 +1132,10 @@ static CURLcode local_decode_rdata_alpn(unsigned char *rrval, size_t len,
     }
     remaining -= (int)tlen;
   }
-  olen = Curl_dyn_len(&dval);
-  /* I think the + 1 here is ok but it could trigger a read error */
-  oval = (char *)Curl_memdup(Curl_dyn_ptr(&dval), olen + 1);
+  /* this string is always null terminated */
+  oval = Curl_dyn_ptr(&dval);
   if(!oval)
     goto err;
-  Curl_dyn_free(&dval);
-  oval[olen]='\0';
   *alpns = oval;
   return CURLE_OK;
 err:
@@ -1192,11 +1184,10 @@ static CURLcode Curl_doh_decode_httpsrr(unsigned char *rrval, size_t len,
   lhrr = calloc(1, sizeof(struct Curl_https_rrinfo));
   if(!lhrr)
     return CURLE_OUT_OF_MEMORY;
-  lhrr->val = calloc(1, len);
+  lhrr->val = Curl_memdup(rrval, len);
   if(!lhrr->val)
     goto err;
   lhrr->len = len;
-  memcpy(lhrr->val, rrval, len);
   if(remaining <= 2)
     goto err;
   lhrr->priority = (uint16_t)((cp[0] << 8) + cp[1]);
@@ -1245,12 +1236,9 @@ static CURLcode Curl_doh_decode_httpsrr(unsigned char *rrval, size_t len,
   return CURLE_OK;
 err:
   if(lhrr) {
-    if(lhrr->target)
-      free(lhrr->target);
-    if(lhrr->echconfiglist)
-      free(lhrr->echconfiglist);
-    if(lhrr->val)
-      free(lhrr->val);
+    free(lhrr->target);
+    free(lhrr->echconfiglist);
+    free(lhrr->val);
     free(lhrr);
   }
   return CURLE_OUT_OF_MEMORY;

@@ -253,7 +253,7 @@ static CURLcode unfold_value(struct Curl_easy *data, const char *value,
   newhs = Curl_saferealloc(hs, sizeof(*hs) + vlen + oalloc + 1);
   if(!newhs)
     return CURLE_OUT_OF_MEMORY;
-  /* ->name' and ->value point into ->buffer (to keep the header allocation
+  /* ->name and ->value point into ->buffer (to keep the header allocation
      in a single memory block), which now potentially have moved. Adjust
      them. */
   newhs->name = newhs->buffer;

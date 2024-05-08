@@ -1289,6 +1289,29 @@ static void reset_socket_fdwrite(curl_socket_t s)
 }
 #endif
 
+static CURLMcode ufds_increase(struct pollfd **pfds, unsigned int *pfds_len,
+                               unsigned int inc, bool *is_malloced)
+{
+  struct pollfd *new_fds, *old_fds = *pfds;
+  unsigned int new_len = *pfds_len + inc;
+
+  new_fds = calloc(new_len, sizeof(struct pollfd));
+  if(!new_fds) {
+    if(*is_malloced)
+      free(old_fds);
+    *pfds = NULL;
+    *pfds_len = 0;
+    return CURLM_OUT_OF_MEMORY;
+  }
+  memcpy(new_fds, old_fds, (*pfds_len) * sizeof(struct pollfd));
+  if(*is_malloced)
+    free(old_fds);
+  *pfds = new_fds;
+  *pfds_len = new_len;
+  *is_malloced = TRUE;
+  return CURLM_OK;
+}
+
 #define NUM_POLLS_ON_STACK 10
 
 static CURLMcode multi_wait(struct Curl_multi *multi,
@@ -1302,12 +1325,12 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   struct Curl_easy *data;
   struct easy_pollset ps;
   size_t i;
-  unsigned int nfds = 0;
-  unsigned int curlfds;
   long timeout_internal;
   int retcode = 0;
   struct pollfd a_few_on_stack[NUM_POLLS_ON_STACK];
   struct pollfd *ufds = &a_few_on_stack[0];
+  unsigned int ufds_len = NUM_POLLS_ON_STACK;
+  unsigned int nfds = 0, curl_nfds = 0; /* how many ufds are in use */
   bool ufds_malloc = FALSE;
 #ifdef USE_WINSOCK
   WSANETWORKEVENTS wsa_events;
@@ -1326,13 +1349,6 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   if(timeout_ms < 0)
     return CURLM_BAD_FUNCTION_ARGUMENT;
 
-  /* Count up how many fds we have from the multi handle */
-  memset(&ps, 0, sizeof(ps));
-  for(data = multi->easyp; data; data = data->next) {
-    multi_getsock(data, &ps);
-    nfds += ps.num;
-  }
-
   /* If the internally desired timeout is actually shorter than requested from
      the outside, then use the shorter time! But only if the internal timer
      is actually larger than -1! */
@@ -1340,69 +1356,59 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   if((timeout_internal >= 0) && (timeout_internal < (long)timeout_ms))
     timeout_ms = (int)timeout_internal;
 
-  curlfds = nfds; /* number of internal file descriptors */
-  nfds += extra_nfds; /* add the externally provided ones */
+  memset(ufds, 0, ufds_len * sizeof(struct pollfd));
+  memset(&ps, 0, sizeof(ps));
 
-#ifdef ENABLE_WAKEUP
+  /* Add the curl handles to our pollfds first */
+  for(data = multi->easyp; data; data = data->next) {
+    multi_getsock(data, &ps);
+
+    for(i = 0; i < ps.num; i++) {
+      short events = 0;
 #ifdef USE_WINSOCK
-  if(use_wakeup) {
-#else
-  if(use_wakeup && multi->wakeup_pair[0] != CURL_SOCKET_BAD) {
+      long mask = 0;
 #endif
-    ++nfds;
-  }
-#endif
-
-  if(nfds > NUM_POLLS_ON_STACK) {
-    /* 'nfds' is a 32 bit value and 'struct pollfd' is typically 8 bytes
-       big, so at 2^29 sockets this value might wrap. When a process gets
-       the capability to actually handle over 500 million sockets this
-       calculation needs an integer overflow check. */
-    ufds = malloc(nfds * sizeof(struct pollfd));
-    if(!ufds)
-      return CURLM_OUT_OF_MEMORY;
-    ufds_malloc = TRUE;
-  }
-  nfds = 0;
-
-  /* only do the second loop if we found descriptors in the first stage run
-     above */
-
-  if(curlfds) {
-    /* Add the curl handles to our pollfds first */
-    for(data = multi->easyp; data; data = data->next) {
-      multi_getsock(data, &ps);
-
-      for(i = 0; i < ps.num; i++) {
-        struct pollfd *ufd = &ufds[nfds++];
+      if(ps.actions[i] & CURL_POLL_IN) {
 #ifdef USE_WINSOCK
-        long mask = 0;
+        mask |= FD_READ|FD_ACCEPT|FD_CLOSE;
 #endif
-        ufd->fd = ps.sockets[i];
-        ufd->events = 0;
-        if(ps.actions[i] & CURL_POLL_IN) {
+        events |= POLLIN;
+      }
+      if(ps.actions[i] & CURL_POLL_OUT) {
 #ifdef USE_WINSOCK
-          mask |= FD_READ|FD_ACCEPT|FD_CLOSE;
+        mask |= FD_WRITE|FD_CONNECT|FD_CLOSE;
+        reset_socket_fdwrite(ps.sockets[i]);
 #endif
-          ufd->events |= POLLIN;
+        events |= POLLOUT;
+      }
+      if(events) {
+        if(nfds && ps.sockets[i] == ufds[nfds-1].fd) {
+          ufds[nfds-1].events |= events;
         }
-        if(ps.actions[i] & CURL_POLL_OUT) {
-#ifdef USE_WINSOCK
-          mask |= FD_WRITE|FD_CONNECT|FD_CLOSE;
-          reset_socket_fdwrite(ps.sockets[i]);
-#endif
-          ufd->events |= POLLOUT;
+        else {
+          if(nfds >= ufds_len) {
+            if(ufds_increase(&ufds, &ufds_len, 100, &ufds_malloc))
+              return CURLM_OUT_OF_MEMORY;
+          }
+          DEBUGASSERT(nfds < ufds_len);
+          ufds[nfds].fd = ps.sockets[i];
+          ufds[nfds].events = events;
+          ++nfds;
         }
+      }
 #ifdef USE_WINSOCK
+      if(mask) {
         if(WSAEventSelect(ps.sockets[i], multi->wsa_event, mask) != 0) {
           if(ufds_malloc)
             free(ufds);
           return CURLM_INTERNAL_ERROR;
         }
-#endif
       }
+#endif
     }
   }
+
+  curl_nfds = nfds; /* what curl internally used in ufds */
 
   /* Add external file descriptions from poll-like struct curl_waitfd */
   for(i = 0; i < extra_nfds; i++) {
@@ -1422,6 +1428,11 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
       return CURLM_INTERNAL_ERROR;
     }
 #endif
+    if(nfds >= ufds_len) {
+      if(ufds_increase(&ufds, &ufds_len, 100, &ufds_malloc))
+        return CURLM_OUT_OF_MEMORY;
+    }
+    DEBUGASSERT(nfds < ufds_len);
     ufds[nfds].fd = extra_fds[i].fd;
     ufds[nfds].events = 0;
     if(extra_fds[i].events & CURL_WAIT_POLLIN)
@@ -1436,6 +1447,11 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
 #ifdef ENABLE_WAKEUP
 #ifndef USE_WINSOCK
   if(use_wakeup && multi->wakeup_pair[0] != CURL_SOCKET_BAD) {
+    if(nfds >= ufds_len) {
+      if(ufds_increase(&ufds, &ufds_len, 100, &ufds_malloc))
+        return CURLM_OUT_OF_MEMORY;
+    }
+    DEBUGASSERT(nfds < ufds_len);
     ufds[nfds].fd = multi->wakeup_pair[0];
     ufds[nfds].events = POLLIN;
     ++nfds;
@@ -1475,7 +1491,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
          struct, the bit values of the actual underlying poll() implementation
          may not be the same as the ones in the public libcurl API! */
       for(i = 0; i < extra_nfds; i++) {
-        unsigned r = ufds[curlfds + i].revents;
+        unsigned r = ufds[curl_nfds + i].revents;
         unsigned short mask = 0;
 #ifdef USE_WINSOCK
         curl_socket_t s = extra_fds[i].fd;
@@ -1508,7 +1524,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
 #ifdef USE_WINSOCK
       /* Count up all our own sockets that had activity,
          and remove them from the event. */
-      if(curlfds) {
+      if(curl_nfds) {
 
         for(data = multi->easyp; data; data = data->next) {
           multi_getsock(data, &ps);
@@ -1529,7 +1545,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
 #else
 #ifdef ENABLE_WAKEUP
       if(use_wakeup && multi->wakeup_pair[0] != CURL_SOCKET_BAD) {
-        if(ufds[curlfds + extra_nfds].revents & POLLIN) {
+        if(ufds[curl_nfds + extra_nfds].revents & POLLIN) {
           char buf[64];
           ssize_t nread;
           while(1) {
@@ -2530,7 +2546,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             multistate(data, MSTATE_SETUP);
             rc = CURLM_CALL_MULTI_PERFORM;
           }
-          free(newurl);
         }
         else {
           /* after the transfer is done, go DONE */
@@ -2542,7 +2557,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             newurl = data->req.location;
             data->req.location = NULL;
             result = Curl_follow(data, newurl, FOLLOW_FAKE);
-            free(newurl);
             if(result) {
               stream_error = TRUE;
               result = multi_done(data, result, TRUE);
@@ -2561,6 +2575,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
            transfers */
         Curl_expire(data, 0, EXPIRE_RUN_NOW);
       }
+      free(newurl);
       break;
     }
 

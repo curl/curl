@@ -1,0 +1,87 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+chunked Transfer-Encoding
+DELAY
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 funky chunky!
+Server: fakeit/0.9 fakeitbad/1.0
+Transfer-Encoding: chunked, chunked
+Connection: mooo
+
+40
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+30
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+21;heresatest=moooo
+cccccccccccccccccccccccccccccccc
+
+0
+%if !hyper
+chunky-trailer: header data
+another-header: yes
+%endif
+
+</data>
+<datacheck>
+HTTP/1.1 200 funky chunky!
+Server: fakeit/0.9 fakeitbad/1.0
+Transfer-Encoding: chunked, chunked
+Connection: mooo
+
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcccccccccccccccccccccccccccccccc
+%if !hyper
+chunky-trailer: header data
+another-header: yes
+%endif
+</datacheck>
+<servercmd>
+writedelay: 10
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP GET with double chunked in TE header
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -D %LOGDIR/heads%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<file name="%LOGDIR/heads%TESTNUMBER">
+HTTP/1.1 200 funky chunky!
+Server: fakeit/0.9 fakeitbad/1.0
+Transfer-Encoding: chunked, chunked
+Connection: mooo
+
+%if !hyper
+chunky-trailer: header data
+another-header: yes
+%endif
+</file>
+</verify>
+
+</testcase>

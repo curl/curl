@@ -2324,7 +2324,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
         Curl_hsts_cleanup(&data->hsts);
         data->hsts = data->share->hsts;
       }
-#endif   /* CURL_DISABLE_HTTP */
+#endif
 #ifdef USE_SSL
       if(data->share->sslsession) {
         data->set.general_ssl.max_ssl_sessions = data->share->max_ssl_sessions;

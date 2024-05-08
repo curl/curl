@@ -173,8 +173,7 @@ void Curl_creader_set_rewind(struct Curl_easy *data, bool enable)
   data->req.rewind_read = !!enable;
 }
 
-/* Write data using an unencoding writer stack. "nbytes" is not
-   allowed to be 0. */
+/* Write data using an unencoding writer stack. */
 CURLcode Curl_cwriter_write(struct Curl_easy *data,
                              struct Curl_cwriter *writer, int type,
                              const char *buf, size_t nbytes)
@@ -668,7 +667,7 @@ static CURLcode cr_in_read(struct Curl_easy *data,
   switch(nread) {
   case 0:
     if((ctx->total_len >= 0) && (ctx->read_len < ctx->total_len)) {
-      failf(data, "client read function EOF fail, only "
+      failf(data, "client read function EOF fail, "
             "only %"CURL_FORMAT_CURL_OFF_T"/%"CURL_FORMAT_CURL_OFF_T
             " of needed bytes read", ctx->read_len, ctx->total_len);
       return CURLE_READ_ERROR;

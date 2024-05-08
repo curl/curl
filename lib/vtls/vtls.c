@@ -605,9 +605,10 @@ void Curl_ssl_kill_session(struct Curl_ssl_session *session)
     /* defensive check */
 
     /* free the ID the SSL-layer specific way */
-    Curl_ssl->session_free(session->sessionid);
+    session->sessionid_free(session->sessionid, session->idsize);
 
     session->sessionid = NULL;
+    session->sessionid_free = NULL;
     session->age = 0; /* fresh */
 
     Curl_free_primary_ssl_config(&session->ssl_config);
@@ -645,42 +646,41 @@ CURLcode Curl_ssl_addsessionid(struct Curl_cfilter *cf,
                                const struct ssl_peer *peer,
                                void *ssl_sessionid,
                                size_t idsize,
-                               bool *added)
+                               Curl_ssl_sessionid_dtor *sessionid_free_cb)
 {
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   size_t i;
   struct Curl_ssl_session *store;
   long oldest_age;
-  char *clone_host;
-  char *clone_conn_to_host;
+  char *clone_host = NULL;
+  char *clone_conn_to_host = NULL;
   int conn_to_port;
   long *general_age;
+  CURLcode result = CURLE_OUT_OF_MEMORY;
 
-  if(added)
-    *added = FALSE;
+  DEBUGASSERT(ssl_sessionid);
+  DEBUGASSERT(sessionid_free_cb);
 
-  if(!data->state.session)
+  if(!data->state.session) {
+    sessionid_free_cb(ssl_sessionid, idsize);
     return CURLE_OK;
+  }
 
   store = &data->state.session[0];
   oldest_age = data->state.session[0].age; /* zero if unused */
-  (void)ssl_config;
   DEBUGASSERT(ssl_config->primary.sessionid);
+  (void)ssl_config;
 
   clone_host = strdup(peer->hostname);
   if(!clone_host)
-    return CURLE_OUT_OF_MEMORY; /* bail out */
+    goto out;
 
   if(cf->conn->bits.conn_to_host) {
     clone_conn_to_host = strdup(cf->conn->conn_to_host.name);
-    if(!clone_conn_to_host) {
-      free(clone_host);
-      return CURLE_OUT_OF_MEMORY; /* bail out */
-    }
+    if(!clone_conn_to_host)
+      goto out;
   }
-  else
-    clone_conn_to_host = NULL;
 
   if(cf->conn->bits.conn_to_port)
     conn_to_port = cf->conn->conn_to_port;
@@ -713,34 +713,43 @@ CURLcode Curl_ssl_addsessionid(struct Curl_cfilter *cf,
     store = &data->state.session[i]; /* use this slot */
 
   /* now init the session struct wisely */
+  if(!clone_ssl_primary_config(conn_config, &store->ssl_config)) {
+    Curl_free_primary_ssl_config(&store->ssl_config);
+    store->sessionid = NULL; /* let caller free sessionid */
+    goto out;
+  }
   store->sessionid = ssl_sessionid;
   store->idsize = idsize;
+  store->sessionid_free = sessionid_free_cb;
   store->age = *general_age;    /* set current age */
   /* free it if there's one already present */
   free(store->name);
   free(store->conn_to_host);
   store->name = clone_host;               /* clone host name */
+  clone_host = NULL;
   store->conn_to_host = clone_conn_to_host; /* clone connect to host name */
+  clone_conn_to_host = NULL;
   store->conn_to_port = conn_to_port; /* connect to port number */
   /* port number */
   store->remote_port = peer->port;
   store->scheme = cf->conn->handler->scheme;
   store->transport = peer->transport;
 
-  if(!clone_ssl_primary_config(conn_config, &store->ssl_config)) {
-    Curl_free_primary_ssl_config(&store->ssl_config);
-    store->sessionid = NULL; /* let caller free sessionid */
-    free(clone_host);
-    free(clone_conn_to_host);
-    return CURLE_OUT_OF_MEMORY;
+  result = CURLE_OK;
+
+out:
+  free(clone_host);
+  free(clone_conn_to_host);
+  if(result) {
+    failf(data, "Failed to add Session ID to cache for %s://%s:%d [%s]",
+          store->scheme, store->name, store->remote_port,
+          Curl_ssl_cf_is_proxy(cf) ? "PROXY" : "server");
+    sessionid_free_cb(ssl_sessionid, idsize);
+    return result;
   }
-
-  if(added)
-    *added = TRUE;
-
-  DEBUGF(infof(data, "Added Session ID to cache for %s://%s:%d [%s]",
-               store->scheme, store->name, store->remote_port,
-               Curl_ssl_cf_is_proxy(cf) ? "PROXY" : "server"));
+  CURL_TRC_CF(data, cf, "Added Session ID to cache for %s://%s:%d [%s]",
+              store->scheme, store->name, store->remote_port,
+              Curl_ssl_cf_is_proxy(cf) ? "PROXY" : "server");
   return CURLE_OK;
 }
 
@@ -1323,7 +1332,6 @@ static const struct Curl_ssl Curl_ssl_multi = {
   multissl_get_internals,            /* get_internals */
   multissl_close,                    /* close_one */
   Curl_none_close_all,               /* close_all */
-  Curl_none_session_free,            /* session_free */
   Curl_none_set_engine,              /* set_engine */
   Curl_none_set_engine_default,      /* set_engine_default */
   Curl_none_engines_list,            /* engines_list */

@@ -49,13 +49,15 @@ class ScoreCard:
                  nghttpx: Optional[Nghttpx],
                  caddy: Optional[Caddy],
                  verbose: int,
-                 curl_verbose: int):
+                 curl_verbose: int,
+                 download_parallel: int = 0):
         self.verbose = verbose
         self.env = env
         self.httpd = httpd
         self.nghttpx = nghttpx
         self.caddy = caddy
         self._silent_curl = not curl_verbose
+        self._download_parallel = download_parallel
 
     def info(self, msg):
         if self.verbose > 0:
@@ -138,6 +140,7 @@ class ScoreCard:
         return {
             'count': count,
             'samples': sample_size,
+            'max-parallel': 1,
             'speed': mean(samples) if len(samples) else -1,
             'errors': errors,
             'stats': RunProfile.AverageStats(profiles),
@@ -164,6 +167,7 @@ class ScoreCard:
         return {
             'count': count,
             'samples': sample_size,
+            'max-parallel': 1,
             'speed': mean(samples) if len(samples) else -1,
             'errors': errors,
             'stats': RunProfile.AverageStats(profiles),
@@ -174,6 +178,7 @@ class ScoreCard:
         samples = []
         errors = []
         profiles = []
+        max_parallel = self._download_parallel if self._download_parallel > 0 else count
         url = f'{url}?[0-{count - 1}]'
         self.info(f'parallel...')
         for i in range(sample_size):
@@ -182,7 +187,7 @@ class ScoreCard:
                                    with_headers=False,
                                    with_profile=True,
                                    extra_args=['--parallel',
-                                               '--parallel-max', str(count)])
+                                               '--parallel-max', str(max_parallel)])
             err = self._check_downloads(r, count)
             if err:
                 errors.append(err)
@@ -193,6 +198,7 @@ class ScoreCard:
         return {
             'count': count,
             'samples': sample_size,
+            'max-parallel': max_parallel,
             'speed': mean(samples) if len(samples) else -1,
             'errors': errors,
             'stats': RunProfile.AverageStats(profiles),
@@ -436,7 +442,7 @@ class ScoreCard:
                     for mkey, mval in server_score[sskey].items():
                         if mkey not in measures:
                             measures.append(mkey)
-                            m_names[mkey] = f'{mkey}({mval["count"]}x)'
+                            m_names[mkey] = f'{mkey}({mval["count"]}x{mval["max-parallel"]})'
 
             print('Downloads')
             print(f'  {"Server":<8} {"Size":>8}', end='')
@@ -543,6 +549,8 @@ def main():
                         default=None, help="evaluate download size")
     parser.add_argument("--download-count", action='store', type=int,
                         default=50, help="perform that many downloads")
+    parser.add_argument("--download-parallel", action='store', type=int,
+                        default=0, help="perform that many downloads in parallel (default all)")
     parser.add_argument("-r", "--requests", action='store_true',
                         default=False, help="evaluate requests")
     parser.add_argument("--request-count", action='store', type=int,
@@ -607,7 +615,8 @@ def main():
             assert caddy.start()
 
         card = ScoreCard(env=env, httpd=httpd, nghttpx=nghttpx, caddy=caddy,
-                         verbose=args.verbose, curl_verbose=args.curl_verbose)
+                         verbose=args.verbose, curl_verbose=args.curl_verbose,
+                         download_parallel=args.download_parallel)
         score = card.score_proto(proto=protocol,
                                  handshakes=handshakes,
                                  downloads=downloads,

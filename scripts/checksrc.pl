@@ -720,7 +720,8 @@ sub scanfile {
                     strtok|
                     v?sprintf|
                     (str|_mbs|_tcs|_wcs)n?cat|
-                    LoadLibrary(Ex)?(A|W)?)
+                    LoadLibrary(Ex)?(A|W)?|
+                    _?w?access)
                    \s*\(
                  /x) {
             checkwarn("BANNEDFUNC",

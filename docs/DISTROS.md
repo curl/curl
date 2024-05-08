@@ -85,6 +85,8 @@ mailing list](https://lists.haxx.se/listinfo/curl-distros).
 *Rolling Release*
 
 - curl: https://curl.se/windows/
+- curl patches: https://github.com/curl/curl-for-win/blob/main/curl.patch (if any)
+- build-specific issues: https://github.com/curl/curl-for-win/issues
 
 Issues and patches for this are managed in the main curl project.
 

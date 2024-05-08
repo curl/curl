@@ -47,6 +47,9 @@ Can be specified several ways. Month names can only be three-letter English
 abbreviations, numbers can be zero-prefixed and the year may use 2 or 4
 digits. Examples: 06 Nov 1994, 06-Nov-94 and Nov-94 6.
 
+If the year appears to be below 100 (two-digit), any year after 70 is assumed
+to be 1900 + the given year. All others are 2000 + the given year.
+
 ## time of the day items
 
 This string specifies the time on a given day. You must specify it with 6
@@ -62,7 +65,7 @@ UTC. Supported formats include: -1200, MST, +0100.
 ## day of the week items
 
 Specifies a day of the week. Days of the week may be spelled out in full
-(using English): `Sunday', `Monday', etc or they may be abbreviated to their
+(using English): 'Sunday', 'Monday', etc or they may be abbreviated to their
 first three letters. This is usually not info that adds anything.
 
 ## pure numbers

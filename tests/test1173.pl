@@ -75,6 +75,8 @@ my %deprecated = (
     CURLINFO_DATA_OUT => 1,
     CURLINFO_SSL_DATA_IN => 1,
     CURLINFO_SSL_DATA_OUT => 1,
+    CURLOPT_EGDSOCKET => 1,
+    CURLOPT_RANDOM_FILE => 1,
     );
 sub allsymbols {
     open(my $f, "<", "$symbolsinversions") ||
@@ -134,9 +136,10 @@ sub scanmanpage {
 
     open(my $m, "<", "$file") ||
         die "test1173.pl could not open $file";
-    if($file =~ /[\/\\](CURL|curl_)[^\/\\]*.3/) {
-        # This is a man page for libcurl. It requires an example!
-        $reqex = 1;
+    if($file =~ /[\/\\](CURL|curl_)([^\/\\]*).3/) {
+        # This is a man page for libcurl. It requires an example unless it's
+        # considered deprecated.
+        $reqex = 1 unless defined $deprecated{'CURL'.$2};
         if($1 eq "CURL") {
             $optpage = 1;
         }

@@ -497,9 +497,6 @@ fi
 AC_SUBST(REQUIRE_LIB_DEPS)
 AM_CONDITIONAL(USE_EXPLICIT_LIB_DEPS, test x$REQUIRE_LIB_DEPS = xyes)
 
-dnl check if there's a way to force code inline
-AC_C_INLINE
-
 dnl **********************************************************************
 dnl platform/compiler/architecture specific checks/flags
 dnl **********************************************************************
@@ -3826,15 +3823,14 @@ AC_CHECK_DECL([fseeko],
 
 CURL_CHECK_NONBLOCKING_SOCKET
 
-AC_PATH_PROG( PERL, perl, ,
-  $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin )
-AC_SUBST(PERL)
+if test "x$BUILD_DOCS" != "x0" -o "x$USE_MANUAL" != "x0"; then
+  AC_PATH_PROG( PERL, perl, ,
+    $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin )
+  AC_SUBST(PERL)
 
-if test -z "$PERL"; then
-  dnl if perl was not found then disable building docs
-  AC_MSG_WARN([disabling documentation])
-  BUILD_DOCS=0
-  curl_docs_msg="no"
+  if test -z "$PERL"; then
+    AC_MSG_ERROR([perl was not found, needed for docs and manual])
+  fi
 fi
 
 dnl set variable for use in automakefile(s)

@@ -380,7 +380,6 @@ int main(int argc, char *argv[])
     if(still_running) {
       /* wait for activity, timeout or "nothing" */
       mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
-      fprintf(stderr, "curl_multi_poll() -> %d\n", mc);
     }
 
     if(mc)

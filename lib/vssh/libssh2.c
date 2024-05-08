@@ -1086,6 +1086,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           /* To ponder about: should really the lib be messing about with the
              HOME environment variable etc? */
           char *home = curl_getenv("HOME");
+          struct_stat sbuf;
 
           /* If no private key file is specified, try some common paths. */
           if(home) {
@@ -1093,12 +1094,12 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
             sshc->rsa = aprintf("%s/.ssh/id_rsa", home);
             if(!sshc->rsa)
               out_of_memory = TRUE;
-            else if(access(sshc->rsa, R_OK) != 0) {
+            else if(stat(sshc->rsa, &sbuf)) {
               Curl_safefree(sshc->rsa);
               sshc->rsa = aprintf("%s/.ssh/id_dsa", home);
               if(!sshc->rsa)
                 out_of_memory = TRUE;
-              else if(access(sshc->rsa, R_OK) != 0) {
+              else if(stat(sshc->rsa, &sbuf)) {
                 Curl_safefree(sshc->rsa);
               }
             }
@@ -1107,10 +1108,10 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           if(!out_of_memory && !sshc->rsa) {
             /* Nothing found; try the current dir. */
             sshc->rsa = strdup("id_rsa");
-            if(sshc->rsa && access(sshc->rsa, R_OK) != 0) {
+            if(sshc->rsa && stat(sshc->rsa, &sbuf)) {
               Curl_safefree(sshc->rsa);
               sshc->rsa = strdup("id_dsa");
-              if(sshc->rsa && access(sshc->rsa, R_OK) != 0) {
+              if(sshc->rsa && stat(sshc->rsa, &sbuf)) {
                 Curl_safefree(sshc->rsa);
                 /* Out of guesses. Set to the empty string to avoid
                  * surprising info messages. */
@@ -3285,14 +3286,12 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
     return CURLE_FAILED_INIT;
   }
 
-#ifdef HAVE_LIBSSH2_VERSION
   /* Set the packet read timeout if the libssh2 version supports it */
 #if LIBSSH2_VERSION_NUM >= 0x010B00
   if(data->set.server_response_timeout > 0) {
     libssh2_session_set_read_timeout(sshc->ssh_session,
                                      data->set.server_response_timeout / 1000);
   }
-#endif
 #endif
 
 #ifndef CURL_DISABLE_PROXY

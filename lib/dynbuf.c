@@ -213,7 +213,7 @@ CURLcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
   }
   /* If we failed, we cleanup the whole buffer and return error */
   Curl_dyn_free(s);
-  return CURLE_OK;
+  return CURLE_OUT_OF_MEMORY;
 #endif
 }
 

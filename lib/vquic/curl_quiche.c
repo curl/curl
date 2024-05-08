@@ -138,6 +138,9 @@ static void cf_quiche_ctx_clear(struct cf_quiche_ctx *ctx)
   }
 }
 
+static CURLcode cf_flush_egress(struct Curl_cfilter *cf,
+                                struct Curl_easy *data);
+
 /**
  * All about the H3 internals of a stream
  */
@@ -222,6 +225,7 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  CURLcode result;
 
   (void)cf;
   if(stream) {
@@ -235,6 +239,9 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
         stream->send_closed = TRUE;
       }
       stream->closed = TRUE;
+      result = cf_flush_egress(cf, data);
+      if(result)
+        CURL_TRC_CF(data, cf, "data_done, flush egress -> %d", result);
     }
     Curl_hash_offt_remove(&ctx->streams, data->id);
   }
@@ -286,6 +293,21 @@ static struct Curl_easy *get_stream_easy(struct Curl_cfilter *cf,
   }
   *pstream = NULL;
   return NULL;
+}
+
+static void cf_quiche_expire_conn_closed(struct Curl_cfilter *cf,
+                                         struct Curl_easy *data)
+{
+  struct Curl_easy *sdata;
+
+  DEBUGASSERT(data->multi);
+  CURL_TRC_CF(data, cf, "conn closed, expire all transfers");
+  for(sdata = data->multi->easyp; sdata; sdata = sdata->next) {
+    if(sdata == data || sdata->conn != data->conn)
+      continue;
+    CURL_TRC_CF(sdata, cf, "conn closed, expire transfer");
+    Curl_expire(sdata, 0, EXPIRE_RUN_NOW);
+  }
 }
 
 /*
@@ -586,6 +608,14 @@ static CURLcode recv_pkt(const unsigned char *pkt, size_t pktlen,
                            &recv_info);
   if(nread < 0) {
     if(QUICHE_ERR_DONE == nread) {
+      if(quiche_conn_is_draining(ctx->qconn)) {
+        CURL_TRC_CF(r->data, r->cf, "ingress, connection is draining");
+        return CURLE_RECV_ERROR;
+      }
+      if(quiche_conn_is_closed(ctx->qconn)) {
+        CURL_TRC_CF(r->data, r->cf, "ingress, connection is closed");
+        return CURLE_RECV_ERROR;
+      }
       CURL_TRC_CF(r->data, r->cf, "ingress, quiche is DONE");
       return CURLE_OK;
     }
@@ -686,7 +716,13 @@ static CURLcode cf_flush_egress(struct Curl_cfilter *cf,
   if(!expiry_ns) {
     quiche_conn_on_timeout(ctx->qconn);
     if(quiche_conn_is_closed(ctx->qconn)) {
-      failf(data, "quiche_conn_on_timeout closed the connection");
+      if(quiche_conn_is_timed_out(ctx->qconn))
+        failf(data, "connection closed by idle timeout");
+      else
+        failf(data, "connection closed by server");
+      /* Connection timed out, expire all transfers belonging to it
+       * as will not get any more POLL events here. */
+      cf_quiche_expire_conn_closed(cf, data);
       return CURLE_SEND_ERROR;
     }
   }
@@ -1469,7 +1505,9 @@ static CURLcode cf_quiche_query(struct Curl_cfilter *cf,
       max_streams += quiche_conn_peer_streams_left_bidi(ctx->qconn);
     }
     *pres1 = (max_streams > INT_MAX)? INT_MAX : (int)max_streams;
-    CURL_TRC_CF(data, cf, "query: MAX_CONCURRENT -> %d", *pres1);
+    CURL_TRC_CF(data, cf, "query conn[%" CURL_FORMAT_CURL_OFF_T "]: "
+                "MAX_CONCURRENT -> %d (%zu in use)",
+                cf->conn->connection_id, *pres1, CONN_INUSE(cf->conn));
     return CURLE_OK;
   }
   case CF_QUERY_CONNECT_REPLY_MS:

@@ -479,13 +479,8 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   backend->config = rustls_client_config_builder_build(config_builder);
   DEBUGASSERT(rconn == NULL);
-  {
-    /* rustls claims to manage ip address hostnames as well here. So,
-     * if we have an SNI, we use it, otherwise we pass the hostname */
-    char *server = connssl->peer.sni?
-                   connssl->peer.sni : connssl->peer.hostname;
-    result = rustls_client_connection_new(backend->config, server, &rconn);
-  }
+  result = rustls_client_connection_new(backend->config,
+                                        connssl->peer.hostname, &rconn);
   if(result != RUSTLS_RESULT_OK) {
     rustls_error(result, errorbuf, sizeof(errorbuf), &errorlen);
     failf(data, "rustls_client_connection_new: %.*s", (int)errorlen, errorbuf);
@@ -725,7 +720,6 @@ static size_t cr_version(char *buffer, size_t size)
 const struct Curl_ssl Curl_ssl_rustls = {
   { CURLSSLBACKEND_RUSTLS, "rustls" },
   SSLSUPP_CAINFO_BLOB |            /* supports */
-  SSLSUPP_TLS13_CIPHERSUITES |
   SSLSUPP_HTTPS_PROXY,
   sizeof(struct rustls_ssl_backend_data),
 
@@ -743,7 +737,6 @@ const struct Curl_ssl Curl_ssl_rustls = {
   cr_get_internals,                /* get_internals */
   cr_close,                        /* close_one */
   Curl_none_close_all,             /* close_all */
-  Curl_none_session_free,          /* session_free */
   Curl_none_set_engine,            /* set_engine */
   Curl_none_set_engine_default,    /* set_engine_default */
   Curl_none_engines_list,          /* engines_list */

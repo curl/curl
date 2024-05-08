@@ -44,6 +44,7 @@ LIB_VAUTH_HFILES =      \
 
 LIB_VTLS_CFILES =           \
   vtls/bearssl.c            \
+  vtls/cipher_suite.c       \
   vtls/gtls.c               \
   vtls/hostcheck.c          \
   vtls/keylog.c             \
@@ -60,6 +61,7 @@ LIB_VTLS_CFILES =           \
 
 LIB_VTLS_HFILES =           \
   vtls/bearssl.h            \
+  vtls/cipher_suite.h       \
   vtls/gtls.h               \
   vtls/hostcheck.h          \
   vtls/keylog.h             \
@@ -139,6 +141,7 @@ LIB_CFILES =         \
   curl_trc.c         \
   cw-out.c           \
   dict.c             \
+  dllmain.c          \
   doh.c              \
   dynbuf.c           \
   dynhds.c           \

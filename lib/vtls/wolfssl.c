@@ -1058,6 +1058,13 @@ wolfssl_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
 }
 
 
+static void wolfssl_session_free(void *sessionid, size_t idsize)
+{
+  (void)idsize;
+  wolfSSL_SESSION_free(sessionid);
+}
+
+
 static CURLcode
 wolfssl_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
@@ -1071,42 +1078,27 @@ wolfssl_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
   DEBUGASSERT(backend);
 
   if(ssl_config->primary.sessionid) {
-    bool incache;
-    bool added = FALSE;
-    void *old_ssl_sessionid = NULL;
     /* wolfSSL_get1_session allocates memory that has to be freed. */
     WOLFSSL_SESSION *our_ssl_sessionid = wolfSSL_get1_session(backend->handle);
 
     if(our_ssl_sessionid) {
+      void *old_ssl_sessionid = NULL;
+      bool incache;
       Curl_ssl_sessionid_lock(data);
       incache = !(Curl_ssl_getsessionid(cf, data, &connssl->peer,
                                         &old_ssl_sessionid, NULL));
       if(incache) {
-        if(old_ssl_sessionid != our_ssl_sessionid) {
-          infof(data, "old SSL session ID is stale, removing");
-          Curl_ssl_delsessionid(data, old_ssl_sessionid);
-          incache = FALSE;
-        }
+        Curl_ssl_delsessionid(data, old_ssl_sessionid);
       }
 
-      if(!incache) {
-        result = Curl_ssl_addsessionid(cf, data, &connssl->peer,
-                                       our_ssl_sessionid, 0, NULL);
-        if(result) {
-          Curl_ssl_sessionid_unlock(data);
-          wolfSSL_SESSION_free(our_ssl_sessionid);
-          failf(data, "failed to store ssl session");
-          return result;
-        }
-        else {
-          added = TRUE;
-        }
-      }
+      /* call takes ownership of `our_ssl_sessionid` */
+      result = Curl_ssl_addsessionid(cf, data, &connssl->peer,
+                                     our_ssl_sessionid, 0,
+                                     wolfssl_session_free);
       Curl_ssl_sessionid_unlock(data);
-
-      if(!added) {
-        /* If the session info wasn't added to the cache, free our copy. */
-        wolfSSL_SESSION_free(our_ssl_sessionid);
+      if(result) {
+        failf(data, "failed to store ssl session");
+        return result;
       }
     }
   }
@@ -1237,12 +1229,6 @@ static ssize_t wolfssl_recv(struct Curl_cfilter *cf,
   }
   CURL_TRC_CF(data, cf, "wolfssl_recv(len=%zu) -> %d", blen, nread);
   return nread;
-}
-
-
-static void wolfssl_session_free(void *ptr)
-{
-  wolfSSL_SESSION_free(ptr);
 }
 
 
@@ -1525,7 +1511,6 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
   wolfssl_get_internals,           /* get_internals */
   wolfssl_close,                   /* close_one */
   Curl_none_close_all,             /* close_all */
-  wolfssl_session_free,            /* session_free */
   Curl_none_set_engine,            /* set_engine */
   Curl_none_set_engine_default,    /* set_engine_default */
   Curl_none_engines_list,          /* engines_list */

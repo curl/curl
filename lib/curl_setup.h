@@ -409,11 +409,9 @@
 #  define LSEEK_ERROR                (__int64)-1
 #  define open                       curlx_win32_open
 #  define fopen(fname,mode)          curlx_win32_fopen(fname, mode)
-#  define access(fname,mode)         curlx_win32_access(fname, mode)
    int curlx_win32_open(const char *filename, int oflag, ...);
    int curlx_win32_stat(const char *path, struct_stat *buffer);
    FILE *curlx_win32_fopen(const char *filename, const char *mode);
-   int curlx_win32_access(const char *path, int mode);
 #endif
 
 /*
@@ -432,11 +430,9 @@
 #    define struct_stat                struct _stat
 #    define open                       curlx_win32_open
 #    define fopen(fname,mode)          curlx_win32_fopen(fname, mode)
-#    define access(fname,mode)         curlx_win32_access(fname, mode)
      int curlx_win32_stat(const char *path, struct_stat *buffer);
      int curlx_win32_open(const char *filename, int oflag, ...);
      FILE *curlx_win32_fopen(const char *filename, const char *mode);
-     int curlx_win32_access(const char *path, int mode);
 #  endif
 #  define LSEEK_ERROR                (long)-1
 #endif
@@ -889,6 +885,28 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
    replacements (yet) so tell the compiler to not warn for them. */
 #ifdef USE_OPENSSL
 #define OPENSSL_SUPPRESS_DEPRECATED
+#endif
+
+#if defined(inline)
+  /* 'inline' is defined as macro and assumed to be correct */
+  /* No need for 'inline' replacement */
+#elif defined(__cplusplus)
+  /* The code is compiled with C++ compiler.
+     C++ always supports 'inline'. */
+  /* No need for 'inline' replacement */
+#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901
+  /* C99 (and later) supports 'inline' keyword */
+  /* No need for 'inline' replacement */
+#elif defined(__GNUC__) && __GNUC__ >= 3
+  /* GCC supports '__inline__' as an extension */
+#  define inline __inline__
+#elif defined(_MSC_VER) && _MSC_VER >= 1400
+  /* MSC supports '__inline' from VS 2005 (or even earlier) */
+#  define inline __inline
+#else
+  /* Probably 'inline' is not supported by compiler.
+     Define to the empty string to be on the safe side. */
+#  define inline /* empty */
 #endif
 
 #endif /* HEADER_CURL_SETUP_H */
