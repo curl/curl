@@ -67,6 +67,13 @@ infrastructure.
 The curl security team is the sole arbiter if a reported flaw is subject to a
 bounty or not.
 
+## Third parties
+
+The curl bug bounty does not cover flaws in third party dependencies
+(libraries) used by curl or libcurl. If the bug triggers because of curl
+behaving wrongly or abusing a third party dependency, the problem is rather in
+curl and not in the dependency and then the bounty might cover the problem.
+
 ## How are vulnerabilities graded?
 
 The grading of each reported vulnerability that makes a reward claim is
