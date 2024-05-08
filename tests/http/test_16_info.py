@@ -62,9 +62,9 @@ class TestInfo:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{count-1}]'
         r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True)
-        r.check_stats(count=count, http_status=200)
-        for s in r.stats:
-            self.check_stat(s, dl_size=30, ul_size=0)
+        r.check_stats(count=count, http_status=200, exitcode=0)
+        for idx, s in enumerate(r.stats):
+            self.check_stat(idx, s, r, dl_size=30, ul_size=0)
 
     # download plain file with a 302 redirect
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
@@ -77,9 +77,9 @@ class TestInfo:
         r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True, extra_args=[
             '--location'
         ])
-        r.check_stats(count=count, http_status=200)
-        for s in r.stats:
-            self.check_stat(s, dl_size=30, ul_size=0)
+        r.check_stats(count=count, http_status=200, exitcode=0)
+        for idx, s in enumerate(r.stats):
+            self.check_stat(idx, s, r, dl_size=30, ul_size=0)
 
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_16_03_info_upload(self, env: Env, httpd, nghttpx, proto, repeat):
@@ -91,11 +91,13 @@ class TestInfo:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-{count-1}]'
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto,
-                             with_headers=True)
+                             with_headers=True, extra_args=[
+                                '--trace-config', 'http/2,http/3'
+                             ])
         r.check_response(count=count, http_status=200)
-        r.check_stats(count=count, http_status=200)
-        for s in r.stats:
-            self.check_stat(s, dl_size=fsize, ul_size=fsize)
+        r.check_stats(count=count, http_status=200, exitcode=0)
+        for idx, s in enumerate(r.stats):
+            self.check_stat(idx, s, r, dl_size=fsize, ul_size=fsize)
 
     # download plain file via http: ('time_appconnect' is 0)
     @pytest.mark.parametrize("proto", ['http/1.1'])
@@ -104,21 +106,22 @@ class TestInfo:
         curl = CurlClient(env=env)
         url = f'http://{env.domain1}:{env.http_port}/data.json?[0-{count-1}]'
         r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True)
-        r.check_stats(count=count, http_status=200)
-        for s in r.stats:
-            self.check_stat(s, dl_size=30, ul_size=0)
+        r.check_stats(count=count, http_status=200, exitcode=0)
+        for idx, s in enumerate(r.stats):
+            self.check_stat(idx, s, r, dl_size=30, ul_size=0)
 
-    def check_stat(self, s, dl_size=None, ul_size=None):
+    def check_stat(self, idx, s, r, dl_size=None, ul_size=None):
         self.check_stat_times(s)
         # we always send something
         self.check_stat_positive(s, 'size_request')
         # we always receive response headers
         self.check_stat_positive(s, 'size_header')
         if ul_size is not None:
-            assert s['size_upload'] == ul_size  # the file we sent
-        assert s['size_request'] >= s['size_upload'], f'"size_request" smaller than "size_upload", {s}'
+            assert s['size_upload'] == ul_size, f'stat #{idx}\n{r.dump_logs()}'  # the file we sent
+        assert s['size_request'] >= s['size_upload'], \
+            f'stat #{idx}, "size_request" smaller than "size_upload", {s}\n{r.dump_logs()}'
         if dl_size is not None:
-            assert s['size_download'] == dl_size  # the file we received
+            assert s['size_download'] == dl_size, f'stat #{idx}\n{r.dump_logs()}'  # the file we received
 
     def check_stat_positive(self, s, key):
         assert key in s, f'stat "{key}" missing: {s}'
