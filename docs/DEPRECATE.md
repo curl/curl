@@ -19,8 +19,8 @@ curl drops support for TLS libraries without TLS 1.3 capability in May 2025.
 It requires that a curl build using the library should be able to negotiate
 and use TLS 1.3, or else it is not good enough.
 
-As of May 2024, the three libraries that need to get fixed to remain supported
-after May 2025 are: BearSSL, mbedTLS and Secure Transport.
+As of May 2024, the libraries that need to get fixed to remain supported after
+May 2025 are: BearSSL and Secure Transport.
 
 ## space-separated `NOPROXY` patterns
 
