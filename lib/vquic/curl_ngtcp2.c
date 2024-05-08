@@ -564,7 +564,7 @@ static int cb_stream_close(ngtcp2_conn *tconn, uint32_t flags,
   }
 
   rv = nghttp3_conn_close_stream(ctx->h3conn, stream_id, app_error_code);
-  CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] quic close(err=%"
+  CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] quic close(app_error=%"
               CURL_PRIu64 ") -> %d", stream_id, (curl_uint64_t)app_error_code,
               rv);
   if(rv && rv != NGHTTP3_ERR_STREAM_NOT_FOUND) {
