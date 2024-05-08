@@ -54,14 +54,19 @@ int main(void)
     /* Do not do the transfer - only connect to host */
     curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);
     res = curl_easy_perform(curl);
+    if(res != CURLE_OK) {
+      printf("Error: %s\n", curl_easy_strerror(res));
+      curl_easy_cleanup(curl);
+      return 1;
+    }
 
     /* Extract the socket from the curl handle */
     res = curl_easy_getinfo(curl, CURLINFO_LASTSOCKET, &sockfd);
-
-    if(res != CURLE_OK) {
-      printf("Error: %s\n", curl_easy_strerror(res));
-      return 1;
+    if(!res && sockfd != -1) {
+      /* operate on sockfd */
     }
+
+    curl_easy_cleanup(curl);
   }
 }
 ~~~
