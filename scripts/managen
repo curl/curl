@@ -984,7 +984,7 @@ sub listglobals {
 
 sub noext {
     my $in = $_[0];
-    $in =~ s/\.d//;
+    $in =~ s/\.md//;
     return $in;
 }
 
