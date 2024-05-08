@@ -74,8 +74,8 @@ jobs:
           apt-get install -y --no-install-suggests --no-install-recommends cmake make gcc pkg-config libpsl-dev libzstd-dev zlib1g-dev libssl1.0-dev libssh-dev libssh2-1-dev libc-ares-dev heimdal-dev libldap2-dev stunnel4 groff
           # GitHub's actions/checkout needs a newer glibc. This one is the
           # latest available for buster, the next stable release after stretch.
-          httrack --get https://security.debian.org/debian-security/pool/updates/main/g/glibc/libc6_2.28-10+deb10u2_amd64.deb
-          dpkg -i libc6_2.28-10+deb10u2_amd64.deb
+          httrack --get https://security.debian.org/debian-security/pool/updates/main/g/glibc/libc6_2.28-10+deb10u3_amd64.deb
+          dpkg -i libc6_2.28-10+deb10u3_amd64.deb
 
       - uses: actions/checkout@v4
 
