@@ -958,6 +958,16 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data)
   return result;
 }
 
+static int libssh2_open_key(const char *filename)
+{
+  FILE *fd = fopen(filename, FOPEN_READTEXT);
+  if(!fd) {
+    return 1;
+  }
+  fclose(fd);
+  return 0;
+}
+
 /*
  * ssh_statemach_act() runs the SSH state machine as far as it can without
  * blocking and without reaching the end.  The data the pointer 'block' points
@@ -1086,7 +1096,6 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           /* To ponder about: should really the lib be messing about with the
              HOME environment variable etc? */
           char *home = curl_getenv("HOME");
-          struct_stat sbuf;
 
           /* If no private key file is specified, try some common paths. */
           if(home) {
@@ -1094,12 +1103,13 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
             sshc->rsa = aprintf("%s/.ssh/id_rsa", home);
             if(!sshc->rsa)
               out_of_memory = TRUE;
-            else if(stat(sshc->rsa, &sbuf)) {
+            else if(libssh2_open_key(sshc->rsa)) {
               Curl_safefree(sshc->rsa);
+
               sshc->rsa = aprintf("%s/.ssh/id_dsa", home);
               if(!sshc->rsa)
                 out_of_memory = TRUE;
-              else if(stat(sshc->rsa, &sbuf)) {
+              else if(libssh2_open_key(sshc->rsa)) {
                 Curl_safefree(sshc->rsa);
               }
             }
@@ -1108,10 +1118,11 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           if(!out_of_memory && !sshc->rsa) {
             /* Nothing found; try the current dir. */
             sshc->rsa = strdup("id_rsa");
-            if(sshc->rsa && stat(sshc->rsa, &sbuf)) {
+            if(sshc->rsa && libssh2_open_key(sshc->rsa)) {
               Curl_safefree(sshc->rsa);
+
               sshc->rsa = strdup("id_dsa");
-              if(sshc->rsa && stat(sshc->rsa, &sbuf)) {
+              if(sshc->rsa && libssh2_open_key(sshc->rsa)) {
                 Curl_safefree(sshc->rsa);
                 /* Out of guesses. Set to the empty string to avoid
                  * surprising info messages. */
