@@ -960,12 +960,15 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data)
 
 static int libssh2_open_key(const char *filename)
 {
-  FILE *fd = fopen(filename, FOPEN_READTEXT);
-  if(!fd) {
-    return 1;
+  struct_stat sbuf;
+  if(!stat(filename, &sbuf)) {
+    FILE *fd = fopen(filename, FOPEN_READTEXT);
+    if(fd) {
+      fclose(fd);
+      return 0;
+    }
   }
-  fclose(fd);
-  return 0;
+  return 1;
 }
 
 /*
