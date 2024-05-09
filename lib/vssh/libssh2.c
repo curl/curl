@@ -958,17 +958,17 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data)
   return result;
 }
 
-static int libssh2_open_key(const char *filename)
+static int libssh2_key_exists(const char *filename)
 {
   struct_stat sbuf;
   if(!stat(filename, &sbuf)) {
     FILE *fd = fopen(filename, FOPEN_READTEXT);
     if(fd) {
       fclose(fd);
-      return 0;
+      return 1;
     }
   }
-  return 1;
+  return 0;
 }
 
 /*
@@ -1106,13 +1106,13 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
             sshc->rsa = aprintf("%s/.ssh/id_rsa", home);
             if(!sshc->rsa)
               out_of_memory = TRUE;
-            else if(libssh2_open_key(sshc->rsa)) {
+            else if(!libssh2_key_exists(sshc->rsa)) {
               Curl_safefree(sshc->rsa);
 
               sshc->rsa = aprintf("%s/.ssh/id_dsa", home);
               if(!sshc->rsa)
                 out_of_memory = TRUE;
-              else if(libssh2_open_key(sshc->rsa)) {
+              else if(!libssh2_key_exists(sshc->rsa)) {
                 Curl_safefree(sshc->rsa);
               }
             }
@@ -1121,11 +1121,11 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           if(!out_of_memory && !sshc->rsa) {
             /* Nothing found; try the current dir. */
             sshc->rsa = strdup("id_rsa");
-            if(sshc->rsa && libssh2_open_key(sshc->rsa)) {
+            if(sshc->rsa && !libssh2_key_exists(sshc->rsa)) {
               Curl_safefree(sshc->rsa);
 
               sshc->rsa = strdup("id_dsa");
-              if(sshc->rsa && libssh2_open_key(sshc->rsa)) {
+              if(sshc->rsa && !libssh2_key_exists(sshc->rsa)) {
                 Curl_safefree(sshc->rsa);
                 /* Out of guesses. Set to the empty string to avoid
                  * surprising info messages. */
