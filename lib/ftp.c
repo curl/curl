@@ -154,7 +154,9 @@ static void _ftp_state(struct Curl_easy *data,
   struct ftp_conn *ftpc = &conn->proto.ftpc;
 
 #if defined(CURL_DISABLE_VERBOSE_STRINGS)
-  (void) lineno;
+#ifdef DEBUGBUILD
+  (void)lineno;
+#endif
 #else /* CURL_DISABLE_VERBOSE_STRINGS */
   if(ftpc->state != newstate)
 #ifdef DEBUGBUILD
