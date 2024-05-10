@@ -46,6 +46,8 @@ UNITTEST_START
   struct Curl_easy *empty;
   const char *hostname = "hostname";
   enum dupstring i;
+  char *userstr = NULL;
+  char *passwdstr = NULL;
 
   bool async = FALSE;
   bool protocol_connect = FALSE;
@@ -73,10 +75,12 @@ UNITTEST_START
   rc = Curl_init_do(empty, empty->conn);
   fail_unless(rc == CURLE_OK, "Curl_init_do() failed");
 
-  rc = Curl_parse_login_details(
-                          hostname, strlen(hostname), NULL, NULL, NULL);
+  rc = Curl_parse_login_details(hostname, strlen(hostname),
+                                &userstr, &passwdstr, NULL);
   fail_unless(rc == CURLE_OK,
               "Curl_parse_login_details() failed");
+  free(userstr);
+  free(passwdstr);
 
   Curl_freeset(empty);
   for(i = (enum dupstring)0; i < STRING_LAST; i++) {
