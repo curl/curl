@@ -41,17 +41,20 @@ permissions: {}
 
 jobs:
   build_netbsd:
-    name: 'NetBSD (cmake, openssl, clang, amd64)'
+    name: 'NetBSD (cmake, openssl, clang)'
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      matrix:
+        arch: ['x86_64']
     steps:
       - uses: actions/checkout@v4
       - name: 'cmake'
-        uses: cross-platform-actions/action@v0.23.0
+        uses: cross-platform-actions/action@v0.24.0
         with:
           operating_system: 'netbsd'
-          version: '9.3'
-          architecture: 'x86-64'
+          version: '10.0'
+          architecture: ${{ matrix.arch }}
           run: |
             # https://pkgsrc.se/
             sudo pkgin -y install cmake perl
@@ -63,20 +66,23 @@ jobs:
               -DBUILD_EXAMPLES=ON \
               -DBUILD_TESTING=ON
             cmake --build bld --parallel 3
-            cmake --build bld --parallel 3 --target testdeps
+            make --directory bld testdeps -j3 VERBOSE=1
 
   build_openbsd:
-    name: 'OpenBSD (cmake, libressl, clang, amd64)'
+    name: 'OpenBSD (cmake, libressl, clang)'
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      matrix:
+        arch: ['x86_64']
     steps:
       - uses: actions/checkout@v4
       - name: 'cmake'
-        uses: cross-platform-actions/action@v0.23.0
+        uses: cross-platform-actions/action@v0.24.0
         with:
           operating_system: 'openbsd'
-          version: '7.4'
-          architecture: 'x86-64'
+          version: '7.5'
+          architecture: ${{ matrix.arch }}
           run: |
             # https://openbsd.app/
             sudo pkg_add cmake perl
@@ -98,11 +104,11 @@ jobs:
       CC: clang
     strategy:
       matrix:
-        arch: ['x86-64', 'arm64']
+        arch: ['arm64']
     steps:
       - uses: actions/checkout@v4
       - name: 'autotools'
-        uses: cross-platform-actions/action@v0.23.0
+        uses: cross-platform-actions/action@v0.24.0
         with:
           operating_system: 'freebsd'
           version: '14.0'
@@ -113,8 +119,8 @@ jobs:
             sudo pkg install -y autoconf automake libtool
             autoreconf -fi
             mkdir bld && cd bld && ../configure --enable-debug --enable-warnings --enable-werror \
-               --with-openssl \
-               --disable-dependency-tracking
+              --with-openssl \
+              --disable-dependency-tracking
             make -j3
             make -j3 examples
             make check V=1
@@ -134,8 +140,8 @@ jobs:
           run: |
             autoreconf -fi
             mkdir bld && cd bld && ../configure --enable-debug --enable-warnings --enable-werror \
-               --with-openssl \
-               --disable-dependency-tracking
+              --with-openssl \
+              --disable-dependency-tracking
             gmake -j3
             gmake -j3 examples
             # Tests requiring C preprocessor (`cpp` by default). Could not figure out how to install it.
