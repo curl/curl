@@ -51,7 +51,7 @@ jobs:
         with:
           operating_system: 'netbsd'
           version: '9.3'
-          architecture: 'x86_64'
+          architecture: 'x86-64'
           run: |
             # https://pkgsrc.se/
             sudo pkgin -y install cmake perl
@@ -76,7 +76,7 @@ jobs:
         with:
           operating_system: 'openbsd'
           version: '7.4'
-          architecture: 'x86_64'
+          architecture: 'x86-64'
           run: |
             # https://openbsd.app/
             sudo pkg_add cmake perl
@@ -98,7 +98,7 @@ jobs:
       CC: clang
     strategy:
       matrix:
-        arch: [x86-64, arm64]
+        arch: ['x86-64', 'arm64']
     steps:
       - uses: actions/checkout@v4
       - name: 'autotools'
