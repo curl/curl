@@ -62,6 +62,7 @@ jobs:
               -DBUILD_EXAMPLES=ON \
               -DCURL_USE_OPENSSL=ON
             cmake --build bld --parallel 3
+            cmake --build bld --parallel 3 --target testdeps
 
   build_openbsd:
     name: 'OpenBSD (cmake, libressl, clang, amd64)'
@@ -85,6 +86,7 @@ jobs:
               -DBUILD_EXAMPLES=ON \
               -DCURL_USE_OPENSSL=ON
             cmake --build bld --parallel 3
+            cmake --build bld --parallel 3 --target testdeps
 
   build_freebsd:
     name: 'FreeBSD (autotools, openssl, clang)'
