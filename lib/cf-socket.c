@@ -923,7 +923,8 @@ static CURLcode set_local_ip(struct Curl_cfilter *cf,
   struct cf_socket_ctx *ctx = cf->ctx;
 
 #ifdef HAVE_GETSOCKNAME
-  if(!(data->conn->handler->protocol & CURLPROTO_TFTP)) {
+  if((ctx->sock != CURL_SOCKET_BAD) &&
+     !(data->conn->handler->protocol & CURLPROTO_TFTP)) {
     /* TFTP does not connect, so it cannot get the IP like this */
 
     char buffer[STRERROR_LEN];
