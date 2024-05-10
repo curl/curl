@@ -59,7 +59,7 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON \
-              -DOPENSSL_ROOT_DIR=/usr/lib
+              -DCURL_USE_OPENSSL=ON
             cmake --build bld --parallel 3
 
   build_openbsd:
@@ -81,7 +81,7 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON \
-              -DOPENSSL_ROOT_DIR=/usr/lib
+              -DCURL_USE_OPENSSL=ON
             cmake --build bld --parallel 3
 
   build_freebsd:
@@ -107,7 +107,7 @@ jobs:
             sudo pkg install -y autoconf automake libtool
             autoreconf -fi
             mkdir bld && cd bld && ../configure --enable-debug --enable-warnings --enable-werror \
-               --with-openssl=/usr/lib
+               --with-openssl
             make -j3
             make check V=1
 
@@ -126,6 +126,6 @@ jobs:
           run: |
             autoreconf -fi
             mkdir bld && cd bld && ../configure --enable-debug --enable-warnings --enable-werror \
-               --with-openssl=/usr/lib
+               --with-openssl
             gmake -j3
             gmake check V=1
