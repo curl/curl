@@ -59,6 +59,7 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON \
+              -DBUILD_EXAMPLES=ON \
               -DCURL_USE_OPENSSL=ON
             cmake --build bld --parallel 3
 
@@ -81,6 +82,7 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON \
+              -DBUILD_EXAMPLES=ON \
               -DCURL_USE_OPENSSL=ON
             cmake --build bld --parallel 3
 
@@ -110,6 +112,7 @@ jobs:
                --with-openssl \
                --disable-dependency-tracking
             make -j3
+            make -j3 examples
             make check V=1
 
   build_omnios:
@@ -130,4 +133,5 @@ jobs:
                --with-openssl \
                --disable-dependency-tracking
             gmake -j3
+            gmake -j3 examples
             gmake check V=1
