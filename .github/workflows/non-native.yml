@@ -60,6 +60,7 @@ jobs:
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON \
               -DBUILD_EXAMPLES=ON \
+              -DBUILD_TESTING=ON \
               -DCURL_USE_OPENSSL=ON
             cmake --build bld --parallel 3
             cmake --build bld --parallel 3 --target testdeps
@@ -84,6 +85,7 @@ jobs:
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON \
               -DBUILD_EXAMPLES=ON \
+              -DBUILD_TESTING=ON \
               -DCURL_USE_OPENSSL=ON
             cmake --build bld --parallel 3
             cmake --build bld --parallel 3 --target testdeps
