@@ -1,0 +1,131 @@
+# Copyright (C) Viktor Szakats
+#
+# SPDX-License-Identifier: curl
+
+name: non-native
+
+on:
+  push:
+    branches:
+      - master
+      - '*/ci'
+    paths-ignore:
+      - '**/*.md'
+      - '.azure-pipelines.yml'
+      - '.circleci/**'
+      - '.cirrus.yml'
+      - 'appveyor.*'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+      - 'winbuild/**'
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - '**/*.md'
+      - '.azure-pipelines.yml'
+      - '.circleci/**'
+      - '.cirrus.yml'
+      - 'appveyor.*'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+      - 'winbuild/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  build_netbsd:
+    name: 'NetBSD (cmake, openssl, clang, amd64)'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: 'cmake'
+        uses: cross-platform-actions/action@v0.23.0
+        with:
+          operating_system: 'netbsd'
+          version: '9.3'
+          architecture: 'x86_64'
+          run: |
+            # https://pkgsrc.se/
+            sudo pkgin -y install cmake
+            cmake -B bld \
+              -DCMAKE_UNITY_BUILD=ON \
+              -DCURL_WERROR=ON \
+              -DENABLE_DEBUG=ON \
+              -DOPENSSL_ROOT_DIR=/usr/lib
+            cmake --build bld --parallel 3
+
+  build_openbsd:
+    name: 'OpenBSD (cmake, libressl, clang, amd64)'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: 'cmake'
+        uses: cross-platform-actions/action@v0.23.0
+        with:
+          operating_system: 'openbsd'
+          version: '7.4'
+          architecture: 'x86_64'
+          run: |
+            # https://openbsd.app/
+            sudo pkg_add cmake
+            cmake -B bld \
+              -DCMAKE_UNITY_BUILD=ON \
+              -DCURL_WERROR=ON \
+              -DENABLE_DEBUG=ON \
+              -DOPENSSL_ROOT_DIR=/usr/lib
+            cmake --build bld --parallel 3
+
+  build_freebsd:
+    name: 'FreeBSD (autotools, openssl, clang)'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CC: clang
+    strategy:
+      matrix:
+        arch: [x86-64, arm64]
+    steps:
+      - uses: actions/checkout@v4
+      - name: 'autotools'
+        uses: cross-platform-actions/action@v0.23.0
+        with:
+          operating_system: 'freebsd'
+          version: '14.0'
+          architecture: ${{ matrix.arch }}
+          environment_variables: 'CC'
+          run: |
+            # https://ports.freebsd.org/
+            sudo pkg install -y autoconf automake libtool
+            autoreconf -fi
+            mkdir bld && cd bld && ../configure --enable-debug --enable-warnings --enable-werror \
+               --with-openssl=/usr/lib
+            make -j3
+            make check V=1
+
+  build_omnios:
+    name: 'OmniOS (autotools, openssl, gcc, amd64)'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: 'autotools'
+        uses: vmactions/omnios-vm@v1
+        with:
+          usesh: true
+          # https://pkg.omnios.org/r151048/core/en/index.shtml
+          prepare: pkg install build-essential libtool
+          run: |
+            autoreconf -fi
+            mkdir bld && cd bld && ../configure --enable-debug --enable-warnings --enable-werror \
+               --with-openssl=/usr/lib
+            gmake -j3
+            gmake check V=1
