@@ -130,7 +130,7 @@ jobs:
         with:
           usesh: true
           # https://pkg.omnios.org/r151048/core/en/index.shtml
-          prepare: pkg install build-essential libtool
+          prepare: pkg install build-essential libtool cpp
           run: |
             cpp || true
             cpp --version || true
