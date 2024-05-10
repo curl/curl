@@ -38,7 +38,7 @@ UNITPROGS = unit1300          unit1302 unit1303 unit1304 unit1305 unit1307 \
  unit1620 unit1621 \
  unit1650 unit1651 unit1652 unit1653 unit1654 unit1655 \
  unit1660 unit1661 \
- unit2600 unit2601 unit2602 unit2603 \
+ unit2600 unit2601 unit2602 unit2603 unit2604 \
  unit3200 \
  unit3205
 
@@ -133,6 +133,8 @@ unit2601_SOURCES = unit2601.c $(UNITFILES)
 unit2602_SOURCES = unit2602.c $(UNITFILES)
 
 unit2603_SOURCES = unit2603.c $(UNITFILES)
+
+unit2604_SOURCES = unit2604.c $(UNITFILES)
 
 unit3200_SOURCES = unit3200.c $(UNITFILES)
 

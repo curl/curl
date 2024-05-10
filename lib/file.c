@@ -109,7 +109,7 @@ static CURLcode file_setup_connection(struct Curl_easy *data,
  */
 
 const struct Curl_handler Curl_handler_file = {
-  "FILE",                               /* scheme */
+  "file",                               /* scheme */
   file_setup_connection,                /* setup_connection */
   file_do,                              /* do_it */
   file_done,                            /* done */

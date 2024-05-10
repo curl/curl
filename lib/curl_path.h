@@ -45,5 +45,5 @@ CURLcode Curl_getworkingpath(struct Curl_easy *data,
                              char *homedir,
                              char **path);
 
-CURLcode Curl_get_pathname(const char **cpp, char **path, char *homedir);
+CURLcode Curl_get_pathname(const char **cpp, char **path, const char *homedir);
 #endif /* HEADER_CURL_PATH_H */

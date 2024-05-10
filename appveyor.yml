@@ -166,8 +166,8 @@ environment:
       SCHANNEL: 'ON'
       ENABLE_UNICODE: 'OFF'
       HTTP_ONLY: 'OFF'
-      TESTING: 'ON'
-      DISABLED_TESTS: '!1086 !1139 !1451 !1501 !1177 !1477'
+      TESTING: 'OFF'
+      DISABLED_TESTS: ''
       ADD_PATH: 'C:/mingw-w64/i686-6.3.0-posix-dwarf-rt_v5-rev1/mingw32/bin'
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k

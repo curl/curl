@@ -34,9 +34,11 @@ if [ -z "$version" ]; then
   exit
 fi
 
+timestamp="${2:-$(date -u +%s)}"
+
 make distclean
 docker build \
-       --build-arg SOURCE_DATE_EPOCH="$(date -u +%s)" \
+       --build-arg SOURCE_DATE_EPOCH="$timestamp" \
        --build-arg UID="$(id -u)" \
        --build-arg GID="$(id -g)" \
        -t curl/curl .

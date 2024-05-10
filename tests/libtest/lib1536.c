@@ -71,9 +71,9 @@ int test(char *URL)
             __FILE__, __LINE__, res, curl_easy_strerror(res));
     goto test_cleanup;
   }
-  if(!scheme || memcmp(scheme, "HTTP", 5) != 0) {
+  if(!scheme || memcmp(scheme, "http", 5) != 0) {
     fprintf(stderr, "%s:%d scheme of http resource is incorrect; "
-            "expected 'HTTP' but is %s\n",
+            "expected 'http' but is %s\n",
             __FILE__, __LINE__,
             (scheme == NULL ? "NULL" : "invalid"));
     res = CURLE_HTTP_RETURNED_ERROR;

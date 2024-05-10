@@ -100,7 +100,7 @@ CURLcode rtsp_parse_transport(struct Curl_easy *data, const char *transport);
  * RTSP handler interface.
  */
 const struct Curl_handler Curl_handler_rtsp = {
-  "RTSP",                               /* scheme */
+  "rtsp",                               /* scheme */
   rtsp_setup_connection,                /* setup_connection */
   rtsp_do,                              /* do_it */
   rtsp_done,                            /* done */

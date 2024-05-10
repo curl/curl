@@ -163,7 +163,7 @@ static CURLcode ftp_dophase_done(struct Curl_easy *data,
  */
 
 const struct Curl_handler Curl_handler_ftp = {
-  "FTP",                           /* scheme */
+  "ftp",                           /* scheme */
   ftp_setup_connection,            /* setup_connection */
   ftp_do,                          /* do_it */
   ftp_done,                        /* done */
@@ -195,7 +195,7 @@ const struct Curl_handler Curl_handler_ftp = {
  */
 
 const struct Curl_handler Curl_handler_ftps = {
-  "FTPS",                          /* scheme */
+  "ftps",                          /* scheme */
   ftp_setup_connection,            /* setup_connection */
   ftp_do,                          /* do_it */
   ftp_done,                        /* done */

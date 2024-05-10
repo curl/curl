@@ -894,8 +894,7 @@ static ParameterError data_urlencode(struct GlobalConfig *global,
     err = getstr(&postdata, p, ALLOW_BLANK);
     if(err)
       goto error;
-    if(postdata)
-      size = strlen(postdata);
+    size = strlen(postdata);
   }
 
   if(!postdata) {
@@ -1124,8 +1123,7 @@ static ParameterError set_data(cmdline_t cmd,
     err = getstr(&postdata, nextarg, ALLOW_BLANK);
     if(err)
       return err;
-    if(postdata)
-      size = strlen(postdata);
+    size = strlen(postdata);
   }
   if(cmd == C_JSON)
     config->jsoned = TRUE;

@@ -109,7 +109,7 @@ static void http_exp100_send_anyway(struct Curl_easy *data);
  * HTTP handler interface.
  */
 const struct Curl_handler Curl_handler_http = {
-  "HTTP",                               /* scheme */
+  "http",                               /* scheme */
   Curl_http_setup_conn,                 /* setup_connection */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
@@ -138,7 +138,7 @@ const struct Curl_handler Curl_handler_http = {
  * HTTPS handler interface.
  */
 const struct Curl_handler Curl_handler_https = {
-  "HTTPS",                              /* scheme */
+  "https",                              /* scheme */
   Curl_http_setup_conn,                 /* setup_connection */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */

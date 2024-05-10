@@ -44,7 +44,7 @@ Connection: close
 Content-Type: text/plain
 
 testdata
-HTTP
+http
 </stdout>
 <protocol>
 GET /%TESTNUMBER HTTP/1.1

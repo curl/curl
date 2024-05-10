@@ -175,8 +175,7 @@ char *curl_version(void)
   /* Override version string when environment variable CURL_VERSION is set */
   const char *debugversion = getenv("CURL_VERSION");
   if(debugversion) {
-    strncpy(out, debugversion, sizeof(out)-1);
-    out[sizeof(out)-1] = '\0';
+    msnprintf(out, sizeof(out), "%s", debugversion);
     return out;
   }
 #endif

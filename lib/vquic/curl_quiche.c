@@ -101,7 +101,6 @@ struct cf_quiche_ctx {
   struct bufc_pool stream_bufcp;     /* chunk pool for streams */
   struct Curl_hash streams;          /* hash `data->id` to `stream_ctx` */
   curl_off_t data_recvd;
-  curl_uint64_t max_idle_ms;         /* max idle time for QUIC conn */
   BIT(goaway);                       /* got GOAWAY from server */
   BIT(x509_store_setup);             /* if x509 store has been set up */
 };
@@ -1257,7 +1256,6 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
     debug_log_init = 1;
   }
 #endif
-  ctx->max_idle_ms = CURL_QUIC_MAX_IDLE_MS;
   Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
                   H3_STREAM_POOL_SPARES);
   Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
@@ -1277,7 +1275,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
     return CURLE_FAILED_INIT;
   }
   quiche_config_enable_pacing(ctx->cfg, false);
-  quiche_config_set_max_idle_timeout(ctx->cfg, ctx->max_idle_ms * 1000);
+  quiche_config_set_max_idle_timeout(ctx->cfg, CURL_QUIC_MAX_IDLE_MS);
   quiche_config_set_initial_max_data(ctx->cfg, (1 * 1024 * 1024)
     /* (QUIC_MAX_STREAMS/2) * H3_STREAM_WINDOW_SIZE */);
   quiche_config_set_initial_max_streams_bidi(ctx->cfg, QUIC_MAX_STREAMS);
@@ -1549,23 +1547,12 @@ static bool cf_quiche_conn_is_alive(struct Curl_cfilter *cf,
   if(!ctx->qconn)
     return FALSE;
 
-  /* Both sides of the QUIC connection announce they max idle times in
-   * the transport parameters. Look at the minimum of both and if
-   * we exceed this, regard the connection as dead. The other side
-   * may have completely purged it and will no longer respond
-   * to any packets from us. */
-  {
-    quiche_transport_params qpeerparams;
-    timediff_t idletime;
-    curl_uint64_t idle_ms = ctx->max_idle_ms;
-
-    if(quiche_conn_peer_transport_params(ctx->qconn, &qpeerparams) &&
-       qpeerparams.peer_max_idle_timeout &&
-       qpeerparams.peer_max_idle_timeout < idle_ms)
-      idle_ms = qpeerparams.peer_max_idle_timeout;
-    idletime = Curl_timediff(Curl_now(), cf->conn->lastused);
-    if(idletime > 0 && (curl_uint64_t)idletime > idle_ms)
-      return FALSE;
+  if(quiche_conn_is_closed(ctx->qconn)) {
+    if(quiche_conn_is_timed_out(ctx->qconn))
+      CURL_TRC_CF(data, cf, "connection was closed due to idle timeout");
+    else
+      CURL_TRC_CF(data, cf, "connection is closed");
+    return FALSE;
   }
 
   if(!cf->next || !cf->next->cft->is_alive(cf->next, data, input_pending))

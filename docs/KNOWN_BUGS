@@ -80,6 +80,7 @@ problems may have been fixed or changed somewhat since this was written.
  10.3 FTPS over SOCKS
 
  11. Internals
+ 11.1 gssapi library name + version is missing in curl_version_info()
  11.2 error buffer not set if connection to multiple addresses fails
  11.4 HTTP test server 'connection-monitor' problems
  11.5 Connection information when using TCP Fast Open
@@ -489,6 +490,12 @@ problems may have been fixed or changed somewhat since this was written.
 
 
 11. Internals
+
+11.1 gssapi library name + version is missing in curl_version_info()
+
+ The struct needs to be expanded and code added to store this info.
+
+ See https://github.com/curl/curl/issues/13492
 
 11.2 error buffer not set if connection to multiple addresses fails
 

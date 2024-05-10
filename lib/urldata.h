@@ -241,8 +241,7 @@ typedef CURLcode (*Curl_datastream)(struct Curl_easy *data,
 #ifdef HAVE_GSSAPI
 /* Types needed for krb5-ftp connections */
 struct krb5buffer {
-  void *data;
-  size_t size;
+  struct dynbuf buf;
   size_t index;
   BIT(eof_flag);
 };
@@ -657,7 +656,7 @@ enum doh_slots {
  */
 
 struct Curl_handler {
-  const char *scheme;        /* URL scheme name. */
+  const char *scheme;        /* URL scheme name in lowercase */
 
   /* Complement to setup_connection_internals(). This is done before the
      transfer "owns" the connection. */

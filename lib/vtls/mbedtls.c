@@ -122,6 +122,10 @@ struct mbed_ssl_backend_data {
 #define mbedtls_strerror(a,b,c) b[0] = 0
 #endif
 
+#if defined(MBEDTLS_SSL_PROTO_TLS1_3) && MBEDTLS_VERSION_NUMBER >= 0x03060000
+#define TLS13_SUPPORT
+#endif
+
 #if defined(THREADING_SUPPORT)
 static mbedtls_entropy_context ts_entropy;
 
@@ -262,7 +266,12 @@ static CURLcode mbedtls_version_from_curl(
     *mbedver = MBEDTLS_SSL_VERSION_TLS1_2;
     return CURLE_OK;
   case CURL_SSLVERSION_TLSv1_3:
+#ifdef TLS13_SUPPORT
+    *mbedver = MBEDTLS_SSL_VERSION_TLS1_3;
+    return CURLE_OK;
+#else
     break;
+#endif
   }
 
   return CURLE_SSL_CONNECT_ERROR;
@@ -309,7 +318,11 @@ set_ssl_version_min_max(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
 #if MBEDTLS_VERSION_NUMBER >= 0x03020000
   mbedtls_ssl_protocol_version mbedtls_ver_min = MBEDTLS_SSL_VERSION_TLS1_2;
+#ifdef TLS13_SUPPORT
+  mbedtls_ssl_protocol_version mbedtls_ver_max = MBEDTLS_SSL_VERSION_TLS1_3;
+#else
   mbedtls_ssl_protocol_version mbedtls_ver_max = MBEDTLS_SSL_VERSION_TLS1_2;
+#endif
 #elif MBEDTLS_VERSION_NUMBER >= 0x03000000
   int mbedtls_ver_min = MBEDTLS_SSL_MINOR_VERSION_3;
   int mbedtls_ver_max = MBEDTLS_SSL_MINOR_VERSION_3;
@@ -333,7 +346,11 @@ set_ssl_version_min_max(struct Curl_cfilter *cf, struct Curl_easy *data)
   switch(ssl_version_max) {
     case CURL_SSLVERSION_MAX_NONE:
     case CURL_SSLVERSION_MAX_DEFAULT:
+#ifdef TLS13_SUPPORT
+      ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_3;
+#else
       ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_2;
+#endif
       break;
   }
 
@@ -356,6 +373,17 @@ set_ssl_version_min_max(struct Curl_cfilter *cf, struct Curl_easy *data)
                                mbedtls_ver_min);
   mbedtls_ssl_conf_max_version(&backend->config, MBEDTLS_SSL_MAJOR_VERSION_3,
                                mbedtls_ver_max);
+#endif
+
+#ifdef TLS13_SUPPORT
+  if(mbedtls_ver_min == MBEDTLS_SSL_VERSION_TLS1_3) {
+    mbedtls_ssl_conf_authmode(&backend->config, MBEDTLS_SSL_VERIFY_REQUIRED);
+  }
+  else {
+    mbedtls_ssl_conf_authmode(&backend->config, MBEDTLS_SSL_VERIFY_OPTIONAL);
+  }
+#else
+  mbedtls_ssl_conf_authmode(&backend->config, MBEDTLS_SSL_VERIFY_OPTIONAL);
 #endif
 
   return result;
@@ -482,6 +510,16 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     failf(data, "Not supported SSL version");
     return CURLE_NOT_BUILT_IN;
   }
+
+#ifdef TLS13_SUPPORT
+  ret = psa_crypto_init();
+  if(ret != PSA_SUCCESS) {
+    mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
+    failf(data, "mbedTLS psa_crypto_init returned (-0x%04X) %s",
+          -ret, errorbuf);
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+#endif /* TLS13_SUPPORT */
 
 #ifdef THREADING_SUPPORT
   mbedtls_ctr_drbg_init(&backend->ctr_drbg);
@@ -729,8 +767,6 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
     return CURLE_SSL_CONNECT_ERROR;
   }
-
-  mbedtls_ssl_conf_authmode(&backend->config, MBEDTLS_SSL_VERIFY_OPTIONAL);
 
   mbedtls_ssl_conf_rng(&backend->config, mbedtls_ctr_drbg_random,
                        &backend->ctr_drbg);
@@ -1167,8 +1203,11 @@ static ssize_t mbed_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     if(ret == MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY)
       return 0;
 
-    *curlcode = (ret == MBEDTLS_ERR_SSL_WANT_READ) ?
-      CURLE_AGAIN : CURLE_RECV_ERROR;
+    *curlcode = ((ret == MBEDTLS_ERR_SSL_WANT_READ)
+#ifdef TLS13_SUPPORT
+              || (ret == MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET)
+#endif
+    ) ? CURLE_AGAIN : CURLE_RECV_ERROR;
     return -1;
   }
 

@@ -46,7 +46,7 @@ int main(void)
     if(res == CURLE_OK) {
       long connects;
       res = curl_easy_getinfo(curl, CURLINFO_NUM_CONNECTS, &connects);
-      if(res)
+      if(!res)
         printf("It needed %ld connects\n", connects);
     }
     curl_easy_cleanup(curl);
