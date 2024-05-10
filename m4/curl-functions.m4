@@ -3592,7 +3592,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_FIONBIO], [
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
       ]],[[
-        int flags = 0;
+        unsigned long flags = 0;
         if(0 != ioctlsocket(0, FIONBIO, &flags))
           return 1;
       ]])
