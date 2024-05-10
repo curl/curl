@@ -130,3 +130,4 @@ jobs:
                --with-openssl \
                --disable-dependency-tracking
             gmake -j3
+            gmake check V=1
