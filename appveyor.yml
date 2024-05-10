@@ -140,7 +140,8 @@ environment:
       ENABLE_UNICODE: 'ON'
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
-      DISABLED_TESTS: '!1086 !1139 !1451 !1501 !1177 !1477'
+      # test 286 disabled due to https://github.com/curl/curl/issues/12040
+      DISABLED_TESTS: '~286 !1086 !1139 !1451 !1501 !1177 !1477'
       ADD_PATH: 'C:/mingw-w64/x86_64-7.2.0-posix-seh-rt_v5-rev1/mingw64/bin'
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
