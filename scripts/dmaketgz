@@ -34,12 +34,7 @@ if [ -z "$version" ]; then
   exit
 fi
 
-if [ -z "$2" ]; then
-  timestamp="$(date -u +%s)"
-else
-  timestamp="$2"
-fi
-
+timestamp="${2:-$(date -u +%s)}"
 
 make distclean
 docker build \
