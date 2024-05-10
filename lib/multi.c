@@ -552,6 +552,8 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
   if(data->set.errorbuffer)
     data->set.errorbuffer[0] = 0;
 
+  data->state.os_errno = 0;
+
   /* make the Curl_easy refer back to this multi handle - before Curl_expire()
      is called. */
   data->multi = multi;
