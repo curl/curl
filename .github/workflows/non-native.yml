@@ -54,7 +54,7 @@ jobs:
           architecture: 'x86_64'
           run: |
             # https://pkgsrc.se/
-            sudo pkgin -y install cmake
+            sudo pkgin -y install cmake perl
             cmake -B bld \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_USE_OPENSSL=ON \
@@ -79,7 +79,7 @@ jobs:
           architecture: 'x86_64'
           run: |
             # https://openbsd.app/
-            sudo pkg_add cmake
+            sudo pkg_add cmake perl
             cmake -B bld \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_USE_OPENSSL=ON \
