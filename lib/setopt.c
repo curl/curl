@@ -520,11 +520,12 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
            data.
         */
         char *p = Curl_memdup0(argptr, (size_t)data->set.postfieldsize);
-        (void) Curl_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], NULL);
         if(!p)
           result = CURLE_OUT_OF_MEMORY;
-        else
+        else {
+          free(data->set.str[STRING_COPYPOSTFIELDS]);
           data->set.str[STRING_COPYPOSTFIELDS] = p;
+        }
       }
     }
 
@@ -538,7 +539,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      */
     data->set.postfields = va_arg(param, void *);
     /* Release old copied data. */
-    (void) Curl_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], NULL);
+    Curl_safefree(data->set.str[STRING_COPYPOSTFIELDS]);
     data->set.method = HTTPREQ_POST;
     break;
 
@@ -554,7 +555,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     if(data->set.postfieldsize < bigsize &&
        data->set.postfields == data->set.str[STRING_COPYPOSTFIELDS]) {
       /* Previous CURLOPT_COPYPOSTFIELDS is no longer valid. */
-      (void) Curl_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], NULL);
+      Curl_safefree(data->set.str[STRING_COPYPOSTFIELDS]);
       data->set.postfields = NULL;
     }
 
@@ -573,7 +574,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     if(data->set.postfieldsize < bigsize &&
        data->set.postfields == data->set.str[STRING_COPYPOSTFIELDS]) {
       /* Previous CURLOPT_COPYPOSTFIELDS is no longer valid. */
-      (void) Curl_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], NULL);
+      Curl_safefree(data->set.str[STRING_COPYPOSTFIELDS]);
       data->set.postfields = NULL;
     }
 
@@ -1860,7 +1861,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /*
      * flag to set engine as default.
      */
-    Curl_setstropt(&data->set.str[STRING_SSL_ENGINE], NULL);
+    Curl_safefree(data->set.str[STRING_SSL_ENGINE]);
     result = Curl_ssl_set_engine_default(data);
     break;
   case CURLOPT_CRLF:
