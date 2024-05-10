@@ -485,6 +485,8 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     }
 */
 #else
+    (void)ldap_option;
+    (void)ldap_ca;
     /* we should probably never come up to here since configure
        should check in first place if we can support LDAP SSL/TLS */
     failf(data, "LDAP local: SSL/TLS not supported with this version "
