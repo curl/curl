@@ -172,13 +172,8 @@ static void _ftp_state(struct Curl_easy *data,
 
 /* Local API functions */
 #ifndef DEBUGBUILD
-static void _ftp_state(struct Curl_easy *data,
-                       ftpstate newstate);
 #define ftp_state(x,y) _ftp_state(x,y)
 #else /* !DEBUGBUILD */
-static void _ftp_state(struct Curl_easy *data,
-                       ftpstate newstate,
-                       int lineno);
 #define ftp_state(x,y) _ftp_state(x,y,__LINE__)
 #endif /* DEBUGBUILD */
 
