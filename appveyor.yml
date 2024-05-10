@@ -238,32 +238,32 @@ environment:
       TESTING: 'OFF'
       VC_VERSION: VC12
     # autotools-based builds (NOT mingw cross-compiling, but msys2 native)
-    - job_name: 'autotools, msys2, Debug, x86_64, no Proxy, no SSL'
+    - job_name: 'autotools, msys2, Debug, x86_64, no Proxy, OpenSSL'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: autotools
       TESTING: 'ON'
       DISABLED_TESTS: '!19 !1233'
-      CONFIG_ARGS: '--enable-debug --enable-werror --disable-threaded-resolver --disable-proxy --without-ssl --enable-websockets --without-libpsl'
-    - job_name: 'autotools, msys2, Debug, x86_64, no SSL'
+      CONFIG_ARGS: '--enable-debug --enable-werror --disable-threaded-resolver --disable-proxy --with-openssl --enable-websockets --without-libpsl'
+    - job_name: 'autotools, msys2, Debug, x86_64, OpenSSL'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: autotools
       TESTING: 'ON'
       DISABLED_TESTS: '!19 !504 !704 !705 !1233'
-      CONFIG_ARGS: '--enable-debug --enable-werror --disable-threaded-resolver --without-ssl --enable-websockets --without-libpsl'
-    - job_name: 'autotools, msys2, Release, x86_64, no SSL'
+      CONFIG_ARGS: '--enable-debug --enable-werror --disable-threaded-resolver --with-openssl --enable-websockets --without-libpsl'
+    - job_name: 'autotools, msys2, Release, x86_64, OpenSSL'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: autotools
       TESTING: 'ON'
       DISABLED_TESTS: '!19 !504 !704 !705 !1233'
-      CONFIG_ARGS: '--enable-warnings --enable-werror --without-ssl --enable-websockets --without-libpsl'
+      CONFIG_ARGS: '--enable-warnings --enable-werror --with-openssl --enable-websockets --without-libpsl'
     # autotools-based Cygwin build
-    - job_name: 'autotools, cygwin, Debug, x86_64, no SSL'
+    - job_name: 'autotools, cygwin, Debug, x86_64, OpenSSL'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: autotools
       TESTING: 'ON'
       DISABLED_TESTS: ''
       ADD_SHELL: 'C:/cygwin64/bin'
-      CONFIG_ARGS: '--enable-debug --enable-werror --disable-threaded-resolver --without-ssl --enable-websockets --without-libpsl'
+      CONFIG_ARGS: '--enable-debug --enable-werror --disable-threaded-resolver --with-openssl --enable-websockets --without-libpsl'
 
 install:
   - ps: |
