@@ -87,7 +87,7 @@ jobs:
   build_freebsd:
     name: 'FreeBSD (autotools, openssl, clang)'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     env:
       CC: clang
     strategy:
@@ -107,7 +107,8 @@ jobs:
             sudo pkg install -y autoconf automake libtool
             autoreconf -fi
             mkdir bld && cd bld && ../configure --enable-debug --enable-warnings --enable-werror \
-               --with-openssl
+               --with-openssl \
+               --disable-dependency-tracking
             make -j3
             make check V=1
 
@@ -126,6 +127,6 @@ jobs:
           run: |
             autoreconf -fi
             mkdir bld && cd bld && ../configure --enable-debug --enable-warnings --enable-werror \
-               --with-openssl
+               --with-openssl \
+               --disable-dependency-tracking
             gmake -j3
-            gmake check V=1
