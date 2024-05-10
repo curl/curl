@@ -666,6 +666,8 @@ void Curl_auth_digest_cleanup(struct digestdata *digest)
 
   /* Free the copy of user/passwd used to make the identity for http_context */
   Curl_safefree(digest->user);
+  if(digest->passwd)
+    Curl_explicit_bzero(digest->passwd, strlen(digest->passwd);
   Curl_safefree(digest->passwd);
 }
 

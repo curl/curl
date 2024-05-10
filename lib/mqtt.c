@@ -35,6 +35,7 @@
 #include "mqtt.h"
 #include "select.h"
 #include "strdup.h"
+#include "strzero.h"
 #include "url.h"
 #include "escape.h"
 #include "warnless.h"
@@ -328,6 +329,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   /* if passwd was provided, add it to the packet */
   if(plen) {
     rc = add_passwd(passwd, plen, packet, start_pwd, remain_pos);
+    Curl_explicit_bzero(data->state.aptr.passwd, plen);
     if(rc) {
       failf(data, "Password is too large: [%zu]", plen);
       result = CURLE_WEIRD_SERVER_REPLY;
@@ -339,8 +341,10 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
     result = mqtt_send(data, packet, packetlen);
 
 end:
-  if(packet)
+  if(packet) {
+    Curl_explicit_bzero(packet, packetlen);
     free(packet);
+  }
   Curl_safefree(data->state.aptr.user);
   Curl_safefree(data->state.aptr.passwd);
   return result;

@@ -53,6 +53,7 @@
 #include "tftp.h"
 #include "strdup.h"
 #include "escape.h"
+#include "strzero.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -144,6 +145,8 @@ static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp)
 
     /* Store the password part of option if required */
     if(passwdp) {
+      if(*passwdp)
+        Curl_explicit_bzero(*passwdp, strlen(*passwdp));
       Curl_safefree(*passwdp);
       *passwdp = passwd;
     }

@@ -27,6 +27,7 @@
 #if !defined(CURL_DISABLE_DIGEST_AUTH) && !defined(CURL_DISABLE_SHA512_256)
 
 #include "curl_sha512_256.h"
+#include "strzero.h"
 #include "warnless.h"
 
 /* The recommended order of the TLS backends:
@@ -182,7 +183,7 @@ Curl_sha512_256_finish(unsigned char *digest,
                            tmp_digest, NULL) ? CURLE_OK : CURLE_SSL_CIPHER;
   if(ret == CURLE_OK)
     memcpy(digest, tmp_digest, SHA512_256_DIGEST_SIZE);
-  explicit_memset(tmp_digest, 0, sizeof(tmp_digest));
+  Curl_explicit_bzero(tmp_digest, sizeof(tmp_digest));
 #else  /* ! NEED_NETBSD_SHA512_256_WORKAROUND */
   ret = EVP_DigestFinal_ex(*ctx, digest, NULL) ? CURLE_OK : CURLE_SSL_CIPHER;
 #endif /* ! NEED_NETBSD_SHA512_256_WORKAROUND */

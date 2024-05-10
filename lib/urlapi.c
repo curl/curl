@@ -35,6 +35,7 @@
 #include "strdup.h"
 #include "idn.h"
 #include "curl_memrchr.h"
+#include "strzero.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -486,6 +487,8 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
   }
 
   if(passwdp) {
+    if(u->password)
+      Curl_explicit_bzero(u->password, strlen(u->password));
     free(u->password);
     u->password = passwdp;
   }
@@ -502,6 +505,8 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
 out:
 
   free(userp);
+  if(passwdp)
+    Curl_explicit_bzero(passwdp, strlen(passwdp));
   free(passwdp);
   free(optionsp);
   u->user = NULL;

@@ -90,6 +90,7 @@
 #include "ws.h"
 #include "c-hyper.h"
 #include "curl_ctype.h"
+#include "strzero.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -4107,6 +4108,7 @@ static CURLcode req_assign_url_authority(struct httpreq *req, CURLU *url)
       goto out;
     if(pass) {
       result = Curl_dyn_addf(&buf, ":%s", pass);
+      Curl_explicit_bzero(pass, strlen(pass));
       if(result)
         goto out;
     }

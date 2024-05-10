@@ -4777,6 +4777,203 @@ AC_DEFUN([CURL_CHECK_FUNC_STRTOK_R], [
   fi
 ])
 
+dnl CURL_CHECK_FUNC_MEMSET_S
+dnl -------------------------------------------------
+dnl Verify if memset_s is available.
+AC_DEFUN([CURL_CHECK_FUNC_MEMSET_S], [
+
+  tst_links_memset_s="unknown"
+  tst_proto_memset_s="unknown"
+  tst_compile_memset_s="unknown"
+
+  AC_MSG_CHECKING([if memset_s can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([memset_s])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_memset_s="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_memset_s="no"
+  ])
+  #
+  if test "$tst_links_memset_s" = "yes"; then
+    AC_MSG_CHECKING([if memset_s is prototyped])
+    AC_EGREP_CPP([memset_s],[
+      $curl_includes_string
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_memset_s="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_memset_s="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_memset_s"="yes"; then
+    AC_MSG_CHECKING([if memset_s is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_string
+      ]],[[
+        if(0 != memset_s(0, 0, 0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compile_memset_s="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compile_memset_s="no"
+    ])
+  fi
+  #
+  AC_MSG_CHECKING([if memset_s might be used])
+  if test "$tst_links_memset_s" = "yes" &&
+     test "$tst_proto_memset_s" = "yes" &&
+     test "$tst_compile_memset_s" = "yes" &&
+     test "x$curl_disallow_memset_s" != "xyes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_MEMSET_S, 1,
+      [Define to 1 if you have the memset_s function.])
+    curl_cv_func_memset_s="yes"
+  else
+    AC_MSG_RESULT([no])
+    curl_cv_func_memset_s="no"
+  fi
+])
+
+dnl CURL_CHECK_FUNC_EXPLICIT_BZERO
+dnl -------------------------------------------------
+dnl Verify if explicit_bzero is available.
+AC_DEFUN([CURL_CHECK_FUNC_EXPLICIT_BZERO], [
+
+  tst_links_explicit_bzero="unknown"
+  tst_proto_explicit_bzero="unknown"
+  tst_compile_explicit_bzero="unknown"
+
+  AC_MSG_CHECKING([if explicit_bzero can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([explicit_bzero])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_explicit_bzero="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_explicit_bzero="no"
+  ])
+  #
+  if test "$tst_links_explicit_bzero" = "yes"; then
+    AC_MSG_CHECKING([if explicit_bzero is prototyped])
+    AC_EGREP_CPP([explicit_bzero],[
+      $curl_includes_string
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_explicit_bzero="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_explicit_bzero="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_explicit_bzero"="yes"; then
+    AC_MSG_CHECKING([if explicit_bzero is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_string
+      ]],[[
+        if(explicit_bzero(0,0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compile_explicit_bzero="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compile_explicit_bzero="no"
+    ])
+  fi
+  #
+  AC_MSG_CHECKING([if explicit_bzero might be used])
+  if test "$tst_links_explicit_bzero" = "yes" &&
+     test "$tst_proto_explicit_bzero" = "yes" &&
+     test "$tst_compile_explicit_bzero" = "yes" &&
+     test "x$curl_disallow_explicit_bzero" != "xyes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_EXPLICIT_BZERO, 1,
+      [Define to 1 if you have the explicit_bzero function.])
+    curl_cv_func_explicit_bzero="yes"
+  else
+    AC_MSG_RESULT([no])
+    curl_cv_func_explicit_bzero="no"
+  fi
+])
+
+dnl CURL_CHECK_FUNC_EXPLICIT_MEMSET
+dnl -------------------------------------------------
+dnl Verify if explicit_memset is available.
+AC_DEFUN([CURL_CHECK_FUNC_EXPLICIT_MEMSET], [
+
+  tst_links_explicit_memset="unknown"
+  tst_proto_explicit_memset="unknown"
+  tst_compile_explicit_memset="unknown"
+
+  AC_MSG_CHECKING([if explicit_memset can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([explicit_memset])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_explicit_memset="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_explicit_memset="no"
+  ])
+  #
+  if test "$tst_links_explicit_memset" = "yes"; then
+    AC_MSG_CHECKING([if explicit_memset is prototyped])
+    AC_EGREP_CPP([explicit_memset],[
+      $curl_includes_string
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_explicit_memset="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_explicit_memset="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_explicit_memset"="yes"; then
+    AC_MSG_CHECKING([if explicit_memset is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_string
+      ]],[[
+        if(explicit_memset(0,0,0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compile_explicit_memset="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compile_explicit_memset="no"
+    ])
+  fi
+  #
+  AC_MSG_CHECKING([if explicit_memset might be used])
+  if test "$tst_links_explicit_memset" = "yes" &&
+     test "$tst_proto_explicit_memset" = "yes" &&
+     test "$tst_compile_explicit_memset" = "yes" &&
+     test "x$curl_disallow_explicit_memset" != "xyes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_EXPLICIT_MEMSET, 1,
+      [Define to 1 if you have the explicit_memset function.])
+    curl_cv_func_explicit_memset="yes"
+  else
+    AC_MSG_RESULT([no])
+    curl_cv_func_explicit_memset="no"
+  fi
+])
 
 dnl CURL_CHECK_FUNC_STRTOLL
 dnl -------------------------------------------------

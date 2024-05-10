@@ -1302,6 +1302,17 @@ check_symbol_exists(getrlimit      "${CURL_INCLUDES}" HAVE_GETRLIMIT)
 check_symbol_exists(setlocale      "${CURL_INCLUDES}" HAVE_SETLOCALE)
 check_symbol_exists(setmode        "${CURL_INCLUDES}" HAVE_SETMODE)
 check_symbol_exists(setrlimit      "${CURL_INCLUDES}" HAVE_SETRLIMIT)
+# On Windows we use SecureMemoryZero which is available in all supported
+# versions of Windows
+if(NOT WIN32)
+  check_symbol_exists(memset_s "string.h" HAVE_MEMSET_S)
+  if(NOT HAVE_MEMSET_S)
+    check_symbol_exists(explicit_bzero "string.h" HAVE_EXPLICIT_BZERO)
+    if(NOT HAVE_EXPLICIT_BZERO)
+      check_symbol_exists(explicit_memset "string.h" HAVE_EXPLICIT_MEMSET)
+    endif()
+  endif()
+endif()
 
 if(NOT MSVC OR (MSVC_VERSION GREATER_EQUAL 1900))
   # earlier MSVC compilers had faulty snprintf implementations

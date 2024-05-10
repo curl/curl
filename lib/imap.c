@@ -76,6 +76,7 @@
 #include "curl_sasl.h"
 #include "warnless.h"
 #include "curl_ctype.h"
+#include "strzero.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -528,6 +529,8 @@ static CURLcode imap_perform_login(struct Curl_easy *data,
                       passwd ? passwd : "");
 
   free(user);
+  if(passwd)
+    Curl_explicit_bzero(passwd, strlen(passwd));
   free(passwd);
 
   if(!result)

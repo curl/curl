@@ -224,6 +224,7 @@ LIB_CFILES =         \
   strerror.c         \
   strtok.c           \
   strtoofft.c        \
+  strzero.c          \
   system_win32.c     \
   telnet.c           \
   tftp.c             \
@@ -360,6 +361,7 @@ LIB_HFILES =         \
   strerror.h         \
   strtok.h           \
   strtoofft.h        \
+  strzero.h          \
   system_win32.h     \
   telnet.h           \
   tftp.h             \
