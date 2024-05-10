@@ -288,7 +288,7 @@ static CURLcode auth_decode_digest_md5_message(const struct bufref *chlgref,
   /* Retrieve realm string from the challenge */
   if(!auth_digest_get_key_value(chlg, "realm=\"", realm, rlen, '\"')) {
     /* Challenge does not have a realm, set empty string [RFC2831] page 6 */
-    strcpy(realm, "");
+    *realm = '\0';
   }
 
   /* Retrieve algorithm string from the challenge */
