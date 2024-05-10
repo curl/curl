@@ -130,14 +130,13 @@ jobs:
         with:
           usesh: true
           # https://pkg.omnios.org/r151048/core/en/index.shtml
-          prepare: pkg install build-essential libtool cpp
+          prepare: pkg install build-essential libtool
           run: |
-            cpp || true
-            cpp --version || true
             autoreconf -fi
             mkdir bld && cd bld && ../configure --enable-debug --enable-warnings --enable-werror \
                --with-openssl \
                --disable-dependency-tracking
             gmake -j3
             gmake -j3 examples
-            gmake check V=1
+            # Tests requiring C preprocessor (`cpp` by default). Could not figure out how to install it.
+            gmake check V=1 TFLAGS="!1119 !1167"
