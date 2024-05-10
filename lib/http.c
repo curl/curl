@@ -3255,10 +3255,6 @@ CURLcode Curl_http_statusline(struct Curl_easy *data,
        of the protocol */
     conn->bundle->multiuse = BUNDLE_MULTIPLEX;
   }
-  else if(k->httpversion >= 11 && !conn->bits.close) {
-    /* If HTTP version is >= 1.1 and connection is persistent */
-    DEBUGF(infof(data, "HTTP 1.1 or later with persistent connection"));
-  }
 
   k->http_bodyless = k->httpcode >= 100 && k->httpcode < 200;
   switch(k->httpcode) {
