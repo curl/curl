@@ -244,6 +244,7 @@ void Curl_hostcache_prune(struct Curl_easy *data)
   if(data->share)
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
+  now = time(NULL);
   time(&now);
 
   do {
@@ -298,6 +299,7 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
     /* See whether the returned entry is stale. Done before we release lock */
     struct hostcache_prune_data user;
 
+    user.now = time(NULL);
     time(&user.now);
     user.cache_timeout = data->set.dns_cache_timeout;
     user.oldest = 0;
