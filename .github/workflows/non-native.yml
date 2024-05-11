@@ -62,11 +62,11 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_USE_OPENSSL=ON \
               -DCURL_WERROR=ON \
-              -DENABLE_DEBUG=ON \
+              -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
               -DBUILD_TESTING=ON
-            cmake --build bld --parallel 3
-            cmake --build bld --parallel 3 --target testdeps
-            cmake --build bld --target test-ci
+            cmake --build bld --config Debug --parallel 3
+            cmake --build bld --config Debug --parallel 3 --target testdeps
+            cmake --build bld --config Debug --target test-ci
 
   build_openbsd:
     name: 'OpenBSD (cmake, libressl, clang)'
@@ -90,12 +90,12 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_USE_OPENSSL=ON \
               -DCURL_WERROR=ON \
-              -DENABLE_DEBUG=ON \
+              -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
               -DBUILD_TESTING=ON
-            cmake --build bld --parallel 3
-            cmake --build bld --parallel 3 --target testdeps
+            cmake --build bld --config Debug --parallel 3
+            cmake --build bld --config Debug --parallel 3 --target testdeps
             export TFLAGS='!TFTP !1167'
-            cmake --build bld --target test-ci
+            cmake --build bld --config Debug --target test-ci
 
   build_freebsd:
     name: 'FreeBSD (autotools, openssl, clang)'
