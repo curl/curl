@@ -1,0 +1,206 @@
+# Copyright (C) Viktor Szakats
+#
+# SPDX-License-Identifier: curl
+
+name: non-native
+
+on:
+  push:
+    branches:
+      - master
+      - '*/ci'
+    paths-ignore:
+      - '**/*.md'
+      - '.azure-pipelines.yml'
+      - '.circleci/**'
+      - '.cirrus.yml'
+      - 'appveyor.*'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+      - 'winbuild/**'
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - '**/*.md'
+      - '.azure-pipelines.yml'
+      - '.circleci/**'
+      - '.cirrus.yml'
+      - 'appveyor.*'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+      - 'winbuild/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  build_cygwin:
+    name: 'cygwin'
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      SHELLOPTS: 'igncr'
+    strategy:
+      matrix:
+        include:
+          - { build: 'automake', platform: 'x86_64', compiler: 'gcc' }
+          - { build: 'cmake'   , platform: 'x86_64', compiler: 'gcc' }
+      fail-fast: false
+    steps:
+      - run: git config --global core.autocrlf input
+      - uses: actions/checkout@v4
+      - uses: cygwin/cygwin-install-action@v4
+        with:
+          platform: ${{ matrix.platform }}
+          packages: autoconf libtool ${{ matrix.build }} gcc-core gcc-g++ binutils make libssl-devel zlib-devel
+          site: https://mirrors.kernel.org/sourceware/cygwin/
+
+      - name: 'autotools'
+        if: ${{ matrix.build == 'automake' }}
+        timeout-minutes: 10
+        shell: C:\cygwin\bin\bash.exe '{0}'
+        run: |
+          export PATH="/usr/bin:$(cygpath ${SYSTEMROOT})/system32"
+          autoreconf -fi
+          mkdir bld && cd bld && ../configure --enable-werror --enable-debug \
+            --with-crypto=openssl \
+            --disable-docker-tests
+          make -j3
+          make check V=1
+
+      - name: 'cmake'
+        if: ${{ matrix.build == 'cmake' }}
+        timeout-minutes: 10
+        shell: C:\cygwin\bin\bash.exe '{0}'
+        run: |
+          export PATH="/usr/bin:$(cygpath ${SYSTEMROOT})/system32"
+          cmake -B bld \
+            -DCMAKE_UNITY_BUILD=ON \
+            -DENABLE_WERROR=ON \
+            -DENABLE_DEBUG_LOGGING=ON \
+            -DCRYPTO_BACKEND=OpenSSL \
+            -DOPENSSL_ROOT_DIR=/usr/lib \
+            -DENABLE_ZLIB_COMPRESSION=ON \
+            -DRUN_DOCKER_TESTS=OFF \
+            -DRUN_SSHD_TESTS=OFF
+          cmake --build bld --parallel 3
+          cd bld && ctest -VV --output-on-failure
+
+  build_msys2:
+    name: 'msys2'
+    runs-on: windows-latest
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        include:
+          - { build: 'autotools', sys: msys   , crypto: openssl, env: x86_64 }
+          - { build: 'cmake'    , sys: msys   , crypto: OpenSSL, env: x86_64 }
+          - { build: 'autotools', sys: mingw64, crypto: wincng , env: x86_64 }
+          - { build: 'autotools', sys: mingw64, crypto: openssl, env: x86_64 }
+          - { build: 'autotools', sys: mingw32, crypto: openssl, env: i686 }
+          - { build: 'autotools', sys: ucrt64 , crypto: openssl, env: ucrt-x86_64 }
+          - { build: 'autotools', sys: clang64, crypto: openssl, env: clang-x86_64 }
+          - { build: 'autotools', sys: clang64, crypto: wincng , env: clang-x86_64 }
+          - { build: 'cmake'    , sys: ucrt64 , crypto: OpenSSL, env: ucrt-x86_64 }
+          - { build: 'cmake'    , sys: clang64, crypto: OpenSSL, env: clang-x86_64 }
+          - { build: 'cmake'    , sys: mingw64, crypto: OpenSSL, env: x86_64, test: 'uwp' }
+          - { build: 'cmake'    , sys: mingw64, crypto: OpenSSL, env: x86_64, test: 'no-options' }
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        if: ${{ matrix.sys == 'msys' }}
+        with:
+          msystem: ${{ matrix.sys }}
+          install: gcc ${{ matrix.build }} make openssl-devel zlib-devel
+      - uses: msys2/setup-msys2@v2
+        if: ${{ matrix.sys != 'msys' }}
+        with:
+          msystem: ${{ matrix.sys }}
+          install: >-
+            mingw-w64-${{ matrix.env }}-cc
+            mingw-w64-${{ matrix.env }}-${{ matrix.build }} make
+            mingw-w64-${{ matrix.env }}-openssl
+
+      - name: 'autotools autoreconf'
+        if: ${{ matrix.build == 'autotools' }}
+        shell: msys2 {0}
+        run: autoreconf -fi
+      - name: 'autotools configure'
+        if: ${{ matrix.build == 'autotools' }}
+        env:
+          SSHD: 'C:/Program Files/Git/usr/bin/sshd.exe'
+        shell: msys2 {0}
+        run: |
+          if [ '${{ matrix.crypto }}' = 'wincng' ] && [[ '${{ matrix.env }}' = 'clang'* ]]; then
+            options='--enable-ecdsa-wincng'
+          fi
+          # sshd tests sometimes hang
+          mkdir bld && cd bld && ../configure --enable-werror --enable-debug \
+            --with-crypto=${{ matrix.crypto }} \
+            --disable-docker-tests \
+            --disable-sshd-tests \
+            ${options}
+
+      - name: 'autotools build'
+        if: ${{ matrix.build == 'autotools' }}
+        shell: msys2 {0}
+        run: make -C bld -j3
+      - name: 'autotools tests'
+        if: ${{ matrix.build == 'autotools' }}
+        timeout-minutes: 10
+        shell: msys2 {0}
+        run: make -C bld check V=1
+      - name: 'cmake configure'
+        if: ${{ matrix.build == 'cmake' }}
+        shell: msys2 {0}
+        run: |
+          if [[ '${{ matrix.env }}' = 'clang'* ]]; then
+            options='-DCMAKE_C_COMPILER=clang'
+          else
+            options='-DCMAKE_C_COMPILER=gcc'
+          fi
+          if [ '${{ matrix.test }}' = 'uwp' ]; then
+            options="${options} -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0"
+            pacman --noconfirm --ask 20 --noprogressbar --sync --needed 'mingw-w64-${{ matrix.env }}-winstorecompat-git'
+            specs="$(realpath gcc-specs-uwp)"
+            gcc -dumpspecs | sed -e 's/-lmingwex/-lwindowsapp -lmingwex -lwindowsapp -lwindowsappcompat/' -e 's/-lmsvcrt/-lmsvcr120_app/' > "${specs}"
+            cflags="-specs=${specs} -DWINSTORECOMPAT -DWINAPI_FAMILY=WINAPI_FAMILY_APP"
+            # CMake (as of v3.26.4) gets confused and applies the MSVC rc.exe command-line
+            # template to windres. Reset it to the windres template manually:
+            rcopts='<CMAKE_RC_COMPILER> -O coff <DEFINES> <INCLUDES> <FLAGS> <SOURCE> <OBJECT>'
+          elif [ '${{ matrix.test }}' = 'no-options' ]; then
+            options="${options} -DLIBSSH2_NO_DEPRECATED=ON"
+            cflags='-DLIBSSH2_NO_MD5 -DLIBSSH2_NO_MD5_PEM -DLIBSSH2_NO_HMAC_RIPEMD -DLIBSSH2_NO_DSA -DLIBSSH2_NO_AES_CBC -DLIBSSH2_NO_AES_CTR -DLIBSSH2_NO_BLOWFISH -DLIBSSH2_NO_RC4 -DLIBSSH2_NO_CAST -DLIBSSH2_NO_3DES'
+          else
+            cflags=''
+            rcopts=''
+          fi
+          cmake -B bld ${options} \
+            "-DCMAKE_C_FLAGS=${cflags}" \
+            "-DCMAKE_RC_COMPILE_OBJECT=${rcopts}" \
+            -DCMAKE_UNITY_BUILD=ON \
+            -DENABLE_WERROR=ON \
+            -DENABLE_DEBUG_LOGGING=ON \
+            -DCRYPTO_BACKEND=${{ matrix.crypto }} \
+            -DENABLE_ZLIB_COMPRESSION=ON \
+            -DRUN_DOCKER_TESTS=OFF \
+            -DRUN_SSHD_TESTS=OFF \
+            -DCMAKE_VERBOSE_MAKEFILE=ON
+
+      - name: 'cmake build'
+        if: ${{ matrix.build == 'cmake' }}
+        shell: msys2 {0}
+        run: cmake --build bld --parallel 3
+      - name: 'cmake tests'
+        # UWP missing 'msvcr120_app.dll', fails with exit code 0xc0000135
+        if: ${{ matrix.build == 'cmake' && matrix.test != 'uwp' }}
+        timeout-minutes: 10
+        shell: msys2 {0}
+        run: cd bld && ctest -VV --output-on-failure
