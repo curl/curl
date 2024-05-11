@@ -101,6 +101,8 @@ EOF
   )
   curl="builds/libcurl-vc14.10-x64-${PATHPART}-dll-ssl-dll-ipv6-sspi/bin/curl.exe"
 elif [ "${BUILD_SYSTEM}" = 'autotools' ]; then
+  ls -l /usr/lib
+  ls -l /usr/include
   autoreconf -fi
   (
     mkdir _bld
