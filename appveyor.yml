@@ -246,7 +246,7 @@ environment:
 
     # autotools-based builds (NOT mingw cross-compiling, but msys2 native)
 
-    - job_name: 'autotools, msys2, x86_64, no SSL, Debug, no Proxy'
+    - job_name: 'autotools, msys2, Debug, x86_64, no Proxy, no SSL'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: autotools
       TESTING: 'ON'
@@ -267,7 +267,7 @@ environment:
 
     # autotools-based Cygwin build
 
-    - job_name: 'autotools, cygwin, x86_64, no SSL, Debug'
+    - job_name: 'autotools, cygwin, Debug, x86_64, no SSL'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: autotools
       TESTING: 'ON'
