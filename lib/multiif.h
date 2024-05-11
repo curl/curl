@@ -45,7 +45,8 @@ void Curl_multi_connchanged(struct Curl_multi *multi);
 
 /* Internal version of curl_multi_init() accepts size parameters for the
    socket, connection and dns hashes */
-struct Curl_multi *Curl_multi_handle(size_t hashsize, int chashsize,
+struct Curl_multi *Curl_multi_handle(size_t hashsize,
+                                     size_t chashsize,
                                      size_t dnssize);
 
 /* the write bits start at bit 16 for the *getsock() bitmap */
