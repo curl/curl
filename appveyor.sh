@@ -43,7 +43,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   [ "${PRJ_CFG}" = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
   [[ "${PRJ_GEN}" = *'Visual Studio'* ]] && options+=' -DCMAKE_VS_GLOBALS=TrackFileAccess=false'
   if [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ]; then
-    [ "${PRJ_CFG}" = 'Debug' ] && [ "${DEBUG}" = 'ON' ] && [ "${SHARED}" = 'ON' ] && SKIP_RUN='Crash on startup in -DDEBUGBUILD shared builds'
+    [ "${DEBUG}" = 'ON' ] && [ "${SHARED}" = 'ON' ] && SKIP_RUN='Crash on startup in -DDEBUGBUILD shared builds'
     # Fails to run without this due to missing MSVCR90.dll / MSVCR90D.dll
     options+=' -DCURL_STATIC_CRT=ON'
   fi
