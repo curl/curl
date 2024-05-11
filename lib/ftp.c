@@ -95,19 +95,89 @@
 
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
 #define ftp_pasv_verbose(a,b,c,d)  Curl_nop_stmt
+#define FTP_CSTATE(c)   ""
+#define FTP_DSTATE(d)   ""
+#else /* CURL_DISABLE_VERBOSE_STRINGS */
+  /* for tracing purposes */
+static const char * const ftp_state_names[]={
+  "STOP",
+  "WAIT220",
+  "AUTH",
+  "USER",
+  "PASS",
+  "ACCT",
+  "PBSZ",
+  "PROT",
+  "CCC",
+  "PWD",
+  "SYST",
+  "NAMEFMT",
+  "QUOTE",
+  "RETR_PREQUOTE",
+  "STOR_PREQUOTE",
+  "POSTQUOTE",
+  "CWD",
+  "MKD",
+  "MDTM",
+  "TYPE",
+  "LIST_TYPE",
+  "RETR_TYPE",
+  "STOR_TYPE",
+  "SIZE",
+  "RETR_SIZE",
+  "STOR_SIZE",
+  "REST",
+  "RETR_REST",
+  "PORT",
+  "PRET",
+  "PASV",
+  "LIST",
+  "RETR",
+  "STOR",
+  "QUIT"
+};
+#define FTP_CSTATE(c)   ((c)? ftp_state_names[(c)->proto.ftpc.state] : "???")
+#define FTP_DSTATE(d)   (((d) && (d)->conn)? \
+                         ftp_state_names[(d)->conn->proto.ftpc.state] : "???")
+
+#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
+
+/* This is the ONLY way to change FTP state! */
+static void _ftp_state(struct Curl_easy *data,
+                       ftpstate newstate
+#ifdef DEBUGBUILD
+                       , int lineno
 #endif
+  )
+{
+  struct connectdata *conn = data->conn;
+  struct ftp_conn *ftpc = &conn->proto.ftpc;
+
+#if defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifdef DEBUGBUILD
+  (void)lineno;
+#endif
+#else /* CURL_DISABLE_VERBOSE_STRINGS */
+  if(ftpc->state != newstate)
+#ifdef DEBUGBUILD
+    CURL_TRC_FTP(data, "[%s] -> [%s] (line %d)", FTP_DSTATE(data),
+                 ftp_state_names[newstate], lineno);
+#else
+    CURL_TRC_FTP(data, "[%s] -> [%s]", FTP_DSTATE(data),
+                 ftp_state_names[newstate]);
+#endif
+#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
+
+  ftpc->state = newstate;
+}
+
 
 /* Local API functions */
 #ifndef DEBUGBUILD
-static void _ftp_state(struct Curl_easy *data,
-                       ftpstate newstate);
 #define ftp_state(x,y) _ftp_state(x,y)
-#else
-static void _ftp_state(struct Curl_easy *data,
-                       ftpstate newstate,
-                       int lineno);
+#else /* !DEBUGBUILD */
 #define ftp_state(x,y) _ftp_state(x,y,__LINE__)
-#endif
+#endif /* DEBUGBUILD */
 
 static CURLcode ftp_sendquote(struct Curl_easy *data,
                               struct connectdata *conn,
@@ -223,6 +293,7 @@ const struct Curl_handler Curl_handler_ftps = {
 static void close_secondarysocket(struct Curl_easy *data,
                                   struct connectdata *conn)
 {
+  CURL_TRC_FTP(data, "[%s] closing DATA connection", FTP_DSTATE(data));
   Curl_conn_close(data, SECONDARYSOCKET);
   Curl_conn_cf_discard_all(data, conn, SECONDARYSOCKET);
 }
@@ -566,7 +637,7 @@ static CURLcode InitiateTransfer(struct Curl_easy *data)
   struct connectdata *conn = data->conn;
   bool connected;
 
-  DEBUGF(infof(data, "ftp InitiateTransfer()"));
+  CURL_TRC_FTP(data, "InitiateTransfer()");
   if(conn->bits.ftp_use_data_ssl && data->set.ftp_use_port &&
      !Curl_conn_is_ssl(conn, SECONDARYSOCKET)) {
     result = Curl_ssl_cfilter_add(data, conn, SECONDARYSOCKET);
@@ -649,7 +720,7 @@ static CURLcode AllowServerConnect(struct Curl_easy *data, bool *connected)
   }
 
 out:
-  DEBUGF(infof(data, "ftp AllowServerConnect() -> %d", result));
+  CURL_TRC_FTP(data, "AllowServerConnect() -> %d", result);
   return result;
 }
 
@@ -831,73 +902,6 @@ CURLcode Curl_GetFTPResponse(struct Curl_easy *data,
   return result;
 }
 
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
-  /* for debug purposes */
-static const char * const ftp_state_names[]={
-  "STOP",
-  "WAIT220",
-  "AUTH",
-  "USER",
-  "PASS",
-  "ACCT",
-  "PBSZ",
-  "PROT",
-  "CCC",
-  "PWD",
-  "SYST",
-  "NAMEFMT",
-  "QUOTE",
-  "RETR_PREQUOTE",
-  "STOR_PREQUOTE",
-  "POSTQUOTE",
-  "CWD",
-  "MKD",
-  "MDTM",
-  "TYPE",
-  "LIST_TYPE",
-  "RETR_TYPE",
-  "STOR_TYPE",
-  "SIZE",
-  "RETR_SIZE",
-  "STOR_SIZE",
-  "REST",
-  "RETR_REST",
-  "PORT",
-  "PRET",
-  "PASV",
-  "LIST",
-  "RETR",
-  "STOR",
-  "QUIT"
-};
-#endif
-
-/* This is the ONLY way to change FTP state! */
-static void _ftp_state(struct Curl_easy *data,
-                       ftpstate newstate
-#ifdef DEBUGBUILD
-                       , int lineno
-#endif
-  )
-{
-  struct connectdata *conn = data->conn;
-  struct ftp_conn *ftpc = &conn->proto.ftpc;
-
-#if defined(DEBUGBUILD)
-
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
-  (void) lineno;
-#else
-  if(ftpc->state != newstate)
-    infof(data, "FTP %p (line %d) state change from %s to %s",
-          (void *)ftpc, lineno, ftp_state_names[ftpc->state],
-          ftp_state_names[newstate]);
-#endif
-#endif
-
-  ftpc->state = newstate;
-}
-
 static CURLcode ftp_state_user(struct Curl_easy *data,
                                struct connectdata *conn)
 {
@@ -941,7 +945,7 @@ static int ftp_domore_getsock(struct Curl_easy *data,
    * remote site, or we could wait for that site to connect to us. Or just
    * handle ordinary commands.
    */
-  DEBUGF(infof(data, "ftp_domore_getsock()"));
+  CURL_TRC_FTP(data, "[%s] ftp_domore_getsock()", FTP_DSTATE(data));
 
   if(FTP_STOP == ftpc->state) {
     /* if stopped and still in this state, then we're also waiting for a
@@ -1208,7 +1212,8 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
           Curl_strerror(error, buffer, sizeof(buffer)));
     goto out;
   }
-  DEBUGF(infof(data, "ftp_state_use_port(), opened socket"));
+  CURL_TRC_FTP(data, "[%s] ftp_state_use_port(), opened socket",
+               FTP_DSTATE(data));
 
   /* step 3, bind to a suitable local address */
 
@@ -1269,7 +1274,8 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
           Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
     goto out;
   }
-  DEBUGF(infof(data, "ftp_state_use_port(), socket bound to port %d", port));
+  CURL_TRC_FTP(data, "[%s] ftp_state_use_port(), socket bound to port %d",
+               FTP_DSTATE(data), port);
 
   /* step 4, listen on the socket */
 
@@ -1278,7 +1284,8 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
           Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
     goto out;
   }
-  DEBUGF(infof(data, "ftp_state_use_port(), listening on %d", port));
+  CURL_TRC_FTP(data, "[%s] ftp_state_use_port(), listening on %d",
+               FTP_DSTATE(data), port);
 
   /* step 5, send the proper FTP command */
 
@@ -2353,7 +2360,7 @@ static CURLcode ftp_state_retr(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
 
-  DEBUGF(infof(data, "ftp_state_retr()"));
+  CURL_TRC_FTP(data, "[%s] ftp_state_retr()", FTP_DSTATE(data));
   if(data->set.max_filesize && (filesize > data->set.max_filesize)) {
     failf(data, "Maximum file size exceeded");
     return CURLE_FILESIZE_EXCEEDED;
@@ -3068,7 +3075,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
         }
       }
       ftp_state(data, FTP_STOP); /* we are done with the CONNECT phase! */
-      DEBUGF(infof(data, "protocol connect phase DONE"));
+      CURL_TRC_FTP(data, "[%s] protocol connect phase DONE", FTP_DSTATE(data));
       break;
 
     case FTP_SYST:
@@ -3113,7 +3120,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
       }
 
       ftp_state(data, FTP_STOP); /* we are done with the CONNECT phase! */
-      DEBUGF(infof(data, "protocol connect phase DONE"));
+      CURL_TRC_FTP(data, "[%s] protocol connect phase DONE", FTP_DSTATE(data));
       break;
 
     case FTP_NAMEFMT:
@@ -3124,7 +3131,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
       }
 
       ftp_state(data, FTP_STOP); /* we are done with the CONNECT phase! */
-      DEBUGF(infof(data, "protocol connect phase DONE"));
+      CURL_TRC_FTP(data, "[%s] protocol connect phase DONE", FTP_DSTATE(data));
       break;
 
     case FTP_QUOTE:
@@ -3553,6 +3560,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
   /* Send any post-transfer QUOTE strings? */
   if(!status && !result && !premature && data->set.postquote)
     result = ftp_sendquote(data, conn, data->set.postquote);
+  CURL_TRC_FTP(data, "[%s] done, result=%d", FTP_DSTATE(data), result);
   Curl_safefree(ftp->pathalloc);
   return result;
 }
@@ -3821,7 +3829,8 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
   if(!ftpc->wait_data_conn) {
     /* no waiting for the data connection so this is now complete */
     *completep = 1;
-    DEBUGF(infof(data, "DO-MORE phase ends with %d", (int)result));
+    CURL_TRC_FTP(data, "[%s] DO-MORE phase ends with %d", FTP_DSTATE(data),
+                 (int)result);
   }
 
   return result;
@@ -3845,7 +3854,7 @@ CURLcode ftp_perform(struct Curl_easy *data,
   /* this is FTP and no proxy */
   CURLcode result = CURLE_OK;
 
-  DEBUGF(infof(data, "DO phase starts"));
+  CURL_TRC_FTP(data, "[%s] DO phase starts", FTP_DSTATE(data));
 
   if(data->req.no_body) {
     /* requested no body means no transfer... */
@@ -3865,10 +3874,15 @@ CURLcode ftp_perform(struct Curl_easy *data,
 
   *connected = Curl_conn_is_connected(data->conn, SECONDARYSOCKET);
 
-  infof(data, "ftp_perform ends with SECONDARY: %d", *connected);
+  if(*connected)
+    infof(data, "[FTP] [%s] perform, DATA connection established",
+          FTP_DSTATE(data));
+  else
+    CURL_TRC_FTP(data, "[%s] perform, awaiting DATA connect",
+                 FTP_DSTATE(data));
 
   if(*dophase_done)
-    DEBUGF(infof(data, "DO phase is complete1"));
+    CURL_TRC_FTP(data, "[%s] DO phase is complete1", FTP_DSTATE(data));
 
   return result;
 }
@@ -4435,11 +4449,11 @@ static CURLcode ftp_doing(struct Curl_easy *data,
   CURLcode result = ftp_multi_statemach(data, dophase_done);
 
   if(result)
-    DEBUGF(infof(data, "DO phase failed"));
+    CURL_TRC_FTP(data, "[%s] DO phase failed", FTP_DSTATE(data));
   else if(*dophase_done) {
     result = ftp_dophase_done(data, FALSE /* not connected */);
 
-    DEBUGF(infof(data, "DO phase is complete2"));
+    CURL_TRC_FTP(data, "[%s] DO phase is complete2", FTP_DSTATE(data));
   }
   return result;
 }
@@ -4563,6 +4577,7 @@ static CURLcode ftp_setup_connection(struct Curl_easy *data,
   ftpc->use_ssl = data->set.use_ssl;
   ftpc->ccc = data->set.ftp_ccc;
 
+  CURL_TRC_FTP(data, "[%s] setup connection -> %d", FTP_CSTATE(conn), result);
   return result;
 }
 

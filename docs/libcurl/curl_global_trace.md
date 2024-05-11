@@ -74,6 +74,10 @@ Tracing of TCP socket handling: connect, sends, receives.
 
 Tracing of SSL/TLS operations, whichever SSL backend is used in your build.
 
+## `ftp`
+
+Tracing of FTP operations when this protocol is enabled in your build.
+
 ## `http/2`
 
 Details about HTTP/2 handling: frames, events, I/O, etc.

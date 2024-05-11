@@ -44,7 +44,7 @@ int main(void)
     long my_scope_id;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-    my_scope_id = if_nametoindex("eth0");
+    my_scope_id = (long)if_nametoindex("eth0");
     curl_easy_setopt(curl, CURLOPT_ADDRESS_SCOPE, my_scope_id);
 
     /* Perform the request, res gets the return code */

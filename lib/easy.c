@@ -728,6 +728,8 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
     /* clear this as early as possible */
     data->set.errorbuffer[0] = 0;
 
+  data->state.os_errno = 0;
+
   if(data->multi) {
     failf(data, "easy handle already used in multi handle");
     return CURLE_FAILED_INIT;
