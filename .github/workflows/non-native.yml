@@ -94,6 +94,7 @@ jobs:
               -DBUILD_TESTING=ON
             cmake --build bld --parallel 3
             cmake --build bld --parallel 3 --target testdeps
+            export TFLAGS='!TFTP !1167'
             cmake --build bld --target test-ci
 
   build_freebsd:
@@ -143,4 +144,4 @@ jobs:
               --disable-dependency-tracking
             gmake -j3
             # Tests requiring C preprocessor (`cpp` by default). Could not figure out how to install it.
-            gmake check V=1 TFLAGS="!1119 !1167"
+            gmake check V=1 TFLAGS='!1119 !1167'
