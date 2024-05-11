@@ -64,7 +64,7 @@ if(BUILD_STATIC_CURL)
   set(CURLX_CFILES ${CURLTOOL_LIBCURL_CFILES})
 endif()
 
-if(ENABLE_CURLDEBUG)
+if(ENABLE_DEBUG)
   # We must compile this source separately to avoid memdebug.h redefinitions
   # applying to them.
   set_source_files_properties(../lib/curl_multibyte.c PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)

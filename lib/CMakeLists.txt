@@ -58,7 +58,7 @@ if(BUILD_TESTING)
   target_compile_definitions(curlu PUBLIC UNITTESTS CURL_STATICLIB)
 endif()
 
-if(ENABLE_CURLDEBUG)
+if(ENABLE_DEBUG)
   # We must compile these sources separately to avoid memdebug.h redefinitions
   # applying to them.
   set_source_files_properties(memdebug.c curl_multibyte.c PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)

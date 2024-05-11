@@ -119,13 +119,7 @@ option(ENABLE_CURLDEBUG "Set to ON to build with TrackMemory feature enabled" OF
 include(PickyWarnings)
 
 if(ENABLE_DEBUG)
-  # DEBUGBUILD will be defined only for Debug builds
-  set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Debug>:DEBUGBUILD>)
-  set(ENABLE_CURLDEBUG ON)
-endif()
-
-if(ENABLE_CURLDEBUG)
-  set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS CURLDEBUG)
+  add_definitions("-DDEBUGBUILD -DCURLDEBUG")
 endif()
 
 # For debug libs and exes, add "-d" postfix
