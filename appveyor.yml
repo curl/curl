@@ -42,6 +42,7 @@ environment:
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'Visual Studio 9 2008'
       PRJ_CFG: Release
+      DEBUG: 'OFF'
       SCHANNEL: 'ON'
       ENABLE_UNICODE: 'OFF'
       HTTP_ONLY: 'OFF'
