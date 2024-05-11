@@ -66,13 +66,13 @@ jobs:
         run: |
           export PATH="/usr/bin:$(cygpath ${SYSTEMROOT})/system32"
           autoreconf -fi
-          export TFLAGS='${{ tflags }}'
+          export TFLAGS='${{ matrix.tflags }}'
           if [ -x "$(cygpath -u "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath -u "${SYSTEMROOT}/System32/curl.exe")"
           fi
           mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
             --enable-websockets \
-            --with-openssl --with-libpsl ${{ config }}
+            --with-openssl --with-libpsl ${{ matrix.config }}
           make -j3 V=1
           make -j3 V=1 examples
           make -j3 -C tests V=1
@@ -102,13 +102,13 @@ jobs:
         shell: msys2 {0}
         run: |
           autoreconf -fi
-          export TFLAGS='${{ tflags }}'
+          export TFLAGS='${{ matrix.tflags }}'
           if [ -x "$(cygpath -u "C:/msys64/usr/bin/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath -u "C:/msys64/usr/bin/curl.exe")"
           fi
           mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
             --enable-websockets \
-            --with-openssl --with-libpsl ${{ config }}
+            --with-openssl --with-libpsl ${{ matrix.config }}
           make -j3 V=1
           make -j3 V=1 examples
           make -j3 -C tests V=1
