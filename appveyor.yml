@@ -117,7 +117,9 @@ environment:
       HTTP_ONLY: 'ON'
       TESTING: 'ON'
       DISABLED_TESTS: '!1139 !1501 !1177 !1477'
+
     # generated CMake-based MSYS Makefiles builds (mingw cross-compiling)
+
     - job_name: 'CMake, mingw-w64, gcc 13, Debug, x64, Schannel, Static, Unicode'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
@@ -173,7 +175,9 @@ environment:
       MSYS2_ARG_CONV_EXCL: '/*'
       BUILD_OPT: -k
       UNITY: 'OFF'
+
     # winbuild-based builds
+
     - job_name: 'winbuild, VS2015, Debug, x64, OpenSSL 1.1.1, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       BUILD_SYSTEM: winbuild_vs2015
@@ -230,40 +234,46 @@ environment:
       PATHPART: release
       TESTING: 'OFF'
       ENABLE_UNICODE: 'yes'
+
     # generated VisualStudioSolution-based builds
+
     - job_name: 'VisualStudioSolution, VS2013, Debug, x86, Schannel, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       BUILD_SYSTEM: VisualStudioSolution
       PRJ_CFG: 'DLL Debug - DLL Windows SSPI - DLL WinIDN'
       TESTING: 'OFF'
       VC_VERSION: VC12
+
     # autotools-based builds (NOT mingw cross-compiling, but msys2 native)
+
     - job_name: 'autotools, msys2, Debug, x86_64, no Proxy, no SSL'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: autotools
       TESTING: 'ON'
       DISABLED_TESTS: '!19 !1233'
-      CONFIG_ARGS: '--enable-debug --enable-werror --disable-threaded-resolver --disable-proxy --without-ssl --enable-websockets --without-libpsl'
+      CONFIG_ARGS: '--enable-warnings --enable-werror --without-ssl --enable-websockets --without-libpsl --enable-debug --disable-threaded-resolver --disable-proxy'
     - job_name: 'autotools, msys2, Debug, x86_64, no SSL'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: autotools
       TESTING: 'ON'
       DISABLED_TESTS: '!19 !504 !704 !705 !1233'
-      CONFIG_ARGS: '--enable-debug --enable-werror --disable-threaded-resolver --without-ssl --enable-websockets --without-libpsl'
+      CONFIG_ARGS: '--enable-warnings --enable-werror --without-ssl --enable-websockets --without-libpsl --enable-debug --disable-threaded-resolver'
     - job_name: 'autotools, msys2, Release, x86_64, no SSL'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: autotools
       TESTING: 'ON'
       DISABLED_TESTS: '!19 !504 !704 !705 !1233'
       CONFIG_ARGS: '--enable-warnings --enable-werror --without-ssl --enable-websockets --without-libpsl'
+
     # autotools-based Cygwin build
+
     - job_name: 'autotools, cygwin, Debug, x86_64, no SSL'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: autotools
       TESTING: 'ON'
       DISABLED_TESTS: ''
       ADD_SHELL: 'C:/cygwin64/bin'
-      CONFIG_ARGS: '--enable-debug --enable-werror --disable-threaded-resolver --without-ssl --enable-websockets --without-libpsl'
+      CONFIG_ARGS: '--enable-warnings --enable-werror --without-ssl --enable-websockets --without-libpsl --enable-debug --disable-threaded-resolver'
 
 install:
   - ps: |
