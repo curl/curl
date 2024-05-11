@@ -383,7 +383,7 @@ static void multi_addmsg(struct Curl_multi *multi, struct Curl_message *msg)
 
 struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
                                      int chashsize, /* connection hash */
-                                     int dnssize) /* dns hash */
+                                     size_t dnssize) /* dns hash */
 {
   struct Curl_multi *multi = calloc(1, sizeof(struct Curl_multi));
 
