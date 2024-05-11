@@ -101,6 +101,11 @@ EOF
   )
   curl="builds/libcurl-vc14.10-x64-${PATHPART}-dll-ssl-dll-ipv6-sspi/bin/curl.exe"
 elif [ "${BUILD_SYSTEM}" = 'autotools' ]; then
+  if command -v apt-cyg 2>/dev/null; then
+    apt-cyg install libssl-devel
+  else
+    pacman --noconfirm --ask 20 --noprogressbar --sync --needed openssl
+  fi
   ls -l /usr/lib
   ls -l /usr/include
   autoreconf -fi
