@@ -252,13 +252,13 @@ environment:
       TESTING: 'ON'
       DISABLED_TESTS: '!19 !1233'
       CONFIG_ARGS: '--enable-warnings --enable-werror --without-ssl --enable-websockets --without-libpsl --enable-debug --disable-threaded-resolver --disable-proxy'
-    - job_name: 'autotools, msys2, x86_64, no SSL, Debug'
+    - job_name: 'autotools, msys2, Debug, x86_64, no SSL'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: autotools
       TESTING: 'ON'
       DISABLED_TESTS: '!19 !504 !704 !705 !1233'
       CONFIG_ARGS: '--enable-warnings --enable-werror --without-ssl --enable-websockets --without-libpsl --enable-debug --disable-threaded-resolver'
-    - job_name: 'autotools, msys2, x86_64, no SSL'
+    - job_name: 'autotools, msys2, Release, x86_64, no SSL'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: autotools
       TESTING: 'ON'
