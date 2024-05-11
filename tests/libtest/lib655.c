@@ -58,7 +58,7 @@ resolver_alloc_cb_pass(void *resolver_state, void *reserved, void *userdata)
   return 0;
 }
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
@@ -110,5 +110,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return (int)res;
+  return res;
 }

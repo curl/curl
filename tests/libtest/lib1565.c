@@ -38,7 +38,7 @@
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 static CURL *pending_handles[CONN_NUM];
 static int pending_num = 0;
-static int test_failure = 0;
+static CURLcode test_failure = CURLE_OK;
 
 static CURLM *multi = NULL;
 static const char *url;
@@ -46,7 +46,7 @@ static const char *url;
 static void *run_thread(void *ptr)
 {
   CURL *easy = NULL;
-  int res = 0;
+  CURLcode res = CURLE_OK;
   int i;
 
   (void)ptr;
@@ -89,12 +89,13 @@ test_cleanup:
   return NULL;
 }
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   int still_running;
   int num;
   int i;
-  int res = 0;
+  int result;
+  CURLcode res = CURLE_OK;
   CURL *started_handles[CONN_NUM];
   int started_num = 0;
   int finished_num = 0;
@@ -110,12 +111,12 @@ int test(char *URL)
 
   url = URL;
 
-  res = pthread_create(&tid, NULL, run_thread, NULL);
-  if(!res)
+  result = pthread_create(&tid, NULL, run_thread, NULL);
+  if(!result)
     tid_valid = true;
   else {
     fprintf(stderr, "%s:%d Couldn't create thread, errno %d\n",
-            __FILE__, __LINE__, res);
+            __FILE__, __LINE__, result);
     goto test_cleanup;
   }
 
@@ -201,7 +202,7 @@ test_cleanup:
 }
 
 #else /* without pthread, this test doesn't work */
-int test(char *URL)
+CURLcode test(char *URL)
 {
   (void)URL;
   return 0;

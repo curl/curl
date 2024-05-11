@@ -220,9 +220,9 @@ static void checkFdSet(CURLM *curl, struct Sockets *sockets, fd_set *fdset,
   }
 }
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
-  int res = 0;
+  CURLcode res = CURLE_OK;
   CURL *curl = NULL;
   FILE *hd_src = NULL;
   int hd;

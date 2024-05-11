@@ -28,7 +28,7 @@
 /* Test case code based on source in a bug report filed by James Bursa on
    28 Apr 2004 */
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURLcode code;
   int rc = 99;
@@ -72,5 +72,5 @@ int test(char *URL)
   else
     rc = 5;
 
-  return rc;
+  return (CURLcode)rc;
 }

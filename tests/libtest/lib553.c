@@ -57,7 +57,7 @@ static size_t myreadfunc(char *ptr, size_t size, size_t nmemb, void *stream)
 
 static char buf[SIZE_HEADERS + 100];
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_FAILED_INIT;
@@ -109,5 +109,5 @@ test_cleanup:
 
   curl_global_cleanup();
 
-  return (int)res;
+  return res;
 }

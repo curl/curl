@@ -43,7 +43,7 @@ static void my_unlock(CURL *handle, curl_lock_data data, void *useptr)
 }
 
 /* test function */
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURLcode res = CURLE_OK;
   CURLSH *share = NULL;
@@ -91,5 +91,5 @@ test_cleanup:
   curl_share_cleanup(share);
   curl_global_cleanup();
 
-  return (int)res;
+  return res;
 }

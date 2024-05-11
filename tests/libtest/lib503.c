@@ -37,11 +37,11 @@
  * auth info.
  */
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURL *c = NULL;
   CURLM *m = NULL;
-  int res = 0;
+  CURLcode res = CURLE_OK;
   int running;
 
   start_test_timing();

@@ -31,7 +31,7 @@ static char teststring[] =
     'w', 'i', 't', 'h', ' ', 'a', 'n', ' ',
     'e', 'm', 'b', 'e', 'd', 'd', 'e', 'd', ' ', 'N', 'U', 'L'};
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
@@ -80,5 +80,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return (int)res;
+  return res;
 }

@@ -172,9 +172,9 @@ static char *suburl(const char *base, int i)
 
 
 /* test function */
-int test(char *URL)
+CURLcode test(char *URL)
 {
-  int res;
+  CURLcode res;
   CURLSHcode scode = CURLSHE_OK;
   CURLcode code = CURLE_OK;
   char *url = NULL;
@@ -261,7 +261,7 @@ int test(char *URL)
   curl_easy_cleanup(curl);
 
 
-  res = 0;
+  res = CURLE_OK;
 
   /* start treads */
   for(i = 1; i <= THREADS; i++) {

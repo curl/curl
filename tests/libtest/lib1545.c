@@ -26,10 +26,10 @@
 #endif
 #include "test.h"
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURL *eh = NULL;
-  int res = 0;
+  CURLcode res = CURLE_OK;
   struct curl_httppost *lastptr = NULL;
   struct curl_httppost *m_formpost = NULL;
 

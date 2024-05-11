@@ -30,7 +30,7 @@
 #define print_err(name, exp) \
   fprintf(stderr, "Type mismatch for CURLOPT_%s (expected %s)\n", name, exp);
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
 /* Only test if GCC typechecking is available */
   int error = 0;
@@ -80,5 +80,5 @@ int test(char *URL)
   }
 #endif
   (void)URL;
-  return error;
+  return error == 0 ? CURLE_OK : TEST_ERR_FAILURE;
 }

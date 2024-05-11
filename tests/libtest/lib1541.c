@@ -110,10 +110,10 @@ static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *userp)
   return size * nmemb;
 }
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURL *curls = NULL;
-  int res = 0;
+  CURLcode res = CURLE_OK;
   struct transfer_status st;
 
   start_test_timing();
@@ -148,5 +148,5 @@ test_cleanup:
   curl_easy_cleanup(curls);
   curl_global_cleanup();
 
-  return (int)res; /* return the final return code */
+  return res; /* return the final return code */
 }

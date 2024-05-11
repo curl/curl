@@ -62,15 +62,14 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   return 0;                         /* no more data left to deliver */
 }
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURL *easy = NULL;
   CURL *easy2 = NULL;
   curl_mime *mime = NULL;
   curl_mimepart *part;
   struct curl_slist *hdrs = NULL;
-  CURLcode result;
-  int res = TEST_ERR_FAILURE;
+  CURLcode res = TEST_ERR_FAILURE;
   struct WriteThis pooh;
 
   /*
@@ -131,19 +130,17 @@ int test(char *URL)
   mime = NULL;  /* Already cleaned up. */
 
   /* Perform on the first handle: should not send any data. */
-  result = curl_easy_perform(easy);
-  if(result) {
+  res = curl_easy_perform(easy);
+  if(res != CURLE_OK) {
     fprintf(stderr, "curl_easy_perform(original) failed\n");
-    res = (int) result;
     goto test_cleanup;
   }
 
   /* Perform on the second handle: if the bound mime structure has not been
      duplicated properly, it should cause a valgrind error. */
-  result = curl_easy_perform(easy2);
-  if(result) {
+  res = curl_easy_perform(easy2);
+  if(res != CURLE_OK) {
     fprintf(stderr, "curl_easy_perform(duplicated) failed\n");
-    res = (int) result;
     goto test_cleanup;
   }
 

@@ -55,7 +55,7 @@ static CURLcode run(CURL *hnd, long limit, long time)
   return curl_easy_perform(hnd);
 }
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURLcode ret;
   CURL *hnd;
@@ -81,5 +81,5 @@ int test(char *URL)
   curl_easy_cleanup(hnd);
   curl_global_cleanup();
 
-  return (int)ret;
+  return ret;
 }

@@ -29,13 +29,13 @@
 
 #define TEST_HANG_TIMEOUT 60 * 1000
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURL *curls = NULL;
   CURLM *multi = NULL;
   int still_running;
-  int i = TEST_ERR_FAILURE;
-  int res = 0;
+  CURLcode i = TEST_ERR_FAILURE;
+  CURLcode res = CURLE_OK;
   CURLMsg *msg;
 
   start_test_timing();
@@ -56,10 +56,11 @@ int test(char *URL)
   abort_on_test_timeout();
 
   while(still_running) {
+    CURLMcode mres;
     int num;
-    res = curl_multi_wait(multi, NULL, 0, TEST_HANG_TIMEOUT, &num);
-    if(res != CURLM_OK) {
-      printf("curl_multi_wait() returned %d\n", res);
+    mres = curl_multi_wait(multi, NULL, 0, TEST_HANG_TIMEOUT, &num);
+    if(mres != CURLM_OK) {
+      printf("curl_multi_wait() returned %d\n", mres);
       res = TEST_ERR_MAJOR_BAD;
       goto test_cleanup;
     }

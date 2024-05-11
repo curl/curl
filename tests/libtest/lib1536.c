@@ -27,7 +27,7 @@
 
 /* Test CURLINFO_SCHEME */
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURL *curl, *dupe = NULL;
   char *scheme;
@@ -127,5 +127,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_easy_cleanup(dupe);
   curl_global_cleanup();
-  return (int)res;
+  return res;
 }

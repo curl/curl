@@ -27,13 +27,13 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURLM *curlm = NULL;
   CURL *curl1 = NULL;
   CURL *curl2 = NULL;
   int running_handles = 0;
-  int res = 0;
+  CURLcode res = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
 

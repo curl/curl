@@ -63,7 +63,7 @@ static int loadfile(const char *filename, void **filedata, size_t *filesize)
   return data ? 1 : 0;
 }
 
-static int test_cert_blob(const char *url, const char *cafile)
+static CURLcode test_cert_blob(const char *url, const char *cafile)
 {
   CURLcode code = CURLE_OUT_OF_MEMORY;
   CURL *curl;
@@ -94,12 +94,12 @@ static int test_cert_blob(const char *url, const char *cafile)
   }
   curl_easy_cleanup(curl);
 
-  return (int)code;
+  return code;
 }
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
-  int res = 0;
+  CURLcode res = CURLE_OK;
   curl_global_init(CURL_GLOBAL_DEFAULT);
   if(!strcmp("check", URL)) {
     CURL *e;
@@ -112,7 +112,7 @@ int test(char *URL)
         printf("CURLOPT_CAINFO_BLOB is not supported\n");
       curl_easy_cleanup(e);
     }
-    res = (int)w;
+    res = w;
   }
   else
     res = test_cert_blob(URL, libtest_arg2);

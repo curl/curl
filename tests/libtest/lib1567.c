@@ -27,7 +27,7 @@
 
 #include <curl/multi.h>
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURL *curl = NULL;
   CURLcode res = CURLE_OK;
@@ -55,5 +55,5 @@ test_cleanup:
   curl_url_cleanup(u);
   curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return (int)res;
+  return res;
 }

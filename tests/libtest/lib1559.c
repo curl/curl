@@ -28,7 +28,7 @@
 #include "memdebug.h"
 
 #define EXCESSIVE 10*1000*1000
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURLcode res = CURLE_OK;
   CURL *curl = NULL;
@@ -37,7 +37,7 @@ int test(char *URL)
   (void)URL;
 
   if(!longurl)
-    return 1;
+    return (CURLcode)1;
 
   memset(longurl, 'a', EXCESSIVE);
   longurl[EXCESSIVE-1] = 0;
@@ -47,11 +47,11 @@ int test(char *URL)
 
   res = curl_easy_setopt(curl, CURLOPT_URL, longurl);
   printf("CURLOPT_URL %d bytes URL == %d\n",
-         EXCESSIVE, (int)res);
+         EXCESSIVE, res);
 
   res = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, longurl);
   printf("CURLOPT_POSTFIELDS %d bytes data == %d\n",
-         EXCESSIVE, (int)res);
+         EXCESSIVE, res);
 
   u = curl_url();
   if(u) {
