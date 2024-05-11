@@ -145,10 +145,7 @@ if [ "${TESTING}" = 'ON' ]; then
     ls _bld/lib/*.dll >/dev/null 2>&1 && cp -f -p _bld/lib/*.dll _bld/tests/libtest/
     cmake --build _bld --config "${PRJ_CFG}" --target test-ci
   elif [ "${BUILD_SYSTEM}" = 'autotools' ]; then
-    (
-      cd _bld
-      make -j2 V=1 test-ci
-    )
+    make -C _bld -j2 V=1 test-ci
   else
     (
       TFLAGS="-a -p !flaky -r -rm ${TFLAGS}"
