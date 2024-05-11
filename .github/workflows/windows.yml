@@ -92,6 +92,7 @@ jobs:
           - { build: 'autotools', sys: 'msys', env: 'x86_64', tflags: '!19 !504 !704 !705 !1233', config: '' }
       fail-fast: false
     steps:
+      - run: git config --global core.autocrlf input
       - uses: actions/checkout@v4
       - uses: msys2/setup-msys2@v2
         if: ${{ matrix.sys == 'msys' }}
