@@ -257,18 +257,21 @@ environment:
       DISABLED_TESTS: '!19 !504 !704 !705 !1233'
       CONFIG_ARGS: '--enable-warnings --enable-werror --with-openssl --enable-websockets --without-libpsl'
     # autotools-based Cygwin build
-    - job_name: 'autotools, cygwin, Debug, x86_64, no SSL'
+    - job_name: 'autotools, cygwin, Debug, x86_64, OpenSSL'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: autotools
       TESTING: 'ON'
       DISABLED_TESTS: ''
       ADD_SHELL: 'C:/cygwin64/bin'
-      CONFIG_ARGS: '--enable-debug --enable-werror --disable-threaded-resolver --without-ssl --enable-websockets --without-libpsl'
+      CONFIG_ARGS: '--enable-debug --enable-werror --disable-threaded-resolver --with-openssl --enable-websockets --without-libpsl'
 
 install:
   - ps: |
       if($env:ADD_SHELL -ne $null) {
         $env:PATH = "$env:ADD_SHELL;$env:PATH"
+        if($env:ADD_SHELL.Contains('cygwin')) {
+          Start-ProcessWithOutput "setup-x86_64.exe -qgnNdO -l C:/cygwin64/var/cache/setup -R C:/cygwin64 -s https://cygwin.mirror.constant.com -P libssl-devel"
+        }
       }
       else {
         $env:PATH = "C:/msys64/usr/bin;$env:PATH"
