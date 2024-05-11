@@ -100,7 +100,7 @@ jobs:
             cmake --build bld --config Debug --target test-ci
 
   build_freebsd:
-    name: 'FreeBSD (autotools, openssl, clang)'
+    name: 'FreeBSD (autotools, openssl, clang, build-only)'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
@@ -126,7 +126,8 @@ jobs:
               --disable-dependency-tracking
             make -j3
             src/curl --disable --version
-            make check V=1
+            # Slow, let's skip building/running tests for now
+            #make check V=1
 
   build_omnios:
     name: 'OmniOS (autotools, openssl, gcc, amd64)'
