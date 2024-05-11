@@ -66,10 +66,7 @@ jobs:
               -DBUILD_TESTING=ON
             cmake --build bld --parallel 3
             cmake --build bld --parallel 3 --target testdeps
-            cd bld/tests
-            pwd
-            ls -l
-            ./runtests.pl
+            cmake --build bld --target test-ci
 
   build_openbsd:
     name: 'OpenBSD (cmake, libressl, clang)'
@@ -97,10 +94,7 @@ jobs:
               -DBUILD_TESTING=ON
             cmake --build bld --parallel 3
             cmake --build bld --parallel 3 --target testdeps
-            cd bld/tests
-            pwd
-            ls -l
-            ./runtests.pl
+            cmake --build bld --target test-ci
 
   build_freebsd:
     name: 'FreeBSD (autotools, openssl, clang)'
