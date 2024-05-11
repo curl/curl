@@ -63,10 +63,9 @@ jobs:
               -DCURL_USE_OPENSSL=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON \
-              -DBUILD_EXAMPLES=ON \
               -DBUILD_TESTING=ON
             cmake --build bld --parallel 3
-            make --directory bld testdeps -j3 VERBOSE=1
+            cmake --build bld --parallel 3 --target testdeps
 
   build_openbsd:
     name: 'OpenBSD (cmake, libressl, clang)'
@@ -91,7 +90,6 @@ jobs:
               -DCURL_USE_OPENSSL=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON \
-              -DBUILD_EXAMPLES=ON \
               -DBUILD_TESTING=ON
             cmake --build bld --parallel 3
             cmake --build bld --parallel 3 --target testdeps
@@ -122,7 +120,6 @@ jobs:
               --with-openssl \
               --disable-dependency-tracking
             make -j3
-            make -j3 examples
             make check V=1
 
   build_omnios:
@@ -143,6 +140,5 @@ jobs:
               --with-openssl \
               --disable-dependency-tracking
             gmake -j3
-            gmake -j3 examples
             # Tests requiring C preprocessor (`cpp` by default). Could not figure out how to install it.
             gmake check V=1 TFLAGS="!1119 !1167"
