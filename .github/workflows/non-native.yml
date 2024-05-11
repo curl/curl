@@ -67,6 +67,8 @@ jobs:
             cmake --build bld --parallel 3
             cmake --build bld --parallel 3 --target testdeps
             cd bld/tests
+            pwd
+            ls -l
             ./runtests.pl
 
   build_openbsd:
@@ -96,6 +98,8 @@ jobs:
             cmake --build bld --parallel 3
             cmake --build bld --parallel 3 --target testdeps
             cd bld/tests
+            pwd
+            ls -l
             ./runtests.pl
 
   build_freebsd:
