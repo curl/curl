@@ -41,6 +41,7 @@ permissions: {}
 
 jobs:
   cygwin:
+    name: "cygwin (${{ matrix.build }}, ${{ matrix.platform }}, ${{ matrix.config }})"
     runs-on: windows-latest
     timeout-minutes: 30
     env:
@@ -74,11 +75,13 @@ jobs:
             --enable-websockets \
             --with-openssl --with-libpsl ${{ matrix.config }}
           make -j3 V=1
+          bld/src/curl.exe --disable --version
           make -j3 V=1 examples
           make -j3 -C tests V=1
           make -j3 V=1 test-ci
 
   msys2:
+    name: "msys2 (${{ matrix.build }}, ${{ matrix.sys }}, ${{ matrix.env }}, ${{ matrix.config }})"
     runs-on: windows-latest
     timeout-minutes: 30
     strategy:
@@ -110,6 +113,7 @@ jobs:
             --enable-websockets \
             --with-openssl --with-libpsl ${{ matrix.config }}
           make -j3 V=1
+          bld/src/curl.exe --disable --version
           make -j3 V=1 examples
           make -j3 -C tests V=1
           make -j3 V=1 test-ci
