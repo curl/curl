@@ -127,10 +127,6 @@ if false; then
   done
 fi
 
-if [ "${TESTING}" = 'ON' ] && [ "${BUILD_SYSTEM}" = 'CMake' ]; then
-  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
-fi
-
 # test
 
 if [ "${TESTING}" = 'ON' ]; then
@@ -142,6 +138,7 @@ if [ "${TESTING}" = 'ON' ]; then
   fi
   TFLAGS+=" ${DISABLED_TESTS:-}"
   if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
+    cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
     ls _bld/lib/*.dll >/dev/null 2>&1 && cp -f -p _bld/lib/*.dll _bld/tests/libtest/
     cmake --build _bld --config "${PRJ_CFG}" --target test-ci
   elif [ "${BUILD_SYSTEM}" = 'autotools' ]; then
