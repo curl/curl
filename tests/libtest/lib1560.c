@@ -1847,43 +1847,43 @@ err:
   return 1;
 }
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   (void)URL; /* not used */
 
   if(urldup())
-    return 11;
+    return (CURLcode)11;
 
   if(setget_parts())
-    return 10;
+    return (CURLcode)10;
 
   if(get_url())
-    return 3;
+    return (CURLcode)3;
 
   if(huge())
-    return 9;
+    return (CURLcode)9;
 
   if(get_nothing())
-    return 7;
+    return (CURLcode)7;
 
   if(scopeid())
-    return 6;
+    return (CURLcode)6;
 
   if(append())
-    return 5;
+    return (CURLcode)5;
 
   if(set_url())
-    return 1;
+    return (CURLcode)1;
 
   if(set_parts())
-    return 2;
+    return (CURLcode)2;
 
   if(get_parts())
-    return 4;
+    return (CURLcode)4;
 
   if(clear_url())
-    return 8;
+    return (CURLcode)8;
 
   printf("success\n");
-  return 0;
+  return CURLE_OK;
 }

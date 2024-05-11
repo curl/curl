@@ -29,13 +29,13 @@
 
 #define TEST_HANG_TIMEOUT 60 * 1000
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURL *curls = NULL;
   CURLM *multi = NULL;
   int still_running;
-  int i = -1;
-  int res = 0;
+  CURLcode i = (CURLcode)-1;
+  CURLcode res = CURLE_OK;
   CURLMsg *msg;
 
   start_test_timing();

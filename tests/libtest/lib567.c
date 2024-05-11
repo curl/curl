@@ -28,7 +28,7 @@
 /*
  * Test a simple OPTIONS request with a custom header
  */
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURLcode res;
   CURL *curl;
@@ -68,5 +68,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return (int)res;
+  return res;
 }

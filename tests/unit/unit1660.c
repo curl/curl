@@ -41,7 +41,7 @@ unit_stop(void)
 #if defined(CURL_DISABLE_HTTP) || defined(CURL_DISABLE_HSTS)
 UNITTEST_START
 {
-  return 0; /* nothing to do when HTTP or HSTS are disabled */
+  return CURLE_OK; /* nothing to do when HTTP or HSTS are disabled */
 }
 UNITTEST_STOP
 #else

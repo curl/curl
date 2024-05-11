@@ -35,11 +35,11 @@
    to allow old and slow machines to run this test too */
 #define MAX_BLOCKED_TIME_MS 500
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURL *handle = NULL;
   CURLM *mhandle = NULL;
-  int res = 0;
+  CURLcode res = CURLE_OK;
   int still_running = 0;
 
   start_test_timing();
@@ -96,7 +96,7 @@ int test(char *URL)
     fprintf(stderr, "pong = %ld\n", e);
 
     if(e > MAX_BLOCKED_TIME_MS) {
-      res = 100;
+      res = (CURLcode) 100;
       break;
     }
   }

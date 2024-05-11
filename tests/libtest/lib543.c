@@ -27,7 +27,7 @@
 
 #include "memdebug.h"
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   static const unsigned char a[] = {
       0x9c, 0x26, 0x4b, 0x3d, 0x49, 0x4, 0xa1, 0x1,
@@ -68,5 +68,5 @@ int test(char *URL)
   }
   curl_global_cleanup();
 
-  return (int)res;
+  return res;
 }

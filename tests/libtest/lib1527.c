@@ -45,7 +45,7 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
 }
 
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURL *curl = NULL;
   CURLcode res = CURLE_FAILED_INIT;
@@ -98,5 +98,5 @@ test_cleanup:
 
   curl_global_cleanup();
 
-  return (int)res;
+  return res;
 }

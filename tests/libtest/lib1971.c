@@ -35,7 +35,7 @@ static size_t read_callback(char *buffer, size_t size, size_t nitems,
   return 0;
 }
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURL *curl;
   CURLcode res = TEST_ERR_MAJOR_BAD;

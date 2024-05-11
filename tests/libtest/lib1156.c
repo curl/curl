@@ -131,7 +131,7 @@ test_cleanup:
 /* for debugging: */
 /* #define SINGLETEST 9 */
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURLcode res;
   CURL *curl;
@@ -162,12 +162,12 @@ int test(char *URL)
 
   curl_global_cleanup();
   printf("%d\n", status);
-  return status;
+  return (CURLcode)status;
 
 test_cleanup:
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return (int)res;
+  return res;
 }

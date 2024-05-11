@@ -26,7 +26,7 @@
 #include "testtrace.h"
 #include "memdebug.h"
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURLcode ret;
   CURL *hnd;
@@ -48,5 +48,5 @@ int test(char *URL)
   hnd = NULL;
 
   curl_global_cleanup();
-  return (int)ret;
+  return ret;
 }

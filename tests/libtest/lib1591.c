@@ -73,7 +73,7 @@ static int trailers_callback(struct curl_slist **list, void *userdata)
   }
 }
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURL *curl = NULL;
   CURLcode res = CURLE_FAILED_INIT;
@@ -116,5 +116,5 @@ test_cleanup:
 
   curl_global_cleanup();
 
-  return (int)res;
+  return res;
 }

@@ -41,9 +41,9 @@ static char *suburl(const char *base, int i)
 /*
  * Test the Client->Server ANNOUNCE functionality (PUT style)
  */
-int test(char *URL)
+CURLcode test(char *URL)
 {
-  int res;
+  CURLcode res;
   CURL *curl;
   int sdp;
   FILE *sdpf = NULL;

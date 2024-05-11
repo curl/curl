@@ -47,7 +47,7 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
 }
 
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURLcode res = CURLE_OK;
   CURL *hnd;
@@ -86,5 +86,5 @@ int test(char *URL)
   curl_easy_cleanup(hnd);
   curl_mime_free(mime1);
   curl_global_cleanup();
-  return (int)res;
+  return res;
 }

@@ -27,18 +27,18 @@
 #ifdef USE_WEBSOCKETS
 #if 0
 
-static int ping(CURL *curl, const char *send_payload)
+static CURLcode ping(CURL *curl, const char *send_payload)
 {
   size_t sent;
   CURLcode result =
     curl_ws_send(curl, send_payload, strlen(send_payload), &sent, CURLWS_PING);
   fprintf(stderr,
-          "ws: curl_ws_send returned %u, sent %u\n", (int)result, (int)sent);
+          "ws: curl_ws_send returned %d, sent %d\n", result, (int)sent);
 
-  return (int)result;
+  return result;
 }
 
-static int recv_pong(CURL *curl, const char *expected_payload)
+static CURLcode recv_pong(CURL *curl, const char *expected_payload)
 {
   size_t rlen;
   unsigned int rflags;
@@ -58,11 +58,11 @@ static int recv_pong(CURL *curl, const char *expected_payload)
       fprintf(stderr, "ws: did NOT get the same payload back\n");
   }
   else {
-    fprintf(stderr, "recv_pong: got %u bytes rflags %x\n", (int)rlen, rflags);
+    fprintf(stderr, "recv_pong: got %d bytes rflags %x\n", (int)rlen, rflags);
   }
-  fprintf(stderr, "ws: curl_ws_recv returned %u, received %u\n", (int)result,
-         rlen);
-  return (int)result;
+  fprintf(stderr, "ws: curl_ws_recv returned %d, received %d\n", result,
+          (int)rlen);
+  return result;
 }
 
 /* just close the connection */
@@ -72,7 +72,7 @@ static void websocket_close(CURL *curl)
   CURLcode result =
     curl_ws_send(curl, "", 0, &sent, CURLWS_CLOSE);
   fprintf(stderr,
-          "ws: curl_ws_send returned %u, sent %u\n", (int)result, (int)sent);
+          "ws: curl_ws_send returned %d, sent %d\n", result, (int)sent);
 }
 
 static void websocket(CURL *curl)
@@ -101,7 +101,7 @@ static size_t writecb(char *b, size_t size, size_t nitems, void *p)
     0x8a, 0x0
   };
   size_t incoming = nitems;
-  fprintf(stderr, "Called CURLOPT_WRITEFUNCTION with %u bytes: ",
+  fprintf(stderr, "Called CURLOPT_WRITEFUNCTION with %d bytes: ",
           (int)nitems);
   for(i = 0; i < nitems; i++)
     fprintf(stderr, "%02x ", (unsigned char)buffer[i]);
@@ -119,7 +119,7 @@ static size_t writecb(char *b, size_t size, size_t nitems, void *p)
   return nitems;
 }
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
@@ -137,7 +137,7 @@ int test(char *URL)
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writecb);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, curl);
     res = curl_easy_perform(curl);
-    fprintf(stderr, "curl_easy_perform() returned %u\n", (int)res);
+    fprintf(stderr, "curl_easy_perform() returned %d\n", res);
 #if 0
     if(res == CURLE_OK)
       websocket(curl);
@@ -146,7 +146,7 @@ int test(char *URL)
     curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
-  return (int)res;
+  return res;
 }
 
 #else /* no websockets */

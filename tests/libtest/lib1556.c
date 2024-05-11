@@ -44,11 +44,11 @@ static size_t header(void *ptr, size_t size, size_t nmemb, void *stream)
   return nmemb * size;
 }
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURLcode code;
   CURL *curl = NULL;
-  int res = 0;
+  CURLcode res = CURLE_OK;
   struct headerinfo info = {0};
 
   global_init(CURL_GLOBAL_ALL);
@@ -64,7 +64,7 @@ int test(char *URL)
   if(CURLE_OK != code) {
     fprintf(stderr, "%s:%d curl_easy_perform() failed, "
             "with code %d (%s)\n",
-            __FILE__, __LINE__, (int)code, curl_easy_strerror(code));
+            __FILE__, __LINE__, code, curl_easy_strerror(code));
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
