@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: curl
 
-name: non-native
+name: windows
 
 on:
   push:
@@ -40,8 +40,7 @@ concurrency:
 permissions: {}
 
 jobs:
-  build_cygwin:
-    name: 'cygwin'
+  cygwin:
     runs-on: windows-latest
     timeout-minutes: 30
     env:
@@ -79,8 +78,7 @@ jobs:
           make -j3 -C tests V=1
           make -j3 V=1 test-ci
 
-  build_msys2:
-    name: 'msys2'
+  msys2:
     runs-on: windows-latest
     timeout-minutes: 30
     strategy:
@@ -100,6 +98,7 @@ jobs:
 
       - name: 'autotools'
         if: ${{ matrix.build == 'autotools' }}
+        timeout-minutes: 30
         shell: msys2 {0}
         run: |
           autoreconf -fi
