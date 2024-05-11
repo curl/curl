@@ -56,7 +56,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     '-DCURL_WERROR=ON' \
     "-DENABLE_DEBUG=${DEBUG}" \
     "-DENABLE_UNICODE=${ENABLE_UNICODE}" \
-    '-DCMAKE_INSTALL_PREFIX=C:/CURL' \
+    '-DCMAKE_INSTALL_PREFIX=C:/curl' \
     "-DCMAKE_BUILD_TYPE=${PRJ_CFG}"
   # shellcheck disable=SC2086
   cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --clean-first -- ${BUILD_OPT:-}
