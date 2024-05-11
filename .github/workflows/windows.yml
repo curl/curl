@@ -75,7 +75,8 @@ jobs:
             --enable-websockets \
             --with-openssl --with-libpsl ${{ matrix.config }}
           make -j3 V=1
-          bld/src/curl.exe --disable --version
+          find . -name '*.exe' -o -name '*.dll'
+          src/curl.exe --disable --version
           make -j3 V=1 examples
           make -j3 -C tests V=1
           make -j3 V=1 test-ci
@@ -114,7 +115,8 @@ jobs:
             --enable-websockets \
             --with-openssl --with-libpsl ${{ matrix.config }}
           make -j3 V=1
-          bld/src/curl.exe --disable --version
+          find . -name '*.exe' -o -name '*.dll'
+          src/curl.exe --disable --version
           make -j3 V=1 examples
           make -j3 -C tests V=1
           make -j3 V=1 test-ci
