@@ -68,7 +68,7 @@ int Curl_gethostname(char * const name, GETHOSTNAME_TYPE_ARG2 namelen)
   /* Override host name when environment variable CURL_GETHOSTNAME is set */
   const char *force_hostname = getenv("CURL_GETHOSTNAME");
   if(force_hostname) {
-    strncpy(name, force_hostname, namelen);
+    strncpy(name, force_hostname, namelen - 1);
     err = 0;
   }
   else {

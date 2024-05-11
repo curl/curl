@@ -1279,7 +1279,7 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 #ifdef DEBUGBUILD
   /* simulate network blocking/partial writes */
   if(ctx->wblock_percent > 0) {
-    unsigned char c;
+    unsigned char c = 0;
     Curl_rand(data, &c, 1);
     if(c >= ((100-ctx->wblock_percent)*256/100)) {
       CURL_TRC_CF(data, cf, "send(len=%zu) SIMULATE EWOULDBLOCK", orig_len);
@@ -1357,7 +1357,7 @@ static ssize_t cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 #ifdef DEBUGBUILD
   /* simulate network blocking/partial reads */
   if(cf->cft != &Curl_cft_udp && ctx->rblock_percent > 0) {
-    unsigned char c;
+    unsigned char c = 0;
     Curl_rand(data, &c, 1);
     if(c >= ((100-ctx->rblock_percent)*256/100)) {
       CURL_TRC_CF(data, cf, "recv(len=%zu) SIMULATE EWOULDBLOCK", len);
