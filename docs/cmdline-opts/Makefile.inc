@@ -136,6 +136,7 @@ DPAGES = \
   include.md \
   insecure.md \
   interface.md \
+  ip-tos.md \
   ipfs-gateway.md \
   ipv4.md \
   ipv6.md \
