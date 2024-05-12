@@ -85,6 +85,7 @@ struct OperationConfig {
   char *range;
   long low_speed_limit;
   long low_speed_time;
+  long ip_tos;         /* IP Type of Service */
   char *dns_servers;   /* dot notation: 1.1.1.1;2.2.2.2 */
   char *dns_interface; /* interface name */
   char *dns_ipv4_addr; /* dot notation */
