@@ -50,6 +50,7 @@ jobs:
       matrix:
         include:
           - { build: 'automake', platform: 'x86_64', tflags: '', config: '--enable-debug --disable-threaded-resolver' }
+          - { build: 'cmake'   , platform: 'x86_64', tflags: '', config: '-DCURL_USE_OPENSSL=ON' }
       fail-fast: false
     steps:
       - run: git config --global core.autocrlf input
@@ -104,6 +105,27 @@ jobs:
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
           make -C bld -j3 V=1 test-ci
+
+      - name: 'cmake configure'
+        if: ${{ matrix.build == 'cmake' }}
+        timeout-minutes: 5
+        shell: C:\cygwin\bin\bash.exe '{0}'
+        run: |
+          export PATH="/usr/bin:$(cygpath ${SYSTEMROOT})/system32"
+          cmake -B bld ${options} ${{ matrix.config }} \
+            "-DCMAKE_C_FLAGS=${cflags}" \
+            '-DCMAKE_UNITY_BUILD=ON' \
+            '-DCURL_WERROR=ON' \
+            '-DBUILD_EXAMPLES=ON'
+
+      - name: 'cmake build'
+        if: ${{ matrix.build == 'cmake' }}
+        timeout-minutes: 10
+        shell: C:\cygwin\bin\bash.exe '{0}'
+        run: |
+          cmake --build bld --config '${{ matrix.type }}' --parallel 3
+          [[ '${{ matrix.config }}' = *'BUILD_SHARED_LIBS=ON'* ]] && cp -f -p bld/lib/*.dll bld/src/
+          bld/src/curl.exe --disable --version
 
   msys2:
     name: "msys2 (${{ matrix.build }}, ${{ matrix.sys }}, ${{ matrix.env }}, ${{ matrix.config }})"
