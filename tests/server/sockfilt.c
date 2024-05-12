@@ -179,7 +179,7 @@ static ssize_t read_wincon(int fd, void *buf, size_t count)
     return rcount;
   }
 
-  errno = GetLastError();
+  errno = (int)GetLastError();
   return -1;
 }
 #undef  read
@@ -214,7 +214,7 @@ static ssize_t write_wincon(int fd, const void *buf, size_t count)
     return wcount;
   }
 
-  errno = GetLastError();
+  errno = (int)GetLastError();
   return -1;
 }
 #undef  write
@@ -483,7 +483,7 @@ static unsigned int WINAPI select_ws_wait_thread(void *lpParameter)
         size.LowPart = GetFileSize(handle, &length);
         if((size.LowPart != INVALID_FILE_SIZE) ||
             (GetLastError() == NO_ERROR)) {
-          size.HighPart = length;
+          size.HighPart = (LONG)length;
           /* get the current position within the file */
           pos.QuadPart = 0;
           pos.LowPart = SetFilePointer(handle, 0, &pos.HighPart, FILE_CURRENT);
