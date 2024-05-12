@@ -136,8 +136,8 @@ if [ "${TESTING}" = 'ON' ]; then
   export TFLAGS=''
   if [ -x "$(cygpath -u "${WINDIR}/System32/curl.exe")" ]; then
     TFLAGS+=" -ac $(cygpath -u "${WINDIR}/System32/curl.exe")"
-  elif [ -x "$(cygpath -u "C:/msys64/usr/bin/curl.exe")" ]; then
-    TFLAGS+=" -ac $(cygpath -u "C:/msys64/usr/bin/curl.exe")"
+  elif [ -x "$(cygpath -u 'C:/msys64/usr/bin/curl.exe')" ]; then
+    TFLAGS+=" -ac $(cygpath -u 'C:/msys64/usr/bin/curl.exe')"
   fi
   TFLAGS+=" ${DISABLED_TESTS:-}"
   if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
