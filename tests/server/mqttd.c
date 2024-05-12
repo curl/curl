@@ -443,7 +443,7 @@ static int publish(FILE *dump,
     loghex(packet, rc);
     logprotocol(FROM_SERVER, "PUBLISH", remaininglength, dump, packet, rc);
   }
-  if(rc == packetlen)
+  if((size_t)rc == packetlen)
     return 0;
   return 1;
 }
