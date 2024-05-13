@@ -83,7 +83,7 @@ static size_t write_cb(char *data, size_t n, size_t l, void *userp)
   (void)userp;
   return n*l;
 }
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURL *easy = NULL;
   CURLcode res = CURLE_OK;
@@ -116,5 +116,5 @@ int test(char *URL)
 test_cleanup:
   curl_easy_cleanup(easy);
   curl_global_cleanup();
-  return (int)res;
+  return res;
 }

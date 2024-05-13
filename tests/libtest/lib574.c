@@ -36,9 +36,9 @@ static int new_fnmatch(void *ptr,
   return CURL_FNMATCHFUNC_MATCH;
 }
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
-  int res;
+  CURLcode res;
   CURL *curl;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {

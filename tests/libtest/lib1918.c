@@ -27,10 +27,9 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   const struct curl_easyoption *o;
-  int error = 0;
   (void)URL;
 
   curl_global_init(CURL_GLOBAL_ALL);
@@ -53,5 +52,5 @@ int test(char *URL)
     }
   }
   curl_global_cleanup();
-  return error;
+  return CURLE_OK;
 }

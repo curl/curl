@@ -153,7 +153,7 @@ static const struct dcheck dates[] = {
   { NULL, 0 }
 };
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   int i;
   int error = 0;
@@ -169,5 +169,5 @@ int test(char *URL)
     }
   }
 
-  return error;
+  return error == 0 ? CURLE_OK : TEST_ERR_FAILURE;
 }

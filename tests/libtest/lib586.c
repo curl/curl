@@ -129,7 +129,7 @@ static void *fire(void *ptr)
 }
 
 /* test function */
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURLcode res = CURLE_OK;
   CURLSHcode scode = CURLSHE_OK;

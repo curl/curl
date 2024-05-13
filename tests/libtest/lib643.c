@@ -56,7 +56,7 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   return 0;                         /* no more data left to deliver */
 }
 
-static int once(char *URL, bool oldstyle)
+static CURLcode once(char *URL, bool oldstyle)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
@@ -223,7 +223,7 @@ test_cleanup:
   return res;
 }
 
-static int cyclic_add(void)
+static CURLcode cyclic_add(void)
 {
   CURL *easy = curl_easy_init();
   curl_mime *mime = curl_mime_init(easy);
@@ -242,14 +242,14 @@ static int cyclic_add(void)
   curl_easy_cleanup(easy);
   if(a1 != CURLE_BAD_FUNCTION_ARGUMENT)
     /* that should have failed */
-    return 1;
+    return (CURLcode)1;
 
-  return 0;
+  return CURLE_OK;
 }
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
-  int res;
+  CURLcode res;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");

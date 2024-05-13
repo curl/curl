@@ -20,9 +20,10 @@ Example:
 Warning: this is considered an insecure option. Consider using --ssl-reqd
 instead to be sure curl upgrades to a secure connection.
 
-Try to use SSL/TLS for the connection. Reverts to a non-secure connection if
-the server does not support SSL/TLS. See also --ftp-ssl-control and --ssl-reqd
-for different levels of encryption required.
+Try to use SSL/TLS for the connection - often referred to as STARTTLS or STLS
+because of the involved commands. Reverts to a non-secure connection if the
+server does not support SSL/TLS. See also --ftp-ssl-control and --ssl-reqd for
+different levels of encryption required.
 
 This option is handled in LDAP (added in 7.81.0). It is fully supported by the
 OpenLDAP backend and ignored by the generic ldap backend.

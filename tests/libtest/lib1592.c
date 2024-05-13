@@ -41,7 +41,7 @@
 
 #include <sys/stat.h>
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   int stillRunning;
   CURLM *multiHandle = NULL;
@@ -103,8 +103,7 @@ int test(char *URL)
   start_test_timing();
   mres = curl_multi_remove_handle(multiHandle, curl);
   if(mres) {
-    fprintf(stderr, "curl_multi_remove_handle() failed, "
-            "with code %d\n", (int)res);
+    fprintf(stderr, "curl_multi_remove_handle() failed, with code %d\n", mres);
     res = TEST_ERR_MULTI;
     goto test_cleanup;
   }
@@ -120,5 +119,5 @@ test_cleanup:
   curl_multi_cleanup(multiHandle);
   curl_global_cleanup();
 
-  return (int)res;
+  return res;
 }

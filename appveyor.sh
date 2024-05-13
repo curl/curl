@@ -39,7 +39,6 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   options=''
   [[ "${TARGET:-}" = *'ARM64'* ]] && SKIP_RUN='ARM64 architecture'
   [ "${OPENSSL}" = 'ON' ] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
-  [ "${OPENSSL}" = 'ON' ] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
   [ "${PRJ_CFG}" = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
   [ "${PRJ_CFG}" = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
   [[ "${PRJ_GEN}" = *'Visual Studio'* ]] && options+=' -DCMAKE_VS_GLOBALS=TrackFileAccess=false'
@@ -57,7 +56,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     '-DCURL_WERROR=ON' \
     "-DENABLE_DEBUG=${DEBUG}" \
     "-DENABLE_UNICODE=${ENABLE_UNICODE}" \
-    '-DCMAKE_INSTALL_PREFIX=C:/CURL' \
+    '-DCMAKE_INSTALL_PREFIX=C:/curl' \
     "-DCMAKE_BUILD_TYPE=${PRJ_CFG}"
   # shellcheck disable=SC2086
   cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --clean-first -- ${BUILD_OPT:-}
@@ -128,10 +127,6 @@ if false; then
   done
 fi
 
-if [ "${TESTING}" = 'ON' ] && [ "${BUILD_SYSTEM}" = 'CMake' ]; then
-  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
-fi
-
 # test
 
 if [ "${TESTING}" = 'ON' ]; then
@@ -143,13 +138,11 @@ if [ "${TESTING}" = 'ON' ]; then
   fi
   TFLAGS+=" ${DISABLED_TESTS:-}"
   if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
+    cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
     ls _bld/lib/*.dll >/dev/null 2>&1 && cp -f -p _bld/lib/*.dll _bld/tests/libtest/
     cmake --build _bld --config "${PRJ_CFG}" --target test-ci
   elif [ "${BUILD_SYSTEM}" = 'autotools' ]; then
-    (
-      cd _bld
-      make -j2 V=1 test-ci
-    )
+    make -C _bld -j2 V=1 test-ci
   else
     (
       TFLAGS="-a -p !flaky -r -rm ${TFLAGS}"

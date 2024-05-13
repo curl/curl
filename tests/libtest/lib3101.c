@@ -24,9 +24,9 @@
 #include "test.h"
 #include "memdebug.h"
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
-  int res;
+  CURLcode res;
   CURL *curl;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
@@ -51,7 +51,7 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_REDIR_PROTOCOLS_STR, "https");
 
   res = curl_easy_perform(curl);
-  if(res != (int)CURLE_OK) {
+  if(res != CURLE_OK) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }

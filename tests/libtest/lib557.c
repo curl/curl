@@ -1464,7 +1464,8 @@ static int test_return_codes(void)
 
   return 0;
 }
-int test(char *URL)
+
+CURLcode test(char *URL)
 {
   int errors = 0;
   (void)URL; /* not used */
@@ -1504,5 +1505,5 @@ int test(char *URL)
   if(errors)
     return TEST_ERR_MAJOR_BAD;
   else
-    return 0;
+    return CURLE_OK;
 }

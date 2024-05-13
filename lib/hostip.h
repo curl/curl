@@ -166,7 +166,7 @@ void Curl_resolv_unlock(struct Curl_easy *data,
                         struct Curl_dns_entry *dns);
 
 /* init a new dns cache */
-void Curl_init_dnscache(struct Curl_hash *hash, int hashsize);
+void Curl_init_dnscache(struct Curl_hash *hash, size_t hashsize);
 
 /* prune old entries from the DNS cache */
 void Curl_hostcache_prune(struct Curl_easy *data);

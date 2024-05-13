@@ -30,12 +30,12 @@
 #define TEST_HANG_TIMEOUT 60 * 1000
 #define WAKEUP_NUM 10
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURLM *multi = NULL;
   int numfds;
   int i;
-  int res = 0;
+  CURLcode res = CURLE_OK;
   struct timeval time_before_wait, time_after_wait;
 
   (void)URL;

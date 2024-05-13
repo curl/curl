@@ -136,7 +136,7 @@ char *hexdump(const unsigned char *buffer, size_t len)
 int main(int argc, char **argv)
 {
   char *URL;
-  int result;
+  CURLcode result;
 
 #ifdef O_BINARY
 #  ifdef __HIGHC__
@@ -185,5 +185,5 @@ int main(int argc, char **argv)
 
   /* Regular program status codes are limited to 0..127 and 126 and 127 have
    * special meanings by the shell, so limit a normal return code to 125 */
-  return result <= 125 ? result : 125;
+  return (int)result <= 125 ? (int)result : 125;
 }

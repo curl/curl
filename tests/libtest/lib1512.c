@@ -34,9 +34,9 @@
 
 #define NUM_HANDLES 2
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
-  int res = 0;
+  CURLcode res = CURLE_OK;
   CURL *curl[NUM_HANDLES] = {NULL, NULL};
   char *port = libtest_arg3;
   char *address = libtest_arg2;

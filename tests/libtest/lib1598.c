@@ -54,7 +54,7 @@ static int trailers_callback(struct curl_slist **list, void *userdata)
 
 static const char *post_data = "xxx=yyy&aaa=bbbbb";
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURL *curl = NULL;
   CURLcode res = CURLE_FAILED_INIT;
@@ -103,5 +103,5 @@ test_cleanup:
 
   curl_global_cleanup();
 
-  return (int)res;
+  return res;
 }

@@ -30,7 +30,7 @@
 static const char cmd[] = "A1 IDLE\r\n";
 static char buf[1024];
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURLM *mcurl;
   CURL *curl = NULL;
@@ -39,7 +39,7 @@ int test(char *URL)
   time_t start = time(NULL);
   int state = 0;
   ssize_t pos = 0;
-  int res = 0;
+  CURLcode res = CURLE_OK;
 
   global_init(CURL_GLOBAL_DEFAULT);
   multi_init(mcurl);

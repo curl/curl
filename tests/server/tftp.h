@@ -42,9 +42,9 @@
    things build. */
 
 struct tftphdr {
-  short th_opcode;         /* packet type */
-  unsigned short th_block; /* all sorts of things */
-  char th_data[1];         /* data or error string */
+  unsigned short th_opcode; /* packet type */
+  unsigned short th_block;  /* all sorts of things */
+  char th_data[1];          /* data or error string */
 } PACKED_STRUCT;
 
 #define th_stuff th_block

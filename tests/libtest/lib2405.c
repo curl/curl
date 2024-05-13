@@ -73,9 +73,9 @@ static size_t emptyWriteFunc(void *ptr, size_t size, size_t nmemb,
   return size * nmemb;
 }
 
-static int set_easy(char *URL, CURL *easy, long option)
+static CURLcode set_easy(char *URL, CURL *easy, long option)
 {
-  int res = CURLE_OK;
+  CURLcode res = CURLE_OK;
 
   /* First set the URL that is about to receive our POST. */
   easy_setopt(easy, CURLOPT_URL, URL);
@@ -115,7 +115,7 @@ test_cleanup:
   return res;
 }
 
-static int test_run(char *URL, long option, unsigned int *max_fd_count)
+static CURLcode test_run(char *URL, long option, unsigned int *max_fd_count)
 {
   CURLMcode mc = CURLM_OK;
   CURLM *multi = NULL;
@@ -131,7 +131,7 @@ static int test_run(char *URL, long option, unsigned int *max_fd_count)
   int msgs_left; /* how many messages are left */
 
   CURLcode result;
-  int res = CURLE_OK;
+  CURLcode res = CURLE_OK;
 
   struct curl_waitfd ufds[10];
   struct curl_waitfd ufds1[10];
@@ -205,7 +205,7 @@ static int test_run(char *URL, long option, unsigned int *max_fd_count)
       result = msg->data.result;
 
       if(!res)
-        res = (int)result;
+        res = result;
     }
   }
 
@@ -221,10 +221,11 @@ test_cleanup:
 
   if(max_fd_count)
     *max_fd_count = max_count;
+
   return res;
 }
 
-static int empty_multi_test(void)
+static CURLcode empty_multi_test(void)
 {
   CURLMcode mc = CURLM_OK;
   CURLM *multi = NULL;
@@ -232,7 +233,7 @@ static int empty_multi_test(void)
 
   struct curl_waitfd ufds[10];
 
-  int res = CURLE_OK;
+  CURLcode res = CURLE_OK;
   unsigned int fd_count = 0;
 
   multi_init(multi);
@@ -282,9 +283,9 @@ test_cleanup:
   return res;
 }
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
-  int res = CURLE_OK;
+  CURLcode res = CURLE_OK;
   unsigned int fd_count = 0;
 
   global_init(CURL_GLOBAL_ALL);

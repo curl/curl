@@ -100,9 +100,9 @@ static char *suburl(const char *base, int i)
   return curl_maprintf("%s%.4d", base, i);
 }
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
-  int res;
+  CURLcode res;
   CURL *curl;
   char *stream_uri = NULL;
   int request = 1;

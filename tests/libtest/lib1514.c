@@ -54,11 +54,11 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   return 0;                         /* no more data left to deliver */
 }
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURL *curl;
   CURLcode result = CURLE_OK;
-  int res = 0;
+  CURLcode res = CURLE_OK;
   struct WriteThis pooh = { data, sizeof(data)-1 };
 
   global_init(CURL_GLOBAL_ALL);
@@ -82,5 +82,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return (int)result;
+  return result;
 }

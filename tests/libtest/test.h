@@ -68,8 +68,8 @@ extern int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
 
 extern void wait_ms(int ms); /* wait this many milliseconds */
 
-extern int test(char *URL); /* the actual test function provided by each
-                               individual libXXX.c file */
+extern CURLcode test(char *URL); /* the actual test function provided by each
+                                    individual libXXX.c file */
 
 extern char *hexdump(const unsigned char *buffer, size_t len);
 
@@ -490,11 +490,11 @@ extern int unitfail;
   chk_global_init((A), (__FILE__), (__LINE__))
 
 #define NO_SUPPORT_BUILT_IN                     \
-  int test(char *URL)                           \
+  CURLcode test(char *URL)                      \
   {                                             \
     (void)URL;                                  \
     fprintf(stderr, "Missing support\n");       \
-    return 1;                                   \
+    return (CURLcode)1;                         \
   }
 
 /* ---------------------------------------------------------------- */

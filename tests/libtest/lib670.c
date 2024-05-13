@@ -97,7 +97,7 @@ static int xferinfo(void *clientp, curl_off_t dltotal, curl_off_t dlnow,
 }
 #endif
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
 #if defined(LIB670) || defined(LIB671)
   curl_mime *mime = NULL;
@@ -116,8 +116,7 @@ int test(char *URL)
 #endif
 
   struct ReadThis pooh;
-  CURLcode result;
-  int res = TEST_ERR_FAILURE;
+  CURLcode res = TEST_ERR_FAILURE;
 
   /*
    * Check proper pausing/unpausing from a mime or form read callback.
@@ -145,11 +144,11 @@ int test(char *URL)
   /* Build the mime tree. */
   mime = curl_mime_init(pooh.easy);
   part = curl_mime_addpart(mime);
-  result = curl_mime_name(part, name);
-  if(result) {
+  res = curl_mime_name(part, name);
+  if(res != CURLE_OK) {
     fprintf(stderr,
             "Something went wrong when building the mime structure: %d\n",
-            (int) result);
+            res);
     goto test_cleanup;
   }
 
@@ -157,7 +156,7 @@ int test(char *URL)
                           NULL, NULL, &pooh);
 
   /* Bind mime data to its easy handle. */
-  if(!res)
+  if(res == CURLE_OK)
     test_setopt(pooh.easy, CURLOPT_MIMEPOST, mime);
 #else
   /* Build the form. */
@@ -233,8 +232,7 @@ int test(char *URL)
       if(!msg)
         break;
       if(msg->msg == CURLMSG_DONE) {
-        result = msg->data.result;
-        res = (int) result;
+        res = msg->data.result;
       }
     }
 
@@ -246,8 +244,7 @@ int test(char *URL)
   test_setopt(pooh.easy, CURLOPT_XFERINFODATA, &pooh);
   test_setopt(pooh.easy, CURLOPT_XFERINFOFUNCTION, xferinfo);
   test_setopt(pooh.easy, CURLOPT_NOPROGRESS, 0L);
-  result = curl_easy_perform(pooh.easy);
-  res = (int) result;
+  res = curl_easy_perform(pooh.easy);
 #endif
 
 

@@ -69,8 +69,8 @@ static void unit_stop(void)
 struct timetest {
   int now_s;
   int now_us;
-  int timeout_ms;
-  int connecttimeout_ms;
+  unsigned int timeout_ms;
+  unsigned int connecttimeout_ms;
   bool connecting;
   timediff_t result;
   const char *comment;

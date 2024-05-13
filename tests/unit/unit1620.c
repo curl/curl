@@ -42,7 +42,7 @@ static void unit_stop(void)
 
 UNITTEST_START
 {
-  int rc;
+  CURLcode rc;
   struct Curl_easy *empty;
   const char *hostname = "hostname";
   enum dupstring i;
