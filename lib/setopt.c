@@ -111,7 +111,6 @@ CURLcode Curl_setblobopt(struct curl_blob **blobp,
 
 static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp)
 {
-  CURLcode result = CURLE_OK;
   char *user = NULL;
   char *passwd = NULL;
 
@@ -122,30 +121,22 @@ static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp)
      to clear the existing data */
   if(option) {
     size_t len = strlen(option);
+    CURLcode result;
     if(len > CURL_MAX_INPUT_LENGTH)
       return CURLE_BAD_FUNCTION_ARGUMENT;
 
     result = Curl_parse_login_details(option, len, &user, &passwd, NULL);
+    if(result)
+      return result;
   }
 
-  if(!result) {
-    /* Store the username part */
-    if(!user && option && option[0] == ':') {
-      /* Allocate an empty string instead of returning NULL as user name */
-      user = strdup("");
-      if(!user)
-        result = CURLE_OUT_OF_MEMORY;
-    }
+  free(*userp);
+  *userp = user;
 
-    Curl_safefree(*userp);
-    *userp = user;
+  free(*passwdp);
+  *passwdp = passwd;
 
-    /* Store the password part */
-    Curl_safefree(*passwdp);
-    *passwdp = passwd;
-  }
-
-  return result;
+  return CURLE_OK;
 }
 
 #define C_SSLVERSION_VALUE(x) (x & 0xffff)
