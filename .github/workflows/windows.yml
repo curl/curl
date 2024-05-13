@@ -206,7 +206,6 @@ jobs:
         timeout-minutes: 5
         shell: msys2 {0}
         run: |
-          export MSYS2_ARG_CONV_EXCL='/*'
           export TFLAGS='-j14 ${{ matrix.tflags }}'
           if [ -x "$(cygpath -u 'C:/msys64/usr/bin/curl.exe')" ]; then
             TFLAGS+=" -ac $(cygpath -u 'C:/msys64/usr/bin/curl.exe')"
