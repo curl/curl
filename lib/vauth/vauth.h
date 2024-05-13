@@ -79,12 +79,10 @@ CURLcode Curl_auth_create_plain_message(const char *authzid,
                                         struct bufref *out);
 
 /* This is used to generate a LOGIN cleartext message */
-CURLcode Curl_auth_create_login_message(const char *value,
-                                        struct bufref *out);
+void Curl_auth_create_login_message(const char *value, struct bufref *out);
 
 /* This is used to generate an EXTERNAL cleartext message */
-CURLcode Curl_auth_create_external_message(const char *user,
-                                           struct bufref *out);
+void Curl_auth_create_external_message(const char *user, struct bufref *out);
 
 #ifndef CURL_DISABLE_DIGEST_AUTH
 /* This is used to generate a CRAM-MD5 response message */
