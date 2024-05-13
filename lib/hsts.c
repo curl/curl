@@ -107,11 +107,6 @@ void Curl_hsts_cleanup(struct hsts **hp)
   }
 }
 
-static struct stsentry *hsts_entry(void)
-{
-  return calloc(1, sizeof(struct stsentry));
-}
-
 static CURLcode hsts_create(struct hsts *h,
                             const char *hostname,
                             bool subdomains,
@@ -127,7 +122,7 @@ static CURLcode hsts_create(struct hsts *h,
     --hlen;
   if(hlen) {
     char *duphost;
-    struct stsentry *sts = hsts_entry();
+    struct stsentry *sts = calloc(1, sizeof(struct stsentry));
     if(!sts)
       return CURLE_OUT_OF_MEMORY;
 
