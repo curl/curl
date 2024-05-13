@@ -4,7 +4,7 @@ curl and libcurl 8.8.0
  Command line options:         259
  curl_easy_setopt() options:   305
  Public functions in libcurl:  94
- Contributors:                 3165
+ Contributors:                 3166
 
 This release includes the following changes:
 
@@ -22,6 +22,8 @@ This release includes the following bugfixes:
  o appveyor: make gcc 6 mingw64 job build-only [152]
  o asyn-thread: fix curl_global_cleanup crash in Windows [161]
  o asyn-thread: fix Curl_thread_create result check [162]
+ o autotools: delete unused functions [177]
+ o autotools: fix `HAVE_IOCTLSOCKET_FIONBIO` test for gcc 14 [186]
  o bearssl: fix compiler warnings [43]
  o bearssl: use common code for cipher suite lookup [126]
  o bufq: remove duplicate word in comment [154]
@@ -29,6 +31,7 @@ This release includes the following bugfixes:
  o build: remove MacOSX-Framework script [60]
  o cd2nroff/manage: use UTC when SOURCE_DATE_EPOCH is set [36]
  o cf-https-connect: use timeouts as unsigned ints [143]
+ o cf-socket: don't try getting local IP without socket [188]
  o cf-socket: remove references to l_ip, l_port [9]
  o ci: add curl-for-win builds: Linux MUSL, macOS, Windows [68]
  o cmake: add `BUILD_EXAMPLES` option to build examples [128]
@@ -37,6 +40,7 @@ This release includes the following bugfixes:
  o cmake: enable `-pedantic-errors` for clang when `CURL_WERROR=ON` [47]
  o cmake: FindNGHTTP2 add static lib name to find_library call [141]
  o cmake: fix `CURL_WERROR=ON` for old CMake and use it in GHA/linux-old [48]
+ o cmake: fix `HAVE_IOCTLSOCKET_FIONBIO` test with gcc 14 [179]
  o cmake: fixup `DEPENDS` filename [51]
  o cmake: forward `USE_LIBRTMP` option to C [59]
  o cmake: generate misc manpages and install `mk-ca-bundle.pl` [24]
@@ -64,6 +68,7 @@ This release includes the following bugfixes:
  o curl_url_get.md: clarify queries and fragments and CURLU_GET_EMPTY [105]
  o CURLINFO_REQUEST_SIZE: fixed, add tests for transfer infos reported [52]
  o cw-out: improved error handling [104]
+ o digest: replace strcpy for empty string with simple assignment [185]
  o dist: `set -eu`, fix shellcheck, make reproducible and smaller tarballs [38]
  o dist: add files missing from release tarball [53]
  o dist: add reproducible dir entries to tarballs [56]
@@ -75,6 +80,7 @@ This release includes the following bugfixes:
  o dllmain: Call OpenSSL thread cleanup for Windows and Cygwin [114]
  o doc: pytest `--repeat` -> `--count` [58]
  o docs/cmdline-opts: invoke managen using a relative path [30]
+ o docs/cmdline-opts: mention STARTTLS for --ssl and --ssl-reqd [175]
  o docs/MAIL-ETIQUETTE: convert to markdown [12]
  o docs: add CURLOPT_NOPROGRESS to CURLOPT_XFERINFOFUNCTION example [61]
  o docs: clarify CURLOPT_MAXFILESIZE and CURLOPT_MAXFILESIZE_LARGE [74]
@@ -82,8 +88,11 @@ This release includes the following bugfixes:
  o doh: fix typo in comment [173]
  o doh: remove unused function prototype [169]
  o dynbuf: fix returncode on memory error [174]
+ o examples: fix/silence `-Wsign-conversion` [178]
  o EXPERIMENTAL: add graduation requirements for each feature [166]
  o file: remove useless assignment [89]
+ o ftp: add tracing support [181]
+ o ftp: fix build for CURL_DISABLE_VERBOSE_STRINGS
  o ftp: fix socket leak on rare error [102]
  o GHA: add shellcheck job and fix warnings, shell tidy-ups [70]
  o GHA: add valgrind to a wolfSSL build [37]
@@ -91,20 +100,25 @@ This release includes the following bugfixes:
  o gnutls: lazy init the trust settings [75]
  o h3/ngtcp2: improve error handling [140]
  o hash: change 'slots' to size_t from int [144]
+ o hsts: remove single-use single-line function [151]
  o http2 + ngtcp2: pass CURLcode errors from callbacks [94]
  o http2, http3: decouple stream state from easy handle [92]
  o http2: emit RST when client write fails [65]
  o http3: quiche+ngtcp2 improvements [129]
  o http: acknowledge a returned error code [123]
  o http: reject HTTP major version switch mid connection [100]
+ o http: remove redundant check [182]
  o http: with chunked POST forced, disable length check on read callback [31]
  o http_aws_sigv4: remove useless assignment [88]
  o idn: make Curl_idnconvert_hostname() use Curl_idn_decode() [16]
  o if2ip: make the buf_size arg a size_t [142]
  o INSTALL-CMAKE.md: explain `cmake -G <generator-name>` [32]
  o krb5: use dynbuf [149]
+ o ldap: fix unused variables (seen on OmniOS) [183]
  o lib/cf-h1-proxy: silence compiler warnings (gcc 14) [155]
  o lib: add trace support for client reads and writes [45]
+ o lib: bump hash sizes to `size_t` [153]
+ o lib: clear the easy handle's saved errno before transfer [180]
  o lib: make protocol handlers store scheme name lowercase [159]
  o lib: merge `ENABLE_QUIC` C macro into `USE_HTTP3` [84]
  o lib: remove two instances of "only only" messages [160]
@@ -141,6 +155,7 @@ This release includes the following bugfixes:
  o projects: drop MSVC project files for recent versions [79]
  o quic: fixup duplicate static function name (for cmake unity) [77]
  o quiche: expire all active transfers on connection close [116]
+ o quiche: trust its timeout handling [190]
  o RELEASE-PROCEDURE: mention an initial working build [7]
  o request: make Curl_req_init return void [96]
  o request: paused upload on completed download, assess connection [54]
@@ -149,6 +164,7 @@ This release includes the following bugfixes:
  o rustls: remove incorrect SSLSUPP_TLS13_CIPHERSUITES flag [115]
  o sendf: fix two typos in comments [90]
  o sendf: useless assignment in cr_lc_read() [120]
+ o setopt: warn on Curl_set*opt() uses not using the return value [176]
  o smtp: result of Curl_bufq_cread was not used [78]
  o telnet: check return code from fileno() [112]
  o tests/http: fix compiler warning [39]
@@ -156,6 +172,7 @@ This release includes the following bugfixes:
  o tests: check caddy server version to match test expectations [106]
  o tests: enable test 1117 for hyper [119]
  o tests: fix feature case in test1481 [117]
+ o tests: make the unit test result type `CURLcode` [165]
  o tests: Mark tftpd timer function as noreturn [168]
  o tls: fix SecureTransport + BearSSL cmake unity builds [113]
  o tls: remove EXAMPLEs from deprecated options [164]
@@ -164,6 +181,7 @@ This release includes the following bugfixes:
  o tool_cb_rea: limit rate unpause for -T . uploads [136]
  o tool_cfgable: free {proxy_}cipher13_list on exit [172]
  o tool_getparam: output warning for leading unicode quote character [14]
+ o tool_getparam: remove two redundant conditions [189]
  o tool_operate: don't truncate the etag save file by default [118]
  o tool_operate: init vars unconditionally in post_per_transfer [124]
  o tool_paramhlp: remove duplicate assign [121]
@@ -172,12 +190,14 @@ This release includes the following bugfixes:
  o transfer: remove useless assignment [122]
  o url: do not URL decode proxy crendentials [55]
  o url: fix use of an uninitialized variable [86]
+ o url: make parse_login_details use memdup0 [184]
  o urlapi: allow setting port number zero [76]
  o urlapi: fix relative redirects to fragment-only [83]
  o urldata: remove fields not used depending on used features [46]
  o version: use msnprintf instead of strncpy [157]
  o vquic: use CURL_FORMAT_CURL_OFF_T for 64 bit printf output [18]
  o vtls: TLS session storage overhaul [130]
+ o websocket: avoid memory leak in error path [148]
  o winbuild: add ENABLE_WEBSOCKETS option [93]
  o winbuild: use $(RC) correctly [27]
  o wolfssl: plug memory leak in wolfssl_connect_step2() [25]
@@ -204,15 +224,15 @@ advice from friends like these:
   Hongfei Li, Ivan, Jan Macku, Jan Venekamp, Jeff King, Jérôme Leclercq,
   Jiwoo Park, Johann Sebastian Schicho, Jonatan Vela, Kailun Qin,
   kalvdans on github, Keitagit-kun on github, Konstantin Kuzov,
-  kpcyrd on github, Laramie Leavitt, Lucas Nussbaum, magisterquis on hackerone,
-  Marcel Raad, Matt Jolly, Mel Zuser, Michael Kaufmann, Michał Antoniak,
-  Patrick Monnerat, Paul Gilmartin, Paul Howarth, Pavel Kropachev,
-  Pavel Pavlov, Philip Heiduck, Rahul Krishna M, RainRat, Ray Satiro,
-  riastradh on github, Robert Moreton, Sanjay Pujare, Sergey Bronnikov,
-  Sergey Ogryzkov, Sergio Durigan Junior, southernedge on github,
-  Stefan Eissing, Stephen Farrell, Tal Regev, Tobias Stoeckmann, Toon Claes,
-  Viktor Szakats, zmcx16 on github
-  (70 contributors)
+  kpcyrd on github, Laramie Leavitt, LigH, Lucas Nussbaum,
+  magisterquis on hackerone, Marcel Raad, Matt Jolly, Mel Zuser,
+  Michael Kaufmann, Michał Antoniak, Orgad Shaneh, Patrick Monnerat,
+  Paul Gilmartin, Paul Howarth, Pavel Kropachev, Pavel Pavlov, Philip Heiduck,
+  Rahul Krishna M, RainRat, Ray Satiro, riastradh on github, Robert Moreton,
+  Sanjay Pujare, Sergey Bronnikov, Sergey Ogryzkov, Sergio Durigan Junior,
+  southernedge on github, Stefan Eissing, Stephen Farrell, Tal Regev,
+  Tobias Stoeckmann, Toon Claes, Viktor Szakats, zmcx16 on github
+  (72 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -363,9 +383,12 @@ References to bug reports and discussions on issues:
  [145] = https://curl.se/bug/?i=13498
  [146] = https://curl.se/bug/?i=13500
  [147] = https://curl.se/bug/?i=13557
+ [148] = https://curl.se/bug/?i=13602
  [149] = https://curl.se/bug/?i=13568
  [150] = https://curl.se/bug/?i=13567
+ [151] = https://curl.se/bug/?i=13604
  [152] = https://curl.se/bug/?i=13566
+ [153] = https://curl.se/bug/?i=13601
  [154] = https://curl.se/bug/?i=13554
  [155] = https://curl.se/bug/?i=13237
  [156] = https://curl.se/bug/?i=13539
@@ -377,6 +400,7 @@ References to bug reports and discussions on issues:
  [162] = https://curl.se/bug/?i=13542
  [163] = https://curl.se/bug/?i=13529
  [164] = https://curl.se/bug/?i=13540
+ [165] = https://curl.se/bug/?i=13600
  [166] = https://curl.se/bug/?i=13541
  [167] = https://curl.se/bug/?i=13538
  [168] = https://curl.se/bug/?i=13534
@@ -385,3 +409,18 @@ References to bug reports and discussions on issues:
  [172] = https://curl.se/bug/?i=13531
  [173] = https://curl.se/bug/?i=13504
  [174] = https://curl.se/bug/?i=13533
+ [175] = https://curl.se/bug/?i=13590
+ [176] = https://curl.se/bug/?i=13591
+ [177] = https://curl.se/bug/?i=13605
+ [178] = https://curl.se/bug/?i=13501
+ [179] = https://curl.se/bug/?i=13578
+ [180] = https://curl.se/bug/?i=13574
+ [181] = https://curl.se/bug/?i=13580
+ [182] = https://curl.se/bug/?i=13582
+ [183] = https://curl.se/bug/?i=13588
+ [184] = https://curl.se/bug/?i=13584
+ [185] = https://curl.se/bug/?i=13586
+ [186] = https://curl.se/bug/?i=13579
+ [188] = https://curl.se/bug/?i=13577
+ [189] = https://curl.se/bug/?i=13576
+ [190] = https://curl.se/bug/?i=13581
