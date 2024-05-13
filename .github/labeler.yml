@@ -109,13 +109,13 @@ GOPHER:
   - all:
       - changed-files:
           - any-glob-to-all-files:
-              - '{lib/gopher*}'
+              - 'lib/gopher*'
 
 HTTP:
   - all:
       - changed-files:
           - any-glob-to-all-files:
-              - '{docs/examples/hsts*,docs/examples/http-*,docs/examples/httpput*,docs/examples/https*,docs/examples/*post*,docs/HSTS.md,docs/HTTP-COOKIES.md,docs/libcurl/opts/CURLINFO_COOKIE*,docs/libcurl/opts/CURLOPT_COOKIE*,docs/libcurl/opts/CURLINFO_HTTP_**,docs/libcurl/opts/CURLINFO_REDIRECT*,docs/libcurl/opts/CURLINFO_REFER*,docs/libcurl/opts/CURLOPT_FOLLOWLOCATION*,docs/libcurl/opts/CURLOPT_HSTS*,docs/libcurl/opts/CURLOPT_HTTP*,docs/libcurl/opts/CURLOPT_POST.*,docs/libcurl/opts/CURLOPT_POSTFIELD*,docs/libcurl/opts/CURLOPT_POSTREDIR*,docs/libcurl/opts/CURLOPT_REDIR*,docs/libcurl/opts/CURLOPT_REFER*,docs/libcurl/opts/CURLOPT_TRAILER*,docs/libcurl/opts/CURLOPT_TRANSFER_ENCODING*,lib/cf-https*,lib/cf-h1*,lib/cf-h2*,lib/cookie.*,lib/http*,tests/http*,tests/http-server.pl,tests/http/*,tests/nghttp*}'
+              - '{docs/examples/hsts*,docs/examples/http-*,docs/examples/httpput*,docs/examples/https*,docs/examples/*post*,docs/HSTS.md,docs/HTTP-COOKIES.md,docs/libcurl/opts/CURLINFO_COOKIE*,docs/libcurl/opts/CURLOPT_COOKIE*,docs/libcurl/opts/CURLINFO_HTTP_**,docs/libcurl/opts/CURLINFO_REDIRECT*,docs/libcurl/opts/CURLINFO_REFER*,docs/libcurl/opts/CURLOPT_FOLLOWLOCATION*,docs/libcurl/opts/CURLOPT_HSTS*,docs/libcurl/opts/CURLOPT_HTTP*,docs/libcurl/opts/CURLOPT_POST.*,docs/libcurl/opts/CURLOPT_POSTFIELD*,docs/libcurl/opts/CURLOPT_POSTREDIR*,docs/libcurl/opts/CURLOPT_REDIR*,docs/libcurl/opts/CURLOPT_REFER*,docs/libcurl/opts/CURLOPT_TRAILER*,docs/libcurl/opts/CURLOPT_TRANSFER_ENCODING*,lib/cf-https*,lib/cf-h1*,lib/cf-h2*,lib/cookie.*,lib/hsts.*,lib/http*,tests/http*,tests/http-server.pl,tests/http/*,tests/nghttp*}'
 
 HTTP/2:
   - all:
@@ -145,7 +145,7 @@ LDAP:
   - all:
       - changed-files:
           - any-glob-to-all-files:
-              - '{lib/*ldap*}'
+              - 'lib/*ldap*'
 
 libcurl API:
   - all:
@@ -189,7 +189,7 @@ RTMP:
   - all:
       - changed-files:
           - any-glob-to-all-files:
-              - '{lib/curl_rtmp.*}'
+              - 'lib/curl_rtmp.*'
 
 RTSP:
   - all:
