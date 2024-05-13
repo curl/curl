@@ -73,8 +73,10 @@ jobs:
           sudo python3 -m pip install impacket
         name: 'install prereqs and impacket'
 
+      - uses: actions/checkout@v4
+
       - run: |
-          WOLFSSL_VER=5.6.3
+          source .github/scripts/VERSIONS
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssl/archive/v$WOLFSSL_VER-stable.tar.gz
           tar -xzf v$WOLFSSL_VER-stable.tar.gz
           cd wolfssl-$WOLFSSL_VER-stable
@@ -82,8 +84,6 @@ jobs:
           ./configure --enable-tls13 ${{ matrix.build.wolfssl-configure }} --enable-harden --prefix=$HOME/wssl
           make install
         name: 'install wolfssl'
-
-      - uses: actions/checkout@v4
 
       - run: autoreconf -fi
         name: 'autoreconf'
