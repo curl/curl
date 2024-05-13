@@ -68,7 +68,7 @@ jobs:
         run: |
           export PATH="/usr/bin:$(cygpath ${SYSTEMROOT})/system32"
           autoreconf -fi
-          export TFLAGS='-j16 ${{ matrix.tflags }}'
+          export TFLAGS='-j14 ${{ matrix.tflags }}'
           if [ -x "$(cygpath -u "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath -u "${SYSTEMROOT}/System32/curl.exe")"
           fi
@@ -163,7 +163,7 @@ jobs:
         shell: msys2 {0}
         run: |
           autoreconf -fi
-          export TFLAGS='-j16 ${{ matrix.tflags }}'
+          export TFLAGS='-j14 ${{ matrix.tflags }}'
           if [ -x "$(cygpath -u 'C:/msys64/usr/bin/curl.exe')" ]; then
             TFLAGS+=" -ac $(cygpath -u 'C:/msys64/usr/bin/curl.exe')"
           fi
@@ -207,7 +207,7 @@ jobs:
         shell: msys2 {0}
         run: |
           export MSYS2_ARG_CONV_EXCL='/*'
-          export TFLAGS='-j16 ${{ matrix.tflags }}'
+          export TFLAGS='-j14 ${{ matrix.tflags }}'
           if [ -x "$(cygpath -u 'C:/msys64/usr/bin/curl.exe')" ]; then
             TFLAGS+=" -ac $(cygpath -u 'C:/msys64/usr/bin/curl.exe')"
           fi
