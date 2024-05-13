@@ -167,17 +167,12 @@ create_hostcache_id(const char *name,
                     int port, char *ptr, size_t buflen)
 {
   size_t len = nlen ? nlen : strlen(name);
-  size_t olen = 0;
   DEBUGASSERT(buflen >= MAX_HOSTCACHE_LEN);
   if(len > (buflen - 7))
     len = buflen - 7;
   /* store and lower case the name */
-  while(len--) {
-    *ptr++ = Curl_raw_tolower(*name++);
-    olen++;
-  }
-  olen += msnprintf(ptr, 7, ":%u", port);
-  return olen;
+  Curl_strntolower(ptr, name, len);
+  return msnprintf(&ptr[len], 7, ":%u", port) + len;
 }
 
 struct hostcache_prune_data {
