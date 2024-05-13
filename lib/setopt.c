@@ -779,22 +779,20 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /*
      * Set cookie file name to dump all cookies to when we're done.
      */
-  {
-    struct CookieInfo *newcookies;
     result = Curl_setstropt(&data->set.str[STRING_COOKIEJAR],
                             va_arg(param, char *));
-
-    /*
-     * Activate the cookie parser. This may or may not already
-     * have been made.
-     */
-    newcookies = Curl_cookie_init(data, NULL, data->cookies,
-                                  data->set.cookiesession);
-    if(!newcookies)
-      result = CURLE_OUT_OF_MEMORY;
-    data->cookies = newcookies;
-  }
-  break;
+    if(!result) {
+      /*
+       * Activate the cookie parser. This may or may not already
+       * have been made.
+       */
+      struct CookieInfo *newcookies =
+        Curl_cookie_init(data, NULL, data->cookies, data->set.cookiesession);
+      if(!newcookies)
+        result = CURLE_OUT_OF_MEMORY;
+      data->cookies = newcookies;
+    }
+    break;
 
   case CURLOPT_COOKIESESSION:
     /*
