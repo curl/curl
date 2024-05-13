@@ -125,6 +125,7 @@ jobs:
         run: |
           cmake --build bld --config '${{ matrix.type }}' --parallel 3
           [[ '${{ matrix.config }}' = *'BUILD_SHARED_LIBS=ON'* ]] && cp -f -p bld/lib/*.dll bld/src/
+          find . -name '*.exe' -o -name '*.dll'
           bld/src/curl.exe --disable --version
 
   msys2:
@@ -246,6 +247,7 @@ jobs:
         run: |
           cmake --build bld --config '${{ matrix.type }}' --parallel 3
           [[ '${{ matrix.config }}' = *'BUILD_SHARED_LIBS=ON'* ]] && cp -f -p bld/lib/*.dll bld/src/
+          find . -name '*.exe' -o -name '*.dll'
           bld/src/curl.exe --disable --version
 
       - name: 'cmake build tests'
