@@ -1603,7 +1603,6 @@ CURLcode Curl_ssl_peer_init(struct ssl_peer *peer, struct Curl_cfilter *cf,
       }
     }
 
-    peer->sni = NULL;
     peer->type = get_peer_type(peer->hostname);
     if(peer->type == CURL_SSL_PEER_DNS && peer->hostname[0]) {
       /* not an IP address, normalize according to RCC 6066 ch. 3,
