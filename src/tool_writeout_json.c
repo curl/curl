@@ -72,7 +72,7 @@ int jsonquoted(const char *in, size_t len,
       if(*i < 32)
         result = curlx_dyn_addf(out, "\\u%04x", *i);
       else {
-        char o = *i;
+        char o = (char)*i;
         if(lowercase && (o >= 'A' && o <= 'Z'))
           /* do not use tolower() since that's locale specific */
           o |= ('a' - 'A');
