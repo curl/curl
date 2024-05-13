@@ -96,7 +96,7 @@ jobs:
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
             cmake --build bld --config Debug --parallel 3 --target testdeps
-            export TFLAGS='!TFTP !1167'
+            #export TFLAGS='!TFTP !1167'
             cmake --build bld --config Debug --target test-ci
 
   build_freebsd:
