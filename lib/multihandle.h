@@ -159,7 +159,7 @@ struct Curl_multi {
   WSAEVENT wsa_event; /* winsock event used for waits */
 #else
 #ifdef ENABLE_WAKEUP
-  curl_socket_t wakeup_pair[2]; /* socketpair() used for wakeup
+  curl_socket_t wakeup_pair[2]; /* pipe()/socketpair() used for wakeup
                                    0 is used for read, 1 is used for write */
 #endif
 #endif
