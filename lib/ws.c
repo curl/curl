@@ -718,8 +718,10 @@ CURLcode Curl_ws_request(struct Curl_easy *data, REQTYPE *req)
   if(result)
     return result;
   DEBUGASSERT(randlen < sizeof(keyval));
-  if(randlen >= sizeof(keyval))
+  if(randlen >= sizeof(keyval)) {
+    free(randstr);
     return CURLE_FAILED_INIT;
+  }
   strcpy(keyval, randstr);
   free(randstr);
   for(i = 0; !result && (i < sizeof(heads)/sizeof(heads[0])); i++) {
