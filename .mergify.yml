@@ -1,0 +1,10 @@
+pull_request_rules:
+  - name: Label first PR of Mergify Stacks PRs
+    description: The first PR of a Mergify stack should be labeled as such
+    conditions:
+      - 'body ~= ^Change-Id:'
+      - '-base ~= ^mergify_cli/'
+    actions:
+      label:
+        toggle:
+          - top of the stack
