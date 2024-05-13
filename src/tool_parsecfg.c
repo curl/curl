@@ -130,7 +130,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
     DEBUGASSERT(filename);
 
     while(!rc && my_get_line(file, &buf, &fileerror)) {
-      int res;
+      ParameterError res;
       bool alloced_param = FALSE;
       lineno++;
       line = curlx_dyn_ptr(&buf);
@@ -266,7 +266,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
           const char *reason = param2text(res);
           errorf(operation->global, "%s:%d: '%s' %s",
                  filename, lineno, option, reason);
-          rc = res;
+          rc = (int)res;
         }
       }
 

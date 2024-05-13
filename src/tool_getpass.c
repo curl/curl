@@ -146,12 +146,12 @@ static bool ttyecho(bool enable, int fd)
 #ifdef HAVE_TERMIOS_H
     tcgetattr(fd, &withecho);
     noecho = withecho;
-    noecho.c_lflag &= ~ECHO;
+    noecho.c_lflag &= ~(tcflag_t)ECHO;
     tcsetattr(fd, TCSANOW, &noecho);
 #elif defined(HAVE_TERMIO_H)
     ioctl(fd, TCGETA, &withecho);
     noecho = withecho;
-    noecho.c_lflag &= ~ECHO;
+    noecho.c_lflag &= ~(tcflag_t)ECHO;
     ioctl(fd, TCSETA, &noecho);
 #else
     /* neither HAVE_TERMIO_H nor HAVE_TERMIOS_H, we can't disable echo! */

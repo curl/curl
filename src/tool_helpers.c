@@ -40,9 +40,8 @@
 ** Helper functions that are used from more than one source file.
 */
 
-const char *param2text(int res)
+const char *param2text(ParameterError error)
 {
-  ParameterError error = (ParameterError)res;
   switch(error) {
   case PARAM_GOT_EXTRA_PARAMETER:
     return "had unsupported trailing garbage";

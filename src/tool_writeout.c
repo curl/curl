@@ -443,7 +443,7 @@ static int writeLong(FILE *stream, const struct writeoutvar *wovar,
       valid = true;
       break;
     case VAR_EXITCODE:
-      longinfo = per_result;
+      longinfo = (long)per_result;
       valid = true;
       break;
     case VAR_URLNUM:

@@ -187,10 +187,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
         }
         p += 9;
 
-        /* this expression below typecasts 'cb' only to avoid
-           warning: signed and unsigned type in conditional expression
-        */
-        len = (ssize_t)cb - (p - str);
+        len = cb - (size_t)(p - str);
         filename = parse_filename(p, len);
         if(filename) {
           if(outs->stream) {
