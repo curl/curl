@@ -1,0 +1,9 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+# renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver registryUrl=https://github.com
+WOLFSSL_VER=5.6.0
+
+# renovate: datasource=github-tags depName=wolfSSL/wolfssh versioning=semver registryUrl=https://github.com
+WOLFSSH_VER=1.4.12

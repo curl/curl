@@ -42,6 +42,8 @@ permissions: {}
 
 env:
   MAKEFLAGS: -j 3
+
+  # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
   awslc-version: 1.13.0
 
 jobs:
