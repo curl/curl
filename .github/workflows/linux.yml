@@ -42,13 +42,20 @@ permissions: {}
 env:
   MAKEFLAGS: -j 3
   bearssl-version: 0.6
-  libressl-version: v3.7.3
-  mbedtls-version: v3.5.0
-  mod_h2-version: v2.0.27
-  msh3-version: v0.6.0
+  # renovate: datasource=github-tags depName=libressl-portable/portable versioning=semver registryUrl=https://github.com
+  libressl-version: 3.7.3
+  # renovate: datasource=github-tags depName=ARMmbed/mbedtls versioning=semver registryUrl=https://github.com
+  mbedtls-version: 3.5.0
+  # renovate: datasource=github-tags depName=icing/mod_h2 versioning=semver registryUrl=https://github.com
+  mod_h2-version: 2.0.27
+  # renovate: datasource=github-tags depName=nibanks/msh3 versioning=semver registryUrl=https://github.com
+  msh3-version: 0.6.0
+  # handled in renovate.json
   openssl3-version: openssl-3.1.3
+  # unhandled
   quictls-version: 3.1.4+quic
-  rustls-version: v0.13.0
+  # renovate: datasource=github-tags depName=rustls/rustls-ffi versioning=semver registryUrl=https://github.com
+  rustls-version: 0.13.0
 
 jobs:
   autotools:
@@ -250,7 +257,7 @@ jobs:
       - name: 'build libressl'
         if: contains(matrix.build.install_steps, 'libressl') && steps.cache-libressl.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet --depth=1 -b ${{ env.libressl-version }} https://github.com/libressl-portable/portable.git libressl-git
+          git clone --quiet --depth=1 -b v${{ env.libressl-version }} https://github.com/libressl-portable/portable.git libressl-git
           cd libressl-git
           ./autogen.sh
           ./configure --prefix=$HOME/libressl
@@ -269,7 +276,7 @@ jobs:
       - name: 'build mbedtls'
         if: contains(matrix.build.install_steps, 'mbedtls') && steps.cache-mbedtls.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet --depth=1 -b ${{ env.mbedtls-version }} https://github.com/ARMmbed/mbedtls
+          git clone --quiet --depth=1 -b v${{ env.mbedtls-version }} https://github.com/ARMmbed/mbedtls
           cd mbedtls
           make DESTDIR=$HOME/mbedtls install
 
@@ -322,7 +329,7 @@ jobs:
       - name: 'build msh3'
         if: contains(matrix.build.install_steps, 'msh3') && steps.cache-msh3.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet -b ${{ env.msh3-version }} --depth=1 --recursive https://github.com/nibanks/msh3
+          git clone --quiet -b v${{ env.msh3-version }} --depth=1 --recursive https://github.com/nibanks/msh3
           cd msh3 && mkdir build && cd build
           cmake -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=$HOME/msh3 ..
           cmake --build .
@@ -349,7 +356,7 @@ jobs:
       - name: 'build rustls'
         if: contains(matrix.build.install_steps, 'rustls') && steps.cache-rustls.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet --depth=1 -b ${{ env.rustls-version }} --recursive https://github.com/rustls/rustls-ffi.git
+          git clone --quiet --depth=1 -b v${{ env.rustls-version }} --recursive https://github.com/rustls/rustls-ffi.git
           cd rustls-ffi
           make DESTDIR=$HOME/rustls install
 
@@ -392,7 +399,7 @@ jobs:
         if: contains(matrix.build.install_steps, 'pytest') && steps.cache-mod_h2.outputs.cache-hit != 'true'
         run: |
           cd $HOME
-          git clone --quiet --depth=1 -b  ${{ env.mod_h2-version }} https://github.com/icing/mod_h2
+          git clone --quiet --depth=1 -b v${{ env.mod_h2-version }} https://github.com/icing/mod_h2
           cd mod_h2
           autoreconf -fi
           ./configure
