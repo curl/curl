@@ -211,7 +211,7 @@ static CURLcode Curl_wssl_init_ssl(struct curl_tls_ctx *ctx,
 
   if(alpn)
     wolfSSL_set_alpn_protos(ctx->wssl.handle, (const unsigned char *)alpn,
-                            (int)alpn_len);
+                            (unsigned int)alpn_len);
 
   if(peer->sni) {
     wolfSSL_UseSNI(ctx->wssl.handle, WOLFSSL_SNI_HOST_NAME,

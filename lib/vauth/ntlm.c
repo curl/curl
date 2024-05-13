@@ -482,9 +482,9 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   size_t size;
   unsigned char ntlmbuf[NTLM_BUFSIZE];
-  int lmrespoff;
+  unsigned int lmrespoff;
   unsigned char lmresp[24]; /* fixed-size */
-  int ntrespoff;
+  unsigned int ntrespoff;
   unsigned int ntresplen = 24;
   unsigned char ntresp[24]; /* fixed-size */
   unsigned char *ptr_ntresp = &ntresp[0];
@@ -585,7 +585,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
       return result;
 
     Curl_ntlm_core_lm_resp(lmbuffer, &ntlm->nonce[0], lmresp);
-    ntlm->flags &= ~NTLMFLAG_NEGOTIATE_NTLM2_KEY;
+    ntlm->flags &= ~(unsigned int)NTLMFLAG_NEGOTIATE_NTLM2_KEY;
 
     /* A safer but less compatible alternative is:
      *   Curl_ntlm_core_lm_resp(ntbuffer, &ntlm->nonce[0], lmresp);

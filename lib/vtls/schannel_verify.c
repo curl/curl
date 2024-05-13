@@ -448,7 +448,7 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
     /* pwszDNSName is in ia5 string format and hence doesn't contain any
      * non-ascii characters. */
     while(*dns_w != '\0') {
-      *current_pos++ = (char)(*dns_w++);
+      *current_pos++ = (TCHAR)(*dns_w++);
     }
     *current_pos++ = '\0';
     actual_length += (DWORD)current_length;

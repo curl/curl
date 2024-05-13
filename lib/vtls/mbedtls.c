@@ -788,10 +788,11 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
                       NULL /*  rev_timeout() */);
 
   if(conn_config->cipher_list) {
-    ret = mbed_set_selected_ciphers(data, backend, conn_config->cipher_list);
-    if(ret) {
+    CURLcode result = mbed_set_selected_ciphers(data, backend,
+                                                conn_config->cipher_list);
+    if(result != CURLE_OK) {
       failf(data, "mbedTLS: failed to set cipher suites");
-      return ret;
+      return result;
     }
   }
   else {
@@ -883,11 +884,11 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* give application a chance to interfere with mbedTLS set up. */
   if(data->set.ssl.fsslctx) {
-    ret = (*data->set.ssl.fsslctx)(data, &backend->config,
-                                   data->set.ssl.fsslctxp);
-    if(ret) {
+    CURLcode result = (*data->set.ssl.fsslctx)(data, &backend->config,
+                                               data->set.ssl.fsslctxp);
+    if(result != CURLE_OK) {
       failf(data, "error signaled by ssl ctx callback");
-      return ret;
+      return result;
     }
   }
 

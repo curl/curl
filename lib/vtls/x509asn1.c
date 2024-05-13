@@ -372,7 +372,7 @@ utf8asn1str(struct dynbuf *to, int type, const char *from, const char *end)
   else {
     while(!result && (from < end)) {
       char buf[4]; /* decode buffer */
-      int charsize = 1;
+      size_t charsize = 1;
       unsigned int wc = 0;
 
       switch(size) {
@@ -959,7 +959,8 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
       if(ssl_push_certinfo(data, certnum, "ECC Public Key", q))
         return 1;
     }
-    return do_pubkey_field(data, certnum, "ecPublicKey", pubkey);
+    return do_pubkey_field(data, certnum, "ecPublicKey", pubkey) == CURLE_OK
+      ? 0 : 1;
   }
 
   /* Get the public key (single element). */

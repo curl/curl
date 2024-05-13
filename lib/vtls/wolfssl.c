@@ -382,7 +382,7 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
   /* load certificate blob */
   if(ca_info_blob) {
     if(wolfSSL_CTX_load_verify_buffer(wssl->ctx, ca_info_blob->data,
-                                      ca_info_blob->len,
+                                      (long)ca_info_blob->len,
                                       SSL_FILETYPE_PEM) != SSL_SUCCESS) {
       if(imported_native_ca) {
         infof(data, "error importing CA certificate blob, continuing anyway");
@@ -857,7 +857,8 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
     result = Curl_alpn_to_proto_str(&proto, connssl->alpn);
     if(result ||
-       wolfSSL_UseALPN(backend->handle, (char *)proto.data, proto.len,
+       wolfSSL_UseALPN(backend->handle,
+                       (char *)proto.data, (unsigned int)proto.len,
                        WOLFSSL_ALPN_CONTINUE_ON_MISMATCH) != SSL_SUCCESS) {
       failf(data, "SSL: failed setting ALPN protocols");
       return CURLE_SSL_CONNECT_ERROR;
@@ -1157,7 +1158,7 @@ wolfssl_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     }
     else {
       failf(data, "SSL_connect failed with error %d: %s", detail,
-            wolfSSL_ERR_error_string(detail, error_buffer));
+            wolfSSL_ERR_error_string((unsigned long)detail, error_buffer));
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
@@ -1329,7 +1330,7 @@ static ssize_t wolfssl_send(struct Curl_cfilter *cf,
       }
       CURL_TRC_CF(data, cf, "wolfssl_send(len=%zu) -> %d, %d", len, rc, err);
       failf(data, "SSL write: %s, errno %d",
-            wolfSSL_ERR_error_string(err, error_buffer),
+            wolfSSL_ERR_error_string((unsigned long)err, error_buffer),
             SOCKERRNO);
       *curlcode = CURLE_SEND_ERROR;
       return -1;
@@ -1406,7 +1407,8 @@ static ssize_t wolfssl_recv(struct Curl_cfilter *cf,
         return -1;
       }
       failf(data, "SSL read: %s, errno %d",
-            wolfSSL_ERR_error_string(err, error_buffer), SOCKERRNO);
+            wolfSSL_ERR_error_string((unsigned long)err, error_buffer),
+            SOCKERRNO);
       *curlcode = CURLE_RECV_ERROR;
       return -1;
     }

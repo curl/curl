@@ -232,7 +232,7 @@ static CURLcode cf_osslq_stream_open(struct cf_osslq_stream *s,
   if(!s->ssl) {
     return CURLE_FAILED_INIT;
   }
-  s->id = SSL_get_stream_id(s->ssl);
+  s->id = (curl_int64_t)SSL_get_stream_id(s->ssl);
   SSL_set_app_data(s->ssl, user_data);
   return CURLE_OK;
 }
@@ -355,12 +355,12 @@ static CURLcode cf_osslq_h3conn_add_stream(struct cf_osslq_h3conn *h3,
                                            struct Curl_easy *data)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
-  int64_t stream_id = SSL_get_stream_id(stream_ssl);
+  curl_int64_t stream_id = (curl_int64_t)SSL_get_stream_id(stream_ssl);
 
   if(h3->remote_ctrl_n >= ARRAYSIZE(h3->remote_ctrl)) {
     /* rejected, we are full */
     CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] rejecting remote stream",
-                (curl_int64_t)stream_id);
+                stream_id);
     SSL_free(stream_ssl);
     return CURLE_FAILED_INIT;
   }
@@ -371,12 +371,12 @@ static CURLcode cf_osslq_h3conn_add_stream(struct cf_osslq_h3conn *h3,
       nstream->ssl = stream_ssl;
       Curl_bufq_initp(&nstream->recvbuf, &ctx->stream_bufcp, 1, BUFQ_OPT_NONE);
       CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] accepted remote uni stream",
-                  (curl_int64_t)stream_id);
+                  stream_id);
       break;
     }
     default:
       CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] reject remote non-uni-read"
-                  " stream", (curl_int64_t)stream_id);
+                  " stream", stream_id);
       SSL_free(stream_ssl);
       return CURLE_FAILED_INIT;
   }
