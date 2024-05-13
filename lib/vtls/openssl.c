@@ -254,6 +254,13 @@
 #endif
 #endif
 
+#if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
+typedef size_t numcert_t;
+#else
+typedef int numcert_t;
+#endif
+#define ossl_valsize_t numcert_t
+
 #if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 /* up2date versions of OpenSSL maintain reasonably secure defaults without
  * breaking compatibility, so it is better not to override the defaults in curl
@@ -373,7 +380,7 @@ static void X509V3_ext(struct Curl_easy *data,
 
   for(i = 0; i < (int)sk_X509_EXTENSION_num(exts); i++) {
     ASN1_OBJECT *obj;
-    X509_EXTENSION *ext = sk_X509_EXTENSION_value(exts, i);
+    X509_EXTENSION *ext = sk_X509_EXTENSION_value(exts, (ossl_valsize_t)i);
     BUF_MEM *biomem;
     char namebuf[128];
     BIO *bio_out = BIO_new(BIO_s_mem());
@@ -394,12 +401,6 @@ static void X509V3_ext(struct Curl_easy *data,
     BIO_free(bio_out);
   }
 }
-
-#if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
-typedef size_t numcert_t;
-#else
-typedef int numcert_t;
-#endif
 
 CURLcode Curl_ossl_certchain(struct Curl_easy *data, SSL *ssl)
 {
@@ -430,7 +431,7 @@ CURLcode Curl_ossl_certchain(struct Curl_easy *data, SSL *ssl)
 
   for(i = 0; i < (int)numcerts; i++) {
     ASN1_INTEGER *num;
-    X509 *x = sk_X509_value(sk, i);
+    X509 *x = sk_X509_value(sk, (ossl_valsize_t)i);
     EVP_PKEY *pubkey = NULL;
     int j;
     char *ptr;
@@ -719,7 +720,10 @@ static int ossl_bio_cf_out_write(BIO *bio, const char *buf, int blen)
   CURLcode result = CURLE_SEND_ERROR;
 
   DEBUGASSERT(data);
-  nwritten = Curl_conn_cf_send(cf->next, data, buf, blen, &result);
+  if(blen < 0)
+    return 0;
+
+  nwritten = Curl_conn_cf_send(cf->next, data, buf, (size_t)blen, &result);
   CURL_TRC_CF(data, cf, "ossl_bio_cf_out_write(len=%d) -> %d, err=%d",
               blen, (int)nwritten, result);
   BIO_clear_retry_flags(bio);
@@ -744,8 +748,10 @@ static int ossl_bio_cf_in_read(BIO *bio, char *buf, int blen)
   /* OpenSSL catches this case, so should we. */
   if(!buf)
     return 0;
+  if(blen < 0)
+    return 0;
 
-  nread = Curl_conn_cf_recv(cf->next, data, buf, blen, &result);
+  nread = Curl_conn_cf_recv(cf->next, data, buf, (size_t)blen, &result);
   CURL_TRC_CF(data, cf, "ossl_bio_cf_in_read(len=%d) -> %d, err=%d",
               blen, (int)nread, result);
   BIO_clear_retry_flags(bio);
@@ -955,7 +961,7 @@ static int passwd_callback(char *buf, int num, int encrypting,
 {
   DEBUGASSERT(0 == encrypting);
 
-  if(!encrypting) {
+  if(!encrypting && num >= 0) {
     int klen = curlx_uztosi(strlen((char *)global_passwd));
     if(num > klen) {
       memcpy(buf, global_passwd, klen + 1);
@@ -1006,13 +1012,12 @@ static CURLcode ossl_seed(struct Curl_easy *data)
     for(i = 0, i_max = len / sizeof(struct curltime); i < i_max; ++i) {
       struct curltime tv = Curl_now();
       Curl_wait_ms(1);
-      tv.tv_sec *= i + 1;
-      tv.tv_usec *= (unsigned int)i + 2;
-      tv.tv_sec ^= ((Curl_now().tv_sec + Curl_now().tv_usec) *
-                    (i + 3)) << 8;
-      tv.tv_usec ^= (unsigned int) ((Curl_now().tv_sec +
-                                     Curl_now().tv_usec) *
-                                    (i + 4)) << 16;
+      tv.tv_sec *= (time_t)i + 1;
+      tv.tv_usec *= (int)i + 2;
+      tv.tv_sec ^= ((Curl_now().tv_sec + (time_t)Curl_now().tv_usec) *
+                    (time_t)(i + 3)) << 8;
+      tv.tv_usec ^= (int) ((Curl_now().tv_sec + (time_t)Curl_now().tv_usec) *
+                           (time_t)(i + 4)) << 16;
       memcpy(&randb[i * sizeof(struct curltime)], &tv,
              sizeof(struct curltime));
     }
@@ -1879,7 +1884,7 @@ static void ossl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     if(cf->next && cf->next->connected && !connssl->peer_closed) {
       char buf[1024];
       int nread, err;
-      long sslerr;
+      unsigned long sslerr;
 
       /* Maybe the server has already sent a close notify alert.
          Read it to avoid an RST on the TCP connection. */
@@ -2375,7 +2380,7 @@ static CURLcode verifystatus(struct Curl_cfilter *cf,
 
   DEBUGASSERT(octx);
 
-  len = SSL_get_tlsext_status_ocsp_resp(octx->ssl, &status);
+  len = (long)SSL_get_tlsext_status_ocsp_resp(octx->ssl, &status);
 
   if(!status) {
     failf(data, "No OCSP response received");
@@ -2456,7 +2461,7 @@ static CURLcode verifystatus(struct Curl_cfilter *cf,
   }
 
   for(i = 0; i < (int)sk_X509_num(ch); i++) {
-    X509 *issuer = sk_X509_value(ch, i);
+    X509 *issuer = sk_X509_value(ch, (ossl_valsize_t)i);
     if(X509_check_issued(issuer, cert) == X509_V_OK) {
       id = OCSP_cert_to_id(EVP_sha1(), cert, issuer);
       break;
@@ -2801,7 +2806,7 @@ ossl_set_ssl_version_min_max(struct Curl_cfilter *cf, SSL_CTX *ctx)
   }
 
   /* ... then, TLS max version */
-  curl_ssl_version_max = conn_config->version_max;
+  curl_ssl_version_max = (long)conn_config->version_max;
 
   /* convert curl max SSL version option to OpenSSL constant */
   switch(curl_ssl_version_max) {
@@ -2842,6 +2847,9 @@ ossl_set_ssl_version_min_max(struct Curl_cfilter *cf, SSL_CTX *ctx)
 typedef uint32_t ctx_option_t;
 #elif OPENSSL_VERSION_NUMBER >= 0x30000000L
 typedef uint64_t ctx_option_t;
+#elif OPENSSL_VERSION_NUMBER >= 0x10100000L && \
+  !defined(LIBRESSL_VERSION_NUMBER)
+typedef unsigned long ctx_option_t;
 #else
 typedef long ctx_option_t;
 #endif
@@ -3009,7 +3017,7 @@ static CURLcode load_cacert_from_memory(X509_STORE *store,
 
   /* add each entry from PEM file to x509_store */
   for(i = 0; i < (int)sk_X509_INFO_num(inf); ++i) {
-    itmp = sk_X509_INFO_value(inf, i);
+    itmp = sk_X509_INFO_value(inf, (ossl_valsize_t)i);
     if(itmp->x509) {
       if(X509_STORE_add_cert(store, itmp->x509)) {
         ++count;
@@ -3156,7 +3164,7 @@ static CURLcode import_windows_cert_store(struct Curl_easy *data,
       else
         continue;
 
-      x509 = d2i_X509(NULL, &encoded_cert, pContext->cbCertEncoded);
+      x509 = d2i_X509(NULL, &encoded_cert, (long)pContext->cbCertEncoded);
       if(!x509)
         continue;
 
@@ -3665,14 +3673,14 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
 #ifdef SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG
   /* mitigate CVE-2010-4180 */
-  ctx_options &= ~SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG;
+  ctx_options &= ~(ctx_option_t)SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG;
 #endif
 
 #ifdef SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS
   /* unless the user explicitly asks to allow the protocol vulnerability we
      use the work-around */
   if(!ssl_config->enable_beast)
-    ctx_options &= ~SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS;
+    ctx_options &= ~(ctx_option_t)SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS;
 #endif
 
   switch(ssl_version_min) {
@@ -5122,7 +5130,7 @@ static size_t ossl_version(char *buffer, size_t size)
 #ifdef LIBRESSL_VERSION_NUMBER
 #ifdef HAVE_OPENSSL_VERSION
   char *p;
-  int count;
+  size_t count;
   const char *ver = OpenSSL_version(OPENSSL_VERSION);
   const char expected[] = OSSL_PACKAGE " "; /* ie "LibreSSL " */
   if(strncasecompare(ver, expected, sizeof(expected) - 1)) {
@@ -5211,7 +5219,7 @@ static CURLcode ossl_random(struct Curl_easy *data,
       return CURLE_FAILED_INIT;
   }
   /* RAND_bytes() returns 1 on success, 0 otherwise.  */
-  rc = RAND_bytes(entropy, curlx_uztosi(length));
+  rc = RAND_bytes(entropy, (ossl_valsize_t)curlx_uztosi(length));
   return (rc == 1 ? CURLE_OK : CURLE_FAILED_INIT);
 }
 

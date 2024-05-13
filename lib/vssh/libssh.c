@@ -740,7 +740,8 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
           break;
         }
 
-        sshc->auth_methods = ssh_userauth_list(sshc->ssh_session, NULL);
+        sshc->auth_methods =
+          (unsigned int)ssh_userauth_list(sshc->ssh_session, NULL);
         if(sshc->auth_methods)
           infof(data, "SSH authentication methods available: %s%s%s%s",
                 sshc->auth_methods & SSH_AUTH_METHOD_PUBLICKEY ?
@@ -2611,7 +2612,7 @@ static ssize_t sftp_recv(struct Curl_easy *data, int sockindex,
 
       nread = sftp_async_read(conn->proto.sshc.sftp_file,
                               mem, (uint32_t)len,
-                              conn->proto.sshc.sftp_file_index);
+                              (uint32_t)conn->proto.sshc.sftp_file_index);
 
       myssh_block2waitfor(conn, (nread == SSH_AGAIN)?TRUE:FALSE);
 

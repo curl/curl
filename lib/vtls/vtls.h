@@ -203,7 +203,7 @@ CURLcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
  * Option is one of the defined SSLSUPP_* values.
  * `data` maybe NULL for the features of the default implementation.
  */
-bool Curl_ssl_supports(struct Curl_easy *data, int ssl_option);
+bool Curl_ssl_supports(struct Curl_easy *data, unsigned int ssl_option);
 
 /**
  * Get the internal ssl instance (like OpenSSL's SSL*) from the filter

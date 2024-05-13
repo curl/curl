@@ -326,8 +326,8 @@ static void pktx_update_time(struct pkt_io_ctx *pktx,
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
 
   vquic_ctx_update_time(&ctx->q);
-  pktx->ts = ctx->q.last_op.tv_sec * NGTCP2_SECONDS +
-             ctx->q.last_op.tv_usec * NGTCP2_MICROSECONDS;
+  pktx->ts = (ngtcp2_tstamp)ctx->q.last_op.tv_sec * NGTCP2_SECONDS +
+             (ngtcp2_tstamp)ctx->q.last_op.tv_usec * NGTCP2_MICROSECONDS;
 }
 
 static void pktx_init(struct pkt_io_ctx *pktx,
@@ -417,7 +417,7 @@ static void quic_settings(struct cf_ngtcp2_ctx *ctx,
   }
 }
 
-static int init_ngh3_conn(struct Curl_cfilter *cf);
+static CURLcode init_ngh3_conn(struct Curl_cfilter *cf);
 
 static int cb_handshake_completed(ngtcp2_conn *tconn, void *user_data)
 {
@@ -506,8 +506,8 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
   /* number of bytes inside buflen which consists of framing overhead
    * including QPACK HEADERS. In other words, it does not consume payload of
    * DATA frame. */
-  ngtcp2_conn_extend_max_stream_offset(tconn, stream_id, nconsumed);
-  ngtcp2_conn_extend_max_offset(tconn, nconsumed);
+  ngtcp2_conn_extend_max_stream_offset(tconn, stream_id, (uint64_t)nconsumed);
+  ngtcp2_conn_extend_max_offset(tconn, (uint64_t)nconsumed);
 
   return 0;
 }
@@ -798,7 +798,8 @@ static CURLcode check_and_set_expiry(struct Curl_cfilter *cf,
       if(timeout % NGTCP2_MILLISECONDS) {
         timeout += NGTCP2_MILLISECONDS;
       }
-      Curl_expire(data, timeout / NGTCP2_MILLISECONDS, EXPIRE_QUIC);
+      Curl_expire(data, (timediff_t)(timeout / NGTCP2_MILLISECONDS),
+                  EXPIRE_QUIC);
     }
   }
   return CURLE_OK;
@@ -1091,7 +1092,7 @@ static nghttp3_callbacks ngh3_callbacks = {
   NULL /* recv_settings */
 };
 
-static int init_ngh3_conn(struct Curl_cfilter *cf)
+static CURLcode init_ngh3_conn(struct Curl_cfilter *cf)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
   CURLcode result;
@@ -1631,7 +1632,7 @@ static CURLcode recv_pkt(const unsigned char *pkt, size_t pktlen,
 
   ++pktx->pkt_count;
   ngtcp2_addr_init(&path.local, (struct sockaddr *)&ctx->q.local_addr,
-                   ctx->q.local_addrlen);
+                   (socklen_t)ctx->q.local_addrlen);
   ngtcp2_addr_init(&path.remote, (struct sockaddr *)remote_addr,
                    remote_addrlen);
   pi.ecn = (uint8_t)ecn;
@@ -2196,7 +2197,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
                    (struct sockaddr *)&ctx->q.local_addr,
                    ctx->q.local_addrlen);
   ngtcp2_addr_init(&ctx->connected_path.remote,
-                   &sockaddr->sa_addr, sockaddr->addrlen);
+                   &sockaddr->sa_addr, (socklen_t)sockaddr->addrlen);
 
   rc = ngtcp2_conn_client_new(&ctx->qconn, &ctx->dcid, &ctx->scid,
                               &ctx->connected_path,
@@ -2343,7 +2344,7 @@ static CURLcode cf_ngtcp2_query(struct Curl_cfilter *cf,
       *pres1 = (max_streams > INT_MAX)? INT_MAX : (int)max_streams;
     }
     else  /* transport params not arrived yet? take our default. */
-      *pres1 = Curl_multi_max_concurrent_streams(data->multi);
+      *pres1 = (int)Curl_multi_max_concurrent_streams(data->multi);
     CURL_TRC_CF(data, cf, "query conn[%" CURL_FORMAT_CURL_OFF_T "]: "
                 "MAX_CONCURRENT -> %d (%zu in use)",
                 cf->conn->connection_id, *pres1, CONN_INUSE(cf->conn));

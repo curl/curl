@@ -327,7 +327,7 @@ static unsigned x509_end_chain(const br_x509_class **ctx)
   struct x509_context *x509 = (struct x509_context *)ctx;
 
   if(!x509->verifypeer) {
-    return br_x509_decoder_last_error(&x509->decoder);
+    return (unsigned)br_x509_decoder_last_error(&x509->decoder);
   }
 
   return x509->minimal.vtable->end_chain(&x509->minimal.vtable);

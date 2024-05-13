@@ -101,7 +101,7 @@ read_cb(void *userdata, uint8_t *buf, uintptr_t len, uintptr_t *out_n)
   }
   else if(nread == 0)
     connssl->peer_closed = TRUE;
-  *out_n = (int)nread;
+  *out_n = (uintptr_t)nread;
   CURL_TRC_CF(io_ctx->data, io_ctx->cf, "cf->next recv(len=%zu) -> %zd, %d",
               len, nread, result);
   return ret;
@@ -122,7 +122,7 @@ write_cb(void *userdata, const uint8_t *buf, uintptr_t len, uintptr_t *out_n)
     else
       ret = EINVAL;
   }
-  *out_n = (int)nwritten;
+  *out_n = (uintptr_t)nwritten;
   CURL_TRC_CF(io_ctx->data, io_ctx->cf, "cf->next send(len=%zu) -> %zd, %d",
               len, nwritten, result);
   return ret;
@@ -438,7 +438,7 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
   const char *hostname = connssl->peer.hostname;
   char errorbuf[256];
   size_t errorlen;
-  int result;
+  rustls_result result;
 
   DEBUGASSERT(backend);
   rconn = backend->conn;
