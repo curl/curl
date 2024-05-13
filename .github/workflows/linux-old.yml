@@ -57,7 +57,7 @@ jobs:
   cmake:
     name: linux (cmake)
     runs-on: 'ubuntu-latest'
-    container: 'debian:stretch'
+    container: 'debian:bookworm@sha256:1aadfee8d292f64b045adb830f8a58bfacc15789ae5f489a0fedcd517a862cb9'
 
     steps:
       - name: 'install prereqs'
