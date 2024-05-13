@@ -43,7 +43,7 @@ jobs:
   cygwin:
     name: "cygwin (${{ matrix.build }}, ${{ matrix.platform }}, ${{ matrix.config }})"
     runs-on: windows-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
       SHELLOPTS: 'igncr'
     strategy:
@@ -124,7 +124,7 @@ jobs:
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
           cmake --build bld --config '${{ matrix.type }}' --parallel 3
-          [[ '${{ matrix.config }}' = *'BUILD_SHARED_LIBS=ON'* ]] && cp -f -p bld/lib/*.dll bld/src/
+          [[ '${{ matrix.config }}' != *'BUILD_SHARED_LIBS=OFF'* ]] && cp -f -p bld/lib/*.dll bld/src/
           find . -name '*.exe' -o -name '*.dll'
           bld/src/curl.exe --disable --version
 
@@ -246,7 +246,7 @@ jobs:
         shell: msys2 {0}
         run: |
           cmake --build bld --config '${{ matrix.type }}' --parallel 3
-          [[ '${{ matrix.config }}' = *'BUILD_SHARED_LIBS=ON'* ]] && cp -f -p bld/lib/*.dll bld/src/
+          [[ '${{ matrix.config }}' != *'BUILD_SHARED_LIBS=OFF'* ]] && cp -f -p bld/lib/*.dll bld/src/
           find . -name '*.exe' -o -name '*.dll'
           bld/src/curl.exe --disable --version
 
