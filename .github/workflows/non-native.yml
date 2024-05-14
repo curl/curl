@@ -67,6 +67,7 @@ jobs:
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
             cmake --build bld --config Debug --parallel 3 --target testdeps
+            export TFLAGS='-j12'
             cmake --build bld --config Debug --target test-ci
 
   openbsd:
@@ -96,7 +97,7 @@ jobs:
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
             cmake --build bld --config Debug --parallel 3 --target testdeps
-            export TFLAGS='~TFTP'  # FIXME: TFTP requests executed twice? Related: `curl: (69) TFTP: Access Violation`?
+            export TFLAGS='-j12 ~TFTP'  # FIXME: TFTP requests executed twice? Related: `curl: (69) TFTP: Access Violation`?
             cmake --build bld --config Debug --target test-ci
 
   freebsd:
@@ -178,4 +179,5 @@ jobs:
               --disable-dependency-tracking
             gmake -j3
             src/curl --disable --version
+            export TFLAGS='-j12'
             gmake check V=1
