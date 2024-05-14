@@ -1,8 +1,29 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:best-practices",
-    "group:allNonMajor"
+    "config:best-practices"
+  ],
+  "packageRules": [
+    {
+      "matchManagers": ["github-actions"],
+      "commitMessagePrefix": "gha: ",
+      "labels": ["CI"]
+    },
+    {
+      "matchUpdateTypes": ["pin", "pinDigest"],
+      "commitMessagePrefix": "ci: ",
+      "labels": ["CI"]
+    },
+    {
+      "matchManagers": ["regex"],
+      "commitMessagePrefix": "ci: ",
+      "labels": ["CI"]
+    },
+    {
+      "matchDepNames": ["debian"],
+      "matchFileNames": [".github/workflows/linux-old.yml"],
+      "enabled": false
+    }
   ],
   "customManagers": [
     {
