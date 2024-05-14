@@ -63,7 +63,7 @@ jobs:
               -DCURL_USE_OPENSSL=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
-              -DBUILD_EXAMPLES=OFF \
+              -DBUILD_EXAMPLES=ON \
               -DBUILD_TESTING=ON
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
@@ -93,7 +93,7 @@ jobs:
               -DCURL_USE_OPENSSL=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
-              -DBUILD_EXAMPLES=OFF \
+              -DBUILD_EXAMPLES=ON \
               -DBUILD_TESTING=ON
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
@@ -152,7 +152,7 @@ jobs:
               -DCURL_USE_OPENSSL=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
-              -DBUILD_EXAMPLES=OFF \
+              -DBUILD_EXAMPLES=ON \
               -DBUILD_TESTING=ON
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
