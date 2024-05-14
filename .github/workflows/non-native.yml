@@ -99,28 +99,30 @@ jobs:
             export TFLAGS='~TFTP'  # FIXME: TFTP requests executed twice? Related: `curl: (69) TFTP: Access Violation`?
             cmake --build bld --config Debug --target test-ci
 
-  freebsd_autotools:
-    name: 'FreeBSD (autotools, openssl, clang, build-only)'
+  freebsd:
+    name: 'FreeBSD (cmake, openssl, clang, build-only)'
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    env:
-      CC: clang
     strategy:
       matrix:
-        arch: ['arm64']
+        include:
+          - { build: 'autotools', arch: 'arm64' , compiler: 'clang' }
+          - { build: 'cmake'    , arch: 'x86_64', compiler: 'clang' }
     steps:
       - uses: actions/checkout@v4
+
       - name: 'autotools'
+        if: ${{ matrix.build == 'autotools' }}
         uses: cross-platform-actions/action@v0.24.0
         with:
           operating_system: 'freebsd'
           version: '14.0'
           architecture: ${{ matrix.arch }}
-          environment_variables: 'CC'
           run: |
             # https://ports.freebsd.org/
             sudo pkg install -y autoconf automake libtool
             autoreconf -fi
+            export CC='${{ matrix.compiler }}'
             mkdir bld && cd bld && ../configure --enable-debug --enable-warnings --enable-werror \
               --with-openssl \
               --disable-dependency-tracking
@@ -128,29 +130,18 @@ jobs:
             src/curl --disable --version
             #make check V=1  # Slow, let's skip building/running tests for now
 
-  freebsd_cmake:
-    name: 'FreeBSD (cmake, openssl, clang, build-only)'
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    env:
-      CC: clang
-    strategy:
-      matrix:
-        arch: ['arm64']
-    steps:
-      - uses: actions/checkout@v4
-      - name: 'autotools'
+      - name: 'cmake'
+        if: ${{ matrix.build == 'cmake' }}
         uses: cross-platform-actions/action@v0.24.0
         with:
           operating_system: 'freebsd'
           version: '14.0'
           architecture: ${{ matrix.arch }}
-          environment_variables: 'CC'
           run: |
             # https://ports.freebsd.org/
-            sudo pkg install -y cmake
+            sudo pkg install -y cmake perl
             cmake -B bld \
-              "-DCMAKE_C_COMPILER=${CC}" \
+              -DCMAKE_C_COMPILER=${{ matrix.compiler }} \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_USE_OPENSSL=ON \
               -DCURL_WERROR=ON \
@@ -158,8 +149,9 @@ jobs:
               -DBUILD_TESTING=ON
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
+            # Slow, let's skip building/running tests for now
             cmake --build bld --config Debug --parallel 3 --target testdeps
-            #cmake --build bld --config Debug --target test-ci  # Slow, let's skip building/running tests for now
+            #cmake --build bld --config Debug --target test-ci
 
   omnios:
     name: 'OmniOS (autotools, openssl, gcc, amd64)'
