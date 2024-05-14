@@ -523,8 +523,11 @@ static CURLcode hsts_load(struct hsts *h, const char *file)
       char *lineptr = Curl_dyn_ptr(&buf);
       while(*lineptr && ISBLANK(*lineptr))
         lineptr++;
-      if(*lineptr == '#')
-        /* skip commented lines */
+      /*
+       * Skip empty or commented lines, since we know the line will have a
+       * trailing newline from Curl_get_line we can treat length 1 as empty.
+       */
+      if((*lineptr == '#') || strlen(lineptr) <= 1)
         continue;
 
       hsts_add(h, lineptr);
