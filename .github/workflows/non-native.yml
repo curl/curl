@@ -108,9 +108,9 @@ jobs:
         include:
           - { build: 'autotools', arch: 'arm64' , compiler: 'clang' }
           - { build: 'cmake'    , arch: 'x86_64', compiler: 'clang' }
+      fail-fast: false
     steps:
       - uses: actions/checkout@v4
-
       - name: 'autotools'
         if: ${{ matrix.build == 'autotools' }}
         uses: cross-platform-actions/action@v0.24.0
@@ -139,7 +139,7 @@ jobs:
           architecture: ${{ matrix.arch }}
           run: |
             # https://ports.freebsd.org/
-            sudo pkg install -y cmake perl
+            sudo pkg install -y cmake perl5
             cmake -B bld \
               -DCMAKE_C_COMPILER=${{ matrix.compiler }} \
               -DCMAKE_UNITY_BUILD=ON \
