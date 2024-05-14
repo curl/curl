@@ -57,7 +57,7 @@ jobs:
           architecture: ${{ matrix.arch }}
           run: |
             # https://pkgsrc.se/
-            sudo pkgin -y install cmake perl python312 py-impacket
+            sudo pkgin -y install cmake perl python311 py311-impacket
             cmake -B bld \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_USE_OPENSSL=ON \
@@ -109,7 +109,6 @@ jobs:
         include:
           - { build: 'autotools', arch: 'x86_64', compiler: 'clang' }
           - { build: 'cmake'    , arch: 'arm64' , compiler: 'clang' }
-          - { build: 'cmake'    , arch: 'x86_64', compiler: 'gcc' }
       fail-fast: false
     steps:
       - uses: actions/checkout@v4
