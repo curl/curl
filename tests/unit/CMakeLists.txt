@@ -33,7 +33,7 @@ include_directories(
   ${CURL_BINARY_DIR}/include      # To be able to reach "curl/curl.h"
 )
 
-if (ENABLE_CURLDEBUG) # running unittests require curl to compiled with CURLDEBUG
+if(ENABLE_CURLDEBUG)  # running unittests require curl to compiled with CURLDEBUG
   foreach(_testfile ${UNITPROGS})
     add_executable(${_testfile} EXCLUDE_FROM_ALL ${_testfile}.c ${UNITFILES})
     add_dependencies(testdeps ${_testfile})
