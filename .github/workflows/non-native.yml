@@ -101,7 +101,7 @@ jobs:
             cmake --build bld --config Debug --target test-ci
 
   freebsd:
-    name: 'FreeBSD (${{ matrix.build }}, ${{ matric.arch }}, openssl, ${{ matrix.compiler }})'
+    name: 'FreeBSD (${{ matrix.build }}, ${{ matrix.arch }}, openssl, ${{ matrix.compiler }})'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
