@@ -910,21 +910,32 @@ static CURLcode tftp_state_machine(struct tftp_state_data *state,
   switch(state->state) {
   case TFTP_STATE_START:
     DEBUGF(infof(data, "TFTP_STATE_START"));
+    fputs("DEBUG: tftp_state_machine() TFTP_STATE_START begin\n", stderr);
     result = tftp_send_first(state, event);
+    fprintf(stderr, "DEBUG: tftp_state_machine() TFTP_STATE_START |%d|\n",
+                    (int)result);
     break;
   case TFTP_STATE_RX:
     DEBUGF(infof(data, "TFTP_STATE_RX"));
+    fputs("DEBUG: tftp_state_machine() TFTP_STATE_RX begin\n", stderr);
     result = tftp_rx(state, event);
+    fprintf(stderr, "DEBUG: tftp_state_machine() TFTP_STATE_RX |%d|\n",
+                    (int)result);
     break;
   case TFTP_STATE_TX:
     DEBUGF(infof(data, "TFTP_STATE_TX"));
+    fputs("DEBUG: tftp_state_machine() TFTP_STATE_TX begin\n", stderr);
     result = tftp_tx(state, event);
+    fprintf(stderr, "DEBUG: tftp_state_machine() TFTP_STATE_TX |%d|\n",
+                    (int)result);
     break;
   case TFTP_STATE_FIN:
+    fputs("DEBUG: tftp_state_machine() TFTP_STATE_FIN\n", stderr);
     infof(data, "%s", "TFTP finished");
     break;
   default:
     DEBUGF(infof(data, "STATE: %d", state->state));
+    fputs("DEBUG: tftp_state_machine() default / error\n", stderr);
     failf(data, "%s", "Internal state machine error");
     result = CURLE_TFTP_ILLEGAL;
     break;
