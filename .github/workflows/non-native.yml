@@ -67,7 +67,7 @@ jobs:
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
             cmake --build bld --config Debug --parallel 3 --target testdeps
-            export TFLAGS='-j8'
+            export TFLAGS='-j2'
             cmake --build bld --config Debug --target test-ci
 
   openbsd:
