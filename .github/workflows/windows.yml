@@ -68,10 +68,6 @@ jobs:
         run: |
           export PATH="/usr/bin:$(cygpath ${SYSTEMROOT})/system32"
           autoreconf -fi
-          export TFLAGS='-j14 ${{ matrix.tflags }}'
-          if [ -x "$(cygpath -u "${SYSTEMROOT}/System32/curl.exe")" ]; then
-            TFLAGS+=" -ac $(cygpath -u "${SYSTEMROOT}/System32/curl.exe")"
-          fi
           mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
             --enable-websockets \
             --with-openssl --with-libpsl ${{ matrix.config }}
@@ -104,6 +100,10 @@ jobs:
         timeout-minutes: 30
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
+          export TFLAGS='-j14 ${{ matrix.tflags }}'
+          if [ -x "$(cygpath -u "${SYSTEMROOT}/System32/curl.exe")" ]; then
+            TFLAGS+=" -ac $(cygpath -u "${SYSTEMROOT}/System32/curl.exe")"
+          fi
           make -C bld -j3 V=1 test-ci
 
       - name: 'cmake configure'
@@ -163,10 +163,6 @@ jobs:
         shell: msys2 {0}
         run: |
           autoreconf -fi
-          export TFLAGS='-j14 ${{ matrix.tflags }}'
-          if [ -x "$(cygpath -u 'C:/msys64/usr/bin/curl.exe')" ]; then
-            TFLAGS+=" -ac $(cygpath -u 'C:/msys64/usr/bin/curl.exe')"
-          fi
           mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
             --enable-websockets \
             --with-openssl --with-libpsl ${{ matrix.config }}
@@ -199,6 +195,10 @@ jobs:
         timeout-minutes: 30
         shell: msys2 {0}
         run: |
+          export TFLAGS='-j14 ${{ matrix.tflags }}'
+          if [ -x "$(cygpath -u 'C:/msys64/usr/bin/curl.exe')" ]; then
+            TFLAGS+=" -ac $(cygpath -u 'C:/msys64/usr/bin/curl.exe')"
+          fi
           make -C bld -j3 V=1 test-ci
 
       - name: 'cmake configure'
@@ -206,10 +206,6 @@ jobs:
         timeout-minutes: 5
         shell: msys2 {0}
         run: |
-          export TFLAGS='-j14 ${{ matrix.tflags }}'
-          if [ -x "$(cygpath -u 'C:/msys64/usr/bin/curl.exe')" ]; then
-            TFLAGS+=" -ac $(cygpath -u 'C:/msys64/usr/bin/curl.exe')"
-          fi
           if [[ '${{ matrix.env }}' = 'clang'* ]]; then
             options='-DCMAKE_C_COMPILER=clang'
           else
@@ -257,9 +253,13 @@ jobs:
           cmake --build bld --config '${{ matrix.type }}' --parallel 3 --target testdeps
 
       - name: 'cmake run tests'
-        if: ${{ matrix.build == 'cmake' }}
+        if: ${{ matrix.build == 'cmake' && matrix.tflags }}
         timeout-minutes: 30
         shell: msys2 {0}
         run: |
+          export TFLAGS='-j14 ${{ matrix.tflags }}'
+          if [ -x "$(cygpath -u 'C:/msys64/usr/bin/curl.exe')" ]; then
+            TFLAGS+=" -ac $(cygpath -u 'C:/msys64/usr/bin/curl.exe')"
+          fi
           ls bld/lib/*.dll >/dev/null 2>&1 && cp -f -p bld/lib/*.dll bld/tests/libtest/
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
