@@ -279,6 +279,7 @@ jobs:
         run: |
           git clone --quiet --depth=1 -b v${{ env.mbedtls-version }} https://github.com/ARMmbed/mbedtls
           cd mbedtls
+          git submodule update --init
           make DESTDIR=$HOME/mbedtls install
 
       - name: cache openssl3
