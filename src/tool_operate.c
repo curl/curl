@@ -162,7 +162,7 @@ static int get_address_family(curl_socket_t sockfd)
 }
 #endif
 
-#if defined(IP_TOS) || defined(IPV6_TCLASS)
+#if defined(IP_TOS) || defined(IPV6_TCLASS) || defined(SO_PRIORITY)
 static int sockopt_callback(void *clientp, curl_socket_t curlfd,
                             curlsocktype purpose)
 {
@@ -171,6 +171,7 @@ static int sockopt_callback(void *clientp, curl_socket_t curlfd,
     return CURL_SOCKOPT_OK;
   (void)config;
   (void)curlfd;
+#if defined(IP_TOS) || defined(IPV6_TCLASS)
   if(config->ip_tos > 0) {
     int tos = (int)config->ip_tos;
     int result = 0;
@@ -195,6 +196,18 @@ static int sockopt_callback(void *clientp, curl_socket_t curlfd,
             tos, error, strerror(error));
     }
   }
+#endif
+#ifdef SO_PRIORITY
+  if(config->vlan_priority > 0) {
+    int priority = (int)config->vlan_priority;
+    if(setsockopt(curlfd, SOL_SOCKET, SO_PRIORITY,
+      (const char *)&priority, sizeof(priority)) != 0) {
+      int error = errno;
+      warnf(config->global, "VLAN priority %d failed with errno %d: %s;\n",
+            priority, error, strerror(error));
+    }
+  }
+#endif
   return CURL_SOCKOPT_OK;
 }
 #endif
@@ -2253,13 +2266,21 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 #endif
 
         /* new in 8.9.0 */
-        if(config->ip_tos > 0) {
-#if defined(IP_TOS) || defined(IPV6_TCLASS)
+        if(config->ip_tos > 0 || config->vlan_priority > 0) {
+#if defined(IP_TOS) || defined(IPV6_TCLASS) || defined(SO_PRIORITY)
           my_setopt(curl, CURLOPT_SOCKOPTFUNCTION, sockopt_callback);
           my_setopt(curl, CURLOPT_SOCKOPTDATA, config);
 #else
-          warnf(config->global,
-                "Type of service is not supported in this build.");
+          if(config->ip_tos > 0) {
+            errorf(config->global,
+                  "Type of service is not supported in this build.");
+            result = CURLE_NOT_BUILT_IN;
+          }
+          if(config->vlan_priority > 0) {
+            errorf(config->global,
+                  "VLAN priority is not supported in this build.");
+            result = CURLE_NOT_BUILT_IN;
+          }
 #endif
         }
 
