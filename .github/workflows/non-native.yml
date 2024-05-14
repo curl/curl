@@ -98,6 +98,7 @@ jobs:
             cmake --build bld --config Debug --parallel 3 --target testdeps
             # FIXME: TFTP requests executed twice?
             #export TFLAGS='!TFTP'
+            find . -type d -exec chmod 777 {} \;
             cmake --build bld --config Debug --target test-ci
 
   build_freebsd:
