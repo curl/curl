@@ -304,5 +304,6 @@ DPAGES = \
   variable.md \
   verbose.md \
   version.md \
+  vlan-priority.md \
   write-out.md \
   xattr.md

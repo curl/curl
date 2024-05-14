@@ -269,5 +269,6 @@
 --variable                           8.3.0
 --verbose (-v)                       4.0
 --version (-V)                       4.0
+--vlan-priority                      8.9.0
 --write-out (-w)                     6.5
 --xattr                              7.21.3

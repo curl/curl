@@ -340,6 +340,7 @@ typedef enum {
   C_VARIABLE,
   C_VERBOSE,
   C_VERSION,
+  C_VLAN_PRIORITY,
   C_WDEBUG,
   C_WRITE_OUT,
   C_XATTR
@@ -624,6 +625,7 @@ static const struct LongShort aliases[]= {
   {"variable",                   ARG_STRG, ' ', C_VARIABLE},
   {"verbose",                    ARG_BOOL, 'v', C_VERBOSE},
   {"version",                    ARG_BOOL, 'V', C_VERSION},
+  {"vlan-priority",              ARG_STRG, ' ', C_VLAN_PRIORITY},
 #ifdef USE_WATT32
   {"wdebug",                     ARG_BOOL, ' ', C_WDEBUG},
 #endif
@@ -1690,6 +1692,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         err = str2unummax(&config->ip_tos, nextarg, 0xFF);
       break;
     }
+    case C_VLAN_PRIORITY: /* --vlan-priority */
+      err = str2unummax(&config->vlan_priority, nextarg, 7);
+      break;
     case C_PROXY_DIGEST: /* --proxy-digest */
       config->proxydigest = toggle;
       break;
