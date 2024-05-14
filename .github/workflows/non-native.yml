@@ -107,10 +107,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - { build: 'autotools', arch: 'arm64' , compiler: 'clang' }
           - { build: 'autotools', arch: 'x86_64', compiler: 'clang' }
           - { build: 'cmake'    , arch: 'arm64' , compiler: 'clang' }
-          - { build: 'cmake'    , arch: 'x86_64', compiler: 'clang' }
+          - { build: 'cmake'    , arch: 'x86_64', compiler: 'gcc' }
       fail-fast: false
     steps:
       - uses: actions/checkout@v4
