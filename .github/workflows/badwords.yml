@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
 
     - name: check
       run: ./.github/scripts/badwords.pl < .github/scripts/badwords.txt docs/*.md docs/libcurl/*.md docs/libcurl/opts/*.md docs/cmdline-opts/*.md
