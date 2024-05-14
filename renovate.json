@@ -3,25 +3,44 @@
   "extends": [
     "config:best-practices"
   ],
+  "semanticCommitType": "ci",
   "packageRules": [
     {
-      "matchManagers": ["github-actions"],
+      "matchManagers": [
+        "github-actions"
+      ],
       "commitMessagePrefix": "gha: ",
-      "labels": ["CI"]
+      "labels": [
+        "CI"
+      ]
     },
     {
-      "matchUpdateTypes": ["pin", "pinDigest"],
+      "matchUpdateTypes": [
+        "pin",
+        "pinDigest",
+        "digest"
+      ],
       "commitMessagePrefix": "ci: ",
-      "labels": ["CI"]
+      "labels": [
+        "CI"
+      ]
     },
     {
-      "matchManagers": ["regex"],
+      "matchManagers": [
+        "regex"
+      ],
       "commitMessagePrefix": "ci: ",
-      "labels": ["CI"]
+      "labels": [
+        "CI"
+      ]
     },
     {
-      "matchDepNames": ["debian"],
-      "matchFileNames": [".github/workflows/linux-old.yml"],
+      "matchDepNames": [
+        "debian"
+      ],
+      "matchFileNames": [
+        ".github/workflows/linux-old.yml"
+      ],
       "enabled": false
     }
   ],
