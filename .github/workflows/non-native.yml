@@ -100,7 +100,7 @@ jobs:
             cmake --build bld --config Debug --target test-ci
 
   freebsd:
-    name: 'FreeBSD (cmake, openssl, clang, build-only)'
+    name: 'FreeBSD (${{ matrix.build }}, ${{ matric.arch }}, openssl, ${{ matrix.compiler }})'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
@@ -128,7 +128,10 @@ jobs:
               --disable-dependency-tracking
             make -j3
             src/curl --disable --version
-            #make check V=1  # Slow, let's skip building/running tests for now
+            if [ '${{ matrix.arch }}' = 'x86_64' ]; then
+              export TFLAGS='-j12'
+              make check V=1
+            fi
 
       - name: 'cmake'
         if: ${{ matrix.build == 'cmake' }}
@@ -149,9 +152,11 @@ jobs:
               -DBUILD_TESTING=ON
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
-            # Slow, let's skip building/running tests for now
-            cmake --build bld --config Debug --parallel 3 --target testdeps
-            #cmake --build bld --config Debug --target test-ci
+            if [ '${{ matrix.arch }}' = 'x86_64' ]; then
+              cmake --build bld --config Debug --parallel 3 --target testdeps
+              export TFLAGS='-j12'
+              cmake --build bld --config Debug --target test-ci
+            fi
 
   omnios:
     name: 'OmniOS (autotools, openssl, gcc, amd64)'
