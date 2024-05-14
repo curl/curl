@@ -40,7 +40,7 @@ concurrency:
 permissions: {}
 
 jobs:
-  build_netbsd:
+  netbsd:
     name: 'NetBSD (cmake, openssl, clang)'
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -69,7 +69,7 @@ jobs:
             cmake --build bld --config Debug --parallel 3 --target testdeps
             cmake --build bld --config Debug --target test-ci
 
-  build_openbsd:
+  openbsd:
     name: 'OpenBSD (cmake, libressl, clang)'
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -100,7 +100,7 @@ jobs:
             find . -type d -exec chmod 777 {} \;
             cmake --build bld --config Debug --target test-ci
 
-  build_freebsd:
+  freebsd:
     name: 'FreeBSD (autotools, openssl, clang, build-only)'
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -129,7 +129,7 @@ jobs:
             src/curl --disable --version
             #make check V=1  # Slow, let's skip building/running tests for now
 
-  build_omnios:
+  omnios:
     name: 'OmniOS (autotools, openssl, gcc, amd64)'
     runs-on: ubuntu-22.04
     timeout-minutes: 30
