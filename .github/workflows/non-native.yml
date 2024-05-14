@@ -129,7 +129,7 @@ jobs:
             #make check V=1  # Slow, let's skip building/running tests for now
 
   freebsd_cmake:
-    name: 'FreeBSD (autotools, openssl, clang, build-only)'
+    name: 'FreeBSD (cmake, openssl, clang, build-only)'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
@@ -148,7 +148,7 @@ jobs:
           environment_variables: 'CC'
           run: |
             # https://ports.freebsd.org/
-            #sudo pkg install -y cmake
+            sudo pkg install -y cmake
             cmake -B bld \
               "-DCMAKE_C_COMPILER=${CC}" \
               -DCMAKE_UNITY_BUILD=ON \
