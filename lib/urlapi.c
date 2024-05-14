@@ -233,7 +233,7 @@ size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen,
        be the host name "data" with a specified port number. */
 
     /* the length of the scheme is the name part only */
-    size_t len = (size_t)i;
+    size_t len = i;
     if(buf) {
       Curl_strntolower(buf, url, i);
       buf[i] = 0;
