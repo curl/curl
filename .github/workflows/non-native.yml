@@ -63,6 +63,7 @@ jobs:
               -DCURL_USE_OPENSSL=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
+              -DBUILD_EXAMPLES=OFF \
               -DBUILD_TESTING=ON
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
@@ -92,6 +93,7 @@ jobs:
               -DCURL_USE_OPENSSL=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
+              -DBUILD_EXAMPLES=OFF \
               -DBUILD_TESTING=ON
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
@@ -128,6 +130,7 @@ jobs:
               --disable-dependency-tracking
             make -j3
             src/curl --disable --version
+            make -j3 examples
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then
               export TFLAGS='-j12'
               make check V=1
@@ -149,6 +152,7 @@ jobs:
               -DCURL_USE_OPENSSL=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
+              -DBUILD_EXAMPLES=OFF \
               -DBUILD_TESTING=ON
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
@@ -178,5 +182,6 @@ jobs:
               --disable-dependency-tracking
             gmake -j3
             src/curl --disable --version
+            gmake -j3 examples
             export TFLAGS='-j12'
             gmake check V=1
