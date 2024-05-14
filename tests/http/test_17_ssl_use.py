@@ -175,4 +175,3 @@ class TestSSLUse:
         assert r.json, f'{r}'
         if proto != 'h3':  # we proxy h3
             assert r.json['SSL_TLS_SNI'] == domain, f'{r.json}'
-

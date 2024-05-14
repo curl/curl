@@ -104,6 +104,7 @@ sub scanenums {
                ($_ ne "typedef") &&
                ($_ ne "enum") &&
                ($_ ne "=") &&
+               ($_ !~ /^\d+$/) &&
                ($_ !~ /^[ \t]*$/)) {
                 if($verbose) {
                     print "Source: $Cpreprocessor $i$file\n";

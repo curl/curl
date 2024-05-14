@@ -100,7 +100,7 @@ static void free_bundle_hash_entry(void *freethis)
   bundle_destroy(b);
 }
 
-int Curl_conncache_init(struct conncache *connc, int size)
+int Curl_conncache_init(struct conncache *connc, size_t size)
 {
   /* allocate a new easy handle to use when closing cached connections */
   connc->closure_handle = curl_easy_init();

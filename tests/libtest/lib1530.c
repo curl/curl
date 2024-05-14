@@ -37,7 +37,7 @@ static curl_socket_t opensocket(void *clientp,
   return CURL_SOCKET_BAD;
 }
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURL *curl = NULL;
   CURLcode res = CURLE_FAILED_INIT;
@@ -66,5 +66,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return (int)res;
+  return res;
 }

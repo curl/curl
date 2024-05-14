@@ -60,7 +60,7 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
 #endif
 }
 
-static int once(char *URL, bool oldstyle)
+static CURLcode once(char *URL, bool oldstyle)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
@@ -189,9 +189,9 @@ test_cleanup:
   return res;
 }
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
-  int res;
+  CURLcode res;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");

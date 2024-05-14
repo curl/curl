@@ -45,7 +45,7 @@ static unsigned int WINAPI run_thread(void *ptr)
   return 0;
 }
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
 #ifdef _WIN32_WCE
   typedef HANDLE curl_win_thread_handle_t;
@@ -64,7 +64,7 @@ int test(char *URL)
     fprintf(stderr, "%s:%d On Windows but the "
             "CURL_VERSION_THREADSAFE feature flag is not set\n",
             __FILE__, __LINE__);
-    return -1;
+    return (CURLcode)-1;
   }
 
   /* On Windows libcurl global init/cleanup calls LoadLibrary/FreeLibrary for
@@ -105,7 +105,7 @@ cleanup:
     }
   }
 
-  return test_failure;
+  return (CURLcode)test_failure;
 }
 
 #elif defined(HAVE_PTHREAD_H)
@@ -123,12 +123,12 @@ static void *run_thread(void *ptr)
   return NULL;
 }
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURLcode results[NUM_THREADS];
   pthread_t tids[NUM_THREADS];
   unsigned tid_count = NUM_THREADS, i;
-  int test_failure = 0;
+  CURLcode test_failure = CURLE_OK;
   curl_version_info_data *ver;
   (void) URL;
 
@@ -137,7 +137,7 @@ int test(char *URL)
     fprintf(stderr, "%s:%d Have pthread but the "
             "CURL_VERSION_THREADSAFE feature flag is not set\n",
             __FILE__, __LINE__);
-    return -1;
+    return (CURLcode)-1;
   }
 
   for(i = 0; i < tid_count; i++) {
@@ -148,7 +148,7 @@ int test(char *URL)
       fprintf(stderr, "%s:%d Couldn't create thread, errno %d\n",
               __FILE__, __LINE__, res);
       tid_count = i;
-      test_failure = -1;
+      test_failure = (CURLcode)-1;
       goto cleanup;
     }
   }
@@ -160,7 +160,7 @@ cleanup:
       fprintf(stderr, "%s:%d thread[%u]: curl_global_init() failed,"
               "with code %d (%s)\n", __FILE__, __LINE__,
               i, (int) results[i], curl_easy_strerror(results[i]));
-      test_failure = -1;
+      test_failure = (CURLcode)-1;
     }
   }
 
@@ -168,7 +168,7 @@ cleanup:
 }
 
 #else /* without pthread or Windows, this test doesn't work */
-int test(char *URL)
+CURLcode test(char *URL)
 {
   curl_version_info_data *ver;
   (void)URL;
@@ -178,8 +178,8 @@ int test(char *URL)
     fprintf(stderr, "%s:%d No pthread but the "
             "CURL_VERSION_THREADSAFE feature flag is set\n",
             __FILE__, __LINE__);
-    return -1;
+    return (CURLcode)-1;
   }
-  return 0;
+  return CURLE_OK;
 }
 #endif

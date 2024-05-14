@@ -147,7 +147,7 @@ static const char *win32_strerror(int err, char *buf, size_t buflen)
 void win32_perror(const char *msg)
 {
   char buf[512];
-  DWORD err = SOCKERRNO;
+  int err = SOCKERRNO;
   win32_strerror(err, buf, sizeof(buf));
   if(msg)
     fprintf(stderr, "%s: ", msg);

@@ -94,7 +94,7 @@ long chunk_end(void *ptr)
   return CURL_CHUNK_END_FUNC_OK;
 }
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURL *handle = NULL;
   CURLcode res = CURLE_OK;

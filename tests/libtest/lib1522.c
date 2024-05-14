@@ -49,7 +49,7 @@ static int sockopt_callback(void *clientp, curl_socket_t curlfd,
   return CURL_SOCKOPT_OK;
 }
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURLcode code = TEST_ERR_MAJOR_BAD;
   CURLcode res;
@@ -97,5 +97,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return (int)code;
+  return code;
 }

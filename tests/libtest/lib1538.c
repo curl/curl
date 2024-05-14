@@ -25,9 +25,9 @@
 
 #include "memdebug.h"
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
-  int res = 0;
+  CURLcode res = CURLE_OK;
   CURLcode easyret;
   CURLMcode multiret;
   CURLSHcode shareret;
@@ -56,5 +56,5 @@ int test(char *URL)
     printf("u%d: %s\n", (int)urlret, curl_url_strerror(urlret));
   }
 
-  return (int)res;
+  return res;
 }

@@ -146,7 +146,7 @@ static curl_hstswrite_callback hstswritecb;
 static curl_resolver_start_callback resolver_start_cb;
 static curl_prereq_callback prereqcb;
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURL *curl = NULL;
   CURL *dep = NULL;
@@ -363,7 +363,7 @@ test_cleanup:
   curl_share_cleanup(share);
   curl_global_cleanup();
 
-  return (int)res;
+  return res;
 }
 FOOTER
     ;

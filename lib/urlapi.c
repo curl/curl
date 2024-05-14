@@ -234,10 +234,8 @@ size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen,
     /* the length of the scheme is the name part only */
     size_t len = i;
     if(buf) {
+      Curl_strntolower(buf, url, i);
       buf[i] = 0;
-      while(i--) {
-        buf[i] = Curl_raw_tolower(url[i]);
-      }
     }
     return len;
   }

@@ -28,7 +28,7 @@
 
 static char buffer[17000]; /* more than 16K */
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;

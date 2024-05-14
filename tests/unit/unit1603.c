@@ -31,7 +31,7 @@
 #include "memdebug.h" /* LAST include file */
 
 static struct Curl_hash hash_static;
-static const int slots = 3;
+static const size_t slots = 3;
 
 static void mydtor(void *p)
 {

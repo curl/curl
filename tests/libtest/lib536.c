@@ -37,7 +37,7 @@ static void proxystat(CURL *curl)
   }
 }
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURLcode res = CURLE_OK;
   CURL *curl;
@@ -80,5 +80,5 @@ test_cleanup:
   curl_slist_free_all(host);
   curl_global_cleanup();
 
-  return (int)res;
+  return res;
 }

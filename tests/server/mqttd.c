@@ -343,10 +343,10 @@ static int disconnect(FILE *dump, curl_socket_t fd)
 */
 
 /* return number of bytes used */
-static int encode_length(size_t packetlen,
-                         unsigned char *remlength) /* 4 bytes */
+static size_t encode_length(size_t packetlen,
+                            unsigned char *remlength) /* 4 bytes */
 {
-  int bytes = 0;
+  size_t bytes = 0;
   unsigned char encode;
 
   do {
@@ -396,12 +396,12 @@ static int publish(FILE *dump,
   size_t topiclen = strlen(topic);
   unsigned char *packet;
   size_t payloadindex;
-  ssize_t remaininglength = topiclen + 2 + payloadlen;
-  ssize_t packetlen;
-  ssize_t sendamount;
+  size_t remaininglength = topiclen + 2 + payloadlen;
+  size_t packetlen;
+  size_t sendamount;
   ssize_t rc;
   unsigned char rembuffer[4];
-  int encodedlen;
+  size_t encodedlen;
 
   if(config.excessive_remaining) {
     /* manually set illegal remaining length */
@@ -443,7 +443,7 @@ static int publish(FILE *dump,
     loghex(packet, rc);
     logprotocol(FROM_SERVER, "PUBLISH", remaininglength, dump, packet, rc);
   }
-  if(rc == packetlen)
+  if((size_t)rc == packetlen)
     return 0;
   return 1;
 }
@@ -463,7 +463,7 @@ static int fixedheader(curl_socket_t fd,
 
   /* get the first two bytes */
   ssize_t rc = sread(fd, (char *)buffer, 2);
-  int i;
+  size_t i;
   if(rc < 2) {
     logmsg("READ %zd bytes [SHORT!]", rc);
     return 1; /* fail */

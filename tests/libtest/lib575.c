@@ -37,12 +37,12 @@
  * 3. with multi interface
  */
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURL *handle = NULL;
   CURL *duphandle = NULL;
   CURLM *mhandle = NULL;
-  int res = 0;
+  CURLcode res = CURLE_OK;
   int still_running = 0;
 
   start_test_timing();

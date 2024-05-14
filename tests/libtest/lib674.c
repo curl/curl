@@ -31,7 +31,7 @@
  * Get a single URL without select().
  */
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURL *handle = NULL;
   CURL *handle2;

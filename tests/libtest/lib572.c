@@ -41,9 +41,9 @@ static char *suburl(const char *base, int i)
 /*
  * Test GET_PARAMETER: PUT, HEARTBEAT, and POST
  */
-int test(char *URL)
+CURLcode test(char *URL)
 {
-  int res;
+  CURLcode res;
   CURL *curl;
   int params;
   FILE *paramsf = NULL;

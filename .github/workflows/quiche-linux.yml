@@ -46,12 +46,18 @@ permissions: {}
 
 env:
   MAKEFLAGS: -j 3
+  # unhandled
   openssl-version: 3.1.4+quic
-  nghttp3-version: v1.2.0
-  ngtcp2-version: v1.4.0
-  nghttp2-version: v1.61.0
+  # renovate: datasource=github-tags depName=ngtcp2/nghttp3 versioning=semver registryUrl=https://github.com
+  nghttp3-version: 1.2.0
+  # renovate: datasource=github-tags depName=ngtcp2/ngtcp2 versioning=semver registryUrl=https://github.com
+  ngtcp2-version: 1.4.0
+  # renovate: datasource=github-tags depName=nghttp2/nghttp2 versioning=semver registryUrl=https://github.com
+  nghttp2-version: 1.61.0
+  # renovate: datasource=github-tags depName=cloudflare/quiche versioning=semver registryUrl=https://github.com
   quiche-version: 0.20.0
-  mod_h2-version: v2.0.27
+  # renovate: datasource=github-tags depName=icing/mod_h2 versioning=semver registryUrl=https://github.com
+  mod_h2-version: 2.0.27
 
 jobs:
   autotools:
@@ -101,7 +107,7 @@ jobs:
 
       - if: steps.cache-nghttpx.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet --depth=1 -b ${{ env.nghttp3-version }} https://github.com/ngtcp2/nghttp3
+          git clone --quiet --depth=1 -b v${{ env.nghttp3-version }} https://github.com/ngtcp2/nghttp3
           cd nghttp3
           git submodule update --init
           autoreconf -fi
@@ -111,7 +117,7 @@ jobs:
 
       - if: steps.cache-nghttpx.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet --depth=1 -b ${{ env.ngtcp2-version }} https://github.com/ngtcp2/ngtcp2
+          git clone --quiet --depth=1 -b v${{ env.ngtcp2-version }} https://github.com/ngtcp2/ngtcp2
           cd ngtcp2
           autoreconf -fi
           ./configure --prefix=$HOME/nghttpx PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" --enable-lib-only --with-openssl
@@ -120,7 +126,7 @@ jobs:
 
       - if: steps.cache-nghttpx.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet --depth=1 -b ${{ env.nghttp2-version }} https://github.com/nghttp2/nghttp2
+          git clone --quiet --depth=1 -b v${{ env.nghttp2-version }} https://github.com/nghttp2/nghttp2
           cd nghttp2
           autoreconf -fi
           ./configure --prefix=$HOME/nghttpx PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" --enable-http3
@@ -167,7 +173,7 @@ jobs:
       - if: steps.cache-mod_h2.outputs.cache-hit != 'true'
         run: |
           cd $HOME
-          git clone --quiet --depth=1 -b  ${{ env.mod_h2-version }} https://github.com/icing/mod_h2
+          git clone --quiet --depth=1 -b v${{ env.mod_h2-version }} https://github.com/icing/mod_h2
           cd mod_h2
           autoreconf -fi
           ./configure

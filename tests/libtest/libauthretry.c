@@ -60,13 +60,13 @@ test_cleanup:
 static CURLcode send_wrong_password(CURL *curl, const char *url, int seq,
                                     long auth_scheme)
 {
-    return send_request(curl, url, seq, auth_scheme, "testuser:wrongpass");
+  return send_request(curl, url, seq, auth_scheme, "testuser:wrongpass");
 }
 
 static CURLcode send_right_password(CURL *curl, const char *url, int seq,
                                     long auth_scheme)
 {
-    return send_request(curl, url, seq, auth_scheme, "testuser:testpass");
+  return send_request(curl, url, seq, auth_scheme, "testuser:testpass");
 }
 
 static long parse_auth_name(const char *arg)
@@ -82,7 +82,7 @@ static long parse_auth_name(const char *arg)
   return CURLAUTH_NONE;
 }
 
-int test(char *url)
+CURLcode test(char *url)
 {
   CURLcode res;
   CURL *curl = NULL;
@@ -145,5 +145,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return (int)res;
+  return res;
 }

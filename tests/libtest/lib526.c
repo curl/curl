@@ -52,9 +52,9 @@
 
 #define NUM_HANDLES 4
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
-  int res = 0;
+  CURLcode res = CURLE_OK;
   CURL *curl[NUM_HANDLES];
   int running;
   CURLM *m = NULL;
@@ -163,7 +163,7 @@ test_cleanup:
      cleanup'ed yet, in this case we have to cleanup them or otherwise these
      will be leaked, let's use undocumented cleanup sequence - type UB */
 
-  if(res)
+  if(res != CURLE_OK)
     for(i = 0; i < NUM_HANDLES; i++)
       curl_easy_cleanup(curl[i]);
 

@@ -51,4 +51,3 @@ A name to use to over-ride the `public_name` field of an ECHConfigList
 
 Most errors cause error
 *CURLE_ECH_REQUIRED* (101).
-

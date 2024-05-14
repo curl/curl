@@ -91,7 +91,7 @@ static size_t writecb(char *buffer, size_t size, size_t nitems, void *p)
   return nitems;
 }
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
@@ -112,13 +112,13 @@ int test(char *URL)
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writecb);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &ws_data);
     res = curl_easy_perform(curl);
-    fprintf(stderr, "curl_easy_perform() returned %u\n", (int)res);
+    fprintf(stderr, "curl_easy_perform() returned %d\n", res);
     /* always cleanup */
     curl_easy_cleanup(curl);
     flush_data(&ws_data);
   }
   curl_global_cleanup();
-  return (int)res;
+  return res;
 }
 
 #else

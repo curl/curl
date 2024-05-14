@@ -541,11 +541,11 @@ class CurlClient:
         started_at = datetime.now()
         exception = None
         profile = None
+        started_at = datetime.now()
         try:
             with open(self._stdoutfile, 'w') as cout:
                 with open(self._stderrfile, 'w') as cerr:
                     if with_profile:
-                        started_at = datetime.now()
                         end_at = started_at + timedelta(seconds=self._timeout) \
                             if self._timeout else None
                         log.info(f'starting: {args}')
@@ -575,7 +575,10 @@ class CurlClient:
                                            timeout=self._timeout)
                         exitcode = p.returncode
         except subprocess.TimeoutExpired:
-            log.warning(f'Timeout after {self._timeout}s: {args}')
+            now = datetime.now()
+            duration = now - started_at
+            log.warning(f'Timeout at {now} after {duration.total_seconds()}s '
+                        f'(configured {self._timeout}s): {args}')
             exitcode = -1
             exception = 'TimeoutExpired'
         coutput = open(self._stdoutfile).readlines()
