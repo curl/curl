@@ -119,7 +119,7 @@ fi
 
 find . -name '*.exe' -o -name '*.dll'
 if [ -z "${SKIP_RUN:-}" ]; then
-  "${curl}" --version
+  "${curl}" --disable --version
 else
   echo "Skip running curl.exe. Reason: ${SKIP_RUN}"
 fi
