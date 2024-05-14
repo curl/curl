@@ -1345,6 +1345,8 @@ static CURLcode tftp_do(struct Curl_easy *data, bool *done)
   CURLcode result;
   struct connectdata *conn = data->conn;
 
+  fputs("DEBUG: tftp_do() begin\n", stderr);
+
   *done = FALSE;
 
   if(!conn->proto.tftpc) {
@@ -1364,6 +1366,9 @@ static CURLcode tftp_do(struct Curl_easy *data, bool *done)
   if(!result)
     /* If we have encountered an internal tftp error, translate it. */
     result = tftp_translate_code(state->error);
+
+  fprintf(stderr, "DEBUG: tftp_do() end result:|%d| done:|%d|\n",
+                  (int)result, (int)*done);
 
   return result;
 }
