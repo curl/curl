@@ -97,7 +97,6 @@ jobs:
             bld/src/curl --disable --version
             cmake --build bld --config Debug --parallel 3 --target testdeps
             export TFLAGS='~TFTP'  # FIXME: TFTP requests executed twice? Related: `curl: (69) TFTP: Access Violation`?
-            find . -type d -exec chmod 777 {} \;
             cmake --build bld --config Debug --target test-ci
 
   freebsd:
