@@ -127,8 +127,7 @@ jobs:
               --disable-dependency-tracking
             make -j3
             src/curl --disable --version
-            # Slow, let's skip building/running tests for now
-            #make check V=1
+            #make check V=1  # Slow, let's skip building/running tests for now
 
   build_omnios:
     name: 'OmniOS (autotools, openssl, gcc, amd64)'
@@ -143,8 +142,7 @@ jobs:
           # https://pkg.omnios.org/r151048/core/en/index.shtml
           prepare: pkg install build-essential libtool
           run: |
-            # Some tests expect `cpp`, which is named `gcpp` in this env.
-            ln -s /usr/bin/gcpp /usr/bin/cpp
+            ln -s /usr/bin/gcpp /usr/bin/cpp  # Some tests expect `cpp`, which is named `gcpp` in this env.
             autoreconf -fi
             mkdir bld && cd bld && ../configure --enable-debug --enable-warnings --enable-werror \
               --with-openssl \
