@@ -46,6 +46,8 @@ Via curl's `configure` script you may specify:
 
   * `--with-test-nghttpx=<path-of-nghttpx>` if you have nghttpx to use somewhere outside your `$PATH`.
   * `--with-test-httpd=<httpd-install-path>` if you have an Apache httpd installed somewhere else. On Debian/Ubuntu it will otherwise look into `/usr/bin` and `/usr/sbin` to find those.
+  * `--with-test-caddy=<caddy-install-path>` if you have a Caddy web server installed somewhere else.
+  * `--with-test-vsftpd=<vsftpd-install-path>` if you have a vsftpd ftp  server installed somewhere else.
 
 ## Usage Tips
 

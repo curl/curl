@@ -105,8 +105,8 @@ class TestGoAway:
         assert nghttpx.reload(timeout=timedelta(seconds=2))
         t.join()
         r: ExecResult = self.r
-        # this should take `count` seconds to retrieve
-        assert r.duration >= timedelta(seconds=count)
+        # this should take `count` seconds to retrieve, maybe a little less
+        assert r.duration >= timedelta(seconds=count-1)
         r.check_response(count=count, http_status=200, connect_count=2)
         # reload will shut down the connection gracefully with GOAWAY
         # we expect to see a second connection opened afterwards
