@@ -45,6 +45,10 @@ def pytest_report_header(config):
         report.extend([
             f'  Caddy: {env.caddy_version()}, http:{env.caddy_http_port} https:{env.caddy_https_port}'
         ])
+    if env.has_vsftpd():
+        report.extend([
+            f'  VsFTPD: {env.vsftpd_version()}, ftp:{env.ftp_port}'
+        ])
     return '\n'.join(report)
 
 

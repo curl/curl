@@ -129,7 +129,8 @@ class TestErrors:
         r = curl.http_download(urls=[url], alpn_proto=proto, extra_args=[
             '--parallel',
         ])
-        if proto == 'http/1.0':
+        if proto == 'http/1.0' and env.curl_is_debug():
+            # we only fail in debug builds here
             r.check_exit_code(56)
         else:
             r.check_exit_code(0)

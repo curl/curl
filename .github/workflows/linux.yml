@@ -383,7 +383,7 @@ jobs:
 
       - if: contains(matrix.build.install_steps, 'pytest')
         run: |
-          sudo apt-get install apache2 apache2-dev libnghttp2-dev
+          sudo apt-get install apache2 apache2-dev libnghttp2-dev vsftpd
           sudo python3 -m pip install -r tests/http/requirements.txt
         name: 'install pytest and apach2-dev'
 
