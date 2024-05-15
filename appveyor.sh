@@ -42,8 +42,11 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   [ "${PRJ_CFG}" = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
   [ "${PRJ_CFG}" = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
   [[ "${PRJ_GEN}" = *'Visual Studio'* ]] && options+=' -DCMAKE_VS_GLOBALS=TrackFileAccess=false'
-  # Fails to run without this run due to missing MSVCR90.dll
-  [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ] && options+=' -DCURL_STATIC_CRT=ON'
+  if [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ]; then
+    [ "${PRJ_CFG}" = 'Debug' ] && [ "${DEBUG}" = 'ON' ] && [ "${SHARED}" = 'ON' ] && SKIP_RUN='Crash on startup in -DDEBUGBUILD shared builds'
+    # Fails to run without this due to missing MSVCR90.dll / MSVCR90D.dll
+    options+=' -DCURL_STATIC_CRT=ON'
+  fi
   # shellcheck disable=SC2086
   cmake -B _bld "-G${PRJ_GEN}" ${TARGET:-} ${options} \
     "-DCURL_USE_OPENSSL=${OPENSSL}" \
