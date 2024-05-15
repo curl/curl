@@ -80,6 +80,10 @@ Files: README
 Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
 
+Files: renovate.json
+Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
+License: curl
+
 Files: .mailmap
 Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
