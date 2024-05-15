@@ -38,7 +38,14 @@
 #define wakeup_write     swrite
 #define wakeup_read      sread
 #define wakeup_close     sclose
-#define wakeup_create(p) Curl_socketpair(AF_UNIX, SOCK_STREAM, 0, p)
+
+#ifdef USE_UNIX_SOCKETS
+#define CURL_SOCKET_FAMILY AF_UNIX
+#else
+#define CURL_SOCKET_FAMILY AF_INET
+#endif
+
+#define wakeup_create(p) Curl_socketpair(CURL_SOCKET_FAMILY, SOCK_STREAM, 0, p)
 
 #endif /* HAVE_PIPE */
 
