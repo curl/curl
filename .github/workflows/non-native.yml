@@ -63,8 +63,8 @@ jobs:
               -DCURL_USE_OPENSSL=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
-              -DBUILD_EXAMPLES=ON \
-              -DBUILD_TESTING=ON
+              -DBUILD_TESTING=ON \
+              -DBUILD_EXAMPLES=ON
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
@@ -95,8 +95,8 @@ jobs:
               -DCURL_USE_OPENSSL=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
-              -DBUILD_EXAMPLES=ON \
-              -DBUILD_TESTING=ON
+              -DBUILD_TESTING=ON \
+              -DBUILD_EXAMPLES=ON
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
@@ -156,8 +156,8 @@ jobs:
               -DCURL_USE_OPENSSL=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
-              -DBUILD_EXAMPLES=ON \
-              -DBUILD_TESTING=ON
+              -DBUILD_TESTING=ON \
+              -DBUILD_EXAMPLES=ON
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
