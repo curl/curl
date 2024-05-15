@@ -48,6 +48,17 @@ environment:
       SHARED: 'ON'
       TESTING: 'OFF'
       DISABLED_TESTS: ''
+    - job_name: 'CMake, VS2008, Debug, x86, Schannel, Build-only'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
+      BUILD_SYSTEM: CMake
+      PRJ_GEN: 'Visual Studio 9 2008'
+      PRJ_CFG: Debug
+      SCHANNEL: 'ON'
+      ENABLE_UNICODE: 'OFF'
+      HTTP_ONLY: 'OFF'
+      SHARED: 'ON'
+      TESTING: 'OFF'
+      DISABLED_TESTS: ''
     - job_name: 'CMake, VS2022, Release, x64, OpenSSL 3.2, WebSockets, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
