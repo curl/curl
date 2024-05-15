@@ -105,7 +105,7 @@ int main(void)
   CURL *curl = curl_easy_init();
   if(curl) {
     /* pause a transfer in both directions */
-    curl_easy_pause(curl, CURL_READFUNC_PAUSE | CURL_WRITEFUNC_PAUSE);
+    curl_easy_pause(curl, CURLPAUSE_RECV | CURLPAUSE_SEND);
 
   }
 }
