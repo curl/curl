@@ -24,6 +24,6 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
       - name: REUSE Compliance Check
-        uses: fsfe/reuse-action@v3
+        uses: fsfe/reuse-action@a46482ca367aef4454a87620aa37c2be4b2f8106 # v3

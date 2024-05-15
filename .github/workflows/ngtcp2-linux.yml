@@ -101,7 +101,7 @@ jobs:
         name: 'install prereqs and impacket, pytest, crypto, apache2'
 
       - name: cache quictls
-        uses: actions/cache@v4
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         id: cache-quictls-no-deprecated
         env:
           cache-name: cache-quictls-no-deprecated
@@ -125,7 +125,7 @@ jobs:
 
 
       - name: cache gnutls
-        uses: actions/cache@v4
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         id: cache-gnutls
         env:
           cache-name: cache-gnutls
@@ -152,7 +152,7 @@ jobs:
         name: 'install gnutls'
 
       - name: cache wolfssl
-        uses: actions/cache@v4
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         id: cache-wolfssl
         env:
           cache-name: cache-wolfssl
@@ -178,7 +178,7 @@ jobs:
 
 
       - name: cache nghttp3
-        uses: actions/cache@v4
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         id: cache-nghttp3
         env:
           cache-name: cache-nghttp3
@@ -221,7 +221,7 @@ jobs:
         name: 'install nghttp2'
 
       - name: cache mod_h2
-        uses: actions/cache@v4
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         id: cache-mod_h2
         env:
           cache-name: cache-mod_h2
@@ -244,7 +244,7 @@ jobs:
           sudo make install
         name: 'install mod_h2'
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
 
       - run: |
           sudo python3 -m pip install -r tests/requirements.txt -r tests/http/requirements.txt

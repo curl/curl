@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
 
       - run: sudo apt-get purge -y curl libcurl4 libcurl4-doc
         name: 'remove preinstalled curl libcurl4{-doc}'
@@ -50,7 +50,7 @@ jobs:
           mkdir run2; cp -p ./curl-99.98.97.* run2/
           diff run1 run2
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4
         with:
           name: 'release-tgz'
           path: 'curl-99.98.97.tar.gz'
@@ -74,7 +74,7 @@ jobs:
     timeout-minutes: 30
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4
         with:
           name: 'release-tgz'
 
@@ -97,7 +97,7 @@ jobs:
     timeout-minutes: 30
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4
         with:
           name: 'release-tgz'
 
@@ -118,7 +118,7 @@ jobs:
     timeout-minutes: 30
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4
         with:
           name: 'release-tgz'
 
