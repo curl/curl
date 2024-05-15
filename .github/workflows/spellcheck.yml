@@ -27,7 +27,7 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
 
       - name: trim all man page *.md files
         run: find docs -name "*.md" ! -name "_*" | xargs -n1 ./.github/scripts/cleancmd.pl
@@ -45,6 +45,6 @@ jobs:
         run: grep -v '^#' .github/scripts/spellcheck.words >  wordlist.txt
 
       - name: Check Spelling
-        uses: rojopolis/spellcheck-github-actions@v0
+        uses: rojopolis/spellcheck-github-actions@dbd2f1da869c05ad874fffeb6fe1ed50cd1a6e98 # v0
         with:
           config_path: .github/scripts/spellcheck.yaml

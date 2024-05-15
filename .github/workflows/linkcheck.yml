@@ -30,12 +30,12 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
         name: checkout
 
       - name: trim the cmdline docs markdown files
         run: find docs/cmdline-opts -name "*.md" ! -name "_*" ! -name MANPAGE.md | xargs -n1 ./.github/scripts/cleancmd.pl
 
-      - uses: gaurav-nelson/github-action-markdown-link-check@v1
+      - uses: gaurav-nelson/github-action-markdown-link-check@5c5dfc0ac2e225883c0e5f03a85311ec2830d368 # v1
         with:
           use-quiet-mode: 'yes'

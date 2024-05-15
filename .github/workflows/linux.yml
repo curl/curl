@@ -204,7 +204,7 @@ jobs:
           apk add --no-cache build-base autoconf automake libtool perl openssl-dev libssh2-dev zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev heimdal-dev libpsl-dev py3-impacket py3-asn1 py3-six py3-pycryptodomex perl-time-hires openssh stunnel sudo git
         name: 'install dependencies'
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
 
       - name: Fix kernel mmap rnd bits
         # Asan in llvm 14 provided in ubuntu 22.04 is incompatible with
@@ -226,7 +226,7 @@ jobs:
 
       - name: cache bearssl
         if: contains(matrix.build.install_steps, 'bearssl')
-        uses: actions/cache@v4
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         id: cache-bearssl
         env:
           cache-name: cache-bearssl
@@ -247,7 +247,7 @@ jobs:
 
       - name: cache libressl
         if: contains(matrix.build.install_steps, 'libressl')
-        uses: actions/cache@v4
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         id: cache-libressl
         env:
           cache-name: cache-libressl
@@ -266,7 +266,7 @@ jobs:
 
       - name: cache mbedtls
         if: contains(matrix.build.install_steps, 'mbedtls')
-        uses: actions/cache@v4
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         id: cache-mbedtls
         env:
           cache-name: cache-mbedtls
@@ -284,7 +284,7 @@ jobs:
 
       - name: cache openssl3
         if: contains(matrix.build.install_steps, 'openssl3')
-        uses: actions/cache@v4
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         id: cache-openssl3
         env:
           cache-name: cache-openssl3
@@ -302,7 +302,7 @@ jobs:
 
       - name: cache quictls
         if: contains(matrix.build.install_steps, 'quictls')
-        uses: actions/cache@v4
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         id: cache-quictls
         env:
           cache-name: cache-quictls
@@ -320,7 +320,7 @@ jobs:
 
       - name: cache msh3
         if: contains(matrix.build.install_steps, 'msh3')
-        uses: actions/cache@v4
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         id: cache-msh3
         env:
           cache-name: cache-msh3
@@ -347,7 +347,7 @@ jobs:
 
       - name: cache rustls
         if: contains(matrix.build.install_steps, 'rustls')
-        uses: actions/cache@v4
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         id: cache-rustls
         env:
           cache-name: cache-rustls
@@ -389,7 +389,7 @@ jobs:
 
       - name: cache mod_h2
         if: contains(matrix.build.install_steps, 'pytest')
-        uses: actions/cache@v4
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         id: cache-mod_h2
         env:
           cache-name: cache-mod_h2

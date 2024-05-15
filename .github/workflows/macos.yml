@@ -178,7 +178,7 @@ jobs:
           python3 -m pip install impacket
         name: 'pip3 install'
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
 
       - run: rm -f $HOME/.curlrc
         name: remove $HOME/.curlrc
@@ -249,7 +249,7 @@ jobs:
           esac
         name: 'brew unlink openssl'
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
 
       - run: cmake -B build -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DUSE_APPLE_IDN=ON ${{ matrix.build.generate }}
         name: 'cmake generate'
