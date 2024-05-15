@@ -38,7 +38,16 @@
 #define wakeup_write     swrite
 #define wakeup_read      sread
 #define wakeup_close     sclose
-#define wakeup_create(p) Curl_socketpair(AF_UNIX, SOCK_STREAM, 0, p)
+
+#if defined(USE_UNIX_SOCKETS) && defined(HAVE_SOCKETPAIR)
+#define SOCKET_FAMILY AF_UNIX
+#elif !defined(HAVE_SOCKETPAIR)
+#define SOCKET_FAMILY 0 /* not used */
+#else
+#error "unsupported unix domain and socketpair build combo"
+#endif
+
+#define wakeup_create(p) Curl_socketpair(SOCKET_FAMILY, SOCK_STREAM, 0, p)
 
 #endif /* HAVE_PIPE */
 
