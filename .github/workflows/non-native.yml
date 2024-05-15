@@ -67,8 +67,10 @@ jobs:
               -DBUILD_TESTING=ON
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
-            cmake --build bld --config Debug --parallel 3 --target testdeps
-            cmake --build bld --config Debug --target test-ci
+            if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
+              cmake --build bld --config Debug --parallel 3 --target testdeps
+              cmake --build bld --config Debug --target test-ci
+            fi
 
   openbsd:
     name: 'OpenBSD (cmake, libressl, clang)'
@@ -97,9 +99,11 @@ jobs:
               -DBUILD_TESTING=ON
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
-            cmake --build bld --config Debug --parallel 3 --target testdeps
-            export TFLAGS='-j12 ~TFTP'  # FIXME: TFTP requests executed twice? Related: `curl: (69) TFTP: Access Violation`?
-            cmake --build bld --config Debug --target test-ci
+            if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
+              cmake --build bld --config Debug --parallel 3 --target testdeps
+              export TFLAGS='-j12 ~TFTP'  # FIXME: TFTP requests executed twice? Related: `curl: (69) TFTP: Access Violation`?
+              cmake --build bld --config Debug --target test-ci
+            fi
 
   freebsd:
     name: 'FreeBSD (${{ matrix.build }}, openssl, ${{ matrix.compiler }}, ${{ matrix.arch }})'
@@ -131,7 +135,7 @@ jobs:
             make -j3
             src/curl --disable --version
             make -j3 examples
-            if [ '${{ matrix.arch }}' = 'x86_64' ]; then
+            if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               export TFLAGS='-j12'
               make check V=1
             fi
@@ -156,7 +160,7 @@ jobs:
               -DBUILD_TESTING=ON
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
-            if [ '${{ matrix.arch }}' = 'x86_64' ]; then
+            if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               cmake --build bld --config Debug --parallel 3 --target testdeps
               export TFLAGS='-j12'
               cmake --build bld --config Debug --target test-ci
