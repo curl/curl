@@ -27,7 +27,7 @@
     },
     {
       "matchManagers": [
-        "regex"
+        "custom.regex"
       ],
       "commitMessagePrefix": "ci: ",
       "labels": [
