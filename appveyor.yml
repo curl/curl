@@ -95,6 +95,17 @@ environment:
       HTTP_ONLY: 'OFF'
       TESTING: 'OFF'
       DISABLED_TESTS: ''
+    - job_name: 'CMake, VS2010, Debug, x64, Schannel, Shared, Build-only'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
+      BUILD_SYSTEM: CMake
+      PRJ_GEN: 'Visual Studio 10 2010 Win64'
+      PRJ_CFG: Debug
+      SCHANNEL: 'ON'
+      ENABLE_UNICODE: 'OFF'
+      HTTP_ONLY: 'OFF'
+      SHARED: 'ON'
+      TESTING: 'OFF'
+      DISABLED_TESTS: ''
     - job_name: 'CMake, VS2022, Debug, x64, Schannel, Static, Unicode'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
@@ -106,6 +117,18 @@ environment:
       HTTP_ONLY: 'OFF'
       TESTING: 'ON'
       DISABLED_TESTS: '!1139 !1501 !1177 !1477'
+    - job_name: 'CMake, VS2022, Debug, x64, Schannel, Shared, Unicode, Build-only'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
+      BUILD_SYSTEM: CMake
+      PRJ_GEN: 'Visual Studio 17 2022'
+      TARGET: '-A x64'
+      PRJ_CFG: Debug
+      SCHANNEL: 'ON'
+      ENABLE_UNICODE: 'ON'
+      HTTP_ONLY: 'OFF'
+      SHARED: 'ON'
+      TESTING: 'OFF'
+      DISABLED_TESTS: ''
     - job_name: 'CMake, VS2022, Debug, x64, no SSL, Static'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
