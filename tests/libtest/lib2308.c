@@ -39,7 +39,7 @@ static size_t cb_curl(void *buffer, size_t size, size_t nmemb, void *userp)
 CURLcode test(char *URL)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode res = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
   curl = curl_easy_init();
