@@ -141,18 +141,19 @@ struct dohentry {
 };
 
 
-#ifdef DEBUGBUILD
-DOHcode doh_encode(const char *host,
-                   DNStype dnstype,
-                   unsigned char *dnsp, /* buffer */
-                   size_t len,  /* buffer size */
-                   size_t *olen); /* output length */
-DOHcode doh_decode(const unsigned char *doh,
-                   size_t dohlen,
-                   DNStype dnstype,
-                   struct dohentry *d);
-void de_init(struct dohentry *d);
-void de_cleanup(struct dohentry *d);
+#ifdef UNITTESTS
+UNITTEST DOHcode doh_encode(const char *host,
+                            DNStype dnstype,
+                            unsigned char *dnsp,  /* buffer */
+                            size_t len,  /* buffer size */
+                            size_t *olen);  /* output length */
+UNITTEST DOHcode doh_decode(const unsigned char *doh,
+                            size_t dohlen,
+                            DNStype dnstype,
+                            struct dohentry *d);
+
+UNITTEST void de_init(struct dohentry *d);
+UNITTEST void de_cleanup(struct dohentry *d);
 #endif
 
 extern struct curl_trc_feat Curl_doh_trc;
