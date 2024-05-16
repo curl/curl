@@ -73,7 +73,7 @@ noinst_PROGRAMS = chkhostname libauthretry libntlmconnect libprereq      \
  lib1945 lib1946 lib1947 lib1948 lib1955 lib1956 lib1957 lib1958 lib1959 \
  lib1960 lib1964 \
  lib1970 lib1971 lib1972 lib1973 lib1974 lib1975 \
- lib2301 lib2302 lib2304 lib2305 lib2306 \
+ lib2301 lib2302 lib2304 lib2305 lib2306         lib2308 \
  lib2402 lib2404 lib2405 \
  lib2502 \
  lib3010 lib3025 lib3026 lib3027 \
@@ -676,6 +676,9 @@ lib2305_LDADD = $(TESTUTIL_LIBS)
 
 lib2306_SOURCES = lib2306.c $(SUPPORTFILES)
 lib2306_LDADD = $(TESTUTIL_LIBS)
+
+lib2308_SOURCES = lib2308.c $(SUPPORTFILES)
+lib2308_LDADD = $(TESTUTIL_LIBS)
 
 lib2402_SOURCES = lib2402.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib2402_LDADD = $(TESTUTIL_LIBS)
