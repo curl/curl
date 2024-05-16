@@ -302,7 +302,11 @@ static int curltest_tweak_handler(request_rec *r)
   if(strcmp(r->handler, "curltest-tweak")) {
     return DECLINED;
   }
-  if(r->method_number != M_GET && r->method_number != M_POST) {
+  if(r->method_number == M_DELETE) {
+    http_status = 204;
+    chunks = 0;
+  }
+  else if(r->method_number != M_GET && r->method_number != M_POST) {
     return DECLINED;
   }
 

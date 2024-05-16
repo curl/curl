@@ -474,6 +474,25 @@ class CurlClient:
                          with_headers=with_headers,
                          with_profile=with_profile)
 
+    def http_delete(self, urls: List[str],
+                    alpn_proto: Optional[str] = None,
+                    with_stats: bool = True,
+                    with_profile: bool = False,
+                    extra_args: Optional[List[str]] = None):
+        if extra_args is None:
+            extra_args = []
+        extra_args.extend([
+            '-X', 'DELETE', '-o', '/dev/null',
+        ])
+        if with_stats:
+            extra_args.extend([
+                '-w', '%{json}\\n'
+            ])
+        return self._raw(urls, alpn_proto=alpn_proto, options=extra_args,
+                         with_stats=with_stats,
+                         with_headers=False,
+                         with_profile=with_profile)
+
     def http_put(self, urls: List[str], data=None, fdata=None,
                  alpn_proto: Optional[str] = None,
                  with_stats: bool = True,
