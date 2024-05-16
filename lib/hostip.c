@@ -245,7 +245,6 @@ void Curl_hostcache_prune(struct Curl_easy *data)
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
   now = time(NULL);
-  time(&now);
 
   do {
     /* Remove outdated and unused entries from the hostcache */
@@ -300,7 +299,6 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
     struct hostcache_prune_data user;
 
     user.now = time(NULL);
-    time(&user.now);
     user.cache_timeout = data->set.dns_cache_timeout;
     user.oldest = 0;
 

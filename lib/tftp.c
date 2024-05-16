@@ -1205,7 +1205,6 @@ static timediff_t tftp_state_timeout(struct Curl_easy *data,
     return 0;
   }
   current = time(NULL);
-  time(&current);
   if(current > state->rx_time + state->retry_time) {
     if(event)
       *event = TFTP_EVENT_TIMEOUT;
