@@ -41,7 +41,7 @@ CURLcode test(char *URL)
   CURL *curl;
   CURLcode res;
 
-  curl_global_init(CURL_GLOBAL_SSL);
+  global_init(CURL_GLOBAL_ALL);
   curl = curl_easy_init();
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cb_curl);
   curl_easy_setopt(curl, CURLOPT_URL, URL);
