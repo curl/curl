@@ -1565,6 +1565,10 @@ set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
 set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
 set(version_config "${generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
 
+cmake_dependent_option(BUILD_TESTING "Build tests"
+  ON "PERL_FOUND;NOT CURL_DISABLE_TESTS"
+  OFF)
+
 if(HAVE_MANUAL_TOOLS)
   add_subdirectory(docs)
 endif()
@@ -1580,9 +1584,6 @@ if(BUILD_EXAMPLES)
   add_subdirectory(docs/examples)
 endif()
 
-cmake_dependent_option(BUILD_TESTING "Build tests"
-  ON "PERL_FOUND;NOT CURL_DISABLE_TESTS"
-  OFF)
 if(BUILD_TESTING)
   add_subdirectory(tests)
 endif()
