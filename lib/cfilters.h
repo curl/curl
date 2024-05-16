@@ -486,7 +486,9 @@ CURLcode Curl_conn_keep_alive(struct Curl_easy *data,
                               struct connectdata *conn,
                               int sockindex);
 
+#ifdef UNITTESTS
 void Curl_cf_def_close(struct Curl_cfilter *cf, struct Curl_easy *data);
+#endif
 void Curl_conn_get_host(struct Curl_easy *data, int sockindex,
                         const char **phost, const char **pdisplay_host,
                         int *pport);

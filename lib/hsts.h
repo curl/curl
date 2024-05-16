@@ -29,7 +29,7 @@
 #include <curl/curl.h>
 #include "llist.h"
 
-#ifdef DEBUGBUILD
+#ifdef UNITTESTS
 extern time_t deltatime;
 #endif
 

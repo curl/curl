@@ -95,6 +95,9 @@ struct dynhds_entry *Curl_dynhds_get(struct dynhds *dynhds,
                                      const char *name, size_t namelen);
 struct dynhds_entry *Curl_dynhds_cget(struct dynhds *dynhds, const char *name);
 
+#ifdef UNITTESTS
+/* used by unit2602.c */
+
 /**
  * Return TRUE iff one or more headers with the given name exist.
  */
@@ -116,6 +119,27 @@ size_t Curl_dynhds_count_name(struct dynhds *dynhds,
 size_t Curl_dynhds_ccount_name(struct dynhds *dynhds, const char *name);
 
 /**
+ * Remove all entries with the given name.
+ * Returns number of entries removed.
+ */
+size_t Curl_dynhds_remove(struct dynhds *dynhds,
+                          const char *name, size_t namelen);
+size_t Curl_dynhds_cremove(struct dynhds *dynhds, const char *name);
+
+/**
+ * Set the give header name and value, replacing any entries with
+ * the same name. The header is added at the end of all (remaining)
+ * entries.
+ */
+CURLcode Curl_dynhds_set(struct dynhds *dynhds,
+                         const char *name, size_t namelen,
+                         const char *value, size_t valuelen);
+#endif
+
+CURLcode Curl_dynhds_cset(struct dynhds *dynhds,
+                          const char *name, const char *value);
+
+/**
  * Add a header, name + value, to `dynhds` at the end. Does *not*
  * check for duplicate names.
  */
@@ -127,27 +151,6 @@ CURLcode Curl_dynhds_add(struct dynhds *dynhds,
  * Add a header, c-string name + value, to `dynhds` at the end.
  */
 CURLcode Curl_dynhds_cadd(struct dynhds *dynhds,
-                          const char *name, const char *value);
-
-/**
- * Remove all entries with the given name.
- * Returns number of entries removed.
- */
-size_t Curl_dynhds_remove(struct dynhds *dynhds,
-                          const char *name, size_t namelen);
-size_t Curl_dynhds_cremove(struct dynhds *dynhds, const char *name);
-
-
-/**
- * Set the give header name and value, replacing any entries with
- * the same name. The header is added at the end of all (remaining)
- * entries.
- */
-CURLcode Curl_dynhds_set(struct dynhds *dynhds,
-                         const char *name, size_t namelen,
-                         const char *value, size_t valuelen);
-
-CURLcode Curl_dynhds_cset(struct dynhds *dynhds,
                           const char *name, const char *value);
 
 /**

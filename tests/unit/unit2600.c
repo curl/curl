@@ -72,8 +72,6 @@ static void unit_stop(void)
   curl_global_cleanup();
 }
 
-#ifdef DEBUGBUILD
-
 struct test_case {
   int id;
   const char *url;
@@ -329,8 +327,6 @@ static void test_connect(struct test_case *tc)
   check_result(tc, &tr);
 }
 
-#endif /* DEBUGBUILD */
-
 /*
  * How these test cases work:
  * - replace the creation of the TCP socket filter with our test filter
@@ -385,15 +381,10 @@ static struct test_case TEST_CASES[] = {
 
 UNITTEST_START
 
-#if defined(DEBUGBUILD)
   size_t i;
 
   for(i = 0; i < sizeof(TEST_CASES)/sizeof(TEST_CASES[0]); ++i) {
     test_connect(&TEST_CASES[i]);
   }
-#else
-  (void)TEST_CASES;
-  (void)test_connect;
-#endif
 
 UNITTEST_STOP
