@@ -324,13 +324,15 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
 #elif defined(USE_WOLFSSL)
   (void)data;
   if(conn_config->verifyhost) {
-    /* TODO: this does not really verify the peer certificate.
-     * On TCP connection this works as it is wired into the wolfSSL
-     * connect() implementation and gives a special return code on
-     * such a fail. */
-    if(peer->sni &&
-       wolfSSL_check_domain_name(ctx->ssl, peer->sni) == SSL_FAILURE)
-      return CURLE_PEER_FAILED_VERIFICATION;
+    if(peer->sni) {
+      WOLFSSL_X509* cert = wolfSSL_get_peer_certificate(ctx->ssl);
+      if(wolfSSL_X509_check_host(cert, peer->sni, strlen(peer->sni), 0, NULL)
+            == WOLFSSL_FAILURE) {
+        result = CURLE_PEER_FAILED_VERIFICATION;
+      }
+      wolfSSL_X509_free(cert);
+    }
+
   }
 #endif
   return result;

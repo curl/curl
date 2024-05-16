@@ -126,7 +126,6 @@
  13.13 Make sure we forbid TLS 1.3 post-handshake authentication
  13.14 Support the clienthello extension
  13.15 Select signature algorithms
- 13.16 QUIC peer verification with wolfSSL
 
  14. GnuTLS
  14.2 check connection
@@ -921,11 +920,6 @@
  supported signature algorithm in the client hello message.
 
  https://github.com/curl/curl/issues/12982
-
-13.16 QUIC peer verification with wolfSSL
-
- Peer certificate verification is missing in the QUIC (ngtcp2) implementation
- using wolfSSL.
 
 14. GnuTLS
 
