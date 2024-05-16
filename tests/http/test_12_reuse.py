@@ -59,6 +59,8 @@ class TestReuse:
         delta = 5
         assert (count/2 - delta) < r.total_connects < (count/2 + delta)
 
+    @pytest.mark.skipif(condition=Env.httpd_is_at_least('2.5.0'),
+                        reason=f"httpd 2.5+ handles KeepAlives different")
     @pytest.mark.parametrize("proto", ['http/1.1'])
     def test_12_02_h1_conn_timeout(self, env: Env,
                                    httpd, nghttpx, repeat, proto):
