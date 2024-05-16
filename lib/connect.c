@@ -1112,7 +1112,7 @@ struct transport_provider {
 };
 
 static
-#ifndef DEBUGBUILD
+#ifndef UNITTESTS
 const
 #endif
 struct transport_provider transport_providers[] = {
@@ -1378,7 +1378,7 @@ out:
   return result;
 }
 
-#ifdef DEBUGBUILD
+#ifdef UNITTESTS
 /* used by unit2600.c */
 void Curl_debug_set_transport_provider(int transport,
                                        cf_ip_connect_create *cf_create)
@@ -1391,7 +1391,7 @@ void Curl_debug_set_transport_provider(int transport,
     }
   }
 }
-#endif /* DEBUGBUILD */
+#endif /* UNITTESTS */
 
 CURLcode Curl_cf_setup_insert_after(struct Curl_cfilter *cf_at,
                                     struct Curl_easy *data,

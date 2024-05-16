@@ -27,7 +27,7 @@
 
 #ifndef CURL_DISABLE_PROXY
 
-#ifdef DEBUGBUILD
+#ifdef UNITTESTS
 
 UNITTEST bool Curl_cidr4_match(const char *ipv4,    /* 1.2.3.4 address */
                                const char *network, /* 1.2.3.4 address */
