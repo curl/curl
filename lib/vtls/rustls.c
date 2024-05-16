@@ -61,7 +61,7 @@ static CURLcode map_error(rustls_result r)
     case RUSTLS_RESULT_NULL_PARAMETER:
       return CURLE_BAD_FUNCTION_ARGUMENT;
     default:
-      return CURLE_READ_ERROR;
+      return CURLE_RECV_ERROR;
   }
 }
 
@@ -150,7 +150,7 @@ static ssize_t tls_recv_more(struct Curl_cfilter *cf,
     char buffer[STRERROR_LEN];
     failf(data, "reading from socket: %s",
           Curl_strerror(io_error, buffer, sizeof(buffer)));
-    *err = CURLE_READ_ERROR;
+    *err = CURLE_RECV_ERROR;
     return -1;
   }
 
@@ -220,7 +220,7 @@ cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     else if(rresult == RUSTLS_RESULT_UNEXPECTED_EOF) {
       failf(data, "rustls: peer closed TCP connection "
         "without first closing TLS connection");
-      *err = CURLE_READ_ERROR;
+      *err = CURLE_RECV_ERROR;
       nread = -1;
       goto out;
     }
@@ -230,7 +230,7 @@ cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       size_t errorlen;
       rustls_error(rresult, errorbuf, sizeof(errorbuf), &errorlen);
       failf(data, "rustls_connection_read: %.*s", (int)errorlen, errorbuf);
-      *err = CURLE_READ_ERROR;
+      *err = CURLE_RECV_ERROR;
       nread = -1;
       goto out;
     }
@@ -620,7 +620,7 @@ cr_connect_common(struct Curl_cfilter *cf,
           infof(data, "reading would block");
           /* fall through */
         }
-        else if(tmperr == CURLE_READ_ERROR) {
+        else if(tmperr == CURLE_RECV_ERROR) {
           return CURLE_SSL_CONNECT_ERROR;
         }
         else {
