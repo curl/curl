@@ -115,9 +115,9 @@ jobs:
           export PATH="/usr/bin:$(cygpath ${SYSTEMROOT})/system32"
           cmake -B bld ${options} ${{ matrix.config }} \
             "-DCMAKE_C_FLAGS=${cflags}" \
-            '-DCMAKE_UNITY_BUILD=ON' \
-            '-DCURL_WERROR=ON' \
-            '-DBUILD_EXAMPLES=ON'
+            -DCMAKE_UNITY_BUILD=ON \
+            -DCURL_WERROR=ON \
+            -DBUILD_EXAMPLES=ON
 
       - name: 'cmake build'
         if: ${{ matrix.build == 'cmake' }}
@@ -234,10 +234,10 @@ jobs:
           cmake -B bld ${options} ${{ matrix.config }} \
             "-DCMAKE_C_FLAGS=${cflags}" \
             "-DCMAKE_RC_COMPILE_OBJECT=${rcopts}" \
-            '-DCMAKE_UNITY_BUILD=ON' \
-            '-DCURL_WERROR=ON' \
-            '-DBUILD_EXAMPLES=ON' \
-            '-DCURL_BROTLI=ON' \
+            -DCMAKE_UNITY_BUILD=ON \
+            -DCURL_WERROR=ON \
+            -DBUILD_EXAMPLES=ON \
+            -DCURL_BROTLI=ON \
             "-DCMAKE_BUILD_TYPE=${{ matrix.type }}"
 
       - name: 'cmake build'
