@@ -51,7 +51,7 @@ jobs:
           JSON
 
       - name: check prose
-        run: a=`git ls-files '*.md' | grep -Ev '(docs/CHECKSRC.md|docs/DISTROS.md)'` && proselint $a README
+        run: git ls-files '*.md' | grep -Ev 'CHECKSRC.md|DISTROS.md|CURLOPT_INTERFACE.md' | xargs proselint README
 
       # This is for CHECKSRC and files with aggressive exclamation mark needs
       - name: create second proselint config
@@ -68,4 +68,4 @@ jobs:
           JSON
 
       - name: check special prose
-        run: a=docs/CHECKSRC.md && proselint $a
+        run: proselint docs/CHECKSRC.md docs/libcurl/opts/CURLOPT_INTERFACE.md

@@ -28,15 +28,16 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_INTERFACE, char *interface);
 
 Pass a char pointer as parameter. This sets the *interface* name to use as
 outgoing network interface. The name can be an interface name, an IP address,
-or a hostname.
+or a hostname. If you prefer one of these, you can use the following special
+prefixes:
 
-If the parameter starts with "if!" then it is treated only as an interface
-name. If the parameter starts with "host!" it is treated as either an IP
-address or a hostname.
+* `if!<name>` - Interface name
+* `host!<name>` - IP address or hostname
+* `ifhost!<interface>!<host>` - Interface name and IP address or hostname
 
-If "if!" is specified but the parameter does not match an existing interface,
-*CURLE_INTERFACE_FAILED* is returned from the libcurl function used to perform
-the transfer.
+If `if!` or `ifhost!` is specified but the parameter does not match an existing
+interface, *CURLE_INTERFACE_FAILED* is returned from the libcurl function used
+to perform the transfer.
 
 libcurl does not support using network interface names for this option on
 Windows.
@@ -74,7 +75,9 @@ int main(void)
 
 # AVAILABILITY
 
-The "if!" and "host!" syntax was added in 7.24.0.
+The `if!` and `host!` syntax was added in 7.24.0.
+
+The `ifhost!` syntax was added in 8.9.0.
 
 # RETURN VALUE
 

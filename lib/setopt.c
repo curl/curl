@@ -139,6 +139,42 @@ static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp)
   return CURLE_OK;
 }
 
+static CURLcode setstropt_interface(
+  char *option, char **devp, char **ifacep, char **hostp)
+{
+  char *dev = NULL;
+  char *iface = NULL;
+  char *host = NULL;
+  size_t len;
+  CURLcode result;
+
+  DEBUGASSERT(devp);
+  DEBUGASSERT(ifacep);
+  DEBUGASSERT(hostp);
+
+  /* Parse the interface details */
+  if(!option || !*option)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  len = strlen(option);
+  if(len > 255)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  result = Curl_parse_interface(option, len, &dev, &iface, &host);
+  if(result)
+    return result;
+
+  free(*devp);
+  *devp = dev;
+
+  free(*ifacep);
+  *ifacep = iface;
+
+  free(*hostp);
+  *hostp = host;
+
+  return CURLE_OK;
+}
+
 #define C_SSLVERSION_VALUE(x) (x & 0xffff)
 #define C_SSLVERSION_MAX_VALUE(x) (x & 0xffff0000)
 
@@ -1881,8 +1917,10 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * Set what interface or address/hostname to bind the socket to when
      * performing an operation and thus what from-IP your connection will use.
      */
-    result = Curl_setstropt(&data->set.str[STRING_DEVICE],
-                            va_arg(param, char *));
+    result = setstropt_interface(va_arg(param, char *),
+                                 &data->set.str[STRING_DEVICE],
+                                 &data->set.str[STRING_INTERFACE],
+                                 &data->set.str[STRING_BINDHOST]);
     break;
 #ifndef CURL_DISABLE_BINDLOCAL
   case CURLOPT_LOCALPORT:

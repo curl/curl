@@ -54,6 +54,11 @@ struct Curl_sockaddr_ex {
 };
 #define sa_addr _sa_ex_u.addr
 
+/*
+ * Parse interface option, and return the interface name and the host part.
+*/
+CURLcode Curl_parse_interface(const char *input, size_t len,
+                              char **dev, char **iface, char **host);
 
 /*
  * Create a socket based on info from 'conn' and 'ai'.
