@@ -54,8 +54,8 @@ jobs:
       fail-fast: false
     steps:
       - run: git config --global core.autocrlf input
-      - uses: actions/checkout@v4
-      - uses: cygwin/cygwin-install-action@v4
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
+      - uses: cygwin/cygwin-install-action@006ad0b0946ca6d0a3ea2d4437677fa767392401 # v4
         with:
           platform: ${{ matrix.platform }}
           # https://cygwin.com/cgi-bin2/package-grep.cgi
@@ -151,14 +151,14 @@ jobs:
       fail-fast: false
     steps:
       - run: git config --global core.autocrlf input
-      - uses: actions/checkout@v4
-      - uses: msys2/setup-msys2@v2
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
+      - uses: msys2/setup-msys2@d0e80f58dffbc64f6a3a1f43527d469b4fc7b6c8 # v2
         if: ${{ matrix.sys == 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
           # https://packages.msys2.org/search
           install: gcc ${{ matrix.build }} make openssl-devel zlib-devel brotli-devel libnghttp2-devel libpsl-devel libssh2-devel
-      - uses: msys2/setup-msys2@v2
+      - uses: msys2/setup-msys2@d0e80f58dffbc64f6a3a1f43527d469b4fc7b6c8 # v2
         if: ${{ matrix.sys != 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
