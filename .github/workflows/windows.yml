@@ -235,7 +235,6 @@ jobs:
             '-DCMAKE_UNITY_BUILD=ON' \
             '-DCURL_WERROR=ON' \
             '-DBUILD_EXAMPLES=ON' \
-            '-DBUILD_TESTING=ON' \
             "-DCMAKE_BUILD_TYPE=${{ matrix.type }}"
 
       - name: 'cmake build'
