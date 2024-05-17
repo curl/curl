@@ -60,10 +60,10 @@ jobs:
             sudo pkgin -y install cmake perl brotli openldap-client libssh2 libidn2 libpsl nghttp2  # python311 py311-impacket
             cmake -B bld \
               -DCMAKE_UNITY_BUILD=ON \
-              -DCURL_USE_OPENSSL=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
               -DBUILD_EXAMPLES=ON \
+              -DCURL_USE_OPENSSL=ON \
               -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON
             cmake --build bld --config Debug --parallel 3
             export CURL=$(pwd)/bld/src/curl
@@ -93,10 +93,10 @@ jobs:
             sudo pkg_add cmake perl brotli openldap-client libssh2 libidn2 libpsl nghttp2 python3 py3-impacket
             cmake -B bld \
               -DCMAKE_UNITY_BUILD=ON \
-              -DCURL_USE_OPENSSL=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
               -DBUILD_EXAMPLES=ON \
+              -DCURL_USE_OPENSSL=ON \
               -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON
             cmake --build bld --config Debug --parallel 3
             export CURL=$(pwd)/bld/src/curl
@@ -159,10 +159,10 @@ jobs:
             cmake -B bld \
               -DCMAKE_C_COMPILER=${{ matrix.compiler }} \
               -DCMAKE_UNITY_BUILD=ON \
-              -DCURL_USE_OPENSSL=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
               -DBUILD_EXAMPLES=ON \
+              -DCURL_USE_OPENSSL=ON \
               -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON -DCURL_USE_GSSAPI=ON
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
