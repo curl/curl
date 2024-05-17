@@ -63,9 +63,11 @@ jobs:
               -DCURL_USE_OPENSSL=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
-              -DBUILD_EXAMPLES=ON
+              -DBUILD_EXAMPLES=ON \
+              -DCURL_BROTLI=ON
             cmake --build bld --config Debug --parallel 3
-            bld/src/curl --disable --version
+            export CURL=$(pwd)/bld/src/curl
+            "${CURL}" --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               cmake --build bld --config Debug --parallel 3 --target testdeps
               cmake --build bld --config Debug --target test-ci
@@ -94,9 +96,11 @@ jobs:
               -DCURL_USE_OPENSSL=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
-              -DBUILD_EXAMPLES=ON
+              -DBUILD_EXAMPLES=ON \
+              -DCURL_BROTLI=ON
             cmake --build bld --config Debug --parallel 3
-            bld/src/curl --disable --version
+            export CURL=$(pwd)/bld/src/curl
+            "${CURL}" --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               cmake --build bld --config Debug --parallel 3 --target testdeps
               export TFLAGS='-j12 ~TFTP'  # FIXME: TFTP requests executed twice? Related: `curl: (69) TFTP: Access Violation`?
@@ -124,7 +128,7 @@ jobs:
           architecture: ${{ matrix.arch }}
           run: |
             # https://ports.freebsd.org/
-            sudo pkg install -y autoconf automake libtool brotli openldap26-client libssh2 libidn2 libnghttp2 perl5 python3
+            sudo pkg install -y autoconf automake libtool pkgconf brotli openldap26-client libidn2 libnghttp2 perl5 python3
             sudo pkg delete -y curl
             autoreconf -fi
             export CC='${{ matrix.compiler }}'
@@ -148,7 +152,7 @@ jobs:
           architecture: ${{ matrix.arch }}
           run: |
             # https://ports.freebsd.org/
-            sudo pkg install -y cmake brotli openldap26-client libssh2 libidn2 libnghttp2 perl5 python3
+            sudo pkg install -y cmake pkgconf brotli openldap26-client libidn2 libnghttp2 perl5 python3
             sudo pkg delete -y curl
             cmake -B bld \
               -DCMAKE_C_COMPILER=${{ matrix.compiler }} \
@@ -156,7 +160,8 @@ jobs:
               -DCURL_USE_OPENSSL=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
-              -DBUILD_EXAMPLES=ON
+              -DBUILD_EXAMPLES=ON \
+              -DCURL_BROTLI=ON
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
@@ -176,7 +181,7 @@ jobs:
         with:
           usesh: true
           # https://pkg.omnios.org/r151048/core/en/index.shtml
-          prepare: pkg install build-essential libtool brotli nghttp2
+          prepare: pkg install build-essential libtool
           run: |
             pkg uninstall curl
             ln -s /usr/bin/gcpp /usr/bin/cpp  # Some tests expect `cpp`, which is named `gcpp` in this env.
