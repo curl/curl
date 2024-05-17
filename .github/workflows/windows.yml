@@ -117,6 +117,7 @@ jobs:
             "-DCMAKE_C_FLAGS=${cflags}" \
             -DCMAKE_UNITY_BUILD=ON \
             -DCURL_WERROR=ON \
+            -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON \
             -DBUILD_EXAMPLES=ON
 
       - name: 'cmake build'
@@ -236,8 +237,8 @@ jobs:
             "-DCMAKE_RC_COMPILE_OBJECT=${rcopts}" \
             -DCMAKE_UNITY_BUILD=ON \
             -DCURL_WERROR=ON \
-            -DBUILD_EXAMPLES=ON \
             -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON \
+            -DBUILD_EXAMPLES=ON \
             "-DCMAKE_BUILD_TYPE=${{ matrix.type }}"
 
       - name: 'cmake build'
