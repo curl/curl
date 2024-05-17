@@ -330,6 +330,7 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   DEBUGASSERT(backend);
   rconn = backend->conn;
+  DEBUGASSERT(rconn);
 
   CURL_TRC_CF(data, cf, "cf_send(len=%zu)", plainlen);
 
@@ -534,6 +535,7 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
     failf(data, "rustls_client_connection_new: %.*s", (int)errorlen, errorbuf);
     return CURLE_COULDNT_CONNECT;
   }
+  DEBUGASSERT(rconn);
   rustls_connection_set_userdata(rconn, backend);
   backend->conn = rconn;
   return CURLE_OK;
@@ -582,9 +584,12 @@ cr_connect_common(struct Curl_cfilter *cf,
 
   DEBUGASSERT(backend);
 
-  if(ssl_connection_none == connssl->state) {
+  CURL_TRC_CF(data, cf, "cr_connect_common, state=%d", connssl->state);
+  *done = FALSE;
+  if(!backend->conn) {
     result = cr_init_backend(cf, data,
                (struct rustls_ssl_backend_data *)connssl->backend);
+    CURL_TRC_CF(data, cf, "cr_connect_common, init backend -> %d", result);
     if(result != CURLE_OK) {
       return result;
     }
@@ -601,21 +606,34 @@ cr_connect_common(struct Curl_cfilter *cf,
     */
     if(!rustls_connection_is_handshaking(rconn)) {
       infof(data, "Done handshaking");
-      /* Done with the handshake. Set up callbacks to send/receive data. */
-      connssl->state = ssl_connection_complete;
-
+      /* rustls claims it is no longer handshaking *before* it has
+       * send its FINISHED message off. We attempt to let it write
+       * one more time. Oh my.
+       */
       cr_set_negotiated_alpn(cf, data, rconn);
-
+      cr_send(cf, data, NULL, 0, &tmperr);
+      if(tmperr == CURLE_AGAIN) {
+        connssl->connecting_state = ssl_connect_2_writing;
+        return CURLE_OK;
+      }
+      else if(tmperr != CURLE_OK) {
+        return tmperr;
+      }
+      /* REALLY Done with the handshake. */
+      connssl->state = ssl_connection_complete;
       *done = TRUE;
       return CURLE_OK;
     }
 
     wants_read = rustls_connection_wants_read(rconn);
-    wants_write = rustls_connection_wants_write(rconn);
+    wants_write = rustls_connection_wants_write(rconn) ||
+                  backend->plain_out_buffered;
     DEBUGASSERT(wants_read || wants_write);
     writefd = wants_write?sockfd:CURL_SOCKET_BAD;
     readfd = wants_read?sockfd:CURL_SOCKET_BAD;
 
+    connssl->connecting_state = wants_write?
+      ssl_connect_2_writing : ssl_connect_2_reading;
     /* check allowed time left */
     timeout_ms = Curl_timeleft(data, NULL, TRUE);
 
@@ -627,8 +645,8 @@ cr_connect_common(struct Curl_cfilter *cf,
 
     socket_check_timeout = blocking?timeout_ms:0;
 
-    what = Curl_socket_check(
-      readfd, CURL_SOCKET_BAD, writefd, socket_check_timeout);
+    what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
+                             socket_check_timeout);
     if(what < 0) {
       /* fatal error */
       failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
@@ -640,19 +658,18 @@ cr_connect_common(struct Curl_cfilter *cf,
       return CURLE_OPERATION_TIMEDOUT;
     }
     if(0 == what) {
-      infof(data, "Curl_socket_check: %s would block",
+      CURL_TRC_CF(data, cf, "Curl_socket_check: %s would block",
             wants_read&&wants_write ? "writing and reading" :
             wants_write ? "writing" : "reading");
-      *done = FALSE;
       return CURLE_OK;
     }
     /* socket is readable or writable */
 
     if(wants_write) {
-      infof(data, "rustls_connection wants us to write_tls.");
+      CURL_TRC_CF(data, cf, "rustls_connection wants us to write_tls.");
       cr_send(cf, data, NULL, 0, &tmperr);
       if(tmperr == CURLE_AGAIN) {
-        infof(data, "writing would block");
+        CURL_TRC_CF(data, cf, "writing would block");
         /* fall through */
       }
       else if(tmperr != CURLE_OK) {
@@ -661,11 +678,10 @@ cr_connect_common(struct Curl_cfilter *cf,
     }
 
     if(wants_read) {
-      infof(data, "rustls_connection wants us to read_tls.");
-
+      CURL_TRC_CF(data, cf, "rustls_connection wants us to read_tls.");
       if(tls_recv_more(cf, data, &tmperr) < 0) {
         if(tmperr == CURLE_AGAIN) {
-          infof(data, "reading would block");
+          CURL_TRC_CF(data, cf, "reading would block");
           /* fall through */
         }
         else if(tmperr == CURLE_RECV_ERROR) {
@@ -691,35 +707,10 @@ cr_connect_nonblocking(struct Curl_cfilter *cf,
 }
 
 static CURLcode
-cr_connect_blocking(struct Curl_cfilter *cf UNUSED_PARAM,
-           struct Curl_easy *data UNUSED_PARAM)
+cr_connect_blocking(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   bool done; /* unused */
   return cr_connect_common(cf, data, true, &done);
-}
-
-static void cr_adjust_pollset(struct Curl_cfilter *cf,
-                              struct Curl_easy *data,
-                              struct easy_pollset *ps)
-{
-  if(!cf->connected) {
-    curl_socket_t sock = Curl_conn_cf_get_socket(cf->next, data);
-    struct ssl_connect_data *const connssl = cf->ctx;
-    struct rustls_ssl_backend_data *const backend =
-      (struct rustls_ssl_backend_data *)connssl->backend;
-    struct rustls_connection *rconn = NULL;
-
-    (void)data;
-    DEBUGASSERT(backend);
-    rconn = backend->conn;
-
-    if(rustls_connection_wants_write(rconn)) {
-      Curl_pollset_add_out(data, ps, sock);
-    }
-    if(rustls_connection_wants_read(rconn)) {
-      Curl_pollset_add_in(data, ps, sock);
-    }
-  }
 }
 
 static void *
@@ -742,8 +733,8 @@ cr_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   ssize_t n = 0;
 
   DEBUGASSERT(backend);
-
   if(backend->conn && !connssl->peer_closed) {
+    CURL_TRC_CF(data, cf, "closing connection, send notify");
     rustls_connection_send_close_notify(backend->conn);
     n = cr_send(cf, data, NULL, 0, &tmperr);
     if(n < 0) {
@@ -781,7 +772,7 @@ const struct Curl_ssl Curl_ssl_rustls = {
   Curl_none_cert_status_request,   /* cert_status_request */
   cr_connect_blocking,             /* connect */
   cr_connect_nonblocking,          /* connect_nonblocking */
-  cr_adjust_pollset,               /* adjust_pollset */
+  Curl_ssl_adjust_pollset,         /* adjust_pollset */
   cr_get_internals,                /* get_internals */
   cr_close,                        /* close_one */
   Curl_none_close_all,             /* close_all */
