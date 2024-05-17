@@ -70,7 +70,7 @@ jobs:
           autoreconf -fi
           mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
             --enable-websockets \
-            --with-openssl \
+            --with-openssl --with-libssh2 \
             ${{ matrix.config }} || { tail -n 1200 config.log; false; }
 
       - name: 'autotools build'
@@ -169,7 +169,7 @@ jobs:
           autoreconf -fi
           mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
             --enable-websockets \
-            --with-openssl \
+            --with-openssl --with-libssh2 \
             ${{ matrix.config }} || { tail -n 1200 config.log; false; }
 
       - name: 'autotools build'
