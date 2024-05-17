@@ -204,12 +204,10 @@
  * Whether SSL_CTX_set_keylog_callback is available.
  * OpenSSL: supported since 1.1.1 https://github.com/openssl/openssl/pull/2287
  * BoringSSL: supported since d28f59c27bac (committed 2015-11-19)
- * LibreSSL: supported since 3.5.0 (released 2022-02-24)
+ * LibreSSL: not supported. 3.5.0+ has a stub function that does nothing.
  */
 #if (OPENSSL_VERSION_NUMBER >= 0x10101000L && \
      !defined(LIBRESSL_VERSION_NUMBER)) || \
-    (defined(LIBRESSL_VERSION_NUMBER) && \
-     LIBRESSL_VERSION_NUMBER >= 0x3050000fL) || \
     defined(OPENSSL_IS_BORINGSSL)
 #define HAVE_KEYLOG_CALLBACK
 #endif
