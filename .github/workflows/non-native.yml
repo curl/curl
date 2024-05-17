@@ -64,7 +64,7 @@ jobs:
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
               -DBUILD_EXAMPLES=ON \
               -DCURL_USE_OPENSSL=ON \
-              -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON
+              -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON -DCURL_USE_GSSAPI=ON
             cmake --build bld --config Debug --parallel 3
             export CURL=$(pwd)/bld/src/curl
             "${CURL}" --disable --version
@@ -97,7 +97,7 @@ jobs:
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
               -DBUILD_EXAMPLES=ON \
               -DCURL_USE_OPENSSL=ON \
-              -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON
+              -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON -DCURL_USE_GSSAPI=ON
             cmake --build bld --config Debug --parallel 3
             export CURL=$(pwd)/bld/src/curl
             "${CURL}" --disable --version
@@ -191,6 +191,7 @@ jobs:
             mkdir bld && cd bld && ../configure --enable-debug --enable-warnings --enable-werror \
               --prefix="${HOME}"/install \
               --with-openssl \
+              --with-libidn2 --with-gssapi \
               --disable-dependency-tracking || { tail -n 1000 config.log; false; }
             gmake -j3 install
             src/curl --disable --version
