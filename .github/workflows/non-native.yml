@@ -91,7 +91,7 @@ jobs:
           architecture: ${{ matrix.arch }}
           run: |
             # https://openbsd.app/
-            sudo pkg_add cmake perl brotli heimdal-libs openldap-client libssh2 libidn2 libpsl nghttp2 python3 py3-impacket
+            sudo pkg_add cmake perl brotli heimdal openldap-client libssh2 libidn2 libpsl nghttp2 python3 py3-impacket
             cmake -B bld \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
