@@ -70,7 +70,8 @@ jobs:
           autoreconf -fi
           mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
             --enable-websockets \
-            --with-openssl --with-libpsl ${{ matrix.config }} || { tail -n 1200 config.log; false; }
+            --with-openssl \
+            ${{ matrix.config }} || { tail -n 1200 config.log; false; }
 
       - name: 'autotools build'
         if: ${{ matrix.build == 'automake' }}
@@ -167,7 +168,8 @@ jobs:
           autoreconf -fi
           mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
             --enable-websockets \
-            --with-openssl --with-libpsl ${{ matrix.config }} || { tail -n 1200 config.log; false; }
+            --with-openssl \
+            ${{ matrix.config }} || { tail -n 1200 config.log; false; }
 
       - name: 'autotools build'
         if: ${{ matrix.build == 'autotools' }}
