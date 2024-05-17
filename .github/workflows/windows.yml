@@ -101,7 +101,7 @@ jobs:
 
       - name: 'autotools run tests'
         if: ${{ matrix.build == 'automake' && matrix.tflags != 'skip' }}
-        timeout-minutes: 30
+        timeout-minutes: 40
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
           export TFLAGS='-j8 ${{ matrix.tflags }}'
@@ -269,7 +269,7 @@ jobs:
 
       - name: 'cmake run tests'
         if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skip' }}
-        timeout-minutes: 30
+        timeout-minutes: 40
         shell: msys2 {0}
         run: |
           export TFLAGS='-j14 ${{ matrix.tflags }}'
