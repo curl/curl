@@ -58,7 +58,7 @@ jobs:
       - uses: cygwin/cygwin-install-action@v4
         with:
           platform: ${{ matrix.platform }}
-          packages: autoconf libtool ${{ matrix.build }} gcc-core gcc-g++ binutils make libssl-devel zlib-devel libbrotli-devel libpsl-devel libssh2-devel
+          packages: autoconf libtool ${{ matrix.build }} gcc-core gcc-g++ binutils make libssl-devel zlib-devel libbrotli-devel libnghttp2-devel libpsl-devel libssh2-devel
           site: https://mirrors.kernel.org/sourceware/cygwin/
 
       - name: 'autotools configure'
@@ -150,7 +150,7 @@ jobs:
         if: ${{ matrix.sys == 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
-          install: gcc ${{ matrix.build }} make openssl-devel zlib-devel brotli-devel libpsl-devel libssh2-devel
+          install: gcc ${{ matrix.build }} make openssl-devel zlib-devel brotli-devel libnghttp2-devel libpsl-devel libssh2-devel
       - uses: msys2/setup-msys2@v2
         if: ${{ matrix.sys != 'msys' }}
         with:
@@ -237,7 +237,7 @@ jobs:
             -DCMAKE_UNITY_BUILD=ON \
             -DCURL_WERROR=ON \
             -DBUILD_EXAMPLES=ON \
-            -DCURL_BROTLI=ON \
+            -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON \
             "-DCMAKE_BUILD_TYPE=${{ matrix.type }}"
 
       - name: 'cmake build'
