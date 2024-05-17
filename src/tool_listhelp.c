@@ -711,6 +711,9 @@ const struct helptxt helptext[] = {
   {"    --ssl-no-revoke",
    "Disable cert revocation checks (Schannel)",
    CURLHELP_TLS},
+  {"    --ssl-no-verify-host",
+   "Disable SSL host verification",
+   CURLHELP_TLS},
   {"    --ssl-reqd",
    "Require SSL/TLS",
    CURLHELP_TLS | CURLHELP_IMAP | CURLHELP_POP3 | CURLHELP_SMTP |

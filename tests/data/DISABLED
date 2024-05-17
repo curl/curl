@@ -51,7 +51,10 @@
 # https://github.com/curl/curl/issues/380
 1801
 #
+# The following 2 tests depend on badssl certificate, which can only be
+# validated if the system has up-to-date CA certificates.
 2043
+2090
 %if WinIDN
 165
 %endif

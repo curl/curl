@@ -268,6 +268,7 @@ DPAGES = \
   ssl-allow-beast.md \
   ssl-auto-client-cert.md \
   ssl-no-revoke.md \
+  ssl-no-verify-host.md \
   ssl-reqd.md \
   ssl-revoke-best-effort.md \
   ssl-sessions.md \

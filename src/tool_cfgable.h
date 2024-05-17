@@ -336,6 +336,7 @@ struct OperationConfig {
                                      from user callbacks */
   BIT(synthetic_error);           /* if TRUE, this is tool-internal error */
   BIT(ssh_compression);           /* enable/disable SSH compression */
+  BIT(ssl_no_verify_host);        /* Disable verify peer certificate host */
   BIT(haproxy_protocol);          /* whether to send HAProxy protocol v1 */
   BIT(disallow_username_in_url);  /* disallow usernames in URLs */
   BIT(mptcp);                     /* enable MPTCP support */

@@ -321,6 +321,7 @@ static const struct LongShort aliases[]= {
   {"ssl-auto-client-cert",       ARG_BOOL|ARG_TLS, ' ',
    C_SSL_AUTO_CLIENT_CERT},
   {"ssl-no-revoke",              ARG_BOOL|ARG_TLS, ' ', C_SSL_NO_REVOKE},
+  {"ssl-no-verify-host",         ARG_BOOL|ARG_TLS, ' ', C_SSL_NO_VERIFY_HOST},
   {"ssl-reqd",                   ARG_BOOL|ARG_TLS, ' ', C_SSL_REQD},
   {"ssl-revoke-best-effort",     ARG_BOOL|ARG_TLS, ' ',
    C_SSL_REVOKE_BEST_EFFORT},
@@ -2006,6 +2007,9 @@ static ParameterError opt_bool(struct GlobalConfig *global,
     break;
   case C_SSL_REVOKE_BEST_EFFORT: /* --ssl-revoke-best-effort */
     config->ssl_revoke_best_effort = toggle;
+    break;
+  case C_SSL_NO_VERIFY_HOST: /* --ssl-no-verify-host */
+    config->ssl_no_verify_host = toggle;
     break;
   case C_TCP_FASTOPEN: /* --tcp-fastopen */
     config->tcp_fastopen = toggle;
