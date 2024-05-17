@@ -72,7 +72,8 @@ jobs:
           mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
             --prefix="${HOME}"/install \
             --enable-websockets \
-            --with-openssl --with-libssh2 \
+            --with-openssl \
+            --with-libssh2 \
             ${{ matrix.config }} || { tail -n 1200 config.log; false; }
 
       - name: 'autotools build'
@@ -119,8 +120,8 @@ jobs:
             "-DCMAKE_C_FLAGS=${cflags}" \
             -DCMAKE_UNITY_BUILD=ON \
             -DCURL_WERROR=ON \
-            -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON \
-            -DBUILD_EXAMPLES=ON
+            -DBUILD_EXAMPLES=ON \
+            -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON
 
       - name: 'cmake build'
         if: ${{ matrix.build == 'cmake' }}
@@ -173,7 +174,8 @@ jobs:
           mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
             --prefix="${HOME}"/install \
             --enable-websockets \
-            --with-openssl --with-libssh2 \
+            --with-openssl \
+            --with-libssh2 \
             ${{ matrix.config }} || { tail -n 1200 config.log; false; }
 
       - name: 'autotools build'
@@ -239,11 +241,11 @@ jobs:
           cmake -B bld ${options} ${{ matrix.config }} \
             "-DCMAKE_C_FLAGS=${cflags}" \
             "-DCMAKE_RC_COMPILE_OBJECT=${rcopts}" \
+            "-DCMAKE_BUILD_TYPE=${{ matrix.type }}" \
             -DCMAKE_UNITY_BUILD=ON \
             -DCURL_WERROR=ON \
-            -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON \
             -DBUILD_EXAMPLES=ON \
-            "-DCMAKE_BUILD_TYPE=${{ matrix.type }}"
+            -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON
 
       - name: 'cmake build'
         if: ${{ matrix.build == 'cmake' }}
