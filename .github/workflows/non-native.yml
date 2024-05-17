@@ -57,7 +57,7 @@ jobs:
           architecture: ${{ matrix.arch }}
           run: |
             # https://pkgsrc.se/
-            sudo pkgin -y install cmake perl  # python311 py311-impacket
+            sudo pkgin -y install cmake perl brotli openldap-client libssh2 libidn2 nghttp2  # python311 py311-impacket
             sudo pkgin -y remove curl
             cmake -B bld \
               -DCMAKE_UNITY_BUILD=ON \
@@ -89,7 +89,7 @@ jobs:
           architecture: ${{ matrix.arch }}
           run: |
             # https://openbsd.app/
-            sudo pkg_add cmake perl python3 py3-impacket
+            sudo pkg_add cmake perl brotli openldap-client libssh2 libidn2 nghttp2 python3 py3-impacket
             sudo pkg_delete curl
             cmake -B bld \
               -DCMAKE_UNITY_BUILD=ON \
@@ -126,7 +126,7 @@ jobs:
           architecture: ${{ matrix.arch }}
           run: |
             # https://ports.freebsd.org/
-            sudo pkg install -y autoconf automake libtool perl5 python3
+            sudo pkg install -y autoconf automake libtool brotli openldap26-client libssh2 libidn2 libnghttp2 perl5 python3
             sudo pkg delete -y curl
             autoreconf -fi
             export CC='${{ matrix.compiler }}'
@@ -150,7 +150,7 @@ jobs:
           architecture: ${{ matrix.arch }}
           run: |
             # https://ports.freebsd.org/
-            sudo pkg install -y cmake perl5 python3
+            sudo pkg install -y cmake brotli openldap26-client libssh2 libidn2 libnghttp2 perl5 python3
             sudo pkg delete -y curl
             cmake -B bld \
               -DCMAKE_C_COMPILER=${{ matrix.compiler }} \
@@ -178,7 +178,7 @@ jobs:
         with:
           usesh: true
           # https://pkg.omnios.org/r151048/core/en/index.shtml
-          prepare: pkg install build-essential libtool
+          prepare: pkg install build-essential libtool brotli nghttp2
           run: |
             pkg uninstall curl
             ln -s /usr/bin/gcpp /usr/bin/cpp  # Some tests expect `cpp`, which is named `gcpp` in this env.
