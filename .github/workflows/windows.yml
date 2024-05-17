@@ -101,7 +101,7 @@ jobs:
         timeout-minutes: 30
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
-          export TFLAGS='-j14 ${{ matrix.tflags }}'
+          export TFLAGS='-j8 ${{ matrix.tflags }}'
           if [ -x "$(cygpath -u "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath -u "${SYSTEMROOT}/System32/curl.exe")"
           fi
