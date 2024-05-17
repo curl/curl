@@ -57,7 +57,7 @@ jobs:
           architecture: ${{ matrix.arch }}
           run: |
             # https://pkgsrc.se/
-            sudo pkgin -y install cmake perl brotli openldap-client libssh2 libidn2 nghttp2  # python311 py311-impacket
+            sudo pkgin -y install cmake perl brotli openldap-client libssh2 libidn2 libpsl nghttp2  # python311 py311-impacket
             cmake -B bld \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_USE_OPENSSL=ON \
@@ -90,7 +90,7 @@ jobs:
           architecture: ${{ matrix.arch }}
           run: |
             # https://openbsd.app/
-            sudo pkg_add cmake perl brotli openldap-client libssh2 libidn2 nghttp2 python3 py3-impacket
+            sudo pkg_add cmake perl brotli openldap-client libssh2 libidn2 libpsl nghttp2 python3 py3-impacket
             cmake -B bld \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_USE_OPENSSL=ON \
@@ -134,6 +134,7 @@ jobs:
             export CC='${{ matrix.compiler }}'
             mkdir bld && cd bld && ../configure --enable-debug --enable-warnings --enable-werror \
               --with-openssl \
+              --with-brotli --enable-ldap --enable-ldaps --with-libidn2 --with-libssh2 --with-nghttp2
               --disable-dependency-tracking || { tail -n 1000 config.log; false; }
             make -j3
             src/curl --disable --version
