@@ -85,7 +85,7 @@ struct memory {
   size_t size;
 };
 
-static size_t cb(void *data, size_t size, size_t nmemb, void *clientp)
+static size_t cb(char *data, size_t size, size_t nmemb, void *clientp)
 {
   size_t realsize = size * nmemb;
   struct memory *mem = (struct memory *)clientp;
