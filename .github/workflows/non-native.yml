@@ -129,7 +129,7 @@ jobs:
             export CC='${{ matrix.compiler }}'
             mkdir bld && cd bld && ../configure --enable-debug --enable-warnings --enable-werror \
               --with-openssl \
-              --disable-dependency-tracking
+              --disable-dependency-tracking || { tail -n 1000 config.log; false; }
             make -j3
             src/curl --disable --version
             make -j3 examples
@@ -180,7 +180,7 @@ jobs:
             autoreconf -fi
             mkdir bld && cd bld && ../configure --enable-debug --enable-warnings --enable-werror \
               --with-openssl \
-              --disable-dependency-tracking
+              --disable-dependency-tracking || { tail -n 1000 config.log; false; }
             gmake -j3
             src/curl --disable --version
             gmake -j3 examples
