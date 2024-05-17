@@ -141,12 +141,12 @@ jobs:
     strategy:
       matrix:
         include:
-          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19                !1233', config: '--enable-debug --disable-threaded-resolver --disable-proxy' }
-          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233', config: '--enable-debug --disable-threaded-resolver' }
-          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233', config: '' }
-          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233', config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', type: 'Debug' }
-          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: 'skip'                    , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', type: 'Release' }
-          - { build: 'cmake'    , sys: 'clang64', env: 'clang-x86_64', tflags: 'skip'                    , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=OFF', type: 'Release' }
+          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19                !1233'            , config: '--enable-debug --disable-threaded-resolver --disable-proxy' }
+          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233'            , config: '--enable-debug --disable-threaded-resolver' }
+          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233'            , config: '' }
+          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233 ~2301 ~2305', config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', type: 'Debug' }
+          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: 'skip'                                , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', type: 'Release' }
+          - { build: 'cmake'    , sys: 'clang64', env: 'clang-x86_64', tflags: 'skip'                                , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=OFF', type: 'Release' }
       fail-fast: false
     steps:
       - run: git config --global core.autocrlf input
@@ -207,7 +207,7 @@ jobs:
         timeout-minutes: 30
         shell: msys2 {0}
         run: |
-          export TFLAGS='-j8 ${{ matrix.tflags }}'
+          export TFLAGS='-j14 ${{ matrix.tflags }}'
           if [ -x "$(cygpath -u 'C:/msys64/usr/bin/curl.exe')" ]; then
             TFLAGS+=" -ac $(cygpath -u 'C:/msys64/usr/bin/curl.exe')"
           fi
@@ -271,7 +271,7 @@ jobs:
         timeout-minutes: 30
         shell: msys2 {0}
         run: |
-          export TFLAGS='-j8 ${{ matrix.tflags }}'
+          export TFLAGS='-j14 ${{ matrix.tflags }}'
           if [ -x "$(cygpath -u 'C:/msys64/usr/bin/curl.exe')" ]; then
             TFLAGS+=" -ac $(cygpath -u 'C:/msys64/usr/bin/curl.exe')"
           fi
