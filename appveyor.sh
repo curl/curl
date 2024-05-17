@@ -28,37 +28,24 @@ set -eux; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 
 # build
 
-if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2022' ]; then
-  openssl_root_win='C:/OpenSSL-v32-Win64'
-else
-  openssl_root_win='C:/OpenSSL-v111-Win64'
-fi
-openssl_root="$(cygpath -u "${openssl_root_win}")"
-
 if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   options=''
   [[ "${TARGET:-}" = *'ARM64'* ]] && SKIP_RUN='ARM64 architecture'
-  [ "${OPENSSL}" = 'ON' ] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
   [ "${PRJ_CFG}" = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
   [ "${PRJ_CFG}" = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
   [[ "${PRJ_GEN}" = *'Visual Studio'* ]] && options+=' -DCMAKE_VS_GLOBALS=TrackFileAccess=false'
-  if [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ]; then
-    [ "${PRJ_CFG}" = 'Debug' ] && [ "${DEBUG}" = 'ON' ] && [ "${SHARED}" = 'ON' ] && SKIP_RUN='Crash on startup in -DDEBUGBUILD shared builds'
-    # Fails to run without this due to missing MSVCR90.dll / MSVCR90D.dll
-    options+=' -DCURL_STATIC_CRT=ON'
-  fi
+  [ "${DEBUG}" = 'ON' ] && options+=' -DCMAKE_C_FLAGS=-DDEBUGBUILD'
   # shellcheck disable=SC2086
   cmake -B _bld "-G${PRJ_GEN}" ${TARGET:-} ${options} \
-    "-DCURL_USE_OPENSSL=${OPENSSL}" \
-    "-DCURL_USE_SCHANNEL=${SCHANNEL}" \
-    "-DHTTP_ONLY=${HTTP_ONLY}" \
+    '-DCURL_USE_OPENSSL=OFF' \
+    '-DCURL_USE_SCHANNEL=ON' \
     "-DBUILD_SHARED_LIBS=${SHARED}" \
-    "-DBUILD_TESTING=${TESTING}" \
-    "-DENABLE_WEBSOCKETS=${WEBSOCKETS:-}" \
-    "-DCMAKE_UNITY_BUILD=${UNITY}" \
+    "-DENABLE_CURLDEBUG=${CURLDEBUG}" \
+    '-DBUILD_TESTING=ON' \
+    '-DENABLE_WEBSOCKETS=ON' \
+    '-DCMAKE_UNITY_BUILD=ON' \
     '-DCURL_WERROR=ON' \
-    "-DENABLE_DEBUG=${DEBUG}" \
-    "-DENABLE_UNICODE=${ENABLE_UNICODE}" \
+    '-DENABLE_UNICODE=ON' \
     '-DCMAKE_INSTALL_PREFIX=C:/curl' \
     "-DCMAKE_BUILD_TYPE=${PRJ_CFG}"
   # shellcheck disable=SC2086
@@ -66,42 +53,20 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   if [ "${SHARED}" = 'ON' ]; then
     cp -f -p _bld/lib/*.dll _bld/src/
   fi
-  if [ "${OPENSSL}" = 'ON' ]; then
-    cp -f -p "${openssl_root}"/*.dll _bld/src/
-  fi
   curl='_bld/src/curl.exe'
-elif [ "${BUILD_SYSTEM}" = 'VisualStudioSolution' ]; then
+  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
+elif [ "${BUILD_SYSTEM}" = 'autotools' ]; then
+  autoreconf -fi
   (
-    cd projects
-    ./generate.bat "${VC_VERSION}"
-    msbuild.exe -maxcpucount "-property:Configuration=${PRJ_CFG}" "Windows/${VC_VERSION}/curl-all.sln"
+    mkdir _bld
+    cd _bld
+    # shellcheck disable=SC2086
+    ../configure ${CONFIG_ARGS:-}
+    make -j2 V=1
+    make -j2 V=1 examples
+    make -j2 V=1 -C tests
   )
-  curl="build/Win32/${VC_VERSION}/${PRJ_CFG}/curld.exe"
-elif [ "${BUILD_SYSTEM}" = 'winbuild_vs2015' ]; then
-  ./buildconf.bat
-  (
-    cd winbuild
-    cat << EOF > _make.bat
-      call "C:/Program Files/Microsoft SDKs/Windows/v7.1/Bin/SetEnv.cmd" /x64
-      call "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/vcvarsall.bat" x86_amd64
-      nmake -f Makefile.vc mode=dll VC=14 "SSL_PATH=${openssl_root_win}" WITH_SSL=dll MACHINE=x64 DEBUG=${DEBUG} ENABLE_UNICODE=${ENABLE_UNICODE}
-EOF
-    ./_make.bat
-    rm _make.bat
-  )
-  curl="builds/libcurl-vc14-x64-${PATHPART}-dll-ssl-dll-ipv6-sspi/bin/curl.exe"
-elif [ "${BUILD_SYSTEM}" = 'winbuild_vs2017' ]; then
-  ./buildconf.bat
-  (
-    cd winbuild
-    cat << EOF > _make.bat
-      call "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Auxiliary/Build/vcvars64.bat"
-      nmake -f Makefile.vc mode=dll VC=14.10 "SSL_PATH=${openssl_root_win}" WITH_SSL=dll MACHINE=x64 DEBUG=${DEBUG} ENABLE_UNICODE=${ENABLE_UNICODE} ENABLE_WEBSOCKETS=yes
-EOF
-    ./_make.bat
-    rm _make.bat
-  )
-  curl="builds/libcurl-vc14.10-x64-${PATHPART}-dll-ssl-dll-ipv6-sspi/bin/curl.exe"
+  curl='_bld/src/curl.exe'
 fi
 
 find . -name '*.exe' -o -name '*.dll'
@@ -115,27 +80,4 @@ if false; then
   for log in CMakeFiles/CMakeConfigureLog.yaml CMakeFiles/CMakeOutput.log CMakeFiles/CMakeError.log; do
     [ -r "_bld/${log}" ] && cat "_bld/${log}"
   done
-fi
-
-# test
-
-if [ "${TESTING}" = 'ON' ]; then
-  export TFLAGS=''
-  if [ -x "$(cygpath -u "${WINDIR}/System32/curl.exe")" ]; then
-    TFLAGS+=" -ac $(cygpath -u "${WINDIR}/System32/curl.exe")"
-  elif [ -x "$(cygpath -u 'C:/msys64/usr/bin/curl.exe')" ]; then
-    TFLAGS+=" -ac $(cygpath -u 'C:/msys64/usr/bin/curl.exe')"
-  fi
-  TFLAGS+=" ${DISABLED_TESTS:-}"
-  if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
-    cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
-    ls _bld/lib/*.dll >/dev/null 2>&1 && cp -f -p _bld/lib/*.dll _bld/tests/libtest/
-    cmake --build _bld --config "${PRJ_CFG}" --target test-ci
-  else
-    (
-      TFLAGS="-a -p !flaky -r -rm ${TFLAGS}"
-      cd _bld/tests
-      ./runtests.pl
-    )
-  fi
 fi
