@@ -58,7 +58,6 @@ jobs:
           run: |
             # https://pkgsrc.se/
             sudo pkgin -y install cmake perl brotli openldap-client libssh2 libidn2 nghttp2  # python311 py311-impacket
-            sudo pkgin -y remove curl
             cmake -B bld \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_USE_OPENSSL=ON \
@@ -90,7 +89,6 @@ jobs:
           run: |
             # https://openbsd.app/
             sudo pkg_add cmake perl brotli openldap-client libssh2 libidn2 nghttp2 python3 py3-impacket
-            sudo pkg_delete curl
             cmake -B bld \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_USE_OPENSSL=ON \
