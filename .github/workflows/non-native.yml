@@ -187,7 +187,7 @@ jobs:
         with:
           usesh: true
           # https://pkg.omnios.org/r151048/core/en/index.shtml
-          prepare: pkg install build-essential libtool gss
+          prepare: pkg install build-essential libtool library/security/gss
           run: |
             pkg uninstall curl
             ln -s /usr/bin/gcpp /usr/bin/cpp  # Some tests expect `cpp`, which is named `gcpp` in this env.
