@@ -128,7 +128,7 @@ jobs:
           architecture: ${{ matrix.arch }}
           run: |
             # https://ports.freebsd.org/
-            sudo pkg install -y autoconf automake libtool pkgconf brotli openldap26-client libidn2 libnghttp2 perl5 python3
+            sudo pkg install -y autoconf automake libtool brotli openldap26-client libidn2 libnghttp2 perl5 python3
             sudo pkg delete -y curl
             autoreconf -fi
             export CC='${{ matrix.compiler }}'
@@ -153,7 +153,7 @@ jobs:
           architecture: ${{ matrix.arch }}
           run: |
             # https://ports.freebsd.org/
-            sudo pkg install -y cmake pkgconf brotli openldap26-client libidn2 libnghttp2 perl5 python3
+            sudo pkg install -y cmake brotli openldap26-client libidn2 libnghttp2 perl5 python3
             sudo pkg delete -y curl
             cmake -B bld \
               -DCMAKE_C_COMPILER=${{ matrix.compiler }} \
