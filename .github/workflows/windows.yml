@@ -58,6 +58,7 @@ jobs:
       - uses: cygwin/cygwin-install-action@v4
         with:
           platform: ${{ matrix.platform }}
+          # https://cygwin.com/cgi-bin2/package-grep.cgi
           packages: autoconf libtool ${{ matrix.build }} gcc-core gcc-g++ binutils make libssl-devel zlib-devel libbrotli-devel libnghttp2-devel libpsl-devel libssh2-devel
           site: https://mirrors.kernel.org/sourceware/cygwin/
 
@@ -151,6 +152,7 @@ jobs:
         if: ${{ matrix.sys == 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
+          # https://packages.msys2.org/search
           install: gcc ${{ matrix.build }} make openssl-devel zlib-devel brotli-devel libnghttp2-devel libpsl-devel libssh2-devel
       - uses: msys2/setup-msys2@v2
         if: ${{ matrix.sys != 'msys' }}
