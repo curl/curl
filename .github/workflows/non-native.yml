@@ -91,7 +91,7 @@ jobs:
           architecture: ${{ matrix.arch }}
           run: |
             # https://openbsd.app/
-            sudo pkg_add cmake perl brotli heimdal openldap-client libssh2 libidn2 libpsl nghttp2 python3 py3-impacket
+            sudo pkg_add cmake perl brotli openldap-client libssh2 libidn2 libpsl nghttp2 python3 py3-impacket
             cmake -B bld \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
@@ -99,7 +99,7 @@ jobs:
               -DBUILD_EXAMPLES=ON \
               -DENABLE_WEBSOCKETS=ON \
               -DCURL_USE_OPENSSL=ON \
-              -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON -DCURL_USE_GSSAPI=ON
+              -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON
             cmake --build bld --config Debug --parallel 3
             export CURL=$(pwd)/bld/src/curl
             "${CURL}" --disable --version
