@@ -121,6 +121,7 @@ jobs:
             -DCMAKE_UNITY_BUILD=ON \
             -DCURL_WERROR=ON \
             -DBUILD_EXAMPLES=ON \
+            -DENABLE_WEBSOCKETS=ON \
             -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON
 
       - name: 'cmake build'
@@ -245,6 +246,7 @@ jobs:
             -DCMAKE_UNITY_BUILD=ON \
             -DCURL_WERROR=ON \
             -DBUILD_EXAMPLES=ON \
+            -DENABLE_WEBSOCKETS=ON \
             -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON
 
       - name: 'cmake build'
