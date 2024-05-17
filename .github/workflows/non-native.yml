@@ -135,7 +135,7 @@ jobs:
             mkdir bld && cd bld && ../configure --enable-debug --enable-warnings --enable-werror \
               --prefix="${HOME}"/install \
               --with-openssl \
-              --with-brotli --enable-ldap --enable-ldaps --with-libidn2 --with-libssh2 --with-nghttp2 \
+              --with-brotli --enable-ldap --enable-ldaps --with-libidn2 --with-libssh2 --with-nghttp2 --with-gssapi \
               --disable-dependency-tracking || { tail -n 1000 config.log; false; }
             make -j3 install
             src/curl --disable --version
@@ -163,7 +163,7 @@ jobs:
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
               -DBUILD_EXAMPLES=ON \
-              -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON
+              -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON -DCURL_USE_GSSAPI=ON
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
