@@ -128,15 +128,17 @@ jobs:
           architecture: ${{ matrix.arch }}
           run: |
             # https://ports.freebsd.org/
-            # FIXME: brotli + --with-brotli results in:
-            #        configure: error: BROTLI libs and/or directories were not found where specified!
-            sudo pkg install -y autoconf automake libtool openldap26-client libidn2 libnghttp2 perl5 python3
+            # FIXME: brotli + --with-brotli breaks ./configure:
+            #          configure: error: BROTLI libs and/or directories were not found where specified!
+            #        also openldap26-client + --enable-ldap --enable-ldaps
+            #          configure: error: couldn't detect the LDAP libraries
+            sudo pkg install -y autoconf automake libtool pkgconf brotli openldap26-client libidn2 libnghttp2 perl5 python3
             sudo pkg delete -y curl
             autoreconf -fi
             export CC='${{ matrix.compiler }}'
             mkdir bld && cd bld && ../configure --enable-debug --enable-warnings --enable-werror \
               --with-openssl \
-              --enable-ldap --enable-ldaps --with-libidn2 --with-libssh2 --with-nghttp2 \
+              --with-brotli --enable-ldap --enable-ldaps --with-libidn2 --with-libssh2 --with-nghttp2 \
               --disable-dependency-tracking || { tail -n 1000 config.log; false; }
             make -j3
             src/curl --disable --version
