@@ -64,7 +64,7 @@ jobs:
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
               -DBUILD_EXAMPLES=ON \
-              -DCURL_BROTLI=ON
+              -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON
             cmake --build bld --config Debug --parallel 3
             export CURL=$(pwd)/bld/src/curl
             "${CURL}" --disable --version
@@ -97,7 +97,7 @@ jobs:
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
               -DBUILD_EXAMPLES=ON \
-              -DCURL_BROTLI=ON
+              -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON
             cmake --build bld --config Debug --parallel 3
             export CURL=$(pwd)/bld/src/curl
             "${CURL}" --disable --version
@@ -161,7 +161,7 @@ jobs:
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
               -DBUILD_EXAMPLES=ON \
-              -DCURL_BROTLI=ON
+              -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
