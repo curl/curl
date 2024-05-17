@@ -133,10 +133,11 @@ jobs:
             autoreconf -fi
             export CC='${{ matrix.compiler }}'
             mkdir bld && cd bld && ../configure --enable-debug --enable-warnings --enable-werror \
+              --prefix="${HOME}"/install \
               --with-openssl \
               --with-brotli --enable-ldap --enable-ldaps --with-libidn2 --with-libssh2 --with-nghttp2 \
               --disable-dependency-tracking || { tail -n 1000 config.log; false; }
-            make -j3
+            make -j3 install
             src/curl --disable --version
             make -j3 examples
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
@@ -188,9 +189,10 @@ jobs:
             ln -s /usr/bin/gcpp /usr/bin/cpp  # Some tests expect `cpp`, which is named `gcpp` in this env.
             autoreconf -fi
             mkdir bld && cd bld && ../configure --enable-debug --enable-warnings --enable-werror \
+              --prefix="${HOME}"/install \
               --with-openssl \
               --disable-dependency-tracking || { tail -n 1000 config.log; false; }
-            gmake -j3
+            gmake -j3 install
             src/curl --disable --version
             gmake -j3 examples
             export TFLAGS='-j12'
