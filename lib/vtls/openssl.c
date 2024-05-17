@@ -4150,14 +4150,11 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
   }
 
 #ifndef HAVE_KEYLOG_CALLBACK
-  if(Curl_tls_keylog_enabled()) {
-    /* If key logging is enabled, wait for the handshake to complete and then
-     * proceed with logging secrets (for TLS 1.2 or older).
-     */
-    bool done = FALSE;
-    ossl_log_tls12_secret(octx->ssl, &done);
-    octx->keylog_done = done;
-  }
+  /* If key logging is enabled, wait for the handshake to complete and then
+   * proceed with logging secrets (for TLS 1.2 or older).
+   */
+  if(Curl_tls_keylog_enabled() && !octx->keylog_done)
+    ossl_log_tls12_secret(octx->ssl, &octx->keylog_done);
 #endif
 
   /* 1  is fine
