@@ -49,12 +49,12 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     '-DCMAKE_INSTALL_PREFIX=C:/curl' \
     "-DCMAKE_BUILD_TYPE=${PRJ_CFG}"
   # shellcheck disable=SC2086
-  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --clean-first -- ${BUILD_OPT:-}
+  cmake --build _bld --config "${PRJ_CFG}" --verbose --parallel 2 --clean-first -- ${BUILD_OPT:-}
   if [ "${SHARED}" = 'ON' ]; then
     cp -f -p _bld/lib/*.dll _bld/src/
   fi
   curl='_bld/src/curl.exe'
-  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
+  cmake --build _bld --config "${PRJ_CFG}" --verbose --parallel 2 --target testdeps
 elif [ "${BUILD_SYSTEM}" = 'autotools' ]; then
   autoreconf -fi
   (
