@@ -64,13 +64,13 @@ string(REGEX REPLACE "[^0]+0x" "" CURL_VERSION_NUM ${CURL_VERSION_NUM})
 
 
 # Setup package meta-data
-# SET(PACKAGE "curl")
+# set(PACKAGE "curl")
 message(STATUS "curl version=[${CURL_VERSION}]")
-# SET(PACKAGE_TARNAME "curl")
-# SET(PACKAGE_NAME "curl")
-# SET(PACKAGE_VERSION "-")
-# SET(PACKAGE_STRING "curl-")
-# SET(PACKAGE_BUGREPORT "a suitable curl mailing list => https://curl.se/mail/")
+# set(PACKAGE_TARNAME "curl")
+# set(PACKAGE_NAME "curl")
+# set(PACKAGE_VERSION "-")
+# set(PACKAGE_STRING "curl-")
+# set(PACKAGE_BUGREPORT "a suitable curl mailing list => https://curl.se/mail/")
 set(OPERATING_SYSTEM "${CMAKE_SYSTEM_NAME}")
 if(CMAKE_C_COMPILER_TARGET)
   set(OS "\"${CMAKE_C_COMPILER_TARGET}\"")
@@ -422,8 +422,8 @@ endif()
 
 if(CURL_USE_SCHANNEL)
   set(SSL_ENABLED ON)
-  set(USE_SCHANNEL ON) # Windows native SSL/TLS support
-  set(USE_WINDOWS_SSPI ON) # CURL_USE_SCHANNEL implies CURL_WINDOWS_SSPI
+  set(USE_SCHANNEL ON)  # Windows native SSL/TLS support
+  set(USE_WINDOWS_SSPI ON)  # CURL_USE_SCHANNEL implies CURL_WINDOWS_SSPI
 
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "schannel")
     set(valid_default_ssl_backend TRUE)
@@ -470,7 +470,7 @@ if(CURL_USE_OPENSSL)
   set(USE_OPENSSL ON)
 
   # Depend on OpenSSL via imported targets if supported by the running
-  # version of CMake.  This allows our dependents to get our dependencies
+  # version of CMake. This allows our dependents to get our dependencies
   # transitively.
   if(NOT CMAKE_VERSION VERSION_LESS 3.4)
     list(APPEND CURL_LIBS OpenSSL::SSL OpenSSL::Crypto)
@@ -914,8 +914,8 @@ if(APPLE)
   endif()
 endif()
 
-#libpsl
-option(CURL_USE_LIBPSL "Use libPSL" ON)
+# libpsl
+option(CURL_USE_LIBPSL "Use libpsl" ON)
 mark_as_advanced(CURL_USE_LIBPSL)
 set(USE_LIBPSL OFF)
 
@@ -929,8 +929,8 @@ if(CURL_USE_LIBPSL)
   endif()
 endif()
 
-#libSSH2
-option(CURL_USE_LIBSSH2 "Use libSSH2" ON)
+# libssh2
+option(CURL_USE_LIBSSH2 "Use libssh2" ON)
 mark_as_advanced(CURL_USE_LIBSSH2)
 set(USE_LIBSSH2 OFF)
 
@@ -945,7 +945,7 @@ if(CURL_USE_LIBSSH2)
 endif()
 
 # libssh
-option(CURL_USE_LIBSSH "Use libSSH" OFF)
+option(CURL_USE_LIBSSH "Use libssh" OFF)
 mark_as_advanced(CURL_USE_LIBSSH)
 if(NOT USE_LIBSSH2 AND CURL_USE_LIBSSH)
   find_package(libssh CONFIG)
@@ -1011,7 +1011,6 @@ if(CURL_USE_GSSAPI)
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${GSS_LINKER_FLAGS}")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${GSS_LINKER_FLAGS}")
     list(APPEND CURL_LIBS ${GSS_LIBRARIES})
-
   else()
     message(WARNING "GSSAPI support has been requested but no supporting libraries found. Skipping.")
   endif()
@@ -1453,9 +1452,9 @@ endif()
 # Check for nonblocking
 set(HAVE_DISABLED_NONBLOCKING 1)
 if(HAVE_FIONBIO OR
-    HAVE_IOCTLSOCKET OR
-    HAVE_IOCTLSOCKET_CASE OR
-    HAVE_O_NONBLOCK)
+   HAVE_IOCTLSOCKET OR
+   HAVE_IOCTLSOCKET_CASE OR
+   HAVE_O_NONBLOCK)
   set(HAVE_DISABLED_NONBLOCKING)
 endif()
 
@@ -1463,7 +1462,7 @@ if(CMAKE_COMPILER_IS_GNUCC AND APPLE)
   include(CheckCCompilerFlag)
   check_c_compiler_flag(-Wno-long-double HAVE_C_FLAG_Wno_long_double)
   if(HAVE_C_FLAG_Wno_long_double)
-    # The Mac version of GCC warns about use of long double.  Disable it.
+    # The Mac version of GCC warns about use of long double. Disable it.
     get_source_file_property(MPRINTF_COMPILE_FLAGS mprintf.c COMPILE_FLAGS)
     if(MPRINTF_COMPILE_FLAGS)
       set(MPRINTF_COMPILE_FLAGS "${MPRINTF_COMPILE_FLAGS} -Wno-long-double")
@@ -1540,7 +1539,8 @@ if(CURL_LTO)
 endif()
 
 
-# Ugly (but functional) way to include "Makefile.inc" by transforming it (= regenerate it).
+# Ugly (but functional) way to include "Makefile.inc" by transforming it
+# (= regenerate it).
 function(transform_makefile_inc INPUT_FILE OUTPUT_FILE)
   file(READ ${INPUT_FILE} MAKEFILE_INC_TEXT)
   string(REPLACE "$(top_srcdir)"   "\${CURL_SOURCE_DIR}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
@@ -1550,8 +1550,8 @@ function(transform_makefile_inc INPUT_FILE OUTPUT_FILE)
   string(REGEX REPLACE "([a-zA-Z_][a-zA-Z0-9_]*)[\t ]*=[\t ]*([^\n]*)" "SET(\\1 \\2)" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
   string(REPLACE "!π!α!" "\n" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
 
-  string(REGEX REPLACE "\\$\\(([a-zA-Z_][a-zA-Z0-9_]*)\\)" "\${\\1}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})    # Replace $() with ${}
-  string(REGEX REPLACE "@([a-zA-Z_][a-zA-Z0-9_]*)@" "\${\\1}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})    # Replace @@ with ${}, even if that may not be read by CMake scripts.
+  string(REGEX REPLACE "\\$\\(([a-zA-Z_][a-zA-Z0-9_]*)\\)" "\${\\1}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})  # Replace $() with ${}
+  string(REGEX REPLACE "@([a-zA-Z_][a-zA-Z0-9_]*)@" "\${\\1}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})  # Replace @@ with ${}, even if that may not be read by CMake scripts.
   file(WRITE ${OUTPUT_FILE} ${MAKEFILE_INC_TEXT})
   set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${INPUT_FILE}")
 endfunction()
@@ -1596,8 +1596,8 @@ if(NOT CURL_DISABLE_INSTALL)
             GROUP_READ GROUP_EXECUTE
             WORLD_READ WORLD_EXECUTE)
 
-  # Helper to populate a list (_items) with a label when conditions (the remaining
-  # args) are satisfied
+  # Helper to populate a list (_items) with a label when conditions
+  # (the remaining args) are satisfied
   macro(_add_if label)
     # needs to be a macro to allow this indirection
     if(${ARGN})
@@ -1811,7 +1811,7 @@ if(NOT CURL_DISABLE_INSTALL)
   # * ENABLE_SHARED
   # * ENABLE_STATIC
   configure_file("${CURL_SOURCE_DIR}/curl-config.in"
-                "${CURL_BINARY_DIR}/curl-config" @ONLY)
+                 "${CURL_BINARY_DIR}/curl-config" @ONLY)
   install(FILES "${CURL_BINARY_DIR}/curl-config"
           DESTINATION ${CMAKE_INSTALL_BINDIR}
           PERMISSIONS
@@ -1821,7 +1821,7 @@ if(NOT CURL_DISABLE_INSTALL)
 
   # Finally generate a pkg-config file matching this config
   configure_file("${CURL_SOURCE_DIR}/libcurl.pc.in"
-                "${CURL_BINARY_DIR}/libcurl.pc" @ONLY)
+                 "${CURL_BINARY_DIR}/libcurl.pc" @ONLY)
   install(FILES "${CURL_BINARY_DIR}/libcurl.pc"
           DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
@@ -1837,11 +1837,11 @@ if(NOT CURL_DISABLE_INSTALL)
       COMPATIBILITY SameMajorVersion
   )
   file(READ "${version_config}" generated_version_config)
-  file(WRITE "${version_config}"
-  "if(NOT PACKAGE_FIND_VERSION_RANGE AND PACKAGE_FIND_VERSION_MAJOR STREQUAL \"7\")
-      # Version 8 satisfies version 7... requirements
-      set(PACKAGE_FIND_VERSION_MAJOR 8)
-      set(PACKAGE_FIND_VERSION_COUNT 1)
+  file(WRITE "${version_config}" "
+  if(NOT PACKAGE_FIND_VERSION_RANGE AND PACKAGE_FIND_VERSION_MAJOR STREQUAL \"7\")
+    # Version 8 satisfies version 7... requirements
+    set(PACKAGE_FIND_VERSION_MAJOR 8)
+    set(PACKAGE_FIND_VERSION_COUNT 1)
   endif()
   ${generated_version_config}"
   )
@@ -1850,20 +1850,18 @@ if(NOT CURL_DISABLE_INSTALL)
   # * TARGETS_EXPORT_NAME
   # * PROJECT_NAME
   configure_package_config_file(CMake/curl-config.cmake.in
-          "${project_config}"
-          INSTALL_DESTINATION ${CURL_INSTALL_CMAKE_DIR}
+    "${project_config}"
+    INSTALL_DESTINATION ${CURL_INSTALL_CMAKE_DIR}
   )
 
   if(CURL_ENABLE_EXPORT_TARGET)
-    install(
-            EXPORT "${TARGETS_EXPORT_NAME}"
+    install(EXPORT "${TARGETS_EXPORT_NAME}"
             NAMESPACE "${PROJECT_NAME}::"
             DESTINATION ${CURL_INSTALL_CMAKE_DIR}
     )
   endif()
 
-  install(
-          FILES ${version_config} ${project_config}
+  install(FILES ${version_config} ${project_config}
           DESTINATION ${CURL_INSTALL_CMAKE_DIR}
   )
 
@@ -1878,12 +1876,12 @@ if(NOT CURL_DISABLE_INSTALL)
 
   if(NOT TARGET curl_uninstall)
     configure_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/CMake/cmake_uninstall.cmake.in
-        ${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake
-        IMMEDIATE @ONLY)
+      ${CMAKE_CURRENT_SOURCE_DIR}/CMake/cmake_uninstall.cmake.in
+      ${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake
+      IMMEDIATE @ONLY)
 
     add_custom_target(curl_uninstall
-        COMMAND ${CMAKE_COMMAND} -P
-        ${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake)
+      COMMAND ${CMAKE_COMMAND} -P
+      ${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake)
   endif()
 endif()

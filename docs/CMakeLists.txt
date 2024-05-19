@@ -21,7 +21,7 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-#add_subdirectory(examples)
+
 if(BUILD_LIBCURL_DOCS)
   add_subdirectory(libcurl)
 endif()

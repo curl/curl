@@ -23,7 +23,7 @@
 ###########################################################################
 set(TARGET_LABEL_PREFIX "Test ")
 
-function(setup_test TEST_NAME)          # ARGN are the files in the test
+function(setup_test TEST_NAME)  # ARGN are the files in the test
 
   if(LIB_SELECTED STREQUAL LIB_STATIC)
     # These are part of the libcurl static lib. Do not compile/link them again.
@@ -35,10 +35,10 @@ function(setup_test TEST_NAME)          # ARGN are the files in the test
   string(TOUPPER ${TEST_NAME} UPPER_TEST_NAME)
 
   include_directories(
-    ${CURL_SOURCE_DIR}/lib          # To be able to reach "curl_setup_once.h"
-    ${CURL_BINARY_DIR}/lib          # To be able to reach "curl_config.h"
-    ${CURL_BINARY_DIR}/include      # To be able to reach "curl/curl.h"
-    ${CURL_SOURCE_DIR}/tests/libtest # To be able to build generated tests
+    ${CURL_SOURCE_DIR}/lib            # for "curl_setup_once.h"
+    ${CURL_BINARY_DIR}/lib            # for "curl_config.h"
+    ${CURL_BINARY_DIR}/include        # for "curl/curl.h"
+    ${CURL_SOURCE_DIR}/tests/libtest  # to be able to build generated tests
     )
   if(USE_ARES)
     include_directories(${CARES_INCLUDE_DIR})
@@ -72,7 +72,7 @@ if(NOT WIN32)
   # Output to .libs for compatibility with autotools, the test data expects a
   # library at (tests)/libtest/.libs/libhostname.so
   set_target_properties(hostname PROPERTIES
-      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/.libs)
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/.libs)
   if(HIDES_CURL_PRIVATE_SYMBOLS)
     set_property(TARGET hostname APPEND PROPERTY COMPILE_DEFINITIONS "CURL_HIDDEN_SYMBOLS")
     set_property(TARGET hostname APPEND PROPERTY COMPILE_FLAGS ${CURL_CFLAG_SYMBOLS_HIDE})
