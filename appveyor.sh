@@ -39,7 +39,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   options=''
   [[ "${TARGET:-}" = *'ARM64'* ]] && SKIP_RUN='ARM64 architecture'
   [ "${OPENSSL}" = 'ON' ] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
-  [ "${CURLDEBUG}" = 'ON' ] && options+=' -DENABLE_CURLDEBUG=ON'
+  [ "${CURLDEBUG:-}" = 'ON' ] && options+=' -DENABLE_CURLDEBUG=ON'
   [ "${PRJ_CFG}" = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
   [ "${PRJ_CFG}" = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
   [[ "${PRJ_GEN}" = *'Visual Studio'* ]] && options+=' -DCMAKE_VS_GLOBALS=TrackFileAccess=false'
@@ -119,7 +119,7 @@ if false; then
 fi
 
 if [ "${BUILD_SYSTEM}" = 'CMake' ] && \
-   [[ "${TESTING}" = 'ON' || "${CURLDEBUG}" = 'ON' ]]; then
+   [[ "${TESTING}" = 'ON' || "${CURLDEBUG:-}" = 'ON' ]]; then
   cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
 fi
 
