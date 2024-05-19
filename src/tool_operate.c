@@ -1731,14 +1731,11 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           my_setopt_str(curl, CURLOPT_SSLKEYTYPE, config->key_type);
           my_setopt_str(curl, CURLOPT_PROXY_SSLKEYTYPE,
                         config->proxy_key_type);
+
+          /* libcurl default is strict verifyhost -> 1L, verifypeer -> 1L */
           if(config->insecure_ok) {
             my_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
             my_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-          }
-          else {
-            my_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-            /* libcurl default is strict verifyhost -> 2L   */
-            /* my_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L); */
           }
 
           if(config->doh_insecure_ok) {
@@ -1749,9 +1746,6 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           if(config->proxy_insecure_ok) {
             my_setopt(curl, CURLOPT_PROXY_SSL_VERIFYPEER, 0L);
             my_setopt(curl, CURLOPT_PROXY_SSL_VERIFYHOST, 0L);
-          }
-          else {
-            my_setopt(curl, CURLOPT_PROXY_SSL_VERIFYPEER, 1L);
           }
 
           if(config->verifystatus)
