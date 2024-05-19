@@ -914,21 +914,6 @@ if(APPLE)
   endif()
 endif()
 
-#libpsl
-option(CURL_USE_LIBPSL "Use libPSL" ON)
-mark_as_advanced(CURL_USE_LIBPSL)
-set(USE_LIBPSL OFF)
-
-if(CURL_USE_LIBPSL)
-  find_package(LibPSL)
-  if(LIBPSL_FOUND)
-    list(APPEND CURL_LIBS ${LIBPSL_LIBRARY})
-    list(APPEND CMAKE_REQUIRED_INCLUDES "${LIBPSL_INCLUDE_DIR}")
-    include_directories("${LIBPSL_INCLUDE_DIR}")
-    set(USE_LIBPSL ON)
-  endif()
-endif()
-
 #libSSH2
 option(CURL_USE_LIBSSH2 "Use libSSH2" ON)
 mark_as_advanced(CURL_USE_LIBSSH2)
@@ -1585,6 +1570,21 @@ endif()
 
 if(BUILD_TESTING)
   add_subdirectory(tests)
+endif()
+
+#libpsl
+option(CURL_USE_LIBPSL "Use libPSL" ON)
+mark_as_advanced(CURL_USE_LIBPSL)
+set(USE_LIBPSL OFF)
+
+if(CURL_USE_LIBPSL)
+  find_package(LibPSL)
+  if(LIBPSL_FOUND)
+    list(APPEND CURL_LIBS ${LIBPSL_LIBRARY})
+    list(APPEND CMAKE_REQUIRED_INCLUDES "${LIBPSL_INCLUDE_DIR}")
+    include_directories("${LIBPSL_INCLUDE_DIR}")
+    set(USE_LIBPSL ON)
+  endif()
 endif()
 
 if(NOT CURL_DISABLE_INSTALL)
