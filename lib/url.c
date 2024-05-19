@@ -829,6 +829,7 @@ static bool extract_if_dead(struct connectdata *conn,
     }
 
     if(dead) {
+      /* remove connection from cache */
       infof(data, "Connection %" CURL_FORMAT_CURL_OFF_T " seems to be dead",
             conn->connection_id);
       Curl_conncache_remove_conn(data, conn, FALSE);
@@ -884,8 +885,7 @@ static void prune_dead_connections(struct Curl_easy *data)
                                  call_extract_if_dead)) {
       /* unlocked */
 
-      /* remove connection from cache */
-      Curl_conncache_remove_conn(data, prune.extracted, TRUE);
+      /* connection previously removed from cache in extract_if_dead() */
 
       /* disconnect it */
       Curl_disconnect(data, prune.extracted, TRUE);
