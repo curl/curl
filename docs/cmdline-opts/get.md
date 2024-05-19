@@ -19,10 +19,10 @@ Example:
 
 # `--get`
 
-When used, this option makes all data specified with --data, --data-binary
-or --data-urlencode to be used in an HTTP GET request instead of the POST
-request that otherwise would be used. The data is appended to the URL
-with a '?' separator.
+When used, this option makes all data specified with --data, --data-binary or
+--data-urlencode to be used in an HTTP GET request instead of the POST request
+that otherwise would be used. curl appends the provided data to the URL as a
+query string.
 
 If used in combination with --head, the POST data is instead appended to the
 URL with a HEAD request.
