@@ -22,7 +22,11 @@ Example:
 When used, this option makes all data specified with --data, --data-binary
 or --data-urlencode to be used in an HTTP GET request instead of the POST
 request that otherwise would be used. The data is appended to the URL
-with a '?' separator.
+with a '?' as a separator. Or with '&' if more data is provided (check
+--data for details).
+
+Prior to 7.86.0 curl could again use '?' as a separator in some
+edge cases even if '?' was already in place.
 
 If used in combination with --head, the POST data is instead appended to the
 URL with a HEAD request.
