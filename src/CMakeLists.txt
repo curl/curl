@@ -81,7 +81,7 @@ add_executable(
   )
 
 add_library(
-  curltool # special libcurltool library just for unittests
+  curltool  # special libcurltool library just for unittests
   STATIC
   EXCLUDE_FROM_ALL
   ${CURL_CFILES} ${CURLTOOL_LIBCURL_CFILES} ${CURL_HFILES}
@@ -104,23 +104,23 @@ source_group("curl source files" FILES ${CURL_CFILES})
 source_group("curl header files" FILES ${CURL_HFILES})
 
 include_directories(
-  ${CURL_SOURCE_DIR}/lib        # To be able to reach "curl_setup_once.h"
-  ${CURL_BINARY_DIR}/lib        # To be able to reach "curl_config.h"
-  ${CURL_BINARY_DIR}/include    # To be able to reach "curl/curl.h"
+  ${CURL_SOURCE_DIR}/lib      # for "curl_setup_once.h"
+  ${CURL_BINARY_DIR}/lib      # for "curl_config.h"
+  ${CURL_BINARY_DIR}/include  # for "curl/curl.h"
   # This is needed as tool_hugehelp.c is generated in the binary dir
-  ${CURL_SOURCE_DIR}/src        # To be able to reach "tool_hugehelp.h"
+  ${CURL_SOURCE_DIR}/src      # for "tool_hugehelp.h"
   )
 
-#Build curl executable
+# Build curl executable
 target_link_libraries(${EXE_NAME} ${LIB_SELECTED_FOR_EXE} ${CURL_LIBS})
 
 ################################################################################
 
-#SET_TARGET_PROPERTIES(${EXE_NAME} ARCHIVE_OUTPUT_DIRECTORY "blah blah blah")
-#SET_TARGET_PROPERTIES(${EXE_NAME} RUNTIME_OUTPUT_DIRECTORY "blah blah blah")
-#SET_TARGET_PROPERTIES(${EXE_NAME} LIBRARY_OUTPUT_DIRECTORY "blah blah blah")
+#set_target_properties(${EXE_NAME} ARCHIVE_OUTPUT_DIRECTORY "blah blah blah")
+#set_target_properties(${EXE_NAME} RUNTIME_OUTPUT_DIRECTORY "blah blah blah")
+#set_target_properties(${EXE_NAME} LIBRARY_OUTPUT_DIRECTORY "blah blah blah")
 
-#INCLUDE(ModuleInstall OPTIONAL)
+#include(ModuleInstall OPTIONAL)
 
 install(TARGETS ${EXE_NAME} EXPORT ${TARGETS_EXPORT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
 export(TARGETS ${EXE_NAME}

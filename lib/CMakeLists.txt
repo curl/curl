@@ -185,8 +185,8 @@ if(BUILD_SHARED_LIBS)
   add_library(${PROJECT_NAME}::${LIB_SHARED} ALIAS ${LIB_SHARED})
   if(WIN32 OR CYGWIN)
     if(CYGWIN)
-      # For cygwin always compile dllmain.c as a separate unit since it
-      # includes windows.h, which shouldn't be included in other units.
+      # For Cygwin always compile dllmain.c as a separate unit since it
+      # includes windows.h, which should not be included in other units.
       set_source_files_properties(dllmain.c PROPERTIES
         SKIP_UNITY_BUILD_INCLUSION ON)
     endif()
