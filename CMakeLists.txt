@@ -293,7 +293,7 @@ if(ENABLE_IPV6 AND NOT WIN32)
         CACHE BOOL "Define if you want to enable IPv6 support" FORCE)
   endif()
 
-  if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND NOT ENABLE_ARES)
+  if(APPLE AND NOT ENABLE_ARES)
     set(use_core_foundation_and_core_services ON)
 
     find_library(SYSTEMCONFIGURATION_FRAMEWORK "SystemConfiguration")
