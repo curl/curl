@@ -77,7 +77,7 @@ jobs:
           httrack --get https://security.debian.org/debian-security/pool/updates/main/g/glibc/libc6_2.28-10+deb10u3_amd64.deb
           dpkg -i libc6_2.28-10+deb10u3_amd64.deb
 
-      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
+      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
 
       - name: 'cmake build-only (out-of-tree, libssh2)'
         run: |
