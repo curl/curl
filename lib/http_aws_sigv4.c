@@ -668,7 +668,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
       time(&clock);
   }
 #else
-  time(&clock);
+  clock = time(NULL);
 #endif
   result = Curl_gmtime(clock, &tm);
   if(result) {
