@@ -2849,7 +2849,7 @@ CURLcode Curl_http_header(struct Curl_easy *data,
 #ifndef CURL_DISABLE_ALTSVC
     v = (data->asi &&
          ((data->conn->handler->flags & PROTOPT_SSL) ||
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
           /* allow debug builds to circumvent the HTTPS restriction */
           getenv("CURL_ALTSVC_HTTP")
 #else
@@ -3116,7 +3116,7 @@ CURLcode Curl_http_header(struct Curl_easy *data,
     /* If enabled, the header is incoming and this is over HTTPS */
     v = (data->hsts &&
          ((conn->handler->flags & PROTOPT_SSL) ||
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
            /* allow debug builds to circumvent the HTTPS restriction */
            getenv("CURL_HSTS_HTTP")
 #else

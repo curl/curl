@@ -191,7 +191,7 @@ doh_write_cb(const void *contents, size_t size, size_t nmemb, void *userp)
   return realsize;
 }
 
-#if defined(USE_HTTPSRR) && defined(CURLDEBUG)
+#if defined(USE_HTTPSRR) && defined(DEBUGBUILD)
 static void local_print_buf(struct Curl_easy *data,
                             const char *prefix,
                             unsigned char *buf, size_t len)
@@ -285,7 +285,7 @@ static CURLcode dohprobe(struct Curl_easy *data,
     ERROR_CHECK_SETOPT(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
     ERROR_CHECK_SETOPT(CURLOPT_PIPEWAIT, 1L);
 #endif
-#ifndef CURLDEBUG
+#ifndef DEBUGBUILD
     /* enforce HTTPS if not debug */
     ERROR_CHECK_SETOPT(CURLOPT_PROTOCOLS, CURLPROTO_HTTPS);
 #else
@@ -870,7 +870,7 @@ static void showdoh(struct Curl_easy *data,
   }
 #ifdef USE_HTTPSRR
   for(i = 0; i < d->numhttps_rrs; i++) {
-# ifdef CURLDEBUG
+# ifdef DEBUGBUILD
     local_print_buf(data, "DoH HTTPS",
                     d->https_rrs[i].val, d->https_rrs[i].len);
 # else
@@ -1143,7 +1143,7 @@ err:
   return CURLE_BAD_CONTENT_ENCODING;
 }
 
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
 static CURLcode test_alpn_escapes(void)
 {
   /* we'll use an example from draft-ietf-dnsop-svcb, figure 10 */
@@ -1176,7 +1176,7 @@ static CURLcode Curl_doh_decode_httpsrr(unsigned char *rrval, size_t len,
   struct Curl_https_rrinfo *lhrr = NULL;
   char *dnsname = NULL;
 
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
   /* a few tests of escaping, shouldn't be here but ok for now */
   if(test_alpn_escapes() != CURLE_OK)
     return CURLE_OUT_OF_MEMORY;
@@ -1244,7 +1244,7 @@ err:
   return CURLE_OUT_OF_MEMORY;
 }
 
-# ifdef CURLDEBUG
+# ifdef DEBUGBUILD
 static void local_print_httpsrr(struct Curl_easy *data,
                                 struct Curl_https_rrinfo *hrr)
 {
@@ -1382,7 +1382,7 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
         return result;
       }
       infof(data, "Some HTTPS RR to process");
-# ifdef CURLDEBUG
+# ifdef DEBUGBUILD
       local_print_httpsrr(data, hrr);
 # endif
       (*dnsp)->hinfo = hrr;

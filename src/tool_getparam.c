@@ -1825,7 +1825,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       config->sasl_ir = toggle;
       break;
     case C_TEST_EVENT: /* --test-event */
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
       global->test_event_based = toggle;
 #else
       warnf(global, "--test-event is ignored unless a debug build");

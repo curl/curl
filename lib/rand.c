@@ -105,7 +105,7 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
   static unsigned int randseed;
   static bool seeded = FALSE;
 
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
   char *force_entropy = getenv("CURL_ENTROPY");
   if(force_entropy) {
     if(!seeded) {

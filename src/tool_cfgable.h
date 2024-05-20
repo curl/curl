@@ -323,7 +323,7 @@ struct GlobalConfig {
   bool styled_output;             /* enable fancy output style detection */
   long ms_per_transfer;           /* start next transfer after (at least) this
                                      many milliseconds */
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
   bool test_event_based;
 #endif
   bool parallel;

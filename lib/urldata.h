@@ -1375,7 +1375,7 @@ struct UrlState {
   unsigned char select_bits; /* != 0 -> bitmask of socket events for this
                                  transfer overriding anything the socket may
                                  report */
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
   BIT(conncache_lock);
 #endif
   /* when curl_easy_perform() is called, the multi handle is "owned" by
