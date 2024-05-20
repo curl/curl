@@ -83,13 +83,11 @@
 #include "tool_progress.h"
 #include "tool_ipfs.h"
 #include "dynbuf.h"
+#ifdef DEBUGBUILD
+#include "easyif.h"  /* for libcurl's debug-only curl_easy_perform_ev() */
+#endif
 
 #include "memdebug.h" /* keep this as LAST include */
-
-#ifdef DEBUGBUILD
-/* libcurl's debug builds provide an extra function */
-CURLcode curl_easy_perform_ev(CURL *easy);
-#endif
 
 #ifndef O_BINARY
 /* since O_BINARY as used in bitmasks, setting it to zero makes it usable in
