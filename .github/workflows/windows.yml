@@ -240,7 +240,6 @@ jobs:
           fi
           [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
           [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
-          [ '${{ matrix.type }}' = 'Release' ] && [[ '${{ matrix.config }}' = *'ENABLE_DEBUG=ON'* ]] && cflags+=' -DDEBUGBUILD'
           cmake -B bld ${options} \
             "-DCMAKE_C_FLAGS=${cflags}" \
             "-DCMAKE_RC_COMPILE_OBJECT=${rcopts}" \
