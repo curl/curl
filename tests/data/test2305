@@ -8,7 +8,7 @@ WebSockets
 #
 # Sends three 4097 bytes TEXT frames, as one single message
 <reply>
-<data nocheck="yes" nonewline="yes">
+<data nocheck="yes">
 HTTP/1.1 101 Switching to WebSockets
 Server: test-server/fake
 Upgrade: websocket
@@ -50,7 +50,7 @@ ws://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/save%TESTNUMBER
 
 #
 <verify>
-<file name="%LOGDIR/save%TESTNUMBER">
+<file name="%LOGDIR/save%TESTNUMBER" mode="text">
 %repeat[256 x helothisisdaniel]%
 %repeat[256 x helothisisdaniel]%
 %repeat[256 x helothisisdaniel]%
