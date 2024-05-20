@@ -774,16 +774,16 @@ static bool conn_maxage(struct Curl_easy *data,
 }
 
 /*
- * This function checks if the given connection is dead and extracts it from
+ * This function checks if the given connection is dead and prunes it from
  * the connection cache if so.
  *
  * When this is called as a Curl_conncache_foreach() callback, the connection
  * cache lock is held!
  *
- * Returns TRUE if the connection was dead and extracted.
+ * Returns TRUE if the connection was dead and pruned.
  */
-static bool extract_if_dead(struct connectdata *conn,
-                            struct Curl_easy *data)
+static bool prune_if_dead(struct connectdata *conn,
+                          struct Curl_easy *data)
 {
   if(!CONN_INUSE(conn)) {
     /* The check for a dead socket makes sense only if the connection isn't in
@@ -840,15 +840,15 @@ static bool extract_if_dead(struct connectdata *conn,
 }
 
 /*
- * Wrapper to use extract_if_dead() function in Curl_conncache_foreach()
+ * Wrapper to use prune_if_dead() function in Curl_conncache_foreach()
  *
  */
-static int call_extract_if_dead(struct Curl_easy *data,
-                                struct connectdata *conn, void *param)
+static int call_prune_if_dead(struct Curl_easy *data,
+                              struct connectdata *conn, void *param)
 {
   struct connectdata **pruned = (struct connectdata **)param;
-  if(extract_if_dead(conn, data)) {
-    /* stop the iteration here, pass back the connection that was extracted */
+  if(prune_if_dead(conn, data)) {
+    /* stop the iteration here, pass back the connection that was pruned */
     *pruned = conn;
     return 1;
   }
@@ -875,10 +875,10 @@ static void prune_dead_connections(struct Curl_easy *data)
   if(elapsed >= 1000L) {
     struct connectdata *pruned = NULL;
     while(Curl_conncache_foreach(data, data->state.conn_cache, &pruned,
-                                 call_extract_if_dead)) {
+                                 call_prune_if_dead)) {
       /* unlocked */
 
-      /* connection previously removed from cache in extract_if_dead() */
+      /* connection previously removed from cache in prune_if_dead() */
 
       /* disconnect it */
       Curl_disconnect(data, pruned, TRUE);
@@ -1293,7 +1293,7 @@ ConnectionExists(struct Curl_easy *data,
       /* When not multiplexed, we have a match here! */
       infof(data, "Multiplexed connection found");
     }
-    else if(extract_if_dead(check, data)) {
+    else if(prune_if_dead(check, data)) {
       /* disconnect it */
       Curl_disconnect(data, check, TRUE);
       continue;
