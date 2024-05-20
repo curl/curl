@@ -54,7 +54,7 @@ jobs:
       fail-fast: false
     steps:
       - run: git config --global core.autocrlf input
-      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
+      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
       - uses: cygwin/cygwin-install-action@006ad0b0946ca6d0a3ea2d4437677fa767392401 # v4
         with:
           platform: ${{ matrix.platform }}
@@ -151,7 +151,7 @@ jobs:
       fail-fast: false
     steps:
       - run: git config --global core.autocrlf input
-      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
+      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
       - uses: msys2/setup-msys2@d0e80f58dffbc64f6a3a1f43527d469b4fc7b6c8 # v2
         if: ${{ matrix.sys == 'msys' }}
         with:
