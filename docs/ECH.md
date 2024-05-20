@@ -53,7 +53,7 @@ want to debug curl then you should add ``--enable-debug`` to the ``configure``
 command.
 
 In a recent (2024-05-20) build on one machine, configure failed to find the
-ECH-enabled SSL library, apparenly due to the existence of
+ECH-enabled SSL library, apparently due to the existence of
 ``$HOME/code/openssl-local-inst/lib/pkgconfig`` as a directory containing
 various settings. Deleting that directory worked around the problem but may not
 be the best solution.
