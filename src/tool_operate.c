@@ -83,13 +83,11 @@
 #include "tool_progress.h"
 #include "tool_ipfs.h"
 #include "dynbuf.h"
+#ifdef DEBUGBUILD
+#include "easyif.h"  /* for libcurl's debug-only curl_easy_perform_ev() */
+#endif
 
 #include "memdebug.h" /* keep this as LAST include */
-
-#ifdef CURLDEBUG
-/* libcurl's debug builds provide an extra function */
-CURLcode curl_easy_perform_ev(CURL *easy);
-#endif
 
 #ifndef O_BINARY
 /* since O_BINARY as used in bitmasks, setting it to zero makes it usable in
@@ -1315,7 +1313,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         my_setopt(curl, CURLOPT_SEEKFUNCTION, tool_seek_cb);
 
         {
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
           char *env = getenv("CURL_BUFFERSIZE");
           if(env) {
             long size = strtol(env, NULL, 10);
@@ -1647,7 +1645,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
            *  must do the same thing as classic:
            *    --cert <filename>:<password> --cert-type p12
            *  but is designed to test blob */
-#if defined(CURLDEBUG) || defined(DEBUGBUILD)
+#ifdef DEBUGBUILD
           if(config->cert && (strlen(config->cert) > 8) &&
              (memcmp(config->cert, "loadmem=",8) == 0)) {
             FILE *fInCert = fopen(config->cert + 8, "rb");
@@ -1690,7 +1688,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
                         config->proxy_cert_type);
 
 
-#if defined(CURLDEBUG) || defined(DEBUGBUILD)
+#ifdef DEBUGBUILD
           if(config->key && (strlen(config->key) > 8) &&
              (memcmp(config->key, "loadmem=",8) == 0)) {
             FILE *fInCert = fopen(config->key + 8, "rb");
@@ -2484,7 +2482,7 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
         break;
     }
     start = tvnow();
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
     if(global->test_event_based)
       result = curl_easy_perform_ev(per->curl);
     else

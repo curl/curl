@@ -718,7 +718,7 @@ CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
   conn = data->conn;
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
   {
     /* Allow debug builds to override this logic to force short sends
     */

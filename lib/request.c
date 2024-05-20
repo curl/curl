@@ -187,7 +187,7 @@ static CURLcode xfer_send(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
 
   *pnwritten = 0;
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
   {
     /* Allow debug builds to override this logic to force short initial
        sends
