@@ -1,0 +1,478 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: http3-linux
+
+on:
+  push:
+    branches:
+      - master
+      - '*/ci'
+    paths-ignore:
+      - '**/*.md'
+      - '**/CMakeLists.txt'
+      - '.azure-pipelines.yml'
+      - '.circleci/**'
+      - '.cirrus.yml'
+      - 'appveyor.*'
+      - 'CMake/**'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+      - 'winbuild/**'
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - '**/*.md'
+      - '**/CMakeLists.txt'
+      - '.azure-pipelines.yml'
+      - '.circleci/**'
+      - '.cirrus.yml'
+      - 'appveyor.*'
+      - 'CMake/**'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+      - 'winbuild/**'
+
+concurrency:
+  # Hardcoded workflow filename as workflow name above is just Linux again
+  group: http3-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions: {}
+
+env:
+  MAKEFLAGS: -j 4
+  # handled in renovate.json
+  openssl3-version: openssl-3.3.0
+  # unhandled
+  quictls-version: 3.1.4+quic
+  # renovate: datasource=github-tags depName=gnutls/gnutls versioning=semver registryUrl=https://github.com
+  gnutls-version: 3.8.5
+  wolfssl-version: master
+  # renovate: datasource=github-tags depName=ngtcp2/nghttp3 versioning=semver registryUrl=https://github.com
+  nghttp3-version: 1.3.0
+  # renovate: datasource=github-tags depName=ngtcp2/ngtcp2 versioning=semver registryUrl=https://github.com
+  ngtcp2-version: 1.5.0
+  # renovate: datasource=github-tags depName=nghttp2/nghttp2 versioning=semver registryUrl=https://github.com
+  nghttp2-version: 1.62.1
+  # renovate: datasource=github-tags depName=cloudflare/quiche versioning=semver registryUrl=https://github.com
+  quiche-version: 0.21.0
+  # renovate: datasource=github-tags depName=icing/mod_h2 versioning=semver registryUrl=https://github.com
+  mod_h2-version: 2.0.27
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      wolfssl-version: ${{ steps.wolfssl-version.outputs.result }}
+
+    steps:
+      - id: wolfssl-version
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: |
+            let version = '${{ env.wolfssl-version }}'
+
+            if (version != 'master') {
+                return version
+            }
+
+            let { data: commits } = await github.rest.repos.listCommits({
+                owner: 'wolfSSL',
+                repo: 'wolfssl',
+            })
+
+            return commits[0].sha
+
+  build-cache:
+    needs:
+      - setup
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: cache quictls
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        id: cache-quictls-no-deprecated
+        env:
+          cache-name: cache-quictls-no-deprecated
+        with:
+          path: /home/runner/quictls/build
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.quictls-version }}
+
+      - name: cache gnutls
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        id: cache-gnutls
+        env:
+          cache-name: cache-gnutls
+        with:
+          path: /home/runner/gnutls/build
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.gnutls-version }}
+
+      - name: cache wolfssl
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        id: cache-wolfssl
+        env:
+          cache-name: cache-wolfssl
+          wolfssl-version: ${{ needs.setup.outputs.wolfssl-version }}
+        with:
+          path: /home/runner/wolfssl/build
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.wolfssl-version }}
+
+      - name: cache nghttp3
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        id: cache-nghttp3
+        env:
+          cache-name: cache-nghttp3
+        with:
+          path: /home/runner/nghttp3/build
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.nghttp3-version }}
+
+      - name: cache ngtcp2
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        id: cache-ngtcp2
+        env:
+          cache-name: cache-ngtcp2
+        with:
+          path: /home/runner/ngtcp2/build
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.ngtcp2-version }}
+
+      - name: cache nghttp2
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        id: cache-nghttp2
+        env:
+          cache-name: cache-nghttp2
+        with:
+          path: /home/runner/nghttp2/build
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.nghttp2-version }}
+
+      - id: settings
+        if: |
+          steps.cache-quictls-no-deprecated.outputs.cache-hit != 'true' ||
+          steps.cache-gnutls.outputs.cache-hit != 'true' ||
+          steps.cache-wolfssl.outputs.cache-hit != 'true' ||
+          steps.cache-nghttp3.outputs.cache-hit != 'true' ||
+          steps.cache-ngtcp2.outputs.cache-hit != 'true' ||
+          steps.cache-nghttp2.outputs.cache-hit != 'true'
+        run: |
+          echo 'needs-build=true' >> $GITHUB_OUTPUT
+
+      - name: install build prerequisites
+        if: steps.settings.outputs.needs-build == 'true'
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo apt-get update
+          sudo apt-get install libtool autoconf automake pkg-config stunnel4 \
+            libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libev-dev libc-ares-dev \
+            nettle-dev libp11-kit-dev libtspi-dev libunistring-dev guile-2.2-dev libtasn1-bin \
+            libtasn1-6-dev libidn2-0-dev gawk gperf libtss2-dev dns-root-data bison gtk-doc-tools \
+            texinfo texlive texlive-extra-utils autopoint libev-dev \
+            apache2 apache2-dev libnghttp2-dev
+          echo 'CC=gcc-12' >> $GITHUB_ENV
+          echo 'CXX=g++-12' >> $GITHUB_ENV
+
+      - if: steps.cache-quictls-no-deprecated.outputs.cache-hit != 'true'
+        run: |
+          cd $HOME
+          git clone --quiet --depth=1 -b openssl-${{ env.quictls-version }} https://github.com/quictls/openssl quictls
+          cd quictls
+          ./config no-deprecated --prefix=$PWD/build --libdir=$PWD/build/lib
+          make
+          make -j1 install_sw
+        name: 'build quictls'
+
+      - if: steps.cache-gnutls.outputs.cache-hit != 'true'
+        run: |
+          cd $HOME
+          git clone --quiet --depth=1 -b ${{ env.gnutls-version }} https://github.com/gnutls/gnutls.git
+          cd gnutls
+          ./bootstrap
+          ./configure --disable-dependency-tracking --prefix=$PWD/build \
+            LDFLAGS="-Wl,-rpath,$PWD/build/lib -L$PWD/build/lib" \
+            --with-included-libtasn1 --with-included-unistring \
+            --disable-guile --disable-doc --disable-tests --disable-tools
+          make
+          make install
+        name: 'build gnutls'
+
+      - if: steps.cache-wolfssl.outputs.cache-hit != 'true'
+        env:
+          wolfssl-version: ${{ needs.setup.outputs.wolfssl-version }}
+        run: |
+          cd $HOME
+          mkdir wolfssl
+          cd wolfssl
+          git init
+          git remote add origin https://github.com/wolfSSL/wolfssl.git
+          git fetch origin --depth=1 ${{ env.wolfssl-version }}
+          git checkout ${{ env.wolfssl-version }}
+          ./autogen.sh
+          ./configure --disable-dependency-tracking --enable-all --enable-quic --prefix=$PWD/build
+          make
+          make install
+        name: 'build wolfssl'
+
+      - if: steps.cache-nghttp3.outputs.cache-hit != 'true'
+        run: |
+          cd $HOME
+          git clone --quiet --depth=1 -b v${{ env.nghttp3-version }} https://github.com/ngtcp2/nghttp3
+          cd nghttp3
+          git submodule update --init
+          autoreconf -fi
+          ./configure --disable-dependency-tracking --prefix=$PWD/build PKG_CONFIG_PATH="$PWD/build/lib/pkgconfig" --enable-lib-only
+          make
+          make install
+        name: 'build nghttp3'
+
+      - if: steps.cache-ngtcp2.outputs.cache-hit != 'true'
+        run: |
+          cd $HOME
+          git clone --quiet --depth=1 -b v${{ env.ngtcp2-version }} https://github.com/ngtcp2/ngtcp2
+          cd ngtcp2
+          autoreconf -fi
+          ./configure --disable-dependency-tracking --prefix=$PWD/build \
+            PKG_CONFIG_PATH="$PWD/build/lib/pkgconfig:$HOME/quictls/build/lib/pkgconfig:$HOME/gnutls/build/lib/pkgconfig:$HOME/wolfssl/build/lib/pkgconfig:$HOME/nghttp3/build/lib/pkgconfig" \
+            --enable-lib-only --with-openssl --with-gnutls --with-wolfssl
+          make install
+        name: 'build ngtcp2'
+
+      - if: steps.cache-nghttp2.outputs.cache-hit != 'true'
+        run: |
+          cd $HOME
+          git clone --quiet --depth=1 -b v${{ env.nghttp2-version }} https://github.com/nghttp2/nghttp2
+          cd nghttp2
+          autoreconf -fi
+          ./configure --disable-dependency-tracking --prefix=$PWD/build \
+            PKG_CONFIG_PATH="$HOME/build/lib/pkgconfig:$HOME/quictls/build/lib/pkgconfig:$HOME/nghttp3/build/lib/pkgconfig:$HOME/ngtcp2/build/lib/pkgconfig" \
+            LDFLAGS="-Wl,-rpath,$HOME/quictls/build/lib" \
+            --enable-http3
+          make install
+        name: 'build nghttp2'
+
+  autotools:
+    name: ${{ matrix.build.name }}
+    needs:
+      - setup
+      - build-cache
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        build:
+          - name: quictls
+            configure: >-
+              PKG_CONFIG_PATH="$HOME/quictls/build/lib/pkgconfig:$HOME/nghttp3/build/lib/pkgconfig:$HOME/ngtcp2/build/lib/pkgconfig:$HOME/nghttp2/build/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/quictls/build/lib"
+              --with-ngtcp2=$HOME/ngtcp2/build --enable-warnings --enable-werror --enable-debug --disable-ntlm
+              --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
+              --with-openssl=$HOME/quictls/build
+          - name: gnutls
+            configure: >-
+              PKG_CONFIG_PATH="$HOME/gnutls/build/lib/pkgconfig:$HOME/nghttp3/build/lib/pkgconfig:$HOME/ngtcp2/build/lib/pkgconfig:$HOME/nghttp2/build/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/gnutls/build/lib"
+              --with-ngtcp2=$HOME/ngtcp2/build --enable-warnings --enable-werror --enable-debug
+              --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
+              --with-gnutls=$HOME/gnutls/build
+          - name: wolfssl
+            configure: >-
+              PKG_CONFIG_PATH="$HOME/wolfssl/build/lib/pkgconfig:$HOME/nghttp3/build/lib/pkgconfig:$HOME/ngtcp2/build/lib/pkgconfig:$HOME/nghttp2/build/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/wolfssl/build/lib"
+              --with-ngtcp2=$HOME/ngtcp2/build --enable-warnings --enable-werror --enable-debug
+              --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
+              --with-wolfssl=$HOME/wolfssl/build
+          - name: openssl-quic
+            configure: >-
+              PKG_CONFIG_PATH="$HOME/openssl3/build/lib64/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/openssl3/build/lib64"
+              --enable-warnings --enable-werror --enable-debug --disable-ntlm
+              --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
+              --with-openssl=$HOME/openssl3/build --with-openssl-quic
+              --with-nghttp3=$HOME/nghttp3/build
+          - name: quiche
+            configure: >-
+              LDFLAGS="-Wl,-rpath,/home/runner/quiche/target/release"
+              --with-openssl=/home/runner/quiche/quiche/deps/boringssl/src
+              --enable-debug
+              --with-quiche=/home/runner/quiche/target/release
+              --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
+              --with-ca-fallback
+
+    steps:
+      - run: |
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo apt-get update
+          sudo apt-get install libtool autoconf automake pkg-config stunnel4 \
+            libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libev-dev libc-ares-dev \
+            nettle-dev libp11-kit-dev libtspi-dev libunistring-dev guile-2.2-dev libtasn1-bin \
+            libtasn1-6-dev libidn2-0-dev gawk gperf libtss2-dev dns-root-data bison gtk-doc-tools \
+            texinfo texlive texlive-extra-utils autopoint libev-dev \
+            apache2 apache2-dev libnghttp2-dev vsftpd
+          echo 'CC=gcc-12' >> $GITHUB_ENV
+          echo 'CXX=g++-12' >> $GITHUB_ENV
+        name: 'install prereqs and impacket, pytest, crypto, apache2'
+
+      - name: cache quictls
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        id: cache-quictls-no-deprecated
+        env:
+          cache-name: cache-quictls-no-deprecated
+        with:
+          path: /home/runner/quictls/build
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.quictls-version }}
+          fail-on-cache-miss: true
+
+      - name: cache gnutls
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        id: cache-gnutls
+        env:
+          cache-name: cache-gnutls
+        with:
+          path: /home/runner/gnutls/build
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.gnutls-version }}
+          fail-on-cache-miss: true
+
+      - name: cache wolfssl
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        id: cache-wolfssl
+        env:
+          cache-name: cache-wolfssl
+          wolfssl-version: ${{ needs.setup.outputs.wolfssl-version }}
+        with:
+          path: /home/runner/wolfssl/build
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.wolfssl-version }}
+          fail-on-cache-miss: true
+
+      - name: cache nghttp3
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        id: cache-nghttp3
+        env:
+          cache-name: cache-nghttp3
+        with:
+          path: /home/runner/nghttp3/build
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.nghttp3-version }}
+          fail-on-cache-miss: true
+
+      - name: cache ngtcp2
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        id: cache-ngtcp2
+        env:
+          cache-name: cache-ngtcp2
+        with:
+          path: /home/runner/ngtcp2/build
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.ngtcp2-version }}
+          fail-on-cache-miss: true
+
+      - name: cache nghttp2
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        id: cache-nghttp2
+        env:
+          cache-name: cache-nghttp2
+        with:
+          path: /home/runner/nghttp2/build
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.nghttp2-version }}
+          fail-on-cache-miss: true
+
+      - name: cache openssl3
+        if: matrix.build.name == 'openssl-quic'
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        id: cache-openssl3
+        env:
+          cache-name: cache-openssl3
+        with:
+          path: /home/runner/openssl3/build
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.openssl3-version }}
+
+      - name: 'install openssl3'
+        if: matrix.build.name == 'openssl-quic' && steps.cache-openssl3.outputs.cache-hit != 'true'
+        run: |
+          git clone --quiet --depth=1 -b ${{ env.openssl3-version }} https://github.com/openssl/openssl
+          cd openssl
+          ./config --prefix=$HOME/openssl3/build
+          make -j1 install_sw
+          cat exporters/openssl.pc
+
+      - name: cache quiche
+        if: matrix.build.name == 'quiche'
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        id: cache-quiche
+        env:
+          cache-name: cache-quiche
+        with:
+          path: /home/runner/quiche
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-quiche-${{ env.quiche-version }}
+
+      - if: matrix.build.name == 'quiche' && steps.cache-quiche.outputs.cache-hit != 'true'
+        run: |
+          cd $HOME
+          git clone --quiet --depth=1 -b ${{ env.quiche-version }} --recursive https://github.com/cloudflare/quiche.git
+          cd quiche
+          #### Work-around https://github.com/curl/curl/issues/7927 #######
+          #### See https://github.com/alexcrichton/cmake-rs/issues/131 ####
+          sed -i -e 's/cmake = "0.1"/cmake = "=0.1.45"/' quiche/Cargo.toml
+
+          cargo build -v --package quiche --release --features ffi,pkg-config-meta,qlog --verbose
+          mkdir -v quiche/deps/boringssl/src/lib
+          ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) quiche/deps/boringssl/src/lib/
+
+          # include dir
+          # /home/runner/quiche/quiche/deps/boringssl/src/include
+          # lib dir
+          # /home/runner/quiche/quiche/deps/boringssl/src/lib
+        name: 'build quiche and boringssl'
+
+      - name: cache mod_h2
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        id: cache-mod_h2
+        env:
+          cache-name: cache-mod_h2
+        with:
+          path: /home/runner/mod_h2
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.mod_h2-version }}
+
+      - if: steps.cache-mod_h2.outputs.cache-hit != 'true'
+        run: |
+          cd $HOME
+          git clone --quiet --depth=1 -b v${{ env.mod_h2-version }} https://github.com/icing/mod_h2
+          cd mod_h2
+          autoreconf -fi
+          ./configure
+          make
+        name: 'build mod_h2'
+
+      - run: |
+          cd $HOME/mod_h2
+          sudo make install
+        name: 'install mod_h2'
+
+      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
+
+      - run: |
+          sudo python3 -m pip install -r tests/requirements.txt -r tests/http/requirements.txt
+        name: 'install python test prereqs'
+
+      - run: autoreconf -fi
+        name: 'autoreconf'
+
+      - run: ./configure --disable-dependency-tracking ${{ matrix.build.configure }}
+        name: 'configure'
+
+      - run: make V=1
+        name: 'make'
+
+      - run: make V=1 examples
+        name: 'make examples'
+
+      - run: make V=1 -C tests
+        name: 'make tests'
+
+      - run: make V=1 test-ci
+        name: 'run tests'
+        env:
+          TFLAGS: "${{ matrix.build.tflags }}"
+
+      - run: pytest -v tests
+        name: 'run pytest'
+        env:
+          TFLAGS: "${{ matrix.build.tflags }}"
+          CURL_CI: github
