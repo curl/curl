@@ -994,6 +994,8 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
       const struct Curl_cwtype *cwt;
       struct Curl_cwriter *writer;
 
+      CURL_TRC_WRITE(data, "looking for %s decoder: %.*s",
+                     is_transfer? "transfer" : "content", (int)namelen, name);
       is_chunked = (is_transfer && (namelen == 7) &&
                     strncasecompare(name, "chunked", 7));
       /* if we skip the decoding in this phase, do not look further.
@@ -1001,6 +1003,8 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
       if((is_transfer && !data->set.http_transfer_encoding && !is_chunked) ||
          (!is_transfer && data->set.http_ce_skip)) {
         /* not requested, ignore */
+        CURL_TRC_WRITE(data, "decoder not requested, ignored: %.*s",
+                       (int)namelen, name);
         return CURLE_OK;
       }
 
@@ -1018,6 +1022,7 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
          * "A sender MUST NOT apply the chunked transfer coding more than
          *  once to a message body."
          */
+        CURL_TRC_WRITE(data, "ignoring duplicate 'chunked' decoder");
         return CURLE_OK;
       }
 
@@ -1040,6 +1045,8 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
         cwt = &error_writer;  /* Defer error at use. */
 
       result = Curl_cwriter_create(&writer, data, cwt, phase);
+      CURL_TRC_WRITE(data, "added %s decoder %s -> %d",
+                     is_transfer? "transfer" : "content", cwt->name, result);
       if(result)
         return result;
 
