@@ -190,6 +190,8 @@ class VsFTPD:
             f'anonymous_enable=YES',
             f'anon_root={self._docs_dir}',
             f'dirmessage_enable=YES',
+            f'write_enable=YES',
+            f'anon_upload_enable=YES',
             f'log_ftp_protocol=YES',
             f'xferlog_enable=YES',
             f'xferlog_std_format=YES',

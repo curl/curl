@@ -115,6 +115,24 @@ class TestVsFTPD:
         r.check_stats(count=count, http_status=226)
         self.check_downloads(curl, srcfile, count)
 
+    @pytest.mark.parametrize("docname", [
+        'upload-1k', 'upload-100k', 'upload-1m'
+    ])
+    def test_30_05_upload_1(self, env: Env, vsftpd: VsFTPD, docname, repeat):
+        curl = CurlClient(env=env)
+        srcfile = os.path.join(env.gen_dir, docname)
+        dstfile = os.path.join(vsftpd.docs_dir, docname)
+        self._rmf(dstfile)
+        count = 1
+        url = f'ftp://{env.ftp_domain}:{vsftpd.port}/'
+        r = curl.ftp_upload(urls=[url], fupload=f'{srcfile}', with_stats=True)
+        r.check_stats(count=count, http_status=226)
+        self.check_upload(env, vsftpd, docname=docname)
+
+    def _rmf(self, path):
+        if os.path.exists(path):
+            return os.remove(path)
+
     def check_downloads(self, client, srcfile: str, count: int,
                         complete: bool = True):
         for i in range(count):
@@ -128,5 +146,15 @@ class TestVsFTPD:
                                                     n=1))
                 assert False, f'download {dfile} differs:\n{diff}'
 
-
-
+    def check_upload(self, env, vsftpd: VsFTPD, docname):
+        srcfile = os.path.join(env.gen_dir, docname)
+        dstfile = os.path.join(vsftpd.docs_dir, docname)
+        assert os.path.exists(srcfile)
+        assert os.path.exists(dstfile)
+        if not filecmp.cmp(srcfile, dstfile, shallow=False):
+            diff = "".join(difflib.unified_diff(a=open(srcfile).readlines(),
+                                                b=open(dstfile).readlines(),
+                                                fromfile=srcfile,
+                                                tofile=dstfile,
+                                                n=1))
+            assert False, f'upload {dstfile} differs:\n{diff}'
