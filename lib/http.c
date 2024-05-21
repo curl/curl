@@ -3139,19 +3139,23 @@ CURLcode Curl_http_header(struct Curl_easy *data,
     break;
   case 't':
   case 'T':
-    v = !k->http_bodyless? HD_VAL(hd, hdlen, "Transfer-Encoding:") : NULL;
+    /* RFC 9112, ch. 6.1
+     * "Transfer-Encoding MAY be sent in a response to a HEAD request or
+     *  in a 304 (Not Modified) response (Section 15.4.5 of [HTTP]) to a
+     *  GET request, neither of which includes a message body, to indicate
+     *  that the origin server would have applied a transfer coding to the
+     *  message body if the request had been an unconditional GET."
+     *
+     * Read: in these cases the 'Transfer-Encoding' does not apply
+     * to any data following the response headers. Do not add any decoders.
+     */
+    v = (!k->http_bodyless &&
+         (data->state.httpreq != HTTPREQ_HEAD) &&
+         (k->httpcode != 304))?
+        HD_VAL(hd, hdlen, "Transfer-Encoding:") : NULL;
     if(v) {
       /* One or more encodings. We check for chunked and/or a compression
          algorithm. */
-      /*
-       * [RFC 2616, section 3.6.1] A 'chunked' transfer encoding
-       * means that the server will send a series of "chunks". Each
-       * chunk starts with line with info (including size of the
-       * coming block) (terminated with CRLF), then a block of data
-       * with the previously mentioned size. There can be any amount
-       * of chunks, and a chunk-data set to zero signals the
-       * end-of-chunks. */
-
       result = Curl_build_unencoding_stack(data, v, TRUE);
       if(result)
         return result;
