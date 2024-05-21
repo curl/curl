@@ -638,7 +638,8 @@ static bool init_resolve_thread(struct Curl_easy *data,
 
 #ifdef _WIN32
   if(Curl_isWindows8OrGreater && Curl_FreeAddrInfoExW &&
-     Curl_GetAddrInfoExCancel && Curl_GetAddrInfoExW) {
+     Curl_GetAddrInfoExCancel && Curl_GetAddrInfoExW &&
+     !Curl_win32_impersonating()) {
 #define MAX_NAME_LEN 256 /* max domain name is 253 chars */
 #define MAX_PORT_LEN 8
     WCHAR namebuf[MAX_NAME_LEN];

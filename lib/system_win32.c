@@ -267,4 +267,14 @@ HMODULE Curl_load_library(LPCTSTR filename)
 #endif
 }
 
+bool Curl_win32_impersonating(void)
+{
+  HANDLE token = NULL;
+  if(OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, TRUE, &token)) {
+    CloseHandle(token);
+    return TRUE;
+  }
+  return FALSE;
+}
+
 #endif /* _WIN32 */
