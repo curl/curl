@@ -346,7 +346,8 @@ static void my_md5_final(unsigned char *result, my_md5_ctx *ctx);
  * This processes one or more 64-byte data blocks, but does NOT update
  * the bit counters.  There are no alignment requirements.
  */
-static const void *my_md5_body(my_md5_ctx *ctx, const void *data, unsigned long size)
+static const void *my_md5_body(my_md5_ctx *ctx,
+                               const void *data, unsigned long size)
 {
   const unsigned char *ptr;
   MD5_u32plus a, b, c, d;

@@ -316,7 +316,8 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx);
  * This processes one or more 64-byte data blocks, but does NOT update
  * the bit counters.  There are no alignment requirements.
  */
-static const void *my_md4_body(MD4_CTX *ctx, const void *data, unsigned long size)
+static const void *my_md4_body(MD4_CTX *ctx,
+                               const void *data, unsigned long size)
 {
   const unsigned char *ptr;
   MD4_u32plus a, b, c, d;
