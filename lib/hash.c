@@ -192,25 +192,6 @@ Curl_hash_pick(struct Curl_hash *h, void *key, size_t key_len)
   return NULL;
 }
 
-#if defined(DEBUGBUILD) && defined(AGGRESSIVE_TEST)
-void
-Curl_hash_apply(Curl_hash *h, void *user,
-                void (*cb)(void *user, void *ptr))
-{
-  struct Curl_llist_element  *le;
-  size_t i;
-
-  for(i = 0; i < h->slots; ++i) {
-    for(le = (h->table[i])->head;
-        le;
-        le = le->next) {
-      Curl_hash_element *el = le->ptr;
-      cb(user, el->ptr);
-    }
-  }
-}
-#endif
-
 /* Destroys all the entries in the given hash and resets its attributes,
  * prepping the given hash for [static|dynamic] deallocation.
  *
