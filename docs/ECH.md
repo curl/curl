@@ -40,7 +40,7 @@ To build curl ECH-enabled, making use of the above:
     git clone https://github.com/curl/curl
     cd curl
     autoreconf -fi
-    LDFLAGS="-Wl,-rpath,$HOME/code/openssl-local-inst/lib/" ./configure  --with-ssl=$HOME/code/openssl-local-inst  --enable-ech --enable-httpsrr
+    LDFLAGS="-Wl,-rpath,$HOME/code/openssl-local-inst/lib/" ./configure --with-ssl=$HOME/code/openssl-local-inst --enable-ech --enable-httpsrr
     ...lots of output...
     WARNING: ech ECH HTTPSRR enabled but marked EXPERIMENTAL...
     make
