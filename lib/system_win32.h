@@ -68,6 +68,8 @@ extern FREEADDRINFOEXW_FN Curl_FreeAddrInfoExW;
 extern GETADDRINFOEXCANCEL_FN Curl_GetAddrInfoExCancel;
 extern GETADDRINFOEXW_FN Curl_GetAddrInfoExW;
 
+bool Curl_win32_impersonating(void);
+
 /* This is used to dynamically load DLLs */
 HMODULE Curl_load_library(LPCTSTR filename);
 #else  /* _WIN32 */
