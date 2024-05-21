@@ -579,6 +579,37 @@ class CurlClient:
                             with_profile=with_profile, no_save=no_save,
                             extra_args=extra_args)
 
+    def ftp_upload(self, urls: List[str], fupload,
+                   with_stats: bool = True,
+                   with_profile: bool = False,
+                   extra_args: List[str] = None):
+        if extra_args is None:
+            extra_args = []
+        extra_args.extend([
+            '--upload-file', fupload
+        ])
+        if with_stats:
+            extra_args.extend([
+                '-w', '%{json}\\n'
+            ])
+        return self._raw(urls, options=extra_args,
+                         with_stats=with_stats,
+                         with_headers=False,
+                         with_profile=with_profile)
+
+    def ftp_ssl_upload(self, urls: List[str], fupload,
+                       with_stats: bool = True,
+                       with_profile: bool = False,
+                       extra_args: List[str] = None):
+        if extra_args is None:
+            extra_args = []
+        extra_args.extend([
+            '--ssl-reqd',
+        ])
+        return self.ftp_upload(urls=urls, fupload=fupload,
+                               with_stats=with_stats, with_profile=with_profile,
+                               extra_args=extra_args)
+
     def response_file(self, idx: int):
         return os.path.join(self._run_dir, f'download_{idx}.data')
 

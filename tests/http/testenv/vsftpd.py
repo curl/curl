@@ -190,16 +190,19 @@ class VsFTPD:
             f'anonymous_enable=YES',
             f'anon_root={self._docs_dir}',
             f'dirmessage_enable=YES',
+            f'write_enable=YES',
+            f'anon_upload_enable=YES',
             f'log_ftp_protocol=YES',
             f'xferlog_enable=YES',
-            f'xferlog_std_format=YES',
-            f'xferlog_file={self._error_log}',
+            f'xferlog_std_format=NO',
+            f'vsftpd_log_file={self._error_log}',
             f'\n',
         ]
         if self._with_ssl:
             creds = self.env.get_credentials(self.domain)
             conf.extend([
                 f'ssl_enable=YES',
+                f'debug_ssl=YES',
                 f'allow_anon_ssl=YES',
                 f'rsa_cert_file={creds.cert_file}',
                 f'rsa_private_key_file={creds.pkey_file}',
