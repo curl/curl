@@ -67,6 +67,9 @@ class TestVsFTPD:
         self._make_docs_file(docs_dir=vsftpd.docs_dir, fname='data-10k', fsize=10*1024)
         self._make_docs_file(docs_dir=vsftpd.docs_dir, fname='data-1m', fsize=1024*1024)
         self._make_docs_file(docs_dir=vsftpd.docs_dir, fname='data-10m', fsize=10*1024*1024)
+        env.make_data_file(indir=env.gen_dir, fname="upload-1k", fsize=1024)
+        env.make_data_file(indir=env.gen_dir, fname="upload-100k", fsize=100*1024)
+        env.make_data_file(indir=env.gen_dir, fname="upload-1m", fsize=1024*1024)
 
     def test_30_01_list_dir(self, env: Env, vsftpd: VsFTPD, repeat):
         curl = CurlClient(env=env)
