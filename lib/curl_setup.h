@@ -291,8 +291,9 @@
 
 /* based on logic in "curl/mprintf.h" */
 
-#if (defined(__GNUC__) || defined(__clang__) || defined(__IAR_SYSTEMS_ICC__)) &&    \
-  defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&                     \
+#if (defined(__GNUC__) || defined(__clang__) ||                         \
+  defined(__IAR_SYSTEMS_ICC__)) &&                                      \
+  defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&         \
   !defined(CURL_NO_FMT_CHECKS)
 #if defined(__MINGW32__) && !defined(__clang__)
 #define CURL_PRINTF(fmt, arg) \
@@ -721,7 +722,8 @@
 /* noreturn attribute */
 
 #if !defined(CURL_NORETURN)
-#if (defined(__GNUC__) && (__GNUC__ >= 3)) || defined(__clang__) || defined(__IAR_SYSTEMS_ICC__)
+#if (defined(__GNUC__) && (__GNUC__ >= 3)) || defined(__clang__) || \
+  defined(__IAR_SYSTEMS_ICC__)
 #  define CURL_NORETURN  __attribute__((__noreturn__))
 #elif defined(_MSC_VER) && (_MSC_VER >= 1200)
 #  define CURL_NORETURN  __declspec(noreturn)
