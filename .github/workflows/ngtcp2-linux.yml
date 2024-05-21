@@ -7,7 +7,7 @@ name: ngtcp2-linux
 on:
   push:
     branches:
-      - master
+      - ngtcp2-cache
       - '*/ci'
     paths-ignore:
       - '**/*.md'
