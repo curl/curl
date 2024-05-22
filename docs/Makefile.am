@@ -28,6 +28,7 @@ if BUILD_DOCS
 # if we disable man page building, ignore these
 MK_CA_DOCS = mk-ca-bundle.1
 CURLCONF_DOCS = curl-config.1
+man_MANS = curl-config.1
 endif
 
 CURLPAGES = curl-config.md mk-ca-bundle.md
