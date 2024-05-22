@@ -94,7 +94,7 @@ jobs:
 
       - name: 'autotools build tests'
         if: ${{ matrix.build == 'automake' }}
-        timeout-minutes: 10
+        timeout-minutes: 15
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
           make -C bld -j3 -C tests V=1
