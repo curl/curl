@@ -186,6 +186,7 @@ static int curltest_echo_handler(request_rec *r)
   char buffer[8192];
   const char *ct;
   apr_off_t die_after_len = -1, total_read_len = 0;
+  int just_die = 0, die_after_100 = 0;
   long l;
 
   if(strcmp(r->handler, "curltest-echo")) {
@@ -208,16 +209,35 @@ static int curltest_echo_handler(request_rec *r)
         val = s + 1;
         if(!strcmp("die_after", arg)) {
           die_after_len = (apr_off_t)apr_atoi64(val);
+          continue;
+        }
+        else if(!strcmp("just_die", arg)) {
+          just_die = 1;
+          continue;
+        }
+        else if(!strcmp("die_after_100", arg)) {
+          die_after_100 = 1;
+          continue;
         }
       }
     }
+  }
+
+  if(just_die) {
+    ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r,
+                  "echo_handler: dying right away");
+    /* Generate no HTTP response at all. */
+    ap_remove_output_filter_byhandle(r->output_filters, "HTTP_HEADER");
+    r->connection->keepalive = AP_CONN_CLOSE;
+    return AP_FILTER_ERROR;
   }
 
   r->status = 200;
   if(die_after_len >= 0) {
     r->clength = die_after_len + 1;
     r->chunked = 0;
-    apr_table_set(r->headers_out, "Content-Length", apr_ltoa(r->pool, (long)r->clength));
+    apr_table_set(r->headers_out, "Content-Length",
+                  apr_ltoa(r->pool, (long)r->clength));
   }
   else {
     r->clength = -1;
@@ -235,6 +255,14 @@ static int curltest_echo_handler(request_rec *r)
   bb = apr_brigade_create(r->pool, c->bucket_alloc);
   /* copy any request body into the response */
   if((rv = ap_setup_client_block(r, REQUEST_CHUNKED_DECHUNK))) goto cleanup;
+  if(die_after_100) {
+    ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r,
+                  "echo_handler: dying after 100-continue");
+    /* Generate no HTTP response at all. */
+    ap_remove_output_filter_byhandle(r->output_filters, "HTTP_HEADER");
+    r->connection->keepalive = AP_CONN_CLOSE;
+    return AP_FILTER_ERROR;
+  }
   if(ap_should_client_block(r)) {
     while(0 < (l = ap_get_client_block(r, &buffer[0], sizeof(buffer)))) {
       total_read_len += l;
@@ -242,6 +270,8 @@ static int curltest_echo_handler(request_rec *r)
         ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r,
                       "echo_handler: dying after %ld bytes as requested",
                       (long)total_read_len);
+        ap_pass_brigade(r->output_filters, bb);
+        ap_remove_output_filter_byhandle(r->output_filters, "HTTP_HEADER");
         r->connection->keepalive = AP_CONN_CLOSE;
         return DONE;
       }

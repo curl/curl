@@ -289,6 +289,13 @@ static CURLcode cw_download_write(struct Curl_easy *data,
     if(nwrite == wmax) {
       data->req.download_done = TRUE;
     }
+
+    if((type & CLIENTWRITE_EOS) && !data->req.no_body &&
+       (data->req.maxdownload > data->req.bytecount)) {
+      failf(data, "end of response with %" CURL_FORMAT_CURL_OFF_T
+            " bytes missing", data->req.maxdownload - data->req.bytecount);
+      return CURLE_PARTIAL_FILE;
+    }
   }
 
   /* Error on too large filesize is handled below, after writing
@@ -694,6 +701,7 @@ static CURLcode cr_in_read(struct Curl_easy *data,
       return CURLE_READ_ERROR;
     }
     /* CURL_READFUNC_PAUSE pauses read callbacks that feed socket writes */
+    CURL_TRC_READ(data, "cr_in_read, callback returned CURL_READFUNC_PAUSE");
     data->req.keepon |= KEEP_SEND_PAUSE; /* mark socket send as paused */
     *pnread = 0;
     *peos = FALSE;

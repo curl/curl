@@ -133,7 +133,7 @@ static int debug_cb(CURL *handle, curl_infotype type,
   return 0;
 }
 
-#define PAUSE_READ_AFTER  10
+#define PAUSE_READ_AFTER  1
 static size_t total_read = 0;
 
 static size_t read_callback(char *ptr, size_t size, size_t nmemb,
@@ -143,11 +143,13 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb,
   (void)nmemb;
   (void)userdata;
   if(total_read >= PAUSE_READ_AFTER) {
+    fprintf(stderr, "read_callback, return PAUSE\n");
     return CURL_READFUNC_PAUSE;
   }
   else {
     ptr[0] = '\n';
     ++total_read;
+    fprintf(stderr, "read_callback, return 1 byte\n");
     return 1;
   }
 }
@@ -158,13 +160,19 @@ static int progress_callback(void *clientp,
                              double ultotal,
                              double ulnow)
 {
-  CURL *curl;
   (void)dltotal;
   (void)dlnow;
   (void)ultotal;
   (void)ulnow;
-  curl = (CURL *)clientp;
-  curl_easy_pause(curl, CURLPAUSE_CONT);
+  (void)clientp;
+#if 0
+  /* Used to unpause on progress, but keeping for now. */
+  {
+    CURL *curl = (CURL *)clientp;
+    curl_easy_pause(curl, CURLPAUSE_CONT);
+    /* curl_easy_pause(curl, CURLPAUSE_RECV_CONT); */
+  }
+#endif
   return 0;
 }
 

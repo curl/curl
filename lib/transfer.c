@@ -271,7 +271,10 @@ static CURLcode readwrite_data(struct Curl_easy *data,
         DEBUGF(infof(data, "nread == 0, stream closed, bailing"));
       else
         DEBUGF(infof(data, "nread <= 0, server closed connection, bailing"));
-      k->keepon &= ~(KEEP_RECV|KEEP_SEND); /* stop sending as well */
+      /* stop receiving and ALL sending as well, including PAUSE and HOLD.
+       * We might still be paused on receive client writes though, so
+       * keep those bits around. */
+      k->keepon &= ~(KEEP_RECV|KEEP_SENDBITS);
       if(k->eos_written) /* already did write this to client, leave */
         break;
     }
