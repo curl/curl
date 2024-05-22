@@ -902,8 +902,6 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     (struct mbed_ssl_backend_data *)connssl->backend;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   const mbedtls_x509_crt *peercert;
-  char cipher_str[64];
-  uint16_t cipher_id;
 #ifndef CURL_DISABLE_PROXY
   const char * const pinnedpubkey = Curl_ssl_cf_is_proxy(cf)?
     data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY]:
@@ -932,11 +930,18 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  cipher_id = (uint16_t)
-              mbedtls_ssl_get_ciphersuite_id_from_ssl(&backend->ssl);
-  mbed_cipher_suite_get_str(cipher_id, cipher_str, sizeof(cipher_str), true);
-  infof(data, "mbedTLS: Handshake complete, cipher is %s", cipher_str);
-
+#if MBEDTLS_VERSION_NUMBER >= 0x03020000
+  {
+    char cipher_str[64];
+    uint16_t cipher_id;
+    cipher_id = (uint16_t)
+                mbedtls_ssl_get_ciphersuite_id_from_ssl(&backend->ssl);
+    mbed_cipher_suite_get_str(cipher_id, cipher_str, sizeof(cipher_str), true);
+    infof(data, "mbedTLS: Handshake complete, cipher is %s", cipher_str);
+  }
+#else
+  infof(data, "mbedTLS: Handshake complete");
+#endif
   ret = mbedtls_ssl_get_verify_result(&backend->ssl);
 
   if(!conn_config->verifyhost)
