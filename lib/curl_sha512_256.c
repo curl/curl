@@ -476,8 +476,8 @@ MHDx_sha512_256_transform(curl_uint64_t H[SHA512_256_HASH_SIZE_WORDS],
 
   /* 'Ch' and 'Maj' macro functions are defined with widely-used optimisation.
      See FIPS PUB 180-4 formulae 4.8, 4.9. */
-#define Ch(x,y,z)     ( (z) ^ ((x) & ((y) ^ (z))) )
-#define Maj(x,y,z)    ( ((x) & (y)) ^ ((z) & ((x) ^ (y))) )
+#define Sha512_Ch(x,y,z)     ( (z) ^ ((x) & ((y) ^ (z))) )
+#define Sha512_Maj(x,y,z)    ( ((x) & (y)) ^ ((z) & ((x) ^ (y))) )
 
   /* Four 'Sigma' macro functions.
      See FIPS PUB 180-4 formulae 4.10, 4.11, 4.12, 4.13. */
@@ -547,9 +547,9 @@ MHDx_sha512_256_transform(curl_uint64_t H[SHA512_256_HASH_SIZE_WORDS],
        * Note: 'wt' must be used exactly one time in this macro as macro for
        'wt' calculation may change other data as well every time when
        used. */
-#define SHA2STEP64(vA,vB,vC,vD,vE,vF,vG,vH,kt,wt) do {                  \
-      (vD) += ((vH) += SIG1 ((vE)) + Ch ((vE),(vF),(vG)) + (kt) + (wt)); \
-      (vH) += SIG0 ((vA)) + Maj ((vA),(vB),(vC)); } while (0)
+#define SHA2STEP64(vA,vB,vC,vD,vE,vF,vG,vH,kt,wt) do {                       \
+     (vD) += ((vH) += SIG1((vE)) + Sha512_Ch((vE),(vF),(vG)) + (kt) + (wt)); \
+     (vH) += SIG0((vA)) + Sha512_Maj((vA),(vB),(vC)); } while (0)
 
     /* One step of SHA-512/256 computation with working variables rotation,
        see FIPS PUB 180-4 section 6.4.2 step 3. This macro version reassigns
