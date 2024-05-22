@@ -160,15 +160,18 @@ static int progress_callback(void *clientp,
                              double ultotal,
                              double ulnow)
 {
-  CURL *curl;
   (void)dltotal;
   (void)dlnow;
   (void)ultotal;
   (void)ulnow;
-  curl = (CURL *)clientp;
+  (void)clientp;
 #if 0
-  curl_easy_pause(curl, CURLPAUSE_CONT);
-  /* curl_easy_pause(curl, CURLPAUSE_RECV_CONT); */
+  /* Used to unpause on progress, but keeping for now. */
+  {
+    CURL *curl = (CURL *)clientp;
+    curl_easy_pause(curl, CURLPAUSE_CONT);
+    /* curl_easy_pause(curl, CURLPAUSE_RECV_CONT); */
+  }
 #endif
   return 0;
 }
