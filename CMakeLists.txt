@@ -580,7 +580,6 @@ if(CURL_BROTLI)
   find_package(Brotli REQUIRED)
   if(BROTLI_FOUND)
     set(HAVE_BROTLI ON)
-    set(CURL_LIBS "${BROTLI_LIBRARIES};${CURL_LIBS}")  # For 'ld' linker. Emulate `list(PREPEND ...)` to stay compatible with <v3.15 CMake.
     list(APPEND CURL_LIBS ${BROTLI_LIBRARIES})
     include_directories(${BROTLI_INCLUDE_DIRS})
     list(APPEND CMAKE_REQUIRED_INCLUDES ${BROTLI_INCLUDE_DIRS})
