@@ -3363,8 +3363,35 @@ CURLcode Curl_bump_headersize(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+static CURLcode http_write_header(struct Curl_easy *data,
+                                  const char *hd, size_t hdlen)
+{
+  CURLcode result;
+  int writetype;
+
+  /* now, only output this if the header AND body are requested:
+   */
+  Curl_debug(data, CURLINFO_HEADER_IN, (char *)hd, hdlen);
+
+  writetype = CLIENTWRITE_HEADER |
+    ((data->req.httpcode/100 == 1) ? CLIENTWRITE_1XX : 0);
+
+  result = Curl_client_write(data, writetype, hd, hdlen);
+  if(result)
+    return result;
+
+  result = Curl_bump_headersize(data, hdlen, FALSE);
+  if(result)
+    return result;
+
+  data->req.deductheadercount = (100 <= data->req.httpcode &&
+                                 199 >= data->req.httpcode)?
+                                data->req.headerbytecount:0;
+  return result;
+}
 
 static CURLcode http_on_response(struct Curl_easy *data,
+                                 const char *last_hd, size_t last_hd_len,
                                  const char *buf, size_t blen,
                                  size_t *pconsumed)
 {
@@ -3384,9 +3411,20 @@ static CURLcode http_on_response(struct Curl_easy *data,
     conn->bundle->multiuse = BUNDLE_NO_MULTIUSE;
   }
 
+  if(k->httpcode < 200 && last_hd) {
+    /* Intermediate responses might trigger processing of more
+     * responses, write the last header to the client before
+     * proceeding. */
+    result = http_write_header(data, last_hd, last_hd_len);
+    last_hd = NULL; /* handled it */
+    if(result)
+      goto out;
+  }
+
   if(k->httpcode < 100) {
     failf(data, "Unsupported response code in HTTP response");
-    return CURLE_UNSUPPORTED_PROTOCOL;
+    result = CURLE_UNSUPPORTED_PROTOCOL;
+    goto out;
   }
   else if(k->httpcode < 200) {
     /* "A user agent MAY ignore unexpected 1xx status responses."
@@ -3405,10 +3443,12 @@ static CURLcode http_on_response(struct Curl_easy *data,
       break;
     case 101:
       /* Switching Protocols only allowed from HTTP/1.1 */
+
       if(conn->httpversion != 11) {
         /* invalid for other HTTP versions */
         failf(data, "unexpected 101 response code");
-        return CURLE_WEIRD_SERVER_REPLY;
+        result = CURLE_WEIRD_SERVER_REPLY;
+        goto out;
       }
       if(k->upgr101 == UPGR101_H2) {
         /* Switching to HTTP/2, where we will get more responses */
@@ -3421,7 +3461,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
          * be processed. */
         result = Curl_http2_upgrade(data, conn, FIRSTSOCKET, buf, blen);
         if(result)
-          return result;
+          goto out;
         *pconsumed += blen;
       }
 #ifdef USE_WEBSOCKETS
@@ -3430,7 +3470,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
          * WebSockets format and taken in by the protocol handler. */
         result = Curl_ws_accept(data, buf, blen);
         if(result)
-          return result;
+          goto out;
         *pconsumed += blen; /* ws accept handled the data */
         k->header = FALSE; /* we will not get more responses */
         if(data->set.connect_only)
@@ -3451,7 +3491,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
        * to receive a final response eventually. */
       break;
     }
-    return result;
+    goto out;
   }
 
   /* k->httpcode >= 200, final response */
@@ -3512,7 +3552,8 @@ static CURLcode http_on_response(struct Curl_easy *data,
   /* All >=200 HTTP status codes are errors when wanting websockets */
   if(data->req.upgr101 == UPGR101_WS) {
     failf(data, "Refused WebSockets upgrade: %d", k->httpcode);
-    return CURLE_HTTP_RETURNED_ERROR;
+    result = CURLE_HTTP_RETURNED_ERROR;
+    goto out;
   }
 #endif
 
@@ -3520,7 +3561,8 @@ static CURLcode http_on_response(struct Curl_easy *data,
   if(http_should_fail(data, data->req.httpcode)) {
     failf(data, "The requested URL returned error: %d",
           k->httpcode);
-    return CURLE_HTTP_RETURNED_ERROR;
+    result = CURLE_HTTP_RETURNED_ERROR;
+    goto out;
   }
 
   /* Curl_http_auth_act() checks what authentication methods
@@ -3528,7 +3570,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
    * use. It will set 'newurl' if an auth method was picked. */
   result = Curl_http_auth_act(data);
   if(result)
-    return result;
+    goto out;
 
   if(k->httpcode >= 300) {
     if((!data->req.authneg) && !conn->bits.close &&
@@ -3566,7 +3608,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
                           "Stop sending data before everything sent");
               result = http_perhapsrewind(data, conn);
               if(result)
-                return result;
+                goto out;
             }
             data->state.disableexpect = TRUE;
             DEBUGASSERT(!data->req.newurl);
@@ -3582,7 +3624,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
             streamclose(conn, "Stop sending data before everything sent");
             result = Curl_req_abort_sending(data);
             if(result)
-              return result;
+              goto out;
           }
         }
         break;
@@ -3605,7 +3647,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
    */
   result = Curl_http_size(data);
   if(result)
-    return result;
+    goto out;
 
   /* If we requested a "no body", this is a good time to get
    * out and return home.
@@ -3624,7 +3666,16 @@ static CURLcode http_on_response(struct Curl_easy *data,
     k->download_done = TRUE;
 
   /* final response without error, prepare to receive the body */
-  return Curl_http_firstwrite(data);
+  result = Curl_http_firstwrite(data);
+
+out:
+  if(last_hd) {
+    /* if not written yet, write it now */
+    CURLcode r2 = http_write_header(data, last_hd, last_hd_len);
+    if(!result)
+      result = r2;
+  }
+  return result;
 }
 
 static CURLcode http_rw_hd(struct Curl_easy *data,
@@ -3639,36 +3690,25 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
   *pconsumed = 0;
   if((0x0a == *hd) || (0x0d == *hd)) {
     /* Empty header line means end of headers! */
+    struct dynbuf last_header;
     size_t consumed;
 
-    /* now, only output this if the header AND body are requested:
-     */
-    Curl_debug(data, CURLINFO_HEADER_IN, (char *)hd, hdlen);
-
-    writetype = CLIENTWRITE_HEADER |
-      ((k->httpcode/100 == 1) ? CLIENTWRITE_1XX : 0);
-
-    result = Curl_client_write(data, writetype, hd, hdlen);
+    Curl_dyn_init(&last_header, hdlen + 1);
+    result = Curl_dyn_addn(&last_header, hd, hdlen);
     if(result)
       return result;
-
-    result = Curl_bump_headersize(data, hdlen, FALSE);
-    if(result)
-      return result;
-
-    data->req.deductheadercount =
-      (100 <= k->httpcode && 199 >= k->httpcode)?data->req.headerbytecount:0;
 
     /* analyze the response to find out what to do. */
     /* Caveat: we clear anything in the header brigade, because a
      * response might switch HTTP version which may call use recursively.
      * Not nice, but that is currently the way of things. */
     Curl_dyn_reset(&data->state.headerb);
-    result = http_on_response(data, buf_remain, blen, &consumed);
-    if(result)
-      return result;
+    result = http_on_response(data, Curl_dyn_ptr(&last_header),
+                              Curl_dyn_len(&last_header),
+                              buf_remain, blen, &consumed);
     *pconsumed += consumed;
-    return CURLE_OK;
+    Curl_dyn_free(&last_header);
+    return result;
   }
 
   /*
