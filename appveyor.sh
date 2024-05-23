@@ -33,7 +33,7 @@ if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2022' ]; then
 else
   openssl_root_win='C:/OpenSSL-v111-Win64'
 fi
-openssl_root="$(cygpath -u "${openssl_root_win}")"
+openssl_root="$(cygpath "${openssl_root_win}")"
 
 if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   options=''
@@ -121,10 +121,10 @@ fi
 
 if [ "${TESTING}" = 'ON' ]; then
   export TFLAGS=''
-  if [ -x "$(cygpath -u "${WINDIR}/System32/curl.exe")" ]; then
-    TFLAGS+=" -ac $(cygpath -u "${WINDIR}/System32/curl.exe")"
-  elif [ -x "$(cygpath -u 'C:/msys64/usr/bin/curl.exe')" ]; then
-    TFLAGS+=" -ac $(cygpath -u 'C:/msys64/usr/bin/curl.exe')"
+  if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
+    TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
+  elif [ -x "$(cygpath 'C:/msys64/usr/bin/curl.exe')" ]; then
+    TFLAGS+=" -ac $(cygpath 'C:/msys64/usr/bin/curl.exe')"
   fi
   TFLAGS+=" ${DISABLED_TESTS:-}"
   if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
