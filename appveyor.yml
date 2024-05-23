@@ -129,51 +129,6 @@ environment:
       TESTING: 'ON'
       DISABLED_TESTS: '!1139 !1501 !1177 !1477'
 
-    # generated CMake-based MSYS Makefiles builds (mingw cross-compiling)
-
-    - job_name: 'CMake, mingw-w64, gcc 7, Debug, x64, Schannel, Static, Unicode'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
-      BUILD_SYSTEM: CMake
-      PRJ_GEN: 'MSYS Makefiles'
-      PRJ_CFG: Debug
-      SCHANNEL: 'ON'
-      ENABLE_UNICODE: 'ON'
-      HTTP_ONLY: 'OFF'
-      TESTING: 'ON'
-      # test 286 disabled due to https://github.com/curl/curl/issues/12040
-      DISABLED_TESTS: '~286 !1086 !1139 !1451 !1501 !1177 !1477'
-      ADD_PATH: 'C:/mingw-w64/x86_64-7.2.0-posix-seh-rt_v5-rev1/mingw64/bin'
-      MSYS2_ARG_CONV_EXCL: '/*'
-      BUILD_OPT: -k
-    - job_name: 'CMake, mingw-w64, gcc 9, Debug, x64, Schannel, Static'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
-      BUILD_SYSTEM: CMake
-      PRJ_GEN: 'MSYS Makefiles'
-      PRJ_CFG: Debug
-      SCHANNEL: 'ON'
-      ENABLE_UNICODE: 'OFF'
-      HTTP_ONLY: 'OFF'
-      TESTING: 'ON'
-      # test 286 disabled due to https://github.com/curl/curl/issues/12040
-      DISABLED_TESTS: '~286 !1086 !1139 !1451 !1501 !1177 !1477'
-      ADD_PATH: 'C:/msys64/mingw64/bin'
-      MSYS2_ARG_CONV_EXCL: '/*'
-      BUILD_OPT: -k
-    - job_name: 'CMake, mingw-w64, gcc 6, Debug, x86, Schannel, Static, no-unity'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      BUILD_SYSTEM: CMake
-      PRJ_GEN: 'MSYS Makefiles'
-      PRJ_CFG: Debug
-      SCHANNEL: 'ON'
-      ENABLE_UNICODE: 'OFF'
-      HTTP_ONLY: 'OFF'
-      TESTING: 'OFF'
-      DISABLED_TESTS: ''
-      ADD_PATH: 'C:/mingw-w64/i686-6.3.0-posix-dwarf-rt_v5-rev1/mingw32/bin'
-      MSYS2_ARG_CONV_EXCL: '/*'
-      BUILD_OPT: -k
-      UNITY: 'OFF'
-
     # winbuild-based builds
 
     - job_name: 'winbuild, VS2015, Debug, x64, OpenSSL 1.1.1, Build-only'
@@ -243,16 +198,7 @@ environment:
       VC_VERSION: VC12
 
 install:
-  - ps: |
-      if($env:ADD_SHELL -ne $null) {
-        $env:PATH = "$env:ADD_SHELL;$env:PATH"
-      }
-      else {
-        $env:PATH = "C:/msys64/usr/bin;$env:PATH"
-      }
-      if($env:ADD_PATH -ne $null) {
-        $env:PATH = "$env:ADD_PATH;$env:PATH"
-      }
+  - ps: $env:PATH = "C:/msys64/usr/bin;$env:PATH"
 
 build_script:
   - cmd: sh -c ./appveyor.sh
