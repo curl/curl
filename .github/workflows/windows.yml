@@ -41,7 +41,7 @@ permissions: {}
 
 jobs:
   cygwin:
-    name: "cygwin (${{ matrix.build }}, ${{ matrix.platform }}, ${{ matrix.config }})"
+    name: 'cygwin (${{ matrix.build }}, ${{ matrix.platform }}, ${{ matrix.config }})'
     runs-on: windows-latest
     timeout-minutes: 45
     env:
@@ -105,8 +105,8 @@ jobs:
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
           export TFLAGS='-j8 ${{ matrix.tflags }}'
-          if [ -x "$(cygpath -u "${SYSTEMROOT}/System32/curl.exe")" ]; then
-            TFLAGS+=" -ac $(cygpath -u "${SYSTEMROOT}/System32/curl.exe")"
+          if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
+            TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
           make -C bld -j3 V=1 test-ci
 
@@ -116,13 +116,14 @@ jobs:
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
           export PATH="/usr/bin:$(cygpath ${SYSTEMROOT})/system32"
-          cmake -B bld ${options} ${{ matrix.config }} \
+          cmake -B bld ${options} \
             "-DCMAKE_C_FLAGS=${cflags}" \
             -DCMAKE_UNITY_BUILD=ON \
             -DCURL_WERROR=ON \
             -DBUILD_EXAMPLES=ON \
             -DENABLE_WEBSOCKETS=ON \
-            -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON
+            -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON \
+            ${{ matrix.config }}
 
       - name: 'cmake build'
         if: ${{ matrix.build == 'cmake' }}
@@ -135,7 +136,7 @@ jobs:
           bld/src/curl.exe --disable --version
 
   msys2:
-    name: "msys2 (${{ matrix.build }}, ${{ matrix.sys }}, ${{ matrix.env }}, ${{ matrix.config }})"
+    name: 'msys2 (${{ matrix.build }}, ${{ matrix.sys }}, ${{ matrix.env }}, ${{ matrix.config }})'
     runs-on: windows-latest
     timeout-minutes: 45
     strategy:
@@ -209,8 +210,8 @@ jobs:
         shell: msys2 {0}
         run: |
           export TFLAGS='-j14 ${{ matrix.tflags }}'
-          if [ -x "$(cygpath -u 'C:/msys64/usr/bin/curl.exe')" ]; then
-            TFLAGS+=" -ac $(cygpath -u 'C:/msys64/usr/bin/curl.exe')"
+          if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
+            TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
           make -C bld -j3 V=1 test-ci
 
@@ -224,7 +225,7 @@ jobs:
           else
             options='-DCMAKE_C_COMPILER=gcc'
           fi
-          cflags='-Wno-deprecated-declarations'
+          cflags='-Wno-deprecated-declarations'  # for examples
           if [ '${{ matrix.test }}' = 'uwp' ]; then
             options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
             pacman --noconfirm --ask 20 --noprogressbar --sync --needed 'mingw-w64-${{ matrix.env }}-winstorecompat-git'
@@ -240,15 +241,16 @@ jobs:
           [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
           [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
           [ '${{ matrix.type }}' = 'Release' ] && [[ '${{ matrix.config }}' = *'ENABLE_DEBUG=ON'* ]] && cflags+=' -DDEBUGBUILD'
-          cmake -B bld ${options} ${{ matrix.config }} \
+          cmake -B bld ${options} \
             "-DCMAKE_C_FLAGS=${cflags}" \
             "-DCMAKE_RC_COMPILE_OBJECT=${rcopts}" \
-            "-DCMAKE_BUILD_TYPE=${{ matrix.type }}" \
+            '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
             -DCMAKE_UNITY_BUILD=ON \
             -DCURL_WERROR=ON \
             -DBUILD_EXAMPLES=ON \
             -DENABLE_WEBSOCKETS=ON \
-            -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON
+            -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON \
+            ${{ matrix.config }}
 
       - name: 'cmake build'
         if: ${{ matrix.build == 'cmake' }}
@@ -273,8 +275,110 @@ jobs:
         shell: msys2 {0}
         run: |
           export TFLAGS='-j14 ${{ matrix.tflags }}'
-          if [ -x "$(cygpath -u 'C:/msys64/usr/bin/curl.exe')" ]; then
-            TFLAGS+=" -ac $(cygpath -u 'C:/msys64/usr/bin/curl.exe')"
+          if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
+            TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
+          fi
+          ls bld/lib/*.dll >/dev/null 2>&1 && cp -f -p bld/lib/*.dll bld/tests/libtest/
+          cmake --build bld --config '${{ matrix.type }}' --target test-ci
+
+  old-mingw-w64:
+    name: 'old-mingw-w64 (${{ matrix.build }}, ${{ matrix.env }}, ${{ matrix.config }})'
+    runs-on: windows-latest
+    timeout-minutes: 45
+    strategy:
+      matrix:
+        include:
+          - build: 'cmake'
+            env: '9.5.0-x86_64'
+            url: 'https://github.com/brechtsanders/winlibs_mingw/releases/download/9.5.0-10.0.0-msvcrt-r1/winlibs-x86_64-posix-seh-gcc-9.5.0-mingw-w64msvcrt-10.0.0-r1.7z'
+            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
+            type: 'Debug'
+            tflags: '~1139 ~1177 ~1477 ~2301 ~2302 ~3027'
+          - build: 'cmake'
+            env: '7.3.0-x86_64'
+            url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/7.3.0/threads-win32/seh/x86_64-7.3.0-release-win32-seh-rt_v5-rev0.7z'
+            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON'
+            type: 'Debug'
+            tflags: '~1139 ~1177 ~1477 ~2301 ~2302 ~3027'
+          - build: 'cmake'
+            env: '6.4.0-i686'
+            url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/6.4.0/threads-win32/dwarf/i686-6.4.0-release-win32-dwarf-rt_v5-rev0.7z'
+            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCMAKE_UNITY_BUILD=OFF'
+            type: 'Debug'
+            tflags: 'skiprun'
+      fail-fast: false
+    steps:
+      - name: 'cache compiler (gcc ${{ matrix.env }})'
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        id: cache-compiler
+        with:
+          path: C:\my-cache\mingw-w64-${{ matrix.env }}
+          key: ${{ runner.os }}-mingw-w64-${{ matrix.env }}
+
+      - name: 'install compiler (gcc ${{ matrix.env }})'
+        if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
+        timeout-minutes: 5
+        shell: C:\msys64\usr\bin\bash.exe {0}
+        run: |
+          mkdir -p /c/my-cache/
+          cd /c/my-cache/ || exit 1
+          curl --fail --silent --show-error --retry 3 --retry-connrefused --output pack.bin --location --proto-redir =https '${{ matrix.url }}'
+          mkdir -p mingw-w64-${{ matrix.env }}
+          cd mingw-w64-${{ matrix.env }} || exit 1
+          pwd
+          7z x -y ../pack.bin >/dev/null
+
+      - run: git config --global core.autocrlf input
+      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
+
+      - name: 'update PATH (gcc ${{ matrix.env }})'
+        shell: C:\msys64\usr\bin\bash.exe {0}
+        run: |
+          echo "PATH=/c/my-cache/mingw-w64-${{ matrix.env }}/mingw64/bin:/c/msys64/usr/bin:$PATH" >> $GITHUB_ENV
+
+      - name: 'cmake configure'
+        if: ${{ matrix.build == 'cmake' }}
+        timeout-minutes: 5
+        shell: C:\msys64\usr\bin\bash.exe {0}
+        run: |
+          cflags='-Wno-deprecated-declarations'  # for examples
+          [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
+          [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
+          cmake -B bld ${options} \
+            '-GMSYS Makefiles' \
+            -DCMAKE_C_COMPILER=gcc \
+            "-DCMAKE_C_FLAGS=${cflags}" \
+            '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
+            -DCMAKE_UNITY_BUILD=ON \
+            -DCURL_WERROR=ON \
+            -DBUILD_EXAMPLES=ON \
+            -DENABLE_WEBSOCKETS=ON \
+            ${{ matrix.config }}
+
+      - name: 'cmake build'
+        if: ${{ matrix.build == 'cmake' }}
+        timeout-minutes: 10
+        shell: C:\msys64\usr\bin\bash.exe {0}
+        run: |
+          cmake --build bld --config '${{ matrix.type }}' --parallel 3
+          [[ '${{ matrix.config }}' != *'BUILD_SHARED_LIBS=OFF'* ]] && cp -f -p bld/lib/*.dll bld/src/
+          bld/src/curl.exe --disable --version
+
+      - name: 'cmake build tests'
+        if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' }}
+        timeout-minutes: 10
+        shell: C:\msys64\usr\bin\bash.exe {0}
+        run: |
+          cmake --build bld --config '${{ matrix.type }}' --parallel 3 --target testdeps
+
+      - name: 'cmake run tests'
+        if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        timeout-minutes: 40
+        shell: C:\msys64\usr\bin\bash.exe {0}
+        run: |
+          export TFLAGS='-j14 ${{ matrix.tflags }}'
+          if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
+            TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
           ls bld/lib/*.dll >/dev/null 2>&1 && cp -f -p bld/lib/*.dll bld/tests/libtest/
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
