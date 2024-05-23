@@ -67,8 +67,7 @@ jobs:
               -DCURL_USE_OPENSSL=ON \
               -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON -DCURL_USE_GSSAPI=ON
             cmake --build bld --config Debug --parallel 3
-            export CURL=$(pwd)/bld/src/curl
-            "${CURL}" --disable --version
+            "$(pwd)/bld/src/curl" --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               cmake --build bld --config Debug --parallel 3 --target testdeps
               cmake --build bld --config Debug --target test-ci
@@ -101,8 +100,7 @@ jobs:
               -DCURL_USE_OPENSSL=ON \
               -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON
             cmake --build bld --config Debug --parallel 3
-            export CURL=$(pwd)/bld/src/curl
-            "${CURL}" --disable --version
+            "$(pwd)/bld/src/curl" --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               cmake --build bld --config Debug --parallel 3 --target testdeps
               export TFLAGS='-j8 ~TFTP'  # FIXME: TFTP requests executed twice? Related: `curl: (69) TFTP: Access Violation`?
@@ -131,7 +129,6 @@ jobs:
           run: |
             # https://ports.freebsd.org/
             sudo pkg install -y autoconf automake libtool pkgconf brotli openldap26-client libidn2 libnghttp2 nghttp2 stunnel py39-openssl py39-impacket py39-cryptography
-            sudo pkg delete -y curl
             autoreconf -fi
             export CC='${{ matrix.compiler }}'
             mkdir bld && cd bld && ../configure --enable-debug --enable-warnings --enable-werror \
@@ -158,9 +155,8 @@ jobs:
           run: |
             # https://ports.freebsd.org/
             sudo pkg install -y cmake brotli openldap26-client libidn2 libnghttp2 nghttp2 stunnel py39-openssl py39-impacket py39-cryptography
-            sudo pkg delete -y curl
             cmake -B bld \
-              -DCMAKE_C_COMPILER=${{ matrix.compiler }} \
+              '-DCMAKE_C_COMPILER=${{ matrix.compiler }}' \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
@@ -189,7 +185,6 @@ jobs:
           # https://pkg.omnios.org/r151048/core/en/index.shtml
           prepare: pkg install build-essential libtool
           run: |
-            pkg uninstall curl
             ln -s /usr/bin/gcpp /usr/bin/cpp  # Some tests expect `cpp`, which is named `gcpp` in this env.
             autoreconf -fi
             mkdir bld && cd bld && ../configure --enable-debug --enable-warnings --enable-werror \
