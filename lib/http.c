@@ -3411,7 +3411,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
     conn->bundle->multiuse = BUNDLE_NO_MULTIUSE;
   }
 
-  if(k->httpcode < 100 && last_hd) {
+  if(k->httpcode < 200 && last_hd) {
     /* Intermediate responses might trigger processing of more
      * responses, write the last header to the client before
      * proceeding. */
