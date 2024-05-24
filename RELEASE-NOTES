@@ -4,7 +4,7 @@ curl and libcurl 8.8.1
  Command line options:         259
  curl_easy_setopt() options:   305
  Public functions in libcurl:  94
- Contributors:                 3173
+ Contributors:                 3174
 
 This release includes the following changes:
 
@@ -12,8 +12,19 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o (lib)curl.rc: set debug flag also for `CURLDEBUG` and `UNITTESTS` [2]
+ o asyn-thread: avoid using GetAddrInfoExW with impersonation [7]
+ o cmake: fix brotli lib order [3]
+ o cmake: fix building in unity mode [4]
+ o cmake: fix building with both md4 and md5 in unity mode [13]
+ o docs/Makefile.am: make curl-config.1 install [14]
+ o mbedtls: check version for cipher id [12]
+ o mbedtls: send close-notify on close [11]
+ o pytest: add ftp upload tests [16]
+ o test: add test1484, for HEAD with content [18]
+ o test: add test1546, chunked not last transfer encoding [17]
+ o transfer: conn close on paused upload [8]
  o winbuild: fix PE version info debug flag [1]
- --- new entries are listed above this ---
+ o winbuild: remove outdated WIN32 defines [5]
 
 This release includes the following known bugs:
 
@@ -28,10 +39,24 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Ray Satiro, Viktor Szakats
-  (2 contributors)
+  Daniel Stenberg, dependabot[bot], edmcln on github, Kai Pastor,
+  Keerthi Timmaraju, Orgad Shaneh, Pavel Pavlov, Ray Satiro, renovate[bot],
+  Sergey Bronnikov, Stefan Eissing, Viktor Szakats
+  (12 contributors)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.se/bug/?i=13739
  [2] = https://curl.se/bug/?i=13730
+ [3] = https://curl.se/bug/?i=13761
+ [4] = https://curl.se/bug/?i=13751
+ [5] = https://curl.se/bug/?i=13739
+ [7] = https://curl.se/bug/?i=13612
+ [8] = https://curl.se/bug/?i=13740
+ [11] = https://curl.se/bug/?i=13745
+ [12] = https://curl.se/bug/?i=13749
+ [13] = https://curl.se/bug/?i=13737
+ [14] = https://curl.se/bug/?i=13741
+ [16] = https://curl.se/bug/?i=13734
+ [17] = https://curl.se/bug/?i=13736
+ [18] = https://curl.se/bug/?i=13735
