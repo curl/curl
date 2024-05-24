@@ -382,3 +382,68 @@ jobs:
           fi
           ls bld/lib/*.dll >/dev/null 2>&1 && cp -f -p bld/lib/*.dll bld/tests/libtest/
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
+
+  msvc:
+    name: 'msvc (${{ matrix.arch }}, ${{ matrix.plat }}, ${{ matrix.config }})'
+    runs-on: windows-latest
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        include:
+          - { arch: 'x64', plat: 'windows', tflags: '~1516 ~2301 ~2302 ~2303 ~2307', config: '-DENABLE_DEBUG=ON -DCURL_USE_SCHANNEL=ON  -DBUILD_SHARED_LIBS=OFF -DENABLE_UNICODE=ON ', type: 'Debug' }
+          - { arch: 'x64', plat: 'windows', tflags: '~1516 ~2301 ~2302 ~2303 ~2307', config: '-DENABLE_DEBUG=ON -DCURL_USE_SCHANNEL=OFF -DBUILD_SHARED_LIBS=OFF -DENABLE_UNICODE=OFF', type: 'Debug' }
+          - { arch: 'x64', plat: 'windows', tflags: '~1516 ~2301 ~2302 ~2303 ~2307', config: '-DENABLE_DEBUG=ON -DCURL_USE_SCHANNEL=OFF -DHTTP_ONLY=ON          -DENABLE_UNICODE=OFF', type: 'Debug' }
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
+      - name: 'cmake configure'
+        timeout-minutes: 5
+        shell: bash
+        run: |
+          archgen=${{ matrix.arch }}; [ "${archgen}" = 'x86' ] && archgen='Win32'
+          if [ '${{ matrix.plat }}' = 'uwp' ]; then
+            system='WindowsStore'
+            options='-DCMAKE_SYSTEM_VERSION=10.0'
+          else
+            system='Windows'
+          fi
+          [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
+          [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
+          cmake -B bld ${options} \
+            "-DCMAKE_SYSTEM_NAME=${system}" \
+            -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake \
+            "-DCMAKE_GENERATOR_PLATFORM=${archgen}" \
+            '-DVCPKG_TARGET_TRIPLET=${{ matrix.arch }}-${{ matrix.plat }}' \
+            -DCMAKE_VS_GLOBALS=TrackFileAccess=false \
+            '-DCMAKE_UNITY_BUILD=${{ matrix.unity }}' \
+            "-DCMAKE_C_FLAGS=${cflags}" \
+            '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
+            -DCMAKE_UNITY_BUILD=ON \
+            -DCURL_WERROR=ON \
+            -DBUILD_EXAMPLES=ON \
+            -DENABLE_WEBSOCKETS=ON \
+            ${{ matrix.config }}
+
+      - name: 'cmake build'
+        timeout-minutes: 5
+        shell: bash
+        run: |
+          cmake --build bld --config '${{ matrix.type }}' --parallel 3
+          [[ '${{ matrix.config }}' != *'BUILD_SHARED_LIBS=OFF'* ]] && cp -f -p bld/lib/*.dll bld/src/
+          bld/src/curl.exe --disable --version
+
+      - name: 'cmake build tests'
+        if: ${{ matrix.tflags != 'skipall' }}
+        timeout-minutes: 10
+        shell: bash
+        run: |
+          cmake --build bld --config '${{ matrix.type }}' --parallel 3 --target testdeps
+
+      - name: 'cmake run tests'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        timeout-minutes: 30
+        shell: bash
+        run: |
+          export TFLAGS='-j14 ${{ matrix.tflags }}'
+          ls bld/lib/*.dll >/dev/null 2>&1 && cp -f -p bld/lib/*.dll bld/tests/libtest/
+          cmake --build bld --config '${{ matrix.type }}' --target test-ci
