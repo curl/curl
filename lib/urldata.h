@@ -908,11 +908,6 @@ struct connectdata {
   CtxtHandle *sslContext;
 #endif
 
-#if defined(_WIN32) && defined(USE_WINSOCK)
-  struct curltime last_sndbuf_update;  /* last time readwrite_upload called
-                                          win_update_buffer_size */
-#endif
-
 #ifdef USE_GSASL
   struct gsasldata gsasl;
 #endif
