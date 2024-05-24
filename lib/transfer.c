@@ -341,9 +341,6 @@ static void win_update_buffer_size(curl_socket_t sockfd)
 #define win_update_buffer_size(x)
 #endif
 
-#define curl_upload_refill_watermark(data) \
-        ((size_t)((data)->set.upload_buffer_size >> 5))
-
 /*
  * Send data to upload to the server, when the socket is writable.
  */
