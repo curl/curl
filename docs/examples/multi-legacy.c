@@ -147,7 +147,8 @@ int main(void)
   }
 
   /* See how the transfers went */
-  while((msg = curl_multi_info_read(multi_handle, &msgs_left))) {
+  /* !checksrc! disable EQUALSNULL 1 */
+  while((msg = curl_multi_info_read(multi_handle, &msgs_left)) != NULL) {
     if(msg->msg == CURLMSG_DONE) {
       int idx;
 
