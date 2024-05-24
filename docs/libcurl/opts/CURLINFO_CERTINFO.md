@@ -93,9 +93,10 @@ See also the *certinfo.c* example.
 
 # AVAILABILITY
 
-This option is only working in libcurl built with OpenSSL, GnuTLS, Schannel or
-Secure Transport. GnuTLS support added in 7.42.0. Schannel support added in
-7.50.0. Secure Transport support added in 7.79.0.
+This option is only working in libcurl built with OpenSSL, GnuTLS, Schannel,
+Secure Transport or mbedTLS. GnuTLS support added in 7.42.0. Schannel support
+added in 7.50.0. Secure Transport support added in 7.79.0. mbedTLS support added
+in 8.9.0.
 
 Added in 7.19.1
 
