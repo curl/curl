@@ -25,19 +25,24 @@
  * Pass in a custom socket for libcurl to use.
  * </DESC>
  */
+#ifdef _WIN32
+#ifndef _WINSOCK_DEPRECATED_NO_WARNINGS
+#define _WINSOCK_DEPRECATED_NO_WARNINGS  /* for inet_addr() */
+#endif
+#endif
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <curl/curl.h>
 
 #ifdef _WIN32
-#include <winsock2.h>
 #define close closesocket
 #else
 #include <sys/types.h>        /*  socket types              */
 #include <sys/socket.h>       /*  socket definitions        */
 #include <netinet/in.h>
-#include <arpa/inet.h>        /*  inet (3) functions         */
+#include <arpa/inet.h>        /*  inet (3) functions        */
 #include <unistd.h>           /*  misc. Unix functions      */
 #endif
 
