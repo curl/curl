@@ -395,7 +395,25 @@ void Curl_sndbufset(curl_socket_t sockfd)
 
   setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (const char *)&val, sizeof(val));
 }
+
+#ifndef SIO_IDEAL_SEND_BACKLOG_QUERY
+#define SIO_IDEAL_SEND_BACKLOG_QUERY 0x4004747B
 #endif
+
+static void win_update_buffer_size(curl_socket_t sockfd)
+{
+  int result;
+  ULONG ideal;
+  DWORD ideallen;
+  result = WSAIoctl(sockfd, SIO_IDEAL_SEND_BACKLOG_QUERY, 0, 0,
+                    &ideal, sizeof(ideal), &ideallen, 0, 0);
+  if(result == 0) {
+    setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF,
+               (const char *)&ideal, sizeof(ideal));
+  }
+}
+
+#endif /* USE_WINSOCK */
 
 #ifndef CURL_DISABLE_BINDLOCAL
 static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
@@ -770,6 +788,9 @@ struct cf_socket_ctx {
   struct curltime started_at;        /* when socket was created */
   struct curltime connected_at;      /* when socket connected/got first byte */
   struct curltime first_byte_at;     /* when first byte was recvd */
+#ifdef USE_WINSOCK
+  struct curltime last_sndbuf_update; /* last update of sendbuf */
+#endif
   int error;                         /* errno of last failure or 0 */
 #ifdef DEBUGBUILD
   int wblock_percent;                /* percent of writes doing EAGAIN */
@@ -1335,6 +1356,16 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       *err = CURLE_SEND_ERROR;
     }
   }
+
+#if defined(USE_WINSOCK)
+  if(!*err) {
+    struct curltime n = Curl_now();
+    if(Curl_timediff(n, ctx->last_sndbuf_update) > 1000) {
+      win_update_buffer_size(ctx->sock);
+      ctx->last_sndbuf_update = n;
+    }
+  }
+#endif
 
   CURL_TRC_CF(data, cf, "send(len=%zu) -> %d, err=%d",
               orig_len, (int)nwritten, *err);

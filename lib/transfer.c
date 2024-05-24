@@ -320,34 +320,11 @@ out:
   return result;
 }
 
-#if defined(_WIN32) && defined(USE_WINSOCK)
-#ifndef SIO_IDEAL_SEND_BACKLOG_QUERY
-#define SIO_IDEAL_SEND_BACKLOG_QUERY 0x4004747B
-#endif
-
-static void win_update_buffer_size(curl_socket_t sockfd)
-{
-  int result;
-  ULONG ideal;
-  DWORD ideallen;
-  result = WSAIoctl(sockfd, SIO_IDEAL_SEND_BACKLOG_QUERY, 0, 0,
-                    &ideal, sizeof(ideal), &ideallen, 0, 0);
-  if(result == 0) {
-    setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF,
-               (const char *)&ideal, sizeof(ideal));
-  }
-}
-#else
-#define win_update_buffer_size(x)
-#endif
-
 /*
  * Send data to upload to the server, when the socket is writable.
  */
 static CURLcode readwrite_upload(struct Curl_easy *data, int *didwhat)
 {
-  CURLcode result = CURLE_OK;
-
   if((data->req.keepon & KEEP_SEND_PAUSE))
     return CURLE_OK;
 
@@ -358,23 +335,9 @@ static CURLcode readwrite_upload(struct Curl_easy *data, int *didwhat)
 
   if(!Curl_req_done_sending(data)) {
     *didwhat |= KEEP_SEND;
-    result = Curl_req_send_more(data);
-    if(result)
-      return result;
-
-#if defined(_WIN32) && defined(USE_WINSOCK)
-    /* FIXME: this looks like it would fit better into cf-socket.c
-     * but then I do not know enough Windows to say... */
-    {
-      struct curltime n = Curl_now();
-      if(Curl_timediff(n, data->conn->last_sndbuf_update) > 1000) {
-        win_update_buffer_size(data->conn->writesockfd);
-        data->conn->last_sndbuf_update = n;
-      }
-    }
-#endif
+    return Curl_req_send_more(data);
   }
-  return result;
+  return CURLE_OK;
 }
 
 static int select_bits_paused(struct Curl_easy *data, int select_bits)
