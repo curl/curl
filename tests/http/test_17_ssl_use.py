@@ -79,7 +79,7 @@ class TestSSLUse:
             pytest.skip('BearSSL does not support TLSv1.3')
         if env.curl_uses_lib('mbedtls') and tls_max == '1.3' and \
                 not env.curl_lib_version_at_least('mbedtls', '3.6.0'):
-            pytest.skip('mbedtls does not support TLSv1.3')
+            pytest.skip('mbedtls TLSv1.3 support requires at least 3.6.0')
 
         curl = CurlClient(env=env)
         # tell the server to close the connection after each request
