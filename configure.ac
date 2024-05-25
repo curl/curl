@@ -5037,7 +5037,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   Features:         ${SUPPORT_FEATURES}
 ])
 
-non13=`echo "$TLSCHOICE" | grep -Ei 'bearssl|secure-transport|mbedtls'`;
+non13=`echo "$TLSCHOICE" | $EGREP -i 'bearssl|secure-transport|mbedtls'`;
 if test -n "$non13"; then
  cat >&2 << _EOF
   WARNING: A selected TLS library ($TLSCHOICE) does not support TLS 1.3!
