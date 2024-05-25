@@ -448,6 +448,13 @@ sub compare {
 }
 
 #######################################################################
+# Numeric-sort words in a string
+sub numsortwords {
+    my ($string)=@_;
+    return join(' ', sort { $a <=> $b } split(' ', $string));
+}
+
+#######################################################################
 # Parse and store the protocols in curl's Protocols: line
 sub parseprotocols {
     my ($line)=@_;
@@ -3022,13 +3029,15 @@ if(%skipped && !$short) {
 
 if($total) {
     if($failedign) {
-        logmsg "IGNORED: failed tests: $failedign\n";
+        my $failedignsorted = numsortwords($failedign);
+        logmsg "IGNORED: failed tests: $failedignsorted\n";
     }
     logmsg sprintf("TESTDONE: $ok tests out of $total reported OK: %d%%\n",
                    $ok/$total*100);
 
     if($failed && ($ok != $total)) {
-        logmsg "\nTESTFAIL: These test cases failed: $failed\n\n";
+        my $failedsorted = numsortwords($failed);
+        logmsg "\nTESTFAIL: These test cases failed: $failedsorted\n\n";
     }
 }
 else {
