@@ -33,9 +33,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#ifndef _WIN32
-#include <sys/time.h>
-#endif
 
 #include <curl/curl.h>
 
