@@ -81,9 +81,9 @@ int Curl_socket_close(struct Curl_easy *data, struct connectdata *conn,
    Buffer Size
 
 */
-void Curl_sndbufset(curl_socket_t sockfd);
+void Curl_sndbuf_init(curl_socket_t sockfd);
 #else
-#define Curl_sndbufset(y) Curl_nop_stmt
+#define Curl_sndbuf_init(y) Curl_nop_stmt
 #endif
 
 /**

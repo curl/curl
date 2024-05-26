@@ -654,7 +654,7 @@ static CURLcode InitiateTransfer(struct Curl_easy *data)
     Curl_pgrsSetUploadSize(data, data->state.infilesize);
 
     /* set the SO_SNDBUF for the secondary socket for those who need it */
-    Curl_sndbufset(conn->sock[SECONDARYSOCKET]);
+    Curl_sndbuf_init(conn->sock[SECONDARYSOCKET]);
 
     Curl_xfer_setup(data, -1, -1, FALSE, SECONDARYSOCKET);
   }

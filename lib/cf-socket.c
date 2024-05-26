@@ -370,7 +370,7 @@ int Curl_socket_close(struct Curl_easy *data, struct connectdata *conn,
 #define DETECT_OS_PREVISTA 1
 #define DETECT_OS_VISTA_OR_LATER 2
 
-void Curl_sndbufset(curl_socket_t sockfd)
+void Curl_sndbuf_init(curl_socket_t sockfd)
 {
   int val = CURL_MAX_WRITE_SIZE + 32;
   int curval = 0;
@@ -395,24 +395,6 @@ void Curl_sndbufset(curl_socket_t sockfd)
 
   setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (const char *)&val, sizeof(val));
 }
-
-#ifndef SIO_IDEAL_SEND_BACKLOG_QUERY
-#define SIO_IDEAL_SEND_BACKLOG_QUERY 0x4004747B
-#endif
-
-static void win_update_buffer_size(curl_socket_t sockfd)
-{
-  int result;
-  ULONG ideal;
-  DWORD ideallen;
-  result = WSAIoctl(sockfd, SIO_IDEAL_SEND_BACKLOG_QUERY, 0, 0,
-                    &ideal, sizeof(ideal), &ideallen, 0, 0);
-  if(result == 0) {
-    setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF,
-               (const char *)&ideal, sizeof(ideal));
-  }
-}
-
 #endif /* USE_WINSOCK */
 
 #ifndef CURL_DISABLE_BINDLOCAL
@@ -789,7 +771,8 @@ struct cf_socket_ctx {
   struct curltime connected_at;      /* when socket connected/got first byte */
   struct curltime first_byte_at;     /* when first byte was recvd */
 #ifdef USE_WINSOCK
-  struct curltime last_sndbuf_update; /* last update of sendbuf */
+  struct curltime last_sndbuf_query_at;  /* when SO_SNDBUF last queried */
+  ULONG sndbuf_size;                     /* the last set SO_SNDBUF size */
 #endif
   int error;                         /* errno of last failure or 0 */
 #ifdef DEBUGBUILD
@@ -1025,7 +1008,7 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
 
   nosigpipe(data, ctx->sock);
 
-  Curl_sndbufset(ctx->sock);
+  Curl_sndbuf_init(ctx->sock);
 
   if(is_tcp && data->set.tcp_keepalive)
     tcpkeepalive(data, ctx->sock);
@@ -1285,6 +1268,32 @@ static bool cf_socket_data_pending(struct Curl_cfilter *cf,
   return (readable > 0 && (readable & CURL_CSELECT_IN));
 }
 
+#ifdef USE_WINSOCK
+
+#ifndef SIO_IDEAL_SEND_BACKLOG_QUERY
+#define SIO_IDEAL_SEND_BACKLOG_QUERY 0x4004747B
+#endif
+
+static void win_update_sndbuf_size(struct cf_socket_ctx *ctx)
+{
+  ULONG ideal;
+  DWORD ideallen;
+  struct curltime n = Curl_now();
+
+  if(Curl_timediff(n, ctx->last_sndbuf_query_at) > 1000) {
+    if(!WSAIoctl(ctx->sock, SIO_IDEAL_SEND_BACKLOG_QUERY, 0, 0,
+                  &ideal, sizeof(ideal), &ideallen, 0, 0) &&
+       ideal != ctx->sndbuf_size &&
+       !setsockopt(ctx->sock, SOL_SOCKET, SO_SNDBUF,
+                   (const char *)&ideal, sizeof(ideal))) {
+      ctx->sndbuf_size = ideal;
+    }
+    ctx->last_sndbuf_query_at = n;
+  }
+}
+
+#endif /* USE_WINSOCK */
+
 static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                               const void *buf, size_t len, CURLcode *err)
 {
@@ -1358,13 +1367,8 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
 #if defined(USE_WINSOCK)
-  if(!*err) {
-    struct curltime n = Curl_now();
-    if(Curl_timediff(n, ctx->last_sndbuf_update) > 1000) {
-      win_update_buffer_size(ctx->sock);
-      ctx->last_sndbuf_update = n;
-    }
-  }
+  if(!*err)
+    win_update_sndbuf_size(ctx);
 #endif
 
   CURL_TRC_CF(data, cf, "send(len=%zu) -> %d, err=%d",
