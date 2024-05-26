@@ -580,7 +580,6 @@ if(CURL_BROTLI)
   find_package(Brotli REQUIRED)
   if(BROTLI_FOUND)
     set(HAVE_BROTLI ON)
-    set(CURL_LIBS "${BROTLI_LIBRARIES};${CURL_LIBS}")  # For 'ld' linker. Emulate `list(PREPEND ...)` to stay compatible with <v3.15 CMake.
     list(APPEND CURL_LIBS ${BROTLI_LIBRARIES})
     include_directories(${BROTLI_INCLUDE_DIRS})
     list(APPEND CMAKE_REQUIRED_INCLUDES ${BROTLI_INCLUDE_DIRS})
@@ -1010,7 +1009,6 @@ if(CURL_USE_GSSAPI)
     string(REPLACE ";" " " GSS_LINKER_FLAGS "${GSS_LINKER_FLAGS}")
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${GSS_LINKER_FLAGS}")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${GSS_LINKER_FLAGS}")
-    set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} ${GSS_LINKER_FLAGS}")
     list(APPEND CURL_LIBS ${GSS_LIBRARIES})
 
   else()
@@ -1565,6 +1563,10 @@ set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
 set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
 set(version_config "${generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
 
+cmake_dependent_option(BUILD_TESTING "Build tests"
+  ON "PERL_FOUND;NOT CURL_DISABLE_TESTS"
+  OFF)
+
 if(HAVE_MANUAL_TOOLS)
   add_subdirectory(docs)
 endif()
@@ -1580,9 +1582,6 @@ if(BUILD_EXAMPLES)
   add_subdirectory(docs/examples)
 endif()
 
-cmake_dependent_option(BUILD_TESTING "Build tests"
-  ON "PERL_FOUND;NOT CURL_DISABLE_TESTS"
-  OFF)
 if(BUILD_TESTING)
   add_subdirectory(tests)
 endif()
@@ -1686,7 +1685,7 @@ if(NOT CURL_DISABLE_INSTALL)
   _add_if("RTMP"          USE_LIBRTMP)
   _add_if("MQTT"          NOT CURL_DISABLE_MQTT)
   _add_if("WS"            USE_WEBSOCKETS)
-  _add_if("WSS"           USE_WEBSOCKETS)
+  _add_if("WSS"           USE_WEBSOCKETS AND SSL_ENABLED)
   if(_items)
     list(SORT _items)
   endif()

@@ -41,14 +41,22 @@ permissions: {}
 
 env:
   MAKEFLAGS: -j 3
+  # unhandled
   bearssl-version: 0.6
-  libressl-version: v3.7.3
-  mbedtls-version: v3.5.0
-  mod_h2-version: v2.0.27
-  msh3-version: v0.6.0
+  # renovate: datasource=github-tags depName=libressl-portable/portable versioning=semver registryUrl=https://github.com
+  libressl-version: 3.9.2
+  # renovate: datasource=github-tags depName=ARMmbed/mbedtls versioning=semver registryUrl=https://github.com
+  mbedtls-version: 3.5.0
+  # renovate: datasource=github-tags depName=icing/mod_h2 versioning=semver registryUrl=https://github.com
+  mod_h2-version: 2.0.27
+  # renovate: datasource=github-tags depName=nibanks/msh3 versioning=semver registryUrl=https://github.com
+  msh3-version: 0.6.0
+  # handled in renovate.json
   openssl3-version: openssl-3.1.3
+  # unhandled
   quictls-version: 3.1.4+quic
-  rustls-version: v0.13.0
+  # renovate: datasource=github-tags depName=rustls/rustls-ffi versioning=semver registryUrl=https://github.com
+  rustls-version: 0.13.0
 
 jobs:
   autotools:
@@ -196,7 +204,7 @@ jobs:
           apk add --no-cache build-base autoconf automake libtool perl openssl-dev libssh2-dev zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev heimdal-dev libpsl-dev py3-impacket py3-asn1 py3-six py3-pycryptodomex perl-time-hires openssh stunnel sudo git
         name: 'install dependencies'
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
 
       - name: Fix kernel mmap rnd bits
         # Asan in llvm 14 provided in ubuntu 22.04 is incompatible with
@@ -218,7 +226,7 @@ jobs:
 
       - name: cache bearssl
         if: contains(matrix.build.install_steps, 'bearssl')
-        uses: actions/cache@v4
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         id: cache-bearssl
         env:
           cache-name: cache-bearssl
@@ -239,7 +247,7 @@ jobs:
 
       - name: cache libressl
         if: contains(matrix.build.install_steps, 'libressl')
-        uses: actions/cache@v4
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         id: cache-libressl
         env:
           cache-name: cache-libressl
@@ -250,7 +258,7 @@ jobs:
       - name: 'build libressl'
         if: contains(matrix.build.install_steps, 'libressl') && steps.cache-libressl.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet --depth=1 -b ${{ env.libressl-version }} https://github.com/libressl-portable/portable.git libressl-git
+          git clone --quiet --depth=1 -b v${{ env.libressl-version }} https://github.com/libressl-portable/portable.git libressl-git
           cd libressl-git
           ./autogen.sh
           ./configure --prefix=$HOME/libressl
@@ -258,7 +266,7 @@ jobs:
 
       - name: cache mbedtls
         if: contains(matrix.build.install_steps, 'mbedtls')
-        uses: actions/cache@v4
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         id: cache-mbedtls
         env:
           cache-name: cache-mbedtls
@@ -269,13 +277,14 @@ jobs:
       - name: 'build mbedtls'
         if: contains(matrix.build.install_steps, 'mbedtls') && steps.cache-mbedtls.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet --depth=1 -b ${{ env.mbedtls-version }} https://github.com/ARMmbed/mbedtls
+          git clone --quiet --depth=1 -b v${{ env.mbedtls-version }} https://github.com/ARMmbed/mbedtls
           cd mbedtls
+          git submodule update --init
           make DESTDIR=$HOME/mbedtls install
 
       - name: cache openssl3
         if: contains(matrix.build.install_steps, 'openssl3')
-        uses: actions/cache@v4
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         id: cache-openssl3
         env:
           cache-name: cache-openssl3
@@ -293,7 +302,7 @@ jobs:
 
       - name: cache quictls
         if: contains(matrix.build.install_steps, 'quictls')
-        uses: actions/cache@v4
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         id: cache-quictls
         env:
           cache-name: cache-quictls
@@ -311,7 +320,7 @@ jobs:
 
       - name: cache msh3
         if: contains(matrix.build.install_steps, 'msh3')
-        uses: actions/cache@v4
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         id: cache-msh3
         env:
           cache-name: cache-msh3
@@ -322,7 +331,7 @@ jobs:
       - name: 'build msh3'
         if: contains(matrix.build.install_steps, 'msh3') && steps.cache-msh3.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet -b ${{ env.msh3-version }} --depth=1 --recursive https://github.com/nibanks/msh3
+          git clone --quiet -b v${{ env.msh3-version }} --depth=1 --recursive https://github.com/nibanks/msh3
           cd msh3 && mkdir build && cd build
           cmake -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=$HOME/msh3 ..
           cmake --build .
@@ -338,7 +347,7 @@ jobs:
 
       - name: cache rustls
         if: contains(matrix.build.install_steps, 'rustls')
-        uses: actions/cache@v4
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         id: cache-rustls
         env:
           cache-name: cache-rustls
@@ -349,7 +358,7 @@ jobs:
       - name: 'build rustls'
         if: contains(matrix.build.install_steps, 'rustls') && steps.cache-rustls.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet --depth=1 -b ${{ env.rustls-version }} --recursive https://github.com/rustls/rustls-ffi.git
+          git clone --quiet --depth=1 -b v${{ env.rustls-version }} --recursive https://github.com/rustls/rustls-ffi.git
           cd rustls-ffi
           make DESTDIR=$HOME/rustls install
 
@@ -374,13 +383,13 @@ jobs:
 
       - if: contains(matrix.build.install_steps, 'pytest')
         run: |
-          sudo apt-get install apache2 apache2-dev libnghttp2-dev
+          sudo apt-get install apache2 apache2-dev libnghttp2-dev vsftpd
           sudo python3 -m pip install -r tests/http/requirements.txt
         name: 'install pytest and apach2-dev'
 
       - name: cache mod_h2
         if: contains(matrix.build.install_steps, 'pytest')
-        uses: actions/cache@v4
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         id: cache-mod_h2
         env:
           cache-name: cache-mod_h2
@@ -392,7 +401,7 @@ jobs:
         if: contains(matrix.build.install_steps, 'pytest') && steps.cache-mod_h2.outputs.cache-hit != 'true'
         run: |
           cd $HOME
-          git clone --quiet --depth=1 -b  ${{ env.mod_h2-version }} https://github.com/icing/mod_h2
+          git clone --quiet --depth=1 -b v${{ env.mod_h2-version }} https://github.com/icing/mod_h2
           cd mod_h2
           autoreconf -fi
           ./configure

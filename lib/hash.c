@@ -40,7 +40,10 @@ hash_element_dtor(void *user, void *element)
   struct Curl_hash_element *e = (struct Curl_hash_element *) element;
 
   if(e->ptr) {
-    h->dtor(e->ptr);
+    if(e->dtor)
+      e->dtor(e->key, e->key_len, e->ptr);
+    else
+      h->dtor(e->ptr);
     e->ptr = NULL;
   }
 
@@ -77,7 +80,8 @@ Curl_hash_init(struct Curl_hash *h,
 }
 
 static struct Curl_hash_element *
-mk_hash_element(const void *key, size_t key_len, const void *p)
+mk_hash_element(const void *key, size_t key_len, const void *p,
+                Curl_hash_elem_dtor dtor)
 {
   /* allocate the struct plus memory after it to store the key */
   struct Curl_hash_element *he = malloc(sizeof(struct Curl_hash_element) +
@@ -87,22 +91,15 @@ mk_hash_element(const void *key, size_t key_len, const void *p)
     memcpy(he->key, key, key_len);
     he->key_len = key_len;
     he->ptr = (void *) p;
+    he->dtor = dtor;
   }
   return he;
 }
 
 #define FETCH_LIST(x,y,z) &x->table[x->hash_func(y, z, x->slots)]
 
-/* Insert the data in the hash. If there already was a match in the hash, that
- * data is replaced. This function also "lazily" allocates the table if
- * needed, as it isn't done in the _init function (anymore).
- *
- * @unittest: 1305
- * @unittest: 1602
- * @unittest: 1603
- */
-void *
-Curl_hash_add(struct Curl_hash *h, void *key, size_t key_len, void *p)
+void *Curl_hash_add2(struct Curl_hash *h, void *key, size_t key_len, void *p,
+                     Curl_hash_elem_dtor dtor)
 {
   struct Curl_hash_element  *he;
   struct Curl_llist_element *le;
@@ -130,7 +127,7 @@ Curl_hash_add(struct Curl_hash *h, void *key, size_t key_len, void *p)
     }
   }
 
-  he = mk_hash_element(key, key_len, p);
+  he = mk_hash_element(key, key_len, p, dtor);
   if(he) {
     Curl_llist_append(l, he, &he->list);
     ++h->size;
@@ -138,6 +135,20 @@ Curl_hash_add(struct Curl_hash *h, void *key, size_t key_len, void *p)
   }
 
   return NULL; /* failure */
+}
+
+/* Insert the data in the hash. If there already was a match in the hash, that
+ * data is replaced. This function also "lazily" allocates the table if
+ * needed, as it isn't done in the _init function (anymore).
+ *
+ * @unittest: 1305
+ * @unittest: 1602
+ * @unittest: 1603
+ */
+void *
+Curl_hash_add(struct Curl_hash *h, void *key, size_t key_len, void *p)
+{
+  return Curl_hash_add2(h, key, key_len, p, NULL);
 }
 
 /* Remove the identified hash entry.
@@ -191,25 +202,6 @@ Curl_hash_pick(struct Curl_hash *h, void *key, size_t key_len)
 
   return NULL;
 }
-
-#if defined(DEBUGBUILD) && defined(AGGRESSIVE_TEST)
-void
-Curl_hash_apply(Curl_hash *h, void *user,
-                void (*cb)(void *user, void *ptr))
-{
-  struct Curl_llist_element  *le;
-  size_t i;
-
-  for(i = 0; i < h->slots; ++i) {
-    for(le = (h->table[i])->head;
-        le;
-        le = le->next) {
-      Curl_hash_element *el = le->ptr;
-      cb(user, el->ptr);
-    }
-  }
-}
-#endif
 
 /* Destroys all the entries in the given hash and resets its attributes,
  * prepping the given hash for [static|dynamic] deallocation.

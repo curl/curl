@@ -978,6 +978,7 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
   do {
     const char *name;
     size_t namelen;
+    bool is_chunked = FALSE;
 
     /* Parse a single encoding name. */
     while(ISBLANK(*enclist) || *enclist == ',')
@@ -993,12 +994,17 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
       const struct Curl_cwtype *cwt;
       struct Curl_cwriter *writer;
 
+      CURL_TRC_WRITE(data, "looking for %s decoder: %.*s",
+                     is_transfer? "transfer" : "content", (int)namelen, name);
+      is_chunked = (is_transfer && (namelen == 7) &&
+                    strncasecompare(name, "chunked", 7));
       /* if we skip the decoding in this phase, do not look further.
        * Exception is "chunked" transfer-encoding which always must happen */
-      if((is_transfer && !data->set.http_transfer_encoding &&
-          (namelen != 7 || !strncasecompare(name, "chunked", 7))) ||
+      if((is_transfer && !data->set.http_transfer_encoding && !is_chunked) ||
          (!is_transfer && data->set.http_ce_skip)) {
         /* not requested, ignore */
+        CURL_TRC_WRITE(data, "decoder not requested, ignored: %.*s",
+                       (int)namelen, name);
         return CURLE_OK;
       }
 
@@ -1009,17 +1015,38 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
       }
 
       cwt = find_unencode_writer(name, namelen, phase);
-      if(is_transfer && cwt && strncasecompare(name, "chunked", 7) &&
-         Curl_cwriter_get_by_type(data, cwt)) {
+      if(cwt && is_chunked && Curl_cwriter_get_by_type(data, cwt)) {
         /* A 'chunked' transfer encoding has already been added.
-         * Ignore duplicates. See #13451. */
+         * Ignore duplicates. See #13451.
+         * Also RFC 9112, ch. 6.1:
+         * "A sender MUST NOT apply the chunked transfer coding more than
+         *  once to a message body."
+         */
+        CURL_TRC_WRITE(data, "ignoring duplicate 'chunked' decoder");
         return CURLE_OK;
+      }
+
+      if(is_transfer && !is_chunked &&
+         Curl_cwriter_get_by_name(data, "chunked")) {
+        /* RFC 9112, ch. 6.1:
+         * "If any transfer coding other than chunked is applied to a
+         *  response's content, the sender MUST either apply chunked as the
+         *  final transfer coding or terminate the message by closing the
+         *  connection."
+         * "chunked" must be the last added to be the first in its phase,
+         *  reject this.
+         */
+        failf(data, "Reject response due to 'chunked' not being the last "
+              "Transfer-Encoding");
+        return CURLE_BAD_CONTENT_ENCODING;
       }
 
       if(!cwt)
         cwt = &error_writer;  /* Defer error at use. */
 
       result = Curl_cwriter_create(&writer, data, cwt, phase);
+      CURL_TRC_WRITE(data, "added %s decoder %s -> %d",
+                     is_transfer? "transfer" : "content", cwt->name, result);
       if(result)
         return result;
 

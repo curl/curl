@@ -40,7 +40,7 @@ To build curl ECH-enabled, making use of the above:
     git clone https://github.com/curl/curl
     cd curl
     autoreconf -fi
-    LDFLAGS="-Wl,-rpath,$HOME/code/openss-local-inst/lib/" ./configure  --with-ssl=$HOME/code/openssl-local-inst  --enable-ech --enable-httpsrr
+    LDFLAGS="-Wl,-rpath,$HOME/code/openssl-local-inst/lib/" ./configure --with-ssl=$HOME/code/openssl-local-inst --enable-ech --enable-httpsrr
     ...lots of output...
     WARNING: ech ECH HTTPSRR enabled but marked EXPERIMENTAL...
     make
@@ -52,9 +52,11 @@ is not enabled, so go back some steps and re-do whatever needs re-doing:-) If yo
 want to debug curl then you should add ``--enable-debug`` to the ``configure``
 command.
 
-With the above build, I still need to set ``LD_LIBRARY_PATH`` to run the
-version of curl built against OpenSSL in my development environment (Ubuntu
-23.10).
+In a recent (2024-05-20) build on one machine, configure failed to find the
+ECH-enabled SSL library, apparently due to the existence of
+``$HOME/code/openssl-local-inst/lib/pkgconfig`` as a directory containing
+various settings. Deleting that directory worked around the problem but may not
+be the best solution.
 
 ## Using ECH and DoH
 

@@ -111,7 +111,6 @@ CURLcode Curl_setblobopt(struct curl_blob **blobp,
 
 static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp)
 {
-  CURLcode result = CURLE_OK;
   char *user = NULL;
   char *passwd = NULL;
 
@@ -122,30 +121,22 @@ static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp)
      to clear the existing data */
   if(option) {
     size_t len = strlen(option);
+    CURLcode result;
     if(len > CURL_MAX_INPUT_LENGTH)
       return CURLE_BAD_FUNCTION_ARGUMENT;
 
     result = Curl_parse_login_details(option, len, &user, &passwd, NULL);
+    if(result)
+      return result;
   }
 
-  if(!result) {
-    /* Store the username part */
-    if(!user && option && option[0] == ':') {
-      /* Allocate an empty string instead of returning NULL as user name */
-      user = strdup("");
-      if(!user)
-        result = CURLE_OUT_OF_MEMORY;
-    }
+  free(*userp);
+  *userp = user;
 
-    Curl_safefree(*userp);
-    *userp = user;
+  free(*passwdp);
+  *passwdp = passwd;
 
-    /* Store the password part */
-    Curl_safefree(*passwdp);
-    *passwdp = passwd;
-  }
-
-  return result;
+  return CURLE_OK;
 }
 
 #define C_SSLVERSION_VALUE(x) (x & 0xffff)
@@ -788,22 +779,20 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /*
      * Set cookie file name to dump all cookies to when we're done.
      */
-  {
-    struct CookieInfo *newcookies;
     result = Curl_setstropt(&data->set.str[STRING_COOKIEJAR],
                             va_arg(param, char *));
-
-    /*
-     * Activate the cookie parser. This may or may not already
-     * have been made.
-     */
-    newcookies = Curl_cookie_init(data, NULL, data->cookies,
-                                  data->set.cookiesession);
-    if(!newcookies)
-      result = CURLE_OUT_OF_MEMORY;
-    data->cookies = newcookies;
-  }
-  break;
+    if(!result) {
+      /*
+       * Activate the cookie parser. This may or may not already
+       * have been made.
+       */
+      struct CookieInfo *newcookies =
+        Curl_cookie_init(data, NULL, data->cookies, data->set.cookiesession);
+      if(!newcookies)
+        result = CURLE_OUT_OF_MEMORY;
+      data->cookies = newcookies;
+    }
+    break;
 
   case CURLOPT_COOKIESESSION:
     /*

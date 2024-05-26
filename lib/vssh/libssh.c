@@ -388,28 +388,25 @@ static int myssh_is_known(struct Curl_easy *data)
     goto cleanup;
   }
 
-  if(data->set.ssl.primary.verifyhost != TRUE) {
-    rc = SSH_OK;
-    goto cleanup;
-  }
+  if(data->set.str[STRING_SSH_KNOWNHOSTS]) {
 
 #if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0,9,0)
-  /* Get the known_key from the known hosts file */
-  vstate = ssh_session_get_known_hosts_entry(sshc->ssh_session,
-                                             &knownhostsentry);
+    /* Get the known_key from the known hosts file */
+    vstate = ssh_session_get_known_hosts_entry(sshc->ssh_session,
+                                               &knownhostsentry);
 
-  /* Case an entry was found in a known hosts file */
-  if(knownhostsentry) {
-    if(knownhostsentry->publickey) {
-      rc = ssh_pki_export_pubkey_base64(knownhostsentry->publickey,
-                                        &known_base64);
-      if(rc != SSH_OK) {
-        goto cleanup;
-      }
-      knownkey.key = known_base64;
-      knownkey.len = strlen(known_base64);
+    /* Case an entry was found in a known hosts file */
+    if(knownhostsentry) {
+      if(knownhostsentry->publickey) {
+        rc = ssh_pki_export_pubkey_base64(knownhostsentry->publickey,
+                                          &known_base64);
+        if(rc != SSH_OK) {
+          goto cleanup;
+        }
+        knownkey.key = known_base64;
+        knownkey.len = strlen(known_base64);
 
-      switch(ssh_key_type(knownhostsentry->publickey)) {
+        switch(ssh_key_type(knownhostsentry->publickey)) {
         case SSH_KEYTYPE_RSA:
           knownkey.keytype = CURLKHTYPE_RSA;
           break;
@@ -431,12 +428,12 @@ static int myssh_is_known(struct Curl_easy *data)
         default:
           rc = SSH_ERROR;
           goto cleanup;
+        }
+        knownkeyp = &knownkey;
       }
-      knownkeyp = &knownkey;
     }
-  }
 
-  switch(vstate) {
+    switch(vstate) {
     case SSH_KNOWN_HOSTS_OK:
       keymatch = CURLKHMATCH_OK;
       break;
@@ -446,14 +443,14 @@ static int myssh_is_known(struct Curl_easy *data)
     case SSH_KNOWN_HOSTS_ERROR:
       keymatch = CURLKHMATCH_MISSING;
       break;
-  default:
+    default:
       keymatch = CURLKHMATCH_MISMATCH;
       break;
-  }
+    }
 
 #else
-  vstate = ssh_is_server_known(sshc->ssh_session);
-  switch(vstate) {
+    vstate = ssh_is_server_known(sshc->ssh_session);
+    switch(vstate) {
     case SSH_SERVER_KNOWN_OK:
       keymatch = CURLKHMATCH_OK;
       break;
@@ -461,21 +458,21 @@ static int myssh_is_known(struct Curl_easy *data)
     case SSH_SERVER_NOT_KNOWN:
       keymatch = CURLKHMATCH_MISSING;
       break;
-  default:
+    default:
       keymatch = CURLKHMATCH_MISMATCH;
       break;
-  }
+    }
 #endif
 
-  if(func) { /* use callback to determine action */
-    rc = ssh_pki_export_pubkey_base64(pubkey, &found_base64);
-    if(rc != SSH_OK)
-      goto cleanup;
+    if(func) { /* use callback to determine action */
+      rc = ssh_pki_export_pubkey_base64(pubkey, &found_base64);
+      if(rc != SSH_OK)
+        goto cleanup;
 
-    foundkey.key = found_base64;
-    foundkey.len = strlen(found_base64);
+      foundkey.key = found_base64;
+      foundkey.len = strlen(found_base64);
 
-    switch(ssh_key_type(pubkey)) {
+      switch(ssh_key_type(pubkey)) {
       case SSH_KEYTYPE_RSA:
         foundkey.keytype = CURLKHTYPE_RSA;
         break;
@@ -501,15 +498,15 @@ static int myssh_is_known(struct Curl_easy *data)
       default:
         rc = SSH_ERROR;
         goto cleanup;
-    }
+      }
 
-    Curl_set_in_callback(data, true);
-    rc = func(data, knownkeyp, /* from the knownhosts file */
-              &foundkey, /* from the remote host */
-              keymatch, data->set.ssh_keyfunc_userp);
-    Curl_set_in_callback(data, false);
+      Curl_set_in_callback(data, true);
+      rc = func(data, knownkeyp, /* from the knownhosts file */
+                &foundkey, /* from the remote host */
+                keymatch, data->set.ssh_keyfunc_userp);
+      Curl_set_in_callback(data, false);
 
-    switch(rc) {
+      switch(rc) {
       case CURLKHSTAT_FINE_ADD_TO_FILE:
 #if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0,8,0)
         rc = ssh_session_update_known_hosts(sshc->ssh_session);
@@ -525,12 +522,13 @@ static int myssh_is_known(struct Curl_easy *data)
       default: /* REJECT/DEFER */
         rc = SSH_ERROR;
         goto cleanup;
+      }
     }
-  }
-  else {
-    if(keymatch != CURLKHMATCH_OK) {
-      rc = SSH_ERROR;
-      goto cleanup;
+    else {
+      if(keymatch != CURLKHMATCH_OK) {
+        rc = SSH_ERROR;
+        goto cleanup;
+      }
     }
   }
   rc = SSH_OK;

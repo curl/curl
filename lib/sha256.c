@@ -334,14 +334,14 @@ static const unsigned long K[64] = {
 #define RORc(x, y) \
 (((((unsigned long)(x) & 0xFFFFFFFFUL) >> (unsigned long)((y) & 31)) | \
    ((unsigned long)(x) << (unsigned long)(32 - ((y) & 31)))) & 0xFFFFFFFFUL)
-#define Ch(x,y,z)   (z ^ (x & (y ^ z)))
-#define Maj(x,y,z)  (((x | y) & z) | (x & y))
-#define S(x, n)     RORc((x), (n))
-#define R(x, n)     (((x)&0xFFFFFFFFUL)>>(n))
-#define Sigma0(x)   (S(x, 2) ^ S(x, 13) ^ S(x, 22))
-#define Sigma1(x)   (S(x, 6) ^ S(x, 11) ^ S(x, 25))
-#define Gamma0(x)   (S(x, 7) ^ S(x, 18) ^ R(x, 3))
-#define Gamma1(x)   (S(x, 17) ^ S(x, 19) ^ R(x, 10))
+#define Sha256_Ch(x,y,z)  (z ^ (x & (y ^ z)))
+#define Sha256_Maj(x,y,z) (((x | y) & z) | (x & y))
+#define Sha256_S(x, n)    RORc((x), (n))
+#define Sha256_R(x, n)    (((x)&0xFFFFFFFFUL)>>(n))
+#define Sigma0(x)         (Sha256_S(x, 2) ^ Sha256_S(x, 13) ^ Sha256_S(x, 22))
+#define Sigma1(x)         (Sha256_S(x, 6) ^ Sha256_S(x, 11) ^ Sha256_S(x, 25))
+#define Gamma0(x)         (Sha256_S(x, 7) ^ Sha256_S(x, 18) ^ Sha256_R(x, 3))
+#define Gamma1(x)         (Sha256_S(x, 17) ^ Sha256_S(x, 19) ^ Sha256_R(x, 10))
 
 /* Compress 512-bits */
 static int sha256_compress(struct sha256_state *md,
@@ -364,12 +364,12 @@ static int sha256_compress(struct sha256_state *md,
   }
 
   /* Compress */
-#define RND(a,b,c,d,e,f,g,h,i)                                          \
-  do {                                                                  \
-    unsigned long t0 = h + Sigma1(e) + Ch(e, f, g) + K[i] + W[i];       \
-    unsigned long t1 = Sigma0(a) + Maj(a, b, c);                        \
-    d += t0;                                                            \
-    h = t0 + t1;                                                        \
+#define RND(a,b,c,d,e,f,g,h,i)                                           \
+  do {                                                                   \
+    unsigned long t0 = h + Sigma1(e) + Sha256_Ch(e, f, g) + K[i] + W[i]; \
+    unsigned long t1 = Sigma0(a) + Sha256_Maj(a, b, c);                  \
+    d += t0;                                                             \
+    h = t0 + t1;                                                         \
   } while(0)
 
   for(i = 0; i < 64; ++i) {

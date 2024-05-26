@@ -110,6 +110,7 @@ struct mbed_ssl_backend_data {
   const char *protocols[3];
 #endif
   int *ciphersuites;
+  BIT(initialized); /* mbedtls_ssl_context is initialized */
 };
 
 /* apply threading? */
@@ -504,6 +505,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   char errorbuf[128];
 
   DEBUGASSERT(backend);
+  DEBUGASSERT(!backend->initialized);
 
   if((conn_config->version == CURL_SSLVERSION_SSLv2) ||
      (conn_config->version == CURL_SSLVERSION_SSLv3)) {
@@ -739,6 +741,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
   mbedtls_ssl_init(&backend->ssl);
+  backend->initialized = TRUE;
 
   /* new profile with RSA min key len = 1024 ... */
   mbedtls_ssl_conf_cert_profile(&backend->config,
@@ -902,8 +905,6 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     (struct mbed_ssl_backend_data *)connssl->backend;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   const mbedtls_x509_crt *peercert;
-  char cipher_str[64];
-  uint16_t cipher_id;
 #ifndef CURL_DISABLE_PROXY
   const char * const pinnedpubkey = Curl_ssl_cf_is_proxy(cf)?
     data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY]:
@@ -932,11 +933,18 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  cipher_id = (uint16_t)
-              mbedtls_ssl_get_ciphersuite_id_from_ssl(&backend->ssl);
-  mbed_cipher_suite_get_str(cipher_id, cipher_str, sizeof(cipher_str), true);
-  infof(data, "mbedTLS: Handshake complete, cipher is %s", cipher_str);
-
+#if MBEDTLS_VERSION_NUMBER >= 0x03020000
+  {
+    char cipher_str[64];
+    uint16_t cipher_id;
+    cipher_id = (uint16_t)
+                mbedtls_ssl_get_ciphersuite_id_from_ssl(&backend->ssl);
+    mbed_cipher_suite_get_str(cipher_id, cipher_str, sizeof(cipher_str), true);
+    infof(data, "mbedTLS: Handshake complete, cipher is %s", cipher_str);
+  }
+#else
+  infof(data, "mbedTLS: Handshake complete");
+#endif
   ret = mbedtls_ssl_get_verify_result(&backend->ssl);
 
   if(!conn_config->verifyhost)
@@ -1159,28 +1167,34 @@ static void mbedtls_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct ssl_connect_data *connssl = cf->ctx;
   struct mbed_ssl_backend_data *backend =
     (struct mbed_ssl_backend_data *)connssl->backend;
-  char buf[32];
 
   (void)data;
   DEBUGASSERT(backend);
+  if(backend->initialized) {
+    char buf[32];
+    int ret;
 
-  /* Maybe the server has already sent a close notify alert.
-     Read it to avoid an RST on the TCP connection. */
-  (void)mbedtls_ssl_read(&backend->ssl, (unsigned char *)buf, sizeof(buf));
+    /* Maybe the server has already sent a close notify alert.
+       Read it to avoid an RST on the TCP connection. */
+    (void)mbedtls_ssl_read(&backend->ssl, (unsigned char *)buf, sizeof(buf));
+    ret = mbedtls_ssl_close_notify(&backend->ssl);
+    CURL_TRC_CF(data, cf, "close_notify() -> %x", ret);
 
-  mbedtls_pk_free(&backend->pk);
-  mbedtls_x509_crt_free(&backend->clicert);
-  mbedtls_x509_crt_free(&backend->cacert);
+    mbedtls_pk_free(&backend->pk);
+    mbedtls_x509_crt_free(&backend->clicert);
+    mbedtls_x509_crt_free(&backend->cacert);
 #ifdef MBEDTLS_X509_CRL_PARSE_C
-  mbedtls_x509_crl_free(&backend->crl);
+    mbedtls_x509_crl_free(&backend->crl);
 #endif
-  Curl_safefree(backend->ciphersuites);
-  mbedtls_ssl_config_free(&backend->config);
-  mbedtls_ssl_free(&backend->ssl);
-  mbedtls_ctr_drbg_free(&backend->ctr_drbg);
+    Curl_safefree(backend->ciphersuites);
+    mbedtls_ssl_config_free(&backend->config);
+    mbedtls_ssl_free(&backend->ssl);
+    mbedtls_ctr_drbg_free(&backend->ctr_drbg);
 #ifndef THREADING_SUPPORT
-  mbedtls_entropy_free(&backend->entropy);
+    mbedtls_entropy_free(&backend->entropy);
 #endif /* THREADING_SUPPORT */
+    backend->initialized = FALSE;
+  }
 }
 
 static ssize_t mbed_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
@@ -1501,7 +1515,6 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   mbedtls_sha256sum,                /* sha256sum */
   NULL,                             /* associate_connection */
   NULL,                             /* disassociate_connection */
-  NULL,                             /* free_multi_ssl_backend_data */
   mbed_recv,                        /* recv decrypted data */
   mbed_send,                        /* send data to encrypt */
 };

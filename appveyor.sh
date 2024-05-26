@@ -42,8 +42,11 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   [ "${PRJ_CFG}" = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
   [ "${PRJ_CFG}" = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
   [[ "${PRJ_GEN}" = *'Visual Studio'* ]] && options+=' -DCMAKE_VS_GLOBALS=TrackFileAccess=false'
-  # Fails to run without this run due to missing MSVCR90.dll
-  [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ] && options+=' -DCURL_STATIC_CRT=ON'
+  if [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ]; then
+    [ "${PRJ_CFG}" = 'Debug' ] && [ "${DEBUG}" = 'ON' ] && [ "${SHARED}" = 'ON' ] && SKIP_RUN='Crash on startup in -DDEBUGBUILD shared builds'
+    # Fails to run without this due to missing MSVCR90.dll / MSVCR90D.dll
+    options+=' -DCURL_STATIC_CRT=ON'
+  fi
   # shellcheck disable=SC2086
   cmake -B _bld "-G${PRJ_GEN}" ${TARGET:-} ${options} \
     "-DCURL_USE_OPENSSL=${OPENSSL}" \
@@ -59,7 +62,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     '-DCMAKE_INSTALL_PREFIX=C:/curl' \
     "-DCMAKE_BUILD_TYPE=${PRJ_CFG}"
   # shellcheck disable=SC2086
-  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --clean-first -- ${BUILD_OPT:-}
+  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}
   if [ "${SHARED}" = 'ON' ]; then
     cp -f -p _bld/lib/*.dll _bld/src/
   fi
@@ -99,24 +102,11 @@ EOF
     rm _make.bat
   )
   curl="builds/libcurl-vc14.10-x64-${PATHPART}-dll-ssl-dll-ipv6-sspi/bin/curl.exe"
-elif [ "${BUILD_SYSTEM}" = 'autotools' ]; then
-  autoreconf -fi
-  (
-    mkdir _bld
-    cd _bld
-    # shellcheck disable=SC2086
-    ../configure ${CONFIG_ARGS:-}
-    make -j2 V=1
-    make -j2 V=1 examples
-    cd tests
-    make -j2 V=1
-  )
-  curl='_bld/src/curl.exe'
 fi
 
 find . -name '*.exe' -o -name '*.dll'
 if [ -z "${SKIP_RUN:-}" ]; then
-  "${curl}" --version
+  "${curl}" --disable --version
 else
   echo "Skip running curl.exe. Reason: ${SKIP_RUN}"
 fi
@@ -133,16 +123,14 @@ if [ "${TESTING}" = 'ON' ]; then
   export TFLAGS=''
   if [ -x "$(cygpath -u "${WINDIR}/System32/curl.exe")" ]; then
     TFLAGS+=" -ac $(cygpath -u "${WINDIR}/System32/curl.exe")"
-  elif [ -x "$(cygpath -u "C:/msys64/usr/bin/curl.exe")" ]; then
-    TFLAGS+=" -ac $(cygpath -u "C:/msys64/usr/bin/curl.exe")"
+  elif [ -x "$(cygpath -u 'C:/msys64/usr/bin/curl.exe')" ]; then
+    TFLAGS+=" -ac $(cygpath -u 'C:/msys64/usr/bin/curl.exe')"
   fi
   TFLAGS+=" ${DISABLED_TESTS:-}"
   if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
     ls _bld/lib/*.dll >/dev/null 2>&1 && cp -f -p _bld/lib/*.dll _bld/tests/libtest/
     cmake --build _bld --config "${PRJ_CFG}" --target test-ci
-  elif [ "${BUILD_SYSTEM}" = 'autotools' ]; then
-    make -C _bld -j2 V=1 test-ci
   else
     (
       TFLAGS="-a -p !flaky -r -rm ${TFLAGS}"

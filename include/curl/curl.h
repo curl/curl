@@ -34,17 +34,25 @@
 #endif
 
 /* Compile-time deprecation macros. */
-#if defined(__GNUC__) &&                                                \
-  ((__GNUC__ > 12) || ((__GNUC__ == 12) && (__GNUC_MINOR__ >= 1 ))) &&  \
+#if (defined(__GNUC__) &&                                               \
+  ((__GNUC__ > 12) || ((__GNUC__ == 12) && (__GNUC_MINOR__ >= 1 ))) ||  \
+  defined(__IAR_SYSTEMS_ICC__)) &&                                      \
   !defined(__INTEL_COMPILER) &&                                         \
   !defined(CURL_DISABLE_DEPRECATION) && !defined(BUILDING_LIBCURL)
 #define CURL_DEPRECATED(version, message)                       \
   __attribute__((deprecated("since " # version ". " message)))
+#if defined(__IAR_SYSTEMS_ICC__)
+#define CURL_IGNORE_DEPRECATION(statements) \
+      _Pragma("diag_suppress=Pe1444") \
+      statements \
+      _Pragma("diag_default=Pe1444")
+#else
 #define CURL_IGNORE_DEPRECATION(statements) \
       _Pragma("GCC diagnostic push") \
       _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"") \
       statements \
       _Pragma("GCC diagnostic pop")
+#endif
 #else
 #define CURL_DEPRECATED(version, message)
 #define CURL_IGNORE_DEPRECATION(statements)     statements

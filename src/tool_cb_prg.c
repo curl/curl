@@ -53,7 +53,7 @@
      printf "%d, ", sin($i/200 * 2 * $pi) * 500000 + 500000;
    }
 */
-static const unsigned int sinus[] = {
+static const int sinus[] = {
   515704, 531394, 547052, 562664, 578214, 593687, 609068, 624341, 639491,
   654504, 669364, 684057, 698568, 712883, 726989, 740870, 754513, 767906,
   781034, 793885, 806445, 818704, 830647, 842265, 853545, 864476, 875047,
@@ -194,7 +194,7 @@ int tool_progress_cb(void *clientp,
     double frac;
     double percent;
     int barwidth;
-    int num;
+    size_t num;
     if(point > total)
       /* we have got more than the expected total! */
       total = point;
@@ -202,7 +202,7 @@ int tool_progress_cb(void *clientp,
     frac = (double)point / (double)total;
     percent = frac * 100.0;
     barwidth = bar->width - 7;
-    num = (int) (((double)barwidth) * frac);
+    num = (size_t) (((double)barwidth) * frac);
     if(num > MAX_BARLENGTH)
       num = MAX_BARLENGTH;
     memset(line, '#', num);
@@ -257,7 +257,7 @@ unsigned int get_terminal_columns(void)
 #elif defined(TIOCGWINSZ)
     struct winsize ts;
     if(!ioctl(STDIN_FILENO, TIOCGWINSZ, &ts))
-      cols = ts.ws_col;
+      cols = (int)ts.ws_col;
 #elif defined(_WIN32)
     {
       HANDLE  stderr_hnd = GetStdHandle(STD_ERROR_HANDLE);
@@ -274,8 +274,8 @@ unsigned int get_terminal_columns(void)
       }
     }
 #endif /* TIOCGSIZE */
-    if(cols < 10000)
-      width = cols;
+    if(cols >= 0 && cols < 10000)
+      width = (unsigned int)cols;
   }
   if(!width)
     width = 79;
@@ -285,7 +285,7 @@ unsigned int get_terminal_columns(void)
 void progressbarinit(struct ProgressData *bar,
                      struct OperationConfig *config)
 {
-  int cols;
+  unsigned int cols;
   memset(bar, 0, sizeof(struct ProgressData));
 
   /* pass the resume from value through to the progress function so it can
@@ -297,7 +297,7 @@ void progressbarinit(struct ProgressData *bar,
   if(cols > MAX_BARLENGTH)
     bar->width = MAX_BARLENGTH;
   else if(cols > 20)
-    bar->width = cols;
+    bar->width = (int)cols;
 
   bar->out = tool_stderr;
   bar->tick = 150;

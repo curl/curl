@@ -474,6 +474,25 @@ class CurlClient:
                          with_headers=with_headers,
                          with_profile=with_profile)
 
+    def http_delete(self, urls: List[str],
+                    alpn_proto: Optional[str] = None,
+                    with_stats: bool = True,
+                    with_profile: bool = False,
+                    extra_args: Optional[List[str]] = None):
+        if extra_args is None:
+            extra_args = []
+        extra_args.extend([
+            '-X', 'DELETE', '-o', '/dev/null',
+        ])
+        if with_stats:
+            extra_args.extend([
+                '-w', '%{json}\\n'
+            ])
+        return self._raw(urls, alpn_proto=alpn_proto, options=extra_args,
+                         with_stats=with_stats,
+                         with_headers=False,
+                         with_profile=with_profile)
+
     def http_put(self, urls: List[str], data=None, fdata=None,
                  alpn_proto: Optional[str] = None,
                  with_stats: bool = True,
@@ -519,6 +538,78 @@ class CurlClient:
                          with_stats=with_stats,
                          with_headers=with_headers)
 
+    def ftp_get(self, urls: List[str],
+                      with_stats: bool = True,
+                      with_profile: bool = False,
+                      no_save: bool = False,
+                      extra_args: List[str] = None):
+        if extra_args is None:
+            extra_args = []
+        if no_save:
+            extra_args.extend([
+                '-o', '/dev/null',
+            ])
+        else:
+            extra_args.extend([
+                '-o', 'download_#1.data',
+            ])
+        # remove any existing ones
+        for i in range(100):
+            self._rmf(self.download_file(i))
+        if with_stats:
+            extra_args.extend([
+                '-w', '%{json}\\n'
+            ])
+        return self._raw(urls, options=extra_args,
+                         with_stats=with_stats,
+                         with_headers=False,
+                         with_profile=with_profile)
+
+    def ftp_ssl_get(self, urls: List[str],
+                      with_stats: bool = True,
+                      with_profile: bool = False,
+                      no_save: bool = False,
+                      extra_args: List[str] = None):
+        if extra_args is None:
+            extra_args = []
+        extra_args.extend([
+            '--ssl-reqd',
+        ])
+        return self.ftp_get(urls=urls, with_stats=with_stats,
+                            with_profile=with_profile, no_save=no_save,
+                            extra_args=extra_args)
+
+    def ftp_upload(self, urls: List[str], fupload,
+                   with_stats: bool = True,
+                   with_profile: bool = False,
+                   extra_args: List[str] = None):
+        if extra_args is None:
+            extra_args = []
+        extra_args.extend([
+            '--upload-file', fupload
+        ])
+        if with_stats:
+            extra_args.extend([
+                '-w', '%{json}\\n'
+            ])
+        return self._raw(urls, options=extra_args,
+                         with_stats=with_stats,
+                         with_headers=False,
+                         with_profile=with_profile)
+
+    def ftp_ssl_upload(self, urls: List[str], fupload,
+                       with_stats: bool = True,
+                       with_profile: bool = False,
+                       extra_args: List[str] = None):
+        if extra_args is None:
+            extra_args = []
+        extra_args.extend([
+            '--ssl-reqd',
+        ])
+        return self.ftp_upload(urls=urls, fupload=fupload,
+                               with_stats=with_stats, with_profile=with_profile,
+                               extra_args=extra_args)
+
     def response_file(self, idx: int):
         return os.path.join(self._run_dir, f'download_{idx}.data')
 
@@ -541,11 +632,11 @@ class CurlClient:
         started_at = datetime.now()
         exception = None
         profile = None
+        started_at = datetime.now()
         try:
             with open(self._stdoutfile, 'w') as cout:
                 with open(self._stderrfile, 'w') as cerr:
                     if with_profile:
-                        started_at = datetime.now()
                         end_at = started_at + timedelta(seconds=self._timeout) \
                             if self._timeout else None
                         log.info(f'starting: {args}')
@@ -575,7 +666,10 @@ class CurlClient:
                                            timeout=self._timeout)
                         exitcode = p.returncode
         except subprocess.TimeoutExpired:
-            log.warning(f'Timeout after {self._timeout}s: {args}')
+            now = datetime.now()
+            duration = now - started_at
+            log.warning(f'Timeout at {now} after {duration.total_seconds()}s '
+                        f'(configured {self._timeout}s): {args}')
             exitcode = -1
             exception = 'TimeoutExpired'
         coutput = open(self._stdoutfile).readlines()

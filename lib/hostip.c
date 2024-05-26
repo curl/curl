@@ -167,17 +167,12 @@ create_hostcache_id(const char *name,
                     int port, char *ptr, size_t buflen)
 {
   size_t len = nlen ? nlen : strlen(name);
-  size_t olen = 0;
   DEBUGASSERT(buflen >= MAX_HOSTCACHE_LEN);
   if(len > (buflen - 7))
     len = buflen - 7;
   /* store and lower case the name */
-  while(len--) {
-    *ptr++ = Curl_raw_tolower(*name++);
-    olen++;
-  }
-  olen += msnprintf(ptr, 7, ":%u", port);
-  return olen;
+  Curl_strntolower(ptr, name, len);
+  return msnprintf(&ptr[len], 7, ":%u", port) + len;
 }
 
 struct hostcache_prune_data {
@@ -249,7 +244,7 @@ void Curl_hostcache_prune(struct Curl_easy *data)
   if(data->share)
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
-  time(&now);
+  now = time(NULL);
 
   do {
     /* Remove outdated and unused entries from the hostcache */
@@ -303,7 +298,7 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
     /* See whether the returned entry is stale. Done before we release lock */
     struct hostcache_prune_data user;
 
-    time(&user.now);
+    user.now = time(NULL);
     user.cache_timeout = data->set.dns_cache_timeout;
     user.oldest = 0;
 

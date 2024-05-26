@@ -3476,7 +3476,6 @@ const struct Curl_ssl Curl_ssl_sectransp = {
   sectransp_sha256sum,                /* sha256sum */
   NULL,                               /* associate_connection */
   NULL,                               /* disassociate_connection */
-  NULL,                               /* free_multi_ssl_backend_data */
   sectransp_recv,                     /* recv decrypted data */
   sectransp_send,                     /* send data to encrypt */
 };

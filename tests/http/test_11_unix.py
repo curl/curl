@@ -81,6 +81,8 @@ Content-Length: 19
 
             except ConnectionAbortedError:
                 self._done = True
+            except OSError:
+                self._done = True
 
 
 class TestUnix:

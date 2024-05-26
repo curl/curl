@@ -1,0 +1,280 @@
+# Copyright (C) Viktor Szakats
+#
+# SPDX-License-Identifier: curl
+
+name: windows
+
+on:
+  push:
+    branches:
+      - master
+      - '*/ci'
+    paths-ignore:
+      - '**/*.md'
+      - '.azure-pipelines.yml'
+      - '.circleci/**'
+      - '.cirrus.yml'
+      - 'appveyor.*'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+      - 'winbuild/**'
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - '**/*.md'
+      - '.azure-pipelines.yml'
+      - '.circleci/**'
+      - '.cirrus.yml'
+      - 'appveyor.*'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+      - 'winbuild/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  cygwin:
+    name: "cygwin (${{ matrix.build }}, ${{ matrix.platform }}, ${{ matrix.config }})"
+    runs-on: windows-latest
+    timeout-minutes: 45
+    env:
+      SHELLOPTS: 'igncr'
+    strategy:
+      matrix:
+        include:
+          - { build: 'automake', platform: 'x86_64', tflags: '', config: '--enable-debug --disable-threaded-resolver' }
+          - { build: 'cmake'   , platform: 'x86_64', tflags: '', config: '-DCURL_USE_OPENSSL=ON' }
+      fail-fast: false
+    steps:
+      - run: git config --global core.autocrlf input
+      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
+      - uses: cygwin/cygwin-install-action@006ad0b0946ca6d0a3ea2d4437677fa767392401 # v4
+        with:
+          platform: ${{ matrix.platform }}
+          # https://cygwin.com/cgi-bin2/package-grep.cgi
+          packages: autoconf libtool ${{ matrix.build }} gcc-core gcc-g++ binutils make libssl-devel zlib-devel libbrotli-devel libnghttp2-devel libpsl-devel libssh2-devel
+          site: https://mirrors.kernel.org/sourceware/cygwin/
+
+      - name: 'autotools configure'
+        if: ${{ matrix.build == 'automake' }}
+        timeout-minutes: 5
+        shell: C:\cygwin\bin\bash.exe '{0}'
+        run: |
+          export PATH="/usr/bin:$(cygpath ${SYSTEMROOT})/system32"
+          autoreconf -fi
+          mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
+            --prefix="${HOME}"/install \
+            --enable-websockets \
+            --with-openssl \
+            --with-libssh2 \
+            ${{ matrix.config }} || { tail -n 1200 config.log; false; }
+
+      - name: 'autotools build'
+        if: ${{ matrix.build == 'automake' }}
+        timeout-minutes: 10
+        shell: C:\cygwin\bin\bash.exe '{0}'
+        run: |
+          make -C bld -j3 V=1 install
+          find . -name '*.exe' -o -name '*.dll'
+          bld/src/curl.exe --disable --version
+
+      - name: 'autotools build examples'
+        if: ${{ matrix.build == 'automake' }}
+        timeout-minutes: 5
+        shell: C:\cygwin\bin\bash.exe '{0}'
+        run: |
+          make -C bld -j3 V=1 examples
+
+      - name: 'autotools build tests'
+        if: ${{ matrix.build == 'automake' }}
+        timeout-minutes: 15
+        shell: C:\cygwin\bin\bash.exe '{0}'
+        run: |
+          make -C bld -j3 -C tests V=1
+
+      - name: 'autotools run tests'
+        if: ${{ matrix.build == 'automake' && matrix.tflags != 'skip' }}
+        timeout-minutes: 40
+        shell: C:\cygwin\bin\bash.exe '{0}'
+        run: |
+          export TFLAGS='-j8 ${{ matrix.tflags }}'
+          if [ -x "$(cygpath -u "${SYSTEMROOT}/System32/curl.exe")" ]; then
+            TFLAGS+=" -ac $(cygpath -u "${SYSTEMROOT}/System32/curl.exe")"
+          fi
+          make -C bld -j3 V=1 test-ci
+
+      - name: 'cmake configure'
+        if: ${{ matrix.build == 'cmake' }}
+        timeout-minutes: 5
+        shell: C:\cygwin\bin\bash.exe '{0}'
+        run: |
+          export PATH="/usr/bin:$(cygpath ${SYSTEMROOT})/system32"
+          cmake -B bld ${options} ${{ matrix.config }} \
+            "-DCMAKE_C_FLAGS=${cflags}" \
+            -DCMAKE_UNITY_BUILD=ON \
+            -DCURL_WERROR=ON \
+            -DBUILD_EXAMPLES=ON \
+            -DENABLE_WEBSOCKETS=ON \
+            -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON
+
+      - name: 'cmake build'
+        if: ${{ matrix.build == 'cmake' }}
+        timeout-minutes: 10
+        shell: C:\cygwin\bin\bash.exe '{0}'
+        run: |
+          cmake --build bld --config '${{ matrix.type }}' --parallel 3
+          [[ '${{ matrix.config }}' != *'BUILD_SHARED_LIBS=OFF'* ]] && cp -f -p bld/lib/*.dll bld/src/
+          find . -name '*.exe' -o -name '*.dll'
+          bld/src/curl.exe --disable --version
+
+  msys2:
+    name: "msys2 (${{ matrix.build }}, ${{ matrix.sys }}, ${{ matrix.env }}, ${{ matrix.config }})"
+    runs-on: windows-latest
+    timeout-minutes: 45
+    strategy:
+      matrix:
+        include:
+          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19                !1233', config: '--enable-debug --disable-threaded-resolver --disable-proxy' }
+          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233', config: '--enable-debug --disable-threaded-resolver' }
+          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233', config: '' }
+          # FIXME: WebSockets test results ignored due to frequent failures on native Windows:
+          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: '!TFTP ~2301 ~2302'       , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', type: 'Debug' }
+          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: 'skip'                    , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', type: 'Release' }
+          - { build: 'cmake'    , sys: 'clang64', env: 'clang-x86_64', tflags: 'skip'                    , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=OFF', type: 'Release' }
+      fail-fast: false
+    steps:
+      - run: git config --global core.autocrlf input
+      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
+      - uses: msys2/setup-msys2@d0e80f58dffbc64f6a3a1f43527d469b4fc7b6c8 # v2
+        if: ${{ matrix.sys == 'msys' }}
+        with:
+          msystem: ${{ matrix.sys }}
+          # https://packages.msys2.org/search
+          install: gcc ${{ matrix.build }} make openssl-devel zlib-devel brotli-devel libnghttp2-devel libpsl-devel libssh2-devel
+      - uses: msys2/setup-msys2@d0e80f58dffbc64f6a3a1f43527d469b4fc7b6c8 # v2
+        if: ${{ matrix.sys != 'msys' }}
+        with:
+          msystem: ${{ matrix.sys }}
+          install: >-
+            mingw-w64-${{ matrix.env }}-cc
+            mingw-w64-${{ matrix.env }}-${{ matrix.build }} make
+            mingw-w64-${{ matrix.env }}-openssl
+
+      - name: 'autotools configure'
+        if: ${{ matrix.build == 'autotools' }}
+        timeout-minutes: 5
+        shell: msys2 {0}
+        run: |
+          autoreconf -fi
+          mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
+            --prefix="${HOME}"/install \
+            --enable-websockets \
+            --with-openssl \
+            --with-libssh2 \
+            ${{ matrix.config }} || { tail -n 1200 config.log; false; }
+
+      - name: 'autotools build'
+        if: ${{ matrix.build == 'autotools' }}
+        timeout-minutes: 10
+        shell: msys2 {0}
+        run: |
+          make -C bld -j3 V=1 install
+          find . -name '*.exe' -o -name '*.dll'
+          bld/src/curl.exe --disable --version
+
+      - name: 'autotools build examples'
+        if: ${{ matrix.build == 'autotools' }}
+        timeout-minutes: 5
+        shell: msys2 {0}
+        run: |
+          make -C bld -j3 V=1 examples
+
+      - name: 'autotools build tests'
+        if: ${{ matrix.build == 'autotools' }}
+        timeout-minutes: 10
+        shell: msys2 {0}
+        run: |
+          make -C bld -j3 -C tests V=1
+
+      - name: 'autotools run tests'
+        if: ${{ matrix.build == 'autotools' && matrix.tflags != 'skip' }}
+        timeout-minutes: 30
+        shell: msys2 {0}
+        run: |
+          export TFLAGS='-j14 ${{ matrix.tflags }}'
+          if [ -x "$(cygpath -u 'C:/msys64/usr/bin/curl.exe')" ]; then
+            TFLAGS+=" -ac $(cygpath -u 'C:/msys64/usr/bin/curl.exe')"
+          fi
+          make -C bld -j3 V=1 test-ci
+
+      - name: 'cmake configure'
+        if: ${{ matrix.build == 'cmake' }}
+        timeout-minutes: 5
+        shell: msys2 {0}
+        run: |
+          if [[ '${{ matrix.env }}' = 'clang'* ]]; then
+            options='-DCMAKE_C_COMPILER=clang'
+          else
+            options='-DCMAKE_C_COMPILER=gcc'
+          fi
+          cflags='-Wno-deprecated-declarations'
+          if [ '${{ matrix.test }}' = 'uwp' ]; then
+            options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
+            pacman --noconfirm --ask 20 --noprogressbar --sync --needed 'mingw-w64-${{ matrix.env }}-winstorecompat-git'
+            specs="$(realpath gcc-specs-uwp)"
+            gcc -dumpspecs | sed -e 's/-lmingwex/-lwindowsapp -lmingwex -lwindowsapp -lwindowsappcompat/' -e 's/-lmsvcrt/-lmsvcr120_app/' > "${specs}"
+            cflags+=" -specs=${specs} -DWINSTORECOMPAT -DWINAPI_FAMILY=WINAPI_FAMILY_APP"
+            # CMake (as of v3.26.4) gets confused and applies the MSVC rc.exe command-line
+            # template to windres. Reset it to the windres template manually:
+            rcopts='<CMAKE_RC_COMPILER> -O coff <DEFINES> <INCLUDES> <FLAGS> <SOURCE> <OBJECT>'
+          else
+            rcopts=''
+          fi
+          [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
+          [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
+          [ '${{ matrix.type }}' = 'Release' ] && [[ '${{ matrix.config }}' = *'ENABLE_DEBUG=ON'* ]] && cflags+=' -DDEBUGBUILD'
+          cmake -B bld ${options} ${{ matrix.config }} \
+            "-DCMAKE_C_FLAGS=${cflags}" \
+            "-DCMAKE_RC_COMPILE_OBJECT=${rcopts}" \
+            "-DCMAKE_BUILD_TYPE=${{ matrix.type }}" \
+            -DCMAKE_UNITY_BUILD=ON \
+            -DCURL_WERROR=ON \
+            -DBUILD_EXAMPLES=ON \
+            -DENABLE_WEBSOCKETS=ON \
+            -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON
+
+      - name: 'cmake build'
+        if: ${{ matrix.build == 'cmake' }}
+        timeout-minutes: 10
+        shell: msys2 {0}
+        run: |
+          cmake --build bld --config '${{ matrix.type }}' --parallel 3
+          [[ '${{ matrix.config }}' != *'BUILD_SHARED_LIBS=OFF'* ]] && cp -f -p bld/lib/*.dll bld/src/
+          find . -name '*.exe' -o -name '*.dll'
+          bld/src/curl.exe --disable --version
+
+      - name: 'cmake build tests'
+        if: ${{ matrix.build == 'cmake' }}
+        timeout-minutes: 10
+        shell: msys2 {0}
+        run: |
+          cmake --build bld --config '${{ matrix.type }}' --parallel 3 --target testdeps
+
+      - name: 'cmake run tests'
+        if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skip' }}
+        timeout-minutes: 40
+        shell: msys2 {0}
+        run: |
+          export TFLAGS='-j14 ${{ matrix.tflags }}'
+          if [ -x "$(cygpath -u 'C:/msys64/usr/bin/curl.exe')" ]; then
+            TFLAGS+=" -ac $(cygpath -u 'C:/msys64/usr/bin/curl.exe')"
+          fi
+          ls bld/lib/*.dll >/dev/null 2>&1 && cp -f -p bld/lib/*.dll bld/tests/libtest/
+          cmake --build bld --config '${{ matrix.type }}' --target test-ci

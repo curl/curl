@@ -1,0 +1,63 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+Transfer-Encoding
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Mon, 29 Nov 2004 21:56:53 GMT
+Server: Apache
+Transfer-Encoding: chunked, gzip
+
+0
+
+</data>
+
+<datacheck>
+HTTP/1.1 200 OK
+Date: Mon, 29 Nov 2004 21:56:53 GMT
+Server: Apache
+</datacheck>
+
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+libz
+</features>
+<server>
+http
+</server>
+<name>
+HTTP transfer-encoding wrong order
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --tr-encoding
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Connection: TE
+TE: gzip
+
+</protocol>
+<errorcode>
+61
+</errorcode>
+</verify>
+</testcase>

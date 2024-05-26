@@ -135,8 +135,6 @@ struct Curl_ssl {
   bool (*attach_data)(struct Curl_cfilter *cf, struct Curl_easy *data);
   void (*detach_data)(struct Curl_cfilter *cf, struct Curl_easy *data);
 
-  void (*free_multi_ssl_backend_data)(struct multi_ssl_backend_data *mbackend);
-
   ssize_t (*recv_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
                         char *buf, size_t len, CURLcode *code);
   ssize_t (*send_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,

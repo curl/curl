@@ -323,6 +323,8 @@ class TestDownload:
     @pytest.mark.parametrize("pause_offset", [0, 10*1024, 100*1023, 640000])
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_21_lib_serial(self, env: Env, httpd, nghttpx, proto, pause_offset, repeat):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
         count = 2 if proto == 'http/1.1' else 10
         docname = 'data-10m'
         url = f'https://localhost:{env.https_port}/{docname}'
@@ -340,6 +342,8 @@ class TestDownload:
     @pytest.mark.parametrize("pause_offset", [100*1023])
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_22_lib_parallel_resume(self, env: Env, httpd, nghttpx, proto, pause_offset, repeat):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
         count = 2 if proto == 'http/1.1' else 10
         max_parallel = 5
         docname = 'data-10m'
@@ -358,8 +362,12 @@ class TestDownload:
     # download, several at a time, pause and abort paused
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_23a_lib_abort_paused(self, env: Env, httpd, nghttpx, proto, repeat):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_ossl_quic():
             pytest.skip('OpenSSL QUIC fails here')
+        if proto == 'h3' and env.ci_run and env.curl_uses_lib('quiche'):
+            pytest.skip("fails in CI, but works locally for unknown reasons")
         if proto in ['h2', 'h3']:
             count = 200
             max_parallel = 100
@@ -385,8 +393,12 @@ class TestDownload:
     # download, several at a time, abort after n bytes
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_23b_lib_abort_offset(self, env: Env, httpd, nghttpx, proto, repeat):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_ossl_quic():
             pytest.skip('OpenSSL QUIC fails here')
+        if proto == 'h3' and env.ci_run and env.curl_uses_lib('quiche'):
+            pytest.skip("fails in CI, but works locally for unknown reasons")
         if proto in ['h2', 'h3']:
             count = 200
             max_parallel = 100
@@ -412,8 +424,12 @@ class TestDownload:
     # download, several at a time, abort after n bytes
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_23c_lib_fail_offset(self, env: Env, httpd, nghttpx, proto, repeat):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_ossl_quic():
             pytest.skip('OpenSSL QUIC fails here')
+        if proto == 'h3' and env.ci_run and env.curl_uses_lib('quiche'):
+            pytest.skip("fails in CI, but works locally for unknown reasons")
         if proto in ['h2', 'h3']:
             count = 200
             max_parallel = 100

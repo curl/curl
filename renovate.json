@@ -1,0 +1,87 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:best-practices",
+    ":disableDependencyDashboard"
+  ],
+  "semanticCommitType": "ci",
+  "packageRules": [
+    {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "commitMessagePrefix": "gha: ",
+      "labels": [
+        "CI"
+      ]
+    },
+    {
+      "matchUpdateTypes": [
+        "pin",
+        "pinDigest",
+        "digest"
+      ],
+      "commitMessagePrefix": "ci: ",
+      "labels": [
+        "CI"
+      ]
+    },
+    {
+      "matchManagers": [
+        "custom.regex"
+      ],
+      "commitMessagePrefix": "ci: ",
+      "labels": [
+        "CI"
+      ]
+    },
+    {
+      "matchDepNames": [
+        "debian"
+      ],
+      "matchFileNames": [
+        ".github/workflows/linux-old.yml"
+      ],
+      "enabled": false
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "^.github/scripts/VERSIONS$"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?( extractVersion=(?<extractVersion>.+?))?( registryUrl=(?<registryUrl>.*?))?\\s.*?_VER=(?<currentValue>.*)\\s"
+      ],
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}",
+      "extractVersionTemplate": "{{#if extractVersion}}{{{extractVersion}}}{{else}}^v?(?<version>.+)${{/if}}"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "^.github/workflows/.*\\.yml$"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?( extractVersion=(?<extractVersion>.+?))?( registryUrl=(?<registryUrl>.*?))?\\s.*?-version:\\s*(?<currentValue>.*)\\s"
+      ],
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}",
+      "extractVersionTemplate": "{{#if extractVersion}}{{{extractVersion}}}{{else}}^v?(?<version>.+)${{/if}}"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "^.github/workflows/linux.yml$",
+        "^.github/workflows/osslq-linux.yml$"
+      ],
+      "matchStrings": [
+        "openssl3-version: (?<currentValue>.*)\\s"
+      ],
+      "datasourceTemplate": "github-tags",
+      "depNameTemplate": "openssl/openssl",
+      "versioningTemplate": "semver",
+      "extractVersionTemplate": "^openssl-(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$",
+      "registryUrlTemplate": "https://github.com"
+    }
+  ]
+}

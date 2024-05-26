@@ -310,7 +310,7 @@ AS_HELP_STRING([--with-test-nghttpx=PATH],[where to find nghttpx for testing]),
 )
 AC_SUBST(TEST_NGHTTPX)
 
-CADDY=caddy
+CADDY=/usr/bin/caddy
 AC_ARG_WITH(test-caddy,dnl
 AS_HELP_STRING([--with-test-caddy=PATH],[where to find caddy for testing]),
   CADDY=$withval
@@ -319,6 +319,16 @@ AS_HELP_STRING([--with-test-caddy=PATH],[where to find caddy for testing]),
   fi
 )
 AC_SUBST(CADDY)
+
+VSFTPD=/usr/sbin/vsftpd
+AC_ARG_WITH(test-vsftpd,dnl
+AS_HELP_STRING([--with-test-vsftpd=PATH],[where to find vsftpd for testing]),
+  VSFTPD=$withval
+  if test X"$OPT_VSFTPD" = "Xno" ; then
+      VSFTPD=""
+  fi
+)
+AC_SUBST(VSFTPD)
 
 dnl we'd like a httpd+apachectl as test server
 dnl
@@ -5027,7 +5037,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   Features:         ${SUPPORT_FEATURES}
 ])
 
-non13=`echo "$TLSCHOICE" | grep -Ei 'bearssl|secure-transport|mbedtls'`;
+non13=`echo "$TLSCHOICE" | $EGREP -i 'bearssl|secure-transport|mbedtls'`;
 if test -n "$non13"; then
  cat >&2 << _EOF
   WARNING: A selected TLS library ($TLSCHOICE) does not support TLS 1.3!

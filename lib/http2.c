@@ -1716,6 +1716,15 @@ static ssize_t http2_handle_stream_close(struct Curl_cfilter *cf,
     return -1;
   }
   else if(stream->error != NGHTTP2_NO_ERROR) {
+    if(stream->resp_hds_complete && data->req.no_body) {
+      CURL_TRC_CF(data, cf, "[%d] error after response headers, but we did "
+                  "not want a body anyway, ignore: %s (err %u)",
+                  stream->id, nghttp2_http2_strerror(stream->error),
+                  stream->error);
+      stream->close_handled = TRUE;
+      *err = CURLE_OK;
+      goto out;
+    }
     failf(data, "HTTP/2 stream %u was not closed cleanly: %s (err %u)",
           stream->id, nghttp2_http2_strerror(stream->error),
           stream->error);

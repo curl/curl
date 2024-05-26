@@ -160,6 +160,7 @@ static const struct Curl_OID OIDtable[] = {
   { "2.16.840.1.101.3.4.2.1",   "sha256" },
   { "2.16.840.1.101.3.4.2.2",   "sha384" },
   { "2.16.840.1.101.3.4.2.3",   "sha512" },
+  { "1.2.840.113549.1.9.2",     "unstructuredName" },
   { (const char *) NULL,        (const char *) NULL }
 };
 
@@ -467,6 +468,8 @@ static CURLcode OID2str(struct dynbuf *store,
         const struct Curl_OID *op = searchOID(Curl_dyn_ptr(&buf));
         if(op)
           result = Curl_dyn_add(store, op->textoid);
+        else
+          result = CURLE_BAD_FUNCTION_ARGUMENT;
         Curl_dyn_free(&buf);
       }
     }

@@ -277,14 +277,14 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx);
  * F and G are optimized compared to their RFC 1320 definitions, with the
  * optimization for F borrowed from Colin Plumb's MD5 implementation.
  */
-#define F(x, y, z)                      ((z) ^ ((x) & ((y) ^ (z))))
-#define G(x, y, z)                      (((x) & ((y) | (z))) | ((y) & (z)))
-#define H(x, y, z)                      ((x) ^ (y) ^ (z))
+#define MD4_F(x, y, z)                  ((z) ^ ((x) & ((y) ^ (z))))
+#define MD4_G(x, y, z)                  (((x) & ((y) | (z))) | ((y) & (z)))
+#define MD4_H(x, y, z)                  ((x) ^ (y) ^ (z))
 
 /*
  * The MD4 transformation for all three rounds.
  */
-#define STEP(f, a, b, c, d, x, s) \
+#define MD4_STEP(f, a, b, c, d, x, s) \
         (a) += f((b), (c), (d)) + (x); \
         (a) = (((a) << (s)) | (((a) & 0xffffffff) >> (32 - (s))));
 
@@ -297,18 +297,18 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx);
  * doesn't work.
  */
 #if defined(__i386__) || defined(__x86_64__) || defined(__vax__)
-#define SET(n) \
+#define MD4_SET(n) \
         (*(MD4_u32plus *)(void *)&ptr[(n) * 4])
-#define GET(n) \
-        SET(n)
+#define MD4_GET(n) \
+        MD4_SET(n)
 #else
-#define SET(n) \
+#define MD4_SET(n) \
         (ctx->block[(n)] = \
         (MD4_u32plus)ptr[(n) * 4] | \
         ((MD4_u32plus)ptr[(n) * 4 + 1] << 8) | \
         ((MD4_u32plus)ptr[(n) * 4 + 2] << 16) | \
         ((MD4_u32plus)ptr[(n) * 4 + 3] << 24))
-#define GET(n) \
+#define MD4_GET(n) \
         (ctx->block[(n)])
 #endif
 
@@ -316,7 +316,8 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx);
  * This processes one or more 64-byte data blocks, but does NOT update
  * the bit counters.  There are no alignment requirements.
  */
-static const void *body(MD4_CTX *ctx, const void *data, unsigned long size)
+static const void *my_md4_body(MD4_CTX *ctx,
+                               const void *data, unsigned long size)
 {
   const unsigned char *ptr;
   MD4_u32plus a, b, c, d;
@@ -337,58 +338,58 @@ static const void *body(MD4_CTX *ctx, const void *data, unsigned long size)
     saved_d = d;
 
 /* Round 1 */
-    STEP(F, a, b, c, d, SET(0), 3)
-    STEP(F, d, a, b, c, SET(1), 7)
-    STEP(F, c, d, a, b, SET(2), 11)
-    STEP(F, b, c, d, a, SET(3), 19)
-    STEP(F, a, b, c, d, SET(4), 3)
-    STEP(F, d, a, b, c, SET(5), 7)
-    STEP(F, c, d, a, b, SET(6), 11)
-    STEP(F, b, c, d, a, SET(7), 19)
-    STEP(F, a, b, c, d, SET(8), 3)
-    STEP(F, d, a, b, c, SET(9), 7)
-    STEP(F, c, d, a, b, SET(10), 11)
-    STEP(F, b, c, d, a, SET(11), 19)
-    STEP(F, a, b, c, d, SET(12), 3)
-    STEP(F, d, a, b, c, SET(13), 7)
-    STEP(F, c, d, a, b, SET(14), 11)
-    STEP(F, b, c, d, a, SET(15), 19)
+    MD4_STEP(MD4_F, a, b, c, d, MD4_SET(0), 3)
+    MD4_STEP(MD4_F, d, a, b, c, MD4_SET(1), 7)
+    MD4_STEP(MD4_F, c, d, a, b, MD4_SET(2), 11)
+    MD4_STEP(MD4_F, b, c, d, a, MD4_SET(3), 19)
+    MD4_STEP(MD4_F, a, b, c, d, MD4_SET(4), 3)
+    MD4_STEP(MD4_F, d, a, b, c, MD4_SET(5), 7)
+    MD4_STEP(MD4_F, c, d, a, b, MD4_SET(6), 11)
+    MD4_STEP(MD4_F, b, c, d, a, MD4_SET(7), 19)
+    MD4_STEP(MD4_F, a, b, c, d, MD4_SET(8), 3)
+    MD4_STEP(MD4_F, d, a, b, c, MD4_SET(9), 7)
+    MD4_STEP(MD4_F, c, d, a, b, MD4_SET(10), 11)
+    MD4_STEP(MD4_F, b, c, d, a, MD4_SET(11), 19)
+    MD4_STEP(MD4_F, a, b, c, d, MD4_SET(12), 3)
+    MD4_STEP(MD4_F, d, a, b, c, MD4_SET(13), 7)
+    MD4_STEP(MD4_F, c, d, a, b, MD4_SET(14), 11)
+    MD4_STEP(MD4_F, b, c, d, a, MD4_SET(15), 19)
 
 /* Round 2 */
-    STEP(G, a, b, c, d, GET(0) + 0x5a827999, 3)
-    STEP(G, d, a, b, c, GET(4) + 0x5a827999, 5)
-    STEP(G, c, d, a, b, GET(8) + 0x5a827999, 9)
-    STEP(G, b, c, d, a, GET(12) + 0x5a827999, 13)
-    STEP(G, a, b, c, d, GET(1) + 0x5a827999, 3)
-    STEP(G, d, a, b, c, GET(5) + 0x5a827999, 5)
-    STEP(G, c, d, a, b, GET(9) + 0x5a827999, 9)
-    STEP(G, b, c, d, a, GET(13) + 0x5a827999, 13)
-    STEP(G, a, b, c, d, GET(2) + 0x5a827999, 3)
-    STEP(G, d, a, b, c, GET(6) + 0x5a827999, 5)
-    STEP(G, c, d, a, b, GET(10) + 0x5a827999, 9)
-    STEP(G, b, c, d, a, GET(14) + 0x5a827999, 13)
-    STEP(G, a, b, c, d, GET(3) + 0x5a827999, 3)
-    STEP(G, d, a, b, c, GET(7) + 0x5a827999, 5)
-    STEP(G, c, d, a, b, GET(11) + 0x5a827999, 9)
-    STEP(G, b, c, d, a, GET(15) + 0x5a827999, 13)
+    MD4_STEP(MD4_G, a, b, c, d, MD4_GET(0) + 0x5a827999, 3)
+    MD4_STEP(MD4_G, d, a, b, c, MD4_GET(4) + 0x5a827999, 5)
+    MD4_STEP(MD4_G, c, d, a, b, MD4_GET(8) + 0x5a827999, 9)
+    MD4_STEP(MD4_G, b, c, d, a, MD4_GET(12) + 0x5a827999, 13)
+    MD4_STEP(MD4_G, a, b, c, d, MD4_GET(1) + 0x5a827999, 3)
+    MD4_STEP(MD4_G, d, a, b, c, MD4_GET(5) + 0x5a827999, 5)
+    MD4_STEP(MD4_G, c, d, a, b, MD4_GET(9) + 0x5a827999, 9)
+    MD4_STEP(MD4_G, b, c, d, a, MD4_GET(13) + 0x5a827999, 13)
+    MD4_STEP(MD4_G, a, b, c, d, MD4_GET(2) + 0x5a827999, 3)
+    MD4_STEP(MD4_G, d, a, b, c, MD4_GET(6) + 0x5a827999, 5)
+    MD4_STEP(MD4_G, c, d, a, b, MD4_GET(10) + 0x5a827999, 9)
+    MD4_STEP(MD4_G, b, c, d, a, MD4_GET(14) + 0x5a827999, 13)
+    MD4_STEP(MD4_G, a, b, c, d, MD4_GET(3) + 0x5a827999, 3)
+    MD4_STEP(MD4_G, d, a, b, c, MD4_GET(7) + 0x5a827999, 5)
+    MD4_STEP(MD4_G, c, d, a, b, MD4_GET(11) + 0x5a827999, 9)
+    MD4_STEP(MD4_G, b, c, d, a, MD4_GET(15) + 0x5a827999, 13)
 
 /* Round 3 */
-    STEP(H, a, b, c, d, GET(0) + 0x6ed9eba1, 3)
-    STEP(H, d, a, b, c, GET(8) + 0x6ed9eba1, 9)
-    STEP(H, c, d, a, b, GET(4) + 0x6ed9eba1, 11)
-    STEP(H, b, c, d, a, GET(12) + 0x6ed9eba1, 15)
-    STEP(H, a, b, c, d, GET(2) + 0x6ed9eba1, 3)
-    STEP(H, d, a, b, c, GET(10) + 0x6ed9eba1, 9)
-    STEP(H, c, d, a, b, GET(6) + 0x6ed9eba1, 11)
-    STEP(H, b, c, d, a, GET(14) + 0x6ed9eba1, 15)
-    STEP(H, a, b, c, d, GET(1) + 0x6ed9eba1, 3)
-    STEP(H, d, a, b, c, GET(9) + 0x6ed9eba1, 9)
-    STEP(H, c, d, a, b, GET(5) + 0x6ed9eba1, 11)
-    STEP(H, b, c, d, a, GET(13) + 0x6ed9eba1, 15)
-    STEP(H, a, b, c, d, GET(3) + 0x6ed9eba1, 3)
-    STEP(H, d, a, b, c, GET(11) + 0x6ed9eba1, 9)
-    STEP(H, c, d, a, b, GET(7) + 0x6ed9eba1, 11)
-    STEP(H, b, c, d, a, GET(15) + 0x6ed9eba1, 15)
+    MD4_STEP(MD4_H, a, b, c, d, MD4_GET(0) + 0x6ed9eba1, 3)
+    MD4_STEP(MD4_H, d, a, b, c, MD4_GET(8) + 0x6ed9eba1, 9)
+    MD4_STEP(MD4_H, c, d, a, b, MD4_GET(4) + 0x6ed9eba1, 11)
+    MD4_STEP(MD4_H, b, c, d, a, MD4_GET(12) + 0x6ed9eba1, 15)
+    MD4_STEP(MD4_H, a, b, c, d, MD4_GET(2) + 0x6ed9eba1, 3)
+    MD4_STEP(MD4_H, d, a, b, c, MD4_GET(10) + 0x6ed9eba1, 9)
+    MD4_STEP(MD4_H, c, d, a, b, MD4_GET(6) + 0x6ed9eba1, 11)
+    MD4_STEP(MD4_H, b, c, d, a, MD4_GET(14) + 0x6ed9eba1, 15)
+    MD4_STEP(MD4_H, a, b, c, d, MD4_GET(1) + 0x6ed9eba1, 3)
+    MD4_STEP(MD4_H, d, a, b, c, MD4_GET(9) + 0x6ed9eba1, 9)
+    MD4_STEP(MD4_H, c, d, a, b, MD4_GET(5) + 0x6ed9eba1, 11)
+    MD4_STEP(MD4_H, b, c, d, a, MD4_GET(13) + 0x6ed9eba1, 15)
+    MD4_STEP(MD4_H, a, b, c, d, MD4_GET(3) + 0x6ed9eba1, 3)
+    MD4_STEP(MD4_H, d, a, b, c, MD4_GET(11) + 0x6ed9eba1, 9)
+    MD4_STEP(MD4_H, c, d, a, b, MD4_GET(7) + 0x6ed9eba1, 11)
+    MD4_STEP(MD4_H, b, c, d, a, MD4_GET(15) + 0x6ed9eba1, 15)
 
     a += saved_a;
     b += saved_b;
@@ -442,11 +443,11 @@ static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
     memcpy(&ctx->buffer[used], data, available);
     data = (const unsigned char *)data + available;
     size -= available;
-    body(ctx, ctx->buffer, 64);
+    my_md4_body(ctx, ctx->buffer, 64);
   }
 
   if(size >= 64) {
-    data = body(ctx, data, size & ~(unsigned long)0x3f);
+    data = my_md4_body(ctx, data, size & ~(unsigned long)0x3f);
     size &= 0x3f;
   }
 
@@ -465,7 +466,7 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 
   if(available < 8) {
     memset(&ctx->buffer[used], 0, available);
-    body(ctx, ctx->buffer, 64);
+    my_md4_body(ctx, ctx->buffer, 64);
     used = 0;
     available = 64;
   }
@@ -482,7 +483,7 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
   ctx->buffer[62] = curlx_ultouc((ctx->hi >> 16)&0xff);
   ctx->buffer[63] = curlx_ultouc(ctx->hi >> 24);
 
-  body(ctx, ctx->buffer, 64);
+  my_md4_body(ctx, ctx->buffer, 64);
 
   result[0] = curlx_ultouc((ctx->a)&0xff);
   result[1] = curlx_ultouc((ctx->a >> 8)&0xff);
