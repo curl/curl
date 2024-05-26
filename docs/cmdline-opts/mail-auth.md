@@ -12,7 +12,7 @@ See-also:
   - mail-rcpt
   - mail-from
 Example:
-  - --mail-auth user@example.come -T mail smtp://example.com/
+  - --mail-auth user@example.com -T mail smtp://example.com/
 ---
 
 # `--mail-auth`
