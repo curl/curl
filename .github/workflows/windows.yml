@@ -74,6 +74,7 @@ jobs:
             --enable-websockets \
             --with-openssl \
             --with-libssh2 \
+            --disable-dependency-tracking \
             ${{ matrix.config }} || { tail -n 1200 config.log; false; }
 
       - name: 'autotools build'
@@ -200,6 +201,7 @@ jobs:
             --enable-websockets \
             --with-openssl \
             --with-libssh2 \
+            --disable-dependency-tracking \
             ${{ matrix.config }} || { tail -n 1200 config.log; false; }
 
       - name: 'autotools build'

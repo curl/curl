@@ -104,7 +104,7 @@ stages:
             displayName: 'apt install'
             retryCountOnTaskFailure: 3
 
-          - script: autoreconf -fi && ./configure --enable-warnings --enable-werror $(configure)
+          - script: autoreconf -fi && ./configure --disable-dependency-tracking --enable-warnings --enable-werror $(configure)
             displayName: 'configure $(name)'
 
           - script: make V=1 && make V=1 examples && cd tests && make V=1
@@ -131,7 +131,7 @@ stages:
           - script: autoreconf -fi
             displayName: 'autoreconf'
 
-          - script: scan-build ./configure --enable-debug --enable-werror --with-openssl --with-libssh2
+          - script: scan-build ./configure --disable-dependency-tracking --enable-debug --enable-werror --with-openssl --with-libssh2
             displayName: 'configure'
             env:
               CC: "clang"
@@ -233,7 +233,7 @@ stages:
             condition: variables.prepare
             retryCountOnTaskFailure: 3
 
-          - script: $(container_cmd) -l -c "cd $(echo '%cd%') && autoreconf -fi && ./configure $(configure)"
+          - script: $(container_cmd) -l -c "cd $(echo '%cd%') && autoreconf -fi && ./configure --disable-dependency-tracking $(configure)"
             displayName: 'configure $(name)'
 
           - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make V=1 && make V=1 examples && cd tests && make V=1"

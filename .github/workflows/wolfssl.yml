@@ -81,14 +81,14 @@ jobs:
           tar -xzf v$WOLFSSL_VER-stable.tar.gz
           cd wolfssl-$WOLFSSL_VER-stable
           ./autogen.sh
-          ./configure --enable-tls13 ${{ matrix.build.wolfssl-configure }} --enable-harden --prefix=$HOME/wssl
+          ./configure --disable-dependency-tracking --enable-tls13 ${{ matrix.build.wolfssl-configure }} --enable-harden --prefix=$HOME/wssl
           make install
         name: 'install wolfssl'
 
       - run: autoreconf -fi
         name: 'autoreconf'
 
-      - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
+      - run: ./configure --disable-dependency-tracking --enable-warnings --enable-werror ${{ matrix.build.configure }}
         name: 'configure'
 
       - run: make V=1
