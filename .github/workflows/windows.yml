@@ -49,8 +49,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - { build: 'automake', platform: 'x86_64', tflags: '', config: '--enable-debug --disable-threaded-resolver' }
-          - { build: 'cmake'   , platform: 'x86_64', tflags: '', config: '-DCURL_USE_OPENSSL=ON' }
+          - { build: 'automake', platform: 'x86_64', tflags: ''       , config: '--enable-debug --disable-threaded-resolver' }
+          - { build: 'cmake'   , platform: 'x86_64', tflags: 'skipall', config: '-DCURL_USE_OPENSSL=ON' }
       fail-fast: false
     steps:
       - run: git config --global core.autocrlf input
@@ -93,14 +93,14 @@ jobs:
           make -C bld -j3 V=1 examples
 
       - name: 'autotools build tests'
-        if: ${{ matrix.build == 'automake' }}
+        if: ${{ matrix.build == 'automake' && matrix.tflags != 'skipall' }}
         timeout-minutes: 15
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
           make -C bld -j3 -C tests V=1
 
       - name: 'autotools run tests'
-        if: ${{ matrix.build == 'automake' && matrix.tflags != 'skip' }}
+        if: ${{ matrix.build == 'automake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 40
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
@@ -135,6 +135,25 @@ jobs:
           find . -name '*.exe' -o -name '*.dll'
           bld/src/curl.exe --disable --version
 
+      - name: 'cmake build tests'
+        if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' }}
+        timeout-minutes: 15
+        shell: C:\cygwin\bin\bash.exe '{0}'
+        run: |
+          cmake --build bld --config '${{ matrix.type }}' --parallel 3 --target testdeps
+
+      - name: 'cmake run tests'
+        if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        timeout-minutes: 40
+        shell: C:\cygwin\bin\bash.exe '{0}'
+        run: |
+          export TFLAGS='-j8 ${{ matrix.tflags }}'
+          if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
+            TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
+          fi
+          ls bld/lib/*.dll >/dev/null 2>&1 && cp -f -p bld/lib/*.dll bld/tests/libtest/
+          cmake --build bld --config '${{ matrix.type }}' --target test-ci
+
   msys2:
     name: 'msys2 (${{ matrix.build }}, ${{ matrix.sys }}, ${{ matrix.env }}, ${{ matrix.config }})'
     runs-on: windows-latest
@@ -145,11 +164,11 @@ jobs:
           - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19                !1233', config: '--enable-debug --disable-threaded-resolver --disable-proxy' }
           - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233', config: '--enable-debug --disable-threaded-resolver' }
           - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233', config: '' }
-          - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: 'skip'                    , config: '--enable-debug --disable-threaded-resolver --enable-static=no' }
+          - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '--enable-debug --disable-threaded-resolver --enable-static=no' }
           # FIXME: WebSockets test results ignored due to frequent failures on native Windows:
           - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: '!TFTP ~2301 ~2302'       , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', type: 'Debug' }
-          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: 'skip'                    , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', type: 'Release' }
-          - { build: 'cmake'    , sys: 'clang64', env: 'clang-x86_64', tflags: 'skip'                    , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=OFF', type: 'Release' }
+          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', type: 'Release' }
+          - { build: 'cmake'    , sys: 'clang64', env: 'clang-x86_64', tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=OFF', type: 'Release' }
       fail-fast: false
     steps:
       - run: git config --global core.autocrlf input
@@ -200,14 +219,14 @@ jobs:
           make -C bld -j3 V=1 examples
 
       - name: 'autotools build tests'
-        if: ${{ matrix.build == 'autotools' }}
+        if: ${{ matrix.build == 'autotools' && matrix.tflags != 'skipall' }}
         timeout-minutes: 10
         shell: msys2 {0}
         run: |
           make -C bld -j3 -C tests V=1
 
       - name: 'autotools run tests'
-        if: ${{ matrix.build == 'autotools' && matrix.tflags != 'skip' }}
+        if: ${{ matrix.build == 'autotools' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 30
         shell: msys2 {0}
         run: |
@@ -264,14 +283,14 @@ jobs:
           bld/src/curl.exe --disable --version
 
       - name: 'cmake build tests'
-        if: ${{ matrix.build == 'cmake' }}
+        if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' }}
         timeout-minutes: 10
         shell: msys2 {0}
         run: |
           cmake --build bld --config '${{ matrix.type }}' --parallel 3 --target testdeps
 
       - name: 'cmake run tests'
-        if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skip' }}
+        if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 40
         shell: msys2 {0}
         run: |
