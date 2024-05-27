@@ -125,7 +125,7 @@ static ssize_t gtls_pull(void *s, void *buf, size_t blen)
   CURLcode result;
 
   DEBUGASSERT(data);
-  if(!backend->gtls.trust_setup) {
+  if(!backend->gtls.shared_creds->trust_setup) {
     result = Curl_gtls_client_trust_setup(cf, data, &backend->gtls);
     if(result) {
       gnutls_transport_set_errno(backend->gtls.session, EINVAL);
@@ -297,7 +297,7 @@ static CURLcode handshake(struct Curl_cfilter *cf,
     backend->gtls.io_result = CURLE_OK;
     rc = gnutls_handshake(session);
 
-    if(!backend->gtls.trust_setup) {
+    if(!backend->gtls.shared_creds->trust_setup) {
       /* After having send off the ClientHello, we prepare the trust
        * store to verify the coming certificate from the server */
       CURLcode result = Curl_gtls_client_trust_setup(cf, data, &backend->gtls);
@@ -451,20 +451,67 @@ set_ssl_version_min_max(struct Curl_easy *data,
   return CURLE_SSL_CONNECT_ERROR;
 }
 
-CURLcode Curl_gtls_client_trust_setup(struct Curl_cfilter *cf,
-                                      struct Curl_easy *data,
-                                      struct gtls_ctx *gtls)
+CURLcode Curl_gtls_shared_creds_create(struct Curl_easy *data,
+                                       struct gtls_shared_creds **pcreds)
+{
+  struct gtls_shared_creds *shared;
+  int rc;
+
+  *pcreds = NULL;
+  shared = calloc(1, sizeof(*shared));
+  if(!shared)
+    return CURLE_OUT_OF_MEMORY;
+
+  rc = gnutls_certificate_allocate_credentials(&shared->creds);
+  if(rc != GNUTLS_E_SUCCESS) {
+    failf(data, "gnutls_cert_all_cred() failed: %s", gnutls_strerror(rc));
+    free(shared);
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+
+  shared->refcount = 1;
+  shared->time = Curl_now();
+  *pcreds = shared;
+  return CURLE_OK;
+}
+
+CURLcode Curl_gtls_shared_creds_up_ref(struct gtls_shared_creds *creds)
+{
+  DEBUGASSERT(creds);
+  if(creds->refcount < SIZE_T_MAX) {
+    ++creds->refcount;
+    return CURLE_OK;
+  }
+  return CURLE_BAD_FUNCTION_ARGUMENT;
+}
+
+void Curl_gtls_shared_creds_free(struct gtls_shared_creds **pcreds)
+{
+  struct gtls_shared_creds *shared = *pcreds;
+  *pcreds = NULL;
+  if(shared) {
+    --shared->refcount;
+    if(!shared->refcount) {
+      gnutls_certificate_free_credentials(shared->creds);
+      free(shared->CAfile);
+      free(shared);
+    }
+  }
+}
+
+static CURLcode gtls_populate_creds(struct Curl_cfilter *cf,
+                                    struct Curl_easy *data,
+                                    gnutls_certificate_credentials_t creds)
 {
   struct ssl_primary_config *config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   int rc;
 
-  CURL_TRC_CF(data, cf, "setup trust anchors and CRLs");
   if(config->verifypeer) {
     bool imported_native_ca = false;
 
     if(ssl_config->native_ca_store) {
-      rc = gnutls_certificate_set_x509_system_trust(gtls->cred);
+      rc = gnutls_certificate_set_x509_system_trust(creds);
       if(rc < 0)
         infof(data, "error reading native ca store (%s), continuing anyway",
               gnutls_strerror(rc));
@@ -477,10 +524,10 @@ CURLcode Curl_gtls_client_trust_setup(struct Curl_cfilter *cf,
 
     if(config->CAfile) {
       /* set the trusted CA cert bundle file */
-      gnutls_certificate_set_verify_flags(gtls->cred,
+      gnutls_certificate_set_verify_flags(creds,
                                           GNUTLS_VERIFY_ALLOW_X509_V1_CA_CRT);
 
-      rc = gnutls_certificate_set_x509_trust_file(gtls->cred,
+      rc = gnutls_certificate_set_x509_trust_file(creds,
                                                   config->CAfile,
                                                   GNUTLS_X509_FMT_PEM);
       if(rc < 0) {
@@ -498,8 +545,7 @@ CURLcode Curl_gtls_client_trust_setup(struct Curl_cfilter *cf,
 
     if(config->CApath) {
       /* set the trusted CA cert directory */
-      rc = gnutls_certificate_set_x509_trust_dir(gtls->cred,
-                                                 config->CApath,
+      rc = gnutls_certificate_set_x509_trust_dir(creds, config->CApath,
                                                  GNUTLS_X509_FMT_PEM);
       if(rc < 0) {
         infof(data, "error reading ca cert file %s (%s)%s",
@@ -517,8 +563,7 @@ CURLcode Curl_gtls_client_trust_setup(struct Curl_cfilter *cf,
 
   if(config->CRLfile) {
     /* set the CRL list file */
-    rc = gnutls_certificate_set_x509_crl_file(gtls->cred,
-                                              config->CRLfile,
+    rc = gnutls_certificate_set_x509_crl_file(creds, config->CRLfile,
                                               GNUTLS_X509_FMT_PEM);
     if(rc < 0) {
       failf(data, "error reading crl file %s (%s)",
@@ -529,7 +574,141 @@ CURLcode Curl_gtls_client_trust_setup(struct Curl_cfilter *cf,
       infof(data, "found %d CRL in %s", rc, config->CRLfile);
   }
 
-  gtls->trust_setup = TRUE;
+  return CURLE_OK;
+}
+
+/* key to use at `multi->proto_hash` */
+#define MPROTO_GTLS_X509_KEY   "tls:gtls:x509:share"
+
+static bool gtls_shared_creds_expired(const struct Curl_easy *data,
+                                      const struct gtls_shared_creds *sc)
+{
+  const struct ssl_general_config *cfg = &data->set.general_ssl;
+  struct curltime now = Curl_now();
+  timediff_t elapsed_ms = Curl_timediff(now, sc->time);
+  timediff_t timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
+
+  if(timeout_ms < 0)
+    return false;
+
+  return elapsed_ms >= timeout_ms;
+}
+
+static bool gtls_shared_creds_different(struct Curl_cfilter *cf,
+                                        const struct gtls_shared_creds *sc)
+{
+  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  if(!sc->CAfile || !conn_config->CAfile)
+    return sc->CAfile != conn_config->CAfile;
+
+  return strcmp(sc->CAfile, conn_config->CAfile);
+}
+
+static struct gtls_shared_creds*
+gtls_get_cached_creds(struct Curl_cfilter *cf, struct Curl_easy *data)
+{
+  struct gtls_shared_creds *shared_creds;
+
+  if(data->multi) {
+    shared_creds = Curl_hash_pick(&data->multi->proto_hash,
+                                  (void *)MPROTO_GTLS_X509_KEY,
+                                  sizeof(MPROTO_GTLS_X509_KEY)-1);
+     if(shared_creds && shared_creds->creds &&
+        !gtls_shared_creds_expired(data, shared_creds) &&
+        !gtls_shared_creds_different(cf, shared_creds)) {
+       return shared_creds;
+     }
+  }
+  return NULL;
+}
+
+static void gtls_shared_creds_hash_free(void *key, size_t key_len, void *p)
+{
+  struct gtls_shared_creds *sc = p;
+  DEBUGASSERT(key_len == (sizeof(MPROTO_GTLS_X509_KEY)-1));
+  DEBUGASSERT(!memcmp(MPROTO_GTLS_X509_KEY, key, key_len));
+  (void)key;
+  (void)key_len;
+  Curl_gtls_shared_creds_free(&sc); /* down reference */
+}
+
+static void gtls_set_cached_creds(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  struct gtls_shared_creds *sc)
+{
+  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+
+  DEBUGASSERT(sc);
+  DEBUGASSERT(sc->creds);
+  DEBUGASSERT(!sc->CAfile);
+  DEBUGASSERT(sc->refcount == 1);
+  if(!data->multi)
+    return;
+
+  if(conn_config->CAfile) {
+    sc->CAfile = strdup(conn_config->CAfile);
+    if(!sc->CAfile)
+      return;
+  }
+
+  if(Curl_gtls_shared_creds_up_ref(sc))
+    return;
+
+  if(!Curl_hash_add2(&data->multi->proto_hash,
+                    (void *)MPROTO_GTLS_X509_KEY,
+                    sizeof(MPROTO_GTLS_X509_KEY)-1,
+                    sc, gtls_shared_creds_hash_free)) {
+    Curl_gtls_shared_creds_free(&sc); /* down reference again */
+    return;
+  }
+}
+
+CURLcode Curl_gtls_client_trust_setup(struct Curl_cfilter *cf,
+                                      struct Curl_easy *data,
+                                      struct gtls_ctx *gtls)
+{
+  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+  struct gtls_shared_creds *cached_creds = NULL;
+  bool cache_criteria_met;
+  CURLcode result;
+  int rc;
+
+
+  /* Consider the X509 store cacheable if it comes exclusively from a CAfile,
+    or no source is provided and we are falling back to openssl's built-in
+    default. */
+  cache_criteria_met = (data->set.general_ssl.ca_cache_timeout != 0) &&
+    conn_config->verifypeer &&
+    !conn_config->CApath &&
+    !conn_config->ca_info_blob &&
+    !ssl_config->primary.CRLfile &&
+    !ssl_config->native_ca_store &&
+    !conn_config->clientcert; /* GNUTls adds client cert to its credentials! */
+
+  if(cache_criteria_met)
+    cached_creds = gtls_get_cached_creds(cf, data);
+
+  if(cached_creds && !Curl_gtls_shared_creds_up_ref(cached_creds)) {
+    CURL_TRC_CF(data, cf, "using shared trust anchors and CRLs");
+    Curl_gtls_shared_creds_free(&gtls->shared_creds);
+    gtls->shared_creds = cached_creds;
+    rc = gnutls_credentials_set(gtls->session, GNUTLS_CRD_CERTIFICATE,
+                                gtls->shared_creds->creds);
+    if(rc != GNUTLS_E_SUCCESS) {
+      failf(data, "gnutls_credentials_set() failed: %s", gnutls_strerror(rc));
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+  }
+  else {
+    CURL_TRC_CF(data, cf, "loading trust anchors and CRLs");
+    result = gtls_populate_creds(cf, data, gtls->shared_creds->creds);
+    if(result)
+      return result;
+    gtls->shared_creds->trust_setup = TRUE;
+    if(cache_criteria_met)
+      gtls_set_cached_creds(cf, data, gtls->shared_creds);
+  }
   return CURLE_OK;
 }
 
@@ -640,12 +819,10 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
   else if(config->version == CURL_SSLVERSION_SSLv3)
     sni = FALSE; /* SSLv3 has no SNI */
 
-  /* allocate a cred struct */
-  rc = gnutls_certificate_allocate_credentials(&gtls->cred);
-  if(rc != GNUTLS_E_SUCCESS) {
-    failf(data, "gnutls_cert_all_cred() failed: %s", gnutls_strerror(rc));
-    return CURLE_SSL_CONNECT_ERROR;
-  }
+  /* allocate a shared creds struct */
+  result = Curl_gtls_shared_creds_create(data, &gtls->shared_creds);
+  if(result)
+    return result;
 
 #ifdef USE_GNUTLS_SRP
   if(config->username && Curl_auth_allowed_to_host(data)) {
@@ -757,7 +934,7 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
   }
 
   if(config->clientcert) {
-    if(!gtls->trust_setup) {
+    if(!gtls->shared_creds->trust_setup) {
       result = Curl_gtls_client_trust_setup(cf, data, gtls);
       if(result)
         return result;
@@ -769,7 +946,7 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
         GNUTLS_PKCS_USE_PBES2_AES_128 | GNUTLS_PKCS_USE_PBES2_AES_192 |
         GNUTLS_PKCS_USE_PBES2_AES_256;
       rc = gnutls_certificate_set_x509_key_file2(
-           gtls->cred,
+           gtls->shared_creds->creds,
            config->clientcert,
            ssl_config->key ? ssl_config->key : config->clientcert,
            do_file_type(ssl_config->cert_type),
@@ -784,7 +961,7 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
     }
     else {
       if(gnutls_certificate_set_x509_key_file(
-           gtls->cred,
+           gtls->shared_creds->creds,
            config->clientcert,
            ssl_config->key ? ssl_config->key : config->clientcert,
            do_file_type(ssl_config->cert_type) ) !=
@@ -809,7 +986,7 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
 #endif
   {
     rc = gnutls_credentials_set(gtls->session, GNUTLS_CRD_CERTIFICATE,
-                                gtls->cred);
+                                gtls->shared_creds->creds);
     if(rc != GNUTLS_E_SUCCESS) {
       failf(data, "gnutls_credentials_set() failed: %s", gnutls_strerror(rc));
       return CURLE_SSL_CONNECT_ERROR;
@@ -1645,9 +1822,8 @@ static void gtls_close(struct Curl_cfilter *cf,
     gnutls_deinit(backend->gtls.session);
     backend->gtls.session = NULL;
   }
-  if(backend->gtls.cred) {
-    gnutls_certificate_free_credentials(backend->gtls.cred);
-    backend->gtls.cred = NULL;
+  if(backend->gtls.shared_creds) {
+    Curl_gtls_shared_creds_free(&backend->gtls.shared_creds);
   }
 #ifdef USE_GNUTLS_SRP
   if(backend->gtls.srp_client_cred) {
@@ -1724,7 +1900,6 @@ static int gtls_shutdown(struct Curl_cfilter *cf,
     }
     gnutls_deinit(backend->gtls.session);
   }
-  gnutls_certificate_free_credentials(backend->gtls.cred);
 
 #ifdef USE_GNUTLS_SRP
   {
@@ -1734,8 +1909,8 @@ static int gtls_shutdown(struct Curl_cfilter *cf,
   }
 #endif
 
-  backend->gtls.cred = NULL;
   backend->gtls.session = NULL;
+  Curl_gtls_shared_creds_free(&backend->gtls.shared_creds);
 
   return retval;
 }
@@ -1837,7 +2012,8 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   SSLSUPP_CA_PATH  |
   SSLSUPP_CERTINFO |
   SSLSUPP_PINNEDPUBKEY |
-  SSLSUPP_HTTPS_PROXY,
+  SSLSUPP_HTTPS_PROXY |
+  SSLSUPP_CA_CACHE,
 
   sizeof(struct gtls_ssl_backend_data),
 
