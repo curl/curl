@@ -20,7 +20,7 @@
  1.1 TFO support on Windows
  1.2 Consult %APPDATA% also for .netrc
  1.3 struct lifreq
- 1.4 Better and more sharing
+ 1.4 alt-svc sharing
  1.5 get rid of PATH_MAX
  1.8 CURLOPT_RESOLVE for any port number
  1.9 Cache negative name resolves
@@ -62,7 +62,6 @@
  4. FTP
  4.1 HOST
  4.2 Alter passive/active on failure and retry
- 4.3 Earlier bad letter detection
  4.4 Support CURLOPT_PREQUOTE for dir listings too
  4.5 ASCII support
  4.6 GSSAPI via Windows SSPI
@@ -108,13 +107,11 @@
  11.4 Create remote directories
 
  12. FILE
- 12.1 Directory listing for FILE:
+ 12.1 Directory listing on non-POSIX
 
  13. TLS
  13.1 TLS-PSK with OpenSSL
- 13.2 Provide mutex locking API
  13.3 Defeat TLS fingerprinting
- 13.4 Cache/share OpenSSL contexts
  13.5 Export session ids
  13.6 Provide callback for cert verification
  13.7 Less memory massaging with Schannel
@@ -122,7 +119,6 @@
  13.9 TLS record padding
  13.10 Support Authority Information Access certificate extension (AIA)
  13.11 Some TLS options are not offered for HTTPS proxies
- 13.12 Reduce CA certificate bundle reparsing
  13.13 Make sure we forbid TLS 1.3 post-handshake authentication
  13.14 Support the clienthello extension
  13.15 Select signature algorithms
@@ -153,12 +149,11 @@
  18.4 --proxycommand
  18.5 UTF-8 filenames in Content-Disposition
  18.6 Option to make -Z merge lined based outputs on stdout
- 18.8 Consider convenience options for JSON and XML?
  18.9 Choose the name of file in braces for complex URLs
  18.10 improve how curl works in a windows console window
  18.11 Windows: set attribute 'archive' for completed downloads
  18.12 keep running, read instructions from pipe/socket
- 18.13 Ratelimit or wait between serial requests
+ 18.13 Acknowledge Ratelimit headers
  18.14 --dry-run
  18.15 --retry should resume
  18.16 send only part of --data
@@ -187,13 +182,12 @@
  20.2 nicer lacking perl message
  20.3 more protocols supported
  20.4 more platforms supported
- 20.5 Add support for concurrent connections
  20.6 Use the RFC 6265 test suite
- 20.7 Support LD_PRELOAD on macOS
  20.8 Run web-platform-tests URL tests
 
  21. MQTT
  21.1 Support rate-limiting
+ 21.2 Support MQTTS
 
  22. TFTP
  22.1 TFTP doesn't convert LF to CRLF for mode=netascii
@@ -225,7 +219,7 @@
  SIOCGIFADDR on newer Solaris versions as they claim the latter is obsolete.
  To support IPv6 interface addresses for network interfaces properly.
 
-1.4 Better and more sharing
+1.4 alt-svc sharing
 
  The share interface could benefit from allowing the alt-svc cache to be
  possible to share between easy handles.
@@ -548,11 +542,6 @@
  connection. There could be a way to fallback to an active connection (and
  vice versa). https://curl.se/bug/feature.cgi?id=1754793
 
-4.3 Earlier bad letter detection
-
- Make the detection of (bad) %0d and %0a codes in FTP URL parts earlier in the
- process to avoid doing a resolve and connect in vain.
-
 4.4 Support CURLOPT_PREQUOTE for dir listings too
 
  The lack of support is mostly an oversight and requires the FTP state machine
@@ -775,11 +764,11 @@
 
 12. FILE
 
-12.1 Directory listing for FILE:
+12.1 Directory listing on non-POSIX
 
- Add support for listing the contents of a directory accessed with FILE. The
- output should probably be the same as/similar to FTP.
-
+ Listing the contents of a directory accessed with FILE only works on
+ platforms with opendir. Support could be added for more systems, like
+ Windows.
 
 13. TLS
 
@@ -792,12 +781,6 @@
 
  https://github.com/curl/curl/issues/5081
 
-13.2 Provide mutex locking API
-
- Provide a libcurl API for setting mutex callbacks in the underlying SSL
- library, so that the same application code can use mutex-locking
- independently of OpenSSL or GnutTLS being used.
-
 13.3 Defeat TLS fingerprinting
 
  By changing the order of TLS extensions provided in the TLS handshake, it is
@@ -805,22 +788,6 @@
  extension order is of course not the only way to fingerprint a client.
 
  See https://github.com/curl/curl/issues/8119
-
-13.4 Cache/share OpenSSL contexts
-
- "Look at SSL cafile - quick traces look to me like these are done on every
- request as well, when they should only be necessary once per SSL context (or
- once per handle)". The major improvement we can rather easily do is to make
- sure we do not create and kill a new SSL "context" for every request, but
- instead make one for every connection and reuse that SSL context in the same
- style connections are reused. It will make us use slightly more memory but it
- will libcurl do less creations and deletions of SSL contexts.
-
- Technically, the "caching" is probably best implemented by getting added to
- the share interface so that easy handles who want to and can reuse the
- context specify that by sharing with the right properties set.
-
- https://github.com/curl/curl/issues/1110
 
 13.5 Export session ids
 
@@ -886,15 +853,6 @@
  https://curl.se/libcurl/c/tls-options.html
 
  https://github.com/curl/curl/issues/12286
-
-13.12 Reduce CA certificate bundle reparsing
-
- When using the OpenSSL backend, curl will load and reparse the CA bundle at
- the creation of the "SSL context" when it sets up a connection to do a TLS
- handshake. A more effective way would be to somehow cache the CA bundle to
- avoid it having to be repeatedly reloaded and reparsed.
-
- See https://github.com/curl/curl/issues/9379
 
 13.13 Make sure we forbid TLS 1.3 post-handshake authentication
 
@@ -1058,20 +1016,6 @@
 
  https://github.com/curl/curl/issues/5175
 
-18.8 Consider convenience options for JSON and XML?
-
- Could we add `--xml` or `--json` to add headers needed to call rest API:
-
- `--xml` adds -H 'Content-Type: application/xml' -H "Accept: application/xml" and
- `--json` adds -H 'Content-Type: application/json' -H "Accept: application/json"
-
- Setting Content-Type when doing a GET or any other method without a body
- would be a bit strange I think - so maybe only add CT for requests with body?
- Maybe plain `--xml` and ` --json` are a bit too brief and generic. Maybe
- `--http-json` etc?
-
- See https://github.com/curl/curl/issues/5203
-
 18.9 Choose the name of file in braces for complex URLs
 
  When using braces to download a list of URLs and you use complicated names
@@ -1109,12 +1053,10 @@
  invoke can talk to the still running instance and ask for transfers to get
  done, and thus maintain its connection pool, DNS cache and more.
 
-18.13 Ratelimit or wait between serial requests
+18.13 Acknowledge Ratelimit headers
 
  Consider a command line option that can make curl do multiple serial requests
- slow, potentially with a (random) wait between transfers. There is also a
- proposed set of standard HTTP headers to let servers let the client adapt to
- its rate limits:
+ while acknowledging server specified rate limits:
  https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/
 
  See https://github.com/curl/curl/issues/5406
@@ -1344,20 +1286,6 @@
  Make the test suite work on more platforms. OpenBSD and Mac OS. Remove
  fork()s and it should become even more portable.
 
-20.5 Add support for concurrent connections
-
- Tests 836, 882 and 938 were designed to verify that separate connections are
- not used when using different login credentials in protocols that should not
- reuse a connection under such circumstances.
-
- Unfortunately, ftpserver.pl does not appear to support multiple concurrent
- connections. The read while() loop seems to loop until it receives a
- disconnect from the client, where it then enters the waiting for connections
- loop. When the client opens a second connection to the server, the first
- connection has not been dropped (unless it has been forced - which we
- should not do in these tests) and thus the wait for connections loop is never
- entered to receive the second connection.
-
 20.6 Use the RFC 6265 test suite
 
  A test suite made for HTTP cookies (RFC 6265) by Adam Barth is available at
@@ -1366,12 +1294,6 @@
  It'd be really awesome if someone would write a script/setup that would run
  curl with that test suite and detect deviances. Ideally, that would even be
  incorporated into our regular test suite.
-
-20.7 Support LD_PRELOAD on macOS
-
- LD_RELOAD does not work on macOS, but there are tests which require it to run
- properly. Look into making the preload support in runtests.pl portable such
- that it uses DYLD_INSERT_LIBRARIES on macOS.
 
 20.8 Run web-platform-tests URL tests
 
@@ -1388,6 +1310,8 @@
 
  The rate-limiting logic is done in the PERFORMING state in multi.c but MQTT
  is not (yet) implemented to use that.
+
+21.2 Support MQTTS
 
 22. TFTP
 
