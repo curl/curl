@@ -121,7 +121,9 @@ include(PickyWarnings)
 if(ENABLE_DEBUG)
   # DEBUGBUILD will be defined only for Debug builds
   set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Debug>:DEBUGBUILD>)
-  set(ENABLE_CURLDEBUG ON)
+  if(NOT DEFINED ENABLE_CURLDEBUG)
+    set(ENABLE_CURLDEBUG ON)
+  endif()
 endif()
 
 if(ENABLE_CURLDEBUG)
