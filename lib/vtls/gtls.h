@@ -30,6 +30,7 @@
 #ifdef USE_GNUTLS
 
 #include <gnutls/gnutls.h>
+#include "timeval.h"
 
 #ifdef HAVE_GNUTLS_SRP
 /* the function exists */
@@ -45,14 +46,26 @@ struct ssl_primary_config;
 struct ssl_config_data;
 struct ssl_peer;
 
+struct gtls_shared_creds {
+  gnutls_certificate_credentials_t creds;
+  char *CAfile; /* CAfile path used to generate X509 store */
+  struct curltime time; /* when the shared creds was created */
+  size_t refcount;
+  BIT(trust_setup); /* x509 anchors + CRLs have been set up */
+};
+
+CURLcode Curl_gtls_shared_creds_create(struct Curl_easy *data,
+                                       struct gtls_shared_creds **pcreds);
+CURLcode Curl_gtls_shared_creds_up_ref(struct gtls_shared_creds *creds);
+void Curl_gtls_shared_creds_free(struct gtls_shared_creds **pcreds);
+
 struct gtls_ctx {
   gnutls_session_t session;
-  gnutls_certificate_credentials_t cred;
+  struct gtls_shared_creds *shared_creds;
 #ifdef USE_GNUTLS_SRP
   gnutls_srp_client_credentials_t srp_client_cred;
 #endif
   CURLcode io_result; /* result of last IO cfilter operation */
-  BIT(trust_setup); /* x509 anchors + CRLs have been set up */
 };
 
 typedef CURLcode Curl_gtls_ctx_setup_cb(struct Curl_cfilter *cf,
