@@ -144,9 +144,9 @@ struct dohentry {
 #ifdef UNITTESTS
 UNITTEST DOHcode doh_encode(const char *host,
                             DNStype dnstype,
-                            unsigned char *dnsp, /* buffer */
+                            unsigned char *dnsp,  /* buffer */
                             size_t len,  /* buffer size */
-                            size_t *olen); /* output length */
+                            size_t *olen);  /* output length */
 UNITTEST DOHcode doh_decode(const unsigned char *doh,
                             size_t dohlen,
                             DNStype dnstype,
