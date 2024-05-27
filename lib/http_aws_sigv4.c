@@ -423,6 +423,76 @@ static int compare_func(const void *a, const void *b)
 
 #define MAX_QUERYPAIRS 64
 
+/**
+ * found_equals have a double meaning,
+ * detect if an equal have been found when called from canon_query,
+ * and mark that this function is called to compute the path,
+ * if found_equals is NULL.
+ */
+static CURLcode canon_string(const char *q, size_t len,
+                             struct dynbuf *dq, bool *found_equals)
+{
+  CURLcode result = CURLE_OK;
+
+  for(; len && !result; q++, len--) {
+    if(ISALNUM(*q))
+      result = Curl_dyn_addn(dq, q, 1);
+    else {
+      switch(*q) {
+      case '-':
+      case '.':
+      case '_':
+      case '~':
+        /* allowed as-is */
+        result = Curl_dyn_addn(dq, q, 1);
+        break;
+      case '%':
+        /* uppercase the following if hexadecimal */
+        if(ISXDIGIT(q[1]) && ISXDIGIT(q[2])) {
+          char tmp[3]="%";
+          tmp[1] = Curl_raw_toupper(q[1]);
+          tmp[2] = Curl_raw_toupper(q[2]);
+          result = Curl_dyn_addn(dq, tmp, 3);
+          q += 2;
+          len -= 2;
+        }
+        else
+          /* '%' without a following two-digit hex, encode it */
+          result = Curl_dyn_addn(dq, "%25", 3);
+        break;
+      default: {
+        const char hex[] = "0123456789ABCDEF";
+        char out[3]={'%'};
+
+        if(!found_equals) {
+          /* if found_equals is NULL assuming, been in path */
+          if(*q == '/') {
+            /* allowed as if */
+            result = Curl_dyn_addn(dq, q, 1);
+            break;
+          }
+        }
+        else {
+          /* allowed as-is */
+          if(*q == '=') {
+            result = Curl_dyn_addn(dq, q, 1);
+            *found_equals = true;
+            break;
+          }
+        }
+        /* URL encode */
+        out[1] = hex[((unsigned char)*q)>>4];
+        out[2] = hex[*q & 0xf];
+        result = Curl_dyn_addn(dq, out, 3);
+        break;
+      }
+      }
+    }
+  }
+  return result;
+}
+
+
 static CURLcode canon_query(struct Curl_easy *data,
                             const char *query, struct dynbuf *dq)
 {
@@ -460,54 +530,11 @@ static CURLcode canon_query(struct Curl_easy *data,
 
   ap = &array[0];
   for(i = 0; !result && (i < entry); i++, ap++) {
-    size_t len;
     const char *q = ap->p;
     bool found_equals = false;
     if(!ap->len)
       continue;
-    for(len = ap->len; len && !result; q++, len--) {
-      if(ISALNUM(*q))
-        result = Curl_dyn_addn(dq, q, 1);
-      else {
-        switch(*q) {
-        case '-':
-        case '.':
-        case '_':
-        case '~':
-          /* allowed as-is */
-          result = Curl_dyn_addn(dq, q, 1);
-          break;
-        case '=':
-          /* allowed as-is */
-          result = Curl_dyn_addn(dq, q, 1);
-          found_equals = true;
-          break;
-        case '%':
-          /* uppercase the following if hexadecimal */
-          if(ISXDIGIT(q[1]) && ISXDIGIT(q[2])) {
-            char tmp[3]="%";
-            tmp[1] = Curl_raw_toupper(q[1]);
-            tmp[2] = Curl_raw_toupper(q[2]);
-            result = Curl_dyn_addn(dq, tmp, 3);
-            q += 2;
-            len -= 2;
-          }
-          else
-            /* '%' without a following two-digit hex, encode it */
-            result = Curl_dyn_addn(dq, "%25", 3);
-          break;
-        default: {
-          /* URL encode */
-          const char hex[] = "0123456789ABCDEF";
-          char out[3]={'%'};
-          out[1] = hex[((unsigned char)*q)>>4];
-          out[2] = hex[*q & 0xf];
-          result = Curl_dyn_addn(dq, out, 3);
-          break;
-        }
-        }
-      }
-    }
+    result = canon_string(q, ap->len, dq, &found_equals);
     if(!result && !found_equals) {
       /* queries without value still need an equals */
       result = Curl_dyn_addn(dq, "=", 1);
@@ -540,6 +567,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   struct dynbuf canonical_headers;
   struct dynbuf signed_headers;
   struct dynbuf canonical_query;
+  struct dynbuf canonical_path;
   char *date_header = NULL;
   Curl_HttpReq httpreq;
   const char *method = NULL;
@@ -570,6 +598,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   Curl_dyn_init(&canonical_headers, CURL_MAX_HTTP_HEADER);
   Curl_dyn_init(&canonical_query, CURL_MAX_HTTP_HEADER);
   Curl_dyn_init(&signed_headers, CURL_MAX_HTTP_HEADER);
+  Curl_dyn_init(&canonical_path, CURL_MAX_HTTP_HEADER);
 
   /*
    * Parameters parsing
@@ -698,6 +727,11 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   result = canon_query(data, data->state.up.query, &canonical_query);
   if(result)
     goto fail;
+
+  result = canon_string(data->state.up.path, strlen(data->state.up.path),
+                        &canonical_path, NULL);
+  if(result)
+    goto fail;
   result = CURLE_OUT_OF_MEMORY;
 
   canonical_request =
@@ -708,7 +742,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
                   "%s\n" /* SignedHeaders */
                   "%.*s",  /* HashedRequestPayload in hex */
                   method,
-                  data->state.up.path,
+                  Curl_dyn_ptr(&canonical_path),
                   Curl_dyn_ptr(&canonical_query) ?
                   Curl_dyn_ptr(&canonical_query) : "",
                   Curl_dyn_ptr(&canonical_headers),
@@ -800,6 +834,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 
 fail:
   Curl_dyn_free(&canonical_query);
+  Curl_dyn_free(&canonical_path);
   Curl_dyn_free(&canonical_headers);
   Curl_dyn_free(&signed_headers);
   free(canonical_request);
