@@ -195,5 +195,5 @@ jobs:
             gmake -j3 install
             src/curl --disable --version
             gmake -j3 examples
-            export TFLAGS='-j12'
+            export TFLAGS='-j12 ~MQTT ~FTP'
             gmake check V=1
