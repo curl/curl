@@ -35,8 +35,11 @@ environment:
   OPENSSL: 'OFF'
   DEBUG: 'ON'
   SHARED: 'OFF'
+  TFLAGS: 'skipall'
   matrix:
-    # generated CMake-based Visual Studio Release builds
+
+    # generated CMake-based Visual Studio builds
+
     - job_name: 'CMake, VS2008, Release, x86, Schannel, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       BUILD_SYSTEM: CMake
@@ -47,8 +50,6 @@ environment:
       ENABLE_UNICODE: 'OFF'
       HTTP_ONLY: 'OFF'
       SHARED: 'ON'
-      TESTING: 'OFF'
-      DISABLED_TESTS: ''
     - job_name: 'CMake, VS2008, Debug, x86, Schannel, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       BUILD_SYSTEM: CMake
@@ -58,8 +59,6 @@ environment:
       ENABLE_UNICODE: 'OFF'
       HTTP_ONLY: 'OFF'
       SHARED: 'ON'
-      TESTING: 'OFF'
-      DISABLED_TESTS: ''
     - job_name: 'CMake, VS2022, Release, x64, OpenSSL 3.2, WebSockets, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
@@ -71,8 +70,6 @@ environment:
       ENABLE_UNICODE: 'OFF'
       HTTP_ONLY: 'OFF'
       SHARED: 'ON'
-      TESTING: 'OFF'
-      DISABLED_TESTS: ''
       WEBSOCKETS: 'ON'
     - job_name: 'CMake, VS2022, Release, arm64, Schannel, Static, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
@@ -83,9 +80,6 @@ environment:
       SCHANNEL: 'ON'
       ENABLE_UNICODE: 'OFF'
       HTTP_ONLY: 'OFF'
-      TESTING: 'OFF'
-      DISABLED_TESTS: ''
-    # generated CMake-based Visual Studio Debug builds
     - job_name: 'CMake, VS2010, Debug, x64, Schannel, Static, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       BUILD_SYSTEM: CMake
@@ -94,8 +88,6 @@ environment:
       SCHANNEL: 'ON'
       ENABLE_UNICODE: 'OFF'
       HTTP_ONLY: 'OFF'
-      TESTING: 'OFF'
-      DISABLED_TESTS: ''
     - job_name: 'CMake, VS2022, Debug, x64, Schannel, Static, Unicode, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
@@ -105,8 +97,6 @@ environment:
       SCHANNEL: 'ON'
       ENABLE_UNICODE: 'ON'
       HTTP_ONLY: 'OFF'
-      TESTING: 'OFF'
-      DISABLED_TESTS: '!1139 !1501 !1177 !1477'
     - job_name: 'CMake, VS2022, Debug, x64, no SSL, Static, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
@@ -116,8 +106,6 @@ environment:
       SCHANNEL: 'OFF'
       ENABLE_UNICODE: 'OFF'
       HTTP_ONLY: 'OFF'
-      TESTING: 'OFF'
-      DISABLED_TESTS: '!1139 !1501 !1177 !1477'
     - job_name: 'CMake, VS2022, Debug, x64, no SSL, Static, HTTP only, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
@@ -127,8 +115,6 @@ environment:
       SCHANNEL: 'OFF'
       ENABLE_UNICODE: 'OFF'
       HTTP_ONLY: 'ON'
-      TESTING: 'OFF'
-      DISABLED_TESTS: '!1139 !1501 !1177 !1477'
 
     # winbuild-based builds
 
@@ -137,56 +123,48 @@ environment:
       BUILD_SYSTEM: winbuild_vs2015
       DEBUG: 'yes'
       PATHPART: debug
-      TESTING: 'OFF'
       ENABLE_UNICODE: 'no'
     - job_name: 'winbuild, VS2015, Release, x64, OpenSSL 1.1.1, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       BUILD_SYSTEM: winbuild_vs2015
       DEBUG: 'no'
       PATHPART: release
-      TESTING: 'OFF'
       ENABLE_UNICODE: 'no'
     - job_name: 'winbuild, VS2017, Debug, x64, OpenSSL 1.1.1, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: winbuild_vs2017
       DEBUG: 'yes'
       PATHPART: debug
-      TESTING: 'OFF'
       ENABLE_UNICODE: 'no'
     - job_name: 'winbuild, VS2017, Release, x64, OpenSSL 1.1.1, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: winbuild_vs2017
       DEBUG: 'no'
       PATHPART: release
-      TESTING: 'OFF'
       ENABLE_UNICODE: 'no'
     - job_name: 'winbuild, VS2015, Debug, x64, OpenSSL 1.1.1, Unicode, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       BUILD_SYSTEM: winbuild_vs2015
       DEBUG: 'yes'
       PATHPART: debug
-      TESTING: 'OFF'
       ENABLE_UNICODE: 'yes'
     - job_name: 'winbuild, VS2015, Release, x64, OpenSSL 1.1.1, Unicode, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       BUILD_SYSTEM: winbuild_vs2015
       DEBUG: 'no'
       PATHPART: release
-      TESTING: 'OFF'
       ENABLE_UNICODE: 'yes'
     - job_name: 'winbuild, VS2017, Debug, x64, OpenSSL 1.1.1, Unicode, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: winbuild_vs2017
       DEBUG: 'yes'
       PATHPART: debug
-      TESTING: 'OFF'
       ENABLE_UNICODE: 'yes'
     - job_name: 'winbuild, VS2017, Release, x64, OpenSSL 1.1.1, Unicode, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: winbuild_vs2017
       DEBUG: 'no'
       PATHPART: release
-      TESTING: 'OFF'
       ENABLE_UNICODE: 'yes'
 
     # generated VisualStudioSolution-based builds
@@ -195,7 +173,6 @@ environment:
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       BUILD_SYSTEM: VisualStudioSolution
       PRJ_CFG: 'DLL Debug - DLL Windows SSPI - DLL WinIDN'
-      TESTING: 'OFF'
       VC_VERSION: VC12
 
 install:

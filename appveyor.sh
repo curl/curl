@@ -53,7 +53,6 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     "-DCURL_USE_SCHANNEL=${SCHANNEL}" \
     "-DHTTP_ONLY=${HTTP_ONLY}" \
     "-DBUILD_SHARED_LIBS=${SHARED}" \
-    "-DBUILD_TESTING=${TESTING}" \
     "-DENABLE_WEBSOCKETS=${WEBSOCKETS:-}" \
     "-DCMAKE_UNITY_BUILD=${UNITY}" \
     '-DCURL_WERROR=ON' \
@@ -117,18 +116,23 @@ if false; then
   done
 fi
 
-# test
+# build tests
 
-if [ "${TESTING}" = 'ON' ]; then
-  export TFLAGS=''
+if [[ "${TFLAGS}" != 'skipall' ]] && \
+   [ "${BUILD_SYSTEM}" = 'CMake' ]; then
+  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
+fi
+
+# run tests
+
+if [[ "${TFLAGS}" != 'skipall' ]] && \
+   [[ "${TFLAGS}" != 'skiprun' ]]; then
   if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
     TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
   elif [ -x "$(cygpath 'C:/msys64/usr/bin/curl.exe')" ]; then
     TFLAGS+=" -ac $(cygpath 'C:/msys64/usr/bin/curl.exe')"
   fi
-  TFLAGS+=" ${DISABLED_TESTS:-}"
   if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
-    cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
     ls _bld/lib/*.dll >/dev/null 2>&1 && cp -f -p _bld/lib/*.dll _bld/tests/libtest/
     cmake --build _bld --config "${PRJ_CFG}" --target test-ci
   else
