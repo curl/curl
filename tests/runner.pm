@@ -857,6 +857,7 @@ sub singletest_run {
         else {
             $cmdargs .= "--trace-ascii $LOGDIR/trace$testnum ";
         }
+        $cmdargs .= "--trace-config all ";
         $cmdargs .= "--trace-time ";
         if($run_event_based) {
             $cmdargs .= "--test-event ";
