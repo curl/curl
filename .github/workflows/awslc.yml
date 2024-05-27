@@ -91,7 +91,7 @@ jobs:
       - run: |
           mkdir build
           cd build
-          ../configure --enable-warnings --enable-werror --with-openssl=$HOME/awslc
+          ../configure --disable-dependency-tracking --enable-warnings --enable-werror --with-openssl=$HOME/awslc
           cd ..
         name: 'configure out-of-tree'
 

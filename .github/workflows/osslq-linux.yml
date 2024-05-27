@@ -159,7 +159,7 @@ jobs:
           cd nghttp3
           git submodule update --init
           autoreconf -fi
-          ./configure --prefix=$HOME/nghttpx PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" --enable-lib-only
+          ./configure --disable-dependency-tracking --prefix=$HOME/nghttpx PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" --enable-lib-only
           make
         name: 'build nghttp3'
 
@@ -173,7 +173,7 @@ jobs:
           git clone --quiet --depth=1 -b v${{ env.ngtcp2-version }} https://github.com/ngtcp2/ngtcp2
           cd ngtcp2
           autoreconf -fi
-          ./configure --prefix=$HOME/nghttpx PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" --enable-lib-only --with-openssl
+          ./configure --disable-dependency-tracking --prefix=$HOME/nghttpx PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" --enable-lib-only --with-openssl
           make install
         name: 'install ngtcp2'
 
@@ -182,7 +182,7 @@ jobs:
           git clone --quiet --depth=1 -b v${{ env.nghttp2-version }} https://github.com/nghttp2/nghttp2
           cd nghttp2
           autoreconf -fi
-          ./configure --prefix=$HOME/nghttpx PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" --enable-http3
+          ./configure --disable-dependency-tracking --prefix=$HOME/nghttpx PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" --enable-http3
           make install
         name: 'install nghttp2'
 
@@ -219,7 +219,7 @@ jobs:
       - run: autoreconf -fi
         name: 'autoreconf'
 
-      - run: ./configure ${{ matrix.build.configure }}
+      - run: ./configure --disable-dependency-tracking ${{ matrix.build.configure }}
         name: 'configure'
 
       - run: make V=1

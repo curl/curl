@@ -78,7 +78,7 @@ jobs:
       - run: autoreconf -fi
         name: 'autoreconf'
 
-      - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
+      - run: ./configure --disable-dependency-tracking --enable-warnings --enable-werror ${{ matrix.build.configure }}
         name: 'configure'
 
       - run: make V=1

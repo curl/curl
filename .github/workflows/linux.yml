@@ -261,7 +261,7 @@ jobs:
           git clone --quiet --depth=1 -b v${{ env.libressl-version }} https://github.com/libressl-portable/portable.git libressl-git
           cd libressl-git
           ./autogen.sh
-          ./configure --prefix=$HOME/libressl
+          ./configure --disable-dependency-tracking --prefix=$HOME/libressl
           make install
 
       - name: cache mbedtls
@@ -416,7 +416,7 @@ jobs:
       - run: autoreconf -fi
         name: 'autoreconf'
 
-      - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
+      - run: ./configure --disable-dependency-tracking --enable-warnings --enable-werror ${{ matrix.build.configure }}
         name: 'configure'
 
       - run: make V=1
