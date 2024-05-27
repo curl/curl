@@ -113,17 +113,14 @@ cmake_dependent_option(ENABLE_THREADED_RESOLVER "Set to ON to enable threaded DN
         ON "NOT ENABLE_ARES"
         OFF)
 
-option(ENABLE_DEBUG "Set to ON to enable curl debug features" OFF)
-option(ENABLE_CURLDEBUG "Set to ON to build with TrackMemory feature enabled" OFF)
-
 include(PickyWarnings)
+
+option(ENABLE_DEBUG "Set to ON to enable curl debug features" OFF)
+option(ENABLE_CURLDEBUG "Set to ON to build with TrackMemory feature enabled" ${ENABLE_DEBUG})
 
 if(ENABLE_DEBUG)
   # DEBUGBUILD will be defined only for Debug builds
   set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Debug>:DEBUGBUILD>)
-  if(NOT DEFINED ENABLE_CURLDEBUG)
-    set(ENABLE_CURLDEBUG ON)
-  endif()
 endif()
 
 if(ENABLE_CURLDEBUG)
