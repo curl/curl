@@ -30,6 +30,7 @@
 #include "tool_cfgable.h"
 #include "tool_msgs.h"
 #include "tool_cb_prg.h"
+#include "terminal.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
