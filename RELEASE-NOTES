@@ -4,7 +4,7 @@ curl and libcurl 8.8.1
  Command line options:         259
  curl_easy_setopt() options:   305
  Public functions in libcurl:  94
- Contributors:                 3174
+ Contributors:                 3176
 
 This release includes the following changes:
 
@@ -13,16 +13,43 @@ This release includes the following bugfixes:
 
  o (lib)curl.rc: set debug flag also for `CURLDEBUG` and `UNITTESTS` [2]
  o asyn-thread: avoid using GetAddrInfoExW with impersonation [7]
+ o build: add more supported attributes to the IAR compiler [46]
+ o build: untangle `CURLDEBUG` and `DEBUGBUILD` macros [9]
+ o ci: update dependency awslabs/aws-lc to v1.28.0 [42]
+ o cmake: allow `ENABLE_CURLDEBUG=OFF` with `ENABLE_DEBUG=ON` [26]
+ o cmake: always build unit tests with the `testdeps` target [20]
+ o cmake: fix `-Wredundant-decls` in unity/mingw-w64 builds [15]
  o cmake: fix brotli lib order [3]
  o cmake: fix building in unity mode [4]
  o cmake: fix building with both md4 and md5 in unity mode [13]
+ o cmake: fix test 1013 with websockets enabled and no TLS [47]
+ o cmake: use `APPLE` instead of `CMAKE_SYSTEM_NAME` string [24]
+ o cmake: whitespace, formatting/tidy-up in comments [25]
+ o configure: use `$EGREP` in place of `grep -E` [41]
+ o docs/cmdline-opts: fix mail-auth example TLD typo [35]
  o docs/Makefile.am: make curl-config.1 install [14]
+ o examples: delete unused includes [10]
+ o examples: fix compiling with MSVC [34]
+ o http: write last header line late [44]
+ o lib: fix gcc warning in certain debug builds [19]
+ o libssh: remove CURLOPT_SSL_VERIFYHOST check [36]
  o mbedtls: check version for cipher id [12]
  o mbedtls: send close-notify on close [11]
+ o multi: add multi->proto_hash, a key-value store for protocol data [37]
+ o openssl: stop duplicate ssl key logging for legacy OpenSSL [49]
  o pytest: add ftp upload tests [16]
+ o runtests: sort test IDs in summary lines [33]
  o test: add test1484, for HEAD with content [18]
  o test: add test1546, chunked not last transfer encoding [17]
+ o tests: add pytest for --ciphers and --tls13-ciphers options [38]
+ o tests: extend user/password parsing test1620 [40]
+ o tests: run with "--trace-config all" to provide even more info [6]
+ o tests: test_17_ssl_use.py clarify mbedtls TLSv1.3 support [43]
+ o tests: use exec when spawning nghttpx [45]
+ o TODO: remove some old, clarify, add something [31]
+ o tool_operate: avoid explicitly setting verifypeer to 1 [39]
  o transfer: conn close on paused upload [8]
+ o transfer: remove curl_upload_refill_watermark, no longer used [50]
  o winbuild: fix PE version info debug flag [1]
  o winbuild: remove outdated WIN32 defines [5]
 
@@ -39,10 +66,12 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, dependabot[bot], edmcln on github, Kai Pastor,
-  Keerthi Timmaraju, Orgad Shaneh, Pavel Pavlov, Ray Satiro, renovate[bot],
-  Sergey Bronnikov, Stefan Eissing, Viktor Szakats
-  (12 contributors)
+  Alejandro R. Sedeño, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
+  dependabot[bot], edmcln on github, Harry Sintonen, James Abbatiello,
+  Jan Venekamp, Jonathan Matthews, Joseph Chen, Kai Pastor, Keerthi Timmaraju,
+  Orgad Shaneh, Pavel Pavlov, Ray Satiro, renovate[bot], Sergey Bronnikov,
+  Stefan Eissing, Viktor Szakats
+  (20 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -51,12 +80,39 @@ References to bug reports and discussions on issues:
  [3] = https://curl.se/bug/?i=13761
  [4] = https://curl.se/bug/?i=13751
  [5] = https://curl.se/bug/?i=13739
+ [6] = https://curl.se/bug/?i=13791
  [7] = https://curl.se/bug/?i=13612
  [8] = https://curl.se/bug/?i=13740
+ [9] = https://curl.se/bug/?i=13718
+ [10] = https://curl.se/bug/?i=13785
  [11] = https://curl.se/bug/?i=13745
  [12] = https://curl.se/bug/?i=13749
  [13] = https://curl.se/bug/?i=13737
  [14] = https://curl.se/bug/?i=13741
+ [15] = https://curl.se/bug/?i=13705
  [16] = https://curl.se/bug/?i=13734
  [17] = https://curl.se/bug/?i=13736
  [18] = https://curl.se/bug/?i=13735
+ [19] = https://curl.se/bug/?i=13800
+ [20] = https://curl.se/bug/?i=13698
+ [24] = https://curl.se/bug/?i=13713
+ [25] = https://curl.se/bug/?i=13711
+ [26] = https://curl.se/bug/?i=13792
+ [31] = https://curl.se/bug/?i=13788
+ [33] = https://curl.se/bug/?i=13774
+ [34] = https://curl.se/bug/?i=13771
+ [35] = https://curl.se/bug/?i=13784
+ [36] = https://curl.se/bug/?i=13767
+ [37] = https://curl.se/bug/?i=13345
+ [38] = https://curl.se/bug/?i=13530
+ [39] = https://curl.se/bug/?i=13704
+ [40] = https://curl.se/bug/?i=13756
+ [41] = https://curl.se/bug/?i=13780
+ [42] = https://curl.se/bug/?i=13770
+ [43] = https://curl.se/bug/?i=13779
+ [44] = https://curl.se/bug/?i=13752
+ [45] = https://curl.se/bug/?i=13772
+ [46] = https://curl.se/bug/?i=13744
+ [47] = https://curl.se/bug/?i=13769
+ [49] = https://curl.se/bug/?i=13683
+ [50] = https://curl.se/bug/?i=13764
