@@ -60,9 +60,9 @@ jobs:
           tar xvf curl-99.98.97.tar.gz
           pushd curl-99.98.97
           ./configure --prefix=$HOME/temp --without-ssl --without-libpsl
-          make -j3
-          make -j3 test-ci
-          make -j3 install
+          make -j5
+          make -j5 test-ci
+          make -j5 install
           popd
           # basic check of the installed files
           bash scripts/installcheck.sh $HOME/temp
@@ -85,8 +85,8 @@ jobs:
           mkdir build
           pushd build
           ../curl-99.98.97/configure --without-ssl --without-libpsl
-          make -j3
-          make -j3 test-ci
+          make -j5
+          make -j5 test-ci
           popd
           rm -rf build
           rm -rf curl-99.98.97
@@ -108,9 +108,9 @@ jobs:
           mkdir build
           pushd build
           ../configure --without-ssl --enable-debug "--prefix=${PWD}/pkg" --without-libpsl
-          make -j3
-          make -j3 test-ci
-          make -j3 install
+          make -j5
+          make -j5 test-ci
+          make -j5 install
         name: 'verify out-of-tree autotools debug build'
 
   verify-out-of-tree-cmake:
@@ -127,5 +127,5 @@ jobs:
           tar xvf curl-99.98.97.tar.gz
           pushd curl-99.98.97
           cmake -B build -DCURL_WERROR=ON
-          make -C build -j3
+          make -C build -j5
         name: 'verify out-of-tree cmake build'

@@ -50,7 +50,7 @@ on:
 permissions: {}
 
 env:
-  MAKEFLAGS: -j 3
+  MAKEFLAGS: -j 5
   DEBIAN_FRONTEND: noninteractive
 
 jobs:
