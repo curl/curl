@@ -232,7 +232,7 @@ jobs:
         timeout-minutes: 30
         shell: msys2 {0}
         run: |
-          export TFLAGS='-j14 !TFTP ${{ matrix.tflags }}'
+          export TFLAGS='-j14 ${{ matrix.tflags }}'
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
@@ -296,7 +296,7 @@ jobs:
         timeout-minutes: 40
         shell: msys2 {0}
         run: |
-          export TFLAGS='-j14 !TFTP ${{ matrix.tflags }}'
+          export TFLAGS='-j14 ${{ matrix.tflags }}'
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
@@ -398,7 +398,7 @@ jobs:
         timeout-minutes: 40
         shell: C:\msys64\usr\bin\bash.exe {0}
         run: |
-          export TFLAGS='-j14 !TFTP ${{ matrix.tflags }}'
+          export TFLAGS='-j14 ${{ matrix.tflags }}'
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
@@ -466,6 +466,6 @@ jobs:
         timeout-minutes: 30
         shell: bash
         run: |
-          export TFLAGS='-j14 !TFTP ${{ matrix.tflags }}'
+          export TFLAGS='-j14 ${{ matrix.tflags }}'
           ls bld/lib/*.dll >/dev/null 2>&1 && cp -f -p bld/lib/*.dll bld/tests/libtest/
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
