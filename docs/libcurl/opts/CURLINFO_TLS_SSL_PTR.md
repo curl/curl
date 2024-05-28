@@ -95,6 +95,8 @@ as well:
 
 **SSL ***
 
+##
+
 If the *internals* pointer is NULL then either the SSL backend is not
 supported, an SSL session has not yet been established or the connection is no
 longer associated with the easy handle (e.g. curl_easy_perform(3) has

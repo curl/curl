@@ -63,6 +63,8 @@ SOCKS5 Proxy.
 
 SOCKS5 Proxy. Proxy resolves URL hostname.
 
+##
+
 Often it is more convenient to specify the proxy type with the scheme part of
 the CURLOPT_PROXY(3) string.
 

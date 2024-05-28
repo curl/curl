@@ -50,13 +50,15 @@ It is extracted from the hostname specified in the URL if omitted.
 The argument is a function provided by a cloud. It is extracted from the
 hostname specified in the URL if omitted.
 
-NOTE: This call set CURLOPT_HTTPAUTH(3) to CURLAUTH_AWS_SIGV4.
-Calling CURLOPT_HTTPAUTH(3) with CURLAUTH_AWS_SIGV4 is the same
-as calling this with **"aws:amz"** in parameter.
+##
+
+NOTE: This call set CURLOPT_HTTPAUTH(3) to CURLAUTH_AWS_SIGV4. Calling
+CURLOPT_HTTPAUTH(3) with CURLAUTH_AWS_SIGV4 is the same as calling this with
+**"aws:amz"** in parameter.
 
 Example with "Test:Try", when curl uses the algorithm, it generates
-**"TEST-HMAC-SHA256"** for "Algorithm", **"x-try-date"** and
-**"X-Try-Date"** for "date", **"test4_request"** for "request type",
+**"TEST-HMAC-SHA256"** for "Algorithm", **"x-try-date"** and **"X-Try-Date"**
+for "date", **"test4_request"** for "request type",
 **"SignedHeaders=content-type;host;x-try-date"** for "signed headers"
 
 If you use just "test", instead of "test:try", test is used for every

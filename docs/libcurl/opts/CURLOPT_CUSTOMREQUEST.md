@@ -95,9 +95,6 @@ with CURLOPT_MAIL_RCPT(3), to specify an EXPN request. If the
 CURLOPT_NOBODY(3) option is specified then the request can be used to
 issue **NOOP** and **RSET** commands.
 
-The application does not have to keep the string around after setting this
-option.
-
 # DEFAULT
 
 NULL
