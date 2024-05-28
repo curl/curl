@@ -524,7 +524,7 @@ int defaultvariables(struct GlobalConfig *global)
   int junk[4];
   int err;
   struct timeval now = tvnow();
-  srandom((int)now.tv_usec);
+  srand((int)now.tv_usec);
   junk[0] = rand();
   junk[1] = rand();
   junk[2] = rand();
