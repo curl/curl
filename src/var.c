@@ -37,6 +37,7 @@
 #include "curl_base64.h"
 #include "tool_paramhlp.h"
 #include "tool_writeout_json.h"
+#include "tool_util.h"
 #include "var.h"
 
 #include "memdebug.h" /* keep this as LAST include */
@@ -93,6 +94,10 @@ static const struct var *varcontent(struct GlobalConfig *global,
 #define FUNC_URL_LEN (sizeof(FUNC_URL) - 1)
 #define FUNC_B64 "b64"
 #define FUNC_B64_LEN (sizeof(FUNC_B64) - 1)
+#define FUNC_HEX "hex"
+#define FUNC_HEX_LEN (sizeof(FUNC_HEX) - 1)
+#define FUNC_UUID "uuid"
+#define FUNC_UUID_LEN (sizeof(FUNC_UUID) - 1)
 
 static ParameterError varfunc(struct GlobalConfig *global,
                               char *c, /* content */
@@ -177,6 +182,54 @@ static ParameterError varfunc(struct GlobalConfig *global,
         if(curlx_dyn_addn(out, enc, elen))
           err = PARAM_NO_MEM;
         curl_free(enc);
+        if(err)
+          break;
+      }
+    }
+    else if(FUNCMATCH(f, FUNC_HEX, FUNC_HEX_LEN)) {
+      int i = 0;
+      f += FUNC_HEX_LEN;
+      curlx_dyn_reset(out);
+      while(clen) {
+        /* put it in the output as hex */
+        if(curlx_dyn_addf(out, "%02x", (unsigned char)c[i]))
+          err = PARAM_NO_MEM;
+        if(err)
+          break;
+        c++;
+        clen--;
+      }
+    }
+    else if(FUNCMATCH(f, FUNC_UUID, FUNC_UUID_LEN)) {
+      f += FUNC_UUID_LEN;
+      curlx_dyn_reset(out);
+      if(clen >= 16) {
+        int i;
+        int o = 0;
+        /* needs 16 bytes, output as 8-4-4-4-12 */
+        for(i = 0; !err && (i < 4); i++, o++)
+          if(curlx_dyn_addf(out, "%02x", (unsigned char)c[o]))
+            err = PARAM_NO_MEM;
+        if(!err && curlx_dyn_addn(out, "-", 1))
+          err = PARAM_NO_MEM;
+        for(i = 0; !err && (i < 2); i++, o++)
+          if(curlx_dyn_addf(out, "%02x", (unsigned char)c[o]))
+            err = PARAM_NO_MEM;
+        if(!err && curlx_dyn_addn(out, "-", 1))
+          err = PARAM_NO_MEM;
+        for(i = 0; !err && (i < 2); i++, o++)
+          if(curlx_dyn_addf(out, "%02x", (unsigned char)c[o]))
+            err = PARAM_NO_MEM;
+        if(!err && curlx_dyn_addn(out, "-", 1))
+          err = PARAM_NO_MEM;
+        for(i = 0; !err && (i < 2); i++, o++)
+          if(curlx_dyn_addf(out, "%02x", (unsigned char)c[o]))
+            err = PARAM_NO_MEM;
+        if(!err && curlx_dyn_addn(out, "-", 1))
+          err = PARAM_NO_MEM;
+        for(i = 0; !err && (i < 6); i++, o++)
+          if(curlx_dyn_addf(out, "%02x", (unsigned char)c[o]))
+            err = PARAM_NO_MEM;
         if(err)
           break;
       }
@@ -464,4 +517,21 @@ ParameterError setvariable(struct GlobalConfig *global,
       free(content);
   }
   return err;
+}
+
+int defaultvariables(struct GlobalConfig *global)
+{
+  int junk[4];
+  int err;
+  struct timeval now = tvnow();
+  srandom((int)now.tv_usec);
+  junk[0] = rand();
+  junk[1] = rand();
+  junk[2] = rand();
+  junk[3] = rand();
+  err = addvariable(global, "random", 6,
+                    (char *)&junk[0], sizeof(junk), FALSE);
+  if(err)
+    return err;
+  return 0;
 }
