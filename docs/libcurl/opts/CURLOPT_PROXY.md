@@ -69,15 +69,16 @@ SOCKS5 Proxy.
 
 SOCKS5 Proxy. Proxy resolves URL hostname.
 
-Without a scheme prefix, CURLOPT_PROXYTYPE(3) can be used to specify
-which kind of proxy the string identifies.
+##
+
+Without a scheme prefix, CURLOPT_PROXYTYPE(3) can be used to specify which
+kind of proxy the string identifies.
 
 When you tell the library to use an HTTP proxy, libcurl transparently converts
 operations to HTTP even if you specify an FTP URL etc. This may have an impact
-on what other features of the library you can use, such as
-CURLOPT_QUOTE(3) and similar FTP specifics that do not work unless you
-tunnel through the HTTP proxy. Such tunneling is activated with
-CURLOPT_HTTPPROXYTUNNEL(3).
+on what other features of the library you can use, such as CURLOPT_QUOTE(3)
+and similar FTP specifics that do not work unless you tunnel through the HTTP
+proxy. Such tunneling is activated with CURLOPT_HTTPPROXYTUNNEL(3).
 
 Setting the proxy string to "" (an empty string) explicitly disables the use
 of a proxy, even if there is an environment variable set for it.
@@ -87,9 +88,6 @@ user + password.
 
 Unix domain sockets are supported for socks proxies since 7.84.0. Set
 localhost for the host part. e.g. socks5h://localhost/path/to/socket.sock
-
-The application does not have to keep the string around after setting this
-option.
 
 When a proxy is used, the active FTP mode as set with *CUROPT_FTPPORT(3)*,
 cannot be used.
