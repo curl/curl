@@ -22,7 +22,7 @@ permissions: {}
 env:
   CW_NOGET: 'curl trurl'
   CW_MAP: '0'
-  CW_JOBS: '3'
+  CW_JOBS: '5'
   CW_NOPKG: '1'
   DOCKER_CONTENT_TRUST: '1'
 
@@ -54,6 +54,8 @@ jobs:
   mac-clang:
     runs-on: macos-latest
     timeout-minutes: 30
+    env:
+      CW_JOBS: '4'
     steps:
       - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
         with:

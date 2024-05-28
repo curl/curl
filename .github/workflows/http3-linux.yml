@@ -45,7 +45,7 @@ concurrency:
 permissions: {}
 
 env:
-  MAKEFLAGS: -j 4
+  MAKEFLAGS: -j 5
   # handled in renovate.json
   openssl3-version: openssl-3.3.0
   # unhandled

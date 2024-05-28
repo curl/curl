@@ -82,7 +82,7 @@ jobs:
         timeout-minutes: 10
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
-          make -C bld -j3 V=1 install
+          make -C bld -j5 V=1 install
           find . -name '*.exe' -o -name '*.dll'
           bld/src/curl.exe --disable --version
 
@@ -91,14 +91,14 @@ jobs:
         timeout-minutes: 5
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
-          make -C bld -j3 V=1 examples
+          make -C bld -j5 V=1 examples
 
       - name: 'autotools build tests'
         if: ${{ matrix.build == 'automake' && matrix.tflags != 'skipall' }}
         timeout-minutes: 15
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
-          make -C bld -j3 -C tests V=1
+          make -C bld -j5 -C tests V=1
 
       - name: 'autotools run tests'
         if: ${{ matrix.build == 'automake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -109,7 +109,7 @@ jobs:
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
-          make -C bld -j3 V=1 test-ci
+          make -C bld -j5 V=1 test-ci
 
       - name: 'cmake configure'
         if: ${{ matrix.build == 'cmake' }}
@@ -131,7 +131,7 @@ jobs:
         timeout-minutes: 10
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
-          cmake --build bld --config '${{ matrix.type }}' --parallel 3
+          cmake --build bld --config '${{ matrix.type }}' --parallel 5
           [[ '${{ matrix.config }}' != *'BUILD_SHARED_LIBS=OFF'* ]] && cp -f -p bld/lib/*.dll bld/src/
           find . -name '*.exe' -o -name '*.dll'
           bld/src/curl.exe --disable --version
@@ -141,7 +141,7 @@ jobs:
         timeout-minutes: 15
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
-          cmake --build bld --config '${{ matrix.type }}' --parallel 3 --target testdeps
+          cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
 
       - name: 'cmake run tests'
         if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -209,7 +209,7 @@ jobs:
         timeout-minutes: 10
         shell: msys2 {0}
         run: |
-          make -C bld -j3 V=1 install
+          make -C bld -j5 V=1 install
           find . -name '*.exe' -o -name '*.dll'
           bld/src/curl.exe --disable --version
 
@@ -218,14 +218,14 @@ jobs:
         timeout-minutes: 5
         shell: msys2 {0}
         run: |
-          make -C bld -j3 V=1 examples
+          make -C bld -j5 V=1 examples
 
       - name: 'autotools build tests'
         if: ${{ matrix.build == 'autotools' && matrix.tflags != 'skipall' }}
         timeout-minutes: 10
         shell: msys2 {0}
         run: |
-          make -C bld -j3 -C tests V=1
+          make -C bld -j5 -C tests V=1
 
       - name: 'autotools run tests'
         if: ${{ matrix.build == 'autotools' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -236,7 +236,7 @@ jobs:
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
-          make -C bld -j3 V=1 test-ci
+          make -C bld -j5 V=1 test-ci
 
       - name: 'cmake configure'
         if: ${{ matrix.build == 'cmake' }}
@@ -279,7 +279,7 @@ jobs:
         timeout-minutes: 10
         shell: msys2 {0}
         run: |
-          cmake --build bld --config '${{ matrix.type }}' --parallel 3
+          cmake --build bld --config '${{ matrix.type }}' --parallel 5
           [[ '${{ matrix.config }}' != *'BUILD_SHARED_LIBS=OFF'* ]] && cp -f -p bld/lib/*.dll bld/src/
           find . -name '*.exe' -o -name '*.dll'
           bld/src/curl.exe --disable --version
@@ -289,7 +289,7 @@ jobs:
         timeout-minutes: 10
         shell: msys2 {0}
         run: |
-          cmake --build bld --config '${{ matrix.type }}' --parallel 3 --target testdeps
+          cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
 
       - name: 'cmake run tests'
         if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -380,7 +380,7 @@ jobs:
         shell: C:\msys64\usr\bin\bash.exe {0}
         run: |
           export PATH="$(cygpath "${USERPROFILE}")/my-cache/mingw64/bin:/c/msys64/usr/bin:$PATH"
-          cmake --build bld --config '${{ matrix.type }}' --parallel 3
+          cmake --build bld --config '${{ matrix.type }}' --parallel 5
           [[ '${{ matrix.config }}' != *'BUILD_SHARED_LIBS=OFF'* ]] && cp -f -p bld/lib/*.dll bld/src/
           bld/src/curl.exe --disable --version
 
@@ -390,7 +390,7 @@ jobs:
         shell: C:\msys64\usr\bin\bash.exe {0}
         run: |
           export PATH="$(cygpath "${USERPROFILE}")/my-cache/mingw64/bin:/c/msys64/usr/bin:$PATH"
-          cmake --build bld --config '${{ matrix.type }}' --parallel 3 --target testdeps
+          cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
 
       - name: 'cmake run tests'
         if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -450,7 +450,7 @@ jobs:
         timeout-minutes: 5
         shell: bash
         run: |
-          cmake --build bld --config '${{ matrix.type }}' --parallel 3
+          cmake --build bld --config '${{ matrix.type }}' --parallel 5
           [[ '${{ matrix.config }}' != *'BUILD_SHARED_LIBS=OFF'* ]] && cp -f -p bld/lib/*.dll bld/src/
           bld/src/curl.exe --disable --version
 
@@ -459,7 +459,7 @@ jobs:
         timeout-minutes: 10
         shell: bash
         run: |
-          cmake --build bld --config '${{ matrix.type }}' --parallel 3 --target testdeps
+          cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
 
       - name: 'cmake run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
