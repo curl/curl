@@ -167,7 +167,7 @@ jobs:
           - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233', config: '' }
           - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '--enable-debug --disable-threaded-resolver --disable-curldebug --enable-static=no' }
           # FIXME: WebSockets test results ignored due to frequent failures on native Windows:
-          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: '!TFTP ~2301 ~2302'       , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', type: 'Debug' }
+          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: '~2301 ~2302'             , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', type: 'Debug' }
           - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_CURLDEBUG=ON', type: 'Release' }
           - { build: 'cmake'    , sys: 'clang64', env: 'clang-x86_64', tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=OFF', type: 'Release' }
       fail-fast: false
@@ -232,7 +232,7 @@ jobs:
         timeout-minutes: 30
         shell: msys2 {0}
         run: |
-          export TFLAGS='-j14 ${{ matrix.tflags }}'
+          export TFLAGS='-j14 !TFTP ${{ matrix.tflags }}'
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
@@ -296,7 +296,7 @@ jobs:
         timeout-minutes: 40
         shell: msys2 {0}
         run: |
-          export TFLAGS='-j14 ${{ matrix.tflags }}'
+          export TFLAGS='-j14 !TFTP ${{ matrix.tflags }}'
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
@@ -398,7 +398,7 @@ jobs:
         timeout-minutes: 40
         shell: C:\msys64\usr\bin\bash.exe {0}
         run: |
-          export TFLAGS='-j14 ${{ matrix.tflags }}'
+          export TFLAGS='-j14 !TFTP ${{ matrix.tflags }}'
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
@@ -466,6 +466,6 @@ jobs:
         timeout-minutes: 30
         shell: bash
         run: |
-          export TFLAGS='-j14 ${{ matrix.tflags }}'
+          export TFLAGS='-j14 !TFTP ${{ matrix.tflags }}'
           ls bld/lib/*.dll >/dev/null 2>&1 && cp -f -p bld/lib/*.dll bld/tests/libtest/
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
