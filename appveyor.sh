@@ -40,8 +40,6 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   [[ "${TARGET:-}" = *'ARM64'* ]] && SKIP_RUN='ARM64 architecture'
   [ "${OPENSSL}" = 'ON' ] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
   [ -n "${CURLDEBUG:-}" ] && options+=" -DENABLE_CURLDEBUG=${CURLDEBUG}"
-  [ "${PRJ_CFG}" = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
-  [ "${PRJ_CFG}" = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
   [[ "${PRJ_GEN}" = *'Visual Studio'* ]] && options+=' -DCMAKE_VS_GLOBALS=TrackFileAccess=false'
   if [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ]; then
     [ "${DEBUG}" = 'ON' ] && [ "${SHARED}" = 'ON' ] && SKIP_RUN='Crash on startup in ENABLE_DEBUG=ON shared builds'
@@ -59,10 +57,9 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     '-DCURL_WERROR=ON' \
     "-DENABLE_DEBUG=${DEBUG}" \
     "-DENABLE_UNICODE=${ENABLE_UNICODE}" \
-    '-DCMAKE_INSTALL_PREFIX=C:/curl' \
-    "-DCMAKE_BUILD_TYPE=${PRJ_CFG}"
+    '-DCMAKE_INSTALL_PREFIX=C:/curl'
   # shellcheck disable=SC2086
-  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}
+  cmake --build _bld --parallel 2 -- ${BUILD_OPT:-}
   if [ "${SHARED}" = 'ON' ]; then
     cp -f -p _bld/lib/*.dll _bld/src/
   fi
@@ -121,7 +118,7 @@ fi
 
 if [[ "${TFLAGS}" != 'skipall' ]] && \
    [ "${BUILD_SYSTEM}" = 'CMake' ]; then
-  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
+  cmake --build _bld --parallel 2 --target testdeps
 fi
 
 # run tests
@@ -135,7 +132,7 @@ if [[ "${TFLAGS}" != 'skipall' ]] && \
   fi
   if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     ls _bld/lib/*.dll >/dev/null 2>&1 && cp -f -p _bld/lib/*.dll _bld/tests/libtest/
-    cmake --build _bld --config "${PRJ_CFG}" --target test-ci
+    cmake --build _bld --config --target test-ci
   else
     (
       TFLAGS="-a -p !flaky -r -rm ${TFLAGS}"
