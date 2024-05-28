@@ -29,6 +29,7 @@
 
 #include "tool_cfgable.h"
 #include "tool_msgs.h"
+#include "tool_cb_prg.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -46,7 +47,7 @@ static void voutf(struct GlobalConfig *config,
                   const char *fmt,
                   va_list ap)
 {
-  size_t width = (79 - strlen(prefix));
+  size_t width = (get_terminal_columns() - strlen(prefix));
   DEBUGASSERT(!strchr(fmt, '\n'));
   if(!config->silent) {
     size_t len;
