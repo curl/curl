@@ -61,16 +61,16 @@ jobs:
             cmake -B bld \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
-              -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
+              -DENABLE_DEBUG=ON \
               -DBUILD_EXAMPLES=ON \
               -DENABLE_WEBSOCKETS=ON \
               -DCURL_USE_OPENSSL=ON \
               -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON -DCURL_USE_GSSAPI=ON
-            cmake --build bld --config Debug --parallel 3
+            cmake --build bld --parallel 3
             "$(pwd)/bld/src/curl" --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
-              cmake --build bld --config Debug --parallel 3 --target testdeps
-              cmake --build bld --config Debug --target test-ci
+              cmake --build bld --parallel 3 --target testdeps
+              cmake --build bld --target test-ci
             fi
 
   openbsd:
@@ -94,17 +94,17 @@ jobs:
             cmake -B bld \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
-              -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
+              -DENABLE_DEBUG=ON \
               -DBUILD_EXAMPLES=ON \
               -DENABLE_WEBSOCKETS=ON \
               -DCURL_USE_OPENSSL=ON \
               -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON
-            cmake --build bld --config Debug --parallel 3
+            cmake --build bld --parallel 3
             "$(pwd)/bld/src/curl" --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
-              cmake --build bld --config Debug --parallel 3 --target testdeps
+              cmake --build bld --parallel 3 --target testdeps
               export TFLAGS='-j8 ~3017 ~TFTP'  # FIXME: TFTP requests executed twice? Related: `curl: (69) TFTP: Access Violation`?
-              cmake --build bld --config Debug --target test-ci
+              cmake --build bld --target test-ci
             fi
 
   freebsd:
@@ -159,17 +159,17 @@ jobs:
               '-DCMAKE_C_COMPILER=${{ matrix.compiler }}' \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
-              -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
+              -DENABLE_DEBUG=ON \
               -DBUILD_EXAMPLES=ON \
               -DENABLE_WEBSOCKETS=ON \
               -DCURL_USE_OPENSSL=ON \
               -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON -DCURL_USE_GSSAPI=ON
-            cmake --build bld --config Debug --parallel 3
+            cmake --build bld --parallel 3
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
-              cmake --build bld --config Debug --parallel 3 --target testdeps
+              cmake --build bld --parallel 3 --target testdeps
               export TFLAGS='-j12'
-              cmake --build bld --config Debug --target test-ci
+              cmake --build bld --target test-ci
             fi
 
   omnios:

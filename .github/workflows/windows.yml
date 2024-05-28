@@ -131,7 +131,7 @@ jobs:
         timeout-minutes: 10
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
-          cmake --build bld --config '${{ matrix.type }}' --parallel 3
+          cmake --build bld --parallel 3
           [[ '${{ matrix.config }}' != *'BUILD_SHARED_LIBS=OFF'* ]] && cp -f -p bld/lib/*.dll bld/src/
           find . -name '*.exe' -o -name '*.dll'
           bld/src/curl.exe --disable --version
@@ -141,7 +141,7 @@ jobs:
         timeout-minutes: 15
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
-          cmake --build bld --config '${{ matrix.type }}' --parallel 3 --target testdeps
+          cmake --build bld --parallel 3 --target testdeps
 
       - name: 'cmake run tests'
         if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -153,7 +153,7 @@ jobs:
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
           ls bld/lib/*.dll >/dev/null 2>&1 && cp -f -p bld/lib/*.dll bld/tests/libtest/
-          cmake --build bld --config '${{ matrix.type }}' --target test-ci
+          cmake --build bld --target test-ci
 
   msys2:
     name: 'msys2 (${{ matrix.build }}, ${{ matrix.sys }}, ${{ matrix.env }}, ${{ matrix.config }})'
@@ -167,9 +167,9 @@ jobs:
           - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233', config: '' }
           - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '--enable-debug --disable-threaded-resolver --disable-curldebug --enable-static=no' }
           # FIXME: WebSockets test results ignored due to frequent failures on native Windows:
-          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: '!TFTP ~2301 ~2302'       , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', type: 'Debug' }
-          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_CURLDEBUG=ON', type: 'Release' }
-          - { build: 'cmake'    , sys: 'clang64', env: 'clang-x86_64', tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=OFF', type: 'Release' }
+          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: '!TFTP ~2301 ~2302'       , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON' }
+          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_CURLDEBUG=ON' }
+          - { build: 'cmake'    , sys: 'clang64', env: 'clang-x86_64', tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=OFF' }
       fail-fast: false
     steps:
       - run: git config --global core.autocrlf input
@@ -261,12 +261,9 @@ jobs:
           else
             rcopts=''
           fi
-          [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
-          [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
           cmake -B bld ${options} \
             "-DCMAKE_C_FLAGS=${cflags}" \
             "-DCMAKE_RC_COMPILE_OBJECT=${rcopts}" \
-            '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
             -DCMAKE_UNITY_BUILD=ON \
             -DCURL_WERROR=ON \
             -DBUILD_EXAMPLES=ON \
@@ -279,7 +276,7 @@ jobs:
         timeout-minutes: 10
         shell: msys2 {0}
         run: |
-          cmake --build bld --config '${{ matrix.type }}' --parallel 3
+          cmake --build bld --parallel 3
           [[ '${{ matrix.config }}' != *'BUILD_SHARED_LIBS=OFF'* ]] && cp -f -p bld/lib/*.dll bld/src/
           find . -name '*.exe' -o -name '*.dll'
           bld/src/curl.exe --disable --version
@@ -289,7 +286,7 @@ jobs:
         timeout-minutes: 10
         shell: msys2 {0}
         run: |
-          cmake --build bld --config '${{ matrix.type }}' --parallel 3 --target testdeps
+          cmake --build bld --parallel 3 --target testdeps
 
       - name: 'cmake run tests'
         if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -301,7 +298,7 @@ jobs:
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
           ls bld/lib/*.dll >/dev/null 2>&1 && cp -f -p bld/lib/*.dll bld/tests/libtest/
-          cmake --build bld --config '${{ matrix.type }}' --target test-ci
+          cmake --build bld --target test-ci
 
   old-mingw-w64:
     name: 'old-mingw-w64 (${{ matrix.build }}, ${{ matrix.env }}, ${{ matrix.config }})'
@@ -314,19 +311,16 @@ jobs:
             env: '9.5.0-x86_64'
             url: 'https://github.com/brechtsanders/winlibs_mingw/releases/download/9.5.0-10.0.0-msvcrt-r1/winlibs-x86_64-posix-seh-gcc-9.5.0-mingw-w64msvcrt-10.0.0-r1.7z'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
-            type: 'Release'
             tflags: '~1139 ~1177 ~1477 ~2301 ~2302 ~3027'
           - build: 'cmake'
             env: '7.3.0-x86_64'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/7.3.0/threads-win32/seh/x86_64-7.3.0-release-win32-seh-rt_v5-rev0.7z'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON'
-            type: 'Debug'
             tflags: '~1139 ~1177 ~1477 ~2301 ~2302 ~3027'
           - build: 'cmake'
             env: '6.4.0-i686'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/6.4.0/threads-win32/dwarf/i686-6.4.0-release-win32-dwarf-rt_v5-rev0.7z'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCMAKE_UNITY_BUILD=OFF'
-            type: 'Debug'
             tflags: 'skiprun'
       fail-fast: false
     steps:
@@ -364,13 +358,10 @@ jobs:
         shell: C:\msys64\usr\bin\bash.exe {0}
         run: |
           cflags='-Wno-deprecated-declarations'  # for examples
-          [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
-          [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
           cmake -B bld ${options} \
             '-GMSYS Makefiles' \
             -DCMAKE_C_COMPILER=gcc \
             "-DCMAKE_C_FLAGS=${cflags}" \
-            '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
             -DCMAKE_UNITY_BUILD=ON \
             -DCURL_WERROR=ON \
             -DBUILD_EXAMPLES=ON \
@@ -382,7 +373,7 @@ jobs:
         timeout-minutes: 10
         shell: C:\msys64\usr\bin\bash.exe {0}
         run: |
-          cmake --build bld --config '${{ matrix.type }}' --parallel 3
+          cmake --build bld --parallel 3
           [[ '${{ matrix.config }}' != *'BUILD_SHARED_LIBS=OFF'* ]] && cp -f -p bld/lib/*.dll bld/src/
           bld/src/curl.exe --disable --version
 
@@ -391,7 +382,7 @@ jobs:
         timeout-minutes: 10
         shell: C:\msys64\usr\bin\bash.exe {0}
         run: |
-          cmake --build bld --config '${{ matrix.type }}' --parallel 3 --target testdeps
+          cmake --build bld --parallel 3 --target testdeps
 
       - name: 'cmake run tests'
         if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -403,7 +394,7 @@ jobs:
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
           ls bld/lib/*.dll >/dev/null 2>&1 && cp -f -p bld/lib/*.dll bld/tests/libtest/
-          cmake --build bld --config '${{ matrix.type }}' --target test-ci
+          cmake --build bld --target test-ci
 
   msvc:
     name: 'msvc (${{ matrix.arch }}, ${{ matrix.plat }}, ${{ matrix.config }})'
@@ -412,9 +403,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - { arch: 'x64', plat: 'windows', tflags: '~1516 ~2301 ~2302 ~2303 ~2307', config: '-DENABLE_DEBUG=ON -DCURL_USE_SCHANNEL=ON  -DBUILD_SHARED_LIBS=OFF -DENABLE_UNICODE=ON ', type: 'Debug' }
-          - { arch: 'x64', plat: 'windows', tflags: '~1516 ~2301 ~2302 ~2303 ~2307', config: '-DENABLE_DEBUG=ON -DCURL_USE_SCHANNEL=OFF -DBUILD_SHARED_LIBS=OFF -DENABLE_UNICODE=OFF', type: 'Debug' }
-          - { arch: 'x64', plat: 'windows', tflags: '~1516 ~2301 ~2302 ~2303 ~2307', config: '-DENABLE_DEBUG=ON -DCURL_USE_SCHANNEL=OFF -DHTTP_ONLY=ON          -DENABLE_UNICODE=OFF', type: 'Debug' }
+          - { arch: 'x64', plat: 'windows', tflags: '~1516 ~2301 ~2302 ~2303 ~2307', config: '-DENABLE_DEBUG=ON -DCURL_USE_SCHANNEL=ON  -DBUILD_SHARED_LIBS=OFF -DENABLE_UNICODE=ON'  }
+          - { arch: 'x64', plat: 'windows', tflags: '~1516 ~2301 ~2302 ~2303 ~2307', config: '-DENABLE_DEBUG=ON -DCURL_USE_SCHANNEL=OFF -DBUILD_SHARED_LIBS=OFF -DENABLE_UNICODE=OFF' }
+          - { arch: 'x64', plat: 'windows', tflags: '~1516 ~2301 ~2302 ~2303 ~2307', config: '-DENABLE_DEBUG=ON -DCURL_USE_SCHANNEL=OFF -DHTTP_ONLY=ON          -DENABLE_UNICODE=OFF' }
       fail-fast: false
     steps:
       - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
@@ -429,8 +420,6 @@ jobs:
           else
             system='Windows'
           fi
-          [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
-          [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
           cmake -B bld ${options} \
             "-DCMAKE_SYSTEM_NAME=${system}" \
             -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake \
@@ -439,7 +428,6 @@ jobs:
             -DCMAKE_VS_GLOBALS=TrackFileAccess=false \
             '-DCMAKE_UNITY_BUILD=${{ matrix.unity }}' \
             "-DCMAKE_C_FLAGS=${cflags}" \
-            '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
             -DCMAKE_UNITY_BUILD=ON \
             -DCURL_WERROR=ON \
             -DBUILD_EXAMPLES=ON \
@@ -450,7 +438,7 @@ jobs:
         timeout-minutes: 5
         shell: bash
         run: |
-          cmake --build bld --config '${{ matrix.type }}' --parallel 3
+          cmake --build bld --parallel 3
           [[ '${{ matrix.config }}' != *'BUILD_SHARED_LIBS=OFF'* ]] && cp -f -p bld/lib/*.dll bld/src/
           bld/src/curl.exe --disable --version
 
@@ -459,7 +447,7 @@ jobs:
         timeout-minutes: 10
         shell: bash
         run: |
-          cmake --build bld --config '${{ matrix.type }}' --parallel 3 --target testdeps
+          cmake --build bld --parallel 3 --target testdeps
 
       - name: 'cmake run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -468,4 +456,4 @@ jobs:
         run: |
           export TFLAGS='-j14 ${{ matrix.tflags }}'
           ls bld/lib/*.dll >/dev/null 2>&1 && cp -f -p bld/lib/*.dll bld/tests/libtest/
-          cmake --build bld --config '${{ matrix.type }}' --target test-ci
+          cmake --build bld --target test-ci
