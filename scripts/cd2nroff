@@ -412,6 +412,11 @@ sub single {
             }
             $header = 1;
         }
+        elsif(/^##/) {
+            # end of IP sequence
+            push @desc, ".PP\n";
+            $header = 1;
+        }
         elsif(/^# (.*)/) {
             my $word = $1;
             # if there are enclosing quotes, remove them first
