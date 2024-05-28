@@ -376,9 +376,15 @@ set_ssl_version_min_max(struct Curl_easy *data,
   long ssl_version = conn_config->version;
   long ssl_version_max = conn_config->version_max;
 
+  if((ssl_version == CURL_SSLVERSION_DEFAULT) ||
+     (ssl_version == CURL_SSLVERSION_TLSv1))
+    ssl_version = CURL_SSLVERSION_TLSv1_0;
+  if(ssl_version_max == CURL_SSLVERSION_MAX_NONE)
+    ssl_version_max = CURL_SSLVERSION_MAX_DEFAULT;
+
   if(peer->transport == TRNSPRT_QUIC) {
-    if((ssl_version != CURL_SSLVERSION_DEFAULT) &&
-       (ssl_version < CURL_SSLVERSION_TLSv1_3)) {
+    if((ssl_version_max != CURL_SSLVERSION_MAX_DEFAULT) &&
+       (ssl_version_max < CURL_SSLVERSION_MAX_TLSv1_3)) {
       failf(data, "QUIC needs at least TLS version 1.3");
       return CURLE_SSL_CONNECT_ERROR;
      }
@@ -386,11 +392,6 @@ set_ssl_version_min_max(struct Curl_easy *data,
     return CURLE_OK;
   }
 
-  if((ssl_version == CURL_SSLVERSION_DEFAULT) ||
-     (ssl_version == CURL_SSLVERSION_TLSv1))
-    ssl_version = CURL_SSLVERSION_TLSv1_0;
-  if(ssl_version_max == CURL_SSLVERSION_MAX_NONE)
-    ssl_version_max = CURL_SSLVERSION_MAX_DEFAULT;
   if(!tls13support) {
     /* If the running GnuTLS doesn't support TLS 1.3, we must not specify a
        prioritylist involving that since it will make GnuTLS return an en
