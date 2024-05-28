@@ -245,7 +245,7 @@ static CURLcode tftp_set_timeouts(struct tftp_state_data *state)
         (int)state->state, timeout_ms, state->retry_time, state->retry_max);
 
   /* init RX time */
-  time(&state->rx_time);
+  state->rx_time = time(NULL);
 
   return CURLE_OK;
 }
@@ -626,7 +626,7 @@ static CURLcode tftp_rx(struct tftp_state_data *state,
     else {
       state->state = TFTP_STATE_RX;
     }
-    time(&state->rx_time);
+    state->rx_time = time(NULL);
     break;
 
   case TFTP_EVENT_OACK:
@@ -646,7 +646,7 @@ static CURLcode tftp_rx(struct tftp_state_data *state,
 
     /* we're ready to RX data */
     state->state = TFTP_STATE_RX;
-    time(&state->rx_time);
+    state->rx_time = time(NULL);
     break;
 
   case TFTP_EVENT_TIMEOUT:
@@ -753,7 +753,7 @@ static CURLcode tftp_tx(struct tftp_state_data *state, tftp_event_t event)
       }
       /* This is the expected packet.  Reset the counters and send the next
          block */
-      time(&state->rx_time);
+      state->rx_time = time(NULL);
       state->block++;
     }
     else
@@ -1208,7 +1208,7 @@ static timediff_t tftp_state_timeout(struct Curl_easy *data,
   if(current > state->rx_time + state->retry_time) {
     if(event)
       *event = TFTP_EVENT_TIMEOUT;
-    time(&state->rx_time); /* update even though we received nothing */
+    state->rx_time = time(NULL); /* update even though we received nothing */
   }
 
   return timeout_ms;
