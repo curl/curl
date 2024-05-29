@@ -3985,7 +3985,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 # else
     if(trying_ech_now && outername) {
       infof(data, "ECH: inner: '%s', outer: '%s'",
-            peer->hostname ? "NULL": peer->hostname, outername);
+            peer->hostname ? peer->hostname : "NULL", outername);
       result = SSL_ech_set_server_names(octx->ssl,
                                         peer->hostname, outername,
                                         0 /* do send outer */);
