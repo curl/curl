@@ -1366,13 +1366,6 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   if(timeout_ms < 0)
     return CURLM_BAD_FUNCTION_ARGUMENT;
 
-  /* If the internally desired timeout is actually shorter than requested from
-     the outside, then use the shorter time! But only if the internal timer
-     is actually larger than -1! */
-  (void)multi_timeout(multi, &timeout_internal);
-  if((timeout_internal >= 0) && (timeout_internal < (long)timeout_ms))
-    timeout_ms = (int)timeout_internal;
-
   memset(ufds, 0, ufds_len * sizeof(struct pollfd));
   memset(&ps, 0, sizeof(ps));
 
@@ -1475,6 +1468,14 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   }
 #endif
 #endif
+
+  /* We check the internal timeout *AFTER* we collected all sockets to
+   * poll. Collecting the sockets may install new timers by protocols
+   * and connection filters.
+   * Use the shorter one of the internal and the caller requested timeout. */
+  (void)multi_timeout(multi, &timeout_internal);
+  if((timeout_internal >= 0) && (timeout_internal < (long)timeout_ms))
+    timeout_ms = (int)timeout_internal;
 
 #if defined(ENABLE_WAKEUP) && defined(USE_WINSOCK)
   if(nfds || use_wakeup) {
