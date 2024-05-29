@@ -24,8 +24,5 @@ or --data-urlencode to be used in an HTTP GET request instead of the POST
 request that otherwise would be used. curl will append provided data to URL
 as a query string.
 
-Prior to 7.86.0 curl could use '?' as a separator between data fields in some
-edge cases.
-
 If used in combination with --head, the POST data is instead appended to the
 URL with a HEAD request.
