@@ -306,6 +306,8 @@ int Curl_resolver_getsock(struct Curl_easy *data,
   if(milli == 0)
     milli += 10;
   Curl_expire(data, milli, EXPIRE_ASYNC_NAME);
+  DEBUGF(infof(data, "ares_getsock() -> %d, fd=%d, timeout=%d",
+         max, (int)socks[0], (int)milli));
 
   return max;
 }
