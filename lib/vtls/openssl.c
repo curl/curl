@@ -3537,9 +3537,6 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   const char * const ssl_cert_type = ssl_config->cert_type;
   const bool verifypeer = conn_config->verifypeer;
   char error_buffer[256];
-#ifdef USE_ECH
-  struct ssl_connect_data *connssl = cf->ctx;
-#endif
 
   /* Make funny stuff to get random input */
   result = ossl_seed(data);
@@ -3938,7 +3935,8 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
     else {
       struct Curl_dns_entry *dns = NULL;
 
-      dns = Curl_fetch_addr(data, connssl->peer.hostname, connssl->peer.port);
+      if(peer->hostname)
+        dns = Curl_fetch_addr(data, peer->hostname, peer->port);
       if(!dns) {
         infof(data, "ECH: requested but no DNS info available");
         if(data->set.tls_ech & CURLECH_HARD)
@@ -3987,9 +3985,9 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 # else
     if(trying_ech_now && outername) {
       infof(data, "ECH: inner: '%s', outer: '%s'",
-            connssl->peer.hostname, outername);
+            peer->hostname ? peer->hostname : "NULL", outername);
       result = SSL_ech_set_server_names(octx->ssl,
-                                        connssl->peer.hostname, outername,
+                                        peer->hostname, outername,
                                         0 /* do send outer */);
       if(result != 1) {
         infof(data, "ECH: rv failed to set server name(s) %d [ERROR]", result);
