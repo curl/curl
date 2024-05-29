@@ -75,15 +75,17 @@ populated with a URL, the new URL can be relative to the previous.
 When successfully setting a new URL, relative or absolute, the handle contents
 is replaced with the components of the newly set URL.
 
-Pass a pointer to a null-terminated string to the *url* parameter. The
-string must point to a correctly formatted "RFC 3986+" URL or be a NULL
-pointer.
+Pass a pointer to a null-terminated string to the *url* parameter. The string
+must point to a correctly formatted "RFC 3986+" URL or be a NULL pointer. The
+URL parser only understands and parses the subset of URLS that are
+"hierarchical" and therefore contain a :// separator - not the ones that are
+normally specified with only a colon separator.
 
-By default, this API only accepts setting URLs using schemes for protocols
-that are supported built-in. To make libcurl parse URLs generically even for
-schemes it does not know about, the **CURLU_NON_SUPPORT_SCHEME** flags bit
-must be set. Otherwise, this function returns *CURLUE_UNSUPPORTED_SCHEME* for
-URL schemes it does not recognize.
+By default this API only parses URLs using schemes for protocols that are
+supported built-in. To make libcurl parse URLs generically even for schemes it
+does not know about, the **CURLU_NON_SUPPORT_SCHEME** flags bit must be set.
+Otherwise, this function returns *CURLUE_UNSUPPORTED_SCHEME* for URL schemes
+it does not recognize.
 
 Unless *CURLU_NO_AUTHORITY* is set, a blank hostname is not allowed in
 the URL.
@@ -167,7 +169,8 @@ first '=' symbol is not URL encoded.
 
 ## CURLU_NON_SUPPORT_SCHEME
 
-If set, allows curl_url_set(3) to set a non-supported scheme.
+If set, allows curl_url_set(3) to set a non-supported scheme. It then of
+course cannot know if the provided scheme is a valid one or not.
 
 ## CURLU_URLENCODE
 
