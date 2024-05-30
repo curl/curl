@@ -62,7 +62,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     '-DCMAKE_INSTALL_PREFIX=C:/curl' \
     "-DCMAKE_BUILD_TYPE=${PRJ_CFG}"
   # shellcheck disable=SC2086
-  cmake --build _bld --config "${PRJ_CFG}" --parallel 3 -- ${BUILD_OPT:-}
+  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}
   if [ "${SHARED}" = 'ON' ]; then
     cp -f -p _bld/lib/*.dll _bld/src/
   fi
@@ -74,7 +74,7 @@ elif [ "${BUILD_SYSTEM}" = 'VisualStudioSolution' ]; then
   (
     cd projects
     ./generate.bat "${VC_VERSION}"
-    msbuild.exe -maxcpucount:3 "-property:Configuration=${PRJ_CFG}" "Windows/${VC_VERSION}/curl-all.sln"
+    msbuild.exe -maxcpucount "-property:Configuration=${PRJ_CFG}" "Windows/${VC_VERSION}/curl-all.sln"
   )
   curl="build/Win32/${VC_VERSION}/${PRJ_CFG}/curld.exe"
 elif [ "${BUILD_SYSTEM}" = 'winbuild_vs2015' ]; then
@@ -121,7 +121,7 @@ fi
 
 if [[ "${TFLAGS}" != 'skipall' ]] && \
    [ "${BUILD_SYSTEM}" = 'CMake' ]; then
-  cmake --build _bld --config "${PRJ_CFG}" --parallel 3 --target testdeps
+  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
 fi
 
 # run tests
