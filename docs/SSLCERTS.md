@@ -117,8 +117,8 @@ server, do one of the following:
     order:
       1. application's directory
       2. current working directory
-      3. Windows System directory (e.g. C:\windows\system32)
-      4. Windows Directory (e.g. C:\windows)
+      3. Windows System directory (e.g. C:\Windows\System32)
+      4. Windows Directory (e.g. C:\Windows)
       5. all directories along %PATH%
 
  5. Get another CA cert bundle. One option is to extract the one a recent
