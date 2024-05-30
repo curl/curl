@@ -3800,26 +3800,6 @@ AC_CHECK_FUNCS([\
   snprintf \
   utime \
   utimes \
-],[
-],[
-  func="$ac_func"
-  eval skipcheck=\$skipcheck_$func
-  if test "x$skipcheck" != "xyes"; then
-    AC_MSG_CHECKING([deeper for $func])
-    AC_LINK_IFELSE([
-      AC_LANG_PROGRAM([[
-      ]],[[
-        $func ();
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      eval "ac_cv_func_$func=yes"
-      AC_DEFINE_UNQUOTED(XC_SH_TR_CPP([HAVE_$func]), [1],
-        [Define to 1 if you have the $func function.])
-    ],[
-      AC_MSG_RESULT([but still no])
-    ])
-  fi
 ])
 
 dnl On Android, the only way to know if fseeko can be used is to see if it is
