@@ -44,7 +44,7 @@ concurrency:
 permissions: {}
 
 env:
-  MAKEFLAGS: -j 4
+  MAKEFLAGS: -j 5
 
 jobs:
   linux-i686:

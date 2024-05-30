@@ -41,7 +41,7 @@ permissions: {}
 
 env:
   DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
-  MAKEFLAGS: -j 3
+  MAKEFLAGS: -j 4
 
 jobs:
   autotools:
