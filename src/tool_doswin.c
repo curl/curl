@@ -606,8 +606,8 @@ char **__crt0_glob_function(char *arg)
  * The order of the directories it searches is:
  *  1. application's directory
  *  2. current working directory
- *  3. Windows System directory (e.g. C:\windows\system32)
- *  4. Windows Directory (e.g. C:\windows)
+ *  3. Windows System directory (e.g. C:\Windows\System32)
+ *  4. Windows Directory (e.g. C:\Windows)
  *  5. all directories along %PATH%
  *
  * For WinXP and later search order actually depends on registry value:

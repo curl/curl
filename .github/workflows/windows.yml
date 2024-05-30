@@ -67,7 +67,7 @@ jobs:
         timeout-minutes: 5
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
-          export PATH="/usr/bin:$(cygpath ${SYSTEMROOT})/system32"
+          export PATH="/usr/bin:$(cygpath ${SYSTEMROOT})/System32"
           autoreconf -fi
           mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
             --prefix="${HOME}"/install \
@@ -116,7 +116,7 @@ jobs:
         timeout-minutes: 5
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
-          export PATH="/usr/bin:$(cygpath ${SYSTEMROOT})/system32"
+          export PATH="/usr/bin:$(cygpath ${SYSTEMROOT})/System32"
           cmake -B bld ${options} \
             "-DCMAKE_C_FLAGS=${cflags}" \
             -DCMAKE_UNITY_BUILD=ON \
