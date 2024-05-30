@@ -174,7 +174,7 @@ jobs:
 
   omnios:
     name: 'OmniOS (autotools, openssl, gcc, amd64)'
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
@@ -182,7 +182,7 @@ jobs:
         uses: vmactions/omnios-vm@a61ca1ebafdcb14a9d986928d070c9834ee66fd3 # v1
         with:
           usesh: true
-          # https://pkg.omnios.org/r151048/core/en/index.shtml
+          # https://pkg.omnios.org/r151050/core/en/index.shtml
           prepare: pkg install build-essential libtool
           run: |
             ln -s /usr/bin/gcpp /usr/bin/cpp  # Some tests expect `cpp`, which is named `gcpp` in this env.
