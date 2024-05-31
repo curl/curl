@@ -151,6 +151,9 @@ class TestCaddy:
             pytest.skip("h3 not supported in curl")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
             pytest.skip("msh3 itself crashes")
+        if proto == 'http/1.1' and env.curl_uses_lib('mbedtls'):
+            pytest.skip("mbedtls 3.6.0 fails on 50 connections with: "\
+                "ssl_handshake returned: (-0x7F00) SSL - Memory allocation failed")
         count = 50
         curl = CurlClient(env=env)
         urln = f'https://{env.domain1}:{caddy.port}/data10.data?[0-{count-1}]'
