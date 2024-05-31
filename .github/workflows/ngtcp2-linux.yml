@@ -46,6 +46,8 @@ permissions: {}
 
 env:
   MAKEFLAGS: -j 4
+  # handled in renovate.json
+  openssl3-version: openssl-3.3.0
   # unhandled
   quictls-version: 3.1.4+quic
   # renovate: datasource=github-tags depName=gnutls/gnutls versioning=semver registryUrl=https://github.com
@@ -278,6 +280,13 @@ jobs:
               --with-ngtcp2=$HOME/ngtcp2/build --enable-warnings --enable-werror --enable-debug
               --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
               --with-wolfssl=$HOME/wolfssl/build
+          - name: openssl-quic
+            configure: >-
+              PKG_CONFIG_PATH="$HOME/openssl3/build/lib64/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/openssl3/build/lib64"
+              --enable-warnings --enable-werror --enable-debug --disable-ntlm
+              --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
+              --with-openssl=$HOME/openssl3/build --with-openssl-quic
+              --with-nghttp3=$HOME/nghttp3/build
 
     steps:
       - run: |
@@ -377,6 +386,25 @@ jobs:
           cd $HOME/mod_h2
           sudo make install
         name: 'install mod_h2'
+
+      - name: cache openssl3
+        if: matrix.build.name == 'openssl3'
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        id: cache-openssl3
+        env:
+          cache-name: cache-openssl3
+        with:
+          path: /home/runner/openssl3/build
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.openssl3-version }}
+
+      - name: 'install openssl3'
+        if: matrix.build.name == 'openssl3' && steps.cache-openssl3.outputs.cache-hit != 'true'
+        run: |
+          git clone --quiet --depth=1 -b ${{ env.openssl3-version }} https://github.com/openssl/openssl
+          cd openssl
+          ./config --prefix=$HOME/openssl3/build
+          make -j1 install_sw
+          cat exporters/openssl.pc
 
       - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
 
