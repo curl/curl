@@ -14,7 +14,8 @@ distro. Those marked *Rolling Release* typically run the latest version of curl
 and are therefore less likely to have back-ported patches to older versions.
 
 We discuss curl distro issues, patches and collaboration on the [curl-distros
-mailing list](https://lists.haxx.se/listinfo/curl-distros).
+mailing list](https://lists.haxx.se/listinfo/curl-distros) ([list
+archives](https://curl.se/mail/list.cgi?list=curl-distros)).
 
 ## AlmaLinux
 
