@@ -150,7 +150,7 @@ jobs:
 
       - id: settings
         if: |
-          steps.cache-quictls.outputs.cache-hit != 'true' ||
+          steps.cache-quictls-no-deprecated.outputs.cache-hit != 'true' ||
           steps.cache-gnutls.outputs.cache-hit != 'true' ||
           steps.cache-wolfssl.outputs.cache-hit != 'true' ||
           steps.cache-nghttp3.outputs.cache-hit != 'true' ||
@@ -388,7 +388,7 @@ jobs:
         name: 'install mod_h2'
 
       - name: cache openssl3
-        if: contains(matrix.build.install_steps, 'openssl3')
+        if: matrix.build.name == 'openssl-quic'
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         id: cache-openssl3
         env:
@@ -398,7 +398,7 @@ jobs:
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.openssl3-version }}
 
       - name: 'install openssl3'
-        if: contains(matrix.build.install_steps, 'openssl3') && steps.cache-openssl3.outputs.cache-hit != 'true'
+        if: matrix.build.name == 'openssl-quic' && steps.cache-openssl3.outputs.cache-hit != 'true'
         run: |
           git clone --quiet --depth=1 -b ${{ env.openssl3-version }} https://github.com/openssl/openssl
           cd openssl
