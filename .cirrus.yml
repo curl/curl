@@ -24,7 +24,9 @@
 # https://cirrus-ci.com/github/curl/curl
 #
 # Cirrus CI configuration:
-# https://cirrus-ci.org/guide/writing-tasks/
+#   https://cirrus-ci.org/guide/writing-tasks/
+# Used/remaining credits (must be logged in):
+#   https://cirrus-ci.com/settings/github/curl
 
 freebsd_task:
   skip: "changesIncludeOnly(
@@ -46,6 +48,7 @@ freebsd_task:
     - name: FreeBSD 14.0
       freebsd_instance:
         image_family: freebsd-14-0
+        memory: 1600M
 
   env:
     CIRRUS_CLONE_DEPTH: 10
@@ -79,7 +82,6 @@ freebsd_task:
     - find . -type d -exec chmod 777 {} \;
     # The OpenSSH server instance for the testsuite cannot be started on FreeBSD,
     # therefore the SFTP and SCP tests are disabled right away from the beginning.
-    #
     - sudo -u nobody make V=1 TFLAGS="-n !SFTP !SCP" test-ci
   install_script:
     - make V=1 install
