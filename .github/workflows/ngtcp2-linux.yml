@@ -168,7 +168,7 @@ jobs:
             libpsl-dev libbrotli-dev zlib1g-dev libev-dev libc-ares-dev \
             nettle-dev libp11-kit-dev libtspi-dev libunistring-dev libtasn1-bin \
             libtasn1-6-dev libidn2-0-dev libtss2-dev dns-root-data \
-            autopoint libev-dev \
+            autopoint libev-dev vsftpd \
             apache2 apache2-dev libnghttp2-dev
           echo 'CC=gcc-12' >> $GITHUB_ENV
           echo 'CXX=g++-12' >> $GITHUB_ENV
