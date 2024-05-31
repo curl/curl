@@ -94,6 +94,7 @@ int main(void)
   CURL *easy_handle;
   CURLM *multi_handle;
   int still_running = 0;
+  int myfd; /* this is our own file descriptor */
 
   /* add the individual easy handle */
   curl_multi_add_handle(multi_handle, easy_handle);
@@ -105,8 +106,19 @@ int main(void)
     mc = curl_multi_perform(multi_handle, &still_running);
 
     if(mc == CURLM_OK) {
-      /* wait for activity or timeout */
-      mc = curl_multi_poll(multi_handle, NULL, 0, 1000, &numfds);
+      struct curl_waitfd myown;
+      myown.fd = myfd;
+      myown.events = CURL_WAIT_POLLIN; /* wait for input */
+      myown.revents = 0; /* clear it */
+
+      /* wait for activity on curl's descriptors or on our own,
+         or timeout */
+      mc = curl_multi_poll(multi_handle, &myown, 1, 1000, &numfds);
+
+      if(myown.revents) {
+        /* did our descriptor receive an event? */
+        handle_fd(myfd);
+      }
     }
 
     if(mc != CURLM_OK) {
