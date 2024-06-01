@@ -4,7 +4,7 @@ curl and libcurl 8.8.1
  Command line options:         259
  curl_easy_setopt() options:   305
  Public functions in libcurl:  94
- Contributors:                 3176
+ Contributors:                 3179
 
 This release includes the following changes:
 
@@ -13,8 +13,12 @@ This release includes the following bugfixes:
 
  o (lib)curl.rc: set debug flag also for `CURLDEBUG` and `UNITTESTS` [2]
  o asyn-thread: avoid using GetAddrInfoExW with impersonation [7]
+ o autoconf: remove 'deeper' checks for `AC_CHECK_FUNCS` [23]
+ o aws-sigv4: url encode the canonical path [55]
  o build: add more supported attributes to the IAR compiler [46]
  o build: untangle `CURLDEBUG` and `DEBUGBUILD` macros [9]
+ o cd2nroff: use an empty "##" to signal end of .IP sequence [56]
+ o cf-socket: improve SO_SNDBUF update for Winsock [27]
  o ci: update dependency awslabs/aws-lc to v1.28.0 [42]
  o cmake: allow `ENABLE_CURLDEBUG=OFF` with `ENABLE_DEBUG=ON` [26]
  o cmake: always build unit tests with the `testdeps` target [20]
@@ -26,19 +30,32 @@ This release includes the following bugfixes:
  o cmake: use `APPLE` instead of `CMAKE_SYSTEM_NAME` string [24]
  o cmake: whitespace, formatting/tidy-up in comments [25]
  o configure: use `$EGREP` in place of `grep -E` [41]
+ o curl: make warnings and other messages aware of terminal width [58]
+ o curl_multi_poll.md: expand the example with an custom file descriptor [21]
+ o curl_url_set.md: libcurl only parses :// URLs [48]
+ o DISTROS: add a link to the list archive [22]
  o docs/cmdline-opts: fix mail-auth example TLD typo [35]
  o docs/Makefile.am: make curl-config.1 install [14]
  o examples: delete unused includes [10]
  o examples: fix compiling with MSVC [34]
+ o get.d: clarify the explanation [32]
+ o GHA: disable TFTP tests in Windows jobs
+ o GHA: enable tests 1139, 1177, 1477 on Windows [59]
+ o gnutls: improve TLS shutdown [62]
  o http: write last header line late [44]
  o lib: fix gcc warning in certain debug builds [19]
+ o lib: prefer `var = time(NULL)` over `time(&var)` [52]
  o libssh: remove CURLOPT_SSL_VERIFYHOST check [36]
  o mbedtls: check version for cipher id [12]
  o mbedtls: send close-notify on close [11]
  o multi: add multi->proto_hash, a key-value store for protocol data [37]
+ o multi: fix multi_wait() timeout handling [51]
+ o openssl/gnutls: rectify the TLS version checks for QUIC [61]
+ o openssl: fix %-specifier in infof() call [57]
  o openssl: stop duplicate ssl key logging for legacy OpenSSL [49]
  o pytest: add ftp upload tests [16]
  o runtests: sort test IDs in summary lines [33]
+ o sectransp: use common code for cipher suite lookup [54]
  o test: add test1484, for HEAD with content [18]
  o test: add test1546, chunked not last transfer encoding [17]
  o tests: add pytest for --ciphers and --tls13-ciphers options [38]
@@ -46,12 +63,14 @@ This release includes the following bugfixes:
  o tests: run with "--trace-config all" to provide even more info [6]
  o tests: test_17_ssl_use.py clarify mbedtls TLSv1.3 support [43]
  o tests: use exec when spawning nghttpx [45]
+ o tidy-up: use consistent casing for Windows directories [28]
  o TODO: remove some old, clarify, add something [31]
  o tool_operate: avoid explicitly setting verifypeer to 1 [39]
  o transfer: conn close on paused upload [8]
  o transfer: remove curl_upload_refill_watermark, no longer used [50]
  o winbuild: fix PE version info debug flag [1]
  o winbuild: remove outdated WIN32 defines [5]
+ o winsock: move SO_SNDBUF update into cf-socket [53]
 
 This release includes the following known bugs:
 
@@ -66,12 +85,15 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alejandro R. Sedeño, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
-  dependabot[bot], edmcln on github, Harry Sintonen, James Abbatiello,
-  Jan Venekamp, Jonathan Matthews, Joseph Chen, Kai Pastor, Keerthi Timmaraju,
-  Orgad Shaneh, Pavel Pavlov, Ray Satiro, renovate[bot], Sergey Bronnikov,
-  Stefan Eissing, Viktor Szakats
-  (20 contributors)
+  Alejandro R. Sedeño, Alexander Shtuchkin, Ayesh Karunaratne,
+  Christian Heusel, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
+  dependabot[bot], edmcln on github, Eli Schwartz, Elliott Balsley,
+  fds242 on github, Harry Sintonen, James Abbatiello, Jan Venekamp,
+  Jonathan Matthews, Joseph Chen, Kai Pastor, Keerthi Timmaraju,
+  Matthias Gatto, Matt Jolly, Orgad Shaneh, Pavel Pavlov, pszlazak on github,
+  Ray Satiro, renovate[bot], Sergey Bronnikov, Stefan Eissing, Viktor Szakats,
+  vvb2060
+  (30 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -95,10 +117,16 @@ References to bug reports and discussions on issues:
  [18] = https://curl.se/bug/?i=13735
  [19] = https://curl.se/bug/?i=13800
  [20] = https://curl.se/bug/?i=13698
+ [21] = https://curl.se/bug/?i=13842
+ [22] = https://curl.se/bug/?i=13843
+ [23] = https://bugs.gentoo.org/932827
  [24] = https://curl.se/bug/?i=13713
  [25] = https://curl.se/bug/?i=13711
  [26] = https://curl.se/bug/?i=13792
+ [27] = https://curl.se/bug/?i=13827
+ [28] = https://curl.se/bug/?i=13832
  [31] = https://curl.se/bug/?i=13788
+ [32] = https://curl.se/bug/?i=13706
  [33] = https://curl.se/bug/?i=13774
  [34] = https://curl.se/bug/?i=13771
  [35] = https://curl.se/bug/?i=13784
@@ -114,5 +142,17 @@ References to bug reports and discussions on issues:
  [45] = https://curl.se/bug/?i=13772
  [46] = https://curl.se/bug/?i=13744
  [47] = https://curl.se/bug/?i=13769
+ [48] = https://curl.se/bug/?i=13821
  [49] = https://curl.se/bug/?i=13683
  [50] = https://curl.se/bug/?i=13764
+ [51] = https://curl.se/bug/?i=13782
+ [52] = https://curl.se/bug/?i=13815
+ [53] = https://curl.se/bug/?i=13763
+ [54] = https://curl.se/bug/?i=13521
+ [55] = https://curl.se/bug/?i=13754
+ [56] = https://curl.se/bug/?i=13803
+ [57] = https://curl.se/bug/?i=13816
+ [58] = https://curl.se/bug/?i=13804
+ [59] = https://curl.se/bug/?i=13817
+ [61] = https://curl.se/bug/?i=13799
+ [62] = https://curl.se/bug/?i=13790
