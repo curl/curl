@@ -38,6 +38,7 @@ struct Curl_ssl_session;
 #define SSLSUPP_TLS13_CIPHERSUITES (1<<5) /* supports TLS 1.3 ciphersuites */
 #define SSLSUPP_CAINFO_BLOB  (1<<6)
 #define SSLSUPP_ECH          (1<<7)
+#define SSLSUPP_CA_CACHE     (1<<8)
 
 #define ALPN_ACCEPTED "ALPN: server accepted "
 

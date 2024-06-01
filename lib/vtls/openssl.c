@@ -2849,8 +2849,8 @@ typedef long ctx_option_t;
 #if (OPENSSL_VERSION_NUMBER < 0x10100000L) /* 1.1.0 */
 static CURLcode
 ossl_set_ssl_version_min_max_legacy(ctx_option_t *ctx_options,
-                                       struct Curl_cfilter *cf,
-                                       struct Curl_easy *data)
+                                    struct Curl_cfilter *cf,
+                                    struct Curl_easy *data)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   long ssl_version = conn_config->version;
@@ -5273,6 +5273,7 @@ const struct Curl_ssl Curl_ssl_openssl = {
 #ifdef USE_ECH
   SSLSUPP_ECH |
 #endif
+  SSLSUPP_CA_CACHE |
   SSLSUPP_HTTPS_PROXY,
 
   sizeof(struct ossl_ctx),

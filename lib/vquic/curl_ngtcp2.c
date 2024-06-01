@@ -2120,7 +2120,7 @@ static CURLcode tls_ctx_setup(struct Curl_cfilter *cf,
     return CURLE_FAILED_INIT;
   }
 #elif defined(USE_WOLFSSL)
-  if(ngtcp2_crypto_wolfssl_configure_client_context(ctx->ssl_ctx) != 0) {
+  if(ngtcp2_crypto_wolfssl_configure_client_context(ctx->wssl.ctx) != 0) {
     failf(data, "ngtcp2_crypto_wolfssl_configure_client_context failed");
     return CURLE_FAILED_INIT;
   }
@@ -2211,7 +2211,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
 #elif defined(USE_GNUTLS)
   ngtcp2_conn_set_tls_native_handle(ctx->qconn, ctx->tls.gtls.session);
 #else
-  ngtcp2_conn_set_tls_native_handle(ctx->qconn, ctx->tls.ssl);
+  ngtcp2_conn_set_tls_native_handle(ctx->qconn, ctx->tls.wssl.handle);
 #endif
 
   ngtcp2_ccerr_default(&ctx->last_error);
