@@ -135,9 +135,9 @@ Using this flag when getting CURLUPART_SCHEME if the scheme was set as the
 result of a guess makes curl_url_get() return CURLUE_NO_SCHEME.
 
 Using this flag when getting CURLUPART_URL if the scheme was set as the result
-of a guess makes curl_url_get() the full URL without the scheme component.
-Such a URL can then only be parsed curl_url_set() if CURLU_GUESS_SCHEME is
-set.
+of a guess makes curl_url_get() return the full URL without the scheme
+component. Such a URL can then only be parsed with curl_url_set() if
+CURLU_GUESS_SCHEME is used.
 
 (Added in curl 8.9.0)
 
