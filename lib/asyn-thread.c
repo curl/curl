@@ -168,7 +168,7 @@ struct thread_sync_data {
                             duplicate */
 #ifndef CURL_DISABLE_SOCKETPAIR
   struct Curl_easy *data;
-  curl_socket_t sock_pair[2]; /* socket pair */
+  curl_socket_t sock_pair[2]; /* eventfd/pipes/socket pair */
 #endif
   int sock_error;
   struct Curl_addrinfo *res;
@@ -251,7 +251,7 @@ int init_thread_sync_data(struct thread_data *td,
 
 #ifndef CURL_DISABLE_SOCKETPAIR
   /* create socket pair or pipe */
-  if(wakeup_create(&tsd->sock_pair[0]) < 0) {
+  if(wakeup_create(tsd->sock_pair, FALSE) < 0) {
     tsd->sock_pair[0] = CURL_SOCKET_BAD;
     tsd->sock_pair[1] = CURL_SOCKET_BAD;
     goto err_exit;
@@ -302,6 +302,14 @@ query_complete(DWORD err, DWORD bytes, LPWSAOVERLAPPED overlapped)
   struct Curl_addrinfo *ca;
   struct Curl_addrinfo *cafirst = NULL;
   struct Curl_addrinfo *calast = NULL;
+#ifndef CURL_DISABLE_SOCKETPAIR
+#ifdef USE_EVENTFD
+  const void *buf;
+  const uint64_t val = 1;
+#else
+  char buf[1];
+#endif
+#endif
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcast-align"
@@ -421,11 +429,14 @@ query_complete(DWORD err, DWORD bytes, LPWSAOVERLAPPED overlapped)
   }
   else {
 #ifndef CURL_DISABLE_SOCKETPAIR
-    char buf[1];
     if(tsd->sock_pair[1] != CURL_SOCKET_BAD) {
-      /* DNS has been resolved, signal client task */
+#ifdef USE_EVENTFD
+      buf = &val;
+#else
       buf[0] = 1;
-      if(swrite(tsd->sock_pair[1],  buf, sizeof(buf)) < 0) {
+#endif
+      /* DNS has been resolved, signal client task */
+      if(wakeup_write(tsd->sock_pair[1], buf, sizeof(buf)) < 0) {
         /* update sock_erro to errno */
         tsd->sock_error = SOCKERRNO;
       }
@@ -460,7 +471,12 @@ CURL_STDCALL getaddrinfo_thread(void *arg)
   char service[12];
   int rc;
 #ifndef CURL_DISABLE_SOCKETPAIR
+#ifdef USE_EVENTFD
+  const void *buf;
+  const uint64_t val = 1;
+#else
   char buf[1];
+#endif
 #endif
 
   msnprintf(service, sizeof(service), "%d", tsd->port);
@@ -486,9 +502,13 @@ CURL_STDCALL getaddrinfo_thread(void *arg)
   else {
 #ifndef CURL_DISABLE_SOCKETPAIR
     if(tsd->sock_pair[1] != CURL_SOCKET_BAD) {
-      /* DNS has been resolved, signal client task */
+#ifdef USE_EVENTFD
+      buf = &val;
+#else
       buf[0] = 1;
-      if(wakeup_write(tsd->sock_pair[1],  buf, sizeof(buf)) < 0) {
+#endif
+      /* DNS has been resolved, signal client task */
+      if(wakeup_write(tsd->sock_pair[1], buf, sizeof(buf)) < 0) {
         /* update sock_erro to errno */
         tsd->sock_error = SOCKERRNO;
       }

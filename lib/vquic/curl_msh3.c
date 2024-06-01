@@ -883,7 +883,7 @@ static CURLcode cf_msh3_connect(struct Curl_cfilter *cf,
   CF_DATA_SAVE(save, cf, data);
 
   if(ctx->sock[SP_LOCAL] == CURL_SOCKET_BAD) {
-    if(Curl_socketpair(AF_UNIX, SOCK_STREAM, 0, &ctx->sock[0]) < 0) {
+    if(Curl_socketpair(AF_UNIX, SOCK_STREAM, 0, &ctx->sock[0], FALSE) < 0) {
       ctx->sock[SP_LOCAL] = CURL_SOCKET_BAD;
       ctx->sock[SP_REMOTE] = CURL_SOCKET_BAD;
       return CURLE_COULDNT_CONNECT;

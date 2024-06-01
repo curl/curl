@@ -419,6 +419,9 @@
 /* Define to 1 if you have the `pipe' function. */
 #cmakedefine HAVE_PIPE 1
 
+/* Define to 1 if you have the `eventfd' function. */
+#cmakedefine HAVE_EVENTFD 1
+
 /* If you have a fine poll */
 #cmakedefine HAVE_POLL_FINE 1
 
@@ -538,6 +541,9 @@
 
 /* Define to 1 if you have the timeval struct. */
 #cmakedefine HAVE_STRUCT_TIMEVAL 1
+
+/* Define to 1 if you have the <sys/eventfd.h> header file. */
+#cmakedefine HAVE_SYS_EVENTFD_H 1
 
 /* Define to 1 if you have the <sys/filio.h> header file. */
 #cmakedefine HAVE_SYS_FILIO_H 1

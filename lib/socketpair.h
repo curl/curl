@@ -26,19 +26,42 @@
 
 #include "curl_setup.h"
 
-#ifdef HAVE_PIPE
+#if defined(HAVE_EVENTFD) && \
+    defined(__x86_64__) && \
+    defined(__aarch64__) && \
+    defined(__ia64__) && \
+    defined(__ppc64__) && \
+    defined(__mips64) && \
+    defined(__sparc64__) && \
+    defined(__riscv_64e) && \
+    defined(__s390x__)
+
+/* Use eventfd only with 64-bit CPU architectures because eventfd has a
+ * stringent rule of requiring the 8-byte buffer when calling read(2) and
+ * write(2) on it. In some rare cases, the C standard library implementation
+ * on a 32-bit system might choose to define uint64_t as a 32-bit type for
+ * various reasons (memory limitations, compatibility with older code),
+ * which makes eventfd broken.
+ */
+#define USE_EVENTFD 1
 
 #define wakeup_write  write
 #define wakeup_read   read
 #define wakeup_close  close
-#define wakeup_create(p) Curl_pipe(p)
+#define wakeup_create(p,nb) Curl_eventfd(p,nb)
 
-#ifdef HAVE_FCNTL
 #include <curl/curl.h>
-int Curl_pipe(curl_socket_t socks[2]);
-#else
-#define Curl_pipe(p) pipe(p)
-#endif
+int Curl_eventfd(curl_socket_t socks[2], bool nonblocking);
+
+#elif defined(HAVE_PIPE)
+
+#define wakeup_write  write
+#define wakeup_read   read
+#define wakeup_close  close
+#define wakeup_create(p,nb) Curl_pipe(p,nb)
+
+#include <curl/curl.h>
+int Curl_pipe(curl_socket_t socks[2], bool nonblocking);
 
 #else /* HAVE_PIPE */
 
@@ -60,19 +83,13 @@ int Curl_pipe(curl_socket_t socks[2]);
 #define SOCKETPAIR_TYPE SOCK_STREAM
 #endif
 
-#define wakeup_create(p)\
-Curl_socketpair(SOCKETPAIR_FAMILY, SOCKETPAIR_TYPE, 0, p)
+#define wakeup_create(p,nb)\
+Curl_socketpair(SOCKETPAIR_FAMILY, SOCKETPAIR_TYPE, 0, p, nb)
 
 #endif /* HAVE_PIPE */
 
-
-#ifndef HAVE_SOCKETPAIR
 #include <curl/curl.h>
 
 int Curl_socketpair(int domain, int type, int protocol,
-                    curl_socket_t socks[2]);
-#else
-#define Curl_socketpair(a,b,c,d) socketpair(a,b,c,d)
-#endif
-
+                    curl_socket_t socks[2], bool nonblocking);
 #endif /* HEADER_CURL_SOCKETPAIR_H */

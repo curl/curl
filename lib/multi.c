@@ -426,14 +426,7 @@ struct Curl_multi *Curl_multi_handle(size_t hashsize, /* socket hash */
     goto error;
 #else
 #ifdef ENABLE_WAKEUP
-  if(wakeup_create(multi->wakeup_pair) < 0) {
-    multi->wakeup_pair[0] = CURL_SOCKET_BAD;
-    multi->wakeup_pair[1] = CURL_SOCKET_BAD;
-  }
-  else if(curlx_nonblock(multi->wakeup_pair[0], TRUE) < 0 ||
-          curlx_nonblock(multi->wakeup_pair[1], TRUE) < 0) {
-    wakeup_close(multi->wakeup_pair[0]);
-    wakeup_close(multi->wakeup_pair[1]);
+  if(wakeup_create(multi->wakeup_pair, TRUE) < 0) {
     multi->wakeup_pair[0] = CURL_SOCKET_BAD;
     multi->wakeup_pair[1] = CURL_SOCKET_BAD;
   }
@@ -1639,6 +1632,15 @@ CURLMcode curl_multi_wakeup(struct Curl_multi *multi)
      it has to be careful only to access parts of the
      Curl_multi struct that are constant */
 
+#if defined(ENABLE_WAKEUP) && !defined(USE_WINSOCK)
+#ifdef USE_EVENTFD
+  const void *buf;
+  const uint64_t val = 1;
+#else
+  char buf[1];
+#endif
+#endif
+
   /* GOOD_MULTI_HANDLE can be safely called */
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
@@ -1652,8 +1654,11 @@ CURLMcode curl_multi_wakeup(struct Curl_multi *multi)
      making it safe to access from another thread after the init part
      and before cleanup */
   if(multi->wakeup_pair[1] != CURL_SOCKET_BAD) {
-    char buf[1];
+#ifdef USE_EVENTFD
+    buf = &val;
+#else
     buf[0] = 1;
+#endif
     while(1) {
       /* swrite() is not thread-safe in general, because concurrent calls
          can have their messages interleaved, but in this case the content
@@ -2882,7 +2887,9 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
 #else
 #ifdef ENABLE_WAKEUP
     wakeup_close(multi->wakeup_pair[0]);
+#ifndef USE_EVENTFD
     wakeup_close(multi->wakeup_pair[1]);
+#endif
 #endif
 #endif
 
