@@ -142,7 +142,8 @@ static void nosigpipe(struct Curl_easy *data,
 #define nosigpipe(x,y) Curl_nop_stmt
 #endif
 
-#if (defined(__DragonFly__) && __DragonFly_version < 500702) || defined(USE_WINSOCK)
+#if defined(USE_WINSOCK) || \
+   (defined(__DragonFly__) && __DragonFly_version < 500702)
 /* DragonFlyBSD < 500702 and Windows use millisecond units */
 #define KEEPALIVE_FACTOR(x) (x *= 1000)
 #else
