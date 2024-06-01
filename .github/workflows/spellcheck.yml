@@ -45,6 +45,6 @@ jobs:
         run: grep -v '^#' .github/scripts/spellcheck.words >  wordlist.txt
 
       - name: Check Spelling
-        uses: rojopolis/spellcheck-github-actions@dbd2f1da869c05ad874fffeb6fe1ed50cd1a6e98 # v0
+        uses: rojopolis/spellcheck-github-actions@e36f662b21ead3f6f29794ac5c35069bf236463c # v0
         with:
           config_path: .github/scripts/spellcheck.yaml
