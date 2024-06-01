@@ -453,7 +453,7 @@ static bool ssl_prefs_check(struct Curl_easy *data)
 }
 
 static struct ssl_connect_data *cf_ctx_new(struct Curl_easy *data,
-                                     const struct alpn_spec *alpn)
+                                           const struct alpn_spec *alpn)
 {
   struct ssl_connect_data *ctx;
 

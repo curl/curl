@@ -14,6 +14,8 @@ Protocol:
   - TLS
 TLS-backend:
   - OpenSSL
+  - Schannel
+  - wolfSSL
 ---
 
 # NAME
@@ -31,16 +33,17 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CA_CACHE_TIMEOUT, long age);
 # DESCRIPTION
 
 Pass a long, this sets the timeout in seconds. This tells libcurl the maximum
-time any cached certificate store it has in memory may be kept and reused for
-new connections. Once the timeout has expired, a subsequent fetch requiring a
-certificate has to reload it.
+time any cached CA certificate store it has in memory may be kept and reused
+for new connections. Once the timeout has expired, a subsequent fetch
+requiring a CA certificate has to reload it.
 
-Building a certificate store from a CURLOPT_CAINFO(3) file is a slow
-operation so curl may cache the generated certificate store internally to speed
-up future connections.
+Building a CA certificate store from a CURLOPT_CAINFO(3) file is a slow
+operation so curl may cache the generated certificate store internally to
+speed up future connections.
 
-Set to zero to completely disable caching, or set to -1 to retain the cached
-store remain forever. By default, libcurl caches this info for 24 hours.
+Set the timeout to zero to completely disable caching, or set to -1 to retain
+the cached store remain forever. By default, libcurl caches this info for 24
+hours.
 
 # DEFAULT
 
@@ -74,8 +77,8 @@ int main(void)
 
 This option was added in curl 7.87.0.
 
-This option is supported by OpenSSL and its forks (since 7.87.0) and Schannel
-(since 8.5.0).
+This option is supported by OpenSSL and its forks (since 7.87.0), Schannel
+(since 8.5.0) and wolfSSL (since 8.9.0).
 
 # RETURN VALUE
 

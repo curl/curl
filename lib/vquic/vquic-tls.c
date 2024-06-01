@@ -76,7 +76,7 @@ static void keylog_callback(const WOLFSSL *ssl, const char *line)
 }
 #endif
 
-static CURLcode curl_wssl_init_ctx(struct curl_tls_ctx *ctx,
+static CURLcode Curl_wssl_init_ctx(struct curl_tls_ctx *ctx,
                                    struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    Curl_vquic_tls_ctx_setup *cb_setup,
@@ -91,8 +91,8 @@ static CURLcode curl_wssl_init_ctx(struct curl_tls_ctx *ctx,
     goto out;
   }
 
-  ctx->ssl_ctx = wolfSSL_CTX_new(wolfTLSv1_3_client_method());
-  if(!ctx->ssl_ctx) {
+  ctx->wssl.ctx = wolfSSL_CTX_new(wolfTLSv1_3_client_method());
+  if(!ctx->wssl.ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
@@ -103,9 +103,9 @@ static CURLcode curl_wssl_init_ctx(struct curl_tls_ctx *ctx,
       goto out;
   }
 
-  wolfSSL_CTX_set_default_verify_paths(ctx->ssl_ctx);
+  wolfSSL_CTX_set_default_verify_paths(ctx->wssl.ctx);
 
-  if(wolfSSL_CTX_set_cipher_list(ctx->ssl_ctx, conn_config->cipher_list13 ?
+  if(wolfSSL_CTX_set_cipher_list(ctx->wssl.ctx, conn_config->cipher_list13 ?
                                  conn_config->cipher_list13 :
                                  QUIC_CIPHERS) != 1) {
     char error_buffer[256];
@@ -115,7 +115,7 @@ static CURLcode curl_wssl_init_ctx(struct curl_tls_ctx *ctx,
     goto out;
   }
 
-  if(wolfSSL_CTX_set1_groups_list(ctx->ssl_ctx, conn_config->curves ?
+  if(wolfSSL_CTX_set1_groups_list(ctx->wssl.ctx, conn_config->curves ?
                                   conn_config->curves :
                                   (char *)QUIC_GROUPS) != 1) {
     failf(data, "wolfSSL failed to set curves");
@@ -127,7 +127,7 @@ static CURLcode curl_wssl_init_ctx(struct curl_tls_ctx *ctx,
   Curl_tls_keylog_open();
   if(Curl_tls_keylog_enabled()) {
 #if defined(HAVE_SECRET_CALLBACK)
-    wolfSSL_CTX_set_keylog_callback(ctx->ssl_ctx, keylog_callback);
+    wolfSSL_CTX_set_keylog_callback(ctx->wssl.ctx, keylog_callback);
 #else
     failf(data, "wolfSSL was built without keylog callback");
     result = CURLE_NOT_BUILT_IN;
@@ -139,12 +139,12 @@ static CURLcode curl_wssl_init_ctx(struct curl_tls_ctx *ctx,
     const char * const ssl_cafile = conn_config->CAfile;
     const char * const ssl_capath = conn_config->CApath;
 
-    wolfSSL_CTX_set_verify(ctx->ssl_ctx, SSL_VERIFY_PEER, NULL);
+    wolfSSL_CTX_set_verify(ctx->wssl.ctx, SSL_VERIFY_PEER, NULL);
     if(ssl_cafile || ssl_capath) {
       /* tell wolfSSL where to find CA certificates that are used to verify
          the server's certificate. */
       int rc =
-        wolfSSL_CTX_load_verify_locations_ex(ctx->ssl_ctx, ssl_cafile,
+        wolfSSL_CTX_load_verify_locations_ex(ctx->wssl.ctx, ssl_cafile,
                                              ssl_capath,
                                              WOLFSSL_LOAD_FLAG_IGNORE_ERR);
       if(SSL_SUCCESS != rc) {
@@ -163,18 +163,18 @@ static CURLcode curl_wssl_init_ctx(struct curl_tls_ctx *ctx,
     else {
       /* verifying the peer without any CA certificates won't work so
          use wolfssl's built-in default as fallback */
-      wolfSSL_CTX_set_default_verify_paths(ctx->ssl_ctx);
+      wolfSSL_CTX_set_default_verify_paths(ctx->wssl.ctx);
     }
 #endif
   }
   else {
-    wolfSSL_CTX_set_verify(ctx->ssl_ctx, SSL_VERIFY_NONE, NULL);
+    wolfSSL_CTX_set_verify(ctx->wssl.ctx, SSL_VERIFY_NONE, NULL);
   }
 
   /* give application a chance to interfere with SSL set up. */
   if(data->set.ssl.fsslctx) {
     Curl_set_in_callback(data, true);
-    result = (*data->set.ssl.fsslctx)(data, ctx->ssl_ctx,
+    result = (*data->set.ssl.fsslctx)(data, ctx->wssl.ctx,
                                       data->set.ssl.fsslctxp);
     Curl_set_in_callback(data, false);
     if(result) {
@@ -185,36 +185,36 @@ static CURLcode curl_wssl_init_ctx(struct curl_tls_ctx *ctx,
   result = CURLE_OK;
 
 out:
-  if(result && ctx->ssl_ctx) {
-    SSL_CTX_free(ctx->ssl_ctx);
-    ctx->ssl_ctx = NULL;
+  if(result && ctx->wssl.ctx) {
+    SSL_CTX_free(ctx->wssl.ctx);
+    ctx->wssl.ctx = NULL;
   }
   return result;
 }
 
 /** SSL callbacks ***/
 
-static CURLcode curl_wssl_init_ssl(struct curl_tls_ctx *ctx,
+static CURLcode Curl_wssl_init_ssl(struct curl_tls_ctx *ctx,
                                    struct Curl_easy *data,
                                    struct ssl_peer *peer,
                                    const char *alpn, size_t alpn_len,
                                    void *user_data)
 {
   (void)data;
-  DEBUGASSERT(!ctx->ssl);
-  DEBUGASSERT(ctx->ssl_ctx);
-  ctx->ssl = wolfSSL_new(ctx->ssl_ctx);
+  DEBUGASSERT(!ctx->wssl.handle);
+  DEBUGASSERT(ctx->wssl.ctx);
+  ctx->wssl.handle = wolfSSL_new(ctx->wssl.ctx);
 
-  wolfSSL_set_app_data(ctx->ssl, user_data);
-  wolfSSL_set_connect_state(ctx->ssl);
-  wolfSSL_set_quic_use_legacy_codepoint(ctx->ssl, 0);
+  wolfSSL_set_app_data(ctx->wssl.handle, user_data);
+  wolfSSL_set_connect_state(ctx->wssl.handle);
+  wolfSSL_set_quic_use_legacy_codepoint(ctx->wssl.handle, 0);
 
   if(alpn)
-    wolfSSL_set_alpn_protos(ctx->ssl, (const unsigned char *)alpn,
+    wolfSSL_set_alpn_protos(ctx->wssl.handle, (const unsigned char *)alpn,
                             (int)alpn_len);
 
   if(peer->sni) {
-    wolfSSL_UseSNI(ctx->ssl, WOLFSSL_SNI_HOST_NAME,
+    wolfSSL_UseSNI(ctx->wssl.handle, WOLFSSL_SNI_HOST_NAME,
                    peer->sni, (unsigned short)strlen(peer->sni));
   }
 
@@ -243,11 +243,11 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
                             (const unsigned char *)alpn, alpn_len,
                             cb_setup, cb_user_data, ssl_user_data);
 #elif defined(USE_WOLFSSL)
-  result = curl_wssl_init_ctx(ctx, cf, data, cb_setup, cb_user_data);
+  result = Curl_wssl_init_ctx(ctx, cf, data, cb_setup, cb_user_data);
   if(result)
     return result;
 
-  return curl_wssl_init_ssl(ctx, data, peer, alpn, alpn_len, ssl_user_data);
+  return Curl_wssl_init_ssl(ctx, data, peer, alpn, alpn_len, ssl_user_data);
 #else
 #error "no TLS lib in used, should not happen"
   return CURLE_FAILED_INIT;
@@ -267,10 +267,10 @@ void Curl_vquic_tls_cleanup(struct curl_tls_ctx *ctx)
   if(ctx->gtls.session)
     gnutls_deinit(ctx->gtls.session);
 #elif defined(USE_WOLFSSL)
-  if(ctx->ssl)
-    wolfSSL_free(ctx->ssl);
-  if(ctx->ssl_ctx)
-    wolfSSL_CTX_free(ctx->ssl_ctx);
+  if(ctx->wssl.handle)
+    wolfSSL_free(ctx->wssl.handle);
+  if(ctx->wssl.ctx)
+    wolfSSL_CTX_free(ctx->wssl.ctx);
 #endif
   memset(ctx, 0, sizeof(*ctx));
 }
@@ -285,6 +285,12 @@ CURLcode Curl_vquic_tls_before_recv(struct curl_tls_ctx *ctx,
     if(result)
       return result;
     ctx->ossl.x509_store_setup = TRUE;
+  }
+#elif defined(USE_WOLFSSL)
+  if(!ctx->wssl.x509_store_setup) {
+    CURLcode result = Curl_wssl_setup_x509_store(cf, data, &ctx->wssl);
+    if(result)
+      return result;
   }
 #elif defined(USE_GNUTLS)
   if(!ctx->gtls.trust_setup) {
@@ -325,7 +331,7 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
   (void)data;
   if(conn_config->verifyhost) {
     if(peer->sni) {
-      WOLFSSL_X509* cert = wolfSSL_get_peer_certificate(ctx->ssl);
+      WOLFSSL_X509* cert = wolfSSL_get_peer_certificate(ctx->wssl.handle);
       if(wolfSSL_X509_check_host(cert, peer->sni, strlen(peer->sni), 0, NULL)
             == WOLFSSL_FAILURE) {
         result = CURLE_PEER_FAILED_VERIFICATION;
