@@ -23,25 +23,6 @@ and use TLS 1.3, or else it is not good enough.
 As of May 2024, the libraries that need to get fixed to remain supported after
 May 2025 are: BearSSL and Secure Transport.
 
-## space-separated `NOPROXY` patterns
-
-When specifying patterns/domain names for curl that should *not* go through a
-proxy, the curl tool features the `--noproxy` command line option and the
-library supports the `NO_PROXY` environment variable and the `CURLOPT_NOPROXY`
-libcurl option.
-
-They all set the same list of patterns. This list is documented to be a set of
-**comma-separated** names, but can also be provided separated with just
-space. The ability to just use spaces for this has never been documented but
-some users may still have come to rely on this.
-
-Several other tools and utilities also parse the `NO_PROXY` environment
-variable but do not consider a space to be a valid separator. Using spaces for
-separator is probably less portable and might cause more friction than commas
-do. Users should use commas for this for greater portability.
-
-curl removes the support for space-separated names in July 2024.
-
 ## past removals
 
  - Pipelining
@@ -53,3 +34,4 @@ curl removes the support for space-separated names in July 2024.
  - gskit
  - mingw v1
  - NTLM_WB
+ - space-separated `NOPROXY` patterns
