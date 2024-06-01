@@ -1068,6 +1068,7 @@ CURLU_GET_EMPTY                 8.8.0
 CURLU_GUESS_SCHEME              7.62.0
 CURLU_NO_AUTHORITY              7.67.0
 CURLU_NO_DEFAULT_PORT           7.62.0
+CURLU_NO_GUESS_SCHEME           8.9.0
 CURLU_NON_SUPPORT_SCHEME        7.62.0
 CURLU_PATH_AS_IS                7.62.0
 CURLU_PUNY2IDN                  8.3.0

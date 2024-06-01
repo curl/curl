@@ -102,6 +102,7 @@ typedef enum {
 #define CURLU_GET_EMPTY (1<<14)         /* allow empty queries and fragments
                                            when extracting the URL or the
                                            components */
+#define CURLU_NO_GUESS_SCHEME (1<<14)   /* for get, don't accept a guess */
 
 typedef struct Curl_URL CURLU;
 
