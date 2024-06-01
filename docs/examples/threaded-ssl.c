@@ -65,6 +65,8 @@ static unsigned long thread_id(void)
 {
   unsigned long ret;
 
+  /* pthreads_self() returns a pthread_t that for most pthreads libraries is
+     equivalent to an integer thread ID. Others may use different methods. */
   ret = (unsigned long)pthread_self();
   return ret;
 }
