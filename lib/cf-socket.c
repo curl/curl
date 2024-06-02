@@ -1016,7 +1016,20 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
   (void)data;
   DEBUGASSERT(ctx->sock == CURL_SOCKET_BAD);
   ctx->started_at = Curl_now();
+#ifdef SOCK_NONBLOCK
+  /* Don't tuck SOCK_NONBLOCK into socktype when opensocket callback is set
+   * because we wouldn't know how socketype is about to be used in the
+   * callback, SOCK_NONBLOCK might get factored out before calling socket().
+   */
+  if(!data->set.fopensocket)
+    ctx->addr.socktype |= SOCK_NONBLOCK;
+#endif
   result = socket_open(data, &ctx->addr, &ctx->sock);
+#ifdef SOCK_NONBLOCK
+  /* Restore the socktype after the socket is created. */
+  if(!data->set.fopensocket)
+    ctx->addr.socktype &= ~SOCK_NONBLOCK;
+#endif
   if(result)
     goto out;
 
@@ -1087,8 +1100,14 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
   }
 #endif
 
+#ifndef SOCK_NONBLOCK
   /* set socket non-blocking */
   (void)curlx_nonblock(ctx->sock, TRUE);
+#else
+  if(data->set.fopensocket)
+    /* set socket non-blocking */
+    (void)curlx_nonblock(ctx->sock, TRUE);
+#endif
   ctx->sock_connected = (ctx->addr.socktype != SOCK_DGRAM);
 out:
   if(result) {
@@ -1681,7 +1700,7 @@ out:
 }
 
 static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
-                               struct Curl_easy *data)
+                                  struct Curl_easy *data)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
   int rc;
@@ -1707,7 +1726,11 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
               ctx->sock, ctx->ip.local_ip, ctx->ip.local_port,
               ctx->ip.remote_ip, ctx->ip.remote_port);
 
-  (void)curlx_nonblock(ctx->sock, TRUE);
+  /* Currently, cf->ctx->sock is always non-blocking because the only
+   * caller to cf_udp_setup_quic() is cf_udp_connect() that passes the
+   * non-blocking socket created by cf_socket_open() to it. Thus, we
+   * don't need to call curlx_nonblock() in cf_udp_setup_quic() anymore.
+   */
   switch(ctx->addr.family) {
 #if defined(__linux__) && defined(IP_MTU_DISCOVER)
   case AF_INET: {
