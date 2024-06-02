@@ -216,7 +216,7 @@ static CURLcode xfer_send(struct Curl_easy *data,
     if(*pnwritten > hds_len) {
       size_t body_len = *pnwritten - hds_len;
       Curl_debug(data, CURLINFO_DATA_OUT, (char *)buf + hds_len, body_len);
-      data->req.writebytecount += body_len;
+      data->req.writebytecount += (curl_off_t)body_len;
       Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
     }
   }

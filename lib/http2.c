@@ -1688,7 +1688,7 @@ static CURLcode http2_data_done_send(struct Curl_cfilter *cf,
     stream->send_closed = TRUE;
     if(stream->upload_left) {
       /* we now know that everything that is buffered is all there is. */
-      stream->upload_left = Curl_bufq_len(&stream->sendbuf);
+      stream->upload_left = (curl_off_t)Curl_bufq_len(&stream->sendbuf);
       /* resume sending here to trigger the callback to get called again so
          that it can signal EOF to nghttp2 */
       (void)nghttp2_session_resume_data(ctx->h2, stream->id);

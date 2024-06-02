@@ -278,7 +278,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
       if(k->eos_written) /* already did write this to client, leave */
         break;
     }
-    total_received += blen;
+    total_received += (curl_off_t)blen;
 
     result = Curl_xfer_write_resp(data, buf, blen, is_eos);
     if(result || data->req.done)
@@ -1207,7 +1207,7 @@ CURLcode Curl_xfer_send(struct Curl_easy *data,
     *pnwritten = 0;
   }
   else if(!result && *pnwritten)
-    data->info.request_size += *pnwritten;
+    data->info.request_size += (curl_off_t)*pnwritten;
 
   return result;
 }

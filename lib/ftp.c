@@ -1719,7 +1719,7 @@ static CURLcode ftp_state_ul_setup(struct Curl_easy *data,
           data->state.fread_func(scratch, 1, readthisamountnow,
                                  data->state.in);
 
-        passed += actuallyread;
+        passed += (curl_off_t)actuallyread;
         if((actuallyread == 0) || (actuallyread > readthisamountnow)) {
           /* this checks for greater-than only to make sure that the
              CURL_READFUNC_ABORT return code still aborts */

@@ -318,7 +318,8 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
       break;
     case CURLFORM_CONTENTSLENGTH:
       current_form->contentslength =
-        array_state?(size_t)array_value:(size_t)va_arg(params, long);
+        array_state?(curl_off_t)(size_t)array_value:
+                    (curl_off_t)(size_t)va_arg(params, long);
       break;
 
     case CURLFORM_CONTENTLEN:

@@ -670,7 +670,7 @@ static int uploadstreamed(void *userdata, hyper_context *ctx,
     }
     /* increasing the writebytecount here is a little premature but we
        don't know exactly when the body is sent */
-    data->req.writebytecount += fillcount;
+    data->req.writebytecount += (curl_off_t)fillcount;
     Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
     rc = HYPER_POLL_READY;
   }

@@ -350,7 +350,7 @@ static void update_meta(struct websocket *ws,
   ws->frame.flags = frame_flags;
   ws->frame.offset = payload_offset;
   ws->frame.len = cur_len;
-  ws->frame.bytesleft = (payload_len - payload_offset - cur_len);
+  ws->frame.bytesleft = payload_len - payload_offset - (curl_off_t)cur_len;
 }
 
 /* WebSockets decoding client writer */
@@ -392,7 +392,7 @@ static ssize_t ws_cw_dec_next(const unsigned char *buf, size_t buflen,
   struct ws_cw_dec_ctx *ctx = user_data;
   struct Curl_easy *data = ctx->data;
   struct websocket *ws = ctx->ws;
-  curl_off_t remain = (payload_len - (payload_offset + buflen));
+  curl_off_t remain = payload_len - (payload_offset + (curl_off_t)buflen);
 
   (void)frame_age;
   if((frame_flags & CURLWS_PING) && !remain) {
@@ -869,7 +869,7 @@ static ssize_t ws_client_collect(const unsigned char *buf, size_t buflen,
 {
   struct ws_collect *ctx = userp;
   size_t nwritten;
-  curl_off_t remain = (payload_len - (payload_offset + buflen));
+  curl_off_t remain = payload_len - (payload_offset + (curl_off_t)buflen);
 
   if(!ctx->bufidx) {
     /* first write */

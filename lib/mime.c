@@ -782,7 +782,7 @@ static size_t readback_bytes(struct mime_state *state,
     sz = bufsize;
 
   memcpy(buffer, bytes, sz);
-  state->offset += sz;
+  state->offset += (curl_off_t)sz;
   return sz;
 }
 
@@ -843,7 +843,7 @@ static size_t read_part_content(curl_mimepart *part,
     part->lastreadstatus = sz;
     break;
   default:
-    part->state.offset += sz;
+    part->state.offset += (curl_off_t)sz;
     part->lastreadstatus = sz;
     break;
   }
@@ -1388,7 +1388,7 @@ CURLcode curl_mime_data(curl_mimepart *part,
     if(!part->data)
       return CURLE_OUT_OF_MEMORY;
 
-    part->datasize = datasize;
+    part->datasize = (curl_off_t)datasize;
     part->readfunc = mime_mem_read;
     part->seekfunc = mime_mem_seek;
     part->freefunc = mime_mem_free;
@@ -1661,8 +1661,9 @@ static curl_off_t mime_size(curl_mimepart *part)
 
   if(size >= 0 && !(part->flags & MIME_BODY_ONLY)) {
     /* Compute total part size. */
-    size += slist_size(part->curlheaders, 2, NULL, 0);
-    size += slist_size(part->userheaders, 2, STRCONST("Content-Type"));
+    size += (curl_off_t)slist_size(part->curlheaders, 2, NULL, 0);
+    size += (curl_off_t)slist_size(part->userheaders, 2,
+                                   STRCONST("Content-Type"));
     size += 2;    /* CRLF after headers. */
   }
   return size;
@@ -2005,7 +2006,7 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
       ctx->error_result = CURLE_READ_ERROR;
       return CURLE_READ_ERROR;
     }
-    ctx->read_len += nread;
+    ctx->read_len += (curl_off_t)nread;
     if(ctx->total_len >= 0)
       ctx->seen_eos = (ctx->read_len >= ctx->total_len);
     *pnread = nread;
