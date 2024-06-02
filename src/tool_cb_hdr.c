@@ -105,7 +105,11 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
     if(rc != cb)
       return rc;
     /* flush the stream to send off what we got earlier */
-    (void)fflush(heads->stream);
+    if(fflush(heads->stream)) {
+      errorf(per->config->global, "Failed writing headers to %s",
+             per->config->headerfile);
+      return CURL_WRITEFUNC_ERROR;
+    }
   }
 
   curl_easy_getinfo(per->curl, CURLINFO_SCHEME, &scheme);
