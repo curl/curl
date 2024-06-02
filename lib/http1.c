@@ -217,7 +217,7 @@ static CURLcode start_req(struct h1_req_parser *parser,
     tmp[target_len] = '\0';
     /* See if treating TARGET as an absolute URL makes sense */
     if(Curl_is_absolute_url(tmp, NULL, 0, FALSE)) {
-      int url_options;
+      unsigned int url_options;
 
       url = curl_url();
       if(!url) {

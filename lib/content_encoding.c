@@ -536,13 +536,13 @@ static CURLcode gzip_do_write(struct Curl_easy *data,
     /* Append the new block of data to the previous one */
     memcpy(z->next_in + z->avail_in - nbytes, buf, nbytes);
 
-    switch(check_gzip_header(z->next_in, z->avail_in, &hlen)) {
+    switch(check_gzip_header(z->next_in, (ssize_t)z->avail_in, &hlen)) {
     case GZIP_OK:
       /* This is the zlib stream data */
       free(z->next_in);
       /* Don't point into the malloced block since we just freed it */
       z->next_in = (Bytef *) buf + hlen + nbytes - z->avail_in;
-      z->avail_in = (uInt) (z->avail_in - hlen);
+      z->avail_in = z->avail_in - (uInt)hlen;
       zp->zlib_init = ZLIB_GZIP_INFLATING;   /* Inflating stream state */
       break;
 

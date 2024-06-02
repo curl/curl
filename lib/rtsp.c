@@ -316,7 +316,9 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
 
   p_session_id = data->set.str[STRING_RTSP_SESSION_ID];
   if(!p_session_id &&
-     (rtspreq & ~(RTSPREQ_OPTIONS | RTSPREQ_DESCRIBE | RTSPREQ_SETUP))) {
+     (rtspreq & ~(Curl_RtspReq)(RTSPREQ_OPTIONS |
+                                RTSPREQ_DESCRIBE |
+                                RTSPREQ_SETUP))) {
     failf(data, "Refusing to issue an RTSP request [%s] without a session ID.",
           p_request);
     result = CURLE_BAD_FUNCTION_ARGUMENT;

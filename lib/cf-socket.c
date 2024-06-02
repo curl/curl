@@ -180,10 +180,10 @@ tcpkeepalive(struct Curl_easy *data,
     vals.onoff = 1;
     optval = curlx_sltosi(data->set.tcp_keepidle);
     KEEPALIVE_FACTOR(optval);
-    vals.keepalivetime = optval;
+    vals.keepalivetime = (u_long)optval;
     optval = curlx_sltosi(data->set.tcp_keepintvl);
     KEEPALIVE_FACTOR(optval);
-    vals.keepaliveinterval = optval;
+    vals.keepaliveinterval = (u_long)optval;
     if(WSAIoctl(sockfd, SIO_KEEPALIVE_VALS, (LPVOID) &vals, sizeof(vals),
                 NULL, 0, &dummy, NULL, NULL) != 0) {
       infof(data, "Failed to set SIO_KEEPALIVE_VALS on fd "
@@ -255,7 +255,7 @@ void Curl_sock_assign_addr(struct Curl_sockaddr_ex *dest,
     dest->protocol = IPPROTO_UDP;
     break;
   }
-  dest->addrlen = ai->ai_addrlen;
+  dest->addrlen = (unsigned int)ai->ai_addrlen;
 
   if(dest->addrlen > sizeof(struct Curl_sockaddr_storage))
     dest->addrlen = sizeof(struct Curl_sockaddr_storage);
@@ -959,7 +959,7 @@ static CURLcode set_remote_ip(struct Curl_cfilter *cf,
   struct cf_socket_ctx *ctx = cf->ctx;
 
   /* store remote address and port used in this connection attempt */
-  if(!Curl_addr2string(&ctx->addr.sa_addr, ctx->addr.addrlen,
+  if(!Curl_addr2string(&ctx->addr.sa_addr, (curl_socklen_t)ctx->addr.addrlen,
                        ctx->ip.remote_ip, &ctx->ip.remote_port)) {
     char buffer[STRERROR_LEN];
 
@@ -1124,7 +1124,8 @@ static int do_connect(struct Curl_cfilter *cf, struct Curl_easy *data,
 #endif
   }
   else {
-    rc = connect(ctx->sock, &ctx->addr.sa_addr, ctx->addr.addrlen);
+    rc = connect(ctx->sock, &ctx->addr.sa_addr,
+                 (curl_socklen_t)ctx->addr.addrlen);
   }
   return rc;
 }
@@ -1662,7 +1663,8 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
   /* On macOS OpenSSL QUIC fails on connected sockets.
    * see: <https://github.com/openssl/openssl/issues/23251> */
 #else
-  rc = connect(ctx->sock, &ctx->addr.sa_addr, ctx->addr.addrlen);
+  rc = connect(ctx->sock, &ctx->addr.sa_addr,
+               (curl_socklen_t)ctx->addr.addrlen);
   if(-1 == rc) {
     return socket_connect_result(data, ctx->ip.remote_ip, SOCKERRNO);
   }
