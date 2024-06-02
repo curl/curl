@@ -874,7 +874,7 @@ static uint16_t sectransp_cipher_suite_walk_str(const char **str,
                                                 const char **end)
 {
   uint16_t id = Curl_cipher_suite_walk_str(str, end);
-  size_t len = *end - *str;
+  size_t len = (size_t)(*end - *str);
 
   if(!id) {
     /* are these fortezza suites even supported ? */
