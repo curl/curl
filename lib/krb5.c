@@ -133,7 +133,7 @@ krb5_check_prot(void *app_data, int level)
 
 static int
 krb5_decode(void *app_data, void *buf, int len,
-            int level UNUSED_PARAM,
+            enum protection_level level UNUSED_PARAM,
             struct connectdata *conn UNUSED_PARAM)
 {
   gss_ctx_id_t *context = app_data;

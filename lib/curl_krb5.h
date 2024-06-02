@@ -32,7 +32,8 @@ struct Curl_sec_client_mech {
   void (*end)(void *);
   int (*check_prot)(void *, int);
   int (*encode)(void *, const void *, int, int, void **);
-  int (*decode)(void *, void *, int, int, struct connectdata *);
+  int (*decode)(void *, void *, int, enum protection_level,
+                struct connectdata *);
 };
 
 #define AUTH_OK         0
