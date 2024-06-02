@@ -334,7 +334,7 @@ jobs:
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         id: cache-compiler
         with:
-          path: C:\my-cache\mingw-w64-${{ matrix.env }}
+          path: ~\my-cache
           key: ${{ runner.os }}-mingw-w64-${{ matrix.env }}
 
       - name: 'install compiler (gcc ${{ matrix.env }})'
@@ -342,13 +342,14 @@ jobs:
         timeout-minutes: 5
         shell: C:\msys64\usr\bin\bash.exe {0}
         run: |
-          mkdir -p /c/my-cache/
-          cd /c/my-cache/ || exit 1
+          cd "${USERPROFILE}" || exit 1
+          mkdir my-cache
+          cd my-cache || exit 1
           curl --fail --silent --show-error --retry 3 --retry-connrefused --output pack.bin --location --proto-redir =https '${{ matrix.url }}'
-          mkdir -p mingw-w64-${{ matrix.env }}
-          cd mingw-w64-${{ matrix.env }} || exit 1
           pwd
-          7z x -y ../pack.bin >/dev/null
+          7z x -y pack.bin >/dev/null
+          rm -r -f pack.bin
+          ls -l
 
       - run: git config --global core.autocrlf input
       - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
@@ -356,7 +357,7 @@ jobs:
       - name: 'update PATH (gcc ${{ matrix.env }})'
         shell: C:\msys64\usr\bin\bash.exe {0}
         run: |
-          echo "PATH=/c/my-cache/mingw-w64-${{ matrix.env }}/mingw64/bin:/c/msys64/usr/bin:$PATH" >> "$GITHUB_ENV"
+          echo "PATH=$(cygpath "${USERPROFILE}")/my-cache/mingw64/bin:/c/msys64/usr/bin:$PATH" >> "$GITHUB_ENV"
 
       - name: 'cmake configure'
         if: ${{ matrix.build == 'cmake' }}
