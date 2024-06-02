@@ -469,7 +469,7 @@ static CURLcode OID2str(struct dynbuf *store,
         if(op)
           result = Curl_dyn_add(store, op->textoid);
         else
-          result = CURLE_BAD_FUNCTION_ARGUMENT;
+          result = Curl_dyn_add(store, Curl_dyn_ptr(&buf));
         Curl_dyn_free(&buf);
       }
     }
