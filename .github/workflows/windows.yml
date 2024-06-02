@@ -67,7 +67,7 @@ jobs:
         timeout-minutes: 5
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
-          export PATH="/usr/bin:$(cygpath ${SYSTEMROOT})/System32"
+          export PATH="/usr/bin:$(cygpath "${SYSTEMROOT}")/System32"
           autoreconf -fi
           mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
             --prefix="${HOME}"/install \
@@ -116,7 +116,7 @@ jobs:
         timeout-minutes: 5
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
-          export PATH="/usr/bin:$(cygpath ${SYSTEMROOT})/System32"
+          export PATH="/usr/bin:$(cygpath "${SYSTEMROOT}")/System32"
           cmake -B bld ${options} \
             "-DCMAKE_C_FLAGS=${cflags}" \
             -DCMAKE_UNITY_BUILD=ON \
@@ -334,7 +334,7 @@ jobs:
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         id: cache-compiler
         with:
-          path: C:\my-cache\mingw-w64-${{ matrix.env }}
+          path: ~\my-cache
           key: ${{ runner.os }}-mingw-w64-${{ matrix.env }}
 
       - name: 'install compiler (gcc ${{ matrix.env }})'
@@ -342,27 +342,24 @@ jobs:
         timeout-minutes: 5
         shell: C:\msys64\usr\bin\bash.exe {0}
         run: |
-          mkdir -p /c/my-cache/
-          cd /c/my-cache/ || exit 1
+          cd "${USERPROFILE}" || exit 1
+          mkdir my-cache
+          cd my-cache || exit 1
           curl --fail --silent --show-error --retry 3 --retry-connrefused --output pack.bin --location --proto-redir =https '${{ matrix.url }}'
-          mkdir -p mingw-w64-${{ matrix.env }}
-          cd mingw-w64-${{ matrix.env }} || exit 1
           pwd
-          7z x -y ../pack.bin >/dev/null
+          7z x -y pack.bin >/dev/null
+          rm -r -f pack.bin
+          ls -l
 
       - run: git config --global core.autocrlf input
       - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
-
-      - name: 'update PATH (gcc ${{ matrix.env }})'
-        shell: C:\msys64\usr\bin\bash.exe {0}
-        run: |
-          echo "PATH=/c/my-cache/mingw-w64-${{ matrix.env }}/mingw64/bin:/c/msys64/usr/bin:$PATH" >> $GITHUB_ENV
 
       - name: 'cmake configure'
         if: ${{ matrix.build == 'cmake' }}
         timeout-minutes: 5
         shell: C:\msys64\usr\bin\bash.exe {0}
         run: |
+          export PATH="$(cygpath "${USERPROFILE}")/my-cache/mingw64/bin:/c/msys64/usr/bin:$PATH"
           cflags='-Wno-deprecated-declarations'  # for examples
           [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
           [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
@@ -382,6 +379,7 @@ jobs:
         timeout-minutes: 10
         shell: C:\msys64\usr\bin\bash.exe {0}
         run: |
+          export PATH="$(cygpath "${USERPROFILE}")/my-cache/mingw64/bin:/c/msys64/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --parallel 3
           [[ '${{ matrix.config }}' != *'BUILD_SHARED_LIBS=OFF'* ]] && cp -f -p bld/lib/*.dll bld/src/
           bld/src/curl.exe --disable --version
@@ -391,6 +389,7 @@ jobs:
         timeout-minutes: 10
         shell: C:\msys64\usr\bin\bash.exe {0}
         run: |
+          export PATH="$(cygpath "${USERPROFILE}")/my-cache/mingw64/bin:/c/msys64/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --parallel 3 --target testdeps
 
       - name: 'cmake run tests'
@@ -398,6 +397,7 @@ jobs:
         timeout-minutes: 40
         shell: C:\msys64\usr\bin\bash.exe {0}
         run: |
+          export PATH="$(cygpath "${USERPROFILE}")/my-cache/mingw64/bin:/c/msys64/usr/bin:$PATH"
           export TFLAGS='-j14 !TFTP ${{ matrix.tflags }}'
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
