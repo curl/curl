@@ -67,7 +67,7 @@ jobs:
         timeout-minutes: 5
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
-          export PATH="/usr/bin:$(cygpath ${SYSTEMROOT})/System32"
+          export PATH="/usr/bin:$(cygpath "${SYSTEMROOT}")/System32"
           autoreconf -fi
           mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
             --prefix="${HOME}"/install \
@@ -116,7 +116,7 @@ jobs:
         timeout-minutes: 5
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
-          export PATH="/usr/bin:$(cygpath ${SYSTEMROOT})/System32"
+          export PATH="/usr/bin:$(cygpath "${SYSTEMROOT}")/System32"
           cmake -B bld ${options} \
             "-DCMAKE_C_FLAGS=${cflags}" \
             -DCMAKE_UNITY_BUILD=ON \
@@ -356,7 +356,7 @@ jobs:
       - name: 'update PATH (gcc ${{ matrix.env }})'
         shell: C:\msys64\usr\bin\bash.exe {0}
         run: |
-          echo "PATH=/c/my-cache/mingw-w64-${{ matrix.env }}/mingw64/bin:/c/msys64/usr/bin:$PATH" >> $GITHUB_ENV
+          echo "PATH=/c/my-cache/mingw-w64-${{ matrix.env }}/mingw64/bin:/c/msys64/usr/bin:$PATH" >> "$GITHUB_ENV"
 
       - name: 'cmake configure'
         if: ${{ matrix.build == 'cmake' }}
