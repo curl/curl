@@ -317,9 +317,10 @@ fail:
 
     /* typecasting to ints are fine here since we make sure above that we
        are within 31 bits */
-    pat->content.NumRange.ptr_n = pat->content.NumRange.min_n = min_n;
-    pat->content.NumRange.max_n = max_n;
-    pat->content.NumRange.step = step_n;
+    pat->content.NumRange.ptr_n = pat->content.NumRange.min_n =
+                                    (curl_off_t)min_n;
+    pat->content.NumRange.max_n = (curl_off_t)max_n;
+    pat->content.NumRange.step = (curl_off_t)step_n;
 
     if(multiply(amount, ((pat->content.NumRange.max_n -
                           pat->content.NumRange.min_n) /

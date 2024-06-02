@@ -2090,7 +2090,7 @@ static CURLcode cf_osslq_data_event(struct Curl_cfilter *cf,
     struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
     if(stream && !stream->send_closed) {
       stream->send_closed = TRUE;
-      stream->upload_left = Curl_bufq_len(&stream->sendbuf);
+      stream->upload_left = (curl_off_t)Curl_bufq_len(&stream->sendbuf);
       (void)nghttp3_conn_resume_stream(ctx->h3.conn, stream->s.id);
     }
     break;
