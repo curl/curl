@@ -61,7 +61,7 @@ static char *getflagstr(int flags)
   return buf;
 }
 
-static char *getcurlcodestr(int cc)
+static char *getcurlcodestr(SANITIZEcode cc)
 {
   char *buf = malloc(256);
   if(buf) {
