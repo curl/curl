@@ -270,8 +270,9 @@ size_t Curl_hash_str(void *key, size_t key_length, size_t slots_num)
   size_t h = 5381;
 
   while(key_str < end) {
+    size_t j = (size_t)*key_str++;
     h += h << 5;
-    h ^= *key_str++;
+    h ^= j;
   }
 
   return (h % slots_num);

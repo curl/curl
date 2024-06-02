@@ -201,7 +201,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     if(gss_send_token.length) {
       socksreq[0] = 1;    /* GSS-API subnegotiation version */
       socksreq[1] = 1;    /* authentication message type */
-      us_length = htons((short)gss_send_token.length);
+      us_length = htons((unsigned short)gss_send_token.length);
       memcpy(socksreq + 2, &us_length, sizeof(short));
 
       nwritten = Curl_conn_cf_send(cf->next, data, (char *)socksreq, 4, &code);
@@ -406,7 +406,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     }
     gss_release_buffer(&gss_status, &gss_send_token);
 
-    us_length = htons((short)gss_w_token.length);
+    us_length = htons((unsigned short)gss_w_token.length);
     memcpy(socksreq + 2, &us_length, sizeof(short));
   }
 

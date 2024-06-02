@@ -317,7 +317,11 @@ Curl_he2ai(const struct hostent *he, int port)
       addr = (void *)ai->ai_addr; /* storage area for this info */
 
       memcpy(&addr->sin_addr, curr, sizeof(struct in_addr));
+#ifdef __MINGW32__
+      addr->sin_family = (short)(he->h_addrtype);
+#else
       addr->sin_family = (CURL_SA_FAMILY_T)(he->h_addrtype);
+#endif
       addr->sin_port = htons((unsigned short)port);
       break;
 
@@ -326,7 +330,11 @@ Curl_he2ai(const struct hostent *he, int port)
       addr6 = (void *)ai->ai_addr; /* storage area for this info */
 
       memcpy(&addr6->sin6_addr, curr, sizeof(struct in6_addr));
+#ifdef __MINGW32__
+      addr6->sin6_family = (short)(he->h_addrtype);
+#else
       addr6->sin6_family = (CURL_SA_FAMILY_T)(he->h_addrtype);
+#endif
       addr6->sin6_port = htons((unsigned short)port);
       break;
 #endif

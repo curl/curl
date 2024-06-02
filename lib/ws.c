@@ -102,7 +102,7 @@ static unsigned char ws_frame_flags2op(int flags)
   size_t i;
   for(i = 0; i < sizeof(WS_FRAMES)/sizeof(WS_FRAMES[0]); ++i) {
     if(WS_FRAMES[i].flags & flags)
-      return WS_FRAMES[i].proto_opcode;
+      return (unsigned char)WS_FRAMES[i].proto_opcode;
   }
   return 0;
 }
@@ -171,7 +171,7 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
       dec->head[0] = *inbuf;
       Curl_bufq_skip(inraw, 1);
 
-      dec->frame_flags  = ws_frame_op2flags(dec->head[0]);
+      dec->frame_flags = ws_frame_op2flags(dec->head[0]);
       if(!dec->frame_flags) {
         failf(data, "WS: unknown opcode: %x", dec->head[0]);
         ws_dec_reset(dec);
@@ -560,7 +560,7 @@ static ssize_t ws_enc_write_head(struct Curl_easy *data,
     return -1;
   }
 
-  opcode = ws_frame_flags2op(flags);
+  opcode = ws_frame_flags2op((int)flags);
   if(!opcode) {
     failf(data, "WS: provided flags not recognized '%x'", flags);
     *err = CURLE_SEND_ERROR;

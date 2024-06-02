@@ -58,7 +58,7 @@
  *  - uses no statics
  *  - takes a unsigned char* not an in_addr as input
  */
-static char *inet_ntop4 (const unsigned char *src, char *dst, size_t size)
+static char *inet_ntop4(const unsigned char *src, char *dst, size_t size)
 {
   char tmp[sizeof("255.255.255.255")];
   size_t len;
@@ -84,7 +84,7 @@ static char *inet_ntop4 (const unsigned char *src, char *dst, size_t size)
 /*
  * Convert IPv6 binary address into presentation (printable) format.
  */
-static char *inet_ntop6 (const unsigned char *src, char *dst, size_t size)
+static char *inet_ntop6(const unsigned char *src, char *dst, size_t size)
 {
   /*
    * Note that int32_t and int16_t need only be "at least" large enough

@@ -518,12 +518,12 @@ static DOHcode skipqname(const unsigned char *doh, size_t dohlen,
   return DOH_OK;
 }
 
-static unsigned short get16bit(const unsigned char *doh, int index)
+static unsigned short get16bit(const unsigned char *doh, unsigned int index)
 {
   return (unsigned short)((doh[index] << 8) | doh[index + 1]);
 }
 
-static unsigned int get32bit(const unsigned char *doh, int index)
+static unsigned int get32bit(const unsigned char *doh, unsigned int index)
 {
   /* make clang and gcc optimize this to bswap by incrementing
      the pointer first. */
@@ -606,7 +606,7 @@ static DOHcode store_cname(const unsigned char *doh,
 
       /* move to the new index */
       newpos = (length & 0x3f) << 8 | doh[index + 1];
-      index = newpos;
+      index = (unsigned int)newpos;
       continue;
     }
     else if(length & 0xc0)
@@ -670,7 +670,7 @@ static DOHcode rdata(const unsigned char *doh,
     break;
 #endif
   case DNS_TYPE_CNAME:
-    rc = store_cname(doh, dohlen, index, d);
+    rc = store_cname(doh, dohlen, (unsigned int)index, d);
     if(rc)
       return rc;
     break;
@@ -771,7 +771,7 @@ UNITTEST DOHcode doh_decode(const unsigned char *doh,
     if(dohlen < (index + rdlength))
       return DOH_DNS_OUT_OF_RANGE;
 
-    rc = rdata(doh, dohlen, rdlength, type, index, d);
+    rc = rdata(doh, dohlen, rdlength, type, (int)index, d);
     if(rc)
       return rc; /* bad rdata */
     index += rdlength;
@@ -967,7 +967,11 @@ static CURLcode doh2ai(const struct dohentry *de, const char *hostname,
       addr = (void *)ai->ai_addr; /* storage area for this info */
       DEBUGASSERT(sizeof(struct in_addr) == sizeof(de->addr[i].ip.v4));
       memcpy(&addr->sin_addr, &de->addr[i].ip.v4, sizeof(struct in_addr));
+#ifdef __MINGW32__
+      addr->sin_family = (short)addrtype;
+#else
       addr->sin_family = addrtype;
+#endif
       addr->sin_port = htons((unsigned short)port);
       break;
 
@@ -976,7 +980,11 @@ static CURLcode doh2ai(const struct dohentry *de, const char *hostname,
       addr6 = (void *)ai->ai_addr; /* storage area for this info */
       DEBUGASSERT(sizeof(struct in6_addr) == sizeof(de->addr[i].ip.v6));
       memcpy(&addr6->sin6_addr, &de->addr[i].ip.v6, sizeof(struct in6_addr));
+#ifdef __MINGW32__
+      addr6->sin6_family = (short)addrtype;
+#else
       addr6->sin6_family = addrtype;
+#endif
       addr6->sin6_port = htons((unsigned short)port);
       break;
 #endif
