@@ -31,7 +31,7 @@ int gethostname(char *name, GETHOSTNAME_TYPE_ARG2 namelen)
 {
   const char *force_hostname = getenv("CURL_GETHOSTNAME");
   if(force_hostname) {
-    strncpy(name, force_hostname, namelen);
+    strncpy(name, force_hostname, (size_t)namelen);
     name[namelen-1] = '\0';
     return 0;
   }
