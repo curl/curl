@@ -143,8 +143,10 @@ static void nosigpipe(struct Curl_easy *data,
 #endif
 
 #if defined(USE_WINSOCK) || \
+   (defined(__sun) && !defined(TCP_KEEPIDLE)) || \
    (defined(__DragonFly__) && __DragonFly_version < 500702)
-/* DragonFlyBSD < 500702 and Windows use millisecond units */
+/* Solaris < 11.4, DragonFlyBSD < 500702 and Windows
+ * use millisecond units. */
 #define KEEPALIVE_FACTOR(x) (x *= 1000)
 #else
 #define KEEPALIVE_FACTOR(x)
@@ -210,6 +212,16 @@ tcpkeepalive(struct Curl_easy *data,
             "%" CURL_FORMAT_SOCKET_T ": errno %d",
             sockfd, SOCKERRNO);
     }
+#elif defined(TCP_KEEPALIVE_THRESHOLD)
+    /* Solaris <11.4 style */
+    optval = curlx_sltosi(data->set.tcp_keepidle);
+    KEEPALIVE_FACTOR(optval);
+    if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPALIVE_THRESHOLD,
+      (void *)&optval, sizeof(optval)) < 0) {
+      infof(data, "Failed to set TCP_KEEPALIVE_THRESHOLD on fd "
+            "%" CURL_FORMAT_SOCKET_T ": errno %d",
+            sockfd, SOCKERRNO);
+    }
 #endif
 #ifdef TCP_KEEPINTVL
     optval = curlx_sltosi(data->set.tcp_keepintvl);
@@ -217,6 +229,26 @@ tcpkeepalive(struct Curl_easy *data,
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPINTVL,
           (void *)&optval, sizeof(optval)) < 0) {
       infof(data, "Failed to set TCP_KEEPINTVL on fd "
+            "%" CURL_FORMAT_SOCKET_T ": errno %d",
+            sockfd, SOCKERRNO);
+    }
+#elif defined(TCP_KEEPALIVE_ABORT_THRESHOLD)
+    /* Solaris <11.4 style */
+    /* TCP_KEEPALIVE_ABORT_THRESHOLD should equal to
+     * TCP_KEEPCNT * TCP_KEEPINTVL on other platforms.
+     * The default value of TCP_KEEPCNT is 9 on Linux,
+     * 8 on *BSD/macOS, 5 or 10 on Windows. We choose
+     * 9 for Solaris <11.4 because there is no default
+     * value for TCP_KEEPCNT on Solaris 11.4.
+     *
+     * Note that the consequent probes will not be sent
+     * at equal intervals on Solaris, but will be sent
+     * using the exponential backoff algorithm. */
+    optval = 9 * curlx_sltosi(data->set.tcp_keepintvl);
+    KEEPALIVE_FACTOR(optval);
+    if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPALIVE_ABORT_THRESHOLD,
+          (void *)&optval, sizeof(optval)) < 0) {
+      infof(data, "Failed to set TCP_KEEPALIVE_ABORT_THRESHOLD on fd "
             "%" CURL_FORMAT_SOCKET_T ": errno %d",
             sockfd, SOCKERRNO);
     }
