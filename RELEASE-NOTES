@@ -4,10 +4,13 @@ curl and libcurl 8.8.1
  Command line options:         259
  curl_easy_setopt() options:   305
  Public functions in libcurl:  94
- Contributors:                 3179
+ Contributors:                 3183
 
 This release includes the following changes:
 
+ o noproxy: patterns need to be comma separated [75]
+ o urlapi: add CURLU_NO_GUESS_SCHEME [72]
+ o wolfssl: support CA caching [73]
 
 This release includes the following bugfixes:
 
@@ -39,10 +42,13 @@ This release includes the following bugfixes:
  o examples: delete unused includes [10]
  o examples: fix compiling with MSVC [34]
  o get.d: clarify the explanation [32]
+ o GHA: disable MQTT and WebSocket tests in Windows jobs [63]
  o GHA: disable TFTP tests in Windows jobs
  o GHA: enable tests 1139, 1177, 1477 on Windows [59]
+ o GHA: unify http3 workflows into one [77]
  o gnutls: improve TLS shutdown [62]
  o http: write last header line late [44]
+ o lib/v*: tidy up types and casts [64]
  o lib: fix gcc warning in certain debug builds [19]
  o lib: prefer `var = time(NULL)` over `time(&var)` [52]
  o libssh: remove CURLOPT_SSL_VERIFYHOST check [36]
@@ -52,10 +58,14 @@ This release includes the following bugfixes:
  o multi: fix multi_wait() timeout handling [51]
  o openssl/gnutls: rectify the TLS version checks for QUIC [61]
  o openssl: fix %-specifier in infof() call [57]
+ o openSSL: fix hostname handling when using ECH [78]
  o openssl: stop duplicate ssl key logging for legacy OpenSSL [49]
  o pytest: add ftp upload tests [16]
+ o request.md: language fix [70]
  o runtests: sort test IDs in summary lines [33]
+ o sectransp: remove large cipher table [76]
  o sectransp: use common code for cipher suite lookup [54]
+ o socket: change TCP keepalive from ms to seconds on DragonFly BSD [74]
  o test: add test1484, for HEAD with content [18]
  o test: add test1546, chunked not last transfer encoding [17]
  o tests: add pytest for --ciphers and --tls13-ciphers options [38]
@@ -65,12 +75,16 @@ This release includes the following bugfixes:
  o tests: use exec when spawning nghttpx [45]
  o tidy-up: use consistent casing for Windows directories [28]
  o TODO: remove some old, clarify, add something [31]
+ o tool_cb_hdr: return error for failed header writes [30]
  o tool_operate: avoid explicitly setting verifypeer to 1 [39]
  o transfer: conn close on paused upload [8]
  o transfer: remove curl_upload_refill_watermark, no longer used [50]
+ o vtls: deprioritize Secure Transport [71]
  o winbuild: fix PE version info debug flag [1]
  o winbuild: remove outdated WIN32 defines [5]
  o winsock: move SO_SNDBUF update into cf-socket [53]
+ o x509asn1: add some common ECDSA OIDs [67]
+ o x509asn1: fallback to dotted OID representation [69]
 
 This release includes the following known bugs:
 
@@ -85,15 +99,16 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alejandro R. Sedeño, Alexander Shtuchkin, Ayesh Karunaratne,
-  Christian Heusel, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
-  dependabot[bot], edmcln on github, Eli Schwartz, Elliott Balsley,
-  fds242 on github, Harry Sintonen, James Abbatiello, Jan Venekamp,
-  Jonathan Matthews, Joseph Chen, Kai Pastor, Keerthi Timmaraju,
-  Matthias Gatto, Matt Jolly, Orgad Shaneh, Pavel Pavlov, pszlazak on github,
-  Ray Satiro, renovate[bot], Sergey Bronnikov, Stefan Eissing, Viktor Szakats,
-  vvb2060
-  (30 contributors)
+  Alejandro R. Sedeño, Alexander Shtuchkin, Andy Pan, Ayesh Karunaratne,
+  Bo Anderson, Christian Heusel, Christian Schmitz, Dan Fandrich,
+  Daniel Gustafsson, Daniel Stenberg, dependabot[bot], edmcln on github,
+  Eli Schwartz, Elliott Balsley, fds242 on github, Harry Sintonen,
+  James Abbatiello, Jan Venekamp, Jonathan Matthews, Joseph Chen, Kai Pastor,
+  Keerthi Timmaraju, Lee Li, Luke Hamburg, Matthias Gatto, Matt Jolly,
+  Orgad Shaneh, Pavel Pavlov, pszlazak on github, Ray Satiro, renovate[bot],
+  Sebastian Andersson, Sergey Bronnikov, Stefan Eissing, Stephen Farrell,
+  Tatsuhiro Tsujikawa, Viktor Szakats, vvb2060
+  (38 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -125,6 +140,7 @@ References to bug reports and discussions on issues:
  [26] = https://curl.se/bug/?i=13792
  [27] = https://curl.se/bug/?i=13827
  [28] = https://curl.se/bug/?i=13832
+ [30] = https://curl.se/bug/?i=13836
  [31] = https://curl.se/bug/?i=13788
  [32] = https://curl.se/bug/?i=13706
  [33] = https://curl.se/bug/?i=13774
@@ -156,3 +172,16 @@ References to bug reports and discussions on issues:
  [59] = https://curl.se/bug/?i=13817
  [61] = https://curl.se/bug/?i=13799
  [62] = https://curl.se/bug/?i=13790
+ [63] = https://curl.se/bug/?i=13860
+ [64] = https://curl.se/bug/?i=13622
+ [67] = https://curl.se/bug/?i=13857
+ [69] = https://curl.se/bug/?i=13845
+ [70] = https://curl.se/bug/?i=13854
+ [71] = https://curl.se/bug/?i=13547
+ [72] = https://curl.se/bug/?i=13616
+ [73] = https://curl.se/bug/?i=13786
+ [74] = https://curl.se/bug/?i=13847
+ [75] = https://curl.se/bug/?i=13789
+ [76] = https://curl.se/bug/?i=13823
+ [77] = https://curl.se/bug/?i=13841
+ [78] = https://curl.se/bug/?i=13818
