@@ -106,6 +106,7 @@ problems may have been fixed or changed somewhat since this was written.
  16. aws-sigv4
  16.1 aws-sigv4 does not sign requests with * correctly
  16.2 aws-sigv4 does not handle multipart/form-data correctly
+ 16.3 aws-sigv4 has problems with particular URLs
  16.6 aws-sigv4 does not behave well with AWS VPC Lattice
 
  17. HTTP/2
@@ -618,6 +619,10 @@ problems may have been fixed or changed somewhat since this was written.
 16.2 aws-sigv4 does not handle multipart/form-data correctly
 
  https://github.com/curl/curl/issues/13351
+
+16.3 aws-sigv4 has problems with particular URLs
+
+ https://github.com/curl/curl/issues/13058
 
 16.6 aws-sigv4 does not behave well with AWS VPC Lattice
 
