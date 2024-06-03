@@ -2012,7 +2012,8 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   SSLSUPP_CA_PATH  |
   SSLSUPP_CERTINFO |
   SSLSUPP_PINNEDPUBKEY |
-  SSLSUPP_HTTPS_PROXY,
+  SSLSUPP_HTTPS_PROXY |
+  SSLSUPP_CA_CACHE,
 
   sizeof(struct gtls_ssl_backend_data),
 
