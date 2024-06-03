@@ -28,7 +28,8 @@
 
 #ifdef USE_SCHANNEL
 
-#if defined(__MINGW32__) || defined(CERT_CHAIN_REVOCATION_CHECK_CHAIN)
+#if (defined(__MINGW32__) || defined(CERT_CHAIN_REVOCATION_CHECK_CHAIN)) \
+  && !defined(CURL_WINDOWS_APP)
 #define HAS_MANUAL_VERIFY_API
 #endif
 
