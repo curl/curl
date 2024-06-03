@@ -48,7 +48,8 @@
 
 #ifdef _WIN32
 
-#if defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x600
+#if defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x600 && \
+  !defined(CURL_WINDOWS_APP)
 #  define HAVE_WIN_BCRYPTGENRANDOM
 #  include <bcrypt.h>
 #  ifdef _MSC_VER
