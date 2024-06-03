@@ -133,6 +133,10 @@ double tutil_tvdiff_secs(struct timeval newer, struct timeval older)
 #ifdef _WIN32
 HMODULE win32_load_system_library(const TCHAR *filename)
 {
+#ifdef CURL_WINDOWS_APP
+  (void)filename;
+  return NULL;
+#else
   size_t filenamelen = _tcslen(filename);
   size_t systemdirlen = GetSystemDirectory(NULL, 0);
   size_t written;
@@ -158,5 +162,6 @@ HMODULE win32_load_system_library(const TCHAR *filename)
   _tcscpy(path + written, filename);
 
   return LoadLibrary(path);
+#endif
 }
 #endif

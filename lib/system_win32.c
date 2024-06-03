@@ -112,7 +112,11 @@ CURLcode Curl_win32_init(long flags)
   }
 
 #ifdef USE_WINSOCK
+#ifdef CURL_WINDOWS_APP
+  ws2_32Dll = Curl_load_library(TEXT("ws2_32.dll"));
+#else
   ws2_32Dll = GetModuleHandleA("ws2_32");
+#endif
   if(ws2_32Dll) {
     Curl_FreeAddrInfoExW = CURLX_FUNCTION_CAST(FREEADDRINFOEXW_FN,
       GetProcAddress(ws2_32Dll, "FreeAddrInfoExW"));
@@ -269,11 +273,13 @@ HMODULE Curl_load_library(LPCTSTR filename)
 
 bool Curl_win32_impersonating(void)
 {
+#ifndef CURL_WINDOWS_APP
   HANDLE token = NULL;
   if(OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, TRUE, &token)) {
     CloseHandle(token);
     return TRUE;
   }
+#endif
   return FALSE;
 }
 

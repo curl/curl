@@ -156,7 +156,7 @@ jobs:
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
   msys2:
-    name: 'msys2 (${{ matrix.build }}, ${{ matrix.sys }}, ${{ matrix.env }}, ${{ matrix.config }})'
+    name: 'msys2 (${{ matrix.build }}, ${{ matrix.sys }}, ${{ matrix.env }}, ${{ matrix.config }}, ${{ matrix.test }})'
     runs-on: windows-latest
     timeout-minutes: 45
     strategy:
@@ -170,6 +170,7 @@ jobs:
           - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: '~2301 ~2302'             , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', type: 'Debug' }
           - { build: 'cmake'    , sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_CURLDEBUG=ON', type: 'Release' }
           - { build: 'cmake'    , sys: 'clang64', env: 'clang-x86_64', tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=OFF', type: 'Release' }
+          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DBUILD_EXAMPLES=OFF', type: 'Release', test: 'uwp' }
       fail-fast: false
     steps:
       - run: git config --global core.autocrlf input
@@ -254,7 +255,7 @@ jobs:
             pacman --noconfirm --ask 20 --noprogressbar --sync --needed 'mingw-w64-${{ matrix.env }}-winstorecompat-git'
             specs="$(realpath gcc-specs-uwp)"
             gcc -dumpspecs | sed -e 's/-lmingwex/-lwindowsapp -lmingwex -lwindowsapp -lwindowsappcompat/' -e 's/-lmsvcrt/-lmsvcr120_app/' > "${specs}"
-            cflags+=" -specs=${specs} -DWINSTORECOMPAT -DWINAPI_FAMILY=WINAPI_FAMILY_APP"
+            cflags+=" -specs=$(cygpath -w "${specs}") -DWINSTORECOMPAT -DWINAPI_FAMILY=WINAPI_FAMILY_APP"
             # CMake (as of v3.26.4) gets confused and applies the MSVC rc.exe command-line
             # template to windres. Reset it to the windres template manually:
             rcopts='<CMAKE_RC_COMPILER> -O coff <DEFINES> <INCLUDES> <FLAGS> <SOURCE> <OBJECT>'
@@ -282,7 +283,9 @@ jobs:
           cmake --build bld --config '${{ matrix.type }}' --parallel 5
           [[ '${{ matrix.config }}' != *'BUILD_SHARED_LIBS=OFF'* ]] && cp -f -p bld/lib/*.dll bld/src/
           find . -name '*.exe' -o -name '*.dll'
-          bld/src/curl.exe --disable --version
+          if [ '${{ matrix.test }}' != 'uwp' ]; then  # UWP missing 'msvcr120_app.dll', fails with exit code 0xc0000135
+            bld/src/curl.exe --disable --version
+          fi
 
       - name: 'cmake build tests'
         if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' }}

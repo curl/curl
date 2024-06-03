@@ -276,6 +276,10 @@ if(HTTP_ONLY)
   set(CURL_DISABLE_TFTP ON)
 endif()
 
+if(WINDOWS_STORE)
+  set(CURL_DISABLE_TELNET ON)  # telnet code needs fixing to compile for UWP.
+endif()
+
 option(ENABLE_IPV6 "Define if you want to enable IPv6 support" ON)
 mark_as_advanced(ENABLE_IPV6)
 if(ENABLE_IPV6 AND NOT WIN32)
@@ -769,7 +773,7 @@ if(NOT CURL_DISABLE_SRP AND (HAVE_GNUTLS_SRP OR HAVE_OPENSSL_SRP))
 endif()
 
 if(NOT CURL_DISABLE_LDAP)
-  if(WIN32)
+  if(WIN32 AND NOT WINDOWS_STORE)
     option(USE_WIN32_LDAP "Use Windows LDAP implementation" ON)
     if(USE_WIN32_LDAP)
       list(APPEND CURL_LIBS "wldap32")

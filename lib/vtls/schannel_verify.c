@@ -346,6 +346,12 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
                                   DWORD length)
 {
   DWORD actual_length = 0;
+#if defined(CURL_WINDOWS_APP)
+  (void)data;
+  (void)cert_context;
+  (void)host_names;
+  (void)length;
+#else
   BOOL compute_content = FALSE;
   CERT_INFO *cert_info = NULL;
   CERT_EXTENSION *extension = NULL;
@@ -457,6 +463,7 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
     /* Last string has double null-terminator. */
     *current_pos = '\0';
   }
+#endif
   return actual_length;
 }
 
