@@ -670,7 +670,7 @@ sub protocolsetup {
     }
 }
 
-# Perform the disconnecgt handshake with sockfilt on the secondary connection
+# Perform the disconnect handshake with sockfilt on the secondary connection
 # (the only connection we actively disconnect).
 # This involves waiting for the disconnect acknowledgment after the DISC
 # command, while throwing away anything else that might come in before
@@ -690,9 +690,8 @@ sub disc_handshake {
                 $size = hex($1);
             }
 
-            read_datasockf(\$line, $size);
-
             logmsg "> Throwing away $size bytes on closed connection\n";
+            read_datasockf(\$line, $size);
         }
         elsif($line eq "DISC\n") {
             logmsg "Fancy that; client wants to DISC, too\n";
