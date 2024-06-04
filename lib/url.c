@@ -3663,8 +3663,12 @@ static CURLcode create_conn(struct Curl_easy *data,
       if(conn_candidate)
         Curl_disconnect(data, conn_candidate, FALSE);
       else {
-        infof(data, "No connections available in cache");
-        connections_available = FALSE;
+        if(data->set.dohfor)
+          infof(data, "Allowing DoH to override max connection limit");
+        else {
+          infof(data, "No connections available in cache");
+          connections_available = FALSE;
+        }
       }
     }
 
