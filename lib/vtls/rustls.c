@@ -604,6 +604,7 @@ cr_connect_common(struct Curl_cfilter *cf,
     * Connection has been established according to rustls. Set send/recv
     * handlers, and update the state machine.
     */
+    connssl->io_need = CURL_SSL_IO_NEED_NONE;
     if(!rustls_connection_is_handshaking(rconn)) {
       infof(data, "Done handshaking");
       /* rustls claims it is no longer handshaking *before* it has
@@ -613,7 +614,7 @@ cr_connect_common(struct Curl_cfilter *cf,
       cr_set_negotiated_alpn(cf, data, rconn);
       cr_send(cf, data, NULL, 0, &tmperr);
       if(tmperr == CURLE_AGAIN) {
-        connssl->connecting_state = ssl_connect_2_writing;
+        connssl->io_need = CURL_SSL_IO_NEED_SEND;
         return CURLE_OK;
       }
       else if(tmperr != CURLE_OK) {
@@ -625,6 +626,7 @@ cr_connect_common(struct Curl_cfilter *cf,
       return CURLE_OK;
     }
 
+    connssl->connecting_state = ssl_connect_2;
     wants_read = rustls_connection_wants_read(rconn);
     wants_write = rustls_connection_wants_write(rconn) ||
                   backend->plain_out_buffered;
@@ -632,8 +634,6 @@ cr_connect_common(struct Curl_cfilter *cf,
     writefd = wants_write?sockfd:CURL_SOCKET_BAD;
     readfd = wants_read?sockfd:CURL_SOCKET_BAD;
 
-    connssl->connecting_state = wants_write?
-      ssl_connect_2_writing : ssl_connect_2_reading;
     /* check allowed time left */
     timeout_ms = Curl_timeleft(data, NULL, TRUE);
 
@@ -661,6 +661,10 @@ cr_connect_common(struct Curl_cfilter *cf,
       CURL_TRC_CF(data, cf, "Curl_socket_check: %s would block",
             wants_read&&wants_write ? "writing and reading" :
             wants_write ? "writing" : "reading");
+      if(wants_write)
+        connssl->io_need |= CURL_SSL_IO_NEED_SEND;
+      if(wants_read)
+        connssl->io_need |= CURL_SSL_IO_NEED_RECV;
       return CURLE_OK;
     }
     /* socket is readable or writable */

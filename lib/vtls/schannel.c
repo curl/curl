@@ -1332,7 +1332,8 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   DEBUGASSERT(backend);
 
-  doread = (connssl->connecting_state != ssl_connect_2_writing) ? TRUE : FALSE;
+  doread = (connssl->io_need & CURL_SSL_IO_NEED_SEND)? FALSE : TRUE;
+  connssl->io_need = CURL_SSL_IO_NEED_NONE;
 
   DEBUGF(infof(data,
                "schannel: SSL/TLS connection with %s port %d (step 2/3)",
@@ -1393,8 +1394,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
                                backend->encdata_offset,
                                &result);
       if(result == CURLE_AGAIN) {
-        if(connssl->connecting_state != ssl_connect_2_writing)
-          connssl->connecting_state = ssl_connect_2_reading;
+        connssl->io_need = CURL_SSL_IO_NEED_RECV;
         DEBUGF(infof(data, "schannel: failed to receive handshake, "
                      "need more data"));
         return CURLE_OK;
@@ -1448,7 +1448,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     /* check if the handshake was incomplete */
     if(sspi_status == SEC_E_INCOMPLETE_MESSAGE) {
       backend->encdata_is_incomplete = true;
-      connssl->connecting_state = ssl_connect_2_reading;
+      connssl->io_need = CURL_SSL_IO_NEED_RECV;
       DEBUGF(infof(data,
                    "schannel: received incomplete message, need more data"));
       return CURLE_OK;
@@ -1460,7 +1460,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     if(sspi_status == SEC_I_INCOMPLETE_CREDENTIALS &&
        !(backend->req_flags & ISC_REQ_USE_SUPPLIED_CREDS)) {
       backend->req_flags |= ISC_REQ_USE_SUPPLIED_CREDS;
-      connssl->connecting_state = ssl_connect_2_writing;
+      connssl->io_need = CURL_SSL_IO_NEED_SEND;
       DEBUGF(infof(data,
                    "schannel: a client certificate has been requested"));
       return CURLE_OK;
@@ -1560,7 +1560,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* check if the handshake needs to be continued */
   if(sspi_status == SEC_I_CONTINUE_NEEDED) {
-    connssl->connecting_state = ssl_connect_2_reading;
+    connssl->io_need = CURL_SSL_IO_NEED_RECV;
     return CURLE_OK;
   }
 
@@ -1867,9 +1867,7 @@ schannel_connect_common(struct Curl_cfilter *cf,
       return result;
   }
 
-  while(ssl_connect_2 == connssl->connecting_state ||
-        ssl_connect_2_reading == connssl->connecting_state ||
-        ssl_connect_2_writing == connssl->connecting_state) {
+  while(ssl_connect_2 == connssl->connecting_state) {
 
     /* check out how much more time we're allowed */
     timeout_ms = Curl_timeleft(data, NULL, TRUE);
@@ -1881,13 +1879,12 @@ schannel_connect_common(struct Curl_cfilter *cf,
     }
 
     /* if ssl is expecting something, check if it's available. */
-    if(connssl->connecting_state == ssl_connect_2_reading
-       || connssl->connecting_state == ssl_connect_2_writing) {
+    if(connssl->io_need) {
 
-      curl_socket_t writefd = ssl_connect_2_writing ==
-        connssl->connecting_state ? sockfd : CURL_SOCKET_BAD;
-      curl_socket_t readfd = ssl_connect_2_reading ==
-        connssl->connecting_state ? sockfd : CURL_SOCKET_BAD;
+      curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND)?
+                              sockfd : CURL_SOCKET_BAD;
+      curl_socket_t readfd = (connssl->io_need & CURL_SSL_IO_NEED_RECV)?
+                             sockfd : CURL_SOCKET_BAD;
 
       what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
                                nonblocking ? 0 : timeout_ms);
@@ -1918,10 +1915,7 @@ schannel_connect_common(struct Curl_cfilter *cf,
      * have a valid fdset to wait on.
      */
     result = schannel_connect_step2(cf, data);
-    if(result || (nonblocking &&
-                  (ssl_connect_2 == connssl->connecting_state ||
-                   ssl_connect_2_reading == connssl->connecting_state ||
-                   ssl_connect_2_writing == connssl->connecting_state)))
+    if(result || (nonblocking && (ssl_connect_2 == connssl->connecting_state)))
       return result;
 
   } /* repeat step2 until all transactions are done. */
@@ -2320,7 +2314,8 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
         /* begin renegotiation */
         infof(data, "schannel: renegotiating SSL/TLS connection");
         connssl->state = ssl_connection_negotiating;
-        connssl->connecting_state = ssl_connect_2_writing;
+        connssl->connecting_state = ssl_connect_2;
+        connssl->io_need = CURL_SSL_IO_NEED_SEND;
         backend->recv_renegotiating = true;
         *err = schannel_connect_common(cf, data, FALSE, &done);
         backend->recv_renegotiating = false;

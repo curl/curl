@@ -943,11 +943,11 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
   ret = mbedtls_ssl_handshake(&backend->ssl);
 
   if(ret == MBEDTLS_ERR_SSL_WANT_READ) {
-    connssl->connecting_state = ssl_connect_2_reading;
+    connssl->io_need = CURL_SSL_IO_NEED_RECV;
     return CURLE_OK;
   }
   else if(ret == MBEDTLS_ERR_SSL_WANT_WRITE) {
-    connssl->connecting_state = ssl_connect_2_writing;
+    connssl->io_need = CURL_SSL_IO_NEED_SEND;
     return CURLE_OK;
   }
   else if(ret == MBEDTLS_ERR_X509_CERT_VERIFY_FAILED) {
@@ -1358,9 +1358,7 @@ mbed_connect_common(struct Curl_cfilter *cf, struct Curl_easy *data,
       return retcode;
   }
 
-  while(ssl_connect_2 == connssl->connecting_state ||
-        ssl_connect_2_reading == connssl->connecting_state ||
-        ssl_connect_2_writing == connssl->connecting_state) {
+  while(ssl_connect_2 == connssl->connecting_state) {
 
     /* check allowed time left */
     timeout_ms = Curl_timeleft(data, NULL, TRUE);
@@ -1372,13 +1370,12 @@ mbed_connect_common(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
 
     /* if ssl is expecting something, check if it's available. */
-    if(connssl->connecting_state == ssl_connect_2_reading
-       || connssl->connecting_state == ssl_connect_2_writing) {
+    if(connssl->io_need) {
 
-      curl_socket_t writefd = ssl_connect_2_writing ==
-        connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
-      curl_socket_t readfd = ssl_connect_2_reading ==
-        connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
+      curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND)?
+                              sockfd:CURL_SOCKET_BAD;
+      curl_socket_t readfd = (connssl->io_need & CURL_SSL_IO_NEED_RECV)?
+                             sockfd:CURL_SOCKET_BAD;
 
       what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
                                nonblocking ? 0 : timeout_ms);
@@ -1408,11 +1405,10 @@ mbed_connect_common(struct Curl_cfilter *cf, struct Curl_easy *data,
      * ensuring that a client using select() or epoll() will always
      * have a valid fdset to wait on.
      */
+    connssl->io_need = CURL_SSL_IO_NEED_NONE;
     retcode = mbed_connect_step2(cf, data);
-    if(retcode || (nonblocking &&
-                   (ssl_connect_2 == connssl->connecting_state ||
-                    ssl_connect_2_reading == connssl->connecting_state ||
-                    ssl_connect_2_writing == connssl->connecting_state)))
+    if(retcode ||
+       (nonblocking && (ssl_connect_2 == connssl->connecting_state)))
       return retcode;
 
   } /* repeat step2 until all transactions are done. */
