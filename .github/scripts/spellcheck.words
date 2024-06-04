@@ -119,10 +119,10 @@ CMake
 cmake
 CMake's
 cmake's
-CNAME
-CNAMEs
 CMakeLists
 CNA
+CNAME
+CNAMEs
 CodeQL
 codeql
 CODESET
@@ -209,9 +209,9 @@ EBCDIC
 ECC
 ECDHE
 ECH
-ecl
 ECHConfig
 ECHConfigList
+ecl
 ECONNREFUSED
 eCOS
 EFnet
@@ -358,6 +358,7 @@ ifdef
 ifdefed
 Ifdefs
 ifdefs
+ifhost
 IIS
 ILE
 Illumos
