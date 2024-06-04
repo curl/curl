@@ -112,7 +112,11 @@ CURLcode Curl_win32_init(long flags)
   }
 
 #ifdef USE_WINSOCK
+#ifdef CURL_WINDOWS_APP
+  ws2_32Dll = Curl_load_library(TEXT("ws2_32.dll"));
+#else
   ws2_32Dll = GetModuleHandleA("ws2_32");
+#endif
   if(ws2_32Dll) {
     Curl_FreeAddrInfoExW = CURLX_FUNCTION_CAST(FREEADDRINFOEXW_FN,
       GetProcAddress(ws2_32Dll, "FreeAddrInfoExW"));
