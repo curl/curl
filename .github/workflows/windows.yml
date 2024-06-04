@@ -283,7 +283,6 @@ jobs:
           cmake --build bld --config '${{ matrix.type }}' --parallel 5
           [[ '${{ matrix.config }}' != *'BUILD_SHARED_LIBS=OFF'* ]] && cp -f -p bld/lib/*.dll bld/src/
           find . -name '*.exe' -o -name '*.dll'
-          # UWP missing 'msvcr120_app.dll', fails with exit code 0xc0000135
           [ '${{ matrix.test }}' = 'uwp' ] || bld/src/curl.exe --disable --version
 
       - name: 'cmake build tests'
