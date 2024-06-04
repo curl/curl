@@ -303,9 +303,11 @@ query_complete(DWORD err, DWORD bytes, LPWSAOVERLAPPED overlapped)
   struct Curl_addrinfo *cafirst = NULL;
   struct Curl_addrinfo *calast = NULL;
 #ifndef CURL_DISABLE_SOCKETPAIR
+#ifdef USE_EVENTFD
   const void *buf;
-#ifdef HAVE_EVENTFD
   static const uint64_t val = 1;
+#else
+  char buf[1];
 #endif
 #endif
 #ifdef __clang__
@@ -428,10 +430,10 @@ query_complete(DWORD err, DWORD bytes, LPWSAOVERLAPPED overlapped)
   else {
 #ifndef CURL_DISABLE_SOCKETPAIR
     if(tsd->sock_pair[1] != CURL_SOCKET_BAD) {
-#ifdef HAVE_EVENTFD
+#ifdef USE_EVENTFD
       buf = &val;
 #else
-      buf = ".";
+      buf[0] = 1;
 #endif
       /* DNS has been resolved, signal client task */
       if(wakeup_write(tsd->sock_pair[1], buf, sizeof(buf)) < 0) {
@@ -463,9 +465,11 @@ static unsigned int CURL_STDCALL getaddrinfo_thread(void *arg)
   char service[12];
   int rc;
 #ifndef CURL_DISABLE_SOCKETPAIR
+#ifdef USE_EVENTFD
   const void *buf;
-#ifdef HAVE_EVENTFD
   static const uint64_t val = 1;
+#else
+  char buf[1];
 #endif
 #endif
 
@@ -492,10 +496,10 @@ static unsigned int CURL_STDCALL getaddrinfo_thread(void *arg)
   else {
 #ifndef CURL_DISABLE_SOCKETPAIR
     if(tsd->sock_pair[1] != CURL_SOCKET_BAD) {
-#ifdef HAVE_EVENTFD
+#ifdef USE_EVENTFD
       buf = &val;
 #else
-      buf = ".";
+      buf[0] = 1;
 #endif
       /* DNS has been resolved, signal client task */
       if(wakeup_write(tsd->sock_pair[1], buf, sizeof(buf)) < 0) {

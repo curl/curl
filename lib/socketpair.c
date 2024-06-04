@@ -27,15 +27,7 @@
 #include "urldata.h"
 #include "rand.h"
 
-#if defined(HAVE_EVENTFD) && \
-    defined(__x86_64__) && \
-    defined(__aarch64__) && \
-    defined(__ia64__) && \
-    defined(__ppc64__) && \
-    defined(__mips64) && \
-    defined(__sparc64__) && \
-    defined(__riscv_64e) && \
-    defined(__s390x__)
+#if defined(USE_EVENTFD)
 #ifdef HAVE_SYS_EVENTFD_H
 #include <sys/eventfd.h>
 #endif

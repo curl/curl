@@ -1633,9 +1633,11 @@ CURLMcode curl_multi_wakeup(struct Curl_multi *multi)
      Curl_multi struct that are constant */
 
 #if defined(ENABLE_WAKEUP) && !defined(USE_WINSOCK)
-    const void *buf;
-#ifdef HAVE_EVENTFD
-    static const uint64_t val = 1;
+#ifdef USE_EVENTFD
+  const void *buf;
+  static const uint64_t val = 1;
+#else
+  char buf[1];
 #endif
 #endif
 
@@ -1652,10 +1654,10 @@ CURLMcode curl_multi_wakeup(struct Curl_multi *multi)
      making it safe to access from another thread after the init part
      and before cleanup */
   if(multi->wakeup_pair[1] != CURL_SOCKET_BAD) {
-#ifdef HAVE_EVENTFD
+#ifdef USE_EVENTFD
     buf = &val;
 #else
-    buf = ".";
+    buf[0] = 1;
 #endif
     while(1) {
       /* swrite() is not thread-safe in general, because concurrent calls
@@ -2885,7 +2887,7 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
 #else
 #ifdef ENABLE_WAKEUP
     wakeup_close(multi->wakeup_pair[0]);
-#ifndef HAVE_EVENTFD
+#ifndef USE_EVENTFD
     wakeup_close(multi->wakeup_pair[1]);
 #endif
 #endif

@@ -36,7 +36,14 @@
     defined(__riscv_64e) && \
     defined(__s390x__)
 
-/* Use eventfd only on 64-bit CPU architectures */
+/* Use eventfd only with 64-bit CPU architectures because eventfd has a
+ * stringent rule of requiring the 8-byte buffer when calling read(2) and
+ * write(2) on it. In some rare cases, the C standard library implementation
+ * on a 32-bit system might choose to define uint64_t as a 32-bit type for
+ * various reasons (memory limitations, compatibility with older code),
+ * which makes eventfd broken.
+ */
+#define USE_EVENTFD 1
 
 #define wakeup_write  write
 #define wakeup_read   read
