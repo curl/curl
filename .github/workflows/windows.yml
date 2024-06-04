@@ -124,7 +124,7 @@ jobs:
             -DBUILD_EXAMPLES=ON \
             -DENABLE_WEBSOCKETS=ON \
             -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON \
-            ${{ matrix.config }}
+            ${{ matrix.config }} || { cat bld/CMakeFiles/CMake*.yaml; false; }
 
       - name: 'cmake build'
         if: ${{ matrix.build == 'cmake' }}
@@ -272,7 +272,7 @@ jobs:
             -DBUILD_EXAMPLES=ON \
             -DENABLE_WEBSOCKETS=ON \
             -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON \
-            ${{ matrix.config }}
+            ${{ matrix.config }} || { cat bld/CMakeFiles/CMake*.yaml; false; }
 
       - name: 'cmake build'
         if: ${{ matrix.build == 'cmake' }}
@@ -375,7 +375,7 @@ jobs:
             -DCURL_WERROR=ON \
             -DBUILD_EXAMPLES=ON \
             -DENABLE_WEBSOCKETS=ON \
-            ${{ matrix.config }}
+            ${{ matrix.config }} || { cat bld/CMakeFiles/CMake*.yaml; false; }
 
       - name: 'cmake build'
         if: ${{ matrix.build == 'cmake' }}
@@ -447,7 +447,7 @@ jobs:
             -DCURL_WERROR=ON \
             -DBUILD_EXAMPLES=ON \
             -DENABLE_WEBSOCKETS=ON \
-            ${{ matrix.config }}
+            ${{ matrix.config }} || { cat bld/CMakeFiles/CMake*.yaml; false; }
 
       - name: 'cmake build'
         timeout-minutes: 5
