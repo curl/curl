@@ -277,8 +277,7 @@ if(HTTP_ONLY)
 endif()
 
 if(WINDOWS_STORE)
-  set(CURL_DISABLE_TELNET ON)
-  set(BUILD_CURL_EXE OFF)
+  set(CURL_DISABLE_TELNET ON)  # telnet code need fixing to compile successfully for UWP.
 endif()
 
 option(ENABLE_IPV6 "Define if you want to enable IPv6 support" ON)
