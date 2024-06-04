@@ -447,7 +447,13 @@ query_complete(DWORD err, DWORD bytes, LPWSAOVERLAPPED overlapped)
  * For builds without ARES, but with USE_IPV6, create a resolver thread
  * and wait on it.
  */
-static unsigned int CURL_STDCALL getaddrinfo_thread(void *arg)
+static
+#if defined(_WIN32_WCE)
+DWORD
+#else
+unsigned int
+#endif
+CURL_STDCALL getaddrinfo_thread(void *arg)
 {
   struct thread_sync_data *tsd = (struct thread_sync_data *)arg;
   struct thread_data *td = tsd->td;
@@ -500,7 +506,13 @@ static unsigned int CURL_STDCALL getaddrinfo_thread(void *arg)
 /*
  * gethostbyname_thread() resolves a name and then exits.
  */
-static unsigned int CURL_STDCALL gethostbyname_thread(void *arg)
+static
+#if defined(_WIN32_WCE)
+DWORD
+#else
+unsigned int
+#endif
+CURL_STDCALL gethostbyname_thread(void *arg)
 {
   struct thread_sync_data *tsd = (struct thread_sync_data *)arg;
   struct thread_data *td = tsd->td;
