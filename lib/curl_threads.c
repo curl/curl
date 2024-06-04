@@ -100,8 +100,13 @@ int Curl_thread_join(curl_thread_t *hnd)
 
 #elif defined(USE_THREADS_WIN32)
 
-/* !checksrc! disable SPACEBEFOREPAREN 1 */
-curl_thread_t Curl_thread_create(unsigned int (CURL_STDCALL *func) (void *),
+curl_thread_t Curl_thread_create(
+#if defined(_WIN32_WCE)
+                                 DWORD
+#else
+                                 unsigned int
+#endif
+                                 (CURL_STDCALL *func) (void *),
                                  void *arg)
 {
 #ifdef _WIN32_WCE
