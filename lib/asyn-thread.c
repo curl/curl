@@ -305,7 +305,7 @@ query_complete(DWORD err, DWORD bytes, LPWSAOVERLAPPED overlapped)
 #ifndef CURL_DISABLE_SOCKETPAIR
 #ifdef USE_EVENTFD
   const void *buf;
-  static const uint64_t val = 1;
+  static const uint64_t val = 1; /* read-only constant, shared by callers */
 #else
   char buf[1];
 #endif
@@ -467,7 +467,7 @@ static unsigned int CURL_STDCALL getaddrinfo_thread(void *arg)
 #ifndef CURL_DISABLE_SOCKETPAIR
 #ifdef USE_EVENTFD
   const void *buf;
-  static const uint64_t val = 1;
+  static const uint64_t val = 1; /* read-only constant, shared by callers */
 #else
   char buf[1];
 #endif

@@ -1635,7 +1635,7 @@ CURLMcode curl_multi_wakeup(struct Curl_multi *multi)
 #if defined(ENABLE_WAKEUP) && !defined(USE_WINSOCK)
 #ifdef USE_EVENTFD
   const void *buf;
-  static const uint64_t val = 1;
+  static const uint64_t val = 1; /* read-only constant, shared by callers */
 #else
   char buf[1];
 #endif
