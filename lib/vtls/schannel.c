@@ -2682,6 +2682,13 @@ static void schannel_checksum(const unsigned char *input,
                               DWORD provType,
                               const unsigned int algId)
 {
+#ifdef CURL_WINDOWS_APP
+  (void)input;
+  (void)inputlen;
+  (void)provType;
+  (void)algId;
+  memset(checksum, 0, checksumlen);
+#else
   HCRYPTPROV hProv = 0;
   HCRYPTHASH hHash = 0;
   DWORD cbHashSize = 0;
@@ -2722,6 +2729,7 @@ static void schannel_checksum(const unsigned char *input,
 
   if(hProv)
     CryptReleaseContext(hProv, 0);
+#endif
 }
 
 static CURLcode schannel_sha256sum(const unsigned char *input,
@@ -2906,7 +2914,9 @@ const struct Curl_ssl Curl_ssl_schannel = {
 #ifdef HAS_MANUAL_VERIFY_API
   SSLSUPP_CAINFO_BLOB |
 #endif
+#ifndef CURL_WINDOWS_APP
   SSLSUPP_PINNEDPUBKEY |
+#endif
   SSLSUPP_TLS13_CIPHERSUITES |
   SSLSUPP_CA_CACHE |
   SSLSUPP_HTTPS_PROXY,
