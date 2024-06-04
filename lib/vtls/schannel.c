@@ -2314,7 +2314,7 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
         /* begin renegotiation */
         infof(data, "schannel: renegotiating SSL/TLS connection");
         connssl->state = ssl_connection_negotiating;
-        connecting_state = ssl_connect_2;
+        connssl->connecting_state = ssl_connect_2;
         connssl->io_need = CURL_SSL_IO_NEED_SEND;
         backend->recv_renegotiating = true;
         *err = schannel_connect_common(cf, data, FALSE, &done);
