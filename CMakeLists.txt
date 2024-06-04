@@ -276,6 +276,10 @@ if(HTTP_ONLY)
   set(CURL_DISABLE_TFTP ON)
 endif()
 
+if(WINDOWS_STORE)
+  set(CURL_DISABLE_TELNET ON)
+endif()
+
 option(ENABLE_IPV6 "Define if you want to enable IPv6 support" ON)
 mark_as_advanced(ENABLE_IPV6)
 if(ENABLE_IPV6 AND NOT WIN32)
