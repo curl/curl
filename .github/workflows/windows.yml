@@ -281,9 +281,9 @@ jobs:
         shell: msys2 {0}
         run: |
           cmake --build bld --config '${{ matrix.type }}' --parallel 5
-          [[ '${{ matrix.config }}' != *'BUILD_SHARED_LIBS=OFF'* ]] && cp -f -p bld/lib/*.dll bld/src/
+          [[ '${{ matrix.config }}' != *'BUILD_SHARED_LIBS=OFF'* ]] && [ '${{ matrix.test }}' != 'uwp' ] && cp -f -p bld/lib/*.dll bld/src/
           find . -name '*.exe' -o -name '*.dll'
-          [ '${{ matrix.test }}' = 'uwp' ] || bld/src/curl.exe --disable --version
+          [ '${{ matrix.test }}' != 'uwp' ] && bld/src/curl.exe --disable --version
 
       - name: 'cmake build tests'
         if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' }}
