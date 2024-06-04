@@ -709,6 +709,9 @@ cleanup:
   return slist;
 }
 
+bool tool_term_has_bold;
+
+#ifndef CURL_WINDOWS_APP
 /* The terminal settings to restore on exit */
 static struct TerminalSettings {
   HANDLE hStdOut;
@@ -719,8 +722,6 @@ static struct TerminalSettings {
 #ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
 #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 #endif
-
-bool tool_term_has_bold;
 
 static void restore_terminal(void)
 {
@@ -776,6 +777,7 @@ static void init_terminal(void)
     }
   }
 }
+#endif
 
 LARGE_INTEGER tool_freq;
 bool tool_isVistaOrGreater;
@@ -792,7 +794,9 @@ CURLcode win32_init(void)
 
   QueryPerformanceFrequency(&tool_freq);
 
+#ifndef CURL_WINDOWS_APP
   init_terminal();
+#endif
 
   return CURLE_OK;
 }
