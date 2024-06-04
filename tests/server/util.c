@@ -366,7 +366,7 @@ void clear_advisor_read_lock(const char *filename)
 }
 
 
-#if defined(_WIN32) && !defined(MSDOS)
+#if defined(_WIN32)
 
 static struct timeval tvnow(void)
 {
