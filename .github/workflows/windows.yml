@@ -281,9 +281,9 @@ jobs:
         shell: msys2 {0}
         run: |
           cmake --build bld --config '${{ matrix.type }}' --parallel 5
-          if [ '${{ matrix.test }}' != 'uwp' ]; then
-            [[ '${{ matrix.config }}' != *'BUILD_SHARED_LIBS=OFF'* ]] && cp -f -p bld/lib/*.dll bld/src/
-            find . -name '*.exe' -o -name '*.dll'
+          [[ '${{ matrix.config }}' != *'BUILD_SHARED_LIBS=OFF'* ]] && cp -f -p bld/lib/*.dll bld/src/
+          find . -name '*.exe' -o -name '*.dll'
+          if [ '${{ matrix.test }}' != 'uwp' ]; then  # UWP missing 'msvcr120_app.dll', fails with exit code 0xc0000135
             bld/src/curl.exe --disable --version
           fi
 
