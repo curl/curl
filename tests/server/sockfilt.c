@@ -921,7 +921,7 @@ static bool disc_handshake(void)
       }
       else if(!memcmp("DATA", buffer, 4)) {
         /* We must read more data to stay in sync */
-        logmsg("Throwing away %zd data bytes", buffer_len);
+        logmsg("Throwing away data bytes");
         if(!read_data_block(buffer, sizeof(buffer), &buffer_len))
           return FALSE;
 
