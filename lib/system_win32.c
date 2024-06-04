@@ -269,11 +269,13 @@ HMODULE Curl_load_library(LPCTSTR filename)
 
 bool Curl_win32_impersonating(void)
 {
+#ifndef CURL_WINDOWS_APP
   HANDLE token = NULL;
   if(OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, TRUE, &token)) {
     CloseHandle(token);
     return TRUE;
   }
+#endif
   return FALSE;
 }
 
