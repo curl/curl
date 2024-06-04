@@ -23,6 +23,8 @@
 #
 ###########################################################################
 
+# shellcheck disable=SC2006
+
 prefix="@prefix@"
 # Used in @libdir@
 # shellcheck disable=SC2034
@@ -100,17 +102,17 @@ while test "$#" -gt 0; do
 
   --checkfor)
     checkfor=$2
-    cmajor=$(echo "$checkfor" | cut -d. -f1)
-    cminor=$(echo "$checkfor" | cut -d. -f2)
+    cmajor=`echo "$checkfor" | cut -d. -f1`
+    cminor=`echo "$checkfor" | cut -d. -f2`
     # when extracting the patch part we strip off everything after a
     # dash as that's used for things like version 1.2.3-pre1
-    cpatch=$(echo "$checkfor" | cut -d. -f3 | cut -d- -f1)
+    cpatch=`echo "$checkfor" | cut -d. -f3 | cut -d- -f1`
 
-    vmajor=$(echo '@CURLVERSION@' | cut -d. -f1)
-    vminor=$(echo '@CURLVERSION@' | cut -d. -f2)
+    vmajor=`echo '@CURLVERSION@' | cut -d. -f1`
+    vminor=`echo '@CURLVERSION@' | cut -d. -f2`
     # when extracting the patch part we strip off everything after a
     # dash as that's used for things like version 1.2.3-pre1
-    vpatch=$(echo '@CURLVERSION@' | cut -d. -f3 | cut -d- -f1)
+    vpatch=`echo '@CURLVERSION@' | cut -d. -f3 | cut -d- -f1`
 
     if test "$vmajor" -gt "$cmajor"; then
       exit 0
