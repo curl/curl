@@ -690,8 +690,9 @@ sub disc_handshake {
                 $size = hex($1);
             }
 
-            logmsg "> Throwing away $size bytes on closed connection\n";
+            logmsg "> Throwing away bytes on closed connection\n";
             read_datasockf(\$line, $size);
+            logmsg "> Thrown away $size bytes on closed connection\n";
         }
         elsif($line eq "DISC\n") {
             logmsg "Fancy that; client wants to DISC, too\n";
