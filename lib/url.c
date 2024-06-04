@@ -3662,14 +3662,16 @@ static CURLcode create_conn(struct Curl_easy *data,
       conn_candidate = Curl_conncache_extract_oldest(data);
       if(conn_candidate)
         Curl_disconnect(data, conn_candidate, FALSE);
-      else {
+      else
+#ifndef CURL_DISABLE_DOH
         if(data->set.dohfor)
           infof(data, "Allowing DoH to override max connection limit");
-        else {
+        else
+#endif
+        {
           infof(data, "No connections available in cache");
           connections_available = FALSE;
         }
-      }
     }
 
     if(!connections_available) {
