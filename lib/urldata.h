@@ -257,22 +257,6 @@ enum protection_level {
 };
 #endif
 
-/* enum for the nonblocking SSL connection state machine */
-typedef enum {
-  ssl_connect_1,
-  ssl_connect_2,
-  ssl_connect_2_reading,
-  ssl_connect_2_writing,
-  ssl_connect_3,
-  ssl_connect_done
-} ssl_connect_state;
-
-typedef enum {
-  ssl_connection_none,
-  ssl_connection_negotiating,
-  ssl_connection_complete
-} ssl_connection_state;
-
 /* SSL backend-specific data; declared differently by each SSL backend */
 struct ssl_backend_data;
 

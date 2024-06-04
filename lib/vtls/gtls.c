@@ -251,6 +251,7 @@ static CURLcode handshake(struct Curl_cfilter *cf,
 
   DEBUGASSERT(backend);
   session = backend->gtls.session;
+  connssl->connecting_state = ssl_connect_2;
 
   for(;;) {
     timediff_t timeout_ms;
@@ -266,13 +267,12 @@ static CURLcode handshake(struct Curl_cfilter *cf,
     }
 
     /* if ssl is expecting something, check if it's available. */
-    if(connssl->connecting_state == ssl_connect_2_reading
-       || connssl->connecting_state == ssl_connect_2_writing) {
+    if(connssl->io_need) {
       int what;
-      curl_socket_t writefd = ssl_connect_2_writing ==
-        connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
-      curl_socket_t readfd = ssl_connect_2_reading ==
-        connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
+      curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND)?
+                              sockfd:CURL_SOCKET_BAD;
+      curl_socket_t readfd = (connssl->io_need & CURL_SSL_IO_NEED_RECV)?
+                             sockfd:CURL_SOCKET_BAD;
 
       what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
                                nonblocking?0:
@@ -294,6 +294,7 @@ static CURLcode handshake(struct Curl_cfilter *cf,
       /* socket is readable or writable */
     }
 
+    connssl->io_need = CURL_SSL_IO_NEED_NONE;
     backend->gtls.io_result = CURLE_OK;
     rc = gnutls_handshake(session);
 
@@ -306,9 +307,9 @@ static CURLcode handshake(struct Curl_cfilter *cf,
     }
 
     if((rc == GNUTLS_E_AGAIN) || (rc == GNUTLS_E_INTERRUPTED)) {
-      connssl->connecting_state =
+      connssl->io_need =
         gnutls_record_get_direction(session)?
-        ssl_connect_2_writing:ssl_connect_2_reading;
+        CURL_SSL_IO_NEED_SEND:CURL_SSL_IO_NEED_RECV;
       continue;
     }
     else if((rc < 0) && !gnutls_error_is_fatal(rc)) {
@@ -1684,8 +1685,8 @@ out:
  */
 /* We use connssl->connecting_state to keep track of the connection status;
    there are three states: 'ssl_connect_1' (not started yet or complete),
-   'ssl_connect_2_reading' (waiting for data from server), and
-   'ssl_connect_2_writing' (waiting to be able to write).
+   'ssl_connect_2' (doing handshake with the server), and
+   'ssl_connect_3' (verifying and getting stats).
  */
 static CURLcode
 gtls_connect_common(struct Curl_cfilter *cf,

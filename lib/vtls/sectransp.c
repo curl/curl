@@ -1948,21 +1948,20 @@ static CURLcode sectransp_connect_step2(struct Curl_cfilter *cf,
   SSLCipherSuite cipher;
   SSLProtocol protocol = 0;
 
-  DEBUGASSERT(ssl_connect_2 == connssl->connecting_state
-              || ssl_connect_2_reading == connssl->connecting_state
-              || ssl_connect_2_writing == connssl->connecting_state);
+  DEBUGASSERT(ssl_connect_2 == connssl->connecting_state);
   DEBUGASSERT(backend);
   CURL_TRC_CF(data, cf, "connect_step2");
 
   /* Here goes nothing: */
 check_handshake:
+  connssl->io_need = CURL_SSL_IO_NEED_NONE;
   err = SSLHandshake(backend->ssl_ctx);
 
   if(err != noErr) {
     switch(err) {
       case errSSLWouldBlock:  /* they're not done with us yet */
-        connssl->connecting_state = backend->ssl_direction ?
-            ssl_connect_2_writing : ssl_connect_2_reading;
+        connssl->io_need = backend->ssl_direction ?
+            CURL_SSL_IO_NEED_SEND : CURL_SSL_IO_NEED_RECV;
         return CURLE_OK;
 
       /* The below is errSSLServerAuthCompleted; it's not defined in
@@ -2460,9 +2459,7 @@ sectransp_connect_common(struct Curl_cfilter *cf, struct Curl_easy *data,
       return result;
   }
 
-  while(ssl_connect_2 == connssl->connecting_state ||
-        ssl_connect_2_reading == connssl->connecting_state ||
-        ssl_connect_2_writing == connssl->connecting_state) {
+  while(ssl_connect_2 == connssl->connecting_state) {
 
     /* check allowed time left */
     const timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
@@ -2474,13 +2471,12 @@ sectransp_connect_common(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
 
     /* if ssl is expecting something, check if it's available. */
-    if(connssl->connecting_state == ssl_connect_2_reading ||
-       connssl->connecting_state == ssl_connect_2_writing) {
+    if(connssl->io_need) {
 
-      curl_socket_t writefd = ssl_connect_2_writing ==
-      connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
-      curl_socket_t readfd = ssl_connect_2_reading ==
-      connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
+      curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND)?
+                              sockfd:CURL_SOCKET_BAD;
+      curl_socket_t readfd = (connssl->io_need & CURL_SSL_IO_NEED_RECV)?
+                             sockfd:CURL_SOCKET_BAD;
 
       what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
                                nonblocking ? 0 : timeout_ms);
@@ -2510,10 +2506,7 @@ sectransp_connect_common(struct Curl_cfilter *cf, struct Curl_easy *data,
      * or epoll() will always have a valid fdset to wait on.
      */
     result = sectransp_connect_step2(cf, data);
-    if(result || (nonblocking &&
-                  (ssl_connect_2 == connssl->connecting_state ||
-                   ssl_connect_2_reading == connssl->connecting_state ||
-                   ssl_connect_2_writing == connssl->connecting_state)))
+    if(result || (nonblocking && (ssl_connect_2 == connssl->connecting_state)))
       return result;
 
   } /* repeat step2 until all transactions are done. */

@@ -772,11 +772,12 @@ void Curl_ssl_close_all(struct Curl_easy *data)
 void Curl_ssl_adjust_pollset(struct Curl_cfilter *cf, struct Curl_easy *data,
                               struct easy_pollset *ps)
 {
-  if(!cf->connected) {
-    struct ssl_connect_data *connssl = cf->ctx;
+  struct ssl_connect_data *connssl = cf->ctx;
+
+  if(connssl->io_need) {
     curl_socket_t sock = Curl_conn_cf_get_socket(cf->next, data);
     if(sock != CURL_SOCKET_BAD) {
-      if(connssl->connecting_state == ssl_connect_2_writing) {
+      if(connssl->io_need & CURL_SSL_IO_NEED_SEND) {
         Curl_pollset_set_out_only(data, ps, sock);
         CURL_TRC_CF(data, cf, "adjust_pollset, POLLOUT fd=%"
                     CURL_FORMAT_SOCKET_T, sock);

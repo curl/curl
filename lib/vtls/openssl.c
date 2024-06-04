@@ -4165,11 +4165,10 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
   struct ssl_connect_data *connssl = cf->ctx;
   struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  DEBUGASSERT(ssl_connect_2 == connssl->connecting_state
-              || ssl_connect_2_reading == connssl->connecting_state
-              || ssl_connect_2_writing == connssl->connecting_state);
+  DEBUGASSERT(ssl_connect_2 == connssl->connecting_state);
   DEBUGASSERT(octx);
 
+  connssl->io_need = CURL_SSL_IO_NEED_NONE;
   ERR_clear_error();
 
   err = SSL_connect(octx->ssl);
@@ -4198,11 +4197,11 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
     int detail = SSL_get_error(octx->ssl, err);
 
     if(SSL_ERROR_WANT_READ == detail) {
-      connssl->connecting_state = ssl_connect_2_reading;
+      connssl->io_need = CURL_SSL_IO_NEED_RECV;
       return CURLE_OK;
     }
     if(SSL_ERROR_WANT_WRITE == detail) {
-      connssl->connecting_state = ssl_connect_2_writing;
+      connssl->io_need = CURL_SSL_IO_NEED_SEND;
       return CURLE_OK;
     }
 #ifdef SSL_ERROR_WANT_ASYNC
@@ -4828,9 +4827,7 @@ static CURLcode ossl_connect_common(struct Curl_cfilter *cf,
       goto out;
   }
 
-  while(ssl_connect_2 == connssl->connecting_state ||
-        ssl_connect_2_reading == connssl->connecting_state ||
-        ssl_connect_2_writing == connssl->connecting_state) {
+  while(ssl_connect_2 == connssl->connecting_state) {
 
     /* check allowed time left */
     const timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
@@ -4843,14 +4840,12 @@ static CURLcode ossl_connect_common(struct Curl_cfilter *cf,
     }
 
     /* if ssl is expecting something, check if it's available. */
-    if(!nonblocking &&
-       (connssl->connecting_state == ssl_connect_2_reading ||
-        connssl->connecting_state == ssl_connect_2_writing)) {
+    if(!nonblocking && connssl->io_need) {
 
-      curl_socket_t writefd = ssl_connect_2_writing ==
-        connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
-      curl_socket_t readfd = ssl_connect_2_reading ==
-        connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
+      curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND)?
+                              sockfd:CURL_SOCKET_BAD;
+      curl_socket_t readfd = (connssl->io_need & CURL_SSL_IO_NEED_RECV)?
+                             sockfd:CURL_SOCKET_BAD;
 
       what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
                                timeout_ms);
@@ -4876,10 +4871,7 @@ static CURLcode ossl_connect_common(struct Curl_cfilter *cf,
      * or epoll() will always have a valid fdset to wait on.
      */
     result = ossl_connect_step2(cf, data);
-    if(result || (nonblocking &&
-                  (ssl_connect_2 == connssl->connecting_state ||
-                   ssl_connect_2_reading == connssl->connecting_state ||
-                   ssl_connect_2_writing == connssl->connecting_state)))
+    if(result || (nonblocking && (ssl_connect_2 == connssl->connecting_state)))
       goto out;
 
   } /* repeat step2 until all transactions are done. */
