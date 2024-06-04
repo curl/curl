@@ -278,6 +278,7 @@ endif()
 
 if(WINDOWS_STORE)
   set(CURL_DISABLE_TELNET ON)
+  set(BUILD_CURL_EXE OFF)
 endif()
 
 option(ENABLE_IPV6 "Define if you want to enable IPv6 support" ON)
