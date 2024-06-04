@@ -1700,8 +1700,7 @@ out:
 }
 
 static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  bool blocking)
+                                  struct Curl_easy *data)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
   int rc;
@@ -1727,8 +1726,11 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
               ctx->sock, ctx->ip.local_ip, ctx->ip.local_port,
               ctx->ip.remote_ip, ctx->ip.remote_port);
 
-  if(blocking)
-    (void)curlx_nonblock(ctx->sock, TRUE);
+  /* Currently, cf->ctx->sock is always non-blocking because the only
+   * caller to cf_udp_setup_quic() is cf_udp_connect() that passes the
+   * non-blocking socket created by cf_socket_open() to it. Thus, we
+   * don't need to call curlx_nonblock() in cf_udp_setup_quic() anymore.
+   */
   switch(ctx->addr.family) {
 #if defined(__linux__) && defined(IP_MTU_DISCOVER)
   case AF_INET: {
@@ -1771,7 +1773,7 @@ static CURLcode cf_udp_connect(struct Curl_cfilter *cf,
     }
 
     if(ctx->transport == TRNSPRT_QUIC) {
-      result = cf_udp_setup_quic(cf, data, FALSE);
+      result = cf_udp_setup_quic(cf, data);
       if(result)
         goto out;
       CURL_TRC_CF(data, cf, "cf_udp_connect(), opened socket=%"
