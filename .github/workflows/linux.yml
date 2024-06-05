@@ -197,6 +197,8 @@ jobs:
         with:
           task: 'start-measurement'
           continue-on-error: true
+          send-data: false
+          show-carbon: false
 
       - if: matrix.build.container == null
         run: |
