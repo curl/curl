@@ -179,6 +179,7 @@ typedef enum {
   C_JSON,
   C_JUNK_SESSION_COOKIES,
   C_KEEPALIVE,
+  C_KEEPALIVE_CNT,
   C_KEEPALIVE_TIME,
   C_KEY,
   C_KEY_TYPE,
@@ -465,6 +466,7 @@ static const struct LongShort aliases[]= {
   {"json",                       ARG_STRG, ' ', C_JSON},
   {"junk-session-cookies",       ARG_BOOL, 'j', C_JUNK_SESSION_COOKIES},
   {"keepalive",                  ARG_BOOL, ' ', C_KEEPALIVE},
+  {"keepalive-cnt",              ARG_STRG, ' ', C_KEEPALIVE_CNT},
   {"keepalive-time",             ARG_STRG, ' ', C_KEEPALIVE_TIME},
   {"key",                        ARG_FILE, ' ', C_KEY},
   {"key-type",                   ARG_STRG, ' ', C_KEY_TYPE},
@@ -1825,6 +1827,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_KEEPALIVE_TIME: /* --keepalive-time */
       err = str2unum(&config->alivetime, nextarg);
+      break;
+    case C_KEEPALIVE_CNT: /* --keepalive-cnt */
+      err = str2unum(&config->alivecnt, nextarg);
       break;
     case C_POST301: /* --post301 */
       config->post301 = toggle;

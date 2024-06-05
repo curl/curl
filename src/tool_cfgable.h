@@ -249,7 +249,8 @@ struct OperationConfig {
   bool post302;
   bool post303;
   bool nokeepalive;         /* for keepalive needs */
-  long alivetime;
+  long alivetime;           /* keepalive-time */
+  long alivecnt;            /* keepalive-cnt */
   bool content_disposition; /* use Content-disposition filename */
 
   int default_node_flags;   /* default flags to search for each 'node', which

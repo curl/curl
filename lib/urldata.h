@@ -1733,6 +1733,7 @@ struct UserDefined {
 
   int tcp_keepidle;     /* seconds in idle before sending keepalive probe */
   int tcp_keepintvl;    /* seconds between TCP keepalive probes */
+  int tcp_keepcnt;      /* maximum number of keepalive probes */
 
   long expect_100_timeout; /* in milliseconds */
 #if defined(USE_HTTP2) || defined(USE_HTTP3)

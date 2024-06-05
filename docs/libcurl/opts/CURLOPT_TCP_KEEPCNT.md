@@ -1,41 +1,42 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
 SPDX-License-Identifier: curl
-Title: CURLOPT_TCP_KEEPIDLE
+Title: CURLOPT_TCP_KEEPCNT
 Section: 3
 Source: libcurl
 See-also:
   - CURLOPT_TCP_KEEPALIVE (3)
+  - CURLOPT_TCP_KEEPIDLE (3)
   - CURLOPT_TCP_KEEPINTVL (3)
-  - CURLOPT_TCP_KEEPCNT (3)
 Protocol:
   - TCP
 ---
 
 # NAME
 
-CURLOPT_TCP_KEEPIDLE - TCP keep-alive idle time wait
+CURLOPT_TCP_KEEPCNT - Maximum number of TCP keep-alive probes
 
 # SYNOPSIS
 
 ~~~c
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TCP_KEEPIDLE, long delay);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TCP_KEEPCNT, long cnt);
 ~~~
 
 # DESCRIPTION
 
-Pass a long. Sets the *delay*, in seconds, to wait while the connection is
-idle before sending keepalive probes. Not all operating systems support this
-option.
+Pass a long. Sets the number of probes to send before dropping
+the connection. Not all operating systems support this option.
+(Added in 8.9.0)
 
-The maximum value this accepts is 2147483648. Any larger value is capped to
-this amount.
+The maximum value this option accepts is INT_MAX or whatever your
+system allows.
+Any larger value is capped to this amount.
 
 # DEFAULT
 
-60
+9
 
 # EXAMPLE
 
@@ -65,7 +66,7 @@ int main(void)
 
 # AVAILABILITY
 
-Added in 7.25.0
+Added in v8.9.0
 
 # RETURN VALUE
 

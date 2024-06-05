@@ -328,6 +328,7 @@ struct curl_easyoption Curl_easyopts[] = {
    CURLOT_LONG, 0},
   {"TCP_FASTOPEN", CURLOPT_TCP_FASTOPEN, CURLOT_LONG, 0},
   {"TCP_KEEPALIVE", CURLOPT_TCP_KEEPALIVE, CURLOT_LONG, 0},
+  {"TCP_KEEPCNT", CURLOPT_TCP_KEEPCNT, CURLOT_LONG, 0},
   {"TCP_KEEPIDLE", CURLOPT_TCP_KEEPIDLE, CURLOT_LONG, 0},
   {"TCP_KEEPINTVL", CURLOPT_TCP_KEEPINTVL, CURLOT_LONG, 0},
   {"TCP_NODELAY", CURLOPT_TCP_NODELAY, CURLOT_LONG, 0},
@@ -376,6 +377,6 @@ struct curl_easyoption Curl_easyopts[] = {
  */
 int Curl_easyopts_check(void)
 {
-  return ((CURLOPT_LASTENTRY%10000) != (325 + 1));
+  return ((CURLOPT_LASTENTRY%10000) != (326 + 1));
 }
 #endif

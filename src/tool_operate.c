@@ -2111,6 +2111,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             my_setopt(curl, CURLOPT_TCP_KEEPIDLE, config->alivetime);
             my_setopt(curl, CURLOPT_TCP_KEEPINTVL, config->alivetime);
           }
+          if(config->alivecnt)
+            my_setopt(curl, CURLOPT_TCP_KEEPCNT, config->alivecnt);
         }
         else
           my_setopt(curl, CURLOPT_TCP_KEEPALIVE, 0L);
