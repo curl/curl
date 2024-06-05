@@ -493,11 +493,11 @@ CURLcode Curl_parse_interface(const char *input, size_t len,
     host_part = memchr(input, '!', len);
     if(!host_part || !*(host_part + 1))
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    *iface = Curl_memdup0(input, host_part - input);
+    *iface = Curl_memdup0(input, (size_t)(host_part - input));
     if(!*iface)
       return CURLE_OUT_OF_MEMORY;
     ++host_part;
-    *host = Curl_memdup0(host_part, len - (host_part - input));
+    *host = Curl_memdup0(host_part, len - (size_t)(host_part - input));
     if(!*host) {
       free(*iface);
       *iface = NULL;
