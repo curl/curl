@@ -16,7 +16,7 @@ Example:
 # `--proxy-ssl-allow-beast`
 
 Do not work around a security flaw in the TLS1.0 protocol known as BEAST when
-communicating to a HTTPS proxy. If this option is not used, the TLS layer may
+communicating to an HTTPS proxy. If this option is not used, the TLS layer may
 use workarounds known to cause interoperability problems with some older
 server implementations.
 
