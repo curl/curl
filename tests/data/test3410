@@ -1,0 +1,42 @@
+<testcase>
+<info>
+<keywords>
+SIEVE
+GETSCRIPT
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+REPLY GETSCRIPT NO (NONEXISTENT) \"Where is this script ?\"
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+sieve
+</server>
+ <name>
+SIEVE get non-existent script
+ </name>
+ <command>
+sieve://%HOSTIP:%SIEVEPORT/script%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GETSCRIPT "script%TESTNUMBER"
+LOGOUT
+</protocol>
+<errorcode>
+78
+</errorcode>
+</verify>
+</testcase>

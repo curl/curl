@@ -1,0 +1,38 @@
+<testcase>
+<info>
+<keywords>
+SIEVE
+LISTSCRIPTS
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+sieve
+</server>
+ <name>
+SIEVE LISTSCRIPTS
+ </name>
+ <command>
+sieve://%HOSTIP:%SIEVEPORT/
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+LISTSCRIPTS
+LOGOUT
+</protocol>
+<stdout>
+"default" ACTIVE
+"holidays"
+"spam"
+{12}
+strange"name
+</stdout>
+</verify>
+</testcase>

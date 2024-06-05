@@ -1,0 +1,59 @@
+<testcase>
+<info>
+<keywords>
+SIEVE
+SASL
+SASL AUTH CRAM-MD5
+SASL AUTH PLAIN
+SASL DOWNGRADE
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+REPLY welcome \"SASL\" \"CRAM-MD5 PLAIN\"\r\nOK
+REPLY 'AUTHENTICATE "CRAM-MD5"' \"Rubbish\"
+REPLY * NO \"AUTHENTICATE exchange cancelled by client\"
+REPLY 'AUTHENTICATE "PLAIN" "%b64[%00user%00secret]b64%"' OK \"Logged in\"
+</servercmd>
+<data>
+require "fileinto";
+if header :comparator "i;ascii-casemap" :contains "X-Spam-Level" "*****"  {
+    fileinto "Junk";
+    stop;
+}
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+sieve
+</server>
+<features>
+crypto
+</features>
+ <name>
+SIEVE CRAM-MD5 authentication with SASL downgrade
+ </name>
+ <command>
+sieve://%HOSTIP:%SIEVEPORT/script%TESTNUMBER -u user:secret
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+AUTHENTICATE "CRAM-MD5"
+"*"
+AUTHENTICATE "PLAIN" "%b64[%00user%00secret]b64%"
+CAPABILITY
+GETSCRIPT "script%TESTNUMBER"
+LOGOUT
+</protocol>
+</verify>
+</testcase>

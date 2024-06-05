@@ -1,0 +1,47 @@
+<testcase>
+<info>
+<keywords>
+SIEVE
+STARTTLS
+redirect_url
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+REPLY welcome "STARTTLS"\r\nOK \"Welcome\"
+REPLY STARTTLS NO (REFERRAL \"sieve://%HOSTIP:%SIEVEPORT\") \"Redirected\"
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+SSL
+</features>
+<server>
+sieve
+</server>
+ <name>
+SIEVE disable URL redirection before SSL established
+ </name>
+ <command>
+sieve://%HOSTIP:%SIEVEPORT/ --ssl --location --max-redirs 2
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+STARTTLS
+</protocol>
+# 47 - CURLE_TOO_MANY_REDIRECTS
+<errorcode>
+47
+</errorcode>
+</verify>
+</testcase>
