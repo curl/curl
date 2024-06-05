@@ -417,6 +417,10 @@ Idle time before sending keep-alive. See CURLOPT_TCP_KEEPIDLE(3)
 
 Interval between keep-alive probes. See CURLOPT_TCP_KEEPINTVL(3)
 
+## CURLOPT_TCP_KEEPCNT
+
+Maximum number of keep-alive probes. See CURLOPT_TCP_KEEPCNT(3)
+
 ## CURLOPT_UNIX_SOCKET_PATH
 
 Path to a Unix domain socket. See CURLOPT_UNIX_SOCKET_PATH(3)

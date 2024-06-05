@@ -141,6 +141,7 @@ DPAGES = \
   ipv6.md \
   json.md \
   junk-session-cookies.md \
+  keepalive-cnt.md \
   keepalive-time.md \
   key-type.md \
   key.md \

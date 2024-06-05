@@ -44,6 +44,9 @@ int main(void)
     /* interval time between keep-alive probes: 60 seconds */
     curl_easy_setopt(curl, CURLOPT_TCP_KEEPINTVL, 60L);
 
+    /* maximum number of keep-alive probes: 3 */
+    curl_easy_setopt(curl, CURLOPT_TCP_KEEPCNT, 3L);
+
     curl_easy_setopt(curl, CURLOPT_URL, "https://curl.se/");
 
     res = curl_easy_perform(curl);

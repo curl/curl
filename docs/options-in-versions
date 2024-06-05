@@ -106,6 +106,7 @@
 --ipv6 (-6)                          7.10.8
 --json                               7.82.0
 --junk-session-cookies (-j)          7.9.7
+--keepalive-cnt                      8.9.0
 --keepalive-time                     7.18.0
 --key                                7.9.3
 --key-type                           7.9.3

@@ -384,6 +384,7 @@ man_MANS =                                      \
   CURLOPT_TCP_KEEPALIVE.3                       \
   CURLOPT_TCP_KEEPIDLE.3                        \
   CURLOPT_TCP_KEEPINTVL.3                       \
+  CURLOPT_TCP_KEEPCNT.3                         \
   CURLOPT_TCP_NODELAY.3                         \
   CURLOPT_TELNETOPTIONS.3                       \
   CURLOPT_TFTP_BLKSIZE.3                        \

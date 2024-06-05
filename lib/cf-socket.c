@@ -145,8 +145,9 @@ static void nosigpipe(struct Curl_easy *data,
 
 #if defined(USE_WINSOCK) || \
    (defined(__sun) && !defined(TCP_KEEPIDLE)) || \
-   (defined(__DragonFly__) && __DragonFly_version < 500702)
-/* Solaris < 11.4, DragonFlyBSD < 500702 and Windows
+   (defined(__DragonFly__) && __DragonFly_version < 500702) || \
+   (defined(_WIN32) && !defined(TCP_KEEPIDLE))
+/* Solaris < 11.4, DragonFlyBSD < 500702 and Windows < 10.0.16299
  * use millisecond units. */
 #define KEEPALIVE_FACTOR(x) (x *= 1000)
 #else
@@ -177,7 +178,33 @@ tcpkeepalive(struct Curl_easy *data,
           sockfd, SOCKERRNO);
   }
   else {
-#if defined(SIO_KEEPALIVE_VALS)
+#if defined(SIO_KEEPALIVE_VALS) /* Windows */
+/* Windows 10, version 1709 (10.0.16299) and later versions */
+#if defined(TCP_KEEPIDLE) && defined(TCP_KEEPINTVL) && defined(TCP_KEEPCNT)
+    optval = curlx_sltosi(data->set.tcp_keepidle);
+    KEEPALIVE_FACTOR(optval);
+    if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE,
+                (const char *)&optval, sizeof(optval)) < 0) {
+      infof(data, "Failed to set TCP_KEEPIDLE on fd "
+            "%" CURL_FORMAT_SOCKET_T ": errno %d",
+            sockfd, SOCKERRNO);
+    }
+    optval = curlx_sltosi(data->set.tcp_keepintvl);
+    KEEPALIVE_FACTOR(optval);
+    if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPINTVL,
+                (const char *)&optval, sizeof(optval)) < 0) {
+      infof(data, "Failed to set TCP_KEEPINTVL on fd "
+            "%" CURL_FORMAT_SOCKET_T ": errno %d",
+            sockfd, SOCKERRNO);
+    }
+    optval = curlx_sltosi(data->set.tcp_keepcnt);
+    if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPCNT,
+                (const char *)&optval, sizeof(optval)) < 0) {
+      infof(data, "Failed to set TCP_KEEPCNT on fd "
+            "%" CURL_FORMAT_SOCKET_T ": errno %d",
+            sockfd, SOCKERRNO);
+    }
+#else /* Windows < 10.0.16299 */
     struct tcp_keepalive vals;
     DWORD dummy;
     vals.onoff = 1;
@@ -193,7 +220,8 @@ tcpkeepalive(struct Curl_easy *data,
                   "%" CURL_FORMAT_SOCKET_T ": errno %d",
                   sockfd, SOCKERRNO);
     }
-#else
+#endif
+#else /* !Windows */
 #ifdef TCP_KEEPIDLE
     optval = curlx_sltosi(data->set.tcp_keepidle);
     KEEPALIVE_FACTOR(optval);
@@ -238,18 +266,28 @@ tcpkeepalive(struct Curl_easy *data,
     /* TCP_KEEPALIVE_ABORT_THRESHOLD should equal to
      * TCP_KEEPCNT * TCP_KEEPINTVL on other platforms.
      * The default value of TCP_KEEPCNT is 9 on Linux,
-     * 8 on *BSD/macOS, 5 or 10 on Windows. We choose
-     * 9 for Solaris <11.4 because there is no default
-     * value for TCP_KEEPCNT on Solaris 11.4.
+     * 8 on *BSD/macOS, 5 or 10 on Windows. We use the
+     * default config for Solaris <11.4 because there is
+     * no default value for TCP_KEEPCNT on Solaris 11.4.
      *
      * Note that the consequent probes will not be sent
      * at equal intervals on Solaris, but will be sent
      * using the exponential backoff algorithm. */
-    optval = 9 * curlx_sltosi(data->set.tcp_keepintvl);
+    optval = curlx_sltosi(data->set.tcp_keepcnt) *
+             curlx_sltosi(data->set.tcp_keepintvl);
     KEEPALIVE_FACTOR(optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPALIVE_ABORT_THRESHOLD,
           (void *)&optval, sizeof(optval)) < 0) {
       infof(data, "Failed to set TCP_KEEPALIVE_ABORT_THRESHOLD on fd "
+            "%" CURL_FORMAT_SOCKET_T ": errno %d",
+            sockfd, SOCKERRNO);
+    }
+#endif
+#ifdef TCP_KEEPCNT
+    optval = curlx_sltosi(data->set.tcp_keepcnt);
+    if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPCNT,
+                (void *)&optval, sizeof(optval)) < 0) {
+      infof(data, "Failed to set TCP_KEEPCNT on fd "
             "%" CURL_FORMAT_SOCKET_T ": errno %d",
             sockfd, SOCKERRNO);
     }

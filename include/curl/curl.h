@@ -2218,8 +2218,11 @@ typedef enum {
   /* millisecond version */
   CURLOPT(CURLOPT_SERVER_RESPONSE_TIMEOUT_MS, CURLOPTTYPE_LONG, 324),
 
-  /* set ECH configuration  */
+  /* set ECH configuration */
   CURLOPT(CURLOPT_ECH, CURLOPTTYPE_STRINGPOINT, 325),
+
+  /* maximum number of keepalive probes (Linux, *BSD, macOS, etc.) */
+  CURLOPT(CURLOPT_TCP_KEEPCNT, CURLOPTTYPE_LONG, 326),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

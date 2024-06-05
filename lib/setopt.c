@@ -2960,6 +2960,14 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       arg = INT_MAX;
     data->set.tcp_keepintvl = (int)arg;
     break;
+  case CURLOPT_TCP_KEEPCNT:
+    arg = va_arg(param, long);
+    if(arg < 0)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    else if(arg > INT_MAX)
+      arg = INT_MAX;
+    data->set.tcp_keepcnt = (int)arg;
+    break;
   case CURLOPT_TCP_FASTOPEN:
 #if defined(CONNECT_DATA_IDEMPOTENT) || defined(MSG_FASTOPEN) || \
    defined(TCP_FASTOPEN_CONNECT)
