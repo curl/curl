@@ -192,9 +192,10 @@ jobs:
 
     steps:
       - name: 'initialize energy estimation'
+        if: matrix.build.container == null
         uses: green-coding-solutions/eco-ci-energy-estimation@v3
         with:
-          task: start-measurement
+          task: 'start-measurement'
           continue-on-error: true
 
       - if: matrix.build.container == null
@@ -458,7 +459,7 @@ jobs:
           CURL_CI: github
 
       - name: 'show energy results'
+        if: matrix.build.container == null
         uses: green-coding-solutions/eco-ci-energy-estimation@v3
         with:
-          task: display-results
-          continue-on-error: true
+          task: 'display-results'
