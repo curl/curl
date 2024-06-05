@@ -15,4 +15,15 @@ Example:
 
 # `--proxy-ssl-allow-beast`
 
-Same as --ssl-allow-beast but used in HTTPS proxy context.
+Do not work around a security flaw in the TLS1.0 protocol known as BEAST when
+communicating to an HTTPS proxy. If this option is not used, the TLS layer may
+use workarounds known to cause interoperability problems with some older
+server implementations.
+
+This option only changes how curl does TLS 1.0 with an HTTPS proxy and has no
+effect on later TLS versions.
+
+**WARNING**: this option loosens the TLS security, and by using this flag you
+ask for exactly that.
+
+Equivalent to --ssl-allow-beast but used in HTTPS proxy context.

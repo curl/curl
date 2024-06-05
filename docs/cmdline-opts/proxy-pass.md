@@ -16,4 +16,6 @@ Example:
 
 # `--proxy-pass`
 
-Same as --pass but used in HTTPS proxy context.
+Passphrase for the private key for HTTPS proxy client certificate.
+
+Equivalent to --pass but used in HTTPS proxy context.

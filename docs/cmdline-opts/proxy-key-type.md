@@ -16,4 +16,7 @@ Example:
 
 # `--proxy-key-type`
 
-Same as --key-type but used in HTTPS proxy context.
+Specify the private key file type your --proxy-key provided private key uses.
+DER, PEM, and ENG are supported. If not specified, PEM is assumed.
+
+Equivalent to --key-type but used in HTTPS proxy context.
