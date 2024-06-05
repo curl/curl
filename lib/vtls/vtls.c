@@ -1778,11 +1778,9 @@ static void ssl_cf_adjust_pollset(struct Curl_cfilter *cf,
 {
   struct cf_call_data save;
 
-  if(!cf->connected) {
-    CF_DATA_SAVE(save, cf, data);
-    Curl_ssl->adjust_pollset(cf, data, ps);
-    CF_DATA_RESTORE(cf, save);
-  }
+  CF_DATA_SAVE(save, cf, data);
+  Curl_ssl->adjust_pollset(cf, data, ps);
+  CF_DATA_RESTORE(cf, save);
 }
 
 static CURLcode ssl_cf_cntrl(struct Curl_cfilter *cf,

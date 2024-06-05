@@ -785,6 +785,7 @@ cr_shutdown(struct Curl_cfilter *cf,
   }
   else if(result == CURLE_AGAIN) {
     connssl->io_need = CURL_SSL_IO_NEED_RECV;
+    result = CURLE_OK;
   }
   else {
     DEBUGASSERT(result);

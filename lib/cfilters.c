@@ -558,6 +558,9 @@ int Curl_conn_cf_poll(struct Curl_cfilter *cf,
       ++npfds;
     }
   }
+
+  if(!npfds)
+    DEBUGF(infof(data, "no sockets to poll!"));
   return Curl_poll(pfds, npfds, timeout_ms);
 }
 
