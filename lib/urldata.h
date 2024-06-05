@@ -847,6 +847,10 @@ struct connectdata {
   Curl_recv *recv[2];
   Curl_send *send[2];
   struct Curl_cfilter *cfilter[2]; /* connection filters */
+  struct {
+    struct curltime start[2]; /* when filter shutdown started */
+    unsigned int timeout_ms; /* 0 means no timeout */
+  } shutdown;
 
   struct ssl_primary_config ssl_config;
 #ifndef CURL_DISABLE_PROXY
@@ -1614,9 +1618,10 @@ struct UserDefined {
   void *progress_client; /* pointer to pass to the progress callback */
   void *ioctl_client;   /* pointer to pass to the ioctl callback */
   unsigned int timeout;        /* ms, 0 means no timeout */
-  unsigned int connecttimeout; /* ms, 0 means no timeout */
+  unsigned int connecttimeout; /* ms, 0 means default timeout */
   unsigned int happy_eyeballs_timeout; /* ms, 0 is a valid value */
   unsigned int server_response_timeout; /* ms, 0 means no timeout */
+  unsigned int shutdowntimeout; /* ms, 0 means default timeout */
   long maxage_conn;     /* in seconds, max idle time to allow a connection that
                            is to be reused */
   long maxlifetime_conn; /* in seconds, max time since creation to allow a

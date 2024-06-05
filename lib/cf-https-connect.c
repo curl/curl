@@ -55,7 +55,8 @@ struct cf_hc_baller {
   CURLcode result;
   struct curltime started;
   int reply_ms;
-  bool enabled;
+  BIT(enabled);
+  BIT(shutdown);
 };
 
 static void cf_hc_baller_reset(struct cf_hc_baller *b,
@@ -322,6 +323,49 @@ out:
   return result;
 }
 
+static CURLcode cf_hc_shutdown(struct Curl_cfilter *cf,
+                               struct Curl_easy *data, bool *done)
+{
+  struct cf_hc_ctx *ctx = cf->ctx;
+  struct cf_hc_baller *ballers[2];
+  size_t i;
+  CURLcode result = CURLE_OK;
+
+  DEBUGASSERT(data);
+  if(cf->connected) {
+    *done = TRUE;
+    return CURLE_OK;
+  }
+
+  /* shutdown all ballers that have not done so already. If one fails,
+   * continue shutting down others until all are shutdown. */
+  ballers[0] = &ctx->h3_baller;
+  ballers[1] = &ctx->h21_baller;
+  for(i = 0; i < sizeof(ballers)/sizeof(ballers[0]); i++) {
+    struct cf_hc_baller *b = ballers[i];
+    bool bdone = FALSE;
+    if(!cf_hc_baller_is_active(b) || b->shutdown)
+      continue;
+    b->result = b->cf->cft->do_shutdown(b->cf, data, &bdone);
+    if(b->result || bdone)
+      b->shutdown = TRUE; /* treat a failed shutdown as done */
+  }
+
+  *done = TRUE;
+  for(i = 0; i < sizeof(ballers)/sizeof(ballers[0]); i++) {
+    if(ballers[i] && !ballers[i]->shutdown)
+      *done = FALSE;
+  }
+  if(*done) {
+    for(i = 0; i < sizeof(ballers)/sizeof(ballers[0]); i++) {
+      if(ballers[i] && ballers[i]->result)
+        result = ballers[i]->result;
+    }
+  }
+  CURL_TRC_CF(data, cf, "shutdown -> %d, done=%d", result, *done);
+  return result;
+}
+
 static void cf_hc_adjust_pollset(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   struct easy_pollset *ps)
@@ -434,6 +478,7 @@ struct Curl_cftype Curl_cft_http_connect = {
   cf_hc_destroy,
   cf_hc_connect,
   cf_hc_close,
+  cf_hc_shutdown,
   Curl_cf_def_get_host,
   cf_hc_adjust_pollset,
   cf_hc_data_pending,

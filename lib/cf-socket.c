@@ -1010,6 +1010,29 @@ static void cf_socket_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   cf->connected = FALSE;
 }
 
+static CURLcode cf_socket_shutdown(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   bool *done)
+{
+  if(cf->connected) {
+    struct cf_socket_ctx *ctx = cf->ctx;
+
+    CURL_TRC_CF(data, cf, "cf_socket_shutdown(%" CURL_FORMAT_SOCKET_T
+                ")", ctx->sock);
+    if(ctx->sock != CURL_SOCKET_BAD && ctx->transport == TRNSPRT_TCP) {
+      /* To avoid unwanted TCP RSTs, we do a final receive to discard
+       * any bytes before we close the socket. */
+      struct reader_ctx rctx = {cf, data};
+      unsigned char buf[1024];
+      CURLcode result;
+      (void)nw_in_read(&rctx, buf, sizeof(buf), &result);
+    }
+    cf_socket_close(cf, data);
+  }
+  *done = TRUE;
+  return CURLE_OK;
+}
+
 static void cf_socket_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
@@ -1729,6 +1752,7 @@ struct Curl_cftype Curl_cft_tcp = {
   cf_socket_destroy,
   cf_tcp_connect,
   cf_socket_close,
+  cf_socket_shutdown,
   cf_socket_get_host,
   cf_socket_adjust_pollset,
   cf_socket_data_pending,
@@ -1872,6 +1896,7 @@ struct Curl_cftype Curl_cft_udp = {
   cf_socket_destroy,
   cf_udp_connect,
   cf_socket_close,
+  cf_socket_shutdown,
   cf_socket_get_host,
   cf_socket_adjust_pollset,
   cf_socket_data_pending,
@@ -1923,6 +1948,7 @@ struct Curl_cftype Curl_cft_unix = {
   cf_socket_destroy,
   cf_tcp_connect,
   cf_socket_close,
+  cf_socket_shutdown,
   cf_socket_get_host,
   cf_socket_adjust_pollset,
   cf_socket_data_pending,
@@ -1987,6 +2013,7 @@ struct Curl_cftype Curl_cft_tcp_accept = {
   cf_socket_destroy,
   cf_tcp_accept_connect,
   cf_socket_close,
+  cf_socket_shutdown,
   cf_socket_get_host,              /* TODO: not accurate */
   cf_socket_adjust_pollset,
   cf_socket_data_pending,
