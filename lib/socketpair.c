@@ -75,7 +75,29 @@ int Curl_pipe(curl_socket_t socks[2], bool nonblocking)
 #endif
 
 
-#if !defined(HAVE_SOCKETPAIR) && !defined(CURL_DISABLE_SOCKETPAIR)
+#ifndef CURL_DISABLE_SOCKETPAIR
+#ifdef HAVE_SOCKETPAIR
+int Curl_socketpair(int domain, int type, int protocol,
+                    curl_socket_t socks[2], bool nonblocking)
+{
+#ifdef SOCK_NONBLOCK
+  type = nonblocking ? type | SOCK_NONBLOCK : type;
+#endif
+  if(socketpair(domain, type, protocol, socks))
+    return -1;
+#ifndef SOCK_NONBLOCK
+  if(nonblocking) {
+    if(curlx_nonblock(socks[0], TRUE) < 0 ||
+       curlx_nonblock(socks[1], TRUE) < 0) {
+      close(socks[0]);
+      close(socks[1]);
+      return -1;
+    }
+  }
+#endif
+  return 0;
+}
+#else /* !HAVE_SOCKETPAIR */
 #ifdef _WIN32
 /*
  * This is a socketpair() implementation for Windows.
@@ -238,25 +260,5 @@ error:
   sclose(socks[1]);
   return -1;
 }
-#else
-int Curl_socketpair(int domain, int type, int protocol,
-                    curl_socket_t socks[2], bool nonblocking)
-{
-#ifdef SOCK_NONBLOCK
-  type = nonblocking ? type | SOCK_NONBLOCK : type;
 #endif
-  if(socketpair(domain, type, protocol, socks))
-    return -1;
-#ifndef SOCK_NONBLOCK
-  if(nonblocking) {
-    if(curlx_nonblock(socks[0], TRUE) < 0 ||
-       curlx_nonblock(socks[1], TRUE) < 0) {
-      close(socks[0]);
-      close(socks[1]);
-      return -1;
-    }
-  }
-#endif
-  return 0;
-}
-#endif /* ! HAVE_SOCKETPAIR */
+#endif /* !CURL_DISABLE_SOCKETPAIR */
