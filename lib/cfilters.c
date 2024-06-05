@@ -345,8 +345,10 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
 
   cf = data->conn->cfilter[sockindex];
   DEBUGASSERT(cf);
-  if(!cf)
+  if(!cf) {
+    *done = FALSE;
     return CURLE_FAILED_INIT;
+  }
 
   *done = cf->connected;
   if(!*done) {
