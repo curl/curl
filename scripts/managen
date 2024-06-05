@@ -783,7 +783,9 @@ sub getshortlong {
     my $protocols;
     my $category;
     my $start = 0;
+    my $line = 0;
     while(<F>) {
+        $line++;
         if(!$start) {
             if(/^---/) {
                 $start = 1;
@@ -798,6 +800,11 @@ sub getshortlong {
         }
         elsif(/^Help: (.*)/i) {
             $help=$1;
+            my $len = length($help);
+            if($len >= 49) {
+                printf STDERR "$f:$line:1:WARN: oversized help text: %d characters\n",
+                    $len;
+            }
         }
         elsif(/^Arg: (.*)/i) {
             $arg=$1;
