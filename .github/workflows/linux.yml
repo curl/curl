@@ -191,6 +191,12 @@ jobs:
             singleuse: --unit
 
     steps:
+      - name: 'initialize energy estimation'
+        uses: green-coding-solutions/eco-ci-energy-estimation@v3
+        with:
+          task: start-measurement
+          continue-on-error: true
+
       - if: matrix.build.container == null
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
@@ -450,3 +456,9 @@ jobs:
         env:
           TFLAGS: "${{ matrix.build.tflags }}"
           CURL_CI: github
+
+      - name: 'show energy results'
+        uses: green-coding-solutions/eco-ci-energy-estimation@v3
+        with:
+          task: display-results
+          continue-on-error: true
