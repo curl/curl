@@ -67,7 +67,6 @@ struct gtls_ctx {
 #endif
   CURLcode io_result; /* result of last IO cfilter operation */
   BIT(sent_shutdown);
-  BIT(shutdown);
 };
 
 typedef CURLcode Curl_gtls_ctx_setup_cb(struct Curl_cfilter *cf,

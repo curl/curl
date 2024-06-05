@@ -1816,7 +1816,7 @@ static CURLcode gtls_shutdown(struct Curl_cfilter *cf,
   size_t i;
 
   DEBUGASSERT(backend);
-  if(!backend->gtls.session || backend->gtls.shutdown) {
+  if(!backend->gtls.session || connssl->shutdown) {
     *done = TRUE;
     goto out;
   }
@@ -1878,7 +1878,7 @@ static void gtls_close(struct Curl_cfilter *cf,
   DEBUGASSERT(backend);
   CURL_TRC_CF(data, cf, "close");
   if(backend->gtls.session) {
-    if(!backend->gtls.shutdown) {
+    if(!connssl->shutdown) {
       bool done;
       gtls_shutdown(cf, data, TRUE, &done);
     }
