@@ -31,9 +31,9 @@ outgoing network interface. The name can be an interface name, an IP address,
 or a hostname. If you prefer one of these, you can use the following special
 prefixes:
 
-* `if!<name>` - Interface name
-* `host!<name>` - IP address or hostname
-* `ifhost!<interface>!<host>` - Interface name and IP address or hostname
+* `if!\<name\>` - Interface name
+* `host!\<name\>` - IP address or hostname
+* `ifhost!\<interface\>!\<host\>` - Interface name and IP address or hostname
 
 If `if!` or `ifhost!` is specified but the parameter does not match an existing
 interface, *CURLE_INTERFACE_FAILED* is returned from the libcurl function used
