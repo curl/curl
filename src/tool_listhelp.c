@@ -169,7 +169,7 @@ const struct helptxt helptext[] = {
    "Write the received headers to <filename>",
    CURLHELP_HTTP | CURLHELP_FTP},
   {"    --ech <config>",
-   "Configure Encrypted Client Hello (ECH) for use with the TLS session",
+   "Configure ECH",
    CURLHELP_TLS | CURLHELP_ECH},
   {"    --egd-file <file>",
    "EGD socket path for random data",
