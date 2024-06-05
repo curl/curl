@@ -1855,6 +1855,7 @@ if(NOT CURL_DISABLE_INSTALL)
   configure_package_config_file(CMake/curl-config.cmake.in
     "${project_config}"
     INSTALL_DESTINATION ${CURL_INSTALL_CMAKE_DIR}
+    PATH_VARS CMAKE_INSTALL_INCLUDEDIR
   )
 
   if(CURL_ENABLE_EXPORT_TARGET)

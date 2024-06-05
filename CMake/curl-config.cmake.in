@@ -38,3 +38,7 @@ check_required_components("@PROJECT_NAME@")
 if(NOT TARGET @PROJECT_NAME@::libcurl)
   add_library(@PROJECT_NAME@::libcurl ALIAS @PROJECT_NAME@::@LIB_SELECTED@)
 endif()
+
+# For compatibility with CMake's FindCURL.cmake
+set(CURL_LIBRARIES @PROJECT_NAME@::libcurl)
+set_and_check(CURL_INCLUDE_DIRS "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@")
