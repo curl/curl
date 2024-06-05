@@ -1468,31 +1468,6 @@ static bool wolfssl_data_pending(struct Curl_cfilter *cf,
     return FALSE;
 }
 
-
-/*
- * This function is called to shut down the SSL layer but keep the
- * socket open (CCC - Clear Command Channel)
- */
-static int wolfssl_shutdown(struct Curl_cfilter *cf,
-                            struct Curl_easy *data)
-{
-  struct ssl_connect_data *ctx = cf->ctx;
-  struct wolfssl_ctx *backend;
-  int retval = 0;
-
-  (void)data;
-  DEBUGASSERT(ctx && ctx->backend);
-
-  backend = (struct wolfssl_ctx *)ctx->backend;
-  if(backend->handle) {
-    wolfSSL_ERR_clear_error();
-    wolfSSL_free(backend->handle);
-    backend->handle = NULL;
-  }
-  return retval;
-}
-
-
 static CURLcode
 wolfssl_connect_common(struct Curl_cfilter *cf,
                        struct Curl_easy *data,
@@ -1683,7 +1658,7 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
   wolfssl_cleanup,                 /* cleanup */
   wolfssl_version,                 /* version */
   Curl_none_check_cxn,             /* check_cxn */
-  wolfssl_shutdown,                /* shutdown */
+  Curl_none_shutdown,              /* shutdown */
   wolfssl_data_pending,            /* data_pending */
   wolfssl_random,                  /* random */
   Curl_none_cert_status_request,   /* cert_status_request */
