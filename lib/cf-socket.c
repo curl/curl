@@ -1022,9 +1022,11 @@ static CURLcode cf_socket_shutdown(struct Curl_cfilter *cf,
     if(ctx->sock != CURL_SOCKET_BAD && ctx->transport == TRNSPRT_TCP) {
       /* To avoid unwanted TCP RSTs, we do a final receive to discard
        * any bytes before we close the socket. */
-      struct reader_ctx rctx = {cf, data};
+      struct reader_ctx rctx;
       unsigned char buf[1024];
       CURLcode result;
+      rctx.cf = cf;
+      rctx.data = data;
       (void)nw_in_read(&rctx, buf, sizeof(buf), &result);
     }
     cf_socket_close(cf, data);
