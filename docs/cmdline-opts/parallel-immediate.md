@@ -16,7 +16,10 @@ Example:
 
 # `--parallel-immediate`
 
-When doing parallel transfers, this option instructs curl that it should
-rather prefer opening up more connections in parallel at once rather than
-waiting to see if new transfers can be added as multiplexed streams on another
-connection.
+When doing parallel transfers, this option instructs curl to prefer opening up
+more connections in parallel at once rather than waiting to see if new
+transfers can be added as multiplexed streams on another connection.
+
+By default, without this option set, curl prefers to wait a little and
+multiplex new transfers over existing connections. It keeps the number of
+connections low at the expense of risking a slightly slower transfer startup.

@@ -7,6 +7,7 @@ Help: Maximum concurrency for parallel transfers
 Added: 7.66.0
 Category: connection curl
 Multi: single
+Scope: global
 See-also:
   - parallel
 Example:
@@ -18,7 +19,5 @@ Example:
 When asked to do parallel transfers, using --parallel, this option controls
 the maximum amount of transfers to do simultaneously.
 
-This option is global and does not need to be specified for each use of
---next.
+The default is 50. 300 is the largest supported value.
 
-The default is 50.
