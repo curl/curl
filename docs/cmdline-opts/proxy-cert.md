@@ -23,4 +23,4 @@ PEM format if using any other engine. If the optional password is not
 specified, it is queried for on the terminal. Use --proxy-key to provide the
 private key.
 
-This optionis the equivalent to --cert but used in HTTPS proxy context.
+This option is the equivalent to --cert but used in HTTPS proxy context.

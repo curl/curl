@@ -17,5 +17,5 @@ Example:
 # `--proxy-key`
 
 Specify the filename for your private key when using client certificates with
-your HTTPS proxy. This opton is the equivalent to --key but used in HTTPS
+your HTTPS proxy. This option is the equivalent to --key but used in HTTPS
 proxy context.
