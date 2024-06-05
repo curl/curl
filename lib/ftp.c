@@ -2988,8 +2988,8 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
          * alert in response. Thus we wait for a close notify alert from the
          * server, but we do not send one. Let's hope other servers do
          * the same... */
-        bool send_shutdown = (data->set.ftp_ccc == CURLFTPSSL_CCC_ACTIVE);
-        result = Curl_ssl_cfilter_remove(data, FIRSTSOCKET, send_shutdown);
+        result = Curl_ssl_cfilter_remove(data, FIRSTSOCKET,
+          (data->set.ftp_ccc == CURLFTPSSL_CCC_ACTIVE));
 
         if(result)
           failf(data, "Failed to clear the command channel (CCC)");
