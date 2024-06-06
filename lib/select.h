@@ -111,4 +111,37 @@ int Curl_wait_ms(timediff_t timeout_ms);
   } while(0)
 #endif
 
+struct curl_pollfds {
+  struct pollfd *pfds;
+  unsigned int n;
+  unsigned int count;
+  BIT(allocated_pfds);
+};
+
+void Curl_pollfds_init(struct curl_pollfds *cpfds,
+                       struct pollfd *static_pfds,
+                       unsigned int static_count);
+
+void Curl_pollfds_cleanup(struct curl_pollfds *cpfds);
+
+CURLcode Curl_pollfds_add_ps(struct curl_pollfds *cpfds,
+                             struct easy_pollset *ps);
+
+CURLcode Curl_pollfds_add_sock(struct curl_pollfds *cpfds,
+                               curl_socket_t sock, short events);
+
+struct curl_waitfds {
+  struct curl_waitfd *wfds;
+  unsigned int n;
+  unsigned int count;
+};
+
+void Curl_waitfds_init(struct curl_waitfds *cwfds,
+                       struct curl_waitfd *static_wfds,
+                       unsigned int static_count);
+
+CURLcode Curl_waitfds_add_ps(struct curl_waitfds *cwfds,
+                             struct easy_pollset *ps);
+
+
 #endif /* HEADER_CURL_SELECT_H */

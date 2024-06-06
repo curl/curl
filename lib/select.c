@@ -47,6 +47,10 @@
 #include "select.h"
 #include "timediff.h"
 #include "warnless.h"
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
+#include "curl_memory.h"
+#include "memdebug.h"
 
 /*
  * Internal function used for waiting a specific amount of ms
@@ -400,4 +404,148 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
 #endif  /* HAVE_POLL_FINE */
 
   return r;
+}
+
+void Curl_pollfds_init(struct curl_pollfds *cpfds,
+                       struct pollfd *static_pfds,
+                       unsigned int static_count)
+{
+  DEBUGASSERT(cpfds);
+  memset(cpfds, 0, sizeof(*cpfds));
+  if(static_pfds && static_count) {
+    cpfds->pfds = static_pfds;
+    cpfds->count = static_count;
+  }
+}
+
+void Curl_pollfds_cleanup(struct curl_pollfds *cpfds)
+{
+  DEBUGASSERT(cpfds);
+  if(cpfds->allocated_pfds) {
+    free(cpfds->pfds);
+  }
+  memset(cpfds, 0, sizeof(*cpfds));
+}
+
+static CURLcode cpfds_increase(struct curl_pollfds *cpfds, unsigned int inc)
+{
+  struct pollfd *new_fds;
+  unsigned int new_count = cpfds->count + inc;
+
+  new_fds = calloc(new_count, sizeof(struct pollfd));
+  if(!new_fds)
+    return CURLE_OUT_OF_MEMORY;
+
+  memcpy(new_fds, cpfds->pfds, cpfds->count * sizeof(struct pollfd));
+  if(cpfds->allocated_pfds)
+    free(cpfds->pfds);
+  cpfds->pfds = new_fds;
+  cpfds->count = new_count;
+  cpfds->allocated_pfds = TRUE;
+  return CURLE_OK;
+}
+
+static CURLcode cpfds_add_sock(struct curl_pollfds *cpfds,
+                               curl_socket_t sock, short events, bool fold)
+{
+  int i;
+
+  if(fold && cpfds->n <= INT_MAX) {
+    for(i = (int)cpfds->n - 1; i >= 0; --i) {
+      if(sock == cpfds->pfds[i].fd) {
+        cpfds->pfds[i].events |= events;
+        return CURLE_OK;
+      }
+    }
+  }
+  /* not folded, add new entry */
+  if(cpfds->n >= cpfds->count) {
+    if(cpfds_increase(cpfds, 100))
+      return CURLE_OUT_OF_MEMORY;
+  }
+  cpfds->pfds[cpfds->n].fd = sock;
+  cpfds->pfds[cpfds->n].events = events;
+  ++cpfds->n;
+  return CURLE_OK;
+}
+
+CURLcode Curl_pollfds_add_sock(struct curl_pollfds *cpfds,
+                               curl_socket_t sock, short events)
+{
+  return cpfds_add_sock(cpfds, sock, events, FALSE);
+}
+
+CURLcode Curl_pollfds_add_ps(struct curl_pollfds *cpfds,
+                             struct easy_pollset *ps)
+{
+  size_t i;
+
+  DEBUGASSERT(cpfds);
+  DEBUGASSERT(ps);
+  for(i = 0; i < ps->num; i++) {
+    short events = 0;
+    if(ps->actions[i] & CURL_POLL_IN)
+      events |= POLLIN;
+    if(ps->actions[i] & CURL_POLL_OUT)
+      events |= POLLOUT;
+    if(events) {
+      if(cpfds_add_sock(cpfds, ps->sockets[i], events, TRUE))
+        return CURLE_OUT_OF_MEMORY;
+    }
+  }
+  return CURLE_OK;
+}
+
+void Curl_waitfds_init(struct curl_waitfds *cwfds,
+                       struct curl_waitfd *static_wfds,
+                       unsigned int static_count)
+{
+  DEBUGASSERT(cwfds);
+  DEBUGASSERT(static_wfds);
+  memset(cwfds, 0, sizeof(*cwfds));
+  cwfds->wfds = static_wfds;
+  cwfds->count = static_count;
+}
+
+static CURLcode cwfds_add_sock(struct curl_waitfds *cwfds,
+                               curl_socket_t sock, short events)
+{
+  int i;
+
+  if(cwfds->n <= INT_MAX) {
+    for(i = (int)cwfds->n - 1; i >= 0; --i) {
+      if(sock == cwfds->wfds[i].fd) {
+        cwfds->wfds[i].events |= events;
+        return CURLE_OK;
+      }
+    }
+  }
+  /* not folded, add new entry */
+  if(cwfds->n >= cwfds->count)
+    return CURLE_OUT_OF_MEMORY;
+  cwfds->wfds[cwfds->n].fd = sock;
+  cwfds->wfds[cwfds->n].events = events;
+  ++cwfds->n;
+  return CURLE_OK;
+}
+
+CURLcode Curl_waitfds_add_ps(struct curl_waitfds *cwfds,
+                             struct easy_pollset *ps)
+{
+  size_t i;
+
+  DEBUGASSERT(cwfds);
+  DEBUGASSERT(ps);
+  for(i = 0; i < ps->num; i++) {
+    short events = 0;
+    if(ps->actions[i] & CURL_POLL_IN)
+      events |= CURL_WAIT_POLLIN;
+    if(ps->actions[i] & CURL_POLL_OUT)
+      events |= CURL_WAIT_POLLOUT;
+    if(events) {
+      if(cwfds_add_sock(cwfds, ps->sockets[i], events))
+        return CURLE_OUT_OF_MEMORY;
+    }
+  }
+  return CURLE_OK;
 }
