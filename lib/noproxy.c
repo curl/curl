@@ -89,11 +89,11 @@ UNITTEST bool Curl_cidr6_match(const char *ipv6,
 
   bytes = bits / 8;
   rest = bits & 0x07;
+  if((bytes > 16) || ((bytes == 16) && rest))
+    return FALSE;
   if(1 != Curl_inet_pton(AF_INET6, ipv6, address))
     return FALSE;
   if(1 != Curl_inet_pton(AF_INET6, network, check))
-    return FALSE;
-  if((bytes > 16) || ((bytes == 16) && rest))
     return FALSE;
   if(bytes && memcmp(address, check, bytes))
     return FALSE;
@@ -231,6 +231,8 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
           slash = strchr(check, '/');
           /* if the slash is part of this token, use it */
           if(slash) {
+            /* if the bits variable gets a crazy value here, that is fine as
+               the value will then be rejected in the cidr function */
             bits = (unsigned int)atoi(slash + 1);
             *slash = 0; /* null terminate there */
           }
