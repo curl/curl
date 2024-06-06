@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: ech
 Arg: <config>
-Help: Configure Encrypted Client Hello (ECH) for use with the TLS session
+Help: Configure ECH
 Added: 8.8.0
 Category: tls ECH
 Protocols: HTTPS

@@ -270,7 +270,7 @@ static CURLcode altsvc_out(struct altsvc *as, FILE *fp)
           "%s %s%s%s %u "
           "\"%d%02d%02d "
           "%02d:%02d:%02d\" "
-          "%u %d\n",
+          "%u %u\n",
           Curl_alpnid2str(as->src.alpnid),
           src6_pre, as->src.host, src6_post,
           as->src.port,
@@ -462,7 +462,7 @@ static time_t altsvc_debugtime(void *unused)
   char *timestr = getenv("CURL_TIME");
   (void)unused;
   if(timestr) {
-    unsigned long val = strtol(timestr, NULL, 10);
+    long val = strtol(timestr, NULL, 10);
     return (time_t)val;
   }
   return time(NULL);
@@ -624,7 +624,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
           num = strtoul(value_ptr, &end_ptr, 10);
           if((end_ptr != value_ptr) && (num < ULONG_MAX)) {
             if(strcasecompare("ma", option))
-              maxage = num;
+              maxage = (time_t)num;
             else if(strcasecompare("persist", option) && (num == 1))
               persist = TRUE;
           }
@@ -696,7 +696,7 @@ bool Curl_altsvc_lookup(struct altsvcinfo *asi,
     if((as->src.alpnid == srcalpnid) &&
        hostcompare(srchost, as->src.host) &&
        (as->src.port == srcport) &&
-       (versions & as->dst.alpnid)) {
+       (versions & (int)as->dst.alpnid)) {
       /* match */
       *dstentry = as;
       return TRUE;

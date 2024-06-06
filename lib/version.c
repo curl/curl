@@ -258,10 +258,11 @@ char *curl_version(void)
     api.ldapai_info_version = LDAP_API_INFO_VERSION;
 
     if(ldap_get_option(NULL, LDAP_OPT_API_INFO, &api) == LDAP_OPT_SUCCESS) {
-      unsigned int patch = api.ldapai_vendor_version % 100;
-      unsigned int major = api.ldapai_vendor_version / 10000;
+      unsigned int patch = (unsigned int)(api.ldapai_vendor_version % 100);
+      unsigned int major = (unsigned int)(api.ldapai_vendor_version / 10000);
       unsigned int minor =
-        ((api.ldapai_vendor_version - major * 10000) - patch) / 100;
+        (((unsigned int)api.ldapai_vendor_version - major * 10000)
+          - patch) / 100;
       msnprintf(ldap_buf, sizeof(ldap_buf), "%s/%u.%u.%u",
                 api.ldapai_vendor_name, major, minor, patch);
       src[i++] = ldap_buf;
@@ -640,7 +641,7 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
 #ifdef USE_NGHTTP2
   {
     nghttp2_info *h2 = nghttp2_version(0);
-    version_info.nghttp2_ver_num = h2->version_num;
+    version_info.nghttp2_ver_num = (unsigned int)h2->version_num;
     version_info.nghttp2_version = h2->version_str;
   }
 #endif

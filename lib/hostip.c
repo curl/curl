@@ -428,8 +428,8 @@ UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
         if(Curl_rand(data, (unsigned char *)rnd, rnd_size) == CURLE_OK) {
           struct Curl_addrinfo *swap_tmp;
           for(i = num_addrs - 1; i > 0; i--) {
-            swap_tmp = nodes[rnd[i] % (i + 1)];
-            nodes[rnd[i] % (i + 1)] = nodes[i];
+            swap_tmp = nodes[rnd[i] % (unsigned int)(i + 1)];
+            nodes[rnd[i] % (unsigned int)(i + 1)] = nodes[i];
             nodes[i] = swap_tmp;
           }
 

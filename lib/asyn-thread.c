@@ -697,7 +697,7 @@ static bool init_resolve_thread(struct Curl_easy *data,
                                   NULL, &td->tsd.w8.overlapped,
                                   &query_complete, &td->tsd.w8.cancel_ev);
         if(err != WSA_IO_PENDING)
-          query_complete(err, 0, &td->tsd.w8.overlapped);
+          query_complete((DWORD)err, 0, &td->tsd.w8.overlapped);
         return TRUE;
       }
     }

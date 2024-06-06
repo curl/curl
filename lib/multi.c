@@ -343,7 +343,7 @@ static size_t hash_fd(void *key, size_t key_length, size_t slots_num)
   curl_socket_t fd = *((curl_socket_t *) key);
   (void) key_length;
 
-  return (fd % slots_num);
+  return (fd % (curl_socket_t)slots_num);
 }
 
 /*
@@ -1492,7 +1492,8 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
 #ifdef USE_WINSOCK
     }
     else { /* now wait... if not ready during the pre-check (pollrc == 0) */
-      WSAWaitForMultipleEvents(1, &multi->wsa_event, FALSE, timeout_ms, FALSE);
+      WSAWaitForMultipleEvents(1, &multi->wsa_event, FALSE, (DWORD)timeout_ms,
+                               FALSE);
     }
     /* With WinSock, we have to run the following section unconditionally
        to call WSAEventSelect(fd, event, 0) on all the sockets */
@@ -1502,7 +1503,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
          struct, the bit values of the actual underlying poll() implementation
          may not be the same as the ones in the public libcurl API! */
       for(i = 0; i < extra_nfds; i++) {
-        unsigned r = ufds[curl_nfds + i].revents;
+        unsigned r = (unsigned)ufds[curl_nfds + i].revents;
         unsigned short mask = 0;
 #ifdef USE_WINSOCK
         curl_socket_t s = extra_fds[i].fd;
@@ -1519,7 +1520,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
         }
         WSAEventSelect(s, multi->wsa_event, 0);
         if(!pollrc) {
-          extra_fds[i].revents = mask;
+          extra_fds[i].revents = (short)mask;
           continue;
         }
 #endif
@@ -1529,7 +1530,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
           mask |= CURL_WAIT_POLLOUT;
         if(r & POLLPRI)
           mask |= CURL_WAIT_POLLPRI;
-        extra_fds[i].revents = mask;
+        extra_fds[i].revents = (short)mask;
       }
 
 #ifdef USE_WINSOCK
@@ -2814,7 +2815,7 @@ CURLMcode curl_multi_perform(struct Curl_multi *multi, int *running_handles)
     }
   } while(t);
 
-  *running_handles = multi->num_alive;
+  *running_handles = (int)multi->num_alive;
 
   if(CURLM_OK >= returncode)
     returncode = Curl_update_timer(multi);
@@ -3034,7 +3035,8 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
       }
     }
 
-    entry->action = comboaction; /* store the current action state */
+    /* store the current action state */
+    entry->action = (unsigned int)comboaction;
   }
 
   /* Check for last_poll.sockets that no longer appear in cur_poll.sockets.
@@ -3319,7 +3321,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
   if(first)
     sigpipe_restore(&pipe_st);
 
-  *running_handles = multi->num_alive;
+  *running_handles = (int)multi->num_alive;
   return result;
 }
 
@@ -3624,7 +3626,7 @@ void Curl_expire(struct Curl_easy *data, timediff_t milli, expire_id id)
 
   set = Curl_now();
   set.tv_sec += (time_t)(milli/1000); /* might be a 64 to 32 bit conversion */
-  set.tv_usec += (unsigned int)(milli%1000)*1000;
+  set.tv_usec += (int)(milli%1000)*1000;
 
   if(set.tv_usec >= 1000000) {
     set.tv_sec++;
@@ -3738,12 +3740,12 @@ CURLMcode curl_multi_assign(struct Curl_multi *multi, curl_socket_t s,
 
 size_t Curl_multi_max_host_connections(struct Curl_multi *multi)
 {
-  return multi ? multi->max_host_connections : 0;
+  return multi ? (size_t)multi->max_host_connections : 0;
 }
 
 size_t Curl_multi_max_total_connections(struct Curl_multi *multi)
 {
-  return multi ? multi->max_total_connections : 0;
+  return multi ? (size_t)multi->max_total_connections : 0;
 }
 
 /*

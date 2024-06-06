@@ -1137,7 +1137,7 @@ static void cleanup_part_content(curl_mimepart *part)
   part->datasize = (curl_off_t) 0;    /* No size yet. */
   cleanup_encoder_state(&part->encstate);
   part->kind = MIMEKIND_NONE;
-  part->flags &= ~MIME_FAST_READ;
+  part->flags &= ~(unsigned int)MIME_FAST_READ;
   part->lastreadstatus = 1; /* Successful read status. */
   part->state.state = MIMESTATE_BEGIN;
 }
@@ -1497,7 +1497,7 @@ CURLcode curl_mime_headers(curl_mimepart *part,
   if(part->flags & MIME_USERHEADERS_OWNER) {
     if(part->userheaders != headers)  /* Allow setting twice the same list. */
       curl_slist_free_all(part->userheaders);
-    part->flags &= ~MIME_USERHEADERS_OWNER;
+    part->flags &= ~(unsigned int)MIME_USERHEADERS_OWNER;
   }
   part->userheaders = headers;
   if(headers && take_ownership)
@@ -1662,7 +1662,8 @@ static curl_off_t mime_size(curl_mimepart *part)
   if(size >= 0 && !(part->flags & MIME_BODY_ONLY)) {
     /* Compute total part size. */
     size += slist_size(part->curlheaders, 2, NULL, 0);
-    size += slist_size(part->userheaders, 2, STRCONST("Content-Type"));
+    size += slist_size(part->userheaders, 2,
+                       STRCONST("Content-Type"));
     size += 2;    /* CRLF after headers. */
   }
   return size;

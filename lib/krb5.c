@@ -169,7 +169,7 @@ krb5_encode(void *app_data, const void *from, int length, int level, void **to)
    * libraries modify the input buffer in gss_wrap()
    */
   dec.value = (void *)from;
-  dec.length = length;
+  dec.length = (size_t)length;
   maj = gss_wrap(&min, *context,
                  level == PROT_PRIVATE,
                  GSS_C_QOP_DEFAULT,
@@ -524,7 +524,7 @@ static CURLcode read_data(struct Curl_easy *data, int sockindex,
     return result;
 
   if(len) {
-    len = ntohl(len);
+    len = (int)ntohl((uint32_t)len);
     if(len > CURL_MAX_INPUT_LENGTH)
       return CURLE_TOO_LARGE;
 
@@ -536,7 +536,7 @@ static CURLcode read_data(struct Curl_easy *data, int sockindex,
   do {
     char buffer[1024];
     nread = CURLMIN(len, (int)sizeof(buffer));
-    result = socket_read(data, sockindex, buffer, nread);
+    result = socket_read(data, sockindex, buffer, (size_t)nread);
     if(result)
       return result;
     result = Curl_dyn_addn(&buf->buf, buffer, nread);
@@ -630,7 +630,7 @@ static void do_sec_send(struct Curl_easy *data, struct connectdata *conn,
     else
       prot_level = conn->command_prot;
   }
-  bytes = conn->mech->encode(conn->app_data, from, length, prot_level,
+  bytes = conn->mech->encode(conn->app_data, from, length, (int)prot_level,
                              (void **)&buffer);
   if(!buffer || bytes <= 0)
     return; /* error */
@@ -658,7 +658,7 @@ static void do_sec_send(struct Curl_easy *data, struct connectdata *conn,
     }
   }
   else {
-    htonl_bytes = htonl(bytes);
+    htonl_bytes = (int)htonl((OM_uint32)bytes);
     socket_write(data, fd, &htonl_bytes, sizeof(htonl_bytes));
     socket_write(data, fd, buffer, curlx_sitouz(bytes));
   }
@@ -724,7 +724,7 @@ int Curl_sec_read_msg(struct Curl_easy *data, struct connectdata *conn,
   decoded_len = curlx_uztosi(decoded_sz);
 
   decoded_len = conn->mech->decode(conn->app_data, buf, decoded_len,
-                                   level, conn);
+                                   (int)level, conn);
   if(decoded_len <= 0) {
     free(buf);
     return -1;
@@ -789,7 +789,7 @@ static int sec_set_protection_level(struct Curl_easy *data)
     if(pbsz) {
       /* stick to default value if the check fails */
       if(ISDIGIT(pbsz[5]))
-        buffer_size = atoi(&pbsz[5]);
+        buffer_size = (unsigned int)atoi(&pbsz[5]);
       if(buffer_size < conn->buffer_size)
         conn->buffer_size = buffer_size;
     }

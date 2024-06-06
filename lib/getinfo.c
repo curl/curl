@@ -204,7 +204,7 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
 #ifdef DEBUGBUILD
   char *timestr = getenv("CURL_TIME");
   if(timestr) {
-    unsigned long val = strtol(timestr, NULL, 10);
+    unsigned long val = strtoul(timestr, NULL, 10);
     switch(info) {
     case CURLINFO_LOCAL_PORT:
       *param_longp = (long)val;
@@ -216,7 +216,7 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
   /* use another variable for this to allow different values */
   timestr = getenv("CURL_DEBUG_SIZE");
   if(timestr) {
-    unsigned long val = strtol(timestr, NULL, 10);
+    unsigned long val = strtoul(timestr, NULL, 10);
     switch(info) {
     case CURLINFO_HEADER_SIZE:
     case CURLINFO_REQUEST_SIZE:
@@ -335,7 +335,7 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
     }
     break;
   case CURLINFO_PROTOCOL:
-    *param_longp = data->info.conn_protocol;
+    *param_longp = (long)data->info.conn_protocol;
     break;
   case CURLINFO_USED_PROXY:
     *param_longp =
@@ -361,7 +361,7 @@ static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
 #ifdef DEBUGBUILD
   char *timestr = getenv("CURL_TIME");
   if(timestr) {
-    unsigned long val = strtol(timestr, NULL, 10);
+    unsigned long val = strtoul(timestr, NULL, 10);
     switch(info) {
     case CURLINFO_TOTAL_TIME_T:
     case CURLINFO_NAMELOOKUP_TIME_T:
@@ -450,7 +450,7 @@ static CURLcode getinfo_double(struct Curl_easy *data, CURLINFO info,
 #ifdef DEBUGBUILD
   char *timestr = getenv("CURL_TIME");
   if(timestr) {
-    unsigned long val = strtol(timestr, NULL, 10);
+    unsigned long val = strtoul(timestr, NULL, 10);
     switch(info) {
     case CURLINFO_TOTAL_TIME:
     case CURLINFO_NAMELOOKUP_TIME:

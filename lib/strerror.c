@@ -795,7 +795,7 @@ get_winapi_error(int err, char *buf, size_t buflen)
      expect the local codepage (eg fprintf, failf, infof).
      FormatMessageW -> wcstombs is used for Windows CE compatibility. */
   if(FormatMessageW((FORMAT_MESSAGE_FROM_SYSTEM |
-                     FORMAT_MESSAGE_IGNORE_INSERTS), NULL, err,
+                     FORMAT_MESSAGE_IGNORE_INSERTS), NULL, (DWORD)err,
                     LANG_NEUTRAL, wbuf, sizeof(wbuf)/sizeof(wchar_t), NULL)) {
     size_t written = wcstombs(buf, wbuf, buflen - 1);
     if(written != (size_t)-1)
@@ -865,7 +865,7 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
 #ifdef USE_WINSOCK
        !get_winsock_error(err, buf, buflen) &&
 #endif
-       !get_winapi_error((DWORD)err, buf, buflen))
+       !get_winapi_error(err, buf, buflen))
       msnprintf(buf, buflen, "Unknown error %d (%#x)", err, err);
   }
 #else /* not Windows coming up */
@@ -944,7 +944,7 @@ const char *Curl_winapi_strerror(DWORD err, char *buf, size_t buflen)
   *buf = '\0';
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-  if(!get_winapi_error(err, buf, buflen)) {
+  if(!get_winapi_error((int)err, buf, buflen)) {
     msnprintf(buf, buflen, "Unknown error %lu (0x%08lX)", err, err);
   }
 #else

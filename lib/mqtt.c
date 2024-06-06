@@ -154,15 +154,15 @@ static int mqtt_getsock(struct Curl_easy *data,
 
 static int mqtt_encode_len(char *buf, size_t len)
 {
-  unsigned char encoded;
   int i;
 
   for(i = 0; (len > 0) && (i<4); i++) {
+    unsigned char encoded;
     encoded = len % 0x80;
     len /= 0x80;
     if(len)
       encoded |= 0x80;
-    buf[i] = encoded;
+    buf[i] = (char)encoded;
   }
 
   return i;

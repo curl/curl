@@ -125,7 +125,7 @@ int Curl_blockread_all(struct Curl_cfilter *cf,
     }
     nread = Curl_conn_cf_recv(cf->next, data, buf, buffersize, &err);
     if(nread <= 0) {
-      result = err;
+      result = (int)err;
       if(CURLE_AGAIN == err)
         continue;
       if(err) {
