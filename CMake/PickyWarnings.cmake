@@ -69,6 +69,7 @@ if(PICKY_COMPILER)
       -Wmissing-prototypes                 # clang  1.0  gcc  1.0
       -Wnested-externs                     # clang  1.0  gcc  2.7
       -Wno-long-long                       # clang  1.0  gcc  2.95
+      -Wno-sign-conversion                 # clang  2.9  gcc  4.3
       -Wno-multichar                       # clang  1.0  gcc  2.95
       -Wpointer-arith                      # clang  1.0  gcc  1.4
       -Wshadow                             # clang  1.0  gcc  2.95
