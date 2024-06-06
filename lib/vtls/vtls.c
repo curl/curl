@@ -2058,6 +2058,7 @@ static CURLcode vtls_shutdown_blocking(struct Curl_cfilter *cf,
   }
   CF_DATA_SAVE(save, cf, data);
 
+  *done = FALSE;
   while(!result && !*done && loop--) {
     timeout_ms = Curl_shutdown_timeleft(cf->conn, cf->sockindex, NULL);
 
