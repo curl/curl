@@ -1414,16 +1414,16 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   /* Set the WSA events based on the collected pollds */
   for(i = 0; i < nfds; i++) {
     long mask = 0;
-    if(ufds[nfds].events & POLLIN)
+    if(ufds[i].events & POLLIN)
       mask |= FD_READ|FD_ACCEPT|FD_CLOSE;
-    if(ufds[nfds].events & POLLPRI)
+    if(ufds[i].events & POLLPRI)
       mask |= FD_OOB;
-    if(ufds[nfds].events & POLLOUT) {
+    if(ufds[i].events & POLLOUT) {
       mask |= FD_WRITE|FD_CONNECT|FD_CLOSE;
-      reset_socket_fdwrite(ufds[nfds].fd);
+      reset_socket_fdwrite(ufds[i].fd);
     }
     if(mask) {
-      if(WSAEventSelect(ufds[nfds].fd, multi->wsa_event, mask) != 0) {
+      if(WSAEventSelect(ufds[i].fd, multi->wsa_event, mask) != 0) {
         if(ufds_malloc)
           free(ufds);
         return CURLM_INTERNAL_ERROR;
