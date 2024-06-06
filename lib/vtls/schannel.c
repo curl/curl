@@ -2490,6 +2490,9 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
   DEBUGASSERT(data);
   DEBUGASSERT(backend);
 
+  /* Not supported in schannel */
+  (void)send_shutdown;
+
   *done = FALSE;
   if(backend->ctxt) {
     infof(data, "schannel: shutting down SSL/TLS connection with %s port %d",
@@ -2502,7 +2505,6 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
     SECURITY_STATUS sspi_status;
     SecBuffer outbuf;
     SecBufferDesc outbuf_desc;
-    CURLcode result;
     DWORD dwshut = SCHANNEL_SHUTDOWN;
 
     InitSecBuffer(&Buffer, SECBUFFER_TOKEN, &dwshut, sizeof(dwshut));
@@ -2601,8 +2603,6 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     backend->decdata_length = 0;
     backend->decdata_offset = 0;
   }
-
-    schannel_shutdown(cf, data);
 }
 
 static int schannel_init(void)
