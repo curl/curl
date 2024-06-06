@@ -1368,22 +1368,10 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
 
     for(i = 0; i < ps.num; i++) {
       short events = 0;
-#ifdef USE_WINSOCK
-      long mask = 0;
-#endif
-      if(ps.actions[i] & CURL_POLL_IN) {
-#ifdef USE_WINSOCK
-        mask |= FD_READ|FD_ACCEPT|FD_CLOSE;
-#endif
+      if(ps.actions[i] & CURL_POLL_IN)
         events |= POLLIN;
-      }
-      if(ps.actions[i] & CURL_POLL_OUT) {
-#ifdef USE_WINSOCK
-        mask |= FD_WRITE|FD_CONNECT|FD_CLOSE;
-        reset_socket_fdwrite(ps.sockets[i]);
-#endif
+      if(ps.actions[i] & CURL_POLL_OUT)
         events |= POLLOUT;
-      }
       if(events) {
         if(nfds && ps.sockets[i] == ufds[nfds-1].fd) {
           ufds[nfds-1].events |= events;
@@ -1399,15 +1387,6 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
           ++nfds;
         }
       }
-#ifdef USE_WINSOCK
-      if(mask) {
-        if(WSAEventSelect(ps.sockets[i], multi->wsa_event, mask) != 0) {
-          if(ufds_malloc)
-            free(ufds);
-          return CURLM_INTERNAL_ERROR;
-        }
-      }
-#endif
     }
   }
 
@@ -1415,22 +1394,6 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
 
   /* Add external file descriptions from poll-like struct curl_waitfd */
   for(i = 0; i < extra_nfds; i++) {
-#ifdef USE_WINSOCK
-    long mask = 0;
-    if(extra_fds[i].events & CURL_WAIT_POLLIN)
-      mask |= FD_READ|FD_ACCEPT|FD_CLOSE;
-    if(extra_fds[i].events & CURL_WAIT_POLLPRI)
-      mask |= FD_OOB;
-    if(extra_fds[i].events & CURL_WAIT_POLLOUT) {
-      mask |= FD_WRITE|FD_CONNECT|FD_CLOSE;
-      reset_socket_fdwrite(extra_fds[i].fd);
-    }
-    if(WSAEventSelect(extra_fds[i].fd, multi->wsa_event, mask) != 0) {
-      if(ufds_malloc)
-        free(ufds);
-      return CURLM_INTERNAL_ERROR;
-    }
-#endif
     if(nfds >= ufds_len) {
       if(ufds_increase(&ufds, &ufds_len, 100, &ufds_malloc))
         return CURLM_OUT_OF_MEMORY;
@@ -1446,6 +1409,28 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
       ufds[nfds].events |= POLLOUT;
     ++nfds;
   }
+
+#ifdef USE_WINSOCK
+  /* Set the WSA events based on the collected pollds */
+  for(i = 0; i < nfds; i++) {
+    long mask = 0;
+    if(ufds[nfds].events & POLLIN)
+      mask |= FD_READ|FD_ACCEPT|FD_CLOSE;
+    if(ufds[nfds].events & POLLPRI)
+      mask |= FD_OOB;
+    if(ufds[nfds].events & POLLOUT) {
+      mask |= FD_WRITE|FD_CONNECT|FD_CLOSE;
+      reset_socket_fdwrite(ufds[nfds].fd);
+    }
+    if(mask) {
+      if(WSAEventSelect(ufds[nfds].fd, multi->wsa_event, mask) != 0) {
+        if(ufds_malloc)
+          free(ufds);
+        return CURLM_INTERNAL_ERROR;
+      }
+    }
+  }
+#endif
 
 #ifdef ENABLE_WAKEUP
 #ifndef USE_WINSOCK
