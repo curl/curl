@@ -130,6 +130,10 @@ redirect). Note that the status line IS NOT a header. (Added in 7.73.0)
 ## `num_redirects`
 Number of redirects that were followed in the request. (Added in 7.12.3)
 
+## `num_retries`
+Number of retries actually performed when `--retry` has been used.
+(Added in 8.9.0)
+
 ## `onerror`
 The rest of the output is only shown if the transfer returned a non-zero error.
 (Added in 7.75.0)
