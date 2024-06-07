@@ -26,6 +26,13 @@
 
 #include <curl/curl.h> /* for curl_socket_t */
 
+#if defined(SOCK_NONBLOCK) && !defined(_WIN32)
+/* While SOCK_NONBLOCK may be defined on Windows, it does not
+ * seem to work reliably on all such platforms. Better pay
+ * the price of setting it explicitly via curlx_nonblock(). */
+#define USE_SOCK_NONBLOCK
+#endif
+
 int curlx_nonblock(curl_socket_t sockfd,    /* operate on this */
                    int nonblock   /* TRUE or FALSE */);
 
