@@ -1,13 +1,15 @@
 curl and libcurl 8.8.1
 
  Public curl releases:         258
- Command line options:         259
+ Command line options:         261
  curl_easy_setopt() options:   305
  Public functions in libcurl:  94
- Contributors:                 3184
+ Contributors:                 3187
 
 This release includes the following changes:
 
+ o curl: add --mptcp [29]
+ o curl: support IP Type of Service / Traffic Class: --ip-tos [42]
  o gnutls: support CA caching [90]
  o noproxy: patterns need to be comma separated [75]
  o socket: support binding to interface *AND* IP [80]
@@ -34,7 +36,12 @@ This release includes the following bugfixes:
  o cmake: fix test 1013 with websockets enabled and no TLS [47]
  o cmake: use `APPLE` instead of `CMAKE_SYSTEM_NAME` string [24]
  o cmake: whitespace, formatting/tidy-up in comments [25]
+ o cmdline-opts/_PROTOCOLS.md: mention WS(S) [94]
+ o cmdline-opts/ech.md: shorten the help text [93]
+ o cmdline-opts/fail.md: expand and clarify [95]
  o cmdline-opts/interface.md: expand the documentation [66]
+ o cmdline-opts: expand the parallel explanations [98]
+ o cmdline: expand proxy option explanations [97]
  o configure: use `$EGREP` in place of `grep -E` [41]
  o curl-config: revert to backticks to support old target envs [88]
  o curl: make warnings and other messages aware of terminal width [58]
@@ -43,6 +50,7 @@ This release includes the following bugfixes:
  o DISTROS: add a link to the list archive [22]
  o docs/cmdline-opts: fix mail-auth example TLD typo [35]
  o docs/Makefile.am: make curl-config.1 install [14]
+ o doh-insecure.md: expand [96]
  o examples/threaded-ssl: remove locking callback code [83]
  o examples: delete unused includes [10]
  o examples: fix compiling with MSVC [34]
@@ -57,12 +65,15 @@ This release includes the following bugfixes:
  o lib: fix gcc warning in certain debug builds [19]
  o lib: fix thread entry point to return `DWORD` on WinCE [85]
  o lib: prefer `var = time(NULL)` over `time(&var)` [52]
+ o lib: tidy up types and casts [92]
  o libssh: remove CURLOPT_SSL_VERIFYHOST check [36]
+ o managen: warn on excessively long help texts [87]
  o mbedtls: check version for cipher id [12]
  o mbedtls: send close-notify on close [11]
  o mbedtls: v3.6.0 workarounds [89]
  o multi: add multi->proto_hash, a key-value store for protocol data [37]
  o multi: fix multi_wait() timeout handling [51]
+ o noproxy: test bad ipv6 net size first [82]
  o openssl/gnutls: rectify the TLS version checks for QUIC [61]
  o openssl: fix %-specifier in infof() call [57]
  o openSSL: fix hostname handling when using ECH [78]
@@ -115,14 +126,16 @@ advice from friends like these:
 
   Alejandro R. Sedeño, Alexander Shtuchkin, Andy Pan, Ayesh Karunaratne,
   Bo Anderson, Christian Heusel, Christian Schmitz, Dan Fandrich,
-  Daniel Gustafsson, Daniel Stenberg, dependabot[bot], edmcln on github,
-  Eli Schwartz, Elliott Balsley, fds242 on github, Harry Sintonen,
-  James Abbatiello, Jan Venekamp, Jonathan Matthews, Joseph Chen, Kai Pastor,
-  kartatz, Keerthi Timmaraju, Lee Li, Luke Hamburg, Matthias Gatto, Matt Jolly,
-  Orgad Shaneh, Pavel Pavlov, pszlazak on github, Ray Satiro, renovate[bot],
-  Sebastian Andersson, Sergey Bronnikov, Stefan Eissing, Stephen Farrell,
-  Tatsuhiro Tsujikawa, Viktor Szakats, vvb2060
-  (39 contributors)
+  Daniel Gustafsson, Daniel Stenberg, dependabot[bot], Dorian Craps,
+  edmcln on github, Eli Schwartz, Elliott Balsley, fds242 on github,
+  Harry Sintonen, James Abbatiello, Jan Venekamp, Jonathan Matthews,
+  Joseph Chen, Kai Pastor, kartatz, Keerthi Timmaraju, Lee Li, Luke Hamburg,
+  Marcel Raad, Matthias Gatto, Matthieu Baerts, Matt Jolly,
+  Olivier Bonaventure, Orgad Shaneh, Pavel Pavlov, pszlazak on github,
+  Ray Satiro, renovate[bot], Sebastian Andersson, Sergey Bronnikov,
+  Stefan Eissing, Stephen Farrell, Tatsuhiro Tsujikawa, Viktor Szakats,
+  vvb2060
+  (43 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -154,6 +167,7 @@ References to bug reports and discussions on issues:
  [26] = https://curl.se/bug/?i=13792
  [27] = https://curl.se/bug/?i=13827
  [28] = https://curl.se/bug/?i=13832
+ [29] = https://curl.se/bug/?i=13278
  [30] = https://curl.se/bug/?i=13836
  [31] = https://curl.se/bug/?i=13788
  [32] = https://curl.se/bug/?i=13706
@@ -166,6 +180,7 @@ References to bug reports and discussions on issues:
  [39] = https://curl.se/bug/?i=13704
  [40] = https://curl.se/bug/?i=13756
  [41] = https://curl.se/bug/?i=13780
+ [42] = https://curl.se/bug/?i=13606
  [43] = https://curl.se/bug/?i=13779
  [44] = https://curl.se/bug/?i=13752
  [45] = https://curl.se/bug/?i=13772
@@ -204,11 +219,20 @@ References to bug reports and discussions on issues:
  [79] = https://curl.se/bug/?i=13870
  [80] = https://curl.se/bug/?i=13719
  [81] = https://curl.se/bug/?i=13874
+ [82] = https://curl.se/bug/?i=13902
  [83] = https://curl.se/bug/?i=13851
  [84] = https://curl.se/bug/?i=13878
  [85] = https://curl.se/bug/?i=13877
  [86] = https://curl.se/bug/?i=13855
+ [87] = https://curl.se/bug/?i=13895
  [88] = https://curl.se/bug/?i=13871
  [89] = https://curl.se/bug/?i=13653
  [90] = https://curl.se/bug/?i=13795
  [91] = https://curl.se/bug/?i=13864
+ [92] = https://curl.se/bug/?i=13862
+ [93] = https://curl.se/bug/?i=13894
+ [94] = https://curl.se/bug/?i=13891
+ [95] = https://curl.se/bug/?i=13890
+ [96] = https://curl.se/bug/?i=13889
+ [97] = https://curl.se/bug/?i=13887
+ [98] = https://curl.se/bug/?i=13886
