@@ -23,19 +23,9 @@ MPTCP is beneficial in networks where multiple paths exist between clients and
 servers, such as mobile networks where a device may switch between WiFi and
 cellular data or in wired networks with multiple Internet Service Providers.
 
-## Usage
-
-To use MPTCP for your connections, add the `--mptcp` option when using `curl'.
-
-## Requirements
-
-This feature is currently only supported on Linux starting from kernel 5.6. Only
+This option is currently only supported on Linux starting from kernel 5.6. Only
 TCP connections are modified, hence this option does not effect HTTP/3 (QUIC)
-connections.
+or UDP connections.
 
-The server you are connecting to must also support MPTCP. If not, the connection
+The server curl connects to must also support MPTCP. If not, the connection
 seamlessly falls back to TCP.
-
-## Availability
-
-The `--mptcp` option is available starting from `curl` version 8.9.0.
