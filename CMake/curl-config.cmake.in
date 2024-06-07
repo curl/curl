@@ -41,3 +41,4 @@ endif()
 
 # For compatibility with CMake's FindCURL.cmake
 set(CURL_LIBRARIES @PROJECT_NAME@::libcurl)
+set_and_check(CURL_INCLUDE_DIRS "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@")
