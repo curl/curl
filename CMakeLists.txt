@@ -159,6 +159,7 @@ endif()
 
 # initialize CURL_LIBS
 set(CURL_LIBS "")
+set(LIBCURL_PC_REQUIRES_PRIVATE "")
 
 if(ENABLE_ARES)
   set(USE_ARES 1)
@@ -1786,8 +1787,12 @@ if(NOT CURL_DISABLE_INSTALL)
       set(LIBCURL_LIBS          "${LIBCURL_LIBS} -l${_lib}")
     endif()
   endforeach()
-  set(LIBCURL_PC_REQUIRES "")
-  set(LIBCURL_PC_REQUIRES_PRIVATE "")
+
+  # Export a .pc file for client projects not using CMake
+  if(LIBCURL_PC_REQUIRES_PRIVATE)
+    string(REPLACE ";" "," LIBCURL_PC_REQUIRES_PRIVATE "${LIBCURL_PC_REQUIRES_PRIVATE}")
+  endif()
+
   # Merge pkg-config private fields into public ones when static-only
   if(BUILD_SHARED_LIBS)
     set(ENABLE_SHARED         "yes")
