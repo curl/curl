@@ -1809,6 +1809,9 @@ if(NOT CURL_DISABLE_INSTALL)
   # SUPPORT_PROTOCOLS
   set(VERSIONNUM              "${CURL_VERSION_NUM}")
 
+  set(LIBCURL_PC_REQUIRES "")
+  set(LIBCURL_PC_REQUIRES_PRIVATE "")
+
   # Finally generate a "curl-config" matching this config
   # Use:
   # * ENABLE_SHARED

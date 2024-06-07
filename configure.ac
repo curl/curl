@@ -4912,6 +4912,9 @@ SUPPORT_PROTOCOLS=`echo $SUPPORT_PROTOCOLS | tr ' ' '\012' | sort | tr '\012' ' 
 
 AC_SUBST(SUPPORT_PROTOCOLS)
 
+AC_SUBST(LIBCURL_PC_REQUIRES)
+AC_SUBST(LIBCURL_PC_REQUIRES_PRIVATE)
+
 dnl squeeze whitespace out of some variables
 
 squeeze CFLAGS
