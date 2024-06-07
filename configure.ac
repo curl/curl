@@ -1469,6 +1469,7 @@ if test X"$OPT_BROTLI" != Xno; then
          AC_MSG_NOTICE([Added $DIR_BROTLI to CURL_LIBRARY_PATH])
        fi
     fi
+    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE${LIBCURL_PC_REQUIRES_PRIVATE:+,}libbrotlidec"
   else
     dnl no brotli, revert back to clean variables
     LDFLAGS=$CLEANLDFLAGS
