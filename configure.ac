@@ -799,7 +799,8 @@ if test X"$want_hyper" != Xno; then
           AC_SUBST(USE_HYPER, [1])
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_HYPER"
           export CURL_LIBRARY_PATH
-          AC_MSG_NOTICE([Added $DIR_HYPER to CURL_LIBRARY_PATH]),
+          AC_MSG_NOTICE([Added $DIR_HYPER to CURL_LIBRARY_PATH])
+          LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE hyper"
        )
       ],
       for d in `echo $DIR_HYPER | $SED -e 's/:/ /'`; do
@@ -1381,6 +1382,7 @@ else
     dnl replace 'HAVE_LIBZ' in the automake makefile.ams
     AMFIXLIB="1"
     AC_MSG_NOTICE([found both libz and libz.h header])
+    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE zlib"
     curl_zlib_msg="enabled"
   fi
 fi
@@ -1469,6 +1471,7 @@ if test X"$OPT_BROTLI" != Xno; then
          AC_MSG_NOTICE([Added $DIR_BROTLI to CURL_LIBRARY_PATH])
        fi
     fi
+    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libbrotlidec"
   else
     dnl no brotli, revert back to clean variables
     LDFLAGS=$CLEANLDFLAGS
@@ -1556,6 +1559,7 @@ if test X"$OPT_ZSTD" != Xno; then
          AC_MSG_NOTICE([Added $DIR_ZSTD to CURL_LIBRARY_PATH])
        fi
     fi
+    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE zstd"
   else
     dnl no zstd, revert back to clean variables
     LDFLAGS=$CLEANLDFLAGS
@@ -2142,6 +2146,7 @@ if test X"$OPT_LIBPSL" != Xno; then
         LIBPSL_ENABLED=1
         AC_DEFINE(USE_LIBPSL, 1, [if libpsl is in use])
         AC_SUBST(USE_LIBPSL, [1])
+        LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libpsl"
      )
     ],
       dnl not found, revert back to clean variables
@@ -2274,6 +2279,7 @@ if test X"$OPT_LIBSSH2" != Xno; then
          AC_MSG_NOTICE([Added $DIR_SSH2 to CURL_LIBRARY_PATH])
        fi
     fi
+    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libssh2"
   else
     dnl no libssh2, revert back to clean variables
     LDFLAGS=$CLEANLDFLAGS
@@ -2347,6 +2353,7 @@ elif test X"$OPT_LIBSSH" != Xno; then
          AC_MSG_NOTICE([Added $DIR_SSH to CURL_LIBRARY_PATH])
        fi
     fi
+    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libssh"
   else
     dnl no libssh, revert back to clean variables
     LDFLAGS=$CLEANLDFLAGS
@@ -2441,6 +2448,7 @@ if test X"$OPT_LIBRTMP" != Xno; then
         LIBRTMP_ENABLED=1
         AC_DEFINE(USE_LIBRTMP, 1, [if librtmp is in use])
         AC_SUBST(USE_LIBRTMP, [1])
+        LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE librtmp"
      )
     ],
       dnl not found, revert back to clean variables
@@ -2724,6 +2732,7 @@ if test "$want_idn" = "yes"; then
       export CURL_LIBRARY_PATH
       AC_MSG_NOTICE([Added $IDN_DIR to CURL_LIBRARY_PATH])
     fi
+    LIBCURL_PC_REQUIRES_PRIVATE="libidn2 $LIBCURL_PC_REQUIRES_PRIVATE"
   else
     AC_MSG_WARN([Cannot find libraries for IDN support: IDN disabled])
     CPPFLAGS="$clean_CPPFLAGS"
@@ -2814,6 +2823,7 @@ if test X"$want_nghttp2" != Xno; then
         NGHTTP2_ENABLED=1
         AC_DEFINE(USE_NGHTTP2, 1, [if nghttp2 is in use])
         AC_SUBST(USE_NGHTTP2, [1])
+        LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libnghttp2"
      )
 
      CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_H2"
@@ -2902,6 +2912,7 @@ if test X"$want_tcp2" != Xno; then
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_TCP2"
           export CURL_LIBRARY_PATH
           AC_MSG_NOTICE([Added $DIR_TCP2 to CURL_LIBRARY_PATH])
+          LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE ngtcp2"
        )
       ],
         dnl not found, revert back to clean variables
@@ -2958,6 +2969,7 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$OPENSSL_ENABLED" = "x1" -a "x$OPENSSL_IS
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_NGTCP2_CRYPTO_QUICTLS"
           export CURL_LIBRARY_PATH
           AC_MSG_NOTICE([Added $DIR_NGTCP2_CRYPTO_QUICTLS to CURL_LIBRARY_PATH])
+          LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE ngtcp2_crypto_quictls"
        )
       ],
         dnl not found, revert back to clean variables
@@ -3013,6 +3025,7 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$OPENSSL_ENABLED" = "x1" -a "x$OPENSSL_IS
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_NGTCP2_CRYPTO_BORINGSSL"
           export CURL_LIBRARY_PATH
           AC_MSG_NOTICE([Added $DIR_NGTCP2_CRYPTO_BORINGSSL to CURL_LIBRARY_PATH])
+          LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE ngtcp2_crypto_boringssl"
        )
       ],
         dnl not found, revert back to clean variables
@@ -3068,6 +3081,7 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$GNUTLS_ENABLED" = "x1"; then
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_NGTCP2_CRYPTO_GNUTLS"
           export CURL_LIBRARY_PATH
           AC_MSG_NOTICE([Added $DIR_NGTCP2_CRYPTO_GNUTLS to CURL_LIBRARY_PATH])
+          LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE ngtcp2_crypto_gnutls"
        )
       ],
         dnl not found, revert back to clean variables
@@ -3123,6 +3137,7 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$WOLFSSL_ENABLED" = "x1"; then
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_NGTCP2_CRYPTO_WOLFSSL"
           export CURL_LIBRARY_PATH
           AC_MSG_NOTICE([Added $DIR_NGTCP2_CRYPTO_WOLFSSL to CURL_LIBRARY_PATH])
+          LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE ngtcp2_crypto_wolfssl"
        )
       ],
         dnl not found, revert back to clean variables
@@ -3251,6 +3266,7 @@ if test X"$want_nghttp3" != Xno; then
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_NGHTTP3"
           export CURL_LIBRARY_PATH
           AC_MSG_NOTICE([Added $DIR_NGHTTP3 to CURL_LIBRARY_PATH])
+          LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE nghttp3"
        )
       ],
         dnl not found, revert back to clean variables
@@ -3374,7 +3390,8 @@ if test X"$want_quiche" != Xno; then
           AC_CHECK_FUNCS([quiche_conn_set_qlog_fd])
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_QUICHE"
           export CURL_LIBRARY_PATH
-          AC_MSG_NOTICE([Added $DIR_QUICHE to CURL_LIBRARY_PATH]),
+          AC_MSG_NOTICE([Added $DIR_QUICHE to CURL_LIBRARY_PATH])
+          LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE quiche",
           [],
           [
 AC_INCLUDES_DEFAULT
@@ -4647,12 +4664,20 @@ dnl to let curl-config output the static libraries correctly
 ENABLE_STATIC="$enable_static"
 AC_SUBST(ENABLE_STATIC)
 
-dnl merge the pkg-config Libs.private field into Libs when static-only
+squeeze LIBCURL_PC_REQUIRES_PRIVATE
+LIBCURL_PC_REQUIRES_PRIVATE=`echo $LIBCURL_PC_REQUIRES_PRIVATE | tr ' ' ','`
+
+AC_SUBST(LIBCURL_PC_REQUIRES_PRIVATE)
+
+dnl Merge pkg-config private fields into public ones when static-only
 if test "x$enable_shared" = "xno"; then
+  LIBCURL_PC_REQUIRES=$LIBCURL_PC_REQUIRES_PRIVATE
   LIBCURL_NO_SHARED=$LIBCURL_LIBS
 else
+  LIBCURL_PC_REQUIRES=
   LIBCURL_NO_SHARED=
 fi
+AC_SUBST(LIBCURL_PC_REQUIRES)
 AC_SUBST(LIBCURL_NO_SHARED)
 
 rm $compilersh

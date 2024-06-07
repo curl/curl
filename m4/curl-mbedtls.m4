@@ -101,6 +101,7 @@ if test "x$OPT_MBEDTLS" != xno; then
           AC_MSG_NOTICE([Added $mbedtlslib to CURL_LIBRARY_PATH])
         fi
       fi
+      LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE mbedtls"
     fi
 
   fi dnl mbedTLS not disabled

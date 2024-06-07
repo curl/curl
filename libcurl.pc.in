@@ -22,9 +22,6 @@
 #
 ###########################################################################
 
-# This should most probably benefit from getting a "Requires:" field added
-# dynamically by configure.
-#
 prefix=@prefix@
 exec_prefix=@exec_prefix@
 libdir=@libdir@
@@ -36,6 +33,8 @@ Name: libcurl
 URL: https://curl.se/
 Description: Library to transfer files with ftp, http, etc.
 Version: @CURLVERSION@
+Requires: @LIBCURL_PC_REQUIRES@
+Requires.private: @LIBCURL_PC_REQUIRES_PRIVATE@
 Libs: -L${libdir} -lcurl @LIBCURL_NO_SHARED@
 Libs.private: @LIBCURL_LIBS@
 Cflags: -I${includedir} @CPPFLAG_CURL_STATICLIB@

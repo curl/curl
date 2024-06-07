@@ -172,6 +172,7 @@ if test "x$OPT_RUSTLS" != xno; then
         AC_MSG_NOTICE([Added $LIB_RUSTLS to CURL_LIBRARY_PATH])
       fi
     fi
+    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE rustls"
   fi
 
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"

@@ -351,6 +351,7 @@ if test "x$OPT_OPENSSL" != xno; then
        fi
     fi
     check_for_ca_bundle=1
+    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE openssl"
   fi
 
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"

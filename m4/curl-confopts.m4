@@ -563,6 +563,7 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
       AC_DEFINE(USE_ARES, 1, [Define to enable c-ares support])
       AC_DEFINE(CARES_NO_DEPRECATED, 1, [Ignore c-ares deprecation warnings])
       AC_SUBST([USE_ARES], [1])
+      LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libcares"
       curl_res_msg="c-ares"
     fi
   fi

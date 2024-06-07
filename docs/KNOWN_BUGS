@@ -40,7 +40,6 @@ problems may have been fixed or changed somewhat since this was written.
  5.3 building for old macOS fails with gcc
  5.5 cannot handle Unicode arguments in non-Unicode builds on Windows
  5.6 cygwin: make install installs curl-config.1 twice
- 5.9 Utilize Requires.private directives in libcurl.pc
  5.11 configure --with-gssapi with Heimdal is ignored on macOS
  5.12 flaky CI builds
  5.13 long paths are not fully supported on Windows
@@ -254,10 +253,6 @@ problems may have been fixed or changed somewhat since this was written.
 5.6 cygwin: make install installs curl-config.1 twice
 
  https://github.com/curl/curl/issues/8839
-
-5.9 Utilize Requires.private directives in libcurl.pc
-
- https://github.com/curl/curl/issues/864
 
 5.11 configure --with-gssapi with Heimdal is ignored on macOS
 
