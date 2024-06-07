@@ -1206,6 +1206,7 @@ static const struct Curl_crtype cr_hyper_protocol = {
   Curl_creader_def_resume_from,
   Curl_creader_def_rewind,
   cr_hyper_unpause,
+  Curl_creader_def_is_paused,
   Curl_creader_def_done,
   sizeof(struct Curl_creader)
 };
