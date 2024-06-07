@@ -2495,7 +2495,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           }
         }
       }
-      else if(data->state.select_bits) {
+      else if(data->state.select_bits && !Curl_xfer_is_blocked(data)) {
         /* This avoids CURLM_CALL_MULTI_PERFORM so that a very fast transfer
            won't get stuck on this transfer at the expense of other concurrent
            transfers */

@@ -606,6 +606,14 @@ CURLcode Curl_creader_def_unpause(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+bool Curl_creader_def_is_paused(struct Curl_easy *data,
+                                struct Curl_creader *reader)
+{
+  (void)data;
+  (void)reader;
+  return FALSE;
+}
+
 void Curl_creader_def_done(struct Curl_easy *data,
                            struct Curl_creader *reader, int premature)
 {
@@ -624,6 +632,7 @@ struct cr_in_ctx {
   BIT(seen_eos);
   BIT(errored);
   BIT(has_used_cb);
+  BIT(is_paused);
 };
 
 static CURLcode cr_in_init(struct Curl_easy *data, struct Curl_creader *reader)
@@ -645,6 +654,8 @@ static CURLcode cr_in_read(struct Curl_easy *data,
 {
   struct cr_in_ctx *ctx = reader->ctx;
   size_t nread;
+
+  ctx->is_paused = FALSE;
 
   /* Once we have errored, we will return the same error forever */
   if(ctx->errored) {
@@ -704,6 +715,7 @@ static CURLcode cr_in_read(struct Curl_easy *data,
     }
     /* CURL_READFUNC_PAUSE pauses read callbacks that feed socket writes */
     CURL_TRC_READ(data, "cr_in_read, callback returned CURL_READFUNC_PAUSE");
+    ctx->is_paused = TRUE;
     data->req.keepon |= KEEP_SEND_PAUSE; /* mark socket send as paused */
     *pnread = 0;
     *peos = FALSE;
@@ -866,6 +878,22 @@ static CURLcode cr_in_rewind(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+static CURLcode cr_in_unpause(struct Curl_easy *data,
+                              struct Curl_creader *reader)
+{
+  struct cr_in_ctx *ctx = reader->ctx;
+  (void)data;
+  ctx->is_paused = FALSE;
+  return CURLE_OK;
+}
+
+static bool cr_in_is_paused(struct Curl_easy *data,
+                            struct Curl_creader *reader)
+{
+  struct cr_in_ctx *ctx = reader->ctx;
+  (void)data;
+  return ctx->is_paused;
+}
 
 static const struct Curl_crtype cr_in = {
   "cr-in",
@@ -876,7 +904,8 @@ static const struct Curl_crtype cr_in = {
   cr_in_total_length,
   cr_in_resume_from,
   cr_in_rewind,
-  Curl_creader_def_unpause,
+  cr_in_unpause,
+  cr_in_is_paused,
   Curl_creader_def_done,
   sizeof(struct cr_in_ctx)
 };
@@ -1032,6 +1061,7 @@ static const struct Curl_crtype cr_lc = {
   Curl_creader_def_resume_from,
   Curl_creader_def_rewind,
   Curl_creader_def_unpause,
+  Curl_creader_def_is_paused,
   Curl_creader_def_done,
   sizeof(struct cr_lc_ctx)
 };
@@ -1205,6 +1235,7 @@ static const struct Curl_crtype cr_null = {
   Curl_creader_def_resume_from,
   Curl_creader_def_rewind,
   Curl_creader_def_unpause,
+  Curl_creader_def_is_paused,
   Curl_creader_def_done,
   sizeof(struct Curl_creader)
 };
@@ -1304,6 +1335,7 @@ static const struct Curl_crtype cr_buf = {
   cr_buf_resume_from,
   Curl_creader_def_rewind,
   Curl_creader_def_unpause,
+  Curl_creader_def_is_paused,
   Curl_creader_def_done,
   sizeof(struct cr_buf_ctx)
 };
@@ -1364,6 +1396,18 @@ CURLcode Curl_creader_unpause(struct Curl_easy *data)
     reader = reader->next;
   }
   return result;
+}
+
+bool Curl_creader_is_paused(struct Curl_easy *data)
+{
+  struct Curl_creader *reader = data->req.reader_stack;
+
+  while(reader) {
+    if(reader->crt->is_paused(data, reader))
+      return TRUE;
+    reader = reader->next;
+  }
+  return FALSE;
 }
 
 void Curl_creader_done(struct Curl_easy *data, int premature)
