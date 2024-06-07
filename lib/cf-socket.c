@@ -1019,9 +1019,9 @@ static CURLcode cf_socket_shutdown(struct Curl_cfilter *cf,
 
     CURL_TRC_CF(data, cf, "cf_socket_shutdown(%" CURL_FORMAT_SOCKET_T
                 ")", ctx->sock);
-    /* On TPC, and when the socket looks well and non-blocking mode
+    /* On TCP, and when the socket looks well and non-blocking mode
      * can be enabled, receive dangling bytes before close to avoid
-     * TCP entering RST states unnecessarily. */
+     * entering RST states unnecessarily. */
     if(ctx->sock != CURL_SOCKET_BAD &&
        ctx->transport == TRNSPRT_TCP &&
        (curlx_nonblock(ctx->sock, TRUE) >= 0)) {
