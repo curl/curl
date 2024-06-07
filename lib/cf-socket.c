@@ -1019,7 +1019,6 @@ static CURLcode cf_socket_shutdown(struct Curl_cfilter *cf,
 
     CURL_TRC_CF(data, cf, "cf_socket_shutdown(%" CURL_FORMAT_SOCKET_T
                 ")", ctx->sock);
-#if 0
     /* Temporarily disable this to check if this causes the test
      * hangers on Windows CI jobs */
     if(ctx->sock != CURL_SOCKET_BAD && ctx->transport == TRNSPRT_TCP) {
@@ -1032,7 +1031,6 @@ static CURLcode cf_socket_shutdown(struct Curl_cfilter *cf,
       rctx.data = data;
       (void)nw_in_read(&rctx, buf, sizeof(buf), &result);
     }
-#endif
     cf_socket_close(cf, data);
   }
   *done = TRUE;
