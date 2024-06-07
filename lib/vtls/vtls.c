@@ -68,6 +68,8 @@
 #include "curl_base64.h"
 #include "curl_printf.h"
 #include "inet_pton.h"
+#include "connect.h"
+#include "select.h"
 #include "strdup.h"
 
 /* The last #include files should be: */
@@ -1168,12 +1170,18 @@ int Curl_none_init(void)
 void Curl_none_cleanup(void)
 { }
 
-int Curl_none_shutdown(struct Curl_cfilter *cf UNUSED_PARAM,
-                       struct Curl_easy *data UNUSED_PARAM)
+CURLcode Curl_none_shutdown(struct Curl_cfilter *cf UNUSED_PARAM,
+                            struct Curl_easy *data UNUSED_PARAM,
+                            bool send_shutdown UNUSED_PARAM,
+                            bool *done)
 {
   (void)data;
   (void)cf;
-  return 0;
+  (void)send_shutdown;
+  /* Every SSL backend should have a shutdown implementation. Until we
+   * have implemented that, we put this fake in place. */
+  *done = TRUE;
+  return CURLE_OK;
 }
 
 int Curl_none_check_cxn(struct Curl_cfilter *cf, struct Curl_easy *data)
@@ -1745,17 +1753,34 @@ static ssize_t ssl_cf_recv(struct Curl_cfilter *cf,
   return nread;
 }
 
+static CURLcode ssl_cf_shutdown(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
+                                bool *done)
+{
+  struct ssl_connect_data *connssl = cf->ctx;
+  struct cf_call_data save;
+  CURLcode result = CURLE_OK;
+
+  *done = TRUE;
+  if(!connssl->shutdown) {
+    CF_DATA_SAVE(save, cf, data);
+    result = Curl_ssl->shut_down(cf, data, TRUE, done);
+    CURL_TRC_CF(data, cf, "cf_shutdown -> %d, done=%d", result, *done);
+    CF_DATA_RESTORE(cf, save);
+    connssl->shutdown = (result || *done);
+  }
+  return result;
+}
+
 static void ssl_cf_adjust_pollset(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
-                                   struct easy_pollset *ps)
+                                  struct Curl_easy *data,
+                                  struct easy_pollset *ps)
 {
   struct cf_call_data save;
 
-  if(!cf->connected) {
-    CF_DATA_SAVE(save, cf, data);
-    Curl_ssl->adjust_pollset(cf, data, ps);
-    CF_DATA_RESTORE(cf, save);
-  }
+  CF_DATA_SAVE(save, cf, data);
+  Curl_ssl->adjust_pollset(cf, data, ps);
+  CF_DATA_RESTORE(cf, save);
 }
 
 static CURLcode ssl_cf_cntrl(struct Curl_cfilter *cf,
@@ -1845,6 +1870,7 @@ struct Curl_cftype Curl_cft_ssl = {
   ssl_cf_destroy,
   ssl_cf_connect,
   ssl_cf_close,
+  ssl_cf_shutdown,
   Curl_cf_def_get_host,
   ssl_cf_adjust_pollset,
   ssl_cf_data_pending,
@@ -1865,6 +1891,7 @@ struct Curl_cftype Curl_cft_ssl_proxy = {
   ssl_cf_destroy,
   ssl_cf_connect,
   ssl_cf_close,
+  ssl_cf_shutdown,
   Curl_cf_def_get_host,
   ssl_cf_adjust_pollset,
   ssl_cf_data_pending,
@@ -2015,19 +2042,77 @@ void *Curl_ssl_get_internals(struct Curl_easy *data, int sockindex,
   return result;
 }
 
+static CURLcode vtls_shutdown_blocking(struct Curl_cfilter *cf,
+                                       struct Curl_easy *data,
+                                       bool send_shutdown, bool *done)
+{
+  struct ssl_connect_data *connssl = cf->ctx;
+  struct cf_call_data save;
+  CURLcode result = CURLE_OK;
+  timediff_t timeout_ms;
+  int what, loop = 10;
+
+  if(connssl->shutdown) {
+    *done = TRUE;
+    return CURLE_OK;
+  }
+  CF_DATA_SAVE(save, cf, data);
+
+  *done = FALSE;
+  while(!result && !*done && loop--) {
+    timeout_ms = Curl_shutdown_timeleft(cf->conn, cf->sockindex, NULL);
+
+    if(timeout_ms < 0) {
+      /* no need to continue if time is already up */
+      failf(data, "SSL shutdown timeout");
+      return CURLE_OPERATION_TIMEDOUT;
+    }
+
+    result = Curl_ssl->shut_down(cf, data, send_shutdown, done);
+    if(result ||*done)
+      goto out;
+
+    if(connssl->io_need) {
+      what = Curl_conn_cf_poll(cf, data, timeout_ms);
+      if(what < 0) {
+        /* fatal error */
+        failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
+        result = CURLE_RECV_ERROR;
+        goto out;
+      }
+      else if(0 == what) {
+        /* timeout */
+        failf(data, "SSL shutdown timeout");
+        result = CURLE_OPERATION_TIMEDOUT;
+        goto out;
+      }
+      /* socket is readable or writable */
+    }
+  }
+out:
+  CF_DATA_RESTORE(cf, save);
+  connssl->shutdown = (result || *done);
+  return result;
+}
+
 CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
-                                 int sockindex)
+                                 int sockindex, bool send_shutdown)
 {
   struct Curl_cfilter *cf, *head;
   CURLcode result = CURLE_OK;
 
-  (void)data;
   head = data->conn? data->conn->cfilter[sockindex] : NULL;
   for(cf = head; cf; cf = cf->next) {
     if(cf->cft == &Curl_cft_ssl) {
-      if(Curl_ssl->shut_down(cf, data))
+      bool done;
+      CURL_TRC_CF(data, cf, "shutdown and remove SSL, start");
+      Curl_shutdown_start(data, sockindex, NULL);
+      result = vtls_shutdown_blocking(cf, data, send_shutdown, &done);
+      Curl_shutdown_clear(data, sockindex);
+      if(!result && !done) /* blocking failed? */
         result = CURLE_SSL_SHUTDOWN_FAILED;
       Curl_conn_cf_discard_sub(head, cf, data, FALSE);
+      CURL_TRC_CF(data, cf, "shutdown and remove SSL, done -> %d", result);
       break;
     }
   }

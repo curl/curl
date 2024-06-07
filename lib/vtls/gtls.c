@@ -1799,6 +1799,74 @@ static ssize_t gtls_send(struct Curl_cfilter *cf,
   return rc;
 }
 
+/*
+ * This function is called to shut down the SSL layer but keep the
+ * socket open (CCC - Clear Command Channel)
+ */
+static CURLcode gtls_shutdown(struct Curl_cfilter *cf,
+                              struct Curl_easy *data,
+                              bool send_shutdown, bool *done)
+{
+  struct ssl_connect_data *connssl = cf->ctx;
+  struct gtls_ssl_backend_data *backend =
+    (struct gtls_ssl_backend_data *)connssl->backend;
+  char buf[1024];
+  CURLcode result = CURLE_OK;
+  ssize_t nread;
+  size_t i;
+
+  DEBUGASSERT(backend);
+  if(!backend->gtls.session || connssl->shutdown) {
+    *done = TRUE;
+    goto out;
+  }
+
+  connssl->io_need = CURL_SSL_IO_NEED_NONE;
+  *done = FALSE;
+
+  if(!backend->gtls.sent_shutdown) {
+    /* do this only once */
+    backend->gtls.sent_shutdown = TRUE;
+    if(send_shutdown) {
+      int ret = gnutls_bye(backend->gtls.session, GNUTLS_SHUT_RDWR);
+      if(ret != GNUTLS_E_SUCCESS) {
+        CURL_TRC_CF(data, cf, "SSL shutdown, gnutls_bye error: '%s'(%d)",
+                    gnutls_strerror((int)ret), (int)ret);
+        result = CURLE_RECV_ERROR;
+        goto out;
+      }
+    }
+  }
+
+  /* SSL should now have started the shutdown from our side. Since it
+   * was not complete, we are lacking the close notify from the server. */
+  for(i = 0; i < 10; ++i) {
+    nread = gnutls_record_recv(backend->gtls.session, buf, sizeof(buf));
+    if(nread <= 0)
+      break;
+  }
+  if(nread > 0) {
+    /* still data coming in? */
+  }
+  else if(nread == 0) {
+    /* We got the close notify alert and are done. */
+    *done = TRUE;
+  }
+  else if((nread == GNUTLS_E_AGAIN) || (nread == GNUTLS_E_INTERRUPTED)) {
+    connssl->io_need = gnutls_record_get_direction(backend->gtls.session)?
+      CURL_SSL_IO_NEED_SEND : CURL_SSL_IO_NEED_RECV;
+  }
+  else {
+    CURL_TRC_CF(data, cf, "SSL shutdown, error: '%s'(%d)",
+                gnutls_strerror((int)nread), (int)nread);
+    result = CURLE_RECV_ERROR;
+  }
+
+out:
+  connssl->shutdown = (result || *done);
+  return result;
+}
+
 static void gtls_close(struct Curl_cfilter *cf,
                        struct Curl_easy *data)
 {
@@ -1810,16 +1878,10 @@ static void gtls_close(struct Curl_cfilter *cf,
   DEBUGASSERT(backend);
   CURL_TRC_CF(data, cf, "close");
   if(backend->gtls.session) {
-    char buf[32];
-    /* Maybe the server has already sent a close notify alert.
-       Read it to avoid an RST on the TCP connection. */
-    CURL_TRC_CF(data, cf, "close, try receive before bye");
-    (void)gnutls_record_recv(backend->gtls.session, buf, sizeof(buf));
-    CURL_TRC_CF(data, cf, "close, send bye");
-    gnutls_bye(backend->gtls.session, GNUTLS_SHUT_RDWR);
-    /* try one last receive */
-    CURL_TRC_CF(data, cf, "close, receive after bye");
-    (void)gnutls_record_recv(backend->gtls.session, buf, sizeof(buf));
+    if(!connssl->shutdown) {
+      bool done;
+      gtls_shutdown(cf, data, TRUE, &done);
+    }
     gnutls_deinit(backend->gtls.session);
     backend->gtls.session = NULL;
   }
@@ -1832,88 +1894,6 @@ static void gtls_close(struct Curl_cfilter *cf,
     backend->gtls.srp_client_cred = NULL;
   }
 #endif
-}
-
-/*
- * This function is called to shut down the SSL layer but keep the
- * socket open (CCC - Clear Command Channel)
- */
-static int gtls_shutdown(struct Curl_cfilter *cf,
-                         struct Curl_easy *data)
-{
-  struct ssl_connect_data *connssl = cf->ctx;
-  struct gtls_ssl_backend_data *backend =
-    (struct gtls_ssl_backend_data *)connssl->backend;
-  int retval = 0;
-
-  DEBUGASSERT(backend);
-
-#ifndef CURL_DISABLE_FTP
-  /* This has only been tested on the proftpd server, and the mod_tls code
-     sends a close notify alert without waiting for a close notify alert in
-     response. Thus we wait for a close notify alert from the server, but
-     we do not send one. Let's hope other servers do the same... */
-
-  if(data->set.ftp_ccc == CURLFTPSSL_CCC_ACTIVE)
-    gnutls_bye(backend->gtls.session, GNUTLS_SHUT_WR);
-#endif
-
-  if(backend->gtls.session) {
-    ssize_t result;
-    bool done = FALSE;
-    char buf[120];
-
-    while(!done && !connssl->peer_closed) {
-      int what = SOCKET_READABLE(Curl_conn_cf_get_socket(cf, data),
-                                 SSL_SHUTDOWN_TIMEOUT);
-      if(what > 0) {
-        /* Something to read, let's do it and hope that it is the close
-           notify alert from the server */
-        result = gnutls_record_recv(backend->gtls.session,
-                                    buf, sizeof(buf));
-        switch(result) {
-        case 0:
-          /* This is the expected response. There was no data but only
-             the close notify alert */
-          done = TRUE;
-          break;
-        case GNUTLS_E_AGAIN:
-        case GNUTLS_E_INTERRUPTED:
-          infof(data, "GNUTLS_E_AGAIN || GNUTLS_E_INTERRUPTED");
-          break;
-        default:
-          retval = -1;
-          done = TRUE;
-          break;
-        }
-      }
-      else if(0 == what) {
-        /* timeout */
-        failf(data, "SSL shutdown timeout");
-        done = TRUE;
-      }
-      else {
-        /* anything that gets here is fatally bad */
-        failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
-        retval = -1;
-        done = TRUE;
-      }
-    }
-    gnutls_deinit(backend->gtls.session);
-  }
-
-#ifdef USE_GNUTLS_SRP
-  {
-    struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-    if(ssl_config->primary.username)
-      gnutls_srp_free_client_credentials(backend->gtls.srp_client_cred);
-  }
-#endif
-
-  backend->gtls.session = NULL;
-  Curl_gtls_shared_creds_free(&backend->gtls.shared_creds);
-
-  return retval;
 }
 
 static ssize_t gtls_recv(struct Curl_cfilter *cf,

@@ -111,6 +111,7 @@ struct mbed_ssl_backend_data {
 #endif
   int *ciphersuites;
   BIT(initialized); /* mbedtls_ssl_context is initialized */
+  BIT(sent_shutdown);
 };
 
 /* apply threading? */
@@ -1198,23 +1199,108 @@ static void mbedtls_close_all(struct Curl_easy *data)
   (void)data;
 }
 
+static CURLcode mbedtls_shutdown(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 bool send_shutdown, bool *done)
+{
+  struct ssl_connect_data *connssl = cf->ctx;
+  struct mbed_ssl_backend_data *backend =
+    (struct mbed_ssl_backend_data *)connssl->backend;
+  unsigned char buf[1024];
+  CURLcode result = CURLE_OK;
+  int ret;
+  size_t i;
+
+  DEBUGASSERT(backend);
+
+  if(!backend->initialized || connssl->shutdown) {
+    *done = TRUE;
+    return CURLE_OK;
+  }
+
+  connssl->io_need = CURL_SSL_IO_NEED_NONE;
+  *done = FALSE;
+
+  if(!backend->sent_shutdown) {
+    /* do this only once */
+    backend->sent_shutdown = TRUE;
+    if(send_shutdown) {
+      ret = mbedtls_ssl_close_notify(&backend->ssl);
+      switch(ret) {
+      case 0: /* we sent it, receive from the server */
+        break;
+      case MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY: /* server also closed */
+        *done = TRUE;
+        goto out;
+      case MBEDTLS_ERR_SSL_WANT_READ:
+        connssl->io_need = CURL_SSL_IO_NEED_RECV;
+        goto out;
+      case MBEDTLS_ERR_SSL_WANT_WRITE:
+        connssl->io_need = CURL_SSL_IO_NEED_SEND;
+        goto out;
+      default:
+        CURL_TRC_CF(data, cf, "mbedtls_shutdown error -0x%04X", -ret);
+        result = CURLE_RECV_ERROR;
+        goto out;
+      }
+    }
+  }
+
+  /* SSL should now have started the shutdown from our side. Since it
+   * was not complete, we are lacking the close notify from the server. */
+  for(i = 0; i < 10; ++i) {
+    ret = mbedtls_ssl_read(&backend->ssl, buf, sizeof(buf));
+    /* This seems to be a bug in mbedTLS TLSv1.3 where it reports
+     * WANT_READ, but has not encountered an EAGAIN. */
+    if(ret == MBEDTLS_ERR_SSL_WANT_READ)
+      ret = mbedtls_ssl_read(&backend->ssl, buf, sizeof(buf));
+#ifdef TLS13_SUPPORT
+    if(ret == MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET)
+      continue;
+#endif
+    if(ret <= 0)
+      break;
+  }
+
+  if(ret > 0) {
+    /* still data coming in? */
+    CURL_TRC_CF(data, cf, "mbedtls_shutdown, still getting data");
+  }
+  else if(ret == 0 || (ret == MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY)) {
+    /* We got the close notify alert and are done. */
+    CURL_TRC_CF(data, cf, "mbedtls_shutdown done");
+    *done = TRUE;
+  }
+  else if(ret == MBEDTLS_ERR_SSL_WANT_READ) {
+    CURL_TRC_CF(data, cf, "mbedtls_shutdown, need RECV");
+    connssl->io_need = CURL_SSL_IO_NEED_RECV;
+  }
+  else if(ret == MBEDTLS_ERR_SSL_WANT_WRITE) {
+    CURL_TRC_CF(data, cf, "mbedtls_shutdown, need SEND");
+    connssl->io_need = CURL_SSL_IO_NEED_SEND;
+  }
+  else {
+    CURL_TRC_CF(data, cf, "mbedtls_shutdown error -0x%04X", -ret);
+    result = CURLE_RECV_ERROR;
+  }
+
+out:
+  connssl->shutdown = (result || *done);
+  return result;
+}
+
 static void mbedtls_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct mbed_ssl_backend_data *backend =
     (struct mbed_ssl_backend_data *)connssl->backend;
 
-  (void)data;
   DEBUGASSERT(backend);
   if(backend->initialized) {
-    char buf[32];
-    int ret;
-
-    /* Maybe the server has already sent a close notify alert.
-       Read it to avoid an RST on the TCP connection. */
-    (void)mbedtls_ssl_read(&backend->ssl, (unsigned char *)buf, sizeof(buf));
-    ret = mbedtls_ssl_close_notify(&backend->ssl);
-    CURL_TRC_CF(data, cf, "close_notify() -> %04x", -ret);
+    if(!connssl->shutdown) {
+      bool done;
+      mbedtls_shutdown(cf, data, TRUE, &done);
+    }
 
     mbedtls_pk_free(&backend->pk);
     mbedtls_x509_crt_free(&backend->clicert);
@@ -1535,7 +1621,7 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   mbedtls_cleanup,                  /* cleanup */
   mbedtls_version,                  /* version */
   Curl_none_check_cxn,              /* check_cxn */
-  Curl_none_shutdown,               /* shutdown */
+  mbedtls_shutdown,                 /* shutdown */
   mbedtls_data_pending,             /* data_pending */
   mbedtls_random,                   /* random */
   Curl_none_cert_status_request,    /* cert_status_request */

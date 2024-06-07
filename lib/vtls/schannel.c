@@ -2470,8 +2470,9 @@ static bool schannel_data_pending(struct Curl_cfilter *cf,
 /* shut down the SSL connection and clean up related memory.
    this function can be called multiple times on the same connection including
    if the SSL connection failed (eg connection made but failed handshake). */
-static int schannel_shutdown(struct Curl_cfilter *cf,
-                             struct Curl_easy *data)
+static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  bool send_shutdown, bool *done)
 {
   /* See https://msdn.microsoft.com/en-us/library/windows/desktop/aa380138.aspx
    * Shutting Down an Schannel Connection
@@ -2479,10 +2480,20 @@ static int schannel_shutdown(struct Curl_cfilter *cf,
   struct ssl_connect_data *connssl = cf->ctx;
   struct schannel_ssl_backend_data *backend =
     (struct schannel_ssl_backend_data *)connssl->backend;
+  CURLcode result = CURLE_OK;
+
+  if(connssl->shutdown) {
+    *done = TRUE;
+    return CURLE_OK;
+  }
 
   DEBUGASSERT(data);
   DEBUGASSERT(backend);
 
+  /* Not supported in schannel */
+  (void)send_shutdown;
+
+  *done = FALSE;
   if(backend->ctxt) {
     infof(data, "schannel: shutting down SSL/TLS connection with %s port %d",
           connssl->peer.hostname, connssl->peer.port);
@@ -2494,7 +2505,6 @@ static int schannel_shutdown(struct Curl_cfilter *cf,
     SECURITY_STATUS sspi_status;
     SecBuffer outbuf;
     SecBufferDesc outbuf_desc;
-    CURLcode result;
     DWORD dwshut = SCHANNEL_SHUTDOWN;
 
     InitSecBuffer(&Buffer, SECBUFFER_TOKEN, &dwshut, sizeof(dwshut));
@@ -2507,6 +2517,8 @@ static int schannel_shutdown(struct Curl_cfilter *cf,
       char buffer[STRERROR_LEN];
       failf(data, "schannel: ApplyControlToken failure: %s",
             Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
+      result = CURLE_SEND_ERROR;
+      goto out;
     }
 
     /* setup output buffer */
@@ -2536,8 +2548,30 @@ static int schannel_shutdown(struct Curl_cfilter *cf,
       if((result != CURLE_OK) || (outbuf.cbBuffer != (size_t) written)) {
         infof(data, "schannel: failed to send close msg: %s"
               " (bytes written: %zd)", curl_easy_strerror(result), written);
+        result = CURLE_SEND_ERROR;
       }
     }
+  }
+
+out:
+  connssl->shutdown = (result || *done);
+  return result;
+}
+
+static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
+{
+  struct ssl_connect_data *connssl = cf->ctx;
+  struct schannel_ssl_backend_data *backend =
+    (struct schannel_ssl_backend_data *)connssl->backend;
+
+  DEBUGASSERT(data);
+  DEBUGASSERT(backend);
+
+  if(backend->cred && backend->ctxt &&
+     cf->connected && !connssl->shutdown &&
+     cf->next && cf->next->connected && !connssl->peer_closed) {
+    bool done;
+    (void)schannel_shutdown(cf, data, TRUE, &done);
   }
 
   /* free SSPI Schannel API security context handle */
@@ -2569,13 +2603,6 @@ static int schannel_shutdown(struct Curl_cfilter *cf,
     backend->decdata_length = 0;
     backend->decdata_offset = 0;
   }
-
-  return CURLE_OK;
-}
-
-static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
-{
-  schannel_shutdown(cf, data);
 }
 
 static int schannel_init(void)

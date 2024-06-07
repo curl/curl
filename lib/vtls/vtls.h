@@ -191,7 +191,7 @@ CURLcode Curl_cf_ssl_insert_after(struct Curl_cfilter *cf_at,
                                   struct Curl_easy *data);
 
 CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
-                                 int sockindex);
+                                 int sockindex, bool send_shutdown);
 
 #ifndef CURL_DISABLE_PROXY
 CURLcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
@@ -250,7 +250,7 @@ extern struct Curl_cftype Curl_cft_ssl_proxy;
 #define Curl_ssl_get_internals(a,b,c,d) NULL
 #define Curl_ssl_supports(a,b) FALSE
 #define Curl_ssl_cfilter_add(a,b,c) CURLE_NOT_BUILT_IN
-#define Curl_ssl_cfilter_remove(a,b) CURLE_OK
+#define Curl_ssl_cfilter_remove(a,b,c) CURLE_OK
 #define Curl_ssl_cf_get_config(a,b) NULL
 #define Curl_ssl_cf_get_primary_config(a) NULL
 #endif
