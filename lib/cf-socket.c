@@ -1019,14 +1019,13 @@ static CURLcode cf_socket_shutdown(struct Curl_cfilter *cf,
 
     CURL_TRC_CF(data, cf, "cf_socket_shutdown(%" CURL_FORMAT_SOCKET_T
                 ")", ctx->sock);
-    /* Temporarily disable this to check if this causes the test
-     * hangers on Windows CI jobs */
-    if(ctx->sock != CURL_SOCKET_BAD && ctx->transport == TRNSPRT_TCP) {
-      /* To avoid unwanted TCP RSTs, we do a final receive to discard
-       * any bytes before we close the socket. */
+    /* On TPC, and when the socket looks well and non-blocking mode
+     * can be enabled, receive dangling bytes before close to avoid
+     * TCP entering RST states unnecessarily. */
+    if(ctx->sock != CURL_SOCKET_BAD &&
+       ctx->transport == TRNSPRT_TCP &&
+       (curlx_nonblock(ctx->sock, TRUE) >= 0)) {
       unsigned char buf[1024];
-      /* make double sure we are not blocking */
-      curlx_nonblock(ctx->sock, TRUE);
       (void)sread(ctx->sock, buf, sizeof(buf));
     }
     cf_socket_close(cf, data);
