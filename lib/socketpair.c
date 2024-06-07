@@ -242,12 +242,12 @@ error:
 int Curl_socketpair(int domain, int type, int protocol,
                     curl_socket_t socks[2], bool nonblocking)
 {
-#ifdef USE_SOCK_NONBLOCK
+#ifdef SOCK_NONBLOCK
   type = nonblocking ? type | SOCK_NONBLOCK : type;
 #endif
   if(socketpair(domain, type, protocol, socks))
     return -1;
-#ifndef USE_SOCK_NONBLOCK
+#ifndef SOCK_NONBLOCK
   if(nonblocking) {
     if(curlx_nonblock(socks[0], TRUE) < 0 ||
        curlx_nonblock(socks[1], TRUE) < 0) {
