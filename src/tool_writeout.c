@@ -92,6 +92,7 @@ static const struct writeoutvar variables[] = {
   {"num_connects", VAR_NUM_CONNECTS, CURLINFO_NUM_CONNECTS, writeLong},
   {"num_headers", VAR_NUM_HEADERS, CURLINFO_NONE, writeLong},
   {"num_redirects", VAR_REDIRECT_COUNT, CURLINFO_REDIRECT_COUNT, writeLong},
+  {"num_retries", VAR_NUM_RETRY, CURLINFO_NONE, writeLong},
   {"onerror", VAR_ONERROR, CURLINFO_NONE, NULL},
   {"proxy_ssl_verify_result", VAR_PROXY_SSL_VERIFY_RESULT,
    CURLINFO_PROXY_SSL_VERIFYRESULT, writeLong},
@@ -443,6 +444,10 @@ static int writeLong(FILE *stream, const struct writeoutvar *wovar,
   }
   else {
     switch(wovar->id) {
+    case VAR_NUM_RETRY:
+      longinfo = per->num_retries;
+      valid = true;
+      break;
     case VAR_NUM_CERTS:
       certinfo(per);
       longinfo = per->certinfo ? per->certinfo->num_of_certs : 0;

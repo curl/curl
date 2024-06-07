@@ -510,7 +510,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
 
   /* if retry-max-time is non-zero, make sure we haven't exceeded the
      time */
-  if(per->retry_numretries &&
+  if(per->retry_remaining &&
      (!config->retry_maxtime ||
       (tvdiff(tvnow(), per->retrystart) <
        config->retry_maxtime*1000L)) ) {
@@ -632,9 +632,9 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
       warnf(config->global, "Problem %s. "
             "Will retry in %ld seconds. "
             "%ld retries left.",
-            m[retry], sleeptime/1000L, per->retry_numretries);
+            m[retry], sleeptime/1000L, per->retry_remaining);
 
-      per->retry_numretries--;
+      per->retry_remaining--;
       if(!config->retry_delay) {
         per->retry_sleep *= 2;
         if(per->retry_sleep > RETRY_SLEEP_MAX)
@@ -672,10 +672,11 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
         outs->bytes = 0; /* clear for next round */
       }
       *retryp = TRUE;
+      per->num_retries++;
       *delay = sleeptime;
       return CURLE_OK;
     }
-  } /* if retry_numretries */
+  } /* if retry_remaining */
 noretry:
 
   if((global->progressmode == CURL_PROGRESS_BAR) &&
@@ -2265,7 +2266,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         /* initialize retry vars for loop below */
         per->retry_sleep_default = (config->retry_delay) ?
           config->retry_delay*1000L : RETRY_SLEEP_DEFAULT; /* ms */
-        per->retry_numretries = config->req_retry;
+        per->retry_remaining = config->req_retry;
         per->retry_sleep = per->retry_sleep_default; /* ms */
         per->retrystart = tvnow();
 
