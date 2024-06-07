@@ -29,7 +29,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CONNECTTIMEOUT, long timeout);
 Pass a long. It sets the maximum time in seconds that you allow the connection
 phase to take. This timeout only limits the connection phase, it has no impact
 once libcurl has connected. The connection phase includes the name resolve
-(DNS) and all protocol handshakes and negoatations until there is an
+(DNS) and all protocol handshakes and negotiations until there is an
 established connection with the remote side.
 
 Set this option to zero to switch to the default built-in connection timeout -
