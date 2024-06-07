@@ -38,9 +38,6 @@ log = logging.getLogger(__name__)
 
 
 @pytest.mark.skipif(condition=not Env.has_vsftpd(), reason=f"missing vsftpd")
-# rustsl: transfers sometimes fail with "received corrupt message of type InvalidContentType"
-# sporadic, never seen when filter tracing is on
-@pytest.mark.skipif(condition=Env.curl_uses_lib('rustls-ffi'), reason=f"rustls unreliable here")
 class TestVsFTPD:
 
     SUPPORTS_SSL = True

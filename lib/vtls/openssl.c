@@ -1870,6 +1870,100 @@ static struct curl_slist *ossl_engines_list(struct Curl_easy *data)
   return list;
 }
 
+static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
+                              struct Curl_easy *data,
+                              bool send_shutdown, bool *done)
+{
+  struct ssl_connect_data *connssl = cf->ctx;
+  struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
+  CURLcode result = CURLE_OK;
+  char buf[1024];
+  int nread, err;
+  unsigned long sslerr;
+
+  DEBUGASSERT(octx);
+  if(!octx->ssl || connssl->shutdown) {
+    *done = TRUE;
+    goto out;
+  }
+
+  connssl->io_need = CURL_SSL_IO_NEED_NONE;
+  *done = FALSE;
+  if(!(SSL_get_shutdown(octx->ssl) & SSL_SENT_SHUTDOWN)) {
+    /* We have not started the shutdown from our side yet. Check
+     * if the server already sent us one. */
+    ERR_clear_error();
+    nread = SSL_read(octx->ssl, buf, (int)sizeof(buf));
+    err = SSL_get_error(octx->ssl, nread);
+    if(!nread && err == SSL_ERROR_ZERO_RETURN) {
+      bool input_pending;
+      /* Yes, it did. */
+      if(!send_shutdown) {
+        connssl->shutdown = TRUE;
+        CURL_TRC_CF(data, cf, "SSL shutdown received, not sending");
+        goto out;
+      }
+      else if(!cf->next->cft->is_alive(cf->next, data, &input_pending)) {
+        /* Server closed the connection after its closy notify. It
+         * seems not interested to see our close notify, so do not
+         * send it. We are done. */
+        connssl->peer_closed = TRUE;
+        connssl->shutdown = TRUE;
+        CURL_TRC_CF(data, cf, "peer closed connection");
+        goto out;
+      }
+    }
+  }
+
+  if(send_shutdown && SSL_shutdown(octx->ssl) == 1) {
+    CURL_TRC_CF(data, cf, "SSL shutdown finished");
+    *done = TRUE;
+    goto out;
+  }
+  else {
+    size_t i;
+    /* SSL should now have started the shutdown from our side. Since it
+     * was not complete, we are lacking the close notify from the server. */
+    for(i = 0; i < 10; ++i) {
+      ERR_clear_error();
+      nread = SSL_read(octx->ssl, buf, (int)sizeof(buf));
+      if(nread <= 0)
+        break;
+    }
+    err = SSL_get_error(octx->ssl, nread);
+    switch(err) {
+    case SSL_ERROR_ZERO_RETURN: /* no more data */
+      CURL_TRC_CF(data, cf, "SSL shutdown received");
+      *done = TRUE;
+      break;
+    case SSL_ERROR_NONE: /* just did not get anything */
+    case SSL_ERROR_WANT_READ:
+      /* SSL has send its notify and now wants to read the reply
+       * from the server. We are not really interested in that. */
+      CURL_TRC_CF(data, cf, "SSL shutdown sent, want receive");
+      connssl->io_need = CURL_SSL_IO_NEED_RECV;
+      break;
+    case SSL_ERROR_WANT_WRITE:
+      CURL_TRC_CF(data, cf, "SSL shutdown send blocked");
+      connssl->io_need = CURL_SSL_IO_NEED_SEND;
+      break;
+    default:
+      sslerr = ERR_get_error();
+      CURL_TRC_CF(data, cf, "SSL shutdown, error: '%s', errno %d",
+                  (sslerr ?
+                   ossl_strerror(sslerr, buf, sizeof(buf)) :
+                   SSL_ERROR_to_str(err)),
+                  SOCKERRNO);
+      result = CURLE_RECV_ERROR;
+      break;
+    }
+  }
+
+out:
+  connssl->shutdown = (result || *done);
+  return result;
+}
+
 static void ossl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
@@ -1879,72 +1973,12 @@ static void ossl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   DEBUGASSERT(octx);
 
   if(octx->ssl) {
-    /* Send the TLS shutdown if we are still connected *and* if
-     * the peer did not already close the connection. */
-    if(cf->next && cf->next->connected && !connssl->peer_closed) {
-      char buf[1024];
-      int nread, err;
-      unsigned long sslerr;
-
-      /* Maybe the server has already sent a close notify alert.
-         Read it to avoid an RST on the TCP connection. */
-      ERR_clear_error();
-      nread = SSL_read(octx->ssl, buf, (int)sizeof(buf));
-      err = SSL_get_error(octx->ssl, nread);
-      if(!nread && err == SSL_ERROR_ZERO_RETURN) {
-        CURLcode result;
-        ssize_t n;
-        size_t blen = sizeof(buf);
-        CURL_TRC_CF(data, cf, "peer has shutdown TLS");
-        /* SSL_read() will not longer touch the socket, let's receive
-         * directly from the next filter to see if the underlying
-         * connection has also been closed. */
-        n = Curl_conn_cf_recv(cf->next, data, buf, blen, &result);
-        if(!n) {
-          connssl->peer_closed = TRUE;
-          CURL_TRC_CF(data, cf, "peer closed connection");
-        }
-      }
-      ERR_clear_error();
-      if(connssl->peer_closed) {
-        /* As the peer closed, we do not expect it to read anything more we
-         * may send. It may be harmful, leading to TCP RST and delaying
-         * a lingering close. Just leave. */
-        CURL_TRC_CF(data, cf, "not from sending TLS shutdown on "
-                    "connection closed by peer");
-      }
-      else if(SSL_shutdown(octx->ssl) == 1) {
-        CURL_TRC_CF(data, cf, "SSL shutdown finished");
-      }
-      else {
-        nread = SSL_read(octx->ssl, buf, (int)sizeof(buf));
-        err = SSL_get_error(octx->ssl, nread);
-        switch(err) {
-        case SSL_ERROR_NONE: /* this is not an error */
-        case SSL_ERROR_ZERO_RETURN: /* no more data */
-          CURL_TRC_CF(data, cf, "SSL shutdown, EOF from server");
-          break;
-        case SSL_ERROR_WANT_READ:
-          /* SSL has send its notify and now wants to read the reply
-           * from the server. We are not really interested in that. */
-          CURL_TRC_CF(data, cf, "SSL shutdown sent");
-          break;
-        case SSL_ERROR_WANT_WRITE:
-          CURL_TRC_CF(data, cf, "SSL shutdown send blocked");
-          break;
-        default:
-          sslerr = ERR_get_error();
-          CURL_TRC_CF(data, cf, "SSL shutdown, error: '%s', errno %d",
-                      (sslerr ?
-                       ossl_strerror(sslerr, buf, sizeof(buf)) :
-                       SSL_ERROR_to_str(err)),
-                      SOCKERRNO);
-          break;
-        }
-      }
-
-      ERR_clear_error();
-      SSL_set_connect_state(octx->ssl);
+    /* Send the TLS shutdown if have not done so already and are still
+     * connected *and* if the peer did not already close the connection. */
+    if(cf->connected && !connssl->shutdown &&
+       cf->next && cf->next->connected && !connssl->peer_closed) {
+      bool done;
+      (void)ossl_shutdown(cf, data, TRUE, &done);
     }
 
     SSL_free(octx->ssl);
@@ -1959,114 +1993,6 @@ static void ossl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     ossl_bio_cf_method_free(octx->bio_method);
     octx->bio_method = NULL;
   }
-}
-
-/*
- * This function is called to shut down the SSL layer but keep the
- * socket open (CCC - Clear Command Channel)
- */
-static int ossl_shutdown(struct Curl_cfilter *cf,
-                         struct Curl_easy *data)
-{
-  int retval = 0;
-  struct ssl_connect_data *connssl = cf->ctx;
-  char buf[256]; /* We will use this for the OpenSSL error buffer, so it has
-                    to be at least 256 bytes long. */
-  unsigned long sslerror;
-  int nread;
-  int buffsize;
-  int err;
-  bool done = FALSE;
-  struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
-  int loop = 10;
-
-  DEBUGASSERT(octx);
-
-#ifndef CURL_DISABLE_FTP
-  /* This has only been tested on the proftpd server, and the mod_tls code
-     sends a close notify alert without waiting for a close notify alert in
-     response. Thus we wait for a close notify alert from the server, but
-     we do not send one. Let's hope other servers do the same... */
-
-  if(data->set.ftp_ccc == CURLFTPSSL_CCC_ACTIVE)
-    (void)SSL_shutdown(octx->ssl);
-#endif
-
-  if(octx->ssl) {
-    buffsize = (int)sizeof(buf);
-    while(!done && loop--) {
-      int what = SOCKET_READABLE(Curl_conn_cf_get_socket(cf, data),
-                                 SSL_SHUTDOWN_TIMEOUT);
-      if(what > 0) {
-        ERR_clear_error();
-
-        /* Something to read, let's do it and hope that it is the close
-           notify alert from the server */
-        nread = SSL_read(octx->ssl, buf, buffsize);
-        err = SSL_get_error(octx->ssl, nread);
-
-        switch(err) {
-        case SSL_ERROR_NONE: /* this is not an error */
-        case SSL_ERROR_ZERO_RETURN: /* no more data */
-          /* This is the expected response. There was no data but only
-             the close notify alert */
-          done = TRUE;
-          break;
-        case SSL_ERROR_WANT_READ:
-          /* there's data pending, re-invoke SSL_read() */
-          infof(data, "SSL_ERROR_WANT_READ");
-          break;
-        case SSL_ERROR_WANT_WRITE:
-          /* SSL wants a write. Really odd. Let's bail out. */
-          infof(data, "SSL_ERROR_WANT_WRITE");
-          done = TRUE;
-          break;
-        default:
-          /* openssl/ssl.h says "look at error stack/return value/errno" */
-          sslerror = ERR_get_error();
-          failf(data, OSSL_PACKAGE " SSL_read on shutdown: %s, errno %d",
-                (sslerror ?
-                 ossl_strerror(sslerror, buf, sizeof(buf)) :
-                 SSL_ERROR_to_str(err)),
-                SOCKERRNO);
-          done = TRUE;
-          break;
-        }
-      }
-      else if(0 == what) {
-        /* timeout */
-        failf(data, "SSL shutdown timeout");
-        done = TRUE;
-      }
-      else {
-        /* anything that gets here is fatally bad */
-        failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
-        retval = -1;
-        done = TRUE;
-      }
-    } /* while()-loop for the select() */
-
-    if(data->set.verbose) {
-#ifdef HAVE_SSL_GET_SHUTDOWN
-      switch(SSL_get_shutdown(octx->ssl)) {
-      case SSL_SENT_SHUTDOWN:
-        infof(data, "SSL_get_shutdown() returned SSL_SENT_SHUTDOWN");
-        break;
-      case SSL_RECEIVED_SHUTDOWN:
-        infof(data, "SSL_get_shutdown() returned SSL_RECEIVED_SHUTDOWN");
-        break;
-      case SSL_SENT_SHUTDOWN|SSL_RECEIVED_SHUTDOWN:
-        infof(data, "SSL_get_shutdown() returned SSL_SENT_SHUTDOWN|"
-              "SSL_RECEIVED__SHUTDOWN");
-        break;
-      }
-#endif
-    }
-
-    SSL_free(octx->ssl);
-    octx->ssl = NULL;
-  }
-  return retval;
 }
 
 static void ossl_session_free(void *sessionid, size_t idsize)

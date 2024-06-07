@@ -290,12 +290,15 @@ const struct Curl_handler Curl_handler_ftps = {
 };
 #endif
 
-static void close_secondarysocket(struct Curl_easy *data,
-                                  struct connectdata *conn)
+static void close_secondarysocket(struct Curl_easy *data, bool premature)
 {
+  if(!premature) {
+    CURL_TRC_FTP(data, "[%s] shutting down DATA connection", FTP_DSTATE(data));
+    Curl_conn_shutdown_blocking(data, SECONDARYSOCKET);
+  }
   CURL_TRC_FTP(data, "[%s] closing DATA connection", FTP_DSTATE(data));
   Curl_conn_close(data, SECONDARYSOCKET);
-  Curl_conn_cf_discard_all(data, conn, SECONDARYSOCKET);
+  Curl_conn_cf_discard_all(data, data->conn, SECONDARYSOCKET);
 }
 
 /*
@@ -475,7 +478,7 @@ static CURLcode AcceptServerConnect(struct Curl_easy *data)
     Curl_set_in_callback(data, false);
 
     if(error) {
-      close_secondarysocket(data, conn);
+      close_secondarysocket(data, TRUE);
       return CURLE_ABORTED_BY_CALLBACK;
     }
   }
@@ -2980,7 +2983,13 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
     case FTP_CCC:
       if(ftpcode < 500) {
         /* First shut down the SSL layer (note: this call will block) */
-        result = Curl_ssl_cfilter_remove(data, FIRSTSOCKET);
+        /* This has only been tested on the proftpd server, and the mod_tls
+         * code sends a close notify alert without waiting for a close notify
+         * alert in response. Thus we wait for a close notify alert from the
+         * server, but we do not send one. Let's hope other servers do
+         * the same... */
+        result = Curl_ssl_cfilter_remove(data, FIRSTSOCKET,
+          (data->set.ftp_ccc == CURLFTPSSL_CCC_ACTIVE));
 
         if(result)
           failf(data, "Failed to clear the command channel (CCC)");
@@ -3457,7 +3466,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
       }
     }
 
-    close_secondarysocket(data, conn);
+    close_secondarysocket(data, result != CURLE_OK);
   }
 
   if(!result && (ftp->transfer == PPTRANSFER_BODY) && ftpc->ctl_valid &&
@@ -4425,7 +4434,7 @@ static CURLcode ftp_dophase_done(struct Curl_easy *data, bool connected)
     CURLcode result = ftp_do_more(data, &completed);
 
     if(result) {
-      close_secondarysocket(data, conn);
+      close_secondarysocket(data, TRUE);
       return result;
     }
   }

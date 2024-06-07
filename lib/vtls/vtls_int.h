@@ -94,6 +94,7 @@ struct ssl_connect_data {
   int io_need;                      /* TLS signals special SEND/RECV needs */
   BIT(use_alpn);                    /* if ALPN shall be used in handshake */
   BIT(peer_closed);                 /* peer has closed connection */
+  BIT(shutdown);                    /* graceful close notify finished */
 };
 
 
@@ -118,8 +119,8 @@ struct Curl_ssl {
 
   size_t (*version)(char *buffer, size_t size);
   int (*check_cxn)(struct Curl_cfilter *cf, struct Curl_easy *data);
-  int (*shut_down)(struct Curl_cfilter *cf,
-                   struct Curl_easy *data);
+  CURLcode (*shut_down)(struct Curl_cfilter *cf, struct Curl_easy *data,
+                        bool send_shutdown, bool *done);
   bool (*data_pending)(struct Curl_cfilter *cf,
                        const struct Curl_easy *data);
 
@@ -134,9 +135,8 @@ struct Curl_ssl {
                                   struct Curl_easy *data,
                                   bool *done);
 
-  /* During handshake, adjust the pollset to include the socket
-   * for POLLOUT or POLLIN as needed.
-   * Mandatory. */
+  /* During handshake/shutdown, adjust the pollset to include the socket
+   * for POLLOUT or POLLIN as needed. Mandatory. */
   void (*adjust_pollset)(struct Curl_cfilter *cf, struct Curl_easy *data,
                           struct easy_pollset *ps);
   void *(*get_internals)(struct ssl_connect_data *connssl, CURLINFO info);
@@ -166,7 +166,8 @@ extern const struct Curl_ssl *Curl_ssl;
 
 int Curl_none_init(void);
 void Curl_none_cleanup(void);
-int Curl_none_shutdown(struct Curl_cfilter *cf, struct Curl_easy *data);
+CURLcode Curl_none_shutdown(struct Curl_cfilter *cf, struct Curl_easy *data,
+                            bool send_shutdown, bool *done);
 int Curl_none_check_cxn(struct Curl_cfilter *cf, struct Curl_easy *data);
 CURLcode Curl_none_random(struct Curl_easy *data, unsigned char *entropy,
                           size_t length);

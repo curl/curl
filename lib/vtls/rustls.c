@@ -48,6 +48,7 @@ struct rustls_ssl_backend_data
   struct rustls_connection *conn;
   size_t plain_out_buffered;
   BIT(data_in_pending);
+  BIT(sent_shutdown);
 };
 
 /* For a given rustls_result error code, return the best-matching CURLcode. */
@@ -727,22 +728,90 @@ cr_get_internals(struct ssl_connect_data *connssl,
   return &backend->conn;
 }
 
+static CURLcode
+cr_shutdown(struct Curl_cfilter *cf,
+            struct Curl_easy *data,
+            bool send_shutdown, bool *done)
+{
+  struct ssl_connect_data *connssl = cf->ctx;
+  struct rustls_ssl_backend_data *backend =
+    (struct rustls_ssl_backend_data *)connssl->backend;
+  CURLcode result = CURLE_OK;
+  ssize_t nwritten, nread;
+  char buf[1024];
+  size_t i;
+
+  DEBUGASSERT(backend);
+  if(!backend->conn || connssl->shutdown) {
+    *done = TRUE;
+    goto out;
+  }
+
+  connssl->io_need = CURL_SSL_IO_NEED_NONE;
+  *done = FALSE;
+
+  if(!backend->sent_shutdown) {
+    /* do this only once */
+    backend->sent_shutdown = TRUE;
+    if(send_shutdown) {
+      rustls_connection_send_close_notify(backend->conn);
+    }
+  }
+
+  nwritten = cr_send(cf, data, NULL, 0, &result);
+  if(nwritten < 0) {
+    if(result == CURLE_AGAIN) {
+      connssl->io_need = CURL_SSL_IO_NEED_SEND;
+      result = CURLE_OK;
+      goto out;
+    }
+    DEBUGASSERT(result);
+    CURL_TRC_CF(data, cf, "shutdown send failed: %d", result);
+    goto out;
+  }
+
+  for(i = 0; i < 10; ++i) {
+    nread = cr_recv(cf, data, buf, (int)sizeof(buf), &result);
+    if(nread <= 0)
+      break;
+  }
+
+  if(nread > 0) {
+    /* still data coming in? */
+  }
+  else if(nread == 0) {
+    /* We got the close notify alert and are done. */
+    *done = TRUE;
+  }
+  else if(result == CURLE_AGAIN) {
+    connssl->io_need = CURL_SSL_IO_NEED_RECV;
+    result = CURLE_OK;
+  }
+  else {
+    DEBUGASSERT(result);
+    CURL_TRC_CF(data, cf, "shutdown, error: %d", result);
+  }
+
+out:
+  connssl->shutdown = (result || *done);
+  return result;
+}
+
 static void
 cr_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct rustls_ssl_backend_data *backend =
     (struct rustls_ssl_backend_data *)connssl->backend;
-  CURLcode tmperr = CURLE_OK;
-  ssize_t n = 0;
 
   DEBUGASSERT(backend);
-  if(backend->conn && !connssl->peer_closed) {
-    CURL_TRC_CF(data, cf, "closing connection, send notify");
-    rustls_connection_send_close_notify(backend->conn);
-    n = cr_send(cf, data, NULL, 0, &tmperr);
-    if(n < 0) {
-      failf(data, "rustls: error sending close_notify: %d", tmperr);
+  if(backend->conn) {
+    /* Send the TLS shutdown if have not done so already and are still
+     * connected *and* if the peer did not already close the connection. */
+    if(cf->connected && !connssl->shutdown &&
+       cf->next && cf->next->connected && !connssl->peer_closed) {
+      bool done;
+      (void)cr_shutdown(cf, data, TRUE, &done);
     }
 
     rustls_connection_free(backend->conn);
@@ -770,7 +839,7 @@ const struct Curl_ssl Curl_ssl_rustls = {
   Curl_none_cleanup,               /* cleanup */
   cr_version,                      /* version */
   Curl_none_check_cxn,             /* check_cxn */
-  Curl_none_shutdown,              /* shutdown */
+  cr_shutdown,                     /* shutdown */
   cr_data_pending,                 /* data_pending */
   Curl_none_random,                /* random */
   Curl_none_cert_status_request,   /* cert_status_request */

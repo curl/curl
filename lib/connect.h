@@ -40,6 +40,18 @@ timediff_t Curl_timeleft(struct Curl_easy *data,
 
 #define DEFAULT_CONNECT_TIMEOUT 300000 /* milliseconds == five minutes */
 
+#define DEFAULT_SHUTDOWN_TIMEOUT_MS   (2 * 1000)
+
+void Curl_shutdown_start(struct Curl_easy *data, int sockindex,
+                         struct curltime *nowp);
+
+/* return how much time there's left to shutdown the connection at
+ * sockindex. */
+timediff_t Curl_shutdown_timeleft(struct connectdata *conn, int sockindex,
+                                  struct curltime *nowp);
+
+void Curl_shutdown_clear(struct Curl_easy *data, int sockindex);
+
 /*
  * Used to extract socket and connectdata struct for the most recent
  * transfer on the given Curl_easy.

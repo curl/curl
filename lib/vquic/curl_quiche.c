@@ -1580,6 +1580,7 @@ struct Curl_cftype Curl_cft_http3 = {
   cf_quiche_destroy,
   cf_quiche_connect,
   cf_quiche_close,
+  Curl_cf_def_shutdown,
   Curl_cf_def_get_host,
   cf_quiche_adjust_pollset,
   cf_quiche_data_pending,

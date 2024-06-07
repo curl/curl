@@ -142,6 +142,43 @@ timediff_t Curl_timeleft(struct Curl_easy *data,
   return (ctimeleft_ms < timeleft_ms)? ctimeleft_ms : timeleft_ms;
 }
 
+void Curl_shutdown_start(struct Curl_easy *data, int sockindex,
+                         struct curltime *nowp)
+{
+  struct curltime now;
+
+  DEBUGASSERT(data->conn);
+  if(!nowp) {
+    now = Curl_now();
+    nowp = &now;
+  }
+  data->conn->shutdown.start[sockindex] = *nowp;
+  data->conn->shutdown.timeout_ms = (data->set.shutdowntimeout > 0) ?
+    data->set.shutdowntimeout : DEFAULT_SHUTDOWN_TIMEOUT_MS;
+}
+
+timediff_t Curl_shutdown_timeleft(struct connectdata *conn, int sockindex,
+                                  struct curltime *nowp)
+{
+  struct curltime now;
+
+  if(!conn->shutdown.start[sockindex].tv_sec || !conn->shutdown.timeout_ms)
+    return 0; /* not started or no limits */
+
+  if(!nowp) {
+    now = Curl_now();
+    nowp = &now;
+  }
+  return conn->shutdown.timeout_ms -
+         Curl_timediff(*nowp, conn->shutdown.start[sockindex]);
+}
+
+void Curl_shutdown_clear(struct Curl_easy *data, int sockindex)
+{
+  struct curltime *pt = &data->conn->shutdown.start[sockindex];
+  memset(pt, 0, sizeof(*pt));
+}
+
 /* Copies connection info into the transfer handle to make it available when
    the transfer handle is no longer associated with the connection. */
 void Curl_persistconninfo(struct Curl_easy *data, struct connectdata *conn,
@@ -358,6 +395,7 @@ struct eyeballer {
   BIT(has_started);                  /* attempts have started */
   BIT(is_done);                      /* out of addresses/time */
   BIT(connected);                    /* cf has connected */
+  BIT(shutdown);                     /* cf has shutdown */
   BIT(inconclusive);                 /* connect was not a hard failure, we
                                       * might talk to a restarting server */
 };
@@ -857,6 +895,46 @@ static void cf_he_ctx_clear(struct Curl_cfilter *cf, struct Curl_easy *data)
   ctx->winner = NULL;
 }
 
+static CURLcode cf_he_shutdown(struct Curl_cfilter *cf,
+                               struct Curl_easy *data, bool *done)
+{
+  struct cf_he_ctx *ctx = cf->ctx;
+  size_t i;
+  CURLcode result = CURLE_OK;
+
+  DEBUGASSERT(data);
+  if(cf->connected) {
+    *done = TRUE;
+    return CURLE_OK;
+  }
+
+  /* shutdown all ballers that have not done so already. If one fails,
+   * continue shutting down others until all are shutdown. */
+  for(i = 0; i < ARRAYSIZE(ctx->baller); i++) {
+    struct eyeballer *baller = ctx->baller[i];
+    bool bdone = FALSE;
+    if(!baller || !baller->cf || baller->shutdown)
+      continue;
+    baller->result = baller->cf->cft->do_shutdown(baller->cf, data, &bdone);
+    if(baller->result || bdone)
+      baller->shutdown = TRUE; /* treat a failed shutdown as done */
+  }
+
+  *done = TRUE;
+  for(i = 0; i < ARRAYSIZE(ctx->baller); i++) {
+    if(ctx->baller[i] && !ctx->baller[i]->shutdown)
+      *done = FALSE;
+  }
+  if(*done) {
+    for(i = 0; i < ARRAYSIZE(ctx->baller); i++) {
+      if(ctx->baller[i] && ctx->baller[i]->result)
+        result = ctx->baller[i]->result;
+    }
+  }
+  CURL_TRC_CF(data, cf, "shutdown -> %d, done=%d", result, *done);
+  return result;
+}
+
 static void cf_he_adjust_pollset(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   struct easy_pollset *ps)
@@ -1052,6 +1130,7 @@ struct Curl_cftype Curl_cft_happy_eyeballs = {
   cf_he_destroy,
   cf_he_connect,
   cf_he_close,
+  cf_he_shutdown,
   Curl_cf_def_get_host,
   cf_he_adjust_pollset,
   cf_he_data_pending,
@@ -1316,6 +1395,7 @@ struct Curl_cftype Curl_cft_setup = {
   cf_setup_destroy,
   cf_setup_connect,
   cf_setup_close,
+  Curl_cf_def_shutdown,
   Curl_cf_def_get_host,
   Curl_cf_def_adjust_pollset,
   Curl_cf_def_data_pending,
