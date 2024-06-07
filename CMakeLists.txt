@@ -1786,12 +1786,17 @@ if(NOT CURL_DISABLE_INSTALL)
       set(LIBCURL_LIBS          "${LIBCURL_LIBS} -l${_lib}")
     endif()
   endforeach()
+  set(LIBCURL_PC_REQUIRES "")
+  set(LIBCURL_PC_REQUIRES_PRIVATE "")
+  # Merge pkg-config private fields into public ones when static-only
   if(BUILD_SHARED_LIBS)
     set(ENABLE_SHARED         "yes")
+    set(LIBCURL_PC_REQUIRES   "")
     set(LIBCURL_NO_SHARED     "")
     set(CPPFLAG_CURL_STATICLIB "")
   else()
     set(ENABLE_SHARED         "no")
+    set(LIBCURL_PC_REQUIRES   "${LIBCURL_PC_REQUIRES_PRIVATE}")
     set(LIBCURL_NO_SHARED     "${LIBCURL_LIBS}")
     set(CPPFLAG_CURL_STATICLIB "-DCURL_STATICLIB")
   endif()
@@ -1808,9 +1813,6 @@ if(NOT CURL_DISABLE_INSTALL)
   # SUPPORT_FEATURES
   # SUPPORT_PROTOCOLS
   set(VERSIONNUM              "${CURL_VERSION_NUM}")
-
-  set(LIBCURL_PC_REQUIRES "")
-  set(LIBCURL_PC_REQUIRES_PRIVATE "")
 
   # Finally generate a "curl-config" matching this config
   # Use:

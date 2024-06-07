@@ -4647,12 +4647,17 @@ dnl to let curl-config output the static libraries correctly
 ENABLE_STATIC="$enable_static"
 AC_SUBST(ENABLE_STATIC)
 
-dnl merge the pkg-config Libs.private field into Libs when static-only
+AC_SUBST(LIBCURL_PC_REQUIRES_PRIVATE)
+
+dnl merge the pkg-config private fields into public ones when static-only
 if test "x$enable_shared" = "xno"; then
+  LIBCURL_PC_REQUIRES=$LIBCURL_PC_REQUIRES_PRIVATE
   LIBCURL_NO_SHARED=$LIBCURL_LIBS
 else
+  LIBCURL_PC_REQUIRES=
   LIBCURL_NO_SHARED=
 fi
+AC_SUBST(LIBCURL_PC_REQUIRES)
 AC_SUBST(LIBCURL_NO_SHARED)
 
 rm $compilersh
@@ -4911,9 +4916,6 @@ dnl replace the newlines back to spaces
 SUPPORT_PROTOCOLS=`echo $SUPPORT_PROTOCOLS | tr ' ' '\012' | sort | tr '\012' ' '`
 
 AC_SUBST(SUPPORT_PROTOCOLS)
-
-AC_SUBST(LIBCURL_PC_REQUIRES)
-AC_SUBST(LIBCURL_PC_REQUIRES_PRIVATE)
 
 dnl squeeze whitespace out of some variables
 
