@@ -2096,6 +2096,14 @@ static CURLcode cr_mime_unpause(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+static bool cr_mime_is_paused(struct Curl_easy *data,
+                              struct Curl_creader *reader)
+{
+  struct cr_mime_ctx *ctx = reader->ctx;
+  (void)data;
+  return (ctx->part && ctx->part->lastreadstatus == CURL_READFUNC_PAUSE);
+}
+
 static const struct Curl_crtype cr_mime = {
   "cr-mime",
   cr_mime_init,
@@ -2106,6 +2114,7 @@ static const struct Curl_crtype cr_mime = {
   cr_mime_resume_from,
   cr_mime_rewind,
   cr_mime_unpause,
+  cr_mime_is_paused,
   Curl_creader_def_done,
   sizeof(struct cr_mime_ctx)
 };

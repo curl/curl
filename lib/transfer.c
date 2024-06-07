@@ -1323,3 +1323,13 @@ CURLcode Curl_xfer_send_shutdown(struct Curl_easy *data, bool *done)
   sockindex = (data->conn->writesockfd == data->conn->sock[SECONDARYSOCKET]);
   return Curl_conn_shutdown(data, sockindex, done);
 }
+
+bool Curl_xfer_is_blocked(struct Curl_easy *data)
+{
+  if(!CURL_WANT_SEND(data))
+    return (CURL_WANT_RECV(data) && Curl_cwriter_is_paused(data));
+  else if(!CURL_WANT_RECV(data))
+    return (CURL_WANT_SEND(data) && Curl_creader_is_paused(data));
+  else
+    return Curl_creader_is_paused(data) && Curl_cwriter_is_paused(data);
+}
