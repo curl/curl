@@ -116,13 +116,11 @@ struct curl_pollfds {
   unsigned int n;
   unsigned int count;
   BIT(allocated_pfds);
-  BIT(auto_grow);
 };
 
 void Curl_pollfds_init(struct curl_pollfds *cpfds,
                        struct pollfd *static_pfds,
-                       unsigned int static_count,
-                       bool auto_grow);
+                       unsigned int static_count);
 
 void Curl_pollfds_cleanup(struct curl_pollfds *cpfds);
 

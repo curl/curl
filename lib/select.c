@@ -408,8 +408,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
 
 void Curl_pollfds_init(struct curl_pollfds *cpfds,
                        struct pollfd *static_pfds,
-                       unsigned int static_count,
-                       bool auto_grow)
+                       unsigned int static_count)
 {
   DEBUGASSERT(cpfds);
   memset(cpfds, 0, sizeof(*cpfds));
@@ -417,7 +416,6 @@ void Curl_pollfds_init(struct curl_pollfds *cpfds,
     cpfds->pfds = static_pfds;
     cpfds->count = static_count;
   }
-  cpfds->auto_grow = auto_grow;
 }
 
 void Curl_pollfds_cleanup(struct curl_pollfds *cpfds)
@@ -433,9 +431,6 @@ static CURLcode cpfds_increase(struct curl_pollfds *cpfds, unsigned int inc)
 {
   struct pollfd *new_fds;
   unsigned int new_count = cpfds->count + inc;
-
-  if(!cpfds->auto_grow)
-    return CURLE_OUT_OF_MEMORY;
 
   new_fds = calloc(new_count, sizeof(struct pollfd));
   if(!new_fds)
