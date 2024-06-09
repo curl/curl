@@ -162,6 +162,8 @@ if(PICKY_COMPILER)
         list(APPEND WPICKY_ENABLE
           ${WPICKY_COMMON_OLD}
           -Wclobbered                      #             gcc  4.3
+          -Wconversion-extra               #             gcc  4.0
+            -Wno-error=conversion-extra
           -Wmissing-parameter-type         #             gcc  4.3
           -Wold-style-declaration          #             gcc  4.3
           -Wstrict-aliasing=3              #             gcc  4.0

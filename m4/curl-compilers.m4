@@ -985,6 +985,8 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           #
           dnl Only gcc 3.4 or later
           if test "$compiler_num" -ge "304"; then
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [conversion-extra])
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-error=no-conversion-extra"
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [declaration-after-statement])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [old-style-definition])
           fi
