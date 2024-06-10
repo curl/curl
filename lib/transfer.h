@@ -135,7 +135,4 @@ CURLcode Curl_xfer_recv(struct Curl_easy *data,
 CURLcode Curl_xfer_send_close(struct Curl_easy *data);
 CURLcode Curl_xfer_send_shutdown(struct Curl_easy *data, bool *done);
 
-CURLcode Curl_xfer_recv_shutdown(struct Curl_easy *data, bool *done);
-bool Curl_xfer_recv_shutdown_started(struct Curl_easy *data);
-
 #endif /* HEADER_CURL_TRANSFER_H */
