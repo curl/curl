@@ -529,6 +529,7 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
   struct curl_certinfo *certinfo;
   CURLcode res = curl_easy_getinfo(per->curl, CURLINFO_CERTINFO, &certinfo);
   bool fclose_stream = FALSE;
+  struct dynbuf name;
 
   if(!writeinfo)
     return;
@@ -536,6 +537,7 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
   if(!res && certinfo)
     per->certinfo = certinfo;
 
+  curlx_dyn_init(&name, MAX_WRITEOUT_NAME_LENGTH);
   while(ptr && *ptr && !done) {
     if('%' == *ptr && ptr[1]) {
       if('%' == ptr[1]) {
@@ -550,7 +552,6 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
         if('{' == ptr[1]) {
           struct writeoutvar *wv = NULL;
           struct writeoutvar find = { 0 };
-          struct dynbuf name;
           end = strchr(ptr, '}');
           if(!end) {
             fputs("%{", stream);
@@ -558,14 +559,13 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
           }
           ptr += 2; /* pass the % and the { */
           vlen = end - ptr;
-          curlx_dyn_init(&name, MAX_WRITEOUT_NAME_LENGTH);
 
+          curlx_dyn_reset(&name);
           if(!curlx_dyn_addn(&name, ptr, vlen)) {
             find.name = curlx_dyn_ptr(&name);
             wv = bsearch(&find,
                          variables, sizeof(variables)/sizeof(variables[0]),
                          sizeof(variables[0]), matchvar);
-            curlx_dyn_free(&name);
           }
           if(wv) {
             switch(wv->id) {
@@ -687,4 +687,5 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
   }
   if(fclose_stream)
     fclose(stream);
+  curlx_dyn_free(&name);
 }
