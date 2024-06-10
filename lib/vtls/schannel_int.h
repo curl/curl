@@ -158,6 +158,7 @@ struct schannel_ssl_backend_data {
 #ifdef HAS_MANUAL_VERIFY_API
   bool use_manual_cred_validation; /* true if manual cred validation is used */
 #endif
+  BIT(sent_shutdown);
 };
 
 /* key to use at `multi->proto_hash` */

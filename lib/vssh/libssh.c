@@ -1350,7 +1350,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         Curl_pgrsSetUploadSize(data, data->state.infilesize);
       }
       /* upload data */
-      Curl_xfer_setup(data, -1, -1, FALSE, FIRSTSOCKET);
+      Curl_xfer_setup1(data, CURL_XFER_SEND, -1, FALSE);
 
       /* not set by Curl_xfer_setup to preserve keepon bits */
       conn->sockfd = conn->writesockfd;
@@ -1576,7 +1576,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       sshc->sftp_dir = NULL;
 
       /* no data to transfer */
-      Curl_xfer_setup(data, -1, -1, FALSE, -1);
+      Curl_xfer_setup_nop(data);
       state(data, SSH_STOP);
       break;
 
@@ -1721,12 +1721,12 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
     /* Setup the actual download */
     if(data->req.size == 0) {
       /* no data to transfer */
-      Curl_xfer_setup(data, -1, -1, FALSE, -1);
+      Curl_xfer_setup_nop(data);
       infof(data, "File already completely downloaded");
       state(data, SSH_STOP);
       break;
     }
-    Curl_xfer_setup(data, FIRSTSOCKET, data->req.size, FALSE, -1);
+    Curl_xfer_setup1(data, CURL_XFER_RECV, data->req.size, FALSE);
 
     /* not set by Curl_xfer_setup to preserve keepon bits */
     conn->writesockfd = conn->sockfd;
@@ -1850,7 +1850,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       }
 
       /* upload data */
-      Curl_xfer_setup(data, -1, data->req.size, FALSE, FIRSTSOCKET);
+      Curl_xfer_setup1(data, CURL_XFER_SEND, -1, FALSE);
 
       /* not set by Curl_xfer_setup to preserve keepon bits */
       conn->sockfd = conn->writesockfd;
@@ -1894,7 +1894,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         /* download data */
         bytecount = ssh_scp_request_get_size(sshc->scp_session);
         data->req.maxdownload = (curl_off_t) bytecount;
-        Curl_xfer_setup(data, FIRSTSOCKET, bytecount, FALSE, -1);
+        Curl_xfer_setup1(data, CURL_XFER_RECV, bytecount, FALSE);
 
         /* not set by Curl_xfer_setup to preserve keepon bits */
         conn->writesockfd = conn->sockfd;

@@ -160,6 +160,30 @@ bool Curl_meets_timecondition(struct Curl_easy *data, time_t timeofdoc)
   return TRUE;
 }
 
+static CURLcode xfer_recv_shutdown(struct Curl_easy *data, bool *done)
+{
+  int sockindex;
+
+  if(!data || !data->conn)
+    return CURLE_FAILED_INIT;
+  if(data->conn->sockfd == CURL_SOCKET_BAD)
+    return CURLE_FAILED_INIT;
+  sockindex = (data->conn->sockfd == data->conn->sock[SECONDARYSOCKET]);
+  return Curl_conn_shutdown(data, sockindex, done);
+}
+
+static bool xfer_recv_shutdown_started(struct Curl_easy *data)
+{
+  int sockindex;
+
+  if(!data || !data->conn)
+    return CURLE_FAILED_INIT;
+  if(data->conn->sockfd == CURL_SOCKET_BAD)
+    return CURLE_FAILED_INIT;
+  sockindex = (data->conn->sockfd == data->conn->sock[SECONDARYSOCKET]);
+  return Curl_shutdown_started(data, sockindex);
+}
+
 /**
  * Receive raw response data for the transfer.
  * @param data         the transfer
@@ -186,17 +210,35 @@ static ssize_t Curl_xfer_recv_resp(struct Curl_easy *data,
     else if(totalleft < (curl_off_t)blen)
       blen = (size_t)totalleft;
   }
-
-  if(!blen) {
-    /* want nothing - continue as if read nothing. */
-    DEBUGF(infof(data, "readwrite_data: we're done"));
-    *err = CURLE_OK;
-    return 0;
+  else if(xfer_recv_shutdown_started(data)) {
+    /* we already reveived everything. Do not try more. */
+    blen = 0;
   }
 
-  *err = Curl_xfer_recv(data, buf, blen, &nread);
+  if(!blen) {
+    /* want nothing more */
+    *err = CURLE_OK;
+    nread = 0;
+  }
+  else {
+    *err = Curl_xfer_recv(data, buf, blen, &nread);
+  }
+
   if(*err)
     return -1;
+  if(nread == 0) {
+    if(data->req.shutdown) {
+      bool done;
+      *err = xfer_recv_shutdown(data, &done);
+      if(*err)
+        return -1;
+      if(!done) {
+        *err = CURLE_AGAIN;
+        return -1;
+      }
+    }
+    DEBUGF(infof(data, "readwrite_data: we're done"));
+  }
   DEBUGASSERT(nread >= 0);
   return nread;
 }
@@ -1064,16 +1106,17 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
 }
 
 /*
- * Curl_xfer_setup() is called to setup some basic properties for the
- * upcoming transfer.
+ * xfer_setup() is called to setup basic properties for the transfer.
  */
-void Curl_xfer_setup(
+static void xfer_setup(
   struct Curl_easy *data,   /* transfer */
   int sockindex,            /* socket index to read from or -1 */
   curl_off_t size,          /* -1 if unknown at this point */
   bool getheader,           /* TRUE if header parsing is wanted */
-  int writesockindex        /* socket index to write to, it may very well be
+  int writesockindex,       /* socket index to write to, it may very well be
                                the same we read from. -1 disables */
+  bool shutdown             /* shutdown connection at transfer end. Only
+                             * supported when sending OR receiving. */
   )
 {
   struct SingleRequest *k = &data->req;
@@ -1083,6 +1126,7 @@ void Curl_xfer_setup(
   DEBUGASSERT(conn != NULL);
   DEBUGASSERT((sockindex <= 1) && (sockindex >= -1));
   DEBUGASSERT((writesockindex <= 1) && (writesockindex >= -1));
+  DEBUGASSERT(!shutdown || (sockindex == -1) || (writesockindex == -1));
 
   if(conn->bits.multiplex || conn->httpversion >= 20 || want_send) {
     /* when multiplexing, the read/write sockets need to be the same! */
@@ -1100,9 +1144,10 @@ void Curl_xfer_setup(
     conn->writesockfd = writesockindex == -1 ?
       CURL_SOCKET_BAD:conn->sock[writesockindex];
   }
-  k->getheader = getheader;
 
+  k->getheader = getheader;
   k->size = size;
+  k->shutdown = shutdown;
 
   /* The code sequence below is placed in this function just because all
      necessary input is not always known in do_complete() as this function may
@@ -1123,6 +1168,33 @@ void Curl_xfer_setup(
       k->keepon |= KEEP_SEND;
   } /* if(k->getheader || !data->req.no_body) */
 
+}
+
+void Curl_xfer_setup_nop(struct Curl_easy *data)
+{
+  xfer_setup(data, -1, -1, FALSE, -1, FALSE);
+}
+
+void Curl_xfer_setup1(struct Curl_easy *data,
+                      int send_recv,
+                      curl_off_t recv_size,
+                      bool getheader)
+{
+  int recv_index = (send_recv & CURL_XFER_RECV)? FIRSTSOCKET : -1;
+  int send_index = (send_recv & CURL_XFER_SEND)? FIRSTSOCKET : -1;
+  DEBUGASSERT((recv_index >= 0) || (recv_size == -1));
+  xfer_setup(data, recv_index, recv_size, getheader, send_index, FALSE);
+}
+
+void Curl_xfer_setup2(struct Curl_easy *data,
+                      int send_recv,
+                      curl_off_t recv_size,
+                      bool shutdown)
+{
+  int recv_index = (send_recv & CURL_XFER_RECV)? SECONDARYSOCKET : -1;
+  int send_index = (send_recv & CURL_XFER_SEND)? SECONDARYSOCKET : -1;
+  DEBUGASSERT((recv_index >= 0) || (recv_size == -1));
+  xfer_setup(data, recv_index, recv_size, FALSE, send_index, shutdown);
 }
 
 CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
@@ -1238,4 +1310,16 @@ CURLcode Curl_xfer_send_close(struct Curl_easy *data)
 {
   Curl_conn_ev_data_done_send(data);
   return CURLE_OK;
+}
+
+CURLcode Curl_xfer_send_shutdown(struct Curl_easy *data, bool *done)
+{
+  int sockindex;
+
+  if(!data || !data->conn)
+    return CURLE_FAILED_INIT;
+  if(data->conn->writesockfd == CURL_SOCKET_BAD)
+    return CURLE_FAILED_INIT;
+  sockindex = (data->conn->writesockfd == data->conn->sock[SECONDARYSOCKET]);
+  return Curl_conn_shutdown(data, sockindex, done);
 }

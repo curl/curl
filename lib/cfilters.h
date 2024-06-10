@@ -384,10 +384,11 @@ bool Curl_conn_is_multiplex(struct connectdata *conn, int sockindex);
 void Curl_conn_close(struct Curl_easy *data, int sockindex);
 
 /**
- * Shutdown the connection at `sockindex` blocking with timeout
- * from `data->set.shutdowntimeout`, default DEFAULT_SHUTDOWN_TIMEOUT_MS
+ * Shutdown the connection at `sockindex` non-blocking, using timeout
+ * from `data->set.shutdowntimeout`, default DEFAULT_SHUTDOWN_TIMEOUT_MS.
+ * Will return CURLE_OK and *done == FALSE if not finished.
  */
-CURLcode Curl_conn_shutdown_blocking(struct Curl_easy *data, int sockindex);
+CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done);
 
 /**
  * Return if data is pending in some connection filter at chain

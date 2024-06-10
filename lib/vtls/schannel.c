@@ -2499,7 +2499,12 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
           connssl->peer.hostname, connssl->peer.port);
   }
 
-  if(backend->cred && backend->ctxt) {
+  if(!backend->ctxt || connssl->shutdown) {
+    *done = TRUE;
+    goto out;
+  }
+
+  if(backend->cred && backend->ctxt && !backend->sent_shutdown) {
     SecBufferDesc BuffDesc;
     SecBuffer Buffer;
     SECURITY_STATUS sspi_status;
@@ -2545,11 +2550,58 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
                                           outbuf.pvBuffer, outbuf.cbBuffer,
                                           &result);
       s_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
-      if((result != CURLE_OK) || (outbuf.cbBuffer != (size_t) written)) {
-        infof(data, "schannel: failed to send close msg: %s"
-              " (bytes written: %zd)", curl_easy_strerror(result), written);
-        result = CURLE_SEND_ERROR;
+      if(!result) {
+        if(written < (ssize_t)outbuf.cbBuffer) {
+          /* TODO: handle partial sends */
+          infof(data, "schannel: failed to send close msg: %s"
+                " (bytes written: %zd)", curl_easy_strerror(result), written);
+          result = CURLE_SEND_ERROR;
+          goto out;
+        }
+        backend->sent_shutdown = TRUE;
+        *done = TRUE;
       }
+      else if(result == CURLE_AGAIN) {
+        connssl->io_need = CURL_SSL_IO_NEED_SEND;
+        result = CURLE_OK;
+        goto out;
+      }
+      else {
+        if(!backend->recv_connection_closed) {
+          infof(data, "schannel: error sending close msg: %d", result);
+          result = CURLE_SEND_ERROR;
+          goto out;
+        }
+        /* Looks like server already closed the connection.
+         * An error to send our close notify is not a failure. */
+        *done = TRUE;
+        result = CURLE_OK;
+      }
+    }
+  }
+
+  /* If the connection seems open and we have not seen the close notify
+   * from the server yet, try to receive it. */
+  if(backend->cred && backend->ctxt &&
+     !backend->recv_sspi_close_notify && !backend->recv_connection_closed) {
+    char buffer[1024];
+    ssize_t nread;
+
+    nread = schannel_recv(cf, data, buffer, sizeof(buffer), &result);
+    if(nread > 0) {
+      /* still data coming in? */
+    }
+    else if(nread == 0) {
+      /* We got the close notify alert and are done. */
+      backend->recv_connection_closed = TRUE;
+      *done = TRUE;
+    }
+    else if(nread < 0 && result == CURLE_AGAIN) {
+      connssl->io_need = CURL_SSL_IO_NEED_RECV;
+    }
+    else {
+      CURL_TRC_CF(data, cf, "SSL shutdown, error %d", result);
+      result = CURLE_RECV_ERROR;
     }
   }
 

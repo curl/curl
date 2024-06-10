@@ -179,6 +179,12 @@ void Curl_shutdown_clear(struct Curl_easy *data, int sockindex)
   memset(pt, 0, sizeof(*pt));
 }
 
+bool Curl_shutdown_started(struct Curl_easy *data, int sockindex)
+{
+  struct curltime *pt = &data->conn->shutdown.start[sockindex];
+  return (pt->tv_sec > 0) || (pt->tv_usec > 0);
+}
+
 /* Copies connection info into the transfer handle to make it available when
    the transfer handle is no longer associated with the connection. */
 void Curl_persistconninfo(struct Curl_easy *data, struct connectdata *conn,

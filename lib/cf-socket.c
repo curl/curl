@@ -1028,7 +1028,6 @@ static CURLcode cf_socket_shutdown(struct Curl_cfilter *cf,
       unsigned char buf[1024];
       (void)sread(ctx->sock, buf, sizeof(buf));
     }
-    cf_socket_close(cf, data);
   }
   *done = TRUE;
   return CURLE_OK;

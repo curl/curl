@@ -175,60 +175,54 @@ void Curl_conn_close(struct Curl_easy *data, int index)
   if(cf) {
     cf->cft->do_close(cf, data);
   }
+  Curl_shutdown_clear(data, index);
 }
 
-CURLcode Curl_conn_shutdown_blocking(struct Curl_easy *data, int sockindex)
+CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done)
 {
   struct Curl_cfilter *cf;
   CURLcode result = CURLE_OK;
+  timediff_t timeout_ms;
+  struct curltime now;
 
   DEBUGASSERT(data->conn);
   /* it is valid to call that without filters being present */
   cf = data->conn->cfilter[sockindex];
-  if(cf) {
-    timediff_t timeout_ms;
-    bool done = FALSE;
-    int what;
+  if(!cf) {
+    *done = TRUE;
+    return CURLE_OK;
+  }
 
+  *done = FALSE;
+  now = Curl_now();
+  if(!Curl_shutdown_started(data, sockindex)) {
     DEBUGF(infof(data, "shutdown start on%s connection",
            sockindex? " secondary" : ""));
-    Curl_shutdown_start(data, sockindex, NULL);
-    while(cf) {
-      while(!done && !result) {
-        result = cf->cft->do_shutdown(cf, data, &done);
-        if(!result && !done) {
-          timeout_ms = Curl_shutdown_timeleft(data->conn, sockindex, NULL);
-          if(timeout_ms < 0) {
-            failf(data, "SSL shutdown timeout");
-            result = CURLE_OPERATION_TIMEDOUT;
-            goto out;
-          }
-
-          what = Curl_conn_cf_poll(cf, data, timeout_ms);
-          if(what < 0) {
-            /* fatal error */
-            failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
-            result = CURLE_RECV_ERROR;
-            goto out;
-          }
-          else if(0 == what) {
-            failf(data, "SSL shutdown timeout");
-            result = CURLE_OPERATION_TIMEDOUT;
-            goto out;
-          }
-        }
-      }
-      if(result)
-        break;
-      CURL_TRC_CF(data, cf, "shut down successfully");
-      cf = cf->next;
-      done = FALSE;
-    }
-    Curl_shutdown_clear(data, sockindex);
-    DEBUGF(infof(data, "shutdown done on%s connection -> %d",
-           sockindex? " secondary" : "", result));
+    Curl_shutdown_start(data, sockindex, &now);
   }
-out:
+  else {
+    timeout_ms = Curl_shutdown_timeleft(data->conn, sockindex, &now);
+    if(timeout_ms < 0) {
+      failf(data, "SSL shutdown timeout");
+      return CURLE_OPERATION_TIMEDOUT;
+    }
+  }
+
+  while(cf) {
+    bool cfdone = FALSE;
+    result = cf->cft->do_shutdown(cf, data, &cfdone);
+    if(result) {
+      CURL_TRC_CF(data, cf, "shut down failed with %d", result);
+      return result;
+    }
+    else if(!cfdone) {
+      CURL_TRC_CF(data, cf, "shut down not done yet");
+      return CURLE_OK;
+    }
+    CURL_TRC_CF(data, cf, "shut down successfully");
+    cf = cf->next;
+  }
+  *done = (!result);
   return result;
 }
 
