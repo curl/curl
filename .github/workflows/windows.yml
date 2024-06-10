@@ -164,6 +164,7 @@ jobs:
         include:
           - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19                !1233', config: '--enable-debug --disable-threaded-resolver --disable-proxy' }
           - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233', config: '--enable-debug --disable-threaded-resolver' }
+          - { build: 'cmake'    , sys: 'msys'   , env: 'x86_64'      , tflags: 'skipall'                 , config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF' }
           - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233', config: '' }
           - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '--enable-debug --disable-threaded-resolver --disable-curldebug --enable-static=no' }
           # FIXME: WebSockets test results ignored due to frequent failures on native Windows:
