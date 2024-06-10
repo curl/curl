@@ -241,7 +241,7 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
       failf(data, "Failed sending DICT request");
       goto error;
     }
-    Curl_xfer_setup(data, FIRSTSOCKET, -1, FALSE, -1); /* no upload */
+    Curl_xfer_setup1(data, CURL_XFER_RECV, -1, FALSE); /* no upload */
   }
   else if(strncasecompare(path, DICT_DEFINE, sizeof(DICT_DEFINE)-1) ||
           strncasecompare(path, DICT_DEFINE2, sizeof(DICT_DEFINE2)-1) ||
@@ -287,7 +287,7 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
       failf(data, "Failed sending DICT request");
       goto error;
     }
-    Curl_xfer_setup(data, FIRSTSOCKET, -1, FALSE, -1);
+    Curl_xfer_setup1(data, CURL_XFER_RECV, -1, FALSE);
   }
   else {
 
@@ -309,7 +309,7 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
         goto error;
       }
 
-      Curl_xfer_setup(data, FIRSTSOCKET, -1, FALSE, -1);
+      Curl_xfer_setup1(data, CURL_XFER_RECV, -1, FALSE);
     }
   }
 

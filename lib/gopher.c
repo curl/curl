@@ -238,7 +238,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
   if(result)
     return result;
 
-  Curl_xfer_setup(data, FIRSTSOCKET, -1, FALSE, -1);
+  Curl_xfer_setup1(data, CURL_XFER_RECV, -1, FALSE);
   return CURLE_OK;
 }
 #endif /* CURL_DISABLE_GOPHER */

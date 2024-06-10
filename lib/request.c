@@ -54,6 +54,7 @@ CURLcode Curl_req_soft_reset(struct SingleRequest *req,
   req->upload_done = FALSE;
   req->download_done = FALSE;
   req->ignorebody = FALSE;
+  req->shutdown = FALSE;
   req->bytecount = 0;
   req->writebytecount = 0;
   req->header = TRUE; /* assume header */
@@ -156,6 +157,7 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
   req->getheader = FALSE;
   req->no_body = data->set.opt_no_body;
   req->authneg = FALSE;
+  req->shutdown = FALSE;
 }
 
 void Curl_req_free(struct SingleRequest *req, struct Curl_easy *data)
@@ -291,6 +293,14 @@ static CURLcode req_flush(struct Curl_easy *data)
 
   if(!data->req.upload_done && data->req.eos_read &&
      Curl_bufq_is_empty(&data->req.sendbuf)) {
+    if(data->req.shutdown) {
+      bool done;
+      result = Curl_xfer_send_shutdown(data, &done);
+      if(result)
+        return result;
+      if(!done)
+        return CURLE_AGAIN;
+    }
     return req_set_upload_done(data);
   }
   return CURLE_OK;

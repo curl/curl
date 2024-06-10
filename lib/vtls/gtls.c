@@ -1829,6 +1829,13 @@ static CURLcode gtls_shutdown(struct Curl_cfilter *cf,
     backend->gtls.sent_shutdown = TRUE;
     if(send_shutdown) {
       int ret = gnutls_bye(backend->gtls.session, GNUTLS_SHUT_RDWR);
+      if((ret == GNUTLS_E_AGAIN) || (ret == GNUTLS_E_INTERRUPTED)) {
+        CURL_TRC_CF(data, cf, "SSL shutdown, gnutls_bye EAGAIN");
+        connssl->io_need = gnutls_record_get_direction(backend->gtls.session)?
+          CURL_SSL_IO_NEED_SEND : CURL_SSL_IO_NEED_RECV;
+        result = CURLE_OK;
+        goto out;
+      }
       if(ret != GNUTLS_E_SUCCESS) {
         CURL_TRC_CF(data, cf, "SSL shutdown, gnutls_bye error: '%s'(%d)",
                     gnutls_strerror((int)ret), (int)ret);

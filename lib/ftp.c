@@ -290,12 +290,8 @@ const struct Curl_handler Curl_handler_ftps = {
 };
 #endif
 
-static void close_secondarysocket(struct Curl_easy *data, bool premature)
+static void close_secondarysocket(struct Curl_easy *data)
 {
-  if(!premature) {
-    CURL_TRC_FTP(data, "[%s] shutting down DATA connection", FTP_DSTATE(data));
-    Curl_conn_shutdown_blocking(data, SECONDARYSOCKET);
-  }
   CURL_TRC_FTP(data, "[%s] closing DATA connection", FTP_DSTATE(data));
   Curl_conn_close(data, SECONDARYSOCKET);
   Curl_conn_cf_discard_all(data, data->conn, SECONDARYSOCKET);
@@ -478,7 +474,7 @@ static CURLcode AcceptServerConnect(struct Curl_easy *data)
     Curl_set_in_callback(data, false);
 
     if(error) {
-      close_secondarysocket(data, TRUE);
+      close_secondarysocket(data);
       return CURLE_ABORTED_BY_CALLBACK;
     }
   }
@@ -659,12 +655,12 @@ static CURLcode InitiateTransfer(struct Curl_easy *data)
     /* set the SO_SNDBUF for the secondary socket for those who need it */
     Curl_sndbuf_init(conn->sock[SECONDARYSOCKET]);
 
-    Curl_xfer_setup(data, -1, -1, FALSE, SECONDARYSOCKET);
+    Curl_xfer_setup2(data, CURL_XFER_SEND, -1, TRUE);
   }
   else {
     /* FTP download: */
-    Curl_xfer_setup(data, SECONDARYSOCKET,
-                    conn->proto.ftpc.retr_size_saved, FALSE, -1);
+    Curl_xfer_setup2(data, CURL_XFER_RECV,
+                     conn->proto.ftpc.retr_size_saved, TRUE);
   }
 
   conn->proto.ftpc.pp.pending_resp = TRUE; /* expect server response */
@@ -1739,7 +1735,7 @@ static CURLcode ftp_state_ul_setup(struct Curl_easy *data,
         infof(data, "File already completely uploaded");
 
         /* no data to transfer */
-        Curl_xfer_setup(data, -1, -1, FALSE, -1);
+        Curl_xfer_setup_nop(data);
 
         /* Set ->transfer so that we won't get any error in
          * ftp_done() because we didn't transfer anything! */
@@ -2410,7 +2406,7 @@ static CURLcode ftp_state_retr(struct Curl_easy *data,
 
     if(ftp->downloadsize == 0) {
       /* no data to transfer */
-      Curl_xfer_setup(data, -1, -1, FALSE, -1);
+      Curl_xfer_setup_nop(data);
       infof(data, "File already completely downloaded");
 
       /* Set ->transfer so that we won't get any error in ftp_done()
@@ -3466,7 +3462,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
       }
     }
 
-    close_secondarysocket(data, result != CURLE_OK);
+    close_secondarysocket(data);
   }
 
   if(!result && (ftp->transfer == PPTRANSFER_BODY) && ftpc->ctl_valid &&
@@ -3833,7 +3829,7 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
   }
 
   /* no data to transfer */
-  Curl_xfer_setup(data, -1, -1, FALSE, -1);
+  Curl_xfer_setup_nop(data);
 
   if(!ftpc->wait_data_conn) {
     /* no waiting for the data connection so this is now complete */
@@ -4434,14 +4430,14 @@ static CURLcode ftp_dophase_done(struct Curl_easy *data, bool connected)
     CURLcode result = ftp_do_more(data, &completed);
 
     if(result) {
-      close_secondarysocket(data, TRUE);
+      close_secondarysocket(data);
       return result;
     }
   }
 
   if(ftp->transfer != PPTRANSFER_BODY)
     /* no data to transfer */
-    Curl_xfer_setup(data, -1, -1, FALSE, -1);
+    Curl_xfer_setup_nop(data);
   else if(!connected)
     /* since we didn't connect now, we want do_more to get called */
     conn->bits.do_more = TRUE;

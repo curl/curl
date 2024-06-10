@@ -1133,7 +1133,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     Curl_pgrsSetUploadSize(data, 0); /* nothing */
   }
 
-  Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, FIRSTSOCKET);
+  Curl_xfer_setup1(data, CURL_XFER_SENDRECV, -1, TRUE);
   conn->datastream = Curl_hyper_stream;
 
   /* clear userpwd and proxyuserpwd to avoid reusing old credentials
