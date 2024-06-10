@@ -4669,7 +4669,7 @@ LIBCURL_PC_REQUIRES_PRIVATE=`echo $LIBCURL_PC_REQUIRES_PRIVATE | tr ' ' ','`
 
 AC_SUBST(LIBCURL_PC_REQUIRES_PRIVATE)
 
-dnl merge the pkg-config private fields into public ones when static-only
+dnl Merge pkg-config private fields into public ones when static-only
 if test "x$enable_shared" = "xno"; then
   LIBCURL_PC_REQUIRES=$LIBCURL_PC_REQUIRES_PRIVATE
   LIBCURL_NO_SHARED=$LIBCURL_LIBS
