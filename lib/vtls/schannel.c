@@ -2568,9 +2568,9 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
       }
       else {
         if(!backend->recv_connection_closed) {
-        infof(data, "schannel: error sending close msg: %d", result);
-        result = CURLE_SEND_ERROR;
-        goto out;
+          infof(data, "schannel: error sending close msg: %d", result);
+          result = CURLE_SEND_ERROR;
+          goto out;
         }
         /* Looks like server already closed the connection.
          * An error to send our close notify is not a failure. */
