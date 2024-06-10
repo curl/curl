@@ -559,11 +559,11 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
           struct writeoutvar *wv = NULL;
           struct writeoutvar find = { 0 };
           end = strchr(ptr, '}');
+          ptr += 2; /* pass the % and the { */
           if(!end) {
             fputs("%{", stream);
             continue;
           }
-          ptr += 2; /* pass the % and the { */
           vlen = end - ptr;
 
           curlx_dyn_reset(&name);
