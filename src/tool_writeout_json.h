@@ -30,6 +30,7 @@ int jsonquoted(const char *in, size_t len,
                struct curlx_dynbuf *out, bool lowercase);
 
 void ourWriteOutJSON(FILE *stream, const struct writeoutvar mappings[],
+                     size_t nentries,
                      struct per_transfer *per, CURLcode per_result);
 void headerJSON(FILE *stream, struct per_transfer *per);
 void jsonWriteString(FILE *stream, const char *in, bool lowercase);

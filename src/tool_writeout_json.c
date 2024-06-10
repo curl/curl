@@ -101,13 +101,14 @@ void jsonWriteString(FILE *stream, const char *in, bool lowercase)
 }
 
 void ourWriteOutJSON(FILE *stream, const struct writeoutvar mappings[],
+                     size_t nentries,
                      struct per_transfer *per, CURLcode per_result)
 {
-  int i;
+  size_t i;
 
   fputs("{", stream);
 
-  for(i = 0; mappings[i].name != NULL; i++) {
+  for(i = 0; i < nentries; i++) {
     if(mappings[i].writefunc &&
        mappings[i].writefunc(stream, &mappings[i], per, per_result, true))
       fputs(",", stream);
