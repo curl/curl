@@ -268,6 +268,15 @@ static int urlpart(struct per_transfer *per, writeoutid vid,
   return rc;
 }
 
+static void certinfo(struct per_transfer *per)
+{
+  if(!per->certinfo) {
+    struct curl_certinfo *certinfo;
+    CURLcode res = curl_easy_getinfo(per->curl, CURLINFO_CERTINFO, &certinfo);
+    per->certinfo = (!res && certinfo) ? certinfo : NULL;
+  }
+}
+
 static int writeString(FILE *stream, const struct writeoutvar *wovar,
                        struct per_transfer *per, CURLcode per_result,
                        bool use_json)
@@ -303,6 +312,7 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
   else {
     switch(wovar->id) {
     case VAR_CERT:
+      certinfo(per);
       if(per->certinfo) {
         int i;
         bool error = FALSE;
@@ -434,6 +444,7 @@ static int writeLong(FILE *stream, const struct writeoutvar *wovar,
   else {
     switch(wovar->id) {
     case VAR_NUM_CERTS:
+      certinfo(per);
       longinfo = per->certinfo ? per->certinfo->num_of_certs : 0;
       valid = true;
       break;
@@ -526,16 +537,11 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
   const char *writeinfo = config->writeout;
   const char *ptr = writeinfo;
   bool done = FALSE;
-  struct curl_certinfo *certinfo;
-  CURLcode res = curl_easy_getinfo(per->curl, CURLINFO_CERTINFO, &certinfo);
   bool fclose_stream = FALSE;
   struct dynbuf name;
 
   if(!writeinfo)
     return;
-
-  if(!res && certinfo)
-    per->certinfo = certinfo;
 
   curlx_dyn_init(&name, MAX_WRITEOUT_NAME_LENGTH);
   while(ptr && *ptr && !done) {
