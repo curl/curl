@@ -166,6 +166,14 @@ unless it is very specific to Homebrew's way of packaging software.
 
 *Rolling Release*
 
+- curl: https://github.com/msys2/MSYS2-packages/tree/master/curl
+- curl issues: https://github.com/msys2/MSYS2-packages/issues
+- curl patches: https://github.com/msys2/MSYS2-packages/tree/master/curl (`*.patch`)
+
+## MSYS2 (mingw-w64)
+
+*Rolling Release*
+
 - curl: https://github.com/msys2/MINGW-packages/tree/master/mingw-w64-curl
 - curl issues: https://github.com/msys2/MINGW-packages/issues
 - curl patches: https://github.com/msys2/MINGW-packages/tree/master/mingw-w64-curl (`*.patch`)
