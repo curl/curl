@@ -593,7 +593,9 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
               stream = tool_stderr;
               break;
             case VAR_JSON:
-              ourWriteOutJSON(stream, variables, per, per_result);
+              ourWriteOutJSON(stream, variables,
+                              sizeof(variables)/sizeof(variables[0]),
+                              per, per_result);
               break;
             case VAR_HEADER_JSON:
               headerJSON(stream, per);
