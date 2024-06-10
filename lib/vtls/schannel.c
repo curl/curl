@@ -2596,7 +2596,7 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
       backend->recv_connection_closed = TRUE;
       *done = TRUE;
     }
-    else if(nread < 0 && result == CURLE_AGAIN)) {
+    else if(nread < 0 && result == CURLE_AGAIN) {
       connssl->io_need = CURL_SSL_IO_NEED_RECV;
     }
     else {
