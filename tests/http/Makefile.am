@@ -35,6 +35,7 @@ testenv/httpd.py                      \
 testenv/mod_curltest/mod_curltest.c   \
 testenv/nghttpx.py                    \
 testenv/ports.py                      \
+testenv/vsftpd.py                     \
 testenv/ws_echo_server.py
 
 EXTRA_DIST =           \
