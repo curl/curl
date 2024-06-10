@@ -2551,7 +2551,7 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
                                           &result);
       s_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
       if(!result) {
-        if(written < outbuf.cbBuffer) {
+        if(written < (ssize_t)outbuf.cbBuffer) {
           /* TODO: handle partial sends */
           infof(data, "schannel: failed to send close msg: %s"
                 " (bytes written: %zd)", curl_easy_strerror(result), written);
