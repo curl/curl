@@ -3310,14 +3310,15 @@ cached_x509_store_expired(const struct Curl_easy *data,
                           const struct ossl_x509_share *mb)
 {
   const struct ssl_general_config *cfg = &data->set.general_ssl;
-  struct curltime now = Curl_now();
-  timediff_t elapsed_ms = Curl_timediff(now, mb->time);
-  timediff_t timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
+  if(cfg->ca_cache_timeout < 0)
+    return FALSE;
+  else {
+    struct curltime now = Curl_now();
+    timediff_t elapsed_ms = Curl_timediff(now, mb->time);
+    timediff_t timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
 
-  if(timeout_ms < 0)
-    return false;
-
-  return elapsed_ms >= timeout_ms;
+    return elapsed_ms >= timeout_ms;
+  }
 }
 
 static bool
