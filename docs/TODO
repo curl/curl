@@ -891,7 +891,7 @@
 13.17 Add CA caching to more TLS backends
 
  The ability to cache the CA store between invokes can improve transfer
- performance signficantly. In curl 8.9.0, only OpenSSL, Schannel and wolfSSL
+ performance significantly. In curl 8.9.0, only OpenSSL, Schannel and wolfSSL
  support this.
 
 14. GnuTLS
