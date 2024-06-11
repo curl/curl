@@ -65,7 +65,7 @@ struct OUR_OSVERSIONINFOEXW {
  *                     ignored.
  * platform     [in] - The optional platform identifier.
  * condition    [in] - The test condition used to specifier whether we are
- *                     checking a version less then, equal to or greater than
+ *                     checking a version less than, equal to or greater than
  *                     what is specified in the major and minor version
  *                     numbers.
  *
