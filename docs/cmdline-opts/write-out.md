@@ -63,6 +63,11 @@ The variables available are:
 Output the certificate chain with details. Supported only by the OpenSSL,
 GnuTLS, Schannel and Secure Transport backends. (Added in 7.88.0)
 
+## `conn_id`
+The connection identifier last used by the transfer. The connection id is
+unique number among all connections using the same connection cache.
+(Added in 8.2.0)
+
 ## `content_type`
 The Content-Type of the requested document, if there was any.
 
@@ -309,3 +314,9 @@ same index number as the origin globbed URL. (Added in 7.75.0)
 ## `url_effective`
 The URL that was fetched last. This is most meaningful if you have told curl
 to follow location: headers.
+
+## `xfer_id`
+The numerical identifier of the last transfer done. -1 if no transfer has been
+started yet for the handle. The transfer id is unique among all transfers
+performed using the same connection cache.
+(Added in 8.2.0)

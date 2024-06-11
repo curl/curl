@@ -40,6 +40,7 @@ TESTSCRIPTS = \
  test1275.pl  \
  test1276.pl  \
  test1477.pl  \
+ test1486.pl  \
  test1544.pl  \
  test971.pl
 
