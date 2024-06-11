@@ -34,6 +34,7 @@ my $root=$ARGV[0] || ".";
 my %insrc; # variable set in source
 my %indocs; # variable described in docs
 
+my $srccount = 1;
 sub getsrcvars {
     open(my $f, "<", "$root/../src/tool_writeout.c");
     my $mode = 0;
@@ -48,7 +49,7 @@ sub getsrcvars {
             }
             if($_ =~ /^  \{\"([^\"]*)/) {
                 my $var = $1;
-                $insrc{$var} = 1;
+                $insrc{$var} = $srccount++;
             }
         }
     }
@@ -75,11 +76,18 @@ if((scalar(keys %indocs) < 10) || (scalar(keys %insrc) < 10)) {
     $error++;
 }
 
+# also verify that the source code lists them alphabetically
+my $check = 1;
 for(sort keys %insrc) {
     if($insrc{$_} && !$indocs{$_}) {
         print "$_ is not mentioned in write.out.md\n";
         $error++;
     }
+    if($insrc{$_} ne $check) {
+        print "$_ is not in alphabetical order\n";
+        $error++;
+    }
+    $check++;
 }
 
 for(sort keys %indocs) {
