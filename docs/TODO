@@ -123,7 +123,7 @@
  13.14 Support the clienthello extension
  13.15 Select signature algorithms
  13.16 Share the CA cache
- 13.17 Add CA caching to more TLS backends
+ 13.17 Add missing features to TLS backends
 
  14. GnuTLS
  14.2 check connection
@@ -888,11 +888,11 @@
  allow multiple easy handles to reuse the CA cache and save themselves from a
  lot of extra processing overhead.
 
-13.17 Add CA caching to more TLS backends
+13.17 Add missing features to TLS backends
 
- The ability to cache the CA store between invokes can improve transfer
- performance significantly. In curl 8.9.0, only OpenSSL, Schannel and wolfSSL
- support this.
+ The feature matrix at https://curl.se/libcurl/c/tls-options.html shows which
+ features are supported by which TLS backends, and thus also where there are
+ feature gaps.
 
 14. GnuTLS
 
