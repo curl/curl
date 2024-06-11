@@ -55,7 +55,7 @@ ECH is not possible.
 
 ## hard
 
-Instructs client to attempt ECH and fail if if attempting ECH is not possible.
+Instructs client to attempt ECH and fail if attempting ECH is not possible.
 
 ## ecl:\<base64-value\>
 
