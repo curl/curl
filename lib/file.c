@@ -465,7 +465,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     const struct tm *tm = &buffer;
     char header[80];
     int headerlen;
-    char accept_ranges[24]= { "Accept-ranges: bytes\r\n" };
+    static const char accept_ranges[]= { "Accept-ranges: bytes\r\n" };
     if(expected_size >= 0) {
       headerlen =
         msnprintf(header, sizeof(header),
@@ -476,7 +476,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
         return result;
 
       result = Curl_client_write(data, CLIENTWRITE_HEADER,
-                                 accept_ranges, strlen(accept_ranges));
+                                 accept_ranges, sizeof(accept_ranges) - 1);
       if(result != CURLE_OK)
         return result;
     }
