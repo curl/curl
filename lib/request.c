@@ -158,7 +158,7 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
   req->authneg = FALSE;
   req->shutdown = FALSE;
 #ifdef USE_HYPER
-  req->bodywritten = 0;
+  req->bodywritten = FALSE;
 #endif
 }
 
