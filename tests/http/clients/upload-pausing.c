@@ -241,7 +241,7 @@ int main(int argc, char *argv[])
   curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
   curl_easy_setopt(curl, CURLOPT_TCP_KEEPIDLE, 1L);
   curl_easy_setopt(curl, CURLOPT_TCP_KEEPINTVL, 1L);
-  curl_easy_setopt(curl, CURLOPT_TCP_KEEPINTVL, 1L);
+  curl_easy_setopt(curl, CURLOPT_TCP_KEEPCNT, 1L);
 
   /* Enable uploading. */
   curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
