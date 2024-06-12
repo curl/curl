@@ -316,7 +316,9 @@ static CURLcode cw_download_write(struct Curl_easy *data,
   }
   /* Update stats, write and report progress */
   data->req.bytecount += nwrite;
-  ++data->req.bodywrites;
+#ifdef USE_HYPER
+  data->req.bodywritten = TRUE;
+#endif
   result = Curl_pgrsSetDownloadCounter(data, data->req.bytecount);
   if(result)
     return result;

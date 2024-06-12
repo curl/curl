@@ -93,7 +93,6 @@ struct SingleRequest {
   struct bufq sendbuf; /* data which needs to be send to the server */
   size_t sendbuf_hds_len; /* amount of header bytes in sendbuf */
   time_t timeofdoc;
-  long bodywrites;
   char *location;   /* This points to an allocated version of the Location:
                        header data */
   char *newurl;     /* Set to the new URL to use when a redirect or a retry is
@@ -148,6 +147,9 @@ struct SingleRequest {
                         negotiation. */
   BIT(sendbuf_init); /* sendbuf is initialized */
   BIT(shutdown);     /* request end will shutdown connection */
+#ifdef USE_HYPER
+  BIT(bodywritten);
+#endif
 };
 
 /**

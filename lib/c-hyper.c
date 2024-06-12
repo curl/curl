@@ -206,7 +206,7 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
   struct SingleRequest *k = &data->req;
   CURLcode result = CURLE_OK;
 
-  if(0 == k->bodywrites) {
+  if(!k->bodywritten) {
 #if defined(USE_NTLM)
     struct connectdata *conn = data->conn;
     if(conn->bits.close &&
@@ -420,7 +420,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
         /* end of transfer */
         data->req.done = TRUE;
         infof(data, "hyperstream is done");
-        if(!k->bodywrites) {
+        if(!k->bodywritten) {
           /* hyper doesn't always call the body write callback */
           result = Curl_http_firstwrite(data);
         }

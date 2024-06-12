@@ -136,7 +136,6 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
   req->keepon = 0;
   req->upgr101 = UPGR101_INIT;
   req->timeofdoc = 0;
-  req->bodywrites = 0;
   req->location = NULL;
   req->newurl = NULL;
 #ifndef CURL_DISABLE_COOKIES
@@ -158,6 +157,9 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
   req->no_body = data->set.opt_no_body;
   req->authneg = FALSE;
   req->shutdown = FALSE;
+#ifdef USE_HYPER
+  req->bodywritten = 0;
+#endif
 }
 
 void Curl_req_free(struct SingleRequest *req, struct Curl_easy *data)
