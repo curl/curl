@@ -465,17 +465,18 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     const struct tm *tm = &buffer;
     char header[80];
     int headerlen;
-    char accept_ranges[24]= { "Accept-ranges: bytes\r\n" };
+    static const char accept_ranges[]= { "Accept-ranges: bytes\r\n" };
     if(expected_size >= 0) {
-      headerlen = msnprintf(header, sizeof(header),
-                "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n",
-                expected_size);
+      headerlen =
+        msnprintf(header, sizeof(header),
+                  "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n",
+                  expected_size);
       result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
       if(result)
         return result;
 
       result = Curl_client_write(data, CLIENTWRITE_HEADER,
-                                 accept_ranges, strlen(accept_ranges));
+                                 accept_ranges, sizeof(accept_ranges) - 1);
       if(result != CURLE_OK)
         return result;
     }
@@ -486,23 +487,26 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
       return result;
 
     /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
-    headerlen = msnprintf(header, sizeof(header),
-              "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n%s",
-              Curl_wkday[tm->tm_wday?tm->tm_wday-1:6],
-              tm->tm_mday,
-              Curl_month[tm->tm_mon],
-              tm->tm_year + 1900,
-              tm->tm_hour,
-              tm->tm_min,
-              tm->tm_sec,
-              data->req.no_body ? "": "\r\n");
+    headerlen =
+      msnprintf(header, sizeof(header),
+                "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
+                Curl_wkday[tm->tm_wday?tm->tm_wday-1:6],
+                tm->tm_mday,
+                Curl_month[tm->tm_mon],
+                tm->tm_year + 1900,
+                tm->tm_hour,
+                tm->tm_min,
+                tm->tm_sec);
     result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
+    if(!result)
+      /* end of headers */
+      result = Curl_client_write(data, CLIENTWRITE_HEADER, "\r\n", 2);
     if(result)
       return result;
     /* set the file size to make it available post transfer */
     Curl_pgrsSetDownloadSize(data, expected_size);
     if(data->req.no_body)
-      return result;
+      return CURLE_OK;
   }
 
   /* Check whether file range has been specified */
