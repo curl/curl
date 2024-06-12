@@ -73,7 +73,6 @@ char *Curl_checkProxyheaders(struct Curl_easy *data,
                              const struct connectdata *conn,
                              const char *thisheader,
                              const size_t thislen);
-struct HTTP; /* see below */
 
 CURLcode Curl_add_timecondition(struct Curl_easy *data,
 #ifndef USE_HYPER
