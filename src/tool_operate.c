@@ -178,14 +178,13 @@ static int sockopt_callback(void *clientp, curl_socket_t curlfd,
     switch(get_address_family(curlfd)) {
     case AF_INET:
 #ifdef IP_TOS
-      result = setsockopt(curlfd, SOL_IP, IP_TOS,
-                          (const char *)&tos, sizeof(tos));
+      result = setsockopt(curlfd, SOL_IP, IP_TOS, (void *)&tos, sizeof(tos));
 #endif
       break;
     case AF_INET6:
 #ifdef IPV6_TCLASS
       result = setsockopt(curlfd, IPPROTO_IPV6, IPV6_TCLASS,
-                          (const char *)&tos, sizeof(tos));
+                          (void *)&tos, sizeof(tos));
 #endif
       break;
     }
@@ -201,7 +200,7 @@ static int sockopt_callback(void *clientp, curl_socket_t curlfd,
   if(config->vlan_priority > 0) {
     int priority = (int)config->vlan_priority;
     if(setsockopt(curlfd, SOL_SOCKET, SO_PRIORITY,
-      (const char *)&priority, sizeof(priority)) != 0) {
+      (void *)&priority, sizeof(priority)) != 0) {
       int error = errno;
       warnf(config->global, "VLAN priority %d failed with errno %d: %s;\n",
             priority, error, strerror(error));

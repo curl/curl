@@ -46,6 +46,8 @@ typedef unsigned long   u_int32_t;
 #include <qsoasync.h>
 #include <gssapi.h>
 
+#ifdef BUILDING_LIBCURL
+
 extern int Curl_getaddrinfo_a(const char *nodename,
                               const char *servname,
                               const struct addrinfo *hints,
@@ -140,5 +142,7 @@ extern int Curl_os400_getsockname(int sd, struct sockaddr *addr, int *addrlen);
 #define inflate                 Curl_os400_inflate
 #define inflateEnd              Curl_os400_inflateEnd
 #endif
+
+#endif /* BUILDING_LIBCURL */
 
 #endif /* HEADER_CURL_SETUP_OS400_H */
