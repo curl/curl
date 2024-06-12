@@ -326,7 +326,8 @@ sub single {
         }
         else {
             chomp;
-            print STDERR "WARN: unrecognized line in $f, ignoring:\n:'$_';"
+            print STDERR "$f:$line:1:ERROR: unrecognized header keyword: '$_'\n";
+            $errors++;
         }
     }
 
@@ -387,7 +388,8 @@ sub single {
         $d =~ s/\*(\S.*?)\*/\\fI$1\\fP/g;
 
         if($d =~ /[^\\][\<\>]/) {
-            print STDERR "$f:$line:1:WARN: un-escaped < or > used\n";
+            print STDERR "$f:$line:1:ERROR: un-escaped < or > used\n";
+            $errors++;
         }
         # convert backslash-'<' or '> to just the second character
         $d =~ s/\\([<>])/$1/g;
