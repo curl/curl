@@ -104,7 +104,6 @@ struct SingleRequest {
   union {
     struct FILEPROTO *file;
     struct FTP *ftp;
-    struct HTTP *http;
     struct IMAP *imap;
     struct ldapreqinfo *ldap;
     struct MQTT *mqtt;

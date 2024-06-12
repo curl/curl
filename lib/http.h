@@ -73,7 +73,6 @@ char *Curl_checkProxyheaders(struct Curl_easy *data,
                              const struct connectdata *conn,
                              const char *thisheader,
                              const size_t thislen);
-struct HTTP; /* see below */
 
 CURLcode Curl_add_timecondition(struct Curl_easy *data,
 #ifndef USE_HYPER
@@ -187,10 +186,6 @@ void Curl_http_exp100_got100(struct Curl_easy *data);
 /****************************************************************************
  * HTTP unique setup
  ***************************************************************************/
-struct HTTP {
-  /* TODO: no longer used, we should remove it from SingleRequest */
-  char unused;
-};
 
 CURLcode Curl_http_size(struct Curl_easy *data);
 
