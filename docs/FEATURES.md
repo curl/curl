@@ -206,6 +206,18 @@ SPDX-License-Identifier: curl
 
  - Subscribe to and publish topics using URL scheme `mqtt://broker/topic`
 
+## SIEVE
+
+ - explicit "STARTTLS" usage to "upgrade" plain `sieve://` connections to
+   use SSL
+ - SASL based authentication: Plain, Login, CRAM-MD5, Digest-MD5, NTLM (9),
+   Kerberos 5 (4), SCRAM-SHA-1(13), SCRAM-SHA-256(13) and External.
+ - list the user scripts
+ - fetch a script
+ - upload a script via the PUTSCRIPT command
+ - enhanced command support for: CAPABILITY, CHECKSCRIPT, SETACTIVE,
+   DELETESCRIPT, RENAMESCRIPT and HAVESPACE via custom requests
+
 ## Footnotes
 
   1. requires a TLS library
@@ -223,3 +235,4 @@ SPDX-License-Identifier: curl
   10. requires libidn2 or Windows
   11. requires libz, brotli and/or zstd
   12. requires a GSS-API implementation (such as Heimdal or MIT Kerberos)
+  13. requires libgsasl

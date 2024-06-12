@@ -142,8 +142,8 @@ matched case insensitively:
 
 `dict`, `file`, `ftp`, `ftps`, `gopher`, `gophers`, `http`, `https`, `imap`,
 `imaps`, `ldap`, `ldaps`, `mqtt`, `pop3`, `pop3s`, `rtmp`, `rtmpe`, `rtmps`,
-`rtmpt`, `rtmpte`, `rtmpts`, `rtsp`, `smb`, `smbs`, `smtp`, `smtps`, `telnet`,
-`tftp`
+`rtmpt`, `rtmpte`, `rtmpts`, `rtsp`, `sieve`, `smb`, `smbs`, `smtp`, `smtps`,
+`telnet`, `tftp`
 
 When the URL is specified to identify a proxy, curl recognizes the following
 schemes:
@@ -157,9 +157,9 @@ authentication purposes in this transfer. The use of this field is discouraged
 since it often means passing around the password in plain text and is thus a
 security risk.
 
-URLs for IMAP, POP3 and SMTP also support *login options* as part of the
-userinfo field. They are provided as a semicolon after the password and then
-the options.
+URLs for IMAP, POP3, SIEVE and SMTP also support *login options* as part
+of the userinfo field. They are provided as a semicolon after the password and
+then the options.
 
 ## Hostname
 
@@ -211,8 +211,8 @@ number based on the provide scheme:
 
 DICT 2628, FTP 21, FTPS 990, GOPHER 70, GOPHERS 70, HTTP 80, HTTPS 443,
 IMAP 132, IMAPS 993, LDAP 369, LDAPS 636, MQTT 1883, POP3 110, POP3S 995,
-RTMP 1935, RTMPS 443, RTMPT 80, RTSP 554, SCP 22, SFTP 22, SMB 445, SMBS 445,
-SMTP 25, SMTPS 465, TELNET 23, TFTP 69
+RTMP 1935, RTMPS 443, RTMPT 80, RTSP 554, SCP 22, SFTP 22, SIEVE 4190, SMB 445,
+SMBS 445, SMTP 25, SMTPS 465, TELNET 23, TFTP 69
 
 # Scheme specific behaviors
 
@@ -358,6 +358,14 @@ The path part of an SFTP URL specifies the file to retrieve or upload. If the
 path ends with a slash (`/`) then a directory listing is returned instead of a
 file. If the path is omitted entirely then the directory listing for the root
 / home directory is returned.
+
+## SIEVE
+The real protocol name is ManageSieve, however the protocol's scheme is
+"sieve". For this reason, it is always referenced as SIEVE in curl.
+SIEVE URL paths targeting a global script are not supported, because the
+protocol does not feature such a reference. A trailing slash in the path
+directs to list the owner's scripts. If the owner is specified, it supersedes
+the --authzid option.
 
 ## SMB
 The path part of a SMB request specifies the file to retrieve and from what

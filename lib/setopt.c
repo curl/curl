@@ -640,32 +640,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.http_transfer_encoding = (0 != va_arg(param, long));
     break;
 
-  case CURLOPT_FOLLOWLOCATION:
-    /*
-     * Follow Location: header hints on an HTTP-server.
-     */
-    data->set.http_follow_location = (0 != va_arg(param, long));
-    break;
-
-  case CURLOPT_UNRESTRICTED_AUTH:
-    /*
-     * Send authentication (user+password) when following locations, even when
-     * hostname changed.
-     */
-    data->set.allow_auth_to_other_hosts = (0 != va_arg(param, long));
-    break;
-
-  case CURLOPT_MAXREDIRS:
-    /*
-     * The maximum amount of hops you allow curl to follow Location:
-     * headers. This should mostly be used to detect never-ending loops.
-     */
-    arg = va_arg(param, long);
-    if(arg < -1)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.maxredirs = arg;
-    break;
-
   case CURLOPT_POSTREDIR:
     /*
      * Set the behavior of POST when redirecting
@@ -1022,6 +996,34 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.mime_formescape = !!(arg & CURLMIMEOPT_FORMESCAPE);
   break;
 # endif
+#endif
+
+#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_SIEVE)
+  case CURLOPT_FOLLOWLOCATION:
+    /*
+     * Follow Location: header hints on an HTTP-server.
+     */
+    data->set.http_follow_location = (0 != va_arg(param, long));
+    break;
+
+  case CURLOPT_UNRESTRICTED_AUTH:
+    /*
+     * Send authentication (user+password) when following locations, even when
+     * hostname changed.
+     */
+    data->set.allow_auth_to_other_hosts = (0 != va_arg(param, long));
+    break;
+
+  case CURLOPT_MAXREDIRS:
+    /*
+     * The maximum amount of hops you allow curl to follow Location:
+     * headers. This should mostly be used to detect never-ending loops.
+     */
+    arg = va_arg(param, long);
+    if(arg < -1)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.maxredirs = arg;
+    break;
 #endif
 
   case CURLOPT_HTTPAUTH:

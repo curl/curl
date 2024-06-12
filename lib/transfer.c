@@ -620,6 +620,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   data->state.requests = 0;
   data->state.followlocation = 0; /* reset the location-follow counter */
   data->state.this_is_a_follow = FALSE; /* reset this */
+  data->state.redir_protocols = data->set.redir_protocols;
   data->state.errorbuf = FALSE; /* no error has occurred */
   data->state.httpwant = data->set.httpwant;
   data->state.httpversion = 0;
@@ -757,7 +758,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
                      char *newurl,    /* the Location: string */
                      followtype type) /* see transfer.h */
 {
-#ifdef CURL_DISABLE_HTTP
+#if defined(CURL_DISABLE_HTTP) && defined(CURL_DISABLE_SIEVE)
   (void)data;
   (void)newurl;
   (void)type;

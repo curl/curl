@@ -366,6 +366,9 @@ static const char * const supported_protocols[] = {
 #ifdef USE_SSH
   "sftp",
 #endif
+#ifndef CURL_DISABLE_SIEVE
+  "sieve",
+#endif
 #if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE)
   "smb",
 #  ifdef USE_SSL

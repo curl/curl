@@ -42,6 +42,7 @@
 #define PORT_IMAPS 993
 #define PORT_POP3 110
 #define PORT_POP3S 995
+#define PORT_SIEVE 4190
 #define PORT_SMB 445
 #define PORT_SMBS 445
 #define PORT_SMTP 25
@@ -80,6 +81,13 @@ struct curl_trc_featt;
 /* This should be undefined once we need bit 32 or higher */
 #define PROTO_TYPE_SMALL
 
+#ifndef CURL_DISABLE_SIEVE
+#define CURLPROTO_SIEVE ((curl_prot_t) 1 << 32)
+#undef PROTO_TYPE_SMALL
+#else
+#define CURLPROTO_SIEVE 0
+#endif
+
 #ifndef PROTO_TYPE_SMALL
 typedef curl_off_t curl_prot_t;
 #else
@@ -113,7 +121,8 @@ typedef unsigned int curl_prot_t;
 #define PROTO_FAMILY_SSH  (CURLPROTO_SCP|CURLPROTO_SFTP)
 
 #if !defined(CURL_DISABLE_FTP) || defined(USE_SSH) ||   \
-  !defined(CURL_DISABLE_POP3) || !defined(CURL_DISABLE_FILE)
+  !defined(CURL_DISABLE_POP3) || !defined(CURL_DISABLE_FILE) || \
+  !defined(CURL_DISABLE_SIEVE)
 /* these protocols support CURLOPT_DIRLISTONLY */
 #define CURL_LIST_ONLY_PROTOCOL 1
 #endif
@@ -179,6 +188,7 @@ typedef CURLcode (*Curl_datastream)(struct Curl_easy *data,
 #include "imap.h"
 #include "pop3.h"
 #include "smtp.h"
+#include "sieve.h"
 #include "ftp.h"
 #include "file.h"
 #include "vssh/ssh.h"
@@ -937,6 +947,9 @@ struct connectdata {
 #ifndef CURL_DISABLE_SMTP
     struct smtp_conn smtpc;
 #endif
+#ifndef CURL_DISABLE_SIEVE
+    struct sieve_conn sievec;
+#endif
 #ifndef CURL_DISABLE_RTSP
     struct rtsp_conn rtspc;
 #endif
@@ -1292,6 +1305,7 @@ struct UrlState {
   struct urlpieces up;
   char *url;        /* work URL, copied from UserDefined */
   char *referer;    /* referer string */
+  curl_prot_t redir_protocols; /* Allowed protocols while redirecting */
   struct curl_slist *resolve; /* set to point to the set.resolve list when
                                  this should be dealt with in pretransfer */
 #ifndef CURL_DISABLE_HTTP

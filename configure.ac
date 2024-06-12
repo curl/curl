@@ -942,6 +942,27 @@ AS_HELP_STRING([--disable-imap],[Disable IMAP support]),
 )
 
 
+AC_MSG_CHECKING([whether to support sieve])
+AC_ARG_ENABLE(sieve,
+AS_HELP_STRING([--enable-sieve], [Enable SIEVE support])
+AS_HELP_STRING([--disable-sieve], [Disable SIEVE support]),
+[ case "$enableval" in
+  yes) AC_MSG_RESULT(yes)
+       experimental="$experimental SIEVE"
+       AC_MSG_NOTICE([SIEVE support is experimental])
+       ;;
+  *)   AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_SIEVE, 1, [to disable SIEVE])
+       AC_SUBST(CURL_DISABLE_SIEVE, [1])
+       ;;
+  esac ],[
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_SIEVE, 1, [to disable SIEVE])
+       AC_SUBST(CURL_DISABLE_SIEVE, [1])
+  ]
+)
+
+
 AC_MSG_CHECKING([whether to support smb])
 AC_ARG_ENABLE(smb,
 AS_HELP_STRING([--enable-smb],[Enable SMB/CIFS support])
@@ -4873,6 +4894,9 @@ if test "x$CURL_DISABLE_IMAP" != "x1"; then
   if test "x$SSL_ENABLED" = "x1"; then
     SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS IMAPS"
   fi
+fi
+if test "x$CURL_DISABLE_SIEVE" != "x1"; then
+  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SIEVE"
 fi
 if test "x$CURL_DISABLE_SMB" != "x1" \
     -a "x$use_curl_ntlm_core" = "xyes"; then

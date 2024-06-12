@@ -131,6 +131,9 @@
 /* disables RTSP */
 #cmakedefine CURL_DISABLE_RTSP 1
 
+/* disables SIEVE */
+#cmakedefine CURL_DISABLE_SIEVE 1
+
 /* disables SMB */
 #cmakedefine CURL_DISABLE_SMB 1
 

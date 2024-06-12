@@ -204,6 +204,9 @@
 #  ifndef CURL_DISABLE_SMB
 #    define CURL_DISABLE_SMB
 #  endif
+#  ifndef CURL_DISABLE_SIEVE
+#    define CURL_DISABLE_SIEVE
+#  endif
 #  ifndef CURL_DISABLE_SMTP
 #    define CURL_DISABLE_SMTP
 #  endif

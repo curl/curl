@@ -482,7 +482,7 @@
 
  The multi interface treats the authentication process as part of the connect
  phase. As such any failures during authentication will not trigger the relevant
- QUIT or LOGOFF for protocols such as IMAP, POP3 and SMTP.
+ QUIT or LOGOFF for protocols such as IMAP, POP3, SIEVE and SMTP.
 
 2.5 Edge-triggered sockets should work
 
