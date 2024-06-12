@@ -443,8 +443,12 @@
      d                 c                   X'00000400'
      d CURLU_ALLOW_SPACE...
      d                 c                   X'00000800'
-     d CURLU_PUNYCODE...
-     d                 c                   X'00001000'
+     d CURLU_PUNYCODE  c                   X'00001000'
+     d CURLU_PUNY2IDN  c                   X'00002000'
+     d CURLU_GET_EMPTY...
+     d                 c                   X'00004000'
+     d CURLU_NO_GUESS_SCHEME...
+     d                 c                   X'00008000'
       *
      d CURLOT_FLAG_ALIAS...
      d                 c                   X'00000001'
@@ -1666,6 +1670,8 @@
      d  CURLOPT_SERVER_RESPONSE_TIMEOUT_MS...
      d                 c                   00324
      d  CURLOPT_ECH    c                   10325
+     d  CURLOPT_TCP_KEEPCNT...
+     d                 c                   00326
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001
