@@ -1685,9 +1685,12 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       config->tcp_nodelay = toggle;
       break;
     case C_IP_TOS: { /* --ip-tos */
-      const struct TOSEntry *entry = bsearch(
-        &nextarg, tos_entries, sizeof(tos_entries)/sizeof(*tos_entries),
-        sizeof(*tos_entries), find_tos);
+      struct TOSEntry find;
+      const struct TOSEntry *entry;
+      find.name = nextarg;
+      entry = bsearch(&find, tos_entries,
+                      sizeof(tos_entries)/sizeof(*tos_entries),
+                      sizeof(*tos_entries), find_tos);
       if(entry)
         config->ip_tos = entry->value;
       else /* numeric tos value */
