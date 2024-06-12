@@ -169,14 +169,6 @@ CURLcode Curl_http_setup_conn(struct Curl_easy *data,
 {
   /* allocate the HTTP-specific struct for the Curl_easy, only to survive
      during this request */
-  struct HTTP *http;
-  DEBUGASSERT(data->req.p.http == NULL);
-
-  http = calloc(1, sizeof(struct HTTP));
-  if(!http)
-    return CURLE_OUT_OF_MEMORY;
-
-  data->req.p.http = http;
   connkeep(conn, "HTTP default");
 
   if(data->state.httpwant == CURL_HTTP_VERSION_3ONLY) {
@@ -1174,15 +1166,11 @@ CURLcode Curl_http_done(struct Curl_easy *data,
                         CURLcode status, bool premature)
 {
   struct connectdata *conn = data->conn;
-  struct HTTP *http = data->req.p.http;
 
   /* Clear multipass flag. If authentication isn't done yet, then it will get
    * a chance to be set back to true when we output the next auth header */
   data->state.authhost.multipass = FALSE;
   data->state.authproxy.multipass = FALSE;
-
-  if(!http)
-    return CURLE_OK;
 
   Curl_dyn_reset(&data->state.headerb);
   Curl_hyper_done(data);

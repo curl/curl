@@ -292,10 +292,6 @@ static CURLcode http2_data_setup(struct Curl_cfilter *cf,
 
   (void)cf;
   DEBUGASSERT(data);
-  if(!data->req.p.http) {
-    failf(data, "initialization failure, transfer not http initialized");
-    return CURLE_FAILED_INIT;
-  }
   stream = H2_STREAM_CTX(ctx, data);
   if(stream) {
     *pstream = stream;
@@ -797,18 +793,9 @@ static struct Curl_easy *h2_duphandle(struct Curl_cfilter *cf,
 {
   struct Curl_easy *second = curl_easy_duphandle(data);
   if(second) {
-    /* setup the request struct */
-    struct HTTP *http = calloc(1, sizeof(struct HTTP));
-    if(!http) {
-      (void)Curl_close(&second);
-    }
-    else {
-      struct h2_stream_ctx *second_stream;
-
-      second->req.p.http = http;
-      http2_data_setup(cf, second, &second_stream);
-      second->state.priority.weight = data->state.priority.weight;
-    }
+    struct h2_stream_ctx *second_stream;
+    http2_data_setup(cf, second, &second_stream);
+    second->state.priority.weight = data->state.priority.weight;
   }
   return second;
 }
@@ -870,9 +857,7 @@ fail:
 static void discard_newhandle(struct Curl_cfilter *cf,
                               struct Curl_easy *newhandle)
 {
-  if(newhandle->req.p.http) {
-    http2_data_done(cf, newhandle);
-  }
+  http2_data_done(cf, newhandle);
   (void)Curl_close(&newhandle);
 }
 
