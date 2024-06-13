@@ -5044,15 +5044,15 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   Features:         ${SUPPORT_FEATURES}
 ])
 
-non13=`echo "$TLSCHOICE" | $EGREP -i 'bearssl|secure-transport|mbedtls'`;
+non13=`echo "$TLSCHOICE" | $EGREP -io 'bearssl|secure-transport'`;
 if test -n "$non13"; then
- cat >&2 << _EOF
-  WARNING: A selected TLS library ($TLSCHOICE) does not support TLS 1.3!
-_EOF
+ for a in $non13; do
+   AC_MSG_WARN([$a is enabled for TLS but it does not support TLS 1.3])
+ done
 fi
 
 if test -n "$experimental"; then
- cat >&2 << _EOF
-  WARNING: $experimental enabled but marked EXPERIMENTAL. Use with caution!
-_EOF
+ for a in $experimental; do
+   AC_MSG_WARN([$a is enabled but marked EXPERIMENTAL. Use with caution!])
+ done
 fi

@@ -662,7 +662,6 @@ AS_HELP_STRING([--disable-httpsrr],[Disable HTTPSRR support]),
       dnl --enable-httpsrr option used
       want_httpsrr="yes"
       curl_httpsrr_msg="enabled (--disable-httpsrr)"
-      experimental="httpsrr"
       AC_MSG_RESULT([yes])
       ;;
   esac
@@ -698,7 +697,6 @@ AS_HELP_STRING([--disable-ech],[Disable ECH support]),
       dnl --enable-ech option used
       want_ech="yes"
       curl_ech_msg="enabled (--disable-ech)"
-      experimental="ech"
       AC_MSG_RESULT([yes])
       ;;
   esac
