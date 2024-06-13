@@ -900,6 +900,7 @@ static void conncache_shutdown_discard_all(struct conncache *connc)
   connc->shutdowns.iter_locked = FALSE;
 }
 
+#ifdef DEBUGBUILD
 static void conncache_shutdown_all(struct conncache *connc, int timeout_ms)
 {
   struct connectdata *conn;
@@ -945,7 +946,7 @@ static void conncache_shutdown_all(struct conncache *connc, int timeout_ms)
   /* Due to errors/timeout, we might come here without being full ydone. */
   conncache_shutdown_discard_all(connc);
 }
-
+#endif
 
 #if 0
 /* Useful for debugging the connection cache */
