@@ -1338,6 +1338,9 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   struct pollfd a_few_on_stack[NUM_POLLS_ON_STACK];
   struct curl_pollfds cpfds;
   unsigned int curl_nfds = 0; /* how many pfds are for curl transfers */
+  struct Curl_llist conn_caches;
+  struct Curl_llist_element *le;
+  CURLMcode result = CURLM_OK;
 #ifdef USE_WINSOCK
   WSANETWORKEVENTS wsa_events;
   DEBUGASSERT(multi->wsa_event != WSA_INVALID_EVENT);
@@ -1345,9 +1348,6 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
 #ifndef ENABLE_WAKEUP
   (void)use_wakeup;
 #endif
-  struct Curl_llist conn_caches;
-  struct Curl_llist_element *le;
-  CURLMcode result = CURLM_OK;
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
