@@ -65,29 +65,6 @@ if(ENABLE_CURLDEBUG)
   set_source_files_properties(memdebug.c curl_multibyte.c PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
 endif()
 
-transform_makefile_inc("Makefile.soname" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake")
-include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake)
-
-if(APPLE OR
-  CMAKE_SYSTEM_NAME STREQUAL "AIX" OR
-  CMAKE_SYSTEM_NAME STREQUAL "Linux" OR
-  CMAKE_SYSTEM_NAME STREQUAL "SunOS" OR
-  CMAKE_SYSTEM_NAME STREQUAL "GNU/kFreeBSD" OR
-
-  # FreeBSD comes with the a.out and elf flavours
-  # but a.out was supported up to version 3.x and
-  # elf from 3.x. I cannot imagine someone running
-  # CMake on those ancient systems
-  CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR
-
-  CMAKE_SYSTEM_NAME STREQUAL "Haiku")
-
-  math(EXPR CMAKESONAME "${VERSIONCHANGE} - ${VERSIONDEL}")
-  set(CMAKEVERSION "${CMAKESONAME}.${VERSIONDEL}.${VERSIONADD}")
-else()
-  unset(CMAKESONAME)
-endif()
-
 ## Library definition
 
 # Add "_imp" as a suffix before the extension to avoid conflicting with
@@ -169,10 +146,6 @@ if(BUILD_STATIC_LIBS)
       INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE
       INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO TRUE)
   endif()
-  if(CMAKEVERSION AND CMAKESONAME)
-    set_target_properties(${LIB_STATIC} PROPERTIES
-      VERSION ${CMAKEVERSION} SOVERSION ${CMAKESONAME})
-  endif()
 
   target_include_directories(${LIB_STATIC} INTERFACE
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
@@ -213,14 +186,31 @@ if(BUILD_SHARED_LIBS)
       INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE
       INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO TRUE)
   endif()
-  if(CMAKEVERSION AND CMAKESONAME)
-    set_target_properties(${LIB_SHARED} PROPERTIES
-      VERSION ${CMAKEVERSION} SOVERSION ${CMAKESONAME})
-  endif()
 
   target_include_directories(${LIB_SHARED} INTERFACE
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     $<BUILD_INTERFACE:${CURL_SOURCE_DIR}/include>)
+
+  if(APPLE OR
+    CMAKE_SYSTEM_NAME STREQUAL "AIX" OR
+    CMAKE_SYSTEM_NAME STREQUAL "Linux" OR
+    CMAKE_SYSTEM_NAME STREQUAL "SunOS" OR
+    CMAKE_SYSTEM_NAME STREQUAL "Haiku" OR
+    CMAKE_SYSTEM_NAME STREQUAL "GNU/kFreeBSD" OR
+    # FreeBSD comes with the a.out and ELF flavours but a.out was supported
+    # up to v3.x and ELF from v3.x. I cannot imagine someone running CMake
+    # on those ancient systems.
+    CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
+
+    transform_makefile_inc("Makefile.soname" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake")
+    include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake)
+
+    math(EXPR CMAKESONAME "${VERSIONCHANGE} - ${VERSIONDEL}")
+    set(CMAKEVERSION "${CMAKESONAME}.${VERSIONDEL}.${VERSIONADD}")
+
+    set_target_properties(${LIB_SHARED} PROPERTIES
+      VERSION "${CMAKEVERSION}" SOVERSION "${CMAKESONAME}")
+  endif()
 endif()
 
 add_library(${LIB_NAME} ALIAS ${LIB_SELECTED})
