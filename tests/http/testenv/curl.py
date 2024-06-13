@@ -27,6 +27,7 @@
 import json
 import logging
 import os
+import sys
 import time
 from threading import Thread
 
@@ -134,17 +135,29 @@ class RunTcpDump:
                 lines.append(l)
         return lines
 
+    @property
+    def stderr(self) -> List[str]:
+        if self._proc:
+            raise Exception('tcpdump still running')
+        lines = []
+        return open(self._stderrfile).readlines()
+
     def sample(self):
-        local_if = 'lo0'
+        # not sure how to make that detection reliable for all platforms
+        local_if = 'lo0' if sys.platform.startswith('darwin') else 'lo'
         try:
             tcpdump = self._env.tcpdump()
             if tcpdump is None:
                 raise Exception('tcpdump not available')
             # look with tcpdump for TCP RST packets which indicate
             # we did not shut down connections cleanly
-            args = [
+            args = []
+            # at least on Linux, we need root permissions to run tcpdump
+            if sys.platform.startswith('linux'):
+                args.append('sudo')
+            args.extend([
                 tcpdump, '-i', local_if, '-n', 'tcp[tcpflags] & (tcp-rst)!=0'
-            ]
+            ])
             with open(self._stdoutfile, 'w') as cout:
                 with open(self._stderrfile, 'w') as cerr:
                     self._proc = subprocess.Popen(args, stdout=cout, stderr=cerr,

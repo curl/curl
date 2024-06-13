@@ -564,10 +564,22 @@ class TestDownload:
         srcfile = os.path.join(httpd.docs_dir, docname)
         self.check_downloads(client, srcfile, count)
 
-    # check with `tcpdump` if curl causes any TCP RST packets
+    # check with `tcpdump` that we see curl TCP RST packets
+    @pytest.mark.skipif(condition=not Env.tcpdump(), reason="tcpdump not available")
+    @pytest.mark.parametrize("proto", ['http/1.1'])
+    def test_02_30_check_tcp_rst(self, env: Env, httpd, repeat, proto):
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-1]'
+        r = curl.http_download(urls=[url], alpn_proto=proto, with_tcpdump=True, extra_args=[
+            '--parallel'
+        ])
+        r.check_response(http_status=200, count=2)
+        assert r.tcpdump
+        assert len(r.tcpdump.stats) != 0, f'Expected TCP RSTs packets: {r.tcpdump.stderr}'
+
     @pytest.mark.skipif(condition=not Env.tcpdump(), reason="tcpdump not available")
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
-    def test_02_30_check_shutdown(self, env: Env, httpd, repeat, proto):
+    def test_02_31_check_shutdown(self, env: Env, httpd, repeat, proto):
         if not env.curl_is_debug():
             pytest.skip('only works for curl debug builds')
         curl = CurlClient(env=env, run_env={
