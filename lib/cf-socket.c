@@ -1234,12 +1234,25 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
 #endif
 
 #ifndef SOCK_NONBLOCK
-  /* set socket non-blocking */
-  (void)curlx_nonblock(ctx->sock, TRUE);
+  /* Set socket non-blocking, must be a non-blocking socket for
+   * a non-blocking connect. */
+  error = curlx_nonblock(ctx->sock, TRUE);
+  if(error < 0) {
+    result = CURLE_UNSUPPORTED_PROTOCOL;
+    ctx->error = SOCKERRNO;
+    goto out;
+  }
 #else
-  if(data->set.fopensocket)
-    /* set socket non-blocking */
-    (void)curlx_nonblock(ctx->sock, TRUE);
+  if(data->set.fopensocket) {
+    /* Set socket non-blocking, must be a non-blocking socket for
+     * a non-blocking connect. */
+    error = curlx_nonblock(ctx->sock, TRUE);
+    if(error < 0) {
+      result = CURLE_UNSUPPORTED_PROTOCOL;
+      ctx->error = SOCKERRNO;
+      goto out;
+    }
+  }
 #endif
   ctx->sock_connected = (ctx->addr.socktype != SOCK_DGRAM);
 out:

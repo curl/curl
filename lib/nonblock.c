@@ -50,9 +50,18 @@ int curlx_nonblock(curl_socket_t sockfd,    /* operate on this */
   /* most recent unix versions */
   int flags;
   flags = sfcntl(sockfd, F_GETFL, 0);
+  if(flags < 0)
+    return -1;
+  /* Check if the current file status flags have already satisfied
+   * the request, if so, it's no need to call fcntl() to replicate it.
+   */
+  if(!!(flags & O_NONBLOCK) == !!nonblock)
+    return 0;
   if(nonblock)
-    return sfcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
-  return sfcntl(sockfd, F_SETFL, flags & (~O_NONBLOCK));
+    flags |= O_NONBLOCK;
+  else
+    flags &= ~O_NONBLOCK;
+  return sfcntl(sockfd, F_SETFL, flags);
 
 #elif defined(HAVE_IOCTL_FIONBIO)
 
