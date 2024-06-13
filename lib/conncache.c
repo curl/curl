@@ -58,7 +58,9 @@ static void connc_disconnect(struct Curl_easy *data,
 static void connc_run_conn_shutdown(struct Curl_easy *data,
                                     struct connectdata *conn,
                                     bool *done);
+#ifdef DEBUGBUILD
 static void conncache_shutdown_all(struct conncache *connc, int timeout_ms);
+#endif
 
 static CURLcode bundle_create(struct connectbundle **bundlep)
 {
@@ -538,10 +540,25 @@ Curl_conncache_extract_oldest(struct Curl_easy *data)
   return conn_candidate;
 }
 
+static void conncache_shutdown_discard_all(struct conncache *connc)
+{
+  struct connectdata *conn;
+
+  DEBUGASSERT(!connc->shutdowns.iter_locked);
+  connc->shutdowns.iter_locked = TRUE;
+  while(connc->shutdowns.conn_list.head) {
+    struct Curl_llist_element *e = connc->shutdowns.conn_list.head;
+    conn = e->ptr;
+    Curl_llist_remove(&connc->shutdowns.conn_list, e, NULL);
+    DEBUGF(infof(connc->closure_handle, "discard connection"));
+    connc_disconnect(connc->closure_handle, conn, FALSE);
+  }
+  connc->shutdowns.iter_locked = FALSE;
+}
+
 void Curl_conncache_close_all_connections(struct conncache *connc)
 {
   struct connectdata *conn;
-  struct Curl_llist_element *e;
   SIGPIPE_VARIABLE(pipe_st);
   if(!connc->closure_handle)
     return;
@@ -566,18 +583,7 @@ void Curl_conncache_close_all_connections(struct conncache *connc)
 #endif
 
   /* discard all connections in the shutdown list */
-  DEBUGASSERT(!connc->shutdowns.iter_locked);
-  connc->shutdowns.iter_locked = TRUE;
-  e = connc->shutdowns.conn_list.head;
-  while(e) {
-    conn = e->ptr;
-    Curl_llist_remove(&connc->shutdowns.conn_list, e, NULL);
-    sigpipe_ignore(connc->closure_handle, &pipe_st);
-    connc_disconnect(connc->closure_handle, conn, FALSE);
-    sigpipe_restore(&pipe_st);
-    e = connc->shutdowns.conn_list.head;
-  }
-  connc->shutdowns.iter_locked = FALSE;
+  conncache_shutdown_discard_all(connc);
 
   sigpipe_ignore(connc->closure_handle, &pipe_st);
   Curl_hostcache_clean(connc->closure_handle,
@@ -863,6 +869,8 @@ static void connc_disconnect(struct Curl_easy *data,
   Curl_conn_free(data, conn);
 }
 
+#ifdef DEBUGBUILD
+
 #define NUM_POLLS_ON_STACK 10
 
 static CURLcode conncache_shutdown_wait(struct conncache *connc,
@@ -884,23 +892,6 @@ out:
   return result;
 }
 
-static void conncache_shutdown_discard_all(struct conncache *connc)
-{
-  struct connectdata *conn;
-
-  DEBUGASSERT(!connc->shutdowns.iter_locked);
-  connc->shutdowns.iter_locked = TRUE;
-  while(connc->shutdowns.conn_list.head) {
-    struct Curl_llist_element *e = connc->shutdowns.conn_list.head;
-    conn = e->ptr;
-    Curl_llist_remove(&connc->shutdowns.conn_list, e, NULL);
-    DEBUGF(infof(connc->closure_handle, "discard connection"));
-    connc_disconnect(connc->closure_handle, conn, FALSE);
-  }
-  connc->shutdowns.iter_locked = FALSE;
-}
-
-#ifdef DEBUGBUILD
 static void conncache_shutdown_all(struct conncache *connc, int timeout_ms)
 {
   struct connectdata *conn;
