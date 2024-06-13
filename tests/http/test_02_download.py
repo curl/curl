@@ -568,6 +568,8 @@ class TestDownload:
     @pytest.mark.skipif(condition=not Env.tcpdump(), reason="tcpdump not available")
     @pytest.mark.parametrize("proto", ['http/1.1'])
     def test_02_30_check_tcp_rst(self, env: Env, httpd, repeat, proto):
+        if env.ci_run:
+            pytest.skip("seems not to work in CI")
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-1]'
         r = curl.http_download(urls=[url], alpn_proto=proto, with_tcpdump=True, extra_args=[

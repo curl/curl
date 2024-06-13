@@ -1246,6 +1246,7 @@ static void conncaches_tmp_add(struct Curl_llist *list,
         break;
       }
     }
+    (void)found; /* some Windows builds complains about found not used. */
     DEBUGASSERT(found);
   }
 #endif
