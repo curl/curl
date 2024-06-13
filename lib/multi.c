@@ -782,9 +782,8 @@ static CURLcode multi_done(struct Curl_easy *data,
                  data->set.reuse_forbid, conn->bits.close, premature,
                  Curl_conn_is_multiplex(conn, FIRSTSOCKET)));
     connclose(conn, "disconnecting");
-    Curl_conncache_remove_conn(data, conn, FALSE);
+    Curl_conncache_shutdown_conn(data, conn, premature, FALSE);
     CONNCACHE_UNLOCK(data);
-    Curl_disconnect(data, conn, premature);
   }
   else {
     char buffer[256];
@@ -935,8 +934,7 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
     curl_socket_t s;
     s = Curl_getconnectinfo(data, &c);
     if((s != CURL_SOCKET_BAD) && c) {
-      Curl_conncache_remove_conn(data, c, TRUE);
-      Curl_disconnect(data, c, TRUE);
+      Curl_conncache_shutdown_conn(data, c, TRUE, TRUE);
     }
   }
 
@@ -1221,6 +1219,38 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
   return CURLM_OK;
 }
 
+static void conncaches_tmp_add(struct Curl_llist *list,
+                               struct conncache *connc)
+{
+  /* If connc is not already on the list, add it */
+  if(connc && list->head &&
+     !connc->tmp_list.prev && connc != list->head->ptr) {
+#ifdef DEBUGBUILD
+    /* it MUST NOT already be on the list */
+    struct Curl_llist_element *le;
+    for(le = list->head; le; le = le->next) {
+      if(le->ptr == connc)
+        DEBUGASSERT(0);
+    }
+#endif
+    Curl_llist_append(list, connc, &connc->tmp_list);
+  }
+#ifdef DEBUGBUILD
+  else if(connc) {
+    /* it MUST already be on the list */
+    struct Curl_llist_element *le;
+    bool found = FALSE;
+    for(le = list->head; le; le = le->next) {
+      if(le->ptr == connc) {
+        found = TRUE;
+        break;
+      }
+    }
+    DEBUGASSERT(found);
+  }
+#endif
+}
+
 CURLMcode curl_multi_waitfds(struct Curl_multi *multi,
                              struct curl_waitfd *ufds,
                              unsigned int size,
@@ -1229,6 +1259,9 @@ CURLMcode curl_multi_waitfds(struct Curl_multi *multi,
   struct Curl_easy *data;
   struct curl_waitfds cwfds;
   struct easy_pollset ps;
+  struct Curl_llist conn_caches;
+  struct Curl_llist_element *le;
+  CURLMcode result = CURLM_OK;
 
   if(!ufds)
     return CURLM_BAD_FUNCTION_ARGUMENT;
@@ -1239,17 +1272,36 @@ CURLMcode curl_multi_waitfds(struct Curl_multi *multi,
   if(multi->in_callback)
     return CURLM_RECURSIVE_API_CALL;
 
+  Curl_llist_init(&conn_caches, NULL);
+  DEBUGASSERT(!multi->conn_cache.tmp_list.next &&
+              !multi->conn_cache.tmp_list.prev);
+  Curl_llist_append(&conn_caches, &multi->conn_cache,
+                    &multi->conn_cache.tmp_list);
+
   Curl_waitfds_init(&cwfds, ufds, size);
   memset(&ps, 0, sizeof(ps));
   for(data = multi->easyp; data; data = data->next) {
     multi_getsock(data, &ps);
-    if(Curl_waitfds_add_ps(&cwfds, &ps))
-      return CURLM_OUT_OF_MEMORY;
+    if(Curl_waitfds_add_ps(&cwfds, &ps)) {
+      result = CURLM_OUT_OF_MEMORY;
+      goto out;
+    }
+    conncaches_tmp_add(&conn_caches, data->state.conn_cache);
   }
 
+  /* Let all involved connection caches add their pollfds. */
+  for(le = conn_caches.head; le; le = le->next) {
+    if(Curl_conncache_add_waitfds(le->ptr, &cwfds)) {
+      result = CURLM_OUT_OF_MEMORY;
+      goto out;
+    }
+  }
+
+out:
+  Curl_llist_destroy(&conn_caches, NULL);
   if(fd_count)
     *fd_count = cwfds.n;
-  return CURLM_OK;
+  return result;
 }
 
 #ifdef USE_WINSOCK
@@ -1293,6 +1345,9 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
 #ifndef ENABLE_WAKEUP
   (void)use_wakeup;
 #endif
+  struct Curl_llist conn_caches;
+  struct Curl_llist_element *le;
+  CURLMcode result = CURLM_OK;
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
@@ -1303,6 +1358,12 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   if(timeout_ms < 0)
     return CURLM_BAD_FUNCTION_ARGUMENT;
 
+  Curl_llist_init(&conn_caches, NULL);
+  DEBUGASSERT(!multi->conn_cache.tmp_list.next &&
+              !multi->conn_cache.tmp_list.prev);
+  Curl_llist_append(&conn_caches, &multi->conn_cache,
+                    &multi->conn_cache.tmp_list);
+
   Curl_pollfds_init(&cpfds, a_few_on_stack, NUM_POLLS_ON_STACK);
   memset(&ps, 0, sizeof(ps));
 
@@ -1310,8 +1371,17 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   for(data = multi->easyp; data; data = data->next) {
     multi_getsock(data, &ps);
     if(Curl_pollfds_add_ps(&cpfds, &ps)) {
-      Curl_pollfds_cleanup(&cpfds);
-      return CURLM_OUT_OF_MEMORY;
+      result = CURLM_OUT_OF_MEMORY;
+      goto out;
+    }
+    conncaches_tmp_add(&conn_caches, data->state.conn_cache);
+  }
+
+  /* Let all involved connection caches add their pollfds. */
+  for(le = conn_caches.head; le; le = le->next) {
+    if(Curl_conncache_add_pollfds(le->ptr, &cpfds)) {
+      result = CURLM_OUT_OF_MEMORY;
+      goto out;
     }
   }
 
@@ -1326,8 +1396,8 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
     if(extra_fds[i].events & CURL_WAIT_POLLOUT)
       events |= POLLOUT;
     if(Curl_pollfds_add_sock(&cpfds, extra_fds[i].fd, events)) {
-      Curl_pollfds_cleanup(&cpfds);
-      return CURLM_OUT_OF_MEMORY;
+      result = CURLM_OUT_OF_MEMORY;
+      goto out;
     }
   }
 
@@ -1345,8 +1415,8 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
     }
     if(mask) {
       if(WSAEventSelect(cpfds.pfds[i].fd, multi->wsa_event, mask) != 0) {
-        Curl_pollfds_cleanup(&cpfds);
-        return CURLM_INTERNAL_ERROR;
+        result = CURLM_OUT_OF_MEMORY;
+        goto out;
       }
     }
   }
@@ -1356,8 +1426,8 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
 #ifndef USE_WINSOCK
   if(use_wakeup && multi->wakeup_pair[0] != CURL_SOCKET_BAD) {
     if(Curl_pollfds_add_sock(&cpfds, multi->wakeup_pair[0], POLLIN)) {
-      Curl_pollfds_cleanup(&cpfds);
-      return CURLM_OUT_OF_MEMORY;
+      result = CURLM_OUT_OF_MEMORY;
+      goto out;
     }
   }
 #endif
@@ -1386,8 +1456,8 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
     pollrc = Curl_poll(cpfds.pfds, cpfds.n, timeout_ms); /* wait... */
 #endif
     if(pollrc < 0) {
-      Curl_pollfds_cleanup(&cpfds);
-      return CURLM_UNRECOVERABLE_POLL;
+      result = CURLM_UNRECOVERABLE_POLL;
+      goto out;
     }
 
     if(pollrc > 0) {
@@ -1505,8 +1575,10 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
     }
   }
 
+out:
   Curl_pollfds_cleanup(&cpfds);
-  return CURLM_OK;
+  Curl_llist_destroy(&conn_caches, NULL);
+  return result;
 }
 
 CURLMcode curl_multi_wait(struct Curl_multi *multi,
@@ -2591,11 +2663,8 @@ statemachine_end:
                failure is detected */
             Curl_detach_connection(data);
 
-            /* remove connection from cache */
-            Curl_conncache_remove_conn(data, conn, TRUE);
-
-            /* disconnect properly */
-            Curl_disconnect(data, conn, dead_connection);
+            /* shutdown connection from cache */
+            Curl_conncache_shutdown_conn(data, conn, dead_connection, TRUE);
           }
         }
         else if(data->mstate == MSTATE_CONNECT) {
@@ -2657,12 +2726,20 @@ CURLMcode curl_multi_perform(struct Curl_multi *multi, int *running_handles)
   CURLMcode returncode = CURLM_OK;
   struct Curl_tree *t;
   struct curltime now = Curl_now();
+  struct Curl_llist conn_caches;
+  struct Curl_llist_element *le;
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
 
   if(multi->in_callback)
     return CURLM_RECURSIVE_API_CALL;
+
+  Curl_llist_init(&conn_caches, NULL);
+  DEBUGASSERT(!multi->conn_cache.tmp_list.next &&
+              !multi->conn_cache.tmp_list.prev);
+  Curl_llist_append(&conn_caches, &multi->conn_cache,
+                    &multi->conn_cache.tmp_list);
 
   data = multi->easyp;
   if(data) {
@@ -2676,6 +2753,9 @@ CURLMcode curl_multi_perform(struct Curl_multi *multi, int *running_handles)
       /* the current node might be unlinked in multi_runsingle(), get the next
          pointer now */
       struct Curl_easy *datanext = data->next;
+
+      conncaches_tmp_add(&conn_caches, data->state.conn_cache);
+
       if(data->set.no_signal != nosig) {
         sigpipe_restore(&pipe_st);
         sigpipe_ignore(data, &pipe_st);
@@ -2684,10 +2764,17 @@ CURLMcode curl_multi_perform(struct Curl_multi *multi, int *running_handles)
       result = multi_runsingle(multi, &now, data);
       if(result)
         returncode = result;
+
       data = datanext; /* operate on next handle */
     } while(data);
     sigpipe_restore(&pipe_st);
   }
+
+  /* Let all involved connection caches to their maintenance. */
+  for(le = conn_caches.head; le; le = le->next) {
+    Curl_conncache_perform(le->ptr);
+  }
+  Curl_llist_destroy(&conn_caches, NULL);
 
   /*
    * Simply remove all expired timers from the splay since handles are dealt
@@ -3275,6 +3362,9 @@ CURLMcode curl_multi_setopt(struct Curl_multi *multi,
     break;
   case CURLMOPT_MAX_TOTAL_CONNECTIONS:
     multi->max_total_connections = va_arg(param, long);
+    /* for now, let this also decide the max number of connections
+     * in shutdown handling */
+    multi->max_shutdown_connections = va_arg(param, long);
     break;
     /* options formerly used for pipelining */
   case CURLMOPT_MAX_PIPELINE_LENGTH:

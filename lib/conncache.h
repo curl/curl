@@ -35,6 +35,13 @@
 #include "timeval.h"
 
 struct connectdata;
+struct curl_pollfds;
+struct curl_waitfds;
+
+struct connshutdowns {
+  struct Curl_llist conn_list;  /* The connectdata to shut down */
+  BIT(iter_locked);  /* TRUE while iterating the list */
+};
 
 struct conncache {
   struct Curl_hash hash;
@@ -42,8 +49,12 @@ struct conncache {
   curl_off_t next_connection_id;
   curl_off_t next_easy_id;
   struct curltime last_cleanup;
+  struct connshutdowns shutdowns;
   /* handle used for closing cached connections */
   struct Curl_easy *closure_handle;
+   /* temporary list of caches, build and destroyed during
+    * multi wait/processing/cleanup. */
+  struct Curl_llist_element tmp_list;
 };
 
 #define BUNDLE_NO_MULTIUSE -1
@@ -118,5 +129,16 @@ struct connectdata *
 Curl_conncache_extract_oldest(struct Curl_easy *data);
 void Curl_conncache_close_all_connections(struct conncache *connc);
 void Curl_conncache_print(struct conncache *connc);
+
+void Curl_conncache_shutdown_conn(struct Curl_easy *data,
+                                  struct connectdata *conn,
+                                  bool is_dead, bool lock);
+
+CURLcode Curl_conncache_add_pollfds(struct conncache *connc,
+                                    struct curl_pollfds *cpfds);
+CURLcode Curl_conncache_add_waitfds(struct conncache *connc,
+                                    struct curl_waitfds *cwfds);
+
+void Curl_conncache_perform(struct conncache *connc);
 
 #endif /* HEADER_CURL_CONNCACHE_H */

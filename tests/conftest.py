@@ -47,7 +47,7 @@ def pytest_report_header(config):
         ])
     if env.has_vsftpd():
         report.extend([
-            f'  VsFTPD: {env.vsftpd_version()}, ftp:{env.ftp_port}'
+            f'  VsFTPD: {env.vsftpd_version()}, ftp:{env.ftp_port}, ftps:{env.ftps_port}'
         ])
     return '\n'.join(report)
 

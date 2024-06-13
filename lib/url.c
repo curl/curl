@@ -556,19 +556,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
   return result;
 }
 
-static void conn_shutdown(struct Curl_easy *data)
-{
-  DEBUGASSERT(data);
-  infof(data, "Closing connection");
-
-  /* possible left-overs from the async name resolvers */
-  Curl_resolver_cancel(data);
-
-  Curl_conn_close(data, SECONDARYSOCKET);
-  Curl_conn_close(data, FIRSTSOCKET);
-}
-
-static void conn_free(struct Curl_easy *data, struct connectdata *conn)
+void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
 {
   size_t i;
 
@@ -607,78 +595,6 @@ static void conn_free(struct Curl_easy *data, struct connectdata *conn)
 #endif
 
   free(conn); /* free all the connection oriented data */
-}
-
-/*
- * Disconnects the given connection. Note the connection may not be the
- * primary connection, like when freeing room in the connection cache or
- * killing of a dead old connection.
- *
- * A connection needs an easy handle when closing down. We support this passed
- * in separately since the connection to get closed here is often already
- * disassociated from an easy handle.
- *
- * This function MUST NOT reset state in the Curl_easy struct if that
- * isn't strictly bound to the life-time of *this* particular connection.
- *
- */
-
-void Curl_disconnect(struct Curl_easy *data,
-                     struct connectdata *conn, bool dead_connection)
-{
-  /* there must be a connection to close */
-  DEBUGASSERT(conn);
-
-  /* it must be removed from the connection cache */
-  DEBUGASSERT(!conn->bundle);
-
-  /* there must be an associated transfer */
-  DEBUGASSERT(data);
-
-  /* the transfer must be detached from the connection */
-  DEBUGASSERT(!data->conn);
-
-  DEBUGF(infof(data, "Curl_disconnect(conn #%"
-         CURL_FORMAT_CURL_OFF_T ", dead=%d)",
-         conn->connection_id, dead_connection));
-  /*
-   * If this connection isn't marked to force-close, leave it open if there
-   * are other users of it
-   */
-  if(CONN_INUSE(conn) && !dead_connection) {
-    DEBUGF(infof(data, "Curl_disconnect when inuse: %zu", CONN_INUSE(conn)));
-    return;
-  }
-
-  if(conn->dns_entry) {
-    Curl_resolv_unlock(data, conn->dns_entry);
-    conn->dns_entry = NULL;
-  }
-
-  /* Cleanup NTLM connection-related data */
-  Curl_http_auth_cleanup_ntlm(conn);
-
-  /* Cleanup NEGOTIATE connection-related data */
-  Curl_http_auth_cleanup_negotiate(conn);
-
-  if(conn->connect_only)
-    /* treat the connection as dead in CONNECT_ONLY situations */
-    dead_connection = TRUE;
-
-  /* temporarily attach the connection to this transfer handle for the
-     disconnect and shutdown */
-  Curl_attach_connection(data, conn);
-
-  if(conn->handler && conn->handler->disconnect)
-    /* This is set if protocol-specific cleanups should be made */
-    conn->handler->disconnect(data, conn, dead_connection);
-
-  conn_shutdown(data);
-
-  /* detach it again */
-  Curl_detach_connection(data);
-
-  conn_free(data, conn);
 }
 
 /*
@@ -881,8 +797,8 @@ static void prune_dead_connections(struct Curl_easy *data)
 
       /* connection previously removed from cache in prune_if_dead() */
 
-      /* disconnect it */
-      Curl_disconnect(data, pruned, TRUE);
+      /* shut it down */
+      Curl_conncache_shutdown_conn(data, pruned, TRUE, TRUE);
     }
     CONNCACHE_LOCK(data);
     data->state.conn_cache->last_cleanup = now;
@@ -1295,7 +1211,7 @@ ConnectionExists(struct Curl_easy *data,
     }
     else if(prune_if_dead(check, data)) {
       /* disconnect it */
-      Curl_disconnect(data, check, TRUE);
+      Curl_conncache_shutdown_conn(data, check, TRUE, TRUE);
       continue;
     }
 
@@ -3333,7 +3249,7 @@ static void reuse_conn(struct Curl_easy *data,
   /* reuse init */
   existing->bits.reuse = TRUE; /* yes, we're reusing here */
 
-  conn_free(data, temp);
+  Curl_conn_free(data, temp);
 }
 
 /**
@@ -3642,7 +3558,7 @@ static CURLcode create_conn(struct Curl_easy *data,
         CONNCACHE_UNLOCK(data);
 
         if(conn_candidate)
-          Curl_disconnect(data, conn_candidate, FALSE);
+          Curl_conncache_shutdown_conn(data, conn_candidate, FALSE, FALSE);
         else {
           infof(data, "No more connections allowed to host: %zu",
                 max_host_connections);
@@ -3662,7 +3578,7 @@ static CURLcode create_conn(struct Curl_easy *data,
       /* The cache is full. Let's see if we can kill a connection. */
       conn_candidate = Curl_conncache_extract_oldest(data);
       if(conn_candidate)
-        Curl_disconnect(data, conn_candidate, FALSE);
+        Curl_conncache_shutdown_conn(data, conn_candidate, FALSE, FALSE);
       else
 #ifndef CURL_DISABLE_DOH
         if(data->set.dohfor)
@@ -3678,7 +3594,7 @@ static CURLcode create_conn(struct Curl_easy *data,
     if(!connections_available) {
       infof(data, "No connections available.");
 
-      conn_free(data, conn);
+      Curl_conn_free(data, conn);
       *in_connect = NULL;
 
       result = CURLE_NO_CONNECTION_AVAILABLE;
@@ -3828,8 +3744,7 @@ CURLcode Curl_connect(struct Curl_easy *data,
     /* We're not allowed to return failure with memory left allocated in the
        connectdata struct, free those here */
     Curl_detach_connection(data);
-    Curl_conncache_remove_conn(data, conn, TRUE);
-    Curl_disconnect(data, conn, TRUE);
+    Curl_conncache_shutdown_conn(data, conn, TRUE, TRUE);
   }
 
   return result;

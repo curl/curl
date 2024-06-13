@@ -29,13 +29,17 @@
 
 #include "urldata.h"
 #include "url.h"
+#include "cfilters.h"
 #include "progress.h"
 #include "multiif.h"
 #include "sendf.h"
 #include "conncache.h"
+#include "http_negotiate.h"
+#include "http_ntlm.h"
 #include "share.h"
 #include "sigpipe.h"
 #include "connect.h"
+#include "select.h"
 #include "strcase.h"
 
 /* The last 3 #include files should be in this order */
@@ -44,6 +48,17 @@
 #include "memdebug.h"
 
 #define HASHKEY_SIZE 128
+
+static void conncache_shutdown_conn(struct conncache *connc,
+                                    struct connectdata *conn,
+                                    bool is_dead, bool lock);
+static void connc_disconnect(struct Curl_easy *data,
+                             struct connectdata *conn,
+                             bool do_shutdown);
+static void connc_run_conn_shutdown(struct Curl_easy *data,
+                                    struct connectdata *conn,
+                                    bool *done);
+static void conncache_shutdown_all(struct conncache *connc, int timeout_ms);
 
 static CURLcode bundle_create(struct connectbundle **bundlep)
 {
@@ -107,18 +122,26 @@ int Curl_conncache_init(struct conncache *connc, size_t size)
   if(!connc->closure_handle)
     return 1; /* bad */
   connc->closure_handle->state.internal = true;
+ #ifdef DEBUGBUILD
+  if(getenv("CURL_DEBUG"))
+    connc->closure_handle->set.verbose = true;
+#endif
 
   Curl_hash_init(&connc->hash, size, Curl_hash_str,
                  Curl_str_key_compare, free_bundle_hash_entry);
   connc->closure_handle->state.conn_cache = connc;
+
+  Curl_llist_init(&connc->shutdowns.conn_list, NULL);
 
   return 0; /* good */
 }
 
 void Curl_conncache_destroy(struct conncache *connc)
 {
-  if(connc)
+  if(connc) {
     Curl_hash_destroy(&connc->hash);
+    DEBUGASSERT(!Curl_llist_count(&connc->shutdowns.conn_list));
+  }
 }
 
 /* creates a key to find a bundle for this connection */
@@ -394,8 +417,7 @@ bool Curl_conncache_return_conn(struct Curl_easy *data,
          important that details from this (unrelated) disconnect does not
          taint meta-data in the data handle. */
       struct conncache *connc = data->state.conn_cache;
-      Curl_disconnect(connc->closure_handle, conn_candidate,
-                      /* dead_connection */ FALSE);
+      connc_disconnect(connc->closure_handle, conn_candidate, TRUE);
     }
   }
 
@@ -519,29 +541,411 @@ Curl_conncache_extract_oldest(struct Curl_easy *data)
 void Curl_conncache_close_all_connections(struct conncache *connc)
 {
   struct connectdata *conn;
+  struct Curl_llist_element *e;
   SIGPIPE_VARIABLE(pipe_st);
   if(!connc->closure_handle)
     return;
 
+  /* Move all connections to the shutdown list */
   conn = conncache_find_first_connection(connc);
   while(conn) {
     sigpipe_ignore(connc->closure_handle, &pipe_st);
     /* This will remove the connection from the cache */
     connclose(conn, "kill all");
-    Curl_conncache_remove_conn(connc->closure_handle, conn, TRUE);
-    Curl_disconnect(connc->closure_handle, conn, FALSE);
+    conncache_shutdown_conn(connc, conn, FALSE, FALSE);
     sigpipe_restore(&pipe_st);
 
     conn = conncache_find_first_connection(connc);
   }
 
-  sigpipe_ignore(connc->closure_handle, &pipe_st);
+    /* Just for testing, run graceful shutdown */
+#ifdef DEBUGBUILD
+    if(getenv("CURL_GRACEFUL_SHUTDOWN")) {
+      conncache_shutdown_all(connc, DEFAULT_SHUTDOWN_TIMEOUT_MS);
+    }
+#endif
 
+  /* discard all connections in the shutdown list */
+  DEBUGASSERT(!connc->shutdowns.iter_locked);
+  connc->shutdowns.iter_locked = TRUE;
+  e = connc->shutdowns.conn_list.head;
+  while(e) {
+    conn = e->ptr;
+    Curl_llist_remove(&connc->shutdowns.conn_list, e, NULL);
+    sigpipe_ignore(connc->closure_handle, &pipe_st);
+    connc_disconnect(connc->closure_handle, conn, FALSE);
+    sigpipe_restore(&pipe_st);
+    e = connc->shutdowns.conn_list.head;
+  }
+  connc->shutdowns.iter_locked = FALSE;
+
+  sigpipe_ignore(connc->closure_handle, &pipe_st);
   Curl_hostcache_clean(connc->closure_handle,
                        connc->closure_handle->dns.hostcache);
   Curl_close(&connc->closure_handle);
   sigpipe_restore(&pipe_st);
 }
+
+static void connc_shutdown_discard_oldest(struct conncache *connc)
+{
+  struct Curl_llist_element *e;
+  struct connectdata *conn;
+  SIGPIPE_VARIABLE(pipe_st);
+
+  DEBUGASSERT(!connc->shutdowns.iter_locked);
+  if(connc->shutdowns.iter_locked)
+    return;
+
+  e = connc->shutdowns.conn_list.head;
+  if(e) {
+    conn = e->ptr;
+    Curl_llist_remove(&connc->shutdowns.conn_list, e, NULL);
+    sigpipe_ignore(connc->closure_handle, &pipe_st);
+    connc_disconnect(connc->closure_handle, conn, FALSE);
+    sigpipe_restore(&pipe_st);
+  }
+}
+
+static void conncache_shutdown_conn(struct conncache *connc,
+                                    struct connectdata *conn,
+                                    bool is_dead, bool lock)
+{
+  struct Curl_easy *data = connc->closure_handle;
+  bool done;
+
+  DEBUGASSERT(connc);
+  if(conn->bundle)
+    Curl_conncache_remove_conn(data, conn, lock);
+
+  /*
+   * If this connection isn't marked to force-close, leave it open if there
+   * are other users of it
+   */
+  if(CONN_INUSE(conn) && !is_dead) {
+    DEBUGF(infof(data, "conncache_shutdown_conn when inuse: %zu",
+                 CONN_INUSE(conn)));
+    return;
+  }
+
+  /* treat the connection as dead in CONNECT_ONLY situations */
+  if(conn->connect_only)
+    is_dead = TRUE;
+  conn->bits.shutdown_maybe_dead = is_dead;
+
+  /* Attempt to shutdown the connection right away. */
+  Curl_attach_connection(data, conn);
+  connc_run_conn_shutdown(data, conn, &done);
+  Curl_detach_connection(data);
+  if(done) {
+    DEBUGF(infof(connc->closure_handle, "shutdown, disconnect connection %"
+           CURL_FORMAT_CURL_OFF_T " as done", conn->connection_id));
+    connc_disconnect(data, conn, FALSE);
+    return;
+  }
+
+  DEBUGASSERT(!connc->shutdowns.iter_locked);
+  if(connc->shutdowns.iter_locked) {
+    DEBUGF(infof(connc->closure_handle, "shutdown, disconnect connection %"
+           CURL_FORMAT_CURL_OFF_T " as shutdown list locked",
+           conn->connection_id));
+    connc_disconnect(data, conn, FALSE);
+    return;
+  }
+
+  DEBUGF(infof(data, "conncache_shutdown adding connection"));
+  /* Add the connection to our shutdown list for non-blocking shutdown
+   * during multi processing. */
+  if(data->multi && data->multi->max_shutdown_connections > 0 &&
+     (data->multi->max_shutdown_connections >=
+      (long)Curl_llist_count(&connc->shutdowns.conn_list))) {
+    DEBUGF(infof(data, "conncache_shutdown discard oldest, shutdown limit "
+                 "%zu reached", data->multi->max_shutdown_connections));
+    connc_shutdown_discard_oldest(connc);
+  }
+  Curl_llist_append(&connc->shutdowns.conn_list, conn, &conn->bundle_node);
+}
+
+void Curl_conncache_shutdown_conn(struct Curl_easy *data,
+                                  struct connectdata *conn,
+                                  bool is_dead, bool lock)
+{
+  infof(data, "Closing connection");
+  conncache_shutdown_conn(data->state.conn_cache, conn, is_dead, lock);
+}
+
+static void connc_run_conn_shutdown(struct Curl_easy *data,
+                                    struct connectdata *conn,
+                                    bool *done)
+{
+  CURLcode r1, r2;
+  bool done1, done2;
+
+  /* We expect to be attached when called */
+  DEBUGASSERT(data->conn == conn);
+  if(conn->bits.shutdown_filters) {
+    *done = TRUE;
+    return;
+  }
+
+  if(!conn->bits.shutdown_handler) {
+    DEBUGF(infof(data, "connc_disconnect(conn #%"
+           CURL_FORMAT_CURL_OFF_T ", dead=%d)",
+           conn->connection_id, conn->bits.shutdown_maybe_dead));
+
+    if(conn->dns_entry) {
+      Curl_resolv_unlock(data, conn->dns_entry);
+      conn->dns_entry = NULL;
+    }
+
+    /* Cleanup NTLM connection-related data */
+    Curl_http_auth_cleanup_ntlm(conn);
+
+    /* Cleanup NEGOTIATE connection-related data */
+    Curl_http_auth_cleanup_negotiate(conn);
+
+    if(conn->handler && conn->handler->disconnect) {
+      /* This is set if protocol-specific cleanups should be made */
+      conn->handler->disconnect(data, conn, conn->bits.shutdown_maybe_dead);
+    }
+    conn->bits.shutdown_handler = TRUE;
+  }
+
+  /* possible left-overs from the async name resolvers */
+  Curl_resolver_cancel(data);
+
+  if(!conn->connect_only && Curl_conn_is_connected(conn, FIRSTSOCKET))
+    r1 = Curl_conn_shutdown(data, FIRSTSOCKET, &done1);
+  else {
+    r1 = CURLE_OK;
+    done1 = TRUE;
+  }
+
+  if(!conn->connect_only && Curl_conn_is_connected(conn, SECONDARYSOCKET))
+    r2 = Curl_conn_shutdown(data, SECONDARYSOCKET, &done2);
+  else {
+    r2 = CURLE_OK;
+    done2 = TRUE;
+  }
+
+  /* we are done when any failed or both report success */
+  *done = (r1 || r2 || (done1 && done2));
+  if(*done)
+    conn->bits.shutdown_filters = TRUE;
+}
+
+CURLcode Curl_conncache_add_pollfds(struct conncache *connc,
+                                    struct curl_pollfds *cpfds)
+{
+  CURLcode result = CURLE_OK;
+
+  DEBUGASSERT(!connc->shutdowns.iter_locked);
+  connc->shutdowns.iter_locked = TRUE;
+  if(connc->shutdowns.conn_list.head) {
+    struct Curl_llist_element *e = connc->shutdowns.conn_list.head;
+    struct easy_pollset ps;
+
+    for(e = connc->shutdowns.conn_list.head; e; e = e->next) {
+      struct connectdata *conn = e->ptr;
+
+      memset(&ps, 0, sizeof(ps));
+      Curl_attach_connection(connc->closure_handle, conn);
+      Curl_conn_adjust_pollset(connc->closure_handle, &ps);
+      Curl_detach_connection(connc->closure_handle);
+
+      if(Curl_pollfds_add_ps(cpfds, &ps)) {
+        Curl_pollfds_cleanup(cpfds);
+        result = CURLE_OUT_OF_MEMORY;
+        goto out;
+      }
+    }
+  }
+out:
+  connc->shutdowns.iter_locked = FALSE;
+  return result;
+}
+
+CURLcode Curl_conncache_add_waitfds(struct conncache *connc,
+                                    struct curl_waitfds *cwfds)
+{
+  CURLcode result = CURLE_OK;
+
+  DEBUGASSERT(!connc->shutdowns.iter_locked);
+  connc->shutdowns.iter_locked = TRUE;
+  if(connc->shutdowns.conn_list.head) {
+    struct Curl_llist_element *e = connc->shutdowns.conn_list.head;
+    struct easy_pollset ps;
+
+    for(e = connc->shutdowns.conn_list.head; e; e = e->next) {
+      struct connectdata *conn = e->ptr;
+
+      memset(&ps, 0, sizeof(ps));
+      Curl_attach_connection(connc->closure_handle, conn);
+      Curl_conn_adjust_pollset(connc->closure_handle, &ps);
+      Curl_detach_connection(connc->closure_handle);
+
+      if(Curl_waitfds_add_ps(cwfds, &ps)) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto out;
+      }
+    }
+  }
+out:
+  connc->shutdowns.iter_locked = FALSE;
+  return result;
+}
+
+void Curl_conncache_perform(struct conncache *connc)
+{
+  struct Curl_llist_element *e = connc->shutdowns.conn_list.head;
+  struct Curl_llist_element *enext;
+  struct connectdata *conn;
+  bool done;
+
+  DEBUGASSERT(!connc->shutdowns.iter_locked);
+  connc->shutdowns.iter_locked = TRUE;
+  while(e) {
+    enext = e->next;
+    conn = e->ptr;
+    Curl_attach_connection(connc->closure_handle, conn);
+    connc_run_conn_shutdown(connc->closure_handle, conn, &done);
+    if(done)
+      DEBUGF(infof(connc->closure_handle, "connection shut down"));
+    Curl_detach_connection(connc->closure_handle);
+    if(done) {
+      Curl_llist_remove(&connc->shutdowns.conn_list, e, NULL);
+      connc_disconnect(connc->closure_handle, conn, FALSE);
+    }
+    e = enext;
+  }
+  connc->shutdowns.iter_locked = FALSE;
+}
+
+/*
+ * Disconnects the given connection. Note the connection may not be the
+ * primary connection, like when freeing room in the connection cache or
+ * killing of a dead old connection.
+ *
+ * A connection needs an easy handle when closing down. We support this passed
+ * in separately since the connection to get closed here is often already
+ * disassociated from an easy handle.
+ *
+ * This function MUST NOT reset state in the Curl_easy struct if that
+ * isn't strictly bound to the life-time of *this* particular connection.
+ *
+ */
+static void connc_disconnect(struct Curl_easy *data,
+                             struct connectdata *conn,
+                             bool do_shutdown)
+{
+  bool done;
+
+  /* there must be a connection to close */
+  DEBUGASSERT(conn);
+  /* it must be removed from the connection cache */
+  DEBUGASSERT(!conn->bundle);
+  /* there must be an associated transfer */
+  DEBUGASSERT(data);
+  /* the transfer must be detached from the connection */
+  DEBUGASSERT(!data->conn);
+
+  Curl_attach_connection(data, conn);
+
+  if(do_shutdown) {
+    /* Make a last attempt to shutdown handlers and filters, if
+     * not done so already. */
+    connc_run_conn_shutdown(data, conn, &done);
+  }
+
+  Curl_conn_close(data, SECONDARYSOCKET);
+  Curl_conn_close(data, FIRSTSOCKET);
+  Curl_detach_connection(data);
+
+  Curl_conn_free(data, conn);
+}
+
+#define NUM_POLLS_ON_STACK 10
+
+static CURLcode conncache_shutdown_wait(struct conncache *connc,
+                                        int timeout_ms)
+{
+  struct pollfd a_few_on_stack[NUM_POLLS_ON_STACK];
+  struct curl_pollfds cpfds;
+  CURLcode result;
+
+  Curl_pollfds_init(&cpfds, a_few_on_stack, NUM_POLLS_ON_STACK);
+
+  result = Curl_conncache_add_pollfds(connc, &cpfds);
+  if(result)
+    goto out;
+
+  Curl_poll(cpfds.pfds, cpfds.n, CURLMIN(timeout_ms, 1000));
+
+out:
+  return result;
+}
+
+static void conncache_shutdown_discard_all(struct conncache *connc)
+{
+  struct connectdata *conn;
+
+  DEBUGASSERT(!connc->shutdowns.iter_locked);
+  connc->shutdowns.iter_locked = TRUE;
+  while(connc->shutdowns.conn_list.head) {
+    struct Curl_llist_element *e = connc->shutdowns.conn_list.head;
+    conn = e->ptr;
+    Curl_llist_remove(&connc->shutdowns.conn_list, e, NULL);
+    DEBUGF(infof(connc->closure_handle, "discard connection"));
+    connc_disconnect(connc->closure_handle, conn, FALSE);
+  }
+  connc->shutdowns.iter_locked = FALSE;
+}
+
+static void conncache_shutdown_all(struct conncache *connc, int timeout_ms)
+{
+  struct connectdata *conn;
+  struct curltime started = Curl_now();
+
+  if(!connc->closure_handle)
+    return;
+
+  /* Move all connections into the shutdown queue */
+  conn = conncache_find_first_connection(connc);
+  while(conn) {
+    /* This will remove the connection from the cache */
+    DEBUGF(infof(connc->closure_handle, "moving connection %"
+           CURL_FORMAT_CURL_OFF_T " to shutdown queue", conn->connection_id));
+    conncache_shutdown_conn(connc, conn, FALSE, TRUE);
+    conn = conncache_find_first_connection(connc);
+  }
+
+  DEBUGASSERT(!connc->shutdowns.iter_locked);
+  while(connc->shutdowns.conn_list.head) {
+    timediff_t timespent;
+    int remain_ms;
+
+    Curl_conncache_perform(connc);
+
+    if(!connc->shutdowns.conn_list.head) {
+      DEBUGF(infof(connc->closure_handle, "conncache shutdown ok"));
+      break;
+    }
+
+    /* wait for activity, timeout or "nothing" */
+    timespent = Curl_timediff(Curl_now(), started);
+    if(timespent >= (timediff_t)timeout_ms) {
+      DEBUGF(infof(connc->closure_handle, "conncache shutdown timeout"));
+      break;
+    }
+
+    remain_ms = timeout_ms - (int)timespent;
+    if(conncache_shutdown_wait(connc, remain_ms))
+      break;
+  }
+
+  /* Due to errors/timeout, we might come here without being full ydone. */
+  conncache_shutdown_discard_all(connc);
+}
+
 
 #if 0
 /* Useful for debugging the connection cache */

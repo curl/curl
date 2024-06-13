@@ -183,7 +183,6 @@ struct cf_h2_proxy_ctx {
   BIT(conn_closed);
   BIT(rcvd_goaway);
   BIT(sent_goaway);
-  BIT(shutdown);
   BIT(nw_out_blocked);
 };
 
@@ -1172,13 +1171,16 @@ static CURLcode cf_h2_proxy_shutdown(struct Curl_cfilter *cf,
                                      struct Curl_easy *data, bool *done)
 {
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
+  struct cf_call_data save;
   CURLcode result;
   int rv;
 
-  if(!cf->connected || !ctx->h2 || ctx->shutdown) {
+  if(!cf->connected || !ctx->h2 || cf->shutdown || ctx->conn_closed) {
     *done = TRUE;
     return CURLE_OK;
   }
+
+  CF_DATA_SAVE(save, cf, data);
 
   if(!ctx->sent_goaway) {
     rv = nghttp2_submit_goaway(ctx->h2, NGHTTP2_FLAG_NONE,
@@ -1187,7 +1189,8 @@ static CURLcode cf_h2_proxy_shutdown(struct Curl_cfilter *cf,
     if(rv) {
       failf(data, "nghttp2_submit_goaway() failed: %s(%d)",
             nghttp2_strerror(rv), rv);
-      return CURLE_SEND_ERROR;
+      result = CURLE_SEND_ERROR;
+      goto out;
     }
     ctx->sent_goaway = TRUE;
   }
@@ -1198,9 +1201,12 @@ static CURLcode cf_h2_proxy_shutdown(struct Curl_cfilter *cf,
   if(!result && nghttp2_session_want_read(ctx->h2))
     result = proxy_h2_progress_ingress(cf, data);
 
-  *done = !result && !nghttp2_session_want_write(ctx->h2) &&
-          !nghttp2_session_want_read(ctx->h2);
-  ctx->shutdown = (result || *done);
+  *done = (ctx->conn_closed ||
+           (!result && !nghttp2_session_want_write(ctx->h2) &&
+            !nghttp2_session_want_read(ctx->h2)));
+out:
+  CF_DATA_RESTORE(cf, save);
+  cf->shutdown = (result || *done);
   return result;
 }
 
@@ -1240,7 +1246,7 @@ static void cf_h2_proxy_adjust_pollset(struct Curl_cfilter *cf,
     Curl_pollset_set(data, ps, sock, want_recv, want_send);
     CF_DATA_RESTORE(cf, save);
   }
-  else if(ctx->sent_goaway && !ctx->shutdown) {
+  else if(ctx->sent_goaway && !cf->shutdown) {
     /* shutdown in progress */
     CF_DATA_SAVE(save, cf, data);
     want_send = nghttp2_session_want_write(ctx->h2);

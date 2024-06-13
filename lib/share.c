@@ -26,6 +26,7 @@
 
 #include <curl/curl.h>
 #include "urldata.h"
+#include "connect.h"
 #include "share.h"
 #include "psl.h"
 #include "vtls/vtls.h"
