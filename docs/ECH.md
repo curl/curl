@@ -6,16 +6,15 @@ SPDX-License-Identifier: curl
 
 # Building curl with HTTPS-RR and ECH support
 
-We've added support for ECH to in this curl build. That can use HTTPS RRs
-published in the DNS, if curl is using DoH, or else can accept the relevant
-ECHConfigList values from the command line. That works with OpenSSL,
-WolfSSL or boringssl as the TLS provider, depending on how you build curl.
+We have added support for ECH to curl. It can use HTTPS RRs published in the
+DNS if curl uses DoH, or else can accept the relevant ECHConfigList values
+from the command line. This works with OpenSSL, WolfSSL or boringssl as the
+TLS provider.
 
 This feature is EXPERIMENTAL. DO NOT USE IN PRODUCTION.
 
 This should however provide enough of a proof-of-concept to prompt an informed
-discussion about a good path forward for ECH support in curl, when using
-OpenSSL, or other TLS libraries, as those add ECH support.
+discussion about a good path forward for ECH support in curl.
 
 ## OpenSSL Build
 
@@ -42,21 +41,21 @@ To build curl ECH-enabled, making use of the above:
     autoreconf -fi
     LDFLAGS="-Wl,-rpath,$HOME/code/openssl-local-inst/lib/" ./configure --with-ssl=$HOME/code/openssl-local-inst --enable-ech --enable-httpsrr
     ...lots of output...
-    WARNING: ech ECH HTTPSRR enabled but marked EXPERIMENTAL...
+    WARNING: ECH HTTPSRR enabled but marked EXPERIMENTAL...
     make
     ...lots more output...
 ```
 
-If you do not get that WARNING at the end of the ``configure`` command, then ECH
-is not enabled, so go back some steps and re-do whatever needs re-doing:-) If you
-want to debug curl then you should add ``--enable-debug`` to the ``configure``
-command.
+If you do not get that WARNING at the end of the ``configure`` command, then
+ECH is not enabled, so go back some steps and re-do whatever needs re-doing:-)
+If you want to debug curl then you should add ``--enable-debug`` to the
+``configure`` command.
 
 In a recent (2024-05-20) build on one machine, configure failed to find the
 ECH-enabled SSL library, apparently due to the existence of
 ``$HOME/code/openssl-local-inst/lib/pkgconfig`` as a directory containing
-various settings. Deleting that directory worked around the problem but may not
-be the best solution.
+various settings. Deleting that directory worked around the problem but may
+not be the best solution.
 
 ## Using ECH and DoH
 
@@ -216,7 +215,7 @@ or IP address hints.
 - ``USE_ECH`` protects ECH specific code.
 
 There are various obvious code blocks for handling the new command line
-arguments which aren't described here, but should be fairly clear.
+arguments which are not described here, but should be fairly clear.
 
 As shown in the ``configure`` usage above, there are ``configure.ac`` changes
 that allow separately dis/enabling ``USE_HTTPSRR`` and ``USE_ECH``. If ``USE_ECH``
@@ -270,7 +269,7 @@ curl might handle those values when present in the DNS.
   ("aliasMode") - the current code takes no account of that at all. One could
 envisage implementing the equivalent of following CNAMEs in such cases, but
 it is not clear if that'd be a good plan. (As of now, chrome browsers do not seem
-to have any support for that "aliasMode" and we've not checked Firefox for that
+to have any support for that "aliasMode" and we have not checked Firefox for that
 recently.)
 
 - We have not investigated what related changes or additions might be needed
@@ -282,7 +281,7 @@ doing so would seem to require re-implementing an ECH-enabled server as part
 of the curl test harness. For now, we have a ``./tests/ech_test.sh`` script
 that attempts ECH with various test servers and with many combinations of the
 allowed command line options. While that is a useful test and has find issues,
-it is not comprehensive and we're not (as yet) sure what would be the right
+it is not comprehensive and we are not (as yet) sure what would be the right
 level of coverage. When running that script you should not have a
 ``$HOME/.curlrc`` file that affects ECH or some of the negative tests could
 produce spurious failures.
@@ -331,7 +330,7 @@ Then:
     autoreconf -fi
     LDFLAGS="-Wl,-rpath,$HOME/code/boringssl/inst/lib" ./configure --with-ssl=$HOME/code/boringssl/inst --enable-ech --enable-httpsrr
     ...lots of output...
-    WARNING: ech ECH HTTPSRR enabled but marked EXPERIMENTAL. Use with caution!
+    WARNING: ECH HTTPSRR enabled but marked EXPERIMENTAL. Use with caution!
     make
 ```
 
@@ -384,13 +383,12 @@ There are some known issues with the ECH implementation in WolfSSL:
 
 There are what seem like oddball differences:
 
-- The DoH URL in``$HOME/.curlrc`` can use "1.1.1.1" for OpenSSL but has to be
-  "one.one.one.one" for WolfSSL. The latter works for both, so OK, we'll change
-  to that.
+- The DoH URL in``$HOME/.curlrc`` can use `1.1.1.1` for OpenSSL but has to be
+  `one.one.one.one` for WolfSSL. The latter works for both, so OK, we us that.
 - There seems to be some difference in CA databases too - the WolfSSL version
-  does not like ``defo.ie``, whereas the system and OpenSSL ones do. We can ignore
-  that for our purposes via ``--insecure``/``-k`` but would need to fix for a
-  real setup. (Browsers do like those certificates though.)
+  does not like ``defo.ie``, whereas the system and OpenSSL ones do. We can
+  ignore that for our purposes via ``--insecure``/``-k`` but would need to fix
+  for a real setup. (Browsers do like those certificates though.)
 
 Then there are some functional code changes:
 
@@ -418,22 +416,22 @@ on localhost:53, so would fit this use-case. That said, it is unclear if
 this is a niche that is worth trying to address. (The author is just as happy to
 let curl use DoH to talk to the same public recursive that stubby might use:-)
 
-Assuming for the moment this is a use-case we'd like to support, then
-if DoH is not being used by curl, it is not clear at this time how to provide
+Assuming for the moment this is a use-case we would like to support, then if
+DoH is not being used by curl, it is not clear at this time how to provide
 support for ECH. One option would seem to be to extend the ``c-ares`` library
-to support HTTPS RRs, but in that case it is not now clear whether such changes
-would be attractive to the ``c-ares`` maintainers, nor whether the "tag=value"
-extensibility inherent in the HTTPS/SVCB specification is a good match for the
-``c-ares`` approach of defining structures specific to decoded answers for each
-supported RRtype. We're also not sure how many downstream curl deployments
-actually make use of the ``c-ares`` library, which would affect the utility of
-such changes. Another option might be to consider using some other generic DNS
-library that does support HTTPS RRs, but it is unclear if such a library could
-or would be used by all or almost all curl builds and downstream releases of
-curl.
+to support HTTPS RRs, but in that case it is not now clear whether such
+changes would be attractive to the ``c-ares`` maintainers, nor whether the
+"tag=value" extensibility inherent in the HTTPS/SVCB specification is a good
+match for the ``c-ares`` approach of defining structures specific to decoded
+answers for each supported RRtype. We are also not sure how many downstream
+curl deployments actually make use of the ``c-ares`` library, which would
+affect the utility of such changes. Another option might be to consider using
+some other generic DNS library that does support HTTPS RRs, but it is unclear
+if such a library could or would be used by all or almost all curl builds and
+downstream releases of curl.
 
 Our current conclusion is that doing the above is likely best left until we
-have some experience with the "using DoH" approach, so we're going to punt on
+have some experience with the "using DoH" approach, so we are going to punt on
 this for now.
 
 ### Debugging

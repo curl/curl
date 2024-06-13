@@ -18,7 +18,7 @@ problems may have been fixed or changed somewhat since this was written.
  2. TLS
  2.1 IMAPS connection fails with rustls error
  2.3 Unable to use PKCS12 certificate with Secure Transport
- 2.4 Secure Transport will not import PKCS#12 client certificates without a password
+ 2.4 Secure Transport does not import PKCS#12 client certificates without a password
  2.5 Client cert handling with Issuer DN differs between backends
  2.7 Client cert (MTLS) issues with Schannel
  2.11 Schannel TLS 1.2 handshake bug in old Windows versions
@@ -60,7 +60,7 @@ problems may have been fixed or changed somewhat since this was written.
  6.13 Negotiate against Hadoop HDFS
 
  7. FTP
- 7.1 FTP upload fails if remembered dir is deleted
+ 7.1 FTP upload fails if remembered directory is deleted
  7.2 Implicit FTPS upload timeout
  7.3 FTP with NOBODY and FAILONERROR
  7.4 FTP with ACCT
@@ -145,7 +145,7 @@ problems may have been fixed or changed somewhat since this was written.
 
  See https://github.com/curl/curl/issues/5403
 
-2.4 Secure Transport will not import PKCS#12 client certificates without a password
+2.4 Secure Transport does not import PKCS#12 client certificates without a password
 
  libcurl calls SecPKCS12Import with the PKCS#12 client certificate, but that
  function rejects certificates that do not have a password.
@@ -226,9 +226,9 @@ problems may have been fixed or changed somewhat since this was written.
 
 5.2 curl-config --libs contains private details
 
- "curl-config --libs" will include details set in LDFLAGS when configure is
- run that might be needed only for building libcurl. Further, curl-config
- --cflags suffers from the same effects with CFLAGS/CPPFLAGS.
+ "curl-config --libs" include details set in LDFLAGS when configure is run
+ that might be needed only for building libcurl. Further, curl-config --cflags
+ suffers from the same effects with CFLAGS/CPPFLAGS.
 
 5.3 building for old macOS fails with gcc
 
@@ -243,8 +243,8 @@ problems may have been fixed or changed somewhat since this was written.
  it can only be encoded properly in the Unicode character set. Windows uses
  UTF-16 encoding for Unicode and stores it in wide characters, however curl
  and libcurl are not equipped for that at the moment except when built with
- _UNICODE and UNICODE defined. And, except for Cygwin, Windows cannot use UTF-8
- as a locale.
+ _UNICODE and UNICODE defined. Except for Cygwin, Windows cannot use UTF-8 as
+ a locale.
 
   https://curl.se/bug/?i=345
   https://curl.se/bug/?i=731
@@ -303,7 +303,7 @@ problems may have been fixed or changed somewhat since this was written.
 
 6.1 NTLM authentication and unicode
 
- NTLM authentication involving unicode user name or password only works
+ NTLM authentication involving unicode username or password only works
  properly if built with UNICODE defined together with the Schannel
  backend. The original problem was mentioned in:
  https://curl.se/mail/lib-2009-10/0024.html
@@ -321,8 +321,8 @@ problems may have been fixed or changed somewhat since this was written.
 6.3 NTLM in system context uses wrong name
 
  NTLM authentication using SSPI (on Windows) when (lib)curl is running in
- "system context" will make it use wrong(?) user name - at least when compared
- to what winhttp does. See https://curl.se/bug/view.cgi?id=535
+ "system context" makes it use wrong(?) username - at least when compared to
+ what winhttp does. See https://curl.se/bug/view.cgi?id=535
 
 6.5 NTLM does not support password with § character
 
@@ -331,11 +331,11 @@ problems may have been fixed or changed somewhat since this was written.
 6.6 libcurl can fail to try alternatives with --proxy-any
 
  When connecting via a proxy using --proxy-any, a failure to establish an
- authentication will cause libcurl to abort trying other options if the
- failed method has a higher preference than the alternatives. As an example,
+ authentication causes libcurl to abort trying other options if the failed
+ method has a higher preference than the alternatives. As an example,
  --proxy-any against a proxy which advertise Negotiate and NTLM, but which
- fails to set up Kerberos authentication will not proceed to try authentication
- using NTLM.
+ fails to set up Kerberos authentication does not proceed to try
+ authentication using NTLM.
 
  https://github.com/curl/curl/issues/876
 
@@ -378,7 +378,7 @@ problems may have been fixed or changed somewhat since this was written.
 
 7. FTP
 
-7.1 FTP upload fails if remembered dir is deleted
+7.1 FTP upload fails if remembered directory is deleted
 
  curl's FTP code assumes that the directory it entered in a previous transfer
  still exists when it comes back to do a second transfer, and does not respond
@@ -399,17 +399,16 @@ problems may have been fixed or changed somewhat since this was written.
 7.4 FTP with ACCT
 
  When doing an operation over FTP that requires the ACCT command (but not when
- logging in), the operation will fail since libcurl does not detect this and
- thus fails to issue the correct command:
- https://curl.se/bug/view.cgi?id=635
+ logging in), the operation fails since libcurl does not detect this and thus
+ fails to issue the correct command: https://curl.se/bug/view.cgi?id=635
 
 7.12 FTPS server compatibility on Windows with Schannel
 
- FTPS is not widely used with the Schannel TLS backend and so there may be more
- bugs compared to other TLS backends such as OpenSSL. In the past users have
- reported hanging and failed connections. It's very likely some changes to curl
- since then fixed the issues. None of the reported issues can be reproduced any
- longer.
+ FTPS is not widely used with the Schannel TLS backend and so there may be
+ more bugs compared to other TLS backends such as OpenSSL. In the past users
+ have reported hanging and failed connections. It is likely some changes to
+ curl since then fixed the issues. None of the reported issues can be
+ reproduced any longer.
 
  If you encounter an issue connecting to your server via FTPS with the latest
  curl and Schannel then please search for open issues or file a new issue.
@@ -444,7 +443,7 @@ problems may have been fixed or changed somewhat since this was written.
 
  In the SSH_SFTP_INIT state for libssh, the ssh session working mode is set to
  blocking mode. If the network is suddenly disconnected during sftp
- transmission, curl will be stuck, even if curl is configured with a timeout.
+ transmission, curl is stuck, even if curl is configured with a timeout.
 
  https://github.com/curl/curl/issues/8632
 
@@ -472,8 +471,8 @@ problems may have been fixed or changed somewhat since this was written.
 11.2 error buffer not set if connection to multiple addresses fails
 
  If you ask libcurl to resolve a hostname like example.com to IPv6 addresses
- only. But you only have IPv4 connectivity. libcurl will correctly fail with
- CURLE_COULDNT_CONNECT. But the error buffer set by CURLOPT_ERRORBUFFER
+ when you only have IPv4 connectivity. libcurl fails with
+ CURLE_COULDNT_CONNECT, but the error buffer set by CURLOPT_ERRORBUFFER
  remains empty. Issue: https://github.com/curl/curl/issues/544
 
 11.4 HTTP test server 'connection-monitor' problems
@@ -532,8 +531,8 @@ problems may have been fixed or changed somewhat since this was written.
 13.2 Trying local ports fails on Windows
 
  This makes '--local-port [range]' to not work since curl cannot properly
- detect if a port is already in use, so it will try the first port, use that and
- then subsequently fail anyway if that was actually in use.
+ detect if a port is already in use, so it tries the first port, uses that and
+ then subsequently fails anyway if that was actually in use.
 
  https://github.com/curl/curl/issues/8112
 
@@ -607,9 +606,9 @@ problems may have been fixed or changed somewhat since this was written.
 17.2 HTTP/2 frames while in the connection pool kill reuse
 
  If the server sends HTTP/2 frames (like for example an HTTP/2 PING frame) to
- curl while the connection is held in curl's connection pool, the socket will
- be found readable when considered for reuse and that makes curl think it is
- dead and then it will be closed and a new connection gets created instead.
+ curl while the connection is held in curl's connection pool, the socket is
+ found readable when considered for reuse and that makes curl think it is dead
+ and then it is closed and a new connection gets created instead.
 
  This is *best* fixed by adding monitoring to connections while they are kept
  in the pool so that pings can be responded to appropriately.
@@ -638,7 +637,7 @@ problems may have been fixed or changed somewhat since this was written.
 19.1 Some methods do not support response bodies
 
  The RTSP implementation is written to assume that a number of RTSP methods
- will always get responses without bodies, even though there seems to be no
+ always get responses without bodies, even though there seems to be no
  indication in the RFC that this is always the case.
 
  https://github.com/curl/curl/issues/12414

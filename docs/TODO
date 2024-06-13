@@ -62,7 +62,7 @@
  4. FTP
  4.1 HOST
  4.2 Alter passive/active on failure and retry
- 4.4 Support CURLOPT_PREQUOTE for dir listings too
+ 4.4 Support CURLOPT_PREQUOTE for directories listings
  4.5 ASCII support
  4.6 GSSAPI via Windows SSPI
  4.7 STAT for LIST without data connection
@@ -159,16 +159,16 @@
  18.14 --dry-run
  18.15 --retry should resume
  18.16 send only part of --data
- 18.17 consider file name from the redirected URL with -O ?
+ 18.17 consider filename from the redirected URL with -O ?
  18.18 retry on network is unreachable
  18.19 expand ~/ in config files
- 18.20 host name sections in config files
+ 18.20 hostname sections in config files
  18.21 retry on the redirected-to URL
  18.23 Set the modification date on an uploaded file
  18.24 Use multiple parallel transfers for a single download
  18.25 Prevent terminal injection when writing to terminal
  18.26 Custom progress meter update interval
- 18.27 -J and -O with %-encoded file names
+ 18.27 -J and -O with %-encoded filenames
  18.28 -J with -C -
  18.29 --retry and transfer timeouts
 
@@ -192,7 +192,7 @@
  21.2 Support MQTTS
 
  22. TFTP
- 22.1 TFTP doesn't convert LF to CRLF for mode=netascii
+ 22.1 TFTP does not convert LF to CRLF for mode=netascii
 
 ==============================================================================
 
@@ -250,7 +250,7 @@
 
  This option allows applications to set a replacement IP address for a given
  host + port pair. Consider making support for providing a replacement address
- for the host name on all port numbers.
+ for the hostname on all port numbers.
 
  See https://github.com/curl/curl/issues/1264
 
@@ -291,11 +291,12 @@
 
 1.13 c-ares and CURLOPT_OPENSOCKETFUNCTION
 
- curl will create most sockets via the CURLOPT_OPENSOCKETFUNCTION callback and
+ curl creates most sockets via the CURLOPT_OPENSOCKETFUNCTION callback and
  close them with the CURLOPT_CLOSESOCKETFUNCTION callback. However, c-ares
- does not use those functions and instead opens and closes the sockets
- itself. This means that when curl passes the c-ares socket to the
- CURLMOPT_SOCKETFUNCTION it is not owned by the application like other sockets.
+ does not use those functions and instead opens and closes the sockets itself.
+ This means that when curl passes the c-ares socket to the
+ CURLMOPT_SOCKETFUNCTION it is not owned by the application like other
+ sockets.
 
  See https://github.com/curl/curl/issues/2734
 
@@ -481,8 +482,8 @@
 2.4 Split connect and authentication process
 
  The multi interface treats the authentication process as part of the connect
- phase. As such any failures during authentication will not trigger the relevant
- QUIT or LOGOFF for protocols such as IMAP, POP3 and SMTP.
+ phase. As such any failures during authentication does not trigger the
+ relevant QUIT or LOGOFF for protocols such as IMAP, POP3 and SMTP.
 
 2.5 Edge-triggered sockets should work
 
@@ -532,7 +533,7 @@
 
 4.1 HOST
 
- HOST is a command for a client to tell which host name to use, to offer FTP
+ HOST is a command for a client to tell which hostname to use, to offer FTP
  servers named-based virtual hosting:
 
  https://datatracker.ietf.org/doc/html/rfc7151
@@ -544,7 +545,7 @@
  connection. There could be a way to fallback to an active connection (and
  vice versa). https://curl.se/bug/feature.cgi?id=1754793
 
-4.4 Support CURLOPT_PREQUOTE for dir listings too
+4.4 Support CURLOPT_PREQUOTE for directions listings
 
  The lack of support is mostly an oversight and requires the FTP state machine
  to get updated to get fixed.
@@ -585,10 +586,10 @@
 
 5.1 Provide the error body from a CONNECT response
 
- When curl receives a body response from a CONNECT request to a proxy, it will
- always just read and ignore it. It would make some users happy if curl
- instead optionally would be able to make that responsible available. Via a new
- callback? Through some other means?
+ When curl receives a body response from a CONNECT request to a proxy, it
+ always just reads and ignores it. It would make some users happy if curl
+ instead optionally would be able to make that responsible available. Via a
+ new callback? Through some other means?
 
  See https://github.com/curl/curl/issues/9513
 
@@ -615,7 +616,7 @@
 5.4 Allow SAN names in HTTP/2 server push
 
  curl only allows HTTP/2 push promise if the provided :authority header value
- exactly matches the host name given in the URL. It could be extended to allow
+ exactly matches the hostname given in the URL. It could be extended to allow
  any name that would match the Subject Alternative Names in the server's TLS
  certificate.
 
@@ -660,7 +661,7 @@
 6.2 ditch telnet-specific select
 
  Move the telnet support's network select() loop go away and merge the code
- into the main transfer loop. Until this is done, the multi interface will not
+ into the main transfer loop. Until this is done, the multi interface does not
  work for telnet.
 
 6.3 feature negotiation debug data
@@ -919,10 +920,10 @@
 
 15.4 Add option to allow abrupt server closure
 
- libcurl w/schannel will error without a known termination point from the
- server (such as length of transfer, or SSL "close notify" alert) to prevent
- against a truncation attack. Really old servers may neglect to send any
- termination point. An option could be added to ignore such abrupt closures.
+ libcurl w/schannel errors without a known termination point from the server
+ (such as length of transfer, or SSL "close notify" alert) to prevent against
+ a truncation attack. Really old servers may neglect to send any termination
+ point. An option could be added to ignore such abrupt closures.
 
  https://github.com/curl/curl/issues/4427
 
@@ -948,7 +949,7 @@
  SSH is a perfectly fine multiplexed protocols which would allow libcurl to do
  multiple parallel transfers from the same host using the same connection,
  much in the same spirit as HTTP/2 does. libcurl however does not take
- advantage of that ability but will instead always create a new connection for
+ advantage of that ability but does instead always create a new connection for
  new transfers even if an existing connection already exists to the host.
 
  To fix this, libcurl would have to detect an existing connection and "attach"
@@ -958,7 +959,7 @@
 
  The SFTP code in libcurl checks the file size *before* a transfer starts and
  then proceeds to transfer exactly that amount of data. If the remote file
- grows while the transfer is in progress libcurl will not notice and will not
+ grows while the transfer is in progress libcurl does not notice and does not
  adapt. The OpenSSH SFTP command line tool does and libcurl could also just
  attempt to download more to see if there is more to get...
 
@@ -1026,7 +1027,7 @@
 18.6 Option to make -Z merge lined based outputs on stdout
 
  When a user requests multiple lined based files using -Z and sends them to
- stdout, curl will not "merge" and send complete lines fine but may send
+ stdout, curl does not "merge" and send complete lines fine but may send
  partial lines from several sources.
 
  https://github.com/curl/curl/issues/5175
@@ -1055,7 +1056,7 @@
  backed up from those that are either not ready or have not changed.
 
  Downloads in progress are neither ready to be backed up, nor should they be
- opened by a different process. Only after a download has been completed it's
+ opened by a different process. Only after a download has been completed it is
  sensible to include it in any integer snapshot or backup of the system.
 
  See https://github.com/curl/curl/issues/3354
@@ -1101,22 +1102,22 @@
 
  See https://github.com/curl/curl/issues/1200
 
-18.17 consider file name from the redirected URL with -O ?
+18.17 consider filename from the redirected URL with -O ?
 
  When a user gives a URL and uses -O, and curl follows a redirect to a new
- URL, the file name is not extracted and used from the newly redirected-to URL
- even if the new URL may have a much more sensible file name.
+ URL, the filename is not extracted and used from the newly redirected-to URL
+ even if the new URL may have a much more sensible filename.
 
  This is clearly documented and helps for security since there is no surprise
- to users which file name that might get overwritten. But maybe a new option
+ to users which filename that might get overwritten, but maybe a new option
  could allow for this or maybe -J should imply such a treatment as well as -J
- already allows for the server to decide what file name to use so it already
+ already allows for the server to decide what filename to use so it already
  provides the "may overwrite any file" risk.
 
- This is extra tricky if the original URL has no file name part at all since
- then the current code path will error out with an error message, and we cannot
- *know* already at that point if curl will be redirected to a URL that has a
- file name...
+ This is extra tricky if the original URL has no filename part at all since
+ then the current code path does error out with an error message, and we
+ cannot *know* already at that point if curl is redirected to a URL that has a
+ filename...
 
  See https://github.com/curl/curl/issues/1241
 
@@ -1138,10 +1139,10 @@
 
  See https://github.com/curl/curl/issues/2317
 
-18.20 host name sections in config files
+18.20 hostname sections in config files
 
  config files would be more powerful if they could set different
- configurations depending on used URLs, host name or possibly origin. Then a
+ configurations depending on used URLs, hostname or possibly origin. Then a
  default .curlrc could a specific user-agent only when doing requests against
  a certain site.
 
@@ -1179,7 +1180,7 @@
  - If splitting up the work improves the transfer rate, it could then be done
    again. Then again, etc up to a limit.
 
- This way, if transfer B fails (because Range: is not supported) it will let
+ This way, if transfer B fails (because Range: is not supported) it lets
  transfer A remain the single one. N and M could be set to some sensible
  defaults.
 
@@ -1200,9 +1201,9 @@
  progressing and has not stuck, but they may not appreciate the
  many-times-a-second frequency curl can end up doing it with now.
 
-18.27 -J and -O with %-encoded file names
+18.27 -J and -O with %-encoded filenames
 
- -J/--remote-header-name does not decode %-encoded file names. RFC 6266 details
+ -J/--remote-header-name does not decode %-encoded filenames. RFC 6266 details
  how it should be done. The can of worm is basically that we have no charset
  handling in curl and ascii >=128 is a challenge for us. Not to mention that
  decoding also means that we need to check for nastiness that is attempted,
@@ -1213,15 +1214,15 @@
  -O also does not decode %-encoded names, and while it has even less
  information about the charset involved the process is similar to the -J case.
 
- Note that we will not add decoding to -O without the user asking for it with
- some other means as well, since -O has always been documented to use the name
- exactly as specified in the URL.
+ Note that we do not decode -O without the user asking for it with some other
+ means, since -O has always been documented to use the name exactly as
+ specified in the URL.
 
 18.28 -J with -C -
 
  When using -J (with -O), automatically resumed downloading together with "-C
  -" fails. Without -J the same command line works. This happens because the
- resume logic is worked out before the target file name (and thus its
+ resume logic is worked out before the target filename (and thus its
  pre-transfer size) has been figured out. This can be improved.
 
  https://curl.se/bug/view.cgi?id=1169
@@ -1230,8 +1231,8 @@
 
  If using --retry and the transfer timeouts (possibly due to using -m or
  -y/-Y) the next attempt does not resume the transfer properly from what was
- downloaded in the previous attempt but will truncate and restart at the
- original position where it was at before the previous failed attempt. See
+ downloaded in the previous attempt but truncates and restarts at the original
+ position where it was at before the previous failed attempt. See
  https://curl.se/mail/lib-2008-01/0080.html and Mandriva bug report
  https://qa.mandriva.com/show_bug.cgi?id=22565
 
@@ -1251,12 +1252,13 @@
  curl.
 
 19.3 Do not use GNU libtool on OpenBSD
- When compiling curl on OpenBSD with "--enable-debug" it will give linking
- errors when you use GNU libtool. This can be fixed by using the libtool
- provided by OpenBSD itself. However for this the user always needs to invoke
- make with "LIBTOOL=/usr/bin/libtool". It would be nice if the script could
- have some magic to detect if this system is an OpenBSD host and then use the
- OpenBSD libtool instead.
+
+ When compiling curl on OpenBSD with "--enable-debug" it gives linking errors
+ when you use GNU libtool. This can be fixed by using the libtool provided by
+ OpenBSD itself. However for this the user always needs to invoke make with
+ "LIBTOOL=/usr/bin/libtool". It would be nice if the script could have some
+ magic to detect if this system is an OpenBSD host and then use the OpenBSD
+ libtool instead.
 
  See https://github.com/curl/curl/issues/5862
 
@@ -1306,8 +1308,8 @@
  A test suite made for HTTP cookies (RFC 6265) by Adam Barth is available at
  https://github.com/abarth/http-state/tree/master/tests
 
- It'd be really awesome if someone would write a script/setup that would run
- curl with that test suite and detect deviances. Ideally, that would even be
+ It would be good if someone would write a script/setup that would run curl
+ with that test suite and detect deviances. Ideally, that would even be
  incorporated into our regular test suite.
 
 20.8 Run web-platform-tests URL tests
@@ -1330,7 +1332,7 @@
 
 22. TFTP
 
-22.1 TFTP doesn't convert LF to CRLF for mode=netascii
+22.1 TFTP does not convert LF to CRLF for mode=netascii
 
  RFC 3617 defines that an TFTP transfer can be done using "netascii"
  mode. curl does not support extracting that mode from the URL nor does it treat
