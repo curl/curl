@@ -659,7 +659,7 @@ static void conncache_shutdown_conn(struct conncache *connc,
      (data->multi->max_shutdown_connections >=
       (long)Curl_llist_count(&connc->shutdowns.conn_list))) {
     DEBUGF(infof(data, "conncache_shutdown discard oldest, shutdown limit "
-                 "%zu reached", data->multi->max_shutdown_connections));
+                 "%ld reached", data->multi->max_shutdown_connections));
     connc_shutdown_discard_oldest(connc);
   }
   Curl_llist_append(&connc->shutdowns.conn_list, conn, &conn->bundle_node);
