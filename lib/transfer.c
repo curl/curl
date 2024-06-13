@@ -338,8 +338,9 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 
   } while(maxloops-- && data_pending(data));
 
-  if(maxloops <= 0) {
-    /* did not read until EAGAIN, mark read-again-please */
+  if((maxloops <= 0) || data_pending(data)) {
+    /* did not read until EAGAIN or there is still pending data, mark as
+       read-again-please */
     data->state.select_bits = CURL_CSELECT_IN;
     if((k->keepon & KEEP_SENDBITS) == KEEP_SEND)
       data->state.select_bits |= CURL_CSELECT_OUT;
