@@ -192,7 +192,7 @@
  21.2 Support MQTTS
 
  22. TFTP
- 22.1 TFTP doesn't convert LF to CRLF for mode=netascii
+ 22.1 TFTP does not convert LF to CRLF for mode=netascii
 
 ==============================================================================
 
@@ -1330,7 +1330,7 @@
 
 22. TFTP
 
-22.1 TFTP doesn't convert LF to CRLF for mode=netascii
+22.1 TFTP does not convert LF to CRLF for mode=netascii
 
  RFC 3617 defines that an TFTP transfer can be done using "netascii"
  mode. curl does not support extracting that mode from the URL nor does it treat

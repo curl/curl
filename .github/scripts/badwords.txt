@@ -12,13 +12,24 @@ wild-card:wildcard
 wild card:wildcard
 i'm:I am
 you've:You have
+we've:we have
+we're:we are
+we'll:we will
+we'd:we would
 they've:They have
 they're:They are
+they'll:They will
+they'd:They would
+you've:you have
+you'd:you would
+you'll:you will
+you're:you are
 should've:should have
 don't:do not
 could've:could have
 doesn't:does not
 isn't:is not
+aren't:are not
  a html: an html
  a http: an http
  a ftp: an ftp
@@ -26,14 +37,13 @@ isn't:is not
 internet\b=Internet
 isation:ization
 it's:it is
+it'd:it would
 there's:there is
 [^.]\. And: Rewrite it somehow?
 ^(And|So|But) = Rewrite it somehow?
 \. But: Rewrite it somehow?
 \. So : Rewrite without "so" ?
  dir :directory
-you'd:you would
-you'll:you will
 can't:cannot
 that's:that is
 web page:webpage

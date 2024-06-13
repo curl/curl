@@ -6,7 +6,7 @@ SPDX-License-Identifier: curl
 
 # Building curl with HTTPS-RR and ECH support
 
-We've added support for ECH to in this curl build. That can use HTTPS RRs
+We have added support for ECH to in this curl build. That can use HTTPS RRs
 published in the DNS, if curl is using DoH, or else can accept the relevant
 ECHConfigList values from the command line. That works with OpenSSL,
 WolfSSL or boringssl as the TLS provider, depending on how you build curl.
@@ -216,7 +216,7 @@ or IP address hints.
 - ``USE_ECH`` protects ECH specific code.
 
 There are various obvious code blocks for handling the new command line
-arguments which aren't described here, but should be fairly clear.
+arguments which are not described here, but should be fairly clear.
 
 As shown in the ``configure`` usage above, there are ``configure.ac`` changes
 that allow separately dis/enabling ``USE_HTTPSRR`` and ``USE_ECH``. If ``USE_ECH``
@@ -270,7 +270,7 @@ curl might handle those values when present in the DNS.
   ("aliasMode") - the current code takes no account of that at all. One could
 envisage implementing the equivalent of following CNAMEs in such cases, but
 it is not clear if that'd be a good plan. (As of now, chrome browsers do not seem
-to have any support for that "aliasMode" and we've not checked Firefox for that
+to have any support for that "aliasMode" and we have not checked Firefox for that
 recently.)
 
 - We have not investigated what related changes or additions might be needed
@@ -282,7 +282,7 @@ doing so would seem to require re-implementing an ECH-enabled server as part
 of the curl test harness. For now, we have a ``./tests/ech_test.sh`` script
 that attempts ECH with various test servers and with many combinations of the
 allowed command line options. While that is a useful test and has find issues,
-it is not comprehensive and we're not (as yet) sure what would be the right
+it is not comprehensive and we are not (as yet) sure what would be the right
 level of coverage. When running that script you should not have a
 ``$HOME/.curlrc`` file that affects ECH or some of the negative tests could
 produce spurious failures.
@@ -385,7 +385,7 @@ There are some known issues with the ECH implementation in WolfSSL:
 There are what seem like oddball differences:
 
 - The DoH URL in``$HOME/.curlrc`` can use "1.1.1.1" for OpenSSL but has to be
-  "one.one.one.one" for WolfSSL. The latter works for both, so OK, we'll change
+  "one.one.one.one" for WolfSSL. The latter works for both, so OK, we will change
   to that.
 - There seems to be some difference in CA databases too - the WolfSSL version
   does not like ``defo.ie``, whereas the system and OpenSSL ones do. We can ignore
@@ -425,7 +425,7 @@ to support HTTPS RRs, but in that case it is not now clear whether such changes
 would be attractive to the ``c-ares`` maintainers, nor whether the "tag=value"
 extensibility inherent in the HTTPS/SVCB specification is a good match for the
 ``c-ares`` approach of defining structures specific to decoded answers for each
-supported RRtype. We're also not sure how many downstream curl deployments
+supported RRtype. We are also not sure how many downstream curl deployments
 actually make use of the ``c-ares`` library, which would affect the utility of
 such changes. Another option might be to consider using some other generic DNS
 library that does support HTTPS RRs, but it is unclear if such a library could
@@ -433,7 +433,7 @@ or would be used by all or almost all curl builds and downstream releases of
 curl.
 
 Our current conclusion is that doing the above is likely best left until we
-have some experience with the "using DoH" approach, so we're going to punt on
+have some experience with the "using DoH" approach, so we are going to punt on
 this for now.
 
 ### Debugging
