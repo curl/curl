@@ -417,7 +417,7 @@ on localhost:53, so would fit this use-case. That said, it is unclear if
 this is a niche that is worth trying to address. (The author is just as happy to
 let curl use DoH to talk to the same public recursive that stubby might use:-)
 
-Assuming for the moment this is a use-case we wouldd like to support, then if
+Assuming for the moment this is a use-case we would like to support, then if
 DoH is not being used by curl, it is not clear at this time how to provide
 support for ECH. One option would seem to be to extend the ``c-ares`` library
 to support HTTPS RRs, but in that case it is not now clear whether such

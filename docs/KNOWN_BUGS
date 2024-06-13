@@ -243,8 +243,8 @@ problems may have been fixed or changed somewhat since this was written.
  it can only be encoded properly in the Unicode character set. Windows uses
  UTF-16 encoding for Unicode and stores it in wide characters, however curl
  and libcurl are not equipped for that at the moment except when built with
- _UNICODE and UNICODE defined. And, except for Cygwin, Windows cannot use UTF-8
- as a locale.
+ _UNICODE and UNICODE defined. Except for Cygwin, Windows cannot use UTF-8 as
+ a locale.
 
   https://curl.se/bug/?i=345
   https://curl.se/bug/?i=731
@@ -404,11 +404,11 @@ problems may have been fixed or changed somewhat since this was written.
 
 7.12 FTPS server compatibility on Windows with Schannel
 
- FTPS is not widely used with the Schannel TLS backend and so there may be more
- bugs compared to other TLS backends such as OpenSSL. In the past users have
- reported hanging and failed connections. It's very likely some changes to curl
- since then fixed the issues. None of the reported issues can be reproduced any
- longer.
+ FTPS is not widely used with the Schannel TLS backend and so there may be
+ more bugs compared to other TLS backends such as OpenSSL. In the past users
+ have reported hanging and failed connections. It is likely some changes to
+ curl since then fixed the issues. None of the reported issues can be
+ reproduced any longer.
 
  If you encounter an issue connecting to your server via FTPS with the latest
  curl and Schannel then please search for open issues or file a new issue.

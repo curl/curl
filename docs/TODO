@@ -586,10 +586,10 @@
 
 5.1 Provide the error body from a CONNECT response
 
- When curl receives a body response from a CONNECT request to a proxy, it will
- always just read and ignore it. It would make some users happy if curl
- instead optionally would be able to make that responsible available. Via a new
- callback? Through some other means?
+ When curl receives a body response from a CONNECT request to a proxy, it
+ always just reads and ignores it. It would make some users happy if curl
+ instead optionally would be able to make that responsible available. Via a
+ new callback? Through some other means?
 
  See https://github.com/curl/curl/issues/9513
 
@@ -1056,7 +1056,7 @@
  backed up from those that are either not ready or have not changed.
 
  Downloads in progress are neither ready to be backed up, nor should they be
- opened by a different process. Only after a download has been completed it's
+ opened by a different process. Only after a download has been completed it is
  sensible to include it in any integer snapshot or backup of the system.
 
  See https://github.com/curl/curl/issues/3354
@@ -1109,7 +1109,7 @@
  even if the new URL may have a much more sensible filename.
 
  This is clearly documented and helps for security since there is no surprise
- to users which filename that might get overwritten. But maybe a new option
+ to users which filename that might get overwritten, but maybe a new option
  could allow for this or maybe -J should imply such a treatment as well as -J
  already allows for the server to decide what filename to use so it already
  provides the "may overwrite any file" risk.
@@ -1308,8 +1308,8 @@
  A test suite made for HTTP cookies (RFC 6265) by Adam Barth is available at
  https://github.com/abarth/http-state/tree/master/tests
 
- It'd be really awesome if someone would write a script/setup that would run
- curl with that test suite and detect deviances. Ideally, that would even be
+ It would be good if someone would write a script/setup that would run curl
+ with that test suite and detect deviances. Ideally, that would even be
  incorporated into our regular test suite.
 
 20.8 Run web-platform-tests URL tests
