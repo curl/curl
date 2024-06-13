@@ -384,13 +384,12 @@ There are some known issues with the ECH implementation in WolfSSL:
 
 There are what seem like oddball differences:
 
-- The DoH URL in``$HOME/.curlrc`` can use "1.1.1.1" for OpenSSL but has to be
-  "one.one.one.one" for WolfSSL. The latter works for both, so OK, we will change
-  to that.
+- The DoH URL in``$HOME/.curlrc`` can use `1.1.1.1` for OpenSSL but has to be
+  `one.one.one.one` for WolfSSL. The latter works for both, so OK, we us that.
 - There seems to be some difference in CA databases too - the WolfSSL version
-  does not like ``defo.ie``, whereas the system and OpenSSL ones do. We can ignore
-  that for our purposes via ``--insecure``/``-k`` but would need to fix for a
-  real setup. (Browsers do like those certificates though.)
+  does not like ``defo.ie``, whereas the system and OpenSSL ones do. We can
+  ignore that for our purposes via ``--insecure``/``-k`` but would need to fix
+  for a real setup. (Browsers do like those certificates though.)
 
 Then there are some functional code changes:
 
@@ -418,19 +417,19 @@ on localhost:53, so would fit this use-case. That said, it is unclear if
 this is a niche that is worth trying to address. (The author is just as happy to
 let curl use DoH to talk to the same public recursive that stubby might use:-)
 
-Assuming for the moment this is a use-case we'd like to support, then
-if DoH is not being used by curl, it is not clear at this time how to provide
+Assuming for the moment this is a use-case we wouldd like to support, then if
+DoH is not being used by curl, it is not clear at this time how to provide
 support for ECH. One option would seem to be to extend the ``c-ares`` library
-to support HTTPS RRs, but in that case it is not now clear whether such changes
-would be attractive to the ``c-ares`` maintainers, nor whether the "tag=value"
-extensibility inherent in the HTTPS/SVCB specification is a good match for the
-``c-ares`` approach of defining structures specific to decoded answers for each
-supported RRtype. We are also not sure how many downstream curl deployments
-actually make use of the ``c-ares`` library, which would affect the utility of
-such changes. Another option might be to consider using some other generic DNS
-library that does support HTTPS RRs, but it is unclear if such a library could
-or would be used by all or almost all curl builds and downstream releases of
-curl.
+to support HTTPS RRs, but in that case it is not now clear whether such
+changes would be attractive to the ``c-ares`` maintainers, nor whether the
+"tag=value" extensibility inherent in the HTTPS/SVCB specification is a good
+match for the ``c-ares`` approach of defining structures specific to decoded
+answers for each supported RRtype. We are also not sure how many downstream
+curl deployments actually make use of the ``c-ares`` library, which would
+affect the utility of such changes. Another option might be to consider using
+some other generic DNS library that does support HTTPS RRs, but it is unclear
+if such a library could or would be used by all or almost all curl builds and
+downstream releases of curl.
 
 Our current conclusion is that doing the above is likely best left until we
 have some experience with the "using DoH" approach, so we are going to punt on
