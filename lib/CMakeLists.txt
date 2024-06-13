@@ -201,7 +201,14 @@ if(BUILD_SHARED_LIBS)
     # up to v3.x and ELF from v3.x. I cannot imagine someone running CMake
     # on those ancient systems.
     CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
+    set(soversion_default TRUE)
+  else()
+    set(soversion_default FALSE)
+  endif()
 
+  option(CURL_LIBCURL_SOVERSION "Enable libcurl SOVERSION" ${soversion_default})
+
+  if(CURL_LIBCURL_SOVERSION)
     transform_makefile_inc("Makefile.soname" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake")
     include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake)
 
