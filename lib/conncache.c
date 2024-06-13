@@ -50,6 +50,7 @@
 #define HASHKEY_SIZE 128
 
 static void conncache_shutdown_conn(struct conncache *connc,
+                                    struct Curl_easy *last_data,
                                     struct connectdata *conn,
                                     bool is_dead, bool lock);
 static void connc_disconnect(struct Curl_easy *data,
@@ -58,6 +59,8 @@ static void connc_disconnect(struct Curl_easy *data,
 static void connc_run_conn_shutdown(struct Curl_easy *data,
                                     struct connectdata *conn,
                                     bool *done);
+static void connc_run_conn_shutdown_handler(struct Curl_easy *data,
+                                            struct connectdata *conn);
 #ifdef DEBUGBUILD
 static void conncache_shutdown_all(struct conncache *connc, int timeout_ms);
 #endif
@@ -569,7 +572,7 @@ void Curl_conncache_close_all_connections(struct conncache *connc)
     sigpipe_ignore(connc->closure_handle, &pipe_st);
     /* This will remove the connection from the cache */
     connclose(conn, "kill all");
-    conncache_shutdown_conn(connc, conn, FALSE, FALSE);
+    conncache_shutdown_conn(connc, NULL, conn, FALSE, TRUE);
     sigpipe_restore(&pipe_st);
 
     conn = conncache_find_first_connection(connc);
@@ -613,10 +616,21 @@ static void connc_shutdown_discard_oldest(struct conncache *connc)
 }
 
 static void conncache_shutdown_conn(struct conncache *connc,
+                                    struct Curl_easy *last_data,
                                     struct connectdata *conn,
                                     bool is_dead, bool lock)
 {
-  struct Curl_easy *data = connc->closure_handle;
+  /* `last_data`, if present, is the transfer that last worked with
+   * the connection. It is present when the connection is being shut down
+   * via `Curl_conncache_shutdown_conn()`, e.g. when the transfer failed
+   * or does not allow connection reuse.
+   * Using the original handle is necessary for shutting down the protocol
+   * handler belonging to the connection. Protocols like 'file:' rely on
+   * being invoked to clean up their allocations in the easy handle.
+   * When a connection comes from the cache, the transfer is no longer
+   * there and we use the cache's own closure handle.
+   */
+  struct Curl_easy *data = last_data? last_data : connc->closure_handle;
   bool done;
 
   DEBUGASSERT(connc);
@@ -676,23 +690,12 @@ void Curl_conncache_shutdown_conn(struct Curl_easy *data,
                                   bool is_dead, bool lock)
 {
   infof(data, "Closing connection");
-  conncache_shutdown_conn(data->state.conn_cache, conn, is_dead, lock);
+  conncache_shutdown_conn(data->state.conn_cache, data, conn, is_dead, lock);
 }
 
-static void connc_run_conn_shutdown(struct Curl_easy *data,
-                                    struct connectdata *conn,
-                                    bool *done)
+static void connc_run_conn_shutdown_handler(struct Curl_easy *data,
+                                            struct connectdata *conn)
 {
-  CURLcode r1, r2;
-  bool done1, done2;
-
-  /* We expect to be attached when called */
-  DEBUGASSERT(data->conn == conn);
-  if(conn->bits.shutdown_filters) {
-    *done = TRUE;
-    return;
-  }
-
   if(!conn->bits.shutdown_handler) {
     DEBUGF(infof(data, "connc_disconnect(conn #%"
            CURL_FORMAT_CURL_OFF_T ", dead=%d)",
@@ -713,11 +716,29 @@ static void connc_run_conn_shutdown(struct Curl_easy *data,
       /* This is set if protocol-specific cleanups should be made */
       conn->handler->disconnect(data, conn, conn->bits.shutdown_maybe_dead);
     }
+
+    /* possible left-overs from the async name resolvers */
+    Curl_resolver_cancel(data);
+
     conn->bits.shutdown_handler = TRUE;
   }
+}
 
-  /* possible left-overs from the async name resolvers */
-  Curl_resolver_cancel(data);
+static void connc_run_conn_shutdown(struct Curl_easy *data,
+                                    struct connectdata *conn,
+                                    bool *done)
+{
+  CURLcode r1, r2;
+  bool done1, done2;
+
+  /* We expect to be attached when called */
+  DEBUGASSERT(data->conn == conn);
+  if(conn->bits.shutdown_filters) {
+    *done = TRUE;
+    return;
+  }
+
+  connc_run_conn_shutdown_handler(data, conn);
 
   if(!conn->connect_only && Curl_conn_is_connected(conn, FIRSTSOCKET))
     r1 = Curl_conn_shutdown(data, FIRSTSOCKET, &done1);
@@ -856,6 +877,7 @@ static void connc_disconnect(struct Curl_easy *data,
 
   Curl_attach_connection(data, conn);
 
+  connc_run_conn_shutdown_handler(data, conn);
   if(do_shutdown) {
     /* Make a last attempt to shutdown handlers and filters, if
      * not done so already. */
@@ -906,7 +928,7 @@ static void conncache_shutdown_all(struct conncache *connc, int timeout_ms)
     /* This will remove the connection from the cache */
     DEBUGF(infof(connc->closure_handle, "moving connection %"
            CURL_FORMAT_CURL_OFF_T " to shutdown queue", conn->connection_id));
-    conncache_shutdown_conn(connc, conn, FALSE, TRUE);
+    conncache_shutdown_conn(connc, NULL, conn, FALSE, TRUE);
     conn = conncache_find_first_connection(connc);
   }
 
