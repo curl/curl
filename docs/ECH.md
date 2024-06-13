@@ -6,16 +6,15 @@ SPDX-License-Identifier: curl
 
 # Building curl with HTTPS-RR and ECH support
 
-We have added support for ECH to in this curl build. That can use HTTPS RRs
-published in the DNS, if curl is using DoH, or else can accept the relevant
-ECHConfigList values from the command line. That works with OpenSSL,
-WolfSSL or boringssl as the TLS provider, depending on how you build curl.
+We have added support for ECH to curl. It can use HTTPS RRs published in the
+DNS if curl uses DoH, or else can accept the relevant ECHConfigList values
+from the command line. This works with OpenSSL, WolfSSL or boringssl as the
+TLS provider.
 
 This feature is EXPERIMENTAL. DO NOT USE IN PRODUCTION.
 
 This should however provide enough of a proof-of-concept to prompt an informed
-discussion about a good path forward for ECH support in curl, when using
-OpenSSL, or other TLS libraries, as those add ECH support.
+discussion about a good path forward for ECH support in curl.
 
 ## OpenSSL Build
 
@@ -42,21 +41,21 @@ To build curl ECH-enabled, making use of the above:
     autoreconf -fi
     LDFLAGS="-Wl,-rpath,$HOME/code/openssl-local-inst/lib/" ./configure --with-ssl=$HOME/code/openssl-local-inst --enable-ech --enable-httpsrr
     ...lots of output...
-    WARNING: ech ECH HTTPSRR enabled but marked EXPERIMENTAL...
+    WARNING: ECH HTTPSRR enabled but marked EXPERIMENTAL...
     make
     ...lots more output...
 ```
 
-If you do not get that WARNING at the end of the ``configure`` command, then ECH
-is not enabled, so go back some steps and re-do whatever needs re-doing:-) If you
-want to debug curl then you should add ``--enable-debug`` to the ``configure``
-command.
+If you do not get that WARNING at the end of the ``configure`` command, then
+ECH is not enabled, so go back some steps and re-do whatever needs re-doing:-)
+If you want to debug curl then you should add ``--enable-debug`` to the
+``configure`` command.
 
 In a recent (2024-05-20) build on one machine, configure failed to find the
 ECH-enabled SSL library, apparently due to the existence of
 ``$HOME/code/openssl-local-inst/lib/pkgconfig`` as a directory containing
-various settings. Deleting that directory worked around the problem but may not
-be the best solution.
+various settings. Deleting that directory worked around the problem but may
+not be the best solution.
 
 ## Using ECH and DoH
 
@@ -331,7 +330,7 @@ Then:
     autoreconf -fi
     LDFLAGS="-Wl,-rpath,$HOME/code/boringssl/inst/lib" ./configure --with-ssl=$HOME/code/boringssl/inst --enable-ech --enable-httpsrr
     ...lots of output...
-    WARNING: ech ECH HTTPSRR enabled but marked EXPERIMENTAL. Use with caution!
+    WARNING: ECH HTTPSRR enabled but marked EXPERIMENTAL. Use with caution!
     make
 ```
 
