@@ -980,6 +980,15 @@ if(NOT USE_LIBSSH2 AND CURL_USE_LIBSSH)
   endif()
 endif()
 
+option(CURL_USE_GSASL "Use GSASL implementation" OFF)
+mark_as_advanced(CURL_USE_GSASL)
+if(CURL_USE_GSASL)
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(GSASL REQUIRED libgsasl)
+  list(APPEND CURL_LIBS ${GSASL_LINK_LIBRARIES})
+  set(USE_GSASL ON)
+endif()
+
 option(CURL_USE_GSSAPI "Use GSSAPI implementation (right now only Heimdal is supported with CMake build)" OFF)
 mark_as_advanced(CURL_USE_GSSAPI)
 
