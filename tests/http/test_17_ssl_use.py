@@ -104,8 +104,6 @@ class TestSSLUse:
     # use host name with trailing dot, verify handshake
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_17_03_trailing_dot(self, env: Env, httpd, nghttpx, repeat, proto):
-        if env.curl_uses_lib('gnutls'):
-            pytest.skip("gnutls does not match hostnames with trailing dot")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
