@@ -689,8 +689,14 @@ void Curl_conncache_shutdown_conn(struct Curl_easy *data,
                                   struct connectdata *conn,
                                   bool is_dead, bool lock)
 {
+  DEBUGASSERT(data);
   infof(data, "Closing connection");
-  conncache_shutdown_conn(data->state.conn_cache, data, conn, is_dead, lock);
+  if(data->state.conn_cache) {
+    conncache_shutdown_conn(data->state.conn_cache, data, conn, is_dead, lock);
+  }
+  else {
+    connc_disconnect(data, conn, !is_dead);
+  }
 }
 
 static void connc_run_conn_shutdown_handler(struct Curl_easy *data,
