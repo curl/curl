@@ -8,8 +8,8 @@ See-also:
   - CURLINFO_REDIRECT_COUNT (3)
   - CURLINFO_REDIRECT_URL (3)
   - CURLOPT_POSTREDIR (3)
-  - CURLOPT_PROTOCOLS (3)
-  - CURLOPT_REDIR_PROTOCOLS (3)
+  - CURLOPT_PROTOCOLS_STR (3)
+  - CURLOPT_REDIR_PROTOCOLS_STR (3)
 Protocol:
   - HTTP
 ---
@@ -38,7 +38,7 @@ maximum limit is reached. CURLOPT_MAXREDIRS(3) is used to limit the
 number of redirects libcurl follows.
 
 libcurl restricts what protocols it automatically follow redirects to. The
-accepted target protocols are set with CURLOPT_REDIR_PROTOCOLS(3). By
+accepted target protocols are set with CURLOPT_REDIR_PROTOCOLS_STR(3). By
 default libcurl allows HTTP, HTTPS, FTP and FTPS on redirects.
 
 When following a redirect, the specific 30x response code also dictates which

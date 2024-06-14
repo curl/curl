@@ -10,7 +10,7 @@ See-also:
   - CURLOPT_FORBID_REUSE (3)
   - CURLOPT_FRESH_CONNECT (3)
   - CURLOPT_PATH_AS_IS (3)
-  - CURLOPT_PROTOCOLS (3)
+  - CURLOPT_PROTOCOLS_STR (3)
   - curl_easy_perform (3)
   - curl_url_get (3)
   - curl_url_set (3)
@@ -109,11 +109,11 @@ custom port number can allow external users to play tricks with your local
 services.
 
 Accepting external URLs may also use other protocols than http:// or other
-common ones. Restrict what accept with CURLOPT_PROTOCOLS(3).
+common ones. Restrict what accept with CURLOPT_PROTOCOLS_STR(3).
 
 User provided URLs can also be made to point to sites that redirect further on
 (possibly to other protocols too). Consider your
-CURLOPT_FOLLOWLOCATION(3) and CURLOPT_REDIR_PROTOCOLS(3) settings.
+CURLOPT_FOLLOWLOCATION(3) and CURLOPT_REDIR_PROTOCOLS_STR(3) settings.
 
 # EXAMPLE
 
