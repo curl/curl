@@ -220,8 +220,8 @@ jobs:
           - CC: gcc-12
         build:
           - name: OpenSSL
-            install: nghttp2 openssl
-            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/openssl -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9
+            install: nghttp2 openssl gsasl
+            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/openssl -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -DCURL_USE_GSASL=ON
           - name: LibreSSL
             install: nghttp2 libressl
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DBUILD_EXAMPLES=ON
