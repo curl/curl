@@ -774,20 +774,20 @@ CURLcode Curl_conncache_add_pollfds(struct conncache *connc,
   DEBUGASSERT(!connc->shutdowns.iter_locked);
   connc->shutdowns.iter_locked = TRUE;
   if(connc->shutdowns.conn_list.head) {
-    struct Curl_llist_element *e = connc->shutdowns.conn_list.head;
+    struct Curl_llist_element *e;
     struct easy_pollset ps;
+    struct connectdata *conn;
 
     for(e = connc->shutdowns.conn_list.head; e; e = e->next) {
-      struct connectdata *conn = e->ptr;
-
+      conn = e->ptr;
       memset(&ps, 0, sizeof(ps));
       Curl_attach_connection(connc->closure_handle, conn);
       Curl_conn_adjust_pollset(connc->closure_handle, &ps);
       Curl_detach_connection(connc->closure_handle);
 
-      if(Curl_pollfds_add_ps(cpfds, &ps)) {
+      result = Curl_pollfds_add_ps(cpfds, &ps);
+      if(result) {
         Curl_pollfds_cleanup(cpfds);
-        result = CURLE_OUT_OF_MEMORY;
         goto out;
       }
     }
@@ -805,21 +805,20 @@ CURLcode Curl_conncache_add_waitfds(struct conncache *connc,
   DEBUGASSERT(!connc->shutdowns.iter_locked);
   connc->shutdowns.iter_locked = TRUE;
   if(connc->shutdowns.conn_list.head) {
-    struct Curl_llist_element *e = connc->shutdowns.conn_list.head;
+    struct Curl_llist_element *e;
     struct easy_pollset ps;
+    struct connectdata *conn;
 
     for(e = connc->shutdowns.conn_list.head; e; e = e->next) {
-      struct connectdata *conn = e->ptr;
-
+      conn = e->ptr;
       memset(&ps, 0, sizeof(ps));
       Curl_attach_connection(connc->closure_handle, conn);
       Curl_conn_adjust_pollset(connc->closure_handle, &ps);
       Curl_detach_connection(connc->closure_handle);
 
-      if(Curl_waitfds_add_ps(cwfds, &ps)) {
-        result = CURLE_OUT_OF_MEMORY;
+      result = Curl_waitfds_add_ps(cwfds, &ps);
+      if(result)
         goto out;
-      }
     }
   }
 out:
