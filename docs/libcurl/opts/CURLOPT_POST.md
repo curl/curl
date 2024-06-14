@@ -9,7 +9,7 @@ Protocol:
 See-also:
   - CURLOPT_HTTPPOST (3)
   - CURLOPT_POSTFIELDS (3)
-  - CURLOPT_PUT (3)
+  - CURLOPT_UPLOAD (3)
 ---
 
 # NAME
