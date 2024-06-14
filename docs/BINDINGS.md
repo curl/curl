@@ -63,7 +63,7 @@ Go: [go-curl](https://github.com/andelf/go-curl) by ShuYu Wang
 
 [Hollywood](https://www.hollywood-mal.com/download.html) hURL by Andreas Falkenhahn
 
-[Java](https://github.com/pjlegato/curl-java)
+[Java](https://github.com/covers1624/curl4j)
 
 [Julia](https://github.com/JuliaWeb/LibCURL.jl) Written by Amit Murthy
 
