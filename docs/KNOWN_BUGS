@@ -110,6 +110,7 @@ problems may have been fixed or changed somewhat since this was written.
  17.1 HTTP/2 prior knowledge over proxy
  17.2 HTTP/2 frames while in the connection pool kill reuse
  17.3 ENHANCE_YOUR_CALM causes infinite retries
+ 17.4 HTTP/2 + TLS spends a lot of time in recv
 
  18. HTTP/3
  18.1 connection migration does not work
@@ -619,6 +620,16 @@ problems may have been fixed or changed somewhat since this was written.
  with ENHANCE_YOUR_CALM error code.
 
  See https://github.com/curl/curl/issues/5119
+
+17.4 HTTP/2 + TLS spends a lot of time in recv
+
+ It has been observered that by making the speed limit less accurate we could
+ improve this performance. (by reverting
+ https://github.com/curl/curl/commit/db5c9f4f9e0779b49624752b135281a0717b277b)
+ Can we find a golden middle ground?
+
+ See https://curl.se/mail/lib-2024-05/0026.html and
+ https://github.com/curl/curl/issues/13416
 
 18. HTTP/3
 
