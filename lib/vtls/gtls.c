@@ -1466,7 +1466,13 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
      in RFC2818 (HTTPS), which takes into account wildcards, and the subject
      alternative name PKIX extension. Returns non zero on success, and zero on
      failure. */
-  rc = (int)gnutls_x509_crt_check_hostname(x509_cert, peer->hostname);
+
+  /* This function does not handle trailing dots, so if we have an SNI name
+     use that and fallback to the hostname only if there is no SNI (like for
+     IP addresses) */
+  rc = (int)gnutls_x509_crt_check_hostname(x509_cert,
+                                           peer->sni ? peer->sni :
+                                           peer->hostname);
 #if GNUTLS_VERSION_NUMBER < 0x030306
   /* Before 3.3.6, gnutls_x509_crt_check_hostname() didn't check IP
      addresses. */
