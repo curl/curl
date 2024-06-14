@@ -1,10 +1,10 @@
 curl and libcurl 8.8.1
 
  Public curl releases:         258
- Command line options:         261
- curl_easy_setopt() options:   305
+ Command line options:         263
+ curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3189
+ Contributors:                 3194
 
 This release includes the following changes:
 
@@ -25,18 +25,24 @@ This release includes the following bugfixes:
  o asyn-thread: avoid using GetAddrInfoExW with impersonation [7]
  o autoconf: remove 'deeper' checks for `AC_CHECK_FUNCS` [23]
  o aws-sigv4: url encode the canonical path [55]
+ o BINDINGS: update java link to one that exists [115]
  o build: add more supported attributes to the IAR compiler [46]
  o build: untangle `CURLDEBUG` and `DEBUGBUILD` macros [9]
+ o cd2nroff: convert two warnings to errors [135]
  o cd2nroff: use an empty "##" to signal end of .IP sequence [56]
  o cf-socket: improve SO_SNDBUF update for Winsock [27]
  o cfilters: make Curl_conn_connect always assign 'done' [60]
  o cmake: allow `ENABLE_CURLDEBUG=OFF` with `ENABLE_DEBUG=ON` [26]
+ o cmake: allow SOVERSION override with `CURL_LIBCURL_SOVERSION` [120]
  o cmake: always build unit tests with the `testdeps` target [20]
+ o cmake: bring `curl-config.cmake` closer to `FindCURL` [130]
+ o cmake: enable SOVERSION for Cygwin and `CMAKE_DLL_NAME_WITH_SOVERSION` [119]
  o cmake: fix `-Wredundant-decls` in unity/mingw-w64 builds [15]
  o cmake: fix brotli lib order [3]
  o cmake: fix building in unity mode [4]
  o cmake: fix building with both md4 and md5 in unity mode [13]
  o cmake: fix test 1013 with websockets enabled and no TLS [47]
+ o cmake: stop setting SOVERSION for the static lib target [127]
  o cmake: use `APPLE` instead of `CMAKE_SYSTEM_NAME` string [24]
  o cmake: whitespace, formatting/tidy-up in comments [25]
  o cmdline-opts/_PROTOCOLS.md: mention WS(S) [94]
@@ -46,6 +52,7 @@ This release includes the following bugfixes:
  o cmdline-opts: expand the parallel explanations [98]
  o cmdline: expand proxy option explanations [97]
  o configure: use `$EGREP` in place of `grep -E` [41]
+ o configure: use AC_MSG_WARN for TLS/experimental warning texts [122]
  o connection: shutdown TLS (for FTP) better [104]
  o curl-config: revert to backticks to support old target envs [88]
  o curl: make warnings and other messages aware of terminal width [58]
@@ -55,18 +62,25 @@ This release includes the following bugfixes:
  o CURLOPT_ECH.md: remove repeated 'if' [109]
  o DISTROS: add a link to the list archive [22]
  o DISTROS: add MSYS2 (native) links [100]
+ o Dockerfile: update debian:bookworm-slim to 84d83b2 [121]
  o docs/cmdline-opts: fix mail-auth example TLD typo [35]
  o docs/Makefile.am: make curl-config.1 install [14]
+ o docs: reference non deprecated libcurl options [113]
  o doh-insecure.md: expand [96]
  o examples/threaded-ssl: remove locking callback code [83]
+ o examples: add missing binaries to .gitignore [106]
  o examples: delete unused includes [10]
  o examples: fix compiling with MSVC [34]
+ o file: separate fake headers and body with a stand-alone CRLF [137]
  o get.d: clarify the explanation [32]
+ o GHA: detect and warn for more English contractions [123]
  o GHA: disable MQTT and WebSocket tests in Windows jobs [63]
  o GHA: disable TFTP tests in Windows jobs
  o GHA: enable tests 1139, 1177, 1477 on Windows [59]
  o GHA: unify http3 workflows into one [77]
  o gnutls: improve TLS shutdown [62]
+ o gnutls: pass in SNI name, not hostname when checking cert [114]
+ o http: remove "struct HTTP" [134]
  o http: write last header line late [44]
  o lib/v*: tidy up types and casts [64]
  o lib: fix gcc warning in certain debug builds [19]
@@ -74,6 +88,7 @@ This release includes the following bugfixes:
  o lib: prefer `var = time(NULL)` over `time(&var)` [52]
  o lib: tidy up types and casts [92]
  o lib: xfer_setup and non-blocking shutdown [111]
+ o libcurl.pc: add `Requires.private`, `Requires` for static linking [129]
  o libssh: remove CURLOPT_SSL_VERIFYHOST check [36]
  o managen: warn on excessively long help texts [87]
  o mbedtls: check version for cipher id [12]
@@ -87,9 +102,11 @@ This release includes the following bugfixes:
  o openssl: fix %-specifier in infof() call [57]
  o openSSL: fix hostname handling when using ECH [78]
  o openssl: stop duplicate ssl key logging for legacy OpenSSL [49]
+ o os400: make it compilable again [128]
  o pytest: add ftp upload tests [16]
  o pytest: include testenv/vsftpd.py in dist tarball [99]
  o request.md: language fix [70]
+ o request: change the struct field bodywrites to a bool, only for hyper [132]
  o runtests: sort test IDs in summary lines [33]
  o sectransp: remove large cipher table [76]
  o sectransp: use common code for cipher suite lookup [54]
@@ -109,12 +126,15 @@ This release includes the following bugfixes:
  o tests: use exec when spawning nghttpx [45]
  o tidy-up: use consistent casing for Windows directories [28]
  o TODO: remove some old, clarify, add something [31]
+ o tool_cb_hdr: allow etag and content-disposition for 3xx reply [117]
  o tool_cb_hdr: return error for failed header writes [30]
  o tool_operate: avoid explicitly setting verifypeer to 1 [39]
  o tool_writeout: bsearch the variable name [102]
  o tool_writeout: get certinfo only when needing it [101]
  o transfer: conn close on paused upload [8]
+ o transfer: do not use EXPIRE_NOW while blocked [124]
  o transfer: remove curl_upload_refill_watermark, no longer used [50]
+ o transfer: set CSELECT_IN if there is data pending [118]
  o url: allow DoH transfers to override max connection limit [68]
  o vms: fixed language in comment [110]
  o vtls: deprioritize Secure Transport [71]
@@ -138,18 +158,20 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alejandro R. Sedeño, Alexander Shtuchkin, Andy Pan, Ayesh Karunaratne,
-  Bo Anderson, Christian Heusel, Christian Schmitz, Dan Fandrich,
-  Daniel Gustafsson, Daniel Stenberg, dependabot[bot], Dorian Craps,
-  edmcln on github, Eli Schwartz, Elliott Balsley, fds242 on github,
-  Guilherme Puida, Harry Sintonen, James Abbatiello, Jan Venekamp,
-  Jay Guerette, Jonathan Matthews, Joseph Chen, Kai Pastor, kartatz,
-  Keerthi Timmaraju, Lee Li, Luke Hamburg, Marcel Raad, Matthias Gatto,
-  Matthieu Baerts, Matt Jolly, Olivier Bonaventure, Orgad Shaneh, Pavel Pavlov,
-  pszlazak on github, RainRat, Ray Satiro, renovate[bot], Sebastian Andersson,
+  Alejandro R. Sedeño, alervd on github, Alexander Shtuchkin, Andy Pan,
+  Aurélien Pierre, Ayesh Karunaratne, Bo Anderson, Christian Heusel,
+  Christian Schmitz, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
+  dependabot[bot], dogma, Dorian Craps, edmcln on github, Eli Schwartz,
+  Elliott Balsley, fds242 on github, Guilherme Puida, Harry Sintonen,
+  James Abbatiello, Jan Venekamp, Jay Guerette, Jiang Wenjian,
+  Jonathan Matthews, Joseph Chen, Kai Pastor, kartatz, Keerthi Timmaraju,
+  Lee Li, Luke Hamburg, Marcel Raad, Matthias Gatto, Matthieu Baerts,
+  Matt Jolly, Morgan Willcock, Olivier Bonaventure, Orgad Shaneh,
+  Patrick Monnerat, Pavel Pavlov, pszlazak on github, RainRat, Ray Satiro,
+  renovate[bot], Ryan Carsten Schmidt, Samuel Chiang, Sebastian Andersson,
   Sergey Bronnikov, Stefan Eissing, Stephen Farrell, Tatsuhiro Tsujikawa,
-  Viktor Szakats, vvb2060
-  (46 contributors)
+  Viktor Szakats, vvb2060, Yedaya Katsman
+  (55 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -258,9 +280,29 @@ References to bug reports and discussions on issues:
  [103] = https://curl.se/bug/?i=13885
  [104] = https://curl.se/bug/?i=13904
  [105] = https://curl.se/bug/?i=13905
+ [106] = https://curl.se/bug/?i=13952
  [107] = https://curl.se/bug/?i=13907
  [108] = https://curl.se/bug/?i=13923
  [109] = https://curl.se/bug/?i=13922
  [110] = https://curl.se/bug/?i=13921
  [111] = https://curl.se/bug/?i=13913
  [112] = https://curl.se/bug/?i=13920
+ [113] = https://curl.se/bug/?i=13951
+ [114] = https://curl.se/bug/?i=13428
+ [115] = https://github.com/curl/everything-curl/issues/456
+ [117] = https://curl.se/bug/?i=13302
+ [118] = https://curl.se/bug/?i=13695
+ [119] = https://curl.se/bug/?i=13898
+ [120] = https://curl.se/bug/?i=13944
+ [121] = https://curl.se/bug/?i=13934
+ [122] = https://curl.se/bug/?i=13941
+ [123] = https://curl.se/bug/?i=13940
+ [124] = https://curl.se/bug/?i=13908
+ [127] = https://curl.se/bug/?i=13936
+ [128] = https://curl.se/bug/?i=13930
+ [129] = https://curl.se/bug/?i=864
+ [130] = https://curl.se/bug/?i=13897
+ [132] = https://curl.se/bug/?i=13928
+ [134] = https://curl.se/bug/?i=13927
+ [135] = https://curl.se/bug/?i=13929
+ [137] = https://curl.se/mail/lib-2024-06/0033.html
