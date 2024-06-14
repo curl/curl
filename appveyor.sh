@@ -62,7 +62,13 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     '-DCMAKE_INSTALL_PREFIX=C:/curl' \
     "-DCMAKE_BUILD_TYPE=${PRJ_CFG}"
   # shellcheck disable=SC2086
-  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}
+  if ! cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}; then
+    if [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ]; then
+      find . -name BuildLog.htm -exec dos2unix '{}' +
+      find . -name BuildLog.htm -exec cat '{}' +
+    fi
+    false
+  fi
   if [ "${SHARED}" = 'ON' ]; then
     cp -f -p _bld/lib/*.dll _bld/src/
   fi
