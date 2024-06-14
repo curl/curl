@@ -465,7 +465,7 @@ if(use_core_foundation_and_core_services)
     message(FATAL_ERROR "CoreServices framework not found")
   endif()
 
-  list(APPEND CURL_LIBS "-framework CoreFoundation -framework CoreServices")
+  list(APPEND CURL_LIBS "-framework CoreFoundation" "-framework CoreServices")
 endif()
 
 if(CURL_USE_OPENSSL)
