@@ -30,8 +30,10 @@ This parameter controls the preference *level* of libcurl between using
 usernames and passwords from your *~/.netrc* file, relative to usernames and
 passwords in the URL supplied with CURLOPT_URL(3).
 
-On Windows, libcurl uses the file as *%HOME%/_netrc*. If *%HOME%* is
-not set on Windows, libcurl falls back to *%USERPROFILE%*.
+On Windows, libcurl primarily checks for *.netrc* in *%HOME%*. If *%HOME%* is
+not set on Windows, libcurl falls back to *%USERPROFILE%*. If the file does
+not exist, it falls back to check if there is instead a file named *_netrc* -
+using an underscore instead of period.
 
 You can also tell libcurl a different filename to use with
 CURLOPT_NETRC_FILE(3).
