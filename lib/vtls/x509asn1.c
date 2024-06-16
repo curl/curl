@@ -1228,6 +1228,8 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
       result = ssl_push_certinfo_dyn(data, certnum, "Cert", &out);
 
 done:
+  if(result)
+    failf(data, "Failed extracting certificate chain");
   Curl_dyn_free(&out);
   return result;
 }
