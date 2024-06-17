@@ -694,6 +694,12 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
     failf(data, "Not resolving .onion address (RFC 7686)");
     return CURLRESOLV_ERROR;
   }
+  if(hostname_len >= 5 &&
+     (curl_strequal(&hostname[hostname_len - 4], ".i2p") ||
+      curl_strequal(&hostname[hostname_len - 5], ".i2p."))) {
+    failf(data, "Not resolving .i2p address");
+    return CURLRESOLV_ERROR;
+  }
   *entry = NULL;
 #ifndef CURL_DISABLE_DOH
   conn->bits.doh = FALSE; /* default is not */

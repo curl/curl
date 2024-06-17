@@ -1,0 +1,41 @@
+<testcase>
+<info>
+<keywords>
+I2P
+FAILURE
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+http
+</features>
+<name>
+Fail to resolve .i2p TLD
+</name>
+<command>
+proxy.i2p
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# Couldn't resolve host name
+<errorcode>
+6
+</errorcode>
+<stderr mode="text">
+curl: (6) Not resolving .i2p address
+</stderr>
+</verify>
+</testcase>
