@@ -1295,6 +1295,7 @@ static void mbedtls_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct mbed_ssl_backend_data *backend =
     (struct mbed_ssl_backend_data *)connssl->backend;
 
+  (void)data;
   DEBUGASSERT(backend);
   if(backend->initialized) {
     mbedtls_pk_free(&backend->pk);

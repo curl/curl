@@ -804,6 +804,7 @@ cr_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct rustls_ssl_backend_data *backend =
     (struct rustls_ssl_backend_data *)connssl->backend;
 
+  (void)data;
   DEBUGASSERT(backend);
   if(backend->conn) {
     rustls_connection_free(backend->conn);

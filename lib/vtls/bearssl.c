@@ -1112,6 +1112,7 @@ static void bearssl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     (struct bearssl_ssl_backend_data *)connssl->backend;
   size_t i;
 
+  (void)data;
   DEBUGASSERT(backend);
 
   backend->active = FALSE;
