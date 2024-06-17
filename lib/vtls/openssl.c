@@ -1883,7 +1883,7 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
   size_t i;
 
   DEBUGASSERT(octx);
-  if(!octx->ssl || connssl->shutdown) {
+  if(!octx->ssl || cf->shutdown) {
     *done = TRUE;
     goto out;
   }
@@ -1905,8 +1905,8 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
       bool input_pending;
       /* Yes, it did. */
       if(!send_shutdown) {
-        connssl->shutdown = TRUE;
         CURL_TRC_CF(data, cf, "SSL shutdown received, not sending");
+        *done = TRUE;
         goto out;
       }
       else if(!cf->next->cft->is_alive(cf->next, data, &input_pending)) {
@@ -1914,8 +1914,8 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
          * seems not interested to see our close notify, so do not
          * send it. We are done. */
         connssl->peer_closed = TRUE;
-        connssl->shutdown = TRUE;
         CURL_TRC_CF(data, cf, "peer closed connection");
+        *done = TRUE;
         goto out;
       }
     }
@@ -1972,7 +1972,7 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
   }
 
 out:
-  connssl->shutdown = (result || *done);
+  cf->shutdown = (result || *done);
   return result;
 }
 
@@ -1985,14 +1985,6 @@ static void ossl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   DEBUGASSERT(octx);
 
   if(octx->ssl) {
-    /* Send the TLS shutdown if have not done so already and are still
-     * connected *and* if the peer did not already close the connection. */
-    if(cf->connected && !connssl->shutdown &&
-       cf->next && cf->next->connected && !connssl->peer_closed) {
-      bool done;
-      (void)ossl_shutdown(cf, data, TRUE, &done);
-    }
-
     SSL_free(octx->ssl);
     octx->ssl = NULL;
   }

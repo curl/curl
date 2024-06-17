@@ -132,7 +132,7 @@ void Curl_conncache_print(struct conncache *connc);
 
 void Curl_conncache_shutdown_conn(struct Curl_easy *data,
                                   struct connectdata *conn,
-                                  bool is_dead, bool lock);
+                                  bool aborted, bool lock);
 
 CURLcode Curl_conncache_add_pollfds(struct conncache *connc,
                                     struct curl_pollfds *cpfds);

@@ -52,7 +52,7 @@
 static void conncache_shutdown_conn(struct conncache *connc,
                                     struct Curl_easy *last_data,
                                     struct connectdata *conn,
-                                    bool is_dead, bool lock);
+                                    bool aborted, bool lock);
 static void connc_disconnect(struct Curl_easy *data,
                              struct connectdata *conn,
                              bool do_shutdown);
@@ -618,7 +618,7 @@ static void connc_shutdown_discard_oldest(struct conncache *connc)
 static void conncache_shutdown_conn(struct conncache *connc,
                                     struct Curl_easy *last_data,
                                     struct connectdata *conn,
-                                    bool is_dead, bool lock)
+                                    bool aborted, bool lock)
 {
   /* `last_data`, if present, is the transfer that last worked with
    * the connection. It is present when the connection is being shut down
@@ -631,7 +631,7 @@ static void conncache_shutdown_conn(struct conncache *connc,
    * there and we use the cache's own closure handle.
    */
   struct Curl_easy *data = last_data? last_data : connc->closure_handle;
-  bool done;
+  bool done = FALSE;
 
   DEBUGASSERT(connc);
   if(conn->bundle)
@@ -641,33 +641,42 @@ static void conncache_shutdown_conn(struct conncache *connc,
    * If this connection isn't marked to force-close, leave it open if there
    * are other users of it
    */
-  if(CONN_INUSE(conn) && !is_dead) {
+  if(CONN_INUSE(conn) && !aborted) {
     DEBUGF(infof(data, "conncache_shutdown_conn when inuse: %zu",
                  CONN_INUSE(conn)));
     return;
   }
 
-  /* treat the connection as dead in CONNECT_ONLY situations */
+  /* treat the connection as aborted in CONNECT_ONLY situations, we do
+   * not know what the APP did with it. */
   if(conn->connect_only)
-    is_dead = TRUE;
-  conn->bits.shutdown_maybe_dead = is_dead;
+    aborted = TRUE;
+  conn->bits.aborted = aborted;
 
-  /* Attempt to shutdown the connection right away. */
-  Curl_attach_connection(data, conn);
-  connc_run_conn_shutdown(data, conn, &done);
-  Curl_detach_connection(data);
+  /* We do not shutdown dead connections. The term 'dead' can be misleading
+   * here, as we also mark errored connections/transfers as 'dead'.
+   * If we do a shutdown for an aborted transfer, the server might think
+   * it was successful otherwise (for example an ftps: upload). This is
+   * not what we want. */
+  if(aborted)
+    done = TRUE;
+  else if(!done) {
+    /* Attempt to shutdown the connection right away. */
+    Curl_attach_connection(data, conn);
+    connc_run_conn_shutdown(data, conn, &done);
+    Curl_detach_connection(data);
+  }
+
   if(done) {
-    DEBUGF(infof(connc->closure_handle, "shutdown, disconnect connection %"
-           CURL_FORMAT_CURL_OFF_T " as done", conn->connection_id));
+    DEBUGF(infof(connc->closure_handle, "shutdown, done, disconnect"));
     connc_disconnect(data, conn, FALSE);
     return;
   }
 
   DEBUGASSERT(!connc->shutdowns.iter_locked);
   if(connc->shutdowns.iter_locked) {
-    DEBUGF(infof(connc->closure_handle, "shutdown, disconnect connection %"
-           CURL_FORMAT_CURL_OFF_T " as shutdown list locked",
-           conn->connection_id));
+    DEBUGF(infof(connc->closure_handle, "shutdown, disconnect "
+           "as shutdown list locked"));
     connc_disconnect(data, conn, FALSE);
     return;
   }
@@ -687,15 +696,20 @@ static void conncache_shutdown_conn(struct conncache *connc,
 
 void Curl_conncache_shutdown_conn(struct Curl_easy *data,
                                   struct connectdata *conn,
-                                  bool is_dead, bool lock)
+                                  bool aborted, bool lock)
 {
   DEBUGASSERT(data);
-  infof(data, "Closing connection");
   if(data->state.conn_cache) {
-    conncache_shutdown_conn(data->state.conn_cache, data, conn, is_dead, lock);
+    infof(data, "%s connection #%" CURL_FORMAT_CURL_OFF_T,
+          aborted? "Closing" : "Shutting down", conn->connection_id);
+    conncache_shutdown_conn(data->state.conn_cache, data, conn, aborted, lock);
   }
   else {
-    connc_disconnect(data, conn, !is_dead);
+    infof(data, "Closing connection #%" CURL_FORMAT_CURL_OFF_T,
+          conn->connection_id);
+    DEBUGASSERT(!conn->bundle);
+    connc_run_conn_shutdown_handler(data, conn);
+    connc_disconnect(data, conn, !aborted);
   }
 }
 
@@ -703,9 +717,8 @@ static void connc_run_conn_shutdown_handler(struct Curl_easy *data,
                                             struct connectdata *conn)
 {
   if(!conn->bits.shutdown_handler) {
-    DEBUGF(infof(data, "connc_disconnect(conn #%"
-           CURL_FORMAT_CURL_OFF_T ", dead=%d)",
-           conn->connection_id, conn->bits.shutdown_maybe_dead));
+    DEBUGF(infof(data, "shutdown connection protocol (aborted=%d)",
+           conn->bits.aborted));
 
     if(conn->dns_entry) {
       Curl_resolv_unlock(data, conn->dns_entry);
@@ -720,7 +733,7 @@ static void connc_run_conn_shutdown_handler(struct Curl_easy *data,
 
     if(conn->handler && conn->handler->disconnect) {
       /* This is set if protocol-specific cleanups should be made */
-      conn->handler->disconnect(data, conn, conn->bits.shutdown_maybe_dead);
+      conn->handler->disconnect(data, conn, conn->bits.aborted);
     }
 
     /* possible left-overs from the async name resolvers */
@@ -739,12 +752,13 @@ static void connc_run_conn_shutdown(struct Curl_easy *data,
 
   /* We expect to be attached when called */
   DEBUGASSERT(data->conn == conn);
+
+  connc_run_conn_shutdown_handler(data, conn);
+
   if(conn->bits.shutdown_filters) {
     *done = TRUE;
     return;
   }
-
-  connc_run_conn_shutdown_handler(data, conn);
 
   if(!conn->connect_only && Curl_conn_is_connected(conn, FIRSTSOCKET))
     r1 = Curl_conn_shutdown(data, FIRSTSOCKET, &done1);

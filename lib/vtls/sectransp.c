@@ -2575,7 +2575,7 @@ static CURLcode sectransp_shutdown(struct Curl_cfilter *cf,
   size_t i;
 
   DEBUGASSERT(backend);
-  if(!backend->ssl_ctx || connssl->shutdown) {
+  if(!backend->ssl_ctx || cf->shutdown) {
     *done = TRUE;
     goto out;
   }
@@ -2638,7 +2638,7 @@ static CURLcode sectransp_shutdown(struct Curl_cfilter *cf,
   }
 
 out:
-  connssl->shutdown = (result || *done);
+  cf->shutdown = (result || *done);
   return result;
 }
 
@@ -2654,12 +2654,6 @@ static void sectransp_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   if(backend->ssl_ctx) {
     CURL_TRC_CF(data, cf, "close");
-    if(cf->connected && !connssl->shutdown &&
-       cf->next && cf->next->connected && !connssl->peer_closed) {
-      bool done;
-      (void)sectransp_shutdown(cf, data, TRUE, &done);
-    }
-
 #if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
     if(SSLCreateContext)
       CFRelease(backend->ssl_ctx);

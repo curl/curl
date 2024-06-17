@@ -740,6 +740,7 @@ static bool prune_if_dead(struct connectdata *conn,
          * any time (HTTP/2 PING for example), the protocol handler needs
          * to install its own `connection_check` callback.
          */
+        DEBUGF(infof(data, "connection has input pending, not reusable"));
         dead = TRUE;
       }
       Curl_detach_connection(data);
@@ -798,7 +799,7 @@ static void prune_dead_connections(struct Curl_easy *data)
       /* connection previously removed from cache in prune_if_dead() */
 
       /* shut it down */
-      Curl_conncache_shutdown_conn(data, pruned, TRUE, TRUE);
+      Curl_conncache_shutdown_conn(data, pruned, FALSE, TRUE);
     }
     CONNCACHE_LOCK(data);
     data->state.conn_cache->last_cleanup = now;
@@ -1211,7 +1212,7 @@ ConnectionExists(struct Curl_easy *data,
     }
     else if(prune_if_dead(check, data)) {
       /* disconnect it */
-      Curl_conncache_shutdown_conn(data, check, TRUE, TRUE);
+      Curl_conncache_shutdown_conn(data, check, FALSE, TRUE);
       continue;
     }
 

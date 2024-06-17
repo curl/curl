@@ -1757,17 +1757,17 @@ static CURLcode ssl_cf_shutdown(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 bool *done)
 {
-  struct ssl_connect_data *connssl = cf->ctx;
-  struct cf_call_data save;
   CURLcode result = CURLE_OK;
 
   *done = TRUE;
-  if(!connssl->shutdown) {
+  if(!cf->shutdown) {
+    struct cf_call_data save;
+
     CF_DATA_SAVE(save, cf, data);
     result = Curl_ssl->shut_down(cf, data, TRUE, done);
     CURL_TRC_CF(data, cf, "cf_shutdown -> %d, done=%d", result, *done);
     CF_DATA_RESTORE(cf, save);
-    connssl->shutdown = (result || *done);
+    cf->shutdown = (result || *done);
   }
   return result;
 }
@@ -2052,7 +2052,7 @@ static CURLcode vtls_shutdown_blocking(struct Curl_cfilter *cf,
   timediff_t timeout_ms;
   int what, loop = 10;
 
-  if(connssl->shutdown) {
+  if(cf->shutdown) {
     *done = TRUE;
     return CURLE_OK;
   }
@@ -2091,7 +2091,7 @@ static CURLcode vtls_shutdown_blocking(struct Curl_cfilter *cf,
   }
 out:
   CF_DATA_RESTORE(cf, save);
-  connssl->shutdown = (result || *done);
+  cf->shutdown = (result || *done);
   return result;
 }
 
