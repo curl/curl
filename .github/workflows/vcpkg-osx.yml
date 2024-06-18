@@ -1,0 +1,180 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: vcpkg macOS
+
+on:
+  push:
+    branches:
+      - master
+      - '*/ci'
+    paths-ignore:
+      - '**/*.md'
+      - '.azure-pipelines.yml'
+      - '.circleci/**'
+      - '.cirrus.yml'
+      - 'appveyor.*'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+      - 'winbuild/**'
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - '**/*.md'
+      - '.azure-pipelines.yml'
+      - '.circleci/**'
+      - '.cirrus.yml'
+      - 'appveyor.*'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+      - 'winbuild/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions: {}
+
+env:
+  OS: osx
+  BUILD_DIR: vcpkg/cache
+  VCPKG_ROOT: vcpkg/cache/vcpkg
+  VCPKG_LINK: https://github.com/microsoft/vcpkg/
+  BINARY_CACHE: vcpkg/cache/linux
+  CFLAGS: "-mmacosx-version-min=10.8"
+
+jobs:
+  build:
+    name: vcpkg-macos-${{ matrix.PROCESSOR }}-${{ matrix.BUILD_OPTION }}
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - BUILD_OPTION: openssl
+          PROCESSOR: arm64
+          CMAKE_OPTIONS: -DCURL_USE_LIBSSH2=ON 
+        - BUILD_OPTION: libressl
+          PROCESSOR: arm64
+          CMAKE_OPTIONS: -DCURL_USE_LIBSSH2=OFF
+        - BUILD_OPTION: secure_transport
+          PROCESSOR: arm64
+          CMAKE_OPTIONS: -DCURL_USE_LIBSSH2=ON -DCURL_USE_SECTRANSP=ON -DCURL_USE_OPENSSL=OFF
+    env:
+      PROCESSOR: ${{ matrix.PROCESSOR }}
+      BUILD_OPTION: ${{ matrix.BUILD_OPTION }}
+      CMAKE_OPTIONS: ${{ matrix.CMAKE_OPTIONS }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache dependencies
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{env.BINARY_CACHE }}/${{ matrix.BUILD_OPTION }}
+          key: ${{ env.OS }}-${{ matrix.BUILD_OPTION }}-${{ hashFiles('.github/workflows/vcpkg-osx.yml') }}
+          restore-keys: ${{ env.OS }}-${{ matrix.BUILD_OPTION }}-${{ hashFiles('.github/workflows/vcpkg-osx.yml') }}
+
+      - name: Install Dependencies
+        run: |
+          sudo xcode-select -switch /Applications/Xcode.app
+      - name: Install ninja
+        if: success()
+        run: |   
+          brew install ninja
+          ninja --version
+          whereis ninja
+
+      - name: Init vcpkg
+        if: success()
+        run: |        
+          mkdir -p $BUILD_DIR
+          git -C $BUILD_DIR clone $VCPKG_LINK
+          $VCPKG_ROOT/bootstrap-vcpkg.sh
+  
+      - name: vcpkg build openssl
+        if: ${{ success() && matrix.BUILD_OPTION == 'openssl' }}
+        run: |
+          export CURRENT_BINARY_CACHE="$BINARY_CACHE/$BUILD_OPTION"
+          mkdir -p $CURRENT_BINARY_CACHE
+          export VCPKG_BINARY_SOURCES="clear;files,$PWD/$CURRENT_BINARY_CACHE,readwrite;"
+          $VCPKG_ROOT/vcpkg x-set-installed libssh2[core,openssl] nghttp2 openssl zstd --triplet=$PROCESSOR-$OS-release
+
+      - name: vcpkg build libressl
+        if: ${{ success() && matrix.BUILD_OPTION == 'libressl' }}
+        run: |
+          export CURRENT_BINARY_CACHE="$BINARY_CACHE/$BUILD_OPTION"
+          mkdir -p $CURRENT_BINARY_CACHE
+          export VCPKG_BINARY_SOURCES="clear;files,$PWD/$CURRENT_BINARY_CACHE,readwrite;"
+          $VCPKG_ROOT/vcpkg x-set-installed libressl nghttp2 zstd --triplet=$PROCESSOR-$OS-release
+
+      - name: vcpkg build secure_transport
+        if: ${{ success() && matrix.BUILD_OPTION == 'secure_transport' }}
+        run: |
+          export CURRENT_BINARY_CACHE="$BINARY_CACHE/$BUILD_OPTION"
+          mkdir -p $CURRENT_BINARY_CACHE
+          export VCPKG_BINARY_SOURCES="clear;files,$PWD/$CURRENT_BINARY_CACHE,readwrite;"
+          $VCPKG_ROOT/vcpkg x-set-installed nghttp2 zstd --triplet=$PROCESSOR-$OS-release
+
+      - name: cmake config
+        if: success() 
+        run: |
+          export CMAKE_GENERATOR=Ninja
+          cmake . -B build \
+              -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
+              -DVCPKG_INSTALLED_DIR=$VCPKG_ROOT/installed \
+              -DVCPKG_TARGET_TRIPLET=$PROCESSOR-$OS-release \
+              -DCMAKE_UNITY_BUILD=ON \
+              -DCURL_WERROR=ON \
+              -DBUILD_SHARED_LIBS=OFF \
+              -DCURL_ZSTD=ON \
+              -DUSE_NGHTTP2=ON \
+              -DCURL_USE_LIBPSL=OFF \
+              -DCURL_USE_GSSAPI=OFF \
+              -DENABLE_ARES=OFF \
+              -DCURL_USE_LIBSSH=OFF \
+              $CMAKE_OPTIONS
+
+      - name: Prepare logs on failure
+        if: failure()
+        run: |
+          7z a -t7z -r -mx=9 logs.7z \
+              $VCPKG_ROOT/buildtrees/*.log \
+              build/.ninja_log \
+              build/build.ninja \
+              build/install_manifest.txt \
+              build/vcpkg-manifest-install.log
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: osx_logs_${{matrix.BUILD_OPTION}}_${{github.event.pull_request.head.sha}}
+          path: logs.7z
+
+      - name: Save cache dependencies
+        id: cache-save
+        uses: actions/cache/save@v4
+        with:
+          path: ${{env.BINARY_CACHE }}/${{ matrix.BUILD_OPTION }}
+          key: ${{ env.OS }}-${{ matrix.BUILD_OPTION }}-${{ hashFiles('.github/workflows/vcpkg-osx.yml') }}-${{ hashFiles('vcpkg/cache/vcpkg/installed/vcpkg/updates/*') }}
+
+      - name: Cmake build
+        if: success()
+        run: |
+          cmake --build build --config Release -j2
+          build/src/curl --disable --version
+
+      - name: Cmake install
+        if: success()
+        run: |
+          sudo cmake --install build --config Release
+
+      - name: Run tests
+        if: success() 
+        run: |
+          cmake --build build --target test-ci -j2
