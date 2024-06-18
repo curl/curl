@@ -5109,38 +5109,22 @@ static CURLcode ossl_get_tls_server_end_point(struct Curl_easy *data,
 
   /* https://datatracker.ietf.org/doc/html/rfc5929#section-4.1 */
   if(algo_nid == NID_md5 || algo_nid == NID_sha1) {
-    algo_name = "SHA256";
+    algo_type = EVP_sha256();
   }
   else {
-    algo_name = OBJ_nid2sn(algo_nid);
-    if(!algo_name) {
-      failf(data, "Could not find digest algorithm name for NID %d",
-            algo_nid);
+    algo_type = EVP_get_digestbynid(algo_nid);
+    if(!algo_type) {
+      algo_name = OBJ_nid2sn(algo_nid);
+      failf(data, "Could not find digest algorithm %s (NID %d)",
+            algo_name ? algo_name : "(null)", algo_nid);
       return CURLE_SSL_INVALIDCERTSTATUS;
     }
-  }
-
-#if OPENSSL_VERSION_NUMBER >= 0x30000000L
-  algo_type = EVP_MD_fetch(NULL, algo_name, NULL);
-#else
-  /* OpenSSL 1.1.0 to 1.1.1 must use implicit fetching */
-  algo_type = EVP_get_digestbyname(algo_name);
-#endif
-  if(!algo_type) {
-    failf(data, "Could not find digest algorithm %s (NID %d)",
-          algo_name ? algo_name : "(null)", algo_nid);
-    return CURLE_SSL_INVALIDCERTSTATUS;
   }
 
   if(!X509_digest(cert, algo_type, buf, &length)) {
     failf(data, "X509_digest() failed");
     return CURLE_SSL_INVALIDCERTSTATUS;
   }
-
-#if OPENSSL_VERSION_NUMBER >= 0x30000000L
-  /* Free the explicitly fetched algorithm object */
-  EVP_MD_free((EVP_MD *)algo_type);
-#endif
 
   *binding = malloc(sizeof(prefix) - 1 + length);
   if(!*binding)
