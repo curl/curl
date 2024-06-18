@@ -104,7 +104,10 @@ UNITTEST_START
   }
 
   free((void *)list[0].cp);
-  return error == 0 ? CURLE_OK : TEST_ERR_FAILURE;
+  if(error == 0) {
+    return CURLE_OK;
+  }
+  fail("TEST_ERR_FAILURE");
 }
 #endif
 
