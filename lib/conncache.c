@@ -1017,7 +1017,6 @@ static CURLcode conncache_update_shutdown_ev(struct Curl_multi *multi,
                                              struct Curl_easy *data,
                                              struct connectdata *conn)
 {
-  struct conncache *connc = &multi->conn_cache;
   struct easy_pollset ps;
   unsigned int i;
   int rc;
@@ -1038,7 +1037,7 @@ static CURLcode conncache_update_shutdown_ev(struct Curl_multi *multi,
     /* TODO: compare with previous pollset and update events */
     DEBUGF(infof(data, "[CCACHE-%" CURL_FORMAT_CURL_OFF_T "] "
                  "set socket=%d events=%d on #%" CURL_FORMAT_CURL_OFF_T,
-                 connc->cache_id, ps.sockets[i], ps.actions[i],
+                 multi->conn_cache.cache_id, ps.sockets[i], ps.actions[i],
                  conn->connection_id));
     multi->in_callback = TRUE;
     rc = multi->socket_cb(data, ps.sockets[i], ps.actions[i],
