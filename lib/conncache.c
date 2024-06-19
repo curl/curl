@@ -1034,9 +1034,9 @@ static CURLcode conncache_update_shutdown_ev(struct Curl_multi *multi,
     return CURLE_FAILED_INIT;
 
   for(i = 0; i < ps.num; ++i) {
-    /* TODO: compare with previous pollset and update events */
     DEBUGF(infof(data, "[CCACHE-%" CURL_FORMAT_CURL_OFF_T "] "
-                 "set socket=%d events=%d on #%" CURL_FORMAT_CURL_OFF_T,
+                 "set socket=%" CURL_FORMAT_SOCKET_T
+                 " events=%d on #%" CURL_FORMAT_CURL_OFF_T,
                  multi->conn_cache.cache_id, ps.sockets[i], ps.actions[i],
                  conn->connection_id));
     multi->in_callback = TRUE;
