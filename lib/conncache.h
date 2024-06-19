@@ -35,6 +35,14 @@
 #include "timeval.h"
 
 struct connectdata;
+struct curl_pollfds;
+struct curl_waitfds;
+struct Curl_multi;
+
+struct connshutdowns {
+  struct Curl_llist conn_list;  /* The connectdata to shut down */
+  BIT(iter_locked);  /* TRUE while iterating the list */
+};
 
 struct conncache {
   struct Curl_hash hash;
@@ -42,8 +50,10 @@ struct conncache {
   curl_off_t next_connection_id;
   curl_off_t next_easy_id;
   struct curltime last_cleanup;
+  struct connshutdowns shutdowns;
   /* handle used for closing cached connections */
   struct Curl_easy *closure_handle;
+  struct Curl_multi *multi; /* Optional, set if cache belongs to multi */
 };
 
 #define BUNDLE_NO_MULTIUSE -1
@@ -84,8 +94,12 @@ struct connectbundle {
   struct Curl_llist conn_list;  /* The connectdata members of the bundle */
 };
 
-/* returns 1 on error, 0 is fine */
-int Curl_conncache_init(struct conncache *, size_t size);
+/* Init the cache, pass multi only if cache is owned by it.
+ * returns 1 on error, 0 is fine.
+ */
+int Curl_conncache_init(struct conncache *,
+                        struct Curl_multi *multi,
+                        size_t size);
 void Curl_conncache_destroy(struct conncache *connc);
 
 /* return the correct bundle, to a host or a proxy */
@@ -118,5 +132,33 @@ struct connectdata *
 Curl_conncache_extract_oldest(struct Curl_easy *data);
 void Curl_conncache_close_all_connections(struct conncache *connc);
 void Curl_conncache_print(struct conncache *connc);
+
+/**
+ * Tear down the connection. If `aborted` is FALSE, the connection
+ * will be shut down first before discarding. If the shutdown
+ * is not immediately complete, the connection
+ * will be placed into the cache's shutdown queue.
+ */
+void Curl_conncache_disconnect(struct Curl_easy *data,
+                               struct connectdata *conn,
+                               bool aborted);
+
+/**
+ * Add sockets and POLLIN/OUT flags for connections handled by the cache.
+ */
+CURLcode Curl_conncache_add_pollfds(struct conncache *connc,
+                                    struct curl_pollfds *cpfds);
+CURLcode Curl_conncache_add_waitfds(struct conncache *connc,
+                                    struct curl_waitfds *cwfds);
+
+/**
+ * Perform maintenance on connections in the cache. Specifically,
+ * progress the shutdown of connections in the queue.
+ */
+void Curl_conncache_multi_perform(struct Curl_multi *multi);
+
+void Curl_conncache_multi_socket(struct Curl_multi *multi,
+                                 curl_socket_t s, int ev_bitmask);
+void Curl_conncache_multi_close_all(struct Curl_multi *multi);
 
 #endif /* HEADER_CURL_CONNCACHE_H */

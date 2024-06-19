@@ -324,10 +324,11 @@ static int curltest_tweak_handler(request_rec *r)
   int i, chunks = 3, error_bucket = 1;
   size_t chunk_size = sizeof(buffer);
   const char *request_id = "none";
-  apr_time_t delay = 0, chunk_delay = 0;
+  apr_time_t delay = 0, chunk_delay = 0, close_delay = 0;
   apr_array_header_t *args = NULL;
   int http_status = 200;
   apr_status_t error = APR_SUCCESS, body_error = APR_SUCCESS;
+  int close_conn = 0, with_cl = 0;
 
   if(strcmp(r->handler, "curltest-tweak")) {
     return DECLINED;
@@ -405,6 +406,21 @@ static int curltest_tweak_handler(request_rec *r)
             continue;
           }
         }
+        else if(!strcmp("close_delay", arg)) {
+          rv = duration_parse(&close_delay, val, "s");
+          if(APR_SUCCESS == rv) {
+            continue;
+          }
+        }
+      }
+      else if(!strcmp("close", arg)) {
+        /* we are asked to close the connection */
+        close_conn = 1;
+        continue;
+      }
+      else if(!strcmp("with_cl", arg)) {
+        with_cl = 1;
+        continue;
       }
       ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "query parameter not "
                     "understood: '%s' in %s",
@@ -417,10 +433,15 @@ static int curltest_tweak_handler(request_rec *r)
   ap_log_rerror(APLOG_MARK, APLOG_TRACE1, 0, r, "error_handler: processing "
                 "request, %s", r->args? r->args : "(no args)");
   r->status = http_status;
-  r->clength = -1;
-  r->chunked = (r->proto_num >= HTTP_VERSION(1,1));
+  r->clength = with_cl? (chunks * chunk_size) : -1;
+  r->chunked = (r->proto_num >= HTTP_VERSION(1,1)) && !with_cl;
   apr_table_setn(r->headers_out, "request-id", request_id);
-  apr_table_unset(r->headers_out, "Content-Length");
+  if(r->clength >= 0) {
+    apr_table_set(r->headers_out, "Content-Length",
+                  apr_ltoa(r->pool, (long)r->clength));
+  }
+  else
+    apr_table_unset(r->headers_out, "Content-Length");
   /* Discourage content-encodings */
   apr_table_unset(r->headers_out, "Content-Encoding");
   apr_table_setn(r->subprocess_env, "no-brotli", "1");
@@ -467,9 +488,19 @@ static int curltest_tweak_handler(request_rec *r)
                 "error_handler: response passed");
 
 cleanup:
+  if(close_conn) {
+    if(close_delay) {
+      b = apr_bucket_flush_create(c->bucket_alloc);
+      APR_BRIGADE_INSERT_TAIL(bb, b);
+      rv = ap_pass_brigade(r->output_filters, bb);
+      apr_brigade_cleanup(bb);
+      apr_sleep(close_delay);
+    }
+    r->connection->keepalive = AP_CONN_CLOSE;
+  }
   ap_log_rerror(APLOG_MARK, APLOG_TRACE1, rv, r,
-                "error_handler: request cleanup, r->status=%d, aborted=%d",
-                r->status, c->aborted);
+                "error_handler: request cleanup, r->status=%d, aborted=%d, "
+                "close=%d", r->status, c->aborted, close_conn);
   if(rv == APR_SUCCESS) {
     return OK;
   }

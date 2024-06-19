@@ -143,6 +143,35 @@ class TestVsFTPD:
         if os.path.exists(path):
             return os.remove(path)
 
+    # check with `tcpdump` if curl causes any TCP RST packets
+    @pytest.mark.skipif(condition=not Env.tcpdump(), reason="tcpdump not available")
+    def test_31_06_shutdownh_download(self, env: Env, vsftpds: VsFTPD, repeat):
+        docname = 'data-1k'
+        curl = CurlClient(env=env)
+        count = 1
+        url = f'ftp://{env.ftp_domain}:{vsftpds.port}/{docname}?[0-{count-1}]'
+        r = curl.ftp_ssl_get(urls=[url], with_stats=True, with_tcpdump=True)
+        r.check_stats(count=count, http_status=226)
+        # vsftp closes control connection without niceties,
+        # disregard RST packets it sent from its port to curl
+        assert len(r.tcpdump.stats_excluding(src_port=env.ftps_port)) == 0, f'Unexpected TCP RSTs packets'
+
+    # check with `tcpdump` if curl causes any TCP RST packets
+    @pytest.mark.skipif(condition=not Env.tcpdump(), reason="tcpdump not available")
+    def test_31_07_shutdownh_upload(self, env: Env, vsftpds: VsFTPD, repeat):
+        docname = 'upload-1k'
+        curl = CurlClient(env=env)
+        srcfile = os.path.join(env.gen_dir, docname)
+        dstfile = os.path.join(vsftpds.docs_dir, docname)
+        self._rmf(dstfile)
+        count = 1
+        url = f'ftp://{env.ftp_domain}:{vsftpds.port}/'
+        r = curl.ftp_ssl_upload(urls=[url], fupload=f'{srcfile}', with_stats=True, with_tcpdump=True)
+        r.check_stats(count=count, http_status=226)
+        # vsftp closes control connection without niceties,
+        # disregard RST packets it sent from its port to curl
+        assert len(r.tcpdump.stats_excluding(src_port=env.ftps_port)) == 0, f'Unexpected TCP RSTs packets'
+
     def check_downloads(self, client, srcfile: str, count: int,
                         complete: bool = True):
         for i in range(count):

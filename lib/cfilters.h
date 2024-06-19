@@ -223,6 +223,7 @@ struct Curl_cfilter {
   struct connectdata *conn;      /* the connection this filter belongs to */
   int sockindex;                 /* the index the filter is installed at */
   BIT(connected);                /* != 0 iff this filter is connected */
+  BIT(shutdown);                 /* != 0 iff this filter has shut down */
 };
 
 /* Default implementations for the type functions, implementing nop. */

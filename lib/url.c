@@ -556,19 +556,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
   return result;
 }
 
-static void conn_shutdown(struct Curl_easy *data)
-{
-  DEBUGASSERT(data);
-  infof(data, "Closing connection");
-
-  /* possible left-overs from the async name resolvers */
-  Curl_resolver_cancel(data);
-
-  Curl_conn_close(data, SECONDARYSOCKET);
-  Curl_conn_close(data, FIRSTSOCKET);
-}
-
-static void conn_free(struct Curl_easy *data, struct connectdata *conn)
+void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
 {
   size_t i;
 
@@ -620,11 +608,9 @@ static void conn_free(struct Curl_easy *data, struct connectdata *conn)
  *
  * This function MUST NOT reset state in the Curl_easy struct if that
  * isn't strictly bound to the life-time of *this* particular connection.
- *
  */
-
 void Curl_disconnect(struct Curl_easy *data,
-                     struct connectdata *conn, bool dead_connection)
+                     struct connectdata *conn, bool aborted)
 {
   /* there must be a connection to close */
   DEBUGASSERT(conn);
@@ -639,13 +625,14 @@ void Curl_disconnect(struct Curl_easy *data,
   DEBUGASSERT(!data->conn);
 
   DEBUGF(infof(data, "Curl_disconnect(conn #%"
-         CURL_FORMAT_CURL_OFF_T ", dead=%d)",
-         conn->connection_id, dead_connection));
+         CURL_FORMAT_CURL_OFF_T ", aborted=%d)",
+         conn->connection_id, aborted));
+
   /*
    * If this connection isn't marked to force-close, leave it open if there
    * are other users of it
    */
-  if(CONN_INUSE(conn) && !dead_connection) {
+  if(CONN_INUSE(conn) && !aborted) {
     DEBUGF(infof(data, "Curl_disconnect when inuse: %zu", CONN_INUSE(conn)));
     return;
   }
@@ -662,23 +649,10 @@ void Curl_disconnect(struct Curl_easy *data,
   Curl_http_auth_cleanup_negotiate(conn);
 
   if(conn->connect_only)
-    /* treat the connection as dead in CONNECT_ONLY situations */
-    dead_connection = TRUE;
+    /* treat the connection as aborted in CONNECT_ONLY situations */
+    aborted = TRUE;
 
-  /* temporarily attach the connection to this transfer handle for the
-     disconnect and shutdown */
-  Curl_attach_connection(data, conn);
-
-  if(conn->handler && conn->handler->disconnect)
-    /* This is set if protocol-specific cleanups should be made */
-    conn->handler->disconnect(data, conn, dead_connection);
-
-  conn_shutdown(data);
-
-  /* detach it again */
-  Curl_detach_connection(data);
-
-  conn_free(data, conn);
+  Curl_conncache_disconnect(data, conn, aborted);
 }
 
 /*
@@ -824,6 +798,7 @@ static bool prune_if_dead(struct connectdata *conn,
          * any time (HTTP/2 PING for example), the protocol handler needs
          * to install its own `connection_check` callback.
          */
+        DEBUGF(infof(data, "connection has input pending, not reusable"));
         dead = TRUE;
       }
       Curl_detach_connection(data);
@@ -881,8 +856,8 @@ static void prune_dead_connections(struct Curl_easy *data)
 
       /* connection previously removed from cache in prune_if_dead() */
 
-      /* disconnect it */
-      Curl_disconnect(data, pruned, TRUE);
+      /* disconnect it, do not treat as aborted */
+      Curl_disconnect(data, pruned, FALSE);
     }
     CONNCACHE_LOCK(data);
     data->state.conn_cache->last_cleanup = now;
@@ -1294,8 +1269,8 @@ ConnectionExists(struct Curl_easy *data,
       infof(data, "Multiplexed connection found");
     }
     else if(prune_if_dead(check, data)) {
-      /* disconnect it */
-      Curl_disconnect(data, check, TRUE);
+      /* disconnect it, do not treat as aborted */
+      Curl_disconnect(data, check, FALSE);
       continue;
     }
 
@@ -3333,7 +3308,7 @@ static void reuse_conn(struct Curl_easy *data,
   /* reuse init */
   existing->bits.reuse = TRUE; /* yes, we're reusing here */
 
-  conn_free(data, temp);
+  Curl_conn_free(data, temp);
 }
 
 /**
@@ -3678,7 +3653,7 @@ static CURLcode create_conn(struct Curl_easy *data,
     if(!connections_available) {
       infof(data, "No connections available.");
 
-      conn_free(data, conn);
+      Curl_conn_free(data, conn);
       *in_connect = NULL;
 
       result = CURLE_NO_CONNECTION_AVAILABLE;

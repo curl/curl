@@ -546,6 +546,9 @@ struct ConnectBits {
                          accept() */
   BIT(parallel_connect); /* set TRUE when a parallel connect attempt has
                             started (happy eyeballs) */
+  BIT(aborted); /* connection was aborted, e.g. in unclean state */
+  BIT(shutdown_handler); /* connection shutdown: handler shut down */
+  BIT(shutdown_filters); /* connection shutdown: filters shut down */
 };
 
 struct hostname {

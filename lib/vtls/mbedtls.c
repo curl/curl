@@ -1274,7 +1274,7 @@ static CURLcode mbedtls_shutdown(struct Curl_cfilter *cf,
 
   DEBUGASSERT(backend);
 
-  if(!backend->initialized || connssl->shutdown) {
+  if(!backend->initialized || cf->shutdown) {
     *done = TRUE;
     return CURLE_OK;
   }
@@ -1346,7 +1346,7 @@ static CURLcode mbedtls_shutdown(struct Curl_cfilter *cf,
   }
 
 out:
-  connssl->shutdown = (result || *done);
+  cf->shutdown = (result || *done);
   return result;
 }
 
@@ -1356,13 +1356,9 @@ static void mbedtls_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct mbed_ssl_backend_data *backend =
     (struct mbed_ssl_backend_data *)connssl->backend;
 
+  (void)data;
   DEBUGASSERT(backend);
   if(backend->initialized) {
-    if(!connssl->shutdown) {
-      bool done;
-      mbedtls_shutdown(cf, data, TRUE, &done);
-    }
-
     mbedtls_pk_free(&backend->pk);
     mbedtls_x509_crt_free(&backend->clicert);
     mbedtls_x509_crt_free(&backend->cacert);

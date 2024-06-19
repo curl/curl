@@ -159,6 +159,7 @@ struct transfer {
 
 static size_t transfer_count = 1;
 static struct transfer *transfers;
+static int forbid_reuse = 0;
 
 static struct transfer *get_transfer_for_easy(CURL *easy)
 {
@@ -239,6 +240,8 @@ static int setup(CURL *hnd, const char *url, struct transfer *t,
   curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 0L);
   curl_easy_setopt(hnd, CURLOPT_XFERINFOFUNCTION, my_progress_cb);
   curl_easy_setopt(hnd, CURLOPT_XFERINFODATA, t);
+  if(forbid_reuse)
+    curl_easy_setopt(hnd, CURLOPT_FORBID_REUSE, 1L);
 
   /* please be verbose */
   if(verbose) {
@@ -288,13 +291,16 @@ int main(int argc, char *argv[])
   int http_version = CURL_HTTP_VERSION_2_0;
   int ch;
 
-  while((ch = getopt(argc, argv, "ahm:n:A:F:P:V:")) != -1) {
+  while((ch = getopt(argc, argv, "afhm:n:A:F:P:V:")) != -1) {
     switch(ch) {
     case 'h':
       usage(NULL);
       return 2;
     case 'a':
       abort_paused = 1;
+      break;
+    case 'f':
+      forbid_reuse = 1;
       break;
     case 'm':
       max_parallel = (size_t)strtol(optarg, NULL, 10);

@@ -1080,7 +1080,7 @@ static CURLcode bearssl_shutdown(struct Curl_cfilter *cf,
   CURLcode result;
 
   DEBUGASSERT(backend);
-  if(!backend->active || connssl->shutdown) {
+  if(!backend->active || cf->shutdown) {
     *done = TRUE;
     return CURLE_OK;
   }
@@ -1101,7 +1101,7 @@ static CURLcode bearssl_shutdown(struct Curl_cfilter *cf,
   else
     CURL_TRC_CF(data, cf, "shutdown error: %d", result);
 
-  connssl->shutdown = (result || *done);
+  cf->shutdown = (result || *done);
   return result;
 }
 
@@ -1112,15 +1112,10 @@ static void bearssl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     (struct bearssl_ssl_backend_data *)connssl->backend;
   size_t i;
 
+  (void)data;
   DEBUGASSERT(backend);
 
-  if(backend->active) {
-    if(!connssl->shutdown) {
-      bool done;
-      bearssl_shutdown(cf, data, TRUE, &done);
-    }
-    backend->active = FALSE;
-  }
+  backend->active = FALSE;
   if(backend->anchors) {
     for(i = 0; i < backend->anchors_len; ++i)
       free(backend->anchors[i].dn.data);

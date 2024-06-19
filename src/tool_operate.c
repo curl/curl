@@ -2579,6 +2579,9 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
     }
     start = tvnow();
 #ifdef DEBUGBUILD
+    if(getenv("CURL_FORBID_REUSE"))
+      (void)curl_easy_setopt(per->curl, CURLOPT_FORBID_REUSE, 1L);
+
     if(global->test_event_based)
       result = curl_easy_perform_ev(per->curl);
     else
