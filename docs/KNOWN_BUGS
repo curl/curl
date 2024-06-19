@@ -79,6 +79,7 @@ problems may have been fixed or changed somewhat since this was written.
  11. Internals
  11.1 gssapi library name + version is missing in curl_version_info()
  11.2 error buffer not set if connection to multiple addresses fails
+ 11.3 TFTP tests fail on OpenBSD
  11.4 HTTP test server 'connection-monitor' problems
  11.5 Connection information when using TCP Fast Open
 
@@ -475,6 +476,13 @@ problems may have been fixed or changed somewhat since this was written.
  when you only have IPv4 connectivity. libcurl fails with
  CURLE_COULDNT_CONNECT, but the error buffer set by CURLOPT_ERRORBUFFER
  remains empty. Issue: https://github.com/curl/curl/issues/544
+
+11.3 TFTP tests fail on OpenBSD
+
+ When adding an OpenBSD job with tests to GHA, some tests consistently fail
+ to run.
+
+ See https://github.com/curl/curl/issues/13623
 
 11.4 HTTP test server 'connection-monitor' problems
 
