@@ -1880,9 +1880,10 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
   char buf[1024];
   int nread, err;
   unsigned long sslerr;
+  size_t i;
 
   DEBUGASSERT(octx);
-  if(!octx->ssl || connssl->shutdown) {
+  if(!octx->ssl || cf->shutdown) {
     *done = TRUE;
     goto out;
   }
@@ -1893,14 +1894,19 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
     /* We have not started the shutdown from our side yet. Check
      * if the server already sent us one. */
     ERR_clear_error();
-    nread = SSL_read(octx->ssl, buf, (int)sizeof(buf));
+    for(i = 0; i < 10; ++i) {
+      nread = SSL_read(octx->ssl, buf, (int)sizeof(buf));
+      CURL_TRC_CF(data, cf, "SSL shutdown not sent, read -> %d", nread);
+      if(nread <= 0)
+        break;
+    }
     err = SSL_get_error(octx->ssl, nread);
     if(!nread && err == SSL_ERROR_ZERO_RETURN) {
       bool input_pending;
       /* Yes, it did. */
       if(!send_shutdown) {
-        connssl->shutdown = TRUE;
         CURL_TRC_CF(data, cf, "SSL shutdown received, not sending");
+        *done = TRUE;
         goto out;
       }
       else if(!cf->next->cft->is_alive(cf->next, data, &input_pending)) {
@@ -1908,59 +1914,65 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
          * seems not interested to see our close notify, so do not
          * send it. We are done. */
         connssl->peer_closed = TRUE;
-        connssl->shutdown = TRUE;
         CURL_TRC_CF(data, cf, "peer closed connection");
+        *done = TRUE;
         goto out;
       }
     }
+    if(send_shutdown && SSL_shutdown(octx->ssl) == 1) {
+      CURL_TRC_CF(data, cf, "SSL shutdown finished");
+      *done = TRUE;
+      goto out;
+    }
   }
 
-  if(send_shutdown && SSL_shutdown(octx->ssl) == 1) {
-    CURL_TRC_CF(data, cf, "SSL shutdown finished");
+  /* SSL should now have started the shutdown from our side. Since it
+   * was not complete, we are lacking the close notify from the server. */
+  for(i = 0; i < 10; ++i) {
+    ERR_clear_error();
+    nread = SSL_read(octx->ssl, buf, (int)sizeof(buf));
+    CURL_TRC_CF(data, cf, "SSL shutdown read -> %d", nread);
+    if(nread <= 0)
+      break;
+  }
+  if(SSL_get_shutdown(octx->ssl) & SSL_RECEIVED_SHUTDOWN) {
+    CURL_TRC_CF(data, cf, "SSL shutdown received, finished");
     *done = TRUE;
     goto out;
   }
-  else {
-    size_t i;
-    /* SSL should now have started the shutdown from our side. Since it
-     * was not complete, we are lacking the close notify from the server. */
-    for(i = 0; i < 10; ++i) {
-      ERR_clear_error();
-      nread = SSL_read(octx->ssl, buf, (int)sizeof(buf));
-      if(nread <= 0)
-        break;
-    }
-    err = SSL_get_error(octx->ssl, nread);
-    switch(err) {
-    case SSL_ERROR_ZERO_RETURN: /* no more data */
-      CURL_TRC_CF(data, cf, "SSL shutdown received");
-      *done = TRUE;
-      break;
-    case SSL_ERROR_NONE: /* just did not get anything */
-    case SSL_ERROR_WANT_READ:
-      /* SSL has send its notify and now wants to read the reply
-       * from the server. We are not really interested in that. */
-      CURL_TRC_CF(data, cf, "SSL shutdown sent, want receive");
-      connssl->io_need = CURL_SSL_IO_NEED_RECV;
-      break;
-    case SSL_ERROR_WANT_WRITE:
-      CURL_TRC_CF(data, cf, "SSL shutdown send blocked");
-      connssl->io_need = CURL_SSL_IO_NEED_SEND;
-      break;
-    default:
-      sslerr = ERR_get_error();
-      CURL_TRC_CF(data, cf, "SSL shutdown, error: '%s', errno %d",
-                  (sslerr ?
-                   ossl_strerror(sslerr, buf, sizeof(buf)) :
-                   SSL_ERROR_to_str(err)),
-                  SOCKERRNO);
-      result = CURLE_RECV_ERROR;
-      break;
-    }
+  err = SSL_get_error(octx->ssl, nread);
+  switch(err) {
+  case SSL_ERROR_ZERO_RETURN: /* no more data */
+    CURL_TRC_CF(data, cf, "SSL shutdown not received, but closed");
+    *done = TRUE;
+    break;
+  case SSL_ERROR_NONE: /* just did not get anything */
+  case SSL_ERROR_WANT_READ:
+    /* SSL has send its notify and now wants to read the reply
+     * from the server. We are not really interested in that. */
+    CURL_TRC_CF(data, cf, "SSL shutdown sent, want receive");
+    connssl->io_need = CURL_SSL_IO_NEED_RECV;
+    break;
+  case SSL_ERROR_WANT_WRITE:
+    CURL_TRC_CF(data, cf, "SSL shutdown send blocked");
+    connssl->io_need = CURL_SSL_IO_NEED_SEND;
+    break;
+  default:
+    /* Server seems to have closed the connection without sending us
+     * a close notify. */
+    sslerr = ERR_get_error();
+    CURL_TRC_CF(data, cf, "SSL shutdown, ignore recv error: '%s', errno %d",
+                (sslerr ?
+                 ossl_strerror(sslerr, buf, sizeof(buf)) :
+                 SSL_ERROR_to_str(err)),
+                SOCKERRNO);
+    *done = TRUE;
+    result = CURLE_OK;
+    break;
   }
 
 out:
-  connssl->shutdown = (result || *done);
+  cf->shutdown = (result || *done);
   return result;
 }
 
@@ -1973,14 +1985,6 @@ static void ossl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   DEBUGASSERT(octx);
 
   if(octx->ssl) {
-    /* Send the TLS shutdown if have not done so already and are still
-     * connected *and* if the peer did not already close the connection. */
-    if(cf->connected && !connssl->shutdown &&
-       cf->next && cf->next->connected && !connssl->peer_closed) {
-      bool done;
-      (void)ossl_shutdown(cf, data, TRUE, &done);
-    }
-
     SSL_free(octx->ssl);
     octx->ssl = NULL;
   }

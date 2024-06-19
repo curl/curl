@@ -186,8 +186,11 @@ CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done)
   struct curltime now;
 
   DEBUGASSERT(data->conn);
-  /* it is valid to call that without filters being present */
+  /* Get the first connected filter that is not shut down already. */
   cf = data->conn->cfilter[sockindex];
+  while(cf && (!cf->connected || cf->shutdown))
+    cf = cf->next;
+
   if(!cf) {
     *done = TRUE;
     return CURLE_OK;
@@ -209,17 +212,20 @@ CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done)
   }
 
   while(cf) {
-    bool cfdone = FALSE;
-    result = cf->cft->do_shutdown(cf, data, &cfdone);
-    if(result) {
-      CURL_TRC_CF(data, cf, "shut down failed with %d", result);
-      return result;
+    if(!cf->shutdown) {
+      bool cfdone = FALSE;
+      result = cf->cft->do_shutdown(cf, data, &cfdone);
+      if(result) {
+        CURL_TRC_CF(data, cf, "shut down failed with %d", result);
+        return result;
+      }
+      else if(!cfdone) {
+        CURL_TRC_CF(data, cf, "shut down not done yet");
+        return CURLE_OK;
+      }
+      CURL_TRC_CF(data, cf, "shut down successfully");
+      cf->shutdown = TRUE;
     }
-    else if(!cfdone) {
-      CURL_TRC_CF(data, cf, "shut down not done yet");
-      return CURLE_OK;
-    }
-    CURL_TRC_CF(data, cf, "shut down successfully");
     cf = cf->next;
   }
   *done = (!result);
@@ -501,6 +507,9 @@ void Curl_conn_cf_adjust_pollset(struct Curl_cfilter *cf,
 {
   /* Get the lowest not-connected filter, if there are any */
   while(cf && !cf->connected && cf->next && !cf->next->connected)
+    cf = cf->next;
+  /* Skip all filters that have already shut down */
+  while(cf && cf->shutdown)
     cf = cf->next;
   /* From there on, give all filters a chance to adjust the pollset.
    * Lower filters are called later, so they may override */

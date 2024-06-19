@@ -123,3 +123,16 @@ greater. There is a number of debug levels, refer to *openldap.c* comments.
 
 Used to influence the buffer chunk size used for WebSocket encoding and
 decoding.
+
+## CURL_FORBID_REUSE
+
+Used to set the CURLOPT_FORBID_REUSE flag on each transfer initiated
+by the curl command line tool. The value of the environment variable
+does not matter.
+
+## CURL_GRACEFUL_SHUTDOWN
+
+Make a blocking, graceful shutdown of all remaining connections when
+a multi handle is destroyed. This implicitly triggers for easy handles
+that are run via easy_perform. The value of the environment variable
+gives the shutdown timeout in milliseconds.

@@ -27,6 +27,7 @@
 import logging
 import os
 import re
+import shutil
 import socket
 import subprocess
 import sys
@@ -203,6 +204,8 @@ class EnvConfig:
             except Exception as e:
                 self.vsftpd = None
 
+        self._tcpdump = shutil.which('tcpdump')
+
     @property
     def httpd_version(self):
         if self._httpd_version is None and self.apxs is not None:
@@ -263,6 +266,10 @@ class EnvConfig:
     @property
     def vsftpd_version(self):
         return self._vsftpd_version
+
+    @property
+    def tcpdmp(self) -> Optional[str]:
+        return self._tcpdump
 
 
 class Env:
@@ -382,6 +389,10 @@ class Env:
     @staticmethod
     def vsftpd_version() -> str:
         return Env.CONFIG.vsftpd_version
+
+    @staticmethod
+    def tcpdump() -> Optional[str]:
+        return Env.CONFIG.tcpdmp
 
     def __init__(self, pytestconfig=None):
         self._verbose = pytestconfig.option.verbose \

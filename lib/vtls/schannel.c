@@ -2482,7 +2482,7 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
     (struct schannel_ssl_backend_data *)connssl->backend;
   CURLcode result = CURLE_OK;
 
-  if(connssl->shutdown) {
+  if(cf->shutdown) {
     *done = TRUE;
     return CURLE_OK;
   }
@@ -2499,7 +2499,7 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
           connssl->peer.hostname, connssl->peer.port);
   }
 
-  if(!backend->ctxt || connssl->shutdown) {
+  if(!backend->ctxt || cf->shutdown) {
     *done = TRUE;
     goto out;
   }
@@ -2606,7 +2606,7 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
   }
 
 out:
-  connssl->shutdown = (result || *done);
+  cf->shutdown = (result || *done);
   return result;
 }
 
@@ -2618,13 +2618,6 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   DEBUGASSERT(data);
   DEBUGASSERT(backend);
-
-  if(backend->cred && backend->ctxt &&
-     cf->connected && !connssl->shutdown &&
-     cf->next && cf->next->connected && !connssl->peer_closed) {
-    bool done;
-    (void)schannel_shutdown(cf, data, TRUE, &done);
-  }
 
   /* free SSPI Schannel API security context handle */
   if(backend->ctxt) {

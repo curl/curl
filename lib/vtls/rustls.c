@@ -742,7 +742,7 @@ cr_shutdown(struct Curl_cfilter *cf,
   size_t i;
 
   DEBUGASSERT(backend);
-  if(!backend->conn || connssl->shutdown) {
+  if(!backend->conn || cf->shutdown) {
     *done = TRUE;
     goto out;
   }
@@ -793,7 +793,7 @@ cr_shutdown(struct Curl_cfilter *cf,
   }
 
 out:
-  connssl->shutdown = (result || *done);
+  cf->shutdown = (result || *done);
   return result;
 }
 
@@ -804,16 +804,9 @@ cr_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct rustls_ssl_backend_data *backend =
     (struct rustls_ssl_backend_data *)connssl->backend;
 
+  (void)data;
   DEBUGASSERT(backend);
   if(backend->conn) {
-    /* Send the TLS shutdown if have not done so already and are still
-     * connected *and* if the peer did not already close the connection. */
-    if(cf->connected && !connssl->shutdown &&
-       cf->next && cf->next->connected && !connssl->peer_closed) {
-      bool done;
-      (void)cr_shutdown(cf, data, TRUE, &done);
-    }
-
     rustls_connection_free(backend->conn);
     backend->conn = NULL;
   }

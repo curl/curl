@@ -148,6 +148,8 @@ struct Curl_multi {
 
   long max_total_connections; /* if >0, a fixed limit of the maximum number
                                  of connections in total */
+  long max_shutdown_connections; /* if >0, a fixed limit of the maximum number
+                                 of connections in shutdown handling */
 
   /* timer callback and user data pointer for the *socket() API */
   curl_multi_timer_callback timer_cb;
