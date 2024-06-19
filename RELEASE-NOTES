@@ -4,7 +4,7 @@ curl and libcurl 8.8.1
  Command line options:         263
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3194
+ Contributors:                 3196
 
 This release includes the following changes:
 
@@ -13,6 +13,7 @@ This release includes the following changes:
  o curl: add --vlan-priority [107]
  o curl: add -w '%{num_retries} [65]
  o gnutls: support CA caching [90]
+ o mbedtls: support CURLOPT_CERTINFO [116]
  o noproxy: patterns need to be comma separated [75]
  o socket: support binding to interface *AND* IP [80]
  o tcpkeepalive: add CURLOPT_TCP_KEEPCNT and --keepalive-cnt [103]
@@ -32,6 +33,7 @@ This release includes the following bugfixes:
  o cd2nroff: use an empty "##" to signal end of .IP sequence [56]
  o cf-socket: improve SO_SNDBUF update for Winsock [27]
  o cfilters: make Curl_conn_connect always assign 'done' [60]
+ o cmake: add CURL_USE_GSASL option with detection + CI test [133]
  o cmake: allow `ENABLE_CURLDEBUG=OFF` with `ENABLE_DEBUG=ON` [26]
  o cmake: allow SOVERSION override with `CURL_LIBCURL_SOVERSION` [120]
  o cmake: always build unit tests with the `testdeps` target [20]
@@ -41,6 +43,7 @@ This release includes the following bugfixes:
  o cmake: fix brotli lib order [3]
  o cmake: fix building in unity mode [4]
  o cmake: fix building with both md4 and md5 in unity mode [13]
+ o cmake: fix quotes when appending multiple options (SecureTransport) [139]
  o cmake: fix test 1013 with websockets enabled and no TLS [47]
  o cmake: stop setting SOVERSION for the static lib target [127]
  o cmake: use `APPLE` instead of `CMAKE_SYSTEM_NAME` string [24]
@@ -60,6 +63,7 @@ This release includes the following bugfixes:
  o curl_url_set.md: libcurl only parses :// URLs [48]
  o CURLOPT_CONNECTTIMEOUT*: clarify, document the milliseond version [105]
  o CURLOPT_ECH.md: remove repeated 'if' [109]
+ o CURLOPT_NETRC.md: clarify what it does on Windows [140]
  o DISTROS: add a link to the list archive [22]
  o DISTROS: add MSYS2 (native) links [100]
  o Dockerfile: update debian:bookworm-slim to 84d83b2 [121]
@@ -143,7 +147,10 @@ This release includes the following bugfixes:
  o windows: fix UWP builds, add GHA job [79]
  o winsock: move SO_SNDBUF update into cf-socket [53]
  o x509asn1: add some common ECDSA OIDs [67]
+ o x509asn1: ASN1tostr() should fail when 'constructed' is set [125]
  o x509asn1: fallback to dotted OID representation [69]
+ o x509asn1: make Curl_extract_certinfo store error message [136]
+ o x509asn1: remove two static variables [126]
 
 This release includes the following known bugs:
 
@@ -159,19 +166,19 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alejandro R. Sedeño, alervd on github, Alexander Shtuchkin, Andy Pan,
-  Aurélien Pierre, Ayesh Karunaratne, Bo Anderson, Christian Heusel,
-  Christian Schmitz, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
-  dependabot[bot], dogma, Dorian Craps, edmcln on github, Eli Schwartz,
-  Elliott Balsley, fds242 on github, Guilherme Puida, Harry Sintonen,
-  James Abbatiello, Jan Venekamp, Jay Guerette, Jiang Wenjian,
+  Aurélien Pierre, Ayesh Karunaratne, Bo Anderson, brian m. carlson,
+  Christian Heusel, Christian Schmitz, Dan Fandrich, Daniel Gustafsson,
+  Daniel Stenberg, dependabot[bot], dogma, Dorian Craps, edmcln on github,
+  Eli Schwartz, Elliott Balsley, fds242 on github, Guilherme Puida,
+  Harry Sintonen, James Abbatiello, Jan Venekamp, Jay Guerette, Jiang Wenjian,
   Jonathan Matthews, Joseph Chen, Kai Pastor, kartatz, Keerthi Timmaraju,
   Lee Li, Luke Hamburg, Marcel Raad, Matthias Gatto, Matthieu Baerts,
   Matt Jolly, Morgan Willcock, Olivier Bonaventure, Orgad Shaneh,
   Patrick Monnerat, Pavel Pavlov, pszlazak on github, RainRat, Ray Satiro,
   renovate[bot], Ryan Carsten Schmidt, Samuel Chiang, Sebastian Andersson,
-  Sergey Bronnikov, Stefan Eissing, Stephen Farrell, Tatsuhiro Tsujikawa,
-  Viktor Szakats, vvb2060, Yedaya Katsman
-  (55 contributors)
+  Sergey Bronnikov, Sergey Markelov, Stefan Eissing, Stephen Farrell,
+  Tal Regev, Tatsuhiro Tsujikawa, Viktor Szakats, vvb2060, Yedaya Katsman, z2_
+  (59 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -290,6 +297,7 @@ References to bug reports and discussions on issues:
  [113] = https://curl.se/bug/?i=13951
  [114] = https://curl.se/bug/?i=13428
  [115] = https://github.com/curl/everything-curl/issues/456
+ [116] = https://curl.se/bug/?i=13113
  [117] = https://curl.se/bug/?i=13302
  [118] = https://curl.se/bug/?i=13695
  [119] = https://curl.se/bug/?i=13898
@@ -298,11 +306,17 @@ References to bug reports and discussions on issues:
  [122] = https://curl.se/bug/?i=13941
  [123] = https://curl.se/bug/?i=13940
  [124] = https://curl.se/bug/?i=13908
+ [125] = https://curl.se/bug/?i=13972
+ [126] = https://curl.se/bug/?i=13971
  [127] = https://curl.se/bug/?i=13936
  [128] = https://curl.se/bug/?i=13930
  [129] = https://curl.se/bug/?i=864
  [130] = https://curl.se/bug/?i=13897
  [132] = https://curl.se/bug/?i=13928
+ [133] = https://curl.se/bug/?i=13948
  [134] = https://curl.se/bug/?i=13927
  [135] = https://curl.se/bug/?i=13929
+ [136] = https://curl.se/bug/?i=13959
  [137] = https://curl.se/mail/lib-2024-06/0033.html
+ [139] = https://curl.se/bug/?i=13953
+ [140] = https://curl.se/bug/?i=13956
