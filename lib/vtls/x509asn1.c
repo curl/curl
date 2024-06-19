@@ -599,7 +599,7 @@ static CURLcode ASN1tostr(struct dynbuf *store,
 {
   CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
   if(elem->constructed)
-    return CURLE_OK; /* No conversion of structured elements. */
+    return result; /* No conversion of structured elements. */
 
   if(!type)
     type = elem->tag;   /* Type not forced: use element tag as type. */
