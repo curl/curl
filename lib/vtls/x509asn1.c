@@ -695,6 +695,11 @@ static CURLcode encodeDN(struct dynbuf *store, struct Curl_asn1Element *dn)
 
       str = Curl_dyn_ptr(&temp);
 
+      if(!str) {
+        result = CURLE_BAD_FUNCTION_ARGUMENT;
+        goto error;
+      }
+
       /* Encode delimiter.
          If attribute has a short uppercase name, delimiter is ", ". */
       for(p3 = str; ISUPPER(*p3); p3++)
