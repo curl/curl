@@ -2915,7 +2915,7 @@ const struct Curl_ssl Curl_ssl_sectransp = {
   NULL,                               /* disassociate_connection */
   sectransp_recv,                     /* recv decrypted data */
   sectransp_send,                     /* send data to encrypt */
-  NULL,                               /* get_tls_server_end_point */
+  NULL,                               /* get_channel_binding */
 };
 
 #ifdef __GNUC__

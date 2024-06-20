@@ -5055,7 +5055,7 @@ out:
   return nread;
 }
 
-static CURLcode ossl_get_tls_server_end_point(struct Curl_easy *data,
+static CURLcode ossl_get_channel_binding(struct Curl_easy *data,
                                               int sockindex, char **binding,
                                               size_t *len)
 {
@@ -5332,7 +5332,7 @@ const struct Curl_ssl Curl_ssl_openssl = {
   NULL,                     /* remote of data from this connection */
   ossl_recv,                /* recv decrypted data */
   ossl_send,                /* send data to encrypt */
-  ossl_get_tls_server_end_point /* get_tls_server_end_point */
+  ossl_get_channel_binding  /* get_channel_binding */
 };
 
 #endif /* USE_OPENSSL */

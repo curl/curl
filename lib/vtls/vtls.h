@@ -189,7 +189,7 @@ bool Curl_ssl_false_start(struct Curl_easy *data);
  * If getting the channel binding is not supported, *binding will be set to
  * NULL.
  */
-CURLcode Curl_ssl_get_tls_server_end_point(struct Curl_easy *data,
+CURLcode Curl_ssl_get_channel_binding(struct Curl_easy *data,
                                            int sockindex, char **binding,
                                            size_t *len);
 

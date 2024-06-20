@@ -749,12 +749,12 @@ out:
   return CURLE_OK;
 }
 
-CURLcode Curl_ssl_get_tls_server_end_point(struct Curl_easy *data,
+CURLcode Curl_ssl_get_channel_binding(struct Curl_easy *data,
                                            int sockindex, char **binding,
                                            size_t *len)
 {
-  if(Curl_ssl->get_tls_server_end_point)
-    return Curl_ssl->get_tls_server_end_point(data, sockindex, binding, len);
+  if(Curl_ssl->get_channel_binding)
+    return Curl_ssl->get_channel_binding(data, sockindex, binding, len);
   *binding = NULL;
   *len = 0;
   return CURLE_OK;
@@ -1349,7 +1349,7 @@ static const struct Curl_ssl Curl_ssl_multi = {
   NULL,                              /* disassociate_connection */
   multissl_recv_plain,               /* recv decrypted data */
   multissl_send_plain,               /* send data to encrypt */
-  NULL,                              /* get_tls_server_end_point */
+  NULL,                              /* get_channel_binding */
 };
 
 const struct Curl_ssl *Curl_ssl =
