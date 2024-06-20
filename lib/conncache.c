@@ -974,7 +974,7 @@ static void connc_disconnect(struct Curl_easy *data,
     data = connc->closure_handle;
 
   /* the transfer must be detached from the connection */
-  DEBUGASSERT(!data->conn);
+  DEBUGASSERT(data && !data->conn);
 
   if(connc && connc->multi && connc->multi->socket_cb) {
     unsigned int i;
