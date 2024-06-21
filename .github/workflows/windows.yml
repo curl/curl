@@ -421,7 +421,7 @@ jobs:
   msvc:
     name: 'msvc (${{ matrix.arch }}, ${{ matrix.plat }}, ${{ matrix.name }})'
     runs-on: windows-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
       VCPKG_DISABLE_METRICS: '1'
     strategy:
@@ -429,26 +429,26 @@ jobs:
         include:
           # name should be unique and without special chars. It creates a folder with that name for the cache.
         - name: 'schannel'
-          install: 'zstd zlib nghttp2 libssh2[core,zlib]'
+          install: 'brotli libpsl zstd zlib pkgconf gsasl nghttp2 libssh2[core,zlib]'
           arch: 'x64'
           plat: 'windows'
           type: 'Debug'
-          tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
-          config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=ON  -DCURL_USE_SCHANNEL=ON  -DCURL_ZSTD=ON -DUSE_NGHTTP2=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON'
+          tflags: '~1516 ~2301 ~2302 ~2303 ~2307 ~165 ~1448 ~2046 ~2047'
+          config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=ON  -DCURL_USE_SCHANNEL=ON  -DCURL_BROTLI=ON -DCURL_USE_LIBPSL=ON -DCURL_ZSTD=ON -DUSE_NGHTTP2=ON -DCURL_USE_GSASL=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DUSE_WIN32_IDN=ON'
         - name: 'openssl'
-          install: 'zstd zlib nghttp2 nghttp3 openssl libssh2'
+          install: 'brotli libpsl zstd zlib pkgconf gsasl nghttp2 nghttp3 openssl libssh2'
           arch: 'x64'
           plat: 'windows'
           type: 'Debug'
           tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
-          config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_ZSTD=ON -DUSE_NGHTTP2=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON'
+          config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_USE_LIBPSL=ON -DCURL_ZSTD=ON -DUSE_NGHTTP2=ON -DCURL_USE_GSASL=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DUSE_LIBIDN2=ON -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON'
         - name: 'no ssl'
-          install: 'zstd zlib'
+          install: 'brotli libpsl zstd zlib'
           arch: 'x64'
           plat: 'windows'
           type: 'Debug'
           tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
-          config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_ZSTD=ON -DHTTP_ONLY=ON'
+          config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_USE_LIBPSL=ON -DCURL_ZSTD=ON -DHTTP_ONLY=ON'
       fail-fast: false
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
@@ -469,7 +469,7 @@ jobs:
           vcpkg/bootstrap-vcpkg.sh -disableMetrics
 
       - name: 'vcpkg build'
-        timeout-minutes: 10
+        timeout-minutes: 25
         shell: bash
         run: |
           export VCPKG_ROOT="$PWD/vcpkg"
