@@ -163,11 +163,11 @@ void Curl_printable_address(const struct Curl_addrinfo *ai, char *buf,
  */
 static size_t
 create_hostcache_id(const char *name,
-                    size_t nlen, /* 0 or actual name length */
+                    size_t len, /* name length */
                     int port, char *ptr, size_t buflen)
 {
-  size_t len = nlen ? nlen : strlen(name);
   DEBUGASSERT(buflen >= MAX_HOSTCACHE_LEN);
+  DEBUGASSERT(len);
   if(len > (buflen - 7))
     len = buflen - 7;
   /* store and lower case the name */
@@ -278,20 +278,36 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
 {
   struct Curl_dns_entry *dns = NULL;
   char entry_id[MAX_HOSTCACHE_LEN];
+  size_t hostlen = strlen(hostname);
+  bool portwildcard = FALSE;
 
   /* Create an entry id, based upon the hostname and port */
-  size_t entry_len = create_hostcache_id(hostname, 0, port,
+  size_t entry_len = create_hostcache_id(hostname, hostlen, port,
                                          entry_id, sizeof(entry_id));
 
   /* See if it's already in our dns cache */
   dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len + 1);
 
-  /* No entry found in cache, check if we might have a wildcard entry */
+  /* No entry found in cache, check if we have a wildcard hostname */
   if(!dns && data->state.wildcard_resolve) {
     entry_len = create_hostcache_id("*", 1, port, entry_id, sizeof(entry_id));
-
-    /* See if it's already in our dns cache */
     dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len + 1);
+
+    /* check if we have a hostname + wildcard port */
+    if(!dns) {
+      entry_len = create_hostcache_id(hostname, hostlen, -1,
+                                      entry_id, sizeof(entry_id));
+      dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len + 1);
+
+      /* check if we have wildcard hostname + wildcard port */
+      if(!dns) {
+        entry_len = create_hostcache_id("*", 1, -1,
+                                        entry_id, sizeof(entry_id));
+        dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len + 1);
+      }
+      if(dns)
+        portwildcard = TRUE;
+    }
   }
 
   if(dns && (data->set.dns_cache_timeout != -1)) {
@@ -332,6 +348,25 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
       infof(data, "Hostname in DNS cache doesn't have needed family, zapped");
       dns = NULL; /* the memory deallocation is being handled by the hash */
       Curl_hash_delete(data->dns.hostcache, entry_id, entry_len + 1);
+    }
+  }
+  if(dns && portwildcard) {
+    /* this matched a port wildcard; update the port number fields to
+       correspond to what was asked for */
+    struct Curl_addrinfo *ai = dns->addr;
+    dns->hostport = port;
+    while(ai) {
+#ifdef USE_IPV6
+      if(ai->ai_family == AF_INET6) {
+        struct sockaddr_in6 *si6 = (struct sockaddr_in6 *)ai->ai_addr;
+        si6->sin6_port = htons((unsigned short)port);
+      }
+#endif
+      if(ai->ai_family == AF_INET) {
+        struct sockaddr_in *si4 = (struct sockaddr_in *)ai->ai_addr;
+        si4->sin_port = htons((unsigned short)port);
+      }
+      ai = ai->ai_next;
     }
   }
   return dns;
@@ -1185,11 +1220,18 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       hlen = host_end - host_begin;
 
       port_ptr = host_end + 1;
-      tmp_port = strtoul(port_ptr, &end_ptr, 10);
-      if(tmp_port > USHRT_MAX || end_ptr == port_ptr || *end_ptr != ':')
-        goto err;
+      if(!strncmp("*:", port_ptr, 2)) {
+        data->state.wildcard_resolve = true;
+        port = -1; /* any port number */
+        end_ptr = &port_ptr[1];
+      }
+      else {
+        tmp_port = strtoul(port_ptr, &end_ptr, 10);
+        if(tmp_port > USHRT_MAX || end_ptr == port_ptr || *end_ptr != ':')
+          goto err;
 
-      port = (int)tmp_port;
+        port = (int)tmp_port;
+      }
 #if !defined(CURL_DISABLE_VERBOSE_STRINGS)
       addresses = end_ptr + 1;
 #endif

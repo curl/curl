@@ -60,6 +60,11 @@ entries added with `+HOST:...` times out just like ordinary DNS cache entries.
 If the DNS cache already has an entry for the given host+port pair, the new
 entry overrides the former one.
 
+Starting in version 8.10.0, the port number can be specified as an asterisk
+(`*`) to make the address used for the specified hostname for any port number.
+A resolve entry for a fixed port number still has priority if existing. Also
+works if the hostname is a wildcard.
+
 An ADDRESS provided by this option is only used if not restricted by the
 setting of CURLOPT_IPRESOLVE(3) to a different IP version.
 

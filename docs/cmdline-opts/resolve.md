@@ -28,6 +28,11 @@ By specifying `*` as host you can tell curl to resolve any host and specific
 port pair to the specified address. Wildcard is resolved last so any --resolve
 with a specific host and port is used first.
 
+Starting in curl version 8.10.0, the port number can be specified as an
+asterisk (`*`) to make the address used for the specified hostname for any
+port number. A resolve entry for a fixed port number still has priority if
+existing. Also works if the hostname is a wildcard.
+
 The provided address set by this option is used even if --ipv4 or --ipv6 is
 set to make curl use another IP version.
 
