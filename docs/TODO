@@ -150,6 +150,7 @@
  18. Command line tool
  18.1 sync
  18.2 glob posts
+ 18.3 -h option
  18.4 --proxycommand
  18.5 UTF-8 filenames in Content-Disposition
  18.6 Option to make -Z merge lined based outputs on stdout
@@ -1036,6 +1037,12 @@
 
  Globbing support for -d and -F, as in 'curl -d "name=foo[0-9]" URL'.
  This is easily scripted though.
+
+18.3 -h option
+
+ Support "curl -h --insecure" etc to output the manpage section for the
+ --insecure command line option in the terminal. Should be possible to work
+ with either long or short versions of command line options.
 
 18.4 --proxycommand
 
