@@ -28,6 +28,7 @@
  1.11 minimize dependencies with dynamically loaded modules
  1.12 updated DNS server while running
  1.13 c-ares and CURLOPT_OPENSOCKETFUNCTION
+ 1.14 connect to multiple IPs in parallel
  1.15 Monitor connections in the connection pool
  1.16 Try to URL encode given URL
  1.17 Add support for IRIs
@@ -300,6 +301,17 @@
  sockets.
 
  See https://github.com/curl/curl/issues/2734
+
+1.14 connect to multiple IPs in parallel
+
+ curl currently implements the happy eyeball algorithm for connecting to the
+ IPv4 and IPv6 alternatives for a host in parallel, sticking with the
+ connection that "wins". We could implement a similar algorithm per individual
+ IP family as well when there are multiple available addresses: start with the
+ first address, then start a second attempt N milliseconds after and then a
+ third another N milliseconds later. That way there would be less waiting when
+ the first IP has problems. It also improves the connection timeout value
+ handling for multiple address situations.
 
 1.15 Monitor connections in the connection pool
 
