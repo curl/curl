@@ -28,3 +28,13 @@ original hostname and port number.
 A hostname specified to this option is compared as a string, so it needs to
 match the name used in request URL. It can be either numerical such as
 `127.0.0.1` or the full host name such as `example.org`.
+
+Example: redirect connects from the example.com hostname to 127.0.0.1
+independently of port number:
+
+    curl --connect-to example.com::127.0.0.1: https://example.com/
+
+Example: redirect connects from all hostnames to 127.0.0.1 independently of
+port number:
+
+    curl --connect-to ::127.0.0.1: http://example.com/
