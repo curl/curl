@@ -13,12 +13,14 @@ See-also:
   - output
 Example:
   - --dump-header store.txt $URL
+  - --dump-header - $URL -o save
 ---
 
 # `--dump-header`
 
 Write the received protocol headers to the specified file. If no headers are
-received, the use of this option creates an empty file.
+received, the use of this option creates an empty file. Specify `-` as file
+name (a single minus) to have it written to stdout.
 
 When used in FTP, the FTP server response lines are considered being "headers"
 and thus are saved there.
