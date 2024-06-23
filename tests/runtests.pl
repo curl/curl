@@ -1311,6 +1311,10 @@ sub singletest_check {
             chomp($validstderr[-1]);
         }
 
+        if($hash{'crlf'}) {
+            subnewlines(0, \$_) for @validstderr;
+        }
+
         $res = compare($runnerid, $testnum, $testname, "stderr", \@actual, \@validstderr);
         if($res) {
             return -1;
