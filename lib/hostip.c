@@ -358,12 +358,12 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
     while(ai) {
 #ifdef USE_IPV6
       if(ai->ai_family == AF_INET6) {
-        struct sockaddr_in6 *si6 = (struct sockaddr_in6 *)ai->ai_addr;
+        struct sockaddr_in6 *si6 = (void *)ai->ai_addr;
         si6->sin6_port = htons((unsigned short)port);
       }
 #endif
       if(ai->ai_family == AF_INET) {
-        struct sockaddr_in *si4 = (struct sockaddr_in *)ai->ai_addr;
+        struct sockaddr_in *si4 = (void *)ai->ai_addr;
         si4->sin_port = htons((unsigned short)port);
       }
       ai = ai->ai_next;
