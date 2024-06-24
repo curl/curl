@@ -591,7 +591,8 @@ static void connc_close_all(struct conncache *connc)
     sigpipe_ignore(data, &pipe_st);
     /* This will remove the connection from the cache */
     connclose(conn, "kill all");
-    connc_discard_conn(connc, NULL, conn, FALSE);
+    Curl_conncache_remove_conn(connc->closure_handle, conn, TRUE);
+    connc_discard_conn(connc, connc->closure_handle, conn, FALSE);
     sigpipe_restore(&pipe_st);
 
     conn = connc_find_first_connection(connc);
@@ -743,25 +744,24 @@ static void connc_discard_conn(struct conncache *connc,
   memset(&data->last_poll, 0, sizeof(data->last_poll));
 }
 
-void Curl_conncache_discard_conn(struct Curl_easy *data,
-                                 struct connectdata *conn,
-                                 bool aborted, bool lock)
+void Curl_conncache_disconnect(struct Curl_easy *data,
+                               struct connectdata *conn,
+                               bool aborted)
 {
   DEBUGASSERT(data);
-  /* Remove it from the conncache it is in. */
-  if(conn->bundle)
-    Curl_conncache_remove_conn(data, conn, lock);
+  /* Connection must no longer be in and connection cache */
+  DEBUGASSERT(!conn->bundle);
 
   if(data->multi) {
     /* Add it to the multi's conncache for shutdown handling */
-    infof(data, "%s connection #%" CURL_FORMAT_CURL_OFF_T,
-          aborted? "Closing" : "Shutting down", conn->connection_id);
+    DEBUGF(infof(data, "[CCACHE] %s #%" CURL_FORMAT_CURL_OFF_T,
+                 aborted? "closing" : "shutting down", conn->connection_id));
     connc_discard_conn(&data->multi->conn_cache, data, conn, aborted);
   }
   else {
     /* No multi available. Make a best-effort shutdown + close */
-    infof(data, "Closing connection #%" CURL_FORMAT_CURL_OFF_T,
-          conn->connection_id);
+    DEBUGF(infof(data, "[CCACHE] closing #%" CURL_FORMAT_CURL_OFF_T,
+                 conn->connection_id));
     DEBUGASSERT(!conn->bundle);
     connc_run_conn_shutdown_handler(data, conn);
     connc_disconnect(data, conn, NULL, !aborted);
@@ -1100,18 +1100,22 @@ out:
 
 static void connc_shutdown_all(struct conncache *connc, int timeout_ms)
 {
+  struct Curl_easy *data = connc->closure_handle;
   struct connectdata *conn;
   struct curltime started = Curl_now();
 
-  if(!connc->closure_handle)
+  if(!data)
     return;
+  (void)data;
+
+  DEBUGF(infof(data, "conncache shutdown all"));
 
   /* Move all connections into the shutdown queue */
   conn = connc_find_first_connection(connc);
   while(conn) {
     /* This will remove the connection from the cache */
-    DEBUGF(infof(connc->closure_handle, "moving connection %"
-           CURL_FORMAT_CURL_OFF_T " to shutdown queue", conn->connection_id));
+    DEBUGF(infof(data, "moving connection %" CURL_FORMAT_CURL_OFF_T
+                 " to shutdown queue", conn->connection_id));
     connc_remove_conn(connc, conn);
     connc_discard_conn(connc, NULL, conn, FALSE);
     conn = connc_find_first_connection(connc);
@@ -1125,20 +1129,22 @@ static void connc_shutdown_all(struct conncache *connc, int timeout_ms)
     connc_perform(connc);
 
     if(!connc->shutdowns.conn_list.head) {
-      DEBUGF(infof(connc->closure_handle, "conncache shutdown ok"));
+      DEBUGF(infof(data, "conncache shutdown ok"));
       break;
     }
 
     /* wait for activity, timeout or "nothing" */
     timespent = Curl_timediff(Curl_now(), started);
     if(timespent >= (timediff_t)timeout_ms) {
-      DEBUGF(infof(connc->closure_handle, "conncache shutdown timeout"));
+      DEBUGF(infof(data, "conncache shutdown timeout"));
       break;
     }
 
     remain_ms = timeout_ms - (int)timespent;
-    if(connc_shutdown_wait(connc, remain_ms))
+    if(connc_shutdown_wait(connc, remain_ms)) {
+      DEBUGF(infof(data, "conncache shutdown all, abort"));
       break;
+    }
   }
 
   /* Due to errors/timeout, we might come here without being full ydone. */

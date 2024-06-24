@@ -134,14 +134,14 @@ void Curl_conncache_close_all_connections(struct conncache *connc);
 void Curl_conncache_print(struct conncache *connc);
 
 /**
- * Discard the connection. If `aborted` is FALSE, the connection
+ * Tear down the connection. If `aborted` is FALSE, the connection
  * will be shut down first before discarding. If the shutdown
  * is not immediately complete, the connection
  * will be placed into the cache's shutdown queue.
  */
-void Curl_conncache_discard_conn(struct Curl_easy *data,
-                                 struct connectdata *conn,
-                                 bool aborted, bool lock);
+void Curl_conncache_disconnect(struct Curl_easy *data,
+                               struct connectdata *conn,
+                               bool aborted);
 
 /**
  * Add sockets and POLLIN/OUT flags for connections handled by the cache.

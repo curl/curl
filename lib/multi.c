@@ -782,8 +782,9 @@ static CURLcode multi_done(struct Curl_easy *data,
                  data->set.reuse_forbid, conn->bits.close, premature,
                  Curl_conn_is_multiplex(conn, FIRSTSOCKET)));
     connclose(conn, "disconnecting");
-    Curl_conncache_discard_conn(data, conn, premature, FALSE);
+    Curl_conncache_remove_conn(data, conn, FALSE);
     CONNCACHE_UNLOCK(data);
+    Curl_disconnect(data, conn, premature);
   }
   else {
     char buffer[256];
@@ -934,7 +935,8 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
     curl_socket_t s;
     s = Curl_getconnectinfo(data, &c);
     if((s != CURL_SOCKET_BAD) && c) {
-      Curl_conncache_discard_conn(data, c, TRUE, TRUE);
+      Curl_conncache_remove_conn(data, c, TRUE);
+      Curl_disconnect(data, c, TRUE);
     }
   }
 
@@ -2605,8 +2607,11 @@ statemachine_end:
                failure is detected */
             Curl_detach_connection(data);
 
-            /* shutdown connection from cache */
-            Curl_conncache_discard_conn(data, conn, dead_connection, TRUE);
+            /* remove connection from cache */
+            Curl_conncache_remove_conn(data, conn, TRUE);
+
+            /* disconnect properly */
+            Curl_disconnect(data, conn, dead_connection);
           }
         }
         else if(data->mstate == MSTATE_CONNECT) {
