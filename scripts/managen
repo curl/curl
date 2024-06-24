@@ -237,8 +237,8 @@ sub too_old {
     elsif($version =~ /^(\d+)\.(\d+)/) {
         $a = $1 * 1000 + $2 * 10;
     }
-    if($a < 7500) {
-        # we consider everything before 7.50.0 to be too old to mention
+    if($a < 7600) {
+        # we consider everything before 7.60.0 to be too old to mention
         # specific changes for
         return 1;
     }
@@ -375,10 +375,19 @@ sub render {
         # convert backticks to double quotes
         $d =~ s/\`/\"/g;
 
+        if($d =~ /\(added in(.*)/i) {
+            if(length($1) < 2) {
+                print STDERR "$f:$line:1:ERROR: broken up added-in line:\n";
+                print STDERR "$f:$line:1:ERROR: $d";
+                return 3;
+            }
+        }
+      again:
         if($d =~ /\(Added in ([0-9.]+)\)/i) {
             my $ver = $1;
             if(too_old($ver)) {
                 $d =~ s/ *\(Added in $ver\)//gi;
+                goto again;
             }
         }
 

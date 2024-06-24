@@ -80,8 +80,8 @@ The numerical exit code of the transfer. (Added in 7.75.0)
 ## `filename_effective`
 The ultimate filename that curl writes out to. This is only meaningful if curl
 is told to write to a file with the --remote-name or --output option. It is
-most useful in combination with the --remote-header-name option. (Added in
-7.26.0)
+most useful in combination with the --remote-header-name option.
+(Added in 7.26.0)
 
 ## `ftp_entry_path`
 The initial path curl ended up in when logging on to the remote FTP
