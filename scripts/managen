@@ -713,8 +713,8 @@ sub single {
 
     if($requires) {
         my $l = $manpage ? manpageify($long) : "--$long";
-        push @foot, "$l requires that the underlying libcurl".
-            " was built to support $requires.\n";
+        push @foot, "$l requires that libcurl".
+            " is built to support $requires.\n";
     }
     if($mutexed) {
         my @m=split(/ /, $mutexed);
