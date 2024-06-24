@@ -65,9 +65,7 @@ static void connc_run_conn_shutdown_handler(struct Curl_easy *data,
 static CURLcode connc_update_shutdown_ev(struct Curl_multi *multi,
                                          struct Curl_easy *data,
                                          struct connectdata *conn);
-#ifdef DEBUGBUILD
 static void connc_shutdown_all(struct conncache *connc, int timeout_ms);
-#endif
 
 static CURLcode bundle_create(struct connectbundle **bundlep)
 {
@@ -1078,8 +1076,6 @@ void Curl_conncache_multi_close_all(struct Curl_multi *multi)
 }
 
 
-#ifdef DEBUGBUILD
-
 #define NUM_POLLS_ON_STACK 10
 
 static CURLcode connc_shutdown_wait(struct conncache *connc, int timeout_ms)
@@ -1153,7 +1149,6 @@ static void connc_shutdown_all(struct conncache *connc, int timeout_ms)
   /* Due to errors/timeout, we might come here without being full ydone. */
   connc_shutdown_discard_all(connc);
 }
-#endif
 
 #if 0
 /* Useful for debugging the connection cache */
