@@ -32,6 +32,7 @@ This release includes the following bugfixes:
  o cd2nroff: convert two warnings to errors [135]
  o cd2nroff: use an empty "##" to signal end of .IP sequence [56]
  o cf-socket: improve SO_SNDBUF update for Winsock [27]
+ o cf-socket: optimize curlx_nonblock() and check its return error [151]
  o cfilters: make Curl_conn_connect always assign 'done' [60]
  o cmake: add CURL_USE_GSASL option with detection + CI test [133]
  o cmake: allow `ENABLE_CURLDEBUG=OFF` with `ENABLE_DEBUG=ON` [26]
@@ -54,9 +55,13 @@ This release includes the following bugfixes:
  o cmdline-opts/interface.md: expand the documentation [66]
  o cmdline-opts: expand the parallel explanations [98]
  o cmdline: expand proxy option explanations [97]
+ o configure: fix pkg-config library name 'libnghttp3' [138]
+ o configure: require a QUIC library if nghttp3 is used [142]
  o configure: use `$EGREP` in place of `grep -E` [41]
  o configure: use AC_MSG_WARN for TLS/experimental warning texts [122]
+ o connect-to.md: expand with examples [147]
  o connection: shutdown TLS (for FTP) better [104]
+ o cookie-jar.md: see also --junk-session-cookies [144]
  o curl-config: revert to backticks to support old target envs [88]
  o curl: make warnings and other messages aware of terminal width [58]
  o curl_multi_poll.md: expand the example with an custom file descriptor [21]
@@ -64,13 +69,16 @@ This release includes the following bugfixes:
  o CURLOPT_CONNECTTIMEOUT*: clarify, document the milliseond version [105]
  o CURLOPT_ECH.md: remove repeated 'if' [109]
  o CURLOPT_NETRC.md: clarify what it does on Windows [140]
+ o CURLOPT_RESOLVE.md: mention hostname can be wildcard ('*') [150]
  o DISTROS: add a link to the list archive [22]
  o DISTROS: add MSYS2 (native) links [100]
  o Dockerfile: update debian:bookworm-slim to 84d83b2 [121]
  o docs/cmdline-opts: fix mail-auth example TLD typo [35]
+ o docs/cmdline-opts: remove two superfluous "Added in" mentions [143]
  o docs/Makefile.am: make curl-config.1 install [14]
  o docs: reference non deprecated libcurl options [113]
  o doh-insecure.md: expand [96]
+ o dump-header.md: mention minus for stdout [149]
  o examples/threaded-ssl: remove locking callback code [83]
  o examples: add missing binaries to .gitignore [106]
  o examples: delete unused includes [10]
@@ -94,6 +102,8 @@ This release includes the following bugfixes:
  o lib: xfer_setup and non-blocking shutdown [111]
  o libcurl.pc: add `Requires.private`, `Requires` for static linking [129]
  o libssh: remove CURLOPT_SSL_VERIFYHOST check [36]
+ o managen: "added in" fixes [131]
+ o managen: cleanups to generate nicer-looking output [141]
  o managen: warn on excessively long help texts [87]
  o mbedtls: check version for cipher id [12]
  o mbedtls: send close-notify on close [11]
@@ -112,6 +122,7 @@ This release includes the following bugfixes:
  o request.md: language fix [70]
  o request: change the struct field bodywrites to a bool, only for hyper [132]
  o runtests: sort test IDs in summary lines [33]
+ o runtests: support crlf="yes" for the <stderr> section
  o sectransp: remove large cipher table [76]
  o sectransp: use common code for cipher suite lookup [54]
  o socket: change TCP keepalive from ms to seconds on DragonFly BSD [74]
@@ -135,10 +146,12 @@ This release includes the following bugfixes:
  o tool_operate: avoid explicitly setting verifypeer to 1 [39]
  o tool_writeout: bsearch the variable name [102]
  o tool_writeout: get certinfo only when needing it [101]
+ o trace-ascii.md: mention "%" for stderr [146]
  o transfer: conn close on paused upload [8]
  o transfer: do not use EXPIRE_NOW while blocked [124]
  o transfer: remove curl_upload_refill_watermark, no longer used [50]
  o transfer: set CSELECT_IN if there is data pending [118]
+ o unit2604: use 'unitfail' instead of 'error' variable [153]
  o url: allow DoH transfers to override max connection limit [68]
  o vms: fixed language in comment [110]
  o vtls: deprioritize Secure Transport [71]
@@ -150,6 +163,7 @@ This release includes the following bugfixes:
  o x509asn1: ASN1tostr() should fail when 'constructed' is set [125]
  o x509asn1: fallback to dotted OID representation [69]
  o x509asn1: make Curl_extract_certinfo store error message [136]
+ o x509asn1: prevent NULL dereference [152]
  o x509asn1: remove two static variables [126]
 
 This release includes the following known bugs:
@@ -312,11 +326,24 @@ References to bug reports and discussions on issues:
  [128] = https://curl.se/bug/?i=13930
  [129] = https://curl.se/bug/?i=864
  [130] = https://curl.se/bug/?i=13897
+ [131] = https://curl.se/bug/?i=14002
  [132] = https://curl.se/bug/?i=13928
  [133] = https://curl.se/bug/?i=13948
  [134] = https://curl.se/bug/?i=13927
  [135] = https://curl.se/bug/?i=13929
  [136] = https://curl.se/bug/?i=13959
  [137] = https://curl.se/mail/lib-2024-06/0033.html
+ [138] = https://curl.se/bug/?i=13994
  [139] = https://curl.se/bug/?i=13953
  [140] = https://curl.se/bug/?i=13956
+ [141] = https://curl.se/bug/?i=14001
+ [142] = https://curl.se/bug/?i=13995
+ [143] = https://curl.se/bug/?i=14000
+ [144] = https://curl.se/bug/?i=13996
+ [146] = https://curl.se/bug/?i=13991
+ [147] = https://curl.se/bug/?i=13989
+ [149] = https://curl.se/bug/?i=13985
+ [150] = https://curl.se/bug/?i=13983
+ [151] = https://curl.se/bug/?i=13942
+ [152] = https://curl.se/bug/?i=13978
+ [153] = https://curl.se/bug/?i=13967
