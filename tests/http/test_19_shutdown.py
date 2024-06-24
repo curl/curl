@@ -100,7 +100,7 @@ class TestShutdown:
             f'id=[0-{count-1}]&with_cl&close'
         r = curl.http_download(urls=[url], alpn_proto=proto)
         r.check_response(http_status=200, count=count)
-        shutdowns = [l for l in r.trace_lines if re.match(r'.*CCACHE-\d+\] shutdown #\d+, done=1', l)]
+        shutdowns = [l for l in r.trace_lines if re.match(r'.*CCACHE\] shutdown #\d+, done=1', l)]
         assert len(shutdowns) == count, f'{shutdowns}'
 
     # run downloads with CURLOPT_FORBID_REUSE set, meaning *we* close
@@ -122,7 +122,7 @@ class TestShutdown:
              '-n', f'{count}', '-f', '-V', proto, url
         ])
         r.check_exit_code(0)
-        shutdowns = [l for l in r.trace_lines if re.match(r'.*CCACHE-\d+\] shutdown #\d+, done=1', l)]
+        shutdowns = [l for l in r.trace_lines if re.match(r'.*CCACHE\] shutdown #\d+, done=1', l)]
         assert len(shutdowns) == count, f'{shutdowns}'
 
     # run event-based downloads with CURLOPT_FORBID_REUSE set, meaning *we* close
@@ -146,7 +146,7 @@ class TestShutdown:
         ])
         r.check_response(http_status=200, count=count)
         # check that we closed all connections
-        closings = [l for l in r.trace_lines if re.match(r'.*CCACHE-\d+\] closing #\d+', l)]
+        closings = [l for l in r.trace_lines if re.match(r'.*CCACHE\] closing #\d+', l)]
         assert len(closings) == count, f'{closings}'
         # check that all connection sockets were removed from event
         removes = [l for l in r.trace_lines if re.match(r'.*socket cb: socket \d+ REMOVED', l)]

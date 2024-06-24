@@ -49,10 +49,10 @@
 
 #define HASHKEY_SIZE 128
 
-static void conncache_discard_conn(struct conncache *connc,
-                                   struct Curl_easy *last_data,
-                                   struct connectdata *conn,
-                                   bool aborted);
+static void connc_discard_conn(struct conncache *connc,
+                               struct Curl_easy *last_data,
+                               struct connectdata *conn,
+                               bool aborted);
 static void connc_disconnect(struct Curl_easy *data,
                              struct connectdata *conn,
                              struct conncache *connc,
@@ -62,11 +62,11 @@ static void connc_run_conn_shutdown(struct Curl_easy *data,
                                     bool *done);
 static void connc_run_conn_shutdown_handler(struct Curl_easy *data,
                                             struct connectdata *conn);
-static CURLcode conncache_update_shutdown_ev(struct Curl_multi *multi,
-                                             struct Curl_easy *data,
-                                             struct connectdata *conn);
+static CURLcode connc_update_shutdown_ev(struct Curl_multi *multi,
+                                         struct Curl_easy *data,
+                                         struct connectdata *conn);
 #ifdef DEBUGBUILD
-static void conncache_shutdown_all(struct conncache *connc, int timeout_ms);
+static void connc_shutdown_all(struct conncache *connc, int timeout_ms);
 #endif
 
 static CURLcode bundle_create(struct connectbundle **bundlep)
@@ -214,15 +214,14 @@ Curl_conncache_find_bundle(struct Curl_easy *data,
   return bundle;
 }
 
-static void *conncache_add_bundle(struct conncache *connc,
-                                  char *key,
-                                  struct connectbundle *bundle)
+static void *connc_add_bundle(struct conncache *connc,
+                              char *key, struct connectbundle *bundle)
 {
   return Curl_hash_add(&connc->hash, key, strlen(key), bundle);
 }
 
-static void conncache_remove_bundle(struct conncache *connc,
-                                    struct connectbundle *bundle)
+static void connc_remove_bundle(struct conncache *connc,
+                                struct connectbundle *bundle)
 {
   struct Curl_hash_iterator iter;
   struct Curl_hash_element *he;
@@ -265,7 +264,7 @@ CURLcode Curl_conncache_add_conn(struct Curl_easy *data)
 
     hashkey(conn, key, sizeof(key));
 
-    if(!conncache_add_bundle(data->state.conn_cache, key, bundle)) {
+    if(!connc_add_bundle(data->state.conn_cache, key, bundle)) {
       bundle_destroy(bundle);
       result = CURLE_OUT_OF_MEMORY;
       goto unlock;
@@ -286,8 +285,8 @@ unlock:
   return result;
 }
 
-static void conncache_remove_conn(struct conncache *connc,
-                                  struct connectdata *conn)
+static void connc_remove_conn(struct conncache *connc,
+                              struct connectdata *conn)
 {
   struct connectbundle *bundle = conn->bundle;
 
@@ -296,7 +295,7 @@ static void conncache_remove_conn(struct conncache *connc,
   if(bundle) {
     bundle_remove_conn(bundle, conn);
     if(connc && bundle->num_connections == 0)
-      conncache_remove_bundle(connc, bundle);
+      connc_remove_bundle(connc, bundle);
     conn->bundle = NULL; /* removed from it */
     if(connc)
       connc->num_conn--;
@@ -317,7 +316,7 @@ void Curl_conncache_remove_conn(struct Curl_easy *data,
 
   if(lock)
     CONNCACHE_LOCK(data);
-  conncache_remove_conn(connc, conn);
+  connc_remove_conn(connc, conn);
   if(lock)
     CONNCACHE_UNLOCK(data);
   if(connc)
@@ -384,7 +383,7 @@ bool Curl_conncache_foreach(struct Curl_easy *data,
    up a cache!
 */
 static struct connectdata *
-conncache_find_first_connection(struct conncache *connc)
+connc_find_first_connection(struct conncache *connc)
 {
   struct Curl_hash_iterator iter;
   struct Curl_hash_element *he;
@@ -554,7 +553,7 @@ Curl_conncache_extract_oldest(struct Curl_easy *data)
   return conn_candidate;
 }
 
-static void conncache_shutdown_discard_all(struct conncache *connc)
+static void connc_shutdown_discard_all(struct conncache *connc)
 {
   struct Curl_llist_element *e = connc->shutdowns.conn_list.head;
   struct connectdata *conn;
@@ -576,7 +575,7 @@ static void conncache_shutdown_discard_all(struct conncache *connc)
   connc->shutdowns.iter_locked = FALSE;
 }
 
-static void conncache_close_all(struct conncache *connc)
+static void connc_close_all(struct conncache *connc)
 {
   struct Curl_easy *data = connc->closure_handle;
   struct connectdata *conn;
@@ -586,16 +585,16 @@ static void conncache_close_all(struct conncache *connc)
     return;
 
   /* Move all connections to the shutdown list */
-  conn = conncache_find_first_connection(connc);
+  conn = connc_find_first_connection(connc);
   while(conn) {
-    conncache_remove_conn(connc, conn);
+    connc_remove_conn(connc, conn);
     sigpipe_ignore(data, &pipe_st);
     /* This will remove the connection from the cache */
     connclose(conn, "kill all");
-    conncache_discard_conn(connc, NULL, conn, FALSE);
+    connc_discard_conn(connc, NULL, conn, FALSE);
     sigpipe_restore(&pipe_st);
 
-    conn = conncache_find_first_connection(connc);
+    conn = connc_find_first_connection(connc);
   }
 
     /* Just for testing, run graceful shutdown */
@@ -605,13 +604,13 @@ static void conncache_close_all(struct conncache *connc)
     if(p) {
       long l = strtol(p, NULL, 10);
       if(l > 0 && l < INT_MAX)
-        conncache_shutdown_all(connc, (int)l);
+        connc_shutdown_all(connc, (int)l);
     }
   }
 #endif
 
   /* discard all connections in the shutdown list */
-  conncache_shutdown_discard_all(connc);
+  connc_shutdown_discard_all(connc);
 
   sigpipe_ignore(data, &pipe_st);
   Curl_hostcache_clean(data, data->dns.hostcache);
@@ -621,7 +620,7 @@ static void conncache_close_all(struct conncache *connc)
 
 void Curl_conncache_close_all_connections(struct conncache *connc)
 {
-  conncache_close_all(connc);
+  connc_close_all(connc);
 }
 
 static void connc_shutdown_discard_oldest(struct conncache *connc)
@@ -644,10 +643,10 @@ static void connc_shutdown_discard_oldest(struct conncache *connc)
   }
 }
 
-static void conncache_discard_conn(struct conncache *connc,
-                                   struct Curl_easy *last_data,
-                                   struct connectdata *conn,
-                                   bool aborted)
+static void connc_discard_conn(struct conncache *connc,
+                               struct Curl_easy *last_data,
+                               struct connectdata *conn,
+                               bool aborted)
 {
   /* `last_data`, if present, is the transfer that last worked with
    * the connection. It is present when the connection is being shut down
@@ -724,7 +723,7 @@ static void conncache_discard_conn(struct conncache *connc,
 
   if(data->multi && data->multi->socket_cb) {
     DEBUGASSERT(connc == &data->multi->conn_cache);
-    if(conncache_update_shutdown_ev(data->multi, data, conn)) {
+    if(connc_update_shutdown_ev(data->multi, data, conn)) {
       DEBUGF(infof(data, "[CCACHE] update events for shutdown failed, "
                          "discarding #%" CURL_FORMAT_CURL_OFF_T,
                          conn->connection_id));
@@ -757,7 +756,7 @@ void Curl_conncache_discard_conn(struct Curl_easy *data,
     /* Add it to the multi's conncache for shutdown handling */
     infof(data, "%s connection #%" CURL_FORMAT_CURL_OFF_T,
           aborted? "Closing" : "Shutting down", conn->connection_id);
-    conncache_discard_conn(&data->multi->conn_cache, data, conn, aborted);
+    connc_discard_conn(&data->multi->conn_cache, data, conn, aborted);
   }
   else {
     /* No multi available. Make a best-effort shutdown + close */
@@ -896,7 +895,7 @@ out:
   return result;
 }
 
-static void conncache_perform(struct conncache *connc)
+static void connc_perform(struct conncache *connc)
 {
   struct Curl_easy *data = connc->closure_handle;
   struct Curl_llist_element *e = connc->shutdowns.conn_list.head;
@@ -930,7 +929,7 @@ static void conncache_perform(struct conncache *connc)
 
 void Curl_conncache_multi_perform(struct Curl_multi *multi)
 {
-  conncache_perform(&multi->conn_cache);
+  connc_perform(&multi->conn_cache);
 }
 
 
@@ -1002,9 +1001,9 @@ static void connc_disconnect(struct Curl_easy *data,
 }
 
 
-static CURLcode conncache_update_shutdown_ev(struct Curl_multi *multi,
-                                             struct Curl_easy *data,
-                                             struct connectdata *conn)
+static CURLcode connc_update_shutdown_ev(struct Curl_multi *multi,
+                                         struct Curl_easy *data,
+                                         struct connectdata *conn)
 {
   struct easy_pollset ps;
   unsigned int i;
@@ -1060,7 +1059,7 @@ void Curl_conncache_multi_socket(struct Curl_multi *multi,
       DEBUGF(infof(data, "[CCACHE] shutdown #%" CURL_FORMAT_CURL_OFF_T
                    ", done=%d", conn->connection_id, done));
       Curl_detach_connection(data);
-      if(done || conncache_update_shutdown_ev(multi, data, conn)) {
+      if(done || connc_update_shutdown_ev(multi, data, conn)) {
         Curl_llist_remove(&connc->shutdowns.conn_list, e, NULL);
         connc_disconnect(NULL, conn, connc, FALSE);
       }
@@ -1073,7 +1072,7 @@ void Curl_conncache_multi_socket(struct Curl_multi *multi,
 
 void Curl_conncache_multi_close_all(struct Curl_multi *multi)
 {
-  conncache_close_all(&multi->conn_cache);
+  connc_close_all(&multi->conn_cache);
 }
 
 
@@ -1081,8 +1080,7 @@ void Curl_conncache_multi_close_all(struct Curl_multi *multi)
 
 #define NUM_POLLS_ON_STACK 10
 
-static CURLcode conncache_shutdown_wait(struct conncache *connc,
-                                        int timeout_ms)
+static CURLcode connc_shutdown_wait(struct conncache *connc, int timeout_ms)
 {
   struct pollfd a_few_on_stack[NUM_POLLS_ON_STACK];
   struct curl_pollfds cpfds;
@@ -1100,7 +1098,7 @@ out:
   return result;
 }
 
-static void conncache_shutdown_all(struct conncache *connc, int timeout_ms)
+static void connc_shutdown_all(struct conncache *connc, int timeout_ms)
 {
   struct connectdata *conn;
   struct curltime started = Curl_now();
@@ -1109,14 +1107,14 @@ static void conncache_shutdown_all(struct conncache *connc, int timeout_ms)
     return;
 
   /* Move all connections into the shutdown queue */
-  conn = conncache_find_first_connection(connc);
+  conn = connc_find_first_connection(connc);
   while(conn) {
     /* This will remove the connection from the cache */
     DEBUGF(infof(connc->closure_handle, "moving connection %"
            CURL_FORMAT_CURL_OFF_T " to shutdown queue", conn->connection_id));
-    conncache_remove_conn(connc, conn);
-    conncache_discard_conn(connc, NULL, conn, FALSE);
-    conn = conncache_find_first_connection(connc);
+    connc_remove_conn(connc, conn);
+    connc_discard_conn(connc, NULL, conn, FALSE);
+    conn = connc_find_first_connection(connc);
   }
 
   DEBUGASSERT(!connc->shutdowns.iter_locked);
@@ -1124,7 +1122,7 @@ static void conncache_shutdown_all(struct conncache *connc, int timeout_ms)
     timediff_t timespent;
     int remain_ms;
 
-    conncache_perform(connc);
+    connc_perform(connc);
 
     if(!connc->shutdowns.conn_list.head) {
       DEBUGF(infof(connc->closure_handle, "conncache shutdown ok"));
@@ -1139,12 +1137,12 @@ static void conncache_shutdown_all(struct conncache *connc, int timeout_ms)
     }
 
     remain_ms = timeout_ms - (int)timespent;
-    if(conncache_shutdown_wait(connc, remain_ms))
+    if(connc_shutdown_wait(connc, remain_ms))
       break;
   }
 
   /* Due to errors/timeout, we might come here without being full ydone. */
-  conncache_shutdown_discard_all(connc);
+  connc_shutdown_discard_all(connc);
 }
 #endif
 
