@@ -76,4 +76,3 @@ class TestMethods:
                 '&chunks=1&chunk_size=0&chunk_delay=10ms'
         r = curl.http_delete(urls=[url], alpn_proto=proto)
         r.check_stats(count=count, http_status=204, exitcode=0)
-

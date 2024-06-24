@@ -168,4 +168,3 @@ class TestVsFTPD:
                                                 tofile=dstfile,
                                                 n=1))
             assert False, f'upload {dstfile} differs:\n{diff}'
-
