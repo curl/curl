@@ -719,15 +719,22 @@ sub single {
     if($mutexed) {
         my @m=split(/ /, $mutexed);
         my $mstr;
+        my $num = scalar(@m);
+        my $count;
         for my $k (@m) {
             if(!$helplong{$k}) {
                 print STDERR "WARN: $f mutexes a non-existing option: $k\n";
             }
             my $l = $manpage ? manpageify($k) : "--$k";
-            $mstr .= sprintf "%s$l", $mstr?" and ":"";
+            my $sep = ", ";
+            if($count == ($num -1)) {
+                $sep = " and ";
+            }
+            $mstr .= sprintf "%s$l", $mstr?$sep:"";
+            $count++;
         }
         push @foot, overrides($standalone,
-                              "This option is mutually exclusive to $mstr.\n");
+                              "This option is mutually exclusive with $mstr.\n");
     }
     if($examples[0]) {
         my $s ="";
