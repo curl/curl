@@ -40,10 +40,6 @@ expired.
 To redirect connects from a specific hostname or any hostname, independently
 of port number, consider the --connect-to option.
 
-Support for providing the IP address within [brackets] was added in 7.57.0.
-
-Support for providing multiple IP addresses per entry was added in 7.59.0.
-
 Support for resolving with wildcard was added in 7.64.0.
 
 Support for the '+' prefix was added in 7.75.0.

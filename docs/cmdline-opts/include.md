@@ -21,6 +21,3 @@ things like server name, cookies, date of the document, HTTP version and
 more... With non-HTTP protocols, the "headers" are other server communication.
 
 To view the request headers, consider the --verbose option.
-
-Prior to 7.75.0 curl did not print the headers if --fail was used in
-combination with this option and there was error reported by server.
