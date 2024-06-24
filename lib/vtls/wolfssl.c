@@ -759,7 +759,8 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 #ifndef NO_FILESYSTEM
   /* Load the client certificate, and private key */
-  if(ssl_config->primary.clientcert && ssl_config->key) {
+  if(ssl_config->primary.clientcert) {
+    char *key_file = ssl_config->key;
     int file_type = do_file_type(ssl_config->cert_type);
 
     if(file_type == WOLFSSL_FILETYPE_PEM) {
@@ -783,8 +784,12 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
 
-    file_type = do_file_type(ssl_config->key_type);
-    if(wolfSSL_CTX_use_PrivateKey_file(backend->ctx, ssl_config->key,
+    if(!key_file)
+      key_file = ssl_config->primary.clientcert;
+    else
+      file_type = do_file_type(ssl_config->key_type);
+
+    if(wolfSSL_CTX_use_PrivateKey_file(backend->ctx, key_file,
                                        file_type) != 1) {
       failf(data, "unable to set private key");
       return CURLE_SSL_CONNECT_ERROR;
