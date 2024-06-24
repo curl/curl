@@ -16,7 +16,7 @@ Example:
 
 # `--vlan-priority`
 
-Set VLAN priority as defined in IEEE 802.1Q. (Added in 8.9.0).
+Set VLAN priority as defined in IEEE 802.1Q.
 
 This field is set on Ethernet level, and only works within a local network.
 

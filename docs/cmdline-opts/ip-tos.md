@@ -17,7 +17,7 @@ Example:
 
 # `--ip-tos`
 
-Set Type of Service (TOS) for IPv4 or Traffic Class for IPv6. (Added in 8.9.0).
+Set Type of Service (TOS) for IPv4 or Traffic Class for IPv6.
 
 The values allowed for \<string\> can be a numeric value between 1 and 255
 or one of the following:
