@@ -35,9 +35,9 @@ Usage: curl [options...] <url>
  -d, --data <data>           HTTP POST data
  -f, --fail                  Fail fast with no output on HTTP errors
  -h, --help <category>       Get help for commands
- -i, --include               Include response headers in output
  -o, --output <file>         Write to file instead of stdout
  -O, --remote-name           Write output to file named as remote file
+ -i, --show-headers          Show response headers in output
  -s, --silent                Silent mode
  -T, --upload-file <file>    Transfer local FILE to destination
  -u, --user <user:password>  Server user and password

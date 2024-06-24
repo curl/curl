@@ -1,9 +1,9 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
-Long: include
+Long: show-headers
 Short: i
-Help: Include response headers in output
+Help: Show response headers in output
 Protocols: HTTP FTP
 Category: important verbose
 Added: 4.8
@@ -14,7 +14,7 @@ Example:
   - -i $URL
 ---
 
-# `--include`
+# `--show-headers`
 
 Include response headers in the output. HTTP response headers can include
 things like server name, cookies, date of the document, HTTP version and
@@ -24,3 +24,6 @@ To view the request headers, consider the --verbose option.
 
 Prior to 7.75.0 curl did not print the headers if --fail was used in
 combination with this option and there was error reported by server.
+
+This option was called --include before 8.10.0. The former name remains
+working.
