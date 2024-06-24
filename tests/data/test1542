@@ -58,12 +58,11 @@ Accept: */*
 == Info: Connection #0 to host %HOSTIP left intact
 == Info: Connection #0 to host %HOSTIP left intact
 == Info: Connection #0 to host %HOSTIP left intact
-== Info: [CCACHE] shutting down #0
-== Info: [CCACHE] closing #0
+== Info: shutting down connection #0
 == Info: Connection #1 to host %HOSTIP left intact
 </file>
 <stripfile>
-$_ = '' if (($_ !~ /left intact/) && ($_ !~ /(closing|shutting down) #\d+/))
+$_ = '' if (($_ !~ /left intact/) && ($_ !~ /(closing|shutting down) connection #\d+/))
 </stripfile>
 </verify>
 </testcase>

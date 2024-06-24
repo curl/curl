@@ -754,14 +754,14 @@ void Curl_conncache_disconnect(struct Curl_easy *data,
 
   if(data->multi) {
     /* Add it to the multi's conncache for shutdown handling */
-    DEBUGF(infof(data, "[CCACHE] %s #%" CURL_FORMAT_CURL_OFF_T,
-                 aborted? "closing" : "shutting down", conn->connection_id));
+    infof(data, "%s connection #%" CURL_FORMAT_CURL_OFF_T,
+          aborted? "closing" : "shutting down", conn->connection_id);
     connc_discard_conn(&data->multi->conn_cache, data, conn, aborted);
   }
   else {
     /* No multi available. Make a best-effort shutdown + close */
-    DEBUGF(infof(data, "[CCACHE] closing #%" CURL_FORMAT_CURL_OFF_T,
-                 conn->connection_id));
+    infof(data, "closing connection #%" CURL_FORMAT_CURL_OFF_T,
+          conn->connection_id);
     DEBUGASSERT(!conn->bundle);
     connc_run_conn_shutdown_handler(data, conn);
     connc_disconnect(data, conn, NULL, !aborted);
