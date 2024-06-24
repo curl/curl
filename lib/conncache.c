@@ -1093,6 +1093,7 @@ static CURLcode connc_shutdown_wait(struct conncache *connc, int timeout_ms)
   Curl_poll(cpfds.pfds, cpfds.n, CURLMIN(timeout_ms, 1000));
 
 out:
+  Curl_pollfds_cleanup(&cpfds);
   return result;
 }
 
