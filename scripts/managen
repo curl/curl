@@ -255,7 +255,7 @@ sub added {
         return ".SH \"ADDED\"\nAdded in curl version $data\n";
     }
     else {
-        return "Added in $data. ";
+        return "\nAdded in $data.";
     }
 }
 
