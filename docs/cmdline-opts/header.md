@@ -46,7 +46,7 @@ other safe guards. That includes white space and control characters.
 
 This option can take an argument in @filename style, which then adds a header
 for each line in the input file. Using @- makes curl read the header file from
-stdin. Added in 7.55.0.
+stdin. (Added in 7.55.0)
 
 Please note that most anti-spam utilities check the presence and value of
 several MIME mail headers: these are `From:`, `To:`, `Date:` and `Subject:`
