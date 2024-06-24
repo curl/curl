@@ -52,8 +52,8 @@ Please note that most anti-spam utilities check the presence and value of
 several MIME mail headers: these are `From:`, `To:`, `Date:` and `Subject:`
 among others and should be added with this option.
 
-You need --proxy-header to send custom headers intended for an HTTP
-proxy. Added in 7.37.0.
+You need --proxy-header to send custom headers intended for an HTTP proxy.
+(Added in 7.37.0)
 
 Passing on a "Transfer-Encoding: chunked" header when doing an HTTP request
 with a request body, makes curl send the data using chunked encoding.
