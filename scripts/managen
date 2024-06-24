@@ -203,7 +203,7 @@ sub seealso {
             ".SH \"SEE ALSO\"\n$data\n";
     }
     else {
-        return "See also $data. ";
+        return "\nSee also $data. ";
     }
 }
 
@@ -255,7 +255,7 @@ sub added {
         return ".SH \"ADDED\"\nAdded in curl version $data\n";
     }
     else {
-        return "Added in $data. ";
+        return "\nAdded in $data.";
     }
 }
 
@@ -710,25 +710,31 @@ sub single {
         $mstr .= sprintf "%s$l", $mstr?"$sep ":"";
         $i++;
     }
-    push @foot, seealso($standalone, $mstr);
 
     if($requires) {
         my $l = $manpage ? manpageify($long) : "--$long";
-        push @foot, "$l requires that the underlying libcurl".
-            " was built to support $requires. ";
+        push @foot, "$l requires that libcurl".
+            " is built to support $requires.\n";
     }
     if($mutexed) {
         my @m=split(/ /, $mutexed);
         my $mstr;
+        my $num = scalar(@m);
+        my $count;
         for my $k (@m) {
             if(!$helplong{$k}) {
                 print STDERR "WARN: $f mutexes a non-existing option: $k\n";
             }
             my $l = $manpage ? manpageify($k) : "--$k";
-            $mstr .= sprintf "%s$l", $mstr?" and ":"";
+            my $sep = ", ";
+            if($count == ($num -1)) {
+                $sep = " and ";
+            }
+            $mstr .= sprintf "%s$l", $mstr?$sep:"";
+            $count++;
         }
         push @foot, overrides($standalone,
-                              "This option is mutually exclusive to $mstr. ");
+                              "This option is mutually exclusive with $mstr.\n");
     }
     if($examples[0]) {
         my $s ="";
@@ -757,6 +763,7 @@ sub single {
     if($added) {
         push @foot, added($standalone, $added);
     }
+    push @foot, seealso($standalone, $mstr);
     if($foot[0]) {
         print "\n";
         my $f = join("", @foot);
