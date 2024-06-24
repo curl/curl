@@ -579,6 +579,7 @@ static void connc_close_all(struct conncache *connc)
 {
   struct Curl_easy *data = connc->closure_handle;
   struct connectdata *conn;
+  int timeout_ms = 0;
   SIGPIPE_VARIABLE(pipe_st);
 
   if(!data)
@@ -605,10 +606,11 @@ static void connc_close_all(struct conncache *connc)
     if(p) {
       long l = strtol(p, NULL, 10);
       if(l > 0 && l < INT_MAX)
-        connc_shutdown_all(connc, (int)l);
+        timeout_ms = (int)l;
     }
   }
 #endif
+  connc_shutdown_all(connc, timeout_ms);
 
   /* discard all connections in the shutdown list */
   connc_shutdown_discard_all(connc);
@@ -1136,7 +1138,8 @@ static void connc_shutdown_all(struct conncache *connc, int timeout_ms)
     /* wait for activity, timeout or "nothing" */
     timespent = Curl_timediff(Curl_now(), started);
     if(timespent >= (timediff_t)timeout_ms) {
-      DEBUGF(infof(data, "conncache shutdown timeout"));
+      DEBUGF(infof(data, "conncache shutdown %s",
+                   (timeout_ms > 0)? "timeout" : "best effort done"));
       break;
     }
 
