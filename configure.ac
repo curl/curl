@@ -3231,6 +3231,11 @@ esac
 curl_http3_msg="no      (--with-nghttp3)"
 if test X"$want_nghttp3" != Xno; then
 
+  if test "x$USE_NGTCP2" != "x1" -a "x$USE_OPENSSL_QUIC" != "x1"; then
+    # without ngtcp2 or openssl quic, nghttp3 is of no use for us
+    AC_MSG_ERROR([nghttp3 enabled without a QUIC library; enable ngtcp2 or OpenSSL-QUIC])
+  fi
+
   dnl backup the pre-nghttp3 variables
   CLEANLDFLAGS="$LDFLAGS"
   CLEANCPPFLAGS="$CPPFLAGS"
