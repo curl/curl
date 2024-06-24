@@ -47,7 +47,6 @@ struct connshutdowns {
 struct conncache {
   struct Curl_hash hash;
   size_t num_conn;
-  curl_off_t cache_id;
   curl_off_t next_connection_id;
   curl_off_t next_easy_id;
   struct curltime last_cleanup;

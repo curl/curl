@@ -124,12 +124,9 @@ static void free_bundle_hash_entry(void *freethis)
   bundle_destroy(b);
 }
 
-static curl_off_t next_cache_id;
-
 int Curl_conncache_init(struct conncache *connc,
                         struct Curl_multi *multi, size_t size)
 {
-  connc->cache_id = next_cache_id++;
   /* allocate a new easy handle to use when closing cached connections */
   connc->closure_handle = curl_easy_init();
   if(!connc->closure_handle)
@@ -673,9 +670,8 @@ static void conncache_discard_conn(struct conncache *connc,
    * are other users of it
    */
   if(CONN_INUSE(conn) && !aborted) {
-    DEBUGF(infof(data, "[CCACHE-%" CURL_FORMAT_CURL_OFF_T "] not discarding "
-                       "#%" CURL_FORMAT_CURL_OFF_T " still in use by %zu "
-                       "transfers", connc->cache_id, conn->connection_id,
+    DEBUGF(infof(data, "[CCACHE] not discarding #%" CURL_FORMAT_CURL_OFF_T
+                       " still in use by %zu transfers", conn->connection_id,
                        CONN_INUSE(conn)));
     return;
   }
@@ -697,9 +693,8 @@ static void conncache_discard_conn(struct conncache *connc,
     /* Attempt to shutdown the connection right away. */
     Curl_attach_connection(data, conn);
     connc_run_conn_shutdown(data, conn, &done);
-    DEBUGF(infof(data, "[CCACHE-%" CURL_FORMAT_CURL_OFF_T "] shutdown "
-                       "#%" CURL_FORMAT_CURL_OFF_T ", done=%d",
-                       connc->cache_id, conn->connection_id, done));
+    DEBUGF(infof(data, "[CCACHE] shutdown #%" CURL_FORMAT_CURL_OFF_T
+                       ", done=%d",conn->connection_id, done));
     Curl_detach_connection(data);
   }
 
@@ -710,9 +705,8 @@ static void conncache_discard_conn(struct conncache *connc,
 
   DEBUGASSERT(!connc->shutdowns.iter_locked);
   if(connc->shutdowns.iter_locked) {
-    DEBUGF(infof(data, "[CCACHE-%" CURL_FORMAT_CURL_OFF_T "] discarding "
-                       "#%" CURL_FORMAT_CURL_OFF_T ", list locked",
-                       connc->cache_id, conn->connection_id));
+    DEBUGF(infof(data, "[CCACHE] discarding #%" CURL_FORMAT_CURL_OFF_T
+                       ", list locked", conn->connection_id));
     connc_disconnect(data, conn, connc, FALSE);
     return;
   }
@@ -722,29 +716,27 @@ static void conncache_discard_conn(struct conncache *connc,
   if(data->multi && data->multi->max_shutdown_connections > 0 &&
      (data->multi->max_shutdown_connections >=
       (long)Curl_llist_count(&connc->shutdowns.conn_list))) {
-    DEBUGF(infof(data, "[CCACHE-%" CURL_FORMAT_CURL_OFF_T "] discarding"
-                 " oldest shutdown connection due to limit of %ld",
-                 connc->cache_id, data->multi->max_shutdown_connections));
+    DEBUGF(infof(data, "[CCACHE] discarding oldest shutdown connection "
+                       "due to limit of %ld",
+                       data->multi->max_shutdown_connections));
     connc_shutdown_discard_oldest(connc);
   }
 
   if(data->multi && data->multi->socket_cb) {
     DEBUGASSERT(connc == &data->multi->conn_cache);
     if(conncache_update_shutdown_ev(data->multi, data, conn)) {
-      DEBUGF(infof(data, "[CCACHE-%" CURL_FORMAT_CURL_OFF_T "] update events"
-                   " for shutdown failed, discarding #%"
-                   CURL_FORMAT_CURL_OFF_T,
-                   connc->cache_id, conn->connection_id));
+      DEBUGF(infof(data, "[CCACHE] update events for shutdown failed, "
+                         "discarding #%" CURL_FORMAT_CURL_OFF_T,
+                         conn->connection_id));
       connc_disconnect(data, conn, connc, FALSE);
       return;
     }
   }
 
   Curl_llist_append(&connc->shutdowns.conn_list, conn, &conn->bundle_node);
-  DEBUGF(infof(data, "[CCACHE-%" CURL_FORMAT_CURL_OFF_T "] added"
-               " #%" CURL_FORMAT_CURL_OFF_T " to shutdown list of length %zu",
-               connc->cache_id, conn->connection_id,
-               Curl_llist_count(&connc->shutdowns.conn_list)));
+  DEBUGF(infof(data, "[CCACHE] added #%" CURL_FORMAT_CURL_OFF_T
+                     " to shutdown list of length %zu", conn->connection_id,
+                     Curl_llist_count(&connc->shutdowns.conn_list)));
 
   /* Forget what this transfer last polled, the connection is ours now.
    * If we do not clear this, the event handling for `data` will tell
@@ -916,8 +908,7 @@ static void conncache_perform(struct conncache *connc)
     return;
 
   DEBUGASSERT(!connc->shutdowns.iter_locked);
-  DEBUGF(infof(data, "[CCACHE-%" CURL_FORMAT_CURL_OFF_T "] perform, "
-               "%zu connections being shutdown", connc->cache_id,
+  DEBUGF(infof(data, "[CCACHE] perform, %zu connections being shutdown",
                Curl_llist_count(&connc->shutdowns.conn_list)));
   connc->shutdowns.iter_locked = TRUE;
   while(e) {
@@ -925,9 +916,8 @@ static void conncache_perform(struct conncache *connc)
     conn = e->ptr;
     Curl_attach_connection(data, conn);
     connc_run_conn_shutdown(data, conn, &done);
-    DEBUGF(infof(data, "[CCACHE-%" CURL_FORMAT_CURL_OFF_T "] shutdown"
-                 " #%" CURL_FORMAT_CURL_OFF_T ", done=%d",
-                 connc->cache_id, conn->connection_id, done));
+    DEBUGF(infof(data, "[CCACHE] shutdown #%" CURL_FORMAT_CURL_OFF_T
+                 ", done=%d", conn->connection_id, done));
     Curl_detach_connection(data);
     if(done) {
       Curl_llist_remove(&connc->shutdowns.conn_list, e, NULL);
@@ -999,9 +989,8 @@ static void connc_disconnect(struct Curl_easy *data,
   }
 
   if(connc)
-    DEBUGF(infof(data, "[CCACHE-%" CURL_FORMAT_CURL_OFF_T "] closing #%"
-                 CURL_FORMAT_CURL_OFF_T,
-                 connc->cache_id, conn->connection_id));
+    DEBUGF(infof(data, "[CCACHE] closing #%" CURL_FORMAT_CURL_OFF_T,
+                 conn->connection_id));
   else
     DEBUGF(infof(data, "closing connection #%" CURL_FORMAT_CURL_OFF_T,
                  conn->connection_id));
@@ -1034,11 +1023,9 @@ static CURLcode conncache_update_shutdown_ev(struct Curl_multi *multi,
     return CURLE_FAILED_INIT;
 
   for(i = 0; i < ps.num; ++i) {
-    DEBUGF(infof(data, "[CCACHE-%" CURL_FORMAT_CURL_OFF_T "] "
-                 "set socket=%" CURL_FORMAT_SOCKET_T
+    DEBUGF(infof(data, "[CCACHE] set socket=%" CURL_FORMAT_SOCKET_T
                  " events=%d on #%" CURL_FORMAT_CURL_OFF_T,
-                 multi->conn_cache.cache_id, ps.sockets[i], ps.actions[i],
-                 conn->connection_id));
+                 ps.sockets[i], ps.actions[i], conn->connection_id));
     multi->in_callback = TRUE;
     rc = multi->socket_cb(data, ps.sockets[i], ps.actions[i],
                           multi->socket_userp, NULL);
@@ -1070,9 +1057,8 @@ void Curl_conncache_multi_socket(struct Curl_multi *multi,
     if(s == conn->sock[FIRSTSOCKET] || s == conn->sock[SECONDARYSOCKET]) {
       Curl_attach_connection(data, conn);
       connc_run_conn_shutdown(data, conn, &done);
-      DEBUGF(infof(data, "[CCACHE-%" CURL_FORMAT_CURL_OFF_T "] shutdown"
-                   " #%" CURL_FORMAT_CURL_OFF_T ", done=%d",
-                   connc->cache_id, conn->connection_id, done));
+      DEBUGF(infof(data, "[CCACHE] shutdown #%" CURL_FORMAT_CURL_OFF_T
+                   ", done=%d", conn->connection_id, done));
       Curl_detach_connection(data);
       if(done || conncache_update_shutdown_ev(multi, data, conn)) {
         Curl_llist_remove(&connc->shutdowns.conn_list, e, NULL);
