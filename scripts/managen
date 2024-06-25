@@ -59,6 +59,8 @@ my $year = strftime "%Y", @ts;
 my $version = "unknown";
 my $globals;
 
+my $indent = 4;
+
 # get the long name version, return the man page string
 sub manpageify {
     my ($k)=@_;
@@ -85,13 +87,13 @@ sub manpageify {
 }
 
 
-my $colwidth=78; # max number of columns
+my $colwidth=79; # max number of columns
 
 sub justline {
     my ($lvl, @line) = @_;
     my $w = -1;
     my $spaces = -1;
-    my $width = $colwidth - ($lvl * 4);
+    my $width = $colwidth - ($lvl * $indent);
     for(@line) {
         $w += length($_);
         $w++;
@@ -103,7 +105,7 @@ sub justline {
         $ratio = $inject / $spaces;
     }
     my $spare = 0;
-    print ' ' x ($lvl * 4);
+    print ' ' x ($lvl * $indent);
     my $prev;
     for(@line) {
         while($spare >= 0.90) {
@@ -119,7 +121,7 @@ sub justline {
 
 sub lastline {
     my ($lvl, @line) = @_;
-    print ' ' x ($lvl * 4);
+    print ' ' x ($lvl * $indent);
     my $prev = 0;
     for(@line) {
         printf "%s%s", $prev?" ":"", $_;
@@ -134,7 +136,7 @@ sub outputpara {
 
     my $w = 0;
     my @words = split(/  */, $f);
-    my $width = $colwidth - ($lvl * 4);
+    my $width = $colwidth - ($lvl * $indent);
 
     my @line;
     for my $e (@words) {
@@ -203,7 +205,7 @@ sub seealso {
             ".SH \"SEE ALSO\"\n$data\n";
     }
     else {
-        return "\nSee also $data. ";
+        return "See also $data. ";
     }
 }
 
@@ -255,7 +257,7 @@ sub added {
         return ".SH \"ADDED\"\nAdded in curl version $data\n";
     }
     else {
-        return "\nAdded in $data.";
+        return "Added in $data. ";
     }
 }
 
@@ -773,16 +775,15 @@ sub single {
         push @foot, added($standalone, $added);
     }
     push @foot, seealso($standalone, $mstr);
-    if($foot[0]) {
-        print "\n";
-        my $f = join("", @foot);
-        if($manpage) {
-            $f =~ s/ +\z//; # remove trailing space
-            print "$f\n";
-        }
-        else {
-            printdesc($manpage, 2, "[1]$f");
-        }
+
+    print "\n";
+    my $f = join("", @foot);
+    if($manpage) {
+        $f =~ s/ +\z//; # remove trailing space
+        print "$f\n";
+    }
+    else {
+        printdesc($manpage, 2, "[1]$f");
     }
     return 0;
 }
