@@ -89,6 +89,12 @@ sub manpageify {
 
 my $colwidth=79; # max number of columns
 
+sub prefixline {
+    my ($num) = @_;
+    print "\t" x ($num/8);
+    print ' ' x ($num%8);
+}
+
 sub justline {
     my ($lvl, @line) = @_;
     my $w = -1;
@@ -105,7 +111,7 @@ sub justline {
         $ratio = $inject / $spaces;
     }
     my $spare = 0;
-    print ' ' x ($lvl * $indent);
+    prefixline($lvl * $indent);
     my $prev;
     for(@line) {
         while($spare >= 0.90) {
@@ -121,7 +127,7 @@ sub justline {
 
 sub lastline {
     my ($lvl, @line) = @_;
-    print ' ' x ($lvl * $indent);
+    prefixline($lvl * $indent);
     my $prev = 0;
     for(@line) {
         printf "%s%s", $prev?" ":"", $_;
