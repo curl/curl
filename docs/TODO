@@ -154,6 +154,7 @@
  18.4 --proxycommand
  18.5 UTF-8 filenames in Content-Disposition
  18.6 Option to make -Z merge lined based outputs on stdout
+ 18.7 specify which response codes that make -f/--fail return error
  18.9 Choose the name of file in braces for complex URLs
  18.10 improve how curl works in a windows console window
  18.11 Windows: set attribute 'archive' for completed downloads
@@ -1068,6 +1069,11 @@
  partial lines from several sources.
 
  https://github.com/curl/curl/issues/5175
+
+18.7 specify which response codes that make -f/--fail return error
+
+ Allows a user to better specify exacly which error code(s) that are fine
+ and which are errors for their specific uses cases
 
 18.9 Choose the name of file in braces for complex URLs
 
