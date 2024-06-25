@@ -35,6 +35,9 @@
 #elif defined(HAVE_NETINET_TCP_H)
 #include <netinet/tcp.h>
 #endif
+#ifdef HAVE_NETINET_UDP_H
+#include <netinet/udp.h>
+#endif
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
@@ -1852,6 +1855,9 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
 {
   struct cf_socket_ctx *ctx = cf->ctx;
   int rc;
+  int one = 1;
+
+  (void)one;
 
   /* QUIC needs a connected socket, nonblocking */
   DEBUGASSERT(ctx->sock != CURL_SOCKET_BAD);
@@ -1892,6 +1898,13 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
   }
 #endif
   }
+
+#if defined(UDP_GRO) && (defined(HAVE_SENDMMSG) || defined(HAVE_SENDMSG)) &&  \
+  ((defined(USE_NGTCP2) && defined(USE_NGHTTP3)) || defined(USE_QUICHE))
+  (void)setsockopt(ctx->sock, IPPROTO_UDP, UDP_GRO, &one,
+                   (socklen_t)sizeof(one));
+#endif
+
   return CURLE_OK;
 }
 
