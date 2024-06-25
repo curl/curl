@@ -1024,12 +1024,14 @@ void Curl_attach_connection(struct Curl_easy *data,
 static int connecting_getsock(struct Curl_easy *data, curl_socket_t *socks)
 {
   struct connectdata *conn = data->conn;
-  (void)socks;
-  /* Not using `conn->sockfd` as `Curl_xfer_setup()` initializes
-   * that *after* the connect. */
-  if(conn && conn->sock[FIRSTSOCKET] != CURL_SOCKET_BAD) {
+  curl_socket_t sockfd;
+
+  if(!conn)
+    return GETSOCK_BLANK;
+  sockfd = Curl_conn_get_socket(data, FIRSTSOCKET);
+  if(sockfd != CURL_SOCKET_BAD) {
     /* Default is to wait to something from the server */
-    socks[0] = conn->sock[FIRSTSOCKET];
+    socks[0] = sockfd;
     return GETSOCK_READSOCK(0);
   }
   return GETSOCK_BLANK;
@@ -1038,11 +1040,16 @@ static int connecting_getsock(struct Curl_easy *data, curl_socket_t *socks)
 static int protocol_getsock(struct Curl_easy *data, curl_socket_t *socks)
 {
   struct connectdata *conn = data->conn;
-  if(conn && conn->handler->proto_getsock)
+  curl_socket_t sockfd;
+
+  if(!conn)
+    return GETSOCK_BLANK;
+  if(conn->handler->proto_getsock)
     return conn->handler->proto_getsock(data, conn, socks);
-  else if(conn && conn->sockfd != CURL_SOCKET_BAD) {
+  sockfd = Curl_conn_get_socket(data, FIRSTSOCKET);
+  if(sockfd != CURL_SOCKET_BAD) {
     /* Default is to wait to something from the server */
-    socks[0] = conn->sockfd;
+    socks[0] = sockfd;
     return GETSOCK_READSOCK(0);
   }
   return GETSOCK_BLANK;
@@ -1051,9 +1058,11 @@ static int protocol_getsock(struct Curl_easy *data, curl_socket_t *socks)
 static int domore_getsock(struct Curl_easy *data, curl_socket_t *socks)
 {
   struct connectdata *conn = data->conn;
-  if(conn && conn->handler->domore_getsock)
+  if(!conn)
+    return GETSOCK_BLANK;
+  if(conn->handler->domore_getsock)
     return conn->handler->domore_getsock(data, conn, socks);
-  else if(conn && conn->sockfd != CURL_SOCKET_BAD) {
+  else if(conn->sockfd != CURL_SOCKET_BAD) {
     /* Default is that we want to send something to the server */
     socks[0] = conn->sockfd;
     return GETSOCK_WRITESOCK(0);
@@ -1064,9 +1073,11 @@ static int domore_getsock(struct Curl_easy *data, curl_socket_t *socks)
 static int doing_getsock(struct Curl_easy *data, curl_socket_t *socks)
 {
   struct connectdata *conn = data->conn;
-  if(conn && conn->handler->doing_getsock)
+  if(!conn)
+    return GETSOCK_BLANK;
+  if(conn->handler->doing_getsock)
     return conn->handler->doing_getsock(data, conn, socks);
-  else if(conn && conn->sockfd != CURL_SOCKET_BAD) {
+  else if(conn->sockfd != CURL_SOCKET_BAD) {
     /* Default is that we want to send something to the server */
     socks[0] = conn->sockfd;
     return GETSOCK_WRITESOCK(0);
@@ -1077,7 +1088,6 @@ static int doing_getsock(struct Curl_easy *data, curl_socket_t *socks)
 static int perform_getsock(struct Curl_easy *data, curl_socket_t *sock)
 {
   struct connectdata *conn = data->conn;
-
   if(!conn)
     return GETSOCK_BLANK;
   else if(conn->handler->perform_getsock)
@@ -1114,6 +1124,7 @@ static int perform_getsock(struct Curl_easy *data, curl_socket_t *sock)
 static void multi_getsock(struct Curl_easy *data,
                           struct easy_pollset *ps)
 {
+  bool expect_sockets = TRUE;
   /* The no connection case can happen when this is called from
      curl_multi_remove_handle() => singlesocket() => multi_getsock().
   */
@@ -1127,6 +1138,7 @@ static void multi_getsock(struct Curl_easy *data,
   case MSTATE_SETUP:
   case MSTATE_CONNECT:
     /* nothing to poll for yet */
+    expect_sockets = FALSE;
     break;
 
   case MSTATE_RESOLVING:
@@ -1165,18 +1177,25 @@ static void multi_getsock(struct Curl_easy *data,
 
   case MSTATE_RATELIMITING:
     /* we need to let time pass, ignore socket(s) */
+    expect_sockets = FALSE;
     break;
 
   case MSTATE_DONE:
   case MSTATE_COMPLETED:
   case MSTATE_MSGSENT:
     /* nothing more to poll for */
+    expect_sockets = FALSE;
     break;
 
   default:
     failf(data, "multi_getsock: unexpected multi state %d", data->mstate);
     DEBUGASSERT(0);
+    expect_sockets = FALSE;
     break;
+  }
+
+  if(expect_sockets && !ps->num && !Curl_xfer_is_blocked(data)) {
+    infof(data, "WARNING: no socket in pollset, transfer may stall!");
   }
 }
 
