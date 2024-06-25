@@ -270,11 +270,13 @@ sub render {
     my $top = ($line == 1);
     my $quote;
     my $level;
+    my $blankline;
     $start = 0;
 
     while(<$fh>) {
         my $d = $_;
         $line++;
+        $blankline = ($d eq "\n");
         if($d =~ /^\.(SH|BR|IP|B)/) {
             print STDERR "$f:$line:1:ERROR: nroff instruction in input: \".$1\"\n";
             return 4;
@@ -441,6 +443,10 @@ sub render {
         push @desc, "[".(1 + $level)."$qstr]$d" if(!$manpage);
         $header = 0;
 
+    }
+    if($blankline) {
+        print STDERR "$f:$line:1:ERROR: trailing blank line\n";
+        exit 3;
     }
     if($tablemode) {
         # end of table
