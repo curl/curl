@@ -110,8 +110,8 @@ endif()
 option(CURL_LTO "Turn on compiler Link Time Optimizations" OFF)
 
 cmake_dependent_option(ENABLE_THREADED_RESOLVER "Set to ON to enable threaded DNS lookup"
-        ON "NOT ENABLE_ARES"
-        OFF)
+  ON "NOT ENABLE_ARES"
+  OFF)
 
 include(PickyWarnings)
 

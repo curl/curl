@@ -71,8 +71,8 @@ $!  ssl$* logicals means HP ssl is present
 $!----------------------------------------
 $   if f$trnlnm("ssl$root") .nes. ""
 $   then
-$	nohpssl = 0
-$	hpssl = 1
+$       nohpssl = 0
+$       hpssl = 1
 $   endif
 $!
 $!  HP defines OPENSSL as SSL$INCLUDE as a convenience for linking.
@@ -83,25 +83,25 @@ $!------------------------------------
 $   openssl_lnm = f$trnlnm("OPENSSL")
 $   if (openssl_lnm .nes. "SYS$INCLUDE")
 $   then
-$!	Non HP SSL is installed, default to use it.
-$	nohpssl = 1
-$	hpssl = 0
+$!      Non HP SSL is installed, default to use it.
+$       nohpssl = 1
+$       hpssl = 0
 $   endif
 $!
 $!  Now check to see if hpssl has been specifically disabled
 $!----------------------------------------------------------
 $   if f$locate(",nohpssl,", args_lower) .lt. args_len
 $   then
-$	nohpssl = 1
-$	hpssl = 0
+$       nohpssl = 1
+$       hpssl = 0
 $   endif
 $!
 $!  Finally check to see if hp ssl has been specifically included.
 $!----------------------------------------------------------------
 $   if f$locate(",nohpssl,", args_lower) .lt. args_len
 $   then
-$	nohpssl = 1
-$	hpssl = 0
+$       nohpssl = 1
+$       hpssl = 0
 $   endif
 $endif
 $!
@@ -113,14 +113,14 @@ $   write sys$output "NOTICE:  A LIBIDN port has been detected."
 $   write sys$output " This port of curl for VMS has not been tested with it."
 $   if f$locate(",libidn,", args_lower) .lt. args_len
 $   then
-$	libidn = 1
+$       libidn = 1
 $   endif
 $   if .not. libidn
 $   then
-$	write sys$output " LIBIDN support is not enabled."
-$	write sys$output "Run with the ""libidn"" parameter to attempt to use."
+$       write sys$output " LIBIDN support is not enabled."
+$       write sys$output "Run with the ""libidn"" parameter to attempt to use."
 $   else
-$	write sys$output " Untested LIBIDN support requested."
+$       write sys$output " Untested LIBIDN support requested."
 $   endif
 $endif
 $!
@@ -132,14 +132,14 @@ $   write sys$output "NOTICE:  A LIBSSH2 port has been detected."
 $   write sys$output " This port of curl for VMS has not been tested with it."
 $   if f$locate(",libssh2,", args_lower) .lt. args_len
 $   then
-$	libssh2 = 1
+$       libssh2 = 1
 $   endif
 $   if .not. libssh2
 $   then
-$	write sys$output " LIBSSH2 support is not enabled."
-$	write sys$output "Run with the ""libssh2"" parameter to attempt to use."
+$       write sys$output " LIBSSH2 support is not enabled."
+$       write sys$output "Run with the ""libssh2"" parameter to attempt to use."
 $   else
-$	write sys$output " Untested LIBSSH2 support requested."
+$       write sys$output " Untested LIBSSH2 support requested."
 $   endif
 $endif
 $!
@@ -159,7 +159,7 @@ $then
 $!  If kerberos is installed: sys$share:gss$rtl.exe exists.
 $   if f$search("sys$shsare:gss$rtl.exe") .eqs. ""
 $   then
-$	nokerberos = 1
+$       nokerberos = 1
 $   endif
 $endif
 $!
@@ -170,13 +170,13 @@ $if f$trnlnm("GNV$LIBZSHR") .nes. ""
 $then
 $   if f$locate(",nozlib,", args_lower) .lt. args_len
 $   then
-$	nozlib = 1
+$       nozlib = 1
 $   endif
 $!   if .not. nozlib
 $!   then
-$!	write sys$output " GNV$LIBZSHR support is enabled."
+$!      write sys$output " GNV$LIBZSHR support is enabled."
 $!   else
-$!	write sys$output " GNV$LIBZSHR support is disabled by nozlib."
+$!      write sys$output " GNV$LIBZSHR support is disabled by nozlib."
 $!   endif
 $else
 $   nozlib = 1
@@ -262,9 +262,9 @@ $   write cvh "#undef CURL_DISABLE_LDAP"
 $   write cvh "#endif"
 $   if .not. nossl
 $   then
-$	write cvh "#ifdef CURL_DISABLE_LDAPS"
-$	write cvh "#undef CURL_DISABLE_LDAPS"
-$	write cvh "#endif"
+$       write cvh "#ifdef CURL_DISABLE_LDAPS"
+$       write cvh "#undef CURL_DISABLE_LDAPS"
+$       write cvh "#endif"
 $   endif
 $endif
 $write cvh "#ifdef CURL_DISABLE_LIBCURL_OPTION"
