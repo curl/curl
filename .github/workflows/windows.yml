@@ -453,7 +453,7 @@ jobs:
           restore-keys: ${{ matrix.plat }}-${{ matrix.name }}
 
       - name: 'vcpkg init'
-        timeout-minutes: 5      
+        timeout-minutes: 5
         if: success()
         shell: bash
         run: |
