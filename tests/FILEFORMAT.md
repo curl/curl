@@ -136,20 +136,18 @@ Available substitute variables include:
 - `%GOPHERSPORT` - Port number of the Gophers server
 - `%HOST6IP` - IPv6 address of the host running this test
 - `%HOSTIP` - IPv4 address of the host running this test
+- `%HTTP2PORT` - Port number of the HTTP/2 server
 - `%HTTP6PORT` - IPv6 port number of the HTTP server
 - `%HTTPPORT` - Port number of the HTTP server
-- `%HTTP2PORT` - Port number of the HTTP/2 server
 - `%HTTPSPORT` - Port number of the HTTPS server
 - `%HTTPSPROXYPORT` - Port number of the HTTPS-proxy
 - `%HTTPTLS6PORT` - IPv6 port number of the HTTP TLS server
 - `%HTTPTLSPORT` - Port number of the HTTP TLS server
 - `%HTTPUNIXPATH` - Path to the Unix socket of the HTTP server
-- `%SOCKSUNIXPATH` - Path to the Unix socket of the SOCKS server
 - `%IMAP6PORT` - IPv6 port number of the IMAP server
 - `%IMAPPORT` - Port number of the IMAP server
 - `%LOGDIR` - Log directory relative to %PWD
 - `%MQTTPORT` - Port number of the MQTT server
-- `%TELNETPORT` - Port number of the telnet server
 - `%NOLISTENPORT` - Port number where no service is listening
 - `%POP36PORT` - IPv6 port number of the POP3 server
 - `%POP3PORT` - Port number of the POP3 server
@@ -163,17 +161,19 @@ Available substitute variables include:
 - `%SMTP6PORT` - IPv6 port number of the SMTP server
 - `%SMTPPORT` - Port number of the SMTP server
 - `%SOCKSPORT` - Port number of the SOCKS4/5 server
+- `%SOCKSUNIXPATH` - Path to the Unix socket of the SOCKS server
 - `%SRCDIR` - Full path to the source dir
+- `%SSH_PWD` - Current directory friendly for the SSH server
 - `%SSHPORT` - Port number of the SCP/SFTP server
 - `%SSHSRVMD5` - MD5 of SSH server's public key
 - `%SSHSRVSHA256` - SHA256 of SSH server's public key
-- `%SSH_PWD` - Current directory friendly for the SSH server
+- `%TELNETPORT` - Port number of the telnet server
 - `%TESTNUMBER` - Number of the test case
 - `%TFTP6PORT` - IPv6 port number of the TFTP server
 - `%TFTPPORT` - Port number of the TFTP server
 - `%USER` - Login ID of the user running the test
-- `%VERSION` - the full version number of the tested curl
 - `%VERNUM` - the version number of the tested curl (without -DEV)
+- `%VERSION` - the full version number of the tested curl
 
 # `<testcase>`
 
