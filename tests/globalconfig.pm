@@ -39,6 +39,7 @@ BEGIN {
         $CURL
         $CURLVERSION
         $CURLVERNUM
+        $DATE
         $has_shared
         $LIBDIR
         $listonly

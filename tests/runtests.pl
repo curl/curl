@@ -60,6 +60,7 @@ use strict;
 # Promote all warnings to fatal
 use warnings FATAL => 'all';
 use 5.006;
+use POSIX qw(strftime);
 
 # These should be the only variables that might be needed to get edited:
 
@@ -498,6 +499,8 @@ sub checksystemfeatures {
 
     $versretval = runclient($versioncmd);
     $versnoexec = $!;
+
+    $DATE = strftime "%Y-%m-%d", localtime;
 
     open(my $versout, "<", "$curlverout");
     @version = <$versout>;
