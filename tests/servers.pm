@@ -2970,6 +2970,7 @@ sub subvariables {
     $$thing =~ s/${prefix}PWD/$pwd/g;
     $$thing =~ s/${prefix}POSIX_PWD/$posix_pwd/g;
     $$thing =~ s/${prefix}VERSION/$CURLVERSION/g;
+    $$thing =~ s/${prefix}VERNUM/$CURLVERNUM/g;
     $$thing =~ s/${prefix}TESTNUMBER/$testnum/g;
 
     my $file_pwd = $pwd;
