@@ -589,6 +589,15 @@ which is useful if the test case needs a file to act on.
 If `nonewline="yes"` is used, the created file will have the final newline
 stripped off.
 
+### `<file1>`
+1 to 4 can be appended to 'file' to create more files.
+
+### `<file2>`
+
+### `<file3>`
+
+### `<file4>`
+
 ### `<stdin [nonewline="yes"]>`
 Pass this given data on stdin to the tool.
 
