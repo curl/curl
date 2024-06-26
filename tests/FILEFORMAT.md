@@ -173,6 +173,7 @@ Available substitute variables include:
 - `%TFTPPORT` - Port number of the TFTP server
 - `%USER` - Login ID of the user running the test
 - `%VERSION` - the full version number of the tested curl
+- `%VERNUM` - the version number of the tested curl (without -DEV)
 
 # `<testcase>`
 

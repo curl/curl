@@ -519,6 +519,8 @@ sub checksystemfeatures {
         if($_ =~ /^curl ([^ ]*)/) {
             $curl = $_;
             $CURLVERSION = $1;
+            $CURLVERNUM = $CURLVERSION;
+            $CURLVERNUM =~ s/[^0-9.]//g; # dots and numbers only
             $curl =~ s/^(.*)(libcurl.*)/$1/g || die "Failure determining curl binary version";
 
             $libcurl = $2;
