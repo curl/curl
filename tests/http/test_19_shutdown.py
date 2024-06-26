@@ -153,4 +153,24 @@ class TestShutdown:
         removes = [l for l in r.trace_lines if re.match(r'.*socket cb: socket \d+ REMOVED', l)]
         assert len(removes) == count, f'{removes}'
 
+    # check graceful shutdown on multiplexed http
+    @pytest.mark.parametrize("proto", ['h2', 'h3'])
+    def test_19_06_check_shutdown(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        if not env.curl_is_debug():
+            pytest.skip('only works for curl debug builds')
+        curl = CurlClient(env=env, run_env={
+            'CURL_GRACEFUL_SHUTDOWN': '2000',
+            'CURL_DEBUG': 'all'
+        })
+        url = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-1]'
+        r = curl.http_download(urls=[url], alpn_proto=proto, with_tcpdump=True, extra_args=[
+            '--parallel'
+        ])
+        r.check_response(http_status=200, count=2)
+        # check connection cache closings
+        shutdowns = [l for l in r.trace_lines if re.match(r'.*CCACHE\] shutdown #\d+, done=1', l)]
+        assert len(shutdowns) == 1, f'{shutdowns}'
+
 

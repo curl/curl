@@ -103,6 +103,7 @@ struct cf_quiche_ctx {
   curl_off_t data_recvd;
   BIT(goaway);                       /* got GOAWAY from server */
   BIT(x509_store_setup);             /* if x509 store has been set up */
+  BIT(shutdown_started);             /* queued shutdown packets */
 };
 
 #ifdef DEBUG_QUICHE
@@ -1464,18 +1465,60 @@ out:
   return result;
 }
 
+static CURLcode cf_quiche_shutdown(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data, bool *done)
+{
+  struct cf_quiche_ctx *ctx = cf->ctx;
+  CURLcode result = CURLE_OK;
+
+  if(cf->shutdown || !ctx || !ctx->qconn) {
+    *done = TRUE;
+    return CURLE_OK;
+  }
+
+  *done = FALSE;
+  if(!ctx->shutdown_started) {
+    int err;
+
+    ctx->shutdown_started = TRUE;
+    vquic_ctx_update_time(&ctx->q);
+    err = quiche_conn_close(ctx->qconn, TRUE, 0, NULL, 0);
+    if(err) {
+      CURL_TRC_CF(data, cf, "error %d adding shutdown packet, "
+                  "aborting shutdown", err);
+      result = CURLE_SEND_ERROR;
+      goto out;
+    }
+  }
+
+  if(!Curl_bufq_is_empty(&ctx->q.sendbuf)) {
+    CURL_TRC_CF(data, cf, "shutdown, flushing sendbuf");
+    result = cf_flush_egress(cf, data);
+    if(result)
+      goto out;
+  }
+
+  if(Curl_bufq_is_empty(&ctx->q.sendbuf)) {
+    /* sent everything, quiche does not seem to support a graceful
+     * shutdown waiting for a reply, so ware done. */
+    CURL_TRC_CF(data, cf, "shutdown completely sent off, done");
+    *done = TRUE;
+  }
+  else {
+    CURL_TRC_CF(data, cf, "shutdown sending blocked");
+  }
+
+out:
+  return result;
+}
+
 static void cf_quiche_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
 
   if(ctx) {
-    if(ctx->qconn) {
-      vquic_ctx_update_time(&ctx->q);
-      (void)quiche_conn_close(ctx->qconn, TRUE, 0, NULL, 0);
-      /* flushing the egress is not a failsafe way to deliver all the
-         outstanding packets, but we also don't want to get stuck here... */
-      (void)cf_flush_egress(cf, data);
-    }
+    bool done;
+    (void)cf_quiche_shutdown(cf, data, &done);
     cf_quiche_ctx_clear(ctx);
   }
 }
@@ -1580,7 +1623,7 @@ struct Curl_cftype Curl_cft_http3 = {
   cf_quiche_destroy,
   cf_quiche_connect,
   cf_quiche_close,
-  Curl_cf_def_shutdown,
+  cf_quiche_shutdown,
   Curl_cf_def_get_host,
   cf_quiche_adjust_pollset,
   cf_quiche_data_pending,
