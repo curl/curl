@@ -429,11 +429,14 @@ dnl ---
 dnl We may use OpenSSL QUIC.
 dnl ---
 if test "$OPENSSL_ENABLED" = "1"; then
-  AC_MSG_CHECKING([for QUIC support in OpenSSL])
+  AC_MSG_CHECKING([for QUIC support and OpenSSL >= 3.3])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
 #include <openssl/ssl.h>
     ]],[[
+      #if (OPENSSL_VERSION_NUMBER < 0x30300000L)
+      #error need at least version 3.3.0
+      #endif
       OSSL_QUIC_client_method();
     ]])
   ],[
