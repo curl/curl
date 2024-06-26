@@ -339,7 +339,16 @@ static size_t msghdr_get_udp_gro(struct msghdr *msg)
 #ifdef UDP_GRO
   struct cmsghdr *cmsg;
 
+  /* Workaround musl CMSG_NXTHDR issue */
+#ifndef __GLIBC__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wsign-compare"
+#pragma clang diagnostic ignored "-Wcast-align"
+#endif
   for(cmsg = CMSG_FIRSTHDR(msg); cmsg; cmsg = CMSG_NXTHDR(msg, cmsg)) {
+#ifndef __GLIBC__
+#pragma clang diagnostic pop
+#endif
     if(cmsg->cmsg_level == SOL_UDP && cmsg->cmsg_type == UDP_GRO) {
       memcpy(&gso_size, CMSG_DATA(cmsg), sizeof(gso_size));
 
