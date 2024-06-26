@@ -138,7 +138,7 @@ struct cf_ngtcp2_ctx {
   uint64_t used_bidi_streams;        /* bidi streams we have opened */
   uint64_t max_bidi_streams;         /* max bidi streams we can open */
   int qlogfd;
-  BIT(conn_closed);                  /* connection is closed */
+  BIT(shutdown_started);             /* queued shutdown packets */
 };
 
 /* How to access `call_data` from a cf_ngtcp2 filter */
@@ -816,6 +816,9 @@ static void cf_ngtcp2_adjust_pollset(struct Curl_cfilter *cf,
     return;
 
   Curl_pollset_check(data, ps, ctx->q.sockfd, &want_recv, &want_send);
+  if(!want_send && !Curl_bufq_is_empty(&ctx->q.sendbuf))
+    want_send = TRUE;
+
   if(want_recv || want_send) {
     struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
     struct cf_call_data save;
@@ -1203,7 +1206,7 @@ static ssize_t cf_ngtcp2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   pktx_init(&pktx, cf, data);
 
-  if(!stream || ctx->conn_closed) {
+  if(!stream || ctx->shutdown_started) {
     *err = CURLE_RECV_ERROR;
     goto out;
   }
@@ -1505,7 +1508,7 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
   if(!stream || stream->id < 0) {
-    if(ctx->conn_closed) {
+    if(ctx->shutdown_started) {
       CURL_TRC_CF(data, cf, "cannot open stream on closed connection");
       *err = CURLE_SEND_ERROR;
       sent = -1;
@@ -1559,7 +1562,7 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     sent = -1;
     goto out;
   }
-  else if(ctx->conn_closed) {
+  else if(ctx->shutdown_started) {
     CURL_TRC_CF(data, cf, "cannot send on closed connection");
     *err = CURLE_SEND_ERROR;
     sent = -1;
@@ -2008,29 +2011,97 @@ static void cf_ngtcp2_ctx_clear(struct cf_ngtcp2_ctx *ctx)
   ctx->call_data = save;
 }
 
+static CURLcode cf_ngtcp2_shutdown(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data, bool *done)
+{
+  struct cf_ngtcp2_ctx *ctx = cf->ctx;
+  struct cf_call_data save;
+  struct pkt_io_ctx pktx;
+  CURLcode result = CURLE_OK;
+
+  if(cf->shutdown || !ctx->qconn) {
+    *done = TRUE;
+    return CURLE_OK;
+  }
+
+  CF_DATA_SAVE(save, cf, data);
+  *done = FALSE;
+  pktx_init(&pktx, cf, data);
+
+  if(!ctx->shutdown_started) {
+    char buffer[NGTCP2_MAX_UDP_PAYLOAD_SIZE];
+    ngtcp2_ssize nwritten;
+
+    if(!Curl_bufq_is_empty(&ctx->q.sendbuf)) {
+      CURL_TRC_CF(data, cf, "shutdown, flushing sendbuf");
+      result = cf_progress_egress(cf, data, &pktx);
+      if(!Curl_bufq_is_empty(&ctx->q.sendbuf)) {
+        CURL_TRC_CF(data, cf, "sending shutdown packets blocked");
+        result = CURLE_OK;
+        goto out;
+      }
+      else if(result) {
+        CURL_TRC_CF(data, cf, "shutdown, error %d flushing sendbuf", result);
+        *done = TRUE;
+        goto out;
+      }
+    }
+
+    ctx->shutdown_started = TRUE;
+    nwritten = ngtcp2_conn_write_connection_close(
+      ctx->qconn, NULL, /* path */
+      NULL, /* pkt_info */
+      (uint8_t *)buffer, sizeof(buffer),
+      &ctx->last_error, pktx.ts);
+    CURL_TRC_CF(data, cf, "start shutdown(err_type=%d, err_code=%"
+                CURL_PRIu64 ") -> %d", ctx->last_error.type,
+                (curl_uint64_t)ctx->last_error.error_code, (int)nwritten);
+    if(nwritten > 0) {
+      Curl_bufq_write(&ctx->q.sendbuf, (const unsigned char *)buffer,
+                      (size_t)nwritten, &result);
+      if(result) {
+        CURL_TRC_CF(data, cf, "error %d adding shutdown packets to sendbuf, "
+                    "aborting shutdown", result);
+        goto out;
+      }
+      ctx->q.no_gso = TRUE;
+      ctx->q.gsolen = (size_t)nwritten;
+      ctx->q.split_len = 0;
+    }
+  }
+
+  if(!Curl_bufq_is_empty(&ctx->q.sendbuf)) {
+    CURL_TRC_CF(data, cf, "shutdown, flushing egress");
+    result = vquic_flush(cf, data, &ctx->q);
+    if(result == CURLE_AGAIN) {
+      CURL_TRC_CF(data, cf, "sending shutdown packets blocked");
+      result = CURLE_OK;
+      goto out;
+    }
+    else if(result) {
+      CURL_TRC_CF(data, cf, "shutdown, error %d flushing sendbuf", result);
+      *done = TRUE;
+      goto out;
+    }
+  }
+
+  if(Curl_bufq_is_empty(&ctx->q.sendbuf)) {
+    /* Sent everything off. ngtcp2 seems to have no support for graceful
+     * shutdowns. So, we are done. */
+    CURL_TRC_CF(data, cf, "shutdown completely sent off, done");
+    *done = TRUE;
+    result = CURLE_OK;
+  }
+out:
+  CF_DATA_RESTORE(cf, save);
+  return result;
+}
+
 static void cf_ngtcp2_conn_close(struct Curl_cfilter *cf,
                                  struct Curl_easy *data)
 {
-  struct cf_ngtcp2_ctx *ctx = cf->ctx;
-  if(ctx && ctx->qconn && !ctx->conn_closed) {
-    char buffer[NGTCP2_MAX_UDP_PAYLOAD_SIZE];
-    struct pkt_io_ctx pktx;
-    ngtcp2_ssize rc;
-
-    ctx->conn_closed = TRUE;
-    pktx_init(&pktx, cf, data);
-    rc = ngtcp2_conn_write_connection_close(ctx->qconn, NULL, /* path */
-                                            NULL, /* pkt_info */
-                                            (uint8_t *)buffer, sizeof(buffer),
-                                            &ctx->last_error, pktx.ts);
-    CURL_TRC_CF(data, cf, "closing connection(err_type=%d, err_code=%"
-                CURL_PRIu64 ") -> %d", ctx->last_error.type,
-                (curl_uint64_t)ctx->last_error.error_code, (int)rc);
-    if(rc > 0) {
-      while((send(ctx->q.sockfd, buffer, (SEND_TYPE_ARG3)rc, 0) == -1) &&
-            SOCKERRNO == EINTR);
-    }
-  }
+  bool done;
+  cf_ngtcp2_shutdown(cf, data, &done);
 }
 
 static void cf_ngtcp2_close(struct Curl_cfilter *cf, struct Curl_easy *data)
@@ -2332,7 +2403,7 @@ static CURLcode cf_ngtcp2_query(struct Curl_cfilter *cf,
      * by callback. QUIC counts the number over the lifetime of the
      * connection, ever increasing.
      * We count the *open* transfers plus the budget for new ones. */
-    if(!ctx->qconn || ctx->conn_closed) {
+    if(!ctx->qconn || ctx->shutdown_started) {
       *pres1 = 0;
     }
     else if(ctx->max_bidi_streams) {
@@ -2390,7 +2461,7 @@ static bool cf_ngtcp2_conn_is_alive(struct Curl_cfilter *cf,
 
   CF_DATA_SAVE(save, cf, data);
   *input_pending = FALSE;
-  if(!ctx->qconn || ctx->conn_closed)
+  if(!ctx->qconn || ctx->shutdown_started)
     goto out;
 
   /* Both sides of the QUIC connection announce they max idle times in
@@ -2438,7 +2509,7 @@ struct Curl_cftype Curl_cft_http3 = {
   cf_ngtcp2_destroy,
   cf_ngtcp2_connect,
   cf_ngtcp2_close,
-  Curl_cf_def_shutdown,
+  cf_ngtcp2_shutdown,
   Curl_cf_def_get_host,
   cf_ngtcp2_adjust_pollset,
   cf_ngtcp2_data_pending,

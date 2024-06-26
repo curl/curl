@@ -294,10 +294,10 @@ struct cf_osslq_ctx {
   size_t max_stream_window;          /* max flow window for one stream */
   uint64_t max_idle_ms;              /* max idle time for QUIC connection */
   BIT(got_first_byte);               /* if first byte was received */
-#ifdef USE_OPENSSL
   BIT(x509_store_setup);             /* if x509 store has been set up */
   BIT(protocol_shutdown);            /* QUIC connection is shut down */
-#endif
+  BIT(need_recv);                    /* QUIC connection needs to receive */
+  BIT(need_send);                    /* QUIC connection needs to send */
 };
 
 static void cf_osslq_ctx_clear(struct cf_osslq_ctx *ctx)
@@ -316,6 +316,77 @@ static void cf_osslq_ctx_clear(struct cf_osslq_ctx *ctx)
   ctx->call_data = save;
 }
 
+static CURLcode cf_osslq_shutdown(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data, bool *done)
+{
+  struct cf_osslq_ctx *ctx = cf->ctx;
+  struct cf_call_data save;
+  CURLcode result = CURLE_OK;
+  int rc;
+
+  CF_DATA_SAVE(save, cf, data);
+
+  if(cf->shutdown || ctx->protocol_shutdown) {
+    *done = TRUE;
+    return CURLE_OK;
+  }
+
+  CF_DATA_SAVE(save, cf, data);
+  *done = FALSE;
+  ctx->need_send = FALSE;
+  ctx->need_recv = FALSE;
+
+  rc = SSL_shutdown_ex(ctx->tls.ossl.ssl,
+                       SSL_SHUTDOWN_FLAG_NO_BLOCK, NULL, 0);
+  if(rc == 0) {  /* ongoing */
+    CURL_TRC_CF(data, cf, "shutdown ongoing");
+    ctx->need_recv = TRUE;
+    goto out;
+  }
+  else if(rc == 1) {  /* done */
+    CURL_TRC_CF(data, cf, "shutdown finished");
+    *done = TRUE;
+    goto out;
+  }
+  else {
+    long sslerr;
+    char err_buffer[256];
+    int err = SSL_get_error(ctx->tls.ossl.ssl, rc);
+
+    switch(err) {
+    case SSL_ERROR_NONE:
+    case SSL_ERROR_ZERO_RETURN:
+      CURL_TRC_CF(data, cf, "shutdown not received, but closed");
+      *done = TRUE;
+      goto out;
+    case SSL_ERROR_WANT_READ:
+      /* SSL has send its notify and now wants to read the reply
+       * from the server. We are not really interested in that. */
+      CURL_TRC_CF(data, cf, "shutdown sent, want receive");
+      ctx->need_recv = TRUE;
+      goto out;
+    case SSL_ERROR_WANT_WRITE:
+      CURL_TRC_CF(data, cf, "shutdown send blocked");
+      ctx->need_send = TRUE;
+      goto out;
+    default:
+      /* We give up on this. */
+      sslerr = ERR_get_error();
+      CURL_TRC_CF(data, cf, "shutdown, ignore recv error: '%s', errno %d",
+                  (sslerr ?
+                   osslq_strerror(sslerr, err_buffer, sizeof(err_buffer)) :
+                   osslq_SSL_ERROR_to_str(err)),
+                  SOCKERRNO);
+      *done = TRUE;
+      result = CURLE_OK;
+      goto out;
+    }
+  }
+out:
+  CF_DATA_RESTORE(cf, save);
+  return result;
+}
+
 static void cf_osslq_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
@@ -323,8 +394,13 @@ static void cf_osslq_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   CF_DATA_SAVE(save, cf, data);
   if(ctx && ctx->tls.ossl.ssl) {
-    /* TODO: send connection close */
     CURL_TRC_CF(data, cf, "cf_osslq_close()");
+    if(!cf->shutdown && !ctx->protocol_shutdown) {
+      /* last best effort, which OpenSSL calls a "rapid" shutdown. */
+      SSL_shutdown_ex(ctx->tls.ossl.ssl,
+                      (SSL_SHUTDOWN_FLAG_NO_BLOCK | SSL_SHUTDOWN_FLAG_RAPID),
+                      NULL, 0);
+    }
     cf_osslq_ctx_clear(ctx);
   }
 
@@ -2182,6 +2258,10 @@ static void cf_osslq_adjust_pollset(struct Curl_cfilter *cf,
                        SSL_net_read_desired(ctx->tls.ossl.ssl),
                        SSL_net_write_desired(ctx->tls.ossl.ssl));
     }
+    else if(ctx->need_recv || ctx->need_send) {
+      Curl_pollset_set(data, ps, ctx->q.sockfd,
+                       ctx->need_recv, ctx->need_send);
+    }
   }
 }
 
@@ -2245,7 +2325,7 @@ struct Curl_cftype Curl_cft_http3 = {
   cf_osslq_destroy,
   cf_osslq_connect,
   cf_osslq_close,
-  Curl_cf_def_shutdown,
+  cf_osslq_shutdown,
   Curl_cf_def_get_host,
   cf_osslq_adjust_pollset,
   cf_osslq_data_pending,
