@@ -767,7 +767,7 @@ if(USE_OPENSSL_QUIC)
   if(USE_NGTCP2 OR USE_QUICHE OR USE_MSH3)
     message(FATAL_ERROR "Only one HTTP/3 backend can be selected!")
   endif()
-  find_package(OpenSSL 3.2.0 REQUIRED)
+  find_package(OpenSSL 3.3.0 REQUIRED)
 
   find_package(NGHTTP3 REQUIRED)
   set(USE_NGHTTP3 ON)

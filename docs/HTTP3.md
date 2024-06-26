@@ -209,10 +209,10 @@ Build curl:
 
 QUIC support is **EXPERIMENTAL**
 
-Build OpenSSL 3.2.0
+Build OpenSSL 3.3.1
 
      % cd ..
-     % git clone -b openssl-3.2.0 https://github.com/openssl/openssl
+     % git clone -b openssl-3.3.1 https://github.com/openssl/openssl
      % cd openssl
      % ./config enable-tls1_3 --prefix=<somewhere> --libdir=<somewhere>/lib
      % make
