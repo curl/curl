@@ -348,7 +348,7 @@ sub render {
             }
             if($tablemode) {
                 # end of table
-                push @desc, ".RE\n.IP\n";
+                push @desc, ".RE\n.IP\n" if($manpage);
                 $tablemode = 0;
             }
             $header = 1;
