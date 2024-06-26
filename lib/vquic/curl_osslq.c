@@ -1442,19 +1442,12 @@ static CURLcode h3_send_streams(struct Curl_cfilter *cf,
     for(i = 0; (i < n) && !blocked; ++i) {
       /* Without stream->s.ssl, we closed that already, so
        * pretend the write did succeed. */
-#ifdef SSL_WRITE_FLAG_CONCLUDE
-      /* Since OpenSSL v3.3.x, on last chunk set EOS if needed  */
       uint64_t flags = (eos && ((i + 1) == n))? SSL_WRITE_FLAG_CONCLUDE : 0;
       written = vec[i].len;
       ok = !s->ssl || SSL_write_ex2(s->ssl, vec[i].base, vec[i].len, flags,
                                    &written);
       if(ok && flags & SSL_WRITE_FLAG_CONCLUDE)
         eos_written = TRUE;
-#else
-      written = vec[i].len;
-      ok = !s->ssl || SSL_write_ex(s->ssl, vec[i].base, vec[i].len,
-                                   &written);
-#endif
       if(ok) {
         /* As OpenSSL buffers the data, we count this as acknowledged
          * from nghttp3's point of view */
