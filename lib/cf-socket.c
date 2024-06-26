@@ -1905,7 +1905,8 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
 #endif
   }
 
-#ifdef UDP_GRO
+#if defined(UDP_GRO) && (defined(HAVE_SENDMMSG) || defined(HAVE_SENDMSG)) &&  \
+  ((defined(USE_NGTCP2) && defined(USE_NGHTTP3)) || defined(USE_QUICHE))
   (void)setsockopt(ctx->sock, IPPROTO_UDP, UDP_GRO, &one,
                    (socklen_t)sizeof(one));
 #endif
