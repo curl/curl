@@ -488,8 +488,8 @@ jobs:
             system='Windows'
           fi
           export VCPKG_ROOT="$PWD/vcpkg"
-          cmake . -B bld ${options} \
-            "-DCMAKE_SYSTEM_NAME=$system" \
+          cmake -B bld ${options} \
+            "-DCMAKE_SYSTEM_NAME=${system}" \
             "-DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" \
             "-DVCPKG_INSTALLED_DIR=$VCPKG_ROOT/installed" \
             '-DVCPKG_TARGET_TRIPLET=${{ matrix.arch }}-${{ matrix.plat }}' \
