@@ -88,7 +88,7 @@ stages:
             disable_http_smtp_imap:
               name: w/o HTTP/SMTP/IMAP
               configure: --disable-http --disable-smtp --disable-imap --without-ssl
-            disable_thredres:
+            disable_threadres:
               name: sync resolver
               configure: --disable-threaded-resolver --with-openssl
             https_only:
