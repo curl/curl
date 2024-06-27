@@ -113,18 +113,18 @@ while (my $filename = <$git_ls_files>) {
 
     if (fn_match($filename, @need_crlf) &&
         $eol ne "crlf") {
-        push @err, "content: must use CRLF EOL for file type";
+        push @err, "content: must use CRLF EOL for this file type";
     }
 
     if (!fn_match($filename, @need_crlf) &&
         !fn_match($filename, @mixed_eol) &&
         $eol ne "lf") {
-        push @err, "content: must use LF EOL for file type";
+        push @err, "content: must use LF EOL for this file type";
     }
 
     if (!fn_match($filename, @space_at_eol) &&
         $content =~ / \n/) {
-        push @err, "content: has ending whitespace";
+        push @err, "content: has line-ending whitespace";
     }
 
     if (!fn_match($filename, @eol_at_eof) &&
