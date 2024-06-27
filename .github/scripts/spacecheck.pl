@@ -27,18 +27,18 @@ use strict;
 use warnings;
 
 my @tabs = (
-    "Makefile\\.[a-z]+\$",
     "m4/zz40-xc-ovr.m4",
+    "Makefile\\.[a-z]+\$",
     "/mkfile",
     "\\.(bat|cmd|sln|vc)\$",
-    "^tests/certs/",
     "^tests/stunnel.pem",
-    "^tests/data/",
+    "^tests/certs/",
+    "^tests/data/test",
 );
 
 my @mixed_eol = (
     "^tests/certs/",
-    "^tests/data/",
+    "^tests/data/test",
 );
 
 my @need_crlf = (
@@ -47,13 +47,12 @@ my @need_crlf = (
 );
 
 my @space_at_eol = (
-    "^tests/certs/",
     "^tests/stunnel.pem",
-    "^tests/data/",
+    "^tests/certs/",
+    "^tests/data/test",
 );
 
 my @eol_at_eof = (
-    "^projects/Windows/",
     "^tests/certs/",
 );
 
