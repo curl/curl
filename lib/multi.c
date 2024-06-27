@@ -1010,8 +1010,9 @@ void Curl_detach_connection(struct Curl_easy *data)
  * This is the only function that should assign data->conn
  */
 void Curl_attach_connection(struct Curl_easy *data,
-                             struct connectdata *conn)
+                            struct connectdata *conn)
 {
+  DEBUGASSERT(data);
   DEBUGASSERT(!data->conn);
   DEBUGASSERT(conn);
   data->conn = conn;
