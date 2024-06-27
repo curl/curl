@@ -2,8 +2,8 @@ extensions = x509v3
 [ req ]
 default_bits                    = 2048
 distinguished_name              = req_DN
-default_md			= sha256
-string_mask			= utf8only
+default_md                      = sha256
+string_mask                     = utf8only
 [ req_DN ]
 countryName                     = "Country Name"
 countryName_value            = NN
