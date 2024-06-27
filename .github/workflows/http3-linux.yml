@@ -294,6 +294,7 @@ jobs:
               LDFLAGS="-Wl,-rpath,/home/runner/quiche/target/release"
               --with-openssl=/home/runner/quiche/quiche/deps/boringssl/src
               --enable-debug
+              --enable-werror
               --with-quiche=/home/runner/quiche/target/release
               --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
               --with-ca-fallback
