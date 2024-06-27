@@ -293,7 +293,7 @@ jobs:
             configure: >-
               LDFLAGS="-Wl,-rpath,/home/runner/quiche/target/release"
               --with-openssl=/home/runner/quiche/quiche/deps/boringssl/src
-              --enable-debug
+              --enable-warnings --enable-werror --enable-debug
               --with-quiche=/home/runner/quiche/target/release
               --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
               --with-ca-fallback
