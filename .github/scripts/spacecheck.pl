@@ -27,7 +27,7 @@ use strict;
 use warnings;
 
 my @tabs = (
-    "m4/zz40-xc-ovr.m4",
+    "^m4/zz40-xc-ovr.m4",
     "Makefile\\.[a-z]+\$",
     "/mkfile",
     "\\.(bat|cmd|sln|vc)\$",
