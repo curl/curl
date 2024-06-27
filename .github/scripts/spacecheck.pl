@@ -51,7 +51,7 @@ my @space_at_eol = (
 );
 
 my @eol_at_eof = (
-    "^tests/certs/",
+    "^tests/certs/.+\\.der\$",
 );
 
 sub fn_match {
@@ -127,7 +127,8 @@ while (my $filename = <$git_ls_files>) {
         push @err, "content: has line-ending whitespace";
     }
 
-    if (!fn_match($filename, @eol_at_eof) &&
+    if ($content ne "" &&
+        !fn_match($filename, @eol_at_eof) &&
         $content !~ /\n\z/) {
         push @err, "content: has no EOL at EOF";
     }
