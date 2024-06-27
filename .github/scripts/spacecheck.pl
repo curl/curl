@@ -123,7 +123,7 @@ while (my $filename = <$git_ls_files>) {
     }
 
     if (!fn_match($filename, @space_at_eol) &&
-        $content =~ / \n/) {
+        $content =~ /[ \t]\n/) {
         push @err, "content: has line-ending whitespace";
     }
 
