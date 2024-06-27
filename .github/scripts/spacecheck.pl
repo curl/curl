@@ -31,13 +31,12 @@ my @tabs = (
     "Makefile\\.[a-z]+\$",
     "/mkfile",
     "\\.(bat|cmd|sln|vc)\$",
-    "^tests/stunnel.pem",
-    "^tests/certs/",
+    "^tests/.+\\.(der|pem|prm)\$",
     "^tests/data/test",
 );
 
 my @mixed_eol = (
-    "^tests/certs/",
+    "^tests/certs/.+\\.(crt|der|pem)\$",
     "^tests/data/test",
 );
 
@@ -47,8 +46,7 @@ my @need_crlf = (
 );
 
 my @space_at_eol = (
-    "^tests/stunnel.pem",
-    "^tests/certs/",
+    "^tests/.+\\.(cacert|crt|pem|prm)\$",
     "^tests/data/test",
 );
 
@@ -118,7 +116,7 @@ while (my $filename = <$git_ls_files>) {
         push @err, "content: must use CRLF EOL for this file type";
     }
 
-    if ($eol ne "lf" &&
+    if ($eol ne "lf" && $content ne "" &&
         !fn_match($filename, @need_crlf) &&
         !fn_match($filename, @mixed_eol)) {
         push @err, "content: must use LF EOL for this file type";
