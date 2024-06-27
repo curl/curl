@@ -46,7 +46,7 @@ my @need_crlf = (
 );
 
 my @space_at_eol = (
-    "^tests/.+\\.(cacert|crt|pem|prm)\$",
+    "^tests/.+\\.(cacert|crt|pem)\$",
     "^tests/data/test",
 );
 
