@@ -489,11 +489,11 @@ jobs:
           fi
           export VCPKG_ROOT="$PWD/vcpkg"
           cmake . -B bld ${options} \
-            -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
-            -DVCPKG_INSTALLED_DIR=$VCPKG_ROOT/installed \
-            -DVCPKG_TARGET_TRIPLET=${{ matrix.arch }}-${{ matrix.plat }} \
-            -DCMAKE_BUILD_TYPE=${{ matrix.type }} \
-            -DCMAKE_SYSTEM_NAME=$system \
+            "-DCMAKE_SYSTEM_NAME=$system" \
+            "-DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" \
+            "-DVCPKG_INSTALLED_DIR=$VCPKG_ROOT/installed" \
+            '-DVCPKG_TARGET_TRIPLET=${{ matrix.arch }}-${{ matrix.plat }}' \
+            '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
             -DCMAKE_VS_GLOBALS=TrackFileAccess=false \
             -DCMAKE_UNITY_BUILD=ON \
             -DCURL_WERROR=ON \
@@ -511,7 +511,7 @@ jobs:
           export VCPKG_ROOT="$GITHUB_WORKSPACE/vcpkg"
           mkdir -p bld
           7z a -t7z -r -mx=9 logs.7z \
-            $VCPKG_ROOT/buildtrees/*.log \
+            "$VCPKG_ROOT/buildtrees/*.log" \
             bld/.ninja_log \
             bld/build.ninja \
             bld/install_manifest.txt \
@@ -532,9 +532,9 @@ jobs:
         run: |
           cmake --build bld --config '${{ matrix.type }}' --parallel 5
           export VCPKG_ROOT="$PWD/vcpkg"
-          export VCPKG_TRIPLED_DIR="$VCPKG_ROOT/installed/${{ matrix.arch }}-${{ matrix.plat }}"
-          export debug_lib="$VCPKG_TRIPLED_DIR/debug/bin"
-          export release_lib="$VCPKG_TRIPLED_DIR/bin"
+          export VCPKG_TRIPLET_DIR="$VCPKG_ROOT/installed/${{ matrix.arch }}-${{ matrix.plat }}"
+          export debug_lib="$VCPKG_TRIPLET_DIR/debug/bin"
+          export release_lib="$VCPKG_TRIPLET_DIR/bin"
           export PATH="$PWD/bld/lib/:$release_lib:$debug_lib:$PATH"
           bld/src/curl.exe --disable --version
 
@@ -552,8 +552,8 @@ jobs:
         run: |
           export TFLAGS='-j14 !TFTP !MQTT !WebSockets ${{ matrix.tflags }}'
           export VCPKG_ROOT="$PWD/vcpkg"
-          export VCPKG_TRIPLED_DIR="$VCPKG_ROOT/installed/${{ matrix.arch }}-${{ matrix.plat }}"
-          export debug_lib="$VCPKG_TRIPLED_DIR/debug/bin"
-          export release_lib="$VCPKG_TRIPLED_DIR/bin"
+          export VCPKG_TRIPLET_DIR="$VCPKG_ROOT/installed/${{ matrix.arch }}-${{ matrix.plat }}"
+          export debug_lib="$VCPKG_TRIPLET_DIR/debug/bin"
+          export release_lib="$VCPKG_TRIPLET_DIR/bin"
           export PATH="$PWD/bld/lib/:$release_lib:$debug_lib:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
