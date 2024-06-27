@@ -7,7 +7,7 @@ Short: o
 Help: Write to file instead of stdout
 Category: important curl
 Added: 4.0
-Multi: append
+Multi: per-URL
 See-also:
   - remote-name
   - remote-name-all

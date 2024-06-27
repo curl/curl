@@ -704,6 +704,11 @@ sub single {
     elsif($multi eq "custom") {
         ; # left for the text to describe
     }
+    elsif($multi eq "per-URL") {
+        push @extra,
+            "${pre}--$long is associated with a single URL. Use it once per URL\n".
+            "when you use several URLs in a command line.\n";
+    }
     else {
         print STDERR "$f:$line:1:ERROR: unrecognized Multi: '$multi'\n";
         return 2;
