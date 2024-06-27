@@ -106,19 +106,19 @@ while (my $filename = <$git_ls_files>) {
         push @err, "content: has tab";
     }
 
-    if (!fn_match($filename, @mixed_eol) &&
-        $eol eq "") {
+    if ($eol eq "" &&
+        !fn_match($filename, @mixed_eol)) {
         push @err, "content: has mixed EOL types";
     }
 
-    if (fn_match($filename, @need_crlf) &&
-        $eol ne "crlf") {
+    if ($eol ne "crlf" &&
+        fn_match($filename, @need_crlf)) {
         push @err, "content: must use CRLF EOL for this file type";
     }
 
-    if (!fn_match($filename, @need_crlf) &&
-        !fn_match($filename, @mixed_eol) &&
-        $eol ne "lf") {
+    if ($eol ne "lf" &&
+        !fn_match($filename, @need_crlf) &&
+        !fn_match($filename, @mixed_eol)) {
         push @err, "content: must use LF EOL for this file type";
     }
 
