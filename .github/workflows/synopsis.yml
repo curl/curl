@@ -11,11 +11,15 @@ on:
       - '*/ci'
     paths:
       - 'docs/libcurl/curl_*.md'
+      - 'scripts/*.pl'
+      - '.github/workflows/*.yml'
   pull_request:
     branches:
       - master
     paths:
       - 'docs/libcurl/curl_*.md'
+      - 'scripts/*.pl'
+      - '.github/workflows/*.yml'
 
 permissions: {}
 
