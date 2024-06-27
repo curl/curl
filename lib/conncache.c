@@ -689,7 +689,7 @@ static void connc_discard_conn(struct conncache *connc,
    * not what we want. */
   if(aborted)
     done = TRUE;
-  else if(!done) {
+  else {
     /* Attempt to shutdown the connection right away. */
     Curl_attach_connection(data, conn);
     connc_run_conn_shutdown(data, conn, &done);
