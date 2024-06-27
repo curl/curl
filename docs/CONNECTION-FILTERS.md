@@ -271,7 +271,7 @@ conn[curl.se] --> SETUP[TCP] --> HAPPY-EYEBALLS --> TCP[2a04:4e42:c00::347]:443
 * transfer
 ```
 
-The modular design of connection filters and that we can plug them into each other is used to control the parallel attempts. When a `TCP` filter does not connect (in time), it is torn down and another one is created for the next address. This keeps the `TCP` filter simple. 
+The modular design of connection filters and that we can plug them into each other is used to control the parallel attempts. When a `TCP` filter does not connect (in time), it is torn down and another one is created for the next address. This keeps the `TCP` filter simple.
 
 The `HAPPY-EYEBALLS` on the other hand stays focused on its side of the problem. We can use it also to make other type of connection by just giving it another filter type to try to have happy eyeballing for QUIC:
 
