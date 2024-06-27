@@ -1,4 +1,5 @@
 extensions = x509v3
+
 [ x509v3 ]
 subjectAltName          = DNS:localhost,DNS:localhost1,DNS:localhost2
 keyUsage                = keyEncipherment,digitalSignature,keyAgreement

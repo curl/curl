@@ -1,4 +1,5 @@
 extensions = x509v3
+
 [ x509v3 ]
 basicConstraints        = critical,CA:true
 keyUsage                = critical,keyCertSign,cRLSign
@@ -22,6 +23,7 @@ default_bits            = 2048
 distinguished_name      = req_DN
 default_md              = sha256
 string_mask             = utf8only
+
 [ req_DN ]
 countryName             = "Country Name"
 countryName_value       = NN

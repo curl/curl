@@ -1,4 +1,5 @@
 extensions = x509v3
+
 [ x509v3 ]
 subjectAltName          = DNS:localhost1,DNS:localhost2,DNS:localhost
 keyUsage                = keyEncipherment,digitalSignature,keyAgreement
@@ -24,6 +25,7 @@ default_bits            = 1024
 distinguished_name      = req_DN
 default_md              = sha256
 string_mask             = utf8only
+
 [ req_DN ]
 countryName             = "Country Name is Northern Nowhere"
 countryName_value       = NN
