@@ -33,6 +33,8 @@ problems may have been fixed or changed somewhat since this was written.
  3.6 POP3 issue when reading small chunks
 
  4. Command line
+ 4.1 -T /dev/stdin may upload with an incorrect content length
+ 4.2 -T - always uploads chunked
 
  5. Build and portability issues
  5.1 OS400 port requires deprecated IBM library
@@ -82,6 +84,7 @@ problems may have been fixed or changed somewhat since this was written.
  11.3 TFTP tests fail on OpenBSD
  11.4 HTTP test server 'connection-monitor' problems
  11.5 Connection information when using TCP Fast Open
+ 11.6 test cases sometimes timeout
 
  12. LDAP
  12.1 OpenLDAP hangs after returning results
@@ -215,6 +218,25 @@ problems may have been fixed or changed somewhat since this was written.
  See https://github.com/curl/curl/issues/12063
 
 4. Command line
+
+4.1 -T /dev/stdin may upload with an incorrect content length
+
+ -T stats the path to figure out its size in bytes to use it as Content-Length
+ if it is a regular file.
+
+ The problem with that is that, on BSDs and some other UNIXes (not Linux),
+ open(path) may not give you a file descriptor with a 0 offset from the start
+ of the file.
+
+ See https://github.com/curl/curl/issues/12177
+
+4.2 -T - always uploads chunked
+
+ When the `<` shell operator is used. curl should realise that stdin is a
+ regular file in this case, and that it can do a non-chunked upload, like it
+ would do if you used -T file.
+
+ See https://github.com/curl/curl/issues/12171
 
 5. Build and portability issues
 
@@ -498,6 +520,12 @@ problems may have been fixed or changed somewhat since this was written.
 
  See https://github.com/curl/curl/issues/1332 and
  https://github.com/curl/curl/issues/4296
+
+11.6 test cases sometimes timeout
+
+ Occasionally, one of the tests timeouts. Inexplicably.
+
+ See https://github.com/curl/curl/issues/13350
 
 12. LDAP
 
