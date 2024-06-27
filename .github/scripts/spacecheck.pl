@@ -36,7 +36,8 @@ my @tabs = (
 );
 
 my @mixed_eol = (
-    "^tests/certs/.+\\.(crt|der|pem)\$",
+    "^tests/certs/.+\\.(crt|der)\$",
+    "^tests/certs/Server-localhost0h-sv.pem",
     "^tests/data/test",
 );
 
