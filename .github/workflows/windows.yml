@@ -493,8 +493,8 @@ jobs:
             "-DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" \
             "-DVCPKG_INSTALLED_DIR=$VCPKG_ROOT/installed" \
             '-DVCPKG_TARGET_TRIPLET=${{ matrix.arch }}-${{ matrix.plat }}' \
-            '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
             -DCMAKE_VS_GLOBALS=TrackFileAccess=false \
+            '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
             -DCMAKE_UNITY_BUILD=ON \
             -DCURL_WERROR=ON \
             -DBUILD_EXAMPLES=ON \
@@ -511,7 +511,7 @@ jobs:
           export VCPKG_ROOT="$GITHUB_WORKSPACE/vcpkg"
           mkdir -p bld
           7z a -t7z -r -mx=9 logs.7z \
-            "$VCPKG_ROOT/buildtrees/*.log" \
+            "$VCPKG_ROOT"/buildtrees/*.log \
             bld/.ninja_log \
             bld/build.ninja \
             bld/install_manifest.txt \
