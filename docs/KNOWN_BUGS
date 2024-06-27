@@ -221,8 +221,8 @@ problems may have been fixed or changed somewhat since this was written.
 
 4.1 -T /dev/stdin may upload with an incorrect content length
 
- -T will stat the path to figure out its size in bytes to use it as
- Content-Length if it is a regular file.
+ -T stats the path to figure out its size in bytes to use it as Content-Length
+ if it is a regular file.
 
  The problem with that is that, on BSDs and some other UNIXes (not Linux),
  open(path) may not give you a file descriptor with a 0 offset from the start
@@ -523,7 +523,7 @@ problems may have been fixed or changed somewhat since this was written.
 
 11.6 test cases sometimes timeout
 
- Occasionally, one of the tests will timeout. Inexplicably.
+ Occasionally, one of the tests timeouts. Inexplicably.
 
  See https://github.com/curl/curl/issues/13350
 
