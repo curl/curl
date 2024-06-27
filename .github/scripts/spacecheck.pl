@@ -31,7 +31,7 @@ my @tabs = (
     "Makefile\\.[a-z]+\$",
     "/mkfile",
     "\\.(bat|cmd|sln|vc)\$",
-    "^tests/.+\\.(der|pem)\$",
+    "^tests/certs/.+\\.der\$",
     "^tests/data/test",
 );
 
