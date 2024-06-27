@@ -600,6 +600,7 @@ def main():
     caddy = None
     try:
         if test_httpd:
+            print(f'httpd: {env.httpd_version()}, http:{env.http_port} https:{env.https_port}')
             httpd = Httpd(env=env)
             assert httpd.exists(), \
                 f'httpd not found: {env.httpd}'
@@ -610,6 +611,7 @@ def main():
                 nghttpx.clear_logs()
                 assert nghttpx.start()
         if test_caddy and env.caddy:
+            print(f'Caddy: {env.caddy_version()}, http:{env.caddy_http_port} https:{env.caddy_https_port}')
             caddy = Caddy(env=env)
             caddy.clear_logs()
             assert caddy.start()
