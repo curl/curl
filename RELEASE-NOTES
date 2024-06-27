@@ -4,7 +4,7 @@ curl and libcurl 8.8.1
  Command line options:         263
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3196
+ Contributors:                 3199
 
 This release includes the following changes:
 
@@ -25,6 +25,7 @@ This release includes the following bugfixes:
  o (lib)curl.rc: set debug flag also for `CURLDEBUG` and `UNITTESTS` [2]
  o asyn-thread: avoid using GetAddrInfoExW with impersonation [7]
  o autoconf: remove 'deeper' checks for `AC_CHECK_FUNCS` [23]
+ o autotools: fix pkg-config names (zstd, ngtcp2*) [170]
  o aws-sigv4: url encode the canonical path [55]
  o BINDINGS: update java link to one that exists [115]
  o build: add more supported attributes to the IAR compiler [46]
@@ -49,6 +50,7 @@ This release includes the following bugfixes:
  o cmake: stop setting SOVERSION for the static lib target [127]
  o cmake: use `APPLE` instead of `CMAKE_SYSTEM_NAME` string [24]
  o cmake: whitespace, formatting/tidy-up in comments [25]
+ o cmdline-docs: "added in" cleanups [171]
  o cmdline-opts/_PROTOCOLS.md: mention WS(S) [94]
  o cmdline-opts/ech.md: shorten the help text [93]
  o cmdline-opts/fail.md: expand and clarify [95]
@@ -92,11 +94,13 @@ This release includes the following bugfixes:
  o GHA: unify http3 workflows into one [77]
  o gnutls: improve TLS shutdown [62]
  o gnutls: pass in SNI name, not hostname when checking cert [114]
+ o http/3: add shutdown support [154]
  o http: remove "struct HTTP" [134]
  o http: write last header line late [44]
  o lib/v*: tidy up types and casts [64]
  o lib: fix gcc warning in certain debug builds [19]
  o lib: fix thread entry point to return `DWORD` on WinCE [85]
+ o lib: graceful connection shutdown [162]
  o lib: prefer `var = time(NULL)` over `time(&var)` [52]
  o lib: tidy up types and casts [92]
  o lib: xfer_setup and non-blocking shutdown [111]
@@ -104,6 +108,9 @@ This release includes the following bugfixes:
  o libssh: remove CURLOPT_SSL_VERIFYHOST check [36]
  o managen: "added in" fixes [131]
  o managen: cleanups to generate nicer-looking output [141]
+ o managen: error on trailing blank lines in input files [165]
+ o managen: only output .RE for manpage output [156]
+ o managen: output tabs for each 8 leading spaces [164]
  o managen: warn on excessively long help texts [87]
  o mbedtls: check version for cipher id [12]
  o mbedtls: send close-notify on close [11]
@@ -111,6 +118,7 @@ This release includes the following bugfixes:
  o misc: fix typos [108]
  o multi: add multi->proto_hash, a key-value store for protocol data [37]
  o multi: fix multi_wait() timeout handling [51]
+ o multi: multi_getsock(), check correct socket [167]
  o noproxy: test bad ipv6 net size first [82]
  o openssl/gnutls: rectify the TLS version checks for QUIC [61]
  o openssl: fix %-specifier in infof() call [57]
@@ -119,15 +127,21 @@ This release includes the following bugfixes:
  o os400: make it compilable again [128]
  o pytest: add ftp upload tests [16]
  o pytest: include testenv/vsftpd.py in dist tarball [99]
+ o quic: enable UDP GRO [157]
+ o quic: openssl quic, cmake and doc version update to 3.3.0 [148]
+ o quic: require at least OpenSSL 3.3 for QUIC [158]
  o request.md: language fix [70]
  o request: change the struct field bodywrites to a bool, only for hyper [132]
  o runtests: sort test IDs in summary lines [33]
+ o runtests: support %DATE for YYYY-MM-DD of right now
+ o runtests: support %VERNUM
  o runtests: support crlf="yes" for the <stderr> section
  o sectransp: remove large cipher table [76]
  o sectransp: use common code for cipher suite lookup [54]
  o socket: change TCP keepalive from ms to seconds on DragonFly BSD [74]
  o socket: use SOCK_NONBLOCK to eliminate extra system call [86]
  o socketpair: add `eventfd` and use `SOCK_NONBLOCK` for `socketpair()` [81]
+ o system_win32: add missing curl.h include [160]
  o tcpkeepalive: support TCP keep-alive parameters on Solaris <11.4 [91]
  o test1486: verify that write-out.md and tool_writeout.c are in sync [112]
  o test: add test1484, for HEAD with content [18]
@@ -159,6 +173,7 @@ This release includes the following bugfixes:
  o winbuild: remove outdated WIN32 defines [5]
  o windows: fix UWP builds, add GHA job [79]
  o winsock: move SO_SNDBUF update into cf-socket [53]
+ o wolfssl: assume key_file equal to clientcert if no key_file [169]
  o x509asn1: add some common ECDSA OIDs [67]
  o x509asn1: ASN1tostr() should fail when 'constructed' is set [125]
  o x509asn1: fallback to dotted OID representation [69]
@@ -179,20 +194,22 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alejandro R. Sedeño, alervd on github, Alexander Shtuchkin, Andy Pan,
-  Aurélien Pierre, Ayesh Karunaratne, Bo Anderson, brian m. carlson,
+  Alejandro R. Sedeño, alervd on github, Alexander Shtuchkin, Alex Snast,
+  Andy Pan, Aurélien Pierre, Ayesh Karunaratne, Bo Anderson, brian m. carlson,
   Christian Heusel, Christian Schmitz, Dan Fandrich, Daniel Gustafsson,
-  Daniel Stenberg, dependabot[bot], dogma, Dorian Craps, edmcln on github,
-  Eli Schwartz, Elliott Balsley, fds242 on github, Guilherme Puida,
-  Harry Sintonen, James Abbatiello, Jan Venekamp, Jay Guerette, Jiang Wenjian,
-  Jonathan Matthews, Joseph Chen, Kai Pastor, kartatz, Keerthi Timmaraju,
-  Lee Li, Luke Hamburg, Marcel Raad, Matthias Gatto, Matthieu Baerts,
-  Matt Jolly, Morgan Willcock, Olivier Bonaventure, Orgad Shaneh,
-  Patrick Monnerat, Pavel Pavlov, pszlazak on github, RainRat, Ray Satiro,
-  renovate[bot], Ryan Carsten Schmidt, Samuel Chiang, Sebastian Andersson,
+  Daniel Stenberg, dependabot[bot], Dexter Gerig, dogma, Dorian Craps,
+  edmcln on github, Eli Schwartz, Elliott Balsley, fds242 on github,
+  Guilherme Puida, Harry Sintonen, James Abbatiello, Jan Venekamp,
+  Jay Guerette, Jiang Wenjian, Jonathan Matthews, Joseph Chen, Kai Pastor,
+  kartatz, Keerthi Timmaraju, Lee Li, Luke Hamburg, Marcel Raad,
+  Matthias Gatto, Matthieu Baerts, Matt Jolly, Morgan Willcock,
+  Olivier Bonaventure, Orgad Shaneh, Patrick Monnerat, Pavel Pavlov,
+  pszlazak on github, RainRat, Ray Satiro, renovate[bot], Ryan Carsten Schmidt,
+  Samuel Chiang, saurabhsingh-dev on github, Sebastian Andersson,
   Sergey Bronnikov, Sergey Markelov, Stefan Eissing, Stephen Farrell,
-  Tal Regev, Tatsuhiro Tsujikawa, Viktor Szakats, vvb2060, Yedaya Katsman, z2_
-  (59 contributors)
+  Tal Regev, Tatsuhiro Tsujikawa, Viktor Szakats, vvb2060, Yedaya Katsman, z2_,
+  李四
+  (63 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -342,8 +359,21 @@ References to bug reports and discussions on issues:
  [144] = https://curl.se/bug/?i=13996
  [146] = https://curl.se/bug/?i=13991
  [147] = https://curl.se/bug/?i=13989
+ [148] = https://curl.se/bug/?i=14028
  [149] = https://curl.se/bug/?i=13985
  [150] = https://curl.se/bug/?i=13983
  [151] = https://curl.se/bug/?i=13942
  [152] = https://curl.se/bug/?i=13978
  [153] = https://curl.se/bug/?i=13967
+ [154] = https://curl.se/bug/?i=14022
+ [156] = https://curl.se/bug/?i=14025
+ [157] = https://curl.se/bug/?i=14012
+ [158] = https://curl.se/bug/?i=14026
+ [160] = https://curl.se/bug/?i=14019
+ [162] = https://curl.se/bug/?i=13976
+ [164] = https://curl.se/bug/?i=14016
+ [165] = https://curl.se/bug/?i=14015
+ [167] = https://curl.se/bug/?i=13998
+ [169] = https://curl.se/bug/?i=14007
+ [170] = https://curl.se/bug/?i=14005
+ [171] = https://curl.se/bug/?i=14003
