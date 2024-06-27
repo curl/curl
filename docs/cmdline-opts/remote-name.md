@@ -6,13 +6,14 @@ Short: O
 Help: Write output to file named as remote file
 Category: important output
 Added: 4.0
-Multi: append
+Multi: per-URL
 See-also:
   - remote-name-all
   - output-dir
   - remote-header-name
 Example:
   - -O https://example.com/filename
+  - -O https://example.com/filename -O https://example.com/file2
 ---
 
 # `--remote-name`
