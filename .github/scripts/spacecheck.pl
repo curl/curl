@@ -99,12 +99,12 @@ while (my $filename = <$git_ls_files>) {
 
     my @err = ();
 
-    my $eol = eol_detect($content);
-
     if (!fn_match($filename, @tabs) &&
         $content =~ /\t/) {
         push @err, "content: has tab";
     }
+
+    my $eol = eol_detect($content);
 
     if ($eol eq "" &&
         !fn_match($filename, @mixed_eol)) {
