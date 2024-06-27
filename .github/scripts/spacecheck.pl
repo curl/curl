@@ -23,11 +23,36 @@
 #
 ###########################################################################
 
-my @tab_allowed = ("Makefile\\.[a-z]+\$", "m4/zz40-xc-ovr.m4", "/mkfile", "\\.(bat|cmd|sln|vc)\$", "^tests/certs/", "^tests/stunnel.pem", "^tests/data/");
-my @mixed_eol_allowed = ("^tests/certs/", "^tests/data/");
-my @need_crlf = ("\\.(bat|sln)\$", "^winbuild/.+\\.(cmd|md)\$");
-my @space_at_eol = ("^tests/certs/", "^tests/stunnel.pem", "^tests/data/");
-my @eol_at_eof = ("^projects/Windows/", "^tests/certs/");
+my @tabs = (
+    "Makefile\\.[a-z]+\$",
+    "m4/zz40-xc-ovr.m4",
+    "/mkfile",
+    "\\.(bat|cmd|sln|vc)\$",
+    "^tests/certs/",
+    "^tests/stunnel.pem",
+    "^tests/data/",
+);
+
+my @mixed_eol = (
+    "^tests/certs/",
+    "^tests/data/",
+);
+
+my @need_crlf = (
+    "\\.(bat|sln)\$",
+    "^winbuild/.+\\.(cmd|md)\$",
+);
+
+my @space_at_eol = (
+    "^tests/certs/",
+    "^tests/stunnel.pem",
+    "^tests/data/",
+);
+
+my @eol_at_eof = (
+    "^projects/Windows/",
+    "^tests/certs/",
+);
 
 sub fn_match {
     my ($filename, @masklist) = @_;
@@ -46,16 +71,16 @@ sub eol_detect {
     my $cr = () = $content =~ /\r/g;
     my $lf = () = $content =~ /\n/g;
 
-    if($cr > 0 && $lf == 0) {
+    if ($cr > 0 && $lf == 0) {
         return "cr"
     }
-    elsif($cr == 0 && $lf > 0) {
+    elsif ($cr == 0 && $lf > 0) {
         return "lf"
     }
-    elsif($cr == 0 && $lf == 0) {
+    elsif ($cr == 0 && $lf == 0) {
         return "bin"
     }
-    elsif($cr == $lf) {
+    elsif ($cr == $lf) {
         return "crlf"
     }
 
@@ -76,12 +101,12 @@ while (my $filename = <$git_ls_files>) {
 
     my $eol = eol_detect($content);
 
-    if (!fn_match($filename, @tab_allowed) &&
+    if (!fn_match($filename, @tabs) &&
         $content =~ /\t/) {
         push @err, "content: has tab";
     }
 
-    if (!fn_match($filename, @mixed_eol_allowed) &&
+    if (!fn_match($filename, @mixed_eol) &&
         $eol eq "") {
         push @err, "content: has mixed EOL types";
     }
@@ -92,7 +117,7 @@ while (my $filename = <$git_ls_files>) {
     }
 
     if (!fn_match($filename, @need_crlf) &&
-        !fn_match($filename, @mixed_eol_allowed) &&
+        !fn_match($filename, @mixed_eol) &&
         $eol ne "lf") {
         push @err, "content: must use LF EOL for file type";
     }
