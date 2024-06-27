@@ -246,6 +246,7 @@ class Httpd:
                 f'ErrorLog {self._error_log}',
                 f'LogLevel {self._get_log_level()}',
                 f'StartServers 4',
+                f'ReadBufferSize 16000',
                 f'H2MinWorkers 16',
                 f'H2MaxWorkers 256',
                 f'H2Direct on',
