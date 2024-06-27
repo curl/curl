@@ -10,12 +10,16 @@ on:
       - master
       - '*/ci'
     paths:
-      - 'docs/libcurl/curl_*.3'
+      - 'docs/libcurl/curl_*.md'
+      - 'scripts/*.pl'
+      - '.github/workflows/*.yml'
   pull_request:
     branches:
       - master
     paths:
-      - 'docs/libcurl/curl_*.3'
+      - 'docs/libcurl/curl_*.md'
+      - 'scripts/*.pl'
+      - '.github/workflows/*.yml'
 
 permissions: {}
 
@@ -27,4 +31,4 @@ jobs:
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - name: verify-synopsis
-        run: ./.github/scripts/verify-synopsis.pl docs/libcurl/curl*.3
+        run: ./.github/scripts/verify-synopsis.pl docs/libcurl/curl*.md
