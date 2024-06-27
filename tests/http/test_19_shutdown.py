@@ -172,5 +172,3 @@ class TestShutdown:
         # check connection cache closings
         shutdowns = [l for l in r.trace_lines if re.match(r'.*CCACHE\] shutdown #\d+, done=1', l)]
         assert len(shutdowns) == 1, f'{shutdowns}'
-
-

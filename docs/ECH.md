@@ -337,7 +337,7 @@ Then:
 The boringssl APIs are fairly similar to those in our ECH-enabled OpenSSL
 fork, so code changes are also in ``lib/vtls/openssl.c``, protected
 via ``#ifdef OPENSSL_IS_BORINGSSL`` and are mostly obvious API variations.
- 
+
 The boringssl APIs however do not support the ``--ech pn:`` command line
 variant as of now.
 
@@ -377,7 +377,7 @@ There are some known issues with the ECH implementation in WolfSSL:
   [this ECH test web site](https://tls-ech.dev) and any other similarly configured
   sites.
 - There is also an issue related to so-called middlebox compatibility mode.
-  [middlebox compatibility issue](https://github.com/wolfSSL/wolfssl/issues/6774) 
+  [middlebox compatibility issue](https://github.com/wolfSSL/wolfssl/issues/6774)
 
 ### Code changes to support WolfSSL
 
@@ -445,7 +445,7 @@ LD_LIBRARY_PATH=$HOME/code/openssl:./lib/.libs gdb ./src/.libs/curl
 ### Localhost testing
 
 It can be useful to be able to run against a localhost OpenSSL ``s_server``
-for testing. We have published instructions for such 
+for testing. We have published instructions for such
 [localhost tests](https://github.com/defo-project/ech-dev-utils/blob/main/howtos/localhost-tests.md)
 in another repository. Once you have that set up, you can start a server
 and then run curl against that:
