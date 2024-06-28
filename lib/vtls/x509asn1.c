@@ -393,7 +393,6 @@ utf8asn1str(struct dynbuf *to, int type, const char *from, const char *end)
         if(wc >= 0x00000800) {
           if(wc >= 0x00010000) {
             if(wc >= 0x00200000) {
-              free(buf);
               /* Invalid char. size for target encoding. */
               return CURLE_WEIRD_SERVER_REPLY;
             }
