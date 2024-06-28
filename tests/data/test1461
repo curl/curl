@@ -47,8 +47,9 @@ Usage: curl [options...] <url>
 
 This is not the full help; this menu is split into categories.
 Use "--help category" to get an overview of all categories, which are:
-auth, connection, curl, dns, file, ftp, http, imap, misc, output, pop3, post, 
-proxy, scp, sftp, smtp, ssh, telnet, tftp, tls, ech, upload, verbose.
+auth, connection, curl, deprecated, dns, file, ftp, global, http, imap, ldap, 
+output, pop3, post, proxy, scp, sftp, smtp, ssh, telnet, tftp, timeout, tls, 
+upload, verbose.
 For all options use the manual or "--help all".
 </stdout>
 </verify>
