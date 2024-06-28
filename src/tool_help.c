@@ -129,6 +129,33 @@ static void get_categories(void)
     printf(" %-11s %s\n", categories[i].opt, categories[i].desc);
 }
 
+/* Prints all categories as a comma-separated list of given width */
+static void get_categories_list(unsigned int width)
+{
+  unsigned int i;
+  size_t col = 0;
+  for(i = 0; categories[i].opt; ++i) {
+    size_t len = strlen(categories[i].opt);
+    if(!categories[i + 1].opt) {
+      /* final category */
+      if(col + len + 1 < width)
+        printf("%s.\n", categories[i].opt);
+      else
+        /* start a new line first */
+        printf("\n%s.\n", categories[i].opt);
+    }
+    else if(col + len + 2 < width) {
+      printf("%s, ", categories[i].opt);
+      col += len + 2;
+    }
+    else {
+      /* start a new line first */
+      printf("\n%s, ", categories[i].opt);
+      col = len + 2;
+    }
+  }
+}
+
 
 void tool_help(char *category)
 {
@@ -136,12 +163,15 @@ void tool_help(char *category)
   puts("Usage: curl [options...] <url>");
   /* If no category was provided */
   if(!category) {
-    const char *category_note = "\nThis is not the full help, this "
-      "menu is stripped into categories.\nUse \"--help category\" to get "
-      "an overview of all categories.\nFor all options use the manual"
+    const char *category_note = "\nThis is not the full help; this "
+      "menu is split into categories.\nUse \"--help category\" to get "
+      "an overview of all categories, which are:";
+    const char *category_note2 = "For all options use the manual"
       " or \"--help all\".";
     print_category(CURLHELP_IMPORTANT, cols);
     puts(category_note);
+    get_categories_list(cols);
+    puts(category_note2);
   }
   /* Lets print everything if "all" was provided */
   else if(curl_strequal(category, "all"))
