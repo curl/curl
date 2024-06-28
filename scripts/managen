@@ -454,6 +454,10 @@ sub render {
         print STDERR "$f:$line:1:ERROR: trailing blank line\n";
         exit 3;
     }
+    if($quote) {
+        # don't leave the quote "hanging"
+        push @desc, ".fi\n" if($manpage);
+    }
     if($tablemode) {
         # end of table
         push @desc, ".RE\n.IP\n" if($manpage);
@@ -673,9 +677,6 @@ sub single {
         }
     }
 
-    printdesc($manpage, 2, (@leading, @desc));
-    undef @desc;
-
     my @extra;
     if($multi eq "single") {
         push @extra, "${pre}If --$long is provided several times, the last set ".
@@ -706,7 +707,7 @@ sub single {
     }
     elsif($multi eq "per-URL") {
         push @extra,
-            "${pre}--$long is associated with a single URL. Use it once per URL\n".
+            "${pre}--$long is associated with a single URL. Use it once per URL ".
             "when you use several URLs in a command line.\n";
     }
     else {
@@ -714,7 +715,8 @@ sub single {
         return 2;
     }
 
-    printdesc($manpage, 2, @extra);
+    printdesc($manpage, 2, (@leading, @desc, @extra));
+    undef @desc;
 
     my @foot;
 
