@@ -60,7 +60,7 @@ env:
   # renovate: datasource=github-tags depName=nghttp2/nghttp2 versioning=semver registryUrl=https://github.com
   nghttp2-version: 1.62.1
   # renovate: datasource=github-tags depName=cloudflare/quiche versioning=semver registryUrl=https://github.com
-  quiche-version: 0.21.0
+  quiche-version: 0.22.0
   # renovate: datasource=github-tags depName=icing/mod_h2 versioning=semver registryUrl=https://github.com
   mod_h2-version: 2.0.27
 
@@ -412,6 +412,7 @@ jobs:
           sed -i -e 's/cmake = "0.1"/cmake = "=0.1.45"/' quiche/Cargo.toml
 
           cargo build -v --package quiche --release --features ffi,pkg-config-meta,qlog --verbose
+          ln -s libquiche.so target/release/libquiche.so.0
           mkdir -v quiche/deps/boringssl/src/lib
           ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) quiche/deps/boringssl/src/lib/
 
