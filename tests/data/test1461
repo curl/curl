@@ -45,8 +45,11 @@ Usage: curl [options...] <url>
  -v, --verbose               Make the operation more talkative
  -V, --version               Show version number and quit
 
-This is not the full help, this menu is stripped into categories.
-Use "--help category" to get an overview of all categories.
+This is not the full help; this menu is split into categories.
+Use "--help category" to get an overview of all categories, which are:
+auth, connection, curl, deprecated, dns, file, ftp, global, http, imap, ldap, 
+output, pop3, post, proxy, scp, sftp, smtp, ssh, telnet, tftp, timeout, tls, 
+upload, verbose.
 For all options use the manual or "--help all".
 </stdout>
 </verify>
