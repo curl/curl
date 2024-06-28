@@ -2285,9 +2285,9 @@ CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
 #if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_TLSEXT) && \
   !defined(OPENSSL_NO_OCSP)
 static CURLcode verifystatus(struct Curl_cfilter *cf,
-                             struct Curl_easy *data)
+                             struct Curl_easy *data,
+                             struct ossl_ctx *octx)
 {
-  struct ssl_connect_data *connssl = cf->ctx;
   int i, ocsp_status;
 #if defined(OPENSSL_IS_AWSLC)
   const uint8_t *status;
@@ -2300,7 +2300,6 @@ static CURLcode verifystatus(struct Curl_cfilter *cf,
   OCSP_BASICRESP *br = NULL;
   X509_STORE     *st = NULL;
   STACK_OF(X509) *ch = NULL;
-  struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
   X509 *cert;
   OCSP_CERTID *id = NULL;
   int cert_status, crl_reason;
@@ -2308,6 +2307,7 @@ static CURLcode verifystatus(struct Curl_cfilter *cf,
   int ret;
   long len;
 
+  (void)cf;
   DEBUGASSERT(octx);
 
   len = (long)SSL_get_tlsext_status_ocsp_resp(octx->ssl, &status);
@@ -4657,7 +4657,7 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
   !defined(OPENSSL_NO_OCSP)
   if(conn_config->verifystatus && !octx->reused_session) {
     /* don't do this after Session ID reuse */
-    result = verifystatus(cf, data);
+    result = verifystatus(cf, data, octx);
     if(result) {
       /* when verifystatus failed, remove the session id from the cache again
          if present */

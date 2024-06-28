@@ -240,3 +240,20 @@ class TestSSLUse:
             assert r.json['SSL_CIPHER'] in cipher_names, f'{r.json}'
         else:
             assert r.exit_code != 0, f'{r}'
+
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_17_08_cert_status(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        if not env.curl_uses_lib('openssl') and \
+            not env.curl_uses_lib('gnutls') and \
+            not env.curl_uses_lib('quictls'):
+            pytest.skip("tls library does not support --cert-status")
+        curl = CurlClient(env=env)
+        domain = f'localhost'
+        url = f'https://{env.authority_for(domain, proto)}/'
+        r = curl.http_get(url=url, alpn_proto=proto, extra_args=[
+            '--cert-status'
+        ])
+        # CURLE_SSL_INVALIDCERTSTATUS, our certs have no OCSP info
+        assert r.exit_code == 91, f'{r}'
