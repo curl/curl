@@ -74,6 +74,10 @@ If you think this option still does not give you enough details, consider using
 Note that verbose output of curl activities and network traffic might contain
 sensitive data, including usernames, credentials or secret data content. Be
 aware and be careful when sharing trace logs with others.
+
+End with a quote
+
+    hello
 </file2>
 <file3 name="%LOGDIR/option2.md">
 ---
@@ -216,6 +220,12 @@ If you think this option still does not give you enough details, consider using
 Note that verbose output of curl activities and network traffic might contain
 sensitive data, including usernames, credentials or secret data content. Be
 aware and be careful when sharing trace logs with others.
+
+End with a quote
+.nf
+
+hello
+.fi
 
 This option is global and does not need to be specified for each use of --next.
 

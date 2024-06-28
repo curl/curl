@@ -195,10 +195,8 @@ DESCRIPTION
 	    logs with others.
 
 	    This option is global  and does not need  to be specified for  each
-	    use of --next.
-
-	    Providing --fakeitreal multiple times has no extra effect.  Disable
-	    it again with --no-fakeitreal.
+	    use of --next. Providing --fakeitreal  multiple times has no  extra
+	    effect. Disable it again with --no-fakeitreal.
 
 	    Example:
 	     curl --verbose https://example.com
