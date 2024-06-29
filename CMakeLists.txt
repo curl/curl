@@ -327,7 +327,7 @@ option(BUILD_LIBCURL_DOCS "to build libcurl man pages" ON)
 option(BUILD_MISC_DOCS "to build misc man pages (e.g. curl-config and mk-ca-bundle)" ON)
 option(ENABLE_CURL_MANUAL "to build the man page for curl and enable its -M/--manual option" ON)
 
-if(ENABLE_CURL_MANUAL OR BUILD_LIBCURL_DOCS OR CURL_CA_EMBED_SET)
+if(ENABLE_CURL_MANUAL OR BUILD_LIBCURL_DOCS)
   if(PERL_FOUND)
     set(HAVE_MANUAL_TOOLS ON)
   endif()
