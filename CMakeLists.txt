@@ -314,7 +314,11 @@ endif()
 
 set(CURL_CA_EMBED_SET FALSE)
 if(DEFINED CURL_CA_EMBED AND NOT CURL_CA_EMBED STREQUAL "")
-  set(CURL_CA_EMBED_SET TRUE)
+  if(EXISTS "${CURL_CA_EMBED}")
+    set(CURL_CA_EMBED_SET TRUE)
+  else()
+    message(FATAL_ERROR "CA bundle to embed is missing: '${CURL_CA_EMBED}'")
+  endif()
 endif()
 
 find_package(Perl)
