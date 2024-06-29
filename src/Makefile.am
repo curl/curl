@@ -88,7 +88,7 @@ CLEANFILES = tool_hugehelp.c
 # embedded text.
 NROFF=env LC_ALL=C @NROFF@ @MANOPT@ 2>/dev/null # figured out by the configure script
 
-EXTRA_DIST = mkhelp.pl \
+EXTRA_DIST = mk-file-embed.pl mkhelp.pl \
  Makefile.mk curl.rc Makefile.inc CMakeLists.txt .checksrc
 
 # Use absolute directory to disable VPATH
