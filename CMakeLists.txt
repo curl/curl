@@ -1682,6 +1682,9 @@ if(NOT CURL_DISABLE_INSTALL)
                           (USE_THREADS_POSIX AND HAVE_PTHREAD_H) OR
                           (WIN32 AND HAVE_WIN32_WINNT GREATER_EQUAL 0x600))
   _add_if("PSL"           USE_LIBPSL)
+  if(_items)
+    list(SORT _items)
+  endif()
   string(REPLACE ";" " " SUPPORT_FEATURES "${_items}")
   message(STATUS "Enabled features: ${SUPPORT_FEATURES}")
 
