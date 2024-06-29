@@ -15,7 +15,7 @@ Protocol:
 
 # NAME
 
-curl_multi_waitfds - extracts file descriptor information from a multi handle
+curl_multi_waitfds - extract file descriptor information from a multi handle
 
 # SYNOPSIS
 

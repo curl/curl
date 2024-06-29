@@ -15,7 +15,7 @@ Protocol:
 
 # NAME
 
-curl_getdate - Convert a date string to number of seconds
+curl_getdate - convert date string to number of seconds
 
 # SYNOPSIS
 

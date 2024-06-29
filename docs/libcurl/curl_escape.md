@@ -13,7 +13,7 @@ Protocol:
 
 # NAME
 
-curl_escape - URL encodes the given string
+curl_escape - URL encode a string
 
 # SYNOPSIS
 

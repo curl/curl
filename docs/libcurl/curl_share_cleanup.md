@@ -13,7 +13,7 @@ Protocol:
 
 # NAME
 
-curl_share_cleanup - Clean up a shared object
+curl_share_cleanup - close a shared object
 
 # SYNOPSIS
 

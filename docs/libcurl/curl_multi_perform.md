@@ -18,7 +18,7 @@ Protocol:
 
 # NAME
 
-curl_multi_perform - reads/writes available data from easy handles
+curl_multi_perform - run all transfers until it would block
 
 # SYNOPSIS
 

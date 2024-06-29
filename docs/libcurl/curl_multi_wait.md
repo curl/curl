@@ -14,7 +14,7 @@ Protocol:
 
 # NAME
 
-curl_multi_wait - polls on all easy handles in a multi handle
+curl_multi_wait - poll on all easy handles in a multi handle
 
 # SYNOPSIS
 

@@ -15,7 +15,7 @@ Protocol:
 
 # NAME
 
-curl_easy_duphandle - Clone a libcurl session handle
+curl_easy_duphandle - clone an easy handle
 
 # SYNOPSIS
 

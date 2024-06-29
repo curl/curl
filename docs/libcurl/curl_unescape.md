@@ -15,7 +15,7 @@ Protocol:
 
 # NAME
 
-curl_unescape - URL decodes the given string
+curl_unescape - URL decode a string
 
 # SYNOPSIS
 

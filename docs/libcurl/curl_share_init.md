@@ -13,7 +13,7 @@ Protocol:
 
 # NAME
 
-curl_share_init - Create a shared object
+curl_share_init - create a share object
 
 # SYNOPSIS
 

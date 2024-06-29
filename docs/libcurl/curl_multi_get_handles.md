@@ -15,7 +15,7 @@ Protocol:
 
 # NAME
 
-curl_multi_get_handles - returns all added easy handles
+curl_multi_get_handles - return all added easy handles
 
 # SYNOPSIS
 

@@ -13,7 +13,7 @@ Protocol:
 
 # NAME
 
-curl_global_sslset - Select SSL backend to use with libcurl
+curl_global_sslset - select SSL backend to use
 
 # SYNOPSIS
 
