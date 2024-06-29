@@ -312,14 +312,18 @@ if(ENABLE_IPV6)
   set(USE_IPV6 ON)
 endif()
 
+set(CURL_CA_EMBED_SET FALSE)
+if(DEFINED CURL_CA_EMBED AND NOT CURL_CA_EMBED STREQUAL "")
+  set(CURL_CA_EMBED_SET TRUE)
+endif()
+
 find_package(Perl)
 
 option(BUILD_LIBCURL_DOCS "to build libcurl man pages" ON)
 option(BUILD_MISC_DOCS "to build misc man pages (e.g. curl-config and mk-ca-bundle)" ON)
 option(ENABLE_CURL_MANUAL "to build the man page for curl and enable its -M/--manual option" ON)
 
-if(ENABLE_CURL_MANUAL OR BUILD_LIBCURL_DOCS OR
-   (DEFINED CURL_CA_EMBED AND NOT CURL_CA_EMBED STREQUAL ""))
+if(ENABLE_CURL_MANUAL OR BUILD_LIBCURL_DOCS OR CURL_CA_EMBED_SET)
   if(PERL_FOUND)
     set(HAVE_MANUAL_TOOLS ON)
   endif()
