@@ -24,29 +24,26 @@ curl_multi_socket - read/write available data
 #include <curl/curl.h>
 CURLMcode curl_multi_socket(CURLM *multi_handle, curl_socket_t sockfd,
                             int *running_handles);
-
-CURLMcode curl_multi_socket_all(CURLM *multi_handle,
-                                int *running_handles);
 ~~~
 
 # DESCRIPTION
 
-These functions are deprecated. Do not use. See curl_multi_socket_action(3)
+This function is deprecated. Do not use. See curl_multi_socket_action(3)
 instead.
 
 At return, the integer **running_handles** points to contains the number of
 still running easy handles within the multi handle. When this number reaches
 zero, all transfers are complete/done. Note that when you call
-curl_multi_socket_action(3) on a specific socket and the counter decreases by
-one, it DOES NOT necessarily mean that this exact socket/transfer is the one
-that completed. Use curl_multi_info_read(3) to figure out which easy handle
-that completed.
+curl_multi_socket(3) on a specific socket and the counter decreases by one, it
+DOES NOT necessarily mean that this exact socket/transfer is the one that
+completed. Use curl_multi_info_read(3) to figure out which easy handle that
+completed.
 
-The curl_multi_socket_action(3) functions inform the application about updates
-in the socket (file descriptor) status by doing none, one, or multiple calls
-to the socket callback function set with the CURLMOPT_SOCKETFUNCTION(3) option
-to curl_multi_setopt(3). They update the status with changes since the
-previous time the callback was called.
+The curl_multi_socket(3) functions inform the application about updates in the
+socket (file descriptor) status by doing none, one, or multiple calls to the
+socket callback function set with the CURLMOPT_SOCKETFUNCTION(3) option to
+curl_multi_setopt(3). They update the status with changes since the previous
+time the callback was called.
 
 Get the timeout time by setting the CURLMOPT_TIMERFUNCTION(3) option with
 curl_multi_setopt(3). Your application then gets called with information on
@@ -58,10 +55,6 @@ callback is far better than relying on polling the timeout value.
 
 Usage of curl_multi_socket(3) is deprecated, whereas the function is
 equivalent to curl_multi_socket_action(3) with **ev_bitmask** set to 0.
-
-Force libcurl to (re-)check all its internal sockets and transfers instead of
-just a single one by calling curl_multi_socket_all(3). Note that there should
-not be any reason to use this function.
 
 # EXAMPLE
 
