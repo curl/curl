@@ -1769,6 +1769,7 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
   NULL,                            /* disassociate_connection */
   wolfssl_recv,                    /* recv decrypted data */
   wolfssl_send,                    /* send data to encrypt */
+  NULL,                            /* get_tls_server_end_point */
 };
 
 #endif
