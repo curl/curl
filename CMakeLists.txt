@@ -312,15 +312,6 @@ if(ENABLE_IPV6)
   set(USE_IPV6 ON)
 endif()
 
-set(CURL_CA_EMBED_SET FALSE)
-if(BUILD_CURL_EXE AND DEFINED CURL_CA_EMBED AND NOT CURL_CA_EMBED STREQUAL "")
-  if(EXISTS "${CURL_CA_EMBED}")
-    set(CURL_CA_EMBED_SET TRUE)
-  else()
-    message(FATAL_ERROR "CA bundle to embed is missing: '${CURL_CA_EMBED}'")
-  endif()
-endif()
-
 find_package(Perl)
 
 option(BUILD_LIBCURL_DOCS "to build libcurl man pages" ON)
@@ -1179,6 +1170,15 @@ if(CURL_CA_PATH_SET AND
   message(STATUS
           "CA path only supported by OpenSSL, wolfSSL, GnuTLS or mbedTLS. "
           "Set CURL_CA_PATH=none or enable one of those TLS backends.")
+endif()
+
+set(CURL_CA_EMBED_SET FALSE)
+if(BUILD_CURL_EXE AND DEFINED CURL_CA_EMBED AND NOT CURL_CA_EMBED STREQUAL "")
+  if(EXISTS "${CURL_CA_EMBED}")
+    set(CURL_CA_EMBED_SET TRUE)
+  else()
+    message(FATAL_ERROR "CA bundle to embed is missing: '${CURL_CA_EMBED}'")
+  endif()
 endif()
 
 # Check for header files
