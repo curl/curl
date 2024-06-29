@@ -54,7 +54,7 @@ endif()
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
 
-if(DEFINED CURL_CA_EMBED AND NOT CURL_CA_EMBED STREQUAL "")
+if(CURL_CA_EMBED_SET)
   if(PERL_FOUND)
     add_definitions("-DCURL_CA_EMBED")
     add_custom_command(
