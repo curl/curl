@@ -17,7 +17,7 @@ Protocol:
 
 # NAME
 
-curl_url - returns a new URL handle
+curl_url - create a URL handle
 
 # SYNOPSIS
 

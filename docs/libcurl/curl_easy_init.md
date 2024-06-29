@@ -17,7 +17,7 @@ Protocol:
 
 # NAME
 
-curl_easy_init - Start a libcurl easy session
+curl_easy_init - create an easy handle
 
 # SYNOPSIS
 

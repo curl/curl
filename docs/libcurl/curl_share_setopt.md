@@ -13,7 +13,7 @@ Protocol:
 
 # NAME
 
-curl_share_setopt - Set options for a shared object
+curl_share_setopt - set options for a shared object
 
 # SYNOPSIS
 

@@ -13,7 +13,7 @@ Protocol:
 
 # NAME
 
-curl_easy_unescape - URL decodes the given string
+curl_easy_unescape - URL decode a string
 
 # SYNOPSIS
 

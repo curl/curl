@@ -13,7 +13,7 @@ Protocol:
 
 # NAME
 
-curl_global_init_mem - Global libcurl initialization with memory callbacks
+curl_global_init_mem - global libcurl initialization with memory callbacks
 
 # SYNOPSIS
 

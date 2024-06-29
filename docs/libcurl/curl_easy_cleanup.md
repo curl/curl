@@ -16,7 +16,7 @@ Protocol:
 
 # NAME
 
-curl_easy_cleanup - End a libcurl easy handle
+curl_easy_cleanup - free an easy handle
 
 # SYNOPSIS
 

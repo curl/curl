@@ -13,7 +13,7 @@ Protocol:
 
 # NAME
 
-curl_formget - serialize a previously built multipart form POST chain
+curl_formget - serialize a multipart form POST chain
 
 # SYNOPSIS
 

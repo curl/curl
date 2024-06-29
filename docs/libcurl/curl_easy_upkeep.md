@@ -13,7 +13,7 @@ Protocol:
 
 # NAME
 
-curl_easy_upkeep - Perform any connection upkeep checks.
+curl_easy_upkeep - keep existing connections alive
 
 # SYNOPSIS
 

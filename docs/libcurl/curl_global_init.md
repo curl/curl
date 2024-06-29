@@ -17,7 +17,7 @@ Protocol:
 
 # NAME
 
-curl_global_init - Global libcurl initialization
+curl_global_init - global libcurl initialization
 
 # SYNOPSIS
 
