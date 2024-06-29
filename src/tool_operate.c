@@ -1667,14 +1667,22 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           blob.data = (void *)curl_ca_embed;
           blob.len = strlen((const char *)curl_ca_embed);
           blob.flags = CURL_BLOB_NOCOPY;
-          curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
+          result = curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
+          if(result == CURLE_NOT_BUILT_IN) {
+            warnf(global,
+                  "ignoring embedded CA bundle, not supported by libcurl");
+          }
         }
         if(!config->proxy_cacert && !config->proxy_capath) {
           struct curl_blob blob;
           blob.data = (void *)curl_ca_embed;
           blob.len = strlen((const char *)curl_ca_embed);
           blob.flags = CURL_BLOB_NOCOPY;
-          curl_easy_setopt(curl, CURLOPT_PROXY_CAINFO_BLOB, &blob);
+          result = curl_easy_setopt(curl, CURLOPT_PROXY_CAINFO_BLOB, &blob);
+          if(result == CURLE_NOT_BUILT_IN) {
+            warnf(global,
+                  "ignoring embedded CA bundle, not supported by libcurl");
+          }
         }
 #endif
 
