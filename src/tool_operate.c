@@ -94,6 +94,10 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
+#ifdef CURL_CA_EMBED
+extern const unsigned char curl_ca_embed[];
+#endif
+
 #ifndef O_BINARY
 /* since O_BINARY as used in bitmasks, setting it to zero makes it usable in
    source code but yet it does not ruin anything */
@@ -1656,6 +1660,23 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           else if(result)
             break;
         }
+
+#ifdef CURL_CA_EMBED
+        if(!config->cacert && !config->capath) {
+          struct curl_blob blob;
+          blob.data = (void *)curl_ca_embed;
+          blob.len = strlen((const char *)curl_ca_embed);
+          blob.flags = CURL_BLOB_NOCOPY;
+          curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
+        }
+        if(!config->proxy_cacert && !config->proxy_capath) {
+          struct curl_blob blob;
+          blob.data = (void *)curl_ca_embed;
+          blob.len = strlen((const char *)curl_ca_embed);
+          blob.flags = CURL_BLOB_NOCOPY;
+          curl_easy_setopt(curl, CURLOPT_PROXY_CAINFO_BLOB, &blob);
+        }
+#endif
 
         if(config->crlfile)
           my_setopt_str(curl, CURLOPT_CRLFILE, config->crlfile);
