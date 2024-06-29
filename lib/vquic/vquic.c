@@ -335,8 +335,8 @@ CURLcode vquic_send_tail_split(struct Curl_cfilter *cf, struct Curl_easy *data,
 #if defined(HAVE_SENDMMSG) || defined(HAVE_SENDMSG)
 static size_t msghdr_get_udp_gro(struct msghdr *msg)
 {
-  uint16_t gso_size = 0;
-#ifdef UDP_GRO
+  int gso_size = 0;
+#if defined(__linux__) && defined(UDP_GRO)
   struct cmsghdr *cmsg;
 
   /* Workaround musl CMSG_NXTHDR issue */
@@ -358,7 +358,7 @@ static size_t msghdr_get_udp_gro(struct msghdr *msg)
 #endif
   (void)msg;
 
-  return gso_size;
+  return (size_t)gso_size;
 }
 #endif
 
