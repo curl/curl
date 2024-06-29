@@ -247,6 +247,9 @@ void tool_version_info(void)
     printf("Features:");
     for(builtin = feature_names; *builtin; ++builtin)
       printf(" %s", *builtin);
+#ifdef CURL_CA_EMBED
+    printf(" CAcert");
+#endif
     puts(""); /* newline */
   }
   if(strcmp(CURL_VERSION, curlinfo->version)) {
