@@ -135,6 +135,16 @@ $(HUGE):
 	echo '#include "tool_hugehelp.h"' >> $(HUGE)
 endif
 
+if CURL_CA_EMBED_SET
+AM_CPPFLAGS += -DCURL_CA_EMBED
+MK_FILE_EMBED = $(top_srcdir)/src/mk-file-embed.pl
+CA_EMBED_CSOURCE = tool_ca_embed.c
+CURL_CFILES += $(CA_EMBED_CSOURCE)
+CLEANFILES += $(CA_EMBED_CSOURCE)
+$(CA_EMBED_CSOURCE): $(MK_FILE_EMBED)
+	$(PERL) $(MK_FILE_EMBED) --var curl_ca_embed < $(CURL_CA_EMBED) > $(CA_EMBED_CSOURCE)
+endif
+
 # ignore tool_hugehelp.c since it is generated source code and it plays
 # by slightly different rules!
 checksrc:
