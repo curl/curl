@@ -4846,6 +4846,10 @@ else
   ])
 fi
 
+if test "x$CURL_CA_EMBED" != "x"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES CAcert"
+fi
+
 dnl replace spaces with newlines
 dnl sort the lines
 dnl replace the newlines back to spaces

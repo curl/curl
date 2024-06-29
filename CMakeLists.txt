@@ -1751,6 +1751,7 @@ if(NOT CURL_DISABLE_INSTALL)
                           (USE_THREADS_POSIX AND HAVE_PTHREAD_H) OR
                           (WIN32 AND HAVE_WIN32_WINNT GREATER_EQUAL 0x600))
   _add_if("PSL"           USE_LIBPSL)
+  _add_if("CAcert"        CURL_CA_EMBED_SET)
   if(_items)
     if(NOT CMAKE_VERSION VERSION_LESS 3.13)
       list(SORT _items CASE INSENSITIVE)
