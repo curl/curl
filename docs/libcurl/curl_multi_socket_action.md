@@ -16,7 +16,7 @@ Protocol:
 
 # NAME
 
-curl_multi_socket_action - reads/writes available data given an action
+curl_multi_socket_action - read/write available data given an action
 
 # SYNOPSIS
 

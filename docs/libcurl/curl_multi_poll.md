@@ -15,7 +15,7 @@ Protocol:
 
 # NAME
 
-curl_multi_poll - polls on all easy handles in a multi handle
+curl_multi_poll - poll on all easy handles in a multi handle
 
 # SYNOPSIS
 

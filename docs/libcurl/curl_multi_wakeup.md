@@ -13,7 +13,7 @@ Protocol:
 
 # NAME
 
-curl_multi_wakeup - wakes up a sleeping curl_multi_poll call
+curl_multi_wakeup - wake up a sleeping curl_multi_poll call
 
 # SYNOPSIS
 

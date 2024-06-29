@@ -18,7 +18,7 @@ Protocol:
 
 # NAME
 
-curl_multi_fdset - extracts file descriptor information from a multi handle
+curl_multi_fdset - extract file descriptor information from a multi handle
 
 # SYNOPSIS
 
