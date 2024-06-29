@@ -10,6 +10,7 @@ Added: 7.5
 Multi: single
 See-also:
   - capath
+  - dump-ca-embed
   - insecure
 Example:
   - --cacert CA-file.txt $URL

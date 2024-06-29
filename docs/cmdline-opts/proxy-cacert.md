@@ -11,6 +11,7 @@ See-also:
   - proxy-capath
   - cacert
   - capath
+  - dump-ca-embed
   - proxy
 Example:
   - --proxy-cacert CA-file.txt -x https://proxy $URL

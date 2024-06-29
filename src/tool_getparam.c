@@ -122,6 +122,7 @@ typedef enum {
   C_DOH_CERT_STATUS,
   C_DOH_INSECURE,
   C_DOH_URL,
+  C_DUMP_CA_EMBED,
   C_DUMP_HEADER,
   C_ECH,
   C_EGD_FILE,
@@ -408,6 +409,7 @@ static const struct LongShort aliases[]= {
   {"doh-cert-status",            ARG_BOOL, ' ', C_DOH_CERT_STATUS},
   {"doh-insecure",               ARG_BOOL, ' ', C_DOH_INSECURE},
   {"doh-url"        ,            ARG_STRG, ' ', C_DOH_URL},
+  {"dump-ca-embed",              ARG_NONE, ' ', C_DUMP_CA_EMBED},
   {"dump-header",                ARG_FILE, 'D', C_DUMP_HEADER},
   {"ech",                        ARG_STRG, ' ', C_ECH},
   {"egd-file",                   ARG_STRG, ' ', C_EGD_FILE},
@@ -2113,6 +2115,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case C_URL_QUERY:  /* --url-query */
       err = url_query(nextarg, global, config);
       break;
+    case C_DUMP_CA_EMBED: /* --dump-ca-embed */
+      err = PARAM_CA_EMBED_REQUESTED;
+      break;
     case C_DUMP_HEADER: /* --dump-header */
       err = getstr(&config->headerfile, nextarg, DENY_BLANK);
       break;
@@ -2984,7 +2989,8 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
   if(result && result != PARAM_HELP_REQUESTED &&
      result != PARAM_MANUAL_REQUESTED &&
      result != PARAM_VERSION_INFO_REQUESTED &&
-     result != PARAM_ENGINES_REQUESTED) {
+     result != PARAM_ENGINES_REQUESTED &&
+     result != PARAM_CA_EMBED_REQUESTED) {
     const char *reason = param2text(result);
 
     if(orig_opt && strcmp(":", orig_opt))

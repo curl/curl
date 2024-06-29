@@ -94,6 +94,10 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
+#ifdef CURL_CA_EMBED
+extern const unsigned char curl_ca_embed[];
+#endif
+
 #ifndef O_BINARY
 /* since O_BINARY as used in bitmasks, setting it to zero makes it usable in
    source code but yet it does not ruin anything */
@@ -1657,6 +1661,37 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             break;
         }
 
+#ifdef CURL_CA_EMBED
+        if(!config->cacert && !config->capath) {
+          struct curl_blob blob;
+          blob.data = (void *)curl_ca_embed;
+          blob.len = strlen((const char *)curl_ca_embed);
+          blob.flags = CURL_BLOB_NOCOPY;
+          notef(config->global,
+                "Using embedded CA bundle (%zu bytes)",
+                blob.len);
+          result = curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
+          if(result == CURLE_NOT_BUILT_IN) {
+            warnf(global,
+                  "ignoring embedded CA bundle, not supported by libcurl");
+          }
+        }
+        if(!config->proxy_cacert && !config->proxy_capath) {
+          struct curl_blob blob;
+          blob.data = (void *)curl_ca_embed;
+          blob.len = strlen((const char *)curl_ca_embed);
+          blob.flags = CURL_BLOB_NOCOPY;
+          notef(config->global,
+                "Using embedded CA bundle, for proxies (%zu bytes)",
+                blob.len);
+          result = curl_easy_setopt(curl, CURLOPT_PROXY_CAINFO_BLOB, &blob);
+          if(result == CURLE_NOT_BUILT_IN) {
+            warnf(global,
+                  "ignoring embedded CA bundle, not supported by libcurl");
+          }
+        }
+#endif
+
         if(config->crlfile)
           my_setopt_str(curl, CURLOPT_CRLFILE, config->crlfile);
         if(config->proxy_crlfile)
@@ -2842,6 +2877,12 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
       /* Check if we were asked to list the SSL engines */
       else if(res == PARAM_ENGINES_REQUESTED)
         tool_list_engines();
+      /* Check if we were asked to dump the embedded CA bundle */
+      else if(res == PARAM_CA_EMBED_REQUESTED) {
+#ifdef CURL_CA_EMBED
+        printf("%s", curl_ca_embed);
+#endif
+      }
       else if(res == PARAM_LIBCURL_UNSUPPORTED_PROTOCOL)
         result = CURLE_UNSUPPORTED_PROTOCOL;
       else if(res == PARAM_READ_ERROR)

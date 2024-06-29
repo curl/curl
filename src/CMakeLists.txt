@@ -54,6 +54,22 @@ endif()
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
 
+if(CURL_CA_EMBED_SET)
+  if(PERL_FOUND)
+    add_definitions("-DCURL_CA_EMBED")
+    add_custom_command(
+      OUTPUT tool_ca_embed.c
+      COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/mk-file-embed.pl" --var curl_ca_embed < "${CURL_CA_EMBED}" > tool_ca_embed.c
+      DEPENDS
+        "${CURL_CA_EMBED}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/mk-file-embed.pl"
+      VERBATIM)
+    list(APPEND CURL_CFILES tool_ca_embed.c)
+  else()
+    message(WARNING "Perl not found. Will not embed the CA bundle.")
+  endif()
+endif()
+
 if(WIN32)
   list(APPEND CURL_CFILES curl.rc)
 endif()
