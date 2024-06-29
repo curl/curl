@@ -148,11 +148,12 @@ $(CA_EMBED_CSOURCE):
 	echo 'extern const void *curl_ca_embed; const void *curl_ca_embed;' > $(CA_EMBED_CSOURCE)
 endif
 
-# ignore tool_hugehelp.c since it is generated source code and it plays
-# by slightly different rules!
+# ignore generated C files since they play by slightly different rules!
 checksrc:
 	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
-	-W$(srcdir)/tool_hugehelp.c $(srcdir)/*.[ch])
+	  -W$(srcdir)/$(HUGE) \
+	  -W$(srcdir)/$(CA_EMBED_CSOURCE) \
+	  $(srcdir)/*.[ch])
 
 if DEBUGBUILD
 # for debug builds, we scan the sources on all regular make invokes
