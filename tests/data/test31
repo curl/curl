@@ -149,7 +149,12 @@ perl -e "print 'Test requires default test server host' if ( '%HOSTIP' ne '127.0
 </precheck>
 <features>
 cookies
+debug
 </features>
+# This date is exactly: Thu Nov 16 10:12:59 AM UTC 2023
+<setenv>
+CURL_TIME=1700129579
+</setenv>
 </client>
 
 # Verify data after the test has been "shot"
@@ -171,11 +176,7 @@ test31.curl	FALSE	/we/want/	FALSE	0	withspaces2	before equals
 test31.curl	FALSE	/we/want/	FALSE	0	withspaces	yes  within and around
 .test31.curl	TRUE	/we/want/	FALSE	0	blexp	yesyes
 #HttpOnly_test31.curl	FALSE	/silly/	FALSE	0	magic	yessir
-%if large-time
-test31.curl	FALSE	/we/want/	FALSE	17517902187	nodomain	value
-%else
-test31.curl	FALSE	/we/want/	FALSE	2118138987	nodomain	value
-%endif
+test31.curl	FALSE	/we/want/	FALSE	1734689579	nodomain	value
 .test31.curl	TRUE	/	FALSE	0	partmatch	present
 #HttpOnly_.test31.curl	TRUE	/p4/	FALSE	0	httponly	myvalue1
 #HttpOnly_.test31.curl	TRUE	/p4/	FALSE	0	httpo4	value4
