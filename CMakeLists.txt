@@ -1673,10 +1673,10 @@ if(NOT CURL_DISABLE_INSTALL)
   _add_if("HTTP2"         USE_NGHTTP2)
   _add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE OR USE_OPENSSL_QUIC)
   _add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
-  # TODO wolfSSL only support this from v5.0.0 onwards
   _add_if("HTTPS-proxy"   SSL_ENABLED AND (USE_OPENSSL OR USE_GNUTLS
                           OR USE_SCHANNEL OR USE_RUSTLS OR USE_BEARSSL OR
-                          USE_MBEDTLS OR USE_SECTRANSP))
+                          USE_MBEDTLS OR USE_SECTRANSP OR
+                          (USE_WOLFSSL AND NOT WolfSSL_VERSION VERSION_LESS 5.0.0)))
   _add_if("unicode"       ENABLE_UNICODE)
   _add_if("threadsafe"    HAVE_ATOMIC OR
                           (USE_THREADS_POSIX AND HAVE_PTHREAD_H) OR

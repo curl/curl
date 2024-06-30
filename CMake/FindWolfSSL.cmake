@@ -21,16 +21,40 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-find_path(WolfSSL_INCLUDE_DIR NAMES wolfssl/ssl.h)
-find_library(WolfSSL_LIBRARY NAMES wolfssl)
-mark_as_advanced(WolfSSL_INCLUDE_DIR WolfSSL_LIBRARY)
+
+find_package(PkgConfig QUIET)
+pkg_check_modules(PC_WOLFSSL QUIET "wolfssl")
+
+find_path(WolfSSL_INCLUDE_DIR
+  NAMES "wolfssl/ssl.h"
+  HINTS ${PC_WOLFSSL_INCLUDE_DIRS}
+)
+
+find_library(WolfSSL_LIBRARY
+  NAMES "wolfssl"
+  HINTS ${PC_WOLFSSL_LIBRARY_DIRS}
+)
+
+if(WolfSSL_INCLUDE_DIR)
+  set(_version_regex "^#define[ \t]+LIBWOLFSSL_VERSION_STRING[ \t]+\"([^\"]+)\".*")
+  file(STRINGS "${WolfSSL_INCLUDE_DIR}/wolfssl/version.h"
+    WolfSSL_VERSION REGEX "${_version_regex}")
+  string(REGEX REPLACE "${_version_regex}" "\\1"
+    WolfSSL_VERSION "${WolfSSL_VERSION}")
+  unset(_version_regex)
+endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(WolfSSL
-  REQUIRED_VARS WolfSSL_INCLUDE_DIR WolfSSL_LIBRARY
-  )
+  REQUIRED_VARS
+    WolfSSL_INCLUDE_DIR
+    WolfSSL_LIBRARY
+  VERSION_VAR WolfSSL_VERSION
+)
 
 if(WolfSSL_FOUND)
   set(WolfSSL_INCLUDE_DIRS ${WolfSSL_INCLUDE_DIR})
-  set(WolfSSL_LIBRARIES ${WolfSSL_LIBRARY})
+  set(WolfSSL_LIBRARIES    ${WolfSSL_LIBRARY})
 endif()
+
+mark_as_advanced(WolfSSL_INCLUDE_DIR WolfSSL_LIBRARY)
