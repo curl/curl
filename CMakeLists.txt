@@ -1734,7 +1734,8 @@ if(NOT CURL_DISABLE_INSTALL)
     list(SORT _items)
   endif()
   string(REPLACE ";" " " SUPPORT_PROTOCOLS "${_items}")
-  message(STATUS "Enabled protocols: ${SUPPORT_PROTOCOLS}")
+  string(TOLOWER "${SUPPORT_PROTOCOLS}" SUPPORT_PROTOCOLS_LOWER)
+  message(STATUS "Enabled protocols: ${SUPPORT_PROTOCOLS_LOWER}")
 
   # Clear list and collect SSL backends
   set(_items)
