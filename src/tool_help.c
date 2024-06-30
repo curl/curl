@@ -244,13 +244,24 @@ void tool_version_info(void)
     puts(""); /* newline */
   }
   if(feature_names[0]) {
-    printf("Features:");
-    for(builtin = feature_names; *builtin; ++builtin)
-      printf(" %s", *builtin);
+    const char **feat_ext;
+    size_t feat_ext_count = feature_count;
 #ifdef CURL_CA_EMBED
-    printf(" CAcert");
+    ++feat_ext_count;
 #endif
+    feat_ext = malloc(sizeof(*feature_names) * (feat_ext_count + 1));
+    memcpy(feat_ext, feature_names, sizeof(*feature_names) * feature_count);
+    feat_ext_count = feature_count;
+#ifdef CURL_CA_EMBED
+    feat_ext[feat_ext_count++] = "CAcert";
+#endif
+    feat_ext[feat_ext_count] = NULL;
+    qsort(feat_ext, feat_ext_count, sizeof(*feat_ext), struplocompare4sort);
+    printf("Features:");
+    for(builtin = feat_ext; *builtin; ++builtin)
+      printf(" %s", *builtin);
     puts(""); /* newline */
+    free(feat_ext);
   }
   if(strcmp(CURL_VERSION, curlinfo->version)) {
     printf("WARNING: curl and libcurl versions do not match. "
