@@ -743,7 +743,7 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
   struct mqtt_conn *mqtt = &conn->proto.mqtt;
   struct MQTT *mq = data->req.p.mqtt;
   ssize_t nread;
-  unsigned char byte;
+  unsigned char recvbyte;
 
   *done = FALSE;
 
@@ -776,13 +776,13 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
     FALLTHROUGH();
   case MQTT_REMAINING_LENGTH:
     do {
-      result = Curl_xfer_recv(data, (char *)&byte, 1, &nread);
+      result = Curl_xfer_recv(data, (char *)&recvbyte, 1, &nread);
       if(result || !nread)
         break;
-      Curl_debug(data, CURLINFO_HEADER_IN, (char *)&byte, 1);
-      mq->pkt_hd[mq->npacket++] = byte;
-    } while((byte & 0x80) && (mq->npacket < 4));
-    if(!result && nread && (byte & 0x80))
+      Curl_debug(data, CURLINFO_HEADER_IN, (char *)&recvbyte, 1);
+      mq->pkt_hd[mq->npacket++] = recvbyte;
+    } while((recvbyte & 0x80) && (mq->npacket < 4));
+    if(!result && nread && (recvbyte & 0x80))
       /* MQTT supports up to 127 * 128^0 + 127 * 128^1 + 127 * 128^2 +
          127 * 128^3 bytes. server tried to send more */
       result = CURLE_WEIRD_SERVER_REPLY;
