@@ -1645,9 +1645,15 @@ if(NOT CURL_DISABLE_INSTALL)
     endif()
   endmacro()
 
-  # NTLM support requires crypto function adaptions from various SSL libs
-  if(NOT (CURL_DISABLE_NTLM) AND
-      (USE_OPENSSL OR USE_MBEDTLS OR USE_SECTRANSP OR USE_WIN32_CRYPTO OR USE_GNUTLS))
+  # NTLM support requires crypto functions from various SSL libs.
+  # These conditions must match those in lib/curl_setup.h.
+  if(NOT CURL_DISABLE_NTLM AND
+     (USE_OPENSSL OR
+      USE_MBEDTLS OR
+      USE_GNUTLS OR
+      USE_SECTRANSP OR
+      USE_WIN32_CRYPTO OR
+      (USE_WOLFSSL AND HAVE_WOLFSSL_DES_ECB_ENCRYPT)))
     set(use_curl_ntlm_core ON)
   endif()
 
