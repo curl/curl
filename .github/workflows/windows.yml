@@ -421,7 +421,7 @@ jobs:
   msvc:
     name: 'msvc (${{ matrix.arch }}, ${{ matrix.plat }}, ${{ matrix.name }})'
     runs-on: windows-latest
-    timeout-minutes: 45
+    timeout-minutes: 55
     env:
       VCPKG_DISABLE_METRICS: '1'
     strategy:
@@ -442,6 +442,13 @@ jobs:
           type: 'Debug'
           tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
           config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_USE_LIBPSL=ON -DCURL_ZSTD=ON -DUSE_NGHTTP2=ON -DCURL_USE_GSASL=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DUSE_LIBIDN2=ON -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON'
+        - name: 'openssl'
+          install: 'brotli zstd zlib nghttp2 nghttp3 openssl libssh2'
+          arch: 'x64'
+          plat: 'uwp'
+          type: 'Debug'
+          tflags: 'skipall'
+          config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DUSE_NGHTTP2=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DUSE_LIBIDN2=ON -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON'
         - name: 'no ssl'
           install: 'brotli libpsl zstd zlib'
           arch: 'x64'
@@ -456,9 +463,9 @@ jobs:
       - name: 'restore cache dependencies'
         uses: actions/cache/restore@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         with:
-          path: 'cache/${{ matrix.name }}'
-          key: ${{ matrix.plat }}-${{ matrix.name }}
-          restore-keys: ${{ matrix.plat }}-${{ matrix.name }}
+          path: 'cache/${{ matrix.arch }}-${{ matrix.plat }}-${{ matrix.name }}'
+          key: ${{ matrix.arch }}-${{ matrix.plat }}-${{ matrix.name }}
+          restore-keys: ${{ matrix.arch }}-${{ matrix.plat }}-${{ matrix.name }}
 
       - name: 'vcpkg init'
         timeout-minutes: 5
@@ -473,7 +480,7 @@ jobs:
         shell: bash
         run: |
           export VCPKG_ROOT="$PWD/vcpkg"
-          export CURRENT_BINARY_CACHE='cache/${{ matrix.name }}'
+          export CURRENT_BINARY_CACHE='cache/${{ matrix.arch }}-${{ matrix.plat }}-${{ matrix.name }}'
           mkdir -p "$CURRENT_BINARY_CACHE"
           export VCPKG_BINARY_SOURCES="clear;files,$GITHUB_WORKSPACE/$CURRENT_BINARY_CACHE,readwrite;"
           vcpkg/vcpkg x-set-installed ${{ matrix.install }} --triplet=${{ matrix.arch }}-${{ matrix.plat }}
@@ -482,22 +489,15 @@ jobs:
         id: cache-save
         uses: actions/cache/save@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         with:
-          path: 'cache/${{ matrix.name }}'
-          key: ${{ matrix.plat }}-${{ matrix.name }}-${{ hashFiles('vcpkg/installed/vcpkg/info/*', 'vcpkg/installed/vcpkg/updates/*') }}
+          path: 'cache/${{ matrix.arch }}-${{ matrix.plat }}-${{ matrix.name }}'
+          key: ${{ matrix.arch }}-${{ matrix.plat }}-${{ matrix.name }}-${{ hashFiles('vcpkg/installed/vcpkg/info/*', 'vcpkg/installed/vcpkg/updates/*') }}
 
       - name: 'cmake configure'
         timeout-minutes: 5
         shell: bash
         run: |
-          if [ '${{ matrix.plat }}' = 'uwp' ]; then
-            system='WindowsStore'
-            options='-DCMAKE_SYSTEM_VERSION=10.0'
-          else
-            system='Windows'
-          fi
           export VCPKG_ROOT="$PWD/vcpkg"
-          cmake -B bld ${options} \
-            "-DCMAKE_SYSTEM_NAME=${system}" \
+          cmake -B bld \
             "-DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" \
             "-DVCPKG_INSTALLED_DIR=$VCPKG_ROOT/installed" \
             '-DVCPKG_TARGET_TRIPLET=${{ matrix.arch }}-${{ matrix.plat }}' \
@@ -544,7 +544,9 @@ jobs:
           export debug_lib="$VCPKG_TRIPLET_DIR/debug/bin"
           export release_lib="$VCPKG_TRIPLET_DIR/bin"
           export PATH="$PWD/bld/lib/:$release_lib:$debug_lib:$PATH"
-          bld/src/curl.exe --disable --version
+          if [ '${{ matrix.plat }}' != 'uwp' ]; then
+            bld/src/curl.exe --disable --version
+          fi
 
       - name: 'cmake build tests'
         if: ${{ matrix.tflags != 'skipall' }}
