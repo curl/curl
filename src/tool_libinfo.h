@@ -34,6 +34,7 @@ extern const char * const *built_in_protos;
 extern size_t proto_count;
 
 extern const char * const *feature_names;
+extern size_t feature_count;
 
 extern const char *proto_file;
 extern const char *proto_ftp;
