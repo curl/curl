@@ -4,7 +4,7 @@ curl and libcurl 8.8.1
  Command line options:         263
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3199
+ Contributors:                 3200
 
 This release includes the following changes:
 
@@ -38,6 +38,7 @@ This release includes the following bugfixes:
  o cmake: add CURL_USE_GSASL option with detection + CI test [133]
  o cmake: allow `ENABLE_CURLDEBUG=OFF` with `ENABLE_DEBUG=ON` [26]
  o cmake: allow SOVERSION override with `CURL_LIBCURL_SOVERSION` [120]
+ o cmake: alpha-sort feature list [161]
  o cmake: always build unit tests with the `testdeps` target [20]
  o cmake: bring `curl-config.cmake` closer to `FindCURL` [130]
  o cmake: enable SOVERSION for Cygwin and `CMAKE_DLL_NAME_WITH_SOVERSION` [119]
@@ -66,17 +67,20 @@ This release includes the following bugfixes:
  o cookie-jar.md: see also --junk-session-cookies [144]
  o curl-config: revert to backticks to support old target envs [88]
  o curl: make warnings and other messages aware of terminal width [58]
+ o curl_mprintf.md: add missing comma
  o curl_multi_poll.md: expand the example with an custom file descriptor [21]
  o curl_url_set.md: libcurl only parses :// URLs [48]
  o CURLOPT_CONNECTTIMEOUT*: clarify, document the milliseond version [105]
  o CURLOPT_ECH.md: remove repeated 'if' [109]
  o CURLOPT_NETRC.md: clarify what it does on Windows [140]
  o CURLOPT_RESOLVE.md: mention hostname can be wildcard ('*') [150]
+ o CURLOPT_TLSAUTH_PASSWORD/USERNAME.md: language fixups [155]
  o DISTROS: add a link to the list archive [22]
  o DISTROS: add MSYS2 (native) links [100]
  o Dockerfile: update debian:bookworm-slim to 84d83b2 [121]
  o docs/cmdline-opts: fix mail-auth example TLD typo [35]
  o docs/cmdline-opts: remove two superfluous "Added in" mentions [143]
+ o docs/libcurl: polish the single-line descriptions [159]
  o docs/Makefile.am: make curl-config.1 install [14]
  o docs: reference non deprecated libcurl options [113]
  o doh-insecure.md: expand [96]
@@ -92,12 +96,14 @@ This release includes the following bugfixes:
  o GHA: disable TFTP tests in Windows jobs
  o GHA: enable tests 1139, 1177, 1477 on Windows [59]
  o GHA: unify http3 workflows into one [77]
+ o GHA: use vcpkg to install packages for MSVC jobs [145]
  o gnutls: improve TLS shutdown [62]
  o gnutls: pass in SNI name, not hostname when checking cert [114]
  o http/3: add shutdown support [154]
  o http: remove "struct HTTP" [134]
  o http: write last header line late [44]
  o lib/v*: tidy up types and casts [64]
+ o lib: add a few DEBUGASSERT(data) to aid code analyzers [187]
  o lib: fix gcc warning in certain debug builds [19]
  o lib: fix thread entry point to return `DWORD` on WinCE [85]
  o lib: graceful connection shutdown [162]
@@ -109,6 +115,8 @@ This release includes the following bugfixes:
  o managen: "added in" fixes [131]
  o managen: cleanups to generate nicer-looking output [141]
  o managen: error on trailing blank lines in input files [165]
+ o managen: insert final .fi for files ending with a quote [174]
+ o managen: introduce "Multi: per-URL" [176]
  o managen: only output .RE for manpage output [156]
  o managen: output tabs for each 8 leading spaces [164]
  o managen: warn on excessively long help texts [87]
@@ -116,9 +124,11 @@ This release includes the following bugfixes:
  o mbedtls: send close-notify on close [11]
  o mbedtls: v3.6.0 workarounds [89]
  o misc: fix typos [108]
+ o mk-ca-bundle.pl: delay 'curl -V' execution until it is needed [168]
  o multi: add multi->proto_hash, a key-value store for protocol data [37]
  o multi: fix multi_wait() timeout handling [51]
  o multi: multi_getsock(), check correct socket [167]
+ o ngtcp2+quictls: fix cert-status use [173]
  o noproxy: test bad ipv6 net size first [82]
  o openssl/gnutls: rectify the TLS version checks for QUIC [61]
  o openssl: fix %-specifier in infof() call [57]
@@ -130,6 +140,8 @@ This release includes the following bugfixes:
  o quic: enable UDP GRO [157]
  o quic: openssl quic, cmake and doc version update to 3.3.0 [148]
  o quic: require at least OpenSSL 3.3 for QUIC [158]
+ o quic: update to quiche 0.22.0 [175]
+ o quiche: fix operand of ‘?:’ changes signedness [177]
  o request.md: language fix [70]
  o request: change the struct field bodywrites to a bool, only for hyper [132]
  o runtests: sort test IDs in summary lines [33]
@@ -141,6 +153,7 @@ This release includes the following bugfixes:
  o socket: change TCP keepalive from ms to seconds on DragonFly BSD [74]
  o socket: use SOCK_NONBLOCK to eliminate extra system call [86]
  o socketpair: add `eventfd` and use `SOCK_NONBLOCK` for `socketpair()` [81]
+ o src/Makefile.am: remove SUBDIRS assignment [172]
  o system_win32: add missing curl.h include [160]
  o tcpkeepalive: support TCP keep-alive parameters on Solaris <11.4 [91]
  o test1486: verify that write-out.md and tool_writeout.c are in sync [112]
@@ -167,6 +180,7 @@ This release includes the following bugfixes:
  o transfer: set CSELECT_IN if there is data pending [118]
  o unit2604: use 'unitfail' instead of 'error' variable [153]
  o url: allow DoH transfers to override max connection limit [68]
+ o verify-synopsis.pl: work with .md files [185]
  o vms: fixed language in comment [110]
  o vtls: deprioritize Secure Transport [71]
  o winbuild: fix PE version info debug flag [1]
@@ -179,6 +193,7 @@ This release includes the following bugfixes:
  o x509asn1: fallback to dotted OID representation [69]
  o x509asn1: make Curl_extract_certinfo store error message [136]
  o x509asn1: prevent NULL dereference [152]
+ o x509asn1: remove superfluous free()
  o x509asn1: remove two static variables [126]
 
 This release includes the following known bugs:
@@ -200,16 +215,16 @@ advice from friends like these:
   Daniel Stenberg, dependabot[bot], Dexter Gerig, dogma, Dorian Craps,
   edmcln on github, Eli Schwartz, Elliott Balsley, fds242 on github,
   Guilherme Puida, Harry Sintonen, James Abbatiello, Jan Venekamp,
-  Jay Guerette, Jiang Wenjian, Jonathan Matthews, Joseph Chen, Kai Pastor,
-  kartatz, Keerthi Timmaraju, Lee Li, Luke Hamburg, Marcel Raad,
+  Jay Guerette, Jiang Wenjian, Jonathan Matthews, Joseph Chen, Junho Choi,
+  Kai Pastor, kartatz, Keerthi Timmaraju, Lee Li, Luke Hamburg, Marcel Raad,
   Matthias Gatto, Matthieu Baerts, Matt Jolly, Morgan Willcock,
   Olivier Bonaventure, Orgad Shaneh, Patrick Monnerat, Pavel Pavlov,
-  pszlazak on github, RainRat, Ray Satiro, renovate[bot], Ryan Carsten Schmidt,
-  Samuel Chiang, saurabhsingh-dev on github, Sebastian Andersson,
-  Sergey Bronnikov, Sergey Markelov, Stefan Eissing, Stephen Farrell,
-  Tal Regev, Tatsuhiro Tsujikawa, Viktor Szakats, vvb2060, Yedaya Katsman, z2_,
-  李四
-  (63 contributors)
+  Philip Heiduck, pszlazak on github, RainRat, Ray Satiro, renovate[bot],
+  Ryan Carsten Schmidt, Samuel Chiang, saurabhsingh-dev on github,
+  Sebastian Andersson, Sergey Bronnikov, Sergey Markelov, Sertonix,
+  Stefan Eissing, Stephen Farrell, Tal Regev, Tatsuhiro Tsujikawa,
+  Viktor Szakats, vvb2060, Yedaya Katsman, z2_, 李四
+  (66 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -357,6 +372,7 @@ References to bug reports and discussions on issues:
  [142] = https://curl.se/bug/?i=13995
  [143] = https://curl.se/bug/?i=14000
  [144] = https://curl.se/bug/?i=13996
+ [145] = https://curl.se/bug/?i=13979
  [146] = https://curl.se/bug/?i=13991
  [147] = https://curl.se/bug/?i=13989
  [148] = https://curl.se/bug/?i=14028
@@ -366,14 +382,26 @@ References to bug reports and discussions on issues:
  [152] = https://curl.se/bug/?i=13978
  [153] = https://curl.se/bug/?i=13967
  [154] = https://curl.se/bug/?i=14022
+ [155] = https://curl.se/bug/?i=14061
  [156] = https://curl.se/bug/?i=14025
  [157] = https://curl.se/bug/?i=14012
  [158] = https://curl.se/bug/?i=14026
+ [159] = https://curl.se/bug/?i=14062
  [160] = https://curl.se/bug/?i=14019
+ [161] = https://curl.se/bug/?i=14063
  [162] = https://curl.se/bug/?i=13976
  [164] = https://curl.se/bug/?i=14016
  [165] = https://curl.se/bug/?i=14015
  [167] = https://curl.se/bug/?i=13998
+ [168] = https://curl.se/bug/?i=14060
  [169] = https://curl.se/bug/?i=14007
  [170] = https://curl.se/bug/?i=14005
  [171] = https://curl.se/bug/?i=14003
+ [172] = https://curl.se/bug/?i=14054
+ [173] = https://curl.se/bug/?i=14049
+ [174] = https://curl.se/bug/?i=14048
+ [175] = https://curl.se/bug/?i=14030
+ [176] = https://curl.se/bug/?i=14045
+ [177] = https://curl.se/bug/?i=14041
+ [185] = https://curl.se/bug/?i=14038
+ [187] = https://curl.se/bug/?i=14033
