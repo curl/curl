@@ -656,6 +656,11 @@ macro(openssl_check_quic)
   endif()
 endmacro()
 
+if(USE_WOLFSSL)
+  openssl_check_symbol_exists(wolfSSL_DES_ecb_encrypt "wolfssl/openssl/des.h" HAVE_WOLFSSL_DES_ECB_ENCRYPT "")
+  openssl_check_symbol_exists(wolfSSL_BIO_set_shutdown "wolfssl/ssl.h" HAVE_WOLFSSL_FULL_BIO "")
+endif()
+
 if(USE_OPENSSL OR USE_WOLFSSL)
   if(NOT DEFINED HAVE_SSL_SET0_WBIO)
     openssl_check_symbol_exists(SSL_set0_wbio "openssl/ssl.h" HAVE_SSL_SET0_WBIO "")
