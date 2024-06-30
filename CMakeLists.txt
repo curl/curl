@@ -1642,7 +1642,7 @@ if(NOT CURL_DISABLE_INSTALL)
 
   # NTLM support requires crypto function adaptions from various SSL libs
   if(NOT (CURL_DISABLE_NTLM) AND
-      (USE_OPENSSL OR USE_MBEDTLS OR USE_DARWINSSL OR USE_WIN32_CRYPTO OR USE_GNUTLS))
+      (USE_OPENSSL OR USE_MBEDTLS OR USE_SECTRANSP OR USE_WIN32_CRYPTO OR USE_GNUTLS))
     set(use_curl_ntlm_core ON)
   endif()
 
