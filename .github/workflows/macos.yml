@@ -225,6 +225,9 @@ jobs:
           - name: LibreSSL
             install: nghttp2 libressl
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DBUILD_EXAMPLES=ON
+          - name: wolfSSL
+            install: nghttp2 wolfssl
+            generate: -DCURL_USE_WOLFSSL=ON -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
           - name: libssh2
             install: nghttp2 openssl libssh2
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/openssl -DCURL_USE_LIBSSH2=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON
