@@ -1681,7 +1681,7 @@ if(NOT CURL_DISABLE_INSTALL)
   _add_if("HTTPS-proxy"   SSL_ENABLED AND (USE_OPENSSL OR USE_GNUTLS
                           OR USE_SCHANNEL OR USE_RUSTLS OR USE_BEARSSL OR
                           USE_MBEDTLS OR USE_SECTRANSP OR
-                          (USE_WOLFSSL AND NOT WolfSSL_VERSION VERSION_LESS 5.0.0)))
+                          (USE_WOLFSSL AND HAVE_WOLFSSL_FULL_BIO)))
   _add_if("unicode"       ENABLE_UNICODE)
   _add_if("threadsafe"    HAVE_ATOMIC OR
                           (USE_THREADS_POSIX AND HAVE_PTHREAD_H) OR
