@@ -25,7 +25,7 @@ you'd:you would
 you'll:you will
 you're:you are
 should've:should have
-don't:do not
+don't=do not
 could've:could have
 doesn't:does not
 isn't:is not
@@ -59,8 +59,8 @@ doesn't:does not
 won't:will not
 couldn't:could not
 \bwill\b:rewrite to present tense
-32bit=32-bit
-64bit=64-bit
+\b32bit=32-bit
+\b64bit=64-bit
 32 bit\b=32-bit
 64 bit\b=64-bit
 64-bits:64 bits or 64-bit
