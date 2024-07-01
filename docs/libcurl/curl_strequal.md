@@ -5,6 +5,7 @@ Title: curl_strequal
 Section: 3
 Source: libcurl
 See-also:
+  - curl_strnequal (3)
   - strcasecmp (3)
   - strcmp (3)
 Protocol:
@@ -13,7 +14,7 @@ Protocol:
 
 # NAME
 
-curl_strequal, curl_strnequal - case insensitive string comparisons
+curl_strequal - compare two strings ignoring case
 
 # SYNOPSIS
 
@@ -21,21 +22,21 @@ curl_strequal, curl_strnequal - case insensitive string comparisons
 #include <curl/curl.h>
 
 int curl_strequal(const char *str1, const char *str2);
-int curl_strnequal(const char *str1, const char *str2, size_t length);
 ~~~
 
 # DESCRIPTION
 
-The curl_strequal(3) function compares the two strings *str1* and
-*str2*, ignoring the case of the characters. It returns a non-zero (TRUE)
-integer if the strings are identical.
+The curl_strequal(3) function compares the two strings *str1* and *str2*,
+ignoring the case of the characters. It returns a non-zero (TRUE) integer if
+the strings are identical.
 
-The **curl_strnequal()** function is similar, except it only compares the
-first *length* characters of *str1*.
+This function uses plain ASCII based comparisons completely disregarding the
+locale - contrary to how **strcasecmp** and other system case insensitive
+string comparisons usually work.
 
-These functions are provided by libcurl to enable applications to compare
-strings in a truly portable manner. There are no standard portable case
-insensitive string comparison functions. These two work on all platforms.
+This function is provided by libcurl to enable applications to compare strings
+in a truly portable manner. There are no standard portable case insensitive
+string comparison functions. This function works on all platforms.
 
 # EXAMPLE
 
@@ -45,8 +46,6 @@ int main(int argc, char **argv)
   const char *name = "compare";
   if(curl_strequal(name, argv[1]))
     printf("Name and input matches\n");
-  if(curl_strnequal(name, argv[1], 5))
-    printf("Name and input matches in the 5 first bytes\n");
 }
 ~~~
 
