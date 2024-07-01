@@ -1961,7 +1961,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case C_PROGRESS_BAR: /* --progress-bar */
       global->progressmode = toggle ? CURL_PROGRESS_BAR : CURL_PROGRESS_STATS;
       break;
-    case C_VARIABLE: /* --Variable */
+    case C_VARIABLE: /* --variable */
       err = setvariable(global, nextarg);
       break;
     case C_NEXT: /* --next */
