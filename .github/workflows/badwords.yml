@@ -9,11 +9,11 @@ on:
   # master branch
   push:
     branches:
-    - master
-    - '*/ci'
+      - master
+      - '*/ci'
   pull_request:
     branches:
-    - master
+      - master
 
 permissions: {}
 
