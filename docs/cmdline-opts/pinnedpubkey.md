@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: pinnedpubkey
 Arg: <hashes>
-Help: FILE/HASHES Public key to verify peer against
+Help: Public key to verify peer against
 Protocols: TLS
 Category: tls
 Added: 7.39.0
