@@ -1230,7 +1230,13 @@ static void cf_h2_proxy_adjust_pollset(struct Curl_cfilter *cf,
   curl_socket_t sock = Curl_conn_cf_get_socket(cf, data);
   bool want_recv, want_send;
 
-  Curl_pollset_check(data, ps, sock, &want_recv, &want_send);
+  if(!cf->connected && ctx->h2) {
+    want_send = nghttp2_session_want_write(ctx->h2);
+    want_recv = nghttp2_session_want_read(ctx->h2);
+  }
+  else
+    Curl_pollset_check(data, ps, sock, &want_recv, &want_send);
+
   if(ctx->h2 && (want_recv || want_send)) {
     bool c_exhaust, s_exhaust;
 

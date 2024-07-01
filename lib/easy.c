@@ -1143,6 +1143,11 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
       goto out;
   }
 
+  if(!(k->keepon & KEEP_RECV_PAUSE) && Curl_cwriter_is_paused(data)) {
+    Curl_conn_ev_data_pause(data, FALSE);
+    result = Curl_cwriter_unpause(data);
+  }
+
 out:
   if(!result && !data->state.done && keep_changed)
     /* This transfer may have been moved in or out of the bundle, update the

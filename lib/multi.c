@@ -1144,7 +1144,9 @@ static void multi_getsock(struct Curl_easy *data,
 
   case MSTATE_RESOLVING:
     Curl_pollset_add_socks(data, ps, Curl_resolv_getsock);
-    /* connection filters are not involved in this phase */
+    /* connection filters are not involved in this phase. It's ok if we get no
+     * sockets to wait for. Resolving can wake up from other sources. */
+    expect_sockets = FALSE;
     break;
 
   case MSTATE_CONNECTING:
@@ -1195,8 +1197,10 @@ static void multi_getsock(struct Curl_easy *data,
     break;
   }
 
-  if(expect_sockets && !ps->num && !Curl_xfer_is_blocked(data)) {
+  if(expect_sockets && !ps->num &&
+     !(data->req.keepon & (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE))) {
     infof(data, "WARNING: no socket in pollset, transfer may stall!");
+    DEBUGASSERT(0);
   }
 }
 

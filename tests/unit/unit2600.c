@@ -152,6 +152,15 @@ static CURLcode cf_test_connect(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
+static void cf_test_adjust_pollset(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   struct easy_pollset *ps)
+{
+  /* just for testing, give one socket with events back */
+  (void)cf;
+  Curl_pollset_set(data, ps, 1, TRUE, TRUE);
+}
+
 static struct Curl_cftype cft_test = {
   "TEST",
   CF_TYPE_IP_CONNECT,
@@ -161,7 +170,7 @@ static struct Curl_cftype cft_test = {
   Curl_cf_def_close,
   Curl_cf_def_shutdown,
   Curl_cf_def_get_host,
-  Curl_cf_def_adjust_pollset,
+  cf_test_adjust_pollset,
   Curl_cf_def_data_pending,
   Curl_cf_def_send,
   Curl_cf_def_recv,
