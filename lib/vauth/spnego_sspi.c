@@ -79,10 +79,10 @@ bool Curl_auth_is_spnego_supported(void)
  * Parameters:
  *
  * data        [in]     - The session handle.
- * user        [in]     - The user name in the format User or Domain\User.
+ * user        [in]     - The username in the format User or Domain\User.
  * password    [in]     - The user's password.
  * service     [in]     - The service type such as http, smtp, pop or imap.
- * host        [in]     - The host name.
+ * host        [in]     - The hostname.
  * chlg64      [in]     - The optional base64 encoded challenge message.
  * nego        [in/out] - The Negotiate data struct being used and modified.
  *
@@ -113,8 +113,8 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
 
   if(nego->context && nego->status == SEC_E_OK) {
     /* We finished successfully our part of authentication, but server
-     * rejected it (since we're again here). Exit with an error since we
-     * can't invent anything better */
+     * rejected it (since we are again here). Exit with an error since we
+     * cannot invent anything better */
     Curl_auth_cleanup_spnego(nego);
     return CURLE_LOGIN_DENIED;
   }
@@ -132,7 +132,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
                                                        TEXT(SP_NAME_NEGOTIATE),
                                                        &SecurityPackage);
     if(nego->status != SEC_E_OK) {
-      failf(data, "SSPI: couldn't get auth info");
+      failf(data, "SSPI: could not get auth info");
       return CURLE_AUTH_ERROR;
     }
 

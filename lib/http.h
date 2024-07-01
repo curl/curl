@@ -146,7 +146,7 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data);
    selected to use no auth at all. Ie, we actively select no auth, as opposed
    to not having one selected. The other CURLAUTH_* defines are present in the
    public curl/curl.h header. */
-#define CURLAUTH_PICKNONE (1<<30) /* don't use auth */
+#define CURLAUTH_PICKNONE (1<<30) /* do not use auth */
 
 /* MAX_INITIAL_POST_SIZE indicates the number of bytes that will make the POST
    data get included in the initial data chunk sent to the server. If the
@@ -235,7 +235,7 @@ struct httpreq {
 };
 
 /**
- * Create a HTTP request struct.
+ * Create an HTTP request struct.
  */
 CURLcode Curl_http_req_make(struct httpreq **preq,
                             const char *method, size_t m_len,
@@ -285,7 +285,7 @@ struct http_resp {
 };
 
 /**
- * Create a HTTP response struct.
+ * Create an HTTP response struct.
  */
 CURLcode Curl_http_resp_make(struct http_resp **presp,
                              int status,

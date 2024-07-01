@@ -37,7 +37,7 @@ static char *GetEnv(const char *variable)
   return NULL;
 #elif defined(_WIN32)
   /* This uses Windows API instead of C runtime getenv() to get the environment
-     variable since some changes aren't always visible to the latter. #4774 */
+     variable since some changes are not always visible to the latter. #4774 */
   char *buf = NULL;
   char *tmp;
   DWORD bufsize;
@@ -54,8 +54,8 @@ static char *GetEnv(const char *variable)
     buf = tmp;
     bufsize = rc;
 
-    /* It's possible for rc to be 0 if the variable was found but empty.
-       Since getenv doesn't make that distinction we ignore it as well. */
+    /* it is possible for rc to be 0 if the variable was found but empty.
+       Since getenv does not make that distinction we ignore it as well. */
     rc = GetEnvironmentVariableA(variable, buf, bufsize);
     if(!rc || rc == bufsize || rc > max) {
       free(buf);

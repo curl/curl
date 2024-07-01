@@ -270,9 +270,9 @@ Curl_sha512_256_finish(unsigned char *digest,
  * ** written by Evgeny Grin (Karlson2k) for GNU libmicrohttpd.          ** *
  * ** The author ported the code to libcurl. The ported code is provided ** *
  * ** under curl license.                                                ** *
- * ** This is a minimal version with minimal optimisations. Performance  ** *
+ * ** This is a minimal version with minimal optimizations. Performance  ** *
  * ** can be significantly improved. Big-endian store and load macros    ** *
- * ** are obvious targets for optimisation.                              ** */
+ * ** are obvious targets for optimization.                              ** */
 
 #ifdef __GNUC__
 #  if defined(__has_attribute) && defined(__STDC_VERSION__)
@@ -328,7 +328,7 @@ MHDx_rotr64(curl_uint64_t value, unsigned int bits)
   bits %= 64;
   if(0 == bits)
     return value;
-  /* Defined in a form which modern compiler could optimise. */
+  /* Defined in a form which modern compiler could optimize. */
   return (value >> bits) | (value << (64 - bits));
 }
 
@@ -474,7 +474,7 @@ MHDx_sha512_256_transform(curl_uint64_t H[SHA512_256_HASH_SIZE_WORDS],
      See FIPS PUB 180-4 section 5.2.2, 6.7, 6.4. */
   curl_uint64_t W[16];
 
-  /* 'Ch' and 'Maj' macro functions are defined with widely-used optimisation.
+  /* 'Ch' and 'Maj' macro functions are defined with widely-used optimization.
      See FIPS PUB 180-4 formulae 4.8, 4.9. */
 #define Sha512_Ch(x,y,z)     ( (z) ^ ((x) & ((y) ^ (z))) )
 #define Sha512_Maj(x,y,z)    ( ((x) & (y)) ^ ((z) & ((x) ^ (y))) )

@@ -708,8 +708,8 @@ static CURLcode cr_in_read(struct Curl_easy *data,
   case CURL_READFUNC_PAUSE:
     if(data->conn->handler->flags & PROTOPT_NONETWORK) {
       /* protocols that work without network cannot be paused. This is
-         actually only FILE:// just now, and it can't pause since the transfer
-         isn't done using the "normal" procedure. */
+         actually only FILE:// just now, and it cannot pause since the transfer
+         is not done using the "normal" procedure. */
       failf(data, "Read callback asked for PAUSE when not supported");
       return CURLE_READ_ERROR;
     }
@@ -786,7 +786,7 @@ static CURLcode cr_in_resume_from(struct Curl_easy *data,
       failf(data, "Could not seek stream");
       return CURLE_READ_ERROR;
     }
-    /* when seekerr == CURL_SEEKFUNC_CANTSEEK (can't seek to offset) */
+    /* when seekerr == CURL_SEEKFUNC_CANTSEEK (cannot seek to offset) */
     do {
       char scratch[4*1024];
       size_t readthisamountnow =
@@ -820,7 +820,7 @@ static CURLcode cr_in_resume_from(struct Curl_easy *data,
       return CURLE_PARTIAL_FILE;
     }
   }
-  /* we've passed, proceed as normal */
+  /* we have passed, proceed as normal */
   return CURLE_OK;
 }
 
@@ -872,7 +872,7 @@ static CURLcode cr_in_rewind(struct Curl_easy *data,
     }
 
     /* no callback set or failure above, makes us fail at once */
-    failf(data, "necessary data rewind wasn't possible");
+    failf(data, "necessary data rewind was not possible");
     return CURLE_SEND_FAIL_REWIND;
   }
   return CURLE_OK;
@@ -1018,7 +1018,7 @@ static CURLcode cr_lc_read(struct Curl_easy *data,
         return result;
       start = i + 1;
       if(!data->set.crlf && (data->state.infilesize != -1)) {
-        /* we're here only because FTP is in ASCII mode...
+        /* we are here only because FTP is in ASCII mode...
            bump infilesize for the LF we just added */
         data->state.infilesize++;
         /* comment: this might work for FTP, but in HTTP we could not change

@@ -82,7 +82,7 @@
 #define ASCII_FLAG   0x01 /* bit 0 set: file probably ascii text */
 #define HEAD_CRC     0x02 /* bit 1 set: header CRC present */
 #define EXTRA_FIELD  0x04 /* bit 2 set: extra field present */
-#define ORIG_NAME    0x08 /* bit 3 set: original file name present */
+#define ORIG_NAME    0x08 /* bit 3 set: original filename present */
 #define COMMENT      0x10 /* bit 4 set: file comment present */
 #define RESERVED     0xE0 /* bits 5..7: reserved */
 
@@ -192,7 +192,7 @@ static CURLcode inflate_stream(struct Curl_easy *data,
      zp->zlib_init != ZLIB_GZIP_INFLATING)
     return exit_zlib(data, z, &zp->zlib_init, CURLE_WRITE_ERROR);
 
-  /* Dynamically allocate a buffer for decompression because it's uncommonly
+  /* Dynamically allocate a buffer for decompression because it is uncommonly
      large to hold on the stack */
   decomp = malloc(DSIZ);
   if(!decomp)
@@ -246,7 +246,7 @@ static CURLcode inflate_stream(struct Curl_easy *data,
          to fix and continue anyway */
       if(zp->zlib_init == ZLIB_INIT) {
         /* Do not use inflateReset2(): only available since zlib 1.2.3.4. */
-        (void) inflateEnd(z);     /* don't care about the return code */
+        (void) inflateEnd(z);     /* do not care about the return code */
         if(inflateInit2(z, -MAX_WBITS) == Z_OK) {
           z->next_in = orig_in;
           z->avail_in = nread;
@@ -266,7 +266,7 @@ static CURLcode inflate_stream(struct Curl_easy *data,
   }
   free(decomp);
 
-  /* We're about to leave this call so the `nread' data bytes won't be seen
+  /* We are about to leave this call so the `nread' data bytes will not be seen
      again. If we are in a state that would wrongly allow restart in raw mode
      at the next call, assume output has already started. */
   if(nread && zp->zlib_init == ZLIB_INIT)
@@ -388,7 +388,7 @@ static gzip_status check_gzip_header(unsigned char const *data, ssize_t len,
   flags = data[3];
 
   if(method != Z_DEFLATED || (flags & RESERVED) != 0) {
-    /* Can't handle this compression method or unknown flag */
+    /* cannot handle this compression method or unknown flag */
     return GZIP_BAD;
   }
 
@@ -412,7 +412,7 @@ static gzip_status check_gzip_header(unsigned char const *data, ssize_t len,
   }
 
   if(flags & ORIG_NAME) {
-    /* Skip over NUL-terminated file name */
+    /* Skip over NUL-terminated filename */
     while(len && *data) {
       --len;
       ++data;
@@ -474,10 +474,10 @@ static CURLcode gzip_do_write(struct Curl_easy *data,
   return exit_zlib(data, z, &zp->zlib_init, CURLE_WRITE_ERROR);
 
 #else
-  /* This next mess is to get around the potential case where there isn't
-   * enough data passed in to skip over the gzip header.  If that happens, we
-   * malloc a block and copy what we have then wait for the next call.  If
-   * there still isn't enough (this is definitely a worst-case scenario), we
+  /* This next mess is to get around the potential case where there is not
+   * enough data passed in to skip over the gzip header. If that happens, we
+   * malloc a block and copy what we have then wait for the next call. If
+   * there still is not enough (this is definitely a worst-case scenario), we
    * make the block bigger, copy the next part in and keep waiting.
    *
    * This is only required with zlib versions < 1.2.0.4 as newer versions
@@ -499,11 +499,11 @@ static CURLcode gzip_do_write(struct Curl_easy *data,
       break;
 
     case GZIP_UNDERFLOW:
-      /* We need more data so we can find the end of the gzip header.  It's
+      /* We need more data so we can find the end of the gzip header. it is
        * possible that the memory block we malloc here will never be freed if
-       * the transfer abruptly aborts after this point.  Since it's unlikely
+       * the transfer abruptly aborts after this point. Since it is unlikely
        * that circumstances will be right for this code path to be followed in
-       * the first place, and it's even more unlikely for a transfer to fail
+       * the first place, and it is even more unlikely for a transfer to fail
        * immediately afterwards, it should seldom be a problem.
        */
       z->avail_in = (uInt) nbytes;
@@ -513,7 +513,7 @@ static CURLcode gzip_do_write(struct Curl_easy *data,
       }
       memcpy(z->next_in, buf, z->avail_in);
       zp->zlib_init = ZLIB_GZIP_HEADER;  /* Need more gzip header data state */
-      /* We don't have any data to inflate yet */
+      /* We do not have any data to inflate yet */
       return CURLE_OK;
 
     case GZIP_BAD:
@@ -540,14 +540,14 @@ static CURLcode gzip_do_write(struct Curl_easy *data,
     case GZIP_OK:
       /* This is the zlib stream data */
       free(z->next_in);
-      /* Don't point into the malloced block since we just freed it */
+      /* Do not point into the malloced block since we just freed it */
       z->next_in = (Bytef *) buf + hlen + nbytes - z->avail_in;
       z->avail_in = z->avail_in - (uInt)hlen;
       zp->zlib_init = ZLIB_GZIP_INFLATING;   /* Inflating stream state */
       break;
 
     case GZIP_UNDERFLOW:
-      /* We still don't have any data to inflate! */
+      /* We still do not have any data to inflate! */
       return CURLE_OK;
 
     case GZIP_BAD:
@@ -572,11 +572,11 @@ static CURLcode gzip_do_write(struct Curl_easy *data,
   }
 
   if(z->avail_in == 0) {
-    /* We don't have any data to inflate; wait until next time */
+    /* We do not have any data to inflate; wait until next time */
     return CURLE_OK;
   }
 
-  /* We've parsed the header, now uncompress the data */
+  /* We have parsed the header, now uncompress the data */
   return inflate_stream(data, writer, type, ZLIB_GZIP_INFLATING);
 #endif
 }
@@ -966,7 +966,7 @@ static const struct Curl_cwtype *find_unencode_writer(const char *name,
   return NULL;
 }
 
-/* Set-up the unencoding stack from the Content-Encoding header value.
+/* Setup the unencoding stack from the Content-Encoding header value.
  * See RFC 7231 section 3.1.2.2. */
 CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
                                      const char *enclist, int is_transfer)

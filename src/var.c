@@ -110,7 +110,7 @@ static ParameterError varfunc(struct GlobalConfig *global,
     if(*f == '}')
       /* end of functions */
       break;
-    /* On entry, this is known to be a colon already.  In subsequent laps, it
+    /* On entry, this is known to be a colon already. In subsequent laps, it
        is also known to be a colon since that is part of the FUNCMATCH()
        checks */
     f++;

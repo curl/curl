@@ -324,7 +324,7 @@ static CURLcode empty_header(struct Curl_easy *data)
     result = hyper_each_header(data, NULL, 0, NULL, 0) ?
       CURLE_WRITE_ERROR : CURLE_OK;
     if(result)
-      failf(data, "hyperstream: couldn't pass blank header");
+      failf(data, "hyperstream: could not pass blank header");
     /* Hyper does chunked decoding itself. If it was added during
      * response header processing, remove it again. */
     Curl_cwriter_remove_by_name(data, "chunked");
@@ -421,7 +421,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
         data->req.done = TRUE;
         infof(data, "hyperstream is done");
         if(!k->bodywritten) {
-          /* hyper doesn't always call the body write callback */
+          /* hyper does not always call the body write callback */
           result = Curl_http_firstwrite(data);
         }
         break;
@@ -439,7 +439,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
 
     *didwhat = KEEP_RECV;
     if(!resp) {
-      failf(data, "hyperstream: couldn't get response");
+      failf(data, "hyperstream: could not get response");
       return CURLE_RECV_ERROR;
     }
 
@@ -462,7 +462,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
 
     headers = hyper_response_headers(resp);
     if(!headers) {
-      failf(data, "hyperstream: couldn't get response headers");
+      failf(data, "hyperstream: could not get response headers");
       result = CURLE_RECV_ERROR;
       break;
     }
@@ -505,7 +505,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
 
     resp_body = hyper_response_body(resp);
     if(!resp_body) {
-      failf(data, "hyperstream: couldn't get response body");
+      failf(data, "hyperstream: could not get response body");
       result = CURLE_RECV_ERROR;
       break;
     }
@@ -669,7 +669,7 @@ static int uploadstreamed(void *userdata, hyper_context *ctx,
       goto out;
     }
     /* increasing the writebytecount here is a little premature but we
-       don't know exactly when the body is sent */
+       do not know exactly when the body is sent */
     data->req.writebytecount += fillcount;
     Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
     rc = HYPER_POLL_READY;
@@ -772,7 +772,7 @@ static void http1xx_cb(void *arg, struct hyper_response *resp)
   if(!result) {
     headers = hyper_response_headers(resp);
     if(!headers) {
-      failf(data, "hyperstream: couldn't get 1xx response headers");
+      failf(data, "hyperstream: could not get 1xx response headers");
       result = CURLE_RECV_ERROR;
     }
   }

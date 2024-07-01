@@ -95,7 +95,7 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
       Curl_http_auth_cleanup_negotiate(conn);
     }
     else if(state != GSS_AUTHNONE) {
-      /* The server rejected our authentication and hasn't supplied any more
+      /* The server rejected our authentication and has not supplied any more
       negotiation mechanisms */
       Curl_http_auth_cleanup_negotiate(conn);
       return CURLE_LOGIN_DENIED;
@@ -218,7 +218,7 @@ CURLcode Curl_output_negotiate(struct Curl_easy *data,
 
   if(*state == GSS_AUTHDONE || *state == GSS_AUTHSUCC) {
     /* connection is already authenticated,
-     * don't send a header in future requests */
+     * do not send a header in future requests */
     authp->done = TRUE;
   }
 

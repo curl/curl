@@ -406,7 +406,7 @@ static CURLcode pop3_perform_user(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
 
   /* Check we have a username and password to authenticate with and end the
-     connect phase if we don't */
+     connect phase if we do not */
   if(!data->state.aptr.user) {
     pop3_state(data, POP3_STOP);
 
@@ -440,7 +440,7 @@ static CURLcode pop3_perform_apop(struct Curl_easy *data,
   char secret[2 * MD5_DIGEST_LEN + 1];
 
   /* Check we have a username and password to authenticate with and end the
-     connect phase if we don't */
+     connect phase if we do not */
   if(!data->state.aptr.user) {
     pop3_state(data, POP3_STOP);
 
@@ -550,7 +550,7 @@ static CURLcode pop3_perform_authentication(struct Curl_easy *data,
   saslprogress progress = SASL_IDLE;
 
   /* Check we have enough data to authenticate with and end the
-     connect phase if we don't */
+     connect phase if we do not */
   if(!Curl_sasl_can_authenticate(&pop3c->sasl, data)) {
     pop3_state(data, POP3_STOP);
     return result;
@@ -758,7 +758,7 @@ static CURLcode pop3_state_capa_resp(struct Curl_easy *data, int pop3code,
     }
   }
   else {
-    /* Clear text is supported when CAPA isn't recognised */
+    /* Clear text is supported when CAPA is not recognised */
     if(pop3code != '+')
       pop3c->authtypes |= POP3_TYPE_CLEARTEXT;
 
@@ -931,7 +931,7 @@ static CURLcode pop3_state_command_resp(struct Curl_easy *data,
   pop3c->eob = 2;
 
   /* But since this initial CR LF pair is not part of the actual body, we set
-     the strip counter here so that these bytes won't be delivered. */
+     the strip counter here so that these bytes will not be delivered. */
   pop3c->strip = 2;
 
   if(pop3->transfer == PPTRANSFER_BODY) {
@@ -1477,7 +1477,7 @@ CURLcode Curl_pop3_write(struct Curl_easy *data, const char *str, size_t nread)
         pop3c->eob++;
 
         if(i) {
-          /* Write out the body part that didn't match */
+          /* Write out the body part that did not match */
           result = Curl_client_write(data, CLIENTWRITE_BODY, &str[last],
                                      i - last);
 
@@ -1490,7 +1490,7 @@ CURLcode Curl_pop3_write(struct Curl_easy *data, const char *str, size_t nread)
       else if(pop3c->eob == 3)
         pop3c->eob++;
       else
-        /* If the character match wasn't at position 0 or 3 then restart the
+        /* If the character match was not at position 0 or 3 then restart the
            pattern matching */
         pop3c->eob = 1;
       break;
@@ -1499,7 +1499,7 @@ CURLcode Curl_pop3_write(struct Curl_easy *data, const char *str, size_t nread)
       if(pop3c->eob == 1 || pop3c->eob == 4)
         pop3c->eob++;
       else
-        /* If the character match wasn't at position 1 or 4 then start the
+        /* If the character match was not at position 1 or 4 then start the
            search again */
         pop3c->eob = 0;
       break;
@@ -1513,7 +1513,7 @@ CURLcode Curl_pop3_write(struct Curl_easy *data, const char *str, size_t nread)
         pop3c->eob = 0;
       }
       else
-        /* If the character match wasn't at position 2 then start the search
+        /* If the character match was not at position 2 then start the search
            again */
         pop3c->eob = 0;
       break;

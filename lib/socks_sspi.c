@@ -158,7 +158,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
 
   (void)curlx_nonblock(sock, FALSE);
 
-  /* As long as we need to keep sending some context info, and there's no  */
+  /* As long as we need to keep sending some context info, and there is no  */
   /* errors, keep sending it...                                            */
   for(;;) {
     TCHAR *sname;
@@ -328,7 +328,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   if(check_sspi_err(data, status, "QueryCredentialAttributes")) {
     s_pSecFn->DeleteSecurityContext(&sspi_context);
     s_pSecFn->FreeContextBuffer(names.sUserName);
-    failf(data, "Failed to determine user name.");
+    failf(data, "Failed to determine username.");
     return CURLE_COULDNT_CONNECT;
   }
   else {
@@ -383,7 +383,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
    *
    * The token is produced by encapsulating an octet containing the
    * required protection level using gss_seal()/gss_wrap() with conf_req
-   * set to FALSE.  The token is verified using gss_unseal()/
+   * set to FALSE. The token is verified using gss_unseal()/
    * gss_unwrap().
    *
    */

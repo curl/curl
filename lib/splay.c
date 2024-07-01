@@ -93,7 +93,7 @@ struct Curl_tree *Curl_splay(struct curltime i,
   return t;
 }
 
-/* Insert key i into the tree t.  Return a pointer to the resulting tree or
+/* Insert key i into the tree t. Return a pointer to the resulting tree or
  * NULL if something went wrong.
  *
  * @unittest: 1309
@@ -150,7 +150,7 @@ struct Curl_tree *Curl_splayinsert(struct curltime i,
 }
 
 /* Finds and deletes the best-fit node from the tree. Return a pointer to the
-   resulting tree.  best-fit means the smallest node if it is not larger than
+   resulting tree. best-fit means the smallest node if it is not larger than
    the key */
 struct Curl_tree *Curl_splaygetbest(struct curltime i,
                                     struct Curl_tree *t,
@@ -197,13 +197,13 @@ struct Curl_tree *Curl_splaygetbest(struct curltime i,
 }
 
 
-/* Deletes the very node we point out from the tree if it's there. Stores a
+/* Deletes the very node we point out from the tree if it is there. Stores a
  * pointer to the new resulting tree in 'newroot'.
  *
  * Returns zero on success and non-zero on errors!
  * When returning error, it does not touch the 'newroot' pointer.
  *
- * NOTE: when the last node of the tree is removed, there's no tree left so
+ * NOTE: when the last node of the tree is removed, there is no tree left so
  * 'newroot' will be made to point to NULL.
  *
  * @unittest: 1309
@@ -241,7 +241,7 @@ int Curl_splayremove(struct Curl_tree *t,
 
   /* First make sure that we got the same root node as the one we want
      to remove, as otherwise we might be trying to remove a node that
-     isn't actually in the tree.
+     is not actually in the tree.
 
      We cannot just compare the keys here as a double remove in quick
      succession of a node with key != KEY_NOTUSED && same != NULL
@@ -249,7 +249,7 @@ int Curl_splayremove(struct Curl_tree *t,
   if(t != removenode)
     return 2;
 
-  /* Check if there is a list with identical sizes, as then we're trying to
+  /* Check if there is a list with identical sizes, as then we are trying to
      remove the root node of a list of nodes with identical keys. */
   x = t->samen;
   if(x != t) {

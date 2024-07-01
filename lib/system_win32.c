@@ -68,7 +68,7 @@ CURLcode Curl_win32_init(long flags)
     res = WSAStartup(wVersionRequested, &wsaData);
 
     if(res)
-      /* Tell the user that we couldn't find a usable */
+      /* Tell the user that we could not find a usable */
       /* winsock.dll.     */
       return CURLE_FAILED_INIT;
 
@@ -80,7 +80,7 @@ CURLcode Curl_win32_init(long flags)
 
     if(LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
        HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested) ) {
-      /* Tell the user that we couldn't find a usable */
+      /* Tell the user that we could not find a usable */
 
       /* winsock.dll. */
       WSACleanup();
@@ -212,7 +212,7 @@ HMODULE Curl_load_library(LPCTSTR filename)
   HMODULE hModule = NULL;
   LOADLIBRARYEX_FN pLoadLibraryEx = NULL;
 
-  /* Get a handle to kernel32 so we can access it's functions at runtime */
+  /* Get a handle to kernel32 so we can access it is functions at runtime */
   HMODULE hKernel32 = GetModuleHandle(TEXT("kernel32"));
   if(!hKernel32)
     return NULL;
@@ -223,7 +223,7 @@ HMODULE Curl_load_library(LPCTSTR filename)
     CURLX_FUNCTION_CAST(LOADLIBRARYEX_FN,
                         (GetProcAddress(hKernel32, LOADLIBARYEX)));
 
-  /* Detect if there's already a path in the filename and load the library if
+  /* Detect if there is already a path in the filename and load the library if
      there is. Note: Both back slashes and forward slashes have been supported
      since the earlier days of DOS at an API level although they are not
      supported by command prompt */
@@ -265,7 +265,7 @@ HMODULE Curl_load_library(LPCTSTR filename)
   }
   return hModule;
 #else
-  /* the Universal Windows Platform (UWP) can't do this */
+  /* the Universal Windows Platform (UWP) cannot do this */
   (void)filename;
   return NULL;
 #endif

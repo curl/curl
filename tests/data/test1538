@@ -37,9 +37,9 @@ e1: Unsupported protocol
 e2: Failed initialization
 e3: URL using bad/illegal format or missing URL
 e4: A requested feature, protocol or option was not found built-in in this libcurl due to a build-time decision.
-e5: Couldn't resolve proxy name
-e6: Couldn't resolve host name
-e7: Couldn't connect to server
+e5: Could not resolve proxy name
+e6: Could not resolve hostname
+e7: Could not connect to server
 e8: Weird server reply
 e9: Access denied to remote resource
 e10: FTP: The server failed to connect to data port
@@ -47,11 +47,11 @@ e11: FTP: unknown PASS reply
 e12: FTP: Accepting server connect has timed out
 e13: FTP: unknown PASV reply
 e14: FTP: unknown 227 response format
-e15: FTP: can't figure out the host in the PASV response
+e15: FTP: cannot figure out the host in the PASV response
 e16: Error in the HTTP2 framing layer
-e17: FTP: couldn't set file type
+e17: FTP: could not set file type
 e18: Transferred a partial file
-e19: FTP: couldn't retrieve (RETR failed) the specified file
+e19: FTP: could not retrieve (RETR failed) the specified file
 e20: Unknown error
 e21: Quote command returned error
 e22: HTTP response code said error
@@ -68,8 +68,8 @@ e32: Unknown error
 e33: Requested range was not delivered by the server
 e34: Internal problem setting up the POST
 e35: SSL connect error
-e36: Couldn't resume download
-e37: Couldn't read a file:// file
+e36: Could not resume download
+e37: Could not read a file:// file
 e38: LDAP: cannot bind
 e39: LDAP: search failed
 e40: Unknown error
@@ -91,7 +91,7 @@ e55: Failed sending data to the peer
 e56: Failure when receiving data from the peer
 e57: Unknown error
 e58: Problem with the local SSL certificate
-e59: Couldn't use specified SSL cipher
+e59: Could not use specified SSL cipher
 e60: SSL peer certificate or SSH remote key was not OK
 e61: Unrecognized or bad HTTP Content or Transfer-Encoding
 e62: Unknown error

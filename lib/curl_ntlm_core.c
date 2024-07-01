@@ -110,7 +110,7 @@
 #elif defined(USE_WIN32_CRYPTO)
 #  include <wincrypt.h>
 #else
-#  error "Can't compile NTLM support without a crypto library with DES."
+#  error "cannot compile NTLM support without a crypto library with DES."
 #  define CURL_NTLM_NOT_SUPPORTED
 #endif
 
@@ -150,7 +150,7 @@ static void extend_key_56_to_64(const unsigned char *key_56, char *key)
 
 #if defined(USE_OPENSSL_DES) || defined(USE_WOLFSSL)
 /*
- * Turns a 56 bit key into the 64 bit, odd parity key and sets the key.  The
+ * Turns a 56-bit key into a 64-bit, odd parity key and sets the key. The
  * key schedule ks is also set.
  */
 static void setup_des_key(const unsigned char *key_56,

@@ -32,7 +32,7 @@ struct Curl_tree {
   struct Curl_tree *samen;   /* points to the next node with identical key */
   struct Curl_tree *samep;   /* points to the prev node with identical key */
   struct curltime key;        /* this node's "sort" key */
-  void *payload;             /* data the splay code doesn't care about */
+  void *payload;             /* data the splay code does not care about */
 };
 
 struct Curl_tree *Curl_splay(struct curltime i,

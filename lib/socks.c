@@ -194,7 +194,7 @@ static void socksstate(struct socks_state *sx, struct Curl_easy *data,
 
   (void)data;
   if(oldstate == state)
-    /* don't bother when the new state is the same as the old state */
+    /* do not bother when the new state is the same as the old state */
     return;
 
   sx->state = state;
@@ -335,7 +335,7 @@ static CURLproxycode do_SOCKS4(struct Curl_cfilter *cf,
       goto CONNECT_RESOLVED;
     }
 
-    /* socks4a doesn't resolve anything locally */
+    /* socks4a does not resolve anything locally */
     sxstate(sx, data, CONNECT_REQ_INIT);
     goto CONNECT_REQ_INIT;
 
@@ -365,7 +365,7 @@ CONNECT_RESOLVED:
   {
     struct Curl_addrinfo *hp = NULL;
     /*
-     * We cannot use 'hostent' as a struct that Curl_resolv() returns.  It
+     * We cannot use 'hostent' as a struct that Curl_resolv() returns. It
      * returns a Curl_addrinfo pointer that may not always look the same.
      */
     if(dns) {
@@ -413,7 +413,7 @@ CONNECT_REQ_INIT:
         /* there is no real size limit to this field in the protocol, but
            SOCKS5 limits the proxy user field to 255 bytes and it seems likely
            that a longer field is either a mistake or malicious input */
-        failf(data, "Too long SOCKS proxy user name");
+        failf(data, "Too long SOCKS proxy username");
         return CURLPX_LONG_USER;
       }
       /* copy the proxy name WITH trailing zero */
@@ -440,7 +440,7 @@ CONNECT_REQ_INIT:
            (packetsize + hostnamelen < sizeof(sx->buffer)))
           strcpy((char *)socksreq + packetsize, sx->hostname);
         else {
-          failf(data, "SOCKS4: too long host name");
+          failf(data, "SOCKS4: too long hostname");
           return CURLPX_LONG_HOSTNAME;
         }
         packetsize += hostnamelen;
@@ -516,7 +516,7 @@ CONNECT_REQ_INIT:
     break;
   case 91:
     failf(data,
-          "Can't complete SOCKS4 connection to %d.%d.%d.%d:%d. (%d)"
+          "cannot complete SOCKS4 connection to %d.%d.%d.%d:%d. (%d)"
           ", request rejected or failed.",
           socksreq[4], socksreq[5], socksreq[6], socksreq[7],
           (((unsigned char)socksreq[2] << 8) | (unsigned char)socksreq[3]),
@@ -524,7 +524,7 @@ CONNECT_REQ_INIT:
     return CURLPX_REQUEST_FAILED;
   case 92:
     failf(data,
-          "Can't complete SOCKS4 connection to %d.%d.%d.%d:%d. (%d)"
+          "cannot complete SOCKS4 connection to %d.%d.%d.%d:%d. (%d)"
           ", request rejected because SOCKS server cannot connect to "
           "identd on the client.",
           socksreq[4], socksreq[5], socksreq[6], socksreq[7],
@@ -533,7 +533,7 @@ CONNECT_REQ_INIT:
     return CURLPX_IDENTD;
   case 93:
     failf(data,
-          "Can't complete SOCKS4 connection to %d.%d.%d.%d:%d. (%d)"
+          "cannot complete SOCKS4 connection to %d.%d.%d.%d:%d. (%d)"
           ", request rejected because the client program and identd "
           "report different user-ids.",
           socksreq[4], socksreq[5], socksreq[6], socksreq[7],
@@ -542,7 +542,7 @@ CONNECT_REQ_INIT:
     return CURLPX_IDENTD_DIFFER;
   default:
     failf(data,
-          "Can't complete SOCKS4 connection to %d.%d.%d.%d:%d. (%d)"
+          "cannot complete SOCKS4 connection to %d.%d.%d.%d:%d. (%d)"
           ", Unknown.",
           socksreq[4], socksreq[5], socksreq[6], socksreq[7],
           (((unsigned char)socksreq[2] << 8) | (unsigned char)socksreq[3]),
@@ -562,7 +562,7 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
                                struct Curl_easy *data)
 {
   /*
-    According to the RFC1928, section "6.  Replies". This is what a SOCK5
+    According to the RFC1928, section "6. Replies". This is what a SOCK5
     replies:
 
         +----+-----+-------+------+----------+----------+
@@ -714,7 +714,7 @@ CONNECT_SOCKS_READ_INIT:
 
 CONNECT_AUTH_INIT:
   case CONNECT_AUTH_INIT: {
-    /* Needs user name and password */
+    /* Needs username and password */
     size_t proxy_user_len, proxy_password_len;
     if(sx->proxy_user && sx->proxy_password) {
       proxy_user_len = strlen(sx->proxy_user);
@@ -738,7 +738,7 @@ CONNECT_AUTH_INIT:
     if(sx->proxy_user && proxy_user_len) {
       /* the length must fit in a single byte */
       if(proxy_user_len > 255) {
-        failf(data, "Excessive user name length for proxy auth");
+        failf(data, "Excessive username length for proxy auth");
         return CURLPX_LONG_USER;
       }
       memcpy(socksreq + len, sx->proxy_user, proxy_user_len);
@@ -990,7 +990,7 @@ CONNECT_REQ_SEND:
     else if(socksreq[1]) { /* Anything besides 0 is an error */
       CURLproxycode rc = CURLPX_REPLY_UNASSIGNED;
       int code = socksreq[1];
-      failf(data, "Can't complete SOCKS5 connection to %s. (%d)",
+      failf(data, "cannot complete SOCKS5 connection to %s. (%d)",
             sx->hostname, (unsigned char)socksreq[1]);
       if(code < 9) {
         /* RFC 1928 section 6 lists: */
@@ -1120,7 +1120,7 @@ static void socks_proxy_cf_free(struct Curl_cfilter *cf)
 }
 
 /* After a TCP connection to the proxy has been verified, this function does
-   the next magic steps. If 'done' isn't set TRUE, it is not done yet and
+   the next magic steps. If 'done' is not set TRUE, it is not done yet and
    must be called again.
 
    Note: this function's sub-functions call failf()

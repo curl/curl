@@ -76,7 +76,7 @@ void Curl_multiuse_state(struct Curl_easy *data,
  * Curl_multi_closed()
  *
  * Used by the connect code to tell the multi_socket code that one of the
- * sockets we were using is about to be closed.  This function will then
+ * sockets we were using is about to be closed. This function will then
  * remove it from the sockethash for this handle to make the multi_socket API
  * behave properly, especially for the case when libcurl will create another
  * socket again and it gets the same file descriptor number.

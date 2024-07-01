@@ -105,7 +105,7 @@ static CURLcode blobdup(struct curl_blob **dest,
   DEBUGASSERT(dest);
   DEBUGASSERT(!*dest);
   if(src) {
-    /* only if there's data to dupe! */
+    /* only if there is data to dupe! */
     struct curl_blob *d;
     d = malloc(sizeof(struct curl_blob) + src->len);
     if(!d)
@@ -154,7 +154,7 @@ static const struct alpn_spec *alpn_get_spec(int httpwant, bool use_alpn)
   (void)httpwant;
 #endif
   /* Use the ALPN protocol "http/1.1" for HTTP/1.x.
-     Avoid "http/1.0" because some servers don't support it. */
+     Avoid "http/1.0" because some servers do not support it. */
   return &ALPN_SPEC_H11;
 }
 #endif /* USE_SSL */
@@ -531,8 +531,8 @@ void Curl_ssl_sessionid_unlock(struct Curl_easy *data)
 }
 
 /*
- * Check if there's a session ID for the given connection in the cache, and if
- * there's one suitable, it is provided. Returns TRUE when no entry matched.
+ * Check if there is a session ID for the given connection in the cache, and if
+ * there is one suitable, it is provided. Returns TRUE when no entry matched.
  */
 bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
                            struct Curl_easy *data,
@@ -592,7 +592,7 @@ bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
   }
 
   DEBUGF(infof(data, "%s Session ID in cache for %s %s://%s:%d",
-               no_match? "Didn't find": "Found",
+               no_match? "Did not find": "Found",
                Curl_ssl_cf_is_proxy(cf) ? "proxy" : "host",
                cf->conn->handler->scheme, peer->hostname, peer->port));
   return no_match;
@@ -689,7 +689,7 @@ CURLcode Curl_ssl_addsessionid(struct Curl_cfilter *cf,
   else
     conn_to_port = -1;
 
-  /* Now we should add the session ID and the host name to the cache, (remove
+  /* Now we should add the session ID and the hostname to the cache, (remove
      the oldest if necessary) */
 
   /* If using shared SSL session, lock! */
@@ -724,12 +724,12 @@ CURLcode Curl_ssl_addsessionid(struct Curl_cfilter *cf,
   store->idsize = idsize;
   store->sessionid_free = sessionid_free_cb;
   store->age = *general_age;    /* set current age */
-  /* free it if there's one already present */
+  /* free it if there is one already present */
   free(store->name);
   free(store->conn_to_host);
-  store->name = clone_host;               /* clone host name */
+  store->name = clone_host;               /* clone hostname */
   clone_host = NULL;
-  store->conn_to_host = clone_conn_to_host; /* clone connect to host name */
+  store->conn_to_host = clone_conn_to_host; /* clone connect to hostname */
   clone_conn_to_host = NULL;
   store->conn_to_port = conn_to_port; /* connect to port number */
   /* port number */
@@ -997,7 +997,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
   (void)data;
 #endif
 
-  /* if a path wasn't specified, don't pin */
+  /* if a path was not specified, do not pin */
   if(!pinnedpubkey)
     return CURLE_OK;
   if(!pubkey || !pubkeylen)
@@ -1045,7 +1045,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
       end_pos = strstr(begin_pos, ";sha256//");
       /*
        * if there is an end_pos, null terminate,
-       * otherwise it'll go to the end of the original string
+       * otherwise it will go to the end of the original string
        */
       if(end_pos)
         end_pos[0] = '\0';
@@ -1091,7 +1091,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
 
     /*
      * if the size of our certificate is bigger than the file
-     * size then it can't match
+     * size then it cannot match
      */
     size = curlx_sotouz((curl_off_t) filesize);
     if(pubkeylen > size)
@@ -1109,7 +1109,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     if((int) fread(buf, size, 1, fp) != 1)
       break;
 
-    /* If the sizes are the same, it can't be base64 encoded, must be der */
+    /* If the sizes are the same, it cannot be base64 encoded, must be der */
     if(pubkeylen == size) {
       if(!memcmp(pubkey, buf, pubkeylen))
         result = CURLE_OK;
@@ -1117,18 +1117,18 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     }
 
     /*
-     * Otherwise we will assume it's PEM and try to decode it
+     * Otherwise we will assume it is PEM and try to decode it
      * after placing null terminator
      */
     buf[size] = '\0';
     pem_read = pubkey_pem_to_der((const char *)buf, &pem_ptr, &pem_len);
-    /* if it wasn't read successfully, exit */
+    /* if it was not read successfully, exit */
     if(pem_read)
       break;
 
     /*
-     * if the size of our certificate doesn't match the size of
-     * the decoded file, they can't be the same, otherwise compare
+     * if the size of our certificate does not match the size of
+     * the decoded file, they cannot be the same, otherwise compare
      */
     if(pubkeylen == pem_len && !memcmp(pubkey, pem_ptr, pubkeylen))
       result = CURLE_OK;
@@ -1566,10 +1566,10 @@ CURLcode Curl_ssl_peer_init(struct ssl_peer *peer, struct Curl_cfilter *cf,
   const char *ehostname, *edispname;
   int eport;
 
-  /* We need the hostname for SNI negotiation. Once handshaked, this
-   * remains the SNI hostname for the TLS connection. But when the
-   * connection is reused, the settings in cf->conn might change.
-   * So we keep a copy of the hostname we use for SNI.
+  /* We need the hostname for SNI negotiation. Once handshaked, this remains
+   * the SNI hostname for the TLS connection. When the connection is reused,
+   * the settings in cf->conn might change. We keep a copy of the hostname we
+   * use for SNI.
    */
 #ifndef CURL_DISABLE_PROXY
   if(Curl_ssl_cf_is_proxy(cf)) {

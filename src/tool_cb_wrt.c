@@ -75,7 +75,7 @@ bool tool_create_output_file(struct OutStruct *outs,
     int fd;
     do {
       fd = open(fname, O_CREAT | O_WRONLY | O_EXCL | O_BINARY, OPENMODE);
-      /* Keep retrying in the hope that it isn't interrupted sometime */
+      /* Keep retrying in the hope that it is not interrupted sometime */
     } while(fd == -1 && errno == EINTR);
     if(config->file_clobber_mode == CLOBBER_NEVER && fd == -1) {
       int next_num = 1;
@@ -94,15 +94,15 @@ bool tool_create_output_file(struct OutStruct *outs,
       }
       memcpy(newname, fname, len);
       newname[len] = '.';
-      while(fd == -1 && /* haven't successfully opened a file */
+      while(fd == -1 && /* have not successfully opened a file */
             (errno == EEXIST || errno == EISDIR) &&
             /* because we keep having files that already exist */
-            next_num < 100 /* and we haven't reached the retry limit */ ) {
+            next_num < 100 /* and we have not reached the retry limit */ ) {
         curlx_msnprintf(newname + len + 1, 12, "%d", next_num);
         next_num++;
         do {
           fd = open(newname, O_CREAT | O_WRONLY | O_EXCL | O_BINARY, OPENMODE);
-          /* Keep retrying in the hope that it isn't interrupted sometime */
+          /* Keep retrying in the hope that it is not interrupted sometime */
         } while(fd == -1 && errno == EINTR);
       }
       outs->filename = newname; /* remember the new one */

@@ -155,7 +155,7 @@ int Curl_socketpair(int domain, int type, int protocol,
   socks[0] = socks[1] = CURL_SOCKET_BAD;
 
 #if defined(_WIN32) || defined(__CYGWIN__)
-  /* don't set SO_REUSEADDR on Windows */
+  /* do not set SO_REUSEADDR on Windows */
   (void)reuse;
 #ifdef SO_EXCLUSIVEADDRUSE
   {
@@ -183,7 +183,7 @@ int Curl_socketpair(int domain, int type, int protocol,
   if(connect(socks[0], &a.addr, sizeof(a.inaddr)) == -1)
     goto error;
 
-  /* use non-blocking accept to make sure we don't block forever */
+  /* use non-blocking accept to make sure we do not block forever */
   if(curlx_nonblock(listener, TRUE) < 0)
     goto error;
   pfd[0].fd = listener;
@@ -217,7 +217,7 @@ int Curl_socketpair(int domain, int type, int protocol,
       nread = sread(socks[1], p, s);
       if(nread == -1) {
         int sockerr = SOCKERRNO;
-        /* Don't block forever */
+        /* Do not block forever */
         if(Curl_timediff(Curl_now(), start) > (60 * 1000))
           goto error;
         if(

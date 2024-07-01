@@ -44,9 +44,9 @@
 
 /*
  * Curl_addrinfo is our internal struct definition that we use to allow
- * consistent internal handling of this data. We use this even when the
- * system provides an addrinfo structure definition. And we use this for
- * all sorts of IPv4 and IPV6 builds.
+ * consistent internal handling of this data. We use this even when the system
+ * provides an addrinfo structure definition. We use this for all sorts of
+ * IPv4 and IPV6 builds.
  */
 
 struct Curl_addrinfo {

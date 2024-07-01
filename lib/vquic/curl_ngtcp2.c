@@ -88,7 +88,7 @@
 /* The pool keeps spares around and half of a full stream windows
  * seems good. More does not seem to improve performance.
  * The benefit of the pool is that stream buffer to not keep
- * spares. So memory consumption goes down when streams run empty,
+ * spares. Memory consumption goes down when streams run empty,
  * have a large upload done, etc. */
 #define H3_STREAM_POOL_SPARES \
           (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE ) / 2
@@ -663,7 +663,7 @@ static void cb_rand(uint8_t *dest, size_t destlen,
 
   result = Curl_rand(NULL, dest, destlen);
   if(result) {
-    /* cb_rand is only used for non-cryptographic context.  If Curl_rand
+    /* cb_rand is only used for non-cryptographic context. If Curl_rand
        failed, just fill 0 and call it *random*. */
     memset(dest, 0, destlen);
   }
@@ -958,7 +958,7 @@ static int cb_h3_end_headers(nghttp3_conn *conn, int64_t sid,
 
   if(!stream)
     return 0;
-  /* add a CRLF only if we've received some headers */
+  /* add a CRLF only if we have received some headers */
   h3_xfer_write_resp_hd(cf, data, stream, STRCONST("\r\n"), stream->closed);
 
   CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] end_headers, status=%d",
@@ -1871,7 +1871,7 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
     DEBUGASSERT(nread > 0);
     if(pktcnt == 0) {
       /* first packet in buffer. This is either of a known, "good"
-       * payload size or it is a PMTUD. We'll see. */
+       * payload size or it is a PMTUD. We will see. */
       gsolen = (size_t)nread;
     }
     else if((size_t)nread > gsolen ||
@@ -2177,7 +2177,7 @@ static CURLcode tls_ctx_setup(struct Curl_cfilter *cf,
     return CURLE_FAILED_INIT;
   }
 #endif /* !OPENSSL_IS_BORINGSSL && !OPENSSL_IS_AWSLC */
-  /* Enable the session cache because it's a prerequisite for the
+  /* Enable the session cache because it is a prerequisite for the
    * "new session" callback. Use the "external storage" mode to prevent
    * OpenSSL from creating an internal session cache.
    */
@@ -2488,8 +2488,8 @@ static bool cf_ngtcp2_conn_is_alive(struct Curl_cfilter *cf,
   alive = TRUE;
   if(*input_pending) {
     CURLcode result;
-    /* This happens before we've sent off a request and the connection is
-       not in use by any other transfer, there shouldn't be any data here,
+    /* This happens before we have sent off a request and the connection is
+       not in use by any other transfer, there should not be any data here,
        only "protocol frames" */
     *input_pending = FALSE;
     result = cf_progress_ingress(cf, data, NULL);

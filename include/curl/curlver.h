@@ -48,7 +48,7 @@
 
    Where XX, YY and ZZ are the main version, release and patch numbers in
    hexadecimal (using 8 bits each). All three numbers are always represented
-   using two digits.  1.2 would appear as "0x010200" while version 9.11.7
+   using two digits. 1.2 would appear as "0x010200" while version 9.11.7
    appears as "0x090b07".
 
    This 6-digit (24 bits) hexadecimal number does not show pre-release number,

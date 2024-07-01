@@ -211,7 +211,7 @@ static CURLcode altsvc_load(struct altsvcinfo *asi, const char *file)
   CURLcode result = CURLE_OK;
   FILE *fp;
 
-  /* we need a private copy of the file name so that the altsvc cache file
+  /* we need a private copy of the filename so that the altsvc cache file
      name survives an easy handle reset */
   free(asi->filename);
   asi->filename = strdup(file);
@@ -373,7 +373,7 @@ CURLcode Curl_altsvc_save(struct Curl_easy *data,
     file = altsvc->filename;
 
   if((altsvc->flags & CURLALTSVC_READONLYFILE) || !file || !file[0])
-    /* marked as read-only, no file or zero length file name */
+    /* marked as read-only, no file or zero length filename */
     return CURLE_OK;
 
   result = Curl_fopen(data, file, &out, &tempstore);
@@ -430,7 +430,7 @@ static bool hostcompare(const char *host, const char *check)
   if(hlen && (host[hlen - 1] == '.'))
     hlen--;
   if(hlen != clen)
-    /* they can't match if they have different lengths */
+    /* they cannot match if they have different lengths */
     return FALSE;
   return strncasecompare(host, check, hlen);
 }
@@ -477,11 +477,11 @@ static time_t altsvc_debugtime(void *unused)
  * Curl_altsvc_parse() takes an incoming alt-svc response header and stores
  * the data correctly in the cache.
  *
- * 'value' points to the header *value*. That's contents to the right of the
+ * 'value' points to the header *value*. That is contents to the right of the
  * header name.
  *
  * Currently this function rejects invalid data without returning an error.
- * Invalid host name, port number will result in the specific alternative
+ * Invalid hostname, port number will result in the specific alternative
  * being rejected. Unknown protocols are skipped.
  */
 CURLcode Curl_altsvc_parse(struct Curl_easy *data,
@@ -531,7 +531,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
         bool valid = TRUE;
         p++;
         if(*p != ':') {
-          /* host name starts here */
+          /* hostname starts here */
           const char *hostp = p;
           if(*p == '[') {
             /* pass all valid IPv6 letters - does not handle zone id */
@@ -549,7 +549,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
             len = p - hostp;
           }
           if(!len || (len >= MAX_ALTSVC_HOSTLEN)) {
-            infof(data, "Excessive alt-svc host name, ignoring.");
+            infof(data, "Excessive alt-svc hostname, ignoring.");
             valid = FALSE;
           }
           else {
@@ -651,7 +651,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
       }
       else
         break;
-      /* after the double quote there can be a comma if there's another
+      /* after the double quote there can be a comma if there is another
          string or a semicolon if no more */
       if(*p == ',') {
         /* comma means another alternative is presented */

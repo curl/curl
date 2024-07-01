@@ -27,7 +27,7 @@
 #include "curl_setup.h"
 #ifndef CURL_DISABLE_NETRC
 
-/* returns -1 on failure, 0 if the host is found, 1 is the host isn't found */
+/* returns -1 on failure, 0 if the host is found, 1 is the host is not found */
 int Curl_parsenetrc(const char *host, char **loginp,
                     char **passwordp, char *filename);
   /* Assume: (*passwordp)[0]=0, host[0] != 0.

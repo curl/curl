@@ -207,7 +207,7 @@ bool Curl_is_ASCII_name(const char *hostname)
  * Curl_idn_decode() returns an allocated IDN decoded string if it was
  * possible. NULL on error.
  *
- * CURLE_URL_MALFORMAT - the host name could not be converted
+ * CURLE_URL_MALFORMAT - the hostname could not be converted
  * CURLE_OUT_OF_MEMORY - memory problem
  *
  */
@@ -319,7 +319,7 @@ void Curl_free_idnconverted_hostname(struct hostname *host)
  */
 CURLcode Curl_idnconvert_hostname(struct hostname *host)
 {
-  /* set the name we use to display the host name */
+  /* set the name we use to display the hostname */
   host->dispname = host->name;
 
 #ifdef USE_IDN

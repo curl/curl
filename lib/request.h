@@ -51,10 +51,10 @@ enum upgrade101 {
 
 
 /*
- * Request specific data in the easy handle (Curl_easy).  Previously,
+ * Request specific data in the easy handle (Curl_easy). Previously,
  * these members were on the connectdata struct but since a conn struct may
  * now be shared between different Curl_easys, we store connection-specific
- * data here. This struct only keeps stuff that's interesting for *this*
+ * data here. This struct only keeps stuff that is interesting for *this*
  * request, as it will be cleared between multiple ones
  */
 struct SingleRequest {
@@ -68,7 +68,7 @@ struct SingleRequest {
   unsigned int headerbytecount;  /* received server headers (not CONNECT
                                     headers) */
   unsigned int allheadercount;   /* all received headers (server + CONNECT) */
-  unsigned int deductheadercount; /* this amount of bytes doesn't count when
+  unsigned int deductheadercount; /* this amount of bytes does not count when
                                      we check if anything has been transferred
                                      at the end of a connection. We use this
                                      counter to make only a 100 reply (without

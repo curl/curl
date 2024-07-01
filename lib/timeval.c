@@ -77,7 +77,7 @@ struct curltime Curl_now(void)
 
   /*
   ** clock_gettime() may be defined by Apple's SDK as weak symbol thus
-  ** code compiles but fails during run-time if clock_gettime() is
+  ** code compiles but fails during runtime if clock_gettime() is
   ** called on unsupported OS version.
   */
 #if defined(__APPLE__) && defined(HAVE_BUILTIN_AVAILABLE) && \
@@ -112,7 +112,7 @@ struct curltime Curl_now(void)
   /*
   ** Even when the configure process has truly detected monotonic clock
   ** availability, it might happen that it is not actually available at
-  ** run-time. When this occurs simply fallback to other time source.
+  ** runtime. When this occurs simply fallback to other time source.
   */
 #ifdef HAVE_GETTIMEOFDAY
   else {

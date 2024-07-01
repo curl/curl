@@ -42,7 +42,7 @@ Invalid category provided, here is a list of all categories:
  ftp         FTP protocol options
  http        HTTP and HTTPS protocol options
  imap        IMAP protocol options
- misc        Options that don't fit into any other category
+ misc        Options that do not fit into any other category
  output      Filesystem output
  pop3        POP3 protocol options
  post        HTTP Post specific options

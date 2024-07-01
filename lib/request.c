@@ -204,7 +204,7 @@ static CURLcode xfer_send(struct Curl_easy *data,
     }
   }
 #endif
-  /* Make sure this doesn't send more body bytes than what the max send
+  /* Make sure this does not send more body bytes than what the max send
      speed says. The headers do not count to the max speed. */
   if(data->set.max_send_speed) {
     size_t body_bytes = blen - hds_len;
@@ -255,7 +255,7 @@ static CURLcode req_set_upload_done(struct Curl_easy *data)
 {
   DEBUGASSERT(!data->req.upload_done);
   data->req.upload_done = TRUE;
-  data->req.keepon &= ~(KEEP_SEND|KEEP_SEND_TIMED); /* we're done sending */
+  data->req.keepon &= ~(KEEP_SEND|KEEP_SEND_TIMED); /* we are done sending */
 
   Curl_creader_done(data, data->req.upload_aborted);
 

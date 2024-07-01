@@ -38,7 +38,7 @@ struct connectdata;
 #define CHUNK_MAXNUM_LEN (SIZEOF_CURL_OFF_T * 2)
 
 typedef enum {
-  /* await and buffer all hexadecimal digits until we get one that isn't a
+  /* await and buffer all hexadecimal digits until we get one that is not a
      hexadecimal digit. When done, we go CHUNK_LF */
   CHUNK_HEX,
 
@@ -54,9 +54,9 @@ typedef enum {
      big deal. */
   CHUNK_POSTLF,
 
-  /* Used to mark that we're out of the game.  NOTE: that there's a 'datasize'
-     field in the struct that will tell how many bytes that were not passed to
-     the client in the end of the last buffer! */
+  /* Used to mark that we are out of the game. NOTE: that there is a
+     'datasize' field in the struct that will tell how many bytes that were
+     not passed to the client in the end of the last buffer! */
   CHUNK_STOP,
 
   /* At this point optional trailer headers can be found, unless the next line

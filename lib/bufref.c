@@ -48,7 +48,7 @@ void Curl_bufref_init(struct bufref *br)
 }
 
 /*
- * Free the buffer and re-init the necessary fields. It doesn't touch the
+ * Free the buffer and re-init the necessary fields. It does not touch the
  * 'signature' field and thus this buffer reference can be reused.
  */
 

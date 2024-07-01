@@ -50,7 +50,7 @@ static void show_dir_errno(struct GlobalConfig *global, const char *name)
   switch(errno) {
 #ifdef EACCES
   case EACCES:
-    errorf(global, "You don't have permission to create %s", name);
+    errorf(global, "You do not have permission to create %s", name);
     break;
 #endif
 #ifdef ENAMETOOLONG
@@ -117,7 +117,7 @@ CURLcode create_dir_hierarchy(const char *outfile, struct GlobalConfig *global)
   }
   dirbuildup[0] = '\0';
 
-  /* Allow strtok() here since this isn't used threaded */
+  /* Allow strtok() here since this is not used threaded */
   /* !checksrc! disable BANNEDFUNC 2 */
   tempdir = strtok(outdup, PATH_DELIMITERS);
 
@@ -137,13 +137,13 @@ CURLcode create_dir_hierarchy(const char *outfile, struct GlobalConfig *global)
              It may seem as though that would harmlessly fail but it could be
              a corner case if X: did not exist, since we would be creating it
              erroneously.
-             eg if outfile is X:\foo\bar\filename then don't mkdir X:
+             eg if outfile is X:\foo\bar\filename then do not mkdir X:
              This logic takes into account unsupported drives !:, 1:, etc. */
           char *p = strchr(tempdir, ':');
           if(p && !p[1])
             skip = true;
 #endif
-          /* the output string doesn't start with a separator */
+          /* the output string does not start with a separator */
           strcpy(dirbuildup, tempdir);
         }
         else

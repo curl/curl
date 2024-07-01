@@ -61,7 +61,7 @@ enum {
   FTP_STOR_PREQUOTE,
   FTP_POSTQUOTE,
   FTP_CWD,  /* change dir */
-  FTP_MKD,  /* if the dir didn't exist */
+  FTP_MKD,  /* if the dir did not exist */
   FTP_MDTM, /* to figure out the datestamp */
   FTP_TYPE, /* to set type when doing a head-like request */
   FTP_LIST_TYPE, /* set type when about to do a dir list */
@@ -123,7 +123,7 @@ struct ftp_conn {
   char *account;
   char *alternative_to_user;
   char *entrypath; /* the PWD reply when we logged on */
-  char *file;    /* url-decoded file name (or path) */
+  char *file;    /* url-decoded filename (or path) */
   char **dirs;   /* realloc()ed array for path components */
   char *newhost;
   char *prevpath;   /* url-decoded conn->path from the previous transfer */
@@ -139,7 +139,7 @@ struct ftp_conn {
   int count1; /* general purpose counter for the state machine */
   int count2; /* general purpose counter for the state machine */
   int count3; /* general purpose counter for the state machine */
-  /* newhost is the (allocated) IP addr or host name to connect the data
+  /* newhost is the (allocated) IP addr or hostname to connect the data
      connection to */
   unsigned short newport;
   ftpstate state; /* always use ftp.c:state() to change state! */

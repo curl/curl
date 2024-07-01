@@ -67,7 +67,7 @@ struct curl_trc_featt;
 #ifdef USE_WEBSOCKETS
 /* CURLPROTO_GOPHERS (29) is the highest publicly used protocol bit number,
  * the rest are internal information. If we use higher bits we only do this on
- * platforms that have a >= 64 bit type and then we use such a type for the
+ * platforms that have a >= 64-bit type and then we use such a type for the
  * protocol fields in the protocol handler.
  */
 #define CURLPROTO_WS     (1<<30)
@@ -276,7 +276,7 @@ struct ssl_peer {
 };
 
 struct ssl_primary_config {
-  char *CApath;          /* certificate dir (doesn't work on windows) */
+  char *CApath;          /* certificate dir (does not work on windows) */
   char *CAfile;          /* certificate to verify peer against */
   char *issuercert;      /* optional issuer certificate filename */
   char *clientcert;
@@ -307,7 +307,7 @@ struct ssl_config_data {
   curl_ssl_ctx_callback fsslctx; /* function to initialize ssl ctx */
   void *fsslctxp;        /* parameter for call back */
   char *cert_type; /* format for certificate (default: PEM)*/
-  char *key; /* private key file name */
+  char *key; /* private key filename */
   struct curl_blob *key_blob;
   char *key_type; /* format for private key (default: PEM) */
   char *key_passwd; /* plain text private key password */
@@ -315,7 +315,7 @@ struct ssl_config_data {
   BIT(falsestart);
   BIT(enable_beast); /* allow this flaw for interoperability's sake */
   BIT(no_revoke);    /* disable SSL certificate revocation checks */
-  BIT(no_partialchain); /* don't accept partial certificate chains */
+  BIT(no_partialchain); /* do not accept partial certificate chains */
   BIT(revoke_best_effort); /* ignore SSL revocation offline/missing revocation
                               list errors */
   BIT(native_ca_store); /* use the native ca store of operating system */
@@ -332,8 +332,8 @@ typedef void Curl_ssl_sessionid_dtor(void *sessionid, size_t idsize);
 
 /* information stored about one single SSL session */
 struct Curl_ssl_session {
-  char *name;       /* host name for which this ID was used */
-  char *conn_to_host; /* host name for the connection (may be NULL) */
+  char *name;       /* hostname for which this ID was used */
+  char *conn_to_host; /* hostname for the connection (may be NULL) */
   const char *scheme; /* protocol scheme used */
   void *sessionid;  /* as returned from the SSL layer */
   size_t idsize;    /* if known, otherwise 0 */
@@ -519,10 +519,10 @@ struct ConnectBits {
                          re-attempted at another connection. */
 #ifndef CURL_DISABLE_FTP
   BIT(ftp_use_epsv);  /* As set with CURLOPT_FTP_USE_EPSV, but if we find out
-                         EPSV doesn't work we disable it for the forthcoming
+                         EPSV does not work we disable it for the forthcoming
                          requests */
   BIT(ftp_use_eprt);  /* As set with CURLOPT_FTP_USE_EPRT, but if we find out
-                         EPRT doesn't work we disable it for the forthcoming
+                         EPRT does not work we disable it for the forthcoming
                          requests */
   BIT(ftp_use_data_ssl); /* Enabled SSL for the data connection */
   BIT(ftp_use_control_ssl); /* Enabled SSL for the control connection */
@@ -663,7 +663,7 @@ struct Curl_handler {
   /* This function *MAY* be set to a protocol-dependent function that is run
    * after the connect() and everything is done, as a step in the connection.
    * The 'done' pointer points to a bool that should be set to TRUE if the
-   * function completes before return. If it doesn't complete, the caller
+   * function completes before return. If it does not complete, the caller
    * should call the ->connecting() function until it is.
    */
   CURLcode (*connect_it)(struct Curl_easy *data, bool *done);
@@ -694,7 +694,7 @@ struct Curl_handler {
                          struct connectdata *conn, curl_socket_t *socks);
 
   /* This function *MAY* be set to a protocol-dependent function that is run
-   * by the curl_disconnect(), as a step in the disconnection.  If the handler
+   * by the curl_disconnect(), as a step in the disconnection. If the handler
    * is called because the connection has been considered dead,
    * dead_connection is set to TRUE. The connection is (again) associated with
    * the transfer here.
@@ -742,11 +742,11 @@ struct Curl_handler {
    the send function might need to be called while uploading, or vice versa.
 */
 #define PROTOPT_DIRLOCK (1<<3)
-#define PROTOPT_NONETWORK (1<<4)   /* protocol doesn't use the network! */
+#define PROTOPT_NONETWORK (1<<4)   /* protocol does not use the network! */
 #define PROTOPT_NEEDSPWD (1<<5)    /* needs a password, and if none is set it
                                       gets a default */
-#define PROTOPT_NOURLQUERY (1<<6)   /* protocol can't handle
-                                        url query strings (?foo=bar) ! */
+#define PROTOPT_NOURLQUERY (1<<6)   /* protocol cannot handle
+                                       URL query strings (?foo=bar) ! */
 #define PROTOPT_CREDSPERREQUEST (1<<7) /* requires login credentials per
                                           request instead of per connection */
 #define PROTOPT_ALPN (1<<8) /* set ALPN for this */
@@ -758,8 +758,8 @@ struct Curl_handler {
                                          this protocol and act as a gateway */
 #define PROTOPT_WILDCARD (1<<12) /* protocol supports wildcard matching */
 #define PROTOPT_USERPWDCTRL (1<<13) /* Allow "control bytes" (< 32 ascii) in
-                                       user name and password */
-#define PROTOPT_NOTCPPROXY (1<<14) /* this protocol can't proxy over TCP */
+                                       username and password */
+#define PROTOPT_NOTCPPROXY (1<<14) /* this protocol cannot proxy over TCP */
 
 #define CONNCHECK_NONE 0                 /* No checks */
 #define CONNCHECK_ISDEAD (1<<0)          /* Check if the connection is dead. */
@@ -780,7 +780,7 @@ struct proxy_info {
   int port;
   unsigned char proxytype; /* curl_proxytype: what kind of proxy that is in
                               use */
-  char *user;    /* proxy user name string, allocated */
+  char *user;    /* proxy username string, allocated */
   char *passwd;  /* proxy password string, allocated */
 };
 
@@ -822,8 +822,8 @@ struct connectdata {
   const struct Curl_sockaddr_ex *remote_addr;
 
   struct hostname host;
-  char *hostname_resolve; /* host name to resolve to address, allocated */
-  char *secondaryhostname; /* secondary socket host name (ftp) */
+  char *hostname_resolve; /* hostname to resolve to address, allocated */
+  char *secondaryhostname; /* secondary socket hostname (ftp) */
   struct hostname conn_to_host; /* the host to connect to. valid only if
                                    bits.conn_to_host is set */
 #ifndef CURL_DISABLE_PROXY
@@ -837,7 +837,7 @@ struct connectdata {
      these are updated with data which comes directly from the socket. */
   struct ip_quadruple primary;
   struct ip_quadruple secondary;
-  char *user;    /* user name string, allocated */
+  char *user;    /* username string, allocated */
   char *passwd;  /* password string, allocated */
   char *options; /* options string, allocated */
   char *sasl_authzid;     /* authorization identity string, allocated */
@@ -972,7 +972,7 @@ struct connectdata {
   /* When this connection is created, store the conditions for the local end
      bind. This is stored before the actual bind and before any connection is
      made and will serve the purpose of being used for comparison reasons so
-     that subsequent bound-requested connections aren't accidentally reusing
+     that subsequent bound-requested connections are not accidentally reusing
      wrong connections. */
   char *localdev;
   unsigned short localportrange;
@@ -1031,7 +1031,7 @@ struct PureInfo {
   unsigned long httpauthavail;  /* what host auth types were announced */
   long numconnects; /* how many new connection did libcurl created */
   char *contenttype; /* the content type of the object */
-  char *wouldredirect; /* URL this would've been redirected to if asked to */
+  char *wouldredirect; /* URL this would have been redirected to if asked to */
   curl_off_t retry_after; /* info from Retry-After: header */
   unsigned int header_size;  /* size of read header(s) in bytes */
 
@@ -1050,7 +1050,7 @@ struct PureInfo {
   struct curl_certinfo certs; /* info about the certs. Asked for with
                                  CURLOPT_CERTINFO / CURLINFO_CERTINFO */
   CURLproxycode pxcode;
-  BIT(timecond);  /* set to TRUE if the time condition didn't match, which
+  BIT(timecond);  /* set to TRUE if the time condition did not match, which
                      thus made the document NOT get fetched */
   BIT(used_proxy); /* the transfer used a proxy */
 };
@@ -1223,8 +1223,8 @@ struct UrlState {
   curl_off_t current_speed;  /* the ProgressShow() function sets this,
                                 bytes / second */
 
-  /* host name, port number and protocol of the first (not followed) request.
-     if set, this should be the host name that we will sent authorization to,
+  /* hostname, port number and protocol of the first (not followed) request.
+     if set, this should be the hostname that we will sent authorization to,
      no else. Used to make Location: following not keep sending user+password.
      This is strdup()ed data. */
   char *first_host;
@@ -1376,7 +1376,7 @@ struct UrlState {
                     called. */
   BIT(allow_port); /* Is set.use_port allowed to take effect or not. This
                       is always set TRUE when curl_easy_perform() is called. */
-  BIT(authproblem); /* TRUE if there's some problem authenticating */
+  BIT(authproblem); /* TRUE if there is some problem authenticating */
   /* set after initial USER failure, to prevent an authentication loop */
   BIT(wildcardmatch); /* enable wildcard matching */
   BIT(disableexpect);    /* TRUE if Expect: is disabled due to a previous
@@ -1414,12 +1414,12 @@ struct UrlState {
 struct Curl_multi;    /* declared in multihandle.c */
 
 enum dupstring {
-  STRING_CERT,            /* client certificate file name */
+  STRING_CERT,            /* client certificate filename */
   STRING_CERT_TYPE,       /* format for certificate (default: PEM)*/
-  STRING_KEY,             /* private key file name */
+  STRING_KEY,             /* private key filename */
   STRING_KEY_PASSWD,      /* plain text private key password */
   STRING_KEY_TYPE,        /* format for private key (default: PEM) */
-  STRING_SSL_CAPATH,      /* CA directory name (doesn't work on windows) */
+  STRING_SSL_CAPATH,      /* CA directory name (does not work on windows) */
   STRING_SSL_CAFILE,      /* certificate file to verify peer against */
   STRING_SSL_PINNEDPUBLICKEY, /* public key file to verify peer against */
   STRING_SSL_CIPHER_LIST, /* list of ciphers to use */
@@ -1428,12 +1428,12 @@ enum dupstring {
   STRING_SSL_ISSUERCERT, /* issuer cert file to check certificate */
   STRING_SERVICE_NAME,    /* Service name */
 #ifndef CURL_DISABLE_PROXY
-  STRING_CERT_PROXY,      /* client certificate file name */
+  STRING_CERT_PROXY,      /* client certificate filename */
   STRING_CERT_TYPE_PROXY, /* format for certificate (default: PEM)*/
-  STRING_KEY_PROXY,       /* private key file name */
+  STRING_KEY_PROXY,       /* private key filename */
   STRING_KEY_PASSWD_PROXY, /* plain text private key password */
   STRING_KEY_TYPE_PROXY,  /* format for private key (default: PEM) */
-  STRING_SSL_CAPATH_PROXY, /* CA directory name (doesn't work on windows) */
+  STRING_SSL_CAPATH_PROXY, /* CA directory name (does not work on windows) */
   STRING_SSL_CAFILE_PROXY, /* certificate file to verify peer against */
   STRING_SSL_PINNEDPUBLICKEY_PROXY, /* public key file to verify proxy */
   STRING_SSL_CIPHER_LIST_PROXY, /* list of ciphers to use */
@@ -1447,7 +1447,7 @@ enum dupstring {
   STRING_COOKIEJAR,       /* dump all cookies to this file */
 #endif
   STRING_CUSTOMREQUEST,   /* HTTP/FTP/RTSP request/method to use */
-  STRING_DEFAULT_PROTOCOL, /* Protocol to use when the URL doesn't specify */
+  STRING_DEFAULT_PROTOCOL, /* Protocol to use when the URL does not specify */
   STRING_DEVICE,          /* local network interface/address to use */
   STRING_INTERFACE,       /* local network interface to use */
   STRING_BINDHOST,        /* local address to use */
@@ -1492,7 +1492,7 @@ enum dupstring {
   STRING_SSH_PUBLIC_KEY,  /* path to the public key file for auth */
   STRING_SSH_HOST_PUBLIC_KEY_MD5, /* md5 of host public key in ascii hex */
   STRING_SSH_HOST_PUBLIC_KEY_SHA256, /* sha256 of host public key in base64 */
-  STRING_SSH_KNOWNHOSTS,  /* file name of knownhosts file */
+  STRING_SSH_KNOWNHOSTS,  /* filename of knownhosts file */
 #endif
 #ifndef CURL_DISABLE_SMTP
   STRING_MAIL_FROM,
@@ -1563,7 +1563,7 @@ enum dupblob {
 };
 
 /* callback that gets called when this easy handle is completed within a multi
-   handle.  Only used for internally created transfers, like for example
+   handle. Only used for internally created transfers, like for example
    DoH. */
 typedef int (*multidone_func)(struct Curl_easy *easy, CURLcode result);
 
@@ -1588,7 +1588,7 @@ struct UserDefined {
 #ifndef CURL_DISABLE_BINDLOCAL
   unsigned short localport; /* local port number to bind to */
   unsigned short localportrange; /* number of additional port numbers to test
-                                    in case the 'localport' one can't be
+                                    in case the 'localport' one cannot be
                                     bind()ed */
 #endif
   curl_write_callback fwrite_func;   /* function that stores the output */
@@ -1689,7 +1689,7 @@ struct UserDefined {
   struct curl_slist *postquote; /* after the transfer */
   struct curl_slist *prequote; /* before the transfer, after type */
   /* Despite the name, ftp_create_missing_dirs is for FTP(S) and SFTP
-     1 - create directories that don't exist
+     1 - create directories that do not exist
      2 - the same but also allow MKD to fail once
   */
   unsigned char ftp_create_missing_dirs;
@@ -1785,10 +1785,10 @@ struct UserDefined {
 
 /* Here follows boolean settings that define how to behave during
    this session. They are STATIC, set by libcurl users or at least initially
-   and they don't change during operations. */
+   and they do not change during operations. */
   BIT(quick_exit);       /* set 1L when it is okay to leak things (like
-                            threads), as we're about to exit() anyway and
-                            don't want lengthy cleanups to delay termination,
+                            threads), as we are about to exit() anyway and
+                            do not want lengthy cleanups to delay termination,
                             e.g. after a DNS timeout */
   BIT(get_filetime);     /* get the time and get of the remote file */
 #ifndef CURL_DISABLE_PROXY
@@ -1808,7 +1808,7 @@ struct UserDefined {
                             us */
   BIT(wildcard_enabled); /* enable wildcard matching */
 #endif
-  BIT(hide_progress);    /* don't use the progress meter */
+  BIT(hide_progress);    /* do not use the progress meter */
   BIT(http_fail_on_error);  /* fail on HTTP error codes >= 400 */
   BIT(http_keep_sending_on_error); /* for HTTP status codes >= 300 */
   BIT(http_follow_location); /* follow HTTP redirects */
@@ -1854,7 +1854,7 @@ struct UserDefined {
 #ifdef USE_UNIX_SOCKETS
   BIT(abstract_unix_socket);
 #endif
-  BIT(disallow_username_in_url); /* disallow username in url */
+  BIT(disallow_username_in_url); /* disallow username in URL */
 #ifndef CURL_DISABLE_DOH
   BIT(doh); /* DNS-over-HTTPS enabled */
   BIT(doh_verifypeer);     /* DoH certificate peer verification */

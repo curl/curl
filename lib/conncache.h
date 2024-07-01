@@ -137,7 +137,7 @@ void Curl_conncache_print(struct conncache *connc);
  * Tear down the connection. If `aborted` is FALSE, the connection
  * will be shut down first before discarding. If the shutdown
  * is not immediately complete, the connection
- * will be placed into the cache's shutdown queue.
+ * will be placed into the cache is shutdown queue.
  */
 void Curl_conncache_disconnect(struct Curl_easy *data,
                                struct connectdata *conn,

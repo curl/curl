@@ -241,7 +241,7 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
 }
 
 /*
- * Return TRUE if the given host name is currently an HSTS one.
+ * Return TRUE if the given hostname is currently an HSTS one.
  *
  * The 'subdomain' argument tells the function if subdomain matching should be
  * attempted.
@@ -368,7 +368,7 @@ CURLcode Curl_hsts_save(struct Curl_easy *data, struct hsts *h,
     file = h->filename;
 
   if((h->flags & CURLHSTS_READONLYFILE) || !file || !file[0])
-    /* marked as read-only, no file or zero length file name */
+    /* marked as read-only, no file or zero length filename */
     goto skipsave;
 
   result = Curl_fopen(data, file, &out, &tempstore);
@@ -393,7 +393,7 @@ CURLcode Curl_hsts_save(struct Curl_easy *data, struct hsts *h,
   free(tempstore);
 skipsave:
   if(data->set.hsts_write) {
-    /* if there's a write callback */
+    /* if there is a write callback */
     struct curl_index i; /* count */
     i.total = h->list.size;
     i.index = 0;
@@ -440,7 +440,7 @@ static CURLcode hsts_add(struct hsts *h, char *line)
     if(!e)
       result = hsts_create(h, p, subdomain, expires);
     else {
-      /* the same host name, use the largest expire time */
+      /* the same hostname, use the largest expire time */
       if(expires > e->expires)
         e->expires = expires;
     }
@@ -508,7 +508,7 @@ static CURLcode hsts_load(struct hsts *h, const char *file)
   CURLcode result = CURLE_OK;
   FILE *fp;
 
-  /* we need a private copy of the file name so that the hsts cache file
+  /* we need a private copy of the filename so that the hsts cache file
      name survives an easy handle reset */
   free(h->filename);
   h->filename = strdup(file);

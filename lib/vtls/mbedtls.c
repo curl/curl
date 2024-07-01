@@ -837,7 +837,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
                                    MBEDTLS_SSL_SESSION_TICKETS_DISABLED);
 #endif
 
-  /* Check if there's a cached ID we can/should use here! */
+  /* Check if there is a cached ID we can/should use here! */
   if(ssl_config->primary.sessionid) {
     void *old_session = NULL;
 
@@ -884,7 +884,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     for(i = 0; i < connssl->alpn->count; ++i) {
       backend->protocols[i] = connssl->alpn->entries[i];
     }
-    /* this function doesn't clone the protocols array, which is why we need
+    /* this function does not clone the protocols array, which is why we need
        to keep it around */
     if(mbedtls_ssl_conf_alpn_protocols(&backend->config,
                                        &backend->protocols[0])) {
@@ -1209,7 +1209,7 @@ mbed_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
       return CURLE_SSL_CONNECT_ERROR;
     }
 
-    /* If there's already a matching session in the cache, delete it */
+    /* If there is already a matching session in the cache, delete it */
     Curl_ssl_sessionid_lock(data);
     if(!Curl_ssl_getsessionid(cf, data, &connssl->peer,
                               &old_ssl_sessionid, NULL))
@@ -1488,7 +1488,7 @@ mbed_connect_common(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
   if(ssl_connect_1 == connssl->connecting_state) {
-    /* Find out how much more time we're allowed */
+    /* Find out how much more time we are allowed */
     timeout_ms = Curl_timeleft(data, NULL, TRUE);
 
     if(timeout_ms < 0) {
@@ -1512,7 +1512,7 @@ mbed_connect_common(struct Curl_cfilter *cf, struct Curl_easy *data,
       return CURLE_OPERATION_TIMEDOUT;
     }
 
-    /* if ssl is expecting something, check if it's available. */
+    /* if ssl is expecting something, check if it is available. */
     if(connssl->io_need) {
 
       curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND)?

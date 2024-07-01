@@ -25,7 +25,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-/* global variable declarations, for libcurl run-time info */
+/* global variable declarations, for libcurl runtime info */
 
 
 extern curl_version_info_data *curlinfo;

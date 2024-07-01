@@ -50,8 +50,8 @@ struct OperationConfig {
   struct curl_slist *cookies;  /* cookies to serialize into a single line */
   char *cookiejar;          /* write to this file */
   struct curl_slist *cookiefiles;  /* file(s) to load cookies from */
-  char *altsvc;             /* alt-svc cache file name */
-  char *hsts;               /* HSTS cache file name */
+  char *altsvc;             /* alt-svc cache filename */
+  char *hsts;               /* HSTS cache filename */
   bool cookiesession;       /* new session? */
   bool encoding;            /* Accept-Encoding please */
   bool tr_encoding;         /* Transfer-Encoding please */
@@ -116,7 +116,7 @@ struct OperationConfig {
   bool failonerror;         /* fail on (HTTP) errors */
   bool failwithbody;        /* fail on (HTTP) errors but still store body */
   bool show_headers;        /* show headers to data output */
-  bool no_body;             /* don't get the body */
+  bool no_body;             /* do not get the body */
   bool dirlistonly;         /* only get the FTP dir list */
   bool followlocation;      /* follow http redirects */
   bool unrestricted_auth;   /* Continue to send authentication (user+password)
@@ -312,8 +312,8 @@ struct OperationConfig {
 
 struct GlobalConfig {
   bool showerror;                 /* show errors when silent */
-  bool silent;                    /* don't show messages, --silent given */
-  bool noprogress;                /* don't show progress bar */
+  bool silent;                    /* do not show messages, --silent given */
+  bool noprogress;                /* do not show progress bar */
   bool isatty;                    /* Updated internally if output is a tty */
   char *trace_dump;               /* file to dump the network trace to */
   FILE *trace_stream;
@@ -322,7 +322,7 @@ struct GlobalConfig {
   bool tracetime;                 /* include timestamp? */
   bool traceids;                  /* include xfer-/conn-id? */
   int progressmode;               /* CURL_PROGRESS_BAR / CURL_PROGRESS_STATS */
-  char *libcurl;                  /* Output libcurl code to this file name */
+  char *libcurl;                  /* Output libcurl code to this filename */
   bool fail_early;                /* exit on first transfer error */
   bool styled_output;             /* enable fancy output style detection */
   long ms_per_transfer;           /* start next transfer after (at least) this

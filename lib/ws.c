@@ -579,7 +579,7 @@ static ssize_t ws_enc_write_head(struct Curl_easy *data,
     enc->contfragment = FALSE;
   }
   else if(enc->contfragment) {
-    /* the previous fragment was not a final one and this isn't either, keep a
+    /* the previous fragment was not a final one and this is not either, keep a
        CONT opcode and no FIN bit */
     firstbyte |= WSBIT_OPCODE_CONT;
   }

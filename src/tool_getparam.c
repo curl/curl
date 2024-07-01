@@ -353,7 +353,7 @@ struct LongShort {
     ARG_NONE, /* stand-alone but not a boolean */
     ARG_BOOL, /* accepts a --no-[name] prefix */
     ARG_STRG, /* requires an argument */
-    ARG_FILE  /* requires an argument, usually a file name */
+    ARG_FILE  /* requires an argument, usually a filename */
   } desc;
   char letter;  /* short name option or ' ' */
   cmdline_t cmd;
@@ -637,7 +637,7 @@ static const struct LongShort aliases[]= {
 
 /* Split the argument of -E to 'certname' and 'passphrase' separated by colon.
  * We allow ':' and '\' to be escaped by '\' so that we can use certificate
- * nicknames containing ':'.  See <https://sourceforge.net/p/curl/bugs/1196/>
+ * nicknames containing ':'. See <https://sourceforge.net/p/curl/bugs/1196/>
  * for details. */
 #ifndef UNITTESTS
 static
@@ -678,7 +678,7 @@ void parse_cert_parameter(const char *cert_parameter,
     strncpy(certname_place, param_place, span);
     param_place += span;
     certname_place += span;
-    /* we just ate all the non-special chars. now we're on either a special
+    /* we just ate all the non-special chars. now we are on either a special
      * char or the end of the string. */
     switch(*param_place) {
     case '\0':
@@ -708,7 +708,7 @@ void parse_cert_parameter(const char *cert_parameter,
       /* Since we live in a world of weirdness and confusion, the win32
          dudes can use : when using drive letters and thus c:\file:password
          needs to work. In order not to break compatibility, we still use : as
-         separator, but we try to detect when it is used for a file name! On
+         separator, but we try to detect when it is used for a filename! On
          windows. */
 #ifdef _WIN32
       if((param_place == &cert_parameter[1]) &&
@@ -724,7 +724,7 @@ void parse_cert_parameter(const char *cert_parameter,
       }
 #endif
       /* escaped colons and Windows drive letter colons were handled
-       * above; if we're still here, this is a separating colon */
+       * above; if we are still here, this is a separating colon */
       param_place++;
       if(*param_place) {
         *passphrase = strdup(param_place);
@@ -835,7 +835,7 @@ static ParameterError GetSizeParameter(struct GlobalConfig *global,
 static void cleanarg(argv_item_t str)
 {
   /* now that getstr has copied the contents of nextarg, wipe the next
-   * argument out so that the username:password isn't displayed in the
+   * argument out so that the username:password is not displayed in the
    * system process list */
   if(str) {
     size_t len = strlen(str);
@@ -853,7 +853,7 @@ static ParameterError data_urlencode(struct GlobalConfig *global,
                                      size_t *lenp)
 {
   /* [name]=[content], we encode the content part only
-   * [name]@[file name]
+   * [name]@[filename]
    *
    * Case 2: we first load the file using that name and then encode
    * the content.
@@ -872,14 +872,14 @@ static ParameterError data_urlencode(struct GlobalConfig *global,
     is_file = *p++; /* pass the separator */
   }
   else {
-    /* neither @ nor =, so no name and it isn't a file */
+    /* neither @ nor =, so no name and it is not a file */
     nlen = 0;
     is_file = 0;
     p = nextarg;
   }
   if('@' == is_file) {
     FILE *file;
-    /* a '@' letter, it means that a file name or - (stdin) follows */
+    /* a '@' letter, it means that a filename or - (stdin) follows */
     if(!strcmp("-", p)) {
       file = stdin;
       set_binmode(stdin);
@@ -964,7 +964,7 @@ static CURLcode set_trace_config(struct GlobalConfig *global,
   if(!tmp)
     return CURLE_OUT_OF_MEMORY;
 
-  /* Allow strtok() here since this isn't used threaded */
+  /* Allow strtok() here since this is not used threaded */
   /* !checksrc! disable BANNEDFUNC 2 */
   token = strtok(tmp, ", ");
   while(token) {
@@ -1134,7 +1134,7 @@ static ParameterError set_data(cmdline_t cmd,
       return err;
   }
   else if('@' == *nextarg && (cmd != C_DATA_RAW)) {
-    /* the data begins with a '@' letter, it means that a file name
+    /* the data begins with a '@' letter, it means that a filename
        or - (stdin) follows */
     nextarg++; /* pass the @ */
 
@@ -1293,7 +1293,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
   (void)cleararg;
 #endif
 
-  *usedarg = FALSE; /* default is that we don't use the arg */
+  *usedarg = FALSE; /* default is that we do not use the arg */
 
   if(('-' != flag[0]) || ('-' == flag[1])) {
     /* this should be a long name */
@@ -1325,7 +1325,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       goto error;
     }
     if(noflagged && (a->desc != ARG_BOOL)) {
-      /* --no- prefixed an option that isn't boolean! */
+      /* --no- prefixed an option that is not boolean! */
       err = PARAM_NO_NOT_BOOLEAN;
       goto error;
     }
@@ -1335,7 +1335,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 
       if((a->desc != ARG_STRG) &&
          (a->desc != ARG_FILE)) {
-        /* --expand on an option that isn't a string or a filename */
+        /* --expand on an option that is not a string or a filename */
         err = PARAM_EXPAND_ERROR;
         goto error;
       }
@@ -1373,7 +1373,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       /* this option requires an extra parameter */
       if(!longopt && parse[1]) {
         nextarg = (char *)&parse[1]; /* this is the actual extra parameter */
-        singleopt = TRUE;   /* don't loop anymore after this */
+        singleopt = TRUE;   /* do not loop anymore after this */
       }
       else if(!nextarg) {
         err = PARAM_REQUIRES_PARAMETER;
@@ -1388,8 +1388,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 
       if((a->desc == ARG_FILE) &&
          (nextarg[0] == '-') && nextarg[1]) {
-        /* if the file name looks like a command line option */
-        warnf(global, "The file name argument '%s' looks like a flag.",
+        /* if the filename looks like a command line option */
+        warnf(global, "The filename argument '%s' looks like a flag.",
               nextarg);
       }
       else if(!strncmp("\xe2\x80\x9c", nextarg, 3)) {
@@ -1546,7 +1546,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case C_ANYAUTH: /* --anyauth */
       if(toggle)
         config->authtype = CURLAUTH_ANY;
-      /* --no-anyauth simply doesn't touch it */
+      /* --no-anyauth simply does not touch it */
       break;
 #ifdef USE_WATT32
     case C_WDEBUG: /* --wdebug */
@@ -1625,7 +1625,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         config->url_get = config->url_list;
 
       if(config->url_get) {
-        /* there's a node here, if it already is filled-in continue to find
+        /* there is a node here, if it already is filled-in continue to find
            an "empty" node */
         while(config->url_get && (config->url_get->flags & GETOUT_URL))
           config->url_get = config->url_get->next;
@@ -1758,7 +1758,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       while(ISDIGIT(*p))
         p++;
       if(*p) {
-        /* if there's anything more than a plain decimal number */
+        /* if there is anything more than a plain decimal number */
         rc = sscanf(p, " - %6s", lrange);
         *p = 0; /* null-terminate to make str2unum() work below */
       }
@@ -2451,7 +2451,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         else {
           err = file2memory(&string, &len, file);
           if(!err && string) {
-            /* Allow strtok() here since this isn't used threaded */
+            /* Allow strtok() here since this is not used threaded */
             /* !checksrc! disable BANNEDFUNC 2 */
             char *h = strtok(string, "\r\n");
             while(h) {
@@ -2561,7 +2561,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       if(!config->url_out)
         config->url_out = config->url_list;
       if(config->url_out) {
-        /* there's a node here, if it already is filled-in continue to find
+        /* there is a node here, if it already is filled-in continue to find
            an "empty" node */
         while(config->url_out && (config->url_out->flags & GETOUT_OUTFILE))
           config->url_out = config->url_out->next;
@@ -2612,7 +2612,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
 
     case C_DISABLE: /* --disable */
-      /* if used first, already taken care of, we do it like this so we don't
+      /* if used first, already taken care of, we do it like this so we do not
          cause an error! */
       break;
     case C_QUOTE: /* --quote */
@@ -2635,9 +2635,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_RANGE: /* --range */
       /* Specifying a range WITHOUT A DASH will create an illegal HTTP range
-         (and won't actually be range by definition). The man page previously
-         claimed that to be a good way, why this code is added to work-around
-         it. */
+         (and will not actually be range by definition). The manpage
+         previously claimed that to be a good way, why this code is added to
+         work-around it. */
       if(ISDIGIT(*nextarg) && !strchr(nextarg, '-')) {
         char buffer[32];
         if(curlx_strtoofft(nextarg, NULL, 10, &value)) {
@@ -2691,7 +2691,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       if(!config->url_ul)
         config->url_ul = config->url_list;
       if(config->url_ul) {
-        /* there's a node here, if it already is filled-in continue to find
+        /* there is a node here, if it already is filled-in continue to find
            an "empty" node */
         while(config->url_ul && (config->url_ul->flags & GETOUT_UPLOAD))
           config->url_ul = config->url_ul->next;
@@ -2754,7 +2754,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case C_WRITE_OUT: /* --write-out */
       /* get the output string */
       if('@' == *nextarg) {
-        /* the data begins with a '@' letter, it means that a file name
+        /* the data begins with a '@' letter, it means that a filename
            or - (stdin) follows */
         FILE *file;
         const char *fname;
@@ -2851,7 +2851,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       now = time(NULL);
       config->condtime = (curl_off_t)curl_getdate(nextarg, &now);
       if(-1 == config->condtime) {
-        /* now let's see if it is a file name to get the time from instead! */
+        /* now let's see if it is a filename to get the time from instead! */
         rc = getfiletime(nextarg, global, &value);
         if(!rc)
           /* pull the time out from the file */
@@ -2861,7 +2861,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           config->timecond = CURL_TIMECOND_NONE;
           warnf(global,
                 "Illegal date format for -z, --time-cond (and not "
-                "a file name). Disabling time condition. "
+                "a filename). Disabling time condition. "
                 "See curl_getdate(3) for valid date syntax.");
         }
       }
@@ -2950,7 +2950,7 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
           }
         }
         else if(!result && passarg)
-          i++; /* we're supposed to skip this */
+          i++; /* we are supposed to skip this */
       }
     }
     else {

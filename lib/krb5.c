@@ -25,7 +25,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE INSTITUTE AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE INSTITUTE OR CONTRIBUTORS BE LIABLE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE INSTITUTE OR CONTRIBUTORS BE LIABLE
  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
  * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
@@ -178,7 +178,7 @@ krb5_encode(void *app_data, const void *from, int length, int level, void **to)
   if(maj != GSS_S_COMPLETE)
     return -1;
 
-  /* malloc a new buffer, in case gss_release_buffer doesn't work as
+  /* malloc a new buffer, in case gss_release_buffer does not work as
      expected */
   *to = malloc(enc.length);
   if(!*to)
@@ -227,7 +227,7 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
 
   /* this loop will execute twice (once for service, once for host) */
   for(;;) {
-    /* this really shouldn't be repeated here, but can't help it */
+    /* this really should not be repeated here, but cannot help it */
     if(service == srv_host) {
       result = ftpsend(data, conn, "AUTH GSSAPI");
       if(result)
@@ -329,7 +329,7 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
           size_t len = Curl_dyn_len(&pp->recvbuf);
           p = Curl_dyn_ptr(&pp->recvbuf);
           if((len < 4) || (p[0] != '2' && p[0] != '3')) {
-            infof(data, "Server didn't accept auth data");
+            infof(data, "Server did not accept auth data");
             ret = AUTH_ERROR;
             break;
           }
@@ -878,7 +878,7 @@ static CURLcode choose_mech(struct Curl_easy *data, struct connectdata *conn)
 
   if(ret != AUTH_CONTINUE) {
     if(ret != AUTH_OK) {
-      /* Mechanism has dumped the error to stderr, don't error here. */
+      /* Mechanism has dumped the error to stderr, do not error here. */
       return CURLE_USE_SSL_FAILED;
     }
     DEBUGASSERT(ret == AUTH_OK);

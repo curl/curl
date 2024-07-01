@@ -657,7 +657,7 @@ static void connc_discard_conn(struct conncache *connc,
    * handler belonging to the connection. Protocols like 'file:' rely on
    * being invoked to clean up their allocations in the easy handle.
    * When a connection comes from the cache, the transfer is no longer
-   * there and we use the cache's own closure handle.
+   * there and we use the cache is own closure handle.
    */
   struct Curl_easy *data = last_data? last_data : connc->closure_handle;
   bool done = FALSE;
@@ -667,7 +667,7 @@ static void connc_discard_conn(struct conncache *connc,
   DEBUGASSERT(!conn->bundle);
 
   /*
-   * If this connection isn't marked to force-close, leave it open if there
+   * If this connection is not marked to force-close, leave it open if there
    * are other users of it
    */
   if(CONN_INUSE(conn) && !aborted) {
@@ -945,7 +945,7 @@ void Curl_conncache_multi_perform(struct Curl_multi *multi)
  * disassociated from an easy handle.
  *
  * This function MUST NOT reset state in the Curl_easy struct if that
- * isn't strictly bound to the life-time of *this* particular connection.
+ * is not strictly bound to the life-time of *this* particular connection.
  *
  */
 static void connc_disconnect(struct Curl_easy *data,

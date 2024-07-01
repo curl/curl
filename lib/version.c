@@ -395,7 +395,7 @@ static const char * const supported_protocols[] = {
 };
 
 /*
- * Feature presence run-time check functions.
+ * Feature presence runtime check functions.
  *
  * Warning: the value returned by these should not change between
  * curl_global_init() and curl_global_cleanup() calls.
@@ -541,7 +541,7 @@ static curl_version_info_data version_info = {
   LIBCURL_VERSION,
   LIBCURL_VERSION_NUM,
   OS,   /* as found by configure or set by hand at build-time */
-  0,    /* features bitmask is built at run-time */
+  0,    /* features bitmask is built at runtime */
   NULL, /* ssl_version */
   0,    /* ssl_version_num, this is kept at zero */
   NULL, /* zlib_version */
@@ -597,7 +597,7 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
   static char zstd_buffer[80];
 #endif
 
-  (void)stamp; /* avoid compiler warnings, we don't use this */
+  (void)stamp; /* avoid compiler warnings, we do not use this */
 
 #ifdef USE_SSL
   Curl_ssl_version(ssl_buffer, sizeof(ssl_buffer));
