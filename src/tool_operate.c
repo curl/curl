@@ -104,10 +104,10 @@
 #  define SOL_IP IPPROTO_IP
 #endif
 
-#define CURL_CA_CERT_ERRORMSG                                           \
-  "More details here: https://curl.se/docs/sslcerts.html\n\n"           \
-  "curl failed to verify the legitimacy of the server and therefore "   \
-  "could not\nestablish a secure connection to it. To learn more about " \
+#define CURL_CA_CERT_ERRORMSG                                              \
+  "More details here: https://curl.se/docs/sslcerts.html\n\n"              \
+  "curl failed to verify the legitimacy of the server and therefore "      \
+  "could not\nestablish a secure connection to it. To learn more about "   \
   "this situation and\nhow to fix it, please visit the webpage mentioned " \
   "above.\n"
 

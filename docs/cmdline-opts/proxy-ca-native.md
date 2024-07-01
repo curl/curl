@@ -12,7 +12,7 @@ See-also:
   - capath
   - insecure
 Example:
-  - --ca-native $URL
+  - --proxy-ca-native $URL
 ---
 
 # `--proxy-ca-native`
