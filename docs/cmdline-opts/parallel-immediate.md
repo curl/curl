@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: parallel-immediate
-Help: Do not wait for multiplexing (with --parallel)
+Help: Do not wait for multiplexing
 Added: 7.68.0
 Category: connection curl
 Multi: boolean
