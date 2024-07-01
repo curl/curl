@@ -317,7 +317,7 @@ sub render {
             $word =~ s/[\"\'](.*)[\"\']\z/$1/;
 
             # remove backticks from headers
-            $words =~ s/\`//g;
+            $word =~ s/\`//g;
 
             # if there is a space, it needs quotes for man page
             if(($word =~ / /) && $manpage) {
