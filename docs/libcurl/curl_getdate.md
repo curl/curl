@@ -122,12 +122,12 @@ Always
 This function returns -1 when it fails to parse the date string. Otherwise it
 returns the number of seconds as described.
 
-On systems with a signed 32 bit time_t: if the year is larger than 2037 or
+On systems with a signed 32-bit time_t: if the year is larger than 2037 or
 less than 1903, this function returns -1.
 
-On systems with an unsigned 32 bit time_t: if the year is larger than 2106 or
+On systems with an unsigned 32-bit time_t: if the year is larger than 2106 or
 less than 1970, this function returns -1.
 
-On systems with 64 bit time_t: if the year is less than 1583, this function
+On systems with 64-bit time_t: if the year is less than 1583, this function
 returns -1. (The Gregorian calendar was first introduced 1582 so no "real"
 dates in this way of doing dates existed before then.)

@@ -56,7 +56,7 @@ FAQ
  4. Running Problems
   4.2 Why do I get problems when I use & or % in the URL?
   4.3 How can I use {, }, [ or ] to specify multiple URLs?
-  4.4 Why do I get downloaded data even though the web page does not exist?
+  4.4 Why do I get downloaded data even though the webpage does not exist?
   4.5 Why do I get return code XXX from an HTTP server?
    4.5.1 "400 Bad Request"
    4.5.2 "401 Unauthorized"
@@ -65,7 +65,7 @@ FAQ
    4.5.5 "405 Method Not Allowed"
    4.5.6 "301 Moved Permanently"
   4.6 Can you tell me what error code 142 means?
-  4.7 How do I keep user names and passwords secret in curl command lines?
+  4.7 How do I keep usernames and passwords secret in curl command lines?
   4.8 I found a bug
   4.9 curl cannot authenticate to a server that requires NTLM?
   4.10 My HTTP request using HEAD, PUT or DELETE does not work
@@ -89,7 +89,7 @@ FAQ
   5.6 What about Keep-Alive or persistent connections?
   5.7 Link errors when building libcurl on Windows
   5.8 libcurl.so.X: open failed: No such file or directory
-  5.9 How does libcurl resolve host names?
+  5.9 How does libcurl resolve hostnames?
   5.10 How do I prevent libcurl from writing the response to stdout?
   5.11 How do I make libcurl not receive the whole HTTP response?
   5.12 Can I make libcurl fake or hide my real IP address?
@@ -624,7 +624,7 @@ FAQ
 
   3.14 Does curl support JavaScript or PAC (automated proxy config)?
 
-  Many web pages do magic stuff using embedded JavaScript. curl and libcurl
+  Many webpages do magic stuff using embedded JavaScript. curl and libcurl
   have no built-in support for that, so it will be treated just like any other
   contents.
 
@@ -722,7 +722,7 @@ FAQ
 
     curl --header "Host: www.example.com" http://127.0.0.1/
 
-  You can also opt to add faked host name entries to curl with the --resolve
+  You can also opt to add faked hostname entries to curl with the --resolve
   option. That has the added benefit that things like redirects will also work
   properly. The above operation would instead be done as:
 
@@ -771,11 +771,10 @@ FAQ
   [WHATEVER]. This way you can for example send a DELETE by doing "curl -X
   DELETE [URL]".
 
-  It is thus pointless to do "curl -XGET [URL]" as GET would be used
-  anyway. In the same vein it is pointless to do "curl -X POST -d data
-  [URL]"... But you can make a fun and somewhat rare request that sends a
-  request-body in a GET request with something like "curl -X GET -d data
-  [URL]"
+  It is thus pointless to do "curl -XGET [URL]" as GET would be used anyway.
+  In the same vein it is pointless to do "curl -X POST -d data [URL]". You can
+  make a fun and somewhat rare request that sends a request-body in a GET
+  request with something like "curl -X GET -d data [URL]"
 
   Note that -X does not actually change curl's behavior as it only modifies the
   actual string sent in the request, but that may of course trigger a
@@ -822,7 +821,7 @@ FAQ
 
     curl -g 'www.example.com/weirdname[].html'
 
-  4.4 Why do I get downloaded data even though the web page does not exist?
+  4.4 Why do I get downloaded data even though the webpage does not exist?
 
   curl asks remote servers for the page you specify. If the page does not exist
   at the server, the HTTP protocol defines how the server should respond and
@@ -883,7 +882,7 @@ FAQ
   appreciate a detailed bug report from you that describes how we could go
   ahead and repeat this.
 
-  4.7 How do I keep user names and passwords secret in curl command lines?
+  4.7 How do I keep usernames and passwords secret in curl command lines?
 
   This problem has two sides:
 
@@ -1100,7 +1099,7 @@ FAQ
   When doing HTTP transfers, curl will perform exactly what you are asking it
   to do and if successful it will not return an error. You can use curl to
   test your web server's "file not found" page (that gets 404 back), you can
-  use it to check your authentication protected web pages (that gets a 401
+  use it to check your authentication protected webpages (that gets a 401
   back) and so on.
 
   The specific HTTP response code does not constitute a problem or error for
@@ -1192,7 +1191,7 @@ FAQ
   5.6 What about Keep-Alive or persistent connections?
 
   curl and libcurl have excellent support for persistent connections when
-  transferring several files from the same server.  curl will attempt to reuse
+  transferring several files from the same server. curl will attempt to reuse
   connections for all URLs specified on the same command line/config file, and
   libcurl will reuse connections for all transfers that are made using the
   same libcurl handle.
@@ -1252,14 +1251,14 @@ FAQ
 
   'man ld.so' and 'man ld' will tell you more details
 
-  5.9 How does libcurl resolve host names?
+  5.9 How does libcurl resolve hostnames?
 
   libcurl supports a large number of name resolve functions. One of them is
   picked at build-time and will be used unconditionally. Thus, if you want to
   change name resolver function you must rebuild libcurl and tell it to use a
   different function.
 
-  - The non-IPv6 resolver that can use one of four different host name resolve
+  - The non-IPv6 resolver that can use one of four different hostname resolve
   calls (depending on what your system supports):
 
       A - gethostbyname()

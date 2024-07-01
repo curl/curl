@@ -30,18 +30,16 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_FILETIME_T,
 # DESCRIPTION
 
 Pass a pointer to a curl_off_t to receive the remote time of the retrieved
-document in number of seconds since January 1 1970 in the GMT/UTC time
-zone. If you get -1, it can be because of many reasons (it might be unknown,
-the server might hide it or the server does not support the command that tells
+document in number of seconds since January 1 1970 in the GMT/UTC time zone.
+If you get -1, it can be because of many reasons (it might be unknown, the
+server might hide it or the server does not support the command that tells
 document time etc) and the time of the document is unknown.
 
 You must ask libcurl to collect this information before the transfer is made,
-by using the CURLOPT_FILETIME(3) option to curl_easy_setopt(3) or
-you unconditionally get a -1 back.
+by using the CURLOPT_FILETIME(3) option or you unconditionally get a -1 back.
 
-This option is an alternative to CURLINFO_FILETIME(3) to allow systems
-with 32 bit long variables to extract dates outside of the 32bit timestamp
-range.
+This option is an alternative to CURLINFO_FILETIME(3) to allow systems with 32
+bit long variables to extract dates outside of the 32-bit timestamp range.
 
 # EXAMPLE
 
