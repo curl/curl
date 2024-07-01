@@ -2877,6 +2877,12 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
       /* Check if we were asked to list the SSL engines */
       else if(res == PARAM_ENGINES_REQUESTED)
         tool_list_engines();
+      /* Check if we were asked to dump the embedded CA bundle */
+      else if(res == PARAM_CA_EMBED_REQUESTED) {
+#ifdef CURL_CA_EMBED
+        printf("%s", curl_ca_embed);
+#endif
+      }
       else if(res == PARAM_LIBCURL_UNSUPPORTED_PROTOCOL)
         result = CURLE_UNSUPPORTED_PROTOCOL;
       else if(res == PARAM_READ_ERROR)
