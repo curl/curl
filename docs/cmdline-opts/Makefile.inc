@@ -89,6 +89,7 @@ DPAGES = \
   doh-cert-status.md \
   doh-insecure.md \
   doh-url.md \
+  dump-ca-embed.md \
   dump-header.md \
   ech.md \
   egd-file.md \
