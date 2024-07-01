@@ -31,8 +31,8 @@ ignoring the case of the characters. It returns a non-zero (TRUE) integer if
 the strings are identical.
 
 This function uses plain ASCII based comparisons completely disregarding the
-locale - contrary to how strcasecmp and other system case insensitive string
-comparisons usually work.
+locale - contrary to how **strcasecmp** and other system case insensitive
+string comparisons usually work.
 
 This function is provided by libcurl to enable applications to compare strings
 in a truly portable manner. There are no standard portable case insensitive
