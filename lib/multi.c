@@ -3406,8 +3406,8 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
     if(Curl_splaycomparekeys(multi->timetree->key, now) > 0) {
       /* some time left before expiration */
       timediff_t diff = Curl_timediff_ceil(multi->timetree->key, now);
-      /* this should be safe even on 32 bit archs, as we don't use that
-         overly long timeouts */
+      /* this should be safe even on 32-bit archs, as we don't use that overly
+         long timeouts */
       *timeout_ms = (long)diff;
     }
     else
@@ -3572,7 +3572,7 @@ void Curl_expire(struct Curl_easy *data, timediff_t milli, expire_id id)
   DEBUGASSERT(id < EXPIRE_LAST);
 
   set = Curl_now();
-  set.tv_sec += (time_t)(milli/1000); /* might be a 64 to 32 bit conversion */
+  set.tv_sec += (time_t)(milli/1000); /* might be a 64 to 32 bits conversion */
   set.tv_usec += (int)(milli%1000)*1000;
 
   if(set.tv_usec >= 1000000) {
