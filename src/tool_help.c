@@ -31,6 +31,8 @@
 #include "tool_util.h"
 #include "tool_version.h"
 #include "tool_cb_prg.h"
+#include "tool_hugehelp.h"
+#include "tool_getparam.h"
 #include "terminal.h"
 
 #include "memdebug.h" /* keep this as LAST include */
@@ -135,13 +137,13 @@ static void get_categories(void)
 void tool_help(char *category)
 {
   unsigned int cols = get_terminal_columns();
-  puts("Usage: curl [options...] <url>");
   /* If no category was provided */
   if(!category) {
     const char *category_note = "\nThis is not the full help, this "
       "menu is stripped into categories.\nUse \"--help category\" to get "
       "an overview of all categories.\nFor all options use the manual"
       " or \"--help all\".";
+    puts("Usage: curl [options...] <url>");
     print_category(CURLHELP_IMPORTANT, cols);
     puts(category_note);
   }
@@ -152,6 +154,35 @@ void tool_help(char *category)
   /* Lets handle the string "category" differently to not print an errormsg */
   else if(curl_strequal(category, "category"))
     get_categories();
+  else if(category[0] == '-') {
+#ifdef USE_MANUAL
+    /* command line option help */
+    const struct LongShort *a = NULL;
+    if(category[1] == '-')
+      a = findlongopt(&category[2]);
+    else if(!category[2])
+      a = findshortopt(category[1]);
+    if(!a) {
+      fprintf(tool_stderr, "Incorrect option name to show help for,"
+              " see curl -h\n");
+    }
+    else {
+      char cmdbuf[80];
+      if(a->letter != ' ')
+        msnprintf(cmdbuf, sizeof(cmdbuf), "\n    -%c, --", a->letter);
+      else
+        msnprintf(cmdbuf, sizeof(cmdbuf), "\n    %s", category);
+      if(a->cmd == C_XATTR)
+        /* this is the last option, which then ends when FILES starts */
+        showhelp(cmdbuf, "\nFILES");
+      else
+        showhelp(cmdbuf, "\n    -");
+    }
+#else
+    fprintf(tool_stderr, "Cannot comply. "
+            "This curl was built without built-in manual\n");
+#endif
+  }
   /* Otherwise print category and handle the case if the cat was not found */
   else if(get_category_content(category, cols)) {
     puts("Invalid category provided, here is a list of all categories:\n");

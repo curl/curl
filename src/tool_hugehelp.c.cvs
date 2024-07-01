@@ -27,5 +27,12 @@
 
 void hugehelp(void)
 {
-  puts("This is a silly replacement for the actual file.");
+  puts("built-in manual was disabled at build-time");
+}
+
+void showhelp(const char *arg, const char *endarg)
+{
+  (void)arg;
+  (void)endarg;
+  hugehelp();
 }

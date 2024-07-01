@@ -53,6 +53,64 @@ print <<HEAD
  */
 #ifdef USE_MANUAL
 #include "tool_hugehelp.h"
+
+
+struct scan_ctx {
+  const char *arg;
+  size_t flen;
+  const char *endarg;
+  size_t elen;
+  size_t olen;
+  char rbuf[80];
+  char obuf[80];
+  bool show;
+};
+
+static void initscan(struct scan_ctx *ctx,
+                     const char *arg,
+                     const char *endarg)
+{
+  ctx->arg = arg;
+  ctx->flen = strlen(arg);
+  ctx->endarg = endarg;
+  ctx->elen = strlen(endarg);
+  ctx->show = FALSE;
+  ctx->olen = 0;
+  memset(ctx->rbuf, 0, sizeof(ctx->rbuf));
+}
+
+static bool scanfor(unsigned char *buf, size_t len, struct scan_ctx *ctx)
+{
+  size_t i;
+  for(i = 0; i < len; i++) {
+    if(!ctx->show) {
+      memmove(&ctx->rbuf[0], &ctx->rbuf[1], ctx->flen - 1);
+      ctx->rbuf[ctx->flen - 1] = buf[i];
+      if(!memcmp(ctx->rbuf, ctx->arg, ctx->flen)) {
+        /* match, now output until endarg */
+        fputs(&ctx->arg[1], stdout);
+        ctx->show = TRUE;
+      }
+      continue;
+    }
+
+    /* show until the end */
+    memmove(&ctx->rbuf[0], &ctx->rbuf[1], ctx->elen - 1);
+    ctx->rbuf[ctx->elen - 1] = buf[i];
+    if(!memcmp(ctx->rbuf, ctx->endarg, ctx->elen))
+      return FALSE;
+
+    if(buf[i] == \'\\n\') {
+      ctx->obuf[ctx->olen++] = 0;
+      ctx->olen = 0;
+      puts(ctx->obuf);
+    }
+    else
+      ctx->obuf[ctx->olen++] = buf[i];
+  }
+  return TRUE;
+}
+
 HEAD
     ;
 if($c) {
@@ -111,23 +169,25 @@ static void zfree_func(voidpf opaque, voidpf ptr)
   (void) opaque;
   free(ptr);
 }
+
+#define HEADERLEN 10
+
 /* Decompress and send to stdout a gzip-compressed buffer */
 void hugehelp(void)
 {
   unsigned char *buf;
-  int status, headerlen;
+  int status;
   z_stream z;
 
   /* Make sure no gzip options are set */
   if(hugehelpgz[3] & 0xfe)
     return;
 
-  headerlen = 10;
   memset(&z, 0, sizeof(z_stream));
   z.zalloc = (alloc_func)zalloc_func;
   z.zfree = (free_func)zfree_func;
-  z.avail_in = (unsigned int)(sizeof(hugehelpgz) - headerlen);
-  z.next_in = (unsigned char *)hugehelpgz + headerlen;
+  z.avail_in = (unsigned int)(sizeof(hugehelpgz) - HEADERLEN);
+  z.next_in = (unsigned char *)hugehelpgz + HEADERLEN;
 
   if(inflateInit2(&z, -MAX_WBITS) != Z_OK)
     return;
@@ -144,7 +204,49 @@ void hugehelp(void)
           break;
       }
       else
-        break;    /* Error */
+        break;    /* error */
+    }
+    free(buf);
+  }
+  inflateEnd(&z);
+}
+/* Show the help text for the 'arg' curl argument on stdout */
+void showhelp(const char *arg, const char *endarg)
+{
+  unsigned char *buf;
+  int status;
+  z_stream z;
+  struct scan_ctx ctx;
+  initscan(&ctx, arg, endarg);
+
+  /* Make sure no gzip options are set */
+  if(hugehelpgz[3] & 0xfe)
+    return;
+
+  memset(&z, 0, sizeof(z_stream));
+  z.zalloc = (alloc_func)zalloc_func;
+  z.zfree = (free_func)zfree_func;
+  z.avail_in = (unsigned int)(sizeof(hugehelpgz) - HEADERLEN);
+  z.next_in = (unsigned char *)hugehelpgz + HEADERLEN;
+
+  if(inflateInit2(&z, -MAX_WBITS) != Z_OK)
+    return;
+
+  buf = malloc(BUF_SIZE);
+  if(buf) {
+    while(1) {
+      z.avail_out = BUF_SIZE;
+      z.next_out = buf;
+      status = inflate(&z, Z_SYNC_FLUSH);
+      if(status == Z_OK || status == Z_STREAM_END) {
+        size_t len = BUF_SIZE - z.avail_out;
+        if(!scanfor(buf, len, &ctx))
+          break;
+        if(status == Z_STREAM_END)
+          break;
+      }
+      else
+        break;    /* error */
     }
     free(buf);
   }
@@ -187,6 +289,21 @@ void hugehelp(void)
   int i = 0;
   while(curlman[i])
     puts(curlman[i++]);
+}
+
+/* Show the help text for the 'arg' curl argument on stdout */
+void showhelp(const char *arg, const char *endarg)
+{
+  int i = 0;
+  struct scan_ctx ctx;
+  initscan(&ctx, arg, endarg);
+  while(curlman[i]) {
+    size_t len = strlen(curlman[i]);
+    if(!scanfor((unsigned char *)curlman[i], len, &ctx) ||
+       !scanfor((unsigned char *)"\\n", 1, &ctx))
+      break;
+    i++;
+  }
 }
 ENDLINE
     ;
