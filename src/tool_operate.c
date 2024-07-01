@@ -1667,6 +1667,9 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           blob.data = (void *)curl_ca_embed;
           blob.len = strlen((const char *)curl_ca_embed);
           blob.flags = CURL_BLOB_NOCOPY;
+          notef(config->global,
+                "Using embedded CA bundle (%zu bytes)",
+                blob.len);
           result = curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
           if(result == CURLE_NOT_BUILT_IN) {
             warnf(global,
@@ -1678,6 +1681,9 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           blob.data = (void *)curl_ca_embed;
           blob.len = strlen((const char *)curl_ca_embed);
           blob.flags = CURL_BLOB_NOCOPY;
+          notef(config->global,
+                "Using embedded CA bundle, for proxies (%zu bytes)",
+                blob.len);
           result = curl_easy_setopt(curl, CURLOPT_PROXY_CAINFO_BLOB, &blob);
           if(result == CURLE_NOT_BUILT_IN) {
             warnf(global,
