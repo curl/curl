@@ -161,10 +161,10 @@ int tool_progress_cb(void *clientp,
     if(total) {
       /* we know the total data to get... */
       if(bar->prev == point)
-        /* progress didn't change since last invoke */
+        /* progress did not change since last invoke */
         return 0;
       else if((tvdiff(now, bar->prevtime) < 100L) && point < total)
-        /* limit progress-bar updating to 10 Hz except when we're at 100% */
+        /* limit progress-bar updating to 10 Hz except when we are at 100% */
         return 0;
     }
     else {
@@ -227,7 +227,7 @@ void progressbarinit(struct ProgressData *bar,
   memset(bar, 0, sizeof(struct ProgressData));
 
   /* pass the resume from value through to the progress function so it can
-   * display progress towards total file not just the part that's left. */
+   * display progress towards total file not just the part that is left. */
   if(config->use_resume)
     bar->initial_size = config->resume_from;
 

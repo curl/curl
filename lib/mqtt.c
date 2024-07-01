@@ -312,7 +312,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   start_user = pos + 3 + MQTT_CLIENTID_LEN;
   /* position where starts the password payload */
   start_pwd = start_user + ulen;
-  /* if user name was provided, add it to the packet */
+  /* if username was provided, add it to the packet */
   if(ulen) {
     start_pwd += 2;
 

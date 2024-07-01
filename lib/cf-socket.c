@@ -394,7 +394,7 @@ CURLcode Curl_socket_open(struct Curl_easy *data,
   struct Curl_sockaddr_ex dummy;
 
   if(!addr)
-    /* if the caller doesn't want info back, use a local temp copy */
+    /* if the caller does not want info back, use a local temp copy */
     addr = &dummy;
 
   Curl_sock_assign_addr(addr, ai, transport);
@@ -443,7 +443,7 @@ int Curl_socket_close(struct Curl_easy *data, struct connectdata *conn,
    Buffer Size
 
    The problem described in this knowledge-base is applied only to pre-Vista
-   Windows.  Following function trying to detect OS version and skips
+   Windows. Following function trying to detect OS version and skips
    SO_SNDBUF adjustment for Windows Vista and above.
 */
 #define DETECT_OS_NONE 0
@@ -485,8 +485,8 @@ void Curl_sndbuf_init(curl_socket_t sockfd)
  *
  *   <iface_or_host> - can be either an interface name or a host.
  *   if!<iface> - interface name.
- *   host!<host> - host name.
- *   ifhost!<iface>!<host> - interface name and host name.
+ *   host!<host> - hostname.
+ *   ifhost!<iface>!<host> - interface name and hostname.
  *
  * Parameters:
  *
@@ -611,7 +611,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
       */
     if(setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
                   iface, (curl_socklen_t)strlen(iface) + 1) == 0) {
-      /* This is often "errno 1, error: Operation not permitted" if you're
+      /* This is often "errno 1, error: Operation not permitted" if you are
         * not running as root or another suitable privileged user. If it
         * succeeds it means the parameter was a valid interface and not an IP
         * address. Return immediately.
@@ -633,7 +633,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
     switch(if2ip_result) {
       case IF2IP_NOT_FOUND:
         if(iface_input && !host_input) {
-          /* Do not fall back to treating it as a host name */
+          /* Do not fall back to treating it as a hostname */
           failf(data, "Couldn't bind to interface '%s'", iface);
           return CURLE_INTERFACE_FAILED;
         }
@@ -653,7 +653,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
     }
     if(!iface_input || host_input) {
       /*
-       * This was not an interface, resolve the name as a host name
+       * This was not an interface, resolve the name as a hostname
        * or IP number
        *
        * Temporarily force name resolution to use only the address type
@@ -713,7 +713,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
           if(scope_ptr) {
             /* The "myhost" string either comes from Curl_if2ip or from
                Curl_printable_address. The latter returns only numeric scope
-               IDs and the former returns none at all.  So the scope ID, if
+               IDs and the former returns none at all. So the scope ID, if
                present, is known to be numeric */
             unsigned long scope_id = strtoul(scope_ptr, NULL, 10);
             if(scope_id > UINT_MAX)
@@ -818,8 +818,8 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
    * Gisle Vanem could reproduce the former problems with this function, but
    * could avoid them by adding this SleepEx() call below:
    *
-   *    "I don't have Rational Quantify, but the hint from his post was
-   *    ntdll::NtRemoveIoCompletion(). So I'd assume the SleepEx (or maybe
+   *    "I do not have Rational Quantify, but the hint from his post was
+   *    ntdll::NtRemoveIoCompletion(). I would assume the SleepEx (or maybe
    *    just Sleep(0) would be enough?) would release whatever
    *    mutex/critical-section the ntdll call is waiting on.
    *
@@ -837,14 +837,14 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
   if(0 != getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (void *)&err, &errSize))
     err = SOCKERRNO;
 #ifdef _WIN32_WCE
-  /* Old WinCE versions don't support SO_ERROR */
+  /* Old WinCE versions do not support SO_ERROR */
   if(WSAENOPROTOOPT == err) {
     SET_SOCKERRNO(0);
     err = 0;
   }
 #endif
 #if defined(EBADIOCTL) && defined(__minix)
-  /* Minix 3.1.x doesn't support getsockopt on UDP sockets */
+  /* Minix 3.1.x does not support getsockopt on UDP sockets */
   if(EBADIOCTL == err) {
     SET_SOCKERRNO(0);
     err = 0;
@@ -854,7 +854,7 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
     /* we are connected, awesome! */
     rc = TRUE;
   else
-    /* This wasn't a successful connect */
+    /* This was not a successful connect */
     rc = FALSE;
   if(error)
     *error = err;
@@ -1153,8 +1153,8 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
   DEBUGASSERT(ctx->sock == CURL_SOCKET_BAD);
   ctx->started_at = Curl_now();
 #ifdef SOCK_NONBLOCK
-  /* Don't tuck SOCK_NONBLOCK into socktype when opensocket callback is set
-   * because we wouldn't know how socketype is about to be used in the
+  /* Do not tuck SOCK_NONBLOCK into socktype when opensocket callback is set
+   * because we would not know how socketype is about to be used in the
    * callback, SOCK_NONBLOCK might get factored out before calling socket().
    */
   if(!data->set.fopensocket)
@@ -1878,7 +1878,7 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
   /* Currently, cf->ctx->sock is always non-blocking because the only
    * caller to cf_udp_setup_quic() is cf_udp_connect() that passes the
    * non-blocking socket created by cf_socket_open() to it. Thus, we
-   * don't need to call curlx_nonblock() in cf_udp_setup_quic() anymore.
+   * do not need to call curlx_nonblock() in cf_udp_setup_quic() anymore.
    */
   switch(ctx->addr.family) {
 #if defined(__linux__) && defined(IP_MTU_DISCOVER)

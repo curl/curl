@@ -34,7 +34,7 @@
 #ifdef USE_SCHANNEL
 
 #ifndef USE_WINDOWS_SSPI
-#  error "Can't compile SCHANNEL support without SSPI."
+#  error "cannot compile SCHANNEL support without SSPI."
 #endif
 
 #include "schannel.h"
@@ -976,7 +976,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
   }
   else {
     /* Pre-Windows 10 1809 or the user set a legacy algorithm list. Although MS
-       doesn't document it, currently Schannel will not negotiate TLS 1.3 when
+       does not document it, currently Schannel will not negotiate TLS 1.3 when
        SCHANNEL_CRED is used. */
     ALG_ID algIds[NUM_CIPHERS];
     char *ciphers = conn_config->cipher_list;
@@ -1083,7 +1083,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 #ifdef HAS_ALPN
   /* ALPN is only supported on Windows 8.1 / Server 2012 R2 and above.
-     Also it doesn't seem to be supported for Wine, see curl bug #983. */
+     Also it does not seem to be supported for Wine, see curl bug #983. */
   backend->use_alpn = connssl->alpn &&
     !GetProcAddress(GetModuleHandle(TEXT("ntdll")),
                     "wine_get_version") &&
@@ -1095,7 +1095,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 #ifdef _WIN32_WCE
 #ifdef HAS_MANUAL_VERIFY_API
-  /* certificate validation on CE doesn't seem to work right; we'll
+  /* certificate validation on CE does not seem to work right; we will
    * do it following a more manual process. */
   backend->use_manual_cred_validation = true;
 #else
@@ -1241,7 +1241,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   /* Schannel InitializeSecurityContext:
      https://msdn.microsoft.com/en-us/library/windows/desktop/aa375924.aspx
 
-     At the moment we don't pass inbuf unless we're using ALPN since we only
+     At the moment we do not pass inbuf unless we are using ALPN since we only
      use it for that, and Wine (for which we currently disable ALPN) is giving
      us problems with inbuf regardless. https://github.com/curl/curl/issues/983
   */
@@ -1531,7 +1531,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
                    inbuf[1].cbBuffer));
       /*
         There are two cases where we could be getting extra data here:
-        1) If we're renegotiating a connection and the handshake is already
+        1) If we are renegotiating a connection and the handshake is already
         complete (from the server perspective), it can encrypted app data
         (not handshake data) in an extra buffer at this point.
         2) (sspi_status == SEC_I_CONTINUE_NEEDED) We are negotiating a
@@ -1593,7 +1593,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
 #endif
 
   /* Verify the hostname manually when certificate verification is disabled,
-     because in that case Schannel won't verify it. */
+     because in that case Schannel will not verify it. */
   if(!conn_config->verifypeer && conn_config->verifyhost)
     return Curl_verify_host(cf, data);
 
@@ -1783,7 +1783,8 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
       if(old_cred != backend->cred) {
         DEBUGF(infof(data,
                      "schannel: old credential handle is stale, removing"));
-        /* we're not taking old_cred ownership here, no refcount++ is needed */
+        /* we are not taking old_cred ownership here, no refcount++ is
+           needed */
         Curl_ssl_delsessionid(data, (void *)old_cred);
         incache = FALSE;
       }
@@ -1853,7 +1854,7 @@ schannel_connect_common(struct Curl_cfilter *cf,
   }
 
   if(ssl_connect_1 == connssl->connecting_state) {
-    /* check out how much more time we're allowed */
+    /* check out how much more time we are allowed */
     timeout_ms = Curl_timeleft(data, NULL, TRUE);
 
     if(timeout_ms < 0) {
@@ -1869,7 +1870,7 @@ schannel_connect_common(struct Curl_cfilter *cf,
 
   while(ssl_connect_2 == connssl->connecting_state) {
 
-    /* check out how much more time we're allowed */
+    /* check out how much more time we are allowed */
     timeout_ms = Curl_timeleft(data, NULL, TRUE);
 
     if(timeout_ms < 0) {
@@ -1878,7 +1879,7 @@ schannel_connect_common(struct Curl_cfilter *cf,
       return CURLE_OPERATION_TIMEDOUT;
     }
 
-    /* if ssl is expecting something, check if it's available. */
+    /* if ssl is expecting something, check if it is available. */
     if(connssl->io_need) {
 
       curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND)?
@@ -2023,10 +2024,10 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     len = outbuf[0].cbBuffer + outbuf[1].cbBuffer + outbuf[2].cbBuffer;
 
     /*
-      It's important to send the full message which includes the header,
-      encrypted payload, and trailer.  Until the client receives all the
+      it is important to send the full message which includes the header,
+      encrypted payload, and trailer. Until the client receives all the
       data a coherent message has not been delivered and the client
-      can't read any of it.
+      cannot read any of it.
 
       If we wanted to buffer the unwritten encrypted bytes, we would
       tell the client that all data it has requested to be sent has been
@@ -2123,8 +2124,9 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   DEBUGASSERT(backend);
 
   /****************************************************************************
-   * Don't return or set backend->recv_unrecoverable_err unless in the cleanup.
-   * The pattern for return error is set *err, optional infof, goto cleanup.
+   * Do not return or set backend->recv_unrecoverable_err unless in the
+   * cleanup. The pattern for return error is set *err, optional infof, goto
+   * cleanup.
    *
    * Our priority is to always return as much decrypted data to the caller as
    * possible, even if an error occurs. The state of the decrypted buffer must
@@ -2149,7 +2151,7 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     infof(data, "schannel: server indicated shutdown in a prior call");
     goto cleanup;
   }
-  /* It's debatable what to return when !len. Regardless we can't return
+  /* it is debatable what to return when !len. Regardless we cannot return
      immediately because there may be data to decrypt (in the case we want to
      decrypt all encrypted cached data) so handle !len later in cleanup.
   */
@@ -2307,7 +2309,7 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       if(sspi_status == SEC_I_RENEGOTIATE) {
         infof(data, "schannel: remote party requests renegotiation");
         if(*err && *err != CURLE_AGAIN) {
-          infof(data, "schannel: can't renegotiate, an error is pending");
+          infof(data, "schannel: cannot renegotiate, an error is pending");
           goto cleanup;
         }
 
@@ -2372,13 +2374,13 @@ cleanup:
 
   /* Error if the connection has closed without a close_notify.
 
-     The behavior here is a matter of debate. We don't want to be vulnerable
-     to a truncation attack however there's some browser precedent for
+     The behavior here is a matter of debate. We do not want to be vulnerable
+     to a truncation attack however there is some browser precedent for
      ignoring the close_notify for compatibility reasons.
 
      Additionally, Windows 2000 (v5.0) is a special case since it seems it
-     doesn't return close_notify. In that case if the connection was closed we
-     assume it was graceful (close_notify) since there doesn't seem to be a
+     does not return close_notify. In that case if the connection was closed we
+     assume it was graceful (close_notify) since there does not seem to be a
      way to tell.
   */
   if(len && !backend->decdata_offset && backend->recv_connection_closed &&
@@ -2415,7 +2417,7 @@ cleanup:
   if(!*err && !backend->recv_connection_closed)
     *err = CURLE_AGAIN;
 
-  /* It's debatable what to return when !len. We could return whatever error
+  /* it is debatable what to return when !len. We could return whatever error
      we got from decryption but instead we override here so the return is
      consistent.
   */
@@ -2687,7 +2689,7 @@ static CURLcode schannel_pkp_pin_peer_pubkey(struct Curl_cfilter *cf,
 
   DEBUGASSERT(backend);
 
-  /* if a path wasn't specified, don't pin */
+  /* if a path was not specified, do not pin */
   if(!pinnedpubkey)
     return CURLE_OK;
 

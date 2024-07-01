@@ -124,7 +124,7 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
   char hostip[128];
 
   /*
-   * If we don't have a hostname at all, like for example with a FILE
+   * If we do not have a hostname at all, like for example with a FILE
    * transfer, we have nothing to interrogate the noproxy list with.
    */
   if(!name || name[0] == '\0')
@@ -142,7 +142,7 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
     if(!strcmp("*", no_proxy))
       return TRUE;
 
-    /* NO_PROXY was specified and it wasn't just an asterisk */
+    /* NO_PROXY was specified and it was not just an asterisk */
 
     if(name[0] == '[') {
       char *endptr;
@@ -165,7 +165,7 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
       if(1 == Curl_inet_pton(AF_INET, name, &address))
         type = TYPE_IPV4;
       else {
-        /* ignore trailing dots in the host name */
+        /* ignore trailing dots in the hostname */
         if(name[namelen - 1] == '.')
           namelen--;
       }
@@ -256,7 +256,7 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
       while(*p == ',')
         p++;
     } /* while(*p) */
-  } /* NO_PROXY was specified and it wasn't just an asterisk */
+  } /* NO_PROXY was specified and it was not just an asterisk */
 
   return FALSE;
 }

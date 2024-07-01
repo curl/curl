@@ -26,7 +26,7 @@
 
 #include <curl/curl.h>
 
-/* returns TRUE if there's a match */
+/* returns TRUE if there is a match */
 bool Curl_cert_hostcheck(const char *match_pattern, size_t matchlen,
                          const char *hostname, size_t hostlen);
 

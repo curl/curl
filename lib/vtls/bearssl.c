@@ -940,7 +940,7 @@ static CURLcode bearssl_connect_common(struct Curl_cfilter *cf,
       return CURLE_OPERATION_TIMEDOUT;
     }
 
-    /* if ssl is expecting something, check if it's available. */
+    /* if ssl is expecting something, check if it is available. */
     if(connssl->io_need) {
 
       curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND)?

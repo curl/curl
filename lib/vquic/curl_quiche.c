@@ -64,11 +64,10 @@
 
 #define H3_STREAM_WINDOW_SIZE  (128 * 1024)
 #define H3_STREAM_CHUNK_SIZE    (16 * 1024)
-/* The pool keeps spares around and half of a full stream windows
- * seems good. More does not seem to improve performance.
- * The benefit of the pool is that stream buffer to not keep
- * spares. So memory consumption goes down when streams run empty,
- * have a large upload done, etc. */
+/* The pool keeps spares around and half of a full stream windows seems good.
+ * More does not seem to improve performance. The benefit of the pool is that
+ * stream buffer to not keep spares. Memory consumption goes down when streams
+ * run empty, have a large upload done, etc. */
 #define H3_STREAM_POOL_SPARES \
           (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE ) / 2
 /* Receive and Send max number of chunks just follows from the
@@ -1272,7 +1271,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
 
   ctx->cfg = quiche_config_new(QUICHE_PROTOCOL_VERSION);
   if(!ctx->cfg) {
-    failf(data, "can't create quiche config");
+    failf(data, "cannot create quiche config");
     return CURLE_FAILED_INIT;
   }
   quiche_config_enable_pacing(ctx->cfg, false);
@@ -1323,7 +1322,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
                                       &sockaddr->sa_addr, sockaddr->addrlen,
                                       ctx->cfg, ctx->tls.ossl.ssl, false);
   if(!ctx->qconn) {
-    failf(data, "can't create quiche connection");
+    failf(data, "cannot create quiche connection");
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -1602,8 +1601,8 @@ static bool cf_quiche_conn_is_alive(struct Curl_cfilter *cf,
     return FALSE;
 
   if(*input_pending) {
-    /* This happens before we've sent off a request and the connection is
-       not in use by any other transfer, there shouldn't be any data here,
+    /* This happens before we have sent off a request and the connection is
+       not in use by any other transfer, there should not be any data here,
        only "protocol frames" */
     *input_pending = FALSE;
     if(cf_process_ingress(cf, data))

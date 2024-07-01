@@ -26,7 +26,7 @@
 #include "tool_setup.h"
 
 #ifndef HAVE_GETPASS_R
-/* If there's a system-provided function named like this, we trust it is
+/* If there is a system-provided function named like this, we trust it is
    also found in one of the standard headers. */
 
 /*

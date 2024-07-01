@@ -90,7 +90,7 @@
 
 /*
  * Curl_timeleft() returns the amount of milliseconds left allowed for the
- * transfer/connection. If the value is 0, there's no timeout (ie there's
+ * transfer/connection. If the value is 0, there is no timeout (ie there is
  * infinite time left). If the value is negative, the timeout time has already
  * elapsed.
  * @param data the transfer to check on
@@ -360,7 +360,7 @@ void Curl_conncontrol(struct connectdata *conn,
 #endif
   )
 {
-  /* close if a connection, or a stream that isn't multiplexed. */
+  /* close if a connection, or a stream that is not multiplexed. */
   /* This function will be called both before and after this connection is
      associated with a transfer. */
   bool closeit, is_multiplex;
@@ -508,7 +508,7 @@ static void baller_initiate(struct Curl_cfilter *cf,
   CURLcode result;
 
 
-  /* Don't close a previous cfilter yet to ensure that the next IP's
+  /* Do not close a previous cfilter yet to ensure that the next IP's
      socket gets a different file descriptor, which can prevent bugs when
      the curl_multi_socket_action interface is used with certain select()
      replacements such as kqueue. */
@@ -788,7 +788,7 @@ evaluate:
 }
 
 /*
- * Connect to the given host with timeout, proxy or remote doesn't matter.
+ * Connect to the given host with timeout, proxy or remote does not matter.
  * There might be more than one IP address to try out.
  */
 static CURLcode start_connect(struct Curl_cfilter *cf,
@@ -1001,7 +1001,7 @@ static CURLcode cf_he_connect(struct Curl_cfilter *cf,
                            CF_CTRL_CONN_INFO_UPDATE, 0, NULL);
 
         if(cf->conn->handler->protocol & PROTO_FAMILY_SSH)
-          Curl_pgrsTime(data, TIMER_APPCONNECT); /* we're connected already */
+          Curl_pgrsTime(data, TIMER_APPCONNECT); /* we are connected already */
         Curl_verboseconnect(data, cf->conn, cf->sockindex);
         data->info.numconnects++; /* to track the # of connections made */
       }

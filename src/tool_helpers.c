@@ -58,17 +58,17 @@ const char *param2text(ParameterError error)
   case PARAM_NEGATIVE_NUMERIC:
     return "expected a positive numerical parameter";
   case PARAM_LIBCURL_DOESNT_SUPPORT:
-    return "the installed libcurl version doesn't support this";
+    return "the installed libcurl version does not support this";
   case PARAM_LIBCURL_UNSUPPORTED_PROTOCOL:
     return "a specified protocol is unsupported by libcurl";
   case PARAM_NO_MEM:
     return "out of memory";
   case PARAM_NO_PREFIX:
-    return "the given option can't be reversed with a --no- prefix";
+    return "the given option cannot be reversed with a --no- prefix";
   case PARAM_NUMBER_TOO_LARGE:
     return "too large number";
   case PARAM_NO_NOT_BOOLEAN:
-    return "used '--no-' for option that isn't a boolean";
+    return "used '--no-' for option that is not a boolean";
   case PARAM_CONTDISP_SHOW_HEADER:
     return "showing headers and --remote-header-name cannot be combined";
   case PARAM_CONTDISP_RESUME_FROM:

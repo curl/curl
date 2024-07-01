@@ -29,7 +29,7 @@
  * OutStruct variables keep track of information relative to curl's
  * output writing, which may take place to a standard stream or a file.
  *
- * 'filename' member is either a pointer to a file name string or NULL
+ * 'filename' member is either a pointer to a filename string or NULL
  * when dealing with a standard stream.
  *
  * 'alloc_filename' member is TRUE when string pointed by 'filename' has been
@@ -40,7 +40,7 @@
  *
  * 's_isreg' member is TRUE when output goes to a regular file, this also
  * implies that output is 'seekable' and 'appendable' and also that member
- * 'filename' points to file name's string. For any standard stream member
+ * 'filename' points to filename's string. For any standard stream member
  * 's_isreg' will be FALSE.
  *
  * 'fopened' member is TRUE when output goes to a regular file and it
@@ -93,7 +93,7 @@ struct getout {
 
 #define GETOUT_OUTFILE    (1<<0)  /* set when outfile is deemed done */
 #define GETOUT_URL        (1<<1)  /* set when URL is deemed done */
-#define GETOUT_USEREMOTE  (1<<2)  /* use remote file name locally */
+#define GETOUT_USEREMOTE  (1<<2)  /* use remote filename locally */
 #define GETOUT_UPLOAD     (1<<3)  /* if set, -T has been used */
 #define GETOUT_NOUPLOAD   (1<<4)  /* if set, -T "" has been used */
 

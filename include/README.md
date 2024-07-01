@@ -8,7 +8,7 @@ SPDX-License-Identifier: curl
 
 Public include files for libcurl, external users.
 
-They're all placed in the curl subdirectory here for better fit in any kind of
+They are all placed in the curl subdirectory here for better fit in any kind of
 environment. You must include files from here using...
 
     #include <curl/curl.h>

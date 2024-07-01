@@ -315,7 +315,7 @@ static CURLcode tftp_parse_option_ack(struct tftp_state_data *state,
   const char *tmp = ptr;
   struct Curl_easy *data = state->data;
 
-  /* if OACK doesn't contain blksize option, the default (512) must be used */
+  /* if OACK does not contain blksize option, the default (512) must be used */
   state->blksize = TFTP_BLKSIZE_DEFAULT;
 
   while(tmp < ptr + len) {
@@ -349,7 +349,7 @@ static CURLcode tftp_parse_option_ack(struct tftp_state_data *state,
         return CURLE_TFTP_ILLEGAL;
       }
       else if(blksize > state->requested_blksize) {
-        /* could realloc pkt buffers here, but the spec doesn't call out
+        /* could realloc pkt buffers here, but the spec does not call out
          * support for the server requesting a bigger blksize than the client
          * requests */
         failf(data, "%s (%ld)",
@@ -461,7 +461,7 @@ static CURLcode tftp_send_first(struct tftp_state_data *state,
       setpacketevent(&state->spacket, TFTP_EVENT_RRQ);
     }
     /* As RFC3617 describes the separator slash is not actually part of the
-       file name so we skip the always-present first letter of the path
+       filename so we skip the always-present first letter of the path
        string. */
     result = Curl_urldecode(&state->data->state.up.path[1], 0,
                             &filename, NULL, REJECT_ZERO);
@@ -469,9 +469,9 @@ static CURLcode tftp_send_first(struct tftp_state_data *state,
       return result;
 
     if(strlen(filename) > (state->blksize - strlen(mode) - 4)) {
-      failf(data, "TFTP file name too long");
+      failf(data, "TFTP filename too long");
       free(filename);
-      return CURLE_TFTP_ILLEGAL; /* too long file name field */
+      return CURLE_TFTP_ILLEGAL; /* too long filename field */
     }
 
     msnprintf((char *)state->spacket.data + 2,
@@ -590,7 +590,7 @@ static CURLcode tftp_rx(struct tftp_state_data *state,
     /* Is this the block we expect? */
     rblock = getrpacketblock(&state->rpacket);
     if(NEXT_BLOCKNUM(state->block) == rblock) {
-      /* This is the expected block.  Reset counters and ACK it. */
+      /* This is the expected block. Reset counters and ACK it. */
       state->retries = 0;
     }
     else if(state->block == rblock) {
@@ -644,7 +644,7 @@ static CURLcode tftp_rx(struct tftp_state_data *state,
       return CURLE_SEND_ERROR;
     }
 
-    /* we're ready to RX data */
+    /* we are ready to RX data */
     state->state = TFTP_STATE_RX;
     state->rx_time = time(NULL);
     break;
@@ -653,7 +653,7 @@ static CURLcode tftp_rx(struct tftp_state_data *state,
     /* Increment the retry count and fail if over the limit */
     state->retries++;
     infof(data,
-          "Timeout waiting for block %d ACK.  Retries = %d",
+          "Timeout waiting for block %d ACK. Retries = %d",
           NEXT_BLOCKNUM(state->block), state->retries);
     if(state->retries > state->retry_max) {
       state->error = TFTP_ERR_TIMEOUT;
@@ -679,8 +679,8 @@ static CURLcode tftp_rx(struct tftp_state_data *state,
                  4, SEND_4TH_ARG,
                  (struct sockaddr *)&state->remote_addr,
                  state->remote_addrlen);
-    /* don't bother with the return code, but if the socket is still up we
-     * should be a good TFTP client and let the server know we're done */
+    /* do not bother with the return code, but if the socket is still up we
+     * should be a good TFTP client and let the server know we are done */
     state->state = TFTP_STATE_FIN;
     break;
 
@@ -719,13 +719,13 @@ static CURLcode tftp_tx(struct tftp_state_data *state, tftp_event_t event)
       int rblock = getrpacketblock(&state->rpacket);
 
       if(rblock != state->block &&
-         /* There's a bug in tftpd-hpa that causes it to send us an ack for
-          * 65535 when the block number wraps to 0. So when we're expecting
+         /* There is a bug in tftpd-hpa that causes it to send us an ack for
+          * 65535 when the block number wraps to 0. So when we are expecting
           * 0, also accept 65535. See
           * https://www.syslinux.org/archives/2010-September/015612.html
           * */
          !(state->block == 0 && rblock == 65535)) {
-        /* This isn't the expected block.  Log it and up the retry counter */
+        /* This is not the expected block. Log it and up the retry counter */
         infof(data, "Received ACK for block %d, expecting %d",
               rblock, state->block);
         state->retries++;
@@ -751,7 +751,7 @@ static CURLcode tftp_tx(struct tftp_state_data *state, tftp_event_t event)
 
         return result;
       }
-      /* This is the expected packet.  Reset the counters and send the next
+      /* This is the expected packet. Reset the counters and send the next
          block */
       state->rx_time = time(NULL);
       state->block++;
@@ -801,7 +801,7 @@ static CURLcode tftp_tx(struct tftp_state_data *state, tftp_event_t event)
     state->retries++;
     infof(data, "Timeout waiting for block %d ACK. "
           " Retries = %d", NEXT_BLOCKNUM(state->block), state->retries);
-    /* Decide if we've had enough */
+    /* Decide if we have had enough */
     if(state->retries > state->retry_max) {
       state->error = TFTP_ERR_TIMEOUT;
       state->state = TFTP_STATE_FIN;
@@ -829,8 +829,8 @@ static CURLcode tftp_tx(struct tftp_state_data *state, tftp_event_t event)
     (void)sendto(state->sockfd, (void *)state->spacket.data, 4, SEND_4TH_ARG,
                  (struct sockaddr *)&state->remote_addr,
                  state->remote_addrlen);
-    /* don't bother with the return code, but if the socket is still up we
-     * should be a good TFTP client and let the server know we're done */
+    /* do not bother with the return code, but if the socket is still up we
+     * should be a good TFTP client and let the server know we are done */
     state->state = TFTP_STATE_FIN;
     break;
 
@@ -1001,7 +1001,7 @@ static CURLcode tftp_connect(struct Curl_easy *data, bool *done)
       return CURLE_OUT_OF_MEMORY;
   }
 
-  /* we don't keep TFTP connections up basically because there's none or very
+  /* we do not keep TFTP connections up basically because there is none or very
    * little gain for UDP */
   connclose(conn, "TFTP");
 
@@ -1132,7 +1132,7 @@ static CURLcode tftp_receive_packet(struct Curl_easy *data)
 
     switch(state->event) {
     case TFTP_EVENT_DATA:
-      /* Don't pass to the client empty or retransmitted packets */
+      /* Do not pass to the client empty or retransmitted packets */
       if(state->rbytes > 4 &&
          (NEXT_BLOCKNUM(state->block) == getrpacketblock(&state->rpacket))) {
         result = Curl_client_write(data, CLIENTWRITE_BODY,
@@ -1241,7 +1241,7 @@ static CURLcode tftp_multi_statemach(struct Curl_easy *data, bool *done)
       return result;
     *done = (state->state == TFTP_STATE_FIN) ? TRUE : FALSE;
     if(*done)
-      /* Tell curl we're done */
+      /* Tell curl we are done */
       Curl_xfer_setup_nop(data);
   }
   else {
@@ -1264,7 +1264,7 @@ static CURLcode tftp_multi_statemach(struct Curl_easy *data, bool *done)
         return result;
       *done = (state->state == TFTP_STATE_FIN) ? TRUE : FALSE;
       if(*done)
-        /* Tell curl we're done */
+        /* Tell curl we are done */
         Curl_xfer_setup_nop(data);
     }
     /* if rc == 0, then select() timed out */
@@ -1289,7 +1289,7 @@ static CURLcode tftp_doing(struct Curl_easy *data, bool *dophase_done)
     DEBUGF(infof(data, "DO phase is complete"));
   }
   else if(!result) {
-    /* The multi code doesn't have this logic for the DOING state so we
+    /* The multi code does not have this logic for the DOING state so we
        provide it for TFTP since it may do the entire transfer in this
        state. */
     if(Curl_pgrsUpdate(data))
@@ -1376,7 +1376,7 @@ static CURLcode tftp_setup_connection(struct Curl_easy *data,
   conn->transport = TRNSPRT_UDP;
 
   /* TFTP URLs support an extension like ";mode=<typecode>" that
-   * we'll try to get now! */
+   * we will try to get now! */
   type = strstr(data->state.up.path, ";mode=");
 
   if(!type)

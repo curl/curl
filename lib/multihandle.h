@@ -167,7 +167,7 @@ struct Curl_multi {
 #endif
   unsigned int max_concurrent_streams;
   unsigned int maxconnects; /* if >0, a fixed limit of the maximum number of
-                               entries we're allowed to grow the connection
+                               entries we are allowed to grow the connection
                                cache to */
 #define IPV6_UNKNOWN 0
 #define IPV6_DEAD    1

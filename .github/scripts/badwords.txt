@@ -53,6 +53,7 @@ file name\b:filename
 file names\b:filenames
 \buser name\b:username
 \buser names\b:usernames
+\bpass phrase:passphrase
 didn't:did not
 doesn't:does not
 won't:will not

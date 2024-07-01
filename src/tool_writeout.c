@@ -582,7 +582,7 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
             switch(wv->id) {
             case VAR_ONERROR:
               if(per_result == CURLE_OK)
-                /* this isn't error so skip the rest */
+                /* this is not error so skip the rest */
                 done = TRUE;
               break;
             case VAR_STDOUT:
@@ -645,7 +645,7 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
           }
           end = strchr(ptr, '}');
           if(end) {
-            char fname[512]; /* holds the longest file name */
+            char fname[512]; /* holds the longest filename */
             size_t flen = end - ptr;
             if(flen < sizeof(fname)) {
               FILE *stream2;

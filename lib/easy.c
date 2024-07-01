@@ -242,7 +242,7 @@ CURLcode curl_global_init_mem(long flags, curl_malloc_callback m,
   global_init_lock();
 
   if(initialized) {
-    /* Already initialized, don't do it again, but bump the variable anyway to
+    /* Already initialized, do not do it again, but bump the variable anyway to
        work like curl_global_init() and require the same amount of cleanup
        calls. */
     initialized++;
@@ -268,7 +268,8 @@ CURLcode curl_global_init_mem(long flags, curl_malloc_callback m,
 
 /**
  * curl_global_cleanup() globally cleanups curl, uses the value of
- * "easy_init_flags" to determine what needs to be cleaned up and what doesn't.
+ * "easy_init_flags" to determine what needs to be cleaned up and what does
+ * not.
  */
 void curl_global_cleanup(void)
 {
@@ -627,7 +628,7 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
     if(mcode)
       return CURLE_URL_MALFORMAT;
 
-    /* we don't really care about the "msgs_in_queue" value returned in the
+    /* we do not really care about the "msgs_in_queue" value returned in the
        second argument */
     msg = curl_multi_info_read(multi, &pollrc);
     if(msg) {
@@ -656,7 +657,7 @@ static CURLcode easy_events(struct Curl_multi *multi)
   return wait_or_timeout(multi, &evs);
 }
 #else /* DEBUGBUILD */
-/* when not built with debug, this function doesn't exist */
+/* when not built with debug, this function does not exist */
 #define easy_events(x) CURLE_NOT_BUILT_IN
 #endif
 
@@ -706,7 +707,7 @@ static CURLcode easy_transfer(struct Curl_multi *multi)
  * easy handle, destroys the multi handle and returns the easy handle's return
  * code.
  *
- * REALITY: it can't just create and destroy the multi handle that easily. It
+ * REALITY: it cannot just create and destroy the multi handle that easily. It
  * needs to keep it around since if this easy handle is used again by this
  * function, the same multi handle must be reused so that the same pools and
  * caches can be used.
@@ -768,7 +769,7 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
   /* run the transfer */
   result = events ? easy_events(multi) : easy_transfer(multi);
 
-  /* ignoring the return code isn't nice, but atm we can't really handle
+  /* ignoring the return code is not nice, but atm we cannot really handle
      a failure here, room for future improvement! */
   (void)curl_multi_remove_handle(multi, data);
 
@@ -1090,7 +1091,7 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
   bool keep_changed, unpause_read, not_all_paused;
 
   if(!GOOD_EASY_HANDLE(data) || !data->conn)
-    /* crazy input, don't continue */
+    /* crazy input, do not continue */
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   if(Curl_is_in_callback(data))

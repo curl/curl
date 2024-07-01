@@ -179,10 +179,10 @@ static ssize_t tls_recv_more(struct Curl_cfilter *cf,
  *  - Read out as many plaintext bytes from rustls as possible, until hitting
  *    error, EOF, or EAGAIN/EWOULDBLOCK, or plainbuf/plainlen is filled up.
  *
- * It's okay to call this function with plainbuf == NULL and plainlen == 0.
- * In that case, it will copy bytes from the socket into rustls' TLS input
- * buffer, and process packets, but won't consume bytes from rustls' plaintext
- * output buffer.
+ * it is okay to call this function with plainbuf == NULL and plainlen == 0. In
+ * that case, it will copy bytes from the socket into rustls' TLS input
+ * buffer, and process packets, but will not consume bytes from rustls'
+ * plaintext output buffer.
  */
 static ssize_t
 cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
@@ -227,7 +227,7 @@ cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       goto out;
     }
     else if(rresult != RUSTLS_RESULT_OK) {
-      /* n always equals 0 in this case, don't need to check it */
+      /* n always equals 0 in this case, do not need to check it */
       char errorbuf[255];
       size_t errorlen;
       rustls_error(rresult, errorbuf, sizeof(errorbuf), &errorlen);
@@ -309,8 +309,8 @@ static CURLcode cr_flush_out(struct Curl_cfilter *cf, struct Curl_easy *data,
  *  - Fully drain rustls' plaintext output buffer into the socket until
  *    we get either an error or EAGAIN/EWOULDBLOCK.
  *
- * It's okay to call this function with plainbuf == NULL and plainlen == 0.
- * In that case, it won't read anything into rustls' plaintext input buffer.
+ * it is okay to call this function with plainbuf == NULL and plainlen == 0.
+ * In that case, it will not read anything into rustls' plaintext input buffer.
  * It will only drain rustls' plaintext output buffer into the socket.
  */
 static ssize_t
@@ -462,7 +462,7 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(!verifypeer) {
     rustls_client_config_builder_dangerous_set_certificate_verifier(
       config_builder, cr_verify_none);
-    /* rustls doesn't support IP addresses (as of 0.19.0), and will reject
+    /* rustls does not support IP addresses (as of 0.19.0), and will reject
      * connections created with an IP address, even when certificate
      * verification is turned off. Set a placeholder hostname and disable
      * SNI. */
@@ -475,7 +475,7 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
     roots_builder = rustls_root_cert_store_builder_new();
 
     if(ca_info_blob) {
-      /* Enable strict parsing only if verification isn't disabled. */
+      /* Enable strict parsing only if verification is not disabled. */
       result = rustls_root_cert_store_builder_add_pem(roots_builder,
                                                       ca_info_blob->data,
                                                       ca_info_blob->len,
@@ -489,7 +489,7 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
       }
     }
     else if(ssl_cafile) {
-      /* Enable strict parsing only if verification isn't disabled. */
+      /* Enable strict parsing only if verification is not disabled. */
       result = rustls_root_cert_store_builder_load_roots_from_file(
         roots_builder, ssl_cafile, verifypeer);
       if(result != RUSTLS_RESULT_OK) {
@@ -700,7 +700,7 @@ cr_connect_common(struct Curl_cfilter *cf,
   }
 
   /* We should never fall through the loop. We should return either because
-     the handshake is done or because we can't read/write without blocking. */
+     the handshake is done or because we cannot read/write without blocking. */
   DEBUGASSERT(false);
 }
 

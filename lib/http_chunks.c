@@ -182,7 +182,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
     case CHUNK_LF:
       /* waiting for the LF after a chunk size */
       if(*buf == 0x0a) {
-        /* we're now expecting data to come, unless size was zero! */
+        /* we are now expecting data to come, unless size was zero! */
         if(0 == ch->datasize) {
           ch->state = CHUNK_TRAILER; /* now check for trailers */
         }
@@ -289,9 +289,9 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
             break;
         }
         else {
-          /* no trailer, we're on the final CRLF pair */
+          /* no trailer, we are on the final CRLF pair */
           ch->state = CHUNK_TRAILER_POSTCR;
-          break; /* don't advance the pointer */
+          break; /* do not advance the pointer */
         }
       }
       else {
@@ -344,7 +344,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
         blen--;
         (*pconsumed)++;
         /* Record the length of any data left in the end of the buffer
-           even if there's no more chunks to read */
+           even if there is no more chunks to read */
         ch->datasize = blen;
         ch->state = CHUNK_DONE;
         CURL_TRC_WRITE(data, "http_chunk, response complete");
@@ -470,7 +470,7 @@ const struct Curl_cwtype Curl_httpchunk_unencoder = {
   sizeof(struct chunked_writer)
 };
 
-/* max length of a HTTP chunk that we want to generate */
+/* max length of an HTTP chunk that we want to generate */
 #define CURL_CHUNKED_MINLEN   (1024)
 #define CURL_CHUNKED_MAXLEN   (64 * 1024)
 

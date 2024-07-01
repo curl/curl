@@ -236,7 +236,7 @@ static CURLcode rtmp_connect(struct Curl_easy *data, bool *done)
 
   r->m_sb.sb_socket = (int)conn->sock[FIRSTSOCKET];
 
-  /* We have to know if it's a write before we send the
+  /* We have to know if it is a write before we send the
    * connect request packet
    */
   if(data->state.upload)

@@ -467,7 +467,7 @@ static int my_sha256_final(unsigned char *out,
   md->buf[md->curlen++] = (unsigned char)0x80;
 
   /* If the length is currently above 56 bytes we append zeros
-   * then compress.  Then we can fall back to padding zeros and length
+   * then compress. Then we can fall back to padding zeros and length
    * encoding like normal.
    */
   if(md->curlen > 56) {

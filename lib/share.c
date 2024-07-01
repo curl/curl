@@ -65,7 +65,7 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
     return CURLSHE_INVALID;
 
   if(share->dirty)
-    /* don't allow setting options while one or more handles are already
+    /* do not allow setting options while one or more handles are already
        using this share */
     return CURLSHE_IN_USE;
 
@@ -269,7 +269,7 @@ Curl_share_lock(struct Curl_easy *data, curl_lock_data type,
     if(share->lockfunc) /* only call this if set! */
       share->lockfunc(data, type, accesstype, share->clientdata);
   }
-  /* else if we don't share this, pretend successful lock */
+  /* else if we do not share this, pretend successful lock */
 
   return CURLSHE_OK;
 }

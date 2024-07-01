@@ -34,7 +34,7 @@ CURLTOOL_LIBCURL_CFILES = \
   ../lib/base64.c \
   ../lib/dynbuf.c
 
-# libcurl has sources that provide functions named curlx_* that aren't part of
+# libcurl has sources that provide functions named curlx_* that are not part of
 # the official API, but we reuse the code here to avoid duplication.
 CURLX_CFILES = \
   ../lib/base64.c \

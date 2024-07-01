@@ -62,7 +62,7 @@ bool Curl_ipvalid(struct Curl_easy *data, struct connectdata *conn)
 {
   (void)data;
   if(conn->ip_version == CURL_IPRESOLVE_V6)
-    /* An IPv6 address was requested and we can't get/use one */
+    /* An IPv6 address was requested and we cannot get/use one */
     return FALSE;
 
   return TRUE; /* OK, proceed */
@@ -193,8 +193,8 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
    * small. Previous versions are known to return ERANGE for the same
    * problem.
    *
-   * This wouldn't be such a big problem if older versions wouldn't
-   * sometimes return EAGAIN on a common failure case. Alas, we can't
+   * This would not be such a big problem if older versions would not
+   * sometimes return EAGAIN on a common failure case. Alas, we cannot
    * assume that EAGAIN *or* ERANGE means ERANGE for any given version of
    * glibc.
    *
@@ -210,9 +210,9 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
    * gethostbyname_r() in glibc:
    *
    * In glibc 2.2.5 the interface is different (this has also been
-   * discovered in glibc 2.1.1-6 as shipped by Redhat 6). What I can't
+   * discovered in glibc 2.1.1-6 as shipped by Redhat 6). What I cannot
    * explain, is that tests performed on glibc 2.2.4-34 and 2.2.4-32
-   * (shipped/upgraded by Redhat 7.2) don't show this behavior!
+   * (shipped/upgraded by Redhat 7.2) do not show this behavior!
    *
    * In this "buggy" version, the return code is -1 on error and 'errno'
    * is set to the ERANGE or EAGAIN code. Note that 'errno' is not a
@@ -223,7 +223,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
 #elif defined(HAVE_GETHOSTBYNAME_R_3)
   /* AIX, Digital Unix/Tru64, HPUX 10, more? */
 
-  /* For AIX 4.3 or later, we don't use gethostbyname_r() at all, because of
+  /* For AIX 4.3 or later, we do not use gethostbyname_r() at all, because of
    * the plain fact that it does not return unique full buffers on each
    * call, but instead several of the pointers in the hostent structs will
    * point to the same actual data! This have the unfortunate down-side that
@@ -237,7 +237,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
    *
    * Troels Walsted Hansen helped us work this out on March 3rd, 2003.
    *
-   * [*] = much later we've found out that it isn't at all "completely
+   * [*] = much later we have found out that it is not at all "completely
    * thread-safe", but at least the gethostbyname() function is.
    */
 
@@ -253,7 +253,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
                           (struct hostent *)buf,
                           (struct hostent_data *)((char *)buf +
                                                   sizeof(struct hostent)));
-    h_errnop = SOCKERRNO; /* we don't deal with this, but set it anyway */
+    h_errnop = SOCKERRNO; /* we do not deal with this, but set it anyway */
   }
   else
     res = -1; /* failure, too smallish buffer size */
@@ -263,8 +263,8 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
     h = buf; /* result expected in h */
 
     /* This is the worst kind of the different gethostbyname_r() interfaces.
-     * Since we don't know how big buffer this particular lookup required,
-     * we can't realloc down the huge alloc without doing closer analysis of
+     * Since we do not know how big buffer this particular lookup required,
+     * we cannot realloc down the huge alloc without doing closer analysis of
      * the returned data. Thus, we always use CURL_HOSTENT_SIZE for every
      * name lookup. Fixing this would require an extra malloc() and then
      * calling Curl_addrinfo_copy() that subsequent realloc()s down the new
@@ -280,7 +280,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
 #else /* (HAVE_GETADDRINFO && HAVE_GETADDRINFO_THREADSAFE) ||
           HAVE_GETHOSTBYNAME_R */
   /*
-   * Here is code for platforms that don't have a thread safe
+   * Here is code for platforms that do not have a thread safe
    * getaddrinfo() nor gethostbyname_r() function or for which
    * gethostbyname() is the preferred one.
    */

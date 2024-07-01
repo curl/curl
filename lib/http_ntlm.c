@@ -200,7 +200,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
 
   Curl_bufref_init(&ntlmmsg);
 
-  /* connection is already authenticated, don't send a header in future
+  /* connection is already authenticated, do not send a header in future
    * requests so go directly to NTLMSTATE_LAST */
   if(*state == NTLMSTATE_TYPE3)
     *state = NTLMSTATE_LAST;

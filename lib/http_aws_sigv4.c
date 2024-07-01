@@ -620,7 +620,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
                ":%" MAX_SIGV4_LEN_TXT "s",
                provider0, provider1, region, service);
   if(!provider0[0]) {
-    failf(data, "first aws-sigv4 provider can't be empty");
+    failf(data, "first aws-sigv4 provider cannot be empty");
     result = CURLE_BAD_FUNCTION_ARGUMENT;
     goto fail;
   }
@@ -810,7 +810,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
                                "SignedHeaders=%s, "
                                "Signature=%s\r\n"
                                /*
-                                * date_header is added here, only if it wasn't
+                                * date_header is added here, only if it was not
                                 * user-specified (using CURLOPT_HTTPHEADER).
                                 * date_header includes \r\n
                                 */

@@ -139,7 +139,7 @@ void *Curl_hash_add2(struct Curl_hash *h, void *key, size_t key_len, void *p,
 
 /* Insert the data in the hash. If there already was a match in the hash, that
  * data is replaced. This function also "lazily" allocates the table if
- * needed, as it isn't done in the _init function (anymore).
+ * needed, as it is not done in the _init function (anymore).
  *
  * @unittest: 1305
  * @unittest: 1602

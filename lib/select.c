@@ -33,7 +33,7 @@
 #endif
 
 #if !defined(HAVE_SELECT) && !defined(HAVE_POLL_FINE)
-#error "We can't compile without select() or poll() support."
+#error "We cannot compile without select() or poll() support."
 #endif
 
 #ifdef MSDOS
@@ -85,7 +85,7 @@ int Curl_wait_ms(timediff_t timeout_ms)
 #if TIMEDIFF_T_MAX >= ULONG_MAX
   if(timeout_ms >= ULONG_MAX)
     timeout_ms = ULONG_MAX-1;
-    /* don't use ULONG_MAX, because that is equal to INFINITE */
+    /* do not use ULONG_MAX, because that is equal to INFINITE */
 #endif
   Sleep((ULONG)timeout_ms);
 #else
@@ -135,7 +135,7 @@ static int our_select(curl_socket_t maxfd,   /* highest socket number */
   struct timeval *ptimeout;
 
 #ifdef USE_WINSOCK
-  /* WinSock select() can't handle zero events.  See the comment below. */
+  /* WinSock select() cannot handle zero events. See the comment below. */
   if((!fds_read || fds_read->fd_count == 0) &&
      (!fds_write || fds_write->fd_count == 0) &&
      (!fds_err || fds_err->fd_count == 0)) {
@@ -148,14 +148,14 @@ static int our_select(curl_socket_t maxfd,   /* highest socket number */
 
 #ifdef USE_WINSOCK
   /* WinSock select() must not be called with an fd_set that contains zero
-    fd flags, or it will return WSAEINVAL.  But, it also can't be called
+    fd flags, or it will return WSAEINVAL. But, it also cannot be called
     with no fd_sets at all!  From the documentation:
 
     Any two of the parameters, readfds, writefds, or exceptfds, can be
     given as null. At least one must be non-null, and any non-null
     descriptor set must contain at least one handle to a socket.
 
-    It is unclear why WinSock doesn't just handle this for us instead of
+    It is unclear why WinSock does not just handle this for us instead of
     calling this an error. Luckily, with WinSock, we can _also_ ask how
     many bits are set on an fd_set. So, let's just check it beforehand.
   */
@@ -173,7 +173,7 @@ static int our_select(curl_socket_t maxfd,   /* highest socket number */
 /*
  * Wait for read or write events on a set of file descriptors. It uses poll()
  * when a fine poll() is available, in order to avoid limits with FD_SETSIZE,
- * otherwise select() is used.  An error is returned if select() is being used
+ * otherwise select() is used. An error is returned if select() is being used
  * and a file descriptor is too large for FD_SETSIZE.
  *
  * A negative timeout value makes this function wait indefinitely,
@@ -261,8 +261,8 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
 }
 
 /*
- * This is a wrapper around poll().  If poll() does not exist, then
- * select() is used instead.  An error is returned if select() is
+ * This is a wrapper around poll(). If poll() does not exist, then
+ * select() is used instead. An error is returned if select() is
  * being used and a file descriptor is too large for FD_SETSIZE.
  * A negative timeout value makes this function wait indefinitely,
  * unless no valid file descriptor is given, when this happens the
@@ -361,7 +361,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
   }
 
   /*
-     Note also that WinSock ignores the first argument, so we don't worry
+     Note also that WinSock ignores the first argument, so we do not worry
      about the fact that maxfd is computed incorrectly with WinSock (since
      curl_socket_t is unsigned in such cases and thus -1 is the largest
      value).

@@ -84,8 +84,8 @@
  * source file are these:
  *
  * CURLRES_IPV6 - this host has getaddrinfo() and family, and thus we use
- * that. The host may not be able to resolve IPv6, but we don't really have to
- * take that into account. Hosts that aren't IPv6-enabled have CURLRES_IPV4
+ * that. The host may not be able to resolve IPv6, but we do not really have to
+ * take that into account. Hosts that are not IPv6-enabled have CURLRES_IPV4
  * defined.
  *
  * CURLRES_ARES - is defined if libcurl is built to use c-ares for
@@ -238,7 +238,7 @@ void Curl_hostcache_prune(struct Curl_easy *data)
   int timeout = data->set.dns_cache_timeout;
 
   if(!data->dns.hostcache)
-    /* NULL hostcache means we can't do it */
+    /* NULL hostcache means we cannot do it */
     return;
 
   if(data->share)
@@ -283,14 +283,14 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
   size_t entry_len = create_hostcache_id(hostname, 0, port,
                                          entry_id, sizeof(entry_id));
 
-  /* See if it's already in our dns cache */
+  /* See if it is already in our dns cache */
   dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len + 1);
 
   /* No entry found in cache, check if we might have a wildcard entry */
   if(!dns && data->state.wildcard_resolve) {
     entry_len = create_hostcache_id("*", 1, port, entry_id, sizeof(entry_id));
 
-    /* See if it's already in our dns cache */
+    /* See if it is already in our dns cache */
     dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len + 1);
   }
 
@@ -329,7 +329,7 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
     }
 
     if(!found) {
-      infof(data, "Hostname in DNS cache doesn't have needed family, zapped");
+      infof(data, "Hostname in DNS cache does not have needed family, zapped");
       dns = NULL; /* the memory deallocation is being handled by the hash */
       Curl_hash_delete(data->dns.hostcache, entry_id, entry_len + 1);
     }
@@ -349,7 +349,7 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
  * Returns the Curl_dns_entry entry pointer or NULL if not in the cache.
  *
  * The returned data *MUST* be "unlocked" with Curl_resolv_unlock() after
- * use, or we'll leak memory!
+ * use, or we will leak memory!
  */
 struct Curl_dns_entry *
 Curl_fetch_addr(struct Curl_easy *data,
@@ -602,7 +602,7 @@ static struct Curl_addrinfo *get_localhost(int port, const char *name)
 bool Curl_ipv6works(struct Curl_easy *data)
 {
   if(data) {
-    /* the nature of most system is that IPv6 status doesn't come and go
+    /* the nature of most system is that IPv6 status does not come and go
        during a program's lifetime so we only probe the first time and then we
        have the info kept for fast reuse */
     DEBUGASSERT(data);
@@ -618,7 +618,7 @@ bool Curl_ipv6works(struct Curl_easy *data)
     /* probe to see if we have a working IPv6 stack */
     curl_socket_t s = socket(PF_INET6, SOCK_DGRAM, 0);
     if(s == CURL_SOCKET_BAD)
-      /* an IPv6 address was requested but we can't get/use one */
+      /* an IPv6 address was requested but we cannot get/use one */
       ipv6_works = 0;
     else {
       ipv6_works = 1;
@@ -662,11 +662,11 @@ static bool tailmatch(const char *full, const char *part)
 /*
  * Curl_resolv() is the main name resolve function within libcurl. It resolves
  * a name and returns a pointer to the entry in the 'entry' argument (if one
- * is provided). This function might return immediately if we're using asynch
+ * is provided). This function might return immediately if we are using asynch
  * resolves. See the return codes.
  *
  * The cache entry we return will get its 'inuse' counter increased when this
- * function is used. You MUST call Curl_resolv_unlock() later (when you're
+ * function is used. You MUST call Curl_resolv_unlock() later (when you are
  * done using this struct) to decrease the counter again.
  *
  * Return codes:
@@ -813,7 +813,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
       if(respwait) {
         /* the response to our resolve call will come asynchronously at
            a later time, good or bad */
-        /* First, check that we haven't received the info by now */
+        /* First, check that we have not received the info by now */
         result = Curl_resolv_check(data, &dns);
         if(result) /* error detected */
           return CURLRESOLV_ERROR;
@@ -851,7 +851,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
 #ifdef USE_ALARM_TIMEOUT
 /*
  * This signal handler jumps back into the main libcurl code and continues
- * execution.  This effectively causes the remainder of the application to run
+ * execution. This effectively causes the remainder of the application to run
  * within a signal handler which is nonportable and could lead to problems.
  */
 CURL_NORETURN static
@@ -864,11 +864,11 @@ void alarmfunc(int sig)
 
 /*
  * Curl_resolv_timeout() is the same as Curl_resolv() but specifies a
- * timeout.  This function might return immediately if we're using asynch
+ * timeout. This function might return immediately if we are using asynch
  * resolves. See the return codes.
  *
  * The cache entry we return will get its 'inuse' counter increased when this
- * function is used. You MUST call Curl_resolv_unlock() later (when you're
+ * function is used. You MUST call Curl_resolv_unlock() later (when you are
  * done using this struct) to decrease the counter again.
  *
  * If built with a synchronous resolver and use of signals is not
@@ -934,7 +934,7 @@ enum resolve_t Curl_resolv_timeout(struct Curl_easy *data,
      will generate a signal and we will siglongjmp() from that here.
      This technique has problems (see alarmfunc).
      This should be the last thing we do before calling Curl_resolv(),
-     as otherwise we'd have to worry about variables that get modified
+     as otherwise we would have to worry about variables that get modified
      before we invoke Curl_resolv() (and thus use "volatile"). */
   curl_simple_lock_lock(&curl_jmpenv_lock);
 
@@ -955,7 +955,7 @@ enum resolve_t Curl_resolv_timeout(struct Curl_easy *data,
     keep_copysig = TRUE; /* yes, we have a copy */
     sigact.sa_handler = alarmfunc;
 #ifdef SA_RESTART
-    /* HPUX doesn't have SA_RESTART but defaults to that behavior! */
+    /* HPUX does not have SA_RESTART but defaults to that behavior! */
     sigact.sa_flags &= ~SA_RESTART;
 #endif
     /* now set the new struct */
@@ -1022,7 +1022,7 @@ clean_up:
        ((alarm_set >= 0x80000000) && (prev_alarm < 0x80000000)) ) {
       /* if the alarm time-left reached zero or turned "negative" (counted
          with unsigned values), we should fire off a SIGALRM here, but we
-         won't, and zero would be to switch it off so we never set it to
+         will not, and zero would be to switch it off so we never set it to
          less than 1! */
       alarm(1);
       rc = CURLRESOLV_TIMEDOUT;
@@ -1150,7 +1150,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       if(data->share)
         Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
-      /* delete entry, ignore if it didn't exist */
+      /* delete entry, ignore if it did not exist */
       Curl_hash_delete(data->dns.hostcache, entry_id, entry_len + 1);
 
       if(data->share)
@@ -1264,7 +1264,7 @@ err:
       if(data->share)
         Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
-      /* See if it's already in our dns cache */
+      /* See if it is already in our dns cache */
       dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len + 1);
 
       if(dns) {
@@ -1362,7 +1362,7 @@ static void show_resolve_info(struct Curl_easy *data,
       if(!result)
         result = Curl_dyn_add(d, buf);
       if(result) {
-        infof(data, "too many IP, can't show");
+        infof(data, "too many IP, cannot show");
         goto fail;
       }
     }

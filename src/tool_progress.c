@@ -48,13 +48,13 @@ static char *max5data(curl_off_t bytes, char *max5)
     msnprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "k", bytes/ONE_KILOBYTE);
 
   else if(bytes < CURL_OFF_T_C(100) * ONE_MEGABYTE)
-    /* 'XX.XM' is good as long as we're less than 100 megs */
+    /* 'XX.XM' is good as long as we are less than 100 megs */
     msnprintf(max5, 6, "%2" CURL_FORMAT_CURL_OFF_T ".%0"
               CURL_FORMAT_CURL_OFF_T "M", bytes/ONE_MEGABYTE,
               (bytes%ONE_MEGABYTE) / (ONE_MEGABYTE/CURL_OFF_T_C(10)) );
 
   else if(bytes < CURL_OFF_T_C(10000) * ONE_MEGABYTE)
-    /* 'XXXXM' is good until we're at 10000MB or above */
+    /* 'XXXXM' is good until we are at 10000MB or above */
     msnprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "M", bytes/ONE_MEGABYTE);
 
   else if(bytes < CURL_OFF_T_C(100) * ONE_GIGABYTE)
@@ -75,7 +75,7 @@ static char *max5data(curl_off_t bytes, char *max5)
     /* up to 10000PB, display without decimal: XXXXP */
     msnprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "P", bytes/ONE_PETABYTE);
 
-  /* 16384 petabytes (16 exabytes) is the maximum a 64 bit unsigned number can
+  /* 16384 petabytes (16 exabytes) is the maximum a 64-bit unsigned number can
      hold, but our data type is signed so 8192PB will be the maximum. */
   return max5;
 }

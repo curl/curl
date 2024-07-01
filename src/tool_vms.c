@@ -74,7 +74,7 @@ int is_vms_shell(void)
 }
 
 /*
- * VMS has two exit() routines.  When running under a Unix style shell, then
+ * VMS has two exit() routines. When running under a Unix style shell, then
  * Unix style and the __posix_exit() routine is used.
  *
  * When running under the DCL shell, then the VMS encoded codes and decc$exit()
@@ -133,9 +133,9 @@ struct decc_feat_t {
 static const struct decc_feat_t decc_feat_array[] = {
   /* Preserve command-line case with SET PROCESS/PARSE_STYLE=EXTENDED */
   { "DECC$ARGV_PARSE_STYLE", 1 },
-  /* Preserve case for file names on ODS5 disks. */
+  /* Preserve case for filenames on ODS5 disks. */
   { "DECC$EFS_CASE_PRESERVE", 1 },
-  /* Enable multiple dots (and most characters) in ODS5 file names,
+  /* Enable multiple dots (and most characters) in ODS5 filenames,
      while preserving VMS-ness of ";version". */
   { "DECC$EFS_CHARSET", 1 },
   /* List terminator. */
@@ -165,14 +165,14 @@ static void decc_init(void)
     feat_index = decc$feature_get_index(decc_feat_array[i].name);
 
     if(feat_index >= 0) {
-      /* Valid item.  Collect its properties. */
+      /* Valid item. Collect its properties. */
       feat_value = decc$feature_get_value(feat_index, 1);
       feat_value_min = decc$feature_get_value(feat_index, 2);
       feat_value_max = decc$feature_get_value(feat_index, 3);
 
       if((decc_feat_array[i].value >= feat_value_min) &&
          (decc_feat_array[i].value <= feat_value_max)) {
-        /* Valid value.  Set it if necessary. */
+        /* Valid value. Set it if necessary. */
         if(feat_value != decc_feat_array[i].value) {
           sts = decc$feature_set_value(feat_index, 1,
                                        decc_feat_array[i].value);
@@ -198,7 +198,7 @@ static void decc_init(void)
 #pragma nostandard
 
 /* Establish the LIB$INITIALIZE PSECTs, with proper alignment and
-   other attributes.  Note that "nopic" is significant only on VAX. */
+   other attributes. Note that "nopic" is significant only on VAX. */
 #pragma extern_model save
 #pragma extern_model strict_refdef "LIB$INITIALIZ" 2, nopic, nowrt
 const int spare[8] = {0};

@@ -733,7 +733,7 @@ CURLcode Curl_conn_may_http3(struct Curl_easy *data,
     return CURLE_URL_MALFORMAT;
   }
   if(conn->bits.httpproxy && conn->bits.tunnel_proxy) {
-    failf(data, "HTTP/3 is not supported over a HTTP proxy");
+    failf(data, "HTTP/3 is not supported over an HTTP proxy");
     return CURLE_URL_MALFORMAT;
   }
 #endif

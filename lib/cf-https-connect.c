@@ -555,7 +555,7 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
 
   if(data->state.httpwant == CURL_HTTP_VERSION_3ONLY) {
     result = Curl_conn_may_http3(data, conn);
-    if(result) /* can't do it */
+    if(result) /* cannot do it */
       goto out;
     try_h3 = TRUE;
     try_h21 = FALSE;

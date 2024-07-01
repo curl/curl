@@ -1152,7 +1152,7 @@ ldapsb_tls_remove(Sockbuf_IO_Desc *sbiod)
   return 0;
 }
 
-/* We don't need to do anything because libcurl does it already */
+/* We do not need to do anything because libcurl does it already */
 static int
 ldapsb_tls_close(Sockbuf_IO_Desc *sbiod)
 {

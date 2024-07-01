@@ -80,7 +80,7 @@ static int multiply(curl_off_t *amount, curl_off_t with)
 #else
     sum = *amount * with;
     if(sum/with != *amount)
-      return 1; /* didn't fit, bail out */
+      return 1; /* did not fit, bail out */
 #endif
   }
   *amount = sum;
@@ -123,7 +123,7 @@ static CURLcode glob_set(struct URLGlob *glob, char **patternp,
         return GLOBERROR("empty string within braces", *posp,
                          CURLE_URL_MALFORMAT);
 
-      /* add 1 to size since it'll be incremented below */
+      /* add 1 to size since it will be incremented below */
       if(multiply(amount, pat->content.Set.size + 1))
         return GLOBERROR("range overflow", 0, CURLE_URL_MALFORMAT);
 

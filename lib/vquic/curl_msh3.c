@@ -293,7 +293,7 @@ static const MSH3_REQUEST_IF msh3_request_if = {
   msh3_data_sent
 };
 
-/* Decode HTTP status code.  Returns -1 if no valid status code was
+/* Decode HTTP status code. Returns -1 if no valid status code was
    decoded. (duplicate from http2.c) */
 static int decode_status_code(const char *value, size_t len)
 {
@@ -689,7 +689,7 @@ static ssize_t cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
 
     /* TODO - msh3/msquic will hold onto this memory until the send complete
-       event. How do we make sure curl doesn't free it until then? */
+       event. How do we make sure curl does not free it until then? */
     *err = CURLE_OK;
     nwritten = len;
   }
@@ -840,7 +840,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
 
   ctx->api = MsH3ApiOpen();
   if(!ctx->api) {
-    failf(data, "can't create msh3 api");
+    failf(data, "cannot create msh3 api");
     return CURLE_FAILED_INIT;
   }
 
@@ -851,7 +851,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
                                   &addr,
                                   !verify);
   if(!ctx->qconn) {
-    failf(data, "can't create msh3 connection");
+    failf(data, "cannot create msh3 connection");
     if(ctx->api) {
       MsH3ApiClose(ctx->api);
       ctx->api = NULL;

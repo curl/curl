@@ -93,21 +93,21 @@ UNITTEST DOHcode doh_encode(const char *host,
   const char *hostp = host;
 
   /* The expected output length is 16 bytes more than the length of
-   * the QNAME-encoding of the host name.
+   * the QNAME-encoding of the hostname.
    *
    * A valid DNS name may not contain a zero-length label, except at
-   * the end.  For this reason, a name beginning with a dot, or
+   * the end. For this reason, a name beginning with a dot, or
    * containing a sequence of two or more consecutive dots, is invalid
    * and cannot be encoded as a QNAME.
    *
-   * If the host name ends with a trailing dot, the corresponding
-   * QNAME-encoding is one byte longer than the host name. If (as is
+   * If the hostname ends with a trailing dot, the corresponding
+   * QNAME-encoding is one byte longer than the hostname. If (as is
    * also valid) the hostname is shortened by the omission of the
    * trailing dot, then its QNAME-encoding will be two bytes longer
-   * than the host name.
+   * than the hostname.
    *
    * Each [ label, dot ] pair is encoded as [ length, label ],
-   * preserving overall length.  A final [ label ] without a dot is
+   * preserving overall length. A final [ label ] without a dot is
    * also encoded as [ length, label ], increasing overall length
    * by one. The encoding is completed by appending a zero byte,
    * representing the zero-length root label, again increasing
@@ -455,9 +455,9 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
    * TODO: Figure out the conditions under which we want to make
    * a request for an HTTPS RR when we are not doing ECH. For now,
    * making this request breaks a bunch of DoH tests, e.g. test2100,
-   * where the additional request doesn't match the pre-cooked data
-   * files, so there's a bit of work attached to making the request
-   * in a non-ECH use-case. For the present, we'll only make the
+   * where the additional request does not match the pre-cooked data
+   * files, so there is a bit of work attached to making the request
+   * in a non-ECH use-case. For the present, we will only make the
    * request when ECH is enabled in the build and is being used for
    * the curl operation.
    */
@@ -531,7 +531,7 @@ static unsigned int get32bit(const unsigned char *doh, unsigned int index)
 
   /* avoid undefined behavior by casting to unsigned before shifting
      24 bits, possibly into the sign bit. codegen is same, but
-     ub sanitizer won't be upset */
+     ub sanitizer will not be upset */
   return ((unsigned)doh[0] << 24) | ((unsigned)doh[1] << 16) |
          ((unsigned)doh[2] << 8) | doh[3];
 }
@@ -891,11 +891,11 @@ static void showdoh(struct Curl_easy *data,
  *
  * This function returns a pointer to the first element of a newly allocated
  * Curl_addrinfo struct linked list filled with the data from a set of DoH
- * lookups.  Curl_addrinfo is meant to work like the addrinfo struct does for
+ * lookups. Curl_addrinfo is meant to work like the addrinfo struct does for
  * a IPv6 stack, but usable also for IPv4, all hosts and environments.
  *
  * The memory allocated by this function *MUST* be free'd later on calling
- * Curl_freeaddrinfo().  For each successful call to this function there
+ * Curl_freeaddrinfo(). For each successful call to this function there
  * must be an associated call later to Curl_freeaddrinfo().
  */
 
@@ -923,7 +923,7 @@ static CURLcode doh2ai(const struct dohentry *de, const char *hostname,
     CURL_SA_FAMILY_T addrtype;
     if(de->addr[i].type == DNS_TYPE_AAAA) {
 #ifndef USE_IPV6
-      /* we can't handle IPv6 addresses */
+      /* we cannot handle IPv6 addresses */
       continue;
 #else
       ss_size = sizeof(struct sockaddr_in6);
@@ -1046,7 +1046,7 @@ UNITTEST void de_cleanup(struct dohentry *d)
  *
  * The input buffer pointer will be modified so it points to
  * just after the end of the DNS name encoding on output. (And
- * that's why it's an "unsigned char **" :-)
+ * that is why it is an "unsigned char **" :-)
  */
 static CURLcode local_decode_rdata_name(unsigned char **buf, size_t *remaining,
                                         char **dnsname)
@@ -1105,7 +1105,7 @@ static CURLcode local_decode_rdata_alpn(unsigned char *rrval, size_t len,
    * output is comma-sep list of the strings
    * implementations may or may not handle quoting of comma within
    * string values, so we might see a comma within the wire format
-   * version of a string, in which case we'll precede that by a
+   * version of a string, in which case we will precede that by a
    * backslash - same goes for a backslash character, and of course
    * we need to use two backslashes in strings when we mean one;-)
    */
@@ -1154,7 +1154,7 @@ err:
 #ifdef DEBUGBUILD
 static CURLcode test_alpn_escapes(void)
 {
-  /* we'll use an example from draft-ietf-dnsop-svcb, figure 10 */
+  /* we will use an example from draft-ietf-dnsop-svcb, figure 10 */
   static unsigned char example[] = {
     0x08,                                           /* length 8 */
     0x66, 0x5c, 0x6f, 0x6f, 0x2c, 0x62, 0x61, 0x72, /* value "f\\oo,bar" */
@@ -1185,7 +1185,7 @@ static CURLcode Curl_doh_decode_httpsrr(unsigned char *rrval, size_t len,
   char *dnsname = NULL;
 
 #ifdef DEBUGBUILD
-  /* a few tests of escaping, shouldn't be here but ok for now */
+  /* a few tests of escaping, should not be here but ok for now */
   if(test_alpn_escapes() != CURLE_OK)
     return CURLE_OUT_OF_MEMORY;
 #endif
@@ -1349,7 +1349,7 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
 
 
       if(Curl_trc_ft_is_verbose(data, &Curl_doh_trc)) {
-        infof(data, "[DoH] Host name: %s", dohp->host);
+        infof(data, "[DoH] hostname: %s", dohp->host);
         showdoh(data, &de);
       }
 

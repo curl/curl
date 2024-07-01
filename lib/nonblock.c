@@ -53,7 +53,7 @@ int curlx_nonblock(curl_socket_t sockfd,    /* operate on this */
   if(flags < 0)
     return -1;
   /* Check if the current file status flags have already satisfied
-   * the request, if so, it's no need to call fcntl() to replicate it.
+   * the request, if so, it is no need to call fcntl() to replicate it.
    */
   if(!!(flags & O_NONBLOCK) == !!nonblock)
     return 0;

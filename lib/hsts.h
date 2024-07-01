@@ -40,7 +40,7 @@ struct stsentry {
   curl_off_t expires; /* the timestamp of this entry's expiry */
 };
 
-/* The HSTS cache. Needs to be able to tailmatch host names. */
+/* The HSTS cache. Needs to be able to tailmatch hostnames. */
 struct hsts {
   struct Curl_llist list;
   char *filename;

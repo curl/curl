@@ -119,7 +119,7 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
                            interval_ms);
 
   if(block) {
-    /* if we didn't wait, we don't have to spend time on this now */
+    /* if we did not wait, we do not have to spend time on this now */
     if(Curl_pgrsUpdate(data))
       result = CURLE_ABORTED_BY_CALLBACK;
     else
@@ -179,7 +179,7 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
   DEBUGASSERT(pp->sendthis == NULL);
 
   if(!conn)
-    /* can't send without a connection! */
+    /* cannot send without a connection! */
     return CURLE_SEND_ERROR;
 
   Curl_dyn_reset(&pp->sendbuf);
@@ -329,7 +329,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
     char *nl = memchr(line, '\n', Curl_dyn_len(&pp->recvbuf));
     if(nl) {
       /* a newline is CRLF in pp-talk, so the CR is ignored as
-         the line isn't really terminated until the LF comes */
+         the line is not really terminated until the LF comes */
       size_t length = nl - line + 1;
 
       /* output debug output if that is requested */
@@ -372,7 +372,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
       break;
     }
 
-  } while(1); /* while there's buffer left to scan */
+  } while(1); /* while there is buffer left to scan */
 
   pp->pending_resp = FALSE;
 

@@ -65,4 +65,4 @@ Curl_strtok_r(char *ptr, const char *sep, char **end)
   return NULL;
 }
 
-#endif /* this was only compiled if strtok_r wasn't present */
+#endif /* this was only compiled if strtok_r was not present */

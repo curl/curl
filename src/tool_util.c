@@ -81,7 +81,7 @@ struct timeval tvnow(void)
   /*
   ** Even when the configure process has truly detected monotonic clock
   ** availability, it might happen that it is not actually available at
-  ** run-time. When this occurs simply fallback to other time source.
+  ** runtime. When this occurs simply fallback to other time source.
   */
 #ifdef HAVE_GETTIMEOFDAY
   else
@@ -126,7 +126,7 @@ struct timeval tvnow(void)
 
 /*
  * Make sure that the first argument is the more recent time, as otherwise
- * we'll get a weird negative time-diff back...
+ * we will get a weird negative time-diff back...
  *
  * Returns: the time difference in number of milliseconds.
  */

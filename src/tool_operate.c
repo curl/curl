@@ -96,7 +96,7 @@
 
 #ifndef O_BINARY
 /* since O_BINARY as used in bitmasks, setting it to zero makes it usable in
-   source code but yet it doesn't ruin anything */
+   source code but yet it does not ruin anything */
 #  define O_BINARY 0
 #endif
 
@@ -104,11 +104,11 @@
 #  define SOL_IP IPPROTO_IP
 #endif
 
-#define CURL_CA_CERT_ERRORMSG                                               \
-  "More details here: https://curl.se/docs/sslcerts.html\n\n"          \
-  "curl failed to verify the legitimacy of the server and therefore "       \
-  "could not\nestablish a secure connection to it. To learn more about "    \
-  "this situation and\nhow to fix it, please visit the web page mentioned " \
+#define CURL_CA_CERT_ERRORMSG                                           \
+  "More details here: https://curl.se/docs/sslcerts.html\n\n"           \
+  "curl failed to verify the legitimacy of the server and therefore "   \
+  "could not\nestablish a secure connection to it. To learn more about " \
+  "this situation and\nhow to fix it, please visit the webpage mentioned " \
   "above.\n"
 
 static CURLcode single_transfer(struct GlobalConfig *global,
@@ -339,7 +339,7 @@ static CURLcode pre_transfer(struct GlobalConfig *global,
   if(per->uploadfile && !stdin_upload(per->uploadfile)) {
     /* VMS Note:
      *
-     * Reading binary from files can be a problem...  Only FIXED, VAR
+     * Reading binary from files can be a problem... Only FIXED, VAR
      * etc WITHOUT implied CC will work. Others need a \n appended to
      * a line
      *
@@ -373,7 +373,7 @@ static CURLcode pre_transfer(struct GlobalConfig *global,
     if((per->infd == -1) || fstat(per->infd, &fileinfo))
 #endif
     {
-      helpf(tool_stderr, "Can't open '%s'", per->uploadfile);
+      helpf(tool_stderr, "cannot open '%s'", per->uploadfile);
       if(per->infd != -1) {
         close(per->infd);
         per->infd = STDIN_FILENO;
@@ -520,7 +520,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
     memset(outs->utf8seq, 0, sizeof(outs->utf8seq));
 #endif
 
-  /* if retry-max-time is non-zero, make sure we haven't exceeded the
+  /* if retry-max-time is non-zero, make sure we have not exceeded the
      time */
   if(per->retry_remaining &&
      (!config->retry_maxtime ||
@@ -594,7 +594,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
       if((scheme == proto_ftp || scheme == proto_ftps) && response / 100 == 4)
         /*
          * This is typically when the FTP server only allows a certain
-         * amount of users and we are not one of them.  All 4xx codes
+         * amount of users and we are not one of them. All 4xx codes
          * are transient.
          */
         retry = RETRY_FTP;
@@ -619,7 +619,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
       if(RETRY_HTTP == retry) {
         curl_easy_getinfo(curl, CURLINFO_RETRY_AFTER, &retry_after);
         if(retry_after) {
-          /* store in a 'long', make sure it doesn't overflow */
+          /* store in a 'long', make sure it does not overflow */
           if(retry_after > LONG_MAX/1000)
             sleeptime = LONG_MAX;
           else if((retry_after * 1000) > sleeptime)
@@ -662,7 +662,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
         /* truncate file at the position where we started appending */
 #ifdef HAVE_FTRUNCATE
         if(ftruncate(fileno(outs->stream), outs->init)) {
-          /* when truncate fails, we can't just append as then we'll
+          /* when truncate fails, we cannot just append as then we will
              create something strange, bail out */
           errorf(config->global, "Failed to truncate file");
           return CURLE_WRITE_ERROR;
@@ -672,7 +672,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
         rc = fseek(outs->stream, 0, SEEK_END);
 #else
         /* ftruncate is not available, so just reposition the file
-           to the location we would have truncated it. This won't
+           to the location we would have truncated it. This will not
            work properly with large files on 32-bit systems, but
            most of those will have ftruncate. */
         rc = fseek(outs->stream, (long)outs->init, SEEK_SET);
@@ -780,7 +780,7 @@ static CURLcode url_proto(char **url,
         if(curl_strequal(schemep, proto_ipfs) ||
            curl_strequal(schemep, proto_ipns)) {
           result = ipfs_url_rewrite(uh, schemep, url, config);
-          /* short-circuit proto_token, we know it's ipfs or ipns */
+          /* short-circuit proto_token, we know it is ipfs or ipns */
           if(curl_strequal(schemep, proto_ipfs))
             proto = proto_ipfs;
           else if(curl_strequal(schemep, proto_ipns))
@@ -1130,20 +1130,20 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             (per->outfile && strcmp("-", per->outfile)))) {
 
           /*
-           * We have specified a file name to store the result in, or we have
-           * decided we want to use the remote file name.
+           * We have specified a filename to store the result in, or we have
+           * decided we want to use the remote filename.
            */
 
           if(!per->outfile) {
-            /* extract the file name from the URL */
+            /* extract the filename from the URL */
             result = get_url_file_name(&per->outfile, per->this_url);
             if(result) {
-              errorf(global, "Failed to extract a sensible file name"
+              errorf(global, "Failed to extract a sensible filename"
                      " from the URL to use for storage");
               break;
             }
             if(!*per->outfile && !config->content_disposition) {
-              errorf(global, "Remote file name has no length");
+              errorf(global, "Remote filename has no length");
               result = CURLE_WRITE_ERROR;
               break;
             }
@@ -1191,7 +1191,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           }
 
           if(config->resume_from_current) {
-            /* We're told to continue from where we are now. Get the size
+            /* We are told to continue from where we are now. Get the size
                of the file as it is now and open it for append instead */
             struct_stat fileinfo;
             /* VMS -- Danger, the filesize is only valid for stream files */
@@ -1214,7 +1214,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             FILE *file = fopen(per->outfile, "ab");
 #endif
             if(!file) {
-              errorf(global, "Can't open '%s'", per->outfile);
+              errorf(global, "cannot open '%s'", per->outfile);
               result = CURLE_WRITE_ERROR;
               break;
             }
@@ -1231,7 +1231,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
         if(per->uploadfile && !stdin_upload(per->uploadfile)) {
           /*
-           * We have specified a file to upload and it isn't "-".
+           * We have specified a file to upload and it is not "-".
            */
           result = add_file_name_to_url(per->curl, &per->this_url,
                                         per->uploadfile);
@@ -1247,7 +1247,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             if(config->authtype & (1UL << bitcheck++)) {
               authbits++;
               if(authbits > 1) {
-                /* more than one, we're done! */
+                /* more than one, we are done! */
                 break;
               }
             }
@@ -1345,7 +1345,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
 #ifndef DEBUGBUILD
         /* On most modern OSes, exiting works thoroughly,
-           we'll clean everything up via exit(), so don't bother with
+           we will clean everything up via exit(), so do not bother with
            slow cleanups. Crappy ones might need to skip this.
            Note: avoid having this setopt added to the --libcurl source
            output. */
@@ -1748,7 +1748,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
               structblob.len = (size_t)filesize;
               structblob.flags = CURL_BLOB_COPY;
               my_setopt_str(curl, CURLOPT_SSLCERT_BLOB, &structblob);
-              /* if test run well, we are sure we don't reuse
+              /* if test run well, we are sure we do not reuse
                * original mem pointer */
               memset(certdata, 0, (size_t)filesize);
             }
@@ -1791,7 +1791,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
               structblob.len = (size_t)filesize;
               structblob.flags = CURL_BLOB_COPY;
               my_setopt_str(curl, CURLOPT_SSLKEY_BLOB, &structblob);
-              /* if test run well, we are sure we don't reuse
+              /* if test run well, we are sure we do not reuse
                * original mem pointer */
               memset(certdata, 0, (size_t)filesize);
             }
@@ -2382,7 +2382,7 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
     if(!errorbuf)
       return CURLE_OUT_OF_MEMORY;
 
-    /* parallel connect means that we don't set PIPEWAIT since pipewait
+    /* parallel connect means that we do not set PIPEWAIT since pipewait
        will make libcurl prefer multiplexing */
     (void)curl_easy_setopt(per->curl, CURLOPT_PIPEWAIT,
                            global->parallel_connect ? 0L : 1L);
@@ -2525,7 +2525,7 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
         if(tres)
           result = tres;
         if(added_transfers)
-          /* we added new ones, make sure the loop doesn't exit yet */
+          /* we added new ones, make sure the loop does not exit yet */
           still_running = 1;
       }
       if(is_fatal_error(result) || (result && global->fail_early))
@@ -2649,10 +2649,10 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
     return CURLE_FAILED_INIT;
   }
 
-  /* On WIN32 we can't set the path to curl-ca-bundle.crt
-   * at compile time. So we look here for the file in two ways:
+  /* On WIN32 we cannot set the path to curl-ca-bundle.crt at compile time. We
+   * look for the file in two ways:
    * 1: look at the environment variable CURL_CA_BUNDLE for a path
-   * 2: if #1 isn't found, use the windows API function SearchPath()
+   * 2: if #1 is not found, use the windows API function SearchPath()
    *    to find it along the app's path (includes app's dir and CWD)
    *
    * We support the environment variable thing for non-Windows platforms
@@ -2782,7 +2782,7 @@ static CURLcode run_all_transfers(struct GlobalConfig *global,
     long delay;
     CURLcode result2 = post_per_transfer(global, per, result, &retry, &delay);
     if(!result)
-      /* don't overwrite the original error */
+      /* do not overwrite the original error */
       result = result2;
 
     /* Free list of given URLs */

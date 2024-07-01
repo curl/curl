@@ -1071,7 +1071,7 @@ static CURLcode smb_request_state(struct Curl_easy *data, bool *done)
     break;
 
   case SMB_CLOSE:
-    /* We don't care if the close failed, proceed to tree disconnect anyway */
+    /* We do not care if the close failed, proceed to tree disconnect anyway */
     next_state = SMB_TREE_DISCONNECT;
     break;
 

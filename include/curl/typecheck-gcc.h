@@ -34,11 +34,11 @@
  * _curl_easy_setopt_err_sometype below
  *
  * NOTE: We use two nested 'if' statements here instead of the && operator, in
- *       order to work around gcc bug #32061.  It affects only gcc 4.3.x/4.4.x
+ *       order to work around gcc bug #32061. It affects only gcc 4.3.x/4.4.x
  *       when compiling with -Wlogical-op.
  *
- * To add an option that uses the same type as an existing option, you'll just
- * need to extend the appropriate _curl_*_option macro
+ * To add an option that uses the same type as an existing option, you will
+ * just need to extend the appropriate _curl_*_option macro
  */
 #define curl_easy_setopt(handle, option, value)                         \
   __extension__({                                                       \
@@ -245,7 +245,7 @@ CURLWARNING(_curl_easy_getinfo_err_curl_off_t,
 
 /* To add a new option to one of the groups, just add
  *   (option) == CURLOPT_SOMETHING
- * to the or-expression. If the option takes a long or curl_off_t, you don't
+ * to the or-expression. If the option takes a long or curl_off_t, you do not
  * have to do anything
  */
 
@@ -678,7 +678,7 @@ typedef CURLcode (*_curl_ssl_ctx_callback4)(CURL *, const void *,
                                             const void *);
 #ifdef HEADER_SSL_H
 /* hack: if we included OpenSSL's ssl.h, we know about SSL_CTX
- * this will of course break if we're included before OpenSSL headers...
+ * this will of course break if we are included before OpenSSL headers...
  */
 typedef CURLcode (*_curl_ssl_ctx_callback5)(CURL *, SSL_CTX *, void *);
 typedef CURLcode (*_curl_ssl_ctx_callback6)(CURL *, SSL_CTX *, const void *);

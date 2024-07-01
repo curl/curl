@@ -26,7 +26,7 @@
  * Source file for all GnuTLS-specific code for the TLS/SSL layer. No code
  * but vtls.c should ever call or use these functions.
  *
- * Note: don't use the GnuTLS' *_t variable type names in this source code,
+ * Note: do not use the GnuTLS' *_t variable type names in this source code,
  * since they were not present in 1.0.X.
  */
 
@@ -266,7 +266,7 @@ static CURLcode handshake(struct Curl_cfilter *cf,
       return CURLE_OPERATION_TIMEDOUT;
     }
 
-    /* if ssl is expecting something, check if it's available. */
+    /* if ssl is expecting something, check if it is available. */
     if(connssl->io_need) {
       int what;
       curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND)?
@@ -394,7 +394,7 @@ set_ssl_version_min_max(struct Curl_easy *data,
   }
 
   if(!tls13support) {
-    /* If the running GnuTLS doesn't support TLS 1.3, we must not specify a
+    /* If the running GnuTLS does not support TLS 1.3, we must not specify a
        prioritylist involving that since it will make GnuTLS return an en
        error back at us */
     if((ssl_version_max == CURL_SSLVERSION_MAX_TLSv1_3) ||
@@ -884,7 +884,7 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
   tls13support = gnutls_check_version("3.6.5");
 
   /* Ensure +SRP comes at the *end* of all relevant strings so that it can be
-   * removed if a run-time error indicates that SRP is not supported by this
+   * removed if a runtime error indicates that SRP is not supported by this
    * GnuTLS version */
 
   if(config->version == CURL_SSLVERSION_SSLv2 ||
@@ -1158,7 +1158,7 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
   /* Result is returned to caller */
   CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
 
-  /* if a path wasn't specified, don't pin */
+  /* if a path was not specified, do not pin */
   if(!pinnedpubkey)
     return CURLE_OK;
 
@@ -1266,7 +1266,7 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
       }
 #endif
     }
-    infof(data, " common name: WARNING couldn't obtain");
+    infof(data, " common name: WARNING could not obtain");
   }
 
   if(data->set.ssl.certinfo && chainp) {
@@ -1474,7 +1474,7 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
                                            peer->sni ? peer->sni :
                                            peer->hostname);
 #if GNUTLS_VERSION_NUMBER < 0x030306
-  /* Before 3.3.6, gnutls_x509_crt_check_hostname() didn't check IP
+  /* Before 3.3.6, gnutls_x509_crt_check_hostname() did not check IP
      addresses. */
   if(!rc) {
 #ifdef USE_IPV6
@@ -1500,7 +1500,7 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
         size_t certaddrlen = sizeof(certaddr);
         int ret = gnutls_x509_crt_get_subject_alt_name(x509_cert, i, certaddr,
                                                        &certaddrlen, NULL);
-        /* If this happens, it wasn't an IP address. */
+        /* If this happens, it was not an IP address. */
         if(ret == GNUTLS_E_SHORT_MEMORY_BUFFER)
           continue;
         if(ret < 0)
@@ -1518,7 +1518,7 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
   if(!rc) {
     if(config->verifyhost) {
       failf(data, "SSL: certificate subject name (%s) does not match "
-            "target host name '%s'", certname, peer->dispname);
+            "target hostname '%s'", certname, peer->dispname);
       gnutls_x509_crt_deinit(x509_cert);
       return CURLE_PEER_FAILED_VERIFICATION;
     }

@@ -62,7 +62,7 @@ static bool pmatch(const char *hostname, size_t hostlen,
  * We use the matching rule described in RFC6125, section 6.4.3.
  * https://datatracker.ietf.org/doc/html/rfc6125#section-6.4.3
  *
- * In addition: ignore trailing dots in the host names and wildcards, so that
+ * In addition: ignore trailing dots in the hostnames and wildcards, so that
  * the names are used normalized. This is what the browsers do.
  *
  * Do not allow wildcard matching on IP numbers. There are apparently

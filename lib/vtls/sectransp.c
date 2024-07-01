@@ -73,7 +73,7 @@
 #if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
 
 #if MAC_OS_X_VERSION_MAX_ALLOWED < 1050
-#error "The Secure Transport back-end requires Leopard or later."
+#error "The Secure Transport backend requires Leopard or later."
 #endif /* MAC_OS_X_VERSION_MAX_ALLOWED < 1050 */
 
 #define CURL_BUILD_IOS 0
@@ -123,7 +123,7 @@
 #define CURL_SUPPORT_MAC_10_9 0
 
 #else
-#error "The Secure Transport back-end requires iOS or macOS."
+#error "The Secure Transport backend requires iOS or macOS."
 #endif /* (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE)) */
 
 #if CURL_BUILD_MAC
@@ -145,7 +145,8 @@
 #include "memdebug.h"
 
 
-/* From MacTypes.h (which we can't include because it isn't present in iOS: */
+/* From MacTypes.h (which we cannot include because it is not present in
+   iOS: */
 #define ioErr -36
 #define paramErr -50
 
@@ -241,7 +242,7 @@ static const unsigned char rsa2048SpkiHeader[] = {
                                        0xf7, 0x0d, 0x01, 0x01, 0x01, 0x05,
                                        0x00, 0x03, 0x82, 0x01, 0x0f, 0x00};
 #ifdef SECTRANSP_PINNEDPUBKEY_V1
-/* the *new* version doesn't return DER encoded ecdsa certs like the old... */
+/* the *new* version does not return DER encoded ecdsa certs like the old... */
 static const unsigned char ecDsaSecp256r1SpkiHeader[] = {
                                        0x30, 0x59, 0x30, 0x13, 0x06, 0x07,
                                        0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02,
@@ -363,15 +364,15 @@ CF_INLINE void GetDarwinVersionNumber(int *major, int *minor)
 #endif /* CURL_BUILD_MAC */
 
 /* Apple provides a myriad of ways of getting information about a certificate
-   into a string. Some aren't available under iOS or newer cats. So here's
-   a unified function for getting a string describing the certificate that
-   ought to work in all cats starting with Leopard. */
+   into a string. Some are not available under iOS or newer cats. Here's a
+   unified function for getting a string describing the certificate that ought
+   to work in all cats starting with Leopard. */
 CF_INLINE CFStringRef getsubject(SecCertificateRef cert)
 {
   CFStringRef server_cert_summary = CFSTR("(null)");
 
 #if CURL_BUILD_IOS
-  /* iOS: There's only one way to do this. */
+  /* iOS: There is only one way to do this. */
   server_cert_summary = SecCertificateCopySubjectSummary(cert);
 #else
 #if CURL_BUILD_MAC_10_7
@@ -431,7 +432,7 @@ static CURLcode CopyCertSubject(struct Curl_easy *data,
         *certp = cbuf;
     }
     else {
-      failf(data, "SSL: couldn't allocate %zu bytes of memory", cbuf_size);
+      failf(data, "SSL: could not allocate %zu bytes of memory", cbuf_size);
       result = CURLE_OUT_OF_MEMORY;
     }
   }
@@ -443,7 +444,7 @@ static CURLcode CopyCertSubject(struct Curl_easy *data,
 
 #if CURL_SUPPORT_MAC_10_6
 /* The SecKeychainSearch API was deprecated in Lion, and using it will raise
-   deprecation warnings, so let's not compile this unless it's necessary: */
+   deprecation warnings, so let's not compile this unless it is necessary: */
 static OSStatus CopyIdentityWithLabelOldSchool(char *label,
                                                SecIdentityRef *out_c_a_k)
 {
@@ -514,7 +515,7 @@ static OSStatus CopyIdentityWithLabel(char *label,
     /* identity searches need a SecPolicyRef in order to work */
     values[3] = SecPolicyCreateSSL(false, NULL);
     keys[3] = kSecMatchPolicy;
-    /* match the name of the certificate (doesn't work in macOS 10.12.1) */
+    /* match the name of the certificate (does not work in macOS 10.12.1) */
     values[4] = label_cf;
     keys[4] = kSecAttrLabel;
     query_dict = CFDictionaryCreate(NULL, (const void **)keys,
@@ -526,7 +527,7 @@ static OSStatus CopyIdentityWithLabel(char *label,
     /* Do we have a match? */
     status = SecItemCopyMatching(query_dict, (CFTypeRef *) &keys_list);
 
-    /* Because kSecAttrLabel matching doesn't work with kSecClassIdentity,
+    /* Because kSecAttrLabel matching does not work with kSecClassIdentity,
      * we need to find the correct identity ourselves */
     if(status == noErr) {
       keys_list_count = CFArrayGetCount(keys_list);
@@ -638,7 +639,7 @@ static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
   /* On macOS SecPKCS12Import will always add the client certificate to
    * the Keychain.
    *
-   * As this doesn't match iOS, and apps may not want to see their client
+   * As this does not match iOS, and apps may not want to see their client
    * certificate saved in the user's keychain, we use SecItemImport
    * with a NULL keychain to avoid importing it.
    *
@@ -923,7 +924,7 @@ static SSLCipherSuite * sectransp_get_supported_ciphers(SSLContextRef ssl_ctx,
   {
     int maj = 0, min = 0;
     GetDarwinVersionNumber(&maj, &min);
-    /* There's a known bug in early versions of Mountain Lion where ST's ECC
+    /* There is a known bug in early versions of Mountain Lion where ST's ECC
        ciphers (cipher suite 0xC001 through 0xC032) simply do not work.
        Work around the problem here by disabling those ciphers if we are
        running in an affected version of OS X. */
@@ -1062,7 +1063,7 @@ static void sectransp_session_free(void *sessionid, size_t idsize)
 {
   /* ST, as of iOS 5 and Mountain Lion, has no public method of deleting a
      cached session ID inside the Security framework. There is a private
-     function that does this, but I don't want to have to explain to you why I
+     function that does this, but I do not want to have to explain to you why I
      got your application rejected from the App Store due to the use of a
      private API, so the best we can do is free up our own char array that we
      created way back in sectransp_connect_step1... */
@@ -1103,18 +1104,18 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
       CFRelease(backend->ssl_ctx);
     backend->ssl_ctx = SSLCreateContext(NULL, kSSLClientSide, kSSLStreamType);
     if(!backend->ssl_ctx) {
-      failf(data, "SSL: couldn't create a context");
+      failf(data, "SSL: could not create a context");
       return CURLE_OUT_OF_MEMORY;
     }
   }
   else {
-  /* The old ST API does not exist under iOS, so don't compile it: */
+  /* The old ST API does not exist under iOS, so do not compile it: */
 #if CURL_SUPPORT_MAC_10_8
     if(backend->ssl_ctx)
       (void)SSLDisposeContext(backend->ssl_ctx);
     err = SSLNewContext(false, &(backend->ssl_ctx));
     if(err != noErr) {
-      failf(data, "SSL: couldn't create a context: OSStatus %d", err);
+      failf(data, "SSL: could not create a context: OSStatus %d", err);
       return CURLE_OUT_OF_MEMORY;
     }
 #endif /* CURL_SUPPORT_MAC_10_8 */
@@ -1124,13 +1125,13 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
     (void)SSLDisposeContext(backend->ssl_ctx);
   err = SSLNewContext(false, &(backend->ssl_ctx));
   if(err != noErr) {
-    failf(data, "SSL: couldn't create a context: OSStatus %d", err);
+    failf(data, "SSL: could not create a context: OSStatus %d", err);
     return CURLE_OUT_OF_MEMORY;
   }
 #endif /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
   backend->ssl_write_buffered_length = 0UL; /* reset buffered write length */
 
-  /* check to see if we've been told to use an explicit SSL/TLS version */
+  /* check to see if we have been told to use an explicit SSL/TLS version */
 #if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
   if(SSLSetProtocolVersionMax) {
     switch(conn_config->version) {
@@ -1348,11 +1349,11 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
                     cert_showfilename_error);
         break;
       case errSecItemNotFound:
-        failf(data, "SSL: Can't find the certificate \"%s\" and its private "
+        failf(data, "SSL: cannot find the certificate \"%s\" and its private "
                     "key in the Keychain.", cert_showfilename_error);
         break;
       default:
-        failf(data, "SSL: Can't load the certificate \"%s\" and its private "
+        failf(data, "SSL: cannot load the certificate \"%s\" and its private "
                     "key: OSStatus %d", cert_showfilename_error, err);
         break;
       }
@@ -1367,7 +1368,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
 #if CURL_BUILD_MAC_10_6 || CURL_BUILD_IOS
   /* Snow Leopard introduced the SSLSetSessionOption() function, but due to
      a library bug with the way the kSSLSessionOptionBreakOnServerAuth flag
-     works, it doesn't work as expected under Snow Leopard, Lion or
+     works, it does not work as expected under Snow Leopard, Lion or
      Mountain Lion.
      So we need to call SSLSetEnableCertVerify() on those older cats in order
      to disable certificate validation if the user turned that off.
@@ -1419,7 +1420,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
     bool is_cert_file = (!is_cert_data) && is_file(ssl_cafile);
 
     if(!(is_cert_file || is_cert_data)) {
-      failf(data, "SSL: can't load CA certificate file %s",
+      failf(data, "SSL: cannot load CA certificate file %s",
             ssl_cafile ? ssl_cafile : "(blob memory)");
       return CURLE_SSL_CACERT_BADFILE;
     }
@@ -1463,7 +1464,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
 
 #if CURL_BUILD_MAC_10_9 || CURL_BUILD_IOS_7
   /* We want to enable 1/n-1 when using a CBC cipher unless the user
-     specifically doesn't want us doing that: */
+     specifically does not want us doing that: */
   if(SSLSetSessionOption) {
     SSLSetSessionOption(backend->ssl_ctx, kSSLSessionOptionSendOneByteRecord,
                         !ssl_config->enable_beast);
@@ -1472,7 +1473,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
   }
 #endif /* CURL_BUILD_MAC_10_9 || CURL_BUILD_IOS_7 */
 
-  /* Check if there's a cached ID we can/should use here! */
+  /* Check if there is a cached ID we can/should use here! */
   if(ssl_config->primary.sessionid) {
     char *ssl_sessionid;
     size_t ssl_sessionid_len;
@@ -1490,7 +1491,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
       /* Informational message */
       infof(data, "SSL reusing session ID");
     }
-    /* If there isn't one, then let's make one up! This has to be done prior
+    /* If there is not one, then let's make one up! This has to be done prior
        to starting the handshake. */
     else {
       ssl_sessionid =
@@ -1838,7 +1839,7 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
   /* Result is returned to caller */
   CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
 
-  /* if a path wasn't specified, don't pin */
+  /* if a path was not specified, do not pin */
   if(!pinnedpubkey)
     return CURLE_OK;
 
@@ -1960,12 +1961,12 @@ check_handshake:
 
   if(err != noErr) {
     switch(err) {
-      case errSSLWouldBlock:  /* they're not done with us yet */
+      case errSSLWouldBlock:  /* they are not done with us yet */
         connssl->io_need = backend->ssl_direction ?
             CURL_SSL_IO_NEED_SEND : CURL_SSL_IO_NEED_RECV;
         return CURLE_OK;
 
-      /* The below is errSSLServerAuthCompleted; it's not defined in
+      /* The below is errSSLServerAuthCompleted; it is not defined in
         Leopard's headers */
       case -9841:
         if((conn_config->CAfile || conn_config->ca_info_blob) &&
@@ -2075,8 +2076,8 @@ check_handshake:
               "authority");
         break;
 
-      /* This error is raised if the server's cert didn't match the server's
-         host name: */
+      /* This error is raised if the server's cert did not match the server's
+         hostname: */
       case errSSLHostNameMismatch:
         failf(data, "SSL certificate peer verification failed, the "
               "certificate did not match \"%s\"\n", connssl->peer.dispname);
@@ -2178,7 +2179,7 @@ check_handshake:
   }
   else {
     char cipher_str[64];
-    /* we have been connected fine, we're not waiting for anything else. */
+    /* we have been connected fine, we are not waiting for anything else. */
     connssl->connecting_state = ssl_connect_3;
 
 #ifdef SECTRANSP_PINNEDPUBKEY
@@ -2255,7 +2256,7 @@ check_handshake:
                             BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
 
         /* chosenProtocol is a reference to the string within alpnArr
-           and doesn't need to be freed separately */
+           and does not need to be freed separately */
         if(alpnArr)
           CFRelease(alpnArr);
       }
@@ -2357,7 +2358,7 @@ static CURLcode collect_server_cert(struct Curl_cfilter *cf,
   /* SSLCopyPeerCertificates() is deprecated as of Mountain Lion.
      The function SecTrustGetCertificateAtIndex() is officially present
      in Lion, but it is unfortunately also present in Snow Leopard as
-     private API and doesn't work as expected. So we have to look for
+     private API and does not work as expected. So we have to look for
      a different symbol to make sure this code is only executed under
      Lion or later. */
   if(SecTrustCopyPublicKey) {
@@ -2446,7 +2447,7 @@ sectransp_connect_common(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
   if(ssl_connect_1 == connssl->connecting_state) {
-    /* Find out how much more time we're allowed */
+    /* Find out how much more time we are allowed */
     const timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
 
     if(timeout_ms < 0) {
@@ -2471,7 +2472,7 @@ sectransp_connect_common(struct Curl_cfilter *cf, struct Curl_easy *data,
       return CURLE_OPERATION_TIMEDOUT;
     }
 
-    /* if ssl is expecting something, check if it's available. */
+    /* if ssl is expecting something, check if it is available. */
     if(connssl->io_need) {
 
       curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND)?
@@ -2699,7 +2700,7 @@ static bool sectransp_data_pending(struct Curl_cfilter *cf,
 static CURLcode sectransp_random(struct Curl_easy *data UNUSED_PARAM,
                                  unsigned char *entropy, size_t length)
 {
-  /* arc4random_buf() isn't available on cats older than Lion, so let's
+  /* arc4random_buf() is not available on cats older than Lion, so let's
      do this manually for the benefit of the older cats. */
   size_t i;
   u_int32_t random_number = 0;
@@ -2757,7 +2758,7 @@ static ssize_t sectransp_send(struct Curl_cfilter *cf,
 
      Now, one could interpret that as "written to the socket," but actually,
      it returns the amount of data that was written to a buffer internal to
-     the SSLContextRef instead. So it's possible for SSLWrite() to return
+     the SSLContextRef instead. So it is possible for SSLWrite() to return
      errSSLWouldBlock and a number of bytes "written" because those bytes were
      encrypted and written to a buffer, not to the socket.
 
@@ -2770,7 +2771,7 @@ static ssize_t sectransp_send(struct Curl_cfilter *cf,
     err = SSLWrite(backend->ssl_ctx, NULL, 0UL, &processed);
     switch(err) {
       case noErr:
-        /* processed is always going to be 0 because we didn't write to
+        /* processed is always going to be 0 because we did not write to
            the buffer, so return how much was written to the socket */
         processed = backend->ssl_write_buffered_length;
         backend->ssl_write_buffered_length = 0UL;
@@ -2785,7 +2786,7 @@ static ssize_t sectransp_send(struct Curl_cfilter *cf,
     }
   }
   else {
-    /* We've got new data to write: */
+    /* We have got new data to write: */
     err = SSLWrite(backend->ssl_ctx, mem, len, &processed);
     if(err != noErr) {
       switch(err) {
@@ -2842,7 +2843,7 @@ again:
         *curlcode = CURLE_OK;
         return 0;
 
-        /* The below is errSSLPeerAuthCompleted; it's not defined in
+        /* The below is errSSLPeerAuthCompleted; it is not defined in
            Leopard's headers */
       case -9841:
         if((conn_config->CAfile || conn_config->ca_info_blob) &&

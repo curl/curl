@@ -71,7 +71,7 @@
 /* The pool keeps spares around and half of a full stream window
  * seems good. More does not seem to improve performance.
  * The benefit of the pool is that stream buffer to not keep
- * spares. So memory consumption goes down when streams run empty,
+ * spares. Memory consumption goes down when streams run empty,
  * have a large upload done, etc. */
 #define H3_STREAM_POOL_SPARES \
           (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE ) / 2
@@ -516,7 +516,7 @@ static CURLcode cf_osslq_ssl_err(struct Curl_cfilter *cf,
 
   /* detail is already set to the SSL error above */
 
-  /* If we e.g. use SSLv2 request-method and the server doesn't like us
+  /* If we e.g. use SSLv2 request-method and the server does not like us
    * (RST connection, etc.), OpenSSL gives no explanation whatsoever and
    * the SO_ERROR is also lost.
    */
@@ -905,7 +905,7 @@ static int cb_h3_end_headers(nghttp3_conn *conn, int64_t sid,
 
   if(!stream)
     return 0;
-  /* add a CRLF only if we've received some headers */
+  /* add a CRLF only if we have received some headers */
   result = write_resp_raw(cf, data, "\r\n", 2, FALSE);
   if(result) {
     return -1;
@@ -1835,7 +1835,7 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
   *err = cf_osslq_stream_open(&stream->s, ctx->tls.ossl.ssl, 0,
                               &ctx->stream_bufcp, data);
   if(*err) {
-    failf(data, "can't get bidi streams");
+    failf(data, "cannot get bidi streams");
     *err = CURLE_SEND_ERROR;
     goto out;
   }
@@ -2218,8 +2218,8 @@ static bool cf_osslq_conn_is_alive(struct Curl_cfilter *cf,
   alive = TRUE;
   if(*input_pending) {
     CURLcode result;
-    /* This happens before we've sent off a request and the connection is
-       not in use by any other transfer, there shouldn't be any data here,
+    /* This happens before we have sent off a request and the connection is
+       not in use by any other transfer, there should not be any data here,
        only "protocol frames" */
     *input_pending = FALSE;
     result = cf_progress_ingress(cf, data);

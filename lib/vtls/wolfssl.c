@@ -632,7 +632,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  /* check to see if we've been told to use an explicit SSL/TLS version */
+  /* check to see if we have been told to use an explicit SSL/TLS version */
   switch(conn_config->version) {
   case CURL_SSLVERSION_DEFAULT:
   case CURL_SSLVERSION_TLSv1:
@@ -688,7 +688,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
   if(!req_method) {
-    failf(data, "SSL: couldn't create a method");
+    failf(data, "SSL: could not create a method");
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -697,7 +697,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   backend->ctx = wolfSSL_CTX_new(req_method);
 
   if(!backend->ctx) {
-    failf(data, "SSL: couldn't create a context");
+    failf(data, "SSL: could not create a context");
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -718,7 +718,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
        && (wolfSSL_CTX_SetMinVersion(backend->ctx, WOLFSSL_TLSV1_3) != 1)
 #endif
       ) {
-      failf(data, "SSL: couldn't set the minimum protocol version");
+      failf(data, "SSL: could not set the minimum protocol version");
       return CURLE_SSL_CONNECT_ERROR;
     }
 #endif
@@ -830,7 +830,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 #ifdef NO_FILESYSTEM
   else if(conn_config->verifypeer) {
-    failf(data, "SSL: Certificates can't be loaded because wolfSSL was built"
+    failf(data, "SSL: Certificates cannot be loaded because wolfSSL was built"
           " with \"no filesystem\". Either disable peer verification"
           " (insecure) or if you are building an application with libcurl you"
           " can load certificates via CURLOPT_SSL_CTX_FUNCTION.");
@@ -843,7 +843,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     wolfSSL_free(backend->handle);
   backend->handle = wolfSSL_new(backend->ctx);
   if(!backend->handle) {
-    failf(data, "SSL: couldn't create a handle");
+    failf(data, "SSL: could not create a handle");
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -890,7 +890,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 #endif /* HAVE_SECURE_RENEGOTIATION */
 
-  /* Check if there's a cached ID we can/should use here! */
+  /* Check if there is a cached ID we can/should use here! */
   if(ssl_config->primary.sessionid) {
     void *ssl_sessionid = NULL;
 
@@ -900,7 +900,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       /* we got a session id, use it! */
       if(!SSL_set_session(backend->handle, ssl_sessionid)) {
         Curl_ssl_delsessionid(data, ssl_sessionid);
-        infof(data, "Can't use session ID, going on without");
+        infof(data, "cannot use session ID, going on without");
       }
       else
         infof(data, "SSL reusing session ID");
@@ -977,7 +977,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
     if(trying_ech_now
        && SSL_set_min_proto_version(backend->handle, TLS1_3_VERSION) != 1) {
-      infof(data, "ECH: Can't force TLSv1.3 [ERROR]");
+      infof(data, "ECH: cannot force TLSv1.3 [ERROR]");
       return CURLE_SSL_CONNECT_ERROR;
     }
 
@@ -1141,7 +1141,7 @@ wolfssl_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
       word32 echConfigsLen = 1000;
       int rv = 0;
 
-      /* this currently doesn't produce the retry_configs */
+      /* this currently does not produce the retry_configs */
       rv = wolfSSL_GetEchConfigs(backend->handle, echConfigs,
                                  &echConfigsLen);
       if(rv != WOLFSSL_SUCCESS) {
@@ -1324,7 +1324,7 @@ static ssize_t wolfssl_send(struct Curl_cfilter *cf,
     switch(err) {
     case SSL_ERROR_WANT_READ:
     case SSL_ERROR_WANT_WRITE:
-      /* there's data pending, re-invoke SSL_write() */
+      /* there is data pending, re-invoke SSL_write() */
       CURL_TRC_CF(data, cf, "wolfssl_send(len=%zu) -> AGAIN", len);
       *curlcode = CURLE_AGAIN;
       return -1;
@@ -1489,7 +1489,7 @@ static ssize_t wolfssl_recv(struct Curl_cfilter *cf,
     case SSL_ERROR_NONE:
     case SSL_ERROR_WANT_READ:
     case SSL_ERROR_WANT_WRITE:
-      /* there's data pending, re-invoke wolfSSL_read() */
+      /* there is data pending, re-invoke wolfSSL_read() */
       CURL_TRC_CF(data, cf, "wolfssl_recv(len=%zu) -> AGAIN", blen);
       *curlcode = CURLE_AGAIN;
       return -1;
@@ -1578,7 +1578,7 @@ wolfssl_connect_common(struct Curl_cfilter *cf,
   }
 
   if(ssl_connect_1 == connssl->connecting_state) {
-    /* Find out how much more time we're allowed */
+    /* Find out how much more time we are allowed */
     const timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
 
     if(timeout_ms < 0) {
@@ -1603,7 +1603,7 @@ wolfssl_connect_common(struct Curl_cfilter *cf,
       return CURLE_OPERATION_TIMEDOUT;
     }
 
-    /* if ssl is expecting something, check if it's available. */
+    /* if ssl is expecting something, check if it is available. */
     if(connssl->io_need) {
 
       curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND)?

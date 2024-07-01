@@ -328,7 +328,7 @@ bool Curl_sasl_can_authenticate(struct SASL *sasl, struct Curl_easy *data)
   if(data->state.aptr.user)
     return TRUE;
 
-  /* EXTERNAL can authenticate without a user name and/or password */
+  /* EXTERNAL can authenticate without a username and/or password */
   if(sasl->authmechs & sasl->prefmech & SASL_MECH_EXTERNAL)
     return TRUE;
 

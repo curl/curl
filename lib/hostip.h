@@ -80,7 +80,7 @@ struct Curl_https_rrinfo {
   char *alpns; /* keytag = 1 */
   bool no_def_alpn; /* keytag = 2 */
   /*
-   * we don't support ports (keytag = 3) as we don't support
+   * we do not support ports (keytag = 3) as we do not support
    * port-switching yet
    */
   unsigned char *ipv4hints; /* keytag = 4 */
@@ -97,7 +97,7 @@ struct Curl_dns_entry {
 #ifdef USE_HTTPSRR
   struct Curl_https_rrinfo *hinfo;
 #endif
-  /* timestamp == 0 -- permanent CURLOPT_RESOLVE entry (doesn't time out) */
+  /* timestamp == 0 -- permanent CURLOPT_RESOLVE entry (does not time out) */
   time_t timestamp;
   /* use-counter, use Curl_resolv_unlock to release reference */
   long inuse;
@@ -114,7 +114,7 @@ bool Curl_host_is_ipnum(const char *hostname);
  * and port.
  *
  * The returned data *MUST* be "unlocked" with Curl_resolv_unlock() after
- * use, or we'll leak memory!
+ * use, or we will leak memory!
  */
 /* return codes */
 enum resolve_t {
@@ -200,7 +200,7 @@ void Curl_printable_address(const struct Curl_addrinfo *ip,
  * Returns the Curl_dns_entry entry pointer or NULL if not in the cache.
  *
  * The returned data *MUST* be "unlocked" with Curl_resolv_unlock() after
- * use, or we'll leak memory!
+ * use, or we will leak memory!
  */
 struct Curl_dns_entry *
 Curl_fetch_addr(struct Curl_easy *data,

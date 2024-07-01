@@ -49,9 +49,10 @@ char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w);
  * Allocated memory should be free'd with curlx_unicodefree().
  *
  * Note: Because these are curlx functions their memory usage is not tracked
- * by the curl memory tracker memdebug. You'll notice that curlx function-like
- * macros call free and strdup in parentheses, eg (strdup)(ptr), and that's to
- * ensure that the curl memdebug override macros do not replace them.
+ * by the curl memory tracker memdebug. you will notice that curlx
+ * function-like macros call free and strdup in parentheses, eg (strdup)(ptr),
+ * and that is to ensure that the curl memdebug override macros do not replace
+ * them.
  */
 
 #if defined(UNICODE) && defined(_WIN32)
