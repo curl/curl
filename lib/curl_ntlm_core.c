@@ -158,7 +158,7 @@ static void setup_des_key(const unsigned char *key_56,
 {
   DES_cblock key;
 
-  /* Expand the 56-bit key to 64-bits */
+  /* Expand the 56-bit key to 64 bits */
   extend_key_56_to_64(key_56, (char *) &key);
 
   /* Set the key parity to odd */
@@ -175,7 +175,7 @@ static void setup_des_key(const unsigned char *key_56,
 {
   char key[8];
 
-  /* Expand the 56-bit key to 64-bits */
+  /* Expand the 56-bit key to 64 bits */
   extend_key_56_to_64(key_56, key);
 
   /* Set the key parity to odd */
@@ -193,7 +193,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   mbedtls_des_context ctx;
   char key[8];
 
-  /* Expand the 56-bit key to 64-bits */
+  /* Expand the 56-bit key to 64 bits */
   extend_key_56_to_64(key_56, key);
 
   /* Set the key parity to odd */
@@ -214,7 +214,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   size_t out_len;
   CCCryptorStatus err;
 
-  /* Expand the 56-bit key to 64-bits */
+  /* Expand the 56-bit key to 64 bits */
   extend_key_56_to_64(key_56, key);
 
   /* Set the key parity to odd */
@@ -240,7 +240,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   ctl.Func_ID = ENCRYPT_ONLY;
   ctl.Data_Len = sizeof(key);
 
-  /* Expand the 56-bit key to 64-bits */
+  /* Expand the 56-bit key to 64 bits */
   extend_key_56_to_64(key_56, ctl.Crypto_Key);
 
   /* Set the key parity to odd */
@@ -278,7 +278,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   blob.hdr.aiKeyAlg = CALG_DES;
   blob.len = sizeof(blob.key);
 
-  /* Expand the 56-bit key to 64-bits */
+  /* Expand the 56-bit key to 64 bits */
   extend_key_56_to_64(key_56, blob.key);
 
   /* Set the key parity to odd */
