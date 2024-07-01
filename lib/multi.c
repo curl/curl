@@ -1144,7 +1144,9 @@ static void multi_getsock(struct Curl_easy *data,
 
   case MSTATE_RESOLVING:
     Curl_pollset_add_socks(data, ps, Curl_resolv_getsock);
-    /* connection filters are not involved in this phase */
+    /* connection filters are not involved in this phase. It's ok if we get no
+     * sockets to wait for. Resolving can wake up from other sources. */
+    expect_sockets = FALSE;
     break;
 
   case MSTATE_CONNECTING:
