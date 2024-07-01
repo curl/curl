@@ -189,8 +189,8 @@ manner.
 ## CURLU_DEFAULT_SCHEME
 
 If set, allows the URL to be set without a scheme and then sets that to the
-default scheme: HTTPS. Overrides the *CURLU_GUESS_SCHEME* option if both
-are set.
+default scheme: HTTPS. Overrides the *CURLU_GUESS_SCHEME* option if both are
+set.
 
 ## CURLU_GUESS_SCHEME
 
@@ -199,6 +199,14 @@ which scheme that was intended based on the hostname. If the outermost
 subdomain name matches DICT, FTP, IMAP, LDAP, POP3 or SMTP then that scheme is
 used, otherwise it picks HTTP. Conflicts with the *CURLU_DEFAULT_SCHEME*
 option which takes precedence if both are set.
+
+If guessing is not allowed and there is no default scheme set, trying to parse
+a URL without a scheme returns error.
+
+If the scheme ends up set as a result of guessing, i.e. it is not actually
+present in the parsed URL, it can later be figured out by using the
+**CURLU_NO_GUESS_SCHEME** flag when subsequently getting the URL or the scheme
+with curl_url_get(3).
 
 ## CURLU_NO_AUTHORITY
 
