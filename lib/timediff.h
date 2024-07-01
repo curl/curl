@@ -26,7 +26,7 @@
 
 #include "curl_setup.h"
 
-/* Use a larger type even for 32 bit time_t systems so that we can keep
+/* Use a larger type even for 32-bit time_t systems so that we can keep
    microsecond accuracy in it */
 typedef curl_off_t timediff_t;
 #define CURL_FORMAT_TIMEDIFF_T CURL_FORMAT_CURL_OFF_T

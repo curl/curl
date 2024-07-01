@@ -521,13 +521,13 @@ static int parsedate(const char *date, time_t *output)
 #if (SIZEOF_TIME_T < 5)
 
 #ifdef HAVE_TIME_T_UNSIGNED
-  /* an unsigned 32 bit time_t can only hold dates to 2106 */
+  /* an unsigned 32-bit time_t can only hold dates to 2106 */
   if(yearnum > 2105) {
     *output = TIME_T_MAX;
     return PARSEDATE_LATER;
   }
 #else
-  /* a signed 32 bit time_t can only hold dates to the beginning of 2038 */
+  /* a signed 32-bit time_t can only hold dates to the beginning of 2038 */
   if(yearnum > 2037) {
     *output = TIME_T_MAX;
     return PARSEDATE_LATER;
@@ -549,7 +549,7 @@ static int parsedate(const char *date, time_t *output)
     return PARSEDATE_FAIL; /* clearly an illegal date */
 
   /* time2epoch() returns a time_t. time_t is often 32 bits, sometimes even on
-     architectures that feature 64 bit 'long' but ultimately time_t is the
+     architectures that feature a 64 bits 'long' but ultimately time_t is the
      correct data type to use.
   */
   t = time2epoch(secnum, minnum, hournum, mdaynum, monnum, yearnum);

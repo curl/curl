@@ -2667,7 +2667,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /*
      * Use this scope id when using IPv6
      * We always get longs when passed plain numericals so we should check
-     * that the value fits into an unsigned 32 bit integer.
+     * that the value fits into an unsigned 32-bit integer.
      */
     uarg = va_arg(param, unsigned long);
 #if SIZEOF_LONG > 4

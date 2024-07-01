@@ -33,7 +33,7 @@ struct connectdata;
 /*
  * The longest possible hexadecimal number we support in a chunked transfer.
  * Neither RFC2616 nor the later HTTP specs define a maximum chunk size.
- * For 64 bit curl_off_t we support 16 digits. For 32 bit, 8 digits.
+ * For 64-bit curl_off_t we support 16 digits. For 32-bit, 8 digits.
  */
 #define CHUNK_MAXNUM_LEN (SIZEOF_CURL_OFF_T * 2)
 

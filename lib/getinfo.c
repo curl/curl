@@ -277,8 +277,8 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
   case CURLINFO_LASTSOCKET:
     sockfd = Curl_getconnectinfo(data, NULL);
 
-    /* note: this is not a good conversion for systems with 64 bit sockets and
-       32 bit longs */
+    /* note: this is not a good conversion for systems with 64-bit sockets and
+       32-bit longs */
     if(sockfd != CURL_SOCKET_BAD)
       *param_longp = (long)sockfd;
     else

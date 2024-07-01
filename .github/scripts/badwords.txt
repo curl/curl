@@ -58,3 +58,9 @@ doesn't:does not
 won't:will not
 couldn't:could not
 \bwill\b:rewrite to present tense
+32bit=32-bit
+64bit=64-bit
+32 bit\b=32-bit
+64 bit\b=64-bit
+64-bits:64 bits or 64-bit
+32-bits:32 bits or 32-bit

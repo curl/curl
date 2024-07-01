@@ -29,7 +29,7 @@ May 2025 are: BearSSL and Secure Transport.
  - axTLS
  - PolarSSL
  - NPN
- - Support for systems without 64 bit data types
+ - Support for systems without 64-bit data types
  - NSS
  - gskit
  - mingw v1
