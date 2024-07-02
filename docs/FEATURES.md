@@ -105,7 +105,7 @@ SPDX-License-Identifier: curl
  - "Transfer-Encoding: chunked" support in uploads
  - HSTS
  - alt-svc
- - etags
+ - ETags
  - HTTP/1.1 trailers, both sending and getting
 
 ## HTTPS
