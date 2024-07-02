@@ -234,7 +234,10 @@ jobs:
         timeout-minutes: 30
         shell: msys2 {0}
         run: |
-          export TFLAGS='-j14 !TFTP !MQTT !WebSockets ${{ matrix.tflags }}'
+          export TFLAGS='-j14 ${{ matrix.tflags }}'
+          if [ '${{ matrix.sys }}' != 'msys' ]; then
+            TFLAGS+=' !TFTP !MQTT !WebSockets !SMTP'
+          fi
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
@@ -300,7 +303,10 @@ jobs:
         timeout-minutes: 40
         shell: msys2 {0}
         run: |
-          export TFLAGS='-j14 !TFTP !MQTT !WebSockets ${{ matrix.tflags }}'
+          export TFLAGS='-j14 ${{ matrix.tflags }}'
+          if [ '${{ matrix.sys }}' != 'msys' ]; then
+            TFLAGS+=' !TFTP !MQTT !WebSockets !SMTP'
+          fi
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
@@ -326,7 +332,7 @@ jobs:
             dir: 'mingw64'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/7.3.0/threads-win32/seh/x86_64-7.3.0-release-win32-seh-rt_v5-rev0.7z'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON'
-            type: 'Debug'
+            type: 'Release'
             tflags: '~2301 ~2302 ~3027'
           - build: 'cmake'
             env: '6.4.0-i686'
@@ -416,6 +422,8 @@ jobs:
     name: 'msvc (${{ matrix.arch }}, ${{ matrix.plat }}, ${{ matrix.name }})'
     runs-on: windows-latest
     timeout-minutes: 30
+    env:
+      VCPKG_DISABLE_METRICS: '1'
     strategy:
       matrix:
         include:
@@ -458,7 +466,7 @@ jobs:
         shell: bash
         run: |
           git clone --quiet --depth 1 https://github.com/microsoft/vcpkg/
-          vcpkg/bootstrap-vcpkg.sh
+          vcpkg/bootstrap-vcpkg.sh -disableMetrics
 
       - name: 'vcpkg build'
         timeout-minutes: 10
@@ -550,7 +558,7 @@ jobs:
         timeout-minutes: 30
         shell: bash
         run: |
-          export TFLAGS='-j14 !TFTP !MQTT !WebSockets ${{ matrix.tflags }}'
+          export TFLAGS='-j14 !TFTP !MQTT !WebSockets !SMTP ${{ matrix.tflags }}'
           export VCPKG_ROOT="$PWD/vcpkg"
           export VCPKG_TRIPLET_DIR="$VCPKG_ROOT/installed/${{ matrix.arch }}-${{ matrix.plat }}"
           export debug_lib="$VCPKG_TRIPLET_DIR/debug/bin"
