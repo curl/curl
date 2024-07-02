@@ -16,7 +16,7 @@ Protocol:
 
 # NAME
 
-curl_easy_perform - perform a blocking file transfer
+curl_easy_perform - perform a blocking network transfer
 
 # SYNOPSIS
 
