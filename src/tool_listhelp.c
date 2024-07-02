@@ -29,7 +29,7 @@
  * This source file is generated with the following command in an autotools
  * build:
  *
- * "make listhelp"
+ * "make -C docs/cmdline-opts/ listhelp"
  */
 
 const struct helptxt helptext[] = {
