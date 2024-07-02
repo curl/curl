@@ -45,6 +45,11 @@ TARGETS := curl$(BIN_EXT)
 
 CURL_CFILES += $(notdir $(CURLX_CFILES))
 
+ifneq ($(CURL_CA_EMBED),)
+CPPFLAGS += -DCURL_CA_EMBED
+CURL_CFILES += tool_ca_embed.c
+endif
+
 curl_OBJECTS := $(patsubst %.c,$(OBJ_DIR)/%.o,$(strip $(CURL_CFILES)))
 ifdef MAP
 CURL_MAP := curl.map
@@ -57,8 +62,9 @@ TOCLEAN := $(curl_OBJECTS)
 
 ### Rules
 
-ifneq ($(wildcard tool_hugehelp.c.cvs),)
 PERL  ?= perl
+
+ifneq ($(wildcard tool_hugehelp.c.cvs),)
 NROFF ?= groff
 
 TOCLEAN += tool_hugehelp.c
@@ -82,6 +88,12 @@ tool_hugehelp.c:
 	@echo Creating $@
 	@$(call COPY, $@.cvs, $@)
 endif
+endif
+
+ifneq ($(CURL_CA_EMBED),)
+TOCLEAN += tool_ca_embed.c
+tool_ca_embed.c: mk-file-embed.pl
+	$(PERL) mk-file-embed.pl --var curl_ca_embed < $(CURL_CA_EMBED) > $@
 endif
 
 $(TARGETS): $(curl_OBJECTS) $(PROOT)/lib/libcurl.a

@@ -10,6 +10,7 @@ Multi: boolean
 See-also:
   - cacert
   - capath
+  - dump-ca-embed
   - insecure
 Example:
   - --proxy-ca-native $URL

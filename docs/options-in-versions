@@ -54,6 +54,7 @@
 --doh-cert-status                    7.76.0
 --doh-insecure                       7.76.0
 --doh-url                            7.62.0
+--dump-ca-embed                      8.10.0
 --dump-header (-D)                   5.7
 --ech                                8.8.0
 --egd-file                           7.7

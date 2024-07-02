@@ -88,7 +88,7 @@ CLEANFILES = tool_hugehelp.c
 # embedded text.
 NROFF=env LC_ALL=C @NROFF@ @MANOPT@ 2>/dev/null # figured out by the configure script
 
-EXTRA_DIST = mkhelp.pl \
+EXTRA_DIST = mk-file-embed.pl mkhelp.pl \
  Makefile.mk curl.rc Makefile.inc CMakeLists.txt .checksrc
 
 # Use absolute directory to disable VPATH
@@ -135,11 +135,25 @@ $(HUGE):
 	echo '#include "tool_hugehelp.h"' >> $(HUGE)
 endif
 
-# ignore tool_hugehelp.c since it is generated source code and it plays
-# by slightly different rules!
+CA_EMBED_CSOURCE = tool_ca_embed.c
+CURL_CFILES += $(CA_EMBED_CSOURCE)
+CLEANFILES += $(CA_EMBED_CSOURCE)
+if CURL_CA_EMBED_SET
+AM_CPPFLAGS += -DCURL_CA_EMBED
+MK_FILE_EMBED = $(top_srcdir)/src/mk-file-embed.pl
+$(CA_EMBED_CSOURCE): $(MK_FILE_EMBED)
+	$(PERL) $(MK_FILE_EMBED) --var curl_ca_embed < $(CURL_CA_EMBED) > $(CA_EMBED_CSOURCE)
+else
+$(CA_EMBED_CSOURCE):
+	echo 'extern const void *curl_ca_embed; const void *curl_ca_embed;' > $(CA_EMBED_CSOURCE)
+endif
+
+# ignore generated C files since they play by slightly different rules!
 checksrc:
 	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
-	-W$(srcdir)/tool_hugehelp.c $(srcdir)/*.[ch])
+	  -W$(srcdir)/$(HUGE) \
+	  -W$(srcdir)/$(CA_EMBED_CSOURCE) \
+	  $(srcdir)/*.[ch])
 
 if DEBUGBUILD
 # for debug builds, we scan the sources on all regular make invokes

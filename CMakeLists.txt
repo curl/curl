@@ -1100,6 +1100,8 @@ set(CURL_CA_FALLBACK OFF CACHE BOOL
     "Set ON to use built-in CA store of TLS backend. Defaults to OFF")
 set(CURL_CA_PATH "auto" CACHE STRING
     "Location of default CA path. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
+set(CURL_CA_EMBED "" CACHE STRING
+    "Path to the CA bundle to embed into the curl tool.")
 
 if("${CURL_CA_BUNDLE}" STREQUAL "")
   message(FATAL_ERROR "Invalid value of CURL_CA_BUNDLE. Use 'none', 'auto' or file path.")
@@ -1170,6 +1172,15 @@ if(CURL_CA_PATH_SET AND
   message(STATUS
           "CA path only supported by OpenSSL, wolfSSL, GnuTLS or mbedTLS. "
           "Set CURL_CA_PATH=none or enable one of those TLS backends.")
+endif()
+
+set(CURL_CA_EMBED_SET FALSE)
+if(BUILD_CURL_EXE AND NOT CURL_CA_EMBED STREQUAL "")
+  if(EXISTS "${CURL_CA_EMBED}")
+    set(CURL_CA_EMBED_SET TRUE)
+  else()
+    message(FATAL_ERROR "CA bundle to embed is missing: '${CURL_CA_EMBED}'")
+  endif()
 endif()
 
 # Check for header files
@@ -1742,6 +1753,7 @@ if(NOT CURL_DISABLE_INSTALL)
                           (USE_THREADS_POSIX AND HAVE_PTHREAD_H) OR
                           (WIN32 AND HAVE_WIN32_WINNT GREATER_EQUAL 0x600))
   _add_if("PSL"           USE_LIBPSL)
+  _add_if("CAcert"        CURL_CA_EMBED_SET)
   if(_items)
     if(NOT CMAKE_VERSION VERSION_LESS 3.13)
       list(SORT _items CASE INSENSITIVE)
