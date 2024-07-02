@@ -48,7 +48,6 @@ CURL_CFILES += $(notdir $(CURLX_CFILES))
 ifneq ($(CURL_CA_EMBED),)
 CPPFLAGS += -DCURL_CA_EMBED
 CURL_CFILES += tool_ca_embed.c
-TOCLEAN += tool_ca_embed.c
 endif
 
 curl_OBJECTS := $(patsubst %.c,$(OBJ_DIR)/%.o,$(strip $(CURL_CFILES)))
@@ -92,6 +91,7 @@ endif
 endif
 
 ifneq ($(CURL_CA_EMBED),)
+TOCLEAN += tool_ca_embed.c
 tool_ca_embed.c: mk-file-embed.pl
 	$(PERL) mk-file-embed.pl --var curl_ca_embed < $(CURL_CA_EMBED) > $@
 endif
