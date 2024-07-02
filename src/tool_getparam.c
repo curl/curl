@@ -286,6 +286,7 @@ typedef enum {
   C_SESSIONID,
   C_SHOW_ERROR,
   C_SILENT,
+  C_SKIP_EXITING,
   C_SOCKS4,
   C_SOCKS4A,
   C_SOCKS5,
@@ -573,6 +574,7 @@ static const struct LongShort aliases[]= {
   {"sessionid",                  ARG_BOOL, ' ', C_SESSIONID},
   {"show-error",                 ARG_BOOL, 'S', C_SHOW_ERROR},
   {"silent",                     ARG_BOOL, 's', C_SILENT},
+  {"skip-existing",              ARG_BOOL, ' ', C_SKIP_EXITING},
   {"socks4",                     ARG_STRG, ' ', C_SOCKS4},
   {"socks4a",                    ARG_STRG, ' ', C_SOCKS4A},
   {"socks5",                     ARG_STRG, ' ', C_SOCKS5},
@@ -2678,6 +2680,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_SILENT: /* --silent */
       global->silent = toggle;
+      break;
+    case C_SKIP_EXITING: /* --skip-existing */
+      config->skip_existing = toggle;
       break;
     case C_SHOW_ERROR: /* --show-error */
       global->showerror = toggle;

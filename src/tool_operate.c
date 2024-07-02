@@ -456,6 +456,9 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
   if(per->infdopen)
     close(per->infd);
 
+  if(per->skip)
+    goto skip;
+
 #ifdef __VMS
   if(is_vms_shell()) {
     /* VMS DCL shell behavior */
@@ -727,7 +730,7 @@ noretry:
     curl_easy_getinfo(curl, CURLINFO_FILETIME_T, &filetime);
     setfiletime(filetime, outs->filename, global);
   }
-
+skip:
   /* Write the --write-out data before cleanup but after result is final */
   if(config->writeout)
     ourWriteOut(config, per, result);
@@ -1184,6 +1187,15 @@ static CURLcode single_transfer(struct GlobalConfig *global,
               break;
           }
 
+          if(per->outfile && config->skip_existing) {
+            struct_stat fileinfo;
+            if(!stat(per->outfile, &fileinfo)) {
+              /* file is present */
+              notef(global, "skips transfer, \"%s\" exists locally",
+                    per->outfile);
+              per->skip = TRUE;
+            }
+          }
           if((urlnode->flags & GETOUT_USEREMOTE)
              && config->content_disposition) {
             /* Our header callback MIGHT set the filename */
@@ -2568,25 +2580,29 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
     long delay_ms;
     bool bailout = FALSE;
     struct timeval start;
-    result = pre_transfer(global, per);
-    if(result)
-      break;
 
-    if(global->libcurl) {
-      result = easysrc_perform();
+    if(!per->skip) {
+      result = pre_transfer(global, per);
       if(result)
         break;
-    }
-    start = tvnow();
-#ifdef DEBUGBUILD
-    if(getenv("CURL_FORBID_REUSE"))
-      (void)curl_easy_setopt(per->curl, CURLOPT_FORBID_REUSE, 1L);
 
-    if(global->test_event_based)
-      result = curl_easy_perform_ev(per->curl);
-    else
+      if(global->libcurl) {
+        result = easysrc_perform();
+        if(result)
+          break;
+      }
+
+      start = tvnow();
+#ifdef DEBUGBUILD
+      if(getenv("CURL_FORBID_REUSE"))
+        (void)curl_easy_setopt(per->curl, CURLOPT_FORBID_REUSE, 1L);
+
+      if(global->test_event_based)
+        result = curl_easy_perform_ev(per->curl);
+      else
 #endif
-      result = curl_easy_perform(per->curl);
+        result = curl_easy_perform(per->curl);
+    }
 
     returncode = post_per_transfer(global, per, result, &retry, &delay_ms);
     if(retry) {

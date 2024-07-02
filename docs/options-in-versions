@@ -217,6 +217,7 @@
 --service-name                       7.43.0
 --show-error (-S)                    5.9
 --silent (-s)                        4.0
+--skip-existing                      8.10.0
 --socks4                             7.15.2
 --socks4a                            7.18.0
 --socks5                             7.18.0
