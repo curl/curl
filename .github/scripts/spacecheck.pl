@@ -30,7 +30,7 @@ my @tabs = (
     "^m4/zz40-xc-ovr.m4",
     "Makefile\\.[a-z]+\$",
     "/mkfile",
-    "\\.(bat|cmd|sln|vc)\$",
+    "\\.(bat|sln|vc)\$",
     "^tests/certs/.+\\.der\$",
     "^tests/data/test",
 );
@@ -43,7 +43,7 @@ my @mixed_eol = (
 
 my @need_crlf = (
     "\\.(bat|sln)\$",
-    "^winbuild/.+\\.(cmd|md)\$",
+    "^winbuild/.+\\.md\$",
 );
 
 my @space_at_eol = (

@@ -1,6 +1,0 @@
-# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-#
-# SPDX-License-Identifier: curl
-
-# OS400 .cmd files are not windows scripts.
-*.cmd text eol=auto
