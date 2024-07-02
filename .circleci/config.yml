@@ -230,7 +230,7 @@ commands:
 
   test:
     steps:
-      - run: make -j3 V=1 test-ci
+      - run: make -j3 V=1 TFLAGS="-j14" test-ci
 
   test-macos:
     steps:

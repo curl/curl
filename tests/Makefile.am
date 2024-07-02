@@ -126,7 +126,7 @@ TEST_E = -a -e
 TEST_NF = -a -p ~flaky ~timing-dependent
 
 # special CI target derived from nonflaky with CI-specific flags
-TEST_CI = $(TEST_NF) -rm
+TEST_CI = $(TEST_NF) -rm -j2
 endif
 
 # make sure that PERL is pointing to an executable

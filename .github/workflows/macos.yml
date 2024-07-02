@@ -203,7 +203,7 @@ jobs:
       - run: make V=1 test-ci
         name: 'run tests'
         env:
-          TFLAGS: "${{ matrix.build.tflags }} ~1452"
+          TFLAGS: "${{ matrix.build.tflags }} -j3 ~1452"
 
   cmake:
     name: cmake ${{ matrix.compiler.CC }} ${{ matrix.build.name }}

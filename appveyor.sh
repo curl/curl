@@ -139,6 +139,7 @@ if [[ "${TFLAGS}" != 'skipall' ]] && \
   elif [ -x "$(cygpath 'C:/msys64/usr/bin/curl.exe')" ]; then
     TFLAGS+=" -ac $(cygpath 'C:/msys64/usr/bin/curl.exe')"
   fi
+  TFLAGS+=' -j0'
   if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     ls _bld/lib/*.dll >/dev/null 2>&1 && cp -f -p _bld/lib/*.dll _bld/tests/libtest/
     cmake --build _bld --config "${PRJ_CFG}" --target test-ci
