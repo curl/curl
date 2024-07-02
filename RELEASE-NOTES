@@ -46,18 +46,25 @@ This release includes the following bugfixes:
  o cmake: fix brotli lib order [3]
  o cmake: fix building in unity mode [4]
  o cmake: fix building with both md4 and md5 in unity mode [13]
+ o cmake: fix feature and protocol lists for SecureTransport [194]
  o cmake: fix quotes when appending multiple options (SecureTransport) [139]
  o cmake: fix test 1013 with websockets enabled and no TLS [47]
+ o cmake: improve wolfSSL detection [190]
+ o cmake: show protocols, then features [180]
  o cmake: stop setting SOVERSION for the static lib target [127]
+ o cmake: sync protocol/feature list with `curl -V` output [182]
  o cmake: use `APPLE` instead of `CMAKE_SYSTEM_NAME` string [24]
  o cmake: whitespace, formatting/tidy-up in comments [25]
  o cmdline-docs: "added in" cleanups [171]
+ o cmdline-docs: fix `--proxy-ca-native` example + tidy-ups [181]
  o cmdline-opts/_PROTOCOLS.md: mention WS(S) [94]
  o cmdline-opts/ech.md: shorten the help text [93]
  o cmdline-opts/fail.md: expand and clarify [95]
  o cmdline-opts/interface.md: expand the documentation [66]
  o cmdline-opts: expand the parallel explanations [98]
+ o cmdline-opts: shorten six help texts [178]
  o cmdline: expand proxy option explanations [97]
+ o code: language cleanup in comments [186]
  o configure: fix pkg-config library name 'libnghttp3' [138]
  o configure: require a QUIC library if nghttp3 is used [142]
  o configure: use `$EGREP` in place of `grep -E` [41]
@@ -67,9 +74,12 @@ This release includes the following bugfixes:
  o cookie-jar.md: see also --junk-session-cookies [144]
  o curl-config: revert to backticks to support old target envs [88]
  o curl: make warnings and other messages aware of terminal width [58]
+ o curl_easy_escape: elaborate a little on encoding a URL [193]
  o curl_mprintf.md: add missing comma
  o curl_multi_poll.md: expand the example with an custom file descriptor [21]
+ o curl_str[n]equal.md: tidy up text to make them stand-alone [195]
  o curl_url_set.md: libcurl only parses :// URLs [48]
+ o curl_url_set: elaborate on scheme guessing [191]
  o CURLOPT_CONNECTTIMEOUT*: clarify, document the milliseond version [105]
  o CURLOPT_ECH.md: remove repeated 'if' [109]
  o CURLOPT_NETRC.md: clarify what it does on Windows [140]
@@ -111,10 +121,12 @@ This release includes the following bugfixes:
  o lib: tidy up types and casts [92]
  o lib: xfer_setup and non-blocking shutdown [111]
  o libcurl.pc: add `Requires.private`, `Requires` for static linking [129]
+ o libcurl.pc: add more `Requires.private`/`Requires` dependencies [189]
  o libssh: remove CURLOPT_SSL_VERIFYHOST check [36]
  o managen: "added in" fixes [131]
  o managen: cleanups to generate nicer-looking output [141]
  o managen: error on trailing blank lines in input files [165]
+ o managen: fix removing backticks from subtitles [179]
  o managen: insert final .fi for files ending with a quote [174]
  o managen: introduce "Multi: per-URL" [176]
  o managen: only output .RE for manpage output [156]
@@ -127,6 +139,7 @@ This release includes the following bugfixes:
  o mk-ca-bundle.pl: delay 'curl -V' execution until it is needed [168]
  o multi: add multi->proto_hash, a key-value store for protocol data [37]
  o multi: fix multi_wait() timeout handling [51]
+ o multi: fix pollset during RESOLVING phase [166]
  o multi: multi_getsock(), check correct socket [167]
  o ngtcp2+quictls: fix cert-status use [173]
  o noproxy: test bad ipv6 net size first [82]
@@ -184,6 +197,7 @@ This release includes the following bugfixes:
  o vms: fixed language in comment [110]
  o vtls: deprioritize Secure Transport [71]
  o winbuild: fix PE version info debug flag [1]
+ o winbuild: MS-DOS batch tidy-ups [163]
  o winbuild: remove outdated WIN32 defines [5]
  o windows: fix UWP builds, add GHA job [79]
  o winsock: move SO_SNDBUF update into cf-socket [53]
@@ -390,8 +404,10 @@ References to bug reports and discussions on issues:
  [160] = https://curl.se/bug/?i=14019
  [161] = https://curl.se/bug/?i=14063
  [162] = https://curl.se/bug/?i=13976
+ [163] = https://curl.se/bug/?i=14084
  [164] = https://curl.se/bug/?i=14016
  [165] = https://curl.se/bug/?i=14015
+ [166] = https://curl.se/bug/?i=14047
  [167] = https://curl.se/bug/?i=13998
  [168] = https://curl.se/bug/?i=14060
  [169] = https://curl.se/bug/?i=14007
@@ -403,5 +419,17 @@ References to bug reports and discussions on issues:
  [175] = https://curl.se/bug/?i=14030
  [176] = https://curl.se/bug/?i=14045
  [177] = https://curl.se/bug/?i=14041
+ [178] = https://curl.se/bug/?i=14075
+ [179] = https://curl.se/bug/?i=14081
+ [180] = https://curl.se/bug/?i=14082
+ [181] = https://curl.se/bug/?i=14078
+ [182] = https://curl.se/bug/?i=14066
  [185] = https://curl.se/bug/?i=14038
+ [186] = https://curl.se/bug/?i=14073
  [187] = https://curl.se/bug/?i=14033
+ [189] = https://curl.se/bug/?i=14072
+ [190] = https://curl.se/bug/?i=14064
+ [191] = https://curl.se/bug/?i=14071
+ [193] = https://curl.se/bug/?i=14069
+ [194] = https://curl.se/bug/?i=13963
+ [195] = https://curl.se/bug/?i=14068
