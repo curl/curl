@@ -5,7 +5,7 @@ Long: pubkey
 Arg: <key>
 Protocols: SFTP SCP
 Help: SSH Public key filename
-Category: sftp scp auth
+Category: sftp scp ssh auth
 Added: 7.16.2
 Multi: single
 See-also:
