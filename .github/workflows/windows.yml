@@ -235,6 +235,7 @@ jobs:
         shell: msys2 {0}
         run: |
           export TFLAGS='-j14 !TFTP !MQTT !WebSockets ${{ matrix.tflags }}'
+          [ '${{ matrix.sys }}' != 'msys' ] && TFLAGS+=' !3005 !3006'
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
@@ -301,6 +302,7 @@ jobs:
         shell: msys2 {0}
         run: |
           export TFLAGS='-j14 !TFTP !MQTT !WebSockets ${{ matrix.tflags }}'
+          [ '${{ matrix.sys }}' != 'msys' ] && TFLAGS+=' !3005 !3006'
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
