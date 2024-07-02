@@ -11,6 +11,7 @@ Protocol:
   - TLS
 TLS-backend:
   - OpenSSL
+  - wolfSSL
 ---
 
 # NAME
@@ -79,7 +80,8 @@ int main(void)
 
 # AVAILABILITY
 
-Added in 7.71.0. This option is supported by the OpenSSL backends.
+Added in 7.71.0. This option is supported by the OpenSSL and
+wolfSSL (added in 8.10.0) backends.
 
 # RETURN VALUE
 

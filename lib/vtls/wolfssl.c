@@ -757,40 +757,88 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     }
   }
 
-#ifndef NO_FILESYSTEM
   /* Load the client certificate, and private key */
-  if(ssl_config->primary.clientcert) {
-    char *key_file = ssl_config->key;
+#ifndef NO_FILESYSTEM
+  if(ssl_config->primary.cert_blob || ssl_config->primary.clientcert) {
+    const char *cert_file = ssl_config->primary.clientcert;
+    const char *key_file = ssl_config->key;
+    const struct curl_blob *cert_blob = ssl_config->primary.cert_blob;
+    const struct curl_blob *key_blob = ssl_config->key_blob;
     int file_type = do_file_type(ssl_config->cert_type);
+    int rc;
 
-    if(file_type == WOLFSSL_FILETYPE_PEM) {
-      if(wolfSSL_CTX_use_certificate_chain_file(backend->ctx,
-                                                ssl_config->primary.clientcert)
-         != 1) {
-        failf(data, "unable to use client certificate");
-        return CURLE_SSL_CONNECT_ERROR;
-      }
-    }
-    else if(file_type == WOLFSSL_FILETYPE_ASN1) {
-      if(wolfSSL_CTX_use_certificate_file(backend->ctx,
-                                          ssl_config->primary.clientcert,
-                                          file_type) != 1) {
-        failf(data, "unable to use client certificate");
-        return CURLE_SSL_CONNECT_ERROR;
-      }
-    }
-    else {
+    switch(file_type) {
+    case WOLFSSL_FILETYPE_PEM:
+      rc = cert_blob ?
+        wolfSSL_CTX_use_certificate_chain_buffer(backend->ctx,
+                                                 cert_blob->data,
+                                                 cert_blob->len) :
+        wolfSSL_CTX_use_certificate_chain_file(backend->ctx, cert_file);
+      break;
+    case WOLFSSL_FILETYPE_ASN1:
+      rc = cert_blob ?
+        wolfSSL_CTX_use_certificate_buffer(backend->ctx, cert_blob->data,
+                                           cert_blob->len, file_type) :
+        wolfSSL_CTX_use_certificate_file(backend->ctx, cert_file, file_type);
+      break;
+    default:
       failf(data, "unknown cert type");
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
+    if(rc != 1) {
+      failf(data, "unable to use client certificate");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
 
-    if(!key_file)
-      key_file = ssl_config->primary.clientcert;
+    if(!key_blob && !key_file) {
+      key_blob = cert_blob;
+      key_file = cert_file;
+    }
     else
       file_type = do_file_type(ssl_config->key_type);
 
-    if(wolfSSL_CTX_use_PrivateKey_file(backend->ctx, key_file,
-                                       file_type) != 1) {
+    rc = key_blob ?
+      wolfSSL_CTX_use_PrivateKey_buffer(backend->ctx, key_blob->data,
+                                        key_blob->len, file_type) :
+      wolfSSL_CTX_use_PrivateKey_file(backend->ctx, key_file, file_type);
+    if(rc != 1) {
+      failf(data, "unable to set private key");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+  }
+#else /* NO_FILESYSTEM */
+  if(ssl_config->primary.cert_blob) {
+    const struct curl_blob *cert_blob = ssl_config->primary.cert_blob;
+    const struct curl_blob *key_blob = ssl_config->key_blob;
+    int file_type = do_file_type(ssl_config->cert_type);
+    int rc;
+
+    switch(file_type) {
+    case WOLFSSL_FILETYPE_PEM:
+      rc = wolfSSL_CTX_use_certificate_chain_buffer(backend->ctx,
+                                                    cert_blob->data,
+                                                    cert_blob->len);
+      break;
+    case WOLFSSL_FILETYPE_ASN1:
+      rc = wolfSSL_CTX_use_certificate_buffer(backend->ctx, cert_blob->data,
+                                              cert_blob->len, file_type);
+      break;
+    default:
+      failf(data, "unknown cert type");
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
+    if(rc != 1) {
+      failf(data, "unable to use client certificate");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+
+    if(!key_blob)
+      key_blob = cert_blob;
+    else
+      file_type = do_file_type(ssl_config->key_type);
+
+    if(wolfSSL_CTX_use_PrivateKey_buffer(backend->ctx, key_blob->data,
+                                         key_blob->len, file_type) != 1) {
       failf(data, "unable to set private key");
       return CURLE_SSL_CONNECT_ERROR;
     }

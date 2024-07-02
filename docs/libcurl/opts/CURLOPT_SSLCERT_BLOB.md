@@ -15,6 +15,7 @@ TLS-backend:
   - Secure Transport
   - Schannel
   - mbedTLS
+  - wolfSSL
 ---
 
 # NAME
@@ -78,7 +79,7 @@ int main(void)
 # AVAILABILITY
 
 Added in 7.71.0. This option is supported by the OpenSSL, Secure Transport,
-Schannel and mbedTLS (since 7.78.0) backends.
+Schannel, mbedTLS (added in 7.78.0) and wolfSSL (added in 8.10.0) backends.
 
 # RETURN VALUE
 
