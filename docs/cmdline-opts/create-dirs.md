@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: create-dirs
 Help: Create necessary local directory hierarchy
-Category: curl
+Category: curl output
 Added: 7.10.3
 Multi: boolean
 See-also:
