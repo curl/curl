@@ -778,7 +778,7 @@ static bool prune_if_dead(struct connectdata *conn,
          checking it */
       Curl_attach_connection(data, conn);
 
-      state = conn->handler->connection_check(data, conn, CONNCHECK_ISDEAD);
+      state = conn->handler->connection_check(data, CONNCHECK_ISDEAD);
       dead = (state & CONNRESULT_DEAD);
       /* detach the connection again */
       Curl_detach_connection(data);
@@ -788,7 +788,7 @@ static bool prune_if_dead(struct connectdata *conn,
       bool input_pending = FALSE;
 
       Curl_attach_connection(data, conn);
-      dead = !Curl_conn_is_alive(data, conn, &input_pending);
+      dead = !Curl_conn_is_alive(data, &input_pending);
       if(input_pending) {
         /* For reuse, we want a "clean" connection state. The includes
          * that we expect - in general - no waiting input data. Input

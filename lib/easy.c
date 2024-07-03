@@ -1306,7 +1306,7 @@ static int conn_upkeep(struct Curl_easy *data,
   Curl_attach_connection(data, conn);
   if(conn->handler->connection_check) {
     /* Do a protocol-specific keepalive check on the connection. */
-    conn->handler->connection_check(data, conn, CONNCHECK_KEEPALIVE);
+    conn->handler->connection_check(data, CONNCHECK_KEEPALIVE);
   }
   else {
     /* Do the generic action on the FIRSTSOCKET filter chain */

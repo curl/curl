@@ -75,7 +75,6 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
 static CURLcode rtsp_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn);
 static unsigned int rtsp_conncheck(struct Curl_easy *data,
-                                   struct connectdata *check,
                                    unsigned int checks_to_perform);
 
 /* this returns the socket to wait for in the DO and DOING state for the multi
@@ -144,18 +143,15 @@ static CURLcode rtsp_setup_connection(struct Curl_easy *data,
  * Function to check on various aspects of a connection.
  */
 static unsigned int rtsp_conncheck(struct Curl_easy *data,
-                                   struct connectdata *conn,
                                    unsigned int checks_to_perform)
 {
   unsigned int ret_val = CONNRESULT_NONE;
-  (void)data;
 
   if(checks_to_perform & CONNCHECK_ISDEAD) {
     bool input_pending;
-    if(!Curl_conn_is_alive(data, conn, &input_pending))
+    if(!Curl_conn_is_alive(data, &input_pending))
       ret_val |= CONNRESULT_DEAD;
   }
-
   return ret_val;
 }
 

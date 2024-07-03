@@ -506,8 +506,7 @@ bool Curl_conn_cf_is_alive(struct Curl_cfilter *cf,
 /**
  * Check if FIRSTSOCKET's cfilter chain deems connection alive.
  */
-bool Curl_conn_is_alive(struct Curl_easy *data, struct connectdata *conn,
-                        bool *input_pending);
+bool Curl_conn_is_alive(struct Curl_easy *data, bool *input_pending);
 
 /**
  * Try to upkeep the connection filters at sockindex.

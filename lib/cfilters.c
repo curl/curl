@@ -755,10 +755,9 @@ bool Curl_conn_cf_is_alive(struct Curl_cfilter *cf,
   return FALSE;
 }
 
-bool Curl_conn_is_alive(struct Curl_easy *data, struct connectdata *conn,
-                        bool *input_pending)
+bool Curl_conn_is_alive(struct Curl_easy *data, bool *input_pending)
 {
-  struct Curl_cfilter *cf = conn->cfilter[FIRSTSOCKET];
+  struct Curl_cfilter *cf = data->conn->cfilter[FIRSTSOCKET];
 
   *input_pending = FALSE;
   if(cf->conn->bits.close)

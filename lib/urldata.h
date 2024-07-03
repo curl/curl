@@ -718,7 +718,6 @@ struct Curl_handler {
      CONNCHECK_* for more information about the checks that can be performed,
      and CONNRESULT_* for the results that can be returned. */
   unsigned int (*connection_check)(struct Curl_easy *data,
-                                   struct connectdata *conn,
                                    unsigned int checks_to_perform);
 
   /* attach() attaches this transfer to this connection */
