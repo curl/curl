@@ -422,6 +422,8 @@ jobs:
     name: 'msvc (${{ matrix.arch }}, ${{ matrix.plat }}, ${{ matrix.name }})'
     runs-on: windows-latest
     timeout-minutes: 30
+    env:
+      VCPKG_DISABLE_METRICS: '1'
     strategy:
       matrix:
         include:
