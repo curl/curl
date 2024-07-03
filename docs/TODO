@@ -127,9 +127,6 @@
  13.16 Share the CA cache
  13.17 Add missing features to TLS backends
 
- 14. GnuTLS
- 14.2 check connection
-
  15. Schannel
  15.1 Extend support for client certificate authentication
  15.2 Extend support for the --ciphers option
@@ -926,13 +923,6 @@
  The feature matrix at https://curl.se/libcurl/c/tls-options.html shows which
  features are supported by which TLS backends, and thus also where there are
  feature gaps.
-
-14. GnuTLS
-
-14.2 check connection
-
- Add a way to check if the connection seems to be alive, to correspond to the
- SSL_peak() way we use with OpenSSL.
 
 15. Schannel
 
