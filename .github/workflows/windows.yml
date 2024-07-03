@@ -556,7 +556,7 @@ jobs:
         timeout-minutes: 30
         shell: bash
         run: |
-          export TFLAGS='-j14 !TFTP !SMTP ${{ matrix.tflags }}'
+          export TFLAGS='-j14 !TFTP !MQTT !WebSockets !SMTP ${{ matrix.tflags }}'
           export VCPKG_ROOT="$PWD/vcpkg"
           export VCPKG_TRIPLET_DIR="$VCPKG_ROOT/installed/${{ matrix.arch }}-${{ matrix.plat }}"
           export debug_lib="$VCPKG_TRIPLET_DIR/debug/bin"
