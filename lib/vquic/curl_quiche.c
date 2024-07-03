@@ -1532,6 +1532,43 @@ static void cf_quiche_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
   cf->ctx = NULL;
 }
 
+static bool cf_quiche_conn_is_alive(struct Curl_cfilter *cf,
+                                    struct Curl_easy *data,
+                                    bool *input_pending)
+{
+  struct cf_quiche_ctx *ctx = cf->ctx;
+  bool alive = TRUE;
+
+  *input_pending = FALSE;
+  if(!ctx->qconn)
+    return FALSE;
+
+  if(quiche_conn_is_closed(ctx->qconn)) {
+    if(quiche_conn_is_timed_out(ctx->qconn))
+      CURL_TRC_CF(data, cf, "connection was closed due to idle timeout");
+    else
+      CURL_TRC_CF(data, cf, "connection is closed");
+    return FALSE;
+  }
+
+  if(!Curl_conn_cf_is_alive(cf->next, data, input_pending))
+    return FALSE;
+
+  if(*input_pending) {
+    /* This happens before we have sent off a request and the connection is
+       not in use by any other transfer, there should not be any data here,
+       only "protocol frames" */
+    *input_pending = FALSE;
+    if(cf_process_ingress(cf, data))
+      alive = FALSE;
+    else {
+      alive = TRUE;
+    }
+  }
+
+  return alive;
+}
+
 static CURLcode cf_quiche_query(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 int query, int *pres1, void *pres2)
@@ -1570,49 +1607,13 @@ static CURLcode cf_quiche_query(struct Curl_cfilter *cf,
       *when = ctx->handshake_at;
     return CURLE_OK;
   }
+  case CF_QUERY_IS_ALIVE:
+    *pres1 = cf_quiche_conn_is_alive(cf, data, (bool *)pres2);
+    return CURLE_OK;
   default:
     break;
   }
-  return cf->next?
-    cf->next->cft->query(cf->next, data, query, pres1, pres2) :
-    CURLE_UNKNOWN_OPTION;
-}
-
-static bool cf_quiche_conn_is_alive(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data,
-                                    bool *input_pending)
-{
-  struct cf_quiche_ctx *ctx = cf->ctx;
-  bool alive = TRUE;
-
-  *input_pending = FALSE;
-  if(!ctx->qconn)
-    return FALSE;
-
-  if(quiche_conn_is_closed(ctx->qconn)) {
-    if(quiche_conn_is_timed_out(ctx->qconn))
-      CURL_TRC_CF(data, cf, "connection was closed due to idle timeout");
-    else
-      CURL_TRC_CF(data, cf, "connection is closed");
-    return FALSE;
-  }
-
-  if(!cf->next || !cf->next->cft->is_alive(cf->next, data, input_pending))
-    return FALSE;
-
-  if(*input_pending) {
-    /* This happens before we have sent off a request and the connection is
-       not in use by any other transfer, there should not be any data here,
-       only "protocol frames" */
-    *input_pending = FALSE;
-    if(cf_process_ingress(cf, data))
-      alive = FALSE;
-    else {
-      alive = TRUE;
-    }
-  }
-
-  return alive;
+  return Curl_cf_def_query(cf, data, query, pres1, pres2);
 }
 
 struct Curl_cftype Curl_cft_http3 = {
@@ -1629,7 +1630,6 @@ struct Curl_cftype Curl_cft_http3 = {
   cf_quiche_send,
   cf_quiche_recv,
   cf_quiche_data_event,
-  cf_quiche_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
   cf_quiche_query,
 };

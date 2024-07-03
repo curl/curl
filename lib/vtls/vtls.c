@@ -1812,27 +1812,6 @@ static CURLcode ssl_cf_cntrl(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-static CURLcode ssl_cf_query(struct Curl_cfilter *cf,
-                             struct Curl_easy *data,
-                             int query, int *pres1, void *pres2)
-{
-  struct ssl_connect_data *connssl = cf->ctx;
-
-  switch(query) {
-  case CF_QUERY_TIMER_APPCONNECT: {
-    struct curltime *when = pres2;
-    if(cf->connected && !Curl_ssl_cf_is_proxy(cf))
-      *when = connssl->handshake_done;
-    return CURLE_OK;
-  }
-  default:
-    break;
-  }
-  return cf->next?
-    cf->next->cft->query(cf->next, data, query, pres1, pres2) :
-    CURLE_UNKNOWN_OPTION;
-}
-
 static bool cf_ssl_is_alive(struct Curl_cfilter *cf, struct Curl_easy *data,
                             bool *input_pending)
 {
@@ -1857,10 +1836,32 @@ static bool cf_ssl_is_alive(struct Curl_cfilter *cf, struct Curl_easy *data,
     *input_pending = FALSE;
     return FALSE;
   }
-  /* ssl backend does not know */
-  return cf->next?
-    cf->next->cft->is_alive(cf->next, data, input_pending) :
-    FALSE; /* pessimistic in absence of data */
+  /* ssl backend does not know, check lower filters */
+  return Curl_conn_cf_is_alive(cf->next, data, input_pending);
+}
+
+static CURLcode cf_ssl_query(struct Curl_cfilter *cf,
+                             struct Curl_easy *data,
+                             int query, int *pres1, void *pres2)
+{
+  struct ssl_connect_data *connssl = cf->ctx;
+
+  switch(query) {
+  case CF_QUERY_TIMER_APPCONNECT: {
+    struct curltime *when = pres2;
+    if(cf->connected && !Curl_ssl_cf_is_proxy(cf)) {
+      *when = connssl->handshake_done;
+      return CURLE_OK;
+    }
+    break;
+  }
+  case CF_QUERY_IS_ALIVE:
+    *pres1 = cf_ssl_is_alive(cf, data, (bool *)pres2);
+    return CURLE_OK;
+  default:
+    break;
+  }
+  return Curl_cf_def_query(cf, data, query, pres1, pres2);
 }
 
 struct Curl_cftype Curl_cft_ssl = {
@@ -1877,9 +1878,8 @@ struct Curl_cftype Curl_cft_ssl = {
   ssl_cf_send,
   ssl_cf_recv,
   ssl_cf_cntrl,
-  cf_ssl_is_alive,
   Curl_cf_def_conn_keep_alive,
-  ssl_cf_query,
+  cf_ssl_query,
 };
 
 #ifndef CURL_DISABLE_PROXY
@@ -1898,9 +1898,8 @@ struct Curl_cftype Curl_cft_ssl_proxy = {
   ssl_cf_send,
   ssl_cf_recv,
   ssl_cf_cntrl,
-  cf_ssl_is_alive,
   Curl_cf_def_conn_keep_alive,
-  Curl_cf_def_query,
+  cf_ssl_query,
 };
 
 #endif /* !CURL_DISABLE_PROXY */

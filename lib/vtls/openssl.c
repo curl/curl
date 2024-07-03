@@ -1909,7 +1909,7 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
         *done = TRUE;
         goto out;
       }
-      else if(!cf->next->cft->is_alive(cf->next, data, &input_pending)) {
+      else if(!Curl_conn_cf_is_alive(cf->next, data, &input_pending)) {
         /* Server closed the connection after its closy notify. It
          * seems not interested to see our close notify, so do not
          * send it. We are done. */

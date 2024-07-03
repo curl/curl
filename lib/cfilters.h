@@ -113,10 +113,6 @@ typedef ssize_t  Curl_cft_recv(struct Curl_cfilter *cf,
                                size_t len,             /* amount to read */
                                CURLcode *err);         /* error to return */
 
-typedef bool     Curl_cft_conn_is_alive(struct Curl_cfilter *cf,
-                                        struct Curl_easy *data,
-                                        bool *input_pending);
-
 typedef CURLcode Curl_cft_conn_keep_alive(struct Curl_cfilter *cf,
                                           struct Curl_easy *data);
 
@@ -170,6 +166,7 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
 #define CF_QUERY_TIMER_CONNECT      4  /* -          struct curltime */
 #define CF_QUERY_TIMER_APPCONNECT   5  /* -          struct curltime */
 #define CF_QUERY_STREAM_ERROR       6  /* error code - */
+#define CF_QUERY_IS_ALIVE           7  /* TRUE/FALSE bool* input_pending */
 
 /**
  * Query the cfilter for properties. Filters ignorant of a query will
@@ -210,7 +207,6 @@ struct Curl_cftype {
   Curl_cft_send *do_send;                 /* send data */
   Curl_cft_recv *do_recv;                 /* receive data */
   Curl_cft_cntrl *cntrl;                  /* events/control */
-  Curl_cft_conn_is_alive *is_alive;       /* FALSE if conn is dead, Jim! */
   Curl_cft_conn_keep_alive *keep_alive;   /* try to keep it alive */
   Curl_cft_query *query;                  /* query filter chain */
 };
@@ -247,9 +243,6 @@ ssize_t  Curl_cf_def_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 CURLcode Curl_cf_def_cntrl(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 int event, int arg1, void *arg2);
-bool     Curl_cf_def_conn_is_alive(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
-                                   bool *input_pending);
 CURLcode Curl_cf_def_conn_keep_alive(struct Curl_cfilter *cf,
                                      struct Curl_easy *data);
 CURLcode Curl_cf_def_query(struct Curl_cfilter *cf,
@@ -501,6 +494,13 @@ CURLcode Curl_conn_ev_data_pause(struct Curl_easy *data, bool do_pause);
  */
 void Curl_conn_ev_update_info(struct Curl_easy *data,
                               struct connectdata *conn);
+
+/**
+ * Check if a connection filter deems the connection to be alive.
+ */
+bool Curl_conn_cf_is_alive(struct Curl_cfilter *cf,
+                           struct Curl_easy *data,
+                           bool *input_pending);
 
 /**
  * Check if FIRSTSOCKET's cfilter chain deems connection alive.

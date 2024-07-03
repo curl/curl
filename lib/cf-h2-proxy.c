@@ -1536,57 +1536,59 @@ out:
   return nwritten;
 }
 
-static bool proxy_h2_connisalive(struct Curl_cfilter *cf,
+static bool cf_h2_proxy_is_alive(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  bool *input_pending)
 {
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
-  bool alive = TRUE;
+  bool is_alive = TRUE;
 
   *input_pending = FALSE;
-  if(!cf->next || !cf->next->cft->is_alive(cf->next, data, input_pending))
+  if(!ctx || !ctx->h2 || !Curl_conn_cf_is_alive(cf->next, data, input_pending))
     return FALSE;
 
   if(*input_pending) {
     /* This happens before we have sent off a request and the connection is
        not in use by any other transfer, there should not be any data here,
        only "protocol frames" */
+    struct cf_call_data save;
     CURLcode result;
     ssize_t nread = -1;
 
-    *input_pending = FALSE;
+    CF_DATA_SAVE(save, cf, data);
     nread = Curl_bufq_slurp(&ctx->inbufq, proxy_nw_in_reader, cf, &result);
     if(nread != -1) {
       if(proxy_h2_process_pending_input(cf, data, &result) < 0)
         /* immediate error, considered dead */
-        alive = FALSE;
+        is_alive = FALSE;
       else {
-        alive = !proxy_h2_should_close_session(ctx);
+        is_alive = !proxy_h2_should_close_session(ctx);
       }
     }
     else if(result != CURLE_AGAIN) {
       /* the read failed so let's say this is dead anyway */
-      alive = FALSE;
+      is_alive = FALSE;
     }
+    CF_DATA_RESTORE(cf, save);
   }
 
-  return alive;
+  CURL_TRC_CF(data, cf, "[0] conn alive -> %d, input_pending=%d",
+              is_alive, *input_pending);
+  return is_alive;
 }
 
-static bool cf_h2_proxy_is_alive(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data,
-                                 bool *input_pending)
+static CURLcode cf_h2_proxy_query(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  int query, int *pres1, void *pres2)
 {
-  struct cf_h2_proxy_ctx *ctx = cf->ctx;
-  CURLcode result;
-  struct cf_call_data save;
-
-  CF_DATA_SAVE(save, cf, data);
-  result = (ctx && ctx->h2 && proxy_h2_connisalive(cf, data, input_pending));
-  CURL_TRC_CF(data, cf, "[0] conn alive -> %d, input_pending=%d",
-              result, *input_pending);
-  CF_DATA_RESTORE(cf, save);
-  return result;
+  switch(query) {
+  case CF_QUERY_IS_ALIVE:
+    *pres1 = cf_h2_proxy_is_alive(cf, data, (bool *)pres2);
+    return CURLE_OK;
+  default:
+    break;
+  }
+  return Curl_cf_def_query(cf, data, query, pres1, pres2);
 }
 
 struct Curl_cftype Curl_cft_h2_proxy = {
@@ -1603,9 +1605,8 @@ struct Curl_cftype Curl_cft_h2_proxy = {
   cf_h2_proxy_send,
   cf_h2_proxy_recv,
   Curl_cf_def_cntrl,
-  cf_h2_proxy_is_alive,
   Curl_cf_def_conn_keep_alive,
-  Curl_cf_def_query,
+  cf_h2_proxy_query,
 };
 
 CURLcode Curl_cf_h2_proxy_insert_after(struct Curl_cfilter *cf,

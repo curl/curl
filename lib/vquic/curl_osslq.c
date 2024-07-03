@@ -2179,6 +2179,39 @@ static CURLcode cf_osslq_data_event(struct Curl_cfilter *cf,
   return result;
 }
 
+static void cf_osslq_adjust_pollset(struct Curl_cfilter *cf,
+                                    struct Curl_easy *data,
+                                    struct easy_pollset *ps)
+{
+  struct cf_osslq_ctx *ctx = cf->ctx;
+
+  if(!ctx->tls.ossl.ssl) {
+    /* NOP */
+  }
+  else if(!cf->connected) {
+    /* during handshake, transfer has not started yet. we always
+     * add our socket for polling if SSL wants to send/recv */
+    Curl_pollset_set(data, ps, ctx->q.sockfd,
+                     SSL_net_read_desired(ctx->tls.ossl.ssl),
+                     SSL_net_write_desired(ctx->tls.ossl.ssl));
+  }
+  else {
+    /* once connected, we only modify the socket if it is present.
+     * this avoids adding it for paused transfers. */
+    bool want_recv, want_send;
+    Curl_pollset_check(data, ps, ctx->q.sockfd, &want_recv, &want_send);
+    if(want_recv || want_send) {
+      Curl_pollset_set(data, ps, ctx->q.sockfd,
+                       SSL_net_read_desired(ctx->tls.ossl.ssl),
+                       SSL_net_write_desired(ctx->tls.ossl.ssl));
+    }
+    else if(ctx->need_recv || ctx->need_send) {
+      Curl_pollset_set(data, ps, ctx->q.sockfd,
+                       ctx->need_recv, ctx->need_send);
+    }
+  }
+}
+
 static bool cf_osslq_conn_is_alive(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    bool *input_pending)
@@ -2212,7 +2245,7 @@ static bool cf_osslq_conn_is_alive(struct Curl_cfilter *cf,
 
 #endif
 
-  if(!cf->next || !cf->next->cft->is_alive(cf->next, data, input_pending))
+  if(!Curl_conn_cf_is_alive(cf->next, data, input_pending))
     goto out;
 
   alive = TRUE;
@@ -2230,39 +2263,6 @@ static bool cf_osslq_conn_is_alive(struct Curl_cfilter *cf,
 out:
   CF_DATA_RESTORE(cf, save);
   return alive;
-}
-
-static void cf_osslq_adjust_pollset(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data,
-                                    struct easy_pollset *ps)
-{
-  struct cf_osslq_ctx *ctx = cf->ctx;
-
-  if(!ctx->tls.ossl.ssl) {
-    /* NOP */
-  }
-  else if(!cf->connected) {
-    /* during handshake, transfer has not started yet. we always
-     * add our socket for polling if SSL wants to send/recv */
-    Curl_pollset_set(data, ps, ctx->q.sockfd,
-                     SSL_net_read_desired(ctx->tls.ossl.ssl),
-                     SSL_net_write_desired(ctx->tls.ossl.ssl));
-  }
-  else {
-    /* once connected, we only modify the socket if it is present.
-     * this avoids adding it for paused transfers. */
-    bool want_recv, want_send;
-    Curl_pollset_check(data, ps, ctx->q.sockfd, &want_recv, &want_send);
-    if(want_recv || want_send) {
-      Curl_pollset_set(data, ps, ctx->q.sockfd,
-                       SSL_net_read_desired(ctx->tls.ossl.ssl),
-                       SSL_net_write_desired(ctx->tls.ossl.ssl));
-    }
-    else if(ctx->need_recv || ctx->need_send) {
-      Curl_pollset_set(data, ps, ctx->q.sockfd,
-                       ctx->need_recv, ctx->need_send);
-    }
-  }
 }
 
 static CURLcode cf_osslq_query(struct Curl_cfilter *cf,
@@ -2310,12 +2310,13 @@ static CURLcode cf_osslq_query(struct Curl_cfilter *cf,
       *when = ctx->handshake_at;
     return CURLE_OK;
   }
+  case CF_QUERY_IS_ALIVE:
+    *pres1 = cf_osslq_conn_is_alive(cf, data, (bool *)pres2);
+    return CURLE_OK;
   default:
     break;
   }
-  return cf->next?
-    cf->next->cft->query(cf->next, data, query, pres1, pres2) :
-    CURLE_UNKNOWN_OPTION;
+  return Curl_cf_def_query(cf, data, query, pres1, pres2);
 }
 
 struct Curl_cftype Curl_cft_http3 = {
@@ -2332,7 +2333,6 @@ struct Curl_cftype Curl_cft_http3 = {
   cf_osslq_send,
   cf_osslq_recv,
   cf_osslq_data_event,
-  cf_osslq_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
   cf_osslq_query,
 };

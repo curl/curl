@@ -1011,12 +1011,13 @@ static CURLcode cf_msh3_query(struct Curl_cfilter *cf,
       *when = ctx->handshake_at;
     return CURLE_OK;
   }
+  case CF_QUERY_IS_ALIVE:
+    *pres1 = cf_msh3_conn_is_alive(cf, data, (bool *)pres2);
+    return CURLE_OK;
   default:
     break;
   }
-  return cf->next?
-    cf->next->cft->query(cf->next, data, query, pres1, pres2) :
-    CURLE_UNKNOWN_OPTION;
+  return Curl_cf_def_query(cf, data, query, pres1, pres2);
 }
 
 static bool cf_msh3_conn_is_alive(struct Curl_cfilter *cf,
@@ -1045,7 +1046,6 @@ struct Curl_cftype Curl_cft_http3 = {
   cf_msh3_send,
   cf_msh3_recv,
   cf_msh3_data_event,
-  cf_msh3_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
   cf_msh3_query,
 };

@@ -2388,6 +2388,58 @@ out:
   return result;
 }
 
+static bool cf_ngtcp2_conn_is_alive(struct Curl_cfilter *cf,
+                                    struct Curl_easy *data,
+                                    bool *input_pending)
+{
+  struct cf_ngtcp2_ctx *ctx = cf->ctx;
+  bool alive = FALSE;
+  const ngtcp2_transport_params *rp;
+  struct cf_call_data save;
+
+  CF_DATA_SAVE(save, cf, data);
+  *input_pending = FALSE;
+  if(!ctx->qconn || ctx->shutdown_started)
+    goto out;
+
+  /* Both sides of the QUIC connection announce they max idle times in
+   * the transport parameters. Look at the minimum of both and if
+   * we exceed this, regard the connection as dead. The other side
+   * may have completely purged it and will no longer respond
+   * to any packets from us. */
+  rp = ngtcp2_conn_get_remote_transport_params(ctx->qconn);
+  if(rp) {
+    timediff_t idletime;
+    uint64_t idle_ms = ctx->max_idle_ms;
+
+    if(rp->max_idle_timeout &&
+      (rp->max_idle_timeout / NGTCP2_MILLISECONDS) < idle_ms)
+      idle_ms = (rp->max_idle_timeout / NGTCP2_MILLISECONDS);
+    idletime = Curl_timediff(Curl_now(), ctx->q.last_io);
+    if(idletime > 0 && (uint64_t)idletime > idle_ms)
+      goto out;
+  }
+
+  if(!Curl_conn_cf_is_alive(cf->next, data, input_pending))
+    goto out;
+
+  alive = TRUE;
+  if(*input_pending) {
+    CURLcode result;
+    /* This happens before we have sent off a request and the connection is
+       not in use by any other transfer, there should not be any data here,
+       only "protocol frames" */
+    *input_pending = FALSE;
+    result = cf_progress_ingress(cf, data, NULL);
+    CURL_TRC_CF(data, cf, "is_alive, progress ingress -> %d", result);
+    alive = result? FALSE : TRUE;
+  }
+
+out:
+  CF_DATA_RESTORE(cf, save);
+  return alive;
+}
+
 static CURLcode cf_ngtcp2_query(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 int query, int *pres1, void *pres2)
@@ -2442,64 +2494,13 @@ static CURLcode cf_ngtcp2_query(struct Curl_cfilter *cf,
       *when = ctx->handshake_at;
     return CURLE_OK;
   }
+  case CF_QUERY_IS_ALIVE:
+    *pres1 = cf_ngtcp2_conn_is_alive(cf, data, (bool *)pres2);
+    return CURLE_OK;
   default:
     break;
   }
-  return cf->next?
-    cf->next->cft->query(cf->next, data, query, pres1, pres2) :
-    CURLE_UNKNOWN_OPTION;
-}
-
-static bool cf_ngtcp2_conn_is_alive(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data,
-                                    bool *input_pending)
-{
-  struct cf_ngtcp2_ctx *ctx = cf->ctx;
-  bool alive = FALSE;
-  const ngtcp2_transport_params *rp;
-  struct cf_call_data save;
-
-  CF_DATA_SAVE(save, cf, data);
-  *input_pending = FALSE;
-  if(!ctx->qconn || ctx->shutdown_started)
-    goto out;
-
-  /* Both sides of the QUIC connection announce they max idle times in
-   * the transport parameters. Look at the minimum of both and if
-   * we exceed this, regard the connection as dead. The other side
-   * may have completely purged it and will no longer respond
-   * to any packets from us. */
-  rp = ngtcp2_conn_get_remote_transport_params(ctx->qconn);
-  if(rp) {
-    timediff_t idletime;
-    uint64_t idle_ms = ctx->max_idle_ms;
-
-    if(rp->max_idle_timeout &&
-      (rp->max_idle_timeout / NGTCP2_MILLISECONDS) < idle_ms)
-      idle_ms = (rp->max_idle_timeout / NGTCP2_MILLISECONDS);
-    idletime = Curl_timediff(Curl_now(), ctx->q.last_io);
-    if(idletime > 0 && (uint64_t)idletime > idle_ms)
-      goto out;
-  }
-
-  if(!cf->next || !cf->next->cft->is_alive(cf->next, data, input_pending))
-    goto out;
-
-  alive = TRUE;
-  if(*input_pending) {
-    CURLcode result;
-    /* This happens before we have sent off a request and the connection is
-       not in use by any other transfer, there should not be any data here,
-       only "protocol frames" */
-    *input_pending = FALSE;
-    result = cf_progress_ingress(cf, data, NULL);
-    CURL_TRC_CF(data, cf, "is_alive, progress ingress -> %d", result);
-    alive = result? FALSE : TRUE;
-  }
-
-out:
-  CF_DATA_RESTORE(cf, save);
-  return alive;
+  return Curl_cf_def_query(cf, data, query, pres1, pres2);
 }
 
 struct Curl_cftype Curl_cft_http3 = {
@@ -2516,7 +2517,6 @@ struct Curl_cftype Curl_cft_http3 = {
   cf_ngtcp2_send,
   cf_ngtcp2_recv,
   cf_ngtcp2_data_event,
-  cf_ngtcp2_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
   cf_ngtcp2_query,
 };

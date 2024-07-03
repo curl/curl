@@ -1791,12 +1791,13 @@ static CURLcode cf_socket_query(struct Curl_cfilter *cf,
     }
     return CURLE_OK;
   }
+  case CF_QUERY_IS_ALIVE:
+    *pres1 = cf_socket_conn_is_alive(cf, data, (bool *)pres2);
+    return CURLE_OK;
   default:
     break;
   }
-  return cf->next?
-    cf->next->cft->query(cf->next, data, query, pres1, pres2) :
-    CURLE_UNKNOWN_OPTION;
+  return Curl_cf_def_query(cf, data, query, pres1, pres2);
 }
 
 struct Curl_cftype Curl_cft_tcp = {
@@ -1813,7 +1814,6 @@ struct Curl_cftype Curl_cft_tcp = {
   cf_socket_send,
   cf_socket_recv,
   cf_socket_cntrl,
-  cf_socket_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
   cf_socket_query,
 };
@@ -1962,7 +1962,6 @@ struct Curl_cftype Curl_cft_udp = {
   cf_socket_send,
   cf_socket_recv,
   cf_socket_cntrl,
-  cf_socket_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
   cf_socket_query,
 };
@@ -2014,7 +2013,6 @@ struct Curl_cftype Curl_cft_unix = {
   cf_socket_send,
   cf_socket_recv,
   cf_socket_cntrl,
-  cf_socket_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
   cf_socket_query,
 };
@@ -2079,7 +2077,6 @@ struct Curl_cftype Curl_cft_tcp_accept = {
   cf_socket_send,
   cf_socket_recv,
   cf_socket_cntrl,
-  cf_socket_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
   cf_socket_query,
 };

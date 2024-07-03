@@ -605,7 +605,7 @@ static bool http2_connisalive(struct Curl_cfilter *cf, struct Curl_easy *data,
   bool alive = TRUE;
 
   *input_pending = FALSE;
-  if(!cf->next || !cf->next->cft->is_alive(cf->next, data, input_pending))
+  if(!cf->next || !Curl_conn_cf_is_alive(cf->next, data, input_pending))
     return FALSE;
 
   if(*input_pending) {
@@ -2660,12 +2660,13 @@ static CURLcode cf_h2_query(struct Curl_cfilter *cf,
     *pres1 = stream? (int)stream->error : 0;
     return CURLE_OK;
   }
+  case CF_QUERY_IS_ALIVE:
+    *pres1 = cf_h2_is_alive(cf, data, (bool *)pres2);
+    return CURLE_OK;
   default:
     break;
   }
-  return cf->next?
-    cf->next->cft->query(cf->next, data, query, pres1, pres2) :
-    CURLE_UNKNOWN_OPTION;
+  return Curl_cf_def_query(cf, data, query, pres1, pres2);
 }
 
 struct Curl_cftype Curl_cft_nghttp2 = {
@@ -2682,7 +2683,6 @@ struct Curl_cftype Curl_cft_nghttp2 = {
   cf_h2_send,
   cf_h2_recv,
   cf_h2_cntrl,
-  cf_h2_is_alive,
   cf_h2_keep_alive,
   cf_h2_query,
 };

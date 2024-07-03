@@ -113,15 +113,6 @@ ssize_t  Curl_cf_def_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     CURLE_SEND_ERROR;
 }
 
-bool Curl_cf_def_conn_is_alive(struct Curl_cfilter *cf,
-                               struct Curl_easy *data,
-                               bool *input_pending)
-{
-  return cf->next?
-    cf->next->cft->is_alive(cf->next, data, input_pending) :
-    FALSE; /* pessimistic in absence of data */
-}
-
 CURLcode Curl_cf_def_conn_keep_alive(struct Curl_cfilter *cf,
                                      struct Curl_easy *data)
 {
@@ -746,12 +737,37 @@ static void conn_report_connect_stats(struct Curl_easy *data,
   }
 }
 
+bool Curl_conn_cf_is_alive(struct Curl_cfilter *cf,
+                           struct Curl_easy *data,
+                           bool *input_pending)
+{
+  int is_alive = FALSE;
+  *input_pending = FALSE;
+  if(cf) {
+    CURLcode result = cf->cft->query(cf, data, CF_QUERY_IS_ALIVE,
+                                     &is_alive, input_pending);
+    return !result && !!is_alive;
+  }
+  return FALSE;
+}
+
 bool Curl_conn_is_alive(struct Curl_easy *data, struct connectdata *conn,
                         bool *input_pending)
 {
   struct Curl_cfilter *cf = conn->cfilter[FIRSTSOCKET];
-  return cf && !cf->conn->bits.close &&
-         cf->cft->is_alive(cf, data, input_pending);
+
+  *input_pending = FALSE;
+  if(cf->conn->bits.close)
+    return FALSE;
+
+  /* Get the lowest not-connected filter, if there is one */
+  while(cf && !cf->connected && cf->next && !cf->next->connected)
+    cf = cf->next;
+  /* If this filter is shutdown, the connection is not alive */
+  if(cf && cf->shutdown)
+    return FALSE;
+
+  return Curl_conn_cf_is_alive(cf, data, input_pending);
 }
 
 CURLcode Curl_conn_keep_alive(struct Curl_easy *data,

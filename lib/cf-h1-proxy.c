@@ -1083,7 +1083,6 @@ struct Curl_cftype Curl_cft_h1_proxy = {
   Curl_cf_def_send,
   Curl_cf_def_recv,
   Curl_cf_def_cntrl,
-  Curl_cf_def_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
   Curl_cf_def_query,
 };
