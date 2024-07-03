@@ -466,7 +466,7 @@ jobs:
         shell: bash
         run: |
           git clone --quiet --depth 1 https://github.com/microsoft/vcpkg/
-          vcpkg/bootstrap-vcpkg.sh
+          vcpkg/bootstrap-vcpkg.sh -disableMetrics
 
       - name: 'vcpkg build'
         timeout-minutes: 10
