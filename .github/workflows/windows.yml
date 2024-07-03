@@ -236,7 +236,7 @@ jobs:
         run: |
           export TFLAGS='-j14 ${{ matrix.tflags }}'
           if [ '${{ matrix.sys }}' != 'msys' ]; then
-            TFLAGS+=' !TFTP !MQTT !WebSockets !3005 !3006'
+            TFLAGS+=' !TFTP !MQTT !WebSockets !SMTP'
           fi
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
@@ -305,7 +305,7 @@ jobs:
         run: |
           export TFLAGS='-j14 ${{ matrix.tflags }}'
           if [ '${{ matrix.sys }}' != 'msys' ]; then
-            TFLAGS+=' !TFTP !MQTT !WebSockets !3005 !3006'
+            TFLAGS+=' !TFTP !MQTT !WebSockets !SMTP'
           fi
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
@@ -556,7 +556,7 @@ jobs:
         timeout-minutes: 30
         shell: bash
         run: |
-          export TFLAGS='-j14 !TFTP ${{ matrix.tflags }}'
+          export TFLAGS='-j14 !TFTP !SMTP ${{ matrix.tflags }}'
           export VCPKG_ROOT="$PWD/vcpkg"
           export VCPKG_TRIPLET_DIR="$VCPKG_ROOT/installed/${{ matrix.arch }}-${{ matrix.plat }}"
           export debug_lib="$VCPKG_TRIPLET_DIR/debug/bin"
