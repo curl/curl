@@ -985,6 +985,18 @@ static void cf_msh3_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 }
 
+static bool cf_msh3_conn_is_alive(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  bool *input_pending)
+{
+  struct cf_msh3_ctx *ctx = cf->ctx;
+
+  (void)data;
+  *input_pending = FALSE;
+  return ctx && ctx->sock[SP_LOCAL] != CURL_SOCKET_BAD && ctx->qconn &&
+         ctx->connected;
+}
+
 static CURLcode cf_msh3_query(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
                               int query, int *pres1, void *pres2)
@@ -1021,18 +1033,6 @@ static CURLcode cf_msh3_query(struct Curl_cfilter *cf,
     break;
   }
   return Curl_cf_def_query(cf, data, query, pres1, pres2);
-}
-
-static bool cf_msh3_conn_is_alive(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  bool *input_pending)
-{
-  struct cf_msh3_ctx *ctx = cf->ctx;
-
-  (void)data;
-  *input_pending = FALSE;
-  return ctx && ctx->sock[SP_LOCAL] != CURL_SOCKET_BAD && ctx->qconn &&
-         ctx->connected;
 }
 
 struct Curl_cftype Curl_cft_http3 = {
