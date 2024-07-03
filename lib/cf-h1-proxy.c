@@ -378,7 +378,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
   error = SELECT_OK;
   *done = FALSE;
 
-  if(!Curl_conn_data_pending(data, cf->sockindex))
+  if(!Curl_conn_input_pending(data, cf->sockindex))
     return CURLE_OK;
 
   while(ts->keepon) {
@@ -1079,7 +1079,6 @@ struct Curl_cftype Curl_cft_h1_proxy = {
   Curl_cf_def_shutdown,
   Curl_cf_http_proxy_get_host,
   cf_h1_proxy_adjust_pollset,
-  Curl_cf_def_data_pending,
   Curl_cf_def_send,
   Curl_cf_def_recv,
   Curl_cf_def_cntrl,

@@ -1252,7 +1252,6 @@ struct Curl_cftype Curl_cft_socks_proxy = {
   Curl_cf_def_shutdown,
   socks_cf_get_host,
   socks_cf_adjust_pollset,
-  Curl_cf_def_data_pending,
   Curl_cf_def_send,
   Curl_cf_def_recv,
   Curl_cf_def_cntrl,

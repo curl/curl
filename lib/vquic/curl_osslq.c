@@ -2123,8 +2123,8 @@ out:
  * Called from transfer.c:data_pending to know if we should keep looping
  * to receive more data from the connection.
  */
-static bool cf_osslq_data_pending(struct Curl_cfilter *cf,
-                                  const struct Curl_easy *data)
+static bool cf_osslq_input_pending(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
   const struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
@@ -2313,6 +2313,9 @@ static CURLcode cf_osslq_query(struct Curl_cfilter *cf,
   case CF_QUERY_IS_ALIVE:
     *pres1 = cf_osslq_conn_is_alive(cf, data, (bool *)pres2);
     return CURLE_OK;
+  case CF_QUERY_INPUT_PENDING:
+    *pres1 = cf_osslq_input_pending(cf, data);
+    return CURLE_OK;
   default:
     break;
   }
@@ -2329,7 +2332,6 @@ struct Curl_cftype Curl_cft_http3 = {
   cf_osslq_shutdown,
   Curl_cf_def_get_host,
   cf_osslq_adjust_pollset,
-  cf_osslq_data_pending,
   cf_osslq_send,
   cf_osslq_recv,
   cf_osslq_data_event,

@@ -863,7 +863,7 @@ CURLcode Curl_GetFTPResponse(struct Curl_easy *data,
        * wait for more data anyway.
        */
     }
-    else if(!Curl_conn_data_pending(data, FIRSTSOCKET)) {
+    else if(!Curl_conn_input_pending(data, FIRSTSOCKET)) {
       switch(SOCKET_READABLE(sockfd, interval_ms)) {
       case -1: /* select() error, stop reading */
         failf(data, "FTP response aborted due to select/poll error: %d",

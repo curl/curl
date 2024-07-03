@@ -120,12 +120,12 @@ static int data_pending(struct Curl_easy *data)
   struct connectdata *conn = data->conn;
 
   if(conn->handler->protocol&PROTO_FAMILY_FTP)
-    return Curl_conn_data_pending(data, SECONDARYSOCKET);
+    return Curl_conn_input_pending(data, SECONDARYSOCKET);
 
   /* in the case of libssh2, we can never be really sure that we have emptied
      its internal buffers so we MUST always try until we get EAGAIN back */
   return conn->handler->protocol&(CURLPROTO_SCP|CURLPROTO_SFTP) ||
-    Curl_conn_data_pending(data, FIRSTSOCKET);
+    Curl_conn_input_pending(data, FIRSTSOCKET);
 }
 
 /*

@@ -1461,8 +1461,8 @@ static void cf_socket_adjust_pollset(struct Curl_cfilter *cf,
   }
 }
 
-static bool cf_socket_data_pending(struct Curl_cfilter *cf,
-                                   const struct Curl_easy *data)
+static bool cf_socket_input_pending(struct Curl_cfilter *cf,
+                                    struct Curl_easy *data)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
   int readable;
@@ -1794,6 +1794,9 @@ static CURLcode cf_socket_query(struct Curl_cfilter *cf,
   case CF_QUERY_IS_ALIVE:
     *pres1 = cf_socket_conn_is_alive(cf, data, (bool *)pres2);
     return CURLE_OK;
+  case CF_QUERY_INPUT_PENDING:
+    *pres1 = cf_socket_input_pending(cf, data);
+    return CURLE_OK;
   default:
     break;
   }
@@ -1810,7 +1813,6 @@ struct Curl_cftype Curl_cft_tcp = {
   cf_socket_shutdown,
   cf_socket_get_host,
   cf_socket_adjust_pollset,
-  cf_socket_data_pending,
   cf_socket_send,
   cf_socket_recv,
   cf_socket_cntrl,
@@ -1958,7 +1960,6 @@ struct Curl_cftype Curl_cft_udp = {
   cf_socket_shutdown,
   cf_socket_get_host,
   cf_socket_adjust_pollset,
-  cf_socket_data_pending,
   cf_socket_send,
   cf_socket_recv,
   cf_socket_cntrl,
@@ -2009,7 +2010,6 @@ struct Curl_cftype Curl_cft_unix = {
   cf_socket_shutdown,
   cf_socket_get_host,
   cf_socket_adjust_pollset,
-  cf_socket_data_pending,
   cf_socket_send,
   cf_socket_recv,
   cf_socket_cntrl,
@@ -2073,7 +2073,6 @@ struct Curl_cftype Curl_cft_tcp_accept = {
   cf_socket_shutdown,
   cf_socket_get_host,              /* TODO: not accurate */
   cf_socket_adjust_pollset,
-  cf_socket_data_pending,
   cf_socket_send,
   cf_socket_recv,
   cf_socket_cntrl,

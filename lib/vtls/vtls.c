@@ -1701,8 +1701,8 @@ out:
   return result;
 }
 
-static bool ssl_cf_data_pending(struct Curl_cfilter *cf,
-                                const struct Curl_easy *data)
+static bool cf_ssl_input_pending(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data)
 {
   struct cf_call_data save;
   bool result;
@@ -1711,7 +1711,7 @@ static bool ssl_cf_data_pending(struct Curl_cfilter *cf,
   if(Curl_ssl->data_pending(cf, data))
     result = TRUE;
   else
-    result = cf->next->cft->has_data_pending(cf->next, data);
+    result = Curl_conn_cf_input_pending(cf->next, data);
   CF_DATA_RESTORE(cf, save);
   return result;
 }
@@ -1858,6 +1858,9 @@ static CURLcode cf_ssl_query(struct Curl_cfilter *cf,
   case CF_QUERY_IS_ALIVE:
     *pres1 = cf_ssl_is_alive(cf, data, (bool *)pres2);
     return CURLE_OK;
+  case CF_QUERY_INPUT_PENDING:
+    *pres1 = cf_ssl_input_pending(cf, data);
+    return CURLE_OK;
   default:
     break;
   }
@@ -1874,7 +1877,6 @@ struct Curl_cftype Curl_cft_ssl = {
   ssl_cf_shutdown,
   Curl_cf_def_get_host,
   ssl_cf_adjust_pollset,
-  ssl_cf_data_pending,
   ssl_cf_send,
   ssl_cf_recv,
   ssl_cf_cntrl,
@@ -1894,7 +1896,6 @@ struct Curl_cftype Curl_cft_ssl_proxy = {
   ssl_cf_shutdown,
   Curl_cf_def_get_host,
   ssl_cf_adjust_pollset,
-  ssl_cf_data_pending,
   ssl_cf_send,
   ssl_cf_recv,
   ssl_cf_cntrl,

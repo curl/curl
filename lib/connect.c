@@ -1030,19 +1030,19 @@ static void cf_he_close(struct Curl_cfilter *cf,
 }
 
 static bool cf_he_data_pending(struct Curl_cfilter *cf,
-                               const struct Curl_easy *data)
+                               struct Curl_easy *data)
 {
   struct cf_he_ctx *ctx = cf->ctx;
   size_t i;
 
   if(cf->connected)
-    return cf->next->cft->has_data_pending(cf->next, data);
+    return Curl_conn_cf_input_pending(cf->next, data);
 
   for(i = 0; i < ARRAYSIZE(ctx->baller); i++) {
     struct eyeballer *baller = ctx->baller[i];
     if(!baller || !baller->cf)
       continue;
-    if(baller->cf->cft->has_data_pending(baller->cf, data))
+    if(Curl_conn_cf_input_pending(baller->cf, data))
       return TRUE;
   }
   return FALSE;
@@ -1107,6 +1107,9 @@ static CURLcode cf_he_query(struct Curl_cfilter *cf,
       *when = get_max_baller_time(cf, data, CF_QUERY_TIMER_APPCONNECT);
       return CURLE_OK;
     }
+    case CF_QUERY_INPUT_PENDING:
+      *pres1 = cf_he_data_pending(cf, data);
+      return CURLE_OK;
     default:
       break;
     }
@@ -1139,7 +1142,6 @@ struct Curl_cftype Curl_cft_happy_eyeballs = {
   cf_he_shutdown,
   Curl_cf_def_get_host,
   cf_he_adjust_pollset,
-  cf_he_data_pending,
   Curl_cf_def_send,
   Curl_cf_def_recv,
   Curl_cf_def_cntrl,
@@ -1403,7 +1405,6 @@ struct Curl_cftype Curl_cft_setup = {
   Curl_cf_def_shutdown,
   Curl_cf_def_get_host,
   Curl_cf_def_adjust_pollset,
-  Curl_cf_def_data_pending,
   Curl_cf_def_send,
   Curl_cf_def_recv,
   Curl_cf_def_cntrl,

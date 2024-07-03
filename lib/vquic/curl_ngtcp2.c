@@ -1913,18 +1913,6 @@ out:
   return CURLE_OK;
 }
 
-/*
- * Called from transfer.c:data_pending to know if we should keep looping
- * to receive more data from the connection.
- */
-static bool cf_ngtcp2_data_pending(struct Curl_cfilter *cf,
-                                   const struct Curl_easy *data)
-{
-  (void)cf;
-  (void)data;
-  return FALSE;
-}
-
 static CURLcode h3_data_pause(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
                               bool pause)
@@ -2497,6 +2485,9 @@ static CURLcode cf_ngtcp2_query(struct Curl_cfilter *cf,
   case CF_QUERY_IS_ALIVE:
     *pres1 = cf_ngtcp2_conn_is_alive(cf, data, (bool *)pres2);
     return CURLE_OK;
+  case CF_QUERY_INPUT_PENDING:
+    /* we never buffer */
+    break;
   default:
     break;
   }
@@ -2513,7 +2504,6 @@ struct Curl_cftype Curl_cft_http3 = {
   cf_ngtcp2_shutdown,
   Curl_cf_def_get_host,
   cf_ngtcp2_adjust_pollset,
-  cf_ngtcp2_data_pending,
   cf_ngtcp2_send,
   cf_ngtcp2_recv,
   cf_ngtcp2_data_event,

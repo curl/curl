@@ -1210,15 +1210,15 @@ out:
   return result;
 }
 
-static bool cf_h2_proxy_data_pending(struct Curl_cfilter *cf,
-                                     const struct Curl_easy *data)
+static bool cf_h2_proxy_input_pending(struct Curl_cfilter *cf,
+                                      struct Curl_easy *data)
 {
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
   if((ctx && !Curl_bufq_is_empty(&ctx->inbufq)) ||
      (ctx && ctx->tunnel.state == H2_TUNNEL_ESTABLISHED &&
       !Curl_bufq_is_empty(&ctx->tunnel.recvbuf)))
     return TRUE;
-  return cf->next? cf->next->cft->has_data_pending(cf->next, data) : FALSE;
+  return Curl_conn_cf_input_pending(cf->next, data);
 }
 
 static void cf_h2_proxy_adjust_pollset(struct Curl_cfilter *cf,
@@ -1585,6 +1585,9 @@ static CURLcode cf_h2_proxy_query(struct Curl_cfilter *cf,
   case CF_QUERY_IS_ALIVE:
     *pres1 = cf_h2_proxy_is_alive(cf, data, (bool *)pres2);
     return CURLE_OK;
+  case CF_QUERY_INPUT_PENDING:
+    *pres1 = cf_h2_proxy_input_pending(cf, data);
+    return CURLE_OK;
   default:
     break;
   }
@@ -1601,7 +1604,6 @@ struct Curl_cftype Curl_cft_h2_proxy = {
   cf_h2_proxy_shutdown,
   Curl_cf_http_proxy_get_host,
   cf_h2_proxy_adjust_pollset,
-  cf_h2_proxy_data_pending,
   cf_h2_proxy_send,
   cf_h2_proxy_recv,
   Curl_cf_def_cntrl,

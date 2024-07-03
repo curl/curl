@@ -197,7 +197,6 @@ struct Curl_cftype Curl_cft_haproxy = {
   Curl_cf_def_shutdown,
   Curl_cf_def_get_host,
   cf_haproxy_adjust_pollset,
-  Curl_cf_def_data_pending,
   Curl_cf_def_send,
   Curl_cf_def_recv,
   Curl_cf_def_cntrl,

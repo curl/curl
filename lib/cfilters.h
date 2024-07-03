@@ -98,9 +98,6 @@ typedef void     Curl_cft_adjust_pollset(struct Curl_cfilter *cf,
                                           struct Curl_easy *data,
                                           struct easy_pollset *ps);
 
-typedef bool     Curl_cft_data_pending(struct Curl_cfilter *cf,
-                                       const struct Curl_easy *data);
-
 typedef ssize_t  Curl_cft_send(struct Curl_cfilter *cf,
                                struct Curl_easy *data, /* transfer */
                                const void *buf,        /* data to write */
@@ -167,6 +164,7 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
 #define CF_QUERY_TIMER_APPCONNECT   5  /* -          struct curltime */
 #define CF_QUERY_STREAM_ERROR       6  /* error code - */
 #define CF_QUERY_IS_ALIVE           7  /* TRUE/FALSE bool* input_pending */
+#define CF_QUERY_INPUT_PENDING      8  /* TRUE/FALSE - */
 
 /**
  * Query the cfilter for properties. Filters ignorant of a query will
@@ -203,7 +201,6 @@ struct Curl_cftype {
   Curl_cft_shutdown *do_shutdown;         /* shutdown conn */
   Curl_cft_get_host *get_host;            /* host filter talks to */
   Curl_cft_adjust_pollset *adjust_pollset; /* adjust transfer poll set */
-  Curl_cft_data_pending *has_data_pending;/* conn has data pending */
   Curl_cft_send *do_send;                 /* send data */
   Curl_cft_recv *do_recv;                 /* receive data */
   Curl_cft_cntrl *cntrl;                  /* events/control */
@@ -234,8 +231,6 @@ void     Curl_cf_def_get_host(struct Curl_cfilter *cf, struct Curl_easy *data,
 void     Curl_cf_def_adjust_pollset(struct Curl_cfilter *cf,
                                      struct Curl_easy *data,
                                      struct easy_pollset *ps);
-bool     Curl_cf_def_data_pending(struct Curl_cfilter *cf,
-                                  const struct Curl_easy *data);
 ssize_t  Curl_cf_def_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                           const void *buf, size_t len, CURLcode *err);
 ssize_t  Curl_cf_def_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
@@ -384,12 +379,18 @@ void Curl_conn_close(struct Curl_easy *data, int sockindex);
  */
 CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done);
 
+
 /**
- * Return if data is pending in some connection filter at chain
+ * Return if the filter chain starting at `cf` has input data pending.
+ */
+bool Curl_conn_cf_input_pending(struct Curl_cfilter *cf,
+                                struct Curl_easy *data);
+
+/**
+ * Return if input data is pending in the connection filter chain at
  * `sockindex` for connection `data->conn`.
  */
-bool Curl_conn_data_pending(struct Curl_easy *data,
-                            int sockindex);
+bool Curl_conn_input_pending(struct Curl_easy *data, int sockindex);
 
 /**
  * Return the socket used on data's connection for the index.

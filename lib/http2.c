@@ -1907,7 +1907,7 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
        * the transfer loop can handle the data/close here. However,
        * this may leave data in underlying buffers that will not
        * be consumed. */
-      if(!cf->next || !cf->next->cft->has_data_pending(cf->next, data))
+      if(!Curl_conn_cf_input_pending(cf->next, data))
         drain_stream(cf, data, stream);
       break;
     }
@@ -2592,8 +2592,8 @@ static CURLcode cf_h2_cntrl(struct Curl_cfilter *cf,
   return result;
 }
 
-static bool cf_h2_data_pending(struct Curl_cfilter *cf,
-                               const struct Curl_easy *data)
+static bool cf_h2_input_pending(struct Curl_cfilter *cf,
+                                struct Curl_easy *data)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
   struct h2_stream_ctx *stream = H2_STREAM_CTX(ctx, data);
@@ -2601,7 +2601,7 @@ static bool cf_h2_data_pending(struct Curl_cfilter *cf,
   if(ctx && (!Curl_bufq_is_empty(&ctx->inbufq)
             || (stream && !Curl_bufq_is_empty(&stream->sendbuf))))
     return TRUE;
-  return cf->next? cf->next->cft->has_data_pending(cf->next, data) : FALSE;
+  return Curl_conn_cf_input_pending(cf->next, data);
 }
 
 static bool cf_h2_is_alive(struct Curl_cfilter *cf,
@@ -2663,6 +2663,9 @@ static CURLcode cf_h2_query(struct Curl_cfilter *cf,
   case CF_QUERY_IS_ALIVE:
     *pres1 = cf_h2_is_alive(cf, data, (bool *)pres2);
     return CURLE_OK;
+  case CF_QUERY_INPUT_PENDING:
+    *pres1 = cf_h2_input_pending(cf, data);
+    return CURLE_OK;
   default:
     break;
   }
@@ -2679,7 +2682,6 @@ struct Curl_cftype Curl_cft_nghttp2 = {
   cf_h2_shutdown,
   Curl_cf_def_get_host,
   cf_h2_adjust_pollset,
-  cf_h2_data_pending,
   cf_h2_send,
   cf_h2_recv,
   cf_h2_cntrl,

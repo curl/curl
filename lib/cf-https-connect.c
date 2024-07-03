@@ -91,9 +91,9 @@ static int cf_hc_baller_reply_ms(struct cf_hc_baller *b,
 }
 
 static bool cf_hc_baller_data_pending(struct cf_hc_baller *b,
-                                      const struct Curl_easy *data)
+                                      struct Curl_easy *data)
 {
-  return b->cf && !b->result && b->cf->cft->has_data_pending(b->cf, data);
+  return !b->result && Curl_conn_cf_input_pending(b->cf, data);
 }
 
 struct cf_hc_ctx {
@@ -388,12 +388,12 @@ static void cf_hc_adjust_pollset(struct Curl_cfilter *cf,
 }
 
 static bool cf_hc_data_pending(struct Curl_cfilter *cf,
-                               const struct Curl_easy *data)
+                               struct Curl_easy *data)
 {
   struct cf_hc_ctx *ctx = cf->ctx;
 
   if(cf->connected)
-    return cf->next->cft->has_data_pending(cf->next, data);
+    return Curl_conn_cf_input_pending(cf->next, data);
 
   CURL_TRC_CF((struct Curl_easy *)data, cf, "data_pending");
   return cf_hc_baller_data_pending(&ctx->h3_baller, data)
@@ -440,13 +440,14 @@ static CURLcode cf_hc_query(struct Curl_cfilter *cf,
       *when = cf_get_max_baller_time(cf, data, CF_QUERY_TIMER_APPCONNECT);
       return CURLE_OK;
     }
+    case CF_QUERY_INPUT_PENDING:
+      *pres1 = cf_hc_data_pending(cf, data);
+      return CURLE_OK;
     default:
       break;
     }
   }
-  return cf->next?
-    cf->next->cft->query(cf->next, data, query, pres1, pres2) :
-    CURLE_UNKNOWN_OPTION;
+  return Curl_cf_def_query(cf, data, query, pres1, pres2);
 }
 
 static void cf_hc_close(struct Curl_cfilter *cf, struct Curl_easy *data)
@@ -481,7 +482,6 @@ struct Curl_cftype Curl_cft_http_connect = {
   cf_hc_shutdown,
   Curl_cf_def_get_host,
   cf_hc_adjust_pollset,
-  cf_hc_data_pending,
   Curl_cf_def_send,
   Curl_cf_def_recv,
   Curl_cf_def_cntrl,

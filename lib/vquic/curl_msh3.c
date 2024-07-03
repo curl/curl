@@ -724,8 +724,8 @@ static void cf_msh3_adjust_pollset(struct Curl_cfilter *cf,
   }
 }
 
-static bool cf_msh3_data_pending(struct Curl_cfilter *cf,
-                                 const struct Curl_easy *data)
+static bool cf_msh3_input_pending(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data)
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
   struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
@@ -1014,6 +1014,9 @@ static CURLcode cf_msh3_query(struct Curl_cfilter *cf,
   case CF_QUERY_IS_ALIVE:
     *pres1 = cf_msh3_conn_is_alive(cf, data, (bool *)pres2);
     return CURLE_OK;
+  case CF_QUERY_INPUT_PENDING:
+    *pres1 = cf_msh3_input_pending(cf, data);
+    return CURLE_OK;
   default:
     break;
   }
@@ -1042,7 +1045,6 @@ struct Curl_cftype Curl_cft_http3 = {
   Curl_cf_def_shutdown,
   Curl_cf_def_get_host,
   cf_msh3_adjust_pollset,
-  cf_msh3_data_pending,
   cf_msh3_send,
   cf_msh3_recv,
   cf_msh3_data_event,

@@ -104,12 +104,12 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
   else
     interval_ms = 0; /* immediate */
 
-  if(Curl_conn_data_pending(data, FIRSTSOCKET))
+  if(Curl_conn_input_pending(data, FIRSTSOCKET))
     rc = 1;
   else if(pp->overflow)
     /* We are receiving and there is data in the cache so just read it */
     rc = 1;
-  else if(!pp->sendleft && Curl_conn_data_pending(data, FIRSTSOCKET))
+  else if(!pp->sendleft && Curl_conn_input_pending(data, FIRSTSOCKET))
     /* We are receiving and there is data ready in the SSL library */
     rc = 1;
   else
