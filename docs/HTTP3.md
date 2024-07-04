@@ -215,7 +215,7 @@ Build OpenSSL 3.3.1
      % cd ..
      % git clone -b openssl-3.3.1 https://github.com/openssl/openssl
      % cd openssl
-     % ./config enable-tls1_3 --prefix=<somewhere> --libdir=<somewhere>/lib
+     % ./config enable-tls1_3 --prefix=<somewhere> --libdir=lib
      % make
      % make install
 
