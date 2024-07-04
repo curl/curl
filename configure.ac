@@ -4817,6 +4817,10 @@ else
   AC_MSG_RESULT([no])
 fi
 
+if test "x$ECH_ENABLED" = "x1"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES ECH"
+fi
+
 if test ${ac_cv_sizeof_curl_off_t} -gt 4; then
   if test ${ac_cv_sizeof_off_t} -gt 4 -o \
      "$curl_win32_file_api" = "win32_large_files"; then
@@ -4842,6 +4846,13 @@ else
      SUPPORT_FEATURES="$SUPPORT_FEATURES threadsafe"
   ],[
   ])
+fi
+
+if test "x$want_debug" = "xyes"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES Debug"
+fi
+if test "x$want_curldebug" = "xyes"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES TrackMemory"
 fi
 
 dnl replace spaces with newlines
