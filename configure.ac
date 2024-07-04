@@ -549,8 +549,6 @@ CURL_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE
 CURL_CHECK_COMPILER_PROTOTYPE_MISMATCH
 CURL_CHECK_COMPILER_SYMBOL_HIDING
 
-CURL_CHECK_CURLDEBUG
-
 supports_unittests=yes
 # cross-compilation of unit tests static library/programs fails when
 # libcurl shared library is built. This might be due to a libtool or
@@ -4817,6 +4815,12 @@ else
   AC_MSG_RESULT([no])
 fi
 
+if test "x$OPENSSL_ENABLED" = "x1" -o -n "$SSL_ENABLED"; then
+  if test "x$ECH_ENABLED" = "x1"; then
+    SUPPORT_FEATURES="$SUPPORT_FEATURES ECH"
+  fi
+fi
+
 if test ${ac_cv_sizeof_curl_off_t} -gt 4; then
   if test ${ac_cv_sizeof_off_t} -gt 4 -o \
      "$curl_win32_file_api" = "win32_large_files"; then
@@ -4842,6 +4846,13 @@ else
      SUPPORT_FEATURES="$SUPPORT_FEATURES threadsafe"
   ],[
   ])
+fi
+
+if test "x$want_debug" = "xyes"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES Debug"
+fi
+if test "x$want_curldebug" = "xyes"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES TrackMemory"
 fi
 
 dnl replace spaces with newlines
