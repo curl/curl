@@ -257,5 +257,5 @@ jobs:
       - run: cmake -B build -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DUSE_APPLE_IDN=ON ${{ matrix.build.generate }}
         name: 'cmake generate'
 
-      - run: cmake --build build --parallel 3
+      - run: cmake --build build --parallel 4
         name: 'cmake build'
