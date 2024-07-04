@@ -1338,9 +1338,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(result)
           break;
 
-        /* result is only used when for ipfs and ipns, ignored otherwise */
         result = url_proto(&per->this_url, config, &use_proto);
-        if(result && (use_proto == proto_ipfs || use_proto == proto_ipns))
+        if(result)
           break;
 
 #ifndef DEBUGBUILD
