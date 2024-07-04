@@ -4817,8 +4817,10 @@ else
   AC_MSG_RESULT([no])
 fi
 
-if test "x$ECH_ENABLED" = "x1"; then
-  SUPPORT_FEATURES="$SUPPORT_FEATURES ECH"
+if test "x$OPENSSL_ENABLED" = "x1" -o -n "$SSL_ENABLED"; then
+  if test "x$ECH_ENABLED" = "x1"; then
+    SUPPORT_FEATURES="$SUPPORT_FEATURES ECH"
+  fi
 fi
 
 if test ${ac_cv_sizeof_curl_off_t} -gt 4; then
