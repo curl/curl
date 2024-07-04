@@ -2813,7 +2813,7 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
   /* Parse .curlrc if necessary */
   if((argc == 1) ||
      (first_arg && strncmp(first_arg, "-q", 2) &&
-      !curl_strequal(first_arg, "--disable"))) {
+      strcmp(first_arg, "--disable"))) {
     parseconfig(NULL, global); /* ignore possible failure */
 
     /* If we had no arguments then make sure a url was specified in .curlrc */
