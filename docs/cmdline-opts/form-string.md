@@ -5,7 +5,7 @@ Long: form-string
 Help: Specify multipart MIME data
 Protocols: HTTP SMTP IMAP
 Arg: <name=string>
-Category: http upload
+Category: http upload post smtp imap
 Added: 7.13.2
 Multi: append
 See-also:

@@ -42,41 +42,39 @@
 struct category_descriptors {
   const char *opt;
   const char *desc;
-  curlhelp_t category;
+  unsigned int category;
 };
 
 static const struct category_descriptors categories[] = {
-  {"auth", "Different types of authentication methods", CURLHELP_AUTH},
-  {"connection", "Low level networking operations",
-   CURLHELP_CONNECTION},
-  {"curl", "The command line tool itself", CURLHELP_CURL},
-  {"dns", "General DNS options", CURLHELP_DNS},
-  {"file", "FILE protocol options", CURLHELP_FILE},
-  {"ftp", "FTP protocol options", CURLHELP_FTP},
-  {"http", "HTTP and HTTPS protocol options", CURLHELP_HTTP},
-  {"imap", "IMAP protocol options", CURLHELP_IMAP},
   /* important is left out because it is the default help page */
-  {"misc", "Options that do not fit into any other category", CURLHELP_MISC},
+  {"auth", "Authentication methods", CURLHELP_AUTH},
+  {"connection", "Manage connections", CURLHELP_CONNECTION},
+  {"curl", "The command line tool itself", CURLHELP_CURL},
+  {"deprecated", "Legacy", CURLHELP_DEPRECATED},
+  {"dns", "Names and resolving", CURLHELP_DNS},
+  {"file", "FILE protocol", CURLHELP_FILE},
+  {"ftp", "FTP protocol", CURLHELP_FTP},
+  {"global", "Global options", CURLHELP_GLOBAL},
+  {"http", "HTTP and HTTPS protocol", CURLHELP_HTTP},
+  {"imap", "IMAP protocol", CURLHELP_IMAP},
+  {"ldap", "LDAP protocol", CURLHELP_LDAP},
   {"output", "Filesystem output", CURLHELP_OUTPUT},
-  {"pop3", "POP3 protocol options", CURLHELP_POP3},
-  {"post", "HTTP Post specific options", CURLHELP_POST},
-  {"proxy", "All options related to proxies", CURLHELP_PROXY},
-  {"scp", "SCP protocol options", CURLHELP_SCP},
-  {"sftp", "SFTP protocol options", CURLHELP_SFTP},
-  {"smtp", "SMTP protocol options", CURLHELP_SMTP},
-  {"ssh", "SSH protocol options", CURLHELP_SSH},
-  {"telnet", "TELNET protocol options", CURLHELP_TELNET},
-  {"tftp", "TFTP protocol options", CURLHELP_TFTP},
-  {"tls", "All TLS/SSL related options", CURLHELP_TLS},
-  {"ech", "All Encrypted Client Hello (ECH) options", CURLHELP_ECH},
-  {"upload", "All options for uploads",
-   CURLHELP_UPLOAD},
-  {"verbose", "Options related to any kind of command line output of curl",
-   CURLHELP_VERBOSE},
-  {NULL, NULL, CURLHELP_HIDDEN}
+  {"pop3", "POP3 protocol", CURLHELP_POP3},
+  {"post", "HTTP POST specific", CURLHELP_POST},
+  {"proxy", "Options for proxies", CURLHELP_PROXY},
+  {"scp", "SCP protocol", CURLHELP_SCP},
+  {"sftp", "SFTP protocol", CURLHELP_SFTP},
+  {"smtp", "SMTP protocol", CURLHELP_SMTP},
+  {"ssh", "SSH protocol", CURLHELP_SSH},
+  {"telnet", "TELNET protocol", CURLHELP_TELNET},
+  {"tftp", "TFTP protocol", CURLHELP_TFTP},
+  {"timeout", "Timeouts and delays", CURLHELP_TIMEOUT},
+  {"tls", "TLS/SSL related", CURLHELP_TLS},
+  {"upload", "Upload, sending data", CURLHELP_UPLOAD},
+  {"verbose", "Tracing, logging etc", CURLHELP_VERBOSE}
 };
 
-static void print_category(curlhelp_t category, unsigned int cols)
+static void print_category(unsigned int category, unsigned int cols)
 {
   unsigned int i;
   size_t longopt = 5;
@@ -114,7 +112,7 @@ static void print_category(curlhelp_t category, unsigned int cols)
 static int get_category_content(const char *category, unsigned int cols)
 {
   unsigned int i;
-  for(i = 0; categories[i].opt; ++i)
+  for(i = 0; i < sizeof(categories)/sizeof(categories[0]); ++i)
     if(curl_strequal(categories[i].opt, category)) {
       printf("%s: %s\n", categories[i].opt, categories[i].desc);
       print_category(categories[i].category, cols);
@@ -127,7 +125,7 @@ static int get_category_content(const char *category, unsigned int cols)
 static void get_categories(void)
 {
   unsigned int i;
-  for(i = 0; categories[i].opt; ++i)
+  for(i = 0; i < sizeof(categories)/sizeof(categories[0]); ++i)
     printf(" %-11s %s\n", categories[i].opt, categories[i].desc);
 }
 
@@ -147,14 +145,14 @@ void tool_help(char *category)
   }
   /* Lets print everything if "all" was provided */
   else if(curl_strequal(category, "all"))
-    /* Print everything except hidden */
-    print_category(~(CURLHELP_HIDDEN), cols);
+    /* Print everything */
+    print_category(CURLHELP_ALL, cols);
   /* Lets handle the string "category" differently to not print an errormsg */
   else if(curl_strequal(category, "category"))
     get_categories();
   /* Otherwise print category and handle the case if the cat was not found */
   else if(get_category_content(category, cols)) {
-    puts("Invalid category provided, here is a list of all categories:\n");
+    puts("Unknown category provided, here is a list of all categories:\n");
     get_categories();
   }
   free(category);

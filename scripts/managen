@@ -667,6 +667,10 @@ sub single {
     my $pre = $manpage ? "\n": "[1]";
 
     if($scope) {
+        if($category !~ /global/) {
+            print STDERR "$f:$line:1:ERROR: global scope option does not have global category\n";
+            return 2;
+        }
         if($scope eq "global") {
             push @desc, "\n" if(!$manpage);
             push @desc, "${pre}This option is global and does not need to be specified for each use of --next.\n";
@@ -885,7 +889,25 @@ sub header {
     printdesc($manpage, 0, @d);
 }
 
+
+sub sourcecategories {
+    my ($dir) = @_;
+    my %cats;
+    open(H, "<$dir/../../src/tool_help.h") ||
+        die "can't find the header file";
+    while(<H>) {
+        if(/^\#define CURLHELP_([A-Z0-9]*)/) {
+            $cats{lc($1)}++;
+        }
+    }
+    close(H);
+    return %cats;
+}
+
 sub listhelp {
+    my ($dir) = @_;
+    my %cats = sourcecategories($dir);
+
     print <<HEAD
 /***************************************************************************
  *                                  _   _ ____  _
@@ -938,6 +960,12 @@ HEAD
             $opt = "    --$long";
         }
         for my $i (0 .. $#categories) {
+            if(!$cats{ $categories[$i] }) {
+                printf STDERR "$f.md:ERROR: Unknown category '%s'\n",
+                    $categories[$i];
+                exit 3;
+            }
+
             $bitmask .= 'CURLHELP_' . uc $categories[$i];
             # If not last element, append |
             if($i < $#categories) {
@@ -963,7 +991,7 @@ HEAD
         print $line;
     }
     print <<FOOT
-  { NULL, NULL, CURLHELP_HIDDEN }
+  { NULL, NULL, 0 }
 };
 FOOT
         ;
@@ -982,9 +1010,9 @@ sub listcats {
         push @categories, $key;
     }
     @categories = sort @categories;
-    unshift @categories, 'hidden';
     for my $i (0..$#categories) {
-        print '#define ' . 'CURLHELP_' . uc($categories[$i]) . ' ' . "1u << " . $i . "u\n";
+        printf("#define CURLHELP_%-10s (%s)\n",
+               uc($categories[$i]), "1u << ${i}u");
     }
 }
 
@@ -1129,7 +1157,7 @@ sub getargs {
         return;
     }
     elsif($f eq "listhelp") {
-        listhelp();
+        listhelp($dir);
         return;
     }
     elsif($f eq "single") {

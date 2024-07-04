@@ -5,7 +5,7 @@ Long: oauth2-bearer
 Help: OAuth 2 Bearer Token
 Arg: <token>
 Protocols: IMAP LDAP POP3 SMTP HTTP
-Category: auth
+Category: auth imap pop3 smtp ldap
 Added: 7.33.0
 Multi: single
 See-also:

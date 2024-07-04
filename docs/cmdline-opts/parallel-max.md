@@ -5,7 +5,7 @@ Long: parallel-max
 Arg: <num>
 Help: Maximum concurrency for parallel transfers
 Added: 7.66.0
-Category: connection curl
+Category: connection curl global
 Multi: single
 Scope: global
 See-also:

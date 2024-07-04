@@ -6,7 +6,7 @@ Arg: <URL>
 Help: Gateway for IPFS
 Protocols: IPFS
 Added: 8.4.0
-Category: ipfs
+Category: curl
 Multi: single
 See-also:
   - help

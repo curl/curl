@@ -4,7 +4,7 @@ SPDX-License-Identifier: curl
 Long: metalink
 Help: Process given URLs as metalink XML file
 Added: 7.27.0
-Category: misc
+Category: deprecated
 Multi: single
 See-also:
   - parallel

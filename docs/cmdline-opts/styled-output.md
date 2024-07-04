@@ -4,7 +4,7 @@ SPDX-License-Identifier: curl
 Long: styled-output
 Help: Enable styled output for HTTP headers
 Added: 7.61.0
-Category: verbose
+Category: verbose global
 Multi: boolean
 Scope: global
 See-also:

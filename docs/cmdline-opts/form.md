@@ -7,7 +7,7 @@ Arg: <name=content>
 Help: Specify multipart MIME data
 Protocols: HTTP SMTP IMAP
 Mutexed: data head upload-file
-Category: http upload
+Category: http upload post imap smtp
 Added: 5.0
 Multi: append
 See-also:

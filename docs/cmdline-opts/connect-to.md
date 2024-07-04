@@ -3,9 +3,9 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: connect-to
 Arg: <HOST1:PORT1:HOST2:PORT2>
-Help: Connect to host
+Help: Connect to host2 instead of host1
 Added: 7.49.0
-Category: connection
+Category: connection dns
 Multi: append
 See-also:
   - resolve

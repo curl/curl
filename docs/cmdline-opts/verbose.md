@@ -5,7 +5,7 @@ Short: v
 Long: verbose
 Mutexed: trace trace-ascii
 Help: Make the operation more talkative
-Category: important verbose
+Category: important verbose global
 Added: 4.0
 Multi: boolean
 Scope: global

@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: no-clobber
 Help: Do not overwrite files that already exist
-Category: curl output
+Category: output
 Added: 7.83.0
 Multi: boolean
 See-also:

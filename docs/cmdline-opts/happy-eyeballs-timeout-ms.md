@@ -5,7 +5,7 @@ Long: happy-eyeballs-timeout-ms
 Arg: <ms>
 Help: Time for IPv6 before IPv4
 Added: 7.59.0
-Category: connection
+Category: connection timeout
 Multi: single
 See-also:
   - max-time

@@ -5,7 +5,7 @@ Long: trace-ascii
 Arg: <file>
 Help: Like --trace, but without hex output
 Mutexed: trace verbose
-Category: verbose
+Category: verbose global
 Added: 7.9.7
 Multi: single
 Scope: global

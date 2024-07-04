@@ -4,7 +4,7 @@ SPDX-License-Identifier: curl
 Long: fail-early
 Help: Fail on first transfer error
 Added: 7.52.0
-Category: curl
+Category: curl global
 Multi: boolean
 Scope: global
 See-also:

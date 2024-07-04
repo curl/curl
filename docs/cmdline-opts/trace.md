@@ -5,7 +5,7 @@ Long: trace
 Arg: <file>
 Help: Write a debug trace to FILE
 Mutexed: verbose trace-ascii
-Category: verbose
+Category: verbose global
 Added: 7.9.7
 Multi: single
 Scope: global

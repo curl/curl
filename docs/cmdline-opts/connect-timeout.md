@@ -4,7 +4,7 @@ SPDX-License-Identifier: curl
 Long: connect-timeout
 Arg: <seconds>
 Help: Maximum time allowed to connect
-Category: connection
+Category: connection timeout
 Added: 7.7
 Multi: single
 See-also:

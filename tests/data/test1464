@@ -36,7 +36,7 @@ curl file category --help with lower/upper mix
 </errorcode>
 <stdout mode="text">
 Usage: curl [options...] <url>
-file: FILE protocol options
+file: FILE protocol
      --create-file-mode <mode>  File mode for created files
  -I, --head                     Show document info only
  -l, --list-only                List only mode

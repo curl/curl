@@ -4,7 +4,7 @@ SPDX-License-Identifier: curl
 Long: ftp-create-dirs
 Protocols: FTP SFTP
 Help: Create the remote dirs if not present
-Category: ftp sftp curl
+Category: ftp sftp
 Added: 7.10.7
 Multi: boolean
 See-also:

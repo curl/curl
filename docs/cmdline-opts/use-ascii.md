@@ -5,7 +5,7 @@ Short: B
 Long: use-ascii
 Help: Use ASCII/text transfer
 Protocols: FTP LDAP
-Category: misc
+Category: ftp output ldap
 Added: 5.0
 Multi: boolean
 See-also:

@@ -5,7 +5,7 @@ Long: retry-max-time
 Arg: <seconds>
 Help: Retry only within this period
 Added: 7.12.3
-Category: curl
+Category: curl timeout
 Multi: single
 See-also:
   - retry

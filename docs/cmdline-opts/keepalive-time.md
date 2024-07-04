@@ -5,7 +5,7 @@ Long: keepalive-time
 Arg: <seconds>
 Help: Interval time for keepalive probes
 Added: 7.18.0
-Category: connection
+Category: connection timeout
 Multi: single
 See-also:
   - no-keepalive

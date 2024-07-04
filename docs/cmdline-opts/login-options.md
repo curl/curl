@@ -6,7 +6,7 @@ Arg: <options>
 Protocols: IMAP LDAP POP3 SMTP
 Help: Server login options
 Added: 7.34.0
-Category: imap pop3 smtp auth
+Category: imap pop3 smtp auth ldap
 Multi: single
 See-also:
   - user

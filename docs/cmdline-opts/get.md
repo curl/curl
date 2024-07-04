@@ -5,7 +5,7 @@ Long: get
 Short: G
 Help: Put the post data in the URL and use GET
 Protocols: HTTP
-Category: http upload
+Category: http
 Added: 7.8.1
 Multi: boolean
 See-also:

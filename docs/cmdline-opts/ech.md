@@ -5,7 +5,7 @@ Long: ech
 Arg: <config>
 Help: Configure ECH
 Added: 8.8.0
-Category: tls ECH
+Category: tls
 Protocols: HTTPS
 Multi: single
 See-also:

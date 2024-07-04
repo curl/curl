@@ -4,7 +4,7 @@ SPDX-License-Identifier: curl
 Long: show-error
 Short: S
 Help: Show error even when -s is used
-Category: curl
+Category: curl global
 Added: 5.9
 Multi: boolean
 Scope: global

@@ -5,7 +5,7 @@ Long: output
 Arg: <file>
 Short: o
 Help: Write to file instead of stdout
-Category: important curl output
+Category: important output
 Added: 4.0
 Multi: per-URL
 See-also:

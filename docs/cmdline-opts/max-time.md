@@ -5,7 +5,7 @@ Long: max-time
 Short: m
 Arg: <seconds>
 Help: Maximum time allowed for transfer
-Category: connection
+Category: connection timeout
 Added: 4.0
 Multi: single
 See-also:

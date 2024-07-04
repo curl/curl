@@ -4,7 +4,7 @@ SPDX-License-Identifier: curl
 Long: rate
 Arg: <max request rate>
 Help: Request rate for serial transfers
-Category: connection
+Category: connection global
 Added: 7.84.0
 Multi: single
 Scope: global

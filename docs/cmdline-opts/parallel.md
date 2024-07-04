@@ -5,7 +5,7 @@ Short: Z
 Long: parallel
 Help: Perform transfers in parallel
 Added: 7.66.0
-Category: connection curl
+Category: connection curl global
 Multi: boolean
 Scope: global
 See-also:

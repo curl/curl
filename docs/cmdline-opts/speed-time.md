@@ -5,7 +5,7 @@ Long: speed-time
 Short: y
 Arg: <seconds>
 Help: Trigger 'speed-limit' abort after this time
-Category: connection
+Category: connection timeout
 Added: 4.7
 Multi: single
 See-also:
