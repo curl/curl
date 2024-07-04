@@ -649,8 +649,6 @@ sub checksystemfeatures {
             $feature{"Kerberos"} = $feat =~ /Kerberos/i;
             # SPNEGO enabled
             $feature{"SPNEGO"} = $feat =~ /SPNEGO/i;
-            # CharConv enabled
-            $feature{"CharConv"} = $feat =~ /CharConv/i;
             # TLS-SRP enabled
             $feature{"TLS-SRP"} = $feat =~ /TLS-SRP/i;
             # PSL enabled
