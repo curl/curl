@@ -55,7 +55,12 @@ jobs:
           - name: normal
             install: nghttp2
             configure: --without-ssl --enable-websockets
+            macosx-version-min: 10.9  # Mavericks (2013)
+          - name: normal gcc-12
+            install: nghttp2
+            configure: --without-ssl --enable-websockets CC=gcc-12
             macosx-version-min: 10.9
+            tflags: ~RTSP ~1156 ~1539
           - name: debug
             install: nghttp2
             configure: --enable-debug --without-ssl --enable-websockets
@@ -111,15 +116,19 @@ jobs:
               --without-zlib \
               --without-zstd
 
-            macosx-version-min: 10.15
+            macosx-version-min: 10.15  # Catalina (2019)
           - name: SecureTransport http2
             install: nghttp2
             configure: --enable-debug --with-secure-transport --enable-websockets
+            macosx-version-min: 10.8  # Mountain Lion (2012)
+          # Fails compiling macOS Framework headers in most
+          # gcc + SDK combinations (except gcc-11 + SDK 14).
+          # Fails linking tests due to not linking SystemConfiguration framework,
+          # because detection fails in CURL_DARWIN_SYSTEMCONFIGURATION due to
+          # an error compiling TargetConditionals.h SDK header.
+          - name: SecureTransport gcc-11
+            configure: --enable-debug --with-secure-transport --enable-websockets CC=gcc-11
             macosx-version-min: 10.8
-          # fails now with linker error on missing symbols, macos no longer old enough?
-          # - name: gcc SecureTransport
-          #   configure: CC=gcc-12 --enable-debug --with-secure-transport --enable-websockets --without-libpsl
-          #   macosx-version-min: 10.8
           - name: OpenSSL http2
             install: nghttp2 openssl
             configure: --enable-debug --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
@@ -191,8 +200,10 @@ jobs:
         env:
           CFLAGS: "-mmacosx-version-min=${{ matrix.build.macosx-version-min }}"
 
-      - run: make V=1
-        name: 'make'
+      - name: 'make'
+        run: |
+          make V=1
+          src/curl --disable --version
 
       - run: make V=1 examples
         name: 'make examples'
@@ -253,8 +264,14 @@ jobs:
 
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
-      - run: cmake -B build -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DUSE_APPLE_IDN=ON ${{ matrix.build.generate }}
-        name: 'cmake generate'
+      - name: 'cmake generate'
+        run: |
+          cmake -B build -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
+            -DUSE_APPLE_IDN=ON \
+            ${{ matrix.build.generate }}
 
-      - run: cmake --build build --parallel 4
-        name: 'cmake build'
+      - name: 'cmake build'
+        run: |
+          cmake --build build --parallel 4
+          build/src/curl --disable --version
