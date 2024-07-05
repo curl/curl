@@ -67,6 +67,8 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
 /* enum for the nonblocking SSL connection state machine */
 typedef enum {
   ssl_connect_1,
+  ssl_connect_1_epending,
+  ssl_connect_1_esending,
   ssl_connect_2,
   ssl_connect_3,
   ssl_connect_done
@@ -74,6 +76,7 @@ typedef enum {
 
 typedef enum {
   ssl_connection_none,
+  ssl_connection_deferred,
   ssl_connection_negotiating,
   ssl_connection_complete
 } ssl_connection_state;
@@ -94,6 +97,7 @@ struct ssl_connect_data {
   int io_need;                      /* TLS signals special SEND/RECV needs */
   BIT(use_alpn);                    /* if ALPN shall be used in handshake */
   BIT(peer_closed);                 /* peer has closed connection */
+  BIT(reused_session);                 /* peer has closed connection */
 };
 
 
