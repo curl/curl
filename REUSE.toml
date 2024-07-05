@@ -44,3 +44,5 @@ path = [
 ]
 SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
 SPDX-License-Identifier = "curl"
+# If there is licensing/copyright information in or next to these files, perfer that
+precedence = "closest"
