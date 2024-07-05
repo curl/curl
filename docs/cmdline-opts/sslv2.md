@@ -9,7 +9,7 @@ Added: 5.9
 Mutexed: sslv3 tlsv1 tlsv1.1 tlsv1.2
 Requires: TLS
 Help: SSLv2
-Category: tls
+Category: deprecated
 Multi: mutex
 See-also:
   - http1.1
