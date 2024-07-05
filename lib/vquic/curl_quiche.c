@@ -1120,7 +1120,7 @@ out:
     nwritten = -1;
   }
   CURL_TRC_CF(data, cf, "[%" CURL_PRIu64 "] cf_send(len=%zu) -> %zd, %d",
-              stream? stream->id : (uint64_t)~0, len, nwritten, *err);
+              stream? stream->id : (curl_uint64_t)~0, len, nwritten, *err);
   return nwritten;
 }
 
