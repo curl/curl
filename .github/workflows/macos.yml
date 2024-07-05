@@ -275,3 +275,144 @@ jobs:
         run: |
           cmake --build build --parallel 4
           build/src/curl --disable --version
+
+  cmake-gcc-vs-sdk:
+    if: true  # Set to `true` to enable this test matrix of about ~144 jobs. It runs fairly quickly.
+    name: '${{ matrix.build }} ${{ matrix.compiler }} ${{ matrix.image }} ${{ matrix.xcode }} ${{ matrix.config }}'
+    runs-on: ${{ matrix.image }}
+    timeout-minutes: 30
+    env:
+      CC: ${{ matrix.compiler }}
+      CFLAGS: '-Wno-deprecated-declarations'  # Required for LDAP
+      DEVELOPER_DIR: /Applications/Xcode_${{ matrix.xcode }}.app/Contents/Developer
+    strategy:
+      fail-fast: false
+      matrix:
+        config: [OpenSSL, SecureTransport]
+        compiler: [gcc-11, gcc-12, gcc-13, gcc-14, llvm, clang]
+        # Xcode support matrix as of 2024-07, with default macOS SDK versions and OS names, years:
+        # macos-12: 13.1, 13.2.1, 13.3.1, 13.4.1, 14.0.1, 14.1, 14.2
+        # macos-13:                                       14.1, 14.2, 14.3.1, 15.0.1, 15.1, 15.2
+        # macos-14:                                                   14.3.1, 15.0.1, 15.1, 15.2, 15.3, 15.4, 16.0
+        # macOSSDK: 12.0, 12.1,   12.3,   12.3,   12.3,   13.0, 13.1, 13.3,   14.0,   14.2, 14.2, 14.4, 14.5, 15.0
+        #           Monterey (2021)                       Ventura (2022)      Sonoma (2023)                   Sequoia (2024)
+        # https://github.com/actions/runner-images/tree/main/images/macos
+        # https://en.wikipedia.org/wiki/MacOS_version_history
+        image: [macos-12, macos-13, macos-14]
+        # '16.0' seems to be missing the type `FILE`:
+        #   https://github.com/curl/curl/actions/runs/9807338718/job/27080925597#step:5:22
+        # '15.1' has the same default macOS SDK as '15.2' and identical test results, so skip it.
+        # '14.0.1' has the same default macOS SDK as '13.4.1' and identical test results, so skip it.
+        # '14.2', '15.0.1', '15.4' but not revealing new fallouts, skip it to reduce jobs.
+        xcode: ['13.4.1', '14.1', '14.3.1', '15.2', '15.3']
+        macosx-version-min: ['10.9']
+        build: [cmake, autotools]
+        #include:
+        #  - { compiler: gcc-11, image: macos-14, xcode: '15.2'  , config: 'OpenSSL'        , build: 'autotools', macosx-version-min: '10.9' }
+        #  - { compiler: llvm  , image: macos-14, xcode: '15.2'  , config: 'OpenSSL'        , build: 'autotools', macosx-version-min: '10.9' }
+        #  - { compiler: clang , image: macos-14, xcode: '15.2'  , config: 'OpenSSL'        , build: 'autotools', macosx-version-min: '10.9' }
+        #  - { compiler: gcc-11, image: macos-14, xcode: '15.2'  , config: 'SecureTransport', build: 'autotools', macosx-version-min: '10.9' }
+        #  - { compiler: llvm  , image: macos-14, xcode: '15.2'  , config: 'SecureTransport', build: 'autotools', macosx-version-min: '10.9' }
+        #  - { compiler: clang , image: macos-14, xcode: '15.2'  , config: 'SecureTransport', build: 'autotools', macosx-version-min: '10.9' }
+        exclude:
+          # Unsupported combinations:
+          - { image: macos-12, xcode: '14.3.1' }
+          - { image: macos-12, xcode: '15.0.1' }
+          - { image: macos-12, xcode: '15.1'   }
+          - { image: macos-12, xcode: '15.2'   }
+          - { image: macos-12, xcode: '15.3'   }
+          - { image: macos-12, xcode: '15.4'   }
+          - { image: macos-12, xcode: '16.0'   }
+          - { image: macos-13, xcode: '13.4.1' }
+          - { image: macos-13, xcode: '14.0.1' }
+          - { image: macos-13, xcode: '15.3'   }
+          - { image: macos-13, xcode: '15.4'   }
+          - { image: macos-13, xcode: '16.0'   }
+          - { image: macos-14, xcode: '13.4.1' }
+          - { image: macos-14, xcode: '14.0.1' }
+          - { image: macos-14, xcode: '14.1'   }
+          - { image: macos-14, xcode: '14.2'   }
+          # Exclude failing combinations. Comment these lines to observe all details.
+          # misc reasons:
+          #- { compiler: gcc-11, image: macos-14, xcode: '14.3.1', config: 'OpenSSL' }          # error: two or more data types in declaration specifiers # fatal error: AvailabilityInternalLegacy.h: No such file or directory
+          #- { compiler: gcc-13, image: macos-12, xcode: '14.1'  , config: 'OpenSSL' }          # error: two or more data types in declaration specifiers # ...
+          #- { compiler: gcc-13, image: macos-12, xcode: '14.2'  , config: 'OpenSSL' }          # error: two or more data types in declaration specifiers # ...
+          #- { compiler: gcc-13, image: macos-13, xcode: '15.0.1', config: 'OpenSSL' }          # error: two or more data types in declaration specifiers # ...
+          #- { compiler: gcc-13, image: macos-13, xcode: '15.1'  , config: 'OpenSSL' }          # error: two or more data types in declaration specifiers # ...
+          #- { compiler: gcc-13, image: macos-13, xcode: '15.2'  , config: 'OpenSSL' }          # error: two or more data types in declaration specifiers # ...
+          #- { compiler: gcc-13, image: macos-14, xcode: '14.3.1', config: 'OpenSSL' }          # error: two or more data types in declaration specifiers # fatal error: AvailabilityInternalLegacy.h: No such file or directory
+          #- { compiler: gcc-13, image: macos-14, xcode: '15.0.1', config: 'OpenSSL' }          # error: two or more data types in declaration specifiers # ...
+          #- { compiler: gcc-13, image: macos-14, xcode: '15.1'  , config: 'OpenSSL' }          # error: two or more data types in declaration specifiers # ...
+          #- { compiler: gcc-13, image: macos-14, xcode: '15.2'  , config: 'OpenSSL' }          # error: two or more data types in declaration specifiers # ...
+          #- { compiler: gcc-11, image: macos-12, xcode: '14.1'  , config: 'SecureTransport' }  # error: expected ';' before 'extern'
+          #- { compiler: gcc-11, image: macos-12, xcode: '14.2'  , config: 'SecureTransport' }  # error: expected ';' before 'extern'
+          #- { compiler: gcc-11, image: macos-13, xcode: '15.0.1', config: 'SecureTransport' }  # error: unknown type name 'dispatch_queue_t'; did you mean 'dispatch_time_t'?
+          #- { compiler: gcc-11, image: macos-13, xcode: '15.2'  , config: 'SecureTransport' }  # error: unknown type name 'dispatch_queue_t'; did you mean 'dispatch_time_t'?
+          #- { compiler: gcc-11, image: macos-14, xcode: '14.3.1', config: 'SecureTransport' }  # error: two or more data types in declaration specifiers # fatal error: AvailabilityInternalLegacy.h: No such file or directory
+          # gcc + SecureTransport incompatibility
+          - { compiler: gcc-12,                                   config: 'SecureTransport' }  # error: attributes should be specified before the declarator in a function definition | # ...
+          - { compiler: gcc-13,                                   config: 'SecureTransport' }  # error: attributes should be specified before the declarator in a function definition | # ...
+          - { compiler: gcc-14,                                   config: 'SecureTransport' }  # error: attributes should be specified before the declarator in a function definition | # ...
+          # llvm v15 + SecureTransport incompatibility
+          #   error: use of undeclared identifier 'noErr' / 'SecCertificateCopyLongDescription' / 'SecItemImportExportKeyParameters' / 'SecExternalFormat' / 'SecExternalItemType' / 'SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION'
+          - { compiler: llvm  , image: macos-14, xcode: '15.3'  , config: 'SecureTransport' }
+          - { compiler: llvm  , image: macos-14, xcode: '15.4'  , config: 'SecureTransport' }
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+
+      - name: 'toolchain versions'
+        run: |
+          [ '${{ matrix.compiler }}' = 'llvm' ] && CC="$(brew --prefix llvm@15)/bin/clang"
+          which "${CC}"
+          "${CC}" --version
+          xcodebuild -version || true
+          xcrun -sdk macosx --show-sdk-path 2>/dev/null || true
+
+      - name: 'install autotools'
+        if: ${{ matrix.build == 'autotools' }}
+        run: |
+          echo autoconf automake libtool | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+          while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
+
+      - name: 'configure / ${{ matrix.build }}'
+        run: |
+          [ '${{ matrix.compiler }}' = 'llvm' ] && CC="$(brew --prefix llvm@15)/bin/clang"
+          if [ '${{ matrix.build }}' = 'autotools' ]; then
+            [ '${{ matrix.compiler }}' = 'llvm' ] && CC+=" --target=$(uname -m)-apple-darwin"
+            [ '${{ matrix.compiler }}' = 'llvm' ] && options+=" --target=$(uname -m)-apple-darwin"
+            [ '${{ matrix.compiler }}' = 'llvm' ] && options+=" --with-sysroot=$(xcrun -sdk macosx --show-sdk-path 2>/dev/null)"
+            [ '${{ matrix.compiler }}' = 'llvm' ] && CFLAGS+=" --sysroot=$(xcrun -sdk macosx --show-sdk-path 2>/dev/null)"  # does not change the end-result
+            [ '${{ matrix.config }}' = 'OpenSSL' ]         && options+=" --with-openssl=$(brew --prefix)/opt/openssl"
+            [ '${{ matrix.config }}' = 'SecureTransport' ] && options+=' --with-secure-transport'
+            CFLAGS+=' -mmacosx-version-min=${{ matrix.macosx-version-min }}'
+            autoreconf -fi
+            # picks up nghttp2 and libidn2
+            mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
+              --disable-dependency-tracking \
+              --disable-docs --disable-manual \
+              --without-nghttp2 --without-libidn2 \
+              "--with-libssh2=$(brew --prefix)/opt/libssh2" \
+              ${options} || { tail -n 1200 config.log; false; }
+          else
+            [ '${{ matrix.config }}' = 'OpenSSL' ]         && options+=' -DCURL_USE_OPENSSL=ON'
+            [ '${{ matrix.config }}' = 'SecureTransport' ] && options+=' -DCURL_USE_SECTRANSP=ON'
+            # picks up libssh2
+            cmake -B bld -DCMAKE_UNITY_BUILD=OFF -DCURL_WERROR=ON \
+              -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.macosx-version-min }} \
+              "-DCMAKE_C_COMPILER_TARGET=$(uname -m)-apple-darwin$(uname -r)" \
+              -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF \
+              -DUSE_APPLE_IDN=OFF \
+              ${options} || { cat bld/CMakeFiles/CMake*.yaml; false; }
+          fi
+
+      - name: 'configure log'
+        run: cat bld/config.log bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
+
+      - name: 'curl config'
+        run: cat bld/lib/curl_config.h || true
+
+      - name: 'build / ${{ matrix.build }}'
+        run: make -C bld V=1 VERBOSE=1
+
+      - name: 'curl version'
+        run: bld/src/curl --disable --version
