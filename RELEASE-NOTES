@@ -61,6 +61,7 @@ This release includes the following bugfixes:
  o cmdline-opts/ech.md: shorten the help text [93]
  o cmdline-opts/fail.md: expand and clarify [95]
  o cmdline-opts/interface.md: expand the documentation [66]
+ o cmdline-opts: category cleanup [196]
  o cmdline-opts: expand the parallel explanations [98]
  o cmdline-opts: shorten six help texts [178]
  o cmdline: expand proxy option explanations [97]
@@ -99,6 +100,7 @@ This release includes the following bugfixes:
  o examples: add missing binaries to .gitignore [106]
  o examples: delete unused includes [10]
  o examples: fix compiling with MSVC [34]
+ o FEATURES.md: refresh [208]
  o file: separate fake headers and body with a stand-alone CRLF [137]
  o get.d: clarify the explanation [32]
  o GHA: detect and warn for more English contractions [123]
@@ -109,6 +111,7 @@ This release includes the following bugfixes:
  o GHA: use vcpkg to install packages for MSVC jobs [145]
  o gnutls: improve TLS shutdown [62]
  o gnutls: pass in SNI name, not hostname when checking cert [114]
+ o help: add flags to output and ssh categories [202]
  o http/3: add shutdown support [154]
  o http: remove "struct HTTP" [134]
  o http: write last header line late [44]
@@ -141,6 +144,7 @@ This release includes the following bugfixes:
  o multi: fix multi_wait() timeout handling [51]
  o multi: fix pollset during RESOLVING phase [166]
  o multi: multi_getsock(), check correct socket [167]
+ o multi: pollset assertion only when IP connected [192]
  o ngtcp2+quictls: fix cert-status use [173]
  o noproxy: test bad ipv6 net size first [82]
  o openssl/gnutls: rectify the TLS version checks for QUIC [61]
@@ -157,6 +161,7 @@ This release includes the following bugfixes:
  o quiche: fix operand of ‘?:’ changes signedness [177]
  o request.md: language fix [70]
  o request: change the struct field bodywrites to a bool, only for hyper [132]
+ o reuse: switch to REUSE 3.2 and REUSE.toml [184]
  o runtests: sort test IDs in summary lines [33]
  o runtests: support %DATE for YYYY-MM-DD of right now
  o runtests: support %VERNUM
@@ -173,6 +178,7 @@ This release includes the following bugfixes:
  o test: add test1484, for HEAD with content [18]
  o test: add test1546, chunked not last transfer encoding [17]
  o tests: add pytest for --ciphers and --tls13-ciphers options [38]
+ o tests: delete `CharConv` remains [201]
  o tests: delete redundant `!MSDOS` guard [84]
  o tests: extend user/password parsing test1620 [40]
  o tests: log "Throwing away" messages before throwing away
@@ -184,9 +190,12 @@ This release includes the following bugfixes:
  o tool_cb_hdr: allow etag and content-disposition for 3xx reply [117]
  o tool_cb_hdr: return error for failed header writes [30]
  o tool_operate: avoid explicitly setting verifypeer to 1 [39]
+ o tool_operate: check for --disable case *sensitively* [199]
+ o tool_operate: simplify return code handling from url_proto() [198]
  o tool_writeout: bsearch the variable name [102]
  o tool_writeout: get certinfo only when needing it [101]
  o trace-ascii.md: mention "%" for stderr [146]
+ o transfer: avoid polling socket every transfer loop [200]
  o transfer: conn close on paused upload [8]
  o transfer: do not use EXPIRE_NOW while blocked [124]
  o transfer: remove curl_upload_refill_watermark, no longer used [50]
@@ -231,14 +240,14 @@ advice from friends like these:
   Guilherme Puida, Harry Sintonen, James Abbatiello, Jan Venekamp,
   Jay Guerette, Jiang Wenjian, Jonathan Matthews, Joseph Chen, Junho Choi,
   Kai Pastor, kartatz, Keerthi Timmaraju, Lee Li, Luke Hamburg, Marcel Raad,
-  Matthias Gatto, Matthieu Baerts, Matt Jolly, Morgan Willcock,
+  Matthias Gatto, Matthieu Baerts, Matt Jolly, Max Mehl, Morgan Willcock,
   Olivier Bonaventure, Orgad Shaneh, Patrick Monnerat, Pavel Pavlov,
   Philip Heiduck, pszlazak on github, RainRat, Ray Satiro, renovate[bot],
   Ryan Carsten Schmidt, Samuel Chiang, saurabhsingh-dev on github,
   Sebastian Andersson, Sergey Bronnikov, Sergey Markelov, Sertonix,
   Stefan Eissing, Stephen Farrell, Tal Regev, Tatsuhiro Tsujikawa,
   Viktor Szakats, vvb2060, Yedaya Katsman, z2_, 李四
-  (66 contributors)
+  (67 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -424,12 +433,21 @@ References to bug reports and discussions on issues:
  [180] = https://curl.se/bug/?i=14082
  [181] = https://curl.se/bug/?i=14078
  [182] = https://curl.se/bug/?i=14066
+ [184] = https://curl.se/bug/?i=14107
  [185] = https://curl.se/bug/?i=14038
  [186] = https://curl.se/bug/?i=14073
  [187] = https://curl.se/bug/?i=14033
  [189] = https://curl.se/bug/?i=14072
  [190] = https://curl.se/bug/?i=14064
  [191] = https://curl.se/bug/?i=14071
+ [192] = https://curl.se/bug/?i=14108
  [193] = https://curl.se/bug/?i=14069
  [194] = https://curl.se/bug/?i=13963
  [195] = https://curl.se/bug/?i=14068
+ [196] = https://curl.se/bug/?i=14101
+ [198] = https://curl.se/bug/?i=14104
+ [199] = https://curl.se/bug/?i=14103
+ [200] = https://curl.se/bug/?i=14098
+ [201] = https://curl.se/bug/?i=14100
+ [202] = https://curl.se/bug/?i=14076
+ [208] = https://curl.se/bug/?i=14086
