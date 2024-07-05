@@ -20,6 +20,15 @@ and
 . If you are using a different SSL backend you can try setting TLS 1.3 cipher
 suites by using the respective regular cipher option.
 
+With curl 8.10 you may specify TLS 1.3 ciphers also via `CURLOPT_SSL_CIPHER_LIST`
+and `--ciphers` if they are *only* 1.3 ones. Mixing 1.2 and 1.3 ciphers in
+the same argument does not work. 
+
+Note that when 1.3 ciphers are configured
+using these options, they implicitly raise the minimum TLS version to 1.3.
+It the minimum TLS version is configured to be lower, setting 1.3 ciphers
+with these options will fail.
+
 The names of the known ciphers differ depending on which TLS backend that
 libcurl was built to use. This is an attempt to list known cipher names.
 

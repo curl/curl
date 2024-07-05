@@ -217,7 +217,7 @@ class TestSSLUse:
                 if not env.curl_lib_version_at_least('mbedtls', '3.6.0'):
                     pytest.skip('mbedTLS TLSv1.3 support requires at least 3.6.0')
                 extra_args = ['--ciphers', ':'.join(cipher_names)]
-            elif env.curl_uses_lib('wolfssl'):
+            elif not env.curl_uses_lib('schannel'):
                 extra_args = ['--ciphers', ':'.join(cipher_names)]
             else:
                 extra_args = ['--tls13-ciphers', ':'.join(cipher_names)]

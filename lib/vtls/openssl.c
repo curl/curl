@@ -2689,9 +2689,6 @@ static CURLcode
 ossl_set_ssl_version_min_max(struct Curl_cfilter *cf, SSL_CTX *ctx)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  /* first, TLS min version... */
-  long curl_ssl_version_min = conn_config->version;
-  long curl_ssl_version_max;
 
   /* convert curl min SSL version option to OpenSSL constant */
 #if (defined(OPENSSL_IS_BORINGSSL)  || \
@@ -2703,7 +2700,9 @@ ossl_set_ssl_version_min_max(struct Curl_cfilter *cf, SSL_CTX *ctx)
   long ossl_ssl_version_min = 0;
   long ossl_ssl_version_max = 0;
 #endif
-  switch(curl_ssl_version_min) {
+  switch(conn_config->version) {
+  case CURL_SSLVERSION_DEFAULT: /* no restriction, let lib use default */
+    break;
   case CURL_SSLVERSION_TLSv1: /* TLS 1.x */
   case CURL_SSLVERSION_TLSv1_0:
     ossl_ssl_version_min = TLS1_VERSION;
@@ -2729,17 +2728,14 @@ ossl_set_ssl_version_min_max(struct Curl_cfilter *cf, SSL_CTX *ctx)
      the library.
      So we skip this, and stay with the library default
   */
-  if(curl_ssl_version_min != CURL_SSLVERSION_DEFAULT) {
+  if(ossl_ssl_version_min) {
     if(!SSL_CTX_set_min_proto_version(ctx, ossl_ssl_version_min)) {
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
 
-  /* ... then, TLS max version */
-  curl_ssl_version_max = (long)conn_config->version_max;
-
   /* convert curl max SSL version option to OpenSSL constant */
-  switch(curl_ssl_version_max) {
+  switch((long)conn_config->version_max) {
   case CURL_SSLVERSION_MAX_TLSv1_0:
     ossl_ssl_version_max = TLS1_VERSION;
     break;
@@ -3454,12 +3450,12 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   void *ssl_sessionid = NULL;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  const long int ssl_version_min = conn_config->version;
   char * const ssl_cert = ssl_config->primary.clientcert;
   const struct curl_blob *ssl_cert_blob = ssl_config->primary.cert_blob;
   const char * const ssl_cert_type = ssl_config->cert_type;
   const bool verifypeer = conn_config->verifypeer;
   char error_buffer[256];
+  bool ciphers12_failed = FALSE;
 
   /* Make funny stuff to get random input */
   result = ossl_seed(data);
@@ -3471,7 +3467,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   switch(transport) {
   case TRNSPRT_TCP:
     /* check to see if we have been told to use an explicit SSL/TLS version */
-    switch(ssl_version_min) {
+    switch(conn_config->version) {
     case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
     case CURL_SSLVERSION_TLSv1_0:
@@ -3598,7 +3594,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
     ctx_options &= ~(ctx_option_t)SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS;
 #endif
 
-  switch(ssl_version_min) {
+  switch(conn_config->version) {
   case CURL_SSLVERSION_SSLv2:
   case CURL_SSLVERSION_SSLv3:
     return CURLE_NOT_BUILT_IN;
@@ -3656,11 +3652,12 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   if(!ciphers && (peer->transport != TRNSPRT_QUIC))
     ciphers = DEFAULT_CIPHER_SELECTION;
   if(ciphers) {
-    if(!SSL_CTX_set_cipher_list(octx->ssl_ctx, ciphers)) {
-      failf(data, "failed setting cipher list: %s", ciphers);
-      return CURLE_SSL_CIPHER;
-    }
-    infof(data, "Cipher selection: %s", ciphers);
+    /* OpenSSL only accepts TLSv1.2 or lower ciphers here. If the user
+     * specified TLSv1.3+ ciphers, this will fail. */
+    if(!SSL_CTX_set_cipher_list(octx->ssl_ctx, ciphers))
+      ciphers12_failed = TRUE;
+    else
+      infof(data, "Cipher selection: %s", ciphers);
   }
 
 #ifdef HAVE_SSL_CTX_SET_CIPHERSUITES
@@ -3673,8 +3670,40 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
       }
       infof(data, "TLS 1.3 cipher selection: %s", ciphers13);
     }
+    else if(conn_config->cipher_list && ciphers12_failed) {
+      /* no explicit 1.3 ciphers configured, normal ciphers failed to
+       * set. User might have configured implicit 1.3 ciphers, we attempt
+       * this unless they asked for lower TLS versions to use. */
+      bool min_is_def_or_at_least_13 =
+        ((conn_config->version == CURL_SSLVERSION_DEFAULT) ||
+         (conn_config->version >= CURL_SSLVERSION_TLSv1_3));
+      bool max_is_def_or_at_least_13 =
+        ((conn_config->version_max == CURL_SSLVERSION_MAX_NONE) ||
+          (conn_config->version_max == CURL_SSLVERSION_MAX_DEFAULT) ||
+          (conn_config->version_max >= CURL_SSLVERSION_MAX_TLSv1_3));
+      if(min_is_def_or_at_least_13 && max_is_def_or_at_least_13) {
+        if(SSL_CTX_set_ciphersuites(octx->ssl_ctx, conn_config->cipher_list)) {
+          /* It worked. User asked for TLSv1.3+ ciphers only. Increase
+           * the min TLS version to 1.3 if not already. */
+          ciphers12_failed = FALSE;
+          infof(data, "Cipher selection: %s", conn_config->cipher_list);
+          if(conn_config->version < CURL_SSLVERSION_TLSv1_3) {
+            if(!SSL_CTX_set_min_proto_version(octx->ssl_ctx, TLS1_3_VERSION)) {
+              failf(data, "failed to lift minimum TLS version to 1.3");
+              return CURLE_SSL_CONNECT_ERROR;
+            }
+            infof(data, "using TLS 1.3 or newer with these ciphers");
+          }
+        }
+      }
+    }
   }
 #endif
+
+  if(ciphers12_failed) {
+    failf(data, "failed setting cipher list: %s", ciphers);
+    return CURLE_SSL_CIPHER;
+  }
 
 #ifdef HAVE_SSL_CTX_SET_POST_HANDSHAKE_AUTH
   /* OpenSSL 1.1.1 requires clients to opt-in for PHA */
