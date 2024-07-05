@@ -50,7 +50,7 @@ jobs:
           mkdir run2; cp -p ./curl-99.98.97.* run2/
           diff run1 run2
 
-      - uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4
+      - uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4
         with:
           name: 'release-tgz'
           path: 'curl-99.98.97.tar.gz'
@@ -74,7 +74,7 @@ jobs:
     timeout-minutes: 30
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4
+      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
         with:
           name: 'release-tgz'
 
@@ -97,7 +97,7 @@ jobs:
     timeout-minutes: 30
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4
+      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
         with:
           name: 'release-tgz'
 
@@ -118,7 +118,7 @@ jobs:
     timeout-minutes: 30
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4
+      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
         with:
           name: 'release-tgz'
 
