@@ -1,6 +1,12 @@
 # SPDX-License-Identifier: curl
 # SPDX-FileCopyrightText: Daniel Stenberg, <daniel@haxx.se>, et al.
 
+# This file describes the licensing and copyright situation for files that
+# cannot be annotated directly, for example because of being simply
+# uncommentable. Unless this is the case, a file should be annotated directly.
+#
+# This follows the REUSE specification: https://reuse.software/spec-3.2/#reusetoml
+
 version = 1
 SPDX-PackageName = "curl"
 SPDX-PackageDownloadLocation = "https://curl.se/"
