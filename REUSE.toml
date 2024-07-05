@@ -1,0 +1,53 @@
+# SPDX-License-Identifier: curl
+# SPDX-FileCopyrightText: Daniel Stenberg, <daniel@haxx.se>, et al.
+
+# This file describes the licensing and copyright situation for files that
+# cannot be annotated directly, for example because of being simply
+# uncommentable. Unless this is the case, a file should be annotated directly.
+#
+# This follows the REUSE specification: https://reuse.software/spec-3.2/#reusetoml
+
+version = 1
+SPDX-PackageName = "curl"
+SPDX-PackageDownloadLocation = "https://curl.se/"
+
+[[annotations]]
+path = [
+  ".mailmap",
+  "CHANGES",
+  "docs/FAQ",
+  "docs/INSTALL",
+  "docs/KNOWN_BUGS",
+  "docs/libcurl/symbols-in-versions",
+  "docs/MAIL-ETIQUETTE",
+  "docs/options-in-versions",
+  "docs/THANKS",
+  "docs/TODO",
+  "GIT-INFO.md",
+  "lib/libcurl.vers.in",
+  "libcurl.def",
+  "packages/OS400/README.OS400",
+  "packages/vms/build_vms.com",
+  "packages/vms/curl_release_note_start.txt",
+  "packages/vms/curlmsg.sdl",
+  "packages/vms/macro32_exactcase.patch",
+  "packages/vms/readme",
+  "plan9/README",
+  "projects/Windows/**", "projects/wolfssl_override.props",
+  "README",
+  "RELEASE-NOTES",
+  "renovate.json",
+  "tests/certs/**",
+  "tests/data/test**",
+  "tests/stunnel.pem",
+  "tests/valgrind.supp",
+  # checksrc control files
+  "docs/examples/.checksrc",
+  "lib/.checksrc",
+  "src/.checksrc",
+  "tests/libtest/.checksrc",
+]
+SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
+SPDX-License-Identifier = "curl"
+# If there is licensing/copyright information in or next to these files, perfer that
+precedence = "closest"
