@@ -1,0 +1,126 @@
+# SPDX-License-Identifier: curl
+# SPDX-FileCopyrightText: Daniel Stenberg, <daniel@haxx.se>, et al.
+
+version = 1
+SPDX-PackageName = "curl"
+SPDX-PackageSupplier = "Daniel Stenberg <daniel@haxx.se>"
+SPDX-PackageDownloadLocation = "https://curl.se/"
+
+[[annotations]]
+path = [
+  "tests/data/test**",
+  "tests/certs/**",
+  "tests/stunnel.pem",
+  "tests/valgrind.supp",
+]
+SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
+SPDX-License-Identifier = "curl"
+
+[[annotations]]
+path = [
+  "docs/FAQ",
+  "docs/INSTALL",
+  "docs/KNOWN_BUGS",
+  "docs/MAIL-ETIQUETTE",
+  "docs/THANKS",
+  "docs/TODO",
+  "docs/libcurl/symbols-in-versions",
+  "docs/options-in-versions",
+]
+SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
+SPDX-License-Identifier = "curl"
+
+[[annotations]]
+path = "projects/Windows/**"
+SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
+SPDX-License-Identifier = "curl"
+
+[[annotations]]
+path = "libcurl.def"
+SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
+SPDX-License-Identifier = "curl"
+
+[[annotations]]
+path = "CHANGES"
+SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
+SPDX-License-Identifier = "curl"
+
+[[annotations]]
+path = "GIT-INFO.md"
+SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
+SPDX-License-Identifier = "curl"
+
+[[annotations]]
+path = "RELEASE-NOTES"
+SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
+SPDX-License-Identifier = "curl"
+
+[[annotations]]
+path = [
+  "lib/.checksrc",
+  "src/.checksrc",
+  "docs/examples/.checksrc",
+  "tests/libtest/.checksrc",
+]
+SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
+SPDX-License-Identifier = "curl"
+
+[[annotations]]
+path = "lib/libcurl.vers.in"
+SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
+SPDX-License-Identifier = "curl"
+
+[[annotations]]
+path = "packages/OS400/README.OS400"
+SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
+SPDX-License-Identifier = "curl"
+
+[[annotations]]
+path = "packages/vms/build_vms.com"
+SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
+SPDX-License-Identifier = "curl"
+
+[[annotations]]
+path = "packages/vms/curl_release_note_start.txt"
+SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
+SPDX-License-Identifier = "curl"
+
+[[annotations]]
+path = "packages/vms/curlmsg.sdl"
+SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
+SPDX-License-Identifier = "curl"
+
+[[annotations]]
+path = "packages/vms/macro32_exactcase.patch"
+SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
+SPDX-License-Identifier = "curl"
+
+[[annotations]]
+path = "packages/vms/readme"
+SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
+SPDX-License-Identifier = "curl"
+
+[[annotations]]
+path = "plan9/README"
+SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
+SPDX-License-Identifier = "curl"
+
+[[annotations]]
+path = "projects/wolfssl_override.props"
+SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
+SPDX-License-Identifier = "curl"
+
+[[annotations]]
+path = "README"
+SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
+SPDX-License-Identifier = "curl"
+
+[[annotations]]
+path = "renovate.json"
+SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
+SPDX-License-Identifier = "curl"
+
+[[annotations]]
+path = ".mailmap"
+SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
+SPDX-License-Identifier = "curl"
