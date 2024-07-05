@@ -320,4 +320,4 @@ smaller header or add the information for a specific file to the `REUSE.toml`
 file.
 
 You can manually verify the copyright and compliance status by running the
-`./scripts/copyright.pl` script in the root of the git repository.
+[REUSE helper tool](https://github.com/fsfe/reuse-tool): `reuse lint`
