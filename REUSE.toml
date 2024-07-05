@@ -6,23 +6,10 @@ SPDX-PackageName = "curl"
 SPDX-PackageSupplier = "Daniel Stenberg <daniel@haxx.se>"
 SPDX-PackageDownloadLocation = "https://curl.se/"
 
-# /
 [[annotations]]
 path = [
   ".mailmap",
   "CHANGES",
-  "GIT-INFO.md",
-  "libcurl.def",
-  "README",
-  "RELEASE-NOTES",
-  "renovate.json",
-]
-SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
-SPDX-License-Identifier = "curl"
-
-# docs/
-[[annotations]]
-path = [
   "docs/FAQ",
   "docs/INSTALL",
   "docs/KNOWN_BUGS",
@@ -31,60 +18,29 @@ path = [
   "docs/options-in-versions",
   "docs/THANKS",
   "docs/TODO",
-]
-SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
-SPDX-License-Identifier = "curl"
-
-# lib/
-[[annotations]]
-path = "lib/libcurl.vers.in"
-SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
-SPDX-License-Identifier = "curl"
-
-# packages/
-[[annotations]]
-path = [
+  "GIT-INFO.md",
+  "lib/libcurl.vers.in",
+  "libcurl.def",
   "packages/OS400/README.OS400",
   "packages/vms/build_vms.com",
   "packages/vms/curl_release_note_start.txt",
   "packages/vms/curlmsg.sdl",
   "packages/vms/macro32_exactcase.patch",
   "packages/vms/readme",
-]
-SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
-SPDX-License-Identifier = "curl"
-
-# plan9/
-[[annotations]]
-path = "plan9/README"
-SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
-SPDX-License-Identifier = "curl"
-
-# projects/
-[[annotations]]
-path = ["projects/Windows/**", "projects/wolfssl_override.props"]
-SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
-SPDX-License-Identifier = "curl"
-
-# tests/
-[[annotations]]
-path = [
+  "plan9/README",
+  "projects/Windows/**", "projects/wolfssl_override.props",
+  "README",
+  "RELEASE-NOTES",
+  "renovate.json",
   "tests/certs/**",
   "tests/data/test**",
   "tests/stunnel.pem",
   "tests/valgrind.supp",
-]
-SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
-SPDX-License-Identifier = "curl"
-
-# checksrc control files
-[[annotations]]
-path = [
+  # checksrc control files
   "docs/examples/.checksrc",
   "lib/.checksrc",
   "src/.checksrc",
   "tests/libtest/.checksrc",
-
 ]
 SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
 SPDX-License-Identifier = "curl"
