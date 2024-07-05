@@ -6,121 +6,81 @@ SPDX-PackageName = "curl"
 SPDX-PackageSupplier = "Daniel Stenberg <daniel@haxx.se>"
 SPDX-PackageDownloadLocation = "https://curl.se/"
 
+# /
 [[annotations]]
 path = [
-  "tests/data/test**",
-  "tests/certs/**",
-  "tests/stunnel.pem",
-  "tests/valgrind.supp",
+  ".mailmap",
+  "CHANGES",
+  "GIT-INFO.md",
+  "libcurl.def",
+  "README",
+  "RELEASE-NOTES",
+  "renovate.json",
 ]
 SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
 SPDX-License-Identifier = "curl"
 
+# docs/
 [[annotations]]
 path = [
+  "docs/examples/.checksrc",
   "docs/FAQ",
   "docs/INSTALL",
   "docs/KNOWN_BUGS",
+  "docs/libcurl/symbols-in-versions",
   "docs/MAIL-ETIQUETTE",
+  "docs/options-in-versions",
   "docs/THANKS",
   "docs/TODO",
-  "docs/libcurl/symbols-in-versions",
-  "docs/options-in-versions",
 ]
 SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
 SPDX-License-Identifier = "curl"
 
+# lib/
 [[annotations]]
-path = "projects/Windows/**"
+path = ["lib/.checksrc", "lib/libcurl.vers.in"]
 SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
 SPDX-License-Identifier = "curl"
 
-[[annotations]]
-path = "libcurl.def"
-SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
-SPDX-License-Identifier = "curl"
-
-[[annotations]]
-path = "CHANGES"
-SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
-SPDX-License-Identifier = "curl"
-
-[[annotations]]
-path = "GIT-INFO.md"
-SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
-SPDX-License-Identifier = "curl"
-
-[[annotations]]
-path = "RELEASE-NOTES"
-SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
-SPDX-License-Identifier = "curl"
-
+# packages/
 [[annotations]]
 path = [
-  "lib/.checksrc",
-  "src/.checksrc",
-  "docs/examples/.checksrc",
-  "tests/libtest/.checksrc",
+  "packages/OS400/README.OS400",
+  "packages/vms/build_vms.com",
+  "packages/vms/curl_release_note_start.txt",
+  "packages/vms/curlmsg.sdl",
+  "packages/vms/macro32_exactcase.patch",
+  "packages/vms/readme",
 ]
 SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
 SPDX-License-Identifier = "curl"
 
-[[annotations]]
-path = "lib/libcurl.vers.in"
-SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
-SPDX-License-Identifier = "curl"
-
-[[annotations]]
-path = "packages/OS400/README.OS400"
-SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
-SPDX-License-Identifier = "curl"
-
-[[annotations]]
-path = "packages/vms/build_vms.com"
-SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
-SPDX-License-Identifier = "curl"
-
-[[annotations]]
-path = "packages/vms/curl_release_note_start.txt"
-SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
-SPDX-License-Identifier = "curl"
-
-[[annotations]]
-path = "packages/vms/curlmsg.sdl"
-SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
-SPDX-License-Identifier = "curl"
-
-[[annotations]]
-path = "packages/vms/macro32_exactcase.patch"
-SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
-SPDX-License-Identifier = "curl"
-
-[[annotations]]
-path = "packages/vms/readme"
-SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
-SPDX-License-Identifier = "curl"
-
+# plan9/
 [[annotations]]
 path = "plan9/README"
 SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
 SPDX-License-Identifier = "curl"
 
+# projects/
 [[annotations]]
-path = "projects/wolfssl_override.props"
+path = ["projects/Windows/**", "projects/wolfssl_override.props"]
 SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
 SPDX-License-Identifier = "curl"
 
+# src/
 [[annotations]]
-path = "README"
+path = "src/.checksrc"
 SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
 SPDX-License-Identifier = "curl"
 
+# tests/
 [[annotations]]
-path = "renovate.json"
-SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
-SPDX-License-Identifier = "curl"
-
-[[annotations]]
-path = ".mailmap"
+path = [
+  "tests/certs/**",
+  "tests/data/test**",
+  "tests/libtest/.checksrc",
+  "tests/stunnel.pem",
+  "tests/valgrind.supp",
+]
 SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
 SPDX-License-Identifier = "curl"
