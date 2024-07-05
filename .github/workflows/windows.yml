@@ -529,7 +529,7 @@ jobs:
       - name: 'upload logs on failure'
         timeout-minutes: 10
         if: failure()
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4
+        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4
         with:
           name: windows_logs_${{matrix.name}}_${{github.event.pull_request.head.sha}}
           path: logs.7z
