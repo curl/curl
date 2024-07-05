@@ -3,7 +3,6 @@
 
 version = 1
 SPDX-PackageName = "curl"
-SPDX-PackageSupplier = "Daniel Stenberg <daniel@haxx.se>"
 SPDX-PackageDownloadLocation = "https://curl.se/"
 
 [[annotations]]
