@@ -210,8 +210,7 @@ jobs:
     runs-on: 'macos-latest'
     env:
       CC: ${{ matrix.compiler.CC }}
-      # '-Wno-deprecated-declarations' required for LDAP and BUILD_EXAMPLES
-      CFLAGS: '-DCMAKE_C_FLAGS=-mmacosx-version-min=10.15 -Wno-deprecated-declarations'
+      CFLAGS: '-Wno-deprecated-declarations'  # Required for LDAP and BUILD_EXAMPLES
     strategy:
       fail-fast: false
       matrix:
@@ -221,7 +220,7 @@ jobs:
         build:
           - name: OpenSSL
             install: nghttp2 openssl gsasl
-            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/openssl -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -DCURL_USE_GSASL=ON
+            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/openssl -DCURL_USE_GSASL=ON
           - name: LibreSSL
             install: nghttp2 libressl
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DBUILD_EXAMPLES=ON
