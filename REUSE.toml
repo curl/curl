@@ -23,7 +23,6 @@ SPDX-License-Identifier = "curl"
 # docs/
 [[annotations]]
 path = [
-  "docs/examples/.checksrc",
   "docs/FAQ",
   "docs/INSTALL",
   "docs/KNOWN_BUGS",
@@ -38,7 +37,7 @@ SPDX-License-Identifier = "curl"
 
 # lib/
 [[annotations]]
-path = ["lib/.checksrc", "lib/libcurl.vers.in"]
+path = "lib/libcurl.vers.in"
 SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
 SPDX-License-Identifier = "curl"
 
@@ -67,20 +66,25 @@ path = ["projects/Windows/**", "projects/wolfssl_override.props"]
 SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
 SPDX-License-Identifier = "curl"
 
-# src/
-[[annotations]]
-path = "src/.checksrc"
-SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
-SPDX-License-Identifier = "curl"
-
 # tests/
 [[annotations]]
 path = [
   "tests/certs/**",
   "tests/data/test**",
-  "tests/libtest/.checksrc",
   "tests/stunnel.pem",
   "tests/valgrind.supp",
+]
+SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
+SPDX-License-Identifier = "curl"
+
+# checksrc control files
+[[annotations]]
+path = [
+  "docs/examples/.checksrc",
+  "lib/.checksrc",
+  "src/.checksrc",
+  "tests/libtest/.checksrc",
+
 ]
 SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
 SPDX-License-Identifier = "curl"
