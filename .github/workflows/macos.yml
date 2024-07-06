@@ -173,6 +173,7 @@ jobs:
     steps:
       - name: 'toolchain versions'
         run: |
+          [ -n '${{ matrix.xcode }}' ] && DEVELOPER_DIR='/Applications/Xcode_${{ matrix.xcode }}.app/Contents/Developer'
           which "${CC}"; "${CC}" --version
           xcodebuild -version || true
           xcrun -sdk macosx --show-sdk-path 2>/dev/null || true
@@ -227,7 +228,7 @@ jobs:
           [ -n '${{ matrix.xcode }}' ] && CFLAGS+=" --sysroot=$(xcrun -sdk macosx --show-sdk-path 2>/dev/null)"
           ./configure --enable-warnings --enable-werror \
             --disable-dependency-tracking \
-            ${{ matrix.configure }} ${options}
+            ${{ matrix.configure }} ${options} || { tail -n 1200 config.log; false; }
 
       - name: 'configure log'
         run: cat config.log || true
@@ -309,7 +310,7 @@ jobs:
           cmake -B build -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
             -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
             -DUSE_APPLE_IDN=ON \
-            ${{ matrix.build.generate }}
+            ${{ matrix.build.generate }} || { cat bld/CMakeFiles/CMake*.yaml; false; }
 
       - run: cmake --build build --parallel 4
         name: 'cmake build'
