@@ -137,12 +137,12 @@ jobs:
           # Fails linking tests due to not linking SystemConfiguration framework,
           # because detection fails in CURL_DARWIN_SYSTEMCONFIGURATION due to an
           # error compiling TargetConditionals.h SDK header that affects gcc-11
-          # and SDK 14.x.
+          # + SDK 14.4, 14.5 (Xcode 15.3, 15.4).
           - name: SecureTransport
             compiler: gcc-11
             configure: --enable-debug --with-secure-transport --enable-websockets
             macos-version-min: 11.0  # Big Sur (2020) match the version used in gcc-11
-            uxcode: _14.3.1  # for SDK 13 to avoid SystemConfiguration detection bug
+            uxcode: _15.2  # for SDK 14.2 to avoid SystemConfiguration detection bug
           - name: LibreSSL
             compiler: clang
             install: nghttp2 libressl
