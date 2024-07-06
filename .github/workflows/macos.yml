@@ -94,7 +94,6 @@ jobs:
             compiler: clang
             configure: |
               --enable-debug \
-              --enable-maintainer-mode \
               --disable-alt-svc \
               --disable-dict \
               --disable-file \
