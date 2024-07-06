@@ -142,7 +142,7 @@ jobs:
             compiler: gcc-11
             configure: --enable-debug --with-secure-transport --enable-websockets
             macos-version-min: 11.0  # Big Sur (2020) match the version used in gcc-11
-            xcode: 14.3.1  # for SDK 13 to avoid SystemConfiguration detection bug
+            xcode: _14.3.1  # for SDK 13 to avoid SystemConfiguration detection bug
           - name: LibreSSL
             compiler: clang
             install: nghttp2 libressl
