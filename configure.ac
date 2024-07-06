@@ -597,7 +597,6 @@ CURL_CHECK_WIN32_LARGEFILE
 CURL_CHECK_WIN32_CRYPTO
 
 CURL_DARWIN_CFLAGS
-CURL_DARWIN_SYSTEMCONFIGURATION
 CURL_SUPPORTS_BUILTIN_AVAILABLE
 
 AM_CONDITIONAL([HAVE_WINDRES],
@@ -3875,6 +3874,10 @@ AM_CONDITIONAL(BUILD_LIBHOSTNAME, test x$build_libhostname = xyes)
 
 if test "x$want_ares" != xyes; then
   CURL_CHECK_OPTION_THREADED_RESOLVER
+
+  if test "$ipv6" = yes; then
+    CURL_DARWIN_SYSTEMCONFIGURATION
+  fi
 fi
 
 dnl ************************************************************
