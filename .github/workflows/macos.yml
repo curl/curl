@@ -50,6 +50,7 @@ jobs:
     timeout-minutes: 60
     env:
       CC: ${{ matrix.compiler }}
+      CFLAGS: '-mmacosx-version-min=${{ matrix.macos-version-min }}'
     strategy:
       fail-fast: false
       matrix:
@@ -130,15 +131,17 @@ jobs:
             install: nghttp2
             configure: --enable-debug --with-secure-transport --enable-websockets
             macos-version-min: 10.8  # Mountain Lion (2012)
-          # Fails compiling macOS Framework headers in most
-          # gcc + SDK combinations (except gcc-11 + SDK 14).
+          # Fails compiling macOS Framework headers in most gcc + SDK combinations
+          # (except gcc-11).
           # Fails linking tests due to not linking SystemConfiguration framework,
-          # because detection fails in CURL_DARWIN_SYSTEMCONFIGURATION due to
-          # an error compiling TargetConditionals.h SDK header.
+          # because detection fails in CURL_DARWIN_SYSTEMCONFIGURATION due to an
+          # error compiling TargetConditionals.h SDK header that affects gcc-11
+          # and SDK 14.x.
           - name: SecureTransport
             compiler: gcc-11
             configure: --enable-debug --with-secure-transport --enable-websockets
             macos-version-min: 10.8
+            xcode: 14.3.1  # for SDK 13 to avoid SystemConfiguration detection bug
           - name: LibreSSL
             compiler: clang
             install: nghttp2 libressl
@@ -216,10 +219,10 @@ jobs:
       - run: autoreconf -fi
         name: 'autoreconf'
 
-      - run: ./configure --disable-dependency-tracking --enable-warnings --enable-werror ${{ matrix.configure }}
-        name: 'configure'
-        env:
-          CFLAGS: "-mmacosx-version-min=${{ matrix.macos-version-min }}"
+      - name: 'configure'
+        run: |
+          [ -n '${{ matrix.xcode }}' ] && DEVELOPER_DIR='/Applications/Xcode_${{ matrix.xcode }}.app/Contents/Developer'
+          ./configure --disable-dependency-tracking --enable-warnings --enable-werror ${{ matrix.configure }}
 
       - name: 'configure log'
         run: cat config.log || true
