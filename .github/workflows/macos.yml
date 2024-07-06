@@ -229,9 +229,10 @@ jobs:
           fi
           ./configure --enable-warnings --enable-werror \
             --disable-dependency-tracking \
-            ${{ matrix.configure }} ${options} || { tail -n 1200 config.log; false; }
+            ${{ matrix.configure }} ${options}
 
       - name: 'configure log'
+        if: ${{ !cancelled() }}
         run: cat config.log || true
 
       - name: 'curl config'
@@ -312,16 +313,17 @@ jobs:
           cmake -B build -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
             -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
             -DUSE_APPLE_IDN=ON \
-            ${{ matrix.build.generate }} || { cat bld/CMakeFiles/CMake*.yaml; false; }
-
-      - run: cmake --build build --parallel 4
-        name: 'cmake build'
+            ${{ matrix.build.generate }}
 
       - name: 'configure log'
+        if: ${{ !cancelled() }}
         run: cat build/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
       - name: 'curl config'
         run: cat build/lib/curl_config.h || true
+
+      - run: cmake --build build --parallel 4
+        name: 'cmake build'
 
       - name: 'curl version'
         run: build/src/curl --disable --version
@@ -447,7 +449,7 @@ jobs:
               --disable-docs --disable-manual \
               --without-nghttp2 --without-libidn2 \
               "--with-libssh2=$(brew --prefix)/opt/libssh2" \
-              ${options} || { tail -n 1200 config.log; false; }
+              ${options}
           else
             [ '${{ matrix.config }}' = 'OpenSSL' ]         && options+=' -DCURL_USE_OPENSSL=ON'
             [ '${{ matrix.config }}' = 'SecureTransport' ] && options+=' -DCURL_USE_SECTRANSP=ON'
@@ -457,10 +459,11 @@ jobs:
               "-DCMAKE_C_COMPILER_TARGET=$(uname -m)-apple-darwin$(uname -r)" \
               -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF \
               -DUSE_APPLE_IDN=OFF \
-              ${options} || { cat bld/CMakeFiles/CMake*.yaml; false; }
+              ${options}
           fi
 
       - name: 'configure log'
+        if: ${{ !cancelled() }}
         run: cat bld/config.log bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
       - name: 'curl config'
