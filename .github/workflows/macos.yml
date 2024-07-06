@@ -426,10 +426,10 @@ jobs:
           if [ '${{ matrix.build }}' = 'autotools' ]; then
             [ '${{ matrix.compiler }}' = 'llvm' ] && CC+=" --target=$(uname -m)-apple-darwin"
             [ '${{ matrix.compiler }}' = 'llvm' ] && options+=" --target=$(uname -m)-apple-darwin"
-            [ '${{ matrix.compiler }}' = 'llvm' ] && options+=" --with-sysroot=$(xcrun -sdk macosx --show-sdk-path 2>/dev/null)"
-            [ '${{ matrix.compiler }}' = 'gcc'  ] && options+=" --with-sysroot=$(xcrun -sdk macosx --show-sdk-path 2>/dev/null)"
-            [ '${{ matrix.compiler }}' = 'llvm' ] && CFLAGS+=" --sysroot=$(xcrun -sdk macosx --show-sdk-path 2>/dev/null)"  # does not change the end-result
-            [ '${{ matrix.compiler }}' = 'gcc'  ] && CFLAGS+=" --sysroot=$(xcrun -sdk macosx --show-sdk-path 2>/dev/null)"  # ?
+            [ '${{ matrix.compiler }}' = 'llvm' ]   && options+=" --with-sysroot=$(xcrun -sdk macosx --show-sdk-path 2>/dev/null)"
+            [[ '${{ matrix.compiler }}' = 'gcc'* ]] && options+=" --with-sysroot=$(xcrun -sdk macosx --show-sdk-path 2>/dev/null)"
+            [ '${{ matrix.compiler }}' = 'llvm' ]   && CFLAGS+=" --sysroot=$(xcrun -sdk macosx --show-sdk-path 2>/dev/null)"  # does not change the end-result
+            [[ '${{ matrix.compiler }}' = 'gcc'* ]] && CFLAGS+=" --sysroot=$(xcrun -sdk macosx --show-sdk-path 2>/dev/null)"  # ?
             [ '${{ matrix.config }}' = 'OpenSSL' ]         && options+=" --with-openssl=$(brew --prefix)/opt/openssl"
             [ '${{ matrix.config }}' = 'SecureTransport' ] && options+=' --with-secure-transport'
             CFLAGS+=' -mmacosx-version-min=${{ matrix.macos-version-min }}'
