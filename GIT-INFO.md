@@ -34,7 +34,7 @@ following software installed:
  - automake 1.7   (or later)
  - libtool  1.4.2 (or later)
  - GNU m4 (required by autoconf)
- - perl 5.8.0 (or later)
+ - perl     5.8.0 (or later)
 
 If you don't have perl and don't want to install it, you can rename the source
 file `src/tool_hugehelp.c.cvs` to `src/tool_hugehelp.c` and avoid having to
