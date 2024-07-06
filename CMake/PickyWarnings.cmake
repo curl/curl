@@ -39,6 +39,10 @@ if(APPLE AND
   set(WPICKY "${WPICKY} -Werror=partial-availability")  # clang 3.6  appleclang 6.3
 endif()
 
+if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
+  set(WPICKY "${WPICKY} -Werror-implicit-function-declaration")  # clang 1.0  gcc 2.95
+endif()
+
 if(PICKY_COMPILER)
   if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
 
