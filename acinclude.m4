@@ -1649,9 +1649,8 @@ AC_DEFUN([CURL_SUPPORTS_BUILTIN_AVAILABLE], [
   AC_MSG_CHECKING([to see if the compiler supports __builtin_available()])
   AC_COMPILE_IFELSE([
     AC_LANG_PROGRAM([[
-#include <stdlib.h>
     ]],[[
-      if (__builtin_available(macOS 10.8, iOS 5.0, *)) {}
+      if(__builtin_available(macOS 10.12, iOS 5.0, *)) {}
     ]])
   ],[
     AC_MSG_RESULT([yes])
