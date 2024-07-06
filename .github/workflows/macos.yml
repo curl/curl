@@ -172,12 +172,6 @@ jobs:
             configure: --enable-debug --disable-ldap --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
             macos-version-min: 10.15
     steps:
-      - name: 'toolchain versions'
-        run: |
-          which "${CC}"; "${CC}" --version
-          xcodebuild -version || true
-          xcrun -sdk macosx --show-sdk-path 2>/dev/null || true
-
       - name: 'brew install'
         # Run this command with retries because of spurious failures seen
         # while running the tests, for example
@@ -212,10 +206,16 @@ jobs:
           source $HOME/venv/bin/activate
           python3 -m pip install impacket
 
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
-
       - name: 'remove $HOME/.curlrc'
         run: rm -f $HOME/.curlrc
+
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+
+      - name: 'toolchain versions'
+        run: |
+          which "${CC}"; "${CC}" --version
+          xcodebuild -version || true
+          xcrun -sdk macosx --show-sdk-path 2>/dev/null || true
 
       - name: 'autoreconf'
         run: autoreconf -fi
@@ -282,12 +282,6 @@ jobs:
             install: gnutls
             generate: -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DCMAKE_SHARED_LINKER_FLAGS=-L$(brew --prefix)/lib -DCMAKE_EXE_LINKER_FLAGS=-L$(brew --prefix)/lib
     steps:
-      - name: 'toolchain versions'
-        run: |
-          which "${CC}"; "${CC}" --version
-          xcodebuild -version || true
-          xcrun -sdk macosx --show-sdk-path 2>/dev/null || true
-
       - name: 'brew install'
         run: |
           echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
@@ -305,6 +299,12 @@ jobs:
           esac
 
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+
+      - name: 'toolchain versions'
+        run: |
+          which "${CC}"; "${CC}" --version
+          xcodebuild -version || true
+          xcrun -sdk macosx --show-sdk-path 2>/dev/null || true
 
       - name: 'cmake generate'
         run: |
@@ -410,6 +410,12 @@ jobs:
           - { compiler: llvm  , image: macos-14, xcode: '15.3'  , config: SecureTransport }
           - { compiler: llvm  , image: macos-14, xcode: '15.4'  , config: SecureTransport }
     steps:
+      - name: 'install autotools'
+        if: ${{ matrix.build == 'autotools' }}
+        run: |
+          echo autoconf automake libtool | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+          while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
+
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - name: 'toolchain versions'
@@ -418,12 +424,6 @@ jobs:
           which "${CC}"; "${CC}" --version
           xcodebuild -version || true
           xcrun -sdk macosx --show-sdk-path 2>/dev/null || true
-
-      - name: 'install autotools'
-        if: ${{ matrix.build == 'autotools' }}
-        run: |
-          echo autoconf automake libtool | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
-          while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
 
       - name: 'autoreconf'
         if: ${{ matrix.build == 'autotools' }}
