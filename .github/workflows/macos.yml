@@ -45,46 +45,53 @@ env:
 
 jobs:
   autotools:
-    name: 'autotools ${{ matrix.compiler && matrix.compiler || 'clang' }} ${{ matrix.name }}'
+    name: 'autotools ${{ matrix.compiler }} ${{ matrix.name }}'
     runs-on: 'macos-latest'
     timeout-minutes: 60
     env:
-      CC: ${{ matrix.compiler && matrix.compiler || 'clang' }}
+      CC: ${{ matrix.compiler }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - name: no-ssl non-debug
+            compiler: clang
             install: nghttp2
             configure: --without-ssl --enable-websockets
             macos-version-min: 10.9  # Mavericks (2013)
           - name: no-ssl non-debug
-            install: nghttp2
             compiler: gcc-12
+            install: nghttp2
             configure: --without-ssl --enable-websockets
             macos-version-min: 10.9
             tflags: ~RTSP ~1156 ~1539
           - name: no-ssl
+            compiler: clang
             install: nghttp2
             configure: --enable-debug --without-ssl --enable-websockets
             macos-version-min: 10.9
           - name: libssh2
+            compiler: clang
             install: nghttp2 libssh2
             configure: --enable-debug --with-libssh2=$(brew --prefix)/opt/libssh2 --without-ssl --enable-websockets
             macos-version-min: 10.9
           - name: libssh c-ares
+            compiler: clang
             install: nghttp2 openssl libssh
             configure: --enable-debug --with-libssh --with-openssl=$(brew --prefix)/opt/openssl --enable-ares --enable-websockets
             macos-version-min: 10.9
           - name: libssh
+            compiler: clang
             install: nghttp2 openssl libssh
             configure: --enable-debug --with-libssh --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
             macos-version-min: 10.9
           - name: c-ares
+            compiler: clang
             install: nghttp2
             configure: --enable-debug --enable-ares --without-ssl --enable-websockets
             macos-version-min: 10.9
           - name: HTTP only
+            compiler: clang
             configure: |
               --enable-debug \
               --enable-maintainer-mode \
@@ -120,6 +127,7 @@ jobs:
 
             macos-version-min: 10.15  # Catalina (2019)
           - name: SecureTransport
+            compiler: clang
             install: nghttp2
             configure: --enable-debug --with-secure-transport --enable-websockets
             macos-version-min: 10.8  # Mountain Lion (2012)
@@ -133,24 +141,29 @@ jobs:
             configure: --enable-debug --with-secure-transport --enable-websockets
             macos-version-min: 10.8
           - name: LibreSSL
+            compiler: clang
             install: nghttp2 libressl
             configure: --enable-debug --with-openssl=$(brew --prefix)/opt/libressl --enable-websockets
             macos-version-min: 10.9
           - name: OpenSSL
+            compiler: clang
             install: nghttp2 openssl
             configure: --enable-debug --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
             macos-version-min: 10.9
           - name: OpenSSL torture no-FTP
+            compiler: clang
             install: nghttp2 openssl
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
             tflags: -n -t --shallow=25 !FTP
             macos-version-min: 10.9
           - name: OpenSSL torture FTP
+            compiler: clang
             install: nghttp2 openssl
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
             tflags: -n -t --shallow=20 FTP
             macos-version-min: 10.9
           - name: OpenSSL libssh2 (macOS 10.15)
+            compiler: clang
             install: nghttp2 openssl libssh2
             configure: --enable-debug --disable-ldap --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
             macos-version-min: 10.15
@@ -227,17 +240,15 @@ jobs:
           TFLAGS: '${{ matrix.tflags }} -j5 ~1452'
 
   cmake:
-    name: 'cmake ${{ matrix.compiler.CC }} ${{ matrix.build.name }}'
+    name: 'cmake ${{ matrix.compiler }} ${{ matrix.build.name }}'
     runs-on: 'macos-latest'
     env:
-      CC: ${{ matrix.compiler.CC }}
+      CC: ${{ matrix.compiler }}
       CFLAGS: '-Wno-deprecated-declarations'  # Required for LDAP
     strategy:
       fail-fast: false
       matrix:
-        compiler:
-          - CC: clang
-          - CC: gcc-12
+        compiler: [clang, gcc-12]
         build:
           - name: OpenSSL
             install: nghttp2 openssl gsasl
