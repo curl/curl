@@ -42,7 +42,7 @@ permissions: {}
 env:
   DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
   MAKEFLAGS: -j 4
-  LDFLAGS: -w
+  #LDFLAGS: -w
 
 jobs:
   autotools:
@@ -224,6 +224,7 @@ jobs:
         run: |
           [ -n '${{ matrix.xcode }}' ] && DEVELOPER_DIR='/Applications/Xcode_${{ matrix.xcode }}.app/Contents/Developer'
           [ -n '${{ matrix.xcode }}' ] && options+=" --with-sysroot=$(xcrun -sdk macosx --show-sdk-path 2>/dev/null)"
+          [ -n '${{ matrix.xcode }}' ] && CFLAGS+=" --sysroot=$(xcrun -sdk macosx --show-sdk-path 2>/dev/null)"
           ./configure --enable-warnings --enable-werror \
             --disable-dependency-tracking \
             ${{ matrix.configure }} ${options}
@@ -428,6 +429,7 @@ jobs:
             [ '${{ matrix.compiler }}' = 'llvm' ] && options+=" --with-sysroot=$(xcrun -sdk macosx --show-sdk-path 2>/dev/null)"
             [ '${{ matrix.compiler }}' = 'gcc'  ] && options+=" --with-sysroot=$(xcrun -sdk macosx --show-sdk-path 2>/dev/null)"
             [ '${{ matrix.compiler }}' = 'llvm' ] && CFLAGS+=" --sysroot=$(xcrun -sdk macosx --show-sdk-path 2>/dev/null)"  # does not change the end-result
+            [ '${{ matrix.compiler }}' = 'gcc'  ] && CFLAGS+=" --sysroot=$(xcrun -sdk macosx --show-sdk-path 2>/dev/null)"  # ?
             [ '${{ matrix.config }}' = 'OpenSSL' ]         && options+=" --with-openssl=$(brew --prefix)/opt/openssl"
             [ '${{ matrix.config }}' = 'SecureTransport' ] && options+=' --with-secure-transport'
             CFLAGS+=' -mmacosx-version-min=${{ matrix.macos-version-min }}'
