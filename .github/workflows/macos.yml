@@ -326,7 +326,7 @@ jobs:
       - name: 'curl version'
         run: build/src/curl --disable --version
 
-  cmake-gcc-vs-sdk:
+  combinations:
     if: true  # Set to `true` to enable this test matrix of about ~144 jobs. It runs fairly quickly.
     name: '${{ matrix.build }} ${{ matrix.compiler }} ${{ matrix.image }} ${{ matrix.xcode }} ${{ matrix.config }}'
     runs-on: ${{ matrix.image }}
