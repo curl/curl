@@ -41,8 +41,8 @@ permissions: {}
 
 env:
   DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
+  LDFLAGS: -w  # suppress 'object file was built for newer macOS version than being linked' warnings
   MAKEFLAGS: -j 4
-  #LDFLAGS: -w
 
 jobs:
   autotools:
