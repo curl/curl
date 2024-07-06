@@ -45,20 +45,23 @@ env:
 
 jobs:
   autotools:
-    name: 'autotools ${{ matrix.build.name }}'
+    name: 'autotools ${{ matrix.compiler }} ${{ matrix.name }}'
     runs-on: 'macos-latest'
     timeout-minutes: 60
+    env:
+      CC: ${{ matrix.compiler && matrix.compiler || 'clang' }}
     strategy:
       fail-fast: false
       matrix:
-        build:
+        include:
           - name: no-ssl non-debug
             install: nghttp2
             configure: --without-ssl --enable-websockets
             macosx-version-min: 10.9  # Mavericks (2013)
-          - name: no-ssl non-debug gcc-12
+          - name: no-ssl non-debug
             install: nghttp2
-            configure: --without-ssl --enable-websockets CC=gcc-12
+            CC: gcc-12
+            configure: --without-ssl --enable-websockets
             macosx-version-min: 10.9
             tflags: ~RTSP ~1156 ~1539
           - name: no-ssl
@@ -125,8 +128,9 @@ jobs:
           # Fails linking tests due to not linking SystemConfiguration framework,
           # because detection fails in CURL_DARWIN_SYSTEMCONFIGURATION due to
           # an error compiling TargetConditionals.h SDK header.
-          - name: SecureTransport gcc-11
-            configure: --enable-debug --with-secure-transport --enable-websockets CC=gcc-11
+          - name: SecureTransport
+            CC: gcc-11
+            configure: --enable-debug --with-secure-transport --enable-websockets
             macosx-version-min: 10.8
           - name: LibreSSL
             install: nghttp2 libressl
@@ -151,7 +155,7 @@ jobs:
             configure: --enable-debug --disable-ldap --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
             macosx-version-min: 10.15
     steps:
-      - run: echo libtool autoconf automake pkg-config libpsl ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+      - run: echo libtool autoconf automake pkg-config libpsl ${{ matrix.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
         name: 'brew bundle'
 
       # Run this command with retries because of spurious failures seen
@@ -161,7 +165,7 @@ jobs:
         name: 'brew install'
 
       - run: |
-          case "${{ matrix.build.install }}" in
+          case "${{ matrix.install }}" in
             *openssl*)
               (
                 cd $(brew --prefix)/opt/openssl/lib/pkgconfig/
@@ -194,10 +198,10 @@ jobs:
       - run: autoreconf -fi
         name: 'autoreconf'
 
-      - run: ./configure --disable-dependency-tracking --enable-warnings --enable-werror ${{ matrix.build.configure }}
+      - run: ./configure --disable-dependency-tracking --enable-warnings --enable-werror ${{ matrix.configure }}
         name: 'configure'
         env:
-          CFLAGS: "-mmacosx-version-min=${{ matrix.build.macosx-version-min }}"
+          CFLAGS: "-mmacosx-version-min=${{ matrix.macosx-version-min }}"
 
       - name: 'configure log'
         run: cat config.log || true
@@ -220,7 +224,7 @@ jobs:
       - run: make V=1 test-ci
         name: 'run tests'
         env:
-          TFLAGS: '${{ matrix.build.tflags }} -j5 ~1452'
+          TFLAGS: '${{ matrix.tflags }} -j5 ~1452'
 
   cmake:
     name: 'cmake ${{ matrix.compiler.CC }} ${{ matrix.build.name }}'
