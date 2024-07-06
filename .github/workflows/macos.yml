@@ -178,16 +178,16 @@ jobs:
           xcodebuild -version || true
           xcrun -sdk macosx --show-sdk-path 2>/dev/null || true
 
-      - run: echo libtool autoconf automake pkg-config libpsl ${{ matrix.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
-        name: 'brew bundle'
+      - name: 'brew install'
+        # Run this command with retries because of spurious failures seen
+        # while running the tests, for example
+        # https://github.com/curl/curl/runs/4095721123?check_suite_focus=true
+        run: |
+          echo libtool autoconf automake pkg-config libpsl ${{ matrix.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+          while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
 
-      # Run this command with retries because of spurious failures seen
-      # while running the tests, for example
-      # https://github.com/curl/curl/runs/4095721123?check_suite_focus=true
-      - run: "while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done"
-        name: 'brew install'
-
-      - run: |
+      - name: 'brew unlink openssl'
+        run: |
           case "${{ matrix.install }}" in
             *openssl*)
               (
@@ -205,21 +205,20 @@ jobs:
                 brew unlink openssl
               fi;;
           esac
-        name: 'brew unlink openssl'
 
-      - run: |
+      - name: 'pip3 install'
+        run: |
           python3 -m venv $HOME/venv
           source $HOME/venv/bin/activate
           python3 -m pip install impacket
-        name: 'pip3 install'
 
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
-      - run: rm -f $HOME/.curlrc
-        name: remove $HOME/.curlrc
+      - name: 'remove $HOME/.curlrc'
+        run: rm -f $HOME/.curlrc
 
-      - run: autoreconf -fi
-        name: 'autoreconf'
+      - name: 'autoreconf'
+        run: autoreconf -fi
 
       - name: 'configure'
         run: |
@@ -238,22 +237,22 @@ jobs:
       - name: 'curl config'
         run: cat lib/curl_config.h || true
 
-      - run: make V=1
-        name: 'make'
+      - name: 'make'
+        run: make V=1
 
       - name: 'curl version'
         run: src/curl --disable --version
 
-      - run: make V=1 examples
-        name: 'make examples'
+      - name: 'make examples'
+        run: make V=1 examples
 
-      - run: make V=1 -C tests
-        name: 'make tests'
+      - name: 'make tests'
+        run: make V=1 -C tests
 
-      - run: make V=1 test-ci
-        name: 'run tests'
+      - name: 'run tests'
         env:
           TFLAGS: '${{ matrix.tflags }} -j5 ~1452'
+        run: make V=1 test-ci
 
   cmake:
     name: 'cmake ${{ matrix.compiler }} ${{ matrix.build.name }}'
@@ -289,13 +288,13 @@ jobs:
           xcodebuild -version || true
           xcrun -sdk macosx --show-sdk-path 2>/dev/null || true
 
-      - run: echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
-        name: 'brew bundle'
+      - name: 'brew install'
+        run: |
+          echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+          while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
 
-      - run: "while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done"
-        name: 'brew install'
-
-      - run: |
+      - name: 'brew unlink openssl'
+        run: |
           case "${{ matrix.build.install }}" in
             *openssl*)
               ;;
@@ -304,7 +303,6 @@ jobs:
                 brew unlink openssl
               fi;;
           esac
-        name: 'brew unlink openssl'
 
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
@@ -322,8 +320,8 @@ jobs:
       - name: 'curl config'
         run: cat build/lib/curl_config.h || true
 
-      - run: cmake --build build --parallel 4
-        name: 'cmake build'
+      - name: 'cmake build'
+        run: cmake --build build --parallel 4
 
       - name: 'curl version'
         run: build/src/curl --disable --version
