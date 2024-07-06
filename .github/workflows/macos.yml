@@ -90,7 +90,7 @@ jobs:
             install: nghttp2
             configure: --enable-debug --enable-ares --without-ssl --enable-websockets
             macos-version-min: 10.9
-          - name: HTTP only
+          - name: HTTP-only
             compiler: clang
             configure: |
               --enable-debug \
