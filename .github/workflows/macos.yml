@@ -57,33 +57,33 @@ jobs:
           - name: no-ssl non-debug
             install: nghttp2
             configure: --without-ssl --enable-websockets
-            macosx-version-min: 10.9  # Mavericks (2013)
+            macos-version-min: 10.9  # Mavericks (2013)
           - name: no-ssl non-debug
             install: nghttp2
             CC: gcc-12
             configure: --without-ssl --enable-websockets
-            macosx-version-min: 10.9
+            macos-version-min: 10.9
             tflags: ~RTSP ~1156 ~1539
           - name: no-ssl
             install: nghttp2
             configure: --enable-debug --without-ssl --enable-websockets
-            macosx-version-min: 10.9
+            macos-version-min: 10.9
           - name: libssh2
             install: nghttp2 libssh2
             configure: --enable-debug --with-libssh2=$(brew --prefix)/opt/libssh2 --without-ssl --enable-websockets
-            macosx-version-min: 10.9
+            macos-version-min: 10.9
           - name: libssh c-ares
             install: nghttp2 openssl libssh
             configure: --enable-debug --with-libssh --with-openssl=$(brew --prefix)/opt/openssl --enable-ares --enable-websockets
-            macosx-version-min: 10.9
+            macos-version-min: 10.9
           - name: libssh
             install: nghttp2 openssl libssh
             configure: --enable-debug --with-libssh --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
-            macosx-version-min: 10.9
+            macos-version-min: 10.9
           - name: c-ares
             install: nghttp2
             configure: --enable-debug --enable-ares --without-ssl --enable-websockets
-            macosx-version-min: 10.9
+            macos-version-min: 10.9
           - name: HTTP only
             configure: |
               --enable-debug \
@@ -118,11 +118,11 @@ jobs:
               --without-zlib \
               --without-zstd
 
-            macosx-version-min: 10.15  # Catalina (2019)
+            macos-version-min: 10.15  # Catalina (2019)
           - name: SecureTransport
             install: nghttp2
             configure: --enable-debug --with-secure-transport --enable-websockets
-            macosx-version-min: 10.8  # Mountain Lion (2012)
+            macos-version-min: 10.8  # Mountain Lion (2012)
           # Fails compiling macOS Framework headers in most
           # gcc + SDK combinations (except gcc-11 + SDK 14).
           # Fails linking tests due to not linking SystemConfiguration framework,
@@ -131,29 +131,29 @@ jobs:
           - name: SecureTransport
             CC: gcc-11
             configure: --enable-debug --with-secure-transport --enable-websockets
-            macosx-version-min: 10.8
+            macos-version-min: 10.8
           - name: LibreSSL
             install: nghttp2 libressl
             configure: --enable-debug --with-openssl=$(brew --prefix)/opt/libressl --enable-websockets
-            macosx-version-min: 10.9
+            macos-version-min: 10.9
           - name: OpenSSL
             install: nghttp2 openssl
             configure: --enable-debug --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
-            macosx-version-min: 10.9
+            macos-version-min: 10.9
           - name: OpenSSL torture no-FTP
             install: nghttp2 openssl
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
             tflags: -n -t --shallow=25 !FTP
-            macosx-version-min: 10.9
+            macos-version-min: 10.9
           - name: OpenSSL torture FTP
             install: nghttp2 openssl
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
             tflags: -n -t --shallow=20 FTP
-            macosx-version-min: 10.9
+            macos-version-min: 10.9
           - name: OpenSSL libssh2 (macOS 10.15)
             install: nghttp2 openssl libssh2
             configure: --enable-debug --disable-ldap --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
-            macosx-version-min: 10.15
+            macos-version-min: 10.15
     steps:
       - run: echo libtool autoconf automake pkg-config libpsl ${{ matrix.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
         name: 'brew bundle'
@@ -201,7 +201,7 @@ jobs:
       - run: ./configure --disable-dependency-tracking --enable-warnings --enable-werror ${{ matrix.configure }}
         name: 'configure'
         env:
-          CFLAGS: "-mmacosx-version-min=${{ matrix.macosx-version-min }}"
+          CFLAGS: "-mmacosx-version-min=${{ matrix.macos-version-min }}"
 
       - name: 'configure log'
         run: cat config.log || true
@@ -322,15 +322,15 @@ jobs:
         # '14.0.1' has the same default macOS SDK as '13.4.1' and identical test results, so skip it.
         # '14.2', '15.0.1', '15.4' but not revealing new fallouts, skip it to reduce jobs.
         xcode: ['13.4.1', '14.1', '14.3.1', '15.2', '15.3']
-        macosx-version-min: ['10.9']
+        macos-version-min: ['10.9']
         build: [cmake, autotools]
         #include:
-        #  - { compiler: gcc-11, image: macos-14, xcode: '15.2'  , config: 'OpenSSL'        , build: 'autotools', macosx-version-min: '10.9' }
-        #  - { compiler: llvm  , image: macos-14, xcode: '15.2'  , config: 'OpenSSL'        , build: 'autotools', macosx-version-min: '10.9' }
-        #  - { compiler: clang , image: macos-14, xcode: '15.2'  , config: 'OpenSSL'        , build: 'autotools', macosx-version-min: '10.9' }
-        #  - { compiler: gcc-11, image: macos-14, xcode: '15.2'  , config: 'SecureTransport', build: 'autotools', macosx-version-min: '10.9' }
-        #  - { compiler: llvm  , image: macos-14, xcode: '15.2'  , config: 'SecureTransport', build: 'autotools', macosx-version-min: '10.9' }
-        #  - { compiler: clang , image: macos-14, xcode: '15.2'  , config: 'SecureTransport', build: 'autotools', macosx-version-min: '10.9' }
+        #  - { compiler: gcc-11, image: macos-14, xcode: '15.2'  , config: 'OpenSSL'        , build: 'autotools', macos-version-min: '10.9' }
+        #  - { compiler: llvm  , image: macos-14, xcode: '15.2'  , config: 'OpenSSL'        , build: 'autotools', macos-version-min: '10.9' }
+        #  - { compiler: clang , image: macos-14, xcode: '15.2'  , config: 'OpenSSL'        , build: 'autotools', macos-version-min: '10.9' }
+        #  - { compiler: gcc-11, image: macos-14, xcode: '15.2'  , config: 'SecureTransport', build: 'autotools', macos-version-min: '10.9' }
+        #  - { compiler: llvm  , image: macos-14, xcode: '15.2'  , config: 'SecureTransport', build: 'autotools', macos-version-min: '10.9' }
+        #  - { compiler: clang , image: macos-14, xcode: '15.2'  , config: 'SecureTransport', build: 'autotools', macos-version-min: '10.9' }
         exclude:
           # Unsupported combinations:
           - { image: macos-12, xcode: '14.3.1' }
@@ -401,7 +401,7 @@ jobs:
             [ '${{ matrix.compiler }}' = 'llvm' ] && CFLAGS+=" --sysroot=$(xcrun -sdk macosx --show-sdk-path 2>/dev/null)"  # does not change the end-result
             [ '${{ matrix.config }}' = 'OpenSSL' ]         && options+=" --with-openssl=$(brew --prefix)/opt/openssl"
             [ '${{ matrix.config }}' = 'SecureTransport' ] && options+=' --with-secure-transport'
-            CFLAGS+=' -mmacosx-version-min=${{ matrix.macosx-version-min }}'
+            CFLAGS+=' -mmacosx-version-min=${{ matrix.macos-version-min }}'
             autoreconf -fi
             # picks up nghttp2 and libidn2
             mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
@@ -415,7 +415,7 @@ jobs:
             [ '${{ matrix.config }}' = 'SecureTransport' ] && options+=' -DCURL_USE_SECTRANSP=ON'
             # picks up libssh2
             cmake -B bld -DCMAKE_UNITY_BUILD=OFF -DCURL_WERROR=ON \
-              -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.macosx-version-min }} \
+              -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.macos-version-min }} \
               "-DCMAKE_C_COMPILER_TARGET=$(uname -m)-apple-darwin$(uname -r)" \
               -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF \
               -DUSE_APPLE_IDN=OFF \
