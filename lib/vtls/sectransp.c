@@ -49,7 +49,6 @@
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Waddress"
-#pragma GCC diagnostic ignored "-Wundef"
 #pragma GCC diagnostic ignored "-Wunreachable-code"
 #endif
 
@@ -735,13 +734,14 @@ static CURLcode sectransp_version_from_curl(SSLProtocol *darwinver,
       return CURLE_OK;
     case CURL_SSLVERSION_TLSv1_3:
       /* TLS 1.3 support first appeared in iOS 11 and macOS 10.13 */
-#if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && HAVE_BUILTIN_AVAILABLE == 1
+#if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && \
+    defined(HAVE_BUILTIN_AVAILABLE)
       if(__builtin_available(macOS 10.13, iOS 11.0, *)) {
         *darwinver = kTLSProtocol13;
         return CURLE_OK;
       }
 #endif /* (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) &&
-          HAVE_BUILTIN_AVAILABLE == 1 */
+          defined(HAVE_BUILTIN_AVAILABLE) */
       break;
   }
   return CURLE_SSL_CONNECT_ERROR;
@@ -764,7 +764,8 @@ static CURLcode set_ssl_version_min_max(struct Curl_cfilter *cf,
   /* macOS 10.5-10.7 supported TLS 1.0 only.
      macOS 10.8 and later, and iOS 5 and later, added TLS 1.1 and 1.2.
      macOS 10.13 and later, and iOS 11 and later, added TLS 1.3. */
-#if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && HAVE_BUILTIN_AVAILABLE == 1
+#if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && \
+    defined(HAVE_BUILTIN_AVAILABLE)
   if(__builtin_available(macOS 10.13, iOS 11.0, *)) {
     max_supported_version_by_os = CURL_SSLVERSION_MAX_TLSv1_3;
   }
@@ -774,7 +775,7 @@ static CURLcode set_ssl_version_min_max(struct Curl_cfilter *cf,
 #else
   max_supported_version_by_os = CURL_SSLVERSION_MAX_TLSv1_2;
 #endif /* (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) &&
-          HAVE_BUILTIN_AVAILABLE == 1 */
+          defined(HAVE_BUILTIN_AVAILABLE) */
 
   switch(ssl_version) {
     case CURL_SSLVERSION_DEFAULT:
@@ -1137,7 +1138,8 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
     switch(conn_config->version) {
     case CURL_SSLVERSION_TLSv1:
       (void)SSLSetProtocolVersionMin(backend->ssl_ctx, kTLSProtocol1);
-#if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && HAVE_BUILTIN_AVAILABLE == 1
+#if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && \
+    defined(HAVE_BUILTIN_AVAILABLE)
       if(__builtin_available(macOS 10.13, iOS 11.0, *)) {
         (void)SSLSetProtocolVersionMax(backend->ssl_ctx, kTLSProtocol13);
       }
@@ -1147,7 +1149,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
 #else
       (void)SSLSetProtocolVersionMax(backend->ssl_ctx, kTLSProtocol12);
 #endif /* (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) &&
-          HAVE_BUILTIN_AVAILABLE == 1 */
+          defined(HAVE_BUILTIN_AVAILABLE) */
       break;
     case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1_0:
@@ -1237,7 +1239,8 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
   }
 #endif /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
 
-#if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && HAVE_BUILTIN_AVAILABLE == 1
+#if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && \
+    defined(HAVE_BUILTIN_AVAILABLE)
   if(connssl->alpn) {
     if(__builtin_available(macOS 10.13.4, iOS 11, tvOS 11, *)) {
       struct alpn_proto_buf proto;
@@ -2228,7 +2231,8 @@ check_handshake:
         break;
     }
 
-#if(CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && HAVE_BUILTIN_AVAILABLE == 1
+#if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && \
+    defined(HAVE_BUILTIN_AVAILABLE)
     if(connssl->alpn) {
       if(__builtin_available(macOS 10.13.4, iOS 11, tvOS 11, *)) {
         CFArrayRef alpnArr = NULL;
