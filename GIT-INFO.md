@@ -27,16 +27,12 @@ In environments that don't support configure (i.e. Windows), do this:
 
 ## REQUIREMENTS
 
-For `autoreconf` and `configure` (not `buildconf.bat`) to work, you need the
-following software installed:
-
- - autoconf 2.57  (or later)
- - automake 1.7   (or later)
- - libtool  1.4.2 (or later)
- - GNU m4 (required by autoconf)
- - perl     5.8.0 (or later)
+See [docs/INTERNALS.md][0] for information on the requirements that you'll
+need or `autoreconf` and `configure` (not `buildconf.bat`) to work.
 
 If you don't have perl and don't want to install it, you can rename the source
 file `src/tool_hugehelp.c.cvs` to `src/tool_hugehelp.c` and avoid having to
 generate this file. This will give you a stubbed version of the file that
 doesn't contain actual content.
+
+[0]: docs/INTERNALS.md
