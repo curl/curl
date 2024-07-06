@@ -45,23 +45,23 @@ env:
 
 jobs:
   autotools:
-    name: ${{ matrix.build.name }}
+    name: 'autotools ${{ matrix.build.name }}'
     runs-on: 'macos-latest'
     timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
         build:
-          - name: normal
+          - name: no-ssl non-debug
             install: nghttp2
             configure: --without-ssl --enable-websockets
             macosx-version-min: 10.9  # Mavericks (2013)
-          - name: normal gcc-12
+          - name: no-ssl non-debug gcc-12
             install: nghttp2
             configure: --without-ssl --enable-websockets CC=gcc-12
             macosx-version-min: 10.9
             tflags: ~RTSP ~1156 ~1539
-          - name: debug
+          - name: no-ssl
             install: nghttp2
             configure: --enable-debug --without-ssl --enable-websockets
             macosx-version-min: 10.9
@@ -69,12 +69,12 @@ jobs:
             install: nghttp2 libssh2
             configure: --enable-debug --with-libssh2=$(brew --prefix)/opt/libssh2 --without-ssl --enable-websockets
             macosx-version-min: 10.9
-          - name: libssh-c-ares
-            install: openssl nghttp2 libssh
+          - name: libssh c-ares
+            install: nghttp2 openssl libssh
             configure: --enable-debug --with-libssh --with-openssl=$(brew --prefix)/opt/openssl --enable-ares --enable-websockets
             macosx-version-min: 10.9
           - name: libssh
-            install: openssl nghttp2 libssh
+            install: nghttp2 openssl libssh
             configure: --enable-debug --with-libssh --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
             macosx-version-min: 10.9
           - name: c-ares
@@ -82,7 +82,6 @@ jobs:
             configure: --enable-debug --enable-ares --without-ssl --enable-websockets
             macosx-version-min: 10.9
           - name: HTTP only
-            install: nghttp2
             configure: |
               --enable-debug \
               --enable-maintainer-mode \
@@ -117,7 +116,7 @@ jobs:
               --without-zstd
 
             macosx-version-min: 10.15  # Catalina (2019)
-          - name: SecureTransport http2
+          - name: SecureTransport
             install: nghttp2
             configure: --enable-debug --with-secure-transport --enable-websockets
             macosx-version-min: 10.8  # Mountain Lion (2012)
@@ -129,26 +128,26 @@ jobs:
           - name: SecureTransport gcc-11
             configure: --enable-debug --with-secure-transport --enable-websockets CC=gcc-11
             macosx-version-min: 10.8
-          - name: OpenSSL http2
-            install: nghttp2 openssl
-            configure: --enable-debug --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
-            macosx-version-min: 10.9
-          - name: LibreSSL http2
+          - name: LibreSSL
             install: nghttp2 libressl
             configure: --enable-debug --with-openssl=$(brew --prefix)/opt/libressl --enable-websockets
             macosx-version-min: 10.9
-          - name: torture
+          - name: OpenSSL
+            install: nghttp2 openssl
+            configure: --enable-debug --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
+            macosx-version-min: 10.9
+          - name: OpenSSL torture no-FTP
             install: nghttp2 openssl
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
             tflags: -n -t --shallow=25 !FTP
             macosx-version-min: 10.9
-          - name: torture-ftp
+          - name: OpenSSL torture FTP
             install: nghttp2 openssl
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
             tflags: -n -t --shallow=20 FTP
             macosx-version-min: 10.9
-          - name: macOS 10.15
-            install: nghttp2 libssh2 openssl
+          - name: OpenSSL libssh2 (macOS 10.15)
+            install: nghttp2 openssl libssh2
             configure: --enable-debug --disable-ldap --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
             macosx-version-min: 10.15
     steps:
@@ -200,10 +199,17 @@ jobs:
         env:
           CFLAGS: "-mmacosx-version-min=${{ matrix.build.macosx-version-min }}"
 
-      - name: 'make'
-        run: |
-          make V=1
-          src/curl --disable --version
+      - name: 'configure log'
+        run: cat config.log || true
+
+      - name: 'curl config'
+        run: cat lib/curl_config.h || true
+
+      - run: make V=1
+        name: 'make'
+
+      - name: 'curl version'
+        run: src/curl --disable --version
 
       - run: make V=1 examples
         name: 'make examples'
@@ -217,7 +223,7 @@ jobs:
           TFLAGS: '${{ matrix.build.tflags }} -j5 ~1452'
 
   cmake:
-    name: cmake ${{ matrix.compiler.CC }} ${{ matrix.build.name }}
+    name: 'cmake ${{ matrix.compiler.CC }} ${{ matrix.build.name }}'
     runs-on: 'macos-latest'
     env:
       CC: ${{ matrix.compiler.CC }}
@@ -271,10 +277,17 @@ jobs:
             -DUSE_APPLE_IDN=ON \
             ${{ matrix.build.generate }}
 
-      - name: 'cmake build'
-        run: |
-          cmake --build build --parallel 4
-          build/src/curl --disable --version
+      - run: cmake --build build --parallel 4
+        name: 'cmake build'
+
+      - name: 'configure log'
+        run: cat build/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
+
+      - name: 'curl config'
+        run: cat build/lib/curl_config.h || true
+
+      - name: 'curl version'
+        run: build/src/curl --disable --version
 
   cmake-gcc-vs-sdk:
     if: true  # Set to `true` to enable this test matrix of about ~144 jobs. It runs fairly quickly.
