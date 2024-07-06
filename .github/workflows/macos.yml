@@ -440,7 +440,7 @@ jobs:
             [ '${{ matrix.config }}' = 'OpenSSL' ]         && options+=' -DCURL_USE_OPENSSL=ON'
             [ '${{ matrix.config }}' = 'SecureTransport' ] && options+=' -DCURL_USE_SECTRANSP=ON'
             # picks up libssh2
-            cmake -B bld -DCMAKE_UNITY_BUILD=OFF -DCURL_WERROR=ON \
+            cmake -B bld -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
               -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.macos-version-min }} \
               "-DCMAKE_C_COMPILER_TARGET=$(uname -m)-apple-darwin$(uname -r)" \
               -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF \
