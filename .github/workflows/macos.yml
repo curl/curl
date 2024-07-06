@@ -51,7 +51,7 @@ jobs:
     env:
       CC: ${{ matrix.compiler }}
       CFLAGS: '-mmacosx-version-min=${{ matrix.macos-version-min }}'
-      DEVELOPER_DIR: /Applications/Xcode${{ matrix.uxcode }}.app/Contents/Developer
+      DEVELOPER_DIR: /Applications/Xcode${{ matrix.xcode && format('_{0}', matrix.xcode) || '' }}.app/Contents/Developer
     strategy:
       fail-fast: false
       matrix:
@@ -141,8 +141,8 @@ jobs:
           - name: SecureTransport
             compiler: gcc-11
             configure: --enable-debug --with-secure-transport --enable-websockets
-            macos-version-min: 11.0  # Big Sur (2020) match the version used in gcc-11
-            uxcode: _15.2  # for SDK 14.2 to avoid SystemConfiguration detection bug
+            macos-version-min: 10.15  # Catalina (2019) the lastest release where SecureTransport is not deprecated
+            xcode: 15.2  # for SDK 14.2, to avoid SystemConfiguration detection bug
             tflags: ~RTSP ~1156 ~1539 ~2100
           - name: LibreSSL
             compiler: clang
