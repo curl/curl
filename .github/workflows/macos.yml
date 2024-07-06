@@ -47,7 +47,7 @@ jobs:
   autotools:
     name: ${{ matrix.build.name }}
     runs-on: 'macos-latest'
-    timeout-minutes: 90
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -203,7 +203,7 @@ jobs:
       - run: make V=1 test-ci
         name: 'run tests'
         env:
-          TFLAGS: "${{ matrix.build.tflags }} ~1452"
+          TFLAGS: '${{ matrix.build.tflags }} -j5 ~1452'
 
   cmake:
     name: cmake ${{ matrix.compiler.CC }} ${{ matrix.build.name }}
