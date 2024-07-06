@@ -42,6 +42,7 @@ permissions: {}
 env:
   DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
   MAKEFLAGS: -j 4
+  LDFLAGS: -w
 
 jobs:
   autotools:
@@ -140,7 +141,7 @@ jobs:
           - name: SecureTransport
             compiler: gcc-11
             configure: --enable-debug --with-secure-transport --enable-websockets
-            macos-version-min: 10.8
+            macos-version-min: 11.0  # Big Sur (2020) match the version used in gcc-11
             xcode: 14.3.1  # for SDK 13 to avoid SystemConfiguration detection bug
           - name: LibreSSL
             compiler: clang
