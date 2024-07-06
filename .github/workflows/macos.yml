@@ -49,9 +49,9 @@ jobs:
     runs-on: 'macos-latest'
     timeout-minutes: 60
     env:
+      DEVELOPER_DIR: /Applications/Xcode${{ matrix.xcode && format('_{0}', matrix.xcode) || '' }}.app/Contents/Developer
       CC: ${{ matrix.compiler }}
       CFLAGS: '-mmacosx-version-min=${{ matrix.macos-version-min }}'
-      DEVELOPER_DIR: /Applications/Xcode${{ matrix.xcode && format('_{0}', matrix.xcode) || '' }}.app/Contents/Developer
     strategy:
       fail-fast: false
       matrix:
@@ -258,9 +258,9 @@ jobs:
     name: 'cmake ${{ matrix.compiler }} ${{ matrix.build.name }}'
     runs-on: 'macos-latest'
     env:
+      DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
       CC: ${{ matrix.compiler }}
       CFLAGS: '-Wno-deprecated-declarations'  # Required for LDAP
-      DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
     strategy:
       fail-fast: false
       matrix:
@@ -332,9 +332,9 @@ jobs:
     runs-on: ${{ matrix.image }}
     timeout-minutes: 30
     env:
+      DEVELOPER_DIR: /Applications/Xcode_${{ matrix.xcode }}.app/Contents/Developer
       CC: ${{ matrix.compiler }}
       CFLAGS: '-Wno-deprecated-declarations'  # Required for LDAP
-      DEVELOPER_DIR: /Applications/Xcode_${{ matrix.xcode }}.app/Contents/Developer
     strategy:
       fail-fast: false
       matrix:
