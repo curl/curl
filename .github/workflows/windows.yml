@@ -482,7 +482,7 @@ jobs:
           export CURRENT_BINARY_CACHE='cache/${{ matrix.arch }}-${{ matrix.plat }}-${{ matrix.name }}'
           mkdir -p "$CURRENT_BINARY_CACHE"
           export VCPKG_BINARY_SOURCES="clear;files,$GITHUB_WORKSPACE/$CURRENT_BINARY_CACHE,readwrite;"
-          vcpkg/vcpkg x-set-installed ${{ matrix.install }} --triplet=${{ matrix.arch }}-${{ matrix.plat }}
+          vcpkg/vcpkg x-set-installed ${{ matrix.install }} '--triplet=${{ matrix.arch }}-${{ matrix.plat }}'
 
       - name: 'save cache dependencies'
         id: cache-save
