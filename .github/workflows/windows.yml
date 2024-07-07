@@ -79,12 +79,15 @@ jobs:
 
       - name: 'autotools configure log'
         if: ${{ !cancelled() }}
+        shell: C:\cygwin\bin\bash.exe '{0}'
         run: cat bld/config.log 2>/dev/null || true
 
       - name: 'curl_config.h'
+        shell: C:\cygwin\bin\bash.exe '{0}'
         run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'curl_config.h (full)'
+        shell: C:\cygwin\bin\bash.exe '{0}'
         run: cat bld/lib/curl_config.h || true
 
       - name: 'autotools build'
@@ -144,12 +147,15 @@ jobs:
 
       - name: 'cmake configure log'
         if: ${{ !cancelled() }}
+        shell: C:\cygwin\bin\bash.exe '{0}'
         run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
+        shell: C:\cygwin\bin\bash.exe '{0}'
         run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'curl_config.h (full)'
+        shell: C:\cygwin\bin\bash.exe '{0}'
         run: cat bld/lib/curl_config.h || true
 
       - name: 'cmake build'
@@ -240,12 +246,15 @@ jobs:
 
       - name: 'autotools configure log'
         if: ${{ !cancelled() }}
+        shell: msys2 {0}
         run: cat bld/config.log 2>/dev/null || true
 
       - name: 'curl_config.h'
+        shell: msys2 {0}
         run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'curl_config.h (full)'
+        shell: msys2 {0}
         run: cat bld/lib/curl_config.h || true
 
       - name: 'autotools build'
@@ -329,12 +338,15 @@ jobs:
 
       - name: 'cmake configure log'
         if: ${{ !cancelled() }}
+        shell: msys2 {0}
         run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
+        shell: msys2 {0}
         run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'curl_config.h (full)'
+        shell: msys2 {0}
         run: cat bld/lib/curl_config.h || true
 
       - name: 'cmake build'
@@ -453,12 +465,15 @@ jobs:
 
       - name: 'cmake configure log'
         if: ${{ !cancelled() }}
+        shell: C:\msys64\usr\bin\bash.exe {0}
         run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
+        shell: C:\msys64\usr\bin\bash.exe {0}
         run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'curl_config.h (full)'
+        shell: C:\msys64\usr\bin\bash.exe {0}
         run: cat bld/lib/curl_config.h || true
 
       - name: 'cmake build'
@@ -599,12 +614,15 @@ jobs:
 
       - name: 'cmake configure log'
         if: ${{ !cancelled() }}
+        shell: bash
         run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
+        shell: bash
         run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'curl_config.h (full)'
+        shell: bash
         run: cat bld/lib/curl_config.h || true
 
       - name: 'cmake build'
