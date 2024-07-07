@@ -3544,7 +3544,7 @@ case "$OPT_FISH_FPATH" in
     dnl --with-fish-functions-dir option used without path
     CURL_CHECK_PKGCONFIG(fish)
     if test "$PKGCONFIG" != "no" ; then
-      FISH_FUNCTIONS_DIR="$($PKGCONFIG --variable completionsdir fish)"
+      FISH_FUNCTIONS_DIR=`$PKGCONFIG --variable completionsdir fish`
     else
       FISH_FUNCTIONS_DIR="$datarootdir/fish/vendor_completions.d"
     fi
