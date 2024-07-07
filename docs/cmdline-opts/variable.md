@@ -10,7 +10,7 @@ Multi: append
 See-also:
   - config
 Example:
-  - --variable name=smith $URL
+  - --variable name=smith --expand-url "$URL/{{name}}"
 ---
 
 # `--variable`
