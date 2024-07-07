@@ -5011,6 +5011,8 @@ AC_OUTPUT
 
 CURL_GENERATE_CONFIGUREHELP_PM
 
+SUPPORT_PROTOCOLS_LOWER=`echo "$SUPPORT_PROTOCOLS" | tr A-Z a-z`
+
 AC_MSG_NOTICE([Configured to build curl/libcurl:
 
   Host setup:       ${host}
@@ -5057,7 +5059,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   HTTP3:            ${curl_h3_msg}
   ECH:              ${curl_ech_msg}
   WebSockets:       ${curl_ws_msg}
-  Protocols:        ${SUPPORT_PROTOCOLS}
+  Protocols:        ${SUPPORT_PROTOCOLS_LOWER}
   Features:         ${SUPPORT_FEATURES}
 ])
 
