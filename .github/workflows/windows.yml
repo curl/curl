@@ -397,8 +397,8 @@ jobs:
           ls bld/lib/*.dll >/dev/null 2>&1 && cp -f -p bld/lib/*.dll bld/tests/libtest/
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
-  mingw-w64-standalone:
-    name: 'mingw64, C ${{ matrix.env }} ${{ matrix.name }}'
+  old-mingw-w64:
+    name: 'old-mingw, C ${{ matrix.env }} ${{ matrix.name }}'
     runs-on: windows-latest
     timeout-minutes: 45
     strategy:
