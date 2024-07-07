@@ -45,7 +45,7 @@ env:
 
 jobs:
   autotools:
-    name: 'autotools ${{ matrix.compiler }} ${{ matrix.name }}'
+    name: 'AM ${{ matrix.compiler }} ${{ matrix.name }}'
     runs-on: 'macos-latest'
     timeout-minutes: 60
     env:
@@ -234,11 +234,11 @@ jobs:
         if: ${{ !cancelled() }}
         run: cat bld/config.log || true
 
-      - name: 'curl config'
-        run: cat bld/lib/curl_config.h || true
-
-      - name: 'curl config (compact)'
+      - name: 'curl_config.h'
         run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
+
+      - name: 'curl_config.h (full)'
+        run: cat bld/lib/curl_config.h || true
 
       - name: 'make'
         run: make -C bld V=1
@@ -258,7 +258,7 @@ jobs:
         run: make -C bld V=1 test-ci
 
   cmake:
-    name: 'cmake ${{ matrix.compiler }} ${{ matrix.build.name }}'
+    name: 'CM ${{ matrix.compiler }} ${{ matrix.build.name }}'
     runs-on: 'macos-latest'
     env:
       DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
@@ -320,11 +320,11 @@ jobs:
         if: ${{ !cancelled() }}
         run: cat bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
-      - name: 'curl config'
-        run: cat bld/lib/curl_config.h || true
-
-      - name: 'curl config (compact)'
+      - name: 'curl_config.h'
         run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
+
+      - name: 'curl_config.h (full)'
+        run: cat bld/lib/curl_config.h || true
 
       - name: 'cmake build'
         run: cmake --build bld --parallel 4
@@ -333,8 +333,8 @@ jobs:
         run: bld/src/curl --disable --version
 
   combinations:
-    if: true  # Set to `true` to enable this test matrix of about ~144 jobs. It runs fairly quickly.
-    name: '${{ matrix.build }} ${{ matrix.compiler }} ${{ matrix.image }} ${{ matrix.xcode }} ${{ matrix.config }}'
+    if: true  # Set to `true` to enable this test matrix of ~126 jobs. It runs fairly quickly.
+    name: "${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }} ${{ matrix.image }} ${{ matrix.xcode }} ${{ matrix.config }}"
     runs-on: ${{ matrix.image }}
     timeout-minutes: 30
     env:
@@ -473,11 +473,11 @@ jobs:
         if: ${{ !cancelled() }}
         run: cat bld/config.log bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
-      - name: 'curl config'
-        run: cat bld/lib/curl_config.h || true
-
-      - name: 'curl config (compact)'
+      - name: 'curl_config.h'
         run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
+
+      - name: 'curl_config.h (full)'
+        run: cat bld/lib/curl_config.h || true
 
       - name: 'build / ${{ matrix.build }}'
         run: make -C bld V=1 VERBOSE=1
