@@ -423,11 +423,11 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 55
     env:
+      VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
       VCPKG_DISABLE_METRICS: '1'
     strategy:
       matrix:
         include:
-          # name should be unique and without special chars. It creates a folder with that name for the cache.
         - name: 'schannel'
           install: 'brotli zlib zstd libpsl nghttp2 libssh2[core,zlib]'
           arch: 'x64'
@@ -460,28 +460,18 @@ jobs:
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
-      - name: 'restore cache dependencies'
-        uses: actions/cache/restore@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+      - name: 'vcpkg cache setup'
+        uses: actions/github-script@v7
         with:
-          path: 'cache/${{ matrix.arch }}-${{ matrix.plat }}-${{ matrix.name }}'
-          key: ${{ matrix.arch }}-${{ matrix.plat }}-${{ matrix.name }}
-          restore-keys: ${{ matrix.arch }}-${{ matrix.plat }}-${{ matrix.name }}
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
 
       - name: 'vcpkg build'
         timeout-minutes: 25
         shell: bash
         run: |
-          export CURRENT_BINARY_CACHE='cache/${{ matrix.arch }}-${{ matrix.plat }}-${{ matrix.name }}'
-          mkdir -p "$CURRENT_BINARY_CACHE"
-          export VCPKG_BINARY_SOURCES="clear;files,$GITHUB_WORKSPACE/$CURRENT_BINARY_CACHE,readwrite;"
           vcpkg x-set-installed ${{ matrix.install }} '--triplet=${{ matrix.arch }}-${{ matrix.plat }}'
-
-      - name: 'save cache dependencies'
-        id: cache-save
-        uses: actions/cache/save@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
-        with:
-          path: 'cache/${{ matrix.arch }}-${{ matrix.plat }}-${{ matrix.name }}'
-          key: ${{ matrix.arch }}-${{ matrix.plat }}-${{ matrix.name }}-${{ hashFiles('vcpkg/installed/vcpkg/info/*', 'vcpkg/installed/vcpkg/updates/*') }}
 
       - name: 'cmake configure'
         timeout-minutes: 5
