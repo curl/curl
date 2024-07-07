@@ -1735,7 +1735,7 @@ if(NOT CURL_DISABLE_INSTALL)
                           OR USE_SCHANNEL OR USE_RUSTLS OR USE_BEARSSL OR
                           USE_MBEDTLS OR USE_SECTRANSP OR
                           (USE_WOLFSSL AND HAVE_WOLFSSL_FULL_BIO)))
-  _add_if("unicode"       ENABLE_UNICODE)
+  _add_if("Unicode"       ENABLE_UNICODE)
   _add_if("threadsafe"    HAVE_ATOMIC OR
                           (USE_THREADS_POSIX AND HAVE_PTHREAD_H) OR
                           (WIN32 AND HAVE_WIN32_WINNT GREATER_EQUAL 0x600))
