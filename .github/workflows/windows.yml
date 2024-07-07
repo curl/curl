@@ -75,7 +75,11 @@ jobs:
             --with-openssl \
             --with-libssh2 \
             --disable-dependency-tracking \
-            ${{ matrix.config }} || { tail -n 1200 config.log; false; }
+            ${{ matrix.config }}
+
+      - name: 'autotools configure log'
+        if: ${{ !cancelled() }}
+        run: cat bld/config.log 2>/dev/null || true
 
       - name: 'autotools build'
         if: ${{ matrix.build == 'automake' }}
@@ -130,7 +134,11 @@ jobs:
             -DBUILD_EXAMPLES=ON \
             -DENABLE_WEBSOCKETS=ON \
             -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON \
-            ${{ matrix.config }} || { cat bld/CMakeFiles/CMake*.yaml; false; }
+            ${{ matrix.config }}
+
+      - name: 'cmake configure log'
+        if: ${{ !cancelled() }}
+        run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'cmake build'
         if: ${{ matrix.build == 'cmake' }}
@@ -216,7 +224,11 @@ jobs:
             --with-openssl \
             --with-libssh2 \
             --disable-dependency-tracking \
-            ${{ matrix.config }} || { tail -n 1200 config.log; false; }
+            ${{ matrix.config }}
+
+      - name: 'autotools configure log'
+        if: ${{ !cancelled() }}
+        run: cat bld/config.log 2>/dev/null || true
 
       - name: 'autotools build'
         if: ${{ matrix.build == 'autotools' }}
@@ -295,7 +307,11 @@ jobs:
             -DBUILD_EXAMPLES=ON \
             -DENABLE_WEBSOCKETS=ON \
             -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON \
-            ${{ matrix.config }} || { cat bld/CMakeFiles/CMake*.yaml; false; }
+            ${{ matrix.config }}
+
+      - name: 'cmake configure log'
+        if: ${{ !cancelled() }}
+        run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'cmake build'
         if: ${{ matrix.build == 'cmake' }}
@@ -409,7 +425,11 @@ jobs:
             -DCURL_WERROR=ON \
             -DBUILD_EXAMPLES=ON \
             -DENABLE_WEBSOCKETS=ON \
-            ${{ matrix.config }} || { cat bld/CMakeFiles/CMake*.yaml; false; }
+            ${{ matrix.config }}
+
+      - name: 'cmake configure log'
+        if: ${{ !cancelled() }}
+        run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'cmake build'
         if: ${{ matrix.build == 'cmake' }}
@@ -545,7 +565,11 @@ jobs:
             -DENABLE_WEBSOCKETS=ON \
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE= \
-            ${{ matrix.config }} || { cat bld/CMakeFiles/CMake*.yaml; false; }
+            ${{ matrix.config }}
+
+      - name: 'cmake configure log'
+        if: ${{ !cancelled() }}
+        run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'cmake build'
         timeout-minutes: 5
