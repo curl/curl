@@ -520,9 +520,7 @@ jobs:
           if [ '${{ matrix.plat }}' != 'uwp' ]; then
             export VCPKG_ROOT="$PWD/vcpkg"
             export VCPKG_TRIPLET_DIR="$VCPKG_ROOT/installed/${{ matrix.arch }}-${{ matrix.plat }}"
-            export debug_lib="$VCPKG_TRIPLET_DIR/debug/bin"
-            export release_lib="$VCPKG_TRIPLET_DIR/bin"
-            export PATH="$PWD/bld/lib/:$release_lib:$debug_lib:$PATH"
+            export PATH="$PWD/bld/lib/:$VCPKG_TRIPLET_DIR/bin:$VCPKG_TRIPLET_DIR/debug/bin:$PATH"
             bld/src/curl.exe --disable --version
           fi
 
@@ -544,7 +542,5 @@ jobs:
           fi
           export VCPKG_ROOT="$PWD/vcpkg"
           export VCPKG_TRIPLET_DIR="$VCPKG_ROOT/installed/${{ matrix.arch }}-${{ matrix.plat }}"
-          export debug_lib="$VCPKG_TRIPLET_DIR/debug/bin"
-          export release_lib="$VCPKG_TRIPLET_DIR/bin"
-          export PATH="$PWD/bld/lib/:$release_lib:$debug_lib:$PATH"
+          export PATH="$PWD/bld/lib/:$VCPKG_TRIPLET_DIR/bin:$VCPKG_TRIPLET_DIR/debug/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
