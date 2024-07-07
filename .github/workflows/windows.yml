@@ -467,6 +467,13 @@ jobs:
             core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
             core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
 
+      - name: 'vcpkg versions'
+        timeout-minutes: 1
+        shell: bash
+        run: |
+          git -C "$VCPKG_INSTALLATION_ROOT" show --no-patch --format='%H %ai'
+          vcpkg version
+
       - name: 'vcpkg build'
         timeout-minutes: 25
         shell: bash
