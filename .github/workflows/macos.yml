@@ -237,6 +237,9 @@ jobs:
       - name: 'curl config'
         run: cat lib/curl_config.h || true
 
+      - name: 'curl config (compact)'
+        run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
+
       - name: 'make'
         run: make V=1
 
@@ -319,6 +322,9 @@ jobs:
 
       - name: 'curl config'
         run: cat build/lib/curl_config.h || true
+
+      - name: 'curl config (compact)'
+        run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'cmake build'
         run: cmake --build build --parallel 4
@@ -469,6 +475,9 @@ jobs:
 
       - name: 'curl config'
         run: cat bld/lib/curl_config.h || true
+
+      - name: 'curl config (compact)'
+        run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'build / ${{ matrix.build }}'
         run: make -C bld V=1 VERBOSE=1
