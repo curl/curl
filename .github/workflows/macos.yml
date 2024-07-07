@@ -309,7 +309,7 @@ jobs:
           xcodebuild -version || true
           xcrun -sdk macosx --show-sdk-path 2>/dev/null || true
 
-      - name: 'cmake generate'
+      - name: 'cmake configure'
         run: |
           cmake -B build -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
             -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
