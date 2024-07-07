@@ -41,7 +41,7 @@ permissions: {}
 
 jobs:
   cygwin:
-    name: "cygwin, ${{ matrix.build == 'cmake' && 'C' || 'A' }} ${{ matrix.platform }} ${{ matrix.config }}"
+    name: "cygwin, ${{ matrix.build == 'cmake' && 'C' || 'A' }} ${{ matrix.platform }} ${{ matrix.name }}"
     runs-on: windows-latest
     timeout-minutes: 45
     env:
@@ -49,8 +49,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - { build: 'automake', platform: 'x86_64', tflags: ''       , config: '--enable-debug --disable-threaded-resolver' }
-          - { build: 'cmake'   , platform: 'x86_64', tflags: 'skipall', config: '-DCURL_USE_OPENSSL=ON' }
+          - { build: 'automake', platform: 'x86_64', tflags: ''       , config: '--enable-debug --disable-threaded-resolver', name: 'openssl debug' }
+          - { build: 'cmake'   , platform: 'x86_64', tflags: 'skipall', config: '-DCURL_USE_OPENSSL=ON', name: 'openssl' }
       fail-fast: false
     steps:
       - run: git config --global core.autocrlf input
@@ -198,22 +198,22 @@ jobs:
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
   msys2:
-    name: "${{ matrix.sys == 'msys' && 'msys2' || 'mingw' }}, ${{ matrix.build == 'cmake' && 'C' || 'A' }} ${{ matrix.env }} ${{ matrix.config }} ${{ matrix.test }}"
+    name: "${{ matrix.sys == 'msys' && 'msys2' || 'mingw' }}, ${{ matrix.build == 'cmake' && 'C' || 'A' }} ${{ matrix.env }} ${{ matrix.name }} ${{ matrix.test }}"
     runs-on: windows-latest
     timeout-minutes: 45
     strategy:
       matrix:
         include:
-          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19                !1233', config: '--enable-debug --disable-threaded-resolver --disable-proxy' }
-          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233', config: '--enable-debug --disable-threaded-resolver' }
-          - { build: 'cmake'    , sys: 'msys'   , env: 'x86_64'      , tflags: 'skipall'                 , config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF' }
-          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233', config: '' }
-          - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '--enable-debug --disable-threaded-resolver --disable-curldebug --enable-static=no' }
+          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19                !1233', config: '--enable-debug --disable-threaded-resolver --disable-proxy', name: 'debug no-proxy' }
+          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233', config: '--enable-debug --disable-threaded-resolver', name: 'debug' }
+          - { build: 'cmake'    , sys: 'msys'   , env: 'x86_64'      , tflags: 'skipall'                 , config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF', name: 'debug' }
+          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233', config: '', name: 'default' }
+          - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '--enable-debug --disable-threaded-resolver --disable-curldebug --enable-static=no', name: 'debug' }
           # FIXME: WebSockets test results ignored due to frequent failures on native Windows:
-          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: '~2301 ~2302'             , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', type: 'Debug' }
-          - { build: 'cmake'    , sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_CURLDEBUG=ON', type: 'Release' }
-          - { build: 'cmake'    , sys: 'clang64', env: 'clang-x86_64', tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=OFF', type: 'Release' }
-          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DBUILD_EXAMPLES=OFF', type: 'Release', test: 'uwp' }
+          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: '~2301 ~2302'             , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', type: 'Debug', name: 'schannel unicode debug' }
+          - { build: 'cmake'    , sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_CURLDEBUG=ON', type: 'Release', name: 'schannel unicode trackmemory' }
+          - { build: 'cmake'    , sys: 'clang64', env: 'clang-x86_64', tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=OFF', type: 'Release', name: 'openssl debug' }
+          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DBUILD_EXAMPLES=OFF', type: 'Release', test: 'uwp', name: 'schannel unicode' }
       fail-fast: false
     steps:
       - run: git config --global core.autocrlf input
@@ -398,25 +398,28 @@ jobs:
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
   old-mingw-w64:
-    name: 'old-mingw-w64, C ${{ matrix.env }} ${{ matrix.config }}'
+    name: 'old-mingw-w64, C ${{ matrix.env }} ${{ matrix.name }}'
     runs-on: windows-latest
     timeout-minutes: 45
     strategy:
       matrix:
         include:
-          - env: '9.5.0-x86_64'
+          - name: 'schannel debug'
+            env: '9.5.0-x86_64'
             dir: 'mingw64'
             url: 'https://github.com/brechtsanders/winlibs_mingw/releases/download/9.5.0-10.0.0-msvcrt-r1/winlibs-x86_64-posix-seh-gcc-9.5.0-mingw-w64msvcrt-10.0.0-r1.7z'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
             type: 'Release'
             tflags: '~2301 ~2302 ~3027'
-          - env: '7.3.0-x86_64'
+          - name: 'schannel debug unicode'
+            env: '7.3.0-x86_64'
             dir: 'mingw64'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/7.3.0/threads-win32/seh/x86_64-7.3.0-release-win32-seh-rt_v5-rev0.7z'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON'
             type: 'Release'
             tflags: '~2301 ~2302 ~3027'
-          - env: '6.4.0-i686'
+          - name: 'schannel debug no-unity'
+            env: '6.4.0-i686'
             dir: 'mingw32'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/6.4.0/threads-win32/dwarf/i686-6.4.0-release-win32-dwarf-rt_v5-rev0.7z'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCMAKE_UNITY_BUILD=OFF'
