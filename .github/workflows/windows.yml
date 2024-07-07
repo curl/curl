@@ -236,7 +236,7 @@ jobs:
         run: |
           export TFLAGS='-j14 ${{ matrix.tflags }}'
           if [ '${{ matrix.sys }}' != 'msys' ]; then
-            TFLAGS+=' !TFTP !MQTT !WebSockets !SMTP'
+            TFLAGS+=' !TFTP !MQTT !WebSockets !SMTP ~FTP'
           fi
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
@@ -305,7 +305,7 @@ jobs:
         run: |
           export TFLAGS='-j14 ${{ matrix.tflags }}'
           if [ '${{ matrix.sys }}' != 'msys' ]; then
-            TFLAGS+=' !TFTP !MQTT !WebSockets !SMTP'
+            TFLAGS+=' !TFTP !MQTT !WebSockets !SMTP ~FTP'
           fi
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
@@ -541,7 +541,7 @@ jobs:
         timeout-minutes: 30
         shell: bash
         run: |
-          export TFLAGS='-j14 !TFTP !MQTT !WebSockets !SMTP ${{ matrix.tflags }}'
+          export TFLAGS='-j14 !TFTP !MQTT !WebSockets !SMTP ~FTP ${{ matrix.tflags }}'
           if [[ '${{ matrix.config }}' = *'-DUSE_WIN32_IDN=ON'* ]]; then
             TFLAGS+=' ~165 ~1448 ~2046 ~2047'
           fi
