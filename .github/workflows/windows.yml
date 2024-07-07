@@ -398,7 +398,7 @@ jobs:
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
   old-mingw-w64:
-    name: 'old-mingw-w64, C ${{ matrix.env }} ${{ matrix.name }}'
+    name: 'old-mingw, C ${{ matrix.env }} ${{ matrix.name }}'
     runs-on: windows-latest
     timeout-minutes: 45
     strategy:
