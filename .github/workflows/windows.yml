@@ -62,13 +62,18 @@ jobs:
           packages: autoconf libtool ${{ matrix.build }} gcc-core gcc-g++ binutils make libssl-devel zlib-devel libbrotli-devel libnghttp2-devel libpsl-devel libssh2-devel
           site: https://mirrors.kernel.org/sourceware/cygwin/
 
+      - name: 'autotools autoreconf'
+        if: ${{ matrix.build == 'automake' }}
+        timeout-minutes: 2
+        shell: C:\cygwin\bin\bash.exe '{0}'
+        run: autoreconf -fi
+
       - name: 'autotools configure'
         if: ${{ matrix.build == 'automake' }}
         timeout-minutes: 5
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
           export PATH="/usr/bin:$(cygpath "${SYSTEMROOT}")/System32"
-          autoreconf -fi
           mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
             --prefix="${HOME}"/install \
             --enable-websockets \
@@ -229,12 +234,17 @@ jobs:
             mingw-w64-${{ matrix.env }}-openssl
             mingw-w64-${{ matrix.env }}-libssh2
 
+      - name: 'autotools autoreconf'
+        if: ${{ matrix.build == 'autotools' }}
+        timeout-minutes: 2
+        shell: msys2 {0}
+        run: autoreconf -fi
+
       - name: 'autotools configure'
         if: ${{ matrix.build == 'autotools' }}
         timeout-minutes: 5
         shell: msys2 {0}
         run: |
-          autoreconf -fi
           mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
             --prefix="${HOME}"/install \
             --enable-websockets \
