@@ -78,15 +78,17 @@ jobs:
             ${{ matrix.config }}
 
       - name: 'autotools configure log'
-        if: ${{ !cancelled() }}
+        if: ${{ matrix.build == 'automake' && !cancelled() }}
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: cat bld/config.log 2>/dev/null || true
 
       - name: 'curl_config.h'
+        if: ${{ matrix.build == 'automake' }}
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'curl_config.h (full)'
+        if: ${{ matrix.build == 'automake' }}
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: cat bld/lib/curl_config.h || true
 
@@ -146,15 +148,17 @@ jobs:
             ${{ matrix.config }}
 
       - name: 'cmake configure log'
-        if: ${{ !cancelled() }}
+        if: ${{ matrix.build == 'cmake' && !cancelled() }}
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
+        if: ${{ matrix.build == 'cmake' }}
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'curl_config.h (full)'
+        if: ${{ matrix.build == 'cmake' }}
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: cat bld/lib/curl_config.h || true
 
@@ -245,15 +249,17 @@ jobs:
             ${{ matrix.config }}
 
       - name: 'autotools configure log'
-        if: ${{ !cancelled() }}
+        if: ${{ matrix.build == 'autotools' && !cancelled() }}
         shell: msys2 {0}
         run: cat bld/config.log 2>/dev/null || true
 
       - name: 'curl_config.h'
+        if: ${{ matrix.build == 'autotools' }}
         shell: msys2 {0}
         run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'curl_config.h (full)'
+        if: ${{ matrix.build == 'autotools' }}
         shell: msys2 {0}
         run: cat bld/lib/curl_config.h || true
 
@@ -337,15 +343,17 @@ jobs:
             ${{ matrix.config }}
 
       - name: 'cmake configure log'
-        if: ${{ !cancelled() }}
+        if: ${{ matrix.build == 'cmake' && !cancelled() }}
         shell: msys2 {0}
         run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
+        if: ${{ matrix.build == 'cmake' }}
         shell: msys2 {0}
         run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'curl_config.h (full)'
+        if: ${{ matrix.build == 'cmake' }}
         shell: msys2 {0}
         run: cat bld/lib/curl_config.h || true
 
@@ -464,15 +472,17 @@ jobs:
             ${{ matrix.config }}
 
       - name: 'cmake configure log'
-        if: ${{ !cancelled() }}
+        if: ${{ matrix.build == 'cmake' && !cancelled() }}
         shell: C:\msys64\usr\bin\bash.exe {0}
         run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
+        if: ${{ matrix.build == 'cmake' }}
         shell: C:\msys64\usr\bin\bash.exe {0}
         run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'curl_config.h (full)'
+        if: ${{ matrix.build == 'cmake' }}
         shell: C:\msys64\usr\bin\bash.exe {0}
         run: cat bld/lib/curl_config.h || true
 
