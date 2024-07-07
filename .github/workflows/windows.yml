@@ -175,7 +175,7 @@ jobs:
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
           [[ '${{ matrix.config }}' != *'BUILD_SHARED_LIBS=OFF'* ]] && cp -f -p bld/lib/*.dll bld/src/
-          find . -name '*.exe' -o -name '*.dll'
+          find . -name '*.exe' -o -name '*.dll' | grep -v '/examples/'
           bld/src/curl.exe --disable --version
 
       - name: 'cmake build tests'
@@ -370,7 +370,7 @@ jobs:
         shell: msys2 {0}
         run: |
           [[ '${{ matrix.config }}' != *'BUILD_SHARED_LIBS=OFF'* ]] && cp -f -p bld/lib/*.dll bld/src/
-          find . -name '*.exe' -o -name '*.dll'
+          find . -name '*.exe' -o -name '*.dll' | grep -v '/examples/'
           if [ '${{ matrix.test }}' != 'uwp' ]; then  # UWP missing 'msvcr120_app.dll', fails with exit code 0xc0000135
             bld/src/curl.exe --disable --version
           fi
