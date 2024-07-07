@@ -449,6 +449,13 @@ jobs:
           type: 'Debug'
           tflags: 'skipall'
           config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON                      -DUSE_NGHTTP2=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON'
+        - name: 'libressl'
+          install: 'brotli zlib zstd libpsl nghttp2 libressl libssh2[core,zlib]'
+          arch: 'x64'
+          plat: 'windows'
+          type: 'Debug'
+          tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
+          config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBPSL=ON -DUSE_NGHTTP2=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_OPENSSL=ON'
         - name: 'no ssl'
           install: 'brotli zlib zstd libpsl'
           arch: 'x64'
@@ -484,7 +491,12 @@ jobs:
         timeout-minutes: 5
         shell: bash
         run: |
-          cmake -B bld \
+          if [[ '${{ matrix.install }}' = *'libressl'* ]]; then
+            # without this, CMake gets confused about the non-vcpkg OpenSSL
+            # installed on the runner and fails when linking.
+            options+=" -DOPENSSL_ROOT_DIR=$VCPKG_INSTALLATION_ROOT/installed/${{ matrix.arch }}-${{ matrix.plat }}"
+          fi
+          cmake -B bld ${options} \
             "-DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
             "-DVCPKG_INSTALLED_DIR=$VCPKG_INSTALLATION_ROOT/installed" \
             '-DVCPKG_TARGET_TRIPLET=${{ matrix.arch }}-${{ matrix.plat }}' \
