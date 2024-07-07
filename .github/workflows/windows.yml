@@ -96,8 +96,7 @@ jobs:
         if: ${{ matrix.build == 'automake' }}
         timeout-minutes: 10
         shell: C:\cygwin\bin\bash.exe '{0}'
-        run: |
-          make -C bld -j5 V=1 install
+        run: make -C bld -j5 V=1 install
 
       - name: 'curl version'
         if: ${{ matrix.build == 'automake' }}
@@ -111,15 +110,13 @@ jobs:
         if: ${{ matrix.build == 'automake' }}
         timeout-minutes: 5
         shell: C:\cygwin\bin\bash.exe '{0}'
-        run: |
-          make -C bld -j5 V=1 examples
+        run: make -C bld -j5 V=1 examples
 
       - name: 'autotools build tests'
         if: ${{ matrix.build == 'automake' && matrix.tflags != 'skipall' }}
         timeout-minutes: 15
         shell: C:\cygwin\bin\bash.exe '{0}'
-        run: |
-          make -C bld -j5 V=1 -C tests
+        run: make -C bld -j5 V=1 -C tests
 
       - name: 'autotools run tests'
         if: ${{ matrix.build == 'automake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -166,8 +163,7 @@ jobs:
         if: ${{ matrix.build == 'cmake' }}
         timeout-minutes: 10
         shell: C:\cygwin\bin\bash.exe '{0}'
-        run: |
-          cmake --build bld --config '${{ matrix.type }}' --parallel 5
+        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5
 
       - name: 'curl version'
         if: ${{ matrix.build == 'cmake' }}
@@ -182,8 +178,7 @@ jobs:
         if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' }}
         timeout-minutes: 15
         shell: C:\cygwin\bin\bash.exe '{0}'
-        run: |
-          cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
+        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
 
       - name: 'cmake run tests'
         if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -267,8 +262,7 @@ jobs:
         if: ${{ matrix.build == 'autotools' }}
         timeout-minutes: 10
         shell: msys2 {0}
-        run: |
-          make -C bld -j5 V=1 install
+        run: make -C bld -j5 V=1 install
 
       - name: 'curl version'
         if: ${{ matrix.build == 'autotools' }}
@@ -282,15 +276,13 @@ jobs:
         if: ${{ matrix.build == 'autotools' }}
         timeout-minutes: 5
         shell: msys2 {0}
-        run: |
-          make -C bld -j5 V=1 examples
+        run: make -C bld -j5 V=1 examples
 
       - name: 'autotools build tests'
         if: ${{ matrix.build == 'autotools' && matrix.tflags != 'skipall' }}
         timeout-minutes: 10
         shell: msys2 {0}
-        run: |
-          make -C bld -j5 V=1 -C tests
+        run: make -C bld -j5 V=1 -C tests
 
       - name: 'autotools run tests'
         if: ${{ matrix.build == 'autotools' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -361,8 +353,7 @@ jobs:
         if: ${{ matrix.build == 'cmake' }}
         timeout-minutes: 10
         shell: msys2 {0}
-        run: |
-          cmake --build bld --config '${{ matrix.type }}' --parallel 5
+        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5
 
       - name: 'curl version'
         if: ${{ matrix.build == 'cmake' }}
@@ -379,8 +370,7 @@ jobs:
         if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' }}
         timeout-minutes: 10
         shell: msys2 {0}
-        run: |
-          cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
+        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
 
       - name: 'cmake run tests'
         if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -589,8 +579,7 @@ jobs:
       - name: 'vcpkg build'
         timeout-minutes: 25
         shell: bash
-        run: |
-          vcpkg x-set-installed ${{ matrix.install }} '--triplet=${{ matrix.arch }}-${{ matrix.plat }}'
+        run: vcpkg x-set-installed ${{ matrix.install }} '--triplet=${{ matrix.arch }}-${{ matrix.plat }}'
 
       - name: 'cmake configure'
         timeout-minutes: 5
@@ -631,8 +620,7 @@ jobs:
       - name: 'cmake build'
         timeout-minutes: 5
         shell: bash
-        run: |
-          cmake --build bld --config '${{ matrix.type }}' --parallel 5
+        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5
 
       - name: 'curl version'
         timeout-minutes: 5
@@ -648,8 +636,7 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
         shell: bash
-        run: |
-          cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
+        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
 
       - name: 'cmake run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
