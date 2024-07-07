@@ -398,28 +398,25 @@ jobs:
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
   old-mingw-w64:
-    name: 'old-mingw-w64 (${{ matrix.build }}, ${{ matrix.env }}, ${{ matrix.config }})'
+    name: 'old-mingw-w64 (cmake, ${{ matrix.env }}, ${{ matrix.config }})'
     runs-on: windows-latest
     timeout-minutes: 45
     strategy:
       matrix:
         include:
-          - build: 'cmake'
-            env: '9.5.0-x86_64'
+          - env: '9.5.0-x86_64'
             dir: 'mingw64'
             url: 'https://github.com/brechtsanders/winlibs_mingw/releases/download/9.5.0-10.0.0-msvcrt-r1/winlibs-x86_64-posix-seh-gcc-9.5.0-mingw-w64msvcrt-10.0.0-r1.7z'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
             type: 'Release'
             tflags: '~2301 ~2302 ~3027'
-          - build: 'cmake'
-            env: '7.3.0-x86_64'
+          - env: '7.3.0-x86_64'
             dir: 'mingw64'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/7.3.0/threads-win32/seh/x86_64-7.3.0-release-win32-seh-rt_v5-rev0.7z'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON'
             type: 'Release'
             tflags: '~2301 ~2302 ~3027'
-          - build: 'cmake'
-            env: '6.4.0-i686'
+          - env: '6.4.0-i686'
             dir: 'mingw32'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/6.4.0/threads-win32/dwarf/i686-6.4.0-release-win32-dwarf-rt_v5-rev0.7z'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCMAKE_UNITY_BUILD=OFF'
@@ -452,7 +449,6 @@ jobs:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - name: 'cmake configure'
-        if: ${{ matrix.build == 'cmake' }}
         timeout-minutes: 5
         shell: C:\msys64\usr\bin\bash.exe {0}
         run: |
@@ -472,22 +468,19 @@ jobs:
             ${{ matrix.config }}
 
       - name: 'cmake configure log'
-        if: ${{ matrix.build == 'cmake' && !cancelled() }}
+        if: ${{ !cancelled() }}
         shell: C:\msys64\usr\bin\bash.exe {0}
         run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
-        if: ${{ matrix.build == 'cmake' }}
         shell: C:\msys64\usr\bin\bash.exe {0}
         run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'curl_config.h (full)'
-        if: ${{ matrix.build == 'cmake' }}
         shell: C:\msys64\usr\bin\bash.exe {0}
         run: cat bld/lib/curl_config.h || true
 
       - name: 'cmake build'
-        if: ${{ matrix.build == 'cmake' }}
         timeout-minutes: 10
         shell: C:\msys64\usr\bin\bash.exe {0}
         run: |
@@ -495,7 +488,6 @@ jobs:
           cmake --build bld --config '${{ matrix.type }}' --parallel 5
 
       - name: 'curl version'
-        if: ${{ matrix.build == 'cmake' }}
         timeout-minutes: 1
         shell: C:\msys64\usr\bin\bash.exe {0}
         run: |
@@ -503,7 +495,7 @@ jobs:
           bld/src/curl.exe --disable --version
 
       - name: 'cmake build tests'
-        if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' }}
+        if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
         shell: C:\msys64\usr\bin\bash.exe {0}
         run: |
@@ -511,7 +503,7 @@ jobs:
           cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
 
       - name: 'cmake run tests'
-        if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 40
         shell: C:\msys64\usr\bin\bash.exe {0}
         run: |
