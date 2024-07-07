@@ -23,7 +23,7 @@ and use TLS 1.3, or else it is not good enough.
 As of May 2024, the libraries that need to get fixed to remain supported after
 May 2025 are: BearSSL and Secure Transport.
 
-## past removals
+## Past removals
 
  - Pipelining
  - axTLS

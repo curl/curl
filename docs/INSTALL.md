@@ -4,7 +4,7 @@ Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 -->
 
-# how to install curl and libcurl
+# How to install curl and libcurl
 
 ## Installing Binary Packages
 
@@ -154,7 +154,7 @@ conflicting identical symbol names.
 When you build with multiple TLS backends, you can select the active one at
 runtime when curl starts up.
 
-## configure finding libs in wrong directory
+## Configure finding libs in wrong directory
 
 When the configure script checks for third-party libraries, it adds those
 directories to the `LDFLAGS` variable and then tries linking to see if it
