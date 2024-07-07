@@ -1702,7 +1702,7 @@ if(NOT CURL_DISABLE_INSTALL)
   endif()
   string(REPLACE ";" " " SUPPORT_PROTOCOLS "${_items}")
   string(TOLOWER "${SUPPORT_PROTOCOLS}" SUPPORT_PROTOCOLS_LOWER)
-  message(STATUS "Enabled protocols: ${SUPPORT_PROTOCOLS_LOWER}")
+  message(STATUS "Protocols: ${SUPPORT_PROTOCOLS_LOWER}")
 
   # Clear list and try to detect available features
   set(_items)
@@ -1735,7 +1735,7 @@ if(NOT CURL_DISABLE_INSTALL)
                           OR USE_SCHANNEL OR USE_RUSTLS OR USE_BEARSSL OR
                           USE_MBEDTLS OR USE_SECTRANSP OR
                           (USE_WOLFSSL AND HAVE_WOLFSSL_FULL_BIO)))
-  _add_if("unicode"       ENABLE_UNICODE)
+  _add_if("Unicode"       ENABLE_UNICODE)
   _add_if("threadsafe"    HAVE_ATOMIC OR
                           (USE_THREADS_POSIX AND HAVE_PTHREAD_H) OR
                           (WIN32 AND HAVE_WIN32_WINNT GREATER_EQUAL 0x600))
@@ -1751,7 +1751,7 @@ if(NOT CURL_DISABLE_INSTALL)
     endif()
   endif()
   string(REPLACE ";" " " SUPPORT_FEATURES "${_items}")
-  message(STATUS "Enabled features: ${SUPPORT_FEATURES}")
+  message(STATUS "Features: ${SUPPORT_FEATURES}")
 
   # Clear list and collect SSL backends
   set(_items)
@@ -1764,7 +1764,11 @@ if(NOT CURL_DISABLE_INSTALL)
   _add_if("GnuTLS"           SSL_ENABLED AND USE_GNUTLS)
 
   if(_items)
-    list(SORT _items)
+    if(NOT CMAKE_VERSION VERSION_LESS 3.13)
+      list(SORT _items CASE INSENSITIVE)
+    else()
+      list(SORT _items)
+    endif()
   endif()
   string(REPLACE ";" " " SSL_BACKENDS "${_items}")
   message(STATUS "Enabled SSL backends: ${SSL_BACKENDS}")
