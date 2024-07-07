@@ -27,12 +27,6 @@ In environments that don't support configure (i.e. Windows), do this:
 
 ## REQUIREMENTS
 
-See [docs/INTERNALS.md][0] for information on the requirements that you'll
-need or `autoreconf` and `configure` (not `buildconf.bat`) to work.
-
-If you don't have perl and don't want to install it, you can rename the source
-file `src/tool_hugehelp.c.cvs` to `src/tool_hugehelp.c` and avoid having to
-generate this file. This will give you a stubbed version of the file that
-doesn't contain actual content.
+See [docs/INTERNALS.md][0] for requirement details.
 
 [0]: docs/INTERNALS.md
