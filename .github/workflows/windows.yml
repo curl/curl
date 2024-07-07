@@ -511,29 +511,6 @@ jobs:
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE= \
             ${{ matrix.config }} || { cat bld/CMakeFiles/CMake*.yaml; false; }
 
-      - name: 'prepare logs on failure'
-        timeout-minutes: 5
-        if: failure()
-        shell: bash
-        run: |
-          export VCPKG_ROOT="$GITHUB_WORKSPACE/vcpkg"
-          mkdir -p bld
-          7z a -t7z -r -mx=9 logs.7z \
-            "$VCPKG_ROOT"/buildtrees/*.log \
-            bld/.ninja_log \
-            bld/build.ninja \
-            bld/install_manifest.txt \
-            bld/vcpkg-manifest-install.log \
-            bld/CMakeFiles/CMake*.yaml
-
-      - name: 'upload logs on failure'
-        timeout-minutes: 10
-        if: failure()
-        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4
-        with:
-          name: windows_logs_${{matrix.name}}_${{github.event.pull_request.head.sha}}
-          path: logs.7z
-
       - name: 'cmake build'
         timeout-minutes: 5
         shell: bash
