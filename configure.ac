@@ -3544,7 +3544,7 @@ case "$OPT_FISH_FPATH" in
     dnl --with-fish-functions-dir option used without path
     CURL_CHECK_PKGCONFIG(fish)
     if test "$PKGCONFIG" != "no" ; then
-      FISH_FUNCTIONS_DIR="$($PKGCONFIG --variable completionsdir fish)"
+      FISH_FUNCTIONS_DIR=`$PKGCONFIG --variable completionsdir fish`
     else
       FISH_FUNCTIONS_DIR="$datarootdir/fish/vendor_completions.d"
     fi
@@ -4858,7 +4858,11 @@ fi
 dnl replace spaces with newlines
 dnl sort the lines
 dnl replace the newlines back to spaces
-SUPPORT_FEATURES=`echo $SUPPORT_FEATURES | tr ' ' '\012' | sort | tr '\012' ' '`
+if sort -f </dev/null >/dev/null 2>&1; then
+  SUPPORT_FEATURES=`echo $SUPPORT_FEATURES | tr ' ' '\012' | sort -f | tr '\012' ' '`
+else
+  SUPPORT_FEATURES=`echo $SUPPORT_FEATURES | tr ' ' '\012' | sort | tr '\012' ' '`
+fi
 AC_SUBST(SUPPORT_FEATURES)
 
 dnl For supported protocols in pkg-config file
@@ -5011,6 +5015,8 @@ AC_OUTPUT
 
 CURL_GENERATE_CONFIGUREHELP_PM
 
+SUPPORT_PROTOCOLS_LOWER=`echo "$SUPPORT_PROTOCOLS" | tr A-Z a-z`
+
 AC_MSG_NOTICE([Configured to build curl/libcurl:
 
   Host setup:       ${host}
@@ -5057,7 +5063,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   HTTP3:            ${curl_h3_msg}
   ECH:              ${curl_ech_msg}
   WebSockets:       ${curl_ws_msg}
-  Protocols:        ${SUPPORT_PROTOCOLS}
+  Protocols:        ${SUPPORT_PROTOCOLS_LOWER}
   Features:         ${SUPPORT_FEATURES}
 ])
 
