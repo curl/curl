@@ -198,7 +198,7 @@ jobs:
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
   msys2:
-    name: "msys2, ${{ matrix.build == 'cmake' && 'C' || 'A' }} ${{ matrix.sys }} ${{ matrix.env }} ${{ matrix.config }} ${{ matrix.test }}"
+    name: "${{ matrix.sys == 'msys' && 'msys2' || 'mingw' }}, ${{ matrix.build == 'cmake' && 'C' || 'A' }} ${{ matrix.env }} ${{ matrix.config }} ${{ matrix.test }}"
     runs-on: windows-latest
     timeout-minutes: 45
     strategy:
