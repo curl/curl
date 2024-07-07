@@ -21,7 +21,7 @@ in the master branch using pull-requests, just like ordinary changes.
 
 The C API for Hyper is brand new and is still under development.
 
-## build curl with hyper
+## Build curl with hyper
 
 Using Rust 1.64.0 or later, build hyper and enable its C API like this:
 
@@ -39,7 +39,7 @@ Build curl to use hyper's C API:
      % ./configure LDFLAGS="-Wl,-rpath,<hyper-dir>/target/debug -Wl,-rpath,<hyper-dir>/target/release" --with-openssl --with-hyper=<hyper-dir>
      % make
 
-# using Hyper internally
+# Using Hyper internally
 
 Hyper is a low level HTTP transport library. curl itself provides all HTTP
 headers and Hyper provides all received headers back to curl.

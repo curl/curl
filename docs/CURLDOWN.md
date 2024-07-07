@@ -147,7 +147,7 @@ readable.
 To make sure curldown documents render correctly as markdown, all literal
 occurrences of `<` or `>` need to be escaped by a leading backslash.
 
-## symbols
+## Symbols
 
 All mentioned curl symbols that have their own man pages, like
 `curl_easy_perform(3)` are automatically rendered using italics in the output

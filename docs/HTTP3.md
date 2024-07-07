@@ -182,7 +182,7 @@ quiche support is **EXPERIMENTAL**
 
 Since the quiche build manages its dependencies, curl can be built against the latest version. You are *probably* able to build against their main branch, but in case of problems, we recommend their latest release tag.
 
-## build
+## Build
 
 Build quiche and BoringSSL:
 
