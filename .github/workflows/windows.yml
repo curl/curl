@@ -81,6 +81,12 @@ jobs:
         if: ${{ !cancelled() }}
         run: cat bld/config.log 2>/dev/null || true
 
+      - name: 'curl_config.h'
+        run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
+
+      - name: 'curl_config.h (full)'
+        run: cat bld/lib/curl_config.h || true
+
       - name: 'autotools build'
         if: ${{ matrix.build == 'automake' }}
         timeout-minutes: 10
@@ -139,6 +145,12 @@ jobs:
       - name: 'cmake configure log'
         if: ${{ !cancelled() }}
         run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
+
+      - name: 'curl_config.h'
+        run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
+
+      - name: 'curl_config.h (full)'
+        run: cat bld/lib/curl_config.h || true
 
       - name: 'cmake build'
         if: ${{ matrix.build == 'cmake' }}
@@ -230,6 +242,12 @@ jobs:
         if: ${{ !cancelled() }}
         run: cat bld/config.log 2>/dev/null || true
 
+      - name: 'curl_config.h'
+        run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
+
+      - name: 'curl_config.h (full)'
+        run: cat bld/lib/curl_config.h || true
+
       - name: 'autotools build'
         if: ${{ matrix.build == 'autotools' }}
         timeout-minutes: 10
@@ -312,6 +330,12 @@ jobs:
       - name: 'cmake configure log'
         if: ${{ !cancelled() }}
         run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
+
+      - name: 'curl_config.h'
+        run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
+
+      - name: 'curl_config.h (full)'
+        run: cat bld/lib/curl_config.h || true
 
       - name: 'cmake build'
         if: ${{ matrix.build == 'cmake' }}
@@ -430,6 +454,12 @@ jobs:
       - name: 'cmake configure log'
         if: ${{ !cancelled() }}
         run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
+
+      - name: 'curl_config.h'
+        run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
+
+      - name: 'curl_config.h (full)'
+        run: cat bld/lib/curl_config.h || true
 
       - name: 'cmake build'
         if: ${{ matrix.build == 'cmake' }}
@@ -570,6 +600,12 @@ jobs:
       - name: 'cmake configure log'
         if: ${{ !cancelled() }}
         run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
+
+      - name: 'curl_config.h'
+        run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
+
+      - name: 'curl_config.h (full)'
+        run: cat bld/lib/curl_config.h || true
 
       - name: 'cmake build'
         timeout-minutes: 5
