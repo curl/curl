@@ -492,6 +492,7 @@ jobs:
         shell: C:\msys64\usr\bin\bash.exe {0}
         run: |
           [[ '${{ matrix.config }}' != *'BUILD_SHARED_LIBS=OFF'* ]] && cp -f -p bld/lib/*.dll bld/src/
+          find . -name '*.exe' -o -name '*.dll' | grep -v '/examples/'
           bld/src/curl.exe --disable --version
 
       - name: 'cmake build tests'
