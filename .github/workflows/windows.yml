@@ -517,7 +517,7 @@ jobs:
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
   msvc:
-    name: 'msvc, C ${{ matrix.arch }} ${{ matrix.plat }} ${{ matrix.name }}'
+    name: 'msvc, C ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
     runs-on: windows-latest
     timeout-minutes: 55
     env:
