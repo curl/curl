@@ -226,36 +226,36 @@ jobs:
             options+=" --with-sysroot=$(xcrun -sdk macosx --show-sdk-path 2>/dev/null)"
             CFLAGS+=" --sysroot=$(xcrun -sdk macosx --show-sdk-path 2>/dev/null)"
           fi
-          ./configure --enable-warnings --enable-werror \
+          mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
             --disable-dependency-tracking \
             ${{ matrix.configure }} ${options}
 
       - name: 'configure log'
         if: ${{ !cancelled() }}
-        run: cat config.log || true
+        run: cat bld/config.log || true
 
       - name: 'curl config'
-        run: cat lib/curl_config.h || true
+        run: cat bld/lib/curl_config.h || true
 
       - name: 'curl config (compact)'
         run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'make'
-        run: make V=1
+        run: make -C bld V=1
 
       - name: 'curl version'
-        run: src/curl --disable --version
+        run: bld/src/curl --disable --version
 
       - name: 'make examples'
-        run: make V=1 examples
+        run: make -C bld V=1 examples
 
       - name: 'make tests'
-        run: make V=1 -C tests
+        run: make -C bld V=1 -C tests
 
       - name: 'run tests'
         env:
           TFLAGS: '${{ matrix.tflags }} -j5 ~1452'
-        run: make V=1 test-ci
+        run: make -C bld V=1 test-ci
 
   cmake:
     name: 'cmake ${{ matrix.compiler }} ${{ matrix.build.name }}'
