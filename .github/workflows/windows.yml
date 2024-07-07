@@ -522,7 +522,7 @@ jobs:
         shell: bash
         run: |
           cmake --build bld --config '${{ matrix.type }}' --parallel 5
-          find . -name '*.exe' -o -name '*.dll'
+          find . -name '*.exe' -o -name '*.dll' | grep -v '/examples/'
           if [ '${{ matrix.plat }}' != 'uwp' ]; then
             export VCPKG_TRIPLET_DIR="$VCPKG_INSTALLATION_ROOT/installed/${{ matrix.arch }}-${{ matrix.plat }}"
             export PATH="$PWD/bld/lib/:$VCPKG_TRIPLET_DIR/bin:$VCPKG_TRIPLET_DIR/debug/bin:$PATH"
