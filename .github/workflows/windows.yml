@@ -83,6 +83,12 @@ jobs:
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
           make -C bld -j5 V=1 install
+
+      - name: 'curl version'
+        if: ${{ matrix.build == 'automake' }}
+        timeout-minutes: 1
+        shell: C:\cygwin\bin\bash.exe '{0}'
+        run: |
           find . -name '*.exe' -o -name '*.dll'
           bld/src/curl.exe --disable --version
 
@@ -132,6 +138,12 @@ jobs:
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
           cmake --build bld --config '${{ matrix.type }}' --parallel 5
+
+      - name: 'curl version'
+        if: ${{ matrix.build == 'cmake' }}
+        timeout-minutes: 1
+        shell: C:\cygwin\bin\bash.exe '{0}'
+        run: |
           [[ '${{ matrix.config }}' != *'BUILD_SHARED_LIBS=OFF'* ]] && cp -f -p bld/lib/*.dll bld/src/
           find . -name '*.exe' -o -name '*.dll'
           bld/src/curl.exe --disable --version
@@ -212,6 +224,12 @@ jobs:
         shell: msys2 {0}
         run: |
           make -C bld -j5 V=1 install
+
+      - name: 'curl version'
+        if: ${{ matrix.build == 'autotools' }}
+        timeout-minutes: 11
+        shell: msys2 {0}
+        run: |
           find . -name '*.exe' -o -name '*.dll'
           bld/src/curl.exe --disable --version
 
@@ -285,6 +303,12 @@ jobs:
         shell: msys2 {0}
         run: |
           cmake --build bld --config '${{ matrix.type }}' --parallel 5
+
+      - name: 'curl version'
+        if: ${{ matrix.build == 'cmake' }}
+        timeout-minutes: 1
+        shell: msys2 {0}
+        run: |
           [[ '${{ matrix.config }}' != *'BUILD_SHARED_LIBS=OFF'* ]] && cp -f -p bld/lib/*.dll bld/src/
           find . -name '*.exe' -o -name '*.dll'
           if [ '${{ matrix.test }}' != 'uwp' ]; then  # UWP missing 'msvcr120_app.dll', fails with exit code 0xc0000135
@@ -394,6 +418,12 @@ jobs:
         run: |
           export PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --parallel 5
+
+      - name: 'curl version'
+        if: ${{ matrix.build == 'cmake' }}
+        timeout-minutes: 1
+        shell: C:\msys64\usr\bin\bash.exe {0}
+        run: |
           [[ '${{ matrix.config }}' != *'BUILD_SHARED_LIBS=OFF'* ]] && cp -f -p bld/lib/*.dll bld/src/
           bld/src/curl.exe --disable --version
 
@@ -522,6 +552,11 @@ jobs:
         shell: bash
         run: |
           cmake --build bld --config '${{ matrix.type }}' --parallel 5
+
+      - name: 'curl version'
+        timeout-minutes: 5
+        shell: bash
+        run: |
           find . -name '*.exe' -o -name '*.dll' | grep -v '/examples/'
           if [ '${{ matrix.plat }}' != 'uwp' ]; then
             export VCPKG_TRIPLET_DIR="$VCPKG_INSTALLATION_ROOT/installed/${{ matrix.arch }}-${{ matrix.plat }}"
