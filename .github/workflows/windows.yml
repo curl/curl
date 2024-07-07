@@ -467,14 +467,6 @@ jobs:
           key: ${{ matrix.arch }}-${{ matrix.plat }}-${{ matrix.name }}
           restore-keys: ${{ matrix.arch }}-${{ matrix.plat }}-${{ matrix.name }}
 
-      - name: 'vcpkg init'
-        timeout-minutes: 5
-        if: success()
-        shell: bash
-        run: |
-          git clone --quiet --depth 1 https://github.com/microsoft/vcpkg/
-          vcpkg/bootstrap-vcpkg.sh -disableMetrics
-
       - name: 'vcpkg build'
         timeout-minutes: 25
         shell: bash
@@ -482,7 +474,7 @@ jobs:
           export CURRENT_BINARY_CACHE='cache/${{ matrix.arch }}-${{ matrix.plat }}-${{ matrix.name }}'
           mkdir -p "$CURRENT_BINARY_CACHE"
           export VCPKG_BINARY_SOURCES="clear;files,$GITHUB_WORKSPACE/$CURRENT_BINARY_CACHE,readwrite;"
-          vcpkg/vcpkg x-set-installed ${{ matrix.install }} '--triplet=${{ matrix.arch }}-${{ matrix.plat }}'
+          vcpkg x-set-installed ${{ matrix.install }} '--triplet=${{ matrix.arch }}-${{ matrix.plat }}'
 
       - name: 'save cache dependencies'
         id: cache-save
@@ -496,8 +488,8 @@ jobs:
         shell: bash
         run: |
           cmake -B bld \
-            "-DCMAKE_TOOLCHAIN_FILE=$PWD/vcpkg/scripts/buildsystems/vcpkg.cmake" \
-            "-DVCPKG_INSTALLED_DIR=$PWD/vcpkg/installed" \
+            "-DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
+            "-DVCPKG_INSTALLED_DIR=$VCPKG_INSTALLATION_ROOT/installed" \
             '-DVCPKG_TARGET_TRIPLET=${{ matrix.arch }}-${{ matrix.plat }}' \
             -DCMAKE_VS_GLOBALS=TrackFileAccess=false \
             '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
@@ -516,7 +508,7 @@ jobs:
           cmake --build bld --config '${{ matrix.type }}' --parallel 5
           find . -name '*.exe' -o -name '*.dll'
           if [ '${{ matrix.plat }}' != 'uwp' ]; then
-            export VCPKG_TRIPLET_DIR="$PWD/vcpkg/installed/${{ matrix.arch }}-${{ matrix.plat }}"
+            export VCPKG_TRIPLET_DIR="$VCPKG_INSTALLATION_ROOT/installed/${{ matrix.arch }}-${{ matrix.plat }}"
             export PATH="$PWD/bld/lib/:$VCPKG_TRIPLET_DIR/bin:$VCPKG_TRIPLET_DIR/debug/bin:$PATH"
             bld/src/curl.exe --disable --version
           fi
@@ -537,6 +529,6 @@ jobs:
           if [[ '${{ matrix.config }}' = *'-DUSE_WIN32_IDN=ON'* ]]; then
             TFLAGS+=' ~165 ~1448 ~2046 ~2047'
           fi
-          export VCPKG_TRIPLET_DIR="$PWD/vcpkg/installed/${{ matrix.arch }}-${{ matrix.plat }}"
+          export VCPKG_TRIPLET_DIR="$VCPKG_INSTALLATION_ROOT/installed/${{ matrix.arch }}-${{ matrix.plat }}"
           export PATH="$PWD/bld/lib/:$VCPKG_TRIPLET_DIR/bin:$VCPKG_TRIPLET_DIR/debug/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
