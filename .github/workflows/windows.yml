@@ -41,7 +41,7 @@ permissions: {}
 
 jobs:
   cygwin:
-    name: 'cygwin (${{ matrix.build }}, ${{ matrix.platform }}, ${{ matrix.config }})'
+    name: "cygwin (${{ matrix.build == 'cmake' && 'C' || 'A' }}, ${{ matrix.platform }}, ${{ matrix.config }})"
     runs-on: windows-latest
     timeout-minutes: 45
     env:
@@ -198,7 +198,7 @@ jobs:
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
   msys2:
-    name: 'msys2 (${{ matrix.build }}, ${{ matrix.sys }}, ${{ matrix.env }}, ${{ matrix.config }}, ${{ matrix.test }})'
+    name: "msys2 (${{ matrix.build == 'cmake' && 'C' || 'A' }}, ${{ matrix.sys }}, ${{ matrix.env }}, ${{ matrix.config }}, ${{ matrix.test }})"
     runs-on: windows-latest
     timeout-minutes: 45
     strategy:
@@ -398,7 +398,7 @@ jobs:
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
   old-mingw-w64:
-    name: 'old-mingw-w64 (cmake, ${{ matrix.env }}, ${{ matrix.config }})'
+    name: 'old-mingw-w64 (C, ${{ matrix.env }}, ${{ matrix.config }})'
     runs-on: windows-latest
     timeout-minutes: 45
     strategy:
@@ -517,7 +517,7 @@ jobs:
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
   msvc:
-    name: 'msvc (${{ matrix.arch }}, ${{ matrix.plat }}, ${{ matrix.name }})'
+    name: 'msvc (C, ${{ matrix.arch }}, ${{ matrix.plat }}, ${{ matrix.name }})'
     runs-on: windows-latest
     timeout-minutes: 55
     env:
