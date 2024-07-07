@@ -98,7 +98,7 @@ jobs:
         timeout-minutes: 15
         shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
-          make -C bld -j5 -C tests V=1
+          make -C bld -j5 V=1 -C tests
 
       - name: 'autotools run tests'
         if: ${{ matrix.build == 'automake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -227,7 +227,7 @@ jobs:
         timeout-minutes: 10
         shell: msys2 {0}
         run: |
-          make -C bld -j5 -C tests V=1
+          make -C bld -j5 V=1 -C tests
 
       - name: 'autotools run tests'
         if: ${{ matrix.build == 'autotools' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
