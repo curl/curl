@@ -341,7 +341,7 @@ jobs:
     env:
       DEVELOPER_DIR: /Applications/Xcode_${{ matrix.xcode }}.app/Contents/Developer
       CC: ${{ matrix.compiler }}
-      CFLAGS: '-Wno-deprecated-declarations'  # Required for LDAP
+      CFLAGS: '-Wno-deprecated-declarations'  # Required for LDAP, SecureTransport
     strategy:
       fail-fast: false
       matrix:
