@@ -74,38 +74,38 @@ jobs:
             compiler: clang
             install: nghttp2
             configure: --without-ssl --enable-websockets
-            macos-version-min: 10.9
+            macos-version-min: '10.9'
           - name: no-ssl non-debug
             compiler: gcc-12
             install: nghttp2
             configure: --without-ssl --enable-websockets
-            macos-version-min: 10.9
+            macos-version-min: '10.9'
             tflags: ~RTSP ~1156 ~1539
           - name: no-ssl
             compiler: clang
             install: nghttp2
             configure: --enable-debug --without-ssl --enable-websockets
-            macos-version-min: 10.9
+            macos-version-min: '10.9'
           - name: libssh2
             compiler: clang
             install: nghttp2 libssh2
             configure: --enable-debug --with-libssh2=$(brew --prefix)/opt/libssh2 --without-ssl --enable-websockets
-            macos-version-min: 10.9
+            macos-version-min: '10.9'
           - name: libssh c-ares
             compiler: clang
             install: nghttp2 openssl libssh
             configure: --enable-debug --with-libssh --with-openssl=$(brew --prefix)/opt/openssl --enable-ares --enable-websockets
-            macos-version-min: 10.9
+            macos-version-min: '10.9'
           - name: libssh
             compiler: clang
             install: nghttp2 openssl libssh
             configure: --enable-debug --with-libssh --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
-            macos-version-min: 10.9
+            macos-version-min: '10.9'
           - name: c-ares
             compiler: clang
             install: nghttp2
             configure: --enable-debug --enable-ares --without-ssl --enable-websockets
-            macos-version-min: 10.9
+            macos-version-min: '10.9'
           - name: HTTP-only
             compiler: clang
             configure: |
@@ -140,12 +140,12 @@ jobs:
               --without-zlib \
               --without-zstd
 
-            macos-version-min: 10.15  # Catalina (2019)
+            macos-version-min: '10.15'  # Catalina (2019)
           - name: SecureTransport
             compiler: clang
             install: nghttp2
             configure: --enable-debug --with-secure-transport --enable-websockets
-            macos-version-min: 10.8
+            macos-version-min: '10.8'
           # Fails compiling macOS Framework headers in most gcc + SDK combinations
           # (except gcc-11).
           # Fails linking tests due to not linking SystemConfiguration framework,
@@ -155,36 +155,36 @@ jobs:
           - name: SecureTransport
             compiler: gcc-11
             configure: --enable-debug --with-secure-transport --enable-websockets
-            macos-version-min: 10.8
+            macos-version-min: '10.8'
             xcode: 15.2  # for SDK 14.2, to avoid SystemConfiguration detection bug
             tflags: ~RTSP ~1156 ~1539 ~2100
           - name: LibreSSL
             compiler: clang
             install: nghttp2 libressl
             configure: --enable-debug --with-openssl=$(brew --prefix)/opt/libressl --enable-websockets
-            macos-version-min: 10.9
+            macos-version-min: '10.9'
           - name: OpenSSL
             compiler: clang
             install: nghttp2 openssl
             configure: --enable-debug --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
-            macos-version-min: 10.9
+            macos-version-min: '10.9'
           - name: OpenSSL torture no-FTP
             compiler: clang
             install: nghttp2 openssl
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
             tflags: -n -t --shallow=25 !FTP
-            macos-version-min: 10.9
+            macos-version-min: '10.9'
           - name: OpenSSL torture FTP
             compiler: clang
             install: nghttp2 openssl
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
             tflags: -n -t --shallow=20 FTP
-            macos-version-min: 10.9
+            macos-version-min: '10.9'
           - name: OpenSSL libssh2 !ldap (macOS 10.15)
             compiler: clang
             install: nghttp2 openssl libssh2
             configure: --enable-debug --disable-ldap --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
-            macos-version-min: 10.15
+            macos-version-min: '10.15'
     steps:
       - name: 'brew install'
         # Run this command with retries because of spurious failures seen
@@ -286,23 +286,23 @@ jobs:
           - name: OpenSSL
             install: nghttp2 openssl gsasl
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/openssl -DCURL_USE_GSASL=ON
-            macos-version-min: 10.9
+            macos-version-min: '10.9'
           - name: LibreSSL !ldap
             install: nghttp2 libressl
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DBUILD_EXAMPLES=ON
-            macos-version-min: 10.15
+            macos-version-min: '10.15'
           - name: wolfSSL !ldap
             install: nghttp2 wolfssl
             generate: -DCURL_USE_WOLFSSL=ON -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
-            macos-version-min: 10.15
+            macos-version-min: '10.15'
           - name: libssh2
             install: nghttp2 openssl libssh2
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/openssl -DCURL_USE_LIBSSH2=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON
-            macos-version-min: 10.9
+            macos-version-min: '10.9'
           - name: GnuTLS !ldap
             install: gnutls
             generate: -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DCMAKE_SHARED_LINKER_FLAGS=-L$(brew --prefix)/lib -DCMAKE_EXE_LINKER_FLAGS=-L$(brew --prefix)/lib
-            macos-version-min: 10.15
+            macos-version-min: '10.15'
     steps:
       - name: 'brew install'
         run: |
