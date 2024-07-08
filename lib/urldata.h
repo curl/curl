@@ -298,7 +298,7 @@ struct ssl_primary_config {
   BIT(verifypeer);       /* set TRUE if this is desired */
   BIT(verifyhost);       /* set TRUE if CN/SAN must match hostname */
   BIT(verifystatus);     /* set TRUE if certificate status must be checked */
-  BIT(sessionid);        /* cache session IDs or not */
+  BIT(cache_session);    /* cache session or not */
 };
 
 struct ssl_config_data {

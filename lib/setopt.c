@@ -2537,9 +2537,10 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
 
   case CURLOPT_SSL_SESSIONID_CACHE:
-    data->set.ssl.primary.sessionid = (0 != va_arg(param, long));
+    data->set.ssl.primary.cache_session = (0 != va_arg(param, long));
 #ifndef CURL_DISABLE_PROXY
-    data->set.proxy_ssl.primary.sessionid = data->set.ssl.primary.sessionid;
+    data->set.proxy_ssl.primary.cache_session =
+      data->set.ssl.primary.cache_session;
 #endif
     break;
 

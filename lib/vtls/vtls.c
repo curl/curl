@@ -168,7 +168,7 @@ void Curl_ssl_easy_config_init(struct Curl_easy *data)
    */
   data->set.ssl.primary.verifypeer = TRUE;
   data->set.ssl.primary.verifyhost = TRUE;
-  data->set.ssl.primary.sessionid = TRUE; /* session ID caching by default */
+  data->set.ssl.primary.cache_session = TRUE; /* caching by default */
 #ifndef CURL_DISABLE_PROXY
   data->set.proxy_ssl = data->set.ssl;
 #endif
@@ -230,7 +230,7 @@ static bool clone_ssl_primary_config(struct ssl_primary_config *source,
   dest->verifypeer = source->verifypeer;
   dest->verifyhost = source->verifyhost;
   dest->verifystatus = source->verifystatus;
-  dest->sessionid = source->sessionid;
+  dest->cache_session = source->cache_session;
   dest->ssl_options = source->ssl_options;
 
   CLONE_BLOB(cert_blob);
@@ -551,9 +551,9 @@ bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
   if(!ssl_config)
     return TRUE;
 
-  DEBUGASSERT(ssl_config->primary.sessionid);
+  DEBUGASSERT(ssl_config->primary.cache_session);
 
-  if(!ssl_config->primary.sessionid || !data->state.session)
+  if(!ssl_config->primary.cache_session || !data->state.session)
     /* session ID reuse is disabled or the session cache has not been
        setup */
     return TRUE;
@@ -637,18 +637,12 @@ void Curl_ssl_delsessionid(struct Curl_easy *data, void *ssl_sessionid)
   }
 }
 
-/*
- * Store session id in the session cache. The ID passed on to this function
- * must already have been extracted and allocated the proper way for the SSL
- * layer. Curl_XXXX_session_free() will be called to free/kill the session ID
- * later on.
- */
-CURLcode Curl_ssl_addsessionid(struct Curl_cfilter *cf,
-                               struct Curl_easy *data,
-                               const struct ssl_peer *peer,
-                               void *ssl_sessionid,
-                               size_t idsize,
-                               Curl_ssl_sessionid_dtor *sessionid_free_cb)
+CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
+                                const struct ssl_peer *peer,
+                                void *ssl_sessionid,
+                                size_t idsize,
+                                Curl_ssl_sessionid_dtor *sessionid_free_cb)
 {
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
@@ -659,6 +653,8 @@ CURLcode Curl_ssl_addsessionid(struct Curl_cfilter *cf,
   char *clone_conn_to_host = NULL;
   int conn_to_port;
   long *general_age;
+  void *old_sessionid;
+  size_t old_size;
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
   DEBUGASSERT(ssl_sessionid);
@@ -669,9 +665,20 @@ CURLcode Curl_ssl_addsessionid(struct Curl_cfilter *cf,
     return CURLE_OK;
   }
 
+  if(!Curl_ssl_getsessionid(cf, data, peer, &old_sessionid, &old_size)) {
+    if((old_size == idsize) &&
+       ((old_sessionid == ssl_sessionid) ||
+        (idsize && !memcmp(old_sessionid, ssl_sessionid, idsize)))) {
+      /* the very same */
+      sessionid_free_cb(ssl_sessionid, idsize);
+      return CURLE_OK;
+    }
+    Curl_ssl_delsessionid(data, old_sessionid);
+  }
+
   store = &data->state.session[0];
   oldest_age = data->state.session[0].age; /* zero if unused */
-  DEBUGASSERT(ssl_config->primary.sessionid);
+  DEBUGASSERT(ssl_config->primary.cache_session);
   (void)ssl_config;
 
   clone_host = strdup(peer->hostname);

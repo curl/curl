@@ -198,19 +198,22 @@ bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
                            const struct ssl_peer *peer,
                            void **ssl_sessionid,
                            size_t *idsize); /* set 0 if unknown */
-/* add a new session ID
+
+/* Set a TLS session ID for `peer`. Replaces an existing session ID if
+ * not already the very same.
  * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
+ * Call takes ownership of `ssl_sessionid`, using `sessionid_free_cb`
+ * to deallocate it. Is called in all outcomes, either right away or
+ * later when the session cache is cleaned up.
  * Caller must ensure that it has properly shared ownership of this sessionid
  * object with cache (e.g. incrementing refcount on success)
- * Call takes ownership of `ssl_sessionid`, using `sessionid_free_cb`
- * to destroy it in case of failure or later removal.
  */
-CURLcode Curl_ssl_addsessionid(struct Curl_cfilter *cf,
-                               struct Curl_easy *data,
-                               const struct ssl_peer *peer,
-                               void *ssl_sessionid,
-                               size_t idsize,
-                               Curl_ssl_sessionid_dtor *sessionid_free_cb);
+CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
+                                const struct ssl_peer *peer,
+                                void *sessionid,
+                                size_t sessionid_size,
+                                Curl_ssl_sessionid_dtor *sessionid_free_cb);
 
 #include "openssl.h"        /* OpenSSL versions */
 #include "gtls.h"           /* GnuTLS versions */

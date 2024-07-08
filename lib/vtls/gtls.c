@@ -727,7 +727,7 @@ static CURLcode gtls_update_session_id(struct Curl_cfilter *cf,
   struct ssl_connect_data *connssl = cf->ctx;
   CURLcode result = CURLE_OK;
 
-  if(ssl_config->primary.sessionid) {
+  if(ssl_config->primary.cache_session) {
     /* we always unconditionally get the session id here, as even if we
        already got it from the cache and asked to use it in the connection, it
        might've been rejected and then a new one is in use now and we need to
@@ -742,27 +742,16 @@ static CURLcode gtls_update_session_id(struct Curl_cfilter *cf,
       return CURLE_OUT_OF_MEMORY;
     }
     else {
-      bool incache;
-      void *ssl_sessionid;
-
       /* extract session ID to the allocated buffer */
       gnutls_session_get_data(session, connect_sessionid, &connect_idsize);
 
       CURL_TRC_CF(data, cf, "get session id (len=%zu) and store in cache",
                   connect_idsize);
       Curl_ssl_sessionid_lock(data);
-      incache = !(Curl_ssl_getsessionid(cf, data, &connssl->peer,
-                                        &ssl_sessionid, NULL));
-      if(incache) {
-        /* there was one before in the cache, so instead of risking that the
-           previous one was rejected, we just kill that and store the new */
-        Curl_ssl_delsessionid(data, ssl_sessionid);
-      }
-
       /* store this session id, takes ownership */
-      result = Curl_ssl_addsessionid(cf, data, &connssl->peer,
-                                     connect_sessionid, connect_idsize,
-                                     gtls_sessionid_free);
+      result = Curl_ssl_set_sessionid(cf, data, &connssl->peer,
+                                      connect_sessionid, connect_idsize,
+                                      gtls_sessionid_free);
       Curl_ssl_sessionid_unlock(data);
     }
   }
@@ -1082,7 +1071,7 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
 
   /* This might be a reconnect, so we check for a session ID in the cache
      to speed up things */
-  if(conn_config->sessionid) {
+  if(conn_config->cache_session) {
     void *ssl_sessionid;
     size_t ssl_idsize;
 

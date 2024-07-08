@@ -2867,42 +2867,25 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
                                SSL_SESSION *session)
 {
   const struct ssl_config_data *config;
-  bool isproxy;
-  bool added = FALSE;
+  CURLcode result = CURLE_OK;
 
   if(!cf || !data)
     goto out;
 
-  isproxy = Curl_ssl_cf_is_proxy(cf);
-
   config = Curl_ssl_cf_get_config(cf, data);
-  if(config->primary.sessionid) {
-    bool incache;
-    void *old_session = NULL;
+  if(config->primary.cache_session) {
 
     Curl_ssl_sessionid_lock(data);
-    if(isproxy)
-      incache = FALSE;
-    else
-      incache = !(Curl_ssl_getsessionid(cf, data, peer,
-                                        &old_session, NULL));
-    if(incache && (old_session != session)) {
-      infof(data, "old SSL session ID is stale, removing");
-      Curl_ssl_delsessionid(data, old_session);
-      incache = FALSE;
-    }
-
-    if(!incache) {
-      added = TRUE;
-      Curl_ssl_addsessionid(cf, data, peer, session, 0, ossl_session_free);
-    }
+    result = Curl_ssl_set_sessionid(cf, data, peer, session, 0,
+                                    ossl_session_free);
+    session = NULL; /* call has taken ownership */
     Curl_ssl_sessionid_unlock(data);
   }
 
 out:
-  if(!added)
+  if(session)
     ossl_session_free(session, 0);
-  return CURLE_OK;
+  return result;
 }
 
 /* The "new session" callback must return zero if the session can be removed
@@ -3945,7 +3928,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 #endif
 
   octx->reused_session = FALSE;
-  if(ssl_config->primary.sessionid && transport == TRNSPRT_TCP) {
+  if(ssl_config->primary.cache_session && transport == TRNSPRT_TCP) {
     Curl_ssl_sessionid_lock(data);
     if(!Curl_ssl_getsessionid(cf, data, peer, &ssl_sessionid, NULL)) {
       /* we got a session id, use it! */
