@@ -166,7 +166,7 @@ jobs:
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
             tflags: -n -t --shallow=20 FTP
             macos-version-min: 10.9
-          - name: OpenSSL libssh2 (macOS 10.15)
+          - name: OpenSSL libssh2 !ldap (macOS 10.15)
             compiler: clang
             install: nghttp2 openssl libssh2
             configure: --enable-debug --disable-ldap --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
@@ -285,7 +285,7 @@ jobs:
             install: nghttp2 openssl libssh2
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/openssl -DCURL_USE_LIBSSH2=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON
             macos-version-min: 10.9
-          - name: GnuTLS
+          - name: GnuTLS !ldap
             install: gnutls
             generate: -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DCMAKE_SHARED_LINKER_FLAGS=-L$(brew --prefix)/lib -DCMAKE_EXE_LINKER_FLAGS=-L$(brew --prefix)/lib
             macos-version-min: 10.15
