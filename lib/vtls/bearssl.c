@@ -584,7 +584,7 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
   backend->x509.verifyhost = verifyhost;
   br_ssl_engine_set_x509(&backend->ctx.eng, &backend->x509.vtable);
 
-  if(ssl_config->primary.sessionid) {
+  if(ssl_config->primary.cache_session) {
     void *session;
 
     CURL_TRC_CF(data, cf, "connect_step1, check session cache");
@@ -818,9 +818,7 @@ static CURLcode bearssl_connect_step3(struct Curl_cfilter *cf,
                              proto? strlen(proto) : 0);
   }
 
-  if(ssl_config->primary.sessionid) {
-    bool incache;
-    void *oldsession;
+  if(ssl_config->primary.cache_session) {
     br_ssl_session_parameters *session;
 
     session = malloc(sizeof(*session));
@@ -828,13 +826,8 @@ static CURLcode bearssl_connect_step3(struct Curl_cfilter *cf,
       return CURLE_OUT_OF_MEMORY;
     br_ssl_engine_get_session_parameters(&backend->ctx.eng, session);
     Curl_ssl_sessionid_lock(data);
-    incache = !(Curl_ssl_getsessionid(cf, data, &connssl->peer,
-                                      &oldsession, NULL));
-    if(incache)
-      Curl_ssl_delsessionid(data, oldsession);
-
-    ret = Curl_ssl_addsessionid(cf, data, &connssl->peer, session, 0,
-                                bearssl_session_free);
+    ret = Curl_ssl_set_sessionid(cf, data, &connssl->peer, session, 0,
+                                 bearssl_session_free);
     Curl_ssl_sessionid_unlock(data);
     if(ret)
       return ret;

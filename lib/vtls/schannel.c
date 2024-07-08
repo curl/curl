@@ -1127,7 +1127,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   backend->cred = NULL;
 
   /* check for an existing reusable credential handle */
-  if(ssl_config->primary.sessionid) {
+  if(ssl_config->primary.cache_session) {
     Curl_ssl_sessionid_lock(data);
     if(!Curl_ssl_getsessionid(cf, data, &connssl->peer,
                               (void **)&old_cred, NULL)) {
@@ -1772,35 +1772,16 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
 #endif
 
   /* save the current session data for possible reuse */
-  if(ssl_config->primary.sessionid) {
-    bool incache;
-    struct Curl_schannel_cred *old_cred = NULL;
-
+  if(ssl_config->primary.cache_session) {
     Curl_ssl_sessionid_lock(data);
-    incache = !(Curl_ssl_getsessionid(cf, data, &connssl->peer,
-                                      (void **)&old_cred, NULL));
-    if(incache) {
-      if(old_cred != backend->cred) {
-        DEBUGF(infof(data,
-                     "schannel: old credential handle is stale, removing"));
-        /* we are not taking old_cred ownership here, no refcount++ is
-           needed */
-        Curl_ssl_delsessionid(data, (void *)old_cred);
-        incache = FALSE;
-      }
-    }
-    if(!incache) {
-      /* Up ref count since call takes ownership */
-      backend->cred->refcount++;
-      result = Curl_ssl_addsessionid(cf, data, &connssl->peer, backend->cred,
-                                     sizeof(struct Curl_schannel_cred),
-                                     schannel_session_free);
-      if(result) {
-        Curl_ssl_sessionid_unlock(data);
-        return result;
-      }
-    }
+    /* Up ref count since call takes ownership */
+    backend->cred->refcount++;
+    result = Curl_ssl_set_sessionid(cf, data, &connssl->peer, backend->cred,
+                                    sizeof(struct Curl_schannel_cred),
+                                    schannel_session_free);
     Curl_ssl_sessionid_unlock(data);
+    if(result)
+      return result;
   }
 
   if(data->set.ssl.certinfo) {

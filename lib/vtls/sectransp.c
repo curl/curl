@@ -1477,7 +1477,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
 #endif /* CURL_BUILD_MAC_10_9 || CURL_BUILD_IOS_7 */
 
   /* Check if there is a cached ID we can/should use here! */
-  if(ssl_config->primary.sessionid) {
+  if(ssl_config->primary.cache_session) {
     char *ssl_sessionid;
     size_t ssl_sessionid_len;
 
@@ -1511,9 +1511,9 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
         return CURLE_SSL_CONNECT_ERROR;
       }
 
-      result = Curl_ssl_addsessionid(cf, data, &connssl->peer, ssl_sessionid,
-                                     ssl_sessionid_len,
-                                     sectransp_session_free);
+      result = Curl_ssl_set_sessionid(cf, data, &connssl->peer, ssl_sessionid,
+                                      ssl_sessionid_len,
+                                      sectransp_session_free);
       Curl_ssl_sessionid_unlock(data);
       if(result)
         return result;

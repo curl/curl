@@ -891,7 +891,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 #endif /* HAVE_SECURE_RENEGOTIATION */
 
   /* Check if there is a cached ID we can/should use here! */
-  if(ssl_config->primary.sessionid) {
+  if(ssl_config->primary.cache_session) {
     void *ssl_sessionid = NULL;
 
     Curl_ssl_sessionid_lock(data);
@@ -1268,24 +1268,16 @@ wolfssl_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
   DEBUGASSERT(backend);
 
-  if(ssl_config->primary.sessionid) {
+  if(ssl_config->primary.cache_session) {
     /* wolfSSL_get1_session allocates memory that has to be freed. */
     WOLFSSL_SESSION *our_ssl_sessionid = wolfSSL_get1_session(backend->handle);
 
     if(our_ssl_sessionid) {
-      void *old_ssl_sessionid = NULL;
-      bool incache;
       Curl_ssl_sessionid_lock(data);
-      incache = !(Curl_ssl_getsessionid(cf, data, &connssl->peer,
-                                        &old_ssl_sessionid, NULL));
-      if(incache) {
-        Curl_ssl_delsessionid(data, old_ssl_sessionid);
-      }
-
       /* call takes ownership of `our_ssl_sessionid` */
-      result = Curl_ssl_addsessionid(cf, data, &connssl->peer,
-                                     our_ssl_sessionid, 0,
-                                     wolfssl_session_free);
+      result = Curl_ssl_set_sessionid(cf, data, &connssl->peer,
+                                      our_ssl_sessionid, 0,
+                                      wolfssl_session_free);
       Curl_ssl_sessionid_unlock(data);
       if(result) {
         failf(data, "failed to store ssl session");
