@@ -35,9 +35,9 @@ my %error; # from the include file
 my %docs; # from libcurl-errors.3
 
 sub getdocserrors {
-    open(my $f, "<", "$root/docs/libcurl/libcurl-errors.3");
+    open(my $f, "<", "$root/docs/libcurl/libcurl-errors.md");
     while(<$f>) {
-        if($_ =~ /^.IP \"(CURL[EM]_[^ \t\"]*)/) {
+        if($_ =~ /^## (CURL[EM]_[^ ]*)/) {
             my ($symbol) = ($1);
             if($symbol =~ /OBSOLETE/) {
                 ;
@@ -71,7 +71,7 @@ getdocserrors();
 
 for(sort keys %error) {
     if($error{$_} && !$docs{$_}) {
-        print "$_ is not in libcurl-errors.3\n";
+        print "$_ is not in libcurl-errors.md\n";
     }
 }
 
