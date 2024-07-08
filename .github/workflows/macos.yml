@@ -380,7 +380,7 @@ jobs:
         # '14.2', '15.0.1', '15.4' but not revealing new fallouts, skip it to reduce jobs.
         xcode: ['13.4.1', '14.1', '14.3.1', '15.2', '15.3']
         macos-version-min: ['10.8']
-        build: [cmake, autotools]
+        build: [autotools, cmake]
         exclude:
           # Unsupported combinations:
           - { image: macos-12, xcode: '14.3.1' }
