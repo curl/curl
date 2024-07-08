@@ -273,22 +273,22 @@ jobs:
             install: nghttp2 openssl gsasl
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/openssl -DCURL_USE_GSASL=ON
             macos-version-min: 10.9
-          - name: LibreSSL
+          - name: LibreSSL !ldap
             install: nghttp2 libressl
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DBUILD_EXAMPLES=ON
-            macos-version-min: 10.9
-          - name: wolfSSL
+            macos-version-min: 10.15
+          - name: wolfSSL !ldap
             install: nghttp2 wolfssl
             generate: -DCURL_USE_WOLFSSL=ON -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
-            macos-version-min: 10.9
-          - name: libssh2 !ldap
-            install: nghttp2 openssl libssh2
-            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/openssl -DCURL_DISABLE_LDAP=OFF -DCURL_USE_LIBSSH2=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON
             macos-version-min: 10.15
+          - name: libssh2
+            install: nghttp2 openssl libssh2
+            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/openssl -DCURL_USE_LIBSSH2=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON
+            macos-version-min: 10.9
           - name: GnuTLS
             install: gnutls
             generate: -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DCMAKE_SHARED_LINKER_FLAGS=-L$(brew --prefix)/lib -DCMAKE_EXE_LINKER_FLAGS=-L$(brew --prefix)/lib
-            macos-version-min: 10.9
+            macos-version-min: 10.15
     steps:
       - name: 'brew install'
         run: |
