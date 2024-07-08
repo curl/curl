@@ -363,13 +363,6 @@ jobs:
         xcode: ['13.4.1', '14.1', '14.3.1', '15.2', '15.3']
         macos-version-min: ['10.9']
         build: [cmake, autotools]
-        #include:
-        #  - { compiler: gcc-11, image: macos-14, xcode: '15.2'  , config: 'OpenSSL'        , build: 'autotools', macos-version-min: '10.9' }
-        #  - { compiler: llvm  , image: macos-14, xcode: '15.2'  , config: 'OpenSSL'        , build: 'autotools', macos-version-min: '10.9' }
-        #  - { compiler: clang , image: macos-14, xcode: '15.2'  , config: 'OpenSSL'        , build: 'autotools', macos-version-min: '10.9' }
-        #  - { compiler: gcc-11, image: macos-14, xcode: '15.2'  , config: 'SecureTransport', build: 'autotools', macos-version-min: '10.9' }
-        #  - { compiler: llvm  , image: macos-14, xcode: '15.2'  , config: 'SecureTransport', build: 'autotools', macos-version-min: '10.9' }
-        #  - { compiler: clang , image: macos-14, xcode: '15.2'  , config: 'SecureTransport', build: 'autotools', macos-version-min: '10.9' }
         exclude:
           # Unsupported combinations:
           - { image: macos-12, xcode: '14.3.1' }
