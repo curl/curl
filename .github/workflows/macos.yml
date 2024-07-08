@@ -146,17 +146,10 @@ jobs:
             install: nghttp2
             configure: --enable-debug --with-secure-transport --enable-websockets
             macos-version-min: '10.8'
-          # Fails compiling macOS Framework headers in most gcc + SDK combinations
-          # (except gcc-11).
-          # Fails linking tests due to not linking SystemConfiguration framework,
-          # because detection fails in CURL_DARWIN_SYSTEMCONFIGURATION due to an
-          # error compiling TargetConditionals.h SDK header that affects gcc-11
-          # + SDK 14.4, 14.5 (Xcode 15.3, 15.4).
           - name: SecureTransport
             compiler: gcc-11
             configure: --enable-debug --with-secure-transport --enable-websockets
             macos-version-min: '10.8'
-            xcode: 15.2  # for SDK 14.2, to avoid SystemConfiguration detection bug
             tflags: ~RTSP ~1156 ~1539 ~2100
           - name: LibreSSL
             compiler: clang
@@ -402,8 +395,6 @@ jobs:
           # Exclude failing combinations. Comment these lines to observe all details.
           # misc reasons:
           - { compiler: gcc-11, image: macos-14, xcode: '14.3.1', config: OpenSSL }          # error: two or more data types in declaration specifiers # fatal error: AvailabilityInternalLegacy.h: No such file or directory
-          - { compiler: gcc-11, image: macos-14, xcode: '15.3'  , build: autotools }         # SystemConfiguration framework detection fails due to: error: missing binary operator before token "("
-          - { compiler: gcc-11, image: macos-14, xcode: '15.4'  , build: autotools }         # SystemConfiguration framework detection fails due to: error: missing binary operator before token "("
           - { compiler: gcc-13, image: macos-12, xcode: '14.1'  , config: OpenSSL }          # error: two or more data types in declaration specifiers # ...
           - { compiler: gcc-13, image: macos-12, xcode: '14.2'  , config: OpenSSL }          # error: two or more data types in declaration specifiers # ...
           - { compiler: gcc-13, image: macos-13, xcode: '15.0.1', config: OpenSSL }          # error: two or more data types in declaration specifiers # ...
