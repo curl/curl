@@ -45,6 +45,45 @@ function(add_runtests targetname test_flags)
   )
 endfunction()
 
+# Create configurehelp.pm, used by tests needing to run the C preprocessor.
+if(MSVC OR CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
+  set(_cpp_cmd "\"${CMAKE_C_COMPILER}\" -E")
+  if(APPLE AND NOT CMAKE_OSX_SYSROOT STREQUAL "")
+    set(_cpp_cmd "${_cpp_cmd} -isysroot ${CMAKE_OSX_SYSROOT}")
+  endif()
+  # Add header directories, like autotools builds do.
+  get_property(_include_dirs TARGET ${LIB_SELECTED} PROPERTY INCLUDE_DIRECTORIES)
+  foreach(_include_dir IN LISTS _include_dirs)
+    set(_cpp_cmd "${_cpp_cmd} -I${_include_dir}")
+  endforeach()
+else()
+  set(_cpp_cmd "cpp")
+endif()
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/configurehelp.pm" "# This is a generated file.  Do not edit.
+
+package configurehelp;
+
+use strict;
+use warnings;
+use Exporter;
+
+use vars qw(
+    @ISA
+    @EXPORT_OK
+    \$Cpreprocessor
+    );
+
+@ISA = qw(Exporter);
+
+@EXPORT_OK = qw(
+    \$Cpreprocessor
+    );
+
+\$Cpreprocessor = '${_cpp_cmd}';
+
+1;
+")
+
 add_runtests(test-quiet     "-a -s")
 add_runtests(test-am        "-a -am")
 add_runtests(test-full      "-a -p -r")
