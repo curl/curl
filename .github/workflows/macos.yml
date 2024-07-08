@@ -70,43 +70,43 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: no-ssl non-debug
+          - name: '!ssl !debug'
             compiler: clang
             install: nghttp2
             configure: --without-ssl --enable-websockets
             macos-version-min: '10.9'
-          - name: no-ssl non-debug
+          - name: '!ssl !debug'
             compiler: gcc-12
             install: nghttp2
             configure: --without-ssl --enable-websockets
             macos-version-min: '10.9'
             tflags: ~RTSP ~1156 ~1539
-          - name: no-ssl
+          - name: '!ssl'
             compiler: clang
             install: nghttp2
             configure: --enable-debug --without-ssl --enable-websockets
             macos-version-min: '10.9'
-          - name: libssh2
+          - name: 'libssh2'
             compiler: clang
             install: nghttp2 libssh2
             configure: --enable-debug --with-libssh2=$(brew --prefix)/opt/libssh2 --without-ssl --enable-websockets
             macos-version-min: '10.9'
-          - name: libssh c-ares
+          - name: 'libssh c-ares'
             compiler: clang
             install: nghttp2 openssl libssh
             configure: --enable-debug --with-libssh --with-openssl=$(brew --prefix)/opt/openssl --enable-ares --enable-websockets
             macos-version-min: '10.9'
-          - name: libssh
+          - name: 'libssh'
             compiler: clang
             install: nghttp2 openssl libssh
             configure: --enable-debug --with-libssh --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
             macos-version-min: '10.9'
-          - name: c-ares
+          - name: 'c-ares'
             compiler: clang
             install: nghttp2
             configure: --enable-debug --enable-ares --without-ssl --enable-websockets
             macos-version-min: '10.9'
-          - name: HTTP-only
+          - name: 'HTTP-only'
             compiler: clang
             configure: |
               --enable-debug \
@@ -141,39 +141,39 @@ jobs:
               --without-zstd
 
             macos-version-min: '10.15'  # Catalina (2019)
-          - name: SecureTransport
+          - name: 'SecureTransport'
             compiler: clang
             install: nghttp2
             configure: --enable-debug --with-secure-transport --enable-websockets
             macos-version-min: '10.8'
-          - name: SecureTransport
+          - name: 'SecureTransport'
             compiler: gcc-11
             configure: --enable-debug --with-secure-transport --enable-websockets
             macos-version-min: '10.8'
             tflags: ~RTSP ~1156 ~1539 ~2100
-          - name: LibreSSL
+          - name: 'LibreSSL'
             compiler: clang
             install: nghttp2 libressl
             configure: --enable-debug --with-openssl=$(brew --prefix)/opt/libressl --enable-websockets
             macos-version-min: '10.9'
-          - name: OpenSSL
+          - name: 'OpenSSL'
             compiler: clang
             install: nghttp2 openssl
             configure: --enable-debug --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
             macos-version-min: '10.9'
-          - name: OpenSSL torture no-FTP
+          - name: 'OpenSSL torture !FTP'
             compiler: clang
             install: nghttp2 openssl
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
             tflags: -n -t --shallow=25 !FTP
             macos-version-min: '10.9'
-          - name: OpenSSL torture FTP
+          - name: 'OpenSSL torture FTP'
             compiler: clang
             install: nghttp2 openssl
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
             tflags: -n -t --shallow=20 FTP
             macos-version-min: '10.9'
-          - name: OpenSSL libssh2 !ldap (macOS 10.15)
+          - name: 'OpenSSL libssh2 !ldap (macOS 10.15)'
             compiler: clang
             install: nghttp2 openssl libssh2
             configure: --enable-debug --disable-ldap --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
@@ -276,23 +276,23 @@ jobs:
       matrix:
         compiler: [clang, gcc-12]
         build:
-          - name: OpenSSL
+          - name: 'OpenSSL'
             install: nghttp2 openssl gsasl
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/openssl -DCURL_USE_GSASL=ON
             macos-version-min: '10.9'
-          - name: LibreSSL !ldap
+          - name: 'LibreSSL !ldap'
             install: nghttp2 libressl
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DBUILD_EXAMPLES=ON
             macos-version-min: '10.15'
-          - name: wolfSSL !ldap
+          - name: 'wolfSSL !ldap'
             install: nghttp2 wolfssl
             generate: -DCURL_USE_WOLFSSL=ON -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
             macos-version-min: '10.15'
-          - name: libssh2
+          - name: 'libssh2'
             install: nghttp2 openssl libssh2
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/openssl -DCURL_USE_LIBSSH2=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON
             macos-version-min: '10.9'
-          - name: GnuTLS !ldap
+          - name: 'GnuTLS !ldap'
             install: gnutls
             generate: -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DCMAKE_SHARED_LINKER_FLAGS=-L$(brew --prefix)/lib -DCMAKE_EXE_LINKER_FLAGS=-L$(brew --prefix)/lib
             macos-version-min: '10.15'
