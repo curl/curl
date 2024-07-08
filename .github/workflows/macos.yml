@@ -264,7 +264,6 @@ jobs:
     env:
       DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
       CC: ${{ matrix.compiler }}
-      CFLAGS: '-Wno-deprecated-declarations'  # Required for LDAP
     strategy:
       fail-fast: false
       matrix:
@@ -273,18 +272,23 @@ jobs:
           - name: OpenSSL
             install: nghttp2 openssl gsasl
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/openssl -DCURL_USE_GSASL=ON
+            macos-version-min: 10.9
           - name: LibreSSL
             install: nghttp2 libressl
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DBUILD_EXAMPLES=ON
+            macos-version-min: 10.9
           - name: wolfSSL
             install: nghttp2 wolfssl
             generate: -DCURL_USE_WOLFSSL=ON -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
-          - name: libssh2
+            macos-version-min: 10.9
+          - name: libssh2 !ldap
             install: nghttp2 openssl libssh2
-            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/openssl -DCURL_USE_LIBSSH2=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON
+            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/openssl -DCURL_DISABLE_LDAP=OFF -DCURL_USE_LIBSSH2=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON
+            macos-version-min: 10.15
           - name: GnuTLS
             install: gnutls
             generate: -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DCMAKE_SHARED_LINKER_FLAGS=-L$(brew --prefix)/lib -DCMAKE_EXE_LINKER_FLAGS=-L$(brew --prefix)/lib
+            macos-version-min: 10.9
     steps:
       - name: 'brew install'
         run: |
@@ -313,7 +317,7 @@ jobs:
       - name: 'cmake configure'
         run: |
           cmake -B bld -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
-            -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.build.macos-version-min }} \
             -DUSE_APPLE_IDN=ON \
             ${{ matrix.build.generate }}
 
@@ -341,7 +345,7 @@ jobs:
     env:
       DEVELOPER_DIR: /Applications/Xcode_${{ matrix.xcode }}.app/Contents/Developer
       CC: ${{ matrix.compiler }}
-      CFLAGS: '-Wno-deprecated-declarations'  # Required for LDAP, SecureTransport
+      CFLAGS: '-Wno-deprecated-declarations'  # for LDAP, SecureTransport
     strategy:
       fail-fast: false
       matrix:
