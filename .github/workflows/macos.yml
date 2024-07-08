@@ -155,7 +155,7 @@ jobs:
           - name: SecureTransport
             compiler: gcc-11
             configure: --enable-debug --with-secure-transport --enable-websockets
-            macos-version-min: 10.15  # Catalina (2019) the lastest release where SecureTransport is not deprecated
+            macos-version-min: 10.8
             xcode: 15.2  # for SDK 14.2, to avoid SystemConfiguration detection bug
             tflags: ~RTSP ~1156 ~1539 ~2100
           - name: LibreSSL
