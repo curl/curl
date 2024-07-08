@@ -64,14 +64,14 @@ my %alias = (
     'CURLINFO_TEXT' => 'none'
     );
 
-sub scanmanpage {
+sub scanmdpage {
     my ($file, @words) = @_;
 
     open(my $mh, "<", "$file") ||
         die "could not open $file";
     my @m;
     while(<$mh>) {
-        if($_ =~ /^\.IP (.*)/) {
+        if($_ =~ /^## (.*)/) {
             my $w = $1;
             # "unquote" minuses
             $w =~ s/\\-/-/g;
@@ -129,8 +129,8 @@ while(<$r>) {
             elsif($type eq "MOPT") {
                 push @curlmopt, $opt,
             }
-            if(! -f "$buildroot/docs/libcurl/opts/$opt.3") {
-                print STDERR "Missing $opt.3\n";
+            if(! -f "$root/docs/libcurl/opts/$opt.md") {
+                print STDERR "Missing $opt.md\n";
                 $errors++;
             }
         }
@@ -138,9 +138,9 @@ while(<$r>) {
 }
 close($r);
 
-scanmanpage("$buildroot/docs/libcurl/curl_easy_setopt.3", @curlopt);
-scanmanpage("$buildroot/docs/libcurl/curl_easy_getinfo.3", @curlinfo);
-scanmanpage("$buildroot/docs/libcurl/curl_multi_setopt.3", @curlmopt);
+scanmdpage("$root/docs/libcurl/curl_easy_setopt.md", @curlopt);
+scanmdpage("$root/docs/libcurl/curl_easy_getinfo.md", @curlinfo);
+scanmdpage("$root/docs/libcurl/curl_multi_setopt.md", @curlmopt);
 
 # using this hash array, we can skip specific options
 my %opts = (
