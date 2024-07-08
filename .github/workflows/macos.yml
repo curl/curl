@@ -39,6 +39,20 @@ concurrency:
 
 permissions: {}
 
+# Deprecated Apple APIs and the macos-version-min value required to avoid deprecation warnings with llvm/clang:
+#
+# - 10.7  Lion (2011)          - GSS
+# - 10.8  Mountain Lion (2012) - CFURLCreateDataAndPropertiesFromResource (used by curl SecureTransport code)
+# - 10.9  Maverick (2013)      - LDAP
+# - 10.14 Mojave (2018)        - SecureTransport
+#
+# For SecureTransport, curl implements features that require a target
+# newer than the 10.8 required by `CFURLCreateDataAndPropertiesFromResource`.
+# In this case `-Wno-deprecated-declarations` still comes handy to pacify
+# deprecation warnings, though the real solution would be to avoid calling
+# that function.
+#
+
 env:
   LDFLAGS: -w  # suppress 'object file was built for newer macOS version than being linked' warnings
   MAKEFLAGS: -j 4
