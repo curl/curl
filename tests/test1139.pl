@@ -129,7 +129,7 @@ while(<$r>) {
             elsif($type eq "MOPT") {
                 push @curlmopt, $opt,
             }
-            if(! -f "$buildroot/docs/libcurl/opts/$opt.md") {
+            if(! -f "$root/docs/libcurl/opts/$opt.md") {
                 print STDERR "Missing $opt.md\n";
                 $errors++;
             }
@@ -138,9 +138,9 @@ while(<$r>) {
 }
 close($r);
 
-scanmdpage("$buildroot/docs/libcurl/curl_easy_setopt.md", @curlopt);
-scanmdpage("$buildroot/docs/libcurl/curl_easy_getinfo.md", @curlinfo);
-scanmdpage("$buildroot/docs/libcurl/curl_multi_setopt.md", @curlmopt);
+scanmdpage("$root/docs/libcurl/curl_easy_setopt.md", @curlopt);
+scanmdpage("$root/docs/libcurl/curl_easy_getinfo.md", @curlinfo);
+scanmdpage("$root/docs/libcurl/curl_multi_setopt.md", @curlmopt);
 
 # using this hash array, we can skip specific options
 my %opts = (
