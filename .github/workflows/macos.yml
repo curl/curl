@@ -260,6 +260,7 @@ jobs:
   cmake:
     name: 'CM ${{ matrix.compiler }} ${{ matrix.build.name }}'
     runs-on: 'macos-latest'
+    timeout-minutes: 10
     env:
       DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
       CC: ${{ matrix.compiler }}
