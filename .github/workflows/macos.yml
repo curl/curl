@@ -210,7 +210,7 @@ jobs:
     runs-on: 'macos-latest'
     env:
       CC: ${{ matrix.compiler.CC }}
-      CFLAGS: '-Wno-deprecated-declarations'  # Required for LDAP and BUILD_EXAMPLES
+      CFLAGS: '-Wno-deprecated-declarations'  # Required for LDAP
     strategy:
       fail-fast: false
       matrix:

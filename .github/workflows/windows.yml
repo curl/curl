@@ -141,7 +141,6 @@ jobs:
         run: |
           export PATH="/usr/bin:$(cygpath "${SYSTEMROOT}")/System32"
           cmake -B bld ${options} \
-            "-DCMAKE_C_FLAGS=${cflags}" \
             -DCMAKE_UNITY_BUILD=ON \
             -DCURL_WERROR=ON \
             -DBUILD_EXAMPLES=ON \
@@ -318,13 +317,12 @@ jobs:
           else
             options='-DCMAKE_C_COMPILER=gcc'
           fi
-          cflags='-Wno-deprecated-declarations'  # for examples
           if [ '${{ matrix.test }}' = 'uwp' ]; then
             options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
             pacman --noconfirm --ask 20 --noprogressbar --sync --needed 'mingw-w64-${{ matrix.env }}-winstorecompat-git'
             specs="$(realpath gcc-specs-uwp)"
             gcc -dumpspecs | sed -e 's/-lmingwex/-lwindowsapp -lmingwex -lwindowsapp -lwindowsappcompat/' -e 's/-lmsvcrt/-lmsvcr120_app/' > "${specs}"
-            cflags+=" -specs=$(cygpath -w "${specs}") -DWINSTORECOMPAT -DWINAPI_FAMILY=WINAPI_FAMILY_APP"
+            cflags="-specs=$(cygpath -w "${specs}") -DWINSTORECOMPAT -DWINAPI_FAMILY=WINAPI_FAMILY_APP"
             # CMake (as of v3.26.4) gets confused and applies the MSVC rc.exe command-line
             # template to windres. Reset it to the windres template manually:
             rcopts='<CMAKE_RC_COMPILER> -O coff <DEFINES> <INCLUDES> <FLAGS> <SOURCE> <OBJECT>'
@@ -456,13 +454,11 @@ jobs:
         shell: C:\msys64\usr\bin\bash.exe {0}
         run: |
           export PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
-          cflags='-Wno-deprecated-declarations'  # for examples
           [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
           [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
           cmake -B bld ${options} \
             '-GMSYS Makefiles' \
             -DCMAKE_C_COMPILER=gcc \
-            "-DCMAKE_C_FLAGS=${cflags}" \
             '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
             -DCMAKE_UNITY_BUILD=ON \
             -DCURL_WERROR=ON \
