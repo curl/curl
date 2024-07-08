@@ -345,7 +345,6 @@ jobs:
     env:
       DEVELOPER_DIR: /Applications/Xcode_${{ matrix.xcode }}.app/Contents/Developer
       CC: ${{ matrix.compiler }}
-      CFLAGS: '-Wno-deprecated-declarations'  # for LDAP, SecureTransport
     strategy:
       fail-fast: false
       matrix:
@@ -437,6 +436,7 @@ jobs:
         run: |
           [ '${{ matrix.compiler }}' = 'llvm' ] && CC="$(brew --prefix llvm@15)/bin/clang"
           if [ '${{ matrix.build }}' = 'autotools' ]; then
+            export CFLAGS
             if [ '${{ matrix.compiler }}' = 'llvm' ]; then
               options+=" --target=$(uname -m)-apple-darwin"
               CC+=" --target=$(uname -m)-apple-darwin"
