@@ -5019,6 +5019,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   Install prefix:   ${prefix}
   Compiler:         ${CC}
    CFLAGS:          ${CFLAGS}
+   CFLAGS extras:   ${CURL_CFLAG_EXTRAS}
    CPPFLAGS:        ${CPPFLAGS}
    LDFLAGS:         ${LDFLAGS}
    LIBS:            ${LIBS}
