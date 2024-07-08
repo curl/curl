@@ -332,7 +332,7 @@ jobs:
         run: cat bld/lib/curl_config.h || true
 
       - name: 'cmake build'
-        run: cmake --build bld --parallel 4
+        run: make -C bld VERBOSE=1
 
       - name: 'curl version'
         run: bld/src/curl --disable --version
