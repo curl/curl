@@ -62,7 +62,7 @@ env:
   # renovate: datasource=github-tags depName=cloudflare/quiche versioning=semver registryUrl=https://github.com
   quiche-version: 0.22.0
   # renovate: datasource=github-tags depName=icing/mod_h2 versioning=semver registryUrl=https://github.com
-  mod_h2-version: 2.0.27
+  mod_h2-version: 2.0.29
 
 jobs:
   setup:
