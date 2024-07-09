@@ -223,6 +223,7 @@ jobs:
           which "${CC}"; "${CC}" --version
           xcodebuild -version || true
           xcrun -sdk macosx --show-sdk-path 2>/dev/null || true
+          ls -l "$(brew --prefix)/opt"
 
       - name: 'autoreconf'
         run: autoreconf -fi
@@ -320,6 +321,7 @@ jobs:
           which "${CC}"; "${CC}" --version
           xcodebuild -version || true
           xcrun -sdk macosx --show-sdk-path 2>/dev/null || true
+          ls -l "$(brew --prefix)/opt"
 
       - name: 'cmake configure'
         run: |
@@ -439,6 +441,7 @@ jobs:
           which "${CC}"; "${CC}" --version
           xcodebuild -version || true
           xcrun -sdk macosx --show-sdk-path 2>/dev/null || true
+          ls -l "$(brew --prefix)/opt"
 
       - name: 'autoreconf'
         if: ${{ matrix.build == 'autotools' }}
