@@ -220,7 +220,7 @@ jobs:
 
       - name: 'toolchain versions'
         run: |
-          which "${CC}"; "${CC}" --version
+          which "${CC}"; "${CC}" --version || true
           xcodebuild -version || true
           xcrun -sdk macosx --show-sdk-path 2>/dev/null || true
           ls -l "$(brew --prefix)/opt"
@@ -318,7 +318,7 @@ jobs:
 
       - name: 'toolchain versions'
         run: |
-          which "${CC}"; "${CC}" --version
+          which "${CC}"; "${CC}" --version || true
           xcodebuild -version || true
           xcrun -sdk macosx --show-sdk-path 2>/dev/null || true
           ls -l "$(brew --prefix)/opt"
@@ -438,7 +438,7 @@ jobs:
       - name: 'toolchain versions'
         run: |
           [ '${{ matrix.compiler }}' = 'llvm' ] && CC="$(brew --prefix llvm@15)/bin/clang"
-          which "${CC}"; "${CC}" --version
+          which "${CC}"; "${CC}" --version || true
           xcodebuild -version || true
           xcrun -sdk macosx --show-sdk-path 2>/dev/null || true
           ls -l "$(brew --prefix)/opt"
