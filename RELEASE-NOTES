@@ -4,7 +4,7 @@ curl and libcurl 8.8.1
  Command line options:         263
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3200
+ Contributors:                 3201
 
 This release includes the following changes:
 
@@ -28,12 +28,14 @@ This release includes the following bugfixes:
  o autotools: fix pkg-config names (zstd, ngtcp2*) [170]
  o aws-sigv4: url encode the canonical path [55]
  o BINDINGS: update java link to one that exists [115]
+ o build: add Debug, TrackMemory, ECH to feature list [218]
  o build: add more supported attributes to the IAR compiler [46]
  o build: untangle `CURLDEBUG` and `DEBUGBUILD` macros [9]
  o cd2nroff: convert two warnings to errors [135]
  o cd2nroff: use an empty "##" to signal end of .IP sequence [56]
  o cf-socket: improve SO_SNDBUF update for Winsock [27]
  o cf-socket: optimize curlx_nonblock() and check its return error [151]
+ o cf-socket: remove obsolete recvbuf [203]
  o cfilters: make Curl_conn_connect always assign 'done' [60]
  o cmake: add CURL_USE_GSASL option with detection + CI test [133]
  o cmake: allow `ENABLE_CURLDEBUG=OFF` with `ENABLE_DEBUG=ON` [26]
@@ -68,12 +70,14 @@ This release includes the following bugfixes:
  o code: language cleanup in comments [186]
  o configure: fix pkg-config library name 'libnghttp3' [138]
  o configure: require a QUIC library if nghttp3 is used [142]
+ o configure: sort feature list, lowercase protocols, use backticks [206]
  o configure: use `$EGREP` in place of `grep -E` [41]
  o configure: use AC_MSG_WARN for TLS/experimental warning texts [122]
  o connect-to.md: expand with examples [147]
  o connection: shutdown TLS (for FTP) better [104]
  o cookie-jar.md: see also --junk-session-cookies [144]
  o curl-config: revert to backticks to support old target envs [88]
+ o curl: list categories in --help [219]
  o curl: make warnings and other messages aware of terminal width [58]
  o curl_easy_escape: elaborate a little on encoding a URL [193]
  o curl_mprintf.md: add missing comma
@@ -100,15 +104,19 @@ This release includes the following bugfixes:
  o examples: add missing binaries to .gitignore [106]
  o examples: delete unused includes [10]
  o examples: fix compiling with MSVC [34]
+ o examples: suppress deprecation warnings locally [211]
  o FEATURES.md: refresh [208]
  o file: separate fake headers and body with a stand-alone CRLF [137]
  o get.d: clarify the explanation [32]
+ o GHA: add MSVC UWP job, expand jobs with more options [216]
  o GHA: detect and warn for more English contractions [123]
  o GHA: disable MQTT and WebSocket tests in Windows jobs [63]
  o GHA: disable TFTP tests in Windows jobs
  o GHA: enable tests 1139, 1177, 1477 on Windows [59]
+ o GHA: improve vcpkg cache, add BoringSSL ECH and LibreSSL MSVC jobs [215]
  o GHA: unify http3 workflows into one [77]
  o GHA: use vcpkg to install packages for MSVC jobs [145]
+ o GIT-INFO.md: remove version requirements [209]
  o gnutls: improve TLS shutdown [62]
  o gnutls: pass in SNI name, not hostname when checking cert [114]
  o help: add flags to output and ssh categories [202]
@@ -126,6 +134,7 @@ This release includes the following bugfixes:
  o libcurl.pc: add `Requires.private`, `Requires` for static linking [129]
  o libcurl.pc: add more `Requires.private`/`Requires` dependencies [189]
  o libssh: remove CURLOPT_SSL_VERIFYHOST check [36]
+ o macos: add workaround for gcc, non-c-ares, IPv6, compile error [213]
  o managen: "added in" fixes [131]
  o managen: cleanups to generate nicer-looking output [141]
  o managen: error on trailing blank lines in input files [165]
@@ -166,6 +175,7 @@ This release includes the following bugfixes:
  o runtests: support %DATE for YYYY-MM-DD of right now
  o runtests: support %VERNUM
  o runtests: support crlf="yes" for the <stderr> section
+ o sectransp: fix `HAVE_BUILTIN_AVAILABLE` checks to not emit warnings [210]
  o sectransp: remove large cipher table [76]
  o sectransp: use common code for cipher suite lookup [54]
  o socket: change TCP keepalive from ms to seconds on DragonFly BSD [74]
@@ -174,6 +184,9 @@ This release includes the following bugfixes:
  o src/Makefile.am: remove SUBDIRS assignment [172]
  o system_win32: add missing curl.h include [160]
  o tcpkeepalive: support TCP keep-alive parameters on Solaris <11.4 [91]
+ o test1119: adapt for `.md` input [204]
+ o test1139: scan .md files instead of .3 ones [197]
+ o test1175: scan libcurl-errors.md, not the generated .3 version [188]
  o test1486: verify that write-out.md and tool_writeout.c are in sync [112]
  o test: add test1484, for HEAD with content [18]
  o test: add test1546, chunked not last transfer encoding [17]
@@ -181,6 +194,9 @@ This release includes the following bugfixes:
  o tests: delete `CharConv` remains [201]
  o tests: delete redundant `!MSDOS` guard [84]
  o tests: extend user/password parsing test1620 [40]
+ o tests: fix sshd IdentityFile path for MinGW/Cygwin [217]
+ o tests: fix sshd UserKnownHostsFile path for MinGW/Cygwin
+ o tests: include current directory when running test Perl commands [205]
  o tests: log "Throwing away" messages before throwing away
  o tests: run with "--trace-config all" to provide even more info [6]
  o tests: test_17_ssl_use.py clarify mbedtls TLSv1.3 support [43]
@@ -202,9 +218,11 @@ This release includes the following bugfixes:
  o transfer: set CSELECT_IN if there is data pending [118]
  o unit2604: use 'unitfail' instead of 'error' variable [153]
  o url: allow DoH transfers to override max connection limit [68]
+ o variable.md: make example use expand [207]
  o verify-synopsis.pl: work with .md files [185]
  o vms: fixed language in comment [110]
  o vtls: deprioritize Secure Transport [71]
+ o vtls: replace addsessionid with set_sessionid [183]
  o winbuild: fix PE version info debug flag [1]
  o winbuild: MS-DOS batch tidy-ups [163]
  o winbuild: remove outdated WIN32 defines [5]
@@ -233,21 +251,21 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alejandro R. Sedeño, alervd on github, Alexander Shtuchkin, Alex Snast,
-  Andy Pan, Aurélien Pierre, Ayesh Karunaratne, Bo Anderson, brian m. carlson,
-  Christian Heusel, Christian Schmitz, Dan Fandrich, Daniel Gustafsson,
-  Daniel Stenberg, dependabot[bot], Dexter Gerig, dogma, Dorian Craps,
-  edmcln on github, Eli Schwartz, Elliott Balsley, fds242 on github,
-  Guilherme Puida, Harry Sintonen, James Abbatiello, Jan Venekamp,
-  Jay Guerette, Jiang Wenjian, Jonathan Matthews, Joseph Chen, Junho Choi,
-  Kai Pastor, kartatz, Keerthi Timmaraju, Lee Li, Luke Hamburg, Marcel Raad,
-  Matthias Gatto, Matthieu Baerts, Matt Jolly, Max Mehl, Morgan Willcock,
-  Olivier Bonaventure, Orgad Shaneh, Patrick Monnerat, Pavel Pavlov,
-  Philip Heiduck, pszlazak on github, RainRat, Ray Satiro, renovate[bot],
-  Ryan Carsten Schmidt, Samuel Chiang, saurabhsingh-dev on github,
-  Sebastian Andersson, Sergey Bronnikov, Sergey Markelov, Sertonix,
-  Stefan Eissing, Stephen Farrell, Tal Regev, Tatsuhiro Tsujikawa,
-  Viktor Szakats, vvb2060, Yedaya Katsman, z2_, 李四
-  (67 contributors)
+  Andy Pan, Andy Reitz, Aurélien Pierre, Ayesh Karunaratne, Bo Anderson,
+  brian m. carlson, Christian Heusel, Christian Schmitz, Dan Fandrich,
+  Daniel Gustafsson, Daniel Stenberg, dependabot[bot], Dexter Gerig, dogma,
+  Dorian Craps, edmcln on github, Eli Schwartz, Elliott Balsley,
+  fds242 on github, Guilherme Puida, Harry Sintonen, James Abbatiello,
+  Jan Venekamp, Jay Guerette, Jiang Wenjian, Jonathan Matthews, Joseph Chen,
+  Junho Choi, Kai Pastor, kartatz, Keerthi Timmaraju, Lee Li, Luke Hamburg,
+  Marcel Raad, Matthias Gatto, Matthieu Baerts, Matt Jolly, Max Mehl,
+  Morgan Willcock, Olivier Bonaventure, Orgad Shaneh, Patrick Monnerat,
+  Pavel Pavlov, Philip Heiduck, pszlazak on github, RainRat, Ray Satiro,
+  renovate[bot], Ryan Carsten Schmidt, Samuel Chiang,
+  saurabhsingh-dev on github, Sebastian Andersson, Sergey Bronnikov,
+  Sergey Markelov, Sertonix, Stefan Eissing, Stephen Farrell, Tal Regev,
+  Tatsuhiro Tsujikawa, Viktor Szakats, vvb2060, Yedaya Katsman, z2_, 李四
+  (68 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -433,10 +451,12 @@ References to bug reports and discussions on issues:
  [180] = https://curl.se/bug/?i=14082
  [181] = https://curl.se/bug/?i=14078
  [182] = https://curl.se/bug/?i=14066
+ [183] = https://curl.se/bug/?i=14121
  [184] = https://curl.se/bug/?i=14107
  [185] = https://curl.se/bug/?i=14038
  [186] = https://curl.se/bug/?i=14073
  [187] = https://curl.se/bug/?i=14033
+ [188] = https://curl.se/bug/?i=14133
  [189] = https://curl.se/bug/?i=14072
  [190] = https://curl.se/bug/?i=14064
  [191] = https://curl.se/bug/?i=14071
@@ -445,9 +465,24 @@ References to bug reports and discussions on issues:
  [194] = https://curl.se/bug/?i=13963
  [195] = https://curl.se/bug/?i=14068
  [196] = https://curl.se/bug/?i=14101
+ [197] = https://curl.se/bug/?i=14132
  [198] = https://curl.se/bug/?i=14104
  [199] = https://curl.se/bug/?i=14103
  [200] = https://curl.se/bug/?i=14098
  [201] = https://curl.se/bug/?i=14100
  [202] = https://curl.se/bug/?i=14076
+ [203] = https://curl.se/bug/?i=14138
+ [204] = https://curl.se/bug/?i=14125
+ [205] = https://curl.se/bug/?i=14124
+ [206] = https://curl.se/bug/?i=14117
+ [207] = https://curl.se/bug/?i=14118
  [208] = https://curl.se/bug/?i=14086
+ [209] = https://curl.se/bug/?i=14112
+ [210] = https://curl.se/bug/?i=14122
+ [211] = https://curl.se/bug/?i=14123
+ [213] = https://curl.se/bug/?i=14119
+ [215] = https://curl.se/bug/?i=14090
+ [216] = https://curl.se/bug/?i=14077
+ [217] = https://curl.se/bug/?i=14113
+ [218] = https://curl.se/bug/?i=14096
+ [219] = https://curl.se/bug/?i=14055
