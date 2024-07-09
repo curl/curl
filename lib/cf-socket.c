@@ -916,7 +916,6 @@ struct cf_socket_ctx {
   int transport;
   struct Curl_sockaddr_ex addr;      /* address to connect to */
   curl_socket_t sock;                /* current attempt socket */
-  struct bufq recvbuf;               /* used when `buffer_recv` is set */
   struct ip_quadruple ip;            /* The IP quadruple 2x(addr+port) */
   struct curltime started_at;        /* when socket was created */
   struct curltime connected_at;      /* when socket connected/got first byte */
@@ -936,7 +935,6 @@ struct cf_socket_ctx {
   BIT(accepted);                     /* socket was accepted, not connected */
   BIT(sock_connected);               /* socket is "connected", e.g. in UDP */
   BIT(active);
-  BIT(buffer_recv);
 };
 
 static void cf_socket_ctx_init(struct cf_socket_ctx *ctx,
@@ -947,7 +945,6 @@ static void cf_socket_ctx_init(struct cf_socket_ctx *ctx,
   ctx->sock = CURL_SOCKET_BAD;
   ctx->transport = transport;
   Curl_sock_assign_addr(&ctx->addr, ai, transport);
-  Curl_bufq_init(&ctx->recvbuf, NW_RECV_CHUNK_SIZE, NW_RECV_CHUNKS);
 #ifdef DEBUGBUILD
   {
     char *p = getenv("CURL_DBG_SOCK_WBLOCK");
@@ -978,56 +975,6 @@ static void cf_socket_ctx_init(struct cf_socket_ctx *ctx,
 #endif
 }
 
-struct reader_ctx {
-  struct Curl_cfilter *cf;
-  struct Curl_easy *data;
-};
-
-static ssize_t nw_in_read(void *reader_ctx,
-                           unsigned char *buf, size_t len,
-                           CURLcode *err)
-{
-  struct reader_ctx *rctx = reader_ctx;
-  struct cf_socket_ctx *ctx = rctx->cf->ctx;
-  ssize_t nread;
-
-  *err = CURLE_OK;
-  nread = sread(ctx->sock, buf, len);
-
-  if(-1 == nread) {
-    int sockerr = SOCKERRNO;
-
-    if(
-#ifdef WSAEWOULDBLOCK
-      /* This is how Windows does it */
-      (WSAEWOULDBLOCK == sockerr)
-#else
-      /* errno may be EWOULDBLOCK or on some systems EAGAIN when it returned
-         due to its inability to send off data without blocking. We therefore
-         treat both error codes the same here */
-      (EWOULDBLOCK == sockerr) || (EAGAIN == sockerr) || (EINTR == sockerr)
-#endif
-      ) {
-      /* this is just a case of EWOULDBLOCK */
-      *err = CURLE_AGAIN;
-      nread = -1;
-    }
-    else {
-      char buffer[STRERROR_LEN];
-
-      failf(rctx->data, "Recv failure: %s",
-            Curl_strerror(sockerr, buffer, sizeof(buffer)));
-      rctx->data->state.os_errno = sockerr;
-      *err = CURLE_RECV_ERROR;
-      nread = -1;
-    }
-  }
-  CURL_TRC_CF(rctx->data, rctx->cf, "nw_in_read(len=%zu, fd=%"
-              CURL_FORMAT_SOCKET_T ") -> %d, err=%d",
-              len, ctx->sock, (int)nread, *err);
-  return nread;
-}
-
 static void cf_socket_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
@@ -1041,9 +988,7 @@ static void cf_socket_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     ctx->sock = CURL_SOCKET_BAD;
     if(ctx->active && cf->sockindex == FIRSTSOCKET)
       cf->conn->remote_addr = NULL;
-    Curl_bufq_reset(&ctx->recvbuf);
     ctx->active = FALSE;
-    ctx->buffer_recv = FALSE;
     memset(&ctx->started_at, 0, sizeof(ctx->started_at));
     memset(&ctx->connected_at, 0, sizeof(ctx->connected_at));
   }
@@ -1080,7 +1025,6 @@ static void cf_socket_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   cf_socket_close(cf, data);
   CURL_TRC_CF(data, cf, "destroy");
-  Curl_bufq_free(&ctx->recvbuf);
   free(ctx);
   cf->ctx = NULL;
 }
@@ -1468,9 +1412,6 @@ static bool cf_socket_data_pending(struct Curl_cfilter *cf,
   int readable;
 
   (void)data;
-  if(!Curl_bufq_is_empty(&ctx->recvbuf))
-    return TRUE;
-
   readable = SOCKET_READABLE(ctx->sock, 0);
   return (readable > 0 && (readable & CURL_CSELECT_IN));
 }
@@ -1588,13 +1529,9 @@ static ssize_t cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                               char *buf, size_t len, CURLcode *err)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
-  curl_socket_t fdsave;
   ssize_t nread;
 
   *err = CURLE_OK;
-
-  fdsave = cf->conn->sock[cf->sockindex];
-  cf->conn->sock[cf->sockindex] = ctx->sock;
 
 #ifdef DEBUGBUILD
   /* simulate network blocking/partial reads */
@@ -1604,9 +1541,7 @@ static ssize_t cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     if(c >= ((100-ctx->rblock_percent)*256/100)) {
       CURL_TRC_CF(data, cf, "recv(len=%zu) SIMULATE EWOULDBLOCK", len);
       *err = CURLE_AGAIN;
-      nread = -1;
-      cf->conn->sock[cf->sockindex] = fdsave;
-      return nread;
+      return -1;
     }
   }
   if(cf->cft != &Curl_cft_udp && ctx->recv_max && ctx->recv_max < len) {
@@ -1617,54 +1552,44 @@ static ssize_t cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 #endif
 
-  if(ctx->buffer_recv && !Curl_bufq_is_empty(&ctx->recvbuf)) {
-    CURL_TRC_CF(data, cf, "recv from buffer");
-    nread = Curl_bufq_read(&ctx->recvbuf, (unsigned char *)buf, len, err);
-  }
-  else {
-    struct reader_ctx rctx;
+  *err = CURLE_OK;
+  nread = sread(ctx->sock, buf, len);
 
-    rctx.cf = cf;
-    rctx.data = data;
+  if(-1 == nread) {
+    int sockerr = SOCKERRNO;
 
-    /* "small" reads may trigger filling our buffer, "large" reads
-     * are probably not worth the additional copy */
-    if(ctx->buffer_recv && len < NW_SMALL_READS) {
-      ssize_t nwritten;
-      nwritten = Curl_bufq_slurp(&ctx->recvbuf, nw_in_read, &rctx, err);
-      if(nwritten < 0 && !Curl_bufq_is_empty(&ctx->recvbuf)) {
-        /* we have a partial read with an error. need to deliver
-         * what we got, return the error later. */
-        CURL_TRC_CF(data, cf, "partial read: empty buffer first");
-        nread = Curl_bufq_read(&ctx->recvbuf, (unsigned char *)buf, len, err);
-      }
-      else if(nwritten < 0) {
-        nread = -1;
-        goto out;
-      }
-      else if(nwritten == 0) {
-        /* eof */
-        *err = CURLE_OK;
-        nread = 0;
-      }
-      else {
-        CURL_TRC_CF(data, cf, "buffered %zd additional bytes", nwritten);
-        nread = Curl_bufq_read(&ctx->recvbuf, (unsigned char *)buf, len, err);
-      }
+    if(
+#ifdef WSAEWOULDBLOCK
+      /* This is how Windows does it */
+      (WSAEWOULDBLOCK == sockerr)
+#else
+      /* errno may be EWOULDBLOCK or on some systems EAGAIN when it returned
+         due to its inability to send off data without blocking. We therefore
+         treat both error codes the same here */
+      (EWOULDBLOCK == sockerr) || (EAGAIN == sockerr) || (EINTR == sockerr)
+#endif
+      ) {
+      /* this is just a case of EWOULDBLOCK */
+      *err = CURLE_AGAIN;
+      nread = -1;
     }
     else {
-      nread = nw_in_read(&rctx, (unsigned char *)buf, len, err);
+      char buffer[STRERROR_LEN];
+
+      failf(data, "Recv failure: %s",
+            Curl_strerror(sockerr, buffer, sizeof(buffer)));
+      data->state.os_errno = sockerr;
+      *err = CURLE_RECV_ERROR;
+      nread = -1;
     }
   }
 
-out:
   CURL_TRC_CF(data, cf, "recv(len=%zu) -> %d, err=%d", len, (int)nread,
               *err);
   if(nread > 0 && !ctx->got_first_byte) {
     ctx->first_byte_at = Curl_now();
     ctx->got_first_byte = TRUE;
   }
-  cf->conn->sock[cf->sockindex] = fdsave;
   return nread;
 }
 
@@ -1686,11 +1611,6 @@ static void cf_socket_active(struct Curl_cfilter *cf, struct Curl_easy *data)
     cf->conn->bits.ipv6 = (ctx->addr.family == AF_INET6)? TRUE : FALSE;
   #endif
     Curl_persistconninfo(data, cf->conn, &ctx->ip);
-    /* buffering is currently disabled by default because we have stalls
-     * in parallel transfers where not all buffered data is consumed and no
-     * socket events happen.
-     */
-    ctx->buffer_recv = FALSE;
   }
   ctx->active = TRUE;
 }
