@@ -70,10 +70,10 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     false
   fi
   if [ "${SHARED}" = 'ON' ]; then
-    cp -f -p _bld/lib/*.dll _bld/src/
+    PATH="$PWD/_bld/lib:$PATH"
   fi
   if [ "${OPENSSL}" = 'ON' ]; then
-    cp -f -p "${openssl_root}"/*.dll _bld/src/
+    PATH="$PWD/_bld/lib:${openssl_root}:$PATH"
   fi
   curl='_bld/src/curl.exe'
 elif [ "${BUILD_SYSTEM}" = 'VisualStudioSolution' ]; then
@@ -140,7 +140,6 @@ if [[ "${TFLAGS}" != 'skipall' ]] && \
     TFLAGS+=" -ac $(cygpath 'C:/msys64/usr/bin/curl.exe')"
   fi
   if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
-    ls _bld/lib/*.dll >/dev/null 2>&1 && cp -f -p _bld/lib/*.dll _bld/tests/libtest/
     cmake --build _bld --config "${PRJ_CFG}" --target test-ci
   else
     (
