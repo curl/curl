@@ -463,7 +463,7 @@ jobs:
             [ '${{ matrix.config }}' = 'OpenSSL' ]         && options+=" --with-openssl=$(brew --prefix)/opt/openssl"
             [ '${{ matrix.config }}' = 'SecureTransport' ] && options+=' --with-secure-transport'
             CFLAGS+=' -mmacosx-version-min=${{ matrix.macos-version-min }}'
-            # would pick up nghttp2 and libidn2
+            # would pick up nghttp2, libidn2, but libssh2 is disabled by default
             mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
               --disable-dependency-tracking \
               --disable-docs --disable-manual \
@@ -472,7 +472,7 @@ jobs:
           else
             [ '${{ matrix.config }}' = 'OpenSSL' ]         && options+=' -DCURL_USE_OPENSSL=ON'
             [ '${{ matrix.config }}' = 'SecureTransport' ] && options+=' -DCURL_USE_SECTRANSP=ON'
-            # would pick up libssh2
+            # would pick up nghttp2, libidn2, and libssh2
             cmake -B bld -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
               -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.macos-version-min }} \
               "-DCMAKE_IGNORE_PREFIX_PATH=$(brew --prefix)" \
