@@ -49,10 +49,8 @@ Result Variables
   version of ngtcp2.
 #]=======================================================================]
 
-if(UNIX)
-  find_package(PkgConfig QUIET)
-  pkg_search_module(PC_NGTCP2 libngtcp2)
-endif()
+find_package(PkgConfig QUIET)
+pkg_search_module(PC_NGTCP2 libngtcp2)
 
 find_path(NGTCP2_INCLUDE_DIR ngtcp2/ngtcp2.h
   HINTS
@@ -83,9 +81,7 @@ if(NGTCP2_FIND_COMPONENTS)
 
   if(NGTCP2_CRYPTO_BACKEND)
     string(TOLOWER "ngtcp2_crypto_${NGTCP2_CRYPTO_BACKEND}" _crypto_library)
-    if(UNIX)
-      pkg_search_module(PC_${_crypto_library} lib${_crypto_library})
-    endif()
+    pkg_search_module(PC_${_crypto_library} lib${_crypto_library})
     find_library(${_crypto_library}_LIBRARY
       NAMES
         ${_crypto_library}

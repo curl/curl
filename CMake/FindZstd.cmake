@@ -39,10 +39,8 @@ Result Variables
   The libraries needed to use zstd
 #]=======================================================================]
 
-if(UNIX)
-  find_package(PkgConfig QUIET)
-  pkg_search_module(PC_Zstd libzstd)
-endif()
+find_package(PkgConfig QUIET)
+pkg_search_module(PC_Zstd libzstd)
 
 find_path(Zstd_INCLUDE_DIR zstd.h
   HINTS

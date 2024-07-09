@@ -38,10 +38,8 @@ Result Variables
 ``MSH3_LIBRARIES``
   The libraries needed to use msh3
 #]=======================================================================]
-if(UNIX)
-  find_package(PkgConfig QUIET)
-  pkg_search_module(PC_MSH3 libmsh3)
-endif()
+find_package(PkgConfig QUIET)
+pkg_search_module(PC_MSH3 libmsh3)
 
 find_path(MSH3_INCLUDE_DIR msh3.h
   HINTS

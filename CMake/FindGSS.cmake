@@ -51,11 +51,11 @@ set(_GSS_ROOT_HINTS
 
 # try to find library using system pkg-config if user didn't specify root dir
 if(NOT GSS_ROOT_DIR AND NOT "$ENV{GSS_ROOT_DIR}")
-  if(UNIX)
-    find_package(PkgConfig QUIET)
-    pkg_search_module(_GSS_PKG ${_MIT_MODNAME} ${_HEIMDAL_MODNAME})
-    list(APPEND _GSS_ROOT_HINTS "${_GSS_PKG_PREFIX}")
-  elseif(WIN32)
+  find_package(PkgConfig QUIET)
+  pkg_search_module(_GSS_PKG ${_MIT_MODNAME} ${_HEIMDAL_MODNAME})
+  list(APPEND _GSS_ROOT_HINTS "${_GSS_PKG_PREFIX}")
+
+  if(WIN32)
     list(APPEND _GSS_ROOT_HINTS "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MIT\\Kerberos;InstallDir]")
   endif()
 endif()

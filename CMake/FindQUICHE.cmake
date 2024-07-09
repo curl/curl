@@ -38,10 +38,9 @@ Result Variables
 ``QUICHE_LIBRARIES``
   The libraries needed to use quiche
 #]=======================================================================]
-if(UNIX)
-  find_package(PkgConfig QUIET)
-  pkg_search_module(PC_QUICHE quiche)
-endif()
+
+find_package(PkgConfig QUIET)
+pkg_search_module(PC_QUICHE quiche)
 
 find_path(QUICHE_INCLUDE_DIR quiche.h
   HINTS
