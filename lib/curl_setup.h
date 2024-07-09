@@ -306,6 +306,19 @@
 #define CURL_PRINTF(fmt, arg)
 #endif
 
+/* Workaround for mainline llvm v16 and earlier missing a built-in macro
+   expected by macOS SDK v14 / Xcode v15 (2023) and newer.
+   gcc (as of v14) is also missing it. */
+#if defined(__APPLE__) &&                                   \
+  ((!defined(__apple_build_version__) &&                    \
+    defined(__clang__) && __clang_major__ < 17) ||          \
+   (defined(__GNUC__) && __GNUC__ <= 14)) &&                \
+  defined(__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__) && \
+  !defined(__ENVIRONMENT_OS_VERSION_MIN_REQUIRED__)
+#define __ENVIRONMENT_OS_VERSION_MIN_REQUIRED__             \
+  __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
+#endif
+
 /*
  * Use getaddrinfo to resolve the IPv4 address literal. If the current network
  * interface does not support IPv4, but supports IPv6, NAT64, and DNS64,
