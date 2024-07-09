@@ -21,21 +21,41 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+
+if(UNIX)
+  find_package(PkgConfig QUIET)
+  pkg_search_module(PC_NGHTTP2 "libnghttp2")
+endif()
+
+find_path(NGHTTP2_INCLUDE_DIR "nghttp2/nghttp2.h"
+  HINTS
+    ${PC_NGHTTP2_INCLUDEDIR}
+    ${PC_NGHTTP2_INCLUDE_DIRS}
+)
+
+find_library(NGHTTP2_LIBRARY NAMES "nghttp2" "nghttp2_static"
+  HINTS
+    ${PC_NGHTTP2_LIBDIR}
+    ${PC_NGHTTP2_LIBRARY_DIRS}
+)
+
+if(PC_NGHTTP2_VERSION)
+  set(NGHTTP2_VERSION ${PC_NGHTTP2_VERSION})
+endif()
+
 include(FindPackageHandleStandardArgs)
-
-find_path(NGHTTP2_INCLUDE_DIR "nghttp2/nghttp2.h")
-
-find_library(NGHTTP2_LIBRARY NAMES nghttp2 nghttp2_static)
-
 find_package_handle_standard_args(NGHTTP2
   FOUND_VAR
     NGHTTP2_FOUND
   REQUIRED_VARS
     NGHTTP2_LIBRARY
     NGHTTP2_INCLUDE_DIR
+  VERSION_VAR NGHTTP2_VERSION
 )
 
-set(NGHTTP2_INCLUDE_DIRS ${NGHTTP2_INCLUDE_DIR})
-set(NGHTTP2_LIBRARIES ${NGHTTP2_LIBRARY})
+if(NGHTTP2_FOUND)
+  set(NGHTTP2_INCLUDE_DIRS ${NGHTTP2_INCLUDE_DIR})
+  set(NGHTTP2_LIBRARIES    ${NGHTTP2_LIBRARY})
+endif()
 
 mark_as_advanced(NGHTTP2_INCLUDE_DIRS NGHTTP2_LIBRARIES)
