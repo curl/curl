@@ -30,17 +30,7 @@
 
 #include "macos.h"
 
-/* Certain Apple SDK v13.0+ headers are incompatible with the GCC compiler.
-   As a workaround, use a minimal header and define the function we need,
-   to avoid hitting those incompatibilities when compiling with GCC. */
-#if defined(__clang__)
 #include <SystemConfiguration/SCDynamicStoreCopySpecific.h>
-#else
-#include <CoreFoundation/CFDictionary.h>
-typedef const struct CF_BRIDGED_TYPE(id) __SCDynamicStore * SCDynamicStoreRef;
-CFDictionaryRef __nullable
-SCDynamicStoreCopyProxies(SCDynamicStoreRef __nullable store);
-#endif
 
 CURLcode Curl_macos_init(void)
 {

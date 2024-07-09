@@ -40,6 +40,23 @@
 #include <_mingw.h>
 #endif
 
+/* Workaround for Homebrew gcc 12.4.0, 13.3.0, 14.1.0 and newer (as of 14.1.0)
+   that started advertising the `availability` attribute, which then gets used
+   by Apple SDK, but, in a way incompatible with gcc, resulting in a misc
+   errors inside SDK headers, e.g.:
+     error: attributes should be specified before the declarator in a function
+            definition
+     error: expected ',' or '}' before
+   Followed by missing declarations.
+   Fix it by overriding the built-in feature-check macro used by the headers
+   to enable the problematic attributes. This makes the feature check fail. */
+#if defined(__APPLE__) &&                \
+  !defined(__clang__) &&                 \
+  defined(__GNUC__) && __GNUC__ >= 12 && \
+  defined(__has_attribute)
+#define availability curl_invalid
+#endif
+
 /*
  * Disable Visual Studio warnings:
  * 4127 "conditional expression is constant"
