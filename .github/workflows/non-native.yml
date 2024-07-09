@@ -57,7 +57,7 @@ jobs:
           architecture: ${{ matrix.arch }}
           run: |
             # https://pkgsrc.se/
-            sudo pkgin -y install cmake perl brotli heimdal openldap-client libssh2 libidn2 libpsl nghttp2  # python311 py311-impacket
+            sudo pkgin -y install cmake pkg-config perl brotli heimdal openldap-client libssh2 libidn2 libpsl nghttp2  # python311 py311-impacket
             cmake -B bld \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
@@ -68,7 +68,7 @@ jobs:
               -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON -DCURL_USE_GSSAPI=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
             cmake --build bld --config Debug --parallel 3
-            "$(pwd)/bld/src/curl" --disable --version
+            bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               cmake --build bld --config Debug --parallel 3 --target testdeps
               cmake --build bld --config Debug --target test-ci
@@ -102,7 +102,7 @@ jobs:
               -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
             cmake --build bld --config Debug --parallel 3
-            "$(pwd)/bld/src/curl" --disable --version
+            bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               cmake --build bld --config Debug --parallel 3 --target testdeps
               export TFLAGS='-j8 ~3017 ~TFTP'  # FIXME: TFTP requests executed twice? Related: `curl: (69) TFTP: Access Violation`?
@@ -156,7 +156,7 @@ jobs:
           architecture: ${{ matrix.arch }}
           run: |
             # https://ports.freebsd.org/
-            sudo pkg install -y cmake brotli openldap26-client libidn2 libnghttp2 nghttp2 stunnel py39-openssl py39-impacket py39-cryptography
+            sudo pkg install -y cmake pkgconf brotli openldap26-client libidn2 libnghttp2 nghttp2 stunnel py39-openssl py39-impacket py39-cryptography
             cmake -B bld \
               '-DCMAKE_C_COMPILER=${{ matrix.compiler }}' \
               -DCMAKE_UNITY_BUILD=ON \
