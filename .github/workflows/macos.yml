@@ -358,7 +358,7 @@ jobs:
       fail-fast: false
       matrix:
         config: [OpenSSL, SecureTransport]
-        compiler: [gcc-11, gcc-12, gcc-13, gcc-14, llvm, clang]
+        compiler: [gcc-11, gcc-12, gcc-13, gcc-14, llvm@15, clang]
         # Xcode support matrix as of 2024-07, with default macOS SDK versions and OS names, years:
         # macos-12: 13.1, 13.2.1, 13.3.1, 13.4.1, 14.0.1, 14.1, 14.2
         # macos-13:                                       14.1, 14.2, 14.3.1, 15.0.1, 15.1, 15.2
@@ -415,9 +415,9 @@ jobs:
           - { compiler: gcc-14,                                   config: SecureTransport }  # error: attributes should be specified before the declarator in a function definition | # ...
           # llvm v15 + SecureTransport incompatibility (llvm v18 is compatible)
           #   error: use of undeclared identifier 'noErr' / 'SecCertificateCopyLongDescription' / 'SecItemImportExportKeyParameters' / 'SecExternalFormat' / 'SecExternalItemType' / 'SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION'
-          - { compiler: llvm  , image: macos-14, xcode: '15.3'  , config: SecureTransport }
-          - { compiler: llvm  , image: macos-14, xcode: '15.4'  , config: SecureTransport }
-          - { compiler: llvm  , image: macos-14, xcode: '16.0'  , config: SecureTransport }  # as of 16.0 (beta)
+          - { compiler: llvm@15, image: macos-14, xcode: '15.3', config: SecureTransport }
+          - { compiler: llvm@15, image: macos-14, xcode: '15.4', config: SecureTransport }
+          - { compiler: llvm@15, image: macos-14, xcode: '16.0', config: SecureTransport }  # as of 16.0 (beta)
           # gcc + Xcode 16.0 / SDK 15.0 (beta) incompatibility
           #   [...]/gcc/14.1.0_1/lib/gcc/current/gcc/aarch64-apple-darwin23/14/include-fixed/stdio.h:83:8: error: unknown type name 'FILE'
           # - autotools (in configure): https://github.com/curl/curl/actions/runs/9845429518/job/27180999475#step:7:169
@@ -437,7 +437,7 @@ jobs:
 
       - name: 'toolchain versions'
         run: |
-          [ '${{ matrix.compiler }}' = 'llvm' ] && CC="$(brew --prefix llvm@15)/bin/clang"
+          [[ '${{ matrix.compiler }}' = 'llvm'* ]] && CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
           which "${CC}"; "${CC}" --version || true
           xcodebuild -version || true
           xcrun -sdk macosx --show-sdk-path 2>/dev/null || true
@@ -449,10 +449,10 @@ jobs:
 
       - name: 'configure / ${{ matrix.build }}'
         run: |
-          [ '${{ matrix.compiler }}' = 'llvm' ] && CC="$(brew --prefix llvm@15)/bin/clang"
+          [[ '${{ matrix.compiler }}' = 'llvm'* ]] && CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
           if [ '${{ matrix.build }}' = 'autotools' ]; then
             export CFLAGS
-            if [ '${{ matrix.compiler }}' = 'llvm' ]; then
+            if [[ '${{ matrix.compiler }}' = 'llvm'* ]]; then
               options+=" --target=$(uname -m)-apple-darwin"
               CC+=" --target=$(uname -m)-apple-darwin"
             fi
