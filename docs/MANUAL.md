@@ -309,7 +309,8 @@ Post a simple `name` and `phone` guestbook.
 
 Or automatically [URL encode the data](https://everything.curl.dev/http/post/url-encode).
 
-    curl --data-urlencode "name=Rafael Sagula&phone=3320780" http://www.example.com/guest.cgi
+    curl --data-urlencode "name=Rafael Sagula&phone=3320780"
+      http://www.example.com/guest.cgi
 
 How to post a form with curl, lesson #1:
 
@@ -343,7 +344,8 @@ We want to enter user `foobar` with password `12345`.
 
 To post to this, you would enter a curl command line like:
 
-    curl -d "user=foobar&pass=12345&id=blablabla&ding=submit" http://example.com/post.cgi
+    curl -d "user=foobar&pass=12345&id=blablabla&ding=submit"
+      http://example.com/post.cgi
 
 While `-d` uses the application/x-www-form-urlencoded mime-type, generally
 understood by CGI's and similar, curl also supports the more capable
