@@ -38,6 +38,9 @@
 #ifdef HAVE_NETINET_UDP_H
 #include <netinet/udp.h>
 #endif
+#ifdef HAVE_NETINET_QUIC_H
+#include <netinet/quic.h>
+#endif
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
@@ -326,6 +329,12 @@ void Curl_sock_assign_addr(struct Curl_sockaddr_ex *dest,
     dest->socktype = SOCK_STREAM;
     dest->protocol = IPPROTO_TCP;
     break;
+#ifdef USE_LINUX_QUIC
+  case TRNSPRT_QUIC:
+    dest->socktype = SOCK_STREAM;
+    dest->protocol = IPPROTO_QUIC;
+    break;
+#endif
   case TRNSPRT_UNIX:
     dest->socktype = SOCK_STREAM;
     dest->protocol = IPPROTO_IP;
@@ -1155,6 +1164,10 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
   is_tcp = (ctx->addr.family == AF_INET) &&
            ctx->addr.socktype == SOCK_STREAM;
 #endif
+#ifdef USE_LINUX_QUIC
+  if(ctx->addr.protocol == IPPROTO_QUIC)
+    is_tcp = 0;
+#endif
   if(is_tcp && data->set.tcp_nodelay)
     tcpnodelay(data, ctx->sock);
 
@@ -1940,6 +1953,149 @@ out:
   return result;
 }
 
+#ifdef USE_LINUX_QUIC
+static CURLcode cf_quic_connect(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
+                                bool blocking, bool *done)
+{
+  struct cf_socket_ctx *ctx = cf->ctx;
+  CURLcode result = CURLE_COULDNT_CONNECT;
+  int rc = 0;
+
+  (void)data;
+  if(cf->connected) {
+    *done = TRUE;
+    return CURLE_OK;
+  }
+
+  /* TODO: need to support blocking connect? */
+  if(blocking)
+    return CURLE_UNSUPPORTED_PROTOCOL;
+
+  *done = FALSE; /* a very negative world view is best */
+  if(ctx->sock == CURL_SOCKET_BAD) {
+
+    result = cf_socket_open(cf, data);
+    if(result)
+      goto out;
+
+    if(cf->connected) {
+      *done = TRUE;
+      return CURLE_OK;
+    }
+
+    /* Connect QUIC socket */
+    rc = connect(ctx->sock, &ctx->addr.sa_addr,
+                 (curl_socklen_t)ctx->addr.addrlen);
+    set_local_ip(cf, data);
+    CURL_TRC_CF(data, cf, "local address %s port %d...",
+                ctx->ip.local_ip, ctx->ip.local_port);
+    if(rc == -1) {
+      result = socket_connect_result(data, ctx->ip.remote_ip, SOCKERRNO);
+      goto out;
+    }
+  }
+
+  /* check socket for connect */
+  rc = SOCKET_WRITABLE(ctx->sock, 0);
+
+  if(rc == 0) { /* no connection yet */
+    CURL_TRC_CF(data, cf, "not connected yet");
+    return CURLE_OK;
+  }
+  else if(rc == CURL_CSELECT_OUT) {
+    if(verifyconnect(ctx->sock, &ctx->error)) {
+      /* we are connected with TCP, awesome! */
+      ctx->connected_at = Curl_now();
+      set_local_ip(cf, data);
+      *done = TRUE;
+      cf->connected = TRUE;
+      CURL_TRC_CF(data, cf, "connected");
+      return CURLE_OK;
+    }
+  }
+  else if(rc & CURL_CSELECT_ERR) {
+    (void)verifyconnect(ctx->sock, &ctx->error);
+    result = CURLE_COULDNT_CONNECT;
+  }
+
+out:
+  if(result) {
+    if(ctx->error) {
+      set_local_ip(cf, data);
+      data->state.os_errno = ctx->error;
+      SET_SOCKERRNO(ctx->error);
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+      {
+        char buffer[STRERROR_LEN];
+        infof(data, "connect to %s port %u from %s port %d failed: %s",
+              ctx->ip.remote_ip, ctx->ip.remote_port,
+              ctx->ip.local_ip, ctx->ip.local_port,
+              Curl_strerror(ctx->error, buffer, sizeof(buffer)));
+      }
+#endif
+    }
+    if(ctx->sock != CURL_SOCKET_BAD) {
+      socket_close(data, cf->conn, TRUE, ctx->sock);
+      ctx->sock = CURL_SOCKET_BAD;
+    }
+    *done = FALSE;
+  }
+  return result;
+}
+
+struct Curl_cftype Curl_cft_quic = {
+  "QUIC",
+  CF_TYPE_IP_CONNECT,
+  CURL_LOG_LVL_NONE,
+  cf_socket_destroy,
+  cf_quic_connect,
+  cf_socket_close,
+  cf_socket_shutdown,
+  cf_socket_get_host,
+  cf_socket_adjust_pollset,
+  cf_socket_data_pending,
+  cf_socket_send,
+  cf_socket_recv,
+  cf_socket_cntrl,
+  cf_socket_conn_is_alive,
+  Curl_cf_def_conn_keep_alive,
+  cf_socket_query,
+};
+
+CURLcode Curl_cf_quic_sock_create(struct Curl_cfilter **pcf,
+                                  struct Curl_easy *data,
+                                  struct connectdata *conn,
+                                  const struct Curl_addrinfo *ai,
+                                  int transport)
+{
+  struct cf_socket_ctx *ctx = NULL;
+  struct Curl_cfilter *cf = NULL;
+  CURLcode result;
+
+  (void)data;
+  (void)conn;
+  DEBUGASSERT(transport == TRNSPRT_QUIC);
+  ctx = calloc(1, sizeof(*ctx));
+  if(!ctx) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+  cf_socket_ctx_init(ctx, ai, transport);
+
+  result = Curl_cf_create(&cf, &Curl_cft_quic, ctx);
+
+out:
+  *pcf = (!result)? cf : NULL;
+  if(result) {
+    Curl_safefree(cf);
+    Curl_safefree(ctx);
+  }
+
+  return result;
+}
+#endif
+
 /* this is the TCP filter which can also handle this case */
 struct Curl_cftype Curl_cft_unix = {
   "UNIX",
@@ -2135,6 +2291,9 @@ static bool cf_is_socket(struct Curl_cfilter *cf)
   return cf && (cf->cft == &Curl_cft_tcp ||
                 cf->cft == &Curl_cft_udp ||
                 cf->cft == &Curl_cft_unix ||
+#ifdef USE_LINUX_QUIC
+                cf->cft == &Curl_cft_quic ||
+#endif
                 cf->cft == &Curl_cft_tcp_accept);
 }
 

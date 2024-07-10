@@ -886,7 +886,36 @@ if(USE_OPENSSL_QUIC)
   list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libnghttp3")
 endif()
 
-if(CURL_WITH_MULTI_SSL AND (USE_NGTCP2 OR USE_QUICHE OR USE_MSH3 OR USE_OPENSSL_QUIC))
+option(USE_LINUX_QUIC "Use Linux Socket QUIC and nghttp3 library for HTTP/3 support" OFF)
+if(USE_LINUX_QUIC)
+  if(USE_NGTCP2 OR USE_QUICHE OR USE_MSH3 OR USE_OPENSSL_QUIC)
+    message(FATAL_ERROR "Only one HTTP/3 backend can be selected!")
+  endif()
+  set(USE_LINUX_QUIC ON)
+
+  if(CURL_USE_GNUTLS)
+    find_package(LIBQUIC REQUIRED)
+    set(USE_LIBQUIC ON)
+    list(APPEND CURL_LIBS ${LIBQUIC_LIBRARIES})
+    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libquic")
+  else()
+    message(FATAL_ERROR "Linux quic requires gnutls for libquic!")
+  endif()
+
+  find_package(NGHTTP3 REQUIRED)
+  set(USE_NGHTTP3 ON)
+  include_directories(${NGHTTP3_INCLUDE_DIRS})
+  list(APPEND CURL_LIBS ${NGHTTP3_LIBRARIES})
+  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libnghttp3")
+endif()
+
+if(USE_MBEDTLS OR
+   USE_BEARSSL OR
+   USE_SECTRANSP)
+  message(WARNING "A selected TLS library does not support TLS 1.3.")
+endif()
+
+if(CURL_WITH_MULTI_SSL AND (USE_NGTCP2 OR USE_QUICHE OR USE_MSH3 OR USE_OPENSSL_QUIC OR USE_LINUX_QUIC))
   message(FATAL_ERROR "MultiSSL cannot be enabled with HTTP/3 and vice versa.")
 endif()
 
@@ -1389,7 +1418,9 @@ check_include_file_concat("netdb.h"          HAVE_NETDB_H)
 check_include_file_concat("netinet/in.h"     HAVE_NETINET_IN_H)
 check_include_file_concat("netinet/tcp.h"    HAVE_NETINET_TCP_H)
 check_include_file_concat("netinet/udp.h"    HAVE_NETINET_UDP_H)
+check_include_file_concat("netinet/quic.h"   HAVE_NETINET_QUIC_H)
 check_include_file("linux/tcp.h"      HAVE_LINUX_TCP_H)
+check_include_file("linux/quic.h"     HAVE_LINUX_QUIC_H)
 
 check_include_file_concat("poll.h"           HAVE_POLL_H)
 check_include_file_concat("pwd.h"            HAVE_PWD_H)
@@ -1884,7 +1915,7 @@ if(NOT CURL_DISABLE_INSTALL)
                           (_use_curl_ntlm_core OR USE_WINDOWS_SSPI))
   _add_if("TLS-SRP"       USE_TLS_SRP)
   _add_if("HTTP2"         USE_NGHTTP2)
-  _add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE OR USE_OPENSSL_QUIC)
+  _add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE OR USE_OPENSSL_QUIC OR USE_LINUX_QUIC)
   _add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
   _add_if("HTTPS-proxy"   _ssl_enabled AND (USE_OPENSSL OR USE_GNUTLS
                           OR USE_SCHANNEL OR USE_RUSTLS OR USE_BEARSSL OR
