@@ -63,7 +63,7 @@ jobs:
     runs-on: 'macos-latest'
     timeout-minutes: 60
     env:
-      DEVELOPER_DIR: /Applications/Xcode${{ matrix.xcode && format('_{0}', matrix.xcode) || '' }}.app/Contents/Developer
+      DEVELOPER_DIR: "/Applications/Xcode${{ matrix.xcode && format('_{0}', matrix.xcode) || '' }}.app/Contents/Developer"
       CC: ${{ matrix.compiler }}
       CFLAGS: '-mmacosx-version-min=${{ matrix.macos-version-min }}'
     strategy:
@@ -273,7 +273,7 @@ jobs:
     runs-on: 'macos-latest'
     timeout-minutes: 10
     env:
-      DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
+      DEVELOPER_DIR: "/Applications/Xcode${{ matrix.xcode && format('_{0}', matrix.xcode) || '' }}.app/Contents/Developer"
       CC: ${{ matrix.compiler }}
     strategy:
       fail-fast: false
@@ -353,17 +353,16 @@ jobs:
         run: bld/src/curl --disable --version
 
   combinations:
-    if: true  # Set to `true` to enable this test matrix. It runs fairly quickly.
     name: "${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }} ${{ matrix.image }} ${{ matrix.xcode }} ${{ matrix.config }}"
     runs-on: ${{ matrix.image }}
     timeout-minutes: 30
     env:
-      DEVELOPER_DIR: /Applications/Xcode_${{ matrix.xcode }}.app/Contents/Developer
+      DEVELOPER_DIR: "/Applications/Xcode${{ matrix.xcode && format('_{0}', matrix.xcode) || '' }}.app/Contents/Developer"
       CC: ${{ matrix.compiler }}
     strategy:
       fail-fast: false
       matrix:
-        config: [OpenSSL, SecureTransport]
+        config: [SecureTransport]  # also: OpenSSL
         compiler: [gcc-11, gcc-12, gcc-13, gcc-14, llvm@15, clang]
         # Xcode support matrix as of 2024-07, with default macOS SDK versions and OS names, years:
         # * = default Xcode on the runner.
@@ -375,10 +374,15 @@ jobs:
         # https://github.com/actions/runner-images/tree/main/images/macos
         # https://en.wikipedia.org/wiki/MacOS_version_history
         image: [macos-12, macos-13, macos-14]
-        # '15.1' has the same default macOS SDK as '15.2' and identical test results, so skip it.
-        # '14.0.1' has the same default macOS SDK as '13.4.1' and identical test results, so skip it.
-        # '14.2', '15.0.1', '15.4' but not revealing new fallouts, skip it to reduce jobs.
-        xcode: ['13.4.1', '14.1', '14.3.1', '15.2', '15.3', '16.0']
+        # Can skip these to reduce jobs:
+        #   13.1, 13.2.1 are fairly old.
+        #   13.3.1, 14.0.1 have the same default macOS SDK as 13.4.1 and identical test results.
+        #   15.1 has the same default macOS SDK as 15.2 and identical test result.
+        #   14.1, 15.4 not revealing new fallouts.
+        #xcode: ['13.1', '13.2.1', '13.3.1', '13.4.1', '14.0.1', '14.1', '14.2', '14.3.1', '15.0.1', '15.1', '15.2', '15.3', '15.4', '16.0']  # all Xcode
+        #xcode: ['13.1', '13.2.1', '13.4.1', '14.1', '14.2', '14.3.1', '15.0.1', '15.2', '15.3', '15.4', '16.0']  # all SDK
+        #xcode: ['']  # default Xcodes
+        xcode: ['13.4.1', '14.2', '14.3.1', '15.0.1', '15.2', '15.3', '16.0']  # coverage
         macos-version-min: ['10.8']
         build: [autotools, cmake]
         exclude:
@@ -390,15 +394,25 @@ jobs:
           - { image: macos-12, xcode: '15.3'   }
           - { image: macos-12, xcode: '15.4'   }
           - { image: macos-12, xcode: '16.0'   }
+          - { image: macos-13, xcode: '13.1'   }
+          - { image: macos-13, xcode: '13.2.1' }
+          - { image: macos-13, xcode: '13.3.1' }
           - { image: macos-13, xcode: '13.4.1' }
           - { image: macos-13, xcode: '14.0.1' }
           - { image: macos-13, xcode: '15.3'   }
           - { image: macos-13, xcode: '15.4'   }
           - { image: macos-13, xcode: '16.0'   }
+          - { image: macos-14, xcode: '13.1'   }
+          - { image: macos-14, xcode: '13.2.1' }
+          - { image: macos-14, xcode: '13.3.1' }
           - { image: macos-14, xcode: '13.4.1' }
           - { image: macos-14, xcode: '14.0.1' }
           - { image: macos-14, xcode: '14.1'   }
           - { image: macos-14, xcode: '14.2'   }
+          # Reduce build combinations,
+          # these jobs are either covered by gcc-11 or gcc-14:
+          - { compiler: gcc-12, config: SecureTransport }
+          - { compiler: gcc-13, config: SecureTransport }
     steps:
       - name: 'install autotools'
         if: ${{ matrix.build == 'autotools' }}
