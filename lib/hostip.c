@@ -537,6 +537,7 @@ static struct Curl_addrinfo *get_localhost6(int port, const char *name)
   sa6.sin6_flowinfo = 0;
   sa6.sin6_scope_id = 0;
   if(Curl_inet_pton(AF_INET6, "::1", ipv6) < 1)
+    free(ca);
     return NULL;
   memcpy(&sa6.sin6_addr, ipv6, sizeof(ipv6));
 
