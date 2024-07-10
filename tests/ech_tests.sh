@@ -68,7 +68,8 @@ declare -A ech_targets=(
     [draft-13.esni.defo.ie:12414]=""
     [crypto.cloudflare.com]="cdn-cgi/trace"
     [tls-ech.dev]=""
-    [epochbelt.com]=""
+    # this one's gone away for now (possibly temporarily)
+    # [epochbelt.com]=""
 )
 
 # Targets we expect not to be ECH-enabled servers
@@ -102,7 +103,7 @@ declare -A neither_targets=(
 : "${tout:=10s}"
 
 # Where we find OpenSSL .so's
-: "${OSSL:=$HOME/code/openssl}"
+: "${OSSL:=$HOME/code/openssl-local-inst}"
 
 # Where we find WolfSSL .so's
 : "${WSSL:=$HOME/code/wolfssl/inst/lib}"
@@ -410,6 +411,11 @@ then
         if [[ "$port" != "443" && "$have_portsblocked" == "yes" ]]
         then
             echo "Skipping $targ as ports != 443 seem blocked"
+            continue
+        fi
+        if [[ "$host" == "crypto.cloudflare.com" ]]
+        then
+            echo "Skipping $host as they've blocked PN override"
             continue
         fi
         path=${ech_targets[$targ]}

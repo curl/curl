@@ -473,7 +473,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
     result = dohprobe(data, &dohp->probe[DOH_PROBE_SLOT_HTTPS],
                       DNS_TYPE_HTTPS, qname, data->set.str[STRING_DOH],
                       data->multi, dohp->headers);
-    free(qname);
+    Curl_safefree(qname);
     if(result)
       goto error;
     dohp->pending++;
@@ -1028,7 +1028,7 @@ UNITTEST void de_cleanup(struct dohentry *d)
   }
 #ifdef USE_HTTPSRR
   for(i = 0; i < d->numhttps_rrs; i++)
-    free(d->https_rrs[i].val);
+    Curl_safefree(d->https_rrs[i].val);
 #endif
 }
 
@@ -1217,18 +1217,24 @@ static CURLcode Curl_doh_decode_httpsrr(unsigned char *rrval, size_t len,
     if(pcode == HTTPS_RR_CODE_NO_DEF_ALPN)
       lhrr->no_def_alpn = TRUE;
     else if(pcode == HTTPS_RR_CODE_IPV4) {
+      if(!plen)
+        goto err;
       lhrr->ipv4hints = Curl_memdup(cp, plen);
       if(!lhrr->ipv4hints)
         goto err;
       lhrr->ipv4hints_len = (size_t)plen;
     }
     else if(pcode == HTTPS_RR_CODE_ECH) {
+      if(!plen)
+        goto err;
       lhrr->echconfiglist = Curl_memdup(cp, plen);
       if(!lhrr->echconfiglist)
         goto err;
       lhrr->echconfiglist_len = (size_t)plen;
     }
     else if(pcode == HTTPS_RR_CODE_IPV6) {
+      if(!plen)
+        goto err;
       lhrr->ipv6hints = Curl_memdup(cp, plen);
       if(!lhrr->ipv6hints)
         goto err;
@@ -1244,10 +1250,11 @@ static CURLcode Curl_doh_decode_httpsrr(unsigned char *rrval, size_t len,
   return CURLE_OK;
 err:
   if(lhrr) {
-    free(lhrr->target);
-    free(lhrr->echconfiglist);
-    free(lhrr->val);
-    free(lhrr);
+    Curl_safefree(lhrr->target);
+    Curl_safefree(lhrr->echconfiglist);
+    Curl_safefree(lhrr->val);
+    Curl_safefree(lhrr->alpns);
+    Curl_safefree(lhrr);
   }
   return CURLE_OUT_OF_MEMORY;
 }
