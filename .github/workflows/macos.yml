@@ -262,7 +262,7 @@ jobs:
 
       - name: 'run tests'
         env:
-          TFLAGS: '${{ matrix.tflags }} -j5 ~1452'
+          TFLAGS: '${{ matrix.tflags }} -j10 ~1452'
         run: make -C bld V=1 test-ci
 
   cmake:
