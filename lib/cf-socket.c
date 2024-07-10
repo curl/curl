@@ -1571,7 +1571,6 @@ static ssize_t cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       ) {
       /* this is just a case of EWOULDBLOCK */
       *err = CURLE_AGAIN;
-      nread = -1;
     }
     else {
       char buffer[STRERROR_LEN];
@@ -1580,7 +1579,6 @@ static ssize_t cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
             Curl_strerror(sockerr, buffer, sizeof(buffer)));
       data->state.os_errno = sockerr;
       *err = CURLE_RECV_ERROR;
-      nread = -1;
     }
   }
 
