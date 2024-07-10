@@ -177,6 +177,7 @@ my %opts = (
     '--krb4' => 6,
     '--ftp-ssl' => 6,
     '--ftp-ssl-reqd' => 6,
+    '--include' => 6,
 
     # for tests and debug only, can remain hidden
     '--test-event' => 6,
