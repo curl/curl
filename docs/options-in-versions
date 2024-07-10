@@ -100,7 +100,6 @@
 --ignore-content-length              7.14.1
 --ip-tos                             8.9.0
 --ipfs-gateway                       8.4.0
---include (-i)                       4.8
 --insecure (-k)                      7.10
 --interface                          7.3
 --ipv4 (-4)                          7.10.8
@@ -216,6 +215,7 @@
 --sasl-ir                            7.31.0
 --service-name                       7.43.0
 --show-error (-S)                    5.9
+--show-headers (-i)                  4.8
 --silent (-s)                        4.0
 --socks4                             7.15.2
 --socks4a                            7.18.0
