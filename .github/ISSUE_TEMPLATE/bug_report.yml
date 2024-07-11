@@ -2,8 +2,8 @@
 #
 # SPDX-License-Identifier: curl
 
-name: Bug Report
-description: Create a report to help us improve
+name: Bug Report on code
+description: Tell us about your problem with curl or libcurl
 
 body:
   - type: markdown
