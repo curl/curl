@@ -103,7 +103,7 @@
 /*
  * Availability note:
  * The TLS 1.3 secret callback (wolfSSL_set_tls13_secret_cb) was added in
- * WolfSSL 4.4.0, but requires the -DHAVE_SECRET_CALLBACK build option. If that
+ * wolfSSL 4.4.0, but requires the -DHAVE_SECRET_CALLBACK build option. If that
  * option is not set, then TLS 1.3 will not be logged.
  * For TLS 1.2 and before, we use wolfSSL_get_keys().
  * SSL_get_client_random and wolfSSL_get_keys require OPENSSL_EXTRA
@@ -913,7 +913,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     int trying_ech_now = 0;
 
     if(data->set.str[STRING_ECH_PUBLIC]) {
-      infof(data, "ECH: outername not (yet) supported with WolfSSL");
+      infof(data, "ECH: outername not (yet) supported with wolfSSL");
       return CURLE_SSL_CONNECT_ERROR;
     }
     if(data->set.tls_ech == CURLECH_GREASE) {

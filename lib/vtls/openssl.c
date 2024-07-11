@@ -3901,7 +3901,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
     }
 # ifdef OPENSSL_IS_BORINGSSL
     if(trying_ech_now && outername) {
-      infof(data, "ECH: setting public_name not supported with boringssl");
+      infof(data, "ECH: setting public_name not supported with BoringSSL");
       return CURLE_SSL_CONNECT_ERROR;
     }
 # else
@@ -3989,7 +3989,7 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
   /* with OpenSSL v1.1.1 we get an alternative to SSL_set_bio() that works
    * without backward compat quirks. Every call takes one reference, so we
    * up it and pass. SSL* then owns it and will free.
-   * We check on the function in configure, since libressl and friends
+   * We check on the function in configure, since LibreSSL and friends
    * each have their own versions to add support for this. */
   BIO_up_ref(bio);
   SSL_set0_rbio(octx->ssl, bio);

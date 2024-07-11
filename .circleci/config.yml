@@ -159,7 +159,7 @@ commands:
     steps:
       - run:
           command: |
-            # Drop libressl as long as we're not trying to build it
+            # Drop LibreSSL as long as we're not trying to build it
             echo libtool autoconf automake pkg-config nghttp2 libssh2 openssl libssh c-ares libpsl icu4c | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
             while [ $? -eq 0 ]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
             sudo python3 -m pip install impacket

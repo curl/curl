@@ -68,7 +68,7 @@ int main(void)
 
 # AVAILABILITY
 
-Added in 7.5. Only set by the OpenSSL/libressl/boringssl and GnuTLS backends.
+Added in 7.5. Only set by the OpenSSL/LibreSSL/BoringSSL and GnuTLS backends.
 
 # RETURN VALUE
 
