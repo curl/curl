@@ -126,7 +126,7 @@ jobs:
         uses: cross-platform-actions/action@cdc9ee69ef84a5f2e59c9058335d9c57bcb4ac86 # v0.25.0
         with:
           operating_system: 'freebsd'
-          version: '14.0'
+          version: '14.1'
           architecture: ${{ matrix.arch }}
           run: |
             # https://ports.freebsd.org/
@@ -152,7 +152,7 @@ jobs:
         uses: cross-platform-actions/action@cdc9ee69ef84a5f2e59c9058335d9c57bcb4ac86 # v0.25.0
         with:
           operating_system: 'freebsd'
-          version: '14.0'
+          version: '14.1'
           architecture: ${{ matrix.arch }}
           run: |
             # https://ports.freebsd.org/
