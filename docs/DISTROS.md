@@ -19,7 +19,7 @@ archives](https://curl.se/mail/list.cgi?list=curl-distros)).
 
 ## AlmaLinux
 
-- curl package source and patches: curl package source and patches
+- curl package source and patches: https://git.almalinux.org/rpms/curl/
 - curl issues: https://bugs.almalinux.org/view_all_bug_page.php click Category and choose curl
 - curl security: https://errata.almalinux.org/ search for curl
 
