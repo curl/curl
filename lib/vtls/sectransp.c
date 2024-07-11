@@ -41,11 +41,6 @@
 #include "strerror.h"
 #include "cipher_suite.h"
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wtautological-pointer-compare"
-#endif /* __clang__ */
-
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Waddress"
@@ -2919,10 +2914,6 @@ const struct Curl_ssl Curl_ssl_sectransp = {
 
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
-#endif
-
-#ifdef __clang__
-#pragma clang diagnostic pop
 #endif
 
 #endif /* USE_SECTRANSP */
