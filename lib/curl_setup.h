@@ -57,6 +57,26 @@
 #define availability curl_pp_attribute_disabled
 #endif
 
+#if defined(__APPLE__)
+#include <sys/types.h>
+#include <TargetConditionals.h>
+/* Fixup faulty target macro initialization in macOS SDK since v14.4 (as of
+   15.0 beta). The SDK target detection in `TargetConditionals.h` correctly
+   detects macOS, but fails to set the macro's old name `TARGET_OS_OSX`, then
+   continues to set it to a default value of 0. Other parts of the SDK still
+   rely on the old name, and with this inconsistency our builds fail due to
+   missing declarations. It happens when using mainline llvm older than v18.
+   Later versions fixed it by predefining these target macros, avoiding the
+   faulty dynamic detection. gcc is not affected (for now) because it lacks
+   the necessary dynamic detection features, so the SDK falls back to
+   a codepath that sets both the old and new macro to 1. */
+#if defined(TARGET_OS_MAC) && TARGET_OS_MAC && \
+  defined(TARGET_OS_OSX) && !TARGET_OS_OSX
+#undef TARGET_OS_OSX
+#define TARGET_OS_OSX TARGET_OS_MAC
+#endif
+#endif
+
 /*
  * Disable Visual Studio warnings:
  * 4127 "conditional expression is constant"
@@ -342,7 +362,6 @@
  * performing this task will result in a synthesized IPv6 address.
  */
 #if defined(__APPLE__) && !defined(USE_ARES)
-#include <TargetConditionals.h>
 #define USE_RESOLVE_ON_IPS 1
 #  if TARGET_OS_MAC && !(defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE) && \
      defined(USE_IPV6)
