@@ -39,8 +39,7 @@ The following information can be extracted:
 
 ## CURLINFO_ACTIVESOCKET
 
-The session's active socket.
-See CURLINFO_ACTIVESOCKET(3)
+The session's active socket. See CURLINFO_ACTIVESOCKET(3)
 
 ## CURLINFO_APPCONNECT_TIME
 
@@ -110,8 +109,7 @@ curl_easy_header(3) instead. See CURLINFO_CONTENT_TYPE(3)
 
 ## CURLINFO_COOKIELIST
 
-List of all known cookies.
-See CURLINFO_COOKIELIST(3)
+List of all known cookies. See CURLINFO_COOKIELIST(3)
 
 ## CURLINFO_EFFECTIVE_METHOD
 
@@ -179,8 +177,7 @@ See CURLINFO_NUM_CONNECTS(3)
 
 ## CURLINFO_OS_ERRNO
 
-The errno from the last failure to connect.
-See CURLINFO_OS_ERRNO(3)
+The errno from the last failure to connect. See CURLINFO_OS_ERRNO(3)
 
 ## CURLINFO_PRETRANSFER_TIME
 
@@ -233,8 +230,7 @@ CURLINFO_QUEUE_TIME_T(3)
 
 ## CURLINFO_REDIRECT_COUNT
 
-Total number of redirects that were followed.
-See CURLINFO_REDIRECT_COUNT(3)
+Total number of redirects that were followed. See CURLINFO_REDIRECT_COUNT(3)
 
 ## CURLINFO_REDIRECT_TIME
 
