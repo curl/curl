@@ -54,7 +54,7 @@
   !defined(__clang__) &&                 \
   defined(__GNUC__) && __GNUC__ >= 12 && \
   defined(__has_attribute)
-#define availability curl_invalid
+#define availability curl_pp_attribute_disabled
 #endif
 
 /*
