@@ -225,6 +225,7 @@ jobs:
           which "${CC}"; "${CC}" --version || true
           xcodebuild -version || true
           xcrun -sdk macosx --show-sdk-path 2>/dev/null || true
+          "${CC}" -dM -E - < /dev/null | sort || true
           ls -l "$(brew --prefix)/opt"
 
       - name: 'autoreconf'
@@ -325,6 +326,7 @@ jobs:
           which "${CC}"; "${CC}" --version || true
           xcodebuild -version || true
           xcrun -sdk macosx --show-sdk-path 2>/dev/null || true
+          "${CC}" -dM -E - < /dev/null | sort || true
           ls -l "$(brew --prefix)/opt"
 
       - name: 'cmake configure'
@@ -414,6 +416,7 @@ jobs:
           which "${CC}"; "${CC}" --version || true
           xcodebuild -version || true
           xcrun -sdk macosx --show-sdk-path 2>/dev/null || true
+          "${CC}" -dM -E - < /dev/null | sort || true
           ls -l "$(brew --prefix)/opt"
 
       - name: 'autoreconf'
