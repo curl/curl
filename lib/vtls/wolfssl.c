@@ -1745,7 +1745,7 @@ static void *wolfssl_get_internals(struct ssl_connect_data *connssl,
 }
 
 const struct Curl_ssl Curl_ssl_wolfssl = {
-  { CURLSSLBACKEND_WOLFSSL, "wolfSSL" }, /* info */
+  { CURLSSLBACKEND_WOLFSSL, "wolfssl" }, /* info */
 
 #ifdef KEEP_PEER_CERT
   SSLSUPP_PINNEDPUBKEY |
