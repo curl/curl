@@ -272,7 +272,7 @@ struct ssl_peer {
   char *sni;             /* SNI version of hostname or NULL if not usable */
   ssl_peer_type type;    /* type of the peer information */
   int port;              /* port we are talking to */
-  int transport;         /* TCP or QUIC */
+  int transport;         /* one of TRNSPRT_* defines */
 };
 
 struct ssl_primary_config {

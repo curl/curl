@@ -1571,69 +1571,70 @@ CURLcode Curl_ssl_peer_init(struct ssl_peer *peer, struct Curl_cfilter *cf,
                             int transport)
 {
   const char *ehostname, *edispname;
-  int eport;
+  CURLcode result = CURLE_OUT_OF_MEMORY;
 
+  /* We expect a clean struct, e.g. called only ONCE */
+  DEBUGASSERT(peer);
+  DEBUGASSERT(!peer->hostname);
+  DEBUGASSERT(!peer->dispname);
+  DEBUGASSERT(!peer->sni);
   /* We need the hostname for SNI negotiation. Once handshaked, this remains
    * the SNI hostname for the TLS connection. When the connection is reused,
    * the settings in cf->conn might change. We keep a copy of the hostname we
    * use for SNI.
    */
+  peer->transport = transport;
 #ifndef CURL_DISABLE_PROXY
   if(Curl_ssl_cf_is_proxy(cf)) {
     ehostname = cf->conn->http_proxy.host.name;
     edispname = cf->conn->http_proxy.host.dispname;
-    eport = cf->conn->http_proxy.port;
+    peer->port = cf->conn->http_proxy.port;
   }
   else
 #endif
   {
     ehostname = cf->conn->host.name;
     edispname = cf->conn->host.dispname;
-    eport = cf->conn->remote_port;
+    peer->port = cf->conn->remote_port;
   }
 
-  /* change if ehostname changed */
-  DEBUGASSERT(!ehostname || ehostname[0]);
-  if(ehostname && (!peer->hostname
-                   || strcmp(ehostname, peer->hostname))) {
+  /* hostname MUST exist and not be empty */
+  if(!ehostname || !ehostname[0]) {
+    result = CURLE_FAILED_INIT;
+    goto out;
+  }
+
+  peer->hostname = strdup(ehostname);
+  if(!peer->hostname)
+    goto out;
+  if(!edispname || !strcmp(ehostname, edispname))
+    peer->dispname = peer->hostname;
+  else {
+    peer->dispname = strdup(edispname);
+    if(!peer->dispname)
+      goto out;
+  }
+  peer->type = get_peer_type(peer->hostname);
+  if(peer->type == CURL_SSL_PEER_DNS) {
+    /* not an IP address, normalize according to RCC 6066 ch. 3,
+     * max len of SNI is 2^16-1, no trailing dot */
+    size_t len = strlen(peer->hostname);
+    if(len && (peer->hostname[len-1] == '.'))
+      len--;
+    if(len < USHRT_MAX) {
+      peer->sni = calloc(1, len + 1);
+      if(!peer->sni)
+        goto out;
+      Curl_strntolower(peer->sni, peer->hostname, len);
+      peer->sni[len] = 0;
+    }
+  }
+  result = CURLE_OK;
+
+out:
+  if(result)
     Curl_ssl_peer_cleanup(peer);
-    peer->hostname = strdup(ehostname);
-    if(!peer->hostname) {
-      Curl_ssl_peer_cleanup(peer);
-      return CURLE_OUT_OF_MEMORY;
-    }
-    if(!edispname || !strcmp(ehostname, edispname))
-      peer->dispname = peer->hostname;
-    else {
-      peer->dispname = strdup(edispname);
-      if(!peer->dispname) {
-        Curl_ssl_peer_cleanup(peer);
-        return CURLE_OUT_OF_MEMORY;
-      }
-    }
-
-    peer->type = get_peer_type(peer->hostname);
-    if(peer->type == CURL_SSL_PEER_DNS && peer->hostname[0]) {
-      /* not an IP address, normalize according to RCC 6066 ch. 3,
-       * max len of SNI is 2^16-1, no trailing dot */
-      size_t len = strlen(peer->hostname);
-      if(len && (peer->hostname[len-1] == '.'))
-        len--;
-      if(len < USHRT_MAX) {
-        peer->sni = calloc(1, len + 1);
-        if(!peer->sni) {
-          Curl_ssl_peer_cleanup(peer);
-          return CURLE_OUT_OF_MEMORY;
-        }
-        Curl_strntolower(peer->sni, peer->hostname, len);
-        peer->sni[len] = 0;
-      }
-    }
-
-  }
-  peer->port = eport;
-  peer->transport = transport;
-  return CURLE_OK;
+  return result;
 }
 
 static void ssl_cf_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
@@ -1672,22 +1673,29 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
     return CURLE_OK;
   }
 
+  if(!cf->next) {
+    *done = FALSE;
+    return CURLE_FAILED_INIT;
+  }
+
+  if(!cf->next->connected) {
+    result = cf->next->cft->do_connect(cf->next, data, blocking, done);
+    if(result || !*done)
+      return result;
+  }
+
   CF_DATA_SAVE(save, cf, data);
   CURL_TRC_CF(data, cf, "cf_connect()");
-  (void)connssl;
   DEBUGASSERT(data->conn);
   DEBUGASSERT(data->conn == cf->conn);
   DEBUGASSERT(connssl);
-  DEBUGASSERT(cf->conn->host.name);
-
-  result = cf->next->cft->do_connect(cf->next, data, blocking, done);
-  if(result || !*done)
-    goto out;
 
   *done = FALSE;
-  result = Curl_ssl_peer_init(&connssl->peer, cf, TRNSPRT_TCP);
-  if(result)
-    goto out;
+  if(!connssl->peer.hostname) {
+    result = Curl_ssl_peer_init(&connssl->peer, cf, TRNSPRT_TCP);
+    if(result)
+      goto out;
+  }
 
   if(blocking) {
     result = ssl_connect(cf, data);
