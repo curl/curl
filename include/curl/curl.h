@@ -771,7 +771,7 @@ typedef CURLcode (*curl_conv_callback)(char *buffer, size_t length);
 
 typedef CURLcode (*curl_ssl_ctx_callback)(CURL *curl,    /* easy handle */
                                           void *ssl_ctx, /* actually an OpenSSL
-                                                            or WolfSSL SSL_CTX,
+                                                            or wolfSSL SSL_CTX,
                                                             or an mbedTLS
                                                           mbedtls_ssl_config */
                                           void *userptr);
@@ -1494,7 +1494,7 @@ typedef enum {
   CURLOPT(CURLOPT_HTTPAUTH, CURLOPTTYPE_VALUES, 107),
 
   /* Set the ssl context callback function, currently only for OpenSSL or
-     WolfSSL ssl_ctx, or mbedTLS mbedtls_ssl_config in the second argument.
+     wolfSSL ssl_ctx, or mbedTLS mbedtls_ssl_config in the second argument.
      The function must match the curl_ssl_ctx_callback prototype. */
   CURLOPT(CURLOPT_SSL_CTX_FUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 108),
 

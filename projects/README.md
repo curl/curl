@@ -97,7 +97,7 @@ use `VC10\curl-all.sln` to build curl and libcurl.
 ## Running DLL based configurations
 
 If you are a developer and plan to run the curl tool from Visual Studio with
-any third-party libraries (such as OpenSSL, wolfSSL or LibSSH2) then you will
+any third-party libraries (such as OpenSSL, wolfSSL or libssh2) then you will
 need to add the search path of these DLLs to the configuration's PATH
 environment. To do that:
 
@@ -130,7 +130,7 @@ DLL Debug - DLL wolfSSL (x64):
     C:\Windows;C:\Windows\System32\Wbem
 
 If you are using a configuration that uses multiple third-party library DLLs
-(such as DLL Debug - DLL OpenSSL - DLL LibSSH2) then 'Path to DLL' will need
+(such as DLL Debug - DLL OpenSSL - DLL libssh2) then 'Path to DLL' will need
 to contain the path to both of these.
 
 ## Notes

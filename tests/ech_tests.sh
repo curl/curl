@@ -104,10 +104,10 @@ declare -A neither_targets=(
 # Where we find OpenSSL .so's
 : "${OSSL:=$HOME/code/openssl}"
 
-# Where we find WolfSSL .so's
+# Where we find wolfSSL .so's
 : "${WSSL:=$HOME/code/wolfssl/inst/lib}"
 
-# Where we find boringssl .so's
+# Where we find BoringSSL .so's
 : "${BSSL:=$HOME/code/boringssl/inst/lib}"
 
 # Where we send DoH queries when using kdig or curl

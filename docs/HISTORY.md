@@ -286,7 +286,7 @@ August:
 
 February: added support for the axTLS backend
 
-April: added the cyassl backend (later renamed to WolfSSL)
+April: added the cyassl backend (later renamed to wolfSSL)
 
 2012
 ----

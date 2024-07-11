@@ -88,8 +88,8 @@ where `<options>` is one or many of:
  - `WITH_MBEDTLS=<dll/static>`   - Enable mbedTLS support, DLL or static
  - `WITH_CARES=<dll/static>`     - Enable c-ares support, DLL or static
  - `WITH_ZLIB=<dll/static>`      - Enable zlib support, DLL or static
- - `WITH_SSH=<dll/static>`       - Enable libSSH support, DLL or static
- - `WITH_SSH2=<dll/static>`      - Enable libSSH2 support, DLL or static
+ - `WITH_SSH=<dll/static>`       - Enable libssh support, DLL or static
+ - `WITH_SSH2=<dll/static>`      - Enable libssh2 support, DLL or static
  - `WITH_PREFIX=<dir>`           - Where to install the build
  - `ENABLE_SSPI=<yes/no>`        - Enable SSPI support, defaults to yes
  - `ENABLE_IPV6=<yes/no>`        - Enable IPv6, defaults to yes
@@ -110,7 +110,7 @@ where `<options>` is one or many of:
  - `MBEDTLS_PATH=<path>`         - Custom path for mbedTLS
  - `NGHTTP2_PATH=<path>`         - Custom path for nghttp2
  - `MSH3_PATH=<path>`            - Custom path for msh3
- - `SSH2_PATH=<path>`            - Custom path for libSSH2
+ - `SSH2_PATH=<path>`            - Custom path for libssh2
  - `SSL_PATH=<path>`             - Custom path for OpenSSL
  - `ZLIB_PATH=<path>`            - Custom path for zlib
 

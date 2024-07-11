@@ -171,7 +171,7 @@ When specifying multiple cipher names, separate them with colon (`:`).
 `TLS_AES_128_CCM_8_SHA256`
 `TLS_AES_128_CCM_SHA256`
 
-## WolfSSL
+## wolfSSL
 
 `RC4-SHA`,
 `RC4-MD5`,

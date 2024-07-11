@@ -685,7 +685,7 @@ CURLcode Curl_gtls_client_trust_setup(struct Curl_cfilter *cf,
     !conn_config->ca_info_blob &&
     !ssl_config->primary.CRLfile &&
     !ssl_config->native_ca_store &&
-    !conn_config->clientcert; /* GNUTls adds client cert to its credentials! */
+    !conn_config->clientcert; /* GnuTLS adds client cert to its credentials! */
 
   if(cache_criteria_met)
     cached_creds = gtls_get_cached_creds(cf, data);
