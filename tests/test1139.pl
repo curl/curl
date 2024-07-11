@@ -80,6 +80,15 @@ sub scanmdpage {
     }
     close($mh);
 
+    my @ms = sort @m;
+    for my $i (0 .. $#m) {
+        if($ms[$i] ne $m[$i]) {
+            print STDERR "$file:1:ERROR: $m[$i] is not alphabetical (expected $ms[$i])\n";
+            $errors++;
+            # no point in reporting many
+            last;
+        }
+    }
     foreach my $m (@words) {
         my @g = grep(/$m/, @m);
         if(!$g[0]) {
