@@ -1311,7 +1311,7 @@ Callback for writing data. See CURLOPT_WRITEFUNCTION(3)
 
 ## CURLOPT_WS_OPTIONS
 
-Set WenSocket options. See CURLOPT_WS_OPTIONS(3)
+Set WebSocket options. See CURLOPT_WS_OPTIONS(3)
 
 ## CURLOPT_XFERINFODATA
 
