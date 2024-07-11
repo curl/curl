@@ -383,7 +383,7 @@ jobs:
         #xcode: ['13.1', '13.2.1', '13.4.1', '14.1', '14.2', '14.3.1', '15.0.1', '15.2', '15.3', '15.4', '16.0']  # all SDK
         #xcode: ['']  # default Xcodes
         xcode: ['13.4.1', '14.2', '14.3.1', '15.0.1', '15.2', '15.3', '16.0']  # coverage
-        macos-version-min: ['10.7']
+        macos-version-min: ['10.8']
         build: [autotools, cmake]
         exclude:
           # Combinations uncovered by runner images:
