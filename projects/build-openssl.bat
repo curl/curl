@@ -241,7 +241,7 @@ rem ***************************************************************************
   echo.
 
   cd /d "%START_DIR%" || (echo Error: Failed cd start & exit /B 1)
-  rem Save the full path of the openssl source dir
+  rem Save the full path of the OpenSSL source dir
   set "SOURCE_PATH=%CD%"
 
   rem Set temporary paths for building and installing OpenSSL. If a temporary

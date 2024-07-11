@@ -677,8 +677,8 @@ CURLcode Curl_gtls_client_trust_setup(struct Curl_cfilter *cf,
 
 
   /* Consider the X509 store cacheable if it comes exclusively from a CAfile,
-    or no source is provided and we are falling back to openssl's built-in
-    default. */
+     or no source is provided and we are falling back to OpenSSL's built-in
+     default. */
   cache_criteria_met = (data->set.general_ssl.ca_cache_timeout != 0) &&
     conn_config->verifypeer &&
     !conn_config->CApath &&

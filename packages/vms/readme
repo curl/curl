@@ -138,7 +138,7 @@ pcsi_product_gnv_curl.com
 readme.                 This file.
 
 report_openssl_version.c
-                        Program to check that the openssl version is new
+                        Program to check that the OpenSSL version is new
                         enough for building a shared libcurl image.
 
 setup_gnv_curl_build.com

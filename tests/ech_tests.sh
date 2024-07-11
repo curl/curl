@@ -533,7 +533,7 @@ fi
 fi # skip
 
 # Check combinations of command line options, if we're good so far
-# Most of this only works for openssl, which is ok, as we're checking
+# Most of this only works for OpenSSL, which is ok, as we're checking
 # the argument handling here, not the ECH protocol
 if [[ "$using_ossl" == "yes" && "$allgood" == "yes" ]]
 then

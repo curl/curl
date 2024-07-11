@@ -33,7 +33,7 @@
  * To support the CURLOPT_SSL_CIPHER_LIST option on SSL backends
  * that do not support it natively, but do support setting a list of
  * IANA ids, we need a list of all supported cipher suite names
- * (openssl and IANA) to be able to look up the IANA ids.
+ * (OpenSSL and IANA) to be able to look up the IANA ids.
  *
  * To keep the binary size of this list down we compress each entry
  * down to 2 + 6 bytes using the C preprocessor.
@@ -42,7 +42,7 @@
 /*
  * mbedTLS NOTE: mbedTLS has mbedtls_ssl_get_ciphersuite_id() to
  * convert a string representation to an IANA id, we do not use that
- * because it does not support "standard" openssl cipher suite
+ * because it does not support "standard" OpenSSL cipher suite
  * names, nor IANA names.
  */
 
@@ -378,7 +378,7 @@ static const struct cs_entry cs_list [] = {
   CS_ENTRY(0xC0AF, ECDHE,ECDSA,AES256,CCM8,,,,),
 #endif
 #if defined(USE_SECTRANSP)
-  /* entries marked bc are backward compatible aliases for old openssl names */
+  /* entries marked bc are backward compatible aliases for old OpenSSL names */
   CS_ENTRY(0x0003, TLS,RSA,EXPORT,WITH,RC4,40,MD5,),
   CS_ENTRY(0x0003, EXP,RC4,MD5,,,,,),
   CS_ENTRY(0x0004, TLS,RSA,WITH,RC4,128,MD5,,),
@@ -513,7 +513,7 @@ static const struct cs_entry cs_list [] = {
   CS_ENTRY(0xC019, AECDH,AES256,SHA,,,,,),
 #endif
 #if defined(USE_MBEDTLS)
-  /* entries marked ns are "non-standard", they are not in openssl */
+  /* entries marked ns are "non-standard", they are not in OpenSSL */
   CS_ENTRY(0x0041, TLS,RSA,WITH,CAMELLIA,128,CBC,SHA,),
   CS_ENTRY(0x0041, CAMELLIA128,SHA,,,,,,),
   CS_ENTRY(0x0045, TLS,DHE,RSA,WITH,CAMELLIA,128,CBC,SHA),
