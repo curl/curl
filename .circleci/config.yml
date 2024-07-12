@@ -84,7 +84,7 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-websockets --without-ssl --with-libssh2=$(brew --prefix libssh2) --enable-debug \
+            ./configure --enable-warnings --enable-websockets --without-ssl "--with-libssh2=$(brew --prefix libssh2)" --enable-debug \
               CPPFLAGS="-I$(brew --prefix libpsl)/include" \
               CFLAGS='-mmacosx-version-min=10.9' \
               LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" \
@@ -135,11 +135,31 @@ commands:
           command: |
             autoreconf -fi
             ./configure --enable-warnings \
-              --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap \
-              --disable-mqtt --disable-pop3 --disable-rtsp --disable-smb --disable-smtp --disable-telnet \
-              --disable-tftp --disable-unix-sockets --disable-shared --without-brotli --without-gssapi \
-              --without-libidn2 --without-libpsl --without-librtmp --without-libssh2 --without-nghttp2 \
-              --without-ssl --without-zlib --enable-debug \
+              --disable-dict \
+              --disable-file \
+              --disable-ftp \
+              --disable-gopher \
+              --disable-imap \
+              --disable-ldap \
+              --disable-mqtt \
+              --disable-pop3 \
+              --disable-rtsp \
+              --disable-smb \
+              --disable-smtp \
+              --disable-telnet \
+              --disable-tftp \
+              --disable-unix-sockets \
+              --disable-shared \
+              --without-brotli \
+              --without-gssapi \
+              --without-libidn2 \
+              --without-libpsl \
+              --without-librtmp \
+              --without-libssh2 \
+              --without-nghttp2 \
+              --without-ssl \
+              --without-zlib \
+              --enable-debug \
               CFLAGS='-mmacosx-version-min=10.15' \
               || { tail -1000 config.log; false; }
 
