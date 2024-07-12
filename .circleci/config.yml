@@ -328,16 +328,16 @@ commands:
 
   test-macos:
     steps:
-      - run: make -j5 V=1 test-ci
+      - run: make -j5 V=1 test-ci TFLAGS='-j10'
 
   test-torture:
     steps:
-      - run: make -j5 V=1 test-ci TFLAGS="-n -t --shallow=25 !FTP"
+      - run: make -j5 V=1 test-ci TFLAGS='-j10 -n -t --shallow=25 !FTP'
 
   test-torture-ftp:
     steps:
       # Test 250 takes too long, causing Circle CI to kill the job
-      - run: make -j5 V=1 test-ci TFLAGS="-n -t --shallow=20 FTP !250 !251"
+      - run: make -j5 V=1 test-ci TFLAGS='-j10 -n -t --shallow=20 FTP !250 !251'
 
 executors:
   ubuntu:
