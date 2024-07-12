@@ -84,7 +84,7 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-websockets --without-ssl --with-libssh2=/opt/homebrew/opt/libssh2 --enable-debug \
+            ./configure --enable-warnings --enable-websockets --without-ssl --with-libssh2=$(brew --prefix libssh2) --enable-debug \
               CPPFLAGS="-I$(brew --prefix libpsl)/include" \
               CFLAGS='-mmacosx-version-min=10.9' \
               LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" \
