@@ -772,10 +772,8 @@ static void connc_run_conn_shutdown_handler(struct Curl_easy *data,
                                             struct connectdata *conn)
 {
   if(!conn->bits.shutdown_handler) {
-    if(conn->dns_entry) {
-      Curl_resolv_unlock(data, conn->dns_entry);
-      conn->dns_entry = NULL;
-    }
+    if(conn->dns_entry)
+      Curl_resolv_unlink(data, &conn->dns_entry);
 
     /* Cleanup NTLM connection-related data */
     Curl_http_auth_cleanup_ntlm(conn);
@@ -1178,7 +1176,7 @@ void Curl_conncache_print(struct conncache *connc)
     while(curr) {
       conn = curr->ptr;
 
-      fprintf(stderr, " [%p %d]", (void *)conn, conn->inuse);
+      fprintf(stderr, " [%p %d]", (void *)conn, conn->refcount);
       curr = curr->next;
     }
     fprintf(stderr, "\n");

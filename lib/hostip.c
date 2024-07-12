@@ -115,7 +115,7 @@
  * CURLRES_* defines based on the config*.h and curl_setup.h defines.
  */
 
-static void freednsentry(void *freethis);
+static void hostcache_unlink_entry(void *entry);
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 static void show_resolve_info(struct Curl_easy *data,
@@ -178,7 +178,7 @@ create_hostcache_id(const char *name,
 struct hostcache_prune_data {
   time_t now;
   time_t oldest; /* oldest time in cache not pruned. */
-  int cache_timeout;
+  int max_age_sec;
 };
 
 /*
@@ -189,16 +189,16 @@ struct hostcache_prune_data {
  * cache.
  */
 static int
-hostcache_timestamp_remove(void *datap, void *hc)
+hostcache_entry_is_stale(void *datap, void *hc)
 {
   struct hostcache_prune_data *prune =
     (struct hostcache_prune_data *) datap;
-  struct Curl_dns_entry *c = (struct Curl_dns_entry *) hc;
+  struct Curl_dns_entry *dns = (struct Curl_dns_entry *) hc;
 
-  if(c->timestamp) {
+  if(dns->timestamp) {
     /* age in seconds */
-    time_t age = prune->now - c->timestamp;
-    if(age >= prune->cache_timeout)
+    time_t age = prune->now - dns->timestamp;
+    if(age >= prune->max_age_sec)
       return TRUE;
     if(age > prune->oldest)
       prune->oldest = age;
@@ -216,13 +216,13 @@ hostcache_prune(struct Curl_hash *hostcache, int cache_timeout,
 {
   struct hostcache_prune_data user;
 
-  user.cache_timeout = cache_timeout;
+  user.max_age_sec = cache_timeout;
   user.now = now;
   user.oldest = 0;
 
   Curl_hash_clean_with_criterium(hostcache,
                                  (void *) &user,
-                                 hostcache_timestamp_remove);
+                                 hostcache_entry_is_stale);
 
   return user.oldest;
 }
@@ -299,10 +299,10 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
     struct hostcache_prune_data user;
 
     user.now = time(NULL);
-    user.cache_timeout = data->set.dns_cache_timeout;
+    user.max_age_sec = data->set.dns_cache_timeout;
     user.oldest = 0;
 
-    if(hostcache_timestamp_remove(&user, dns)) {
+    if(hostcache_entry_is_stale(&user, dns)) {
       infof(data, "Hostname in DNS cache was stale, zapped");
       dns = NULL; /* the memory deallocation is being handled by the hash */
       Curl_hash_delete(data->dns.hostcache, entry_id, entry_len + 1);
@@ -348,7 +348,7 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
  *
  * Returns the Curl_dns_entry entry pointer or NULL if not in the cache.
  *
- * The returned data *MUST* be "unlocked" with Curl_resolv_unlock() after
+ * The returned data *MUST* be "released" with Curl_resolv_unlink() after
  * use, or we will leak memory!
  */
 struct Curl_dns_entry *
@@ -364,7 +364,7 @@ Curl_fetch_addr(struct Curl_easy *data,
   dns = fetch_addr(data, hostname, port);
 
   if(dns)
-    dns->inuse++; /* we use it! */
+    dns->refcount++; /* we use it! */
 
   if(data->share)
     Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
@@ -468,7 +468,8 @@ Curl_cache_addr(struct Curl_easy *data,
                 struct Curl_addrinfo *addr,
                 const char *hostname,
                 size_t hostlen, /* length or zero */
-                int port)
+                int port,
+                bool permanent)
 {
   char entry_id[MAX_HOSTCACHE_LEN];
   size_t entry_len;
@@ -496,11 +497,15 @@ Curl_cache_addr(struct Curl_easy *data,
   entry_len = create_hostcache_id(hostname, hostlen, port,
                                   entry_id, sizeof(entry_id));
 
-  dns->inuse = 1;   /* the cache has the first reference */
+  dns->refcount = 1; /* the cache has the first reference */
   dns->addr = addr; /* this is the address(es) */
-  time(&dns->timestamp);
-  if(dns->timestamp == 0)
-    dns->timestamp = 1;   /* zero indicates permanent CURLOPT_RESOLVE entry */
+  if(permanent)
+    dns->timestamp = 0; /* an entry that never goes stale */
+  else {
+    dns->timestamp = time(NULL);
+    if(dns->timestamp == 0)
+      dns->timestamp = 1;
+  }
   dns->hostport = port;
   if(hostlen)
     memcpy(dns->hostname, hostname, hostlen);
@@ -514,7 +519,7 @@ Curl_cache_addr(struct Curl_easy *data,
   }
 
   dns = dns2;
-  dns->inuse++;         /* mark entry as in-use */
+  dns->refcount++;         /* mark entry as in-use */
   return dns;
 }
 
@@ -666,8 +671,8 @@ static bool tailmatch(const char *full, const char *part)
  * resolves. See the return codes.
  *
  * The cache entry we return will get its 'inuse' counter increased when this
- * function is used. You MUST call Curl_resolv_unlock() later (when you are
- * done using this struct) to decrease the counter again.
+ * function is used. You MUST call Curl_resolv_unlink() later (when you are
+ * done using this struct) to decrease the reference counter again.
  *
  * Return codes:
  *
@@ -708,7 +713,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
 
   if(dns) {
     infof(data, "Hostname %s was found in DNS cache", hostname);
-    dns->inuse++; /* we use it! */
+    dns->refcount++; /* we use it! */
     rc = CURLRESOLV_RESOLVED;
   }
 
@@ -828,7 +833,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
         Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
       /* we got a response, store it in the cache */
-      dns = Curl_cache_addr(data, addr, hostname, 0, port);
+      dns = Curl_cache_addr(data, addr, hostname, 0, port, FALSE);
 
       if(data->share)
         Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
@@ -868,8 +873,8 @@ void alarmfunc(int sig)
  * resolves. See the return codes.
  *
  * The cache entry we return will get its 'inuse' counter increased when this
- * function is used. You MUST call Curl_resolv_unlock() later (when you are
- * done using this struct) to decrease the counter again.
+ * function is used. You MUST call Curl_resolv_unlink() later (when you are
+ * done using this struct) to decrease the reference counter again.
  *
  * If built with a synchronous resolver and use of signals is not
  * disabled by the application, then a nonzero timeout will cause a
@@ -1037,18 +1042,20 @@ clean_up:
 }
 
 /*
- * Curl_resolv_unlock() unlocks the given cached DNS entry. When this has been
- * made, the struct may be destroyed due to pruning. It is important that only
- * one unlock is made for each Curl_resolv() call.
+ * Curl_resolv_unlink() releases a reference to the given cached DNS entry.
+ * When the reference count reaches 0, the entry is destroyed. It is important
+ * that only one unlink is made for each Curl_resolv() call.
  *
  * May be called with 'data' == NULL for global cache.
  */
-void Curl_resolv_unlock(struct Curl_easy *data, struct Curl_dns_entry *dns)
+void Curl_resolv_unlink(struct Curl_easy *data, struct Curl_dns_entry **pdns)
 {
+  struct Curl_dns_entry *dns = *pdns;
+  *pdns = NULL;
   if(data && data->share)
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
-  freednsentry(dns);
+  hostcache_unlink_entry(dns);
 
   if(data && data->share)
     Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
@@ -1057,13 +1064,13 @@ void Curl_resolv_unlock(struct Curl_easy *data, struct Curl_dns_entry *dns)
 /*
  * File-internal: release cache dns entry reference, free if inuse drops to 0
  */
-static void freednsentry(void *freethis)
+static void hostcache_unlink_entry(void *entry)
 {
-  struct Curl_dns_entry *dns = (struct Curl_dns_entry *) freethis;
-  DEBUGASSERT(dns && (dns->inuse>0));
+  struct Curl_dns_entry *dns = (struct Curl_dns_entry *) entry;
+  DEBUGASSERT(dns && (dns->refcount>0));
 
-  dns->inuse--;
-  if(dns->inuse == 0) {
+  dns->refcount--;
+  if(dns->refcount == 0) {
     Curl_freeaddrinfo(dns->addr);
 #ifdef USE_HTTPSRR
     if(dns->hinfo) {
@@ -1092,7 +1099,7 @@ static void freednsentry(void *freethis)
 void Curl_init_dnscache(struct Curl_hash *hash, size_t size)
 {
   Curl_hash_init(hash, size, Curl_hash_str, Curl_str_key_compare,
-                 freednsentry);
+                 hostcache_unlink_entry);
 }
 
 /*
@@ -1285,13 +1292,11 @@ err:
       }
 
       /* put this new host in the cache */
-      dns = Curl_cache_addr(data, head, host_begin, hlen, port);
+      dns = Curl_cache_addr(data, head, host_begin, hlen, port, permanent);
       if(dns) {
-        if(permanent)
-          dns->timestamp = 0; /* mark as permanent */
         /* release the returned reference; the cache itself will keep the
          * entry alive: */
-        dns->inuse--;
+        dns->refcount--;
       }
 
       if(data->share)

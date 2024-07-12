@@ -388,7 +388,7 @@ CONNECT_RESOLVED:
 
         infof(data, "SOCKS4 connect to IPv4 %s (locally resolved)", buf);
 
-        Curl_resolv_unlock(data, dns); /* not used anymore from now on */
+        Curl_resolv_unlink(data, &dns); /* not used anymore from now on */
       }
       else
         failf(data, "SOCKS4 connection to %s not supported", sx->hostname);
@@ -893,7 +893,7 @@ CONNECT_RESOLVED:
       failf(data, "SOCKS5 connection to %s not supported", dest);
     }
 
-    Curl_resolv_unlock(data, dns); /* not used anymore from now on */
+    Curl_resolv_unlink(data, &dns); /* not used anymore from now on */
     goto CONNECT_REQ_SEND;
   }
 CONNECT_RESOLVE_REMOTE:

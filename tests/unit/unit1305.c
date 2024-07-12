@@ -122,7 +122,7 @@ UNITTEST_START
     abort_unless(rc == CURLE_OK, "data node creation failed");
     key_len = strlen(data_key);
 
-    data_node->inuse = 1; /* hash will hold the reference */
+    data_node->refcount = 1; /* hash will hold the reference */
     nodep = Curl_hash_add(&hp, data_key, key_len + 1, data_node);
     abort_unless(nodep, "insertion into hash failed");
     /* Freeing will now be done by Curl_hash_destroy */
