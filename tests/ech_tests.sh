@@ -105,10 +105,10 @@ declare -A neither_targets=(
 # Where we find OpenSSL .so's
 : "${OSSL:=$HOME/code/openssl-local-inst}"
 
-# Where we find WolfSSL .so's
+# Where we find wolfSSL .so's
 : "${WSSL:=$HOME/code/wolfssl/inst/lib}"
 
-# Where we find boringssl .so's
+# Where we find BoringSSL .so's
 : "${BSSL:=$HOME/code/boringssl/inst/lib}"
 
 # Where we send DoH queries when using kdig or curl
@@ -539,7 +539,7 @@ fi
 fi # skip
 
 # Check combinations of command line options, if we're good so far
-# Most of this only works for openssl, which is ok, as we're checking
+# Most of this only works for OpenSSL, which is ok, as we're checking
 # the argument handling here, not the ECH protocol
 if [[ "$using_ossl" == "yes" && "$allgood" == "yes" ]]
 then

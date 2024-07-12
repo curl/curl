@@ -13,7 +13,7 @@ HTTP/2 with curl
 Build prerequisites
 -------------------
   - nghttp2
-  - OpenSSL, libressl, BoringSSL, GnuTLS, mbedTLS, wolfSSL or Schannel
+  - OpenSSL, LibreSSL, BoringSSL, GnuTLS, mbedTLS, wolfSSL or Schannel
     with a new enough version.
 
 [nghttp2](https://nghttp2.org/)

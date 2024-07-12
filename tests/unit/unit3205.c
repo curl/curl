@@ -376,7 +376,7 @@ static const struct test_cs_entry test_cs_list[] = {
             "EDH-RSA-DES-CBC3-SHA" },
 #endif
 #if defined(USE_MBEDTLS)
-  /* entries marked ns are non-"standard", they are not in openssl */
+  /* entries marked ns are non-"standard", they are not in OpenSSL */
   { 0x0041, "TLS_RSA_WITH_CAMELLIA_128_CBC_SHA",
             "CAMELLIA128-SHA" },
   { 0x0045, "TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA",
@@ -682,7 +682,7 @@ UNITTEST_START
       }
     }
 
-    /* test Curl_cipher_suite_lookup_id() for openssl name */
+    /* test Curl_cipher_suite_lookup_id() for OpenSSL name */
     if(test->openssl) {
       id = Curl_cipher_suite_lookup_id(test->openssl, strlen(test->openssl));
       if(id != test->id) {
@@ -706,7 +706,7 @@ UNITTEST_START
       unitfail++;
     }
 
-    /* test Curl_cipher_suite_get_str() prefer openssl name */
+    /* test Curl_cipher_suite_get_str() prefer OpenSSL name */
     buf[0] = '\0';
     expect = test->openssl ? test->openssl : test->rfc;
 

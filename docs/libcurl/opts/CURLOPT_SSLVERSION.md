@@ -76,7 +76,7 @@ TLS v1.3 or later (Added in 7.52.0)
 The maximum TLS version can be set by using *one* of the
 CURL_SSLVERSION_MAX_ macros below. It is also possible to OR *one* of the
 CURL_SSLVERSION_ macros with *one* of the CURL_SSLVERSION_MAX_ macros.
-The MAX macros are not supported for WolfSSL.
+The MAX macros are not supported for wolfSSL.
 
 ## CURL_SSLVERSION_MAX_DEFAULT
 

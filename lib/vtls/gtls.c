@@ -677,15 +677,15 @@ CURLcode Curl_gtls_client_trust_setup(struct Curl_cfilter *cf,
 
 
   /* Consider the X509 store cacheable if it comes exclusively from a CAfile,
-    or no source is provided and we are falling back to openssl's built-in
-    default. */
+     or no source is provided and we are falling back to OpenSSL's built-in
+     default. */
   cache_criteria_met = (data->set.general_ssl.ca_cache_timeout != 0) &&
     conn_config->verifypeer &&
     !conn_config->CApath &&
     !conn_config->ca_info_blob &&
     !ssl_config->primary.CRLfile &&
     !ssl_config->native_ca_store &&
-    !conn_config->clientcert; /* GNUTls adds client cert to its credentials! */
+    !conn_config->clientcert; /* GnuTLS adds client cert to its credentials! */
 
   if(cache_criteria_met)
     cached_creds = gtls_get_cached_creds(cf, data);

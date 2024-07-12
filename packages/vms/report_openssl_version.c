@@ -1,6 +1,6 @@
 /* File: report_openssl_version.c
  *
- * This file dynamically loads the openssl shared image to report the
+ * This file dynamically loads the OpenSSL shared image to report the
  * version string.
  *
  * It will optionally place that version string in a DCL symbol.

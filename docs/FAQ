@@ -423,7 +423,7 @@ FAQ
   backends.
 
   curl can be built to use one of the following SSL alternatives: OpenSSL,
-  libressl, BoringSSL, AWS-LC, GnuTLS, wolfSSL, mbedTLS, Secure Transport
+  LibreSSL, BoringSSL, AWS-LC, GnuTLS, wolfSSL, mbedTLS, Secure Transport
   (native iOS/OS X), Schannel (native Windows), BearSSL or Rustls. They all
   have their pros and cons, and we try to maintain a comparison of them here:
   https://curl.se/docs/ssl-compared.html

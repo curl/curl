@@ -394,7 +394,7 @@ $   endif
 $endif
 $!
 $!
-$! LibIDN not ported to VMS at this time.
+$! libidn not ported to VMS at this time.
 $! This is for international domain name support.
 $! Allow explicit experimentation.
 $if libidn
@@ -410,7 +410,7 @@ $   write cvh "#endif"
 $endif
 $!
 $!
-$! LibSSH2 not ported to VMS at this time.
+$! libssh2 not ported to VMS at this time.
 $! Allow explicit experimentation.
 $if libssh2
 $then

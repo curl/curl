@@ -65,14 +65,14 @@ class TestSSLUse:
         xargs = ['--sessionid', '--tls-max', tls_max, f'--tlsv{tls_max}']
         if env.curl_uses_lib('gnutls'):
             if tls_max == '1.3':
-                exp_resumed = 'Initial'  # 1.2 works in gnutls, but 1.3 does not, TODO
+                exp_resumed = 'Initial'  # 1.2 works in GnuTLS, but 1.3 does not, TODO
         if env.curl_uses_lib('libressl'):
             if tls_max == '1.3':
-                exp_resumed = 'Initial'  # 1.2 works in libressl, but 1.3 does not, TODO
+                exp_resumed = 'Initial'  # 1.2 works in LibreSSL, but 1.3 does not, TODO
         if env.curl_uses_lib('wolfssl'):
             xargs = ['--sessionid', f'--tlsv{tls_max}']
             if tls_max == '1.3':
-                exp_resumed = 'Initial'  # 1.2 works in wolfssl, but 1.3 does not, TODO
+                exp_resumed = 'Initial'  # 1.2 works in wolfSSL, but 1.3 does not, TODO
         if env.curl_uses_lib('rustls-ffi'):
             exp_resumed = 'Initial'  # rustls does not support sessions, TODO
         if env.curl_uses_lib('bearssl') and tls_max == '1.3':
@@ -136,7 +136,7 @@ class TestSSLUse:
                 assert r.json['SSL_TLS_SNI'] == env.domain1, f'{r.json}'
             assert False, f'should not have succeeded: {r.json}'
         # 7 - rustls rejects a servername with .. during setup
-        # 35 - libressl rejects setting an SNI name with trailing dot
+        # 35 - LibreSSL rejects setting an SNI name with trailing dot
         # 60 - peer name matching failed against certificate
         assert r.exit_code in [7, 35, 60], f'{r}'
 
@@ -144,9 +144,9 @@ class TestSSLUse:
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_17_05_ip_addr(self, env: Env, httpd, nghttpx, repeat, proto):
         if env.curl_uses_lib('bearssl'):
-            pytest.skip("bearssl does not support cert verification with IP addresses")
+            pytest.skip("BearSSL does not support cert verification with IP addresses")
         if env.curl_uses_lib('mbedtls'):
-            pytest.skip("mbedtls does not support cert verification with IP addresses")
+            pytest.skip("mbedTLS does not support cert verification with IP addresses")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
@@ -202,20 +202,20 @@ class TestSSLUse:
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
         extra_args = []
         if env.curl_uses_lib('gnutls'):
-            pytest.skip('gnutls does not support setting ciphers by name')
+            pytest.skip('GnuTLS does not support setting ciphers by name')
         if env.curl_uses_lib('rustls-ffi'):
             pytest.skip('rustls-ffi does not support setting ciphers')
         if ciphers[0] & 0xFF00 == 0x1300:
             # test setting TLSv1.3 ciphers
             if env.curl_uses_lib('bearssl'):
-                pytest.skip('bearssl does not support TLSv1.3')
+                pytest.skip('BearSSL does not support TLSv1.3')
             elif env.curl_uses_lib('sectransp'):
-                pytest.skip('sectransp does not support TLSv1.3')
+                pytest.skip('SecureTransport does not support TLSv1.3')
             elif env.curl_uses_lib('boringssl'):
-                pytest.skip('boringssl does not support setting TLSv1.3 ciphers')
+                pytest.skip('BoringSSL does not support setting TLSv1.3 ciphers')
             elif env.curl_uses_lib('mbedtls'):
                 if not env.curl_lib_version_at_least('mbedtls', '3.6.0'):
-                    pytest.skip('mbedtls TLSv1.3 support requires at least 3.6.0')
+                    pytest.skip('mbedTLS TLSv1.3 support requires at least 3.6.0')
                 extra_args = ['--ciphers', ':'.join(cipher_names)]
             elif env.curl_uses_lib('wolfssl'):
                 extra_args = ['--ciphers', ':'.join(cipher_names)]
@@ -224,7 +224,7 @@ class TestSSLUse:
         else:
             # test setting TLSv1.2 ciphers
             if env.curl_uses_lib('schannel'):
-                pytest.skip('schannel does not support setting TLSv1.2 ciphers by name')
+                pytest.skip('Schannel does not support setting TLSv1.2 ciphers by name')
             elif env.curl_uses_lib('wolfssl'):
                 # setting tls version is botched with wolfssl: setting max (--tls-max)
                 # is not supported, setting min (--tlsv1.*) actually also sets max
@@ -248,7 +248,7 @@ class TestSSLUse:
         if not env.curl_uses_lib('openssl') and \
             not env.curl_uses_lib('gnutls') and \
             not env.curl_uses_lib('quictls'):
-            pytest.skip("tls library does not support --cert-status")
+            pytest.skip("TLS library does not support --cert-status")
         curl = CurlClient(env=env)
         domain = f'localhost'
         url = f'https://{env.authority_for(domain, proto)}/'

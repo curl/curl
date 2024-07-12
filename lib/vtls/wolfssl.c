@@ -103,7 +103,7 @@
 /*
  * Availability note:
  * The TLS 1.3 secret callback (wolfSSL_set_tls13_secret_cb) was added in
- * WolfSSL 4.4.0, but requires the -DHAVE_SECRET_CALLBACK build option. If that
+ * wolfSSL 4.4.0, but requires the -DHAVE_SECRET_CALLBACK build option. If that
  * option is not set, then TLS 1.3 will not be logged.
  * For TLS 1.2 and before, we use wolfSSL_get_keys().
  * SSL_get_client_random and wolfSSL_get_keys require OPENSSL_EXTRA
@@ -571,7 +571,7 @@ CURLcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,
   bool cache_criteria_met;
 
   /* Consider the X509 store cacheable if it comes exclusively from a CAfile,
-     or no source is provided and we are falling back to openssl's built-in
+     or no source is provided and we are falling back to OpenSSL's built-in
      default. */
   cache_criteria_met = (data->set.general_ssl.ca_cache_timeout != 0) &&
     conn_config->verifypeer &&
@@ -913,7 +913,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     int trying_ech_now = 0;
 
     if(data->set.str[STRING_ECH_PUBLIC]) {
-      infof(data, "ECH: outername not (yet) supported with WolfSSL");
+      infof(data, "ECH: outername not (yet) supported with wolfSSL");
       return CURLE_SSL_CONNECT_ERROR;
     }
     if(data->set.tls_ech == CURLECH_GREASE) {
@@ -1745,7 +1745,7 @@ static void *wolfssl_get_internals(struct ssl_connect_data *connssl,
 }
 
 const struct Curl_ssl Curl_ssl_wolfssl = {
-  { CURLSSLBACKEND_WOLFSSL, "WolfSSL" }, /* info */
+  { CURLSSLBACKEND_WOLFSSL, "wolfssl" }, /* info */
 
 #ifdef KEEP_PEER_CERT
   SSLSUPP_PINNEDPUBKEY |

@@ -707,13 +707,13 @@ ${SIZEOF_TIME_T_CODE}
 /* if wolfSSL has the wolfSSL_BIO_set_shutdown function. */
 #cmakedefine HAVE_WOLFSSL_FULL_BIO 1
 
-/* if libSSH is in use */
+/* if libssh is in use */
 #cmakedefine USE_LIBSSH 1
 
-/* if libSSH2 is in use */
+/* if libssh2 is in use */
 #cmakedefine USE_LIBSSH2 1
 
-/* if libPSL is in use */
+/* if libpsl is in use */
 #cmakedefine USE_LIBPSL 1
 
 /* if you want to use OpenLDAP code instead of legacy ldap implementation */

@@ -858,7 +858,7 @@ ossl_log_tls12_secret(const SSL *ssl, bool *keylog_done)
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L &&    \
   !(defined(LIBRESSL_VERSION_NUMBER) &&         \
     LIBRESSL_VERSION_NUMBER < 0x20700000L)
-  /* ssl->s3 is not checked in openssl 1.1.0-pre6, but let's assume that
+  /* ssl->s3 is not checked in OpenSSL 1.1.0-pre6, but let's assume that
    * we have a valid SSL context if we have a non-NULL session. */
   SSL_get_client_random(ssl, client_random, SSL3_RANDOM_SIZE);
   master_key_length = (int)
@@ -3216,7 +3216,7 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
     if(!ssl_cafile && !ssl_capath &&
        !imported_native_ca && !imported_ca_info_blob) {
       /* verifying the peer without any CA certificates will not
-         work so use openssl's built-in default as fallback */
+         work so use OpenSSL's built-in default as fallback */
       X509_STORE_set_default_paths(store);
     }
 #endif
@@ -3400,7 +3400,7 @@ CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
   bool cache_criteria_met;
 
   /* Consider the X509 store cacheable if it comes exclusively from a CAfile,
-     or no source is provided and we are falling back to openssl's built-in
+     or no source is provided and we are falling back to OpenSSL's built-in
      default. */
   cache_criteria_met = (data->set.general_ssl.ca_cache_timeout != 0) &&
     conn_config->verifypeer &&
@@ -3901,7 +3901,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
     }
 # ifdef OPENSSL_IS_BORINGSSL
     if(trying_ech_now && outername) {
-      infof(data, "ECH: setting public_name not supported with boringssl");
+      infof(data, "ECH: setting public_name not supported with BoringSSL");
       return CURLE_SSL_CONNECT_ERROR;
     }
 # else
@@ -3989,7 +3989,7 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
   /* with OpenSSL v1.1.1 we get an alternative to SSL_set_bio() that works
    * without backward compat quirks. Every call takes one reference, so we
    * up it and pass. SSL* then owns it and will free.
-   * We check on the function in configure, since libressl and friends
+   * We check on the function in configure, since LibreSSL and friends
    * each have their own versions to add support for this. */
   BIO_up_ref(bio);
   SSL_set0_rbio(octx->ssl, bio);

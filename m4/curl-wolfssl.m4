@@ -91,7 +91,7 @@ if test "x$OPT_WOLFSSL" != xno; then
       AC_MSG_CHECKING([for wolfSSL_Init in -lwolfssl])
       AC_LINK_IFELSE([
         AC_LANG_PROGRAM([[
-/* These aren't needed for detection and confuse WolfSSL.
+/* These are not needed for detection and confuse wolfSSL.
    They are set up properly later if it is detected.  */
 #undef SIZEOF_LONG
 #undef SIZEOF_LONG_LONG
@@ -106,7 +106,7 @@ if test "x$OPT_WOLFSSL" != xno; then
          AC_SUBST(USE_WOLFSSL, [1])
          WOLFSSL_ENABLED=1
          USE_WOLFSSL="yes"
-         ssl_msg="WolfSSL"
+         ssl_msg="wolfSSL"
          QUIC_ENABLED=yes
          test wolfssl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
        ],
@@ -128,7 +128,7 @@ if test "x$OPT_WOLFSSL" != xno; then
 
       LIBS="$addlib -lm $LIBS"
 
-      dnl WolfSSL needs configure --enable-opensslextra to have *get_peer*
+      dnl wolfSSL needs configure --enable-opensslextra to have *get_peer*
       dnl DES* is needed for NTLM support and lives in the OpenSSL compatibility
       dnl layer
       AC_CHECK_FUNCS(wolfSSL_get_peer_certificate \

@@ -8,7 +8,7 @@ SPDX-License-Identifier: curl
 
 We have added support for ECH to curl. It can use HTTPS RRs published in the
 DNS if curl uses DoH, or else can accept the relevant ECHConfigList values
-from the command line. This works with OpenSSL, WolfSSL or boringssl as the
+from the command line. This works with OpenSSL, wolfSSL or BoringSSL as the
 TLS provider.
 
 This feature is EXPERIMENTAL. DO NOT USE IN PRODUCTION.
@@ -149,7 +149,7 @@ the verbose output, e.g.:
 ```
 
 At that point, you could copy the base64 encoded value above and try again.
-For now, this only works for the OpenSSL and boringssl builds.
+For now, this only works for the OpenSSL and BoringSSL builds.
 
 ## Default settings
 
@@ -306,7 +306,7 @@ To build with cmake, assuming our ECH-enabled OpenSSL is as before:
 The binary produced by the cmake build does not need any ECH-specific
 ``LD_LIBRARY_PATH`` setting.
 
-## boringssl build
+## BoringSSL build
 
 BoringSSL is also supported by curl and also supports ECH, so to build
 with that, instead of our ECH-enabled OpenSSL:
@@ -334,16 +334,16 @@ Then:
     make
 ```
 
-The boringssl APIs are fairly similar to those in our ECH-enabled OpenSSL
+The BoringSSL APIs are fairly similar to those in our ECH-enabled OpenSSL
 fork, so code changes are also in ``lib/vtls/openssl.c``, protected
 via ``#ifdef OPENSSL_IS_BORINGSSL`` and are mostly obvious API variations.
 
-The boringssl APIs however do not support the ``--ech pn:`` command line
+The BoringSSL APIs however do not support the ``--ech pn:`` command line
 variant as of now.
 
-## WolfSSL build
+## wolfSSL build
 
-WolfSSL also supports ECH and can be used by curl, so here's how:
+wolfSSL also supports ECH and can be used by curl, so here's how:
 
 ```bash
     cd $HOME/code
@@ -355,7 +355,7 @@ WolfSSL also supports ECH and can be used by curl, so here's how:
     make install
 ```
 
-The install prefix (``inst``) in the above causes WolfSSL to be installed there
+The install prefix (``inst``) in the above causes wolfSSL to be installed there
 and we seem to need that for the curl configure command to work out. The
 ``--enable-opensslextra`` turns out (after much faffing about;-) to be
 important or else we get build problems with curl below.
@@ -369,7 +369,7 @@ important or else we get build problems with curl below.
     make
 ```
 
-There are some known issues with the ECH implementation in WolfSSL:
+There are some known issues with the ECH implementation in wolfSSL:
 
 - The main issue is that the client currently handles HelloRetryRequest
   incorrectly.  [HRR issue](https://github.com/wolfSSL/wolfssl/issues/6802).)
@@ -379,29 +379,29 @@ There are some known issues with the ECH implementation in WolfSSL:
 - There is also an issue related to so-called middlebox compatibility mode.
   [middlebox compatibility issue](https://github.com/wolfSSL/wolfssl/issues/6774)
 
-### Code changes to support WolfSSL
+### Code changes to support wolfSSL
 
 There are what seem like oddball differences:
 
 - The DoH URL in``$HOME/.curlrc`` can use `1.1.1.1` for OpenSSL but has to be
-  `one.one.one.one` for WolfSSL. The latter works for both, so OK, we us that.
-- There seems to be some difference in CA databases too - the WolfSSL version
+  `one.one.one.one` for wolfSSL. The latter works for both, so OK, we us that.
+- There seems to be some difference in CA databases too - the wolfSSL version
   does not like ``defo.ie``, whereas the system and OpenSSL ones do. We can
   ignore that for our purposes via ``--insecure``/``-k`` but would need to fix
   for a real setup. (Browsers do like those certificates though.)
 
 Then there are some functional code changes:
 
-- tweak to ``configure.ac`` to check if WolfSSL has ECH or not
+- tweak to ``configure.ac`` to check if wolfSSL has ECH or not
 - added code to ``lib/vtls/wolfssl.c`` mirroring what's done in the
   OpenSSL equivalent above.
-- WolfSSL does not support ``--ech false`` or the ``--ech pn:`` command line
+- wolfSSL does not support ``--ech false`` or the ``--ech pn:`` command line
   argument.
 
 The lack of support for ``--ech false`` is because wolfSSL has decided to
 always at least GREASE if built to support ECH. In other words, GREASE is
 a compile time choice for wolfSSL, but a runtime choice for OpenSSL or
-boringssl. (Both are reasonable.)
+BoringSSL. (Both are reasonable.)
 
 ## Additional notes
 
@@ -474,5 +474,5 @@ to get the HTTPS RR and pass the ECHConfigList from that on the command line,
 if needed, or one can access the value from command line output in verbose more
 and then re-use that in another invocation.
 
-Both our OpenSSL fork and boringssl have APIs for both controlling GREASE and
-accessing and logging ``retry_configs``, it seems WolfSSL has neither.
+Both our OpenSSL fork and BoringSSL have APIs for both controlling GREASE and
+accessing and logging ``retry_configs``, it seems wolfSSL has neither.

@@ -69,7 +69,6 @@ Bjørn
 bool
 boolean
 BoringSSL
-boringssl
 Boukris
 Broadcom
 brotli
@@ -293,7 +292,6 @@ globbed
 globbing
 gmail
 GnuTLS
-gnutls
 Golemon
 GOST
 GPG
@@ -441,11 +439,9 @@ libpsl
 Libre
 libre
 LibreSSL
-libressl
 librtmp
 libs
 libssh
-libSSH
 libssh2
 Libtool
 libtool

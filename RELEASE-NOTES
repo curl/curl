@@ -158,7 +158,7 @@ This release includes the following bugfixes:
  o noproxy: test bad ipv6 net size first [82]
  o openssl/gnutls: rectify the TLS version checks for QUIC [61]
  o openssl: fix %-specifier in infof() call [57]
- o openSSL: fix hostname handling when using ECH [78]
+ o openssl: fix hostname handling when using ECH [78]
  o openssl: stop duplicate ssl key logging for legacy OpenSSL [49]
  o os400: make it compilable again [128]
  o pytest: add ftp upload tests [16]
@@ -199,7 +199,7 @@ This release includes the following bugfixes:
  o tests: include current directory when running test Perl commands [205]
  o tests: log "Throwing away" messages before throwing away
  o tests: run with "--trace-config all" to provide even more info [6]
- o tests: test_17_ssl_use.py clarify mbedtls TLSv1.3 support [43]
+ o tests: test_17_ssl_use.py clarify mbedTLS TLSv1.3 support [43]
  o tests: use exec when spawning nghttpx [45]
  o tidy-up: use consistent casing for Windows directories [28]
  o TODO: remove some old, clarify, add something [31]

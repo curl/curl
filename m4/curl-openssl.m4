@@ -293,7 +293,7 @@ if test "x$OPT_OPENSSL" != xno; then
         AC_MSG_RESULT([no])
     ])
 
-    AC_MSG_CHECKING([for libressl])
+    AC_MSG_CHECKING([for LibreSSL])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #include <openssl/opensslv.h>
@@ -303,8 +303,8 @@ if test "x$OPT_OPENSSL" != xno; then
     ],[
       AC_MSG_RESULT([yes])
       AC_DEFINE_UNQUOTED(HAVE_LIBRESSL, 1,
-        [Define to 1 if using libressl.])
-      ssl_msg="libressl"
+        [Define to 1 if using LibreSSL.])
+      ssl_msg="LibreSSL"
     ],[
       AC_MSG_RESULT([no])
     ])

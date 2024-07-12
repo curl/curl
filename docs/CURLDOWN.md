@@ -97,7 +97,7 @@ option. The available TLS backends are:
 - `BearSSL`
 - `GnuTLS`
 - `mbedTLS`
-- `OpenSSL` (also covers BoringSSL, libressl, quictls, AWS-LC and AmiSSL)
+- `OpenSSL` (also covers BoringSSL, LibreSSL, quictls, AWS-LC and AmiSSL)
 - `rustls`
 - `Schannel`
 - `Secure Transport`

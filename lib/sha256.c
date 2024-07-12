@@ -542,4 +542,4 @@ const struct HMAC_params Curl_HMAC_SHA256[] = {
 };
 
 
-#endif /* AWS, DIGEST, or libSSH2 */
+#endif /* AWS, DIGEST, or libssh2 */
