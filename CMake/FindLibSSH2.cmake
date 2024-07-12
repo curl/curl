@@ -22,7 +22,7 @@
 #
 ###########################################################################
 # - Try to find the libssh2 library
-# Once done this will define
+# Once done this defines
 #
 # LIBSSH2_FOUND - system has the libssh2 library
 # LIBSSH2_INCLUDE_DIR - the libssh2 include directory

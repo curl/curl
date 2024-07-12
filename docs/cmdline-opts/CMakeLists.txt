@@ -24,7 +24,7 @@
 set(MANPAGE "${CURL_BINARY_DIR}/docs/cmdline-opts/curl.1")
 set(ASCIIPAGE "${CURL_BINARY_DIR}/docs/cmdline-opts/curl.txt")
 
-# Load DPAGES and OTHERPAGES from shared file
+# Get 'DPAGES' variable
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 

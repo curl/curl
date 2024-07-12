@@ -22,7 +22,7 @@
 #
 ###########################################################################
 # - Try to find the libpsl library
-# Once done this will define
+# Once done this defines
 #
 # LIBPSL_FOUND - system has the libpsl library
 # LIBPSL_INCLUDE_DIR - the libpsl include directory

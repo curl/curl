@@ -21,33 +21,21 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-
-#[=======================================================================[.rst:
-FindNGTCP2
-----------
-
-Find the ngtcp2 library
-
-This module accepts optional COMPONENTS to control the crypto library (these are
-mutually exclusive)::
-
-  quictls, LibreSSL:  Use libngtcp2_crypto_quictls
-  BoringSSL, AWS-LC:  Use libngtcp2_crypto_boringssl
-  wolfSSL:            Use libngtcp2_crypto_wolfssl
-  GnuTLS:             Use libngtcp2_crypto_gnutls
-
-Result Variables
-^^^^^^^^^^^^^^^^
-
-``NGTCP2_FOUND``
-  System has ngtcp2
-``NGTCP2_INCLUDE_DIRS``
-  The ngtcp2 include directories.
-``NGTCP2_LIBRARIES``
-  The libraries needed to use ngtcp2
-``NGTCP2_VERSION``
-  version of ngtcp2.
-#]=======================================================================]
+# Find the ngtcp2 library
+#
+# This module accepts optional COMPONENTS to control the crypto library (these are
+# mutually exclusive):
+#
+#  quictls, LibreSSL:  Use libngtcp2_crypto_quictls
+#  BoringSSL, AWS-LC:  Use libngtcp2_crypto_boringssl
+#  wolfSSL:            Use libngtcp2_crypto_wolfssl
+#  GnuTLS:             Use libngtcp2_crypto_gnutls
+#
+# Result Variables:
+# NGTCP2_FOUND         System has ngtcp2
+# NGTCP2_INCLUDE_DIRS  The ngtcp2 include directories.
+# NGTCP2_LIBRARIES     The libraries needed to use ngtcp2
+# NGTCP2_VERSION       version of ngtcp2.
 
 if(UNIX)
   find_package(PkgConfig QUIET)
@@ -72,12 +60,12 @@ endif()
 
 if(NGTCP2_FIND_COMPONENTS)
   set(NGTCP2_CRYPTO_BACKEND "")
-  foreach(component IN LISTS NGTCP2_FIND_COMPONENTS)
-    if(component MATCHES "^(BoringSSL|quictls|wolfSSL|GnuTLS)")
+  foreach(_component IN LISTS NGTCP2_FIND_COMPONENTS)
+    if(_component MATCHES "^(BoringSSL|quictls|wolfSSL|GnuTLS)")
       if(NGTCP2_CRYPTO_BACKEND)
         message(FATAL_ERROR "NGTCP2: Only one crypto library can be selected")
       endif()
-      set(NGTCP2_CRYPTO_BACKEND ${component})
+      set(NGTCP2_CRYPTO_BACKEND ${_component})
     endif()
   endforeach()
 

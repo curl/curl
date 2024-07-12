@@ -21,7 +21,7 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# Load man_MANS from shared file
+# Get 'man_MANS' variable
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
@@ -76,7 +76,7 @@ add_manual_pages(man_MANS)
 add_custom_target(curl-man ALL DEPENDS ${man_MANS})
 if(NOT CURL_DISABLE_INSTALL)
   unset(_src)
-  foreach(_f ${man_MANS})
+  foreach(_f IN LISTS man_MANS)
     list(APPEND _src "${CMAKE_CURRENT_BINARY_DIR}/${_f}")
   endforeach()
   install(FILES ${_src} DESTINATION ${CMAKE_INSTALL_MANDIR}/man3)

@@ -21,23 +21,13 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+# Find the quiche library
+#
+# Result Variables:
+# QUICHE_FOUND         System has quiche
+# QUICHE_INCLUDE_DIRS  The quiche include directories
+# QUICHE_LIBRARIES     The libraries needed to use quiche
 
-#[=======================================================================[.rst:
-FindQUICHE
-----------
-
-Find the quiche library
-
-Result Variables
-^^^^^^^^^^^^^^^^
-
-``QUICHE_FOUND``
-  System has quiche
-``QUICHE_INCLUDE_DIRS``
-  The quiche include directories.
-``QUICHE_LIBRARIES``
-  The libraries needed to use quiche
-#]=======================================================================]
 if(UNIX)
   find_package(PkgConfig QUIET)
   pkg_search_module(PC_QUICHE quiche)

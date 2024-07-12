@@ -21,23 +21,12 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-
-#[=======================================================================[.rst:
-FindZstd
-----------
-
-Find the zstd library
-
-Result Variables
-^^^^^^^^^^^^^^^^
-
-``Zstd_FOUND``
-  System has zstd
-``Zstd_INCLUDE_DIRS``
-  The zstd include directories.
-``Zstd_LIBRARIES``
-  The libraries needed to use zstd
-#]=======================================================================]
+# Find the zstd library
+#
+# Result Variables
+# Zstd_FOUND         System has zstd
+# Zstd_INCLUDE_DIRS  The zstd include directories.
+# Zstd_LIBRARIES     The libraries needed to use zstd
 
 if(UNIX)
   find_package(PkgConfig QUIET)

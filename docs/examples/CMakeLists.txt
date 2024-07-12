@@ -22,23 +22,23 @@
 #
 ###########################################################################
 
+# Get 'check_PROGRAMS' variable
 transform_makefile_inc("Makefile.inc"
   "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
-# Get 'check_PROGRAMS' variable
 
-foreach(example IN LISTS check_PROGRAMS)
-  set(example_target "curl-example-${example}")
-  add_executable(${example_target} "${example}.c")
-  target_include_directories(${example_target} PRIVATE
+foreach(_example IN LISTS check_PROGRAMS)
+  set(_example_target "curl-example-${_example}")
+  add_executable(${_example_target} "${_example}.c")
+  target_include_directories(${_example_target} PRIVATE
     "${CURL_SOURCE_DIR}/lib"      # for "curl_setup_once.h"
     "${CURL_BINARY_DIR}/lib"      # for "curl_config.h"
     "${CURL_BINARY_DIR}/include"  # for "curl/curl.h"
   )
-  target_link_libraries(${example_target} ${LIB_SELECTED} ${CURL_LIBS})
-  target_compile_definitions(${example_target} PRIVATE "CURL_NO_OLDIES")
+  target_link_libraries(${_example_target} ${LIB_SELECTED} ${CURL_LIBS})
+  target_compile_definitions(${_example_target} PRIVATE "CURL_NO_OLDIES")
   if(LIB_SELECTED STREQUAL LIB_STATIC AND WIN32)
-    set_property(TARGET ${example_target} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
+    set_property(TARGET ${_example_target} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
   endif()
-  set_target_properties(${example_target} PROPERTIES OUTPUT_NAME "${example}" UNITY_BUILD OFF)
+  set_target_properties(${_example_target} PROPERTIES OUTPUT_NAME "${_example}" UNITY_BUILD OFF)
 endforeach()

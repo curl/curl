@@ -28,6 +28,7 @@ add_definitions(-DBUILDING_LIBCURL)
 configure_file(curl_config.h.cmake
   ${CMAKE_CURRENT_BINARY_DIR}/curl_config.h)
 
+# Get 'CSOURCES', 'HHEADERS' variables
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
 
@@ -38,19 +39,21 @@ list(APPEND HHEADERS ${CMAKE_CURRENT_BINARY_DIR}/curl_config.h)
 
 # The rest of the build
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/../include)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/..)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include)
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/..)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(
+  ${CMAKE_CURRENT_BINARY_DIR}/../include
+  ${CMAKE_CURRENT_SOURCE_DIR}/..
+  ${CMAKE_CURRENT_SOURCE_DIR}/../include
+  ${CMAKE_CURRENT_BINARY_DIR}/..
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_CURRENT_BINARY_DIR}
+)
 if(USE_ARES)
   include_directories(${CARES_INCLUDE_DIR})
 endif()
 
 if(BUILD_TESTING)
   add_library(
-    curlu # special libcurlu library just for unittests
+    curlu  # special libcurlu library just for unittests
     STATIC
     EXCLUDE_FROM_ALL
     ${HHEADERS} ${CSOURCES}
@@ -122,7 +125,7 @@ else()
   set(LIB_SOURCE ${HHEADERS} ${CSOURCES})
 endif()
 
-# we want it to be called libcurl on all platforms
+# We want it to be called libcurl on all platforms
 if(BUILD_STATIC_LIBS)
   list(APPEND libcurl_export ${LIB_STATIC})
   add_library(${LIB_STATIC} STATIC ${LIB_SOURCE})
@@ -203,22 +206,23 @@ if(BUILD_SHARED_LIBS)
     # up to v3.x and ELF from v3.x. I cannot imagine someone running CMake
     # on those ancient systems.
     CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
-    set(soversion_default TRUE)
+    set(_soversion_default TRUE)
   else()
-    set(soversion_default FALSE)
+    set(_soversion_default FALSE)
   endif()
 
-  option(CURL_LIBCURL_SOVERSION "Enable libcurl SOVERSION" ${soversion_default})
+  option(CURL_LIBCURL_SOVERSION "Enable libcurl SOVERSION" ${_soversion_default})
 
   if(CURL_LIBCURL_SOVERSION)
+    # Get 'VERSIONCHANGE', 'VERSIONADD', 'VERSIONDEL', 'VERSIONINFO' variables
     transform_makefile_inc("Makefile.soname" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake")
     include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake)
 
-    math(EXPR CMAKESONAME "${VERSIONCHANGE} - ${VERSIONDEL}")
-    set(CMAKEVERSION "${CMAKESONAME}.${VERSIONDEL}.${VERSIONADD}")
+    math(EXPR _cmakesoname "${VERSIONCHANGE} - ${VERSIONDEL}")
+    set(_cmakeversion "${_cmakesoname}.${VERSIONDEL}.${VERSIONADD}")
 
     set_target_properties(${LIB_SHARED} PROPERTIES
-      VERSION "${CMAKEVERSION}" SOVERSION "${CMAKESONAME}")
+      VERSION "${_cmakeversion}" SOVERSION "${_cmakesoname}")
   endif()
 endif()
 
@@ -244,7 +248,7 @@ if(CURL_ENABLE_EXPORT_TARGET)
   endif()
 
   export(TARGETS ${libcurl_export}
-         FILE ${PROJECT_BINARY_DIR}/libcurl-target.cmake
-         NAMESPACE ${PROJECT_NAME}::
+    FILE ${PROJECT_BINARY_DIR}/libcurl-target.cmake
+    NAMESPACE ${PROJECT_NAME}::
   )
 endif()

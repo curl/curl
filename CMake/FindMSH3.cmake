@@ -21,23 +21,13 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+# Find the msh3 library
+#
+# Result Variables:
+# MSH3_FOUND         System has msh3
+# MSH3_INCLUDE_DIRS  The msh3 include directories.
+# MSH3_LIBRARIES     The libraries needed to use msh3
 
-#[=======================================================================[.rst:
-FindMSH3
-----------
-
-Find the msh3 library
-
-Result Variables
-^^^^^^^^^^^^^^^^
-
-``MSH3_FOUND``
-  System has msh3
-``MSH3_INCLUDE_DIRS``
-  The msh3 include directories.
-``MSH3_LIBRARIES``
-  The libraries needed to use msh3
-#]=======================================================================]
 if(UNIX)
   find_package(PkgConfig QUIET)
   pkg_search_module(PC_MSH3 libmsh3)

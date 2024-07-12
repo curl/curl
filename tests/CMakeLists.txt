@@ -33,11 +33,11 @@ function(add_runtests targetname test_flags)
   # replaced by the contents of the environment variable in runtests.pl.
   # This is a workaround for CMake's limitation where commands executed by
   # 'make' or 'ninja' cannot portably reference environment variables.
-  string(REPLACE " " ";" test_flags_list "${test_flags}")
+  string(REPLACE " " ";" _test_flags_list "${test_flags}")
   add_custom_target(${targetname}
     COMMAND
       "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/runtests.pl"
-      ${test_flags_list}
+      ${_test_flags_list}
       "\$TFLAGS"
     DEPENDS testdeps
     VERBATIM USES_TERMINAL
@@ -86,7 +86,7 @@ use vars qw(
 add_runtests(test-quiet     "-a -s")
 add_runtests(test-am        "-a -am")
 add_runtests(test-full      "-a -p -r")
-# ~flaky means that it'll ignore results of tests using the flaky keyword
+# ~flaky means that it ignores results of tests using the flaky keyword
 add_runtests(test-nonflaky  "-a -p ~flaky ~timing-dependent")
 add_runtests(test-ci        "-a -p ~flaky ~timing-dependent -r -rm -j2")
 add_runtests(test-torture   "-a -t")

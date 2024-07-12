@@ -21,54 +21,55 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-#File defines convenience macros for available feature testing
+# File defines convenience macros for available feature testing
 
 # Check if header file exists and add it to the list.
 # This macro is intended to be called multiple times with a sequence of
 # possibly dependent header files.  Some headers depend on others to be
 # compiled correctly.
-macro(check_include_file_concat FILE VARIABLE)
-  check_include_files("${CURL_INCLUDES};${FILE}" ${VARIABLE})
-  if(${VARIABLE})
-    set(CURL_INCLUDES ${CURL_INCLUDES} ${FILE})
-    set(CURL_TEST_DEFINES "${CURL_TEST_DEFINES} -D${VARIABLE}")
+macro(check_include_file_concat file variable)
+  check_include_files("${CURL_INCLUDES};${file}" ${variable})
+  if(${variable})
+    set(CURL_INCLUDES ${CURL_INCLUDES} ${file})
+    set(CURL_TEST_DEFINES "${CURL_TEST_DEFINES} -D${variable}")
   endif()
 endmacro()
 
 # For other curl specific tests, use this macro.
-macro(curl_internal_test CURL_TEST)
-  if(NOT DEFINED "${CURL_TEST}")
+# Return result in variable: CURL_TEST_OUTPUT
+macro(curl_internal_test curl_test)
+  if(NOT DEFINED "${curl_test}")
     set(MACRO_CHECK_FUNCTION_DEFINITIONS
-      "-D${CURL_TEST} ${CURL_TEST_DEFINES} ${CMAKE_REQUIRED_FLAGS}")
+      "-D${curl_test} ${CURL_TEST_DEFINES} ${CMAKE_REQUIRED_FLAGS}")
     if(CMAKE_REQUIRED_LIBRARIES)
       set(CURL_TEST_ADD_LIBRARIES
         "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}")
     endif()
 
-    message(STATUS "Performing Test ${CURL_TEST}")
-    try_compile(${CURL_TEST}
+    message(STATUS "Performing Test ${curl_test}")
+    try_compile(${curl_test}
       ${CMAKE_BINARY_DIR}
       ${CMAKE_CURRENT_SOURCE_DIR}/CMake/CurlTests.c
       CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_FUNCTION_DEFINITIONS}
       "${CURL_TEST_ADD_LIBRARIES}"
-      OUTPUT_VARIABLE OUTPUT)
-    if(${CURL_TEST})
-      set(${CURL_TEST} 1 CACHE INTERNAL "Curl test")
-      message(STATUS "Performing Test ${CURL_TEST} - Success")
+      OUTPUT_VARIABLE CURL_TEST_OUTPUT)
+    if(${curl_test})
+      set(${curl_test} 1 CACHE INTERNAL "Curl test")
+      message(STATUS "Performing Test ${curl_test} - Success")
     else()
-      set(${CURL_TEST} "" CACHE INTERNAL "Curl test")
-      message(STATUS "Performing Test ${CURL_TEST} - Failed")
+      set(${curl_test} "" CACHE INTERNAL "Curl test")
+      message(STATUS "Performing Test ${curl_test} - Failed")
     endif()
   endif()
 endmacro()
 
-macro(optional_dependency DEPENDENCY)
-  set(CURL_${DEPENDENCY} AUTO CACHE STRING "Build curl with ${DEPENDENCY} support (AUTO, ON or OFF)")
-  set_property(CACHE CURL_${DEPENDENCY} PROPERTY STRINGS AUTO ON OFF)
+macro(optional_dependency dependency)
+  set(CURL_${dependency} AUTO CACHE STRING "Build curl with ${dependency} support (AUTO, ON or OFF)")
+  set_property(CACHE CURL_${dependency} PROPERTY STRINGS AUTO ON OFF)
 
-  if(CURL_${DEPENDENCY} STREQUAL AUTO)
-    find_package(${DEPENDENCY})
-  elseif(CURL_${DEPENDENCY})
-    find_package(${DEPENDENCY} REQUIRED)
+  if(CURL_${dependency} STREQUAL AUTO)
+    find_package(${dependency})
+  elseif(CURL_${dependency})
+    find_package(${dependency} REQUIRED)
   endif()
 endmacro()
