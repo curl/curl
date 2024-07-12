@@ -26,6 +26,13 @@
 
 #if defined(USE_CURL_NTLM_CORE)
 
+#if defined(USE_OPENSSL)
+#  include <openssl/ssl.h>
+#elif defined(USE_WOLFSSL)
+#  include <wolfssl/options.h>
+#  include <wolfssl/openssl/ssl.h>
+#endif
+
 /*
  * NTLM details:
  *
