@@ -47,9 +47,12 @@ endfunction()
 
 # Create configurehelp.pm, used by tests needing to run the C preprocessor.
 if(MSVC)
-  set(_cpp_option "-P")
+  set(_cpp_options "-P")
 elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
-  set(_cpp_option "-E")
+  set(_cpp_options "-E")
+endif()
+if(APPLE)
+  set(_cpp_options "${_cpp_options} -isysroot ${CMAKE_OSX_SYSROOT}")
 endif()
 if(NOT _cpp_option STREQUAL "")
   file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/configurehelp.pm" "# This is a generated file.  Do not edit.
@@ -72,7 +75,7 @@ use vars qw(
     \$Cpreprocessor
     );
 
-\$Cpreprocessor = '${CMAKE_C_COMPILER} ${_cpp_option}';
+\$Cpreprocessor = '${CMAKE_C_COMPILER} ${_cpp_options}';
 
 1;
 ")
