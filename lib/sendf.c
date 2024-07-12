@@ -1025,6 +1025,12 @@ static CURLcode cr_lc_read(struct Curl_easy *data,
          * the content length after having started the request... */
       }
     }
+
+    if(start < i) { /* leftover */
+      result = Curl_bufq_cwrite(&ctx->buf, buf + start, i - start, &n);
+      if(result)
+        return result;
+    }
   }
 
   DEBUGASSERT(!Curl_bufq_is_empty(&ctx->buf));
