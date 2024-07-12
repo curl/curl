@@ -72,7 +72,7 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-websockets --without-ssl --enable-debug \
+            ./configure --enable-debug --enable-warnings --enable-websockets --without-ssl \
               CPPFLAGS="-I$(brew --prefix libpsl)/include" \
               CFLAGS='-mmacosx-version-min=10.9' \
               LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" \
@@ -84,7 +84,7 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-websockets --without-ssl "--with-libssh2=$(brew --prefix libssh2)" --enable-debug \
+            ./configure --enable-debug --enable-warnings --enable-websockets --without-ssl "--with-libssh2=$(brew --prefix libssh2)" \
               CPPFLAGS="-I$(brew --prefix libpsl)/include" \
               CFLAGS='-mmacosx-version-min=10.9' \
               LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" \
@@ -96,7 +96,7 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-websockets --with-openssl --with-libssh --enable-ares --enable-debug \
+            ./configure --enable-debug --enable-warnings --enable-websockets --with-openssl --with-libssh --enable-ares \
               PKG_CONFIG_PATH="$(brew --prefix openssl)/lib/pkgconfig" \
               CPPFLAGS="-I$(brew --prefix libpsl)/include" \
               CFLAGS='-mmacosx-version-min=10.9' \
@@ -109,7 +109,7 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-websockets --with-openssl --with-libssh --enable-debug \
+            ./configure --enable-debug --enable-warnings --enable-websockets --with-openssl --with-libssh \
               PKG_CONFIG_PATH="$(brew --prefix openssl)/lib/pkgconfig" \
               CPPFLAGS="-I$(brew --prefix libpsl)/include" \
               CFLAGS='-mmacosx-version-min=10.9' \
@@ -122,7 +122,7 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-websockets --without-ssl --enable-ares --enable-debug \
+            ./configure --enable-debug --enable-warnings --enable-websockets --without-ssl --enable-ares \
               CPPFLAGS="-I$(brew --prefix libpsl)/include" \
               CFLAGS='-mmacosx-version-min=10.9' \
               LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" \
@@ -134,7 +134,7 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings \
+            ./configure --enable-debug --enable-warnings \
               --disable-dict \
               --disable-file \
               --disable-ftp \
@@ -159,7 +159,6 @@ commands:
               --without-nghttp2 \
               --without-ssl \
               --without-zlib \
-              --enable-debug \
               CFLAGS='-mmacosx-version-min=10.15' \
               || { tail -1000 config.log; false; }
 
@@ -180,7 +179,7 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-websockets --with-openssl --enable-debug \
+            ./configure --enable-debug --enable-warnings --enable-websockets --with-openssl \
               PKG_CONFIG_PATH="$(brew --prefix openssl)/lib/pkgconfig" \
               CPPFLAGS="-I$(brew --prefix libpsl)/include" \
               CFLAGS='-mmacosx-version-min=10.9' \
@@ -193,7 +192,7 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-websockets --with-openssl --enable-debug \
+            ./configure --enable-debug --enable-warnings --enable-websockets --with-openssl \
               PKG_CONFIG_PATH="$(brew --prefix libressl)/lib/pkgconfig" \
               CPPFLAGS="-I$(brew --prefix libpsl)/include" \
               CFLAGS='-mmacosx-version-min=10.9' \
@@ -206,7 +205,7 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-websockets --disable-shared --disable-threaded-resolver --with-openssl --enable-debug \
+            ./configure --enable-debug --enable-warnings --enable-websockets --disable-shared --disable-threaded-resolver --with-openssl \
               PKG_CONFIG_PATH="$(brew --prefix openssl)/lib/pkgconfig" \
               CPPFLAGS="-I$(brew --prefix libpsl)/include" \
               CFLAGS='-mmacosx-version-min=10.9' \
@@ -219,7 +218,7 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-websockets --disable-shared --disable-threaded-resolver --with-openssl --enable-debug \
+            ./configure --enable-debug --enable-warnings --enable-websockets --disable-shared --disable-threaded-resolver --with-openssl \
               PKG_CONFIG_PATH="$(brew --prefix openssl)/lib/pkgconfig" \
               CPPFLAGS="-I$(brew --prefix libpsl)/include" \
               CFLAGS='-mmacosx-version-min=10.9' \
