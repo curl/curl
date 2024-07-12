@@ -44,7 +44,6 @@
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Waddress"
-#pragma GCC diagnostic ignored "-Wunreachable-code"
 #endif
 
 #include <limits.h>
