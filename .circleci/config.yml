@@ -259,7 +259,8 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-werror --with-openssl --with-libssh || { tail -1000 config.log; false; }
+            ./configure --enable-warnings --enable-werror --with-openssl --with-libssh \
+              || { tail -1000 config.log; false; }
 
   install-wolfssl:
     steps:
@@ -292,21 +293,24 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-werror --with-openssl --enable-ares || { tail -1000 config.log; false; }
+            ./configure --enable-warnings --enable-werror --with-openssl --enable-ares \
+              || { tail -1000 config.log; false; }
 
   configure-wolfssh:
     steps:
       - run:
           command: |
             autoreconf -fi
-            LDFLAGS="-Wl,-rpath,$HOME/wssh/lib" ./configure --enable-warnings --enable-werror --with-wolfssl=$HOME/wssl --with-wolfssh=$HOME/wssh || { tail -1000 config.log; false; }
+            LDFLAGS="-Wl,-rpath,$HOME/wssh/lib" ./configure --enable-warnings --enable-werror --with-wolfssl=$HOME/wssl --with-wolfssh=$HOME/wssh \
+              || { tail -1000 config.log; false; }
 
   configure-cares-debug:
     steps:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-debug --enable-werror --with-openssl --enable-ares || { tail -1000 config.log; false; }
+            ./configure --enable-debug --enable-werror --with-openssl --enable-ares \
+              || { tail -1000 config.log; false; }
 
   build:
     steps:
