@@ -64,7 +64,7 @@ commands:
               CPPFLAGS="-I$(brew --prefix libpsl)/include" \
               CFLAGS='-mmacosx-version-min=10.9' \
               LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" \
-              LIBS="-licuuc -licudata" \
+              LIBS='-licuuc -licudata' \
               || { tail -1000 config.log; false; }
 
   configure-macos-debug:
@@ -76,7 +76,7 @@ commands:
               CPPFLAGS="-I$(brew --prefix libpsl)/include" \
               CFLAGS='-mmacosx-version-min=10.9' \
               LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" \
-              LIBS="-licuuc -licudata" \
+              LIBS='-licuuc -licudata' \
               || { tail -1000 config.log; false; }
 
   configure-macos-libssh2:
@@ -88,7 +88,7 @@ commands:
               CPPFLAGS="-I$(brew --prefix libpsl)/include" \
               CFLAGS='-mmacosx-version-min=10.9' \
               LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" \
-              LIBS="-licuuc -licudata" \
+              LIBS='-licuuc -licudata' \
               || { tail -1000 config.log; false; }
 
   configure-macos-libssh-c-ares:
@@ -101,7 +101,7 @@ commands:
               CPPFLAGS="-I$(brew --prefix libpsl)/include" \
               CFLAGS='-mmacosx-version-min=10.9' \
               LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" \
-              LIBS="-licuuc -licudata" \
+              LIBS='-licuuc -licudata' \
               || { tail -1000 config.log; false; }
 
   configure-macos-libssh:
@@ -114,7 +114,7 @@ commands:
               CPPFLAGS="-I$(brew --prefix libpsl)/include" \
               CFLAGS='-mmacosx-version-min=10.9' \
               LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" \
-              LIBS="-licuuc -licudata" \
+              LIBS='-licuuc -licudata' \
               || { tail -1000 config.log; false; }
 
   configure-macos-c-ares:
@@ -126,7 +126,7 @@ commands:
               CPPFLAGS="-I$(brew --prefix libpsl)/include" \
               CFLAGS='-mmacosx-version-min=10.9' \
               LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" \
-              LIBS="-licuuc -licudata" \
+              LIBS='-licuuc -licudata' \
               || { tail -1000 config.log; false; }
 
   configure-macos-http-only:
@@ -152,7 +152,7 @@ commands:
               CPPFLAGS="-I$(brew --prefix libpsl)/include" \
               CFLAGS='-mmacosx-version-min=10.8' \
               LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" \
-              LIBS="-licuuc -licudata" \
+              LIBS='-licuuc -licudata' \
               || { tail -1000 config.log; false; }
 
   configure-macos-openssl-http2:
@@ -165,7 +165,7 @@ commands:
               CPPFLAGS="-I$(brew --prefix libpsl)/include" \
               CFLAGS='-mmacosx-version-min=10.9' \
               LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" \
-              LIBS="-licuuc -licudata" \
+              LIBS='-licuuc -licudata' \
               || { tail -1000 config.log; false; }
 
   configure-macos-libressl-http2:
@@ -178,7 +178,7 @@ commands:
               CPPFLAGS="-I$(brew --prefix libpsl)/include" \
               CFLAGS='-mmacosx-version-min=10.9' \
               LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" \
-              LIBS="-licuuc -licudata" \
+              LIBS='-licuuc -licudata' \
               || { tail -1000 config.log; false; }
 
   configure-macos-torture:
@@ -191,7 +191,7 @@ commands:
               CPPFLAGS="-I$(brew --prefix libpsl)/include" \
               CFLAGS='-mmacosx-version-min=10.9' \
               LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" \
-              LIBS="-licuuc -licudata" \
+              LIBS='-licuuc -licudata' \
               || { tail -1000 config.log; false; }
 
   configure-macos-torture-ftp:
@@ -204,7 +204,7 @@ commands:
               CPPFLAGS="-I$(brew --prefix libpsl)/include" \
               CFLAGS='-mmacosx-version-min=10.9' \
               LDFLAGS="-L$(brew --prefix libpsl)/lib -L$(brew --prefix icu4c)/lib" \
-              LIBS="-licuuc -licudata" \
+              LIBS='-licuuc -licudata' \
               || { tail -1000 config.log; false; }
 
   install-cares:
