@@ -15,7 +15,7 @@ body:
         Only file documentation bugs here! Ask questions on the mailing lists https://curl.se/mail/
 
   - type: textarea
-    id: reproducer
+    id: source
     attributes:
       label: Specify which documentation you found a problem with
       description: |
@@ -25,7 +25,7 @@ body:
       required: true
 
   - type: textarea
-    id: expected-behaviour
+    id: problem
     attributes:
       label: The problem
     validations:
