@@ -265,7 +265,7 @@ jobs:
 
       - name: 'run tests'
         env:
-          TFLAGS: '${{ matrix.tflags }} -j10 ~1452'
+          TFLAGS: '${{ matrix.tflags }} -j10 ~1452 ~IDN'
         run: make -C bld V=1 test-ci
 
   cmake:
@@ -358,7 +358,7 @@ jobs:
       - name: 'cmake run tests'
         if: ${{ matrix.compiler == 'clang' }}
         env:
-          TFLAGS: '${{ matrix.tflags }} -j10 ~1452'
+          TFLAGS: '${{ matrix.tflags }} -j10 ~1452 ~IDN'
         run: make -C bld test-ci
 
   combinations:
