@@ -32,6 +32,7 @@ converted
 with
 the
 --crlf option
+%repeat[650 x 0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789%0a]%
 </file>
 <command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -T %LOGDIR/upload%TESTNUMBER --crlf
@@ -60,6 +61,7 @@ converted
 with
 the
 --crlf option
+%repeat[650 x 0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789%0a]%
 .
 </upload>
 </verify>

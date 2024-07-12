@@ -1460,6 +1460,9 @@ sub singletest_check {
             # cut off the final newline from the final line of the upload data
             chomp($upload[-1]);
         }
+        for my $line (@upload) {
+            subbase64(\$line);
+        }
 
         # verify uploaded data
         my @out = loadarray("$logdir/upload.$testnum");

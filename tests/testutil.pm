@@ -127,6 +127,7 @@ sub subbase64 {
         # decode %NN characters
         my ($d, $n) = ($2, $1);
         $d =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
+        $n =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
         my $all = $d x $n;
         $$thing =~ s/%%REPEAT%%/$all/;
     }
