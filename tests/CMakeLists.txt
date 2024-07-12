@@ -51,10 +51,10 @@ if(MSVC)
 elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
   set(_cpp_options "-E")
 endif()
-if(APPLE)
-  set(_cpp_options "${_cpp_options} -isysroot ${CMAKE_OSX_SYSROOT}")
-endif()
 if(NOT _cpp_option STREQUAL "")
+  if(APPLE)
+    set(_cpp_options "${_cpp_options} -isysroot ${CMAKE_OSX_SYSROOT}")
+  endif()
   file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/configurehelp.pm" "# This is a generated file.  Do not edit.
 
 package configurehelp;
