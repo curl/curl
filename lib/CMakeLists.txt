@@ -38,12 +38,14 @@ list(APPEND HHEADERS ${CMAKE_CURRENT_BINARY_DIR}/curl_config.h)
 
 # The rest of the build
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/../include)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/..)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include)
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/..)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(
+  ${CMAKE_CURRENT_BINARY_DIR}/../include
+  ${CMAKE_CURRENT_SOURCE_DIR}/..
+  ${CMAKE_CURRENT_SOURCE_DIR}/../include
+  ${CMAKE_CURRENT_BINARY_DIR}/..
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_CURRENT_BINARY_DIR}
+)
 if(USE_ARES)
   include_directories(${CARES_INCLUDE_DIR})
 endif()
@@ -122,7 +124,7 @@ else()
   set(LIB_SOURCE ${HHEADERS} ${CSOURCES})
 endif()
 
-# we want it to be called libcurl on all platforms
+# We want it to be called libcurl on all platforms
 if(BUILD_STATIC_LIBS)
   list(APPEND libcurl_export ${LIB_STATIC})
   add_library(${LIB_STATIC} STATIC ${LIB_SOURCE})

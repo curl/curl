@@ -642,7 +642,7 @@ macro(openssl_check_symbol_exists SYMBOL FILES VARIABLE EXTRA_LIBS)
     endif()
     list(APPEND CMAKE_REQUIRED_DEFINITIONS -DHAVE_UINTPTR_T)  # to pull in stdint.h (as of wolfSSL v5.5.4)
   endif()
-  if(NOT "${EXTRA_LIBS}" STREQUAL "")
+  if(NOT EXTRA_LIBS STREQUAL "")
     list(APPEND CMAKE_REQUIRED_LIBRARIES "${EXTRA_LIBS}")
   endif()
   check_symbol_exists("${SYMBOL}" "${FILES}" "${VARIABLE}")
@@ -980,7 +980,7 @@ if(CURL_USE_LIBPSL)
 endif()
 
 # libssh2
-option(CURL_USE_LIBSSH2 "Use libssh2" ON)
+option(CURL_USE_LIBSSH2 "Use libssh2" ON)  # FIXME: default is OFF in autotools
 mark_as_advanced(CURL_USE_LIBSSH2)
 set(USE_LIBSSH2 OFF)
 
