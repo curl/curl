@@ -52,7 +52,7 @@ elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
   set(_cpp_option "-E")
 endif()
 if(NOT _cpp_option STREQUAL "")
-  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/configurehelp.pm" "This is a generated file.  Do not edit.
+  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/configurehelp.pm" "# This is a generated file.  Do not edit.
 
 package configurehelp;
 
