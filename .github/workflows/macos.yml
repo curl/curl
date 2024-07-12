@@ -147,7 +147,7 @@ jobs:
             configure: --enable-debug --with-secure-transport --enable-websockets
             macos-version-min: '10.8'
           - name: 'SecureTransport'
-            compiler: gcc-11
+            compiler: gcc-12
             configure: --enable-debug --with-secure-transport --enable-websockets
             macos-version-min: '10.8'
             tflags: ~RTSP ~1156 ~1539 ~2100
