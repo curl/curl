@@ -368,12 +368,6 @@
 /* Define to 1 if you have the idn2.h header file. */
 #cmakedefine HAVE_IDN2_H 1
 
-/* Define to 1 if you have the `socket' library (-lsocket). */
-#cmakedefine HAVE_LIBSOCKET 1
-
-/* Define to 1 if you have the `ssh2' library (-lssh2). */
-#cmakedefine HAVE_LIBSSH2 1
-
 /* if zlib is available */
 #cmakedefine HAVE_LIBZ 1
 

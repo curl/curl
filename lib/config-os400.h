@@ -107,9 +107,6 @@
 /* Define if you have the <io.h> header file. */
 #undef HAVE_IO_H
 
-/* Define if you have the `socket' library (-lsocket). */
-#undef HAVE_LIBSOCKET
-
 /* Define if you have GSS API. */
 #define HAVE_GSSAPI
 
