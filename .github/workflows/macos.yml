@@ -121,7 +121,7 @@ jobs:
             install:
             configure: --enable-debug --with-secure-transport --enable-websockets --with-libssh2=$(brew --prefix libssh2)
             macos-version-min: '10.8'
-          - name: 'SecureTransport libssh2'
+          - name: 'SecureTransport libssh2 10.12'
             compiler: clang
             install:
             configure: --enable-debug --with-secure-transport --enable-websockets --with-libssh2=$(brew --prefix libssh2)
@@ -153,7 +153,7 @@ jobs:
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=$(brew --prefix openssl) --enable-websockets
             tflags: -n -t --shallow=20 FTP
             macos-version-min: '10.9'
-          - name: 'OpenSSL libssh2 !ldap (macOS 10.15)'
+          - name: 'OpenSSL libssh2 !ldap 10.15'
             compiler: clang
             install:
             configure: --enable-debug --disable-ldap --with-openssl=$(brew --prefix openssl) --enable-websockets
