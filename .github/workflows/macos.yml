@@ -39,7 +39,8 @@ concurrency:
 
 permissions: {}
 
-# Deprecated Apple APIs and the macos-version-min value required to avoid deprecation warnings with llvm/clang:
+# Deprecated Apple APIs and the macos-version-min value required to avoid
+# deprecation warnings with llvm/clang:
 #
 # - 10.7  Lion (2011)          - GSS
 # - 10.8  Mountain Lion (2012) - CFURLCreateDataAndPropertiesFromResource (used by curl SecureTransport code)
@@ -51,7 +52,6 @@ permissions: {}
 # In this case `-Wno-deprecated-declarations` still comes handy to pacify
 # deprecation warnings, though the real solution would be to avoid calling
 # that function.
-#
 
 env:
   LDFLAGS: -w  # suppress 'object file was built for newer macOS version than being linked' warnings
@@ -356,7 +356,7 @@ jobs:
         run: make -C bld testdeps
 
       - name: 'cmake run tests'
-        if: ${{ matrix.compiler == 'clang' }}
+        if: ${{ matrix.compiler == 'clang' }}  # Save CI time, gcc builds are already tested via autotools
         env:
           TFLAGS: '${{ matrix.tflags }} -j10 ~1452 ~IDN'
         run: make -C bld test-ci
