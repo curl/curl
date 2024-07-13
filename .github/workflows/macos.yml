@@ -290,7 +290,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        compiler: [clang, gcc-12, gcc-13, gcc-14]
+        compiler: [clang, gcc-12]
         build:
           - name: 'OpenSSL'
             install: nghttp2 openssl gsasl
@@ -300,6 +300,14 @@ jobs:
           - name: 'SecureTransport !ldap ws'
             install: nghttp2
             generate: -DCURL_USE_SECTRANSP=ON -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DENABLE_WEBSOCKETS=ON
+            macos-version-min: '10.8'
+          - name: 'SecureTransport ws'
+            install: nghttp2
+            generate: -DCURL_USE_SECTRANSP=ON -DENABLE_WEBSOCKETS=ON
+            macos-version-min: '10.8'
+          - name: 'SecureTransport ws debug+'
+            install: nghttp2
+            generate: -DCURL_USE_SECTRANSP=ON -DENABLE_WEBSOCKETS=ON -DENABLE_DEBUG=ON -DENABLE_CURLDEBUG=ON
             macos-version-min: '10.8'
           - name: 'LibreSSL !ldap'
             install: nghttp2 libressl
