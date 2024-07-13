@@ -224,6 +224,7 @@ jobs:
           fi
           mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
             --disable-dependency-tracking \
+            --with-libpsl=$(brew --prefix libpsl) \
             ${{ matrix.configure }} ${options}
 
       - name: 'configure log'
