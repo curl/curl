@@ -236,10 +236,11 @@ jobs:
         run: cat bld/config.log || true
 
       - name: 'curl_config.h'
-        run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
-
-      - name: 'curl_config.h (full)'
-        run: cat bld/lib/curl_config.h || true
+        run: |
+          echo '::group::full'
+          cat bld/lib/curl_config.h || true
+          echo '::endgroup::'
+          cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'make'
         run: make -C bld V=1
@@ -354,10 +355,11 @@ jobs:
         run: cat bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
-        run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
-
-      - name: 'curl_config.h (full)'
-        run: cat bld/lib/curl_config.h || true
+        run: |
+          echo '::group::full'
+          cat bld/lib/curl_config.h || true
+          echo '::endgroup::'
+          cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'cmake build'
         run: make -C bld VERBOSE=1
@@ -602,10 +604,11 @@ jobs:
         run: cat bld/config.log bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
-        run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
-
-      - name: 'curl_config.h (full)'
-        run: cat bld/lib/curl_config.h || true
+        run: |
+          echo '::group::full'
+          cat bld/lib/curl_config.h || true
+          echo '::endgroup::'
+          cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'build / ${{ matrix.build }}'
         run: make -C bld V=1 VERBOSE=1
