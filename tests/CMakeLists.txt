@@ -75,7 +75,7 @@ use vars qw(
     \$Cpreprocessor
     );
 
-\$Cpreprocessor = '${CMAKE_C_COMPILER} ${_cpp_options}';
+\$Cpreprocessor = '\"${CMAKE_C_COMPILER}\" ${_cpp_options}';
 
 1;
 ")
