@@ -46,7 +46,7 @@ function(add_runtests targetname test_flags)
 endfunction()
 
 # Create configurehelp.pm, used by tests needing to run the C preprocessor.
-if(APPLE)
+if(APPLE AND (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang"))
   set(_cpp_cmd "${CMAKE_C_COMPILER} -E")
   if(NOT CMAKE_OSX_SYSROOT STREQUAL "")
     set(_cpp_cmd "${_cpp_cmd} -isysroot ${CMAKE_OSX_SYSROOT}")
