@@ -57,7 +57,8 @@
 static CURLcode mac_idn_to_ascii(const char *in, char **out)
 {
   UErrorCode err = U_ZERO_ERROR;
-  UIDNA* idna = uidna_openUTS46(UIDNA_CHECK_BIDI, &err);
+  UIDNA* idna = uidna_openUTS46(
+    UIDNA_CHECK_BIDI|UIDNA_NONTRANSITIONAL_TO_ASCII, &err);
   if(U_FAILURE(err)) {
     return CURLE_OUT_OF_MEMORY;
   }
@@ -83,7 +84,8 @@ static CURLcode mac_idn_to_ascii(const char *in, char **out)
 static CURLcode mac_ascii_to_idn(const char *in, char **out)
 {
   UErrorCode err = U_ZERO_ERROR;
-  UIDNA* idna = uidna_openUTS46(UIDNA_CHECK_BIDI, &err);
+  UIDNA* idna = uidna_openUTS46(
+    UIDNA_CHECK_BIDI|UIDNA_NONTRANSITIONAL_TO_UNICODE, &err);
   if(U_FAILURE(err)) {
     return CURLE_OUT_OF_MEMORY;
   }
