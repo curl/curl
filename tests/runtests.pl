@@ -3049,6 +3049,20 @@ if($total) {
 
     if($failed && ($ok != $total)) {
         my $failedsorted = numsortwords($failed);
+        logmsg "\n";
+        foreach my $testnum (split(' ', $failedsorted)) {
+            if(!loadtest("${TESTDIR}/test${testnum}")) {
+                my @info_keywords = getpart("info", "keywords");
+                my $testname = (getpart("client", "name"))[0];
+                chomp $testname;
+                logmsg "FAIL $testnum: [$testname]";
+                for my $k (@info_keywords) {
+                    chomp $k;
+                    logmsg " $k";
+                }
+                logmsg "\n";
+            }
+        }
         logmsg "\nTESTFAIL: These test cases failed: $failedsorted\n\n";
     }
 }
