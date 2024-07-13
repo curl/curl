@@ -94,7 +94,7 @@ int main (void)
 #ifdef $1
   return 0;
 #else
-  force compilation error
+  #error force compilation error
 #endif
 }
     ]])
@@ -130,7 +130,7 @@ int main (void)
 #elif defined(__hpux) && defined(_XOPEN_SOURCE_EXTENDED)
   return 0;
 #else
-  force compilation error
+  #error force compilation error
 #endif
 }
     ]])
