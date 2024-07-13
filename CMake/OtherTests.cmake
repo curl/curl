@@ -137,7 +137,7 @@ if(NOT DEFINED HAVE_GETADDRINFO_THREADSAFE)
     #ifdef h_errno
       return 0;
     #else
-      force compilation error
+      #error force compilation error
     #endif
     }" HAVE_H_ERRNO)
 
@@ -158,7 +158,7 @@ if(NOT DEFINED HAVE_GETADDRINFO_THREADSAFE)
         #elif defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE >= 700)
           return 0;
         #else
-          force compilation error
+          #error force compilation error
         #endif
         }" HAVE_H_ERRNO_SBS_ISSUE_7)
     endif()
