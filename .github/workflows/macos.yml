@@ -147,7 +147,7 @@ jobs:
             macos-version-min: '10.8'
           - name: 'SecureTransport'
             compiler: gcc-12
-            configure: --enable-debug --with-secure-transport --enable-websockets
+            configure: --enable-debug --with-secure-transport --enable-websockets --with-libssh2=$(brew --prefix)/opt/libssh2
             macos-version-min: '10.8'
             #tflags: '~2100'
           - name: 'LibreSSL'
