@@ -47,6 +47,7 @@ my %remove = (
     '#define HAVE_IOCTL 1' => 1,
     '#define HAVE_LDAP_SSL 1' => 1,
     '#define HAVE_LIBBROTLIDEC 1' => 1,
+    '#define HAVE_LIBSOCKET 1' => 1,
     '#define HAVE_LIBSSH2 1' => 1,
     '#define HAVE_LIBSSL 1' => 1,
     '#define HAVE_LIBZSTD 1' => 1,
