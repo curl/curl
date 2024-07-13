@@ -188,9 +188,6 @@ jobs:
           source $HOME/venv/bin/activate
           python3 -m pip install impacket
 
-      - name: 'remove $HOME/.curlrc'
-        run: rm -f $HOME/.curlrc
-
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - name: 'toolchain versions'
@@ -262,6 +259,7 @@ jobs:
           if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
             TFLAGS+=' ~RTSP ~1156 ~1539'
           fi
+          rm -f $HOME/.curlrc
           make -C bld V=1 test-ci
 
   cmake:
@@ -381,6 +379,7 @@ jobs:
           #if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
           #  TFLAGS+=' ~RTSP ~1156 ~1539'
           #fi
+          rm -f $HOME/.curlrc
           make -C bld test-ci
 
   combinations:
