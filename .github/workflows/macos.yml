@@ -232,6 +232,16 @@ jobs:
 
       - name: 'configure'
         run: |
+          if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
+            libgccdir="$(dirname "$("${CC}" -print-libgcc-file-name)")"
+            find "${libgccdir}/include-fixed" | sort
+            for f in dispatch os AvailabilityInternal.h stdio.h; do
+              if [ -r "${libgccdir}/include-fixed/${f}" ]; then
+                echo "Zap gcc hack: '${libgccdir}/include-fixed/${f}'"
+                mv "${libgccdir}/include-fixed/${f}" "${libgccdir}/include-fixed/${f}-BAK"
+              fi
+            done
+          fi
           if [ '${{ matrix.compiler }}' != 'clang' ]; then
             options+=" --with-sysroot=$(xcrun -sdk macosx --show-sdk-path 2>/dev/null)"
             CFLAGS+=" --sysroot=$(xcrun -sdk macosx --show-sdk-path 2>/dev/null)"
@@ -338,6 +348,16 @@ jobs:
 
       - name: 'cmake configure'
         run: |
+          if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
+            libgccdir="$(dirname "$("${CC}" -print-libgcc-file-name)")"
+            find "${libgccdir}/include-fixed" | sort
+            for f in dispatch os AvailabilityInternal.h stdio.h; do
+              if [ -r "${libgccdir}/include-fixed/${f}" ]; then
+                echo "Zap gcc hack: '${libgccdir}/include-fixed/${f}'"
+                mv "${libgccdir}/include-fixed/${f}" "${libgccdir}/include-fixed/${f}-BAK"
+              fi
+            done
+          fi
           cmake -B bld -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
             -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.build.macos-version-min }} \
             ${{ matrix.build.generate }}
