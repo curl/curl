@@ -264,7 +264,7 @@ jobs:
 
       - name: 'run tests'
         run: |
-          export TFLAGS='${{ matrix.tflags }} -j10 ~1452'
+          export TFLAGS='${{ matrix.tflags }} -j10'
           if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
             TFLAGS+=' ~RTSP ~1156 ~1539'
           fi
@@ -364,7 +364,7 @@ jobs:
       - name: 'cmake run tests'
         #if: ${{ matrix.compiler == 'clang' }}  # Save CI time, gcc builds are already tested via autotools
         run: |
-          export TFLAGS='${{ matrix.build.tflags }} -j10 ~1452'
+          export TFLAGS='${{ matrix.build.tflags }} -j10'
           #if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
           #  TFLAGS+=' ~RTSP ~1156 ~1539'
           #fi
