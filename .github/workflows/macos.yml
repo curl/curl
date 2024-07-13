@@ -280,13 +280,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        compiler: [clang, gcc-12]
+        compiler: [clang, gcc-12, gcc-13, gcc-14]
         build:
           - name: 'OpenSSL'
             install: nghttp2 openssl gsasl
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/openssl -DCURL_USE_GSASL=ON -DUSE_APPLE_IDN=ON
             macos-version-min: '10.9'
             tflags: '~165 ~1034 ~1035'  # AppleIDN issue: https://github.com/curl/curl/issues/14176
+          - name: 'SecureTransport !ldap'
+            install: nghttp2
+            generate: -DCURL_USE_SECTRANSP=ON -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
+            macos-version-min: '10.8'
           - name: 'LibreSSL !ldap'
             install: nghttp2 libressl
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DBUILD_EXAMPLES=ON
