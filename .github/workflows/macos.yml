@@ -257,9 +257,9 @@ jobs:
       - name: 'run tests'
         run: |
           export TFLAGS='${{ matrix.tflags }} -j10'
-          if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
-            TFLAGS+=' ~RTSP ~1156 ~1539'
-          fi
+          #if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
+          #  TFLAGS+=' ~RTSP ~1156 ~1539'
+          #fi
           rm -f $HOME/.curlrc
           make -C bld V=1 test-ci
 
