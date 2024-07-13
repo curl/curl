@@ -284,7 +284,7 @@ jobs:
             install: nghttp2 openssl gsasl
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/openssl -DCURL_USE_GSASL=ON -DUSE_APPLE_IDN=ON
             macos-version-min: '10.9'
-            tflags: '165 1034 1035'  # AppleIDN issue: https://github.com/curl/curl/issues/14176
+            #tflags: '165 1034 1035'  # AppleIDN issue: https://github.com/curl/curl/issues/14176
           - name: 'LibreSSL !ldap'
             install: nghttp2 libressl
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DBUILD_EXAMPLES=ON
@@ -359,7 +359,10 @@ jobs:
         if: ${{ matrix.compiler == 'clang' }}  # Save CI time, gcc builds are already tested via autotools
         env:
           TFLAGS: '${{ matrix.tflags }} -j10 ~1452'
-        run: make -C bld test-ci
+        run: |
+          defaults write NSGlobalDomain AppleLanguages -array "de"
+          defaults write NSGlobalDomain AppleLocale -string de_DE
+          make -C bld test-ci
 
   combinations:
     name: "${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }} ${{ matrix.image }} ${{ matrix.xcode }} ${{ matrix.config }}"
