@@ -221,6 +221,10 @@ jobs:
               fi
             done
           fi
+          if [[ '${{ matrix.compiler }}' = 'llvm'* ]]; then
+            options+=" --target=$(uname -m)-apple-darwin"
+            CC+=" --target=$(uname -m)-apple-darwin"
+          fi
           if [ '${{ matrix.compiler }}' != 'clang' ]; then
             options+=" --with-sysroot=$(xcrun -sdk macosx --show-sdk-path 2>/dev/null)"
             CFLAGS+=" --sysroot=$(xcrun -sdk macosx --show-sdk-path 2>/dev/null)"
