@@ -356,7 +356,7 @@ jobs:
         run: make -C bld testdeps
 
       - name: 'cmake run tests'
-        if: ${{ matrix.compiler == 'clang' }}  # Save CI time, gcc builds are already tested via autotools
+        #if: ${{ matrix.compiler == 'clang' }}  # Save CI time, gcc builds are already tested via autotools
         env:
           TFLAGS: '${{ matrix.build.tflags }} -j10 ~1452'
         run: make -C bld test-ci
