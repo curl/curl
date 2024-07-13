@@ -363,9 +363,12 @@ jobs:
 
       - name: 'cmake run tests'
         #if: ${{ matrix.compiler == 'clang' }}  # Save CI time, gcc builds are already tested via autotools
-        env:
-          TFLAGS: '${{ matrix.build.tflags }} -j10 ~1452'
-        run: make -C bld test-ci
+        run: |
+          export TFLAGS='${{ matrix.build.tflags }} -j10 ~1452'
+          #if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
+          #  TFLAGS+=' ~RTSP ~1156 ~1539'
+          #fi
+          make -C bld test-ci
 
   combinations:
     name: "${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }} ${{ matrix.image }} ${{ matrix.xcode }} ${{ matrix.config }}"
