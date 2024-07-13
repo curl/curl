@@ -116,10 +116,10 @@ jobs:
               --without-nghttp2 --without-ntlm-auth --without-ssl --without-zlib --without-zstd
 
             macos-version-min: '10.15'  # Catalina (2019)
-          - name: 'SecureTransport'
+          - name: 'SecureTransport libssh2'
             compiler: clang
             install:
-            configure: --enable-debug --with-secure-transport --enable-websockets
+            configure: --enable-debug --with-secure-transport --enable-websockets --with-libssh2=$(brew --prefix libssh2)
             macos-version-min: '10.8'
           - name: 'SecureTransport libssh2'
             compiler: gcc-12
