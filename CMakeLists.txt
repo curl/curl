@@ -1496,7 +1496,8 @@ endif()
 
 if(APPLE)
   # Check compiler support of __builtin_available()
-  curl_internal_test(HAVE_BUILTIN_AVAILABLE)
+  #curl_internal_test(HAVE_BUILTIN_AVAILABLE)
+  set(HAVE_BUILTIN_AVAILABLE OFF)
 endif()
 
 # Some other minor tests
