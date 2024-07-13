@@ -46,16 +46,12 @@ function(add_runtests targetname test_flags)
 endfunction()
 
 # Create configurehelp.pm, used by tests needing to run the C preprocessor.
-if(MSVC)
-  set(_cpp_options "-P")
-elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
-  set(_cpp_options "-E")
+if(APPLE)
+  set(_cpp_cmd "${CMAKE_C_COMPILER} -E -isysroot ${CMAKE_OSX_SYSROOT}")
+else()
+  set(_cpp_cmd "cpp")
 endif()
-if(NOT _cpp_option STREQUAL "")
-  if(APPLE)
-    set(_cpp_options "${_cpp_options} -isysroot ${CMAKE_OSX_SYSROOT}")
-  endif()
-  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/configurehelp.pm" "# This is a generated file.  Do not edit.
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/configurehelp.pm" "# This is a generated file.  Do not edit.
 
 package configurehelp;
 
@@ -75,11 +71,10 @@ use vars qw(
     \$Cpreprocessor
     );
 
-\$Cpreprocessor = '\"${CMAKE_C_COMPILER}\" ${_cpp_options}';
+\$Cpreprocessor = '${_cpp_cmd}';
 
 1;
 ")
-endif()
 
 add_runtests(test-quiet     "-a -s")
 add_runtests(test-am        "-a -am")
