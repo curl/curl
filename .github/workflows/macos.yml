@@ -376,6 +376,7 @@ jobs:
           make -C bld test-ci
 
   combinations:
+    if: false  # Set to `true` to enable this test matrix. It runs fairly quickly.
     name: "${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }} ${{ matrix.image }} ${{ matrix.xcode }} ${{ matrix.config }}"
     runs-on: ${{ matrix.image }}
     timeout-minutes: 30
