@@ -202,12 +202,8 @@ jobs:
           which "${CC}"; "${CC}" --version || true
           xcodebuild -version || true
           xcrun -sdk macosx --show-sdk-path 2>/dev/null || true
-          echo '::group::macros predefined'
-          "${CC}" -dM -E - < /dev/null | sort || true
-          echo '::endgroup::'
-          echo '::group::brew packages preinstalled'
-          ls -l "$(brew --prefix)/opt"
-          echo '::endgroup::'
+          echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
+          echo '::group::brew packages preinstalled'; ls -l "$(brew --prefix)/opt"; echo '::endgroup::'
 
       - name: 'autoreconf'
         run: autoreconf -fi
@@ -216,9 +212,7 @@ jobs:
         run: |
           if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
             libgccdir="$(dirname "$("${CC}" -print-libgcc-file-name)")"
-            echo '::group::gcc include-fixed details'
-            find "${libgccdir}/include-fixed" | sort
-            echo '::endgroup::'
+            echo '::group::gcc include-fixed details'; find "${libgccdir}/include-fixed" | sort; echo '::endgroup::'
             for f in dispatch os AvailabilityInternal.h stdio.h; do
               if [ -r "${libgccdir}/include-fixed/${f}" ]; then
                 echo "Zap gcc hack: '${libgccdir}/include-fixed/${f}'"
@@ -245,9 +239,7 @@ jobs:
 
       - name: 'curl_config.h'
         run: |
-          echo '::group::full'
-          cat bld/lib/curl_config.h || true
-          echo '::endgroup::'
+          echo '::group::full'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
           cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'make'
@@ -334,20 +326,14 @@ jobs:
           which "${CC}"; "${CC}" --version || true
           xcodebuild -version || true
           xcrun -sdk macosx --show-sdk-path 2>/dev/null || true
-          echo '::group::macros predefined'
-          "${CC}" -dM -E - < /dev/null | sort || true
-          echo '::endgroup::'
-          echo '::group::brew packages preinstalled'
-          ls -l "$(brew --prefix)/opt"
-          echo '::endgroup::'
+          echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
+          echo '::group::brew packages preinstalled'; ls -l "$(brew --prefix)/opt"; echo '::endgroup::'
 
       - name: 'cmake configure'
         run: |
           if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
             libgccdir="$(dirname "$("${CC}" -print-libgcc-file-name)")"
-            echo '::group::gcc include-fixed details'
-            find "${libgccdir}/include-fixed" | sort
-            echo '::endgroup::'
+            echo '::group::gcc include-fixed details'; find "${libgccdir}/include-fixed" | sort; echo '::endgroup::'
             for f in dispatch os AvailabilityInternal.h stdio.h; do
               if [ -r "${libgccdir}/include-fixed/${f}" ]; then
                 echo "Zap gcc hack: '${libgccdir}/include-fixed/${f}'"
@@ -367,9 +353,7 @@ jobs:
 
       - name: 'curl_config.h'
         run: |
-          echo '::group::full'
-          cat bld/lib/curl_config.h || true
-          echo '::endgroup::'
+          echo '::group::full'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
           cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'cmake build'
@@ -469,12 +453,8 @@ jobs:
           which "${CC}"; "${CC}" --version || true
           xcodebuild -version || true
           xcrun -sdk macosx --show-sdk-path 2>/dev/null || true
-          echo '::group::macros predefined'
-          "${CC}" -dM -E - < /dev/null | sort || true
-          echo '::endgroup::'
-          echo '::group::brew packages preinstalled'
-          ls -l "$(brew --prefix)/opt"
-          echo '::endgroup::'
+          echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
+          echo '::group::brew packages preinstalled'; ls -l "$(brew --prefix)/opt"; echo '::endgroup::'
 
       - name: 'autoreconf'
         if: ${{ matrix.build == 'autotools' }}
@@ -568,9 +548,7 @@ jobs:
             #   $(brew --prefix)/Cellar/gcc@11/11.4.0/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include-fixed
             #   $(brew --prefix)/Cellar/gcc/14.1.0_1/lib/gcc/14/gcc/x86_64-apple-darwin21/14/include-fixed
             libgccdir="$(dirname "$("${CC}" -print-libgcc-file-name)")"
-            echo '::group::gcc include-fixed details'
-            find "${libgccdir}/include-fixed" | sort
-            echo '::endgroup::'
+            echo '::group::gcc include-fixed details'; find "${libgccdir}/include-fixed" | sort; echo '::endgroup::'
             patch_out='dispatch os AvailabilityInternal.h'
             patch_out+=' stdio.h'  # for Xcode 16 error: unknown type name 'FILE'
             for f in ${patch_out}; do
@@ -619,9 +597,7 @@ jobs:
 
       - name: 'curl_config.h'
         run: |
-          echo '::group::full'
-          cat bld/lib/curl_config.h || true
-          echo '::endgroup::'
+          echo '::group::full'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
           cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'build / ${{ matrix.build }}'
