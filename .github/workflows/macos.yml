@@ -265,7 +265,7 @@ jobs:
 
       - name: 'run tests'
         env:
-          TFLAGS: '${{ matrix.tflags }} -j10 ~1452 ~IDN'
+          TFLAGS: '${{ matrix.tflags }} -j10 ~1452'
         run: make -C bld V=1 test-ci
 
   cmake:
@@ -282,7 +282,7 @@ jobs:
         build:
           - name: 'OpenSSL'
             install: nghttp2 openssl gsasl
-            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/openssl -DCURL_USE_GSASL=ON
+            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix)/opt/openssl -DCURL_USE_GSASL=ON -DUSE_APPLE_IDN=ON
             macos-version-min: '10.9'
           - name: 'LibreSSL !ldap'
             install: nghttp2 libressl
@@ -333,7 +333,6 @@ jobs:
         run: |
           cmake -B bld -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
             -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.build.macos-version-min }} \
-            -DUSE_APPLE_IDN=ON \
             ${{ matrix.build.generate }}
 
       - name: 'configure log'
@@ -358,7 +357,7 @@ jobs:
       - name: 'cmake run tests'
         if: ${{ matrix.compiler == 'clang' }}  # Save CI time, gcc builds are already tested via autotools
         env:
-          TFLAGS: '${{ matrix.tflags }} -j10 ~1452 ~IDN'
+          TFLAGS: '${{ matrix.tflags }} -j10 ~1452'
         run: make -C bld test-ci
 
   combinations:
