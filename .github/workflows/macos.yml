@@ -85,7 +85,7 @@ jobs:
             install: nghttp2
             configure: --enable-debug --without-ssl --enable-websockets
             macos-version-min: '10.9'
-          - name: 'libssh2'
+          - name: 'libssh2 !ssl'
             compiler: clang
             install: nghttp2 libssh2
             configure: --enable-debug --with-libssh2=$(brew --prefix)/opt/libssh2 --without-ssl --enable-websockets
@@ -100,12 +100,12 @@ jobs:
             install: nghttp2 openssl libssh
             configure: --enable-debug --with-libssh --with-openssl=$(brew --prefix)/opt/openssl --enable-websockets
             macos-version-min: '10.9'
-          - name: 'c-ares'
+          - name: 'c-ares !ssl'
             compiler: clang
             install: nghttp2
             configure: --enable-debug --enable-ares --without-ssl --enable-websockets
             macos-version-min: '10.9'
-          - name: 'HTTP-only'
+          - name: 'HTTP-only !ssl'
             compiler: clang
             configure: |
               --enable-debug \
