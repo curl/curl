@@ -80,7 +80,6 @@ jobs:
             install: nghttp2
             configure: --without-ssl --enable-websockets
             macos-version-min: '10.9'
-            tflags: ~RTSP ~1156 ~1539
           - name: '!ssl'
             compiler: clang
             install: nghttp2
@@ -150,7 +149,7 @@ jobs:
             compiler: gcc-12
             configure: --enable-debug --with-secure-transport --enable-websockets
             macos-version-min: '10.8'
-            tflags: ~RTSP ~1156 ~1539 ~2100
+            tflags: '~2100'
           - name: 'LibreSSL'
             compiler: clang
             install: nghttp2 libressl
@@ -264,9 +263,12 @@ jobs:
         run: make -C bld V=1 -C tests
 
       - name: 'run tests'
-        env:
-          TFLAGS: '${{ matrix.tflags }} -j10 ~1452'
-        run: make -C bld V=1 test-ci
+        run: |
+          export TFLAGS='${{ matrix.tflags }} -j10 ~1452'
+          if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
+            TFLAGS+=' ~RTSP ~1156 ~1539'
+          fi
+          make -C bld V=1 test-ci
 
   cmake:
     name: 'CM ${{ matrix.compiler }} ${{ matrix.build.name }}'
