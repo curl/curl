@@ -214,7 +214,9 @@ jobs:
         run: |
           if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
             libgccdir="$(dirname "$("${CC}" -print-libgcc-file-name)")"
+            echo '::group::gcc include-fixed details'
             find "${libgccdir}/include-fixed" | sort
+            echo '::endgroup::'
             for f in dispatch os AvailabilityInternal.h stdio.h; do
               if [ -r "${libgccdir}/include-fixed/${f}" ]; then
                 echo "Zap gcc hack: '${libgccdir}/include-fixed/${f}'"
@@ -336,7 +338,9 @@ jobs:
         run: |
           if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
             libgccdir="$(dirname "$("${CC}" -print-libgcc-file-name)")"
+            echo '::group::gcc include-fixed details'
             find "${libgccdir}/include-fixed" | sort
+            echo '::endgroup::'
             for f in dispatch os AvailabilityInternal.h stdio.h; do
               if [ -r "${libgccdir}/include-fixed/${f}" ]; then
                 echo "Zap gcc hack: '${libgccdir}/include-fixed/${f}'"
@@ -556,7 +560,9 @@ jobs:
             #   $(brew --prefix)/Cellar/gcc@11/11.4.0/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include-fixed
             #   $(brew --prefix)/Cellar/gcc/14.1.0_1/lib/gcc/14/gcc/x86_64-apple-darwin21/14/include-fixed
             libgccdir="$(dirname "$("${CC}" -print-libgcc-file-name)")"
+            echo '::group::gcc include-fixed details'
             find "${libgccdir}/include-fixed" | sort
+            echo '::endgroup::'
             patch_out='dispatch os AvailabilityInternal.h'
             patch_out+=' stdio.h'  # for Xcode 16 error: unknown type name 'FILE'
             for f in ${patch_out}; do
