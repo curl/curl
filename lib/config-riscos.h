@@ -108,9 +108,6 @@
 /* Define if you have the <io.h> header file. */
 #undef HAVE_IO_H
 
-/* Define if you have the `socket' library (-lsocket). */
-#undef HAVE_LIBSOCKET
-
 /* Define if you need the malloc.h header file even with stdlib.h  */
 /* #define NEED_MALLOC_H 1 */
 
