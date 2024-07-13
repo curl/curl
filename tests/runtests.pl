@@ -3039,9 +3039,30 @@ if(%skipped && !$short) {
     }
 }
 
+sub testnumdetails {
+    my ($desc, $numlist) = @_;
+    foreach my $testnum (split(' ', $numlist)) {
+        if(!loadtest("${TESTDIR}/test${testnum}")) {
+            my @info_keywords = getpart("info", "keywords");
+            my $testname = (getpart("client", "name"))[0];
+            chomp $testname;
+            logmsg "$desc $testnum: '$testname'";
+            my $first = 1;
+            for my $k (@info_keywords) {
+                chomp $k;
+                my $sep = ($first == 1) ? " " : ", ";
+                logmsg "$sep$k";
+                $first = 0;
+            }
+            logmsg "\n";
+        }
+    }
+}
+
 if($total) {
     if($failedign) {
         my $failedignsorted = numsortwords($failedign);
+        testnumdetails("FAIL-IGNORED", $failedignsorted);
         logmsg "IGNORED: failed tests: $failedignsorted\n";
     }
     logmsg sprintf("TESTDONE: $ok tests out of $total reported OK: %d%%\n",
@@ -3049,6 +3070,7 @@ if($total) {
 
     if($failed && ($ok != $total)) {
         my $failedsorted = numsortwords($failed);
+        testnumdetails("\nFAIL", $failedsorted);
         logmsg "\nTESTFAIL: These test cases failed: $failedsorted\n\n";
     }
 }
