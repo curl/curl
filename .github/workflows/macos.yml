@@ -252,7 +252,9 @@ jobs:
         run: make -C bld V=1 examples
 
       - name: 'make tests'
-        run: make -C bld V=1 -C tests
+        run: |
+          make -C bld V=1 -C tests
+          make -C bld V=1 -C tests -C server
 
       - name: 'run tests'
         run: |
