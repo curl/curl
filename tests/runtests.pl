@@ -3055,7 +3055,7 @@ if($total) {
                 my @info_keywords = getpart("info", "keywords");
                 my $testname = (getpart("client", "name"))[0];
                 chomp $testname;
-                logmsg "FAIL $testnum: [$testname]";
+                logmsg "FAIL $testnum: '$testname'";
                 for my $k (@info_keywords) {
                     chomp $k;
                     logmsg ",$k";
