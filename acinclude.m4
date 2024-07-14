@@ -1258,9 +1258,10 @@ AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
     dnl --with-ca-path given
     if test "x$OPENSSL_ENABLED" != "x1" -a \
             "x$GNUTLS_ENABLED" != "x1" -a \
+            "x$BEARSSL_ENABLED" != "x1" -a \
             "x$MBEDTLS_ENABLED" != "x1" -a \
             "x$WOLFSSL_ENABLED" != "x1"; then
-      AC_MSG_ERROR([--with-ca-path only works with OpenSSL, GnuTLS, mbedTLS or wolfSSL])
+      AC_MSG_ERROR([--with-ca-path only works with OpenSSL, GnuTLS, BearSSL, mbedTLS or wolfSSL])
     fi
     capath="$want_capath"
     ca="no"
