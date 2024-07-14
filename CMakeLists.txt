@@ -1170,7 +1170,9 @@ if(curl_ca_bundle_supported)
 
     if(CURL_CA_PATH_AUTODETECT AND NOT CURL_CA_PATH_SET)
       set(SEARCH_CA_PATH "/etc/ssl/certs")
-      if(EXISTS "${SEARCH_CA_PATH}")
+      file(GLOB curl_ca_files_found "${SEARCH_CA_PATH}/[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f].0")
+      if(curl_ca_files_found)
+        unset(curl_ca_files_found)
         message(STATUS "Found CA path: ${SEARCH_CA_PATH}")
         set(CURL_CA_PATH "${SEARCH_CA_PATH}" CACHE STRING
             "Location of default CA path. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
