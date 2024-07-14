@@ -239,7 +239,7 @@ jobs:
 
       - name: 'curl_config.h'
         run: |
-          echo '::group::full'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
           cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'make'
@@ -353,7 +353,7 @@ jobs:
 
       - name: 'curl_config.h'
         run: |
-          echo '::group::full'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
           cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'cmake build'
@@ -598,7 +598,7 @@ jobs:
 
       - name: 'curl_config.h'
         run: |
-          echo '::group::full'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
           cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'build / ${{ matrix.build }}'
