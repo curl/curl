@@ -3058,7 +3058,7 @@ if($total) {
                 logmsg "FAIL $testnum: [$testname]";
                 for my $k (@info_keywords) {
                     chomp $k;
-                    logmsg ", $k";
+                    logmsg ",$k";
                 }
                 logmsg "\n";
             }
