@@ -618,7 +618,7 @@ sub checksystemfeatures {
             # built with memory tracking support (--enable-curldebug); may be disabled later
             $feature{"TrackMemory"} = $feat =~ /TrackMemory/i;
             # curl was built with --enable-debug
-            $feature{"Debug"} = $feat =~ /debug/i;
+            $feature{"Debug"} = $feat =~ /Debug/i;
             # ssl enabled
             $feature{"SSL"} = $feat =~ /SSL/i;
             # multiple ssl backends available.
