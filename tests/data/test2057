@@ -56,7 +56,7 @@ HTTP Negotiate authentication (stub ntlm)
 <features>
 GSS-API
 ld_preload
-!debug
+!Debug
 </features>
 <setenv>
 LD_PRELOAD=%PWD/libtest/.libs/libstubgss.so

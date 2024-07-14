@@ -32,7 +32,7 @@ Funny-head: yesyes
 http
 </server>
 <features>
-debug
+Debug
 </features>
 <name>
 aws-sigv4 with query

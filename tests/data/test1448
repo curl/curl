@@ -39,7 +39,7 @@ OK
 http
 </server>
 <features>
-idn
+IDN
 </features>
 <setenv>
 LC_ALL=en_US.UTF-8

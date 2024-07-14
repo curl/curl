@@ -31,7 +31,7 @@ dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr
 # Client-side
 <client>
 <features>
-ipv6
+IPv6
 </features>
 <server>
 ftp-ipv6

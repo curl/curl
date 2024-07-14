@@ -28,7 +28,7 @@ MOOOO
 # this relies on the debug feature to allow us to set directory to store the
 # -O output in, using the CURL_TESTDIR variable
 <features>
-debug
+Debug
 </features>
 <server>
 ftp

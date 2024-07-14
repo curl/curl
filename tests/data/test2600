@@ -15,7 +15,7 @@ none
 </server>
 <features>
 unittest
-debug
+Debug
 http
 </features>
 <name>

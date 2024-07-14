@@ -432,7 +432,7 @@ Features testable here are:
 - `CharConv`
 - `cookies`
 - `crypto`
-- `debug`
+- `Debug`
 - `DoH`
 - `getrlimit`
 - `GnuTLS`
@@ -443,12 +443,12 @@ Features testable here are:
 - `HTTP-auth`
 - `http/2`
 - `http/3`
-- `https-proxy`
+- `HTTPS-proxy`
 - `hyper`
-- `idn`
-- `ipv6`
+- `IDN`
+- `IPv6`
 - `Kerberos`
-- `large_file`
+- `Largefile`
 - `large-time` (time_t is larger than 32 bit)
 - `ld_preload`
 - `libssh2`
@@ -483,7 +483,7 @@ Features testable here are:
 - `threadsafe`
 - `Unicode`
 - `unittest`
-- `unix-sockets`
+- `UnixSockets`
 - `verbose-strings`
 - `wakeup`
 - `win32`

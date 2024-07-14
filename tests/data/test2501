@@ -25,7 +25,7 @@ Funny-head: yesyes
 # Client-side
 <client>
 <features>
-debug
+Debug
 http
 http/3
 </features>

@@ -31,7 +31,7 @@ These data aren't actually sent to the client
 # Client-side
 <client>
 <features>
-ipv6
+IPv6
 </features>
 <server>
 http-ipv6
