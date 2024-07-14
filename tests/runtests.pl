@@ -742,7 +742,7 @@ sub checksystemfeatures {
     }
 
     # allow this feature only if debug mode is disabled
-    $feature{"ld_preload"} = $feature{"ld_preload"} && !$feature{"debug"};
+    $feature{"ld_preload"} = $feature{"ld_preload"} && !$feature{"Debug"};
 
     if($feature{"IPv6"}) {
         # client has IPv6 support
