@@ -1259,8 +1259,8 @@ AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
     capath="$want_capath"
     ca="no"
   else
-    dnl first try autodetecting a CA bundle , then a CA path
-    dnl both autodetections can be skipped by --without-ca-*
+    dnl first try auto-detecting a CA bundle, then a CA path
+    dnl both auto-detections can be skipped by --without-ca-*
     ca="no"
     capath="no"
     if test "x$cross_compiling" != "xyes"; then
