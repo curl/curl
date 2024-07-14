@@ -1144,8 +1144,10 @@ if(curl_ca_bundle_supported)
     set(CURL_CA_PATH_SET TRUE)
   endif()
 
-  if(CURL_CA_BUNDLE_SET OR CURL_CA_PATH_SET)
-    # Skip auto-detection if any options were set manually
+  if(CURL_CA_BUNDLE_SET AND CURL_CA_PATH_AUTODETECT)
+    # Skip autodetection of unset CA path because CA bundle is set explicitly
+  elseif(CURL_CA_PATH_SET AND CURL_CA_BUNDLE_AUTODETECT)
+    # Skip autodetection of unset CA bundle because CA path is set explicitly
   elseif(CURL_CA_BUNDLE_AUTODETECT OR CURL_CA_PATH_AUTODETECT)
     # First try auto-detecting a CA bundle, then a CA path
 
@@ -1166,7 +1168,7 @@ if(curl_ca_bundle_supported)
       endforeach()
     endif()
 
-    if(CURL_CA_PATH_AUTODETECT AND NOT CURL_CA_BUNDLE_SET)
+    if(CURL_CA_PATH_AUTODETECT AND NOT CURL_CA_PATH_SET)
       set(SEARCH_CA_PATH "/etc/ssl/certs")
       if(EXISTS "${SEARCH_CA_PATH}")
         message(STATUS "Found CA path: ${SEARCH_CA_PATH}")
