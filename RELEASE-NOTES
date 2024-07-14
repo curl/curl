@@ -4,7 +4,7 @@ curl and libcurl 8.8.1
  Command line options:         263
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3201
+ Contributors:                 3204
 
 This release includes the following changes:
 
@@ -30,12 +30,18 @@ This release includes the following bugfixes:
  o BINDINGS: update java link to one that exists [115]
  o build: add Debug, TrackMemory, ECH to feature list [218]
  o build: add more supported attributes to the IAR compiler [46]
+ o build: fix llvm 16 or older + Xcode 15 or newer, and gcc [240]
+ o build: fix llvm 17 and older + macOS SDK 14.4 and newer [230]
+ o build: sync warning options between autotools, cmake & compilers [244]
+ o build: tidy up `__builtin_available` feature checks (Apple) [241]
  o build: untangle `CURLDEBUG` and `DEBUGBUILD` macros [9]
+ o build: use `#error` instead of invalid syntax [212]
  o cd2nroff: convert two warnings to errors [135]
  o cd2nroff: use an empty "##" to signal end of .IP sequence [56]
  o cf-socket: improve SO_SNDBUF update for Winsock [27]
  o cf-socket: optimize curlx_nonblock() and check its return error [151]
  o cf-socket: remove obsolete recvbuf [203]
+ o cf-socket: remove two "useless" assignments [238]
  o cfilters: make Curl_conn_connect always assign 'done' [60]
  o cmake: add CURL_USE_GSASL option with detection + CI test [133]
  o cmake: allow `ENABLE_CURLDEBUG=OFF` with `ENABLE_DEBUG=ON` [26]
@@ -43,11 +49,14 @@ This release includes the following bugfixes:
  o cmake: alpha-sort feature list [161]
  o cmake: always build unit tests with the `testdeps` target [20]
  o cmake: bring `curl-config.cmake` closer to `FindCURL` [130]
+ o cmake: detect `libidn2` also via `pkg-config` [239]
  o cmake: enable SOVERSION for Cygwin and `CMAKE_DLL_NAME_WITH_SOVERSION` [119]
  o cmake: fix `-Wredundant-decls` in unity/mingw-w64 builds [15]
  o cmake: fix brotli lib order [3]
+ o cmake: fix building `unit1600` due to missing `ssl/openssl.h` [222]
  o cmake: fix building in unity mode [4]
  o cmake: fix building with both md4 and md5 in unity mode [13]
+ o cmake: fix builds with detected libidn2 lib but undetected header [221]
  o cmake: fix feature and protocol lists for SecureTransport [194]
  o cmake: fix quotes when appending multiple options (SecureTransport) [139]
  o cmake: fix test 1013 with websockets enabled and no TLS [47]
@@ -68,7 +77,9 @@ This release includes the following bugfixes:
  o cmdline-opts: shorten six help texts [178]
  o cmdline: expand proxy option explanations [97]
  o code: language cleanup in comments [186]
+ o configure: fix `SystemConfiguration` detection [243]
  o configure: fix pkg-config library name 'libnghttp3' [138]
+ o configure: limit `SystemConfiguration` test to non-c-ares, IPv6 builds [242]
  o configure: require a QUIC library if nghttp3 is used [142]
  o configure: sort feature list, lowercase protocols, use backticks [206]
  o configure: use `$EGREP` in place of `grep -E` [41]
@@ -91,6 +102,7 @@ This release includes the following bugfixes:
  o CURLOPT_RESOLVE.md: mention hostname can be wildcard ('*') [150]
  o CURLOPT_TLSAUTH_PASSWORD/USERNAME.md: language fixups [155]
  o DISTROS: add a link to the list archive [22]
+ o DISTROS: add AlmaLinux package source link
  o DISTROS: add MSYS2 (native) links [100]
  o Dockerfile: update debian:bookworm-slim to 84d83b2 [121]
  o docs/cmdline-opts: fix mail-auth example TLD typo [35]
@@ -98,7 +110,9 @@ This release includes the following bugfixes:
  o docs/libcurl: polish the single-line descriptions [159]
  o docs/Makefile.am: make curl-config.1 install [14]
  o docs: reference non deprecated libcurl options [113]
+ o docs: start markdown headers with capital letter where applicable [236]
  o doh-insecure.md: expand [96]
+ o doh: fix leak and zero-length HTTPS RR crash [227]
  o dump-header.md: mention minus for stdout [149]
  o examples/threaded-ssl: remove locking callback code [83]
  o examples: add missing binaries to .gitignore [106]
@@ -108,6 +122,7 @@ This release includes the following bugfixes:
  o FEATURES.md: refresh [208]
  o file: separate fake headers and body with a stand-alone CRLF [137]
  o get.d: clarify the explanation [32]
+ o GHA/windows: ignore FTP test results for old-mingw-w64
  o GHA: add MSVC UWP job, expand jobs with more options [216]
  o GHA: detect and warn for more English contractions [123]
  o GHA: disable MQTT and WebSocket tests in Windows jobs [63]
@@ -120,9 +135,11 @@ This release includes the following bugfixes:
  o gnutls: improve TLS shutdown [62]
  o gnutls: pass in SNI name, not hostname when checking cert [114]
  o help: add flags to output and ssh categories [202]
+ o hostip: skip error check for infallible function call [237]
  o http/3: add shutdown support [154]
  o http: remove "struct HTTP" [134]
  o http: write last header line late [44]
+ o IDN: fix ß with AppleIDN [220]
  o lib/v*: tidy up types and casts [64]
  o lib: add a few DEBUGASSERT(data) to aid code analyzers [187]
  o lib: fix gcc warning in certain debug builds [19]
@@ -131,10 +148,13 @@ This release includes the following bugfixes:
  o lib: prefer `var = time(NULL)` over `time(&var)` [52]
  o lib: tidy up types and casts [92]
  o lib: xfer_setup and non-blocking shutdown [111]
+ o libcurl-docs: make option lists alpha-sorted [214]
+ o libcurl-easy.md: now *more* than 300 options [233]
  o libcurl.pc: add `Requires.private`, `Requires` for static linking [129]
  o libcurl.pc: add more `Requires.private`/`Requires` dependencies [189]
  o libssh: remove CURLOPT_SSL_VERIFYHOST check [36]
  o macos: add workaround for gcc, non-c-ares, IPv6, compile error [213]
+ o macos: undo `availability` macro enabled by Homebrew gcc [231]
  o managen: "added in" fixes [131]
  o managen: cleanups to generate nicer-looking output [141]
  o managen: error on trailing blank lines in input files [165]
@@ -144,6 +164,7 @@ This release includes the following bugfixes:
  o managen: only output .RE for manpage output [156]
  o managen: output tabs for each 8 leading spaces [164]
  o managen: warn on excessively long help texts [87]
+ o MANUAL.md: wrap two example urls that overrun styling [234]
  o mbedtls: check version for cipher id [12]
  o mbedtls: send close-notify on close [11]
  o mbedtls: v3.6.0 workarounds [89]
@@ -176,6 +197,7 @@ This release includes the following bugfixes:
  o runtests: support %VERNUM
  o runtests: support crlf="yes" for the <stderr> section
  o sectransp: fix `HAVE_BUILTIN_AVAILABLE` checks to not emit warnings [210]
+ o sectransp: fix clang compiler warnings, stop silencing them [223]
  o sectransp: remove large cipher table [76]
  o sectransp: use common code for cipher suite lookup [54]
  o socket: change TCP keepalive from ms to seconds on DragonFly BSD [74]
@@ -229,6 +251,7 @@ This release includes the following bugfixes:
  o windows: fix UWP builds, add GHA job [79]
  o winsock: move SO_SNDBUF update into cf-socket [53]
  o wolfssl: assume key_file equal to clientcert if no key_file [169]
+ o wolfssl: use larger error buffer when formatting errors [246]
  o x509asn1: add some common ECDSA OIDs [67]
  o x509asn1: ASN1tostr() should fail when 'constructed' is set [125]
  o x509asn1: fallback to dotted OID representation [69]
@@ -252,20 +275,21 @@ advice from friends like these:
 
   Alejandro R. Sedeño, alervd on github, Alexander Shtuchkin, Alex Snast,
   Andy Pan, Andy Reitz, Aurélien Pierre, Ayesh Karunaratne, Bo Anderson,
-  brian m. carlson, Christian Heusel, Christian Schmitz, Dan Fandrich,
+  brian m. carlson, Christian Heusel, Christian Schmitz, CMD, Dan Fandrich,
   Daniel Gustafsson, Daniel Stenberg, dependabot[bot], Dexter Gerig, dogma,
-  Dorian Craps, edmcln on github, Eli Schwartz, Elliott Balsley,
-  fds242 on github, Guilherme Puida, Harry Sintonen, James Abbatiello,
-  Jan Venekamp, Jay Guerette, Jiang Wenjian, Jonathan Matthews, Joseph Chen,
-  Junho Choi, Kai Pastor, kartatz, Keerthi Timmaraju, Lee Li, Luke Hamburg,
-  Marcel Raad, Matthias Gatto, Matthieu Baerts, Matt Jolly, Max Mehl,
-  Morgan Willcock, Olivier Bonaventure, Orgad Shaneh, Patrick Monnerat,
-  Pavel Pavlov, Philip Heiduck, pszlazak on github, RainRat, Ray Satiro,
-  renovate[bot], Ryan Carsten Schmidt, Samuel Chiang,
-  saurabhsingh-dev on github, Sebastian Andersson, Sergey Bronnikov,
-  Sergey Markelov, Sertonix, Stefan Eissing, Stephen Farrell, Tal Regev,
-  Tatsuhiro Tsujikawa, Viktor Szakats, vvb2060, Yedaya Katsman, z2_, 李四
-  (68 contributors)
+  Dominik Piątkowski, Dorian Craps, edmcln on github, Eli Schwartz,
+  Elliott Balsley, fds242 on github, Guilherme Puida, Harry Sintonen,
+  James Abbatiello, Jan Venekamp, Jay Guerette, Jiang Wenjian,
+  Jonathan Matthews, Joseph Chen, Junho Choi, Kai Pastor, kartatz,
+  Keerthi Timmaraju, Lee Li, Luke Hamburg, Marcel Raad, Martin Peck,
+  Matthias Gatto, Matthieu Baerts, Matt Jolly, Max Mehl, Morgan Willcock,
+  Olivier Bonaventure, Orgad Shaneh, Patrick Monnerat, Pavel Pavlov,
+  Philip Heiduck, pszlazak on github, RainRat, Ray Satiro, renovate[bot],
+  Ryan Carsten Schmidt, Samuel Chiang, saurabhsingh-dev on github,
+  Sebastian Andersson, Sergey Bronnikov, Sergey Markelov, Sertonix,
+  Stefan Eissing, Stephen Farrell, Tal Regev, Tatsuhiro Tsujikawa,
+  Viktor Szakats, vvb2060, Yedaya Katsman, z2_, 李四
+  (71 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -480,9 +504,30 @@ References to bug reports and discussions on issues:
  [209] = https://curl.se/bug/?i=14112
  [210] = https://curl.se/bug/?i=14122
  [211] = https://curl.se/bug/?i=14123
+ [212] = https://curl.se/bug/?i=14181
  [213] = https://curl.se/bug/?i=14119
+ [214] = https://curl.se/bug/?i=14156
  [215] = https://curl.se/bug/?i=14090
  [216] = https://curl.se/bug/?i=14077
  [217] = https://curl.se/bug/?i=14113
  [218] = https://curl.se/bug/?i=14096
  [219] = https://curl.se/bug/?i=14055
+ [220] = https://curl.se/bug/?i=14176
+ [221] = https://curl.se/bug/?i=14175
+ [222] = https://curl.se/bug/?i=14172
+ [223] = https://curl.se/bug/?i=14162
+ [227] = https://curl.se/bug/?i=14151
+ [230] = https://curl.se/bug/?i=14159
+ [231] = https://curl.se/bug/?i=13700
+ [233] = https://curl.se/bug/?i=14153
+ [234] = https://curl.se/bug/?i=14149
+ [236] = https://curl.se/bug/?i=14115
+ [237] = https://curl.se/bug/?i=14147
+ [238] = https://curl.se/bug/?i=14145
+ [239] = https://curl.se/bug/?i=14137
+ [240] = https://curl.se/bug/?i=14134
+ [241] = https://curl.se/bug/?i=14127
+ [242] = https://curl.se/bug/?i=14126
+ [243] = https://curl.se/bug/?i=14130
+ [244] = https://curl.se/bug/?i=14128
+ [246] = https://curl.se/bug/?i=14114
