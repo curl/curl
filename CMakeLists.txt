@@ -487,6 +487,7 @@ if(CURL_USE_OPENSSL)
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "openssl")
     set(valid_default_ssl_backend TRUE)
   endif()
+  set(curl_ca_bundle_supported TRUE)
 
   set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
   if(NOT DEFINED HAVE_BORINGSSL)
@@ -508,6 +509,7 @@ if(CURL_USE_MBEDTLS)
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "mbedtls")
     set(valid_default_ssl_backend TRUE)
   endif()
+  set(curl_ca_bundle_supported TRUE)
 endif()
 
 if(CURL_USE_BEARSSL)
@@ -520,6 +522,7 @@ if(CURL_USE_BEARSSL)
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "bearssl")
     set(valid_default_ssl_backend TRUE)
   endif()
+  set(curl_ca_bundle_supported TRUE)
 endif()
 
 if(CURL_USE_WOLFSSL)
@@ -533,6 +536,7 @@ if(CURL_USE_WOLFSSL)
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "wolfssl")
     set(valid_default_ssl_backend TRUE)
   endif()
+  set(curl_ca_bundle_supported TRUE)
 endif()
 
 if(CURL_USE_GNUTLS)
@@ -546,6 +550,7 @@ if(CURL_USE_GNUTLS)
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "gnutls")
     set(valid_default_ssl_backend TRUE)
   endif()
+  set(curl_ca_bundle_supported TRUE)
 
   if(NOT DEFINED HAVE_GNUTLS_SRP AND NOT CURL_DISABLE_SRP)
     cmake_push_check_state()
@@ -1102,86 +1107,79 @@ else()
   unset(USE_UNIX_SOCKETS CACHE)
 endif()
 
-
 #
 # CA handling
 #
-set(CURL_CA_BUNDLE "auto" CACHE STRING
-    "Path to the CA bundle. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
-set(CURL_CA_FALLBACK OFF CACHE BOOL
-    "Set ON to use built-in CA store of TLS backend. Defaults to OFF")
-set(CURL_CA_PATH "auto" CACHE STRING
-    "Location of default CA path. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
+if(curl_ca_bundle_supported)
+  set(CURL_CA_BUNDLE "auto" CACHE STRING
+      "Path to the CA bundle. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
+  set(CURL_CA_FALLBACK OFF CACHE BOOL
+      "Set ON to use built-in CA store of TLS backend. Defaults to OFF")
+  set(CURL_CA_PATH "auto" CACHE STRING
+      "Location of default CA path. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
 
-if("${CURL_CA_BUNDLE}" STREQUAL "")
-  message(FATAL_ERROR "Invalid value of CURL_CA_BUNDLE. Use 'none', 'auto' or file path.")
-elseif("${CURL_CA_BUNDLE}" STREQUAL "none")
-  unset(CURL_CA_BUNDLE CACHE)
-elseif("${CURL_CA_BUNDLE}" STREQUAL "auto")
-  unset(CURL_CA_BUNDLE CACHE)
-  if(NOT CMAKE_CROSSCOMPILING)
-    set(CURL_CA_BUNDLE_AUTODETECT TRUE)
+  if(CURL_CA_BUNDLE STREQUAL "")
+    message(FATAL_ERROR "Invalid value of CURL_CA_BUNDLE. Use 'none', 'auto' or file path.")
+  elseif(CURL_CA_BUNDLE STREQUAL "none")
+    unset(CURL_CA_BUNDLE CACHE)
+  elseif(CURL_CA_BUNDLE STREQUAL "auto")
+    unset(CURL_CA_BUNDLE CACHE)
+    if(NOT CMAKE_CROSSCOMPILING AND NOT WIN32)
+      set(CURL_CA_BUNDLE_AUTODETECT TRUE)
+    endif()
+  else()
+    set(CURL_CA_BUNDLE_SET TRUE)
   endif()
-else()
-  set(CURL_CA_BUNDLE_SET TRUE)
-endif()
 
-if("${CURL_CA_PATH}" STREQUAL "")
-  message(FATAL_ERROR "Invalid value of CURL_CA_PATH. Use 'none', 'auto' or directory path.")
-elseif("${CURL_CA_PATH}" STREQUAL "none")
-  unset(CURL_CA_PATH CACHE)
-elseif("${CURL_CA_PATH}" STREQUAL "auto")
-  unset(CURL_CA_PATH CACHE)
-  if(NOT CMAKE_CROSSCOMPILING)
-    set(CURL_CA_PATH_AUTODETECT TRUE)
+  if(CURL_CA_PATH STREQUAL "")
+    message(FATAL_ERROR "Invalid value of CURL_CA_PATH. Use 'none', 'auto' or directory path.")
+  elseif(CURL_CA_PATH STREQUAL "none")
+    unset(CURL_CA_PATH CACHE)
+  elseif(CURL_CA_PATH STREQUAL "auto")
+    unset(CURL_CA_PATH CACHE)
+    if(NOT CMAKE_CROSSCOMPILING AND NOT WIN32)
+      set(CURL_CA_PATH_AUTODETECT TRUE)
+    endif()
+  else()
+    set(CURL_CA_PATH_SET TRUE)
   endif()
-else()
-  set(CURL_CA_PATH_SET TRUE)
-endif()
 
-if(CURL_CA_BUNDLE_SET AND CURL_CA_PATH_AUTODETECT)
-  # Skip autodetection of unset CA path because CA bundle is set explicitly
-elseif(CURL_CA_PATH_SET AND CURL_CA_BUNDLE_AUTODETECT)
-  # Skip autodetection of unset CA bundle because CA path is set explicitly
-elseif(CURL_CA_PATH_AUTODETECT OR CURL_CA_BUNDLE_AUTODETECT)
-  # first try autodetecting a CA bundle, then a CA path
+  if(CURL_CA_BUNDLE_SET AND CURL_CA_PATH_AUTODETECT)
+    # Skip auto-detection of unset CA path because CA bundle is set explicitly
+  elseif(CURL_CA_PATH_SET AND CURL_CA_BUNDLE_AUTODETECT)
+    # Skip auto-detection of unset CA bundle because CA path is set explicitly
+  elseif(CURL_CA_BUNDLE_AUTODETECT OR CURL_CA_PATH_AUTODETECT)
+    # First try auto-detecting a CA bundle, then a CA path
 
-  if(CURL_CA_BUNDLE_AUTODETECT)
-    set(SEARCH_CA_BUNDLE_PATHS
-        /etc/ssl/certs/ca-certificates.crt
-        /etc/pki/tls/certs/ca-bundle.crt
-        /usr/share/ssl/certs/ca-bundle.crt
-        /usr/local/share/certs/ca-root-nss.crt
-        /etc/ssl/cert.pem)
+    if(CURL_CA_BUNDLE_AUTODETECT)
+      foreach(SEARCH_CA_BUNDLE_PATH IN ITEMS
+          "/etc/ssl/certs/ca-certificates.crt"
+          "/etc/pki/tls/certs/ca-bundle.crt"
+          "/usr/share/ssl/certs/ca-bundle.crt"
+          "/usr/local/share/certs/ca-root-nss.crt"
+          "/etc/ssl/cert.pem")
+        if(EXISTS "${SEARCH_CA_BUNDLE_PATH}")
+          message(STATUS "Found CA bundle: ${SEARCH_CA_BUNDLE_PATH}")
+          set(CURL_CA_BUNDLE "${SEARCH_CA_BUNDLE_PATH}" CACHE STRING
+              "Path to the CA bundle. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
+          set(CURL_CA_BUNDLE_SET TRUE CACHE BOOL "Path to the CA bundle has been set")
+          break()
+        endif()
+      endforeach()
+    endif()
 
-    foreach(SEARCH_CA_BUNDLE_PATH ${SEARCH_CA_BUNDLE_PATHS})
-      if(EXISTS "${SEARCH_CA_BUNDLE_PATH}")
-        message(STATUS "Found CA bundle: ${SEARCH_CA_BUNDLE_PATH}")
-        set(CURL_CA_BUNDLE "${SEARCH_CA_BUNDLE_PATH}" CACHE STRING
-            "Path to the CA bundle. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
-        set(CURL_CA_BUNDLE_SET TRUE CACHE BOOL "Path to the CA bundle has been set")
-        break()
+    if(CURL_CA_PATH_AUTODETECT AND NOT CURL_CA_PATH_SET)
+      set(SEARCH_CA_PATH "/etc/ssl/certs")
+      file(GLOB curl_ca_files_found "${SEARCH_CA_PATH}/[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f].0")
+      if(curl_ca_files_found)
+        unset(curl_ca_files_found)
+        message(STATUS "Found CA path: ${SEARCH_CA_PATH}")
+        set(CURL_CA_PATH "${SEARCH_CA_PATH}" CACHE STRING
+            "Location of default CA path. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
+        set(CURL_CA_PATH_SET TRUE CACHE BOOL "Path to the CA bundle has been set")
       endif()
-    endforeach()
-  endif()
-
-  if(CURL_CA_PATH_AUTODETECT AND (NOT CURL_CA_PATH_SET))
-    if(EXISTS "/etc/ssl/certs")
-      set(CURL_CA_PATH "/etc/ssl/certs" CACHE STRING
-          "Location of default CA path. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
-      set(CURL_CA_PATH_SET TRUE CACHE BOOL "Path to the CA bundle has been set")
     endif()
   endif()
-endif()
-
-if(CURL_CA_PATH_SET AND
-   NOT USE_OPENSSL AND
-   NOT USE_WOLFSSL AND
-   NOT USE_GNUTLS AND
-   NOT USE_MBEDTLS)
-  message(STATUS
-          "CA path only supported by OpenSSL, wolfSSL, GnuTLS or mbedTLS. "
-          "Set CURL_CA_PATH=none or enable one of those TLS backends.")
 endif()
 
 # Check for header files
