@@ -2083,9 +2083,8 @@ dnl **********************************************************************
 
 if test -n "$check_for_ca_bundle"; then
   CURL_CHECK_CA_BUNDLE
+  CURL_CHECK_CA_EMBED
 fi
-
-CURL_CHECK_CA_EMBED
 
 dnl **********************************************************************
 dnl Check for libpsl
