@@ -1299,6 +1299,7 @@ AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
       if test "x$want_capath" = "xunset"; then
         if test "x$OPENSSL_ENABLED" = "x1" -o \
                 "x$GNUTLS_ENABLED" = "x1" -o \
+                "x$BEARSSL_ENABLED" = "x1" -o \
                 "x$MBEDTLS_ENABLED" = "x1" -o \
                 "x$WOLFSSL_ENABLED" = "x1"; then
           check_capath="/etc/ssl/certs"
