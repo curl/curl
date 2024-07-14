@@ -1152,7 +1152,7 @@ if(curl_ca_bundle_supported)
     # First try auto-detecting a CA bundle, then a CA path
 
     if(CURL_CA_BUNDLE_AUTODETECT)
-      foreach(SEARCH_CA_BUNDLE_PATH
+      foreach(SEARCH_CA_BUNDLE_PATH IN ITEMS
           "/etc/ssl/certs/ca-certificates.crt"
           "/etc/pki/tls/certs/ca-bundle.crt"
           "/usr/share/ssl/certs/ca-bundle.crt"
