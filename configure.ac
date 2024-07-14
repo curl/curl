@@ -597,7 +597,11 @@ CURL_CHECK_WIN32_LARGEFILE
 CURL_CHECK_WIN32_CRYPTO
 
 CURL_DARWIN_CFLAGS
-CURL_SUPPORTS_BUILTIN_AVAILABLE
+case $host_os in
+  darwin*)
+    CURL_SUPPORTS_BUILTIN_AVAILABLE
+    ;;
+esac
 
 AM_CONDITIONAL([HAVE_WINDRES],
   [test "$curl_cv_native_windows" = "yes" && test -n "${RC}"])
