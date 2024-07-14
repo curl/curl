@@ -1256,24 +1256,19 @@ AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
     capath="no"
   elif test "x$want_capath" != "xno" -a "x$want_capath" != "xunset"; then
     dnl --with-ca-path given
-    if test "x$OPENSSL_ENABLED" != "x1" -a \
-            "x$GNUTLS_ENABLED" != "x1" -a \
-            "x$MBEDTLS_ENABLED" != "x1" -a \
-            "x$WOLFSSL_ENABLED" != "x1"; then
-      AC_MSG_ERROR([--with-ca-path only works with OpenSSL, GnuTLS, mbedTLS or wolfSSL])
-    fi
     capath="$want_capath"
     ca="no"
   else
-    dnl first try autodetecting a CA bundle , then a CA path
-    dnl both autodetections can be skipped by --without-ca-*
+    dnl First try auto-detecting a CA bundle, then a CA path.
+    dnl Both auto-detections can be skipped by --without-ca-*
     ca="no"
     capath="no"
-    if test "x$cross_compiling" != "xyes"; then
+    if test "x$cross_compiling" != "xyes" -a \
+            "x$curl_cv_native_windows" != "xyes"; then
       dnl NOT cross-compiling and...
       dnl neither of the --with-ca-* options are provided
       if test "x$want_ca" = "xunset"; then
-        dnl the path we previously would have installed the curl ca bundle
+        dnl the path we previously would have installed the curl CA bundle
         dnl to, and thus we now check for an already existing cert in that
         dnl place in case we find no other
         if test "x$prefix" != xNONE; then
@@ -1296,12 +1291,7 @@ AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
       fi
       AC_MSG_NOTICE([want $want_capath ca $ca])
       if test "x$want_capath" = "xunset"; then
-        if test "x$OPENSSL_ENABLED" = "x1" -o \
-                "x$GNUTLS_ENABLED" = "x1" -o \
-                "x$MBEDTLS_ENABLED" = "x1" -o \
-                "x$WOLFSSL_ENABLED" = "x1"; then
-          check_capath="/etc/ssl/certs"
-        fi
+        check_capath="/etc/ssl/certs"
       fi
     else
       dnl no option given and cross-compiling
