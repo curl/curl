@@ -1091,6 +1091,7 @@ struct Progress {
   timediff_t t_connect;
   timediff_t t_appconnect;
   timediff_t t_pretransfer;
+  timediff_t t_posttransfer;
   timediff_t t_starttransfer;
   timediff_t t_redirect;
 
