@@ -137,6 +137,7 @@ CURLcode test(char *URL)
 
   check_time(curls, KN(CURLINFO_CONNECT_TIME_T), "done");
   check_time(curls, KN(CURLINFO_PRETRANSFER_TIME_T), "done");
+  check_time(curls, KN(CURLINFO_POSTTRANSFER_TIME_T), "done");
   check_time(curls, KN(CURLINFO_STARTTRANSFER_TIME_T), "done");
   /* no SSL, must be 0 */
   check_time0(curls, KN(CURLINFO_APPCONNECT_TIME_T), "done");

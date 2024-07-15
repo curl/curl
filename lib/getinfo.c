@@ -53,6 +53,7 @@ CURLcode Curl_initinfo(struct Curl_easy *data)
   pro->t_connect = 0;
   pro->t_appconnect = 0;
   pro->t_pretransfer = 0;
+  pro->t_posttransfer = 0;
   pro->t_starttransfer = 0;
   pro->timespent = 0;
   pro->t_redirect = 0;
@@ -368,6 +369,7 @@ static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
     case CURLINFO_CONNECT_TIME_T:
     case CURLINFO_APPCONNECT_TIME_T:
     case CURLINFO_PRETRANSFER_TIME_T:
+    case CURLINFO_POSTTRANSFER_TIME_T:
     case CURLINFO_STARTTRANSFER_TIME_T:
     case CURLINFO_REDIRECT_TIME_T:
     case CURLINFO_SPEED_DOWNLOAD_T:
@@ -417,6 +419,9 @@ static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
     break;
   case CURLINFO_PRETRANSFER_TIME_T:
     *param_offt = data->progress.t_pretransfer;
+    break;
+  case CURLINFO_POSTTRANSFER_TIME_T:
+    *param_offt = data->progress.t_posttransfer;
     break;
   case CURLINFO_STARTTRANSFER_TIME_T:
     *param_offt = data->progress.t_starttransfer;

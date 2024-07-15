@@ -180,6 +180,11 @@ See CURLINFO_NUM_CONNECTS(3)
 
 The errno from the last failure to connect. See CURLINFO_OS_ERRNO(3)
 
+## CURLINFO_POSTTRANSFER_TIME_T
+
+The time it took from the start until the last byte is sent by libcurl.
+In microseconds. (Added in 8.10.0) See CURLINFO_POSTTRANSFER_TIME_T(3)
+
 ## CURLINFO_PRETRANSFER_TIME
 
 The time it took from the start until the file transfer is just about to
@@ -375,15 +380,17 @@ An overview of the time values available from curl_easy_getinfo(3)
         |--|--|--CONNECT
         |--|--|--|--APPCONNECT
         |--|--|--|--|--PRETRANSFER
-        |--|--|--|--|--|--STARTTRANSFER
-        |--|--|--|--|--|--|--TOTAL
-        |--|--|--|--|--|--|--REDIRECT
+        |--|--|--|--|--|--POSTTRANSFER
+        |--|--|--|--|--|--|--STARTTRANSFER
+        |--|--|--|--|--|--|--|--TOTAL
+        |--|--|--|--|--|--|--|--REDIRECT
 
 
  CURLINFO_QUEUE_TIME_T(3), CURLINFO_NAMELOOKUP_TIME_T(3),
  CURLINFO_CONNECT_TIME_T(3), CURLINFO_APPCONNECT_TIME_T(3),
- CURLINFO_PRETRANSFER_TIME_T(3), CURLINFO_STARTTRANSFER_TIME_T(3),
- CURLINFO_TOTAL_TIME_T(3), CURLINFO_REDIRECT_TIME_T(3)
+ CURLINFO_PRETRANSFER_TIME_T(3), CURLINFO_POSTTRANSFER_TIME_T(3),
+ CURLINFO_STARTTRANSFER_TIME_T(3), CURLINFO_TOTAL_TIME_T(3),
+ CURLINFO_REDIRECT_TIME_T(3)
 
 # %PROTOCOLS%
 
