@@ -130,7 +130,6 @@ jobs:
             compiler: gcc-12
             configure: --enable-debug --with-secure-transport --enable-websockets --with-libssh2=$(brew --prefix libssh2)
             macos-version-min: '10.8'
-            #tflags: '~2100'
           - name: 'LibreSSL'
             compiler: clang
             install: libressl
@@ -257,9 +256,16 @@ jobs:
       - name: 'run tests'
         run: |
           export TFLAGS='${{ matrix.tflags }} -j10'
-          #if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
-          #  TFLAGS+=' ~RTSP ~1156 ~1539'
-          #fi
+          if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
+            TFLAGS+=' ~RTSP'  # 567 568 569 570 571 572 577 689 3100
+            TFLAGS+=' ~1156 ~1539'  # HTTP Content-Range, Content-Length
+            if [[ '${{ matrix.configure }}' = *'--with-secure-transport'* ]]; then
+              TFLAGS+=' ~2100'  # 2100:'HTTP GET using DoH' https://github.com/curl/curl/actions/runs/9942146678/job/27462937524#step:15:5059
+              TFLAGS+=' ~HTTP/2'  # 2400 2401 2402 2403 2404 2406, SecureTransport + nghttp2
+            else
+              TFLAGS+=' ~2402 ~2404'  # non-SecureTransport + nghttp2
+            fi
+          fi
           rm -f $HOME/.curlrc
           make -C bld V=1 test-ci
 
@@ -279,7 +285,7 @@ jobs:
             install: gsasl
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_USE_GSASL=ON -DUSE_APPLE_IDN=ON -DENABLE_WEBSOCKETS=ON
             macos-version-min: '10.9'
-            #tflags: '~1034 ~1035'  # AppleIDN issue: https://github.com/curl/curl/issues/14176
+            tflags: '~1034 ~1035'  # AppleIDN issues: https://github.com/curl/curl/issues/14176
           - name: 'OpenSSL +static'
             install:
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DBUILD_STATIC_LIBS=ON
@@ -369,9 +375,16 @@ jobs:
         #if: ${{ matrix.compiler == 'clang' }}  # Save CI time, gcc builds are already tested via autotools
         run: |
           export TFLAGS='${{ matrix.build.tflags }} -j10'
-          #if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
-          #  TFLAGS+=' ~RTSP ~1156 ~1539'
-          #fi
+          if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
+            TFLAGS+=' ~RTSP'  # 567 568 569 570 571 572 577 689 3100
+            TFLAGS+=' ~1156 ~1539'  # HTTP Content-Range, Content-Length
+            if [[ '${{ matrix.build.generate }}' = *'-DCURL_USE_SECTRANSP=ON'* ]]; then
+              TFLAGS+=' ~2100'  # 2100:'HTTP GET using DoH' https://github.com/curl/curl/actions/runs/9942146678/job/27462937524#step:15:5059
+              TFLAGS+=' ~HTTP/2'  # 2400 2401 2402 2403 2404 2406, SecureTransport + nghttp2
+            else
+              TFLAGS+=' ~2402 ~2404'  # non-SecureTransport + nghttp2
+            fi
+          fi
           rm -f $HOME/.curlrc
           make -C bld test-ci
 
