@@ -450,8 +450,10 @@ jobs:
           - { image: macos-14, xcode: '14.2'   }
           # Reduce build combinations,
           # these jobs are either covered by gcc-11 or gcc-14:
+          - { compiler: gcc-11, config: autotools }
           - { compiler: gcc-12, config: SecureTransport }
           - { compiler: gcc-13, config: SecureTransport }
+          - { compiler: gcc-14, config: cmake }
     steps:
       - name: 'install autotools'
         if: ${{ matrix.build == 'autotools' }}
