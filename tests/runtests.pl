@@ -3041,7 +3041,6 @@ if(%skipped && !$short) {
 
 sub testnumdetails {
     my ($desc, $numlist) = @_;
-    logmsg "\n";
     foreach my $testnum (split(' ', $numlist)) {
         if(!loadtest("${TESTDIR}/test${testnum}")) {
             my @info_keywords = getpart("info", "keywords");
@@ -3068,7 +3067,7 @@ if($total) {
 
     if($failed && ($ok != $total)) {
         my $failedsorted = numsortwords($failed);
-        testnumdetails("FAIL", $failedsorted);
+        testnumdetails("\nFAIL", $failedsorted);
         logmsg "\nTESTFAIL: These test cases failed: $failedsorted\n\n";
     }
 }
