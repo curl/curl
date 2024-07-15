@@ -3047,9 +3047,12 @@ sub testnumdetails {
             my $testname = (getpart("client", "name"))[0];
             chomp $testname;
             logmsg "$desc $testnum: '$testname'";
+            my $first = 1;
             for my $k (@info_keywords) {
                 chomp $k;
-                logmsg ",$k";
+                my $sep = ($first == 1) ? " " : ",";
+                logmsg "$sep$k";
+                $first = 0;
             }
             logmsg "\n";
         }
