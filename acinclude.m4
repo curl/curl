@@ -1263,7 +1263,8 @@ AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
     dnl Both auto-detections can be skipped by --without-ca-*
     ca="no"
     capath="no"
-    if test "x$cross_compiling" != "xyes"; then
+    if test "x$cross_compiling" != "xyes" -a \
+            "x$curl_cv_native_windows" != "xyes"; then
       dnl NOT cross-compiling and...
       dnl neither of the --with-ca-* options are provided
       if test "x$want_ca" = "xunset"; then
@@ -1306,16 +1307,19 @@ AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
     check_capath="$capath"
   fi
 
-  if test ! -z "$check_capath"; then
-    for a in "$check_capath"; do
-      if test -d "$a" && ls "$a"/[[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]].0 >/dev/null 2>/dev/null; then
-        if test "x$capath" = "xno"; then
-          capath="$a"
+  if test "x$cross_compiling" != "xyes" -a \
+          "x$curl_cv_native_windows" != "xyes"; then
+    if test ! -z "$check_capath"; then
+      for a in "$check_capath"; do
+        if test -d "$a" && ls "$a"/[[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]].0 >/dev/null 2>/dev/null; then
+          if test "x$capath" = "xno"; then
+            capath="$a"
+          fi
+          capath_warning=""
+          break
         fi
-        capath_warning=""
-        break
-      fi
-    done
+      done
+    fi
   fi
 
   if test "x$capath" = "xno"; then
