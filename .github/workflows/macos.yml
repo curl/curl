@@ -65,7 +65,7 @@ jobs:
     env:
       DEVELOPER_DIR: "/Applications/Xcode${{ matrix.xcode && format('_{0}', matrix.xcode) || '' }}.app/Contents/Developer"
       CC: ${{ matrix.compiler }}
-      CFLAGS: '-mmacosx-version-min=${{ matrix.macos-version-min }} -Wno-deprecated-declarations'
+      CFLAGS: '-mmacosx-version-min=${{ matrix.macos-version-min }}'
     strategy:
       fail-fast: false
       matrix:
@@ -125,7 +125,8 @@ jobs:
             compiler: clang
             install:
             configure: --enable-debug --with-secure-transport --enable-websockets --with-libssh2=$(brew --prefix libssh2)
-            macos-version-min: '10.12'
+            macos-version-min: '10.12'  # for monotonic timers
+            cflags: '-Wno-deprecated-declarations'
           - name: 'SecureTransport libssh2'
             compiler: gcc-12
             configure: --enable-debug --with-secure-transport --enable-websockets --with-libssh2=$(brew --prefix libssh2)
@@ -209,6 +210,7 @@ jobs:
 
       - name: 'configure'
         run: |
+          CFLAGS+=' ${{ matrix.cflags }}'
           if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
             libgccdir="$(dirname "$("${CC}" -print-libgcc-file-name)")"
             echo '::group::gcc include-fixed details'; find "${libgccdir}/include-fixed" | sort; echo '::endgroup::'
