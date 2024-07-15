@@ -654,7 +654,10 @@ jobs:
         run: |
           export TFLAGS='-j14 !TFTP !MQTT !WebSockets !SMTP ~FTP ${{ matrix.tflags }}'
           if [[ '${{ matrix.config }}' = *'-DUSE_WIN32_IDN=ON'* ]]; then
-            TFLAGS+=' ~165 ~1448 ~2046 ~2047'
+            TFLAGS+=' ~165'
+            if [[ '${{ matrix.config }}' != *'-DENABLE_UNICODE=ON'* ]]; then
+              TFLAGS+=' ~1448 ~2046 ~2047'
+            fi
           fi
           PATH="$PWD/bld/lib:$VCPKG_INSTALLATION_ROOT/installed/${{ matrix.arch }}-${{ matrix.plat }}/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
