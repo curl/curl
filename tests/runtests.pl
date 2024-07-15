@@ -500,7 +500,9 @@ sub checksystemfeatures {
     $versretval = runclient($versioncmd);
     $versnoexec = $!;
 
-    $DATE = strftime "%Y-%m-%d", localtime;
+    my $current_time = time();
+    $ENV{'SOURCE_DATE_EPOCH'} = $current_time;
+    $DATE = strftime "%Y-%m-%d", localtime($current_time);
 
     open(my $versout, "<", "$curlverout");
     @version = <$versout>;
