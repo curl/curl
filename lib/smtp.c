@@ -1202,6 +1202,7 @@ static CURLcode smtp_statemachine(struct Curl_easy *data,
   size_t nread = 0;
 
   /* Busy upgrading the connection; right now all I/O is SSL/TLS, not SMTP */
+upgrade_tls:
   if(smtpc->state == SMTP_UPGRADETLS)
     return smtp_perform_upgrade_tls(data);
 
@@ -1238,6 +1239,10 @@ static CURLcode smtp_statemachine(struct Curl_easy *data,
 
     case SMTP_STARTTLS:
       result = smtp_state_starttls_resp(data, smtpcode, smtpc->state);
+      /* During UPGRADETLS, leave the read loop as we need to connect
+       * (e.g. TLS handshake) before we continue sending/receiving. */
+      if(!result && (smtpc->state == SMTP_UPGRADETLS))
+        goto upgrade_tls;
       break;
 
     case SMTP_AUTH:
