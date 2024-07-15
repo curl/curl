@@ -42,7 +42,7 @@ mooooooo
 # Client-side
 <client>
 <features>
-ipv6
+IPv6
 proxy
 </features>
 <server>

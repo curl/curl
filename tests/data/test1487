@@ -28,7 +28,7 @@ Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
 # this relies on the debug feature to allow us to set directory to store the
 # -J output in
 <features>
-debug
+Debug
 </features>
 <server>
 http

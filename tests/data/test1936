@@ -35,7 +35,7 @@ http
 # this relies on the debug feature which allow to set the time
 <features>
 SSL
-debug
+Debug
 crypto
 </features>
 

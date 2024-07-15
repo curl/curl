@@ -17,7 +17,7 @@ warning
 none
 </server>
 <features>
-unix-sockets
+UnixSockets
 </features>
 <name>
 filename argument looks like a flag

@@ -33,7 +33,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 http
 </server>
 <features>
-debug
+Debug
 proxy
 </features>
 <setenv>

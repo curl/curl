@@ -28,7 +28,7 @@ Connection: close
 # This relies on the debug feature to allow us to set a directory
 # in which to store the -O output
 <features>
-debug
+Debug
 </features>
 <server>
 http

@@ -4,7 +4,7 @@
 HTTP
 HTTP GET
 SOCKS5
-unix sockets
+UnixSockets
 </keywords>
 </info>
 
@@ -32,7 +32,7 @@ Funny-head: yesyes
 <client>
 <features>
 proxy
-unix-sockets
+UnixSockets
 </features>
 <server>
 http

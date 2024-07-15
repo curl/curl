@@ -37,7 +37,7 @@ http
 # require debug so that alt-svc can work over plain old HTTP
 <features>
 alt-svc
-debug
+Debug
 </features>
 <name>
 alt-svc cache save after resetting the handle

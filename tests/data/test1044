@@ -23,7 +23,7 @@ Largefile
 # Client-side
 <client>
 <features>
-large_file
+Largefile
 </features>
 <server>
 ftp
