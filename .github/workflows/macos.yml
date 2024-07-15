@@ -72,22 +72,18 @@ jobs:
         include:
           - name: '!ssl !debug'
             compiler: clang
-            install:
             configure: --without-ssl --enable-websockets
             macos-version-min: '10.9'
           - name: '!ssl !debug'
             compiler: gcc-12
-            install:
             configure: --without-ssl --enable-websockets
             macos-version-min: '10.9'
           - name: '!ssl'
             compiler: clang
-            install:
             configure: --enable-debug --without-ssl --enable-websockets
             macos-version-min: '10.9'
           - name: '!ssl libssh2'
             compiler: clang
-            install:
             configure: --enable-debug --with-libssh2=$(brew --prefix libssh2) --without-ssl --enable-websockets
             macos-version-min: '10.9'
           - name: 'OpenSSL libssh c-ares'
@@ -102,7 +98,6 @@ jobs:
             macos-version-min: '10.9'
           - name: '!ssl c-ares'
             compiler: clang
-            install:
             configure: --enable-debug --enable-ares --without-ssl --enable-websockets
             macos-version-min: '10.9'
           - name: '!ssl HTTP-only'
@@ -118,12 +113,10 @@ jobs:
             macos-version-min: '10.15'  # Catalina (2019)
           - name: 'SecureTransport libssh2'
             compiler: clang
-            install:
             configure: --enable-debug --with-secure-transport --enable-websockets --with-libssh2=$(brew --prefix libssh2)
             macos-version-min: '10.8'
           - name: 'SecureTransport libssh2 10.12'
             compiler: clang
-            install:
             configure: --enable-debug --with-secure-transport --enable-websockets --with-libssh2=$(brew --prefix libssh2)
             macos-version-min: '10.12'  # for monotonic timers
             cflags: '-Wno-deprecated-declarations'
@@ -138,24 +131,20 @@ jobs:
             macos-version-min: '10.9'
           - name: 'OpenSSL'
             compiler: clang
-            install:
             configure: --enable-debug --with-openssl=$(brew --prefix openssl) --enable-websockets
             macos-version-min: '10.9'
           - name: 'OpenSSL torture !FTP'
             compiler: clang
-            install:
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=$(brew --prefix openssl) --enable-websockets
             tflags: -n -t --shallow=25 !FTP
             macos-version-min: '10.9'
           - name: 'OpenSSL torture FTP'
             compiler: clang
-            install:
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=$(brew --prefix openssl) --enable-websockets
             tflags: -n -t --shallow=20 FTP
             macos-version-min: '10.9'
           - name: 'OpenSSL libssh2 !ldap 10.15'
             compiler: clang
-            install:
             configure: --enable-debug --disable-ldap --with-openssl=$(brew --prefix openssl) --enable-websockets
             macos-version-min: '10.15'
     steps:
@@ -289,11 +278,9 @@ jobs:
             macos-version-min: '10.9'
             tflags: '~1034 ~1035'  # AppleIDN issues: https://github.com/curl/curl/issues/14176
           - name: 'OpenSSL +static'
-            install:
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DBUILD_STATIC_LIBS=ON
             macos-version-min: '10.9'
           - name: 'SecureTransport ws debug+'
-            install:
             generate: -DCURL_USE_SECTRANSP=ON -DENABLE_WEBSOCKETS=ON -DENABLE_DEBUG=ON -DENABLE_CURLDEBUG=ON
             macos-version-min: '10.8'
           - name: 'LibreSSL !ldap'
