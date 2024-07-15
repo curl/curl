@@ -168,16 +168,6 @@
 /* system header files in our config files, avoid this at any cost. */
 /* ================================================================ */
 
-#if defined(__APPLE__) && defined(__GNUC__) && !defined(__clang__) && \
-  !defined(HAVE_BUILTIN_AVAILABLE)
-#ifdef HAVE_CLOCK_GETTIME_MONOTONIC
-#undef HAVE_CLOCK_GETTIME_MONOTONIC
-#endif
-#ifdef HAVE_CLOCK_GETTIME_MONOTONIC_RAW
-#undef HAVE_CLOCK_GETTIME_MONOTONIC_RAW
-#endif
-#endif
-
 /*
  * AIX 4.3 and newer needs _THREAD_SAFE defined to build
  * proper reentrant code. Others may also need it.
