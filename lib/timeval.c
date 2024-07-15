@@ -57,13 +57,8 @@ struct curltime Curl_now(void)
   return now;
 }
 
-#elif (defined(__APPLE__) &&                           \
-       defined(HAVE_BUILTIN_AVAILABLE) &&              \
-       (defined(HAVE_CLOCK_GETTIME_MONOTONIC) ||       \
-        defined(HAVE_CLOCK_GETTIME_MONOTONIC_RAW))) || \
-      (!defined(__APPLE__) &&                          \
-       (defined(HAVE_CLOCK_GETTIME_MONOTONIC) ||       \
-        defined(HAVE_CLOCK_GETTIME_MONOTONIC_RAW)))
+#elif defined(HAVE_CLOCK_GETTIME_MONOTONIC) ||  \
+  defined(HAVE_CLOCK_GETTIME_MONOTONIC_RAW)
 
 struct curltime Curl_now(void)
 {
