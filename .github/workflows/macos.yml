@@ -92,7 +92,7 @@ jobs:
             configure: --enable-debug --with-libssh --with-openssl=$(brew --prefix openssl) --enable-ares --enable-websockets
             macos-version-min: '10.9'
           - name: 'OpenSSL libssh'
-            compiler: clang
+            compiler: llvm@15
             install: libssh
             configure: --enable-debug --with-libssh --with-openssl=$(brew --prefix openssl) --enable-websockets
             macos-version-min: '10.9'
@@ -186,6 +186,7 @@ jobs:
 
       - name: 'toolchain versions'
         run: |
+          [[ '${{ matrix.compiler }}' = 'llvm'* ]] && CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
           [[ '${{ matrix.compiler }}' = 'gcc'* ]] && \
             grep -h -r -E -o '.+[0-9.]+\.sdk/' "$(dirname "$("${CC}" -print-libgcc-file-name)")/include-fixed" | sed -E 's/^\t+//g' | tr -d '"' | sort -u || true
           which "${CC}"; "${CC}" --version || true
@@ -199,6 +200,7 @@ jobs:
 
       - name: 'configure'
         run: |
+          [[ '${{ matrix.compiler }}' = 'llvm'* ]] && CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
           CFLAGS+=' ${{ matrix.cflags }}'
           if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
             libgccdir="$(dirname "$("${CC}" -print-libgcc-file-name)")"
@@ -316,6 +318,7 @@ jobs:
 
       - name: 'toolchain versions'
         run: |
+          [[ '${{ matrix.compiler }}' = 'llvm'* ]] && CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
           [[ '${{ matrix.compiler }}' = 'gcc'* ]] && \
             grep -h -r -E -o '.+[0-9.]+\.sdk/' "$(dirname "$("${CC}" -print-libgcc-file-name)")/include-fixed" | sed -E 's/^\t+//g' | tr -d '"' | sort -u || true
           which "${CC}"; "${CC}" --version || true
@@ -326,6 +329,7 @@ jobs:
 
       - name: 'cmake configure'
         run: |
+          [[ '${{ matrix.compiler }}' = 'llvm'* ]] && CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
           if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
             libgccdir="$(dirname "$("${CC}" -print-libgcc-file-name)")"
             echo '::group::gcc include-fixed details'; find "${libgccdir}/include-fixed" | sort; echo '::endgroup::'
@@ -361,7 +365,6 @@ jobs:
         run: make -C bld testdeps
 
       - name: 'cmake run tests'
-        #if: ${{ matrix.compiler == 'clang' }}  # Save CI time, gcc builds are already tested via autotools
         run: |
           export TFLAGS='${{ matrix.build.tflags }} -j10'
           if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
