@@ -217,7 +217,7 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
       break;
     }
   case TIMER_POSTRANSFER:
-    /* this is the normal end-of-transfer thing */
+    delta = &data->progress.t_posttransfer;
     break;
   case TIMER_REDIRECT:
     data->progress.t_redirect = Curl_timediff_us(timestamp,

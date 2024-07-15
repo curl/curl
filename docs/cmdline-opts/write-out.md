@@ -221,6 +221,10 @@ remote host (or proxy) was completed.
 The time, in seconds, it took from the start until the name resolving was
 completed.
 
+## `time_posttransfer`
+The time it took from the start until the last byte is sent by libcurl.
+In microseconds. (Added in 8.10.0)
+
 ## `time_pretransfer`
 The time, in seconds, it took from the start until the file transfer was just
 about to begin. This includes all pre-transfer commands and negotiations that

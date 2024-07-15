@@ -258,6 +258,7 @@ CURLcode Curl_req_set_upload_done(struct Curl_easy *data)
   data->req.upload_done = TRUE;
   data->req.keepon &= ~(KEEP_SEND|KEEP_SEND_TIMED); /* we are done sending */
 
+  Curl_pgrsTime(data, TIMER_POSTRANSFER);
   Curl_creader_done(data, data->req.upload_aborted);
 
   if(data->req.upload_aborted) {
