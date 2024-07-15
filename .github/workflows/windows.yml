@@ -567,6 +567,13 @@ jobs:
           type: 'Debug'
           tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
           config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBPSL=ON -DHTTP_ONLY=ON'
+        - name: 'wolfssl'
+          install: 'brotli zlib zstd libpsl nghttp2 wolfssl libssh2 pkgconf gsasl'
+          arch: 'x64'
+          plat: 'windows'
+          type: 'Debug'
+          tflags: '~1516'
+          config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBPSL=ON -DUSE_NGHTTP2=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_WOLFSSL=ON -DCURL_USE_GSASL=ON'
       fail-fast: false
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
