@@ -854,8 +854,6 @@ sub checksystemfeatures {
                    $nghttpx_h3);
     logmsg sprintf("%s\n", $libtool?"Libtool ":"");
     logmsg ("* Seed: $randseed\n");
-    logmsg ("* Date: $DATE\n");
-    logmsg ("* SOURCE_DATE_EPOCH: $ENV{'SOURCE_DATE_EPOCH'}\n");
 
     # Disable memory tracking when using threaded resolver
     $feature{"TrackMemory"} = $feature{"TrackMemory"} && !$feature{"threaded-resolver"};
