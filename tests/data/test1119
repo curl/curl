@@ -17,10 +17,6 @@ none
 Verify that symbols-in-versions and headers are in sync
 </name>
 
-<setenv>
-TZ=UTC
-</setenv>
-
 <command type="perl">
 %SRCDIR/test1119.pl %SRCDIR/.. ../include/curl
 </command>
