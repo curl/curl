@@ -500,7 +500,7 @@ sub checksystemfeatures {
     $versretval = runclient($versioncmd);
     $versnoexec = $!;
 
-    my $current_time = time();
+    my $current_time = int(time());
     $ENV{'SOURCE_DATE_EPOCH'} = $current_time;
     $DATE = strftime "%Y-%m-%d", gmtime($current_time);
 
