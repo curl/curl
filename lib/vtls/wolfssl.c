@@ -1009,7 +1009,8 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 }
 
 
-static char *wolfssl_strerror(unsigned long error, char *buf, size_t size)
+static char *wolfssl_strerror(unsigned long error, char *buf,
+                              unsigned long size)
 {
   DEBUGASSERT(size);
   *buf = '\0';
