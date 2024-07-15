@@ -1307,19 +1307,16 @@ AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
     check_capath="$capath"
   fi
 
-  if test "x$cross_compiling" != "xyes" -a \
-          "x$curl_cv_native_windows" != "xyes"; then
-    if test ! -z "$check_capath"; then
-      for a in "$check_capath"; do
-        if test -d "$a" && ls "$a"/[[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]].0 >/dev/null 2>/dev/null; then
-          if test "x$capath" = "xno"; then
-            capath="$a"
-          fi
-          capath_warning=""
-          break
+  if test ! -z "$check_capath"; then
+    for a in "$check_capath"; do
+      if test -d "$a" && ls "$a"/[[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]].0 >/dev/null 2>/dev/null; then
+        if test "x$capath" = "xno"; then
+          capath="$a"
         fi
-      done
-    fi
+        capath_warning=""
+        break
+      fi
+    done
   fi
 
   if test "x$capath" = "xno"; then
