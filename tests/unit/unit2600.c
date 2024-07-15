@@ -47,6 +47,7 @@
 #include "connect.h"
 #include "cfilters.h"
 #include "multiif.h"
+#include "select.h"
 #include "curl_trc.h"
 
 
@@ -62,6 +63,7 @@ static CURLcode unit_setup(void)
     curl_global_cleanup();
     return CURLE_OUT_OF_MEMORY;
   }
+  curl_global_trace("all");
   curl_easy_setopt(easy, CURLOPT_VERBOSE, 1L);
   return res;
 }
@@ -146,8 +148,10 @@ static CURLcode cf_test_connect(struct Curl_cfilter *cf,
           (int)duration_ms, ctx->id);
     return CURLE_COULDNT_CONNECT;
   }
-  if(duration_ms)
+  if(duration_ms) {
     infof(data, "%04dms: cf[%s] continuing", (int)duration_ms, ctx->id);
+    Curl_wait_ms(10);
+  }
   Curl_expire(data, ctx->fail_delay_ms - duration_ms, EXPIRE_RUN_NOW);
   return CURLE_OK;
 }
