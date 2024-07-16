@@ -530,12 +530,12 @@ jobs:
           tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
           config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBPSL=ON -DUSE_NGHTTP2=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_OPENSSL=ON -DUSE_HTTPSRR=ON -DUSE_ECH=ON'
         - name: '!ssl'
-          install: 'brotli zlib zstd libpsl'
+          install: 'brotli zlib zstd libpsl pkgconf libidn2'
           arch: 'x64'
           plat: 'windows'
           type: 'Debug'
           tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
-          config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBPSL=ON -DHTTP_ONLY=ON'
+          config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBPSL=ON -DHTTP_ONLY=ON -DUSE_LIBIDN2=ON'
         - name: 'wolfssl'
           install: 'brotli zlib zstd libpsl nghttp2 wolfssl libssh2 pkgconf gsasl'
           arch: 'x64'
@@ -624,6 +624,8 @@ jobs:
             if [[ '${{ matrix.config }}' != *'-DENABLE_UNICODE=ON'* ]]; then
               TFLAGS+=' ~1448 ~2046 ~2047'
             fi
+          elif [[ '${{ matrix.config }}' = *'-DUSE_LIBIDN2=ON'* ]]; then
+            TFLAGS+=' ~165 ~1448 ~2046 ~2047'
           fi
           PATH="$PWD/bld/lib:$VCPKG_INSTALLATION_ROOT/installed/${{ matrix.arch }}-${{ matrix.plat }}/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
