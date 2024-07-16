@@ -44,6 +44,9 @@ jobs:
     name: "cygwin, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.platform }} ${{ matrix.name }}"
     runs-on: windows-latest
     timeout-minutes: 45
+    defaults:
+      run:
+        shell: C:\cygwin\bin\bash.exe '{0}'
     env:
       SHELLOPTS: 'igncr'
     strategy:
@@ -54,6 +57,7 @@ jobs:
       fail-fast: false
     steps:
       - run: git config --global core.autocrlf input
+        shell: pwsh
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
       - uses: cygwin/cygwin-install-action@006ad0b0946ca6d0a3ea2d4437677fa767392401 # v4
         with:
@@ -65,13 +69,11 @@ jobs:
       - name: 'autotools autoreconf'
         if: ${{ matrix.build == 'automake' }}
         timeout-minutes: 2
-        shell: C:\cygwin\bin\bash.exe '{0}'
         run: autoreconf -fi
 
       - name: 'autotools configure'
         if: ${{ matrix.build == 'automake' }}
         timeout-minutes: 5
-        shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
           PATH="/usr/bin:$(cygpath "${SYSTEMROOT}")/System32"
           mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
@@ -84,29 +86,24 @@ jobs:
 
       - name: 'autotools configure log'
         if: ${{ matrix.build == 'automake' && !cancelled() }}
-        shell: C:\cygwin\bin\bash.exe '{0}'
         run: cat bld/config.log 2>/dev/null || true
 
       - name: 'curl_config.h'
         if: ${{ matrix.build == 'automake' }}
-        shell: C:\cygwin\bin\bash.exe '{0}'
         run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'curl_config.h (full)'
         if: ${{ matrix.build == 'automake' }}
-        shell: C:\cygwin\bin\bash.exe '{0}'
         run: cat bld/lib/curl_config.h || true
 
       - name: 'autotools build'
         if: ${{ matrix.build == 'automake' }}
         timeout-minutes: 10
-        shell: C:\cygwin\bin\bash.exe '{0}'
         run: make -C bld -j5 V=1 install
 
       - name: 'curl version'
         if: ${{ matrix.build == 'automake' }}
         timeout-minutes: 1
-        shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
           find . -name '*.exe' -o -name '*.dll'
           bld/src/curl.exe --disable --version
@@ -114,19 +111,16 @@ jobs:
       - name: 'autotools build examples'
         if: ${{ matrix.build == 'automake' }}
         timeout-minutes: 5
-        shell: C:\cygwin\bin\bash.exe '{0}'
         run: make -C bld -j5 V=1 examples
 
       - name: 'autotools build tests'
         if: ${{ matrix.build == 'automake' && matrix.tflags != 'skipall' }}
         timeout-minutes: 15
-        shell: C:\cygwin\bin\bash.exe '{0}'
         run: make -C bld -j5 V=1 -C tests
 
       - name: 'autotools run tests'
         if: ${{ matrix.build == 'automake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 40
-        shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
           export TFLAGS='-j8 ${{ matrix.tflags }}'
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
@@ -137,7 +131,6 @@ jobs:
       - name: 'cmake configure'
         if: ${{ matrix.build == 'cmake' }}
         timeout-minutes: 5
-        shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
           PATH="/usr/bin:$(cygpath "${SYSTEMROOT}")/System32"
           cmake -B bld ${options} \
@@ -150,29 +143,24 @@ jobs:
 
       - name: 'cmake configure log'
         if: ${{ matrix.build == 'cmake' && !cancelled() }}
-        shell: C:\cygwin\bin\bash.exe '{0}'
         run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
         if: ${{ matrix.build == 'cmake' }}
-        shell: C:\cygwin\bin\bash.exe '{0}'
         run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'curl_config.h (full)'
         if: ${{ matrix.build == 'cmake' }}
-        shell: C:\cygwin\bin\bash.exe '{0}'
         run: cat bld/lib/curl_config.h || true
 
       - name: 'cmake build'
         if: ${{ matrix.build == 'cmake' }}
         timeout-minutes: 10
-        shell: C:\cygwin\bin\bash.exe '{0}'
         run: cmake --build bld --config '${{ matrix.type }}' --parallel 5
 
       - name: 'curl version'
         if: ${{ matrix.build == 'cmake' }}
         timeout-minutes: 1
-        shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
           find . -name '*.exe' -o -name '*.dll' | grep -v '/examples/'
           PATH="$PWD/bld/lib:$PATH"
@@ -181,13 +169,11 @@ jobs:
       - name: 'cmake build tests'
         if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' }}
         timeout-minutes: 15
-        shell: C:\cygwin\bin\bash.exe '{0}'
         run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
 
       - name: 'cmake run tests'
         if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 40
-        shell: C:\cygwin\bin\bash.exe '{0}'
         run: |
           export TFLAGS='-j8 ${{ matrix.tflags }}'
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
@@ -200,6 +186,9 @@ jobs:
     name: "${{ matrix.sys == 'msys' && 'msys2' || 'mingw' }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.env }} ${{ matrix.name }} ${{ matrix.test }}"
     runs-on: windows-latest
     timeout-minutes: 45
+    defaults:
+      run:
+        shell: msys2 {0}
     strategy:
       matrix:
         include:
@@ -216,6 +205,7 @@ jobs:
       fail-fast: false
     steps:
       - run: git config --global core.autocrlf input
+        shell: pwsh
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
       - uses: msys2/setup-msys2@d0e80f58dffbc64f6a3a1f43527d469b4fc7b6c8 # v2
         if: ${{ matrix.sys == 'msys' }}
@@ -236,13 +226,11 @@ jobs:
       - name: 'autotools autoreconf'
         if: ${{ matrix.build == 'autotools' }}
         timeout-minutes: 2
-        shell: msys2 {0}
         run: autoreconf -fi
 
       - name: 'autotools configure'
         if: ${{ matrix.build == 'autotools' }}
         timeout-minutes: 5
-        shell: msys2 {0}
         run: |
           mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
             --prefix="${HOME}"/install \
@@ -254,29 +242,24 @@ jobs:
 
       - name: 'autotools configure log'
         if: ${{ matrix.build == 'autotools' && !cancelled() }}
-        shell: msys2 {0}
         run: cat bld/config.log 2>/dev/null || true
 
       - name: 'curl_config.h'
         if: ${{ matrix.build == 'autotools' }}
-        shell: msys2 {0}
         run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'curl_config.h (full)'
         if: ${{ matrix.build == 'autotools' }}
-        shell: msys2 {0}
         run: cat bld/lib/curl_config.h || true
 
       - name: 'autotools build'
         if: ${{ matrix.build == 'autotools' }}
         timeout-minutes: 10
-        shell: msys2 {0}
         run: make -C bld -j5 V=1 install
 
       - name: 'curl version'
         if: ${{ matrix.build == 'autotools' }}
         timeout-minutes: 11
-        shell: msys2 {0}
         run: |
           find . -name '*.exe' -o -name '*.dll'
           bld/src/curl.exe --disable --version
@@ -284,19 +267,16 @@ jobs:
       - name: 'autotools build examples'
         if: ${{ matrix.build == 'autotools' }}
         timeout-minutes: 5
-        shell: msys2 {0}
         run: make -C bld -j5 V=1 examples
 
       - name: 'autotools build tests'
         if: ${{ matrix.build == 'autotools' && matrix.tflags != 'skipall' }}
         timeout-minutes: 10
-        shell: msys2 {0}
         run: make -C bld -j5 V=1 -C tests
 
       - name: 'autotools run tests'
         if: ${{ matrix.build == 'autotools' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 30
-        shell: msys2 {0}
         run: |
           export TFLAGS='-j14 ${{ matrix.tflags }}'
           if [ '${{ matrix.sys }}' != 'msys' ]; then
@@ -310,7 +290,6 @@ jobs:
       - name: 'cmake configure'
         if: ${{ matrix.build == 'cmake' }}
         timeout-minutes: 5
-        shell: msys2 {0}
         run: |
           if [[ '${{ matrix.env }}' = 'clang'* ]]; then
             options='-DCMAKE_C_COMPILER=clang'
@@ -344,29 +323,24 @@ jobs:
 
       - name: 'cmake configure log'
         if: ${{ matrix.build == 'cmake' && !cancelled() }}
-        shell: msys2 {0}
         run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
         if: ${{ matrix.build == 'cmake' }}
-        shell: msys2 {0}
         run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'curl_config.h (full)'
         if: ${{ matrix.build == 'cmake' }}
-        shell: msys2 {0}
         run: cat bld/lib/curl_config.h || true
 
       - name: 'cmake build'
         if: ${{ matrix.build == 'cmake' }}
         timeout-minutes: 10
-        shell: msys2 {0}
         run: cmake --build bld --config '${{ matrix.type }}' --parallel 5
 
       - name: 'curl version'
         if: ${{ matrix.build == 'cmake' }}
         timeout-minutes: 1
-        shell: msys2 {0}
         run: |
           find . -name '*.exe' -o -name '*.dll' | grep -v '/examples/'
           if [ '${{ matrix.test }}' != 'uwp' ]; then  # UWP missing 'msvcr120_app.dll', fails with exit code 0xc0000135
@@ -377,13 +351,11 @@ jobs:
       - name: 'cmake build tests'
         if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' }}
         timeout-minutes: 10
-        shell: msys2 {0}
         run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
 
       - name: 'cmake run tests'
         if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 40
-        shell: msys2 {0}
         run: |
           export TFLAGS='-j14 ${{ matrix.tflags }}'
           if [ '${{ matrix.sys }}' != 'msys' ]; then
@@ -399,6 +371,9 @@ jobs:
     name: 'old-mingw, CM ${{ matrix.env }} ${{ matrix.name }}'
     runs-on: windows-latest
     timeout-minutes: 45
+    defaults:
+      run:
+        shell: C:\msys64\usr\bin\bash.exe {0}
     strategy:
       matrix:
         include:
@@ -435,7 +410,6 @@ jobs:
       - name: 'install compiler (gcc ${{ matrix.env }})'
         if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
         timeout-minutes: 5
-        shell: C:\msys64\usr\bin\bash.exe {0}
         run: |
           cd "${USERPROFILE}" || exit 1
           mkdir my-cache
@@ -451,7 +425,6 @@ jobs:
 
       - name: 'cmake configure'
         timeout-minutes: 5
-        shell: C:\msys64\usr\bin\bash.exe {0}
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
           [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
@@ -468,27 +441,22 @@ jobs:
 
       - name: 'cmake configure log'
         if: ${{ !cancelled() }}
-        shell: C:\msys64\usr\bin\bash.exe {0}
         run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
-        shell: C:\msys64\usr\bin\bash.exe {0}
         run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'curl_config.h (full)'
-        shell: C:\msys64\usr\bin\bash.exe {0}
         run: cat bld/lib/curl_config.h || true
 
       - name: 'cmake build'
         timeout-minutes: 10
-        shell: C:\msys64\usr\bin\bash.exe {0}
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --parallel 5
 
       - name: 'curl version'
         timeout-minutes: 1
-        shell: C:\msys64\usr\bin\bash.exe {0}
         run: |
           find . -name '*.exe' -o -name '*.dll' | grep -v '/examples/'
           PATH="$PWD/bld/lib:$PATH"
@@ -497,7 +465,6 @@ jobs:
       - name: 'cmake build tests'
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
-        shell: C:\msys64\usr\bin\bash.exe {0}
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
@@ -505,7 +472,6 @@ jobs:
       - name: 'cmake run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 40
-        shell: C:\msys64\usr\bin\bash.exe {0}
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
           export TFLAGS='-j14 !TFTP !MQTT !WebSockets ~FTP ${{ matrix.tflags }}'
@@ -519,6 +485,9 @@ jobs:
     name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
     runs-on: windows-latest
     timeout-minutes: 55
+    defaults:
+      run:
+        shell: bash
     env:
       VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
       VCPKG_DISABLE_METRICS: '1'
@@ -587,19 +556,16 @@ jobs:
 
       - name: 'vcpkg versions'
         timeout-minutes: 1
-        shell: bash
         run: |
           git -C "$VCPKG_INSTALLATION_ROOT" show --no-patch --format='%H %ai'
           vcpkg version
 
       - name: 'vcpkg build'
         timeout-minutes: 25
-        shell: bash
         run: vcpkg x-set-installed ${{ matrix.install }} '--triplet=${{ matrix.arch }}-${{ matrix.plat }}'
 
       - name: 'cmake configure'
         timeout-minutes: 5
-        shell: bash
         run: |
           if [[ '${{ matrix.install }}' = *'libressl'* ]]; then
             # without this, CMake gets confused about the non-vcpkg OpenSSL
@@ -622,25 +588,20 @@ jobs:
 
       - name: 'cmake configure log'
         if: ${{ !cancelled() }}
-        shell: bash
         run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
-        shell: bash
         run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'curl_config.h (full)'
-        shell: bash
         run: cat bld/lib/curl_config.h || true
 
       - name: 'cmake build'
         timeout-minutes: 5
-        shell: bash
         run: cmake --build bld --config '${{ matrix.type }}' --parallel 5
 
       - name: 'curl version'
         timeout-minutes: 5
-        shell: bash
         run: |
           find . -name '*.exe' -o -name '*.dll' | grep -v '/examples/'
           if [ '${{ matrix.plat }}' != 'uwp' ]; then
@@ -651,13 +612,11 @@ jobs:
       - name: 'cmake build tests'
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
-        shell: bash
         run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
 
       - name: 'cmake run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 30
-        shell: bash
         run: |
           export TFLAGS='-j14 !TFTP !MQTT !WebSockets !SMTP ~FTP ${{ matrix.tflags }}'
           if [[ '${{ matrix.config }}' = *'-DUSE_WIN32_IDN=ON'* ]]; then
