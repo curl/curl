@@ -24,7 +24,7 @@ http
 Fail to resolve .onion. TLD
 </name>
 <command>
-tasty.onion.
+--no-progress-meter tasty.onion.
 </command>
 </client>
 

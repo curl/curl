@@ -2643,6 +2643,7 @@ statemachine_end:
         else if(data->mstate == MSTATE_CONNECT) {
           /* Curl_connect() failed */
           (void)Curl_posttransfer(data);
+          (void)Curl_pgrsUpdate(data);
         }
 
         multistate(data, MSTATE_COMPLETED);

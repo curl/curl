@@ -24,7 +24,7 @@ http
 Fail to resolve .onion TLD
 </name>
 <command>
-red.onion
+--no-progress-meter red.onion
 </command>
 </client>
 
