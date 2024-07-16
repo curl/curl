@@ -837,8 +837,8 @@ if(NOT CURL_DISABLE_LDAP)
     if(CMAKE_LDAP_INCLUDE_DIR)
       list(APPEND CMAKE_REQUIRED_INCLUDES ${CMAKE_LDAP_INCLUDE_DIR})
     endif()
-    check_include_file_concat("ldap.h"           HAVE_LDAP_H)
-    check_include_file_concat("lber.h"           HAVE_LBER_H)
+    check_include_file_concat("ldap.h" HAVE_LDAP_H)
+    check_include_file_concat("lber.h" HAVE_LBER_H)
 
     if(NOT HAVE_LDAP_H)
       message(STATUS "LDAP_H not found CURL_DISABLE_LDAP set ON")
@@ -1893,7 +1893,7 @@ if(NOT CURL_DISABLE_INSTALL)
       endif()
     endif()
     if(_lib MATCHES "^-")
-      set(LIBCURL_LIBS          "${LIBCURL_LIBS} ${_lib}")
+      set(LIBCURL_LIBS "${LIBCURL_LIBS} ${_lib}")
     elseif(_lib MATCHES ".*/.*")
       # This gets a bit more complex, because we want to specify the
       # directory separately, and only once per directory
@@ -1903,15 +1903,15 @@ if(NOT CURL_DISABLE_INSTALL)
         list(FIND _libcurl_libs_dirs "${_libdir}" _libdir_index)
         if(_libdir_index LESS 0)
           list(APPEND _libcurl_libs_dirs "${_libdir}")
-          set(LIBCURL_LIBS          "${LIBCURL_LIBS} -L${_libdir}")
+          set(LIBCURL_LIBS "${LIBCURL_LIBS} -L${_libdir}")
         endif()
         string(REGEX REPLACE "^lib" "" _libname "${_libname}")
-        set(LIBCURL_LIBS          "${LIBCURL_LIBS} -l${_libname}")
+        set(LIBCURL_LIBS "${LIBCURL_LIBS} -l${_libname}")
       else()
-        set(LIBCURL_LIBS          "${LIBCURL_LIBS} ${_lib}")
+        set(LIBCURL_LIBS "${LIBCURL_LIBS} ${_lib}")
       endif()
     else()
-      set(LIBCURL_LIBS          "${LIBCURL_LIBS} -l${_lib}")
+      set(LIBCURL_LIBS "${LIBCURL_LIBS} -l${_lib}")
     endif()
   endforeach()
 
@@ -1923,29 +1923,29 @@ if(NOT CURL_DISABLE_INSTALL)
 
   # Merge pkg-config private fields into public ones when static-only
   if(BUILD_SHARED_LIBS)
-    set(ENABLE_SHARED         "yes")
-    set(LIBCURL_PC_REQUIRES   "")
-    set(LIBCURL_NO_SHARED     "")
+    set(ENABLE_SHARED "yes")
+    set(LIBCURL_PC_REQUIRES "")
+    set(LIBCURL_NO_SHARED "")
     set(CPPFLAG_CURL_STATICLIB "")
   else()
-    set(ENABLE_SHARED         "no")
-    set(LIBCURL_PC_REQUIRES   "${LIBCURL_PC_REQUIRES_PRIVATE}")
-    set(LIBCURL_NO_SHARED     "${LIBCURL_LIBS}")
+    set(ENABLE_SHARED "no")
+    set(LIBCURL_PC_REQUIRES "${LIBCURL_PC_REQUIRES_PRIVATE}")
+    set(LIBCURL_NO_SHARED "${LIBCURL_LIBS}")
     set(CPPFLAG_CURL_STATICLIB "${LIBCURL_PC_CFLAGS_PRIVATE}")
   endif()
   if(BUILD_STATIC_LIBS)
-    set(ENABLE_STATIC         "yes")
+    set(ENABLE_STATIC "yes")
   else()
-    set(ENABLE_STATIC         "no")
+    set(ENABLE_STATIC "no")
   endif()
   # "a" (Linux) or "lib" (Windows)
   string(REPLACE "." "" libext "${CMAKE_STATIC_LIBRARY_SUFFIX}")
-  set(prefix                  "${CMAKE_INSTALL_PREFIX}")
+  set(prefix "${CMAKE_INSTALL_PREFIX}")
   # Set this to "yes" to append all libraries on which -lcurl is dependent
-  set(REQUIRE_LIB_DEPS        "no")
+  set(REQUIRE_LIB_DEPS "no")
   # SUPPORT_FEATURES
   # SUPPORT_PROTOCOLS
-  set(VERSIONNUM              "${CURL_VERSION_NUM}")
+  set(VERSIONNUM "${CURL_VERSION_NUM}")
 
   # Finally generate a "curl-config" matching this config
   # Use:
@@ -1968,23 +1968,23 @@ if(NOT CURL_DISABLE_INSTALL)
 
   # install headers
   install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/curl"
-      DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-      FILES_MATCHING PATTERN "*.h")
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    FILES_MATCHING PATTERN "*.h")
 
   include(CMakePackageConfigHelpers)
   write_basic_package_version_file(
-      "${version_config}"
-      VERSION ${CURL_VERSION}
-      COMPATIBILITY SameMajorVersion
+    "${version_config}"
+    VERSION ${CURL_VERSION}
+    COMPATIBILITY SameMajorVersion
   )
   file(READ "${version_config}" generated_version_config)
   file(WRITE "${version_config}" "
-  if(NOT PACKAGE_FIND_VERSION_RANGE AND PACKAGE_FIND_VERSION_MAJOR STREQUAL \"7\")
-    # Version 8 satisfies version 7... requirements
-    set(PACKAGE_FIND_VERSION_MAJOR 8)
-    set(PACKAGE_FIND_VERSION_COUNT 1)
-  endif()
-  ${generated_version_config}"
+    if(NOT PACKAGE_FIND_VERSION_RANGE AND PACKAGE_FIND_VERSION_MAJOR STREQUAL \"7\")
+      # Version 8 satisfies version 7... requirements
+      set(PACKAGE_FIND_VERSION_MAJOR 8)
+      set(PACKAGE_FIND_VERSION_COUNT 1)
+    endif()
+    ${generated_version_config}"
   )
 
   # Use:
