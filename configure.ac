@@ -2086,6 +2086,8 @@ if test -n "$check_for_ca_bundle"; then
   CURL_CHECK_CA_EMBED
 fi
 
+AM_CONDITIONAL(CURL_CA_EMBED_SET, test "x$CURL_CA_EMBED" != "x")
+
 dnl **********************************************************************
 dnl Check for libpsl
 dnl **********************************************************************

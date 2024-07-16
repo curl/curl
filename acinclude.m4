@@ -1386,7 +1386,6 @@ AS_HELP_STRING([--without-ca-embed], [Don't embed a default CA bundle]),
   else
     AC_MSG_RESULT([no])
   fi
-  AM_CONDITIONAL(CURL_CA_EMBED_SET, test "x$CURL_CA_EMBED" != "x")
 ])
 
 dnl CURL_CHECK_WIN32_LARGEFILE
