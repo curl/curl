@@ -853,18 +853,18 @@ if(NOT CURL_DISABLE_LDAP)
         include_directories(${CMAKE_LDAP_INCLUDE_DIR})
       endif()
       set(NEED_LBER_H ON)
-      set(_HEADER_LIST)
+      set(_header_list)
       if(WIN32)
-        list(APPEND _HEADER_LIST "windows.h")
+        list(APPEND _header_list "windows.h")
       endif()
       if(HAVE_SYS_TYPES_H)
-        list(APPEND _HEADER_LIST "sys/types.h")
+        list(APPEND _header_list "sys/types.h")
       endif()
-      list(APPEND _HEADER_LIST "ldap.h")
+      list(APPEND _header_list "ldap.h")
 
-      set(_INCLUDE_STRING "")
-      foreach(_HEADER ${_HEADER_LIST})
-        set(_INCLUDE_STRING "${_INCLUDE_STRING}#include <${_HEADER}>\n")
+      set(_include_string "")
+      foreach(_header ${_header_list})
+        set(_include_string "${_include_string}#include <${_header}>\n")
       endforeach()
 
       list(APPEND CMAKE_REQUIRED_DEFINITIONS -DLDAP_DEPRECATED=1)
@@ -876,7 +876,7 @@ if(NOT CURL_DISABLE_LDAP)
       endif()
 
       check_c_source_compiles("
-        ${_INCLUDE_STRING}
+        ${_include_string}
         int main(int argc, char ** argv)
         {
           BerValue *bvp = NULL;
@@ -1170,15 +1170,15 @@ if(curl_ca_bundle_supported)
     # First try auto-detecting a CA bundle, then a CA path
 
     if(CURL_CA_BUNDLE_AUTODETECT)
-      foreach(SEARCH_CA_BUNDLE_PATH IN ITEMS
+      foreach(_search_ca_bundle_path IN ITEMS
           "/etc/ssl/certs/ca-certificates.crt"
           "/etc/pki/tls/certs/ca-bundle.crt"
           "/usr/share/ssl/certs/ca-bundle.crt"
           "/usr/local/share/certs/ca-root-nss.crt"
           "/etc/ssl/cert.pem")
-        if(EXISTS "${SEARCH_CA_BUNDLE_PATH}")
-          message(STATUS "Found CA bundle: ${SEARCH_CA_BUNDLE_PATH}")
-          set(CURL_CA_BUNDLE "${SEARCH_CA_BUNDLE_PATH}" CACHE STRING
+        if(EXISTS "${_search_ca_bundle_path}")
+          message(STATUS "Found CA bundle: ${_search_ca_bundle_path}")
+          set(CURL_CA_BUNDLE "${_search_ca_bundle_path}" CACHE STRING
               "Path to the CA bundle. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
           set(CURL_CA_BUNDLE_SET TRUE CACHE BOOL "Path to the CA bundle has been set")
           break()
