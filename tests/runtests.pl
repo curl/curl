@@ -3050,7 +3050,7 @@ sub testnumdetails {
             my $first = 1;
             for my $k (@info_keywords) {
                 chomp $k;
-                my $sep = ($first == 1) ? " " : ",";
+                my $sep = ($first == 1) ? " " : ", ";
                 logmsg "$sep$k";
                 $first = 0;
             }
