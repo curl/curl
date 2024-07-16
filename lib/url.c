@@ -637,10 +637,8 @@ void Curl_disconnect(struct Curl_easy *data,
     return;
   }
 
-  if(conn->dns_entry) {
-    Curl_resolv_unlock(data, conn->dns_entry);
-    conn->dns_entry = NULL;
-  }
+  if(conn->dns_entry)
+    Curl_resolv_unlink(data, &conn->dns_entry);
 
   /* Cleanup NTLM connection-related data */
   Curl_http_auth_cleanup_ntlm(conn);
@@ -3101,7 +3099,7 @@ static CURLcode resolve_unix(struct Curl_easy *data,
     return longpath ? CURLE_COULDNT_RESOLVE_HOST : CURLE_OUT_OF_MEMORY;
   }
 
-  hostaddr->inuse++;
+  hostaddr->refcount = 1; /* connection is the only one holding this */
   conn->dns_entry = hostaddr;
   return CURLE_OK;
 }

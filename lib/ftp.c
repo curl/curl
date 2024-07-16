@@ -1042,7 +1042,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   int error;
   char *host = NULL;
   char *string_ftpport = data->set.str[STRING_FTPPORT];
-  struct Curl_dns_entry *h = NULL;
+  struct Curl_dns_entry *dns_entry = NULL;
   unsigned short port_min = 0;
   unsigned short port_max = 0;
   unsigned short port;
@@ -1178,15 +1178,12 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   }
 
   /* resolv ip/host to ip */
-  rc = Curl_resolv(data, host, 0, FALSE, &h);
+  rc = Curl_resolv(data, host, 0, FALSE, &dns_entry);
   if(rc == CURLRESOLV_PENDING)
-    (void)Curl_resolver_wait_resolv(data, &h);
-  if(h) {
-    res = h->addr;
-    /* when we return from this function, we can forget about this entry
-       to we can unlock it now already */
-    Curl_resolv_unlock(data, h);
-  } /* (h) */
+    (void)Curl_resolver_wait_resolv(data, &dns_entry);
+  if(dns_entry) {
+    res = dns_entry->addr;
+  }
   else
     res = NULL; /* failure! */
 
@@ -1381,6 +1378,9 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   ftp_state(data, FTP_PORT);
 
 out:
+  /* If we looked up a dns_entry, now is the time to safely release it */
+  if(dns_entry)
+    Curl_resolv_unlink(data, &dns_entry);
   if(result) {
     ftp_state(data, FTP_STOP);
   }
@@ -2098,7 +2098,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
                            CURL_CF_SSL_ENABLE : CURL_CF_SSL_DISABLE);
 
   if(result) {
-    Curl_resolv_unlock(data, addr); /* we are done using this address */
+    Curl_resolv_unlink(data, &addr); /* we are done using this address */
     if(ftpc->count1 == 0 && ftpcode == 229)
       return ftp_epsv_disable(data, conn);
 
@@ -2116,7 +2116,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
     /* this just dumps information about this second connection */
     ftp_pasv_verbose(data, addr->addr, ftpc->newhost, connectport);
 
-  Curl_resolv_unlock(data, addr); /* we are done using this address */
+  Curl_resolv_unlink(data, &addr); /* we are done using this address */
 
   Curl_safefree(conn->secondaryhostname);
   conn->secondary_port = ftpc->newport;

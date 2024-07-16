@@ -3896,7 +3896,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
           if(data->set.tls_ech & CURLECH_HARD)
             return CURLE_SSL_CONNECT_ERROR;
         }
-        Curl_resolv_unlock(data, dns);
+        Curl_resolv_unlink(data, &dns);
       }
     }
 # ifdef OPENSSL_IS_BORINGSSL

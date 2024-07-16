@@ -971,7 +971,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
           if(data->set.tls_ech & CURLECH_HARD)
             return CURLE_SSL_CONNECT_ERROR;
         }
-        Curl_resolv_unlock(data, dns);
+        Curl_resolv_unlink(data, &dns);
       }
     }
 

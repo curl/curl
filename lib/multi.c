@@ -742,10 +742,8 @@ static CURLcode multi_done(struct Curl_easy *data,
 
   data->state.done = TRUE; /* called just now! */
 
-  if(conn->dns_entry) {
-    Curl_resolv_unlock(data, conn->dns_entry); /* done with this */
-    conn->dns_entry = NULL;
-  }
+  if(conn->dns_entry)
+    Curl_resolv_unlink(data, &conn->dns_entry); /* done with this */
   Curl_hostcache_prune(data);
 
   /* if data->set.reuse_forbid is TRUE, it means the libcurl client has
