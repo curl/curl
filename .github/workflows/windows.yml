@@ -56,16 +56,15 @@ jobs:
           - { build: 'cmake'   , platform: 'x86_64', tflags: 'skipall', config: '-DCURL_USE_OPENSSL=ON', name: 'openssl R' }
       fail-fast: false
     steps:
+      - run: git config --global core.autocrlf input
+        shell: pwsh
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
       - uses: cygwin/cygwin-install-action@006ad0b0946ca6d0a3ea2d4437677fa767392401 # v4
         with:
           platform: ${{ matrix.platform }}
           # https://cygwin.com/cgi-bin2/package-grep.cgi
           packages: autoconf libtool ${{ matrix.build }} gcc-core gcc-g++ binutils make libssl-devel zlib-devel libbrotli-devel libnghttp2-devel libpsl-devel libssh2-devel
           site: https://mirrors.kernel.org/sourceware/cygwin/
-
-      - run: git config --global core.autocrlf input
-        shell: pwsh
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - name: 'autotools autoreconf'
         if: ${{ matrix.build == 'automake' }}
@@ -205,6 +204,9 @@ jobs:
           - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DBUILD_EXAMPLES=OFF', type: 'Release', test: 'uwp', name: 'schannel R' }
       fail-fast: false
     steps:
+      - run: git config --global core.autocrlf input
+        shell: pwsh
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
       - uses: msys2/setup-msys2@d0e80f58dffbc64f6a3a1f43527d469b4fc7b6c8 # v2
         if: ${{ matrix.sys == 'msys' }}
         with:
@@ -220,10 +222,6 @@ jobs:
             mingw-w64-${{ matrix.env }}-${{ matrix.build }} make
             mingw-w64-${{ matrix.env }}-openssl
             mingw-w64-${{ matrix.env }}-libssh2
-
-      - run: git config --global core.autocrlf input
-        shell: pwsh
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - name: 'autotools autoreconf'
         if: ${{ matrix.build == 'autotools' }}
