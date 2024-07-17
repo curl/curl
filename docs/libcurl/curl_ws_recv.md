@@ -36,13 +36,26 @@ Retrieves as much as possible of a received WebSocket data fragment into the
 **buffer**, but not more than **buflen** bytes. *recv* is set to the
 number of bytes actually stored.
 
-If there is more fragment data to deliver than what fits in the provided
-*buffer*, libcurl returns a full buffer and the application needs to call
-this function again to continue draining the buffer.
-
 The *meta* pointer gets set to point to a *const struct curl_ws_frame*
 that contains information about the received data. See the
 curl_ws_meta(3) for details on that struct.
+
+If there is more fragment data to deliver than what fits in the provided
+*buffer*, libcurl returns a full buffer. The bytesleft member of *meta*
+indicates how many additional bytes are expected to arrive as part of the
+current fragment. The application needs to call this function again to continue
+to retrieve more bytes.
+
+The call returns **CURLE_AGAIN** if there is no data to read - the socket is
+used in non-blocking mode internally. When **CURLE_AGAIN** is returned, use
+your operating system facilities like *select(2)* to wait for data. The
+socket may be obtained using curl_easy_getinfo(3) with
+CURLINFO_ACTIVESOCKET(3).
+
+Wait on the socket only if curl_ws_recv(3) returns **CURLE_AGAIN**.
+The reason for this is libcurl or the SSL library may internally cache some
+data, therefore you should call curl_ws_recv(3) until all data is
+read which would include any cached data.
 
 # %PROTOCOLS%
 
