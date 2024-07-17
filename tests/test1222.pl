@@ -208,7 +208,7 @@ sub scan_man_page {
             s/\s+/ /g;
             s/\\f.//g;      # Remove font formatting.
             s/\s+/ /g;      # One line with single space only.
-            if($sh =~ /DESCRIPTION|AVAILABILITY/) {
+            if($sh =~ /DESCRIPTION|DEPRECATED/) {
               while($_ =~ /(?:deprecated|obsoleted?)\b\s*(?:in\b|since\b)?\s*(?:version\b|curl\b|libcurl\b)?\s*(\d[0-9.]*\d)?\b\s*(.*)$/i) {
                 # Flag deprecation status.
                 if($version ne "X" && $version ne "?") {
