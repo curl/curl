@@ -260,6 +260,7 @@ jobs:
             fi
           fi
           rm -f $HOME/.curlrc
+          TFLAGS='${{ matrix.build.tflags }} -j14'
           make -C bld V=1 test-ci
 
       - uses: actions/upload-artifact@v4
@@ -390,6 +391,7 @@ jobs:
             fi
           fi
           rm -f $HOME/.curlrc
+          TFLAGS='${{ matrix.build.tflags }} -j14'
           make -C bld test-ci
 
       - uses: actions/upload-artifact@v4
