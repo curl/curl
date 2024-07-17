@@ -298,12 +298,8 @@ jobs:
             generate: -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DCMAKE_SHARED_LINKER_FLAGS=-L$(brew --prefix nettle)/lib -DCMAKE_EXE_LINKER_FLAGS=-L$(brew --prefix nettle)/lib
             macos-version-min: '10.15'
         exclude:
-          - compiler: llvm@15
-            build:
-              macos-version-min: '10.15'
-          - compiler: llvm@15
-            build:
-              macos-version-min: '10.9'
+          - { compiler: llvm@15, build: { macos-version-min: '10.15' } }
+          - { compiler: llvm@15, build: { macos-version-min: '10.9' } }
     steps:
       - name: 'brew install'
         run: |
