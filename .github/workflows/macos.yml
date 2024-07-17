@@ -263,15 +263,6 @@ jobs:
           TFLAGS='${{ matrix.build.tflags }} -j14'
           make -C bld V=1 test-ci
 
-      - uses: actions/upload-artifact@v4
-        if: ${{ failure() }}
-        with:
-          name: 'curl-failed-autotools'
-          retention-days: 3
-          path: |
-            bld/lib/libcurl*
-            bld/src/curl
-
   cmake:
     name: 'CM ${{ matrix.compiler }} ${{ matrix.build.name }}'
     runs-on: 'macos-latest'
@@ -393,15 +384,6 @@ jobs:
           rm -f $HOME/.curlrc
           TFLAGS='${{ matrix.build.tflags }} -j14'
           make -C bld test-ci
-
-      - uses: actions/upload-artifact@v4
-        if: ${{ failure() }}
-        with:
-          name: 'curl-failed-cmake'
-          retention-days: 3
-          path: |
-            bld/lib/libcurl*
-            bld/src/curl
 
   combinations:  # Test buildability with host OS, Xcode / SDK, compiler, target-OS, SecureTransport/not, built tool, combinations
     if: true  # Set to `true` to enable this test matrix. It runs fairly quickly.
