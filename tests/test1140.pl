@@ -24,7 +24,7 @@
 ###########################################################################
 #
 # scan manpages to find basic syntactic problems such as unbalanced \f
-# codes or references to non-existing curl man pages.
+# codes or references to non-existing curl manpages.
 
 my $docsroot = $ARGV[0];
 
@@ -76,7 +76,7 @@ sub file {
                 my $man = "$1.3";
                 $man =~ s/\\//g; # cut off backslashes
                 if(!manpresent($man)) {
-                    print "error: $f:$line: referring to non-existing man page $man\n";
+                    print "error: $f:$line: referring to non-existing manpage $man\n";
                     $errors++;
                 }
                 if($pre ne "I") {
@@ -95,7 +95,7 @@ sub file {
                 my $man = "$1.3";
                 $man =~ s/\\//g; # cut off backslashes
                 if(!manpresent($man)) {
-                    print "error: $f:$line: referring to non-existing man page $man\n";
+                    print "error: $f:$line: referring to non-existing manpage $man\n";
                     $errors++;
                 }
             }

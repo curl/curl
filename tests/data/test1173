@@ -15,7 +15,7 @@ none
 </server>
 
 <name>
-Man page syntax checks
+Manpage syntax checks
 </name>
 
 <command type="perl">
