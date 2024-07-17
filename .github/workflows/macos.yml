@@ -260,7 +260,6 @@ jobs:
             fi
           fi
           rm -f $HOME/.curlrc
-          TFLAGS='${{ matrix.build.tflags }} -j14'
           make -C bld V=1 test-ci
 
   cmake:
@@ -382,7 +381,6 @@ jobs:
             fi
           fi
           rm -f $HOME/.curlrc
-          TFLAGS='${{ matrix.build.tflags }} -j14'
           make -C bld test-ci
 
   combinations:  # Test buildability with host OS, Xcode / SDK, compiler, target-OS, SecureTransport/not, built tool, combinations
