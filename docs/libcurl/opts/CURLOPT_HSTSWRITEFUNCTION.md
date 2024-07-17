@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_HSTSWRITEDATA (3)
   - CURLOPT_HSTSWRITEFUNCTION (3)
   - CURLOPT_HSTS_CTRL (3)
+Added-in: 7.74.0
 ---
 
 # NAME
@@ -98,10 +99,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.74.0
 
 # RETURN VALUE
 

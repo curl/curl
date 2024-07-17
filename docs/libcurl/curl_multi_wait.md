@@ -10,6 +10,7 @@ See-also:
   - curl_multi_poll (3)
 Protocol:
   - All
+Added-in: 7.28.0
 ---
 
 # NAME
@@ -112,10 +113,6 @@ int main(void)
   curl_multi_remove_handle(multi, easy);
 }
 ~~~
-
-# AVAILABILITY
-
-This function was added in libcurl 7.28.0.
 
 # RETURN VALUE
 

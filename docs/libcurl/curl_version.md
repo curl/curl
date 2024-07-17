@@ -8,6 +8,7 @@ See-also:
   - curl_version_info (3)
 Protocol:
   - All
+Added-in: 7.1
 ---
 
 # NAME
@@ -37,10 +38,6 @@ int main(void)
   printf("libcurl version %s\n", curl_version());
 }
 ~~~
-
-# AVAILABILITY
-
-Always
 
 # RETURN VALUE
 

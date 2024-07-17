@@ -11,6 +11,7 @@ Protocol:
   - TLS
 TLS-backend:
   - OpenSSL
+Added-in: 7.71.0
 ---
 
 # NAME
@@ -76,10 +77,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.71.0. This option is supported by the OpenSSL backends.
 
 # RETURN VALUE
 

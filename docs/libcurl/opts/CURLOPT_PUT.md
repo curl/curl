@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_UPLOAD (3)
 Protocol:
   - HTTP
+Added-in: 7.1
 ---
 
 # NAME
@@ -78,9 +79,9 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# DEPRECATED
 
-Deprecated since 7.12.1. Do not use.
+Deprecated since 7.12.1.
 
 # RETURN VALUE
 

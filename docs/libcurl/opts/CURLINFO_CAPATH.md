@@ -15,6 +15,7 @@ TLS-backend:
   - GnuTLS
   - mbedTLS
   - wolfSSL
+Added-in: 7.84.0
 ---
 
 # NAME
@@ -59,10 +60,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.84.0
 
 # RETURN VALUE
 

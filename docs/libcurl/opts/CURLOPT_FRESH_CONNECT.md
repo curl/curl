@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_FORBID_REUSE (3)
   - CURLOPT_MAXAGE_CONN (3)
   - CURLOPT_MAXLIFETIME_CONN (3)
+Added-in: 7.7
 ---
 
 # NAME
@@ -56,10 +57,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Always
 
 # RETURN VALUE
 

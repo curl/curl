@@ -15,6 +15,7 @@ Protocol:
   - IMAP
   - POP3
   - SMTP
+Added-in: 7.1
 ---
 
 # NAME
@@ -118,10 +119,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-IMAP is supported since 7.30.0, POP3 since 7.26.0 and SMTP since 7.34.0.
 
 # RETURN VALUE
 

@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_TCP_KEEPIDLE (3)
 Protocol:
   - All
+Added-in: 7.62.0
 ---
 
 # NAME
@@ -67,10 +68,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.62.0.
 
 # RETURN VALUE
 

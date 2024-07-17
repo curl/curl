@@ -12,6 +12,7 @@ Protocol:
   - LDAP
   - POP3
   - SMTP
+Added-in: 7.34.0
 ---
 
 # NAME
@@ -67,9 +68,9 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# NOTES
 
-Added in 7.34.0. Support for OpenLDAP added in 7.82.0.
+Support for OpenLDAP added in 7.82.0.
 
 # RETURN VALUE
 

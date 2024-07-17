@@ -15,6 +15,7 @@ See-also:
   - CURLOPT_MIMEPOST (3)
   - CURLOPT_PROXYHEADER (3)
   - curl_mime_init (3)
+Added-in: 7.1
 ---
 
 # NAME
@@ -174,9 +175,9 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# NOTES
 
-As long as HTTP is enabled. Use in MIME mail added in 7.56.0.
+Use for MIME mail added in 7.56.0.
 
 # RETURN VALUE
 

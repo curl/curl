@@ -12,6 +12,7 @@ See-also:
   - CURLOPT_REFERER (3)
 Protocol:
   - HTTP
+Added-in: 7.1
 ---
 
 # NAME
@@ -65,10 +66,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Along with HTTP
 
 # RETURN VALUE
 

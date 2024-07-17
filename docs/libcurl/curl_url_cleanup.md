@@ -12,6 +12,7 @@ See-also:
   - curl_url_set (3)
 Protocol:
   - All
+Added-in: 7.62.0
 ---
 
 # NAME
@@ -43,10 +44,6 @@ int main(void)
   curl_url_cleanup(url);
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.62.0
 
 # RETURN VALUE
 

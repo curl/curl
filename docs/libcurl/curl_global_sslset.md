@@ -9,6 +9,7 @@ See-also:
   - libcurl (3)
 Protocol:
   - All
+Added-in: 7.56.0
 ---
 
 # NAME
@@ -118,11 +119,6 @@ int main(void)
            i, list[i]->name, list[i]->id);
 }
 ~~~
-
-# AVAILABILITY
-
-This function was added in libcurl 7.56.0. Before this version, there was no
-support for choosing SSL backends at runtime.
 
 # RETURN VALUE
 

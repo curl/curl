@@ -12,6 +12,7 @@ See-also:
   - curl_multi_socket_action (3)
 Protocol:
   - All
+Added-in: 7.9.6
 ---
 
 # NAME
@@ -80,10 +81,6 @@ int main(void)
   curl_multi_add_handle(multi, http_handle2);
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.9.6
 
 # RETURN VALUE
 

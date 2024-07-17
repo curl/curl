@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_WRITEFUNCTION (3)
 Protocol:
   - All
+Added-in: 7.9.7
 ---
 
 # NAME
@@ -65,7 +66,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# NOTES
 
 This option was once known by the older name CURLOPT_INFILE, the name
 CURLOPT_READDATA(3) was introduced in 7.9.7.

@@ -9,6 +9,7 @@ See-also:
   - curl_easy_setopt (3)
 Protocol:
   - FTP
+Added-in: 7.15.4
 ---
 
 # NAME
@@ -59,9 +60,9 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# NOTES
 
-Added in 7.15.4. Works for SFTP since 7.21.4
+Works for SFTP since 7.21.4
 
 # RETURN VALUE
 

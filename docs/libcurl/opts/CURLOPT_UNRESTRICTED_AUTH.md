@@ -12,6 +12,7 @@ See-also:
   - CURLOPT_USERPWD (3)
 Protocol:
   - HTTP
+Added-in: 7.10.4
 ---
 
 # NAME
@@ -66,10 +67,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Along with HTTP
 
 # RETURN VALUE
 

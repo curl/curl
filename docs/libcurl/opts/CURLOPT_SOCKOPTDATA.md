@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_SOCKOPTFUNCTION (3)
 Protocol:
   - All
+Added-in: 7.16.0
 ---
 
 # NAME
@@ -63,10 +64,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.16.0
 
 # RETURN VALUE
 

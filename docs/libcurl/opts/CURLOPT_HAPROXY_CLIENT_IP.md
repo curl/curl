@@ -9,6 +9,7 @@ Protocol:
 See-also:
   - CURLOPT_HAPROXYPROTOCOL (3)
   - CURLOPT_PROXY (3)
+Added-in: 8.2.0
 ---
 
 # NAME
@@ -51,10 +52,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Along with HTTP. Added in 8.2.0.
 
 # RETURN VALUE
 

@@ -1,7 +1,7 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
-Title: libcurl
+Title: libcurl-easy
 Section: 3
 Source: libcurl
 See-also:
@@ -13,6 +13,7 @@ See-also:
   - libcurl-multi (3)
 Protocol:
   - All
+Added-in: 7.1
 ---
 
 # NAME

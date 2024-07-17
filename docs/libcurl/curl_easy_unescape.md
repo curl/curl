@@ -9,6 +9,7 @@ See-also:
   - curl_url_get (3)
 Protocol:
   - All
+Added-in: 7.15.4
 ---
 
 # NAME
@@ -65,10 +66,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.15.4 and replaces the old curl_unescape(3) function.
 
 # RETURN VALUE
 

@@ -11,6 +11,7 @@ See-also:
   - curl_share_setopt (3)
 Protocol:
   - All
+Added-in: 7.10.3
 ---
 
 # NAME
@@ -70,10 +71,6 @@ int main(void)
     printf("Error: %s\n", curl_share_strerror(sh));
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.10
 
 # RETURN VALUE
 

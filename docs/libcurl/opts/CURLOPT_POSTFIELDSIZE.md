@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_POSTFIELDSIZE_LARGE (3)
 Protocol:
   - HTTP
+Added-in: 7.2
 ---
 
 # NAME
@@ -59,10 +60,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Along with HTTP
 
 # RETURN VALUE
 

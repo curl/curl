@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_USE_SSL (3)
 Protocol:
   - FTP
+Added-in: 7.16.4
 ---
 
 # NAME
@@ -54,7 +55,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# NOTES
 
 This option was known as CURLOPT_KRB4LEVEL up to 7.16.3
 

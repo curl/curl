@@ -11,6 +11,7 @@ See-also:
   - curl_multi_remove_handle (3)
 Protocol:
   - All
+Added-in: 8.4.0
 ---
 
 # NAME
@@ -69,10 +70,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 8.4.0
 
 # RETURN VALUE
 

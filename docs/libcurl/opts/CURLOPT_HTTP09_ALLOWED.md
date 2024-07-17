@@ -9,6 +9,7 @@ Protocol:
 See-also:
   - CURLOPT_HTTP_VERSION (3)
   - CURLOPT_SSLVERSION (3)
+Added-in: 7.64.0
 ---
 
 # NAME
@@ -52,10 +53,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Option added in 7.64.0, present along with HTTP.
 
 # RETURN VALUE
 

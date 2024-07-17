@@ -8,6 +8,7 @@ See-also:
   - CURLOPT_TFTP_BLKSIZE (3)
 Protocol:
   - TFTP
+Added-in: 7.48.0
 ---
 
 # NAME
@@ -66,10 +67,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.48.0
 
 # RETURN VALUE
 

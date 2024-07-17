@@ -15,6 +15,7 @@ Protocol:
   - FILE
   - RTSP
   - SFTP
+Added-in: 7.1
 ---
 
 # NAME
@@ -76,7 +77,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# NOTES
 
 FILE since 7.18.0, RTSP since 7.20.0
 

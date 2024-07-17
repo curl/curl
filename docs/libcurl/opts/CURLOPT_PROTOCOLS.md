@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_URL (3)
 Protocol:
   - All
+Added-in: 7.19.4
 ---
 
 # NAME
@@ -93,9 +94,9 @@ int main(int argc, char **argv)
 }
 ~~~
 
-# AVAILABILITY
+# DEPRECATED
 
-Added in 7.19.4. Deprecated since 7.85.0.
+Deprecated since 7.85.0.
 
 # RETURN VALUE
 

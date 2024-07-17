@@ -20,6 +20,7 @@ TLS-backend:
   - wolfSSL
   - GnuTLS
   - mbedTLS
+Added-in: 7.9
 ---
 
 # NAME
@@ -87,11 +88,9 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# NOTES
 
 Added in 7.9, in 7.83.0 for BearSSL, in 8.8.0 for mbedTLS
-
-If built TLS enabled.
 
 # RETURN VALUE
 

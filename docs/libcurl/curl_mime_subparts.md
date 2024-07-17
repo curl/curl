@@ -11,6 +11,7 @@ Protocol:
   - HTTP
   - IMAP
   - SMTP
+Added-in: 7.56.0
 ---
 
 # NAME
@@ -77,10 +78,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
 
 # RETURN VALUE
 

@@ -16,6 +16,7 @@ See-also:
   - curl_url_set (3)
 Protocol:
   - All
+Added-in: 7.1
 ---
 
 # NAME
@@ -128,10 +129,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-POP3 and SMTP were added in 7.31.0
 
 # RETURN VALUE
 

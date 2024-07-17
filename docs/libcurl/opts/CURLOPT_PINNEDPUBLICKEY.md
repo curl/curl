@@ -18,6 +18,7 @@ TLS-backend:
   - mbedTLS
   - Secure Transport
   - Schannel
+Added-in: 7.39.0
 ---
 
 # NAME
@@ -116,7 +117,7 @@ footer:
 -----END PUBLIC KEY-----
 ~~~
 
-# AVAILABILITY
+# NOTES
 
 ## PEM/DER support
 

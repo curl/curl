@@ -14,6 +14,7 @@ See-also:
   - select (2)
 Protocol:
   - All
+Added-in: 7.9.6
 ---
 
 # NAME
@@ -111,10 +112,6 @@ int main(void)
   } while(!mc);
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.9.6
 
 # RETURN VALUE
 

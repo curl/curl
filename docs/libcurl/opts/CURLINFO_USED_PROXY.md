@@ -11,6 +11,7 @@ See-also:
   - curl_easy_setopt (3)
 Protocol:
   - All
+Added-in: 8.7.0
 ---
 
 # NAME
@@ -57,10 +58,6 @@ int main(int argc, char *argv[])
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 8.7.0
 
 # RETURN VALUE
 

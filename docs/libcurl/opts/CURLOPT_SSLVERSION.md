@@ -13,6 +13,7 @@ Protocol:
   - TLS
 TLS-backend:
   - All
+Added-in: 7.1
 ---
 
 # NAME
@@ -133,7 +134,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# HISTORY
 
 SSLv2 and SSLv3 are refused completely since curl 7.77.0
 

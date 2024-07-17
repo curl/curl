@@ -17,6 +17,7 @@ TLS-backend:
   - OpenSSL
   - Schannel
   - wolfSSL
+Added-in: 7.87.0
 ---
 
 # NAME
@@ -74,9 +75,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-This option was added in curl 7.87.0.
+# NOTES
 
 This option is supported by OpenSSL and its forks (since 7.87.0), Schannel
 (since 8.5.0), wolfSSL (since 8.9.0) and GnuTLS (since 8.9.0).

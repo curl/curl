@@ -9,6 +9,7 @@ See-also:
   - CURLSHOPT_SHARE (3)
 Protocol:
   - All
+Added-in: 7.10
 ---
 
 # NAME
@@ -76,10 +77,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Always
 
 # RETURN VALUE
 

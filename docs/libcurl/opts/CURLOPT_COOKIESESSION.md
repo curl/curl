@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_COOKIEJAR (3)
 Protocol:
   - HTTP
+Added-in: 7.9.7
 ---
 
 # NAME
@@ -63,10 +64,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Along with HTTP
 
 # RETURN VALUE
 

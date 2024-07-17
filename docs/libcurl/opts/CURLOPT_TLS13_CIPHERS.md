@@ -16,6 +16,7 @@ Protocol:
 TLS-backend:
   - OpenSSL
   - Schannel
+Added-in: 7.61.0
 ---
 
 # NAME
@@ -70,7 +71,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# NOTES
 
 Added in 7.61.0 for OpenSSL. Available when built with OpenSSL \>= 1.1.1.
 

@@ -11,6 +11,7 @@ See-also:
   - curl_easy_send (3)
 Protocol:
   - All
+Added-in: 7.15.2
 ---
 
 # NAME
@@ -72,9 +73,9 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# NOTES
 
-Added in 7.15.2. WS and WSS support added in 7.86.0.
+WS and WSS support added in 7.86.0.
 
 # RETURN VALUE
 

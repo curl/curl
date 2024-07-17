@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_TIMEOUT_MS (3)
 Protocol:
   - All
+Added-in: 7.16.2
 ---
 
 # NAME
@@ -76,10 +77,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Always
 
 # RETURN VALUE
 

@@ -9,6 +9,7 @@ See-also:
   - curl_multi_socket_action (3)
 Protocol:
   - All
+Added-in: 7.15.5
 ---
 
 # NAME
@@ -63,14 +64,6 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.15.5
-
-# RETURN VALUE
-
-The standard CURLMcode for multi interface error codes.
-
 # TYPICAL USAGE
 
 In a typical application you allocate a struct or at least use some kind of
@@ -78,6 +71,10 @@ semi-dynamic data for each socket that we must wait for action on when using
 the curl_multi_socket_action(3) approach.
 
 When our socket-callback gets called by libcurl and we get to know about yet
-another socket to wait for, we can use curl_multi_assign(3) to point out
-the particular data so that when we get updates about this same socket again,
-we do not have to find the struct associated with this socket by ourselves.
+another socket to wait for, we can use curl_multi_assign(3) to point out the
+particular data so that when we get updates about this same socket again, we
+do not have to find the struct associated with this socket by ourselves.
+
+# RETURN VALUE
+
+The standard CURLMcode for multi interface error codes.

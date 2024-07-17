@@ -10,6 +10,7 @@ See-also:
   - strcmp (3)
 Protocol:
   - All
+Added-in: 7.1
 ---
 
 # NAME
@@ -48,10 +49,6 @@ int main(int argc, char **argv)
     printf("Name and input matches\n");
 }
 ~~~
-
-# AVAILABILITY
-
-Always
 
 # RETURN VALUE
 

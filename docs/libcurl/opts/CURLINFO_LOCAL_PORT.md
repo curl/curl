@@ -11,6 +11,7 @@ See-also:
   - CURLINFO_PRIMARY_PORT (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Added-in: 7.21.0
 ---
 
 # NAME
@@ -56,10 +57,6 @@ int main(void)
   return 0;
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.21.0
 
 # RETURN VALUE
 

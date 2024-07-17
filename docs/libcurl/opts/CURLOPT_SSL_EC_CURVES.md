@@ -13,6 +13,7 @@ Protocol:
 TLS-backend:
   - OpenSSL
   - wolfSSL
+Added-in: 7.73.0
 ---
 
 # NAME
@@ -52,10 +53,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.73.0. Supported by the OpenSSL backend.
 
 # RETURN VALUE
 

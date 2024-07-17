@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_KEEP_SENDING_ON_ERROR (3)
 Protocol:
   - HTTP
+Added-in: 7.1
 ---
 
 # NAME
@@ -62,10 +63,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Along with HTTP.
 
 # RETURN VALUE
 

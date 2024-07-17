@@ -11,6 +11,7 @@ See-also:
   - libcurl-errors (3)
 Protocol:
   - All
+Added-in: 7.12.0
 ---
 
 # NAME
@@ -43,10 +44,6 @@ int main(void)
     printf("error: %s\n", curl_multi_strerror(mc));
 }
 ~~~
-
-# AVAILABILITY
-
-This function was added in libcurl 7.12.0
 
 # RETURN VALUE
 

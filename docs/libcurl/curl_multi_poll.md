@@ -11,6 +11,7 @@ See-also:
   - curl_multi_wakeup (3)
 Protocol:
   - All
+Added-in: 7.66.0
 ---
 
 # NAME
@@ -131,10 +132,6 @@ int main(void)
   curl_multi_remove_handle(multi_handle, easy_handle);
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.66.0.
 
 # RETURN VALUE
 

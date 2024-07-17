@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_WRITEFUNCTION (3)
 Protocol:
   - All
+Added-in: 7.10
 ---
 
 # NAME
@@ -72,10 +73,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.10. Growing the buffer was added in 7.53.0.
 
 # RETURN VALUE
 

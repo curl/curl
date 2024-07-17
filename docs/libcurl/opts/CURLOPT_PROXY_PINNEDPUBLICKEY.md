@@ -17,6 +17,7 @@ TLS-backend:
   - GnuTLS
   - mbedTLS
   - wolfSSL
+Added-in: 7.52.0
 ---
 
 # NAME
@@ -109,7 +110,7 @@ footer:
 -----END PUBLIC KEY-----
 ~~~
 
-# AVAILABILITY
+# NOTES
 
 PEM/DER support:
 

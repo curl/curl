@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_INTERFACE (3)
 Protocol:
   - All
+Added-in: 7.33.0
 ---
 
 # NAME
@@ -55,11 +56,10 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# NOTES
 
-Added in 7.33.0. This option also requires that libcurl was built with a
-resolver backend that supports this operation. The c-ares backend is the only
-such one.
+This option requires that libcurl was built with a resolver backend that
+supports this operation. The c-ares backend is the only such one.
 
 # RETURN VALUE
 

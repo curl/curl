@@ -17,6 +17,7 @@ TLS-backend:
   - Schannel
   - Secure Transport
   - wolfSSL
+Added-in: 7.52.0
 ---
 
 # NAME
@@ -67,12 +68,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.52.0
-
-If built TLS enabled.
 
 # RETURN VALUE
 

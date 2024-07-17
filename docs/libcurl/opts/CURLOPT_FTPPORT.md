@@ -9,6 +9,7 @@ Protocol:
 See-also:
   - CURLOPT_FTP_USE_EPRT (3)
   - CURLOPT_FTP_USE_EPSV (3)
+Added-in: 7.1
 ---
 
 # NAME
@@ -86,10 +87,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Port range support was added in 7.19.5
 
 # RETURN VALUE
 

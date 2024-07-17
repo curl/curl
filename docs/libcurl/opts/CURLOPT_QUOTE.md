@@ -12,6 +12,7 @@ See-also:
 Protocol:
   - FTP
   - SFTP
+Added-in: 7.1
 ---
 
 # NAME
@@ -151,7 +152,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# NOTES
 
 SFTP support added in 7.16.3. *-prefix for SFTP added in 7.24.0
 

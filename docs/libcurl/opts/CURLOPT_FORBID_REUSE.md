@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_MAXLIFETIME_CONN (3)
 Protocol:
   - All
+Added-in: 7.7
 ---
 
 # NAME
@@ -57,10 +58,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Always
 
 # RETURN VALUE
 

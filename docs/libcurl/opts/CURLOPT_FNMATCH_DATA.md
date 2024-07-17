@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_WILDCARDMATCH (3)
 Protocol:
   - FTP
+Added-in: 7.21.0
 ---
 
 # NAME
@@ -68,10 +69,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.21.0
 
 # RETURN VALUE
 

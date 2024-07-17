@@ -13,6 +13,7 @@ Protocol:
 TLS-backend:
   - OpenSSL
   - GnuTLS
+Added-in: 7.19.0
 ---
 
 # NAME
@@ -67,10 +68,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-If built TLS enabled
 
 # RETURN VALUE
 

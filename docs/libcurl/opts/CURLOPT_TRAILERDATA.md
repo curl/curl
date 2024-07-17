@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_WRITEFUNCTION (3)
 Protocol:
   - HTTP
+Added-in: 7.64.0
 ---
 
 # NAME
@@ -47,10 +48,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-This option was added in curl 7.64.0 and is present if HTTP support is enabled
 
 # RETURN VALUE
 

@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_USERPWD (3)
 Protocol:
   - IMAP
+Added-in: 7.66.0
 ---
 
 # NAME
@@ -60,10 +61,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.66.0. Support for OpenLDAP added in 7.82.0.
 
 # RETURN VALUE
 

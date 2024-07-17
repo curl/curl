@@ -10,6 +10,7 @@ See-also:
   - curl_easy_setopt (3)
 Protocol:
   - All
+Added-in: 7.55.0
 ---
 
 # NAME
@@ -53,10 +54,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.55.0
 
 # RETURN VALUE
 

@@ -15,6 +15,7 @@ Protocol:
   - SMTP
   - SFTP
   - SCP
+Added-in: 7.20.0
 ---
 
 # NAME
@@ -63,13 +64,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.10.8. Used under this name since 7.20.0
-
-Support for SSH is predicated on a new enough (1.11.0) version of libssh2
-being available when compiling libcurl.
 
 # RETURN VALUE
 

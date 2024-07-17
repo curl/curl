@@ -10,6 +10,7 @@ See-also:
   - curl_easy_setopt (3)
 Protocol:
   - All
+Added-in: 7.4.1
 ---
 
 # NAME
@@ -56,9 +57,9 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# DEPRECATED
 
-Added in 7.4.1. Deprecated since 7.55.0.
+Deprecated since 7.55.0.
 
 # RETURN VALUE
 

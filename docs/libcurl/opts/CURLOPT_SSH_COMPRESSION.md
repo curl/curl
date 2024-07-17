@@ -10,6 +10,7 @@ See-also:
 Protocol:
   - SFTP
   - SCP
+Added-in: 7.56.0
 ---
 
 # NAME
@@ -52,10 +53,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.56.0
 
 # RETURN VALUE
 

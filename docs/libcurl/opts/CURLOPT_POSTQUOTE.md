@@ -10,6 +10,7 @@ See-also:
 Protocol:
   - FTP
   - SFTP
+Added-in: 7.1
 ---
 
 # NAME
@@ -61,10 +62,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-If support for the protocols are built-in.
 
 # RETURN VALUE
 

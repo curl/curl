@@ -12,6 +12,7 @@ See-also:
   - the hiperfifo.c example
 Protocol:
   - All
+Added-in: 7.15.4
 ---
 
 # NAME
@@ -71,10 +72,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-This function was added in libcurl 7.15.4, and is deemed stable since
-7.16.0.
+# DEPRECATED
 
 curl_multi_socket(3) is deprecated, use curl_multi_socket_action(3) instead!
 

@@ -13,6 +13,7 @@ See-also:
   - CURLMOPT_PIPELINING_SITE_BL (3)
 Protocol:
   - HTTP
+Added-in: 7.16.0
 ---
 
 # NAME
@@ -65,10 +66,10 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# NOTES
 
-Added in 7.16.0. Multiplex support bit added in 7.43.0. HTTP/1 Pipelining
-support was disabled in 7.62.0.
+The multiplex support bit was added in 7.43.0. HTTP/1 Pipelining support was
+disabled in 7.62.0.
 
 # RETURN VALUE
 

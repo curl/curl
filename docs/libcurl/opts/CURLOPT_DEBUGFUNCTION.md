@@ -12,6 +12,7 @@ See-also:
   - curl_global_trace (3)
 Protocol:
   - All
+Added-in: 7.9.6
 ---
 
 # NAME
@@ -206,10 +207,6 @@ int main(void)
   return 0;
 }
 ~~~
-
-# AVAILABILITY
-
-Always
 
 # RETURN VALUE
 

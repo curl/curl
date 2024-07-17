@@ -11,6 +11,7 @@ See-also:
   - curl_easy_setopt (3)
 Protocol:
   - HTTP
+Added-in: 7.19.4
 ---
 
 # NAME
@@ -68,10 +69,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.19.4
 
 # RETURN VALUE
 
