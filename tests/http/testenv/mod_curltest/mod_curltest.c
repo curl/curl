@@ -522,7 +522,7 @@ static int curltest_put_handler(request_rec *r)
   apr_bucket_brigade *bb;
   apr_bucket *b;
   apr_status_t rv;
-  char buffer[16*1024];
+  char buffer[128*1024];
   const char *ct;
   apr_off_t rbody_len = 0;
   const char *s_rbody_len;

@@ -61,6 +61,7 @@ class TestCaddy:
         self._make_docs_file(docs_dir=caddy.docs_dir, fname='data5.data', fsize=5*1024*1024)
         self._make_docs_file(docs_dir=caddy.docs_dir, fname='data10.data', fsize=10*1024*1024)
         self._make_docs_file(docs_dir=caddy.docs_dir, fname='data100.data', fsize=100*1024*1024)
+        env.make_data_file(indir=env.gen_dir, fname="data-10m", fsize=10*1024*1024)
 
     # download 1 file
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
@@ -167,10 +168,9 @@ class TestCaddy:
         else:
             assert r.total_connects == 1, r.dump_logs()
 
-    # upload data parallel, check that they were echoed
-    @pytest.mark.skipif(condition=Env().ci_run, reason="not suitable for CI runs")
-    @pytest.mark.parametrize("proto", ['h2', 'h3'])
-    def test_08_06_upload_parallel(self, env: Env, caddy, repeat, proto):
+    # post data parallel, check that they were echoed
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_08_06_post_parallel(self, env: Env, httpd, caddy, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
@@ -179,8 +179,29 @@ class TestCaddy:
         count = 20
         data = '0123456789'
         curl = CurlClient(env=env)
-        url = f'https://{env.domain1}:{caddy.port}/data10.data?[0-{count-1}]'
+        url = f'https://{env.domain2}:{caddy.port}/curltest/echo?id=[0-{count-1}]'
         r = curl.http_upload(urls=[url], data=data, alpn_proto=proto,
                              extra_args=['--parallel'])
-        exp_status = 405 if env.caddy_is_at_least('2.7.0') else 200
-        r.check_stats(count=count, http_status=exp_status, exitcode=0)
+        r.check_stats(count=count, http_status=200, exitcode=0)
+        for i in range(0,count):
+            respdata = open(curl.response_file(i)).readlines()
+            assert respdata == [data]
+
+    # put large file, check that they length were echoed
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_08_07_put_large(self, env: Env, httpd, caddy, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 stalls here")
+        # limit since we use a separate connection in h1<
+        count = 1
+        fdata = os.path.join(env.gen_dir, 'data-10m')
+        curl = CurlClient(env=env)
+        url = f'https://{env.domain2}:{caddy.port}/curltest/put?id=[0-{count-1}]'
+        r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto)
+        exp_data = [f'{os.path.getsize(fdata)}']
+        r.check_response(count=count, http_status=200)
+        for i in range(count):
+            respdata = open(curl.response_file(i)).readlines()
+            assert respdata == exp_data

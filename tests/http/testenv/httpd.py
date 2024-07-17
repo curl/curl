@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
@@ -309,6 +310,18 @@ class Httpd:
             conf.extend(self._curltest_conf(domain1))
             if domain1 in self._extra_configs:
                 conf.extend(self._extra_configs[domain1])
+            conf.extend([
+                f'</VirtualHost>',
+                f'',
+            ])
+            conf.extend([  # plain http host for domain2
+                f'<VirtualHost *:{self.env.http_port}>',
+                f'    ServerName {domain2}',
+                f'    ServerAlias localhost',
+                f'    DocumentRoot "{self._docs_dir}"',
+                f'    Protocols h2c http/1.1',
+            ])
+            conf.extend(self._curltest_conf(domain2))
             conf.extend([
                 f'</VirtualHost>',
                 f'',
