@@ -9,6 +9,7 @@ See-also:
   - unix (7)
 Protocol:
   - All
+Added-in: 7.53.0
 ---
 
 # NAME
@@ -59,10 +60,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.53.0.
 
 # RETURN VALUE
 

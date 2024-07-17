@@ -11,6 +11,7 @@ See-also:
   - vprintf (3)
 Protocol:
   - All
+Added-in: 7.1
 ---
 
 # NAME
@@ -274,11 +275,6 @@ int main(void)
   curl_mprintf("Pi is almost %f\n", (double)25.0/8);
 }
 ~~~
-
-# AVAILABILITY
-
-These functions might be removed from the public libcurl API in the future. Do
-not use them in new programs or projects.
 
 # RETURN VALUE
 

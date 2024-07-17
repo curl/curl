@@ -9,6 +9,7 @@ See-also:
   - curl_easy_perform (3)
 Protocol:
   - HTTP
+Added-in: 7.83.0
 ---
 
 # NAME
@@ -88,10 +89,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.83.0. Officially supported since 7.84.0.
 
 # RETURN VALUE
 

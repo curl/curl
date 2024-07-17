@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_HTTPPOST (3)
   - CURLOPT_POSTFIELDS (3)
   - CURLOPT_UPLOAD (3)
+Added-in: 7.1
 ---
 
 # NAME
@@ -90,10 +91,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Along with HTTP
 
 # RETURN VALUE
 

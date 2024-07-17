@@ -8,6 +8,7 @@ See-also:
   - curl_version (3)
 Protocol:
   - All
+Added-in: 7.10.0
 ---
 
 # NAME
@@ -381,10 +382,6 @@ int main(void)
          ver->version_num & 0xff);
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.10
 
 # RETURN VALUE
 

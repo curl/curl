@@ -13,6 +13,7 @@ See-also:
   - curl_formadd (3)
   - curl_formfree (3)
   - curl_mime_init (3)
+Added-in: 7.1
 ---
 
 # NAME
@@ -89,9 +90,9 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# DEPRECATED
 
-As long as HTTP is enabled. Deprecated in 7.56.0.
+Deprecated in 7.56.0.
 
 # RETURN VALUE
 

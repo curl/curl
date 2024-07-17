@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_REQUEST_TARGET (3)
 Protocol:
   - HTTP
+Added-in: 7.1
 ---
 
 # NAME
@@ -53,10 +54,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-As long as HTTP is supported
 
 # RETURN VALUE
 

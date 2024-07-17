@@ -11,6 +11,7 @@ See-also:
   - curl_url_set (3)
 Protocol:
   - All
+Added-in: 7.42.0
 ---
 
 # NAME
@@ -63,10 +64,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.42.0
 
 # RETURN VALUE
 

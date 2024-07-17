@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_MAIL_FROM (3)
 Protocol:
   - SMTP
+Added-in: 7.20.0
 ---
 
 # NAME
@@ -67,10 +68,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.20.0. The **VRFY** and **EXPN** logic was added in 7.34.0
 
 # RETURN VALUE
 

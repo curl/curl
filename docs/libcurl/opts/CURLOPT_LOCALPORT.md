@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_LOCALPORTRANGE (3)
 Protocol:
   - All
+Added-in: 7.15.2
 ---
 
 # NAME
@@ -52,10 +53,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.15.2
 
 # RETURN VALUE
 

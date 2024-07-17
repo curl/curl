@@ -10,6 +10,7 @@ See-also:
   - curl_mime_init (3)
 Protocol:
   - HTTP
+Added-in: 7.1
 ---
 
 # NAME
@@ -299,7 +300,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# DEPRECATED
 
 Deprecated in 7.56.0. Before this release, field names were allowed to contain
 zero-valued bytes. The pseudo-filename "-" to read stdin is discouraged

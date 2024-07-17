@@ -10,6 +10,7 @@ See-also:
   - unix (7)
 Protocol:
   - All
+Added-in: 7.40.0
 ---
 
 # NAME
@@ -74,10 +75,6 @@ you can use the proc filesystem to bypass the limitation:
   curl_easy_setopt(curl_handle, CURLOPT_UNIX_SOCKET_PATH, path);
   /* Be sure to keep dirfd valid until you discard the handle */
 ~~~
-
-# AVAILABILITY
-
-Added in 7.40.0.
 
 # RETURN VALUE
 

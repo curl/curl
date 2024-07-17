@@ -15,6 +15,7 @@ TLS-backend:
   - mbedTLS
   - Schannel
   - wolfSSL
+Added-in: 7.9.3
 ---
 
 # NAME
@@ -63,10 +64,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-If built TLS enabled.
 
 # RETURN VALUE
 

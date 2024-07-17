@@ -16,6 +16,7 @@ TLS-backend:
   - GnuTLS
   - mbedTLS
   - wolfSSL
+Added-in: 7.9.8
 ---
 
 # NAME
@@ -65,10 +66,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-This option is supported by the OpenSSL, GnuTLS, mbedTLS and wolfSSL backends.
 
 # RETURN VALUE
 

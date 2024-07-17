@@ -13,6 +13,7 @@ See-also:
   - libcurl-errors (3)
 Protocol:
   - All
+Added-in: 7.80.0
 ---
 
 # NAME
@@ -45,10 +46,6 @@ int main(void)
   curl_url_cleanup(url);
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.80.0
 
 # RETURN VALUE
 

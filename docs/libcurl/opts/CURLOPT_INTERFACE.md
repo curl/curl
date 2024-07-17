@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_SOCKOPTFUNCTION (3)
   - CURLOPT_TCP_NODELAY (3)
   - CURLOPT_LOCALPORT (3)
+Added-in: 7.3
 ---
 
 # NAME
@@ -73,7 +74,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# NOTES
 
 The `if!` and `host!` syntax was added in 7.24.0.
 

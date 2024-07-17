@@ -14,6 +14,7 @@ Protocol:
   - POP3
   - IMAP
   - SMTP
+Added-in: 7.7.2
 ---
 
 # NAME
@@ -123,10 +124,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Always
 
 # RETURN VALUE
 

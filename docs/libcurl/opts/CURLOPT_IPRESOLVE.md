@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_SSLVERSION (3)
 Protocol:
   - All
+Added-in: 7.10.8
 ---
 
 # NAME
@@ -71,10 +72,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Always
 
 # RETURN VALUE
 

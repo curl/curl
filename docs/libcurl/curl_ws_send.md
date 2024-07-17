@@ -12,6 +12,7 @@ See-also:
   - libcurl-ws (3)
 Protocol:
   - WS
+Added-in: 7.86.0
 ---
 
 # NAME
@@ -110,10 +111,6 @@ int main(void)
   return (int)res;
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.86.0.
 
 # RETURN VALUE
 

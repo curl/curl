@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_STREAM_WEIGHT (3)
 Protocol:
   - HTTP
+Added-in: 7.46.0
 ---
 
 # NAME
@@ -65,10 +66,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.46.0
 
 # RETURN VALUE
 

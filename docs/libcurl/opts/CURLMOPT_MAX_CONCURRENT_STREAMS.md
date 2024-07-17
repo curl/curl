@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_MAXCONNECTS (3)
 Protocol:
   - HTTP
+Added-in: 7.67.0
 ---
 
 # NAME
@@ -47,10 +48,6 @@ int main(void)
   curl_multi_setopt(m, CURLMOPT_MAX_CONCURRENT_STREAMS, 200L);
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.67.0
 
 # RETURN VALUE
 

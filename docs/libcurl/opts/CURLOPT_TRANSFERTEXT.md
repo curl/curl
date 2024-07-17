@@ -8,6 +8,7 @@ See-also:
   - CURLOPT_CRLF (3)
 Protocol:
   - All
+Added-in: 7.1.1
 ---
 
 # NAME
@@ -53,10 +54,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Along with FTP
 
 # RETURN VALUE
 

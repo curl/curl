@@ -8,6 +8,7 @@ See-also:
   - CURLOPT_PROXY (3)
 Protocol:
   - All
+Added-in: 7.60.0
 ---
 
 # NAME
@@ -52,10 +53,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Along with HTTP. Added in 7.60.0.
 
 # RETURN VALUE
 

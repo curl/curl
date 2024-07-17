@@ -9,6 +9,7 @@ See-also:
   - curl_unescape (3)
 Protocol:
   - All
+Added-in: 7.1
 ---
 
 # NAME
@@ -50,7 +51,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# HISTORY
 
 Since 7.15.4, curl_easy_escape(3) should be used. This function might be
 removed in a future release.

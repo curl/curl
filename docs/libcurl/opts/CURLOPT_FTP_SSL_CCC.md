@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_FTPSSLAUTH (3)
   - CURLOPT_PROTOCOLS_STR (3)
   - CURLOPT_USE_SSL (3)
+Added-in: 7.16.1
 ---
 
 # NAME
@@ -66,10 +67,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.16.1
 
 # RETURN VALUE
 

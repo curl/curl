@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_SERVICE_NAME (3)
 Protocol:
   - All
+Added-in: 7.43.0
 ---
 
 # NAME
@@ -52,10 +53,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.43.0 for HTTP proxies, 7.49.0 for SOCKS5 proxies.
 
 # RETURN VALUE
 

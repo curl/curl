@@ -9,6 +9,7 @@ See-also:
   - curl_global_init (3)
 Protocol:
   - All
+Added-in: 7.12.0
 ---
 
 # NAME
@@ -86,10 +87,6 @@ int main(void)
                        strdup_cb, calloc_cb);
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.12.0
 
 # RETURN VALUE
 

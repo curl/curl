@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_HTTP09_ALLOWED (3)
   - CURLOPT_HTTP200ALIASES (3)
   - CURLOPT_SSLVERSION (3)
+Added-in: 7.9.1
 ---
 
 # NAME
@@ -107,10 +108,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Along with HTTP
 
 # RETURN VALUE
 

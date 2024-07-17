@@ -15,6 +15,7 @@ TLS-backend:
   - wolfSSL
   - mbedTLS
   - BearSSL
+Added-in: 7.10.6
 ---
 
 # NAME
@@ -156,11 +157,6 @@ int main(void)
   return rv;
 }
 ~~~
-
-# AVAILABILITY
-
-OpenSSL (added in 7.11.0), wolfSSL (added in 7.42.0), mbedTLS (added in
-7.54.0) or BearSSL (added in 7.83.0)
 
 # RETURN VALUE
 

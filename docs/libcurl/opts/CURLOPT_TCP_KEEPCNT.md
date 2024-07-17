@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_TCP_KEEPINTVL (3)
 Protocol:
   - TCP
+Added-in: 8.9.0
 ---
 
 # NAME
@@ -63,10 +64,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in v8.9.0
 
 # RETURN VALUE
 

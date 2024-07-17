@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_PROXY (3)
   - CURLOPT_PROXYPORT (3)
   - CURLOPT_PROXYTYPE (3)
+Added-in: 7.3
 ---
 
 # NAME
@@ -63,10 +64,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Always
 
 # RETURN VALUE
 

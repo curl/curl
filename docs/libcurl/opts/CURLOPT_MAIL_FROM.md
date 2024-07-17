@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_MAIL_RCPT (3)
 Protocol:
   - SMTP
+Added-in: 7.20.0
 ---
 
 # NAME
@@ -56,10 +57,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.20.0
 
 # RETURN VALUE
 

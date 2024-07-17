@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_XFERINFODATA (3)
 Protocol:
   - All
+Added-in: 7.32.0
 ---
 
 # NAME
@@ -111,10 +112,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.32.0. This callback replaces CURLOPT_PROGRESSFUNCTION(3)
 
 # RETURN VALUE
 

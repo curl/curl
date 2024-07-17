@@ -8,6 +8,7 @@ See-also:
   - curl_slist_append (3)
 Protocol:
   - All
+Added-in: 7.1
 ---
 
 # NAME
@@ -50,10 +51,6 @@ int main(void)
   curl_slist_free_all(slist); /* free the list again */
 }
 ~~~
-
-# AVAILABILITY
-
-Always
 
 # RETURN VALUE
 

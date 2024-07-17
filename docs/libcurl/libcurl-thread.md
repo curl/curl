@@ -8,6 +8,7 @@ See-also:
   - libcurl-security (3)
 Protocol:
   - All
+Added-in: n/a
 ---
 
 # NAME

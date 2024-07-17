@@ -9,6 +9,7 @@ See-also:
   - curl_pushheader_bynum (3)
 Protocol:
   - HTTP
+Added-in: 7.44.0
 ---
 
 # NAME
@@ -74,10 +75,6 @@ int main(void)
   curl_multi_setopt(multi, CURLMOPT_PUSHDATA, &counter);
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.44.0
 
 # RETURN VALUE
 

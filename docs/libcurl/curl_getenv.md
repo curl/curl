@@ -8,6 +8,7 @@ See-also:
   - getenv (3C)
 Protocol:
   - All
+Added-in: 7.1
 ---
 
 # NAME
@@ -42,10 +43,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Always
 
 # RETURN VALUE
 

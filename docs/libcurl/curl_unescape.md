@@ -11,6 +11,7 @@ See-also:
   - curl_free (3)
 Protocol:
   - All
+Added-in: 7.1
 ---
 
 # NAME
@@ -27,7 +28,7 @@ char *curl_unescape(const char *input, int length);
 
 # DESCRIPTION
 
-Obsolete function. Use curl_easy_unescape(3) instead.
+Deprecated. Use curl_easy_unescape(3) instead.
 
 This function converts the URL encoded string **input** to a "plain string"
 and return that as a new allocated string. All input characters that are URL
@@ -57,7 +58,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# DEPRECATED
 
 Since 7.15.4, curl_easy_unescape(3) should be used. This function might
 be removed in a future release.

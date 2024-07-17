@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_USERPWD (3)
 Protocol:
   - All
+Added-in: 7.19.1
 ---
 
 # NAME
@@ -78,10 +79,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.19.1
 
 # RETURN VALUE
 

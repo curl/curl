@@ -13,6 +13,7 @@ See-also:
   - CURLOPT_WRITEFUNCTION (3)
 Protocol:
   - All
+Added-in: 7.1
 ---
 
 # NAME
@@ -111,7 +112,7 @@ int main(int argc, char **argv)
 }
 ~~~
 
-# AVAILABILITY
+# NOTES
 
 CURL_READFUNC_PAUSE return code was added in 7.18.0 and CURL_READFUNC_ABORT
 was added in 7.12.1.

@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_FOLLOWLOCATION (3)
 Protocol:
   - HTTP
+Added-in: 7.5
 ---
 
 # NAME
@@ -60,10 +61,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Along with HTTP
 
 # RETURN VALUE
 

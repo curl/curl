@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_TRANSFERTEXT (3)
 Protocol:
     - All
+Added-in: 7.18.0
 ---
 
 # NAME
@@ -56,10 +57,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.18.0
 
 # RETURN VALUE
 

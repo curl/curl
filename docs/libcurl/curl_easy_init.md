@@ -13,6 +13,7 @@ See-also:
   - curl_multi_init (3)
 Protocol:
   - All
+Added-in: 7.1
 ---
 
 # NAME
@@ -64,10 +65,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Always
 
 # RETURN VALUE
 

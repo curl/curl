@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_PASSWORD (3)
   - CURLOPT_PROXYAUTH (3)
   - CURLOPT_USERNAME (3)
+Added-in: 7.10.6
 ---
 
 # NAME
@@ -142,9 +143,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Option Added in 7.10.6.
+# NOTES
 
 CURLAUTH_DIGEST_IE was added in 7.19.3
 

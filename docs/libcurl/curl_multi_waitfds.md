@@ -11,6 +11,7 @@ See-also:
   - curl_multi_fdset (3)
 Protocol:
   - All
+Added-in: 8.8.0
 ---
 
 # NAME
@@ -98,10 +99,6 @@ int main(void)
   } while (!mc);
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 8.8.0
 
 # RETURN VALUE
 

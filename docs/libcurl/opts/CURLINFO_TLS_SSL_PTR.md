@@ -18,6 +18,7 @@ TLS-backend:
   - Schannel
   - Secure Transport
   - wolfSSL
+Added-in: 7.48.0
 ---
 
 # NAME
@@ -166,9 +167,7 @@ int main(int argc, char **argv)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.48.0.
+# NOTES
 
 This option supersedes CURLINFO_TLS_SESSION(3) which was added in 7.34.0.
 This option is exactly the same as that option except in the case of OpenSSL.

@@ -15,6 +15,7 @@ Protocol:
   - SMTP
   - SFTP
   - SCP
+Added-in: 8.6.0
 ---
 
 # NAME
@@ -65,10 +66,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 8.6.0.
 
 # RETURN VALUE
 

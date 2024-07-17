@@ -10,6 +10,7 @@ Protocol:
   - TLS
 TLS-backend:
   - Secure Transport
+Added-in: 7.42.0
 ---
 
 # NAME
@@ -50,11 +51,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.42.0. This option is currently only supported by the Secure
-Transport (on iOS 7.0 or later, or OS X 10.9 or later) TLS backend.
 
 # RETURN VALUE
 

@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_OPENSOCKETFUNCTION (3)
 Protocol:
   - All
+Added-in: 7.21.7
 ---
 
 # NAME
@@ -74,10 +75,6 @@ int main(void)
   curl_easy_cleanup(curl);
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.21.7
 
 # RETURN VALUE
 

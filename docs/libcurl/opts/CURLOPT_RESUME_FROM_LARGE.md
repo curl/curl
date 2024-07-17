@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_RESUME_FROM (3)
 Protocol:
   - All
+Added-in: 7.11.0
 ---
 
 # NAME
@@ -67,10 +68,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.11.0
 
 # RETURN VALUE
 

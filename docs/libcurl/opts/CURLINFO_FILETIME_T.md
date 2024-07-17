@@ -1,7 +1,7 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
-Title: CURLINFO_FILETIME
+Title: CURLINFO_FILETIME_T
 Section: 3
 Source: libcurl
 See-also:
@@ -12,6 +12,7 @@ Protocol:
   - HTTP
   - FTP
   - SFTP
+Added-in: 7.59.0
 ---
 
 # NAME
@@ -66,10 +67,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.59.0
 
 # RETURN VALUE
 

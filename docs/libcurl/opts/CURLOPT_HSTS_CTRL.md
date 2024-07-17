@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_CONNECT_TO (3)
   - CURLOPT_HSTS (3)
   - CURLOPT_RESOLVE (3)
+Added-in: 7.74.0
 ---
 
 # NAME
@@ -66,10 +67,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.74.0
 
 # RETURN VALUE
 

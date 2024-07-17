@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_CONV_TO_NETWORK_FUNCTION (3)
 Protocol:
   - All
+Added-in: 7.1
 ---
 
 # NAME
@@ -50,10 +51,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-SMTP since 7.40.0, other protocols since they were introduced
 
 # RETURN VALUE
 

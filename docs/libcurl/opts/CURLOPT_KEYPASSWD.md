@@ -14,6 +14,7 @@ TLS-backend:
   - mbedTLS
   - Schannel
   - wolfSSL
+Added-in: 7.17.0
 ---
 
 # NAME
@@ -60,7 +61,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# NOTES
 
 This option was known as CURLOPT_SSLKEYPASSWD up to 7.16.4 and
 CURLOPT_SSLCERTPASSWD up to 7.9.2.

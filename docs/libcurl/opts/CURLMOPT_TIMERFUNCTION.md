@@ -9,6 +9,7 @@ See-also:
   - CURLMOPT_TIMERDATA (3)
 Protocol:
   - All
+Added-in: 7.16.0
 ---
 
 # NAME
@@ -91,10 +92,6 @@ int main(void)
   curl_multi_setopt(multi, CURLMOPT_TIMERDATA, &mydata);
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.16.0
 
 # RETURN VALUE
 

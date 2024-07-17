@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_RESOLVE (3)
 Protocol:
   - HTTP
+Added-in: 7.64.1
 ---
 
 # NAME
@@ -85,10 +86,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.64.1
 
 # RETURN VALUE
 

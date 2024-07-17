@@ -15,6 +15,7 @@ See-also:
   - curl_multi_setopt (3)
 Protocol:
   - All
+Added-in: 7.1
 ---
 
 # NAME
@@ -1340,12 +1341,6 @@ int main(void)
   }
 }
 ~~~
-
-# ENCRYPTED CLIENT HELLO OPTIONS
-
-# AVAILABILITY
-
-Always
 
 # RETURN VALUE
 

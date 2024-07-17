@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_WRITEDATA (3)
 Protocol:
   - All
+Added-in: 7.1
 ---
 
 # NAME
@@ -125,7 +126,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# HISTORY
 
 Support for the CURL_WRITEFUNC_PAUSE return code was added in version 7.18.0.
 

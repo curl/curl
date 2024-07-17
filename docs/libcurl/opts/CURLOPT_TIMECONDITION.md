@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_TIMEVALUE (3)
 Protocol:
   - HTTP
+Added-in: 7.1
 ---
 
 # NAME
@@ -60,10 +61,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Always
 
 # RETURN VALUE
 

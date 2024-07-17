@@ -9,6 +9,7 @@ See-also:
   - CURLMOPT_PIPELINING (3)
 Protocol:
   - All
+Added-in: 7.30.0
 ---
 
 # NAME
@@ -52,10 +53,6 @@ int main(void)
   curl_multi_setopt(m, CURLMOPT_MAX_PIPELINE_LENGTH, 3L);
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.30.0
 
 # RETURN VALUE
 

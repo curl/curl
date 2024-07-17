@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_TCP_KEEPCNT (3)
 Protocol:
   - TCP
+Added-in: 7.25.0
 ---
 
 # NAME
@@ -62,10 +63,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.25.0
 
 # RETURN VALUE
 

@@ -9,6 +9,7 @@ Protocol:
 See-also:
   - CURLOPT_INTERLEAVEFUNCTION (3)
   - CURLOPT_RTSP_REQUEST (3)
+Added-in: 7.20.0
 ---
 
 # NAME
@@ -60,10 +61,6 @@ int main(void)
  }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.20.0
 
 # RETURN VALUE
 

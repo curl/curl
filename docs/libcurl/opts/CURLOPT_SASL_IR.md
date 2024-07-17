@@ -11,6 +11,7 @@ See-also:
 Protocol:
   - SMTP
   - IMAP
+Added-in: 7.31.0
 ---
 
 # NAME
@@ -61,10 +62,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.31.0
 
 # RETURN VALUE
 

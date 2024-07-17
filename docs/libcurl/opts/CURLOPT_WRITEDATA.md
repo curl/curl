@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_WRITEFUNCTION (3)
 Protocol:
   - All
+Added-in: 7.9.7
 ---
 
 # NAME
@@ -47,14 +48,14 @@ By default, this is a FILE * to stdout.
 
 A common technique is to use the write callback to store the incoming data
 into a dynamically growing allocated buffer, and then this
-CURLOPT_WRITEDATA(3) is used to point to a struct or the buffer to store
-data in. Like in the getinmemory example:
+CURLOPT_WRITEDATA(3) is used to point to a struct or the buffer to store data
+in. Like in the getinmemory example:
 https://curl.se/libcurl/c/getinmemory.html
 
-# AVAILABILITY
+# HISTORY
 
-Available in all libcurl versions. This option was formerly known as
-CURLOPT_FILE, the name CURLOPT_WRITEDATA(3) was added in 7.9.7.
+This option was formerly known as CURLOPT_FILE, the name CURLOPT_WRITEDATA(3)
+was added in 7.9.7.
 
 # RETURN VALUE
 

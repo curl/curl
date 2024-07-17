@@ -13,6 +13,7 @@ Protocol:
   - SFTP
   - FILE
   - SMB
+Added-in: 7.5
 ---
 
 # NAME
@@ -64,10 +65,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Always, for SFTP since 7.49.0
 
 # RETURN VALUE
 

@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_STDERR (3)
 Protocol:
   - FTP
+Added-in: 7.24.0
 ---
 
 # NAME
@@ -49,10 +50,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.24.0
 
 # RETURN VALUE
 

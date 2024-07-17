@@ -12,6 +12,7 @@ Protocol:
 TLS-backend:
   - OpenSSL
   - GnuTLS
+Added-in: 7.21.4
 ---
 
 # NAME
@@ -61,11 +62,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-You need to build libcurl with GnuTLS or OpenSSL with TLS-SRP support for this
-to work. Added in 7.21.4
 
 # RETURN VALUE
 

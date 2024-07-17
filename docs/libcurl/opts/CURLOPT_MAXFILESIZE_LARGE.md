@@ -11,6 +11,7 @@ Protocol:
   - FTP
   - HTTP
   - MQTT
+Added-in: 7.11.0
 ---
 
 # NAME
@@ -61,10 +62,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.11.0
 
 # RETURN VALUE
 

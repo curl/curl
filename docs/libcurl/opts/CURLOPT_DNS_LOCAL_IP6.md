@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_DNS_SERVERS (3)
 Protocol:
   - All
+Added-in: 7.33.0
 ---
 
 # NAME
@@ -54,12 +55,10 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# NOTES
 
 This option requires that libcurl was built with a resolver backend that
 supports this operation. The c-ares backend is the only such one.
-
-Added in 7.33.0
 
 # RETURN VALUE
 

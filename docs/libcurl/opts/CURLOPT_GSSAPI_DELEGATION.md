@@ -9,6 +9,7 @@ Protocol:
 See-also:
   - CURLOPT_HTTPAUTH (3)
   - CURLOPT_PROXYAUTH (3)
+Added-in: 7.22.0
 ---
 
 # NAME
@@ -53,10 +54,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.22.0
 
 # RETURN VALUE
 

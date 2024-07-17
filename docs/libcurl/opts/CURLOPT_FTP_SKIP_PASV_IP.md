@@ -9,6 +9,7 @@ Protocol:
 See-also:
   - CURLOPT_FTPPORT (3)
   - CURLOPT_FTP_USE_EPRT (3)
+Added-in: 7.15.0
 ---
 
 # NAME
@@ -60,10 +61,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.14.2
 
 # RETURN VALUE
 

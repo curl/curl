@@ -11,6 +11,7 @@ See-also:
   - libcurl-thread (3)
 Protocol:
   - All
+Added-in: n/a
 ---
 
 # NAME

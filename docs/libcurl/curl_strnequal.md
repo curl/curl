@@ -1,7 +1,7 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
-Title: curl_strequal
+Title: curl_strnequal
 Section: 3
 Source: libcurl
 See-also:
@@ -10,6 +10,7 @@ See-also:
   - strcmp (3)
 Protocol:
   - All
+Added-in: 7.1
 ---
 
 # NAME
@@ -51,10 +52,6 @@ int main(int argc, char **argv)
     printf("Name and input matches in the 5 first bytes\n");
 }
 ~~~
-
-# AVAILABILITY
-
-Always
 
 # RETURN VALUE
 
