@@ -116,10 +116,7 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
     Curl_bufq_reset(&req->sendbuf);
 
 #ifndef CURL_DISABLE_DOH
-  if(req->doh) {
-    Curl_close(&req->doh->probe[0].easy);
-    Curl_close(&req->doh->probe[1].easy);
-  }
+  Curl_doh_close(data);
 #endif
   /* Can no longer memset() this struct as we need to keep some state */
   req->size = -1;
@@ -173,14 +170,7 @@ void Curl_req_free(struct SingleRequest *req, struct Curl_easy *data)
   Curl_client_cleanup(data);
 
 #ifndef CURL_DISABLE_DOH
-  if(req->doh) {
-    Curl_close(&req->doh->probe[0].easy);
-    Curl_close(&req->doh->probe[1].easy);
-    Curl_dyn_free(&req->doh->probe[0].serverdoh);
-    Curl_dyn_free(&req->doh->probe[1].serverdoh);
-    curl_slist_free_all(req->doh->headers);
-    Curl_safefree(req->doh);
-  }
+  Curl_doh_cleanup(data);
 #endif
 }
 

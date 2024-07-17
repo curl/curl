@@ -2799,6 +2799,9 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
     /* First remove all remaining easy handles */
     data = multi->easyp;
     while(data) {
+      if(!GOOD_EASY_HANDLE(data))
+        return CURLM_BAD_HANDLE;
+
       nextdata = data->next;
       if(!data->state.done && data->conn)
         /* if DONE was never called for this handle */
