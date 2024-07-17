@@ -3070,7 +3070,8 @@ if($total) {
 
     if($failed && ($ok != $total)) {
         my $failedsorted = numsortwords($failed);
-        testnumdetails("\nFAIL", $failedsorted);
+        logmsg "\n";
+        testnumdetails("FAIL", $failedsorted);
         logmsg "\nTESTFAIL: These test cases failed: $failedsorted\n\n";
     }
 }
