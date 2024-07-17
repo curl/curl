@@ -141,6 +141,8 @@ class Caddy:
     def _write_config(self):
         domain1 = self.env.domain1
         creds1 = self.env.get_credentials(domain1)
+        domain2 = self.env.domain2
+        creds2 = self.env.get_credentials(domain2)
         self._mkpath(self._docs_dir)
         self._mkpath(self._tmp_dir)
         with open(os.path.join(self._docs_dir, 'data.json'), 'w') as fd:
@@ -162,6 +164,11 @@ class Caddy:
                 f'    root {self._docs_dir}',
                 f'  }}',
                 f'  tls {creds1.cert_file} {creds1.pkey_file}',
+                f'}}',
+                f'{domain2} {{',
+                f'  reverse_proxy /* http://localhost:{self.env.http_port} {{',
+                f'  }}',
+                f'  tls {creds2.cert_file} {creds2.pkey_file}',
                 f'}}',
             ]
             fd.write("\n".join(conf))
