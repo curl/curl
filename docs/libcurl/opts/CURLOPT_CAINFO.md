@@ -76,7 +76,7 @@ int main(void)
 }
 ~~~
 
-# NOTES
+# HISTORY
 
 Schannel support added in libcurl 7.60.
 

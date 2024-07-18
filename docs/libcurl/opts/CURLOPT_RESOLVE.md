@@ -102,7 +102,7 @@ int main(void)
 }
 ~~~
 
-# NOTES
+# HISTORY
 
 Added in 7.21.3. Removal support added in 7.42.0.
 

@@ -110,7 +110,7 @@ footer:
 -----END PUBLIC KEY-----
 ~~~
 
-# NOTES
+# HISTORY
 
 PEM/DER support:
 

@@ -61,7 +61,7 @@ int main(void)
 }
 ~~~
 
-# NOTES
+# HISTORY
 
 The "" trick was added in 7.26.0
 

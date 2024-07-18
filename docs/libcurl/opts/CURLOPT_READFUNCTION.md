@@ -112,7 +112,7 @@ int main(int argc, char **argv)
 }
 ~~~
 
-# NOTES
+# HISTORY
 
 CURL_READFUNC_PAUSE return code was added in 7.18.0 and CURL_READFUNC_ABORT
 was added in 7.12.1.

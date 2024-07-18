@@ -77,7 +77,7 @@ int main(void)
 }
 ~~~
 
-# NOTES
+# HISTORY
 
 FILE since 7.18.0, RTSP since 7.20.0
 

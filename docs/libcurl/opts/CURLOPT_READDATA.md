@@ -66,7 +66,7 @@ int main(void)
 }
 ~~~
 
-# NOTES
+# HISTORY
 
 This option was once known by the older name CURLOPT_INFILE, the name
 CURLOPT_READDATA(3) was introduced in 7.9.7.

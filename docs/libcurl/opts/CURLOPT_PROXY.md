@@ -127,7 +127,7 @@ int main(void)
 }
 ~~~
 
-# NOTES
+# HISTORY
 
 Since 7.14.1 the proxy environment variable names can include the protocol
 scheme.

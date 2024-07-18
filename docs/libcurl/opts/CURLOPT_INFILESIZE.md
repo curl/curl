@@ -75,7 +75,7 @@ int main(void)
 }
 ~~~
 
-# NOTES
+# HISTORY
 
 SMTP support added in 7.23.0
 

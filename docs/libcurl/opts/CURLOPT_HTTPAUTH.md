@@ -143,7 +143,7 @@ int main(void)
 }
 ~~~
 
-# NOTES
+# HISTORY
 
 CURLAUTH_DIGEST_IE was added in 7.19.3
 

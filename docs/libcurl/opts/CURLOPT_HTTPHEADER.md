@@ -175,7 +175,7 @@ int main(void)
 }
 ~~~
 
-# NOTES
+# HISTORY
 
 Use for MIME mail added in 7.56.0.
 

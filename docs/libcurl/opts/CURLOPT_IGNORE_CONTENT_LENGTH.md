@@ -63,10 +63,14 @@ int main(void)
 }
 ~~~
 
+# HISTORY
+
+Support for FTP added in 7.46.0.
+
 # NOTES
 
-Support for FTP added in 7.46.0. This option is not working for HTTP when
-libcurl is built to use the hyper backend.
+This option is not working for HTTP when libcurl is built to use the hyper
+backend.
 
 # RETURN VALUE
 

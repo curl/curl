@@ -60,7 +60,7 @@ int main(void)
 }
 ~~~
 
-# NOTES
+# HISTORY
 
 Works for SFTP since 7.21.4
 

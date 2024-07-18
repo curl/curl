@@ -74,7 +74,7 @@ int main(void)
 }
 ~~~
 
-# NOTES
+# HISTORY
 
 The `if!` and `host!` syntax was added in 7.24.0.
 

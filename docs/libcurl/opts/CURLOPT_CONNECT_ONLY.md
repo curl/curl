@@ -73,7 +73,7 @@ int main(void)
 }
 ~~~
 
-# NOTES
+# HISTORY
 
 WS and WSS support added in 7.86.0.
 

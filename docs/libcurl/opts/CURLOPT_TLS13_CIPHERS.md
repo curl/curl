@@ -71,7 +71,7 @@ int main(void)
 }
 ~~~
 
-# NOTES
+# HISTORY
 
 Added in 7.61.0 for OpenSSL. Available when built with OpenSSL \>= 1.1.1.
 

@@ -167,7 +167,7 @@ int main(int argc, char **argv)
 }
 ~~~
 
-# NOTES
+# HISTORY
 
 This option supersedes CURLINFO_TLS_SESSION(3) which was added in 7.34.0.
 This option is exactly the same as that option except in the case of OpenSSL.
