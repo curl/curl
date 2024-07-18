@@ -105,6 +105,7 @@ typedef ssize_t  Curl_cft_send(struct Curl_cfilter *cf,
                                struct Curl_easy *data, /* transfer */
                                const void *buf,        /* data to write */
                                size_t len,             /* amount to write */
+                               bool eos,               /* last chunk */
                                CURLcode *err);         /* error to return */
 
 typedef ssize_t  Curl_cft_recv(struct Curl_cfilter *cf,
@@ -241,7 +242,8 @@ void     Curl_cf_def_adjust_pollset(struct Curl_cfilter *cf,
 bool     Curl_cf_def_data_pending(struct Curl_cfilter *cf,
                                   const struct Curl_easy *data);
 ssize_t  Curl_cf_def_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                          const void *buf, size_t len, CURLcode *err);
+                          const void *buf, size_t len, bool eos,
+                          CURLcode *err);
 ssize_t  Curl_cf_def_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                           char *buf, size_t len, CURLcode *err);
 CURLcode Curl_cf_def_cntrl(struct Curl_cfilter *cf,
@@ -317,7 +319,8 @@ CURLcode Curl_conn_cf_connect(struct Curl_cfilter *cf,
                               bool blocking, bool *done);
 void Curl_conn_cf_close(struct Curl_cfilter *cf, struct Curl_easy *data);
 ssize_t Curl_conn_cf_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                          const void *buf, size_t len, CURLcode *err);
+                          const void *buf, size_t len, bool eos,
+                          CURLcode *err);
 ssize_t Curl_conn_cf_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                           char *buf, size_t len, CURLcode *err);
 CURLcode Curl_conn_cf_cntrl(struct Curl_cfilter *cf,
@@ -447,7 +450,7 @@ ssize_t Curl_cf_recv(struct Curl_easy *data, int sockindex, char *buf,
  * The error code is placed into `*code`.
  */
 ssize_t Curl_cf_send(struct Curl_easy *data, int sockindex,
-                     const void *buf, size_t len, CURLcode *code);
+                     const void *buf, size_t len, bool eos, CURLcode *code);
 
 /**
  * The easy handle `data` is being attached to `conn`. This does
@@ -557,7 +560,7 @@ CURLcode Curl_conn_recv(struct Curl_easy *data, int sockindex,
  * Will return CURLE_AGAIN iff blocked on sending.
  */
 CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
-                        const void *buf, size_t blen,
+                        const void *buf, size_t blen, bool eos,
                         size_t *pnwritten);
 
 

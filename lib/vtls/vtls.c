@@ -1725,11 +1725,12 @@ static bool ssl_cf_data_pending(struct Curl_cfilter *cf,
 
 static ssize_t ssl_cf_send(struct Curl_cfilter *cf,
                            struct Curl_easy *data, const void *buf, size_t len,
-                           CURLcode *err)
+                           bool eos, CURLcode *err)
 {
   struct cf_call_data save;
   ssize_t nwritten;
 
+  (void)eos; /* unused */
   CF_DATA_SAVE(save, cf, data);
   *err = CURLE_OK;
   nwritten = Curl_ssl->send_plain(cf, data, buf, len, err);

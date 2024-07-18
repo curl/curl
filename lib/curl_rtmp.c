@@ -329,13 +329,14 @@ static ssize_t rtmp_recv(struct Curl_easy *data, int sockindex, char *buf,
 }
 
 static ssize_t rtmp_send(struct Curl_easy *data, int sockindex,
-                         const void *buf, size_t len, CURLcode *err)
+                         const void *buf, size_t len, bool eos, CURLcode *err)
 {
   struct connectdata *conn = data->conn;
   RTMP *r = conn->proto.rtmp;
   ssize_t num;
 
   (void)sockindex; /* unused */
+  (void)eos; /* unused */
 
   num = RTMP_Write(r, (char *)buf, curlx_uztosi(len));
   if(num < 0)

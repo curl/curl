@@ -3229,7 +3229,7 @@ static ssize_t ssh_tls_send(libssh2_socket_t sock, const void *buffer,
   /* swap in the TLS writer function for this call only, and then swap back
      the SSH one again */
   conn->send[0] = ssh->tls_send;
-  result = Curl_conn_send(data, socknum, buffer, length, &nwrite);
+  result = Curl_conn_send(data, socknum, buffer, length, FALSE, &nwrite);
   conn->send[0] = backup;
   if(result == CURLE_AGAIN)
     return -EAGAIN; /* magic return code for libssh2 */
@@ -3540,12 +3540,13 @@ static CURLcode scp_done(struct Curl_easy *data, CURLcode status,
 }
 
 static ssize_t scp_send(struct Curl_easy *data, int sockindex,
-                        const void *mem, size_t len, CURLcode *err)
+                        const void *mem, size_t len, bool eos, CURLcode *err)
 {
   ssize_t nwrite;
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = &conn->proto.sshc;
   (void)sockindex; /* we only support SCP on the fixed known primary socket */
+  (void)eos;
 
   /* libssh2_channel_write() returns int! */
   nwrite = (ssize_t) libssh2_channel_write(sshc->ssh_channel, mem, len);
@@ -3678,12 +3679,13 @@ static CURLcode sftp_done(struct Curl_easy *data, CURLcode status,
 
 /* return number of sent bytes */
 static ssize_t sftp_send(struct Curl_easy *data, int sockindex,
-                         const void *mem, size_t len, CURLcode *err)
+                         const void *mem, size_t len, bool eos, CURLcode *err)
 {
   ssize_t nwrite;
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = &conn->proto.sshc;
   (void)sockindex;
+  (void)eos;
 
   nwrite = libssh2_sftp_write(sshc->sftp_handle, mem, len);
 

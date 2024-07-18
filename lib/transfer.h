@@ -120,7 +120,7 @@ CURLcode Curl_xfer_write_done(struct Curl_easy *data, bool premature);
  * Will return CURLE_OK on blocking with (*pnwritten == 0).
  */
 CURLcode Curl_xfer_send(struct Curl_easy *data,
-                        const void *buf, size_t blen,
+                        const void *buf, size_t blen, bool eos,
                         size_t *pnwritten);
 
 /**
