@@ -107,6 +107,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 CURLSHE_OK (zero) means that the option was set properly, non-zero means an

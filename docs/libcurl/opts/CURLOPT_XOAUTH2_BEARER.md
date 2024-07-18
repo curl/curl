@@ -66,6 +66,8 @@ int main(void)
 
 Support for OpenLDAP added in 7.82.0.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if the option is supported, CURLE_UNKNOWN_OPTION if not, or

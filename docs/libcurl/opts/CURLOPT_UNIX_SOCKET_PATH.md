@@ -78,6 +78,8 @@ you can use the proc filesystem to bypass the limitation:
   /* Be sure to keep dirfd valid until you discard the handle */
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.

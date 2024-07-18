@@ -72,6 +72,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 None

@@ -1344,6 +1344,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 *CURLE_OK* (zero) means that the option was set properly, non-zero means an

@@ -54,6 +54,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if false start is supported by the SSL backend, otherwise

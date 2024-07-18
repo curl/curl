@@ -413,6 +413,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 If the operation was successful, CURLE_OK is returned. Otherwise an

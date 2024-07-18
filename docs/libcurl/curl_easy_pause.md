@@ -134,6 +134,8 @@ size worth of data that curl cannot stop but instead needs to cache while the
 transfer is paused. This means that if a window size of 64 MB is used, libcurl
 might end up having to cache 64 MB of data.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 CURLE_OK (zero) means that the option was set properly, and a non-zero return

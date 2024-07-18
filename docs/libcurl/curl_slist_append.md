@@ -68,6 +68,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 A null pointer is returned if anything went wrong, otherwise the new list

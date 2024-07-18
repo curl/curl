@@ -81,6 +81,8 @@ int main(void)
 This option was known as CURLOPT_FTPLISTONLY up to 7.16.4. POP3 is supported
 since 7.21.5.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.

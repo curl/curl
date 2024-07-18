@@ -132,6 +132,8 @@ int main(void)
 
 Support for the CURL_WRITEFUNC_PAUSE return code was added in version 7.18.0.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 This returns CURLE_OK.

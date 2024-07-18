@@ -96,6 +96,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 A pointer to a filled-in struct, or NULL if it failed or ran out of

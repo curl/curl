@@ -114,6 +114,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 *CURLE_OK* (zero) means that the data was sent properly, non-zero means an

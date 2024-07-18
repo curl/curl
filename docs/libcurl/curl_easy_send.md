@@ -81,6 +81,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 On success, returns **CURLE_OK** and stores the number of bytes actually

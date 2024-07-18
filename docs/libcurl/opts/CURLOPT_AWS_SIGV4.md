@@ -113,6 +113,8 @@ For **aws:s3**, a **x-amz-content-sha256** header is added to every request if
 not already present. For s3 requests with unknown payload, this header takes
 the special value "UNSIGNED-PAYLOAD".
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.

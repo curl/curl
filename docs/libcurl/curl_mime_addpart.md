@@ -68,6 +68,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 A mime part structure handle, or NULL upon failure.

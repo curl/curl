@@ -95,6 +95,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 CURLE_OK or an error such as CURLE_UNKNOWN_OPTION.

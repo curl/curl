@@ -72,6 +72,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if supported, CURLE_NOT_BUILT_IN otherwise.

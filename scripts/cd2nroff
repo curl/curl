@@ -457,12 +457,14 @@ sub single {
                 $header = 1;
                 next;
             }
-            elsif($word eq "RETURN VALUE") {
+            elsif($word eq "%AVAILABILITY%") {
                 if($addedin ne "n/a") {
-                    # insert the generated AVAILABILITY section before RETURN VALUE
+                    # insert the generated AVAILABILITY section
                     push @desc, ".SH AVAILABILITY\n";
                     push @desc, "Added in curl $addedin\n";
                 }
+                $header = 1;
+                next;
             }
             push @desc, ".SH $word\n";
             $header = 1;

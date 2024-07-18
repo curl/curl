@@ -57,6 +57,8 @@ int main(void)
 
 This option was known as CURLOPT_FTPAPPEND up to 7.16.4
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.

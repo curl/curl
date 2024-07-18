@@ -160,6 +160,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 CURLE_OK if supported; or an error such as:

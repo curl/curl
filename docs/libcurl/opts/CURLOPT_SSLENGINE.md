@@ -57,6 +57,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 CURLE_OK - Engine found.

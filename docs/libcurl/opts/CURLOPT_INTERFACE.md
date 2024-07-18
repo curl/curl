@@ -82,6 +82,8 @@ The `if!` and `host!` syntax was added in 7.24.0.
 
 The `ifhost!` syntax was added in 8.9.0.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK on success or

@@ -76,6 +76,8 @@ int main(void)
 
 Deprecated in 7.56.0.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 None

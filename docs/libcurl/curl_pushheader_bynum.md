@@ -65,6 +65,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns a pointer to the header field content or NULL.

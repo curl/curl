@@ -63,6 +63,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if the size passed is valid or CURLE_BAD_FUNCTION_ARGUMENT if

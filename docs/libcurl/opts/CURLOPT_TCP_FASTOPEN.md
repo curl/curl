@@ -58,6 +58,8 @@ int main(void)
 
 This option is only supported on Linux and macOS 10.11 or later.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if fast open is supported by the operating system, otherwise

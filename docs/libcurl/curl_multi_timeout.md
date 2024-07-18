@@ -85,6 +85,8 @@ out which sockets to wait for by calling curl_multi_fdset(3).
 When there is activity or timeout, call curl_multi_perform(3) and then
 loop - until all transfers are complete.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 The standard CURLMcode for multi interface error codes.

@@ -103,6 +103,8 @@ Boolean (1 or 0) if "persist" was set for this entry
 
 Integer priority value (not currently used)
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.

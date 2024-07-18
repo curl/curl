@@ -120,6 +120,8 @@ int main(void)
 
 Deprecated since 7.32.0.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK.

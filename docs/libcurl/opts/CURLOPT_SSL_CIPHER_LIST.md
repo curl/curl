@@ -94,6 +94,8 @@ int main(void)
 
 Added in 7.9, in 7.83.0 for BearSSL, in 8.8.0 for mbedTLS
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if TLS is supported, CURLE_UNKNOWN_OPTION if not, or

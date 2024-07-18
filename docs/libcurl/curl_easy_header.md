@@ -156,6 +156,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 This function returns a CURLHcode indicating success or error.

@@ -76,6 +76,8 @@ int main(void)
 This option was called CURLOPT_MAIL_RCPT_ALLLOWFAILS (with three instead of
 two letter L) before 8.2.0
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.

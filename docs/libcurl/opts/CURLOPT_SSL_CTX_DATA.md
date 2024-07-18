@@ -121,6 +121,8 @@ int main(void)
 Added in 7.11.0 for OpenSSL, in 7.42.0 for wolfSSL, in 7.54.0 for mbedTLS,
 in 7.83.0 in BearSSL.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 CURLE_OK if supported; or an error such as:

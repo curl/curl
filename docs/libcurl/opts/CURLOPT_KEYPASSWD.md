@@ -68,6 +68,8 @@ int main(void)
 This option was known as CURLOPT_SSLKEYPASSWD up to 7.16.4 and
 CURLOPT_SSLCERTPASSWD up to 7.9.2.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if TLS enabled, CURLE_UNKNOWN_OPTION if not, or

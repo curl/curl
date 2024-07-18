@@ -85,6 +85,8 @@ This option is supported by the BearSSL (since 7.79.0), mbedTLS (since
 7.81.0), rustls (since 7.82.0), wolfSSL (since 8.2.0), OpenSSL, Secure
 Transport and Schannel backends.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if the option is supported, CURLE_UNKNOWN_OPTION if not, or

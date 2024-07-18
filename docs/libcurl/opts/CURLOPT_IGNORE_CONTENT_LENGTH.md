@@ -74,6 +74,8 @@ Support for FTP added in 7.46.0.
 This option is not working for HTTP when libcurl is built to use the hyper
 backend.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.

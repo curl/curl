@@ -145,6 +145,8 @@ vary depending on which backend libcurl has been built to use.
 
 SSLv3 is disabled by default since 7.39.0.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.

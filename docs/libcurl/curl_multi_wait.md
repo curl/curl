@@ -116,6 +116,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 CURLMcode type, general libcurl multi interface error code. See

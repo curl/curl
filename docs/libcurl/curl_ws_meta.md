@@ -135,6 +135,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 This function returns a pointer to a *curl_ws_frame* struct with read-only

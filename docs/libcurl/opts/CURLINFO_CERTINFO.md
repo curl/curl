@@ -99,6 +99,8 @@ See also the *certinfo.c* example.
 GnuTLS support added in 7.42.0. Schannel support added in 7.50.0. Secure
 Transport support added in 7.79.0. mbedTLS support added in 8.9.0.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.

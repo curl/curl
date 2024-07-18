@@ -100,6 +100,8 @@ int main(int argc, char **argv)
 
 Deprecated since 7.85.0.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.

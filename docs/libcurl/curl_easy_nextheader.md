@@ -92,6 +92,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 This function returns the next header, or NULL when there are no more

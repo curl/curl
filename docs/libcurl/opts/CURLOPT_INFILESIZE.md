@@ -81,6 +81,8 @@ int main(void)
 
 SMTP support added in 7.23.0
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.

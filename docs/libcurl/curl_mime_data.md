@@ -74,6 +74,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 CURLE_OK or a CURL error code upon failure.

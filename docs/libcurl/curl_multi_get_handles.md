@@ -73,6 +73,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns NULL on failure. Otherwise it returns a pointer to an allocated array.

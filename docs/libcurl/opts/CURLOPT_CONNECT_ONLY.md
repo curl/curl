@@ -79,6 +79,8 @@ int main(void)
 
 WS and WSS support added in 7.86.0.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.

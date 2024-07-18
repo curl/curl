@@ -63,6 +63,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns **CURLE_OK** if everything is okay, and a non-zero number for

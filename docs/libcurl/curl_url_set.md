@@ -258,6 +258,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns a *CURLUcode* error value, which is CURLUE_OK (0) if everything

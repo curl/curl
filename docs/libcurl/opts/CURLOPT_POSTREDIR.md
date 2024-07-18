@@ -77,6 +77,8 @@ int main(void)
 This option was known as CURLOPT_POST301 up to 7.19.0 as it only supported the
 301 then. CURL_REDIR_POST_303 was added in 7.26.0.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.

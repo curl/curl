@@ -57,6 +57,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if HTTP is supported, CURLE_UNKNOWN_OPTION if not, or

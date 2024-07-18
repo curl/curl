@@ -90,6 +90,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 CURLE_OK (0) means everything was OK, non-zero means an error occurred as

@@ -78,6 +78,8 @@ int main(void)
 
 curl_multi_socket(3) is deprecated, use curl_multi_socket_action(3) instead!
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 CURLMcode type, general libcurl multi interface error code.

@@ -385,6 +385,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 A pointer to a curl_version_info_data struct.

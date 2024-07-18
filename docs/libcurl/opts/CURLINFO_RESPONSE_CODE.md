@@ -64,6 +64,8 @@ int main(void)
 The former name, CURLINFO_HTTP_CODE, was added in 7.4.1. Support for SMTP
 responses added in 7.25.0, for OpenLDAP in 7.81.0.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.

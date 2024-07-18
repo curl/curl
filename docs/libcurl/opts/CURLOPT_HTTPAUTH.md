@@ -157,6 +157,8 @@ CURLAUTH_BEARER was added in 7.61.0
 
 CURLAUTH_AWS_SIGV4 was added in 7.74.0
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if the option is supported, CURLE_UNKNOWN_OPTION if not, or

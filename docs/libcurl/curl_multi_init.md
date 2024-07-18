@@ -52,6 +52,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 If this function returns NULL, something went wrong and you cannot use the

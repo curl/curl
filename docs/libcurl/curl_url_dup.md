@@ -52,6 +52,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns a new handle or NULL if out of memory.

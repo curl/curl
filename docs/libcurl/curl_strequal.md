@@ -52,6 +52,8 @@ int main(int argc, char **argv)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Non-zero if the strings are identical. Zero if they are not.

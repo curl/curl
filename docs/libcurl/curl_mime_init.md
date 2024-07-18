@@ -70,6 +70,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 A mime struct handle, or NULL upon failure.

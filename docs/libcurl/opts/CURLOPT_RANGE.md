@@ -83,6 +83,8 @@ int main(void)
 
 FILE since 7.18.0, RTSP since 7.20.0
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK on success or

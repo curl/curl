@@ -122,6 +122,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 If this function returns *CURLSSLSET_OK*, the backend was successfully

@@ -311,6 +311,8 @@ effective data size can then not be automatically determined, resulting in a
 chunked encoding transfer. Backslashes and double quotes in field and
 filenames are now escaped before transmission.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 0 means everything was OK, non-zero means an error occurred corresponding to a

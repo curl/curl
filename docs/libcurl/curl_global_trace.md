@@ -134,6 +134,8 @@ of an enabled component appears at the beginning in brackets.
 ...
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 If this function returns non-zero, something went wrong and the configuration

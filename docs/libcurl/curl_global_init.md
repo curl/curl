@@ -125,6 +125,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 If this function returns non-zero, something went wrong and you cannot use the

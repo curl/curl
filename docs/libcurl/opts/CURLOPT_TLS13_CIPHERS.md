@@ -79,6 +79,8 @@ Added in 7.61.0 for OpenSSL. Available when built with OpenSSL \>= 1.1.1.
 
 Added in 7.85.0 for Schannel.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if supported, CURLE_NOT_BUILT_IN otherwise.

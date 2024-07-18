@@ -79,6 +79,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK. Returns CURLE_BAD_FUNCTION_ARGUMENT if set to a negative

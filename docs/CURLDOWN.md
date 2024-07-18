@@ -150,8 +150,11 @@ occurrences of `<` or `>` need to be escaped by a leading backslash.
 
 ## Generating contents
 
-When `# %PROTOCOLS%` is used as a subtitle, `cd2nroff` inserts a **PROTOCOLS**
-section based on the metadata provided in the header.
+`# %PROTOCOLS%` - inserts a **PROTOCOLS** section based on the metadata
+provided in the header.
+
+`# %AVAILABILITY%` - inserts an **AVAILABILITY** section based on the metadata
+provided in the header.
 
 ## Symbols
 

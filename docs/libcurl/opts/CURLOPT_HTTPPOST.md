@@ -96,6 +96,8 @@ int main(void)
 
 Deprecated in 7.56.0.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if HTTP is enabled, and CURLE_UNKNOWN_OPTION if not.

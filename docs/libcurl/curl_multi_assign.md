@@ -77,6 +77,8 @@ another socket to wait for, we can use curl_multi_assign(3) to point out the
 particular data so that when we get updates about this same socket again, we
 do not have to find the struct associated with this socket by ourselves.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 The standard CURLMcode for multi interface error codes.

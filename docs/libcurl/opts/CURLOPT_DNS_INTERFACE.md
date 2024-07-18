@@ -63,6 +63,8 @@ int main(void)
 This option requires that libcurl was built with a resolver backend that
 supports this operation. The c-ares backend is the only such one.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if the option is supported, CURLE_UNKNOWN_OPTION if not,

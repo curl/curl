@@ -50,6 +50,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 A pointer to the *curl_easyoption* struct for the option or NULL.

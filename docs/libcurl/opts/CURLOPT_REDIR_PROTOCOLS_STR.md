@@ -84,6 +84,8 @@ int main(int argc, char **argv)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_UNKNOWN_OPTION if the option is not implemented,

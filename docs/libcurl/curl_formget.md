@@ -68,6 +68,8 @@ size_t print_httppost(struct curl_httppost *post)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 0 means everything was OK, non-zero means an error occurred

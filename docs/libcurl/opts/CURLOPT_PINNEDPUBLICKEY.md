@@ -145,6 +145,8 @@ footer:
 
 Other SSL backends not supported.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if TLS enabled, CURLE_UNKNOWN_OPTION if not, or

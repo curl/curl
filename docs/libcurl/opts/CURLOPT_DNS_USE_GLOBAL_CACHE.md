@@ -64,6 +64,8 @@ int main(void)
 
 Deprecated since 7.11.1. Functionality removed in 7.62.0.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.

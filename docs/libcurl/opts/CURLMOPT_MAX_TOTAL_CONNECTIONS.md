@@ -62,6 +62,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLM_OK if the option is supported, and CURLM_UNKNOWN_OPTION if not.

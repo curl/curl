@@ -139,6 +139,8 @@ Since 7.21.7 the proxy string supports the socks protocols as "schemes".
 Since 7.50.2, unsupported schemes in proxy strings cause libcurl to return
 error.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if proxies are supported, CURLE_UNKNOWN_OPTION if not, or

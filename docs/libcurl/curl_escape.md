@@ -58,6 +58,8 @@ int main(void)
 Since 7.15.4, curl_easy_escape(3) should be used. This function might be
 removed in a future release.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 A pointer to a null-terminated string or NULL if it failed.

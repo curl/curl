@@ -71,6 +71,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 On success, returns **CURLE_OK**.

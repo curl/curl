@@ -60,6 +60,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns a **CURLU *** if successful, or NULL if out of memory.

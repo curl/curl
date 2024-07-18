@@ -41,6 +41,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 A pointer to a null-terminated string. The string resides in a statically

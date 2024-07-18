@@ -69,6 +69,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 A pointer to a null-terminated string or NULL if it failed.

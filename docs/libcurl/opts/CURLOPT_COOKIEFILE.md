@@ -95,6 +95,8 @@ int main(void)
 The cookie file format and general cookie concepts in curl are described
 online here: https://curl.se/docs/http-cookies.html
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if HTTP is supported, and CURLE_UNKNOWN_OPTION if not.

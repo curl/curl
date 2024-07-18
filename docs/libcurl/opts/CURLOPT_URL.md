@@ -131,6 +131,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK on success or CURLE_OUT_OF_MEMORY if there was insufficient

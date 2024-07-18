@@ -120,6 +120,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 The standard CURLMcode for multi interface error codes. Note that it returns a

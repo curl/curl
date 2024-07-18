@@ -278,6 +278,8 @@ int main(void)
 }
 ~~~
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 The **curl_maprintf** and **curl_mvaprintf** functions return a pointer to

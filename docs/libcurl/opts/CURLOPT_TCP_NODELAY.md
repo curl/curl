@@ -67,6 +67,8 @@ int main(void)
 
 The default was changed to 1 from 0 in 7.50.2.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK

@@ -116,6 +116,8 @@ RFC 1036) and ANSI C's *asctime()* format.
 
 These formats are the only ones RFC 7231 says HTTP applications may use.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 This function returns -1 when it fails to parse the date string. Otherwise it

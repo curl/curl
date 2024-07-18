@@ -75,6 +75,8 @@ Since 7.62.0, **CURLPIPE_MULTIPLEX** is enabled by default.
 
 Before that, default was **CURLPIPE_NOTHING**.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLM_OK if the option is supported, and CURLM_UNKNOWN_OPTION if not.

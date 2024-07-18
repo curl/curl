@@ -88,6 +88,8 @@ For TLS backends that do not support certificate files, the
 CURLOPT_PROXY_CAINFO(3) option is ignored. Refer to
 https://curl.se/docs/ssl-compared.html
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if the option is supported, CURLE_UNKNOWN_OPTION if not, or

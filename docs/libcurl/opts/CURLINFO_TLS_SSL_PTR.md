@@ -174,6 +174,8 @@ int main(int argc, char **argv)
 This option supersedes CURLINFO_TLS_SESSION(3) which was added in 7.34.0.
 This option is exactly the same as that option except in the case of OpenSSL.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.

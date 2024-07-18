@@ -115,6 +115,8 @@ Support for providing multiple IP addresses per entry was added in 7.59.0.
 Support for adding non-permanent entries by using the "+" prefix was added in
 7.75.0.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
