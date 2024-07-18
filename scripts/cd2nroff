@@ -116,7 +116,7 @@ sub outprotocols {
         }
         if($#s == 0) {
             if($s[0] eq "All") {
-                push @o, " protocols";
+                push @o, " supported protocols";
             }
             else {
                 push @o, " only";
