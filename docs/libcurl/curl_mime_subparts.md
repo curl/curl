@@ -42,6 +42,8 @@ Setting a part's contents multiple times is valid: only the value set by the
 last call is retained. It is possible to unassign previous part's contents by
 setting *subparts* to NULL.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -78,6 +80,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

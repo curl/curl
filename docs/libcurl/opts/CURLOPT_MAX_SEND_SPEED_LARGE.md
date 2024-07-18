@@ -45,6 +45,8 @@ This option does not affect transfer speeds done with FILE:// URLs.
 
 0, disabled
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -61,6 +63,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

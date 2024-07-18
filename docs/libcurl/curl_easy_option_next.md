@@ -67,6 +67,8 @@ struct curl_easyoption {
 };
 ~~~
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -81,6 +83,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

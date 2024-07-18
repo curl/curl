@@ -74,6 +74,8 @@ CURLPROTO_TFTP
 
 All protocols built-in.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -97,6 +99,8 @@ int main(int argc, char **argv)
 # DEPRECATED
 
 Deprecated since 7.85.0.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

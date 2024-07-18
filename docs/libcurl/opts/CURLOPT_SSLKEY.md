@@ -47,6 +47,8 @@ option.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -64,6 +66,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

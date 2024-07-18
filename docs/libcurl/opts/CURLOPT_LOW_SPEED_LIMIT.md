@@ -38,6 +38,8 @@ slow and abort.
 
 0, disabled
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -59,6 +61,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

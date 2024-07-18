@@ -46,8 +46,10 @@ timeout is however treated as a per-connect timeout.
 
 # DEFAULT
 
-The default value is 0, which means that there is no limit. It is then simply
-controlled by the number of easy handles added.
+0, which means that there is no limit. It is then simply controlled by the
+number of easy handles added.
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -59,6 +61,8 @@ int main(void)
   curl_multi_setopt(m, CURLMOPT_MAX_TOTAL_CONNECTIONS, 15L);
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

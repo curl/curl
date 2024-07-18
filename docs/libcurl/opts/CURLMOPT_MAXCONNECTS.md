@@ -53,6 +53,8 @@ ones to get made.
 
 See DESCRIPTION
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -63,6 +65,8 @@ int main(void)
   curl_multi_setopt(m, CURLMOPT_MAXCONNECTS, 10L);
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

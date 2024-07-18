@@ -41,6 +41,8 @@ safely be released or reused after call. Setting a part's name multiple times
 is valid: only the value set by the last call is retained. It is possible to
 reset the name of a part by setting *name* to NULL.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -62,6 +64,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

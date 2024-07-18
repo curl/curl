@@ -37,6 +37,8 @@ sent anyway.
 
 1000 milliseconds
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -53,6 +55,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

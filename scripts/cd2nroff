@@ -103,14 +103,24 @@ sub outprotocols {
     push @o, ".SH PROTOCOLS\n";
 
     if($p[0] eq "TLS") {
-        push @o, "All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.";
+        push @o, "This functionality affects all TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.";
     }
     else {
         my @s = sort @p;
+        push @o, "This functionality affects ";
         for my $e (sort @s) {
-            push @o, sprintf "%s$e",
-                $comma ? (($e eq $s[-1]) ? " and " : ", "): "";
+            push @o, sprintf "%s%s",
+                $comma ? (($e eq $s[-1]) ? " and " : ", "): "",
+                lc($e);
             $comma = 1;
+        }
+        if($#s == 0) {
+            if($s[0] eq "All") {
+                push @o, " supported protocols";
+            }
+            else {
+                push @o, " only";
+            }
         }
     }
     push @o, "\n";
@@ -447,20 +457,24 @@ sub single {
             elsif($word eq "AVAILABILITY") {
                 print STDERR "$f:$line:1:WARN: AVAILABILITY section in source file\n";
             }
-            elsif($word eq "EXAMPLE") {
-                # insert the generated PROTOCOLS section before EXAMPLE
+            elsif($word eq "%PROTOCOLS%") {
+                # insert the generated PROTOCOLS section
                 push @desc, outprotocols(@proto);
 
                 if($proto[0] eq "TLS") {
                     push @desc, outtls(@tls);
                 }
+                $header = 1;
+                next;
             }
-            elsif($word eq "RETURN VALUE") {
+            elsif($word eq "%AVAILABILITY%") {
                 if($addedin ne "n/a") {
-                    # insert the generated AVAILABILITY section before RETURN VALUE
+                    # insert the generated AVAILABILITY section
                     push @desc, ".SH AVAILABILITY\n";
                     push @desc, "Added in curl $addedin\n";
                 }
+                $header = 1;
+                next;
             }
             push @desc, ".SH $word\n";
             $header = 1;

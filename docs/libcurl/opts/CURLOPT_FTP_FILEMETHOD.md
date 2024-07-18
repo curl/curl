@@ -57,6 +57,8 @@ compliant than 'nocwd' but without the full penalty of 'multicwd'.
 
 CURLFTPMETHOD_MULTICWD
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -75,6 +77,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

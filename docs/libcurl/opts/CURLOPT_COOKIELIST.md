@@ -70,6 +70,8 @@ loads all cookies from the files specified by CURLOPT_COOKIEFILE(3)
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -119,7 +121,7 @@ int main(void)
 The cookie file format and general cookie concepts in curl are described
 online here: https://curl.se/docs/http-cookies.html
 
-# NOTES
+# HISTORY
 
 **ALL** was added in 7.14.1
 
@@ -128,6 +130,8 @@ online here: https://curl.se/docs/http-cookies.html
 **FLUSH** was added in 7.17.1
 
 **RELOAD** was added in 7.39.0
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

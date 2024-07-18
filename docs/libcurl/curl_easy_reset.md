@@ -36,6 +36,8 @@ It does not change the following information kept in the handle: live
 connections, the Session ID cache, the DNS cache, the cookies, the shares or
 the alt-svc cache.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -49,6 +51,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

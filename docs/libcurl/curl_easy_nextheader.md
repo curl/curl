@@ -61,6 +61,8 @@ The memory for the struct this points to, is owned and managed by libcurl and
 is associated with the easy handle. Applications must copy the data if they
 want it to survive subsequent API calls or the life-time of the easy handle.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -89,6 +91,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

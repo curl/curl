@@ -64,6 +64,8 @@ To create a proper URL from strings that are not already URL encoded, we
 recommend using libcurl's URL API: set the pieces with curl_url_set(3) and get
 the final correct URL with curl_url_get(3).
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -80,6 +82,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

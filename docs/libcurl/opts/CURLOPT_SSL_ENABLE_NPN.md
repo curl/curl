@@ -38,6 +38,8 @@ is built to use supports it), which can be used to negotiate http2.
 
 1, enabled
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -57,6 +59,8 @@ int main(void)
 # DEPRECATED
 
 Deprecated since 7.86.0.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

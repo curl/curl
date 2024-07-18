@@ -39,6 +39,8 @@ This function must be explicitly called in order to perform the upkeep work.
 The connection upkeep interval is set with
 CURLOPT_UPKEEP_INTERVAL_MS(3).
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -68,6 +70,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -32,6 +32,8 @@ The *clientp* parameter is held verbatim by libcurl and is passed on as
 the *clientp* argument to the callbacks set with
 CURLSHOPT_LOCKFUNC(3) and CURLSHOPT_UNLOCKFUNC(3).
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -49,6 +51,8 @@ int main(void)
     printf("Error: %s\n", curl_share_strerror(sh));
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

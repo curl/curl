@@ -36,6 +36,8 @@ not have to loop through all headers to find the one it is interested in. The
 data this function points to is freed when this callback returns. If more than
 one header field use the same name, this returns only the first one.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -75,6 +77,8 @@ int main(void)
   curl_multi_setopt(multi, CURLMOPT_PUSHDATA, &counter);
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

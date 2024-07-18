@@ -39,6 +39,8 @@ doing FTP via a proxy. Beware that not all proxies support this feature.
 
 0, disabled
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -57,6 +59,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

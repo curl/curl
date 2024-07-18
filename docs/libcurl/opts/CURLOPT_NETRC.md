@@ -118,6 +118,8 @@ done with "macdef" that it finds.
 
 CURL_NETRC_IGNORED
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -132,6 +134,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

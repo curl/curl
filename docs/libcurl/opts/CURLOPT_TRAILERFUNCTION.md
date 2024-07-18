@@ -60,6 +60,8 @@ without any interruptions.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 ~~~c
 static int trailer_cb(struct curl_slist **tr, void *data)
@@ -100,6 +102,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

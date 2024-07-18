@@ -35,6 +35,8 @@ The connection id is unique among all connections using the same
 connection cache. This is implicitly the case for all connections in the
 same multi handle.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -59,6 +61,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

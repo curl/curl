@@ -39,6 +39,8 @@ This function is provided by libcurl to enable applications to compare strings
 in a truly portable manner. There are no standard portable case insensitive
 string comparison functions. This function works on all platforms.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -49,6 +51,8 @@ int main(int argc, char **argv)
     printf("Name and input matches\n");
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

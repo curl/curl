@@ -42,6 +42,8 @@ reporting. Since 7.87.0, it does not need to be the final target handle.
 Using a mime handle is the recommended way to post an HTTP form, format and
 send a multi-part email with SMTP or upload such an email to an IMAP server.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -67,6 +69,8 @@ int main(void)
   curl_mime_free(mime);
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

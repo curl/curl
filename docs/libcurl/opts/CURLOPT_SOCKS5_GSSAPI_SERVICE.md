@@ -40,6 +40,8 @@ option.
 
 See above
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -60,6 +62,8 @@ int main(void)
 # DEPRECATED
 
 Deprecated since 7.49.0
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

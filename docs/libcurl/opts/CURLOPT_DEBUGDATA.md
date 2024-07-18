@@ -34,6 +34,8 @@ not used by libcurl, it is only passed to the callback.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -75,6 +77,8 @@ int main(void)
   return 0;
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

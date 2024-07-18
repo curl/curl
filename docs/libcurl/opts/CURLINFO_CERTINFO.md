@@ -51,6 +51,8 @@ items with textual information in the format "name:content" such as
 "Subject:Foo", "Issuer:Bar", etc. The items in each list varies depending on
 the SSL backend and the certificate.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -92,10 +94,12 @@ int main(void)
 
 See also the *certinfo.c* example.
 
-# NOTES
+# HISTORY
 
 GnuTLS support added in 7.42.0. Schannel support added in 7.50.0. Secure
 Transport support added in 7.79.0. mbedTLS support added in 8.9.0.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

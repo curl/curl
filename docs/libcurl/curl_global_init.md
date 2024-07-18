@@ -110,6 +110,8 @@ Before 7.69.0: when this flag is set, curl acknowledges EINTR condition when
 connecting or when waiting for data. Otherwise, curl waits until full timeout
 elapses. (Added in 7.30.0)
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -122,6 +124,8 @@ int main(void)
   curl_global_cleanup();
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

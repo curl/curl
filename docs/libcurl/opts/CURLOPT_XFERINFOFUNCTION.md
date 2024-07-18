@@ -71,8 +71,9 @@ get called.
 
 # DEFAULT
 
-By default, libcurl has an internal progress meter. That is rarely wanted by
-users.
+NULL - use the internal progress meter. That is rarely wanted by users.
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -112,6 +113,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

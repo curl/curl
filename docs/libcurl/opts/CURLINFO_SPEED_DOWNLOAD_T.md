@@ -32,6 +32,8 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_SPEED_DOWNLOAD_T,
 Pass a pointer to a *curl_off_t* to receive the average download speed
 that curl measured for the complete download. Measured in bytes/second.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -56,6 +58,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

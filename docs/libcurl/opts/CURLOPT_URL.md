@@ -88,8 +88,7 @@ specified when passed to the name resolver functions.
 
 # DEFAULT
 
-There is no default URL. If this option is not set, no transfer can be
-performed.
+NULL. If this option is not set, no transfer can be performed.
 
 # SECURITY CONCERNS
 
@@ -116,6 +115,8 @@ User provided URLs can also be made to point to sites that redirect further on
 (possibly to other protocols too). Consider your
 CURLOPT_FOLLOWLOCATION(3) and CURLOPT_REDIR_PROTOCOLS_STR(3) settings.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -129,6 +130,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -48,8 +48,9 @@ streams).
 
 # DEFAULT
 
-If nothing is set, the HTTP/2 protocol itself uses its own default which is
-16.
+16
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -70,6 +71,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

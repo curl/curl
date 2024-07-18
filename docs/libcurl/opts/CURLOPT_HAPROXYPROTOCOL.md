@@ -39,6 +39,8 @@ Most applications do not need this option.
 
 0, do not send any HAProxy PROXY protocol header
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -53,6 +55,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -33,7 +33,9 @@ CURLOPT_OPENSOCKETFUNCTION(3).
 
 # DEFAULT
 
-The default value of this parameter is NULL.
+NULL
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -81,6 +83,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

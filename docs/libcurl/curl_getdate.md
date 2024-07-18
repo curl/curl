@@ -75,6 +75,8 @@ If a decimal number of the form YYYYMMDD appears, then YYYY is read as the
 year, MM as the month number and DD as the day of the month, for the specified
 calendar date.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -113,6 +115,8 @@ RFC 1123) using time zone name or time zone delta and RFC 850 (obsoleted by
 RFC 1036) and ANSI C's *asctime()* format.
 
 These formats are the only ones RFC 7231 says HTTP applications may use.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -32,6 +32,8 @@ server. If your application encounters a *CURLE_RTSP_CSEQ_ERROR* then you
 may wish to troubleshoot and/or fix the CSeq mismatch by peeking at this
 value.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -50,6 +52,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

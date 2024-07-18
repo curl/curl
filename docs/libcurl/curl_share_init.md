@@ -36,6 +36,8 @@ This *share handle* is what you pass to curl using the
 CURLOPT_SHARE(3) option with curl_easy_setopt(3), to make that
 specific curl handle use the data in this share.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -48,6 +50,8 @@ int main(void)
     printf("Error: %s\n", curl_share_strerror(sh));
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

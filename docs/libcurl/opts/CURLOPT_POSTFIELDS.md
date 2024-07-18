@@ -74,6 +74,8 @@ CURLOPT_MIMEPOST(3) option combined with curl_mime_init(3).
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -115,6 +117,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

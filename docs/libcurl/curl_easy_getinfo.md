@@ -385,6 +385,8 @@ An overview of the time values available from curl_easy_getinfo(3)
  CURLINFO_PRETRANSFER_TIME_T(3), CURLINFO_STARTTRANSFER_TIME_T(3),
  CURLINFO_TOTAL_TIME_T(3), CURLINFO_REDIRECT_TIME_T(3)
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -410,6 +412,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

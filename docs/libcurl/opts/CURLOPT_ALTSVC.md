@@ -39,6 +39,8 @@ Specify a blank filename ("") to make libcurl not load from a file at all.
 
 NULL. The alt-svc cache is not read nor written to file.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -100,6 +102,8 @@ Boolean (1 or 0) if "persist" was set for this entry
 ## 0
 
 Integer priority value (not currently used)
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

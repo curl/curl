@@ -34,6 +34,8 @@ Pass a pointer to a double to receive the specified size of the upload. Since
 CURLINFO_CONTENT_LENGTH_UPLOAD_T(3) is a newer replacement that returns a
 more sensible variable type.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -62,6 +64,8 @@ int main(void)
 # DEPRECATED
 
 Deprecated since 7.55.0.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -36,6 +36,8 @@ is used.
 
 512
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -52,6 +54,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

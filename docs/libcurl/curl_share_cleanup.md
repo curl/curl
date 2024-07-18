@@ -32,6 +32,8 @@ when this function has been called.
 Passing in a NULL pointer in *share_handle* makes this function return
 immediately with no action.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -44,6 +46,8 @@ int main(void)
   curl_share_cleanup(share);
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

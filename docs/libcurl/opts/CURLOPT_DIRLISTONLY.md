@@ -54,6 +54,8 @@ effectively breaks that feature.
 
 0, disabled
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -78,6 +80,8 @@ int main(void)
 
 This option was known as CURLOPT_FTPLISTONLY up to 7.16.4. POP3 is supported
 since 7.21.5.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

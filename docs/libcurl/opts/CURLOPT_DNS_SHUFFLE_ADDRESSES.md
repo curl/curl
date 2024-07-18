@@ -47,6 +47,8 @@ performance impacts and may cause IPv4 to be used before IPv6 or vice versa.
 
 0 (disabled)
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -64,6 +66,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

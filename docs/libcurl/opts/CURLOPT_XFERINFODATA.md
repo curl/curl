@@ -34,7 +34,9 @@ This is an alias for CURLOPT_PROGRESSDATA(3).
 
 # DEFAULT
 
-The default value of this parameter is NULL.
+NULL
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -69,6 +71,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

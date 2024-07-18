@@ -31,7 +31,9 @@ argument in the ioctl callback set with CURLOPT_IOCTLFUNCTION(3).
 
 # DEFAULT
 
-By default, the value of this parameter is NULL.
+NULL
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -65,6 +67,8 @@ int main(void)
 # DEPRECATED
 
 Deprecated since 7.18.0.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

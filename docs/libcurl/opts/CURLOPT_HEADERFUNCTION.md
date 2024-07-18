@@ -101,6 +101,8 @@ although strictly they are just continuations of the previous lines.
 
 Nothing.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -124,6 +126,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

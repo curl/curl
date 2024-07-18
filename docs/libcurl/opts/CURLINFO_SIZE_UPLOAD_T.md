@@ -32,6 +32,8 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_SIZE_UPLOAD_T,
 Pass a pointer to a *curl_off_t* to receive the total amount of bytes that
 were uploaded.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -55,6 +57,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

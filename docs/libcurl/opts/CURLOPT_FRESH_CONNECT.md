@@ -42,6 +42,8 @@ Set *fresh* to 0 to have libcurl attempt reusing an existing connection
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -57,6 +59,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

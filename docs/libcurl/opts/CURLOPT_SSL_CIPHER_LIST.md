@@ -70,7 +70,9 @@ option.
 
 # DEFAULT
 
-NULL, use internal default
+NULL, use built-in list
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -88,9 +90,11 @@ int main(void)
 }
 ~~~
 
-# NOTES
+# HISTORY
 
 Added in 7.9, in 7.83.0 for BearSSL, in 8.8.0 for mbedTLS
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

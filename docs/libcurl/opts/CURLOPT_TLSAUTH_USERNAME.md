@@ -43,6 +43,8 @@ This feature relies on TLS SRP which does not work with TLS 1.3.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -60,6 +62,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

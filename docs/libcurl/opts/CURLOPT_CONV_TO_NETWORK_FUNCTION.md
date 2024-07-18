@@ -72,6 +72,8 @@ You need to override these definitions if they are different on your system.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -103,6 +105,8 @@ Not available and deprecated since 7.82.0.
 
 Available only if **CURL_DOES_CONVERSIONS** was defined when libcurl was
 built.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

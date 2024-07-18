@@ -50,6 +50,8 @@ transfer as that may lead to unintended consequences.
 
 65536 bytes
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -69,6 +71,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

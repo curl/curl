@@ -46,6 +46,8 @@ If the **CURLFORM_STREAM** option is used in the formpost, it prevents
 curl_formget(3) from working until you have performed the actual HTTP request.
 This, because first then does libcurl known which actual read callback to use!
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -65,6 +67,8 @@ size_t print_httppost(struct curl_httppost *post)
   return total_size;
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

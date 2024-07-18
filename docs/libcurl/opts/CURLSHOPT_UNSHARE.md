@@ -59,6 +59,8 @@ The connection cache is no longer shared.
 
 The Public Suffix List is no longer shared.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -71,6 +73,8 @@ int main(void)
     printf("Error: %s\n", curl_share_strerror(sh));
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -43,6 +43,8 @@ CURLMOPT_MAX_PIPELINE_LENGTH(3).
 
 5
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -53,6 +55,8 @@ int main(void)
   curl_multi_setopt(m, CURLMOPT_MAX_PIPELINE_LENGTH, 3L);
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -53,6 +53,8 @@ and support level.
 
 0 (off)
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -67,6 +69,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

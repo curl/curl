@@ -37,6 +37,8 @@ getting called.
 
 1, meaning it normally runs without a progress meter.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -54,6 +56,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

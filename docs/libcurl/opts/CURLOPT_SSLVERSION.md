@@ -116,6 +116,8 @@ inconsistent depending on the TLS library.
 
 CURL_SSLVERSION_DEFAULT
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -142,6 +144,8 @@ SSLv2 is disabled by default since 7.18.1. Other SSL versions availability may
 vary depending on which backend libcurl has been built to use.
 
 SSLv3 is disabled by default since 7.39.0.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

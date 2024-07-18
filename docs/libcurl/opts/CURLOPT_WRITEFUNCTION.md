@@ -73,7 +73,9 @@ do that.
 
 # DEFAULT
 
-libcurl uses 'fwrite' as a callback by default.
+fwrite(3)
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -129,6 +131,8 @@ int main(void)
 # HISTORY
 
 Support for the CURL_WRITEFUNC_PAUSE return code was added in version 7.18.0.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

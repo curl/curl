@@ -84,6 +84,8 @@ Return *CURL_CHUNK_BGN_FUNC_OK* if everything is fine,
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -141,6 +143,8 @@ int main()
   curl_easy_setopt(curl, CURLOPT_CHUNK_DATA, &callback_info);
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -47,6 +47,8 @@ data from the main filename to populate the cache.
 In multi-threaded programs, this function must be called in a synchronous way,
 the input handle may not be in use when cloned.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -64,6 +66,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

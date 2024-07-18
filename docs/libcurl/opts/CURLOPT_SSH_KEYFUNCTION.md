@@ -110,6 +110,8 @@ up from scratch again.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -142,6 +144,8 @@ int main(void)
 }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

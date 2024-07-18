@@ -31,7 +31,9 @@ argument in the progress callback set with CURLOPT_PROGRESSFUNCTION(3).
 
 # DEFAULT
 
-The default value of this parameter is NULL.
+NULL
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -69,6 +71,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

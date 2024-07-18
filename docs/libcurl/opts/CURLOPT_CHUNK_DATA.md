@@ -34,6 +34,8 @@ CURLOPT_CHUNK_END_FUNCTION(3).
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -91,6 +93,8 @@ int main()
   curl_easy_setopt(curl, CURLOPT_CHUNK_DATA, &callback_info);
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

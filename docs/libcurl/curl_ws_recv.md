@@ -44,6 +44,8 @@ The *meta* pointer gets set to point to a *const struct curl_ws_frame*
 that contains information about the received data. See the
 curl_ws_meta(3) for details on that struct.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -60,6 +62,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

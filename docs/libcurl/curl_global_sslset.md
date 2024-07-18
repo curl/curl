@@ -101,6 +101,8 @@ typedef enum {
 } curl_sslbackend;
 ~~~
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -119,6 +121,8 @@ int main(void)
            i, list[i]->name, list[i]->id);
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

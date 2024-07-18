@@ -38,6 +38,8 @@ the new URL.
 This URL is also set if the CURLOPT_MAXREDIRS(3) limit prevented a redirect to
 happen (since 7.54.1).
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -58,6 +60,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

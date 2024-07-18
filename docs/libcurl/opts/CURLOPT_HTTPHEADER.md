@@ -151,6 +151,8 @@ with the CURLOPT_UNRESTRICTED_AUTH(3) option.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -175,9 +177,11 @@ int main(void)
 }
 ~~~
 
-# NOTES
+# HISTORY
 
 Use for MIME mail added in 7.56.0.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

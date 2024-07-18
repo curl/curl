@@ -38,7 +38,9 @@ than CURLMOPT_MAX_PIPELINE_LENGTH(3).
 
 # DEFAULT
 
-The default value is 0, which means that the penalization is inactive.
+0, which means that penalization is inactive.
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -50,6 +52,8 @@ int main(void)
   curl_multi_setopt(m, CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE, maxchunk);
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

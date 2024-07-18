@@ -78,6 +78,8 @@ number must exactly match what was added previously.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -102,7 +104,7 @@ int main(void)
 }
 ~~~
 
-# NOTES
+# HISTORY
 
 Added in 7.21.3. Removal support added in 7.42.0.
 
@@ -112,6 +114,8 @@ Support for providing multiple IP addresses per entry was added in 7.59.0.
 
 Support for adding non-permanent entries by using the "+" prefix was added in
 7.75.0.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -38,6 +38,8 @@ CURLOPT_READFUNCTION(3) (if used) to signal the end of data.
 
 -1
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -61,6 +63,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

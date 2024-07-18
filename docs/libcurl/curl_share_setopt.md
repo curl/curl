@@ -50,6 +50,8 @@ See CURLSHOPT_UNSHARE(3).
 
 See CURLSHOPT_USERDATA(3).
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -62,6 +64,8 @@ int main(void)
     printf("Error: %s\n", curl_share_strerror(sh));
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -35,6 +35,8 @@ is the value read from the Content-Length: field. Since 7.19.4, this returns
 CURLINFO_CONTENT_LENGTH_DOWNLOAD_T(3) is a newer replacement that returns a more
 sensible variable type.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -63,6 +65,8 @@ int main(void)
 # DEPRECATED
 
 Deprecated since 7.55.0.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -128,6 +128,8 @@ See ln.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -152,9 +154,11 @@ int main(void)
 }
 ~~~
 
-# NOTES
+# HISTORY
 
 SFTP support added in 7.16.3. *-prefix for SFTP added in 7.24.0
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -65,6 +65,8 @@ of the proxy certificate.
 
 2
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -81,6 +83,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

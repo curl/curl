@@ -33,6 +33,8 @@ the callback set with CURLOPT_SSH_HOSTKEYFUNCTION(3).
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -67,6 +69,8 @@ int main(void)
 # NOTES
 
 Works only with the libssh2 backend.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

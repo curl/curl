@@ -43,6 +43,8 @@ curl_formadd(3) and may be NULL.
 Passing in a NULL pointer in *form* makes this function return immediately
 with no action.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -73,6 +75,8 @@ int main(void)
 # DEPRECATED
 
 Deprecated in 7.56.0.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

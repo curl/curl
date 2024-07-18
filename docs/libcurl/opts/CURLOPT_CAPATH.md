@@ -49,7 +49,9 @@ The default value for this can be figured out with CURLINFO_CAPATH(3).
 
 # DEFAULT
 
-A default path detected at build time.
+A path detected at build time.
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -66,6 +68,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

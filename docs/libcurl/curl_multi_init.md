@@ -34,6 +34,8 @@ all the other multi-functions, sometimes referred to as a multi handle in some
 places in the documentation. This init call MUST have a corresponding call to
 curl_multi_cleanup(3) when the operation is complete.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -49,6 +51,8 @@ int main(void)
   curl_multi_add_handle(multi, curl2);
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

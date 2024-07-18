@@ -37,6 +37,8 @@ does not match the hash the remote host provides.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -57,6 +59,8 @@ int main(void)
 # NOTES
 
 Requires the libssh2 backend.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

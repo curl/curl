@@ -83,6 +83,8 @@ completed.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -157,6 +159,8 @@ int main(void)
   return rv;
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

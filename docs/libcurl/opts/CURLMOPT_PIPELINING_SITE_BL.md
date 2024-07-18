@@ -37,7 +37,9 @@ Pass a NULL pointer to clear the block list.
 
 # DEFAULT
 
-The default value is NULL, which means that there is no block list.
+NULL, which means that there is no block list.
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -55,6 +57,8 @@ int main(void)
   curl_multi_setopt(m, CURLMOPT_PIPELINING_SITE_BL, site_block_list);
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -73,7 +73,9 @@ not attempt to connect (again).
 
 # DEFAULT
 
-By default, this callback is NULL and unused.
+NULL
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -120,6 +122,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

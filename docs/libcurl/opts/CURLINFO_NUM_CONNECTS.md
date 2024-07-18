@@ -33,6 +33,8 @@ many times libcurl successfully reused existing connection(s) or not. See the
 connection options of curl_easy_setopt(3) to see how libcurl tries to make
 persistent connections to save time.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -54,6 +56,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

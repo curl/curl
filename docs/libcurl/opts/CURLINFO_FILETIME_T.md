@@ -42,6 +42,8 @@ by using the CURLOPT_FILETIME(3) option or you unconditionally get a -1 back.
 This option is an alternative to CURLINFO_FILETIME(3) to allow systems with 32
 bit long variables to extract dates outside of the 32-bit timestamp range.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -67,6 +69,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

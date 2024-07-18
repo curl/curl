@@ -40,6 +40,8 @@ cache between transfers.
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -61,6 +63,8 @@ int main(void)
 # DEPRECATED
 
 Deprecated since 7.11.1. Functionality removed in 7.62.0.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

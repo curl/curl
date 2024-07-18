@@ -203,6 +203,8 @@ for the curl handle.
 
 See example below.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -308,6 +310,8 @@ although still supported, but data is not read before being actually sent: the
 effective data size can then not be automatically determined, resulting in a
 chunked encoding transfer. Backslashes and double quotes in field and
 filenames are now escaped before transmission.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

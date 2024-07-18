@@ -40,6 +40,8 @@ Set to 0 to have libcurl keep the connection open for possible later reuse
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -58,6 +60,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -43,6 +43,8 @@ The order of the easy handles within the array is not guaranteed.
 
 The returned array must be freed with a call to curl_free(3) after use.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -70,6 +72,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

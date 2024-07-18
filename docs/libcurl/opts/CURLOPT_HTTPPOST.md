@@ -50,6 +50,8 @@ CURLOPT_NOBODY(3) to 0.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -93,6 +95,8 @@ int main(void)
 # DEPRECATED
 
 Deprecated in 7.56.0.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

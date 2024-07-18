@@ -51,7 +51,9 @@ option.
 
 # DEFAULT
 
-NULL, use internal default
+NULL, use internal built-in list
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -69,6 +71,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

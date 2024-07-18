@@ -72,9 +72,11 @@ sending the length of the non-compressed content is a common server mistake).
 The application does not have to keep the string around after setting this
 option.
 
-# NOTES
+# HISTORY
 
 This option was called CURLOPT_ENCODING before 7.21.6
+
+# NOTES
 
 The specific libcurl you are using must have been built with zlib to be able to
 decompress gzip and deflate responses, with the brotli library to
@@ -84,6 +86,8 @@ responses.
 # DEFAULT
 
 NULL
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -102,6 +106,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

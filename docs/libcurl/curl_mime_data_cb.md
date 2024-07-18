@@ -98,6 +98,8 @@ the pointed item to be shared between the original and the copied handle. In
 particular, special attention should be given to the *freefunc* procedure
 code since it then gets called twice with the same argument.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 Sending a huge data string causes the same amount of memory to be allocated:
@@ -163,6 +165,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

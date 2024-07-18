@@ -73,6 +73,8 @@ the CURLOPT_PROXY(3) string.
 
 CURLPROXY_HTTP
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -90,6 +92,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

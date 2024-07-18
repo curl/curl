@@ -57,6 +57,8 @@ way to figure out the protocol used in a previous transfer.
 
 All protocols built-in
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -75,6 +77,8 @@ int main(int argc, char **argv)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

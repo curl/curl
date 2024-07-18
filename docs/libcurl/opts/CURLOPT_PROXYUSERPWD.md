@@ -41,7 +41,9 @@ option.
 
 # DEFAULT
 
-This is NULL by default.
+NULL
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -59,6 +61,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

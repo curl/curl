@@ -49,6 +49,8 @@ CURLMOPT_MAXCONNECTS(3) option.
 
 5
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -64,6 +66,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

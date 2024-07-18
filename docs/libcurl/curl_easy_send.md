@@ -53,6 +53,8 @@ Furthermore if you wait on the socket and it tells you it is writable,
 curl_easy_send(3) may return **CURLE_AGAIN** if the only data that was sent
 was for internal SSL processing, and no other data could be sent.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -78,6 +80,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

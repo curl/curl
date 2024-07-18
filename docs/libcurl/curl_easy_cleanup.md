@@ -53,6 +53,8 @@ before it is closed.
 Passing in a NULL pointer in *handle* makes this function return immediately
 with no action.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -69,6 +71,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

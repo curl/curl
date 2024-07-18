@@ -60,6 +60,8 @@ depending on how OpenSSL was built and loaded as a library. It is possible in
 some rare circumstances a memory leak could occur unless you implement your own
 OpenSSL thread cleanup. Refer to libcurl-thread(3).
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -72,6 +74,8 @@ int main(void)
   curl_global_cleanup();
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

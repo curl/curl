@@ -48,7 +48,9 @@ option.
 
 # DEFAULT
 
-Default is NULL, meaning that no Unix domain sockets are used.
+NULL - no Unix domain sockets are used.
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -75,6 +77,8 @@ you can use the proc filesystem to bypass the limitation:
   curl_easy_setopt(curl_handle, CURLOPT_UNIX_SOCKET_PATH, path);
   /* Be sure to keep dirfd valid until you discard the handle */
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

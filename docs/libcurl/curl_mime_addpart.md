@@ -43,6 +43,8 @@ subsequently be populated using functions from the mime API.
 *mime* is the handle of the mime structure in which the new part must be
 appended.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -65,6 +67,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

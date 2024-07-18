@@ -37,7 +37,9 @@ option.
 
 # DEFAULT
 
-NULL, no User-Agent: header is used by default.
+NULL, no User-Agent: header is used.
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -54,6 +56,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

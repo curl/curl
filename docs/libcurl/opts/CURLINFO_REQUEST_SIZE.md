@@ -32,6 +32,8 @@ Pass a pointer to a long to receive the total size of the issued
 requests. This is so far only for HTTP requests. Note that this may be more
 than one request if CURLOPT_FOLLOWLOCATION(3) is enabled.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -52,6 +54,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

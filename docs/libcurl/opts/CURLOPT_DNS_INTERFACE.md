@@ -40,6 +40,8 @@ option.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -60,6 +62,8 @@ int main(void)
 
 This option requires that libcurl was built with a resolver backend that
 supports this operation. The c-ares backend is the only such one.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

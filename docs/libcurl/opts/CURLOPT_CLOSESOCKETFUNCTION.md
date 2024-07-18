@@ -44,7 +44,9 @@ closed.
 
 # DEFAULT
 
-By default libcurl uses the standard socket close function.
+Use the standard socket close function.
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -75,6 +77,8 @@ int main(void)
   curl_easy_cleanup(curl);
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -36,6 +36,8 @@ connection etc due to set conditions and limits imposed by the application.
 
 See also the TIMES overview in the curl_easy_getinfo(3) man page.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -59,6 +61,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

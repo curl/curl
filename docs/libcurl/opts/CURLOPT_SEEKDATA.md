@@ -35,6 +35,8 @@ CURLOPT_SEEKFUNCTION(3) option, this is the pointer you get as input.
 
 If you do not set this, NULL is passed to the callback.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -61,5 +63,7 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE

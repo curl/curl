@@ -75,8 +75,9 @@ get called.
 
 # DEFAULT
 
-By default, libcurl has an internal progress meter. That is rarely wanted by
-users.
+NULL. libcurl has an internal progress meter. That is rarely wanted by users.
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -118,6 +119,8 @@ int main(void)
 # DEPRECATED
 
 Deprecated since 7.32.0.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

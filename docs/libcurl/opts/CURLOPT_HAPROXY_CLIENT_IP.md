@@ -38,6 +38,8 @@ cannot use a specified address.
 
 NULL, no HAProxy header is sent
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -52,6 +54,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -41,6 +41,8 @@ authentication.
 
 CURLSSH_AUTH_ANY (all available)
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -57,6 +59,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

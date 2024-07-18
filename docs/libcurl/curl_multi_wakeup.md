@@ -39,6 +39,8 @@ that multiple calls to this function wake up the same waiting operation.
 
 This function has no effect on curl_multi_wait(3) calls.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -84,6 +86,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

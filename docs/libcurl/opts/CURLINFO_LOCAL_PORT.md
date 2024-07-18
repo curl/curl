@@ -31,6 +31,8 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_LOCAL_PORT, long *portp);
 Pass a pointer to a long to receive the local port number of the most recent
 connection done with this **curl** handle.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -57,6 +59,8 @@ int main(void)
   return 0;
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

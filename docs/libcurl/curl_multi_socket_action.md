@@ -96,6 +96,8 @@ callback has been told.
 socket(s) that got action. If no activity is detected and the timeout expires,
 call curl_multi_socket_action(3) with *CURL_SOCKET_TIMEOUT*.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -112,6 +114,8 @@ int main(void)
     printf("error: %s\n", curl_multi_strerror(mc));
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

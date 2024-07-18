@@ -61,6 +61,8 @@ The default value for this can be figured out with CURLINFO_CAINFO(3).
 Built-in system specific. When curl is built with Secure Transport or
 Schannel, this option is not set by default.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -76,9 +78,11 @@ int main(void)
 }
 ~~~
 
-# NOTES
+# HISTORY
 
 Schannel support added in libcurl 7.60.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

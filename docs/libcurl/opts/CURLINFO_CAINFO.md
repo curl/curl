@@ -41,6 +41,8 @@ This is a path identifying a single file containing CA certificates.
 
 The **path** pointer is set to NULL if there is no default path.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -57,6 +59,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

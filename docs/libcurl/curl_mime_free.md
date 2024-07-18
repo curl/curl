@@ -43,6 +43,8 @@ curl_mime_init(3) and may be NULL.
 Passing in a NULL pointer in *mime* makes this function return immediately
 with no action.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -60,6 +62,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

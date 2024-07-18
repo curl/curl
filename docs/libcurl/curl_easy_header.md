@@ -137,6 +137,8 @@ response that might happen before the "real" response.
 
 The header is an HTTP/2 or HTTP/3 pseudo header
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -153,6 +155,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

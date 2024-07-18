@@ -44,6 +44,8 @@ its option CURLINFO_CERTINFO(3).
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -83,10 +85,12 @@ int main(void)
 }
 ~~~
 
-# NOTES
+# HISTORY
 
 Schannel support added in 7.50.0. Secure Transport support added in 7.79.0.
 mbedTLS support added in 8.9.0.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

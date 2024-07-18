@@ -51,6 +51,8 @@ You are strongly advised to not allow this automatic behavior, by calling
 curl_global_init(3) yourself properly. See the description in libcurl(3) of
 global environment requirements for details of how to use this function.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -65,6 +67,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

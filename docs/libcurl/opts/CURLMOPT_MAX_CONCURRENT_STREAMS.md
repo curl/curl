@@ -38,6 +38,8 @@ value passed here would be honored based on other system resources properties.
 
 100
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -48,6 +50,8 @@ int main(void)
   curl_multi_setopt(m, CURLMOPT_MAX_CONCURRENT_STREAMS, 200L);
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

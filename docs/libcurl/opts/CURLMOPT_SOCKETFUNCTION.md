@@ -90,6 +90,8 @@ active transfer. It might soon be added again.
 
 NULL (no callback)
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -124,6 +126,8 @@ int main(void)
   curl_multi_setopt(multi, CURLMOPT_SOCKETDATA, &setup);
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

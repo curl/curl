@@ -37,6 +37,8 @@ available at runtime. **NOTE:** you must call curl_slist_free_all(3)
 on the list pointer once you are done with it, as libcurl does not free this
 data for you.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -56,6 +58,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

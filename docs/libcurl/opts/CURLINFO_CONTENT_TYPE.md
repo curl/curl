@@ -40,6 +40,8 @@ corresponding CURL handle.
 The modern way to get this header from a response is to instead use the
 curl_easy_header(3) function.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -64,6 +66,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

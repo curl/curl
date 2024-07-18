@@ -59,6 +59,8 @@ the host key is rejected, the connection is canceled.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -92,6 +94,8 @@ int main(void)
 # NOTES
 
 Work only with the libssh2 backend.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

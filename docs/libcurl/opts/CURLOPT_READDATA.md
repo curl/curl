@@ -41,7 +41,9 @@ might experience crashes.
 
 # DEFAULT
 
-By default, this is a FILE * to stdin.
+stdin
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -66,10 +68,12 @@ int main(void)
 }
 ~~~
 
-# NOTES
+# HISTORY
 
 This option was once known by the older name CURLOPT_INFILE, the name
 CURLOPT_READDATA(3) was introduced in 7.9.7.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

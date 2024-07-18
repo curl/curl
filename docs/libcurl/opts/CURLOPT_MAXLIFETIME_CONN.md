@@ -44,7 +44,9 @@ If set to 0, this behavior is disabled: all connections are eligible for reuse.
 
 # DEFAULT
 
-Default *maxlifetime* is 0 seconds (i.e., disabled).
+0 seconds (i.e., disabled)
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -62,6 +64,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -36,6 +36,8 @@ If a proxy was used for the most recent transfer, this is the port number of
 the proxy, if no proxy was used it is the port number of the most recently
 accessed URL.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -56,6 +58,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

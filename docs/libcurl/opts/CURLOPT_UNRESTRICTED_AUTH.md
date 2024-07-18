@@ -53,6 +53,8 @@ again and again as the following hosts can keep redirecting to new hosts.
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -67,6 +69,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

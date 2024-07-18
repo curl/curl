@@ -62,7 +62,9 @@ parameter is ignored when seeking.
 
 # DEFAULT
 
-By default, this parameter is set to NULL. Not used.
+NULL
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -96,6 +98,8 @@ int main(void)
 # DEPRECATED
 
 Deprecated since 7.18.0.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -49,6 +49,8 @@ Note: if libcurl returns a -1 timeout here, it just means that libcurl
 currently has no stored timeout value. You must not wait too long (more than a
 few seconds perhaps) before you call curl_multi_perform(3) again.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -82,6 +84,8 @@ out which sockets to wait for by calling curl_multi_fdset(3).
 
 When there is activity or timeout, call curl_multi_perform(3) and then
 loop - until all transfers are complete.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -240,6 +240,8 @@ If set, the URL parser does not accept embedded credentials for the
 **CURLUPART_URL**, and instead returns **CURLUE_USER_NOT_ALLOWED** for
 such URLs.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -255,6 +257,8 @@ int main(void)
   curl_url_cleanup(url);
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

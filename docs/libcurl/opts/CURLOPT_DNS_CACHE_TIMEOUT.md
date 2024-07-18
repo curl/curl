@@ -55,6 +55,8 @@ Since version 8.1.0, libcurl prunes entries from the DNS cache if it exceeds
 
 60
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -78,6 +80,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

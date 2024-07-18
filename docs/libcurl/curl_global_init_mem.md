@@ -71,6 +71,8 @@ to that man page for documentation.
 Manipulating these gives considerable powers to the application to severely
 screw things up for libcurl. Take care!
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -87,6 +89,8 @@ int main(void)
                        strdup_cb, calloc_cb);
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

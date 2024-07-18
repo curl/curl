@@ -48,6 +48,8 @@ functionality.
 
 It is acceptable to call this function from your multi callback functions.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -74,6 +76,8 @@ When our socket-callback gets called by libcurl and we get to know about yet
 another socket to wait for, we can use curl_multi_assign(3) to point out the
 particular data so that when we get updates about this same socket again, we
 do not have to find the struct associated with this socket by ourselves.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

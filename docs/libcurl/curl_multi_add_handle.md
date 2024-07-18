@@ -64,6 +64,8 @@ first the easy handle and then the multi handle:
 
 3 - curl_multi_cleanup(3)
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -81,6 +83,8 @@ int main(void)
   curl_multi_add_handle(multi, http_handle2);
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

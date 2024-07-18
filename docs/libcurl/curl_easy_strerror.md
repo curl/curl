@@ -34,6 +34,8 @@ CURLcode error code passed in the argument *errornum*.
 Typically applications also appreciate CURLOPT_ERRORBUFFER(3) for more
 specific error descriptions generated at runtime.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -52,6 +54,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

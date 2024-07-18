@@ -44,6 +44,8 @@ The remote filename string is copied into the part, thus the associated
 storage may safely be released or reused after call. Setting a part's file
 name multiple times is valid: only the value set by the last call is retained.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -74,6 +76,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

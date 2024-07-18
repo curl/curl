@@ -37,6 +37,8 @@ NULL, not used
 
 Deprecated since 7.84.0.
 
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK.

@@ -37,6 +37,8 @@ The only protocols that can use this are *sftp://*, *scp://*, and *file://*.
 
 0644
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -51,6 +53,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

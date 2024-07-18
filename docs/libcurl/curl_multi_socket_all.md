@@ -41,6 +41,8 @@ Force libcurl to (re-)check all its internal sockets and transfers instead of
 just a single one by calling curl_multi_socket_all(3). Note that there should
 not be any reason to use this function.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -52,6 +54,8 @@ int main(void)
   rc = curl_multi_socket_all(multi, &running);
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

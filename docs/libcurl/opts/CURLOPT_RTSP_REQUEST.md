@@ -112,6 +112,8 @@ application a chance to run.
 
 # DEFAULT
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -128,6 +130,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

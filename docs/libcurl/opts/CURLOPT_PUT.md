@@ -38,6 +38,8 @@ This option is **deprecated** since version 7.12.1. Use CURLOPT_UPLOAD(3).
 
 0, disabled
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -82,6 +84,8 @@ int main(void)
 # DEPRECATED
 
 Deprecated since 7.12.1.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

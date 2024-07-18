@@ -73,6 +73,8 @@ malicious servers.
 
 1 - enabled
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -89,6 +91,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

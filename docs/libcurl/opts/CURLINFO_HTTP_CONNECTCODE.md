@@ -31,6 +31,8 @@ Pass a pointer to a long to receive the last received HTTP proxy response code
 to a CONNECT request. The returned value is zero if no such response code was
 available.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -54,6 +56,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

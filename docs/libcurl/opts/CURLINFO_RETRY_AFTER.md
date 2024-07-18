@@ -38,7 +38,9 @@ or zero if there was no header or the header could not be parsed.
 
 # DEFAULT
 
-Returns zero delay if there was no header.
+Zero if there was no header.
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -60,6 +62,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

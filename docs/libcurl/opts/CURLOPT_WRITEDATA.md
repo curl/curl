@@ -42,7 +42,9 @@ crashes.
 
 # DEFAULT
 
-By default, this is a FILE * to stdout.
+stdout
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -56,6 +58,8 @@ https://curl.se/libcurl/c/getinmemory.html
 
 This option was formerly known as CURLOPT_FILE, the name CURLOPT_WRITEDATA(3)
 was added in 7.9.7.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

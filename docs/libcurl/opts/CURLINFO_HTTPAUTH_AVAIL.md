@@ -32,6 +32,8 @@ Pass a pointer to a long to receive a bitmask indicating the authentication
 method(s) available according to the previous response. The meaning of the
 bits is explained in the CURLOPT_HTTPAUTH(3) option for curl_easy_setopt(3).
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -64,6 +66,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -33,7 +33,9 @@ CURLOPT_CLOSESOCKETFUNCTION(3).
 
 # DEFAULT
 
-The default value of this parameter is NULL.
+NULL
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -64,6 +66,8 @@ int main(void)
   curl_easy_cleanup(curl);
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

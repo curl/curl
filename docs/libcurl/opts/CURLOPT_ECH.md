@@ -74,6 +74,8 @@ ECHConfigList that is used for ECH.
 
 NULL, meaning ECH is disabled.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -85,6 +87,8 @@ if(curl) {
   curl_easy_perform(curl);
 }
 ~~~
+# %AVAILABILITY%
+
 # RETURN VALUE
 
 Returns CURLE_OK on success or CURLE_OUT_OF_MEMORY if there was insufficient

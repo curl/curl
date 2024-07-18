@@ -44,6 +44,8 @@ option.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -63,6 +65,8 @@ int main(void)
 # HISTORY
 
 Support for OpenLDAP added in 7.82.0.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

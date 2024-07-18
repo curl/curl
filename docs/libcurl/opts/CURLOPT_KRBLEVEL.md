@@ -39,6 +39,8 @@ option.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -55,9 +57,11 @@ int main(void)
 }
 ~~~
 
-# NOTES
+# HISTORY
 
 This option was known as CURLOPT_KRB4LEVEL up to 7.16.3
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -44,6 +44,8 @@ When setting CURLOPT_MIMEPOST(3) to NULL, libcurl resets the request
 type for HTTP to the default to disable the POST. Typically that would mean it
 is reset to GET. Instead you should set a desired request method explicitly.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -72,6 +74,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

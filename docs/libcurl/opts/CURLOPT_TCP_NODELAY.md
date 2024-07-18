@@ -46,6 +46,8 @@ overdone.
 
 1
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -64,6 +66,8 @@ int main(void)
 # HISTORY
 
 The default was changed to 1 from 0 in 7.50.2.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

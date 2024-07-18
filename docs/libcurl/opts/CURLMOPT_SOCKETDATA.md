@@ -37,6 +37,8 @@ callback's **clientp** argument.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -71,6 +73,8 @@ int main(void)
   curl_multi_setopt(multi, CURLMOPT_SOCKETDATA, &setup);
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

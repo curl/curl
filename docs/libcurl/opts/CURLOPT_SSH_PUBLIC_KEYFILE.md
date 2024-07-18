@@ -44,6 +44,8 @@ option.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -61,9 +63,11 @@ int main(void)
 }
 ~~~
 
-# NOTES
+# HISTORY
 
 The "" trick was added in 7.26.0
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -58,6 +58,8 @@ This option overrides CURLOPT_PROXY_CAINFO(3).
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -82,6 +84,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

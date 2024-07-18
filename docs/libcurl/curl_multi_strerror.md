@@ -31,6 +31,8 @@ const char *curl_multi_strerror(CURLMcode errornum);
 This function returns a string describing the *CURLMcode* error code
 passed in the argument *errornum*.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -44,6 +46,8 @@ int main(void)
     printf("error: %s\n", curl_multi_strerror(mc));
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

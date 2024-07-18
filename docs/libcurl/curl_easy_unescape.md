@@ -47,6 +47,8 @@ TPF, but it was otherwise ignored.
 
 You must curl_free(3) the returned string when you are done with it.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -66,6 +68,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

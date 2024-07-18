@@ -64,6 +64,8 @@ do that.
 
 NULL - no callback.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -95,6 +97,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

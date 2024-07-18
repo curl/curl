@@ -48,6 +48,8 @@ Try "AUTH TLS" first, and only if that fails try "AUTH SSL".
 
 CURLFTPAUTH_DEFAULT
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -65,6 +67,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

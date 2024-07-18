@@ -38,6 +38,8 @@ available at compile-time.
 
 CURLGSSAPI_DELEGATION_NONE
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -54,6 +56,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

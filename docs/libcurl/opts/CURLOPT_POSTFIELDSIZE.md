@@ -38,6 +38,8 @@ If you post more than 2GB, use CURLOPT_POSTFIELDSIZE_LARGE(3).
 
 -1
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -60,6 +62,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

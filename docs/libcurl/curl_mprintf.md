@@ -264,6 +264,8 @@ by the corresponding argument.
 
 A '%' symbol is written. No argument is converted.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -275,6 +277,8 @@ int main(void)
   curl_mprintf("Pi is almost %f\n", (double)25.0/8);
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

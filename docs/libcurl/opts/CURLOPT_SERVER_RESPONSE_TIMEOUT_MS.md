@@ -49,6 +49,8 @@ This is the millisecond version of CURLOPT_SERVER_RESPONSE_TIMEOUT(3).
 
 None
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -66,6 +68,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

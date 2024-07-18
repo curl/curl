@@ -50,6 +50,8 @@ last call is retained. It is possible to unassign part's contents by setting
 Setting large data is memory consuming: one might consider using
 curl_mime_data_cb(3) in such a case.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -71,6 +73,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

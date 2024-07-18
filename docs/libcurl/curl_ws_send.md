@@ -90,6 +90,8 @@ fragment like this, the *fragsize* must be provided with the total
 expected fragment size in the first call and it needs to be zero in subsequent
 calls.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -111,6 +113,8 @@ int main(void)
   return (int)res;
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

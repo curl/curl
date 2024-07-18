@@ -58,6 +58,8 @@ option.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -117,7 +119,7 @@ footer:
 -----END PUBLIC KEY-----
 ~~~
 
-# NOTES
+# HISTORY
 
 ## PEM/DER support
 
@@ -142,6 +144,8 @@ footer:
 7.58.1: Schannel
 
 Other SSL backends not supported.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

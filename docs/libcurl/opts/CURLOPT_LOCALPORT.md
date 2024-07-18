@@ -36,6 +36,8 @@ this option is set. Valid port numbers are 1 - 65535.
 
 0, disabled - use whatever the system thinks is fine
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -53,6 +55,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

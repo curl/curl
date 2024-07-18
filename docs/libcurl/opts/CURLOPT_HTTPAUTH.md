@@ -126,6 +126,8 @@ see CURLOPT_AWS_SIGV4(3).
 
 CURLAUTH_BASIC
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -143,7 +145,7 @@ int main(void)
 }
 ~~~
 
-# NOTES
+# HISTORY
 
 CURLAUTH_DIGEST_IE was added in 7.19.3
 
@@ -154,6 +156,8 @@ CURLAUTH_NTLM_WB was added in 7.22.0
 CURLAUTH_BEARER was added in 7.61.0
 
 CURLAUTH_AWS_SIGV4 was added in 7.74.0
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

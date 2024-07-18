@@ -33,6 +33,8 @@ differences in memory management between your application and libcurl.
 Passing in a NULL pointer in *ptr* makes this function return immediately
 with no action.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -45,6 +47,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -32,6 +32,8 @@ Pass a long specifying the scope id value to use when connecting to IPv6 address
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -51,6 +53,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

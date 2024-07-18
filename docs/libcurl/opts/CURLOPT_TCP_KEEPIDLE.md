@@ -38,6 +38,8 @@ this amount.
 
 60
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -63,6 +65,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

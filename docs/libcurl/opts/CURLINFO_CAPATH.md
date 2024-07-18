@@ -44,6 +44,8 @@ This is a path identifying a directory.
 
 The **path** pointer is set to NULL if there is no default path.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -60,6 +62,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

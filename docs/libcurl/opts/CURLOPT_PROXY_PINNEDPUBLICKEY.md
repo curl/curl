@@ -54,6 +54,8 @@ option.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -110,7 +112,7 @@ footer:
 -----END PUBLIC KEY-----
 ~~~
 
-# NOTES
+# HISTORY
 
 PEM/DER support:
 
@@ -121,6 +123,8 @@ sha256 support:
  7.52.0: GnuTLS, OpenSSL, mbedTLS, wolfSSL
 
 Other SSL backends not supported.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

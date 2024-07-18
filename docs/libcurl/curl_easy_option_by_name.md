@@ -35,6 +35,8 @@ insensitive.
 
 If libcurl has no option with the given name, this function returns NULL.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -46,6 +48,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

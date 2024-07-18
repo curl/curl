@@ -43,6 +43,8 @@ freed explicitly.
 Setting a part's custom headers list multiple times is valid: only the value
 set by the last call is retained.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -73,6 +75,8 @@ int main(void)
   curl_easy_perform(easy);
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

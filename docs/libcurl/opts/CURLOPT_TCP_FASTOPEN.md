@@ -38,6 +38,8 @@ Fast Open is also known to be problematic on or across certain networks.
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -55,6 +57,8 @@ int main(void)
 # NOTES
 
 This option is only supported on Linux and macOS 10.11 or later.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

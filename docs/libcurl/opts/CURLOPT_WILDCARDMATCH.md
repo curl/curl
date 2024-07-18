@@ -77,6 +77,8 @@ Using the rules above, a filename pattern can be constructed:
 
     ftp://example.com/some/path/[a-z[:upper:]\\].jpg
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -100,6 +102,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

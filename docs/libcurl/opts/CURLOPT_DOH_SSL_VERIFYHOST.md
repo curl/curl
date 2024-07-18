@@ -60,6 +60,8 @@ of the DoH server certificate.
 
 2
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -79,6 +81,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

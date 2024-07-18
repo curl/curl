@@ -55,6 +55,8 @@ option.
 
 NULL, use whatever the TCP stack finds suitable
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -74,11 +76,13 @@ int main(void)
 }
 ~~~
 
-# NOTES
+# HISTORY
 
 The `if!` and `host!` syntax was added in 7.24.0.
 
 The `ifhost!` syntax was added in 8.9.0.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -57,6 +57,8 @@ callback is far better than relying on polling the timeout value.
 Usage of curl_multi_socket(3) is deprecated, whereas the function is
 equivalent to curl_multi_socket_action(3) with **ev_bitmask** set to 0.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -75,6 +77,8 @@ int main(void)
 # DEPRECATED
 
 curl_multi_socket(3) is deprecated, use curl_multi_socket_action(3) instead!
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

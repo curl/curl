@@ -59,6 +59,8 @@ CURLOPT_POSTFIELDS(3).
 While the **easy_handle** is added to a multi handle, it cannot be used by
 curl_easy_perform(3).
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -73,6 +75,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

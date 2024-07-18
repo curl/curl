@@ -36,6 +36,8 @@ callback's **clientp** argument.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -64,6 +66,8 @@ int main(void)
   curl_multi_setopt(multi, CURLMOPT_TIMERDATA, &mydata);
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

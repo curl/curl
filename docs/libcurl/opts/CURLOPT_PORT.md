@@ -43,8 +43,10 @@ and therefore using a port number lower than zero or over 65535 causes a
 
 # DEFAULT
 
-By default this is 0 which makes it not used. This also makes port number zero
-impossible to set with this API.
+0 which makes it not used. This also makes port number zero impossible to set
+with this API.
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -61,6 +63,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

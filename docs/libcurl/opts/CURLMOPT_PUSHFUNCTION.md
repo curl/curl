@@ -97,6 +97,8 @@ All other return codes are reserved for future use.
 
 NULL, no callback
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -137,6 +139,8 @@ int main(void)
   curl_multi_setopt(multi, CURLMOPT_PUSHDATA, &counter);
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

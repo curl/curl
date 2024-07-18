@@ -36,6 +36,8 @@ libcurl itself, only passed on to the callback function.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -76,6 +78,8 @@ int main(void)
   curl_multi_setopt(multi, CURLMOPT_PUSHDATA, &counter);
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

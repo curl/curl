@@ -98,6 +98,8 @@ This transfer is now closed.
 
 This as an incoming ping message, that expects a pong response.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -132,6 +134,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

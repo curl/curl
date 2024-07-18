@@ -34,6 +34,8 @@ Frees all the resources associated with the given *CURLU* handle!
 Passing in a NULL pointer in *handle* makes this function return
 immediately with no action.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -44,6 +46,8 @@ int main(void)
   curl_url_cleanup(url);
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

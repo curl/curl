@@ -104,6 +104,8 @@ CURLOPT_PRIVATE(3) on your handle.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -207,6 +209,8 @@ int main(void)
   return 0;
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

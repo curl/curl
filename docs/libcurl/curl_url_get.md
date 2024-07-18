@@ -216,6 +216,8 @@ A not-present fragment returns *part* set to NULL.
 
 A zero-length fragment returns *part* as NULL unless CURLU_GET_EMPTY is set.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -235,6 +237,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

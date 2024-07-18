@@ -84,7 +84,9 @@ The pointer you set with CURLOPT_PREREQDATA(3).
 
 # DEFAULT
 
-By default, this is NULL and unused.
+NULL
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -114,6 +116,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

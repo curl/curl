@@ -37,6 +37,8 @@ password with the CURLOPT_PROXYUSERPWD(3) option.
 
 CURLAUTH_BASIC|CURLAUTH_GSSAPI
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -57,6 +59,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

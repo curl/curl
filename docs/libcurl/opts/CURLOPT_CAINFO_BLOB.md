@@ -54,6 +54,8 @@ This option overrides CURLOPT_CAINFO(3).
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -77,11 +79,13 @@ int main(void)
 }
 ~~~
 
-# NOTES
+# HISTORY
 
 This option is supported by the BearSSL (since 7.79.0), mbedTLS (since
 7.81.0), rustls (since 7.82.0), wolfSSL (since 8.2.0), OpenSSL, Secure
 Transport and Schannel backends.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

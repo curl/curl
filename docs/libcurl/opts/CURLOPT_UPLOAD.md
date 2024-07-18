@@ -28,23 +28,25 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_UPLOAD, long upload);
 # DESCRIPTION
 
 The long parameter *upload* set to 1 tells the library to prepare for and
-perform an upload. The CURLOPT_READDATA(3) and
-CURLOPT_INFILESIZE(3) or CURLOPT_INFILESIZE_LARGE(3) options are
-also interesting for uploads. If the protocol is HTTP, uploading means using
-the PUT request unless you tell libcurl otherwise.
+perform an upload. The CURLOPT_READDATA(3) and CURLOPT_INFILESIZE(3) or
+CURLOPT_INFILESIZE_LARGE(3) options are also interesting for uploads. If the
+protocol is HTTP, uploading means using the PUT request unless you tell
+libcurl otherwise.
 
 Using PUT with HTTP 1.1 implies the use of a "Expect: 100-continue" header.
 You can disable this header with CURLOPT_HTTPHEADER(3) as usual.
 
 If you use PUT to an HTTP 1.1 server, you can upload data without knowing the
 size before starting the transfer. The library enables this by adding a header
-"Transfer-Encoding: chunked". With HTTP 1.0 or if you prefer not to use chunked
-transfer, you must specify the size of the data with
+"Transfer-Encoding: chunked". With HTTP 1.0 or if you prefer not to use
+chunked transfer, you must specify the size of the data with
 CURLOPT_INFILESIZE(3) or CURLOPT_INFILESIZE_LARGE(3).
 
 # DEFAULT
 
-0, default is download
+0
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -86,6 +88,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

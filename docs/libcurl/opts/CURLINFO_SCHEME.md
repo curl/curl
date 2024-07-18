@@ -40,6 +40,8 @@ CURL handle.
 The returned scheme might be upper or lowercase. Do comparisons case
 insensitively.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -60,6 +62,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -56,6 +56,8 @@ option.
 
 NULL (make a guess based on the host)
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -74,6 +76,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

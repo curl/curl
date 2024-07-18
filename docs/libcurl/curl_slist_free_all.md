@@ -31,6 +31,8 @@ linked list.
 Passing in a NULL pointer in *list* makes this function return immediately
 with no action.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -51,6 +53,8 @@ int main(void)
   curl_slist_free_all(slist); /* free the list again */
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

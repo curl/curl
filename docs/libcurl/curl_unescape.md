@@ -40,6 +40,8 @@ strlen() on **input** to find out the size.
 
 You must curl_free(3) the returned string when you are done with it.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -62,6 +64,8 @@ int main(void)
 
 Since 7.15.4, curl_easy_unescape(3) should be used. This function might
 be removed in a future release.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

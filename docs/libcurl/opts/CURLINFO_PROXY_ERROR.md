@@ -72,6 +72,8 @@ transfer returned a **CURLE_PROXY** error. That error code matches the
 
 The error code is zero (**CURLPX_OK**) if no response code was available.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -94,6 +96,8 @@ int main(void)
   }
 }
 ~~~
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

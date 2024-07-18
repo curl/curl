@@ -98,6 +98,8 @@ buffering 32 megabyte of data for a paused stream.
 When such a paused stream is unpaused again, any buffered data is delivered
 first.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -131,6 +133,8 @@ If the download is done with HTTP/2 or HTTP/3, there is up to a stream window
 size worth of data that curl cannot stop but instead needs to cache while the
 transfer is paused. This means that if a window size of 64 MB is used, libcurl
 might end up having to cache 64 MB of data.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 
