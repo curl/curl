@@ -102,7 +102,7 @@ static ssize_t gtls_push(void *s, const void *buf, size_t blen)
   CURLcode result;
 
   DEBUGASSERT(data);
-  nwritten = Curl_conn_cf_send(cf->next, data, buf, blen, &result);
+  nwritten = Curl_conn_cf_send(cf->next, data, buf, blen, FALSE, &result);
   CURL_TRC_CF(data, cf, "gtls_push(len=%zu) -> %zd, err=%d",
               blen, nwritten, result);
   backend->gtls.io_result = result;

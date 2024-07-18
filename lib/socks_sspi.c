@@ -207,7 +207,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
       us_length = htons((unsigned short)sspi_send_token.cbBuffer);
       memcpy(socksreq + 2, &us_length, sizeof(short));
 
-      written = Curl_conn_cf_send(cf->next, data, (char *)socksreq, 4, &code);
+      written = Curl_conn_cf_send(cf->next, data, (char *)socksreq, 4, FALSE,
+                                  &code);
       if(code || (4 != written)) {
         failf(data, "Failed to send SSPI authentication request.");
         free(service_name);
@@ -222,7 +223,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
 
       written = Curl_conn_cf_send(cf->next, data,
                                   (char *)sspi_send_token.pvBuffer,
-                                  sspi_send_token.cbBuffer, &code);
+                                  sspi_send_token.cbBuffer, FALSE, &code);
       if(code || (sspi_send_token.cbBuffer != (size_t)written)) {
         failf(data, "Failed to send SSPI authentication token.");
         free(service_name);
@@ -476,7 +477,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     memcpy(socksreq + 2, &us_length, sizeof(short));
   }
 
-  written = Curl_conn_cf_send(cf->next, data, (char *)socksreq, 4, &code);
+  written = Curl_conn_cf_send(cf->next, data, (char *)socksreq, 4, FALSE,
+                              &code);
   if(code || (4 != written)) {
     failf(data, "Failed to send SSPI encryption request.");
     if(sspi_send_token.pvBuffer)
@@ -487,7 +489,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
 
   if(data->set.socks5_gssapi_nec) {
     memcpy(socksreq, &gss_enc, 1);
-    written = Curl_conn_cf_send(cf->next, data, (char *)socksreq, 1, &code);
+    written = Curl_conn_cf_send(cf->next, data, (char *)socksreq, 1, FALSE,
+                                &code);
     if(code || (1 != written)) {
       failf(data, "Failed to send SSPI encryption type.");
       s_pSecFn->DeleteSecurityContext(&sspi_context);
@@ -497,7 +500,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   else {
     written = Curl_conn_cf_send(cf->next, data,
                                 (char *)sspi_send_token.pvBuffer,
-                                sspi_send_token.cbBuffer, &code);
+                                sspi_send_token.cbBuffer, FALSE, &code);
     if(code || (sspi_send_token.cbBuffer != (size_t)written)) {
       failf(data, "Failed to send SSPI encryption type.");
       if(sspi_send_token.pvBuffer)
