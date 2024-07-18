@@ -15,6 +15,7 @@ Protocol:
   - POP3
   - SMTP
   - LDAP
+Added-in: 7.43.0
 ---
 
 # NAME
@@ -57,11 +58,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.43.0 for HTTP, 7.49.0 for FTP, IMAP, POP3 and SMTP,
-7.82.0 for OpenLDAP.
 
 # RETURN VALUE
 

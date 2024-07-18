@@ -48,6 +48,7 @@ See-also:
   - libcurl-multi (3)
   - libcurl-security (3)
   - libcurl-thread (3)
+Added-in: n/a
 ---
 # libcurl symbols
 

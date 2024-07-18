@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_POST (3)
 Protocol:
   - HTTP
+Added-in: 7.36.0
 ---
 
 # NAME
@@ -52,10 +53,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.36.0
 
 # RETURN VALUE
 

@@ -12,6 +12,7 @@ See-also:
   - curl_version_info (3)
 Protocol:
   - All
+Added-in: 7.85.0
 ---
 
 # NAME
@@ -74,10 +75,6 @@ int main(int argc, char **argv)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.85.0
 
 # RETURN VALUE
 

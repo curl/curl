@@ -12,6 +12,7 @@ See-also:
   - CURLOPT_RESOLVE (3)
 Protocol:
   - All
+Added-in: 7.9.3
 ---
 
 # NAME
@@ -77,10 +78,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Always
 
 # RETURN VALUE
 

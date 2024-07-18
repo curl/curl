@@ -11,6 +11,7 @@ See-also:
   - curl_easy_setopt (3)
 Protocol:
   - All
+Added-in: 7.12.1
 ---
 
 # NAME
@@ -48,10 +49,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-This function was added in libcurl 7.12.1
 
 # RETURN VALUE
 

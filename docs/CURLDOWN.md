@@ -80,6 +80,7 @@ Each curldown starts with a header with meta-data:
       - CURLOPT_HTTPAUTH (3)
     TLS-backend:
       - [name]
+    Added-in: [version or "n/a"]
     ---
 
 All curldown files *must* have all the headers present and at least one

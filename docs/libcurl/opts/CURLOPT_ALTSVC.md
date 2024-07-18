@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_RESOLVE (3)
 Protocol:
   - HTTP
+Added-in: 7.64.1
 ---
 <!-- markdown-link-check-disable -->
 # NAME
@@ -99,10 +100,6 @@ Boolean (1 or 0) if "persist" was set for this entry
 ## 0
 
 Integer priority value (not currently used)
-
-# AVAILABILITY
-
-Added in 7.64.1
 
 # RETURN VALUE
 

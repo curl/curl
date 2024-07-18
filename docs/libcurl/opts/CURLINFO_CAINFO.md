@@ -12,6 +12,7 @@ Protocol:
   - TLS
 TLS-backend:
   - All
+Added-in: 7.84.0
 ---
 
 # NAME
@@ -56,10 +57,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.84.0
 
 # RETURN VALUE
 

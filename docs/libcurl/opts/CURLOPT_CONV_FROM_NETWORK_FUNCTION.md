@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_CONV_TO_NETWORK_FUNCTION (3)
 Protocol:
   - All
+Added-in: 7.15.4
 ---
 
 # NAME
@@ -100,7 +101,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# DEPRECATED
 
 Not available and deprecated since 7.82.0.
 

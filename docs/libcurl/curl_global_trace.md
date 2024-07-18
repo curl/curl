@@ -9,6 +9,7 @@ See-also:
   - libcurl (3)
 Protocol:
   - All
+Added-in: 8.3
 ---
 
 # NAME
@@ -130,10 +131,6 @@ of an enabled component appears at the beginning in brackets.
 * [HTTP/2] [h2sid=1] 249 header bytes
 ...
 ~~~
-
-# AVAILABILITY
-
-Added in 8.3
 
 # RETURN VALUE
 

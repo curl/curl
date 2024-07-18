@@ -13,6 +13,7 @@ Protocol:
   - FTP
   - SMTP
   - LDAP
+Added-in: 7.10.8
 ---
 
 # NAME
@@ -56,10 +57,10 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# NOTES
 
-Added in 7.10.8. CURLINFO_HTTP_CODE was added in 7.4.1.
-Support for SMTP responses added in 7.25.0, for OpenLDAP in 7.81.0.
+The former name, CURLINFO_HTTP_CODE, was added in 7.4.1. Support for SMTP
+responses added in 7.25.0, for OpenLDAP in 7.81.0.
 
 # RETURN VALUE
 

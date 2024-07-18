@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_UPLOAD (3)
 Protocol:
   - FTP
+Added-in: 7.17.0
 ---
 
 # NAME
@@ -50,7 +51,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# HISTORY
 
 This option was known as CURLOPT_FTPAPPEND up to 7.16.4
 

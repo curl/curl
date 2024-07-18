@@ -11,6 +11,7 @@ See-also:
   - curl_multi_socket (3)
 Protocol:
   - All
+Added-in: 7.15.4
 ---
 
 # NAME
@@ -116,10 +117,6 @@ int main(void)
   curl_multi_setopt(multi, CURLMOPT_MAXCONNECTS, (long)MAX_PARALLEL);
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.15.4
 
 # RETURN VALUE
 

@@ -9,6 +9,7 @@ Protocol:
 See-also:
   - CURLOPT_DIRLISTONLY (3)
   - CURLOPT_FTP_SKIP_PASV_IP (3)
+Added-in: 7.15.1
 ---
 
 # NAME
@@ -74,10 +75,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.15.1
 
 # RETURN VALUE
 

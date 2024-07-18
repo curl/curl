@@ -9,6 +9,7 @@ See-also:
   - curl_share_setopt (3)
 Protocol:
   - All
+Added-in: 7.10
 ---
 
 # NAME
@@ -43,10 +44,6 @@ int main(void)
   curl_share_cleanup(share);
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.10
 
 # RETURN VALUE
 

@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_UPLOAD (3)
 Protocol:
   - All
+Added-in: 7.11.0
 ---
 
 # NAME
@@ -70,7 +71,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# NOTES
 
 SMTP support added in 7.23.0
 

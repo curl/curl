@@ -25,7 +25,7 @@
 ###########################################################################
 #
 # Check that the deprecated statuses of functions and enum values in header
-# files, man pages and symbols-in-versions are in sync.
+# files, manpages and symbols-in-versions are in sync.
 
 use strict;
 use warnings;
@@ -45,8 +45,8 @@ my $errcode = 0;
 #     x.yy.z  Deprecated in version x.yy.z
 my %syminver;       # Symbols-in-versions deprecations.
 my %hdr;            # Public header files deprecations.
-my %funcman;        # Function man pages deprecations.
-my %optman;         # Option man pages deprecations.
+my %funcman;        # Function manpages deprecations.
+my %optman;         # Option manpages deprecations.
 
 
 # Scan header file for public function and enum values. Flag them with
@@ -141,7 +141,7 @@ sub scan_header {
     close $h;
 }
 
-# Scan function man page for options.
+# Scan function manpage for options.
 # Each option has to be declared as ".IP <option>" where <option> starts with
 # the prefix. Flag each option with its deprecation version, if some.
 sub scan_man_for_opts {
@@ -180,7 +180,7 @@ sub scan_man_for_opts {
     close $m;
 }
 
-# Scan man page for deprecation in DESCRIPTION and/or AVAILABILITY sections.
+# Scan manpage for deprecation in DESCRIPTION and/or AVAILABILITY sections.
 sub scan_man_page {
     my ($path, $sym, $table)=@_;
     my $version = "X";
@@ -191,7 +191,7 @@ sub scan_man_page {
 
       while(<$fh>) {
         if($_ =~ /\.so\s+man3\/(.*\.3\b)/) {
-          # Handle man page inclusion.
+          # Handle manpage inclusion.
           scan_man_page(dirname($path) . "/$1", $sym, $table);
           $version = exists($$table{$sym})? $$table{$sym}: $version;
         }
@@ -208,12 +208,12 @@ sub scan_man_page {
             s/\s+/ /g;
             s/\\f.//g;      # Remove font formatting.
             s/\s+/ /g;      # One line with single space only.
-            if($sh =~ /DESCRIPTION|AVAILABILITY/) {
+            if($sh =~ /DESCRIPTION|DEPRECATED/) {
               while($_ =~ /(?:deprecated|obsoleted?)\b\s*(?:in\b|since\b)?\s*(?:version\b|curl\b|libcurl\b)?\s*(\d[0-9.]*\d)?\b\s*(.*)$/i) {
                 # Flag deprecation status.
                 if($version ne "X" && $version ne "?") {
                   if($1 && $1 ne $version) {
-                    print "error: $sym man page lists unmatching deprecation versions $version and $1\n";
+                    print "error: $sym manpage lists unmatching deprecation versions $version and $1\n";
                     $errcode++;
                   }
                 }
@@ -261,18 +261,18 @@ for(@hfiles) {
   scan_header("$incdir/$_");
 }
 
-# Get function statuses from man pages.
+# Get function statuses from manpages.
 foreach my $sym (keys %hdr) {
   if($sym =~/^(?:curl|curlx)_\w/) {
     scan_man_page("$libdocdir/$sym.3", $sym, \%funcman);
   }
 }
 
-# Get options from function man pages.
+# Get options from function manpages.
 scan_man_for_opts("$libdocdir/curl_easy_setopt.3", "CURLOPT");
 scan_man_for_opts("$libdocdir/curl_easy_getinfo.3", "CURLINFO");
 
-# Get deprecation status from option man pages.
+# Get deprecation status from option manpages.
 foreach my $sym (keys %syminver) {
   if($sym =~ /^(?:CURLOPT|CURLINFO)_\w+$/) {
     scan_man_page("$libdocdir/opts/$sym.3", $sym, \%optman);

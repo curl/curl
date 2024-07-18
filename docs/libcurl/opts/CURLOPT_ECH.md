@@ -11,6 +11,7 @@ Protocol:
 TLS-backend:
   - OpenSSL
   - wolfSSL
+Added-in: 8.8.0
 ---
 
 # NAME
@@ -84,10 +85,6 @@ if(curl) {
   curl_easy_perform(curl);
 }
 ~~~
-# AVAILABILITY
-
-Added in 8.8.0
-
 # RETURN VALUE
 
 Returns CURLE_OK on success or CURLE_OUT_OF_MEMORY if there was insufficient

@@ -11,6 +11,7 @@ Protocol:
   - SFTP
   - SCP
   - FILE
+Added-in: 7.16.4
 ---
 
 # NAME
@@ -50,10 +51,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.16.4
 
 # RETURN VALUE
 

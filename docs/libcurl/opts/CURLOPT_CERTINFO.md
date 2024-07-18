@@ -17,6 +17,7 @@ TLS-backend:
   - GnuTLS
   - Schannel
   - Secure Transport
+Added-in: 7.19.1
 ---
 
 # NAME
@@ -82,7 +83,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# NOTES
 
 Schannel support added in 7.50.0. Secure Transport support added in 7.79.0.
 mbedTLS support added in 8.9.0.

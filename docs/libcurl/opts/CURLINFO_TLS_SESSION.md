@@ -13,6 +13,7 @@ Protocol:
 TLS-backend:
   - OpenSSL
   - GnuTLS
+Added-in: 7.34.0
 ---
 
 # NAME
@@ -66,10 +67,9 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# DEPRECATED
 
-Added in 7.34.0. Deprecated since 7.48.0 and supported by OpenSSL and GnuTLS
-only up until this version was released.
+Deprecated since 7.48.0
 
 # RETURN VALUE
 

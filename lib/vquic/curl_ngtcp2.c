@@ -162,7 +162,6 @@ struct h3_stream_ctx {
   struct bufq sendbuf;   /* h3 request body */
   struct h1_req_parser h1; /* h1 request parsing */
   size_t sendbuf_len_in_flight; /* sendbuf amount "in flight" */
-  size_t upload_blocked_len; /* the amount written last and EGAINed */
   curl_uint64_t error3; /* HTTP/3 stream error code */
   curl_off_t upload_left; /* number of request bytes left to upload */
   int status_code; /* HTTP status code */
@@ -1272,8 +1271,8 @@ static int cb_h3_acked_req_body(nghttp3_conn *conn, int64_t stream_id,
   Curl_bufq_skip(&stream->sendbuf, skiplen);
   stream->sendbuf_len_in_flight -= skiplen;
 
-  /* Everything ACKed, we resume upload processing */
-  if(!stream->sendbuf_len_in_flight) {
+  /* Resume upload processing if we have more data to send */
+  if(stream->sendbuf_len_in_flight < Curl_bufq_len(&stream->sendbuf)) {
     int rv = nghttp3_conn_resume_stream(conn, stream_id);
     if(rv && rv != NGHTTP3_ERR_STREAM_NOT_FOUND) {
       return NGTCP2_ERR_CALLBACK_FAILURE;
@@ -1528,21 +1527,6 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     sent = -1;
     goto out;
   }
-  else if(stream->upload_blocked_len) {
-    /* the data in `buf` has already been submitted or added to the
-     * buffers, but have been EAGAINed on the last invocation. */
-    DEBUGASSERT(len >= stream->upload_blocked_len);
-    if(len < stream->upload_blocked_len) {
-      /* Did we get called again with a smaller `len`? This should not
-       * happen. We are not prepared to handle that. */
-      failf(data, "HTTP/3 send again with decreased length");
-      *err = CURLE_HTTP3;
-      sent = -1;
-      goto out;
-    }
-    sent = (ssize_t)stream->upload_blocked_len;
-    stream->upload_blocked_len = 0;
-  }
   else if(stream->closed) {
     if(stream->resp_hds_complete) {
       /* Server decided to close the stream after having sent us a final
@@ -1583,18 +1567,6 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   result = cf_progress_egress(cf, data, &pktx);
   if(result) {
     *err = result;
-    sent = -1;
-  }
-
-  if(stream && sent > 0 && stream->sendbuf_len_in_flight) {
-    /* We have unacknowledged DATA and cannot report success to our
-     * caller. Instead we EAGAIN and remember how much we have already
-     * "written" into our various internal connection buffers. */
-    stream->upload_blocked_len = sent;
-    CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] cf_send(len=%zu), "
-                "%zu bytes in flight -> EGAIN", stream->id, len,
-                stream->sendbuf_len_in_flight);
-    *err = CURLE_AGAIN;
     sent = -1;
   }
 
@@ -1965,7 +1937,8 @@ static CURLcode cf_ngtcp2_data_event(struct Curl_cfilter *cf,
     struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
     if(stream && !stream->send_closed) {
       stream->send_closed = TRUE;
-      stream->upload_left = Curl_bufq_len(&stream->sendbuf);
+      stream->upload_left = Curl_bufq_len(&stream->sendbuf) -
+        stream->sendbuf_len_in_flight;
       (void)nghttp3_conn_resume_stream(ctx->h3conn, stream->id);
     }
     break;

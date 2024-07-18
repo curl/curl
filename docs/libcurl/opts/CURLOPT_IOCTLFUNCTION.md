@@ -9,6 +9,7 @@ Protocol:
 See-also:
   - CURLOPT_IOCTLDATA (3)
   - CURLOPT_SEEKFUNCTION (3)
+Added-in: 7.12.3
 ---
 
 # NAME
@@ -92,9 +93,9 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# DEPRECATED
 
-Added in 7.12.3. Deprecated since 7.18.0.
+Deprecated since 7.18.0.
 
 # RETURN VALUE
 

@@ -400,7 +400,6 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
                                int *waitp)
 {
   CURLcode result = CURLE_OK;
-  int slot;
   struct dohdata *dohp;
   struct connectdata *conn = data->conn;
 #ifdef USE_HTTPSRR
@@ -484,13 +483,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
   return NULL;
 
 error:
-  curl_slist_free_all(dohp->headers);
-  data->req.doh->headers = NULL;
-  for(slot = 0; slot < DOH_PROBE_SLOTS; slot++) {
-    (void)curl_multi_remove_handle(data->multi, dohp->probe[slot].easy);
-    Curl_close(&dohp->probe[slot].easy);
-  }
-  Curl_safefree(data->req.doh);
+  Curl_doh_cleanup(data);
   return NULL;
 }
 
@@ -1325,10 +1318,7 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
     struct dohentry de;
     int slot;
     /* remove DoH handles from multi handle and close them */
-    for(slot = 0; slot < DOH_PROBE_SLOTS; slot++) {
-      curl_multi_remove_handle(data->multi, dohp->probe[slot].easy);
-      Curl_close(&dohp->probe[slot].easy);
-    }
+    Curl_doh_close(data);
     /* parse the responses, create the struct and return it! */
     de_init(&de);
     for(slot = 0; slot < DOH_PROBE_SLOTS; slot++) {
@@ -1413,6 +1403,34 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
 
   /* else wait for pending DoH transactions to complete */
   return CURLE_OK;
+}
+
+void Curl_doh_close(struct Curl_easy *data)
+{
+  struct dohdata *doh = data->req.doh;
+  if(doh) {
+    size_t slot;
+    for(slot = 0; slot < DOH_PROBE_SLOTS; slot++) {
+      if(!doh->probe[slot].easy)
+        continue;
+      /* data->multi might already be reset at this time */
+      if(doh->probe[slot].easy->multi)
+        curl_multi_remove_handle(doh->probe[slot].easy->multi,
+                                 doh->probe[slot].easy);
+      Curl_close(&doh->probe[slot].easy);
+    }
+  }
+}
+
+void Curl_doh_cleanup(struct Curl_easy *data)
+{
+  struct dohdata *doh = data->req.doh;
+  if(doh) {
+    Curl_doh_close(data);
+    curl_slist_free_all(doh->headers);
+    data->req.doh->headers = NULL;
+    Curl_safefree(data->req.doh);
+  }
 }
 
 #endif /* CURL_DISABLE_DOH */

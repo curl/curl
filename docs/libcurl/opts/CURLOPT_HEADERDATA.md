@@ -10,6 +10,7 @@ See-also:
   - curl_easy_header (3)
 Protocol:
   - All
+Added-in: 7.10
 ---
 
 # NAME
@@ -77,10 +78,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Always
 
 # RETURN VALUE
 

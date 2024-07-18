@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_IPRESOLVE (3)
 Protocol:
   - All
+Added-in: 7.21.3
 ---
 
 # NAME
@@ -101,7 +102,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# NOTES
 
 Added in 7.21.3. Removal support added in 7.42.0.
 

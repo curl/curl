@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_MAXCONNECTS (3)
 Protocol:
   - All
+Added-in: 7.16.3
 ---
 
 # NAME
@@ -62,10 +63,6 @@ int main(void)
   curl_multi_setopt(m, CURLMOPT_MAXCONNECTS, 10L);
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.16.3
 
 # RETURN VALUE
 

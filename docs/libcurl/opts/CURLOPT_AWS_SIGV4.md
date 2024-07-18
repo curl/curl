@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_PROXYAUTH (3)
 Protocol:
   - HTTP
+Added-in: 7.75.0
 ---
 
 # NAME
@@ -93,19 +94,11 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.75.0
-
-# RETURN VALUE
-
-Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
-
 # NOTES
 
 This option overrides the other auth types you might have set in
-CURLOPT_HTTPAUTH(3) which should be highlighted as this makes this auth
-method special. This method cannot be combined with other auth types.
+CURLOPT_HTTPAUTH(3) which should be highlighted as this makes this auth method
+special. This method cannot be combined with other auth types.
 
 A sha256 checksum of the request payload is used as input to the signature
 calculation. For POST requests, this is a checksum of the provided
@@ -113,6 +106,10 @@ CURLOPT_POSTFIELDS(3). Otherwise, it is the checksum of an empty buffer. For
 requests like PUT, you can provide your own checksum in an HTTP header named
 **x-provider2-content-sha256**.
 
-For **aws:s3**, a **x-amz-content-sha256** header is added to every request
-if not already present. For s3 requests with unknown payload, this header takes
+For **aws:s3**, a **x-amz-content-sha256** header is added to every request if
+not already present. For s3 requests with unknown payload, this header takes
 the special value "UNSIGNED-PAYLOAD".
+
+# RETURN VALUE
+
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.

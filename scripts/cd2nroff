@@ -25,7 +25,7 @@
 
 =begin comment
 
-Converts a curldown file to nroff (man page).
+Converts a curldown file to nroff (manpage).
 
 =end comment
 =cut
@@ -197,6 +197,7 @@ sub single {
     my $tlslist;
     my $section;
     my $source;
+    my $addedin;
     my $spdx;
     my $start = 0;
     my $title;
@@ -247,6 +248,14 @@ sub single {
         elsif(/^TLS-backend:/i) {
             $list = 3; # 3 for TLS backend
         }
+        elsif(/^Added-in: *(.*)/i) {
+            $addedin=$1;
+            if(($addedin !~ /^[0-9.]+[0-9]\z/) &&
+               ($addedin ne "n/a")) {
+                print STDERR "$f:$line:1:ERROR: invalid version number in Added-in line: $addedin\n";
+                return 2;
+            }
+        }
         elsif(/^ +- (.*)/i) {
             # the only lists we support are see-also and protocol
             if($list == 1) {
@@ -274,11 +283,19 @@ sub single {
         elsif(/^---/) {
             # end of the header section
             if(!$title) {
-                print STDERR "ERROR: no 'Title:' in $f\n";
+                print STDERR "$f:$line:1:ERROR: no 'Title:' in $f\n";
                 return 1;
             }
             if(!$section) {
-                print STDERR "ERROR: no 'Section:' in $f\n";
+                print STDERR "$f:$line:1:ERROR: no 'Section:' in $f\n";
+                return 2;
+            }
+            if(!$source) {
+                print STDERR "$f:$line:1:ERROR: no 'Source:' in $f\n";
+                return 2;
+            }
+            if(!$addedin) {
+                print STDERR "$f:$line:1:ERROR: no 'Added-in:' in $f\n";
                 return 2;
             }
             if(!$seealso[0]) {
@@ -394,7 +411,7 @@ sub single {
         # convert backslash-'<' or '> to just the second character
         $d =~ s/\\([<>])/$1/g;
 
-        # mentions of curl symbols with man pages use italics by default
+        # mentions of curl symbols with manpages use italics by default
         $d =~ s/((lib|)curl([^ ]*\(3\)))/\\fI$1\\fP/gi;
 
         # backticked becomes italics
@@ -427,12 +444,22 @@ sub single {
             if($word eq "PROTOCOLS") {
                 print STDERR "$f:$line:1:WARN: PROTOCOLS section in source file\n";
             }
+            elsif($word eq "AVAILABILITY") {
+                print STDERR "$f:$line:1:WARN: AVAILABILITY section in source file\n";
+            }
             elsif($word eq "EXAMPLE") {
                 # insert the generated PROTOCOLS section before EXAMPLE
                 push @desc, outprotocols(@proto);
 
                 if($proto[0] eq "TLS") {
                     push @desc, outtls(@tls);
+                }
+            }
+            elsif($word eq "RETURN VALUE") {
+                if($addedin ne "n/a") {
+                    # insert the generated AVAILABILITY section before RETURN VALUE
+                    push @desc, ".SH AVAILABILITY\n";
+                    push @desc, "Added in curl $addedin\n";
                 }
             }
             push @desc, ".SH $word\n";

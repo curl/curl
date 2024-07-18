@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_XFERINFOFUNCTION (3)
 Protocol:
   - All
+Added-in: 7.1
 ---
 
 # NAME
@@ -114,7 +115,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# DEPRECATED
 
 Deprecated since 7.32.0.
 

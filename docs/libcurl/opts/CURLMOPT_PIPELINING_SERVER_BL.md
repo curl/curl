@@ -9,6 +9,7 @@ See-also:
   - CURLMOPT_PIPELINING_SITE_BL (3)
 Protocol:
   - HTTP
+Added-in: 7.30.0
 ---
 
 # NAME
@@ -58,10 +59,6 @@ int main(void)
   curl_multi_setopt(m, CURLMOPT_PIPELINING_SERVER_BL, server_block_list);
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.30.0
 
 # RETURN VALUE
 

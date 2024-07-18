@@ -18,6 +18,7 @@ Protocol:
   - TLS
 TLS-backend:
   - All
+Added-in: 7.52.0
 ---
 
 # NAME
@@ -79,9 +80,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.52.0
+# NOTES
 
 For TLS backends that do not support certificate files, the
 CURLOPT_PROXY_CAINFO(3) option is ignored. Refer to

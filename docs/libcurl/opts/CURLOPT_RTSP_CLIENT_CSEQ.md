@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_RTSP_SERVER_CSEQ (3)
 Protocol:
   - RTSP
+Added-in: 7.20.0
 ---
 
 # NAME
@@ -50,10 +51,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.20.0
 
 # RETURN VALUE
 

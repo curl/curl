@@ -11,6 +11,7 @@ See-also:
   - curl_multi_socket (3)
 Protocol:
   - All
+Added-in: 7.15.4
 ---
 
 # NAME
@@ -81,10 +82,6 @@ out which sockets to wait for by calling curl_multi_fdset(3).
 
 When there is activity or timeout, call curl_multi_perform(3) and then
 loop - until all transfers are complete.
-
-# AVAILABILITY
-
-This function was added in libcurl 7.15.4.
 
 # RETURN VALUE
 

@@ -15,6 +15,7 @@ TLS-backend:
   - OpenSSL
   - Schannel
   - Secure Transport
+Added-in: 7.71.0
 ---
 
 # NAME
@@ -75,10 +76,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.71.0.
 
 # RETURN VALUE
 

@@ -11,6 +11,7 @@ Protocol:
   - HTTP
   - IMAP
   - SMTP
+Added-in: 7.81.0
 ---
 
 # NAME
@@ -87,10 +88,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Option added in 7.81.0.
 
 # RETURN VALUE
 

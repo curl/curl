@@ -11,6 +11,7 @@ Protocol:
   - TLS
 TLS-backend:
   - OpenSSL
+Added-in: 7.9.3
 ---
 
 # NAME
@@ -52,10 +53,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Only if the SSL backend is OpenSSL built with engine support.
 
 # RETURN VALUE
 

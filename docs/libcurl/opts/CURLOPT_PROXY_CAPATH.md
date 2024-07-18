@@ -16,6 +16,7 @@ TLS-backend:
   - OpenSSL
   - GnuTLS
   - mbedTLS
+Added-in: 7.52.0
 ---
 
 # NAME
@@ -64,12 +65,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.52.0
-
-mbedTLS support added in 7.56.0.
 
 # RETURN VALUE
 

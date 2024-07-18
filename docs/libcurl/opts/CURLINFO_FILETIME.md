@@ -12,6 +12,7 @@ Protocol:
   - HTTP
   - FTP
   - SFTP
+Added-in: 7.5
 ---
 
 # NAME
@@ -65,10 +66,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.5
 
 # RETURN VALUE
 

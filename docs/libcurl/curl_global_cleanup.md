@@ -10,6 +10,7 @@ See-also:
   - libcurl-thread (3)
 Protocol:
   - All
+Added-in: 7.8
 ---
 
 # NAME
@@ -71,10 +72,6 @@ int main(void)
   curl_global_cleanup();
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.8
 
 # RETURN VALUE
 

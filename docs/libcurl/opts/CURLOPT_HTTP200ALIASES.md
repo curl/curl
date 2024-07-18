@@ -9,6 +9,7 @@ Protocol:
 See-also:
   - CURLOPT_HTTP09_ALLOWED (3)
   - CURLOPT_HTTP_VERSION (3)
+Added-in: 7.10.3
 ---
 
 # NAME
@@ -63,10 +64,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.10.3
 
 # RETURN VALUE
 

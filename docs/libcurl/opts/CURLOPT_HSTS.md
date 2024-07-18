@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_ALTSVC (3)
   - CURLOPT_HSTS_CTRL (3)
   - CURLOPT_RESOLVE (3)
+Added-in: 7.74.0
 ---
 
 # NAME
@@ -71,10 +72,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.74.0
 
 # RETURN VALUE
 

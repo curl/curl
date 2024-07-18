@@ -10,6 +10,7 @@ See-also:
   - curl_ws_send (3)
 Protocol:
   - WS
+Added-in: 7.86.0
 ---
 
 # NAME
@@ -63,10 +64,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.86.0
 
 # RETURN VALUE
 

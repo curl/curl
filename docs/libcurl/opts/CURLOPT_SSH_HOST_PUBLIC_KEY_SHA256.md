@@ -11,6 +11,7 @@ See-also:
 Protocol:
   - SFTP
   - SCP
+Added-in: 7.80.0
 ---
 
 # NAME
@@ -53,9 +54,8 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# NOTES
 
-Added in 7.80.0
 Requires the libssh2 backend.
 
 # RETURN VALUE

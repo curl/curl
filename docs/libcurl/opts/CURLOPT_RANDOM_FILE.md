@@ -10,6 +10,7 @@ Protocol:
   - TLS
 TLS-backend:
   - OpenSSL
+Added-in: 7.7
 ---
 
 # NAME
@@ -32,9 +33,9 @@ Deprecated option. It serves no purpose anymore.
 
 NULL, not used
 
-# AVAILABILITY
+# DEPRECATED
 
-This option was deprecated in 7.84.0.
+Deprecated since 7.84.0.
 
 # RETURN VALUE
 

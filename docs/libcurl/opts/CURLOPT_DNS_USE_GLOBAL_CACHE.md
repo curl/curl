@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_SHARE (3)
 Protocol:
   - All
+Added-in: 7.9.3
 ---
 
 # NAME
@@ -57,9 +58,9 @@ int main(void)
 
 ~~~
 
-# AVAILABILITY
+# DEPRECATED
 
-Deprecated since 7.11.1. Function removed in 7.62.0.
+Deprecated since 7.11.1. Functionality removed in 7.62.0.
 
 # RETURN VALUE
 

@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_HTTPHEADER (3)
 Protocol:
   - All
+Added-in: 7.37.0
 ---
 
 # NAME
@@ -68,10 +69,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.37.0
 
 # RETURN VALUE
 

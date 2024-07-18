@@ -11,6 +11,7 @@ Protocol:
   - FTP
   - SFTP
   - POP3
+Added-in: 7.17.0
 ---
 
 # NAME
@@ -73,7 +74,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# HISTORY
 
 This option was known as CURLOPT_FTPLISTONLY up to 7.16.4. POP3 is supported
 since 7.21.5.

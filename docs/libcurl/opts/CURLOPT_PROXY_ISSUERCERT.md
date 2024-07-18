@@ -15,6 +15,7 @@ Protocol:
 TLS-backend:
   - OpenSSL
   - GnuTLS
+Added-in: 7.71.0
 ---
 
 # NAME
@@ -72,10 +73,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.71.0. This option is supported by the OpenSSL and GnuTLS backends.
 
 # RETURN VALUE
 

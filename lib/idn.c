@@ -54,58 +54,56 @@
 #if defined(USE_APPLE_IDN)
 #include <unicode/uidna.h>
 
+#define MAX_HOST_LENGTH 512
+
 static CURLcode mac_idn_to_ascii(const char *in, char **out)
 {
-  UErrorCode err = U_ZERO_ERROR;
-  UIDNA* idna = uidna_openUTS46(
-    UIDNA_CHECK_BIDI|UIDNA_NONTRANSITIONAL_TO_ASCII, &err);
-  if(U_FAILURE(err)) {
-    return CURLE_OUT_OF_MEMORY;
-  }
-  else {
-    UIDNAInfo info = UIDNA_INFO_INITIALIZER;
-    char buffer[256] = {0};
-    (void)uidna_nameToASCII_UTF8(idna, in, -1, buffer,
-      sizeof(buffer), &info, &err);
-    uidna_close(idna);
-    if(U_FAILURE(err)) {
-      return CURLE_URL_MALFORMAT;
-    }
-    else {
-      *out = strdup(buffer);
-      if(*out)
-        return CURLE_OK;
-      else
-        return CURLE_OUT_OF_MEMORY;
+  size_t inlen = strlen(in);
+  if(inlen < MAX_HOST_LENGTH) {
+    UErrorCode err = U_ZERO_ERROR;
+    UIDNA* idna = uidna_openUTS46(
+      UIDNA_CHECK_BIDI|UIDNA_NONTRANSITIONAL_TO_ASCII, &err);
+    if(!U_FAILURE(err)) {
+      UIDNAInfo info = UIDNA_INFO_INITIALIZER;
+      char buffer[MAX_HOST_LENGTH] = {0};
+      (void)uidna_nameToASCII_UTF8(idna, in, -1, buffer,
+                                   sizeof(buffer) - 1, &info, &err);
+      uidna_close(idna);
+      if(!U_FAILURE(err)) {
+        *out = strdup(buffer);
+        if(*out)
+          return CURLE_OK;
+        else
+          return CURLE_OUT_OF_MEMORY;
+      }
     }
   }
+  return CURLE_URL_MALFORMAT;
 }
 
 static CURLcode mac_ascii_to_idn(const char *in, char **out)
 {
-  UErrorCode err = U_ZERO_ERROR;
-  UIDNA* idna = uidna_openUTS46(
-    UIDNA_CHECK_BIDI|UIDNA_NONTRANSITIONAL_TO_UNICODE, &err);
-  if(U_FAILURE(err)) {
-    return CURLE_OUT_OF_MEMORY;
-  }
-  else {
-    UIDNAInfo info = UIDNA_INFO_INITIALIZER;
-    char buffer[256] = {0};
-    (void)uidna_nameToUnicodeUTF8(idna, in, -1, buffer,
-      sizeof(buffer), &info, &err);
-    uidna_close(idna);
-    if(U_FAILURE(err)) {
-      return CURLE_URL_MALFORMAT;
-    }
-    else {
-      *out = strdup(buffer);
-      if(*out)
-        return CURLE_OK;
-      else
-        return CURLE_OUT_OF_MEMORY;
+  size_t inlen = strlen(in);
+  if(inlen < MAX_HOST_LENGTH) {
+    UErrorCode err = U_ZERO_ERROR;
+    UIDNA* idna = uidna_openUTS46(
+      UIDNA_CHECK_BIDI|UIDNA_NONTRANSITIONAL_TO_UNICODE, &err);
+    if(!U_FAILURE(err)) {
+      UIDNAInfo info = UIDNA_INFO_INITIALIZER;
+      char buffer[MAX_HOST_LENGTH] = {0};
+      (void)uidna_nameToUnicodeUTF8(idna, in, -1, buffer,
+                                    sizeof(buffer) - 1, &info, &err);
+      uidna_close(idna);
+      if(!U_FAILURE(err)) {
+        *out = strdup(buffer);
+        if(*out)
+          return CURLE_OK;
+        else
+          return CURLE_OUT_OF_MEMORY;
+      }
     }
   }
+  return CURLE_URL_MALFORMAT;
 }
 #endif
 

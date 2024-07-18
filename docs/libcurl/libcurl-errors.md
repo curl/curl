@@ -14,6 +14,7 @@ See-also:
   - curl_url_strerror (3)
 Protocol:
   - All
+Added-in: n/a
 ---
 
 # NAME

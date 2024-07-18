@@ -13,6 +13,7 @@ See-also:
   - curl_url_strerror (3)
 Protocol:
   - All
+Added-in: 7.78.0
 ---
 
 # NAME
@@ -254,10 +255,6 @@ int main(void)
   curl_url_cleanup(url);
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.62.0. CURLUPART_ZONEID was added in 7.65.0.
 
 # RETURN VALUE
 

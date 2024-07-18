@@ -13,6 +13,7 @@ See-also:
 Protocol:
   - HTTP
   - MQTT
+Added-in: 7.1
 ---
 
 # NAME
@@ -114,10 +115,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Always
 
 # RETURN VALUE
 

@@ -8,6 +8,7 @@ See-also:
   - libcurl-env-dbg (3)
 Protocol:
   - All
+Added-in: n/a
 ---
 
 # NAME

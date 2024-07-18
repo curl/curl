@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_PROXYTYPE (3)
 Protocol:
   - All
+Added-in: 7.1
 ---
 
 # NAME
@@ -126,7 +127,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# NOTES
 
 Since 7.14.1 the proxy environment variable names can include the protocol
 scheme.

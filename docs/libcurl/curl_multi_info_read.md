@@ -10,6 +10,7 @@ See-also:
   - curl_multi_perform (3)
 Protocol:
   - All
+Added-in: 7.9.6
 ---
 
 # NAME
@@ -92,10 +93,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.9.6
 
 # RETURN VALUE
 

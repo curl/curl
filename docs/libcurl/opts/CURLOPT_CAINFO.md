@@ -15,6 +15,7 @@ Protocol:
   - TLS
 TLS-backend:
   - All
+Added-in: 7.4.2
 ---
 
 # NAME
@@ -75,7 +76,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# NOTES
 
 Schannel support added in libcurl 7.60.
 

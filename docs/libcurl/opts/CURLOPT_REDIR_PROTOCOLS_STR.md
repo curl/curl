@@ -12,6 +12,7 @@ See-also:
   - CURLOPT_REDIR_PROTOCOLS (3)
 Protocol:
   - HTTP
+Added-in: 7.85.0
 ---
 
 # NAME
@@ -80,10 +81,6 @@ int main(int argc, char **argv)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.85.0.
 
 # RETURN VALUE
 

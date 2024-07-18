@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_CONNECTTIMEOUT_MS (3)
   - CURLOPT_LOW_SPEED_LIMIT (3)
   - CURLOPT_TIMEOUT (3)
+Added-in: 7.59.0
 ---
 
 # NAME
@@ -59,10 +60,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.59.0
 
 # RETURN VALUE
 

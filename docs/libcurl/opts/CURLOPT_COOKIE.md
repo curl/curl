@@ -12,6 +12,7 @@ See-also:
   - CURLOPT_HTTPHEADER (3)
 Protocol:
   - HTTP
+Added-in: 7.1
 ---
 
 # NAME
@@ -84,10 +85,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-If HTTP is enabled
 
 # RETURN VALUE
 

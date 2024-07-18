@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_WILDCARDMATCH (3)
 Protocol:
   - FTP
+Added-in: 7.21.0
 ---
 
 # NAME
@@ -90,10 +91,6 @@ int main()
   curl_easy_setopt(curl, CURLOPT_CHUNK_DATA, &callback_info);
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.21.0
 
 # RETURN VALUE
 

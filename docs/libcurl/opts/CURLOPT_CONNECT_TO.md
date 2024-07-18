@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_URL (3)
 Protocol:
   - All
+Added-in: 7.49.0
 ---
 
 # NAME
@@ -102,10 +103,6 @@ int main(void)
   curl_slist_free_all(connect_to);
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.49.0
 
 # RETURN VALUE
 

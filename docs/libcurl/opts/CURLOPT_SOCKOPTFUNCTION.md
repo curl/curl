@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_SOCKOPTDATA (3)
 Protocol:
   - All
+Added-in: 7.16.0
 ---
 
 # NAME
@@ -119,11 +120,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Added in 7.16.0. The *CURL_SOCKOPT_ALREADY_CONNECTED* return code was
-added in 7.21.5.
 
 # RETURN VALUE
 

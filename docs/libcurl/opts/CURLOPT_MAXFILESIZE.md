@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_MAX_RECV_SPEED_LARGE (3)
 Protocol:
   - All
+Added-in: 7.10.8
 ---
 
 # NAME
@@ -59,10 +60,6 @@ int main(void)
   }
 }
 ~~~
-
-# AVAILABILITY
-
-Always
 
 # RETURN VALUE
 

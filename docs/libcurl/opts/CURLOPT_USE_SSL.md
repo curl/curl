@@ -13,6 +13,7 @@ Protocol:
   - SMTP
   - POP3
   - IMAP
+Added-in: 7.17.0
 ---
 
 # NAME
@@ -76,11 +77,11 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# HISTORY
 
-Added in 7.11.0. This option was known as CURLOPT_FTP_SSL up to 7.16.4, and
-the constants were known as CURLFTPSSL_*
-Handled by LDAP since 7.81.0. Fully supported by the OpenLDAP backend only.
+This option was known as CURLOPT_FTP_SSL up to 7.16.4, and the constants were
+known as CURLFTPSSL_* Handled by LDAP since 7.81.0. Fully supported by the
+OpenLDAP backend only.
 
 # RETURN VALUE
 
