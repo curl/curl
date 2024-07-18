@@ -148,7 +148,6 @@ struct stream_ctx {
   struct bufq recvbuf; /* h3 response */
   struct h1_req_parser h1; /* h1 request parsing */
   curl_uint64_t error3; /* HTTP/3 stream error code */
-  curl_off_t upload_left; /* number of request bytes left to upload */
   BIT(opened); /* TRUE after stream has been opened */
   BIT(closed); /* TRUE on stream close */
   BIT(reset);  /* TRUE on stream reset */
@@ -255,7 +254,7 @@ static void drain_stream(struct Curl_cfilter *cf,
 
   (void)cf;
   bits = CURL_CSELECT_IN;
-  if(stream && !stream->send_closed && stream->upload_left)
+  if(stream && !stream->send_closed)
     bits |= CURL_CSELECT_OUT;
   if(data->state.select_bits != bits) {
     data->state.select_bits = bits;
@@ -890,13 +889,64 @@ out:
   return nread;
 }
 
+static ssize_t cf_quiche_send_body(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   struct stream_ctx *stream,
+                                   const void *buf, size_t len, bool eos,
+                                   CURLcode *err)
+{
+  struct cf_quiche_ctx *ctx = cf->ctx;
+  ssize_t nwritten;
+
+  nwritten = quiche_h3_send_body(ctx->h3c, ctx->qconn, stream->id,
+                                 (uint8_t *)buf, len, eos);
+  if(nwritten == QUICHE_H3_ERR_DONE || (nwritten == 0 && len > 0)) {
+    /* TODO: we seem to be blocked on flow control and should HOLD
+     * sending. But when do we open again? */
+    if(!quiche_conn_stream_writable(ctx->qconn, stream->id, len)) {
+      CURL_TRC_CF(data, cf, "[%" CURL_PRIu64 "] send_body(len=%zu) "
+                  "-> window exhausted", stream->id, len);
+      stream->quic_flow_blocked = TRUE;
+    }
+    *err = CURLE_AGAIN;
+    return -1;
+  }
+  else if(nwritten == QUICHE_H3_TRANSPORT_ERR_INVALID_STREAM_STATE) {
+    CURL_TRC_CF(data, cf, "[%" CURL_PRIu64 "] send_body(len=%zu) "
+                "-> invalid stream state", stream->id, len);
+    *err = CURLE_HTTP3;
+    return -1;
+  }
+  else if(nwritten == QUICHE_H3_TRANSPORT_ERR_FINAL_SIZE) {
+    CURL_TRC_CF(data, cf, "[%" CURL_PRIu64 "] send_body(len=%zu) "
+                "-> exceeds size", stream->id, len);
+    *err = CURLE_SEND_ERROR;
+    return -1;
+  }
+  else if(nwritten < 0) {
+    CURL_TRC_CF(data, cf, "[%" CURL_PRIu64 "] send_body(len=%zu) "
+                "-> quiche err %zd", stream->id, len, nwritten);
+    *err = CURLE_SEND_ERROR;
+    return -1;
+  }
+  else {
+    if(eos && (len == (size_t)nwritten))
+      stream->send_closed = TRUE;
+    CURL_TRC_CF(data, cf, "[%" CURL_PRIu64 "] send body(len=%zu, "
+                "eos=%d) -> %zd",
+                stream->id, len, stream->send_closed, nwritten);
+    *err = CURLE_OK;
+    return nwritten;
+  }
+}
+
 /* Index where :authority header field will appear in request header
    field list. */
 #define AUTHORITY_DST_IDX 3
 
 static ssize_t h3_open_stream(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
-                              const void *buf, size_t len,
+                              const char *buf, size_t len, bool eos,
                               CURLcode *err)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
@@ -952,23 +1002,7 @@ static ssize_t h3_open_stream(struct Curl_cfilter *cf,
     nva[i].value_len = e->valuelen;
   }
 
-  switch(data->state.httpreq) {
-  case HTTPREQ_POST:
-  case HTTPREQ_POST_FORM:
-  case HTTPREQ_POST_MIME:
-  case HTTPREQ_PUT:
-    if(data->state.infilesize != -1)
-      stream->upload_left = data->state.infilesize;
-    else
-      /* data sending without specifying the data amount up front */
-      stream->upload_left = -1; /* unknown */
-    break;
-  default:
-    stream->upload_left = 0; /* no request body */
-    break;
-  }
-
-  if(stream->upload_left == 0)
+  if(eos && ((size_t)nwritten == len))
     stream->send_closed = TRUE;
 
   stream3_id = quiche_h3_send_request(ctx->h3c, ctx->qconn, nva, nheader,
@@ -1009,6 +1043,22 @@ static ssize_t h3_open_stream(struct Curl_cfilter *cf,
     }
   }
 
+  if(nwritten > 0 && ((size_t)nwritten < len)) {
+    /* after the headers, there was request BODY data */
+    size_t hds_len = (size_t)nwritten;
+    ssize_t bwritten;
+
+    bwritten = cf_quiche_send_body(cf, data, stream,
+                                   buf + hds_len, len - hds_len, eos, err);
+    if((bwritten < 0) && (CURLE_AGAIN != *err)) {
+      /* real error, fail */
+      nwritten = -1;
+    }
+    else if(bwritten > 0) {
+      nwritten += bwritten;
+    }
+  }
+
 out:
   free(nva);
   Curl_dynhds_free(&h2_headers);
@@ -1016,7 +1066,8 @@ out:
 }
 
 static ssize_t cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                              const void *buf, size_t len, CURLcode *err)
+                              const void *buf, size_t len, bool eos,
+                              CURLcode *err)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
@@ -1032,7 +1083,7 @@ static ssize_t cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
   if(!stream || !stream->opened) {
-    nwritten = h3_open_stream(cf, data, buf, len, err);
+    nwritten = h3_open_stream(cf, data, buf, len, eos, err);
     if(nwritten < 0)
       goto out;
     stream = H3_STREAM_CTX(ctx, data);
@@ -1060,57 +1111,7 @@ static ssize_t cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     goto out;
   }
   else {
-    bool eof = (stream->upload_left >= 0 &&
-                (curl_off_t)len >= stream->upload_left);
-    nwritten = quiche_h3_send_body(ctx->h3c, ctx->qconn, stream->id,
-                                   (uint8_t *)buf, len, eof);
-    if(nwritten == QUICHE_H3_ERR_DONE || (nwritten == 0 && len > 0)) {
-      /* TODO: we seem to be blocked on flow control and should HOLD
-       * sending. But when do we open again? */
-      if(!quiche_conn_stream_writable(ctx->qconn, stream->id, len)) {
-        CURL_TRC_CF(data, cf, "[%" CURL_PRIu64 "] send_body(len=%zu) "
-                    "-> window exhausted", stream->id, len);
-        stream->quic_flow_blocked = TRUE;
-      }
-      *err = CURLE_AGAIN;
-      nwritten = -1;
-      goto out;
-    }
-    else if(nwritten == QUICHE_H3_TRANSPORT_ERR_INVALID_STREAM_STATE) {
-      CURL_TRC_CF(data, cf, "[%" CURL_PRIu64 "] send_body(len=%zu) "
-                  "-> invalid stream state", stream->id, len);
-      *err = CURLE_HTTP3;
-      nwritten = -1;
-      goto out;
-    }
-    else if(nwritten == QUICHE_H3_TRANSPORT_ERR_FINAL_SIZE) {
-      CURL_TRC_CF(data, cf, "[%" CURL_PRIu64 "] send_body(len=%zu) "
-                  "-> exceeds size", stream->id, len);
-      *err = CURLE_SEND_ERROR;
-      nwritten = -1;
-      goto out;
-    }
-    else if(nwritten < 0) {
-      CURL_TRC_CF(data, cf, "[%" CURL_PRIu64 "] send_body(len=%zu) "
-                  "-> quiche err %zd", stream->id, len, nwritten);
-      *err = CURLE_SEND_ERROR;
-      nwritten = -1;
-      goto out;
-    }
-    else {
-      /* quiche accepted all or at least a part of the buf */
-      if(stream->upload_left > 0) {
-        stream->upload_left = (nwritten < stream->upload_left)?
-                              (stream->upload_left - nwritten) : 0;
-      }
-      if(stream->upload_left == 0)
-        stream->send_closed = TRUE;
-
-      CURL_TRC_CF(data, cf, "[%" CURL_PRIu64 "] send body(len=%zu, "
-                  "left=%" CURL_FORMAT_CURL_OFF_T ") -> %zd",
-                  stream->id, len, stream->upload_left, nwritten);
-      *err = CURLE_OK;
-    }
+    nwritten = cf_quiche_send_body(cf, data, stream, buf, len, eos, err);
   }
 
 out:
@@ -1120,7 +1121,7 @@ out:
     nwritten = -1;
   }
   CURL_TRC_CF(data, cf, "[%" CURL_PRIu64 "] cf_send(len=%zu) -> %zd, %d",
-              stream? stream->id : (uint64_t)~0, len, nwritten, *err);
+              stream? stream->id : (curl_uint64_t)~0, len, nwritten, *err);
   return nwritten;
 }
 
@@ -1215,9 +1216,8 @@ static CURLcode cf_quiche_data_event(struct Curl_cfilter *cf,
       ssize_t sent;
 
       stream->send_closed = TRUE;
-      stream->upload_left = 0;
       body[0] = 'X';
-      sent = cf_quiche_send(cf, data, body, 0, &result);
+      sent = cf_quiche_send(cf, data, body, 0, TRUE, &result);
       CURL_TRC_CF(data, cf, "[%"CURL_PRIu64"] DONE_SEND -> %zd, %d",
                   stream->id, sent, result);
     }

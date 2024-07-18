@@ -1287,7 +1287,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* send initial handshake data which is now stored in output buffer */
   written = Curl_conn_cf_send(cf->next, data,
-                              outbuf.pvBuffer, outbuf.cbBuffer,
+                              outbuf.pvBuffer, outbuf.cbBuffer, FALSE,
                               &result);
   s_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
   if((result != CURLE_OK) || (outbuf.cbBuffer != (size_t) written)) {
@@ -1477,7 +1477,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
           /* send handshake token to server */
           written = Curl_conn_cf_send(cf->next, data,
                                       outbuf[i].pvBuffer, outbuf[i].cbBuffer,
-                                      &result);
+                                      FALSE, &result);
           if((result != CURLE_OK) ||
              (outbuf[i].cbBuffer != (size_t) written)) {
             failf(data, "schannel: failed to send next handshake data: "
@@ -2054,7 +2054,7 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
        this_write = Curl_conn_cf_send(cf->next, data,
                                       ptr + written, len - written,
-                                      &result);
+                                      FALSE, &result);
       if(result == CURLE_AGAIN)
         continue;
       else if(result != CURLE_OK) {
@@ -2531,7 +2531,7 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
       /* send close message which is in output buffer */
       ssize_t written = Curl_conn_cf_send(cf->next, data,
                                           outbuf.pvBuffer, outbuf.cbBuffer,
-                                          &result);
+                                          FALSE, &result);
       s_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
       if(!result) {
         if(written < (ssize_t)outbuf.cbBuffer) {

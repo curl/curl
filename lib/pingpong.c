@@ -199,7 +199,8 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
 #ifdef HAVE_GSSAPI
   conn->data_prot = PROT_CMD;
 #endif
-  result = Curl_conn_send(data, FIRSTSOCKET, s, write_len, &bytes_written);
+  result = Curl_conn_send(data, FIRSTSOCKET, s, write_len, FALSE,
+                          &bytes_written);
   if(result == CURLE_AGAIN) {
     bytes_written = 0;
   }
@@ -403,7 +404,7 @@ CURLcode Curl_pp_flushsend(struct Curl_easy *data,
 
   result = Curl_conn_send(data, FIRSTSOCKET,
                           pp->sendthis + pp->sendsize - pp->sendleft,
-                          pp->sendleft, &written);
+                          pp->sendleft, FALSE, &written);
   if(result == CURLE_AGAIN) {
     result = CURLE_OK;
     written = 0;

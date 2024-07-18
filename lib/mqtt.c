@@ -121,7 +121,7 @@ static CURLcode mqtt_send(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   struct MQTT *mq = data->req.p.mqtt;
   size_t n;
-  result = Curl_xfer_send(data, buf, len, &n);
+  result = Curl_xfer_send(data, buf, len, FALSE, &n);
   if(result)
     return result;
   Curl_debug(data, CURLINFO_HEADER_OUT, buf, (size_t)n);

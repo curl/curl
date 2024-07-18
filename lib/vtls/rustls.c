@@ -115,7 +115,8 @@ write_cb(void *userdata, const uint8_t *buf, uintptr_t len, uintptr_t *out_n)
   CURLcode result;
   int ret = 0;
   ssize_t nwritten = Curl_conn_cf_send(io_ctx->cf->next, io_ctx->data,
-                                       (const char *)buf, len, &result);
+                                       (const char *)buf, len, FALSE,
+                                       &result);
   if(nwritten < 0) {
     nwritten = 0;
     if(CURLE_AGAIN == result)

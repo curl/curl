@@ -146,7 +146,7 @@ static CURLcode sendf(struct Curl_easy *data, const char *fmt, ...)
 
   for(;;) {
     /* Write the buffer to the socket */
-    result = Curl_xfer_send(data, sptr, write_len, &bytes_written);
+    result = Curl_xfer_send(data, sptr, write_len, FALSE, &bytes_written);
 
     if(result)
       break;

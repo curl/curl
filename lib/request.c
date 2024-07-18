@@ -179,6 +179,7 @@ static CURLcode xfer_send(struct Curl_easy *data,
                           size_t hds_len, size_t *pnwritten)
 {
   CURLcode result = CURLE_OK;
+  bool eos = FALSE;
 
   *pnwritten = 0;
 #ifdef DEBUGBUILD
@@ -202,7 +203,13 @@ static CURLcode xfer_send(struct Curl_easy *data,
       blen = hds_len + (size_t)data->set.max_send_speed;
   }
 
-  result = Curl_xfer_send(data, buf, blen, pnwritten);
+  if(data->req.eos_read &&
+    (Curl_bufq_is_empty(&data->req.sendbuf) ||
+     Curl_bufq_len(&data->req.sendbuf) == blen)) {
+    DEBUGF(infof(data, "sending last upload chunk of %zu bytes", blen));
+    eos = TRUE;
+  }
+  result = Curl_xfer_send(data, buf, blen, eos, pnwritten);
   if(!result && *pnwritten) {
     if(hds_len)
       Curl_debug(data, CURLINFO_HEADER_OUT, (char *)buf,
