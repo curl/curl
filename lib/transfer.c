@@ -1250,7 +1250,7 @@ CURLcode Curl_xfer_write_done(struct Curl_easy *data, bool premature)
 }
 
 CURLcode Curl_xfer_send(struct Curl_easy *data,
-                        const void *buf, size_t blen, bool eos,
+                        const void *buf, size_t blen,
                         size_t *pnwritten)
 {
   CURLcode result;
@@ -1267,7 +1267,7 @@ CURLcode Curl_xfer_send(struct Curl_easy *data,
   } */
   sockindex = ((data->conn->writesockfd != CURL_SOCKET_BAD) &&
                (data->conn->writesockfd == data->conn->sock[SECONDARYSOCKET]));
-  result = Curl_conn_send(data, sockindex, buf, blen, eos, pnwritten);
+  result = Curl_conn_send(data, sockindex, buf, blen, pnwritten);
   if(result == CURLE_AGAIN) {
     result = CURLE_OK;
     *pnwritten = 0;

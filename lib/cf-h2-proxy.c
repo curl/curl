@@ -260,7 +260,7 @@ static ssize_t proxy_h2_nw_out_writer(void *writer_ctx,
   if(cf) {
     struct Curl_easy *data = CF_DATA_CURRENT(cf);
     nwritten = Curl_conn_cf_send(cf->next, data, (const char *)buf, buflen,
-                                 FALSE, err);
+                                 err);
     CURL_TRC_CF(data, cf, "[0] nw_out_writer(len=%zu) -> %zd, %d",
                 buflen, nwritten, *err);
   }
@@ -1393,8 +1393,7 @@ out:
 
 static ssize_t cf_h2_proxy_send(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
-                                const void *buf, size_t len, bool eos,
-                                CURLcode *err)
+                                const void *buf, size_t len, CURLcode *err)
 {
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
   struct cf_call_data save;
@@ -1403,7 +1402,6 @@ static ssize_t cf_h2_proxy_send(struct Curl_cfilter *cf,
   CURLcode result;
   int blocked = 0;
 
-  (void)eos; /* TODO, maybe useful for blocks? */
   if(ctx->tunnel.state != H2_TUNNEL_ESTABLISHED) {
     *err = CURLE_SEND_ERROR;
     return -1;

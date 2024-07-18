@@ -159,7 +159,6 @@ typedef ssize_t (Curl_send)(struct Curl_easy *data,   /* transfer */
                             int sockindex,            /* socketindex */
                             const void *buf,          /* data to write */
                             size_t len,               /* max amount to write */
-                            bool eos,                 /* last chunk */
                             CURLcode *err);           /* error to return */
 
 /* return the count of bytes read, or -1 on error */

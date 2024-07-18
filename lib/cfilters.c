@@ -98,11 +98,10 @@ bool Curl_cf_def_data_pending(struct Curl_cfilter *cf,
 }
 
 ssize_t  Curl_cf_def_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                          const void *buf, size_t len, bool eos,
-                          CURLcode *err)
+                          const void *buf, size_t len, CURLcode *err)
 {
   return cf->next?
-    cf->next->cft->do_send(cf->next, data, buf, len, eos, err) :
+    cf->next->cft->do_send(cf->next, data, buf, len, err) :
     CURLE_RECV_ERROR;
 }
 
@@ -257,8 +256,7 @@ ssize_t Curl_cf_recv(struct Curl_easy *data, int num, char *buf,
 }
 
 ssize_t Curl_cf_send(struct Curl_easy *data, int num,
-                     const void *mem, size_t len, bool eos,
-                     CURLcode *code)
+                     const void *mem, size_t len, CURLcode *code)
 {
   struct Curl_cfilter *cf;
 
@@ -270,7 +268,7 @@ ssize_t Curl_cf_send(struct Curl_easy *data, int num,
     cf = cf->next;
   }
   if(cf) {
-    ssize_t nwritten = cf->cft->do_send(cf, data, mem, len, eos, code);
+    ssize_t nwritten = cf->cft->do_send(cf, data, mem, len, code);
     DEBUGASSERT(nwritten >= 0 || *code);
     DEBUGASSERT(nwritten < 0 || !*code || !len);
     return nwritten;
@@ -381,11 +379,10 @@ void Curl_conn_cf_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 }
 
 ssize_t Curl_conn_cf_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                          const void *buf, size_t len, bool eos,
-                          CURLcode *err)
+                          const void *buf, size_t len, CURLcode *err)
 {
   if(cf)
-    return cf->cft->do_send(cf, data, buf, len, eos, err);
+    return cf->cft->do_send(cf, data, buf, len, err);
   *err = CURLE_SEND_ERROR;
   return -1;
 }
@@ -814,10 +811,9 @@ CURLcode Curl_conn_recv(struct Curl_easy *data, int sockindex,
 }
 
 CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
-                        const void *buf, size_t blen, bool eos,
+                        const void *buf, size_t blen,
                         size_t *pnwritten)
 {
-  size_t write_len = blen;
   ssize_t nwritten;
   CURLcode result = CURLE_OK;
   struct connectdata *conn;
@@ -835,14 +831,11 @@ CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
     if(p) {
       size_t altsize = (size_t)strtoul(p, NULL, 10);
       if(altsize)
-        write_len = CURLMIN(write_len, altsize);
+        blen = CURLMIN(blen, altsize);
     }
   }
 #endif
-  if(write_len != blen)
-    eos = FALSE;
-  nwritten = conn->send[sockindex](data, sockindex, buf, write_len, eos,
-                                   &result);
+  nwritten = conn->send[sockindex](data, sockindex, buf, blen, &result);
   DEBUGASSERT((nwritten >= 0) || result);
   *pnwritten = (nwritten < 0)? 0 : (size_t)nwritten;
   return result;

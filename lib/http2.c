@@ -382,8 +382,8 @@ static ssize_t nw_out_writer(void *writer_ctx,
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
 
   if(data) {
-    ssize_t nwritten = Curl_conn_cf_send(cf->next, data, (const char *)buf,
-                                         buflen, FALSE, err);
+    ssize_t nwritten = Curl_conn_cf_send(cf->next, data,
+                                         (const char *)buf, buflen, err);
     if(nwritten > 0)
       CURL_TRC_CF(data, cf, "[0] egress: wrote %zd bytes", nwritten);
     return nwritten;
@@ -2173,8 +2173,7 @@ out:
 }
 
 static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                          const void *buf, size_t len, bool eos,
-                          CURLcode *err)
+                          const void *buf, size_t len, CURLcode *err)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
   struct h2_stream_ctx *stream = H2_STREAM_CTX(ctx, data);
@@ -2187,7 +2186,6 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   CF_DATA_SAVE(save, cf, data);
 
-  (void)eos; /* TODO: use for stream EOF */
   if(stream && stream->id != -1) {
     if(stream->upload_blocked_len) {
       /* the data in `buf` has already been submitted or added to the

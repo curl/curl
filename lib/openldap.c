@@ -1201,7 +1201,7 @@ ldapsb_tls_write(Sockbuf_IO_Desc *sbiod, void *buf, ber_len_t len)
     if(conn) {
       struct ldapconninfo *li = conn->proto.ldapc;
       CURLcode err = CURLE_SEND_ERROR;
-      ret = (li->send)(data, FIRSTSOCKET, buf, len, FALSE, &err);
+      ret = (li->send)(data, FIRSTSOCKET, buf, len, &err);
       if(ret < 0 && err == CURLE_AGAIN) {
         SET_SOCKERRNO(EWOULDBLOCK);
       }

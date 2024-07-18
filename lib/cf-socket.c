@@ -1449,15 +1449,13 @@ static void win_update_sndbuf_size(struct cf_socket_ctx *ctx)
 #endif /* USE_WINSOCK */
 
 static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                              const void *buf, size_t len, bool eos,
-                              CURLcode *err)
+                              const void *buf, size_t len, CURLcode *err)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
   curl_socket_t fdsave;
   ssize_t nwritten;
   size_t orig_len = len;
 
-  (void)eos; /* unused */
   *err = CURLE_OK;
   fdsave = cf->conn->sock[cf->sockindex];
   cf->conn->sock[cf->sockindex] = ctx->sock;

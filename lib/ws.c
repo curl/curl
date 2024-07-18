@@ -1019,7 +1019,7 @@ static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
       if(data->set.connect_only)
         result = Curl_senddata(data, out, outlen, &n);
       else {
-        result = Curl_xfer_send(data, out, outlen, FALSE, &n);
+        result = Curl_xfer_send(data, out, outlen, &n);
         if(!result && !n && outlen)
           result = CURLE_AGAIN;
       }
@@ -1088,7 +1088,7 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *data, const void *buffer,
     /* raw mode sends exactly what was requested, and this is from within
        the write callback */
     if(Curl_is_in_callback(data)) {
-      result = Curl_xfer_send(data, buffer, buflen, FALSE, &nwritten);
+      result = Curl_xfer_send(data, buffer, buflen, &nwritten);
     }
     else
       result = Curl_senddata(data, buffer, buflen, &nwritten);

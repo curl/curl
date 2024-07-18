@@ -1484,8 +1484,7 @@ out:
 }
 
 static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                              const void *buf, size_t len, bool eos,
-                              CURLcode *err)
+                              const void *buf, size_t len, CURLcode *err)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
@@ -1501,7 +1500,6 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   pktx_init(&pktx, cf, data);
   *err = CURLE_OK;
 
-  (void)eos; /* TODO: use for stream EOF and block handling */
   result = cf_progress_ingress(cf, data, &pktx);
   if(result) {
     *err = result;

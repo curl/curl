@@ -572,7 +572,7 @@ static CURLcode smb_send(struct Curl_easy *data, size_t len,
   size_t bytes_written;
   CURLcode result;
 
-  result = Curl_xfer_send(data, smbc->send_buf, len, FALSE, &bytes_written);
+  result = Curl_xfer_send(data, smbc->send_buf, len, &bytes_written);
   if(result)
     return result;
 
@@ -597,7 +597,7 @@ static CURLcode smb_flush(struct Curl_easy *data)
   if(!smbc->send_size)
     return CURLE_OK;
 
-  result = Curl_xfer_send(data, smbc->send_buf + smbc->sent, len, FALSE,
+  result = Curl_xfer_send(data, smbc->send_buf + smbc->sent, len,
                           &bytes_written);
   if(result)
     return result;
