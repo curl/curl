@@ -634,7 +634,10 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
       case IF2IP_NOT_FOUND:
         if(iface_input && !host_input) {
           /* Do not fall back to treating it as a hostname */
-          failf(data, "Couldn't bind to interface '%s'", iface);
+          char buffer[STRERROR_LEN];
+          data->state.os_errno = error = SOCKERRNO;
+          failf(data, "Couldn't bind to interface '%s' with errno %d: %s",
+                iface, error, Curl_strerror(error, buffer, sizeof(buffer)));
           return CURLE_INTERFACE_FAILED;
         }
         break;
@@ -740,8 +743,11 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
       /* errorbuf is set false so failf will overwrite any message already in
          the error buffer, so the user receives this error message instead of a
          generic resolve error. */
+      char buffer[STRERROR_LEN];
       data->state.errorbuf = FALSE;
-      failf(data, "Couldn't bind to '%s'", host);
+      data->state.os_errno = error = SOCKERRNO;
+      failf(data, "Couldn't bind to '%s' with errno %d: %s",
+            host, error, Curl_strerror(error, buffer, sizeof(buffer)));
       return CURLE_INTERFACE_FAILED;
     }
   }
