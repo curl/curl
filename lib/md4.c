@@ -37,6 +37,9 @@
 #if (OPENSSL_VERSION_NUMBER >= 0x30000000L) && !defined(USE_AMISSL)
 /* OpenSSL 3.0.0 marks the MD4 functions as deprecated */
 #define OPENSSL_NO_MD4
+#else
+/* Cover also OPENSSL_NO_MD4 configured in openssl */
+#include <openssl/opensslconf.h>
 #endif
 #endif /* USE_OPENSSL */
 
