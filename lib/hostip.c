@@ -502,7 +502,7 @@ Curl_cache_addr(struct Curl_easy *data,
   if(permanent)
     dns->timestamp = 0; /* an entry that never goes stale */
   else {
-    time(&dns->timestamp);
+    dns->timestamp = time(NULL);
     if(dns->timestamp == 0)
       dns->timestamp = 1;
   }
