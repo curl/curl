@@ -55,6 +55,8 @@ to the file when closing the handle.
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

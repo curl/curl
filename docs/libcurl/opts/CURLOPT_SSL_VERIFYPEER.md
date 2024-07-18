@@ -73,6 +73,8 @@ malicious servers.
 
 1 - enabled
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

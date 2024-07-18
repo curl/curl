@@ -80,6 +80,8 @@ a transfer before you call curl_slist_free_all(3) on the list.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

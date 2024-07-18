@@ -40,6 +40,8 @@ decoding enabled.
 
 1
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

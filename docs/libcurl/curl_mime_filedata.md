@@ -56,6 +56,8 @@ part is transferred using chunks by HTTP but is rejected by IMAP.
 Setting a part's contents multiple times is valid: only the value set by the
 last call is retained.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

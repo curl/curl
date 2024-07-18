@@ -40,6 +40,8 @@ or zero if there was no header or the header could not be parsed.
 
 Zero if there was no header.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

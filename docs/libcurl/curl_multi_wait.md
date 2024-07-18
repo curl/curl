@@ -80,6 +80,8 @@ priority read events such as out of band data.
 Bit flag to *curl_waitfd.events* indicating the socket should poll on
 write events such as the socket being clear to write without blocking.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

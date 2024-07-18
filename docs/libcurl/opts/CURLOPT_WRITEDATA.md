@@ -44,6 +44,8 @@ crashes.
 
 stdout
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 A common technique is to use the write callback to store the incoming data

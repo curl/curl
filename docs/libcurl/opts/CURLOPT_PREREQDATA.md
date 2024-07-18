@@ -34,6 +34,8 @@ argument in the pre-request callback set with CURLOPT_PREREQFUNCTION(3).
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

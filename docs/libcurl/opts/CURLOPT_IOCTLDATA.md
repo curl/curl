@@ -33,6 +33,8 @@ argument in the ioctl callback set with CURLOPT_IOCTLFUNCTION(3).
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

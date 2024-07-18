@@ -39,6 +39,8 @@ application. A work-around is to instead use CURLOPT_DEBUGFUNCTION(3).
 
 stderr
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

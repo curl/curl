@@ -67,6 +67,8 @@ that just completed.
 
 At this point, there are no other **msg** types defined.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

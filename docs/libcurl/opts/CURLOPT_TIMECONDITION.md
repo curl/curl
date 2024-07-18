@@ -40,6 +40,8 @@ option can be used after a transfer to learn if a zero-byte successful
 
 CURL_TIMECOND_NONE (0)
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

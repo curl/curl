@@ -151,6 +151,8 @@ with the CURLOPT_UNRESTRICTED_AUTH(3) option.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

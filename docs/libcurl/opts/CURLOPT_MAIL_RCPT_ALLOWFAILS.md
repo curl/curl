@@ -45,6 +45,8 @@ RCPT TO command.
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

@@ -148,6 +148,11 @@ readable.
 To make sure curldown documents render correctly as markdown, all literal
 occurrences of `<` or `>` need to be escaped by a leading backslash.
 
+## Generating contents
+
+When `# %PROTOCOLS%` is used as a subtitle, `cd2nroff` inserts a **PROTOCOLS**
+section based on the metadata provided in the header.
+
 ## Symbols
 
 All mentioned curl symbols that have their own man pages, like

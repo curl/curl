@@ -37,6 +37,8 @@ The **id** pointer is NULL or points to private memory. You MUST NOT free -
 it gets freed when you call curl_easy_cleanup(3) on the corresponding
 CURL handle.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

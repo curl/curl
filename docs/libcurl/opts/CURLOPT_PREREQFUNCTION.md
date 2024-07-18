@@ -86,6 +86,8 @@ The pointer you set with CURLOPT_PREREQDATA(3).
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

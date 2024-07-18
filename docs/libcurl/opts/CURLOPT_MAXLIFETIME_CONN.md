@@ -46,6 +46,8 @@ If set to 0, this behavior is disabled: all connections are eligible for reuse.
 
 0 seconds (i.e., disabled)
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

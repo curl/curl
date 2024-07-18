@@ -75,6 +75,8 @@ was also built to actually support HTTP/3, otherwise this bit is ignored.
 
 0 - Alt-Svc handling is disabled
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

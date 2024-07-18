@@ -44,6 +44,8 @@ CURLOPT_RESUME_FROM_LARGE(3) instead.
 
 0, not used
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

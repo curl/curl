@@ -37,6 +37,8 @@ This option has no effect unless set after CURLOPT_SSLENGINE(3).
 
 None
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

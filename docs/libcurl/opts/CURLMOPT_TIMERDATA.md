@@ -36,6 +36,8 @@ callback's **clientp** argument.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

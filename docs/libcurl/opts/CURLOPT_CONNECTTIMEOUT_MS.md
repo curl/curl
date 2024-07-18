@@ -61,6 +61,8 @@ signals to be used unless CURLOPT_NOSIGNAL(3) is set.
 
 300000
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

@@ -41,6 +41,8 @@ to get stuck in never-ending redirect loops.
 
 30 (since 8.3.0), it was previously unlimited.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

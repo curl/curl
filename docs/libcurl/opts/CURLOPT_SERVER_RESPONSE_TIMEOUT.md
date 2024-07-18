@@ -47,6 +47,8 @@ This option was formerly known as CURLOPT_FTP_RESPONSE_TIMEOUT.
 
 None
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

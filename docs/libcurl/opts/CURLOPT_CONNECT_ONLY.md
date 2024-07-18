@@ -55,6 +55,8 @@ curl_easy_recv(3) do not function.
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

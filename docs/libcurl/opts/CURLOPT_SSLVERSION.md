@@ -116,6 +116,8 @@ inconsistent depending on the TLS library.
 
 CURL_SSLVERSION_DEFAULT
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

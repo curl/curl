@@ -46,6 +46,8 @@ CURLOPT_COPYPOSTFIELDS(3) option is issued.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

@@ -42,6 +42,8 @@ Most applications do not need this option.
 
 0, stop sending on error
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

@@ -54,6 +54,8 @@ allocated as long as there are active transfers.
 
 CURL_MAX_WRITE_SIZE (16kB)
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

@@ -43,6 +43,8 @@ currently defaults to 200 ms. Firefox and Chrome currently default to 300 ms.
 
 CURL_HET_DEFAULT (currently defined as 200L)
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

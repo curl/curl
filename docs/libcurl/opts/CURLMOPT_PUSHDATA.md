@@ -36,6 +36,8 @@ libcurl itself, only passed on to the callback function.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

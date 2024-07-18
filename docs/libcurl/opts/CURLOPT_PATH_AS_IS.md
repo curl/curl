@@ -48,6 +48,8 @@ The corresponding flag for the curl_url_set(3) function is called
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

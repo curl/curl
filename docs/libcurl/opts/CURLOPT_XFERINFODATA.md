@@ -36,6 +36,8 @@ This is an alias for CURLOPT_PROGRESSDATA(3).
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

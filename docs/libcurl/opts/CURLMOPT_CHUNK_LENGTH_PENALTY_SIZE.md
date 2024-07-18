@@ -40,6 +40,8 @@ than CURLMOPT_MAX_PIPELINE_LENGTH(3).
 
 0, which means that penalization is inactive.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

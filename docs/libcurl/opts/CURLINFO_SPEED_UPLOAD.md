@@ -33,6 +33,8 @@ measured for the complete upload. Measured in bytes/second.
 CURLINFO_SPEED_UPLOAD_T(3) is a newer replacement that returns a more
 sensible variable type.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

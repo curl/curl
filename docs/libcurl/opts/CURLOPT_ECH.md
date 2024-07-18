@@ -74,6 +74,8 @@ ECHConfigList that is used for ECH.
 
 NULL, meaning ECH is disabled.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

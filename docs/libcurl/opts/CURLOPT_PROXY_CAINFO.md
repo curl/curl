@@ -62,6 +62,8 @@ The default value for this can be figured out with CURLINFO_CAINFO(3).
 
 Built-in system specific
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

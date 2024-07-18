@@ -44,6 +44,8 @@ cache that is older than this set *age*, it is closed instead.
 
 118 seconds
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

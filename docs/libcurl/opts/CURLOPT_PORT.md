@@ -46,6 +46,8 @@ and therefore using a port number lower than zero or over 65535 causes a
 0 which makes it not used. This also makes port number zero impossible to set
 with this API.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

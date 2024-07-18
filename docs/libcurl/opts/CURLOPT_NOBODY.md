@@ -50,6 +50,8 @@ URL you request).
 
 0, the body is transferred
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

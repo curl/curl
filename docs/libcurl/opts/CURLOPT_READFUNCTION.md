@@ -75,6 +75,8 @@ and it allows for better error checking.
 
 fread(3)
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

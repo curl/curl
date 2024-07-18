@@ -92,6 +92,8 @@ It is not supported to share the HSTS between multiple concurrent threads.
 
 Added in 7.88.0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

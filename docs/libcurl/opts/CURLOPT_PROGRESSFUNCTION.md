@@ -77,6 +77,8 @@ get called.
 
 NULL. libcurl has an internal progress meter. That is rarely wanted by users.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

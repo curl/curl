@@ -36,6 +36,8 @@ that curl might consider to be HTTP/0.9!
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

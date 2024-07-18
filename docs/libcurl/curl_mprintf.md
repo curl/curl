@@ -264,6 +264,8 @@ by the corresponding argument.
 
 A '%' symbol is written. No argument is converted.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

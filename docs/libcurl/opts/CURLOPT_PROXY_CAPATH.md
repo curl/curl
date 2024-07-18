@@ -48,6 +48,8 @@ The default value for this can be figured out with CURLINFO_CAPATH(3).
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

@@ -31,6 +31,8 @@ linked list.
 Passing in a NULL pointer in *list* makes this function return immediately
 with no action.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

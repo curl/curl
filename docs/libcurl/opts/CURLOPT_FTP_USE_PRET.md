@@ -35,6 +35,8 @@ no effect when using the active FTP transfers mode.
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

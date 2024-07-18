@@ -46,6 +46,8 @@ Only use this option if strictly necessary.
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

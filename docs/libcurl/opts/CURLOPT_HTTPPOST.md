@@ -50,6 +50,8 @@ CURLOPT_NOBODY(3) to 0.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

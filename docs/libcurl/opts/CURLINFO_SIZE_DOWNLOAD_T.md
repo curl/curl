@@ -35,6 +35,8 @@ were downloaded. The amount is only for the latest transfer and gets reset
 again for each new transfer. This counts actual payload data, what's also
 commonly called body. All meta and header data is excluded from this amount.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

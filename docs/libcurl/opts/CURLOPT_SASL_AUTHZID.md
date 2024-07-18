@@ -44,6 +44,8 @@ access to, or a shared mailbox for example.
 
 blank
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

@@ -35,6 +35,8 @@ the incoming server push request or NULL. The data pointed to is freed by
 libcurl when this callback returns. The returned pointer points to a
 "name:value" string that gets freed when this callback returns.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

@@ -38,6 +38,8 @@ is built to use supports it), which can be used to negotiate http2.
 
 1, enabled
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

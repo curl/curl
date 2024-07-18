@@ -97,6 +97,8 @@ All other return codes are reserved for future use.
 
 NULL, no callback
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

@@ -44,6 +44,8 @@ its option CURLINFO_CERTINFO(3).
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

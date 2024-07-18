@@ -49,6 +49,8 @@ timeout is however treated as a per-connect timeout.
 0, which means that there is no limit. It is then simply controlled by the
 number of easy handles added.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

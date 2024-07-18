@@ -59,6 +59,8 @@ the host key is rejected, the connection is canceled.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

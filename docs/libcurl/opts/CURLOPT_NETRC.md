@@ -118,6 +118,8 @@ done with "macdef" that it finds.
 
 CURL_NETRC_IGNORED
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

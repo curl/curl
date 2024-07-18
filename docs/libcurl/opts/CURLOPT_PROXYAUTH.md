@@ -44,6 +44,8 @@ CURLOPT_HTTPAUTH(3) man page.
 
 CURLAUTH_BASIC
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

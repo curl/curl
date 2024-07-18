@@ -64,6 +64,8 @@ parameter is ignored when seeking.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

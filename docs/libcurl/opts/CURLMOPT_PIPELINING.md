@@ -53,6 +53,8 @@ existing connection if possible. This requires HTTP/2 or HTTP/3.
 
 **CURLPIPE_MULTIPLEX**
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

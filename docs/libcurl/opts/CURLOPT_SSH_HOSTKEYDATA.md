@@ -33,6 +33,8 @@ the callback set with CURLOPT_SSH_HOSTKEYFUNCTION(3).
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

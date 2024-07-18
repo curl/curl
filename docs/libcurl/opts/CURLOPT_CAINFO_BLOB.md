@@ -54,6 +54,8 @@ This option overrides CURLOPT_CAINFO(3).
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

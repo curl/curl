@@ -44,6 +44,8 @@ removed
 Passing in a NULL pointer in *multi_handle* makes this function return
 CURLM_BAD_HANDLE immediately with no other action.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

@@ -203,6 +203,8 @@ for the curl handle.
 
 See example below.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

@@ -37,6 +37,8 @@ does not match the hash the remote host provides.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

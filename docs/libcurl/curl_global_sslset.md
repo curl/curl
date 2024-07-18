@@ -101,6 +101,8 @@ typedef enum {
 } curl_sslbackend;
 ~~~
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

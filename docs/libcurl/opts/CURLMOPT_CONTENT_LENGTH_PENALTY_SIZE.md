@@ -39,6 +39,8 @@ CURLMOPT_MAX_PIPELINE_LENGTH(3).
 
 0, which means that the size penalization is inactive.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

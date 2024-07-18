@@ -50,6 +50,8 @@ option.
 
 NULL - no Unix domain sockets are used.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

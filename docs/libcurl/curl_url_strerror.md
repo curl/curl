@@ -33,6 +33,8 @@ const char *curl_url_strerror(CURLUcode errornum);
 This function returns a string describing the CURLUcode error code passed in
 the argument *errornum*.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

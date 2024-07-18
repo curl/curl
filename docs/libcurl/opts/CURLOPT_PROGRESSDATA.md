@@ -33,6 +33,8 @@ argument in the progress callback set with CURLOPT_PROGRESSFUNCTION(3).
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

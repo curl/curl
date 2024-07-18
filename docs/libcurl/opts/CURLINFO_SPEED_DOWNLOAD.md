@@ -35,6 +35,8 @@ measured for the complete download. Measured in bytes/second.
 CURLINFO_SPEED_DOWNLOAD_T(3) is a newer replacement that returns a more
 sensible variable type.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

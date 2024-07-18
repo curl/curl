@@ -35,6 +35,8 @@ returns. curl_slist_append(3) copies the string.
 The list should be freed again (after usage) with
 curl_slist_free_all(3).
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

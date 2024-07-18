@@ -37,6 +37,8 @@ the complete execution time for multiple redirections.
 
 See also the TIMES overview in the curl_easy_getinfo(3) man page.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

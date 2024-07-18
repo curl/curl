@@ -104,6 +104,8 @@ Custom pointer to pass to timer callback. See CURLMOPT_TIMERDATA(3)
 
 Callback to receive timeout values. See CURLMOPT_TIMERFUNCTION(3)
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

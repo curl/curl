@@ -59,6 +59,8 @@ The connection cache is no longer shared.
 
 The Public Suffix List is no longer shared.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

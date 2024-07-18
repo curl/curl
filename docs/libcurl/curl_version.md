@@ -30,6 +30,8 @@ its important components (like OpenSSL version).
 
 We recommend using curl_version_info(3) instead!
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

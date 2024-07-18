@@ -57,6 +57,8 @@ way to figure out the protocol used in a previous transfer.
 
 All protocols built-in
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

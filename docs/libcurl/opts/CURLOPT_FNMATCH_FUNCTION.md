@@ -45,6 +45,8 @@ error occurred.
 
 NULL == an internal function for wildcard matching.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

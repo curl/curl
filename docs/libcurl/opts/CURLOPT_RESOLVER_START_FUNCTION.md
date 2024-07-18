@@ -53,6 +53,8 @@ resolve to fail.
 
 NULL (No callback)
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

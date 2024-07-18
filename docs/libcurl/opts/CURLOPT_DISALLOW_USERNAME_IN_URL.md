@@ -39,6 +39,8 @@ curl_url_set(3) function.
 
 0 (disabled)
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

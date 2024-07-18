@@ -43,6 +43,8 @@ might experience crashes.
 
 stdin
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

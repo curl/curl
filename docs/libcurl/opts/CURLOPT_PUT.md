@@ -38,6 +38,8 @@ This option is **deprecated** since version 7.12.1. Use CURLOPT_UPLOAD(3).
 
 0, disabled
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

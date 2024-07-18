@@ -75,6 +75,8 @@ do that.
 
 fwrite(3)
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

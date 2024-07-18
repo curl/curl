@@ -39,6 +39,8 @@ Specify a blank filename ("") to make libcurl not load from a file at all.
 
 NULL. The alt-svc cache is not read nor written to file.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

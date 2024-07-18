@@ -31,6 +31,8 @@ systems libcurl builds on (including win32).
 
 You must curl_free(3) the returned string when you are done with it.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

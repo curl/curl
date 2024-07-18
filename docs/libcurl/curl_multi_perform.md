@@ -61,6 +61,8 @@ they cannot be continued. curl_multi_perform(3) should not be called
 again on the same multi handle after an error has been returned, unless first
 removing all the handles and adding new ones.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

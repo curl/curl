@@ -53,6 +53,8 @@ Uses only IPv6 addresses.
 
 CURL_IPRESOLVE_WHATEVER
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

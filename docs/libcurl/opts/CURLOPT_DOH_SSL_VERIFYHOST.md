@@ -60,6 +60,8 @@ of the DoH server certificate.
 
 2
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

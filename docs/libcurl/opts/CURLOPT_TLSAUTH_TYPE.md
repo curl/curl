@@ -45,6 +45,8 @@ TLS SRP does not work with TLS 1.3.
 
 blank
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

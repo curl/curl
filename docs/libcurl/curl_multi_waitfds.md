@@ -52,6 +52,8 @@ The client code can pass *size* equal to zero just to get the number of the
 descriptors and allocate appropriate storage for them to be used in a
 subsequent function call.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

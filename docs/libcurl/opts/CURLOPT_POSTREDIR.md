@@ -49,6 +49,8 @@ when setting CURLOPT_FOLLOWLOCATION(3).
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

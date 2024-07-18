@@ -109,6 +109,8 @@ Traces reading of upload data from the application in order to send it to the se
 
 Traces writing of download data, received from the server, to the application.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

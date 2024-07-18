@@ -44,6 +44,8 @@ option.
 
 "*"
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

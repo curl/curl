@@ -32,6 +32,8 @@ associated with the curl handle (set with the CURLOPT_PRIVATE(3)).
 Please note that for internal reasons, the value is returned as a char
 pointer, although effectively being a 'void *'.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

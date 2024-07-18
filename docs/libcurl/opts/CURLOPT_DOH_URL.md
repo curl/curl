@@ -66,6 +66,8 @@ CURLOPT_FTPPORT(3), a proxy type set to **CURLPROXY_SOCKS4** or
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

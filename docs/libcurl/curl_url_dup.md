@@ -33,6 +33,8 @@ Duplicates the URL object the input *CURLU* *inhandle* identifies and
 returns a pointer to the copy as a new *CURLU* handle. The new handle also
 needs to be freed with curl_url_cleanup(3).
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

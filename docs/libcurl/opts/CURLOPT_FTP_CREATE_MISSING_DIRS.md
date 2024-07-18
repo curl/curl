@@ -56,6 +56,8 @@ but then another connection does **MKD** before this connection and thus
 
 CURLFTP_CREATE_DIR_NONE (0)
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

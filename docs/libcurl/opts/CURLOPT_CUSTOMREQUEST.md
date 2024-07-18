@@ -100,6 +100,8 @@ issue **NOOP** and **RSET** commands.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

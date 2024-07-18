@@ -47,6 +47,8 @@ updated contents is used.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

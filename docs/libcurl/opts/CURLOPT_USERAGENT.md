@@ -39,6 +39,8 @@ option.
 
 NULL, no User-Agent: header is used.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

@@ -39,6 +39,8 @@ this are *sftp://*, *scp://*, and *file://*.
 
 0755
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

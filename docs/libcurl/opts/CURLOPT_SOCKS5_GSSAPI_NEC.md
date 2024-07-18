@@ -36,6 +36,8 @@ negotiation.
 
 ?
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

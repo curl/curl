@@ -70,6 +70,8 @@ You need to override these definitions if they are different on your system.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

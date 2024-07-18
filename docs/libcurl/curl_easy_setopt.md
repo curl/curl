@@ -1327,6 +1327,8 @@ Callback for progress meter. See CURLOPT_XFERINFOFUNCTION(3)
 
 OAuth2 bearer token. See CURLOPT_XOAUTH2_BEARER(3)
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

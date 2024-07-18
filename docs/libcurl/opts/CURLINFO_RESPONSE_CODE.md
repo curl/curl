@@ -38,6 +38,8 @@ no server response code has been received.
 Note that a proxy's CONNECT response should be read with
 CURLINFO_HTTP_CONNECTCODE(3) and not this.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

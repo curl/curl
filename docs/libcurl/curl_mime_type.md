@@ -54,6 +54,8 @@ extension, or application/octet-stream by default.
 
 - text/plain in other cases.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

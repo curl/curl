@@ -84,6 +84,8 @@ HTTP, HTTPS, FTP and FTPS (Added in 7.65.2).
 Older versions defaulted to all protocols except FILE, SCP and since 7.40.0
 SMB and SMBS.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

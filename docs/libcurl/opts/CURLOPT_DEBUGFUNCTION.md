@@ -104,6 +104,8 @@ CURLOPT_PRIVATE(3) on your handle.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

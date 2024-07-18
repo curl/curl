@@ -64,6 +64,8 @@ first the easy handle and then the multi handle:
 
 3 - curl_multi_cleanup(3)
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

@@ -39,6 +39,8 @@ Pass a NULL pointer to clear the block list.
 
 NULL, which means that there is no block list.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

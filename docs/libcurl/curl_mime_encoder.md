@@ -71,6 +71,8 @@ Encoding should not be applied to multiparts, thus the use of this function on
 a part with content set with curl_mime_subparts(3) is strongly
 discouraged.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

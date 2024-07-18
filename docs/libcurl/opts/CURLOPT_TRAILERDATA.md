@@ -32,6 +32,8 @@ Data pointer to be passed to the HTTP trailer callback function.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

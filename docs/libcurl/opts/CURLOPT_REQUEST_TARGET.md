@@ -38,6 +38,8 @@ other safe guards. That includes white space and control characters.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

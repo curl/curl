@@ -70,6 +70,8 @@ loads all cookies from the files specified by CURLOPT_COOKIEFILE(3)
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

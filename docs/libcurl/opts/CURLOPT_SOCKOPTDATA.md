@@ -33,6 +33,8 @@ argument in the sockopt callback set with CURLOPT_SOCKOPTFUNCTION(3).
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

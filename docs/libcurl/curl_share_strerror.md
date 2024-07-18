@@ -31,6 +31,8 @@ const char *curl_share_strerror(CURLSHcode errornum);
 The curl_share_strerror(3) function returns a string describing the
 *CURLSHcode* error code passed in the argument *errornum*.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

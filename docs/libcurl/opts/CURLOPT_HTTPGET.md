@@ -43,6 +43,8 @@ reset a handle to default method, consider curl_easy_reset(3).
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

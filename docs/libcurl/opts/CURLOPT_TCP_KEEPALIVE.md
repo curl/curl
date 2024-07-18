@@ -39,6 +39,8 @@ to disable keepalive probes.
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

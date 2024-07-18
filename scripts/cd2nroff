@@ -447,13 +447,15 @@ sub single {
             elsif($word eq "AVAILABILITY") {
                 print STDERR "$f:$line:1:WARN: AVAILABILITY section in source file\n";
             }
-            elsif($word eq "EXAMPLE") {
-                # insert the generated PROTOCOLS section before EXAMPLE
+            elsif($word eq "%PROTOCOLS%") {
+                # insert the generated PROTOCOLS section
                 push @desc, outprotocols(@proto);
 
                 if($proto[0] eq "TLS") {
                     push @desc, outtls(@tls);
                 }
+                $header = 1;
+                next;
             }
             elsif($word eq "RETURN VALUE") {
                 if($addedin ne "n/a") {

@@ -44,6 +44,8 @@ by both HTTP clients and HTTP servers.
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

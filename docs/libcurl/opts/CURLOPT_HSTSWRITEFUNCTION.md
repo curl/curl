@@ -68,6 +68,8 @@ do that.
 
 NULL - no callback.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

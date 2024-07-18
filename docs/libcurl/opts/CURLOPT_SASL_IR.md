@@ -47,6 +47,8 @@ SASL-IR CAPABILITY.
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

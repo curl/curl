@@ -73,6 +73,8 @@ get called.
 
 NULL - use the internal progress meter. That is rarely wanted by users.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

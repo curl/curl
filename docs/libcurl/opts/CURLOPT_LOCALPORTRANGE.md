@@ -39,6 +39,8 @@ setup failures.
 
 1
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

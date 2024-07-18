@@ -48,6 +48,8 @@ functionality.
 
 It is acceptable to call this function from your multi callback functions.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

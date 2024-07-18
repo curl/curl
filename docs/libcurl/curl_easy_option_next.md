@@ -67,6 +67,8 @@ struct curl_easyoption {
 };
 ~~~
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

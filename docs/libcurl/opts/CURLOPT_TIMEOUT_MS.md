@@ -37,6 +37,8 @@ See CURLOPT_TIMEOUT(3) for details.
 
 0 (zero) which means it never times out during transfer.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

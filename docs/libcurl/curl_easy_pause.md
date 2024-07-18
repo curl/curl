@@ -98,6 +98,8 @@ buffering 32 megabyte of data for a paused stream.
 When such a paused stream is unpaused again, any buffered data is delivered
 first.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

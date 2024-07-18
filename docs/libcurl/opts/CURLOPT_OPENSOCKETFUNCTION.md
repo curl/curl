@@ -76,6 +76,8 @@ The equivalent of this:
    return socket(addr->family, addr->socktype, addr->protocol);
 ~~~
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

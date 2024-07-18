@@ -74,6 +74,8 @@ CURLPROTO_TFTP
 
 All protocols built-in.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

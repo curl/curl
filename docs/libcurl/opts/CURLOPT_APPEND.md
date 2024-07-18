@@ -34,6 +34,8 @@ instead of overwrite it. This is only useful when uploading to an FTP site.
 
 0 (disabled)
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

@@ -41,6 +41,8 @@ option.
 
 blank
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

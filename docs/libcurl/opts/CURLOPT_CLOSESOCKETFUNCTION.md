@@ -46,6 +46,8 @@ closed.
 
 Use the standard socket close function.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

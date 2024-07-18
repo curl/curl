@@ -38,6 +38,8 @@ single URL. When the object is first created, there is of course no components
 stored. They are then set in the object with the curl_url_set(3)
 function.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

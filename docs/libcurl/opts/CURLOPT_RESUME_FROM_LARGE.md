@@ -42,6 +42,8 @@ file to the remote target file.
 
 0, not used
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

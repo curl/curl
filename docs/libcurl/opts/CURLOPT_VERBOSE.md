@@ -43,6 +43,8 @@ CURLOPT_DEBUGFUNCTION(3).
 
 0, meaning disabled.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

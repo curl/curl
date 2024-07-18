@@ -36,6 +36,8 @@ well.
 
 If libcurl has no option with the given id, this function returns NULL.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

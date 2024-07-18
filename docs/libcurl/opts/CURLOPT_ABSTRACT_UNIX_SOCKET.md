@@ -45,6 +45,8 @@ share the same storage and therefore only one of them can be set per handle.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

@@ -72,6 +72,8 @@ setting this option with a **"aws:amz"** parameter.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

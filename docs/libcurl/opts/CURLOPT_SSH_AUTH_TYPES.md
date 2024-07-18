@@ -41,6 +41,8 @@ authentication.
 
 CURLSSH_AUTH_ANY (all available)
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c

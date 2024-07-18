@@ -38,6 +38,8 @@ on **string** to find out the size.
 
 You must curl_free(3) the returned string when you are done with it.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
