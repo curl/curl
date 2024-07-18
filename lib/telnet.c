@@ -1276,7 +1276,7 @@ static CURLcode send_telnet_data(struct Curl_easy *data,
       default:                    /* write! */
         bytes_written = 0;
         result = Curl_xfer_send(data, outbuf + total_written,
-                                outlen - total_written, &bytes_written);
+                                outlen - total_written, FALSE, &bytes_written);
         total_written += bytes_written;
         break;
     }

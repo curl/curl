@@ -266,7 +266,7 @@ static CURLcode send_CONNECT(struct Curl_cfilter *cf,
   blen -= ts->nsent;
   buf += ts->nsent;
 
-  nwritten = cf->next->cft->do_send(cf->next, data, buf, blen, &result);
+  nwritten = cf->next->cft->do_send(cf->next, data, buf, blen, FALSE, &result);
   if(nwritten < 0) {
     if(result == CURLE_AGAIN) {
       result = CURLE_OK;

@@ -310,7 +310,8 @@ static OSStatus sectransp_bio_cf_out_write(SSLConnectionRef connection,
   OSStatus rtn = noErr;
 
   DEBUGASSERT(data);
-  nwritten = Curl_conn_cf_send(cf->next, data, buf, *dataLength, &result);
+  nwritten = Curl_conn_cf_send(cf->next, data, buf, *dataLength, FALSE,
+                               &result);
   CURL_TRC_CF(data, cf, "bio_send(len=%zu) -> %zd, result=%d",
               *dataLength, nwritten, result);
   if(nwritten <= 0) {

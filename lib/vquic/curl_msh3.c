@@ -593,7 +593,8 @@ out:
 }
 
 static ssize_t cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                            const void *buf, size_t len, CURLcode *err)
+                            const void *buf, size_t len, bool eos,
+                            CURLcode *err)
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
   struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
@@ -603,7 +604,6 @@ static ssize_t cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   size_t nheader, i;
   ssize_t nwritten = -1;
   struct cf_call_data save;
-  bool eos;
 
   CF_DATA_SAVE(save, cf, data);
 
@@ -644,21 +644,6 @@ static ssize_t cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       nva[i].NameLength = e->namelen;
       nva[i].Value = e->value;
       nva[i].ValueLength = e->valuelen;
-    }
-
-    switch(data->state.httpreq) {
-    case HTTPREQ_POST:
-    case HTTPREQ_POST_FORM:
-    case HTTPREQ_POST_MIME:
-    case HTTPREQ_PUT:
-      /* known request body size or -1 */
-      eos = FALSE;
-      break;
-    default:
-      /* there is not request body */
-      eos = TRUE;
-      stream->upload_done = TRUE;
-      break;
     }
 
     CURL_TRC_CF(data, cf, "req: send %zu headers", nheader);

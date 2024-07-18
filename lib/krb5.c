@@ -91,7 +91,7 @@ static CURLcode ftpsend(struct Curl_easy *data, struct connectdata *conn,
 #ifdef HAVE_GSSAPI
     conn->data_prot = PROT_CMD;
 #endif
-    result = Curl_xfer_send(data, sptr, write_len, &bytes_written);
+    result = Curl_xfer_send(data, sptr, write_len, FALSE, &bytes_written);
 #ifdef HAVE_GSSAPI
     DEBUGASSERT(data_sec > PROT_NONE && data_sec < PROT_LAST);
     conn->data_prot = data_sec;
@@ -497,7 +497,7 @@ socket_write(struct Curl_easy *data, int sockindex, const void *to,
   size_t written;
 
   while(len > 0) {
-    result = Curl_conn_send(data, sockindex, to_p, len, &written);
+    result = Curl_conn_send(data, sockindex, to_p, len, FALSE, &written);
     if(!result && written > 0) {
       len -= written;
       to_p += written;
@@ -686,10 +686,12 @@ static ssize_t sec_write(struct Curl_easy *data, struct connectdata *conn,
 
 /* Matches Curl_send signature */
 static ssize_t sec_send(struct Curl_easy *data, int sockindex,
-                        const void *buffer, size_t len, CURLcode *err)
+                        const void *buffer, size_t len, bool eos,
+                        CURLcode *err)
 {
   struct connectdata *conn = data->conn;
   curl_socket_t fd = conn->sock[sockindex];
+  (void)eos; /* unused */
   *err = CURLE_OK;
   return sec_write(data, conn, fd, buffer, len);
 }
