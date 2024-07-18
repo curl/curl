@@ -49,6 +49,8 @@ This release includes the following bugfixes:
  o cmake: alpha-sort feature list [161]
  o cmake: always build unit tests with the `testdeps` target [20]
  o cmake: bring `curl-config.cmake` closer to `FindCURL` [130]
+ o cmake: create `configurehelp.pm` like autotools does [252]
+ o cmake: delete unused `HAVE_LIBSSH2`, `HAVE_LIBSOCKET` macros [251]
  o cmake: detect `libidn2` also via `pkg-config` [239]
  o cmake: enable SOVERSION for Cygwin and `CMAKE_DLL_NAME_WITH_SOVERSION` [119]
  o cmake: fix `-Wredundant-decls` in unity/mingw-w64 builds [15]
@@ -63,6 +65,7 @@ This release includes the following bugfixes:
  o cmake: improve wolfSSL detection [190]
  o cmake: show protocols, then features [180]
  o cmake: stop setting SOVERSION for the static lib target [127]
+ o cmake: sync CA bundle/path detection with autotools [253]
  o cmake: sync protocol/feature list with `curl -V` output [182]
  o cmake: use `APPLE` instead of `CMAKE_SYSTEM_NAME` string [24]
  o cmake: whitespace, formatting/tidy-up in comments [25]
@@ -77,6 +80,7 @@ This release includes the following bugfixes:
  o cmdline-opts: shorten six help texts [178]
  o cmdline: expand proxy option explanations [97]
  o code: language cleanup in comments [186]
+ o configure: CA bundle/path detection fixes [254]
  o configure: fix `SystemConfiguration` detection [243]
  o configure: fix pkg-config library name 'libnghttp3' [138]
  o configure: limit `SystemConfiguration` test to non-c-ares, IPv6 builds [242]
@@ -96,6 +100,7 @@ This release includes the following bugfixes:
  o curl_str[n]equal.md: tidy up text to make them stand-alone [195]
  o curl_url_set.md: libcurl only parses :// URLs [48]
  o curl_url_set: elaborate on scheme guessing [191]
+ o curldown: make 'added-in:' a mandatory header field [226]
  o CURLOPT_CONNECTTIMEOUT*: clarify, document the milliseond version [105]
  o CURLOPT_ECH.md: remove repeated 'if' [109]
  o CURLOPT_NETRC.md: clarify what it does on Windows [140]
@@ -112,6 +117,7 @@ This release includes the following bugfixes:
  o docs: reference non deprecated libcurl options [113]
  o docs: start markdown headers with capital letter where applicable [236]
  o doh-insecure.md: expand [96]
+ o doh: fix cleanup [228]
  o doh: fix leak and zero-length HTTPS RR crash [227]
  o dump-header.md: mention minus for stdout [149]
  o examples/threaded-ssl: remove locking callback code [83]
@@ -122,6 +128,7 @@ This release includes the following bugfixes:
  o FEATURES.md: refresh [208]
  o file: separate fake headers and body with a stand-alone CRLF [137]
  o get.d: clarify the explanation [32]
+ o GHA/windows: add MSVC wolfSSL job with test [250]
  o GHA/windows: ignore FTP test results for old-mingw-w64
  o GHA: add MSVC UWP job, expand jobs with more options [216]
  o GHA: detect and warn for more English contractions [123]
@@ -137,11 +144,15 @@ This release includes the following bugfixes:
  o help: add flags to output and ssh categories [202]
  o hostip: skip error check for infallible function call [237]
  o http/3: add shutdown support [154]
+ o http/3: resume upload on ack if we have more data to send [232]
  o http: remove "struct HTTP" [134]
  o http: write last header line late [44]
  o IDN: fix ß with AppleIDN [220]
+ o idn: make macidn fail before trying conversion if name too long [235]
+ o idn: tweak buffer use when converting with macidn [245]
  o lib/v*: tidy up types and casts [64]
  o lib: add a few DEBUGASSERT(data) to aid code analyzers [187]
+ o lib: add failure reason on bind errors [247]
  o lib: fix gcc warning in certain debug builds [19]
  o lib: fix thread entry point to return `DWORD` on WinCE [85]
  o lib: graceful connection shutdown [162]
@@ -166,6 +177,7 @@ This release includes the following bugfixes:
  o managen: warn on excessively long help texts [87]
  o MANUAL.md: wrap two example urls that overrun styling [234]
  o mbedtls: check version for cipher id [12]
+ o mbedtls: correct the error message for cert blob parsing failure [225]
  o mbedtls: send close-notify on close [11]
  o mbedtls: v3.6.0 workarounds [89]
  o misc: fix typos [108]
@@ -192,6 +204,7 @@ This release includes the following bugfixes:
  o request.md: language fix [70]
  o request: change the struct field bodywrites to a bool, only for hyper [132]
  o reuse: switch to REUSE 3.2 and REUSE.toml [184]
+ o runtests: show name and keywords for failed tests in summary [249]
  o runtests: sort test IDs in summary lines [33]
  o runtests: support %DATE for YYYY-MM-DD of right now
  o runtests: support %VERNUM
@@ -200,6 +213,8 @@ This release includes the following bugfixes:
  o sectransp: fix clang compiler warnings, stop silencing them [223]
  o sectransp: remove large cipher table [76]
  o sectransp: use common code for cipher suite lookup [54]
+ o sendf: fix CRLF conversion of input [258]
+ o smtp: for starttls, do full upgrade [260]
  o socket: change TCP keepalive from ms to seconds on DragonFly BSD [74]
  o socket: use SOCK_NONBLOCK to eliminate extra system call [86]
  o socketpair: add `eventfd` and use `SOCK_NONBLOCK` for `socketpair()` [81]
@@ -210,8 +225,10 @@ This release includes the following bugfixes:
  o test1139: scan .md files instead of .3 ones [197]
  o test1175: scan libcurl-errors.md, not the generated .3 version [188]
  o test1486: verify that write-out.md and tool_writeout.c are in sync [112]
+ o test2600: disable on win32 [259]
  o test: add test1484, for HEAD with content [18]
  o test: add test1546, chunked not last transfer encoding [17]
+ o tests/scripts: call it 'manpage' (single word) [229]
  o tests: add pytest for --ciphers and --tls13-ciphers options [38]
  o tests: delete `CharConv` remains [201]
  o tests: delete redundant `!MSDOS` guard [84]
@@ -221,6 +238,7 @@ This release includes the following bugfixes:
  o tests: include current directory when running test Perl commands [205]
  o tests: log "Throwing away" messages before throwing away
  o tests: run with "--trace-config all" to provide even more info [6]
+ o tests: sync feature names with `curl -V` [257]
  o tests: test_17_ssl_use.py clarify mbedTLS TLSv1.3 support [43]
  o tests: use exec when spawning nghttpx [45]
  o tidy-up: use consistent casing for Windows directories [28]
@@ -274,12 +292,12 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alejandro R. Sedeño, alervd on github, Alexander Shtuchkin, Alex Snast,
-  Andy Pan, Andy Reitz, Aurélien Pierre, Ayesh Karunaratne, Bo Anderson,
-  brian m. carlson, Christian Heusel, Christian Schmitz, CMD, Dan Fandrich,
-  Daniel Gustafsson, Daniel Stenberg, dependabot[bot], Dexter Gerig, dogma,
-  Dominik Piątkowski, Dorian Craps, edmcln on github, Eli Schwartz,
-  Elliott Balsley, fds242 on github, Guilherme Puida, Harry Sintonen,
-  James Abbatiello, Jan Venekamp, Jay Guerette, Jiang Wenjian,
+  Andy Pan, Andy Reitz, Aurélien Pierre, Ayesh Karunaratne, Bhanu Prakash,
+  Bo Anderson, brian m. carlson, Christian Heusel, Christian Schmitz, CMD,
+  Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, dependabot[bot],
+  Dexter Gerig, dogma, Dominik Piątkowski, Dorian Craps, edmcln on github,
+  Eli Schwartz, Elliott Balsley, fds242 on github, Guilherme Puida,
+  Harry Sintonen, James Abbatiello, Jan Venekamp, Jay Guerette, Jiang Wenjian,
   Jonathan Matthews, Joseph Chen, Junho Choi, Kai Pastor, kartatz,
   Keerthi Timmaraju, Lee Li, Luke Hamburg, Marcel Raad, Martin Peck,
   Matthias Gatto, Matthieu Baerts, Matt Jolly, Max Mehl, Morgan Willcock,
@@ -288,8 +306,9 @@ advice from friends like these:
   Ryan Carsten Schmidt, Samuel Chiang, saurabhsingh-dev on github,
   Sebastian Andersson, Sergey Bronnikov, Sergey Markelov, Sertonix,
   Stefan Eissing, Stephen Farrell, Tal Regev, Tatsuhiro Tsujikawa,
-  Viktor Szakats, vvb2060, Yedaya Katsman, z2_, 李四
-  (71 contributors)
+  tomy2105 on github, Viktor Szakats, vuonganh1993 on github, vvb2060,
+  Yedaya Katsman, z2_, 李四, 罗朝辉
+  (75 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -516,11 +535,17 @@ References to bug reports and discussions on issues:
  [221] = https://curl.se/bug/?i=14175
  [222] = https://curl.se/bug/?i=14172
  [223] = https://curl.se/bug/?i=14162
+ [225] = https://curl.se/bug/?i=14224
+ [226] = https://curl.se/bug/?i=14217
  [227] = https://curl.se/bug/?i=14151
+ [228] = https://curl.se/bug/?i=14207
+ [229] = https://curl.se/bug/?i=14216
  [230] = https://curl.se/bug/?i=14159
  [231] = https://curl.se/bug/?i=13700
+ [232] = https://curl.se/bug/?i=14198
  [233] = https://curl.se/bug/?i=14153
  [234] = https://curl.se/bug/?i=14149
+ [235] = https://curl.se/bug/?i=14215
  [236] = https://curl.se/bug/?i=14115
  [237] = https://curl.se/bug/?i=14147
  [238] = https://curl.se/bug/?i=14145
@@ -530,4 +555,16 @@ References to bug reports and discussions on issues:
  [242] = https://curl.se/bug/?i=14126
  [243] = https://curl.se/bug/?i=14130
  [244] = https://curl.se/bug/?i=14128
+ [245] = https://curl.se/bug/?i=14215
  [246] = https://curl.se/bug/?i=14114
+ [247] = https://curl.se/bug/?i=14221
+ [249] = https://curl.se/bug/?i=14174
+ [250] = https://curl.se/bug/?i=14193
+ [251] = https://curl.se/bug/?i=14178
+ [252] = https://curl.se/bug/?i=14129
+ [253] = https://curl.se/bug/?i=14182
+ [254] = https://curl.se/bug/?i=14186
+ [257] = https://curl.se/bug/?i=14183
+ [258] = https://curl.se/bug/?i=14165
+ [259] = https://curl.se/bug/?i=14177
+ [260] = https://curl.se/bug/?i=14166
