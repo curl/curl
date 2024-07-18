@@ -51,7 +51,7 @@ option.
 
 # DEFAULT
 
-NULL, use internal default
+NULL, use internal built-in list
 
 # EXAMPLE
 

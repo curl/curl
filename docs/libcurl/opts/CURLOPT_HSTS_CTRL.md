@@ -53,7 +53,7 @@ to the file when closing the handle.
 
 # DEFAULT
 
-0. HSTS is disabled by default.
+0
 
 # EXAMPLE
 

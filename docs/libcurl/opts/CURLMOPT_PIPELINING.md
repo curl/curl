@@ -51,9 +51,7 @@ existing connection if possible. This requires HTTP/2 or HTTP/3.
 
 # DEFAULT
 
-Since 7.62.0, **CURLPIPE_MULTIPLEX** is enabled by default.
-
-Before that, default was **CURLPIPE_NOTHING**.
+**CURLPIPE_MULTIPLEX**
 
 # EXAMPLE
 
@@ -66,10 +64,14 @@ int main(void)
 }
 ~~~
 
-# NOTES
+# HISTORY
 
 The multiplex support bit was added in 7.43.0. HTTP/1 Pipelining support was
 disabled in 7.62.0.
+
+Since 7.62.0, **CURLPIPE_MULTIPLEX** is enabled by default.
+
+Before that, default was **CURLPIPE_NOTHING**.
 
 # RETURN VALUE
 

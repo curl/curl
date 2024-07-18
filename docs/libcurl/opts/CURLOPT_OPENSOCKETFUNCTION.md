@@ -71,7 +71,7 @@ CURLOPT_SOCKOPTFUNCTION(3) to signal that it already is connected.
 
 # DEFAULT
 
-The default behavior is the equivalent of this:
+The equivalent of this:
 ~~~c
    return socket(addr->family, addr->socktype, addr->protocol);
 ~~~

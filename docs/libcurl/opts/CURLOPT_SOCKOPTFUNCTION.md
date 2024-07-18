@@ -73,7 +73,7 @@ not attempt to connect (again).
 
 # DEFAULT
 
-By default, this callback is NULL and unused.
+NULL
 
 # EXAMPLE
 

@@ -88,8 +88,7 @@ specified when passed to the name resolver functions.
 
 # DEFAULT
 
-There is no default URL. If this option is not set, no transfer can be
-performed.
+NULL. If this option is not set, no transfer can be performed.
 
 # SECURITY CONCERNS
 

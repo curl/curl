@@ -41,7 +41,7 @@ might experience crashes.
 
 # DEFAULT
 
-By default, this is a FILE * to stdin.
+stdin
 
 # EXAMPLE
 

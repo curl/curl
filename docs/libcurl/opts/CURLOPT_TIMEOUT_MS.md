@@ -35,7 +35,7 @@ See CURLOPT_TIMEOUT(3) for details.
 
 # DEFAULT
 
-Default timeout is 0 (zero) which means it never times out during transfer.
+0 (zero) which means it never times out during transfer.
 
 # EXAMPLE
 

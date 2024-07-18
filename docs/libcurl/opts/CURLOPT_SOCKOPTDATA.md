@@ -31,7 +31,7 @@ argument in the sockopt callback set with CURLOPT_SOCKOPTFUNCTION(3).
 
 # DEFAULT
 
-The default value of this parameter is NULL.
+NULL
 
 # EXAMPLE
 

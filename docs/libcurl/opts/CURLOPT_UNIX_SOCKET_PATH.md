@@ -48,7 +48,7 @@ option.
 
 # DEFAULT
 
-Default is NULL, meaning that no Unix domain sockets are used.
+NULL - no Unix domain sockets are used.
 
 # EXAMPLE
 

@@ -65,11 +65,12 @@ for "date", **"test4_request"** for "request type",
 If you use just "test", instead of "test:try", test is used for every
 generated string.
 
+Setting CURLOPT_HTTPAUTH(3) with the CURLAUTH_AWS_SIGV4 bit set is the same as
+setting this option with a **"aws:amz"** parameter.
+
 # DEFAULT
 
-By default, the value of this parameter is NULL.
-Calling CURLOPT_HTTPAUTH(3) with CURLAUTH_AWS_SIGV4 is the same
-as calling this with **"aws:amz"** in parameter.
+NULL
 
 # EXAMPLE
 

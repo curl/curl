@@ -60,7 +60,7 @@ signals to be used unless CURLOPT_NOSIGNAL(3) is set.
 
 # DEFAULT
 
-Default timeout is 0 (zero) which means it never times out during transfer.
+0 (zero) which means it never times out during transfer.
 
 # EXAMPLE
 

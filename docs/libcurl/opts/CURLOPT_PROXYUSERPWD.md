@@ -41,7 +41,7 @@ option.
 
 # DEFAULT
 
-This is NULL by default.
+NULL
 
 # EXAMPLE
 

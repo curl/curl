@@ -90,6 +90,9 @@ user + password.
 Unix domain sockets are supported for socks proxies since 7.84.0. Set
 localhost for the host part. e.g. socks5h://localhost/path/to/socket.sock
 
+When you set a hostname to use, do not assume that there is any particular
+single port number used widely for proxies. Specify it.
+
 When a proxy is used, the active FTP mode as set with *CUROPT_FTPPORT(3)*,
 cannot be used.
 
@@ -108,10 +111,7 @@ variables.
 
 # DEFAULT
 
-Default is NULL, meaning no proxy is used.
-
-When you set a hostname to use, do not assume that there is any particular
-single port number used widely for proxies. Specify it!
+NULL
 
 # EXAMPLE
 

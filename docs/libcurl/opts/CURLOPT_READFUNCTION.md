@@ -73,7 +73,7 @@ and it allows for better error checking.
 
 # DEFAULT
 
-The default internal read callback is fread().
+fread(3)
 
 # EXAMPLE
 

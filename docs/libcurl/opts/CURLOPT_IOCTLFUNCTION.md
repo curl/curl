@@ -62,7 +62,7 @@ parameter is ignored when seeking.
 
 # DEFAULT
 
-By default, this parameter is set to NULL. Not used.
+NULL
 
 # EXAMPLE
 

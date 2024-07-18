@@ -44,7 +44,7 @@ closed.
 
 # DEFAULT
 
-By default libcurl uses the standard socket close function.
+Use the standard socket close function.
 
 # EXAMPLE
 

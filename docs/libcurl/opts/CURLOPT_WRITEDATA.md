@@ -42,7 +42,7 @@ crashes.
 
 # DEFAULT
 
-By default, this is a FILE * to stdout.
+stdout
 
 # EXAMPLE
 

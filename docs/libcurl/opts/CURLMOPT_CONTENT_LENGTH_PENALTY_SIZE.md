@@ -37,7 +37,7 @@ CURLMOPT_MAX_PIPELINE_LENGTH(3).
 
 # DEFAULT
 
-The default value is 0, which means that the size penalization is inactive.
+0, which means that the size penalization is inactive.
 
 # EXAMPLE
 

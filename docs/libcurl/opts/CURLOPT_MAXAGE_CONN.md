@@ -42,7 +42,7 @@ cache that is older than this set *age*, it is closed instead.
 
 # DEFAULT
 
-Default maximum age is set to 118 seconds.
+118 seconds
 
 # EXAMPLE
 

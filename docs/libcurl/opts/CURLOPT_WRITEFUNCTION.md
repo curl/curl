@@ -73,7 +73,7 @@ do that.
 
 # DEFAULT
 
-libcurl uses 'fwrite' as a callback by default.
+fwrite(3)
 
 # EXAMPLE
 

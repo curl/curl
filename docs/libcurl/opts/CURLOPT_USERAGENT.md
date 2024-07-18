@@ -37,7 +37,7 @@ option.
 
 # DEFAULT
 
-NULL, no User-Agent: header is used by default.
+NULL, no User-Agent: header is used.
 
 # EXAMPLE
 

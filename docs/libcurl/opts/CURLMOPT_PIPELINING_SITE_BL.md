@@ -37,7 +37,7 @@ Pass a NULL pointer to clear the block list.
 
 # DEFAULT
 
-The default value is NULL, which means that there is no block list.
+NULL, which means that there is no block list.
 
 # EXAMPLE
 

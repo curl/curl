@@ -31,7 +31,7 @@ argument in the ioctl callback set with CURLOPT_IOCTLFUNCTION(3).
 
 # DEFAULT
 
-By default, the value of this parameter is NULL.
+NULL
 
 # EXAMPLE
 

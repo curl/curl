@@ -41,7 +41,7 @@ option.
 
 # DEFAULT
 
-NULL - use system default
+NULL
 
 # EXAMPLE
 

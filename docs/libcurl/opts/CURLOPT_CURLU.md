@@ -45,7 +45,7 @@ updated contents is used.
 
 # DEFAULT
 
-The default value of this parameter is NULL.
+NULL
 
 # EXAMPLE
 

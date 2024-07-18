@@ -64,7 +64,7 @@ many systems!
 
 # DEFAULT
 
-By default, this is NULL and unused.
+NULL
 
 # EXAMPLE
 

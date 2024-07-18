@@ -70,7 +70,7 @@ option.
 
 # DEFAULT
 
-NULL, use internal default
+NULL, use built-in list
 
 # EXAMPLE
 
