@@ -1012,8 +1012,10 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
   else if(ret) {
     char errorbuf[128];
+#if MBEDTLS_VERSION_NUMBER >= 0x03020000
     CURL_TRC_CF(data, cf, "TLS version %04X",
                 mbedtls_ssl_get_version_number(&backend->ssl));
+#endif
     mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
     failf(data, "ssl_handshake returned: (-0x%04X) %s",
           -ret, errorbuf);
