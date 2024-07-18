@@ -654,7 +654,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
     if(ret) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-      failf(data, "Error reading private key %s - mbedTLS: (-0x%04X) %s",
+      failf(data, "Error reading client cert data %s - mbedTLS: (-0x%04X) %s",
             ssl_config->key, -ret, errorbuf);
       return CURLE_SSL_CERTPROBLEM;
     }
