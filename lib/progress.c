@@ -587,10 +587,8 @@ static void progress_meter(struct Curl_easy *data)
  * Curl_pgrsUpdate() returns 0 for success or the value returned by the
  * progress callback!
  */
-int Curl_pgrsUpdate(struct Curl_easy *data)
+static int pgrsupdate(struct Curl_easy *data, bool showprogress)
 {
-  struct curltime now = Curl_now(); /* what time is it */
-  bool showprogress = progress_calc(data, now);
   if(!(data->progress.flags & PGRS_HIDE)) {
     if(data->set.fxferinfo) {
       int result;
@@ -630,4 +628,20 @@ int Curl_pgrsUpdate(struct Curl_easy *data)
   }
 
   return 0;
+}
+
+int Curl_pgrsUpdate(struct Curl_easy *data)
+{
+  struct curltime now = Curl_now(); /* what time is it */
+  bool showprogress = progress_calc(data, now);
+  return pgrsupdate(data, showprogress);
+}
+
+/*
+ * Update all progress, do not do progress meter/callbacks.
+ */
+void Curl_pgrsUpdate_nometer(struct Curl_easy *data)
+{
+  struct curltime now = Curl_now(); /* what time is it */
+  (void)progress_calc(data, now);
 }
