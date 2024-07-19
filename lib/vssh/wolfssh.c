@@ -220,13 +220,15 @@ static void state(struct Curl_easy *data, sshstate nowstate)
 }
 
 static ssize_t wscp_send(struct Curl_easy *data, int sockindex,
-                         const void *mem, size_t len, CURLcode *err)
+                         const void *mem, size_t len, bool eos,
+                         CURLcode *err)
 {
   ssize_t nwrite = 0;
   (void)data;
   (void)sockindex; /* we only support SCP on the fixed known primary socket */
   (void)mem;
   (void)len;
+  (void)eos;
   (void)err;
 
   return nwrite;
@@ -247,13 +249,14 @@ static ssize_t wscp_recv(struct Curl_easy *data, int sockindex,
 
 /* return number of sent bytes */
 static ssize_t wsftp_send(struct Curl_easy *data, int sockindex,
-                          const void *mem, size_t len, CURLcode *err)
+                          const void *mem, size_t len, bool eos, CURLcode *err)
 {
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = &conn->proto.sshc;
   word32 offset[2];
   int rc;
   (void)sockindex;
+  (void)eos;
 
   offset[0] = (word32)sshc->offset&0xFFFFFFFF;
   offset[1] = (word32)(sshc->offset>>32)&0xFFFFFFFF;
