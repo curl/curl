@@ -572,7 +572,7 @@ jobs:
         timeout-minutes: 5
         run: |
           if [[ '${{ matrix.install }}' = *'libressl'* ]]; then
-            # without this, CMake gets confused about the non-vcpkg OpenSSL
+            # without this, CMake gets confused by the non-vcpkg OpenSSL
             # installed on the runner and fails when linking.
             options+=" -DOPENSSL_ROOT_DIR=$VCPKG_INSTALLATION_ROOT/installed/${{ matrix.arch }}-${{ matrix.plat }}"
           fi
