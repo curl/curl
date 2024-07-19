@@ -665,7 +665,6 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
  */
 
 #define HOST_ERROR   -1 /* out of memory */
-#define HOST_BAD     -2 /* bad IPv4 address */
 
 #define HOST_NAME    1
 #define HOST_IPV4    2
@@ -836,7 +835,6 @@ static CURLUcode parse_authority(struct Curl_URL *u,
   case HOST_ERROR:
     uc = CURLUE_OUT_OF_MEMORY;
     break;
-  case HOST_BAD:
   default:
     uc = CURLUE_BAD_HOSTNAME; /* Bad IPv4 address even */
     break;
