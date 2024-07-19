@@ -1354,7 +1354,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
       char *dest = target;
 
       /* translate x.x.x.x to x,x,x,x */
-      while(source && *source) {
+      while(*source) {
         if(*source == '.')
           *dest = ',';
         else
