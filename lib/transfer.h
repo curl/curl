@@ -32,7 +32,6 @@ char *Curl_checkheaders(const struct Curl_easy *data,
 void Curl_init_CONNECT(struct Curl_easy *data);
 
 CURLcode Curl_pretransfer(struct Curl_easy *data);
-CURLcode Curl_posttransfer(struct Curl_easy *data);
 
 typedef enum {
   FOLLOW_NONE,  /* not used within the function, just a placeholder to
