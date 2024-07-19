@@ -171,7 +171,7 @@ jobs:
 
       - name: 'cmake run tests'
         if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 40
+        timeout-minutes: 15
         run: |
           export TFLAGS='-j8 ${{ matrix.tflags }}'
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
@@ -353,7 +353,7 @@ jobs:
 
       - name: 'cmake run tests'
         if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 40
+        timeout-minutes: 10
         run: |
           export TFLAGS='-j14 ${{ matrix.tflags }}'
           if [ '${{ matrix.sys }}' != 'msys' ]; then
@@ -469,7 +469,7 @@ jobs:
 
       - name: 'cmake run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 40
+        timeout-minutes: 10
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
           export TFLAGS='-j14 !TFTP !MQTT !WebSockets ~FTP ${{ matrix.tflags }}'
@@ -570,7 +570,7 @@ jobs:
         timeout-minutes: 5
         run: |
           if [[ '${{ matrix.install }}' = *'libressl'* ]]; then
-            # without this, CMake gets confused about the non-vcpkg OpenSSL
+            # without this, CMake gets confused by the non-vcpkg OpenSSL
             # installed on the runner and fails when linking.
             options+=" -DOPENSSL_ROOT_DIR=$VCPKG_INSTALLATION_ROOT/installed/${{ matrix.arch }}-${{ matrix.plat }}"
           fi
@@ -618,7 +618,7 @@ jobs:
 
       - name: 'cmake run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 30
+        timeout-minutes: 12
         run: |
           export TFLAGS='-j14 !TFTP !MQTT !WebSockets !SMTP ~FTP ${{ matrix.tflags }}'
           if [[ '${{ matrix.config }}' = *'-DUSE_WIN32_IDN=ON'* ]]; then
