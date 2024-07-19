@@ -1869,6 +1869,20 @@ static void set_in_callback(struct Curl_multi *multi, bool value)
   multi->in_callback = value;
 }
 
+/*
+ * posttransfer() is called immediately after a transfer ends
+ */
+static void multi_posttransfer(struct Curl_easy *data)
+{
+#if defined(HAVE_SIGNAL) && defined(SIGPIPE) && !defined(HAVE_MSG_NOSIGNAL)
+  /* restore the signal handler for SIGPIPE before we get back */
+  if(!data->set.no_signal)
+    signal(SIGPIPE, data->state.prev_signal);
+#else
+  (void)data; /* unused parameter */
+#endif
+}
+
 static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                  struct curltime *nowp,
                                  struct Curl_easy *data)
@@ -1891,7 +1905,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     /* a multi-level callback returned error before, meaning every individual
      transfer now has failed */
     result = CURLE_ABORTED_BY_CALLBACK;
-    Curl_posttransfer(data);
+    multi_posttransfer(data);
     multi_done(data, result, FALSE);
     multistate(data, MSTATE_COMPLETED);
   }
@@ -2097,7 +2111,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
       else if(result) {
         /* failure detected */
-        Curl_posttransfer(data);
+        multi_posttransfer(data);
         multi_done(data, result, TRUE);
         stream_error = TRUE;
         break;
@@ -2127,7 +2141,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
       else {
         /* failure detected */
-        Curl_posttransfer(data);
+        multi_posttransfer(data);
         multi_done(data, result, TRUE);
         stream_error = TRUE;
       }
@@ -2143,7 +2157,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
       else if(result) {
         /* failure detected */
-        Curl_posttransfer(data);
+        multi_posttransfer(data);
         multi_done(data, result, TRUE);
         stream_error = TRUE;
       }
@@ -2166,7 +2180,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           /* failure in pre-request callback - do not do any other
              processing */
           result = CURLE_ABORTED_BY_CALLBACK;
-          Curl_posttransfer(data);
+          multi_posttransfer(data);
           multi_done(data, result, FALSE);
           stream_error = TRUE;
           break;
@@ -2241,7 +2255,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             stream_error = TRUE;
           }
 
-          Curl_posttransfer(data);
+          multi_posttransfer(data);
           drc = multi_done(data, result, FALSE);
 
           /* When set to retry the connection, we must go back to the CONNECT
@@ -2273,7 +2287,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         }
         else {
           /* failure detected */
-          Curl_posttransfer(data);
+          multi_posttransfer(data);
           if(data->conn)
             multi_done(data, result, FALSE);
           stream_error = TRUE;
@@ -2295,7 +2309,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
       else {
         /* failure detected */
-        Curl_posttransfer(data);
+        multi_posttransfer(data);
         multi_done(data, result, FALSE);
         stream_error = TRUE;
       }
@@ -2321,7 +2335,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
       else {
         /* failure detected */
-        Curl_posttransfer(data);
+        multi_posttransfer(data);
         multi_done(data, result, FALSE);
         stream_error = TRUE;
       }
@@ -2363,7 +2377,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
            result != CURLE_HTTP2_STREAM)
           streamclose(data->conn, "Transfer returned error");
 
-        Curl_posttransfer(data);
+        multi_posttransfer(data);
         multi_done(data, result, TRUE);
       }
       else {
@@ -2485,13 +2499,13 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
            result != CURLE_HTTP2_STREAM)
           streamclose(data->conn, "Transfer returned error");
 
-        Curl_posttransfer(data);
+        multi_posttransfer(data);
         multi_done(data, result, TRUE);
       }
       else if(data->req.done && !Curl_cwriter_is_paused(data)) {
 
         /* call this even if the readwrite function returned error */
-        Curl_posttransfer(data);
+        multi_posttransfer(data);
 
         /* When we follow redirects or is set to retry the connection, we must
            to go back to the CONNECT state */
@@ -2642,7 +2656,7 @@ statemachine_end:
         }
         else if(data->mstate == MSTATE_CONNECT) {
           /* Curl_connect() failed */
-          (void)Curl_posttransfer(data);
+          multi_posttransfer(data);
           Curl_pgrsUpdate_nometer(data);
         }
 
