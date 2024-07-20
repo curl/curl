@@ -152,8 +152,15 @@ jobs:
             make -j3 examples
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               make -j3 -C tests
+              # blackhole?
+              sysctl net.inet.tcp.blackhole
+              # make sure we don't run blackhole != 0
+              sudo sysctl net.inet.tcp.blackhole=0
+              # Some tests won't run if run as root so run them as another user.
+              # Make directories world writable so the test step can write wherever it needs.
+              find .. -type d -exec chmod 777 {} \;
               export TFLAGS='-j12 -qs'
-              make test-ci V=1
+              sudo -u nobody make test-ci V=1
             fi
 
       - name: 'cmake'
@@ -186,8 +193,15 @@ jobs:
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               cmake --build bld --config Debug --parallel 3 --target testdeps
+              # blackhole?
+              sysctl net.inet.tcp.blackhole
+              # make sure we don't run blackhole != 0
+              sudo sysctl net.inet.tcp.blackhole=0
+              # Some tests won't run if run as root so run them as another user.
+              # Make directories world writable so the test step can write wherever it needs.
+              find .. -type d -exec chmod 777 {} \;
               export TFLAGS='-j12 -qs'
-              cmake --build bld --config Debug --target test-ci
+              sudo -u nobody cmake --build bld --config Debug --target test-ci
             fi
 
   omnios:
