@@ -1,10 +1,10 @@
-curl and libcurl 8.8.1
+curl and libcurl 8.9.0
 
  Public curl releases:         258
  Command line options:         263
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3204
+ Contributors:                 3211
 
 This release includes the following changes:
 
@@ -24,8 +24,6 @@ This release includes the following bugfixes:
 
  o (lib)curl.rc: set debug flag also for `CURLDEBUG` and `UNITTESTS` [2]
  o asyn-thread: avoid using GetAddrInfoExW with impersonation [7]
- o autoconf: remove 'deeper' checks for `AC_CHECK_FUNCS` [23]
- o autotools: fix pkg-config names (zstd, ngtcp2*) [170]
  o aws-sigv4: url encode the canonical path [55]
  o BINDINGS: update java link to one that exists [115]
  o build: add Debug, TrackMemory, ECH to feature list [218]
@@ -83,7 +81,9 @@ This release includes the following bugfixes:
  o configure: CA bundle/path detection fixes [254]
  o configure: fix `SystemConfiguration` detection [243]
  o configure: fix pkg-config library name 'libnghttp3' [138]
+ o configure: fix pkg-config names (zstd, ngtcp2*) [170]
  o configure: limit `SystemConfiguration` test to non-c-ares, IPv6 builds [242]
+ o configure: remove 'deeper' checks for `AC_CHECK_FUNCS` [23]
  o configure: require a QUIC library if nghttp3 is used [142]
  o configure: sort feature list, lowercase protocols, use backticks [206]
  o configure: use `$EGREP` in place of `grep -E` [41]
@@ -92,8 +92,12 @@ This release includes the following bugfixes:
  o connection: shutdown TLS (for FTP) better [104]
  o cookie-jar.md: see also --junk-session-cookies [144]
  o curl-config: revert to backticks to support old target envs [88]
+ o curl: allow etag and content-disposition for 3xx reply [117]
+ o curl: bsearch the --write-out variable name [102]
+ o curl: check for --disable case *sensitively* [199]
  o curl: list categories in --help [219]
  o curl: make warnings and other messages aware of terminal width [58]
+ o curl: output "flying saucers" with leading carriage return [121]
  o curl_easy_escape: elaborate a little on encoding a URL [193]
  o curl_mprintf.md: add missing comma
  o curl_multi_poll.md: expand the example with an custom file descriptor [21]
@@ -105,11 +109,11 @@ This release includes the following bugfixes:
  o CURLOPT_ECH.md: remove repeated 'if' [109]
  o CURLOPT_NETRC.md: clarify what it does on Windows [140]
  o CURLOPT_RESOLVE.md: mention hostname can be wildcard ('*') [150]
+ o CURLOPT_SSL_VERIFYHOST.md: refresh [224]
  o CURLOPT_TLSAUTH_PASSWORD/USERNAME.md: language fixups [155]
  o DISTROS: add a link to the list archive [22]
  o DISTROS: add AlmaLinux package source link
  o DISTROS: add MSYS2 (native) links [100]
- o Dockerfile: update debian:bookworm-slim to 84d83b2 [121]
  o docs/cmdline-opts: fix mail-auth example TLD typo [35]
  o docs/cmdline-opts: remove two superfluous "Added in" mentions [143]
  o docs/libcurl: polish the single-line descriptions [159]
@@ -127,6 +131,7 @@ This release includes the following bugfixes:
  o examples: suppress deprecation warnings locally [211]
  o FEATURES.md: refresh [208]
  o file: separate fake headers and body with a stand-alone CRLF [137]
+ o ftp: remove redundant null pointer check in loop condition [256]
  o get.d: clarify the explanation [32]
  o GHA/windows: add MSVC wolfSSL job with test [250]
  o GHA/windows: ignore FTP test results for old-mingw-w64
@@ -147,7 +152,7 @@ This release includes the following bugfixes:
  o http/3: resume upload on ack if we have more data to send [232]
  o http: remove "struct HTTP" [134]
  o http: write last header line late [44]
- o IDN: fix ß with AppleIDN [220]
+ o idn: fix ß with AppleIDN [220]
  o idn: make macidn fail before trying conversion if name too long [235]
  o idn: tweak buffer use when converting with macidn [245]
  o lib/v*: tidy up types and casts [64]
@@ -176,17 +181,19 @@ This release includes the following bugfixes:
  o managen: output tabs for each 8 leading spaces [164]
  o managen: warn on excessively long help texts [87]
  o MANUAL.md: wrap two example urls that overrun styling [234]
+ o mbedtls: check version before getting tls version [261]
  o mbedtls: check version for cipher id [12]
  o mbedtls: correct the error message for cert blob parsing failure [225]
  o mbedtls: send close-notify on close [11]
  o mbedtls: v3.6.0 workarounds [89]
+ o md4: fix compilation with OpenSSL 1.x with md4 disabled [255]
  o misc: fix typos [108]
  o mk-ca-bundle.pl: delay 'curl -V' execution until it is needed [168]
  o multi: add multi->proto_hash, a key-value store for protocol data [37]
+ o multi: do a final progress update on connect failure [248]
  o multi: fix multi_wait() timeout handling [51]
  o multi: fix pollset during RESOLVING phase [166]
  o multi: multi_getsock(), check correct socket [167]
- o multi: pollset assertion only when IP connected [192]
  o ngtcp2+quictls: fix cert-status use [173]
  o noproxy: test bad ipv6 net size first [82]
  o openssl/gnutls: rectify the TLS version checks for QUIC [61]
@@ -243,12 +250,9 @@ This release includes the following bugfixes:
  o tests: use exec when spawning nghttpx [45]
  o tidy-up: use consistent casing for Windows directories [28]
  o TODO: remove some old, clarify, add something [31]
- o tool_cb_hdr: allow etag and content-disposition for 3xx reply [117]
  o tool_cb_hdr: return error for failed header writes [30]
  o tool_operate: avoid explicitly setting verifypeer to 1 [39]
- o tool_operate: check for --disable case *sensitively* [199]
  o tool_operate: simplify return code handling from url_proto() [198]
- o tool_writeout: bsearch the variable name [102]
  o tool_writeout: get certinfo only when needing it [101]
  o trace-ascii.md: mention "%" for stderr [146]
  o transfer: avoid polling socket every transfer loop [200]
@@ -258,6 +262,7 @@ This release includes the following bugfixes:
  o transfer: set CSELECT_IN if there is data pending [118]
  o unit2604: use 'unitfail' instead of 'error' variable [153]
  o url: allow DoH transfers to override max connection limit [68]
+ o urlapi: remove unused definition of HOST_BAD [262]
  o variable.md: make example use expand [207]
  o verify-synopsis.pl: work with .md files [185]
  o vms: fixed language in comment [110]
@@ -293,22 +298,23 @@ advice from friends like these:
 
   Alejandro R. Sedeño, alervd on github, Alexander Shtuchkin, Alex Snast,
   Andy Pan, Andy Reitz, Aurélien Pierre, Ayesh Karunaratne, Bhanu Prakash,
-  Bo Anderson, brian m. carlson, Christian Heusel, Christian Schmitz, CMD,
-  Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, dependabot[bot],
-  Dexter Gerig, dogma, Dominik Piątkowski, Dorian Craps, edmcln on github,
-  Eli Schwartz, Elliott Balsley, fds242 on github, Guilherme Puida,
-  Harry Sintonen, James Abbatiello, Jan Venekamp, Jay Guerette, Jiang Wenjian,
-  Jonathan Matthews, Joseph Chen, Junho Choi, Kai Pastor, kartatz,
-  Keerthi Timmaraju, Lee Li, Luke Hamburg, Marcel Raad, Martin Peck,
-  Matthias Gatto, Matthieu Baerts, Matt Jolly, Max Mehl, Morgan Willcock,
-  Olivier Bonaventure, Orgad Shaneh, Patrick Monnerat, Pavel Pavlov,
-  Philip Heiduck, pszlazak on github, RainRat, Ray Satiro, renovate[bot],
-  Ryan Carsten Schmidt, Samuel Chiang, saurabhsingh-dev on github,
-  Sebastian Andersson, Sergey Bronnikov, Sergey Markelov, Sertonix,
-  Stefan Eissing, Stephen Farrell, Tal Regev, Tatsuhiro Tsujikawa,
-  tomy2105 on github, Viktor Szakats, vuonganh1993 on github, vvb2060,
-  Yedaya Katsman, z2_, 李四, 罗朝辉
-  (75 contributors)
+  Bo Anderson, brian m. carlson, calvin2021y on github, Christian Heusel,
+  Christian Schmitz, Chris Webb, CMD, Dan Fandrich, Daniel Gustafsson,
+  Daniel Stenberg, dependabot[bot], Dexter Gerig, dogma, Dominik Piątkowski,
+  Dorian Craps, edmcln on github, Eli Schwartz, Elliott Balsley,
+  fds242 on github, Guilherme Puida, Harry Sintonen, icy17 on github,
+  James Abbatiello, Jan Venekamp, Jay Guerette, Jiang Wenjian,
+  Jonathan Matthews, Joseph Chen, Junho Choi, Justin Maggard, Kai Pastor,
+  kartatz, Keerthi Timmaraju, Lee Li, Luke Hamburg, Marcel Raad, martinevsky,
+  Martin Peck, Matthias Gatto, Matthieu Baerts, Matt Jolly, Max Mehl,
+  Morgan Willcock, Olivier Bonaventure, Orgad Shaneh, Patrick Monnerat,
+  Pavel Pavlov, Philip Heiduck, pszlazak on github, RainRat, Ray Satiro,
+  renovate[bot], Ryan Carsten Schmidt, Samuel Chiang,
+  saurabhsingh-dev on github, Sebastian Andersson, Sergey Bronnikov,
+  Sergey Markelov, Sertonix, Stefan Eissing, Stephen Farrell, Tal Regev,
+  Tatsuhiro Tsujikawa, tomy2105 on github, Viktor Szakats,
+  vuonganh1993 on github, vvb2060, Yedaya Katsman, z2_, 李四, 罗朝辉
+  (80 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -432,7 +438,7 @@ References to bug reports and discussions on issues:
  [118] = https://curl.se/bug/?i=13695
  [119] = https://curl.se/bug/?i=13898
  [120] = https://curl.se/bug/?i=13944
- [121] = https://curl.se/bug/?i=13934
+ [121] = https://curl.se/bug/?i=14213
  [122] = https://curl.se/bug/?i=13941
  [123] = https://curl.se/bug/?i=13940
  [124] = https://curl.se/bug/?i=13908
@@ -503,7 +509,6 @@ References to bug reports and discussions on issues:
  [189] = https://curl.se/bug/?i=14072
  [190] = https://curl.se/bug/?i=14064
  [191] = https://curl.se/bug/?i=14071
- [192] = https://curl.se/bug/?i=14108
  [193] = https://curl.se/bug/?i=14069
  [194] = https://curl.se/bug/?i=13963
  [195] = https://curl.se/bug/?i=14068
@@ -535,6 +540,7 @@ References to bug reports and discussions on issues:
  [221] = https://curl.se/bug/?i=14175
  [222] = https://curl.se/bug/?i=14172
  [223] = https://curl.se/bug/?i=14162
+ [224] = https://curl.se/bug/?i=14241
  [225] = https://curl.se/bug/?i=14224
  [226] = https://curl.se/bug/?i=14217
  [227] = https://curl.se/bug/?i=14151
@@ -558,13 +564,18 @@ References to bug reports and discussions on issues:
  [245] = https://curl.se/bug/?i=14215
  [246] = https://curl.se/bug/?i=14114
  [247] = https://curl.se/bug/?i=14221
+ [248] = https://curl.se/bug/?i=14204
  [249] = https://curl.se/bug/?i=14174
  [250] = https://curl.se/bug/?i=14193
  [251] = https://curl.se/bug/?i=14178
  [252] = https://curl.se/bug/?i=14129
  [253] = https://curl.se/bug/?i=14182
  [254] = https://curl.se/bug/?i=14186
+ [255] = https://curl.se/bug/?i=14218
+ [256] = https://curl.se/bug/?i=14234
  [257] = https://curl.se/bug/?i=14183
  [258] = https://curl.se/bug/?i=14165
  [259] = https://curl.se/bug/?i=14177
  [260] = https://curl.se/bug/?i=14166
+ [261] = https://curl.se/bug/?i=14228
+ [262] = https://curl.se/bug/?i=14235
