@@ -40,16 +40,16 @@ indicate that it was made for the hostname or address curl connects to, or the
 connection fails. Simply put, it means it has to have the same name in the
 certificate as is in the URL you operate against.
 
-Curl considers the server the intended one when the Common Name field or a
+curl considers the server the intended one when the Common Name field or a
 Subject Alternate Name field in the certificate matches the hostname in the
-URL to which you told Curl to connect.
+URL to which you told curl to connect.
 
 When the *verify* value is 0, the connection succeeds regardless of the names
 in the certificate. Use that ability with caution,
 
 This option controls checking the server's certificate's claimed identity. The
 separate CURLOPT_SSL_VERIFYPEER(3) options enables/disables verification that
-the sertificate is signed by a trusted Certificate Authority.
+the certificate is signed by a trusted Certificate Authority.
 
 WARNING: disabling verification of the certificate allows bad guys to
 man-in-the-middle the communication without you knowing it. Disabling
