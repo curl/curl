@@ -159,8 +159,7 @@ jobs:
               # Some tests won't run if run as root so run them as another user.
               # Make directories world writable so the test step can write wherever it needs.
               find .. -type d -exec chmod 777 {} \;
-              export TFLAGS='-j12 -qs'
-              sudo -u nobody make test-ci V=1
+              sudo -u nobody make test-ci V=1 TFLAGS='-j12 -qs'
             fi
 
       - name: 'cmake'
@@ -200,8 +199,7 @@ jobs:
               # Some tests won't run if run as root so run them as another user.
               # Make directories world writable so the test step can write wherever it needs.
               find .. -type d -exec chmod 777 {} \;
-              export TFLAGS='-j12 -qs'
-              sudo -u nobody cmake --build bld --config Debug --target test-ci
+              sudo -u nobody make test-ci V=1 TFLAGS='-j12 -qs'
             fi
 
   omnios:
