@@ -131,7 +131,7 @@ jobs:
           architecture: ${{ matrix.arch }}
           run: |
             # https://ports.freebsd.org/
-            pkgs='autoconf automake libtool pkgconf brotli openldap26-client libidn2 librtmp libnghttp2 nghttp2 stunnel'
+            pkgs='autoconf automake libtool pkgconf brotli openldap26-client libidn2 libnghttp2 nghttp2 stunnel'
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then
               pkgs="${pkgs} py311-openssl py311-impacket py311-cryptography"
             else
@@ -144,7 +144,7 @@ jobs:
               --prefix="${HOME}"/install \
               --enable-websockets \
               --with-openssl \
-              --with-brotli --enable-ldap --enable-ldaps --with-libidn2 --with-librtmp --with-libssh2 --with-nghttp2 --with-gssapi \
+              --with-brotli --enable-ldap --enable-ldaps --with-libidn2 --with-libssh2 --with-nghttp2 --with-gssapi \
               --disable-dependency-tracking || { tail -n 1000 config.log; false; }
             make -j3 install
             src/curl --disable --version
