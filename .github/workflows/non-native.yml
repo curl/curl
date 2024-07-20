@@ -216,5 +216,4 @@ jobs:
             src/curl --disable --version
             gmake -j3 examples
             gmake -j3 -C tests
-            export TFLAGS='-j12 -qs ~MQTT ~FTP'
-            gmake test-ci V=1
+            gmake test-ci V=1 TFLAGS='-j12 -qs ~MQTT ~FTP'
