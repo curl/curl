@@ -131,9 +131,6 @@ jobs:
           version: '14.1'
           architecture: ${{ matrix.arch }}
           run: |
-            echo '>>>>>>>>>>>>>>>>1'
-            sysctl net.inet.tcp.blackhole
-            echo '>>>>>>>>>>>>>>>>2'
             # https://ports.freebsd.org/
             pkgs='autoconf automake libtool pkgconf brotli openldap26-client libidn2 libnghttp2 nghttp2 stunnel'
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then
@@ -155,10 +152,6 @@ jobs:
             make -j3 examples
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               make -j3 -C tests
-              # blackhole?
-              sysctl net.inet.tcp.blackhole
-              # make sure we don't run blackhole != 0
-              sudo sysctl net.inet.tcp.blackhole=0
               # Some tests won't run if run as root so run them as another user.
               # Make directories world writable so the test step can write wherever it needs.
               find .. -type d -exec chmod 777 {} \;
@@ -197,10 +190,6 @@ jobs:
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               cmake --build bld --config Debug --parallel 3 --target testdeps
-              # blackhole?
-              sysctl net.inet.tcp.blackhole
-              # make sure we don't run blackhole != 0
-              sudo sysctl net.inet.tcp.blackhole=0
               # Some tests won't run if run as root so run them as another user.
               # Make directories world writable so the test step can write wherever it needs.
               find .. -type d -exec chmod 777 {} \;
