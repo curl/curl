@@ -77,19 +77,19 @@ static void fly(struct ProgressData *bar, bool moved)
 
   /* bar->width is range checked when assigned */
   DEBUGASSERT(bar->width <= MAX_BARLENGTH);
-  memset(buf, ' ', bar->width);
-  buf[bar->width] = '\r';
+  buf[0] = '\r';
+  memset(&buf[1], ' ', bar->width);
   buf[bar->width + 1] = '\0';
 
-  memcpy(&buf[bar->bar], "-=O=-", 5);
+  memcpy(&buf[bar->bar + 1], "-=O=-", 5);
 
-  pos = sinus[bar->tick%200] / (1000000 / check);
+  pos = sinus[bar->tick%200] / (1000000 / check) + 1;
   buf[pos] = '#';
-  pos = sinus[(bar->tick + 5)%200] / (1000000 / check);
+  pos = sinus[(bar->tick + 5)%200] / (1000000 / check) + 1;
   buf[pos] = '#';
-  pos = sinus[(bar->tick + 10)%200] / (1000000 / check);
+  pos = sinus[(bar->tick + 10)%200] / (1000000 / check) + 1;
   buf[pos] = '#';
-  pos = sinus[(bar->tick + 15)%200] / (1000000 / check);
+  pos = sinus[(bar->tick + 15)%200] / (1000000 / check) + 1;
   buf[pos] = '#';
 
   fputs(buf, bar->out);
