@@ -157,7 +157,7 @@ jobs:
               find .. -type d -exec chmod 777 {} \;
               # The OpenSSH server instance for the testsuite cannot be started on FreeBSD,
               # therefore the SFTP and SCP tests are disabled right away from the beginning.
-              sudo -u nobody make test-ci V=1 TFLAGS='-j12 -qs !SFTP !SCP'
+              make test-ci V=1 TFLAGS='-j12 -qs !SFTP !SCP'
             fi
 
       - name: 'cmake'
@@ -195,7 +195,7 @@ jobs:
               find .. -type d -exec chmod 777 {} \;
               # The OpenSSH server instance for the testsuite cannot be started on FreeBSD,
               # therefore the SFTP and SCP tests are disabled right away from the beginning.
-              sudo -u nobody make test-ci V=1 TFLAGS='-j12 -qs !SFTP !SCP'
+              make test-ci V=1 TFLAGS='-j12 -qs !SFTP !SCP'
             fi
 
   omnios:
