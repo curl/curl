@@ -62,6 +62,17 @@ HSTS and Alt-Svc information to be stored and used subsequently. Disabling
 certificate verification can make libcurl trust and use such information from
 malicious servers.
 
+# MATCHING
+
+A certificate can have the name as a wildcard. The only asterisk (`*`) must
+then be the left-most character and it must be followed by a period. The
+wildcard must further contain more than one period as it cannot be set for a
+top-level domain.
+
+A certificate can be set for a numerical IP address (IPv4 or IPv6), but then
+it should be a Subject Alternate Name kind and its type should correctly
+idenfify the field as an IP address.
+
 # LIMITATIONS
 
 Secure Transport: If *verify* value is 0, then SNI is also disabled. SNI is a
