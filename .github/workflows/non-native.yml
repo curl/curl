@@ -165,7 +165,13 @@ jobs:
           architecture: ${{ matrix.arch }}
           run: |
             # https://ports.freebsd.org/
-            sudo pkg install -y cmake pkgconf brotli openldap26-client libidn2 libnghttp2 nghttp2 stunnel py39-openssl py39-impacket py39-cryptography
+            pkgs='cmake pkgconf brotli openldap26-client libidn2 libnghttp2 nghttp2 stunnel'
+            if [ '${{ matrix.arch }}' = 'x86_64' ]; then
+              pkgs="${pkgs} py311-openssl py311-impacket py311-cryptography"
+            else
+              pkgs="${pkgs} py39-openssl py39-impacket py39-cryptography"
+            fi
+            sudo pkg install -y ${pkgs}
             cmake -B bld \
               '-DCMAKE_C_COMPILER=${{ matrix.compiler }}' \
               -DCMAKE_UNITY_BUILD=ON \
