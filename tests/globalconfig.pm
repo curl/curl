@@ -52,6 +52,7 @@ BEGIN {
         $proxy_address
         $PROXYIN
         $pwd
+        $quietsuccess
         $randseed
         $run_event_based
         $SERVERCMD
@@ -82,6 +83,7 @@ our $proxy_address;   # external HTTP proxy address
 our $listonly;        # only list the tests
 our $run_event_based; # run curl with --test-event to test the event API
 our $automakestyle;   # use automake-like test status output format
+our $quietsuccess;    # reduce output for successful test runs
 our $anyway;          # continue anyway, even if a test fail
 our $CURLVERSION="";  # curl's reported version number
 our $CURLVERNUM="";   # curl's reported version number (without -DEV)

@@ -418,19 +418,30 @@ sub showdiff {
     return @out;
 }
 
+sub show_fail_header {
+    my ($testnum, $showheader)=@_;
+    if($showheader) {
+        my $testname= (getpart("client", "name"))[0];
+        chomp $testname;
+        logmsg "FAILED: $testnum - $testname\n";
+        $showheader = 0;
+    }
+}
 
 #######################################################################
 # compare test results with the expected output, we might filter off
 # some pattern that is allowed to differ, output test results
 #
 sub compare {
-    my ($runnerid, $testnum, $testname, $subject, $firstref, $secondref)=@_;
+    my ($runnerid, $testnum, $testname, $subject, $firstref, $secondref, $showheader)=@_;
 
     my $result = compareparts($firstref, $secondref);
 
     if($result) {
         # timestamp test result verification end
         $timevrfyend{$testnum} = Time::HiRes::time();
+
+        show_fail_header($testnum, \$showheader);
 
         if(!$short) {
             logmsg "\n $testnum: $subject FAILED:\n";
@@ -1172,14 +1183,15 @@ sub singletest_count {
         return -1;
     }
 
-    # At this point we've committed to run this test
-    logmsg sprintf("test %04d...", $testnum) if(!$automakestyle);
+    if(!$quietsuccess) {
+        # At this point we've committed to run this test
+        logmsg sprintf("test %04d...", $testnum) if(!$automakestyle);
 
-    # name of the test
-    my $testname= (getpart("client", "name"))[0];
-    chomp $testname;
-    logmsg "[$testname]\n" if(!$short);
-
+        # name of the test
+        my $testname= (getpart("client", "name"))[0];
+        chomp $testname;
+        logmsg "[$testname]\n" if(!$short);
+    }
     if($listonly) {
         timestampskippedevents($testnum);
     }
@@ -1198,6 +1210,8 @@ sub singletest_check {
         $timevrfyend{$testnum} = Time::HiRes::time();
         return -2;
     }
+
+    my $showheader = $quietsuccess;
 
     my $logdir = getrunnerlogdir($runnerid);
     my @err = getpart("verify", "errorcode");
@@ -1264,7 +1278,7 @@ sub singletest_check {
             subnewlines(0, \$_) for @validstdout;
         }
 
-        $res = compare($runnerid, $testnum, $testname, "stdout", \@actual, \@validstdout);
+        $res = compare($runnerid, $testnum, $testname, "stdout", \@actual, \@validstdout, \$showheader);
         if($res) {
             return -1;
         }
@@ -1320,7 +1334,7 @@ sub singletest_check {
             subnewlines(0, \$_) for @validstderr;
         }
 
-        $res = compare($runnerid, $testnum, $testname, "stderr", \@actual, \@validstderr);
+        $res = compare($runnerid, $testnum, $testname, "stderr", \@actual, \@validstderr, \$showheader);
         if($res) {
             return -1;
         }
@@ -1370,6 +1384,7 @@ sub singletest_check {
         }
 
         if((!$out[0] || ($out[0] eq "")) && $protocol[0]) {
+            show_fail_header($testnum, \$showheader);
             logmsg "\n $testnum: protocol FAILED!\n".
                 " There was no content at all in the file $logdir/$SERVERIN.\n".
                 " Server glitch? Total curl failure? Returned: $cmdres\n";
@@ -1378,7 +1393,7 @@ sub singletest_check {
             return -1;
         }
 
-        $res = compare($runnerid, $testnum, $testname, "protocol", \@out, \@protocol);
+        $res = compare($runnerid, $testnum, $testname, "protocol", \@out, \@protocol, \$showheader);
         if($res) {
             return -1;
         }
@@ -1444,7 +1459,7 @@ sub singletest_check {
     if(!$replyattr{'nocheck'} && (@reply || $replyattr{'sendzero'})) {
         # verify the received data
         my @out = loadarray($CURLOUT);
-        $res = compare($runnerid, $testnum, $testname, "data", \@out, \@reply);
+        $res = compare($runnerid, $testnum, $testname, "data", \@out, \@reply, \$showheader);
         if ($res) {
             return -1;
         }
@@ -1475,7 +1490,7 @@ sub singletest_check {
             }
         }
 
-        $res = compare($runnerid, $testnum, $testname, "upload", \@out, \@upload);
+        $res = compare($runnerid, $testnum, $testname, "upload", \@out, \@upload, \$showheader);
         if ($res) {
             return -1;
         }
@@ -1518,7 +1533,7 @@ sub singletest_check {
             subnewlines(0, \$_) for @proxyprot;
         }
 
-        $res = compare($runnerid, $testnum, $testname, "proxy", \@out, \@proxyprot);
+        $res = compare($runnerid, $testnum, $testname, "proxy", \@out, \@proxyprot, \$showheader);
         if($res) {
             return -1;
         }
@@ -1600,7 +1615,7 @@ sub singletest_check {
             }
 
             $res = compare($runnerid, $testnum, $testname, "output ($filename)",
-                           \@generated, \@outfile);
+                           \@generated, \@outfile, \$showheader);
             if($res) {
                 return -1;
             }
@@ -1615,7 +1630,7 @@ sub singletest_check {
     if(@socksprot) {
         # Verify the sent SOCKS proxy details
         my @out = loadarray("$logdir/$SOCKSIN");
-        $res = compare($runnerid, $testnum, $testname, "socks", \@out, \@socksprot);
+        $res = compare($runnerid, $testnum, $testname, "socks", \@out, \@socksprot, \$showheader);
         if($res) {
             return -1;
         }
@@ -1731,7 +1746,7 @@ sub singletest_check {
     # add 'E' for event-based
     $ok .= $run_event_based ? "E" : "-";
 
-    logmsg "$ok " if(!$short);
+    logmsg "$ok " if(!$short && !$quietsuccess);
 
     # timestamp test result verification end
     $timevrfyend{$testnum} = Time::HiRes::time();
@@ -1745,23 +1760,25 @@ sub singletest_check {
 sub singletest_success {
     my ($testnum, $count, $total, $errorreturncode)=@_;
 
-    my $sofar= time()-$start;
-    my $esttotal = $sofar/$count * $total;
-    my $estleft = $esttotal - $sofar;
-    my $timeleft=sprintf("remaining: %02d:%02d",
-                     $estleft/60,
-                     $estleft%60);
-    my $took = $timevrfyend{$testnum} - $timeprepini{$testnum};
-    my $duration = sprintf("duration: %02d:%02d",
-                           $sofar/60, $sofar%60);
-    if(!$automakestyle) {
-        logmsg sprintf("OK (%-3d out of %-3d, %s, took %.3fs, %s)\n",
-                       $count, $total, $timeleft, $took, $duration);
-    }
-    else {
-        my $testname= (getpart("client", "name"))[0];
-        chomp $testname;
-        logmsg "PASS: $testnum - $testname\n";
+    if(!$quietsuccess) {
+        if(!$automakestyle) {
+            my $sofar= time()-$start;
+            my $esttotal = $sofar/$count * $total;
+            my $estleft = $esttotal - $sofar;
+            my $timeleft=sprintf("remaining: %02d:%02d",
+                                 $estleft/60,
+                                 $estleft%60);
+            my $took = $timevrfyend{$testnum} - $timeprepini{$testnum};
+            my $duration = sprintf("duration: %02d:%02d",
+                                   $sofar/60, $sofar%60);
+            logmsg sprintf("OK (%-3d out of %-3d, %s, took %.3fs, %s)\n",
+                           $count, $total, $timeleft, $took, $duration);
+        }
+        else {
+            my $testname= (getpart("client", "name"))[0];
+            chomp $testname;
+            logmsg "PASS: $testnum - $testname\n";
+        }
     }
 
     if($errorreturncode==2) {
@@ -2258,6 +2275,10 @@ while(@ARGV) {
         # automake-style output
         $short=1;
         $automakestyle=1;
+    }
+    elsif($ARGV[0] eq "-qs") {
+        # quiet log for successful tests
+        $quietsuccess=1;
     }
     elsif($ARGV[0] eq "-n") {
         # no valgrind
