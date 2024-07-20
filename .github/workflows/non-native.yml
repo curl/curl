@@ -150,8 +150,9 @@ jobs:
             src/curl --disable --version
             make -j3 examples
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
+              make -j3 -C tests
               export TFLAGS='-j12'
-              make check V=1
+              make test-ci V=1
             fi
 
       - name: 'cmake'
@@ -205,5 +206,6 @@ jobs:
             gmake -j3 install
             src/curl --disable --version
             gmake -j3 examples
+            gmake -j3 -C tests
             export TFLAGS='-j12 ~MQTT ~FTP'
-            gmake check V=1
+            gmake test-ci V=1
