@@ -1230,6 +1230,20 @@ static ParameterError set_rate(struct GlobalConfig *global,
 
   if(div) {
     char unit = div[1];
+    curl_off_t numunits;
+    char *endp;
+
+    if(curlx_strtoofft(&div[1], &endp, 10, &numunits)) {
+      /* if it fails, there is no legit number specified */
+      if(endp == &div[1])
+        /* if endp did not move, accept it as a 1 */
+        numunits = 1;
+      else
+        return PARAM_BAD_USE;
+    }
+    else
+      unit = *endp;
+
     switch(unit) {
     case 's': /* per second */
       numerator = 1000;
@@ -1247,6 +1261,13 @@ static ParameterError set_rate(struct GlobalConfig *global,
       err = PARAM_BAD_USE;
       break;
     }
+
+    if((LONG_MAX / numerator) < numunits) {
+      /* overflow, too large number */
+      errorf(global, "too large --rate unit");
+      err = PARAM_NUMBER_TOO_LARGE;
+    }
+    numerator *= numunits;
   }
 
   if(err)
