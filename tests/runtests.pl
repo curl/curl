@@ -1983,6 +1983,8 @@ sub runtimestats {
 
     return if(not $timestats);
 
+    logmsg "::group::Run Time Stats\n";
+
     logmsg "\nTest suite total running time breakdown per task...\n\n";
 
     my @timesrvr;
@@ -2109,6 +2111,8 @@ sub runtimestats {
     }
 
     logmsg "\n";
+
+    logmsg "::endgroup::\n";
 }
 
 #######################################################################
