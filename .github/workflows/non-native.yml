@@ -71,7 +71,7 @@ jobs:
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               cmake --build bld --config Debug --parallel 3 --target testdeps
-              export TFLAGS='-j4 -qs'  # ~389 ~TFTP
+              export TFLAGS='-j2 -qs'  # ~389 ~392 ~TFTP
               cmake --build bld --config Debug --target test-ci
             fi
 
