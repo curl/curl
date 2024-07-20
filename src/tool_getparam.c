@@ -1267,7 +1267,8 @@ static ParameterError set_rate(struct GlobalConfig *global,
       errorf(global, "too large --rate unit");
       err = PARAM_NUMBER_TOO_LARGE;
     }
-    numerator *= numunits;
+    /* this typecast is okay based on the check above */
+    numerator *= (long)numunits;
   }
 
   if(err)
