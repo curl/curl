@@ -108,5 +108,3 @@ From 7.66.0: libcurl treats 1 and 2 to this option the same.
 # RETURN VALUE
 
 Returns CURLE_OK if TLS is supported, and CURLE_UNKNOWN_OPTION if not.
-
-If 1 is set as argument, *CURLE_BAD_FUNCTION_ARGUMENT* is returned.
