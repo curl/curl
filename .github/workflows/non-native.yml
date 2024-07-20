@@ -131,6 +131,9 @@ jobs:
           version: '14.1'
           architecture: ${{ matrix.arch }}
           run: |
+            echo '>>>>>>>>>>>>>>>>1'
+            sysctl net.inet.tcp.blackhole
+            echo '>>>>>>>>>>>>>>>>2'
             # https://ports.freebsd.org/
             pkgs='autoconf automake libtool pkgconf brotli openldap26-client libidn2 libnghttp2 nghttp2 stunnel'
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then
