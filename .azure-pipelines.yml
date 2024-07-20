@@ -34,7 +34,6 @@ trigger:
   paths:
     exclude:
       - '.circleci/*'
-      - '.cirrus.yml'
       - '.github/*'
       - '.github/workflows/*'
       - 'appveyor.*'
@@ -48,7 +47,6 @@ pr:
   paths:
     exclude:
       - '.circleci/*'
-      - '.cirrus.yml'
       - '.github/*'
       - '.github/workflows/*'
       - 'appveyor.*'

@@ -107,11 +107,4 @@ admins/group members can be added on request.
 
 ### Cirrus CI
 
-Cirrus CI runs a basic test suite on FreeBSD and Windows. This is configured in
-`.cirrus.yml`.
-
-You can [view the full list of CI jobs on Cirrus CI's
-website](https://cirrus-ci.com/github/curl/curl).
-
-`@bagder` has access to edit the "Project Settings" on that page. Additional
-admins/group members can be added on request.
+Not used anymore.
