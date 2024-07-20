@@ -159,7 +159,9 @@ jobs:
               # Some tests won't run if run as root so run them as another user.
               # Make directories world writable so the test step can write wherever it needs.
               find .. -type d -exec chmod 777 {} \;
-              sudo -u nobody make test-ci V=1 TFLAGS='-j12 -qs'
+              # The OpenSSH server instance for the testsuite cannot be started on FreeBSD,
+              # therefore the SFTP and SCP tests are disabled right away from the beginning.
+              sudo -u nobody make test-ci V=1 TFLAGS='-j12 -qs !SFTP !SCP'
             fi
 
       - name: 'cmake'
@@ -199,7 +201,9 @@ jobs:
               # Some tests won't run if run as root so run them as another user.
               # Make directories world writable so the test step can write wherever it needs.
               find .. -type d -exec chmod 777 {} \;
-              sudo -u nobody make test-ci V=1 TFLAGS='-j12 -qs'
+              # The OpenSSH server instance for the testsuite cannot be started on FreeBSD,
+              # therefore the SFTP and SCP tests are disabled right away from the beginning.
+              sudo -u nobody make test-ci V=1 TFLAGS='-j12 -qs !SFTP !SCP'
             fi
 
   omnios:
