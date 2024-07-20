@@ -71,7 +71,7 @@ top-level domain.
 
 A certificate can be set for a numerical IP address (IPv4 or IPv6), but then
 it should be a Subject Alternate Name kind and its type should correctly
-idenfify the field as an IP address.
+identify the field as an IP address.
 
 # LIMITATIONS
 
