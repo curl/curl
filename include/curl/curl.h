@@ -942,8 +942,7 @@ typedef enum {
    a client certificate for authentication. (Schannel) */
 #define CURLSSLOPT_AUTO_CLIENT_CERT (1<<5)
 
-/* - CURLSSLOPT_EARLYDATA tells libcurl to try sending application data using
-   tls 1.3 early data */
+/* If possible, send data using TLS 1.3 early data */
 #define CURLSSLOPT_EARLYDATA (1<<6)
 
 /* The default connection attempt delay in milliseconds for happy eyeballs.
