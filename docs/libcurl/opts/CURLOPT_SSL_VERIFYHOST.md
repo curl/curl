@@ -32,8 +32,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_VERIFYHOST, long verify);
 Pass a long set to 2L to make libcurl verify the host in the server's TLS
 certificate.
 
-When negotiating TLS and SSL connections, the server sends a certificate
-indicating its identity.
+When negotiating a TLS connection, the server sends a certificate indicating
+its identity.
 
 When CURLOPT_SSL_VERIFYHOST(3) is set to 1 or 2, the server certificate must
 indicate that it was made for the hostname or address curl connects to, or the
