@@ -2914,34 +2914,48 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
                               struct Curl_easy *data)
 {
   struct easy_pollset cur_poll;
+  CURLMcode mresult;
+
+  /* Fill in the 'current' struct with the state as it is now: what sockets to
+     supervise and for what actions */
+  multi_getsock(data, &cur_poll);
+  mresult = Curl_multi_pollset_ev(multi, data, &cur_poll, &data->last_poll);
+
+  if(!mresult) /* Remember for next time */
+    memcpy(&data->last_poll, &cur_poll, sizeof(cur_poll));
+  return mresult;
+}
+
+CURLMcode Curl_multi_pollset_ev(struct Curl_multi *multi,
+                                struct Curl_easy *data,
+                                struct easy_pollset *ps,
+                                struct easy_pollset *last_ps)
+{
   unsigned int i;
   struct Curl_sh_entry *entry;
   curl_socket_t s;
   int rc;
 
-  /* Fill in the 'current' struct with the state as it is now: what sockets to
-     supervise and for what actions */
-  multi_getsock(data, &cur_poll);
   /* We have 0 .. N sockets already and we get to know about the 0 .. M
      sockets we should have from now on. Detect the differences, remove no
      longer supervised ones and add new ones */
 
   /* walk over the sockets we got right now */
-  for(i = 0; i < cur_poll.num; i++) {
-    unsigned char cur_action = cur_poll.actions[i];
+  for(i = 0; i < ps->num; i++) {
+    unsigned char cur_action = ps->actions[i];
     unsigned char last_action = 0;
     int comboaction;
 
-    s = cur_poll.sockets[i];
+    s = ps->sockets[i];
 
     /* get it from the hash */
     entry = sh_getentry(&multi->sockhash, s);
     if(entry) {
       /* check if new for this transfer */
       unsigned int j;
-      for(j = 0; j< data->last_poll.num; j++) {
-        if(s == data->last_poll.sockets[j]) {
-          last_action = data->last_poll.actions[j];
+      for(j = 0; j< last_ps->num; j++) {
+        if(s == last_ps->sockets[j]) {
+          last_action = last_ps->actions[j];
           break;
         }
       }
@@ -2964,14 +2978,15 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
       if(cur_action & CURL_POLL_OUT)
         entry->writers++;
     }
-    else if(!last_action) {
+    else if(!last_action &&
+            !Curl_hash_pick(&entry->transfers, (char *)&data, /* hash key */
+                            sizeof(struct Curl_easy *))) {
       /* a new transfer using this socket */
       entry->users++;
       if(cur_action & CURL_POLL_IN)
         entry->readers++;
       if(cur_action & CURL_POLL_OUT)
         entry->writers++;
-
       /* add 'data' to the transfer hash on this socket! */
       if(!Curl_hash_add(&entry->transfers, (char *)&data, /* hash key */
                         sizeof(struct Curl_easy *), data)) {
@@ -3004,15 +3019,15 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
     entry->action = (unsigned int)comboaction;
   }
 
-  /* Check for last_poll.sockets that no longer appear in cur_poll.sockets.
+  /* Check for last_poll.sockets that no longer appear in ps->sockets.
    * Need to remove the easy handle from the multi->sockhash->transfers and
    * remove multi->sockhash entry when this was the last transfer */
-  for(i = 0; i< data->last_poll.num; i++) {
+  for(i = 0; i < last_ps->num; i++) {
     unsigned int j;
     bool stillused = FALSE;
-    s = data->last_poll.sockets[i];
-    for(j = 0; j < cur_poll.num; j++) {
-      if(s == cur_poll.sockets[j]) {
+    s = last_ps->sockets[i];
+    for(j = 0; j < ps->num; j++) {
+      if(s == ps->sockets[j]) {
         /* this is still supervised */
         stillused = TRUE;
         break;
@@ -3025,7 +3040,7 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
     /* if this is NULL here, the socket has been closed and notified so
        already by Curl_multi_closed() */
     if(entry) {
-      unsigned char oldactions = data->last_poll.actions[i];
+      unsigned char oldactions = last_ps->actions[i];
       /* this socket has been removed. Decrease user count */
       entry->users--;
       if(oldactions & CURL_POLL_OUT)
@@ -3055,8 +3070,6 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
     }
   } /* for loop over num */
 
-  /* Remember for next time */
-  memcpy(&data->last_poll, &cur_poll, sizeof(data->last_poll));
   return CURLM_OK;
 }
 

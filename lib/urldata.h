@@ -854,6 +854,9 @@ struct connectdata {
     struct curltime start[2]; /* when filter shutdown started */
     unsigned int timeout_ms; /* 0 means no timeout */
   } shutdown;
+  /* Last pollset used in connection shutdown. Used to detect changes
+   * for multi_socket API. */
+  struct easy_pollset shutdown_poll;
 
   struct ssl_primary_config ssl_config;
 #ifndef CURL_DISABLE_PROXY
