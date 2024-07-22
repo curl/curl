@@ -62,9 +62,9 @@ static void connc_run_conn_shutdown(struct Curl_easy *data,
                                     bool *done);
 static void connc_run_conn_shutdown_handler(struct Curl_easy *data,
                                             struct connectdata *conn);
-static CURLcode connc_update_shutdown_ev(struct Curl_multi *multi,
-                                         struct Curl_easy *data,
-                                         struct connectdata *conn);
+static CURLMcode connc_update_shutdown_ev(struct Curl_multi *multi,
+                                          struct Curl_easy *data,
+                                          struct connectdata *conn);
 static void connc_shutdown_all(struct conncache *connc, int timeout_ms);
 
 static CURLcode bundle_create(struct connectbundle **bundlep)
@@ -725,7 +725,10 @@ static void connc_discard_conn(struct conncache *connc,
 
   if(data->multi && data->multi->socket_cb) {
     DEBUGASSERT(connc == &data->multi->conn_cache);
-    if(connc_update_shutdown_ev(data->multi, data, conn)) {
+    /* Start with an empty shutdown pollset, so out internal closure handle
+     * is added to the sockets. */
+    memset(&conn->shutdown_poll, 0, sizeof(conn->shutdown_poll));
+    if(connc_update_shutdown_ev(data->multi, connc->closure_handle, conn)) {
       DEBUGF(infof(data, "[CCACHE] update events for shutdown failed, "
                          "discarding #%" CURL_FORMAT_CURL_OFF_T,
                          conn->connection_id));
@@ -738,11 +741,6 @@ static void connc_discard_conn(struct conncache *connc,
   DEBUGF(infof(data, "[CCACHE] added #%" CURL_FORMAT_CURL_OFF_T
                      " to shutdown list of length %zu", conn->connection_id,
                      Curl_llist_count(&connc->shutdowns.conn_list)));
-
-  /* Forget what this transfer last polled, the connection is ours now.
-   * If we do not clear this, the event handling for `data` will tell
-   * the callback to remove the connection socket after we return here. */
-  memset(&data->last_poll, 0, sizeof(data->last_poll));
 }
 
 void Curl_conncache_disconnect(struct Curl_easy *data,
@@ -967,20 +965,15 @@ static void connc_disconnect(struct Curl_easy *data,
   /* the transfer must be detached from the connection */
   DEBUGASSERT(data && !data->conn);
 
-  if(connc && connc->multi && connc->multi->socket_cb) {
-    unsigned int i;
-    for(i = 0; i < 2; ++i) {
-      if(CURL_SOCKET_BAD == conn->sock[i])
-        continue;
-      /* remove all connection's sockets from event handling */
-      connc->multi->in_callback = TRUE;
-      connc->multi->socket_cb(data, conn->sock[i], CURL_POLL_REMOVE,
-                              connc->multi->socket_userp, NULL);
-      connc->multi->in_callback = FALSE;
-    }
-  }
-
   Curl_attach_connection(data, conn);
+
+  if(connc && connc->multi && connc->multi->socket_cb) {
+    struct easy_pollset ps;
+    /* With an empty pollset, all previously polled sockets will be removed
+     * via the multi_socket API callback. */
+    memset(&ps, 0, sizeof(ps));
+    (void)Curl_multi_pollset_ev(connc->multi, data, &ps, &conn->shutdown_poll);
+  }
 
   connc_run_conn_shutdown_handler(data, conn);
   if(do_shutdown) {
@@ -1003,13 +996,12 @@ static void connc_disconnect(struct Curl_easy *data,
 }
 
 
-static CURLcode connc_update_shutdown_ev(struct Curl_multi *multi,
-                                         struct Curl_easy *data,
-                                         struct connectdata *conn)
+static CURLMcode connc_update_shutdown_ev(struct Curl_multi *multi,
+                                          struct Curl_easy *data,
+                                          struct connectdata *conn)
 {
   struct easy_pollset ps;
-  unsigned int i;
-  int rc;
+  CURLMcode mresult;
 
   DEBUGASSERT(data);
   DEBUGASSERT(multi);
@@ -1020,22 +1012,11 @@ static CURLcode connc_update_shutdown_ev(struct Curl_multi *multi,
   Curl_conn_adjust_pollset(data, &ps);
   Curl_detach_connection(data);
 
-  if(!ps.num)
-    return CURLE_FAILED_INIT;
+  mresult = Curl_multi_pollset_ev(multi, data, &ps, &conn->shutdown_poll);
 
-  for(i = 0; i < ps.num; ++i) {
-    DEBUGF(infof(data, "[CCACHE] set socket=%" CURL_FORMAT_SOCKET_T
-                 " events=%d on #%" CURL_FORMAT_CURL_OFF_T,
-                 ps.sockets[i], ps.actions[i], conn->connection_id));
-    multi->in_callback = TRUE;
-    rc = multi->socket_cb(data, ps.sockets[i], ps.actions[i],
-                          multi->socket_userp, NULL);
-    multi->in_callback = FALSE;
-    if(rc == -1)
-      return CURLE_FAILED_INIT;
-  }
-
-  return CURLE_OK;
+  if(!mresult) /* Remember for next time */
+    memcpy(&conn->shutdown_poll, &ps, sizeof(ps));
+  return mresult;
 }
 
 void Curl_conncache_multi_socket(struct Curl_multi *multi,
