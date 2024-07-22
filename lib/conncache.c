@@ -725,15 +725,10 @@ static void connc_discard_conn(struct conncache *connc,
 
   if(data->multi && data->multi->socket_cb) {
     DEBUGASSERT(connc == &data->multi->conn_cache);
-    /* remember the last pollset we used for this connection, if we have it.
-     * Otherwise start with an empty one. */
-    if(last_data)
-      memcpy(&conn->shutdown_poll, &last_data->last_poll,
-             sizeof(conn->shutdown_poll));
-    else
-      memset(&conn->shutdown_poll, 0, sizeof(conn->shutdown_poll));
-
-    if(connc_update_shutdown_ev(data->multi, data, conn)) {
+    /* Start with an empty shutdown pollset, so out internal closure handle
+     * is added to the sockets. */
+    memset(&conn->shutdown_poll, 0, sizeof(conn->shutdown_poll));
+    if(connc_update_shutdown_ev(data->multi, connc->closure_handle, conn)) {
       DEBUGF(infof(data, "[CCACHE] update events for shutdown failed, "
                          "discarding #%" CURL_FORMAT_CURL_OFF_T,
                          conn->connection_id));
@@ -746,11 +741,6 @@ static void connc_discard_conn(struct conncache *connc,
   DEBUGF(infof(data, "[CCACHE] added #%" CURL_FORMAT_CURL_OFF_T
                      " to shutdown list of length %zu", conn->connection_id,
                      Curl_llist_count(&connc->shutdowns.conn_list)));
-
-  /* Forget what this transfer last polled, the connection is ours now.
-   * If we do not clear this, the event handling for `data` will tell
-   * the callback to remove the connection socket after we return here. */
-  memset(&data->last_poll, 0, sizeof(data->last_poll));
 }
 
 void Curl_conncache_disconnect(struct Curl_easy *data,
