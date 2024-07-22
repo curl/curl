@@ -34,6 +34,9 @@ Frees all the resources associated with the given *CURLU* handle!
 Passing in a NULL pointer in *handle* makes this function return
 immediately with no action.
 
+Any use of the **handle** after this function has been called and have
+returned, is illegal.
+
 # %PROTOCOLS%
 
 # EXAMPLE

@@ -32,6 +32,9 @@ when this function has been called.
 Passing in a NULL pointer in *share_handle* makes this function return
 immediately with no action.
 
+Any use of the **share_handle** after this function has been called and have
+returned, is illegal.
+
 # %PROTOCOLS%
 
 # EXAMPLE
