@@ -2778,7 +2778,8 @@ CURLMcode curl_multi_perform(struct Curl_multi *multi, int *running_handles)
     }
   } while(t);
 
-  *running_handles = (int)multi->num_alive;
+  if(running_handles)
+    *running_handles = (int)multi->num_alive;
 
   if(CURLM_OK >= returncode)
     returncode = Curl_update_timer(multi);
@@ -3302,7 +3303,8 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
   if(first)
     sigpipe_restore(&pipe_st);
 
-  *running_handles = (int)multi->num_alive;
+  if(running_handles)
+    *running_handles = (int)multi->num_alive;
   return result;
 }
 
