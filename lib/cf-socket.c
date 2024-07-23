@@ -1464,7 +1464,7 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   /* simulate network blocking/partial writes */
   if(ctx->wblock_percent > 0) {
     unsigned char c = 0;
-    Curl_rand(data, &c, 1);
+    Curl_rand_bytes(data, FALSE, &c, 1);
     if(c >= ((100-ctx->wblock_percent)*256/100)) {
       CURL_TRC_CF(data, cf, "send(len=%zu) SIMULATE EWOULDBLOCK", orig_len);
       *err = CURLE_AGAIN;

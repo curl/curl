@@ -100,29 +100,34 @@ CURLcode Curl_win32_random(unsigned char *entropy, size_t length)
 }
 #endif
 
-static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
+static CURLcode randit(struct Curl_easy *data, unsigned int *rnd,
+                       bool env_override)
 {
   CURLcode result = CURLE_OK;
   static unsigned int randseed;
   static bool seeded = FALSE;
 
 #ifdef DEBUGBUILD
-  char *force_entropy = getenv("CURL_ENTROPY");
-  if(force_entropy) {
-    if(!seeded) {
-      unsigned int seed = 0;
-      size_t elen = strlen(force_entropy);
-      size_t clen = sizeof(seed);
-      size_t min = elen < clen ? elen : clen;
-      memcpy((char *)&seed, force_entropy, min);
-      randseed = ntohl(seed);
-      seeded = TRUE;
+  if(env_override) {
+    char *force_entropy = getenv("CURL_ENTROPY");
+    if(force_entropy) {
+      if(!seeded) {
+        unsigned int seed = 0;
+        size_t elen = strlen(force_entropy);
+        size_t clen = sizeof(seed);
+        size_t min = elen < clen ? elen : clen;
+        memcpy((char *)&seed, force_entropy, min);
+        randseed = ntohl(seed);
+        seeded = TRUE;
+      }
+      else
+        randseed++;
+      *rnd = randseed;
+      return CURLE_OK;
     }
-    else
-      randseed++;
-    *rnd = randseed;
-    return CURLE_OK;
   }
+#else
+  (void)env_override;
 #endif
 
   /* data may be NULL! */
@@ -198,9 +203,16 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
  *
  */
 
-CURLcode Curl_rand(struct Curl_easy *data, unsigned char *rnd, size_t num)
+CURLcode Curl_rand_bytes(struct Curl_easy *data,
+#ifdef DEBUGBUILD
+                         bool env_override,
+#endif
+                         unsigned char *rnd, size_t num)
 {
   CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
+#ifndef DEBUGBUILD
+  const bool env_override = FALSE;
+#endif
 
   DEBUGASSERT(num);
 
@@ -208,7 +220,7 @@ CURLcode Curl_rand(struct Curl_easy *data, unsigned char *rnd, size_t num)
     unsigned int r;
     size_t left = num < sizeof(unsigned int) ? num : sizeof(unsigned int);
 
-    result = randit(data, &r);
+    result = randit(data, &r, env_override);
     if(result)
       return result;
 
@@ -278,7 +290,7 @@ CURLcode Curl_rand_alnum(struct Curl_easy *data, unsigned char *rnd,
 
   while(num) {
     do {
-      result = randit(data, &r);
+      result = randit(data, &r, TRUE);
       if(result)
         return result;
     } while(r >= (UINT_MAX - UINT_MAX % alnumspace));
