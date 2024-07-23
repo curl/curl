@@ -68,6 +68,7 @@ Aleksandar Milivojevic
 Aleksander Mazur
 Aleksandr Krotov
 Aleksey Tulinov
+alervd on github
 Ales Mlakar
 Ales Novak
 Alessandro Ghedini
@@ -93,6 +94,7 @@ Alex Nichols
 Alex Potapenko
 Alex Rousskov
 Alex Samorukov
+Alex Snast
 Alex Suykov
 Alex Vinnik
 Alex Xu
@@ -109,6 +111,7 @@ Alexander Krasnostavsky
 Alexander Lazic
 Alexander Pepper
 Alexander Peslyak
+Alexander Shtuchkin
 Alexander Sinditskiy
 Alexander Traud
 Alexander V. Tikhonov
@@ -209,6 +212,8 @@ Andrés García
 Andy Alt
 Andy Cedilnik
 Andy Fiddaman
+Andy Pan
+Andy Reitz
 Andy Serpa
 Andy Stamp
 Andy Tsouladze
@@ -270,6 +275,7 @@ AtariDreams on github
 Ates Goral
 atjg on github
 Augustus Saunders
+Aurélien Pierre
 Austin Green
 av223119 on github
 Avery Fay
@@ -340,6 +346,7 @@ Bertrand Demiddelaer
 Bertrand Simonnet
 beslick5 on github
 Bevan Weiss
+Bhanu Prakash
 Bill Doyle
 Bill Egert
 Bill Hoffman
@@ -404,6 +411,7 @@ Brian Green
 Brian Inglis
 Brian J. Murrell
 Brian Lund
+brian m. carlson
 Brian Nixon
 Brian Prodoehl
 Brian R Duffy
@@ -497,6 +505,7 @@ Christian Fillion
 Christian Grothoff
 Christian Heimes
 Christian Hesse
+Christian Heusel
 Christian Hägele
 Christian Krause
 Christian Kurz
@@ -534,6 +543,7 @@ Clifford Wolf
 Clint Clayton
 Cloudogu Siebels
 Clément Notin
+CMD
 cmfrolick on github
 codesniffer13 on github
 Cody Jones
@@ -714,6 +724,7 @@ Denis Laxalde
 Denis Ollier
 Dennis Clarke
 Dennis Felsing
+dependabot[bot]
 Derek Higgins
 Derzsi Dániel
 Desmond O. Chang
@@ -768,16 +779,19 @@ Dmitry S. Baikov
 Dmitry Tretyakov
 Dmitry Wagin
 dnivras on github
+dogma
 Dolbneff A.V
 Domen Kožar
 Domenico Andreoli
 Dominick Meglio
 Dominik Hölzl
 Dominik Klemba
+Dominik Piątkowski
 Dominik Thalhammer
 Dominique Leuenberger
 Don J Olmstead
 Dongliang Mu
+Dorian Craps
 Doron Behar
 Doug Kaufman
 Doug Porter
@@ -838,6 +852,7 @@ Eli Schwartz
 Elia Tufarolo
 Elliot Killick
 Elliot Saba
+Elliott Balsley
 Ellis Pritchard
 Elmira A Semenova
 Elms
@@ -1071,6 +1086,7 @@ Grigory Entin
 Grisha Levit
 Guenole Bescon
 Guido Berhoerster
+Guilherme Puida
 Guillaume Algis
 Guillaume Arluison
 guitared on github
@@ -1236,6 +1252,7 @@ Jakub Bochenski
 Jakub Jelen
 Jakub Wilk
 Jakub Zakrzewski
+James Abbatiello
 James Atwill
 James Brown
 James Bursa
@@ -1293,6 +1310,7 @@ Javier Navarro
 Javier Sixto
 Jay Austin
 Jay Dommaschk
+Jay Guerette
 Jay Wu
 Jayesh A Shah
 Jaz Fresh
@@ -1354,6 +1372,7 @@ Jesse Noller
 Jesse Tan
 jethrogb on github
 jhoyla on github
+Jiang Wenjian
 Jiawen Geng
 Jie He
 Jiehong on github
@@ -1460,6 +1479,7 @@ Jonatan Lander
 Jonatan Vela
 Jonathan Cardoso Machado
 Jonathan Hseu
+Jonathan Matthews
 Jonathan Moerman
 Jonathan Nieder
 Jonathan Perkin
@@ -1557,6 +1577,7 @@ Kari Pahula
 Karl Chen
 Karl Moerder
 Karol Pietrzak
+kartatz
 Kartatz on Github
 Karthikdasari0423
 Karthikdasari0423 on github
@@ -1566,6 +1587,7 @@ Katie Wang
 Katsuhiko YOSHIDA
 Kazuho Oku
 kchow-FTNT on github
+Keerthi Timmaraju
 Kees Cook
 Kees Dekker
 Keitagit-kun on github
@@ -1675,6 +1697,7 @@ Lawrence Wagerfield
 Leah Neukirchen
 Lealem Amedie
 Leandro Coutinho
+Lee Li
 LeeRiva
 Legoff Vincent
 Lehel Bernadt
@@ -1748,6 +1771,7 @@ Luke Amery
 Luke Call
 Luke Dashjr
 Luke Granger-Brown
+Luke Hamburg
 Lukáš Zaoral
 luminixinc on github
 Luo Jinghua
@@ -1865,6 +1889,7 @@ Martin Jansen
 Martin Kammerhofer
 Martin Kepplinger
 Martin Lemke
+Martin Peck
 Martin Schmatz
 Martin Skinner
 Martin Staael
@@ -1874,6 +1899,7 @@ Martin V
 Martin Vejnár
 Martin Waleczek
 Martin Ågren
+martinevsky
 Marty Kuhrt
 Maruko
 Masaya Suzuki
@@ -1915,6 +1941,7 @@ Matthew Whitehead
 Matthias Bolte
 Matthias Gatto
 Matthias Naegler
+Matthieu Baerts
 Mattias Fornander
 Matus Uzak
 Maurice Barnum
@@ -2051,6 +2078,7 @@ momala454 on github
 Momoka Yamamoto
 MonkeybreadSoftware on github
 moohoorama on github
+Morgan Willcock
 Morten Minde Neergaard
 Mostyn Bramley-Moore
 Moti Avrahami
@@ -2175,6 +2203,7 @@ Oliver Schindler
 Oliver Urbann
 oliverpool on github
 Olivier Berger
+Olivier Bonaventure
 Olivier Brunel
 Omar Ramadan
 omau on github
@@ -2429,6 +2458,7 @@ Renaud Lehoux
 Rene Bernhardt
 Rene Rebe
 renovate[bot]
+renovate[bot]
 Reuven Wachtfogel
 RevaliQaQ on github
 Reza Arbab
@@ -2615,6 +2645,7 @@ Sascha Zengler
 Satadru Pramanik
 Satana de Sant'Ana
 Saul good
+saurabhsingh-dev on github
 Saurav Babu
 sayrer on github
 SBKarr on github
@@ -2634,6 +2665,7 @@ Sean McArthur
 Sean Miller
 Sean Molenaar
 Sebastiaan van Erk
+Sebastian Andersson
 Sebastian Haglund
 Sebastian Mundry
 Sebastian Neubauer
@@ -2663,6 +2695,7 @@ Sergio Mijatovic
 Sergio-IME on github
 sergio-nsk on github
 Serj Kalichev
+Sertonix
 SerusDev on github
 Seshubabu Pasam
 Seth Mos
@@ -2946,6 +2979,7 @@ Tommy Chiang
 Tommy Odom
 Tommy Petty
 Tommy Tam
+tomy2105 on github
 Ton Voon
 Toni Moreno
 Tony Kelman
@@ -3040,6 +3074,7 @@ Volker Schmid
 Vsevolod Novikov
 vshmuk on hackerone
 vulnerabilityspotter on hackerone
+vuonganh1993 on github
 vvb2060
 vvb2060 on github
 Vyron Tsingaras
@@ -3135,6 +3170,7 @@ Yves Arrouye
 Yves Lejeune
 YX Hao
 z2-2z on github
+z2_
 z2_ on hackerone
 Zachary Seguin
 Zdenek Pavlas
@@ -3173,5 +3209,7 @@ zzq1015 on github
 加藤郁之
 南宫雪珊
 左潇峰
+李四
 梦终无痕
 積丹尼 Dan Jacobson
+罗朝辉
