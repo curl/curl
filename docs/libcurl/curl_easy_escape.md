@@ -27,18 +27,14 @@ char *curl_easy_escape(CURL *curl, const char *string, int length);
 
 # DESCRIPTION
 
-This function converts the given input *string* to a URL encoded string
-and returns that as a new allocated string. All input characters that are not
-a-z, A-Z, 0-9, '-', '.', '_' or '~' are converted to their "URL escaped"
-version (**%NN** where **NN** is a two-digit hexadecimal number).
+This function converts the given input *string* to a URL encoded string and
+returns that as a new allocated string. All input characters that are not a-z,
+A-Z, 0-9, '-', '.', '_' or '~' are converted to their "URL escaped" version
+(**%NN** where **NN** is a two-digit hexadecimal number).
 
-If *length* is set to 0 (zero), curl_easy_escape(3) uses strlen() on
-the input *string* to find out the size. This function does not accept
-input strings longer than **CURL_MAX_INPUT_LENGTH** (8 MB).
-
-Since 7.82.0, the **curl** parameter is ignored. Prior to that there was
-per-handle character conversion support for some old operating systems such as
-TPF, but it was otherwise ignored.
+If *length* is set to 0 (zero), curl_easy_escape(3) uses strlen() on the input
+*string* to find out the size. This function does not accept input strings
+longer than **CURL_MAX_INPUT_LENGTH** (8 MB).
 
 You must curl_free(3) the returned string when you are done with it.
 
@@ -82,6 +78,12 @@ int main(void)
   }
 }
 ~~~
+
+# HISTORY
+
+Since 7.82.0, the **curl** parameter is ignored. Prior to that there was
+per-handle character conversion support for some old operating systems such as
+TPF, but it was otherwise ignored.
 
 # %AVAILABILITY%
 
