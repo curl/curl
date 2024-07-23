@@ -73,6 +73,10 @@ prior knowledge that the server supports HTTP/2 straight away. HTTPS requests
 still do HTTP/2 the standard way with negotiated protocol version in the TLS
 handshake. (Added in 7.49.0)
 
+Since 8.10.0 if this option is set for an HTTPS request then the application
+layer protocol version (ALPN) offered to the server is only HTTP/2. Prior to
+that both HTTP/1.1 and HTTP/2 were offered.
+
 ## CURL_HTTP_VERSION_3
 
 (Added in 7.66.0) This option makes libcurl attempt to use HTTP/3 to the host

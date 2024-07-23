@@ -138,6 +138,9 @@ static const struct alpn_spec ALPN_SPEC_H11 = {
   { ALPN_HTTP_1_1 }, 1
 };
 #ifdef USE_HTTP2
+static const struct alpn_spec ALPN_SPEC_H2 = {
+  { ALPN_H2 }, 1
+};
 static const struct alpn_spec ALPN_SPEC_H2_H11 = {
   { ALPN_H2, ALPN_HTTP_1_1 }, 2
 };
@@ -148,6 +151,8 @@ static const struct alpn_spec *alpn_get_spec(int httpwant, bool use_alpn)
   if(!use_alpn)
     return NULL;
 #ifdef USE_HTTP2
+  if(httpwant == CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE)
+    return &ALPN_SPEC_H2;
   if(httpwant >= CURL_HTTP_VERSION_2)
     return &ALPN_SPEC_H2_H11;
 #else
