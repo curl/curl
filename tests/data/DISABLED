@@ -84,6 +84,7 @@
 2305
 # response body seem not to be handled by hyper
 2307
+2309
 %endif
 2043
 # The CRL test doesn't work with wolfSSL
