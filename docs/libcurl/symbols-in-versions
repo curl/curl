@@ -1144,6 +1144,7 @@ CURLWS_OFFSET                   7.86.0
 CURLWS_PING                     7.86.0
 CURLWS_PONG                     7.86.0
 CURLWS_RAW_MODE                 7.86.0
+CURLWS_NOAUTOPONG               8.5.0
 CURLWS_TEXT                     7.86.0
 LIBCURL_COPYRIGHT               7.18.0
 LIBCURL_TIMESTAMP               7.16.2

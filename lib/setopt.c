@@ -3173,9 +3173,12 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 #ifdef USE_WEBSOCKETS
   case CURLOPT_WS_OPTIONS: {
     bool raw;
+    bool no_auto_pong;
     arg = va_arg(param, long);
     raw = (arg & CURLWS_RAW_MODE);
     data->set.ws_raw_mode = raw;
+    no_auto_pong = (arg & CURLWS_NOAUTOPONG);
+    data->set.ws_no_auto_pong = no_auto_pong;
     break;
   }
 #endif
