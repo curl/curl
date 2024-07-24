@@ -212,7 +212,7 @@ static int do_file_type(const char *type)
   return -1;
 }
 
-#ifdef HAVE_LIBOQS
+#ifdef WOLFSSL_HAVE_KYBER
 struct group_name_map {
   const word16 group;
   const char   *name;
@@ -611,8 +611,8 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   const struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   WOLFSSL_METHOD* req_method = NULL;
-#ifdef HAVE_LIBOQS
-  word16 oqsAlg = 0;
+#ifdef WOLFSSL_HAVE_KYBER
+  word16 pqkem = 0;
   size_t idx = 0;
 #endif
 #ifdef HAVE_SNI
@@ -739,15 +739,15 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   curves = conn_config->curves;
   if(curves) {
 
-#ifdef HAVE_LIBOQS
+#ifdef WOLFSSL_HAVE_KYBER
     for(idx = 0; gnm[idx].name != NULL; idx++) {
       if(strncmp(curves, gnm[idx].name, strlen(gnm[idx].name)) == 0) {
-        oqsAlg = gnm[idx].group;
+        pqkem = gnm[idx].group;
         break;
       }
     }
 
-    if(oqsAlg == 0)
+    if(pqkem == 0)
 #endif
     {
       if(!SSL_CTX_set1_curves_list(backend->ctx, curves)) {
@@ -847,10 +847,10 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     return CURLE_OUT_OF_MEMORY;
   }
 
-#ifdef HAVE_LIBOQS
-  if(oqsAlg) {
-    if(wolfSSL_UseKeyShare(backend->handle, oqsAlg) != WOLFSSL_SUCCESS) {
-      failf(data, "unable to use oqs KEM");
+#ifdef WOLFSSL_HAVE_KYBER
+  if(pqkem) {
+    if(wolfSSL_UseKeyShare(backend->handle, pqkem) != WOLFSSL_SUCCESS) {
+      failf(data, "unable to use PQ KEM");
     }
   }
 #endif
