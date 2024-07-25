@@ -34,14 +34,14 @@ milliseconds. If the IPv6 address cannot be connected to within that time then
 a connection attempt is made to the IPv4 address in parallel. The first
 connection to be established is the one that is used.
 
-The range of suggested useful values for *timeout* is limited. Happy
-Eyeballs RFC 6555 says "It is RECOMMENDED that connection attempts be paced
-150-250 ms apart to balance human factors against network load." libcurl
-currently defaults to 200 ms. Firefox and Chrome currently default to 300 ms.
+The range of suggested useful values for *timeout* is limited. Happy Eyeballs
+RFC 6555 says "It is RECOMMENDED that connection attempts be paced 150-250 ms
+apart to balance human factors against network load." libcurl currently
+defaults to 40 ms.
 
 # DEFAULT
 
-CURL_HET_DEFAULT (currently defined as 200L)
+CURL_HET_DEFAULT (defined as 40L)
 
 # %PROTOCOLS%
 
@@ -64,6 +64,10 @@ int main(void)
 ~~~
 
 # %AVAILABILITY%
+
+# HISTORY
+
+Up until curl 8.9.0, libcurl's default was 200ms.
 
 # RETURN VALUE
 

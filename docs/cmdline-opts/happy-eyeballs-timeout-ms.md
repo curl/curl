@@ -25,4 +25,6 @@ first connection to be established is the one that is used.
 The range of suggested useful values is limited. Happy Eyeballs RFC 6555 says
 "It is RECOMMENDED that connection attempts be paced 150-250 ms apart to
 balance human factors against network load." libcurl currently defaults to
-200 ms. Firefox and Chrome currently default to 300 ms.
+40 ms.
+
+(Up until curl 8.9.0, curl's default was 200ms.)

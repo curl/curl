@@ -941,9 +941,9 @@ typedef enum {
 #define CURLSSLOPT_AUTO_CLIENT_CERT (1<<5)
 
 /* The default connection attempt delay in milliseconds for happy eyeballs.
-   CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS.3 and happy-eyeballs-timeout-ms.d document
-   this value, keep them in sync. */
-#define CURL_HET_DEFAULT 200L
+   CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS.md and happy-eyeballs-timeout-ms.md
+   document this value, keep them in sync. */
+#define CURL_HET_DEFAULT 40L
 
 /* The default connection upkeep interval in milliseconds. */
 #define CURL_UPKEEP_INTERVAL_DEFAULT 60000L
