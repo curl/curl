@@ -4434,7 +4434,7 @@ static CURLcode cr_exp100_read(struct Curl_easy *data,
     if(!Curl_req_sendbuf_empty(data)) {
       /* The initial request data has not been fully sent yet. Do
        * not start the timer yet. */
-      DEBUGF(infof(data, "cr_exp100_read, requst not full sent yet"));
+      DEBUGF(infof(data, "cr_exp100_read, request not full sent yet"));
       *nread = 0;
       *eos = FALSE;
       return CURLE_OK;
