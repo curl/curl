@@ -157,7 +157,11 @@ static int get_address_family(curl_socket_t sockfd)
   struct sockaddr_storage addr;
   socklen_t addrlen = sizeof(addr);
   if(getsockname(sockfd, (struct sockaddr *)&addr, &addrlen) == 0)
+# ifdef __TANDEM
+    return addr.__ss_family;
+# else
     return addr.ss_family;
+# endif
   return AF_UNSPEC;
 }
 #endif
