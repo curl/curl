@@ -141,6 +141,7 @@ typedef CURLcode Curl_cft_conn_keep_alive(struct Curl_cfilter *cf,
 /* update conn info at connection and data */
 #define CF_CTRL_CONN_INFO_UPDATE (256+0) /* 0          NULL     ignored */
 #define CF_CTRL_FORGET_SOCKET    (256+1) /* 0          NULL     ignored */
+#define CF_CTRL_FLUSH            (256+2) /* 0          NULL     first fail */
 
 /**
  * Handle event/control for the filter.
@@ -163,6 +164,7 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
  *                   were received.
  *                   -1 if not determined yet.
  * - CF_QUERY_SOCKET: the socket used by the filter chain
+ * - CF_QUERY_NEED_FLUSH: TRUE iff any of the filters have unsent data
  */
 /*      query                             res1       res2     */
 #define CF_QUERY_MAX_CONCURRENT     1  /* number     -        */
@@ -171,6 +173,7 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
 #define CF_QUERY_TIMER_CONNECT      4  /* -          struct curltime */
 #define CF_QUERY_TIMER_APPCONNECT   5  /* -          struct curltime */
 #define CF_QUERY_STREAM_ERROR       6  /* error code - */
+#define CF_QUERY_NEED_FLUSH         7  /* TRUE/FALSE - */
 
 /**
  * Query the cfilter for properties. Filters ignorant of a query will
@@ -400,6 +403,17 @@ CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done);
  */
 bool Curl_conn_data_pending(struct Curl_easy *data,
                             int sockindex);
+
+/**
+ * Return TRUE if any of the connection filters at chain `sockindex`
+ * have data still to send.
+ */
+bool Curl_conn_needs_flush(struct Curl_easy *data, int sockindex);
+
+/**
+ * Flush any pending data on the connection filters at chain `sockindex`.
+ */
+CURLcode Curl_conn_flush(struct Curl_easy *data, int sockindex);
 
 /**
  * Return the socket used on data's connection for the index.

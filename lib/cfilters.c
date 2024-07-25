@@ -504,6 +504,17 @@ bool Curl_conn_data_pending(struct Curl_easy *data, int sockindex)
   return FALSE;
 }
 
+bool Curl_conn_needs_flush(struct Curl_easy *data, int sockindex)
+{
+  CURLcode result;
+  int pending = FALSE;
+
+  struct Curl_cfilter *cf = data->conn->cfilter[sockindex];
+  result = cf? cf->cft->query(cf, data, CF_QUERY_NEED_FLUSH,
+                              &pending, NULL) : CURLE_UNKNOWN_OPTION;
+  return (result || pending == FALSE)? FALSE : TRUE;
+}
+
 void Curl_conn_cf_adjust_pollset(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct easy_pollset *ps)
@@ -694,6 +705,13 @@ CURLcode Curl_conn_ev_data_idle(struct Curl_easy *data)
 {
   return cf_cntrl_all(data->conn, data, FALSE,
                       CF_CTRL_DATA_IDLE, 0, NULL);
+}
+
+
+CURLcode Curl_conn_flush(struct Curl_easy *data, int sockindex)
+{
+  return Curl_conn_cf_cntrl(data->conn->cfilter[sockindex], data, FALSE,
+                            CF_CTRL_FLUSH, 0, NULL);
 }
 
 /**

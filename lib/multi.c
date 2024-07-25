@@ -1101,7 +1101,7 @@ static int perform_getsock(struct Curl_easy *data, curl_socket_t *sock)
       sock[sockindex] = conn->sockfd;
     }
 
-    if(CURL_WANT_SEND(data)) {
+    if(Curl_req_want_send(data)) {
       if((conn->sockfd != conn->writesockfd) ||
          bitmap == GETSOCK_BLANK) {
         /* only if they are not the same socket and we have a readable

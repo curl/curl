@@ -4431,8 +4431,16 @@ static CURLcode cr_exp100_read(struct Curl_easy *data,
 
   switch(ctx->state) {
   case EXP100_SENDING_REQUEST:
+    if(!Curl_req_sendbuf_empty(data)) {
+      /* The initial request data has not been fully sent yet. Do
+       * not start the timer yet. */
+      DEBUGF(infof(data, "cr_exp100_read, request not full sent yet"));
+      *nread = 0;
+      *eos = FALSE;
+      return CURLE_OK;
+    }
     /* We are now waiting for a reply from the server or
-     * a timeout on our side */
+     * a timeout on our side IFF the request has been fully sent. */
     DEBUGF(infof(data, "cr_exp100_read, start AWAITING_CONTINUE"));
     ctx->state = EXP100_AWAITING_CONTINUE;
     ctx->start = Curl_now();

@@ -2413,6 +2413,48 @@ out:
   return nwritten;
 }
 
+static CURLcode cf_h2_flush(struct Curl_cfilter *cf,
+                            struct Curl_easy *data)
+{
+  struct cf_h2_ctx *ctx = cf->ctx;
+  struct h2_stream_ctx *stream = H2_STREAM_CTX(ctx, data);
+  struct cf_call_data save;
+  CURLcode result = CURLE_OK;
+
+  CF_DATA_SAVE(save, cf, data);
+  if(stream && !Curl_bufq_is_empty(&stream->sendbuf)) {
+    /* resume the potentially suspended stream */
+    int rv = nghttp2_session_resume_data(ctx->h2, stream->id);
+    if(nghttp2_is_fatal(rv)) {
+      result = CURLE_SEND_ERROR;
+      goto out;
+    }
+  }
+
+  result = h2_progress_egress(cf, data);
+
+out:
+  if(stream) {
+    CURL_TRC_CF(data, cf, "[%d] flush -> %d, "
+                "h2 windows %d-%d (stream-conn), "
+                "buffers %zu-%zu (stream-conn)",
+                stream->id, result,
+                nghttp2_session_get_stream_remote_window_size(
+                  ctx->h2, stream->id),
+                nghttp2_session_get_remote_window_size(ctx->h2),
+                Curl_bufq_len(&stream->sendbuf),
+                Curl_bufq_len(&ctx->outbufq));
+  }
+  else {
+    CURL_TRC_CF(data, cf, "flush -> %d, "
+                "connection-window=%d, nw_send_buffer(%zu)",
+                result, nghttp2_session_get_remote_window_size(ctx->h2),
+                Curl_bufq_len(&ctx->outbufq));
+  }
+  CF_DATA_RESTORE(cf, save);
+  return result;
+}
+
 static void cf_h2_adjust_pollset(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct easy_pollset *ps)
@@ -2622,6 +2664,9 @@ static CURLcode cf_h2_cntrl(struct Curl_cfilter *cf,
   case CF_CTRL_DATA_PAUSE:
     result = http2_data_pause(cf, data, (arg1 != 0));
     break;
+  case CF_CTRL_FLUSH:
+    result = cf_h2_flush(cf, data);
+    break;
   case CF_CTRL_DATA_DONE_SEND:
     result = http2_data_done_send(cf, data);
     break;
@@ -2705,6 +2750,15 @@ static CURLcode cf_h2_query(struct Curl_cfilter *cf,
     struct h2_stream_ctx *stream = H2_STREAM_CTX(ctx, data);
     *pres1 = stream? (int)stream->error : 0;
     return CURLE_OK;
+  }
+  case CF_QUERY_NEED_FLUSH: {
+    struct h2_stream_ctx *stream = H2_STREAM_CTX(ctx, data);
+    if(!Curl_bufq_is_empty(&ctx->outbufq) ||
+       (stream && !Curl_bufq_is_empty(&stream->sendbuf))) {
+      *pres1 = TRUE;
+      return CURLE_OK;
+    }
+    break;
   }
   default:
     break;
