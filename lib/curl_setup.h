@@ -71,7 +71,9 @@
    the necessary dynamic detection features, so the SDK falls back to
    a codepath that sets both the old and new macro to 1. */
 #if defined(TARGET_OS_MAC) && TARGET_OS_MAC && \
-  defined(TARGET_OS_OSX) && !TARGET_OS_OSX
+  defined(TARGET_OS_OSX) && !TARGET_OS_OSX && \
+  (!defined(TARGET_OS_IPHONE) || !TARGET_OS_IPHONE) && \
+  (!defined(TARGET_OS_SIMULATOR) || !TARGET_OS_SIMULATOR)
 #undef TARGET_OS_OSX
 #define TARGET_OS_OSX TARGET_OS_MAC
 #endif
