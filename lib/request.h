@@ -221,9 +221,20 @@ CURLcode Curl_req_send_more(struct Curl_easy *data);
 bool Curl_req_want_send(struct Curl_easy *data);
 
 /**
+ * TRUE iff the request has no buffered bytes yet to send.
+ */
+bool Curl_req_sendbuf_empty(struct Curl_easy *data);
+
+/**
  * Stop sending any more request data to the server.
  * Will clear the send buffer and mark request sending as done.
  */
 CURLcode Curl_req_abort_sending(struct Curl_easy *data);
+
+/**
+ * Stop sending and receiving any more request data.
+ * Will abort sending if not done.
+ */
+CURLcode Curl_req_stop_send_recv(struct Curl_easy *data);
 
 #endif /* HEADER_CURL_REQUEST_H */
