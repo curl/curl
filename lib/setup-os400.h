@@ -38,6 +38,15 @@ typedef unsigned long   u_int32_t;
 #define isatty(fd)      0
 
 
+/* Workaround bug in IBM QADRT runtime library:
+ * function puts() does not output the implicit trailing newline.
+ */
+
+#include <stdio.h>      /* Be sure it is loaded. */
+#undef puts
+#define puts(s) (fputs((s), stdout) == EOF? EOF: putchar('\n'))
+
+
 /* System API wrapper prototypes & definitions to support ASCII parameters. */
 
 #include <sys/socket.h>
