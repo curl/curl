@@ -137,10 +137,10 @@ typedef CURLcode Curl_cft_conn_keep_alive(struct Curl_cfilter *cf,
 #define CF_CTRL_DATA_PAUSE            6  /* on/off     NULL     first fail */
 #define CF_CTRL_DATA_DONE             7  /* premature  NULL     ignored */
 #define CF_CTRL_DATA_DONE_SEND        8  /* 0          NULL     ignored */
-#define CF_CTRL_DATA_SEND_FLUSH       9  /* 0          NULL     first fail */
 /* update conn info at connection and data */
 #define CF_CTRL_CONN_INFO_UPDATE (256+0) /* 0          NULL     ignored */
 #define CF_CTRL_FORGET_SOCKET    (256+1) /* 0          NULL     ignored */
+#define CF_CTRL_FLUSH            (256+2) /* 0          NULL     first fail */
 
 /**
  * Handle event/control for the filter.
@@ -163,7 +163,7 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
  *                   were received.
  *                   -1 if not determined yet.
  * - CF_QUERY_SOCKET: the socket used by the filter chain
- * - CF_QUERY_SEND_PENDING: TRUE iff any of the filter have data to send
+ * - CF_QUERY_NEED_FLUSH: TRUE iff any of the filters have unsent data
  */
 /*      query                             res1       res2     */
 #define CF_QUERY_MAX_CONCURRENT     1  /* number     -        */
@@ -172,7 +172,7 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
 #define CF_QUERY_TIMER_CONNECT      4  /* -          struct curltime */
 #define CF_QUERY_TIMER_APPCONNECT   5  /* -          struct curltime */
 #define CF_QUERY_STREAM_ERROR       6  /* error code - */
-#define CF_QUERY_SEND_PENDING       7  /* TRUE/FALSE - */
+#define CF_QUERY_NEED_FLUSH         7  /* TRUE/FALSE - */
 
 /**
  * Query the cfilter for properties. Filters ignorant of a query will

@@ -507,7 +507,7 @@ bool Curl_conn_send_needs_flush(struct Curl_easy *data, int sockindex)
   int pending = FALSE;
 
   struct Curl_cfilter *cf = data->conn->cfilter[sockindex];
-  result = cf? cf->cft->query(cf, data, CF_QUERY_SEND_PENDING,
+  result = cf? cf->cft->query(cf, data, CF_QUERY_NEED_FLUSH,
                               &pending, NULL) : CURLE_UNKNOWN_OPTION;
   return (result || pending == FALSE)? FALSE : TRUE;
 }
@@ -708,7 +708,7 @@ CURLcode Curl_conn_ev_data_idle(struct Curl_easy *data)
 CURLcode Curl_conn_send_flush(struct Curl_easy *data, int sockindex)
 {
   return Curl_conn_cf_cntrl(data->conn->cfilter[sockindex], data, FALSE,
-                            CF_CTRL_DATA_SEND_FLUSH, 0, NULL);
+                            CF_CTRL_FLUSH, 0, NULL);
 }
 
 /**

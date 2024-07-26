@@ -1571,7 +1571,7 @@ static CURLcode cf_h2_proxy_query(struct Curl_cfilter *cf,
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
 
   switch(query) {
-  case CF_QUERY_SEND_PENDING: {
+  case CF_QUERY_NEED_FLUSH: {
     if(!Curl_bufq_is_empty(&ctx->outbufq) ||
        !Curl_bufq_is_empty(&ctx->tunnel.sendbuf)) {
       *pres1 = TRUE;
@@ -1598,7 +1598,7 @@ static CURLcode cf_h2_proxy_cntrl(struct Curl_cfilter *cf,
   (void)arg2;
 
   switch(event) {
-  case CF_CTRL_DATA_SEND_FLUSH:
+  case CF_CTRL_FLUSH:
     CF_DATA_SAVE(save, cf, data);
     result = cf_h2_proxy_send_flush(cf, data);
     CF_DATA_RESTORE(cf, save);

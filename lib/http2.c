@@ -2618,7 +2618,7 @@ static CURLcode cf_h2_cntrl(struct Curl_cfilter *cf,
   case CF_CTRL_DATA_PAUSE:
     result = http2_data_pause(cf, data, (arg1 != 0));
     break;
-  case CF_CTRL_DATA_SEND_FLUSH:
+  case CF_CTRL_FLUSH:
     result = cf_h2_send_flush(cf, data);
     break;
   case CF_CTRL_DATA_DONE_SEND:
@@ -2705,7 +2705,7 @@ static CURLcode cf_h2_query(struct Curl_cfilter *cf,
     *pres1 = stream? (int)stream->error : 0;
     return CURLE_OK;
   }
-  case CF_QUERY_SEND_PENDING: {
+  case CF_QUERY_NEED_FLUSH: {
     struct h2_stream_ctx *stream = H2_STREAM_CTX(ctx, data);
     if(!Curl_bufq_is_empty(&ctx->outbufq) ||
        (stream && !Curl_bufq_is_empty(&stream->sendbuf))) {
