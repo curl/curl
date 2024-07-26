@@ -601,7 +601,7 @@ CURLcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,
     }
   }
   else {
-   /* We'll never share the CTX's store, use it. */
+   /* We never share the CTX's store, use it. */
    X509_STORE *store = wolfSSL_CTX_get_cert_store(wssl->ctx);
    result = populate_x509_store(cf, data, store, wssl);
   }
