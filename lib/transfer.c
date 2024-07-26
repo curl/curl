@@ -281,13 +281,13 @@ static CURLcode readwrite_data(struct Curl_easy *data,
     buf = xfer_buf;
     bytestoread = xfer_blen;
 
-    if(bytestoread && data->set.max_recv_speed) {
+    if(bytestoread && data->set.max_recv_speed > 0) {
       /* In case of speed limit on receiving: if this loop already got
        * data, break out. If not, limit the amount of bytes to receive.
        * The overall, timed, speed limiting is done in multi.c */
       if(total_received)
         break;
-      if((size_t)data->set.max_recv_speed < bytestoread)
+      if(data->set.max_recv_speed < (curl_off_t)bytestoread)
         bytestoread = (size_t)data->set.max_recv_speed;
     }
 
