@@ -501,7 +501,7 @@ bool Curl_conn_data_pending(struct Curl_easy *data, int sockindex)
   return FALSE;
 }
 
-bool Curl_conn_send_needs_flush(struct Curl_easy *data, int sockindex)
+bool Curl_conn_needs_flush(struct Curl_easy *data, int sockindex)
 {
   CURLcode result;
   int pending = FALSE;
@@ -705,7 +705,7 @@ CURLcode Curl_conn_ev_data_idle(struct Curl_easy *data)
 }
 
 
-CURLcode Curl_conn_send_flush(struct Curl_easy *data, int sockindex)
+CURLcode Curl_conn_flush(struct Curl_easy *data, int sockindex)
 {
   return Curl_conn_cf_cntrl(data->conn->cfilter[sockindex], data, FALSE,
                             CF_CTRL_FLUSH, 0, NULL);

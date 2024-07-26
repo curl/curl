@@ -1479,8 +1479,8 @@ out:
   return nwritten;
 }
 
-static CURLcode cf_h2_proxy_send_flush(struct Curl_cfilter *cf,
-                                       struct Curl_easy *data)
+static CURLcode cf_h2_proxy_flush(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data)
 {
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
   struct cf_call_data save;
@@ -1499,7 +1499,7 @@ static CURLcode cf_h2_proxy_send_flush(struct Curl_cfilter *cf,
   result = proxy_h2_progress_egress(cf, data);
 
 out:
-  CURL_TRC_CF(data, cf, "[%d] send_flush -> %d, "
+  CURL_TRC_CF(data, cf, "[%d] flush -> %d, "
               "h2 windows %d-%d (stream-conn), buffers %zu-%zu (stream-conn)",
               ctx->tunnel.stream_id, result,
               nghttp2_session_get_stream_remote_window_size(
@@ -1600,7 +1600,7 @@ static CURLcode cf_h2_proxy_cntrl(struct Curl_cfilter *cf,
   switch(event) {
   case CF_CTRL_FLUSH:
     CF_DATA_SAVE(save, cf, data);
-    result = cf_h2_proxy_send_flush(cf, data);
+    result = cf_h2_proxy_flush(cf, data);
     CF_DATA_RESTORE(cf, save);
     break;
   default:

@@ -405,12 +405,12 @@ bool Curl_conn_data_pending(struct Curl_easy *data,
  * Return TRUE if any of the connection filters at chain `sockindex`
  * have data still to send.
  */
-bool Curl_conn_send_needs_flush(struct Curl_easy *data, int sockindex);
+bool Curl_conn_needs_flush(struct Curl_easy *data, int sockindex);
 
 /**
  * Flush any pending data on the connection filters at chain `sockindex`.
  */
-CURLcode Curl_conn_send_flush(struct Curl_easy *data, int sockindex);
+CURLcode Curl_conn_flush(struct Curl_easy *data, int sockindex);
 
 /**
  * Return the socket used on data's connection for the index.

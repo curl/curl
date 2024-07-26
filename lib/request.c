@@ -285,9 +285,9 @@ static CURLcode req_flush(struct Curl_easy *data)
       return CURLE_AGAIN;
     }
   }
-  else if(Curl_xfer_send_needs_flush(data)) {
+  else if(Curl_xfer_needs_flush(data)) {
     DEBUGF(infof(data, "Curl_req_flush(), xfer send_pending"));
-    return Curl_xfer_send_flush(data);
+    return Curl_xfer_flush(data);
   }
 
   if(!data->req.upload_done && data->req.eos_read &&
@@ -388,7 +388,7 @@ bool Curl_req_want_send(struct Curl_easy *data)
   return !data->req.done &&
          (((data->req.keepon & KEEP_SENDBITS) == KEEP_SEND) ||
            !Curl_req_sendbuf_empty(data) ||
-           Curl_xfer_send_needs_flush(data));
+           Curl_xfer_needs_flush(data));
 }
 
 bool Curl_req_done_sending(struct Curl_easy *data)

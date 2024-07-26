@@ -2343,8 +2343,8 @@ out:
   return nwritten;
 }
 
-static CURLcode cf_h2_send_flush(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data)
+static CURLcode cf_h2_flush(struct Curl_cfilter *cf,
+                            struct Curl_easy *data)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
   struct h2_stream_ctx *stream = H2_STREAM_CTX(ctx, data);
@@ -2365,7 +2365,7 @@ static CURLcode cf_h2_send_flush(struct Curl_cfilter *cf,
 
 out:
   if(stream) {
-    CURL_TRC_CF(data, cf, "[%d] send_flush -> %d, "
+    CURL_TRC_CF(data, cf, "[%d] flush -> %d, "
                 "h2 windows %d-%d (stream-conn), "
                 "buffers %zu-%zu (stream-conn)",
                 stream->id, result,
@@ -2376,7 +2376,7 @@ out:
                 Curl_bufq_len(&ctx->outbufq));
   }
   else {
-    CURL_TRC_CF(data, cf, "send_flush -> %d, "
+    CURL_TRC_CF(data, cf, "flush -> %d, "
                 "connection-window=%d, nw_send_buffer(%zu)",
                 result, nghttp2_session_get_remote_window_size(ctx->h2),
                 Curl_bufq_len(&ctx->outbufq));
@@ -2619,7 +2619,7 @@ static CURLcode cf_h2_cntrl(struct Curl_cfilter *cf,
     result = http2_data_pause(cf, data, (arg1 != 0));
     break;
   case CF_CTRL_FLUSH:
-    result = cf_h2_send_flush(cf, data);
+    result = cf_h2_flush(cf, data);
     break;
   case CF_CTRL_DATA_DONE_SEND:
     result = http2_data_done_send(cf, data);

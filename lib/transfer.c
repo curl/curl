@@ -1233,20 +1233,20 @@ CURLcode Curl_xfer_write_done(struct Curl_easy *data, bool premature)
   return Curl_cw_out_done(data);
 }
 
-bool Curl_xfer_send_needs_flush(struct Curl_easy *data)
+bool Curl_xfer_needs_flush(struct Curl_easy *data)
 {
   int sockindex;
   sockindex = ((data->conn->writesockfd != CURL_SOCKET_BAD) &&
                (data->conn->writesockfd == data->conn->sock[SECONDARYSOCKET]));
-  return Curl_conn_send_needs_flush(data, sockindex);
+  return Curl_conn_needs_flush(data, sockindex);
 }
 
-CURLcode Curl_xfer_send_flush(struct Curl_easy *data)
+CURLcode Curl_xfer_flush(struct Curl_easy *data)
 {
   int sockindex;
   sockindex = ((data->conn->writesockfd != CURL_SOCKET_BAD) &&
                (data->conn->writesockfd == data->conn->sock[SECONDARYSOCKET]));
-  return Curl_conn_send_flush(data, sockindex);
+  return Curl_conn_flush(data, sockindex);
 }
 
 CURLcode Curl_xfer_send(struct Curl_easy *data,
