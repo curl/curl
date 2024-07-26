@@ -434,10 +434,10 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
     }
     infof(data, " CAfile: %s", ssl_cafile ? ssl_cafile : "none");
     infof(data, " CApath: %s", ssl_capath ? ssl_capath : "none");
-    wssl->x509_store_setup = TRUE;
   }
 #endif
   (void)store;
+  wssl->x509_store_setup = TRUE;
   return CURLE_OK;
 }
 
@@ -833,8 +833,14 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* give application a chance to interfere with SSL set up. */
   if(data->set.ssl.fsslctx) {
-    CURLcode result = (*data->set.ssl.fsslctx)(data, backend->ctx,
-                                               data->set.ssl.fsslctxp);
+    CURLcode result;
+    if(!backend->x509_store_setup) {
+      result = Curl_wssl_setup_x509_store(cf, data, backend);
+      if(result)
+        return result;
+    }
+    result = (*data->set.ssl.fsslctx)(data, backend->ctx,
+                                      data->set.ssl.fsslctxp);
     if(result) {
       failf(data, "error signaled by ssl ctx callback");
       return result;
@@ -1071,15 +1077,9 @@ wolfssl_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     /* After having send off the ClientHello, we prepare the x509
      * store to verify the coming certificate from the server */
     CURLcode result;
-    struct wolfssl_ctx wssl;
-    wssl.ctx = backend->ctx;
-    wssl.handle = backend->handle;
-    wssl.io_result = CURLE_OK;
-    wssl.x509_store_setup = FALSE;
-    result = Curl_wssl_setup_x509_store(cf, data, &wssl);
+    result = Curl_wssl_setup_x509_store(cf, data, backend);
     if(result)
       return result;
-    backend->x509_store_setup = wssl.x509_store_setup;
   }
 
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
