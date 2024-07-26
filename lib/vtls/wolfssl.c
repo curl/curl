@@ -585,13 +585,25 @@ CURLcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,
      && wolfSSL_X509_STORE_up_ref(cached_store)) {
     wolfSSL_CTX_set_cert_store(wssl->ctx, cached_store);
   }
-  else {
-    X509_STORE *store = wolfSSL_CTX_get_cert_store(wssl->ctx);
+  else if(cache_criteria_met) {
+    /* wolfSSL's initial store in CTX is not shareable by default.
+     * Make a new one, suitable for adding to the cache. See #14278 */
+    X509_STORE *store = wolfSSL_X509_STORE_new();
+    if(!store) {
+      failf(data, "SSL: could not create a X509 store");
+      return CURLE_OUT_OF_MEMORY;
+    }
+    wolfSSL_CTX_set_cert_store(wssl->ctx, store);
 
     result = populate_x509_store(cf, data, store, wssl);
-    if(result == CURLE_OK && cache_criteria_met) {
+    if(!result) {
       set_cached_x509_store(cf, data, store);
     }
+  }
+  else {
+   /* We'll never share the CTX's store, use it. */
+   X509_STORE *store = wolfSSL_CTX_get_cert_store(wssl->ctx);
+   result = populate_x509_store(cf, data, store, wssl);
   }
 
   return result;
