@@ -2960,9 +2960,16 @@ CURLMcode Curl_multi_pollset_ev(struct Curl_multi *multi,
           break;
         }
       }
+      DEBUGF(infof(data, "multi_pollset_ev: last action for fd=%"
+                   CURL_FORMAT_SOCKET_T " (users=%d/rds=%d/wrts=%d) "
+                   "was %x, now %x",
+                   s, entry->users, entry->readers, entry->writers,
+                   last_action, cur_action));
     }
     else {
       /* this is a socket we did not have before, add it to the hash! */
+      DEBUGF(infof(data, "multi_pollset_ev: new entry for fd=%"
+                   CURL_FORMAT_SOCKET_T, s));
       entry = sh_addentry(&multi->sockhash, s);
       if(!entry)
         /* fatal */
@@ -2994,6 +3001,11 @@ CURLMcode Curl_multi_pollset_ev(struct Curl_multi *multi,
         Curl_hash_destroy(&entry->transfers);
         return CURLM_OUT_OF_MEMORY;
       }
+      DEBUGF(infof(data, "multi_pollset_ev: added transfer for fd=%"
+                   CURL_FORMAT_SOCKET_T " (users=%d/rds=%d/wrts=%d) "
+                   "was %x, now %x",
+                   s, entry->users, entry->readers, entry->writers,
+                   last_action, cur_action));
     }
 
     comboaction = (entry->writers ? CURL_POLL_OUT : 0) |
@@ -3048,7 +3060,12 @@ CURLMcode Curl_multi_pollset_ev(struct Curl_multi *multi,
         entry->writers--;
       if(oldactions & CURL_POLL_IN)
         entry->readers--;
+      DEBUGF(infof(data, "multi_pollset_ev: transfer no longer using fd=%"
+                   CURL_FORMAT_SOCKET_T " (users=%d/rds=%d/wrts=%d) ",
+                   s, entry->users, entry->readers, entry->writers));
       if(!entry->users) {
+        DEBUGF(infof(data, "multi_pollset_ev: POLL_REMOVE fd=%"
+                     CURL_FORMAT_SOCKET_T, s));
         if(multi->socket_cb) {
           set_in_callback(multi, TRUE);
           rc = multi->socket_cb(data, s, CURL_POLL_REMOVE,
@@ -3063,6 +3080,8 @@ CURLMcode Curl_multi_pollset_ev(struct Curl_multi *multi,
       }
       else {
         /* still users, but remove this handle as a user of this socket */
+        DEBUGF(infof(data, "multi_pollset_ev: remove transfer for fd=%"
+                     CURL_FORMAT_SOCKET_T, s));
         if(Curl_hash_delete(&entry->transfers, (char *)&data,
                             sizeof(struct Curl_easy *))) {
           DEBUGASSERT(NULL);

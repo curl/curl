@@ -130,7 +130,7 @@ int Curl_conncache_init(struct conncache *connc,
   if(!connc->closure_handle)
     return 1; /* bad */
   connc->closure_handle->state.internal = true;
- #ifdef DEBUGBUILD
+#ifdef DEBUGBUILD
   if(getenv("CURL_DEBUG"))
     connc->closure_handle->set.verbose = true;
 #endif
@@ -725,6 +725,13 @@ static void connc_discard_conn(struct conncache *connc,
 
   if(data->multi && data->multi->socket_cb) {
     DEBUGASSERT(connc == &data->multi->conn_cache);
+#ifdef DEBUGBUILD
+    if(last_data && last_data->set.verbose) {
+      connc->closure_handle->set.verbose = last_data->set.verbose;
+      connc->closure_handle->set.fdebug = last_data->set.fdebug;
+      connc->closure_handle->set.debugdata = last_data->set.debugdata;
+    }
+#endif
     /* Start with an empty shutdown pollset, so out internal closure handle
      * is added to the sockets. */
     memset(&conn->shutdown_poll, 0, sizeof(conn->shutdown_poll));
