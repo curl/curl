@@ -243,11 +243,6 @@ static ssize_t Curl_xfer_recv_resp(struct Curl_easy *data,
   return nread;
 }
 
-static CURLcode Curl_xfer_stop_send_recv(struct Curl_easy *data)
-{
-  return Curl_req_stop_send_recv(data);
-}
-
 /*
  * Go ahead and do a read if we have a readable socket or if
  * the stream was rewound (in which case we have data in a
@@ -318,7 +313,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
         DEBUGF(infof(data, "nread == 0, stream closed, bailing"));
       else
         DEBUGF(infof(data, "nread <= 0, server closed connection, bailing"));
-      result = Curl_xfer_stop_send_recv(data);
+      result = Curl_req_stop_send_recv(data);
       if(result)
         goto out;
       if(k->eos_written) /* already did write this to client, leave */
