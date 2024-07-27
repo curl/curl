@@ -294,8 +294,8 @@ jobs:
             generate: -DCURL_USE_WOLFSSL=ON -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
             macos-version-min: '10.15'
           - name: 'GnuTLS !ldap'
-            install: gnutls
-            generate: -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DCMAKE_SHARED_LINKER_FLAGS=-L$(brew --prefix nettle)/lib -DCMAKE_EXE_LINKER_FLAGS=-L$(brew --prefix nettle)/lib
+            install: gnutls nettle
+            generate: -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
             macos-version-min: '10.15'
         exclude:
           - { compiler: llvm@15, build: { macos-version-min: '10.15' } }
