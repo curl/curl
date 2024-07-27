@@ -62,14 +62,15 @@ else()
   endif()
 
   include(FindPackageHandleStandardArgs)
-  find_package_handle_standard_args(nettle
-    REQUIRED_VARS NETTLE_LIBRARY NETTLE_INCLUDE_DIR
-    VERSION_VAR NETTLE_VERSION
-  )
+  find_package_handle_standard_args("nettle"
+    REQUIRED_VARS
+      NETTLE_INCLUDE_DIR
+      NETTLE_LIBRARY
+    VERSION_VAR NETTLE_VERSION)
 
   if(NETTLE_FOUND)
-    set(NETTLE_LIBRARIES    ${NETTLE_LIBRARY})
     set(NETTLE_INCLUDE_DIRS ${NETTLE_INCLUDE_DIR})
+    set(NETTLE_LIBRARIES    ${NETTLE_LIBRARY})
   endif()
 
   mark_as_advanced(NETTLE_INCLUDE_DIR NETTLE_LIBRARY)
