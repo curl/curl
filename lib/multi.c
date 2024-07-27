@@ -3211,6 +3211,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
   bool first = FALSE;
   bool nosig = FALSE;
   SIGPIPE_VARIABLE(pipe_st);
+  bool run_conn_cache = FALSE;
 
   if(checkall) {
     /* *perform() deals with running_handles on its own */
@@ -3254,11 +3255,20 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
         DEBUGASSERT(data);
         DEBUGASSERT(data->magic == CURLEASY_MAGIC_NUMBER);
 
-        if(data->conn && !(data->conn->handler->flags & PROTOPT_DIRLOCK))
-          /* set socket event bitmask if they are not locked */
-          data->state.select_bits |= (unsigned char)ev_bitmask;
+        DEBUGF(infof(data, "multi_socket() on transfer [%"
+               CURL_FORMAT_CURL_OFF_T "-%" CURL_FORMAT_CURL_OFF_T "]"
+               " events=%x fd=%" CURL_FORMAT_SOCKET_T,
+               data->id, data->conn->connection_id, ev_bitmask, s));
+        if(data == multi->conn_cache.closure_handle) {
+          run_conn_cache = TRUE;
+        }
+        else {
+          if(data->conn && !(data->conn->handler->flags & PROTOPT_DIRLOCK))
+            /* set socket event bitmask if they are not locked */
+            data->state.select_bits |= (unsigned char)ev_bitmask;
 
-        Curl_expire(data, 0, EXPIRE_RUN_NOW);
+          Curl_expire(data, 0, EXPIRE_RUN_NOW);
+        }
       }
 
       /* Now we fall-through and do the timer-based stuff, since we do not want
@@ -3321,6 +3331,12 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
   } while(t);
   if(first)
     sigpipe_restore(&pipe_st);
+
+  if(run_conn_cache) {
+    DEBUGF(infof(multi->conn_cache.closure_handle,
+                 "multi_socket(), connn_cache involved, run"));
+    Curl_conncache_multi_perform(multi);
+  }
 
   if(running_handles)
     *running_handles = (int)multi->num_alive;
