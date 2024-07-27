@@ -1196,6 +1196,12 @@ elsif($cmd eq "-I") {
     $cmd = shift @ARGV;
     goto check;
 }
+elsif($cmd eq "-c") {
+    # Column width
+    $colwidth = 0 + shift @ARGV;
+    $cmd = shift @ARGV;
+    goto check;
+}
 
 my @files = @ARGV; # the rest are the files
 
