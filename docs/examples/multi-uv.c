@@ -26,12 +26,12 @@
  * multi_socket API using libuv
  * </DESC>
  */
-/* Example application using the multi socket interface to download multiple
-   files in parallel, powered by libuv.
+/* Use the socket_action interface to download multiple files in parallel,
+   powered by libuv.
 
    Requires libuv and (of course) libcurl.
 
-   See https://nikhilm.github.io/uvbook/ for more information on libuv.
+   See https://docs.libuv.org/en/v1.x/index.html libuv API documentation
 */
 
 #include <stdio.h>
@@ -39,24 +39,30 @@
 #include <uv.h>
 #include <curl/curl.h>
 
-uv_loop_t *loop;
-CURLM *curl_handle;
-uv_timer_t timeout;
+/* object to pass to the callbacks */
+struct datauv {
+  uv_timer_t timeout;
+  uv_loop_t *loop;
+  CURLM *multi;
+};
 
 typedef struct curl_context_s {
   uv_poll_t poll_handle;
   curl_socket_t sockfd;
+  struct datauv *uv;
 } curl_context_t;
 
-static curl_context_t *create_curl_context(curl_socket_t sockfd)
+static curl_context_t *create_curl_context(curl_socket_t sockfd,
+                                           struct datauv *uv)
 {
   curl_context_t *context;
 
   context = (curl_context_t *) malloc(sizeof(*context));
 
   context->sockfd = sockfd;
+  context->uv = uv;
 
-  uv_poll_init_socket(loop, &context->poll_handle, sockfd);
+  uv_poll_init_socket(uv->loop, &context->poll_handle, sockfd);
   context->poll_handle.data = context;
 
   return context;
@@ -73,7 +79,7 @@ static void destroy_curl_context(curl_context_t *context)
   uv_close((uv_handle_t *) &context->poll_handle, curl_close_cb);
 }
 
-static void add_download(const char *url, int num)
+static void add_download(const char *url, int num, CURLM *multi)
 {
   char filename[50];
   FILE *file;
@@ -91,11 +97,11 @@ static void add_download(const char *url, int num)
   curl_easy_setopt(handle, CURLOPT_WRITEDATA, file);
   curl_easy_setopt(handle, CURLOPT_PRIVATE, file);
   curl_easy_setopt(handle, CURLOPT_URL, url);
-  curl_multi_add_handle(curl_handle, handle);
+  curl_multi_add_handle(multi, handle);
   fprintf(stderr, "Added download %s -> %s\n", url, filename);
 }
 
-static void check_multi_info(void)
+static void check_multi_info(curl_context_t *context)
 {
   char *done_url;
   CURLMsg *message;
@@ -103,7 +109,7 @@ static void check_multi_info(void)
   CURL *easy_handle;
   FILE *file;
 
-  while((message = curl_multi_info_read(curl_handle, &pending))) {
+  while((message = curl_multi_info_read(context->uv->multi, &pending))) {
     switch(message->msg) {
     case CURLMSG_DONE:
       /* Do not use message data after calling curl_multi_remove_handle() and
@@ -117,7 +123,7 @@ static void check_multi_info(void)
       curl_easy_getinfo(easy_handle, CURLINFO_PRIVATE, &file);
       printf("%s DONE\n", done_url);
 
-      curl_multi_remove_handle(curl_handle, easy_handle);
+      curl_multi_remove_handle(context->uv->multi, easy_handle);
       curl_easy_cleanup(easy_handle);
       if(file) {
         fclose(file);
@@ -131,73 +137,82 @@ static void check_multi_info(void)
   }
 }
 
-static void curl_perform(uv_poll_t *req, int status, int events)
+/* callback from libuv on socket activity */
+static void on_uv_socket(uv_poll_t *req, int status, int events)
 {
   int running_handles;
   int flags = 0;
-  curl_context_t *context;
-
+  curl_context_t *context = (curl_context_t *) req->data;
+  (void)status;
   if(events & UV_READABLE)
     flags |= CURL_CSELECT_IN;
   if(events & UV_WRITABLE)
     flags |= CURL_CSELECT_OUT;
 
-  context = (curl_context_t *) req->data;
-
-  curl_multi_socket_action(curl_handle, context->sockfd, flags,
+  curl_multi_socket_action(context->uv->multi, context->sockfd, flags,
                            &running_handles);
-
-  check_multi_info();
+  check_multi_info(context);
 }
 
-static void on_timeout(uv_timer_t *req)
+/* callback from libuv when timeout expires */
+static void on_uv_timeout(uv_timer_t *req)
 {
-  int running_handles;
-  curl_multi_socket_action(curl_handle, CURL_SOCKET_TIMEOUT, 0,
-                           &running_handles);
-  check_multi_info();
-}
-
-static int start_timeout(CURLM *multi, long timeout_ms, void *userp)
-{
-  if(timeout_ms < 0) {
-    uv_timer_stop(&timeout);
+  curl_context_t *context = (curl_context_t *) req->data;
+  if(context) {
+    int running_handles;
+    curl_multi_socket_action(context->uv->multi, CURL_SOCKET_TIMEOUT, 0,
+                             &running_handles);
+    check_multi_info(context);
   }
+}
+
+/* callback from libcurl to update the timeout expiry */
+static int cb_timeout(CURLM *multi, long timeout_ms,
+                      struct datauv *uv)
+{
+  (void)multi;
+  if(timeout_ms < 0)
+    uv_timer_stop(&uv->timeout);
   else {
     if(timeout_ms == 0)
-      timeout_ms = 1; /* 0 means call socket_action asap */
-    uv_timer_start(&timeout, on_timeout, timeout_ms, 0);
+      timeout_ms = 1; /* 0 means call curl_multi_socket_action asap but NOT
+                         within the callback itself */
+    uv_timer_start(&uv->timeout, on_uv_timeout, timeout_ms,
+                   0); /* do not repeat */
   }
   return 0;
 }
 
-static int handle_socket(CURL *easy, curl_socket_t s, int action, void *userp,
-                  void *socketp)
+/* callback from libcurl to update socket activity to wait for */
+static int cb_socket(CURL *easy, curl_socket_t s, int action,
+                     struct datauv *uv,
+                     void *socketp)
 {
   curl_context_t *curl_context;
   int events = 0;
+  (void)easy;
 
   switch(action) {
   case CURL_POLL_IN:
   case CURL_POLL_OUT:
   case CURL_POLL_INOUT:
     curl_context = socketp ?
-      (curl_context_t *) socketp : create_curl_context(s);
+      (curl_context_t *) socketp : create_curl_context(s, uv);
 
-    curl_multi_assign(curl_handle, s, (void *) curl_context);
+    curl_multi_assign(uv->multi, s, (void *) curl_context);
 
     if(action != CURL_POLL_IN)
       events |= UV_WRITABLE;
     if(action != CURL_POLL_OUT)
       events |= UV_READABLE;
 
-    uv_poll_start(&curl_context->poll_handle, events, curl_perform);
+    uv_poll_start(&curl_context->poll_handle, events, on_uv_socket);
     break;
   case CURL_POLL_REMOVE:
     if(socketp) {
       uv_poll_stop(&((curl_context_t*)socketp)->poll_handle);
       destroy_curl_context((curl_context_t*) socketp);
-      curl_multi_assign(curl_handle, s, NULL);
+      curl_multi_assign(uv->multi, s, NULL);
     }
     break;
   default:
@@ -209,28 +224,31 @@ static int handle_socket(CURL *easy, curl_socket_t s, int action, void *userp,
 
 int main(int argc, char **argv)
 {
-  loop = uv_default_loop();
+  struct datauv uv = { 0 };
+  int running_handles;
 
   if(argc <= 1)
     return 0;
 
-  if(curl_global_init(CURL_GLOBAL_ALL)) {
-    fprintf(stderr, "Could not init curl\n");
-    return 1;
-  }
+  curl_global_init(CURL_GLOBAL_ALL);
 
-  uv_timer_init(loop, &timeout);
+  uv.loop = uv_default_loop();
+  uv_timer_init(uv.loop, &uv.timeout);
 
-  curl_handle = curl_multi_init();
-  curl_multi_setopt(curl_handle, CURLMOPT_SOCKETFUNCTION, handle_socket);
-  curl_multi_setopt(curl_handle, CURLMOPT_TIMERFUNCTION, start_timeout);
+  uv.multi = curl_multi_init();
+  curl_multi_setopt(uv.multi, CURLMOPT_SOCKETFUNCTION, cb_socket);
+  curl_multi_setopt(uv.multi, CURLMOPT_SOCKETDATA, &uv);
+  curl_multi_setopt(uv.multi, CURLMOPT_TIMERFUNCTION, cb_timeout);
+  curl_multi_setopt(uv.multi, CURLMOPT_TIMERDATA, &uv);
 
   while(argc-- > 1) {
-    add_download(argv[argc], argc);
+    add_download(argv[argc], argc, uv.multi);
   }
 
-  uv_run(loop, UV_RUN_DEFAULT);
-  curl_multi_cleanup(curl_handle);
+  /* kickstart the thing */
+  curl_multi_socket_action(uv.multi, CURL_SOCKET_TIMEOUT, 0, &running_handles);
+  uv_run(uv.loop, UV_RUN_DEFAULT);
+  curl_multi_cleanup(uv.multi);
 
   return 0;
 }
