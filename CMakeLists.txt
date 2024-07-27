@@ -541,11 +541,11 @@ endif()
 
 if(CURL_USE_GNUTLS)
   find_package(GnuTLS REQUIRED)
+  find_package(nettle REQUIRED)
   set(SSL_ENABLED ON)
   set(USE_GNUTLS ON)
-  list(APPEND CURL_LIBS ${GNUTLS_LIBRARIES} "nettle")
   list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "gnutls")
-  include_directories(${GNUTLS_INCLUDE_DIRS})
+  include_directories(${GNUTLS_INCLUDE_DIRS} ${NETTLE_INCLUDE_DIRS})
 
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "gnutls")
     set(valid_default_ssl_backend TRUE)
