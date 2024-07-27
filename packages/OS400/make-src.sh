@@ -30,6 +30,15 @@ SCRIPTDIR=$(dirname "${0}")
 cd "${TOPDIR}/src" || exit 1
 
 
+#       Check if built-in manual can be generated.
+
+USE_MANUAL=
+if [ -f "${IFSDIR}/docs/curl.txt" ] && [ -n "${PASEPERL}" ]
+then    "${PASEPERL}" ./mkhelp.pl < "${IFSDIR}/docs/curl.txt" > tool_hugehelp.c
+        USE_MANUAL="'USE_MANUAL'"
+fi
+
+
 #       Get source lists.
 #       CURL_CFILES are in the current directory.
 #       CURLX_CFILES are in the lib directory and need to be recompiled because
@@ -49,12 +58,12 @@ INCLUDES="'${TOPDIR}/lib'"
 for SRC in ${CURLX_CFILES}
 do      MODULE=$(db2_name "${SRC}")
         MODULE=$(db2_name "X${MODULE}")
-        make_module "${MODULE}" "${SRC}"
+        make_module "${MODULE}" "${SRC}" "${USE_MANUAL}"
 done
 
 for SRC in ${CURL_CFILES}
 do      MODULE=$(db2_name "${SRC}")
-        make_module "${MODULE}" "${SRC}"
+        make_module "${MODULE}" "${SRC}" "${USE_MANUAL}"
 done
 
 

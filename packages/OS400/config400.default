@@ -39,6 +39,7 @@ setenv OUTPUT           '*NONE'                 # Compilation output option.
 setenv TGTRLS           '*CURRENT'              # Target OS release.
 setenv IFSDIR           '/curl'                 # Installation IFS directory.
 setenv QADRTDIR         '/QIBM/ProdData/qadrt'  # QADRT IFS directory.
+setenv PASEPERL         '/QOpenSys/pkgs/bin/perl'       # PASE Perl interpreter.
 
 #       Define ZLIB availability and locations.
 
