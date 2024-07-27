@@ -129,6 +129,11 @@ jobs:
             install: libressl
             configure: --enable-debug --with-openssl=$(brew --prefix libressl) --enable-websockets
             macos-version-min: '10.9'
+          - name: 'GnuTLS'
+            compiler: clang
+            install: gnutls nettle
+            configure: --enable-debug --with-gnutls=$(brew --prefix gnutls) --enable-websockets
+            macos-version-min: '10.9'
           - name: 'OpenSSL'
             compiler: clang
             configure: --enable-debug --with-openssl=$(brew --prefix openssl) --enable-websockets
