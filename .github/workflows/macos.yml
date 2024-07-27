@@ -400,7 +400,7 @@ jobs:
         # * = default Xcode on the runner.
         # macos-12: 13.1, 13.2.1, 13.3.1, 13.4.1, 14.0.1, 14.1,*14.2
         # macos-13:                                       14.1, 14.2, 14.3.1,*15.0.1, 15.1, 15.2
-        # macos-14:                                                   14.3.1,*15.0.1, 15.1, 15.2, 15.3, 15.4, 16.0
+        # macos-14:                                                   14.3.1, 15.0.1, 15.1, 15.2, 15.3,*15.4, 16.0
         # macOSSDK: 12.0, 12.1,   12.3,   12.3,   12.3,   13.0, 13.1, 13.3,   14.0,   14.2, 14.2, 14.4, 14.5, 15.0
         #           Monterey (2021)                       Ventura (2022)      Sonoma (2023)                   Sequoia (2024)
         # https://github.com/actions/runner-images/tree/main/images/macos
