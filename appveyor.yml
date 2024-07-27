@@ -207,7 +207,6 @@ skip_commits:
   files:
     - '.azure-pipelines.yml'
     - '.circleci/*'
-    - '.cirrus.yml'
     - '.github/**/*'
     - 'packages/**/*'
     - 'plan9/**/*'

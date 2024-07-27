@@ -44,7 +44,6 @@ CI:
           - any-glob-to-any-file:
               - '.azure-pipelines.yml'
               - '.circleci/**'
-              - '.cirrus.yml'
               - '.github/**'
               - 'appveyor.*'
               - 'scripts/ci*'
