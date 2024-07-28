@@ -1,17 +1,25 @@
 curl and libcurl 8.9.1
 
- Public curl releases:         258
+ Public curl releases:         259
  Command line options:         263
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3211
+ Contributors:                 3210
 
 This release includes the following changes:
 
 
 This release includes the following bugfixes:
 
+ o example/multi-uv: remove the use of globals [3]
+ o GHA/windows: increase timeout for vcpkg build step
+ o lib: survive some NULL input args [8]
+ o os400: build cli manual. [2]
+ o os400: workaround an IBM ASCII run-time library bug [5]
  o RELEASE-PROCEDURE.md: remove the initial build step [1]
+ o runtests: fold timing details with GHA, sync `-r` tflags [4]
+ o transfer: speed limiting fix for 32bit systems [6]
+ o wolfSSL: allow wolfSSL's implementation of kyber to be used [7]
 
 This release includes the following known bugs:
 
@@ -26,9 +34,17 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg
-  (1 contributors)
+  Anthony Hu, Daniel Stenberg, extrimexxx on github, icy17 on github,
+  Mamoru Tasaka, Patrick Monnerat, Stefan Eissing, Viktor Szakats
+  (8 contributors)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.se/bug/?i=14267
+ [2] = https://curl.se/bug/?i=14289
+ [3] = https://curl.se/bug/?i=14287
+ [4] = https://curl.se/bug/?i=14284
+ [5] = https://curl.se/bug/?i=14281
+ [6] = https://curl.se/bug/?i=14272
+ [7] = https://curl.se/bug/?i=14268
+ [8] = https://curl.se/bug/?i=14247
