@@ -4,22 +4,33 @@ curl and libcurl 8.9.1
  Command line options:         263
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3210
+ Contributors:                 3212
 
 This release includes the following changes:
 
 
 This release includes the following bugfixes:
 
+ o cmake: detect `libssh` via `pkg-config` [10]
+ o cmake: detect `nettle` when building with GnuTLS [12]
+ o connect: fix connection shutdown for event based processing [17]
+ o curl: support __ss_family use on NonStop platforms [15]
+ o CURLOPT_SSL_CTX_FUNCTION.md: mention CA caching [9]
+ o CURLSHOPT_SHARE.md: mention sessions/cookies as not thread-safe [20]
  o example/multi-uv: remove the use of globals [3]
+ o ftpserver.pl: make POP3 LIST serve content from the test file [19]
  o GHA/windows: increase timeout for vcpkg build step
  o lib: survive some NULL input args [8]
+ o macos: fix Apple SDK bug workaround for non-macOS targets [13]
  o os400: build cli manual. [2]
  o os400: workaround an IBM ASCII run-time library bug [5]
  o RELEASE-PROCEDURE.md: remove the initial build step [1]
  o runtests: fold timing details with GHA, sync `-r` tflags [4]
+ o tests: provide FTP directory contents in the test file [18]
+ o TODO: thread-safe sharing
  o transfer: speed limiting fix for 32bit systems [6]
  o wolfSSL: allow wolfSSL's implementation of kyber to be used [7]
+ o wolfssl: CA store share fix [14]
 
 This release includes the following known bugs:
 
@@ -34,9 +45,10 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Anthony Hu, Daniel Stenberg, extrimexxx on github, icy17 on github,
-  Mamoru Tasaka, Patrick Monnerat, Stefan Eissing, Viktor Szakats
-  (8 contributors)
+  Aki Sakurai, Alex Snast, Anthony Hu, Daniel Stenberg, extrimexxx on github,
+  Gordon Parke, icy17 on github, Mamoru Tasaka, Marcel Raad, Patrick Monnerat,
+  Randall S. Becker, Sergey, Stefan Eissing, Viktor Szakats
+  (14 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -48,3 +60,13 @@ References to bug reports and discussions on issues:
  [6] = https://curl.se/bug/?i=14272
  [7] = https://curl.se/bug/?i=14268
  [8] = https://curl.se/bug/?i=14247
+ [9] = https://curl.se/bug/?i=14302
+ [10] = https://curl.se/bug/?i=14199
+ [12] = https://curl.se/bug/?i=14285
+ [13] = https://curl.se/bug/?i=14269
+ [14] = https://curl.se/bug/?i=14278
+ [15] = https://curl.se/bug/?i=14273
+ [17] = https://curl.se/bug/?i=14280
+ [18] = https://curl.se/bug/?i=14295
+ [19] = https://curl.se/bug/?i=14293
+ [20] = https://curl.se/bug/?i=14292
