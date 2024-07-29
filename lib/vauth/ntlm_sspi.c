@@ -294,6 +294,12 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
       type_2_bufs[1].pvBuffer = pkgBindings.Bindings;
     }
   }
+  else if (data->conn->channel_bindings) {
+      type_2_desc.cBuffers++;
+      type_2_bufs[1].BufferType = SECBUFFER_CHANNEL_BINDINGS;
+      type_2_bufs[1].cbBuffer = data->conn->channel_bindings->BindingsLength;
+      type_2_bufs[1].pvBuffer = data->conn->channel_bindings->Bindings;
+  }
 #endif
 
   /* Setup the type-3 "output" security buffer */

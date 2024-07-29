@@ -900,6 +900,7 @@ struct connectdata {
   /*************** Request - specific items ************/
 #if defined(USE_WINDOWS_SSPI) && defined(SECPKG_ATTR_ENDPOINT_BINDINGS)
   CtxtHandle *sslContext;
+  SecPkgContext_Bindings* channel_bindings;
 #endif
 
 #ifdef USE_GSASL
