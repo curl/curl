@@ -2714,6 +2714,7 @@ CURLMcode curl_multi_perform(struct Curl_multi *multi, int *running_handles)
   CURLMcode returncode = CURLM_OK;
   struct Curl_tree *t;
   struct curltime now = Curl_now();
+  SIGPIPE_VARIABLE(pipe_st);
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
@@ -2721,12 +2722,10 @@ CURLMcode curl_multi_perform(struct Curl_multi *multi, int *running_handles)
   if(multi->in_callback)
     return CURLM_RECURSIVE_API_CALL;
 
+  sigpipe_init(&pipe_st);
   data = multi->easyp;
   if(data) {
     CURLMcode result;
-    bool nosig = data->set.no_signal;
-    SIGPIPE_VARIABLE(pipe_st);
-    sigpipe_ignore(data, &pipe_st);
     /* Do the loop and only alter the signal ignore state if the next handle
        has a different NO_SIGNAL state than the previous */
     do {
@@ -2734,21 +2733,22 @@ CURLMcode curl_multi_perform(struct Curl_multi *multi, int *running_handles)
          pointer now */
       struct Curl_easy *datanext = data->next;
 
-      if(data->set.no_signal != nosig) {
-        sigpipe_restore(&pipe_st);
-        sigpipe_ignore(data, &pipe_st);
-        nosig = data->set.no_signal;
+    if(data != multi->conn_cache.closure_handle) {
+        /* connection cache handle is processed below */
+        sigpipe_apply(data, &pipe_st);
+        result = multi_runsingle(multi, &now, data);
+        if(result)
+          returncode = result;
       }
-      result = multi_runsingle(multi, &now, data);
-      if(result)
-        returncode = result;
 
       data = datanext; /* operate on next handle */
     } while(data);
-    sigpipe_restore(&pipe_st);
   }
 
+  sigpipe_apply(multi->conn_cache.closure_handle, &pipe_st);
   Curl_conncache_multi_perform(multi);
+
+  sigpipe_restore(&pipe_st);
 
   /*
    * Simply remove all expired timers from the splay since handles are dealt
@@ -3189,8 +3189,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
   struct Curl_easy *data = NULL;
   struct Curl_tree *t;
   struct curltime now = Curl_now();
-  bool first = FALSE;
-  bool nosig = FALSE;
+  bool run_conn_cache = FALSE;
   SIGPIPE_VARIABLE(pipe_st);
 
   if(checkall) {
@@ -3235,11 +3234,15 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
         DEBUGASSERT(data);
         DEBUGASSERT(data->magic == CURLEASY_MAGIC_NUMBER);
 
-        if(data->conn && !(data->conn->handler->flags & PROTOPT_DIRLOCK))
-          /* set socket event bitmask if they are not locked */
-          data->state.select_bits |= (unsigned char)ev_bitmask;
+        if(data == multi->conn_cache.closure_handle)
+          run_conn_cache = TRUE;
+        else {
+          if(data->conn && !(data->conn->handler->flags & PROTOPT_DIRLOCK))
+            /* set socket event bitmask if they are not locked */
+            data->state.select_bits |= (unsigned char)ev_bitmask;
 
-        Curl_expire(data, 0, EXPIRE_RUN_NOW);
+          Curl_expire(data, 0, EXPIRE_RUN_NOW);
+        }
       }
 
       /* Now we fall-through and do the timer-based stuff, since we do not want
@@ -3266,19 +3269,13 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
    * to process in the splay and 'data' will be re-assigned for every expired
    * handle we deal with.
    */
+  sigpipe_init(&pipe_st);
   do {
+    if(data == multi->conn_cache.closure_handle)
+      run_conn_cache = TRUE;
     /* the first loop lap 'data' can be NULL */
-    if(data) {
-      if(!first) {
-        first = TRUE;
-        nosig = data->set.no_signal; /* initial state */
-        sigpipe_ignore(data, &pipe_st);
-      }
-      else if(data->set.no_signal != nosig) {
-        sigpipe_restore(&pipe_st);
-        sigpipe_ignore(data, &pipe_st);
-        nosig = data->set.no_signal; /* remember new state */
-      }
+    else if(data) {
+      sigpipe_apply(data, &pipe_st);
       result = multi_runsingle(multi, &now, data);
 
       if(CURLM_OK >= result) {
@@ -3300,8 +3297,13 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     }
 
   } while(t);
-  if(first)
-    sigpipe_restore(&pipe_st);
+
+  if(run_conn_cache) {
+    sigpipe_apply(multi->conn_cache.closure_handle, &pipe_st);
+    Curl_conncache_multi_perform(multi);
+  }
+
+  sigpipe_restore(&pipe_st);
 
   if(running_handles)
     *running_handles = (int)multi->num_alive;

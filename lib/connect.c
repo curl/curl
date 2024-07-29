@@ -161,6 +161,7 @@ timediff_t Curl_shutdown_timeleft(struct connectdata *conn, int sockindex,
                                   struct curltime *nowp)
 {
   struct curltime now;
+  timediff_t left_ms;
 
   if(!conn->shutdown.start[sockindex].tv_sec || !conn->shutdown.timeout_ms)
     return 0; /* not started or no limits */
@@ -169,8 +170,30 @@ timediff_t Curl_shutdown_timeleft(struct connectdata *conn, int sockindex,
     now = Curl_now();
     nowp = &now;
   }
-  return conn->shutdown.timeout_ms -
-         Curl_timediff(*nowp, conn->shutdown.start[sockindex]);
+  left_ms = conn->shutdown.timeout_ms -
+            Curl_timediff(*nowp, conn->shutdown.start[sockindex]);
+  return left_ms? left_ms : -1;
+}
+
+timediff_t Curl_conn_shutdown_timeleft(struct connectdata *conn,
+                                       struct curltime *nowp)
+{
+  timediff_t left_ms = 0, ms;
+  struct curltime now;
+  int i;
+
+  for(i = 0; conn->shutdown.timeout_ms && (i < 2); ++i) {
+    if(!conn->shutdown.start[i].tv_sec)
+      continue;
+    if(!nowp) {
+      now = Curl_now();
+      nowp = &now;
+    }
+    ms = Curl_shutdown_timeleft(conn, i, nowp);
+    if(ms && (!left_ms || ms < left_ms))
+      left_ms = ms;
+  }
+  return left_ms;
 }
 
 void Curl_shutdown_clear(struct Curl_easy *data, int sockindex)
