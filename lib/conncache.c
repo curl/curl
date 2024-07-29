@@ -584,15 +584,15 @@ static void connc_close_all(struct conncache *connc)
     return;
 
   /* Move all connections to the shutdown list */
+  sigpipe_init(&pipe_st);
   conn = connc_find_first_connection(connc);
   while(conn) {
     connc_remove_conn(connc, conn);
-    sigpipe_ignore(data, &pipe_st);
+    sigpipe_apply(data, &pipe_st);
     /* This will remove the connection from the cache */
     connclose(conn, "kill all");
     Curl_conncache_remove_conn(connc->closure_handle, conn, TRUE);
     connc_discard_conn(connc, connc->closure_handle, conn, FALSE);
-    sigpipe_restore(&pipe_st);
 
     conn = connc_find_first_connection(connc);
   }
@@ -613,7 +613,7 @@ static void connc_close_all(struct conncache *connc)
   /* discard all connections in the shutdown list */
   connc_shutdown_discard_all(connc);
 
-  sigpipe_ignore(data, &pipe_st);
+  sigpipe_apply(data, &pipe_st);
   Curl_hostcache_clean(data, data->dns.hostcache);
   Curl_close(&data);
   sigpipe_restore(&pipe_st);
@@ -628,7 +628,6 @@ static void connc_shutdown_discard_oldest(struct conncache *connc)
 {
   struct Curl_llist_element *e;
   struct connectdata *conn;
-  SIGPIPE_VARIABLE(pipe_st);
 
   DEBUGASSERT(!connc->shutdowns.iter_locked);
   if(connc->shutdowns.iter_locked)
@@ -636,9 +635,11 @@ static void connc_shutdown_discard_oldest(struct conncache *connc)
 
   e = connc->shutdowns.conn_list.head;
   if(e) {
+    SIGPIPE_VARIABLE(pipe_st);
     conn = e->ptr;
     Curl_llist_remove(&connc->shutdowns.conn_list, e, NULL);
-    sigpipe_ignore(connc->closure_handle, &pipe_st);
+    sigpipe_init(&pipe_st);
+    sigpipe_apply(connc->closure_handle, &pipe_st);
     connc_disconnect(NULL, conn, connc, FALSE);
     sigpipe_restore(&pipe_st);
   }
