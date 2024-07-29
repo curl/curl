@@ -3195,8 +3195,9 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
   struct curltime now = Curl_now();
   bool first = FALSE;
   bool nosig = FALSE;
-  SIGPIPE_VARIABLE(pipe_st);
   bool run_conn_cache = FALSE;
+
+  SIGPIPE_VARIABLE(pipe_st);
 
   if(checkall) {
     /* *perform() deals with running_handles on its own */
