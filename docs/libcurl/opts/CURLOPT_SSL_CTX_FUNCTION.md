@@ -5,9 +5,12 @@ Title: CURLOPT_SSL_CTX_FUNCTION
 Section: 3
 Source: libcurl
 See-also:
-  - CURLOPT_SSL_CTX_DATA (3)
-  - CURLOPT_SSL_VERIFYPEER (3)
+  - CURLOPT_CA_CACHE_TIMEOUT (3)
   - CURLOPT_CAINFO (3)
+  - CURLOPT_CAINFO_BLOB (3)
+  - CURLOPT_SSL_CTX_DATA (3)
+  - CURLOPT_SSL_VERIFYHOST (3)
+  - CURLOPT_SSL_VERIFYPEER (3)
 Protocol:
   - TLS
 TLS-backend:
@@ -78,6 +81,10 @@ libcurl does not guarantee the lifetime of the passed in object once this
 callback function has returned. Your application must not assume that it can
 keep using the SSL context or data derived from it once this function is
 completed.
+
+For libcurl builds using TLS backends that support CA caching and
+CURLOPT_CA_CACHE_TIMEOUT(3) is not set to zero, multiple calls to this
+callback may be done with the same CA store in memory.
 
 # DEFAULT
 
