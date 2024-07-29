@@ -900,6 +900,9 @@ static void connc_perform(struct conncache *connc)
   struct Curl_llist_element *e = connc->shutdowns.conn_list.head;
   struct Curl_llist_element *enext;
   struct connectdata *conn;
+  struct curltime *nowp = NULL;
+  struct curltime now;
+  timediff_t next_from_now_ms = 0, ms;
   bool done;
 
   if(!e)
@@ -922,9 +925,22 @@ static void connc_perform(struct conncache *connc)
       Curl_llist_remove(&connc->shutdowns.conn_list, e, NULL);
       connc_disconnect(NULL, conn, connc, FALSE);
     }
+    else {
+      /* Not done, when does this connection time out? */
+      if(!nowp) {
+        now = Curl_now();
+        nowp = &now;
+      }
+      ms = Curl_conn_shutdown_timeleft(conn, nowp);
+      if(ms && ms < next_from_now_ms)
+        next_from_now_ms = ms;
+    }
     e = enext;
   }
   connc->shutdowns.iter_locked = FALSE;
+
+  if(next_from_now_ms)
+    Curl_expire(data, next_from_now_ms, EXPIRE_RUN_NOW);
 }
 
 void Curl_conncache_multi_perform(struct Curl_multi *multi)

@@ -46,9 +46,14 @@ void Curl_shutdown_start(struct Curl_easy *data, int sockindex,
                          struct curltime *nowp);
 
 /* return how much time there is left to shutdown the connection at
- * sockindex. */
+ * sockindex. Returns 0 if there is no limit or shutdown has not started. */
 timediff_t Curl_shutdown_timeleft(struct connectdata *conn, int sockindex,
                                   struct curltime *nowp);
+
+/* return how much time there is left to shutdown the connection.
+ * Returns 0 if there is no limit or shutdown has not started. */
+timediff_t Curl_conn_shutdown_timeleft(struct connectdata *conn,
+                                       struct curltime *nowp);
 
 void Curl_shutdown_clear(struct Curl_easy *data, int sockindex);
 

@@ -2739,9 +2739,13 @@ CURLMcode curl_multi_perform(struct Curl_multi *multi, int *running_handles)
         sigpipe_ignore(data, &pipe_st);
         nosig = data->set.no_signal;
       }
-      result = multi_runsingle(multi, &now, data);
-      if(result)
-        returncode = result;
+
+      if(data != multi->conn_cache.closure_handle) {
+        /* connection cache handle is processed below */
+        result = multi_runsingle(multi, &now, data);
+        if(result)
+          returncode = result;
+      }
 
       data = datanext; /* operate on next handle */
     } while(data);
@@ -3192,6 +3196,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
   bool first = FALSE;
   bool nosig = FALSE;
   SIGPIPE_VARIABLE(pipe_st);
+  bool run_conn_cache = FALSE;
 
   if(checkall) {
     /* *perform() deals with running_handles on its own */
@@ -3235,11 +3240,15 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
         DEBUGASSERT(data);
         DEBUGASSERT(data->magic == CURLEASY_MAGIC_NUMBER);
 
-        if(data->conn && !(data->conn->handler->flags & PROTOPT_DIRLOCK))
-          /* set socket event bitmask if they are not locked */
-          data->state.select_bits |= (unsigned char)ev_bitmask;
+        if(data == multi->conn_cache.closure_handle)
+          run_conn_cache = TRUE;
+        else {
+          if(data->conn && !(data->conn->handler->flags & PROTOPT_DIRLOCK))
+            /* set socket event bitmask if they are not locked */
+            data->state.select_bits |= (unsigned char)ev_bitmask;
 
-        Curl_expire(data, 0, EXPIRE_RUN_NOW);
+          Curl_expire(data, 0, EXPIRE_RUN_NOW);
+        }
       }
 
       /* Now we fall-through and do the timer-based stuff, since we do not want
@@ -3267,8 +3276,10 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
    * handle we deal with.
    */
   do {
+    if(data == multi->conn_cache.closure_handle)
+      run_conn_cache = TRUE;
     /* the first loop lap 'data' can be NULL */
-    if(data) {
+    else if(data) {
       if(!first) {
         first = TRUE;
         nosig = data->set.no_signal; /* initial state */
@@ -3302,6 +3313,9 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
   } while(t);
   if(first)
     sigpipe_restore(&pipe_st);
+
+  if(run_conn_cache)
+    Curl_conncache_multi_perform(multi);
 
   if(running_handles)
     *running_handles = (int)multi->num_alive;
