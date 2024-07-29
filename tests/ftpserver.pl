@@ -1862,12 +1862,7 @@ sub RETR_pop3 {
 }
 
 sub LIST_pop3 {
-    # This is a built-in fake-message list
-    my @data = (
-        "1 100\r\n",
-        "2 4294967400\r\n",  # > 4 GB
-        "3 200\r\n",
-    );
+    my @data = getpart("reply", "data");
 
     logmsg "retrieve a message list\n";
 
