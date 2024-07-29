@@ -154,14 +154,10 @@ static bool is_pkcs11_uri(const char *string)
 #ifdef IP_TOS
 static int get_address_family(curl_socket_t sockfd)
 {
-  struct sockaddr_storage addr;
-  socklen_t addrlen = sizeof(addr);
+  struct sockaddr addr;
+  curl_socklen_t addrlen = sizeof(addr);
   if(getsockname(sockfd, (struct sockaddr *)&addr, &addrlen) == 0)
-# ifdef __TANDEM
-    return addr.__ss_family;
-# else
-    return addr.ss_family;
-# endif
+    return addr.sa_family;
   return AF_UNSPEC;
 }
 #endif
@@ -185,12 +181,12 @@ static int sockopt_callback(void *clientp, curl_socket_t curlfd,
       result = setsockopt(curlfd, SOL_IP, IP_TOS, (void *)&tos, sizeof(tos));
 #endif
       break;
+#if defined(IPV6_TCLASS) && defined(AF_INET6)
     case AF_INET6:
-#ifdef IPV6_TCLASS
       result = setsockopt(curlfd, IPPROTO_IPV6, IPV6_TCLASS,
                           (void *)&tos, sizeof(tos));
-#endif
       break;
+#endif
     }
     if(result < 0) {
       int error = errno;
