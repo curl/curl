@@ -518,12 +518,13 @@ static CURLcode GTime2str(struct dynbuf *store,
   fracl = 0; /* no fractional seconds detected so far */
   if(fracp < end && (*fracp == '.' || *fracp == ',')) {
     /* Have fractional seconds, e.g. "[.,]\d+". How many? */
-    tzp = fracp++; /* should be a digit char or BAD ARGUMENT */
+    fracp++; /* should be a digit char or BAD ARGUMENT */
+    tzp = fracp;
     while(tzp < end && ISDIGIT(*tzp))
       tzp++;
     if(tzp == fracp) /* never looped, no digit after [.,] */
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    fracl = tzp - fracp - 1; /* number of fractional sec digits */
+    fracl = tzp - fracp; /* number of fractional sec digits */
     DEBUGASSERT(fracl > 0);
     /* Strip trailing zeroes in fractional seconds.
      * May reduce fracl to 0 if only '0's are present. */
@@ -532,18 +533,24 @@ static CURLcode GTime2str(struct dynbuf *store,
   }
 
   /* Process timezone. */
-  if(tzp >= end)
-    ;           /* Nothing to do. */
+  if(tzp >= end) {
+    tzp = "";
+    tzl = 0;
+  }
   else if(*tzp == 'Z') {
-    tzp = " GMT";
-    end = tzp + 4;
+    sep = " ";
+    tzp = "GMT";
+    tzl = 3;
+  }
+  else if((*tzp == '+') || (*tzp == '-')) {
+    sep = " UTC";
+    tzl = end - tzp;
   }
   else {
     sep = " ";
-    tzp++;
+    tzl = end - tzp;
   }
 
-  tzl = end - tzp;
   return Curl_dyn_addf(store,
                        "%.4s-%.2s-%.2s %.2s:%.2s:%c%c%s%.*s%s%.*s",
                        beg, beg + 4, beg + 6,
@@ -551,6 +558,15 @@ static CURLcode GTime2str(struct dynbuf *store,
                        fracl? ".": "", (int)fracl, fracp,
                        sep, (int)tzl, tzp);
 }
+
+#ifdef UNITTESTS
+/* used by unit1656.c */
+CURLcode Curl_x509_GTime2str(struct dynbuf *store,
+                             const char *beg, const char *end)
+{
+  return GTime2str(store, beg, end);
+}
+#endif
 
 /*
  * Convert an ASN.1 UTC time to a printable string.
