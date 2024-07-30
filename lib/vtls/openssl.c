@@ -3244,7 +3244,8 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
        problems with server-sent legacy intermediates. Newer versions of
        OpenSSL do alternate chain checking by default but we do not know how to
        determine that in a reliable manner.
-       https://rt.openssl.org/Ticket/Display.html?id=3621&user=guest&pass=guest
+       https://web.archive.org/web/20190422050538/
+       rt.openssl.org/Ticket/Display.html?id=3621
     */
 #if defined(X509_V_FLAG_TRUSTED_FIRST)
     X509_STORE_set_flags(store, X509_V_FLAG_TRUSTED_FIRST);
