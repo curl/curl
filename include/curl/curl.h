@@ -2133,7 +2133,7 @@ typedef enum {
 
   /* the EC curves requested by the TLS client (RFC 8422, 5.1);
    * OpenSSL support via 'set_groups'/'set_curves':
-   * https://www.openssl.org/docs/manmaster/man3/SSL_CTX_set1_groups.html
+   * https://docs.openssl.org/master/man3/SSL_CTX_set1_curves/
    */
   CURLOPT(CURLOPT_SSL_EC_CURVES, CURLOPTTYPE_STRINGPOINT, 298),
 

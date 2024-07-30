@@ -249,8 +249,8 @@ static const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_fr =
   1024,      /* RSA min key len */
 };
 
-/* See https://tls.mbed.org/discussions/generic/
-   howto-determine-exact-buffer-len-for-mbedtls_pk_write_pubkey_der
+/* See https://web.archive.org/web/20200921194007/tls.mbed.org/discussions/
+   generic/howto-determine-exact-buffer-len-for-mbedtls_pk_write_pubkey_der
 */
 #define RSA_PUB_DER_MAX_BYTES   (38 + 2 * MBEDTLS_MPI_MAX_SIZE)
 #define ECP_PUB_DER_MAX_BYTES   (30 + 2 * MBEDTLS_ECP_MAX_BYTES)

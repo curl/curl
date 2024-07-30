@@ -25,7 +25,7 @@ libcurl was built to use. This is an attempt to list known cipher names.
 
 ## OpenSSL
 
-(based on [OpenSSL docs](https://www.openssl.org/docs/manmaster/man1/openssl-ciphers.html))
+(based on [OpenSSL docs](https://docs.openssl.org/master/man1/openssl-ciphers/))
 
 When specifying multiple cipher names, separate them with colon (`:`).
 
