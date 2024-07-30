@@ -79,9 +79,13 @@ CURLcode Curl_verifyhost(struct Curl_cfilter *cf, struct Curl_easy *data,
                          const char *beg, const char *end);
 
 #ifdef UNITTESTS
-/* used by unit1489.c */
+#if defined(USE_GNUTLS) || defined(USE_SCHANNEL) || defined(USE_SECTRANSP) || \
+  defined(USE_MBEDTLS)
+
+/* used by unit1656.c */
 CURLcode Curl_x509_GTime2str(struct dynbuf *store,
                              const char *beg, const char *end);
+#endif
 #endif
 
 #endif /* USE_GNUTLS or USE_WOLFSSL or USE_SCHANNEL or USE_SECTRANSP */

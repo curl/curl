@@ -559,6 +559,15 @@ static CURLcode GTime2str(struct dynbuf *store,
                        sep, (int)tzl, tzp);
 }
 
+#ifdef UNITTESTS
+/* used by unit1489.c */
+CURLcode Curl_x509_GTime2str(struct dynbuf *store,
+                             const char *beg, const char *end)
+{
+  return GTime2str(store, beg, end);
+}
+#endif
+
 /*
  * Convert an ASN.1 UTC time to a printable string.
  *
@@ -1250,14 +1259,5 @@ done:
 }
 
 #endif /* WANT_EXTRACT_CERTINFO */
-
-#ifdef UNITTESTS
-/* used by unit1489.c */
-CURLcode Curl_x509_GTime2str(struct dynbuf *store,
-                             const char *beg, const char *end)
-{
-  return GTime2str(store, beg, end);
-}
-#endif
 
 #endif /* USE_GNUTLS or USE_WOLFSSL or USE_SCHANNEL or USE_SECTRANSP */
