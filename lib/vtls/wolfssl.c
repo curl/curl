@@ -571,7 +571,7 @@ CURLcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,
   bool cache_criteria_met;
 
   /* Consider the X509 store cacheable if it comes exclusively from a CAfile,
-     or no source is provided and we are falling back to OpenSSL's built-in
+     or no source is provided and we are falling back to wolfSSL's built-in
      default. */
   cache_criteria_met = (data->set.general_ssl.ca_cache_timeout != 0) &&
     conn_config->verifypeer &&
@@ -580,9 +580,8 @@ CURLcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,
     !ssl_config->primary.CRLfile &&
     !ssl_config->native_ca_store;
 
-  cached_store = get_cached_x509_store(cf, data);
-  if(cached_store && cache_criteria_met
-     && wolfSSL_X509_STORE_up_ref(cached_store)) {
+  cached_store = cache_criteria_met ? get_cached_x509_store(cf, data) : NULL;
+  if(cached_store && wolfSSL_X509_STORE_up_ref(cached_store)) {
     wolfSSL_CTX_set_cert_store(wssl->ctx, cached_store);
   }
   else if(cache_criteria_met) {
