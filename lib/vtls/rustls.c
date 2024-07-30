@@ -562,6 +562,7 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
 
     rustls_client_config_builder_set_server_verifier(config_builder,
                                                      server_cert_verifier);
+    rustls_server_cert_verifier_free(server_cert_verifier);
   }
 
   backend->config = rustls_client_config_builder_build(config_builder);
