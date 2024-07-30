@@ -525,6 +525,7 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
 
     verifier_builder = rustls_web_pki_server_cert_verifier_builder_new(roots);
+    rustls_root_cert_store_free(roots);
 
     if(conn_config->CRLfile) {
       struct dynbuf crl_contents;
