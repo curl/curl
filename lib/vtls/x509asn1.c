@@ -494,7 +494,7 @@ static CURLcode GTime2str(struct dynbuf *store,
   /* Convert an ASN.1 Generalized time to a printable string.
      Return the dynamically allocated string, or NULL if an error occurs. */
 
-  for(fracp = beg; fracp < end && *fracp >= '0' && *fracp <= '9'; fracp++)
+  for(fracp = beg; fracp < end && ISDIGIT(*fracp); fracp++)
     ;
 
   /* Get seconds digits. */
@@ -513,17 +513,22 @@ static CURLcode GTime2str(struct dynbuf *store,
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
-  /* Scan for timezone, measure fractional seconds. */
+  /* timezone follows optional fractional seconds. */
   tzp = fracp;
-  fracl = 0;
+  fracl = 0; /* no fractional seconds detected so far */
   if(fracp < end && (*fracp == '.' || *fracp == ',')) {
-    fracp++;
-    do
+    /* Have fractional seconds, e.g. "[.,]\d+". How many? */
+    tzp = fracp++; /* should be a digit char or BAD ARGUMENT */
+    while(tzp < end && ISDIGIT(*tzp))
       tzp++;
-    while(tzp < end && *tzp >= '0' && *tzp <= '9');
-    /* Strip leading zeroes in fractional seconds. */
-    for(fracl = tzp - fracp - 1; fracl && fracp[fracl - 1] == '0'; fracl--)
-      ;
+    if(tzp == fracp) /* never looped, no digit after [.,] */
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    fracl = tzp - fracp - 1; /* number of fractional sec digits */
+    DEBUGASSERT(fracl > 0);
+    /* Strip trailing zeroes in fractional seconds.
+     * May reduce fracl to 0 if only '0's are present. */
+    while(fracl && fracp[fracl - 1] == '0')
+      fracl--;
   }
 
   /* Process timezone. */
