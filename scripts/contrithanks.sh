@@ -70,4 +70,4 @@ cat ./docs/THANKS
 } | \
 sed -f ./docs/THANKS-filter | \
 sort -fu | \
-grep -aixvf ./docs/THANKS
+grep -aixvFf ./docs/THANKS
