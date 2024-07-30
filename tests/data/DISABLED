@@ -85,27 +85,6 @@
 2307
 %endif
 2043
-# The CRL test (313) doesn't work with rustls because rustls doesn't support
-# CRLs.
-# Tests that rely on connecting to an IP address over TLS don't work because
-# rustls doesn't support IP address certificates yet. That's the 400 series of
-# tests listed here, plus 1112 and 1272
-%if rustls
-313
-400
-401
-403
-404
-406
-407
-408
-409
-987
-988
-989
-1112
-1272
-%endif
 # The CRL test doesn't work with wolfSSL
 %if wolfssl
 313

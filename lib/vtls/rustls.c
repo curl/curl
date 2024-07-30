@@ -403,20 +403,26 @@ cr_verify_none(void *userdata UNUSED_PARAM,
   return RUSTLS_RESULT_OK;
 }
 
-static bool
-cr_hostname_is_ip(const char *hostname)
+static int
+read_file_into(const char *filename,
+               struct dynbuf *out)
 {
-  struct in_addr in;
-#ifdef USE_IPV6
-  struct in6_addr in6;
-  if(Curl_inet_pton(AF_INET6, hostname, &in6) > 0) {
-    return true;
+  FILE *f = fopen(filename, FOPEN_READTEXT);
+  if(!f) {
+    return 0;
   }
-#endif /* USE_IPV6 */
-  if(Curl_inet_pton(AF_INET, hostname, &in) > 0) {
-    return true;
+
+  while(!feof(f)) {
+    uint8_t buf[256];
+    size_t rr = fread(buf, 1, sizeof(buf), f);
+    if(rr == 0 ||
+       CURLE_OK != Curl_dyn_addn(out, buf, rr)) {
+      fclose(f);
+      return 0;
+    }
   }
-  return false;
+
+  return fclose(f) == 0;
 }
 
 static CURLcode
@@ -436,7 +442,6 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
     /* CURLOPT_CAINFO_BLOB overrides CURLOPT_CAINFO */
     (ca_info_blob ? NULL : conn_config->CAfile);
   const bool verifypeer = conn_config->verifypeer;
-  const char *hostname = connssl->peer.hostname;
   char errorbuf[256];
   size_t errorlen;
   rustls_result result;
@@ -462,14 +467,6 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(!verifypeer) {
     rustls_client_config_builder_dangerous_set_certificate_verifier(
       config_builder, cr_verify_none);
-    /* rustls does not support IP addresses (as of 0.19.0), and will reject
-     * connections created with an IP address, even when certificate
-     * verification is turned off. Set a placeholder hostname and disable
-     * SNI. */
-    if(cr_hostname_is_ip(hostname)) {
-      rustls_client_config_builder_set_enable_sni(config_builder, false);
-      hostname = "example.invalid";
-    }
   }
   else if(ca_info_blob || ssl_cafile) {
     roots_builder = rustls_root_cert_store_builder_new();
@@ -511,6 +508,29 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
 
     verifier_builder = rustls_web_pki_server_cert_verifier_builder_new(roots);
+    rustls_root_cert_store_free(roots);
+
+    if(conn_config->CRLfile) {
+      struct dynbuf crl_contents;
+      Curl_dyn_init(&crl_contents, SIZE_MAX);
+      if(!read_file_into(conn_config->CRLfile, &crl_contents)) {
+        failf(data, "rustls: failed to read revocation list file");
+        Curl_dyn_free(&crl_contents);
+        rustls_web_pki_server_cert_verifier_builder_free(verifier_builder);
+        return CURLE_SSL_CRL_BADFILE;
+      }
+
+      result = rustls_web_pki_server_cert_verifier_builder_add_crl(
+        verifier_builder,
+        Curl_dyn_uptr(&crl_contents),
+        Curl_dyn_len(&crl_contents));
+      Curl_dyn_free(&crl_contents);
+      if(result != RUSTLS_RESULT_OK) {
+        failf(data, "rustls: failed to parse revocation list");
+        rustls_web_pki_server_cert_verifier_builder_free(verifier_builder);
+        return CURLE_SSL_CRL_BADFILE;
+      }
+    }
 
     result = rustls_web_pki_server_cert_verifier_builder_build(
       verifier_builder, &server_cert_verifier);
@@ -525,6 +545,7 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
 
     rustls_client_config_builder_set_server_verifier(config_builder,
                                                      server_cert_verifier);
+    rustls_server_cert_verifier_free(server_cert_verifier);
   }
 
   backend->config = rustls_client_config_builder_build(config_builder);

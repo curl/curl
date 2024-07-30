@@ -14,6 +14,7 @@ TLS-backend:
   - GnuTLS
   - mbedTLS
   - OpenSSL
+  - rustls
 Added-in: 7.19.0
 ---
 
