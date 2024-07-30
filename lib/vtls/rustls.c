@@ -462,14 +462,6 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(!verifypeer) {
     rustls_client_config_builder_dangerous_set_certificate_verifier(
       config_builder, cr_verify_none);
-    /* rustls does not support IP addresses (as of 0.19.0), and will reject
-     * connections created with an IP address, even when certificate
-     * verification is turned off. Set a placeholder hostname and disable
-     * SNI. */
-    if(cr_hostname_is_ip(hostname)) {
-      rustls_client_config_builder_set_enable_sni(config_builder, false);
-      hostname = "example.invalid";
-    }
   }
   else if(ca_info_blob || ssl_cafile) {
     roots_builder = rustls_root_cert_store_builder_new();
