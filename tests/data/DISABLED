@@ -85,11 +85,6 @@
 2307
 %endif
 2043
-# The CRL test (313) doesn't work with rustls because rustls doesn't support
-# CRLs.
-%if rustls
-313
-%endif
 # The CRL test doesn't work with wolfSSL
 %if wolfssl
 313
