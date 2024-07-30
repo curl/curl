@@ -403,22 +403,6 @@ cr_verify_none(void *userdata UNUSED_PARAM,
   return RUSTLS_RESULT_OK;
 }
 
-static bool
-cr_hostname_is_ip(const char *hostname)
-{
-  struct in_addr in;
-#ifdef USE_IPV6
-  struct in6_addr in6;
-  if(Curl_inet_pton(AF_INET6, hostname, &in6) > 0) {
-    return true;
-  }
-#endif /* USE_IPV6 */
-  if(Curl_inet_pton(AF_INET, hostname, &in) > 0) {
-    return true;
-  }
-  return false;
-}
-
 static int
 read_file_into(const char *filename,
                struct dynbuf *out)
@@ -458,7 +442,6 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
     /* CURLOPT_CAINFO_BLOB overrides CURLOPT_CAINFO */
     (ca_info_blob ? NULL : conn_config->CAfile);
   const bool verifypeer = conn_config->verifypeer;
-  const char *hostname = connssl->peer.hostname;
   char errorbuf[256];
   size_t errorlen;
   rustls_result result;
