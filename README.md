@@ -4,6 +4,8 @@ Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 -->
 
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/63/badge)](https://www.bestpractices.dev/projects/63)
+
 # [![curl logo](https://curl.se/logo/curl-logo.svg)](https://curl.se/)
 
 Curl is a command-line tool for transferring data specified with URL
