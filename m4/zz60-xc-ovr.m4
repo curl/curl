@@ -2,7 +2,7 @@
 #
 # zz60-xc-ovr.m4
 #
-# Copyright (C), Daniel Stenberg <daniel@haxx.se>
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
