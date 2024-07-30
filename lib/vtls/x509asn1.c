@@ -560,7 +560,7 @@ static CURLcode GTime2str(struct dynbuf *store,
 }
 
 #ifdef UNITTESTS
-/* used by unit1489.c */
+/* used by unit1656.c */
 CURLcode Curl_x509_GTime2str(struct dynbuf *store,
                              const char *beg, const char *end)
 {
