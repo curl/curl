@@ -46,6 +46,7 @@
 #include "select.h"
 #include "inet_pton.h"
 #include "transfer.h"
+#include "vtls/gtls.h"
 #include "vquic.h"
 #include "vquic_int.h"
 #include "vquic-tls.h"
@@ -61,26 +62,6 @@
 #include "memdebug.h"
 
 
-/* A stream window is the maximum amount we need to buffer for
- * each active transfer. We use HTTP/3 flow control and only ACK
- * when we take things out of the buffer.
- * Chunk size is large enough to take a full DATA frame */
-#define H3_STREAM_WINDOW_SIZE (128 * 1024)
-#define H3_STREAM_CHUNK_SIZE   (16 * 1024)
-/* The pool keeps spares around and half of a full stream windows
- * seems good. More does not seem to improve performance.
- * The benefit of the pool is that stream buffer to not keep
- * spares. Memory consumption goes down when streams run empty,
- * have a large upload done, etc. */
-#define H3_STREAM_POOL_SPARES \
-          (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE ) / 2
-/* Receive and Send max number of chunks just follows from the
- * chunk size and window size */
-#define H3_STREAM_SEND_CHUNKS \
-          (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE)
-/*
- * Store linuxq version info in this buffer.
- */
 void Curl_linuxq_ver(char *p, size_t len)
 {
   const nghttp3_info *ht3 = nghttp3_version(0);
@@ -118,7 +99,6 @@ struct cf_linuxq_ctx {
 #define CF_CTX_CALL_DATA(cf)  \
   ((struct cf_linuxq_ctx *)(cf)->ctx)->call_data
 
-struct pkt_io_ctx;
 static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
                                     struct Curl_easy *data);
 static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
@@ -245,23 +225,6 @@ static void h3_drain_stream(struct Curl_cfilter *cf,
   }
 }
 
-struct pkt_io_ctx {
-  struct Curl_cfilter *cf;
-  struct Curl_easy *data;
-  size_t pkt_count;
-};
-
-static void pktx_init(struct pkt_io_ctx *pktx,
-                      struct Curl_cfilter *cf,
-                      struct Curl_easy *data)
-{
-  struct cf_linuxq_ctx *ctx = cf->ctx;
-  pktx->cf = cf;
-  pktx->data = data;
-  pktx->pkt_count = 0;
-  vquic_ctx_update_time(&ctx->q);
-}
-
 static CURLcode cf_linuxq_recv_stream_data(struct Curl_cfilter *cf,
                                            struct Curl_easy *data,
                                            const uint8_t *buf, size_t buflen,
@@ -375,12 +338,6 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream3_id,
     return NGHTTP3_ERR_CALLBACK_FAILURE;
 
   h3_xfer_write_resp(cf, data, stream, (char *)buf, blen, FALSE);
-  if(blen) {
-    CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] ACK %zu bytes of DATA",
-                stream->id, blen);
-    //ngtcp2_conn_extend_max_stream_offset(ctx->qconn, stream->id, blen);
-    //ngtcp2_conn_extend_max_offset(ctx->qconn, blen);
-  }
   CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] DATA len=%zu", stream->id, blen);
   return 0;
 }
@@ -575,7 +532,7 @@ static nghttp3_callbacks ngh3_callbacks = {
   cb_h3_end_stream, /* end_stream */
   cb_h3_reset_stream,
   NULL, /* shutdown */
-  //NULL /* recv_settings */ /* XXX */
+  /* recv_settings */ /* XXX: not available in my nghttp3 version */
 };
 
 static CURLcode init_ngh3_conn(struct Curl_cfilter *cf)
@@ -686,7 +643,7 @@ static void cf_linuxq_ctx_clear(struct cf_linuxq_ctx *ctx)
   if(ctx->h3conn)
     nghttp3_conn_del(ctx->h3conn);
   if(ctx->qconn)
-    ctx->qconn = 0; // XXX
+    ctx->qconn = 0; /* XXX */
   Curl_dyn_free(&ctx->scratch);
   Curl_hash_clean(&ctx->streams);
   Curl_hash_destroy(&ctx->streams);
@@ -894,11 +851,11 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
     return CURLE_FAILED_INIT;
 
   ctx->handshake_params.timeout = 15000;
-  ctx->handshake_params.peername = cf->conn->host.name; // XXX
+  ctx->handshake_params.peername = cf->conn->host.name; /* XXX: proxy? */
 
 #if 0
   ctx->qconn = quic_conn_create(ctx->q.sockfd, &ctx->handshake_params)
-  if(!ctx->qconn) == NULL)
+  if(!ctx->qconn)
     return errno;
 #else
   ctx->qconn = 1;
@@ -916,6 +873,8 @@ static CURLcode cf_linuxq_connect(struct Curl_cfilter *cf,
   struct cf_call_data save;
   struct curltime now;
   struct quic_event_option eopt;
+  struct quic_transport_param rp = {0};
+  socklen_t len;
   int rc;
   uint8_t i;
 
@@ -950,8 +909,9 @@ static CURLcode cf_linuxq_connect(struct Curl_cfilter *cf,
   }
 
 #ifdef USE_GNUTLS
+    /* XXX: replace this with calls to Curl_vquic_tls_... */
     rc = quic_client_handshake_parms(ctx->q.sockfd, &ctx->handshake_params);
-    if(rc != 0) {
+    if(rc) {
       result = CURLE_QUIC_CONNECT_ERROR;
       goto out;
     }
@@ -962,8 +922,9 @@ static CURLcode cf_linuxq_connect(struct Curl_cfilter *cf,
   CURL_TRC_CF(data, cf, "handshake complete after %dms",
              (int)Curl_timediff(now, ctx->started_at));
 
+  /* XXX: We only use QUIC_EVENT_CONNECTION_CLOSE for now */
   for(i = 1; i < QUIC_EVENT_END; i++) {
-    eopt.type = i; //QUIC_EVENT_CONNECTION_CLOSE; // XXX
+    eopt.type = i;
     eopt.on = 1;
     rc = setsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_EVENT, &eopt,
                     sizeof(eopt));
@@ -976,9 +937,20 @@ static CURLcode cf_linuxq_connect(struct Curl_cfilter *cf,
     goto out;
   }
 
+  len = sizeof(rp);
+  rp.remote = 1;
+  rc = getsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_TRANSPORT_PARAM, &rp,
+                  &len);
+  if(rc == -1) {
+    result = CURLE_QUIC_CONNECT_ERROR;
+    goto out;
+  }
+  ctx->max_bidi_streams = rp.max_streams_bidi;
+
 #if 0
   result = qng_verify_peer(cf, data);
   if(!result) {
+    ; /* XXX: replace libquic */
   }
 #endif
 
@@ -1039,12 +1011,10 @@ static ssize_t cf_linuxq_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     goto out;
   }
 
-  if((*err = cf_progress_ingress(cf, data))) {
-    nread = -1;
-    goto out;
-  }
+  *err = cf_progress_ingress(cf, data);
+  if(!*err)
+    *err = CURLE_AGAIN;
 
-  *err = CURLE_AGAIN;
   nread = -1;
 
 out:
@@ -1245,14 +1215,12 @@ static ssize_t cf_linuxq_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   ssize_t sent = 0;
   struct cf_call_data save;
-  struct pkt_io_ctx pktx;
   CURLcode result;
 
   CF_DATA_SAVE(save, cf, data);
   DEBUGASSERT(cf->connected);
   DEBUGASSERT(ctx->qconn);
   DEBUGASSERT(ctx->h3conn);
-  pktx_init(&pktx, cf, data);
   *err = CURLE_OK;
 
   if(!stream || stream->id < 0) {
@@ -1368,6 +1336,18 @@ static CURLcode qng_verify_peer(struct Curl_cfilter *cf,
 }
 #endif
 
+static struct cmsghdr *get_cmsg_stream_info(struct msghdr *msg)
+{
+  struct cmsghdr *cmsg = NULL;
+
+  for(cmsg = CMSG_FIRSTHDR(msg); cmsg != NULL; cmsg = CMSG_NXTHDR(msg, cmsg))
+    if(cmsg->cmsg_len == CMSG_LEN(sizeof(struct quic_stream_info)) &&
+       cmsg->cmsg_level == IPPROTO_QUIC && cmsg->cmsg_type == QUIC_STREAM_INFO)
+      break;
+
+  return cmsg;
+}
+
 static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
                          struct Curl_easy *data, struct msghdr *msg,
                          size_t pktlen)
@@ -1379,6 +1359,7 @@ static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
   struct quic_stream_info sinfo;
   int rv;
 
+  cmsg = get_cmsg_stream_info(msg);
 
   if(msg->msg_flags & MSG_NOTIFICATION) {
     if(pktlen < 1)
@@ -1390,14 +1371,12 @@ static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
         return CURLE_HTTP3;
       qev = (union quic_event *)&pkt[1];
       ctx->last_error = qev->close.errcode;
-      failf(data, "connection close error code: %hhu",
-            qev->close.errcode);
       return CURLE_RECV_ERROR;
     case QUIC_EVENT_STREAM_UPDATE:
       if(pktlen < 1 + sizeof(struct quic_stream_update))
         return CURLE_HTTP3;
       qev = (union quic_event *)&pkt[1];
-      if(qev->update.errcode) // XXX
+      if(qev->update.errcode) /* XXX: is this correct? */
         ctx->last_error = qev->update.errcode;
       infof(data, "stream update id=%lu state=%u errcode=%u", qev->update.id,
             qev->update.state, qev->update.errcode);
@@ -1406,7 +1385,17 @@ static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
       if(pktlen < 1 + sizeof(uint64_t))
         return CURLE_HTTP3;
       qev = (union quic_event *)&pkt[1];
-      infof(data, "stream max stream max_stream=%lu", qev->max_stream);
+
+      if(!cmsg)
+        return CURLE_HTTP3;
+      memcpy(&sinfo, CMSG_DATA(cmsg), sizeof(sinfo));
+
+      if(!(sinfo.stream_id & QUIC_STREAM_TYPE_UNI_MASK)) {
+        ctx->max_bidi_streams = qev->max_stream;
+        CURL_TRC_CF(data, cf, "max bidi streams now %" CURL_PRIu64 ", used %"
+                    CURL_PRIu64, (curl_uint64_t)ctx->max_bidi_streams,
+                    (curl_uint64_t)ctx->used_bidi_streams);
+      }
       return CURLE_OK;
     case QUIC_EVENT_CONNECTION_MIGRATION:
       if(pktlen < 1 + sizeof(uint8_t))
@@ -1423,14 +1412,10 @@ static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
             qev->key_update_phase);
       return CURLE_OK;
     default:
-      return CURLE_OK;
+      return CURLE_HTTP3;
     }
   }
 
-  for(cmsg = CMSG_FIRSTHDR(msg); cmsg != NULL; cmsg = CMSG_NXTHDR(msg, cmsg))
-    if(cmsg->cmsg_len == CMSG_LEN(sizeof(sinfo)) &&
-       cmsg->cmsg_level == IPPROTO_QUIC && cmsg->cmsg_type == QUIC_STREAM_INFO)
-      break;
   if(!cmsg)
     return CURLE_RECV_ERROR;
 
