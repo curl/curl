@@ -419,6 +419,28 @@ cr_hostname_is_ip(const char *hostname)
   return false;
 }
 
+static int
+read_file_into(const char *filename,
+               struct dynbuf *out)
+{
+  FILE *f = fopen(filename, FOPEN_READTEXT);
+  if(!f) {
+    return 0;
+  }
+
+  while(!feof(f)) {
+    uint8_t buf[256];
+    size_t rr = fread(buf, 1, sizeof(buf), f);
+    if(rr == 0 ||
+       CURLE_OK != Curl_dyn_addn(out, buf, rr)) {
+      fclose(f);
+      return 0;
+    }
+  }
+
+  return fclose(f) == 0;
+}
+
 static CURLcode
 cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
                 struct rustls_ssl_backend_data *const backend)
@@ -503,6 +525,28 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
 
     verifier_builder = rustls_web_pki_server_cert_verifier_builder_new(roots);
+
+    if(conn_config->CRLfile) {
+      struct dynbuf crl_contents;
+      Curl_dyn_init(&crl_contents, SIZE_MAX);
+      if(!read_file_into(conn_config->CRLfile, &crl_contents)) {
+        failf(data, "rustls: failed to read revocation list file");
+        Curl_dyn_free(&crl_contents);
+        rustls_web_pki_server_cert_verifier_builder_free(verifier_builder);
+        return CURLE_SSL_CRL_BADFILE;
+      }
+
+      result = rustls_web_pki_server_cert_verifier_builder_add_crl(
+        verifier_builder,
+        Curl_dyn_uptr(&crl_contents),
+        Curl_dyn_len(&crl_contents));
+      Curl_dyn_free(&crl_contents);
+      if(result != RUSTLS_RESULT_OK) {
+        failf(data, "rustls: failed to parse revocation list");
+        rustls_web_pki_server_cert_verifier_builder_free(verifier_builder);
+        return CURLE_SSL_CRL_BADFILE;
+      }
+    }
 
     result = rustls_web_pki_server_cert_verifier_builder_build(
       verifier_builder, &server_cert_verifier);
