@@ -52,7 +52,7 @@ endif()
 
 if(BUILD_TESTING)
   add_library(
-    curlu # special libcurlu library just for unittests
+    curlu  # special libcurlu library just for unittests
     STATIC
     EXCLUDE_FROM_ALL
     ${HHEADERS} ${CSOURCES}
@@ -246,7 +246,7 @@ if(CURL_ENABLE_EXPORT_TARGET)
   endif()
 
   export(TARGETS ${libcurl_export}
-         FILE ${PROJECT_BINARY_DIR}/libcurl-target.cmake
-         NAMESPACE ${PROJECT_NAME}::
+    FILE ${PROJECT_BINARY_DIR}/libcurl-target.cmake
+    NAMESPACE ${PROJECT_NAME}::
   )
 endif()

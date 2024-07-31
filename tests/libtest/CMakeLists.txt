@@ -39,7 +39,7 @@ function(setup_test TEST_NAME)  # ARGN are the files in the test
     ${CURL_BINARY_DIR}/lib            # for "curl_config.h"
     ${CURL_BINARY_DIR}/include        # for "curl/curl.h"
     ${CURL_SOURCE_DIR}/tests/libtest  # to be able to build generated tests
-    )
+  )
   if(USE_ARES)
     include_directories(${CARES_INCLUDE_DIR})
   endif()

@@ -197,8 +197,9 @@ option(CURL_DISABLE_DOH "disables DNS-over-HTTPS" OFF)
 mark_as_advanced(CURL_DISABLE_DOH)
 option(CURL_DISABLE_FILE "disables FILE" OFF)
 mark_as_advanced(CURL_DISABLE_FILE)
-cmake_dependent_option(CURL_DISABLE_FORM_API "disables form api" OFF
-                       "NOT CURL_DISABLE_MIME" ON)
+cmake_dependent_option(CURL_DISABLE_FORM_API "disables form api"
+  OFF "NOT CURL_DISABLE_MIME"
+  ON)
 mark_as_advanced(CURL_DISABLE_FORM_API)
 option(CURL_DISABLE_FTP "disables FTP" OFF)
 mark_as_advanced(CURL_DISABLE_FTP)
@@ -1128,13 +1129,13 @@ endif()
 #
 if(curl_ca_bundle_supported)
   set(CURL_CA_BUNDLE "auto" CACHE STRING
-      "Path to the CA bundle. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
+    "Path to the CA bundle. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
   set(CURL_CA_FALLBACK OFF CACHE BOOL
-      "Set ON to use built-in CA store of TLS backend. Defaults to OFF")
+    "Set ON to use built-in CA store of TLS backend. Defaults to OFF")
   set(CURL_CA_PATH "auto" CACHE STRING
-      "Location of default CA path. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
+    "Location of default CA path. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
   set(CURL_CA_EMBED "" CACHE STRING
-      "Path to the CA bundle to embed into the curl tool.")
+    "Path to the CA bundle to embed into the curl tool.")
 
   if(CURL_CA_BUNDLE STREQUAL "")
     message(FATAL_ERROR "Invalid value of CURL_CA_BUNDLE. Use 'none', 'auto' or file path.")
@@ -1179,7 +1180,7 @@ if(curl_ca_bundle_supported)
         if(EXISTS "${_search_ca_bundle_path}")
           message(STATUS "Found CA bundle: ${_search_ca_bundle_path}")
           set(CURL_CA_BUNDLE "${_search_ca_bundle_path}" CACHE STRING
-              "Path to the CA bundle. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
+            "Path to the CA bundle. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
           set(CURL_CA_BUNDLE_SET TRUE CACHE BOOL "Path to the CA bundle has been set")
           break()
         endif()
@@ -1193,7 +1194,7 @@ if(curl_ca_bundle_supported)
         unset(curl_ca_files_found)
         message(STATUS "Found CA path: ${SEARCH_CA_PATH}")
         set(CURL_CA_PATH "${SEARCH_CA_PATH}" CACHE STRING
-            "Location of default CA path. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
+          "Location of default CA path. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
         set(CURL_CA_PATH_SET TRUE CACHE BOOL "Path to the CA bundle has been set")
       endif()
     endif()
@@ -1328,70 +1329,70 @@ elseif(HAVE_LIBSOCKET)
   set(CMAKE_REQUIRED_LIBRARIES socket)
 endif()
 
-check_symbol_exists(fnmatch       "${CURL_INCLUDES};fnmatch.h" HAVE_FNMATCH)
-check_symbol_exists(basename      "${CURL_INCLUDES};string.h" HAVE_BASENAME)
-check_symbol_exists(opendir       "${CURL_INCLUDES};dirent.h" HAVE_OPENDIR)
-check_symbol_exists(socket        "${CURL_INCLUDES}" HAVE_SOCKET)
-check_symbol_exists(sched_yield   "${CURL_INCLUDES};sched.h" HAVE_SCHED_YIELD)
-check_symbol_exists(socketpair    "${CURL_INCLUDES}" HAVE_SOCKETPAIR)
-check_symbol_exists(recv          "${CURL_INCLUDES}" HAVE_RECV)
-check_symbol_exists(send          "${CURL_INCLUDES}" HAVE_SEND)
-check_symbol_exists(sendmsg       "${CURL_INCLUDES}" HAVE_SENDMSG)
-check_symbol_exists(select        "${CURL_INCLUDES}" HAVE_SELECT)
-check_symbol_exists(strdup        "${CURL_INCLUDES};string.h" HAVE_STRDUP)
-check_symbol_exists(strtok_r      "${CURL_INCLUDES};string.h" HAVE_STRTOK_R)
-check_symbol_exists(strcasecmp    "${CURL_INCLUDES};string.h" HAVE_STRCASECMP)
-check_symbol_exists(stricmp       "${CURL_INCLUDES};string.h" HAVE_STRICMP)
-check_symbol_exists(strcmpi       "${CURL_INCLUDES};string.h" HAVE_STRCMPI)
-check_symbol_exists(memrchr       "${CURL_INCLUDES};string.h" HAVE_MEMRCHR)
-check_symbol_exists(alarm         "${CURL_INCLUDES}" HAVE_ALARM)
-check_symbol_exists(arc4random    "${CURL_INCLUDES};stdlib.h" HAVE_ARC4RANDOM)
-check_symbol_exists(fcntl         "${CURL_INCLUDES}" HAVE_FCNTL)
-check_symbol_exists(getppid       "${CURL_INCLUDES}" HAVE_GETPPID)
-check_symbol_exists(utimes        "${CURL_INCLUDES}" HAVE_UTIMES)
+check_symbol_exists(fnmatch         "${CURL_INCLUDES};fnmatch.h" HAVE_FNMATCH)
+check_symbol_exists(basename        "${CURL_INCLUDES};string.h" HAVE_BASENAME)
+check_symbol_exists(opendir         "${CURL_INCLUDES};dirent.h" HAVE_OPENDIR)
+check_symbol_exists(socket          "${CURL_INCLUDES}" HAVE_SOCKET)
+check_symbol_exists(sched_yield     "${CURL_INCLUDES};sched.h" HAVE_SCHED_YIELD)
+check_symbol_exists(socketpair      "${CURL_INCLUDES}" HAVE_SOCKETPAIR)
+check_symbol_exists(recv            "${CURL_INCLUDES}" HAVE_RECV)
+check_symbol_exists(send            "${CURL_INCLUDES}" HAVE_SEND)
+check_symbol_exists(sendmsg         "${CURL_INCLUDES}" HAVE_SENDMSG)
+check_symbol_exists(select          "${CURL_INCLUDES}" HAVE_SELECT)
+check_symbol_exists(strdup          "${CURL_INCLUDES};string.h" HAVE_STRDUP)
+check_symbol_exists(strtok_r        "${CURL_INCLUDES};string.h" HAVE_STRTOK_R)
+check_symbol_exists(strcasecmp      "${CURL_INCLUDES};string.h" HAVE_STRCASECMP)
+check_symbol_exists(stricmp         "${CURL_INCLUDES};string.h" HAVE_STRICMP)
+check_symbol_exists(strcmpi         "${CURL_INCLUDES};string.h" HAVE_STRCMPI)
+check_symbol_exists(memrchr         "${CURL_INCLUDES};string.h" HAVE_MEMRCHR)
+check_symbol_exists(alarm           "${CURL_INCLUDES}" HAVE_ALARM)
+check_symbol_exists(arc4random      "${CURL_INCLUDES};stdlib.h" HAVE_ARC4RANDOM)
+check_symbol_exists(fcntl           "${CURL_INCLUDES}" HAVE_FCNTL)
+check_symbol_exists(getppid         "${CURL_INCLUDES}" HAVE_GETPPID)
+check_symbol_exists(utimes          "${CURL_INCLUDES}" HAVE_UTIMES)
 
-check_symbol_exists(gettimeofday  "${CURL_INCLUDES}" HAVE_GETTIMEOFDAY)
-check_symbol_exists(closesocket   "${CURL_INCLUDES}" HAVE_CLOSESOCKET)
-check_symbol_exists(sigsetjmp     "${CURL_INCLUDES};setjmp.h" HAVE_SIGSETJMP)
-check_symbol_exists(getpass_r     "${CURL_INCLUDES}" HAVE_GETPASS_R)
-check_symbol_exists(getpwuid      "${CURL_INCLUDES}" HAVE_GETPWUID)
-check_symbol_exists(getpwuid_r    "${CURL_INCLUDES}" HAVE_GETPWUID_R)
-check_symbol_exists(geteuid       "${CURL_INCLUDES}" HAVE_GETEUID)
-check_symbol_exists(utime         "${CURL_INCLUDES}" HAVE_UTIME)
-check_symbol_exists(gmtime_r      "${CURL_INCLUDES};stdlib.h;time.h" HAVE_GMTIME_R)
+check_symbol_exists(gettimeofday    "${CURL_INCLUDES}" HAVE_GETTIMEOFDAY)
+check_symbol_exists(closesocket     "${CURL_INCLUDES}" HAVE_CLOSESOCKET)
+check_symbol_exists(sigsetjmp       "${CURL_INCLUDES};setjmp.h" HAVE_SIGSETJMP)
+check_symbol_exists(getpass_r       "${CURL_INCLUDES}" HAVE_GETPASS_R)
+check_symbol_exists(getpwuid        "${CURL_INCLUDES}" HAVE_GETPWUID)
+check_symbol_exists(getpwuid_r      "${CURL_INCLUDES}" HAVE_GETPWUID_R)
+check_symbol_exists(geteuid         "${CURL_INCLUDES}" HAVE_GETEUID)
+check_symbol_exists(utime           "${CURL_INCLUDES}" HAVE_UTIME)
+check_symbol_exists(gmtime_r        "${CURL_INCLUDES};stdlib.h;time.h" HAVE_GMTIME_R)
 
 check_symbol_exists(gethostbyname_r "${CURL_INCLUDES}" HAVE_GETHOSTBYNAME_R)
 
-check_symbol_exists(signal         "${CURL_INCLUDES};signal.h" HAVE_SIGNAL)
-check_symbol_exists(strtoll        "${CURL_INCLUDES};stdlib.h" HAVE_STRTOLL)
-check_symbol_exists(strerror_r     "${CURL_INCLUDES};stdlib.h;string.h" HAVE_STRERROR_R)
-check_symbol_exists(sigaction      "signal.h" HAVE_SIGACTION)
-check_symbol_exists(siginterrupt   "${CURL_INCLUDES};signal.h" HAVE_SIGINTERRUPT)
-check_symbol_exists(getaddrinfo    "${CURL_INCLUDES};stdlib.h;string.h" HAVE_GETADDRINFO)
-check_symbol_exists(getifaddrs     "${CURL_INCLUDES};stdlib.h" HAVE_GETIFADDRS)
-check_symbol_exists(freeaddrinfo   "${CURL_INCLUDES}" HAVE_FREEADDRINFO)
-check_symbol_exists(pipe           "${CURL_INCLUDES}" HAVE_PIPE)
-check_symbol_exists(eventfd        "${CURL_INCLUDES};sys/eventfd.h" HAVE_EVENTFD)
-check_symbol_exists(ftruncate      "${CURL_INCLUDES}" HAVE_FTRUNCATE)
-check_symbol_exists(_fseeki64      "${CURL_INCLUDES};stdio.h" HAVE__FSEEKI64)
-check_symbol_exists(getpeername    "${CURL_INCLUDES}" HAVE_GETPEERNAME)
-check_symbol_exists(getsockname    "${CURL_INCLUDES}" HAVE_GETSOCKNAME)
-check_symbol_exists(if_nametoindex "${CURL_INCLUDES}" HAVE_IF_NAMETOINDEX)
-check_symbol_exists(getrlimit      "${CURL_INCLUDES}" HAVE_GETRLIMIT)
-check_symbol_exists(setlocale      "${CURL_INCLUDES}" HAVE_SETLOCALE)
-check_symbol_exists(setmode        "${CURL_INCLUDES}" HAVE_SETMODE)
-check_symbol_exists(setrlimit      "${CURL_INCLUDES}" HAVE_SETRLIMIT)
+check_symbol_exists(signal          "${CURL_INCLUDES};signal.h" HAVE_SIGNAL)
+check_symbol_exists(strtoll         "${CURL_INCLUDES};stdlib.h" HAVE_STRTOLL)
+check_symbol_exists(strerror_r      "${CURL_INCLUDES};stdlib.h;string.h" HAVE_STRERROR_R)
+check_symbol_exists(sigaction       "signal.h" HAVE_SIGACTION)
+check_symbol_exists(siginterrupt    "${CURL_INCLUDES};signal.h" HAVE_SIGINTERRUPT)
+check_symbol_exists(getaddrinfo     "${CURL_INCLUDES};stdlib.h;string.h" HAVE_GETADDRINFO)
+check_symbol_exists(getifaddrs      "${CURL_INCLUDES};stdlib.h" HAVE_GETIFADDRS)
+check_symbol_exists(freeaddrinfo    "${CURL_INCLUDES}" HAVE_FREEADDRINFO)
+check_symbol_exists(pipe            "${CURL_INCLUDES}" HAVE_PIPE)
+check_symbol_exists(eventfd         "${CURL_INCLUDES};sys/eventfd.h" HAVE_EVENTFD)
+check_symbol_exists(ftruncate       "${CURL_INCLUDES}" HAVE_FTRUNCATE)
+check_symbol_exists(_fseeki64       "${CURL_INCLUDES};stdio.h" HAVE__FSEEKI64)
+check_symbol_exists(getpeername     "${CURL_INCLUDES}" HAVE_GETPEERNAME)
+check_symbol_exists(getsockname     "${CURL_INCLUDES}" HAVE_GETSOCKNAME)
+check_symbol_exists(if_nametoindex  "${CURL_INCLUDES}" HAVE_IF_NAMETOINDEX)
+check_symbol_exists(getrlimit       "${CURL_INCLUDES}" HAVE_GETRLIMIT)
+check_symbol_exists(setlocale       "${CURL_INCLUDES}" HAVE_SETLOCALE)
+check_symbol_exists(setmode         "${CURL_INCLUDES}" HAVE_SETMODE)
+check_symbol_exists(setrlimit       "${CURL_INCLUDES}" HAVE_SETRLIMIT)
 
 if(NOT MSVC OR (MSVC_VERSION GREATER_EQUAL 1900))
   # earlier MSVC compilers had faulty snprintf implementations
-  check_symbol_exists(snprintf       "stdio.h" HAVE_SNPRINTF)
+  check_symbol_exists(snprintf "stdio.h" HAVE_SNPRINTF)
 endif()
 check_function_exists(mach_absolute_time HAVE_MACH_ABSOLUTE_TIME)
-check_symbol_exists(inet_ntop      "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_NTOP)
+check_symbol_exists(inet_ntop "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_NTOP)
 if(MSVC AND (MSVC_VERSION LESS_EQUAL 1600))
   set(HAVE_INET_NTOP OFF)
 endif()
-check_symbol_exists(inet_pton      "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_PTON)
+check_symbol_exists(inet_pton "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_PTON)
 
 check_symbol_exists(fsetxattr "${CURL_INCLUDES}" HAVE_FSETXATTR)
 if(HAVE_FSETXATTR)
@@ -1400,16 +1401,16 @@ if(HAVE_FSETXATTR)
   endforeach()
 endif()
 
-set(CMAKE_EXTRA_INCLUDE_FILES   "sys/socket.h")
-check_type_size("sa_family_t"   SIZEOF_SA_FAMILY_T)
-set(HAVE_SA_FAMILY_T            ${HAVE_SIZEOF_SA_FAMILY_T})
-set(CMAKE_EXTRA_INCLUDE_FILES   "")
+set(CMAKE_EXTRA_INCLUDE_FILES "sys/socket.h")
+check_type_size("sa_family_t" SIZEOF_SA_FAMILY_T)
+set(HAVE_SA_FAMILY_T ${HAVE_SIZEOF_SA_FAMILY_T})
+set(CMAKE_EXTRA_INCLUDE_FILES "")
 
 if(WIN32)
-  set(CMAKE_EXTRA_INCLUDE_FILES   "winsock2.h")
-  check_type_size("ADDRESS_FAMILY"    SIZEOF_ADDRESS_FAMILY)
-  set(HAVE_ADDRESS_FAMILY         ${HAVE_SIZEOF_ADDRESS_FAMILY})
-  set(CMAKE_EXTRA_INCLUDE_FILES   "")
+  set(CMAKE_EXTRA_INCLUDE_FILES "winsock2.h")
+  check_type_size("ADDRESS_FAMILY" SIZEOF_ADDRESS_FAMILY)
+  set(HAVE_ADDRESS_FAMILY ${HAVE_SIZEOF_ADDRESS_FAMILY})
+  set(CMAKE_EXTRA_INCLUDE_FILES "")
 endif()
 
 # Do curl specific tests
@@ -1442,12 +1443,12 @@ if(HAVE_FILE_OFFSET_BITS)
   set(_FILE_OFFSET_BITS 64)
   set(CMAKE_REQUIRED_FLAGS "-D_FILE_OFFSET_BITS=64")
 endif()
-check_type_size("off_t"  SIZEOF_OFF_T)
+check_type_size("off_t" SIZEOF_OFF_T)
 
 # fseeko may not exist with _FILE_OFFSET_BITS=64 but can exist with
 # _FILE_OFFSET_BITS unset or 32 (e.g. Android ARMv7 with NDK 26b and API level < 24)
 # so we need to test fseeko after testing for _FILE_OFFSET_BITS
-check_symbol_exists(fseeko         "${CURL_INCLUDES};stdio.h" HAVE_FSEEKO)
+check_symbol_exists(fseeko "${CURL_INCLUDES};stdio.h" HAVE_FSEEKO)
 
 if(HAVE_FSEEKO)
   set(HAVE_DECL_FSEEKO 1)
@@ -1456,9 +1457,9 @@ endif()
 # include this header to get the type
 set(CMAKE_REQUIRED_INCLUDES "${CURL_SOURCE_DIR}/include")
 set(CMAKE_EXTRA_INCLUDE_FILES "curl/system.h")
-check_type_size("curl_off_t"  SIZEOF_CURL_OFF_T)
+check_type_size("curl_off_t" SIZEOF_CURL_OFF_T)
 set(CMAKE_EXTRA_INCLUDE_FILES "curl/curl.h")
-check_type_size("curl_socket_t"  SIZEOF_CURL_SOCKET_T)
+check_type_size("curl_socket_t" SIZEOF_CURL_SOCKET_T)
 set(CMAKE_EXTRA_INCLUDE_FILES "")
 
 if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
@@ -1698,11 +1699,11 @@ endif()
 if(NOT CURL_DISABLE_INSTALL)
 
   install(FILES "${PROJECT_SOURCE_DIR}/scripts/mk-ca-bundle.pl"
-          DESTINATION ${CMAKE_INSTALL_BINDIR}
-          PERMISSIONS
-            OWNER_READ OWNER_WRITE OWNER_EXECUTE
-            GROUP_READ GROUP_EXECUTE
-            WORLD_READ WORLD_EXECUTE)
+    DESTINATION ${CMAKE_INSTALL_BINDIR}
+    PERMISSIONS
+      OWNER_READ OWNER_WRITE OWNER_EXECUTE
+      GROUP_READ GROUP_EXECUTE
+      WORLD_READ WORLD_EXECUTE)
 
   # Helper to populate a list (_items) with a label when conditions
   # (the remaining args) are satisfied
@@ -1923,14 +1924,14 @@ if(NOT CURL_DISABLE_INSTALL)
 
   # Merge pkg-config private fields into public ones when static-only
   if(BUILD_SHARED_LIBS)
-    set(ENABLE_SHARED "yes")
-    set(LIBCURL_PC_REQUIRES "")
-    set(LIBCURL_NO_SHARED "")
+    set(ENABLE_SHARED          "yes")
+    set(LIBCURL_PC_REQUIRES    "")
+    set(LIBCURL_NO_SHARED      "")
     set(CPPFLAG_CURL_STATICLIB "")
   else()
-    set(ENABLE_SHARED "no")
-    set(LIBCURL_PC_REQUIRES "${LIBCURL_PC_REQUIRES_PRIVATE}")
-    set(LIBCURL_NO_SHARED "${LIBCURL_LIBS}")
+    set(ENABLE_SHARED          "no")
+    set(LIBCURL_PC_REQUIRES    "${LIBCURL_PC_REQUIRES_PRIVATE}")
+    set(LIBCURL_NO_SHARED      "${LIBCURL_LIBS}")
     set(CPPFLAG_CURL_STATICLIB "${LIBCURL_PC_CFLAGS_PRIVATE}")
   endif()
   if(BUILD_STATIC_LIBS)
@@ -1954,17 +1955,17 @@ if(NOT CURL_DISABLE_INSTALL)
   configure_file("${CURL_SOURCE_DIR}/curl-config.in"
                  "${CURL_BINARY_DIR}/curl-config" @ONLY)
   install(FILES "${CURL_BINARY_DIR}/curl-config"
-          DESTINATION ${CMAKE_INSTALL_BINDIR}
-          PERMISSIONS
-            OWNER_READ OWNER_WRITE OWNER_EXECUTE
-            GROUP_READ GROUP_EXECUTE
-            WORLD_READ WORLD_EXECUTE)
+    DESTINATION ${CMAKE_INSTALL_BINDIR}
+    PERMISSIONS
+      OWNER_READ OWNER_WRITE OWNER_EXECUTE
+      GROUP_READ GROUP_EXECUTE
+      WORLD_READ WORLD_EXECUTE)
 
   # Finally generate a pkg-config file matching this config
   configure_file("${CURL_SOURCE_DIR}/libcurl.pc.in"
                  "${CURL_BINARY_DIR}/libcurl.pc" @ONLY)
   install(FILES "${CURL_BINARY_DIR}/libcurl.pc"
-          DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
   # install headers
   install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/curl"
@@ -1975,8 +1976,7 @@ if(NOT CURL_DISABLE_INSTALL)
   write_basic_package_version_file(
     "${_version_config}"
     VERSION ${CURL_VERSION}
-    COMPATIBILITY SameMajorVersion
-  )
+    COMPATIBILITY SameMajorVersion)
   file(READ "${_version_config}" generated_version_config)
   file(WRITE "${_version_config}" "
     if(NOT PACKAGE_FIND_VERSION_RANGE AND PACKAGE_FIND_VERSION_MAJOR STREQUAL \"7\")
@@ -1984,8 +1984,7 @@ if(NOT CURL_DISABLE_INSTALL)
       set(PACKAGE_FIND_VERSION_MAJOR 8)
       set(PACKAGE_FIND_VERSION_COUNT 1)
     endif()
-    ${generated_version_config}"
-  )
+    ${generated_version_config}")
 
   # Use:
   # * TARGETS_EXPORT_NAME
@@ -1993,19 +1992,16 @@ if(NOT CURL_DISABLE_INSTALL)
   configure_package_config_file(CMake/curl-config.cmake.in
     "${_project_config}"
     INSTALL_DESTINATION ${CURL_INSTALL_CMAKE_DIR}
-    PATH_VARS CMAKE_INSTALL_INCLUDEDIR
-  )
+    PATH_VARS CMAKE_INSTALL_INCLUDEDIR)
 
   if(CURL_ENABLE_EXPORT_TARGET)
     install(EXPORT "${TARGETS_EXPORT_NAME}"
-            NAMESPACE "${PROJECT_NAME}::"
-            DESTINATION ${CURL_INSTALL_CMAKE_DIR}
-    )
+      NAMESPACE "${PROJECT_NAME}::"
+      DESTINATION ${CURL_INSTALL_CMAKE_DIR})
   endif()
 
   install(FILES ${_version_config} ${_project_config}
-          DESTINATION ${CURL_INSTALL_CMAKE_DIR}
-  )
+    DESTINATION ${CURL_INSTALL_CMAKE_DIR})
 
   # Workaround for MSVS10 to avoid the Dialog Hell
   # FIXME: This could be removed with future version of CMake.

@@ -86,7 +86,7 @@ if(NOT _GSS_FOUND) #not found by pkg-config. Let's take more traditional approac
       OUTPUT_VARIABLE _GSS_CFLAGS
       RESULT_VARIABLE _GSS_CONFIGURE_FAILED
       OUTPUT_STRIP_TRAILING_WHITESPACE
-      )
+    )
     message(STATUS "CFLAGS: ${_GSS_CFLAGS}")
     if(NOT _GSS_CONFIGURE_FAILED) # 0 means success
       # should also work in an odd case when multiple directories are given

@@ -36,7 +36,7 @@ function(SETUP_EXECUTABLE TEST_NAME)  # ARGN are the files in the test
     ${CURL_BINARY_DIR}/lib      # for "curl_config.h"
     ${CURL_BINARY_DIR}/include  # for "curl/curl.h"
     ${CURL_SOURCE_DIR}/src      # for "tool_xattr.h"
-    )
+  )
   if(USE_ARES)
     include_directories(${CARES_INCLUDE_DIR})
   endif()
