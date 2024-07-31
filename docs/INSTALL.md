@@ -154,6 +154,16 @@ conflicting identical symbol names.
 When you build with multiple TLS backends, you can select the active one at
 runtime when curl starts up.
 
+## MultiSSL and HTTP/3
+
+HTTP/3 needs QUIC and QUIC needs TLS. Building libcurl with HTTP/3 and QUIC
+support is not compatible with the MultiSSL feature: they are mutually
+exclusive. If you need MultiSSL in your build, you cannot have HTTP/3 support
+and vice versa.
+
+libcurl can only use a single TLS library with QUIC and that *same* TLS
+library needs to be used for the other TLS using protocols.
+
 ## Configure finding libs in wrong directory
 
 When the configure script checks for third-party libraries, it adds those
