@@ -4,7 +4,7 @@ curl and libcurl 8.9.1
  Command line options:         263
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3212
+ Contributors:                 3211
 
 This release includes the following changes:
 
@@ -13,8 +13,11 @@ This release includes the following bugfixes:
 
  o cmake: detect `libssh` via `pkg-config` [10]
  o cmake: detect `nettle` when building with GnuTLS [12]
+ o cmake: drop `if(PKG_CONFIG_FOUND)` guard for `pkg_check_modules()` [25]
+ o configure: limit `__builtin_available` test to Darwin [22]
  o connect: fix connection shutdown for event based processing [17]
- o curl: support __ss_family use on NonStop platforms [15]
+ o contrithanks.sh: use -F with -v to match lines as strings
+ o curl: more defensive socket code for --ip-tos [21]
  o CURLOPT_SSL_CTX_FUNCTION.md: mention CA caching [9]
  o CURLSHOPT_SHARE.md: mention sessions/cookies as not thread-safe [20]
  o example/multi-uv: remove the use of globals [3]
@@ -22,15 +25,20 @@ This release includes the following bugfixes:
  o GHA/windows: increase timeout for vcpkg build step
  o lib: survive some NULL input args [8]
  o macos: fix Apple SDK bug workaround for non-macOS targets [13]
+ o misc: cleanup after removing years from copyright [26]
  o os400: build cli manual. [2]
  o os400: workaround an IBM ASCII run-time library bug [5]
  o RELEASE-PROCEDURE.md: remove the initial build step [1]
  o runtests: fold timing details with GHA, sync `-r` tflags [4]
  o tests: provide FTP directory contents in the test file [18]
+ o tidy-up: URL updates [24]
  o TODO: thread-safe sharing
  o transfer: speed limiting fix for 32bit systems [6]
+ o vtls: avoid forward declaration in MultiSSL builds [23]
  o wolfSSL: allow wolfSSL's implementation of kyber to be used [7]
+ o wolfssl: avoid calling get_cached_x509_store if store is uncachable [11]
  o wolfssl: CA store share fix [14]
+ o x509asn1: unittests and fixes for gtime2str [15]
 
 This release includes the following known bugs:
 
@@ -45,10 +53,11 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Aki Sakurai, Alex Snast, Anthony Hu, Daniel Stenberg, extrimexxx on github,
-  Gordon Parke, icy17 on github, Mamoru Tasaka, Marcel Raad, Patrick Monnerat,
-  Randall S. Becker, Sergey, Stefan Eissing, Viktor Szakats
-  (14 contributors)
+  Aki Sakurai, Alex Snast, Anthony Hu, Daniel Stenberg, dependabot[bot],
+  Dov Murik, extrimexxx on github, Gordon Parke, Harry Sintonen,
+  icy17 on github, Ivan Kuchin, Mamoru Tasaka, Marcel Raad, Patrick Monnerat,
+  Randall S. Becker, Sergey, Stefan Eissing, Tal Regev, Viktor Szakats
+  (19 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -62,11 +71,18 @@ References to bug reports and discussions on issues:
  [8] = https://curl.se/bug/?i=14247
  [9] = https://curl.se/bug/?i=14302
  [10] = https://curl.se/bug/?i=14199
+ [11] = https://curl.se/bug/?i=14306
  [12] = https://curl.se/bug/?i=14285
  [13] = https://curl.se/bug/?i=14269
  [14] = https://curl.se/bug/?i=14278
- [15] = https://curl.se/bug/?i=14273
+ [15] = https://curl.se/bug/?i=14316
  [17] = https://curl.se/bug/?i=14280
  [18] = https://curl.se/bug/?i=14295
  [19] = https://curl.se/bug/?i=14293
  [20] = https://curl.se/bug/?i=14292
+ [21] = https://curl.se/bug/?i=14304
+ [22] = https://curl.se/bug/?i=14196
+ [23] = https://curl.se/bug/?i=14305
+ [24] = https://curl.se/bug/?i=14318
+ [25] = https://curl.se/bug/?i=14309
+ [26] = https://curl.se/bug/?i=14312
