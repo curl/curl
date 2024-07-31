@@ -1989,7 +1989,7 @@ if(NOT CURL_DISABLE_INSTALL)
   # Use:
   # * TARGETS_EXPORT_NAME
   # * PROJECT_NAME
-  configure_package_config_file(CMake/curl-config.cmake.in
+  configure_package_config_file("CMake/curl-config.cmake.in"
     "${_project_config}"
     INSTALL_DESTINATION ${CURL_INSTALL_CMAKE_DIR}
     PATH_VARS CMAKE_INSTALL_INCLUDEDIR)
