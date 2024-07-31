@@ -21,33 +21,21 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-
-#[=======================================================================[.rst:
-FindNGTCP2
-----------
-
-Find the ngtcp2 library
-
-This module accepts optional COMPONENTS to control the crypto library (these are
-mutually exclusive)::
-
-  quictls, LibreSSL:  Use libngtcp2_crypto_quictls
-  BoringSSL, AWS-LC:  Use libngtcp2_crypto_boringssl
-  wolfSSL:            Use libngtcp2_crypto_wolfssl
-  GnuTLS:             Use libngtcp2_crypto_gnutls
-
-Result Variables
-^^^^^^^^^^^^^^^^
-
-``NGTCP2_FOUND``
-  System has ngtcp2
-``NGTCP2_INCLUDE_DIRS``
-  The ngtcp2 include directories.
-``NGTCP2_LIBRARIES``
-  The libraries needed to use ngtcp2
-``NGTCP2_VERSION``
-  version of ngtcp2.
-#]=======================================================================]
+# Find the ngtcp2 library
+#
+# This module accepts optional COMPONENTS to control the crypto library (these are
+# mutually exclusive):
+#
+#  quictls, LibreSSL:  Use libngtcp2_crypto_quictls
+#  BoringSSL, AWS-LC:  Use libngtcp2_crypto_boringssl
+#  wolfSSL:            Use libngtcp2_crypto_wolfssl
+#  GnuTLS:             Use libngtcp2_crypto_gnutls
+#
+# Result Variables:
+# NGTCP2_FOUND         System has ngtcp2
+# NGTCP2_INCLUDE_DIRS  The ngtcp2 include directories.
+# NGTCP2_LIBRARIES     The libraries needed to use ngtcp2
+# NGTCP2_VERSION       version of ngtcp2.
 
 if(UNIX)
   find_package(PkgConfig QUIET)

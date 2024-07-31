@@ -21,25 +21,13 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-
-#[=======================================================================[.rst:
-FindNGHTTP3
-----------
-
-Find the nghttp3 library
-
-Result Variables
-^^^^^^^^^^^^^^^^
-
-``NGHTTP3_FOUND``
-  System has nghttp3
-``NGHTTP3_INCLUDE_DIRS``
-  The nghttp3 include directories.
-``NGHTTP3_LIBRARIES``
-  The libraries needed to use nghttp3
-``NGHTTP3_VERSION``
-  version of nghttp3.
-#]=======================================================================]
+# Find the nghttp3 library
+#
+# Result Variables:
+# NGHTTP3_FOUND         System has nghttp3
+# NGHTTP3_INCLUDE_DIRS  The nghttp3 include directories.
+# NGHTTP3_LIBRARIES     The libraries needed to use nghttp3
+# NGHTTP3_VERSION       version of nghttp3.
 
 if(UNIX)
   find_package(PkgConfig QUIET)
