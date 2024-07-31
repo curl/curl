@@ -607,7 +607,7 @@ jobs:
         run: |
           find . -name '*.exe' -o -name '*.dll' | grep -v '/examples/'
           if [ '${{ matrix.plat }}' != 'uwp' ]; then
-            PATH="$PWD/bld/lib:$VCPKG_INSTALLATION_ROOT/installed/${{ matrix.arch }}-${{ matrix.plat }}/bin:$PATH"
+            PATH="$PWD/bld/lib:$PATH"
             bld/src/curl.exe --disable --version
           fi
 
@@ -629,5 +629,5 @@ jobs:
           elif [[ '${{ matrix.config }}' = *'-DUSE_LIBIDN2=ON'* ]]; then
             TFLAGS+=' ~165 ~1448 ~2046 ~2047'
           fi
-          PATH="$PWD/bld/lib:$VCPKG_INSTALLATION_ROOT/installed/${{ matrix.arch }}-${{ matrix.plat }}/bin:$PATH"
+          PATH="$PWD/bld/lib:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
