@@ -493,12 +493,12 @@ jobs:
       matrix:
         include:
         - name: 'schannel U'
-          install: 'brotli zlib zstd libpsl nghttp2 libssh2[core,zlib] pkgconf gsasl'
+          install: 'brotli zlib zstd libpsl nghttp2 libssh2[core,zlib] pkgconf gsasl openssl'
           arch: 'x64'
           plat: 'windows'
           type: 'Debug'
           tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
-          config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=ON  -DCURL_USE_SCHANNEL=ON  -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBPSL=ON -DUSE_NGHTTP2=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DUSE_WIN32_IDN=ON -DCURL_USE_GSASL=ON'
+          config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=ON  -DCURL_USE_SCHANNEL=ON  -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBPSL=ON -DUSE_NGHTTP2=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DUSE_WIN32_IDN=ON -DCURL_USE_GSASL=ON -DCURL_USE_OPENSSL=ON -DCURL_DEFAULT_SSL_BACKEND=schannel'
         - name: 'openssl'
           install: 'brotli zlib zstd libpsl nghttp2 nghttp3 openssl libssh2 pkgconf gsasl'
           arch: 'x64'
