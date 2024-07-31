@@ -129,3 +129,13 @@ jobs:
           cmake -B build -DCURL_WERROR=ON
           make -C build -j5
         name: 'verify out-of-tree cmake build'
+
+  verify-cmake-test-dist:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+
+      - name: 'cmake test dist'
+        run: |
+          cmake -B build -DENABLE_DIST_TEST=ON
