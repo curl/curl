@@ -38,3 +38,4 @@ Requires.private: @LIBCURL_PC_REQUIRES_PRIVATE@
 Libs: -L${libdir} -lcurl @LIBCURL_NO_SHARED@
 Libs.private: @LIBCURL_LIBS@
 Cflags: -I${includedir} @CPPFLAG_CURL_STATICLIB@
+Cflags.private: @LIBCURL_PC_CFLAGS_PRIVATE@
