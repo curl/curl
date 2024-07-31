@@ -1651,9 +1651,9 @@ include(GNUInstallDirs)
 
 set(CURL_INSTALL_CMAKE_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
 set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
-set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
-set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
-set(version_config "${generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
+set(_generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
+set(_project_config "${_generated_dir}/${PROJECT_NAME}Config.cmake")
+set(_version_config "${_generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
 
 cmake_dependent_option(BUILD_TESTING "Build tests"
   ON "PERL_FOUND;NOT CURL_DISABLE_TESTS"
@@ -1973,12 +1973,12 @@ if(NOT CURL_DISABLE_INSTALL)
 
   include(CMakePackageConfigHelpers)
   write_basic_package_version_file(
-    "${version_config}"
+    "${_version_config}"
     VERSION ${CURL_VERSION}
     COMPATIBILITY SameMajorVersion
   )
-  file(READ "${version_config}" generated_version_config)
-  file(WRITE "${version_config}" "
+  file(READ "${_version_config}" generated_version_config)
+  file(WRITE "${_version_config}" "
     if(NOT PACKAGE_FIND_VERSION_RANGE AND PACKAGE_FIND_VERSION_MAJOR STREQUAL \"7\")
       # Version 8 satisfies version 7... requirements
       set(PACKAGE_FIND_VERSION_MAJOR 8)
@@ -1991,7 +1991,7 @@ if(NOT CURL_DISABLE_INSTALL)
   # * TARGETS_EXPORT_NAME
   # * PROJECT_NAME
   configure_package_config_file(CMake/curl-config.cmake.in
-    "${project_config}"
+    "${_project_config}"
     INSTALL_DESTINATION ${CURL_INSTALL_CMAKE_DIR}
     PATH_VARS CMAKE_INSTALL_INCLUDEDIR
   )
@@ -2003,7 +2003,7 @@ if(NOT CURL_DISABLE_INSTALL)
     )
   endif()
 
-  install(FILES ${version_config} ${project_config}
+  install(FILES ${_version_config} ${_project_config}
           DESTINATION ${CURL_INSTALL_CMAKE_DIR}
   )
 
