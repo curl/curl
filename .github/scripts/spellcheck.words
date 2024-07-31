@@ -967,3 +967,6 @@ zsh
 zstd
 Zuul
 zuul
+crontab
+testcurl
+lldb

@@ -22,7 +22,14 @@
 #
 ###########################################################################
 
-MANDISTPAGES = runtests.1.dist testcurl.1.dist
+if BUILD_DOCS
+# if we disable man page building, ignore these
+RUNTESTS_DOCS = runtests.1
+TESTCURL_DOCS = testcurl.1
+MANFILES = $(RUNTESTS_DOCS) $(TESTCURL_DOCS)
+endif
+
+CURLPAGES = runtests.md testcurl.md
 
 # scripts used in test cases
 TESTSCRIPTS = \
@@ -71,7 +78,6 @@ EXTRA_DIST =        \
  requirements.txt   \
  rtspserver.pl      \
  runner.pm          \
- runtests.1         \
  runtests.pl        \
  secureserver.pl    \
  serverhelp.pm      \
@@ -80,14 +86,14 @@ EXTRA_DIST =        \
  sshhelp.pm         \
  sshserver.pl       \
  stunnel.pem        \
- testcurl.1         \
  testcurl.pl        \
  testutil.pm        \
  tftpserver.pl      \
  util.py            \
  valgrind.pm        \
  valgrind.supp      \
- $(TESTSCRIPTS)
+ $(TESTSCRIPTS)     \
+ $(CURLPAGES)
 
 DISTCLEANFILES = configurehelp.pm
 
@@ -130,6 +136,13 @@ TEST_NF = -a -p ~flaky ~timing-dependent
 TEST_CI = $(TEST_NF) -r -rm
 endif
 
+CD2NROFF = $(top_srcdir)/scripts/cd2nroff $< >$@
+
+SUFFIXES = .1 .md
+
+.md.1:
+	$(CD2)$(CD2NROFF)
+
 # make sure that PERL is pointing to an executable
 perlcheck:
 	@if ! test -x "$(PERL)"; then echo "No perl!"; exit 2; fi
@@ -164,7 +177,7 @@ checksrc:
 	(cd server && $(MAKE) checksrc)
 	(cd http && $(MAKE) checksrc)
 
-if DEBUGBUILD
-# for debug builds, we scan the sources on all regular make invokes
-all-local: checksrc
-endif
+all-local: $(MANFILES)
+
+distclean:
+	rm -f $(MANFILES)
