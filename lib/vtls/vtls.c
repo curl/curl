@@ -574,10 +574,9 @@ bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
     }
   }
 
-  DEBUGF(infof(data, "%s Session ID in cache for %s %s://%s:%d",
-               no_match? "Did not find": "Found",
-               Curl_ssl_cf_is_proxy(cf) ? "proxy" : "host",
-               cf->conn->handler->scheme, peer->hostname, peer->port));
+  CURL_TRC_CF(data, cf, "%s cached session ID for %s://%s:%d",
+              no_match? "No": "Found",
+              cf->conn->handler->scheme, peer->hostname, peer->port);
   return no_match;
 }
 

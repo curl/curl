@@ -2542,19 +2542,10 @@ static CURLcode http2_data_pause(struct Curl_cfilter *cf,
       drain_stream(cf, data, stream);
       Curl_expire(data, 0, EXPIRE_RUN_NOW);
     }
-    DEBUGF(infof(data, "Set HTTP/2 window size to %u for stream %u",
-                 window, stream->id));
-
-#ifdef DEBUGBUILD
-    {
-      /* read out the stream local window again */
-      uint32_t window2 = (uint32_t)
-        nghttp2_session_get_stream_local_window_size(ctx->h2,
-                                                     stream->id);
-      DEBUGF(infof(data, "HTTP/2 window size is now %u for stream %u",
-                   window2, stream->id));
-    }
-#endif
+    CURL_TRC_CF(data, cf, "[%d] set window size to %u, local window now %u",
+                stream->id, window,
+                nghttp2_session_get_stream_local_window_size(ctx->h2,
+                                                             stream->id));
   }
 #endif
   return CURLE_OK;
@@ -2791,11 +2782,11 @@ CURLcode Curl_http2_switch(struct Curl_easy *data,
   CURLcode result;
 
   DEBUGASSERT(!Curl_conn_is_http2(data, conn, sockindex));
-  DEBUGF(infof(data, "switching to HTTP/2"));
 
   result = http2_cfilter_add(&cf, data, conn, sockindex, FALSE);
   if(result)
     return result;
+  CURL_TRC_CF(data, cf, "switching connection to HTTP/2");
 
   conn->httpversion = 20; /* we know we are on HTTP/2 now */
   conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
@@ -2842,12 +2833,12 @@ CURLcode Curl_http2_upgrade(struct Curl_easy *data,
   CURLcode result;
 
   DEBUGASSERT(!Curl_conn_is_http2(data, conn, sockindex));
-  DEBUGF(infof(data, "upgrading to HTTP/2"));
   DEBUGASSERT(data->req.upgr101 == UPGR101_RECEIVED);
 
   result = http2_cfilter_add(&cf, data, conn, sockindex, TRUE);
   if(result)
     return result;
+  CURL_TRC_CF(data, cf, "upgrading connection to HTTP/2");
 
   DEBUGASSERT(cf->cft == &Curl_cft_nghttp2);
   ctx = cf->ctx;
