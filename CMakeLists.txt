@@ -1627,24 +1627,24 @@ endif()
 # (= regenerate it).
 function(transform_makefile_inc INPUT_FILE OUTPUT_FILE)
   file(STRINGS "${INPUT_FILE}" _makefile_inc_lines)
-  set(MAKEFILE_INC_TEXT "")
+  set(_makefile_inc_text "")
   foreach(_line IN LISTS _makefile_inc_lines)
     if(_line MATCHES "### USE SIMPLE LIST ASSIGMENTS ABOVE THIS LINE ###")
       break()
     endif()
-    set(MAKEFILE_INC_TEXT "${MAKEFILE_INC_TEXT}${_line}\n")
+    set(_makefile_inc_text "${_makefile_inc_text}${_line}\n")
   endforeach()
 
-  string(REPLACE "$(top_srcdir)"   "\${CURL_SOURCE_DIR}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
-  string(REPLACE "$(top_builddir)" "\${CURL_BINARY_DIR}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
+  string(REPLACE "$(top_srcdir)"   "\${CURL_SOURCE_DIR}" _makefile_inc_text ${_makefile_inc_text})
+  string(REPLACE "$(top_builddir)" "\${CURL_BINARY_DIR}" _makefile_inc_text ${_makefile_inc_text})
 
-  string(REGEX REPLACE "\\\\\n" "!π!α!" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
-  string(REGEX REPLACE "([a-zA-Z_][a-zA-Z0-9_]*)[\t ]*=[\t ]*([^\n]*)" "SET(\\1 \\2)" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
-  string(REPLACE "!π!α!" "\n" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
+  string(REGEX REPLACE "\\\\\n" "!π!α!" _makefile_inc_text ${_makefile_inc_text})
+  string(REGEX REPLACE "([a-zA-Z_][a-zA-Z0-9_]*)[\t ]*=[\t ]*([^\n]*)" "SET(\\1 \\2)" _makefile_inc_text ${_makefile_inc_text})
+  string(REPLACE "!π!α!" "\n" _makefile_inc_text ${_makefile_inc_text})
 
-  string(REGEX REPLACE "\\$\\(([a-zA-Z_][a-zA-Z0-9_]*)\\)" "\${\\1}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})  # Replace $() with ${}
-  string(REGEX REPLACE "@([a-zA-Z_][a-zA-Z0-9_]*)@" "\${\\1}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})  # Replace @@ with ${}, even if that may not be read by CMake scripts.
-  file(WRITE ${OUTPUT_FILE} ${MAKEFILE_INC_TEXT})
+  string(REGEX REPLACE "\\$\\(([a-zA-Z_][a-zA-Z0-9_]*)\\)" "\${\\1}" _makefile_inc_text ${_makefile_inc_text})  # Replace $() with ${}
+  string(REGEX REPLACE "@([a-zA-Z_][a-zA-Z0-9_]*)@" "\${\\1}" _makefile_inc_text ${_makefile_inc_text})  # Replace @@ with ${}, even if that may not be read by CMake scripts.
+  file(WRITE ${OUTPUT_FILE} ${_makefile_inc_text})
   set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${INPUT_FILE}")
 endfunction()
 
