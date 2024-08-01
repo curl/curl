@@ -67,7 +67,7 @@ char *curl_easy_escape(struct Curl_easy *data, const char *string,
   if(!length)
     return strdup("");
 
-  Curl_dyn_init(&d, length * 3);
+  Curl_dyn_init(&d, length * 3 + 1);
 
   while(length--) {
     /* treat the characters unsigned */
