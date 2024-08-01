@@ -1396,7 +1396,7 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
   (void)session;
 
   DEBUGASSERT(call_data);
-  /* stream id 0 is the connection, don't look at that for streams. */
+  /* stream id 0 is the connection, do not look there for streams. */
   data_s = stream_id?
              nghttp2_session_get_stream_user_data(session, stream_id) : NULL;
   if(!data_s) {
