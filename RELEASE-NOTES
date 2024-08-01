@@ -4,19 +4,30 @@ curl and libcurl 8.10.0
  Command line options:         263
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3211
+ Contributors:                 3212
 
 This release includes the following changes:
 
 
 This release includes the following bugfixes:
 
- o rustls: make all tests pass [1]
+ o cmake: distcheck for files in CMake subdir [9]
+ o dist: add missing `FindNettle.cmake` [11]
  o GHA/windows: enable MulitSSL in an MSVC job [2]
+ o GHA: scan git repository and detect unvetted binary files [3]
+ o INSTALL.md: MultiSSL and QUIC are mutually exclusive [7]
+ o lib: convert some debugf()s into traces [8]
+ o libcurl.pc: add `Cflags.private` [10]
+ o rustls: make all tests pass [1]
+ o tests: provide docs as curldown, not nroff [12]
 
 This release includes the following known bugs:
 
- o see docs/KNOWN_BUGS (https://curl.se/docs/knownbugs.html)
+ See docs/KNOWN_BUGS (https://curl.se/docs/knownbugs.html)
+
+For all changes ever done in curl:
+
+ See https://curl.se/changes.html
 
 Planned upcoming removals include:
 
@@ -27,10 +38,18 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, Joe Birr-Pixton, Tal Regev, Viktor Szakats
-  (4 contributors)
+  Christoph Reiter, Daniel Stenberg, Joe Birr-Pixton, Matt Jolly,
+  Stefan Eissing, Tal Regev, Viktor Szakats
+  (7 contributors)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.se/bug/?i=14317
  [2] = https://curl.se/bug/?i=14276
+ [3] = https://curl.se/bug/?i=14333
+ [7] = https://curl.se/bug/?i=14308
+ [8] = https://curl.se/bug/?i=14322
+ [9] = https://curl.se/bug/?i=14323
+ [10] = https://curl.se/bug/?i=14321
+ [11] = https://curl.se/bug/?i=14285
+ [12] = https://curl.se/bug/?i=14324
