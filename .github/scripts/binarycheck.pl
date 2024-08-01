@@ -54,8 +54,12 @@ sub knownbins {
             my ($sum, $file) = ($1, $2);
             $known{$file} = 1;
         }
+        elsif($l =~ /^#/) {
+            # skip comments
+        }
         else {
-            print "MISS: $l\n";
+            print STDERR "suspicious line in $sumsfile\n";
+            $error++;
         }
     }
     close($mh);
