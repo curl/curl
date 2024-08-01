@@ -101,8 +101,8 @@ include src/Makefile.inc
 
 dist-hook:
 	rm -rf $(top_builddir)/tests/log
-	find $(distdir) -name "*.dist" -exec rm {} \;
-	(distit=`find $(srcdir) -name "*.dist" | grep -v ./ares/`; \
+	find $(distdir) -name "*.dist" -a \! -name Makefile.dist -exec rm {} \;
+	(distit=`find $(srcdir) -name "*.dist"`; \
 	for file in $$distit; do \
 	  strip=`echo $$file | sed -e s/^$(srcdir)// -e s/\.dist//`; \
 	  cp -p $$file $(distdir)$$strip; \

@@ -35,8 +35,8 @@ jobs:
       - run: ./configure --without-ssl --without-libpsl
         name: 'configure'
 
-      - run: make V=1 && make V=1 clean
-        name: 'make and clean'
+      - run: make V=1
+        name: 'make'
 
       - name: 'maketgz'
         run: |
@@ -45,7 +45,7 @@ jobs:
       - name: 'maketgz reproducibility test'
         run: |
           mkdir run1; mv ./curl-99.98.97.* run1/
-          make V=1 && make V=1 clean
+          make V=1 clean && make V=1
           SOURCE_DATE_EPOCH=1711526400 ./maketgz 99.98.97
           mkdir run2; cp -p ./curl-99.98.97.* run2/
           diff run1 run2
