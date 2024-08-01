@@ -384,24 +384,24 @@ static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
     *param_offt = (curl_off_t)data->info.filetime;
     break;
   case CURLINFO_SIZE_UPLOAD_T:
-    *param_offt = data->progress.uploaded;
+    *param_offt = data->progress.ul.cur_size;
     break;
   case CURLINFO_SIZE_DOWNLOAD_T:
-    *param_offt = data->progress.downloaded;
+    *param_offt = data->progress.dl.cur_size;
     break;
   case CURLINFO_SPEED_DOWNLOAD_T:
-    *param_offt = data->progress.dlspeed;
+    *param_offt = data->progress.dl.speed;
     break;
   case CURLINFO_SPEED_UPLOAD_T:
-    *param_offt = data->progress.ulspeed;
+    *param_offt = data->progress.ul.speed;
     break;
   case CURLINFO_CONTENT_LENGTH_DOWNLOAD_T:
     *param_offt = (data->progress.flags & PGRS_DL_SIZE_KNOWN)?
-      data->progress.size_dl:-1;
+      data->progress.dl.total_size:-1;
     break;
   case CURLINFO_CONTENT_LENGTH_UPLOAD_T:
     *param_offt = (data->progress.flags & PGRS_UL_SIZE_KNOWN)?
-      data->progress.size_ul:-1;
+      data->progress.ul.total_size:-1;
     break;
    case CURLINFO_TOTAL_TIME_T:
     *param_offt = data->progress.timespent;
@@ -488,24 +488,24 @@ static CURLcode getinfo_double(struct Curl_easy *data, CURLINFO info,
     *param_doublep = DOUBLE_SECS(data->progress.t_starttransfer);
     break;
   case CURLINFO_SIZE_UPLOAD:
-    *param_doublep = (double)data->progress.uploaded;
+    *param_doublep = (double)data->progress.ul.cur_size;
     break;
   case CURLINFO_SIZE_DOWNLOAD:
-    *param_doublep = (double)data->progress.downloaded;
+    *param_doublep = (double)data->progress.dl.cur_size;
     break;
   case CURLINFO_SPEED_DOWNLOAD:
-    *param_doublep = (double)data->progress.dlspeed;
+    *param_doublep = (double)data->progress.dl.speed;
     break;
   case CURLINFO_SPEED_UPLOAD:
-    *param_doublep = (double)data->progress.ulspeed;
+    *param_doublep = (double)data->progress.ul.speed;
     break;
   case CURLINFO_CONTENT_LENGTH_DOWNLOAD:
     *param_doublep = (data->progress.flags & PGRS_DL_SIZE_KNOWN)?
-      (double)data->progress.size_dl:-1;
+      (double)data->progress.dl.total_size:-1;
     break;
   case CURLINFO_CONTENT_LENGTH_UPLOAD:
     *param_doublep = (data->progress.flags & PGRS_UL_SIZE_KNOWN)?
-      (double)data->progress.size_ul:-1;
+      (double)data->progress.ul.total_size:-1;
     break;
   case CURLINFO_REDIRECT_TIME:
     *param_doublep = DOUBLE_SECS(data->progress.t_redirect);

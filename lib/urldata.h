@@ -1058,14 +1058,23 @@ struct PureInfo {
   BIT(used_proxy); /* the transfer used a proxy */
 };
 
+struct pgrs_measure {
+  struct curltime start; /* when measure started */
+  curl_off_t start_size; /* the 'cur_size' the measure started at */
+};
+
+struct pgrs_dir {
+  curl_off_t total_size; /* total expected bytes */
+  curl_off_t cur_size; /* transferred bytes so far */
+  curl_off_t speed; /* bytes per second transferred */
+  struct pgrs_measure limit;
+};
 
 struct Progress {
   time_t lastshow; /* time() of the last displayed progress meter or NULL to
                       force redraw at next call */
-  curl_off_t size_dl; /* total expected size */
-  curl_off_t size_ul; /* total expected size */
-  curl_off_t downloaded; /* transferred so far */
-  curl_off_t uploaded; /* transferred so far */
+  struct pgrs_dir ul;
+  struct pgrs_dir dl;
 
   curl_off_t current_speed; /* uses the currently fastest transfer */
 
@@ -1073,9 +1082,6 @@ struct Progress {
   int flags; /* see progress.h */
 
   timediff_t timespent;
-
-  curl_off_t dlspeed;
-  curl_off_t ulspeed;
 
   timediff_t t_postqueue;
   timediff_t t_nslookup;
@@ -1089,14 +1095,6 @@ struct Progress {
   struct curltime t_startsingle;
   struct curltime t_startop;
   struct curltime t_acceptdata;
-
-
-  /* upload speed limit */
-  struct curltime ul_limit_start;
-  curl_off_t ul_limit_size;
-  /* download speed limit */
-  struct curltime dl_limit_start;
-  curl_off_t dl_limit_size;
 
 #define CURR_TIME (5 + 1) /* 6 entries for 5 seconds */
 

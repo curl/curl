@@ -2384,24 +2384,22 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         send_timeout_ms = 0;
         if(data->set.max_send_speed)
           send_timeout_ms =
-            Curl_pgrsLimitWaitTime(data->progress.uploaded,
-                                   data->progress.ul_limit_size,
+            Curl_pgrsLimitWaitTime(&data->progress.ul,
                                    data->set.max_send_speed,
-                                   data->progress.ul_limit_start,
                                    *nowp);
 
         recv_timeout_ms = 0;
         if(data->set.max_recv_speed)
           recv_timeout_ms =
-            Curl_pgrsLimitWaitTime(data->progress.downloaded,
-                                   data->progress.dl_limit_size,
+            Curl_pgrsLimitWaitTime(&data->progress.dl,
                                    data->set.max_recv_speed,
-                                   data->progress.dl_limit_start,
                                    *nowp);
 
         if(!send_timeout_ms && !recv_timeout_ms) {
           multistate(data, MSTATE_PERFORMING);
           Curl_ratelimit(data, *nowp);
+          /* start performing again right away */
+          rc = CURLM_CALL_MULTI_PERFORM;
         }
         else if(send_timeout_ms >= recv_timeout_ms)
           Curl_expire(data, send_timeout_ms, EXPIRE_TOOFAST);
@@ -2417,19 +2415,15 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       /* check if over send speed */
       send_timeout_ms = 0;
       if(data->set.max_send_speed)
-        send_timeout_ms = Curl_pgrsLimitWaitTime(data->progress.uploaded,
-                                                 data->progress.ul_limit_size,
+        send_timeout_ms = Curl_pgrsLimitWaitTime(&data->progress.ul,
                                                  data->set.max_send_speed,
-                                                 data->progress.ul_limit_start,
                                                  *nowp);
 
       /* check if over recv speed */
       recv_timeout_ms = 0;
       if(data->set.max_recv_speed)
-        recv_timeout_ms = Curl_pgrsLimitWaitTime(data->progress.downloaded,
-                                                 data->progress.dl_limit_size,
+        recv_timeout_ms = Curl_pgrsLimitWaitTime(&data->progress.dl,
                                                  data->set.max_recv_speed,
-                                                 data->progress.dl_limit_start,
                                                  *nowp);
 
       if(send_timeout_ms || recv_timeout_ms) {
