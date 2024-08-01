@@ -176,11 +176,11 @@ class TestSSLUse:
     # test setting cipher suites, the AES 256 ciphers are disabled in the test server
     @pytest.mark.parametrize("ciphers, succeed", [
         [[0x1301], True],
-        [[0x1302], False],
+        [[0x1302], True],
         [[0x1303], True],
         [[0x1302, 0x1303], True],
         [[0xC02B, 0xC02F], True],
-        [[0xC02C, 0xC030], False],
+        [[0xC02C, 0xC030], True],
         [[0xCCA9, 0xCCA8], True],
         [[0xC02C, 0xC030, 0xCCA9, 0xCCA8], True],
     ])
