@@ -146,9 +146,6 @@ else
   automake --include-deps Makefile >/dev/null
 fi
 
-echo "produce CHANGES"
-git log --pretty=fuller --no-color --date=short --decorate=full -1000 | ./scripts/log2changes.pl > CHANGES.dist
-
 echo "produce RELEASE-TOOLS.md"
 ./scripts/release-tools.sh "$timestamp" "$version" > docs/RELEASE-TOOLS.md.dist
 
