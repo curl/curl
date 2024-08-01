@@ -63,7 +63,7 @@ char *curl_easy_escape(struct Curl_easy *data, const char *string,
   if(!string || (inlength < 0))
     return NULL;
 
-  Curl_dyn_init(&d, CURL_MAX_INPUT_LENGTH * 3);
+  Curl_dyn_init(&d, inlength * 3);
 
   length = (inlength?(size_t)inlength:strlen(string));
   if(!length)
