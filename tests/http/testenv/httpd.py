@@ -264,6 +264,7 @@ class Httpd:
                 (f'SSLCipherSuite TLSv1.3'
                  f' TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256'
                 ),
+                f'SSLHonorCipherOrder on',
             ]
             if 'base' in self._extra_configs:
                 conf.extend(self._extra_configs['base'])
