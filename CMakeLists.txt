@@ -419,6 +419,7 @@ count_true(enabled_ssl_options_count
   CURL_USE_MBEDTLS
   CURL_USE_BEARSSL
   CURL_USE_WOLFSSL
+  CURL_USE_GNUTLS
 )
 if(enabled_ssl_options_count GREATER "1")
   set(CURL_WITH_MULTI_SSL ON)
