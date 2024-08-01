@@ -62,15 +62,9 @@ string(REGEX MATCH "#define LIBCURL_VERSION_NUM 0x[0-9a-fA-F]+"
   CURL_VERSION_NUM ${CURL_VERSION_H_CONTENTS})
 string(REGEX REPLACE "[^0]+0x" "" CURL_VERSION_NUM ${CURL_VERSION_NUM})
 
+message(STATUS "curl version=[${CURL_VERSION}]")
 
 # Setup package meta-data
-# set(PACKAGE "curl")
-message(STATUS "curl version=[${CURL_VERSION}]")
-# set(PACKAGE_TARNAME "curl")
-# set(PACKAGE_NAME "curl")
-# set(PACKAGE_VERSION "-")
-# set(PACKAGE_STRING "curl-")
-# set(PACKAGE_BUGREPORT "a suitable curl mailing list => https://curl.se/mail/")
 set(OPERATING_SYSTEM "${CMAKE_SYSTEM_NAME}")
 if(CMAKE_C_COMPILER_TARGET)
   set(OS "\"${CMAKE_C_COMPILER_TARGET}\"")

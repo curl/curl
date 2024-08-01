@@ -55,7 +55,7 @@ function(SETUP_EXECUTABLE TEST_NAME)  # ARGN are the files in the test
     PROJECT_LABEL "${TARGET_LABEL_PREFIX}${TEST_NAME}")
 endfunction()
 
-
+# Get '<target>_SOURCES' variables:
 transform_makefile_inc("Makefile.inc"
   "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
@@ -63,19 +63,3 @@ include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
 foreach(EXECUTABLE_NAME ${noinst_PROGRAMS})
   setup_executable(${EXECUTABLE_NAME} ${${EXECUTABLE_NAME}_SOURCES})
 endforeach()
-
-
-# set(useful
-#   getpart.c getpart.h
-#   ${CURL_SOURCE_DIR}/lib/strequal.c
-#   ${CURL_SOURCE_DIR}/lib/base64.c
-#   ${CURL_SOURCE_DIR}/lib/mprintf.c
-#   ${CURL_SOURCE_DIR}/lib/memdebug.c
-#   ${CURL_SOURCE_DIR}/lib/timeval.c
-# )
-
-# setup_executable(sws sws.c util.c util.h ${useful})
-# setup_executable(resolve resolve.c util.c util.h ${useful})
-# setup_executable(sockfilt sockfilt.c util.c util.h ${useful} ${CURL_SOURCE_DIR}/lib/inet_pton.c)
-# setup_executable(getpart testpart.c ${useful})
-# setup_executable(tftpd tftpd.c util.c util.h ${useful} tftp.h)

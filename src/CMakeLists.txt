@@ -131,12 +131,6 @@ target_link_libraries(${EXE_NAME} ${LIB_SELECTED_FOR_EXE} ${CURL_LIBS})
 
 ################################################################################
 
-#set_target_properties(${EXE_NAME} ARCHIVE_OUTPUT_DIRECTORY "blah blah blah")
-#set_target_properties(${EXE_NAME} RUNTIME_OUTPUT_DIRECTORY "blah blah blah")
-#set_target_properties(${EXE_NAME} LIBRARY_OUTPUT_DIRECTORY "blah blah blah")
-
-#include(ModuleInstall OPTIONAL)
-
 install(TARGETS ${EXE_NAME} EXPORT ${TARGETS_EXPORT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
 export(TARGETS ${EXE_NAME}
   FILE ${PROJECT_BINARY_DIR}/curl-target.cmake
