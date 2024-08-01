@@ -14,7 +14,6 @@ SPDX-PackageDownloadLocation = "https://curl.se/"
 [[annotations]]
 path = [
   ".mailmap",
-  "CHANGES",
   "docs/FAQ",
   "docs/INSTALL",
   "docs/KNOWN_BUGS",

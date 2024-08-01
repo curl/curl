@@ -27,7 +27,6 @@
 /builds/
 /stats/
 __pycache__
-CHANGES.dist
 Debug
 INSTALL
 Makefile
