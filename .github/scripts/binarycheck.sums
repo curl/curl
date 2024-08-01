@@ -1,0 +1,25 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+# SPDX-License-Identifier: curl
+339d83446859f914867398046270d40b6ca7538c0adfef45eb62c8a16abb6a51  ./tests/certs/EdelCurlRoot-ca.der
+c819fdeb4a6d27dde78895c2f3ed6467a31b332e72781e4ce6e11400bae9df3c  ./tests/certs/Server-localhost-firstSAN-sv.der
+f95d6b18fa02a0e2d98ed851cfa2f0b4b57d67fe8676ce4b1f78fc294ac22307  ./tests/certs/Server-localhost-firstSAN-sv.pub.der
+3520cdc749d32bbe93276be4d8f714e24b5b882284566966f28361f1cb8a4d1c  ./tests/certs/Server-localhost-lastSAN-sv.der
+d623be406f9c02b28b2f2a376b3d8e06ed25335b7cbf96cb2c8de9357a09250d  ./tests/certs/Server-localhost-lastSAN-sv.pub.der
+d89d7ea295af4baa5f57304c69570b4a71f2dd4f9fe06350ab50041287b6910a  ./tests/certs/Server-localhost-sv.der
+0005032e4e1cf7cc5c1540ef03d8bf32703d1ee3b4dc83e2d79afe0b1f4e5e77  ./tests/certs/Server-localhost-sv.pub.der
+5b22627a94c67159a18203ab5cd96b739188188cec61e73a444b2290e14d3d82  ./tests/certs/Server-localhost.nn-sv.der
+611cbce062c9c6924119d7498e19eacdee4326190e516cad9c212a4b4bb49930  ./tests/certs/Server-localhost.nn-sv.pub.der
+6eb66ef346068b4d9bbcc7c79244c48d3a4877f08618ff379b40ae02e067ba09  ./tests/certs/Server-localhost0h-sv.der
+b967734c9bfe3d7a1a7795f348f0bce4d9ba15ca9590697ef2d4d15b92822db0  ./tests/certs/Server-localhost0h-sv.pub.der
+6605cac758b09a954b12c2970c7d7a00f92658fc3ced250b281ae066e3ea6a73  ./tests/certs/stunnel-sv.der
+2e9634d7d8387fbffd1fe43e030746610b2fc088f627333a9b58e5cb224ad6ba  ./tests/certs/stunnel-sv.pub.der
+9e38c1fb0a151c4e23c8abddc44711c12afb3161c6b2a1c68e1bb2b0a4484e3b  ./tests/data/test1425
+26ee981dcb84b6a2adce601084b78e6b787b54a2a997549582a8bd42087ab51b  ./tests/data/test1426
+d640923e45809a3fe277e0af90459d82d32603aacc7b8db88754fcb335bf98df  ./tests/data/test1531
+6f51bc318104fb5fe4b6013fc4e8e1c3c8dec1819202e8ea025bdbc4bbc8c02d  ./tests/data/test1938
+28a957ec3397881bbafd0d97879cedfd475bcd1ece903e531576affd7aa3865c  ./tests/data/test2080
+db99126801fd5e7cb0c1ec1a0078e5599038c8c07073f3d62ed51f155e0e3d38  ./tests/data/test262
+2d073a52984bab1f196d80464ea8ab6dafd887bd5fee9ed58603f8510df0c6a5  ./tests/data/test35
+4cc9fd6f31d0bb4dcb38e1565796e7ec5e48ea5ac9d3c1101de576be618786ba  ./tests/data/test463
+d655a29dcf2423b420b508c9e381b0fad0b88feb74caa8978725e22c9f7c374d  ./tests/data/test467
+8644ccf85e552755bf65faf2991d84f19523919379ec2cf195841a4cabe1507b  ./tests/data/test545
