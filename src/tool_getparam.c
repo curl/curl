@@ -846,6 +846,9 @@ static void cleanarg(argv_item_t str)
 #define cleanarg(x)
 #endif
 
+/* the maximum size we allow the dynbuf generated string */
+#define MAX_DATAURLENCODE (500*1024*1024)
+
 /* --data-urlencode */
 static ParameterError data_urlencode(struct GlobalConfig *global,
                                      char *nextarg,
@@ -921,15 +924,22 @@ static ParameterError data_urlencode(struct GlobalConfig *global,
       char *n;
       replace_url_encoded_space_by_plus(enc);
       if(nlen > 0) { /* only append '=' if we have a name */
-        n = aprintf("%.*s=%s", (int)nlen, nextarg, enc);
-        curl_free(enc);
-        if(!n)
+        struct curlx_dynbuf dyn;
+        curlx_dyn_init(&dyn, MAX_DATAURLENCODE);
+        if(curlx_dyn_addn(&dyn, nextarg, nlen) ||
+           curlx_dyn_addn(&dyn, "=", 1) ||
+           curlx_dyn_add(&dyn, enc)) {
+          curl_free(enc);
           return PARAM_NO_MEM;
+        }
+        curl_free(enc);
+        n = curlx_dyn_ptr(&dyn);
+        size = curlx_dyn_len(&dyn);
       }
-      else
+      else {
         n = enc;
-
-      size = strlen(n);
+        size = strlen(n);
+      }
       postdata = n;
     }
     else
