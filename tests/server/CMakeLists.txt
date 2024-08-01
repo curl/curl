@@ -60,6 +60,6 @@ transform_makefile_inc("Makefile.inc"
   "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
 
-foreach(EXECUTABLE_NAME ${noinst_PROGRAMS})
-  setup_executable(${EXECUTABLE_NAME} ${${EXECUTABLE_NAME}_SOURCES})
+foreach(_executable_name ${noinst_PROGRAMS})
+  setup_executable(${_executable_name} ${${_executable_name}_SOURCES})
 endforeach()

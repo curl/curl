@@ -221,20 +221,20 @@ if(PICKY_COMPILER)
 
     #
 
-    foreach(_CCOPT IN LISTS WPICKY_ENABLE)
-      set(WPICKY "${WPICKY} ${_CCOPT}")
+    foreach(_ccopt IN LISTS WPICKY_ENABLE)
+      set(WPICKY "${WPICKY} ${_ccopt}")
     endforeach()
 
-    foreach(_CCOPT IN LISTS WPICKY_DETECT)
+    foreach(_ccopt IN LISTS WPICKY_DETECT)
       # surprisingly, CHECK_C_COMPILER_FLAG needs a new variable to store each new
       # test result in.
-      string(MAKE_C_IDENTIFIER "OPT${_CCOPT}" _optvarname)
+      string(MAKE_C_IDENTIFIER "OPT${_ccopt}" _optvarname)
       # GCC only warns about unknown -Wno- options if there are also other diagnostic messages,
       # so test for the positive form instead
-      string(REPLACE "-Wno-" "-W" _CCOPT_ON "${_CCOPT}")
-      check_c_compiler_flag(${_CCOPT_ON} ${_optvarname})
+      string(REPLACE "-Wno-" "-W" _ccopt_on "${_ccopt}")
+      check_c_compiler_flag(${_ccopt_on} ${_optvarname})
       if(${_optvarname})
-        set(WPICKY "${WPICKY} ${_CCOPT}")
+        set(WPICKY "${WPICKY} ${_ccopt}")
       endif()
     endforeach()
   endif()
