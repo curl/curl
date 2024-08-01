@@ -529,8 +529,7 @@ static void progress_meter(struct Curl_easy *data)
   pgrs_estimates(&p->ul, (p->flags & PGRS_UL_SIZE_KNOWN), &ul_estm);
   pgrs_estimates(&p->dl, (p->flags & PGRS_DL_SIZE_KNOWN), &dl_estm);
 
-  /* Since both happen at the same time, total expected duratin is
-   * maximum of both directions. */
+  /* Since both happen at the same time, total expected duration is max. */
   total_estm.secs = CURLMAX(ul_estm.secs, dl_estm.secs);
   /* create the three time strings */
   time2str(time_left, total_estm.secs > 0?(total_estm.secs - cur_secs):0);

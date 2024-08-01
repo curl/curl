@@ -1066,7 +1066,7 @@ struct pgrs_measure {
 struct pgrs_dir {
   curl_off_t total_size; /* total expected bytes */
   curl_off_t cur_size; /* transferred bytes so far */
-  curl_off_t speed; /* bytes per second transfered */
+  curl_off_t speed; /* bytes per second transferred */
   struct pgrs_measure limit;
 };
 
