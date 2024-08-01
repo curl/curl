@@ -844,7 +844,6 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   if(rc == -1)
     return CURLE_FAILED_INIT;
 
-
   rc = getsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_TRANSPORT_PARAM,
                   &ctx->transport_params, &len);
   if(rc == -1)
@@ -922,7 +921,10 @@ static CURLcode cf_linuxq_connect(struct Curl_cfilter *cf,
   CURL_TRC_CF(data, cf, "handshake complete after %dms",
              (int)Curl_timediff(now, ctx->started_at));
 
-  /* XXX: We only use QUIC_EVENT_CONNECTION_CLOSE for now */
+  /*
+   * XXX: We only use QUIC_EVENT_CONNECTION_CLOSE,
+   * and QUIC_EVENT_STREAM_UPDATE for now
+   */
   for(i = 1; i < QUIC_EVENT_END; i++) {
     eopt.type = i;
     eopt.on = 1;
@@ -1410,6 +1412,10 @@ static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
       qev = (union quic_event *)&pkt[1];
       infof(data, "key update key_update_phase=%hhu",
             qev->key_update_phase);
+      return CURLE_OK;
+    case QUIC_EVENT_NEW_TOKEN:
+      /* XXX: convert/store token? */
+      infof(data, "new token");
       return CURLE_OK;
     default:
       return CURLE_HTTP3;
