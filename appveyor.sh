@@ -118,9 +118,7 @@ else
 fi
 
 if false; then
-  for log in CMakeFiles/CMakeConfigureLog.yaml CMakeFiles/CMakeOutput.log CMakeFiles/CMakeError.log; do
-    [ -r "_bld/${log}" ] && cat "_bld/${log}"
-  done
+  cat CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 fi
 
 # build tests
