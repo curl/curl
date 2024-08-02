@@ -216,11 +216,11 @@ if(BUILD_SHARED_LIBS)
     transform_makefile_inc("Makefile.soname" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake")
     include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake)
 
-    math(EXPR CMAKESONAME "${VERSIONCHANGE} - ${VERSIONDEL}")
-    set(CMAKEVERSION "${CMAKESONAME}.${VERSIONDEL}.${VERSIONADD}")
+    math(EXPR _cmakesoname "${VERSIONCHANGE} - ${VERSIONDEL}")
+    set(_cmakeversion "${_cmakesoname}.${VERSIONDEL}.${VERSIONADD}")
 
     set_target_properties(${LIB_SHARED} PROPERTIES
-      VERSION "${CMAKEVERSION}" SOVERSION "${CMAKESONAME}")
+      VERSION "${_cmakeversion}" SOVERSION "${_cmakesoname}")
   endif()
 endif()
 
