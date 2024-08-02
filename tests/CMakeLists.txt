@@ -33,11 +33,11 @@ function(add_runtests targetname test_flags)
   # replaced by the contents of the environment variable in runtests.pl.
   # This is a workaround for CMake's limitation where commands executed by
   # 'make' or 'ninja' cannot portably reference environment variables.
-  string(REPLACE " " ";" test_flags_list "${test_flags}")
+  string(REPLACE " " ";" _test_flags_list "${test_flags}")
   add_custom_target(${targetname}
     COMMAND
       "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/runtests.pl"
-      ${test_flags_list}
+      ${_test_flags_list}
       "\$TFLAGS"
     DEPENDS testdeps
     VERBATIM USES_TERMINAL
