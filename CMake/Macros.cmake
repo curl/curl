@@ -55,15 +55,9 @@ macro(curl_internal_test CURL_TEST)
     if(${CURL_TEST})
       set(${CURL_TEST} 1 CACHE INTERNAL "Curl test ${FUNCTION}")
       message(STATUS "Performing Test ${CURL_TEST} - Success")
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Performing Test ${CURL_TEST} passed with the following output:\n"
-        "${OUTPUT}\n")
     else()
-      message(STATUS "Performing Test ${CURL_TEST} - Failed")
       set(${CURL_TEST} "" CACHE INTERNAL "Curl test ${FUNCTION}")
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-        "Performing Test ${CURL_TEST} failed with the following output:\n"
-        "${OUTPUT}\n")
+      message(STATUS "Performing Test ${CURL_TEST} - Failed")
     endif()
   endif()
 endmacro()
