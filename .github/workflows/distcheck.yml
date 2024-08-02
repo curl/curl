@@ -139,3 +139,21 @@ jobs:
       - name: 'cmake test dist'
         run: |
           cmake -B build -DENABLE_DIST_TEST=ON
+
+  reproducible-releases:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+
+      - run: sudo apt-get purge -y curl libcurl4 libcurl4-doc
+        name: 'remove preinstalled curl libcurl4{-doc}'
+
+      - run: ./scripts/dmaketgz 9.10.11
+        name: 'generate release tarballs'
+
+      - name: 'verify release tarballs'
+        run: |
+          mkdir _verify
+          mv curl-9.10.11.tar.gz _verify
+          cd _verify
+          ../scripts/verify-release curl-9.10.11.tar.gz
