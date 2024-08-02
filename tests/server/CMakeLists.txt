@@ -27,9 +27,9 @@ if(MSVC)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /wd4306")
 endif()
 
-function(SETUP_EXECUTABLE TEST_NAME)  # ARGN are the files in the test
-  add_executable(${TEST_NAME} EXCLUDE_FROM_ALL ${ARGN})
-  add_dependencies(testdeps ${TEST_NAME})
+function(setup_executable test_name)  # ARGN are the files in the test
+  add_executable(${test_name} EXCLUDE_FROM_ALL ${ARGN})
+  add_dependencies(testdeps ${test_name})
 
   include_directories(
     ${CURL_SOURCE_DIR}/lib      # for "curl_setup_once.h"
@@ -41,7 +41,7 @@ function(SETUP_EXECUTABLE TEST_NAME)  # ARGN are the files in the test
     include_directories(${CARES_INCLUDE_DIR})
   endif()
 
-  target_link_libraries(${TEST_NAME} ${CURL_LIBS})
+  target_link_libraries(${test_name} ${CURL_LIBS})
 
   # Test servers simply are standalone programs that do not use libcurl
   # library.  For convenience and to ease portability of these servers,
@@ -49,10 +49,10 @@ function(SETUP_EXECUTABLE TEST_NAME)  # ARGN are the files in the test
   # to build the servers.  In order to achieve proper linkage of these
   # files on Windows targets it is necessary to build the test servers
   # with CURL_STATICLIB defined, independently of how libcurl is built.
-  set_target_properties(${TEST_NAME} PROPERTIES
+  set_target_properties(${test_name} PROPERTIES
     COMPILE_DEFINITIONS CURL_STATICLIB)
-  set_target_properties(${TEST_NAME} PROPERTIES
-    PROJECT_LABEL "${TARGET_LABEL_PREFIX}${TEST_NAME}")
+  set_target_properties(${test_name} PROPERTIES
+    PROJECT_LABEL "${TARGET_LABEL_PREFIX}${test_name}")
 endfunction()
 
 # Get 'noinst_PROGRAMS', '<target>_SOURCES' variables
