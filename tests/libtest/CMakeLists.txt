@@ -23,16 +23,16 @@
 ###########################################################################
 set(TARGET_LABEL_PREFIX "Test ")
 
-function(setup_test TEST_NAME)  # ARGN are the files in the test
+function(setup_test test_name)  # ARGN are the files in the test
 
   if(LIB_SELECTED STREQUAL LIB_STATIC)
     # These are part of the libcurl static lib. Do not compile/link them again.
     list(REMOVE_ITEM ARGN ${WARNLESS} ${MULTIBYTE} ${TIMEDIFF})
   endif()
 
-  add_executable(${TEST_NAME} EXCLUDE_FROM_ALL ${ARGN})
-  add_dependencies(testdeps ${TEST_NAME})
-  string(TOUPPER ${TEST_NAME} UPPER_TEST_NAME)
+  add_executable(${test_name} EXCLUDE_FROM_ALL ${ARGN})
+  add_dependencies(testdeps ${test_name})
+  string(TOUPPER ${test_name} UPPER_TEST_NAME)
 
   include_directories(
     ${CURL_SOURCE_DIR}/lib            # for "curl_setup_once.h"
@@ -44,23 +44,23 @@ function(setup_test TEST_NAME)  # ARGN are the files in the test
     include_directories(${CARES_INCLUDE_DIR})
   endif()
 
-  target_link_libraries(${TEST_NAME} ${LIB_SELECTED} ${CURL_LIBS})
+  target_link_libraries(${test_name} ${LIB_SELECTED} ${CURL_LIBS})
 
-  set_target_properties(${TEST_NAME}
+  set_target_properties(${test_name}
     PROPERTIES COMPILE_DEFINITIONS ${UPPER_TEST_NAME})
-  set_target_properties(${TEST_NAME}
-    PROPERTIES PROJECT_LABEL "${TARGET_LABEL_PREFIX}${TEST_NAME}")
+  set_target_properties(${test_name}
+    PROPERTIES PROJECT_LABEL "${TARGET_LABEL_PREFIX}${test_name}")
 endfunction()
 
 
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
 
-foreach(TEST_NAME ${noinst_PROGRAMS})
-  if(DEFINED ${TEST_NAME}_SOURCES)
-    setup_test(${TEST_NAME} ${${TEST_NAME}_SOURCES})
+foreach(_test_name ${noinst_PROGRAMS})
+  if(DEFINED ${_test_name}_SOURCES)
+    setup_test(${_test_name} ${${_test_name}_SOURCES})
   else()
-    setup_test(${TEST_NAME} ${nodist_${TEST_NAME}_SOURCES})
+    setup_test(${_test_name} ${nodist_${_test_name}_SOURCES})
   endif()
 endforeach()
 
