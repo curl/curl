@@ -42,7 +42,7 @@ env:
   MAKEFLAGS: -j 5
 
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
-  awslc-version: 1.31.0
+  awslc-version: 1.33.0
 
 jobs:
   autoconf:
