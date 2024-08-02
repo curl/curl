@@ -52,7 +52,7 @@ function(setup_test test_name)  # ARGN are the files in the test
     PROPERTIES PROJECT_LABEL "${TARGET_LABEL_PREFIX}${test_name}")
 endfunction()
 
-
+# Get 'noinst_PROGRAMS', '*_SOURCES' variables
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
 
@@ -65,7 +65,7 @@ foreach(_test_name IN LISTS noinst_PROGRAMS)
 endforeach()
 
 # Allows for hostname override to make tests machine independent.
-# TODO this cmake build assumes a shared build, detect static linking here!
+# TODO: this cmake build assumes a shared build, detect static linking here!
 if(NOT WIN32)
   add_library(hostname MODULE EXCLUDE_FROM_ALL sethostname.c)
   add_dependencies(testdeps hostname)

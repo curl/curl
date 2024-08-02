@@ -47,7 +47,7 @@ function(SETUP_EXECUTABLE TEST_NAME)  # ARGN are the files in the test
   # library.  For convenience and to ease portability of these servers,
   # some source code files from the libcurl subdirectory are also used
   # to build the servers.  In order to achieve proper linkage of these
-  # files on Win32 targets it is necessary to build the test servers
+  # files on Windows targets it is necessary to build the test servers
   # with CURL_STATICLIB defined, independently of how libcurl is built.
   set_target_properties(${TEST_NAME} PROPERTIES
     COMPILE_DEFINITIONS CURL_STATICLIB)
@@ -55,7 +55,7 @@ function(SETUP_EXECUTABLE TEST_NAME)  # ARGN are the files in the test
     PROJECT_LABEL "${TARGET_LABEL_PREFIX}${TEST_NAME}")
 endfunction()
 
-# Get '<target>_SOURCES' variables:
+# Get 'noinst_PROGRAMS', '<target>_SOURCES' variables
 transform_makefile_inc("Makefile.inc"
   "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)

@@ -22,7 +22,7 @@
 #
 ###########################################################################
 # - Try to find the nettle library
-# Once done this will define
+# Once done this defines
 #
 # NETTLE_FOUND - system has nettle
 # NETTLE_INCLUDE_DIRS - nettle include directories

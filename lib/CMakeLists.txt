@@ -28,6 +28,7 @@ add_definitions(-DBUILDING_LIBCURL)
 configure_file(curl_config.h.cmake
   ${CMAKE_CURRENT_BINARY_DIR}/curl_config.h)
 
+# Get 'CSOURCES', 'HHEADERS' variables
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
 
@@ -213,6 +214,7 @@ if(BUILD_SHARED_LIBS)
   option(CURL_LIBCURL_SOVERSION "Enable libcurl SOVERSION" ${_soversion_default})
 
   if(CURL_LIBCURL_SOVERSION)
+    # Get 'VERSIONCHANGE', 'VERSIONADD', 'VERSIONDEL', 'VERSIONINFO' variables
     transform_makefile_inc("Makefile.soname" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake")
     include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake)
 

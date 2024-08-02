@@ -50,6 +50,7 @@ else()
     VERBATIM)
 endif()
 
+# Get 'CURL_CFILES', 'CURLX_CFILES', 'CURL_HFILES', 'CURLTOOL_LIBCURL_CFILES' variables
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
 
@@ -73,8 +74,6 @@ if(WIN32)
   list(APPEND CURL_CFILES curl.rc)
 endif()
 
-# CURL_CFILES, CURLX_CFILES, CURL_HFILES, CURLTOOL_LIBCURL_CFILES
-# come from Makefile.inc
 if(BUILD_STATIC_CURL)
   set(CURLX_CFILES ${CURLTOOL_LIBCURL_CFILES})
 endif()

@@ -24,11 +24,11 @@
 # by Tetetest and Sukender (Benoit Neil)
 
 # Note: By default this CMake build script detects the version of some
-# dependencies using `check_symbol_exists`.  Those checks do not work
-# in the case that both CURL and its dependency are included as
-# sub-projects in a larger build using `FetchContent`.  To support
-# that case, additional variables may be defined by the parent
-# project, ideally in the "extra" find package redirect file:
+# dependencies using `check_symbol_exists`. Those checks do not work in
+# the case that both CURL and its dependency are included as sub-projects
+# in a larger build using `FetchContent`. To support that case, additional
+# variables may be defined by the parent project, ideally in the "extra"
+# find package redirect file:
 # https://cmake.org/cmake/help/latest/module/FetchContent.html#integrating-with-find-package
 #
 # The following variables are available:
@@ -40,8 +40,8 @@
 #   HAVE_ECH: ECH API checks for OpenSSL, BoringSSL or wolfSSL
 #
 # For each of the above variables, if the variable is DEFINED (either
-# to ON or OFF), the symbol detection will be skipped.  If the
-# variable is NOT DEFINED, the symbol detection will be performed.
+# to ON or OFF), the symbol detection is skipped.  If the variable is
+# NOT DEFINED, the symbol detection is performed.
 
 cmake_minimum_required(VERSION 3.7...3.16 FATAL_ERROR)
 message(STATUS "Using CMake version ${CMAKE_VERSION}")
@@ -64,7 +64,6 @@ string(REGEX REPLACE "[^0]+0x" "" CURL_VERSION_NUM ${CURL_VERSION_NUM})
 
 message(STATUS "curl version=[${CURL_VERSION}]")
 
-# Setup package meta-data
 if(CMAKE_C_COMPILER_TARGET)
   set(OS "\"${CMAKE_C_COMPILER_TARGET}\"")
 else()
@@ -136,21 +135,21 @@ elseif(BUILD_STATIC_CURL AND NOT BUILD_STATIC_LIBS)
   set(BUILD_STATIC_CURL OFF)
 endif()
 
-# lib flavour selected for curl tool
+# Lib flavour selected for curl tool
 if(BUILD_STATIC_CURL)
   set(LIB_SELECTED_FOR_EXE ${LIB_STATIC})
 else()
   set(LIB_SELECTED_FOR_EXE ${LIB_SHARED})
 endif()
 
-# lib flavour selected for example and test programs.
+# Lib flavour selected for example and test programs.
 if(BUILD_SHARED_LIBS)
   set(LIB_SELECTED ${LIB_SHARED})
 else()
   set(LIB_SELECTED ${LIB_STATIC})
 endif()
 
-# initialize CURL_LIBS
+# Initialize CURL_LIBS
 set(CURL_LIBS "")
 set(LIBCURL_PC_REQUIRES_PRIVATE "")
 
@@ -352,7 +351,7 @@ include(CheckSymbolExists)
 include(CheckTypeSize)
 include(CheckCSourceCompiles)
 
-# On windows preload settings
+# Preload settings on Windows
 if(WIN32)
   include(${CMAKE_CURRENT_SOURCE_DIR}/CMake/Platforms/WindowsCache.cmake)
 endif()
@@ -380,7 +379,7 @@ if(WIN32)
   list(APPEND CURL_LIBS "ws2_32" "bcrypt")
 endif()
 
-# check SSL libraries
+# Check SSL libraries
 option(CURL_ENABLE_SSL "Enable SSL support" ON)
 
 if(CURL_DEFAULT_SSL_BACKEND)
@@ -815,7 +814,7 @@ if(NOT CURL_DISABLE_LDAP)
   set(CMAKE_LDAP_LIB "ldap" CACHE STRING "Name or full path to ldap library")
   set(CMAKE_LBER_LIB "lber" CACHE STRING "Name or full path to lber library")
 
-  # Now that we know, we're not using windows LDAP...
+  # Now that we know, we are not using Windows LDAP...
   if(NOT USE_WIN32_LDAP)
     # Check for LDAP
     set(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_LIBRARIES})
@@ -837,11 +836,11 @@ if(NOT CURL_DISABLE_LDAP)
     if(NOT HAVE_LDAP_H)
       message(STATUS "LDAP_H not found CURL_DISABLE_LDAP set ON")
       set(CURL_DISABLE_LDAP ON CACHE BOOL "" FORCE)
-      set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES_BAK}) #LDAP includes won't be used
+      set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES_BAK})  # LDAP includes will not be used
     elseif(NOT HAVE_LIBLDAP)
       message(STATUS "LDAP library '${CMAKE_LDAP_LIB}' not found CURL_DISABLE_LDAP set ON")
       set(CURL_DISABLE_LDAP ON CACHE BOOL "" FORCE)
-      set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES_BAK}) #LDAP includes won't be used
+      set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES_BAK})  # LDAP includes will not be used
     else()
       if(CMAKE_LDAP_INCLUDE_DIR)
         include_directories(${CMAKE_LDAP_INCLUDE_DIR})
@@ -1211,7 +1210,7 @@ if(WIN32)
 endif()
 
 if(WIN32)
-  # detect actual value of _WIN32_WINNT and store as HAVE_WIN32_WINNT
+  # Detect actual value of _WIN32_WINNT and store as HAVE_WIN32_WINNT
   curl_internal_test(HAVE_WIN32_WINNT)
   if(HAVE_WIN32_WINNT)
     string(REGEX MATCH ".*_WIN32_WINNT=0x[0-9a-fA-F]+" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")
@@ -1220,7 +1219,7 @@ if(WIN32)
     string(TOLOWER "${CURL_TEST_OUTPUT}" HAVE_WIN32_WINNT)
     message(STATUS "Found _WIN32_WINNT=${HAVE_WIN32_WINNT}")
   endif()
-  # avoid storing HAVE_WIN32_WINNT in CMake cache
+  # Avoid storing HAVE_WIN32_WINNT in CMake cache
   unset(HAVE_WIN32_WINNT CACHE)
 
   if(HAVE_WIN32_WINNT)
@@ -1229,7 +1228,7 @@ if(WIN32)
       message(FATAL_ERROR "Building for Windows XP or newer is required.")
     endif()
 
-    # pre-fill detection results based on target OS version
+    # Pre-fill detection results based on target OS version
     if(MINGW OR MSVC)
       if(HAVE_WIN32_WINNT STRLESS "0x0600")
         set(HAVE_INET_NTOP 0)
@@ -1377,7 +1376,7 @@ check_symbol_exists(setmode         "${CURL_INCLUDES}" HAVE_SETMODE)
 check_symbol_exists(setrlimit       "${CURL_INCLUDES}" HAVE_SETRLIMIT)
 
 if(NOT MSVC OR (MSVC_VERSION GREATER_EQUAL 1900))
-  # earlier MSVC compilers had faulty snprintf implementations
+  # Earlier MSVC compilers had faulty snprintf implementations
   check_symbol_exists(snprintf "stdio.h" HAVE_SNPRINTF)
 endif()
 check_function_exists(mach_absolute_time HAVE_MACH_ABSOLUTE_TIME)
@@ -1447,7 +1446,7 @@ if(HAVE_FSEEKO)
   set(HAVE_DECL_FSEEKO 1)
 endif()
 
-# include this header to get the type
+# Include this header to get the type
 set(CMAKE_REQUIRED_INCLUDES "${CURL_SOURCE_DIR}/include")
 set(CMAKE_EXTRA_INCLUDE_FILES "curl/system.h")
 check_type_size("curl_off_t" SIZEOF_CURL_OFF_T)
@@ -1456,7 +1455,7 @@ check_type_size("curl_socket_t" SIZEOF_CURL_SOCKET_T)
 set(CMAKE_EXTRA_INCLUDE_FILES "")
 
 if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
-  # on not-Windows and not-crosscompiling, check for writable argv[]
+  # On non-Windows and not cross-compiling, check for writable argv[]
   include(CheckCSourceRuns)
   check_c_source_runs("
     int main(int argc, char **argv)
@@ -1594,7 +1593,7 @@ if(CURL_WERROR)
   if(MSVC_VERSION)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /WX")
   else()
-    # this assumes clang or gcc style options
+    # This assumes clang or gcc style options
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
   endif()
 endif()
@@ -1611,7 +1610,7 @@ if(CURL_LTO)
   if(CURL_HAS_LTO)
     message(STATUS "LTO supported and enabled")
   else()
-    message(FATAL_ERROR "LTO was requested - but compiler doesn't support it\n${CURL_LTO_ERROR}")
+    message(FATAL_ERROR "LTO was requested - but compiler does not support it\n${CURL_LTO_ERROR}")
   endif()
 endif()
 
@@ -1701,7 +1700,7 @@ if(NOT CURL_DISABLE_INSTALL)
   # Helper to populate a list (_items) with a label when conditions
   # (the remaining args) are satisfied
   macro(_add_if label)
-    # needs to be a macro to allow this indirection
+    # Needs to be a macro to allow this indirection
     if(${ARGN})
       set(_items ${_items} "${label}")
     endif()
@@ -1839,7 +1838,7 @@ if(NOT CURL_DISABLE_INSTALL)
 
   # curl-config needs the following options to be set.
   set(CC                      "${CMAKE_C_COMPILER}")
-  # TODO probably put a -D... options here?
+  # TODO: probably put a -D... options here?
   set(CONFIGURE_OPTIONS       "")
   set(CURLVERSION             "${CURL_VERSION}")
   set(exec_prefix             "\${prefix}")
@@ -1877,7 +1876,7 @@ if(NOT CURL_DISABLE_INSTALL)
       get_target_property(_imported "${_libname}" IMPORTED)
       if(NOT _imported)
         # Reading the LOCATION property on non-imported target will error out.
-        # Assume the user won't need this information in the .pc file.
+        # Assume the user will not need this information in the .pc file.
         continue()
       endif()
       get_target_property(_lib "${_libname}" LOCATION)
@@ -1960,7 +1959,7 @@ if(NOT CURL_DISABLE_INSTALL)
   install(FILES "${CURL_BINARY_DIR}/libcurl.pc"
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
-  # install headers
+  # Install headers
   install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/curl"
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     FILES_MATCHING PATTERN "*.h")

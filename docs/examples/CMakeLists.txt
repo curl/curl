@@ -22,10 +22,10 @@
 #
 ###########################################################################
 
+# Get 'check_PROGRAMS' variable
 transform_makefile_inc("Makefile.inc"
   "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
-# Get 'check_PROGRAMS' variable
 
 foreach(_example IN LISTS check_PROGRAMS)
   set(_example_target "curl-example-${_example}")
