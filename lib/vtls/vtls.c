@@ -887,7 +887,7 @@ CURLcode Curl_ssl_push_certinfo_len(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   struct dynbuf build;
 
-  Curl_dyn_init(&build, 10000);
+  Curl_dyn_init(&build, CURL_X509_STR_MAX);
 
   if(Curl_dyn_add(&build, label) ||
      Curl_dyn_addn(&build, ":", 1) ||
