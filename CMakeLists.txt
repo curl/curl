@@ -400,11 +400,11 @@ cmake_dependent_option(CURL_USE_BEARSSL "Enable BearSSL for SSL/TLS" OFF CURL_EN
 cmake_dependent_option(CURL_USE_WOLFSSL "Enable wolfSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 cmake_dependent_option(CURL_USE_GNUTLS "Enable GnuTLS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 
-set(openssl_default ON)
+set(_openssl_default ON)
 if(WIN32 OR CURL_USE_SECTRANSP OR CURL_USE_SCHANNEL OR CURL_USE_MBEDTLS OR CURL_USE_WOLFSSL)
-  set(openssl_default OFF)
+  set(_openssl_default OFF)
 endif()
-cmake_dependent_option(CURL_USE_OPENSSL "Enable OpenSSL for SSL/TLS" ${openssl_default} CURL_ENABLE_SSL OFF)
+cmake_dependent_option(CURL_USE_OPENSSL "Enable OpenSSL for SSL/TLS" ${_openssl_default} CURL_ENABLE_SSL OFF)
 option(CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG "Disable automatic loading of OpenSSL configuration" OFF)
 
 count_true(enabled_ssl_options_count
@@ -1182,12 +1182,12 @@ if(curl_ca_bundle_supported)
     endif()
 
     if(CURL_CA_PATH_AUTODETECT AND NOT CURL_CA_PATH_SET)
-      set(SEARCH_CA_PATH "/etc/ssl/certs")
-      file(GLOB curl_ca_files_found "${SEARCH_CA_PATH}/[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f].0")
-      if(curl_ca_files_found)
-        unset(curl_ca_files_found)
-        message(STATUS "Found CA path: ${SEARCH_CA_PATH}")
-        set(CURL_CA_PATH "${SEARCH_CA_PATH}" CACHE STRING
+      set(_search_ca_path "/etc/ssl/certs")
+      file(GLOB _curl_ca_files_found "${_search_ca_path}/[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f].0")
+      if(_curl_ca_files_found)
+        unset(_curl_ca_files_found)
+        message(STATUS "Found CA path: ${_search_ca_path}")
+        set(CURL_CA_PATH "${_search_ca_path}" CACHE STRING
           "Location of default CA path. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
         set(CURL_CA_PATH_SET TRUE CACHE BOOL "Path to the CA bundle has been set")
       endif()
@@ -1679,11 +1679,11 @@ if(ENABLE_DIST_TEST)
   transform_makefile_inc("Makefile.am" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.am.cmake")
   include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.am.cmake)
 
-  file(GLOB_RECURSE curl_cmake_files_found RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
+  file(GLOB_RECURSE _curl_cmake_files_found RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
     "${CMAKE_CURRENT_SOURCE_DIR}/CMake/*.cmake"
     "${CMAKE_CURRENT_SOURCE_DIR}/CMake/*.in")
 
-  foreach(_item IN LISTS curl_cmake_files_found)
+  foreach(_item IN LISTS _curl_cmake_files_found)
     if(NOT _item IN_LIST CMAKE_DIST)
       message(FATAL_ERROR "Source file missing from the Makefile.am CMAKE_DIST list: ${_item}")
     endif()
@@ -1971,14 +1971,14 @@ if(NOT CURL_DISABLE_INSTALL)
     "${_version_config}"
     VERSION ${CURL_VERSION}
     COMPATIBILITY SameMajorVersion)
-  file(READ "${_version_config}" generated_version_config)
+  file(READ "${_version_config}" _generated_version_config)
   file(WRITE "${_version_config}" "
     if(NOT PACKAGE_FIND_VERSION_RANGE AND PACKAGE_FIND_VERSION_MAJOR STREQUAL \"7\")
       # Version 8 satisfies version 7... requirements
       set(PACKAGE_FIND_VERSION_MAJOR 8)
       set(PACKAGE_FIND_VERSION_COUNT 1)
     endif()
-    ${generated_version_config}")
+    ${_generated_version_config}")
 
   # Use:
   # * TARGETS_EXPORT_NAME
