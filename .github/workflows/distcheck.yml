@@ -42,14 +42,6 @@ jobs:
         run: |
           SOURCE_DATE_EPOCH=1711526400 ./maketgz 99.98.97
 
-      - name: 'maketgz reproducibility test'
-        run: |
-          mkdir run1; mv ./curl-99.98.97.* run1/
-          make V=1 clean && make V=1
-          SOURCE_DATE_EPOCH=1711526400 ./maketgz 99.98.97
-          mkdir run2; cp -p ./curl-99.98.97.* run2/
-          diff run1 run2
-
       - uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4
         with:
           name: 'release-tgz'
@@ -139,3 +131,21 @@ jobs:
       - name: 'cmake test dist'
         run: |
           cmake -B build -DENABLE_DIST_TEST=ON
+
+  reproducible-releases:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+
+      - run: sudo apt-get purge -y curl libcurl4 libcurl4-doc
+        name: 'remove preinstalled curl libcurl4{-doc}'
+
+      - run: ./scripts/dmaketgz 9.10.11
+        name: 'generate release tarballs'
+
+      - name: 'verify release tarballs'
+        run: |
+          mkdir _verify
+          mv curl-9.10.11.tar.gz _verify
+          cd _verify
+          ../scripts/verify-release curl-9.10.11.tar.gz
