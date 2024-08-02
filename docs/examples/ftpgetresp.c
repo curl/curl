@@ -58,7 +58,7 @@ int main(void)
     /* Get a file listing from sunet */
     curl_easy_setopt(curl, CURLOPT_URL, "ftp://ftp.example.com/");
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, ftpfile);
-    /* If you intend to use this on windows with a libcurl DLL, you must use
+    /* If you intend to use this on Windows with a libcurl DLL, you must use
        CURLOPT_WRITEFUNCTION as well */
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, write_response);
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, respfile);

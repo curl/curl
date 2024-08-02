@@ -219,7 +219,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 
 #ifdef _WIN32
   fhnd = _get_osfhandle(fileno(outs->stream));
-  /* if windows console then UTF-8 must be converted to UTF-16 */
+  /* if Windows console then UTF-8 must be converted to UTF-16 */
   if(isatty(fileno(outs->stream)) &&
      GetConsoleScreenBufferInfo((HANDLE)fhnd, &console_info)) {
     wchar_t *wc_buf;

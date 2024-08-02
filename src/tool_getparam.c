@@ -713,7 +713,7 @@ void parse_cert_parameter(const char *cert_parameter,
          dudes can use : when using drive letters and thus c:\file:password
          needs to work. In order not to break compatibility, we still use : as
          separator, but we try to detect when it is used for a filename! On
-         windows. */
+         Windows. */
 #ifdef _WIN32
       if((param_place == &cert_parameter[1]) &&
          (cert_parameter[2] == '\\' || cert_parameter[2] == '/') &&

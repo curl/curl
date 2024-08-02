@@ -143,7 +143,7 @@ static const char *win32_strerror(int err, char *buf, size_t buflen)
   return buf;
 }
 
-/* use instead of perror() on generic windows */
+/* use instead of perror() on generic Windows */
 void win32_perror(const char *msg)
 {
   char buf[512];
@@ -690,7 +690,7 @@ static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler,
 void install_signal_handlers(bool keep_sigalrm)
 {
 #ifdef _WIN32
-  /* setup windows exit event before any signal can trigger */
+  /* setup Windows exit event before any signal can trigger */
   exit_event = CreateEvent(NULL, TRUE, FALSE, NULL);
   if(!exit_event)
     logmsg("cannot create exit event");

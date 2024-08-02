@@ -2686,7 +2686,7 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
   /* On WIN32 we cannot set the path to curl-ca-bundle.crt at compile time. We
    * look for the file in two ways:
    * 1: look at the environment variable CURL_CA_BUNDLE for a path
-   * 2: if #1 is not found, use the windows API function SearchPath()
+   * 2: if #1 is not found, use the Windows API function SearchPath()
    *    to find it along the app's path (includes app's dir and CWD)
    *
    * We support the environment variable thing for non-Windows platforms

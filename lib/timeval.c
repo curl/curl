@@ -137,7 +137,7 @@ struct curltime Curl_now(void)
 struct curltime Curl_now(void)
 {
   /*
-  ** Monotonic timer on Mac OS is provided by mach_absolute_time(), which
+  ** Monotonic timer on macOS is provided by mach_absolute_time(), which
   ** returns time in Mach "absolute time units," which are platform-dependent.
   ** To convert to nanoseconds, one must use conversion factors specified by
   ** mach_timebase_info().

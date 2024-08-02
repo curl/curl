@@ -55,7 +55,7 @@ struct OUR_OSVERSIONINFOEXW {
 /*
  * curlx_verify_windows_version()
  *
- * This is used to verify if we are running on a specific windows version.
+ * This is used to verify if we are running on a specific Windows version.
  *
  * Parameters:
  *

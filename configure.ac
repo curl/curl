@@ -3696,7 +3696,7 @@ AC_CHECK_TYPE([bool],[
 AC_CHECK_TYPE(sa_family_t,
    AC_DEFINE(CURL_SA_FAMILY_T, sa_family_t, [IP address type in sockaddr]),
    [
-   # The windows name?
+   # The Windows name?
    AC_CHECK_TYPE(ADDRESS_FAMILY,
      AC_DEFINE(CURL_SA_FAMILY_T, ADDRESS_FAMILY, [IP address type in sockaddr]),
      AC_DEFINE(CURL_SA_FAMILY_T, unsigned short, [IP address type in sockaddr]),

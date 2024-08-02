@@ -58,7 +58,7 @@ are configured:
 
 GitHub Actions runs the following tests:
 
-- Mac OS tests with a variety of different compilation options
+- macOS tests with a variety of different compilation options
 - Fuzz tests ([see the curl-fuzzer repo for more
   info](https://github.com/curl/curl-fuzzer)).
 - Curl compiled using the Rust TLS backend with Hyper

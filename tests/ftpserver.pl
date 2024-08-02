@@ -226,7 +226,7 @@ sub ftpmsg {
 
   # use this, open->print->close system only to make the file
   # open as little as possible, to make the test suite run
-  # better on windows/cygwin
+  # better on Windows/Cygwin
 }
 
 #**********************************************************************

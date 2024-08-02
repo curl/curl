@@ -46,11 +46,11 @@
 # fnmatch differences are just too common to make testing them sensible
 1307
 1316
-# test 1510 causes problems on the CI on github
+# test 1510 causes problems on the CI on GitHub
 # example: https://travis-ci.org/curl/curl/builds/81633600
 1510
 1512
-# test 1801 causes problems on Mac OS X and github
+# test 1801 causes problems on macOS and GitHub
 # https://github.com/curl/curl/issues/380
 1801
 # test 2086 causes issues on Windows only

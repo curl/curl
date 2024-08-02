@@ -16,7 +16,7 @@ Native SSL
 ----------
 
 If libcurl was built with Schannel or Secure Transport support (the native SSL
-libraries included in Windows and Mac OS X), then this does not apply to
+libraries included in Windows and macOS), then this does not apply to
 you. Scroll down for details on how the OS-native engines handle SSL
 certificates. If you are not sure, then run "curl -V" and read the results. If
 the version string says `Schannel` in it, then it was built with Schannel

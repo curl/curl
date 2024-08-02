@@ -124,7 +124,7 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
 #ifndef USE_RESOLVE_ON_IPS
   /*
    * The AI_NUMERICHOST must not be set to get synthesized IPv6 address from
-   * an IPv4 address on iOS and Mac OS X.
+   * an IPv4 address on iOS and macOS.
    */
   if((1 == Curl_inet_pton(AF_INET, hostname, addrbuf)) ||
      (1 == Curl_inet_pton(AF_INET6, hostname, addrbuf))) {

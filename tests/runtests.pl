@@ -1245,7 +1245,7 @@ sub singletest_check {
         # get the mode attribute
         my $filemode=$hash{'mode'};
         if($filemode && ($filemode eq "text") && $has_textaware) {
-            # text mode when running on windows: fix line endings
+            # text mode when running on Windows: fix line endings
             s/\r\n/\n/g for @validstdout;
             s/\n/\r\n/g for @validstdout;
             s/\r\n/\n/g for @actual;
@@ -1305,7 +1305,7 @@ sub singletest_check {
             s/\r\n/\n/g for @validstderr;
         }
         if($filemode && ($filemode eq "text") && $has_textaware) {
-            # text mode when running on windows: fix line endings
+            # text mode when running on Windows: fix line endings
             s/\r\n/\n/g for @validstderr;
             s/\n/\r\n/g for @validstderr;
         }
@@ -1400,7 +1400,7 @@ sub singletest_check {
                 # get the mode attribute
                 my $filemode=$replycheckpartattr{'mode'};
                 if($filemode && ($filemode eq "text") && $has_textaware) {
-                    # text mode when running on windows: fix line endings
+                    # text mode when running on Windows: fix line endings
                     s/\r\n/\n/g for @replycheckpart;
                     s/\n/\r\n/g for @replycheckpart;
                 }
@@ -1430,7 +1430,7 @@ sub singletest_check {
         # get the mode attribute
         my $filemode=$replyattr{'mode'};
         if($filemode && ($filemode eq "text") && $has_textaware) {
-            # text mode when running on windows: fix line endings
+            # text mode when running on Windows: fix line endings
             s/\r\n/\n/g for @reply;
             s/\n/\r\n/g for @reply;
         }
@@ -1569,7 +1569,7 @@ sub singletest_check {
 
             my $filemode=$hash{'mode'};
             if($filemode && ($filemode eq "text") && $has_textaware) {
-                # text mode when running on windows: fix line endings
+                # text mode when running on Windows: fix line endings
                 s/\r\n/\n/g for @outfile;
                 s/\n/\r\n/g for @outfile;
             }
