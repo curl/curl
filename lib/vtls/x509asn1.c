@@ -99,11 +99,6 @@
 #define CURL_ASN1_CHARACTER_STRING      29
 #define CURL_ASN1_BMP_STRING            30
 
-/* Max sixes */
-
-#define MAX_X509_STR  10000
-#define MAX_X509_CERT 100000
-
 #ifdef WANT_EXTRACT_CERTINFO
 /* ASN.1 OID table entry. */
 struct Curl_OID {

@@ -71,6 +71,7 @@
 #include "connect.h"
 #include "select.h"
 #include "strdup.h"
+#include "x509asn1.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
@@ -887,7 +888,7 @@ CURLcode Curl_ssl_push_certinfo_len(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   struct dynbuf build;
 
-  Curl_dyn_init(&build, 10000);
+  Curl_dyn_init(&build, MAX_X509_CERT);
 
   if(Curl_dyn_add(&build, label) ||
      Curl_dyn_addn(&build, ":", 1) ||

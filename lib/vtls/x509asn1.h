@@ -34,6 +34,11 @@
 #include "cfilters.h"
 #include "urldata.h"
 
+/* Max sixes */
+
+#define MAX_X509_STR  10000
+#define MAX_X509_CERT 100000
+
 /*
  * Types.
  */
