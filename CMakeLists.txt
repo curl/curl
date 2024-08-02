@@ -54,12 +54,12 @@ include(CheckCCompilerFlag)
 
 project(CURL C)
 
-file(STRINGS ${CURL_SOURCE_DIR}/include/curl/curlver.h CURL_VERSION_H_CONTENTS REGEX "#define LIBCURL_VERSION( |_NUM )")
+file(STRINGS ${CURL_SOURCE_DIR}/include/curl/curlver.h _curl_version_h_contents REGEX "#define LIBCURL_VERSION( |_NUM )")
 string(REGEX MATCH "#define LIBCURL_VERSION \"[^\"]*"
-  CURL_VERSION ${CURL_VERSION_H_CONTENTS})
+  CURL_VERSION ${_curl_version_h_contents})
 string(REGEX REPLACE "[^\"]+\"" "" CURL_VERSION ${CURL_VERSION})
 string(REGEX MATCH "#define LIBCURL_VERSION_NUM 0x[0-9a-fA-F]+"
-  CURL_VERSION_NUM ${CURL_VERSION_H_CONTENTS})
+  CURL_VERSION_NUM ${_curl_version_h_contents})
 string(REGEX REPLACE "[^0]+0x" "" CURL_VERSION_NUM ${CURL_VERSION_NUM})
 
 message(STATUS "curl version=[${CURL_VERSION}]")
