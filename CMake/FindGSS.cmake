@@ -276,11 +276,11 @@ if(GSS_FLAVOUR)
     endif()
 
     if(EXISTS "${GSS_INCLUDE_DIR}/${HEIMDAL_MANIFEST_FILE}")
-      file(STRINGS "${GSS_INCLUDE_DIR}/${HEIMDAL_MANIFEST_FILE}" heimdal_version_str
+      file(STRINGS "${GSS_INCLUDE_DIR}/${HEIMDAL_MANIFEST_FILE}" _heimdal_version_str
            REGEX "^.*version=\"[0-9]\\.[^\"]+\".*$")
 
       string(REGEX MATCH "[0-9]\\.[^\"]+"
-             GSS_VERSION "${heimdal_version_str}")
+             GSS_VERSION "${_heimdal_version_str}")
     endif()
 
     if(NOT GSS_VERSION)
