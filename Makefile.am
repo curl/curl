@@ -88,7 +88,7 @@ CLEANFILES = $(VC14_LIBVCXPROJ) $(VC14_SRCVCXPROJ) \
 bin_SCRIPTS = curl-config
 
 SUBDIRS = lib docs src scripts
-DIST_SUBDIRS = $(SUBDIRS) tests packages scripts include docs
+DIST_SUBDIRS = $(SUBDIRS) tests packages include docs
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libcurl.pc
@@ -102,7 +102,7 @@ include src/Makefile.inc
 dist-hook:
 	rm -rf $(top_builddir)/tests/log
 	find $(distdir) -name "*.dist" -a \! -name Makefile.dist -exec rm {} \;
-	(distit=`find $(srcdir) -name "*.dist"`; \
+	(distit=`find $(srcdir) -name "*.dist" | grep -v Makefile`; \
 	for file in $$distit; do \
 	  strip=`echo $$file | sed -e s/^$(srcdir)// -e s/\.dist//`; \
 	  cp -p $$file $(distdir)$$strip; \
