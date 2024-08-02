@@ -118,10 +118,16 @@ static void trc_infof(struct Curl_easy *data, struct curl_trc_feat *feat,
                       const char * const fmt, va_list ap)
 {
   int len = 0;
-  char buffer[MAXINFO + 2];
+  char buffer[MAXINFO + 5];
   if(feat)
-    len = msnprintf(buffer, MAXINFO, "[%s] ", feat->name);
-  len += mvsnprintf(buffer + len, MAXINFO - len, fmt, ap);
+    len = msnprintf(buffer, (MAXINFO + 1), "[%s] ", feat->name);
+  len += mvsnprintf(buffer + len, (MAXINFO + 1) - len, fmt, ap);
+  if(len >= MAXINFO) { /* too long, shorten with '...' */
+    --len;
+    buffer[len++] = '.';
+    buffer[len++] = '.';
+    buffer[len++] = '.';
+  }
   buffer[len++] = '\n';
   buffer[len] = '\0';
   Curl_debug(data, CURLINFO_TEXT, buffer, len);

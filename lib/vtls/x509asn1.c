@@ -99,10 +99,6 @@
 #define CURL_ASN1_CHARACTER_STRING      29
 #define CURL_ASN1_BMP_STRING            30
 
-/* Max sixes */
-
-#define MAX_X509_STR  10000
-#define MAX_X509_CERT 100000
 
 #ifdef WANT_EXTRACT_CERTINFO
 /* ASN.1 OID table entry. */
@@ -463,7 +459,7 @@ static CURLcode OID2str(struct dynbuf *store,
   if(beg < end) {
     if(symbolic) {
       struct dynbuf buf;
-      Curl_dyn_init(&buf, MAX_X509_STR);
+      Curl_dyn_init(&buf, CURL_X509_STR_MAX);
       result = encodeOID(&buf, beg, end);
 
       if(!result) {
@@ -685,7 +681,7 @@ static CURLcode encodeDN(struct dynbuf *store, struct Curl_asn1Element *dn)
   CURLcode result = CURLE_OK;
   bool added = FALSE;
   struct dynbuf temp;
-  Curl_dyn_init(&temp, MAX_X509_STR);
+  Curl_dyn_init(&temp, CURL_X509_STR_MAX);
 
   for(p1 = dn->beg; p1 < dn->end;) {
     p1 = getASN1Element(&rdn, p1, dn->end);
@@ -949,7 +945,7 @@ static CURLcode do_pubkey_field(struct Curl_easy *data, int certnum,
   CURLcode result;
   struct dynbuf out;
 
-  Curl_dyn_init(&out, MAX_X509_STR);
+  Curl_dyn_init(&out, CURL_X509_STR_MAX);
 
   /* Generate a certificate information record for the public key. */
 
@@ -1093,7 +1089,7 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
     if(certnum)
       return CURLE_OK;
 
-  Curl_dyn_init(&out, MAX_X509_STR);
+  Curl_dyn_init(&out, CURL_X509_STR_MAX);
   /* Prepare the certificate information for curl_easy_getinfo(). */
 
   /* Extract the certificate ASN.1 elements. */
