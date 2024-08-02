@@ -56,7 +56,7 @@ endfunction()
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
 
-foreach(_test_name ${noinst_PROGRAMS})
+foreach(_test_name IN LISTS noinst_PROGRAMS)
   if(DEFINED ${_test_name}_SOURCES)
     setup_test(${_test_name} ${${_test_name}_SOURCES})
   else()

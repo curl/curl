@@ -857,7 +857,7 @@ if(NOT CURL_DISABLE_LDAP)
       list(APPEND _header_list "ldap.h")
 
       set(_include_string "")
-      foreach(_header ${_header_list})
+      foreach(_header IN LISTS _header_list)
         set(_include_string "${_include_string}#include <${_header}>\n")
       endforeach()
 
@@ -1054,7 +1054,7 @@ if(CURL_USE_GSSAPI)
       string(REPLACE ";" " " _COMPILER_FLAGS_STR "${GSS_COMPILER_FLAGS}")
       string(REPLACE ";" " " _LINKER_FLAGS_STR "${GSS_LINKER_FLAGS}")
 
-      foreach(_dir ${GSS_LINK_DIRECTORIES})
+      foreach(_dir IN LISTS GSS_LINK_DIRECTORIES)
         set(_LINKER_FLAGS_STR "${_LINKER_FLAGS_STR} -L\"${_dir}\"")
       endforeach()
 
@@ -1389,7 +1389,7 @@ check_symbol_exists(inet_pton "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_PTO
 
 check_symbol_exists(fsetxattr "${CURL_INCLUDES}" HAVE_FSETXATTR)
 if(HAVE_FSETXATTR)
-  foreach(_curl_test HAVE_FSETXATTR_5 HAVE_FSETXATTR_6)
+  foreach(_curl_test IN ITEMS HAVE_FSETXATTR_5 HAVE_FSETXATTR_6)
     curl_internal_test(${_curl_test})
   endforeach()
 endif()
@@ -1407,7 +1407,7 @@ if(WIN32)
 endif()
 
 # Do curl specific tests
-foreach(_curl_test
+foreach(_curl_test IN ITEMS
     HAVE_FCNTL_O_NONBLOCK
     HAVE_IOCTLSOCKET
     HAVE_IOCTLSOCKET_CAMEL
@@ -1479,7 +1479,7 @@ if(ENABLE_WEBSOCKETS)
   endif()
 endif()
 
-foreach(_curl_test
+foreach(_curl_test IN ITEMS
     HAVE_GLIBC_STRERROR_R
     HAVE_POSIX_STRERROR_R
     )
@@ -1487,7 +1487,7 @@ foreach(_curl_test
 endforeach()
 
 # Check for reentrant
-foreach(_curl_test
+foreach(_curl_test IN ITEMS
     HAVE_GETHOSTBYNAME_R_3
     HAVE_GETHOSTBYNAME_R_5
     HAVE_GETHOSTBYNAME_R_6)
@@ -1499,7 +1499,7 @@ foreach(_curl_test
 endforeach()
 
 if(NEED_REENTRANT)
-  foreach(_curl_test
+  foreach(_curl_test IN ITEMS
       HAVE_GETHOSTBYNAME_R_3
       HAVE_GETHOSTBYNAME_R_5
       HAVE_GETHOSTBYNAME_R_6)
@@ -1854,7 +1854,7 @@ if(NOT CURL_DISABLE_INSTALL)
   set(_libcurl_libs_dirs)
   # To avoid getting unnecessary -L options for known system directories,
   # _libcurl_libs_dirs is seeded with them.
-  foreach(_libdir ${CMAKE_SYSTEM_PREFIX_PATH})
+  foreach(_libdir IN LISTS CMAKE_SYSTEM_PREFIX_PATH)
     if(_libdir MATCHES "/$")
       set(_libdir "${_libdir}lib")
     else()
@@ -1871,7 +1871,7 @@ if(NOT CURL_DISABLE_INSTALL)
     endif()
   endforeach()
 
-  foreach(_lib ${CMAKE_C_IMPLICIT_LINK_LIBRARIES} ${CURL_LIBS})
+  foreach(_lib IN LISTS CMAKE_C_IMPLICIT_LINK_LIBRARIES CURL_LIBS)
     if(TARGET "${_lib}")
       set(_libname "${_lib}")
       get_target_property(_imported "${_libname}" IMPORTED)
