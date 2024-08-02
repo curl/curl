@@ -1390,8 +1390,8 @@ check_symbol_exists(inet_pton "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_PTO
 
 check_symbol_exists(fsetxattr "${CURL_INCLUDES}" HAVE_FSETXATTR)
 if(HAVE_FSETXATTR)
-  foreach(CURL_TEST HAVE_FSETXATTR_5 HAVE_FSETXATTR_6)
-    curl_internal_test(${CURL_TEST})
+  foreach(_curl_test HAVE_FSETXATTR_5 HAVE_FSETXATTR_6)
+    curl_internal_test(${_curl_test})
   endforeach()
 endif()
 
@@ -1408,7 +1408,7 @@ if(WIN32)
 endif()
 
 # Do curl specific tests
-foreach(CURL_TEST
+foreach(_curl_test
     HAVE_FCNTL_O_NONBLOCK
     HAVE_IOCTLSOCKET
     HAVE_IOCTLSOCKET_CAMEL
@@ -1430,7 +1430,7 @@ foreach(CURL_TEST
     HAVE_FILE_OFFSET_BITS
     HAVE_ATOMIC
     )
-  curl_internal_test(${CURL_TEST})
+  curl_internal_test(${_curl_test})
 endforeach()
 
 if(HAVE_FILE_OFFSET_BITS)
@@ -1480,33 +1480,33 @@ if(ENABLE_WEBSOCKETS)
   endif()
 endif()
 
-foreach(CURL_TEST
+foreach(_curl_test
     HAVE_GLIBC_STRERROR_R
     HAVE_POSIX_STRERROR_R
     )
-  curl_internal_test(${CURL_TEST})
+  curl_internal_test(${_curl_test})
 endforeach()
 
 # Check for reentrant
-foreach(CURL_TEST
+foreach(_curl_test
     HAVE_GETHOSTBYNAME_R_3
     HAVE_GETHOSTBYNAME_R_5
     HAVE_GETHOSTBYNAME_R_6)
-  if(NOT ${CURL_TEST})
-    if(${CURL_TEST}_REENTRANT)
+  if(NOT ${_curl_test})
+    if(${_curl_test}_REENTRANT)
       set(NEED_REENTRANT 1)
     endif()
   endif()
 endforeach()
 
 if(NEED_REENTRANT)
-  foreach(CURL_TEST
+  foreach(_curl_test
       HAVE_GETHOSTBYNAME_R_3
       HAVE_GETHOSTBYNAME_R_5
       HAVE_GETHOSTBYNAME_R_6)
-    set(${CURL_TEST} 0)
-    if(${CURL_TEST}_REENTRANT)
-      set(${CURL_TEST} 1)
+    set(${_curl_test} 0)
+    if(${_curl_test}_REENTRANT)
+      set(${_curl_test} 1)
     endif()
   endforeach()
 endif()
