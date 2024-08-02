@@ -103,7 +103,7 @@ struct Curl_dns_entry {
   size_t refcount;
   /* hostname port number that resolved to addr. */
   int hostport;
-  /* hostname that resolved to addr. may be NULL (unix domain sockets). */
+  /* hostname that resolved to addr. may be NULL (Unix domain sockets). */
   char hostname[1];
 };
 

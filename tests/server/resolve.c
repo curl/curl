@@ -38,7 +38,7 @@
 #include <netinet/in.h>
 #endif
 #ifdef _XOPEN_SOURCE_EXTENDED
-/* This define is "almost" required to build on HPUX 11 */
+/* This define is "almost" required to build on HP-UX 11 */
 #include <arpa/inet.h>
 #endif
 #ifdef HAVE_NETDB_H

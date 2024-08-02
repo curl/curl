@@ -41,7 +41,7 @@ problems may have been fixed or changed somewhat since this was written.
  5.2 curl-config --libs contains private details
  5.3 building for old macOS fails with gcc
  5.5 cannot handle Unicode arguments in non-Unicode builds on Windows
- 5.6 cygwin: make install installs curl-config.1 twice
+ 5.6 Cygwin: make install installs curl-config.1 twice
  5.11 configure --with-gssapi with Heimdal is ignored on macOS
  5.12 flaky CI builds
  5.13 long paths are not fully supported on Windows
@@ -49,7 +49,7 @@ problems may have been fixed or changed somewhat since this was written.
  5.15 Unicode on Windows
 
  6. Authentication
- 6.1 NTLM authentication and unicode
+ 6.1 NTLM authentication and Unicode
  6.2 MIT Kerberos for Windows build
  6.3 NTLM in system context uses wrong name
  6.5 NTLM does not support password with § character
@@ -73,7 +73,7 @@ problems may have been fixed or changed somewhat since this was written.
  9.2 wolfssh: publickey auth does not work
  9.3 Remote recursive folder creation with SFTP
  9.4 libssh blocking and infinite loop problem
- 9.5 cygwin: "WARNING: UNPROTECTED PRIVATE KEY FILE!"
+ 9.5 Cygwin: "WARNING: UNPROTECTED PRIVATE KEY FILE!"
 
  10. SOCKS
  10.3 FTPS over SOCKS
@@ -274,7 +274,7 @@ problems may have been fixed or changed somewhat since this was written.
   https://curl.se/bug/?i=731
   https://curl.se/bug/?i=3747
 
-5.6 cygwin: make install installs curl-config.1 twice
+5.6 Cygwin: make install installs curl-config.1 twice
 
  https://github.com/curl/curl/issues/8839
 
@@ -315,19 +315,19 @@ problems may have been fixed or changed somewhat since this was written.
 
 5.15 Unicode on Windows
 
- Passing in a unicode filename with -o:
+ Passing in a Unicode filename with -o:
 
  https://github.com/curl/curl/issues/11461
 
- Passing in unicode character with -d:
+ Passing in Unicode character with -d:
 
  https://github.com/curl/curl/issues/12231
 
 6. Authentication
 
-6.1 NTLM authentication and unicode
+6.1 NTLM authentication and Unicode
 
- NTLM authentication involving unicode username or password only works
+ NTLM authentication involving Unicode username or password only works
  properly if built with UNICODE defined together with the Schannel
  backend. The original problem was mentioned in:
  https://curl.se/mail/lib-2009-10/0024.html
@@ -471,9 +471,9 @@ problems may have been fixed or changed somewhat since this was written.
 
  https://github.com/curl/curl/issues/8632
 
-9.5 cygwin: "WARNING: UNPROTECTED PRIVATE KEY FILE!"
+9.5 Cygwin: "WARNING: UNPROTECTED PRIVATE KEY FILE!"
 
- Running SCP and SFTP tests on cygwin makes this warning message appear.
+ Running SCP and SFTP tests on Cygwin makes this warning message appear.
 
  https://github.com/curl/curl/issues/11244
 

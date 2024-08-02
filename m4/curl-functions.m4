@@ -1475,35 +1475,35 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
     AC_MSG_CHECKING([if getaddrinfo is threadsafe])
     case $host_os in
       aix[[1234]].* | aix5.[[01]].*)
-        dnl aix 5.1 and older
+        dnl AIX 5.1 and older
         tst_tsafe_getaddrinfo="no"
         ;;
       aix*)
-        dnl aix 5.2 and newer
+        dnl AIX 5.2 and newer
         tst_tsafe_getaddrinfo="yes"
         ;;
       darwin[[12345]].*)
-        dnl darwin 5.0 and mac os x 10.1.X and older
+        dnl Darwin 5.0 and macOS 10.1.X and older
         tst_tsafe_getaddrinfo="no"
         ;;
       darwin*)
-        dnl darwin 6.0 and mac os x 10.2.X and newer
+        dnl Darwin 6.0 and macOS 10.2.X and newer
         tst_tsafe_getaddrinfo="yes"
         ;;
       freebsd[[1234]].* | freebsd5.[[1234]]*)
-        dnl freebsd 5.4 and older
+        dnl FreeBSD 5.4 and older
         tst_tsafe_getaddrinfo="no"
         ;;
       freebsd*)
-        dnl freebsd 5.5 and newer
+        dnl FreeBSD 5.5 and newer
         tst_tsafe_getaddrinfo="yes"
         ;;
       hpux[[123456789]].* | hpux10.* | hpux11.0* | hpux11.10*)
-        dnl hpux 11.10 and older
+        dnl HP-UX 11.10 and older
         tst_tsafe_getaddrinfo="no"
         ;;
       hpux*)
-        dnl hpux 11.11 and newer
+        dnl HP-UX 11.11 and newer
         tst_tsafe_getaddrinfo="yes"
         ;;
       midnightbsd*)
@@ -1511,19 +1511,19 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
         tst_tsafe_getaddrinfo="yes"
         ;;
       netbsd[[123]].*)
-        dnl netbsd 3.X and older
+        dnl NetBSD 3.X and older
         tst_tsafe_getaddrinfo="no"
         ;;
       netbsd*)
-        dnl netbsd 4.X and newer
+        dnl NetBSD 4.X and newer
         tst_tsafe_getaddrinfo="yes"
         ;;
       *bsd*)
-        dnl All other bsd's
+        dnl All other BSD's
         tst_tsafe_getaddrinfo="no"
         ;;
       solaris2*)
-        dnl solaris which have it
+        dnl Solaris which have it
         tst_tsafe_getaddrinfo="yes"
         ;;
     esac

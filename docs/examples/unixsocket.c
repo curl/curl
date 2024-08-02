@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 /* <DESC>
- * Access HTTP server over unix domain socket
+ * Access HTTP server over Unix domain socket
  * </DESC>
  */
 #include <stdio.h>

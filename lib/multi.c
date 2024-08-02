@@ -1416,7 +1416,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
 #endif
     int pollrc;
 #ifdef USE_WINSOCK
-    if(cpfds.n)         /* just pre-check with WinSock */
+    if(cpfds.n)         /* just pre-check with Winsock */
       pollrc = Curl_poll(cpfds.pfds, cpfds.n, 0);
     else
       pollrc = 0;
@@ -1436,7 +1436,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
       WSAWaitForMultipleEvents(1, &multi->wsa_event, FALSE, (DWORD)timeout_ms,
                                FALSE);
     }
-    /* With WinSock, we have to run the following section unconditionally
+    /* With Winsock, we have to run the following section unconditionally
        to call WSAEventSelect(fd, event, 0) on all the sockets */
     {
 #endif

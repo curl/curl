@@ -83,7 +83,7 @@ static int is_cr_or_lf(char c)
 
 /* Search the substring needle,needlelen into string haystack,haystacklen
  * Strings do not need to be terminated by a '\0'.
- * Similar of OSX/Linux memmem (not available on Visual Studio).
+ * Similar of macOS/Linux memmem (not available on Visual Studio).
  * Return position of beginning of first occurrence or NULL if not found
  */
 static const char *c_memmem(const void *haystack, size_t haystacklen,

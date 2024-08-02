@@ -277,7 +277,7 @@ struct ssl_peer {
 };
 
 struct ssl_primary_config {
-  char *CApath;          /* certificate dir (does not work on windows) */
+  char *CApath;          /* certificate dir (does not work on Windows) */
   char *CAfile;          /* certificate to verify peer against */
   char *issuercert;      /* optional issuer certificate filename */
   char *clientcert;
@@ -442,7 +442,7 @@ struct ntlmdata {
   unsigned int flags;
   unsigned char nonce[8];
   unsigned int target_info_len;
-  void *target_info; /* TargetInfo received in the ntlm type-2 message */
+  void *target_info; /* TargetInfo received in the NTLM type-2 message */
 #endif
 };
 #endif
@@ -1422,7 +1422,7 @@ enum dupstring {
   STRING_KEY,             /* private key filename */
   STRING_KEY_PASSWD,      /* plain text private key password */
   STRING_KEY_TYPE,        /* format for private key (default: PEM) */
-  STRING_SSL_CAPATH,      /* CA directory name (does not work on windows) */
+  STRING_SSL_CAPATH,      /* CA directory name (does not work on Windows) */
   STRING_SSL_CAFILE,      /* certificate file to verify peer against */
   STRING_SSL_PINNEDPUBLICKEY, /* public key file to verify peer against */
   STRING_SSL_CIPHER_LIST, /* list of ciphers to use */
@@ -1436,7 +1436,7 @@ enum dupstring {
   STRING_KEY_PROXY,       /* private key filename */
   STRING_KEY_PASSWD_PROXY, /* plain text private key password */
   STRING_KEY_TYPE_PROXY,  /* format for private key (default: PEM) */
-  STRING_SSL_CAPATH_PROXY, /* CA directory name (does not work on windows) */
+  STRING_SSL_CAPATH_PROXY, /* CA directory name (does not work on Windows) */
   STRING_SSL_CAFILE_PROXY, /* certificate file to verify peer against */
   STRING_SSL_PINNEDPUBLICKEY_PROXY, /* public key file to verify proxy */
   STRING_SSL_CIPHER_LIST_PROXY, /* list of ciphers to use */

@@ -81,7 +81,7 @@ expected to be a sequence of characters using an ASCII compatible encoding.
 
 If libcurl is built with IDN support, the server name part of the URL can use
 an "international name" by using the current encoding (according to locale) or
-UTF-8 (when winidn is used; or a Windows Unicode build using libidn2).
+UTF-8 (when WinIDN is used; or a Windows Unicode build using libidn2).
 
 If libcurl is built without IDN support, the server name is used exactly as
 specified when passed to the name resolver functions.

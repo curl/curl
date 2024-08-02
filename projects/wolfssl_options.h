@@ -29,7 +29,7 @@ build-wolfssl will copy to the wolfSSL include directories and will result in
 maximum compatibility.
 
 These are the configure options that were used to build wolfSSL v5.1.1 in
-mingw and generate the options in this file:
+MinGW and generate the options in this file:
 
 C_EXTRA_FLAGS="\
   -Wno-attributes \

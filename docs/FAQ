@@ -84,8 +84,8 @@ FAQ
   5.1 Is libcurl thread-safe?
   5.2 How can I receive all data into a large memory chunk?
   5.3 How do I fetch multiple files with libcurl?
-  5.4 Does libcurl do Winsock initialization on win32 systems?
-  5.5 Does CURLOPT_WRITEDATA and CURLOPT_READDATA work on win32 ?
+  5.4 Does libcurl do Winsock initialization on Win32 systems?
+  5.5 Does CURLOPT_WRITEDATA and CURLOPT_READDATA work on Win32 ?
   5.6 What about Keep-Alive or persistent connections?
   5.7 Link errors when building libcurl on Windows
   5.8 libcurl.so.X: open failed: No such file or directory
@@ -424,7 +424,7 @@ FAQ
 
   curl can be built to use one of the following SSL alternatives: OpenSSL,
   LibreSSL, BoringSSL, AWS-LC, GnuTLS, wolfSSL, mbedTLS, Secure Transport
-  (native iOS/OS X), Schannel (native Windows), BearSSL or Rustls. They all
+  (native iOS/macOS), Schannel (native Windows), BearSSL or Rustls. They all
   have their pros and cons, and we try to maintain a comparison of them here:
   https://curl.se/docs/ssl-compared.html
 
@@ -566,7 +566,7 @@ FAQ
   3.10 What about SOAP, WebDAV, XML-RPC or similar protocols over HTTP?
 
   curl adheres to the HTTP spec, which basically means you can play with *any*
-  protocol that is built on top of HTTP. Protocols such as SOAP, WEBDAV and
+  protocol that is built on top of HTTP. Protocols such as SOAP, WebDAV and
   XML-RPC are all such ones. You can use -X to set custom requests and -H to
   set custom headers (or replace internally generated ones).
 
@@ -604,7 +604,7 @@ FAQ
    curl -d ' with spaces ' example.com
 
   Exactly what kind of quotes and how to do this is entirely up to the shell
-  or command line interpreter that you are using. For most unix shells, you
+  or command line interpreter that you are using. For most Unix shells, you
   can more or less pick either single (') or double (") quotes. For
   Windows/DOS command prompts you must use double (") quotes, and if the
   option string contains inner double quotes you can escape them with a
@@ -1174,11 +1174,11 @@ FAQ
   only reusable, but you are even encouraged to reuse it if you can, as that
   will enable libcurl to use persistent connections.
 
-  5.4 Does libcurl do Winsock initialization on win32 systems?
+  5.4 Does libcurl do Winsock initialization on Win32 systems?
 
   Yes, if told to in the curl_global_init() call.
 
-  5.5 Does CURLOPT_WRITEDATA and CURLOPT_READDATA work on win32 ?
+  5.5 Does CURLOPT_WRITEDATA and CURLOPT_READDATA work on Win32 ?
 
   Yes, but you cannot open a FILE * and pass the pointer to a DLL and have
   that DLL use the FILE * (as the DLL and the client application cannot access
@@ -1352,7 +1352,7 @@ FAQ
   then you have to work with what you are given. The LIST output format is
   entirely at the server's own liking and the NLST output does not reveal any
   types and in many cases does not even include all the directory entries.
-  Also, both LIST and NLST tend to hide unix-style hidden files (those that
+  Also, both LIST and NLST tend to hide Unix-style hidden files (those that
   start with a dot) by default so you need to do "LIST -a" or similar to see
   them.
 

@@ -535,7 +535,7 @@ sub checksystemfeatures {
             }
             if($curl =~ /win32|Windows|mingw(32|64)/) {
                 # This is a Windows MinGW build or native build, we need to use
-                # Win32-style path.
+                # Windows-style path.
                 $pwd = sys_native_current_path();
                 $has_textaware = 1;
                 $feature{"win32"} = 1;
@@ -682,7 +682,7 @@ sub checksystemfeatures {
                 # 'https-proxy' is used as "server" so consider it a protocol
                 push @protocols, 'https-proxy';
             }
-            # UNICODE support
+            # Unicode support
             $feature{"Unicode"} = $feat =~ /Unicode/i;
             # Thread-safe init
             $feature{"threadsafe"} = $feat =~ /threadsafe/i;
@@ -1245,7 +1245,7 @@ sub singletest_check {
         # get the mode attribute
         my $filemode=$hash{'mode'};
         if($filemode && ($filemode eq "text") && $has_textaware) {
-            # text mode when running on windows: fix line endings
+            # text mode when running on Windows: fix line endings
             s/\r\n/\n/g for @validstdout;
             s/\n/\r\n/g for @validstdout;
             s/\r\n/\n/g for @actual;
@@ -1305,7 +1305,7 @@ sub singletest_check {
             s/\r\n/\n/g for @validstderr;
         }
         if($filemode && ($filemode eq "text") && $has_textaware) {
-            # text mode when running on windows: fix line endings
+            # text mode when running on Windows: fix line endings
             s/\r\n/\n/g for @validstderr;
             s/\n/\r\n/g for @validstderr;
         }
@@ -1400,7 +1400,7 @@ sub singletest_check {
                 # get the mode attribute
                 my $filemode=$replycheckpartattr{'mode'};
                 if($filemode && ($filemode eq "text") && $has_textaware) {
-                    # text mode when running on windows: fix line endings
+                    # text mode when running on Windows: fix line endings
                     s/\r\n/\n/g for @replycheckpart;
                     s/\n/\r\n/g for @replycheckpart;
                 }
@@ -1430,7 +1430,7 @@ sub singletest_check {
         # get the mode attribute
         my $filemode=$replyattr{'mode'};
         if($filemode && ($filemode eq "text") && $has_textaware) {
-            # text mode when running on windows: fix line endings
+            # text mode when running on Windows: fix line endings
             s/\r\n/\n/g for @reply;
             s/\n/\r\n/g for @reply;
         }
@@ -1569,7 +1569,7 @@ sub singletest_check {
 
             my $filemode=$hash{'mode'};
             if($filemode && ($filemode eq "text") && $has_textaware) {
-                # text mode when running on windows: fix line endings
+                # text mode when running on Windows: fix line endings
                 s/\r\n/\n/g for @outfile;
                 s/\n/\r\n/g for @outfile;
             }

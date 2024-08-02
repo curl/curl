@@ -26,7 +26,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TRANSFERTEXT, long text);
 # DESCRIPTION
 
 A parameter set to 1 tells the library to use ASCII mode for FTP transfers,
-instead of the default binary transfer. For win32 systems it does not set the
+instead of the default binary transfer. For Win32 systems it does not set the
 stdout to binary mode. This option can be usable when transferring text data
 between systems with different views on certain characters, such as newlines
 or similar.

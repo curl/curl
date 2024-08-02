@@ -35,7 +35,7 @@ Funny-head: yesyes
 http
 </server>
 <name>
-warn about unicode quote character
+warn about Unicode quote character
 </name>
 <command>
 -H “host: %HOSTIP:%HTTPPORT/” -s
@@ -46,7 +46,7 @@ warn about unicode quote character
 # Verify data after the test has been "shot"
 <verify>
 <stderr>
-%hex[Warning: The argument '%e2%80%9chost:' starts with a unicode quote where maybe an ]hex%
+%hex[Warning: The argument '%e2%80%9chost:' starts with a Unicode quote where maybe an ]hex%
 Warning: ASCII " was intended?
 </stderr>
 </verify>

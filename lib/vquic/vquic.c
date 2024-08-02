@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 
-/* WIP, experimental: use recvmmsg() on linux
+/* WIP, experimental: use recvmmsg() on Linux
  * we have no configure check, yet
  * and also it is only available for _GNU_SOURCE, which
  * we do not use otherwise.
@@ -720,7 +720,7 @@ CURLcode Curl_conn_may_http3(struct Curl_easy *data,
                              const struct connectdata *conn)
 {
   if(conn->transport == TRNSPRT_UNIX) {
-    /* cannot do QUIC over a unix domain socket */
+    /* cannot do QUIC over a Unix domain socket */
     return CURLE_QUIC_CONNECT_ERROR;
   }
   if(!(conn->handler->flags & PROTOPT_SSL)) {

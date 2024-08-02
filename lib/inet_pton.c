@@ -65,8 +65,8 @@ static int      inet_pton6(const char *src, unsigned char *dst);
  *      -1 if some other error occurred (`dst' is untouched in this case, too)
  * notice:
  *      On Windows we store the error in the thread errno, not
- *      in the winsock error code. This is to avoid losing the
- *      actual last winsock error. When this function returns
+ *      in the Winsock error code. This is to avoid losing the
+ *      actual last Winsock error. When this function returns
  *      -1, check errno not SOCKERRNO.
  * author:
  *      Paul Vixie, 1996.

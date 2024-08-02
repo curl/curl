@@ -419,11 +419,11 @@ void parse_cert_parameter(const char *cert_parameter,
       }
       break;
     case ':':
-      /* Since we live in a world of weirdness and confusion, the win32
+      /* Since we live in a world of weirdness and confusion, the Windows
          dudes can use : when using drive letters and thus c:\file:password
          needs to work. In order not to break compatibility, we still use : as
          separator, but we try to detect when it is used for a filename! On
-         windows. */
+         Windows. */
 #ifdef _WIN32
       if((param_place == &cert_parameter[1]) &&
          (cert_parameter[2] == '\\' || cert_parameter[2] == '/') &&
@@ -1145,7 +1145,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
               nextarg);
       }
       else if(!strncmp("\xe2\x80\x9c", nextarg, 3)) {
-        warnf(global, "The argument '%s' starts with a unicode quote where "
+        warnf(global, "The argument '%s' starts with a Unicode quote where "
               "maybe an ASCII \" was intended?",
               nextarg);
       }

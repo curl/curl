@@ -45,8 +45,8 @@ SPDX-License-Identifier: curl
 
 ## Requires to run
 
-  - perl (and a unix-style shell)
-  - python (and a unix-style shell, for SMB and TELNET tests)
+  - perl (and a Unix-style shell)
+  - python (and a Unix-style shell, for SMB and TELNET tests)
   - python-impacket (for SMB tests)
   - diff (when a test fails, a diff is shown)
   - stunnel (for HTTPS and FTPS tests)

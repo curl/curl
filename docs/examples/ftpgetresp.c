@@ -48,17 +48,17 @@ int main(void)
   FILE *respfile;
 
   /* local filename to store the file as */
-  ftpfile = fopen(FTPBODY, "wb"); /* b is binary, needed on win32 */
+  ftpfile = fopen(FTPBODY, "wb"); /* b is binary, needed on Windows */
 
   /* local filename to store the FTP server's response lines in */
-  respfile = fopen(FTPHEADERS, "wb"); /* b is binary, needed on win32 */
+  respfile = fopen(FTPHEADERS, "wb"); /* b is binary, needed on Windows */
 
   curl = curl_easy_init();
   if(curl) {
     /* Get a file listing from sunet */
     curl_easy_setopt(curl, CURLOPT_URL, "ftp://ftp.example.com/");
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, ftpfile);
-    /* If you intend to use this on windows with a libcurl DLL, you must use
+    /* If you intend to use this on Windows with a libcurl DLL, you must use
        CURLOPT_WRITEFUNCTION as well */
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, write_response);
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, respfile);

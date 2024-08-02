@@ -2339,7 +2339,7 @@ static CURLcode parse_proxy_auth(struct Curl_easy *data,
   return result;
 }
 
-/* create_conn helper to parse and init proxy values. to be called after unix
+/* create_conn helper to parse and init proxy values. to be called after Unix
    socket init but before any proxy vars are evaluated. */
 static CURLcode create_conn_helper_init_proxy(struct Curl_easy *data,
                                               struct connectdata *conn)
@@ -2406,7 +2406,7 @@ static CURLcode create_conn_helper_init_proxy(struct Curl_easy *data,
   Curl_safefree(no_proxy);
 
 #ifdef USE_UNIX_SOCKETS
-  /* For the time being do not mix proxy and unix domain sockets. See #1274 */
+  /* For the time being do not mix proxy and Unix domain sockets. See #1274 */
   if(proxy && conn->unix_domain_socket) {
     free(proxy);
     proxy = NULL;
@@ -3338,7 +3338,7 @@ static CURLcode create_conn(struct Curl_easy *data,
   }
 #endif
 
-  /* After the unix socket init but before the proxy vars are used, parse and
+  /* After the Unix socket init but before the proxy vars are used, parse and
      initialize the proxy vars */
 #ifndef CURL_DISABLE_PROXY
   result = create_conn_helper_init_proxy(data, conn);

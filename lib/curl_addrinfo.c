@@ -571,7 +571,7 @@ curl_dbg_getaddrinfo(const char *hostname,
 
 #if defined(HAVE_GETADDRINFO) && defined(USE_RESOLVE_ON_IPS)
 /*
- * Work-arounds the sin6_port is always zero bug on iOS 9.3.2 and Mac OS X
+ * Work-arounds the sin6_port is always zero bug on iOS 9.3.2 and macOS
  * 10.11.5.
  */
 void Curl_addrinfo_set_port(struct Curl_addrinfo *addrinfo, int port)

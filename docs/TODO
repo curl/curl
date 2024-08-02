@@ -153,7 +153,7 @@
  18.6 Option to make -Z merge lined based outputs on stdout
  18.7 specify which response codes that make -f/--fail return error
  18.9 Choose the name of file in braces for complex URLs
- 18.10 improve how curl works in a windows console window
+ 18.10 improve how curl works in a Windows console window
  18.11 Windows: set attribute 'archive' for completed downloads
  18.12 keep running, read instructions from pipe/socket
  18.13 Acknowledge Ratelimit headers
@@ -202,7 +202,7 @@
 1.1 TFO support on Windows
 
  libcurl supports the CURLOPT_TCP_FASTOPEN option since 7.49.0 for Linux and
- Mac OS. Windows supports TCP Fast Open starting with Windows 10, version 1607
+ macOS. Windows supports TCP Fast Open starting with Windows 10, version 1607
  and we should add support for it.
 
  TCP Fast Open is supported on several platforms but not on Windows. Work on
@@ -465,7 +465,7 @@
  Make sure we do not ever loop because of non-blocking sockets returning
  EWOULDBLOCK or similar. Blocking cases include:
 
- - Name resolves on non-windows unless c-ares or the threaded resolver is used.
+ - Name resolves on non-Windows unless c-ares or the threaded resolver is used.
 
  - The threaded resolver may block on cleanup:
  https://github.com/curl/curl/issues/4852
@@ -758,7 +758,7 @@
 
 10.4 Certificate-Based Authentication
 
- LDAPS not possible with MAC and Windows with Certificate-Based Authentication
+ LDAPS not possible with macOS and Windows with Certificate-Based Authentication
 
  https://github.com/curl/curl/issues/9641
 
@@ -1078,7 +1078,7 @@
 
  See https://github.com/curl/curl/issues/221
 
-18.10 improve how curl works in a windows console window
+18.10 improve how curl works in a Windows console window
 
  If you pull the scrollbar when transferring with curl in a Windows console
  window, the transfer is interrupted and can get disconnected. This can
@@ -1334,7 +1334,7 @@
 
 20.4 more platforms supported
 
- Make the test suite work on more platforms. OpenBSD and Mac OS. Remove
+ Make the test suite work on more platforms. OpenBSD and macOS. Remove
  fork()s and it should become even more portable.
 
 20.6 Use the RFC 6265 test suite

@@ -97,7 +97,7 @@ static char *checkhome(const char *home, const char *fname, bool dotscore)
  *
  * 1. Iterate over the environment variables in order, and if set, check for
  *    the given file to be accessed there, then it is a match.
- * 2. Non-windows: try getpwuid
+ * 2. Non-Windows: try getpwuid
  */
 char *findfile(const char *fname, int dotscore)
 {

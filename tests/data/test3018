@@ -45,7 +45,7 @@ mqtt://%HOSTIP:%MQTTPORT/%TESTNUMBER --max-filesize 11
 <strippart>
 s/^(.* 00044d5154540402003c000c6375726c).*/$1/
 </strippart>
-# on windows the disconnect is never seen - no idea why
+# on Windows the disconnect is never seen - no idea why
 <strip>
 ^server DISCONNECT 0 e000
 </strip>

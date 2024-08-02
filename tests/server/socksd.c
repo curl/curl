@@ -1117,7 +1117,7 @@ int main(int argc, char *argv[])
 
 #ifdef USE_UNIX_SOCKETS
   if(socket_domain == AF_UNIX)
-    logmsg("Listening on unix socket %s", unix_socket);
+    logmsg("Listening on Unix socket %s", unix_socket);
   else
 #endif
   logmsg("Listening on port %hu", port);

@@ -33,7 +33,7 @@
  *
  * Written by Jeff Pohlmeyer, converted to use epoll by Josh Bialkowski
 
-Requires a linux system with epoll
+Requires a Linux system with epoll
 
 When running, the program creates the named pipe "hiper.fifo"
 

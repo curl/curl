@@ -197,7 +197,7 @@ Transitional Processing. The two standards have a huge overlap but differ
 slightly, perhaps most famously in how they deal with the German "double s"
 (`ß`).
 
-When winidn is used, curl uses IDNA 2003 Transitional Processing, like the rest
+When WinIDN is used, curl uses IDNA 2003 Transitional Processing, like the rest
 of Windows.
 
 ## Port number

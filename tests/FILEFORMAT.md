@@ -152,7 +152,7 @@ Available substitute variables include:
 - `%NOLISTENPORT` - Port number where no service is listening
 - `%POP36PORT` - IPv6 port number of the POP3 server
 - `%POP3PORT` - Port number of the POP3 server
-- `%POSIX_PWD` - Current directory somewhat mingw friendly
+- `%POSIX_PWD` - Current directory somewhat MinGW friendly
 - `%PROXYPORT` - Port number of the HTTP proxy
 - `%PWD` - Current directory
 - `%RTSP6PORT` - IPv6 port number of the RTSP server

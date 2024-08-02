@@ -32,6 +32,6 @@ May 2025 are: BearSSL and Secure Transport.
  - Support for systems without 64-bit data types
  - NSS
  - gskit
- - mingw v1
+ - MinGW v1
  - NTLM_WB
  - space-separated `NOPROXY` patterns

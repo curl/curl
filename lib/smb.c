@@ -924,7 +924,7 @@ static CURLcode smb_connection_state(struct Curl_easy *data, bool *done)
 
 /*
  * Convert a timestamp from the Windows world (100 nsec units from 1 Jan 1601)
- * to Posix time. Cap the output to fit within a time_t.
+ * to POSIX time. Cap the output to fit within a time_t.
  */
 static void get_posix_time(time_t *out, curl_off_t timestamp)
 {

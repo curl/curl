@@ -960,7 +960,7 @@ enum resolve_t Curl_resolv_timeout(struct Curl_easy *data,
     keep_copysig = TRUE; /* yes, we have a copy */
     sigact.sa_handler = alarmfunc;
 #ifdef SA_RESTART
-    /* HPUX does not have SA_RESTART but defaults to that behavior! */
+    /* HP-UX does not have SA_RESTART but defaults to that behavior! */
     sigact.sa_flags &= ~SA_RESTART;
 #endif
     /* now set the new struct */

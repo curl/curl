@@ -190,7 +190,7 @@ pkgadd:
 	cd $(srcdir)/packages/Solaris && $(MAKE) package
 
 #
-# Build a cygwin binary tarball installation file
+# Build a Cygwin binary tarball installation file
 # resulting .tar.bz2 file will end up at packages/Win32/cygwin
 cygwinbin:
 	$(MAKE) -C packages/Win32/cygwin cygwinbin

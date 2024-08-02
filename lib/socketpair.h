@@ -74,7 +74,7 @@ int Curl_pipe(curl_socket_t socks[2], bool nonblocking);
 #elif !defined(HAVE_SOCKETPAIR)
 #define SOCKETPAIR_FAMILY 0 /* not used */
 #else
-#error "unsupported unix domain and socketpair build combo"
+#error "unsupported Unix domain and socketpair build combo"
 #endif
 
 #ifdef SOCK_CLOEXEC

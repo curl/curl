@@ -76,7 +76,7 @@ int main(void)
   upload.readptr = data;
   upload.sizeleft = strlen(data);
 
-  /* In windows, this inits the winsock stuff */
+  /* In Windows, this inits the Winsock stuff */
   res = curl_global_init(CURL_GLOBAL_DEFAULT);
   /* Check for errors */
   if(res != CURLE_OK) {

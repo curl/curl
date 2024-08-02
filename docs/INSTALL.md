@@ -253,7 +253,7 @@ Note: The pre-processor settings can be found using the Visual Studio IDE
 under "Project -> Properties -> Configuration Properties -> C/C++ ->
 Preprocessor".
 
-## Using BSD-style lwIP instead of Winsock TCP/IP stack in Win32 builds
+## Using BSD-style lwIP instead of Winsock TCP/IP stack in Windows builds
 
 In order to compile libcurl and curl using BSD-style lwIP TCP/IP stack it is
 necessary to make the definition of the preprocessor symbol `USE_LWIPSOCK`
@@ -521,14 +521,14 @@ disabling support for some feature (run `./configure --help` to see them all):
  - `--disable-mime` (MIME API)
  - `--disable-netrc`  (.netrc file)
  - `--disable-ntlm` (NTLM authentication)
- - `--disable-ntlm-wb` (NTLM WinBind)
+ - `--disable-ntlm-wb` (NTLM winbind)
  - `--disable-progress-meter` (graphical progress meter in library)
  - `--disable-proxy` (HTTP and SOCKS proxies)
  - `--disable-pthreads` (multi-threading)
  - `--disable-socketpair` (socketpair for asynchronous name resolving)
  - `--disable-threaded-resolver`  (threaded name resolver)
  - `--disable-tls-srp` (Secure Remote Password authentication for TLS)
- - `--disable-unix-sockets` (UNIX sockets)
+ - `--disable-unix-sockets` (Unix sockets)
  - `--disable-verbose` (eliminates debugging strings and error code strings)
  - `--disable-versioned-symbols` (versioned symbols)
  - `--enable-symbol-hiding` (eliminates unneeded symbols in the shared library)

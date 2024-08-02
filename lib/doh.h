@@ -116,7 +116,7 @@ struct dohaddr {
 #define HTTPS_RR_CODE_IPV6            0x06
 
 /*
- * These may need escaping when found within an alpn string
+ * These may need escaping when found within an ALPN string
  * value.
  */
 #define COMMA_CHAR                    ','

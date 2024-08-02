@@ -569,7 +569,7 @@ AC_DEFUN([CURL_SET_COMPILER_BASIC_OPTS], [
         #
       INTEL_UNIX_C)
         #
-        dnl On unix this compiler uses gcc's header files, so
+        dnl On Unix this compiler uses gcc's header files, so
         dnl we select ANSI C89 dialect plus GNU extensions.
         tmp_CFLAGS="$tmp_CFLAGS -std=gnu89"
         dnl Change some warnings into errors
@@ -853,8 +853,8 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [sometimes-uninitialized])
             case $host_os in
             cygwin* | mingw*)
-              dnl skip missing-variable-declarations warnings for cygwin and
-              dnl mingw because the libtool wrapper executable causes them
+              dnl skip missing-variable-declarations warnings for Cygwin and
+              dnl MinGW because the libtool wrapper executable causes them
               ;;
             *)
               CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-variable-declarations])
@@ -1032,7 +1032,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           #
           dnl Only gcc 4.5 or later
           if test "$compiler_num" -ge "405"; then
-            dnl Only windows targets
+            dnl Only Windows targets
             if test "$curl_cv_native_windows" = "yes"; then
               tmp_CFLAGS="$tmp_CFLAGS -Wno-pedantic-ms-format"
             fi

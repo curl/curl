@@ -56,7 +56,7 @@
  * Internal function used for waiting a specific amount of ms
  * in Curl_socket_check() and Curl_poll() when no file descriptor
  * is provided to wait on, just being used to delay execution.
- * WinSock select() and poll() timeout mechanisms need a valid
+ * Winsock select() and poll() timeout mechanisms need a valid
  * socket descriptor in a not null file descriptor set to work.
  * Waiting indefinitely with this function is not allowed, a
  * zero or negative timeout value will return immediately.
@@ -135,7 +135,7 @@ static int our_select(curl_socket_t maxfd,   /* highest socket number */
   struct timeval *ptimeout;
 
 #ifdef USE_WINSOCK
-  /* WinSock select() cannot handle zero events. See the comment below. */
+  /* Winsock select() cannot handle zero events. See the comment below. */
   if((!fds_read || fds_read->fd_count == 0) &&
      (!fds_write || fds_write->fd_count == 0) &&
      (!fds_err || fds_err->fd_count == 0)) {
@@ -147,7 +147,7 @@ static int our_select(curl_socket_t maxfd,   /* highest socket number */
   ptimeout = curlx_mstotv(&pending_tv, timeout_ms);
 
 #ifdef USE_WINSOCK
-  /* WinSock select() must not be called with an fd_set that contains zero
+  /* Winsock select() must not be called with an fd_set that contains zero
     fd flags, or it will return WSAEINVAL. But, it also cannot be called
     with no fd_sets at all!  From the documentation:
 
@@ -155,8 +155,8 @@ static int our_select(curl_socket_t maxfd,   /* highest socket number */
     given as null. At least one must be non-null, and any non-null
     descriptor set must contain at least one handle to a socket.
 
-    It is unclear why WinSock does not just handle this for us instead of
-    calling this an error. Luckily, with WinSock, we can _also_ ask how
+    It is unclear why Winsock does not just handle this for us instead of
+    calling this an error. Luckily, with Winsock, we can _also_ ask how
     many bits are set on an fd_set. So, let's just check it beforehand.
   */
   return select((int)maxfd + 1,
@@ -361,8 +361,8 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
   }
 
   /*
-     Note also that WinSock ignores the first argument, so we do not worry
-     about the fact that maxfd is computed incorrectly with WinSock (since
+     Note also that Winsock ignores the first argument, so we do not worry
+     about the fact that maxfd is computed incorrectly with Winsock (since
      curl_socket_t is unsigned in such cases and thus -1 is the largest
      value).
   */

@@ -89,7 +89,7 @@ unexpected behaviors.
 Initialize the Win32 socket libraries.
 
 The implication here is that if this bit is not set, the initialization of
-winsock has to be done by the application or you risk getting undefined
+Winsock has to be done by the application or you risk getting undefined
 behaviors. This option exists for when the initialization is handled outside
 of libcurl so there is no need for libcurl to do it again.
 

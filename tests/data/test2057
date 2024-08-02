@@ -51,7 +51,7 @@ Nice auth sir!
 http
 </server>
 <name>
-HTTP Negotiate authentication (stub ntlm)
+HTTP Negotiate authentication (stub NTLM)
 </name>
 <features>
 GSS-API

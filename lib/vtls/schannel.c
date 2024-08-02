@@ -1083,7 +1083,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 #ifdef HAS_ALPN
   /* ALPN is only supported on Windows 8.1 / Server 2012 R2 and above.
-     Also it does not seem to be supported for Wine, see curl bug #983. */
+     Also it does not seem to be supported for WINE, see curl bug #983. */
   backend->use_alpn = connssl->alpn &&
     !GetProcAddress(GetModuleHandle(TEXT("ntdll")),
                     "wine_get_version") &&
@@ -1099,7 +1099,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
    * do it following a more manual process. */
   backend->use_manual_cred_validation = true;
 #else
-#error "compiler too old to support requisite manual cert verify for Win CE"
+#error "compiler too old to support Windows CE requisite manual cert verify"
 #endif
 #else
 #ifdef HAS_MANUAL_VERIFY_API
@@ -1242,7 +1242,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
      https://msdn.microsoft.com/en-us/library/windows/desktop/aa375924.aspx
 
      At the moment we do not pass inbuf unless we are using ALPN since we only
-     use it for that, and Wine (for which we currently disable ALPN) is giving
+     use it for that, and WINE (for which we currently disable ALPN) is giving
      us problems with inbuf regardless. https://github.com/curl/curl/issues/983
   */
   sspi_status = s_pSecFn->InitializeSecurityContext(

@@ -54,13 +54,13 @@ int tool_seek_cb(void *userdata, curl_off_t offset, int whence)
 #if(SIZEOF_CURL_OFF_T > SIZEOF_OFF_T) && !defined(USE_WIN32_LARGE_FILES)
 
   /* The offset check following here is only interesting if curl_off_t is
-     larger than off_t and we are not using the WIN32 large file support
-     macros that provide the support to do 64bit seeks correctly */
+     larger than off_t and we are not using the Win32 large file support
+     macros that provide the support to do 64-bit seeks correctly */
 
   if(offset > OUR_MAX_SEEK_O) {
     /* Some precaution code to work around problems with different data sizes
-       to allow seeking >32bit even if off_t is 32bit. Should be very rare and
-       is really valid on weirdo-systems. */
+       to allow seeking >32-bit even if off_t is 32-bit. Should be very rare
+       and is really valid on weirdo-systems. */
     curl_off_t left = offset;
 
     if(whence != SEEK_SET)

@@ -872,7 +872,6 @@ unescape
 Unglobbed
 Unicode
 UNICOS
-unix
 UnixSockets
 UnixWare
 unlink
@@ -934,14 +933,11 @@ WHATWG
 whitespace
 Whitespaces
 winbind
-WinBind
 winbuild
 winidn
 WinIDN
 WinLDAP
-WinSock
 winsock
-WinSSL
 winssl
 Wireshark
 wolfSSH

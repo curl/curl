@@ -27,7 +27,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_NOSIGNAL, long onoff);
 
 If *onoff* is 1, libcurl uses no functions that install signal handlers or
 any functions that cause signals to be sent to the process. This option is
-here to allow multi-threaded unix applications to still set/use all timeout
+here to allow multi-threaded Unix applications to still set/use all timeout
 options etc, without risking getting signals.
 
 If this option is set and libcurl has been built with the standard name

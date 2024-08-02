@@ -54,7 +54,7 @@ With CURLOPT_CONNECTTIMEOUT_MS(3) set to 4000 and CURLOPT_TIMEOUT_MS(3) set to
 the connection phase.
 
 This option may cause libcurl to use the SIGALRM signal to timeout system
-calls on builds not using asynch DNS. In unix-like systems, this might cause
+calls on builds not using asynch DNS. In Unix-like systems, this might cause
 signals to be used unless CURLOPT_NOSIGNAL(3) is set.
 
 # DEFAULT

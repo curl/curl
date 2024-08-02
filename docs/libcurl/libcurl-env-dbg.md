@@ -98,7 +98,7 @@ the current.
 
 ## CURL_TIME
 
-Fake unix timestamp to use for AltSvc, HSTS and CURLINFO variables that are
+Fake Unix timestamp to use for AltSvc, HSTS and CURLINFO variables that are
 time related.
 
 This variable can also be used to fake the data returned by some CURLINFO

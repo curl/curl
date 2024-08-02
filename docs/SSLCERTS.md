@@ -16,7 +16,7 @@ Native SSL
 ----------
 
 If libcurl was built with Schannel or Secure Transport support (the native SSL
-libraries included in Windows and Mac OS X), then this does not apply to
+libraries included in Windows and macOS), then this does not apply to
 you. Scroll down for details on how the OS-native engines handle SSL
 certificates. If you are not sure, then run "curl -V" and read the results. If
 the version string says `Schannel` in it, then it was built with Schannel
@@ -140,12 +140,12 @@ Transport (Apple's native TLS engine) support, then libcurl still performs
 peer certificate verification, but instead of using a CA cert bundle, it uses
 the certificates that are built into the OS. These are the same certificates
 that appear in the Internet Options control panel (under Windows) or Keychain
-Access application (under OS X). Any custom security rules for certificates
+Access application (under macOS). Any custom security rules for certificates
 are honored.
 
 Schannel runs CRL checks on certificates unless peer verification is disabled.
 Secure Transport on iOS runs OCSP checks on certificates unless peer
-verification is disabled. Secure Transport on OS X runs either OCSP or CRL
+verification is disabled. Secure Transport on macOS runs either OCSP or CRL
 checks on certificates if those features are enabled, and this behavior can be
 adjusted in the preferences of Keychain Access.
 

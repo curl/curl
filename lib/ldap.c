@@ -143,7 +143,7 @@ static void _ldap_free_urldesc(LDAPURLDesc *ludp);
 #endif
 
 #if defined(USE_WIN32_LDAP) && defined(ldap_err2string)
-/* Use ansi error strings in UNICODE builds */
+/* Use ANSI error strings in Unicode builds */
 #undef ldap_err2string
 #define ldap_err2string ldap_err2stringA
 #endif

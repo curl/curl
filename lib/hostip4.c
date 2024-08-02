@@ -82,7 +82,7 @@ bool Curl_ipvalid(struct Curl_easy *data, struct connectdata *conn)
  * detect which one this platform supports in the configure script and set up
  * the HAVE_GETHOSTBYNAME_R_3, HAVE_GETHOSTBYNAME_R_5 or
  * HAVE_GETHOSTBYNAME_R_6 defines accordingly. Note that HAVE_GETADDRBYNAME
- * has the corresponding rules. This is primarily on *nix. Note that some unix
+ * has the corresponding rules. This is primarily on *nix. Note that some Unix
  * flavours have thread-safe versions of the plain gethostbyname() etc.
  *
  */
@@ -221,7 +221,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
 
   if(!h) /* failure */
 #elif defined(HAVE_GETHOSTBYNAME_R_3)
-  /* AIX, Digital Unix/Tru64, HPUX 10, more? */
+  /* AIX, Digital UNIX/Tru64, HP-UX 10, more? */
 
   /* For AIX 4.3 or later, we do not use gethostbyname_r() at all, because of
    * the plain fact that it does not return unique full buffers on each

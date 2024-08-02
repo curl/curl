@@ -1786,7 +1786,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
         }
 #if SIZEOF_TIME_T > SIZEOF_LONG
         if(date > 0xffffffff) {
-          /* if 'long' cannot old >32bit, this date cannot be sent */
+          /* if 'long' cannot old >32-bit, this date cannot be sent */
           failf(data, "date overflow");
           fail = TRUE;
         }

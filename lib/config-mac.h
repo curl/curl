@@ -27,7 +27,7 @@
 /* =================================================================== */
 /*                Hand crafted config file for Mac OS 9                */
 /* =================================================================== */
-/*  On Mac OS X you must run configure to generate curl_config.h file  */
+/*   On macOS you must run configure to generate curl_config.h file    */
 /* =================================================================== */
 
 #ifndef OS

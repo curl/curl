@@ -437,7 +437,7 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
 
 
 #***************************************************************************
-# Convert paths for curl's tests running on Windows with Cygwin/Msys OpenSSH
+# Convert paths for curl's tests running on Windows with Cygwin/MSYS OpenSSH
 #
 my $clipubkeyf_config;
 my $hstprvkeyf_config;

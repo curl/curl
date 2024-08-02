@@ -124,7 +124,7 @@ static void tcpnodelay(struct Curl_easy *data, curl_socket_t sockfd)
 }
 
 #ifdef SO_NOSIGPIPE
-/* The preferred method on Mac OS X (10.2 and later) to prevent SIGPIPEs when
+/* The preferred method on macOS (10.2 and later) to prevent SIGPIPEs when
    sending data to a dead peer (instead of relying on the 4th argument to send
    being MSG_NOSIGNAL). Possibly also existing and in use on other BSD
    systems? */
@@ -235,7 +235,7 @@ tcpkeepalive(struct Curl_easy *data,
             sockfd, SOCKERRNO);
     }
 #elif defined(TCP_KEEPALIVE)
-    /* Mac OS X style */
+    /* macOS style */
     optval = curlx_sltosi(data->set.tcp_keepidle);
     KEEPALIVE_FACTOR(optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPALIVE,
@@ -695,7 +695,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
       else {
         /*
          * provided dev was no interface (or interfaces are not supported
-         * e.g. solaris) no ip address and no domain we fail here
+         * e.g. Solaris) no ip address and no domain we fail here
          */
         done = -1;
       }
@@ -844,7 +844,7 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
   if(0 != getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (void *)&err, &errSize))
     err = SOCKERRNO;
 #ifdef _WIN32_WCE
-  /* Old WinCE versions do not support SO_ERROR */
+  /* Old Windows CE versions do not support SO_ERROR */
   if(WSAENOPROTOOPT == err) {
     SET_SOCKERRNO(0);
     err = 0;

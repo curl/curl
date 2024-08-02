@@ -112,7 +112,7 @@ specified are:
 ## CURL_GLOBAL_WIN32
 
 which only does anything on Windows machines. When used on a Windows machine,
-it makes libcurl initialize the win32 socket stuff. Without having that
+it makes libcurl initialize the Win32 socket stuff. Without having that
 initialized properly, your program cannot use sockets properly. You should
 only do this once for each application, so if your program already does this
 or of another library in use does it, you should not tell libcurl to do this
@@ -235,7 +235,7 @@ to make your program run fine virtually everywhere.
 (CURLOPT_WRITEDATA(3) was formerly known as *CURLOPT_FILE*. Both names still
 work and do the same thing).
 
-If you are using libcurl as a win32 DLL, you MUST use the
+If you are using libcurl as a Windows DLL, you MUST use the
 CURLOPT_WRITEFUNCTION(3) if you set CURLOPT_WRITEDATA(3) - or experience
 crashes.
 
