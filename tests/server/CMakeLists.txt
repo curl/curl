@@ -30,7 +30,6 @@ endif()
 function(SETUP_EXECUTABLE TEST_NAME)  # ARGN are the files in the test
   add_executable(${TEST_NAME} EXCLUDE_FROM_ALL ${ARGN})
   add_dependencies(testdeps ${TEST_NAME})
-  string(TOUPPER ${TEST_NAME} UPPER_TEST_NAME)
 
   include_directories(
     ${CURL_SOURCE_DIR}/lib      # for "curl_setup_once.h"
@@ -51,7 +50,7 @@ function(SETUP_EXECUTABLE TEST_NAME)  # ARGN are the files in the test
   # files on Win32 targets it is necessary to build the test servers
   # with CURL_STATICLIB defined, independently of how libcurl is built.
   set_target_properties(${TEST_NAME} PROPERTIES
-    COMPILE_DEFINITIONS CURL_STATICLIB)  # ${UPPER_TEST_NAME}
+    COMPILE_DEFINITIONS CURL_STATICLIB)
   set_target_properties(${TEST_NAME} PROPERTIES
     PROJECT_LABEL "${TARGET_LABEL_PREFIX}${TEST_NAME}")
 endfunction()
