@@ -63,7 +63,7 @@ jobs:
               -DBUILD_EXAMPLES=ON \
               -DENABLE_WEBSOCKETS=ON \
               -DCURL_USE_OPENSSL=ON \
-              -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON -DCURL_USE_GSSAPI=ON \
+              -DCURL_BROTLI=ON -DCURL_USE_GSSAPI=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
@@ -98,7 +98,7 @@ jobs:
               -DBUILD_EXAMPLES=ON \
               -DENABLE_WEBSOCKETS=ON \
               -DCURL_USE_OPENSSL=ON \
-              -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON \
+              -DCURL_BROTLI=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
@@ -167,7 +167,7 @@ jobs:
               -DBUILD_EXAMPLES=ON \
               -DENABLE_WEBSOCKETS=ON \
               -DCURL_USE_OPENSSL=ON \
-              -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON -DCURL_USE_GSSAPI=ON \
+              -DCURL_BROTLI=ON -DCURL_USE_GSSAPI=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
