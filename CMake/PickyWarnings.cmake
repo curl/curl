@@ -180,7 +180,7 @@ if(PICKY_COMPILER)
       endif()
       if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.5 AND MINGW)
         list(APPEND WPICKY_ENABLE
-          -Wno-pedantic-ms-format          #             gcc  4.5 (mingw-only)
+          -Wno-pedantic-ms-format          #             gcc  4.5 (MinGW-only)
         )
       endif()
       if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.8)

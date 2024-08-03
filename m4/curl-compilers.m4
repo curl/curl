@@ -854,7 +854,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             case $host_os in
             cygwin* | mingw*)
               dnl skip missing-variable-declarations warnings for Cygwin and
-              dnl mingw because the libtool wrapper executable causes them
+              dnl MinGW because the libtool wrapper executable causes them
               ;;
             *)
               CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-variable-declarations])
