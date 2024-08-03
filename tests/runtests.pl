@@ -535,7 +535,7 @@ sub checksystemfeatures {
             }
             if($curl =~ /win32|Windows|mingw(32|64)/) {
                 # This is a Windows MinGW build or native build, we need to use
-                # Win32-style path.
+                # Windows-style path.
                 $pwd = sys_native_current_path();
                 $has_textaware = 1;
                 $feature{"win32"} = 1;
