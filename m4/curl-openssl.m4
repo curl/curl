@@ -38,7 +38,7 @@ if test "x$OPT_OPENSSL" != xno; then
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
-  dnl This is for Msys/Mingw
+  dnl This is for MSYS/MinGW
   case $host in
     *-*-msys* | *-*-mingw*)
       AC_MSG_CHECKING([for gdi32])
