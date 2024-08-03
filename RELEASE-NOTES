@@ -8,18 +8,46 @@ curl and libcurl 8.10.0
 
 This release includes the following changes:
 
+ o curl: support embedding a CA bundle [20]
+ o getparam: make --rate accept "number of units" [4]
+ o tool_getparam: make --show-headers the same as --include [6]
 
 This release includes the following bugfixes:
 
+ o autotools: fix typo in tests/data target [30]
+ o cfilters: send flush [13]
+ o CHANGES: rename to CHANGES.md, no longer generated [40]
+ o CI: enable parallel testing in CI builds [18]
+ o ci: Update actions/upload-artifact digest to 89ef406 [24]
+ o cmake: detect `nghttp2` via `pkg-config`, enable by default [21]
  o cmake: distcheck for files in CMake subdir [9]
+ o cmake: drop custom `CMakeOutput.log`/`CMakeError.log` logs [27]
+ o cmake: drop no-op `tests/data/CMakeLists.txt` [26]
+ o cmake: drop reference to undefined variable [25]
+ o cmake: drop unused internal variable [22]
+ o curl: allow 500MB data URL encode strings [38]
+ o Curl_rand_bytes to control env override [17]
  o dist: add missing `FindNettle.cmake` [11]
+ o dist: fix reproducible build from release tarball [36]
+ o dmaketgz: only run 'make distclean' if Makefile exists
+ o escape: allow curl_easy_escape to generate 3*input length output [39]
  o GHA/windows: enable MulitSSL in an MSVC job [2]
  o GHA: scan git repository and detect unvetted binary files [3]
+ o http2: improve rate limiting of downloads [33]
  o INSTALL.md: MultiSSL and QUIC are mutually exclusive [7]
+ o lib: add eos flag to send methods [14]
  o lib: convert some debugf()s into traces [8]
  o libcurl.pc: add `Cflags.private` [10]
+ o Makefile: remove 'scripts' duplicate from DIST_SUBDIRS
+ o progress: ratelimit/progress tweaks [32]
  o rustls: make all tests pass [1]
+ o tests/http: configure test httpd to honor client cipher order [35]
  o tests: provide docs as curldown, not nroff [12]
+ o url: dns_entry related improvements [16]
+ o verify-release: shell script that verifies a release tarball [29]
+ o vtls: fix MSVC 'cast truncates constant value' warning [23]
+ o vtls: init ssl peer only once [15]
+ o x509asn1: raise size limit for x509 certification information [28]
 
 This release includes the following known bugs:
 
@@ -38,18 +66,45 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Christoph Reiter, Daniel Stenberg, Joe Birr-Pixton, Matt Jolly,
+  Antoine du Hamel, Christoph Reiter, Dan Fandrich, Daniel Stenberg,
+  Joe Birr-Pixton, Matt Jolly, renovate[bot], Sergio Durigan Junior,
   Stefan Eissing, Tal Regev, Viktor Szakats
-  (7 contributors)
+  (11 contributors)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.se/bug/?i=14317
  [2] = https://curl.se/bug/?i=14276
  [3] = https://curl.se/bug/?i=14333
+ [4] = https://curl.se/bug/?i=14245
+ [6] = https://curl.se/bug/?i=13987
  [7] = https://curl.se/bug/?i=14308
  [8] = https://curl.se/bug/?i=14322
  [9] = https://curl.se/bug/?i=14323
  [10] = https://curl.se/bug/?i=14321
  [11] = https://curl.se/bug/?i=14285
  [12] = https://curl.se/bug/?i=14324
+ [13] = https://curl.se/bug/?i=14271
+ [14] = https://curl.se/bug/?i=14220
+ [15] = https://curl.se/bug/?i=14152
+ [16] = https://curl.se/bug/?i=14195
+ [17] = https://curl.se/bug/?i=14264
+ [18] = https://curl.se/bug/?i=11510
+ [20] = https://curl.se/bug/?i=14059
+ [21] = https://curl.se/bug/?i=14136
+ [22] = https://curl.se/bug/?i=14361
+ [23] = https://curl.se/bug/?i=14341
+ [24] = https://curl.se/bug/?i=14359
+ [25] = https://curl.se/bug/?i=14358
+ [26] = https://curl.se/bug/?i=14357
+ [27] = https://curl.se/bug/?i=14356
+ [28] = https://curl.se/bug/?i=14352
+ [29] = https://curl.se/bug/?i=14350
+ [30] = https://curl.se/bug/?i=14355
+ [32] = https://curl.se/bug/?i=14335
+ [33] = https://curl.se/bug/?i=14326
+ [35] = https://curl.se/bug/?i=14338
+ [36] = https://curl.se/bug/?i=14336
+ [38] = https://curl.se/bug/?i=14337
+ [39] = https://curl.se/bug/?i=14339
+ [40] = https://curl.se/bug/?i=14331
