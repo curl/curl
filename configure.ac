@@ -2554,7 +2554,7 @@ case "$OPT_WINIDN" in
 esac
 
 if test "$want_winidn" = "yes"; then
-  dnl winidn library support has been requested
+  dnl WinIDN library support has been requested
   clean_CFLAGS="$CFLAGS"
   clean_CPPFLAGS="$CPPFLAGS"
   clean_LDFLAGS="$LDFLAGS"
@@ -2632,7 +2632,7 @@ AS_HELP_STRING([--without-libidn2],[Disable libidn2 usage]),
   [OPT_IDN=$withval])
 if test "x$tst_links_winidn" = "xyes"; then
   want_idn="no"
-  AC_MSG_RESULT([no (using winidn instead)])
+  AC_MSG_RESULT([no (using WinIDN instead)])
 else
   case "$OPT_IDN" in
     no)
