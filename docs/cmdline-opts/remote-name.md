@@ -35,3 +35,8 @@ There is no URL decoding done on the filename. If it has %20 or other URL
 encoded parts of the name, they end up as-is as filename.
 
 You may use this option as many times as the number of URLs you have.
+
+Before curl 8.10.0, curl returned an error if the URL ended with a slash,
+which means that there is no filename part in the URL. Starting in 8.10.0,
+curl sets the filename to the last directory part of the URL or if that also
+is missing to `curl_response` (without extension) for this situation.

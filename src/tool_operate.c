@@ -1147,9 +1147,13 @@ static CURLcode single_transfer(struct GlobalConfig *global,
               break;
             }
             if(!*per->outfile && !config->content_disposition) {
-              errorf(global, "Remote filename has no length");
-              result = CURLE_WRITE_ERROR;
-              break;
+              free(per->outfile);
+              per->outfile = strdup("curl_response");
+              if(!per->outfile) {
+                result = CURLE_OUT_OF_MEMORY;
+                break;
+              }
+              warnf(global, "No remote file name, uses \"%s\"", per->outfile);
             }
           }
           else if(state->urls) {
