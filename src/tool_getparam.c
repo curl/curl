@@ -1429,7 +1429,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
               nextarg);
       }
       else if(!strncmp("\xe2\x80\x9c", nextarg, 3)) {
-        warnf(global, "The argument '%s' starts with a unicode quote where "
+        warnf(global, "The argument '%s' starts with a Unicode quote where "
               "maybe an ASCII \" was intended?",
               nextarg);
       }

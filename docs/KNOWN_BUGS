@@ -49,7 +49,7 @@ problems may have been fixed or changed somewhat since this was written.
  5.15 Unicode on Windows
 
  6. Authentication
- 6.1 NTLM authentication and unicode
+ 6.1 NTLM authentication and Unicode
  6.2 MIT Kerberos for Windows build
  6.3 NTLM in system context uses wrong name
  6.5 NTLM does not support password with § character
@@ -315,19 +315,19 @@ problems may have been fixed or changed somewhat since this was written.
 
 5.15 Unicode on Windows
 
- Passing in a unicode filename with -o:
+ Passing in a Unicode filename with -o:
 
  https://github.com/curl/curl/issues/11461
 
- Passing in unicode character with -d:
+ Passing in Unicode character with -d:
 
  https://github.com/curl/curl/issues/12231
 
 6. Authentication
 
-6.1 NTLM authentication and unicode
+6.1 NTLM authentication and Unicode
 
- NTLM authentication involving unicode username or password only works
+ NTLM authentication involving Unicode username or password only works
  properly if built with UNICODE defined together with the Schannel
  backend. The original problem was mentioned in:
  https://curl.se/mail/lib-2009-10/0024.html

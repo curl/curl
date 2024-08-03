@@ -603,7 +603,7 @@ char **__crt0_glob_function(char *arg)
 /*
  * Function to find CACert bundle on a Win32 platform using SearchPath.
  * (SearchPath is already declared via inclusions done in setup header file)
- * (Use the ASCII version instead of the unicode one!)
+ * (Use the ASCII version instead of the Unicode one!)
  * The order of the directories it searches is:
  *  1. application's directory
  *  2. current working directory
