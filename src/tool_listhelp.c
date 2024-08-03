@@ -266,7 +266,7 @@ const struct helptxt helptext[] = {
   {"-H, --header <header/@file>",
    "Pass custom header(s) to server",
    CURLHELP_HTTP | CURLHELP_IMAP | CURLHELP_SMTP},
-  {"-h, --help <category>",
+  {"-h, --help <subject>",
    "Get help for commands",
    CURLHELP_IMPORTANT | CURLHELP_CURL},
   {"    --hostpubmd5 <md5>",

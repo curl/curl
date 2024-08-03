@@ -31,6 +31,8 @@
 #include "tool_util.h"
 #include "tool_version.h"
 #include "tool_cb_prg.h"
+#include "tool_hugehelp.h"
+#include "tool_getparam.h"
 #include "terminal.h"
 
 #include "memdebug.h" /* keep this as LAST include */
@@ -160,18 +162,84 @@ static void get_categories_list(unsigned int width)
   }
 }
 
+#ifdef USE_MANUAL
+
+void inithelpscan(struct scan_ctx *ctx,
+                  const char *trigger,
+                  const char *arg,
+                  const char *endarg)
+{
+  ctx->trigger = trigger;
+  ctx->tlen = strlen(trigger);
+  ctx->arg = arg;
+  ctx->flen = strlen(arg);
+  ctx->endarg = endarg;
+  ctx->elen = strlen(endarg);
+  DEBUGASSERT((ctx->elen < sizeof(ctx->rbuf)) ||
+              (ctx->flen < sizeof(ctx->rbuf)));
+  ctx->show = 0;
+  ctx->olen = 0;
+  memset(ctx->rbuf, 0, sizeof(ctx->rbuf));
+}
+
+bool helpscan(unsigned char *buf, size_t len, struct scan_ctx *ctx)
+{
+  size_t i;
+  for(i = 0; i < len; i++) {
+    if(!ctx->show) {
+      /* wait for the trigger */
+      memmove(&ctx->rbuf[0], &ctx->rbuf[1], ctx->tlen - 1);
+      ctx->rbuf[ctx->tlen - 1] = buf[i];
+      if(!memcmp(ctx->rbuf, ctx->trigger, ctx->tlen))
+        ctx->show++;
+      continue;
+    }
+    /* past the trigger */
+    if(ctx->show == 1) {
+      memmove(&ctx->rbuf[0], &ctx->rbuf[1], ctx->flen - 1);
+      ctx->rbuf[ctx->flen - 1] = buf[i];
+      if(!memcmp(ctx->rbuf, ctx->arg, ctx->flen)) {
+        /* match, now output until endarg */
+        fputs(&ctx->arg[1], stdout);
+        ctx->show++;
+      }
+      continue;
+    }
+    /* show until the end */
+    memmove(&ctx->rbuf[0], &ctx->rbuf[1], ctx->elen - 1);
+    ctx->rbuf[ctx->elen - 1] = buf[i];
+    if(!memcmp(ctx->rbuf, ctx->endarg, ctx->elen))
+      return FALSE;
+
+    if(buf[i] == '\n') {
+      DEBUGASSERT(ctx->olen < sizeof(ctx->obuf));
+      ctx->obuf[ctx->olen++] = 0;
+      ctx->olen = 0;
+      puts(ctx->obuf);
+    }
+    else
+      ctx->obuf[ctx->olen++] = buf[i];
+  }
+  return TRUE;
+}
+
+#endif
 
 void tool_help(char *category)
 {
   unsigned int cols = get_terminal_columns();
-  puts("Usage: curl [options...] <url>");
   /* If no category was provided */
   if(!category) {
     const char *category_note = "\nThis is not the full help; this "
       "menu is split into categories.\nUse \"--help category\" to get "
       "an overview of all categories, which are:";
-    const char *category_note2 = "For all options use the manual"
-      " or \"--help all\".";
+    const char *category_note2 =
+      "Use \"--help all\" to list all options"
+#ifdef USE_MANUAL
+      "\nUse \"--help [option]\" to view documentation for a given option"
+#endif
+      ;
+    puts("Usage: curl [options...] <url>");
     print_category(CURLHELP_IMPORTANT, cols);
     puts(category_note);
     get_categories_list(cols);
@@ -184,6 +252,48 @@ void tool_help(char *category)
   /* Lets handle the string "category" differently to not print an errormsg */
   else if(curl_strequal(category, "category"))
     get_categories();
+  else if(category[0] == '-') {
+#ifdef USE_MANUAL
+    /* command line option help */
+    const struct LongShort *a = NULL;
+    if(category[1] == '-') {
+      char *lookup = &category[2];
+      bool noflagged = FALSE;
+      if(!strncmp(lookup, "no-", 3)) {
+        lookup += 3;
+        noflagged = TRUE;
+      }
+      a = findlongopt(lookup);
+      if(noflagged && (ARGTYPE(a->desc) != ARG_BOOL))
+        /* a --no- prefix for a non-boolean is not specifying a proper
+           option */
+        a = NULL;
+    }
+    else if(!category[2])
+      a = findshortopt(category[1]);
+    if(!a) {
+      fprintf(tool_stderr, "Incorrect option name to show help for,"
+              " see curl -h\n");
+    }
+    else {
+      char cmdbuf[80];
+      if(a->letter != ' ')
+        msnprintf(cmdbuf, sizeof(cmdbuf), "\n    -%c, --", a->letter);
+      else if(a->desc & ARG_NO)
+        msnprintf(cmdbuf, sizeof(cmdbuf), "\n    --no-%s", a->lname);
+      else
+        msnprintf(cmdbuf, sizeof(cmdbuf), "\n    %s", category);
+      if(a->cmd == C_XATTR)
+        /* this is the last option, which then ends when FILES starts */
+        showhelp("\nALL OPTIONS\n", cmdbuf, "\nFILES");
+      else
+        showhelp("\nALL OPTIONS\n", cmdbuf, "\n    -");
+    }
+#else
+    fprintf(tool_stderr, "Cannot comply. "
+            "This curl was built without built-in manual\n");
+#endif
+  }
   /* Otherwise print category and handle the case if the cat was not found */
   else if(get_category_content(category, cols)) {
     puts("Unknown category provided, here is a list of all categories:\n");

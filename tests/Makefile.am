@@ -50,6 +50,7 @@ TESTSCRIPTS = \
  test1486.pl  \
  test1488.pl  \
  test1544.pl  \
+ test1707.pl  \
  test971.pl
 
 EXTRA_DIST =        \

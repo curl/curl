@@ -25,6 +25,8 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
+void showhelp(const char *trigger, const char *arg, const char *endarg);
+
 #ifdef USE_MANUAL
 void hugehelp(void);
 #else
