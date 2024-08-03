@@ -31,7 +31,6 @@ curl invalid category --help
 0
 </errorcode>
 <stdout mode="text">
-Usage: curl [options...] <url>
 Unknown category provided, here is a list of all categories:
 
  auth        Authentication methods

@@ -71,306 +71,16 @@ static ParameterError getstr(char **str, const char *val, bool allowblank)
   return PARAM_OK;
 }
 
-/* one enum for every command line option. The name is the verbatim long
-   option name, but in uppercase with periods and minuses replaced with
-   underscores using a "C_" prefix. */
-typedef enum {
-  C_ABSTRACT_UNIX_SOCKET,
-  C_ALPN,
-  C_ALT_SVC,
-  C_ANYAUTH,
-  C_APPEND,
-  C_AWS_SIGV4,
-  C_BASIC,
-  C_BUFFER,
-  C_CA_NATIVE,
-  C_CACERT,
-  C_CAPATH,
-  C_CERT,
-  C_CERT_STATUS,
-  C_CERT_TYPE,
-  C_CIPHERS,
-  C_CLOBBER,
-  C_COMPRESSED,
-  C_COMPRESSED_SSH,
-  C_CONFIG,
-  C_CONNECT_TIMEOUT,
-  C_CONNECT_TO,
-  C_CONTINUE_AT,
-  C_COOKIE,
-  C_COOKIE_JAR,
-  C_CREATE_DIRS,
-  C_CREATE_FILE_MODE,
-  C_CRLF,
-  C_CRLFILE,
-  C_CURVES,
-  C_DATA,
-  C_DATA_ASCII,
-  C_DATA_BINARY,
-  C_DATA_RAW,
-  C_DATA_URLENCODE,
-  C_DELEGATION,
-  C_DIGEST,
-  C_DISABLE,
-  C_DISABLE_EPRT,
-  C_DISABLE_EPSV,
-  C_DISALLOW_USERNAME_IN_URL,
-  C_DNS_INTERFACE,
-  C_DNS_IPV4_ADDR,
-  C_DNS_IPV6_ADDR,
-  C_DNS_SERVERS,
-  C_DOH_CERT_STATUS,
-  C_DOH_INSECURE,
-  C_DOH_URL,
-  C_DUMP_CA_EMBED,
-  C_DUMP_HEADER,
-  C_ECH,
-  C_EGD_FILE,
-  C_ENGINE,
-  C_EPRT,
-  C_EPSV,
-  C_ETAG_COMPARE,
-  C_ETAG_SAVE,
-  C_EXPECT100_TIMEOUT,
-  C_FAIL,
-  C_FAIL_EARLY,
-  C_FAIL_WITH_BODY,
-  C_FALSE_START,
-  C_FORM,
-  C_FORM_ESCAPE,
-  C_FORM_STRING,
-  C_FTP_ACCOUNT,
-  C_FTP_ALTERNATIVE_TO_USER,
-  C_FTP_CREATE_DIRS,
-  C_FTP_METHOD,
-  C_FTP_PASV,
-  C_FTP_PORT,
-  C_FTP_PRET,
-  C_FTP_SKIP_PASV_IP,
-  C_FTP_SSL,
-  C_FTP_SSL_CCC,
-  C_FTP_SSL_CCC_MODE,
-  C_FTP_SSL_CONTROL,
-  C_FTP_SSL_REQD,
-  C_GET,
-  C_GLOBOFF,
-  C_HAPPY_EYEBALLS_TIMEOUT_MS,
-  C_HAPROXY_CLIENTIP,
-  C_HAPROXY_PROTOCOL,
-  C_HEAD,
-  C_HEADER,
-  C_HELP,
-  C_HOSTPUBMD5,
-  C_HOSTPUBSHA256,
-  C_HSTS,
-  C_HTTP0_9,
-  C_HTTP1_0,
-  C_HTTP1_1,
-  C_HTTP2,
-  C_HTTP2_PRIOR_KNOWLEDGE,
-  C_HTTP3,
-  C_HTTP3_ONLY,
-  C_IGNORE_CONTENT_LENGTH,
-  C_INCLUDE,
-  C_INSECURE,
-  C_INTERFACE,
-  C_IPFS_GATEWAY,
-  C_IPV4,
-  C_IPV6,
-  C_JSON,
-  C_JUNK_SESSION_COOKIES,
-  C_KEEPALIVE,
-  C_KEEPALIVE_CNT,
-  C_KEEPALIVE_TIME,
-  C_KEY,
-  C_KEY_TYPE,
-  C_KRB,
-  C_KRB4,
-  C_LIBCURL,
-  C_LIMIT_RATE,
-  C_LIST_ONLY,
-  C_LOCAL_PORT,
-  C_LOCATION,
-  C_LOCATION_TRUSTED,
-  C_LOGIN_OPTIONS,
-  C_MAIL_AUTH,
-  C_MAIL_FROM,
-  C_MAIL_RCPT,
-  C_MAIL_RCPT_ALLOWFAILS,
-  C_MANUAL,
-  C_MAX_FILESIZE,
-  C_MAX_REDIRS,
-  C_MAX_TIME,
-  C_METALINK,
-  C_MPTCP,
-  C_NEGOTIATE,
-  C_NETRC,
-  C_NETRC_FILE,
-  C_NETRC_OPTIONAL,
-  C_NEXT,
-  C_NOPROXY,
-  C_NPN,
-  C_NTLM,
-  C_NTLM_WB,
-  C_OAUTH2_BEARER,
-  C_OUTPUT,
-  C_OUTPUT_DIR,
-  C_PARALLEL,
-  C_PARALLEL_IMMEDIATE,
-  C_PARALLEL_MAX,
-  C_PASS,
-  C_PATH_AS_IS,
-  C_PINNEDPUBKEY,
-  C_POST301,
-  C_POST302,
-  C_POST303,
-  C_PREPROXY,
-  C_PROGRESS_BAR,
-  C_PROGRESS_METER,
-  C_PROTO,
-  C_PROTO_DEFAULT,
-  C_PROTO_REDIR,
-  C_PROXY,
-  C_PROXY_ANYAUTH,
-  C_PROXY_BASIC,
-  C_PROXY_CA_NATIVE,
-  C_PROXY_CACERT,
-  C_PROXY_CAPATH,
-  C_PROXY_CERT,
-  C_PROXY_CERT_TYPE,
-  C_PROXY_CIPHERS,
-  C_PROXY_CRLFILE,
-  C_PROXY_DIGEST,
-  C_PROXY_HEADER,
-  C_PROXY_HTTP2,
-  C_PROXY_INSECURE,
-  C_PROXY_KEY,
-  C_PROXY_KEY_TYPE,
-  C_PROXY_NEGOTIATE,
-  C_PROXY_NTLM,
-  C_PROXY_PASS,
-  C_PROXY_PINNEDPUBKEY,
-  C_PROXY_SERVICE_NAME,
-  C_PROXY_SSL_ALLOW_BEAST,
-  C_PROXY_SSL_AUTO_CLIENT_CERT,
-  C_PROXY_TLS13_CIPHERS,
-  C_PROXY_TLSAUTHTYPE,
-  C_PROXY_TLSPASSWORD,
-  C_PROXY_TLSUSER,
-  C_PROXY_TLSV1,
-  C_PROXY_USER,
-  C_PROXY1_0,
-  C_PROXYTUNNEL,
-  C_PUBKEY,
-  C_QUOTE,
-  C_RANDOM_FILE,
-  C_RANGE,
-  C_RATE,
-  C_RAW,
-  C_REFERER,
-  C_REMOTE_HEADER_NAME,
-  C_REMOTE_NAME,
-  C_REMOTE_NAME_ALL,
-  C_REMOTE_TIME,
-  C_REMOVE_ON_ERROR,
-  C_REQUEST,
-  C_REQUEST_TARGET,
-  C_RESOLVE,
-  C_RETRY,
-  C_RETRY_ALL_ERRORS,
-  C_RETRY_CONNREFUSED,
-  C_RETRY_DELAY,
-  C_RETRY_MAX_TIME,
-  C_SASL_AUTHZID,
-  C_SASL_IR,
-  C_SERVICE_NAME,
-  C_SESSIONID,
-  C_SHOW_ERROR,
-  C_SHOW_HEADERS,
-  C_SILENT,
-  C_SOCKS4,
-  C_SOCKS4A,
-  C_SOCKS5,
-  C_SOCKS5_BASIC,
-  C_SOCKS5_GSSAPI,
-  C_SOCKS5_GSSAPI_NEC,
-  C_SOCKS5_GSSAPI_SERVICE,
-  C_SOCKS5_HOSTNAME,
-  C_SPEED_LIMIT,
-  C_SPEED_TIME,
-  C_SSL,
-  C_SSL_ALLOW_BEAST,
-  C_SSL_AUTO_CLIENT_CERT,
-  C_SSL_NO_REVOKE,
-  C_SSL_REQD,
-  C_SSL_REVOKE_BEST_EFFORT,
-  C_SSLV2,
-  C_SSLV3,
-  C_STDERR,
-  C_STYLED_OUTPUT,
-  C_SUPPRESS_CONNECT_HEADERS,
-  C_TCP_FASTOPEN,
-  C_TCP_NODELAY,
-  C_TELNET_OPTION,
-  C_TEST_EVENT,
-  C_TFTP_BLKSIZE,
-  C_TFTP_NO_OPTIONS,
-  C_TIME_COND,
-  C_TLS_MAX,
-  C_TLS13_CIPHERS,
-  C_TLSAUTHTYPE,
-  C_TLSPASSWORD,
-  C_TLSUSER,
-  C_TLSV1,
-  C_TLSV1_0,
-  C_TLSV1_1,
-  C_TLSV1_2,
-  C_TLSV1_3,
-  C_TR_ENCODING,
-  C_TRACE,
-  C_TRACE_ASCII,
-  C_TRACE_CONFIG,
-  C_TRACE_IDS,
-  C_TRACE_TIME,
-  C_IP_TOS,
-  C_UNIX_SOCKET,
-  C_UPLOAD_FILE,
-  C_URL,
-  C_URL_QUERY,
-  C_USE_ASCII,
-  C_USER,
-  C_USER_AGENT,
-  C_VARIABLE,
-  C_VERBOSE,
-  C_VERSION,
-  C_VLAN_PRIORITY,
-  C_WDEBUG,
-  C_WRITE_OUT,
-  C_XATTR
-} cmdline_t;
-
-struct LongShort {
-  const char *lname;  /* long name option */
-  enum {
-    ARG_NONE, /* stand-alone but not a boolean */
-    ARG_BOOL, /* accepts a --no-[name] prefix */
-    ARG_STRG, /* requires an argument */
-    ARG_FILE  /* requires an argument, usually a filename */
-  } desc;
-  char letter;  /* short name option or ' ' */
-  cmdline_t cmd;
-};
-
 /* this array MUST be alphasorted based on the 'lname' */
 static const struct LongShort aliases[]= {
   {"abstract-unix-socket",       ARG_FILE, ' ', C_ABSTRACT_UNIX_SOCKET},
-  {"alpn",                       ARG_BOOL, ' ', C_ALPN},
+  {"alpn",                       ARG_BOOL|ARG_NO, ' ', C_ALPN},
   {"alt-svc",                    ARG_STRG, ' ', C_ALT_SVC},
   {"anyauth",                    ARG_BOOL, ' ', C_ANYAUTH},
   {"append",                     ARG_BOOL, 'a', C_APPEND},
   {"aws-sigv4",                  ARG_STRG, ' ', C_AWS_SIGV4},
   {"basic",                      ARG_BOOL, ' ', C_BASIC},
-  {"buffer",                     ARG_BOOL, 'N', C_BUFFER},
+  {"buffer",                     ARG_BOOL|ARG_NO, 'N', C_BUFFER},
   {"ca-native",                  ARG_BOOL, ' ', C_CA_NATIVE},
   {"cacert",                     ARG_FILE, ' ', C_CACERT},
   {"capath",                     ARG_FILE, ' ', C_CAPATH},
@@ -378,7 +88,7 @@ static const struct LongShort aliases[]= {
   {"cert-status",                ARG_BOOL, ' ', C_CERT_STATUS},
   {"cert-type",                  ARG_STRG, ' ', C_CERT_TYPE},
   {"ciphers",                    ARG_STRG, ' ', C_CIPHERS},
-  {"clobber",                    ARG_BOOL, ' ', C_CLOBBER},
+  {"clobber",                    ARG_BOOL|ARG_NO, ' ', C_CLOBBER},
   {"compressed",                 ARG_BOOL, ' ', C_COMPRESSED},
   {"compressed-ssh",             ARG_BOOL, ' ', C_COMPRESSED_SSH},
   {"config",                     ARG_FILE, 'K', C_CONFIG},
@@ -468,7 +178,7 @@ static const struct LongShort aliases[]= {
   {"ipv6",                       ARG_NONE, '6', C_IPV6},
   {"json",                       ARG_STRG, ' ', C_JSON},
   {"junk-session-cookies",       ARG_BOOL, 'j', C_JUNK_SESSION_COOKIES},
-  {"keepalive",                  ARG_BOOL, ' ', C_KEEPALIVE},
+  {"keepalive",                  ARG_BOOL|ARG_NO, ' ', C_KEEPALIVE},
   {"keepalive-cnt",              ARG_STRG, ' ', C_KEEPALIVE_CNT},
   {"keepalive-time",             ARG_STRG, ' ', C_KEEPALIVE_TIME},
   {"key",                        ARG_FILE, ' ', C_KEY},
@@ -498,7 +208,7 @@ static const struct LongShort aliases[]= {
   {"netrc-optional",             ARG_BOOL, ' ', C_NETRC_OPTIONAL},
   {"next",                       ARG_NONE, ':', C_NEXT},
   {"noproxy",                    ARG_STRG, ' ', C_NOPROXY},
-  {"npn",                        ARG_BOOL, ' ', C_NPN},
+  {"npn",                        ARG_BOOL|ARG_NO, ' ', C_NPN},
   {"ntlm",                       ARG_BOOL, ' ', C_NTLM},
   {"ntlm-wb",                    ARG_BOOL, ' ', C_NTLM_WB},
   {"oauth2-bearer",              ARG_STRG, ' ', C_OAUTH2_BEARER},
@@ -515,7 +225,7 @@ static const struct LongShort aliases[]= {
   {"post303",                    ARG_BOOL, ' ', C_POST303},
   {"preproxy",                   ARG_STRG, ' ', C_PREPROXY},
   {"progress-bar",               ARG_BOOL, '#', C_PROGRESS_BAR},
-  {"progress-meter",             ARG_BOOL, ' ', C_PROGRESS_METER},
+  {"progress-meter",             ARG_BOOL|ARG_NO, ' ', C_PROGRESS_METER},
   {"proto",                      ARG_STRG, ' ', C_PROTO},
   {"proto-default",              ARG_STRG, ' ', C_PROTO_DEFAULT},
   {"proto-redir",                ARG_STRG, ' ', C_PROTO_REDIR},
@@ -573,7 +283,7 @@ static const struct LongShort aliases[]= {
   {"sasl-authzid",               ARG_STRG, ' ', C_SASL_AUTHZID},
   {"sasl-ir",                    ARG_BOOL, ' ', C_SASL_IR},
   {"service-name",               ARG_STRG, ' ', C_SERVICE_NAME},
-  {"sessionid",                  ARG_BOOL, ' ', C_SESSIONID},
+  {"sessionid",                  ARG_BOOL|ARG_NO, ' ', C_SESSIONID},
   {"show-error",                 ARG_BOOL, 'S', C_SHOW_ERROR},
   {"show-headers",               ARG_BOOL, 'i', C_SHOW_HEADERS},
   {"silent",                     ARG_BOOL, 's', C_SILENT},
@@ -1029,7 +739,7 @@ static int findarg(const void *a, const void *b)
   return strcmp(aa->lname, bb->lname);
 }
 
-static const struct LongShort *single(char letter)
+const struct LongShort *findshortopt(char letter)
 {
   static const struct LongShort *singles[128 - ' ']; /* ASCII => pointer */
   static bool singles_done = FALSE;
@@ -1295,6 +1005,15 @@ static ParameterError set_rate(struct GlobalConfig *global,
   return err;
 }
 
+const struct LongShort *findlongopt(const char *opt)
+{
+  struct LongShort key;
+  key.lname = opt;
+
+  return bsearch(&key, aliases, sizeof(aliases)/sizeof(aliases[0]),
+                 sizeof(aliases[0]), findarg);
+}
+
 
 ParameterError getparameter(const char *flag, /* f or -long-flag */
                             char *nextarg,    /* NULL if unset */
@@ -1336,7 +1055,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     const char *word = ('-' == flag[0]) ? flag + 2 : flag;
     bool noflagged = FALSE;
     bool expand = FALSE;
-    struct LongShort key;
 
     if(!strncmp(word, "no-", 3)) {
       /* disable this option but ignore the "no-" part when looking for it */
@@ -1349,10 +1067,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       word += 7;
       expand = TRUE;
     }
-    key.lname = word;
 
-    a = bsearch(&key, aliases, sizeof(aliases)/sizeof(aliases[0]),
-                sizeof(aliases[0]), findarg);
+    a = findlongopt(word);
     if(a) {
       longopt = TRUE;
     }
@@ -1360,7 +1076,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       err = PARAM_OPTION_UNKNOWN;
       goto error;
     }
-    if(noflagged && (a->desc != ARG_BOOL)) {
+    if(noflagged && (ARGTYPE(a->desc) != ARG_BOOL)) {
       /* --no- prefixed an option that is not boolean! */
       err = PARAM_NO_NOT_BOOLEAN;
       goto error;
@@ -1369,8 +1085,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       struct curlx_dynbuf nbuf;
       bool replaced;
 
-      if((a->desc != ARG_STRG) &&
-         (a->desc != ARG_FILE)) {
+      if((ARGTYPE(a->desc) != ARG_STRG) &&
+         (ARGTYPE(a->desc) != ARG_FILE)) {
         /* --expand on an option that is not a string or a filename */
         err = PARAM_EXPAND_ERROR;
         goto error;
@@ -1397,15 +1113,15 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     cmdline_t cmd;
 
     if(!longopt && !a) {
-      a = single(*parse);
+      a = findshortopt(*parse);
       if(!a) {
         err = PARAM_OPTION_UNKNOWN;
         break;
       }
     }
     letter = a->letter;
-    cmd = a->cmd;
-    if(a->desc >= ARG_STRG) {
+    cmd = (cmdline_t)a->cmd;
+    if(ARGTYPE(a->desc) >= ARG_STRG) {
       /* this option requires an extra parameter */
       if(!longopt && parse[1]) {
         nextarg = (char *)&parse[1]; /* this is the actual extra parameter */
@@ -1422,7 +1138,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         *usedarg = TRUE; /* mark it as used */
       }
 
-      if((a->desc == ARG_FILE) &&
+      if((ARGTYPE(a->desc) == ARG_FILE) &&
          (nextarg[0] == '-') && nextarg[1]) {
         /* if the filename looks like a command line option */
         warnf(global, "The filename argument '%s' looks like a flag.",
@@ -1434,7 +1150,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
               nextarg);
       }
     }
-    else if((a->desc == ARG_NONE) && !toggle) {
+    else if((ARGTYPE(a->desc) == ARG_NONE) && !toggle) {
       err = PARAM_NO_PREFIX;
       break;
     }

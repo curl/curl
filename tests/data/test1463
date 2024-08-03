@@ -35,7 +35,6 @@ curl file category --help
 0
 </errorcode>
 <stdout mode="text">
-Usage: curl [options...] <url>
 file: FILE protocol
      --create-file-mode <mode>  File mode for created files
  -I, --head                     Show document info only

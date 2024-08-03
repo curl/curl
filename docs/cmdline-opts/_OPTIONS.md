@@ -24,3 +24,5 @@ clean option state, except for the options that are global. Global options
 retain their values and meaning even after --next.
 
 The following options are global: `%GLOBALS`.
+
+# ALL OPTIONS

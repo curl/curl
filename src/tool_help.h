@@ -28,6 +28,24 @@
 void tool_help(char *category);
 void tool_list_engines(void);
 void tool_version_info(void);
+struct scan_ctx {
+  const char *trigger;
+  size_t tlen;
+  const char *arg;
+  size_t flen;
+  const char *endarg;
+  size_t elen;
+  size_t olen;
+  char rbuf[40];
+  char obuf[80];
+  unsigned char show; /* start as at 0.
+                         trigger match moves it to 1
+                         arg match moves it to 2
+                         endarg stops the search */
+};
+void inithelpscan(struct scan_ctx *ctx, const char *trigger,
+                  const char *arg, const char *endarg);
+bool helpscan(unsigned char *buf, size_t len, struct scan_ctx *ctx);
 
 struct helptxt {
   const char *opt;
