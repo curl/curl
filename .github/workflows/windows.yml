@@ -136,7 +136,7 @@ jobs:
             -DCURL_WERROR=ON \
             -DBUILD_EXAMPLES=ON \
             -DENABLE_WEBSOCKETS=ON \
-            -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON \
+            -DCURL_BROTLI=ON \
             ${{ matrix.config }}
 
       - name: 'cmake configure log'
@@ -316,7 +316,7 @@ jobs:
             -DCURL_WERROR=ON \
             -DBUILD_EXAMPLES=ON \
             -DENABLE_WEBSOCKETS=ON \
-            -DCURL_BROTLI=ON -DUSE_NGHTTP2=ON \
+            -DCURL_BROTLI=ON \
             ${{ matrix.config }}
 
       - name: 'cmake configure log'
@@ -498,35 +498,35 @@ jobs:
           plat: 'windows'
           type: 'Debug'
           tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
-          config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=ON  -DCURL_USE_SCHANNEL=ON  -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBPSL=ON -DUSE_NGHTTP2=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DUSE_WIN32_IDN=ON -DCURL_USE_GSASL=ON -DCURL_USE_OPENSSL=ON -DCURL_DEFAULT_SSL_BACKEND=schannel'
+          config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=ON  -DCURL_USE_SCHANNEL=ON  -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBPSL=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DUSE_WIN32_IDN=ON -DCURL_USE_GSASL=ON -DCURL_USE_OPENSSL=ON -DCURL_DEFAULT_SSL_BACKEND=schannel'
         - name: 'openssl'
           install: 'brotli zlib zstd libpsl nghttp2 nghttp3 openssl libssh2 pkgconf gsasl'
           arch: 'x64'
           plat: 'windows'
           type: 'Debug'
           tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
-          config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBPSL=ON -DUSE_NGHTTP2=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON -DCURL_USE_GSASL=ON'
+          config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBPSL=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON -DCURL_USE_GSASL=ON'
         - name: 'openssl'
           install: 'brotli zlib zstd        nghttp2 nghttp3 openssl libssh2'
           arch: 'x64'
           plat: 'uwp'
           type: 'Debug'
           tflags: 'skipall'
-          config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON                      -DUSE_NGHTTP2=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON'
+          config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON                      -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON'
         - name: 'libressl'
           install: 'brotli zlib zstd libpsl nghttp2 libressl libssh2[core,zlib]'
           arch: 'x64'
           plat: 'windows'
           type: 'Debug'
           tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
-          config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBPSL=ON -DUSE_NGHTTP2=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_OPENSSL=ON'
+          config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBPSL=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_OPENSSL=ON'
         - name: 'boringssl-ECH'
           install: 'brotli zlib zstd libpsl nghttp2 boringssl libssh2[core,zlib]'
           arch: 'x64'
           plat: 'windows'
           type: 'Debug'
           tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
-          config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBPSL=ON -DUSE_NGHTTP2=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_OPENSSL=ON -DUSE_HTTPSRR=ON -DUSE_ECH=ON'
+          config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBPSL=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_OPENSSL=ON -DUSE_HTTPSRR=ON -DUSE_ECH=ON'
         - name: '!ssl'
           install: 'brotli zlib zstd libpsl pkgconf libidn2 libssh'
           arch: 'x64'
@@ -544,7 +544,7 @@ jobs:
           plat: 'windows'
           type: 'Debug'
           tflags: '~1516'
-          config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBPSL=ON -DUSE_NGHTTP2=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_WOLFSSL=ON -DCURL_USE_GSASL=ON'
+          config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBPSL=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_WOLFSSL=ON -DCURL_USE_GSASL=ON'
       fail-fast: false
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4

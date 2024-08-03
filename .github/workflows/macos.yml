@@ -344,7 +344,6 @@ jobs:
           cmake -B bld -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
             -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.build.macos-version-min }} \
             "-DCMAKE_C_COMPILER_TARGET=$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
-            -DUSE_NGHTTP2=ON \
             ${{ matrix.build.generate }}
 
       - name: 'configure log'
@@ -597,7 +596,7 @@ jobs:
               "-DCMAKE_IGNORE_PREFIX_PATH=$(brew --prefix)" \
               "-DCMAKE_C_COMPILER_TARGET=$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
               -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF \
-              -DUSE_APPLE_IDN=OFF \
+              -DUSE_NGHTTP2=OFF -DUSE_LIBIDN2=OFF -DUSE_APPLE_IDN=OFF \
               ${options}
           fi
 
