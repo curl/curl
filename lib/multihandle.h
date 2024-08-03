@@ -155,9 +155,9 @@ struct Curl_multi {
   curl_multi_timer_callback timer_cb;
   void *timer_userp;
   struct curltime timer_lastcall; /* the fixed time for the timeout for the
-                                    previous callback */
+                                     previous callback */
 #ifdef USE_WINSOCK
-  WSAEVENT wsa_event; /* winsock event used for waits */
+  WSAEVENT wsa_event; /* Winsock event used for waits */
 #else
 #ifdef ENABLE_WAKEUP
   curl_socket_t wakeup_pair[2]; /* eventfd()/pipe()/socketpair() used for

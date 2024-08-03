@@ -1152,7 +1152,7 @@ fi
 
 if test "$HAVE_GETHOSTBYNAME" != "1"
 then
-  dnl This is for winsock systems
+  dnl This is for Winsock systems
   if test "$curl_cv_native_windows" = "yes"; then
     winsock_LIB="-lws2_32"
     if test ! -z "$winsock_LIB"; then
