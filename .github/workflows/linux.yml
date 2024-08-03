@@ -149,6 +149,16 @@ jobs:
               --with-openssl --enable-debug --enable-websockets
             singleuse: --unit
 
+          - name: thread-sanitizer
+            install_packages: zlib1g-dev clang libtsan2
+            install_steps: pytest openssltsan3
+            configure: >
+              CC=clang
+              CFLAGS="-fsanitize=thread -g"
+              LDFLAGS="-fsanitize=thread -Wl,-rpath,$HOME/openssl3/lib"
+              --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
+            singleuse: --unit
+
           - name: memory-sanitizer
             install_packages: clang
             install_steps:
@@ -308,6 +318,24 @@ jobs:
           git clone --quiet --depth=1 -b ${{ env.openssl3-version }} https://github.com/openssl/openssl
           cd openssl
           ./config --prefix=$HOME/openssl3 --libdir=lib
+          make -j1 install_sw
+
+      - name: cache openssltsan3
+        if: contains(matrix.build.install_steps, 'openssltsan3')
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        id: cache-openssltsan3
+        env:
+          cache-name: cache-openssltsan3
+        with:
+          path: /home/runner/openssl3
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.openssl3-version }}
+
+      - name: 'install openssltsan3'
+        if: contains(matrix.build.install_steps, 'openssltsan3') && steps.cache-openssltsan3.outputs.cache-hit != 'true'
+        run: |
+          git clone --quiet --depth=1 -b ${{ env.openssl3-version }} https://github.com/openssl/openssl
+          cd openssl
+          CC="clang" CFLAGS="-fsanitize=thread" LDFLAGS="-fsanitize=thread" ./config --prefix=$HOME/openssl3 --libdir=lib
           make -j1 install_sw
 
       - name: cache quictls

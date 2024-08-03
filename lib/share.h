@@ -61,6 +61,7 @@ struct Curl_share {
   struct Curl_ssl_session *sslsession;
   size_t max_ssl_sessions;
   long sessionage;
+  struct Curl_hash *ca_cache;
 #endif
 };
 

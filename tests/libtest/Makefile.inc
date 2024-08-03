@@ -25,6 +25,9 @@
 TESTUTIL = testutil.c testutil.h
 
 # files used only in some libcurl test programs
+FILEUTIL = fileutil.c fileutil.h
+
+# files used only in some libcurl test programs
 TSTTRACE = testtrace.c testtrace.h
 
 # files used only in some libcurl test programs
@@ -36,6 +39,8 @@ MULTIBYTE = ../../lib/curl_multibyte.c ../../lib/curl_multibyte.h
 # these files are used in every single test program below
 TIMEDIFF = ../../lib/timediff.c ../../lib/timediff.h
 SUPPORTFILES = $(TIMEDIFF) first.c test.h
+
+THREADS = ../../lib/curl_threads.c ../../lib/curl_threads.h
 
 # These are all libcurl test programs
 noinst_PROGRAMS = libauthretry libntlmconnect libprereq                  \
@@ -78,7 +83,7 @@ noinst_PROGRAMS = libauthretry libntlmconnect libprereq                  \
  lib2402 lib2404 lib2405 \
  lib2502 \
  lib3010 lib3025 lib3026 lib3027 \
- lib3100 lib3101 lib3102 lib3103
+ lib3100 lib3101 lib3102 lib3103 lib3207
 
 libntlmconnect_SOURCES = libntlmconnect.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 libntlmconnect_LDADD = $(TESTUTIL_LIBS)
@@ -338,7 +343,7 @@ lib676_LDADD = $(TESTUTIL_LIBS)
 lib677_SOURCES = lib677.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS) $(MULTIBYTE)
 lib677_LDADD = $(TESTUTIL_LIBS)
 
-lib678_SOURCES = lib678.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS) $(MULTIBYTE)
+lib678_SOURCES = lib678.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS) $(MULTIBYTE) $(FILEUTIL)
 lib678_LDADD = $(TESTUTIL_LIBS)
 
 lib1301_SOURCES = lib1301.c $(SUPPORTFILES) $(TESTUTIL)
@@ -716,3 +721,6 @@ lib3102_LDADD = $(TESTUTIL_LIBS)
 
 lib3103_SOURCES = lib3103.c $(SUPPORTFILES)
 lib3103_LDADD = $(TESTUTIL_LIBS)
+
+lib3207_SOURCES = lib3207.c $(SUPPORTFILES) $(TESTUTIL) $(THREADS) $(FILEUTIL) $(WARNLESS) $(MULTIBYTE)
+lib3207_LDADD = $(TESTUTIL_LIBS)

@@ -24,44 +24,9 @@
 #include "test.h"
 
 #include "testutil.h"
+#include "fileutil.h"
 #include "warnless.h"
 #include "memdebug.h"
-
-static int loadfile(const char *filename, void **filedata, size_t *filesize)
-{
-  size_t datasize = 0;
-  void *data = NULL;
-  if(filename) {
-    FILE *fInCert = fopen(filename, "rb");
-
-    if(fInCert) {
-      long cert_tell = 0;
-      bool continue_reading = fseek(fInCert, 0, SEEK_END) == 0;
-      if(continue_reading)
-        cert_tell = ftell(fInCert);
-      if(cert_tell < 0)
-        continue_reading = FALSE;
-      else
-        datasize = (size_t)cert_tell;
-      if(continue_reading)
-        continue_reading = fseek(fInCert, 0, SEEK_SET) == 0;
-      if(continue_reading)
-        data = malloc(datasize + 1);
-      if((!data) ||
-         ((int)fread(data, datasize, 1, fInCert) != 1))
-        continue_reading = FALSE;
-      fclose(fInCert);
-      if(!continue_reading) {
-        free(data);
-        datasize = 0;
-        data = NULL;
-      }
-   }
-  }
-  *filesize = datasize;
-  *filedata = data;
-  return data ? 1 : 0;
-}
 
 static CURLcode test_cert_blob(const char *url, const char *cafile)
 {

@@ -61,6 +61,10 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
   curl_unlock_function unlockfunc;
   void *ptr;
   CURLSHcode res = CURLSHE_OK;
+#ifdef USE_SSL
+  struct curl_blob *blob;
+  struct Curl_hash *ca_cache;
+#endif
 
   if(!GOOD_SHARE_HANDLE(share))
     return CURLSHE_INVALID;
@@ -203,6 +207,39 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
     share->clientdata = ptr;
     break;
 
+  case CURLSHOPT_CAINFO_BLOB:
+#ifdef USE_SSL
+    if(Curl_ssl_supports(SSLSUPP_SHARE_CAINFO_BLOB)) {
+      blob = va_arg(param, struct curl_blob *);
+      if(blob) {
+        ca_cache = malloc(sizeof(struct Curl_hash));
+        if(!ca_cache) {
+          res = CURLSHE_NOMEM;
+        }
+        else {
+          res = Curl_ssl_load_cainfo_blob(ca_cache, blob);
+          if(!res) {
+            if(share->ca_cache) {
+              Curl_hash_destroy(share->ca_cache);
+              free(share->ca_cache);
+            }
+            share->ca_cache = ca_cache;
+          }
+          else {
+            Curl_hash_destroy(ca_cache);
+            free(ca_cache);
+          }
+        }
+      }
+      else {
+        Curl_safefree(share->ca_cache);
+      }
+    }
+    else {
+      res = CURLSHE_NOT_BUILT_IN;
+    }
+#endif
+    break;
   default:
     res = CURLSHE_BAD_OPTION;
     break;
@@ -248,6 +285,10 @@ curl_share_cleanup(struct Curl_share *share)
     for(i = 0; i < share->max_ssl_sessions; i++)
       Curl_ssl_kill_session(&(share->sslsession[i]));
     free(share->sslsession);
+  }
+  if(share->ca_cache) {
+    Curl_hash_destroy(share->ca_cache);
+    free(share->ca_cache);
   }
 #endif
 

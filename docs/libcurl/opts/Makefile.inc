@@ -425,4 +425,5 @@ man_MANS =                                      \
   CURLSHOPT_SHARE.3                             \
   CURLSHOPT_UNLOCKFUNC.3                        \
   CURLSHOPT_UNSHARE.3                           \
-  CURLSHOPT_USERDATA.3
+  CURLSHOPT_USERDATA.3                          \
+  CURLSHOPT_CAINFO_BLOB.3

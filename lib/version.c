@@ -415,7 +415,7 @@ static int idn_present(curl_version_info_data *info)
 static int https_proxy_present(curl_version_info_data *info)
 {
   (void) info;
-  return Curl_ssl_supports(NULL, SSLSUPP_HTTPS_PROXY);
+  return Curl_ssl_supports(SSLSUPP_HTTPS_PROXY);
 }
 #endif
 
@@ -423,7 +423,7 @@ static int https_proxy_present(curl_version_info_data *info)
 static int ech_present(curl_version_info_data *info)
 {
   (void) info;
-  return Curl_ssl_supports(NULL, SSLSUPP_ECH);
+  return Curl_ssl_supports(SSLSUPP_ECH);
 }
 #endif
 

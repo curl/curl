@@ -63,6 +63,7 @@
 #include "multiif.h"
 #include "strerror.h"
 #include "curl_printf.h"
+#include "share.h"
 
 #include <openssl/ssl.h>
 #include <openssl/rand.h>
@@ -81,6 +82,7 @@
 #include <openssl/pkcs12.h>
 #include <openssl/tls1.h>
 #include <openssl/evp.h>
+#include <openssl/x509_vfy.h>
 
 #ifdef USE_ECH
 # ifndef OPENSSL_IS_BORINGSSL
@@ -321,6 +323,79 @@ do {                              \
   if(1 != BIO_reset(mem))                                        \
     break;                                                       \
 } while(0)
+
+#ifdef HAVE_SSL_X509_STORE_SHARE
+
+struct ossl_x509_key
+{
+  X509_NAME *name;
+  unsigned long hash;
+};
+
+static struct ossl_x509_key ossl_mk_x509_key(X509_NAME *name)
+{
+  struct ossl_x509_key x509_key;
+  x509_key.name = name;
+  /* The hash serves as a key in the hash table.
+   * If hashing fails, the entry is stored in slot 0.
+   */
+  #if OPENSSL_VERSION_NUMBER >= 0x30000000L
+    x509_key.hash = X509_NAME_hash_ex(name, NULL, NULL, NULL);
+  #else
+    x509_key.hash = X509_NAME_hash(name);
+  #endif
+  return x509_key;
+}
+
+static int ossl_share_verify_callback(X509_STORE_CTX *ctx, void *arg)
+{
+  int i;
+  struct Curl_share *share = (struct Curl_share*) arg;
+  int index = SSL_get_ex_data_X509_STORE_CTX_idx();
+  SSL* ssl = NULL;
+  SSL_CTX* ssl_ctx = NULL;
+  X509_STORE* store = NULL;
+  STACK_OF(X509) *chain = NULL;
+  int size;
+  if(index < 0) {
+    goto cleanup;
+  }
+  ssl = (SSL*)X509_STORE_CTX_get_ex_data(ctx, index);
+  if(!ssl) {
+    goto cleanup;
+  }
+  ssl_ctx =  SSL_get_SSL_CTX(ssl);
+  if(!ssl_ctx) {
+    goto cleanup;
+  }
+  store = SSL_CTX_get_cert_store(ssl_ctx);
+  if(!store) {
+    goto cleanup;
+  }
+  chain = X509_STORE_CTX_get0_untrusted(ctx);
+  if(!chain) {
+    goto cleanup;
+  }
+  size = (int)sk_X509_num(chain);
+  for(i = 0; i < size; i++) {
+    X509* cert = (X509 *)sk_X509_value(chain, i);
+    X509_NAME* name =  X509_get_subject_name(cert);
+    X509_NAME* issuer_name =  X509_get_issuer_name(cert);
+    struct ossl_x509_key x509_key = ossl_mk_x509_key(name);
+    struct ossl_x509_key issuer_x509_key = ossl_mk_x509_key(issuer_name);
+    X509* matched_cert = (X509 *)Curl_hash_pick(share->ca_cache,
+      (void *)&x509_key, sizeof(struct ossl_x509_key));
+    X509* matched_issuer_cert = (X509 *)Curl_hash_pick(share->ca_cache,
+      (void *)&issuer_x509_key, sizeof(struct ossl_x509_key));
+    if(matched_cert)
+      X509_STORE_add_cert(store, matched_cert);
+    if(matched_issuer_cert)
+      X509_STORE_add_cert(store, matched_issuer_cert);
+  }
+  cleanup :
+  return X509_verify_cert(ctx);
+}
+#endif
 
 static void pubkey_show(struct Curl_easy *data,
                         BIO *mem,
@@ -3123,7 +3198,8 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
   const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
   const char * const ssl_cafile =
     /* CURLOPT_CAINFO_BLOB overrides CURLOPT_CAINFO */
-    (ca_info_blob ? NULL : conn_config->CAfile);
+    (ca_info_blob || (data->share && data->share->ca_cache)
+      ? NULL : conn_config->CAfile);
   const char * const ssl_capath = conn_config->CApath;
   const char * const ssl_crlfile = ssl_config->primary.CRLfile;
   const bool verifypeer = conn_config->verifypeer;
@@ -3415,8 +3491,13 @@ CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
     !conn_config->CApath &&
     !conn_config->ca_info_blob &&
     !ssl_config->primary.CRLfile &&
-    !ssl_config->native_ca_store;
+    !ssl_config->native_ca_store &&
+    (!data->share || data->share->ca_cache);
 
+  if(data->share && data->share->ca_cache && conn_config->verifypeer) {
+    SSL_CTX_set_cert_verify_callback(ssl_ctx, ossl_share_verify_callback,
+                                      (void *)data->share);
+  }
   cached_store = get_cached_x509_store(cf, data);
   if(cached_store && cache_criteria_met && X509_STORE_up_ref(cached_store)) {
     SSL_CTX_set_cert_store(ssl_ctx, cached_store);
@@ -5282,11 +5363,97 @@ static void *ossl_get_internals(struct ssl_connect_data *connssl,
     (void *)octx->ssl_ctx : (void *)octx->ssl;
 }
 
+#ifdef HAVE_SSL_X509_STORE_SHARE
+
+static size_t ossl_hash_x509(void *key, size_t key_length, size_t slots_num)
+{
+  unsigned long h;
+  struct ossl_x509_key x509_key;
+  (void) key_length;
+  memcpy(&x509_key, key, sizeof(struct ossl_x509_key));
+  h = x509_key.hash;
+  return (h % slots_num);
+}
+
+static size_t ossl_x509_name_key_cmp(void *key1, size_t key1_len,
+                            void *key2, size_t key2_len) {
+  struct ossl_x509_key x509_key1;
+  struct ossl_x509_key x509_key2;
+  (void)key1_len;
+  (void)key2_len;
+  memcpy(&x509_key1, key1, sizeof(struct ossl_x509_key));
+  memcpy(&x509_key2, key2, sizeof(struct ossl_x509_key));
+  return X509_name_cmp(x509_key1.name, x509_key2.name)? 0 : 1;
+}
+
+static void ossl_x509_free(void *x509)
+{
+  X509_free((X509 *)x509);
+}
+
+static CURLSHcode ossl_load_cainfo_blob(struct Curl_hash *ca_cache,
+                                      struct curl_blob *ca_info_blob)
+{
+  /* these need to be freed at the end */
+  BIO *cbio = NULL;
+  STACK_OF(X509_INFO) *inf = NULL;
+
+  /* everything else is just a reference */
+  int i, count = 0;
+  X509_INFO *itmp = NULL;
+
+  Curl_hash_init(ca_cache, 64, ossl_hash_x509,
+                 ossl_x509_name_key_cmp, ossl_x509_free);
+
+  if(ca_info_blob->len > (size_t)INT_MAX)
+    return CURLSHE_BAD_OPTION;
+
+  cbio = BIO_new_mem_buf(ca_info_blob->data, (int)ca_info_blob->len);
+  if(!cbio)
+    return CURLSHE_NOMEM;
+
+  inf = PEM_X509_INFO_read_bio(cbio, NULL, NULL, NULL);
+  if(!inf) {
+    BIO_free(cbio);
+    return CURLSHE_BAD_OPTION;
+  }
+
+  /* add each entry from PEM file to x509_store */
+  for(i = 0; i < (int)sk_X509_INFO_num(inf); ++i) {
+    itmp = sk_X509_INFO_value(inf, (ossl_valsize_t)i);
+    if(itmp->x509) {
+      X509_NAME *name = X509_get_subject_name(itmp->x509);
+      struct ossl_x509_key x509_key = ossl_mk_x509_key(name);
+      if(Curl_hash_add(ca_cache, (void *)&x509_key,
+          sizeof(struct ossl_x509_key), itmp->x509)) {
+        X509_up_ref(itmp->x509);
+        ++count;
+      }
+      else {
+        /* set count to 0 to return an error */
+        count = 0;
+        break;
+      }
+    }
+  }
+
+  sk_X509_INFO_pop_free(inf, X509_INFO_free);
+  BIO_free(cbio);
+
+  /* if we did not end up importing anything, treat that as an error */
+  return (count > 0) ? CURLSHE_OK : CURLSHE_BAD_OPTION;
+}
+
+#endif
+
 const struct Curl_ssl Curl_ssl_openssl = {
   { CURLSSLBACKEND_OPENSSL, "openssl" }, /* info */
 
   SSLSUPP_CA_PATH |
   SSLSUPP_CAINFO_BLOB |
+#ifdef HAVE_SSL_X509_STORE_SHARE
+  SSLSUPP_SHARE_CAINFO_BLOB |
+#endif
   SSLSUPP_CERTINFO |
   SSLSUPP_PINNEDPUBKEY |
   SSLSUPP_SSL_CTX |
@@ -5329,7 +5496,12 @@ const struct Curl_ssl Curl_ssl_openssl = {
   NULL,                     /* remote of data from this connection */
   ossl_recv,                /* recv decrypted data */
   ossl_send,                /* send data to encrypt */
-  ossl_get_channel_binding  /* get_channel_binding */
+  ossl_get_channel_binding,  /* get_channel_binding */
+#ifdef HAVE_SSL_X509_STORE_SHARE
+  ossl_load_cainfo_blob     /* load cainfo blob into ca cache */
+#else
+  NULL
+#endif
 };
 
 #endif /* USE_OPENSSL */

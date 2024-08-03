@@ -1641,6 +1641,7 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   mbed_recv,                        /* recv decrypted data */
   mbed_send,                        /* send data to encrypt */
   NULL,                             /* get_channel_binding */
+  NULL,                             /* load cainfo blob into ca cache */
 };
 
 #endif /* USE_MBEDTLS */

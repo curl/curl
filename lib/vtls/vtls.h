@@ -40,6 +40,7 @@ struct Curl_ssl_session;
 #define SSLSUPP_ECH          (1<<7)
 #define SSLSUPP_CA_CACHE     (1<<8)
 #define SSLSUPP_CIPHER_LIST  (1<<9) /* supports TLS 1.0-1.2 ciphersuites */
+#define SSLSUPP_SHARE_CAINFO_BLOB     (1<<10)
 
 #define ALPN_ACCEPTED "ALPN: server accepted "
 
@@ -224,7 +225,7 @@ CURLcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
  * Option is one of the defined SSLSUPP_* values.
  * `data` maybe NULL for the features of the default implementation.
  */
-bool Curl_ssl_supports(struct Curl_easy *data, unsigned int ssl_option);
+bool Curl_ssl_supports(unsigned int ssl_option);
 
 /**
  * Get the internal ssl instance (like OpenSSL's SSL*) from the filter
@@ -253,6 +254,9 @@ extern struct Curl_cftype Curl_cft_ssl;
 extern struct Curl_cftype Curl_cft_ssl_proxy;
 #endif
 
+CURLSHcode Curl_ssl_load_cainfo_blob(struct Curl_hash *ca_cache,
+                                     struct curl_blob *cainfo_blob);
+
 #else /* if not USE_SSL */
 
 /* When SSL support is not present, just define away these function calls */
@@ -269,11 +273,12 @@ extern struct Curl_cftype Curl_cft_ssl_proxy;
 #define Curl_ssl_cert_status_request() FALSE
 #define Curl_ssl_false_start(a) FALSE
 #define Curl_ssl_get_internals(a,b,c,d) NULL
-#define Curl_ssl_supports(a,b) FALSE
+#define Curl_ssl_supports(a) FALSE
 #define Curl_ssl_cfilter_add(a,b,c) CURLE_NOT_BUILT_IN
 #define Curl_ssl_cfilter_remove(a,b,c) CURLE_OK
 #define Curl_ssl_cf_get_config(a,b) NULL
 #define Curl_ssl_cf_get_primary_config(a) NULL
+#define Curl_ssl_load_cainfo_blob(a, b) CURLE_NOT_BUILT_IN;
 #endif
 
 #endif /* HEADER_CURL_VTLS_H */

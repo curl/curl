@@ -2177,7 +2177,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   }
 
 #ifdef USE_SSL
-  if(!Curl_ssl_supports(data, SSLSUPP_HTTPS_PROXY))
+  if(!Curl_ssl_supports(SSLSUPP_HTTPS_PROXY))
 #endif
     if(IS_HTTPS_PROXY(proxytype)) {
       failf(data, "Unsupported proxy \'%s\', libcurl is built without the "

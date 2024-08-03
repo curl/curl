@@ -1347,6 +1347,7 @@ static const struct Curl_ssl Curl_ssl_multi = {
   multissl_recv_plain,               /* recv decrypted data */
   multissl_send_plain,               /* send data to encrypt */
   NULL,                              /* get_channel_binding */
+  NULL,                              /* load cainfo blob into ca cache */
 };
 
 const struct Curl_ssl *Curl_ssl =
@@ -2028,9 +2029,8 @@ CURLcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
 
 #endif /* !CURL_DISABLE_PROXY */
 
-bool Curl_ssl_supports(struct Curl_easy *data, unsigned int ssl_option)
+bool Curl_ssl_supports(unsigned int ssl_option)
 {
-  (void)data;
   return (Curl_ssl->supports & ssl_option)? TRUE : FALSE;
 }
 
@@ -2265,6 +2265,12 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
 
 out:
   return CURLE_OK;
+}
+
+CURLSHcode Curl_ssl_load_cainfo_blob(struct Curl_hash *ca_cache,
+                                     struct curl_blob *cainfo_blob)
+{
+  return Curl_ssl->load_cainfo_blob(ca_cache, cainfo_blob);
 }
 
 #endif /* USE_SSL */

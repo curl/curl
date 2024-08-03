@@ -161,6 +161,8 @@ struct Curl_ssl {
   CURLcode (*get_channel_binding)(struct Curl_easy *data, int sockindex,
                                   struct dynbuf *binding);
 
+  CURLSHcode (*load_cainfo_blob)(struct Curl_hash *ca_cache,
+              struct curl_blob *cainfo_blob);
 };
 
 extern const struct Curl_ssl *Curl_ssl;
