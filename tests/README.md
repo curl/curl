@@ -80,6 +80,22 @@ SPDX-License-Identifier: curl
   You may also need to manually install the Python package 'six'
   as that may be a missing requirement for impacket on Python 3.
 
+## Event-based
+
+  If curl is built with `Debug` enabled (see below), then the `runtests.pl`
+  script offers a `-e` option that makes it perform *event-based*. Such tests
+  invokes the curl tool with `--test-event`, a debug-only option made for this
+  purpose.
+
+  Performing event-based means that the curl tool uses the
+  `curl_multi_socket_action()` API call to drive the transfer(s), instead of
+  the otherwise "normal" functions it would use. This allows us to test drive
+  the socket_action API. Transfers done this way should work exactly the same
+  as with the non-event based API.
+
+  To be able to use `--test-event` together with `--parallel`, curl requires
+  *libuv* to be present and enabled in the build: `configure --enable-libuv`
+
 ### Port numbers used by test servers
 
   All test servers run on "random" port numbers. All tests should be written
