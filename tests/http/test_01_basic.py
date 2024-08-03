@@ -112,4 +112,3 @@ class TestBasic:
         # got the Conten-Length: header, but did not download anything
         assert r.responses[0]['header']['content-length'] == '30', f'{r.responses[0]}'
         assert r.stats[0]['size_download'] == 0, f'{r.stats[0]}'
-
