@@ -32,17 +32,24 @@ export LC_ALL=C
 export TZ=UTC
 
 version="${1:-}"
+cmd="${2:-}"
 
 if [ -z "$version" ]; then
   echo "Specify a version number!"
   exit
 fi
 
-if [ "only" = "${2:-}" ]; then
+echo "$cmd"
+
+only=""
+if [ "only" = "$cmd" ]; then
   echo "Setup version number only!"
   only=1
-else
-  only=
+fi
+
+commit=""
+if [ "commit" = "$cmd" ]; then
+  commit=1
 fi
 
 libversion="$version"
@@ -151,6 +158,11 @@ fi
 
 echo "produce RELEASE-TOOLS.md"
 ./scripts/release-tools.sh "$timestamp" "$version" > docs/RELEASE-TOOLS.md.dist
+
+if test -n "$commit"; then
+  echo "produce docs/tarball-commit.txt"
+  git rev-parse HEAD >docs/tarball-commit.txt.dist
+fi
 
 ############################################################################
 #
