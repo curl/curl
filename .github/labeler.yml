@@ -254,4 +254,4 @@ Windows:
   - all:
       - changed-files:
           - any-glob-to-all-files:
-              - '{appveyor.*,.github/workflows/windows.yml,CMake/Platforms/WindowsCache.cmake,lib/*win32*,lib/curl_multibyte.*,lib/rename.*,lib/vtls/schannel*,m4/curl-schannel.m4,projects/**,src/tool_doswin.c,winbuild/**,libcurl.def}'
+              - '{appveyor.*,.github/workflows/cygwin.yml,.github/workflows/windows.yml,CMake/Platforms/WindowsCache.cmake,lib/*win32*,lib/curl_multibyte.*,lib/rename.*,lib/vtls/schannel*,m4/curl-schannel.m4,projects/**,src/tool_doswin.c,winbuild/**,libcurl.def}'
