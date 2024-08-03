@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 
-/* WIP, experimental: use recvmmsg() on linux
+/* WIP, experimental: use recvmmsg() on Linux
  * we have no configure check, yet
  * and also it is only available for _GNU_SOURCE, which
  * we do not use otherwise.
