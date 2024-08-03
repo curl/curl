@@ -253,7 +253,7 @@ Note: The pre-processor settings can be found using the Visual Studio IDE
 under "Project -> Properties -> Configuration Properties -> C/C++ ->
 Preprocessor".
 
-## Using BSD-style lwIP instead of Winsock TCP/IP stack in Win32 builds
+## Using BSD-style lwIP instead of Winsock TCP/IP stack in Windows builds
 
 In order to compile libcurl and curl using BSD-style lwIP TCP/IP stack it is
 necessary to make the definition of the preprocessor symbol `USE_LWIPSOCK`

@@ -150,7 +150,7 @@ $binext = '';
 $libext = '.la'; # .la since both libcurl and libcares are made with libtool
 if ($^O eq 'MSWin32' || $targetos) {
   if (!$targetos) {
-    # If no target defined on Win32 lets assume vc
+    # If no target defined on Windows, let's assume vc
     $targetos = 'vc';
   }
   if ($targetos =~ /vc/ || $targetos =~ /borland/) {

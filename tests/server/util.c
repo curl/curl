@@ -550,7 +550,7 @@ static void exit_signal_handler(int signum)
  * They are included for ANSI compatibility. Therefore, you can set
  * signal handlers for these signals by using signal, and you can also
  * explicitly generate these signals by calling raise. Source:
- * https://docs.microsoft.com/de-de/cpp/c-runtime-library/reference/signal
+ * https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/signal
  */
 static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
 {
