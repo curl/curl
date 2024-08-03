@@ -10,7 +10,7 @@ Added: 4.0
 Multi: boolean
 Scope: global
 See-also:
-  - include
+  - show-headers
   - silent
   - trace
   - trace-ascii

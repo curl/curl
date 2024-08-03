@@ -8,7 +8,7 @@ Added: 7.54.0
 Multi: boolean
 See-also:
   - dump-header
-  - include
+  - show-headers
   - proxytunnel
 Example:
   - --suppress-connect-headers --include -x proxy $URL
