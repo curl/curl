@@ -444,7 +444,7 @@
 #endif
 
 /*
- * Large file (>2Gb) support using WIN32 functions.
+ * Large file (>2Gb) support using Win32 functions.
  */
 
 #ifdef USE_WIN32_LARGE_FILES
@@ -467,7 +467,7 @@
 #endif
 
 /*
- * Small file (<2Gb) support using WIN32 functions.
+ * Small file (<2Gb) support using Win32 functions.
  */
 
 #ifdef USE_WIN32_SMALL_FILES
@@ -854,7 +854,7 @@ Therefore we specify it explicitly. https://github.com/curl/curl/pull/258
 #define FOPEN_WRITETEXT "wt"
 #define FOPEN_APPENDTEXT "at"
 #elif defined(__CYGWIN__)
-/* Cygwin has specific behavior we need to address when WIN32 is not defined.
+/* Cygwin has specific behavior we need to address when _WIN32 is not defined.
 https://cygwin.com/cygwin-ug-net/using-textbinary.html
 For write we want our output to have line endings of LF and be compatible with
 other Cygwin utilities. For read we want to handle input that may have line
