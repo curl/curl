@@ -166,7 +166,7 @@ void win32_init(void)
 
   if(err) {
     perror("Winsock init failed");
-    logmsg("Error initialising winsock -- aborting");
+    logmsg("Error initialising Winsock -- aborting");
     exit(1);
   }
 
@@ -190,7 +190,7 @@ void win32_cleanup(void)
   _flushall();
 }
 
-/* socket-safe strerror (works on WinSock errors, too */
+/* socket-safe strerror (works on Winsock errors, too */
 const char *sstrerror(int err)
 {
   static char buf[512];

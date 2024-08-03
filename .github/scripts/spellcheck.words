@@ -939,7 +939,6 @@ winbuild
 winidn
 WinIDN
 WinLDAP
-WinSock
 winsock
 WinSSL
 winssl
