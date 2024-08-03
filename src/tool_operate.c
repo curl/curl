@@ -1057,7 +1057,12 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         /* Single header file for all URLs */
         if(config->headerfile) {
           /* open file for output: */
-          if(strcmp(config->headerfile, "-")) {
+          if(!strcmp(config->headerfile, "%")) {
+            heads->stream = stderr;
+            /* use binary mode for protocol header output */
+            set_binmode(heads->stream);
+          }
+          else if(strcmp(config->headerfile, "-")) {
             FILE *newfile;
 
             /*
