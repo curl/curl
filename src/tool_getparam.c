@@ -709,7 +709,7 @@ void parse_cert_parameter(const char *cert_parameter,
       }
       break;
     case ':':
-      /* Since we live in a world of weirdness and confusion, the win32
+      /* Since we live in a world of weirdness and confusion, the Windows
          dudes can use : when using drive letters and thus c:\file:password
          needs to work. In order not to break compatibility, we still use : as
          separator, but we try to detect when it is used for a filename! On

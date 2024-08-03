@@ -49,14 +49,14 @@ FREEADDRINFOEXW_FN Curl_FreeAddrInfoExW = NULL;
 GETADDRINFOEXCANCEL_FN Curl_GetAddrInfoExCancel = NULL;
 GETADDRINFOEXW_FN Curl_GetAddrInfoExW = NULL;
 
-/* Curl_win32_init() performs win32 global initialization */
+/* Curl_win32_init() performs Win32 global initialization */
 CURLcode Curl_win32_init(long flags)
 {
 #ifdef USE_WINSOCK
   HMODULE ws2_32Dll;
 #endif
   /* CURL_GLOBAL_WIN32 controls the *optional* part of the initialization which
-     is just for Winsock at the moment. Any required win32 initialization
+     is just for Winsock at the moment. Any required Win32 initialization
      should take place after this block. */
   if(flags & CURL_GLOBAL_WIN32) {
 #ifdef USE_WINSOCK

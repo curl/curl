@@ -84,8 +84,8 @@ FAQ
   5.1 Is libcurl thread-safe?
   5.2 How can I receive all data into a large memory chunk?
   5.3 How do I fetch multiple files with libcurl?
-  5.4 Does libcurl do Winsock initialization on win32 systems?
-  5.5 Does CURLOPT_WRITEDATA and CURLOPT_READDATA work on win32 ?
+  5.4 Does libcurl do Winsock initialization on Win32 systems?
+  5.5 Does CURLOPT_WRITEDATA and CURLOPT_READDATA work on Win32 ?
   5.6 What about Keep-Alive or persistent connections?
   5.7 Link errors when building libcurl on Windows
   5.8 libcurl.so.X: open failed: No such file or directory
@@ -1174,11 +1174,11 @@ FAQ
   only reusable, but you are even encouraged to reuse it if you can, as that
   will enable libcurl to use persistent connections.
 
-  5.4 Does libcurl do Winsock initialization on win32 systems?
+  5.4 Does libcurl do Winsock initialization on Win32 systems?
 
   Yes, if told to in the curl_global_init() call.
 
-  5.5 Does CURLOPT_WRITEDATA and CURLOPT_READDATA work on win32 ?
+  5.5 Does CURLOPT_WRITEDATA and CURLOPT_READDATA work on Win32 ?
 
   Yes, but you cannot open a FILE * and pass the pointer to a DLL and have
   that DLL use the FILE * (as the DLL and the client application cannot access

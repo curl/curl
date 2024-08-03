@@ -27,7 +27,7 @@ char *curl_getenv(const char *name);
 
 curl_getenv() is a portable wrapper for the getenv() function, meant to
 emulate its behavior and provide an identical interface for all operating
-systems libcurl builds on (including win32).
+systems libcurl builds on (including Windows).
 
 You must curl_free(3) the returned string when you are done with it.
 

@@ -683,7 +683,7 @@ if (!$crosscompile || (($extvercmd ne '') && (-x $extvercmd))) {
   my $cmd = ($extvercmd ne '' ? $extvercmd.' ' : '')."./src/curl${binext} --version|";
   open($f, "<", $cmd);
   while(<$f>) {
-    # strip CR from output on non-win32 platforms (WINE on Linux)
+    # strip CR from output on non-Windows platforms (WINE on Linux)
     s/\r// if ($^O ne 'MSWin32');
     print;
   }
