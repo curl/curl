@@ -140,12 +140,12 @@ Transport (Apple's native TLS engine) support, then libcurl still performs
 peer certificate verification, but instead of using a CA cert bundle, it uses
 the certificates that are built into the OS. These are the same certificates
 that appear in the Internet Options control panel (under Windows) or Keychain
-Access application (under OS X). Any custom security rules for certificates
+Access application (under macOS). Any custom security rules for certificates
 are honored.
 
 Schannel runs CRL checks on certificates unless peer verification is disabled.
 Secure Transport on iOS runs OCSP checks on certificates unless peer
-verification is disabled. Secure Transport on OS X runs either OCSP or CRL
+verification is disabled. Secure Transport on macOS runs either OCSP or CRL
 checks on certificates if those features are enabled, and this behavior can be
 adjusted in the preferences of Keychain Access.
 
