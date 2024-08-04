@@ -182,7 +182,7 @@ fail:
  */
 CURLcode get_url_file_name(char **filename, const char *url)
 {
-  char *pc, *pc2;
+  char *pc = NULL, *pc2 = NULL;
   CURLU *uh = curl_url();
   char *path = NULL;
   CURLUcode uerr;
