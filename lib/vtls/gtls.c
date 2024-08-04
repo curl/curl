@@ -1828,6 +1828,7 @@ static CURLcode gtls_shutdown(struct Curl_cfilter *cf,
         CURL_TRC_CF(data, cf, "SSL shutdown, gnutls_bye EAGAIN");
         connssl->io_need = gnutls_record_get_direction(backend->gtls.session)?
           CURL_SSL_IO_NEED_SEND : CURL_SSL_IO_NEED_RECV;
+        backend->gtls.sent_shutdown = FALSE;
         result = CURLE_OK;
         goto out;
       }
