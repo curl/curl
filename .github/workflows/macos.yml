@@ -586,6 +586,7 @@ jobs:
               --disable-dependency-tracking \
               --disable-docs --disable-manual \
               --without-nghttp2 --without-libidn2 \
+              --with-libpsl=$(brew --prefix libpsl) \
               ${options}
           else
             [ '${{ matrix.config }}' = 'OpenSSL' ]         && options+=' -DCURL_USE_OPENSSL=ON'
