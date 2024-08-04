@@ -1879,7 +1879,7 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
   struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
   CURLcode result = CURLE_OK;
   char buf[1024];
-  int nread, err;
+  int nread = -1, err;
   unsigned long sslerr;
   size_t i;
 
