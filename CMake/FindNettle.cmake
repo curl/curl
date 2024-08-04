@@ -30,7 +30,7 @@
 
 if(UNIX)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(NETTLE "nettle")
+  pkg_search_module(NETTLE "nettle")
 endif()
 
 if(NETTLE_FOUND)

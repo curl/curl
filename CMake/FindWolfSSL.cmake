@@ -23,7 +23,7 @@
 ###########################################################################
 
 find_package(PkgConfig QUIET)
-pkg_check_modules(PC_WOLFSSL QUIET "wolfssl")
+pkg_search_module(PC_WOLFSSL QUIET "wolfssl")
 
 find_path(WolfSSL_INCLUDE_DIR
   NAMES "wolfssl/ssl.h"
