@@ -261,7 +261,7 @@ if(BUILD_SHARED_LIBS)
       # Superseded by LINK_OPTIONS in CMake 3.13 and later.
       set_target_properties(${LIB_SHARED} PROPERTIES LINK_FLAGS "${CMAKE_REQUIRED_LINK_OPTIONS}")
     else()
-      message(WARNING "Versioned symbols not supported by the toolchain.")
+      message(WARNING "Versioned symbols requested, but not supported by the toolchain.")
     endif()
     unset(CMAKE_REQUIRED_LINK_OPTIONS)
   endif()
