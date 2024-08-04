@@ -1591,7 +1591,7 @@ endif()
 
 if(CMAKE_COMPILER_IS_GNUCC AND APPLE)
   include(CheckCCompilerFlag)
-  check_c_compiler_flag(-Wno-long-double HAVE_C_FLAG_Wno_long_double)
+  check_c_compiler_flag("-Wno-long-double" HAVE_C_FLAG_Wno_long_double)
   if(HAVE_C_FLAG_Wno_long_double)
     # The Mac version of GCC warns about use of long double. Disable it.
     get_source_file_property(MPRINTF_COMPILE_FLAGS mprintf.c COMPILE_FLAGS)
@@ -1697,7 +1697,7 @@ endfunction()
 
 include(GNUInstallDirs)
 
-set(CURL_INSTALL_CMAKE_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
+set(CURL_INSTALL_CMAKE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
 set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
 set(_generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
 set(_project_config "${_generated_dir}/${PROJECT_NAME}Config.cmake")
@@ -2012,7 +2012,7 @@ if(NOT CURL_DISABLE_INSTALL)
   configure_file("${CURL_SOURCE_DIR}/libcurl.pc.in"
                  "${CURL_BINARY_DIR}/libcurl.pc" @ONLY)
   install(FILES "${CURL_BINARY_DIR}/libcurl.pc"
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 
   # Install headers
   install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/curl"
@@ -2061,12 +2061,12 @@ if(NOT CURL_DISABLE_INSTALL)
 
   if(NOT TARGET curl_uninstall)
     configure_file(
-      ${CMAKE_CURRENT_SOURCE_DIR}/CMake/cmake_uninstall.cmake.in
-      ${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/cmake_uninstall.cmake.in"
+      "${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake"
       IMMEDIATE @ONLY)
 
     add_custom_target(curl_uninstall
       COMMAND ${CMAKE_COMMAND} -P
-      ${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake)
+      "${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake")
   endif()
 endif()
