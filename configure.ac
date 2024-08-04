@@ -3947,7 +3947,7 @@ if test "$want_pthreads" != "no"; then
       AC_CHECK_FUNC(pthread_create, [USE_THREADS_POSIX=1] )
       LIBS="$save_LIBS"
 
-      dnl on HPUX, life is more complicated...
+      dnl on HP-UX, life is more complicated...
       case $host in
       *-hp-hpux*)
          dnl it doesn't actually work without -lpthread

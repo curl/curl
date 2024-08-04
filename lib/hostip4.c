@@ -221,7 +221,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
 
   if(!h) /* failure */
 #elif defined(HAVE_GETHOSTBYNAME_R_3)
-  /* AIX, Digital Unix/Tru64, HPUX 10, more? */
+  /* AIX, Digital Unix/Tru64, HP-UX 10, more? */
 
   /* For AIX 4.3 or later, we do not use gethostbyname_r() at all, because of
    * the plain fact that it does not return unique full buffers on each
