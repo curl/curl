@@ -39,6 +39,7 @@ struct sigpipe_ignore {
 static void sigpipe_init(struct sigpipe_ignore *ig)
 {
   memset(ig, 0, sizeof(*ig));
+  ig->no_signal = TRUE;
 }
 
 /*
