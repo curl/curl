@@ -129,6 +129,37 @@ static void trim_headers(struct curl_slist *head)
 /* string been x-PROVIDER-date:TIMESTAMP, I need +1 for ':' */
 #define DATE_FULL_HDR_LEN (DATE_HDR_KEY_LEN + TIMESTAMP_SIZE + 1)
 
+/* alphabetically compare two headers by their name, expecting
+   headers to use ':' at this point */
+static int compare_header_names(const char *a, const char *b)
+{
+  const char *colon_a;
+  const char *colon_b;
+  size_t len_a;
+  size_t len_b;
+  size_t min_len;
+  int cmp;
+
+  colon_a = strchr(a, ':');
+  colon_b = strchr(b, ':');
+
+  DEBUGASSERT(colon_a);
+  DEBUGASSERT(colon_b);
+
+  len_a = colon_a ? (size_t)(colon_a - a) : strlen(a);
+  len_b = colon_b ? (size_t)(colon_b - b) : strlen(b);
+
+  min_len = (len_a < len_b) ? len_a : len_b;
+
+  cmp = strncmp(a, b, min_len);
+
+  /* return the shorter of the two if one is shorter */
+  if(!cmp)
+    return (int)(len_a - len_b);
+
+  return cmp;
+}
+
 /* timestamp should point to a buffer of at last TIMESTAMP_SIZE bytes */
 static CURLcode make_headers(struct Curl_easy *data,
                              const char *hostname,
@@ -267,13 +298,13 @@ static CURLcode make_headers(struct Curl_easy *data,
     *date_header = NULL;
   }
 
-  /* alpha-sort in a case sensitive manner */
+  /* alpha-sort by header name in a case sensitive manner */
   do {
     again = 0;
     for(l = head; l; l = l->next) {
       struct curl_slist *next = l->next;
 
-      if(next && strcmp(l->data, next->data) > 0) {
+      if(next && compare_header_names(l->data, next->data) > 0) {
         char *tmp = l->data;
 
         l->data = next->data;

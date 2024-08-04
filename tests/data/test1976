@@ -1,0 +1,60 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+CURLOPT_AWS_SIGV4
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 0
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+SSL
+Debug
+crypto
+</features>
+<name>
+HTTP AWS_SIGV4 canonical request header sorting test
+</name>
+<command>
+-X PUT -H "X-Amz-Meta-Test-Two: test2" -H "x-amz-meta-test: test" --aws-sigv4 "aws:amz:us-east-1:s3" -u "xxx:yyy" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+^Content-Length:.*
+^Accept:.*
+</strip>
+<strippart>
+# Strip the actual signature. We only care about header order in this test
+s/Signature=[a-f0-9]{64}/Signature=stripped/
+</strippart>
+<protocol crlf="yes">
+PUT /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: AWS4-HMAC-SHA256 Credential=xxx/19700101/us-east-1/s3/aws4_request, SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-meta-test;x-amz-meta-test-two, Signature=stripped
+X-Amz-Date: 19700101T000000Z
+x-amz-content-sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+X-Amz-Meta-Test-Two: test2
+x-amz-meta-test: test
+
+</protocol>
+</verify>
+</testcase>
