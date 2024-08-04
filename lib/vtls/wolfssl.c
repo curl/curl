@@ -1395,7 +1395,7 @@ static CURLcode wolfssl_shutdown(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
   char buf[1024];
   char error_buffer[256];
-  int nread, err;
+  int nread = -1, err;
   size_t i;
   int detail;
 
