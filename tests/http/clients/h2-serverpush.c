@@ -34,7 +34,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* somewhat unix-specific */
+/* somewhat Unix-specific */
 #include <sys/time.h>
 #include <unistd.h>
 
