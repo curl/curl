@@ -31,16 +31,16 @@
 
 if(UNIX)
   find_package(PkgConfig QUIET)
-  pkg_search_module(PC_NGHTTP3 libnghttp3)
+  pkg_search_module(PC_NGHTTP3 "libnghttp3")
 endif()
 
-find_path(NGHTTP3_INCLUDE_DIR nghttp3/nghttp3.h
+find_path(NGHTTP3_INCLUDE_DIR "nghttp3/nghttp3.h"
   HINTS
     ${PC_NGHTTP3_INCLUDEDIR}
     ${PC_NGHTTP3_INCLUDE_DIRS}
 )
 
-find_library(NGHTTP3_LIBRARY NAMES nghttp3
+find_library(NGHTTP3_LIBRARY NAMES "nghttp3"
   HINTS
     ${PC_NGHTTP3_LIBDIR}
     ${PC_NGHTTP3_LIBRARY_DIRS}

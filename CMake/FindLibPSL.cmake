@@ -28,9 +28,9 @@
 # LIBPSL_INCLUDE_DIR - the libpsl include directory
 # LIBPSL_LIBRARY - the libpsl library name
 
-find_path(LIBPSL_INCLUDE_DIR libpsl.h)
+find_path(LIBPSL_INCLUDE_DIR "libpsl.h")
 
-find_library(LIBPSL_LIBRARY NAMES psl libpsl)
+find_library(LIBPSL_LIBRARY NAMES "psl" "libpsl")
 
 if(LIBPSL_INCLUDE_DIR)
   file(STRINGS "${LIBPSL_INCLUDE_DIR}/libpsl.h" libpsl_version_str REGEX "^#define[\t ]+PSL_VERSION[\t ]+\"(.*)\"")

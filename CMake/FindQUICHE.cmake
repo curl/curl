@@ -30,16 +30,16 @@
 
 if(UNIX)
   find_package(PkgConfig QUIET)
-  pkg_search_module(PC_QUICHE quiche)
+  pkg_search_module(PC_QUICHE "quiche")
 endif()
 
-find_path(QUICHE_INCLUDE_DIR quiche.h
+find_path(QUICHE_INCLUDE_DIR "quiche.h"
   HINTS
     ${PC_QUICHE_INCLUDEDIR}
     ${PC_QUICHE_INCLUDE_DIRS}
 )
 
-find_library(QUICHE_LIBRARY NAMES quiche
+find_library(QUICHE_LIBRARY NAMES "quiche"
   HINTS
     ${PC_QUICHE_LIBDIR}
     ${PC_QUICHE_LIBRARY_DIRS}

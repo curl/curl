@@ -39,16 +39,16 @@
 
 if(UNIX)
   find_package(PkgConfig QUIET)
-  pkg_search_module(PC_NGTCP2 libngtcp2)
+  pkg_search_module(PC_NGTCP2 "libngtcp2")
 endif()
 
-find_path(NGTCP2_INCLUDE_DIR ngtcp2/ngtcp2.h
+find_path(NGTCP2_INCLUDE_DIR "ngtcp2/ngtcp2.h"
   HINTS
     ${PC_NGTCP2_INCLUDEDIR}
     ${PC_NGTCP2_INCLUDE_DIRS}
 )
 
-find_library(NGTCP2_LIBRARY NAMES ngtcp2
+find_library(NGTCP2_LIBRARY NAMES "ngtcp2"
   HINTS
     ${PC_NGTCP2_LIBDIR}
     ${PC_NGTCP2_LIBRARY_DIRS}
@@ -72,7 +72,7 @@ if(NGTCP2_FIND_COMPONENTS)
   if(NGTCP2_CRYPTO_BACKEND)
     string(TOLOWER "ngtcp2_crypto_${NGTCP2_CRYPTO_BACKEND}" _crypto_library)
     if(UNIX)
-      pkg_search_module(PC_${_crypto_library} lib${_crypto_library})
+      pkg_search_module(PC_${_crypto_library} "lib${_crypto_library}")
     endif()
     find_library(${_crypto_library}_LIBRARY
       NAMES

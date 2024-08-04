@@ -30,16 +30,16 @@
 
 if(UNIX)
   find_package(PkgConfig QUIET)
-  pkg_search_module(PC_Zstd libzstd)
+  pkg_search_module(PC_Zstd "libzstd")
 endif()
 
-find_path(Zstd_INCLUDE_DIR zstd.h
+find_path(Zstd_INCLUDE_DIR "zstd.h"
   HINTS
     ${PC_Zstd_INCLUDEDIR}
     ${PC_Zstd_INCLUDE_DIRS}
 )
 
-find_library(Zstd_LIBRARY NAMES zstd
+find_library(Zstd_LIBRARY NAMES "zstd"
   HINTS
     ${PC_Zstd_LIBDIR}
     ${PC_Zstd_LIBRARY_DIRS}

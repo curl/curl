@@ -28,9 +28,9 @@
 # LIBSSH2_INCLUDE_DIR - the libssh2 include directory
 # LIBSSH2_LIBRARY - the libssh2 library name
 
-find_path(LIBSSH2_INCLUDE_DIR libssh2.h)
+find_path(LIBSSH2_INCLUDE_DIR "libssh2.h")
 
-find_library(LIBSSH2_LIBRARY NAMES ssh2 libssh2)
+find_library(LIBSSH2_LIBRARY NAMES "ssh2" "libssh2")
 
 if(LIBSSH2_INCLUDE_DIR)
   file(STRINGS "${LIBSSH2_INCLUDE_DIR}/libssh2.h" libssh2_version_str REGEX "^#define[\t ]+LIBSSH2_VERSION[\t ]+\"(.*)\"")

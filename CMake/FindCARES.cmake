@@ -30,9 +30,9 @@
 # also defined, but not for general use are
 # CARES_LIBRARY, where to find the c-ares library.
 
-find_path(CARES_INCLUDE_DIR ares.h)
+find_path(CARES_INCLUDE_DIR "ares.h")
 
-set(CARES_NAMES ${CARES_NAMES} cares)
+set(CARES_NAMES ${CARES_NAMES} "cares")
 find_library(CARES_LIBRARY
   NAMES ${CARES_NAMES}
 )

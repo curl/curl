@@ -30,16 +30,16 @@
 
 if(UNIX)
   find_package(PkgConfig QUIET)
-  pkg_search_module(PC_MSH3 libmsh3)
+  pkg_search_module(PC_MSH3 "libmsh3")
 endif()
 
-find_path(MSH3_INCLUDE_DIR msh3.h
+find_path(MSH3_INCLUDE_DIR "msh3.h"
   HINTS
     ${PC_MSH3_INCLUDEDIR}
     ${PC_MSH3_INCLUDE_DIRS}
 )
 
-find_library(MSH3_LIBRARY NAMES msh3
+find_library(MSH3_LIBRARY NAMES "msh3"
   HINTS
     ${PC_MSH3_LIBDIR}
     ${PC_MSH3_LIBRARY_DIRS}
