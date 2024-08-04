@@ -222,7 +222,7 @@ SPDX-License-Identifier: curl
   up. Subsets of tests can now be selected by passing keywords to the
   runtests.pl script via the make `TFLAGS` variable.
 
-  New tests are added by finding a free number in `tests/data/Makefile.inc`.
+  New tests are added by finding a free number in `tests/data/Makefile.am`.
 
 ## Write tests
 

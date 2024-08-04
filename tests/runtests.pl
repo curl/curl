@@ -329,8 +329,8 @@ if ($ENV{"NGHTTPX"}) {
 my $disttests = "";
 sub get_disttests {
     # If a non-default $TESTDIR is being used there may not be any
-    # Makefile.inc in which case there's nothing to do.
-    open(my $dh, "<", "$TESTDIR/Makefile.inc") or return;
+    # Makefile.am in which case there's nothing to do.
+    open(my $dh, "<", "$TESTDIR/Makefile.am") or return;
     while(<$dh>) {
         chomp $_;
         if(($_ =~ /^#/) ||($_ !~ /test/)) {
@@ -1034,7 +1034,7 @@ sub singletest_shouldrun {
     my @what;  # what features are needed
 
     if($disttests !~ /test$testnum(\W|\z)/ ) {
-        logmsg "Warning: test$testnum not present in tests/data/Makefile.inc\n";
+        logmsg "Warning: test$testnum not present in tests/data/Makefile.am\n";
     }
     if($disabled{$testnum}) {
         if(!$run_disabled) {
