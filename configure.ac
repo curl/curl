@@ -2164,8 +2164,7 @@ if test X"$OPT_LIBPSL" != Xno; then
       LIBS=$CLEANLIBS
   )
 
-  if test X"$OPT_LIBPSL" != Xoff &&
-     test "$LIBPSL_ENABLED" != "1"; then
+  if test "$LIBPSL_ENABLED" != "1"; then
     AC_MSG_ERROR([libpsl libs and/or directories were not found where specified!])
   fi
 fi
