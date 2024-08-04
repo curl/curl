@@ -938,7 +938,6 @@ winidn
 WinIDN
 WinLDAP
 winsock
-WinSSL
 winssl
 Wireshark
 wolfSSH
