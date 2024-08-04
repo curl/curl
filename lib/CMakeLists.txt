@@ -231,28 +231,31 @@ if(BUILD_SHARED_LIBS)
   ## Versioned symbols
 
   if(CURL_LIBCURL_VERSIONED_SYMBOLS)
-    if(NOT WIN32 AND NOT APPLE)
-      if(CURL_WITH_MULTI_SSL)
-        set(_symb_flavour "MULTISSL_")
-      elseif(CURL_USE_OPENSSL)
-        set(_symb_flavour "OPENSSL_")
-      elseif(CURL_USE_MBEDTLS)
-        set(_symb_flavour "MBEDTLS_")
-      elseif(CURL_USE_BEARSSL)
-        set(_symb_flavour "BEARSSL_")
-      elseif(CURL_USE_WOLFSSL)
-        set(_symb_flavour "WOLFSSL_")
-      elseif(CURL_USE_GNUTLS)
-        set(_symb_flavour "GNUTLS_")
-      else()
-        set(_symb_flavour "")
+    if(APPLE OR WIN32)
+      message(WARNING "Versioned symbols not supported on Apple and Windows platforms.")
+    else()
+      if(NOT DEFINED CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX)
+        # Default to prefixes used by autotools
+        if(CURL_WITH_MULTI_SSL)
+          set(CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX "MULTISSL_")
+        elseif(CURL_USE_OPENSSL)
+          set(CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX "OPENSSL_")
+        elseif(CURL_USE_MBEDTLS)
+          set(CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX "MBEDTLS_")
+        elseif(CURL_USE_BEARSSL)
+          set(CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX "BEARSSL_")
+        elseif(CURL_USE_WOLFSSL)
+          set(CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX "WOLFSSL_")
+        elseif(CURL_USE_GNUTLS)
+          set(CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX "GNUTLS_")
+        endif()
       endif()
       file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/libcurl.vers" "
 HIDDEN
 {
 };
 
-CURL_${_symb_flavour}${_cmakesoname}
+CURL_${CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX}${_cmakesoname}
 {
   global: curl_*;
   local: *;
@@ -263,6 +266,8 @@ CURL_${_symb_flavour}${_cmakesoname}
       check_c_source_compiles("int main(void) { return 0; }" HAVE_VERSIONED_SYMBOLS)
       if(HAVE_VERSIONED_SYMBOLS)
         target_link_options(${LIB_SHARED} PRIVATE ${CMAKE_REQUIRED_LINK_OPTIONS})
+      else()
+        message(WARNING "Versioned symbols not supported by the toolchain.")
       endif()
       unset(CMAKE_REQUIRED_LINK_OPTIONS)
     endif()
