@@ -213,10 +213,8 @@ class TestSSLUse:
                 pytest.skip('SecureTransport does not support TLSv1.3')
             elif env.curl_uses_lib('boringssl'):
                 pytest.skip('BoringSSL does not support setting TLSv1.3 ciphers')
-            elif env.curl_uses_lib('mbedtls'):
-                if not env.curl_lib_version_at_least('mbedtls', '3.6.0'):
-                    pytest.skip('mbedTLS TLSv1.3 support requires at least 3.6.0')
-                extra_args = ['--ciphers', ':'.join(cipher_names)]
+            elif env.curl_uses_lib('mbedtls') and not env.curl_lib_version_at_least('mbedtls', '3.6.0'):
+                pytest.skip('mbedTLS TLSv1.3 support requires at least 3.6.0')
             elif env.curl_uses_lib('wolfssl'):
                 extra_args = ['--ciphers', ':'.join(cipher_names)]
             else:
