@@ -623,6 +623,36 @@ CURLcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,
   return result;
 }
 
+#ifdef WOLFSSL_TLS13
+static size_t
+wssl_get_default_ciphers(bool tls13, char *buf, size_t size)
+{
+  size_t len = 0;
+  char *term = buf;
+  int i;
+  char *str;
+  size_t n;
+
+  for(i = 0; (str = wolfSSL_get_cipher_list(i)); i++) {
+    if((strncmp(str, "TLS13", 5) == 0) != tls13)
+      continue;
+
+    n = strlen(str);
+    if(buf && len + n + 1 <= size) {
+      memcpy(buf + len, str, n);
+      term = buf + len + n;
+      *term = ':';
+    }
+    len += n + 1;
+  }
+
+  if(buf)
+    *term = '\0';
+
+  return len > 0 ? len - 1 : 0;
+}
+#endif
+
 /*
  * This function loads all the client/CA certificates and CRLs. Setup the TLS
  * layer and do all necessary magic.
@@ -753,6 +783,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     break;
   }
 
+#ifndef WOLFSSL_TLS13
   ciphers = conn_config->cipher_list;
   if(ciphers) {
     if(!SSL_CTX_set_cipher_list(backend->ctx, ciphers)) {
@@ -761,6 +792,44 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     }
     infof(data, "Cipher selection: %s", ciphers);
   }
+#else
+  if(conn_config->cipher_list || conn_config->cipher_list13) {
+    const char *ciphers12 = conn_config->cipher_list;
+    const char *ciphers13 = conn_config->cipher_list13;
+
+    /* Set ciphers to a combination of ciphers_list and ciphers_list13.
+     * If cipher_list is not set use the default TLSv1.2 (1.1, 1.0) ciphers.
+     * If cipher_list13 is not set use the default TLSv1.3 ciphers. */
+    size_t len13 = ciphers13 ? strlen(ciphers13)
+        : wssl_get_default_ciphers(true, NULL, 0);
+    size_t len12 = ciphers12 ? strlen(ciphers12)
+        : wssl_get_default_ciphers(false, NULL, 0);
+
+    ciphers = malloc(len13 + 1 + len12 + 1);
+    if(!ciphers)
+      return CURLE_OUT_OF_MEMORY;
+
+    if(ciphers13)
+      memcpy(ciphers, ciphers13, len13);
+    else
+      wssl_get_default_ciphers(true, ciphers, len13 + 1);
+    ciphers[len13] = ':';
+
+    if(ciphers12)
+      memcpy(ciphers + len13 + 1, ciphers12, len12);
+    else
+      wssl_get_default_ciphers(false, ciphers + len13 + 1, len12 + 1);
+    ciphers[len13 + 1 + len12] = '\0';
+
+    if(!SSL_CTX_set_cipher_list(backend->ctx, ciphers)) {
+      failf(data, "failed setting cipher list: %s", ciphers);
+      free(ciphers);
+      return CURLE_SSL_CIPHER;
+    }
+    infof(data, "Cipher selection: %s", ciphers);
+    free(ciphers);
+  }
+#endif
 
   curves = conn_config->curves;
   if(curves) {
@@ -1846,6 +1915,9 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
   SSLSUPP_ECH |
 #endif
   SSLSUPP_SSL_CTX |
+#ifdef WOLFSSL_TLS13
+  SSLSUPP_TLS13_CIPHERSUITES |
+#endif
   SSLSUPP_CA_CACHE,
 
   sizeof(struct wolfssl_ctx),
