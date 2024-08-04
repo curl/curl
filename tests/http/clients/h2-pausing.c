@@ -25,17 +25,25 @@
  * HTTP/2 download pausing
  * </DESC>
  */
-/* This is based on the poc client of issue #11982
+/* This is based on the PoC client of issue #11982
  */
+#include <curl/curl.h>
+
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/time.h>
-#include <unistd.h>
 #include <stdlib.h>
-#include <curl/curl.h>
-#include <curl/mprintf.h>
 
+#ifndef _MSC_VER
+/* somewhat Unix-specific */
+#include <unistd.h>  /* getopt() */
+#endif
+
+#ifdef _MSC_VER
+#define snprintf _snprintf
+#endif
+
+#ifndef _MSC_VER
 #define HANDLECOUNT 2
 
 static void log_line_start(FILE *log, const char *idsbuf, curl_infotype type)
@@ -75,11 +83,10 @@ static int debug_cb(CURL *handle, curl_infotype type,
   if(!curl_easy_getinfo(handle, CURLINFO_XFER_ID, &xfer_id) && xfer_id >= 0) {
     if(!curl_easy_getinfo(handle, CURLINFO_CONN_ID, &conn_id) &&
         conn_id >= 0) {
-      curl_msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_2,
-                     xfer_id, conn_id);
+      snprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_2, xfer_id, conn_id);
     }
     else {
-      curl_msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_1, xfer_id);
+      snprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_1, xfer_id);
     }
   }
   else
@@ -192,9 +199,11 @@ static size_t cb(void *data, size_t size, size_t nmemb, void *clientp)
           handle->idx, (long)realsize);
   return realsize;
 }
+#endif /* !_MSC_VER */
 
 int main(int argc, char *argv[])
 {
+#ifndef _MSC_VER
   struct handle handles[HANDLECOUNT];
   CURLM *multi_handle;
   int i, still_running = 1, msgs_left, numfds;
@@ -263,8 +272,7 @@ int main(int argc, char *argv[])
     exit(1);
   }
   memset(&resolve, 0, sizeof(resolve));
-  curl_msnprintf(resolve_buf, sizeof(resolve_buf)-1,
-                 "%s:%s:127.0.0.1", host, port);
+  snprintf(resolve_buf, sizeof(resolve_buf)-1, "%s:%s:127.0.0.1", host, port);
   resolve = curl_slist_append(resolve, resolve_buf);
 
   for(i = 0; i<HANDLECOUNT; i++) {
@@ -339,7 +347,8 @@ int main(int argc, char *argv[])
     if(curl_multi_poll(multi_handle, NULL, 0, 100, &numfds) != CURLM_OK)
       err();
 
-    while((msg = curl_multi_info_read(multi_handle, &msgs_left))) {
+    /* !checksrc! disable EQUALSNULL 1 */
+    while((msg = curl_multi_info_read(multi_handle, &msgs_left)) != NULL) {
       if(msg->msg == CURLMSG_DONE) {
         for(i = 0; i<HANDLECOUNT; i++) {
           if(msg->easy_handle == handles[i].h) {
@@ -394,4 +403,10 @@ out:
   curl_global_cleanup();
 
   return rc;
+#else
+  (void)argc;
+  (void)argv;
+  fprintf(stderr, "Not supported with this compiler.\n");
+  return 1;
+#endif /* !_MSC_VER */
 }

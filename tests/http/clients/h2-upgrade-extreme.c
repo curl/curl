@@ -25,15 +25,16 @@
  * HTTP/2 Upgrade test
  * </DESC>
  */
+#include <curl/curl.h>
+
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
-#include <inttypes.h>
 /* #include <error.h> */
 #include <errno.h>
-#include <curl/curl.h>
-#include <curl/mprintf.h>
 
+#ifdef _MSC_VER
+#define snprintf _snprintf
+#endif
 
 static void log_line_start(FILE *log, const char *idsbuf, curl_infotype type)
 {
@@ -72,11 +73,10 @@ static int debug_cb(CURL *handle, curl_infotype type,
   if(!curl_easy_getinfo(handle, CURLINFO_XFER_ID, &xfer_id) && xfer_id >= 0) {
     if(!curl_easy_getinfo(handle, CURLINFO_CONN_ID, &conn_id) &&
         conn_id >= 0) {
-      curl_msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_2,
-                     xfer_id, conn_id);
+      snprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_2, xfer_id, conn_id);
     }
     else {
-      curl_msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_1, xfer_id);
+      snprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_1, xfer_id);
     }
   }
   else
@@ -181,8 +181,7 @@ int main(int argc, char *argv[])
       curl_easy_setopt(easy, CURLOPT_WRITEFUNCTION, write_cb);
       curl_easy_setopt(easy, CURLOPT_WRITEDATA, NULL);
       curl_easy_setopt(easy, CURLOPT_HTTPGET, 1L);
-      curl_msnprintf(range, sizeof(range), "%" PRIu64 "-%" PRIu64,
-                     UINT64_C(0), UINT64_C(16384));
+      snprintf(range, sizeof(range), "%d-%d", 0, 16384);
       curl_easy_setopt(easy, CURLOPT_RANGE, range);
 
       mc = curl_multi_add_handle(multi, easy);
@@ -211,7 +210,8 @@ int main(int argc, char *argv[])
     }
 
     /* Check for finished handles and remove. */
-    while((msg = curl_multi_info_read(multi, &msgs_in_queue))) {
+    /* !checksrc! disable EQUALSNULL 1 */
+    while((msg = curl_multi_info_read(multi, &msgs_in_queue)) != NULL) {
       if(msg->msg == CURLMSG_DONE) {
         long status = 0;
         curl_off_t xfer_id;

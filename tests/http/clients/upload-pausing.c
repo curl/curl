@@ -25,16 +25,24 @@
  * upload pausing
  * </DESC>
  */
-/* This is based on the poc client of issue #11769
+/* This is based on the PoC client of issue #11769
  */
+#include <curl/curl.h>
+
 #include <stdio.h>
 #include <string.h>
-#include <sys/time.h>
-#include <unistd.h>
 #include <stdlib.h>
-#include <curl/curl.h>
-#include <curl/mprintf.h>
 
+#ifndef _MSC_VER
+/* somewhat Unix-specific */
+#include <unistd.h>  /* getopt() */
+#endif
+
+#ifdef _MSC_VER
+#define snprintf _snprintf
+#endif
+
+#ifndef _MSC_VER
 static void log_line_start(FILE *log, const char *idsbuf, curl_infotype type)
 {
   /*
@@ -72,11 +80,10 @@ static int debug_cb(CURL *handle, curl_infotype type,
   if(!curl_easy_getinfo(handle, CURLINFO_XFER_ID, &xfer_id) && xfer_id >= 0) {
     if(!curl_easy_getinfo(handle, CURLINFO_CONN_ID, &conn_id) &&
         conn_id >= 0) {
-      curl_msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_2,
-                     xfer_id, conn_id);
+      snprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_2, xfer_id, conn_id);
     }
     else {
-      curl_msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_1, xfer_id);
+      snprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_1, xfer_id);
     }
   }
   else
@@ -192,9 +199,11 @@ static void usage(const char *msg)
     "  -V http_version (http/1.1, h2, h3) http version to use\n"
   );
 }
+#endif /* !_MSC_VER */
 
 int main(int argc, char *argv[])
 {
+#ifndef _MSC_VER
   CURL *curl;
   CURLcode rc = CURLE_OK;
   CURLU *cu;
@@ -254,8 +263,7 @@ int main(int argc, char *argv[])
     exit(1);
   }
   memset(&resolve, 0, sizeof(resolve));
-  curl_msnprintf(resolve_buf, sizeof(resolve_buf)-1,
-                 "%s:%s:127.0.0.1", host, port);
+  snprintf(resolve_buf, sizeof(resolve_buf)-1, "%s:%s:127.0.0.1", host, port);
   resolve = curl_slist_append(resolve, resolve_buf);
 
   curl = curl_easy_init();
@@ -306,4 +314,10 @@ int main(int argc, char *argv[])
   curl_global_cleanup();
 
   return (int)rc;
+#else
+  (void)argc;
+  (void)argv;
+  fprintf(stderr, "Not supported with this compiler.\n");
+  return 1;
+#endif /* !_MSC_VER */
 }

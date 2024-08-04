@@ -22,13 +22,23 @@
 #
 ###########################################################################
 
-# These are all libcurl example programs to be test compiled
-check_PROGRAMS = \
-  h2-download \
-  h2-pausing \
-  h2-serverpush \
-  h2-upgrade-extreme \
-  tls-session-reuse \
-  upload-pausing \
-  ws-data \
-  ws-pingpong
+# Get 'check_PROGRAMS' variable
+transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
+include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
+
+foreach(_client IN LISTS check_PROGRAMS)
+  set(_client_target "curl-test-client-${_client}")
+  add_executable(${_client_target} "${_client}.c")
+  add_dependencies(testdeps ${_client_target})
+  target_include_directories(${_client_target} PRIVATE
+    "${CURL_SOURCE_DIR}/lib"      # for "curl_setup_once.h"
+    "${CURL_BINARY_DIR}/lib"      # for "curl_config.h"
+    "${CURL_BINARY_DIR}/include"  # for "curl/curl.h"
+  )
+  target_link_libraries(${_client_target} ${LIB_SELECTED} ${CURL_LIBS})
+  target_compile_definitions(${_client_target} PRIVATE "CURL_NO_OLDIES")
+  if(LIB_SELECTED STREQUAL LIB_STATIC AND WIN32)
+    set_property(TARGET ${_client_target} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
+  endif()
+  set_target_properties(${_client_target} PROPERTIES OUTPUT_NAME "${_client}" UNITY_BUILD OFF)
+endforeach()

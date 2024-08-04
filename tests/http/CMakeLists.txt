@@ -22,13 +22,30 @@
 #
 ###########################################################################
 
-# These are all libcurl example programs to be test compiled
-check_PROGRAMS = \
-  h2-download \
-  h2-pausing \
-  h2-serverpush \
-  h2-upgrade-extreme \
-  tls-session-reuse \
-  upload-pausing \
-  ws-data \
-  ws-pingpong
+find_program(CADDY "caddy")  # /usr/bin/caddy
+if(NOT CADDY)
+  set(CADDY "")
+endif()
+find_program(VSFTPD "vsftpd")  # /usr/sbin/vsftpd
+if(NOT VSFTPD)
+  set(VSFTPD "")
+endif()
+find_program(HTTPD "apache2")  # /usr/sbin/apache2
+if(NOT HTTPD)
+  set(HTTPD "")
+endif()
+find_program(APACHECTL "apache2ctl")  # /usr/sbin/apache2ctl
+if(NOT APACHECTL)
+  set(APACHECTL "")
+endif()
+find_program(APXS "apxs")
+if(NOT APXS)
+  set(APXS "")
+endif()
+find_program(HTTPD_NGHTTPX "nghttpx" PATHS "/usr/bin" "/usr/local/bin")
+if(NOT HTTPD_NGHTTPX)
+  set(HTTPD_NGHTTPX "")
+endif()
+
+# APXS, HTTPD, APACHECTL, HTTPD_NGHTTPX, CADDY, VSFTPD
+configure_file("config.ini.in" "${CMAKE_CURRENT_BINARY_DIR}/config.ini" @ONLY)

@@ -23,9 +23,18 @@
 ###########################################################################
 set(CMAKE_UNITY_BUILD OFF)
 
+find_program(TEST_NGHTTPX "nghttpx")
+if(NOT TEST_NGHTTPX)
+  set(TEST_NGHTTPX "nghttpx")
+endif()
+# TEST_NGHTTPX
+configure_file("config.in" "${CMAKE_CURRENT_BINARY_DIR}/config" @ONLY)
+
 add_custom_target(testdeps)
-add_subdirectory(libtest)
+add_subdirectory(http)
+add_subdirectory(http/clients)
 add_subdirectory(server)
+add_subdirectory(libtest)
 add_subdirectory(unit)
 
 function(add_runtests targetname test_flags)

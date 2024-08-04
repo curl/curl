@@ -25,21 +25,19 @@
  * HTTP/2 server push
  * </DESC>
  */
-
 /* curl stuff */
 #include <curl/curl.h>
-#include <curl/mprintf.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-/* somewhat Unix-specific */
-#include <sys/time.h>
-#include <unistd.h>
-
 #ifndef CURLPIPE_MULTIPLEX
 #error "too old libcurl, cannot do HTTP/2 server push!"
+#endif
+
+#ifdef _MSC_VER
+#define snprintf _snprintf
 #endif
 
 static
@@ -172,7 +170,7 @@ static int server_push_callback(CURL *parent,
   int rv;
 
   (void)parent; /* we have no use for this */
-  curl_msnprintf(filename, sizeof(filename)-1, "push%u", count++);
+  snprintf(filename, sizeof(filename)-1, "push%u", count++);
 
   /* here's a new stream, save it in a new file for each new push */
   out = fopen(filename, "wb");

@@ -57,8 +57,8 @@ env:
   rustls-version: 0.13.0
 
 jobs:
-  autotools:
-    name: ${{ matrix.build.name }}
+  linux:
+    name: ${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.build.name }}
     runs-on: 'ubuntu-latest'
     container: ${{ matrix.build.container }}
     timeout-minutes: 90
@@ -82,6 +82,12 @@ jobs:
             install_packages: zlib1g-dev valgrind
             install_steps: libressl pytest
             configure: LDFLAGS="-Wl,-rpath,$HOME/libressl/lib" --with-openssl=$HOME/libressl --enable-debug
+            singleuse: --unit
+
+          - name: libressl
+            install_packages: zlib1g-dev valgrind
+            install_steps: libressl pytest
+            generate: -DOPENSSL_ROOT_DIR=$HOME/libressl -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
             singleuse: --unit
 
           - name: libressl-clang
@@ -412,29 +418,57 @@ jobs:
           sudo make install
 
       - run: autoreconf -fi
+        if: ${{ matrix.build.configure }}
         name: 'autoreconf'
 
       - run: ./configure --disable-dependency-tracking --enable-warnings --enable-werror ${{ matrix.build.configure }}
-        name: 'configure'
+        if: ${{ matrix.build.configure }}
+        name: 'configure (autotools)'
 
-      - run: make V=1
+      - run: |
+          cmake . \
+            -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
+            -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
+            -DBUILD_EXAMPLES=ON \
+            -DCURL_BROTLI=ON -DCURL_ZSTD=ON \
+            ${{ matrix.build.generate }}
+        if: ${{ matrix.build.generate }}
+        name: 'configure (cmake)'
+
+      - name: 'test configs'
+        run: |
+          cat tests/config || true
+          cat tests/http/config.ini || true
+
+      - run: make V=1 VERBOSE=1
         name: 'make'
 
       - run: |
           git config --global --add safe.directory "*"
-          ./scripts/singleuse.pl ${{ matrix.build.singleuse }} lib/.libs/libcurl.a
+          if [ -n '${{ matrix.build.generate }}' ]; then
+            libcurla=lib/libcurl.a
+          else
+            libcurla=lib/.libs/libcurl.a
+          fi
+          ./scripts/singleuse.pl ${{ matrix.build.singleuse }} ${libcurla}
         name: single-use function check
 
       - run: ./src/curl -V
         name: 'check curl -V output'
 
       - run: make V=1 examples
+        if: ${{ matrix.build.configure }}
         name: 'make examples'
 
       - run: make V=1 -C tests
-        name: 'make tests'
+        if: ${{ matrix.build.configure }}
+        name: 'make tests (autotools)'
 
-      - run: make V=1 test-ci
+      - run: make VERBOSE=1 testdeps
+        if: ${{ matrix.build.generate }}
+        name: 'make tests (cmake)'
+
+      - run: make V=1 VERBOSE=1 test-ci
         name: 'run tests'
         env:
           TFLAGS: "${{ matrix.build.tflags }}"
