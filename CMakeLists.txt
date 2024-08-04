@@ -123,12 +123,12 @@ if(WIN32)
   option(ENABLE_UNICODE "Set to ON to use the Unicode version of the Windows API functions" OFF)
   set(CURL_TARGET_WINDOWS_VERSION "" CACHE STRING "Minimum target Windows version as hex string")
   if(CURL_TARGET_WINDOWS_VERSION)
-    add_definitions(-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION})
-    list(APPEND CMAKE_REQUIRED_DEFINITIONS -D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION})
+    add_definitions("-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
+    list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
     set(CURL_TEST_DEFINES "${CURL_TEST_DEFINES} -D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
   endif()
   if(ENABLE_UNICODE)
-    add_definitions(-DUNICODE -D_UNICODE)
+    add_definitions("-DUNICODE" "-D_UNICODE")
     if(MINGW)
       add_compile_options(-municode)
     endif()
@@ -898,7 +898,7 @@ if(NOT CURL_DISABLE_LDAP)
         set(_include_string "${_include_string}#include <${_header}>\n")
       endforeach()
 
-      list(APPEND CMAKE_REQUIRED_DEFINITIONS -DLDAP_DEPRECATED=1)
+      list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DLDAP_DEPRECATED=1")
       list(APPEND CMAKE_REQUIRED_LIBRARIES ${CMAKE_LDAP_LIB})
       set(CURL_LIBS "${CMAKE_LDAP_LIB};${CURL_LIBS}")
       if(HAVE_LIBLBER)
@@ -1607,7 +1607,7 @@ endif()
 
 include(CMake/OtherTests.cmake)
 
-add_definitions(-DHAVE_CONFIG_H)
+add_definitions("-DHAVE_CONFIG_H")
 
 # For Windows, all compilers used by CMake should support large files
 if(WIN32)
@@ -1631,7 +1631,7 @@ if(MSVC)
   # Disable default manifest added by CMake
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO")
 
-  add_definitions(-D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
+  add_definitions("-D_CRT_SECURE_NO_DEPRECATE" "-D_CRT_NONSTDC_NO_DEPRECATE")
   if(CMAKE_C_FLAGS MATCHES "/W[0-4]")
     string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
   else()
@@ -1730,7 +1730,7 @@ endif()
 if(ENABLE_DIST_TEST)
   # Get 'CMAKE_DIST' variable
   transform_makefile_inc("Makefile.am" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.am.cmake")
-  include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.am.cmake)
+  include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.am.cmake")
 
   file(GLOB_RECURSE _curl_cmake_files_found RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
     "${CMAKE_CURRENT_SOURCE_DIR}/CMake/*.cmake"

@@ -51,9 +51,8 @@ function(setup_executable test_name)  # ARGN are the files in the test
 endfunction()
 
 # Get 'noinst_PROGRAMS', '<target>_SOURCES' variables
-transform_makefile_inc("Makefile.inc"
-  "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
-include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
+transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
+include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 foreach(_executable_name IN LISTS noinst_PROGRAMS)
   setup_executable(${_executable_name} ${${_executable_name}_SOURCES})

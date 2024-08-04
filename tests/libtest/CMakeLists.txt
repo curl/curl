@@ -53,7 +53,7 @@ endfunction()
 
 # Get 'noinst_PROGRAMS', '*_SOURCES' variables
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
-include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
+include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 foreach(_test_name IN LISTS noinst_PROGRAMS)
   if(DEFINED ${_test_name}_SOURCES)

@@ -22,7 +22,7 @@
 #
 ###########################################################################
 set(EXE_NAME curl)
-add_definitions(-DBUILDING_CURL)
+add_definitions("-DBUILDING_CURL")
 
 if(ENABLE_CURL_MANUAL AND HAVE_MANUAL_TOOLS)
   add_definitions("-DUSE_MANUAL")
@@ -52,7 +52,7 @@ endif()
 
 # Get 'CURL_CFILES', 'CURLX_CFILES', 'CURL_HFILES', 'CURLTOOL_LIBCURL_CFILES' variables
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
-include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
+include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 if(CURL_CA_EMBED_SET)
   if(PERL_FOUND)
@@ -110,7 +110,7 @@ if(CURL_HAS_LTO)
 endif()
 
 if(ENABLE_UNICODE AND MINGW)
-  target_link_libraries(${EXE_NAME} -municode)
+  target_link_libraries(${EXE_NAME} "-municode")
 endif()
 
 source_group("curlX source files" FILES ${CURLX_CFILES})
@@ -131,6 +131,6 @@ target_link_libraries(${EXE_NAME} ${LIB_SELECTED_FOR_EXE} ${CURL_LIBS})
 
 install(TARGETS ${EXE_NAME} EXPORT ${TARGETS_EXPORT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
 export(TARGETS ${EXE_NAME}
-  FILE ${PROJECT_BINARY_DIR}/curl-target.cmake
+  FILE "${PROJECT_BINARY_DIR}/curl-target.cmake"
   NAMESPACE ${PROJECT_NAME}::
 )

@@ -23,14 +23,13 @@
 ###########################################################################
 set(LIB_NAME libcurl)
 set(LIBCURL_OUTPUT_NAME libcurl CACHE STRING "Basename of the curl library")
-add_definitions(-DBUILDING_LIBCURL)
+add_definitions("-DBUILDING_LIBCURL")
 
-configure_file(curl_config.h.cmake
-  ${CMAKE_CURRENT_BINARY_DIR}/curl_config.h)
+configure_file("curl_config.h.cmake" "${CMAKE_CURRENT_BINARY_DIR}/curl_config.h")
 
 # Get 'CSOURCES', 'HHEADERS' variables
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
-include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
+include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 # DllMain is added later for DLL builds only.
 list(REMOVE_ITEM CSOURCES dllmain.c)
@@ -213,7 +212,7 @@ if(BUILD_SHARED_LIBS)
   if(CURL_LIBCURL_SOVERSION OR CURL_LIBCURL_VERSIONED_SYMBOLS)
     # Get 'VERSIONCHANGE', 'VERSIONADD', 'VERSIONDEL', 'VERSIONINFO' variables
     transform_makefile_inc("Makefile.soname" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake")
-    include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake)
+    include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake")
 
     math(EXPR _cmakesoname "${VERSIONCHANGE} - ${VERSIONDEL}")
     set(_cmakeversion "${_cmakesoname}.${VERSIONDEL}.${VERSIONADD}")
@@ -285,7 +284,7 @@ if(CURL_ENABLE_EXPORT_TARGET)
   endif()
 
   export(TARGETS ${libcurl_export}
-    FILE ${PROJECT_BINARY_DIR}/libcurl-target.cmake
+    FILE "${PROJECT_BINARY_DIR}/libcurl-target.cmake"
     NAMESPACE ${PROJECT_NAME}::
   )
 endif()

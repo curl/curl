@@ -24,7 +24,7 @@
 
 # Get 'UNITPROGS', 'UNITFILES' variables
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
-include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
+include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 include_directories(
   "${CURL_BINARY_DIR}/lib"            # for "curl_config.h"
