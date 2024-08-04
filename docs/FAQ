@@ -566,7 +566,7 @@ FAQ
   3.10 What about SOAP, WebDAV, XML-RPC or similar protocols over HTTP?
 
   curl adheres to the HTTP spec, which basically means you can play with *any*
-  protocol that is built on top of HTTP. Protocols such as SOAP, WEBDAV and
+  protocol that is built on top of HTTP. Protocols such as SOAP, WebDAV and
   XML-RPC are all such ones. You can use -X to set custom requests and -H to
   set custom headers (or replace internally generated ones).
 
