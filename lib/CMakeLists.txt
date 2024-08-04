@@ -251,16 +251,12 @@ if(BUILD_SHARED_LIBS)
         endif()
       endif()
       file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/libcurl.vers" "
-HIDDEN
-{
-};
-
-CURL_${CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX}${_cmakesoname}
-{
-  global: curl_*;
-  local: *;
-};
-")
+        HIDDEN {};
+        CURL_${CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX}${_cmakesoname}
+        {
+          global: curl_*;
+          local: *;
+        };")
       include(CheckCSourceCompiles)
       set(CMAKE_REQUIRED_LINK_OPTIONS "-Wl,--version-script=${CMAKE_CURRENT_BINARY_DIR}/libcurl.vers")
       check_c_source_compiles("int main(void) { return 0; }" HAVE_VERSIONED_SYMBOLS)
