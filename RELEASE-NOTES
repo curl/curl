@@ -1,16 +1,19 @@
 curl and libcurl 8.10.0
 
  Public curl releases:         260
- Command line options:         263
+ Command line options:         264
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3212
+ Contributors:                 3213
 
 This release includes the following changes:
 
- o curl: support embedding a CA bundle [20]
- o getparam: make --rate accept "number of units" [4]
- o tool_getparam: make --show-headers the same as --include [6]
+ o curl: --help [option] displays documentation for given cmdline option [19]
+ o curl: for -O, use "default" as filename when the URL has none [34]
+ o curl: make --rate accept "number of units" [4]
+ o curl: make --show-headers the same as --include [6]
+ o curl: support --dump-header % to direct to stderr [31]
+ o curl: support embedding a CA bundle and --dump-ca-embed [20]
 
 This release includes the following bugfixes:
 
@@ -30,6 +33,7 @@ This release includes the following bugfixes:
  o dist: add missing `FindNettle.cmake` [11]
  o dist: fix reproducible build from release tarball [36]
  o dmaketgz: only run 'make distclean' if Makefile exists
+ o doh-url.md: point out DOH server IP pinning [37]
  o escape: allow curl_easy_escape to generate 3*input length output [39]
  o GHA/windows: enable MulitSSL in an MSVC job [2]
  o GHA: scan git repository and detect unvetted binary files [3]
@@ -39,7 +43,9 @@ This release includes the following bugfixes:
  o lib: convert some debugf()s into traces [8]
  o libcurl.pc: add `Cflags.private` [10]
  o Makefile: remove 'scripts' duplicate from DIST_SUBDIRS
+ o maketgz: accept option to include latest commit hash [5]
  o progress: ratelimit/progress tweaks [32]
+ o pytests: add tests for HEAD requests in all HTTP versions [42]
  o rustls: make all tests pass [1]
  o tests/http: configure test httpd to honor client cipher order [35]
  o tests: provide docs as curldown, not nroff [12]
@@ -67,9 +73,9 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Antoine du Hamel, Christoph Reiter, Dan Fandrich, Daniel Stenberg,
-  Joe Birr-Pixton, Matt Jolly, renovate[bot], Sergio Durigan Junior,
-  Stefan Eissing, Tal Regev, Viktor Szakats
-  (11 contributors)
+  David Sardari, Joe Birr-Pixton, Matt Jolly, renovate[bot],
+  Sergio Durigan Junior, Stefan Eissing, Tal Regev, Viktor Szakats
+  (12 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -77,6 +83,7 @@ References to bug reports and discussions on issues:
  [2] = https://curl.se/bug/?i=14276
  [3] = https://curl.se/bug/?i=14333
  [4] = https://curl.se/bug/?i=14245
+ [5] = https://curl.se/bug/?i=14363
  [6] = https://curl.se/bug/?i=13987
  [7] = https://curl.se/bug/?i=14308
  [8] = https://curl.se/bug/?i=14322
@@ -90,6 +97,7 @@ References to bug reports and discussions on issues:
  [16] = https://curl.se/bug/?i=14195
  [17] = https://curl.se/bug/?i=14264
  [18] = https://curl.se/bug/?i=11510
+ [19] = https://curl.se/bug/?i=13997
  [20] = https://curl.se/bug/?i=14059
  [21] = https://curl.se/bug/?i=14136
  [22] = https://curl.se/bug/?i=14361
@@ -101,10 +109,14 @@ References to bug reports and discussions on issues:
  [28] = https://curl.se/bug/?i=14352
  [29] = https://curl.se/bug/?i=14350
  [30] = https://curl.se/bug/?i=14355
+ [31] = https://curl.se/bug/?i=13992
  [32] = https://curl.se/bug/?i=14335
  [33] = https://curl.se/bug/?i=14326
+ [34] = https://curl.se/bug/?i=13988
  [35] = https://curl.se/bug/?i=14338
  [36] = https://curl.se/bug/?i=14336
+ [37] = https://curl.se/bug/?i=14377
  [38] = https://curl.se/bug/?i=14337
  [39] = https://curl.se/bug/?i=14339
  [40] = https://curl.se/bug/?i=14331
+ [42] = https://curl.se/bug/?i=14367
