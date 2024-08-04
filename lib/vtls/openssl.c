@@ -1879,7 +1879,7 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
   struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
   CURLcode result = CURLE_OK;
   char buf[1024];
-  int nread, err;
+  int nread = -1, err;
   unsigned long sslerr;
   size_t i;
 
@@ -1920,26 +1920,32 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
         goto out;
       }
     }
-    if(send_shutdown && SSL_shutdown(octx->ssl) == 1) {
-      CURL_TRC_CF(data, cf, "SSL shutdown finished");
-      *done = TRUE;
-      goto out;
-    }
   }
 
   /* SSL should now have started the shutdown from our side. Since it
    * was not complete, we are lacking the close notify from the server. */
+  if(send_shutdown) {
+    ERR_clear_error();
+    if(SSL_shutdown(octx->ssl) == 1) {
+      CURL_TRC_CF(data, cf, "SSL shutdown finished");
+      *done = TRUE;
+      goto out;
+    }
+    if(SSL_ERROR_WANT_WRITE == SSL_get_error(octx->ssl, nread)) {
+      CURL_TRC_CF(data, cf, "SSL shutdown still wants to send");
+      connssl->io_need = CURL_SSL_IO_NEED_SEND;
+      goto out;
+    }
+    /* Having sent the close notify, we use SSL_read() to get the
+     * missing close notify from the server. */
+  }
+
   for(i = 0; i < 10; ++i) {
     ERR_clear_error();
     nread = SSL_read(octx->ssl, buf, (int)sizeof(buf));
     CURL_TRC_CF(data, cf, "SSL shutdown read -> %d", nread);
     if(nread <= 0)
       break;
-  }
-  if(SSL_get_shutdown(octx->ssl) & SSL_RECEIVED_SHUTDOWN) {
-    CURL_TRC_CF(data, cf, "SSL shutdown received, finished");
-    *done = TRUE;
-    goto out;
   }
   err = SSL_get_error(octx->ssl, nread);
   switch(err) {
@@ -3632,6 +3638,11 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
   SSL_CTX_set_options(octx->ssl_ctx, ctx_options);
 
+#ifdef SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER
+  /* We do retry writes sometimes from another buffer address */
+  SSL_CTX_set_mode(octx->ssl_ctx, SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
+#endif
+
 #ifdef HAS_ALPN
   if(alpn && alpn_len) {
     if(SSL_CTX_set_alpn_protos(octx->ssl_ctx, alpn, (int)alpn_len)) {
@@ -4111,30 +4122,34 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
      <0 is "handshake was not successful, because a fatal error occurred" */
   if(1 != err) {
     int detail = SSL_get_error(octx->ssl, err);
+    CURL_TRC_CF(data, cf, "SSL_connect() -> err=%d, detail=%d", err, detail);
 
     if(SSL_ERROR_WANT_READ == detail) {
+      CURL_TRC_CF(data, cf, "SSL_connect() -> want recv");
       connssl->io_need = CURL_SSL_IO_NEED_RECV;
       return CURLE_OK;
     }
     if(SSL_ERROR_WANT_WRITE == detail) {
+      CURL_TRC_CF(data, cf, "SSL_connect() -> want send");
       connssl->io_need = CURL_SSL_IO_NEED_SEND;
       return CURLE_OK;
     }
 #ifdef SSL_ERROR_WANT_ASYNC
     if(SSL_ERROR_WANT_ASYNC == detail) {
+      CURL_TRC_CF(data, cf, "SSL_connect() -> want async");
+      connssl->io_need = CURL_SSL_IO_NEED_RECV;
       connssl->connecting_state = ssl_connect_2;
       return CURLE_OK;
     }
 #endif
 #ifdef SSL_ERROR_WANT_RETRY_VERIFY
     if(SSL_ERROR_WANT_RETRY_VERIFY == detail) {
+      CURL_TRC_CF(data, cf, "SSL_connect() -> want retry_verify");
+      connssl->io_need = CURL_SSL_IO_NEED_RECV;
       connssl->connecting_state = ssl_connect_2;
       return CURLE_OK;
     }
 #endif
-    if(octx->io_result == CURLE_AGAIN) {
-      return CURLE_OK;
-    }
     else {
       /* untreated error */
       sslerr_t errdetail;
@@ -4722,6 +4737,7 @@ static CURLcode ossl_connect_common(struct Curl_cfilter *cf,
   curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
   int what;
 
+  connssl->io_need = CURL_SSL_IO_NEED_NONE;
   /* check if the connection has already been established */
   if(ssl_connection_complete == connssl->state) {
     *done = TRUE;
@@ -4868,6 +4884,7 @@ static ssize_t ossl_send(struct Curl_cfilter *cf,
 
   ERR_clear_error();
 
+  connssl->io_need = CURL_SSL_IO_NEED_NONE;
   memlen = (len > (size_t)INT_MAX) ? INT_MAX : (int)len;
   rc = SSL_write(octx->ssl, mem, memlen);
 
@@ -4876,10 +4893,11 @@ static ssize_t ossl_send(struct Curl_cfilter *cf,
 
     switch(err) {
     case SSL_ERROR_WANT_READ:
+      connssl->io_need = CURL_SSL_IO_NEED_RECV;
+      *curlcode = CURLE_AGAIN;
+      rc = -1;
+      goto out;
     case SSL_ERROR_WANT_WRITE:
-      /* The operation did not complete; the same TLS/SSL I/O function
-         should be called again later. This is basically an EWOULDBLOCK
-         equivalent. */
       *curlcode = CURLE_AGAIN;
       rc = -1;
       goto out;
@@ -4951,6 +4969,7 @@ static ssize_t ossl_recv(struct Curl_cfilter *cf,
 
   ERR_clear_error();
 
+  connssl->io_need = CURL_SSL_IO_NEED_NONE;
   buffsize = (buffersize > (size_t)INT_MAX) ? INT_MAX : (int)buffersize;
   nread = (ssize_t)SSL_read(octx->ssl, buf, buffsize);
 
@@ -4969,8 +4988,11 @@ static ssize_t ossl_recv(struct Curl_cfilter *cf,
         connclose(conn, "TLS close_notify");
       break;
     case SSL_ERROR_WANT_READ:
+      *curlcode = CURLE_AGAIN;
+      nread = -1;
+      goto out;
     case SSL_ERROR_WANT_WRITE:
-      /* there is data pending, re-invoke SSL_read() */
+      connssl->io_need = CURL_SSL_IO_NEED_SEND;
       *curlcode = CURLE_AGAIN;
       nread = -1;
       goto out;
