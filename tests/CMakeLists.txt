@@ -37,13 +37,13 @@ add_subdirectory(server)
 add_subdirectory(libtest)
 add_subdirectory(unit)
 
-function(add_runtests targetname test_flags)
+function(add_runtests _targetname _test_flags)
   # Use a special '$TFLAGS' placeholder as last argument which will be
   # replaced by the contents of the environment variable in runtests.pl.
   # This is a workaround for CMake's limitation where commands executed by
   # 'make' or 'ninja' cannot portably reference environment variables.
-  string(REPLACE " " ";" _test_flags_list "${test_flags}")
-  add_custom_target(${targetname}
+  string(REPLACE " " ";" _test_flags_list "${_test_flags}")
+  add_custom_target(${_targetname}
     COMMAND
       "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/runtests.pl"
       ${_test_flags_list}

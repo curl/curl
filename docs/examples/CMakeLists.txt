@@ -23,9 +23,8 @@
 ###########################################################################
 
 # Get 'check_PROGRAMS' variable
-transform_makefile_inc("Makefile.inc"
-  "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
-include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
+transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
+include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 foreach(_example IN LISTS check_PROGRAMS)
   set(_example_target "curl-example-${_example}")
@@ -35,5 +34,6 @@ foreach(_example IN LISTS check_PROGRAMS)
   if(LIB_SELECTED STREQUAL LIB_STATIC AND WIN32)
     set_property(TARGET ${_example_target} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
   endif()
-  set_target_properties(${_example_target} PROPERTIES OUTPUT_NAME "${_example}" UNITY_BUILD OFF)
+  set_target_properties(${_example_target} PROPERTIES
+    OUTPUT_NAME "${_example}" UNITY_BUILD OFF)
 endforeach()

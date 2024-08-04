@@ -25,10 +25,10 @@ include(CheckCSourceCompiles)
 include(CheckCSourceRuns)
 include(CheckTypeSize)
 
-macro(add_header_include check header)
-  if(${check})
+macro(add_header_include _check _header)
+  if(${_check})
     set(_source_epilogue "${_source_epilogue}
-      #include <${header}>")
+      #include <${_header}>")
   endif()
 endmacro()
 
@@ -45,6 +45,7 @@ if(NOT DEFINED HAVE_STRUCT_SOCKADDR_STORAGE)
   endif()
   check_type_size("struct sockaddr_storage" SIZEOF_STRUCT_SOCKADDR_STORAGE)
   set(HAVE_STRUCT_SOCKADDR_STORAGE ${HAVE_SIZEOF_STRUCT_SOCKADDR_STORAGE})
+  set(CMAKE_EXTRA_INCLUDE_FILES "")
 endif()
 
 if(NOT WIN32)

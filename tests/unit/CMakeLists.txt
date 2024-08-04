@@ -24,7 +24,7 @@
 
 # Get 'UNITPROGS', 'UNITFILES' variables
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
-include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
+include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 include_directories(
   "${CURL_BINARY_DIR}/lib"            # for "curl_config.h"
@@ -33,8 +33,10 @@ include_directories(
   "${CURL_SOURCE_DIR}/tests/libtest"
 )
 
-foreach(_testfile IN LISTS UNITPROGS)
-  add_executable(${_testfile} EXCLUDE_FROM_ALL ${_testfile}.c ${UNITFILES})
-  add_dependencies(testdeps ${_testfile})
-  target_link_libraries(${_testfile} curltool curlu)
+foreach(_test_name IN LISTS UNITPROGS)
+  add_executable(${_test_name} EXCLUDE_FROM_ALL "${_test_name}.c" ${UNITFILES})
+  add_dependencies(testdeps ${_test_name})
+  target_link_libraries(${_test_name} curltool curlu)
+  set_target_properties(${_test_name} PROPERTIES
+    PROJECT_LABEL "Test unit ${_test_name}")
 endforeach()

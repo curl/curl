@@ -24,22 +24,23 @@
 # Find the quiche library
 #
 # Result Variables:
+#
 # QUICHE_FOUND         System has quiche
 # QUICHE_INCLUDE_DIRS  The quiche include directories
 # QUICHE_LIBRARIES     The libraries needed to use quiche
 
 if(UNIX)
   find_package(PkgConfig QUIET)
-  pkg_search_module(PC_QUICHE quiche)
+  pkg_search_module(PC_QUICHE "quiche")
 endif()
 
-find_path(QUICHE_INCLUDE_DIR quiche.h
+find_path(QUICHE_INCLUDE_DIR "quiche.h"
   HINTS
     ${PC_QUICHE_INCLUDEDIR}
     ${PC_QUICHE_INCLUDE_DIRS}
 )
 
-find_library(QUICHE_LIBRARY NAMES quiche
+find_library(QUICHE_LIBRARY NAMES "quiche"
   HINTS
     ${PC_QUICHE_LIBDIR}
     ${PC_QUICHE_LIBRARY_DIRS}
@@ -48,13 +49,13 @@ find_library(QUICHE_LIBRARY NAMES quiche
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(QUICHE
   REQUIRED_VARS
-    QUICHE_LIBRARY
     QUICHE_INCLUDE_DIR
+    QUICHE_LIBRARY
 )
 
 if(QUICHE_FOUND)
-  set(QUICHE_LIBRARIES    ${QUICHE_LIBRARY})
   set(QUICHE_INCLUDE_DIRS ${QUICHE_INCLUDE_DIR})
+  set(QUICHE_LIBRARIES    ${QUICHE_LIBRARY})
 endif()
 
 mark_as_advanced(QUICHE_INCLUDE_DIRS QUICHE_LIBRARIES)

@@ -21,25 +21,31 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# - Try to find the libssh2 library
-# Once done this defines
+# Find the libssh2 library
 #
-# LIBSSH2_FOUND - system has the libssh2 library
-# LIBSSH2_INCLUDE_DIR - the libssh2 include directory
-# LIBSSH2_LIBRARY - the libssh2 library name
+# Result Variables:
+#
+# LIBSSH2_FOUND        System has libssh2
+# LIBSSH2_INCLUDE_DIR  The libssh2 include directory
+# LIBSSH2_LIBRARY      The libssh2 library name
+# LIBSSH2_VERSION      Version of libssh2
 
-find_path(LIBSSH2_INCLUDE_DIR libssh2.h)
+find_path(LIBSSH2_INCLUDE_DIR "libssh2.h")
 
-find_library(LIBSSH2_LIBRARY NAMES ssh2 libssh2)
+find_library(LIBSSH2_LIBRARY NAMES "ssh2" "libssh2")
 
 if(LIBSSH2_INCLUDE_DIR)
-  file(STRINGS "${LIBSSH2_INCLUDE_DIR}/libssh2.h" libssh2_version_str REGEX "^#define[\t ]+LIBSSH2_VERSION[\t ]+\"(.*)\"")
-  string(REGEX REPLACE "^.*\"([^\"]+)\"" "\\1"  LIBSSH2_VERSION "${libssh2_version_str}")
+  file(STRINGS "${LIBSSH2_INCLUDE_DIR}/libssh2.h" _libssh2_version_str REGEX "^#define[\t ]+LIBSSH2_VERSION[\t ]+\"(.*)\"")
+  string(REGEX REPLACE "^.*\"([^\"]+)\"" "\\1"  LIBSSH2_VERSION "${_libssh2_version_str}")
 endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(LibSSH2
-  REQUIRED_VARS LIBSSH2_LIBRARY LIBSSH2_INCLUDE_DIR
-  VERSION_VAR LIBSSH2_VERSION)
+  REQUIRED_VARS
+    LIBSSH2_INCLUDE_DIR
+    LIBSSH2_LIBRARY
+  VERSION_VAR
+    LIBSSH2_VERSION
+)
 
 mark_as_advanced(LIBSSH2_INCLUDE_DIR LIBSSH2_LIBRARY)

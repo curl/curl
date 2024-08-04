@@ -23,23 +23,25 @@
 ###########################################################################
 # Find the zstd library
 #
-# Result Variables
+# Result Variables:
+#
 # Zstd_FOUND         System has zstd
-# Zstd_INCLUDE_DIRS  The zstd include directories.
+# Zstd_INCLUDE_DIRS  The zstd include directories
 # Zstd_LIBRARIES     The libraries needed to use zstd
+# Zstd_VERSION       Version of zstd
 
 if(UNIX)
   find_package(PkgConfig QUIET)
-  pkg_search_module(PC_Zstd libzstd)
+  pkg_search_module(PC_Zstd "libzstd")
 endif()
 
-find_path(Zstd_INCLUDE_DIR zstd.h
+find_path(Zstd_INCLUDE_DIR "zstd.h"
   HINTS
     ${PC_Zstd_INCLUDEDIR}
     ${PC_Zstd_INCLUDE_DIRS}
 )
 
-find_library(Zstd_LIBRARY NAMES zstd
+find_library(Zstd_LIBRARY NAMES "zstd"
   HINTS
     ${PC_Zstd_LIBDIR}
     ${PC_Zstd_LIBRARY_DIRS}
@@ -54,14 +56,15 @@ endif()
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Zstd
   REQUIRED_VARS
-    Zstd_LIBRARY
     Zstd_INCLUDE_DIR
-  VERSION_VAR Zstd_VERSION
+    Zstd_LIBRARY
+  VERSION_VAR
+    Zstd_VERSION
 )
 
 if(Zstd_FOUND)
-  set(Zstd_LIBRARIES    ${Zstd_LIBRARY})
   set(Zstd_INCLUDE_DIRS ${Zstd_INCLUDE_DIR})
+  set(Zstd_LIBRARIES    ${Zstd_LIBRARY})
 endif()
 
 mark_as_advanced(Zstd_INCLUDE_DIRS Zstd_LIBRARIES)

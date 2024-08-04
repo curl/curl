@@ -21,9 +21,17 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+# Find the wolfssl library
+#
+# Result Variables:
+#
+# WolfSSL_FOUND         System has wolfssl
+# WolfSSL_INCLUDE_DIRS  The wolfssl include directories
+# WolfSSL_LIBRARIES     The wolfssl library names
+# WolfSSL_VERSION       Version of wolfssl
 
 find_package(PkgConfig QUIET)
-pkg_check_modules(PC_WOLFSSL QUIET "wolfssl")
+pkg_search_module(PC_WOLFSSL QUIET "wolfssl")
 
 find_path(WolfSSL_INCLUDE_DIR
   NAMES "wolfssl/ssl.h"
@@ -49,7 +57,8 @@ find_package_handle_standard_args(WolfSSL
   REQUIRED_VARS
     WolfSSL_INCLUDE_DIR
     WolfSSL_LIBRARY
-  VERSION_VAR WolfSSL_VERSION
+  VERSION_VAR
+    WolfSSL_VERSION
 )
 
 if(WolfSSL_FOUND)

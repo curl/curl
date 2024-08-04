@@ -21,18 +21,16 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-set(TARGET_LABEL_PREFIX "Test ")
-
-function(setup_test test_name)  # ARGN are the files in the test
+function(setup_test _test_name)  # ARGN are the files in the test
 
   if(LIB_SELECTED STREQUAL LIB_STATIC)
     # These are part of the libcurl static lib. Do not compile/link them again.
     list(REMOVE_ITEM ARGN ${WARNLESS} ${MULTIBYTE} ${TIMEDIFF})
   endif()
 
-  add_executable(${test_name} EXCLUDE_FROM_ALL ${ARGN})
-  add_dependencies(testdeps ${test_name})
-  string(TOUPPER ${test_name} UPPER_TEST_NAME)
+  add_executable(${_test_name} EXCLUDE_FROM_ALL ${ARGN})
+  add_dependencies(testdeps ${_test_name})
+  string(TOUPPER ${_test_name} _upper_test_name)
 
   include_directories(
     "${CURL_BINARY_DIR}/lib"            # for "curl_config.h"
@@ -43,17 +41,16 @@ function(setup_test test_name)  # ARGN are the files in the test
     include_directories(${CARES_INCLUDE_DIR})
   endif()
 
-  target_link_libraries(${test_name} ${LIB_SELECTED} ${CURL_LIBS})
+  target_link_libraries(${_test_name} ${LIB_SELECTED} ${CURL_LIBS})
 
-  set_target_properties(${test_name}
-    PROPERTIES COMPILE_DEFINITIONS ${UPPER_TEST_NAME})
-  set_target_properties(${test_name}
-    PROPERTIES PROJECT_LABEL "${TARGET_LABEL_PREFIX}${test_name}")
+  set_target_properties(${_test_name} PROPERTIES
+    COMPILE_DEFINITIONS ${_upper_test_name}
+    PROJECT_LABEL "Test ${_test_name}")
 endfunction()
 
 # Get 'noinst_PROGRAMS', '*_SOURCES' variables
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
-include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
+include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 foreach(_test_name IN LISTS noinst_PROGRAMS)
   if(DEFINED ${_test_name}_SOURCES)
@@ -66,12 +63,12 @@ endforeach()
 # Allows for hostname override to make tests machine independent.
 # TODO: this cmake build assumes a shared build, detect static linking here!
 if(NOT WIN32)
-  add_library(hostname MODULE EXCLUDE_FROM_ALL sethostname.c)
+  add_library(hostname MODULE EXCLUDE_FROM_ALL "sethostname.c")
   add_dependencies(testdeps hostname)
   # Output to .libs for compatibility with autotools, the test data expects a
   # library at (tests)/libtest/.libs/libhostname.so
   set_target_properties(hostname PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/.libs)
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/.libs")
   if(HIDES_CURL_PRIVATE_SYMBOLS)
     set_property(TARGET hostname APPEND PROPERTY COMPILE_DEFINITIONS "CURL_HIDDEN_SYMBOLS")
     set_property(TARGET hostname APPEND PROPERTY COMPILE_FLAGS ${CURL_CFLAG_SYMBOLS_HIDE})
@@ -79,8 +76,8 @@ if(NOT WIN32)
 endif()
 
 add_custom_command(
-  OUTPUT lib1521.c
-  COMMAND ${PERL_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/mk-lib1521.pl < ${CURL_SOURCE_DIR}/include/curl/curl.h > lib1521.c
+  OUTPUT "lib1521.c"
+  COMMAND ${PERL_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/mk-lib1521.pl" < "${CURL_SOURCE_DIR}/include/curl/curl.h" > "lib1521.c"
   DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/mk-lib1521.pl"
     "${CURL_SOURCE_DIR}/include/curl/curl.h"

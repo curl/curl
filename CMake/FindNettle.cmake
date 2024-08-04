@@ -21,16 +21,18 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# - Try to find the nettle library
-# Once done this defines
+# Find the nettle library
 #
-# NETTLE_FOUND - system has nettle
-# NETTLE_INCLUDE_DIRS - nettle include directories
-# NETTLE_LIBRARIES - nettle library names
+# Result Variables:
+#
+# NETTLE_FOUND         System has nettle
+# NETTLE_INCLUDE_DIRS  The nettle include directories
+# NETTLE_LIBRARIES     The nettle library names
+# NETTLE_VERSION       Version of nettle
 
 if(UNIX)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(NETTLE "nettle")
+  pkg_search_module(NETTLE "nettle")
 endif()
 
 if(NETTLE_FOUND)
@@ -64,7 +66,9 @@ else()
     REQUIRED_VARS
       NETTLE_INCLUDE_DIR
       NETTLE_LIBRARY
-    VERSION_VAR NETTLE_VERSION)
+    VERSION_VAR
+      NETTLE_VERSION
+  )
 
   if(NETTLE_FOUND)
     set(NETTLE_INCLUDE_DIRS ${NETTLE_INCLUDE_DIR})

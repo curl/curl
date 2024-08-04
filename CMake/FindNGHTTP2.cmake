@@ -21,6 +21,14 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+# Find the nghttp2 library
+#
+# Result Variables:
+#
+# NGHTTP2_FOUND         System has nghttp2
+# NGHTTP2_INCLUDE_DIRS  The nghttp2 include directories
+# NGHTTP2_LIBRARIES     The libraries needed to use nghttp2
+# NGHTTP2_VERSION       Version of nghttp2
 
 if(UNIX)
   find_package(PkgConfig QUIET)
@@ -48,9 +56,10 @@ find_package_handle_standard_args(NGHTTP2
   FOUND_VAR
     NGHTTP2_FOUND
   REQUIRED_VARS
-    NGHTTP2_LIBRARY
     NGHTTP2_INCLUDE_DIR
-  VERSION_VAR NGHTTP2_VERSION
+    NGHTTP2_LIBRARY
+  VERSION_VAR
+    NGHTTP2_VERSION
 )
 
 if(NGHTTP2_FOUND)

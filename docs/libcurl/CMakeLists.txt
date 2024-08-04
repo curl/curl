@@ -41,7 +41,7 @@ function(add_manual_pages _listname)
     if(NOT _file_count LESS ${_files_per_batch} OR _file STREQUAL "_EOL_")
       add_custom_command(OUTPUT ${_rofffiles}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        COMMAND "${PERL_EXECUTABLE}" ${PROJECT_SOURCE_DIR}/scripts/cd2nroff -k -d "${CMAKE_CURRENT_BINARY_DIR}" ${_mdfiles}
+        COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/cd2nroff" -k -d "${CMAKE_CURRENT_BINARY_DIR}" ${_mdfiles}
         DEPENDS ${_mdfiles}
         VERBATIM
       )
@@ -61,11 +61,11 @@ function(add_manual_pages _listname)
   endforeach()
 endfunction()
 
-add_custom_command(OUTPUT libcurl-symbols.md
+add_custom_command(OUTPUT "libcurl-symbols.md"
   COMMAND
     "${PERL_EXECUTABLE}"
     "${CMAKE_CURRENT_SOURCE_DIR}/mksymbolsmanpage.pl" <
-    "${CMAKE_CURRENT_SOURCE_DIR}/symbols-in-versions" > libcurl-symbols.md
+    "${CMAKE_CURRENT_SOURCE_DIR}/symbols-in-versions" > "libcurl-symbols.md"
   DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/symbols-in-versions"
     "${CMAKE_CURRENT_SOURCE_DIR}/mksymbolsmanpage.pl"
@@ -79,7 +79,7 @@ if(NOT CURL_DISABLE_INSTALL)
   foreach(_f IN LISTS man_MANS)
     list(APPEND _src "${CMAKE_CURRENT_BINARY_DIR}/${_f}")
   endforeach()
-  install(FILES ${_src} DESTINATION ${CMAKE_INSTALL_MANDIR}/man3)
+  install(FILES ${_src} DESTINATION "${CMAKE_INSTALL_MANDIR}/man3")
 endif()
 
 add_subdirectory(opts)

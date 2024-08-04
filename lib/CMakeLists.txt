@@ -23,19 +23,18 @@
 ###########################################################################
 set(LIB_NAME libcurl)
 set(LIBCURL_OUTPUT_NAME libcurl CACHE STRING "Basename of the curl library")
-add_definitions(-DBUILDING_LIBCURL)
+add_definitions("-DBUILDING_LIBCURL")
 
-configure_file(curl_config.h.cmake
-  ${CMAKE_CURRENT_BINARY_DIR}/curl_config.h)
+configure_file("curl_config.h.cmake" "${CMAKE_CURRENT_BINARY_DIR}/curl_config.h")
 
 # Get 'CSOURCES', 'HHEADERS' variables
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
-include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
+include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 # DllMain is added later for DLL builds only.
-list(REMOVE_ITEM CSOURCES dllmain.c)
+list(REMOVE_ITEM CSOURCES "dllmain.c")
 
-list(APPEND HHEADERS ${CMAKE_CURRENT_BINARY_DIR}/curl_config.h)
+list(APPEND HHEADERS "${CMAKE_CURRENT_BINARY_DIR}/curl_config.h")
 
 # The rest of the build
 
@@ -54,14 +53,14 @@ if(BUILD_TESTING)
     EXCLUDE_FROM_ALL
     ${HHEADERS} ${CSOURCES}
   )
-  target_compile_definitions(curlu PUBLIC UNITTESTS CURL_STATICLIB)
+  target_compile_definitions(curlu PUBLIC "UNITTESTS" "CURL_STATICLIB")
   target_link_libraries(curlu PRIVATE ${CURL_LIBS})
 endif()
 
 if(ENABLE_CURLDEBUG)
   # We must compile these sources separately to avoid memdebug.h redefinitions
   # applying to them.
-  set_source_files_properties(memdebug.c curl_multibyte.c PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
+  set_source_files_properties("memdebug.c" "curl_multibyte.c" PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
 endif()
 
 ## Library definition
@@ -113,8 +112,8 @@ if(SHARE_LIB_OBJECT)
   endif()
 
   target_include_directories(${LIB_OBJECT} INTERFACE
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-    $<BUILD_INTERFACE:${CURL_SOURCE_DIR}/include>)
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+    "$<BUILD_INTERFACE:${CURL_SOURCE_DIR}/include>")
 
   set(LIB_SOURCE $<TARGET_OBJECTS:${LIB_OBJECT}>)
 else()
@@ -147,8 +146,8 @@ if(BUILD_STATIC_LIBS)
   endif()
 
   target_include_directories(${LIB_STATIC} INTERFACE
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-    $<BUILD_INTERFACE:${CURL_SOURCE_DIR}/include>)
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+    "$<BUILD_INTERFACE:${CURL_SOURCE_DIR}/include>")
 endif()
 
 if(BUILD_SHARED_LIBS)
@@ -159,13 +158,13 @@ if(BUILD_SHARED_LIBS)
     if(CYGWIN)
       # For Cygwin always compile dllmain.c as a separate unit since it
       # includes windows.h, which should not be included in other units.
-      set_source_files_properties(dllmain.c PROPERTIES
+      set_source_files_properties("dllmain.c" PROPERTIES
         SKIP_UNITY_BUILD_INCLUSION ON)
     endif()
-    set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES dllmain.c)
+    set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES "dllmain.c")
   endif()
   if(WIN32)
-    set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES libcurl.rc)
+    set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES "libcurl.rc")
     if(HIDES_CURL_PRIVATE_SYMBOLS)
       set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES "${CURL_SOURCE_DIR}/libcurl.def")
     endif()
@@ -187,8 +186,8 @@ if(BUILD_SHARED_LIBS)
   endif()
 
   target_include_directories(${LIB_SHARED} INTERFACE
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-    $<BUILD_INTERFACE:${CURL_SOURCE_DIR}/include>)
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+    "$<BUILD_INTERFACE:${CURL_SOURCE_DIR}/include>")
 
   if(CMAKE_DLL_NAME_WITH_SOVERSION OR
     CYGWIN OR
@@ -213,7 +212,7 @@ if(BUILD_SHARED_LIBS)
   if(CURL_LIBCURL_SOVERSION OR CURL_LIBCURL_VERSIONED_SYMBOLS)
     # Get 'VERSIONCHANGE', 'VERSIONADD', 'VERSIONDEL', 'VERSIONINFO' variables
     transform_makefile_inc("Makefile.soname" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake")
-    include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake)
+    include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake")
 
     math(EXPR _cmakesoname "${VERSIONCHANGE} - ${VERSIONDEL}")
     set(_cmakeversion "${_cmakesoname}.${VERSIONDEL}.${VERSIONADD}")
@@ -285,7 +284,7 @@ if(CURL_ENABLE_EXPORT_TARGET)
   endif()
 
   export(TARGETS ${libcurl_export}
-    FILE ${PROJECT_BINARY_DIR}/libcurl-target.cmake
+    FILE "${PROJECT_BINARY_DIR}/libcurl-target.cmake"
     NAMESPACE ${PROJECT_NAME}::
   )
 endif()
