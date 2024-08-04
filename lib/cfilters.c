@@ -419,6 +419,13 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
 
   *done = cf->connected;
   if(!*done) {
+    if(Curl_conn_needs_flush(data, sockindex)) {
+      DEBUGF(infof(data, "Curl_conn_connect(index=%d), flush", sockindex));
+      result = Curl_conn_flush(data, sockindex);
+      if(result && (result != CURLE_AGAIN))
+        return result;
+    }
+
     result = cf->cft->do_connect(cf, data, blocking, done);
     if(!result && *done) {
       Curl_conn_ev_update_info(data, data->conn);
@@ -504,15 +511,19 @@ bool Curl_conn_data_pending(struct Curl_easy *data, int sockindex)
   return FALSE;
 }
 
-bool Curl_conn_needs_flush(struct Curl_easy *data, int sockindex)
+bool Curl_conn_cf_needs_flush(struct Curl_cfilter *cf,
+                              struct Curl_easy *data)
 {
   CURLcode result;
   int pending = FALSE;
-
-  struct Curl_cfilter *cf = data->conn->cfilter[sockindex];
   result = cf? cf->cft->query(cf, data, CF_QUERY_NEED_FLUSH,
                               &pending, NULL) : CURLE_UNKNOWN_OPTION;
   return (result || pending == FALSE)? FALSE : TRUE;
+}
+
+bool Curl_conn_needs_flush(struct Curl_easy *data, int sockindex)
+{
+  return Curl_conn_cf_needs_flush(data->conn->cfilter[sockindex], data);
 }
 
 void Curl_conn_cf_adjust_pollset(struct Curl_cfilter *cf,

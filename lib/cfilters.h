@@ -344,6 +344,8 @@ bool Curl_conn_cf_is_ssl(struct Curl_cfilter *cf);
 curl_socket_t Curl_conn_cf_get_socket(struct Curl_cfilter *cf,
                                       struct Curl_easy *data);
 
+bool Curl_conn_cf_needs_flush(struct Curl_cfilter *cf,
+                              struct Curl_easy *data);
 
 #define CURL_CF_SSL_DEFAULT  -1
 #define CURL_CF_SSL_DISABLE  0

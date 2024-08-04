@@ -182,7 +182,16 @@ static int err(void)
   exit(2);
 }
 
-
+static void usage(const char *msg)
+{
+  if(msg)
+    fprintf(stderr, "%s\n", msg);
+  fprintf(stderr,
+    "usage: [options] url\n"
+    "  upload and pause, options:\n"
+    "  -V http_version (http/1.1, h2, h3) http version to use\n"
+  );
+}
 
 int main(int argc, char *argv[])
 {
@@ -192,12 +201,37 @@ int main(int argc, char *argv[])
   struct curl_slist *resolve = NULL;
   char resolve_buf[1024];
   char *url, *host = NULL, *port = NULL;
+  int http_version = CURL_HTTP_VERSION_1_1;
+  int ch;
 
-  if(argc != 2) {
-    fprintf(stderr, "ERROR: need URL as argument\n");
+  while((ch = getopt(argc, argv, "V:")) != -1) {
+    switch(ch) {
+    case 'V': {
+      if(!strcmp("http/1.1", optarg))
+        http_version = CURL_HTTP_VERSION_1_1;
+      else if(!strcmp("h2", optarg))
+        http_version = CURL_HTTP_VERSION_2_0;
+      else if(!strcmp("h3", optarg))
+        http_version = CURL_HTTP_VERSION_3ONLY;
+      else {
+        usage("invalid http version");
+        return 1;
+      }
+      break;
+    }
+    default:
+     usage("invalid option");
+     return 1;
+    }
+  }
+  argc -= optind;
+  argv += optind;
+
+  if(argc != 1) {
+    usage("not enough arguments");
     return 2;
   }
-  url = argv[1];
+  url = argv[0];
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
   curl_global_trace("ids,time");
@@ -247,6 +281,9 @@ int main(int argc, char *argv[])
   curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
   curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+
   if(curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L) != CURLE_OK ||
      curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, debug_cb)
      != CURLE_OK ||
@@ -254,6 +291,8 @@ int main(int argc, char *argv[])
     err();
 
   curl_easy_setopt(curl, CURLOPT_URL, url);
+  curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, http_version);
+
   rc = curl_easy_perform(curl);
 
   if(curl) {

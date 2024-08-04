@@ -1080,7 +1080,7 @@ static CURLcode H2_CONNECT(struct Curl_cfilter *cf,
   } while(ts->state == H2_TUNNEL_INIT);
 
 out:
-  if(result || ctx->tunnel.closed)
+  if((result && (result != CURLE_AGAIN)) || ctx->tunnel.closed)
     h2_tunnel_go_state(cf, ts, H2_TUNNEL_FAILED, data);
   return result;
 }
@@ -1576,6 +1576,7 @@ static CURLcode cf_h2_proxy_query(struct Curl_cfilter *cf,
   case CF_QUERY_NEED_FLUSH: {
     if(!Curl_bufq_is_empty(&ctx->outbufq) ||
        !Curl_bufq_is_empty(&ctx->tunnel.sendbuf)) {
+      CURL_TRC_CF(data, cf, "needs flush");
       *pres1 = TRUE;
       return CURLE_OK;
     }
