@@ -648,28 +648,6 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-static void bearssl_adjust_pollset(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
-                                   struct easy_pollset *ps)
-{
-  if(!cf->connected) {
-    curl_socket_t sock = Curl_conn_cf_get_socket(cf->next, data);
-    if(sock != CURL_SOCKET_BAD) {
-      struct ssl_connect_data *connssl = cf->ctx;
-      struct bearssl_ssl_backend_data *backend =
-        (struct bearssl_ssl_backend_data *)connssl->backend;
-      unsigned state = br_ssl_engine_current_state(&backend->ctx.eng);
-
-      if(state & BR_SSL_SENDREC) {
-        Curl_pollset_set_out_only(data, ps, sock);
-      }
-      else {
-        Curl_pollset_set_in_only(data, ps, sock);
-      }
-    }
-  }
-}
-
 static CURLcode bearssl_run_until(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   unsigned target)
@@ -686,6 +664,7 @@ static CURLcode bearssl_run_until(struct Curl_cfilter *cf,
 
   DEBUGASSERT(backend);
 
+  connssl->io_need = CURL_SSL_IO_NEED_NONE;
   for(;;) {
     state = br_ssl_engine_current_state(&backend->ctx.eng);
     if(state & BR_SSL_CLOSED) {
@@ -1090,8 +1069,10 @@ static CURLcode bearssl_shutdown(struct Curl_cfilter *cf,
   if(result == CURLE_OK) {
     *done = TRUE;
   }
-  else if(result == CURLE_AGAIN)
+  else if(result == CURLE_AGAIN) {
+    CURL_TRC_CF(data, cf, "shutdown EAGAIN, io_need=%x", connssl->io_need);
     result = CURLE_OK;
+  }
   else
     CURL_TRC_CF(data, cf, "shutdown error: %d", result);
 
@@ -1145,7 +1126,7 @@ const struct Curl_ssl Curl_ssl_bearssl = {
   Curl_none_cert_status_request,   /* cert_status_request */
   bearssl_connect,                 /* connect */
   bearssl_connect_nonblocking,     /* connect_nonblocking */
-  bearssl_adjust_pollset,          /* adjust_pollset */
+  Curl_ssl_adjust_pollset,         /* adjust_pollset */
   bearssl_get_internals,           /* get_internals */
   bearssl_close,                   /* close_one */
   Curl_none_close_all,             /* close_all */
