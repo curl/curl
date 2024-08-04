@@ -85,6 +85,8 @@ problems may have been fixed or changed somewhat since this was written.
  11.4 HTTP test server 'connection-monitor' problems
  11.5 Connection information when using TCP Fast Open
  11.6 test cases sometimes timeout
+ 11.7 AppleIDN test failures
+ 11.8 WinIDN test failures
 
  12. LDAP
  12.1 OpenLDAP hangs after returning results
@@ -526,6 +528,16 @@ problems may have been fixed or changed somewhat since this was written.
  Occasionally, one of the tests timeouts. Inexplicably.
 
  See https://github.com/curl/curl/issues/13350
+
+11.7 AppleIDN test failures
+
+ Test 1034 and 1035 fail on macOS when built to use AppleIDN.
+
+ See https://github.com/curl/curl/issues/14176
+
+11.8 WinIDN test failures
+
+ Test 165 disabled when built with WinIDN.
 
 12. LDAP
 

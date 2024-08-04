@@ -426,6 +426,7 @@ SKIPPED.
 Features testable here are:
 
 - `alt-svc`
+- `AppleIDN`
 - `bearssl`
 - `brotli`
 - `c-ares`
@@ -487,6 +488,7 @@ Features testable here are:
 - `verbose-strings`
 - `wakeup`
 - `win32`
+- `WinIDN`
 - `wolfssh`
 - `wolfssl`
 - `xattr`

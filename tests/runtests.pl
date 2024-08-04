@@ -593,6 +593,12 @@ sub checksystemfeatures {
                 # nghttp2 supports h2c, hyper does not
                 $feature{"h2c"} = 1;
             }
+            if ($libcurl =~ /AppleIDN/) {
+                $feature{"AppleIDN"} = 1;
+            }
+            if ($libcurl =~ /WinIDN/) {
+                $feature{"WinIDN"} = 1;
+            }
             if ($libcurl =~ /libssh2/i) {
                 $feature{"libssh2"} = 1;
             }

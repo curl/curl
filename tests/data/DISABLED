@@ -93,3 +93,10 @@
 %if bearssl
 313
 %endif
+%if AppleIDN
+1034
+1035
+%endif
+%if WinIDN
+165
+%endif
