@@ -39,7 +39,9 @@ struct wolfssl_ctx {
   WOLFSSL_CTX *ctx;
   WOLFSSL     *handle;
   CURLcode    io_result;   /* result of last BIO cfilter operation */
+  int io_send_blocked_len; /* length of last BIO write that EAGAINed */
   BIT(x509_store_setup);   /* x509 store has been set up */
+  BIT(shutting_down);      /* TLS is being shut down */
 };
 
 CURLcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,

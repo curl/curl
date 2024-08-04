@@ -287,17 +287,32 @@ static int wolfssl_bio_cf_out_write(WOLFSSL_BIO *bio,
   struct wolfssl_ctx *backend =
     (struct wolfssl_ctx *)connssl->backend;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
-  ssize_t nwritten;
+  ssize_t nwritten, skiplen = 0;
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(data);
+  if(backend->shutting_down && backend->io_send_blocked_len &&
+     (backend->io_send_blocked_len < blen)) {
+    /* bug in wolfSSL: <https://github.com/wolfSSL/wolfssl/issues/7784>
+     * It adds the close notify message again every time we retry
+     * sending during shutdown. */
+    CURL_TRC_CF(data, cf, "bio_write, shutdown restrict send of %d"
+                " to %d bytes", blen, backend->io_send_blocked_len);
+    skiplen = (ssize_t)(blen - backend->io_send_blocked_len);
+    blen = backend->io_send_blocked_len;
+  }
   nwritten = Curl_conn_cf_send(cf->next, data, buf, blen, FALSE, &result);
   backend->io_result = result;
   CURL_TRC_CF(data, cf, "bio_write(len=%d) -> %zd, %d",
               blen, nwritten, result);
   wolfSSL_BIO_clear_retry_flags(bio);
-  if(nwritten < 0 && CURLE_AGAIN == result)
+  if(nwritten < 0 && CURLE_AGAIN == result) {
     BIO_set_retry_write(bio);
+    if(backend->shutting_down && !backend->io_send_blocked_len)
+      backend->io_send_blocked_len = blen;
+  }
+  else if(!result && skiplen)
+    nwritten += skiplen;
   return (int)nwritten;
 }
 
@@ -1428,7 +1443,10 @@ static CURLcode wolfssl_shutdown(struct Curl_cfilter *cf,
   struct wolfssl_ctx *wctx = (struct wolfssl_ctx *)connssl->backend;
   CURLcode result = CURLE_OK;
   char buf[1024];
-  int nread, err;
+  char error_buffer[256];
+  int nread = -1, err;
+  size_t i;
+  int detail;
 
   DEBUGASSERT(wctx);
   if(!wctx->handle || cf->shutdown) {
@@ -1436,6 +1454,7 @@ static CURLcode wolfssl_shutdown(struct Curl_cfilter *cf,
     goto out;
   }
 
+  wctx->shutting_down = TRUE;
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
   *done = FALSE;
   if(!(wolfSSL_get_shutdown(wctx->handle) & SSL_SENT_SHUTDOWN)) {
@@ -1444,6 +1463,7 @@ static CURLcode wolfssl_shutdown(struct Curl_cfilter *cf,
     ERR_clear_error();
     nread = wolfSSL_read(wctx->handle, buf, (int)sizeof(buf));
     err = wolfSSL_get_error(wctx->handle, nread);
+    CURL_TRC_CF(data, cf, "wolfSSL_read, nread=%d, err=%d", nread, err);
     if(!nread && err == SSL_ERROR_ZERO_RETURN) {
       bool input_pending;
       /* Yes, it did. */
@@ -1464,49 +1484,55 @@ static CURLcode wolfssl_shutdown(struct Curl_cfilter *cf,
     }
   }
 
-  if(send_shutdown && wolfSSL_shutdown(wctx->handle) == 1) {
-    CURL_TRC_CF(data, cf, "SSL shutdown finished");
-    *done = TRUE;
-    goto out;
-  }
-  else {
-    size_t i;
-    /* SSL should now have started the shutdown from our side. Since it
-     * was not complete, we are lacking the close notify from the server. */
-    for(i = 0; i < 10; ++i) {
-      ERR_clear_error();
-      nread = wolfSSL_read(wctx->handle, buf, (int)sizeof(buf));
-      if(nread <= 0)
-        break;
-    }
-    err = wolfSSL_get_error(wctx->handle, nread);
-    switch(err) {
-    case SSL_ERROR_ZERO_RETURN: /* no more data */
-      CURL_TRC_CF(data, cf, "SSL shutdown received");
+  /* SSL should now have started the shutdown from our side. Since it
+   * was not complete, we are lacking the close notify from the server. */
+  if(send_shutdown) {
+    ERR_clear_error();
+    if(wolfSSL_shutdown(wctx->handle) == 1) {
+      CURL_TRC_CF(data, cf, "SSL shutdown finished");
       *done = TRUE;
-      break;
-    case SSL_ERROR_NONE: /* just did not get anything */
-    case SSL_ERROR_WANT_READ:
-      /* SSL has send its notify and now wants to read the reply
-       * from the server. We are not really interested in that. */
-      CURL_TRC_CF(data, cf, "SSL shutdown sent, want receive");
-      connssl->io_need = CURL_SSL_IO_NEED_RECV;
-      break;
-    case SSL_ERROR_WANT_WRITE:
-      CURL_TRC_CF(data, cf, "SSL shutdown send blocked");
+      goto out;
+    }
+    if(SSL_ERROR_WANT_WRITE == wolfSSL_get_error(wctx->handle, nread)) {
+      CURL_TRC_CF(data, cf, "SSL shutdown still wants to send");
       connssl->io_need = CURL_SSL_IO_NEED_SEND;
-      break;
-    default: {
-      char error_buffer[256];
-      int detail = wolfSSL_get_error(wctx->handle, err);
-      CURL_TRC_CF(data, cf, "SSL shutdown, error: '%s'(%d)",
-                  wolfssl_strerror((unsigned long)err, error_buffer,
-                                   sizeof(error_buffer)),
-                  detail);
-      result = CURLE_RECV_ERROR;
-      break;
+      goto out;
     }
-    }
+    /* Having sent the close notify, we use wolfSSL_read() to get the
+     * missing close notify from the server. */
+  }
+
+  for(i = 0; i < 10; ++i) {
+    ERR_clear_error();
+    nread = wolfSSL_read(wctx->handle, buf, (int)sizeof(buf));
+    if(nread <= 0)
+      break;
+  }
+  err = wolfSSL_get_error(wctx->handle, nread);
+  switch(err) {
+  case SSL_ERROR_ZERO_RETURN: /* no more data */
+    CURL_TRC_CF(data, cf, "SSL shutdown received");
+    *done = TRUE;
+    break;
+  case SSL_ERROR_NONE: /* just did not get anything */
+  case SSL_ERROR_WANT_READ:
+    /* SSL has send its notify and now wants to read the reply
+     * from the server. We are not really interested in that. */
+    CURL_TRC_CF(data, cf, "SSL shutdown sent, want receive");
+    connssl->io_need = CURL_SSL_IO_NEED_RECV;
+    break;
+  case SSL_ERROR_WANT_WRITE:
+    CURL_TRC_CF(data, cf, "SSL shutdown send blocked");
+    connssl->io_need = CURL_SSL_IO_NEED_SEND;
+    break;
+  default:
+    detail = wolfSSL_get_error(wctx->handle, err);
+    CURL_TRC_CF(data, cf, "SSL shutdown, error: '%s'(%d)",
+                wolfssl_strerror((unsigned long)err, error_buffer,
+                                 sizeof(error_buffer)),
+                detail);
+    result = CURLE_RECV_ERROR;
+    break;
   }
 
 out:
