@@ -212,17 +212,60 @@ if(BUILD_SHARED_LIBS)
   endif()
 
   option(CURL_LIBCURL_SOVERSION "Enable libcurl SOVERSION" ${_soversion_default})
+  option(CURL_LIBCURL_VERSIONED_SYMBOLS "Enable libcurl versioned symbols" OFF)
 
-  if(CURL_LIBCURL_SOVERSION)
+  if(CURL_LIBCURL_SOVERSION OR CURL_LIBCURL_VERSIONED_SYMBOLS)
     # Get 'VERSIONCHANGE', 'VERSIONADD', 'VERSIONDEL', 'VERSIONINFO' variables
     transform_makefile_inc("Makefile.soname" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake")
     include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake)
 
     math(EXPR _cmakesoname "${VERSIONCHANGE} - ${VERSIONDEL}")
     set(_cmakeversion "${_cmakesoname}.${VERSIONDEL}.${VERSIONADD}")
+  endif()
 
+  if(CURL_LIBCURL_SOVERSION)
     set_target_properties(${LIB_SHARED} PROPERTIES
       VERSION "${_cmakeversion}" SOVERSION "${_cmakesoname}")
+  endif()
+
+  ## Versioned symbols
+
+  if(CURL_LIBCURL_VERSIONED_SYMBOLS)
+    if(NOT WIN32 AND NOT APPLE)
+      if(CURL_WITH_MULTI_SSL)
+        set(_symb_flavour "MULTISSL_")
+      elseif(CURL_USE_OPENSSL)
+        set(_symb_flavour "OPENSSL_")
+      elseif(CURL_USE_MBEDTLS)
+        set(_symb_flavour "MBEDTLS_")
+      elseif(CURL_USE_BEARSSL)
+        set(_symb_flavour "BEARSSL_")
+      elseif(CURL_USE_WOLFSSL)
+        set(_symb_flavour "WOLFSSL_")
+      elseif(CURL_USE_GNUTLS)
+        set(_symb_flavour "GNUTLS_")
+      else()
+        set(_symb_flavour "")
+      endif()
+      file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/libcurl.vers" "
+HIDDEN
+{
+};
+
+CURL_${_symb_flavour}${_cmakesoname}
+{
+  global: curl_*;
+  local: *;
+};
+")
+      include(CheckCSourceCompiles)
+      set(CMAKE_REQUIRED_LINK_OPTIONS "-Wl,--version-script=${CMAKE_CURRENT_BINARY_DIR}/libcurl.vers")
+      check_c_source_compiles("int main(void) { return 0; }" HAVE_VERSIONED_SYMBOLS)
+      if(HAVE_VERSIONED_SYMBOLS)
+        target_link_options(${LIB_SHARED} PRIVATE ${CMAKE_REQUIRED_LINK_OPTIONS})
+      endif()
+      unset(CMAKE_REQUIRED_LINK_OPTIONS)
+    endif()
   endif()
 endif()
 
