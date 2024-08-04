@@ -695,7 +695,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
       else {
         /*
          * provided dev was no interface (or interfaces are not supported
-         * e.g. solaris) no ip address and no domain we fail here
+         * e.g. Solaris) no ip address and no domain we fail here
          */
         done = -1;
       }
