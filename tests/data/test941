@@ -26,7 +26,7 @@ To: another
 
 email
 headers and body
-with unix newlines
+with Unix newlines
 meant to be
 converted
 with
@@ -55,7 +55,7 @@ To: another
 
 email
 headers and body
-with unix newlines
+with Unix newlines
 meant to be
 converted
 with
