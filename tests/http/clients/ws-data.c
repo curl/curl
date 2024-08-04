@@ -34,10 +34,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* somewhat Unix-specific */
-#include <sys/time.h>
-#include <unistd.h>
-
 #ifdef USE_WEBSOCKETS
 
 static

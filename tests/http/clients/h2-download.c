@@ -34,10 +34,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* somewhat Unix-specific */
-#include <sys/time.h>
-#include <unistd.h>
-
 #ifndef CURLPIPE_MULTIPLEX
 #error "too old libcurl, cannot do HTTP/2 server push!"
 #endif
