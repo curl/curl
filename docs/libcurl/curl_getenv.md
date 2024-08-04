@@ -55,6 +55,6 @@ specified name.
 
 # NOTE
 
-Under unix operating systems, there is no point in returning an allocated
+Under Unix operating systems, there is no point in returning an allocated
 memory, although other systems does not work properly if this is not done. The
-unix implementation thus suffers slightly from the drawbacks of other systems.
+Unix implementation thus suffers slightly from the drawbacks of other systems.
