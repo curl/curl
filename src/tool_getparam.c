@@ -287,6 +287,7 @@ static const struct LongShort aliases[]= {
   {"show-error",                 ARG_BOOL, 'S', C_SHOW_ERROR},
   {"show-headers",               ARG_BOOL, 'i', C_SHOW_HEADERS},
   {"silent",                     ARG_BOOL, 's', C_SILENT},
+  {"skip-existing",              ARG_BOOL, ' ', C_SKIP_EXISTING},
   {"socks4",                     ARG_STRG, ' ', C_SOCKS4},
   {"socks4a",                    ARG_STRG, ' ', C_SOCKS4A},
   {"socks5",                     ARG_STRG, ' ', C_SOCKS5},
@@ -2434,6 +2435,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_SILENT: /* --silent */
       global->silent = toggle;
+      break;
+    case C_SKIP_EXISTING: /* --skip-existing */
+      config->skip_existing = toggle;
       break;
     case C_SHOW_ERROR: /* --show-error */
       global->showerror = toggle;

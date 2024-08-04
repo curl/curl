@@ -242,6 +242,7 @@ typedef enum {
   C_SHOW_ERROR,
   C_SHOW_HEADERS,
   C_SILENT,
+  C_SKIP_EXISTING,
   C_SOCKS4,
   C_SOCKS4A,
   C_SOCKS5,
