@@ -95,7 +95,7 @@ class TestUnix:
         yield faker
         faker.stop()
 
-    # download http: via unix socket
+    # download http: via Unix socket
     def test_11_01_unix_connect_http(self, env: Env, httpd, uds_faker, repeat):
         curl = CurlClient(env=env)
         url = f'http://{env.domain1}:{env.http_port}/data.json'
@@ -105,7 +105,7 @@ class TestUnix:
                                ])
         r.check_response(count=1, http_status=200)
 
-    # download https: via unix socket
+    # download https: via Unix socket
     @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason=f"curl without SSL")
     def test_11_02_unix_connect_http(self, env: Env, httpd, uds_faker, repeat):
         curl = CurlClient(env=env)
@@ -116,7 +116,7 @@ class TestUnix:
                                ])
         r.check_response(exitcode=35, http_status=None)
 
-    # download HTTP/3 via unix socket
+    # download HTTP/3 via Unix socket
     @pytest.mark.skipif(condition=not Env.have_h3(), reason='h3 not supported')
     def test_11_03_unix_connect_quic(self, env: Env, httpd, uds_faker, repeat):
         curl = CurlClient(env=env)
