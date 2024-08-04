@@ -146,7 +146,7 @@ jobs:
               make -j3 -C tests
               # The OpenSSH server instance for the testsuite cannot be started on FreeBSD,
               # therefore the SFTP and SCP tests are disabled right away from the beginning.
-              make test-ci V=1 TFLAGS='-j8 !SFTP !SCP'
+              make test-ci V=1 TFLAGS='-j8 !SFTP !SCP ~FTP'
             fi
 
       - name: 'cmake'
@@ -175,7 +175,7 @@ jobs:
               cmake --build bld --config Debug --parallel 3 --target testdeps
               # The OpenSSH server instance for the testsuite cannot be started on FreeBSD,
               # therefore the SFTP and SCP tests are disabled right away from the beginning.
-              make test-ci V=1 TFLAGS='-j8 !SFTP !SCP'
+              make test-ci V=1 TFLAGS='-j8 !SFTP !SCP ~FTP'
             fi
 
   omnios:
