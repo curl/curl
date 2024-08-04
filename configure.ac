@@ -2114,6 +2114,7 @@ if test X"$OPT_LIBPSL" != Xno; then
 
   case "$OPT_LIBPSL" in
   yes)
+  off)
     dnl --with-libpsl (without path) used
     CURL_CHECK_PKGCONFIG(libpsl)
 
@@ -2126,10 +2127,6 @@ if test X"$OPT_LIBPSL" != Xno; then
       LIB_PSL="-lpsl"
     fi
 
-    ;;
-  off)
-    dnl no --with-libpsl option given, just check default places
-    LIB_PSL="-lpsl"
     ;;
   *)
     dnl use the given --with-libpsl spot
