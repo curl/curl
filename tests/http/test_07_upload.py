@@ -475,9 +475,14 @@ class TestUpload:
         client = LocalClient(name='upload-pausing', env=env, timeout=60)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
-        url = f'http://{env.domain1}:{env.http_port}/curltest/echo?id=[0-0]&die_after=0'
-        r = client.run([url])
-        r.check_exit_code(18)  # PARTIAL_FILE
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]&die_after=0'
+        r = client.run(['-V', proto, url])
+        exp_code = 18  # PARTIAL_FILE
+        if proto == 'h2':
+            exp_code = 92  # CURLE_HTTP2_STREAM
+        elif proto == 'h3':
+            exp_code = 95  # CURLE_HTTP3
+        r.check_exit_code(exp_code)
 
     # upload data, pause, let connection die without any response at all
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
@@ -489,9 +494,12 @@ class TestUpload:
         client = LocalClient(name='upload-pausing', env=env, timeout=60)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
-        url = f'http://{env.domain1}:{env.http_port}/curltest/echo?id=[0-0]&just_die=1'
-        r = client.run([url])
-        r.check_exit_code(52)  # GOT_NOTHING
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]&just_die=1'
+        r = client.run(['-V', proto, url])
+        exp_code = 52  # GOT_NOTHING
+        if proto == 'h2' or proto == 'h3':
+            exp_code = 0  # we get a 500 from the server
+        r.check_exit_code(exp_code)  # GOT_NOTHING
 
     # upload data, pause, let connection die after 100 continue
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
@@ -503,9 +511,12 @@ class TestUpload:
         client = LocalClient(name='upload-pausing', env=env, timeout=60)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
-        url = f'http://{env.domain1}:{env.http_port}/curltest/echo?id=[0-0]&die_after_100=1'
-        r = client.run([url])
-        r.check_exit_code(52)  # GOT_NOTHING
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]&die_after_100=1'
+        r = client.run(['-V', proto, url])
+        exp_code = 52  # GOT_NOTHING
+        if proto == 'h2' or proto == 'h3':
+            exp_code = 0  # we get a 500 from the server
+        r.check_exit_code(exp_code)  # GOT_NOTHING
 
     # speed limited on put handler
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
