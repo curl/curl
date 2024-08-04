@@ -1576,6 +1576,7 @@ static CURLcode cf_h2_proxy_query(struct Curl_cfilter *cf,
   case CF_QUERY_NEED_FLUSH: {
     if(!Curl_bufq_is_empty(&ctx->outbufq) ||
        !Curl_bufq_is_empty(&ctx->tunnel.sendbuf)) {
+      CURL_TRC_CF(data, cf, "needs flush");
       *pres1 = TRUE;
       return CURLE_OK;
     }

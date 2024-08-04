@@ -96,6 +96,21 @@ static bool cf_hc_baller_data_pending(struct cf_hc_baller *b,
   return b->cf && !b->result && b->cf->cft->has_data_pending(b->cf, data);
 }
 
+static bool cf_hc_baller_needs_flush(struct cf_hc_baller *b,
+                                     struct Curl_easy *data)
+{
+  return b->cf && !b->result && Curl_conn_cf_needs_flush(b->cf, data);
+}
+
+static CURLcode cf_hc_baller_cntrl(struct cf_hc_baller *b,
+                                   struct Curl_easy *data,
+                                   int event, int arg1, void *arg2)
+{
+  if(b->cf && !b->result)
+    return Curl_conn_cf_cntrl(b->cf, data, FALSE, event, arg1, arg2);
+  return CURLE_OK;
+}
+
 struct cf_hc_ctx {
   cf_hc_state state;
   const struct Curl_dns_entry *remotehost;
@@ -428,6 +443,8 @@ static CURLcode cf_hc_query(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             int query, int *pres1, void *pres2)
 {
+  struct cf_hc_ctx *ctx = cf->ctx;
+
   if(!cf->connected) {
     switch(query) {
     case CF_QUERY_TIMER_CONNECT: {
@@ -440,6 +457,14 @@ static CURLcode cf_hc_query(struct Curl_cfilter *cf,
       *when = cf_get_max_baller_time(cf, data, CF_QUERY_TIMER_APPCONNECT);
       return CURLE_OK;
     }
+    case CF_QUERY_NEED_FLUSH: {
+      if(cf_hc_baller_needs_flush(&ctx->h3_baller, data)
+         || cf_hc_baller_needs_flush(&ctx->h21_baller, data)) {
+        *pres1 = TRUE;
+        return CURLE_OK;
+      }
+      break;
+    }
     default:
       break;
     }
@@ -447,6 +472,23 @@ static CURLcode cf_hc_query(struct Curl_cfilter *cf,
   return cf->next?
     cf->next->cft->query(cf->next, data, query, pres1, pres2) :
     CURLE_UNKNOWN_OPTION;
+}
+
+static CURLcode cf_hc_cntrl(struct Curl_cfilter *cf,
+                            struct Curl_easy *data,
+                            int event, int arg1, void *arg2)
+{
+  struct cf_hc_ctx *ctx = cf->ctx;
+  CURLcode result = CURLE_OK;
+
+  if(!cf->connected) {
+    result = cf_hc_baller_cntrl(&ctx->h3_baller, data, event, arg1, arg2);
+    if(!result || (result == CURLE_AGAIN))
+      result = cf_hc_baller_cntrl(&ctx->h21_baller, data, event, arg1, arg2);
+    if(result == CURLE_AGAIN)
+      result = CURLE_OK;
+  }
+  return result;
 }
 
 static void cf_hc_close(struct Curl_cfilter *cf, struct Curl_easy *data)
@@ -484,7 +526,7 @@ struct Curl_cftype Curl_cft_http_connect = {
   cf_hc_data_pending,
   Curl_cf_def_send,
   Curl_cf_def_recv,
-  Curl_cf_def_cntrl,
+  cf_hc_cntrl,
   Curl_cf_def_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
   cf_hc_query,
