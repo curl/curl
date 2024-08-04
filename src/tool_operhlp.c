@@ -182,7 +182,6 @@ fail:
  */
 CURLcode get_url_file_name(char **filename, const char *url)
 {
-  char *pc, *pc2;
   CURLU *uh = curl_url();
   char *path = NULL;
   CURLUcode uerr;
@@ -199,7 +198,7 @@ CURLcode get_url_file_name(char **filename, const char *url)
     uh = NULL;
     if(!uerr) {
       int i;
-
+      char *pc = NULL, *pc2 = NULL;
       for(i = 0; i < 2; i++) {
         pc = strrchr(path, '/');
         pc2 = strrchr(pc ? pc + 1 : path, '\\');
