@@ -521,7 +521,7 @@ disabling support for some feature (run `./configure --help` to see them all):
  - `--disable-mime` (MIME API)
  - `--disable-netrc`  (.netrc file)
  - `--disable-ntlm` (NTLM authentication)
- - `--disable-ntlm-wb` (NTLM WinBind)
+ - `--disable-ntlm-wb` (NTLM winbind)
  - `--disable-progress-meter` (graphical progress meter in library)
  - `--disable-proxy` (HTTP and SOCKS proxies)
  - `--disable-pthreads` (multi-threading)
