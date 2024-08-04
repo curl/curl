@@ -1,0 +1,42 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+--skip-existing with globbing
+</name>
+<command option="no-output">
+-o "%LOGDIR/#1" "http://%HOSTIP:%HTTPPORT/%TESTNUMBER/{hey,ho}" --skip-existing
+</command>
+<file name="%LOGDIR/hey">
+content
+</file>
+<file2 name="%LOGDIR/ho">
+content
+</file2>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<stderr mode="text">
+Note: skips transfer, "%LOGDIR/hey" exists locally
+Note: skips transfer, "%LOGDIR/ho" exists locally
+</stderr>
+</verify>
+</testcase>
