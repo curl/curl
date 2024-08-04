@@ -82,7 +82,7 @@ bool Curl_ipvalid(struct Curl_easy *data, struct connectdata *conn)
  * detect which one this platform supports in the configure script and set up
  * the HAVE_GETHOSTBYNAME_R_3, HAVE_GETHOSTBYNAME_R_5 or
  * HAVE_GETHOSTBYNAME_R_6 defines accordingly. Note that HAVE_GETADDRBYNAME
- * has the corresponding rules. This is primarily on *nix. Note that some unix
+ * has the corresponding rules. This is primarily on *nix. Note that some Unix
  * flavours have thread-safe versions of the plain gethostbyname() etc.
  *
  */

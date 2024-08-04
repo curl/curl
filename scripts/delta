@@ -89,7 +89,7 @@ $deletes=`git diff-tree --diff-filter=A -r --summary origin/$branch $start 2>/de
 $creates=`git diff-tree --diff-filter=D -r --summary origin/$branch $start 2>/dev/null| wc -l`;
 
 # Time since that tag
-$tagged=`git for-each-ref --format="%(refname:short) | %(taggerdate:unix)" refs/tags/* | grep ^$start | cut "-d|" -f2`; # unix timestamp
+$tagged=`git for-each-ref --format="%(refname:short) | %(taggerdate:unix)" refs/tags/* | grep ^$start | cut "-d|" -f2`; # Unix timestamp
 $taggednice=`git for-each-ref --format="%(refname:short) | %(creatordate)" refs/tags/* | grep ^$start | cut '-d|' -f2`; # human readable time
 chomp $taggednice;
 $now=`date +%s`;

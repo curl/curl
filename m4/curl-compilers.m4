@@ -569,7 +569,7 @@ AC_DEFUN([CURL_SET_COMPILER_BASIC_OPTS], [
         #
       INTEL_UNIX_C)
         #
-        dnl On unix this compiler uses gcc's header files, so
+        dnl On Unix this compiler uses gcc's header files, so
         dnl we select ANSI C89 dialect plus GNU extensions.
         tmp_CFLAGS="$tmp_CFLAGS -std=gnu89"
         dnl Change some warnings into errors

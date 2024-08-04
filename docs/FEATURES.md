@@ -44,7 +44,7 @@ SPDX-License-Identifier: curl
  - TCP Fast Open
  - DNS cache (that can be shared between transfers)
  - non-blocking single-threaded parallel transfers
- - unix domain sockets to server or proxy
+ - Unix domain sockets to server or proxy
  - DNS-over-HTTPS
  - uses non-blocking name resolves
  - selectable name resolver backend

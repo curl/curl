@@ -223,7 +223,7 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
    * A leading slash in an AmigaDOS path denotes the parent
    * directory, and hence we block this as it is relative.
    * Absolute paths start with 'volumename:', so we check for
-   * this first. Failing that, we treat the path as a real unix
+   * this first. Failing that, we treat the path as a real Unix
    * path, but only if the application was compiled with -lunix.
    */
   fd = -1;

@@ -528,7 +528,7 @@ disabling support for some feature (run `./configure --help` to see them all):
  - `--disable-socketpair` (socketpair for asynchronous name resolving)
  - `--disable-threaded-resolver`  (threaded name resolver)
  - `--disable-tls-srp` (Secure Remote Password authentication for TLS)
- - `--disable-unix-sockets` (UNIX sockets)
+ - `--disable-unix-sockets` (Unix sockets)
  - `--disable-verbose` (eliminates debugging strings and error code strings)
  - `--disable-versioned-symbols` (versioned symbols)
  - `--enable-symbol-hiding` (eliminates unneeded symbols in the shared library)
