@@ -69,7 +69,7 @@ timestamp=$(grep -Eo 'SOURCE_DATE_EPOCH=[0-9]*' curl-"$curlver"/docs/RELEASE-TOO
 
 pwd=$(pwd)
 cd "curl-$curlver"
-./configure --without-ssl
+./configure --without-ssl --without-libpsl
 ./scripts/dmaketgz "$curlver" "$timestamp"
 
 mv curl-"$curlver"* ../_tarballs/

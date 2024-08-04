@@ -2113,7 +2113,7 @@ if test X"$OPT_LIBPSL" != Xno; then
   CLEANLIBS="$LIBS"
 
   case "$OPT_LIBPSL" in
-  yes)
+  yes|off)
     dnl --with-libpsl (without path) used
     CURL_CHECK_PKGCONFIG(libpsl)
 
@@ -2126,10 +2126,6 @@ if test X"$OPT_LIBPSL" != Xno; then
       LIB_PSL="-lpsl"
     fi
 
-    ;;
-  off)
-    dnl no --with-libpsl option given, just check default places
-    LIB_PSL="-lpsl"
     ;;
   *)
     dnl use the given --with-libpsl spot
@@ -2164,8 +2160,7 @@ if test X"$OPT_LIBPSL" != Xno; then
       LIBS=$CLEANLIBS
   )
 
-  if test X"$OPT_LIBPSL" != Xoff &&
-     test "$LIBPSL_ENABLED" != "1"; then
+  if test "$LIBPSL_ENABLED" != "1"; then
     AC_MSG_ERROR([libpsl libs and/or directories were not found where specified!])
   fi
 fi
