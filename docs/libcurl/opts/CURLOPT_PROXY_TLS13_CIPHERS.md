@@ -15,6 +15,8 @@ Protocol:
 TLS-backend:
   - OpenSSL
   - Schannel
+  - wolfSSL
+  - mbedTLS
 Added-in: 7.61.0
 ---
 
@@ -42,9 +44,11 @@ Find more details about cipher lists on this URL:
 
  https://curl.se/docs/ssl-ciphers.html
 
-This option is currently used only when curl is built to use OpenSSL 1.1.1 or
-later. If you are using a different SSL backend you can try setting TLS 1.3
-cipher suites by using the CURLOPT_PROXY_SSL_CIPHER_LIST(3) option.
+This option is used when curl is built to use OpenSSL 1.1.1 or later,
+Schannel, wolfSSL, or mbedTLS 3.6.0 or later.
+
+Before curl 8.10.0 with mbedTLS or wolfSSL, TLS 1.3 cipher suites where set
+by using the CURLOPT_PROXY_SSL_CIPHER_LIST(3) option.
 
 The application does not have to keep the string around after setting this
 option.
@@ -71,6 +75,16 @@ int main(void)
   }
 }
 ~~~
+
+# HISTORY
+
+Added in 7.61.0 for OpenSSL. Available when built with OpenSSL \>= 1.1.1.
+
+Added in 7.85.0 for Schannel.
+
+Added in 8.10.0 for wolfSSL.
+
+Added in 8.10.0 for mbedTLS. Available when built with mbedTLS \>= 3.6.0.
 
 # %AVAILABILITY%
 
