@@ -26,6 +26,13 @@
  * </DESC>
  */
 
+#ifdef _MSC_VER
+int main(void)
+{
+  return 99;
+}
+#else
+
 /* curl stuff */
 #include <curl/curl.h>
 #include <curl/mprintf.h>
@@ -33,6 +40,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+/* somewhat Unix-specific */
+#include <unistd.h>  /* getopt() */
 
 #ifndef CURLPIPE_MULTIPLEX
 #error "too old libcurl, cannot do HTTP/2 server push!"
@@ -474,3 +484,4 @@ int main(int argc, char *argv[])
 
   return 0;
 }
+#endif /* _MSC_VER */

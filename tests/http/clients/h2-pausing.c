@@ -25,16 +25,24 @@
  * HTTP/2 download pausing
  * </DESC>
  */
-/* This is based on the poc client of issue #11982
+/* This is based on the PoC client of issue #11982
  */
+#ifdef _MSC_VER
+int main(void)
+{
+  return 99;
+}
+#else
+#include <curl/curl.h>
+#include <curl/mprintf.h>
+
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/time.h>
-#include <unistd.h>
 #include <stdlib.h>
-#include <curl/curl.h>
-#include <curl/mprintf.h>
+
+/* somewhat Unix-specific */
+#include <unistd.h>  /* getopt() */
 
 #define HANDLECOUNT 2
 
@@ -395,3 +403,4 @@ out:
 
   return rc;
 }
+#endif /* _MSC_VER */

@@ -25,15 +25,15 @@
  * TLS session reuse
  * </DESC>
  */
+#include <curl/curl.h>
+#include <curl/mprintf.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-#include <inttypes.h>
 /* #include <error.h> */
 #include <errno.h>
-#include <curl/curl.h>
-#include <curl/mprintf.h>
 
 
 static void log_line_start(FILE *log, const char *idsbuf, curl_infotype type)

@@ -25,15 +25,19 @@
  * upload pausing
  * </DESC>
  */
-/* This is based on the poc client of issue #11769
+/* This is based on the PoC client of issue #11769
  */
-#include <stdio.h>
-#include <string.h>
-#include <sys/time.h>
-#include <unistd.h>
-#include <stdlib.h>
 #include <curl/curl.h>
 #include <curl/mprintf.h>
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#ifndef _MSC_VER
+/* somewhat Unix-specific */
+#include <unistd.h>
+#endif
 
 static void log_line_start(FILE *log, const char *idsbuf, curl_infotype type)
 {
