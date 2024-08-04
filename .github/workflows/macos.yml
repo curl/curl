@@ -276,7 +276,6 @@ jobs:
             install: gsasl
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_USE_GSASL=ON -DUSE_APPLE_IDN=ON -DENABLE_WEBSOCKETS=ON
             macos-version-min: '10.9'
-            tflags: '~1034 ~1035'  # AppleIDN issues: https://github.com/curl/curl/issues/14176
           - name: 'OpenSSL +static'
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DBUILD_STATIC_LIBS=ON
             macos-version-min: '10.9'

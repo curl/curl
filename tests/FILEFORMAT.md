@@ -455,6 +455,7 @@ Features testable here are:
 - `libssh`
 - `oldlibssh` (versions before 0.9.4)
 - `libz`
+- `macidn`
 - `manual`
 - `mbedtls`
 - `Mime`
@@ -487,6 +488,7 @@ Features testable here are:
 - `verbose-strings`
 - `wakeup`
 - `win32`
+- `winidn`
 - `wolfssh`
 - `wolfssl`
 - `xattr`
