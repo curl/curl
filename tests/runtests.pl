@@ -594,10 +594,10 @@ sub checksystemfeatures {
                 $feature{"h2c"} = 1;
             }
             if ($libcurl =~ /AppleIDN/) {
-                $feature{"macidn"} = 1;
+                $feature{"AppleIDN"} = 1;
             }
             if ($libcurl =~ /WinIDN/) {
-                $feature{"winidn"} = 1;
+                $feature{"WinIDN"} = 1;
             }
             if ($libcurl =~ /libssh2/i) {
                 $feature{"libssh2"} = 1;
