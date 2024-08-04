@@ -232,7 +232,7 @@ if(BUILD_SHARED_LIBS)
 
   if(CURL_LIBCURL_VERSIONED_SYMBOLS)
     if(APPLE OR WIN32)
-      message(WARNING "Versioned symbols not supported on Apple and Windows platforms.")
+      message(WARNING "Versioned symbols not supported for Apple and Windows targets.")
     else()
       if(NOT DEFINED CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX)
         # Default to prefixes used by autotools
