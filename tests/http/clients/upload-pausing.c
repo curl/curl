@@ -33,14 +33,14 @@ int main(void)
   return 99;
 }
 #else
-#include <curl/curl.h>
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
 /* somewhat Unix-specific */
 #include <unistd.h>  /* getopt() */
+
+#include <curl/curl.h>
 
 static void log_line_start(FILE *log, const char *idsbuf, curl_infotype type)
 {

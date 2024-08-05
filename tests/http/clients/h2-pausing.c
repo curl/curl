@@ -33,8 +33,6 @@ int main(void)
   return 99;
 }
 #else
-#include <curl/curl.h>
-
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -42,6 +40,8 @@ int main(void)
 
 /* somewhat Unix-specific */
 #include <unistd.h>  /* getopt() */
+
+#include <curl/curl.h>
 
 #define HANDLECOUNT 2
 

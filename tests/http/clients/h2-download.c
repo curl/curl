@@ -32,16 +32,15 @@ int main(void)
   return 99;
 }
 #else
-
-/* curl stuff */
-#include <curl/curl.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 /* somewhat Unix-specific */
 #include <unistd.h>  /* getopt() */
+
+/* curl stuff */
+#include <curl/curl.h>
 
 #ifndef CURLPIPE_MULTIPLEX
 #error "too old libcurl, cannot do HTTP/2 server push!"
