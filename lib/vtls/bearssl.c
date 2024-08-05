@@ -1113,7 +1113,12 @@ static CURLcode bearssl_sha256sum(const unsigned char *input,
 
 const struct Curl_ssl Curl_ssl_bearssl = {
   { CURLSSLBACKEND_BEARSSL, "bearssl" }, /* info */
-  SSLSUPP_CAINFO_BLOB | SSLSUPP_SSL_CTX | SSLSUPP_HTTPS_PROXY,
+
+  SSLSUPP_CAINFO_BLOB |
+  SSLSUPP_SSL_CTX |
+  SSLSUPP_HTTPS_PROXY |
+  SSLSUPP_CIPHER_LIST,
+
   sizeof(struct bearssl_ssl_backend_data),
 
   Curl_none_init,                  /* init */

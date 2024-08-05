@@ -1726,7 +1726,8 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
 #ifdef TLS13_SUPPORT
   SSLSUPP_TLS13_CIPHERSUITES |
 #endif
-  SSLSUPP_HTTPS_PROXY,
+  SSLSUPP_HTTPS_PROXY |
+  SSLSUPP_CIPHER_LIST,
 
   sizeof(struct mbed_ssl_backend_data),
 

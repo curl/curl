@@ -5212,7 +5212,8 @@ const struct Curl_ssl Curl_ssl_openssl = {
   SSLSUPP_ECH |
 #endif
   SSLSUPP_CA_CACHE |
-  SSLSUPP_HTTPS_PROXY,
+  SSLSUPP_HTTPS_PROXY |
+  SSLSUPP_CIPHER_LIST,
 
   sizeof(struct ossl_ctx),
 

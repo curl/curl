@@ -1918,7 +1918,8 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
 #ifdef WOLFSSL_TLS13
   SSLSUPP_TLS13_CIPHERSUITES |
 #endif
-  SSLSUPP_CA_CACHE,
+  SSLSUPP_CA_CACHE |
+  SSLSUPP_CIPHER_LIST,
 
   sizeof(struct wolfssl_ctx),
 
