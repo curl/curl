@@ -722,6 +722,12 @@ ${SIZEOF_TIME_T_CODE}
 /* if GSASL is in use */
 #cmakedefine USE_GSASL 1
 
+/* if libuv is in use */
+#cmakedefine USE_LIBUV 1
+
+/* Define to 1 if you have the <uv.h> header file. */
+#cmakedefine HAVE_UV_H 1
+
 /* Define to 1 if you do not want the OpenSSL configuration to be loaded
    automatically */
 #cmakedefine CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG 1
