@@ -45,7 +45,7 @@ function(setup_executable test_name)  # ARGN are the files in the test
   # files on Windows targets it is necessary to build the test servers
   # with CURL_STATICLIB defined, independently of how libcurl is built.
   set_target_properties(${test_name} PROPERTIES
-    COMPILE_DEFINITIONS CURL_STATICLIB)
+    COMPILE_DEFINITIONS "CURL_STATICLIB")
   set_target_properties(${test_name} PROPERTIES
     PROJECT_LABEL "${_target_label_prefix}${test_name}")
 endfunction()

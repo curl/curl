@@ -53,7 +53,7 @@ if(BUILD_TESTING)
     EXCLUDE_FROM_ALL
     ${HHEADERS} ${CSOURCES}
   )
-  target_compile_definitions(curlu PUBLIC UNITTESTS CURL_STATICLIB)
+  target_compile_definitions(curlu PUBLIC "UNITTESTS" "CURL_STATICLIB")
   target_link_libraries(curlu PRIVATE ${CURL_LIBS})
 endif()
 
