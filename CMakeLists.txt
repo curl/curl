@@ -326,7 +326,7 @@ if(ENABLE_IPV6 AND NOT WIN32)
   endif()
 
   if(APPLE AND NOT ENABLE_ARES)
-    set(use_core_foundation_and_core_services ON)
+    set(_use_core_foundation_and_core_services ON)
 
     find_library(SYSTEMCONFIGURATION_FRAMEWORK "SystemConfiguration")
     if(NOT SYSTEMCONFIGURATION_FRAMEWORK)
@@ -467,7 +467,7 @@ if(CURL_WINDOWS_SSPI)
 endif()
 
 if(CURL_USE_SECTRANSP)
-  set(use_core_foundation_and_core_services ON)
+  set(_use_core_foundation_and_core_services ON)
 
   find_library(SECURITY_FRAMEWORK "Security")
   if(NOT SECURITY_FRAMEWORK)
@@ -483,7 +483,7 @@ if(CURL_USE_SECTRANSP)
   endif()
 endif()
 
-if(use_core_foundation_and_core_services)
+if(_use_core_foundation_and_core_services)
   find_library(COREFOUNDATION_FRAMEWORK "CoreFoundation")
   find_library(CORESERVICES_FRAMEWORK "CoreServices")
 
