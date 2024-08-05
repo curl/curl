@@ -24,11 +24,11 @@
 
 # These are all libcurl example programs to be test compiled
 check_PROGRAMS = \
-  h2-serverpush \
   h2-download \
-  ws-data \
-  ws-pingpong \
+  h2-pausing \
+  h2-serverpush \
   h2-upgrade-extreme \
   tls-session-reuse \
-  h2-pausing \
-  upload-pausing
+  upload-pausing \
+  ws-data \
+  ws-pingpong
