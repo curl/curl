@@ -83,8 +83,7 @@ static int debug_cb(CURL *handle, curl_infotype type,
   if(!curl_easy_getinfo(handle, CURLINFO_XFER_ID, &xfer_id) && xfer_id >= 0) {
     if(!curl_easy_getinfo(handle, CURLINFO_CONN_ID, &conn_id) &&
         conn_id >= 0) {
-      snprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_2,
-               xfer_id, conn_id);
+      snprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_2, xfer_id, conn_id);
     }
     else {
       snprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_1, xfer_id);
@@ -273,8 +272,7 @@ int main(int argc, char *argv[])
     exit(1);
   }
   memset(&resolve, 0, sizeof(resolve));
-  snprintf(resolve_buf, sizeof(resolve_buf)-1,
-           "%s:%s:127.0.0.1", host, port);
+  snprintf(resolve_buf, sizeof(resolve_buf)-1, "%s:%s:127.0.0.1", host, port);
   resolve = curl_slist_append(resolve, resolve_buf);
 
   for(i = 0; i<HANDLECOUNT; i++) {
