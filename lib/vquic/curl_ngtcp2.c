@@ -1049,7 +1049,7 @@ static int cb_h3_stop_sending(nghttp3_conn *conn, int64_t stream_id,
   rv = ngtcp2_conn_shutdown_stream_read(ctx->qconn, 0, stream_id,
                                         app_error_code);
   if(rv && rv != NGTCP2_ERR_STREAM_NOT_FOUND) {
-    return NGTCP2_ERR_CALLBACK_FAILURE;
+    return NGHTTP3_ERR_CALLBACK_FAILURE;
   }
 
   return 0;
@@ -1070,7 +1070,7 @@ static int cb_h3_reset_stream(nghttp3_conn *conn, int64_t sid,
                                          app_error_code);
   CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] reset -> %d", stream_id, rv);
   if(rv && rv != NGTCP2_ERR_STREAM_NOT_FOUND) {
-    return NGTCP2_ERR_CALLBACK_FAILURE;
+    return NGHTTP3_ERR_CALLBACK_FAILURE;
   }
 
   return 0;
@@ -1275,7 +1275,7 @@ static int cb_h3_acked_req_body(nghttp3_conn *conn, int64_t stream_id,
   if(stream->sendbuf_len_in_flight < Curl_bufq_len(&stream->sendbuf)) {
     int rv = nghttp3_conn_resume_stream(conn, stream_id);
     if(rv && rv != NGHTTP3_ERR_STREAM_NOT_FOUND) {
-      return NGTCP2_ERR_CALLBACK_FAILURE;
+      return NGHTTP3_ERR_CALLBACK_FAILURE;
     }
   }
   return 0;
@@ -1459,7 +1459,7 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
       break;
     default:
       CURL_TRC_CF(data, cf, "h3sid[%" CURL_PRId64 "] failed to send -> "
-                  "%d (%s)", stream->id, rc, ngtcp2_strerror(rc));
+                  "%d (%s)", stream->id, rc, nghttp3_strerror(rc));
       break;
     }
     *err = CURLE_SEND_ERROR;
