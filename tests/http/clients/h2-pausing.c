@@ -347,7 +347,8 @@ int main(int argc, char *argv[])
     if(curl_multi_poll(multi_handle, NULL, 0, 100, &numfds) != CURLM_OK)
       err();
 
-    while((msg = curl_multi_info_read(multi_handle, &msgs_left))) {
+    /* !checksrc! disable EQUALSNULL 1 */
+    while((msg = curl_multi_info_read(multi_handle, &msgs_left)) != NULL) {
       if(msg->msg == CURLMSG_DONE) {
         for(i = 0; i<HANDLECOUNT; i++) {
           if(msg->easy_handle == handles[i].h) {

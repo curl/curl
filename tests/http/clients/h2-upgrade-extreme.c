@@ -209,7 +209,8 @@ int main(int argc, char *argv[])
     }
 
     /* Check for finished handles and remove. */
-    while((msg = curl_multi_info_read(multi, &msgs_in_queue))) {
+    /* !checksrc! disable EQUALSNULL 1 */
+    while((msg = curl_multi_info_read(multi, &msgs_in_queue)) != NULL) {
       if(msg->msg == CURLMSG_DONE) {
         long status = 0;
         curl_off_t xfer_id;
