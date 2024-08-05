@@ -34,7 +34,7 @@ int main(void)
 }
 #else
 #include <curl/curl.h>
-#include <curl/mprintf.h>
+#include "curl_printf.h"
 
 #include <assert.h>
 #include <stdio.h>

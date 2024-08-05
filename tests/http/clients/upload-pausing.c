@@ -34,14 +34,14 @@ int main(void)
 }
 #else
 #include <curl/curl.h>
-#include <curl/mprintf.h>
+#include "curl_printf.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
 /* somewhat Unix-specific */
-#include <unistd.h>
+#include <unistd.h>  /* getopt() */
 
 static void log_line_start(FILE *log, const char *idsbuf, curl_infotype type)
 {

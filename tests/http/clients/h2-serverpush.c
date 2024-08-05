@@ -28,7 +28,7 @@
 
 /* curl stuff */
 #include <curl/curl.h>
-#include <curl/mprintf.h>
+#include "curl_printf.h"
 
 #include <stdio.h>
 #include <stdlib.h>
