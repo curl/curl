@@ -37,6 +37,9 @@ ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -O -i -D %LOGDIR/heads%TESTNUMBER
 
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+QUIT
+</strip>
 <protocol>
 USER anonymous
 PASS ftp@example.com

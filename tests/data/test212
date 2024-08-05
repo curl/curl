@@ -39,6 +39,9 @@ data blobb
 
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+QUIT
+</strip>
 # Strip the addresses and port number but leave the rest
 <strippart>
 s/^(EPRT \|1\|)\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\|\d{1,5}\|/$1/

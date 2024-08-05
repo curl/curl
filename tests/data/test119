@@ -30,6 +30,9 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -P -
 
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+QUIT
+</strip>
 <errorcode>
 19
 </errorcode>

@@ -33,6 +33,9 @@ ftp://%HOSTIP:%FTPPORT/path/to/file/%TESTNUMBER -m %FTPTIME2
 
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+QUIT
+</strip>
 # 28 is CURLE_OPERATION_TIMEDOUT
 <errorcode>
 28

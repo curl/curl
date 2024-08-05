@@ -46,6 +46,9 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER/ --ftp-alternative-to-user "USER replacement"
 #
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+QUIT
+</strip>
 <protocol>
 USER anonymous
 USER replacement

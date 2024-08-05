@@ -41,6 +41,9 @@ works
 
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+QUIT
+</strip>
 # 64 is CURLE_USE_SSL_FAILED
 <errorcode>
 64

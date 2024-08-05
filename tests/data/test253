@@ -45,6 +45,9 @@ FTP IPv6 dir list with EPRT
 #
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+QUIT
+</strip>
 <strippart>
 s/^(EPRT \|2\|::1\|)(.*)/$1/
 </strippart>

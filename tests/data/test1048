@@ -52,6 +52,9 @@ perl -e "print 'Test requires default test client host address' if ( '%CLIENT6IP
 #
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+QUIT
+</strip>
 <protocol>
 USER anonymous
 PASS ftp@example.com

@@ -35,6 +35,9 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 #
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+QUIT
+</strip>
 # CURLE_REMOTE_FILE_NOT_FOUND
 <errorcode>
 78

@@ -33,6 +33,9 @@ FTP PORT and 421 on download
 
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+QUIT
+</strip>
 <strippart>
 s/^EPRT \|1\|(.*)/EPRT \|1\|/
 </strippart>

@@ -44,6 +44,9 @@ ftp://%HOSTIP:23456/%TESTNUMBER
 
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+QUIT
+</strip>
 <protocol>
 GET ftp://%HOSTIP:23456/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:23456

@@ -43,6 +43,9 @@ ftp://ftp-site/moo/%TESTNUMBER ftp://ftp-site/moo/%TESTNUMBER --proxy http://%HO
 #
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+QUIT
+</strip>
 <protocol>
 GET ftp://ftp-site/moo/%TESTNUMBER HTTP/1.1
 Host: ftp-site:21

@@ -30,6 +30,9 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --disable-epsv
 # certain hosts with buggy resolver code, the resulting address (192.0.2.127)
 # is from an address block that is guaranteed never to be assigned (RFC3330).
 <verify>
+<strip>
+QUIT
+</strip>
 # 14 = CURLE_FTP_WEIRD_227_FORMAT
 <errorcode>
 14

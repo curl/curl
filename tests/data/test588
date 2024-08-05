@@ -45,6 +45,9 @@ Moooooooooooo
 
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+QUIT
+</strip>
 # Strip off parts of the PORT and EPRT commands that might differ
 <strippart>
 s/^PORT (.*)/PORT/

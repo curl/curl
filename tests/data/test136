@@ -28,6 +28,9 @@ FTP with user and no password
 
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+QUIT
+</strip>
 <protocol>
 USER user
 PASS 
