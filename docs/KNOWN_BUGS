@@ -107,7 +107,6 @@ problems may have been fixed or changed somewhat since this was written.
  15.13 CMake build with MIT Kerberos does not work
 
  16. aws-sigv4
- 16.1 aws-sigv4 does not sign requests with * correctly
  16.2 aws-sigv4 does not handle multipart/form-data correctly
  16.3 aws-sigv4 has problems with particular URLs
  16.6 aws-sigv4 does not behave well with AWS VPC Lattice
@@ -629,10 +628,6 @@ problems may have been fixed or changed somewhat since this was written.
  https://github.com/curl/curl/issues/6904
 
 16. aws-sigv4
-
-16.1 aws-sigv4 does not sign requests with * correctly
-
- https://github.com/curl/curl/issues/7559
 
 16.2 aws-sigv4 does not handle multipart/form-data correctly
 
