@@ -27,7 +27,7 @@ find_program(VSFTPD "vsftpd")  # /usr/sbin/vsftpd
 find_program(HTTPD "apache2")  # /usr/sbin/apache2
 find_program(APACHECTL "apache2ctl")  # /usr/sbin/apache2ctl
 find_program(APXS "apxs")
-find_program(HTTPD_NGHTTPX "nghttpx")
+find_program(HTTPD_NGHTTPX "nghttpx" PATHS "/usr/bin" "/usr/local/bin")
 
 # APXS, HTTPD, APACHECTL, HTTPD_NGHTTPX, CADDY, VSFTPD
 configure_file("config.ini.in" "${CMAKE_CURRENT_BINARY_DIR}/config.ini" @ONLY)
