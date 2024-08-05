@@ -50,9 +50,6 @@ the
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-QUIT
-</strip>
 <protocol>
 PUT ftp://daniel:mysecret@host.com/we/want/%TESTNUMBER HTTP/1.1
 Host: host.com:21

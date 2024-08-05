@@ -31,9 +31,6 @@ ftp://%HOSTIP:%FTPPORT/a/path/%TESTNUMBER
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-QUIT
-</strip>
 # Strip all valid kinds of PORT and EPRT that curl can send
 <protocol>
 USER anonymous

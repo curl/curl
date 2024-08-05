@@ -48,9 +48,6 @@ ftp_proxy=http://%HOSTIP:%HTTPPORT/
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-QUIT
-</strip>
 <protocol>
 GET ftp://%HOSTIP:%FTPPORT/%TESTNUMBER;type=A HTTP/1.1
 Host: %HOSTIP:%FTPPORT

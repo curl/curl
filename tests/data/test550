@@ -49,9 +49,6 @@ ftp://www.example.com/moo/%TESTNUMBER http://%HOSTIP:%HTTPPORT ascii
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-QUIT
-</strip>
 <protocol>
 GET ftp://www.example.com/moo/%TESTNUMBER;type=a HTTP/1.1
 Host: www.example.com:21

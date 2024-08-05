@@ -25,9 +25,6 @@ FTP SSL required on non-SSL server
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-QUIT
-</strip>
 <errorcode>
 64
 </errorcode>

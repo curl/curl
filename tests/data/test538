@@ -34,9 +34,6 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 # Verify data after the test has been "shot"
 # TEST_ERR_SUCCESS is errorcode 120
 <verify>
-<strip>
-QUIT
-</strip>
 <errorcode>
 120
 </errorcode>
