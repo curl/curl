@@ -23,6 +23,10 @@
 ###########################################################################
 set(CMAKE_UNITY_BUILD OFF)
 
+find_program(TEST_NGHTTPX "nghttpx")
+# TEST_NGHTTPX
+configure_file("config.in" "${CMAKE_CURRENT_BINARY_DIR}/config" @ONLY)
+
 add_custom_target(testdeps)
 add_subdirectory(libtest)
 add_subdirectory(server)
