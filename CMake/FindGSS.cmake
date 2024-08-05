@@ -255,7 +255,7 @@ else()
     set(_GSS_VERSION _GSS_PKG_${_MIT_MODNAME}_VERSION)
   else()
     set(GSS_FLAVOUR "Heimdal")
-    set(_GSS_VERSION _GSS_PKG_${_MIT_HEIMDAL}_VERSION)
+    set(_GSS_VERSION _GSS_PKG_${_HEIMDAL_MODNAME}_VERSION)
   endif()
 endif()
 
