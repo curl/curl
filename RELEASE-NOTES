@@ -1,58 +1,71 @@
 curl and libcurl 8.10.0
 
  Public curl releases:         260
- Command line options:         264
+ Command line options:         265
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3213
+ Contributors:                 3215
 
 This release includes the following changes:
 
  o curl: --help [option] displays documentation for given cmdline option [19]
+ o curl: add --skip-existing [54]
  o curl: for -O, use "default" as filename when the URL has none [34]
  o curl: make --rate accept "number of units" [4]
  o curl: make --show-headers the same as --include [6]
  o curl: support --dump-header % to direct to stderr [31]
  o curl: support embedding a CA bundle and --dump-ca-embed [20]
+ o vtls: stop offering alpn http/1.1 for http2-prior-knowledge [53]
+ o wolfssl: add support for ssl cert blob / ssl key blob options [50]
 
 This release includes the following bugfixes:
 
  o autotools: fix typo in tests/data target [30]
+ o bearssl: improve shutdown handling [45]
  o cfilters: send flush [13]
  o CHANGES: rename to CHANGES.md, no longer generated [40]
  o CI: enable parallel testing in CI builds [18]
  o ci: Update actions/upload-artifact digest to 89ef406 [24]
+ o cmake: add support for versioned symbols option [51]
  o cmake: detect `nghttp2` via `pkg-config`, enable by default [21]
  o cmake: distcheck for files in CMake subdir [9]
  o cmake: drop custom `CMakeOutput.log`/`CMakeError.log` logs [27]
  o cmake: drop no-op `tests/data/CMakeLists.txt` [26]
  o cmake: drop reference to undefined variable [25]
  o cmake: drop unused internal variable [22]
+ o configure: fail if PSL is not disabled but not found [46]
  o curl: allow 500MB data URL encode strings [38]
  o Curl_rand_bytes to control env override [17]
+ o dist: add missing `docs/examples/CMakeLists.txt` [58]
  o dist: add missing `FindNettle.cmake` [11]
  o dist: fix reproducible build from release tarball [36]
  o dmaketgz: only run 'make distclean' if Makefile exists
  o doh-url.md: point out DOH server IP pinning [37]
+ o easy: fix curl_easy_upkeep for shared connection caches [52]
  o escape: allow curl_easy_escape to generate 3*input length output [39]
  o GHA/windows: enable MulitSSL in an MSVC job [2]
  o GHA: scan git repository and detect unvetted binary files [3]
  o http2: improve rate limiting of downloads [33]
+ o http2: improved upload eos handling [41]
  o INSTALL.md: MultiSSL and QUIC are mutually exclusive [7]
  o lib: add eos flag to send methods [14]
  o lib: convert some debugf()s into traces [8]
  o libcurl.pc: add `Cflags.private` [10]
  o Makefile: remove 'scripts' duplicate from DIST_SUBDIRS
  o maketgz: accept option to include latest commit hash [5]
+ o openssl: improve shutdown handling [44]
  o progress: ratelimit/progress tweaks [32]
  o pytests: add tests for HEAD requests in all HTTP versions [42]
  o rustls: make all tests pass [1]
- o tests/http: configure test httpd to honor client cipher order [35]
+ o sigpipe: init the struct so that first apply ignores [49]
  o tests: provide docs as curldown, not nroff [12]
+ o tidy-up: OS names [57]
+ o tool_operhlp: fix  "potentially uninitialized local variable 'pc' used" [48]
  o url: dns_entry related improvements [16]
  o verify-release: shell script that verifies a release tarball [29]
  o vtls: fix MSVC 'cast truncates constant value' warning [23]
  o vtls: init ssl peer only once [15]
+ o wolfssl: improve shutdown handling [43]
  o x509asn1: raise size limit for x509 certification information [28]
 
 This release includes the following known bugs:
@@ -72,10 +85,12 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Antoine du Hamel, Christoph Reiter, Dan Fandrich, Daniel Stenberg,
-  David Sardari, Joe Birr-Pixton, Matt Jolly, renovate[bot],
-  Sergio Durigan Junior, Stefan Eissing, Tal Regev, Viktor Szakats
-  (12 contributors)
+  Alex Snast, Antoine du Hamel, Christoph Reiter, Dan Fandrich,
+  Daniel Stenberg, David Sardari, Jan Venekamp, Joe Birr-Pixton,
+  kit-ty-kate on github, Matt Jolly, Rasmus Thomsen, Ray Satiro, renovate[bot],
+  Ryan Carsten Schmidt, Sergio Durigan Junior, Stefan Eissing, Tal Regev,
+  Viktor Szakats
+  (18 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -113,10 +128,23 @@ References to bug reports and discussions on issues:
  [32] = https://curl.se/bug/?i=14335
  [33] = https://curl.se/bug/?i=14326
  [34] = https://curl.se/bug/?i=13988
- [35] = https://curl.se/bug/?i=14338
  [36] = https://curl.se/bug/?i=14336
  [37] = https://curl.se/bug/?i=14377
  [38] = https://curl.se/bug/?i=14337
  [39] = https://curl.se/bug/?i=14339
  [40] = https://curl.se/bug/?i=14331
+ [41] = https://curl.se/bug/?i=14253
  [42] = https://curl.se/bug/?i=14367
+ [43] = https://curl.se/bug/?i=14376
+ [44] = https://curl.se/bug/?i=14375
+ [45] = https://curl.se/bug/?i=14374
+ [46] = https://curl.se/bug/?i=14373
+ [48] = https://curl.se/bug/?i=14389
+ [49] = https://curl.se/bug/?i=14344
+ [50] = https://curl.se/bug/?i=14018
+ [51] = https://curl.se/bug/?i=14349
+ [52] = https://curl.se/bug/?i=12677
+ [53] = https://curl.se/bug/?i=9963
+ [54] = https://curl.se/bug/?i=13993
+ [57] = https://curl.se/bug/?i=14360
+ [58] = https://curl.se/bug/?i=14380
