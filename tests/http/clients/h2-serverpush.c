@@ -36,6 +36,10 @@
 #error "too old libcurl, cannot do HTTP/2 server push!"
 #endif
 
+#ifdef _WIN32
+#define snprintf _snprintf
+#endif
+
 static
 void dump(const char *text, unsigned char *ptr, size_t size,
           char nohex)

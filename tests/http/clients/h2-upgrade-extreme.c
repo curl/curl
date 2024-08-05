@@ -32,6 +32,10 @@
 
 #include <curl/curl.h>
 
+#ifdef _WIN32
+#define snprintf _snprintf
+#endif
+
 static void log_line_start(FILE *log, const char *idsbuf, curl_infotype type)
 {
   /*
