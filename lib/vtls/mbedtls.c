@@ -1084,11 +1084,49 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     cipher_id = (uint16_t)
                 mbedtls_ssl_get_ciphersuite_id_from_ssl(&backend->ssl);
     mbed_cipher_suite_get_str(cipher_id, cipher_str, sizeof(cipher_str), true);
-    infof(data, "mbedTLS: Handshake complete, cipher is %s", cipher_str);
+    infof(data, "mbedTLS: %s Handshake complete, cipher is %s",
+          mbedtls_ssl_get_version(&backend->ssl), cipher_str);
   }
 #else
   infof(data, "mbedTLS: Handshake complete");
 #endif
+
+  peercert = mbedtls_ssl_get_peer_cert(&backend->ssl);
+
+  if(peercert) {
+    CURLcode result = collect_server_cert(cf, data, peercert);
+    if(result)
+      return result;
+
+    if(data->set.verbose) {
+#ifndef MBEDTLS_X509_REMOVE_INFO
+      const size_t bufsize = 16384;
+      char *buffer = malloc(bufsize);
+
+      if(!buffer)
+        return CURLE_OUT_OF_MEMORY;
+
+      if(mbedtls_x509_crt_info(buffer, bufsize, "", peercert) > 0) {
+        char *p = buffer;
+        infof(data, "Dumping cert info:");
+        while(*p) {
+          char *nl = strchr(p, '\n');
+          if(nl)
+            *nl = '\0';
+          infof(data, "%s", p);
+          p = nl + 1;
+        }
+      }
+      else
+        infof(data, "Unable to dump certificate information");
+
+      free(buffer);
+#else
+      infof(data, "Unable to dump certificate information");
+#endif
+    }
+  }
+
   ret = mbedtls_ssl_get_verify_result(&backend->ssl);
 
   if(!conn_config->verifyhost)
@@ -1112,33 +1150,6 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
       failf(data, "Cert verify failed: BADCERT_FUTURE");
 
     return CURLE_PEER_FAILED_VERIFICATION;
-  }
-
-  peercert = mbedtls_ssl_get_peer_cert(&backend->ssl);
-
-  if(peercert) {
-    const CURLcode result = collect_server_cert(cf, data, peercert);
-    if(result)
-      return result;
-  }
-
-  if(peercert && data->set.verbose) {
-#ifndef MBEDTLS_X509_REMOVE_INFO
-    const size_t bufsize = 16384;
-    char *buffer = malloc(bufsize);
-
-    if(!buffer)
-      return CURLE_OUT_OF_MEMORY;
-
-    if(mbedtls_x509_crt_info(buffer, bufsize, "* ", peercert) > 0)
-      infof(data, "Dumping cert info: %s", buffer);
-    else
-      infof(data, "Unable to dump certificate information");
-
-    free(buffer);
-#else
-    infof(data, "Unable to dump certificate information");
-#endif
   }
 
   if(pinnedpubkey) {
