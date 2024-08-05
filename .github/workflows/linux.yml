@@ -435,6 +435,11 @@ jobs:
         if: ${{ matrix.build.generate }}
         name: 'configure (cmake)'
 
+      - name: 'test configs'
+        run: |
+          cat tests/config || true
+          cat tests/http/config.ini || true
+
       - run: make V=1 VERBOSE=1
         name: 'make'
 
