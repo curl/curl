@@ -45,10 +45,10 @@ function(setup_test test_name)  # ARGN are the files in the test
 
   target_link_libraries(${test_name} ${LIB_SELECTED} ${CURL_LIBS})
 
-  set_target_properties(${test_name}
-    PROPERTIES COMPILE_DEFINITIONS ${UPPER_TEST_NAME})
-  set_target_properties(${test_name}
-    PROPERTIES PROJECT_LABEL "${_target_label_prefix}${test_name}")
+  set_target_properties(${test_name} PROPERTIES
+    COMPILE_DEFINITIONS ${UPPER_TEST_NAME})
+  set_target_properties(${test_name} PROPERTIES
+    PROJECT_LABEL "${_target_label_prefix}${test_name}")
 endfunction()
 
 # Get 'noinst_PROGRAMS', '*_SOURCES' variables
