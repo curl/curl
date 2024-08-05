@@ -27,6 +27,12 @@
  */
 /* This is based on the PoC client of issue #11769
  */
+#ifdef _MSC_VER
+int main(void)
+{
+  return 99;
+}
+#else
 #include <curl/curl.h>
 #include <curl/mprintf.h>
 
@@ -34,10 +40,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-#ifndef _MSC_VER
 /* somewhat Unix-specific */
 #include <unistd.h>
-#endif
 
 static void log_line_start(FILE *log, const char *idsbuf, curl_infotype type)
 {
@@ -311,3 +315,4 @@ int main(int argc, char *argv[])
 
   return (int)rc;
 }
+#endif /* _MSC_VER */
