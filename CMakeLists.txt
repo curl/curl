@@ -1600,7 +1600,7 @@ if(CMAKE_COMPILER_IS_GNUCC AND APPLE)
     else()
       set(MPRINTF_COMPILE_FLAGS "-Wno-long-double")
     endif()
-    set_source_files_properties(mprintf.c PROPERTIES
+    set_source_files_properties("mprintf.c" PROPERTIES
       COMPILE_FLAGS ${MPRINTF_COMPILE_FLAGS})
   endif()
 endif()
