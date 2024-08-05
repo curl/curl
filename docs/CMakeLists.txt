@@ -34,13 +34,13 @@ if(BUILD_MISC_DOCS)
     set(_man_target "${CURL_BINARY_DIR}/docs/${_man_misc}.1")
     add_custom_command(OUTPUT "${_man_target}"
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-      COMMAND "${PERL_EXECUTABLE}" ${PROJECT_SOURCE_DIR}/scripts/cd2nroff "${_man_misc}.md" > "${_man_target}"
+      COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/cd2nroff" "${_man_misc}.md" > "${_man_target}"
       DEPENDS "${_man_misc}.md"
       VERBATIM
     )
     add_custom_target("curl-generate-${_man_misc}.1" ALL DEPENDS "${_man_target}")
     if(NOT CURL_DISABLE_INSTALL)
-      install(FILES "${_man_target}" DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
+      install(FILES "${_man_target}" DESTINATION "${CMAKE_INSTALL_MANDIR}/man1")
     endif()
   endforeach()
 endif()
