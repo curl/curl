@@ -36,6 +36,9 @@ FTP wildcard download - changed fnmatch, 2x perform (DOS LIST response)
 ############################################
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+QUIT
+</strip>
 <errorcode>
 0
 </errorcode>

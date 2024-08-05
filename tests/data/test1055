@@ -54,6 +54,9 @@ the
 #
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+QUIT
+</strip>
 <protocol>
 PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT

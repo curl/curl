@@ -32,6 +32,9 @@ ftp://%HOSTIP:%FTPPORT/fully_simulated/UNIX/*
 </client>
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+QUIT
+</strip>
 <errorcode>
 0
 </errorcode>

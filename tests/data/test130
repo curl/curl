@@ -50,6 +50,9 @@ default login userdef password passwddef
 #
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+QUIT
+</strip>
 <protocol>
 USER user1
 PASS passwd1

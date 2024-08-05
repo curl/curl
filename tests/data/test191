@@ -27,6 +27,9 @@ FTP URL with ?-letters in username and password
 
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+QUIT
+</strip>
 <protocol>
 USER use?r
 PASS pass?word

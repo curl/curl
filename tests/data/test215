@@ -38,6 +38,9 @@ ftp://%HOSTIP:%FTPPORT/a/path/%TESTNUMBER/ ftp://%HOSTIP:%FTPPORT/a/path/%TESTNU
 
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+QUIT
+</strip>
 <protocol>
 USER anonymous
 PASS ftp@example.com
