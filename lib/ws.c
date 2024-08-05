@@ -560,7 +560,7 @@ static ssize_t ws_enc_write_head(struct Curl_easy *data,
     return -1;
   }
 
-  opcode = ws_frame_flags2op((int)flags);
+  opcode = ws_frame_flags2op((int)flags & ~CURLWS_CONT);
   if(!opcode) {
     failf(data, "WS: provided flags not recognized '%x'", flags);
     *err = CURLE_SEND_ERROR;
