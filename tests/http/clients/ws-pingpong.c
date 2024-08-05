@@ -34,6 +34,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#else
+#include <sys/time.h>
+#endif
+
 #ifdef USE_WEBSOCKETS
 
 static CURLcode ping(CURL *curl, const char *send_payload)
@@ -98,7 +107,11 @@ static CURLcode pingpong(CURL *curl, const char *payload)
     fprintf(stderr, "Receive pong\n");
     res = recv_pong(curl, payload);
     if(res == CURLE_AGAIN) {
+#ifdef _WIN32
+      Sleep(100);
+#else
       usleep(100*1000);
+#endif
       continue;
     }
     websocket_close(curl);

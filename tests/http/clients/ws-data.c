@@ -36,6 +36,15 @@
 
 #ifdef USE_WEBSOCKETS
 
+#ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#else
+#include <sys/time.h>
+#endif
+
 static
 void dump(const char *text, unsigned char *ptr, size_t size,
           char nohex)
@@ -108,7 +117,11 @@ static CURLcode recv_binary(CURL *curl, char *exp_data, size_t exp_len)
     result = curl_ws_recv(curl, recvbuf, sizeof(recvbuf), &nread, &frame);
     if(result == CURLE_AGAIN) {
       fprintf(stderr, "EAGAIN, sleep, try again\n");
+#ifdef _WIN32
+      Sleep(100);
+#else
       usleep(100*1000);
+#endif
       continue;
     }
     fprintf(stderr, "ws: curl_ws_recv(offset=%ld, len=%ld) -> %d, %ld\n",
