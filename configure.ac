@@ -2620,7 +2620,7 @@ if test "$want_winidn" = "yes"; then
 fi
 
 dnl **********************************************************************
-dnl Check for the presence of IDN libraries and headers
+dnl Check for the presence of libidn2
 dnl **********************************************************************
 
 AC_MSG_CHECKING([whether to build with libidn2])
@@ -2742,11 +2742,46 @@ if test "$want_idn" = "yes"; then
     fi
     LIBCURL_PC_REQUIRES_PRIVATE="libidn2 $LIBCURL_PC_REQUIRES_PRIVATE"
   else
-    AC_MSG_WARN([Cannot find libraries for IDN support: IDN disabled])
+    AC_MSG_WARN([Cannot find libidn2])
     CPPFLAGS="$clean_CPPFLAGS"
     LDFLAGS="$clean_LDFLAGS"
     LIBS="$clean_LIBS"
+    want_idn="no"
   fi
+fi
+
+dnl **********************************************************************
+dnl Check for the presence of AppleIDN
+dnl **********************************************************************
+
+AC_MSG_CHECKING([whether to build with Apple IDN])
+OPT_IDN="default"
+AC_ARG_WITH(apple-idn,
+AS_HELP_STRING([--with-apple-idn],[Enable AppleIDN])
+AS_HELP_STRING([--without-apple-idn],[Disable AppleIDN]),
+  [OPT_IDN=$withval])
+if test "x$tst_links_winidn" = "xyes" -o "x$want_idn" != "xno"; then
+  want_appleidn="no"
+else
+  case "$OPT_IDN" in
+    no)
+      dnl --without-apple-idn option used
+      AC_MSG_RESULT([no])
+      ;;
+    *)
+      AC_MSG_RESULT([yes, check])
+      AC_CHECK_LIB(icucore, uidna_nameToASCII_UTF8,
+      [
+        AC_CHECK_HEADERS(unicode/uidna.h,
+           curl_idn_msg="enabled (AppleIDN)"
+           AC_DEFINE(USE_APPLE_IDN, 1, [if AppleIDN])
+           AC_SUBST(USE_APPLE_IDN, [1])
+           AC_SUBST([IDN_ENABLED], [1])
+           LIBS="-licucore $LIBS"
+        )
+      ])
+      ;;
+  esac
 fi
 
 dnl **********************************************************************
