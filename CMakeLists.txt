@@ -440,7 +440,7 @@ endif()
 cmake_dependent_option(CURL_USE_OPENSSL "Enable OpenSSL for SSL/TLS" ${_openssl_default} CURL_ENABLE_SSL OFF)
 option(CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG "Disable automatic loading of OpenSSL configuration" OFF)
 
-count_true(enabled_ssl_options_count
+count_true(_enabled_ssl_options_count
   CURL_USE_SCHANNEL
   CURL_USE_SECTRANSP
   CURL_USE_OPENSSL
@@ -449,7 +449,7 @@ count_true(enabled_ssl_options_count
   CURL_USE_WOLFSSL
   CURL_USE_GNUTLS
 )
-if(enabled_ssl_options_count GREATER "1")
+if(_enabled_ssl_options_count GREATER "1")
   set(CURL_WITH_MULTI_SSL ON)
 endif()
 
@@ -2053,9 +2053,9 @@ if(NOT CURL_DISABLE_INSTALL)
   # Workaround for MSVS10 to avoid the Dialog Hell
   # FIXME: This could be removed with future version of CMake.
   if(MSVC_VERSION EQUAL 1600)
-    set(CURL_SLN_FILENAME "${CMAKE_CURRENT_BINARY_DIR}/CURL.sln")
-    if(EXISTS "${CURL_SLN_FILENAME}")
-      file(APPEND "${CURL_SLN_FILENAME}" "\n# This should be regenerated!\n")
+    set(_curl_sln_filename "${CMAKE_CURRENT_BINARY_DIR}/CURL.sln")
+    if(EXISTS "${_curl_sln_filename}")
+      file(APPEND "${_curl_sln_filename}" "\n# This should be regenerated!\n")
     endif()
   endif()
 
