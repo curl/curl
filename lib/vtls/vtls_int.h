@@ -159,7 +159,7 @@ struct Curl_ssl {
                         const void *mem, size_t len, CURLcode *code);
 
   CURLcode (*get_channel_binding)(struct Curl_easy *data, int sockindex,
-                                       char **binding, size_t *len);
+                                  struct dynbuf *binding);
 
 };
 

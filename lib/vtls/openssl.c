@@ -5055,9 +5055,8 @@ out:
   return nread;
 }
 
-static CURLcode ossl_get_channel_binding(struct Curl_easy *data,
-                                              int sockindex, char **binding,
-                                              size_t *len)
+static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
+                                         struct dynbuf *binding)
 {
   /* required for X509_get_signature_nid support */
 #if OPENSSL_VERSION_NUMBER > 0x10100000L
@@ -5096,8 +5095,6 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data,
   cert = SSL_get1_peer_certificate(octx->ssl);
   if(!cert) {
     /* No server certificate, don't do channel binding */
-    *binding = NULL;
-    *len = 0;
     return CURLE_OK;
   }
 
@@ -5126,12 +5123,12 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data,
     return CURLE_SSL_INVALIDCERTSTATUS;
   }
 
-  *binding = malloc(sizeof(prefix) - 1 + length);
-  if(!*binding)
+  /* Append "tls-server-end-point:" */
+  if(Curl_dyn_addn(binding, prefix, sizeof(prefix) - 1) != CURLE_OK)
     return CURLE_OUT_OF_MEMORY;
-  memcpy(*binding, prefix, sizeof(prefix) - 1);
-  memcpy(*binding + sizeof(prefix) - 1, buf, length);
-  *len = sizeof(prefix) - 1 + length;
+  /* Append digest */
+  if(Curl_dyn_addn(binding, buf, length))
+    return CURLE_OUT_OF_MEMORY;
 
   return CURLE_OK;
 #else

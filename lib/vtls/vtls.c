@@ -749,14 +749,11 @@ out:
   return CURLE_OK;
 }
 
-CURLcode Curl_ssl_get_channel_binding(struct Curl_easy *data,
-                                           int sockindex, char **binding,
-                                           size_t *len)
+CURLcode Curl_ssl_get_channel_binding(struct Curl_easy *data, int sockindex,
+                                       struct dynbuf *binding)
 {
   if(Curl_ssl->get_channel_binding)
-    return Curl_ssl->get_channel_binding(data, sockindex, binding, len);
-  *binding = NULL;
-  *len = 0;
+    return Curl_ssl->get_channel_binding(data, sockindex, binding);
   return CURLE_OK;
 }
 

@@ -150,11 +150,11 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     input_token.length = chlglen;
   }
 
-  /* Set channel binding data */
-  if(nego->channel_binding_data) {
+  /* Set channel binding data if available */
+  if(nego->channel_binding_data.leng > 0) {
     memset(&chan, 0, sizeof(struct gss_channel_bindings_struct));
-    chan.application_data.length = nego->channel_binding_data_len;
-    chan.application_data.value = nego->channel_binding_data;
+    chan.application_data.length = nego->channel_binding_data.leng;
+    chan.application_data.value = nego->channel_binding_data.bufr;
     chan_bindings = &chan;
   }
 

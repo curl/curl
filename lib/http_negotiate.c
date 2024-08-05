@@ -110,9 +110,9 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
   /* Check if the connection is using SSL and get the channel binding data */
 #ifdef HAVE_GSSAPI
   if(conn->handler->flags & PROTOPT_SSL) {
+    Curl_dyn_init(&neg_ctx->channel_binding_data, SSL_CB_MAX_SIZE);
     result = Curl_ssl_get_channel_binding(
-        data, FIRSTSOCKET, &neg_ctx->channel_binding_data,
-        &neg_ctx->channel_binding_data_len);
+        data, FIRSTSOCKET, &neg_ctx->channel_binding_data);
     if(result) {
       Curl_http_auth_cleanup_negotiate(conn);
       return result;
@@ -125,7 +125,7 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
                                            host, header, neg_ctx);
 
 #ifdef HAVE_GSSAPI
-  free(neg_ctx->channel_binding_data);
+  Curl_dyn_free(&neg_ctx->channel_binding_data);
 #endif
 
   if(result)
