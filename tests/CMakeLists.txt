@@ -24,7 +24,7 @@
 set(CMAKE_UNITY_BUILD OFF)
 
 find_program(TEST_NGHTTPX "nghttpx")
-if(NOT TEST_NGHTTPX_FOUND)
+if(NOT TEST_NGHTTPX)
   set(TEST_NGHTTPX "nghttpx")
 endif()
 # TEST_NGHTTPX

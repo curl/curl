@@ -23,28 +23,28 @@
 ###########################################################################
 
 find_program(CADDY "caddy")  # /usr/bin/caddy
-if(NOT CADDY_FOUND)
-  unset(CADDY)
+if(NOT CADDY)
+  set(CADDY "")
 endif()
 find_program(VSFTPD "vsftpd")  # /usr/sbin/vsftpd
-if(NOT VSFTPD_FOUND)
-  unset(VSFTPD)
+if(NOT VSFTPD)
+  set(VSFTPD "")
 endif()
 find_program(HTTPD "apache2")  # /usr/sbin/apache2
-if(NOT HTTPD_FOUND)
-  unset(HTTPD)
+if(NOT HTTPD)
+  set(HTTPD "")
 endif()
 find_program(APACHECTL "apache2ctl")  # /usr/sbin/apache2ctl
-if(NOT APACHECTL_FOUND)
-  unset(APACHECTL)
+if(NOT APACHECTL)
+  set(APACHECTL "")
 endif()
 find_program(APXS "apxs")
-if(NOT APXS_FOUND)
-  unset(APXS)
+if(NOT APXS)
+  set(APXS "")
 endif()
 find_program(HTTPD_NGHTTPX "nghttpx" PATHS "/usr/bin" "/usr/local/bin")
-if(NOT HTTPD_NGHTTPX_FOUND)
-  unset(HTTPD_NGHTTPX)
+if(NOT HTTPD_NGHTTPX)
+  set(HTTPD_NGHTTPX "")
 endif()
 
 # APXS, HTTPD, APACHECTL, HTTPD_NGHTTPX, CADDY, VSFTPD
