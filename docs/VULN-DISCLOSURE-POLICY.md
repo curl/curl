@@ -262,7 +262,7 @@ data. We consider this functionality a best-effort and omissions are not
 security vulnerabilities.
 
  - not all systems allow the arguments to be blanked in the first place
- - since curl blanks the argument itself they area readable for a short moment
+ - since curl blanks the argument itself they are readable for a short moment
    no matter what
  - virtually every argument can contain sensitive data, depending on use
  - blanking all arguments would make it impractical for users to differentiate
