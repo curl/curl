@@ -264,7 +264,7 @@ void tool_help(char *category)
         noflagged = TRUE;
       }
       a = findlongopt(lookup);
-      if(noflagged && (ARGTYPE(a->desc) != ARG_BOOL))
+      if(a && noflagged && (ARGTYPE(a->desc) != ARG_BOOL))
         /* a --no- prefix for a non-boolean is not specifying a proper
            option */
         a = NULL;
