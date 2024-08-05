@@ -255,15 +255,23 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /* deprecated */
     break;
   case CURLOPT_SSL_CIPHER_LIST:
-    /* set a list of cipher we want to use in the SSL connection */
-    result = Curl_setstropt(&data->set.str[STRING_SSL_CIPHER_LIST],
-                            va_arg(param, char *));
+    if(Curl_ssl_supports(data, SSLSUPP_CIPHER_LIST)) {
+      /* set a list of cipher we want to use in the SSL connection */
+      result = Curl_setstropt(&data->set.str[STRING_SSL_CIPHER_LIST],
+                              va_arg(param, char *));
+    }
+    else
+      return CURLE_NOT_BUILT_IN;
     break;
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_SSL_CIPHER_LIST:
-    /* set a list of cipher we want to use in the SSL connection for proxy */
-    result = Curl_setstropt(&data->set.str[STRING_SSL_CIPHER_LIST_PROXY],
-                            va_arg(param, char *));
+    if(Curl_ssl_supports(data, SSLSUPP_CIPHER_LIST)) {
+      /* set a list of cipher we want to use in the SSL connection for proxy */
+      result = Curl_setstropt(&data->set.str[STRING_SSL_CIPHER_LIST_PROXY],
+                              va_arg(param, char *));
+    }
+    else
+      return CURLE_NOT_BUILT_IN;
     break;
 #endif
   case CURLOPT_TLS13_CIPHERS:
