@@ -2776,6 +2776,7 @@ else
            curl_idn_msg="enabled (AppleIDN)"
            AC_DEFINE(USE_APPLE_IDN, 1, [if AppleIDN])
            AC_SUBST(USE_APPLE_IDN, [1])
+           LIBS="-licucore $LIBS"
         )
       ])
       ;;
