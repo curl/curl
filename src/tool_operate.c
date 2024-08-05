@@ -50,6 +50,11 @@
 #endif
 
 #ifdef HAVE_UV_H
+/* Hack for Unity mode */
+#ifdef HEADER_CURL_MEMDEBUG_H
+#undef freeaddrinfo
+#undef getaddrinfo
+#endif
 /* this is for libuv-enabled debug builds only */
 #include <uv.h>
 #endif
