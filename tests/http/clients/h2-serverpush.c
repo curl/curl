@@ -166,7 +166,7 @@ static int server_push_callback(CURL *parent,
   int rv;
 
   (void)parent; /* we have no use for this */
-  curl_msnprintf(filename, sizeof(filename)-1, "push%u", count++);
+  snprintf(filename, sizeof(filename)-1, "push%u", count++);
 
   /* here's a new stream, save it in a new file for each new push */
   out = fopen(filename, "wb");
