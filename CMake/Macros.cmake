@@ -39,10 +39,10 @@ endmacro()
 # Return result in variable: CURL_TEST_OUTPUT
 macro(curl_internal_test curl_test)
   if(NOT DEFINED "${curl_test}")
-    set(MACRO_CHECK_FUNCTION_DEFINITIONS
+    set(_macro_check_function_definitions
       "-D${curl_test} ${CURL_TEST_DEFINES} ${CMAKE_REQUIRED_FLAGS}")
     if(CMAKE_REQUIRED_LIBRARIES)
-      set(CURL_TEST_ADD_LIBRARIES
+      set(_curl_test_add_libraries
         "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}")
     endif()
 
@@ -50,8 +50,8 @@ macro(curl_internal_test curl_test)
     try_compile(${curl_test}
       ${CMAKE_BINARY_DIR}
       ${CMAKE_CURRENT_SOURCE_DIR}/CMake/CurlTests.c
-      CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_FUNCTION_DEFINITIONS}
-      "${CURL_TEST_ADD_LIBRARIES}"
+      CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${_macro_check_function_definitions}
+      "${_curl_test_add_libraries}"
       OUTPUT_VARIABLE CURL_TEST_OUTPUT)
     if(${curl_test})
       set(${curl_test} 1 CACHE INTERNAL "Curl test")
