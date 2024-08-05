@@ -1594,7 +1594,7 @@ if(CMAKE_COMPILER_IS_GNUCC AND APPLE)
   check_c_compiler_flag("-Wno-long-double" HAVE_C_FLAG_Wno_long_double)
   if(HAVE_C_FLAG_Wno_long_double)
     # The Mac version of GCC warns about use of long double. Disable it.
-    get_source_file_property(MPRINTF_COMPILE_FLAGS mprintf.c COMPILE_FLAGS)
+    get_source_file_property(MPRINTF_COMPILE_FLAGS "mprintf.c" COMPILE_FLAGS)
     if(MPRINTF_COMPILE_FLAGS)
       set(MPRINTF_COMPILE_FLAGS "${MPRINTF_COMPILE_FLAGS} -Wno-long-double")
     else()
