@@ -27,22 +27,23 @@
  */
 /* This is based on the PoC client of issue #11982
  */
-#ifdef _MSC_VER
-int main(void)
-{
-  return 99;
-}
-#else
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
+#ifndef _MSC_VER
 /* somewhat Unix-specific */
 #include <unistd.h>  /* getopt() */
+#endif
 
 #include <curl/curl.h>
 
+#ifdef _WIN32
+#define snprintf _snprintf
+#endif
+
+#ifndef _MSC_VER
 #define HANDLECOUNT 2
 
 static void log_line_start(FILE *log, const char *idsbuf, curl_infotype type)
@@ -199,9 +200,11 @@ static size_t cb(void *data, size_t size, size_t nmemb, void *clientp)
           handle->idx, (long)realsize);
   return realsize;
 }
+#endif /* !_MSC_VER */
 
 int main(int argc, char *argv[])
 {
+#ifndef _MSC_VER
   struct handle handles[HANDLECOUNT];
   CURLM *multi_handle;
   int i, still_running = 1, msgs_left, numfds;
@@ -402,5 +405,10 @@ out:
   curl_global_cleanup();
 
   return rc;
+#else
+  (void)argc;
+  (void)argv;
+  fprintf(stderr, "Not supported with this compiler.\n");
+  return 1;
+#endif /* !_MSC_VER */
 }
-#endif /* _MSC_VER */

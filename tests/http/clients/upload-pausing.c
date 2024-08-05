@@ -27,21 +27,22 @@
  */
 /* This is based on the PoC client of issue #11769
  */
-#ifdef _MSC_VER
-int main(void)
-{
-  return 99;
-}
-#else
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
+#ifndef _MSC_VER
 /* somewhat Unix-specific */
 #include <unistd.h>  /* getopt() */
+#endif
 
 #include <curl/curl.h>
 
+#ifdef _WIN32
+#define snprintf _snprintf
+#endif
+
+#ifndef _MSC_VER
 static void log_line_start(FILE *log, const char *idsbuf, curl_infotype type)
 {
   /*
@@ -199,9 +200,11 @@ static void usage(const char *msg)
     "  -V http_version (http/1.1, h2, h3) http version to use\n"
   );
 }
+#endif /* !_MSC_VER */
 
 int main(int argc, char *argv[])
 {
+#ifndef _MSC_VER
   CURL *curl;
   CURLcode rc = CURLE_OK;
   CURLU *cu;
@@ -313,5 +316,10 @@ int main(int argc, char *argv[])
   curl_global_cleanup();
 
   return (int)rc;
+#else
+  (void)argc;
+  (void)argv;
+  fprintf(stderr, "Not supported with this compiler.\n");
+  return 1;
+#endif /* !_MSC_VER */
 }
-#endif /* _MSC_VER */

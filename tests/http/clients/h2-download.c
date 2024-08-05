@@ -25,27 +25,27 @@
  * HTTP/2 server push
  * </DESC>
  */
-
-#ifdef _MSC_VER
-int main(void)
-{
-  return 99;
-}
-#else
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#ifndef _MSC_VER
 /* somewhat Unix-specific */
 #include <unistd.h>  /* getopt() */
+#endif
 
 /* curl stuff */
 #include <curl/curl.h>
+
+#ifdef _WIN32
+#define snprintf _snprintf
+#endif
 
 #ifndef CURLPIPE_MULTIPLEX
 #error "too old libcurl, cannot do HTTP/2 server push!"
 #endif
 
+#ifndef _MSC_VER
 static int verbose = 1;
 
 static void log_line_start(FILE *log, const char *idsbuf, curl_infotype type)
@@ -276,12 +276,14 @@ static void usage(const char *msg)
     "  -V http_version (http/1.1, h2, h3) http version to use\n"
   );
 }
+#endif /* !_MSC_VER */
 
 /*
  * Download a file over HTTP/2, take care of server push.
  */
 int main(int argc, char *argv[])
 {
+#ifndef _MSC_VER
   CURLM *multi_handle;
   struct CURLMsg *m;
   const char *url;
@@ -481,5 +483,10 @@ int main(int argc, char *argv[])
   curl_multi_cleanup(multi_handle);
 
   return 0;
+#else
+  (void)argc;
+  (void)argv;
+  fprintf(stderr, "Not supported with this compiler.\n");
+  return 1;
+#endif /* !_MSC_VER */
 }
-#endif /* _MSC_VER */
