@@ -115,6 +115,11 @@ struct mbed_ssl_backend_data {
   BIT(sent_shutdown);
 };
 
+struct verify_cb_data {
+  struct Curl_easy *data;
+  struct Curl_cfilter *cf;
+};
+
 /* apply threading? */
 #if (defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)) || \
     defined(_WIN32)
@@ -533,19 +538,96 @@ add_ciphers:
   return CURLE_OK;
 }
 
-#ifdef TLS13_SUPPORT
-static int mbed_no_verify(void *udata, mbedtls_x509_crt *crt,
-                          int depth, uint32_t *flags)
+static void dump_cert_info(struct Curl_easy *data,
+                           const mbedtls_x509_crt *peercert)
 {
-  (void)udata;
-  (void)crt;
-  (void)depth;
-  /* we clear any faults the mbedtls' own verification found.
+#if !defined(CURL_DISABLE_VERBOSE_STRINGS) && \
+    !defined(MBEDTLS_X509_REMOVE_INFO)
+  const size_t bufsize = 16384;
+  char *buffer = malloc(bufsize);
+
+  if(!buffer)
+    return;
+
+  if(mbedtls_x509_crt_info(buffer, bufsize, " ", peercert) > 0) {
+    char *p = buffer;
+    infof(data, "Server certificate:");
+    while(*p) {
+      char *nl = strchr(p, '\n');
+      if(nl)
+        *nl = '\0';
+      infof(data, "%s", p);
+      if(!nl)
+        break;
+      p = nl + 1;
+    }
+  }
+  else
+    infof(data, "Unable to dump certificate information");
+
+  free(buffer);
+#endif
+}
+
+static int count_server_cert(const mbedtls_x509_crt *peercert)
+{
+  int count = 1;
+
+  DEBUGASSERT(peercert);
+
+  while(peercert->next) {
+    ++count;
+    peercert = peercert->next;
+  }
+  return count;
+}
+
+static CURLcode collect_server_cert_single(struct Curl_easy *data,
+                                           const mbedtls_x509_crt *server_cert,
+                                           int idx)
+{
+  const char *beg, *end;
+
+  DEBUGASSERT(server_cert);
+
+  beg = (const char *)server_cert->raw.p;
+  end = beg + server_cert->raw.len;
+  return Curl_extract_certinfo(data, idx, beg, end);
+}
+
+static int mbed_verify(void *udata, mbedtls_x509_crt *crt,
+                       int depth, uint32_t *flags)
+{
+  struct verify_cb_data *cb_data = udata;
+  struct Curl_easy *data = cb_data->data;
+  struct Curl_cfilter *cf = cb_data->cf;
+  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+
+  if(depth == 0) {
+    if(data->set.verbose)
+      dump_cert_info(data, crt);
+
+    if(data->set.ssl.certinfo) {
+      mbedtls_x509_crt *peercert = crt;
+      int count = count_server_cert(peercert);
+      CURLcode result = Curl_ssl_init_certinfo(data, count);
+      int i;
+      for(i = 0; result == CURLE_OK && peercert; i++) {
+        result = collect_server_cert_single(data, peercert, i);
+        peercert = peercert->next;
+      }
+    }
+  }
+
+  /* we clear any faults the mbedtls' own verification found if needed.
    * See <https://github.com/Mbed-TLS/mbedtls/issues/9210> */
-  *flags = 0;
+  if(!conn_config->verifypeer)
+    *flags = 0;
+  else if(!conn_config->verifyhost)
+    *flags &= ~MBEDTLS_X509_BADCERT_CN_MISMATCH;
+
   return 0;
 }
-#endif
 
 static CURLcode
 mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
@@ -803,16 +885,6 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     failf(data, "mbedTLS: ssl_config failed");
     return CURLE_SSL_CONNECT_ERROR;
   }
-#ifdef TLS13_SUPPORT
-  if(!verifypeer) {
-    /* Default verify behaviour changed in mbedtls v3.6.0 with TLS v1.3.
-     * On 1.3 connections, the handshake fails by default without trust
-     * anchors. We override this questionable change by installing our
-     * own verify callback that clears all errors. */
-    mbedtls_ssl_conf_verify(&backend->config, mbed_no_verify, cf);
-  }
-#endif
-
 
   mbedtls_ssl_init(&backend->ssl);
   backend->initialized = TRUE;
@@ -979,60 +1051,6 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   return CURLE_OK;
 }
 
-static int count_server_cert(const mbedtls_x509_crt *peercert)
-{
-  int count = 1;
-
-  DEBUGASSERT(peercert);
-
-  while(peercert->next) {
-    ++count;
-    peercert = peercert->next;
-  }
-  return count;
-}
-
-static CURLcode collect_server_cert_single(struct Curl_easy *data,
-                                           const mbedtls_x509_crt *server_cert,
-                                           int idx)
-{
-  const char *beg, *end;
-
-  DEBUGASSERT(server_cert);
-
-  beg = (const char *)server_cert->raw.p;
-  end = beg + server_cert->raw.len;
-  return Curl_extract_certinfo(data, idx, beg, end);
-}
-
-static CURLcode collect_server_cert(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data,
-                                    const struct mbedtls_x509_crt *peercert)
-{
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-  const bool show_verbose_server_cert = data->set.verbose;
-#else
-  const bool show_verbose_server_cert = false;
-#endif
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  CURLcode result = CURLE_PEER_FAILED_VERIFICATION;
-  int i, count;
-
-  if(!show_verbose_server_cert && !ssl_config->certinfo)
-    return CURLE_OK;
-
-  if(!peercert)
-    return result;
-
-  count = count_server_cert(peercert);
-  result = Curl_ssl_init_certinfo(data, count);
-  for(i = 0 ; !result && peercert ; i++) {
-    result = collect_server_cert_single(data, peercert, i);
-    peercert = peercert->next;
-  }
-  return result;
-}
-
 static CURLcode
 mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
@@ -1040,8 +1058,7 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct ssl_connect_data *connssl = cf->ctx;
   struct mbed_ssl_backend_data *backend =
     (struct mbed_ssl_backend_data *)connssl->backend;
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  const mbedtls_x509_crt *peercert;
+  struct verify_cb_data cb_data = { data, cf };
 #ifndef CURL_DISABLE_PROXY
   const char * const pinnedpubkey = Curl_ssl_cf_is_proxy(cf)?
     data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY]:
@@ -1051,6 +1068,8 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
 #endif
 
   DEBUGASSERT(backend);
+
+  mbedtls_ssl_conf_verify(&backend->config, mbed_verify, &cb_data);
 
   ret = mbedtls_ssl_handshake(&backend->ssl);
 
@@ -1063,8 +1082,8 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     return CURLE_OK;
   }
   else if(ret == MBEDTLS_ERR_X509_CERT_VERIFY_FAILED) {
-    failf(data, "peer certificate could not be verified");
-    return CURLE_PEER_FAILED_VERIFICATION;
+    infof(data, "peer certificate could not be verified");
+    /* fall through to flag checking below for better error messages */
   }
   else if(ret) {
     char errorbuf[128];
@@ -1085,18 +1104,16 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     cipher_id = (uint16_t)
                 mbedtls_ssl_get_ciphersuite_id_from_ssl(&backend->ssl);
     mbed_cipher_suite_get_str(cipher_id, cipher_str, sizeof(cipher_str), true);
-    infof(data, "mbedTLS: Handshake complete, cipher is %s", cipher_str);
+    infof(data, "mbedTLS: %s Handshake complete, cipher is %s",
+          mbedtls_ssl_get_version(&backend->ssl), cipher_str);
   }
 #else
-  infof(data, "mbedTLS: Handshake complete");
+  infof(data, "mbedTLS: %s Handshake complete",
+        mbedtls_ssl_get_version(&backend->ssl));
 #endif
   ret = mbedtls_ssl_get_verify_result(&backend->ssl);
 
-  if(!conn_config->verifyhost)
-    /* Ignore hostname errors if verifyhost is disabled */
-    ret &= ~MBEDTLS_X509_BADCERT_CN_MISMATCH;
-
-  if(ret && conn_config->verifypeer) {
+  if(ret) {
     if(ret & MBEDTLS_X509_BADCERT_EXPIRED)
       failf(data, "Cert verify failed: BADCERT_EXPIRED");
 
@@ -1112,42 +1129,20 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     else if(ret & MBEDTLS_X509_BADCERT_FUTURE)
       failf(data, "Cert verify failed: BADCERT_FUTURE");
 
-    return CURLE_PEER_FAILED_VERIFICATION;
-  }
-
-  peercert = mbedtls_ssl_get_peer_cert(&backend->ssl);
-
-  if(peercert) {
-    const CURLcode result = collect_server_cert(cf, data, peercert);
-    if(result)
-      return result;
-  }
-
-  if(peercert && data->set.verbose) {
-#ifndef MBEDTLS_X509_REMOVE_INFO
-    const size_t bufsize = 16384;
-    char *buffer = malloc(bufsize);
-
-    if(!buffer)
-      return CURLE_OUT_OF_MEMORY;
-
-    if(mbedtls_x509_crt_info(buffer, bufsize, "* ", peercert) > 0)
-      infof(data, "Dumping cert info: %s", buffer);
     else
-      infof(data, "Unable to dump certificate information");
+      failf(data, "peer certificate could not be verified");
 
-    free(buffer);
-#else
-    infof(data, "Unable to dump certificate information");
-#endif
+    return CURLE_PEER_FAILED_VERIFICATION;
   }
 
   if(pinnedpubkey) {
     int size;
     CURLcode result;
+    const mbedtls_x509_crt *peercert;
     mbedtls_x509_crt *p = NULL;
     unsigned char *pubkey = NULL;
 
+    peercert = mbedtls_ssl_get_peer_cert(&backend->ssl);
 #if MBEDTLS_VERSION_NUMBER == 0x03000000
     if(!peercert || !peercert->MBEDTLS_PRIVATE(raw).MBEDTLS_PRIVATE(p) ||
        !peercert->MBEDTLS_PRIVATE(raw).MBEDTLS_PRIVATE(len)) {
